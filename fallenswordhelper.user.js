@@ -16,8 +16,6 @@ var fsHelper = {
 		var now=(new Date()).getTime()
 		if (!lastCheck) lastCheck=0;
 		var haveToCheck=(now - lastCheck > 24*60*60*1000)
-		haveToCheck=true;
-		GM_setValue("currentVersion", 0)
 
 		if (haveToCheck) {
 			GM_log("Checking for new version...")
