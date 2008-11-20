@@ -125,6 +125,7 @@ var fsHelper = {
 		fsHelper.prepareGuildList();
 		fsHelper.prepareChat();
 		fsHelper.injectStaminaCalculator();
+		fsHelper.replaceKeyHandler();
 
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
@@ -569,15 +570,23 @@ var fsHelper = {
 		}
 	},
 
+	position: function() {
+		var result = new Object();
+		var posit = fsHelper.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
+		if (!posit) return;
+		var thePosition=posit.innerHTML;
+		var positionRE=/\((\d+),\s*(\d+)\)/
+		var positionX = parseInt(thePosition.match(positionRE)[1]);
+		var positionY = parseInt(thePosition.match(positionRE)[2]);
+		result.X=positionX;
+		result.Y=positionY;
+		return result
+	},
+
 	mapThis: function() {
 		var realm = fsHelper.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
-		var posit = fsHelper.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
-		if ((realm) && (posit)>0) {
-			var position=posit.innerHTML;
+		// if ((realm) && (posit)>0) {
 			var levelName=realm.innerHTML;
-			var positionRE=/\((\d+),\s*(\d+)\)/
-			var positionX = parseInt(position.match(positionRE)[1]);
-			var positionY = parseInt(position.match(positionRE)[2]);
 			var theMap = fsHelper.getValueJSON("map")
 			GM_log(GM_getValue("map"))
 			// theMap = null;
@@ -589,7 +598,7 @@ var fsHelper = {
 			if (!theMap["levels"][levelName][positionX]) theMap["levels"][levelName][positionX]={};
 			theMap["levels"][levelName][positionX][positionY]="!";
 			GM_setValue("map", JSON.stringify(theMap));
-		}
+		// }
 	},
 
 	checkBuffs: function() {
@@ -917,31 +926,29 @@ var fsHelper = {
 		var info = injectHere.insertRow(1);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='fsHelperPlaceholderChat'></span>";
-		fsHelper.retrieveChat();
-	},
-
-	retrieveChat: function() {
 		var chat = fsHelper.getValueJSON("chat");
-
 		var newChat = fsHelper.findNode("//table[contains(.,'chat messages')]")
-
 		if (!chat || newChat) {
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=chat",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Content-Type": "application/x-www-form-urlencoded",
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					fsHelper.parseChatForWorld(responseDetails.responseText);
-				},
-			})
+			fsHelper.retrieveChat();
 		} else {
 			chat.isRefreshed=false;
 			fsHelper.injectChat(chat);
 		}
+	},
+
+	retrieveChat: function() {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=chat",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.parseChatForWorld(responseDetails.responseText);
+			},
+		})
 	},
 
 	parseChatForWorld: function(chatText) {
@@ -969,14 +976,25 @@ var fsHelper = {
 
 	injectChat: function(chat){
 		var injectHere = document.getElementById("fsHelperPlaceholderChat");
-
+		var newTable=false;
 		// window.alert(chat.messages.length);
 
-		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
-		displayList.cellPadding = 1;
-		displayList.width = 125;
+		var displayList = document.getElementById("fsHelperChatWindow");
+		if (!displayList) {
+			displayList=document.createElement("TABLE");
+			displayList.id="fsHelperChatWindow";
+			displayList.style.border = "1px solid #c5ad73";
+			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
+			displayList.cellPadding = 1;
+			displayList.width = 125;
+			newTable=true;
+		}
+		else {
+			while (displayList.rows.length>0) {
+				displayList.deleteRow(0);
+			}
+			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
+		}
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
@@ -995,22 +1013,127 @@ var fsHelper = {
 			result += chat.messages[i].text
 			result += "</span><br/>";
 		}
-		//result += '<form action="index.php" method="post">'
-		//result += '<input type="hidden" value="guild" name="cmd" />'
-		//result += '<input type="hidden" value="dochat" name="subcmd"/>'
-		//result += '<input type="hidden" value="' + chat.confirm + '" name="xc"/>'
-		//result += '<input type="text" class="custominput" size="14" name="msg"/>'
-		//result += '<input type="submit" class="custominput" onkeydown=null onkeyup=null value="Send" name="submit"/>'
-		//result += '</form>'
+		result += '<form action="index.php" method="post" id="fsHelperChatBox" onsubmit="return false;">'
+		result += '<input type="hidden" value="' + chat.confirm + '" name="xc"/>'
+		result += '<input type="text" class="custominput" size="14" name="msg"/>'
+		result += '<input type="submit" class="custominput" value="Send" name="submit"/>'
+		result += '</form>'
 		result += '</div>'
 
 		aCell.innerHTML = result;
 
-		var breaker=document.createElement("BR");
-		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		if (newTable) {
+			var breaker=document.createElement("BR");
+			injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
+			injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		}
+
+		document.getElementById('fsHelperChatBox').addEventListener('submit', fsHelper.sendChat, true);
+
+		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
 
 		GM_setValue("chat", JSON.stringify(chat));
+	},
+
+	sendChat: function(evt) {
+		var oForm=evt.target;
+
+		var confirm=fsHelper.findNode("//input[@name='xc']", 0, evt.target.form).value
+		var msg=fsHelper.findNode("//input[@name='msg']", 0, evt.target.form).value
+		if (msg=="") {
+			fsHelper.retrieveChat();
+			return false;
+		}
+
+		GM_xmlhttpRequest({
+			method: 'POST',
+			url: "http://www.fallensword.com/index.php",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit=Send",
+			onload: function(responseDetails) {
+				fsHelper.retrieveChat();
+			},
+		})
+
+		return false;
+	},
+
+	replaceKeyHandler: function() {
+		// window.alert(unsafeWindow.document.onkeypress);
+		unsafeWindow.document.onkeypress = null;
+		unsafeWindow.document.onkeypress = fsHelper.keyPress;
+	},
+
+	keyPress: function (evt) {
+    var r = "";
+    if (evt.target.tagName!="HTML") return;
+		r = evt.charCode;
+		var pos=fsHelper.position();
+		if (pos) {
+			var x=pos.X;
+			var y=pos.Y;
+		}
+		switch (r) {
+			case 113: // nw
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y-1);
+				break;
+			case 119: // n
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
+				break;
+			case 101: // ne
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y-1);
+				break;
+			case 97: // w
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
+				break;
+			case 100: // e
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
+				break;
+			case 122: // sw
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+1);
+				break;
+			case 120: // s
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
+				break;
+			case 99: // se
+				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+1);
+				break;
+			case 114: // repair
+				window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
+				break;
+			case 103: // create group
+				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+				break;
+			case 49:
+			case 50:
+			case 51:
+			case 52:
+			case 53:
+			case 54:
+			case 55:
+			case 56:
+			case 57: // keyed combat
+				var index	= r-48;
+				var linkObj	= document.getElementById("attackLink"+index);
+				if (linkObj!=null) {
+					window.location = linkObj.href
+				}
+				break;
+			case 98: // backpack [b]
+				window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+				break;
+			case 19: // quick buffs
+				openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 500, ",scrollbars");
+				break;
+			case 48: // return to world
+				window.location = 'index.php?cmd=world';
+				break;
+		}
+		return true;
 	},
 
 	addLogColoring: function(logScreen, dateColumn) {
@@ -1078,7 +1201,7 @@ var fsHelper = {
 			var member=memberList.members[i];
 			memberNameString += member.name + " ";
 		}
-		var isGuildie = false;
+		var isGuildmate = false;
 		for (var i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
 			if (i != 0) {
@@ -1090,7 +1213,7 @@ var fsHelper = {
 						var playerName = aRow.cells[2].firstChild.innerHTML;
 						if (memberNameString.search(playerName) !=-1) {
 							aRow.cells[2].firstChild.innerHTML = "<font style='color:green;'>" + playerName + "</font>";
-							isGuildie = true;
+							isGuildmate = true;
 						}
 						var messageHTML = aRow.cells[2].innerHTML;
 						var firstPart = messageHTML.split(">Reply</a>")[0];
@@ -1098,13 +1221,13 @@ var fsHelper = {
 						//http://www.fallensword.com/index.php?cmd=trade&target_player=Bubbacus62
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> ";
 						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
-						isGuildie = false;
+						isGuildmate = false;
 					}
 				}
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:green;'>(Guildies show up as green)</font>"
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:green;'>(Guildmates show up as green)</font>"
 			}
 
 		}
