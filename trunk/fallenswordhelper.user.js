@@ -15,21 +15,39 @@ var fsHelper = {
 		var re=/cmd=([a-z]+)/;
 		var pageId = re.exec(document.location.search)[1];
 
+		var re=/subcmd=([a-z]+)/;
+		var subPageIdRE = re.exec(document.location.search);
+		var subPageId="***";
+		if (subPageIdRE)
+			subPageId=subPageIdRE[1];
+
 		switch (pageId) {
 		case "settings":
 			fsHelper.injectSettings();
 			break;
 		case "profile":
-			fsHelper.decideProfile();
+			switch (subPageId) {
+			case "***":
+				fsHelper.injectProfile();
+				break;
+			case "dropitems":
+				fsHelper.injectDropItems();
+				break;
+			}
 			break;
 		case "auctionhouse":
 			fsHelper.injectAuctionHouse();
 			break;
 		case "guild":
-			fsHelper.decideGuild();
+			switch(subPageId) {
+			case "inventory":
+				fsHelper.injectDropItems();
+				break;
+			case "chat":
+				fsHelper.injectChat();
+				break;
+			}
 			break;
-		default:
-			// echo("");
 		}
 	},
 
@@ -108,32 +126,46 @@ var fsHelper = {
 	},
 
 	injectGuildList: function(memberList) {
+		var oldMemberList = this.oldMemberList;
+		if (!oldMemberList) {
+			oldMemberList=memberList;
+		}
+		oldIds = new Array();
+		for (var i=0; i<oldMemberList.members.length;i++) {
+			if (oldMemberList.members[i].status=="Online") {
+				oldIds.push(oldMemberList.members[i].id);
+			}
+		}
+
 		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("fsHelperPlaceholderWorld");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
 		displayList.style.backgroundColor = "#4a3918";
-		displayList.cellPadding = 3;
+		displayList.cellPadding = 1;
 		displayList.width = 125;
 
 		if (memberList.isRefreshed) {
 			displayList.style.backgroundColor = "#6a5938";
-			/*
-			var aRow=displayList.insertRow(displayList.rows.length);
-			var aCell=aRow.insertCell(0);
-			aCell.innerHTML = "Refreshed!";
-			*/
 		}
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:white;font-size:10px;'>"
+		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;'>"
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
 				output += "<li>"
-				output += "<a title='" + member.level + " - " + member.rank + "' style='color:white;font-size:10px;'"
+				output += "<a style='color:whilte;font-size:10px;' "
+				output += "href='javascript:openWindow(\"index.php?cmd=quickbuff&tid=" + member.id + "\")'>[b]</a>&nbsp;";
+				output += "<a title='" + member.level + " - " + member.rank + "' style='color:"
+				if (oldIds.indexOf(member.id)<0) { // just logged in
+					output += "yellow";
+				} else {
+					output += "white";
+				}
+				output += ";font-size:10px;'"
 				output += " href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 				output += "</li>"
 			}
@@ -144,49 +176,11 @@ var fsHelper = {
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
 
+		this.oldMemberList=memberList;
 	},
 
 	injectAuctionHouse: function() {
 
-	},
-
-	decideGuild: function() {
-		var re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search); //[1];
-		var subPageId="***";
-		if (subPageIdRE)
-			subPageId=subPageIdRE[1];
-
-		switch(subPageId) {
-		case "inventory":
-			fsHelper.injectDropItems();
-			break;
-		case "chat":
-			fsHelper.injectChat();
-			break;
-		default:
-			// echo ("");
-			}
-	},
-
-
-	decideProfile: function() {
-		var re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search); //[1];
-		var subPageId="***";
-		if (subPageIdRE)
-			subPageId=subPageIdRE[1];
-
-		switch(subPageId) {
-		case "***":
-			fsHelper.injectProfile();
-			break;
-		case "dropitems":
-			fsHelper.injectDropItems();
-			break;
-		default:
-			// echo ("");
-		}
 	},
 
 	injectDropItems: function() {
@@ -196,19 +190,15 @@ var fsHelper = {
 			if (anItem.type=="checkbox") {
 				theLocation=anItem.parentNode.nextSibling.nextSibling;
 				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-				// window.alert(theLocation.innerHTML);
 				var mouseOver=theImage.getAttribute("onmouseover");
-				// window.alert(mouseOver.replace(/\s/g,'*'));
 				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
 				var reResult=reParams.exec(mouseOver);
 				var itemId=reResult[1];
 				var invId=reResult[2];
 				var type=reResult[3];
 				var pid=reResult[4];
-				// window.alert()
 				var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
 				theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
-				// window.alert(theUrl);
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: theUrl,
@@ -218,7 +208,6 @@ var fsHelper = {
 					    'Content-Type': 'application/x-www-form-urlencoded'
 					},
 					onload: function(responseDetails) {
-						// window.alert('\n' + responseDetails.responseText);
 						var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2><b>([^<]+)<\/b>/
 						var fontLineRX=fontLineRE.exec(responseDetails.responseText)
 						fsHelper.injectDropItemsPaint(fontLineRX[1],fontLineRX[2]);
@@ -275,7 +264,7 @@ var fsHelper = {
 				}
 			}
 		}
-/*
+
 		var player = document.evaluate("//textarea[@id='holdtext']", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 		var avyrow = document.evaluate("//td/img[contains(@title, 's Avatar')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 		var imgurls = document.evaluate("//img[contains(@src, '/skin/')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -325,7 +314,7 @@ var fsHelper = {
 			}
 			avyrow.snapshotItem(0).parentNode.innerHTML = newhtml ;
 		}
-*/
+
 	},
 
 	injectSettings: function() {
@@ -355,12 +344,12 @@ var fsHelper = {
 	},
 
 	guildRelationship: function(txt) {
-		var guildSelf = GM_getValue("guildSelf").split(","); // "TheRetreat"
-		var guildFrnd = GM_getValue("guildFrnd").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
-		var guildPast = GM_getValue("guildSelf").split(","); // "Dark Phoenix"
-		if (guildSelf.indexOf(txt)!=-1) return "self";
-		if (guildFrnd.indexOf(txt)!=-1) return "friendly";
-		if (guildPast.indexOf(txt)!=-1) return "old";
+		var guildSelf = GM_getValue("guildSelf").toLowerCase().replace(/\s*,\s*/,",").split(","); // "TheRetreat"
+		var guildFrnd = GM_getValue("guildFrnd").toLowerCase().replace(/\s*,\s*/,",").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
+		var guildPast = GM_getValue("guildPast").toLowerCase().replace(/\s*,\s*/,",").split(","); // "Dark Phoenix"
+		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
+		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
+		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
 		return "";
 	}
 };
