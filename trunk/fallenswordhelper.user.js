@@ -201,6 +201,7 @@ var fsHelper = {
 				break;
 			case "log":
 				fsHelper.addLogColoring("GuildLog", 1);
+				fsHelper.addGuildLogWidgets();
 				break;
 			case "groups":
 				switch(subPage2Id) {
@@ -212,7 +213,7 @@ var fsHelper = {
 				}
 				break;
 			case "manage":
-				fsHelper.hideGuildInfo();
+				fsHelper.injectGuild();
 				break;
 			}
 			break;
@@ -232,11 +233,39 @@ var fsHelper = {
 		}
 	},
 
-	hideGuildInfo: function() {
-		if (!GM_getValue("hideGuildInfo")) return;
-		fsHelper.hideGuildAvatar();
-		fsHelper.hideGuildStatistics();
-		fsHelper.hideGuildStructures();
+	injectGuild: function() {
+		var guildLogo = fsHelper.findNode("//a[contains(.,'Change Logo')]").parentNode;
+		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
+		var guildLogoElement = fsHelper.findNode("//img[contains(@title, 's Logo')]");
+		guildLogoElement.id = "guildLogoControl";
+		if (GM_getValue("guildLogoControl")) {
+			guildLogoElement.style.display = "none";
+			guildLogoElement.style.visibility = "hidden";
+		}
+		var leaveGuild = fsHelper.findNode("//a[contains(.,'Leave')]").parentNode;
+		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
+		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=changefounder']");
+		statisticsListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
+		statisticsListElement.innerHTML = "<span id='statisticsControl'>" + statisticsListElement.innerHTML + "</span>";
+		if (GM_getValue("statisticsControl")) {
+			var statisticsControl = document.getElementById("statisticsControl");
+			statisticsControl.style.display = "none";
+			statisticsControl.style.visibility = "hidden";
+		}
+		var build = fsHelper.findNode("//a[contains(.,'Build')]").parentNode;
+		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' id='toggleGuildStructureControl' linkto='guildStructureControl'>X</span> ]";
+		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=structures']");
+		structureListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
+		structureListElement.innerHTML = "<span id='guildStructureControl'>" + structureListElement.innerHTML + "</span>";
+		if (GM_getValue("guildStructureControl")) {
+			var guildStructureControl = document.getElementById("guildStructureControl");
+			guildStructureControl.style.display = "none";
+			guildStructureControl.style.visibility = "hidden";
+		}
+
+		document.getElementById('toggleGuildLogoControl').addEventListener('click', fsHelper.toggleVisibilty, true);
+		document.getElementById('toggleStatisticsControl').addEventListener('click', fsHelper.toggleVisibilty, true);
+		document.getElementById('toggleGuildStructureControl').addEventListener('click', fsHelper.toggleVisibilty, true);
 	},
 
 	injectStaminaCalculator: function() {
@@ -305,7 +334,7 @@ var fsHelper = {
 		tableWithBorderElement.align = "left";
 		tableWithBorderElement.parentNode.colSpan = "2";
 		var tableInsertPoint = tableWithBorderElement.parentNode.parentNode;
-		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border-style:solid; border-width:1px; border-color: #A07720;'><tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
+		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'><tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
 		var extraTextInsertPoint = fsHelper.findNode("//td[@title='InsertSpot']");
 		var defendingGuild = fsHelper.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
 		var defendingGuildHref = defendingGuild.getAttribute("href");
@@ -320,7 +349,8 @@ var fsHelper = {
 			var memberList = fsHelper.getValueJSON("memberlist");
 			for (var i=0;i<memberList.members.length;i++) {
 				var member=memberList.members[i];
-				if (member.status == "Offline" && (member.level < 400 || member.level > 421)) {
+				if (member.status == "Offline"
+					&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
 					validMemberString += member.name + " ";
 				}
 			}
@@ -346,13 +376,13 @@ var fsHelper = {
 			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
 			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
 			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet)</td></tr>" +
-			"<tr style='display:none;><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
-			"<tr style='display:none;><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
-			"<tr style='display:none;><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
-			"<tr style='display:none;><td align='right' style='color:brown;'>Armor:</td><td align='right' title='LDarmorValue'>0</td></tr>" +
-			"<tr style='display:none;><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
-			"<tr style='display:none;><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
-			"<tr style='display:none;><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
+			"<tr style='display:none;'><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>Armor:</td><td align='right' title='LDarmorValue'>0</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
 			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Defense:</td><td align='right' title='defenseValue'>0</td></tr>" +
@@ -602,9 +632,10 @@ var fsHelper = {
 	},
 
 	checkBuffs: function() {
-		var replacementText = "<td colspan='7' height='5'>"
-		replacementText += "<table cellpadding='1' style='font-size:medium; border-top:2px black solid; border-spacing: 1px; border-collapse: collapse;'>"
-		replacementText += "<tr>";
+		var imgserver = fsHelper.getImageServer();
+		var replacementText = "<td background='" + imgserver + "/skin/realm_right_bg.jpg'>"
+		replacementText += "<table width='100%' cellpadding='1' style='margin-left:28px; margin-right:28px; font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
+		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr><tr>";
 
 		var hasShieldImp = fsHelper.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
 		var hasDeathDealer = fsHelper.findNode("//img[contains(@onmouseover,'Death Dealer')]");
@@ -617,9 +648,9 @@ var fsHelper = {
 				impsRemainingRE = re.exec(textToTest);
 				impsRemaining = impsRemainingRE[1];
 			}
-			var applyImpWarningColor = " style='color:green; style='font-size:small;'";
+			var applyImpWarningColor = " style='color:green; font-size:medium;'";
 			if (impsRemaining<2){
-				applyImpWarningColor = " style='color:red; style='font-size:medium;'";
+				applyImpWarningColor = " style='color:red; font-size:large; font-weight:bold'";
 			}
 			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
 		}
@@ -634,13 +665,15 @@ var fsHelper = {
 		if (!hasDoubler || !hasLibrarian || !hasAdeptLearner || !hasMerchant || !hasTreasureHunter || !hasAnimalMagnetism || !hasConserve) {
 			replacementText += "<tr><td style='font-size:x-small;'>You are missing some hunting buffs!" + "</td></tr>"
 		}
-		replacementText += "<td colspan='2'></td></tr>";
+		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
 		replacementText += "</table>";
 		replacementText += "</td>" ;
 
-		var activeBuffsElement = fsHelper.findNode("//b[(.='Active Buffs')]");
-		beforeActiveBuffsElement = activeBuffsElement.parentNode.parentNode.previousSibling.parentNode.previousSibling.previousSibling;
-		beforeActiveBuffsElement.innerHTML = replacementText;
+		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
+		//insert after kill all monsters image and text
+		newRow=injectHere.insertRow(2);
+
+		newRow.innerHTML=replacementText;
 	},
 
 	injectQuestBook: function() {
@@ -735,11 +768,13 @@ var fsHelper = {
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", imgserver + "/skin/realm_right_bg.jpg");
 		var killAll = GM_getValue("killAll");
-		newCell.innerHTML="<div style='margin-left:28px;'><img id='fsHelperKillAll' src='" + imgserver + "/skin/" +
+		newCell.innerHTML="<span style='margin-left:28px; margin-right:28px; " + (killAll?"font-weight:bold;":"font-weight:normal;") +
+			"'><img style='cursor:pointer;' id='fsHelperKillAll' src='" + imgserver + "/skin/" +
 			(killAll?"quest_complete.gif":"quest_incomplete.gif") +
-			"' />&nbsp;Automatically kill monsters</div>";
+			"' />&nbsp;Automatically kill monsters </span>";
 		document.getElementById('fsHelperKillAll').addEventListener('click', fsHelper.killAllToggleFromWorld, true);
 		// injectHere.style.display='none';
+		//GM_log(newCell.innerHTML);
 		fsHelper.checkBuffs();
 		fsHelper.killAllMonsters();
 	},
@@ -748,7 +783,8 @@ var fsHelper = {
 		var killAll = GM_getValue("killAll");
 		killAll = !killAll;
 		var imgserver = fsHelper.getImageServer();
-		evt.target.src=imgserver + "/skin/" + (killAll?"quest_complete.gif":"quest_incomplete.gif")
+		evt.target.src=imgserver + "/skin/" + (killAll?"quest_complete.gif":"quest_incomplete.gif");
+		evt.target.parentNode.style.fontWeight = (killAll?"bold":"normal");
 		GM_setValue("killAll", killAll);
 		if (killAll) fsHelper.killAllMonsters();
 	},
@@ -923,6 +959,8 @@ var fsHelper = {
 	prepareChat: function() {
 		var injectHere = fsHelper.findNode("//table[@width='120' and contains(.,'New?')]")
 		if (!injectHere) return;
+		var showLines = parseInt(GM_getValue("chatLines"))
+		if (showLines==0) return;
 		var info = injectHere.insertRow(1);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='fsHelperPlaceholderChat'></span>";
@@ -1227,7 +1265,54 @@ var fsHelper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:green;'>(Guildmates show up as green)</font>"
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild mates show up as green)</font>"
+			}
+
+		}
+	},
+
+	addGuildLogWidgets: function() {
+		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
+		var playerIdRE = /http:\/\/www.fallensword.com\/\?ref=(\d+)/
+		var playerId=document.body.innerHTML.match(playerIdRE)[1]*1;
+
+		var logTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var hideNextRows = 0;
+		for (var i=0;i<logTable.rows.length;i++) {
+			var aRow = logTable.rows[i];
+			var firstPlayerID = 0;
+			var secondPlayerID = 0;
+			if (i != 0) {
+				if (hideNextRows>0) {
+					//aRow.style.display = "none";
+					hideNextRows --;
+				}
+				if (aRow.cells[0].innerHTML) {
+					var messageHTML = aRow.cells[2].innerHTML;
+					var doublerPlayerMessageRE = /member\s<a\shref="index.php\?cmd=profile\&amp;player_id=(\d+)/
+					secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
+					var singlePlayerMessageRE = /<a\shref="index.php\?cmd=profile\&amp;player_id=(\d+)/
+					firstPlayer = singlePlayerMessageRE.exec(messageHTML);
+					if (secondPlayer) {
+						firstPlayerID = firstPlayer[1]*1;
+						secondPlayerID = secondPlayer[1]*1;
+					}
+					if (firstPlayer && !secondPlayer) {
+						firstPlayerID = firstPlayer[1]*1;
+					}
+					if (firstPlayerID == playerId || secondPlayerID == playerId) {
+					}
+					else if (firstPlayer) {
+						//aRow.style.display = "none";
+						aRow.style.fontSize = "x-small";
+						aRow.style.color = "gray";
+						hideNextRows = 3;
+					}
+				}
+			}
+			else {
+				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'><b>(Guild Log messages not involving self are dimished!)</b></font>"
 			}
 
 		}
@@ -1266,19 +1351,19 @@ var fsHelper = {
 					fsHelper.getFullPlayerData(member);
 				}
 				output += "<li style='padding-bottom:0px;'>"
-				output += "<a style='color:white;font-size:10px;' "
+				output += "<a style='color:#CCFF99;font-size:10px;' "
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
-				output += "<a style='color:white;font-size:10px;' "
+				output += "<a style='color:#A0CFEC;font-size:10px;' "
 				output += "href=\"http://www.fallensword.com/index.php?cmd=message&target_player=" + member.name + "\">[m]</a>&nbsp;";
 				output += "<a onmouseover=\"tt_setWidth(105);";
-				output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b><br/>XP: " + member.xp + "<br/>Lvl:" + member.level + "<br/>";
+				output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b><br/>XP: " + member.xp + "<br/>Lvl: " + member.level + "<br/>";
 				if (member.hasFullData) {
 
 				}
 				output += "</div>');\" ";
 				output += "style='color:"
 				if (oldIds.indexOf(member.id)<0 /* || member.justLoggedIn */) { // just logged in
-					output += "yellow";
+					output += "orange";
 					member.loggedIn=new Date().getTime();
 					member.lastSeen=new Date().getTime();
 					// if (memberList.isRefreshed) {member.justLoggedIn=true; }
@@ -1442,6 +1527,31 @@ var fsHelper = {
 	},
 
 	injectReportPaint: function() {
+		var mainTable = fsHelper.findNode("//table[@width='600']");
+		for (var i=0;i<mainTable.rows.length;i++) {
+			var aRow = mainTable.rows[i];
+			if (aRow.cells[1]) { // itemRow
+				var itemCell = aRow.cells[1];
+				var itemElement = itemCell.firstChild;
+				var href = itemElement.getAttribute("href");
+				//GM_log(href);
+				var itemIDRE = /recall\&id=(\d+)/
+				var itemID = itemIDRE.exec(href)[1];
+				var playerIDRE = /player_id=(\d+)/
+				var playerID = playerIDRE.exec(href)[1];
+				itemCell.title = itemID;
+				//ajaxLoadItem(2758, 84063685, 1, 1346893 - report link
+				//ajaxLoadItem(2758, 6569239, 4, 40769 - guild store link
+				//unfortunately the itemID for the report link is different than the guild store link so you cannot script
+				//grabbing items from the guild store easily with one click.
+				itemCell.innerHTML += ' [ <span style="cursor:pointer; text-decoration:underline;" id="recallItem" ' +
+					'itemID="' + itemID + '" ' +
+					'playerID="' + playerID + '">Fast Recall</span> ]'
+
+				document.getElementById('recallItem').addEventListener('click', fsHelper.recallItem, true);
+			}
+		}
+
 		//Get the list of online members
 		var memberList = fsHelper.getValueJSON("memberlist");
 
@@ -1451,10 +1561,40 @@ var fsHelper = {
 			if (member.status=="Online") {
 				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
-					player.innerHTML = "[Online] " + player.innerHTML;
+					player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
+				}
+			}
+			else {
+				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
+				if (player) {
+					player.innerHTML = "<a href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 				}
 			}
 		}
+	},
+
+	recallItem: function(evt) {
+		var itemID=evt.target.getAttribute("itemID");
+		var playerID=evt.target.getAttribute("playerID");
+
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.recallItemReturnMessage(itemID);
+			},
+		})
+	},
+
+	recallItemReturnMessage: function (itemID) {
+		var itemCellElement = fsHelper.findNode("//td[@title='" + itemID + "']");
+		itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
 	},
 
 	injectDropItems: function() {
@@ -1755,29 +1895,17 @@ var fsHelper = {
 		expiresLocation.innerHTML += extraText;
 	},
 
-	hideGuildAvatar: function() {
-		var guildLogoElement = fsHelper.findNode("//img[contains(@title, 's Logo')]");
-		guildLogoElement.style.display = "none";
-	},
-
-	hideGuildStatistics: function() {
-		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=changefounder']");
-		statisticsListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-		statisticsListElement.style.display = "none";
-	},
-
-	hideGuildStructures: function() {
-		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=structures']");
-		structureListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-		structureListElement.style.display = "none";
-	},
-
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
 		var currentVisibility=anItem.style.visibility;
 		anItem.style.visibility=(currentVisibility=="hidden")?"visible":"hidden";
 		anItem.style.display=(currentVisibility=="hidden")?"block":"none";
+		if (GM_getValue(anItemId)) {
+			GM_setValue(anItemId, "");
+		} else{
+			GM_setValue(anItemId, "ON");
+		}
 	},
 
 	injectSettingsGuildData: function(guildType) {
@@ -1819,9 +1947,9 @@ var fsHelper = {
 			'<tr><td align="right">Show Administrative Options [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Show Admininstrative Options</b><br><br>Show ranking controls in guild managemenet page - this works for guild founders only.\');">?</a>' +
 				' ]:</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Hide Guild Info [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Hide Guild Info</b><br><br>This will hide three fields on the Guild-Manage screen, the logo, the statistics and the structures. You can always get them back by unchecking this.\');">?</a>' +
-				' ]:</td><td><input name="hideGuildInfo" type="checkbox" value="on"' + (GM_getValue("hideGuildInfo")?" checked":"") + '></td></tr>' +
+			'<td align="right">Hide Non Player Guild Log Messages [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Hide Non Player Guild Log Messages</b><br><br>Any log messages not related to the current player will be dimished (e.g. recall messages from guild store).\');">?</a>' +
+				' ]:</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Disable Item Coloring [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Disable Item Coloring</b><br><br>There is some code that colors the item text based on the rarity of the item.\');">?</a>' +
 				' ]:</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
@@ -1831,7 +1959,11 @@ var fsHelper = {
 			'<tr><td align="right">Show Completed Quests [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Show Completed Quests</b><br><br>This will show completed quests that have been hidden.\');">?</a>' +
 				' ]:</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
+			'<td align="right">Show chat lines [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Chat lines</b><br><br>Display the last {n} lines from guild chat (set to 0 to disable).\');">?</a>' +
+				' ]:</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
+//			'<tr><td colspan="2"></td>' +
+			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
@@ -1871,8 +2003,8 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "disableItemColoring");
 		fsHelper.saveValueForm(oForm, "enableLogColoring");
 		fsHelper.saveValueForm(oForm, "showCompletedQuests");
+		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		fsHelper.saveValueForm(oForm, "hideBanner");
-		fsHelper.saveValueForm(oForm, "hideGuildInfo");
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
@@ -1898,9 +2030,9 @@ var fsHelper = {
 			guildEnmy="";
 			GM_setValue("guildEnmy", guildEnmy);
 		}
-		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").split(","); // "TheRetreat"
-		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
-		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").split(","); // "Dark Phoenix"
+		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").split(",");
+		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").split(",");
+		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").split(",");
 		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").split(",");
 		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
 		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
