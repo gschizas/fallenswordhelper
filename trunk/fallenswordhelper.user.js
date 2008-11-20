@@ -939,6 +939,7 @@ var fsHelper = {
 				},
 			})
 		} else {
+			chat.isRefreshed=false;
 			fsHelper.injectChat(chat);
 		}
 	},
@@ -950,6 +951,7 @@ var fsHelper = {
 		// GM_log(chatTable.innerHTML);
 		var chat = new Object();
 		var chatConfirm=fsHelper.findNode("//input[@name='xc']",0,doc);
+		chat.isRefreshed=true;
 		chat.messages = new Array();
 		for (var i=chatTable.rows.length-1; i>0; i--) {
 			var aRow = chatTable.rows[i];
@@ -972,7 +974,7 @@ var fsHelper = {
 
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = "#4a3918";
+		displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
 		displayList.cellPadding = 1;
 		displayList.width = 125;
 
@@ -1127,13 +1129,9 @@ var fsHelper = {
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = "#4a3918";
+		displayList.style.backgroundColor = (memberList.isRefreshed)?"#6a5938":"#4a3918";
 		displayList.cellPadding = 1;
 		displayList.width = 125;
-
-		if (memberList.isRefreshed) {
-			displayList.style.backgroundColor = "#6a5938";
-		}
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
