@@ -657,7 +657,7 @@ var fsHelper = {
 						color = "gray";
 						break;
 					default:
-						changeAppearance = true;
+						changeAppearance = false;
 				}
 				if (changeAppearance) {
 					aLink.parentNode.style.color=color;
