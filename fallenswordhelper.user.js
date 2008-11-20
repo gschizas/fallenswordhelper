@@ -1713,7 +1713,7 @@ var fsHelper = {
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
 			'with valuable contributions by <a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
-			'<a href="http://www.fallensword.com/index.php?cmd=profile&player_id=524660">Nabalac</a>, '
+			'<a href="http://www.fallensword.com/index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
 			'</table></form>';
 		var insertHere = fsHelper.findNode("//table[@width='100%']");
