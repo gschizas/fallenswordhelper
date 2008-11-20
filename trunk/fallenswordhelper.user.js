@@ -11,6 +11,7 @@ var fsHelper = {
 	},
 
 	onPageLoad: function(anEvent) {
+		fsHelper.prepareGuildList();
 		var re=/cmd=([a-z]+)/;
 		var pageId = re.exec(document.location.search)[1];
 
@@ -27,26 +28,12 @@ var fsHelper = {
 		case "guild":
 			fsHelper.decideGuild();
 			break;
-		case "world":
-			fsHelper.injectWorld();
-			break;
 		default:
 			// echo("");
 		}
 	},
 
-	injectWorld: function() {
-		var injectHere = document
-			.getElementsByTagName("TABLE")[0].rows[2].cells[2]
-			.getElementsByTagName("TABLE")[0].rows[2].cells[0]
-			.getElementsByTagName("TABLE")[0];
-		var info = injectHere.insertRow(0);
-		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
-		fsHelper.retrieveGuildData();
-	},
-
-	injectChat: function() {
+	prepareGuildList: function() {
 		var injectHere = document
 			.getElementsByTagName("TABLE")[0].rows[2].cells[2]
 			.getElementsByTagName("TABLE")[0].rows[2].cells[0]
@@ -58,24 +45,36 @@ var fsHelper = {
 	},
 
 	retrieveGuildData: function() {
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
-			headers: {
-			//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-			//    'Accept': 'application/atom+xml,application/xml,text/xml',
-				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
-				"Cookie" : document.cookie
-			},
-			onload: function(responseDetails) {
-				// window.alert('\n' + responseDetails.responseText);
-				fsHelper.parseGuildForWorld(responseDetails.responseText);
-			},
-		})
+		var memberListJSON = GM_getValue("memberlist");
+		var memberList;
+		// memberListJSON="";
+		if (memberListJSON) {
+			memberList = JSON.parse(memberListJSON);
+			if ((new Date()).getTime() - memberList.changedOn > 15000) memberList = null; // invalidate cache
+		}
+
+		if (!memberList) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.parseGuildForWorld(responseDetails.responseText);
+				},
+			})
+		} else {
+			var memberList = JSON.parse(memberListJSON);
+			memberList.isRefreshed = false;
+			fsHelper.injectGuildList(memberList);
+		}
 	},
 
 	parseGuildForWorld: function(details) {
+		GM_log("parseGuildForWorld");
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
 		var allTables = doc.getElementsByTagName("TABLE")
@@ -88,7 +87,8 @@ var fsHelper = {
 		}
 		if (membersTable) {
 			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
-			var allMembers = new Array();
+			var memberList = new Object();
+			memberList.members = new Array();
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
@@ -99,30 +99,47 @@ var fsHelper = {
 					aMember.level=aRow.cells[2].innerHTML;
 					aMember.rank=aRow.cells[3].innerHTML;
 					aMember.xp=aRow.cells[4].innerHTML;
-					allMembers.push(aMember);
+					memberList.members.push(aMember);
 				}
 			}
-			fsHelper.injectGuildList(allMembers);
+			memberList.changedOn = new Date().getTime();
+			memberList.isRefreshed = true;
+			fsHelper.injectGuildList(memberList);
 		}
 	},
 
 	injectGuildList: function(memberList) {
+		GM_setValue("memberlist", JSON.stringify(memberList));
+		// GM_log(JSON.stringify(memberList));
 		var injectHere = document.getElementById("fsHelperPlaceholderWorld");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid rgb(198, 173, 115)";
+		displayList.style.border = "1px solid #c5ad73";
 		displayList.style.backgroundColor = "#4a3918";
 		displayList.cellPadding = 3;
 		displayList.width = 125;
-		for (var i=0;i<memberList.length;i++) {
-			var member=memberList[i];
+
+		if (memberList.isRefreshed) {
+			displayList.style.backgroundColor = "#6a5938";
+			/*
+			var aRow=displayList.insertRow(displayList.rows.length);
+			var aCell=aRow.insertCell(0);
+			aCell.innerHTML = "Refreshed!";
+			*/
+		}
+
+		for (var i=0;i<memberList.members.length;i++) {
+			var member=memberList.members[i];
 			if (member.status=="Online") {
 				var aRow=displayList.insertRow(displayList.rows.length);
 				var aCell=aRow.insertCell(0);
 				aCell.innerHTML = "<a style='color:white;font-size:10px;' href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 			}
 		}
+		var breaker=document.createElement("BR");
+		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+
 	},
 
 	injectAuctionHouse: function() {
@@ -279,7 +296,7 @@ var fsHelper = {
 
 	guildRelationship: function(txt) {
 		var guildSelf = GM_getValue("guildSelf").split(","); // "TheRetreat"
-		var guildFrnd = GM_getValue("guildFrnd").split(",");  // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
+		var guildFrnd = GM_getValue("guildFrnd").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
 		var guildPast = GM_getValue("guildSelf").split(","); // "Dark Phoenix"
 		if (guildSelf.indexOf(txt)!=-1) return "self";
 		if (guildFrnd.indexOf(txt)!=-1) return "friendly";
