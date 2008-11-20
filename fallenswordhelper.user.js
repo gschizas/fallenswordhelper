@@ -463,21 +463,17 @@ var fsHelper = {
 		var savedItems = fsHelper.getValueJSON("savedItems")
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
-			//window.alert(anItem.innerHTML);
 			if (anItem.src.search("items") != -1) {
 				var mouseOver=anItem.getAttribute("onmouseover");
-				//window.alert(mouseOver);
 				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
 				var reResult=reParams.exec(mouseOver);
 				var itemId=reResult[1];
 				var invId=reResult[2];
 				var type=reResult[3];
 				var pid=reResult[4];
-				//window.alert(invId);
 				if (savedItems && savedItems.indexOf(itemId)>=0) {
-					//
 					//fsHelper.injectDropItemsParse(savedItems(itemId).reponseText);
-					window.alert("script error");
+					GM_log("script error");
 					//window.alert(savedItems(itemId).reponseText);
 				}
 				else {
