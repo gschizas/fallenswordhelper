@@ -275,7 +275,7 @@ var fsHelper = {
 				}
 			}
 		}
-
+/*
 		var player = document.evaluate("//textarea[@id='holdtext']", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 		var avyrow = document.evaluate("//td/img[contains(@title, 's Avatar')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 		var imgurls = document.evaluate("//img[contains(@src, '/skin/')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -325,7 +325,7 @@ var fsHelper = {
 			}
 			avyrow.snapshotItem(0).parentNode.innerHTML = newhtml ;
 		}
-
+*/
 	},
 
 	injectSettings: function() {
