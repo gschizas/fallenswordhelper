@@ -37,7 +37,6 @@ var fsHelper = {
 
 	autoUpdate: function(responseDetails) {
 		if (responseDetails.status!=200) return;
-		window.alert("!");
 		var now=(new Date()).getTime()
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion=GM_getValue("currentVersion");
