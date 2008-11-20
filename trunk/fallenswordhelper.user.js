@@ -569,6 +569,8 @@ var fsHelper = {
 			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
 			var memberList = new Object();
 			memberList.members = new Array();
+			memberList.lookupByName = new Array();
+			memberList.lookupById = new Array();
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
@@ -580,6 +582,8 @@ var fsHelper = {
 					aMember.rank=aRow.cells[3].textContent;
 					aMember.xp=aRow.cells[4].textContent;
 					memberList.members.push(aMember);
+					memberList.lookupByName.push(aMember.name)
+					memberList.lookupById.push(aMember.id)
 				}
 			}
 			memberList.changedOn = new Date().getTime();
@@ -950,6 +954,23 @@ var fsHelper = {
 			anItem = allItems[i];
 			var href = anItem.parentNode.getAttribute("href");
 			fsHelper.retrieveGroupData(href, anItem.parentNode);
+		}
+		allItems = fsHelper.findNodes("//tr[td/a/img/@title='View Group Stats']");
+		var memberList=fsHelper.getValueJSON("memberlist");
+		// window.alert(typeof(memberList.members));
+		// memberList.lookupByName.find
+		for (i=0; i<allItems.length; i++) {
+			var theItem=allItems[i].cells[0];
+			var foundName=theItem.textContent;
+			for (j=0; j<memberList.members.length; j++) {
+				var aMember=memberList.members[j];
+				// window.alert(aMember.name);
+				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+				if (aMember.name==foundName) {
+					theItem.innerHTML += " [" + aMember.level + "]";
+				}
+			}
+			// window.alert(allItems[i].cells[0].textContent);
 		}
 	},
 
