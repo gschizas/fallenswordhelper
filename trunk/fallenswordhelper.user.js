@@ -789,15 +789,15 @@ var fsHelper = {
 					'<b>type</b> will fast kill a type of monster; <b>all</b> will kill all monsters as you move into the square; <b>off</b> returns control to game normal. ' +
 					'<b>CAUTION</b>: If this is set to <b>all</b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
 				' ]:' +
-				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' + 
-					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' + 
-				'<td><input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' + 
-					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +'</td></tr>'+ 
-				'<tr><td></td><td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' + 
-					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td>' + 
-				'<td><input type="radio" id="killAllAdvancedWorldAll" name="killAllAdvancedWorld"  value="all"' + 
-					((killStyle == "all")?" checked":"") + '>' + ((killStyle == "all")?" <b>all</b>":"all") +'</td></tr>' + 
-				'</tbody></table>' + 
+				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
+					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' +
+				'<td><input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
+					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +'</td></tr>'+
+				'<tr><td></td><td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
+					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td>' +
+				'<td><input type="radio" id="killAllAdvancedWorldAll" name="killAllAdvancedWorld"  value="all"' +
+					((killStyle == "all")?" checked":"") + '>' + ((killStyle == "all")?" <b>all</b>":"all") +'</td></tr>' +
+				'</tbody></table>' +
 			'</div>';
 		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
@@ -814,7 +814,7 @@ var fsHelper = {
 		GM_setValue("killAllAdvanced", evt.target.value);
 		window.location = 'index.php?cmd=world';
 	},
-		
+
 	killSingleMonster: function(monsterNumber) {
 		if (GM_getValue("killAllAdvanced") != "single") return;
 		var kills=0;
@@ -1269,7 +1269,7 @@ var fsHelper = {
 					//kill style off
 					if (killStyle == "off") {
 						window.location = linkObj.href
-					} 
+					}
 					//kill style single
 					if (killStyle == "single") {
 						fsHelper.killSingleMonster(index);
@@ -1784,7 +1784,7 @@ var fsHelper = {
 	},
 
 	injectDropItemsPaint: function(responseDetails, callback) {
-		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/; // <b>[^<]+<\/b>/
+		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i; // <b>[^<]+<\/b>/
 		var fontLineRX=fontLineRE.exec(responseDetails.responseText)
 		var textNode = fsHelper.findNode("../../../td", 2, callback);
 		textNode.style.color=fontLineRX[1];
@@ -2105,10 +2105,10 @@ var fsHelper = {
 				'<b>type</b> will fast kill a type of monster; <b>all</b> will kill all monsters as you move into the square; <b>off</b> returns control to game normal. ' +
 				'<b>CAUTION</b>: If this is set to <b>all</b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
 				' ]:</td><td><table><tbody>' +
-				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' + 
-				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+ 
-				'<tr><td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' + 
-				'<td><input type="radio" name="killAllAdvanced"  value="all"' + ((GM_getValue("killAllAdvanced") == "all")?" checked":"") + '>all</td></tr>' + 
+				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
+				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+
+				'<tr><td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
+				'<td><input type="radio" name="killAllAdvanced"  value="all"' + ((GM_getValue("killAllAdvanced") == "all")?" checked":"") + '>all</td></tr>' +
 				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Hide Top Banner</b><br><br>Pretty simple ... it just hides the top banner.\');">?</a>' +
@@ -2173,7 +2173,7 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		fsHelper.saveValueForm(oForm, "hideBanner");
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
-		
+
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
