@@ -27,10 +27,10 @@ var fsHelper = {
 	},
 
 	findNode: function(xpath, index, doc) {
-			var nodes=fsHelper.findNodes(xpath, doc);
-			if (!nodes) return null;
-			if (!index) index=0;
-			return (nodes[index]);
+		var nodes=fsHelper.findNodes(xpath, doc);
+		if (!nodes) return null;
+		if (!index) index=0;
+		return (nodes[index]);
 	},
 
 	findNodes: function(xpath, doc) {
@@ -39,6 +39,7 @@ var fsHelper = {
 			}
 			var nodes=new Array();
 			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			if (findQ.snapshotLength==0) return null;
 			for (var i=0; i<findQ.snapshotLength; i++) {
 				nodes.push(findQ.snapshotItem(i));
 			}
@@ -141,12 +142,25 @@ var fsHelper = {
 		if (subPage2IdRE)
 			subPage2Id=subPage2IdRE[1];
 
+		re=/page=([0-9]+)/;
+		var subsequentPageIdRE = re.exec(document.location.search);
+		var subsequentPageId="-";
+		if (subsequentPageIdRE)
+			subsequentPageId=subsequentPageIdRE[1];
+
 		switch (pageId) {
 		case "settings":
 			fsHelper.injectSettings();
 			break;
 		case "world":
 			fsHelper.injectWorld();
+			break;
+		case "questbook":
+			switch(subsequentPageId) {
+			case "-":
+				fsHelper.injectQuestBook();
+				break;
+			}
 			break;
 		case "profile":
 			switch (subPageId) {
@@ -180,7 +194,11 @@ var fsHelper = {
 				}
 				break;
 			case "chat":
+				fsHelper.addLogColoring("Chat", 0);
 				fsHelper.injectChat();
+				break;
+			case "log":
+				fsHelper.addLogColoring("GuildLog", 1);
 				break;
 			case "groups":
 				switch(subPage2Id) {
@@ -198,6 +216,10 @@ var fsHelper = {
 			break;
 		case "bank":
 			fsHelper.injectBank();
+			break;
+		case "log":
+			fsHelper.addLogColoring("PlayerLog", 1);
+			fsHelper.addLogWidgets();
 			break;
 		case "-":
 			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
@@ -248,9 +270,9 @@ var fsHelper = {
 		if (defendingGuildHref == "index.php?cmd=guild&subcmd=view&guild_id=40769") {
 			var panicGuild = true;
 		}
+		var validMemberString = "";
 		if (panicGuild) {
 			var memberList = fsHelper.getValueJSON("memberlist");
-			var validMemberString = "";
 			for (var i=0;i<memberList.members.length;i++) {
 				var member=memberList.members[i];
 				if (member.status == "Offline" && (member.level < 400 || member.level > 421)) {
@@ -258,7 +280,7 @@ var fsHelper = {
 				}
 			}
 		}
-		
+
 		var listOfDefenders = fsHelper.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
 		var testList = "";
@@ -273,19 +295,31 @@ var fsHelper = {
 			defenderCount++;
 		}
 		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
-		extraTextInsertPoint.innerHTML += "<tr><td>Number of Defenders: " + defenderCount + "<td><tr>";
-		if (panicGuild) {
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
-			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
-		}
-
-		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:small; border-top:2px black solid;'><tr><td colspan='4' style='font-size:x-small; color:gray;'>Simple calc at first 50% of 1st defender + 20% of rest, no check on last logged time or number of relics</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" + 
+		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:small; border-top:2px black solid;'>" +
+			"<tr><td>Number of Defenders:</td><td>" + defenderCount + "</td></tr>" +
+			"<tr><td>Defending Guild Relic Count:</td><td title='relicCount'>0</td></tr>" +
+			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
+			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
+			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet)</td></tr>" +
+			"<tr style='display:none;><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
+			"<tr style='display:none;><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
+			"<tr style='display:none;><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
+			"<tr style='display:none;><td align='right' style='color:brown;'>Armor:</td><td align='right' title='LDarmorValue'>0</td></tr>" +
+			"<tr style='display:none;><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
+			"<tr style='display:none;><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
+			"<tr style='display:none;><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
+			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Defense:</td><td align='right' title='defenseValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Armor:</td><td align='right' title='armorValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr></table><td><tr>";
+			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>"
+		if (panicGuild) {
+			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
+			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
+		}
+		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
 
 	getRelicGuildData: function(extraTextInsertPoint,href) {
@@ -316,7 +350,50 @@ var fsHelper = {
 				relicCount++;
 			}
 		}
-		extraTextInsertPoint.innerHTML += "<tr><td>Defending Guild Relic Count: " + relicCount + "<td><tr>";
+		var relicCountValue = fsHelper.findNode("//td[@title='relicCount']");
+		relicCountValue.innerHTML = relicCount;
+		var relicProcessedValue = fsHelper.findNode("//td[@title='relicProcessed']");
+		relicProcessedValue.innerHTML = 1;
+		var relicMultiplier = 1;
+		if (relicCount == 1) {
+			relicMultiplier = 1.5;
+		}
+		else if (relicCount > 3) {
+			relicMultiplier = 0.9;
+		}
+		var LDProcessedValue = fsHelper.findNode("//td[@title='LDProcessed']");
+		if (LDProcessedValue.innerHTML == "1") {
+			var attackValue = fsHelper.findNode("//td[@title='attackValue']");
+			var LDattackValue = fsHelper.findNode("//td[@title='LDattackValue']");
+			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+			LDattackNumber=LDattackValue.innerHTML.replace(/,/,"")*1;
+			attackValue.innerHTML = fsHelper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
+			var defenseValue = fsHelper.findNode("//td[@title='defenseValue']");
+			var LDdefenseValue = fsHelper.findNode("//td[@title='LDdefenseValue']");
+			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+			LDdefenseNumber=LDdefenseValue.innerHTML.replace(/,/,"")*1;
+			defenseValue.innerHTML = fsHelper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			var armorValue = fsHelper.findNode("//td[@title='armorValue']");
+			var LDarmorValue = fsHelper.findNode("//td[@title='LDarmorValue']");
+			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+			LDarmorNumber=LDarmorValue.innerHTML.replace(/,/,"")*1;
+			armorValue.innerHTML = fsHelper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
+			var damageValue = fsHelper.findNode("//td[@title='damageValue']");
+			var LDdamageValue = fsHelper.findNode("//td[@title='LDdamageValue']");
+			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+			LDdamageNumber=LDdamageValue.innerHTML.replace(/,/,"")*1;
+			damageValue.innerHTML = fsHelper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+			var hpValue = fsHelper.findNode("//td[@title='hpValue']");
+			var LDhpValue = fsHelper.findNode("//td[@title='LDhpValue']");
+			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+			LDhpNumber=LDhpValue.innerHTML.replace(/,/,"")*1;
+			hpValue.innerHTML = fsHelper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+			var defendersProcessed = fsHelper.findNode("//td[@title='defendersProcessed']");
+			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
+			defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
+			var LDpercentageValue = fsHelper.findNode("//td[@title='LDPercentage']");
+			LDpercentageValue.innerHTML = (relicMultiplier*100) + "%";
+		}
 	},
 
 	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
@@ -358,28 +435,94 @@ var fsHelper = {
 				var playerHPValue = hpLocation.textContent;
 			}
 		}
-		var defenderMultiplier = 0.2;
-		if (defenderCount == 0) {
-			defenderMultiplier = 0.5;
+
+		if (defenderCount != 0) {
+			var defenderMultiplier = 0.2;
+			var attackValue = fsHelper.findNode("//td[@title='attackValue']");
+			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+			attackValue.innerHTML = fsHelper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+			var defenseValue = fsHelper.findNode("//td[@title='defenseValue']");
+			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+			defenseValue.innerHTML = fsHelper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			var armorValue = fsHelper.findNode("//td[@title='armorValue']");
+			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+			armorValue.innerHTML = fsHelper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+			var damageValue = fsHelper.findNode("//td[@title='damageValue']");
+			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+			damageValue.innerHTML = fsHelper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+			var hpValue = fsHelper.findNode("//td[@title='hpValue']");
+			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+			hpValue.innerHTML = fsHelper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+			var defendersProcessed = fsHelper.findNode("//td[@title='defendersProcessed']");
+			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
+			defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
 		}
-		var attackValue = fsHelper.findNode("//td[@title='attackValue']");
-		attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-		attackValue.innerHTML = fsHelper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
-		var defenseValue = fsHelper.findNode("//td[@title='defenseValue']");
-		defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-		defenseValue.innerHTML = fsHelper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
-		var armorValue = fsHelper.findNode("//td[@title='armorValue']");
-		armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-		armorValue.innerHTML = fsHelper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
-		var damageValue = fsHelper.findNode("//td[@title='damageValue']");
-		damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-		damageValue.innerHTML = fsHelper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
-		var hpValue = fsHelper.findNode("//td[@title='hpValue']");
-		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-		hpValue.innerHTML = fsHelper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
-		var defendersProcessed = fsHelper.findNode("//td[@title='defendersProcessed']");
-		defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-		defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
+		else {
+			var defenderMultiplier = 1;
+			var attackValue = fsHelper.findNode("//td[@title='LDattackValue']");
+			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+			attackValue.innerHTML = fsHelper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+			var defenseValue = fsHelper.findNode("//td[@title='LDdefenseValue']");
+			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+			defenseValue.innerHTML = fsHelper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			var armorValue = fsHelper.findNode("//td[@title='LDarmorValue']");
+			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+			armorValue.innerHTML = fsHelper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+			var damageValue = fsHelper.findNode("//td[@title='LDdamageValue']");
+			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+			damageValue.innerHTML = fsHelper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+			var hpValue = fsHelper.findNode("//td[@title='LDhpValue']");
+			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+			hpValue.innerHTML = fsHelper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+			var defendersProcessed = fsHelper.findNode("//td[@title='LDProcessed']");
+			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
+			defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
+		}
+		var relicProcessedValue = fsHelper.findNode("//td[@title='relicProcessed']");
+		var relicCountValue = fsHelper.findNode("//td[@title='relicProcessed']");
+		var relicCount = relicCountValue.innerHTML.replace(/,/,"")*1;
+
+		var relicMultiplier = 1;
+		if (relicCount == 1) {
+			relicMultiplier = 1.5;
+		}
+		else if (relicCount > 3) {
+			relicMultiplier = 0.9;
+		}
+
+		//GM_log(defenderCount + ":" + relicProcessedValue.innerHTML);
+		if (defenderCount == 0 && relicProcessedValue.innerHTML == "1") {
+			var attackValue = fsHelper.findNode("//td[@title='attackValue']");
+			var LDattackValue = fsHelper.findNode("//td[@title='LDattackValue']");
+			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+			LDattackNumber=LDattackValue.innerHTML.replace(/,/,"")*1;
+			attackValue.innerHTML = fsHelper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
+			var defenseValue = fsHelper.findNode("//td[@title='defenseValue']");
+			var LDdefenseValue = fsHelper.findNode("//td[@title='LDdefenseValue']");
+			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+			LDdefenseNumber=LDdefenseValue.innerHTML.replace(/,/,"")*1;
+			defenseValue.innerHTML = fsHelper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			var armorValue = fsHelper.findNode("//td[@title='armorValue']");
+			var LDarmorValue = fsHelper.findNode("//td[@title='LDarmorValue']");
+			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+			LDarmorNumber=LDarmorValue.innerHTML.replace(/,/,"")*1;
+			armorValue.innerHTML = fsHelper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
+			var damageValue = fsHelper.findNode("//td[@title='damageValue']");
+			var LDdamageValue = fsHelper.findNode("//td[@title='LDdamageValue']");
+			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+			LDdamageNumber=LDdamageValue.innerHTML.replace(/,/,"")*1;
+			damageValue.innerHTML = fsHelper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+			var hpValue = fsHelper.findNode("//td[@title='hpValue']");
+			var LDhpValue = fsHelper.findNode("//td[@title='LDhpValue']");
+			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+			LDhpNumber=LDhpValue.innerHTML.replace(/,/,"")*1;
+			hpValue.innerHTML = fsHelper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+			var defendersProcessed = fsHelper.findNode("//td[@title='defendersProcessed']");
+			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
+			defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
+			var LDpercentageValue = fsHelper.findNode("//td[@title='LDPercentage']");
+			LDpercentageValue.innerHTML = (relicMultiplier*100) + "%";
+		}
 	},
 
 	mapThis: function() {
@@ -418,13 +561,14 @@ var fsHelper = {
 			if (hasShieldImp) {
 				//textToTest = "tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>2 HP remaining<br></b> (Level: 150)</b><br>[Click to De-Activate]</center>');";
 				textToTest = hasShieldImp.getAttribute("onmouseover");
-				impsRemaining = re.exec(textToTest);
+				impsRemainingRE = re.exec(textToTest);
+				impsRemaining = impsRemainingRE[1];
 			}
 			var applyImpWarningColor = " style='color:green; style='font-size:small;'";
-			if (impsRemaining[1]<2){
+			if (impsRemaining<2){
 				applyImpWarningColor = " style='color:red; style='font-size:medium;'";
 			}
-			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining[1] + "</td></tr>"
+			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
 		}
 
 		var hasDoubler = fsHelper.findNode("//img[contains(@onmouseover,'Doubler')]");
@@ -444,6 +588,90 @@ var fsHelper = {
 		var activeBuffsElement = fsHelper.findNode("//b[(.='Active Buffs')]");
 		beforeActiveBuffsElement = activeBuffsElement.parentNode.parentNode.previousSibling.parentNode.previousSibling.previousSibling;
 		beforeActiveBuffsElement.innerHTML = replacementText;
+	},
+
+	injectQuestBook: function() {
+		if (GM_getValue("showCompletedQuests")) return;
+		var questTable = fsHelper.findNode("//table[@width='100%' and @cellPadding='2']");
+		questTable.setAttribute("title","questTable");
+		var hideNextRows = 0;
+		for (var i=0;i<questTable.rows.length;i++) {
+			var aRow = questTable.rows[i];
+			if (i!=0) {
+				if (hideNextRows > 0) {
+					aRow.style.display = "none";
+					hideNextRows --;
+				}
+				if (aRow.cells[0].innerHTML) {
+					var aCell = aRow.cells[0]
+					var imgElement = aCell.nextSibling.firstChild;
+					if (imgElement.getAttribute("title") == "Completed") {
+						aRow.style.display = "none";
+						hideNextRows = 3;
+					}
+				}
+			}
+			else {
+				var questNameCell = aRow.firstChild.nextSibling;
+				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed quests hidden - see preferences to unhide)</font>"
+			}
+		}
+
+		var pageCountElement = fsHelper.findNode("//select[@class='customselect']");
+		//&nbsp;of&nbsp;5&nbsp;
+		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
+		var pageCount=pageCountElement.parentNode.innerHTML.match(pageRE)[1]*1;
+		for (var i=1;i<pageCount-1;i++) {
+			var href = "http://www.fallensword.com/index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=";
+			fsHelper.getQuestData(href);
+		}
+	},
+
+	getQuestData: function(href) {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: href,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.injectQuestData(responseDetails.responseText);
+			},
+		})
+	},
+
+	injectQuestData: function(responseText) {
+		var doc=fsHelper.createDocument(responseText)
+		var allItems = doc.getElementsByTagName("TD");
+		for (var i=0;i<allItems.length;i++) {
+			var anItem=allItems[i];
+			if (anItem.innerHTML=="Quest Name") {
+				var questTable = anItem.parentNode.parentNode;
+			}
+		}
+		var OriginalQuestTable = fsHelper.findNode("//table[@title='questTable']");
+		var newRow, newCell;
+		var insertNextRows = 0;
+		for (var i=1;i<questTable.rows.length;i++) {
+			var aRow = questTable.rows[i];
+			if (insertNextRows > 0) {
+				newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
+				//newCell=newRow.insertCell(0);
+				newRow.innerHTML = aRow.innerHTML;
+				insertNextRows --;
+			}
+			if (aRow.cells[0].innerHTML) {
+				var aCell = aRow.cells[0]
+				var imgElement = aCell.nextSibling.firstChild;
+				if (imgElement.getAttribute("title") != "Completed") {
+					newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
+					newRow.innerHTML = aRow.innerHTML;
+					insertNextRows = 3;
+				}
+			}
+		}
 	},
 
 	injectWorld: function() {
@@ -641,6 +869,103 @@ var fsHelper = {
 
 	injectChat: function() {
 
+	},
+
+	addLogColoring: function(logScreen, dateColumn) {
+		if (!GM_getValue("enableLogColoring")) return;
+		var lastCheckScreen = "last" + logScreen + "Check";
+		var localLastCheckMilli=GM_getValue(lastCheckScreen);
+		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
+
+		var chatTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+
+		var localDateMilli = (new Date()).getTime();
+		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
+		var gmtOffsetMilli = gmtOffsetMinutes*60*1000;
+
+		for (var i=1;i<chatTable.rows.length;i++) {
+			var aRow = chatTable.rows[i];
+			//GM_log(aRow.innerHTML);
+			if (aRow.cells[0].innerHTML) {
+				//GM_log(aRow.cells[dateColumn].innerHTML);
+				var cellContents = aRow.cells[dateColumn].innerHTML;
+				cellContents = cellContents.substring(0,17); // fix for player log screen.
+				postDateAsDate = fsHelper.textDateToDate(cellContents);
+				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
+				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
+				if (postDateAsLocalMilli > localLastCheckMilli) {
+					aRow.style.backgroundColor = "yellow";
+				}
+				else if (postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
+					aRow.style.backgroundColor = "#CD9E4B";
+
+				}
+			}
+		}
+		now=(new Date()).getTime()
+		GM_setValue(lastCheckScreen, now.toString());
+	},
+
+	textDateToDate: function(textDate) {
+		timeText = textDate.split(" ")[0];
+		dateText = textDate.split(" ")[1];
+		dayText = dateText.split("/")[0];
+		monthText = dateText.split("/")[1];
+		if (monthText == "Jan") {fullMonthText = "January"};
+		if (monthText == "Feb") {fullMonthText = "February"};
+		if (monthText == "Mar") {fullMonthText = "March"};
+		if (monthText == "Apr") {fullMonthText = "April"};
+		if (monthText == "May") {fullMonthText = "May"};
+		if (monthText == "Jun") {fullMonthText = "June"};
+		if (monthText == "Jul") {fullMonthText = "July"};
+		if (monthText == "Aug") {fullMonthText = "August"};
+		if (monthText == "Sep") {fullMonthText = "September"};
+		if (monthText == "Oct") {fullMonthText = "October"};
+		if (monthText == "Nov") {fullMonthText = "November"};
+		if (monthText == "Dec") {fullMonthText = "December"};
+		yearText = dateText.split("/")[2];
+		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00")
+		return dateAsDate;
+	},
+
+	addLogWidgets: function() {
+		var logTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var memberList = fsHelper.getValueJSON("memberlist");
+		var memberNameString;
+		for (var i=0;i<memberList.members.length;i++) {
+			var member=memberList.members[i];
+			memberNameString += member.name + " ";
+		}
+		var isGuildie = false;
+		for (var i=0;i<logTable.rows.length;i++) {
+			var aRow = logTable.rows[i];
+			if (i != 0) {
+				if (aRow.cells[0].innerHTML) {
+					firstCell = aRow.cells[0];
+					//Valid Types: General, Chat, Guild
+					messageType = firstCell.firstChild.getAttribute("title");
+					if (messageType == "Chat") {
+						var playerName = aRow.cells[2].firstChild.innerHTML;
+						if (memberNameString.search(playerName) !=-1) {
+							aRow.cells[2].firstChild.innerHTML = "<font style='color:green;'>" + playerName + "</font>";
+							isGuildie = true;
+						}
+						var messageHTML = aRow.cells[2].innerHTML;
+						var firstPart = messageHTML.split(">Reply</a>")[0];
+						var secondPart = messageHTML.split(">Reply</a>")[1];
+						//http://www.fallensword.com/index.php?cmd=trade&target_player=Bubbacus62
+						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> ";
+						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
+						isGuildie = false;
+					}
+				}
+			}
+			else {
+				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:green;'>(Guildies show up as green)</font>"
+			}
+
+		}
 	},
 
 	injectGuildList: function(memberList) {
@@ -998,28 +1323,28 @@ var fsHelper = {
 	injectGroupStats: function() {
 		var attackTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]");
 		attackValueElement = attackTitleElement.nextSibling;
-		attackValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + attackValueElement.innerHTML + 
-			"</td><td>(</td><td title='attackValue'>" + attackValueElement.innerHTML + 
+		attackValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + attackValueElement.innerHTML +
+			"</td><td>(</td><td title='attackValue'>" + attackValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var defenseTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Defense:')]");
 		defenseValueElement = defenseTitleElement.nextSibling;
-		defenseValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + defenseValueElement.innerHTML + 
-			"</td><td>(</td><td title='defenseValue'>" + defenseValueElement.innerHTML + 
+		defenseValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + defenseValueElement.innerHTML +
+			"</td><td>(</td><td title='defenseValue'>" + defenseValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var armorTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Armor:')]");
 		armorValueElement = armorTitleElement.nextSibling;
-		armorValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + armorValueElement.innerHTML + 
-			"</td><td>(</td><td title='armorValue'>" + armorValueElement.innerHTML + 
+		armorValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + armorValueElement.innerHTML +
+			"</td><td>(</td><td title='armorValue'>" + armorValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var damageTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]");
 		damageValueElement = damageTitleElement.nextSibling;
-		damageValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + damageValueElement.innerHTML + 
-			"</td><td>(</td><td title='damageValue'>" + damageValueElement.innerHTML + 
+		damageValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + damageValueElement.innerHTML +
+			"</td><td>(</td><td title='damageValue'>" + damageValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var hpTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]");
 		hpValueElement = hpTitleElement.nextSibling;
-		hpValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + hpValueElement.innerHTML + 
-			"</td><td>(</td><td title='hpValue'>" + hpValueElement.innerHTML + 
+		hpValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + hpValueElement.innerHTML +
+			"</td><td>(</td><td title='hpValue'>" + hpValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -1082,7 +1407,7 @@ var fsHelper = {
 		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
 		hpValue.innerHTML = fsHelper.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
-		
+
 	addCommas: function(nStr) {
 		nStr += '';
 		x = nStr.split('.');
@@ -1093,8 +1418,8 @@ var fsHelper = {
 			x1 = x1.replace(rgx, '$1' + ',' + '$2');
 		}
 		return x1 + x2;
-	},		
-		
+	},
+
 	injectGroups: function() {
 		var allItems = fsHelper.findNodes("//img[@title='View Group Stats']");
 		for (var i=0; i<allItems.length; i++) {
@@ -1188,21 +1513,37 @@ var fsHelper = {
 	injectSettings: function() {
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
-			'<col width="40%"></col><col width="60%"></col>' +
-			'<tr><td height="1" bgcolor="#333333" colspan="2"></td></tr>' +
-			'<tr><th colspan="2"><b>Fallen Sword Helper configuration</b></td></tr>' +
-			'<tr><td colspan=2 align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate"></td></tr>' +
-			'<tr><th colspan="2" align="left"><b>Enter guild names, seperated by commas</th></tr>' +
-			'<tr><td>Own Guild</td><td><input name="guildSelf" size="80" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
-			'<tr><td>Friendly Guilds</td><td><input name="guildFrnd" size="80" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
-			'<tr><td>Old Guilds</td><td><input name="guildPast" size="80" value="' + GM_getValue("guildPast") + '"></td></tr>' +
-			'<tr><th colspan="2" align="left">Other preferences</td></tr>' +
-			'<tr><td>Automatically Kill all monsters</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("killAll")?" checked":"") + '></td></tr>' +
-			'<tr><td>Show Administrative Options</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
-			'<tr><td>Disable Item Coloring</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
-			'<tr><td>Hide top banner</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td>Hide Guild Info</td><td><input name="hideGuildInfo" type="checkbox" value="on"' + (GM_getValue("hideGuildInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td colspan=2 align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
+			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
+			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate"></td></tr>' +
+			'<tr><td colspan="4" align="left"><b>Enter guild names, seperated by commas</td></tr>' +
+			'<tr><td>Own Guild</td><td colspan="3"><input name="guildSelf" size="60" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
+			'<tr><td>Friendly Guilds</td><td colspan="3"><input name="guildFrnd" size="60" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
+			'<tr><td>Old Guilds</td><td colspan="3"><input name="guildPast" size="60" value="' + GM_getValue("guildPast") + '"></td></tr>' +
+			'<tr><td colspan="4" align="left">Other preferences</td></tr>' +
+			'<tr><td align="right">Automatically Kill All Monsters [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Kill All Monsters</b><br><br>CAUTION: If this is set, while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
+				' ]:</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("killAll")?" checked":"") + '></td>' +
+			'<td align="right">Hide Top Banner [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Hide Top Banner</b><br><br>Pretty simple ... it just hides the top banner.\');">?</a>' +
+				' ]:</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Show Administrative Options [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Show Admininstrative Options</b><br><br>I have not really figured out what this does yet ... I think it works for guild founders only.\');">?</a>' +
+				' ]:</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
+			'<td align="right">Hide Guild Info [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Hide Guild Info</b><br><br>This will hide three fields on the Guild-Manage screen, the logo, the statistics and the structures. You can always get them back by unchecking this.\');">?</a>' +
+				' ]:</td><td><input name="hideGuildInfo" type="checkbox" value="on"' + (GM_getValue("hideGuildInfo")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Disable Item Coloring [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Disable Item Coloring</b><br><br>There is some code that colors the item text based on the rarity of the item. I did not like it so I put in an option to turn it off.\');">?</a>' +
+				' ]:</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
+			'<td align="right">Enable Log Coloring [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Enable Log Coloring</b><br><br>Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.\');">?</a>' +
+				' ]:</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Show Completed Quests [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Show Completed Quests</b><br><br>Pretty simple ... this will show completed quests that have been hidden.\');">?</a>' +
+				' ]:</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
+			'<td colspan="2"></td></tr>' +
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'</table></form>';
 		var insertHere = fsHelper.findNode("//table[@width='100%']");
 		var newRow=insertHere.insertRow(insertHere.rows.length);
@@ -1224,6 +1565,8 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "showAdmin");
 		fsHelper.saveValueForm(oForm, "killAll");
 		fsHelper.saveValueForm(oForm, "disableItemColoring");
+		fsHelper.saveValueForm(oForm, "enableLogColoring");
+		fsHelper.saveValueForm(oForm, "showCompletedQuests");
 		fsHelper.saveValueForm(oForm, "hideBanner");
 		fsHelper.saveValueForm(oForm, "hideGuildInfo");
 		window.alert("FS Helper Settings Saved");
