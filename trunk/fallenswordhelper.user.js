@@ -78,7 +78,7 @@ var fsHelper = {
 		var haveToCheck=(now - lastCheck > 24*60*60*1000)
 
 		if (haveToCheck) {
-			checkForUpdate;
+			fsHelper.checkForUpdate;
 		}
 	},
 
@@ -219,6 +219,7 @@ var fsHelper = {
 	},
 
 	injectRelic: function(isRelicPage) {
+		return;
 		var innerTable = fsHelper.findNode("//table[@width='400']");
 		var listOfDefenders = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
@@ -324,15 +325,15 @@ var fsHelper = {
 				var href=monster.href;
 				GM_xmlhttpRequest({
 					method: 'GET',
-					callbackId: linkId,
+					callback: linkId,
 					url: href,
 					headers: {
 						"User-Agent" : navigator.userAgent,
 						// "Content-Type": "application/x-www-form-urlencoded",
 						"Cookie" : document.cookie
 					},
-					onload: function(responseDetails, callbackId) {
-						fsHelper.killedMonster(responseDetails, this.callbackId);
+					onload: function(responseDetails, callback) {
+						fsHelper.killedMonster(responseDetails, this.callback);
 					},
 				})
 			}
@@ -353,11 +354,11 @@ var fsHelper = {
 		}
 	},
 
-	killedMonster: function(responseDetails, callbackId) {
+	killedMonster: function(responseDetails, callback) {
 		// GM_log(responseDetails.responseHeaders+"\n"+responseDetails.responseText);
 		// GM_log(responseDetails.responseHeaders)
 		// GM_log(responseDetails.responseText);
-		// GM_log(callbackId);
+		// GM_log(callback);
 		try {
 			var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
 			// '"
@@ -385,9 +386,9 @@ var fsHelper = {
 				// GM_log(lootMatch[4]);
 			}
 
-			var monster = fsHelper.findNode(callbackId);
+			var monster = fsHelper.findNode(callback);
 			if (monster) {
-				var resultText="<small><small>"+callbackId.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
+				var resultText="<small><small>"+callback.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
 				if (lootedItem!="") {
 					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
 					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + lootedItem + "</span></small></small>"
@@ -719,24 +720,24 @@ var fsHelper = {
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: theUrl,
-					callbackId: theImage,
+					callback: theImage,
 					headers: {
 					//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
 					//    'Accept': 'application/atom+xml,application/xml,text/xml',
 						'Content-Type': 'application/x-www-form-urlencoded'
 					},
-					onload: function(responseDetails, callbackId) {
-						fsHelper.injectDropItemsPaint(responseDetails, this.callbackId);
+					onload: function(responseDetails, callback) {
+						fsHelper.injectDropItemsPaint(responseDetails, this.callback);
 					}
 				})
 			}
 		}
 	},
 
-	injectDropItemsPaint: function(responseDetails, callbackId) {
+	injectDropItemsPaint: function(responseDetails, callback) {
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/; // <b>[^<]+<\/b>/
 		var fontLineRX=fontLineRE.exec(responseDetails.responseText)
-		var textNode = fsHelper.findNode("../../../td", 2, callbackId);
+		var textNode = fsHelper.findNode("../../../td", 2, callback);
 		textNode.style.color=fontLineRX[1];
 	},
 
