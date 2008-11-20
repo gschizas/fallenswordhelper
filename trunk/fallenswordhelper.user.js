@@ -3,6 +3,7 @@
 // @namespace      terrasoft.gr
 // @description    Fallen Sword Helper
 // @include        http://www.fallensword.com/*
+// @include        http://fallensword.com/*
 // ==/UserScript==
 
 var fsHelper = {
@@ -60,42 +61,91 @@ var fsHelper = {
 		return result;
 	},
 
+	findNode: function(xpath, id, doc) {
+			if (!doc) {
+				doc=document;
+			}
+			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			if (findQ.snapshotLength>0) {
+				if (!id) id=0;
+				return findQ.snapshotItem(id);
+			}
+			else {
+				return null;
+			}
+	},
+
+	findNodes: function(xpath, doc) {
+			if (!doc) {
+				doc=document;
+			}
+			var nodes=new Array();
+			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			for (var i=0; i<findQ.snapshotLength; i++) {
+				nodes.push(findQ.snapshotItem(i));
+			}
+			return nodes;
+	},
+
+	createDocument: function(details) {
+		var doc=document.createElement("HTML");
+		doc.innerHTML=details;
+		return doc
+	},
+
 	onPageLoad: function(anEvent) {
 		fsHelper.init();
 		fsHelper.prepareGuildList();
 		var re=/cmd=([a-z]+)/;
 		var pageId = re.exec(document.location.search)[1];
 
-		var re=/subcmd=([a-z]+)/;
+		re=/subcmd=([a-z]+)/;
 		var subPageIdRE = re.exec(document.location.search);
 		var subPageId="-";
 		if (subPageIdRE)
 			subPageId=subPageIdRE[1];
+
+		re=/subcmd2=([a-z]+)/;
+		var subPage2IdRE = re.exec(document.location.search);
+		var subPage2Id="-";
+		if (subPage2IdRE)
+			subPage2Id=subPage2IdRE[1];
 
 		switch (pageId) {
 		case "settings":
 			fsHelper.injectSettings();
 			break;
 		case "world":
+			// fsHelper.mapThis();
 			fsHelper.killAllMonsters();
 			break;
 		case "profile":
 			switch (subPageId) {
-			case "-":
-				fsHelper.injectProfile();
-				break;
 			case "dropitems":
 				fsHelper.injectDropItems();
 				break;
+			default:
+				fsHelper.injectProfile();
 			}
 			break;
 		case "auctionhouse":
-			fsHelper.injectAuctionHouse();
+			switch (subPageId) {
+			case "create":
+				fsHelper.injectAuctionHouse();
+				break;
+			default:
+			}
 			break;
 		case "guild":
 			switch(subPageId) {
 			case "inventory":
-				fsHelper.injectDropItems();
+				switch(subPage2Id) {
+					case "report":
+						fsHelper.injectReportPaint();
+						break;
+					default:
+						fsHelper.injectDropItems();
+				}
 				break;
 			case "chat":
 				fsHelper.injectChat();
@@ -108,18 +158,42 @@ var fsHelper = {
 		}
 	},
 
+	mapThis: function() {
+		var realm = fsHelper.findNode("//td[@background='http://66.7.192.165/skin/realm_top_b2.jpg']/center/nobr/b");
+		var posit = fsHelper.findNode("//td[@background='http://66.7.192.165/skin/realm_top_b4.jpg']/center/nobr/font");
+		if ((realm) && (posit)>0) {
+			var position=posit.innerHTML;
+			var levelName=realm.innerHTML;
+			var positionRE=/\((\d+),\s*(\d+)\)/
+			var positionX = parseInt(position.match(positionRE)[1]);
+			var positionY = parseInt(position.match(positionRE)[2]);
+			var theMap = fsHelper.getValueJSON("map")
+			GM_log(GM_getValue("map"))
+			// theMap = null;
+			if (!theMap) {
+				theMap = new Object;
+				theMap["levels"] = {};
+			}
+			if (!theMap["levels"][levelName]) theMap["levels"][levelName] = {};
+			if (!theMap["levels"][levelName][positionX]) theMap["levels"][levelName][positionX]={};
+			theMap["levels"][levelName][positionX][positionY]="!";
+			GM_setValue("map", JSON.stringify(theMap));
+		}
+	},
+
 	killAllMonsters: function() {
 		if (!GM_getValue("killAll")) return;
+		var kills=0;
 		for (var i=1; i<=8; i++) {
 			var linkId="//a[@id='attackLink" + i + "']"
-			var monsterQ = document.evaluate(linkId, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-			if (monsterQ.snapshotLength > 0) {
-				// window.alert(monsterQ.snapshotItem(0));
-				var href=monsterQ.snapshotItem(0).href;
+			var monster = fsHelper.findNode(linkId);
+			if (monster) {
+				kills+=1;
+				var href=monster.href;
 				GM_xmlhttpRequest({
 					method: 'GET',
 					callbackId: linkId,
-					url: href, // "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
+					url: href,
 					headers: {
 						"User-Agent" : navigator.userAgent,
 						// "Content-Type": "application/x-www-form-urlencoded",
@@ -131,6 +205,20 @@ var fsHelper = {
 				})
 			}
 		}
+		if (kills>0) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://www.fallensword.com/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					// "Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					// GM_log(responseDetails.responseText);
+				},
+			})
+		}
 	},
 
 	killedMonster: function(responseDetails, callbackId) {
@@ -138,24 +226,52 @@ var fsHelper = {
 		// GM_log(responseDetails.responseHeaders)
 		// GM_log(responseDetails.responseText);
 		// GM_log(callbackId);
-		var monsterQ = document.evaluate(callbackId, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		if (monsterQ.snapshotLength > 0) {
-			var link=monsterQ.snapshotItem(0)
-			// GM_log(link);
-			// link.style.display="none";
-			link.parentNode.style.visibility="hidden";
-			// link.parentNode.parentNode.parentNode.style.backgroundColor="red";
-		}
+		try {
+			var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
+			// '"
+			// GM_log(responseDetails.responseText.match(reportRE)[0]);
 
-		var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
-		GM_log(responseDetails.responseText.match(reportRE)[0])
+			var playerIdRE = /http:\/\/www.fallensword.com\/\?ref=(\d+)/
+			var playerId=document.body.innerHTML.match(playerIdRE)[1];
+
+			var xpGain=responseDetails.responseText.match(/var\s+xpGain=([0-9]+);/)[1];
+			var goldGain=responseDetails.responseText.match(/var\s+goldGain=([0-9]+);/)[1];
+			var guildTaxGain=responseDetails.responseText.match(/var\s+guildTaxGain=([0-9]+);/)[1];
+			var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
+			// <b>You looted the item '<font color='#009900'>Shield of Votintown</font>'</b><br><br><img src="http://66.7.192.165/items/857.gif" onmouseover="ajaxLoadCustom(857, -1, d5b356b45146a64a7d322d48ff98b7cb, 1393340, '');"><br><br><font size=1>Note: Item stats may be higher due to crafting bonuses - check in your inventory.</font></div></td>
+			// '"
+			var lootMatch=responseDetails.responseText.match(lootRE)
+			var lootedItem = "";
+			var lootedItemId = "";
+			var lootedItemVerify="";
+			if (lootMatch && lootMatch.length>0) {
+				lootedItem=lootMatch[2];
+				lootedItemId=lootMatch[3];
+				lootedItemVerify=lootMatch[4];
+				GM_log(lootMatch);
+				GM_log(lootMatch[3]);
+				GM_log(lootMatch[4]);
+			}
+
+			var monster = fsHelper.findNode(callbackId);
+			if (monster) {
+				var resultText="<small><small>"+callbackId.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
+				if (lootedItem!="") {
+					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
+					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + lootedItem + "</span></small></small>"
+				}
+				monster.parentNode.innerHTML=resultText;
+			}
+		}
+		catch (ex) {
+			GM_log(ex);
+			GM_log(responseDetails.responseText);
+		}
 	},
 
 	prepareGuildList: function() {
-		var injectHere = document
-			.getElementsByTagName("TABLE")[0].rows[2].cells[2]
-			.getElementsByTagName("TABLE")[0].rows[2].cells[0]
-			.getElementsByTagName("TABLE")[0];
+		var injectHere = fsHelper.findNode("//table[@width='120' and contains(.,'New?')]")
+		if (!injectHere) return;
 		var info = injectHere.insertRow(0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
@@ -189,8 +305,7 @@ var fsHelper = {
 	},
 
 	parseGuildForWorld: function(details) {
-		var doc=document.createElement("HTML");
-		doc.innerHTML=details;
+		var doc=fsHelper.createDocument(details);
 		var allTables = doc.getElementsByTagName("TABLE")
 		var membersTable;
 		for (var i=0;i<allTables.length;i++) {
@@ -237,6 +352,9 @@ var fsHelper = {
 			}
 		}
 
+		var playerIdRE = /http:\/\/www.fallensword.com\/\?ref=(\d+)/
+		var playerId=document.body.innerHTML.match(playerIdRE)[1];
+
 		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("fsHelperPlaceholderWorld");
 		// injectHere.innerHTML=memberList.length;
@@ -271,13 +389,23 @@ var fsHelper = {
 				output += "style='color:"
 				if (oldIds.indexOf(member.id)<0 /* || member.justLoggedIn */) { // just logged in
 					output += "yellow";
+					member.loggedIn=new Date().getTime();
+					member.lastSeen=new Date().getTime();
 					// if (memberList.isRefreshed) {member.justLoggedIn=true; }
 				} else {
-					output += "white";
+					if (member.id==playerId) {
+						output += "lime";
+					}
+					else {
+						output += "white";
+					}
 				}
 				output += ";font-size:10px;'"
 				output += " href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 				output += "</li>"
+			}
+			else {
+				member.loggedIn=0;
 			}
 		}
 		output += "</ol>"
@@ -292,8 +420,7 @@ var fsHelper = {
 	},
 
 	getFullPlayerData: function(member) {
-		// return;
-		// window.alert("http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id);
+		return;
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id,
@@ -309,28 +436,62 @@ var fsHelper = {
 	},
 
 	parsePlayerData: function(memberId, responseText) {
-		return;
-		var doc=document.createElement("HTML");
-		doc.innerHTML=responseText;
-		var statisticsQ = document.evaluate("//b[contains(.,'Statistics')]", doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		window.alert(statisticsQ.snapshotLength);
-		window.alert(statisticsQ.snapshotItem(0).innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
+		// return;
+		var doc=fsHelper.createDocument(responseText)
+		var statistics = fsHelper.findNode("//b[contains(.,'Statistics')]",0,doc);
+		GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
 	},
 
 	injectBank: function() {
 		var injectHere;
-		var bankQ = document.evaluate("//b[contains(.,'Bank')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		if (bankQ.snapshotLength>0) {
-			injectHere = bankQ.snapshotItem(0);
-			injectHere.innerHTML+="<br><a href='/index.php?cmd=guild&subcmd=bank'>Guild Bank</a>";
+		var bank = fsHelper.findNode("//b[contains(.,'Bank')]");
+		if (bank) {
+			bank.innerHTML+="<br><a href='/index.php?cmd=guild&subcmd=bank'>Guild Bank</a>";
 		}
 	},
 
 	injectAuctionHouse: function() {
+		var allItems=fsHelper.findNodes("//td[contains(@background, 'inventory/2x3.gif')]");
+		for (var i=0;i<allItems.length;i++) {
+			var oneItem=allItems[i];
+			// oneItem.innerHTML+="<a href='#'>[---]</a>";
+		}
+		// window.alert(allItems.length);
+	},
 
+	injectDropItemsAuction: function() {
+		//function to add links to all the items in the drop items list
+		var allItems = document.getElementsByTagName("INPUT");
+		var itemName;
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			if (anItem.type=="checkbox") {
+				theText=anItem.parentNode.nextSibling.nextSibling;
+				theText.innerHTML=theText.innerHTML.replace(/ /i,"");
+				itemName=theText.innerHTML.replace(/ /ig,"+");
+			theText.innerHTML = " <a href=http://www.fallensword.com/?cmd=auctionhouse&type=-1&search_text=" + itemName + ">" + theText.innerHTML + "</a>"
+			}
+		}
+	},
+
+	injectReportPaint: function() {
+		//Get the list of online members
+		var memberList = fsHelper.getValueJSON("memberlist");
+
+		var injectHere, searchString;
+		for (var i=0;i<memberList.members.length;i++) {
+			var member=memberList.members[i];
+			if (member.status=="Online") {
+				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
+				if (player) {
+					player.innerHTML = "[Online] " + player.innerHTML;
+				}
+			}
+		}
 	},
 
 	injectDropItems: function() {
+		if (GM_getValue("disableItemColoring")) return;
 		var allItems = document.getElementsByTagName("INPUT");
 		var savedItems = fsHelper.getValueJSON("savedItems")
 		for (var i=0; i<allItems.length; i++) {
@@ -423,22 +584,22 @@ var fsHelper = {
 			}
 		}
 
-		var player = document.evaluate("//textarea[@id='holdtext']", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		var avyrow = document.evaluate("//td/img[contains(@title, 's Avatar')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		var imgurls = document.evaluate("//img[contains(@src, '/skin/')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		var player = fsHelper.findNode("//textarea[@id='holdtext']");
+		var avyrow = fsHelper.findNode("//img[contains(@title, 's Avatar')]");
+		var imgurl = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		var playerid = document.URL.match(/\w*\d{5}\d*/)
 		var idindex, newhtml, imgserver;
 
-		if (player.snapshotLength == 1)
+		if (player)
 		{
 			if (!playerid)
 			{
-				playerid = player.snapshotItem(0).innerHTML;
+				playerid = player.innerHTML;
 				idindex = playerid.indexOf("?ref=") + 5;
 				playerid = playerid.substr(idindex);
 			}
 
-			var playeravy = avyrow.snapshotItem(0).parentNode.firstChild ;
+			var playeravy = avyrow.parentNode.firstChild ;
 			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue)))
 			{
 				playeravy = playeravy.nextSibling ;
@@ -446,13 +607,13 @@ var fsHelper = {
 			var playername = playeravy.getAttribute("title");
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
-			idindex = imgurls.snapshotItem(0).src.indexOf("/skin/");
-			imgserver = imgurls.snapshotItem(0).src.substr(0,idindex);
+			idindex = imgurl.src.indexOf("/skin/");
+			imgserver = imgurl.src.substr(0,idindex);
 
 			var auctiontext = "Go to " + playername + "'s auctions" ;
 			var ranktext = "Rank " +playername + "" ;
 
-			newhtml = avyrow.snapshotItem(0).parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
+			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
 			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
@@ -464,23 +625,27 @@ var fsHelper = {
 				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
 				newhtml += imgserver + "/guilds/" + guildId + "_mini.jpg></a>" ;
 			}
-			avyrow.snapshotItem(0).parentNode.innerHTML = newhtml ;
+			avyrow.parentNode.innerHTML = newhtml ;
 		}
 
 	},
 
 	injectSettings: function() {
 		var configData=document.createElement("DIV");
-		configData.innerHTML='<div><form>' +
+		configData.innerHTML=
+			'<tr><td height="1" bgcolor="#333333" colspan="3"/></tr>' +
+			'<div><form>' +
 			'<table>' +
 			'<tr><td colspan="2">Enter guild names, seperated by commas</td></tr>' +
 			'<tr><td>Own Guild</td><td><input name="guildSelf" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
 			'<tr><td>Friendly Guilds</td><td><input name="guildFrnd" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
 			'<tr><td>Old Guilds</td><td><input name="guildPast" value="' + GM_getValue("guildPast") + '"></td></tr>' +
-			'<tr><td>Automatically Kill all monsters</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
+			'<tr><td>Automatically Kill all monsters</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("killAll")?" checked":"") + '></td></tr>' +
 			'<tr><td>Show Administrative Options</td><td><input name="guildAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
-			'<tr><td colspan=2><input type="button" class="button" value="Save" id="fsHelperSaveOptions"></td></tr>' +
+			'<tr><td>Disable Item Coloring</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
+			'<tr><td colspan=2><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'</form></div>';
+		// <INPUT type="button" class="custombutton" onclick="if(confirm('Are you sure you with to use a special portal back to Krul Island?')) window.location='index.php?cmd=settings&amp;subcmd=fix&amp;xcv=b1087ede6d48798a8f5c1fa4e070003c';" value="Instant Portal back to Krul Island"/>
 		var insertHere = document.getElementsByTagName("FORM")[0];
 		insertHere.parentNode.insertBefore(configData, insertHere.nextSibling);
 		document.getElementById('fsHelperSaveOptions').addEventListener('click', fsHelper.saveConfig, true);
@@ -493,6 +658,7 @@ var fsHelper = {
 		GM_setValue("guildPast", oForm.elements[2].value);
 		GM_setValue("showAdmin", oForm.elements[4].checked);
 		GM_setValue("killAll", oForm.elements[3].checked);
+		GM_setValue("disableItemColoring", oForm.elements[5].checked);
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
