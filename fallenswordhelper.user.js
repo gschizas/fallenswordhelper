@@ -129,8 +129,12 @@ var fsHelper = {
 		fsHelper.init();
 		fsHelper.hideBanner();
 		fsHelper.prepareGuildList();
+
 		var re=/cmd=([a-z]+)/;
-		var pageId = re.exec(document.location.search)[1];
+		var pageIdRE = re.exec(document.location.search);
+		var pageId="-";
+		if (pageIdRE)
+			pageId=pageIdRE[1];
 
 		re=/subcmd=([a-z]+)/;
 		var subPageIdRE = re.exec(document.location.search);
@@ -198,6 +202,12 @@ var fsHelper = {
 		case "bank":
 			fsHelper.injectBank();
 			break;
+		case "-":
+			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
+			if (isRelicPage) {
+				fsHelper.injectRelic(isRelicPage);
+			}
+			break;
 		}
 	},
 
@@ -208,24 +218,20 @@ var fsHelper = {
 		fsHelper.hideGuildStructures();
 	},
 
-	relicCheck: function() {
-		var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
-		if (isRelicPage) {
-			//window.alert(isRelicPage.getAttribute("title"));
-			var innerTable = fsHelper.findNode("//table[@width='400']");
-			var listOfDefenders = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&player_id=')]");
-			var defenderCount = 0;
-			var testElement = isRelicPage.nextSibling.nextSibling;
-			for (var i=0; i<listOfDefenders.length-1; i++) {
-				var href = listOfDefenders[i].getAttribute("href");
-				if (i==1) {
-					fsHelper.getPlayerData(href);
-				}
-				//testElement.innerHTML += listOfDefenders[i].innerHTML + "\n";
-				defenderCount++;
+	injectRelic: function(isRelicPage) {
+		var innerTable = fsHelper.findNode("//table[@width='400']");
+		var listOfDefenders = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&player_id=')]");
+		var defenderCount = 0;
+		var testElement = isRelicPage.nextSibling.nextSibling;
+		for (var i=0; i<listOfDefenders.length-1; i++) {
+			var href = listOfDefenders[i].getAttribute("href");
+			if (i==1) {
+				fsHelper.getPlayerData(href);
 			}
-			testElement.innerHTML += "<tr><td>Number of Defenders: " + defenderCount + "<td><tr>";
+			//testElement.innerHTML += listOfDefenders[i].innerHTML + "\n";
+			defenderCount++;
 		}
+		testElement.innerHTML += "<tr><td>Number of Defenders: " + defenderCount + "<td><tr>";
 	},
 
 	getPlayerData: function(href) {
@@ -817,27 +823,29 @@ var fsHelper = {
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			var href = anItem.parentNode.getAttribute("href");
-			fsHelper.retrieveGroupData(href);
+			fsHelper.retrieveGroupData(href, anItem.parentNode);
 		}
 	},
 
-	retrieveGroupData: function(href) {
+	retrieveGroupData: function(href, link) {
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://www.fallensword.com/" + href,
+			callback: link,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				fsHelper.parseGroupData(href, responseDetails.responseText);
+				fsHelper.parseGroupData(responseDetails.responseText, this.callback);
 			},
 		})
 	},
 
-	parseGroupData: function(href, responseText) {
+	parseGroupData: function(responseText, linkElement) {
 		var doc=fsHelper.createDocument(responseText);
+		GM_log(responseText);
 		var statisticsElement=fsHelper.findNode("//td[.='Statistics']", 0, doc);
 		var attackLocation = statisticsElement.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
 		var attackValue = attackLocation.textContent;
@@ -850,7 +858,7 @@ var fsHelper = {
 		var hpLocation = damageLocation.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
 		var hpValue = hpLocation.textContent;
 
-		var linkElement=fsHelper.findNode("//a[@href='" + href + "']");
+		// var linkElement=fsHelper.findNode("//a[@href='" + href + "']");
 		extraText = "<table cellpadding='1' style='font-size:x-small; border-top:2px black solid; border-spacing: 1px; border-collapse: collapse;'>"
 		extraText += "<tr>";
 		extraText += "<td style='color:brown;'>Attack</td><td align='right'>" + attackValue + "</td>";
