@@ -157,7 +157,7 @@ var fsHelper = {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
 				output += "<li>"
-				output += "<a style='color:whilte;font-size:10px;' "
+				output += "<a style='color:white;font-size:10px;' "
 				output += "href='javascript:openWindow(\"index.php?cmd=quickbuff&tid=" + member.id + "\")'>[b]</a>&nbsp;";
 				output += "<a title='" + member.level + " - " + member.rank + "' style='color:"
 				if (oldIds.indexOf(member.id)<0) { // just logged in
