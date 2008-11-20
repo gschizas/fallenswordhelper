@@ -7,51 +7,7 @@
 // ==/UserScript==
 
 var fsHelper = {
-	init: function(e) {
-		this.initialized = true;
-		fsHelper.beginAutoUpdate();
-	},
-
-	beginAutoUpdate: function() {
-		var lastCheck=GM_getValue("lastVersionCheck")
-		var now=(new Date()).getTime()
-		if (!lastCheck) lastCheck=0;
-		var haveToCheck=(now - lastCheck > 24*60*60*1000)
-
-		if (haveToCheck) {
-			GM_log("Checking for new version...")
-			GM_setValue("lastVersionCheck", now.toString())
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: "http://userscripts.org/scripts/versions/34343",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					// "Content-Type": "application/x-www-form-urlencoded",
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					fsHelper.autoUpdate(responseDetails);
-				},
-			})
-		}
-	},
-
-	autoUpdate: function(responseDetails) {
-		if (responseDetails.status!=200) return;
-		var now=(new Date()).getTime()
-		GM_setValue("lastVersionCheck", now.toString());
-		var currentVersion=GM_getValue("currentVersion");
-		if (!currentVersion) currentVersion=0;
-		var versionRE=/\<h3\>\n\s*([0-9]+)\s*versions/;
-		var latestVersion=responseDetails.responseText.match(versionRE)[1]
-		if (currentVersion!=latestVersion) {
-			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
-				GM_setValue("currentVersion", latestVersion)
-				document.location="http://userscripts.org/scripts/source/34343.user.js";
-			}
-		}
-	},
-
+	// Static functions
 	getValueJSON: function(name) {
 		var resultJSON=GM_getValue(name);
 		var result;
@@ -99,6 +55,54 @@ var fsHelper = {
 		return doc
 	},
 
+	// System functions
+	init: function(e) {
+		this.initialized = true;
+		fsHelper.beginAutoUpdate();
+	},
+
+	// Autoupdate
+	beginAutoUpdate: function() {
+		var lastCheck=GM_getValue("lastVersionCheck")
+		var now=(new Date()).getTime()
+		if (!lastCheck) lastCheck=0;
+		var haveToCheck=(now - lastCheck > 24*60*60*1000)
+
+		if (haveToCheck) {
+			GM_log("Checking for new version...")
+			GM_setValue("lastVersionCheck", now.toString())
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://userscripts.org/scripts/versions/34343",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					// "Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.autoUpdate(responseDetails);
+				},
+			})
+		}
+	},
+
+	autoUpdate: function(responseDetails) {
+		if (responseDetails.status!=200) return;
+		var now=(new Date()).getTime()
+		GM_setValue("lastVersionCheck", now.toString());
+		var currentVersion=GM_getValue("currentVersion");
+		if (!currentVersion) currentVersion=0;
+		var versionRE=/\<h3\>\n\s*([0-9]+)\s*versions/;
+		var latestVersion=responseDetails.responseText.match(versionRE)[1]
+		if (currentVersion!=latestVersion) {
+			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
+				GM_setValue("currentVersion", latestVersion)
+				document.location="http://userscripts.org/scripts/source/34343.user.js";
+			}
+		}
+	},
+
+	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		fsHelper.init();
 		fsHelper.prepareGuildList();
@@ -156,6 +160,9 @@ var fsHelper = {
 				break;
 			case "chat":
 				fsHelper.injectChat();
+				break;
+			case "groups":
+				fsHelper.injectGroups();
 				break;
 			}
 			break;
@@ -490,7 +497,7 @@ var fsHelper = {
 			method: 'GET',
 			url: theUrl,
 			headers: {
-			//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+				//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
 			//    'Accept': 'application/atom+xml,application/xml,text/xml',
 				'Content-Type': 'application/x-www-form-urlencoded'
 			},
@@ -708,7 +715,60 @@ var fsHelper = {
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
+	},
 
+	injectGroups: function() {
+		var allItems = fsHelper.findNodes("//img[@title='View Group Stats']");
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			var href = anItem.parentNode.getAttribute("href");
+			fsHelper.retrieveGroupData(href);
+		}
+	},
+
+	retrieveGroupData: function(href) {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/" + href,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.parseGroupData(href, responseDetails.responseText);
+			},
+		})
+	},
+
+	parseGroupData: function(href, responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var statisticsElement=fsHelper.findNode("//td[.='Statistics']", 0, doc);
+		var attackLocation = statisticsElement.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+		var attackValue = attackLocation.textContent;
+		var defenseLocation = attackLocation.nextSibling.nextSibling.nextSibling;
+		var defenseValue = defenseLocation.textContent;
+		var armorLocation = defenseLocation.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+		var armorValue = armorLocation.textContent;
+		var damageLocation = armorLocation.nextSibling.nextSibling.nextSibling;
+		var damageValue = damageLocation.textContent;
+		var hpLocation = damageLocation.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+		var hpValue = hpLocation.textContent;
+
+		var linkElement=fsHelper.findNode("//a[@href='" + href + "']");
+		extraText = "<table cellpadding='1' style='font-size:x-small; border-top:2px black solid; border-spacing: 1px; border-collapse: collapse;'>"
+		extraText += "<tr>";
+		extraText += "<td style='color:brown;'>Attack</td><td align='right'>" + attackValue + "</td>";
+		extraText += "<td style='color:brown;'>Defense</td><td align='right'>" + defenseValue + "</td></tr>";
+		extraText += "<tr>";
+		extraText += "<td style='color:brown;'>Armor</td><td align='right'>" + armorValue + "</td>";
+		extraText += "<td style='color:brown;'>Damage</td><td align='right'>" + damageValue + "</td></tr>";
+		extraText += "<tr>";
+		extraText += "<td style='color:brown;'>HP</td><td align='right'>" + hpValue + "</td>";
+		extraText += "<td colspan='2'></td></tr>";
+		extraText += "</table>";
+		expiresLocation = linkElement.parentNode.previousSibling.previousSibling;
+		expiresLocation.innerHTML += extraText;
 	},
 
 	injectSettings: function() {
