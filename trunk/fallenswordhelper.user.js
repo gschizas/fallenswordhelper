@@ -21,6 +21,14 @@ var fsHelper = {
 		var formElement = fsHelper.findNode("//input[@name='" + name + "']", 0, oForm)
 		if (formElement.getAttribute("type")=="checkbox") {
 			GM_setValue(name, formElement.checked);
+		} else if (formElement.getAttribute("type")=="radio") {
+			radioElements = fsHelper.findNodes("//input[@name='" + name + "']", 0, oForm)
+			for (var i=0; i<radioElements.length; i++) {
+				radioElement = radioElements[i];
+				if (radioElement.checked) {
+					GM_setValue(name, radioElement.value);
+				}
+			}
 		} else {
 			GM_setValue(name, formElement.value);
 		}
@@ -69,7 +77,7 @@ var fsHelper = {
 		var lastCheck=GM_getValue("lastVersionCheck")
 		var now=(new Date()).getTime()
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=(now - lastCheck > 24*60*60*1000)
+		var haveToCheck=(now - lastCheck > 6*60*60*1000)
 
 		if (haveToCheck) {
 			fsHelper.checkForUpdate;
@@ -85,7 +93,6 @@ var fsHelper = {
 			url: "http://userscripts.org/scripts/versions/34343",
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				// "Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -403,7 +410,6 @@ var fsHelper = {
 			url: "http://www.fallensword.com/" + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -477,7 +483,6 @@ var fsHelper = {
 			url: "http://www.fallensword.com/" + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -663,7 +668,17 @@ var fsHelper = {
 		var hasAnimalMagnetism = fsHelper.findNode("//img[contains(@onmouseover,'Animal Magnetism')]");
 		var hasConserve = fsHelper.findNode("//img[contains(@onmouseover,'Conserve')]");
 		if (!hasDoubler || !hasLibrarian || !hasAdeptLearner || !hasMerchant || !hasTreasureHunter || !hasAnimalMagnetism || !hasConserve) {
-			replacementText += "<tr><td style='font-size:x-small;'>You are missing some hunting buffs!" + "</td></tr>"
+			replacementText += "<tr><td colspan='2'><div style='font-size:x-small;margin-left: 0px; margin-right: 48px;'>You are missing some hunting buffs ("
+			missingBuffs = new Array();
+			if (!hasDoubler) missingBuffs.push("Doubler")
+			if (!hasLibrarian) missingBuffs.push("Librarian")
+			if (!hasAdeptLearner) missingBuffs.push("Adept Learner")
+			if (!hasMerchant) missingBuffs.push("Merchant")
+			if (!hasTreasureHunter) missingBuffs.push("Treasure Hunter")
+			if (!hasAnimalMagnetism) missingBuffs.push("Animal Magnetism")
+			if (!hasConserve) missingBuffs.push("Conserve")
+			replacementText += missingBuffs.join(", ")
+			replacementText += ")</div></td></tr>"
 		}
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
 		replacementText += "</table>";
@@ -707,7 +722,7 @@ var fsHelper = {
 		//&nbsp;of&nbsp;5&nbsp;
 		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
 		var pageCount=pageCountElement.parentNode.innerHTML.match(pageRE)[1]*1;
-		for (var i=1;i<pageCount-1;i++) {
+		for (var i=1;i<pageCount;i++) {
 			var href = "http://www.fallensword.com/index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=";
 			fsHelper.getQuestData(href);
 		}
@@ -719,7 +734,6 @@ var fsHelper = {
 			url: href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -767,30 +781,124 @@ var fsHelper = {
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", imgserver + "/skin/realm_right_bg.jpg");
-		var killAll = GM_getValue("killAll");
-		newCell.innerHTML="<span style='margin-left:28px; margin-right:28px; " + (killAll?"font-weight:bold;":"font-weight:normal;") +
-			"'><img style='cursor:pointer;' id='fsHelperKillAll' src='" + imgserver + "/skin/" +
-			(killAll?"quest_complete.gif":"quest_incomplete.gif") +
-			"' />&nbsp;Automatically kill monsters </span>";
-		document.getElementById('fsHelperKillAll').addEventListener('click', fsHelper.killAllToggleFromWorld, true);
+		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
+		var killStyle = GM_getValue("killAllAdvanced")
+		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
+				'<tr><td>Auto Kill Style [ ' +
+					'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b>single</b> will fast kill a single monster; ' +
+					'<b>type</b> will fast kill a type of monster; <b>all</b> will kill all monsters as you move into the square; <b>off</b> returns control to game normal. ' +
+					'<b>CAUTION</b>: If this is set to <b>all</b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
+				' ]:' +
+				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' + 
+					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' + 
+				'<td><input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' + 
+					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +'</td></tr>'+ 
+				'<tr><td></td><td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' + 
+					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td>' + 
+				'<td><input type="radio" id="killAllAdvancedWorldAll" name="killAllAdvancedWorld"  value="all"' + 
+					((killStyle == "all")?" checked":"") + '>' + ((killStyle == "all")?" <b>all</b>":"all") +'</td></tr>' + 
+				'</tbody></table>' + 
+			'</div>';
+		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+		document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+		document.getElementById('killAllAdvancedWorldType').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+		document.getElementById('killAllAdvancedWorldAll').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		// injectHere.style.display='none';
-		//GM_log(newCell.innerHTML);
 		fsHelper.checkBuffs();
 		fsHelper.killAllMonsters();
 	},
 
-	killAllToggleFromWorld: function(evt) {
-		var killAll = GM_getValue("killAll");
-		killAll = !killAll;
-		var imgserver = fsHelper.getImageServer();
-		evt.target.src=imgserver + "/skin/" + (killAll?"quest_complete.gif":"quest_incomplete.gif");
-		evt.target.parentNode.style.fontWeight = (killAll?"bold":"normal");
-		GM_setValue("killAll", killAll);
-		if (killAll) fsHelper.killAllMonsters();
+	killAllAdvancedChangeFromWorld: function(evt) {
+		var killAllAdvanced = GM_getValue("killAllAdvanced");
+		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
+		GM_setValue("killAllAdvanced", evt.target.value);
+		window.location = 'index.php?cmd=world';
+	},
+		
+	killSingleMonster: function(monsterNumber) {
+		if (GM_getValue("killAllAdvanced") != "single") return;
+		var kills=0;
+		var linkId="//a[@id='attackLink" + monsterNumber + "']"
+		var monster = fsHelper.findNode(linkId);
+		if (monster) {
+			kills+=1;
+			var href=monster.href;
+			GM_xmlhttpRequest({
+				method: 'GET',
+				callback: linkId,
+				url: href,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					// "Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails, callback) {
+					fsHelper.killedMonster(responseDetails, this.callback);
+				},
+			})
+		}
+		if (kills>0) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://www.fallensword.com/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					// "Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					// GM_log(responseDetails.responseText);
+				},
+			})
+		}
+	},
+
+	killSingleMonsterType: function(monsterType) {
+		if (GM_getValue("killAllAdvanced") != "type") return;
+		var kills=0;
+
+		for (var i=1; i<=8; i++) {
+			var linkId="//a[@id='attackLink" + i + "']"
+			var monster = fsHelper.findNode(linkId);
+			if (monster) {
+				thisMonsterType = monster.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML;
+				if (thisMonsterType == monsterType) {
+					kills+=1;
+					var href=monster.href;
+					GM_xmlhttpRequest({
+						method: 'GET',
+						callback: linkId,
+						url: href,
+						headers: {
+							"User-Agent" : navigator.userAgent,
+							// "Content-Type": "application/x-www-form-urlencoded",
+							"Cookie" : document.cookie
+						},
+						onload: function(responseDetails, callback) {
+							fsHelper.killedMonster(responseDetails, this.callback);
+						},
+					})
+				}
+			}
+		}
+		if (kills>0) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://www.fallensword.com/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					// "Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					// GM_log(responseDetails.responseText);
+				},
+			})
+		}
 	},
 
 	killAllMonsters: function() {
-		if (!GM_getValue("killAll")) return;
+		if (GM_getValue("killAllAdvanced") != "all") return;
 		var kills=0;
 		for (var i=1; i<=8; i++) {
 			var linkId="//a[@id='attackLink" + i + "']"
@@ -819,7 +927,6 @@ var fsHelper = {
 				url: "http://www.fallensword.com/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
-					// "Content-Type": "application/x-www-form-urlencoded",
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -905,7 +1012,6 @@ var fsHelper = {
 				url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
 				headers: {
 					"User-Agent" : navigator.userAgent,
-					"Content-Type": "application/x-www-form-urlencoded",
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -966,7 +1072,7 @@ var fsHelper = {
 		cell.innerHTML="<span id='fsHelperPlaceholderChat'></span>";
 		var chat = fsHelper.getValueJSON("chat");
 		var newChat = fsHelper.findNode("//table[contains(.,'chat messages')]")
-		if (!chat || newChat) {
+		if (!chat || newChat || ((new Date()).getTime() - chat.lastUpdate > 15000)) {
 			fsHelper.retrieveChat();
 		} else {
 			chat.isRefreshed=false;
@@ -980,7 +1086,6 @@ var fsHelper = {
 			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=chat",
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -997,6 +1102,7 @@ var fsHelper = {
 		var chat = new Object();
 		var chatConfirm=fsHelper.findNode("//input[@name='xc']",0,doc);
 		chat.isRefreshed=true;
+		chat.lastUpdate = (new Date()).getTime();
 		chat.messages = new Array();
 		for (var i=chatTable.rows.length-1; i>0; i--) {
 			var aRow = chatTable.rows[i];
@@ -1107,9 +1213,10 @@ var fsHelper = {
 	},
 
 	keyPress: function (evt) {
-    var r = "";
+    var r, s;
     if (evt.target.tagName!="HTML") return;
 		r = evt.charCode;
+		s = evt.keyCode;
 		var pos=fsHelper.position();
 		if (pos) {
 			var x=pos.X;
@@ -1158,7 +1265,20 @@ var fsHelper = {
 				var index	= r-48;
 				var linkObj	= document.getElementById("attackLink"+index);
 				if (linkObj!=null) {
-					window.location = linkObj.href
+					var killStyle = GM_getValue("killAllAdvanced");
+					//kill style off
+					if (killStyle == "off") {
+						window.location = linkObj.href
+					} 
+					//kill style single
+					if (killStyle == "single") {
+						fsHelper.killSingleMonster(index);
+					}
+					//kill style type
+					if (killStyle == "type") {
+						var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
+						fsHelper.killSingleMonsterType(monsterType);
+					}
 				}
 				break;
 			case 98: // backpack [b]
@@ -1170,6 +1290,37 @@ var fsHelper = {
 			case 48: // return to world
 				window.location = 'index.php?cmd=world';
 				break;
+			case 0: // special key
+				switch (s) {
+					case 37: // w
+						if (pos) {
+							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
+							evt.preventDefault();
+							evt.stopPropagation();
+						}
+						break;
+					case 38: // n
+						if (pos) {
+							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
+							evt.preventDefault();
+							evt.stopPropagation();
+						}
+						break;
+					case 39: // e
+						if (pos) {
+							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
+							evt.preventDefault();
+							evt.stopPropagation();
+						}
+						break;
+					case 40: // s
+						if (pos) {
+							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
+							evt.preventDefault();
+							evt.stopPropagation();
+						}
+						break;
+				}
 		}
 		return true;
 	},
@@ -1397,7 +1548,6 @@ var fsHelper = {
 			url: "http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -1458,9 +1608,8 @@ var fsHelper = {
 			method: 'GET',
 			url: theUrl,
 			headers: {
-				//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-			//    'Accept': 'application/atom+xml,application/xml,text/xml',
-				'Content-Type': 'application/x-www-form-urlencoded'
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
 				var craft="";
@@ -1583,7 +1732,6 @@ var fsHelper = {
 			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -1624,9 +1772,8 @@ var fsHelper = {
 					url: theUrl,
 					callback: theImage,
 					headers: {
-					//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-					//    'Accept': 'application/atom+xml,application/xml,text/xml',
-						'Content-Type': 'application/x-www-form-urlencoded'
+						"User-Agent" : navigator.userAgent,
+						"Cookie" : document.cookie
 					},
 					onload: function(responseDetails, callback) {
 						fsHelper.injectDropItemsPaint(responseDetails, this.callback);
@@ -1755,7 +1902,6 @@ var fsHelper = {
 			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=mercs",
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -1855,7 +2001,6 @@ var fsHelper = {
 			callback: link,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -1868,7 +2013,9 @@ var fsHelper = {
 		var doc=fsHelper.createDocument(responseText);
 		// GM_log(responseText);
 		// var statisticsElement=fsHelper.findNode("//td[contains(.,'Statistics')]", 0, doc);
-		var attackLocation = fsHelper.findNode("//td[contains(font,'Attack:')]",0,doc).nextSibling;
+		var attackLocation = fsHelper.findNode("//td[contains(font,'Attack:')]",0,doc);
+        if (!attackLocation) {return;} // fix for Firefox 2 that fails when trying to perform findNode on another object.
+        attackLocation = attackLocation.nextSibling;
 		var attackValue = attackLocation.textContent;
 		var defenseLocation = fsHelper.findNode("//td[contains(font,'Defense:')]",0,doc).nextSibling;
 		var defenseValue = defenseLocation.textContent;
@@ -1918,6 +2065,17 @@ var fsHelper = {
 		return result;
 	},
 
+	formatDateTime: function(aDate) {
+		var result=aDate.toDateString()
+		result += " "
+		var hh=aDate.getHours();
+		if (hh<10) hh = "0" + hh;
+		var mm=aDate.getMinutes();
+		if (mm<10) mm = "0" + mm
+		result += hh + ":" + mm
+		return result
+	},
+
 	injectSettings: function() {
 		if (!GM_getValue("guildSelf")) {GM_setValue("guildSelf", "")}
 		if (!GM_getValue("guildFrnd")) {GM_setValue("guildFrnd", "")}
@@ -1927,20 +2085,31 @@ var fsHelper = {
 		if (!GM_getValue("guildFrndMessage")) {GM_setValue("guildFrndMessage", "yellow|Do not attack - Guild is friendly!")}
 		if (!GM_getValue("guildPastMessage")) {GM_setValue("guildPastMessage", "gray|Do not attack - You've been in that guild once!")}
 		if (!GM_getValue("guildEnmyMessage")) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
+		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")}
+		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")))
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate"></td></tr>' +
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate">'+
+			'<span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + fsHelper.formatDateTime(lastCheck) +
+			')</span></td></tr>' +
 			'<tr><td colspan="4" align="left"><b>Enter guild names, seperated by commas</td></tr>' +
 			'<tr><td>Own Guild</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Self") + '</td></tr>' +
 			'<tr><td>Friendly Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
-			'<tr><td align="right">Automatically Kill All Monsters [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Kill All Monsters</b><br><br>CAUTION: If this is set, while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
-				' ]:</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("killAll")?" checked":"") + '></td>' +
+			'<tr><td align="right">Auto Kill Style [ ' +
+				'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b>single</b> will fast kill a single monster; ' +
+				'<b>type</b> will fast kill a type of monster; <b>all</b> will kill all monsters as you move into the square; <b>off</b> returns control to game normal. ' +
+				'<b>CAUTION</b>: If this is set to <b>all</b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
+				' ]:</td><td><table><tbody>' +
+				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' + 
+				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+ 
+				'<tr><td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' + 
+				'<td><input type="radio" name="killAllAdvanced"  value="all"' + ((GM_getValue("killAllAdvanced") == "all")?" checked":"") + '>all</td></tr>' + 
+				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Hide Top Banner</b><br><br>Pretty simple ... it just hides the top banner.\');">?</a>' +
 				' ]:</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
@@ -1976,7 +2145,6 @@ var fsHelper = {
 		var newCell=newRow.insertCell(0);
 		newCell.colSpan=3;
 		newCell.innerHTML=configData;
-
 		// insertHere.insertBefore(configData, insertHere);
 		document.getElementById('fsHelperSaveOptions').addEventListener('click', fsHelper.saveConfig, true);
 		document.getElementById('fsHelperCheckUpdate').addEventListener('click', fsHelper.checkForUpdate, true);
@@ -1999,12 +2167,13 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "guildEnmyMessage");
 		fsHelper.saveValueForm(oForm, "chatLines");
 		fsHelper.saveValueForm(oForm, "showAdmin");
-		fsHelper.saveValueForm(oForm, "killAll");
 		fsHelper.saveValueForm(oForm, "disableItemColoring");
 		fsHelper.saveValueForm(oForm, "enableLogColoring");
 		fsHelper.saveValueForm(oForm, "showCompletedQuests");
 		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		fsHelper.saveValueForm(oForm, "hideBanner");
+		fsHelper.saveValueForm(oForm, "killAllAdvanced");
+		
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
