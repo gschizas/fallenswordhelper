@@ -87,6 +87,12 @@ var fsHelper = {
 			return nodes;
 	},
 
+	getImageServer: function() {
+		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
+		var idindex = imgurls.src.indexOf("/skin/");
+		return imgurls.src.substr(0,idindex);
+	},
+
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
@@ -134,6 +140,7 @@ var fsHelper = {
 				fsHelper.injectAuctionHouse();
 				break;
 			default:
+				fsHelper.injectAuctionHouse();
 			}
 			break;
 		case "guild":
@@ -450,6 +457,85 @@ var fsHelper = {
 		}
 	},
 
+
+	injectAuctionHouse: function() {
+		var allItems = document.getElementsByTagName("IMG");
+		var savedItems = fsHelper.getValueJSON("savedItems")
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			//window.alert(anItem.innerHTML);
+			if (anItem.src.search("items") != -1) {
+				var mouseOver=anItem.getAttribute("onmouseover");
+				//window.alert(mouseOver);
+				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
+				var reResult=reParams.exec(mouseOver);
+				var itemId=reResult[1];
+				var invId=reResult[2];
+				var type=reResult[3];
+				var pid=reResult[4];
+				//window.alert(invId);
+				if (savedItems && savedItems.indexOf(itemId)>=0) {
+					//
+					//fsHelper.injectDropItemsParse(savedItems(itemId).reponseText);
+					window.alert("script error");
+					//window.alert(savedItems(itemId).reponseText);
+				}
+				else {
+						fsHelper.insertAuctionGetItemDetails(itemId, invId, type, pid);
+				}
+			}
+		}
+	},
+
+	insertAuctionGetItemDetails: function(itemId, invId, type, pid) {
+		var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
+		theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: theUrl,
+			headers: {
+			//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+			//    'Accept': 'application/atom+xml,application/xml,text/xml',
+				'Content-Type': 'application/x-www-form-urlencoded'
+			},
+			onload: function(responseDetails) {
+				var craft="";
+				var responseText=responseDetails.responseText;
+				if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
+					var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/
+					var fontLineRX=fontLineRE.exec(responseText)
+					craft = fontLineRX[3];
+				}
+				var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
+
+				while(re.exec(responseText)) {
+					forgeCount++;
+				}
+				fsHelper.injectAuctionExtraText(invId,craft,forgeCount);
+			}
+		})
+	},
+
+	injectAuctionExtraText: function(invId, craft, forgeCount) {
+		var imgserver = fsHelper.getImageServer();
+
+		var allItems = document.getElementsByTagName("IMG");
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			if (anItem.src.search("items") != -1) {
+				if (anItem.getAttribute("onmouseover").search(invId) != -1) {
+					theText=anItem.parentNode.nextSibling.nextSibling;
+					var preText = craft
+					if (forgeCount != 0) {
+						preText +=  " " + forgeCount + "<img src='" + imgserver + "/hellforge/forgelevel.gif'>"
+					}
+					theText.innerHTML = preText + "<br>" + theText.innerHTML;
+				}
+			}
+		}
+	},
+
+/*
 	injectAuctionHouse: function() {
 		var allItems=fsHelper.findNodes("//td[contains(@background, 'inventory/2x3.gif')]");
 		for (var i=0;i<allItems.length;i++) {
@@ -458,6 +544,7 @@ var fsHelper = {
 		}
 		// window.alert(allItems.length);
 	},
+*/
 
 	injectDropItemsAuction: function() {
 		//function to add links to all the items in the drop items list
@@ -586,7 +673,6 @@ var fsHelper = {
 
 		var player = fsHelper.findNode("//textarea[@id='holdtext']");
 		var avyrow = fsHelper.findNode("//img[contains(@title, 's Avatar')]");
-		var imgurl = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		var playerid = document.URL.match(/\w*\d{5}\d*/)
 		var idindex, newhtml, imgserver;
 
@@ -607,8 +693,7 @@ var fsHelper = {
 			var playername = playeravy.getAttribute("title");
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
-			idindex = imgurl.src.indexOf("/skin/");
-			imgserver = imgurl.src.substr(0,idindex);
+			imgserver = fsHelper.getImageServer();
 
 			var auctiontext = "Go to " + playername + "'s auctions" ;
 			var ranktext = "Rank " +playername + "" ;
