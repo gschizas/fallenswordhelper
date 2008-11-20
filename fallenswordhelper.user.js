@@ -123,6 +123,8 @@ var fsHelper = {
 		fsHelper.init();
 		fsHelper.hideBanner();
 		fsHelper.prepareGuildList();
+		fsHelper.prepareChat();
+		fsHelper.injectStaminaCalculator();
 
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
@@ -195,7 +197,6 @@ var fsHelper = {
 				break;
 			case "chat":
 				fsHelper.addLogColoring("Chat", 0);
-				fsHelper.injectChat();
 				break;
 			case "log":
 				fsHelper.addLogColoring("GuildLog", 1);
@@ -235,6 +236,49 @@ var fsHelper = {
 		fsHelper.hideGuildAvatar();
 		fsHelper.hideGuildStatistics();
 		fsHelper.hideGuildStructures();
+	},
+
+	injectStaminaCalculator: function() {
+		var staminaImageElement = fsHelper.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
+		if (staminaImageElement) {
+			var mouseOverText = staminaImageElement.getAttribute("onmouseover");
+			//GM_log(mouseOverText);
+			//Stamina:&nbsp;</td><td width=\'90%\'>3,612&nbsp;/&nbsp;6,370</td>
+			//tt_setWidth(225); Tip('<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width=\'100%\'>
+			//<tr><td><font color=\'#999999\'>Stamina: </td><td width=\'90%\'>3,607 / 6,370</td></tr><tr><td>
+			//<font color=\'#999999\'>Gain Per Hour: </td><td width=\'90%\'>+90</td></tr><tr><td><font color=\'#999999\'>
+			//Next Gain : </td><td width=\'90%\'>16m 10s</td></tr></table><br>
+			//Stamina is required to perform actions (such as attacking players and creatures).<br>'); tt_resetWidth();
+			var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
+			var curStamina = staminaRE.exec(mouseOverText)[1];
+			curStamina = curStamina.replace(/,/,"")*1;
+			var maxStamina = staminaRE.exec(mouseOverText)[2];
+			maxStamina = maxStamina.replace(/,/,"")*1;
+			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
+			var gainPerHour = gainPerHourRE.exec(mouseOverText)[1];
+			gainPerHour = gainPerHour.replace(/,/,"")*1;
+			var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m/
+			var nextGainMinutes = nextGainRE.exec(mouseOverText)[1];
+			nextGainMinutes = nextGainMinutes.replace(/,/,"")*1;
+			nextGainHours = nextGainMinutes/60;
+			//get the max hours to still be inside stamina maximum
+			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+			var now = (new Date()).getTime();
+			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+			var testDate = Date(now);
+			var d = new Date(nextHuntMilliseconds);
+			var weekday=new Array("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
+			var monthname=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
+			var minutes=((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
+			var hours=((d.getHours() < 10) ? "0" : "") + d.getHours();
+			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + " " +  d.getFullYear() + " " + hours + ":" + minutes;
+			var firstPart = mouseOverText.split("</td></tr></table>")[0];
+			var secondPart = mouseOverText.split("</td></tr></table>")[1];
+			var newPart = "<tr><td><font color=\\'#999999\\'>Max Stam At: </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
+			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
+			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
+		}
 	},
 
 	injectRelic: function(isRelicPage) {
@@ -867,8 +911,104 @@ var fsHelper = {
 		}
 	},
 
-	injectChat: function() {
+	prepareChat: function() {
+		var injectHere = fsHelper.findNode("//table[@width='120' and contains(.,'New?')]")
+		if (!injectHere) return;
+		var info = injectHere.insertRow(1);
+		var cell = info.insertCell(0);
+		cell.innerHTML="<span id='fsHelperPlaceholderChat'></span>";
+		fsHelper.retrieveChat();
+	},
 
+	retrieveChat: function() {
+		var chat = fsHelper.getValueJSON("chat");
+
+		var newChat = fsHelper.findNode("//table[contains(.,'chat messages')]")
+
+		if (!chat || newChat) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=chat",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.parseChatForWorld(responseDetails.responseText);
+				},
+			})
+		} else {
+			fsHelper.injectChat(chat);
+		}
+	},
+
+	parseChatForWorld: function(chatText) {
+		var doc=fsHelper.createDocument(chatText);
+		var chatTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", 0, doc);
+		if (!chatTable) return;
+		// GM_log(chatTable.innerHTML);
+		var chat = new Object();
+		var chatConfirm=fsHelper.findNode("//input[@name='xc']",0,doc);
+		chat.messages = new Array();
+		for (var i=chatTable.rows.length-1; i>0; i--) {
+			var aRow = chatTable.rows[i];
+			if (aRow.cells.length==3) {
+				var aMessage=new Object();
+				aMessage.time=aRow.cells[0].textContent;
+				aMessage.from=aRow.cells[1].textContent;
+				aMessage.text=aRow.cells[2].textContent;
+				chat.messages.push(aMessage);
+			}
+		}
+		chat.confirm=chatConfirm.value;
+		fsHelper.injectChat(chat);
+	},
+
+	injectChat: function(chat){
+		var injectHere = document.getElementById("fsHelperPlaceholderChat");
+
+		// window.alert(chat.messages.length);
+
+		var displayList = document.createElement("TABLE");
+		displayList.style.border = "1px solid #c5ad73";
+		displayList.style.backgroundColor = "#4a3918";
+		displayList.cellPadding = 1;
+		displayList.width = 125;
+
+		var aRow=displayList.insertRow(displayList.rows.length);
+		var aCell=aRow.insertCell(0);
+
+		var result="<div style='font-size:xx-small'>"
+		var showLines = parseInt(GM_getValue("chatLines"))
+		if (isNaN(showLines)) {
+			showLines=10
+			GM_setValue("chatLines", showLines)
+		}
+		var startFrom = (chat.messages.length>showLines)?chat.messages.length-showLines:0;
+		for (var i=startFrom; i<chat.messages.length; i++) {
+			result += "<span style='color:yellow' title='"+chat.messages[i].time+"'>"
+			result += chat.messages[i].from
+			result += ":</span><span style='color:white'>"
+			result += chat.messages[i].text
+			result += "</span><br/>";
+		}
+		//result += '<form action="index.php" method="post">'
+		//result += '<input type="hidden" value="guild" name="cmd" />'
+		//result += '<input type="hidden" value="dochat" name="subcmd"/>'
+		//result += '<input type="hidden" value="' + chat.confirm + '" name="xc"/>'
+		//result += '<input type="text" class="custominput" size="14" name="msg"/>'
+		//result += '<input type="submit" class="custominput" onkeydown=null onkeyup=null value="Send" name="submit"/>'
+		//result += '</form>'
+		result += '</div>'
+
+		aCell.innerHTML = result;
+
+		var breaker=document.createElement("BR");
+		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
+		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+
+		GM_setValue("chat", JSON.stringify(chat));
 	},
 
 	addLogColoring: function(logScreen, dateColumn) {
@@ -997,14 +1137,14 @@ var fsHelper = {
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;padding-left:20px;'>"
+		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
 				if (memberList.isRefreshed) {
 					fsHelper.getFullPlayerData(member);
 				}
-				output += "<li>"
+				output += "<li style='padding-bottom:0px;'>"
 				output += "<a style='color:white;font-size:10px;' "
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
 				output += "<a style='color:white;font-size:10px;' "
@@ -1548,7 +1688,7 @@ var fsHelper = {
 			'<tr><td>Friendly Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td colspan="4" align="left">Other preferences</td></tr>' +
+			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Automatically Kill All Monsters [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Kill All Monsters</b><br><br>CAUTION: If this is set, while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
 				' ]:</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("killAll")?" checked":"") + '></td>' +
@@ -1570,8 +1710,13 @@ var fsHelper = {
 			'<tr><td align="right">Show Completed Quests [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Show Completed Quests</b><br><br>This will show completed quests that have been hidden.\');">?</a>' +
 				' ]:</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td colspan="2"></td></tr>' +
+			'<td align="right">Show chat lines</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
+			'<tr><td colspan="4" align=center>' +
+			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
+			'with valuable contributions by <a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'<a href="http://www.fallensword.com/index.php?cmd=profile&player_id=524660">Nabalac</a>, '
+			'<a href="http://www.fallensword.com/index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
 			'</table></form>';
 		var insertHere = fsHelper.findNode("//table[@width='100%']");
 		var newRow=insertHere.insertRow(insertHere.rows.length);
@@ -1599,6 +1744,7 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "guildFrndMessage");
 		fsHelper.saveValueForm(oForm, "guildPastMessage");
 		fsHelper.saveValueForm(oForm, "guildEnmyMessage");
+		fsHelper.saveValueForm(oForm, "chatLines");
 		fsHelper.saveValueForm(oForm, "showAdmin");
 		fsHelper.saveValueForm(oForm, "killAll");
 		fsHelper.saveValueForm(oForm, "disableItemColoring");
