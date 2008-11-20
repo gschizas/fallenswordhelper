@@ -11,47 +11,31 @@ var fsHelper = {
 	},
 
 	onPageLoad: function(anEvent) {
-		fsHelper.prepareGuildList();
 		var re=/cmd=([a-z]+)/;
 		var pageId = re.exec(document.location.search)[1];
-
-		var re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search);
-		var subPageId="-";
-		if (subPageIdRE)
-			subPageId=subPageIdRE[1];
 
 		switch (pageId) {
 		case "settings":
 			fsHelper.injectSettings();
 			break;
 		case "profile":
-			switch (subPageId) {
-			case "-":
-				fsHelper.injectProfile();
-				break;
-			case "dropitems":
-				fsHelper.injectDropItems();
-				break;
-			}
+			fsHelper.decideProfile();
 			break;
 		case "auctionhouse":
 			fsHelper.injectAuctionHouse();
 			break;
 		case "guild":
-			switch(subPageId) {
-			case "inventory":
-				fsHelper.injectDropItems();
-				break;
-			case "chat":
-				fsHelper.injectChat();
-				break;
-			}
+			fsHelper.decideGuild();
 			break;
+		case "world":
+			fsHelper.injectWorld();
+			break;
+		default:
+			// echo("");
 		}
 	},
 
-	prepareGuildList: function() {
+	injectWorld: function() {
 		var injectHere = document
 			.getElementsByTagName("TABLE")[0].rows[2].cells[2]
 			.getElementsByTagName("TABLE")[0].rows[2].cells[0]
@@ -60,35 +44,33 @@ var fsHelper = {
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
 		fsHelper.retrieveGuildData();
+		// injectHere.innerHTML="***";
+	},
+
+	injectChat: function() {
+		var injectHere = document.getElementsByTagName("TABLE")[9]
+		var info = injectHere.insertRow(25);
+		var cell = info.insertCell(0);
+		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
+		fsHelper.retrieveGuildData();
 	},
 
 	retrieveGuildData: function() {
-		var memberListJSON = GM_getValue("memberlist");
-		var memberList;
-		// memberListJSON="";
-		if (memberListJSON) {
-			memberList = JSON.parse(memberListJSON);
-			if ((new Date()).getTime() - memberList.changedOn > 15000) memberList = null; // invalidate cache
-		}
-
-		if (!memberList) {
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Content-Type": "application/x-www-form-urlencoded",
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					fsHelper.parseGuildForWorld(responseDetails.responseText);
-				},
-			})
-		} else {
-			var memberList = JSON.parse(memberListJSON);
-			memberList.isRefreshed = false;
-			fsHelper.injectGuildList(memberList);
-		}
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
+			headers: {
+			//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+			//    'Accept': 'application/atom+xml,application/xml,text/xml',
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				// window.alert('\n' + responseDetails.responseText);
+				fsHelper.parseGuildForWorld(responseDetails.responseText);
+			},
+		})
 	},
 
 	parseGuildForWorld: function(details) {
@@ -104,8 +86,7 @@ var fsHelper = {
 		}
 		if (membersTable) {
 			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
-			var memberList = new Object();
-			memberList.members = new Array();
+			var allMembers = new Array();
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
@@ -116,75 +97,73 @@ var fsHelper = {
 					aMember.level=aRow.cells[2].innerHTML;
 					aMember.rank=aRow.cells[3].innerHTML;
 					aMember.xp=aRow.cells[4].innerHTML;
-					memberList.members.push(aMember);
+					allMembers.push(aMember);
 				}
 			}
-			memberList.changedOn = new Date().getTime();
-			memberList.isRefreshed = true;
-			fsHelper.injectGuildList(memberList);
+			fsHelper.injectGuildList(allMembers);
 		}
 	},
 
 	injectGuildList: function(memberList) {
-		var oldMemberListJSON = GM_getValue("oldmemberlist");
-		var oldMemberList;
-		if (!oldMemberListJSON) {
-			oldMemberList=memberList;
-		}
-		else {
-			oldMemberList=JSON.parse(oldMemberListJSON);
-		}
-		oldIds = new Array();
-		for (var i=0; i<oldMemberList.members.length;i++) {
-			if (oldMemberList.members[i].status=="Online") {
-				oldIds.push(oldMemberList.members[i].id);
-			}
-		}
-
-		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("fsHelperPlaceholderWorld");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
+		displayList.style.border = "1px solid rgb(198, 173, 115)";
 		displayList.style.backgroundColor = "#4a3918";
-		displayList.cellPadding = 1;
+		displayList.cellPadding = 3;
 		displayList.width = 125;
-
-		if (memberList.isRefreshed) {
-			displayList.style.backgroundColor = "#6a5938";
-		}
-
-		var aRow=displayList.insertRow(displayList.rows.length);
-		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;'>"
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
+		for (var i=0;i<memberList.length;i++) {
+			var member=memberList[i];
 			if (member.status=="Online") {
-				output += "<li>"
-				output += "<a style='color:white;font-size:10px;' "
-				output += "href='javascript:openWindow(\"index.php?cmd=quickbuff&tid=" + member.id + "\")'>[b]</a>&nbsp;";
-				output += "<a title='" + member.level + " - " + member.rank + "' style='color:"
-				if (oldIds.indexOf(member.id)<0) { // just logged in
-					output += "yellow";
-				} else {
-					output += "white";
-				}
-				output += ";font-size:10px;'"
-				output += " href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
-				output += "</li>"
+				var aRow=displayList.insertRow(displayList.rows.length);
+				var aCell=aRow.insertCell(0);
+				aCell.innerHTML = "<a style='color:white;font-size:10px;' href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 			}
 		}
-		output += "</ol>"
-		aCell.innerHTML = output;
-		var breaker=document.createElement("BR");
-		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-
-		GM_setValue("oldmemberlist", JSON.stringify(oldMemberList));
 	},
 
 	injectAuctionHouse: function() {
 
+	},
+
+	decideGuild: function() {
+		var re=/subcmd=([a-z]+)/;
+		var subPageIdRE = re.exec(document.location.search); //[1];
+		var subPageId="***";
+		if (subPageIdRE)
+			subPageId=subPageIdRE[1];
+
+		switch(subPageId) {
+		case "inventory":
+			fsHelper.injectDropItems();
+			break;
+		case "chat":
+			fsHelper.injectChat();
+			break;
+		default:
+			// echo ("");
+			}
+	},
+
+
+	decideProfile: function() {
+		var re=/subcmd=([a-z]+)/;
+		var subPageIdRE = re.exec(document.location.search); //[1];
+		var subPageId="***";
+		if (subPageIdRE)
+			subPageId=subPageIdRE[1];
+
+		switch(subPageId) {
+		case "***":
+			fsHelper.injectProfile();
+			break;
+		case "dropitems":
+			fsHelper.injectDropItems();
+			break;
+		default:
+			// echo ("");
+		}
 	},
 
 	injectDropItems: function() {
@@ -194,15 +173,19 @@ var fsHelper = {
 			if (anItem.type=="checkbox") {
 				theLocation=anItem.parentNode.nextSibling.nextSibling;
 				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
+				// window.alert(theLocation.innerHTML);
 				var mouseOver=theImage.getAttribute("onmouseover");
+				// window.alert(mouseOver.replace(/\s/g,'*'));
 				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
 				var reResult=reParams.exec(mouseOver);
 				var itemId=reResult[1];
 				var invId=reResult[2];
 				var type=reResult[3];
 				var pid=reResult[4];
+				// window.alert()
 				var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
 				theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
+				// window.alert(theUrl);
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: theUrl,
@@ -212,6 +195,7 @@ var fsHelper = {
 					    'Content-Type': 'application/x-www-form-urlencoded'
 					},
 					onload: function(responseDetails) {
+						// window.alert('\n' + responseDetails.responseText);
 						var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2><b>([^<]+)<\/b>/
 						var fontLineRX=fontLineRE.exec(responseDetails.responseText)
 						fsHelper.injectDropItemsPaint(fontLineRX[1],fontLineRX[2]);
@@ -239,13 +223,10 @@ var fsHelper = {
 		for (var i=0; i<allLinks.length; i++) {
 			aLink=allLinks[i];
 			if (aLink.href.search("cmd=guild&subcmd=view") != -1) {
-				var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-				if (guildIdResult) var guildId = parseInt(guildIdResult[1], 10);
 				var warning = document.createElement('span');
 				var color = "";
 				var changeAppearance = true;
-				var relationship = fsHelper.guildRelationship(aLink.text)
-				switch (relationship) {
+				switch (fsHelper.guildRelationship(aLink.text)) {
 					case "self":
 						warning.innerHTML="<br/>Member of your own guild";
 						color = "green";
@@ -268,57 +249,6 @@ var fsHelper = {
 				}
 			}
 		}
-
-		var player = document.evaluate("//textarea[@id='holdtext']", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		var avyrow = document.evaluate("//td/img[contains(@title, 's Avatar')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		var imgurls = document.evaluate("//img[contains(@src, '/skin/')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		var playerid = document.URL.match(/\w*\d{5}\d*/)
-		var idindex, newhtml, imgserver;
-
-		if (player.snapshotLength == 1)
-		{
-			if (!playerid)
-			{
-				playerid = player.snapshotItem(0).innerHTML;
-				idindex = playerid.indexOf("?ref=") + 5;
-				playerid = playerid.substr(idindex);
-			}
-
-			var playeravy = avyrow.snapshotItem(0).parentNode.firstChild ;
-			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue)))
-			{
-				playeravy = playeravy.nextSibling ;
-			}
-			var playername = playeravy.getAttribute("title");
-			playername = playername.substr(0, playername.indexOf("'s Avatar"));
-
-			idindex = imgurls.snapshotItem(0).src.indexOf("/skin/");
-			imgserver = imgurls.snapshotItem(0).src.substr(0,idindex);
-
-			var auctiontext = "Go to " + playername + "'s auctions" ;
-			var ranktext = "Rank " +playername + "" ;
-
-			newhtml = avyrow.snapshotItem(0).parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
-			newhtml += "<a href='http://www.fallensword.com/index.php?cmd=blacksmith&subcmd=repairall'>" ;
-			newhtml += "<img alt='Quick repair all items' title='Quick repair all items' src=" ;
-			newhtml += imgserver + "/skin/realm/icon_action_repair.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
-			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='http://www.fallensword.com/index.php?cmd=world&subcmd=map'>" ;
-			newhtml += "<img alt='Go to realm map' title='Go to realm map' src=" ;
-			newhtml += imgserver + "/skin/realm/icon_action_map.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=http://www.fallensword.com/?cmd=auctionhouse&type=-3&tid=" ;
-			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
-			newhtml += imgserver + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
-			if (relationship == "self" && GM_getValue("showAdmin")) {
-				newhtml += "<a href='http://www.fallensword.com/index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
-				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
-				newhtml += imgserver + "/guilds/" + guildId + "_mini.jpg></a>" ;
-			}
-			avyrow.snapshotItem(0).parentNode.innerHTML = newhtml ;
-		}
-
 	},
 
 	injectSettings: function() {
@@ -329,7 +259,6 @@ var fsHelper = {
 			'<tr><td>Own Guild</td><td><input name="guildSelf" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
 			'<tr><td>Friendly Guilds</td><td><input name="guildFrnd" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
 			'<tr><td>Old Guilds</td><td><input name="guildPast" value="' + GM_getValue("guildPast") + '"></td></tr>' +
-			'<tr><td>Show Administrative Options</td><td><input name="guildAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
 			'<tr><td colspan=2><input type="button" class="button" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'</form></div>';
 		var insertHere = document.getElementsByTagName("FORM")[0];
@@ -342,18 +271,17 @@ var fsHelper = {
 		GM_setValue("guildSelf", oForm.elements[0].value);
 		GM_setValue("guildFrnd", oForm.elements[1].value);
 		GM_setValue("guildPast", oForm.elements[2].value);
-		GM_setValue("showAdmin", oForm.elements[3].checked);
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
 
 	guildRelationship: function(txt) {
-		var guildSelf = GM_getValue("guildSelf").toLowerCase().replace(/\s*,\s*/,",").split(","); // "TheRetreat"
-		var guildFrnd = GM_getValue("guildFrnd").toLowerCase().replace(/\s*,\s*/,",").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
-		var guildPast = GM_getValue("guildPast").toLowerCase().replace(/\s*,\s*/,",").split(","); // "Dark Phoenix"
-		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
-		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
-		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
+		var guildSelf = GM_getValue("guildSelf").split(","); // "TheRetreat"
+		var guildFrnd = GM_getValue("guildFrnd").split(",");  // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
+		var guildPast = GM_getValue("guildSelf").split(","); // "Dark Phoenix"
+		if (guildSelf.indexOf(txt)!=-1) return "self";
+		if (guildFrnd.indexOf(txt)!=-1) return "friendly";
+		if (guildPast.indexOf(txt)!=-1) return "old";
 		return "";
 	}
 };
