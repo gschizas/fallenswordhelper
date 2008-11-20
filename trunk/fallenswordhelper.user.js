@@ -1255,21 +1255,24 @@ var fsHelper = {
 				var relationship = fsHelper.guildRelationship(aLink.text)
 				switch (relationship) {
 					case "self":
-						warning.innerHTML="<br/>Member of your own guild";
-						color = "green";
+						var settings="guildSelfMessage";
 						break;
 					case "friendly":
-						warning.innerHTML="<br/>Do not attack - Guild is friendly!";
-						color = "yellow";
+						var settings="guildSelfMessage";
 						break;
 					case "old":
-						warning.innerHTML="<br/>Do not attack - You've been in that guild once!";
-						color = "gray";
+						var settings="guildSelfMessage";
+						break;
+					case "enemy":
+						var settings="guildSelfMessage";
 						break;
 					default:
 						changeAppearance = false;
 				}
 				if (changeAppearance) {
+					var settingsAry=GM_getValue(settings).split("|");
+					warning.innerHTML="<br/>" + settingsAry[1];
+					color = settingsAry[0];
 					aLink.parentNode.style.color=color;
 					aLink.style.color=color;
 					aLink.parentNode.insertBefore(warning, aLink.nextSibling);
@@ -1436,13 +1439,11 @@ var fsHelper = {
 			var foundName=theItem.textContent;
 			for (j=0; j<memberList.members.length; j++) {
 				var aMember=memberList.members[j];
-				// window.alert(aMember.name);
 				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 				if (aMember.name==foundName) {
 					theItem.innerHTML += " [" + aMember.level + "]";
 				}
 			}
-			// window.alert(allItems[i].cells[0].textContent);
 		}
 	},
 
@@ -1510,16 +1511,43 @@ var fsHelper = {
 		structureListElement.style.display = "none";
 	},
 
+	toggleVisibilty: function(evt) {
+		var anItemId=evt.target.getAttribute("linkto")
+		var anItem=document.getElementById(anItemId);
+		var currentVisibility=anItem.style.visibility;
+		anItem.style.visibility=(currentVisibility=="hidden")?"visible":"hidden";
+		anItem.style.display=(currentVisibility=="hidden")?"block":"none";
+	},
+
+	injectSettingsGuildData: function(guildType) {
+		var result='';
+		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
+		result += '<span style="cursor:pointer;cursor:hand;text-decoration:underline;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message">»</span>'
+		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
+		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
+		result += '</div>'
+		return result;
+	},
+
 	injectSettings: function() {
+		if (!GM_getValue("guildSelf")) {GM_setValue("guildSelf", "")}
+		if (!GM_getValue("guildFrnd")) {GM_setValue("guildFrnd", "")}
+		if (!GM_getValue("guildPast")) {GM_setValue("guildPast", "")}
+		if (!GM_getValue("guildEnmy")) {GM_setValue("guildEnmy", "")}
+		if (!GM_getValue("guildSelfMessage")) {GM_setValue("guildSelfMessage", "green|Member of your own guild")}
+		if (!GM_getValue("guildFrndMessage")) {GM_setValue("guildFrndMessage", "yellow|Do not attack - Guild is friendly!")}
+		if (!GM_getValue("guildPastMessage")) {GM_setValue("guildPastMessage", "gray|Do not attack - You've been in that guild once!")}
+		if (!GM_getValue("guildEnmyMessage")) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate"></td></tr>' +
 			'<tr><td colspan="4" align="left"><b>Enter guild names, seperated by commas</td></tr>' +
-			'<tr><td>Own Guild</td><td colspan="3"><input name="guildSelf" size="60" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
-			'<tr><td>Friendly Guilds</td><td colspan="3"><input name="guildFrnd" size="60" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
-			'<tr><td>Old Guilds</td><td colspan="3"><input name="guildPast" size="60" value="' + GM_getValue("guildPast") + '"></td></tr>' +
+			'<tr><td>Own Guild</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Self") + '</td></tr>' +
+			'<tr><td>Friendly Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Frnd") + '</td></tr>' +
+			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
+			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><td colspan="4" align="left">Other preferences</td></tr>' +
 			'<tr><td align="right">Automatically Kill All Monsters [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Kill All Monsters</b><br><br>CAUTION: If this is set, while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
@@ -1528,19 +1556,19 @@ var fsHelper = {
 				'<a href="#" onmouseover="Tip(\'<b>Hide Top Banner</b><br><br>Pretty simple ... it just hides the top banner.\');">?</a>' +
 				' ]:</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show Administrative Options [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Show Admininstrative Options</b><br><br>I have not really figured out what this does yet ... I think it works for guild founders only.\');">?</a>' +
+				'<a href="#" onmouseover="Tip(\'<b>Show Admininstrative Options</b><br><br>Show ranking controls in guild managemenet page - this works for guild founders only.\');">?</a>' +
 				' ]:</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
 			'<td align="right">Hide Guild Info [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Hide Guild Info</b><br><br>This will hide three fields on the Guild-Manage screen, the logo, the statistics and the structures. You can always get them back by unchecking this.\');">?</a>' +
 				' ]:</td><td><input name="hideGuildInfo" type="checkbox" value="on"' + (GM_getValue("hideGuildInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Disable Item Coloring [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Disable Item Coloring</b><br><br>There is some code that colors the item text based on the rarity of the item. I did not like it so I put in an option to turn it off.\');">?</a>' +
+				'<a href="#" onmouseover="Tip(\'<b>Disable Item Coloring</b><br><br>There is some code that colors the item text based on the rarity of the item.\');">?</a>' +
 				' ]:</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
 			'<td align="right">Enable Log Coloring [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Enable Log Coloring</b><br><br>Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.\');">?</a>' +
 				' ]:</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Show Completed Quests [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Show Completed Quests</b><br><br>Pretty simple ... this will show completed quests that have been hidden.\');">?</a>' +
+				'<a href="#" onmouseover="Tip(\'<b>Show Completed Quests</b><br><br>This will show completed quests that have been hidden.\');">?</a>' +
 				' ]:</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
 			'<td colspan="2"></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
@@ -1552,9 +1580,13 @@ var fsHelper = {
 		newCell.innerHTML=configData;
 
 		// insertHere.insertBefore(configData, insertHere);
-
 		document.getElementById('fsHelperSaveOptions').addEventListener('click', fsHelper.saveConfig, true);
 		document.getElementById('fsHelperCheckUpdate').addEventListener('click', fsHelper.checkForUpdate, true);
+
+		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 	},
 
 	saveConfig: function(evt) {
@@ -1562,6 +1594,11 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "guildSelf");
 		fsHelper.saveValueForm(oForm, "guildFrnd");
 		fsHelper.saveValueForm(oForm, "guildPast");
+		fsHelper.saveValueForm(oForm, "guildEnmy");
+		fsHelper.saveValueForm(oForm, "guildSelfMessage");
+		fsHelper.saveValueForm(oForm, "guildFrndMessage");
+		fsHelper.saveValueForm(oForm, "guildPastMessage");
+		fsHelper.saveValueForm(oForm, "guildEnmyMessage");
 		fsHelper.saveValueForm(oForm, "showAdmin");
 		fsHelper.saveValueForm(oForm, "killAll");
 		fsHelper.saveValueForm(oForm, "disableItemColoring");
@@ -1577,6 +1614,7 @@ var fsHelper = {
 		var guildSelf = GM_getValue("guildSelf");
 		var guildFrnd = GM_getValue("guildFrnd");
 		var guildPast = GM_getValue("guildPast");
+		var guildEnmy = GM_getValue("guildEnmy");
 		if (!guildSelf) {
 			guildSelf="";
 			GM_setValue("guildSelf", guildSelf);
@@ -1589,12 +1627,18 @@ var fsHelper = {
 			guildPast="";
 			GM_setValue("guildPast", guildPast);
 		}
+		if (!guildEnmy) {
+			guildEnmy="";
+			GM_setValue("guildEnmy", guildEnmy);
+		}
 		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").split(","); // "TheRetreat"
 		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
 		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").split(","); // "Dark Phoenix"
+		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").split(",");
 		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
 		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
 		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
+		if (guildEnmy.indexOf(txt.toLowerCase())!=-1) return "enemy";
 		return "";
 	}
 };
