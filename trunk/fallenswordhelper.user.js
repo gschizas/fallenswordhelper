@@ -10,6 +10,15 @@ var fsHelper = {
 		this.initialized = true;
 	},
 
+	getValueJSON: function(name) {
+		var resultJSON=GM_getValue(name);
+		var result;
+		if (resultJSON) {
+			result = JSON.parse(resultJSON);
+		}
+		return result;
+	},
+
 	onPageLoad: function(anEvent) {
 		fsHelper.prepareGuildList();
 		var re=/cmd=([a-z]+)/;
@@ -48,6 +57,9 @@ var fsHelper = {
 				break;
 			}
 			break;
+		case "bank":
+			fsHelper.injectBank();
+			break;
 		}
 	},
 
@@ -63,11 +75,8 @@ var fsHelper = {
 	},
 
 	retrieveGuildData: function() {
-		var memberListJSON = GM_getValue("memberlist");
-		var memberList;
-		// memberListJSON="";
-		if (memberListJSON) {
-			memberList = JSON.parse(memberListJSON);
+		var memberList = fsHelper.getValueJSON("memberlist");
+		if (memberList) {
 			if ((new Date()).getTime() - memberList.changedOn > 15000) memberList = null; // invalidate cache
 		}
 
@@ -85,7 +94,7 @@ var fsHelper = {
 				},
 			})
 		} else {
-			var memberList = JSON.parse(memberListJSON);
+			var memberList = fsHelper.getValueJSON("memberlist");
 			memberList.isRefreshed = false;
 			fsHelper.injectGuildList(memberList);
 		}
@@ -126,14 +135,9 @@ var fsHelper = {
 	},
 
 	injectGuildList: function(memberList) {
-		var oldMemberListJSON = GM_getValue("oldmemberlist");
-		var oldMemberList;
-		if (!oldMemberListJSON) {
-			oldMemberList=memberList;
-		}
-		else {
-			oldMemberList=JSON.parse(oldMemberListJSON);
-		}
+		var oldMemberList = fsHelper.getValueJSON("oldmemberlist");
+		if (!oldMemberList) oldMemberList=memberList;
+
 		oldIds = new Array();
 		for (var i=0; i<oldMemberList.members.length;i++) {
 			if (oldMemberList.members[i].status=="Online") {
@@ -160,12 +164,22 @@ var fsHelper = {
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
+				if (memberList.isRefreshed) {
+					fsHelper.getFullPlayerData(member);
+				}
 				output += "<li>"
 				output += "<a style='color:white;font-size:10px;' "
-				output += "href='javascript:openWindow(\"index.php?cmd=quickbuff&tid=" + member.id + "\")'>[b]</a>&nbsp;";
-				output += "<a title='" + member.level + " - " + member.rank + "' style='color:"
-				if (oldIds.indexOf(member.id)<0) { // just logged in
+				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
+				output += "<a onmouseover=\"tt_setWidth(105);";
+				output += "Tip('<center><b>Guild Member</b><br>Level " + member.level + " " + member.rank + "</b><br>";
+				if (member.hasFullData) {
+
+				}
+				output += "</center>');\" ";
+				output += "style='color:"
+				if (oldIds.indexOf(member.id)<0 /* || member.justLoggedIn */) { // just logged in
 					output += "yellow";
+					// if (memberList.isRefreshed) {member.justLoggedIn=true; }
 				} else {
 					output += "white";
 				}
@@ -185,12 +199,48 @@ var fsHelper = {
 		}
 	},
 
+	getFullPlayerData: function(member) {
+		// return;
+		// window.alert("http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id);
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.parsePlayerData(member.id, responseDetails.responseText);
+			},
+		})
+	},
+
+	parsePlayerData: function(memberId, responseText) {
+		return;
+		var doc=document.createElement("HTML");
+		doc.innerHTML=responseText;
+		var statisticsQ = document.evaluate("//b[contains(.,'Statistics')]", doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		window.alert(statisticsQ.snapshotLength);
+		window.alert(statisticsQ.snapshotItem(0).innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
+	},
+
+	injectBank: function() {
+		var injectHere;
+		var bankQ = document.evaluate("//b[contains(.,'Bank')]", document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		if (bankQ.snapshotLength>0) {
+			injectHere = bankQ.snapshotItem(0);
+			injectHere.innerHTML+="<br><a href='/index.php?cmd=guild&subcmd=bank'>Guild Bank</a>";
+		}
+	},
+
 	injectAuctionHouse: function() {
 
 	},
 
 	injectDropItems: function() {
 		var allItems = document.getElementsByTagName("INPUT");
+		var savedItems = fsHelper.getValueJSON("savedItems")
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			if (anItem.type=="checkbox") {
@@ -203,24 +253,34 @@ var fsHelper = {
 				var invId=reResult[2];
 				var type=reResult[3];
 				var pid=reResult[4];
-				var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-				theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
-				GM_xmlhttpRequest({
-					method: 'GET',
-					url: theUrl,
-					headers: {
-					//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
-					//    'Accept': 'application/atom+xml,application/xml,text/xml',
-					    'Content-Type': 'application/x-www-form-urlencoded'
-					},
-					onload: function(responseDetails) {
-						var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2><b>([^<]+)<\/b>/
-						var fontLineRX=fontLineRE.exec(responseDetails.responseText)
-						fsHelper.injectDropItemsPaint(fontLineRX[1],fontLineRX[2]);
-					},
-				})
+				if (savedItems && savedItems.indexOf(itemId)>=0) {
+					//
+					fsHelper.injectDropItemsParse(savedItems(itemId).reponseText);
+				}
+				else {
+					var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
+					theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
+					GM_xmlhttpRequest({
+						method: 'GET',
+						url: theUrl,
+						headers: {
+						//    'User-agent': 'Mozilla/4.0 (compatible) Greasemonkey',
+						//    'Accept': 'application/atom+xml,application/xml,text/xml',
+							'Content-Type': 'application/x-www-form-urlencoded'
+						},
+						onload: function(responseDetails) {
+							fsHelper.injectDropItemsParse(responseDetails);
+						}
+					})
+				}
 			}
 		}
+	},
+
+	injectDropItemsParse: function(responseDetails) {
+		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2><b>([^<]+)<\/b>/
+		var fontLineRX=fontLineRE.exec(responseDetails.responseText)
+		fsHelper.injectDropItemsPaint(fontLineRX[1],fontLineRX[2]);
 	},
 
 	injectDropItemsPaint: function(color, text) {
@@ -301,15 +361,9 @@ var fsHelper = {
 			var ranktext = "Rank " +playername + "" ;
 
 			newhtml = avyrow.snapshotItem(0).parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
-			newhtml += "<a href='http://www.fallensword.com/index.php?cmd=blacksmith&subcmd=repairall'>" ;
-			newhtml += "<img alt='Quick repair all items' title='Quick repair all items' src=" ;
-			newhtml += imgserver + "/skin/realm/icon_action_repair.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
 			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='http://www.fallensword.com/index.php?cmd=world&subcmd=map'>" ;
-			newhtml += "<img alt='Go to realm map' title='Go to realm map' src=" ;
-			newhtml += imgserver + "/skin/realm/icon_action_map.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href=http://www.fallensword.com/?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
 			newhtml += imgserver + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
@@ -350,9 +404,24 @@ var fsHelper = {
 	},
 
 	guildRelationship: function(txt) {
-		var guildSelf = GM_getValue("guildSelf").toLowerCase().replace(/\s*,\s*/,",").split(","); // "TheRetreat"
-		var guildFrnd = GM_getValue("guildFrnd").toLowerCase().replace(/\s*,\s*/,",").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
-		var guildPast = GM_getValue("guildPast").toLowerCase().replace(/\s*,\s*/,",").split(","); // "Dark Phoenix"
+		var guildSelf = GM_getValue("guildSelf");
+		var guildFrnd = GM_getValue("guildFrnd");
+		var guildPast = GM_getValue("guildPast");
+		if (!guildSelf) {
+			guildSelf="";
+			GM_setValue("guildSelf", guildSelf);
+		}
+		if (!guildFrnd) {
+			guildFrnd="";
+			GM_setValue("guildFrnd", guildFrnd);
+		}
+		if (!guildPast) {
+			guildPast="";
+			GM_setValue("guildPast", guildPast);
+		}
+		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").split(","); // "TheRetreat"
+		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").split(","); // "Armata Rossa,Asphaltanza,Dark Siege,Elendil,Shadow Dracones,The Shadow Warriors,Tuga Knights"
+		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").split(","); // "Dark Phoenix"
 		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
 		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
 		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
