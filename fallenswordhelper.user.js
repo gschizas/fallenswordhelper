@@ -26,18 +26,11 @@ var fsHelper = {
 		}
 	},
 
-	findNode: function(xpath, id, doc) {
-			if (!doc) {
-				doc=document;
-			}
-			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-			if (findQ.snapshotLength>0) {
-				if (!id) id=0;
-				return findQ.snapshotItem(id);
-			}
-			else {
-				return null;
-			}
+	findNode: function(xpath, index, doc) {
+			var nodes=fsHelper.findNodes(xpath, doc);
+			if (!nodes) return null;
+			if (!index) index=0;
+			return (nodes[index]);
 	},
 
 	findNodes: function(xpath, doc) {
@@ -121,7 +114,7 @@ var fsHelper = {
 	hideBanner: function() {
 		if (!GM_getValue("hideBanner")) return;
 		var bannerElement = fsHelper.findNode("//img[(@title='Fallen Sword RPG')]");
-		bannerElement.style.display = "none";
+		if (bannerElement) bannerElement.style.display = "none";
 	},
 
 	// main event dispatcher
@@ -153,9 +146,7 @@ var fsHelper = {
 			fsHelper.injectSettings();
 			break;
 		case "world":
-			// fsHelper.mapThis();
-			fsHelper.checkBuffs();
-			fsHelper.killAllMonsters();
+			fsHelper.injectWorld();
 			break;
 		case "profile":
 			switch (subPageId) {
@@ -219,23 +210,49 @@ var fsHelper = {
 	},
 
 	injectRelic: function(isRelicPage) {
-		return;
-		var innerTable = fsHelper.findNode("//table[@width='400']");
-		var listOfDefenders = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&player_id=')]");
+		var relicNameElement = fsHelper.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
+		relicNameElement.parentNode.style.fontSize = "x-small";
+		var tableElement = fsHelper.findNode("//table[@width='600']");
+		for (var i=0;i<tableElement.rows.length;i++) {
+			var aRow = tableElement.rows[i];
+			if (i==2 ||
+				i==3 || //Relic picture
+				i==4 ||
+				i==5 || //back to world
+				i==6 ||
+				i==7 || //Relic instructions
+				i==8 ||
+				i==10 ||
+				i==11) { // attempt group capture button
+				aRow.firstChild.colSpan = '3';
+			}
+		}
+		var relicName = relicNameElement.innerHTML;
+		var tableWithBorderElement = fsHelper.findNode("//table[@cellpadding='5']");
+		tableWithBorderElement.align = "left";
+		tableWithBorderElement.parentNode.colSpan = "2";
+		var tableInsertPoint = tableWithBorderElement.parentNode.parentNode;
+		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border-style:solid; border-width:1px; border-color: #A07720;'><tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
+		var extraTextInsertPoint = fsHelper.findNode("//td[@title='InsertSpot']");
+		var defendingGuild = fsHelper.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
+		var defendingGuildHref = defendingGuild.getAttribute("href");
+		fsHelper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
+		var listOfDefenders = fsHelper.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
-		var testElement = isRelicPage.nextSibling.nextSibling;
-		for (var i=0; i<listOfDefenders.length-1; i++) {
+		for (var i=0; i<listOfDefenders.length; i++) {
 			var href = listOfDefenders[i].getAttribute("href");
-			if (i==1) {
-				fsHelper.getPlayerData(href);
+			if (i<4) { //I put this in to limit the number of calls this function makes.
+					//I don't want to hammer the server too much.
+				fsHelper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
 			}
 			//testElement.innerHTML += listOfDefenders[i].innerHTML + "\n";
 			defenderCount++;
 		}
-		testElement.innerHTML += "<tr><td>Number of Defenders: " + defenderCount + "<td><tr>";
+		extraTextInsertPoint.innerHTML += "<tr><td>Number of Defenders: " + defenderCount + "<td><tr>";
+		extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:gray;'>Only the first 4 defenders are listed until I figure a way to sum them.<td><tr>";
 	},
 
-	getPlayerData: function(href) {
+	getRelicGuildData: function(extraTextInsertPoint,href) {
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://www.fallensword.com/" + href,
@@ -245,14 +262,82 @@ var fsHelper = {
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				//window.alert(responseDetails.responseText);
+				//GM_log(href);
+				fsHelper.parseRelicGuildData(extraTextInsertPoint,href, responseDetails.responseText);
 			},
 		})
 	},
 
+	parseRelicGuildData: function(extraTextInsertPoint,href, responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var allItems = doc.getElementsByTagName("IMG");
+		var relicCount = 0;
+		for (var i=0;i<allItems.length-1;i++) {
+			var anItem=allItems[i];
+			var mouseoverText = anItem.getAttribute("onmouseover")
+			if (mouseoverText && mouseoverText.search("Relic Bonuses") != -1){
+				//GM_log(mouseoverText);
+				relicCount++;
+			}
+		}
+		extraTextInsertPoint.innerHTML += "<tr><td>Defending Guild Relic Count: " + relicCount + "<td><tr>";
+	},
+
+	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/" + href,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				//window.alert(href);
+				fsHelper.parseRelicPlayerData(defenderCount,extraTextInsertPoint,href, responseDetails.responseText);
+			},
+		})
+	},
+
+	parseRelicPlayerData: function(defenderCount,extraTextInsertPoint,href, responseText) {
+		var doc=fsHelper.createDocument(responseText)
+		var allItems = doc.getElementsByTagName("B")
+		for (var i=0;i<allItems.length;i++) {
+			var anItem=allItems[i];
+			if (anItem.innerHTML == "Attack:&nbsp;"){
+				var attackText = anItem;
+				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var attackValue = attackLocation.textContent;
+				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var defenseValue = defenseLocation.textContent;
+				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var armorValue = armorLocation.textContent;
+				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var damageValue = damageLocation.textContent;
+				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var hpValue = hpLocation.textContent;
+			}
+		}
+		var tempText = "";
+		if (defenderCount == 0) {
+			tempText = "Lead Defender ";
+		}
+		else {
+			tempText = "Defender " + defenderCount + " ";
+		}
+		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:x-small; border-top:2px black solid;'><tr><td colspan='4'>" + tempText + "Stats:</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right'>" + attackValue + "</td><td align='right' style='color:brown;'>Defense:</td><td align='right'>" + defenseValue + "</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Armor:</td><td align='right'>" + armorValue + "</td><td align='right' style='color:brown;'>Damage:</td><td align='right'>" + damageValue + "</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right'>" + hpValue + "</td><td colspan='2'></td></tr></table><td><tr>";
+	},
+
 	mapThis: function() {
-		var realm = fsHelper.findNode("//td[@background='http://66.7.192.165/skin/realm_top_b2.jpg']/center/nobr/b");
-		var posit = fsHelper.findNode("//td[@background='http://66.7.192.165/skin/realm_top_b4.jpg']/center/nobr/font");
+		var realm = fsHelper.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+		var posit = fsHelper.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
 		if ((realm) && (posit)>0) {
 			var position=posit.innerHTML;
 			var levelName=realm.innerHTML;
@@ -314,6 +399,32 @@ var fsHelper = {
 		beforeActiveBuffsElement.innerHTML = replacementText;
 	},
 
+	injectWorld: function() {
+		// fsHelper.mapThis();
+		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
+		var imgserver = fsHelper.getImageServer();
+		var newRow=injectHere.insertRow(1);
+		var newCell=newRow.insertCell(0);
+		newCell.setAttribute("background", imgserver + "/skin/realm_right_bg.jpg");
+		var killAll = GM_getValue("killAll");
+		newCell.innerHTML="<div style='margin-left:28px;'><img id='fsHelperKillAll' src='" + imgserver + "/skin/" +
+			(killAll?"quest_complete.gif":"quest_incomplete.gif") +
+			"' />&nbsp;Automatically kill monsters</div>";
+		document.getElementById('fsHelperKillAll').addEventListener('click', fsHelper.killAllToggleFromWorld, true);
+		// injectHere.style.display='none';
+		fsHelper.checkBuffs();
+		fsHelper.killAllMonsters();
+	},
+
+	killAllToggleFromWorld: function(evt) {
+		var killAll = GM_getValue("killAll");
+		killAll = !killAll;
+		var imgserver = fsHelper.getImageServer();
+		evt.target.src=imgserver + "/skin/" + (killAll?"quest_complete.gif":"quest_incomplete.gif")
+		GM_setValue("killAll", killAll);
+		if (killAll) fsHelper.killAllMonsters();
+	},
+
 	killAllMonsters: function() {
 		if (!GM_getValue("killAll")) return;
 		var kills=0;
@@ -367,12 +478,18 @@ var fsHelper = {
 			var playerIdRE = /http:\/\/www.fallensword.com\/\?ref=(\d+)/
 			var playerId=document.body.innerHTML.match(playerIdRE)[1];
 
-			var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)[1];
-			var goldGain=responseDetails.responseText.match(/var\s+goldGain=(-?[0-9]+);/)[1];
-			var guildTaxGain=responseDetails.responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)[1];
+			var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)
+			if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
+			var goldGain=responseDetails.responseText.match(/var\s+goldGain=(-?[0-9]+);/)
+			if (goldGain) {goldGain=goldGain[1]} else {goldGain=0};
+			var guildTaxGain=responseDetails.responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)
+			if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
 			var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
 			// <b>You looted the item '<font color='#009900'>Shield of Votintown</font>'</b><br><br><img src="http://66.7.192.165/items/857.gif" onmouseover="ajaxLoadCustom(857, -1, d5b356b45146a64a7d322d48ff98b7cb, 1393340, '');"><br><br><font size=1>Note: Item stats may be higher due to crafting bonuses - check in your inventory.</font></div></td>
 			// '"
+			var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+			var info=responseDetails.responseText.match(infoRE)
+			if (info) {info=info[1]} else {info=""};
 			var lootMatch=responseDetails.responseText.match(lootRE)
 			var lootedItem = "";
 			var lootedItemId = "";
@@ -389,6 +506,7 @@ var fsHelper = {
 			var monster = fsHelper.findNode(callback);
 			if (monster) {
 				var resultText="<small><small>"+callback.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
+				if (info!="") resultText+="<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
 				if (lootedItem!="") {
 					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
 					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + lootedItem + "</span></small></small>"
@@ -503,7 +621,7 @@ var fsHelper = {
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;'>"
+		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;padding-left:20px;'>"
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
@@ -513,6 +631,8 @@ var fsHelper = {
 				output += "<li>"
 				output += "<a style='color:white;font-size:10px;' "
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
+				output += "<a style='color:white;font-size:10px;' "
+				output += "href=\"http://www.fallensword.com/index.php?cmd=message&target_player=" + member.name + "\">[m]</a>&nbsp;";
 				output += "<a onmouseover=\"tt_setWidth(105);";
 				output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b><br/>XP: " + member.xp + "<br/>Lvl:" + member.level + "<br/>";
 				if (member.hasFullData) {
@@ -530,6 +650,7 @@ var fsHelper = {
 				}
 				output += ";font-size:10px;'"
 				output += " href='http://www.fallensword.com/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
+				// output += "<br/>"
 				output += "</li>"
 			}
 			else {
@@ -566,8 +687,12 @@ var fsHelper = {
 	parsePlayerData: function(memberId, responseText) {
 		// return;
 		var doc=fsHelper.createDocument(responseText)
-		var statistics = fsHelper.findNode("//b[contains(.,'Statistics')]",0,doc);
-		GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
+		// var statistics = fsHelper.findNode("//table[contains(tr/td/b,'Level:')]",0,doc);
+		var statistics = fsHelper.findNode("//table[contains(tbody/tr/td/b,'Level:')]",0,doc);
+		var levelNode = fsHelper.findNode("//td[contains(b,'Level:')]",0,statistics);
+		var levelValue = levelNode.nextSibling.innerHTML;
+		GM_log(levelValue);
+		// GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
 	},
 
 	injectBank: function() {
@@ -846,7 +971,7 @@ var fsHelper = {
 
 	parseGroupData: function(responseText, linkElement) {
 		var doc=fsHelper.createDocument(responseText);
-		GM_log(responseText);
+		// GM_log(responseText);
 		var statisticsElement=fsHelper.findNode("//td[.='Statistics']", 0, doc);
 		var attackLocation = statisticsElement.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
 		var attackValue = attackLocation.textContent;
@@ -895,14 +1020,14 @@ var fsHelper = {
 	injectSettings: function() {
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
-			'<col width="20%"></col><col width="80%"></col>' +
+			'<col width="40%"></col><col width="60%"></col>' +
 			'<tr><td height="1" bgcolor="#333333" colspan="2"></td></tr>' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration</b></td></tr>' +
 			'<tr><td colspan=2 align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate"></td></tr>' +
 			'<tr><th colspan="2" align="left"><b>Enter guild names, seperated by commas</th></tr>' +
-			'<tr><td>Own Guild</td><td><input name="guildSelf" size="100" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
-			'<tr><td>Friendly Guilds</td><td><input name="guildFrnd" size="100" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
-			'<tr><td>Old Guilds</td><td><input name="guildPast" size="100" value="' + GM_getValue("guildPast") + '"></td></tr>' +
+			'<tr><td>Own Guild</td><td><input name="guildSelf" size="80" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
+			'<tr><td>Friendly Guilds</td><td><input name="guildFrnd" size="80" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
+			'<tr><td>Old Guilds</td><td><input name="guildPast" size="80" value="' + GM_getValue("guildPast") + '"></td></tr>' +
 			'<tr><th colspan="2" align="left">Other preferences</td></tr>' +
 			'<tr><td>Automatically Kill all monsters</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("killAll")?" checked":"") + '></td></tr>' +
 			'<tr><td>Show Administrative Options</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
