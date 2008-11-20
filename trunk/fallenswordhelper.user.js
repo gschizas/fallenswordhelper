@@ -8,6 +8,50 @@
 var fsHelper = {
 	init: function(e) {
 		this.initialized = true;
+		fsHelper.beginAutoUpdate();
+	},
+
+	beginAutoUpdate: function() {
+		var lastCheck=GM_getValue("lastVersionCheck")
+		var now=(new Date()).getTime()
+		if (!lastCheck) lastCheck=0;
+		var haveToCheck=(now - lastCheck > 24*60*60*1000)
+		haveToCheck=true;
+		GM_setValue("currentVersion", 0)
+
+		if (haveToCheck) {
+			GM_log("Checking for new version...")
+			GM_setValue("lastVersionCheck", now.toString())
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://userscripts.org/scripts/versions/34343",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					// "Content-Type": "application/x-www-form-urlencoded",
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.autoUpdate(responseDetails);
+				},
+			})
+		}
+	},
+
+	autoUpdate: function(responseDetails) {
+		if (responseDetails.status!=200) return;
+		window.alert("!");
+		var now=(new Date()).getTime()
+		GM_setValue("lastVersionCheck", now.toString());
+		var currentVersion=GM_getValue("currentVersion");
+		if (!currentVersion) currentVersion=0;
+		var versionRE=/\<h3\>\n\s*([0-9]+)\s*versions/;
+		var latestVersion=responseDetails.responseText.match(versionRE)[1]
+		if (currentVersion!=latestVersion) {
+			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
+				GM_setValue("currentVersion", latestVersion)
+				document.location="http://userscripts.org/scripts/source/34343.user.js";
+			}
+		}
 	},
 
 	getValueJSON: function(name) {
@@ -20,6 +64,7 @@ var fsHelper = {
 	},
 
 	onPageLoad: function(anEvent) {
+		fsHelper.init();
 		fsHelper.prepareGuildList();
 		var re=/cmd=([a-z]+)/;
 		var pageId = re.exec(document.location.search)[1];
@@ -33,6 +78,9 @@ var fsHelper = {
 		switch (pageId) {
 		case "settings":
 			fsHelper.injectSettings();
+			break;
+		case "world":
+			fsHelper.killAllMonsters();
 			break;
 		case "profile":
 			switch (subPageId) {
@@ -61,6 +109,49 @@ var fsHelper = {
 			fsHelper.injectBank();
 			break;
 		}
+	},
+
+	killAllMonsters: function() {
+		if (!GM_getValue("killAll")) return;
+		for (var i=1; i<=8; i++) {
+			var linkId="//a[@id='attackLink" + i + "']"
+			var monsterQ = document.evaluate(linkId, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			if (monsterQ.snapshotLength > 0) {
+				// window.alert(monsterQ.snapshotItem(0));
+				var href=monsterQ.snapshotItem(0).href;
+				GM_xmlhttpRequest({
+					method: 'GET',
+					callbackId: linkId,
+					url: href, // "http://www.fallensword.com/index.php?cmd=guild&subcmd=manage",
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						// "Content-Type": "application/x-www-form-urlencoded",
+						"Cookie" : document.cookie
+					},
+					onload: function(responseDetails, callbackId) {
+						fsHelper.killedMonster(responseDetails, this.callbackId);
+					},
+				})
+			}
+		}
+	},
+
+	killedMonster: function(responseDetails, callbackId) {
+		// GM_log(responseDetails.responseHeaders+"\n"+responseDetails.responseText);
+		// GM_log(responseDetails.responseHeaders)
+		// GM_log(responseDetails.responseText);
+		// GM_log(callbackId);
+		var monsterQ = document.evaluate(callbackId, document, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		if (monsterQ.snapshotLength > 0) {
+			var link=monsterQ.snapshotItem(0)
+			// GM_log(link);
+			// link.style.display="none";
+			link.parentNode.style.visibility="hidden";
+			// link.parentNode.parentNode.parentNode.style.backgroundColor="red";
+		}
+
+		var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
+		GM_log(responseDetails.responseText.match(reportRE)[0])
 	},
 
 	prepareGuildList: function() {
@@ -132,6 +223,10 @@ var fsHelper = {
 			memberList.isRefreshed = true;
 			fsHelper.injectGuildList(memberList);
 		}
+	},
+
+	injectChat: function() {
+
 	},
 
 	injectGuildList: function(memberList) {
@@ -385,6 +480,7 @@ var fsHelper = {
 			'<tr><td>Own Guild</td><td><input name="guildSelf" value="' + GM_getValue("guildSelf") + '"></td></tr>' +
 			'<tr><td>Friendly Guilds</td><td><input name="guildFrnd" value="' + GM_getValue("guildFrnd") + '"></td></tr>' +
 			'<tr><td>Old Guilds</td><td><input name="guildPast" value="' + GM_getValue("guildPast") + '"></td></tr>' +
+			'<tr><td>Automatically Kill all monsters</td><td><input name="killAll" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
 			'<tr><td>Show Administrative Options</td><td><input name="guildAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
 			'<tr><td colspan=2><input type="button" class="button" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'</form></div>';
@@ -398,7 +494,8 @@ var fsHelper = {
 		GM_setValue("guildSelf", oForm.elements[0].value);
 		GM_setValue("guildFrnd", oForm.elements[1].value);
 		GM_setValue("guildPast", oForm.elements[2].value);
-		GM_setValue("showAdmin", oForm.elements[3].checked);
+		GM_setValue("showAdmin", oForm.elements[4].checked);
+		GM_setValue("killAll", oForm.elements[3].checked);
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
