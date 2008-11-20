@@ -180,7 +180,7 @@ var fsHelper = {
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
 
-		GM_setValue("oldmemberlist", JSON.stringify(oldMemberList));
+		GM_setValue("oldmemberlist", JSON.stringify(memberList));
 	},
 
 	injectAuctionHouse: function() {
