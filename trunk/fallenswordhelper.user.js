@@ -183,7 +183,13 @@ var fsHelper = {
 				fsHelper.injectChat();
 				break;
 			case "groups":
-				fsHelper.injectGroups();
+				switch(subPage2Id) {
+					case "viewstats":
+						fsHelper.injectGroupStats();
+						break;
+					default:
+						fsHelper.injectGroups();
+				}
 				break;
 			case "manage":
 				fsHelper.hideGuildInfo();
@@ -237,19 +243,49 @@ var fsHelper = {
 		var defendingGuild = fsHelper.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
 		var defendingGuildHref = defendingGuild.getAttribute("href");
 		fsHelper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
+
+		//code specifically to see if guild members are guarding the relic - only applies to PANIC
+		if (defendingGuildHref == "index.php?cmd=guild&subcmd=view&guild_id=40769") {
+			var panicGuild = true;
+		}
+		if (panicGuild) {
+			var memberList = fsHelper.getValueJSON("memberlist");
+			var validMemberString = "";
+			for (var i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				if (member.status == "Offline" && (member.level < 400 || member.level > 421)) {
+					validMemberString += member.name + " ";
+				}
+			}
+		}
+		
 		var listOfDefenders = fsHelper.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
+		var testList = "";
 		for (var i=0; i<listOfDefenders.length; i++) {
 			var href = listOfDefenders[i].getAttribute("href");
-			if (i<4) { //I put this in to limit the number of calls this function makes.
+			//if (i<3) { //I put this in to limit the number of calls this function makes.
 					//I don't want to hammer the server too much.
 				fsHelper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
-			}
-			//testElement.innerHTML += listOfDefenders[i].innerHTML + "\n";
+			//}
+			testList += listOfDefenders[i].innerHTML + " ";
+			validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
 			defenderCount++;
 		}
+		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
 		extraTextInsertPoint.innerHTML += "<tr><td>Number of Defenders: " + defenderCount + "<td><tr>";
-		extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:gray;'>Only the first 4 defenders are listed until I figure a way to sum them.<td><tr>";
+		if (panicGuild) {
+			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
+			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
+		}
+
+		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:small; border-top:2px black solid;'><tr><td colspan='4' style='font-size:x-small; color:gray;'>Simple calc at first 50% of 1st defender + 20% of rest, no check on last logged time or number of relics</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" + 
+			"<tr><td align='right' style='color:brown;'>Defense:</td><td align='right' title='defenseValue'>0</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Armor:</td><td align='right' title='armorValue'>0</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
+			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr></table><td><tr>";
 	},
 
 	getRelicGuildData: function(extraTextInsertPoint,href) {
@@ -307,32 +343,43 @@ var fsHelper = {
 			if (anItem.innerHTML == "Attack:&nbsp;"){
 				var attackText = anItem;
 				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var attackValue = attackLocation.textContent;
+				var playerAttackValue = attackLocation.textContent;
 				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var defenseValue = defenseLocation.textContent;
+				var playerDefenseValue = defenseLocation.textContent;
 				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var armorValue = armorLocation.textContent;
+				var playerArmorValue = armorLocation.textContent;
 				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var damageValue = damageLocation.textContent;
+				var playerDamageValue = damageLocation.textContent;
 				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var hpValue = hpLocation.textContent;
+				var playerHPValue = hpLocation.textContent;
 			}
 		}
-		var tempText = "";
+		var defenderMultiplier = 0.2;
 		if (defenderCount == 0) {
-			tempText = "Lead Defender ";
+			defenderMultiplier = 0.5;
 		}
-		else {
-			tempText = "Defender " + defenderCount + " ";
-		}
-		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:x-small; border-top:2px black solid;'><tr><td colspan='4'>" + tempText + "Stats:</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right'>" + attackValue + "</td><td align='right' style='color:brown;'>Defense:</td><td align='right'>" + defenseValue + "</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Armor:</td><td align='right'>" + armorValue + "</td><td align='right' style='color:brown;'>Damage:</td><td align='right'>" + damageValue + "</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right'>" + hpValue + "</td><td colspan='2'></td></tr></table><td><tr>";
+		var attackValue = fsHelper.findNode("//td[@title='attackValue']");
+		attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+		attackValue.innerHTML = fsHelper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+		var defenseValue = fsHelper.findNode("//td[@title='defenseValue']");
+		defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+		defenseValue.innerHTML = fsHelper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+		var armorValue = fsHelper.findNode("//td[@title='armorValue']");
+		armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+		armorValue.innerHTML = fsHelper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+		var damageValue = fsHelper.findNode("//td[@title='damageValue']");
+		damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+		damageValue.innerHTML = fsHelper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+		var hpValue = fsHelper.findNode("//td[@title='hpValue']");
+		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+		hpValue.innerHTML = fsHelper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+		var defendersProcessed = fsHelper.findNode("//td[@title='defendersProcessed']");
+		defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
+		defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
 	},
 
 	mapThis: function() {
@@ -948,6 +995,106 @@ var fsHelper = {
 		}
 	},
 
+	injectGroupStats: function() {
+		var attackTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]");
+		attackValueElement = attackTitleElement.nextSibling;
+		attackValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + attackValueElement.innerHTML + 
+			"</td><td>(</td><td title='attackValue'>" + attackValueElement.innerHTML + 
+			"</td><td>)</td></tr></tbody></table>";
+		var defenseTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Defense:')]");
+		defenseValueElement = defenseTitleElement.nextSibling;
+		defenseValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + defenseValueElement.innerHTML + 
+			"</td><td>(</td><td title='defenseValue'>" + defenseValueElement.innerHTML + 
+			"</td><td>)</td></tr></tbody></table>";
+		var armorTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Armor:')]");
+		armorValueElement = armorTitleElement.nextSibling;
+		armorValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + armorValueElement.innerHTML + 
+			"</td><td>(</td><td title='armorValue'>" + armorValueElement.innerHTML + 
+			"</td><td>)</td></tr></tbody></table>";
+		var damageTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]");
+		damageValueElement = damageTitleElement.nextSibling;
+		damageValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + damageValueElement.innerHTML + 
+			"</td><td>(</td><td title='damageValue'>" + damageValueElement.innerHTML + 
+			"</td><td>)</td></tr></tbody></table>";
+		var hpTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]");
+		hpValueElement = hpTitleElement.nextSibling;
+		hpValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + hpValueElement.innerHTML + 
+			"</td><td>(</td><td title='hpValue'>" + hpValueElement.innerHTML + 
+			"</td><td>)</td></tr></tbody></table>";
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://www.fallensword.com/index.php?cmd=guild&subcmd=mercs",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.parseMercStats(responseDetails.responseText);
+			},
+		})
+	},
+
+	parseMercStats: function(responseText) {
+		var mercPage=fsHelper.createDocument(responseText);
+		var mercElements = mercPage.getElementsByTagName("IMG");
+		var totalMercAttack = 0;
+		var totalMercDefense = 0;
+		var totalMercArmor = 0;
+		var totalMercDamage = 0;
+		var totalMercHP = 0;
+		for (var i=0; i<mercElements.length; i++) {
+			merc = mercElements[i];
+			var mouseoverText = merc.getAttribute("onmouseover")
+			var src = merc.getAttribute("src")
+			if (mouseoverText && src.search("/merc/") != -1){
+				//<td>Attack:</td><td>1919</td>
+				var attackRE=/<td>Attack:<\/td><td>(\d+)<\/td>/;
+				var mercAttackValue = attackRE.exec(mouseoverText)[1]*1;
+				totalMercAttack += mercAttackValue;
+				var defenseRE=/<td>Defense:<\/td><td>(\d+)<\/td>/;
+				var mercDefenseValue = defenseRE.exec(mouseoverText)[1]*1;
+				totalMercDefense += mercDefenseValue;
+				var armorRE=/<td>Armor:<\/td><td>(\d+)<\/td>/;
+				var mercArmorValue = armorRE.exec(mouseoverText)[1]*1;
+				totalMercArmor += mercArmorValue;
+				var damageRE=/<td>Damage:<\/td><td>(\d+)<\/td>/;
+				var mercDamageValue = damageRE.exec(mouseoverText)[1]*1;
+				totalMercDamage += mercDamageValue;
+				var hpRE=/<td>HP:<\/td><td>(\d+)<\/td>/;
+				var mercHPValue = hpRE.exec(mouseoverText)[1]*1;
+				totalMercHP += mercHPValue;
+			}
+		}
+		var attackValue = fsHelper.findNode("//td[@title='attackValue']");
+		attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+		attackValue.innerHTML = fsHelper.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
+		var defenseValue = fsHelper.findNode("//td[@title='defenseValue']");
+		defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+		defenseValue.innerHTML = fsHelper.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
+		var armorValue = fsHelper.findNode("//td[@title='armorValue']");
+		armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+		armorValue.innerHTML = fsHelper.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
+		var damageValue = fsHelper.findNode("//td[@title='damageValue']");
+		damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+		damageValue.innerHTML = fsHelper.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
+		var hpValue = fsHelper.findNode("//td[@title='hpValue']");
+		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+		hpValue.innerHTML = fsHelper.addCommas(hpNumber - Math.round(totalMercHP*0.2));
+	},
+		
+	addCommas: function(nStr) {
+		nStr += '';
+		x = nStr.split('.');
+		x1 = x[0];
+		x2 = x.length > 1 ? '.' + x[1] : '';
+		var rgx = /(\d+)(\d{3})/;
+		while (rgx.test(x1)) {
+			x1 = x1.replace(rgx, '$1' + ',' + '$2');
+		}
+		return x1 + x2;
+	},		
+		
 	injectGroups: function() {
 		var allItems = fsHelper.findNodes("//img[@title='View Group Stats']");
 		for (var i=0; i<allItems.length; i++) {
@@ -993,16 +1140,16 @@ var fsHelper = {
 	parseGroupData: function(responseText, linkElement) {
 		var doc=fsHelper.createDocument(responseText);
 		// GM_log(responseText);
-		var statisticsElement=fsHelper.findNode("//td[.='Statistics']", 0, doc);
-		var attackLocation = statisticsElement.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+		// var statisticsElement=fsHelper.findNode("//td[contains(.,'Statistics')]", 0, doc);
+		var attackLocation = fsHelper.findNode("//td[contains(font,'Attack:')]",0,doc).nextSibling;
 		var attackValue = attackLocation.textContent;
-		var defenseLocation = attackLocation.nextSibling.nextSibling.nextSibling;
+		var defenseLocation = fsHelper.findNode("//td[contains(font,'Defense:')]",0,doc).nextSibling;
 		var defenseValue = defenseLocation.textContent;
-		var armorLocation = defenseLocation.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+		var armorLocation = fsHelper.findNode("//td[contains(font,'Armor:')]",0,doc).nextSibling;
 		var armorValue = armorLocation.textContent;
-		var damageLocation = armorLocation.nextSibling.nextSibling.nextSibling;
+		var damageLocation = fsHelper.findNode("//td[contains(font,'Damage:')]",0,doc).nextSibling;
 		var damageValue = damageLocation.textContent;
-		var hpLocation = damageLocation.parentNode.nextSibling.nextSibling.firstChild.nextSibling.nextSibling;
+		var hpLocation = fsHelper.findNode("//td[contains(font,'HP:')]",0,doc).nextSibling;
 		var hpValue = hpLocation.textContent;
 
 		// var linkElement=fsHelper.findNode("//a[@href='" + href + "']");
