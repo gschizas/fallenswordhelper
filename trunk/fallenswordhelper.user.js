@@ -44,12 +44,14 @@ var fsHelper = {
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
 		fsHelper.retrieveGuildData();
-		// injectHere.innerHTML="***";
 	},
 
 	injectChat: function() {
-		var injectHere = document.getElementsByTagName("TABLE")[9]
-		var info = injectHere.insertRow(25);
+		var injectHere = document
+			.getElementsByTagName("TABLE")[0].rows[2].cells[2]
+			.getElementsByTagName("TABLE")[0].rows[2].cells[0]
+			.getElementsByTagName("TABLE")[0];
+		var info = injectHere.insertRow(0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
 		fsHelper.retrieveGuildData();
