@@ -1258,13 +1258,13 @@ var fsHelper = {
 						var settings="guildSelfMessage";
 						break;
 					case "friendly":
-						var settings="guildSelfMessage";
+						var settings="guildFrndMessage";
 						break;
 					case "old":
-						var settings="guildSelfMessage";
+						var settings="guildPastMessage";
 						break;
 					case "enemy":
-						var settings="guildSelfMessage";
+						var settings="guildEnmyMessage";
 						break;
 					default:
 						changeAppearance = false;
