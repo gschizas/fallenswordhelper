@@ -17,7 +17,7 @@ var fsHelper = {
 
 		var re=/subcmd=([a-z]+)/;
 		var subPageIdRE = re.exec(document.location.search);
-		var subPageId="***";
+		var subPageId="-";
 		if (subPageIdRE)
 			subPageId=subPageIdRE[1];
 
@@ -27,7 +27,7 @@ var fsHelper = {
 			break;
 		case "profile":
 			switch (subPageId) {
-			case "***":
+			case "-":
 				fsHelper.injectProfile();
 				break;
 			case "dropitems":
@@ -126,9 +126,13 @@ var fsHelper = {
 	},
 
 	injectGuildList: function(memberList) {
-		var oldMemberList = this.oldMemberList;
-		if (!oldMemberList) {
+		var oldMemberListJSON = GM_getValue("oldmemberlist");
+		var oldMemberList;
+		if (!oldMemberListJSON) {
 			oldMemberList=memberList;
+		}
+		else {
+			oldMemberList=JSON.parse(oldMemberListJSON);
 		}
 		oldIds = new Array();
 		for (var i=0; i<oldMemberList.members.length;i++) {
@@ -176,7 +180,7 @@ var fsHelper = {
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
 
-		this.oldMemberList=memberList;
+		GM_setValue("oldmemberlist", JSON.stringify(oldMemberList));
 	},
 
 	injectAuctionHouse: function() {
