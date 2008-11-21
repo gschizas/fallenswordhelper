@@ -2125,12 +2125,6 @@ var fsHelper = {
 	},
 
 	injectGroups: function() {
-		var allItems = fsHelper.findNodes("//img[@title='View Group Stats']");
-		for (var i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			var href = anItem.parentNode.getAttribute("href");
-			fsHelper.retrieveGroupData(href, anItem.parentNode);
-		}
 		allItems = fsHelper.findNodes("//tr[td/a/img/@title='View Group Stats']");
 		var memberList=fsHelper.getValueJSON("memberlist");
 		// window.alert(typeof(memberList.members));
@@ -2142,12 +2136,26 @@ var fsHelper = {
 				var aMember=memberList.members[j];
 				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 				if (aMember.name==foundName) {
-					theItem.innerHTML += " [" + aMember.level + "]";
+					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" + theItem.innerHTML + "</span> [" + aMember.level + "]";
 				}
 			}
 		}
+		var buttonElement = fsHelper.findNode("//td[input[@value='Join All Available Groups']]");
+		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
+		
+		document.getElementById('fetchgroupstats').addEventListener('click', fsHelper.fetchGroupData, true);
+
 	},
 
+	fetchGroupData: function(evt) {
+		var allItems = fsHelper.findNodes("//img[@title='View Group Stats']");
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			var href = anItem.parentNode.getAttribute("href");
+			fsHelper.retrieveGroupData(href, anItem.parentNode);
+		}
+	},
+	
 	retrieveGroupData: function(href, link) {
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -2166,21 +2174,33 @@ var fsHelper = {
 	parseGroupData: function(responseText, linkElement) {
 		var doc=fsHelper.createDocument(responseText);
 		// GM_log(responseText);
-		// var statisticsElement=fsHelper.findNode("//td[contains(.,'Statistics')]", 0, doc);
-		var attackLocation = fsHelper.findNode("//td[contains(font,'Attack:')]",0,doc);
-        if (!attackLocation) {return;} // fix for Firefox 2 that fails when trying to perform findNode on another object.
-        attackLocation = attackLocation.nextSibling;
-		var attackValue = attackLocation.textContent;
-		var defenseLocation = fsHelper.findNode("//td[contains(font,'Defense:')]",0,doc).nextSibling;
-		var defenseValue = defenseLocation.textContent;
-		var armorLocation = fsHelper.findNode("//td[contains(font,'Armor:')]",0,doc).nextSibling;
-		var armorValue = armorLocation.textContent;
-		var damageLocation = fsHelper.findNode("//td[contains(font,'Damage:')]",0,doc).nextSibling;
-		var damageValue = damageLocation.textContent;
-		var hpLocation = fsHelper.findNode("//td[contains(font,'HP:')]",0,doc).nextSibling;
-		var hpValue = hpLocation.textContent;
-
-		// var linkElement=fsHelper.findNode("//a[@href='" + href + "']");
+		var doc=fsHelper.createDocument(responseText)
+		var allItems = doc.getElementsByTagName("TD")
+		//<td><font color="#333333">Attack:&nbsp;</font></td>
+		
+		for (var i=0;i<allItems.length;i++) {
+			var anItem=allItems[i];
+			if (anItem.innerHTML == '<font color="#333333">Attack:&nbsp;</font>'){
+				var attackLocation = anItem.nextSibling;
+				var attackValue = attackLocation.textContent;
+			}
+			if (anItem.innerHTML == '<font color="#333333">Defense:&nbsp;</font>'){
+				var defenseLocation = anItem.nextSibling;
+				var defenseValue = defenseLocation.textContent;
+			}
+			if (anItem.innerHTML == '<font color="#333333">Armor:&nbsp;</font>'){
+				var armorLocation = anItem.nextSibling;
+				var armorValue = armorLocation.textContent;
+			}
+			if (anItem.innerHTML == '<font color="#333333">Damage:&nbsp;</font>'){
+				var damageLocation = anItem.nextSibling;
+				var damageValue = damageLocation.textContent;
+			}
+			if (anItem.innerHTML == '<font color="#333333">HP:&nbsp;</font>'){
+				var hpLocation = anItem.nextSibling;
+				var hpValue = hpLocation.textContent;
+			}
+		}
 		extraText = "<table cellpadding='1' style='font-size:x-small; border-top:2px black solid; border-spacing: 1px; border-collapse: collapse;'>"
 		extraText += "<tr>";
 		extraText += "<td style='color:brown;'>Attack</td><td align='right'>" + attackValue + "</td>";
