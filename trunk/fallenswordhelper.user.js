@@ -294,9 +294,9 @@ var fsHelper = {
 			//GM_log(mouseOverText);
 			//Stamina:&nbsp;</td><td width=\'90%\'>3,612&nbsp;/&nbsp;6,370</td>
 			//tt_setWidth(225); Tip('<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width=\'100%\'>
-			//<tr><td><font color=\'#999999\'>Stamina:Â </td><td width=\'90%\'>3,607Â /Â 6,370</td></tr><tr><td>
-			//<font color=\'#999999\'>GainÂ PerÂ Hour:Â </td><td width=\'90%\'>+90</td></tr><tr><td><font color=\'#999999\'>
-			//NextÂ GainÂ :Â </td><td width=\'90%\'>16m 10s</td></tr></table><br>
+			//<tr><td><font color=\'#999999\'>Stamina:Â </td><td width=\'90%\'>3,607Â /Â 6,370</td></tr><tr><td>
+			//<font color=\'#999999\'>GainÂ PerÂ Hour:Â </td><td width=\'90%\'>+90</td></tr><tr><td><font color=\'#999999\'>
+			//NextÂ GainÂ :Â </td><td width=\'90%\'>16m 10s</td></tr></table><br>
 			//Stamina is required to perform actions (such as attacking players and creatures).<br>'); tt_resetWidth();
 			var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
 			var curStamina = staminaRE.exec(mouseOverText)[1];
@@ -324,7 +324,7 @@ var fsHelper = {
 			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + " " +  d.getFullYear() + " " + hours + ":" + minutes;
 			var firstPart = mouseOverText.split("</td></tr></table>")[0];
 			var secondPart = mouseOverText.split("</td></tr></table>")[1];
-			var newPart = "<tr><td><font color=\\'#999999\\'>Max Stam At:Â </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
+			var newPart = "<tr><td><font color=\\'#999999\\'>Max Stam At: </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
 			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
 			newMouseoverText = newMouseoverText.replace(/\s:/,":");
 			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
@@ -986,6 +986,8 @@ var fsHelper = {
 				// GM_log(lootMatch[3]);
 				// GM_log(lootMatch[4]);
 			}
+			var shieldImpDeathRE = /Shield Imp absorbed all damage/;
+			var shieldImpDeath = responseDetails.responseText.match(shieldImpDeathRE);
 
 			var monster = fsHelper.findNode(callback);
 			if (monster) {
@@ -993,7 +995,10 @@ var fsHelper = {
 				if (info!="") resultText+="<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
 				if (lootedItem!="") {
 					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + lootedItem + "</span></small></small>"
+					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + lootedItem + "</span></small></small>";
+				}
+				if (shieldImpDeath) {
+					resultText += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>"
 				}
 				monster.parentNode.innerHTML=resultText;
 			}
@@ -1350,6 +1355,9 @@ var fsHelper = {
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
 		var gmtOffsetMilli = gmtOffsetMinutes*60*1000;
 
+		var newRow = chatTable.insertRow(1);
+		var newCell = newRow.insertCell(0);
+		
 		for (var i=1;i<chatTable.rows.length;i++) {
 			var aRow = chatTable.rows[i];
 			//GM_log(aRow.innerHTML);
@@ -1595,22 +1603,22 @@ var fsHelper = {
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
 		imageCell.innerHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
 			"<td bgcolor='#CD9E4B' align='center' colspan='3'>Quick Potion Search</td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Wise'>Lib 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Bookworm'>Lib 225</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Shatter'>SA</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Dragons Blood'>ZK 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Berserkers'>ZK 300</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Fury'>ZK 350</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Sludge'>DC 200</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Black Death'>DC 225</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Doubling'>DB 450</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Acceleration'>DB 500</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Truth'>EW 1000</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Death Dealer'>DD</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Aid'>Assist</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Dull Edge'>Dull Edge</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Potion of Death'>DW</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Supreme Luck'>FI 1000</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Wise' title='Librarian'>Lib 200</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Bookworm' title='Librarian'>Lib 225</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Shatter' title='Shatter Armor'>SA</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Dragons Blood' title='Berserk'>ZK 200</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Berserkers' title='Berserk'>ZK 300</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Fury' title='Berserk'>ZK 350</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Sludge' title='Dark Curse'>DC 200</span></td>" +
+				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Black Death' title='Dark Curse'>DC 225</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Doubling' title='Doubler'>DB 450</span></td>" +
+				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Acceleration' title='Doubler'>DB 500</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Truth' title='Enchant Weapon'>EW 1000</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Death Dealer' title='Death Dealer'>DD</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Aid' title='Assist'>Assist</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Dull Edge' title='Dull Edge'>Dull Edge</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Potion of Death' title='Death Wish'>DW</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Supreme Luck' title='Find Item'>FI 1000</span></td></tr>" +
 			"</tbody></table></span>";
 		//GM_log(imageCell.parentNode.innerHTML);
 		var quickSearchList = fsHelper.findNodes("//span[@id='quickPotionSearch']");
