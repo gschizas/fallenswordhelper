@@ -91,7 +91,7 @@ var fsHelper = {
 		GM_setValue("lastVersionCheck", now.toString())
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: "http://userscripts.org/scripts/review/34343",
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -104,11 +104,12 @@ var fsHelper = {
 
 	autoUpdate: function(responseDetails) {
 		if (responseDetails.status!=200) return;
+		GM_log(responseDetails.responseText);
 		var now=(new Date()).getTime()
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion=GM_getValue("currentVersion");
 		if (!currentVersion) currentVersion=0;
-		var versionRE=/([0-9]+)\s*previous\s*versions<\/a>/;
+		var versionRE=/Revision\s*([0-9]+):/;
 		var latestVersion=responseDetails.responseText.match(versionRE)[1]
 		GM_log("Current version:" + currentVersion);
 		GM_log("Found version:" + latestVersion);
@@ -1357,7 +1358,7 @@ var fsHelper = {
 
 		var newRow = chatTable.insertRow(1);
 		var newCell = newRow.insertCell(0);
-		
+
 		for (var i=1;i<chatTable.rows.length;i++) {
 			var aRow = chatTable.rows[i];
 			//GM_log(aRow.innerHTML);
@@ -2142,7 +2143,7 @@ var fsHelper = {
 		}
 		var buttonElement = fsHelper.findNode("//td[input[@value='Join All Available Groups']]");
 		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
-		
+
 		document.getElementById('fetchgroupstats').addEventListener('click', fsHelper.fetchGroupData, true);
 
 	},
@@ -2155,7 +2156,7 @@ var fsHelper = {
 			fsHelper.retrieveGroupData(href, anItem.parentNode);
 		}
 	},
-	
+
 	retrieveGroupData: function(href, link) {
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -2177,7 +2178,7 @@ var fsHelper = {
 		var doc=fsHelper.createDocument(responseText)
 		var allItems = doc.getElementsByTagName("TD")
 		//<td><font color="#333333">Attack:&nbsp;</font></td>
-		
+
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.innerHTML == '<font color="#333333">Attack:&nbsp;</font>'){
