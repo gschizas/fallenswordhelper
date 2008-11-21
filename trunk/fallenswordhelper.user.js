@@ -63,7 +63,7 @@ var fsHelper = {
 
 	getServer: function() {
 		return document.location.protocol + "//" + document.location.host + "/";
-	}
+	},
 
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
