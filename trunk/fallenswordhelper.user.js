@@ -115,7 +115,7 @@ var fsHelper = {
 		if (currentVersion!=latestVersion) {
 			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
 				GM_setValue("currentVersion", latestVersion)
-				document.location="http://userscripts.org/scripts/source/34343.user.js";
+				document.location="http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js";
 			}
 		}
 	},
@@ -2313,6 +2313,9 @@ var fsHelper = {
 			'with valuable contributions by <a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'<a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
+			'<tr><td colspan="4" align=center>' +
+			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
+			'for any suggestions or bug reports<span></td></tr>' +
 			'</table></form>';
 		var insertHere = fsHelper.findNode("//table[@width='100%']");
 		var newRow=insertHere.insertRow(insertHere.rows.length);
