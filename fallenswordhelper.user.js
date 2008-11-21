@@ -183,7 +183,7 @@ var fsHelper = {
 				fsHelper.injectDropItemsAuction();
 				fsHelper.injectDropItems();
 				break;
-			default:
+			case "-":
 				fsHelper.injectProfile();
 			}
 			break;
@@ -1235,8 +1235,14 @@ var fsHelper = {
 	},
 
 	keyPress: function (evt) {
-    var r, s;
-    if (evt.target.tagName!="HTML") return;
+		var r, s;
+		if (evt.target.tagName!="HTML") return;
+		
+		// ignore control, alt and meta keys (I think meta is the command key in Macintoshes)
+		if (evt.ctrlKey) return;
+		if (evt.metaKey) return;
+		if (evt.altKey) return;
+
 		r = evt.charCode;
 		s = evt.keyCode;
 		var pos=fsHelper.position();
@@ -1244,105 +1250,106 @@ var fsHelper = {
 			var x=pos.X;
 			var y=pos.Y;
 		}
+
 		switch (r) {
-			case 113: // nw
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y-1);
-				break;
-			case 119: // n
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
-				break;
-			case 101: // ne
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y-1);
-				break;
-			case 97: // w
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
-				break;
-			case 100: // e
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
-				break;
-			case 122: // sw
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+1);
-				break;
-			case 120: // s
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
-				break;
-			case 99: // se
-				if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+1);
-				break;
-			case 114: // repair
-				window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
-				break;
-			case 103: // create group
-				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
-				break;
-			case 49:
-			case 50:
-			case 51:
-			case 52:
-			case 53:
-			case 54:
-			case 55:
-			case 56:
-			case 57: // keyed combat
-				var index	= r-48;
-				var linkObj	= document.getElementById("attackLink"+index);
-				if (linkObj!=null) {
-					var killStyle = GM_getValue("killAllAdvanced");
-					//kill style off
-					if (killStyle == "off") {
-						window.location = linkObj.href
-					}
-					//kill style single
-					if (killStyle == "single") {
-						fsHelper.killSingleMonster(index);
-					}
-					//kill style type
-					if (killStyle == "type") {
-						var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
-						fsHelper.killSingleMonsterType(monsterType);
-					}
+		case 113: // nw
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y-1);
+			break;
+		case 119: // n
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
+			break;
+		case 101: // ne
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y-1);
+			break;
+		case 97: // w
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
+			break;
+		case 100: // e
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
+			break;
+		case 122: // sw
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+1);
+			break;
+		case 120: // s
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
+			break;
+		case 99: // se
+			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+1);
+			break;
+		case 114: // repair
+			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
+			break;
+		case 103: // create group
+			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+			break;
+		case 49:
+		case 50:
+		case 51:
+		case 52:
+		case 53:
+		case 54:
+		case 55:
+		case 56:
+		case 57: // keyed combat
+			var index	= r-48;
+			var linkObj	= document.getElementById("attackLink"+index);
+			if (linkObj!=null) {
+				var killStyle = GM_getValue("killAllAdvanced");
+				//kill style off
+				if (killStyle == "off") {
+					window.location = linkObj.href
+				}
+				//kill style single
+				if (killStyle == "single") {
+					fsHelper.killSingleMonster(index);
+				}
+				//kill style type
+				if (killStyle == "type") {
+					var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
+					fsHelper.killSingleMonsterType(monsterType);
+				}
+			}
+			break;
+		case 98: // backpack [b]
+			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+			break;
+		case 19: // quick buffs
+			openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 500, ",scrollbars");
+			break;
+		case 48: // return to world
+			window.location = 'index.php?cmd=world';
+			break;
+		case 0: // special key
+			switch (s) {
+			case 37: // w
+				if (pos) {
+					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
+					evt.preventDefault();
+					evt.stopPropagation();
 				}
 				break;
-			case 98: // backpack [b]
-				window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
-				break;
-			case 19: // quick buffs
-				openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 500, ",scrollbars");
-				break;
-			case 48: // return to world
-				window.location = 'index.php?cmd=world';
-				break;
-			case 0: // special key
-				switch (s) {
-					case 37: // w
-						if (pos) {
-							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
-							evt.preventDefault();
-							evt.stopPropagation();
-						}
-						break;
-					case 38: // n
-						if (pos) {
-							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
-							evt.preventDefault();
-							evt.stopPropagation();
-						}
-						break;
-					case 39: // e
-						if (pos) {
-							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
-							evt.preventDefault();
-							evt.stopPropagation();
-						}
-						break;
-					case 40: // s
-						if (pos) {
-							window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
-							evt.preventDefault();
-							evt.stopPropagation();
-						}
-						break;
+			case 38: // n
+				if (pos) {
+					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
+					evt.preventDefault();
+					evt.stopPropagation();
 				}
+				break;
+			case 39: // e
+				if (pos) {
+					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
+					evt.preventDefault();
+					evt.stopPropagation();
+				}
+				break;
+			case 40: // s
+				if (pos) {
+					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
+					evt.preventDefault();
+					evt.stopPropagation();
+				}
+				break;
+			}
 		}
 		return true;
 	},
@@ -1605,27 +1612,73 @@ var fsHelper = {
 		var isAuctionPage = fsHelper.findNode("//img[contains(@title,'Auction House')]");
 		var imageCell = isAuctionPage.parentNode;
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
-		imageCell.innerHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
-			"<td bgcolor='#CD9E4B' align='center' colspan='3'>Quick Potion Search</td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Wise' title='Librarian'>Lib 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Bookworm' title='Librarian'>Lib 225</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Shatter' title='Shatter Armor'>SA</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Dragons Blood' title='Berserk'>ZK 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Berserkers' title='Berserk'>ZK 300</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Fury' title='Berserk'>ZK 350</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Sludge' title='Dark Curse'>DC 200</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Black Death' title='Dark Curse'>DC 225</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Doubling' title='Doubler'>DB 450</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Acceleration' title='Doubler'>DB 500</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Truth' title='Enchant Weapon'>EW 1000</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Death Dealer' title='Death Dealer'>DD</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Aid' title='Assist'>Assist</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Dull Edge' title='Dull Edge'>Dull Edge</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Potion of Death' title='Death Wish'>DW</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' id='quickPotionSearch' searchtext='Supreme Luck' title='Find Item'>FI 1000</span></td></tr>" +
+		
+		var potions = fsHelper.getValueJSON("potions");
+		
+		if (!potions) {
+			potions = [
+				{"searchname":"Potion of the Wise",         "shortname":"Lib 200",   "buff":"Librarian",      "level":200,  "duration":120, "minlevel":5},
+				{"searchname":"Potion of the Bookworm",     "shortname":"Lib 225",   "buff":"Librarian",      "level":225,  "duration":90,  "minlevel":5},
+				{"searchname":"Potion of Shattering",       "shortname":"SA",        "buff":"Shatter Armor",  "level":150,  "duration":20,  "minlevel":5, "bound":true},
+				{"searchname":"Dragons Blood Potion",       "shortname":"ZK 200",    "buff":"Berzerk",        "level":200,  "duration":30,  "minlevel":5},
+				{"searchname":"Berserkers Potion",          "shortname":"ZK 300",    "buff":"Berserk",        "level":300,  "duration":45,  "minlevel":5},
+				{"searchname":"Potion of Fury",             "shortname":"ZK 350",    "buff":"Berserk",        "level":350,  "duration":60,  "minlevel":5},
+				{"searchname":"Sludge Brew",                "shortname":"DC 200",    "buff":"Dark Curse",     "level":200,  "duration":45,  "minlevel":5, "bound":true},
+				{"searchname":"Potion of Black Death",      "shortname":"DC 225",    "buff":"Dark Curse",     "level":225,  "duration":60,  "minlevel":5, "wide":true},
+				{"searchname":"Potion of Supreme Doubling", "shortname":"DB 450",    "buff":"Doubler",        "level":000,  "duration":00,  "minlevel":5},
+				{"searchname":"Potion of Acceleration",     "shortname":"DB 500",    "buff":"Doubler",        "level":500,  "duration":120, "minlevel":5, "wide":true},
+				{"searchname":"Potion of Truth",            "shortname":"EW 1000",   "buff":"Enchant Weapon", "level":1000, "duration":90,  "minlevel":5, "bound":true},
+				{"searchname":"Potion of Lesser Death Dealer",  "shortname":"DD",    "buff":"Death Dealer",   "level":25,   "duration":45,  "minlevel":20},
+				{"searchname":"Potion of Aid",              "shortname":"Assist",    "buff":"Assist",         "level":150,  "duration":30,  "minlevel":5},
+				{"searchname":"Dull Edge",                  "shortname":"Dull Edge", "buff":"Dull Edge",      "level":25,   "duration":60,  "minlevel":1},
+				{"searchname":"Potion of Death",            "shortname":"DW",        "buff":"Death Wish",     "level":125,  "duration":15,  "minlevel":5, "bound":true},
+				{"searchname":"Potion of Supreme Luck",     "shortname":"FI 1000",   "buff":"Find Item",      "level":1000, "duration":60,  "minlevel":5, "bound":true}
+			];
+		}
+		
+		//GM_log(JSON.stringify(potions));
+		
+		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
+			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
+		var lp=0;
+		for (var p=0;p<potions.length;p++) {
+			var pot=potions[p];
+			if (lp % 3==0) finalHTML += "<tr>";
+			finalHTML += "<td";
+			if (pot.wide) finalHTML+=" colspan='2' "
+			finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' searchtext='" +
+				pot.searchname + "' title='" + 
+				pot.buff + " " + pot.level.toString() + "'>" + 
+				pot.shortname + "</span></td>"
+			if (lp % 3==2) finalHTML += "</tr>";
+			if (pot.wide) lp++;
+			if (lp % 3==2) finalHTML += "</tr>";
+			lp++;
+		}
+		// if (!/</tr>$/.exec(finalHTML)) finalHTML+="</tr>"
+		/*
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Wise' title='Librarian'>Lib 200</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Bookworm' title='Librarian'>Lib 225</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Shatter' title='Shatter Armor'>SA</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Dragons Blood' title='Berserk'>ZK 200</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Berserkers' title='Berserk'>ZK 300</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Fury' title='Berserk'>ZK 350</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Sludge' title='Dark Curse'>DC 200</span></td>" +
+				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Black Death' title='Dark Curse'>DC 225</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Doubling' title='Doubler'>DB 450</span></td>" +
+				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Acceleration' title='Doubler'>DB 500</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Truth' title='Enchant Weapon'>EW 1000</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Death Dealer' title='Death Dealer'>DD</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Aid' title='Assist'>Assist</span></td></tr>" +
+			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Dull Edge' title='Dull Edge'>Dull Edge</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Potion of Death' title='Death Wish'>DW</span></td>" +
+				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Supreme Luck' title='Find Item'>FI 1000</span></td></tr>" +
 			"</tbody></table></span>";
+        */
+		imageCell.innerHTML = finalHTML;
+
 		//GM_log(imageCell.parentNode.innerHTML);
-		var quickSearchList = fsHelper.findNodes("//span[@id='quickPotionSearch']");
+		var quickSearchList = fsHelper.findNodes("//span[@cat='quickPotionSearch']");
 		for (var i=0; i<quickSearchList.length; i++) {
 			quickSearchItem = quickSearchList[i];
 			quickSearchItem.addEventListener('click', fsHelper.quickAuctionSearch, true);
