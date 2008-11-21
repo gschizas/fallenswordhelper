@@ -61,6 +61,10 @@ var fsHelper = {
 		return imgurls.src.substr(0,idindex);
 	},
 
+	getServer: function() {
+		return document.location.protocol + "//" + document.location.host + "/";
+	}
+
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
@@ -420,7 +424,7 @@ var fsHelper = {
 	getRelicGuildData: function(extraTextInsertPoint,href) {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/" + href,
+			url: fsHelper.getServer() + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -493,7 +497,7 @@ var fsHelper = {
 	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/" + href,
+			url: fsHelper.getServer() + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -736,7 +740,7 @@ var fsHelper = {
 		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
 		var pageCount=pageCountElement.parentNode.innerHTML.match(pageRE)[1]*1;
 		for (var i=1;i<pageCount;i++) {
-			var href = document.location.protocol + "//" + document.location.host + "/index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=";
+			var href = fsHelper.getServer() + "index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=";
 			fsHelper.getQuestData(href);
 		}
 	},
@@ -853,7 +857,7 @@ var fsHelper = {
 		if (kills>0) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					// "Content-Type": "application/x-www-form-urlencoded",
@@ -897,7 +901,7 @@ var fsHelper = {
 		if (kills>0) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					// "Content-Type": "application/x-www-form-urlencoded",
@@ -937,7 +941,7 @@ var fsHelper = {
 		if (kills>0) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
@@ -1027,7 +1031,7 @@ var fsHelper = {
 		if (!memberList) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=manage",
+				url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=manage",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
@@ -1101,7 +1105,7 @@ var fsHelper = {
 	retrieveChat: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=chat",
+			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=chat",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -1209,7 +1213,7 @@ var fsHelper = {
 
 		GM_xmlhttpRequest({
 			method: 'POST',
-			url: document.location.protocol + "//" + document.location.host + "/index.php",
+			url: fsHelper.getServer() + "index.php",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
@@ -1526,7 +1530,7 @@ var fsHelper = {
 				output += "<a style='color:#CCFF99;font-size:10px;' "
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
 				output += "<a style='color:#A0CFEC;font-size:10px;' "
-				output += "href=\"" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=message&target_player=" + member.name + "\">[m]</a>&nbsp;";
+				output += "href=\"" + fsHelper.getServer() + "index.php?cmd=message&target_player=" + member.name + "\">[m]</a>&nbsp;";
 				output += "<a onmouseover=\"tt_setWidth(105);";
 				output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b><br/>XP: " + member.xp + "<br/>Lvl: " + member.level + "<br/>";
 				if (member.hasFullData) {
@@ -1543,7 +1547,7 @@ var fsHelper = {
 					output += (member.id==playerId)?"#FFF380":"white";
 				}
 				output += ";font-size:10px;'"
-				output += " href='" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
+				output += " href='" + fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 				// output += "<br/>"
 				output += "</li>"
 			}
@@ -1566,7 +1570,7 @@ var fsHelper = {
 		return;
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=profile&player_id=" + member.id,
+			url: fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -1755,7 +1759,7 @@ var fsHelper = {
 
 	insertAuctionGetItemDetails: function(itemId, invId, type, pid) {
 		var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-		theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
+		theUrl = fsHelper.getServer() + theUrl
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: theUrl,
@@ -1809,10 +1813,10 @@ var fsHelper = {
 			itemInvId = anItem.value;
 			theTextNode = fsHelper.findNode("../../td", 2, anItem);
 			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-			theTextNode.innerHTML = "<a href='" + document.location.protocol + "//" + document.location.host + "/?cmd=auctionhouse&type=-1&search_text="
+			theTextNode.innerHTML = "<a href='" + fsHelper.getServer() + "?cmd=auctionhouse&type=-1&search_text="
 				+ escape(itemName)
 				+ "'>[AH]</a> "
-				+ "<a href='" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+				+ "<a href='" + fsHelper.getServer() + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
 				+ "[Sell]</a> "
 				+ theTextNode.innerHTML;
 
@@ -1863,7 +1867,7 @@ var fsHelper = {
 				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
-						document.location.protocol + "//" + document.location.host + "/index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
 				}
 			}
@@ -1871,7 +1875,7 @@ var fsHelper = {
 				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<a href='" +
-						document.location.protocol + "//" + document.location.host + "/index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 				}
 			}
 		}
@@ -1883,7 +1887,7 @@ var fsHelper = {
 
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
+			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -1920,7 +1924,7 @@ var fsHelper = {
 			}
 			else {
 				var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-				theUrl = document.location.protocol + "//" + document.location.host + "/" + theUrl
+				theUrl = fsHelper.getServer() + theUrl
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: theUrl,
@@ -2013,14 +2017,14 @@ var fsHelper = {
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
 			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
+			newhtml += "<a href=" + fsHelper.getServer() + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
 			newhtml += ");'><img alt='Join All Groups' title='Join All Groups' src=" ;
 			newhtml += imgserver + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=" + document.location.protocol + "//" + document.location.host + "/?cmd=auctionhouse&type=-3&tid=" ;
+			newhtml += "<a href=" + fsHelper.getServer() + "?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
 			newhtml += imgserver + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
-				newhtml += "<a href='" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
+				newhtml += "<a href='" + fsHelper.getServer() + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
 				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
 				newhtml += imgserver + "/guilds/" + guildId + "_mini.jpg></a>" ;
 			}
@@ -2056,7 +2060,7 @@ var fsHelper = {
 			"</td><td>)</td></tr></tbody></table>";
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=mercs",
+			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=mercs",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -2162,7 +2166,7 @@ var fsHelper = {
 	retrieveGroupData: function(href, link) {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: document.location.protocol + "//" + document.location.host + "/" + href,
+			url: fsHelper.getServer() + href,
 			callback: link,
 			headers: {
 				"User-Agent" : navigator.userAgent,
@@ -2312,10 +2316,10 @@ var fsHelper = {
 			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
-			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-			'with valuable contributions by <a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
-			'<a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
-			'<a href="' + document.location.protocol + "//" + document.location.host + '/index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
+			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
+			'with valuable contributions by <a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'<a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
+			'<a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions or bug reports<span></td></tr>' +
