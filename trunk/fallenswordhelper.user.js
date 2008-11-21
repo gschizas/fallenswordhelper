@@ -294,9 +294,9 @@ var fsHelper = {
 			//GM_log(mouseOverText);
 			//Stamina:&nbsp;</td><td width=\'90%\'>3,612&nbsp;/&nbsp;6,370</td>
 			//tt_setWidth(225); Tip('<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width=\'100%\'>
-			//<tr><td><font color=\'#999999\'>Stamina:Â </td><td width=\'90%\'>3,607Â /Â 6,370</td></tr><tr><td>
-			//<font color=\'#999999\'>GainÂ PerÂ Hour:Â </td><td width=\'90%\'>+90</td></tr><tr><td><font color=\'#999999\'>
-			//NextÂ GainÂ :Â </td><td width=\'90%\'>16m 10s</td></tr></table><br>
+			//<tr><td><font color=\'#999999\'>Stamina: </td><td width=\'90%\'>3,607 / 6,370</td></tr><tr><td>
+			//<font color=\'#999999\'>Gain Per Hour: </td><td width=\'90%\'>+90</td></tr><tr><td><font color=\'#999999\'>
+			//Next Gain : </td><td width=\'90%\'>16m 10s</td></tr></table><br>
 			//Stamina is required to perform actions (such as attacking players and creatures).<br>'); tt_resetWidth();
 			var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
 			var curStamina = staminaRE.exec(mouseOverText)[1];
@@ -2212,7 +2212,7 @@ var fsHelper = {
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
-		result += '<span style="cursor:pointer;cursor:hand;text-decoration:underline;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message">Â»</span>'
+		result += '<span style="cursor:pointer;cursor:hand;text-decoration:underline;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message">»</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
 		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
 		result += '</div>'
