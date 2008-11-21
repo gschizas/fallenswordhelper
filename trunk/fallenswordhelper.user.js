@@ -104,7 +104,6 @@ var fsHelper = {
 
 	autoUpdate: function(responseDetails) {
 		if (responseDetails.status!=200) return;
-		GM_log(responseDetails.responseText);
 		var now=(new Date()).getTime()
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion=GM_getValue("currentVersion");
@@ -325,7 +324,7 @@ var fsHelper = {
 			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + " " +  d.getFullYear() + " " + hours + ":" + minutes;
 			var firstPart = mouseOverText.split("</td></tr></table>")[0];
 			var secondPart = mouseOverText.split("</td></tr></table>")[1];
-			var newPart = "<tr><td><font color=\\'#999999\\'>Max Stam At: </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
+			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At:‚ </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
 			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
 			newMouseoverText = newMouseoverText.replace(/\s:/,":");
 			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
@@ -682,7 +681,7 @@ var fsHelper = {
 		var hasAnimalMagnetism = fsHelper.findNode("//img[contains(@onmouseover,'Animal Magnetism')]");
 		var hasConserve = fsHelper.findNode("//img[contains(@onmouseover,'Conserve')]");
 		if (!hasDoubler || !hasLibrarian || !hasAdeptLearner || !hasMerchant || !hasTreasureHunter || !hasAnimalMagnetism || !hasConserve) {
-			replacementText += "<tr><td colspan='2'><div style='font-size:x-small;margin-left: 0px; margin-right: 48px;'>You are missing some hunting buffs ("
+			replacementText += "<tr><td colspan='2'><div style='font-size:x-small;margin-left: 0px; margin-right: 48px;text-align:center;color:navy;'>You are missing some hunting buffs<br/>("
 			missingBuffs = new Array();
 			if (!hasDoubler) missingBuffs.push("Doubler")
 			if (!hasLibrarian) missingBuffs.push("Librarian")
@@ -799,9 +798,9 @@ var fsHelper = {
 		var killStyle = GM_getValue("killAllAdvanced")
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
 				'<tr><td>Auto Kill Style [ ' +
-					'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b>single</b> will fast kill a single monster; ' +
-					'<b>type</b> will fast kill a type of monster; <b>all</b> will kill all monsters as you move into the square; <b>off</b> returns control to game normal. ' +
-					'<b>CAUTION</b>: If this is set to <b>all</b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
+					'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b><u>single</u></b> will fast kill a single monster<br/> ' +
+					'<b><u>type</u></b> will fast kill a type of monster<br><b><u>all</u></b> will kill all monsters as you move into the square<br><b><u>off</u></b> returns control to game normal. ' +
+					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
 				' ]:' +
 				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
 					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' +
@@ -1170,7 +1169,7 @@ var fsHelper = {
 		}
 		var startFrom = (chat.messages.length>showLines)?chat.messages.length-showLines:0;
 		for (var i=startFrom; i<chat.messages.length; i++) {
-			result += "<span style='color:yellow' title='"+chat.messages[i].time+"'>"
+			result += "<span style='color:#F5F298' title='"+chat.messages[i].time+"'>"
 			result += chat.messages[i].from
 			result += ":</span><span style='color:white'>"
 			result += chat.messages[i].text
@@ -1370,7 +1369,7 @@ var fsHelper = {
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 				if (postDateAsLocalMilli > localLastCheckMilli) {
-					aRow.style.backgroundColor = "yellow";
+					aRow.style.backgroundColor = "#F5F298";
 				}
 				else if (postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
 					aRow.style.backgroundColor = "#CD9E4B";
@@ -1438,7 +1437,7 @@ var fsHelper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild mates show up as green)</font>"
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>"
 			}
 
 		}
@@ -1516,7 +1515,7 @@ var fsHelper = {
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:white;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Guild Members"
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
@@ -1541,7 +1540,7 @@ var fsHelper = {
 					member.lastSeen=new Date().getTime();
 					// if (memberList.isRefreshed) {member.justLoggedIn=true; }
 				} else {
-					output += (member.id==playerId)?"lime":"white";
+					output += (member.id==playerId)?"#FFF380":"white";
 				}
 				output += ";font-size:10px;'"
 				output += " href='" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
@@ -2014,6 +2013,9 @@ var fsHelper = {
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
 			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
+			newhtml += "<a href=" + document.location.protocol + "//" + document.location.host + "/index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
+			newhtml += ");'><img alt='Join All Groups' title='Join All Groups' src=" ;
+			newhtml += imgserver + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href=" + document.location.protocol + "//" + document.location.host + "/?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
 			newhtml += imgserver + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
@@ -2233,7 +2235,7 @@ var fsHelper = {
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
-		result += '<span style="cursor:pointer;cursor:hand;text-decoration:underline;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message">»</span>'
+		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message"> ‚»</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
 		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
 		result += '</div>'
@@ -2276,9 +2278,9 @@ var fsHelper = {
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Auto Kill Style [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b>single</b> will fast kill a single monster; ' +
-				'<b>type</b> will fast kill a type of monster; <b>all</b> will kill all monsters as you move into the square; <b>off</b> returns control to game normal. ' +
-				'<b>CAUTION</b>: If this is set to <b>all</b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
+				'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b><u>single</u></b> will fast kill a single monster<br>' +
+				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>off</b></u> returns control to game normal.' +
+				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
 				' ]:</td><td><table><tbody>' +
 				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
 				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+
@@ -2291,7 +2293,7 @@ var fsHelper = {
 			'<tr><td align="right">Show Administrative Options [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Show Admininstrative Options</b><br><br>Show ranking controls in guild managemenet page - this works for guild founders only.\');">?</a>' +
 				' ]:</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Hide Non Player Guild Log Messages [ ' +
+			'<td align="right">Hide Non Player<br/>Guild Log Messages [ ' +
 				'<a href="#" onmouseover="Tip(\'<b>Hide Non Player Guild Log Messages</b><br><br>Any log messages not related to the current player will be dimished (e.g. recall messages from guild store).\');">?</a>' +
 				' ]:</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Disable Item Coloring [ ' +
