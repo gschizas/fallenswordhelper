@@ -243,6 +243,13 @@ var fsHelper = {
 				break;
 			}
 			break;
+		case "marketplace":
+			switch(subPageId) {
+			case "createreq":
+				fsHelper.addMarketplaceWidgets();
+				break;
+			}
+			break;
 		case "-":
 			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
@@ -1764,7 +1771,7 @@ var fsHelper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
-						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" id="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + overBid + '">Bid ' + overBid + '</span>&nbsp';
+						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" id="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
 						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" id="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
@@ -1937,7 +1944,7 @@ var fsHelper = {
 	recallItem: function(evt) {
 		var itemID=evt.target.getAttribute("itemID");
 		var playerID=evt.target.getAttribute("playerID");
-
+GM_log("Debug:recallItem " + itemID + ":" + playerID);
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
@@ -1952,6 +1959,7 @@ var fsHelper = {
 	},
 
 	recallItemReturnMessage: function (itemID) {
+GM_log("Debug:recallItemReturnMessage " + itemID);			
 		var itemCellElement = fsHelper.findNode("//td[@title='" + itemID + "']");
 		itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
 	},
@@ -2274,6 +2282,35 @@ var fsHelper = {
 		extraText += "</table>";
 		expiresLocation = linkElement.parentNode.previousSibling.previousSibling;
 		expiresLocation.innerHTML += extraText;
+	},
+
+	addMarketplaceWidgets: function() {
+		var requestTable = fsHelper.findNode("//table[tbody/tr/td/input[@value='Confirm Request']]");
+		var newRow = requestTable.insertRow(2);
+		var newCell = newRow.insertCell(0);
+		newCell.id = "warningfield";
+		newCell.colSpan = "2";
+		newCell.align = "center";
+
+		document.getElementById('price').addEventListener('keyup', fsHelper.addMarketplaceWarning, true);
+	},
+	
+	addMarketplaceWarning: function(evt) {
+		 var goldPerPoint = fsHelper.findNode("//input[@id='price']");
+		 var warningField = fsHelper.findNode("//td[@id='warningfield']");
+		 var sellPrice = goldPerPoint.value;
+		 if (sellPrice.search(/^[0-9]*$/) != -1) {
+			var warningColor = "green";
+			var warningText = "</b><br>This is probably an offer that will please someone.";
+			if (sellPrice < 100000) {
+				warningColor = "brown";
+				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
+			} else if (sellPrice > 110000) {
+				warningColor = "red";
+				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
+			}
+			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" + fsHelper.addCommas(sellPrice) + warningText + "</span>";
+		}
 	},
 
 	toggleVisibilty: function(evt) {
