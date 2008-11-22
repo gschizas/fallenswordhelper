@@ -954,29 +954,27 @@ var fsHelper = {
 	},
 
 	killedMonster: function(responseDetails, callback) {
-		// GM_log(responseDetails.responseHeaders+"\n"+responseDetails.responseText);
-		// GM_log(responseDetails.responseHeaders)
-		// GM_log(responseDetails.responseText);
-		// GM_log(callback);
+		var doc=fsHelper.createDocument(responseDetails.responseText);
 		try {
 			var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
-			// '"
 			var report=responseDetails.responseText.match(reportRE);
 			if (report) report=report[0]
-			// GM_log(responseDetails.responseText.match(reportRE)[0]);
-
+				
+			// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
+			var specials=fsHelper.findNodes("//div[@id='specialsDiv']", doc);
+			
 			var playerIdRE = /fallensword.com\/\?ref=(\d+)/
 			var playerId=document.body.innerHTML.match(playerIdRE)[1];
-
+			
 			var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)
 			if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
 			var goldGain=responseDetails.responseText.match(/var\s+goldGain=(-?[0-9]+);/)
 			if (goldGain) {goldGain=goldGain[1]} else {goldGain=0};
 			var guildTaxGain=responseDetails.responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)
 			if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
+			var levelUp=responseDetails.responseText.match(/var\s+levelUp=(-?[0-9]+);/)
+			if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
 			var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
-			// <b>You looted the item '<font color='#009900'>Shield of Votintown</font>'</b><br><br><img src="http://66.7.192.165/items/857.gif" onmouseover="ajaxLoadCustom(857, -1, d5b356b45146a64a7d322d48ff98b7cb, 1393340, '');"><br><br><font size=1>Note: Item stats may be higher due to crafting bonuses - check in your inventory.</font></div></td>
-			// '"
 			var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
 			var info=responseDetails.responseText.match(infoRE)
 			if (info) {info=info[1]} else {info=""};
@@ -988,9 +986,6 @@ var fsHelper = {
 				lootedItem=lootMatch[2];
 				lootedItemId=lootMatch[3];
 				lootedItemVerify=lootMatch[4];
-				// GM_log(lootMatch);
-				// GM_log(lootMatch[3]);
-				// GM_log(lootMatch[4]);
 			}
 			var shieldImpDeathRE = /Shield Imp absorbed all damage/;
 			var shieldImpDeath = responseDetails.responseText.match(shieldImpDeathRE);
@@ -1013,12 +1008,26 @@ var fsHelper = {
 				if (report) {
 					var reportLines=report.split("\n");
 					var reportText="";
+					if (specials) {
+						reportText += "<div style='color:red'>"
+						for (var i=0; i<specials.length; i++) {
+							reportText += specials[i].textContent;
+							reportText += "<br/>"
+						}
+						reportText += "</div>"
+					}
 					for (var i=0; i<reportLines.length; i++) {
 						var reportMatch = reportLines[i].match(/\"(.*)\"/);
 						if (reportMatch) {
 							reportText += "<br/>"
 							reportText += reportMatch[1];
 						}
+					}
+					if (levelUp=="1") {
+						reportText += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
+					}
+					if (levelUp=="-1") {
+						reportText += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
 					}
 					mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportText + "</div>"
 					result.setAttribute("mouseOverText", mouseOverText);
