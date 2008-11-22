@@ -1543,9 +1543,15 @@ var fsHelper = {
 				output += "<li style='padding-bottom:0px;'>"
 				output += "<a style='color:#CCFF99;font-size:10px;' "
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
-				output += "<a style='color:#A0CFEC;font-size:10px;' "
-				output += "href=\"" + fsHelper.getServer() + "index.php?cmd=message&target_player=" + member.name + "\">[m]</a>&nbsp;";
-				output += "<a onmouseover=\"tt_setWidth(105);";
+				if (member.id!=playerId) {
+					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
+					output += "href=\"" + fsHelper.getServer() + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
+					output += "</a>";
+				}
+				else {
+					output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
+				}
+				output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
 				output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b><br/>XP: " + member.xp + "<br/>Lvl: " + member.level + "<br/>";
 				if (member.hasFullData) {
 
