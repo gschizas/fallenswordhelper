@@ -680,7 +680,19 @@ var fsHelper = {
 			}
 			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
 		}
-
+		
+		var buffs=GM_getValue("huntingBuffs")
+		if (!buffs) {
+			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
+		}
+		var buffAry=buffs.split("|")
+		var missingBuffs = new Array();
+		for (var i=0;i<buffAry.length;i++) {
+			if (!fsHelper.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
+				missingBuffs.push(buffAry[i]);	
+			}
+		}
+/*
 		var hasDoubler = fsHelper.findNode("//img[contains(@onmouseover,'Doubler')]");
 		var hasLibrarian = fsHelper.findNode("//img[contains(@onmouseover,'Librarian')]");
 		var hasAdeptLearner = fsHelper.findNode("//img[contains(@onmouseover,'Adept Learner')]");
@@ -689,15 +701,9 @@ var fsHelper = {
 		var hasAnimalMagnetism = fsHelper.findNode("//img[contains(@onmouseover,'Animal Magnetism')]");
 		var hasConserve = fsHelper.findNode("//img[contains(@onmouseover,'Conserve')]");
 		if (!hasDoubler || !hasLibrarian || !hasAdeptLearner || !hasMerchant || !hasTreasureHunter || !hasAnimalMagnetism || !hasConserve) {
+*/		
+		if (missingBuffs.length>0) {
 			replacementText += "<tr><td colspan='2'><div style='font-size:x-small;margin-left: 0px; margin-right: 48px;text-align:center;color:navy;'>You are missing some hunting buffs<br/>("
-			missingBuffs = new Array();
-			if (!hasDoubler) missingBuffs.push("Doubler")
-			if (!hasLibrarian) missingBuffs.push("Librarian")
-			if (!hasAdeptLearner) missingBuffs.push("Adept Learner")
-			if (!hasMerchant) missingBuffs.push("Merchant")
-			if (!hasTreasureHunter) missingBuffs.push("Treasure Hunter")
-			if (!hasAnimalMagnetism) missingBuffs.push("Animal Magnetism")
-			if (!hasConserve) missingBuffs.push("Conserve")
 			replacementText += missingBuffs.join(", ")
 			replacementText += ")</div></td></tr>"
 		}
@@ -1943,7 +1949,7 @@ var fsHelper = {
 				var itemID = itemIDRE.exec(href)[1];
 				var playerIDRE = /player_id=(\d+)/
 				var playerID = playerIDRE.exec(href)[1];
-				itemCell.title = itemID;
+				//itemCell.title = itemID;
 				//ajaxLoadItem(2758, 84063685, 1, 1346893 - report link
 				//ajaxLoadItem(2758, 6569239, 4, 40769 - guild store link
 				//unfortunately the itemID for the report link is different than the guild store link so you cannot script
@@ -2000,10 +2006,10 @@ var fsHelper = {
 		var info=responseDetails.responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = fsHelper.findNode("//td[@title='" + itemID + "']");
-		if (info=="You successfully recalled the item.") {
-			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
-		} else {
+		if (info!="") {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+		} else {
+			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
 		}
 	},
 
@@ -2401,6 +2407,11 @@ var fsHelper = {
 		if (!GM_getValue("guildEnmyMessage")) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")}
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")))
+		var buffs=GM_getValue("huntingBuffs")
+		if (!buffs) {
+			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
+		}
+			
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
@@ -2414,39 +2425,33 @@ var fsHelper = {
 			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
-			'<tr><td align="right">Auto Kill Style [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b><u>single</u></b> will fast kill a single monster<br>' +
+			'<tr><td align="right">Auto Kill Style ' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
 				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>off</b></u> returns control to game normal.' +
-				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
-				' ]:</td><td><table><tbody>' +
+				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.') +
+				':</td><td><table><tbody>' +
 				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
 				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+
 				'<tr><td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
 				'<td><input type="radio" name="killAllAdvanced"  value="all"' + ((GM_getValue("killAllAdvanced") == "all")?" checked":"") + '>all</td></tr>' +
 				'</tbody></table></td>' +
-			'<td align="right">Hide Top Banner [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Hide Top Banner</b><br><br>Pretty simple ... it just hides the top banner.\');">?</a>' +
-				' ]:</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show Administrative Options [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Show Admininstrative Options</b><br><br>Show ranking controls in guild managemenet page - this works for guild founders only.\');">?</a>' +
-				' ]:</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Hide Non Player<br/>Guild Log Messages [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Hide Non Player Guild Log Messages</b><br><br>Any log messages not related to the current player will be dimished (e.g. recall messages from guild store).\');">?</a>' +
-				' ]:</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Disable Item Coloring [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Disable Item Coloring</b><br><br>There is some code that colors the item text based on the rarity of the item.\');">?</a>' +
-				' ]:</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
-			'<td align="right">Enable Log Coloring [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Enable Log Coloring</b><br><br>Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.\');">?</a>' +
-				' ]:</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Show Completed Quests [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Show Completed Quests</b><br><br>This will show completed quests that have been hidden.\');">?</a>' +
-				' ]:</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines [ ' +
-				'<a href="#" onmouseover="Tip(\'<b>Chat lines</b><br><br>Display the last {n} lines from guild chat (set to 0 to disable).\');">?</a>' +
-				' ]:</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
+			'<td align="right">Hide Top Banner ' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
+				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Show Administrative Options ' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - this works for guild founders only') +
+				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
+			'<td align="right">Dim Non Player<br/>Guild Log Messages ' + fsHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)') +
+				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Disable Item Coloring ' + fsHelper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
+				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
+			'<td align="right">Enable Log Coloring ' + fsHelper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
+				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Show Completed Quests ' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
+				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
+			'<td align="right">Show chat lines ' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).') + 
+				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 //			'<tr><td colspan="2"></td>' +
 			//save button
+			'<tr><td>Hunting Buffs ' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') + 
+				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
@@ -2471,6 +2476,14 @@ var fsHelper = {
 		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 	},
+		
+	helpLink: function(title, text) {
+		return '[ ' +
+			'<span style="text-decoration:underline;cursor:pointer;cursor:hand;" onmouseover="Tip(\'' + 
+			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' + 
+			text + '\');">?</span>' +
+			' ]'
+	},
 
 	saveConfig: function(evt) {
 		var oForm=evt.target.form;
@@ -2490,6 +2503,7 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		fsHelper.saveValueForm(oForm, "hideBanner");
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
+		fsHelper.saveValueForm(oForm, "huntingBuffs");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
