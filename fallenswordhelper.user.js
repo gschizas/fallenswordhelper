@@ -692,16 +692,6 @@ var fsHelper = {
 				missingBuffs.push(buffAry[i]);	
 			}
 		}
-/*
-		var hasDoubler = fsHelper.findNode("//img[contains(@onmouseover,'Doubler')]");
-		var hasLibrarian = fsHelper.findNode("//img[contains(@onmouseover,'Librarian')]");
-		var hasAdeptLearner = fsHelper.findNode("//img[contains(@onmouseover,'Adept Learner')]");
-		var hasMerchant = fsHelper.findNode("//img[contains(@onmouseover,'Merchant')]");
-		var hasTreasureHunter = fsHelper.findNode("//img[contains(@onmouseover,'Treasure Hunter')]");
-		var hasAnimalMagnetism = fsHelper.findNode("//img[contains(@onmouseover,'Animal Magnetism')]");
-		var hasConserve = fsHelper.findNode("//img[contains(@onmouseover,'Conserve')]");
-		if (!hasDoubler || !hasLibrarian || !hasAdeptLearner || !hasMerchant || !hasTreasureHunter || !hasAnimalMagnetism || !hasConserve) {
-*/		
 		if (missingBuffs.length>0) {
 			replacementText += "<tr><td colspan='2'><div style='font-size:x-small;margin-left: 0px; margin-right: 48px;text-align:center;color:navy;'>You are missing some hunting buffs<br/>("
 			replacementText += missingBuffs.join(", ")
@@ -1996,16 +1986,16 @@ var fsHelper = {
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				fsHelper.recallItemReturnMessage(responseDetails, itemID);
+				fsHelper.recallItemReturnMessage(responseDetails, itemID, evt.target);
 			},
 		})
 	},
 
-	recallItemReturnMessage: function(responseDetails, itemID) {
+	recallItemReturnMessage: function(responseDetails, itemID, target) {
 		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
 		var info=responseDetails.responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
-		var itemCellElement = fsHelper.findNode("//td[@title='" + itemID + "']");
+		var itemCellElement = target.parentNode; //fsHelper.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
