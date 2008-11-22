@@ -685,7 +685,7 @@ var fsHelper = {
 		if (!buffs) {
 			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
 		}
-		var buffAry=buffs.split("|")
+		var buffAry=buffs.split(",")
 		var missingBuffs = new Array();
 		for (var i=0;i<buffAry.length;i++) {
 			if (!fsHelper.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
