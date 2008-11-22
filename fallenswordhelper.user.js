@@ -1907,7 +1907,7 @@ var fsHelper = {
 				var itemID = itemIDRE.exec(href)[1];
 				var playerIDRE = /player_id=(\d+)/
 				var playerID = playerIDRE.exec(href)[1];
-				//itemCell.title = itemID;
+				itemCell.title = itemID;
 				//ajaxLoadItem(2758, 84063685, 1, 1346893 - report link
 				//ajaxLoadItem(2758, 6569239, 4, 40769 - guild store link
 				//unfortunately the itemID for the report link is different than the guild store link so you cannot script
@@ -1964,10 +1964,10 @@ var fsHelper = {
 		var info=responseDetails.responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = fsHelper.findNode("//td[@title='" + itemID + "']");
-		if (info!="") {
-			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+		if (info=="You successfully recalled the item.") {
+			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
 		} else {
-			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
+			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 		}
 	},
 
