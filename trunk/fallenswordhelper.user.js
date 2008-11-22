@@ -2073,6 +2073,7 @@ GM_log("Debug:recallItemReturnMessage " + itemID);
 				playeravy = playeravy.nextSibling ;
 			}
 			var playername = playeravy.getAttribute("title");
+			playeravy.style.borderStyle="none";
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
 			imgserver = fsHelper.getImageServer();
