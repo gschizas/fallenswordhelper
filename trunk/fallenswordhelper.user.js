@@ -302,7 +302,6 @@ var fsHelper = {
 		var staminaImageElement = fsHelper.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
 		if (staminaImageElement) {
 			var mouseOverText = staminaImageElement.getAttribute("onmouseover");
-			//GM_log(mouseOverText);
 			//Stamina:&nbsp;</td><td width=\'90%\'>3,612&nbsp;/&nbsp;6,370</td>
 			//tt_setWidth(225); Tip('<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width=\'100%\'>
 			//<tr><td><font color=\'#999999\'>Stamina: </td><td width=\'90%\'>3,607 / 6,370</td></tr><tr><td>
@@ -437,7 +436,6 @@ var fsHelper = {
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				//GM_log(href);
 				fsHelper.parseRelicGuildData(extraTextInsertPoint,href, responseDetails.responseText);
 			},
 		})
@@ -451,7 +449,6 @@ var fsHelper = {
 			var anItem=allItems[i];
 			var mouseoverText = anItem.getAttribute("onmouseover")
 			if (mouseoverText && mouseoverText.search("Relic Bonuses") != -1){
-				//GM_log(mouseoverText);
 				relicCount++;
 			}
 		}
@@ -594,7 +591,6 @@ var fsHelper = {
 			relicMultiplier = 0.9;
 		}
 
-		//GM_log(defenderCount + ":" + relicProcessedValue.innerHTML);
 		if (defenderCount == 0 && relicProcessedValue.innerHTML == "1") {
 			var attackValue = fsHelper.findNode("//td[@title='attackValue']");
 			var LDattackValue = fsHelper.findNode("//td[@title='LDattackValue']");
@@ -643,6 +639,7 @@ var fsHelper = {
 	},
 
 	mapThis: function() {
+		return;
 		var realm = fsHelper.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
 		// if ((realm) && (posit)>0) {
 			var levelName=realm.innerHTML;
@@ -1910,16 +1907,15 @@ var fsHelper = {
 				var itemID = itemIDRE.exec(href)[1];
 				var playerIDRE = /player_id=(\d+)/
 				var playerID = playerIDRE.exec(href)[1];
-				itemCell.title = itemID;
+				//itemCell.title = itemID;
 				//ajaxLoadItem(2758, 84063685, 1, 1346893 - report link
 				//ajaxLoadItem(2758, 6569239, 4, 40769 - guild store link
 				//unfortunately the itemID for the report link is different than the guild store link so you cannot script
 				//grabbing items from the guild store easily with one click.
-				itemCell.innerHTML += ' [ <span style="cursor:pointer; text-decoration:underline;" id="recallItem" ' +
+				itemCell.innerHTML += ' [ <span style="cursor:pointer; text-decoration:underline;" id="recallItem' + itemID + '" ' +
 					'itemID="' + itemID + '" ' +
 					'playerID="' + playerID + '">Fast Recall</span> ]'
-
-				document.getElementById('recallItem').addEventListener('click', fsHelper.recallItem, true);
+				document.getElementById('recallItem' + itemID).addEventListener('click', fsHelper.recallItem, true);
 			}
 		}
 
@@ -1950,7 +1946,6 @@ var fsHelper = {
 	recallItem: function(evt) {
 		var itemID=evt.target.getAttribute("itemID");
 		var playerID=evt.target.getAttribute("playerID");
-GM_log("Debug:recallItem " + itemID + ":" + playerID);
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
@@ -1959,15 +1954,21 @@ GM_log("Debug:recallItem " + itemID + ":" + playerID);
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				fsHelper.recallItemReturnMessage(itemID);
+				fsHelper.recallItemReturnMessage(responseDetails, itemID);
 			},
 		})
 	},
 
-	recallItemReturnMessage: function (itemID) {
-GM_log("Debug:recallItemReturnMessage " + itemID);			
+	recallItemReturnMessage: function(responseDetails, itemID) {
+		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var info=responseDetails.responseText.match(infoRE)
+		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = fsHelper.findNode("//td[@title='" + itemID + "']");
-		itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
+		if (info!="") {
+			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+		} else {
+			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
+		}
 	},
 
 	injectDropItems: function() {
@@ -2248,7 +2249,6 @@ GM_log("Debug:recallItemReturnMessage " + itemID);
 
 	parseGroupData: function(responseText, linkElement) {
 		var doc=fsHelper.createDocument(responseText);
-		// GM_log(responseText);
 		var doc=fsHelper.createDocument(responseText)
 		var allItems = doc.getElementsByTagName("TD")
 		//<td><font color="#333333">Attack:&nbsp;</font></td>
