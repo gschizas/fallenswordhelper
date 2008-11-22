@@ -335,7 +335,7 @@ var fsHelper = {
 			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + " " +  d.getFullYear() + " " + hours + ":" + minutes;
 			var firstPart = mouseOverText.split("</td></tr></table>")[0];
 			var secondPart = mouseOverText.split("</td></tr></table>")[1];
-			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At:‚ </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
+			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
 			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
 			newMouseoverText = newMouseoverText.replace(/\s:/,":");
 			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
@@ -2336,7 +2336,7 @@ GM_log("Debug:recallItemReturnMessage " + itemID);
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
-		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message"> ‚»</span>'
+		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message"> &#x00bb;</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
 		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
 		result += '</div>'
