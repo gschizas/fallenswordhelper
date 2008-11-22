@@ -965,6 +965,8 @@ var fsHelper = {
 		try {
 			var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
 			// '"
+			var report=responseDetails.responseText.match(reportRE);
+			if (report) report=report[0]
 			// GM_log(responseDetails.responseText.match(reportRE)[0]);
 
 			var playerIdRE = /fallensword.com\/\?ref=(\d+)/
@@ -999,6 +1001,7 @@ var fsHelper = {
 
 			var monster = fsHelper.findNode(callback);
 			if (monster) {
+				var result=document.createElement("div");
 				var resultText="<small><small>"+callback.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
 				if (info!="") resultText+="<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
 				if (lootedItem!="") {
@@ -1008,12 +1011,45 @@ var fsHelper = {
 				if (shieldImpDeath) {
 					resultText += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>"
 				}
-				monster.parentNode.innerHTML=resultText;
+				result.innerHTML=resultText
+				var monsterParent = monster.parentNode;
+				result.id = "result" + callback;
+				if (report) {
+					var reportLines=report.split("\n");
+					var reportText="";
+					for (var i=0; i<reportLines.length; i++) {
+						var reportMatch = reportLines[i].match(/\"(.*)\"/);
+						if (reportMatch) {
+							reportText += "<br/>"
+							reportText += reportMatch[1];
+						}
+					}
+					mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportText + "</div>"
+					result.setAttribute("mouseOverText", mouseOverText);
+				}
+				monsterParent.innerHTML = "";
+				monsterParent.insertBefore(result, monsterParent.nextSibling);
+				if (report) {
+					document.getElementById("result" + callback).addEventListener("mouseover", fsHelper.clientTip, true);
+				}
 			}
 		}
 		catch (ex) {
 			GM_log(ex);
 			GM_log(responseDetails.responseText);
+		}
+	},
+
+	clientTip: function(evt) {
+		var target=evt.target;
+		var value;
+		do {
+			if (target.getAttribute) value=target.getAttribute("mouseOverText");
+			target=target.parentNode;
+		} while (!value && target);
+		if (value) {
+			unsafeWindow.tt_setWidth(250);
+			unsafeWindow.Tip(value);
 		}
 	},
 
@@ -1774,16 +1810,16 @@ var fsHelper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
-						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" id="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
+						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
-						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" id="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
+						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
 					}
 					var buyoutValue = "-";
 					if (buyoutHTML != "-" && !playerListedItem) {
 						newCell.innerHTML = "&nbsp/&nbsp";
 						buyoutValue = (buyoutCell.textContent)*1;
-						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" id="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + buyoutValue + '">Buy Now</span>';
+						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + buyoutValue + '">Buy Now</span>';
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
 					if (!playerListedItem) {
@@ -1795,7 +1831,7 @@ var fsHelper = {
 					}
 					}
 					}
-		var bidOnItemList = fsHelper.findNodes("//span[@id='bidOnItem']");
+		var bidOnItemList = fsHelper.findNodes("//span[@findme='bidOnItem']");
 		for (var i=0; i<bidOnItemList.length; i++) {
 			bidOnItemItem = bidOnItemList[i];
 			bidOnItemItem.addEventListener('click', fsHelper.bidOnItem, true);
