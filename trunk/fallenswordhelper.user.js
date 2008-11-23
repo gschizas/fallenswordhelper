@@ -75,6 +75,11 @@ var fsHelper = {
 	init: function(e) {
 		this.initialized = true;
 		fsHelper.beginAutoUpdate();
+		fsHelper.initSettings();
+	},
+	
+	initSettings: function() {
+		if (!GM_getValue("showCombatLog")) GM_setValue("showCombatLog", true);
 	},
 
 	// Autoupdate
@@ -801,11 +806,10 @@ var fsHelper = {
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced")
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
-				'<tr><td>Auto Kill Style [ ' +
-					'<a href="#" onmouseover="Tip(\'<b>Auto Kill Style</b><br><br><b><u>single</u></b> will fast kill a single monster<br/> ' +
+				'<tr><td>Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br/> ' +
 					'<b><u>type</u></b> will fast kill a type of monster<br><b><u>all</u></b> will kill all monsters as you move into the square<br><b><u>off</u></b> returns control to game normal. ' +
-					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.\');">?</a>' +
-				' ]:' +
+					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.') +
+				':' +
 				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
 					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' +
 				'<td><input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
@@ -823,6 +827,33 @@ var fsHelper = {
 		// injectHere.style.display='none';
 		fsHelper.checkBuffs();
 		fsHelper.killAllMonsters();
+		fsHelper.prepareCombatLog();
+	},
+		
+	prepareCombatLog: function() {
+		if (!GM_getValue("showCombatLog")) return;
+		var reportsTable=fsHelper.findNode("//table[@width='320']/parent::*");
+		var tempLog=document.createElement("div");
+		tempLog.id="reportsLog";
+		var injLog=reportsTable.appendChild(tempLog);
+		var is=injLog.style;
+		is.color = 'black';
+		is.backgroundImage='url(http://66.7.192.165/skin/realm_right_bg.jpg)'
+		is.maxHeight = '200px';
+		is.width = '277px';
+		is.maxWidth = is.width;
+		is.marginLeft = '0px';
+		is.marginRight = '0px';
+		is.paddingLeft = '26px';
+		is.paddingRight = '24px';
+		is.overflow = 'hidden';
+		is.fontSize = 'xx-small';
+		is.textAlign = 'justify';
+		injLog.innerHTML="<img src='' style=''><img src='' style=''>"
+		//injLog.innerHTML+="Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
+		//injLog.innerHTML+="<br/>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
+		//injLog.innerHTML+="<br/><br/>This is the end, my only friend"
+		//injLog.scrollTop=500000;
 	},
 
 	killAllAdvancedChangeFromWorld: function(evt) {
@@ -1029,7 +1060,8 @@ var fsHelper = {
 					if (levelUp=="-1") {
 						reportText += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
 					}
-					mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportText + "</div>"
+					mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportText + "</div>";
+					fsHelper.appendCombatLog(reportText);
 					result.setAttribute("mouseOverText", mouseOverText);
 				}
 				monsterParent.innerHTML = "";
@@ -1043,6 +1075,22 @@ var fsHelper = {
 			GM_log(ex);
 			GM_log(responseDetails.responseText);
 		}
+	},
+		
+	appendCombatLog: function(text) {
+		var reportLog = fsHelper.findNode("//div[@id='reportsLog']");
+		if (!reportLog) return;
+		reportLog.innerHTML += text;
+	},
+		
+	scrollUpCombatLog: function() {
+		var reportLog = fsHelper.findNode("//div[@id='reportsLog']");
+		reportLog.scrollTop-=10;
+	},
+
+	scrollDownCombatLog: function() {
+		var reportLog = fsHelper.findNode("//div[@id='reportsLog']");
+		reportLog.scrollTop+=10;
 	},
 
 	clientTip: function(evt) {
@@ -1334,8 +1382,7 @@ var fsHelper = {
 		case 53:
 		case 54:
 		case 55:
-		case 56:
-		case 57: // keyed combat
+		case 56: // keyed combat
 			var index	= r-48;
 			var linkObj	= document.getElementById("attackLink"+index);
 			if (linkObj!=null) {
@@ -1354,6 +1401,9 @@ var fsHelper = {
 					fsHelper.killSingleMonsterType(monsterType);
 				}
 			}
+			break;
+		case 57: // debug
+			fsHelper.appendCombatLog('test<br/>')
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
@@ -1394,6 +1444,22 @@ var fsHelper = {
 					evt.stopPropagation();
 				}
 				break;
+			case 33:
+				if (fsHelper.findNode("//div[@id='reportsLog']")) {
+					fsHelper.scrollUpCombatLog();
+					evt.preventDefault();
+					evt.stopPropagation();
+				}
+				break;
+			case 34:
+				if (fsHelper.findNode("//div[@id='reportsLog']")) {
+					fsHelper.scrollDownCombatLog();
+					evt.preventDefault();
+					evt.stopPropagation();
+				}
+				break;
+			default:
+				// GM_log('special key: ' +s);
 			}
 		}
 		return true;
@@ -1540,7 +1606,7 @@ var fsHelper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'><b>(Guild Log messages not involving self are dimished!)</b></font>"
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild Log messages not involving self are dimmed!)</font>"
 			}
 
 		}
@@ -1917,10 +1983,10 @@ var fsHelper = {
 			itemInvId = anItem.value;
 			theTextNode = fsHelper.findNode("../../td", 2, anItem);
 			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-			theTextNode.innerHTML = "<a href='" + fsHelper.getServer() + "?cmd=auctionhouse&type=-1&search_text="
+			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.getServer() + "?cmd=auctionhouse&type=-1&search_text="
 				+ escape(itemName)
 				+ "'>[AH]</a> "
-				+ "<a href='" + fsHelper.getServer() + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+				+ "<a findme='Sell' href='" + fsHelper.getServer() + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
 				+ "[Sell]</a> "
 				+ theTextNode.innerHTML;
 
@@ -2013,7 +2079,6 @@ var fsHelper = {
 	},
 
 	injectDropItems: function() {
-		if (GM_getValue("disableItemColoring")) return;
 		var savedItems = fsHelper.getValueJSON("savedItems")
 		var allItems = fsHelper.findNodes("//input[@type='checkbox']");
 		for (var i=0; i<allItems.length; i++) {
@@ -2051,9 +2116,17 @@ var fsHelper = {
 	},
 
 	injectDropItemsPaint: function(responseDetails, callback) {
+		var textNode = fsHelper.findNode("../../../td", 2, callback);
+		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
+		if (guildLockedRE.exec(responseDetails.responseText)) {
+			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", 0, textNode);
+			var sellLink=fsHelper.findNode("a[@findme='Sell']", 0, textNode);
+			auctionHouseLink.style.visibility='hidden';
+			sellLink.style.visibility='hidden';
+		};
+		if (GM_getValue("disableItemColoring")) return;
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i; // <b>[^<]+<\/b>/
 		var fontLineRX=fontLineRE.exec(responseDetails.responseText)
-		var textNode = fsHelper.findNode("../../../td", 2, callback);
 		textNode.style.color=fontLineRX[1];
 	},
 
@@ -2424,7 +2497,7 @@ var fsHelper = {
 			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
-			'<tr><td align="right">Auto Kill Style ' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
+			'<tr><td align="right">Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
 				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>off</b></u> returns control to game normal.' +
 				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.') +
 				':</td><td><table><tbody>' +
@@ -2433,23 +2506,25 @@ var fsHelper = {
 				'<tr><td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
 				'<td><input type="radio" name="killAllAdvanced"  value="all"' + ((GM_getValue("killAllAdvanced") == "all")?" checked":"") + '>all</td></tr>' +
 				'</tbody></table></td>' +
-			'<td align="right">Hide Top Banner ' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
+			'<td align="right">Hide Top Banner' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show Administrative Options ' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - this works for guild founders only') +
+			'<tr><td align="right">Show Administrative Options' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Dim Non Player<br/>Guild Log Messages ' + fsHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)') +
+			'<td align="right">Dim Non Player<br/>Guild Log Messages' + fsHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Disable Item Coloring ' + fsHelper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
+			'<tr><td align="right">Disable Item Coloring' + fsHelper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
 				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
-			'<td align="right">Enable Log Coloring ' + fsHelper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
+			'<td align="right">Enable Log Coloring' + fsHelper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Show Completed Quests ' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
+			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines ' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).') + 
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).') + 
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
-//			'<tr><td colspan="2"></td>' +
+			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
+				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
+			'<td colspan="2">&nbsp;</td></tr>' +
 			//save button
-			'<tr><td>Hunting Buffs ' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') + 
+			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') + 
 				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
@@ -2477,7 +2552,7 @@ var fsHelper = {
 	},
 		
 	helpLink: function(title, text) {
-		return '[ ' +
+		return ' [ ' +
 			'<span style="text-decoration:underline;cursor:pointer;cursor:hand;" onmouseover="Tip(\'' + 
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' + 
 			text + '\');">?</span>' +
@@ -2501,6 +2576,8 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "showCompletedQuests");
 		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		fsHelper.saveValueForm(oForm, "hideBanner");
+		fsHelper.saveValueForm(oForm, "showCombatLog");
+
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
 
