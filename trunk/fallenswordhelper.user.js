@@ -93,6 +93,7 @@ var fsHelper = {
 		fsHelper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		
+		/*
 		GM_log("\n" +
 		"Level: " + fsHelper.characterLevel + "\n" +
 		"Attack: " + fsHelper.characterAttack + "\n" +
@@ -100,6 +101,7 @@ var fsHelper = {
 		"HP: " + fsHelper.characterHP + "\n" +
 		"Armor: " + fsHelper.characterArmor + "\n" +
 		"Damage: " + fsHelper.characterDamage)
+		*/
 	},
 
 	// Autoupdate
