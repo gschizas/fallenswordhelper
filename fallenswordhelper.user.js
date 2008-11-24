@@ -19,7 +19,7 @@ var fsHelper = {
 	},
 
 	saveValueForm: function(oForm, name) {
-		var formElement = fsHelper.findNode("//input[@name='" + name + "']", 0, oForm)
+		var formElement = fsHelper.findNode("//input[@name='" + name + "']", oForm)
 		if (formElement.getAttribute("type")=="checkbox") {
 			GM_setValue(name, formElement.checked);
 		} else if (formElement.getAttribute("type")=="radio") {
@@ -35,11 +35,10 @@ var fsHelper = {
 		}
 	},
 
-	findNode: function(xpath, index, doc) {
+	findNode: function(xpath, doc) {
 		var nodes=fsHelper.findNodes(xpath, doc);
 		if (!nodes) return null;
-		if (!index) index=0;
-		return (nodes[index]);
+		return (nodes[0]);
 	},
 
 	findNodes: function(xpath, doc) {
@@ -74,12 +73,33 @@ var fsHelper = {
 	// System functions
 	init: function(e) {
 		this.initialized = true;
-		fsHelper.beginAutoUpdate();
 		fsHelper.initSettings();
-	},
-	
+		fsHelper.beginAutoUpdate();
+		fsHelper.readInfo();
+},
+
 	initSettings: function() {
-		if (!GM_getValue("showCombatLog")) GM_setValue("showCombatLog", true);
+		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
+		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
+	},
+		
+	readInfo: function() {
+		var charInfo = fsHelper.findNode("//img[contains(@src,'skin/icon_player.gif')]");
+		var charInfoText = charInfo.getAttribute("onmouseover");
+		fsHelper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		fsHelper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		fsHelper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		fsHelper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		fsHelper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		fsHelper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		
+		GM_log("\n" +
+		"Level: " + fsHelper.characterLevel + "\n" +
+		"Attack: " + fsHelper.characterAttack + "\n" +
+		"Defense: " + fsHelper.characterDefense + "\n" +
+		"HP: " + fsHelper.characterHP + "\n" +
+		"Armor: " + fsHelper.characterArmor + "\n" +
+		"Damage: " + fsHelper.characterDamage)
 	},
 
 	// Autoupdate
@@ -685,7 +705,7 @@ var fsHelper = {
 			}
 			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
 		}
-		
+
 		var buffs=GM_getValue("huntingBuffs")
 		if (!buffs) {
 			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
@@ -694,7 +714,7 @@ var fsHelper = {
 		var missingBuffs = new Array();
 		for (var i=0;i<buffAry.length;i++) {
 			if (!fsHelper.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
-				missingBuffs.push(buffAry[i]);	
+				missingBuffs.push(buffAry[i]);
 			}
 		}
 		if (missingBuffs.length>0) {
@@ -826,10 +846,11 @@ var fsHelper = {
 		document.getElementById('killAllAdvancedWorldAll').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		// injectHere.style.display='none';
 		fsHelper.checkBuffs();
+		fsHelper.prepareCheckMonster();
 		fsHelper.killAllMonsters();
 		fsHelper.prepareCombatLog();
 	},
-		
+
 	prepareCombatLog: function() {
 		if (!GM_getValue("showCombatLog")) return;
 		var reportsTable=fsHelper.findNode("//table[@width='320']/parent::*");
@@ -904,7 +925,6 @@ var fsHelper = {
 	killSingleMonsterType: function(monsterType) {
 		if (GM_getValue("killAllAdvanced") != "type") return;
 		var kills=0;
-
 		for (var i=1; i<=8; i++) {
 			var linkId="//a[@id='attackLink" + i + "']"
 			var monster = fsHelper.findNode(linkId);
@@ -919,7 +939,6 @@ var fsHelper = {
 						url: href,
 						headers: {
 							"User-Agent" : navigator.userAgent,
-							// "Content-Type": "application/x-www-form-urlencoded",
 							"Cookie" : document.cookie
 						},
 						onload: function(responseDetails, callback) {
@@ -935,14 +954,89 @@ var fsHelper = {
 				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
-					// "Content-Type": "application/x-www-form-urlencoded",
 					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					// GM_log(responseDetails.responseText);
 				},
 			})
 		}
+	},
+
+	prepareCheckMonster: function() {
+		if (!GM_getValue("showCreatureInfo")) return;
+		for (var i=1; i<=8; i++) {
+			var linkId="//a[@id='attackLink" + i + "']/preceding-sibling::a"
+			var monster = fsHelper.findNode(linkId);
+			if (monster) {
+				var href=monster.href;
+				GM_xmlhttpRequest({
+					method: 'GET',
+					callback: monster,
+					url: href,
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Cookie" : document.cookie
+					},
+					onload: function(responseDetails, callback) {
+						fsHelper.checkedMonster(responseDetails, this.callback);
+					},
+				})
+			}
+			
+		}
+	},
+
+	checkedMonster: function(responseDetails, callback) {
+		var reportText="";
+		var creatureInfo=fsHelper.createDocument(responseDetails.responseText);
+		var statsNode = fsHelper.findNode("//table[@width='400']", creatureInfo);
+		var classNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Class:')]/following-sibling::td", creatureInfo);
+		var levelNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Level:')]/following-sibling::td", creatureInfo);
+		var attackNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]/following-sibling::td", creatureInfo);
+		var defenseNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Defense:')]/following-sibling::td", creatureInfo);
+		var armorNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Armor:')]/following-sibling::td", creatureInfo);
+		var damageNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]/following-sibling::td", creatureInfo);
+		var hitpointsNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]/following-sibling::td", creatureInfo);
+		var goldNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Gold:')]/following-sibling::td", creatureInfo);
+		var enhanceNodes = fsHelper.findNodes("//table[@width='400']/tbody/tr[contains(td,'Enhancements')]/following-sibling::*[td/font[@color='#333333']]", creatureInfo);
+		/*
+		if (statsNode) reportText += "<div style='color:#FFF380;'>Statistics</div>"
+		if (classNode) reportText += "Class: " + classNode.textContent + "<br/>";
+		if (levelNode) reportText += "Level: " + levelNode.textContent + "<br/>";
+		if (attackNode) reportText += "Attack: " + attackNode.textContent + "<br/>";
+		if (defenseNode) reportText += "Defense: " + defenseNode.textContent + "<br/>";
+		if (armorNode) reportText += "Armor: " + armorNode.textContent + "<br/>";
+		if (damageNode) reportText += "Damage: " + damageNode.textContent + "<br/>";
+		if (goldNode) reportText += "Gold: " + goldNode.textContent + "<br/>";
+		if (enhanceNodes) {
+			if (enhanceNodes) reportText += "<div style='color:#FFF380;'>Enhancements</div>"
+			for (i=0; i<enhanceNodes.length; i++) {
+				reportText += enhanceNodes[i].textContent + "<br/>";
+			}
+		}
+		*/
+		var recolor=fsHelper.findNodes("//td[@bgcolor='#cd9e4b']", statsNode);
+		for (var i=0; i<recolor.length; i++) {
+			recolor[i].style.color="black";
+		}
+		recolor=fsHelper.findNodes("//font[@color='#333333']", statsNode);
+		for (var i=0; i<recolor.length; i++) {
+			recolor[i].style.color="#cccccc";
+		}
+		var killButtons=fsHelper.findNode("tbody/tr[td/input]", statsNode);
+		var killButtonHeader=fsHelper.findNode("tbody/tr[contains(td,'Actions')]", statsNode);
+		var killButtonParent=killButtonHeader.parentNode;
+		
+		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + fsHelper.characterLevel + "</span>)"
+		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + fsHelper.characterDefense + "</span>) "
+		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + fsHelper.characterAttack + "</span>)"
+		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + fsHelper.characterDamage + "</span>)"
+		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + fsHelper.characterArmor + "</span>)"
+		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + fsHelper.characterHP + "</span>)"
+		
+		killButtonParent.removeChild(killButtons);
+		killButtonParent.removeChild(killButtonHeader);
+		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
+		callback.setAttribute("mouseOverWidth", "400");
+		callback.addEventListener("mouseover", fsHelper.clientTip, true);
 	},
 
 	killAllMonsters: function() {
@@ -990,13 +1084,13 @@ var fsHelper = {
 			var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
 			var report=responseDetails.responseText.match(reportRE);
 			if (report) report=report[0]
-				
+
 			// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
 			var specials=fsHelper.findNodes("//div[@id='specialsDiv']", doc);
-			
+
 			var playerIdRE = /fallensword.com\/\?ref=(\d+)/
 			var playerId=document.body.innerHTML.match(playerIdRE)[1];
-			
+
 			var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)
 			if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
 			var goldGain=responseDetails.responseText.match(/var\s+goldGain=(-?[0-9]+);/)
@@ -1076,13 +1170,13 @@ var fsHelper = {
 			GM_log(responseDetails.responseText);
 		}
 	},
-		
+
 	appendCombatLog: function(text) {
 		var reportLog = fsHelper.findNode("//div[@id='reportsLog']");
 		if (!reportLog) return;
 		reportLog.innerHTML += text;
 	},
-		
+
 	scrollUpCombatLog: function() {
 		var reportLog = fsHelper.findNode("//div[@id='reportsLog']");
 		reportLog.scrollTop-=10;
@@ -1095,13 +1189,17 @@ var fsHelper = {
 
 	clientTip: function(evt) {
 		var target=evt.target;
-		var value;
+		var value, width;
 		do {
-			if (target.getAttribute) value=target.getAttribute("mouseOverText");
+			if (target.getAttribute) {
+				value=target.getAttribute("mouseovertext");
+				width=target.getAttribute("mouseoverwidth");
+			}
 			target=target.parentNode;
 		} while (!value && target);
 		if (value) {
-			unsafeWindow.tt_setWidth(250);
+			if (!width) width="250";
+			unsafeWindow.tt_setWidth(parseInt(width));
 			unsafeWindow.Tip(value);
 		}
 	},
@@ -1211,11 +1309,11 @@ var fsHelper = {
 
 	parseChatForWorld: function(chatText) {
 		var doc=fsHelper.createDocument(chatText);
-		var chatTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", 0, doc);
+		var chatTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", doc);
 		if (!chatTable) return;
 		// GM_log(chatTable.innerHTML);
 		var chat = new Object();
-		var chatConfirm=fsHelper.findNode("//input[@name='xc']",0,doc);
+		var chatConfirm=fsHelper.findNode("//input[@name='xc']", doc);
 		chat.isRefreshed=true;
 		chat.lastUpdate = (new Date()).getTime();
 		chat.messages = new Array();
@@ -1297,8 +1395,8 @@ var fsHelper = {
 	sendChat: function(evt) {
 		var oForm=evt.target;
 
-		var confirm=fsHelper.findNode("//input[@name='xc']", 0, evt.target.form).value
-		var msg=fsHelper.findNode("//input[@name='msg']", 0, evt.target.form).value
+		var confirm=fsHelper.findNode("//input[@name='xc']", evt.target.form).value
+		var msg=fsHelper.findNode("//input[@name='msg']", evt.target.form).value
 		if (msg=="") {
 			fsHelper.retrieveChat();
 			return false;
@@ -1330,7 +1428,7 @@ var fsHelper = {
 	keyPress: function (evt) {
 		var r, s;
 		if (evt.target.tagName!="HTML") return;
-		
+
 		// ignore control, alt and meta keys (I think meta is the command key in Macintoshes)
 		if (evt.ctrlKey) return;
 		if (evt.metaKey) return;
@@ -1729,9 +1827,9 @@ var fsHelper = {
 		var isAuctionPage = fsHelper.findNode("//img[contains(@title,'Auction House')]");
 		var imageCell = isAuctionPage.parentNode;
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
-		
+
 		var potions = fsHelper.getValueJSON("potions");
-		
+
 		if (!potions) {
 			potions = [
 				{"searchname":"Potion of the Wise",         "shortname":"Lib 200",   "buff":"Librarian",      "level":200,  "duration":120, "minlevel":5},
@@ -1752,9 +1850,9 @@ var fsHelper = {
 				{"searchname":"Potion of Supreme Luck",     "shortname":"FI 1000",   "buff":"Find Item",      "level":1000, "duration":60,  "minlevel":5, "bound":true}
 			];
 		}
-		
+
 		//GM_log(JSON.stringify(potions));
-		
+
 		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
 			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
 		var lp=0;
@@ -1764,8 +1862,8 @@ var fsHelper = {
 			finalHTML += "<td";
 			if (pot.wide) finalHTML+=" colspan='2' "
 			finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' searchtext='" +
-				pot.searchname + "' title='" + 
-				pot.buff + " " + pot.level.toString() + "'>" + 
+				pot.searchname + "' title='" +
+				pot.buff + " " + pot.level.toString() + "'>" +
 				pot.shortname + "</span></td>"
 			if (lp % 3==2) finalHTML += "</tr>";
 			if (pot.wide) lp++;
@@ -1981,7 +2079,7 @@ var fsHelper = {
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			itemInvId = anItem.value;
-			theTextNode = fsHelper.findNode("../../td", 2, anItem);
+			theTextNode = fsHelper.findNode("../../td[3]", anItem);
 			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
 			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.getServer() + "?cmd=auctionhouse&type=-1&search_text="
 				+ escape(itemName)
@@ -2116,11 +2214,11 @@ var fsHelper = {
 	},
 
 	injectDropItemsPaint: function(responseDetails, callback) {
-		var textNode = fsHelper.findNode("../../../td", 2, callback);
+		var textNode = fsHelper.findNode("../../../td[3]", callback);
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
 		if (guildLockedRE.exec(responseDetails.responseText)) {
-			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", 0, textNode);
-			var sellLink=fsHelper.findNode("a[@findme='Sell']", 0, textNode);
+			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
+			var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
 			auctionHouseLink.style.visibility='hidden';
 			sellLink.style.visibility='hidden';
 		};
@@ -2415,7 +2513,7 @@ var fsHelper = {
 
 		document.getElementById('price').addEventListener('keyup', fsHelper.addMarketplaceWarning, true);
 	},
-	
+
 	addMarketplaceWarning: function(evt) {
 		 var goldPerPoint = fsHelper.findNode("//input[@id='price']");
 		 var warningField = fsHelper.findNode("//td[@id='warningfield']");
@@ -2483,7 +2581,7 @@ var fsHelper = {
 		if (!buffs) {
 			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
 		}
-			
+
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
@@ -2518,13 +2616,14 @@ var fsHelper = {
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).') + 
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).') +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td colspan="2">&nbsp;</td></tr>' +
+			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link') +
+				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			//save button
-			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') + 
+			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') +
 				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
@@ -2550,11 +2649,11 @@ var fsHelper = {
 		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 	},
-		
+
 	helpLink: function(title, text) {
 		return ' [ ' +
-			'<span style="text-decoration:underline;cursor:pointer;cursor:hand;" onmouseover="Tip(\'' + 
-			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' + 
+			'<span style="text-decoration:underline;cursor:pointer;cursor:hand;" onmouseover="Tip(\'' +
+			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
 			' ]'
 	},
@@ -2577,6 +2676,7 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		fsHelper.saveValueForm(oForm, "hideBanner");
 		fsHelper.saveValueForm(oForm, "showCombatLog");
+		fsHelper.saveValueForm(oForm, "showCreatureInfo");
 
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
