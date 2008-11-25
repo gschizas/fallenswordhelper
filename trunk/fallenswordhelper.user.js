@@ -82,7 +82,7 @@ var fsHelper = {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
 	},
-		
+
 	readInfo: function() {
 		var charInfo = fsHelper.findNode("//img[contains(@src,'skin/icon_player.gif')]");
 		var charInfoText = charInfo.getAttribute("onmouseover");
@@ -92,7 +92,7 @@ var fsHelper = {
 		fsHelper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		
+
 		/*
 		GM_log("\n" +
 		"Level: " + fsHelper.characterLevel + "\n" +
@@ -964,9 +964,10 @@ var fsHelper = {
 
 	prepareCheckMonster: function() {
 		if (!GM_getValue("showCreatureInfo")) return;
-		for (var i=1; i<=8; i++) {
-			var linkId="//a[@id='attackLink" + i + "']/preceding-sibling::a"
-			var monster = fsHelper.findNode(linkId);
+		if (GM_getValue("killAllAdvanced") == "all") return;
+		var monsters = fsHelper.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
+		for (var i=0; i<monsters.length; i++) {
+			var monster = monsters[i];
 			if (monster) {
 				var href=monster.href;
 				GM_xmlhttpRequest({
@@ -982,7 +983,6 @@ var fsHelper = {
 					},
 				})
 			}
-			
 		}
 	},
 
@@ -1026,14 +1026,14 @@ var fsHelper = {
 		var killButtons=fsHelper.findNode("tbody/tr[td/input]", statsNode);
 		var killButtonHeader=fsHelper.findNode("tbody/tr[contains(td,'Actions')]", statsNode);
 		var killButtonParent=killButtonHeader.parentNode;
-		
+
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + fsHelper.characterLevel + "</span>)"
 		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + fsHelper.characterDefense + "</span>) "
 		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + fsHelper.characterAttack + "</span>)"
 		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + fsHelper.characterDamage + "</span>)"
 		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + fsHelper.characterArmor + "</span>)"
 		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + fsHelper.characterHP + "</span>)"
-		
+
 		killButtonParent.removeChild(killButtons);
 		killButtonParent.removeChild(killButtonHeader);
 		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
