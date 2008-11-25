@@ -85,6 +85,7 @@ var fsHelper = {
 
 	readInfo: function() {
 		var charInfo = fsHelper.findNode("//img[contains(@src,'skin/icon_player.gif')]");
+		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
 		fsHelper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
@@ -276,6 +277,9 @@ var fsHelper = {
 				fsHelper.addMarketplaceWidgets();
 				break;
 			}
+			break;
+		case "quickbuff":
+			fsHelper.injectQuickBuff();
 			break;
 		case "-":
 			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
@@ -607,7 +611,7 @@ var fsHelper = {
 			defendersProcessed.innerHTML = fsHelper.addCommas(defendersProcessedNumber + 1);
 		}
 		var relicProcessedValue = fsHelper.findNode("//td[@title='relicProcessed']");
-		var relicCountValue = fsHelper.findNode("//td[@title='relicProcessed']");
+		var relicCountValue = fsHelper.findNode("//td[@title='relicCount']");
 		var relicCount = relicCountValue.innerHTML.replace(/,/,"")*1;
 
 		var relicMultiplier = 1;
@@ -2463,7 +2467,6 @@ var fsHelper = {
 
 	parseGroupData: function(responseText, linkElement) {
 		var doc=fsHelper.createDocument(responseText);
-		var doc=fsHelper.createDocument(responseText)
 		var allItems = doc.getElementsByTagName("TD")
 		//<td><font color="#333333">Attack:&nbsp;</font></td>
 
@@ -2534,6 +2537,61 @@ var fsHelper = {
 		}
 	},
 
+	injectQuickBuff: function() {
+		var playerIDRE = /tid=(\d+)/;
+		var playerID = playerIDRE.exec(location)[1];
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.getServer() + "index.php?cmd=profile&player_id=" + playerID,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getPlayerBuffs(responseDetails.responseText);
+			},
+		})
+	},
+	
+	getPlayerBuffs: function(responseText) {
+		var injectHere = fsHelper.findNode("//input[@value='Activate Selected Skills']").parentNode.parentNode;
+		injectHere.innerHTML += "<br><span style='color:lime;'><b>Buffs already on player:</b></span><br>"
+
+		//low level buffs used to get the buff above are not really worth casting.
+		var myBuffs = fsHelper.findNodes("//font[@size='1']");
+		for (var i=0;i<myBuffs.length;i++) {
+			var myBuff=myBuffs[i];
+			var buffLevelRE = /\[(\d+)\]/
+			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
+			if (buffLevel <= 11) {
+				myBuff.innerHTML = "<span style='color:gray;'>" + myBuff.innerHTML + "</span>";
+			}
+		}
+		
+		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
+		var doc=fsHelper.createDocument(responseText);
+		var allItems = doc.getElementsByTagName("IMG")
+		for (var i=0;i<allItems.length;i++) {
+			var anItem=allItems[i];
+			if (anItem.getAttribute("onmouseover")) {
+				var onmouseover = anItem.getAttribute("onmouseover");
+				if (onmouseover.search("tt\_setWidth\\(105\\)") != -1) {
+					var buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
+					var buff = buffRE.exec(onmouseover);
+					injectHere.innerHTML += "<span style='color:white; font-size:x-small'>" + buff[1] + " [" + buff[2] + "] </span>";
+					var hasThisBuff = fsHelper.findNode("//font[contains(.,'" + buff[1] + "')]");
+					if (hasThisBuff) {
+						var buffLevelRE = /\[(\d+)\]/
+						var buffLevel = buffLevelRE.exec(hasThisBuff.innerHTML)[1]*1;
+						if (buffLevel > 11) {
+							hasThisBuff.innerHTML = "<span style='color:lime;'>" + hasThisBuff.innerHTML + "</span>";
+						}
+					}
+				}
+			}
+		}
+	},
+	
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
