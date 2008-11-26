@@ -2727,14 +2727,27 @@ var fsHelper = {
 		var creatureDamage = creatureStatTable.rows[3].cells[3].textContent.replace(/,/,"")*1;
 		var creatureHP = creatureStatTable.rows[4].cells[1].textContent.replace(/,/,"")*1;
 		//math section ... analysis
-		//Attack: needs CA added ...
+		//Holy Flame adds its bonus after the armor of the creature has been taken off.
+		var extraNotes = "";
+		if (creatureClass == "Undead") {
+			playerDamageValue = playerDamageValue + ((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
+			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
+			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + " ":"");
+		}
+		var deathDealerBonusDamage = Math.floor(playerDamageValue * (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20)/100));
+		playerDamageValue += deathDealerBonusDamage;
+		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + " ":"");
+		//Attack: needs CA and KE added ...
+		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + " ":"");
 		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
-		//Damage: next bit needs HF calc added ... also DD and CA ...
+		//Damage: next bit needs DD and CA ...
 		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
 		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
 		//Defense:
+		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + " ":"");
 		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack) - (playerDefenseValue + (playerDefenseValue * constitutionLevel * 0.001)));
 		//Armor and HP:
+		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + " ":"");
 		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001) + playerHPValue));
 		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(playerHPValue/(((1.1053*creatureDamage) < (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))? 1: (1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))):"-");
 		//Analysis:
@@ -2766,8 +2779,9 @@ var fsHelper = {
 			"<tr><td align='right'><span style='color:#333333'># Player Hits? </td><td align='left'>" + playerHits + "</td>" +
 			"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
-			"<tr><td colspan='4'><span style='font-size:x-small; color:red'>*To be completed - does not include DD, CA or HF.</span></td></tr>" +
-			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" + extraNotes + "</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:red'>*To be completed - does not include KE or CA.</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
 			"</tbody></table>";
 	},
 	
