@@ -60,16 +60,6 @@ var fsHelper = {
 		nodes.textContent;
 	},
 
-	getImageServer: function() {
-		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
-		var idindex = imgurls.src.indexOf("/skin/");
-		return imgurls.src.substr(0,idindex);
-	},
-
-	getServer: function() {
-		return document.location.protocol + "//" + document.location.host + "/";
-	},
-
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
@@ -88,6 +78,10 @@ var fsHelper = {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
 		if (GM_getValue("huntingBuffs")==undefined) GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve")
+		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
+		var idindex = imgurls.src.indexOf("/skin/");
+		fsHelper.imageServer=imgurls.src.substr(0,idindex);
+		fsHelper.server=document.location.protocol + "//" + document.location.host + "/";
 	},
 
 	readInfo: function() {
@@ -474,7 +468,7 @@ var fsHelper = {
 	getRelicGuildData: function(extraTextInsertPoint,href) {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + href,
+			url: fsHelper.server + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -545,7 +539,7 @@ var fsHelper = {
 	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + href,
+			url: fsHelper.server + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -702,7 +696,7 @@ var fsHelper = {
 	},
 
 	checkBuffs: function() {
-		var imgserver = fsHelper.getImageServer();
+		var imgserver = fsHelper.imageServer;
 		var replacementText = "<td background='" + imgserver + "/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='100%' cellpadding='1' style='margin-left:28px; margin-right:28px; font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr><tr>";
@@ -781,7 +775,7 @@ var fsHelper = {
 		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
 		var pageCount=pageCountElement.parentNode.innerHTML.match(pageRE)[1]*1;
 		for (var i=1;i<pageCount;i++) {
-			var href = fsHelper.getServer() + "index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=";
+			var href = fsHelper.server + "index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=";
 			fsHelper.getQuestData(href);
 		}
 	},
@@ -835,7 +829,7 @@ var fsHelper = {
 	injectWorld: function() {
 		// fsHelper.mapThis();
 		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
-		var imgserver = fsHelper.getImageServer();
+		var imgserver = fsHelper.imageServer;
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", imgserver + "/skin/realm_right_bg.jpg");
@@ -925,7 +919,7 @@ var fsHelper = {
 		if (kills>0) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				url: fsHelper.server + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					// "Content-Type": "application/x-www-form-urlencoded",
@@ -967,7 +961,7 @@ var fsHelper = {
 		if (kills>0) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				url: fsHelper.server + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
@@ -1083,7 +1077,7 @@ var fsHelper = {
 		if (kills>0) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: fsHelper.getServer() + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
+				url: fsHelper.server + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
@@ -1239,7 +1233,7 @@ var fsHelper = {
 		if (!memberList) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=manage",
+				url: fsHelper.server + "index.php?cmd=guild&subcmd=manage",
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
@@ -1313,7 +1307,7 @@ var fsHelper = {
 	retrieveChat: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=chat",
+			url: fsHelper.server + "index.php?cmd=guild&subcmd=chat",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -1421,7 +1415,7 @@ var fsHelper = {
 
 		GM_xmlhttpRequest({
 			method: 'POST',
-			url: fsHelper.getServer() + "index.php",
+			url: fsHelper.server + "index.php",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
@@ -1764,7 +1758,7 @@ var fsHelper = {
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
 				if (member.id!=playerId) {
 					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
-					output += "href=\"" + fsHelper.getServer() + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
+					output += "href=\"" + fsHelper.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
 					output += "</a>";
 				}
 				else {
@@ -1786,7 +1780,7 @@ var fsHelper = {
 					output += (member.id==playerId)?"#FFF380":"white";
 				}
 				output += ";font-size:10px;'"
-				output += " href='" + fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
+				output += " href='" + fsHelper.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 				// output += "<br/>"
 				output += "</li>"
 			}
@@ -1809,7 +1803,7 @@ var fsHelper = {
 		return;
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id,
+			url: fsHelper.server + "index.php?cmd=profile&player_id=" + member.id,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -2044,7 +2038,7 @@ var fsHelper = {
 
 	insertAuctionGetItemDetails: function(itemId, invId, type, pid) {
 		var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-		theUrl = fsHelper.getServer() + theUrl
+		theUrl = fsHelper.server + theUrl
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: theUrl,
@@ -2071,7 +2065,7 @@ var fsHelper = {
 	},
 
 	injectAuctionExtraText: function(invId, craft, forgeCount) {
-		var imgserver = fsHelper.getImageServer();
+		var imgserver = fsHelper.imageServer;
 
 		var allItems = document.getElementsByTagName("IMG");
 		for (var i=0; i<allItems.length; i++) {
@@ -2098,10 +2092,10 @@ var fsHelper = {
 			itemInvId = anItem.value;
 			theTextNode = fsHelper.findNode("../../td[3]", anItem);
 			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.getServer() + "?cmd=auctionhouse&type=-1&search_text="
+			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
 				+ escape(itemName)
 				+ "'>[AH]</a> "
-				+ "<a findme='Sell' href='" + fsHelper.getServer() + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+				+ "<a findme='Sell' href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
 				+ "[Sell]</a> "
 				+ theTextNode.innerHTML;
 
@@ -2151,7 +2145,7 @@ var fsHelper = {
 				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
-						fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						fsHelper.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
 				}
 			}
@@ -2159,7 +2153,7 @@ var fsHelper = {
 				var player=fsHelper.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<a href='" +
-						fsHelper.getServer() + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						fsHelper.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 				}
 			}
 		}
@@ -2170,7 +2164,7 @@ var fsHelper = {
 		var playerID=evt.target.getAttribute("playerID");
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
+			url: fsHelper.server + "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -2213,7 +2207,7 @@ var fsHelper = {
 			}
 			else {
 				var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-				theUrl = fsHelper.getServer() + theUrl
+				theUrl = fsHelper.server + theUrl
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: theUrl,
@@ -2306,7 +2300,7 @@ var fsHelper = {
 			playeravy.style.borderStyle="none";
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
-			imgserver = fsHelper.getImageServer();
+			imgserver = fsHelper.imageServer;
 
 			var auctiontext = "Go to " + playername + "'s auctions" ;
 			var ranktext = "Rank " +playername + "" ;
@@ -2315,14 +2309,14 @@ var fsHelper = {
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
 			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='" + fsHelper.getServer() + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
+			newhtml += "<a href='" + fsHelper.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
 			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
 			newhtml += imgserver + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=" + fsHelper.getServer() + "?cmd=auctionhouse&type=-3&tid=" ;
+			newhtml += "<a href=" + fsHelper.server + "?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
 			newhtml += imgserver + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
-				newhtml += "<a href='" + fsHelper.getServer() + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
+				newhtml += "<a href='" + fsHelper.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
 				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
 				newhtml += imgserver + "/guilds/" + guildId + "_mini.jpg></a>" ;
 			}
@@ -2358,7 +2352,7 @@ var fsHelper = {
 			"</td><td>)</td></tr></tbody></table>";
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + "index.php?cmd=guild&subcmd=mercs",
+			url: fsHelper.server + "index.php?cmd=guild&subcmd=mercs",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -2464,7 +2458,7 @@ var fsHelper = {
 	retrieveGroupData: function(href, link) {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + href,
+			url: fsHelper.server + href,
 			callback: link,
 			headers: {
 				"User-Agent" : navigator.userAgent,
@@ -2553,7 +2547,7 @@ var fsHelper = {
 		var playerID = playerIDRE.exec(location)[1];
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + "index.php?cmd=profile&player_id=" + playerID,
+			url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -2618,7 +2612,7 @@ var fsHelper = {
 		resultText += "</table>"
 
 		var statistics=fsHelper.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
-		statistics.style.backgroundImage = 'url(' + fsHelper.getImageServer() + '/skin/realm_top_b2.jpg)'; //Color='white';
+		statistics.style.backgroundImage = 'url(' + fsHelper.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
 		
 		resultText += statistics.parentNode.innerHTML;
 			
@@ -2630,7 +2624,7 @@ var fsHelper = {
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: fsHelper.getServer() + "index.php?cmd=profile",
+			url: fsHelper.server + "index.php?cmd=profile",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -2798,6 +2792,8 @@ var fsHelper = {
 		if (!buffs) {
 			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
 		}
+		
+		window.alert(navigator.userAgent)
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -2833,21 +2829,21 @@ var fsHelper = {
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).<br>Does not work in Firefox 2 - suggest setting to 0.') +
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.') +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.<br>Does not work in Firefox 2 - suggest disabling.') +
+			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.<br>Does not work in Firefox 2 - suggest disabling  or upgrading to Firefox 3.') +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') +
 				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
-			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-			'with valuable contributions by <a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
-			'<a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
-			'<a href="' + fsHelper.getServer() + 'index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
+			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
+			'with valuable contributions by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
+			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions or bug reports<span></td></tr>' +
