@@ -196,7 +196,13 @@ var fsHelper = {
 			fsHelper.injectSettings();
 			break;
 		case "world":
-			fsHelper.injectWorld();
+			switch (subPageId) {
+			case "viewcreature":
+				fsHelper.injectCreature();
+				break;
+			case "-":
+				fsHelper.injectWorld();
+			}
 			break;
 		case "questbook":
 			switch(subsequentPageId) {
@@ -994,6 +1000,7 @@ var fsHelper = {
 		var reportText="";
 		var creatureInfo=fsHelper.createDocument(responseDetails.responseText);
 		var statsNode = fsHelper.findNode("//table[@width='400']", creatureInfo);
+		if (!statsNode) {return;} // FF2 error fix
 		var classNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Class:')]/following-sibling::td", creatureInfo);
 		var levelNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Level:')]/following-sibling::td", creatureInfo);
 		var attackNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]/following-sibling::td", creatureInfo);
@@ -2571,15 +2578,26 @@ var fsHelper = {
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
 		var doc=fsHelper.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("IMG")
+		var buffRE, buff, buffName, buffLevel;
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.getAttribute("onmouseover")) {
 				var onmouseover = anItem.getAttribute("onmouseover");
 				if (onmouseover.search("tt\_setWidth\\(105\\)") != -1) {
-					var buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
-					var buff = buffRE.exec(onmouseover);
-					injectHere.innerHTML += "<span style='color:white; font-size:x-small'>" + buff[1] + " [" + buff[2] + "] </span>";
-					var hasThisBuff = fsHelper.findNode("//font[contains(.,'" + buff[1] + "')]");
+					if (onmouseover.search("Summon Shield Imp") != -1) {
+						//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
+						buffRE = /<b>([ a-zA-Z]+)<br>(\d+) HP remaining<br><\/b> \(Level: (\d+)\)/
+						buff = buffRE.exec(onmouseover);
+						buffName = buff[1];
+						buffLevel = buff[3];
+					} else {
+						buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
+						buff = buffRE.exec(onmouseover);
+						buffName = buff[1];
+						buffLevel = buff[2];
+					}
+					injectHere.innerHTML += "<span style='color:white; font-size:x-small'>" + buffName + " [" + buffLevel + "] </span>";
+					var hasThisBuff = fsHelper.findNode("//font[contains(.,'" + buffName + "')]");
 					if (hasThisBuff) {
 						var buffLevelRE = /\[(\d+)\]/
 						var buffLevel = buffLevelRE.exec(hasThisBuff.innerHTML)[1]*1;
@@ -2590,6 +2608,86 @@ var fsHelper = {
 				}
 			}
 		}
+	},
+	
+	injectCreature: function() {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.getServer() + "index.php?cmd=profile",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getCreaturePlayerData(responseDetails.responseText);
+			},
+		})
+
+	},
+
+	getCreaturePlayerData: function(responseText) {
+		//playerdata
+		var doc=fsHelper.createDocument(responseText)
+		var allItems = doc.getElementsByTagName("B")
+		for (var i=0;i<allItems.length;i++) {
+			var anItem=allItems[i];
+			if (anItem.innerHTML == "Attack:&nbsp;"){
+				var attackText = anItem;
+				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var playerAttackValue = attackLocation.textContent*1;
+				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var playerDefenseValue = defenseLocation.textContent*1;
+				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var playerArmorValue = armorLocation.textContent*1;
+				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var playerDamageValue = damageLocation.textContent*1;
+				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				var playerHPValue = hpLocation.textContent*1;
+			}
+			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
+				var killStreakText = anItem;
+				var killStreakLocation = killStreakText.parentNode.nextSibling;
+				var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
+			}
+			//get buffs here later ... DD, CA, DC, Constitution, etc
+		}
+		//creaturedata
+		var creatureStatTable = fsHelper.findNode("//table[tbody/tr/td[.='Statistics']]");
+		//GM_log(creatureStatTable.innerHTML);
+		var creatureClass = creatureStatTable.rows[1].cells[1].textContent;
+		var creatureLevel = creatureStatTable.rows[1].cells[3].textContent;
+		var creatureAttack = creatureStatTable.rows[2].cells[1].textContent.replace(/,/,"")*1;
+		var creatureDefense = creatureStatTable.rows[2].cells[3].textContent.replace(/,/,"")*1;
+		var creatureArmor = creatureStatTable.rows[3].cells[1].textContent.replace(/,/,"")*1;
+		var creatureDamage = creatureStatTable.rows[3].cells[3].textContent.replace(/,/,"")*1;
+		var creatureHP = creatureStatTable.rows[4].cells[1].textContent.replace(/,/,"")*1;
+		//information row
+		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
+		var newCell = newRow.insertCell(0);
+		newCell.colSpan = '4';
+		newCell.innerHTML = "<span style='color:red'>To be completed - does not include DC, DD, CA, Constitution or HF. Nor is it very conservative (i.e. allow for randomness).</span>";
+		//analysis
+		newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
+		newCell = newRow.insertCell(0);
+		var didIHit = ((playerAttackValue - creatureDefense) > 0)? true:false;
+		var hitByHowMuch = (playerAttackValue - creatureAttack);
+		var damageDone = (playerDamageValue - (creatureArmor + creatureHP));
+		var numberOfHitsRequired = Math.ceil(creatureHP/((playerDamageValue < creatureArmor)? 1: playerDamageValue - creatureArmor))
+		var didCreatureHit = ((creatureAttack - playerDefenseValue) > 0)? true:false;
+		var creatureDamageDone = (creatureDamage - (playerArmorValue + playerHPValue));
+		var numberOfCreatureHitsTillDead = Math.ceil(playerHPValue/((creatureDamage < playerArmorValue)? 1: creatureDamage - playerArmorValue))
+		newCell.colSpan = '4';
+		newCell.innerHTML = "Do I hit? " + didIHit + " 1-hit damage done? " + damageDone + " Number of hits? " + 
+			((numberOfHitsRequired > 2)?"<span style='color:red;'>" + numberOfHitsRequired + "</span>":numberOfHitsRequired);
+		newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
+		newCell = newRow.insertCell(0);
+		newCell.colSpan = '4';
+		newCell.innerHTML = "Does creature hit? " + didCreatureHit + " 1-hit damage done by creature? " + creatureDamageDone + " Number of creature hits before I die? " + 
+			((numberOfCreatureHitsTillDead > 2)?"<span style='color:red;'>" + numberOfCreatureHitsTillDead + "</span>":numberOfCreatureHitsTillDead);
 	},
 	
 	toggleVisibilty: function(evt) {
@@ -2676,11 +2774,11 @@ var fsHelper = {
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).') +
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).<br>Does not work in Firefox 2 - suggest setting to 0.') +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link') +
+			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.<br>Does not work in Firefox 2 - suggest disabling.') +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') +
