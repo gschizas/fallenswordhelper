@@ -1008,6 +1008,10 @@ var fsHelper = {
 		var hitpointsNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]/following-sibling::td", creatureInfo);
 		var goldNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Gold:')]/following-sibling::td", creatureInfo);
 		var enhanceNodes = fsHelper.findNodes("//table[@width='400']/tbody/tr[contains(td,'Enhancements')]/following-sibling::*[td/font[@color='#333333']]", creatureInfo);
+
+		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/,""));
+		var armorNumber = parseInt(armorNode.textContent.replace(/,/,""));
+		var oneHitNumber = Math.ceil((hitpoints*1.053)+(armorNumber*1.053));
 		/*
 		if (statsNode) reportText += "<div style='color:#FFF380;'>Statistics</div>"
 		if (classNode) reportText += "Class: " + classNode.textContent + "<br/>";
@@ -1041,7 +1045,7 @@ var fsHelper = {
 		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + fsHelper.characterAttack + "</span>)"
 		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + fsHelper.characterDamage + "</span>)"
 		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + fsHelper.characterArmor + "</span>)"
-		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + fsHelper.characterHP + "</span>)"
+		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + fsHelper.characterHP + "</span>)(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
 
 		killButtonParent.removeChild(killButtons);
 		killButtonParent.removeChild(killButtonHeader);
