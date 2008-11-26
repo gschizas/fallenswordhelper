@@ -81,6 +81,7 @@ var fsHelper = {
 	initSettings: function() {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
+		if (GM_getValue("huntingBuffs")==undefined) GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve")
 	},
 
 	readInfo: function() {
@@ -719,9 +720,6 @@ var fsHelper = {
 		}
 
 		var buffs=GM_getValue("huntingBuffs")
-		if (!buffs) {
-			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
-		}
 		var buffAry=buffs.split(",")
 		var missingBuffs = new Array();
 		for (var i=0;i<buffAry.length;i++) {
