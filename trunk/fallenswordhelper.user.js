@@ -82,6 +82,7 @@ var fsHelper = {
 		var idindex = imgurls.src.indexOf("/skin/");
 		fsHelper.imageServer=imgurls.src.substr(0,idindex);
 		fsHelper.server=document.location.protocol + "//" + document.location.host + "/";
+		fsHelper.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1])
 	},
 
 	readInfo: function() {
@@ -545,7 +546,6 @@ var fsHelper = {
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				//window.alert(href);
 				fsHelper.parseRelicPlayerData(defenderCount,extraTextInsertPoint,href, responseDetails.responseText);
 			},
 		})
@@ -1345,7 +1345,6 @@ var fsHelper = {
 	injectChat: function(chat){
 		var injectHere = document.getElementById("fsHelperPlaceholderChat");
 		var newTable=false;
-		// window.alert(chat.messages.length);
 
 		var displayList = document.getElementById("fsHelperChatWindow");
 		if (!displayList) {
@@ -1431,7 +1430,6 @@ var fsHelper = {
 	},
 
 	replaceKeyHandler: function() {
-		// window.alert(unsafeWindow.document.onkeypress);
 		unsafeWindow.document.onkeypress = null;
 		unsafeWindow.document.onkeypress = fsHelper.keyPress;
 	},
@@ -1925,7 +1923,6 @@ var fsHelper = {
 				if (savedItems && savedItems.indexOf(itemId)>=0) {
 					//fsHelper.injectDropItemsParse(savedItems(itemId).reponseText);
 					GM_log("script error");
-					//window.alert(savedItems(itemId).reponseText);
 				}
 				else {
 						fsHelper.insertAuctionGetItemDetails(itemId, invId, type, pid);
@@ -2792,8 +2789,6 @@ var fsHelper = {
 		if (!buffs) {
 			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
 		}
-		
-		window.alert(navigator.userAgent)
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -2829,11 +2824,11 @@ var fsHelper = {
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.') +
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' + ((fsHelper.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.<br>Does not work in Firefox 2 - suggest disabling  or upgrading to Firefox 3.') +
+			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' + ((fsHelper.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') +
