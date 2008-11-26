@@ -2734,13 +2734,23 @@ var fsHelper = {
 			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
 			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + " ":"");
 		}
+		//Death Dealer and Counter Attack both applied at the same time
 		var deathDealerBonusDamage = Math.floor(playerDamageValue * (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20)/100));
-		playerDamageValue += deathDealerBonusDamage;
+		var counterAttackBonusAttack = Math.ceil(playerAttackValue * 0.0025 * counterAttackLevel);
+		var counterAttackBonusDamage = Math.ceil(playerDamageValue * 0.0025 * counterAttackLevel);
+		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(500/50))*0.0025*counterAttackLevel) :0);
+		playerAttackValue += counterAttackBonusAttack;
+		playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
 		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + " ":"");
-		//Attack: needs CA and KE added ...
+		if (counterAttackLevel > 0) {
+			extraNotes += "CA Bonus Attack = " + counterAttackBonusAttack + " ";
+			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + " ";
+			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + " ";
+		}
+		//Attack: needs KE added ...
 		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + " ":"");
 		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
-		//Damage: next bit needs DD and CA ...
+		//Damage: 
 		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
 		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
 		//Defense:
@@ -2780,8 +2790,8 @@ var fsHelper = {
 			"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" + extraNotes + "</span></td></tr>" +
-			"<tr><td colspan='4'><span style='font-size:x-small; color:red'>*To be completed - does not include KE or CA.</span></td></tr>" +
-			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:red'>*To be completed - does not include KE.</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
 			"</tbody></table>";
 	},
 	
