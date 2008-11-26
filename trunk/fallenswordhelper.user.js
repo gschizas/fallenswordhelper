@@ -2627,8 +2627,8 @@ var fsHelper = {
 
 	getCreaturePlayerData: function(responseText) {
 		//playerdata
-		var doc=fsHelper.createDocument(responseText)
-		var allItems = doc.getElementsByTagName("B")
+		var doc=fsHelper.createDocument(responseText);
+		var allItems = doc.getElementsByTagName("B");
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.innerHTML == "Attack:&nbsp;"){
@@ -2653,8 +2653,50 @@ var fsHelper = {
 				var killStreakLocation = killStreakText.parentNode.nextSibling;
 				var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
 			}
-			//get buffs here later ... DD, CA, DC, Constitution, etc
 		}
+		//get buffs here later ... DD, CA, DC, Constitution, etc
+		var allItems = doc.getElementsByTagName("IMG");
+		var counterAttackActive = false;
+		var deathDealerActive = false;
+		var darkCurseActive = false;
+		var holyFlameActive = false;
+		var constitutionActive = false;
+		for (var i=0;i<allItems.length;i++) {
+			var anItem=allItems[i];
+			if (anItem.getAttribute("src").search("/skills/") != -1) {
+				var onmouseover = anItem.getAttribute("onmouseover")
+				var counterAttackLevelRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
+				var counterAttackLevel = counterAttackLevelRE.exec(onmouseover);
+				if (counterAttackLevel) {
+					counterAttackActive = true;
+					counterAttackLevel = counterAttackLevel[1];
+				}
+				var deathDealerLevelRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
+				var deathDealerLevel = deathDealerLevelRE.exec(onmouseover);
+				if (deathDealerLevel) {
+					deathDealerActive = true;
+					deathDealerLevel = deathDealerLevel[1];
+				}
+				var darkCurseLevelRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
+				var darkCurseLevel = darkCurseLevelRE.exec(onmouseover);
+				if (darkCurseLevel) {
+					darkCurseActive = true;
+					darkCurseLevel = darkCurseLevel[1];
+				}
+				var holyFlameLevelRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
+				var holyFlameLevel = holyFlameLevelRE.exec(onmouseover);
+				if (holyFlameLevel) {
+					holyFlameActive = true;
+					holyFlameLevel = holyFlameLevel[1];
+				}
+				var constitutionLevelRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
+				var constitutionLevel = constitutionLevelRE.exec(onmouseover);
+				if (constitutionLevel) {
+					constitutionActive = true;
+					constitutionLevel = constitutionLevel[1];
+				}
+			}
+		}		
 		//creaturedata
 		var creatureStatTable = fsHelper.findNode("//table[tbody/tr/td[.='Statistics']]");
 		//GM_log(creatureStatTable.innerHTML);
