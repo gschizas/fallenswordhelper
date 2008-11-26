@@ -2679,40 +2679,40 @@ var fsHelper = {
 			var anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
 				var onmouseover = anItem.getAttribute("onmouseover")
-				var counterAttackLevelRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
-				counterAttackLevel = counterAttackLevelRE.exec(onmouseover);
-				if (counterAttackLevel) {
-					counterAttackLevel = counterAttackLevel[1];
+				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
+				var counterAttack = counterAttackRE.exec(onmouseover);
+				if (counterAttack) {
+					counterAttackLevel = counterAttack[1];
 				}
-				var doublerLevelRE = /<b>Doubler<\/b> \(Level: (\d+)\)/
-				doublerLevel = doublerLevelRE.exec(onmouseover);
-				if (doublerLevel) {
-					doublerLevel = doublerLevel[1];
+				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/
+				var doubler = doublerRE.exec(onmouseover);
+				if (doubler) {
+					doublerLevel = doubler[1];
 				}
-				var deathDealerLevelRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
-				deathDealerLevel = deathDealerLevelRE.exec(onmouseover);
-				if (deathDealerLevel) {
-					deathDealerLevel = deathDealerLevel[1];
+				var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
+				var deathDealer = deathDealerRE.exec(onmouseover);
+				if (deathDealer) {
+					deathDealerLevel = deathDealer[1];
 				}
-				var darkCurseLevelRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
-				darkCurseLevel = darkCurseLevelRE.exec(onmouseover);
-				if (darkCurseLevel) {
-					darkCurseLevel = darkCurseLevel[1];
+				var darkCurseRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
+				var darkCurse = darkCurseRE.exec(onmouseover);
+				if (darkCurse) {
+					darkCurseLevel = darkCurse[1];
 				}
-				var holyFlameLevelRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
-				holyFlameLevel = holyFlameLevelRE.exec(onmouseover);
-				if (holyFlameLevel) {
-					holyFlameLevel = holyFlameLevel[1];
+				var holyFlameRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
+				var holyFlame = holyFlameRE.exec(onmouseover);
+				if (holyFlame) {
+					holyFlameLevel = holyFlame[1];
 				}
-				var constitutionLevelRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
-				constitutionLevel = constitutionLevelRE.exec(onmouseover);
-				if (constitutionLevel) {
-					constitutionLevel = constitutionLevel[1];
+				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
+				var constitution = constitutionRE.exec(onmouseover);
+				if (constitution) {
+					constitutionLevel = constitution[1];
 				}
-				var sanctuaryLevelRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/
-				sanctuaryLevel = sanctuaryLevelRE.exec(onmouseover);
-				if (sanctuaryLevel) {
-					sanctuaryLevel = sanctuaryLevel[1];
+				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/
+				var sanctuary = sanctuaryRE.exec(onmouseover);
+				if (sanctuary) {
+					sanctuaryLevel = sanctuary[1];
 				}
 			}
 		}		
@@ -2732,7 +2732,7 @@ var fsHelper = {
 		if (creatureClass == "Undead") {
 			playerDamageValue = playerDamageValue + ((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
 			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
-			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + " ":"");
+			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + "<br>":"");
 		}
 		//Death Dealer and Counter Attack both applied at the same time
 		var deathDealerBonusDamage = Math.floor(playerDamageValue * (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20)/100));
@@ -2741,23 +2741,23 @@ var fsHelper = {
 		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(500/50))*0.0025*counterAttackLevel) :0);
 		playerAttackValue += counterAttackBonusAttack;
 		playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
-		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + " ":"");
+		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + "<br>":"");
 		if (counterAttackLevel > 0) {
-			extraNotes += "CA Bonus Attack = " + counterAttackBonusAttack + " ";
-			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + " ";
-			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + " ";
+			extraNotes += "CA Bonus Attack = " + counterAttackBonusAttack + "<br>";
+			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + "<br>";
+			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + "<br>";
 		}
 		//Attack: needs KE added ...
-		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + " ":"");
+		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + "<br>":"");
 		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
 		//Damage: 
 		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
 		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
 		//Defense:
-		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + " ":"");
+		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + "<br>":"");
 		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack) - (playerDefenseValue + (playerDefenseValue * constitutionLevel * 0.001)));
 		//Armor and HP:
-		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + " ":"");
+		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
 		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001) + playerHPValue));
 		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(playerHPValue/(((1.1053*creatureDamage) < (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))? 1: (1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))):"-");
 		//Analysis:
