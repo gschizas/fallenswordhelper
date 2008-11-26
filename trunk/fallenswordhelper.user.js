@@ -499,7 +499,7 @@ var fsHelper = {
 		if (relicCount == 1) {
 			relicMultiplier = 1.5;
 		}
-		else if (relicCount > 3) {
+		else if (relicCount >= 3) {
 			relicMultiplier = 0.9;
 		}
 		var LDProcessedValue = fsHelper.findNode("//td[@title='LDProcessed']");
@@ -625,7 +625,7 @@ var fsHelper = {
 		if (relicCount == 1) {
 			relicMultiplier = 1.5;
 		}
-		else if (relicCount > 3) {
+		else if (relicCount >= 3) {
 			relicMultiplier = 0.9;
 		}
 
@@ -2668,50 +2668,57 @@ var fsHelper = {
 		}
 		//get buffs here later ... DD, CA, DC, Constitution, etc
 		var allItems = doc.getElementsByTagName("IMG");
-		var counterAttackActive = false;
-		var deathDealerActive = false;
-		var darkCurseActive = false;
-		var holyFlameActive = false;
-		var constitutionActive = false;
+		var counterAttackLevel = 0;
+		var doublerLevel = 0;
+		var deathDealerLevel = 0;
+		var darkCurseLevel = 0;
+		var holyFlameLevel = 0;
+		var constitutionLevel = 0;
+		var sanctuaryLevel = 0;		
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
 				var onmouseover = anItem.getAttribute("onmouseover")
 				var counterAttackLevelRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
-				var counterAttackLevel = counterAttackLevelRE.exec(onmouseover);
+				counterAttackLevel = counterAttackLevelRE.exec(onmouseover);
 				if (counterAttackLevel) {
-					counterAttackActive = true;
 					counterAttackLevel = counterAttackLevel[1];
 				}
+				var doublerLevelRE = /<b>Doubler<\/b> \(Level: (\d+)\)/
+				doublerLevel = doublerLevelRE.exec(onmouseover);
+				if (doublerLevel) {
+					doublerLevel = doublerLevel[1];
+				}
 				var deathDealerLevelRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
-				var deathDealerLevel = deathDealerLevelRE.exec(onmouseover);
+				deathDealerLevel = deathDealerLevelRE.exec(onmouseover);
 				if (deathDealerLevel) {
-					deathDealerActive = true;
 					deathDealerLevel = deathDealerLevel[1];
 				}
 				var darkCurseLevelRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
-				var darkCurseLevel = darkCurseLevelRE.exec(onmouseover);
+				darkCurseLevel = darkCurseLevelRE.exec(onmouseover);
 				if (darkCurseLevel) {
-					darkCurseActive = true;
 					darkCurseLevel = darkCurseLevel[1];
 				}
 				var holyFlameLevelRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
-				var holyFlameLevel = holyFlameLevelRE.exec(onmouseover);
+				holyFlameLevel = holyFlameLevelRE.exec(onmouseover);
 				if (holyFlameLevel) {
-					holyFlameActive = true;
 					holyFlameLevel = holyFlameLevel[1];
 				}
 				var constitutionLevelRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
-				var constitutionLevel = constitutionLevelRE.exec(onmouseover);
+				constitutionLevel = constitutionLevelRE.exec(onmouseover);
 				if (constitutionLevel) {
-					constitutionActive = true;
 					constitutionLevel = constitutionLevel[1];
+				}
+				var sanctuaryLevelRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/
+				sanctuaryLevel = sanctuaryLevelRE.exec(onmouseover);
+				if (sanctuaryLevel) {
+					sanctuaryLevel = sanctuaryLevel[1];
 				}
 			}
 		}		
 		//creaturedata
 		var creatureStatTable = fsHelper.findNode("//table[tbody/tr/td[.='Statistics']]");
-		//GM_log(creatureStatTable.innerHTML);
+		if (!creatureStatTable) {return;}
 		var creatureClass = creatureStatTable.rows[1].cells[1].textContent;
 		var creatureLevel = creatureStatTable.rows[1].cells[3].textContent;
 		var creatureAttack = creatureStatTable.rows[2].cells[1].textContent.replace(/,/,"")*1;
@@ -2719,29 +2726,49 @@ var fsHelper = {
 		var creatureArmor = creatureStatTable.rows[3].cells[1].textContent.replace(/,/,"")*1;
 		var creatureDamage = creatureStatTable.rows[3].cells[3].textContent.replace(/,/,"")*1;
 		var creatureHP = creatureStatTable.rows[4].cells[1].textContent.replace(/,/,"")*1;
-		//information row
+		//math section ... analysis
+		//Attack: needs CA added ...
+		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
+		//Damage: next bit needs HF calc added ... also DD and CA ...
+		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
+		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
+		//Defense:
+		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack) - (playerDefenseValue + (playerDefenseValue * constitutionLevel * 0.001)));
+		//Armor and HP:
+		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001) + playerHPValue));
+		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(playerHPValue/(((1.1053*creatureDamage) < (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))? 1: (1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))):"-");
+		//Analysis:
+		var playerHits = (numberOfCreatureHitsTillDead=="-"? numberOfHitsRequired:(numberOfHitsRequired=="-"?"-":(numberOfHitsRequired>numberOfCreatureHitsTillDead?"-":numberOfHitsRequired)));
+		var creatureHits = (numberOfHitsRequired=="-"? numberOfCreatureHitsTillDead:(numberOfCreatureHitsTillDead=="-"?"-":(numberOfCreatureHitsTillDead>numberOfHitsRequired?"-":numberOfCreatureHitsTillDead)));
+		var fightStatus = "Unknown";
+		if (playerHits == "-" && creatureHits == "-") {
+			fightStatus = "Unresolved";
+		} else if (playerHits == "-") {
+			fightStatus = "Player dies";
+		} else if (playerHits == 1) {
+			fightStatus = "Player 1 hits" + (numberOfCreatureHitsTillDead-numberOfHitsRequired<=1? ", dies on miss":", survives a miss");
+		} else if (playerHits > 1) {
+			fightStatus = "Player > 1 hits" + (numberOfCreatureHitsTillDead-numberOfHitsRequired<=1? ", dies on miss":", survives a miss");
+		}
+		//display data
 		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = '4';
-		newCell.innerHTML = "<span style='color:red'>To be completed - does not include DC, DD, CA, Constitution or HF. Nor is it very conservative (i.e. allow for randomness).</span>";
-		//analysis
-		newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
-		newCell = newRow.insertCell(0);
-		var didIHit = ((playerAttackValue - creatureDefense) > 0)? true:false;
-		var hitByHowMuch = (playerAttackValue - creatureAttack);
-		var damageDone = (playerDamageValue - (creatureArmor + creatureHP));
-		var numberOfHitsRequired = Math.ceil(creatureHP/((playerDamageValue < creatureArmor)? 1: playerDamageValue - creatureArmor))
-		var didCreatureHit = ((creatureAttack - playerDefenseValue) > 0)? true:false;
-		var creatureDamageDone = (creatureDamage - (playerArmorValue + playerHPValue));
-		var numberOfCreatureHitsTillDead = Math.ceil(playerHPValue/((creatureDamage < playerArmorValue)? 1: creatureDamage - playerArmorValue))
-		newCell.colSpan = '4';
-		newCell.innerHTML = "Do I hit? " + didIHit + " 1-hit damage done? " + damageDone + " Number of hits? " + 
-			((numberOfHitsRequired > 2)?"<span style='color:red;'>" + numberOfHitsRequired + "</span>":numberOfHitsRequired);
-		newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = '4';
-		newCell.innerHTML = "Does creature hit? " + didCreatureHit + " 1-hit damage done by creature? " + creatureDamageDone + " Number of creature hits before I die? " + 
-			((numberOfCreatureHitsTillDead > 2)?"<span style='color:red;'>" + numberOfCreatureHitsTillDead + "</span>":numberOfCreatureHitsTillDead);
+		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>Combat Evaluation</td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'>Will I hit it? </td><td align='left'>" + (hitByHowMuch > 0? "Yes":"No") + "</td>" +
+			"<td align='right'><span style='color:#333333'>Extra Attack: </td><td align='left'>( " + hitByHowMuch + " )</td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'># Hits to kill it? </td><td align='left'>" + numberOfHitsRequired + "</td>" +
+			"<td align='right'><span style='color:#333333'>Extra Damage: </td><td align='left'>( " + damageDone + " )</td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'>Will I be hit? </td><td align='left'>" + (creatureHitByHowMuch >= 0? "Yes":"No") + "</td>" +
+			"<td align='right'><span style='color:#333333'>Extra Defense: </td><td align='left'>( " + creatureHitByHowMuch + " )</td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'># Hits to kill me? </td><td align='left'>" + numberOfCreatureHitsTillDead + "</td>" +
+			"<td align='right'><span style='color:#333333'>Extra Armor + HP: </td><td align='left'>( " + creatureDamageDone + " )</td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'># Player Hits? </td><td align='left'>" + playerHits + "</td>" +
+			"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:red'>*To be completed - does not include DD, CA or HF.</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
+			"</tbody></table>";
 	},
 	
 	toggleVisibilty: function(evt) {
