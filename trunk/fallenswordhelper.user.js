@@ -53,6 +53,12 @@ var fsHelper = {
 			}
 			return nodes;
 	},
+		
+	findNodeText: function(xpath, doc) {
+		var node=fsHelper.findNode(xpath, doc);
+		if (!node) return null;
+		nodes.textContent;
+	},
 
 	getImageServer: function() {
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
@@ -2559,8 +2565,8 @@ var fsHelper = {
 	},
 	
 	getPlayerBuffs: function(responseText) {
-		var injectHere = fsHelper.findNode("//input[@value='Activate Selected Skills']").parentNode.parentNode;
-		injectHere.innerHTML += "<br><span style='color:lime;'><b>Buffs already on player:</b></span><br>"
+		var injectHere = fsHelper.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
+		var resultText = "<table align='center'><tr><td colspan='2' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
 
 		//low level buffs used to get the buff above are not really worth casting.
 		var myBuffs = fsHelper.findNodes("//font[@size='1']");
@@ -2569,43 +2575,56 @@ var fsHelper = {
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
 			if (buffLevel <= 11) {
-				myBuff.innerHTML = "<span style='color:gray;'>" + myBuff.innerHTML + "</span>";
+				myBuff.style.color = "gray";
 			}
 		}
 		
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
 		var doc=fsHelper.createDocument(responseText);
-		var allItems = doc.getElementsByTagName("IMG")
-		var buffRE, buff, buffName, buffLevel;
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.getAttribute("onmouseover")) {
-				var onmouseover = anItem.getAttribute("onmouseover");
-				if (onmouseover.search("tt\_setWidth\\(105\\)") != -1) {
-					if (onmouseover.search("Summon Shield Imp") != -1) {
-						//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
-						buffRE = /<b>([ a-zA-Z]+)<br>(\d+) HP remaining<br><\/b> \(Level: (\d+)\)/
-						buff = buffRE.exec(onmouseover);
-						buffName = buff[1];
-						buffLevel = buff[3];
-					} else {
-						buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
-						buff = buffRE.exec(onmouseover);
-						buffName = buff[1];
-						buffLevel = buff[2];
-					}
-					injectHere.innerHTML += "<span style='color:white; font-size:x-small'>" + buffName + " [" + buffLevel + "] </span>";
-					var hasThisBuff = fsHelper.findNode("//font[contains(.,'" + buffName + "')]");
-					if (hasThisBuff) {
-						var buffLevelRE = /\[(\d+)\]/
-						var buffLevel = buffLevelRE.exec(hasThisBuff.innerHTML)[1]*1;
-						if (buffLevel > 11) {
-							hasThisBuff.innerHTML = "<span style='color:lime;'>" + hasThisBuff.innerHTML + "</span>";
-						}
+		var buffs = fsHelper.findNodes("//img[contains(@onmouseover,'tt_setWidth(105)')]", doc);
+		if (buffs) {
+			var buffRE, buff, buffName, buffLevel;
+			for (var i=0;i<buffs.length;i++) {
+				var aBuff=buffs[i];
+				var onmouseover = aBuff.getAttribute("onmouseover");
+				if (onmouseover.search("Summon Shield Imp") != -1) {
+					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
+					buffRE = /<b>([ a-zA-Z]+)<br>(\d+) HP remaining<br><\/b> \(Level: (\d+)\)/
+					buff = buffRE.exec(onmouseover);
+					buffName = buff[1];
+					buffLevel = buff[3];
+				} else {
+					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
+					buff = buffRE.exec(onmouseover);
+					buffName = buff[1];
+					buffLevel = buff[2];
+				}
+				resultText += "<tr><td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td></tr>";
+				var hasThisBuff = fsHelper.findNode("//font[contains(.,'" + buffName + "')]");
+				if (hasThisBuff) {
+					var buffLevelRE = /\[(\d+)\]/
+					var buffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
+					if (buffLevel > 11) {
+						hasThisBuff.style.color='lime';
 					}
 				}
 			}
+		} else {
+				resultText += "<tr><td colspan='2' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
+		
+		//var playerLevel=fsHelper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
+		//var playerXP=fsHelper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
+		resultText += "</table>"
+
+		var statistics=fsHelper.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
+		statistics.style.backgroundImage = 'url(' + fsHelper.getImageServer() + '/skin/realm_top_b2.jpg)'; //Color='white';
+		
+		resultText += statistics.parentNode.innerHTML;
+			
+		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
+		injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
+
 	},
 	
 	injectCreature: function() {
@@ -2632,19 +2651,19 @@ var fsHelper = {
 			if (anItem.innerHTML == "Attack:&nbsp;"){
 				var attackText = anItem;
 				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerAttackValue = attackLocation.textContent*1;
+				var playerAttackValue = parseInt(attackLocation.textContent);
 				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDefenseValue = defenseLocation.textContent*1;
+				var playerDefenseValue = parseInt(defenseLocation.textContent);
 				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerArmorValue = armorLocation.textContent*1;
+				var playerArmorValue = parseInt(armorLocation.textContent);
 				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDamageValue = damageLocation.textContent*1;
+				var playerDamageValue = parseInt(damageLocation.textContent);
 				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerHPValue = hpLocation.textContent*1;
+				var playerHPValue = parseInt(hpLocation.textContent);
 			}
 			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
 				var killStreakText = anItem;
