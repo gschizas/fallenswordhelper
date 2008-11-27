@@ -53,7 +53,7 @@ var fsHelper = {
 			}
 			return nodes;
 	},
-		
+
 	findNodeText: function(xpath, doc) {
 		var node=fsHelper.findNode(xpath, doc);
 		if (!node) return null;
@@ -264,6 +264,9 @@ var fsHelper = {
 			case "manage":
 				fsHelper.injectGuild();
 				break;
+			case "advisor":
+				fsHelper.injectAdvisor();
+				break;
 			}
 			break;
 		case "bank":
@@ -302,6 +305,11 @@ var fsHelper = {
 			var isQuestBookPage = fsHelper.findNode("//td[.='Quest Name']");
 			if (isQuestBookPage) {
 				fsHelper.injectQuestBookFull();
+			}
+			var isAdvisorPageClue1 = fsHelper.findNode("//font[@size=2 and .='Advisor']");
+			var isAdvisorPageClue2 = fsHelper.findNode("//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']");
+			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
+				fsHelper.injectAdvisor();
 			}
 			break;
 		}
@@ -700,6 +708,102 @@ var fsHelper = {
 		// }
 	},
 
+	injectAdvisor: function() {
+		var titleCells=fsHelper.findNodes("//tr[td/b='Member']/td");
+		for (var i=0; i<titleCells.length; i++) {
+			var cell=titleCells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
+			cell.addEventListener('click', fsHelper.sortAdvisor, true);
+		}
+	},
+
+	sortAdvisor: function(evt) {
+		var headerClicked=evt.target.textContent;
+		var parentTables=fsHelper.findNodes("ancestor::table", evt.target)
+		var list=parentTables[parentTables.length-1];
+
+		fsHelper.advisorRows = new Array();
+		for (var i=1; i<list.rows.length-1; i++){
+			var theRow=list.rows[i];
+			fsHelper.advisorRows[i-1] = {
+				'Member': theRow.cells[0].textContent,
+				'GoldFromDeposits': theRow.cells[1].textContent,
+				'GoldFromTax': theRow.cells[2].textContent,
+				'GoldTotal': theRow.cells[3].textContent,
+				'FSPs': theRow.cells[4].textContent,
+				'SkillsCast': theRow.cells[5].textContent,
+				'GroupsCreated': theRow.cells[6].textContent,
+				'GroupsJoined': theRow.cells[7].textContent,
+				'RelicsCaptured': theRow.cells[8].textContent,
+				'XPContrib': theRow.cells[9].textContent
+			};
+		}
+
+		if (fsHelper.sortAsc==undefined) fsHelper.sortAsc=true;
+		if (fsHelper.sortBy && fsHelper.sortBy==headerClicked) {
+			fsHelper.sortAsc=!fsHelper.sortAsc;
+		}
+		fsHelper.sortBy=headerClicked;
+
+		if (headerClicked=="Member") {
+			fsHelper.advisorRows.sort(fsHelper.stringSort)
+		}
+		else {
+			fsHelper.advisorRows.sort(fsHelper.numberSort)
+		}
+
+		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
+
+
+		for (var i=0; i<fsHelper.advisorRows.length; i++){
+			var r = fsHelper.advisorRows[i];
+			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
+			result += '<TR>'+
+			'<TD '+bgColor+' ><FONT size="1"> '+r.Member+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GoldFromDeposits+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GoldFromTax+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GoldTotal+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.FSPs+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.SkillsCast+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GroupsCreated+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GroupsJoined+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.RelicsCaptured+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center"><FONT size="1">'+r.XPContrib+'</FONT></TD></TR>';
+		}
+		result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
+
+		list.innerHTML=result;
+
+		for (var i=0; i<list.rows[0].cells.length; i++) {
+			var cell=list.rows[0].cells[i];
+			// GM_log(cell);
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
+			cell.addEventListener('click', fsHelper.sortAdvisor, true);
+		}
+
+	},
+
+	stringSort: function(a,b) {
+		var result=0;
+		if (a[fsHelper.sortBy].toLowerCase()<b[fsHelper.sortBy].toLowerCase()) result=-1;
+		if (a[fsHelper.sortBy].toLowerCase()>b[fsHelper.sortBy].toLowerCase()) result=+1;
+		if (!fsHelper.sortAsc) result=-result;
+		return result;
+	},
+
+	numberSort: function(a,b) {
+		var result=0;
+		var valueA=parseInt(a[fsHelper.sortBy].replace(/,/g,""));
+		var valueB=parseInt(b[fsHelper.sortBy].replace(/,/g,""));
+		result = valueA-valueB;
+		if (!fsHelper.sortAsc) result=-result;
+		return result;
+	},
+
 	checkBuffs: function() {
 		var imgserver = fsHelper.imageServer;
 		var replacementText = "<td background='" + imgserver + "/skin/realm_right_bg.jpg'>"
@@ -764,7 +868,7 @@ var fsHelper = {
 					questNamesOnPage.push(questName);
 					for (var j=0;j<quests.length;j++) {
 						if (questName == quests[j].questName) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level + 
+							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level +
 								"</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + quests[j].location + "</span>";
 							break;
 						} else if (j==quests.length-1) {
@@ -794,8 +898,8 @@ var fsHelper = {
 			if (questList.search(questName) == -1&& questLevel <= characterLevel && processQuests) {
 				newRow = questTable.insertRow(-1);
 				newCell = newRow.insertCell(0);
-				newCell.innerHTML = "<span style='color:gray;'>Missing quest: </span><span style='color:blue;'>" + quests[i].questName + 
-					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + quests[i].level + 
+				newCell.innerHTML = "<span style='color:gray;'>Missing quest: </span><span style='color:blue;'>" + quests[i].questName +
+					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + quests[i].level +
 					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + quests[i].location + "</span>";
 			}
 		}
@@ -819,7 +923,7 @@ var fsHelper = {
 					var insertHere = aRow.cells[0];
 					for (var j=0;j<quests.length;j++) {
 						if (questName == quests[j].questName) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level + 
+							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level +
 								"</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + quests[j].location + "</span>";
 						} else if (j==quests.length) {
 							insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
@@ -889,7 +993,7 @@ var fsHelper = {
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
 					if (questName == quests[j].questName) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level + 
+						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level +
 							"</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + quests[j].location + "</span>";
 					} else if (j==quests.length) {
 						insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
@@ -1234,7 +1338,7 @@ var fsHelper = {
 		questArray = questArray.sort();
 		return questArray;
 	},
-	
+
 	injectWorld: function() {
 		// fsHelper.mapThis();
 		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
@@ -1551,6 +1655,7 @@ var fsHelper = {
 				if (shieldImpDeath) {
 					resultText += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>"
 				}
+				if (xpGain<0) result.style.color='red';
 				result.innerHTML=resultText
 				var monsterParent = monster.parentNode;
 				result.id = "result" + callback;
@@ -1598,7 +1703,7 @@ var fsHelper = {
 	appendCombatLog: function(text) {
 		var reportLog = fsHelper.findNode("//div[@id='reportsLog']");
 		if (!reportLog) return;
-		reportLog.innerHTML += text;
+		reportLog.innerHTML += text + "<br/>";
 	},
 
 	scrollUpCombatLog: function() {
@@ -2968,7 +3073,7 @@ var fsHelper = {
 			},
 		})
 	},
-	
+
 	getPlayerBuffs: function(responseText) {
 		var injectHere = fsHelper.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
 		var resultText = "<table align='center'><tr><td colspan='2' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
@@ -2983,7 +3088,7 @@ var fsHelper = {
 				myBuff.style.color = "gray";
 			}
 		}
-		
+
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
 		var doc=fsHelper.createDocument(responseText);
 		var buffs = fsHelper.findNodes("//img[contains(@onmouseover,'tt_setWidth(105)')]", doc);
@@ -3017,21 +3122,21 @@ var fsHelper = {
 		} else {
 				resultText += "<tr><td colspan='2' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
-		
+
 		//var playerLevel=fsHelper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
 		//var playerXP=fsHelper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
 		resultText += "</table>"
 
 		var statistics=fsHelper.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
 		statistics.style.backgroundImage = 'url(' + fsHelper.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
-		
+
 		resultText += statistics.parentNode.innerHTML;
-			
+
 		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 		injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 
 	},
-	
+
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -3084,7 +3189,7 @@ var fsHelper = {
 		var darkCurseLevel = 0;
 		var holyFlameLevel = 0;
 		var constitutionLevel = 0;
-		var sanctuaryLevel = 0;		
+		var sanctuaryLevel = 0;
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -3125,7 +3230,7 @@ var fsHelper = {
 					sanctuaryLevel = sanctuary[1];
 				}
 			}
-		}		
+		}
 		//creaturedata
 		var creatureStatTable = fsHelper.findNode("//table[tbody/tr/td[.='Statistics']]");
 		if (!creatureStatTable) {return;}
@@ -3157,10 +3262,10 @@ var fsHelper = {
 			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + "<br>";
 			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + "<br>";
 		}
-		//Attack: 
+		//Attack:
 		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + "<br>":"");
 		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
-		//Damage: 
+		//Damage:
 		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
 		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
 		//Defense:
@@ -3203,7 +3308,7 @@ var fsHelper = {
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
 			"</tbody></table>";
 	},
-	
+
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
