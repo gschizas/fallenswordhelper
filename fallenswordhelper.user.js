@@ -752,7 +752,7 @@ var fsHelper = {
 		if (!GM_getValue("showCompletedQuests")) return;
 		var quests = fsHelper.questMatrix();
 		var questTable = fsHelper.findNode("//table[@width='100%' and @cellPadding='2']");
-		questTable.setAttribute("title","questTable");
+		questTable.setAttribute("findme","questTable");
 		var questNamesOnPage = new Array();
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
@@ -805,7 +805,7 @@ var fsHelper = {
 		if (GM_getValue("showCompletedQuests")) return;
 		var quests = fsHelper.questMatrix();
 		var questTable = fsHelper.findNode("//table[@width='100%' and @cellPadding='2']");
-		questTable.setAttribute("title","questTable");
+		questTable.setAttribute("findme","questTable");
 		var hideNextRows = 0;
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
@@ -873,7 +873,7 @@ var fsHelper = {
 				var questTable = anItem.parentNode.parentNode;
 			}
 		}
-		var OriginalQuestTable = fsHelper.findNode("//table[@title='questTable']");
+		var OriginalQuestTable = fsHelper.findNode("//table[@findme='questTable']");
 		var newRow, newCell;
 		var insertNextRows = 0;
 		for (var i=1;i<questTable.rows.length;i++) {
@@ -961,7 +961,7 @@ var fsHelper = {
 			{'questName':'Creeping Stone', 'level':438, 'location':' Stheno Lake (Edge)'},
 			{'questName':'Crown of Purity', 'level':519, 'location':' Teotal (Tangle)'},
 			{'questName':'Cry of the Land', 'level':383, 'location':' Wasteland (East)'},
-			{'questName':'Crypt Of Valsar', 'level':12, 'location':' Krul Beach Forest East'},
+			{'questName':'Crypt of Valsar', 'level':12, 'location':' Krul Beach Forest East'},
 			{'questName':'Crystal Ambush', 'level':225, 'location':' Kozyu (South)'},
 			{'questName':'Crystal Harvest', 'level':352, 'location':' Morukan'},
 			{'questName':'Cutting the Line', 'level':413, 'location':' Citadel of Xinderoth (Floor 13)'},
