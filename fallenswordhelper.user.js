@@ -2747,7 +2747,7 @@ var fsHelper = {
 			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + "<br>";
 			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + "<br>";
 		}
-		//Attack: needs KE added ...
+		//Attack: 
 		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + "<br>":"");
 		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
 		//Damage: 
@@ -2790,7 +2790,6 @@ var fsHelper = {
 			"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" + extraNotes + "</span></td></tr>" +
-			"<tr><td colspan='4'><span style='font-size:x-small; color:red'>*To be completed - does not include KE.</span></td></tr>" +
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
 			"</tbody></table>";
 	},
