@@ -2009,10 +2009,11 @@ var fsHelper = {
 					textInput.id = 'auction' + i + 'text';
 					}
 					var inputText = aRow.cells[6]
-					}
-					}
-					}
+				}
+			}
+		}
 		var bidOnItemList = fsHelper.findNodes("//span[@findme='bidOnItem']");
+		if (!bidOnItemList) return;
 		for (var i=0; i<bidOnItemList.length; i++) {
 			bidOnItemItem = bidOnItemList[i];
 			bidOnItemItem.addEventListener('click', fsHelper.bidOnItem, true);
