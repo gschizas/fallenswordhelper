@@ -5,6 +5,7 @@
 // @include        http://www.fallensword.com/*
 // @include        http://fallensword.com/*
 // @include        http://*.fallensword.com/*
+// @exlude         http://forum.fallensword.com/*
 // ==/UserScript==
 
 var fsHelper = {
