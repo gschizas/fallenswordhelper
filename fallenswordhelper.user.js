@@ -896,6 +896,8 @@ var fsHelper = {
 		if (currentPage == 1) {
 			processQuests = true;
 		}
+		var showExtraQuests = 11;
+		var startShowingExtraQuests = false;
 		for (var i=0;i<quests.length;i++) {
 			var questName = quests[i].questName;
 			var questLevel = quests[i].level;
@@ -903,21 +905,28 @@ var fsHelper = {
 				processQuests = true;
 			}
 			if (quests[i].questName == questNamesOnPage[questNamesOnPage.length-1] && currentPage != lastPage) { //last name in list
+				newRow = questTable.insertRow(-1);
+				newCell = newRow.insertCell(0);
+				newCell.colSpan = '2';	
+				newCell.innerHTML = "<span style='color:gray;'>*The following quests may not be missing, "+ 
+					"they are just the next 10 quests <u>for your level</u> after the last one on this page. " +
+					"Check the next page to see if you are actually missing them.</span";
+				startShowingExtraQuests = true;
+			}
+			if (startShowingExtraQuests && showExtraQuests > 0 && currentPage != lastPage) {
+				if (questLevel <= characterLevel) showExtraQuests --;
+			} else if (startShowingExtraQuests && showExtraQuests == 0 && currentPage != lastPage) {
 				processQuests = false;
 				break;
 			}
 			if (questList.search(questName) == -1 && questLevel <= characterLevel && processQuests) {
 				newRow = questTable.insertRow(-1);
 				newCell = newRow.insertCell(0);
-				newCell.innerHTML = "<span style='color:gray;'>Missing quest: </span><span style='color:blue;'>" + quests[i].questName +
+				newCell.colSpan = '2';	
+				newCell.innerHTML = "<span style='color:gray;'>" + (startShowingExtraQuests? "*Next quest: ":"Known missing quest: ") + "</span><span style='color:blue;'>" + quests[i].questName +
 					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + quests[i].level +
 					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + quests[i].location + "</span>";
 			}
-		}
-		if (currentPage != lastPage) {
-			newRow = questTable.insertRow(-1);
-			newCell = newRow.insertCell(0);
-			newCell.innerHTML = "<span style='color:gray;'>*Missing quests between the last quest on this page and the first quest on the next page will not display.</span";
 		}
 	},
 
