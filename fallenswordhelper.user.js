@@ -5,7 +5,8 @@
 // @include        http://www.fallensword.com/*
 // @include        http://fallensword.com/*
 // @include        http://*.fallensword.com/*
-// @exlude         http://forum.fallensword.com/*
+// @exclude        http://forum.fallensword.com/*
+// @exclude        http://wiki.fallensword.com/*
 // ==/UserScript==
 
 var fsHelper = {
@@ -809,8 +810,7 @@ var fsHelper = {
 	},
 
 	checkBuffs: function() {
-		var imgserver = fsHelper.imageServer;
-		var replacementText = "<td background='" + imgserver + "/skin/realm_right_bg.jpg'>"
+		var replacementText = "<td background='" + fsHelper.imageServer + "/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr><tr>";
 
@@ -1370,10 +1370,9 @@ var fsHelper = {
 	injectWorld: function() {
 		// fsHelper.mapThis();
 		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
-		var imgserver = fsHelper.imageServer;
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
-		newCell.setAttribute("background", imgserver + "/skin/realm_right_bg.jpg");
+		newCell.setAttribute("background", fsHelper.imageServer + "/skin/realm_right_bg.jpg");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced")
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
@@ -1410,8 +1409,8 @@ var fsHelper = {
 		var injLog=reportsTable.appendChild(tempLog);
 		var is=injLog.style;
 		is.color = 'black';
-		is.backgroundImage='url(http://66.7.192.165/skin/realm_right_bg.jpg)'
-		is.maxHeight = '200px';
+		is.backgroundImage='url(' + fsHelper.imageServer + '/skin/realm_right_bg.jpg)';
+		is.maxHeight = '240px';
 		is.width = '277px';
 		is.maxWidth = is.width;
 		is.marginLeft = '0px';
@@ -1421,7 +1420,7 @@ var fsHelper = {
 		is.overflow = 'hidden';
 		is.fontSize = 'xx-small';
 		is.textAlign = 'justify';
-		injLog.innerHTML="<img src='' style=''><img src='' style=''>"
+		//injLog.innerHTML="<img src='' style=''><img src='' style=''>"
 		//injLog.innerHTML+="Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
 		//injLog.innerHTML+="<br/>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
 		//injLog.innerHTML+="<br/><br/>This is the end, my only friend"
@@ -1913,8 +1912,9 @@ var fsHelper = {
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
 
-		var result="<div style='font-size:xx-small'>"
-		var showLines = parseInt(GM_getValue("chatLines"))
+		var result="<div style='font-size:xx-small' id='chatFrame'>";
+
+		var showLines = parseInt(GM_getValue("chatLines"));
 		if (isNaN(showLines)) {
 			showLines=10
 			GM_setValue("chatLines", showLines)
@@ -1935,6 +1935,7 @@ var fsHelper = {
 		result += '</div>'
 
 		aCell.innerHTML = result;
+
 
 		if (newTable) {
 			var breaker=document.createElement("BR");
@@ -2610,8 +2611,6 @@ var fsHelper = {
 	},
 
 	injectAuctionExtraText: function(invId, craft, forgeCount) {
-		var imgserver = fsHelper.imageServer;
-
 		var allItems = document.getElementsByTagName("IMG");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
@@ -2620,7 +2619,7 @@ var fsHelper = {
 					theText=anItem.parentNode.nextSibling.nextSibling;
 					var preText = "<span style='color:blue'>" + craft + "</span>";
 					if (forgeCount != 0) {
-						preText +=  " " + forgeCount + "<img src='" + imgserver + "/hellforge/forgelevel.gif'>"
+						preText +=  " " + forgeCount + "<img src='" + fsHelper.imageServer + "/hellforge/forgelevel.gif'>"
 					}
 					theText.innerHTML = preText + "<br>" + theText.innerHTML;
 				}
@@ -2833,7 +2832,7 @@ var fsHelper = {
 		var player = fsHelper.findNode("//textarea[@id='holdtext']");
 		var avyrow = fsHelper.findNode("//img[contains(@title, 's Avatar')]");
 		var playerid = document.URL.match(/\w*\d{5}\d*/)
-		var idindex, newhtml, imgserver;
+		var idindex, newhtml;
 
 		if (player)
 		{
@@ -2853,25 +2852,23 @@ var fsHelper = {
 			playeravy.style.borderStyle="none";
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
-			imgserver = fsHelper.imageServer;
-
 			var auctiontext = "Go to " + playername + "'s auctions" ;
 			var ranktext = "Rank " +playername + "" ;
 
 			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += imgserver + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
+			newhtml += fsHelper.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href='" + fsHelper.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
 			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
-			newhtml += imgserver + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
+			newhtml += fsHelper.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href=" + fsHelper.server + "?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
-			newhtml += imgserver + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
+			newhtml += fsHelper.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
 				newhtml += "<a href='" + fsHelper.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
 				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
-				newhtml += imgserver + "/guilds/" + guildId + "_mini.jpg></a>" ;
+				newhtml += fsHelper.imageServer + "/guilds/" + guildId + "_mini.jpg></a>" ;
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
