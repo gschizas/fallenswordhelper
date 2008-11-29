@@ -808,7 +808,7 @@ var fsHelper = {
 	checkBuffs: function() {
 		var imgserver = fsHelper.imageServer;
 		var replacementText = "<td background='" + imgserver + "/skin/realm_right_bg.jpg'>"
-		replacementText += "<table width='100%' cellpadding='1' style='margin-left:28px; margin-right:28px; font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
+		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr><tr>";
 
 		var hasShieldImp = fsHelper.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
@@ -838,9 +838,9 @@ var fsHelper = {
 			}
 		}
 		if (missingBuffs.length>0) {
-			replacementText += "<tr><td colspan='2'><div style='font-size:x-small;margin-left: 0px; margin-right: 48px;text-align:center;color:navy;'>You are missing some hunting buffs<br/>("
+			replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>You are missing some hunting buffs<br/>("
 			replacementText += missingBuffs.join(", ")
-			replacementText += ")</div></td></tr>"
+			replacementText += ")</span></td></tr>"
 		}
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
 		replacementText += "</table>";
@@ -2769,6 +2769,13 @@ var fsHelper = {
 		var textNode = fsHelper.findNode("../../../td[3]", callback);
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
 		if (guildLockedRE.exec(responseDetails.responseText)) {
+			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
+			var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
+			auctionHouseLink.style.visibility='hidden';
+			sellLink.style.visibility='hidden';
+		};
+		var boundItemRE = /Bound \(Non-Tradable\) Quest Item/i;
+		if (boundItemRE.exec(responseDetails.responseText)) {
 			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
 			var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
 			auctionHouseLink.style.visibility='hidden';
