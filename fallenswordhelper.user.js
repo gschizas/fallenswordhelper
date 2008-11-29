@@ -886,23 +886,38 @@ var fsHelper = {
 		var characterLevel = fsHelper.characterLevel;
 		var processQuests = false;
 		var newRow, newCell;
+		var currentPageElement = fsHelper.findNode("//option[@selected]");
+		var currentPage = currentPageElement.innerHTML*1;
+		var pageText = currentPageElement.parentNode.parentNode.innerHTML;
+		//Page: <select name="page" class="customselect"><option value="0" selected="selected">1</option><option value="1">2
+		//</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select>&nbsp;of&nbsp;5&nbsp;
+		var lastPageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
+		var lastPage = lastPageRE.exec(pageText)[1]*1;
+		if (currentPage == 1) {
+			processQuests = true;
+		}
 		for (var i=0;i<quests.length;i++) {
 			var questName = quests[i].questName;
 			var questLevel = quests[i].level;
 			if (quests[i].questName == questNamesOnPage[0]) { //first name in list
 				processQuests = true;
 			}
-			if (quests[i].questName == questNamesOnPage[questNamesOnPage.length-1]) { //first name in list
+			if (quests[i].questName == questNamesOnPage[questNamesOnPage.length-1] && currentPage != lastPage) { //last name in list
 				processQuests = false;
 				break;
 			}
-			if (questList.search(questName) == -1&& questLevel <= characterLevel && processQuests) {
+			if (questList.search(questName) == -1 && questLevel <= characterLevel && processQuests) {
 				newRow = questTable.insertRow(-1);
 				newCell = newRow.insertCell(0);
 				newCell.innerHTML = "<span style='color:gray;'>Missing quest: </span><span style='color:blue;'>" + quests[i].questName +
 					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + quests[i].level +
 					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + quests[i].location + "</span>";
 			}
+		}
+		if (currentPage != lastPage) {
+			newRow = questTable.insertRow(-1);
+			newCell = newRow.insertCell(0);
+			newCell.innerHTML = "<span style='color:gray;'>*Missing quests between the last quest on this page and the first quest on the next page will not display.</span";
 		}
 	},
 
