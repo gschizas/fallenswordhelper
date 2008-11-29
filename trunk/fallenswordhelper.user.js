@@ -1515,6 +1515,7 @@ var fsHelper = {
 		if (!GM_getValue("showCreatureInfo")) return;
 		if (GM_getValue("killAllAdvanced") == "all") return;
 		var monsters = fsHelper.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
+		if (!monsters) return;
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
@@ -3378,16 +3379,28 @@ var fsHelper = {
 		textArea.cols=60;
 		textArea.id = "biotext";
 		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" + textArea.value.length + "</span>";
+		var crCount = 0;
+		var startIndex = 0;
+		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
+			crCount++;
+			startIndex = textArea.value.indexOf('\n',startIndex+1);
+		}
+		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" + 
+			(textArea.value.length + crCount) + "</span>";
 
 		document.getElementById('biotext').addEventListener('keyup', fsHelper.updateBioCharacters, true);
 	},
 
 	updateBioCharacters: function(evt) {
-		//note, this still needs to double count carriage returns
 		var textArea = fsHelper.findNode("//textarea[@name='bio']");
 		var characterCount = fsHelper.findNode("//span[@findme='biolength']");
-		characterCount.innerHTML = textArea.value.length;
+		var crCount = 0;
+		var startIndex = 0;
+		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
+			crCount++;
+			startIndex = textArea.value.indexOf('\n',startIndex+1);
+		}
+		characterCount.innerHTML = textArea.value.length + crCount;
 	},
 	
 	toggleVisibilty: function(evt) {
