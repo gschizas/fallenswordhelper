@@ -3386,9 +3386,20 @@ var fsHelper = {
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
 		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" + 
-			(textArea.value.length + crCount) + "</span>";
+			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'></span>";
 
 		document.getElementById('biotext').addEventListener('keyup', fsHelper.updateBioCharacters, true);
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + "index.php?cmd=points",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getTotalBioCharacters(responseDetails.responseText);
+			},
+		})
 	},
 
 	updateBioCharacters: function(evt) {
@@ -3403,6 +3414,16 @@ var fsHelper = {
 		characterCount.innerHTML = textArea.value.length + crCount;
 	},
 	
+	getTotalBioCharacters: function(responseText) {
+		var doc=fsHelper.createDocument(responseText)
+		var bioCharactersText = fsHelper.findNode("//td[.='+25 Bio Characters']",doc);
+		var bioCharactersRatio = bioCharactersText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var bioCharactersValueRE = /(\d+) \/ 75/;
+		var bioCharactersValue = bioCharactersValueRE.exec(bioCharactersRatio.innerHTML)[1]*1;
+		var bioTotal = fsHelper.findNode("//span[@findme='biototal']");
+		bioTotal.innerHTML = (bioCharactersValue * 25) + 255;
+	},
+
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
