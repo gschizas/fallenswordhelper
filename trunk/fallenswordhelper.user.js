@@ -2035,7 +2035,7 @@ var fsHelper = {
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
 		case 19: // quick buffs
-			openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 500, ",scrollbars");
+			openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 800, ",scrollbars");
 			break;
 		case 48: // return to world
 			window.location = 'index.php?cmd=world';
@@ -2272,7 +2272,7 @@ var fsHelper = {
 				}
 				output += "<li style='padding-bottom:0px;'>"
 				output += "<a style='color:#CCFF99;font-size:10px;' "
-				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', 618, 500, 'scrollbars')\">[b]</a>&nbsp;";
+				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>&nbsp;";
 				if (member.id!=playerId) {
 					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
 					output += "href=\"" + fsHelper.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
@@ -3073,11 +3073,22 @@ var fsHelper = {
 				fsHelper.getPlayerBuffs(responseDetails.responseText);
 			},
 		})
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + "index.php?cmd=profile",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getSustain(responseDetails.responseText);
+			},
+		})
 	},
 
 	getPlayerBuffs: function(responseText) {
 		var injectHere = fsHelper.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
-		var resultText = "<table align='center'><tr><td colspan='2' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
+		var resultText = "<table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
 
 		//low level buffs used to get the buff above are not really worth casting.
 		var myBuffs = fsHelper.findNodes("//font[@size='1']");
@@ -3110,7 +3121,9 @@ var fsHelper = {
 					buffName = buff[1];
 					buffLevel = buff[2];
 				}
-				resultText += "<tr><td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td></tr>";
+				resultText += ((i % 2 == 0)? "<tr>":"");
+				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
+				resultText += ((i % 2 == 1)? "</tr>":"");
 				var hasThisBuff = fsHelper.findNode("//font[contains(.,'" + buffName + "')]");
 				if (hasThisBuff) {
 					var buffLevelRE = /\[(\d+)\]/
@@ -3120,8 +3133,9 @@ var fsHelper = {
 					}
 				}
 			}
+			resultText += ((i % 2 == 1)? "<td></td></tr>":"");
 		} else {
-				resultText += "<tr><td colspan='2' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
+			resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
 
 		//var playerLevel=fsHelper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
@@ -3138,6 +3152,20 @@ var fsHelper = {
 
 	},
 
+	getSustain: function(responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var sustainText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
+		if (!sustainText) return;
+		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+		//tt_setWidth(50); Tip('<center>Skill Level<br>90%</center>')
+		var sustainLevelRE = /Level<br>(\d+)%/
+		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
+		var activateInput = fsHelper.findNode("//input[@value='activate']");
+		var inputTable = activateInput.nextSibling.nextSibling;
+		inputTable.rows[3].cells[0].align = "center";
+		inputTable.rows[3].cells[0].innerHTML = "<span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
+	},
+	
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
