@@ -2778,7 +2778,8 @@ var fsHelper = {
 			auctionHouseLink.style.visibility='hidden';
 			sellLink.style.visibility='hidden';
 		};
-		var boundItemRE = /Bound \(Non-Tradable\) Quest Item/i;
+		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
+		var boundItemRE = /Bound \(Non-Tradable\)/i;
 		if (boundItemRE.exec(responseDetails.responseText)) {
 			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
 			var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
