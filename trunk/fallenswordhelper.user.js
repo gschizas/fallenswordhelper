@@ -221,6 +221,9 @@ var fsHelper = {
 				fsHelper.injectDropItemsAuction();
 				fsHelper.injectDropItems();
 				break;
+			case "changebio":
+				fsHelper.addBioWidgets();
+				break;
 			case "-":
 				fsHelper.injectProfile();
 			}
@@ -3369,6 +3372,24 @@ var fsHelper = {
 			"</tbody></table>";
 	},
 
+	addBioWidgets: function() {
+		var textArea = fsHelper.findNode("//textarea[@name='bio']");
+		textArea.rows=15;
+		textArea.cols=60;
+		textArea.id = "biotext";
+		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
+		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" + textArea.value.length + "</span>";
+
+		document.getElementById('biotext').addEventListener('keyup', fsHelper.updateBioCharacters, true);
+	},
+
+	updateBioCharacters: function(evt) {
+		//note, this still needs to double count carriage returns
+		var textArea = fsHelper.findNode("//textarea[@name='bio']");
+		var characterCount = fsHelper.findNode("//span[@findme='biolength']");
+		characterCount.innerHTML = textArea.value.length;
+	},
+	
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
