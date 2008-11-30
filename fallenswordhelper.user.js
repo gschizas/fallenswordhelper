@@ -325,7 +325,7 @@ var fsHelper = {
 
 	injectGuild: function() {
 		var guildLogo = fsHelper.findNode("//a[contains(.,'Change Logo')]").parentNode;
-		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " + 
+		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
 		var guildLogoElement = fsHelper.findNode("//img[contains(@title, 's Logo')]");
 		guildLogoElement.id = "guildLogoControl";
@@ -334,7 +334,7 @@ var fsHelper = {
 			guildLogoElement.style.visibility = "hidden";
 		}
 		var leaveGuild = fsHelper.findNode("//a[contains(.,'Leave')]").parentNode;
-		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " + 
+		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
 		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=changefounder']");
 		statisticsListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
@@ -345,7 +345,7 @@ var fsHelper = {
 			statisticsControl.style.visibility = "hidden";
 		}
 		var build = fsHelper.findNode("//a[contains(.,'Build')]").parentNode;
-		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " + 
+		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildStructureControl' linkto='guildStructureControl'>X</span> ]";
 		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=structures']");
 		structureListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
@@ -394,11 +394,11 @@ var fsHelper = {
 			var monthname=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 			var minutes=((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
 			var hours=((d.getHours() < 10) ? "0" : "") + d.getHours();
-			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + 
+			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() +
 				" " +  d.getFullYear() + " " + hours + ":" + minutes;
 			var firstPart = mouseOverText.split("</td></tr></table>")[0];
 			var secondPart = mouseOverText.split("</td></tr></table>")[1];
-			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" + 
+			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" +
 				nextHuntTimeText + "</td></tr><tr>";
 			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
 			newMouseoverText = newMouseoverText.replace(/\s:/,":");
@@ -429,7 +429,7 @@ var fsHelper = {
 		tableWithBorderElement.align = "left";
 		tableWithBorderElement.parentNode.colSpan = "2";
 		var tableInsertPoint = tableWithBorderElement.parentNode.parentNode;
-		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'>" + 
+		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'>" +
 			"<tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
 		var extraTextInsertPoint = fsHelper.findNode("//td[@title='InsertSpot']");
 		var defendingGuild = fsHelper.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
@@ -918,8 +918,8 @@ var fsHelper = {
 					var insertHere = aRow.cells[0];
 					for (var j=0;j<quests.length;j++) {
 						if (questName == quests[j].questName) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + 
-								quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + 
+							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
+								quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
 								quests[j].location + "</span>";
 						} else if (j==quests.length) {
 							insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
@@ -984,7 +984,7 @@ var fsHelper = {
 	injectQuestData: function(responseText) {
 		var playerQuestListElement = fsHelper.findNode("//span[@findme='playerQuestList']");
 		var playerQuestList = playerQuestListElement.innerHTML.split();
-		
+
 		var quests = fsHelper.questMatrix();
 		var doc=fsHelper.createDocument(responseText)
 		var allItems = doc.getElementsByTagName("TD");
@@ -1010,8 +1010,8 @@ var fsHelper = {
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
 					if (questName == quests[j].questName) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + 
-							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + 
+						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
+							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
 							quests[j].location + "</span>";
 					} else if (j==quests.length) {
 						insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
@@ -1050,7 +1050,7 @@ var fsHelper = {
 					newRow = pageOneQuestTable.insertRow(-1);
 					newCell = newRow.insertCell(0);
 					newCell.colSpan = '2';
-					newCell.innerHTML = "<span style='color:gray;'>Known missing quest: " + 
+					newCell.innerHTML = "<span style='color:gray;'>Known missing quest: " +
 					"</span><span style='color:blue;'>" + questName +
 					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + questLevel +
 					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + questLocation + "</span>";
@@ -1443,25 +1443,6 @@ var fsHelper = {
 		is.overflow = 'hidden';
 		is.fontSize = 'xx-small';
 		is.textAlign = 'justify';
-		//injLog.innerHTML="<img src='' style=''><img src='' style=''>"
-		//injLog.innerHTML+="Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. 
-		//Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. 
-		//Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. 
-		//Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. 
-		//Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. 
-		//Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. 
-		//In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. 
-		//Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
-		//injLog.innerHTML+="<br/>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. 
-		//Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. 
-		//Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. 
-		//Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. 
-		//Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. 
-		//Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. 
-		//In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. 
-		//Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
-		//injLog.innerHTML+="<br/><br/>This is the end, my only friend"
-		//injLog.scrollTop=500000;
 	},
 
 	killAllAdvancedChangeFromWorld: function(evt) {
@@ -1717,8 +1698,8 @@ var fsHelper = {
 				if (info!="") resultText+="<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
 				if (lootedItem!="") {
 					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + 
-						lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + 
+					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" +
+						lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" +
 						lootedItem + "</span></small></small>";
 				}
 				if (shieldImpDeath) {
@@ -2199,8 +2180,8 @@ var fsHelper = {
 					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
 					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + 
 						"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>";
-				}
 			}
+		}
 		}
 		now=(new Date()).getTime()
 		GM_setValue(lastCheckScreen, now.toString());
@@ -2267,8 +2248,8 @@ var fsHelper = {
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName + 
 							"'>Trade</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID + 
 							"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">Buff</a> ]</span>";
-					}
 				}
+			}
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
@@ -2515,24 +2496,32 @@ var fsHelper = {
 		}
 
 		var allItems = document.getElementsByTagName("IMG");
-		var savedItems = fsHelper.getValueJSON("savedItems")
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
-				var mouseOver=anItem.getAttribute("onmouseover");
-				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
-				var reResult=reParams.exec(mouseOver);
-				var itemId=reResult[1];
-				var invId=reResult[2];
-				var type=reResult[3];
-				var pid=reResult[4];
-				if (savedItems && savedItems.indexOf(itemId)>=0) {
-					//fsHelper.injectDropItemsParse(savedItems(itemId).reponseText);
-					GM_log("script error");
-				}
-				else {
-						fsHelper.insertAuctionGetItemDetails(itemId, invId, type, pid);
-				}
+				var theUrl=fsHelper.linkFromMouseover(anItem.getAttribute("onmouseover"));
+				GM_xmlhttpRequest({
+					method: 'GET',
+					url: theUrl,
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Cookie" : document.cookie
+					},
+					onload: function(responseDetails) {
+						var craft="";
+						var responseText=responseDetails.responseText;
+						if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
+							var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/
+							var fontLineRX=fontLineRE.exec(responseText)
+							craft = fontLineRX[3];
+						}
+						var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
+						while(re.exec(responseText)) {
+							forgeCount++;
+						}
+						fsHelper.injectAuctionExtraText(invId,craft,forgeCount);
+					}
+				})
 			}
 		}
 		var minBidLink = fsHelper.findNode("//a[contains(@href,'&order_by=1')]");
@@ -2540,7 +2529,7 @@ var fsHelper = {
 		auctionTable.title = "auctionTable";
 
 		var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
-		var playerId=document.body.innerHTML.match(playerIdRE)[1];
+		var playerId = document.body.innerHTML.match(playerIdRE)[1];
 
 		var newRow, newCell, bidMinBuyoutCell, buyNowBuyoutCell,winningBidBuyoutCell;
 		for (var i=0;i<auctionTable.rows.length;i++) {
@@ -2593,18 +2582,18 @@ var fsHelper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
-						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + 
+						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
-						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + 
+						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
 					}
 					var buyoutValue = "-";
 					if (buyoutHTML != "-" && !playerListedItem) {
 						newCell.innerHTML = "&nbsp/&nbsp";
 						buyoutValue = (buyoutCell.textContent)*1;
-						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + 
+						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" bidvalue="' + buyoutValue + '">Buy Now</span>';
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
@@ -2641,34 +2630,6 @@ var fsHelper = {
 		textInput.value = bidValue;
 		thisForm = textInput.form;
 		thisForm.submit();
-	},
-
-	insertAuctionGetItemDetails: function(itemId, invId, type, pid) {
-		var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-		theUrl = fsHelper.server + theUrl
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: theUrl,
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Cookie" : document.cookie
-			},
-			onload: function(responseDetails) {
-				var craft="";
-				var responseText=responseDetails.responseText;
-				if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-					var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/
-					var fontLineRX=fontLineRE.exec(responseText)
-					craft = fontLineRX[3];
-				}
-				var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
-
-				while(re.exec(responseText)) {
-					forgeCount++;
-				}
-				fsHelper.injectAuctionExtraText(invId,craft,forgeCount);
-			}
-		})
 	},
 
 	injectAuctionExtraText: function(invId, craft, forgeCount) {
@@ -2793,39 +2754,25 @@ var fsHelper = {
 	},
 
 	injectDropItems: function() {
-		var savedItems = fsHelper.getValueJSON("savedItems")
 		var allItems = fsHelper.findNodes("//input[@type='checkbox']");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			theLocation=anItem.parentNode.nextSibling.nextSibling;
 			theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-			var mouseOver=theImage.getAttribute("onmouseover");
-			var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
-			var reResult=reParams.exec(mouseOver);
-			var itemId=reResult[1];
-			var invId=reResult[2];
-			var type=reResult[3];
-			var pid=reResult[4];
-			if (savedItems && savedItems.indexOf(itemId)>=0) {
-				//
-				fsHelper.injectDropItemsParse(savedItems(itemId).reponseText);
-			}
-			else {
-				var theUrl = "fetchitem.php?item_id="+itemId+"&inv_id="+invId+"&t="+type+"&p="+pid /*+"&uid="+1220693678*/
-				theUrl = fsHelper.server + theUrl
-				GM_xmlhttpRequest({
-					method: 'GET',
-					url: theUrl,
-					callback: theImage,
-					headers: {
-						"User-Agent" : navigator.userAgent,
-						"Cookie" : document.cookie
-					},
-					onload: function(responseDetails, callback) {
-						fsHelper.injectDropItemsPaint(responseDetails, this.callback);
-					}
-				})
-			}
+			var theUrl = fsHelper.linkFromMouseover(theImage.getAttribute("onmouseover"));
+			theUrl = fsHelper.server + theUrl
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: theUrl,
+				callback: theImage,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails, callback) {
+					fsHelper.injectDropItemsPaint(responseDetails, this.callback);
+				}
+			})
 		}
 	},
 
@@ -2933,6 +2880,99 @@ var fsHelper = {
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
+
+		var isSelfRE=/player_id=/.exec(document.location.search);
+		if (!isSelfRE) { // self inventory
+			// fsHelper.injectInventory();
+		}
+	},
+
+	injectInventory: function() {
+		var injectHere=fsHelper.findNode("//table[tbody/tr/td/b='Inventory']/../../../..");
+		var newRow = injectHere.insertRow(4);
+		var newCell = newRow.insertCell(0);
+		newCell.style.backgroundColor='#cd9e4b';
+		newCell.colspan=2
+		newCell.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
+			'<tr><td nobr><b>&nbsp;Inventory Manager</b></td>'+
+			'<td bgcolor="#cd9e4b" align="right" width="50%"><FONT size="1">'+
+			'[ <span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ManageInventoryBegin">Manage Inventory</span> | '+
+			'<span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ToggleManager">X</span>�]'+
+			'</FONT></TD></TR></table>';
+		var newRow = injectHere.insertRow(5);
+		var newCell = newRow.insertCell(0);
+		newCell.innerHTML='<div style="font-size:x-small" id="fsHelper:InventoryManagerOutput">' +
+			'' +
+			'</div>'
+		document.getElementById("fsHelper:ManageInventoryBegin").addEventListener("click", fsHelper.parseInventory, true);
+	},
+
+	linkFromMouseover: function(mouseOver) {
+		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
+		var reResult=reParams.exec(mouseOver);
+		var itemId=reResult[1];
+		var invId=reResult[2];
+		var type=reResult[3];
+		var pid=reResult[4];
+		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
+		theUrl = fsHelper.server + theUrl;
+		return theUrl
+	},
+
+	parseInventory: function(evt) {
+		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img");
+		var output=document.getElementById("fsHelper:InventoryManagerOutput");
+		var theCallback;
+
+		// retrieve data for all worn items
+		for (var i=0; i<currentlyWorn.length; i++) {
+			theUrl = fsHelper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover"));
+
+			theCallback={
+				"type": "worn",
+				"index": i}
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: theUrl,
+				callback: theCallback,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails, callback) {
+					fsHelper.parseInventoryItem(responseDetails, this.callback);
+				}
+			})
+		}
+
+		// parse this page
+		parseInventoryPage(document)
+
+		// Open other pages - not sure if this works with folders as I don't have any
+		var inventoryPages=fsHelper.findNodes("//a[contains(@href,'backpack_page=') and not(contains(@href,'subcmd='))]");
+		for (var i=0; i<inventoryPages.length; i++) {
+			if (inventoryPages[i].firstChild.tagName!="FONT") {
+				output.innerHTML+=inventoryPages[i].href;
+				output.innerHTML+="<br/>";
+			}
+		}
+	},
+
+	retrieveInventoryPage: function(responseDetails, callback) {
+
+	},
+
+	parseInventoryPage: function() {
+
+	},
+
+	parseInventoryItem: function(responseDetails, callback) {
+		GM_log(JSON.stringify(callback));
+		GM_log(responseDetails.responseText);
+		// save to GM_vars
+		var itemData=document.createElement("div");
+		itemData.innerHTML=responseDetails.responseText;
+
 	},
 
 	injectGroupStats: function() {
@@ -3046,7 +3086,7 @@ var fsHelper = {
 				var aMember=memberList.members[j];
 				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 				if (aMember.name==foundName) {
-					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" + 
+					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" +
 						theItem.innerHTML + "</span> [" + aMember.level + "]";
 				}
 			}
@@ -3150,7 +3190,7 @@ var fsHelper = {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
-			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" + 
+			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" +
 				fsHelper.addCommas(sellPrice) + warningText + "</span>";
 		}
 	},
@@ -3429,7 +3469,7 @@ var fsHelper = {
 			"<tr><td align='right'><span style='color:#333333'># Player Hits? </td><td align='left'>" + playerHits + "</td>" +
 				"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
-			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" + 
+			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" +
 				extraNotes + "</span></td></tr>" +
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>" +
 				"*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
@@ -3509,7 +3549,7 @@ var fsHelper = {
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
-		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + 
+		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
 			guildType + 'Message"> &#x00bb;</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
 		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
@@ -3558,7 +3598,7 @@ var fsHelper = {
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
-				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>' + 
+				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>' +
 					'off</b></u> returns control to game normal.' +
 				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all ' +
 					'the non-elite monsters on the square you move in to.') +
@@ -3584,12 +3624,12 @@ var fsHelper = {
 			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
 				'quests you might have missed.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' + 
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' +
 				((fsHelper.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' + 
+			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((fsHelper.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			//save button
