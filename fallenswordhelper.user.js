@@ -879,71 +879,22 @@ var fsHelper = {
 			if (i!=0) {
 				if (aRow.cells[0].innerHTML) {
 					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /," ");
-//GM_log(i + ":" + questName + ":" + questTable.rows.length);
 					var insertHere = aRow.cells[0];
 					questNamesOnPage.push(questName);
 					for (var j=0;j<quests.length;j++) {
-						if (questName == quests[j].questName) {
+						var aCell = aRow.cells[0]
+						var imgElement = aCell.nextSibling.firstChild;
+						if (questName == quests[j].questName && imgElement.getAttribute("title") != "Completed") {
 							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
 								"<span style='color:blue;'>" + quests[j].level +
 								"</span> <span style='color:gray;'>Quest location:</span> " +
 								"<span style='color:blue;'>" + quests[j].location + "</span>";
 							break;
-						} else if (j==quests.length-1) {
+						} else if (j==quests.length-1 && imgElement.getAttribute("title") != "Completed") {
 							insertHere.innerHTML += " <span style='color:red;'>Quest not in array sorry (or error in array).</span>";
 						}
 					}
 				}
-			}
-		}
-		var questList = "";
-		for (var i=0;i<questNamesOnPage.length;i++) {
-			questList += questNamesOnPage[i] + " ";
-		}
-		var characterLevel = fsHelper.characterLevel;
-		var processQuests = false;
-		var newRow, newCell;
-		var currentPageElement = fsHelper.findNode("//option[@selected]");
-		var currentPage = currentPageElement.innerHTML*1;
-		var pageText = currentPageElement.parentNode.parentNode.innerHTML;
-		//Page: <select name="page" class="customselect"><option value="0" selected="selected">1</option><option value="1">2
-		//</option><option value="2">3</option><option value="3">4</option><option value="4">5</option></select>&nbsp;of&nbsp;5&nbsp;
-		var lastPageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
-		var lastPage = lastPageRE.exec(pageText)[1]*1;
-		if (currentPage == 1) {
-			processQuests = true;
-		}
-		var showExtraQuests = 11;
-		var startShowingExtraQuests = false;
-		for (var i=0;i<quests.length;i++) {
-			var questName = quests[i].questName;
-			var questLevel = quests[i].level;
-			if (quests[i].questName == questNamesOnPage[0]) { //first name in list
-				processQuests = true;
-			}
-			if (quests[i].questName == questNamesOnPage[questNamesOnPage.length-1] && currentPage != lastPage) { //last name in list
-				newRow = questTable.insertRow(-1);
-				newCell = newRow.insertCell(0);
-				newCell.colSpan = '2';
-				newCell.innerHTML = "<span style='color:gray;'>*The following quests may not be missing, "+
-					"they are just the next 10 quests <u>for your level</u> after the last one on this page. " +
-					"Check the next page to see if you are actually missing them.</span";
-				startShowingExtraQuests = true;
-			}
-			if (startShowingExtraQuests && showExtraQuests > 0 && currentPage != lastPage) {
-				if (questLevel <= characterLevel) showExtraQuests --;
-			} else if (startShowingExtraQuests && showExtraQuests == 0 && currentPage != lastPage) {
-				processQuests = false;
-				break;
-			}
-			if (questList.search(questName) == -1 && questLevel <= characterLevel && processQuests) {
-				newRow = questTable.insertRow(-1);
-				newCell = newRow.insertCell(0);
-				newCell.colSpan = '2';
-				newCell.innerHTML = "<span style='color:gray;'>" + (startShowingExtraQuests? "*Next quest: ":"Known missing quest: ") + 
-					"</span><span style='color:blue;'>" + quests[i].questName +
-					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + quests[i].level +
-					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + quests[i].location + "</span>";
 			}
 		}
 	},
@@ -954,6 +905,7 @@ var fsHelper = {
 		var questTable = fsHelper.findNode("//table[@width='100%' and @cellPadding='2']");
 		questTable.setAttribute("findme","questTable");
 		var hideNextRows = 0;
+		var playerQuestList = new Array();
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
@@ -979,14 +931,31 @@ var fsHelper = {
 						aRow.style.display = "none";
 						hideNextRows = 3;
 					}
+					playerQuestList.push(questName);
 				}
 			}
 			else {
 				var questNameCell = aRow.firstChild.nextSibling;
-				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed and Missing quests hidden - " +
+				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed quests hidden - " +
 					"see preferences to unhide)</font>"
 			}
 		}
+
+		var currentPageElement = fsHelper.findNode("//option[@selected]");
+		var pageText = currentPageElement.parentNode.parentNode.innerHTML;
+		var lastPageNumberRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
+		var lastPageNumber = lastPageNumberRE.exec(pageText)[1]*1;
+		newRow = questTable.insertRow(-1);
+		newCell = newRow.insertCell(0);
+		newCell.colSpan = '2';
+		newCell.style.display = 'none';
+		newCell.innerHTML = "<span style='color:red;' findme='pagesProcessed'>1</span><span style='color:red;' findme='totalPages'>" + lastPageNumber + "</span>";
+
+		newRow = questTable.insertRow(-1);
+		newCell = newRow.insertCell(0);
+		newCell.colSpan = '2';
+		newCell.style.display = 'none';
+		newCell.innerHTML = "<span style='color:red;' findme='playerQuestList'>" + playerQuestList.join() + "</span>";
 
 		var pageCountElement = fsHelper.findNode("//select[@class='customselect']");
 		//&nbsp;of&nbsp;5&nbsp;
@@ -1013,6 +982,9 @@ var fsHelper = {
 	},
 
 	injectQuestData: function(responseText) {
+		var playerQuestListElement = fsHelper.findNode("//span[@findme='playerQuestList']");
+		var playerQuestList = playerQuestListElement.innerHTML.split();
+		
 		var quests = fsHelper.questMatrix();
 		var doc=fsHelper.createDocument(responseText)
 		var allItems = doc.getElementsByTagName("TD");
@@ -1051,6 +1023,36 @@ var fsHelper = {
 					newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
 					newRow.innerHTML = aRow.innerHTML;
 					insertNextRows = 3;
+				}
+				playerQuestList.push(questName);
+			}
+		}
+		var pagesProcessedElement = fsHelper.findNode("//span[@findme='pagesProcessed']");
+		var pagesProcessed = pagesProcessedElement.textContent*1;
+		pagesProcessedElement.innerHTML = pagesProcessed + 1;
+		playerQuestListElement.innerHTML = playerQuestList.join();
+		var totalPagesElement = fsHelper.findNode("//span[@findme='totalPages']");
+		var totalPages = totalPagesElement.textContent*1;
+		var characterLevel = fsHelper.characterLevel;
+		var pageOneQuestTable = fsHelper.findNode("//table[@findme='questTable']");
+
+		if ((pagesProcessed+1) == totalPages) { //all pages processed so now we can find missing quests
+			newRow = pageOneQuestTable.insertRow(-1);
+			newCell = newRow.insertCell(0);
+			newCell.colSpan = '2';
+			newCell.innerHTML = "<span style='color:blue;'>List of known missing quests for your level</span> "; 
+			for (var j=0;j<quests.length;j++) {
+				var questName = quests[j].questName;
+				var questLevel = quests[j].level;
+				var questLocation = quests[j].location;
+				if (playerQuestList.join().search(questName) == -1 && questLevel <= characterLevel) {
+					newRow = pageOneQuestTable.insertRow(-1);
+					newCell = newRow.insertCell(0);
+					newCell.colSpan = '2';
+					newCell.innerHTML = "<span style='color:gray;'>Known missing quest: " + 
+					"</span><span style='color:blue;'>" + questName +
+					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + questLevel +
+					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + questLocation + "</span>";
 				}
 			}
 		}
