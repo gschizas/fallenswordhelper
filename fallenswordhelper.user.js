@@ -79,7 +79,9 @@ var fsHelper = {
 	initSettings: function() {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
-		if (GM_getValue("huntingBuffs")==undefined) GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve")
+		if (GM_getValue("huntingBuffs")==undefined) {
+			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
+		}
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		var idindex = imgurls.src.indexOf("/skin/");
 		fsHelper.imageServer=imgurls.src.substr(0,idindex);
@@ -312,7 +314,8 @@ var fsHelper = {
 				fsHelper.injectQuestBookFull();
 			}
 			var isAdvisorPageClue1 = fsHelper.findNode("//font[@size=2 and .='Advisor']");
-			var isAdvisorPageClue2 = fsHelper.findNode("//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']");
+			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']"
+			var isAdvisorPageClue2 = fsHelper.findNode(clue2);
 			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
 				fsHelper.injectAdvisor();
 			}
@@ -322,7 +325,8 @@ var fsHelper = {
 
 	injectGuild: function() {
 		var guildLogo = fsHelper.findNode("//a[contains(.,'Change Logo')]").parentNode;
-		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
+		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " + 
+			"id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
 		var guildLogoElement = fsHelper.findNode("//img[contains(@title, 's Logo')]");
 		guildLogoElement.id = "guildLogoControl";
 		if (GM_getValue("guildLogoControl")) {
@@ -330,7 +334,8 @@ var fsHelper = {
 			guildLogoElement.style.visibility = "hidden";
 		}
 		var leaveGuild = fsHelper.findNode("//a[contains(.,'Leave')]").parentNode;
-		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
+		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " + 
+			"id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
 		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=changefounder']");
 		statisticsListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
 		statisticsListElement.innerHTML = "<span id='statisticsControl'>" + statisticsListElement.innerHTML + "</span>";
@@ -340,7 +345,8 @@ var fsHelper = {
 			statisticsControl.style.visibility = "hidden";
 		}
 		var build = fsHelper.findNode("//a[contains(.,'Build')]").parentNode;
-		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' id='toggleGuildStructureControl' linkto='guildStructureControl'>X</span> ]";
+		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " + 
+			"id='toggleGuildStructureControl' linkto='guildStructureControl'>X</span> ]";
 		var linkElement=fsHelper.findNode("//a[@href='index.php?cmd=guild&subcmd=structures']");
 		structureListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
 		structureListElement.innerHTML = "<span id='guildStructureControl'>" + structureListElement.innerHTML + "</span>";
@@ -388,10 +394,12 @@ var fsHelper = {
 			var monthname=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 			var minutes=((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
 			var hours=((d.getHours() < 10) ? "0" : "") + d.getHours();
-			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + " " +  d.getFullYear() + " " + hours + ":" + minutes;
+			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() + 
+				" " +  d.getFullYear() + " " + hours + ":" + minutes;
 			var firstPart = mouseOverText.split("</td></tr></table>")[0];
 			var secondPart = mouseOverText.split("</td></tr></table>")[1];
-			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" + nextHuntTimeText + "</td></tr><tr>";
+			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" + 
+				nextHuntTimeText + "</td></tr><tr>";
 			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
 			newMouseoverText = newMouseoverText.replace(/\s:/,":");
 			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
@@ -421,7 +429,8 @@ var fsHelper = {
 		tableWithBorderElement.align = "left";
 		tableWithBorderElement.parentNode.colSpan = "2";
 		var tableInsertPoint = tableWithBorderElement.parentNode.parentNode;
-		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'><tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
+		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'>" + 
+			"<tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
 		var extraTextInsertPoint = fsHelper.findNode("//td[@title='InsertSpot']");
 		var defendingGuild = fsHelper.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
 		var defendingGuildHref = defendingGuild.getAttribute("href");
@@ -811,8 +820,10 @@ var fsHelper = {
 
 	checkBuffs: function() {
 		var replacementText = "<td background='" + fsHelper.imageServer + "/skin/realm_right_bg.jpg'>"
-		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
-		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr><tr>";
+		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
+			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
+		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
+			"colspan='2'></td></tr><tr>";
 
 		var hasShieldImp = fsHelper.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
 		var hasDeathDealer = fsHelper.findNode("//img[contains(@onmouseover,'Death Dealer')]");
@@ -841,7 +852,8 @@ var fsHelper = {
 			}
 		}
 		if (missingBuffs.length>0) {
-			replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>You are missing some hunting buffs<br/>("
+			replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>" +
+				"You are missing some hunting buffs<br/>("
 			replacementText += missingBuffs.join(", ")
 			replacementText += ")</span></td></tr>"
 		}
@@ -872,8 +884,10 @@ var fsHelper = {
 					questNamesOnPage.push(questName);
 					for (var j=0;j<quests.length;j++) {
 						if (questName == quests[j].questName) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level +
-								"</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + quests[j].location + "</span>";
+							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
+								"<span style='color:blue;'>" + quests[j].level +
+								"</span> <span style='color:gray;'>Quest location:</span> " +
+								"<span style='color:blue;'>" + quests[j].location + "</span>";
 							break;
 						} else if (j==quests.length-1) {
 							insertHere.innerHTML += " <span style='color:red;'>Quest not in array sorry (or error in array).</span>";
@@ -926,7 +940,8 @@ var fsHelper = {
 				newRow = questTable.insertRow(-1);
 				newCell = newRow.insertCell(0);
 				newCell.colSpan = '2';
-				newCell.innerHTML = "<span style='color:gray;'>" + (startShowingExtraQuests? "*Next quest: ":"Known missing quest: ") + "</span><span style='color:blue;'>" + quests[i].questName +
+				newCell.innerHTML = "<span style='color:gray;'>" + (startShowingExtraQuests? "*Next quest: ":"Known missing quest: ") + 
+					"</span><span style='color:blue;'>" + quests[i].questName +
 					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + quests[i].level +
 					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + quests[i].location + "</span>";
 			}
@@ -951,8 +966,9 @@ var fsHelper = {
 					var insertHere = aRow.cells[0];
 					for (var j=0;j<quests.length;j++) {
 						if (questName == quests[j].questName) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level +
-								"</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + quests[j].location + "</span>";
+							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + 
+								quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + 
+								quests[j].location + "</span>";
 						} else if (j==quests.length) {
 							insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
 						}
@@ -967,7 +983,8 @@ var fsHelper = {
 			}
 			else {
 				var questNameCell = aRow.firstChild.nextSibling;
-				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed and Missing quests hidden - see preferences to unhide)</font>"
+				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed and Missing quests hidden - " +
+					"see preferences to unhide)</font>"
 			}
 		}
 
@@ -1021,8 +1038,9 @@ var fsHelper = {
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
 					if (questName == quests[j].questName) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + quests[j].level +
-							"</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + quests[j].location + "</span>";
+						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" + 
+							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" + 
+							quests[j].location + "</span>";
 					} else if (j==quests.length) {
 						insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
 					}
@@ -1377,8 +1395,10 @@ var fsHelper = {
 		var killStyle = GM_getValue("killAllAdvanced")
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
 				'<tr><td>Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br/> ' +
-					'<b><u>type</u></b> will fast kill a type of monster<br><b><u>all</u></b> will kill all monsters as you move into the square<br><b><u>off</u></b> returns control to game normal. ' +
-					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.') +
+					'<b><u>type</u></b> will fast kill a type of monster<br><b><u>all</u></b> will kill all monsters as you move into the square<br' +
+					'><b><u>off</u></b> returns control to game normal. ' +
+					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically ' +
+					'kill all the non-elite monsters on the square you move in to.') +
 				':' +
 				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
 					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' +
@@ -1421,8 +1441,22 @@ var fsHelper = {
 		is.fontSize = 'xx-small';
 		is.textAlign = 'justify';
 		//injLog.innerHTML="<img src='' style=''><img src='' style=''>"
-		//injLog.innerHTML+="Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
-		//injLog.innerHTML+="<br/>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
+		//injLog.innerHTML+="Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. 
+		//Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. 
+		//Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. 
+		//Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. 
+		//Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. 
+		//Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. 
+		//In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. 
+		//Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
+		//injLog.innerHTML+="<br/>Lorem ipsum dolor sit amet, consectetuer adipiscing elit. Pellentesque pretium tellus nec dui. Duis sed ante. Sed suscipit ornare orci. 
+		//Phasellus velit libero, porttitor id, dapibus non, pretium vitae, sem. Maecenas dui purus, semper non, bibendum et, tempor eu, ligula. Cras magna. 
+		//Nam sodales, mauris sit amet vehicula volutpat, nisl urna egestas sem, et ultricies dui felis at ligula. Aliquam nisl ipsum, tincidunt lacinia, rhoncus at, suscipit sed, purus. 
+		//Mauris nec risus. Proin faucibus quam ut nisi.<br/><br/>Curabitur dignissim eleifend eros. Sed lacinia nisl et dolor. Cras dignissim nisl id nulla. Duis auctor sodales lacus. 
+		//Etiam ullamcorper erat vitae erat mollis vulputate. Mauris mollis pede id pede. Cras vel ipsum in massa faucibus porttitor. Mauris facilisis tortor in ipsum. 
+		//Morbi magna risus, tincidunt et, congue nec, porta ac, leo. In tempor. Aenean libero dui, dignissim vel, egestas vitae, tincidunt eu, lacus. 
+		//In dui metus, condimentum vitae, molestie vitae, accumsan in, urna. Duis cursus lacus vitae dolor. Pellentesque massa enim, aliquet non, vestibulum vel, ullamcorper sit amet, metus. 
+		//Morbi lacus lacus, porttitor eu, interdum in, vehicula sed, pede. Pellentesque lorem.";
 		//injLog.innerHTML+="<br/><br/>This is the end, my only friend"
 		//injLog.scrollTop=500000;
 	},
@@ -1548,7 +1582,8 @@ var fsHelper = {
 		var damageNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]/following-sibling::td", creatureInfo);
 		var hitpointsNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]/following-sibling::td", creatureInfo);
 		var goldNode = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Gold:')]/following-sibling::td", creatureInfo);
-		var enhanceNodes = fsHelper.findNodes("//table[@width='400']/tbody/tr[contains(td,'Enhancements')]/following-sibling::*[td/font[@color='#333333']]", creatureInfo);
+		var enhanceNodesXpath = "//table[@width='400']/tbody/tr[contains(td,'Enhancements')]/following-sibling::*[td/font[@color='#333333']]"
+		var enhanceNodes = fsHelper.findNodes(enhanceNodesXpath, creatureInfo);
 
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/,""));
@@ -1586,7 +1621,8 @@ var fsHelper = {
 		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + fsHelper.characterAttack + "</span>)"
 		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + fsHelper.characterDamage + "</span>)"
 		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + fsHelper.characterArmor + "</span>)"
-		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + fsHelper.characterHP + "</span>)(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
+		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + fsHelper.characterHP + "</span>)" +
+			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
 
 		killButtonParent.removeChild(killButtons);
 		killButtonParent.removeChild(killButtonHeader);
@@ -1678,7 +1714,9 @@ var fsHelper = {
 				if (info!="") resultText+="<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
 				if (lootedItem!="") {
 					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + lootedItem + "</span></small></small>";
+					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" + 
+						lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" + 
+						lootedItem + "</span></small></small>";
 				}
 				if (shieldImpDeath) {
 					resultText += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>"
@@ -2535,16 +2573,19 @@ var fsHelper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
-						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
+						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + 
+							i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
-						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
+						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + 
+							i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
 					}
 					var buyoutValue = "-";
 					if (buyoutHTML != "-" && !playerListedItem) {
 						newCell.innerHTML = "&nbsp/&nbsp";
 						buyoutValue = (buyoutCell.textContent)*1;
-						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + i + 'text" bidvalue="' + buyoutValue + '">Buy Now</span>';
+						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' + 
+							i + 'text" bidvalue="' + buyoutValue + '">Buy Now</span>';
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
 					if (!playerListedItem) {
@@ -2985,7 +3026,8 @@ var fsHelper = {
 				var aMember=memberList.members[j];
 				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 				if (aMember.name==foundName) {
-					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" + theItem.innerHTML + "</span> [" + aMember.level + "]";
+					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" + 
+						theItem.innerHTML + "</span> [" + aMember.level + "]";
 				}
 			}
 		}
@@ -3088,7 +3130,8 @@ var fsHelper = {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
-			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" + fsHelper.addCommas(sellPrice) + warningText + "</span>";
+			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" + 
+				fsHelper.addCommas(sellPrice) + warningText + "</span>";
 		}
 	},
 
@@ -3190,7 +3233,7 @@ var fsHelper = {
 		var sustainText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
 		if (!sustainText) return;
 		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
-		//tt_setWidth(50); Tip('<center>Skill Level<br>90%</center>')
+		//tt_setWidth(50); Tip('<center>Skillï¿½Level<br>90%</center>')
 		var sustainLevelRE = /Level<br>(\d+)%/
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		var activateInput = fsHelper.findNode("//input[@value='activate']");
@@ -3356,18 +3399,20 @@ var fsHelper = {
 		newCell.colSpan = '4';
 		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>Combat Evaluation</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Will I hit it? </td><td align='left'>" + (hitByHowMuch > 0? "Yes":"No") + "</td>" +
-			"<td align='right'><span style='color:#333333'>Extra Attack: </td><td align='left'>( " + hitByHowMuch + " )</td></tr>" +
+				"<td align='right'><span style='color:#333333'>Extra Attack: </td><td align='left'>( " + hitByHowMuch + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Hits to kill it? </td><td align='left'>" + numberOfHitsRequired + "</td>" +
-			"<td align='right'><span style='color:#333333'>Extra Damage: </td><td align='left'>( " + damageDone + " )</td></tr>" +
+				"<td align='right'><span style='color:#333333'>Extra Damage: </td><td align='left'>( " + damageDone + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Will I be hit? </td><td align='left'>" + (creatureHitByHowMuch >= 0? "Yes":"No") + "</td>" +
-			"<td align='right'><span style='color:#333333'>Extra Defense: </td><td align='left'>( " + creatureHitByHowMuch + " )</td></tr>" +
+				"<td align='right'><span style='color:#333333'>Extra Defense: </td><td align='left'>( " + creatureHitByHowMuch + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Hits to kill me? </td><td align='left'>" + numberOfCreatureHitsTillDead + "</td>" +
-			"<td align='right'><span style='color:#333333'>Extra Armor + HP: </td><td align='left'>( " + creatureDamageDone + " )</td></tr>" +
+				"<td align='right'><span style='color:#333333'>Extra Armor + HP: </td><td align='left'>( " + creatureDamageDone + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Player Hits? </td><td align='left'>" + playerHits + "</td>" +
-			"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
+				"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
-			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" + extraNotes + "</span></td></tr>" +
-			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
+			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" + 
+				extraNotes + "</span></td></tr>" +
+			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>" +
+				"*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
 			"</tbody></table>";
 	},
 
@@ -3384,7 +3429,7 @@ var fsHelper = {
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
 		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'></span>";
+			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'>255</span>";
 
 		document.getElementById('biotext').addEventListener('keyup', fsHelper.updateBioCharacters, true);
 		GM_xmlhttpRequest({
@@ -3409,7 +3454,13 @@ var fsHelper = {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
-		characterCount.innerHTML = textArea.value.length + crCount;
+		characterCount.innerHTML = (textArea.value.length + crCount);
+		var bioTotal = fsHelper.findNode("//span[@findme='biototal']");
+		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1)) {
+			characterCount.style.color = "red";
+		} else {
+			characterCount.style.color = "blue";
+		}
 	},
 
 	getTotalBioCharacters: function(responseText) {
@@ -3438,7 +3489,8 @@ var fsHelper = {
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
-		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + guildType + 'Message"> &#x00bb;</span>'
+		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' + 
+			guildType + 'Message"> &#x00bb;</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
 		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
 		result += '</div>'
@@ -3486,8 +3538,10 @@ var fsHelper = {
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
-				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>off</b></u> returns control to game normal.' +
-				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all the non-elite monsters on the square you move in to.') +
+				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>' + 
+					'off</b></u> returns control to game normal.' +
+				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all ' +
+					'the non-elite monsters on the square you move in to.') +
 				':</td><td><table><tbody>' +
 				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
 				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+
@@ -3496,24 +3550,31 @@ var fsHelper = {
 				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show Administrative Options' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - this works for guild founders only') +
+			'<tr><td align="right">Show Administrative Options' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - ' +
+				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Dim Non Player<br/>Guild Log Messages' + fsHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the current player will be dimmed (e.g. recall messages from guild store)') +
+			'<td align="right">Dim Non Player<br/>Guild Log Messages' + fsHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
+				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + fsHelper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
 				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
-			'<td align="right">Enable Log Coloring' + fsHelper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
+			'<td align="right">Enable Log Coloring' + fsHelper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
+				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any quests you might have missed.') +
+			'<tr><td align="right">Show Completed Quests' + fsHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
+				'quests you might have missed.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' + ((fsHelper.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
+			'<td align="right">Show chat lines' + fsHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' + 
+				((fsHelper.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + fsHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' + ((fsHelper.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' + 
+				((fsHelper.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			//save button
-			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, separated by commas') +
+			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
+				'separated by commas') +
 				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
