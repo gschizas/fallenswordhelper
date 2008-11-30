@@ -1040,7 +1040,8 @@ var fsHelper = {
 			newRow = pageOneQuestTable.insertRow(-1);
 			newCell = newRow.insertCell(0);
 			newCell.colSpan = '2';
-			newCell.innerHTML = "<span style='color:blue;'>List of known missing quests for your level</span> "; 
+			newCell.innerHTML = "<span style='color:blue;'>List of <u>known</u> missing quests for your level. " +
+				"If you find an error with this list, or a missing quest, please report it on the google code page related to this script.</span> "; 
 			for (var j=0;j<quests.length;j++) {
 				var questName = quests[j].questName;
 				var questLevel = quests[j].level;
@@ -2178,6 +2179,7 @@ var fsHelper = {
 		for (var i=1;i<chatTable.rows.length;i++) {
 			var aRow = chatTable.rows[i];
 			//GM_log(aRow.innerHTML);
+			var addBuffTag = true;
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
@@ -2190,6 +2192,13 @@ var fsHelper = {
 				}
 				else if (postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
 					aRow.style.backgroundColor = "#CD9E4B";
+					addBuffTag = false;
+				}
+				if (logScreen == 'Chat' && addBuffTag) {
+					var playerIDRE = /player_id=(\d+)/;
+					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
+					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + 
+						"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>";
 				}
 			}
 		}
@@ -2249,6 +2258,15 @@ var fsHelper = {
 						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
 
 						isGuildmate = false;
+					}
+					if (aRow.cells[2].innerHTML.search("activated") != -1 && aRow.cells[2].getAttribute("width") == "80%") {
+						var buffingPlayerIDRE = /player_id=(\d+)/;
+						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
+						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
+						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName + 
+							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName + 
+							"'>Trade</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID + 
+							"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">Buff</a> ]</span>";
 					}
 				}
 			}
@@ -2768,9 +2786,9 @@ var fsHelper = {
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = target.parentNode; //fsHelper.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
-			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+			itemCellElement.innerHTML += " <span style='color:lime; font-weight:bold;'>" + info + "</span>";
 		} else {
-			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>Item recalled</span>";
+			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 		}
 	},
 
