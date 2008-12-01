@@ -409,6 +409,18 @@ var fsHelper = {
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = fsHelper.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 		relicNameElement.parentNode.style.fontSize = "x-small";
+		var buttonElement = fsHelper.findNode("//input[@value='Attempt Group Capture']");
+		var injectHere = buttonElement.parentNode;
+		injectHere.align = 'center';
+		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
+			'class="custombutton">' + injectHere.innerHTML;
+
+		document.getElementById('calculatedefenderstats').addEventListener('click', fsHelper.calculateRelicDefenderStats, true);
+	},
+
+	calculateRelicDefenderStats: function(evt) {
+		var relicNameElement = fsHelper.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
+		relicNameElement.parentNode.style.fontSize = "x-small";
 		var tableElement = fsHelper.findNode("//table[@width='600']");
 		for (var i=0;i<tableElement.rows.length;i++) {
 			var aRow = tableElement.rows[i];
