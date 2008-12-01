@@ -2500,14 +2500,16 @@ var fsHelper = {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
 				var theUrl=fsHelper.linkFromMouseover(anItem.getAttribute("onmouseover"));
+				var theImage = anItem;
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: theUrl,
+					callback: theImage,
 					headers: {
 						"User-Agent" : navigator.userAgent,
 						"Cookie" : document.cookie
 					},
-					onload: function(responseDetails) {
+					onload: function(responseDetails, callback) {
 						var craft="";
 						var responseText=responseDetails.responseText;
 						if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -2519,7 +2521,7 @@ var fsHelper = {
 						while(re.exec(responseText)) {
 							forgeCount++;
 						}
-						fsHelper.injectAuctionExtraText(invId,craft,forgeCount);
+						fsHelper.injectAuctionExtraText(this.callback,craft,forgeCount);
 					}
 				})
 			}
@@ -2632,21 +2634,13 @@ var fsHelper = {
 		thisForm.submit();
 	},
 
-	injectAuctionExtraText: function(invId, craft, forgeCount) {
-		var allItems = document.getElementsByTagName("IMG");
-		for (var i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			if (anItem.src.search("items") != -1) {
-				if (anItem.getAttribute("onmouseover").search(invId) != -1) {
-					theText=anItem.parentNode.nextSibling.nextSibling;
-					var preText = "<span style='color:blue'>" + craft + "</span>";
-					if (forgeCount != 0) {
-						preText +=  " " + forgeCount + "<img src='" + fsHelper.imageServer + "/hellforge/forgelevel.gif'>"
-					}
-					theText.innerHTML = preText + "<br>" + theText.innerHTML;
-				}
-			}
+	injectAuctionExtraText: function(anItem, craft, forgeCount) {
+		var theText=anItem.parentNode.nextSibling.nextSibling;
+		var preText = "<span style='color:blue'>" + craft + "</span>";
+		if (forgeCount != 0) {
+			preText +=  " " + forgeCount + "<img src='" + fsHelper.imageServer + "/hellforge/forgelevel.gif'>"
 		}
+		theText.innerHTML = preText + "<br>" + theText.innerHTML;
 	},
 
 	injectDropItemsAuction: function() {
