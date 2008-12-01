@@ -1041,7 +1041,7 @@ var fsHelper = {
 			newCell = newRow.insertCell(0);
 			newCell.colSpan = '2';
 			newCell.innerHTML = "<span style='color:blue;'>List of <u>known</u> missing quests for your level. " +
-				"If you find an error with this list, or a missing quest, please report it on the google code page related to this script.</span> "; 
+				"If you find an error with this list, or a missing quest, please report it on the google code page related to this script.</span> ";
 			for (var j=0;j<quests.length;j++) {
 				var questName = quests[j].questName;
 				var questLevel = quests[j].level;
@@ -1413,6 +1413,7 @@ var fsHelper = {
 					((killStyle == "all")?" checked":"") + '>' + ((killStyle == "all")?" <b>all</b>":"all") +'</td></tr>' +
 				'</tbody></table>' +
 			'</div>';
+
 		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldType').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
@@ -2178,7 +2179,7 @@ var fsHelper = {
 				if (logScreen == 'Chat' && addBuffTag) {
 					var playerIDRE = /player_id=(\d+)/;
 					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
-					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + 
+					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID +
 						"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>";
 			}
 		}
@@ -2244,9 +2245,9 @@ var fsHelper = {
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
 						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
-						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName + 
-							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName + 
-							"'>Trade</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID + 
+						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
+							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
+							"'>Trade</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID +
 							"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">Buff</a> ]</span>";
 				}
 			}
@@ -2756,7 +2757,6 @@ var fsHelper = {
 			theLocation=anItem.parentNode.nextSibling.nextSibling;
 			theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
 			var theUrl = fsHelper.linkFromMouseover(theImage.getAttribute("onmouseover"));
-			theUrl = fsHelper.server + theUrl
 			GM_xmlhttpRequest({
 				method: 'GET',
 				url: theUrl,
@@ -2790,7 +2790,7 @@ var fsHelper = {
 			sellLink.style.visibility='hidden';
 		};
 		if (GM_getValue("disableItemColoring")) return;
-		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i; // <b>[^<]+<\/b>/
+		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
 		var fontLineRX=fontLineRE.exec(responseDetails.responseText)
 		textNode.style.color=fontLineRX[1];
 	},
@@ -2879,11 +2879,11 @@ var fsHelper = {
 
 		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
-			// fsHelper.injectInventory();
+			fsHelper.injectInventoryManager();
 		}
 	},
 
-	injectInventory: function() {
+	injectInventoryManager: function() {
 		var injectHere=fsHelper.findNode("//table[tbody/tr/td/b='Inventory']/../../../..");
 		var newRow = injectHere.insertRow(4);
 		var newCell = newRow.insertCell(0);
@@ -2891,20 +2891,20 @@ var fsHelper = {
 		newCell.colspan=2
 		newCell.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
 			'<tr><td nobr><b>&nbsp;Inventory Manager</b></td>'+
-			'<td bgcolor="#cd9e4b" align="right" width="50%"><FONT size="1">'+
+			'<td bgcolor="#cd9e4b" align="right" width="50%"><font size="1">'+
 			'[ <span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ManageInventoryBegin">Manage Inventory</span> | '+
-			'<span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ToggleManager">X</span>�]'+
-			'</FONT></TD></TR></table>';
+			'<span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ToggleManager">X</span> ]'+
+			'</font></td></tr></table>';
 		var newRow = injectHere.insertRow(5);
 		var newCell = newRow.insertCell(0);
-		newCell.innerHTML='<div style="font-size:x-small" id="fsHelper:InventoryManagerOutput">' +
+		newCell.innerHTML='<div style="font-size:x-small;background-color:#333333;opacity:1.00;" id="fsHelper:InventoryManagerOutput">' +
 			'' +
 			'</div>'
 		document.getElementById("fsHelper:ManageInventoryBegin").addEventListener("click", fsHelper.parseInventory, true);
 	},
 
 	linkFromMouseover: function(mouseOver) {
-		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/
+		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
 		var itemId=reResult[1];
 		var invId=reResult[2];
@@ -2917,7 +2917,6 @@ var fsHelper = {
 
 	parseInventory: function(evt) {
 		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img");
-		var output=document.getElementById("fsHelper:InventoryManagerOutput");
 		var theCallback;
 
 		// retrieve data for all worn items
@@ -2926,7 +2925,8 @@ var fsHelper = {
 
 			theCallback={
 				"type": "worn",
-				"index": i}
+				"index": i
+			}
 			GM_xmlhttpRequest({
 				method: 'GET',
 				url: theUrl,
@@ -2936,39 +2936,83 @@ var fsHelper = {
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails, callback) {
-					fsHelper.parseInventoryItem(responseDetails, this.callback);
+					fsHelper.parseInventoryItem(responseDetails.responseText, this.callback);
 				}
 			})
 		}
 
-		// parse this page
-		parseInventoryPage(document)
-
-		// Open other pages - not sure if this works with folders as I don't have any
+		// Open other pages - not sure if this works with folders as I don't have any.
 		var inventoryPages=fsHelper.findNodes("//a[contains(@href,'backpack_page=') and not(contains(@href,'subcmd='))]");
 		for (var i=0; i<inventoryPages.length; i++) {
 			if (inventoryPages[i].firstChild.tagName!="FONT") {
-				output.innerHTML+=inventoryPages[i].href;
-				output.innerHTML+="<br/>";
+				theCallback={
+					"page": i+1
+				}
+				theUrl=fsHelper.server + "index.php?cmd=profile&backpack_page=" + i + "&folder_id=0"
+				GM_xmlhttpRequest({
+					method: 'GET',
+					url: theUrl,
+					callback: theCallback,
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Cookie" : document.cookie
+					},
+					onload: function(responseDetails, callback) {
+						fsHelper.retrieveInventoryPage(responseDetails.responseText, this.callback);
+					}
+				})
+			}
+			else {
+				// parse this page
+				var inventoryTableParent = fsHelper.findNode("//table[@cellspacing='8' and contains(tbody/tr/td/@background,'2x3.gif')]/..")
+				fsHelper.parseInventoryPage(inventoryTableParent.innerHTML, i+1)
 			}
 		}
 	},
 
-	retrieveInventoryPage: function(responseDetails, callback) {
-
+	retrieveInventoryPage: function(responseText, callback) {
+		var inventoryPage = fsHelper.createDocument(responseText);
+		var inventoryNodeParent=fsHelper.findNode("//table[@cellspacing='8' and contains(tbody/tr/td/@background,'2x3.gif')]/..", inventoryPage);
+		var inventoryData = inventoryNodeParent.innerHTML;
+		fsHelper.parseInventoryPage(inventoryData, callback.page);
 	},
 
-	parseInventoryPage: function() {
-
+	parseInventoryPage: function(documentFragment, pageNumber) {
+		GM_log("Parsing page:" + pageNumber);
+		// GM_log(documentFragment);
+		var inventoryGrid = document.createElement("div");
+		inventoryGrid.innerHTML = documentFragment;
+		var items = fsHelper.findNodes("//img",inventoryGrid)
+		for (var i=0; i<items.length; i++) {
+			var theUrl=fsHelper.linkFromMouseover(items[i].getAttribute("onmouseover"));
+			var theCallback={
+				"type":"inventory",
+				"index":i,
+				"page":pageNumber
+			}
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: theUrl,
+				callback: theCallback,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails, callback) {
+					fsHelper.parseInventoryItem(responseDetails.responseText, this.callback);
+				}
+			})
+		}
 	},
 
-	parseInventoryItem: function(responseDetails, callback) {
+	parseInventoryItem: function(responseText, callback) {
+		var output=document.getElementById("fsHelper:InventoryManagerOutput");
 		GM_log(JSON.stringify(callback));
-		GM_log(responseDetails.responseText);
+		// GM_log(responseDetails.responseText);
 		// save to GM_vars
 		var itemData=document.createElement("div");
-		itemData.innerHTML=responseDetails.responseText;
-
+		itemData.innerHTML=responseText;
+		output.innerHTML+=responseText + "<hr/>";
 	},
 
 	injectGroupStats: function() {
@@ -3289,7 +3333,6 @@ var fsHelper = {
 		var sustainText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
 		if (!sustainText) return;
 		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
-		//tt_setWidth(50); Tip('<center>Skill�Level<br>90%</center>')
 		var sustainLevelRE = /Level<br>(\d+)%/
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		var activateInput = fsHelper.findNode("//input[@value='activate']");
