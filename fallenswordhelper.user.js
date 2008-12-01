@@ -1397,7 +1397,7 @@ var fsHelper = {
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced")
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
-				'<tr><td>Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br/> ' +
+				'<tr><td>Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will fast kill a single monster<br/> ' +
 					'<b><u>type</u></b> will fast kill a type of monster<br><b><u>all</u></b> will kill all monsters as you move into the square<br' +
 					'><b><u>off</u></b> returns control to game normal. ' +
 					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically ' +
@@ -2446,7 +2446,7 @@ var fsHelper = {
 				{"searchname":"Potion of Supreme Luck",     "shortname":"FI 1000",   "buff":"Find Item",      "level":1000, "duration":60,  "minlevel":5, "bound":true},
 				{"searchname":"Dull Edge",                  "shortname":"Dull Edge", "buff":"Dull Edge",      "level":25,   "duration":60,  "minlevel":1},
 				{"searchname":"Potion of Decay",            "shortname":"WI 150",    "buff":"Wither",         "level":150,  "duration":15,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Fatality",         "shortname":"WI 350",    "buff":"Wither",         "level":350,  "duration":90,  "minlevel":10, "bound":true}				
+				{"searchname":"Potion of Fatality",         "shortname":"WI 350",    "buff":"Wither",         "level":350,  "duration":90,  "minlevel":10, "bound":true}
 			];
 		}
 
@@ -3636,7 +3636,7 @@ var fsHelper = {
 			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
-			'<tr><td align="right">Auto Kill Style' + fsHelper.helpLink('Auto Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
+			'<tr><td align="right">Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
 				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>' +
 					'off</b></u> returns control to game normal.' +
 				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all ' +
