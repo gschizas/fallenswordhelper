@@ -401,7 +401,7 @@ var fsHelper = {
 			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" +
 				nextHuntTimeText + "</td></tr><tr>";
 			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
-			newMouseoverText = newMouseoverText.replace(/\s:/,":");
+			//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
 			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
 		}
 	},
