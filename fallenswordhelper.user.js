@@ -79,6 +79,7 @@ var fsHelper = {
 	initSettings: function() {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
+		//if (GM_getValue("showDebugInfo")==undefined) GM_setValue("showDebugInfo", false);
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
@@ -198,7 +199,7 @@ var fsHelper = {
 		if (subsequentPageIdRE)
 			subsequentPageId=subsequentPageIdRE[1];
 
-		GM_log(pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")")
+		if (GM_getValue("showDebugInfo")) GM_log(pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")");
 
 		switch (pageId) {
 		case "settings":
@@ -237,7 +238,6 @@ var fsHelper = {
 		case "auctionhouse":
 			switch (subPageId) {
 			case "create":
-				fsHelper.injectAuctionHouse();
 				break;
 			default:
 				fsHelper.injectAuctionHouse();
@@ -1170,7 +1170,7 @@ var fsHelper = {
 			{'questName':'Eternal Chant', 'level':5, 'location':' Varas Dungeon'},
 			{'questName':'Evil Hunt', 'level':345, 'location':' Dark Vale (North)'},
 			{'questName':'Exiled Warriors', 'level':355, 'location':' Glitter Mine Depths'},
-			{'questName':'Extinguish the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
+			{'questName':'Extinguish  the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
 			{'questName':'Eye of the Crocodile', 'level':287, 'location':' Ephal Swamp (East)'},
 			{'questName':'Failed Task', 'level':4, 'location':' Elven Halls'},
 			{'questName':'Familiar Creation', 'level':539, 'location':' Dark Atholhu (Outer)'},
@@ -1764,6 +1764,7 @@ var fsHelper = {
 	},
 
 	prepareGuildList: function() {
+		if (GM_getValue("disableGuildOnlineList")) return;
 		var injectHere = fsHelper.findNode("//table[@width='120' and contains(.,'New?')]")
 		if (!injectHere) return;
 		var info = injectHere.insertRow(0);
@@ -3267,18 +3268,21 @@ var fsHelper = {
 
 	injectQuickBuff: function() {
 		var playerIDRE = /tid=(\d+)/;
-		var playerID = playerIDRE.exec(location)[1];
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Cookie" : document.cookie
-			},
-			onload: function(responseDetails) {
-				fsHelper.getPlayerBuffs(responseDetails.responseText);
-			},
-		})
+		var playerID = playerIDRE.exec(location);
+		if (playerID) {
+			var playerID = playerID[1];
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.getPlayerBuffs(responseDetails.responseText);
+				},
+			})
+		}
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: fsHelper.server + "index.php?cmd=profile",
@@ -3618,7 +3622,7 @@ var fsHelper = {
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
-		result += '<span style="cursor:pointer;cursor:hand;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
+		result += '<span style="cursor:pointer;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
 			guildType + 'Message"> &#x00bb;</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
 		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
@@ -3697,6 +3701,10 @@ var fsHelper = {
 			'<td align="right">Show Creature Info' + fsHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((fsHelper.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Disable Guild Online List' + fsHelper.helpLink('Disable Guild Online List', 'This will disable the guild online list.') +
+				':</td><td><input name="disableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("disableGuildOnlineList")?" checked":"") + '></td>' +
+			'<td align="right">Show Debug Info' + fsHelper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
+				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas') +
@@ -3728,7 +3736,7 @@ var fsHelper = {
 
 	helpLink: function(title, text) {
 		return ' [ ' +
-			'<span style="text-decoration:underline;cursor:pointer;cursor:hand;" onmouseover="Tip(\'' +
+			'<span style="text-decoration:underline;cursor:pointer;" onmouseover="Tip(\'' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
 			' ]'
@@ -3753,7 +3761,8 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "hideBanner");
 		fsHelper.saveValueForm(oForm, "showCombatLog");
 		fsHelper.saveValueForm(oForm, "showCreatureInfo");
-
+		fsHelper.saveValueForm(oForm, "disableGuildOnlineList");		
+		fsHelper.saveValueForm(oForm, "showDebugInfo");
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
 
