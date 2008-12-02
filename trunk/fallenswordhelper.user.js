@@ -2892,6 +2892,39 @@ var fsHelper = {
 		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
 			fsHelper.injectInventoryManager();
+			
+			// Allies/Enemies count/total function
+			var alliesElement = fsHelper.findNode("//b[.='Allies']");
+			var alliesParent = alliesElement.parentNode;
+			var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+			var numberOfAllies = 0;
+			var startIndex = 0;
+			while (alliesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+				numberOfAllies ++;
+				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+			}
+			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>/<span style='color:blue' findme='alliestotal'></span>";
+			var enemiesElement = fsHelper.findNode("//b[.='Enemies']");
+			var enemiesParent = enemiesElement.parentNode;
+			var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+			var numberOfEnemies = 0;
+			var startIndex = 0;
+			while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+				numberOfEnemies ++;
+				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+			}
+			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>/<span style='color:blue' findme='enemiestotal'></span>";
+			GM_xmlhttpRequest({ 
+				method: 'GET',
+				url: fsHelper.server + "index.php?cmd=points",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.getAlliesEnemies(responseDetails.responseText);
+				},
+			})
 		}
 	},
 
@@ -3027,6 +3060,22 @@ var fsHelper = {
 		output.innerHTML+=responseText + "<hr/>";
 	},
 
+	getAlliesEnemies: function(responseText){
+		var doc=fsHelper.createDocument(responseText);
+		var alliesText = fsHelper.findNode("//td[.='+1 Max Allies']",doc);
+		var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var alliesValueRE = /(\d+) \/ 115/;
+		var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
+		var alliesTotalElement = fsHelper.findNode("//span[@findme='alliestotal']");
+		alliesTotalElement.innerHTML = alliesValue + 5;
+		var enemiesText = fsHelper.findNode("//td[.='+1 Max Enemies']",doc);
+		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var enemiesValueRE = /(\d+) \/ 115/;
+		var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
+		var enemiesTotalElement = fsHelper.findNode("//span[@findme='enemiestotal']");
+		enemiesTotalElement.innerHTML = enemiesValue + 5;
+	},
+	
 	injectGroupStats: function() {
 		var attackTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]");
 		attackValueElement = attackTitleElement.nextSibling;
