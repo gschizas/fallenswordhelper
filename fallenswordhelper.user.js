@@ -171,6 +171,7 @@ var fsHelper = {
 		fsHelper.prepareGuildList();
 		fsHelper.prepareChat();
 		fsHelper.injectStaminaCalculator();
+		fsHelper.injectMenu();
 		fsHelper.replaceKeyHandler();
 
 		var re=/cmd=([a-z]+)/;
@@ -321,6 +322,18 @@ var fsHelper = {
 			}
 			break;
 		}
+	},
+
+	injectMenu: function() {
+		// http://www.fallensword.com/index.php?cmd=profile&subcmd=medalguide
+		// <TR><TD></TD></TR>
+		var characterMenuTable = fsHelper.findNode("//div[@id='menuSource_0']/table");
+		var newRow
+		newRow = characterMenuTable.insertRow(11);
+		newRow.innerHTML='<td height="5"></td>';
+		newRow = characterMenuTable.insertRow(11);
+		var newCell = newRow.insertCell(0);
+		newCell.innerHTML='<FONT color="black">  - <A href="index.php?cmd=profile&subcmd=medalguide"><FONT color="black">Medal Guide</FONT></A></FONT>';
 	},
 
 	injectGuild: function() {
@@ -2892,7 +2905,7 @@ var fsHelper = {
 		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
 			fsHelper.injectInventoryManager();
-			
+
 			// Allies/Enemies count/total function
 			var alliesElement = fsHelper.findNode("//b[.='Allies']");
 			var alliesParent = alliesElement.parentNode;
@@ -2914,7 +2927,7 @@ var fsHelper = {
 				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
 			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>/<span style='color:blue' findme='enemiestotal'></span>";
-			GM_xmlhttpRequest({ 
+			GM_xmlhttpRequest({
 				method: 'GET',
 				url: fsHelper.server + "index.php?cmd=points",
 				headers: {
@@ -2961,6 +2974,8 @@ var fsHelper = {
 	},
 
 	parseInventory: function(evt) {
+		if (fsHelper.hasParsedInventory) return;
+		fsHelper.hasParsedInventory=true;
 		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img");
 		var theCallback;
 
@@ -3075,7 +3090,7 @@ var fsHelper = {
 		var enemiesTotalElement = fsHelper.findNode("//span[@findme='enemiestotal']");
 		enemiesTotalElement.innerHTML = enemiesValue + 5;
 	},
-	
+
 	injectGroupStats: function() {
 		var attackTitleElement = fsHelper.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]");
 		attackValueElement = attackTitleElement.nextSibling;
