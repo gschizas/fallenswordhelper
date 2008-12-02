@@ -84,6 +84,7 @@ var fsHelper = {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
+		if (!imgurls) return; //login screen or error loading etc.
 		var idindex = imgurls.src.indexOf("/skin/");
 		fsHelper.imageServer=imgurls.src.substr(0,idindex);
 		fsHelper.server=document.location.protocol + "//" + document.location.host + "/";
