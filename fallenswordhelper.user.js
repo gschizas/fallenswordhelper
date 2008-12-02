@@ -890,7 +890,9 @@ var fsHelper = {
 		replacementText += "</table>";
 		replacementText += "</td>" ;
 
-		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
+		var realmRightBottom = fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]");
+		if (!realmRightBottom) return;
+		var injectHere = realmRightBottom.parentNode.parentNode
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
 
