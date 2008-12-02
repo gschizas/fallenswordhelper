@@ -239,6 +239,8 @@ var fsHelper = {
 			switch (subPageId) {
 			case "create":
 				break;
+			case "preferences":
+				break;
 			default:
 				fsHelper.injectAuctionHouse();
 			}
@@ -1309,7 +1311,7 @@ var fsHelper = {
 			{'questName':'Taking Arms', 'level':2, 'location':' Snow Forest East'},
 			{'questName':'Taking Ground', 'level':357, 'location':' Underground Passages (Outer)'},
 			{'questName':'Tassodans Lost Rune', 'level':2, 'location':' Snow Forest East'},
-			{'questName':'Terror At Krysa', 'level':297, 'location':' Krysa (East)'},
+			{'questName':'Terror At  Krysa', 'level':297, 'location':' Krysa (East)'},
 			{'questName':'The Ant Queen', 'level':221, 'location':' Miyal (South)'},
 			{'questName':'The Ascended', 'level':215, 'location':' Aydr (South)'},
 			{'questName':'The Battle for Narkort', 'level':199, 'location':' Narkort (West)'},
