@@ -74,7 +74,7 @@ var fsHelper = {
 		fsHelper.initSettings();
 		fsHelper.beginAutoUpdate();
 		fsHelper.readInfo();
-},
+	},
 
 	initSettings: function() {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
@@ -197,6 +197,8 @@ var fsHelper = {
 		var subsequentPageId="-";
 		if (subsequentPageIdRE)
 			subsequentPageId=subsequentPageIdRE[1];
+
+		GM_log(pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")")
 
 		switch (pageId) {
 		case "settings":
@@ -325,15 +327,14 @@ var fsHelper = {
 	},
 
 	injectMenu: function() {
-		// http://www.fallensword.com/index.php?cmd=profile&subcmd=medalguide
-		// <TR><TD></TD></TR>
 		var characterMenuTable = fsHelper.findNode("//div[@id='menuSource_0']/table");
+		if (!characterMenuTable) return;
 		var newRow
 		newRow = characterMenuTable.insertRow(11);
 		newRow.innerHTML='<td height="5"></td>';
 		newRow = characterMenuTable.insertRow(11);
 		var newCell = newRow.insertCell(0);
-		newCell.innerHTML='<FONT color="black">  - <A href="index.php?cmd=profile&subcmd=medalguide"><FONT color="black">Medal Guide</FONT></A></FONT>';
+		newCell.innerHTML='<FONT color="black">&nbsp;&nbsp;-&nbsp;<A href="index.php?cmd=profile&subcmd=medalguide"><FONT color="black">Medal Guide</FONT></A></FONT>';
 	},
 
 	injectGuild: function() {
@@ -1422,31 +1423,24 @@ var fsHelper = {
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced")
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
-				'<tr><td>Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will fast kill a single monster<br/> ' +
-					'<b><u>type</u></b> will fast kill a type of monster<br><b><u>all</u></b> will kill all monsters as you move into the square<br' +
-					'><b><u>off</u></b> returns control to game normal. ' +
-					'<br><br><b>CAUTION</b>: If this is set to <b><u>all</u></b> then while you are moving around the world it will automatically ' +
-					'kill all the non-elite monsters on the square you move in to.') +
+				'<tr><td>Quick kill style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will quick kill a single monster<br/> ' +
+					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
+					'<b><u>off</u></b> returns control to game normal.') +
 				':' +
 				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
 					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' +
 				'<td><input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
-					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +'</td></tr>'+
-				'<tr><td></td><td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
-					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td>' +
-				'<td><input type="radio" id="killAllAdvancedWorldAll" name="killAllAdvancedWorld"  value="all"' +
-					((killStyle == "all")?" checked":"") + '>' + ((killStyle == "all")?" <b>all</b>":"all") +'</td></tr>' +
-				'</tbody></table>' +
-			'</div>';
+					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +'</td>'+
+				'<td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
+					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td></tr>' +
+				'</table></div>';
 
 		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldType').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
-		document.getElementById('killAllAdvancedWorldAll').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		// injectHere.style.display='none';
 		fsHelper.checkBuffs();
 		fsHelper.prepareCheckMonster();
-		fsHelper.killAllMonsters();
 		fsHelper.prepareCombatLog();
 	},
 
@@ -1481,7 +1475,7 @@ var fsHelper = {
 	killSingleMonster: function(monsterNumber) {
 		if (GM_getValue("killAllAdvanced") != "single") return;
 		var kills=0;
-		var linkId="//a[@id='attackLink" + monsterNumber + "']"
+		var linkId="//a[@id='aLink" + monsterNumber + "']"
 		var monster = fsHelper.findNode(linkId);
 		if (monster) {
 			kills+=1;
@@ -1492,7 +1486,6 @@ var fsHelper = {
 				url: href,
 				headers: {
 					"User-Agent" : navigator.userAgent,
-					// "Content-Type": "application/x-www-form-urlencoded",
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails, callback) {
@@ -1520,7 +1513,7 @@ var fsHelper = {
 		if (GM_getValue("killAllAdvanced") != "type") return;
 		var kills=0;
 		for (var i=1; i<=8; i++) {
-			var linkId="//a[@id='attackLink" + i + "']"
+			var linkId="//a[@id='aLink" + i + "']"
 			var monster = fsHelper.findNode(linkId);
 			if (monster) {
 				thisMonsterType = monster.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML;
@@ -1639,45 +1632,6 @@ var fsHelper = {
 		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
 		callback.setAttribute("mouseOverWidth", "400");
 		callback.addEventListener("mouseover", fsHelper.clientTip, true);
-	},
-
-	killAllMonsters: function() {
-		if (GM_getValue("killAllAdvanced") != "all") return;
-		var kills=0;
-		for (var i=1; i<=8; i++) {
-			var linkId="//a[@id='attackLink" + i + "']"
-			var monster = fsHelper.findNode(linkId);
-			if (monster) {
-				kills+=1;
-				var href=monster.href;
-				GM_xmlhttpRequest({
-					method: 'GET',
-					callback: linkId,
-					url: href,
-					headers: {
-						"User-Agent" : navigator.userAgent,
-						// "Content-Type": "application/x-www-form-urlencoded",
-						"Cookie" : document.cookie
-					},
-					onload: function(responseDetails, callback) {
-						fsHelper.killedMonster(responseDetails, this.callback);
-					},
-				})
-			}
-		}
-		if (kills>0) {
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: fsHelper.server + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					// GM_log(responseDetails.responseText);
-				},
-			})
-		}
 	},
 
 	killedMonster: function(responseDetails, callback) {
@@ -2087,7 +2041,7 @@ var fsHelper = {
 		case 55:
 		case 56: // keyed combat
 			var index	= r-48;
-			var linkObj	= document.getElementById("attackLink"+index);
+			var linkObj	= document.getElementById("aLink"+index);
 			if (linkObj!=null) {
 				var killStyle = GM_getValue("killAllAdvanced");
 				//kill style off
@@ -2097,7 +2051,7 @@ var fsHelper = {
 				//kill style single
 				if (killStyle == "single") {
 					fsHelper.killSingleMonster(index);
-				}
+				}1
 				//kill style type
 				if (killStyle == "type") {
 					var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
@@ -3713,15 +3667,11 @@ var fsHelper = {
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
-				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>all</b></u> will kill all monsters as you move into the square<br><u><b>' +
-					'off</b></u> returns control to game normal.' +
-				'<br><br><b>CAUTION</b>: If this is set to <u><b>all</b></u> then while you are moving around the world it will automatically kill all ' +
-					'the non-elite monsters on the square you move in to.') +
+				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>off</b></u> returns control to game normal.') +
 				':</td><td><table><tbody>' +
 				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
-				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td></tr>'+
-				'<tr><td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
-				'<td><input type="radio" name="killAllAdvanced"  value="all"' + ((GM_getValue("killAllAdvanced") == "all")?" checked":"") + '>all</td></tr>' +
+				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td>'+
+				'<td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
 				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
@@ -4323,4 +4273,9 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     }
 })();
 
+try {
 fsHelper.onPageLoad(null);
+}
+catch (ex) {
+	window.alert("ERROR:\n"+ex)
+}
