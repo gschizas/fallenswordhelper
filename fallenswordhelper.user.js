@@ -316,6 +316,9 @@ var fsHelper = {
 			case "showlogs":
 				fsHelper.injectNotepadShowLogs();
 				break;
+			case "invmanager":
+				fsHelper.injectInventoryManager();
+				break;
 			}
 			break;
 		case "-":
@@ -343,8 +346,9 @@ var fsHelper = {
 
 	injectMenu: function() {
 		fsHelper.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11, "menuSource_0");
+		if (fsHelper.debug) fsHelper.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13, "menuSource_0");
 		if (GM_getValue("keepLogs")) {
-			fsHelper.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 13, "menuSource_0")
+			fsHelper.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 15, "menuSource_0")
 		}
 	},
 
@@ -2917,8 +2921,6 @@ var fsHelper = {
 
 		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
-			fsHelper.injectInventoryManager();
-
 			// Allies/Enemies count/total function
 			var alliesElement = fsHelper.findNode("//b[.='Allies']");
 			var alliesParent = alliesElement.parentNode;
@@ -2955,23 +2957,15 @@ var fsHelper = {
 	},
 
 	injectInventoryManager: function() {
-		var injectHere=fsHelper.findNode("//table[tbody/tr/td/b='Inventory']/../../../..");
-		var newRow = injectHere.insertRow(4);
-		var newCell = newRow.insertCell(0);
-		newCell.style.backgroundColor='#cd9e4b';
-		newCell.colspan=2
-		newCell.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td nobr><b>&nbsp;Inventory Manager</b></td>'+
-			'<td bgcolor="#cd9e4b" align="right" width="50%"><font size="1">'+
-			'[ <span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ManageInventoryBegin">Manage Inventory</span> | '+
-			'<span style="text-decoration:underline;cursor:pointer;" title="Toggle Section" id="fsHelper:ToggleManager">X</span> ]'+
-			'</font></td></tr></table>';
-		var newRow = injectHere.insertRow(5);
-		var newCell = newRow.insertCell(0);
-		newCell.innerHTML='<div style="font-size:x-small;background-color:#333333;opacity:1.00;" id="fsHelper:InventoryManagerOutput">' +
+		var content=fsHelper.findNode("//table[@width='100%']/..");
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
+			'<tr><td nobr bgcolor="#cd9e4b"><b>&nbsp;Inventory Manager</b></td>'+
+			'</tr></table>' +
+			'<div style="font-size:x-small;background-color:#333333;opacity:1.00;" id="fsHelper:InventoryManagerOutput">' +
 			'' +
 			'</div>'
-		document.getElementById("fsHelper:ManageInventoryBegin").addEventListener("click", fsHelper.parseInventory, true);
+		// document.getElementById("fsHelper:ManageInventoryBegin").addEventListener("click", fsHelper.parseInventory, true);
+		fsHelper.parseInventory()
 	},
 
 	linkFromMouseover: function(mouseOver) {
@@ -2986,9 +2980,10 @@ var fsHelper = {
 		return theUrl
 	},
 
-	parseInventory: function(evt) {
+	parseInventory: function() {
 		if (fsHelper.hasParsedInventory) return;
 		fsHelper.hasParsedInventory=true;
+
 		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img");
 		var theCallback;
 
@@ -3017,29 +3012,22 @@ var fsHelper = {
 		// Open other pages - not sure if this works with folders as I don't have any.
 		var inventoryPages=fsHelper.findNodes("//a[contains(@href,'backpack_page=') and not(contains(@href,'subcmd='))]");
 		for (var i=0; i<inventoryPages.length; i++) {
-			if (inventoryPages[i].firstChild.tagName!="FONT") {
-				theCallback={
-					"page": i+1
+			theCallback={
+				"page": i+1
+			}
+			theUrl=fsHelper.server + "index.php?cmd=profile&backpack_page=" + i + "&folder_id=0"
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: theUrl,
+				callback: theCallback,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails, callback) {
+					fsHelper.retrieveInventoryPage(responseDetails.responseText, this.callback);
 				}
-				theUrl=fsHelper.server + "index.php?cmd=profile&backpack_page=" + i + "&folder_id=0"
-				GM_xmlhttpRequest({
-					method: 'GET',
-					url: theUrl,
-					callback: theCallback,
-					headers: {
-						"User-Agent" : navigator.userAgent,
-						"Cookie" : document.cookie
-					},
-					onload: function(responseDetails, callback) {
-						fsHelper.retrieveInventoryPage(responseDetails.responseText, this.callback);
-					}
-				})
-			}
-			else {
-				// parse this page
-				var inventoryTableParent = fsHelper.findNode("//table[@cellspacing='8' and contains(tbody/tr/td/@background,'2x3.gif')]/..")
-				fsHelper.parseInventoryPage(inventoryTableParent.innerHTML, i+1)
-			}
+			})
 		}
 	},
 
@@ -4401,9 +4389,4 @@ replace(/(?:^|:|,)(?:\s*\[)+/g, ''))) {
     }
 })();
 
-try {
 fsHelper.onPageLoad(null);
-}
-catch (ex) {
-	window.alert("ERROR:\n"+ex)
-}
