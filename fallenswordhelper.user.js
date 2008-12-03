@@ -285,6 +285,9 @@ var fsHelper = {
 			case "advisor":
 				fsHelper.injectAdvisor();
 				break;
+			case "history":
+				fsHelper.addHistoryWidgets();
+				break;
 			}
 			break;
 		case "bank":
@@ -1060,7 +1063,7 @@ var fsHelper = {
 				insertNextRows --;
 			}
 			if (aRow.cells[0].innerHTML) {
-				var questName = aRow.cells[0].firstChild.innerHTML;
+				var questName = aRow.cells[0].firstChild.textContent.replace(/  /," ");
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
 					if (questName == quests[j].questName) {
@@ -1250,7 +1253,7 @@ var fsHelper = {
 			{'questName':'Kidnapped Citizen', 'level':529, 'location':' The Secret Kingdom (Preserve)'},
 			{'questName':'Kill the Head', 'level':375, 'location':' Broken Lands (South)'},
 			{'questName':'Knock Knock', 'level':427, 'location':' Craggy Coastline (Lower)'},
-			{'questName':'Krin\'s Dilema', 'level':329, 'location':' Ponea (North)'},
+			{'questName':'Krins Dilema', 'level':329, 'location':' Ponea (North)'},
 			{'questName':'Laying the Foundations', 'level':351, 'location':' Mountain Heights'},
 			{'questName':'Looking for a Cure', 'level':451, 'location':' Dark Mist Forest (Edge)'},
 			{'questName':'Loot Seeker', 'level':459, 'location':' Dark Mist Forest (Range)'},
@@ -1290,7 +1293,7 @@ var fsHelper = {
 			{'questName':'Rare Search', 'level':55, 'location':' Utapo Flats East'},
 			{'questName':'Rat Infestation', 'level':125, 'location':' Jahd Swamps (North)'},
 			{'questName':'Rat Slayer', 'level':1, 'location':' Mountain Path'},
-			{'questName':'Reclaiming the Forest', 'level':317, 'location':' Inual (East)'},
+			{'questName':'Reclaiming the Forrest', 'level':317, 'location':' Inual (East)'},
 			{'questName':'Regain the Whole', 'level':537, 'location':' Shroud Rim (Stitchers Tower Upper)'},
 			{'questName':'Reluctant Hunter', 'level':111, 'location':' Lenzwer Forest (East)'},
 			{'questName':'Remnants of Corruption', 'level':40, 'location':' Amazon Encampment'},
@@ -3655,6 +3658,62 @@ var fsHelper = {
 		var bioCharactersValue = bioCharactersValueRE.exec(bioCharactersRatio.innerHTML)[1]*1;
 		var bioTotal = fsHelper.findNode("//span[@findme='biototal']");
 		bioTotal.innerHTML = (bioCharactersValue * 25) + 255;
+	},
+
+	addHistoryWidgets: function() {
+		var textArea = fsHelper.findNode("//textarea[@name='history']");
+		if (!textArea) return;
+		textArea.id = "historytext";
+		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Edit Guild History']]");
+		var crCount = 0;
+		var startIndex = 0;
+		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
+			crCount++;
+			startIndex = textArea.value.indexOf('\n',startIndex+1);
+		}
+		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='historylength' style='color:blue;'>" +
+			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='historytotal' style='color:blue;'>255</span>";
+
+		document.getElementById('historytext').addEventListener('keyup', fsHelper.updateHistoryCharacters, true);
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + "index.php?cmd=points&subcmd=guildupgrades",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getTotalHistoryCharacters(responseDetails.responseText);
+			},
+		})
+	},
+
+	updateHistoryCharacters: function(evt) {
+		var textArea = fsHelper.findNode("//textarea[@name='history']");
+		var characterCount = fsHelper.findNode("//span[@findme='historylength']");
+		var crCount = 0;
+		var startIndex = 0;
+		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
+			crCount++;
+			startIndex = textArea.value.indexOf('\n',startIndex+1);
+		}
+		characterCount.innerHTML = (textArea.value.length + crCount);
+		var bioTotal = fsHelper.findNode("//span[@findme='historytotal']");
+		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1)) {
+			characterCount.style.color = "red";
+		} else {
+			characterCount.style.color = "blue";
+		}
+	},
+
+	getTotalHistoryCharacters: function(responseText) {
+		var doc=fsHelper.createDocument(responseText)
+		var historyCharactersText = fsHelper.findNode("//td[.='+20 History Characters']",doc);
+		var historyCharactersRatio = historyCharactersText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var historyCharactersValueRE = /(\d+) \/ 250/;
+		var historyCharactersValue = historyCharactersValueRE.exec(historyCharactersRatio.innerHTML)[1]*1;
+		var historyTotal = fsHelper.findNode("//span[@findme='historytotal']");
+		historyTotal.innerHTML = (historyCharactersValue * 20) + 255;
 	},
 
 	portalToKrul: function(evt) {
