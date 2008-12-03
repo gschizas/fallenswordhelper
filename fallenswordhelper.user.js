@@ -1820,7 +1820,7 @@ var fsHelper = {
 		if (!injectHere) return;
 		var info = injectHere.insertRow(0);
 		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='fsHelperPlaceholderWorld'></span>";
+		cell.innerHTML="<span id='fsHelper:GuildListPlaceholder'></span>";
 		fsHelper.retrieveGuildData();
 	},
 
@@ -1891,13 +1891,13 @@ var fsHelper = {
 	},
 
 	prepareChat: function() {
-		var injectHere = fsHelper.findNode("//table[@width='120' and contains(.,'New?')]")
-		if (!injectHere) return;
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
-		var info = injectHere.insertRow(1);
+		var injectHere = fsHelper.findNode("//table[@width='120' and contains(.,'New?')]")
+		if (!injectHere) return;
+		var info = injectHere.insertRow(GM_getValue("disableGuildOnlineList")?0:1)
 		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='fsHelperPlaceholderChat'></span>";
+		cell.innerHTML="<span id='fsHelper:ChatPlaceholder'></span>";
 		var chat = fsHelper.getValueJSON("chat");
 		var newChat = fsHelper.findNode("//table[contains(.,'chat messages')]")
 		if (!chat || newChat || ((new Date()).getTime() - chat.lastUpdate > 15000)) {
@@ -1947,7 +1947,7 @@ var fsHelper = {
 	},
 
 	injectChat: function(chat){
-		var injectHere = document.getElementById("fsHelperPlaceholderChat");
+		var injectHere = document.getElementById("fsHelper:ChatPlaceholder");
 		var newTable=false;
 
 		var displayList = document.getElementById("fsHelperChatWindow");
@@ -2357,7 +2357,7 @@ var fsHelper = {
 		var playerId=document.body.innerHTML.match(playerIdRE)[1];
 
 		GM_setValue("memberlist", JSON.stringify(memberList));
-		var injectHere = document.getElementById("fsHelperPlaceholderWorld");
+		var injectHere = document.getElementById("fsHelper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
