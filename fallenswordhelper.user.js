@@ -2445,22 +2445,25 @@ var fsHelper = {
 				{"searchname":"Potion of Fury",             "shortname":"ZK 350",    "buff":"Berserk",        "level":350,  "duration":60,  "minlevel":5},
 				{"searchname":"Sludge Brew",                "shortname":"DC 200",    "buff":"Dark Curse",     "level":200,  "duration":45,  "minlevel":5, "bound":true},
 				{"searchname":"Potion of Black Death",      "shortname":"DC 225",    "buff":"Dark Curse",     "level":225,  "duration":60,  "minlevel":5},
-				{"searchname":"Potion of Death",            "shortname":"DW",        "buff":"Death Wish",     "level":125,  "duration":15,  "minlevel":5, "bound":true},
+				{"searchname":"Potion of Aid",              "shortname":"Assist",    "buff":"Assist",         "level":150,  "duration":30,  "minlevel":5, "bound":true},
 				{"searchname":"Potion of Supreme Doubling", "shortname":"DB 450",    "buff":"Doubler",        "level":450,  "duration":00,  "minlevel":5, "bound":true},
 				{"searchname":"Potion of Acceleration",     "shortname":"DB 500",    "buff":"Doubler",        "level":500,  "duration":120, "minlevel":5},
 				{"searchname":"Potion of Lesser Death Dealer",  "shortname":"DD",    "buff":"Death Dealer",   "level":25,   "duration":45,  "minlevel":20},
-				{"searchname":"Potion of Truth",            "shortname":"EW 1000",   "buff":"Enchant Weapon", "level":1000, "duration":90,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Aid",              "shortname":"Assist",    "buff":"Assist",         "level":150,  "duration":30,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Supreme Luck",     "shortname":"FI 1000",   "buff":"Find Item",      "level":1000, "duration":60,  "minlevel":5, "bound":true},
-				{"searchname":"Dull Edge",                  "shortname":"Dull Edge", "buff":"Dull Edge",      "level":25,   "duration":60,  "minlevel":1},
+				{"searchname":"Runic Potion",               "shortname":"FI 250",    "buff":"Find Item",      "level":250,  "duration":60,  "minlevel":5, "bound":true},
+				{"searchname":"Potion of Supreme Luck",     "shortname":"FI 1k",     "buff":"Find Item",      "level":1000, "duration":60,  "minlevel":5, "bound":true},
+				{"searchname":"Potion of Truth",            "shortname":"EW 1k",     "buff":"Enchant Weapon", "level":1000, "duration":90,  "minlevel":5, "bound":true},
+				{"searchname":"Dull Edge",                  "shortname":"DE 25",     "buff":"Dull Edge",      "level":25,   "duration":60,  "minlevel":1},
+				{"searchname":"Notched Blade",              "shortname":"DE 80",     "buff":"Dull Edge",      "level":80,   "duration":45,  "minlevel":10, "bound":true},
+				{"searchname":"Potion of Death",            "shortname":"DW 125",    "buff":"Death Wish",     "level":125,  "duration":15,  "minlevel":5, "bound":true},
 				{"searchname":"Potion of Decay",            "shortname":"WI 150",    "buff":"Wither",         "level":150,  "duration":15,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Fatality",         "shortname":"WI 350",    "buff":"Wither",         "level":350,  "duration":90,  "minlevel":10, "bound":true}
+				{"searchname":"Potion of Fatality",         "shortname":"WI 350",    "buff":"Wither",         "level":350,  "duration":90,  "minlevel":10, "bound":true},
+				{"searchname":"Potion of Annihilation",     "shortname":"DW 150",    "buff":"Death Wish",     "level":150,  "duration":30,  "minlevel":5}
 			];
 		}
 
 		//GM_log(JSON.stringify(potions));
 
-		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
+		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='8'>" + imageHTML + "</td>" +
 			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
 		var lp=0;
 		for (var p=0;p<potions.length;p++) {
@@ -2866,6 +2869,7 @@ var fsHelper = {
 
 			var auctiontext = "Go to " + playername + "'s auctions" ;
 			var ranktext = "Rank " +playername + "" ;
+			var securetradetext = "Create Secure Trade to " + playername;
 
 			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
@@ -2877,6 +2881,9 @@ var fsHelper = {
 			newhtml += "<a href=" + fsHelper.server + "?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
 			newhtml += fsHelper.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
+			newhtml += "<a href=" + fsHelper.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
+			newhtml += playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=';
+			newhtml += fsHelper.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
 				newhtml += "<a href='" + fsHelper.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
 				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
@@ -3322,6 +3329,17 @@ var fsHelper = {
 				fsHelper.getSustain(responseDetails.responseText);
 			},
 		})
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + "index.php?cmd=guild&subcmd=manage",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getFuryCaster(responseDetails.responseText);
+			},
+		})
 	},
 
 	getPlayerBuffs: function(responseText) {
@@ -3400,9 +3418,20 @@ var fsHelper = {
 		var activateInput = fsHelper.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
 		inputTable.rows[3].cells[0].align = "center";
-		inputTable.rows[3].cells[0].innerHTML = "<span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
+		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
 	},
 
+	getFuryCaster: function(responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var furyCasterText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Fury Shrine</b>')]", doc);
+		if (!furyCasterText) return;
+		var furyCasterLevel = furyCasterText.parentNode.nextSibling.textContent*5;
+		var activateInput = fsHelper.findNode("//input[@value='activate']");
+		var inputTable = activateInput.nextSibling.nextSibling;
+		inputTable.rows[3].cells[0].align = "center";
+		inputTable.rows[3].cells[0].innerHTML += " <span style='color:gold;'>Your Fury Caster bonus: +" + furyCasterLevel + "</span>";
+	},
+	
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
