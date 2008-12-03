@@ -342,14 +342,21 @@ var fsHelper = {
 	},
 
 	injectMenu: function() {
-		var characterMenuTable = fsHelper.findNode("//div[@id='menuSource_0']/table");
-		if (!characterMenuTable) return;
+		fsHelper.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11, "menuSource_0");
+		if (GM_getValue("keepLogs")) {
+			fsHelper.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 13, "menuSource_0")
+		}
+	},
+
+	injectOneMenu: function(text, href, position, insertAt) {
+		var menuTable = fsHelper.findNode("//div[@id='" + insertAt + "']/table");
+		if (!menuTable) return;
 		var newRow
-		newRow = characterMenuTable.insertRow(11);
+		newRow = menuTable.insertRow(position);
 		newRow.innerHTML='<td height="5"></td>';
-		newRow = characterMenuTable.insertRow(11);
+		newRow = menuTable.insertRow(position);
 		var newCell = newRow.insertCell(0);
-		newCell.innerHTML='<FONT color="black">&nbsp;&nbsp;-&nbsp;<A href="index.php?cmd=profile&subcmd=medalguide"><FONT color="black">Medal Guide</FONT></A></FONT>';
+		newCell.innerHTML='<font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font>';
 	},
 
 	injectGuild: function() {
@@ -1456,7 +1463,7 @@ var fsHelper = {
 
 		var buttonRow = fsHelper.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-			'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + fsHelper.imageServer + 
+			'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + fsHelper.imageServer +
 			'/temple/3.gif" title="Instant port to Krul Island" border="1"></span></td>';
 
 		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
@@ -1599,7 +1606,6 @@ var fsHelper = {
 	},
 
 	checkedMonster: function(responseDetails, callback) {
-		var reportText="";
 		var creatureInfo=fsHelper.createDocument(responseDetails.responseText);
 		var statsNode = fsHelper.findNode("//table[@width='400']", creatureInfo);
 		if (!statsNode) {return;} // FF2 error fix
@@ -1662,101 +1668,105 @@ var fsHelper = {
 
 	killedMonster: function(responseDetails, callback) {
 		var doc=fsHelper.createDocument(responseDetails.responseText);
-		try {
-			var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
-			var report=responseDetails.responseText.match(reportRE);
-			if (report) report=report[0]
 
-			// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
-			var specials=fsHelper.findNodes("//div[@id='specialsDiv']", doc);
+		var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
+		var report=responseDetails.responseText.match(reportRE);
+		if (report) report=report[0]
 
-			var playerIdRE = /fallensword.com\/\?ref=(\d+)/
-			var playerId=document.body.innerHTML.match(playerIdRE)[1];
+		// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
+		var specials=fsHelper.findNodes("//div[@id='specialsDiv']", doc);
 
-			var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)
-			if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
-			var goldGain=responseDetails.responseText.match(/var\s+goldGain=(-?[0-9]+);/)
-			if (goldGain) {goldGain=goldGain[1]} else {goldGain=0};
-			var guildTaxGain=responseDetails.responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)
-			if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
-			var levelUp=responseDetails.responseText.match(/var\s+levelUp=(-?[0-9]+);/)
-			if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
-			var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
-			var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
-			var info=responseDetails.responseText.match(infoRE)
-			if (info) {info=info[1]} else {info=""};
-			var lootMatch=responseDetails.responseText.match(lootRE)
-			var lootedItem = "";
-			var lootedItemId = "";
-			var lootedItemVerify="";
-			if (lootMatch && lootMatch.length>0) {
-				lootedItem=lootMatch[2];
-				lootedItemId=lootMatch[3];
-				lootedItemVerify=lootMatch[4];
-			}
-			var shieldImpDeathRE = /Shield Imp absorbed all damage/;
-			var shieldImpDeath = responseDetails.responseText.match(shieldImpDeathRE);
+		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
+		var playerId=document.body.innerHTML.match(playerIdRE)[1];
 
-			var monster = fsHelper.findNode(callback);
-			if (monster) {
-				var result=document.createElement("div");
-				var resultText="<small><small>"+callback.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
-				if (info!="") resultText+="<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
-				if (lootedItem!="") {
-					// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-					resultText += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" +
-						lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" +
-						lootedItem + "</span></small></small>";
-				}
-				if (shieldImpDeath) {
-					resultText += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>"
-				}
-				if (xpGain<0) result.style.color='red';
-				result.innerHTML=resultText
-				var monsterParent = monster.parentNode;
-				result.id = "result" + callback;
-				if (report) {
-					var reportLines=report.split("\n");
-					var reportText="";
-					if (specials) {
-						reportText += "<div style='color:red'>"
-						for (var i=0; i<specials.length; i++) {
-							reportText += specials[i].textContent;
-							reportText += "<br/>"
-						}
-						reportText += "</div>"
-					}
-					for (var i=0; i<reportLines.length; i++) {
-						var reportMatch = reportLines[i].match(/\"(.*)\"/);
-						if (reportMatch) {
-							reportText += "<br/>"
-							reportText += reportMatch[1];
-						}
-					}
-					if (levelUp=="1") {
-						reportText += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
-					}
-					if (levelUp=="-1") {
-						reportText += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
-					}
-					mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportText + "</div>";
-					fsHelper.appendCombatLog(reportText);
-					result.setAttribute("mouseOverText", mouseOverText);
-					if (GM_getValue("keepLogs")) {
-						var now=new Date();
-						fsHelper.appendSavedLog("<hr/>" + now.toLocaleFormat("%Y-%m-%d %H:%m:%S") + "<br/>" + resultText + "<br/>" + reportText);
-					}
-				}
-				monsterParent.innerHTML = "";
-				monsterParent.insertBefore(result, monsterParent.nextSibling);
-				if (report) {
-					document.getElementById("result" + callback).addEventListener("mouseover", fsHelper.clientTip, true);
-				}
-			}
+		var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)
+		if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
+		var goldGain=responseDetails.responseText.match(/var\s+goldGain=(-?[0-9]+);/)
+		if (goldGain) {goldGain=goldGain[1]} else {goldGain=0};
+		var guildTaxGain=responseDetails.responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)
+		if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
+		var levelUp=responseDetails.responseText.match(/var\s+levelUp=(-?[0-9]+);/)
+		if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
+		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
+		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var info=responseDetails.responseText.match(infoRE)
+		if (info) {info=info[1]} else {info=""};
+		var lootMatch=responseDetails.responseText.match(lootRE)
+		var lootedItem = "";
+		var lootedItemId = "";
+		var lootedItemVerify="";
+		if (lootMatch && lootMatch.length>0) {
+			lootedItem=lootMatch[2];
+			lootedItemId=lootMatch[3];
+			lootedItemVerify=lootMatch[4];
 		}
-		catch (ex) {
-			GM_log(ex);
-			GM_log(responseDetails.responseText);
+		var shieldImpDeathRE = /Shield Imp absorbed all damage/;
+		var shieldImpDeath = responseDetails.responseText.match(shieldImpDeathRE);
+
+		var monster = fsHelper.findNode(callback);
+		if (monster) {
+			var result=document.createElement("div");
+			var resultHtml = "<small><small>"+callback.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
+			var resultText = "XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")\n"
+			if (info!="") {
+				resultHtml += "<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
+				resultText += info + "\n";
+			}
+			if (lootedItem!="") {
+				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
+				resultHtml += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" +
+					lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" +
+					lootedItem + "</span></small></small>";
+				resultText += "Looted item:" + lootedItem + "\n";
+			}
+			if (shieldImpDeath) {
+				resultHtml += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>";
+				resultText += "Shield Imp Death\n"
+			}
+			if (xpGain<0) result.style.color='red';
+			result.innerHTML=resultHtml
+			var monsterParent = monster.parentNode;
+			result.id = "result" + callback;
+			if (report) {
+				var reportLines=report.split("\n");
+				var reportHtml="";
+				var reportText="";
+				if (specials) {
+					reportHtml += "<div style='color:red'>"
+					for (var i=0; i<specials.length; i++) {
+						reportHtml += specials[i].textContent + "<br/>";
+						reportText += specials[i].textContent + "\n";
+					}
+					reportHtml += "</div>";
+				}
+				for (var i=0; i<reportLines.length; i++) {
+					var reportMatch = reportLines[i].match(/\"(.*)\"/);
+					if (reportMatch) {
+						reportHtml += "<br/>" + reportMatch[1];
+						reportText += reportMatch[1] + "\n";
+					}
+				}
+				if (levelUp=="1") {
+					reportHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
+					reportText += "Your level has increased!\n";
+				}
+				if (levelUp=="-1") {
+					reportHtml += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
+					reportText += "Your level has decreased!\n";
+				}
+				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
+				fsHelper.appendCombatLog(reportHtml);
+				result.setAttribute("mouseOverText", mouseOverText);
+				if (GM_getValue("keepLogs")) {
+					var now=new Date();
+					fsHelper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
+				}
+			}
+			monsterParent.innerHTML = "";
+			monsterParent.insertBefore(result, monsterParent.nextSibling);
+			if (report) {
+				document.getElementById("result" + callback).addEventListener("mouseover", fsHelper.clientTip, true);
+			}
 		}
 	},
 
@@ -3660,7 +3670,7 @@ var fsHelper = {
 	},
 
 	portalToKrul: function(evt) {
-		var answer = confirm('Are you sure you with to use a special portal back to Krul Island?');
+		var answer = window.confirm('Are you sure you with to use a special portal back to Krul Island?');
 		if (answer) {
 			GM_xmlhttpRequest({
 				method: 'GET',
@@ -3853,25 +3863,22 @@ var fsHelper = {
 	injectNotepadShowLogs: function() {
 		var content=fsHelper.findNode("//table[@width='100%']/..");
 		var combatLog=GM_getValue("CombatLog");
-		content.innerHTML='<div style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="fsHelper:CombatLog">' + combatLog + '</div>' +
+		content.innerHTML='<div align="center"><textarea align="center" cols="80" rows="25" '+
+			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="fsHelper:CombatLog">' + combatLog + '</textarea></div>' +
 			'<br /><br /><table width="100%"><tr>'+
-//			'<td colspan="2" align=center>' +
-//			'<input type="button" class="custombutton" value="Copy" id="fsHelper:CopyLog"></td>' +
-			'<td colspan="4" align=center>' +
+			'<td colspan="2" align=center>' +
+			'<input type="button" class="custombutton" value="Select All" id="fsHelper:CopyLog"></td>' +
+			'<td colspan="2" align=center>' +
 			'<input type="button" class="custombutton" value="Clear" id="fsHelper:ClearLog"></td>' +
 			'</tr></table>';
-		// document.getElementById("fsHelper:CopyLog").addEventListener("click", fsHelper.notepadCopyLog, true);
+		document.getElementById("fsHelper:CopyLog").addEventListener("click", fsHelper.notepadCopyLog, true);
 		document.getElementById("fsHelper:ClearLog").addEventListener("click", fsHelper.notepadClearLog, true);
 	},
 
 	notepadCopyLog: function() {
-		// http://la.ma.la/misc/js/setclipboard.txt
-		// fsHelper.setClipboard("test");
 		var combatLog=document.getElementById("fsHelper:CombatLog")
-		// combatLog.focus();
-		// combatLog.select();
-		// CopiedTxt = document.selection.createRange();
-		// CopiedTxt.execCommand("Copy");
+		combatLog.focus();
+		combatLog.select();
 	},
 
 	notepadClearLog: function() {
