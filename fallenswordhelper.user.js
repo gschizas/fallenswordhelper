@@ -1433,7 +1433,9 @@ var fsHelper = {
 
 	injectWorld: function() {
 		// fsHelper.mapThis();
-		var injectHere=fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]").parentNode.parentNode
+		var realmRightBottom = fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]");
+		if (!realmRightBottom) return;
+		var injectHere = realmRightBottom.parentNode.parentNode
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", fsHelper.imageServer + "/skin/realm_right_bg.jpg");
@@ -1452,9 +1454,16 @@ var fsHelper = {
 					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td></tr>' +
 				'</table></div>';
 
+		var buttonRow = fsHelper.findNode("//tr[td/a/img[@title='Open Realm Map']]");
+		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+			'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + fsHelper.imageServer + 
+			'/temple/3.gif" title="Instant port to Krul Island" border="1"></span></td>';
+
 		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
 		document.getElementById('killAllAdvancedWorldType').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+
+		document.getElementById('portaltokrul').addEventListener('click', fsHelper.portalToKrul, true);
 		// injectHere.style.display='none';
 		fsHelper.checkBuffs();
 		fsHelper.prepareCheckMonster();
@@ -1861,6 +1870,10 @@ var fsHelper = {
 			memberList.isRefreshed = true;
 			fsHelper.injectGuildList(memberList);
 		}
+		var furyCasterText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Fury Shrine</b>')]", doc);
+		if (!furyCasterText) return;
+		var furyCasterLevel = furyCasterText.parentNode.nextSibling.textContent*5;
+		GM_setValue("furyCasterLevel", furyCasterLevel);
 	},
 
 	prepareChat: function() {
@@ -3306,17 +3319,17 @@ var fsHelper = {
 		var playerID = playerIDRE.exec(location);
 		if (playerID) {
 			var playerID = playerID[1];
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Cookie" : document.cookie
-			},
-			onload: function(responseDetails) {
-				fsHelper.getPlayerBuffs(responseDetails.responseText);
-			},
-		})
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.getPlayerBuffs(responseDetails.responseText);
+				},
+			})
 		}
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -3329,17 +3342,11 @@ var fsHelper = {
 				fsHelper.getSustain(responseDetails.responseText);
 			},
 		})
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: fsHelper.server + "index.php?cmd=guild&subcmd=manage",
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Cookie" : document.cookie
-			},
-			onload: function(responseDetails) {
-				fsHelper.getFuryCaster(responseDetails.responseText);
-			},
-		})
+		var furyCasterLevel = GM_getValue("furyCasterLevel");
+		var activateInput = fsHelper.findNode("//input[@value='activate']");
+		var inputTable = activateInput.nextSibling.nextSibling;
+		inputTable.rows[3].cells[0].align = "center";
+		inputTable.rows[3].cells[0].innerHTML += " <span style='color:gold;'>Your Fury Caster bonus: +" + furyCasterLevel + "</span>";
 	},
 
 	getPlayerBuffs: function(responseText) {
@@ -3421,17 +3428,6 @@ var fsHelper = {
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
 	},
 
-	getFuryCaster: function(responseText) {
-		var doc=fsHelper.createDocument(responseText);
-		var furyCasterText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Fury Shrine</b>')]", doc);
-		if (!furyCasterText) return;
-		var furyCasterLevel = furyCasterText.parentNode.nextSibling.textContent*5;
-		var activateInput = fsHelper.findNode("//input[@value='activate']");
-		var inputTable = activateInput.nextSibling.nextSibling;
-		inputTable.rows[3].cells[0].align = "center";
-		inputTable.rows[3].cells[0].innerHTML += " <span style='color:gold;'>Your Fury Caster bonus: +" + furyCasterLevel + "</span>";
-	},
-	
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -3661,6 +3657,23 @@ var fsHelper = {
 		var bioCharactersValue = bioCharactersValueRE.exec(bioCharactersRatio.innerHTML)[1]*1;
 		var bioTotal = fsHelper.findNode("//span[@findme='biototal']");
 		bioTotal.innerHTML = (bioCharactersValue * 25) + 255;
+	},
+
+	portalToKrul: function(evt) {
+		var answer = confirm('Are you sure you with to use a special portal back to Krul Island?');
+		if (answer) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					window.location="index.php?cmd=world";
+				},
+			})
+		}
 	},
 
 	toggleVisibilty: function(evt) {
