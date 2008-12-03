@@ -896,6 +896,21 @@ var fsHelper = {
 				applyImpWarningColor = " style='color:red; font-size:large; font-weight:bold'";
 			}
 			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
+			if (hasDeathDealer) {
+				replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>0</span> " +
+					"Damage bonus: <span findme='damagebonus'>0</span>%</td></tr>"
+				GM_xmlhttpRequest({
+					method: 'GET',
+					url: fsHelper.server + "index.php?cmd=profile",
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Cookie" : document.cookie
+					},
+					onload: function(responseDetails) {
+						fsHelper.getKillStreak(responseDetails.responseText);
+					},
+				})
+			}
 		}
 
 		var buffs=GM_getValue("huntingBuffs")
@@ -2251,6 +2266,7 @@ var fsHelper = {
 	addLogWidgets: function() {
 		var logTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var memberList = fsHelper.getValueJSON("memberlist");
+		if (!memberList) return;
 		var memberNameString;
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
@@ -3429,6 +3445,27 @@ var fsHelper = {
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
 	},
 
+	getKillStreak: function(responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		//Kill&nbsp;Streak:&nbsp;
+		var killStreakText = fsHelper.findNode("//b[contains(.,'Kill')]", doc);
+		if (killStreakText) {
+			var killStreakLocation = killStreakText.parentNode.nextSibling;
+			var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
+		}
+		var killStreakElement = fsHelper.findNode("//span[@findme='killstreak']");
+		killStreakElement.innerHTML = fsHelper.addCommas(playerKillStreakValue);
+		var deathDealerBuff = fsHelper.findNode("//img[contains(@onmouseover,'Fury')]");
+		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
+		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
+		if (deathDealer) {
+			var deathDealerLevel = deathDealer[1];
+			var deathDealerPercentage = (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20))
+		}
+		var deathDealerPercentageElement = fsHelper.findNode("//span[@findme='damagebonus']");
+		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
+	},
+	
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
