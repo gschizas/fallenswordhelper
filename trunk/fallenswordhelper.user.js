@@ -9,6 +9,8 @@
 // @exclude        http://wiki.fallensword.com/*
 // ==/UserScript==
 
+// No warranty expressed or implied. Use at your own risk.
+
 var fsHelper = {
 	// Static functions
 	getValueJSON: function(name) {
@@ -79,16 +81,19 @@ var fsHelper = {
 	initSettings: function() {
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
-		//if (GM_getValue("showDebugInfo")==undefined) GM_setValue("showDebugInfo", false);
+		if (GM_getValue("keepLogs")==undefined) GM_setValue("keepLogs", false);
+		if (GM_getValue("showDebugInfo")==undefined) GM_setValue("showDebugInfo", false);
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
+
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex = imgurls.src.indexOf("/skin/");
 		fsHelper.imageServer=imgurls.src.substr(0,idindex);
 		fsHelper.server=document.location.protocol + "//" + document.location.host + "/";
-		fsHelper.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1])
+		fsHelper.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
+		fsHelper.debug = GM_getValue("showDebugInfo");
 	},
 
 	readInfo: function() {
@@ -200,7 +205,7 @@ var fsHelper = {
 		if (subsequentPageIdRE)
 			subsequentPageId=subsequentPageIdRE[1];
 
-		if (GM_getValue("showDebugInfo")) GM_log(pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")");
+		if (fsHelper.debug) GM_log(pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")");
 
 		switch (pageId) {
 		case "settings":
@@ -305,6 +310,13 @@ var fsHelper = {
 			break;
 		case "quickbuff":
 			fsHelper.injectQuickBuff();
+			break;
+		case "notepad":
+			switch(subPageId) {
+			case "showlogs":
+				fsHelper.injectNotepadShowLogs();
+				break;
+			}
 			break;
 		case "-":
 			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
@@ -738,7 +750,7 @@ var fsHelper = {
 		// if ((realm) && (posit)>0) {
 			var levelName=realm.innerHTML;
 			var theMap = fsHelper.getValueJSON("map")
-			GM_log(GM_getValue("map"))
+			// GM_log(GM_getValue("map"))
 			// theMap = null;
 			if (!theMap) {
 				theMap = new Object;
@@ -1175,7 +1187,7 @@ var fsHelper = {
 			{'questName':'Eternal Chant', 'level':5, 'location':' Varas Dungeon'},
 			{'questName':'Evil Hunt', 'level':345, 'location':' Dark Vale (North)'},
 			{'questName':'Exiled Warriors', 'level':355, 'location':' Glitter Mine Depths'},
-			{'questName':'Extinguish  the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
+			{'questName':'Extinguish the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
 			{'questName':'Eye of the Crocodile', 'level':287, 'location':' Ephal Swamp (East)'},
 			{'questName':'Failed Task', 'level':4, 'location':' Elven Halls'},
 			{'questName':'Familiar Creation', 'level':539, 'location':' Dark Atholhu (Outer)'},
@@ -1314,7 +1326,7 @@ var fsHelper = {
 			{'questName':'Taking Arms', 'level':2, 'location':' Snow Forest East'},
 			{'questName':'Taking Ground', 'level':357, 'location':' Underground Passages (Outer)'},
 			{'questName':'Tassodans Lost Rune', 'level':2, 'location':' Snow Forest East'},
-			{'questName':'Terror At  Krysa', 'level':297, 'location':' Krysa (East)'},
+			{'questName':'Terror At Krysa', 'level':297, 'location':' Krysa (East)'},
 			{'questName':'The Ant Queen', 'level':221, 'location':' Miyal (South)'},
 			{'questName':'The Ascended', 'level':215, 'location':' Aydr (South)'},
 			{'questName':'The Battle for Narkort', 'level':199, 'location':' Narkort (West)'},
@@ -1554,7 +1566,7 @@ var fsHelper = {
 
 	prepareCheckMonster: function() {
 		if (!GM_getValue("showCreatureInfo")) return;
-		if (GM_getValue("killAllAdvanced") == "all") return;
+		// if (GM_getValue("killAllAdvanced") == "all") return;
 		var monsters = fsHelper.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
 		if (!monsters) return;
 		for (var i=0; i<monsters.length; i++) {
@@ -1721,6 +1733,10 @@ var fsHelper = {
 					mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportText + "</div>";
 					fsHelper.appendCombatLog(reportText);
 					result.setAttribute("mouseOverText", mouseOverText);
+					if (GM_getValue("keepLogs")) {
+						var now=new Date();
+						fsHelper.appendSavedLog("<hr/>" + now.toLocaleFormat("%Y-%m-%d %H:%m:%S") + "<br/>" + resultText + "<br/>" + reportText);
+					}
 				}
 				monsterParent.innerHTML = "";
 				monsterParent.insertBefore(result, monsterParent.nextSibling);
@@ -1733,6 +1749,13 @@ var fsHelper = {
 			GM_log(ex);
 			GM_log(responseDetails.responseText);
 		}
+	},
+
+	appendSavedLog: function(text) {
+		var theLog=GM_getValue("CombatLog");
+		if (!theLog) theLog="";
+		theLog+=text;
+		GM_setValue("CombatLog", theLog);
 	},
 
 	appendCombatLog: function(text) {
@@ -3276,17 +3299,17 @@ var fsHelper = {
 		var playerID = playerIDRE.exec(location);
 		if (playerID) {
 			var playerID = playerID[1];
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					fsHelper.getPlayerBuffs(responseDetails.responseText);
-				},
-			})
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.getPlayerBuffs(responseDetails.responseText);
+			},
+		})
 		}
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -3666,7 +3689,7 @@ var fsHelper = {
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelperCheckUpdate"></td></tr>'+
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="fsHelper:CheckUpdate"></td></tr>'+
 			'<tr><td colspan="4" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + fsHelper.formatDateTime(lastCheck) +
 			')</span></td></tr>' +
 			'<tr><td colspan="4" align="left"><b>Enter guild names, seperated by commas</td></tr>' +
@@ -3684,6 +3707,10 @@ var fsHelper = {
 				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Keep Combat Logs' + fsHelper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
+				'Press <u>Show logs</u> on the right to display and copy them') +
+				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
+			'<td align="right" colspan="2"><input type="button" class="custombutton" value="Show Logs" id="fsHelper:ShowLogs"></td></td></tr>' +
 			'<tr><td align="right">Show Administrative Options' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
@@ -3710,15 +3737,15 @@ var fsHelper = {
 				':</td><td><input name="disableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("disableGuildOnlineList")?" checked":"") + '></td>' +
 			'<td align="right">Show Debug Info' + fsHelper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
-			//save button
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas') +
 				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelperSaveOptions"></td></tr>' +
+			//save button
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
-			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-			'with valuable contributions by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
-			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
+			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a> and ' +
+			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'with valuable contributions by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
@@ -3730,8 +3757,9 @@ var fsHelper = {
 		newCell.colSpan=3;
 		newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
-		document.getElementById('fsHelperSaveOptions').addEventListener('click', fsHelper.saveConfig, true);
-		document.getElementById('fsHelperCheckUpdate').addEventListener('click', fsHelper.checkForUpdate, true);
+		document.getElementById('fsHelper:SaveOptions').addEventListener('click', fsHelper.saveConfig, true);
+		document.getElementById('fsHelper:CheckUpdate').addEventListener('click', fsHelper.checkForUpdate, true);
+		document.getElementById('fsHelper:ShowLogs').addEventListener('click', fsHelper.showLogs, true);
 
 		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
@@ -3766,13 +3794,50 @@ var fsHelper = {
 		fsHelper.saveValueForm(oForm, "hideBanner");
 		fsHelper.saveValueForm(oForm, "showCombatLog");
 		fsHelper.saveValueForm(oForm, "showCreatureInfo");
-		fsHelper.saveValueForm(oForm, "disableGuildOnlineList");		
+		fsHelper.saveValueForm(oForm, "keepLogs");
+		fsHelper.saveValueForm(oForm, "disableGuildOnlineList");
 		fsHelper.saveValueForm(oForm, "showDebugInfo");
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
+	},
+
+	showLogs: function(evt) {
+		document.location=fsHelper.server + "index.php?cmd=notepad&subcmd=showlogs"
+	},
+
+	injectNotepadShowLogs: function() {
+		var content=fsHelper.findNode("//table[@width='100%']/..");
+		var combatLog=GM_getValue("CombatLog");
+		content.innerHTML='<div style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="fsHelper:CombatLog">' + combatLog + '</div>' +
+			'<br /><br /><table width="100%"><tr>'+
+//			'<td colspan="2" align=center>' +
+//			'<input type="button" class="custombutton" value="Copy" id="fsHelper:CopyLog"></td>' +
+			'<td colspan="4" align=center>' +
+			'<input type="button" class="custombutton" value="Clear" id="fsHelper:ClearLog"></td>' +
+			'</tr></table>';
+		// document.getElementById("fsHelper:CopyLog").addEventListener("click", fsHelper.notepadCopyLog, true);
+		document.getElementById("fsHelper:ClearLog").addEventListener("click", fsHelper.notepadClearLog, true);
+	},
+
+	notepadCopyLog: function() {
+		// http://la.ma.la/misc/js/setclipboard.txt
+		// fsHelper.setClipboard("test");
+		var combatLog=document.getElementById("fsHelper:CombatLog")
+		// combatLog.focus();
+		// combatLog.select();
+		// CopiedTxt = document.selection.createRange();
+		// CopiedTxt.execCommand("Copy");
+	},
+
+	notepadClearLog: function() {
+		if (window.confirm("Are you sure you want to clear your log?")) {
+			var combatLog=document.getElementById("fsHelper:CombatLog");
+			combatLog.innerHTML="";
+			GM_setValue("CombatLog", "");
+		}
 	},
 
 	guildRelationship: function(txt) {
