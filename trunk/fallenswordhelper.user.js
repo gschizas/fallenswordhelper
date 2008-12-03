@@ -3455,7 +3455,7 @@ var fsHelper = {
 		}
 		var killStreakElement = fsHelper.findNode("//span[@findme='killstreak']");
 		killStreakElement.innerHTML = fsHelper.addCommas(playerKillStreakValue);
-		var deathDealerBuff = fsHelper.findNode("//img[contains(@onmouseover,'Fury')]");
+		var deathDealerBuff = fsHelper.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
 		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
 		if (deathDealer) {
