@@ -2509,12 +2509,32 @@ var fsHelper = {
 
 		//GM_log(JSON.stringify(potions));
 
-		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='8'>" + imageHTML + "</td>" +
+		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
 			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
 		var lp=0;
+		var rowCount = 0;
 		for (var p=0;p<potions.length;p++) {
 			var pot=potions[p];
-			if (lp % 3==0) finalHTML += "<tr>";
+			if (lp % 3==0) {
+				finalHTML += "<tr>";
+				rowCount++;
+			}
+			if (rowCount == 7 && lp % 3==0) {
+				finalHTML += "<td><span style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Plant Search</span>" +
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+						"searchtext='Blood Bloom' title='Blood Bloom Plant'>Blood Bloom</span> |" +
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+						"searchtext='Jademare' title='Jademare Plant'>Jademare</span> |" +
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+						"searchtext='Dark Shade' title='Dark Shade Plant'>Dark Shade</span> |" +
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+						"searchtext='Trinettle' title='Trinettle Plant'>Trinettle</span> |" +
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+						"searchtext='Heffle Wart' title='Heffle Wart Plant'>Heffle Wart</span> |" +
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+						"searchtext='Amber' title='Amber Plant'>Amber</span>" +
+					"</td>";
+			}
 			finalHTML += "<td";
 			if (pot.wide) finalHTML+=" colspan='2' "
 			finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' searchtext='" +
