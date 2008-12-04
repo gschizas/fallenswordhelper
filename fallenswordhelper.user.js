@@ -1216,7 +1216,7 @@ var fsHelper = {
 			{'questName':'Eternal Chant', 'level':5, 'location':' Varas Dungeon'},
 			{'questName':'Evil Hunt', 'level':345, 'location':' Dark Vale (North)'},
 			{'questName':'Exiled Warriors', 'level':355, 'location':' Glitter Mine Depths'},
-			{'questName':'Extinguish the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
+			{'questName':'Extinguish  the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
 			{'questName':'Eye of the Crocodile', 'level':287, 'location':' Ephal Swamp (East)'},
 			{'questName':'Failed Task', 'level':4, 'location':' Elven Halls'},
 			{'questName':'Familiar Creation', 'level':539, 'location':' Dark Atholhu (Outer)'},
