@@ -3662,9 +3662,17 @@ var fsHelper = {
 
 	addBioWidgets: function() {
 		var textArea = fsHelper.findNode("//textarea[@name='bio']");
-		textArea.rows=15;
+		//textArea.rows=15;
 		textArea.cols=60;
 		textArea.id = "biotext";
+		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
+		var bioPreviewHTML = fsHelper.convertBioToHTML(textArea.value);
+		var newRow = textAreaTable.insertRow(-1);
+		var newCell = newRow.insertCell(0);
+		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
+			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
+			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML + 
+			'</span></td></tr></tbody></table>';
 		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
 		var crCount = 0;
 		var startIndex = 0;
@@ -3705,6 +3713,9 @@ var fsHelper = {
 		} else {
 			characterCount.style.color = "blue";
 		}
+		var previewArea = fsHelper.findNode("//span[@findme='biopreview']");
+		var bioPreviewHTML = fsHelper.convertBioToHTML(textArea.value);
+		previewArea.innerHTML = bioPreviewHTML;
 	},
 
 	getTotalBioCharacters: function(responseText) {
@@ -3717,9 +3728,27 @@ var fsHelper = {
 		bioTotal.innerHTML = (bioCharactersValue * 25) + 255;
 	},
 
+	convertBioToHTML: function(inputText) {
+		var outputHTML = inputText;
+		outputHTML = outputHTML.replace(/</g,"&lt");
+		outputHTML = outputHTML.replace(/>/g,"&gt");
+		outputHTML = outputHTML.replace(/\n/g,"<br>");
+		outputHTML = outputHTML.replace(/\[\/([a-z])]/g,"<\/\$1>");
+		outputHTML = outputHTML.replace(/\[([a-z])\]/g,"<\$1>");
+		return outputHTML
+	},
+
 	addHistoryWidgets: function() {
 		var textArea = fsHelper.findNode("//textarea[@name='history']");
 		if (!textArea) return;
+		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
+		var bioPreviewHTML = fsHelper.convertBioToHTML(textArea.value);
+		var newRow = textAreaTable.insertRow(-1);
+		var newCell = newRow.insertCell(0);
+		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
+			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
+			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML + 
+			'</span></td></tr></tbody></table>';
 		textArea.id = "historytext";
 		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Edit Guild History']]");
 		var crCount = 0;
@@ -3761,6 +3790,9 @@ var fsHelper = {
 		} else {
 			characterCount.style.color = "blue";
 		}
+		var previewArea = fsHelper.findNode("//span[@findme='biopreview']");
+		var bioPreviewHTML = fsHelper.convertBioToHTML(textArea.value);
+		previewArea.innerHTML = bioPreviewHTML;
 	},
 
 	getTotalHistoryCharacters: function(responseText) {
