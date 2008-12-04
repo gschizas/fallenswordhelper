@@ -204,7 +204,8 @@ var fsHelper = {
 		if (subsequentPageIdRE)
 			subsequentPageId=subsequentPageIdRE[1];
 
-		if (fsHelper.debug) GM_log(pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")");
+		fsHelper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")"
+		if (fsHelper.debug) GM_log(fsHelper.page);
 
 		switch (pageId) {
 		case "settings":
@@ -2057,6 +2058,30 @@ var fsHelper = {
 		unsafeWindow.document.onkeypress = fsHelper.keyPress;
 	},
 
+	moveMe: function(dx, dy) {
+		var pos=fsHelper.position();
+		if (pos) {
+			window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
+		}
+		if (fsHelper.page=="world/map/-(-)") {
+			var playerTile=fsHelper.findNode("//img[contains(@src,'player_tile.gif')]/..");
+			var pos = {};
+			pos.X=playerTile.cellIndex;
+			pos.Y=playerTile.parentNode.rowIndex;
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy),
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					window.location= fsHelper.server + "index.php?cmd=world&subcmd=map";
+				},
+			})
+		}
+	},
+
 	keyPress: function (evt) {
 		var r, s;
 		if (evt.target.tagName!="HTML") return;
@@ -2068,36 +2093,31 @@ var fsHelper = {
 
 		r = evt.charCode;
 		s = evt.keyCode;
-		var pos=fsHelper.position();
-		if (pos) {
-			var x=pos.X;
-			var y=pos.Y;
-		}
 
 		switch (r) {
 		case 113: // nw
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y-1);
+			fsHelper.moveMe(-1,-1)
 			break;
 		case 119: // n
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
+			fsHelper.moveMe(0,-1);
 			break;
 		case 101: // ne
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y-1);
+			fsHelper.moveMe(1,-1);
 			break;
 		case 97: // w
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
+			fsHelper.moveMe(-1,0);
 			break;
 		case 100: // e
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
+			fsHelper.moveMe(1,0);
 			break;
 		case 122: // sw
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+1);
+			fsHelper.moveMe(-1,1);
 			break;
 		case 120: // s
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
+			fsHelper.moveMe(0,1);
 			break;
 		case 99: // se
-			if (pos) window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+1);
+			fsHelper.moveMe(1,1);
 			break;
 		case 114: // repair
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
@@ -2151,32 +2171,24 @@ var fsHelper = {
 		case 0: // special key
 			switch (s) {
 			case 37: // w
-				if (pos) {
-					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x-1) + '&y=' + (y+0);
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
+				fsHelper.moveMe(-1,0);
+				evt.preventDefault();
+				evt.stopPropagation();
 				break;
 			case 38: // n
-				if (pos) {
-					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y-1);
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
+				fsHelper.moveMe(0,-1);
+				evt.preventDefault();
+				evt.stopPropagation();
 				break;
 			case 39: // e
-				if (pos) {
-					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+1) + '&y=' + (y+0);
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
+				fsHelper.moveMe(1,0);
+				evt.preventDefault();
+				evt.stopPropagation();
 				break;
 			case 40: // s
-				if (pos) {
-					window.location = 'index.php?cmd=world&subcmd=move&x=' + (x+0) + '&y=' + (y+1);
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
+				fsHelper.moveMe(0,1);
+				evt.preventDefault();
+				evt.stopPropagation();
 				break;
 			case 33:
 				if (fsHelper.findNode("//div[@id='reportsLog']")) {
