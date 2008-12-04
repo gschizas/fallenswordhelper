@@ -121,12 +121,11 @@ var fsHelper = {
 	// Autoupdate
 	beginAutoUpdate: function() {
 		var lastCheck=GM_getValue("lastVersionCheck")
-		var now=(new Date()).getTime()
+		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=(now - lastCheck > 6*60*60*1000)
-
+		var haveToCheck=((now - lastCheck) > 6*60*60*1000)
 		if (haveToCheck) {
-			fsHelper.checkForUpdate;
+			fsHelper.checkForUpdate();
 		}
 	},
 
@@ -2521,17 +2520,17 @@ var fsHelper = {
 			}
 			if (rowCount == 7 && lp % 3==0) {
 				finalHTML += "<td><span style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Plant Search</span>" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Blood Bloom' title='Blood Bloom Plant'>Blood Bloom</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Jademare' title='Jademare Plant'>Jademare</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Dark Shade' title='Dark Shade Plant'>Dark Shade</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Trinettle' title='Trinettle Plant'>Trinettle</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Heffle Wart' title='Heffle Wart Plant'>Heffle Wart</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " + 
+					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Amber' title='Amber Plant'>Amber</span>" +
 					"</td>";
 			}
@@ -3485,7 +3484,7 @@ var fsHelper = {
 		var deathDealerPercentageElement = fsHelper.findNode("//span[@findme='damagebonus']");
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
 	},
-	
+
 	injectCreature: function() {
 		GM_xmlhttpRequest({
 			method: 'GET',
@@ -3671,7 +3670,7 @@ var fsHelper = {
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
-			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML + 
+			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
 		var crCount = 0;
@@ -3747,7 +3746,7 @@ var fsHelper = {
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
-			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML + 
+			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		textArea.id = "historytext";
 		var innerTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Edit Guild History']]");
