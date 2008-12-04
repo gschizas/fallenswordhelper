@@ -2301,14 +2301,16 @@ var fsHelper = {
 					if (messageType == "Chat") {
 						var playerName = aRow.cells[2].firstChild.innerHTML;
 						if (memberNameString.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.innerHTML = "<font style='color:green;'>" + playerName + "</font>";
+							aRow.cells[2].firstChild.style.color="green";
 							isGuildmate = true;
 						}
 						var messageHTML = aRow.cells[2].innerHTML;
 						var firstPart = messageHTML.split(">Reply</a>")[0];
 						var secondPart = messageHTML.split(">Reply</a>")[1];
 						//http://www.fallensword.com/index.php?cmd=trade&target_player=Bubbacus62
-						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> ";
+						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
+							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
+							"'>ST</a>";
 						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
 
 						isGuildmate = false;
@@ -2319,7 +2321,8 @@ var fsHelper = {
 						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
 						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
-							"'>Trade</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID +
+							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
+							"'>ST</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID +
 							"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">Buff</a> ]</span>";
 				}
 			}
