@@ -132,10 +132,10 @@ var fsHelper = {
 	checkForUpdate: function() {
 		GM_log("Checking for new version...")
 		var now=(new Date()).getTime();
-		GM_setValue("lastVersionCheck", now.toString())
+		GM_setValue("lastVersionCheck", now.toString());
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: "http://fallenswordhelper.googlecode.com/svn/trunk/",
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce="+now,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Cookie" : document.cookie
@@ -1764,7 +1764,7 @@ var fsHelper = {
 					var reportMatch = reportLines[i].match(/\"(.*)\"/);
 					if (reportMatch) {
 						reportHtml += "<br/>" + reportMatch[1];
-						reportText += reportMatch[1] + "\n";
+						reportText += reportMatch[1].replace(/<br>/g, "\n") + "\n";
 					}
 				}
 				if (levelUp=="1") {
@@ -2144,6 +2144,10 @@ var fsHelper = {
 		case 48: // return to world
 			window.location = 'index.php?cmd=world';
 			break;
+		case 109: // map
+			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
+			openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
+			break;
 		case 0: // special key
 			switch (s) {
 			case 37: // w
@@ -2189,8 +2193,11 @@ var fsHelper = {
 				}
 				break;
 			default:
-				// GM_log('special key: ' +s);
+				if (fsHelper.debug) GM_log('special key: ' +s);
 			}
+			break;
+		default:
+			if (fsHelper.debug) GM_log('standard key: ' +r);
 		}
 		return true;
 	},
@@ -2911,21 +2918,19 @@ var fsHelper = {
 
 		var player = fsHelper.findNode("//textarea[@id='holdtext']");
 		var avyrow = fsHelper.findNode("//img[contains(@title, 's Avatar')]");
-		var playerid = document.URL.match(/\w*\d{5}\d*/)
+		var playeridRE = document.URL.match(/player_id=(\d+)/);
+		if (playeridRE) var playerid=playeridRE[1];
 		var idindex, newhtml;
 
-		if (player)
-		{
-			if (!playerid)
-			{
+		if (player) {
+			if (!playerid) {
 				playerid = player.innerHTML;
 				idindex = playerid.indexOf("?ref=") + 5;
 				playerid = playerid.substr(idindex);
 			}
 
 			var playeravy = avyrow.parentNode.firstChild ;
-			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue)))
-			{
+			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue))) {
 				playeravy = playeravy.nextSibling ;
 			}
 			var playername = playeravy.getAttribute("title");
