@@ -83,6 +83,7 @@ var fsHelper = {
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
 		if (GM_getValue("keepLogs")==undefined) GM_setValue("keepLogs", false);
 		if (GM_getValue("showDebugInfo")==undefined) GM_setValue("showDebugInfo", false);
+		if (GM_getValue("showCompletedQuests")==undefined) GM_setValue("showCompletedQuests", true);
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
@@ -3059,13 +3060,15 @@ var fsHelper = {
 	injectQuestManager: function() {
 		var content=fsHelper.findNode("//table[@width='100%']/..");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td nobr bgcolor="#cd9e4b"><b>&nbsp;Quest Manager</b></td>'+
-			'</tr></table>' +
+			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Quest Manager</b></td></tr>'+
+			'<tr><td><b>&nbsp;Show Completed Quests <input id="fsHelper:showCompletedQuests" type="checkbox"' +
+				(GM_getValue("showCompletedQuests")?' checked':'') + '/></b></td></tr>'+
+			'</table>' +
 			'<div style="font-size:small;" id="fsHelper:QuestManagerOutput">' +
 			'Loading quest book...' +
 			'</div>';
-		fsHelper.parseQuestBookStart(0);
 		fsHelper.questMatrix();
+		fsHelper.parseQuestBookStart(0);
 		// fsHelper.injectQuestTable();
 	},
 
@@ -3125,6 +3128,12 @@ var fsHelper = {
 			cell.style.cursor="pointer";
 			cell.addEventListener('click', fsHelper.sortQuestTable, true);
 		}
+		document.getElementById("fsHelper:showCompletedQuests").addEventListener('click', fsHelper.toggleShowHiddenQuests, true);
+	},
+
+	toggleShowHiddenQuests: function(evt) {
+		GM_setValue("showCompletedQuests", evt.target.checked);
+		fsHelper.injectQuestTable();
 	},
 
 	sortQuestTable: function(evt) {
@@ -3153,16 +3162,40 @@ var fsHelper = {
 	generateQuestTable: function() {
 		var quests = fsHelper.questMatrix();
 		var q, bgColor;
+		GM_log(fsHelper.characterLevel);
 		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="fsHelper:QuestTable">';
-		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th sortKey="level">Level</th><th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
+		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th sortKey="level">Level</th>' +
+			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
+		var c=0;
 		for (var i=0;i<quests.length;i++) {
 			q = quests[i];
-			bgColor = (i%2==0)?"#e2b960":"#e7c473";
 			var img="";
 			// if (q.status==undefined) img="";
-			if (q.status=="Completed") img="quest_complete.gif";
-			if (q.status=="Incomplete") img="quest_incomplete.gif";
-			output+='<tr style="background-color:' + bgColor + '"><td>' + q.questName + '</td><td>' + q.level + '</td><td>' + q.location + '</td><td><img src="' + fsHelper.imageServer + "/skin/" + img + '"></td></tr>';
+			if (q.status=="Completed") img=fsHelper.imageServer + "/skin/quest_complete.gif";
+			if (q.status=="Incomplete") img=fsHelper.imageServer + "/skin/quest_incomplete.gif";
+			if (q.status==undefined) img='data:image/png;base64,' +
+				'iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC5UlEQVR4nG1UX2sT' +
+				'QRD/7V5yub0kUi4mFFJfWq2i2Jb+0bZYoX2wgk+C6IvfwQf9AH4HP4KCgopvglIK' +
+				'FqVafFPf1AdFH7TpH2huzzTJOrObi6npcHd7Nzvzm5nfzJ54dmfWAHSRNPdbcCLQ' +
+				'K81mA4FSHZv9Q2wE6ZsQj2/NmEfr30jRhtfYRU427LbOVpyd+efXSBp9MH5G2vX6' +
+				'hRFknKqNqwsnugaNuNUN7ivPIdIlpQ/f9/qCPFz5YBWSgYxpkWEW/6wOFwYSgXS3' +
+				'cqsX+uTftn6Zrj9HFh1Ao+1S/bjRBxgvX+4J2knNGLoIjB+s9H2J/VbbbZBm6NMG' +
+				'Lq3u9IG9XBrA3sUlSOXb74znAIUQ9J7NwXgZ+mAyiQ8VIFpfs0Ds+L+k+k0C1DpG' +
+				'QkXkvCxkwU8bQBpuvU5QePG86/BrfM5WEh6hPbqSLZdZuv99ZhY5lXKsuAExlRUc' +
+				'yr3IGghXDba3YgvYK4YDIY/E5hO7zJQlkrILBTanz9uov8/Nwfwx2K3HKH9eR+GQ' +
+				'MtnFBXANy/CXChXlprATUwwVYm95EbomEA0GqHTK7m2ABaJEozAtgfxVxGCaiNQ2' +
+				'1YA2ueCdGiXJhsHBLrJwJ+uxQT4kNCpRp5yTSK460dopaD+xJdNt6kSUPsDR5vSi' +
+				'XUslblbe+qRVJuz59PaEebDyFdeuTDmQ9OBxYFGH8AKU3r6ynZXFgAcKQRQg+UG1' +
+				'SDYK8eTNe9ycP41Moo0dC6YrJNtY1xGqvAUCraW11QOk28qTxAbV2vbR8s2ZSTsO' +
+				'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
+				'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
+				'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
+				'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
+			if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=fsHelper.characterLevel) {
+				bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
+				output+='<tr style="background-color:' + bgColor + '"><td>' + q.questName + '</td><td>' + q.level + '</td>'+
+					'<td>' + q.location + '</td><td><img src="' + img + '"></td></tr>';
+			}
 		}
 		output+='</table>';
 		return output;
