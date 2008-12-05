@@ -221,6 +221,13 @@ var fsHelper = {
 				fsHelper.injectWorld();
 			}
 			break;
+		case "blacksmith":
+			switch (subPageId) {
+			case "repairall":
+				fsHelper.injectWorld();
+				break;
+			}
+			break;
 		case "questbook":
 			switch(subsequentPageId) {
 			case "-":
@@ -926,19 +933,28 @@ var fsHelper = {
 			}
 			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
 			if (hasDeathDealer) {
-				replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>0</span> " +
-					"Damage bonus: <span findme='damagebonus'>0</span>%</td></tr>"
-				GM_xmlhttpRequest({
-					method: 'GET',
-					url: fsHelper.server + "index.php?cmd=profile",
-					headers: {
-						"User-Agent" : navigator.userAgent,
-						"Cookie" : document.cookie
-					},
-					onload: function(responseDetails) {
-						fsHelper.getKillStreak(responseDetails.responseText);
-					},
-				})
+				if (GM_getValue("lastDeathDealerPercentage")==undefined) GM_setValue("lastDeathDealerPercentage", 0);
+				if (GM_getValue("lastKillStreak")==undefined) GM_setValue("lastKillStreak", 0);
+				var lastDeathDealerPercentage = GM_getValue("lastDeathDealerPercentage");
+				var lastKillStreak = GM_getValue("lastKillStreak");
+				if (impsRemaining>0 && lastDeathDealerPercentage == 20) {
+					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + fshelper.addCommas(lastKillStreak)
+						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
+				} else {
+					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + fshelper.addCommas(lastKillStreak)
+						"</span> Damage bonus: <span findme='damagebonus'>" + lastDeathDealerPercentage + "</span>%</td></tr>"
+					GM_xmlhttpRequest({
+						method: 'GET',
+						url: fsHelper.server + "index.php?cmd=profile",
+						headers: {
+							"User-Agent" : navigator.userAgent,
+							"Cookie" : document.cookie
+						},
+						onload: function(responseDetails) {
+							fsHelper.getKillStreak(responseDetails.responseText);
+						},
+					})
+				}
 			}
 		}
 
@@ -2426,7 +2442,6 @@ var fsHelper = {
 
 		var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
 		var playerId=document.body.innerHTML.match(playerIdRE)[1];
-
 		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("fsHelper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
@@ -2531,6 +2546,26 @@ var fsHelper = {
 		var imageCell = isAuctionPage.parentNode;
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
 
+		var auctionTable = fsHelper.findNode("//img[contains(@title,'Auction House')]/../../../..");
+		
+		//Add functionality to hide the text block at the top.
+		var textRow = auctionTable.rows[2];
+		textRow.id = 'auctionTextControl';
+		var myBidsButton = fsHelper.findNode("//input[@value='My Bids']/..");
+		myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
+			"id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
+		if (GM_getValue("auctionTextControl")) {
+			textRow.style.display = "none";
+			textRow.style.visibility = "hidden";
+		}
+		document.getElementById('toggleAuctionTextControl').addEventListener('click', fsHelper.toggleVisibilty, true);
+
+		//insert another page change block at the top of the screen.
+		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../..");
+		insertPageChangeBlockHere.align = "right";
+		insertPageChangeBlockHere.innerHTML = pageChangeBlock.innerHTML;
+	
 		var potions = fsHelper.getValueJSON("potions");
 
 		if (!potions) {
@@ -2716,7 +2751,7 @@ var fsHelper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
-						winningBidBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
+						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
@@ -3097,15 +3132,20 @@ var fsHelper = {
 
 		var questRows=fsHelper.findNodes("//a[contains(@href,'subcmd=viewquest')]/../..", questPage);
 		var questStatus = new Array();
+		var questHref = new Array();
 
 		for (var i=0; i<questRows.length; i++) {
 			var questRow=questRows[i];
 			questStatus[questRow.cells[0].textContent]=questRow.cells[1].firstChild.getAttribute("title");
+			questHref[questRow.cells[0].textContent]=questRow.cells[0].firstChild.getAttribute("href");
 		}
 
 		for (i=0; i<fsHelper.questArray.length; i++) {
 			if (questStatus[fsHelper.questArray[i].questName]!=undefined) {
 				fsHelper.questArray[i].status=questStatus[fsHelper.questArray[i].questName];
+			}
+			if (questHref[fsHelper.questArray[i].questName]!=undefined) {
+				fsHelper.questArray[i].href=questHref[fsHelper.questArray[i].questName];
 			}
 		}
 
@@ -3162,7 +3202,7 @@ var fsHelper = {
 	generateQuestTable: function() {
 		var quests = fsHelper.questMatrix();
 		var q, bgColor;
-		GM_log(fsHelper.characterLevel);
+		//GM_log(fsHelper.characterLevel);
 		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="fsHelper:QuestTable">';
 		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th sortKey="level">Level</th>' +
 			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
@@ -3193,7 +3233,13 @@ var fsHelper = {
 				'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
 			if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=fsHelper.characterLevel) {
 				bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
-				output+='<tr style="background-color:' + bgColor + '"><td>' + q.questName + '</td><td>' + q.level + '</td>'+
+				output+='<tr style="background-color:' + bgColor + '"><td>';
+				if (q.href!=undefined) {
+					output+= '<a href="' + q.href + '">' + q.questName + '</a>';
+				} else {
+					output+= q.questName;
+				}
+				output+= '</td><td>' + q.level + '</td>'+
 					'<td>' + q.location + '</td><td><img src="' + img + '"></td></tr>';
 			}
 		}
@@ -3669,6 +3715,7 @@ var fsHelper = {
 		}
 		var killStreakElement = fsHelper.findNode("//span[@findme='killstreak']");
 		killStreakElement.innerHTML = fsHelper.addCommas(playerKillStreakValue);
+		GM_setValue("lastKillStreak", playerKillStreakValue);
 		var deathDealerBuff = fsHelper.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
 		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
@@ -3678,6 +3725,7 @@ var fsHelper = {
 		}
 		var deathDealerPercentageElement = fsHelper.findNode("//span[@findme='damagebonus']");
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
+		GM_setValue("lastDeathDealerPercentage", deathDealerPercentage);
 	},
 
 	injectCreature: function() {
@@ -4002,6 +4050,7 @@ var fsHelper = {
 	portalToKrul: function(evt) {
 		var answer = window.confirm('Are you sure you with to use a special portal back to Krul Island?');
 		if (answer) {
+if (fsHelper.debug) GM_log('Going to:' + fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163");
 			GM_xmlhttpRequest({
 				method: 'GET',
 				url: fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163",
@@ -4010,6 +4059,7 @@ var fsHelper = {
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
+if (fsHelper.debug) GM_log(responseDetails.responseText);
 					window.location="index.php?cmd=world";
 				},
 			})
