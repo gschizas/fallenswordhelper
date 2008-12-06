@@ -335,6 +335,13 @@ var fsHelper = {
 				break;
 			}
 			break;
+		case "points":
+			switch(subPageId) {
+			case "-":
+				fsHelper.storePlayerUpgrades();
+				break;
+			}
+			break;
 		case "-":
 			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
@@ -3046,6 +3053,7 @@ var fsHelper = {
 		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
+			var alliesTotal = GM_getValue("alliestotal");
 			var alliesElement = fsHelper.findNode("//b[.='Allies']");
 			var alliesParent = alliesElement.parentNode;
 			var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
@@ -3055,7 +3063,11 @@ var fsHelper = {
 				numberOfAllies ++;
 				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
-			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>/<span style='color:blue' findme='alliestotal'></span>";
+			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
+			if (alliesTotal) {
+				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
+			}
+			var enemiesTotal = GM_getValue("enemiestotal");
 			var enemiesElement = fsHelper.findNode("//b[.='Enemies']");
 			var enemiesParent = enemiesElement.parentNode;
 			var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
@@ -3065,18 +3077,10 @@ var fsHelper = {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
-			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>/<span style='color:blue' findme='enemiestotal'></span>";
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: fsHelper.server + "index.php?cmd=points",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-					fsHelper.getAlliesEnemies(responseDetails.responseText);
-				},
-			})
+			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>";
+			if (enemiesTotal) {
+				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
+			}
 		}
 	},
 
@@ -3204,7 +3208,7 @@ var fsHelper = {
 		var q, bgColor;
 		//GM_log(fsHelper.characterLevel);
 		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="fsHelper:QuestTable">';
-		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th sortKey="level">Level</th>' +
+		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
 			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
 		var c=0;
 		for (var i=0;i<quests.length;i++) {
@@ -3239,8 +3243,10 @@ var fsHelper = {
 				} else {
 					output+= q.questName;
 				}
-				output+= '</td><td>' + q.level + '</td>'+
-					'<td>' + q.location + '</td><td><img src="' + img + '"></td></tr>';
+				var fsgQuestName = q.questName.replace(/ /,"+");
+				output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName + 
+					'" target="_blank" title="Look up this quest on Fallen Sword Guide">+</a></td><td align="right">' + q.level + 
+					'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
 			}
 		}
 		output+='</table>';
@@ -3353,22 +3359,6 @@ var fsHelper = {
 		var itemData=document.createElement("div");
 		itemData.innerHTML=responseText;
 		output.innerHTML+=responseText + "<hr/>";
-	},
-
-	getAlliesEnemies: function(responseText){
-		var doc=fsHelper.createDocument(responseText);
-		var alliesText = fsHelper.findNode("//td[.='+1 Max Allies']",doc);
-		var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var alliesValueRE = /(\d+) \/ 115/;
-		var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
-		var alliesTotalElement = fsHelper.findNode("//span[@findme='alliestotal']");
-		alliesTotalElement.innerHTML = alliesValue + 5;
-		var enemiesText = fsHelper.findNode("//td[.='+1 Max Enemies']",doc);
-		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var enemiesValueRE = /(\d+) \/ 115/;
-		var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
-		var enemiesTotalElement = fsHelper.findNode("//span[@findme='enemiestotal']");
-		enemiesTotalElement.innerHTML = enemiesValue + 5;
 	},
 
 	injectGroupStats: function() {
@@ -4050,20 +4040,36 @@ var fsHelper = {
 	portalToKrul: function(evt) {
 		var answer = window.confirm('Are you sure you with to use a special portal back to Krul Island?');
 		if (answer) {
-if (fsHelper.debug) GM_log('Going to:' + fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163");
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails) {
-if (fsHelper.debug) GM_log(responseDetails.responseText);
-					window.location="index.php?cmd=world";
-				},
-			})
+			var krulXCV = GM_getValue("krulXCV");
+			if (krulXCV) {
+				GM_xmlhttpRequest({
+					method: 'GET',
+					url: fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=" + krulXCV,
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Cookie" : document.cookie
+					},
+					onload: function(responseDetails) {
+						window.location="index.php?cmd=world";
+					},
+				})
+			} else {
+				alert("Please visit the preferences page to cache your Krul Portal link");
+			}
 		}
+	},
+
+	storePlayerUpgrades: function() {
+		var alliesText = fsHelper.findNode("//td[.='+1 Max Allies']");
+		var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var alliesValueRE = /(\d+) \/ 115/;
+		var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
+		GM_setValue("alliestotal",alliesValue+5);
+		var enemiesText = fsHelper.findNode("//td[.='+1 Max Enemies']");
+		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var enemiesValueRE = /(\d+) \/ 115/;
+		var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
+		GM_setValue("enemiestotal",enemiesValue+5);
 	},
 
 	toggleVisibilty: function(evt) {
@@ -4197,6 +4203,13 @@ if (fsHelper.debug) GM_log(responseDetails.responseText);
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
+		
+		var krulButton = fsHelper.findNode('//input[@value="Instant Portal back to Krul Island"]');
+		onClick = krulButton.getAttribute("onclick");
+		//window.location='index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163';
+		krulXCVRE = /xcv=([a-z0-9]+)'/
+		krulXCV = krulXCVRE.exec(onClick);
+		if (krulXCV) GM_setValue("krulXCV",krulXCV[1]);
 	},
 
 	helpLink: function(title, text) {
