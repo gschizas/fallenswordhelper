@@ -3329,6 +3329,51 @@ var fsHelper = {
 			})
 		}
 		else {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + 'index.php?cmd=guild&subcmd=manage&guildstore_page=0',
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.parseGuildStorePage(responseDetails.responseText);
+				}
+			})
+		}
+	},
+
+	parseGuildStorePage: function(responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var output=document.getElementById('fsHelper:InventoryManagerOutput');
+		var guildstoreItems = fsHelper.findNodes("//a[contains(@href,'subcmd2=takeitem')]/img", doc);
+		var pages = fsHelper.findNodes("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]", doc);
+		var currentPage = parseInt(fsHelper.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent);
+		output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
+
+		for (var i=0; i<guildstoreItems.length;i++) {
+			var theUrl=fsHelper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
+			var item={"url": theUrl,
+				"type":"guildstore", "index":(i+1), "page":currentPage};
+			if (i==0) output.innerHTML+="<br/>Found wearable item "
+			output.innerHTML+=(i+1) + " ";
+			fsHelper.inventory.items.push(item);
+		}
+
+		if (currentPage<pages.length) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + 'index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage),
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.parseGuildStorePage(responseDetails.responseText);
+				}
+			})
+		}
+		else {
 			output.innerHTML+="<br/>Parsing inventory item "
 			fsHelper.retrieveInventoryItem(0);
 		}
@@ -3371,6 +3416,9 @@ var fsHelper = {
 		var damageNode=fsHelper.findNode("//tr/td[.='Damage:']/../td[2]", doc);
 		fsHelper.inventory.items[callback.invIndex].damage=(damageNode)?parseInt(damageNode.textContent):0;
 
+		var levelNode=fsHelper.findNode("//tr[td='Min Level:']/td[2]", doc);
+		fsHelper.inventory.items[callback.invIndex].minLevel=(levelNode)?parseInt(levelNode.textContent):0;
+
 		if (callback.invIndex<fsHelper.inventory.items.length-1) {
 			fsHelper.retrieveInventoryItem(callback.invIndex+1);
 		}
@@ -3382,7 +3430,7 @@ var fsHelper = {
 
 	generateInventoryTable: function() {
 		var output=document.getElementById('fsHelper:InventoryManagerOutput');
-		var result='<table><tr><th>Name</th><th>Attack</th><th>Defense</th><th>Armor</th><th>Damage</th></tr>';
+		var result='<table><tr><th>Name</th><th>Min Level</th><th>Attack</th><th>Defense</th><th>Armor</th><th>Damage</th></tr>';
 		var item, color;
 
 		for (var i=0; i<fsHelper.inventory.items.length;i++) {
@@ -3393,6 +3441,7 @@ var fsHelper = {
 
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + item.name + '</td>' +
+				'<td>' + item.minLevel + '</td>' +
 				'<td>' + item.attack + '</td>' +
 				'<td>' + item.defense + '</td>' +
 				'<td>' + item.armor + '</td>' +
