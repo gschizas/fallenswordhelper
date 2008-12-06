@@ -1002,7 +1002,7 @@ var fsHelper = {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
 				if (aRow.cells[0].innerHTML) {
-					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /," ");
+					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ");
 					var insertHere = aRow.cells[0];
 					questNamesOnPage.push(questName);
 					for (var j=0;j<quests.length;j++) {
@@ -1130,7 +1130,7 @@ var fsHelper = {
 				insertNextRows --;
 			}
 			if (aRow.cells[0].innerHTML) {
-				var questName = aRow.cells[0].firstChild.textContent.replace(/  /," ");
+				var questName = aRow.cells[0].firstChild.textContent.replace(/  /g," ");
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
 					if (questName == quests[j].questName) {
@@ -3231,7 +3231,8 @@ var fsHelper = {
 				} else {
 					output+= q.questName;
 				}
-				var fsgQuestName = q.questName.replace(/ /,"+");
+				var fsgQuestName = q.questName.replace(/  /g,"+");
+				fsgQuestName = fsgQuestName.replace(/ /g,"+");
 				output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
 					'" target="_blank" title="Look up this quest on Fallen Sword Guide">+</a></td><td align="right">' + q.level +
 					'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
@@ -3256,15 +3257,24 @@ var fsHelper = {
 	injectInventoryManager: function() {
 		var content=fsHelper.findNode("//table[@width='100%']/..");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b></td>'+
+			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, black = guild store</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
-			'</tr></table>' +
+			'</tr>' +
+			'<tr><td><b>&nbsp;Show Only Useable Items<input id="fsHelper:showUseableItems" type="checkbox"' +
+				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+			
+			'</table>' +
 			'<div style="font-size:small;" id="fsHelper:InventoryManagerOutput">' +
 			'' +
 			'</div>';
 		fsHelper.inventory=fsHelper.getValueJSON("inventory");
 		document.getElementById("fsHelper:InventoryManagerRefresh").addEventListener('click', fsHelper.parseProfileStart, true);
 		fsHelper.generateInventoryTable();
+		document.getElementById("fsHelper:showUseableItems").addEventListener('click', fsHelper.toggleShowUseableItems, true);
+	},
+
+	toggleShowUseableItems: function(evt) {
+		GM_setValue("showUseableItems", evt.target.checked);
+		fsHelper.injectInventoryManager();
 	},
 
 	parseProfileStart: function(){
@@ -3305,16 +3315,20 @@ var fsHelper = {
 		var backpackItems = fsHelper.findNodes("//td[contains(@background,'2x3.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
 		var pages = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
 		var currentPage = parseInt(fsHelper.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent);
-		output.innerHTML+='<br/>Parsing backpack page '+currentPage+'...';
+		if (backpackItems) {
+			output.innerHTML+='<br/>Parsing backpack page '+currentPage+'...';
 
-		for (var i=0; i<backpackItems.length;i++) {
-			var theUrl=fsHelper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
-			var item={"url": theUrl,
-				"type":"backpack", "index":(i+1), "page":currentPage};
-			if (i==0) output.innerHTML+="<br/>Found wearable item "
-			output.innerHTML+=(i+1) + " ";
-			fsHelper.inventory.items.push(item);
-		}
+			for (var i=0; i<backpackItems.length;i++) {
+				var theUrl=fsHelper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
+				var item={"url": theUrl,
+					"type":"backpack", "index":(i+1), "page":currentPage};
+				if (i==0) output.innerHTML+="<br/>Found wearable item "
+				output.innerHTML+=(i+1) + " ";
+				fsHelper.inventory.items.push(item);
+			}
+			} else {
+				output.innerHTML+='<br/>Parsing backpack page '+currentPage+'... Empty';
+			}
 		if (currentPage<pages.length) {
 			GM_xmlhttpRequest({
 				method: 'GET',
@@ -3349,17 +3363,20 @@ var fsHelper = {
 		var guildstoreItems = fsHelper.findNodes("//a[contains(@href,'subcmd2=takeitem')]/img", doc);
 		var pages = fsHelper.findNodes("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]", doc);
 		var currentPage = parseInt(fsHelper.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent);
-		output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
+		if (guildstoreItems) {
+			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
 
-		for (var i=0; i<guildstoreItems.length;i++) {
-			var theUrl=fsHelper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
-			var item={"url": theUrl,
-				"type":"guildstore", "index":(i+1), "page":currentPage};
-			if (i==0) output.innerHTML+="<br/>Found wearable item "
-			output.innerHTML+=(i+1) + " ";
-			fsHelper.inventory.items.push(item);
+			for (var i=0; i<guildstoreItems.length;i++) {
+				var theUrl=fsHelper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
+				var item={"url": theUrl,
+					"type":"guildstore", "index":(i+1), "page":currentPage};
+				if (i==0) output.innerHTML+="<br/>Found wearable item "
+				output.innerHTML+=(i+1) + " ";
+				fsHelper.inventory.items.push(item);
+			}
+		} else {
+			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
 		}
-
 		if (currentPage<pages.length) {
 			GM_xmlhttpRequest({
 				method: 'GET',
@@ -3429,24 +3446,29 @@ var fsHelper = {
 	},
 
 	generateInventoryTable: function() {
+		if (!fsHelper.inventory) return;
 		var output=document.getElementById('fsHelper:InventoryManagerOutput');
-		var result='<table><tr><th>Name</th><th>Min Level</th><th>Attack</th><th>Defense</th><th>Armor</th><th>Damage</th></tr>';
+		var result='<table><tr><th width="10"></th><th>Name</th><th width="10"></th><th>Min Level</th><th width="10"></th><th>Attack</th>'+
+			'<th width="10"></th><th>Defense</th><th width="10"></th><th>Armor</th><th width="10"></th><th>Damage</th></tr>';
 		var item, color;
-
+		var showUseableItems = GM_getValue("showUseableItems");
 		for (var i=0; i<fsHelper.inventory.items.length;i++) {
 			item=fsHelper.inventory.items[i];
 			color='black'
 			if (item.type=="worn") color='green';
 			if (item.type=="backpack") color='blue';
 
-			result+='<tr style="color:'+ color +'">' +
-				'<td>' + item.name + '</td>' +
-				'<td>' + item.minLevel + '</td>' +
-				'<td>' + item.attack + '</td>' +
-				'<td>' + item.defense + '</td>' +
-				'<td>' + item.armor + '</td>' +
-				'<td>' + item.damage + '</td>' +
-				'</tr>';
+			if (showUseableItems && item.minLevel > fsHelper.characterLevel) {
+			} else {
+				result+='<tr style="color:'+ color +'">' +
+					'<td></td><td>' + item.name + '</td>' +
+					'<td></td><td align="right">' + item.minLevel + '</td>' +
+					'<td></td><td align="right">' + item.attack + '</td>' +
+					'<td></td><td align="right">' + item.defense + '</td>' +
+					'<td></td><td align="right">' + item.armor + '</td>' +
+					'<td></td><td align="right">' + item.damage + '</td>' +
+					'</tr>';
+			}
 		}
 		result+='</table>';
 		output.innerHTML=result;
