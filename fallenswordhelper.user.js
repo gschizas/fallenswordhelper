@@ -368,7 +368,7 @@ var fsHelper = {
 	injectMenu: function() {
 		fsHelper.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11, "menuSource_0");
 		fsHelper.injectOneMenu("Quest Manager", "index.php?cmd=notepad&subcmd=questmanager", 13, "menuSource_0");
-		if (fsHelper.debug) fsHelper.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15, "menuSource_0");
+		fsHelper.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15, "menuSource_0");
 		if (GM_getValue("keepLogs")) {
 			fsHelper.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17, "menuSource_0")
 		}
@@ -2554,7 +2554,7 @@ var fsHelper = {
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
 
 		var auctionTable = fsHelper.findNode("//img[contains(@title,'Auction House')]/../../../..");
-		
+
 		//Add functionality to hide the text block at the top.
 		var textRow = auctionTable.rows[2];
 		textRow.id = 'auctionTextControl';
@@ -2572,7 +2572,7 @@ var fsHelper = {
 		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../..");
 		insertPageChangeBlockHere.align = "right";
 		insertPageChangeBlockHere.innerHTML = pageChangeBlock.innerHTML;
-	
+
 		var potions = fsHelper.getValueJSON("potions");
 
 		if (!potions) {
@@ -3084,18 +3084,6 @@ var fsHelper = {
 		}
 	},
 
-	injectInventoryManager: function() {
-		var content=fsHelper.findNode("//table[@width='100%']/..");
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td nobr bgcolor="#cd9e4b"><b>&nbsp;Inventory Manager</b></td>'+
-			'</tr></table>' +
-			'<div style="font-size:x-small;background-color:#333333;opacity:1.00;" id="fsHelper:InventoryManagerOutput">' +
-			'' +
-			'</div>';
-		// document.getElementById("fsHelper:ManageInventoryBegin").addEventListener("click", fsHelper.parseInventory, true);
-		fsHelper.parseInventory()
-	},
-
 	injectQuestManager: function() {
 		var content=fsHelper.findNode("//table[@width='100%']/..");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
@@ -3244,8 +3232,8 @@ var fsHelper = {
 					output+= q.questName;
 				}
 				var fsgQuestName = q.questName.replace(/ /,"+");
-				output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName + 
-					'" target="_blank" title="Look up this quest on Fallen Sword Guide">+</a></td><td align="right">' + q.level + 
+				output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
+					'" target="_blank" title="Look up this quest on Fallen Sword Guide">+</a></td><td align="right">' + q.level +
 					'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
 			}
 		}
@@ -3265,100 +3253,157 @@ var fsHelper = {
 		return theUrl
 	},
 
-	parseInventory: function() {
-		if (fsHelper.hasParsedInventory) return;
-		fsHelper.hasParsedInventory=true;
+	injectInventoryManager: function() {
+		var content=fsHelper.findNode("//table[@width='100%']/..");
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b></td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'</tr></table>' +
+			'<div style="font-size:small;" id="fsHelper:InventoryManagerOutput">' +
+			'' +
+			'</div>';
+		fsHelper.inventory=fsHelper.getValueJSON("inventory");
+		document.getElementById("fsHelper:InventoryManagerRefresh").addEventListener('click', fsHelper.parseProfileStart, true);
+		fsHelper.generateInventoryTable();
+	},
 
-		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img");
-		var theCallback;
+	parseProfileStart: function(){
+		fsHelper.inventory = new Object;
+		fsHelper.inventory.items = new Array();
+		var output=document.getElementById('fsHelper:InventoryManagerOutput')
+		output.innerHTML='<br/>Parsing profile...';
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + 'index.php?cmd=profile',
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.parseProfileDone(responseDetails.responseText);
+			}
+		})
+	},
 
-		// retrieve data for all worn items
+	parseProfileDone: function(responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var output=document.getElementById('fsHelper:InventoryManagerOutput');
+		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
-			theUrl = fsHelper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover"));
+			var item={"url": fsHelper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
+				"type":"worn", "index":(i+1)};
+			if (i==0) output.innerHTML+="<br/>Found worn item "
+			output.innerHTML+=(i+1) + " ";
+			fsHelper.inventory.items.push(item);
+		}
+		fsHelper.parseInventoryPage(responseText);
+	},
 
-			theCallback={
-				"type": "worn",
-				"index": i
-			}
+	parseInventoryPage: function(responseText) {
+		var doc=fsHelper.createDocument(responseText);
+		var output=document.getElementById('fsHelper:InventoryManagerOutput');
+		var backpackItems = fsHelper.findNodes("//td[contains(@background,'2x3.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
+		var pages = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
+		var currentPage = parseInt(fsHelper.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent);
+		output.innerHTML+='<br/>Parsing backpack page '+currentPage+'...';
+
+		for (var i=0; i<backpackItems.length;i++) {
+			var theUrl=fsHelper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
+			var item={"url": theUrl,
+				"type":"backpack", "index":(i+1), "page":currentPage};
+			if (i==0) output.innerHTML+="<br/>Found wearable item "
+			output.innerHTML+=(i+1) + " ";
+			fsHelper.inventory.items.push(item);
+		}
+		if (currentPage<pages.length) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: theUrl,
-				callback: theCallback,
+				url: fsHelper.server + 'index.php?cmd=profile&folder_id=0&backpack_page='+(currentPage),
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
 				},
-				onload: function(responseDetails, callback) {
-					fsHelper.parseInventoryItem(responseDetails.responseText, this.callback);
+				onload: function(responseDetails) {
+					fsHelper.parseInventoryPage(responseDetails.responseText);
 				}
 			})
 		}
-
-		// Open other pages - not sure if this works with folders as I don't have any.
-		var inventoryPages=fsHelper.findNodes("//a[contains(@href,'backpack_page=') and not(contains(@href,'subcmd='))]");
-		for (var i=0; i<inventoryPages.length; i++) {
-			theCallback={
-				"page": i+1
-			}
-			theUrl=fsHelper.server + "index.php?cmd=profile&backpack_page=" + i + "&folder_id=0"
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: theUrl,
-				callback: theCallback,
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails, callback) {
-					fsHelper.retrieveInventoryPage(responseDetails.responseText, this.callback);
-				}
-			})
+		else {
+			output.innerHTML+="<br/>Parsing inventory item "
+			fsHelper.retrieveInventoryItem(0);
 		}
 	},
 
-	retrieveInventoryPage: function(responseText, callback) {
-		var inventoryPage = fsHelper.createDocument(responseText);
-		var inventoryNodeParent=fsHelper.findNode("//table[@cellspacing='8' and contains(tbody/tr/td/@background,'2x3.gif')]/..", inventoryPage);
-		var inventoryData = inventoryNodeParent.innerHTML;
-		fsHelper.parseInventoryPage(inventoryData, callback.page);
-	},
-
-	parseInventoryPage: function(documentFragment, pageNumber) {
-		GM_log("Parsing page:" + pageNumber);
-		// GM_log(documentFragment);
-		var inventoryGrid = document.createElement("div");
-		inventoryGrid.innerHTML = documentFragment;
-		var items = fsHelper.findNodes("//img",inventoryGrid)
-		for (var i=0; i<items.length; i++) {
-			var theUrl=fsHelper.linkFromMouseover(items[i].getAttribute("onmouseover"));
-			var theCallback={
-				"type":"inventory",
-				"index":i,
-				"page":pageNumber
+	retrieveInventoryItem: function(invIndex) {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.inventory.items[invIndex].url,
+			callback: {"invIndex": invIndex},
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				fsHelper.parseInventoryItem(responseDetails.responseText, this.callback);
 			}
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: theUrl,
-				callback: theCallback,
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Cookie" : document.cookie
-				},
-				onload: function(responseDetails, callback) {
-					fsHelper.parseInventoryItem(responseDetails.responseText, this.callback);
-				}
-			})
-		}
+		})
 	},
 
 	parseInventoryItem: function(responseText, callback) {
-		var output=document.getElementById("fsHelper:InventoryManagerOutput");
-		GM_log(JSON.stringify(callback));
-		// GM_log(responseDetails.responseText);
-		// save to GM_vars
-		var itemData=document.createElement("div");
-		itemData.innerHTML=responseText;
-		output.innerHTML+=responseText + "<hr/>";
+		var output=document.getElementById('fsHelper:InventoryManagerOutput');
+		var doc=fsHelper.createDocument(responseText);
+		output.innerHTML+=(callback.invIndex+1) + " ";
+
+		fsHelper.inventory.items[callback.invIndex].html=responseText;
+
+		var nameNode=fsHelper.findNode("//b", doc);
+		fsHelper.inventory.items[callback.invIndex].name=nameNode.textContent
+
+		var attackNode=fsHelper.findNode("//tr/td[.='Attack:']/../td[2]", doc);
+		fsHelper.inventory.items[callback.invIndex].attack=(attackNode)?parseInt(attackNode.textContent):0;
+
+		var defenseNode=fsHelper.findNode("//tr/td[.='Defense:']/../td[2]", doc);
+		fsHelper.inventory.items[callback.invIndex].defense=(defenseNode)?parseInt(defenseNode.textContent):0;
+
+		var armorNode=fsHelper.findNode("//tr/td[.='Armor:']/../td[2]", doc);
+		fsHelper.inventory.items[callback.invIndex].armor=(armorNode)?parseInt(armorNode.textContent):0;
+
+		var damageNode=fsHelper.findNode("//tr/td[.='Damage:']/../td[2]", doc);
+		fsHelper.inventory.items[callback.invIndex].damage=(damageNode)?parseInt(damageNode.textContent):0;
+
+		if (callback.invIndex<fsHelper.inventory.items.length-1) {
+			fsHelper.retrieveInventoryItem(callback.invIndex+1);
+		}
+		else {
+			output.innerHTML+="Parsing done!";
+			fsHelper.generateInventoryTable();
+		}
+	},
+
+	generateInventoryTable: function() {
+		var output=document.getElementById('fsHelper:InventoryManagerOutput');
+		var result='<table><tr><th>Name</th><th>Attack</th><th>Defense</th><th>Armor</th><th>Damage</th></tr>';
+		var item, color;
+
+		for (var i=0; i<fsHelper.inventory.items.length;i++) {
+			item=fsHelper.inventory.items[i];
+			color='black'
+			if (item.type=="worn") color='green';
+			if (item.type=="backpack") color='blue';
+
+			result+='<tr style="color:'+ color +'">' +
+				'<td>' + item.name + '</td>' +
+				'<td>' + item.attack + '</td>' +
+				'<td>' + item.defense + '</td>' +
+				'<td>' + item.armor + '</td>' +
+				'<td>' + item.damage + '</td>' +
+				'</tr>';
+		}
+		result+='</table>';
+		output.innerHTML=result;
+
+		fsHelper.inventory.lastUpdate = (new Date()).getTime();
+		GM_setValue("inventory", JSON.stringify(fsHelper.inventory));
 	},
 
 	injectGroupStats: function() {
@@ -4203,7 +4248,7 @@ var fsHelper = {
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', fsHelper.toggleVisibilty, true);
-		
+
 		var krulButton = fsHelper.findNode('//input[@value="Instant Portal back to Krul Island"]');
 		onClick = krulButton.getAttribute("onclick");
 		//window.location='index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163';
