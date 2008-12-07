@@ -2571,6 +2571,30 @@ var fsHelper = {
 		}
 		document.getElementById('toggleAuctionTextControl').addEventListener('click', fsHelper.toggleVisibilty, true);
 
+		//fix button class and add go to first and last
+		var prevButton = fsHelper.findNode("//input[@value='<']");
+		var nextButton = fsHelper.findNode("//input[@value='>']");
+		if (prevButton) {
+			prevButton.setAttribute("class", "custombutton");
+			var startButton = document.createElement("input");
+			startButton.setAttribute("type", "button");
+			startButton.setAttribute("onclick", "window.location='index.php?cmd=auctionhouse&page=1';");
+			startButton.setAttribute("class", "custombutton");
+			startButton.setAttribute("value", "<<");
+			prevButton.parentNode.insertBefore(startButton,prevButton);
+		};
+		if (nextButton) {
+			nextButton.setAttribute("class", "custombutton");
+			var lastPageNode=fsHelper.findNode("//input[@value='Go']/../preceding-sibling::td");
+			lastPage = lastPageNode.textContent.replace(/\D/g,"");
+			var finishButton = document.createElement("input");
+			finishButton.setAttribute("type", "button");
+			finishButton.setAttribute("onclick", "window.location='index.php?cmd=auctionhouse&page=" + lastPage + "';");
+			finishButton.setAttribute("class", "custombutton");
+			finishButton.setAttribute("value", ">>");
+			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
+		};
+
 		//insert another page change block at the top of the screen.
 		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
 		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../..");
@@ -3265,7 +3289,7 @@ var fsHelper = {
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
 			'<tr><td><b>&nbsp;Show Only Useable Items<input id="fsHelper:showUseableItems" type="checkbox"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+			
+				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="fsHelper:InventoryManagerOutput">' +
 			'' +
@@ -3283,7 +3307,7 @@ var fsHelper = {
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
 			'<tr><td><b>&nbsp;Show Only Useable Items<input id="fsHelper:showUseableItems" type="checkbox"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+			
+				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="fsHelper:GuildInventoryManagerOutput">' +
 			'' +
@@ -3396,7 +3420,7 @@ var fsHelper = {
 			}
 		})
 	},
-		
+
 	parseGuildStorePage: function(responseText) {
 		var doc=fsHelper.createDocument(responseText);
 		var output=document.getElementById('fsHelper:GuildInventoryManagerOutput');
@@ -3459,7 +3483,7 @@ var fsHelper = {
 				output.innerHTML+=(i+1) + " ";
 				fsHelper.guildinventory.items.push(item);
 			}
-		} 
+		}
 		output.innerHTML+="<br/>Parsing guild inventory item "
 		fsHelper.retrieveInventoryItem(0, "guild");
 	},
