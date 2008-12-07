@@ -2578,7 +2578,7 @@ var fsHelper = {
 			prevButton.setAttribute("class", "custombutton");
 			var startButton = document.createElement("input");
 			startButton.setAttribute("type", "button");
-			startButton.setAttribute("onclick", "window.location='index.php?cmd=auctionhouse&page=1';");
+			startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
 			startButton.setAttribute("class", "custombutton");
 			startButton.setAttribute("value", "<<");
 			prevButton.parentNode.insertBefore(startButton,prevButton);
@@ -2589,7 +2589,7 @@ var fsHelper = {
 			lastPage = lastPageNode.textContent.replace(/\D/g,"");
 			var finishButton = document.createElement("input");
 			finishButton.setAttribute("type", "button");
-			finishButton.setAttribute("onclick", "window.location='index.php?cmd=auctionhouse&page=" + lastPage + "';");
+			finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
 			finishButton.setAttribute("class", "custombutton");
 			finishButton.setAttribute("value", ">>");
 			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
@@ -3623,7 +3623,7 @@ var fsHelper = {
 		}
 		fsHelper.sortBy=headerClicked;
 		//GM_log(headerClicked)
-		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" || 
+		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
 			headerClicked=="armor" || headerClicked=="damage") {
 			targetInventory.items.sort(fsHelper.numberSort)
 		}
