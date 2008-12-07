@@ -3182,7 +3182,7 @@ var fsHelper = {
 	injectQuestTable: function() {
 		document.getElementById('fsHelper:QuestManagerOutput').innerHTML=fsHelper.generateQuestTable();
 		var questTable=document.getElementById('fsHelper:QuestTable');
-		for (var i=0; i<4; i++) {
+		for (var i=0; i<questTable.rows[0].cells.length; i++) {
 			var cell=questTable.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
@@ -3561,9 +3561,13 @@ var fsHelper = {
 		}
 		if (!targetInventory) return;
 		var output=document.getElementById(targetId);
-		var result='<table><tr><th width="10"></th><th width="200">Name</th><th width="10"></th><th>Min Level</th>' +
-			'<th width="10"></th><th>Attack</th><th width="10"></th><th>Defense</th><th width="10"></th><th>Armor</th>' +
-			'<th width="10"></th><th>Damage</th>';
+		var result='<table id="fsHelper:InventoryTable"><tr>' +
+			'<th width="10"></th><th width="200" align="left" sortkey="name">Name</th>' +
+			'<th width="10"></th><th sortkey="minLevel">Min Level</th>' +
+			'<th width="10"></th><th sortkey="attack">Attack</th>' +
+			'<th width="10"></th><th sortkey="defense">Defense</th>' +
+			'<th width="10"></th><th sortkey="armor">Armor</th>' +
+			'<th width="10"></th><th sortkey="damage">Damage</th>';
 		var item, color;
 		var showUseableItems = GM_getValue("showUseableItems");
 		for (var i=0; i<targetInventory.items.length;i++) {
@@ -3589,6 +3593,48 @@ var fsHelper = {
 
 		targetInventory.lastUpdate = (new Date()).getTime();
 		GM_setValue(inventoryShell, JSON.stringify(targetInventory));
+
+		var inventoryTable=document.getElementById('fsHelper:InventoryTable');
+		for (var i=0; i<inventoryTable.rows[0].cells.length; i++) {
+			var cell=inventoryTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', fsHelper.sortInventoryTable, true);
+		}
+	},
+
+	sortInventoryTable: function(evt) {
+		re=/subcmd=([a-z]+)/;
+		var subPageIdRE = re.exec(document.location.search);
+		var subPageId="-";
+		if (subPageIdRE)
+			subPageId=subPageIdRE[1];
+		if (subPageId == "guildinvmanager") {
+			fsHelper.guildinventory=fsHelper.getValueJSON("guildinventory");
+			targetInventory = fsHelper.guildinventory;
+		} else {
+			fsHelper.inventory=fsHelper.getValueJSON("inventory");
+			targetInventory = fsHelper.inventory;
+		}
+		var headerClicked=evt.target.getAttribute("sortKey")
+		if (fsHelper.sortAsc==undefined) fsHelper.sortAsc=true;
+		if (fsHelper.sortBy && fsHelper.sortBy==headerClicked) {
+			fsHelper.sortAsc=!fsHelper.sortAsc;
+		}
+		fsHelper.sortBy=headerClicked;
+		//GM_log(headerClicked)
+		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" || 
+			headerClicked=="armor" || headerClicked=="damage") {
+			targetInventory.items.sort(fsHelper.numberSort)
+		}
+		else {
+			targetInventory.items.sort(fsHelper.stringSort)
+		}
+		if (subPageId == "guildinvmanager") {
+			fsHelper.generateInventoryTable("guild");
+		} else {
+			fsHelper.generateInventoryTable("self");
+		}
 	},
 
 	injectGroupStats: function() {
