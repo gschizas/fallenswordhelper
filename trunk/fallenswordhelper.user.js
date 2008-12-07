@@ -3309,13 +3309,15 @@ var fsHelper = {
 
 	injectGuildInventoryManager: function() {
 		var content=fsHelper.findNode("//table[@width='100%']/..");
+		var guildItemCount = "unknown"
 		fsHelper.guildinventory=fsHelper.getValueJSON("guildinventory");
+		if (fsHelper.guildinventory) guildItemCount = fsHelper.guildinventory.items.length;
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
 			'<tr><td><b>&nbsp;Show Only Useable Items<input id="fsHelper:showUseableItems" type="checkbox"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b>&nbsp;Guild Item Count:&nbsp;' + fsHelper.guildinventory.items.length +
+				(GM_getValue("showUseableItems")?' checked':'') + '/></b>&nbsp;Guild Item Count:&nbsp;' + guildItemCount +
 				'</td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="fsHelper:GuildInventoryManagerOutput">' +
