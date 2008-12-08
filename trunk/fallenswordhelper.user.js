@@ -2068,7 +2068,7 @@ var fsHelper = {
 			result += "<span style='color:#F5F298' title='"+chat.messages[i].time+"'>"
 			result += chat.messages[i].from
 			result += ":</span><span style='color:white'>"
-			result += chat.messages[i].text
+			result += chat.messages[i].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 			result += "</span><br/>";
 		}
 		result += '<form action="index.php" method="post" id="fsHelperChatBox" onsubmit="return false;">'
@@ -3274,7 +3274,7 @@ var fsHelper = {
 				var wikiQuestName = q.questName.replace(/  /g,"_");
 				wikiQuestName = wikiQuestName.replace(/ /g,"_");
 				output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
-						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' + 
+						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
 						'&nbsp<a href="http://wiki.fallensword.com/index.php/' + wikiQuestName +
 						'" target="_blank" title="Look up this quest on the wiki">w</a>' +
 					'</td><td align="right">' + q.level +
@@ -3374,7 +3374,7 @@ var fsHelper = {
 		var currentlyWorn=fsHelper.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
 			var item={"url": fsHelper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
-				"type":"worn", "index":(i+1), 
+				"type":"worn", "index":(i+1),
 				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
 			if (i==0) output.innerHTML+="<br/>Found worn item "
 			output.innerHTML+=(i+1) + " ";
@@ -3395,7 +3395,7 @@ var fsHelper = {
 			for (var i=0; i<backpackItems.length;i++) {
 				var theUrl=fsHelper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"backpack", "index":(i+1), "page":currentPage, 
+					"type":"backpack", "index":(i+1), "page":currentPage,
 					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found wearable item "
 				output.innerHTML+=(i+1) + " ";
@@ -3453,7 +3453,7 @@ var fsHelper = {
 			for (var i=0; i<guildstoreItems.length;i++) {
 				var theUrl=fsHelper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"guildstore", "index":(i+1), "page":currentPage, "worn":false, 
+					"type":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
 					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild store item "
 				output.innerHTML+=(i+1) + " ";
@@ -3499,7 +3499,7 @@ var fsHelper = {
 			for (var i=0; i<guildreportItems.length;i++) {
 				var theUrl=fsHelper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"guildreport", "index":(i+1), "worn":false, 
+					"type":"guildreport", "index":(i+1), "worn":false,
 					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild report item "
 				output.innerHTML+=(i+1) + " ";
@@ -3578,7 +3578,7 @@ if (!nameNode) GM_log(responseText);
 			}
 			targetInventory.items[callback.invIndex].craftlevel=craft;
 		}
-		
+
 		if (callback.invIndex<targetInventory.items.length-1) {
 			fsHelper.retrieveInventoryItem(callback.invIndex+1, reporttype);
 		}
@@ -4416,7 +4416,7 @@ if (!nameNode) GM_log(responseText);
 		for (var i=0; i<topPlayerTable.rows.length; i++) {
 			var aRow = topPlayerTable.rows[i];
 			if (aRow.cells[1] && i!=0) {
-				var playerTable = topPlayerTable.rows[i].cells[1].firstChild;		
+				var playerTable = topPlayerTable.rows[i].cells[1].firstChild;
 				var playerElement = playerTable.rows[0].cells[0];
 				var playerGuildHref = playerElement.firstChild.getAttribute("href");
 				var playerGuildName = playerElement.firstChild.firstChild.getAttribute("title");
@@ -4465,7 +4465,7 @@ if (!nameNode) GM_log(responseText);
 			}
 		}
 	},
-	
+
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
