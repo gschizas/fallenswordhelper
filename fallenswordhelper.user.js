@@ -345,6 +345,13 @@ var fsHelper = {
 				break;
 			}
 			break;
+		case "toprated":
+			switch(subPageId) {
+			case "xp":
+				fsHelper.injectTopRated();
+				break;
+			}
+			break;
 		case "-":
 			var isRelicPage = fsHelper.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
@@ -373,6 +380,7 @@ var fsHelper = {
 		fsHelper.injectOneMenu("Quest Manager", "index.php?cmd=notepad&subcmd=questmanager", 13, "menuSource_0");
 		fsHelper.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15, "menuSource_0");
 		fsHelper.injectOneMenu("Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3, "menuSource_5");
+		fsHelper.injectOneMenu("Top  250 Players", "index.php?cmd=toprated&subcmd=xp", 3, "menuSource_3");
 		if (GM_getValue("keepLogs")) {
 			fsHelper.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17, "menuSource_0")
 		}
@@ -4389,6 +4397,75 @@ if (!nameNode) GM_log(responseText);
 		GM_setValue("enemiestotal",enemiesValue+5);
 	},
 
+	injectTopRated: function() {
+		var mainTable = fsHelper.findNode("//table[tbody/tr/td/font/b[.='Top 250 Players']]");
+		var mainTitle = mainTable.rows[0].cells[0];
+		mainTitle.innerHTML += '&nbsp<input id="findOnlinePlayers" type="button" value="Find Online Players" ' +
+			'title="Fetch the online status of the top 250 players (warning ... takes a few seconds)." class="custombutton">';
+
+		document.getElementById('findOnlinePlayers').addEventListener('click', fsHelper.findOnlinePlayers, true);
+	},
+
+	findOnlinePlayers: function() {
+		var findPlayersButton = fsHelper.findNode("//input[@id='findOnlinePlayers']");
+		findPlayersButton.style.display = "none";
+		var topPlayerTable = fsHelper.findNode("//table[@width='500']");
+		var lowestLevel = topPlayerTable.rows[topPlayerTable.rows.length-4].cells[3].textContent*1;
+		GM_setValue("lowestLevelInTop250",lowestLevel);
+		var guildsChecked = "";
+		for (var i=0; i<topPlayerTable.rows.length; i++) {
+			var aRow = topPlayerTable.rows[i];
+			if (aRow.cells[1] && i!=0) {
+				var playerTable = topPlayerTable.rows[i].cells[1].firstChild;		
+				var playerElement = playerTable.rows[0].cells[0];
+				var playerGuildHref = playerElement.firstChild.getAttribute("href");
+				var playerGuildName = playerElement.firstChild.firstChild.getAttribute("title");
+				//GM_log(guildsChecked.indexOf(playerGuildName));
+				//if we haven't already checked this guild, then go ahead and check it
+				if (guildsChecked.search(playerGuildName) == -1) {
+					//GM_log(i+"::"+playerGuildName + "::" + playerGuildHref + "::" + aRow.innerHTML + "::" + guildsChecked);
+					GM_xmlhttpRequest({
+						method: 'GET',
+						url: fsHelper.server + playerGuildHref,
+						headers: {
+							"User-Agent" : navigator.userAgent,
+							"Cookie" : document.cookie
+						},
+						onload: function(responseDetails) {
+							fsHelper.parseGuildOnline(responseDetails.responseText);
+						},
+					})
+					//log current guild as checked.
+					guildsChecked += ' ' + playerGuildName;
+				}
+			}
+		}
+	},
+
+	parseGuildOnline: function(responseText) {
+		var topPlayerTable = fsHelper.findNode("//table[@width='500']");
+		var lowestLevel = GM_getValue("lowestLevelInTop250");
+		var doc=fsHelper.createDocument(responseText);
+		memberTable = fsHelper.findNode("//table[tbody/tr/td[.='Rank']]", doc);
+		for (var i=0; i<memberTable.rows.length; i++) {
+			aRow = memberTable.rows[i];
+			if (aRow.cells[1] && i!= 0) {
+				onlineStatus = aRow.cells[0].innerHTML;
+				playerName = aRow.cells[1].firstChild.nextSibling.innerHTML;
+				playerLevel = aRow.cells[2].textContent*1;
+				if (playerLevel >= lowestLevel) { // don't bother looking if they are a low level
+					//var playerInTopPlayerList = fsHelper.findNode("//a[.='" + playerName +"']", topPlayerTable); // didn't work so had to comprimise.
+					var playerInTopPlayerList = fsHelper.findNode("//a[.='" + playerName +"']");
+					var inTopPlayerTable = fsHelper.findNode("//table[@width='500' and contains(.,'" + playerName +"')]");
+					if (playerInTopPlayerList && inTopPlayerTable) {
+						insertHere = playerInTopPlayerList.parentNode;
+						insertHere.innerHTML += '&nbsp' + onlineStatus;
+					}
+				}
+			}
+		}
+	},
+	
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
