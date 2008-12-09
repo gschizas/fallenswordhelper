@@ -959,10 +959,10 @@ var fsHelper = {
 				var lastDeathDealerPercentage = GM_getValue("lastDeathDealerPercentage");
 				var lastKillStreak = GM_getValue("lastKillStreak");
 				if (impsRemaining>0 && lastDeathDealerPercentage == 20) {
-					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + fshelper.addCommas(lastKillStreak)
+					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + fsHelper.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
 				} else {
-					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + fshelper.addCommas(lastKillStreak)
+					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + fsHelper.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>" + lastDeathDealerPercentage + "</span>%</td></tr>"
 					GM_xmlhttpRequest({
 						method: 'GET',
@@ -1283,7 +1283,7 @@ var fsHelper = {
 				{'questName':'Eternal Chant', 'level':5, 'location':' Varas Dungeon'},
 				{'questName':'Evil Hunt', 'level':345, 'location':' Dark Vale (North)'},
 				{'questName':'Exiled Warriors', 'level':355, 'location':' Glitter Mine Depths'},
-				{'questName':'Extinguish  the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
+				{'questName':'Extinguish the Lights', 'level':283, 'location':' The Bitter Marsh (East)'},
 				{'questName':'Eye of the Crocodile', 'level':287, 'location':' Ephal Swamp (East)'},
 				{'questName':'Failed Task', 'level':4, 'location':' Elven Halls'},
 				{'questName':'Familiar Creation', 'level':539, 'location':' Dark Atholhu (Outer)'},
@@ -1422,7 +1422,7 @@ var fsHelper = {
 				{'questName':'Taking Arms', 'level':2, 'location':' Snow Forest East'},
 				{'questName':'Taking Ground', 'level':357, 'location':' Underground Passages (Outer)'},
 				{'questName':'Tassodans Lost Rune', 'level':2, 'location':' Snow Forest East'},
-				{'questName':'Terror At  Krysa', 'level':297, 'location':' Krysa (East)'},
+				{'questName':'Terror At Krysa', 'level':297, 'location':' Krysa (East)'},
 				{'questName':'The Ant Queen', 'level':221, 'location':' Miyal (South)'},
 				{'questName':'The Ascended', 'level':215, 'location':' Aydr (South)'},
 				{'questName':'The Battle for Narkort', 'level':199, 'location':' Narkort (West)'},
