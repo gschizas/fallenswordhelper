@@ -91,7 +91,7 @@ var fsHelper = {
 		if (GM_getValue("showHuntingBuffs")==undefined) GM_setValue("showHuntingBuffs", true);
 		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", false)};
 		if (GM_getValue("hideNewBox")==undefined) {GM_setValue("hideNewBox", false)}
-		
+
 		if (GM_getValue("guildSelf")==undefined) {GM_setValue("guildSelf", "")}
 		if (GM_getValue("guildFrnd")==undefined) {GM_setValue("guildFrnd", "")}
 		if (GM_getValue("guildPast")==undefined) {GM_setValue("guildPast", "")}
@@ -2909,7 +2909,7 @@ var fsHelper = {
 		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="fsHelper:showExtraLinks">' +
 			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
 		document.getElementById("fsHelper:showExtraLinks").addEventListener('click', fsHelper.toggleShowExtraLinks, true);
-		
+
 		//function to add links to all the items in the drop items list
 		if (GM_getValue("showExtraLinks")) {
 		var itemName, itemInvId, theTextNode, newLink;
@@ -2939,7 +2939,7 @@ var fsHelper = {
 		GM_log(GM_getValue("showExtraLinks"));
 		window.location = window.location;
 	},
-	
+
 	injectReportPaint: function() {
 		var mainTable = fsHelper.findNode("//table[@width='600']");
 		for (var i=0;i<mainTable.rows.length;i++) {
@@ -4629,7 +4629,8 @@ if (!nameNode) GM_log(responseText);
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a> and ' +
 			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'with valuable contributions by <a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
-			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a><span></td></tr>' +
+			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
+			'<a href="' + fsHelper.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions or bug reports<span></td></tr>' +
