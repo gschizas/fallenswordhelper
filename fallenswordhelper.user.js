@@ -79,6 +79,7 @@ var fsHelper = {
 	},
 
 	initSettings: function() {
+		if (GM_getValue("enableLogColoring")==undefined) {GM_setValue("enableLogColoring", true)};
 		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
 		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
 		if (GM_getValue("keepLogs")==undefined) GM_setValue("keepLogs", false);
@@ -87,9 +88,9 @@ var fsHelper = {
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
-		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", true)};
+		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", false)};
 		if (GM_getValue("hideNewBox")==undefined) {GM_setValue("hideNewBox", false)}
-
+		
 		if (GM_getValue("guildSelf")==undefined) {GM_setValue("guildSelf", "")}
 		if (GM_getValue("guildFrnd")==undefined) {GM_setValue("guildFrnd", "")}
 		if (GM_getValue("guildPast")==undefined) {GM_setValue("guildPast", "")}
@@ -2015,10 +2016,6 @@ var fsHelper = {
 			memberList.isRefreshed = true;
 			fsHelper.injectGuildList(memberList);
 		}
-		var furyCasterText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Fury Shrine</b>')]", doc);
-		if (!furyCasterText) return;
-		var furyCasterLevel = furyCasterText.parentNode.nextSibling.textContent*5;
-		GM_setValue("furyCasterLevel", furyCasterLevel);
 	},
 
 	prepareChat: function() {
@@ -2906,32 +2903,42 @@ var fsHelper = {
 	},
 
 	injectDropItemsAuction: function() {
+		var mainTable = fsHelper.findNode("//table[@width='600']");
+		var insertHere = mainTable.rows[5].cells[0];
+		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="fsHelper:showExtraLinks">' +
+			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
+		document.getElementById("fsHelper:showExtraLinks").addEventListener('click', fsHelper.toggleShowExtraLinks, true);
+		
 		//function to add links to all the items in the drop items list
-		var itemName, itemInvId, theTextNode, newLink;
-		var allItems=fsHelper.findNodes("//input[@type='checkbox']");
-		for (var i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			itemInvId = anItem.value;
-			theTextNode = fsHelper.findNode("../../td[3]", anItem);
-			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
-				+ escape(itemName)
-				+ "'>[AH]</a> "
-				+ "<a findme='Sell' href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
-				+ "[Sell]</a> "
-				+ theTextNode.innerHTML;
-
-			//
-			// newLink = document.createElement("a")
-			// newLink.href="
-			// newLink.textContent="[AH]" // Search for " + itemName + " in Auction House]"
-			// window.alert(newLink);
-			// theText.insertBefore(newLink, theText);
-			// theText.textContent=" " + theText.textContent
-			// theText.innerHTML += " <a href=http://www.fallensword.com/?cmd=auctionhouse&type=-1&search_text=" + escape(itemName) + "></a>"
+		if (GM_getValue("showExtraLinks")) {
+			var itemName, itemInvId, theTextNode, newLink;
+			var allItems=fsHelper.findNodes("//input[@type='checkbox']");
+			for (var i=0; i<allItems.length; i++) {
+				anItem = allItems[i];
+				itemInvId = anItem.value;
+				theTextNode = fsHelper.findNode("../../td[3]", anItem);
+				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
+				theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
+					+ escape(itemName)
+					+ "'>[AH]</a> "
+					+ "<a findme='Sell' href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+					+ "[Sell]</a> "
+					+ theTextNode.innerHTML;
+			}
 		}
 	},
 
+	toggleShowExtraLinks: function(evt) {
+		var showExtraLinksElement = fsHelper.findNode("//span[@id='fsHelper:showExtraLinks']");
+		if (showExtraLinksElement.textContent == "Show AH and Sell links") {
+			GM_setValue("showExtraLinks", true);
+		} else {
+			GM_setValue("showExtraLinks", false);
+		}
+		GM_log(GM_getValue("showExtraLinks"));
+		window.location = window.location;
+	},
+	
 	injectReportPaint: function() {
 		var mainTable = fsHelper.findNode("//table[@width='600']");
 		for (var i=0;i<mainTable.rows.length;i++) {
@@ -3033,20 +3040,18 @@ var fsHelper = {
 
 	injectDropItemsPaint: function(responseDetails, callback) {
 		var textNode = fsHelper.findNode("../../../td[3]", callback);
+		var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
+		var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
 		if (guildLockedRE.exec(responseDetails.responseText)) {
-			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
-			var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
-			auctionHouseLink.style.visibility='hidden';
-			sellLink.style.visibility='hidden';
+			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
+			if (sellLink) sellLink.style.visibility='hidden';
 		};
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
 		if (boundItemRE.exec(responseDetails.responseText)) {
-			var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
-			var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
-			auctionHouseLink.style.visibility='hidden';
-			sellLink.style.visibility='hidden';
+			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
+			if (sellLink) sellLink.style.visibility='hidden';
 		};
 		if (GM_getValue("disableItemColoring")) return;
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
@@ -3985,11 +3990,6 @@ if (!nameNode) GM_log(responseText);
 				fsHelper.getSustain(responseDetails.responseText);
 			},
 		})
-		var furyCasterLevel = GM_getValue("furyCasterLevel");
-		var activateInput = fsHelper.findNode("//input[@value='activate']");
-		var inputTable = activateInput.nextSibling.nextSibling;
-		inputTable.rows[3].cells[0].align = "center";
-		inputTable.rows[3].cells[0].innerHTML += " <span style='color:gold;'>Your Fury Caster bonus: +" + furyCasterLevel + "</span>";
 	},
 
 	getPlayerBuffs: function(responseText) {
@@ -4069,6 +4069,12 @@ if (!nameNode) GM_log(responseText);
 		var inputTable = activateInput.nextSibling.nextSibling;
 		inputTable.rows[3].cells[0].align = "center";
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
+		var furyCasterText = fsHelper.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
+		if (!furyCasterText) return;
+		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+		var furyCasterLevelRE = /Level<br>(\d+)%/
+		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
+		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
 	},
 
 	getKillStreak: function(responseText) {
