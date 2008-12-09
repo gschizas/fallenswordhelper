@@ -1022,7 +1022,8 @@ var fsHelper = {
 					for (var j=0;j<quests.length;j++) {
 						var aCell = aRow.cells[0]
 						var imgElement = aCell.nextSibling.firstChild;
-						if (questName == quests[j].questName && imgElement.getAttribute("title") != "Completed") {
+						var matrixQuestName = quests[j].questName.replace(/  /g," ");
+						if (questName == matrixQuestName && imgElement.getAttribute("title") != "Completed") {
 							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
 								"<span style='color:blue;'>" + quests[j].level +
 								"</span> <span style='color:gray;'>Quest location:</span> " +
@@ -1768,6 +1769,7 @@ var fsHelper = {
 
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
 		var playerId=document.body.innerHTML.match(playerIdRE)[1];
+		GM_setValue("playerID",playerId);
 
 		var xpGain=responseDetails.responseText.match(/var\s+xpGain=(-?[0-9]+);/)
 		if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
@@ -2407,6 +2409,7 @@ var fsHelper = {
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
 		var playerId=document.body.innerHTML.match(playerIdRE)[1]*1;
+		GM_setValue("playerID",playerId);
 
 		var logTable = fsHelper.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var hideNextRows = 0;
@@ -2461,8 +2464,11 @@ var fsHelper = {
 			}
 		}
 
-		var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
-		var playerId=document.body.innerHTML.match(playerIdRE)[1];
+		var playerId = GM_getValue("playerID");
+		if (!playerId) {
+			var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
+			playerId=document.body.innerHTML.match(playerIdRE)[1];
+		}
 		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("fsHelper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
@@ -2744,6 +2750,7 @@ var fsHelper = {
 
 		var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
 		var playerId = document.body.innerHTML.match(playerIdRE)[1];
+		GM_setValue("playerID",playerId);
 
 		var newRow, newCell, bidMinBuyoutCell, buyNowBuyoutCell,winningBidBuyoutCell;
 		for (var i=0;i<auctionTable.rows.length;i++) {
@@ -3166,8 +3173,9 @@ var fsHelper = {
 
 		for (var i=0; i<questRows.length; i++) {
 			var questRow=questRows[i];
-			questStatus[questRow.cells[0].textContent]=questRow.cells[1].firstChild.getAttribute("title");
-			questHref[questRow.cells[0].textContent]=questRow.cells[0].firstChild.getAttribute("href");
+			var questPageQuestName = questRow.cells[0].textContent.replace(/  /g," ");
+			questStatus[questPageQuestName]=questRow.cells[1].firstChild.getAttribute("title");
+			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
 		}
 
 		for (i=0; i<fsHelper.questArray.length; i++) {
