@@ -88,6 +88,7 @@ var fsHelper = {
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
+		if (GM_getValue("showHuntingBuffs")==undefined) GM_setValue("showHuntingBuffs", true);
 		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", false)};
 		if (GM_getValue("hideNewBox")==undefined) {GM_setValue("hideNewBox", false)}
 		
@@ -1021,8 +1022,8 @@ var fsHelper = {
 			}
 		}
 
-		var buffs=GM_getValue("huntingBuffs");
-		if (buffs!="") {
+		if (GM_getValue("showHuntingBuffs")) {
+			var buffs=GM_getValue("huntingBuffs");
 			var buffAry=buffs.split(",")
 			var missingBuffs = new Array();
 			for (var i=0;i<buffAry.length;i++) {
@@ -2911,19 +2912,19 @@ var fsHelper = {
 		
 		//function to add links to all the items in the drop items list
 		if (GM_getValue("showExtraLinks")) {
-			var itemName, itemInvId, theTextNode, newLink;
-			var allItems=fsHelper.findNodes("//input[@type='checkbox']");
-			for (var i=0; i<allItems.length; i++) {
-				anItem = allItems[i];
-				itemInvId = anItem.value;
-				theTextNode = fsHelper.findNode("../../td[3]", anItem);
-				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-				theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
-					+ escape(itemName)
-					+ "'>[AH]</a> "
-					+ "<a findme='Sell' href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
-					+ "[Sell]</a> "
-					+ theTextNode.innerHTML;
+		var itemName, itemInvId, theTextNode, newLink;
+		var allItems=fsHelper.findNodes("//input[@type='checkbox']");
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			itemInvId = anItem.value;
+			theTextNode = fsHelper.findNode("../../td[3]", anItem);
+			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
+			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
+				+ escape(itemName)
+				+ "'>[AH]</a> "
+				+ "<a findme='Sell' href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+				+ "[Sell]</a> "
+				+ theTextNode.innerHTML;
 			}
 		}
 	},
@@ -4619,8 +4620,9 @@ if (!nameNode) GM_log(responseText);
 			'<td align="right">Show Debug Info' + fsHelper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
-				'separated by commas. If this is empty, hunting buffs will be disabled.') +
-				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
+				'separated by commas. Use the checkbox to enable/disable them.') +
+				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
+				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
@@ -4687,6 +4689,7 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "showDebugInfo");
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
+		fsHelper.saveValueForm(oForm, "showHuntingBuffs");
 		fsHelper.saveValueForm(oForm, "moveFSBox");
 		fsHelper.saveValueForm(oForm, "hideNewBox");
 
