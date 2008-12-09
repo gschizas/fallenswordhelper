@@ -186,6 +186,7 @@ var fsHelper = {
 	moveFSBox: function() {
 		if (!GM_getValue("moveFSBox")) return;
 		var src=fsHelper.findNode("//b[.='FSBox']/../../../../..");
+		if (!src) return;
 		src.parentNode.removeChild(src.nextSibling);
 		var dest=fsHelper.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
 		// window.alert(dest);
@@ -201,6 +202,7 @@ var fsHelper = {
 	hideNewBox: function() {
 		if (!GM_getValue("hideNewBox")) return;
 		var removeThis = fsHelper.findNode("//font[b='New?']/../../../..");
+		if (!removeThis) return;
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis);
@@ -4576,9 +4578,9 @@ if (!nameNode) GM_log(responseText);
 				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Move FS box' + fsHelper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility.') +
+			'<tr><td align="right">Move FS box' + fsHelper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td>' +
-			'<td align="right">Hide \'New?\' box' + fsHelper.helpLink('Hide New? Box', 'This will hide the \'New?\' box, useful to gain some space if you\'ve already read it.') +
+			'<td align="right">Hide \"New?\" box' + fsHelper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
 				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Keep Combat Logs' + fsHelper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them') +
