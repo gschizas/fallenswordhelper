@@ -87,6 +87,16 @@ var fsHelper = {
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
+		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", true)};
+		if (GM_getValue("guildSelf")==undefined) {GM_setValue("guildSelf", "")}
+		if (GM_getValue("guildFrnd")==undefined) {GM_setValue("guildFrnd", "")}
+		if (GM_getValue("guildPast")==undefined) {GM_setValue("guildPast", "")}
+		if (GM_getValue("guildEnmy")==undefined) {GM_setValue("guildEnmy", "")}
+		if (GM_getValue("guildSelfMessage")==undefined) {GM_setValue("guildSelfMessage", "green|Member of your own guild")}
+		if (GM_getValue("guildFrndMessage")==undefined) {GM_setValue("guildFrndMessage", "yellow|Do not attack - Guild is friendly!")}
+		if (GM_getValue("guildPastMessage")==undefined) {GM_setValue("guildPastMessage", "gray|Do not attack - You've been in that guild once!")}
+		if (GM_getValue("guildEnmyMessage")==undefined) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
+		if (GM_getValue("killAllAdvanced")==undefined) {GM_setValue("killAllAdvanced", "off")}
 
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -171,10 +181,27 @@ var fsHelper = {
 		if (bannerElement) bannerElement.style.display = "none";
 	},
 
+	moveFSBox: function() {
+		GM_log(GM_getValue("moveFSBox"));
+		if (!GM_getValue("moveFSBox")) return;
+		var src=fsHelper.findNode("//b[.='FSBox']/../../../../..");
+		src.parentNode.removeChild(src.nextSibling);
+		var dest=fsHelper.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
+		// window.alert(dest);
+		var info = dest.insertRow(26);
+		var cell = info.insertCell(0);
+		cell.innerHTML="&nbsp;";
+		info = dest.insertRow(26);
+		cell = info.insertCell(0);
+		cell.setAttribute("align", "center");
+		cell.appendChild(src);
+	},
+
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		fsHelper.init();
 		fsHelper.hideBanner();
+		fsHelper.moveFSBox();
 		fsHelper.prepareGuildList();
 		fsHelper.prepareChat();
 		fsHelper.injectStaminaCalculator();
@@ -931,6 +958,8 @@ var fsHelper = {
 	},
 
 	checkBuffs: function() {
+		//
+
 		var replacementText = "<td background='" + fsHelper.imageServer + "/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
@@ -979,22 +1008,24 @@ var fsHelper = {
 			}
 		}
 
-		var buffs=GM_getValue("huntingBuffs")
-		var buffAry=buffs.split(",")
-		var missingBuffs = new Array();
-		for (var i=0;i<buffAry.length;i++) {
-			if (!fsHelper.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
-				missingBuffs.push(buffAry[i]);
+		var buffs=GM_getValue("huntingBuffs");
+		if (buffs!="") {
+			var buffAry=buffs.split(",")
+			var missingBuffs = new Array();
+			for (var i=0;i<buffAry.length;i++) {
+				if (!fsHelper.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
+					missingBuffs.push(buffAry[i]);
+				}
 			}
+			if (missingBuffs.length>0) {
+				replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>" +
+					"You are missing some hunting buffs<br/>("
+				replacementText += missingBuffs.join(", ")
+				replacementText += ")</span></td></tr>"
+			}
+			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
+			replacementText += "</table>";
 		}
-		if (missingBuffs.length>0) {
-			replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>" +
-				"You are missing some hunting buffs<br/>("
-			replacementText += missingBuffs.join(", ")
-			replacementText += ")</span></td></tr>"
-		}
-		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
-		replacementText += "</table>";
 		replacementText += "</td>" ;
 
 		var realmRightBottom = fsHelper.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]");
@@ -4510,20 +4541,8 @@ if (!nameNode) GM_log(responseText);
 	},
 
 	injectSettings: function() {
-		if (!GM_getValue("guildSelf")) {GM_setValue("guildSelf", "")}
-		if (!GM_getValue("guildFrnd")) {GM_setValue("guildFrnd", "")}
-		if (!GM_getValue("guildPast")) {GM_setValue("guildPast", "")}
-		if (!GM_getValue("guildEnmy")) {GM_setValue("guildEnmy", "")}
-		if (!GM_getValue("guildSelfMessage")) {GM_setValue("guildSelfMessage", "green|Member of your own guild")}
-		if (!GM_getValue("guildFrndMessage")) {GM_setValue("guildFrndMessage", "yellow|Do not attack - Guild is friendly!")}
-		if (!GM_getValue("guildPastMessage")) {GM_setValue("guildPastMessage", "gray|Do not attack - You've been in that guild once!")}
-		if (!GM_getValue("guildEnmyMessage")) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
-		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")}
-		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")))
-		var buffs=GM_getValue("huntingBuffs")
-		if (!buffs) {
-			var buffs="Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve"
-		}
+		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
+		var buffs=GM_getValue("huntingBuffs");
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -4547,6 +4566,9 @@ if (!nameNode) GM_log(responseText);
 				'</tbody></table></td>' +
 			'<td align="right">Hide Top Banner' + fsHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Move FS box' + fsHelper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility.') +
+				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td>' +
+			'<td align="right">&nbsp;</td><td>&nbsp;</td></tr>' +
 			'<tr><td align="right">Keep Combat Logs' + fsHelper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
@@ -4578,7 +4600,7 @@ if (!nameNode) GM_log(responseText);
 			'<td align="right">Show Debug Info' + fsHelper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
-				'separated by commas') +
+				'separated by commas. If this is empty, hunting buffs will be disabled.') +
 				':</td><td colspan="3"><input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelper:SaveOptions"></td></tr>' +
@@ -4646,6 +4668,7 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "showDebugInfo");
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
+		fsHelper.saveValueForm(oForm, "moveFSBox");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
