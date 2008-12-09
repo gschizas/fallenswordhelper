@@ -4584,7 +4584,7 @@ if (!nameNode) GM_log(responseText);
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
 			'<td align="right" colspan="2"><input type="button" class="custombutton" value="Show Logs" id="fsHelper:ShowLogs"></td></td></tr>' +
-			'<tr><td align="right">Show Administrative Options' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls in guild managemenet page - ' +
+			'<tr><td align="right">Show Administrative Options' + fsHelper.helpLink('Show Admininstrative Options', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
 			'<td align="right">Dim Non Player<br/>Guild Log Messages' + fsHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
