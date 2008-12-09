@@ -88,6 +88,8 @@ var fsHelper = {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
 		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", true)};
+		if (GM_getValue("hideNewBox")==undefined) {GM_setValue("hideNewBox", false)}
+
 		if (GM_getValue("guildSelf")==undefined) {GM_setValue("guildSelf", "")}
 		if (GM_getValue("guildFrnd")==undefined) {GM_setValue("guildFrnd", "")}
 		if (GM_getValue("guildPast")==undefined) {GM_setValue("guildPast", "")}
@@ -182,7 +184,6 @@ var fsHelper = {
 	},
 
 	moveFSBox: function() {
-		GM_log(GM_getValue("moveFSBox"));
 		if (!GM_getValue("moveFSBox")) return;
 		var src=fsHelper.findNode("//b[.='FSBox']/../../../../..");
 		src.parentNode.removeChild(src.nextSibling);
@@ -197,6 +198,14 @@ var fsHelper = {
 		cell.appendChild(src);
 	},
 
+	hideNewBox: function() {
+		if (!GM_getValue("hideNewBox")) return;
+		var removeThis = fsHelper.findNode("//font[b='New?']/../../../..");
+		removeThis.parentNode.removeChild(removeThis.nextSibling);
+		removeThis.parentNode.removeChild(removeThis.nextSibling);
+		removeThis.parentNode.removeChild(removeThis);
+	},
+
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		fsHelper.init();
@@ -206,6 +215,7 @@ var fsHelper = {
 		fsHelper.prepareChat();
 		fsHelper.injectStaminaCalculator();
 		fsHelper.injectMenu();
+		fsHelper.hideNewBox();
 		fsHelper.replaceKeyHandler();
 
 		var re=/cmd=([a-z]+)/;
@@ -4568,7 +4578,8 @@ if (!nameNode) GM_log(responseText);
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + fsHelper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility.') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td>' +
-			'<td align="right">&nbsp;</td><td>&nbsp;</td></tr>' +
+			'<td align="right">Hide \'New?\' box' + fsHelper.helpLink('Hide New? Box', 'This will hide the \'New?\' box, useful to gain some space if you\'ve already read it.') +
+				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Keep Combat Logs' + fsHelper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
@@ -4669,6 +4680,7 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "killAllAdvanced");
 		fsHelper.saveValueForm(oForm, "huntingBuffs");
 		fsHelper.saveValueForm(oForm, "moveFSBox");
+		fsHelper.saveValueForm(oForm, "hideNewBox");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
