@@ -280,7 +280,6 @@ var fsHelper = {
 		case "profile":
 			switch (subPageId) {
 			case "dropitems":
-				fsHelper.injectDropItemsAuction();
 				fsHelper.injectDropItems();
 				break;
 			case "changebio":
@@ -308,7 +307,6 @@ var fsHelper = {
 						fsHelper.injectReportPaint();
 						break;
 					default:
-						fsHelper.injectDropItemsAuction();
 						fsHelper.injectDropItems();
 				}
 				break;
@@ -2903,32 +2901,6 @@ var fsHelper = {
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
 	},
 
-	injectDropItemsAuction: function() {
-		var mainTable = fsHelper.findNode("//table[@width='600']");
-		var insertHere = mainTable.rows[5].cells[0];
-		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="fsHelper:showExtraLinks">' +
-			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
-		document.getElementById("fsHelper:showExtraLinks").addEventListener('click', fsHelper.toggleShowExtraLinks, true);
-
-		//function to add links to all the items in the drop items list
-		if (GM_getValue("showExtraLinks")) {
-		var itemName, itemInvId, theTextNode, newLink;
-		var allItems=fsHelper.findNodes("//input[@type='checkbox']");
-		for (var i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			itemInvId = anItem.value;
-			theTextNode = fsHelper.findNode("../../td[3]", anItem);
-			itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-			theTextNode.innerHTML = "<a findme='AH' href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
-				+ escape(itemName)
-				+ "'>[AH]</a> "
-				+ "<a findme='Sell' href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
-				+ "[Sell]</a> "
-				+ theTextNode.innerHTML;
-			}
-		}
-	},
-
 	toggleShowExtraLinks: function(evt) {
 		var showExtraLinksElement = fsHelper.findNode("//span[@id='fsHelper:showExtraLinks']");
 		if (showExtraLinksElement.textContent == "Show AH and Sell links") {
@@ -2936,7 +2908,6 @@ var fsHelper = {
 		} else {
 			GM_setValue("showExtraLinks", false);
 		}
-		GM_log(GM_getValue("showExtraLinks"));
 		window.location = window.location;
 	},
 
@@ -3018,6 +2989,39 @@ var fsHelper = {
 	},
 
 	injectDropItems: function() {
+		var mainTable = fsHelper.findNode("//table[@width='600']");
+		var insertHere = mainTable.rows[5].cells[0];
+		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="fsHelper:showExtraLinks">' +
+			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
+		document.getElementById("fsHelper:showExtraLinks").addEventListener('click', fsHelper.toggleShowExtraLinks, true);
+
+		//function to add links to all the items in the drop items list
+		if (GM_getValue("showExtraLinks")) {
+			var itemName, itemInvId, theTextNode, newLink;
+			var allItems=fsHelper.findNodes("//input[@type='checkbox']");
+			for (var i=0; i<allItems.length; i++) {
+				anItem = allItems[i];
+				itemInvId = anItem.value;
+				theTextNode = fsHelper.findNode("../../td[3]", anItem);
+				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
+				var findItems = fsHelper.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + fsHelper.server + "?cmd=auctionhouse&type=-1&search_text="
+					+ escape(itemName)
+					+ "'>AH</a>]</span> "
+					+ "<span findme='Sell'>[<a href='" + fsHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+					+ "Sell</a>]</span> "
+					+ theTextNode.innerHTML
+					+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+			}
+		}
+		
+		var checkAllElements = fsHelper.findNodes("//span[@findme='checkall']");
+		for (var i=0; i<checkAllElements.length; i++) {
+			checkAllElement = checkAllElements[i];
+			itemName = checkAllElement.linkto;
+			checkAllElement.addEventListener('click', fsHelper.checkAll, true);
+		}
+		
 		var allItems = fsHelper.findNodes("//input[@type='checkbox']");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
@@ -3039,10 +3043,25 @@ var fsHelper = {
 		}
 	},
 
+	checkAll: function(evt){
+		var itemName = evt.target.getAttribute("linkto");
+		var findItems = fsHelper.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+		for (var i=0; i<findItems.length; i++) {
+			var item = findItems[i];
+			var checkboxForItem = item.previousSibling.previousSibling.firstChild;
+			if (checkboxForItem.checked) {
+				checkboxForItem.checked = false;
+			} else {
+				checkboxForItem.checked = true;
+			}
+			
+		}
+	},
+	
 	injectDropItemsPaint: function(responseDetails, callback) {
 		var textNode = fsHelper.findNode("../../../td[3]", callback);
-		var auctionHouseLink=fsHelper.findNode("a[@findme='AH']", textNode);
-		var sellLink=fsHelper.findNode("a[@findme='Sell']", textNode);
+		var auctionHouseLink=fsHelper.findNode("span[@findme='AH']", textNode);
+		var sellLink=fsHelper.findNode("span[@findme='Sell']", textNode);
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
 		if (guildLockedRE.exec(responseDetails.responseText)) {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
@@ -3437,6 +3456,20 @@ var fsHelper = {
 			output.innerHTML+=(i+1) + " ";
 			fsHelper.inventory.items.push(item);
 		}
+		var	folderIDs = new Array();
+		fsHelper.folderIDs = folderIDs; //clear out the array before starting.
+		GM_setValue("currentFolder", 1);
+		var folderLinks = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&folder_id=')]", doc);
+		//if folders are enabled then save the ID's in an array
+		if (folderLinks) {
+			for (var i=0; i<folderLinks.length;i++) {
+				folderLink = folderLinks[i];
+				href = folderLink.getAttribute("href")
+				var folderID = /folder_id=([-0-9]+)/.exec(href)[1]*1;
+				folderIDs.push(folderID);
+				fsHelper.folderIDs = folderIDs;
+			}
+		}
 		fsHelper.parseInventoryPage(responseText);
 	},
 
@@ -3445,9 +3478,20 @@ var fsHelper = {
 		var output=document.getElementById('fsHelper:InventoryManagerOutput');
 		var backpackItems = fsHelper.findNodes("//td[contains(@background,'2x3.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
 		var pages = fsHelper.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
-		var currentPage = parseInt(fsHelper.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent);
+		var pageElement = fsHelper.findNode("//a[contains(@href,'backpack_page=')]/font", doc);
+		var currentPage = 1;
+		if (pageElement) currentPage = parseInt(fsHelper.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent);
+		var currentFolder = GM_getValue("currentFolder");
+		var folderCount = 0, folderID = -1;
+		if (fsHelper.folderIDs.length<=1) {
+			folderCount = 1;
+			folderID = -1;
+		} else {
+			folderCount = fsHelper.folderIDs.length;
+			folderID = fsHelper.folderIDs[currentFolder-1];
+		}
 		if (backpackItems) {
-			output.innerHTML+='<br/>Parsing backpack page '+currentPage+'...';
+			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 
 			for (var i=0; i<backpackItems.length;i++) {
 				var theUrl=fsHelper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
@@ -3459,12 +3503,17 @@ var fsHelper = {
 				fsHelper.inventory.items.push(item);
 			}
 			} else {
-				output.innerHTML+='<br/>Parsing backpack page '+currentPage+'... Empty';
+				output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
 			}
-		if (currentPage<pages.length) {
+		if (currentPage<pages.length || currentFolder<folderCount) {
+			if (currentPage==pages.length && currentFolder<folderCount) {
+				currentPage = 0;
+				folderID = fsHelper.folderIDs[currentFolder];
+				GM_setValue("currentFolder", currentFolder+1);
+			}
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: fsHelper.server + 'index.php?cmd=profile&folder_id=0&backpack_page='+(currentPage),
+				url: fsHelper.server + 'index.php?cmd=profile&backpack_page='+(currentPage)+'&folder_id='+(folderID) ,
 				headers: {
 					"User-Agent" : navigator.userAgent,
 					"Cookie" : document.cookie
@@ -3841,6 +3890,14 @@ if (!nameNode) GM_log(responseText);
 	},
 
 	injectGroups: function() {
+		var mainTable = fsHelper.findNode("//table[@width='650']");
+		var subTable = fsHelper.findNode("//table[@width='650']/tbody/tr/td/table");
+		var minGroupLevel = GM_getValue("minGroupLevel");
+		if (minGroupLevel) {
+			var textArea = subTable.rows[0].cells[0];
+			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
+		}
+		
 		allItems = fsHelper.findNodes("//tr[td/a/img/@title='View Group Stats']");
 		var memberList=fsHelper.getValueJSON("memberlist");
 		// window.alert(typeof(memberList.members));
@@ -4656,6 +4713,12 @@ if (!nameNode) GM_log(responseText);
 		krulXCVRE = /xcv=([a-z0-9]+)'/
 		krulXCV = krulXCVRE.exec(onClick);
 		if (krulXCV) GM_setValue("krulXCV",krulXCV[1]);
+		
+		var minGroupLevelTextField = fsHelper.findNode('//input[@name="min_group_level"]');
+		if (minGroupLevelTextField) {
+			var minGroupLevel = minGroupLevelTextField.value;
+			GM_setValue("minGroupLevel",minGroupLevel);
+		}
 	},
 
 	helpLink: function(title, text) {
