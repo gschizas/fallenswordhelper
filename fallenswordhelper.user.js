@@ -85,6 +85,7 @@ var fsHelper = {
 		if (GM_getValue("keepLogs")==undefined) GM_setValue("keepLogs", false);
 		if (GM_getValue("showDebugInfo")==undefined) GM_setValue("showDebugInfo", false);
 		if (GM_getValue("showCompletedQuests")==undefined) GM_setValue("showCompletedQuests", true);
+		if (GM_getValue("showExtraLinks")==undefined) GM_setValue("showExtraLinks", true);
 		if (GM_getValue("huntingBuffs")==undefined) {
 			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		}
@@ -4075,13 +4076,16 @@ if (!nameNode) GM_log(responseText);
 				var onmouseover = aBuff.getAttribute("onmouseover");
 				if (onmouseover.search("Summon Shield Imp") != -1) {
 					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
-					buffRE = /<b>([ a-zA-Z]+)<br>(\d+) HP remaining<br><\/b> \(Level: (\d+)\)/
+					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
+					buffRE = /<b>([ a-zA-Z]+)<br>([ 0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/
 					buff = buffRE.exec(onmouseover);
+					if (!buff) GM_log(onmouseover);
 					buffName = buff[1];
 					buffLevel = buff[3];
 				} else {
 					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
 					buff = buffRE.exec(onmouseover);
+					if (!buff) GM_log(onmouseover);
 					buffName = buff[1];
 					buffLevel = buff[2];
 				}
