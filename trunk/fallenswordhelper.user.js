@@ -108,6 +108,8 @@ var fsHelper = {
 		fsHelper.setDefault("hideKrulPortal", false);
 		fsHelper.setDefault("hideQuests", false);
 		fsHelper.setDefault("hideQuestNames", "");
+		fsHelper.setDefault("hideRecipes", false);
+		fsHelper.setDefault("hideRecipeNames", "");
 
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -380,6 +382,9 @@ var fsHelper = {
 			case "guildinvmanager":
 				fsHelper.injectGuildInventoryManager();
 				break;
+			case "recipemanager":
+				fsHelper.injectRecipeManager();
+				break;
 			case "questmanager":
 				fsHelper.injectQuestManager();
 				break;
@@ -426,6 +431,7 @@ var fsHelper = {
 		fsHelper.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11, "menuSource_0");
 		fsHelper.injectOneMenu("Quest Manager", "index.php?cmd=notepad&subcmd=questmanager", 13, "menuSource_0");
 		fsHelper.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15, "menuSource_0");
+		fsHelper.injectOneMenu("Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 17, "menuSource_0");
 		fsHelper.injectOneMenu("Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3, "menuSource_5");
 		fsHelper.injectOneMenu("Top  250 Players", "index.php?cmd=toprated&subcmd=xp", 3, "menuSource_3");
 		if (GM_getValue("keepLogs")) {
@@ -2895,18 +2901,18 @@ var fsHelper = {
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
 						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
+							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + fsHelper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
 						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
+							i + 'text" title="Click to bid on this item" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
 					}
 					var buyoutValue = "-";
 					if (buyoutHTML != "-" && !playerListedItem) {
 						newCell.innerHTML = "&nbsp/&nbsp";
 						buyoutValue = (buyoutCell.textContent)*1;
 						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" bidvalue="' + buyoutValue + '">Buy Now</span>';
+							i + 'text" title="Click to buy this item now!" bidvalue="' + buyoutValue + '">Buy Now</span>';
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
 					if (!playerListedItem) {
@@ -3069,12 +3075,14 @@ var fsHelper = {
 		}
 
 		var checkAllElements = fsHelper.findNodes("//span[@findme='checkall']");
-		for (var i=0; i<checkAllElements.length; i++) {
-			checkAllElement = checkAllElements[i];
-			itemName = checkAllElement.linkto;
-			checkAllElement.addEventListener('click', fsHelper.checkAll, true);
+		if (checkAllElements) {
+			for (var i=0; i<checkAllElements.length; i++) {
+				checkAllElement = checkAllElements[i];
+				itemName = checkAllElement.linkto;
+				checkAllElement.addEventListener('click', fsHelper.checkAll, true);
+			}
 		}
-
+		
 		var allItems = fsHelper.findNodes("//input[@type='checkbox']");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
@@ -3844,6 +3852,141 @@ if (!nameNode) GM_log(responseText);
 		} else {
 			fsHelper.generateInventoryTable("self");
 		}
+	},
+
+	injectRecipeManager: function() {
+		var content=fsHelper.findNode("//table[@width='100%']/..");
+		fsHelper.recipebook=fsHelper.getValueJSON("recipebook");
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+			'<td width="90%" nobr><b>&nbsp;Recipe Manager</b></td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:RecipeManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'</tr>' +
+			'</table>' +
+			'<div style="font-size:small;" id="fsHelper:RecipeManagerOutput">' +
+			'' +
+			'</div>';
+		document.getElementById("fsHelper:RecipeManagerRefresh").addEventListener('click', fsHelper.parseInventingStart, true);
+		fsHelper.generateRecipeTable();
+	},
+
+	parseInventingStart: function(){
+		fsHelper.recipebook = new Object;
+		fsHelper.recipebook.recipe = new Array();
+		var output=document.getElementById('fsHelper:RecipeManagerOutput')
+		output.innerHTML='<br/>Parsing inventing screen ...';
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: fsHelper.server + 'index.php?cmd=inventing&subcmd=&subcmd2=&page=0&search_text=',
+			callback: {"page": 0},
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails, callback) {
+				fsHelper.parseInventingPage(responseDetails.responseText, this.callback);
+			}
+		})
+	},
+
+	parseInventingPage: function(responseText, callback) {
+		var doc=fsHelper.createDocument(responseText);
+		var output=document.getElementById('fsHelper:RecipeManagerOutput');
+		var currentPage = callback.page;
+		var pages=fsHelper.findNode("//select[@name='page']", doc);
+		if (!pages) return;
+		var recipeTable = fsHelper.findNode("//table[tbody/tr/td[.='Recipe Name']]",doc);
+
+		output.innerHTML+='Parsing page: '+currentPage +'...<br>';
+
+		if (recipeTable) {
+			for (var i=0; i<recipeTable.rows.length;i++) {
+				if (i!=0 && recipeTable.rows[i].cells[0].innerHTML.search("recipe") != -1) {
+					aRow = recipeTable.rows[i];
+					var innerTable = aRow.firstChild.firstChild;
+					var recipeImg = innerTable.rows[0].cells[0].innerHTML;
+					var recipeLink = innerTable.rows[0].cells[1].innerHTML;
+					var recipeName = innerTable.rows[0].cells[1].firstChild.innerHTML;
+					var recipe={
+						"img": recipeImg,
+						"link": recipeLink, 
+						"name":recipeName};
+					output.innerHTML+="Found recipe: "+ recipeName +"<br>";
+					fsHelper.recipebook.recipe.push(recipe);
+				}
+			}
+		}
+
+		var nextPage=currentPage+1; //pages[currentPage];
+		if (nextPage<pages.options.length) {
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.server + 'index.php?cmd=inventing&subcmd=&subcmd2=&page='+nextPage+'&search_text=',
+				callback: {"page": nextPage},
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails, callback) {
+					fsHelper.parseInventingPage(responseDetails.responseText, this.callback);
+				}
+			})
+		}
+		else {
+			output.innerHTML+='Finished parsing ... formatting ...';
+			fsHelper.generateRecipeTable();
+		}
+	},
+
+	generateRecipeTable: function() {
+		var output=document.getElementById('fsHelper:RecipeManagerOutput');
+		var result='<table id="fsHelper:RecipeTable"><tr>' +
+			'<th width="10"></th><th align="left" sortkey="img"></th>' +
+			'<th width="10"></th><th align="left" sortkey="name">Name</th>' +
+			'<th width="10"></th>';
+
+		var hideRecipes=[];
+		if (GM_getValue("hideRecipes")) hideRecipes=GM_getValue("hideRecipeNames").split(",");
+
+		var recipe;
+		for (var i=0; i<fsHelper.recipebook.recipe.length;i++) {
+			recipe=fsHelper.recipebook.recipe[i];
+
+			if (hideRecipes.indexOf(recipe.name) == -1) {
+				result+='<tr>' + 
+					'<td></td><td>' + recipe.img + '</td>' +
+					'<td></td><td>' + recipe.link + '</td>' +
+					'<td></td>' +
+					'</tr>';
+			}
+		}
+		result+='</table>';
+		output.innerHTML=result;
+
+		fsHelper.recipebook.lastUpdate = (new Date()).getTime();
+		GM_setValue("recipebook", JSON.stringify(fsHelper.recipebook));
+
+		var recipeTable=document.getElementById('fsHelper:RecipeTable');
+		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
+			var cell=recipeTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', fsHelper.sortRecipeTable, true);
+		}
+	},
+
+	sortRecipeTable: function(evt) {
+		fsHelper.recipebook=fsHelper.getValueJSON("recipebook");
+		var headerClicked=evt.target.getAttribute("sortKey")
+		if (fsHelper.sortAsc==undefined) fsHelper.sortAsc=true;
+		if (fsHelper.sortBy && fsHelper.sortBy==headerClicked) {
+			fsHelper.sortAsc=!fsHelper.sortAsc;
+		}
+		fsHelper.sortBy=headerClicked;
+		//GM_log(headerClicked)
+		fsHelper.recipebook.recipe.sort(fsHelper.stringSort)
+		fsHelper.generateRecipeTable();
 	},
 
 	injectGroupStats: function() {
@@ -4758,6 +4901,10 @@ if (!nameNode) GM_log(responseText);
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
 				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
+			'<tr><td align="right">Hide Specific Recipes' + fsHelper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
+				'This works on Recipe Manager') +
+				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
+				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
@@ -4838,7 +4985,9 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "hideKrulPortal");
 		fsHelper.saveValueForm(oForm, "hideQuests");
 		fsHelper.saveValueForm(oForm, "hideQuestNames");
-
+		fsHelper.saveValueForm(oForm, "hideRecipes");
+		fsHelper.saveValueForm(oForm, "hideRecipeNames");
+		
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
