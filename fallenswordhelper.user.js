@@ -102,6 +102,8 @@ var fsHelper = {
 		if (GM_getValue("guildPastMessage")==undefined) {GM_setValue("guildPastMessage", "gray|Do not attack - You've been in that guild once!")}
 		if (GM_getValue("guildEnmyMessage")==undefined) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
 		if (GM_getValue("killAllAdvanced")==undefined) {GM_setValue("killAllAdvanced", "off")}
+		if (GM_getValue("showQuickKillOnWorld")==undefined) {GM_setValue("showQuickKillOnWorld", true)}
+		if (GM_getValue("hideKrulPortal")==undefined) {GM_setValue("hideKrulPortal", false)}
 
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -1582,9 +1584,11 @@ var fsHelper = {
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", fsHelper.imageServer + "/skin/realm_right_bg.jpg");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
-		var killStyle = GM_getValue("killAllAdvanced")
-		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
-				'<tr><td>Quick kill style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will quick kill a single monster<br/> ' +
+		var killStyle = GM_getValue("killAllAdvanced");
+		if (GM_getValue("showQuickKillOnWorld")) {
+			newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
+				'<tr><td>Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', 
+					'<b><u>single</u></b> will quick kill a single monster<br/> ' +
 					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
 					'<b><u>off</u></b> returns control to game normal.') +
 				':' +
@@ -1595,17 +1599,19 @@ var fsHelper = {
 				'<td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
 					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td></tr>' +
 				'</table></div>';
+			document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+			document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+			document.getElementById('killAllAdvancedWorldType').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
+		}
 
-		var buttonRow = fsHelper.findNode("//tr[td/a/img[@title='Open Realm Map']]");
-		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-			'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + fsHelper.imageServer +
-			'/temple/3.gif" title="Instant port to Krul Island" border="1"></span></td>';
+		if (!GM_getValue("hideKrulPortal")) {
+			var buttonRow = fsHelper.findNode("//tr[td/a/img[@title='Open Realm Map']]");
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + fsHelper.imageServer +
+				'/temple/3.gif" title="Instant port to Krul Island" border="1"></span></td>';
+			document.getElementById('portaltokrul').addEventListener('click', fsHelper.portalToKrul, true);
+		}
 
-		document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
-		document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
-		document.getElementById('killAllAdvancedWorldType').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
-
-		document.getElementById('portaltokrul').addEventListener('click', fsHelper.portalToKrul, true);
 		// injectHere.style.display='none';
 		fsHelper.checkBuffs();
 		fsHelper.prepareCheckMonster();
@@ -2653,7 +2659,8 @@ var fsHelper = {
 
 		//insert another page change block at the top of the screen.
 		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
-		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../..");
+		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
+		
 		insertPageChangeBlockHere.align = "right";
 		insertPageChangeBlockHere.innerHTML = pageChangeBlock.innerHTML;
 
@@ -3401,7 +3408,7 @@ var fsHelper = {
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="fsHelper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="fsHelper:showUseableItems" type="checkbox"' +
+			'<tr><td><b>&nbsp;Show Only Useable Items<input id="fsHelper:showUseableItems" type="checkbox" linkto="showUseableItems"' +
 				(GM_getValue("showUseableItems")?' checked':'') + '/></b>&nbsp;Guild Item Count:&nbsp;' + guildItemCount +
 				'</td></tr>'+
 			'</table>' +
@@ -3415,16 +3422,7 @@ var fsHelper = {
 
 	toggleShowUseableItems: function(evt) {
 		GM_setValue("showUseableItems", evt.target.checked);
-		re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search);
-		var subPageId="-";
-		if (subPageIdRE)
-			subPageId=subPageIdRE[1];
-		if (subPageId == "guildinvmanager") {
-			fsHelper.injectGuildInventoryManager;
-		} else {
-			fsHelper.injectInventoryManager;
-		}
+		window.location=window.location;
 	},
 
 	parseProfileStart: function(){
@@ -4637,10 +4635,13 @@ if (!nameNode) GM_log(responseText);
 			'<tr><td>Old Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ fsHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
-			'<tr><td align="right">Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', '<b><u>single</u></b> will fast kill a single monster<br>' +
+			'<tr><td align="right">Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', 'Unchecking the checkbox will prevent this option from displaying on the world screen.<br/>'+
+				'<b><u>single</u></b> will fast kill a single monster<br>' +
 				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>off</b></u> returns control to game normal.') +
 				':</td><td><table><tbody>' +
-				'<tr><td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
+				'<tr>' +
+				'<td><input name="showQuickKillOnWorld" type="checkbox" value="on"' + (GM_getValue("showQuickKillOnWorld")?" checked":"") + '></td>' +
+				'<td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
 				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td>'+
 				'<td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
 				'</tbody></table></td>' +
@@ -4680,6 +4681,9 @@ if (!nameNode) GM_log(responseText);
 				':</td><td><input name="disableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("disableGuildOnlineList")?" checked":"") + '></td>' +
 			'<td align="right">Show Debug Info' + fsHelper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Hide Krul Portal' + fsHelper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
+				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
+			'<td align="right"></td><td></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + fsHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -4760,6 +4764,8 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "showHuntingBuffs");
 		fsHelper.saveValueForm(oForm, "moveFSBox");
 		fsHelper.saveValueForm(oForm, "hideNewBox");
+		fsHelper.saveValueForm(oForm, "showQuickKillOnWorld");
+		fsHelper.saveValueForm(oForm, "hideKrulPortal");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
