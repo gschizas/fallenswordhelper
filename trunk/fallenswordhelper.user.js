@@ -78,32 +78,36 @@ var fsHelper = {
 		fsHelper.readInfo();
 	},
 
-	initSettings: function() {
-		if (GM_getValue("enableLogColoring")==undefined) {GM_setValue("enableLogColoring", true)};
-		if (GM_getValue("showCombatLog")==undefined) GM_setValue("showCombatLog", true);
-		if (GM_getValue("showCreatureInfo")==undefined) GM_setValue("showCreatureInfo", true);
-		if (GM_getValue("keepLogs")==undefined) GM_setValue("keepLogs", false);
-		if (GM_getValue("showDebugInfo")==undefined) GM_setValue("showDebugInfo", false);
-		if (GM_getValue("showCompletedQuests")==undefined) GM_setValue("showCompletedQuests", true);
-		if (GM_getValue("showExtraLinks")==undefined) GM_setValue("showExtraLinks", true);
-		if (GM_getValue("huntingBuffs")==undefined) {
-			GM_setValue("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
-		}
-		if (GM_getValue("showHuntingBuffs")==undefined) GM_setValue("showHuntingBuffs", true);
-		if (GM_getValue("moveFSBox")==undefined) {GM_setValue("moveFSBox", false)};
-		if (GM_getValue("hideNewBox")==undefined) {GM_setValue("hideNewBox", false)}
+	setDefault: function(name, value) {
+		if (GM_getValue(name)==undefined) {GM_setValue(name, value)};
+	},
 
-		if (GM_getValue("guildSelf")==undefined) {GM_setValue("guildSelf", "")}
-		if (GM_getValue("guildFrnd")==undefined) {GM_setValue("guildFrnd", "")}
-		if (GM_getValue("guildPast")==undefined) {GM_setValue("guildPast", "")}
-		if (GM_getValue("guildEnmy")==undefined) {GM_setValue("guildEnmy", "")}
-		if (GM_getValue("guildSelfMessage")==undefined) {GM_setValue("guildSelfMessage", "green|Member of your own guild")}
-		if (GM_getValue("guildFrndMessage")==undefined) {GM_setValue("guildFrndMessage", "yellow|Do not attack - Guild is friendly!")}
-		if (GM_getValue("guildPastMessage")==undefined) {GM_setValue("guildPastMessage", "gray|Do not attack - You've been in that guild once!")}
-		if (GM_getValue("guildEnmyMessage")==undefined) {GM_setValue("guildEnmyMessage", "red|Enemy guild. Attack at will!")}
-		if (GM_getValue("killAllAdvanced")==undefined) {GM_setValue("killAllAdvanced", "off")}
-		if (GM_getValue("showQuickKillOnWorld")==undefined) {GM_setValue("showQuickKillOnWorld", true)}
-		if (GM_getValue("hideKrulPortal")==undefined) {GM_setValue("hideKrulPortal", false)}
+	initSettings: function() {
+		fsHelper.setDefault("enableLogColoring", true);
+		fsHelper.setDefault("showCombatLog", true);
+		fsHelper.setDefault("showCreatureInfo", true);
+		fsHelper.setDefault("keepLogs", false);
+		fsHelper.setDefault("showDebugInfo", false);
+		fsHelper.setDefault("showCompletedQuests", true);
+		fsHelper.setDefault("showExtraLinks", true);
+		fsHelper.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
+		fsHelper.setDefault("showHuntingBuffs", true);
+		fsHelper.setDefault("moveFSBox", false);
+		fsHelper.setDefault("hideNewBox", false);
+
+		fsHelper.setDefault("guildSelf", "");
+		fsHelper.setDefault("guildFrnd", "");
+		fsHelper.setDefault("guildPast", "");
+		fsHelper.setDefault("guildEnmy", "");
+		fsHelper.setDefault("guildSelfMessage", "green|Member of your own guild");
+		fsHelper.setDefault("guildFrndMessage", "yellow|Do not attack - Guild is friendly!");
+		fsHelper.setDefault("guildPastMessage", "gray|Do not attack - You've been in that guild once!");
+		fsHelper.setDefault("guildEnmyMessage", "red|Enemy guild. Attack at will!");
+		fsHelper.setDefault("killAllAdvanced", "off");
+		fsHelper.setDefault("showQuickKillOnWorld", true);
+		fsHelper.setDefault("hideKrulPortal", false);
+		fsHelper.setDefault("hideQuests", false);
+		fsHelper.setDefault("hideQuestNames", "");
 
 		var imgurls = fsHelper.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -1061,7 +1065,9 @@ var fsHelper = {
 		var quests = fsHelper.questMatrix();
 		var questTable = fsHelper.findNode("//table[@width='100%' and @cellPadding='2']");
 		questTable.setAttribute("findme","questTable");
-		var questNamesOnPage = new Array();
+		var questNamesOnPage = [];
+		var hideQuests=[];
+		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
@@ -1073,11 +1079,21 @@ var fsHelper = {
 						var aCell = aRow.cells[0]
 						var imgElement = aCell.nextSibling.firstChild;
 						var matrixQuestName = quests[j].questName.replace(/  /g," ");
+
+						// GM_log(questName + "\t" + hideQuests.indexOf(questName));
+
 						if (questName == matrixQuestName && imgElement.getAttribute("title") != "Completed") {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
-								"<span style='color:blue;'>" + quests[j].level +
-								"</span> <span style='color:gray;'>Quest location:</span> " +
-								"<span style='color:blue;'>" + quests[j].location + "</span>";
+							if (hideQuests.indexOf(matrixQuestName)>=0) {
+								aRow.parentNode.removeChild(aRow.nextSibling);
+								aRow.parentNode.removeChild(aRow.nextSibling);
+								aRow.parentNode.removeChild(aRow.nextSibling);
+								aRow.parentNode.removeChild(aRow);
+							} else {
+								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
+									"<span style='color:blue;'>" + quests[j].level +
+									"</span> <span style='color:gray;'>Quest location:</span> " +
+									"<span style='color:blue;'>" + quests[j].location + "</span>";
+							}
 							break;
 						} else if (j==quests.length-1 && imgElement.getAttribute("title") != "Completed") {
 							insertHere.innerHTML += " <span style='color:red;'>Quest not in array sorry (or error in array).</span>";
@@ -1094,7 +1110,10 @@ var fsHelper = {
 		var questTable = fsHelper.findNode("//table[@width='100%' and @cellPadding='2']");
 		questTable.setAttribute("findme","questTable");
 		var hideNextRows = 0;
-		var playerQuestList = new Array();
+		var playerQuestList = [];
+		var hideQuests=[];
+		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
+
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
@@ -1105,11 +1124,21 @@ var fsHelper = {
 				if (aRow.cells[0].innerHTML) {
 					var questName = aRow.cells[0].firstChild.innerHTML;
 					var insertHere = aRow.cells[0];
+					var killThis = false;
 					for (var j=0;j<quests.length;j++) {
-						if (questName == quests[j].questName) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
-								quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
-								quests[j].location + "</span>";
+						var matrixQuestName = quests[j].questName;
+						if (questName == matrixQuestName) {
+							if (hideQuests.indexOf(matrixQuestName)>=0) {
+								aRow.parentNode.removeChild(aRow.nextSibling);
+								aRow.parentNode.removeChild(aRow.nextSibling);
+								aRow.parentNode.removeChild(aRow.nextSibling);
+								aRow.parentNode.removeChild(aRow);
+							} else {
+								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
+									quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
+									quests[j].location + "</span>";
+							}
+							break;
 						} else if (j==quests.length) {
 							insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
 						}
@@ -3335,52 +3364,56 @@ var fsHelper = {
 		var quests = fsHelper.questMatrix();
 		var q, bgColor;
 		//GM_log(fsHelper.characterLevel);
+		var hideQuests=[];
+		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="fsHelper:QuestTable">';
 		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
 			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
 		var c=0;
 		for (var i=0;i<quests.length;i++) {
 			q = quests[i];
-			var img="";
-			// if (q.status==undefined) img="";
-			if (q.status=="Completed") img=fsHelper.imageServer + "/skin/quest_complete.gif";
-			if (q.status=="Incomplete") img=fsHelper.imageServer + "/skin/quest_incomplete.gif";
-			if (q.status==undefined) img='data:image/png;base64,' +
-				'iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC5UlEQVR4nG1UX2sT' +
-				'QRD/7V5yub0kUi4mFFJfWq2i2Jb+0bZYoX2wgk+C6IvfwQf9AH4HP4KCgopvglIK' +
-				'FqVafFPf1AdFH7TpH2huzzTJOrObi6npcHd7Nzvzm5nfzJ54dmfWAHSRNPdbcCLQ' +
-				'K81mA4FSHZv9Q2wE6ZsQj2/NmEfr30jRhtfYRU427LbOVpyd+efXSBp9MH5G2vX6' +
-				'hRFknKqNqwsnugaNuNUN7ivPIdIlpQ/f9/qCPFz5YBWSgYxpkWEW/6wOFwYSgXS3' +
-				'cqsX+uTftn6Zrj9HFh1Ao+1S/bjRBxgvX+4J2knNGLoIjB+s9H2J/VbbbZBm6NMG' +
-				'Lq3u9IG9XBrA3sUlSOXb74znAIUQ9J7NwXgZ+mAyiQ8VIFpfs0Ds+L+k+k0C1DpG' +
-				'QkXkvCxkwU8bQBpuvU5QePG86/BrfM5WEh6hPbqSLZdZuv99ZhY5lXKsuAExlRUc' +
-				'yr3IGghXDba3YgvYK4YDIY/E5hO7zJQlkrILBTanz9uov8/Nwfwx2K3HKH9eR+GQ' +
-				'MtnFBXANy/CXChXlprATUwwVYm95EbomEA0GqHTK7m2ABaJEozAtgfxVxGCaiNQ2' +
-				'1YA2ueCdGiXJhsHBLrJwJ+uxQT4kNCpRp5yTSK460dopaD+xJdNt6kSUPsDR5vSi' +
-				'XUslblbe+qRVJuz59PaEebDyFdeuTDmQ9OBxYFGH8AKU3r6ynZXFgAcKQRQg+UG1' +
-				'SDYK8eTNe9ycP41Moo0dC6YrJNtY1xGqvAUCraW11QOk28qTxAbV2vbR8s2ZSTsO' +
-				'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
-				'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
-				'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
-				'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
-			if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=fsHelper.characterLevel) {
-				bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
-				output+='<tr style="background-color:' + bgColor + '"><td>';
-				if (q.href!=undefined) {
-					output+= '<a href="' + q.href + '">' + q.questName + '</a>';
-				} else {
-					output+= q.questName;
+			if (hideQuests.indexOf(q.questName)<0) {
+				var img="";
+				// if (q.status==undefined) img="";
+				if (q.status=="Completed") img=fsHelper.imageServer + "/skin/quest_complete.gif";
+				if (q.status=="Incomplete") img=fsHelper.imageServer + "/skin/quest_incomplete.gif";
+				if (q.status==undefined) img='data:image/png;base64,' +
+					'iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC5UlEQVR4nG1UX2sT' +
+					'QRD/7V5yub0kUi4mFFJfWq2i2Jb+0bZYoX2wgk+C6IvfwQf9AH4HP4KCgopvglIK' +
+					'FqVafFPf1AdFH7TpH2huzzTJOrObi6npcHd7Nzvzm5nfzJ54dmfWAHSRNPdbcCLQ' +
+					'K81mA4FSHZv9Q2wE6ZsQj2/NmEfr30jRhtfYRU427LbOVpyd+efXSBp9MH5G2vX6' +
+					'hRFknKqNqwsnugaNuNUN7ivPIdIlpQ/f9/qCPFz5YBWSgYxpkWEW/6wOFwYSgXS3' +
+					'cqsX+uTftn6Zrj9HFh1Ao+1S/bjRBxgvX+4J2knNGLoIjB+s9H2J/VbbbZBm6NMG' +
+					'Lq3u9IG9XBrA3sUlSOXb74znAIUQ9J7NwXgZ+mAyiQ8VIFpfs0Ds+L+k+k0C1DpG' +
+					'QkXkvCxkwU8bQBpuvU5QePG86/BrfM5WEh6hPbqSLZdZuv99ZhY5lXKsuAExlRUc' +
+					'yr3IGghXDba3YgvYK4YDIY/E5hO7zJQlkrILBTanz9uov8/Nwfwx2K3HKH9eR+GQ' +
+					'MtnFBXANy/CXChXlprATUwwVYm95EbomEA0GqHTK7m2ABaJEozAtgfxVxGCaiNQ2' +
+					'1YA2ueCdGiXJhsHBLrJwJ+uxQT4kNCpRp5yTSK460dopaD+xJdNt6kSUPsDR5vSi' +
+					'XUslblbe+qRVJuz59PaEebDyFdeuTDmQ9OBxYFGH8AKU3r6ynZXFgAcKQRQg+UG1' +
+					'SDYK8eTNe9ycP41Moo0dC6YrJNtY1xGqvAUCraW11QOk28qTxAbV2vbR8s2ZSTsO' +
+					'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
+					'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
+					'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
+					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
+				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=fsHelper.characterLevel) {
+					bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
+					output+='<tr style="background-color:' + bgColor + '"><td>';
+					if (q.href!=undefined) {
+						output+= '<a href="' + q.href + '">' + q.questName + '</a>';
+					} else {
+						output+= q.questName;
+					}
+					var fsgQuestName = q.questName.replace(/  /g,"+");
+					fsgQuestName = fsgQuestName.replace(/ /g,"+");
+					var wikiQuestName = q.questName.replace(/  /g,"_");
+					wikiQuestName = wikiQuestName.replace(/ /g,"_");
+					output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
+							'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
+							'&nbsp<a href="http://wiki.fallensword.com/index.php/' + wikiQuestName +
+							'" target="_blank" title="Look up this quest on the wiki">w</a>' +
+						'</td><td align="right">' + q.level +
+						'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
 				}
-				var fsgQuestName = q.questName.replace(/  /g,"+");
-				fsgQuestName = fsgQuestName.replace(/ /g,"+");
-				var wikiQuestName = q.questName.replace(/  /g,"_");
-				wikiQuestName = wikiQuestName.replace(/ /g,"_");
-				output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
-						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
-						'&nbsp<a href="http://wiki.fallensword.com/index.php/' + wikiQuestName +
-						'" target="_blank" title="Look up this quest on the wiki">w</a>' +
-					'</td><td align="right">' + q.level +
-					'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
 			}
 		}
 		output+='</table>';
@@ -4721,6 +4754,10 @@ if (!nameNode) GM_log(responseText);
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
+			'<tr><td align="right">Hide Specific Quests' + fsHelper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
+				'This works on Quest Manager and Quest Book.') +
+				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
+				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="fsHelper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
@@ -4799,6 +4836,8 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "hideNewBox");
 		fsHelper.saveValueForm(oForm, "showQuickKillOnWorld");
 		fsHelper.saveValueForm(oForm, "hideKrulPortal");
+		fsHelper.saveValueForm(oForm, "hideQuests");
+		fsHelper.saveValueForm(oForm, "hideQuestNames");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
