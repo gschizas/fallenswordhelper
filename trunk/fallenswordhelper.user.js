@@ -124,22 +124,13 @@ var fsHelper = {
 		var charInfo = fsHelper.findNode("//img[contains(@src,'skin/icon_player.gif')]");
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
+		fsHelper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([a-z]+)/i)[1];
 		fsHelper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		fsHelper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-
-		/*
-		GM_log("\n" +
-		"Level: " + fsHelper.characterLevel + "\n" +
-		"Attack: " + fsHelper.characterAttack + "\n" +
-		"Defense: " + fsHelper.characterDefense + "\n" +
-		"HP: " + fsHelper.characterHP + "\n" +
-		"Armor: " + fsHelper.characterArmor + "\n" +
-		"Damage: " + fsHelper.characterDamage)
-		*/
 	},
 
 	// Autoupdate
@@ -2843,7 +2834,6 @@ var fsHelper = {
 		}
 		var minBidLink = fsHelper.findNode("//a[contains(@href,'&order_by=1')]");
 		var auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
-		auctionTable.title = "auctionTable";
 
 		var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
 		var playerId = document.body.innerHTML.match(playerIdRE)[1];
@@ -3838,6 +3828,8 @@ if (!nameNode) GM_log(responseText);
 		if (fsHelper.sortBy && fsHelper.sortBy==headerClicked) {
 			fsHelper.sortAsc=!fsHelper.sortAsc;
 		}
+		fsHelper.sortBy="name";
+		targetInventory.items.sort(fsHelper.stringSort)
 		fsHelper.sortBy=headerClicked;
 		//GM_log(headerClicked)
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
@@ -4263,7 +4255,8 @@ if (!nameNode) GM_log(responseText);
 			var myBuff=myBuffs[i];
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
-			if (buffLevel <= 11) {
+			if (buffLevel < 75
+			    && myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1) {
 				myBuff.style.color = "gray";
 			}
 		}
