@@ -156,6 +156,7 @@ var fsHelper = {
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce="+now,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -629,6 +630,7 @@ var fsHelper = {
 			url: fsHelper.server + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -700,6 +702,7 @@ var fsHelper = {
 			url: fsHelper.server + href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -1013,6 +1016,7 @@ var fsHelper = {
 						url: fsHelper.server + "index.php?cmd=profile",
 						headers: {
 							"User-Agent" : navigator.userAgent,
+							"Referer": document.location,
 							"Cookie" : document.cookie
 						},
 						onload: function(responseDetails) {
@@ -1158,6 +1162,7 @@ var fsHelper = {
 			url: href,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -1587,7 +1592,7 @@ var fsHelper = {
 		var killStyle = GM_getValue("killAllAdvanced");
 		if (GM_getValue("showQuickKillOnWorld")) {
 			newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
-				'<tr><td>Quick Kill Style' + fsHelper.helpLink('Quick Kill Style', 
+				'<tr><td>Quick Kill Style' + fsHelper.helpLink('Quick Kill Style',
 					'<b><u>single</u></b> will quick kill a single monster<br/> ' +
 					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
 					'<b><u>off</u></b> returns control to game normal.') +
@@ -1660,6 +1665,7 @@ var fsHelper = {
 				url: href,
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails, callback) {
@@ -1673,7 +1679,7 @@ var fsHelper = {
 				url: fsHelper.server + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
-					// "Content-Type": "application/x-www-form-urlencoded",
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -1700,6 +1706,7 @@ var fsHelper = {
 						url: href,
 						headers: {
 							"User-Agent" : navigator.userAgent,
+							"Referer": document.location,
 							"Cookie" : document.cookie
 						},
 						onload: function(responseDetails, callback) {
@@ -1715,6 +1722,7 @@ var fsHelper = {
 				url: fsHelper.server + "index.php?cmd=blacksmith&subcmd=repairall&fromworld=1",
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 			})
@@ -1736,6 +1744,7 @@ var fsHelper = {
 					url: href,
 					headers: {
 						"User-Agent" : navigator.userAgent,
+						"Referer": document.location,
 						"Cookie" : document.cookie
 					},
 					onload: function(responseDetails, callback) {
@@ -1974,6 +1983,7 @@ var fsHelper = {
 				url: fsHelper.server + "index.php?cmd=guild&subcmd=manage",
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -2048,6 +2058,7 @@ var fsHelper = {
 			url: fsHelper.server + "index.php?cmd=guild&subcmd=chat",
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -2158,6 +2169,7 @@ var fsHelper = {
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit=Send",
@@ -2189,6 +2201,7 @@ var fsHelper = {
 				url: fsHelper.server + 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy),
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -2586,6 +2599,7 @@ var fsHelper = {
 			url: fsHelper.server + "index.php?cmd=profile&player_id=" + member.id,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -2660,7 +2674,7 @@ var fsHelper = {
 		//insert another page change block at the top of the screen.
 		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
 		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
-		
+
 		insertPageChangeBlockHere.align = "right";
 		insertPageChangeBlockHere.innerHTML = pageChangeBlock.innerHTML;
 
@@ -2772,6 +2786,7 @@ var fsHelper = {
 					callback: theImage,
 					headers: {
 						"User-Agent" : navigator.userAgent,
+						"Referer": document.location,
 						"Cookie" : document.cookie
 					},
 					onload: function(responseDetails, callback) {
@@ -2976,6 +2991,7 @@ var fsHelper = {
 			url: fsHelper.server + "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -3022,14 +3038,14 @@ var fsHelper = {
 					+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
 			}
 		}
-		
+
 		var checkAllElements = fsHelper.findNodes("//span[@findme='checkall']");
 		for (var i=0; i<checkAllElements.length; i++) {
 			checkAllElement = checkAllElements[i];
 			itemName = checkAllElement.linkto;
 			checkAllElement.addEventListener('click', fsHelper.checkAll, true);
 		}
-		
+
 		var allItems = fsHelper.findNodes("//input[@type='checkbox']");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
@@ -3042,6 +3058,7 @@ var fsHelper = {
 				callback: theImage,
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails, callback) {
@@ -3062,10 +3079,10 @@ var fsHelper = {
 			} else {
 				checkboxForItem.checked = true;
 			}
-			
+
 		}
 	},
-	
+
 	injectDropItemsPaint: function(responseDetails, callback) {
 		var textNode = fsHelper.findNode("../../../td[3]", callback);
 		var auctionHouseLink=fsHelper.findNode("span[@findme='AH']", textNode);
@@ -3228,6 +3245,7 @@ var fsHelper = {
 			callback: {"page": questPage},
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails, callback) {
@@ -3435,6 +3453,7 @@ var fsHelper = {
 			url: fsHelper.server + 'index.php?cmd=profile',
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -3515,6 +3534,7 @@ var fsHelper = {
 				url: fsHelper.server + 'index.php?cmd=profile&backpack_page='+(currentPage)+'&folder_id='+(folderID) ,
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -3538,6 +3558,7 @@ var fsHelper = {
 			url: fsHelper.server + 'index.php?cmd=guild&subcmd=manage&guildstore_page=0',
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -3573,6 +3594,7 @@ var fsHelper = {
 				url: fsHelper.server + 'index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage),
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -3587,6 +3609,7 @@ var fsHelper = {
 				url: fsHelper.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=report',
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -3627,6 +3650,7 @@ var fsHelper = {
 			callback: {"invIndex": invIndex},
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -3820,6 +3844,7 @@ if (!nameNode) GM_log(responseText);
 			url: fsHelper.server + "index.php?cmd=guild&subcmd=mercs",
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -3896,7 +3921,7 @@ if (!nameNode) GM_log(responseText);
 			var textArea = subTable.rows[0].cells[0];
 			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
-		
+
 		allItems = fsHelper.findNodes("//tr[td/a/img/@title='View Group Stats']");
 		var memberList=fsHelper.getValueJSON("memberlist");
 		// window.alert(typeof(memberList.members));
@@ -3938,6 +3963,7 @@ if (!nameNode) GM_log(responseText);
 			callback: link,
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -4029,6 +4055,7 @@ if (!nameNode) GM_log(responseText);
 				url: fsHelper.server + "index.php?cmd=profile&player_id=" + playerID,
 				headers: {
 					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
 					"Cookie" : document.cookie
 				},
 				onload: function(responseDetails) {
@@ -4041,6 +4068,7 @@ if (!nameNode) GM_log(responseText);
 			url: fsHelper.server + "index.php?cmd=profile",
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -4166,6 +4194,7 @@ if (!nameNode) GM_log(responseText);
 			url: fsHelper.server + "index.php?cmd=profile",
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -4363,6 +4392,7 @@ if (!nameNode) GM_log(responseText);
 			url: fsHelper.server + "index.php?cmd=points",
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -4440,6 +4470,7 @@ if (!nameNode) GM_log(responseText);
 			url: fsHelper.server + "index.php?cmd=points&subcmd=guildupgrades",
 			headers: {
 				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
@@ -4489,6 +4520,7 @@ if (!nameNode) GM_log(responseText);
 					url: fsHelper.server + "index.php?cmd=settings&subcmd=fix&xcv=" + krulXCV,
 					headers: {
 						"User-Agent" : navigator.userAgent,
+						"Referer": document.location,
 						"Cookie" : document.cookie
 					},
 					onload: function(responseDetails) {
@@ -4546,6 +4578,7 @@ if (!nameNode) GM_log(responseText);
 						url: fsHelper.server + playerGuildHref,
 						headers: {
 							"User-Agent" : navigator.userAgent,
+							"Referer": document.location,
 							"Cookie" : document.cookie
 						},
 						onload: function(responseDetails) {
@@ -4721,7 +4754,7 @@ if (!nameNode) GM_log(responseText);
 		krulXCVRE = /xcv=([a-z0-9]+)'/
 		krulXCV = krulXCVRE.exec(onClick);
 		if (krulXCV) GM_setValue("krulXCV",krulXCV[1]);
-		
+
 		var minGroupLevelTextField = fsHelper.findNode('//input[@name="min_group_level"]');
 		if (minGroupLevelTextField) {
 			var minGroupLevel = minGroupLevelTextField.value;
