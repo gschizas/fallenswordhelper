@@ -563,9 +563,9 @@ var fsHelper = {
 		var levelupImageElement = fsHelper.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
 		if (!levelupImageElement) return;
 		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
-		var remainingXPRE = /Remaining: <\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
-		var gainRE = /Gain Per Hour: <\/td><td width=\\\'90%\\\'>\+([0-9,]+)/i;
-		var nextGainRE = /Next Gain\s*:\s*<\/td><td width=\\\'90%\\\'>([0-9]*)m\s*([0-9]*)s/i
+		var remainingXPRE = /Remaining:\s<\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
+		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\\\'90%\\\'>\+([0-9,]+)/i;
+		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\\\'90%\\\'>([0-9]*)m\s*([0-9]*)s/i
 		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""));
 		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""));
 		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1]);
