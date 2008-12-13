@@ -72,10 +72,57 @@ var fsHelper = {
 
 	// System functions
 	init: function(e) {
-		this.initialized = true;
+		Date.prototype.toFormatString = fsHelper.formatDate;
+		Number.prototype.padZero = fsHelper.padZero;
+		String.prototype.repeat = fsHelper.repeatString;
+
 		fsHelper.initSettings();
 		fsHelper.beginAutoUpdate();
 		fsHelper.readInfo();
+		this.initialized = true;
+	},
+
+	repeatString: function(times) {
+		var s = '';
+		for (var i=0; i<times; i++) {
+			s += this;
+		}
+		return s;
+	},
+
+	padZero: function(zeroes) {
+		var s=this.toString();
+		var result="0".repeat(zeroes-s.length) + s;
+		return result;
+	},
+
+	formatDate: function(dateFormat) {
+	    if (!this.valueOf()) return;
+		var months = ['January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December'];
+		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+		var theDate=this;
+
+		return dateFormat.replace(/(yyyy|MMMM|MMM|MM|dddd|ddd|dd|hh|HH|mm|ss|a)/g,
+			function($1) {
+				switch ($1) {
+					case 'yyyy': return theDate.getFullYear();
+					case 'MMMM': return months[theDate.getMonth()];
+					case 'MMM':  return months[theDate.getMonth()].substr(0, 3);
+					case 'MM':   return (theDate.getMonth() + 1).padZero(2);
+					case 'dddd': return days[theDate.getDay()];
+					case 'ddd':  return days[theDate.getDay()].substr(0, 3);
+					case 'dd':   return theDate.getDate().padZero(2);
+					case 'HH':   return theDate.getHours().padZero(2);
+					case 'hh':   return ((h = theDate.getHours() % 12) ? h : 12).padZero(2);
+					case 'mm':   return theDate.getMinutes().padZero(2);
+					case 'ss':   return theDate.getSeconds().padZero(2);
+					case 'a':  return theDate.getHours() < 12 ? 'am' : 'pm';
+				}
+			}
+		);
+
 	},
 
 	setDefault: function(name, value) {
@@ -219,6 +266,7 @@ var fsHelper = {
 		fsHelper.prepareGuildList();
 		fsHelper.prepareChat();
 		fsHelper.injectStaminaCalculator();
+		fsHelper.injectLevelupCalculator();
 		fsHelper.injectMenu();
 		fsHelper.hideNewBox();
 		fsHelper.replaceKeyHandler();
@@ -424,7 +472,7 @@ var fsHelper = {
 		fsHelper.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15, "menuSource_0");
 		fsHelper.injectOneMenu("Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 17, "menuSource_0");
 		fsHelper.injectOneMenu("Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3, "menuSource_5");
-		fsHelper.injectOneMenu("Top  250 Players", "index.php?cmd=toprated&subcmd=xp", 3, "menuSource_3");
+		fsHelper.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3, "menuSource_3");
 		if (GM_getValue("keepLogs")) {
 			fsHelper.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17, "menuSource_0")
 		}
@@ -481,48 +529,59 @@ var fsHelper = {
 
 	injectStaminaCalculator: function() {
 		var staminaImageElement = fsHelper.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
-		if (staminaImageElement) {
-			var mouseOverText = staminaImageElement.getAttribute("onmouseover");
-			//Stamina:&nbsp;</td><td width=\'90%\'>3,612&nbsp;/&nbsp;6,370</td>
-			//tt_setWidth(225); Tip('<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width=\'100%\'>
-			//<tr><td><font color=\'#999999\'>Stamina: </td><td width=\'90%\'>3,607 / 6,370</td></tr><tr><td>
-			//<font color=\'#999999\'>Gain Per Hour: </td><td width=\'90%\'>+90</td></tr><tr><td><font color=\'#999999\'>
-			//Next Gain : </td><td width=\'90%\'>16m 10s</td></tr></table><br>
-			//Stamina is required to perform actions (such as attacking players and creatures).<br>'); tt_resetWidth();
-			var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
-			var curStamina = staminaRE.exec(mouseOverText)[1];
-			curStamina = curStamina.replace(/,/,"")*1;
-			var maxStamina = staminaRE.exec(mouseOverText)[2];
-			maxStamina = maxStamina.replace(/,/,"")*1;
-			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
-			var gainPerHour = gainPerHourRE.exec(mouseOverText)[1];
-			gainPerHour = gainPerHour.replace(/,/,"")*1;
-			var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m/
-			var nextGainMinutes = nextGainRE.exec(mouseOverText)[1];
-			nextGainMinutes = nextGainMinutes.replace(/,/,"")*1;
-			nextGainHours = nextGainMinutes/60;
-			//get the max hours to still be inside stamina maximum
-			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-			var now = (new Date()).getTime();
-			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-			var testDate = Date(now);
-			var d = new Date(nextHuntMilliseconds);
-			var weekday=new Array("Sun","Mon","Tue","Wed","Thu","Fri","Sat")
-			var monthname=new Array("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
-			var minutes=((d.getMinutes() < 10) ? "0" : "") + d.getMinutes();
-			var hours=((d.getHours() < 10) ? "0" : "") + d.getHours();
-			var nextHuntTimeText = weekday[d.getDay()] + " " + monthname[d.getMonth()] + " " +  d.getDate() +
-				" " +  d.getFullYear() + " " + hours + ":" + minutes;
-			var firstPart = mouseOverText.split("</td></tr></table>")[0];
-			var secondPart = mouseOverText.split("</td></tr></table>")[1];
-			var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" +
-				nextHuntTimeText + "</td></tr><tr>";
-			var newMouseoverText = firstPart + newPart + "</td></tr></table>" + secondPart;
-			//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-			staminaImageElement.setAttribute("onmouseover",newMouseoverText);
-		}
+		if (!staminaImageElement) return;
+
+		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
+		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
+		var curStamina = staminaRE.exec(mouseoverText)[1];
+		curStamina = curStamina.replace(/,/,"")*1;
+		var maxStamina = staminaRE.exec(mouseoverText)[2];
+		maxStamina = maxStamina.replace(/,/,"")*1;
+		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
+		var gainPerHour = gainPerHourRE.exec(mouseoverText)[1];
+		gainPerHour = gainPerHour.replace(/,/,"")*1;
+		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m/
+		var nextGainMinutes = nextGainRE.exec(mouseoverText)[1];
+		nextGainMinutes = nextGainMinutes.replace(/,/,"")*1;
+		nextGainHours = nextGainMinutes/60;
+		//get the max hours to still be inside stamina maximum
+		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+		var now = (new Date()).getTime();
+		var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+
+		var d = new Date(nextHuntMilliseconds);
+		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+		var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" +
+			nextHuntTimeText + "</td></tr><tr>";
+		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
+		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
+		staminaImageElement.setAttribute("onmouseover", newMouseoverText);
 	},
+
+	injectLevelupCalculator: function() {
+		var levelupImageElement = fsHelper.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
+		if (!levelupImageElement) return;
+		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
+		var remainingXPRE = /Remaining: <\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
+		var gainRE = /Gain Per Hour: <\/td><td width=\\\'90%\\\'>\+([0-9,]+)/i;
+		var nextGainRE = /Next Gain\s*:\s*<\/td><td width=\\\'90%\\\'>([0-9]*)m\s*([0-9]*)s/i
+		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""));
+		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""));
+		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1]);
+		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[1]);
+		var hoursToNextLevel = Math.ceil(remainingXP/gain);
+		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
+
+		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
+		var mouseoverTextAddition = "<tr><td><font color=\\'#FFF380\\'>Next Level At: </td><td width=\\'90%\\'>" +
+			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</td></tr><tr>";
+		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
+		newMouseoverText = newMouseoverText.replace("tt_setWidth(175)", "tt_setWidth(200)");
+		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
+		return;
+	},
+
 
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = fsHelper.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
@@ -1624,10 +1683,10 @@ var fsHelper = {
 					'<b><u>off</u></b> returns control to game normal.') +
 				':' +
 				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
-					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +'</td>' +
-				'<td><input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
-					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +'</td>'+
-				'<td><input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
+					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +
+				'<input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
+					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +
+				'<input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
 					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td></tr>' +
 				'</table></div>';
 			document.getElementById('killAllAdvancedWorldOff').addEventListener('click', fsHelper.killAllAdvancedChangeFromWorld, true);
@@ -2700,10 +2759,12 @@ var fsHelper = {
 		//insert another page change block at the top of the screen.
 		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
 		var pageChangeBlock = fsHelper.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
-
+		var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
+		newPageChangeBlock += "</form>"
+		var insertPageChangeBlock=document.createElement("SPAN");
+		insertPageChangeBlock.innerHTML = newPageChangeBlock;
 		insertPageChangeBlockHere.align = "right";
-		insertPageChangeBlockHere.innerHTML = pageChangeBlock.innerHTML;
-
+		insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
 		var potions = fsHelper.getValueJSON("potions");
 
 		if (!potions) {
@@ -3072,7 +3133,7 @@ var fsHelper = {
 				checkAllElement.addEventListener('click', fsHelper.checkAll, true);
 			}
 		}
-		
+
 		var allItems = fsHelper.findNodes("//input[@type='checkbox']");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
@@ -3901,7 +3962,7 @@ if (!nameNode) GM_log(responseText);
 					var recipeName = innerTable.rows[0].cells[1].firstChild.innerHTML;
 					var recipe={
 						"img": recipeImg,
-						"link": recipeLink, 
+						"link": recipeLink,
 						"name":recipeName};
 					output.innerHTML+="Found recipe: "+ recipeName +"<br>";
 					fsHelper.recipebook.recipe.push(recipe);
@@ -3946,7 +4007,7 @@ if (!nameNode) GM_log(responseText);
 			recipe=fsHelper.recipebook.recipe[i];
 
 			if (hideRecipes.indexOf(recipe.name) == -1) {
-				result+='<tr>' + 
+				result+='<tr>' +
 					'<td></td><td>' + recipe.img + '</td>' +
 					'<td></td><td>' + recipe.link + '</td>' +
 					'<td></td>' +
@@ -4980,7 +5041,7 @@ if (!nameNode) GM_log(responseText);
 		fsHelper.saveValueForm(oForm, "hideQuestNames");
 		fsHelper.saveValueForm(oForm, "hideRecipes");
 		fsHelper.saveValueForm(oForm, "hideRecipeNames");
-		
+
 		window.alert("FS Helper Settings Saved");
 		return false;
 	},
