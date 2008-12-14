@@ -2315,8 +2315,9 @@ var fsHelper = {
 	sendChat: function(evt) {
 		var oForm=evt.target;
 
-		var confirm=fsHelper.findNode("//input[@name='xc']", evt.target.form).value
-		var msg=fsHelper.findNode("//input[@name='msg']", evt.target.form).value
+		var confirm=fsHelper.findNode("//input[@name='xc']", evt.target.form).value;
+		var msg=fsHelper.findNode("//input[@name='msg']", evt.target.form).value;
+		fsHelper.findNode("//input[@name='msg']", evt.target.form).value="";
 		if (msg=="") {
 			fsHelper.retrieveChat();
 			return false;
