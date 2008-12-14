@@ -75,11 +75,16 @@ var fsHelper = {
 		Date.prototype.toFormatString = fsHelper.formatDate;
 		Number.prototype.padZero = fsHelper.padZero;
 		String.prototype.repeat = fsHelper.repeatString;
+		Array.prototype.filterBy = fsHelper.filterBy;
 
 		fsHelper.initSettings();
 		fsHelper.beginAutoUpdate();
 		fsHelper.readInfo();
 		this.initialized = true;
+	},
+
+	filterBy: function(property, value) {
+		return this.filter(function(element, index, array) {return element[property]==value})
 	},
 
 	repeatString: function(times) {
@@ -440,6 +445,13 @@ var fsHelper = {
 			switch(subPageId) {
 			case "xp":
 				fsHelper.injectTopRated();
+				break;
+			}
+			break;
+		case "inventing":
+			switch(subPageId) {
+			case "viewrecipe":
+				fsHelper.injectViewRecipe();
 				break;
 			}
 			break;
@@ -914,6 +926,68 @@ var fsHelper = {
 			GM_setValue("map", JSON.stringify(theMap));
 		// }
 	},
+
+	injectViewRecipe: function() {
+		var components=fsHelper.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
+		for (var i=0; i<components.length; i++) {
+			var mo=components[i].getAttribute("onmouseover")
+			// GM_log(mo + "\n\t" + );
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: fsHelper.linkFromMouseoverCustom(mo),
+				callback: components[i],
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Referer": document.location,
+					"Cookie" : document.cookie
+				},
+				onload: function(responseDetails) {
+					fsHelper.injectViewRecipeLinks(responseDetails.responseText, this.callback);
+				},
+			})
+		}
+	},
+
+	plantFromComponent: function(aComponent) {
+		switch(aComponent) {
+			case "Amber Essense": return "Amber Plant"; break;
+			case "Blood Bloom Flower": return "Blood Bloom Plant"; break;
+			case "Dark Shade ": return "Dark Shade Plant"; break;
+			case "Snake Eye": return "Elya Snake Head"; break;
+			case "Snake Venom Fang": return "Elya Snake Head"; break;
+			case "Heffle Wart": return "Heffle Wart Plant"; break;
+			case "Jademare Blossom": return "Jademare Plant"; break;
+			case "Trinettle Leaf": return "Trinettle Plant"; break;
+			default: return aComponent;
+		}
+	},
+
+	injectViewRecipeLinks: function(responseText, callback) {
+		var itemRE = /<b>([^<]+)<\/b>/i;
+		var itemName = itemRE.exec(responseText);
+		if (itemName) itemName=itemName[1];
+		var itemLinks = document.createElement("td");
+		itemLinks.innerHTML =
+			'<a href="' + fsHelper.server + '?cmd=auctionhouse&type=-1&search_text='
+			+ escape(fsHelper.plantFromComponent(itemName))
+			+ '">AH</a>';
+		var counter=fsHelper.findNode("../../../../tr[2]/td", callback);
+		counter.setAttribute("colspan", "2");
+		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
+	},
+/*
+			linkFromMouseover: function(mouseOver) {
+		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
+		var reResult=reParams.exec(mouseOver);
+		var itemId=reResult[1];
+		var invId=reResult[2];
+		var type=reResult[3];
+		var pid=reResult[4];
+		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
+		theUrl = fsHelper.server + theUrl;
+		return theUrl
+	},
+*/
 
 	injectAdvisor: function() {
 		var titleCells=fsHelper.findNodes("//tr[td/b='Member']/td");
@@ -2601,12 +2675,9 @@ var fsHelper = {
 		var oldMemberList = fsHelper.getValueJSON("oldmemberlist");
 		if (!oldMemberList) oldMemberList=memberList;
 
-		oldIds = new Array();
-		for (var i=0; i<oldMemberList.members.length;i++) {
-			if (oldMemberList.members[i].status=="Online") {
-				oldIds.push(oldMemberList.members[i].id);
-			}
-		}
+		var oldIds=oldMemberList.members
+			.filterBy("status", "Online")
+			.map(function(element, index, array) {return element.id});
 
 		var playerId = GM_getValue("playerID");
 		if (!playerId) {
@@ -2624,7 +2695,7 @@ var fsHelper = {
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Guild Members"
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Guild Members";
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
@@ -2666,7 +2737,7 @@ var fsHelper = {
 				member.loggedIn=0;
 			}
 		}
-		output += "</ol>"
+		output += "</ol>";
 		aCell.innerHTML = output;
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
@@ -3490,6 +3561,20 @@ var fsHelper = {
 		theUrl = fsHelper.server + theUrl;
 		return theUrl
 	},
+
+	linkFromMouseoverCustom: function(mouseOver) {
+		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]+)\'/i;
+		var reResult =reParams.exec(mouseOver);
+		var itemId   = reResult[1];
+		var invId    = reResult[2];
+		var type     = reResult[3];
+		var pid      = reResult[4];
+		var vcode    = reResult[5];
+		var theUrl   = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p=" + pid + "&vcode=" + vcode
+		theUrl = fsHelper.server + theUrl;
+		return theUrl
+	},
+
 
 	injectInventoryManager: function() {
 		var content=fsHelper.findNode("//table[@width='100%']/..");
