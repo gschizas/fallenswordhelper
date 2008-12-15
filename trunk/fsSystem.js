@@ -87,6 +87,26 @@ var fsSystem = {
 		return s;
 	},
 
+	saveValueForm: function(oForm, name) {
+		var formElement = fsSystem.findNode("//input[@name='" + name + "']", oForm)
+		if (formElement.getAttribute("type")=="checkbox") {
+			GM_setValue(name, formElement.checked);
+		} else if (formElement.getAttribute("type")=="radio") {
+			radioElements = fsSystem.findNodes("//input[@name='" + name + "']", 0, oForm)
+			for (var i=0; i<radioElements.length; i++) {
+				radioElement = radioElements[i];
+				if (radioElement.checked) {
+					GM_setValue(name, radioElement.value);
+				}
+			}
+		} else {
+			GM_setValue(name, formElement.value);
+		}
+	},
+
+	setDefault: function(name, value) {
+		if (GM_getValue(name)==undefined) {GM_setValue(name, value)};
+	},
 }
 
 Date.prototype.toFormatString = fsSystem.formatDate;

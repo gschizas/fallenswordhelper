@@ -14,23 +14,6 @@
 // No warranty expressed or implied. Use at your own risk.
 
 var fsHelper = {
-	saveValueForm: function(oForm, name) {
-		var formElement = fsSystem.findNode("//input[@name='" + name + "']", oForm)
-		if (formElement.getAttribute("type")=="checkbox") {
-			GM_setValue(name, formElement.checked);
-		} else if (formElement.getAttribute("type")=="radio") {
-			radioElements = fsSystem.findNodes("//input[@name='" + name + "']", 0, oForm)
-			for (var i=0; i<radioElements.length; i++) {
-				radioElement = radioElements[i];
-				if (radioElement.checked) {
-					GM_setValue(name, radioElement.value);
-				}
-			}
-		} else {
-			GM_setValue(name, formElement.value);
-		}
-	},
-
 	// System functions
 	init: function(e) {
 		fsHelper.initSettings();
@@ -39,38 +22,34 @@ var fsHelper = {
 		this.initialized = true;
 	},
 
-	setDefault: function(name, value) {
-		if (GM_getValue(name)==undefined) {GM_setValue(name, value)};
-	},
-
 	initSettings: function() {
-		fsHelper.setDefault("enableLogColoring", true);
-		fsHelper.setDefault("showCombatLog", true);
-		fsHelper.setDefault("showCreatureInfo", true);
-		fsHelper.setDefault("keepLogs", false);
-		fsHelper.setDefault("showDebugInfo", false);
-		fsHelper.setDefault("showCompletedQuests", true);
-		fsHelper.setDefault("showExtraLinks", true);
-		fsHelper.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
-		fsHelper.setDefault("showHuntingBuffs", true);
-		fsHelper.setDefault("moveFSBox", false);
-		fsHelper.setDefault("hideNewBox", false);
+		fsSystem.setDefault("enableLogColoring", true);
+		fsSystem.setDefault("showCombatLog", true);
+		fsSystem.setDefault("showCreatureInfo", true);
+		fsSystem.setDefault("keepLogs", false);
+		fsSystem.setDefault("showDebugInfo", false);
+		fsSystem.setDefault("showCompletedQuests", true);
+		fsSystem.setDefault("showExtraLinks", true);
+		fsSystem.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
+		fsSystem.setDefault("showHuntingBuffs", true);
+		fsSystem.setDefault("moveFSBox", false);
+		fsSystem.setDefault("hideNewBox", false);
 
-		fsHelper.setDefault("guildSelf", "");
-		fsHelper.setDefault("guildFrnd", "");
-		fsHelper.setDefault("guildPast", "");
-		fsHelper.setDefault("guildEnmy", "");
-		fsHelper.setDefault("guildSelfMessage", "green|Member of your own guild");
-		fsHelper.setDefault("guildFrndMessage", "yellow|Do not attack - Guild is friendly!");
-		fsHelper.setDefault("guildPastMessage", "gray|Do not attack - You've been in that guild once!");
-		fsHelper.setDefault("guildEnmyMessage", "red|Enemy guild. Attack at will!");
-		fsHelper.setDefault("killAllAdvanced", "off");
-		fsHelper.setDefault("showQuickKillOnWorld", true);
-		fsHelper.setDefault("hideKrulPortal", false);
-		fsHelper.setDefault("hideQuests", false);
-		fsHelper.setDefault("hideQuestNames", "");
-		fsHelper.setDefault("hideRecipes", false);
-		fsHelper.setDefault("hideRecipeNames", "");
+		fsSystem.setDefault("guildSelf", "");
+		fsSystem.setDefault("guildFrnd", "");
+		fsSystem.setDefault("guildPast", "");
+		fsSystem.setDefault("guildEnmy", "");
+		fsSystem.setDefault("guildSelfMessage", "green|Member of your own guild");
+		fsSystem.setDefault("guildFrndMessage", "yellow|Do not attack - Guild is friendly!");
+		fsSystem.setDefault("guildPastMessage", "gray|Do not attack - You've been in that guild once!");
+		fsSystem.setDefault("guildEnmyMessage", "red|Enemy guild. Attack at will!");
+		fsSystem.setDefault("killAllAdvanced", "off");
+		fsSystem.setDefault("showQuickKillOnWorld", true);
+		fsSystem.setDefault("hideKrulPortal", false);
+		fsSystem.setDefault("hideQuests", false);
+		fsSystem.setDefault("hideQuestNames", "");
+		fsSystem.setDefault("hideRecipes", false);
+		fsSystem.setDefault("hideRecipeNames", "");
 
 		var imgurls = fsSystem.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -402,7 +381,8 @@ var fsHelper = {
 	injectOneMenu: function(text, href, position, insertAt) {
 		var menuTable = fsSystem.findNode("//div[@id='" + insertAt + "']/table");
 		if (!menuTable) return;
-		var newRow
+		return;
+		var newRow;
 		newRow = menuTable.insertRow(position);
 		newRow.innerHTML='<td height="5"></td>';
 		newRow = menuTable.insertRow(position);
@@ -5004,37 +4984,37 @@ if (!nameNode) GM_log(responseText);
 
 	saveConfig: function(evt) {
 		var oForm=evt.target.form;
-		fsHelper.saveValueForm(oForm, "guildSelf");
-		fsHelper.saveValueForm(oForm, "guildFrnd");
-		fsHelper.saveValueForm(oForm, "guildPast");
-		fsHelper.saveValueForm(oForm, "guildEnmy");
-		fsHelper.saveValueForm(oForm, "guildSelfMessage");
-		fsHelper.saveValueForm(oForm, "guildFrndMessage");
-		fsHelper.saveValueForm(oForm, "guildPastMessage");
-		fsHelper.saveValueForm(oForm, "guildEnmyMessage");
-		fsHelper.saveValueForm(oForm, "chatLines");
-		fsHelper.saveValueForm(oForm, "showAdmin");
-		fsHelper.saveValueForm(oForm, "disableItemColoring");
-		fsHelper.saveValueForm(oForm, "enableLogColoring");
-		fsHelper.saveValueForm(oForm, "showCompletedQuests");
-		fsHelper.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
-		fsHelper.saveValueForm(oForm, "hideBanner");
-		fsHelper.saveValueForm(oForm, "showCombatLog");
-		fsHelper.saveValueForm(oForm, "showCreatureInfo");
-		fsHelper.saveValueForm(oForm, "keepLogs");
-		fsHelper.saveValueForm(oForm, "disableGuildOnlineList");
-		fsHelper.saveValueForm(oForm, "showDebugInfo");
-		fsHelper.saveValueForm(oForm, "killAllAdvanced");
-		fsHelper.saveValueForm(oForm, "huntingBuffs");
-		fsHelper.saveValueForm(oForm, "showHuntingBuffs");
-		fsHelper.saveValueForm(oForm, "moveFSBox");
-		fsHelper.saveValueForm(oForm, "hideNewBox");
-		fsHelper.saveValueForm(oForm, "showQuickKillOnWorld");
-		fsHelper.saveValueForm(oForm, "hideKrulPortal");
-		fsHelper.saveValueForm(oForm, "hideQuests");
-		fsHelper.saveValueForm(oForm, "hideQuestNames");
-		fsHelper.saveValueForm(oForm, "hideRecipes");
-		fsHelper.saveValueForm(oForm, "hideRecipeNames");
+		fsSystem.saveValueForm(oForm, "guildSelf");
+		fsSystem.saveValueForm(oForm, "guildFrnd");
+		fsSystem.saveValueForm(oForm, "guildPast");
+		fsSystem.saveValueForm(oForm, "guildEnmy");
+		fsSystem.saveValueForm(oForm, "guildSelfMessage");
+		fsSystem.saveValueForm(oForm, "guildFrndMessage");
+		fsSystem.saveValueForm(oForm, "guildPastMessage");
+		fsSystem.saveValueForm(oForm, "guildEnmyMessage");
+		fsSystem.saveValueForm(oForm, "chatLines");
+		fsSystem.saveValueForm(oForm, "showAdmin");
+		fsSystem.saveValueForm(oForm, "disableItemColoring");
+		fsSystem.saveValueForm(oForm, "enableLogColoring");
+		fsSystem.saveValueForm(oForm, "showCompletedQuests");
+		fsSystem.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
+		fsSystem.saveValueForm(oForm, "hideBanner");
+		fsSystem.saveValueForm(oForm, "showCombatLog");
+		fsSystem.saveValueForm(oForm, "showCreatureInfo");
+		fsSystem.saveValueForm(oForm, "keepLogs");
+		fsSystem.saveValueForm(oForm, "disableGuildOnlineList");
+		fsSystem.saveValueForm(oForm, "showDebugInfo");
+		fsSystem.saveValueForm(oForm, "killAllAdvanced");
+		fsSystem.saveValueForm(oForm, "huntingBuffs");
+		fsSystem.saveValueForm(oForm, "showHuntingBuffs");
+		fsSystem.saveValueForm(oForm, "moveFSBox");
+		fsSystem.saveValueForm(oForm, "hideNewBox");
+		fsSystem.saveValueForm(oForm, "showQuickKillOnWorld");
+		fsSystem.saveValueForm(oForm, "hideKrulPortal");
+		fsSystem.saveValueForm(oForm, "hideQuests");
+		fsSystem.saveValueForm(oForm, "hideQuestNames");
+		fsSystem.saveValueForm(oForm, "hideRecipes");
+		fsSystem.saveValueForm(oForm, "hideRecipeNames");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
