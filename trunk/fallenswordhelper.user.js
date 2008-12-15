@@ -4238,7 +4238,7 @@ if (!nameNode) GM_log(responseText);
 			if (sellPrice < 100000) {
 				warningColor = "brown";
 				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
-			} else if (sellPrice > 110000) {
+			} else if (sellPrice > 125000) {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
@@ -4306,15 +4306,18 @@ if (!nameNode) GM_log(responseText);
 				if (onmouseover.search("Summon Shield Imp") != -1) {
 					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
 					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
-					buffRE = /<b>([ a-zA-Z]+)<br>([ 0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/
+					buffRE = /<b>([ a-zA-Z]+)<br>([0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/
 					buff = buffRE.exec(onmouseover);
+					if (!buff) {
+						buffRE = /<b>([ a-zA-Z]+)<br> HP remaining<br><\/b> \(Level: (\d+)\)/
+						buff = buffRE.exec(onmouseover);
+					}
 					if (!buff) GM_log(onmouseover);
 					buffName = buff[1];
 					buffLevel = buff[3];
 				} else {
 					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
 					buff = buffRE.exec(onmouseover);
-					if (!buff) GM_log(onmouseover);
 					buffName = buff[1];
 					buffLevel = buff[2];
 				}
