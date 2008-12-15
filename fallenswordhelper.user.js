@@ -381,7 +381,6 @@ var fsHelper = {
 	injectOneMenu: function(text, href, position, insertAt) {
 		var menuTable = fsSystem.findNode("//div[@id='" + insertAt + "']/table");
 		if (!menuTable) return;
-		return;
 		var newRow;
 		newRow = menuTable.insertRow(position);
 		newRow.innerHTML='<td height="5"></td>';
