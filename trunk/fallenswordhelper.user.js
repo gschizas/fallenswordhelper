@@ -4289,10 +4289,20 @@ if (!nameNode) GM_log(responseText);
 		//var playerXP=fsHelper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
 		resultText += "</table>"
 
-		var statistics=calfSystem.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
+		var statistics = calfSystem.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
 		statistics.style.backgroundImage = 'url(' + fsHelper.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
 
+		var lastActivity = calfSystem.findNode("//font[contains(.,'Last Activity:')]", doc);
+
+		var newRow = statistics.insertRow(0);
+		var newCell = newRow.insertCell(0);
+		newCell.setAttribute('colspan', '4');
+		newCell.style.textAlign='center';
+		newCell.innerHTML=lastActivity.innerHTML + '<br/>';
+
+
 		resultText += statistics.parentNode.innerHTML;
+
 
 		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 		injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
