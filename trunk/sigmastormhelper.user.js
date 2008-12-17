@@ -1255,6 +1255,7 @@ var ssHelper = {
 
 	killSingleMonster: function(monsterNumber) {
 		if (GM_getValue("killAllAdvanced") != "single") return;
+		return ssData.questArray;
 		var kills=0;
 		var linkId="//a[@id='aLink" + monsterNumber + "']"
 		var monster = calfSystem.findNode(linkId);
@@ -2734,12 +2735,12 @@ var ssHelper = {
 			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
 		}
 
-		for (i=0; i<ssHelper.questArray.length; i++) {
-			if (questStatus[ssHelper.questArray[i].questName]!=undefined) {
-				ssHelper.questArray[i].status=questStatus[ssHelper.questArray[i].questName];
+		for (i=0; i<ssData.questArray.length; i++) {
+			if (questStatus[ssData.questArray[i].questName]!=undefined) {
+				ssData.questArray[i].status=questStatus[ssData.questArray[i].questName];
 			}
-			if (questHref[ssHelper.questArray[i].questName]!=undefined) {
-				ssHelper.questArray[i].href=questHref[ssHelper.questArray[i].questName];
+			if (questHref[ssData.questArray[i].questName]!=undefined) {
+				ssData.questArray[i].href=questHref[ssData.questArray[i].questName];
 			}
 		}
 
