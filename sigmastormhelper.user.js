@@ -117,7 +117,7 @@ var ssHelper = {
 		if (currentVersion!=latestVersion) {
 			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
 				GM_setValue("currentVersion", latestVersion)
-				document.location="http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js";
+				document.location="http://fallenswordhelper.googlecode.com/svn/trunk/sigmastormhelper.user.js";
 			}
 		}
 	},
