@@ -1,6 +1,21 @@
 // System functions
 
 var calfSystem = {
+	init: function() {
+		Date.prototype.toFormatString = calfSystem.formatDate;
+		Number.prototype.padZero = calfSystem.padZero;
+		String.prototype.repeat = calfSystem.repeatString;
+		Array.prototype.filterBy = calfSystem.filterBy;
+
+		var imgurls = calfSystem.findNode("//img[contains(@src, '/skin/')]");
+		if (!imgurls) return; //login screen or error loading etc.
+		var idindex = imgurls.src.indexOf("/skin/");
+		calfSystem.imageServer=imgurls.src.substr(0,idindex);
+		calfSystem.server=document.location.protocol + "//" + document.location.host + "/";
+		calfSystem.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
+		calfSystem.debug = GM_getValue("showDebugInfo");
+	},
+
 	getValueJSON: function(name) {
 		var resultJSON=GM_getValue(name);
 		var result;
@@ -107,9 +122,21 @@ var calfSystem = {
 	setDefault: function(name, value) {
 		if (GM_getValue(name)==undefined) {GM_setValue(name, value)};
 	},
-}
 
-Date.prototype.toFormatString = calfSystem.formatDate;
-Number.prototype.padZero = calfSystem.padZero;
-String.prototype.repeat = calfSystem.repeatString;
-Array.prototype.filterBy = calfSystem.filterBy;
+	xmlhttp: function(theUrl, func, theCallback) {
+		theUrl=theUrl.replace(calfSystem.server, "");
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: calfSystem.server + theUrl,
+			callback: theCallback,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
+				"Cookie" : document.cookie
+			},
+			onload: func,
+		})
+	},
+	// function(responseDetails) {calfSystem.getSustain(responseDetails.responseText);}
+}
+calfSystem.init();
