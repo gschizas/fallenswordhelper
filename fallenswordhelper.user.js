@@ -2726,12 +2726,12 @@ var fsHelper = {
 			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
 		}
 
-		for (i=0; i<fsHelper.questArray.length; i++) {
-			if (questStatus[fsHelper.questArray[i].questName]!=undefined) {
-				fsHelper.questArray[i].status=questStatus[fsHelper.questArray[i].questName];
+		for (i=0; i<fsData.questArray.length; i++) {
+			if (questStatus[fsData.questArray[i].questName]!=undefined) {
+				fsData.questArray[i].status=questStatus[fsData.questArray[i].questName];
 			}
-			if (questHref[fsHelper.questArray[i].questName]!=undefined) {
-				fsHelper.questArray[i].href=questHref[fsHelper.questArray[i].questName];
+			if (questHref[fsData.questArray[i].questName]!=undefined) {
+				fsData.questArray[i].href=questHref[fsData.questArray[i].questName];
 			}
 		}
 
