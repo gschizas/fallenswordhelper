@@ -1,19 +1,19 @@
 // System functions
 
-var calfSystem = {
+var System = {
 	init: function() {
-		Date.prototype.toFormatString = calfSystem.formatDate;
-		Number.prototype.padZero = calfSystem.padZero;
-		String.prototype.repeat = calfSystem.repeatString;
-		Array.prototype.filterBy = calfSystem.filterBy;
+		Date.prototype.toFormatString = System.formatDate;
+		Number.prototype.padZero = System.padZero;
+		String.prototype.repeat = System.repeatString;
+		Array.prototype.filterBy = System.filterBy;
 
-		var imgurls = calfSystem.findNode("//img[contains(@src, '/skin/')]");
+		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex = imgurls.src.indexOf("/skin/");
-		calfSystem.imageServer=imgurls.src.substr(0,idindex);
-		calfSystem.server=document.location.protocol + "//" + document.location.host + "/";
-		calfSystem.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
-		calfSystem.debug = GM_getValue("showDebugInfo");
+		System.imageServer=imgurls.src.substr(0,idindex);
+		System.server=document.location.protocol + "//" + document.location.host + "/";
+		System.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
+		System.debug = GM_getValue("showDebugInfo");
 	},
 
 	getValueJSON: function(name) {
@@ -26,7 +26,7 @@ var calfSystem = {
 	},
 
 	findNode: function(xpath, doc) {
-		var nodes=calfSystem.findNodes(xpath, doc);
+		var nodes=System.findNodes(xpath, doc);
 		if (!nodes) return null;
 		return (nodes[0]);
 	},
@@ -45,7 +45,7 @@ var calfSystem = {
 	},
 
 	findNodeText: function(xpath, doc) {
-		var node=calfSystem.findNode(xpath, doc);
+		var node=System.findNode(xpath, doc);
 		if (!node) return null;
 		nodes.textContent;
 	},
@@ -103,11 +103,11 @@ var calfSystem = {
 	},
 
 	saveValueForm: function(oForm, name) {
-		var formElement = calfSystem.findNode("//input[@name='" + name + "']", oForm)
+		var formElement = System.findNode("//input[@name='" + name + "']", oForm)
 		if (formElement.getAttribute("type")=="checkbox") {
 			GM_setValue(name, formElement.checked);
 		} else if (formElement.getAttribute("type")=="radio") {
-			radioElements = calfSystem.findNodes("//input[@name='" + name + "']", 0, oForm)
+			radioElements = System.findNodes("//input[@name='" + name + "']", 0, oForm)
 			for (var i=0; i<radioElements.length; i++) {
 				radioElement = radioElements[i];
 				if (radioElement.checked) {
@@ -124,19 +124,20 @@ var calfSystem = {
 	},
 
 	xmlhttp: function(theUrl, func, theCallback) {
-		theUrl=theUrl.replace(calfSystem.server, "");
+		theUrl=theUrl.replace(System.server, "");
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: calfSystem.server + theUrl,
+			url: System.server + theUrl,
 			callback: theCallback,
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
-			onload: func,
+			onload: function(responseDetails) {
+				func.call(this, responseDetails.responseText, this.callback)
+			},
 		})
 	},
-	// function(responseDetails) {calfSystem.getSustain(responseDetails.responseText);}
 }
-calfSystem.init();
+System.init();
