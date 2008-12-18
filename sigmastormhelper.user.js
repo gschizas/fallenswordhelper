@@ -1184,38 +1184,38 @@ var ssHelper = {
 
 	injectWorld: function() {
 		// ssHelper.mapThis();
-		var realmRightBottom = calfSystem.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]");
+		var realmRightBottom = calfSystem.findNode("//tr[contains(td/@background, 'location_header.gif')]");
 		if (!realmRightBottom) return;
 		var injectHere = realmRightBottom.parentNode.parentNode
-		var newRow=injectHere.insertRow(1);
+		var newRow=injectHere.insertRow(2);
 		var newCell=newRow.insertCell(0);
-		newCell.setAttribute("background", ssHelper.imageServer + "/skin/realm_right_bg.jpg");
+		// newCell.setAttribute("background", ssHelper.imageServer + "/skin/realm_right_bg.jpg");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced");
 		if (GM_getValue("showQuickKillOnWorld")) {
-			newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
-				'<tr><td>Quick Kill Style' + ssHelper.helpLink('Quick Kill Style',
+			newCell.innerHTML='<div style="font-size:xx-small;">' +
+				'Quick Kill' + ssHelper.helpLink('Quick Kill Style',
 					'<b><u>single</u></b> will quick kill a single monster<br/> ' +
 					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
 					'<b><u>off</u></b> returns control to game normal.') +
 				':' +
-				'</td><td><input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
+				'<input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
 					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +
 				'<input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
 					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +
 				'<input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
-					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +'</td></tr>' +
-				'</table></div>';
+					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +
+				'</div>';
 			document.getElementById('killAllAdvancedWorldOff').addEventListener('click', ssHelper.killAllAdvancedChangeFromWorld, true);
 			document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', ssHelper.killAllAdvancedChangeFromWorld, true);
 			document.getElementById('killAllAdvancedWorldType').addEventListener('click', ssHelper.killAllAdvancedChangeFromWorld, true);
 		}
 
 		if (!GM_getValue("hideKrulPortal")) {
-			var buttonRow = calfSystem.findNode("//tr[td/a/img[@title='Open Realm Map']]");
+			var buttonRow = calfSystem.findNode("//tr[td/a/img[@title='Open Area Map']]");
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + ssHelper.imageServer +
-				'/temple/3.gif" title="Instant port to Krul Island" border="1"></span></td>';
+				'/temple/3.gif" title="Instant Teleport to Taulin Rad Lands" border="1"></span></td>';
 			document.getElementById('portaltokrul').addEventListener('click', ssHelper.portalToKrul, true);
 		}
 
@@ -1255,9 +1255,8 @@ var ssHelper = {
 
 	killSingleMonster: function(monsterNumber) {
 		if (GM_getValue("killAllAdvanced") != "single") return;
-		return ssData.questArray;
 		var kills=0;
-		var linkId="//a[@id='aLink" + monsterNumber + "']"
+		var linkId="//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')][" + monsterNumber + "]"
 		var monster = calfSystem.findNode(linkId);
 		if (monster) {
 			kills+=1;
@@ -1777,7 +1776,7 @@ var ssHelper = {
 		case 55:
 		case 56: // keyed combat
 			var index	= r-48;
-			var linkObj	= document.getElementById("aLink"+index);
+			var linkObj	= calfSystem.findNode("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')][" + index + "]");
 			if (linkObj!=null) {
 				var killStyle = GM_getValue("killAllAdvanced");
 				//kill style off
@@ -2128,7 +2127,7 @@ var ssHelper = {
 	},
 
 	injectAuctionHouse: function() {
-		var isAuctionPage = calfSystem.findNode("//img[contains(@title,'Auction House')]");
+		var isAuctionPage = calfSystem.findNode("//td[contains(@background,'header_tradehub.jpg')]");
 		var imageCell = isAuctionPage.parentNode;
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
 
@@ -2495,7 +2494,7 @@ var ssHelper = {
 	},
 
 	injectDropItems: function() {
-		var mainTable = calfSystem.findNode("//table[@width='600']");
+		var mainTable = calfSystem.findNode("//table[@width='100%']");
 		var insertHere = mainTable.rows[5].cells[0];
 		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="ssHelper:showExtraLinks">' +
 			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
