@@ -1,14 +1,14 @@
-var ssLayout = {
+var Layout = {
 
 	injectMenu: function() {
-		ssLayout.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 6, "menuSource_0");
-		ssLayout.injectOneMenu("Mission Manager", "index.php?cmd=notepad&subcmd=questmanager", 7, "menuSource_0");
-		ssLayout.injectOneMenu("Backpack Manager", "index.php?cmd=notepad&subcmd=invmanager", 8, "menuSource_0");
-		ssLayout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 9, "menuSource_0");
-		ssLayout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
-		ssLayout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
+		Layout.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 6, "menuSource_0");
+		Layout.injectOneMenu("Mission Manager", "index.php?cmd=notepad&subcmd=questmanager", 7, "menuSource_0");
+		Layout.injectOneMenu("Backpack Manager", "index.php?cmd=notepad&subcmd=invmanager", 8, "menuSource_0");
+		Layout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 9, "menuSource_0");
+		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
+		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
 		if (GM_getValue("keepLogs")) {
-			ssLayout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0")
+			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0")
 		}
 	},
 

@@ -1,7 +1,7 @@
-var fsData = {
+var Data = {
 
 	questMatrix: function() {
-		if (!fsData.questArray) {
+		if (!Data.questArray) {
 			var questArray = [
 				{'questName':'A Bitter Deal', 'level':461, 'location':'Thundersnow Valley (North)'},
 				{'questName':'A Fae Scorned', 'level':525, 'location':' The Secret Kingdom (Grove)'},
@@ -326,8 +326,8 @@ var fsData = {
 				{'questName':'Wrongly Accused', 'level':501, 'location':' Ralthien (Gate)'},
 				{'questName':'Zombie Treasure', 'level':218, 'location':' Yuzha (East)'}
 			];
-			fsData.questArray = questArray.sort();
+			Data.questArray = questArray.sort();
 		}
-		return fsData.questArray;
+		return Data.questArray;
 	},
 }
