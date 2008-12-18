@@ -13,7 +13,7 @@ var Layout = {
 	},
 
 	injectOneMenu: function(text, href, position, insertAt) {
-		var menuTable = calfSystem.findNode("//div[@id='" + insertAt + "']/table");
+		var menuTable = System.findNode("//div[@id='" + insertAt + "']/table");
 		if (!menuTable) return;
 		var newRow;
 		newRow = menuTable.insertRow(position);
@@ -24,16 +24,16 @@ var Layout = {
 
 	hideBanner: function() {
 		if (!GM_getValue("hideBanner")) return;
-		var bannerElement = calfSystem.findNode("//img[(@title='Fallen Sword RPG')]");
+		var bannerElement = System.findNode("//img[(@title='Fallen Sword RPG')]");
 		if (bannerElement) bannerElement.style.display = "none";
 	},
 
 	moveFSBox: function() {
 		if (!GM_getValue("moveFSBox")) return;
-		var src=calfSystem.findNode("//b[.='FSBox']/../../../../..");
+		var src=System.findNode("//b[.='FSBox']/../../../../..");
 		if (!src) return;
 		src.parentNode.removeChild(src.nextSibling);
-		var dest=calfSystem.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
+		var dest=System.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
 		// window.alert(dest);
 		var info = dest.insertRow(26);
 		var cell = info.insertCell(0);
@@ -46,11 +46,14 @@ var Layout = {
 
 	hideNewBox: function() {
 		if (!GM_getValue("hideNewBox")) return;
-		var removeThis = calfSystem.findNode("//font[b='New?']/../../../..");
+		var removeThis = System.findNode("//font[b='New?']/../../../..");
 		if (!removeThis) return;
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis);
 	},
 
+	notebookContent: function() {
+		return System.findNode("//table[@width='640']/..");
+	},
 }
