@@ -1283,14 +1283,13 @@ var Helper = {
 
 	prepareCheckMonster: function() {
 		if (!GM_getValue("showCreatureInfo")) return;
-		// if (GM_getValue("killAllAdvanced") == "all") return;
 		var monsters = calfSystem.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
 		if (!monsters) return;
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
 				var href=monster.href;
-				calfSystem.xmlhttp(monster.href, monster, function(responseDetails, callback) {Helper.checkedMonster(responseDetails, this.callback);});
+				calfSystem.xmlhttp(monster.href, function(responseDetails, callback) {Helper.checkedMonster(responseDetails, this.callback);}, monster);
 			}
 		}
 	},
