@@ -1,13 +1,13 @@
-var ssData = {
+var Data = {
 
 	questMatrix: function() {
-		if (!ssData.questArray) {
+		if (!Data.questArray) {
 			var questArray = [
 				{'questName':'Orientation', 'level':10, 'location':'Initialize (Stage 1)'}
 			];
-			ssData.questArray = questArray.sort();
+			Data.questArray = questArray.sort();
 		}
-		return ssData.questArray;
+		return Data.questArray;
 	},
 
 }

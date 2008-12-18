@@ -15,12 +15,12 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
-var ssHelper = {
+var Helper = {
 	// System functions
 	init: function(e) {
-		ssHelper.initSettings();
-		ssHelper.beginAutoUpdate();
-		ssHelper.readInfo();
+		Helper.initSettings();
+		Helper.beginAutoUpdate();
+		Helper.readInfo();
 		this.initialized = true;
 	},
 
@@ -56,23 +56,23 @@ var ssHelper = {
 		var imgurls = calfSystem.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex = imgurls.src.indexOf("/skin/");
-		ssHelper.imageServer=imgurls.src.substr(0,idindex);
-		ssHelper.server=document.location.protocol + "//" + document.location.host + "/";
-		ssHelper.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
-		ssHelper.debug = GM_getValue("showDebugInfo");
+		calfSystem.imageServer=imgurls.src.substr(0,idindex);
+		calfSystem.server=document.location.protocol + "//" + document.location.host + "/";
+		Helper.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
+		Helper.debug = GM_getValue("showDebugInfo");
 	},
 
 	readInfo: function() {
 		var charInfo = calfSystem.findNode("//img[contains(@src,'skin/icon_player.gif')]");
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
-		ssHelper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
-		ssHelper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		ssHelper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		ssHelper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		ssHelper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		ssHelper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		ssHelper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
+		Helper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 	},
 
 	// Autoupdate
@@ -82,7 +82,7 @@ var ssHelper = {
 		if (!lastCheck) lastCheck=0;
 		var haveToCheck=((now - lastCheck) > 6*60*60*1000)
 		if (haveToCheck) {
-			ssHelper.checkForUpdate();
+			Helper.checkForUpdate();
 		}
 	},
 
@@ -99,7 +99,7 @@ var ssHelper = {
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				ssHelper.autoUpdate(responseDetails);
+				Helper.autoUpdate(responseDetails);
 			},
 		})
 	},
@@ -124,16 +124,16 @@ var ssHelper = {
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
-		ssHelper.init();
-		ssLayout.hideBanner();
-		ssLayout.moveFSBox();
-		ssHelper.prepareGuildList();
-		ssHelper.prepareChat();
-		ssHelper.injectStaminaCalculator();
-		ssHelper.injectLevelupCalculator();
-		ssLayout.injectMenu();
-		ssLayout.hideNewBox();
-		ssHelper.replaceKeyHandler();
+		Helper.init();
+		Layout.hideBanner();
+		Layout.moveFSBox();
+		Helper.prepareGuildList();
+		Helper.prepareChat();
+		Helper.injectStaminaCalculator();
+		Helper.injectLevelupCalculator();
+		Layout.injectMenu();
+		Layout.hideNewBox();
+		Helper.replaceKeyHandler();
 
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
@@ -159,47 +159,47 @@ var ssHelper = {
 		if (subsequentPageIdRE)
 			subsequentPageId=subsequentPageIdRE[1];
 
-		ssHelper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")"
-		if (ssHelper.debug) GM_log(ssHelper.page);
+		Helper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")"
+		if (Helper.debug) GM_log(Helper.page);
 
 		switch (pageId) {
 		case "settings":
-			ssHelper.injectSettings();
+			Helper.injectSettings();
 			break;
 		case "world":
 			switch (subPageId) {
 			case "viewcreature":
-				ssHelper.injectCreature();
+				Helper.injectCreature();
 				break;
 			case "-":
-				ssHelper.injectWorld();
+				Helper.injectWorld();
 			}
 			break;
 		case "blacksmith":
 			switch (subPageId) {
 			case "repairall":
-				ssHelper.injectWorld();
+				Helper.injectWorld();
 				break;
 			}
 			break;
 		case "questbook":
 			switch(subsequentPageId) {
 			case "-":
-				ssHelper.injectQuestBookLite();
+				Helper.injectQuestBookLite();
 				break;
 			}
-			ssHelper.injectQuestBookFull();
+			Helper.injectQuestBookFull();
 			break;
 		case "profile":
 			switch (subPageId) {
 			case "dropitems":
-				ssHelper.injectDropItems();
+				Helper.injectDropItems();
 				break;
 			case "changebio":
-				ssHelper.addBioWidgets();
+				Helper.addBioWidgets();
 				break;
 			case "-":
-				ssHelper.injectProfile();
+				Helper.injectProfile();
 			}
 			break;
 		case "auctionhouse":
@@ -209,7 +209,7 @@ var ssHelper = {
 			case "preferences":
 				break;
 			default:
-				ssHelper.injectAuctionHouse();
+				Helper.injectAuctionHouse();
 			}
 			break;
 		case "guild":
@@ -217,121 +217,121 @@ var ssHelper = {
 			case "inventory":
 				switch(subPage2Id) {
 					case "report":
-						ssHelper.injectReportPaint();
+						Helper.injectReportPaint();
 						break;
 					default:
-						ssHelper.injectDropItems();
+						Helper.injectDropItems();
 				}
 				break;
 			case "chat":
-				ssHelper.addLogColoring("Chat", 0);
+				Helper.addLogColoring("Chat", 0);
 				break;
 			case "log":
-				ssHelper.addLogColoring("GuildLog", 1);
-				ssHelper.addGuildLogWidgets();
+				Helper.addLogColoring("GuildLog", 1);
+				Helper.addGuildLogWidgets();
 				break;
 			case "groups":
 				switch(subPage2Id) {
 					case "viewstats":
-						ssHelper.injectGroupStats();
+						Helper.injectGroupStats();
 						break;
 					default:
-						ssHelper.injectGroups();
+						Helper.injectGroups();
 				}
 				break;
 			case "manage":
-				ssHelper.injectGuild();
+				Helper.injectGuild();
 				break;
 			case "advisor":
-				ssHelper.injectAdvisor();
+				Helper.injectAdvisor();
 				break;
 			case "history":
-				ssHelper.addHistoryWidgets();
+				Helper.addHistoryWidgets();
 				break;
 			}
 			break;
 		case "bank":
-			ssHelper.injectBank();
+			Helper.injectBank();
 			break;
 		case "log":
 			switch (subPageId) {
 			case "outbox":
-				ssHelper.addLogColoring("OutBox", 1);
+				Helper.addLogColoring("OutBox", 1);
 				break;
 			case "-":
-				ssHelper.addLogColoring("PlayerLog", 1);
-				ssHelper.addLogWidgets();
+				Helper.addLogColoring("PlayerLog", 1);
+				Helper.addLogWidgets();
 				break;
 			}
 			break;
 		case "marketplace":
 			switch(subPageId) {
 			case "createreq":
-				ssHelper.addMarketplaceWidgets();
+				Helper.addMarketplaceWidgets();
 				break;
 			}
 			break;
 		case "quickbuff":
-			ssHelper.injectQuickBuff();
+			Helper.injectQuickBuff();
 			break;
 		case "notepad":
 			switch(subPageId) {
 			case "showlogs":
-				ssHelper.injectNotepadShowLogs();
+				Helper.injectNotepadShowLogs();
 				break;
 			case "invmanager":
-				ssHelper.injectInventoryManager();
+				Helper.injectInventoryManager();
 				break;
 			case "guildinvmanager":
-				ssHelper.injectGuildInventoryManager();
+				Helper.injectGuildInventoryManager();
 				break;
 			case "recipemanager":
-				ssHelper.injectRecipeManager();
+				Helper.injectRecipeManager();
 				break;
 			case "questmanager":
-				ssHelper.injectQuestManager();
+				Helper.injectQuestManager();
 				break;
 			}
 			break;
 		case "points":
 			switch(subPageId) {
 			case "-":
-				ssHelper.storePlayerUpgrades();
+				Helper.storePlayerUpgrades();
 				break;
 			}
 			break;
 		case "toprated":
 			switch(subPageId) {
 			case "xp":
-				ssHelper.injectTopRated();
+				Helper.injectTopRated();
 				break;
 			}
 			break;
 		case "inventing":
 			switch(subPageId) {
 			case "viewrecipe":
-				ssHelper.injectViewRecipe();
+				Helper.injectViewRecipe();
 				break;
 			}
 			break;
 		case "-":
 			var isRelicPage = calfSystem.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
-				ssHelper.injectRelic(isRelicPage);
+				Helper.injectRelic(isRelicPage);
 			}
 			var isAuctionPage = calfSystem.findNode("//img[contains(@title,'Auction House')]");
 			if (isAuctionPage) {
-				ssHelper.injectAuctionHouse();
+				Helper.injectAuctionHouse();
 			}
 			var isQuestBookPage = calfSystem.findNode("//td[.='Quest Name']");
 			if (isQuestBookPage) {
-				ssHelper.injectQuestBookFull();
+				Helper.injectQuestBookFull();
 			}
 			var isAdvisorPageClue1 = calfSystem.findNode("//font[@size=2 and .='Advisor']");
 			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']"
 			var isAdvisorPageClue2 = calfSystem.findNode(clue2);
 			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
-				ssHelper.injectAdvisor();
+				Helper.injectAdvisor();
 			}
 			break;
 		}
@@ -370,9 +370,9 @@ var ssHelper = {
 			guildStructureControl.style.visibility = "hidden";
 		}
 
-		document.getElementById('toggleGuildLogoControl').addEventListener('click', ssHelper.toggleVisibilty, true);
-		document.getElementById('toggleStatisticsControl').addEventListener('click', ssHelper.toggleVisibilty, true);
-		document.getElementById('toggleGuildStructureControl').addEventListener('click', ssHelper.toggleVisibilty, true);
+		document.getElementById('toggleGuildLogoControl').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleStatisticsControl').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleGuildStructureControl').addEventListener('click', Helper.toggleVisibilty, true);
 	},
 
 	injectStaminaCalculator: function() {
@@ -440,7 +440,7 @@ var ssHelper = {
 		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
 			'class="custombutton">' + injectHere.innerHTML;
 
-		document.getElementById('calculatedefenderstats').addEventListener('click', ssHelper.calculateRelicDefenderStats, true);
+		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
 
 	calculateRelicDefenderStats: function(evt) {
@@ -473,7 +473,7 @@ var ssHelper = {
 		var extraTextInsertPoint = calfSystem.findNode("//td[@title='InsertSpot']");
 		var defendingGuild = calfSystem.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
 		var defendingGuildHref = defendingGuild.getAttribute("href");
-		ssHelper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
+		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
 
 		//code specifically to see if guild members are guarding the relic - only applies to PANIC
 		if (defendingGuildHref == "index.php?cmd=guild&subcmd=view&guild_id=40769") {
@@ -498,7 +498,7 @@ var ssHelper = {
 			var href = listOfDefenders[i].getAttribute("href");
 			//if (i<3) { //I put this in to limit the number of calls this function makes.
 					//I don't want to hammer the server too much.
-				ssHelper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
+				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
 			//}
 			testList += listOfDefenders[i].innerHTML + " ";
 			validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
@@ -533,7 +533,7 @@ var ssHelper = {
 	},
 
 	getRelicGuildData: function(extraTextInsertPoint,href) {
-		calfSystem.xmlhttp(href, function(responseDetails) {ssHelper.parseRelicGuildData(extraTextInsertPoint,href, responseDetails.responseText);});
+		calfSystem.xmlhttp(href, function(responseDetails) {Helper.parseRelicGuildData(extraTextInsertPoint,href, responseDetails.responseText);});
 	},
 
 	parseRelicGuildData: function(extraTextInsertPoint,href, responseText) {
@@ -564,37 +564,37 @@ var ssHelper = {
 			var LDattackValue = calfSystem.findNode("//td[@title='LDattackValue']");
 			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
 			LDattackNumber=LDattackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = ssHelper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
+			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
 			var defenseValue = calfSystem.findNode("//td[@title='defenseValue']");
 			var LDdefenseValue = calfSystem.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
 			LDdefenseNumber=LDdefenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = ssHelper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
 			var armorValue = calfSystem.findNode("//td[@title='armorValue']");
 			var LDarmorValue = calfSystem.findNode("//td[@title='LDarmorValue']");
 			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
 			LDarmorNumber=LDarmorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = ssHelper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
+			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
 			var damageValue = calfSystem.findNode("//td[@title='damageValue']");
 			var LDdamageValue = calfSystem.findNode("//td[@title='LDdamageValue']");
 			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
 			LDdamageNumber=LDdamageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = ssHelper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
 			var hpValue = calfSystem.findNode("//td[@title='hpValue']");
 			var LDhpValue = calfSystem.findNode("//td[@title='LDhpValue']");
 			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
 			LDhpNumber=LDhpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = ssHelper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
 			var defendersProcessed = calfSystem.findNode("//td[@title='defendersProcessed']");
 			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = ssHelper.addCommas(defendersProcessedNumber + 1);
+			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
 			var LDpercentageValue = calfSystem.findNode("//td[@title='LDPercentage']");
 			LDpercentageValue.innerHTML = (relicMultiplier*100) + "%";
 		}
 	},
 
 	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
-		calfSystem.xmlhttp(href, function(responseDetails) {ssHelper.parseRelicPlayerData(defenderCount,extraTextInsertPoint,href, responseDetails.responseText);})
+		calfSystem.xmlhttp(href, function(responseDetails) {Helper.parseRelicPlayerData(defenderCount,extraTextInsertPoint,href, responseDetails.responseText);})
 	},
 
 	parseRelicPlayerData: function(defenderCount,extraTextInsertPoint,href, responseText) {
@@ -625,43 +625,43 @@ var ssHelper = {
 			var defenderMultiplier = 0.2;
 			var attackValue = calfSystem.findNode("//td[@title='attackValue']");
 			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = ssHelper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
 			var defenseValue = calfSystem.findNode("//td[@title='defenseValue']");
 			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = ssHelper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
 			var armorValue = calfSystem.findNode("//td[@title='armorValue']");
 			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = ssHelper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
 			var damageValue = calfSystem.findNode("//td[@title='damageValue']");
 			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = ssHelper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
 			var hpValue = calfSystem.findNode("//td[@title='hpValue']");
 			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = ssHelper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
 			var defendersProcessed = calfSystem.findNode("//td[@title='defendersProcessed']");
 			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = ssHelper.addCommas(defendersProcessedNumber + 1);
+			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
 		}
 		else {
 			var defenderMultiplier = 1;
 			var attackValue = calfSystem.findNode("//td[@title='LDattackValue']");
 			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = ssHelper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
 			var defenseValue = calfSystem.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = ssHelper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
 			var armorValue = calfSystem.findNode("//td[@title='LDarmorValue']");
 			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = ssHelper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
 			var damageValue = calfSystem.findNode("//td[@title='LDdamageValue']");
 			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = ssHelper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
 			var hpValue = calfSystem.findNode("//td[@title='LDhpValue']");
 			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = ssHelper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
 			var defendersProcessed = calfSystem.findNode("//td[@title='LDProcessed']");
 			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = ssHelper.addCommas(defendersProcessedNumber + 1);
+			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
 		}
 		var relicProcessedValue = calfSystem.findNode("//td[@title='relicProcessed']");
 		var relicCountValue = calfSystem.findNode("//td[@title='relicCount']");
@@ -680,30 +680,30 @@ var ssHelper = {
 			var LDattackValue = calfSystem.findNode("//td[@title='LDattackValue']");
 			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
 			LDattackNumber=LDattackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = ssHelper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
+			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
 			var defenseValue = calfSystem.findNode("//td[@title='defenseValue']");
 			var LDdefenseValue = calfSystem.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
 			LDdefenseNumber=LDdefenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = ssHelper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
 			var armorValue = calfSystem.findNode("//td[@title='armorValue']");
 			var LDarmorValue = calfSystem.findNode("//td[@title='LDarmorValue']");
 			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
 			LDarmorNumber=LDarmorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = ssHelper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
+			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
 			var damageValue = calfSystem.findNode("//td[@title='damageValue']");
 			var LDdamageValue = calfSystem.findNode("//td[@title='LDdamageValue']");
 			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
 			LDdamageNumber=LDdamageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = ssHelper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
 			var hpValue = calfSystem.findNode("//td[@title='hpValue']");
 			var LDhpValue = calfSystem.findNode("//td[@title='LDhpValue']");
 			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
 			LDhpNumber=LDhpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = ssHelper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
 			var defendersProcessed = calfSystem.findNode("//td[@title='defendersProcessed']");
 			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = ssHelper.addCommas(defendersProcessedNumber + 1);
+			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
 			var LDpercentageValue = calfSystem.findNode("//td[@title='LDPercentage']");
 			LDpercentageValue.innerHTML = (relicMultiplier*100) + "%";
 		}
@@ -745,7 +745,7 @@ var ssHelper = {
 		var components=calfSystem.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
 		for (var i=0; i<components.length; i++) {
 			var mo=components[i].getAttribute("onmouseover");
-			calfSystem.xmlhttp(ssHelper.linkFromMouseoverCustom(mo), function(responseDetails) {ssHelper.injectViewRecipeLinks(responseDetails.responseText, this.callback);}, components[i]);
+			calfSystem.xmlhttp(Helper.linkFromMouseoverCustom(mo), function(responseDetails) {Helper.injectViewRecipeLinks(responseDetails.responseText, this.callback);}, components[i]);
 		}
 	},
 
@@ -769,8 +769,8 @@ var ssHelper = {
 		if (itemName) itemName=itemName[1];
 		var itemLinks = document.createElement("td");
 		itemLinks.innerHTML =
-			'<a href="' + ssHelper.server + '?cmd=auctionhouse&type=-1&search_text='
-			+ escape(ssHelper.plantFromComponent(itemName))
+			'<a href="' + calfSystem.server + '?cmd=auctionhouse&type=-1&search_text='
+			+ escape(Helper.plantFromComponent(itemName))
 			+ '">AH</a>';
 		var counter=calfSystem.findNode("../../../../tr[2]/td", callback);
 		counter.setAttribute("colspan", "2");
@@ -785,7 +785,7 @@ var ssHelper = {
 		var type=reResult[3];
 		var pid=reResult[4];
 		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
-		theUrl = ssHelper.server + theUrl;
+		theUrl = calfSystem.server + theUrl;
 		return theUrl
 	},
 */
@@ -797,7 +797,7 @@ var ssHelper = {
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
 			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-			cell.addEventListener('click', ssHelper.sortAdvisor, true);
+			cell.addEventListener('click', Helper.sortAdvisor, true);
 		}
 	},
 
@@ -806,10 +806,10 @@ var ssHelper = {
 		var parentTables=calfSystem.findNodes("ancestor::table", evt.target)
 		var list=parentTables[parentTables.length-1];
 
-		ssHelper.advisorRows = new Array();
+		Helper.advisorRows = new Array();
 		for (var i=1; i<list.rows.length-1; i++){
 			var theRow=list.rows[i];
-			ssHelper.advisorRows[i-1] = {
+			Helper.advisorRows[i-1] = {
 				'Member': theRow.cells[0].textContent,
 				'GoldFromDeposits': theRow.cells[1].textContent,
 				'GoldFromTax': theRow.cells[2].textContent,
@@ -823,24 +823,24 @@ var ssHelper = {
 			};
 		}
 
-		if (ssHelper.sortAsc==undefined) ssHelper.sortAsc=true;
-		if (ssHelper.sortBy && ssHelper.sortBy==headerClicked) {
-			ssHelper.sortAsc=!ssHelper.sortAsc;
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
 		}
-		ssHelper.sortBy=headerClicked;
+		Helper.sortBy=headerClicked;
 
 		if (headerClicked=="Member") {
-			ssHelper.advisorRows.sort(ssHelper.stringSort)
+			Helper.advisorRows.sort(Helper.stringSort)
 		}
 		else {
-			ssHelper.advisorRows.sort(ssHelper.numberSort)
+			Helper.advisorRows.sort(Helper.numberSort)
 		}
 
 		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
 
 
-		for (var i=0; i<ssHelper.advisorRows.length; i++){
-			var r = ssHelper.advisorRows[i];
+		for (var i=0; i<Helper.advisorRows.length; i++){
+			var r = Helper.advisorRows[i];
 			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
 			result += '<TR>'+
 			'<TD '+bgColor+' ><FONT size="1"> '+r.Member+'</FONT></TD>'+
@@ -864,27 +864,27 @@ var ssHelper = {
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
 			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-			cell.addEventListener('click', ssHelper.sortAdvisor, true);
+			cell.addEventListener('click', Helper.sortAdvisor, true);
 		}
 
 	},
 
 	stringSort: function(a,b) {
 		var result=0;
-		if (a[ssHelper.sortBy].toLowerCase()<b[ssHelper.sortBy].toLowerCase()) result=-1;
-		if (a[ssHelper.sortBy].toLowerCase()>b[ssHelper.sortBy].toLowerCase()) result=+1;
-		if (!ssHelper.sortAsc) result=-result;
+		if (a[Helper.sortBy].toLowerCase()<b[Helper.sortBy].toLowerCase()) result=-1;
+		if (a[Helper.sortBy].toLowerCase()>b[Helper.sortBy].toLowerCase()) result=+1;
+		if (!Helper.sortAsc) result=-result;
 		return result;
 	},
 
 	numberSort: function(a,b) {
 		var result=0;
-		var valueA=a[ssHelper.sortBy];
-		var valueB=b[ssHelper.sortBy];
+		var valueA=a[Helper.sortBy];
+		var valueB=b[Helper.sortBy];
 		if (typeof valueA=="string") valueA=parseInt(valueA.replace(/,/g,""));
 		if (typeof valueB=="string") valueB=parseInt(valueB.replace(/,/g,""));
 		result = valueA-valueB;
-		if (!ssHelper.sortAsc) result=-result;
+		if (!Helper.sortAsc) result=-result;
 		return result;
 	},
 
@@ -892,28 +892,28 @@ var ssHelper = {
 		var result=0;
 		var valueA,valueB;
 		var statuses = ["Incomplete", "Complete", ""];
-		if (!a[ssHelper.sortBy]) {
-			valueA=ssHelper.sortAsc?50:-50
+		if (!a[Helper.sortBy]) {
+			valueA=Helper.sortAsc?50:-50
 		}
 		else {
-			valueA=statuses.indexOf(a[ssHelper.sortBy]);
+			valueA=statuses.indexOf(a[Helper.sortBy]);
 		}
-		if (!b[ssHelper.sortBy]) {
-			valueB=ssHelper.sortAsc?50:-50
+		if (!b[Helper.sortBy]) {
+			valueB=Helper.sortAsc?50:-50
 		}
 		else {
-			valueB=statuses.indexOf(b[ssHelper.sortBy]);
+			valueB=statuses.indexOf(b[Helper.sortBy]);
 		}
 
 		result = valueA-valueB;
-		if (!ssHelper.sortAsc) result=-result;
+		if (!Helper.sortAsc) result=-result;
 		return result;
 	},
 
 	checkBuffs: function() {
 		//
 
-		var replacementText = "<td background='" + ssHelper.imageServer + "/skin/realm_right_bg.jpg'>"
+		var replacementText = "<td background='" + calfSystem.imageServer + "/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
@@ -941,12 +941,12 @@ var ssHelper = {
 				var lastDeathDealerPercentage = GM_getValue("lastDeathDealerPercentage");
 				var lastKillStreak = GM_getValue("lastKillStreak");
 				if (impsRemaining>0 && lastDeathDealerPercentage == 20) {
-					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + ssHelper.addCommas(lastKillStreak) +
+					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + Helper.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
 				} else {
-					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + ssHelper.addCommas(lastKillStreak) +
+					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + Helper.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>" + lastDeathDealerPercentage + "</span>%</td></tr>";
-					calfSystem.xmlhttp("index.php?cmd=profile", function(responseDetails) {ssHelper.getKillStreak(responseDetails.responseText);});
+					calfSystem.xmlhttp("index.php?cmd=profile", function(responseDetails) {Helper.getKillStreak(responseDetails.responseText);});
 				}
 			}
 		}
@@ -982,7 +982,7 @@ var ssHelper = {
 
 	injectQuestBookFull: function() {
 		if (!GM_getValue("showCompletedQuests")) return;
-		var quests = ssData.questMatrix();
+		var quests = Data.questMatrix();
 		var questTable = calfSystem.findNode("//table[@width='100%' and @cellPadding='2']");
 		questTable.setAttribute("findme","questTable");
 		var questNamesOnPage = [];
@@ -1026,7 +1026,7 @@ var ssHelper = {
 
 	injectQuestBookLite: function() {
 		if (GM_getValue("showCompletedQuests")) return;
-		var quests = ssData.questMatrix();
+		var quests = Data.questMatrix();
 		var questTable = calfSystem.findNode("//table[@width='100%' and @cellPadding='2']");
 		questTable.setAttribute("findme","questTable");
 		var hideNextRows = 0;
@@ -1100,7 +1100,7 @@ var ssHelper = {
 		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
 		var pageCount=parseInt(pageCountElement.parentNode.innerHTML.match(pageRE)[1]);
 		for (var i=1;i<pageCount;i++) {
-			calfSystem.xmlhttp("index.php?cmd=questbook&page=" + i, function(responseDetails) {ssHelper.injectQuestData(responseDetails.responseText);});
+			calfSystem.xmlhttp("index.php?cmd=questbook&page=" + i, function(responseDetails) {Helper.injectQuestData(responseDetails.responseText);});
 		}
 	},
 
@@ -1108,7 +1108,7 @@ var ssHelper = {
 		var playerQuestListElement = calfSystem.findNode("//span[@findme='playerQuestList']");
 		var playerQuestList = playerQuestListElement.innerHTML.split();
 
-		var quests = ssData.questMatrix();
+		var quests = Data.questMatrix();
 		var doc=calfSystem.createDocument(responseText)
 		var allItems = doc.getElementsByTagName("TD");
 		for (var i=0;i<allItems.length;i++) {
@@ -1156,7 +1156,7 @@ var ssHelper = {
 		playerQuestListElement.innerHTML = playerQuestList.join();
 		var totalPagesElement = calfSystem.findNode("//span[@findme='totalPages']");
 		var totalPages = totalPagesElement.textContent*1;
-		var characterLevel = ssHelper.characterLevel;
+		var characterLevel = Helper.characterLevel;
 		var pageOneQuestTable = calfSystem.findNode("//table[@findme='questTable']");
 
 		if ((pagesProcessed+1) == totalPages) { //all pages processed so now we can find missing quests
@@ -1183,18 +1183,18 @@ var ssHelper = {
 	},
 
 	injectWorld: function() {
-		// ssHelper.mapThis();
+		// Helper.mapThis();
 		var realmRightBottom = calfSystem.findNode("//tr[contains(td/@background, 'location_header.gif')]");
 		if (!realmRightBottom) return;
 		var injectHere = realmRightBottom.parentNode.parentNode
 		var newRow=injectHere.insertRow(2);
 		var newCell=newRow.insertCell(0);
-		// newCell.setAttribute("background", ssHelper.imageServer + "/skin/realm_right_bg.jpg");
+		// newCell.setAttribute("background", calfSystem.imageServer + "/skin/realm_right_bg.jpg");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced");
 		if (GM_getValue("showQuickKillOnWorld")) {
 			newCell.innerHTML='<div style="font-size:xx-small;">' +
-				'Quick Kill' + ssHelper.helpLink('Quick Kill Style',
+				'Quick Kill' + Helper.helpLink('Quick Kill Style',
 					'<b><u>single</u></b> will quick kill a single monster<br/> ' +
 					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
 					'<b><u>off</u></b> returns control to game normal.') +
@@ -1206,34 +1206,35 @@ var ssHelper = {
 				'<input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
 					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +
 				'</div>';
-			document.getElementById('killAllAdvancedWorldOff').addEventListener('click', ssHelper.killAllAdvancedChangeFromWorld, true);
-			document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', ssHelper.killAllAdvancedChangeFromWorld, true);
-			document.getElementById('killAllAdvancedWorldType').addEventListener('click', ssHelper.killAllAdvancedChangeFromWorld, true);
+			document.getElementById('killAllAdvancedWorldOff').addEventListener('click', Helper.killAllAdvancedChangeFromWorld, true);
+			document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', Helper.killAllAdvancedChangeFromWorld, true);
+			document.getElementById('killAllAdvancedWorldType').addEventListener('click', Helper.killAllAdvancedChangeFromWorld, true);
 		}
 
 		if (!GM_getValue("hideKrulPortal")) {
 			var buttonRow = calfSystem.findNode("//tr[td/a/img[@title='Open Area Map']]");
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + ssHelper.imageServer +
+				'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + calfSystem.imageServer +
 				'/temple/3.gif" title="Instant Teleport to Taulin Rad Lands" border="1"></span></td>';
-			document.getElementById('portaltokrul').addEventListener('click', ssHelper.portalToKrul, true);
+			document.getElementById('portaltokrul').addEventListener('click', Helper.portalToKrul, true);
 		}
 
 		// injectHere.style.display='none';
-		ssHelper.checkBuffs();
-		ssHelper.prepareCheckMonster();
-		ssHelper.prepareCombatLog();
+		Helper.checkBuffs();
+		Helper.prepareCheckMonster();
+		Helper.prepareCombatLog();
 	},
 
 	prepareCombatLog: function() {
 		if (!GM_getValue("showCombatLog")) return;
 		var reportsTable=calfSystem.findNode("//table[@width='320']/parent::*");
+		if (!reportsTable) return;
 		var tempLog=document.createElement("div");
 		tempLog.id="reportsLog";
 		var injLog=reportsTable.appendChild(tempLog);
 		var is=injLog.style;
 		is.color = 'black';
-		is.backgroundImage='url(' + ssHelper.imageServer + '/skin/realm_right_bg.jpg)';
+		is.backgroundImage='url(' + calfSystem.imageServer + '/skin/realm_right_bg.jpg)';
 		is.maxHeight = '240px';
 		is.width = '277px';
 		is.maxWidth = is.width;
@@ -1253,14 +1254,17 @@ var ssHelper = {
 		window.location = 'index.php?cmd=world';
 	},
 
+	getMonster: function(index) {
+		return calfSystem.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')]")[index-1];
+	},
+
 	killSingleMonster: function(monsterNumber) {
 		if (GM_getValue("killAllAdvanced") != "single") return;
 		var kills=0;
-		var linkId="//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')][" + monsterNumber + "]"
-		var monster = calfSystem.findNode(linkId);
+		var monster = Helper.getMonster(monsterNumber);
 		if (monster) {
 			kills+=1;
-			calfSystem.xmlhttp(monster.href, function(responseDetails, callback) {ssHelper.killedMonster(responseDetails, this.callback);}, linkId);
+			calfSystem.xmlhttp(monster.href, function(responseDetails, callback) {Helper.killedMonster(responseDetails, this.callback);}, {"node": monster, "index": monsterNumber});
 		}
 		if (kills>0) {
 			calfSystem.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
@@ -1271,13 +1275,12 @@ var ssHelper = {
 		if (GM_getValue("killAllAdvanced") != "type") return;
 		var kills=0;
 		for (var i=1; i<=8; i++) {
-			var linkId="//a[@id='aLink" + i + "']"
-			var monster = calfSystem.findNode(linkId);
+			var monster = Helper.getMonster(i);
 			if (monster) {
 				thisMonsterType = monster.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML;
 				if (thisMonsterType == monsterType) {
 					kills+=1;
-					calfSystem.xmlhttp(monster.href, function(responseDetails, callback) {ssHelper.killedMonster(responseDetails, this.callback);}, linkId);
+					calfSystem.xmlhttp(monster.href, function(responseDetails, callback) {Helper.killedMonster(responseDetails, this.callback);}, {"node": monster, "index": i});
 				}
 			}
 		}
@@ -1295,7 +1298,7 @@ var ssHelper = {
 			var monster = monsters[i];
 			if (monster) {
 				var href=monster.href;
-				calfSystem.xmlhttp(monster.href, monster, function(responseDetails, callback) {ssHelper.checkedMonster(responseDetails, this.callback);});
+				calfSystem.xmlhttp(monster.href, monster, function(responseDetails, callback) {Helper.checkedMonster(responseDetails, this.callback);});
 			}
 		}
 	},
@@ -1346,19 +1349,19 @@ var ssHelper = {
 		var killButtonHeader=calfSystem.findNode("tbody/tr[contains(td,'Actions')]", statsNode);
 		var killButtonParent=killButtonHeader.parentNode;
 
-		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + ssHelper.characterLevel + "</span>)"
-		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + ssHelper.characterDefense + "</span>) "
-		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + ssHelper.characterAttack + "</span>)"
-		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + ssHelper.characterDamage + "</span>)"
-		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + ssHelper.characterArmor + "</span>)"
-		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + ssHelper.characterHP + "</span>)" +
+		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
+		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
+		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + Helper.characterAttack + "</span>)"
+		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + Helper.characterDamage + "</span>)"
+		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + Helper.characterArmor + "</span>)"
+		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + Helper.characterHP + "</span>)" +
 			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
 
 		killButtonParent.removeChild(killButtons);
 		killButtonParent.removeChild(killButtonHeader);
 		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
 		callback.setAttribute("mouseOverWidth", "400");
-		callback.addEventListener("mouseover", ssHelper.clientTip, true);
+		callback.addEventListener("mouseover", Helper.clientTip, true);
 	},
 
 	killedMonster: function(responseDetails, callback) {
@@ -1399,10 +1402,10 @@ var ssHelper = {
 		var shieldImpDeathRE = /Shield Imp absorbed all damage/;
 		var shieldImpDeath = responseDetails.responseText.match(shieldImpDeathRE);
 
-		var monster = calfSystem.findNode(callback);
+		var monster = callback.node;
 		if (monster) {
 			var result=document.createElement("div");
-			var resultHtml = "<small><small>"+callback.replace(/\D/g,"")+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
+			var resultHtml = "<small><small>"+callback.index+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
 			var resultText = "XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")\n"
 			if (info!="") {
 				resultHtml += "<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
@@ -1422,7 +1425,7 @@ var ssHelper = {
 			if (xpGain<0) result.style.color='red';
 			result.innerHTML=resultHtml
 			var monsterParent = monster.parentNode;
-			result.id = "result" + callback;
+			result.id = "result" + callback.index;
 			if (report) {
 				var reportLines=report.split("\n");
 				var reportHtml="";
@@ -1451,17 +1454,17 @@ var ssHelper = {
 					reportText += "Your level has decreased!\n";
 				}
 				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
-				ssHelper.appendCombatLog(reportHtml);
+				Helper.appendCombatLog(reportHtml);
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
-					ssHelper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
+					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
 				}
 			}
 			monsterParent.innerHTML = "";
 			monsterParent.insertBefore(result, monsterParent.nextSibling);
 			if (report) {
-				document.getElementById("result" + callback).addEventListener("mouseover", ssHelper.clientTip, true);
+				document.getElementById("result" + callback.index).addEventListener("mouseover", Helper.clientTip, true);
 			}
 		}
 	},
@@ -1512,8 +1515,8 @@ var ssHelper = {
 		if (!injectHere) return;
 		var info = injectHere.insertRow(0);
 		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='ssHelper:GuildListPlaceholder'></span>";
-		ssHelper.retrieveGuildData();
+		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+		Helper.retrieveGuildData();
 	},
 
 	retrieveGuildData: function() {
@@ -1523,11 +1526,11 @@ var ssHelper = {
 		}
 
 		if (!memberList) {
-			calfSystem.xmlhttp("index.php?cmd=guild&subcmd=manage", function(responseDetails) {ssHelper.parseGuildForWorld(responseDetails.responseText);});
+			calfSystem.xmlhttp("index.php?cmd=guild&subcmd=manage", function(responseDetails) {Helper.parseGuildForWorld(responseDetails.responseText);});
 		} else {
 			var memberList = calfSystem.getValueJSON("memberlist");
 			memberList.isRefreshed = false;
-			ssHelper.injectGuildList(memberList);
+			Helper.injectGuildList(memberList);
 		}
 	},
 
@@ -1564,7 +1567,7 @@ var ssHelper = {
 			}
 			memberList.changedOn = new Date().getTime();
 			memberList.isRefreshed = true;
-			ssHelper.injectGuildList(memberList);
+			Helper.injectGuildList(memberList);
 		}
 	},
 
@@ -1575,19 +1578,19 @@ var ssHelper = {
 		if (!injectHere) return;
 		var info = injectHere.insertRow(GM_getValue("disableGuildOnlineList")?0:1)
 		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='ssHelper:ChatPlaceholder'></span>";
+		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
 		var chat = calfSystem.getValueJSON("chat");
 		var newChat = calfSystem.findNode("//table[contains(.,'chat messages')]")
 		if (!chat || newChat || ((new Date()).getTime() - chat.lastUpdate > 15000)) {
-			ssHelper.retrieveChat();
+			Helper.retrieveChat();
 		} else {
 			chat.isRefreshed=false;
-			ssHelper.injectChat(chat);
+			Helper.injectChat(chat);
 		}
 	},
 
 	retrieveChat: function() {
-		calfSystem.xmlhttp("index.php?cmd=guild&subcmd=chat", function(responseDetails) {ssHelper.parseChatForWorld(responseDetails.responseText);});
+		calfSystem.xmlhttp("index.php?cmd=guild&subcmd=chat", function(responseDetails) {Helper.parseChatForWorld(responseDetails.responseText);});
 	},
 
 	parseChatForWorld: function(chatText) {
@@ -1611,17 +1614,17 @@ var ssHelper = {
 			}
 		}
 		chat.confirm=chatConfirm.value;
-		ssHelper.injectChat(chat);
+		Helper.injectChat(chat);
 	},
 
 	injectChat: function(chat){
-		var injectHere = document.getElementById("ssHelper:ChatPlaceholder");
+		var injectHere = document.getElementById("Helper:ChatPlaceholder");
 		var newTable=false;
 
-		var displayList = document.getElementById("ssHelper:ChatWindow");
+		var displayList = document.getElementById("Helper:ChatWindow");
 		if (!displayList) {
 			displayList=document.createElement("TABLE");
-			displayList.id="ssHelper:ChatWindow";
+			displayList.id="Helper:ChatWindow";
 			displayList.style.border = "1px solid #c5ad73";
 			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
 			displayList.cellPadding = 1;
@@ -1653,7 +1656,7 @@ var ssHelper = {
 			result += chat.messages[i].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 			result += "</span><br/>";
 		}
-		result += '<form action="index.php" method="post" id="ssHelper:ChatBox" onsubmit="return false;">'
+		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">'
 		result += '<input type="hidden" value="' + chat.confirm + '" name="xc"/>'
 		result += '<input type="text" class="custominput" size="14" name="msg"/>'
 		result += '<input type="submit" class="custominput" value="Send" name="submit"/>'
@@ -1669,7 +1672,7 @@ var ssHelper = {
 			injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
 		}
 
-		document.getElementById('ssHelper:ChatBox').addEventListener('submit', ssHelper.sendChat, true);
+		document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
 
 		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
 
@@ -1683,13 +1686,13 @@ var ssHelper = {
 		var msg=calfSystem.findNode("//input[@name='msg']", evt.target.form).value;
 		calfSystem.findNode("//input[@name='msg']", evt.target.form).value="";
 		if (msg=="") {
-			ssHelper.retrieveChat();
+			Helper.retrieveChat();
 			return false;
 		}
 
 		GM_xmlhttpRequest({
 			method: 'POST',
-			url: ssHelper.server + "index.php",
+			url: calfSystem.server + "index.php",
 			headers: {
 				"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
@@ -1698,7 +1701,7 @@ var ssHelper = {
 			},
 			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit=Send",
 			onload: function(responseDetails) {
-				ssHelper.retrieveChat();
+				Helper.retrieveChat();
 			},
 		})
 
@@ -1707,20 +1710,20 @@ var ssHelper = {
 
 	replaceKeyHandler: function() {
 		unsafeWindow.document.onkeypress = null;
-		unsafeWindow.document.onkeypress = ssHelper.keyPress;
+		unsafeWindow.document.onkeypress = Helper.keyPress;
 	},
 
 	moveMe: function(dx, dy) {
-		var pos=ssHelper.position();
+		var pos=Helper.position();
 		if (pos) {
 			window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
 		}
-		if (ssHelper.page=="world/map/-(-)") {
+		if (Helper.page=="world/map/-(-)") {
 			var playerTile=calfSystem.findNode("//img[contains(@src,'player_tile.gif')]/..");
 			var pos = {};
 			pos.X=playerTile.cellIndex;
 			pos.Y=playerTile.parentNode.rowIndex;
-			calfSystem.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function(responseDetails) {window.location= ssHelper.server + "index.php?cmd=world&subcmd=map";});
+			calfSystem.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function(responseDetails) {window.location= calfSystem.server + "index.php?cmd=world&subcmd=map";});
 		}
 	},
 
@@ -1738,28 +1741,28 @@ var ssHelper = {
 
 		switch (r) {
 		case 113: // nw
-			ssHelper.moveMe(-1,-1)
+			Helper.moveMe(-1,-1)
 			break;
 		case 119: // n
-			ssHelper.moveMe(0,-1);
+			Helper.moveMe(0,-1);
 			break;
 		case 101: // ne
-			ssHelper.moveMe(1,-1);
+			Helper.moveMe(1,-1);
 			break;
 		case 97: // w
-			ssHelper.moveMe(-1,0);
+			Helper.moveMe(-1,0);
 			break;
 		case 100: // e
-			ssHelper.moveMe(1,0);
+			Helper.moveMe(1,0);
 			break;
 		case 122: // sw
-			ssHelper.moveMe(-1,1);
+			Helper.moveMe(-1,1);
 			break;
 		case 120: // s
-			ssHelper.moveMe(0,1);
+			Helper.moveMe(0,1);
 			break;
 		case 99: // se
-			ssHelper.moveMe(1,1);
+			Helper.moveMe(1,1);
 			break;
 		case 114: // repair
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
@@ -1776,7 +1779,7 @@ var ssHelper = {
 		case 55:
 		case 56: // keyed combat
 			var index	= r-48;
-			var linkObj	= calfSystem.findNode("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')][" + index + "]");
+			var linkObj	= Helper.getMonster(index);
 			if (linkObj!=null) {
 				var killStyle = GM_getValue("killAllAdvanced");
 				//kill style off
@@ -1785,17 +1788,17 @@ var ssHelper = {
 				}
 				//kill style single
 				if (killStyle == "single") {
-					ssHelper.killSingleMonster(index);
+					Helper.killSingleMonster(index);
 				}1
 				//kill style type
 				if (killStyle == "type") {
 					var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
-					ssHelper.killSingleMonsterType(monsterType);
+					Helper.killSingleMonsterType(monsterType);
 				}
 			}
 			break;
 		case 57: // debug
-			ssHelper.appendCombatLog('test<br/>')
+			Helper.appendCombatLog('test<br/>')
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
@@ -1813,45 +1816,45 @@ var ssHelper = {
 		case 0: // special key
 			switch (s) {
 			case 37: // w
-				ssHelper.moveMe(-1,0);
+				Helper.moveMe(-1,0);
 				evt.preventDefault();
 				evt.stopPropagation();
 				break;
 			case 38: // n
-				ssHelper.moveMe(0,-1);
+				Helper.moveMe(0,-1);
 				evt.preventDefault();
 				evt.stopPropagation();
 				break;
 			case 39: // e
-				ssHelper.moveMe(1,0);
+				Helper.moveMe(1,0);
 				evt.preventDefault();
 				evt.stopPropagation();
 				break;
 			case 40: // s
-				ssHelper.moveMe(0,1);
+				Helper.moveMe(0,1);
 				evt.preventDefault();
 				evt.stopPropagation();
 				break;
 			case 33:
 				if (calfSystem.findNode("//div[@id='reportsLog']")) {
-					ssHelper.scrollUpCombatLog();
+					Helper.scrollUpCombatLog();
 					evt.preventDefault();
 					evt.stopPropagation();
 				}
 				break;
 			case 34:
 				if (calfSystem.findNode("//div[@id='reportsLog']")) {
-					ssHelper.scrollDownCombatLog();
+					Helper.scrollDownCombatLog();
 					evt.preventDefault();
 					evt.stopPropagation();
 				}
 				break;
 			default:
-				if (ssHelper.debug) GM_log('special key: ' +s);
+				if (calfSystem.debug) GM_log('special key: ' +s);
 			}
 			break;
 		default:
-			if (ssHelper.debug) GM_log('standard key: ' +r);
+			if (calfSystem.debug) GM_log('standard key: ' +r);
 		}
 		return true;
 	},
@@ -1879,7 +1882,7 @@ var ssHelper = {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
 				cellContents = cellContents.substring(0,17); // fix for player log screen.
-				postDateAsDate = ssHelper.textDateToDate(cellContents);
+				postDateAsDate = Helper.textDateToDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 				if (postDateAsLocalMilli > localLastCheckMilli) {
@@ -1949,7 +1952,6 @@ var ssHelper = {
 						var messageHTML = aRow.cells[2].innerHTML;
 						var firstPart = messageHTML.split(">Reply</a>")[0];
 						var secondPart = messageHTML.split(">Reply</a>")[1];
-						//http://www.sigmastorm2.com/index.php?cmd=trade&target_player=Bubbacus62
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
 							"'>ST</a>";
@@ -2039,7 +2041,7 @@ var ssHelper = {
 			playerId=document.body.innerHTML.match(playerIdRE)[1];
 		}
 		GM_setValue("memberlist", JSON.stringify(memberList));
-		var injectHere = document.getElementById("ssHelper:GuildListPlaceholder");
+		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
@@ -2054,14 +2056,14 @@ var ssHelper = {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
 				if (memberList.isRefreshed) {
-					ssHelper.getFullPlayerData(member);
+					Helper.getFullPlayerData(member);
 				}
 				output += "<li style='padding-bottom:0px;'>"
 				output += "<a style='color:#CCFF99;font-size:10px;' "
 				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>&nbsp;";
 				if (member.id!=playerId) {
 					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
-					output += "href=\"" + ssHelper.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
+					output += "href=\"" + calfSystem.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
 					output += "</a>";
 				}
 				else {
@@ -2083,7 +2085,7 @@ var ssHelper = {
 					output += (member.id==playerId)?"#FFF380":"white";
 				}
 				output += ";font-size:10px;'"
-				output += " href='" + ssHelper.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
+				output += " href='" + calfSystem.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
 				// output += "<br/>"
 				output += "</li>"
 			}
@@ -2104,7 +2106,7 @@ var ssHelper = {
 
 	getFullPlayerData: function(member) {
 		return;
-		calfSystem.xmlhttp("index.php?cmd=profile&player_id=" + member.id, function(responseDetails) {ssHelper.parsePlayerData(member.id, responseDetails.responseText);});
+		calfSystem.xmlhttp("index.php?cmd=profile&player_id=" + member.id, function(responseDetails) {Helper.parsePlayerData(member.id, responseDetails.responseText);});
 	},
 
 	parsePlayerData: function(memberId, responseText) {
@@ -2143,7 +2145,7 @@ var ssHelper = {
 			textRow.style.display = "none";
 			textRow.style.visibility = "hidden";
 		}
-		document.getElementById('toggleAuctionTextControl').addEventListener('click', ssHelper.toggleVisibilty, true);
+		document.getElementById('toggleAuctionTextControl').addEventListener('click', Helper.toggleVisibilty, true);
 
 		//fix button class and add go to first and last
 		var prevButton = calfSystem.findNode("//input[@value='<']");
@@ -2271,7 +2273,7 @@ var ssHelper = {
 		var quickSearchList = calfSystem.findNodes("//span[@cat='quickPotionSearch']");
 		for (var i=0; i<quickSearchList.length; i++) {
 			quickSearchItem = quickSearchList[i];
-			quickSearchItem.addEventListener('click', ssHelper.quickAuctionSearch, true);
+			quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
 		}
 
 		var allItems = document.getElementsByTagName("IMG");
@@ -2279,7 +2281,7 @@ var ssHelper = {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
 				var theImage = anItem;
-				calfSystem.xmlhttp(ssHelper.linkFromMouseover(anItem.getAttribute("onmouseover")),
+				calfSystem.xmlhttp(Helper.linkFromMouseover(anItem.getAttribute("onmouseover")),
 					function(responseDetails, callback) {
 						var craft="";
 						var responseText=responseDetails.responseText;
@@ -2292,7 +2294,7 @@ var ssHelper = {
 						while(re.exec(responseText)) {
 							forgeCount++;
 						}
-						ssHelper.injectAuctionExtraText(this.callback,craft,forgeCount);
+						Helper.injectAuctionExtraText(this.callback,craft,forgeCount);
 					},
 					theImage);
 			}
@@ -2356,7 +2358,7 @@ var ssHelper = {
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = Math.ceil(winningBidValue * 1.05);
 						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + ssHelper.addCommas(overBid) + '</span>&nbsp';
+							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + Helper.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
 						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
@@ -2383,7 +2385,7 @@ var ssHelper = {
 		if (!bidOnItemList) return;
 		for (var i=0; i<bidOnItemList.length; i++) {
 			bidOnItemItem = bidOnItemList[i];
-			bidOnItemItem.addEventListener('click', ssHelper.bidOnItem, true);
+			bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
 		}
 	},
 
@@ -2409,13 +2411,13 @@ var ssHelper = {
 		var theText=anItem.parentNode.nextSibling.nextSibling;
 		var preText = "<span style='color:blue'>" + craft + "</span>";
 		if (forgeCount != 0) {
-			preText +=  " " + forgeCount + "<img src='" + ssHelper.imageServer + "/hellforge/forgelevel.gif'>"
+			preText +=  " " + forgeCount + "<img src='" + calfSystem.imageServer + "/hellforge/forgelevel.gif'>"
 		}
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
 	},
 
 	toggleShowExtraLinks: function(evt) {
-		var showExtraLinksElement = calfSystem.findNode("//span[@id='ssHelper:showExtraLinks']");
+		var showExtraLinksElement = calfSystem.findNode("//span[@id='Helper:showExtraLinks']");
 		if (showExtraLinksElement.textContent == "Show AH and Sell links") {
 			GM_setValue("showExtraLinks", true);
 		} else {
@@ -2445,7 +2447,7 @@ var ssHelper = {
 				itemCell.innerHTML += ' [ <span style="cursor:pointer; text-decoration:underline;" id="recallItem' + itemID + '" ' +
 					'itemID="' + itemID + '" ' +
 					'playerID="' + playerID + '">Fast Recall</span> ]'
-				document.getElementById('recallItem' + itemID).addEventListener('click', ssHelper.recallItem, true);
+				document.getElementById('recallItem' + itemID).addEventListener('click', Helper.recallItem, true);
 			}
 		}
 
@@ -2459,7 +2461,7 @@ var ssHelper = {
 				var player=calfSystem.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
-						ssHelper.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						calfSystem.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
 				}
 			}
@@ -2467,7 +2469,7 @@ var ssHelper = {
 				var player=calfSystem.findNode("//b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<a href='" +
-						ssHelper.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						calfSystem.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
 				}
 			}
 		}
@@ -2477,7 +2479,7 @@ var ssHelper = {
 		var itemID=evt.target.getAttribute("itemID");
 		var playerID=evt.target.getAttribute("playerID");
 		calfSystem.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID, function(responseDetails) {
-				ssHelper.recallItemReturnMessage(responseDetails, itemID, evt.target);
+				Helper.recallItemReturnMessage(responseDetails, itemID, evt.target);
 			});
 	},
 
@@ -2496,9 +2498,9 @@ var ssHelper = {
 	injectDropItems: function() {
 		var mainTable = calfSystem.findNode("//table[@width='100%']");
 		var insertHere = mainTable.rows[5].cells[0];
-		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="ssHelper:showExtraLinks">' +
+		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
 			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
-		document.getElementById("ssHelper:showExtraLinks").addEventListener('click', ssHelper.toggleShowExtraLinks, true);
+		document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
 
 		//function to add links to all the items in the drop items list
 		if (GM_getValue("showExtraLinks")) {
@@ -2510,10 +2512,10 @@ var ssHelper = {
 				theTextNode = calfSystem.findNode("../../td[3]", anItem);
 				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
 				var findItems = calfSystem.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
-				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + ssHelper.server + "?cmd=auctionhouse&type=-1&search_text="
+				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + calfSystem.server + "?cmd=auctionhouse&type=-1&search_text="
 					+ escape(itemName)
 					+ "'>AH</a>]</span> "
-					+ "<span findme='Sell'>[<a href='" + ssHelper.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+					+ "<span findme='Sell'>[<a href='" + calfSystem.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
 					+ "Sell</a>]</span> "
 					+ theTextNode.innerHTML
 					+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
@@ -2525,7 +2527,7 @@ var ssHelper = {
 			for (var i=0; i<checkAllElements.length; i++) {
 				checkAllElement = checkAllElements[i];
 				itemName = checkAllElement.linkto;
-				checkAllElement.addEventListener('click', ssHelper.checkAll, true);
+				checkAllElement.addEventListener('click', Helper.checkAll, true);
 			}
 		}
 
@@ -2534,9 +2536,9 @@ var ssHelper = {
 			anItem = allItems[i];
 			theLocation=anItem.parentNode.nextSibling.nextSibling;
 			theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-			calfSystem.xmlhttp(ssHelper.linkFromMouseover(theImage.getAttribute("onmouseover")),
+			calfSystem.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")),
 				function(responseDetails, callback) {
-					ssHelper.injectDropItemsPaint(responseDetails, this.callback);
+					Helper.injectDropItemsPaint(responseDetails, this.callback);
 				}, theImage);
 		}
 	},
@@ -2587,7 +2589,7 @@ var ssHelper = {
 				var warning = document.createElement('span');
 				var color = "";
 				var changeAppearance = true;
-				var relationship = ssHelper.guildRelationship(aLink.text)
+				var relationship = Helper.guildRelationship(aLink.text)
 				switch (relationship) {
 					case "self":
 						var settings="guildSelfMessage";
@@ -2643,20 +2645,20 @@ var ssHelper = {
 			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += ssHelper.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='" + ssHelper.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
+			newhtml += calfSystem.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
+			newhtml += "<a href='" + calfSystem.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
 			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
-			newhtml += ssHelper.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=" + ssHelper.server + "?cmd=auctionhouse&type=-3&tid=" ;
+			newhtml += calfSystem.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
+			newhtml += "<a href=" + calfSystem.server + "?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
-			newhtml += ssHelper.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
-			newhtml += "<a href=" + ssHelper.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
+			newhtml += calfSystem.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
+			newhtml += "<a href=" + calfSystem.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
 			newhtml += playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=';
-			newhtml += ssHelper.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
+			newhtml += calfSystem.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
-				newhtml += "<a href='" + ssHelper.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
+				newhtml += "<a href='" + calfSystem.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
 				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
-				newhtml += ssHelper.imageServer + "/guilds/" + guildId + "_mini.jpg></a>" ;
+				newhtml += calfSystem.imageServer + "/guilds/" + guildId + "_mini.jpg></a>" ;
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
@@ -2699,27 +2701,27 @@ var ssHelper = {
 		var content=calfSystem.findNode("//table[@width='640']/..");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
 			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Quest Manager</b></td></tr>'+
-			'<tr><td><b>&nbsp;Show Completed Quests <input id="ssHelper:showCompletedQuests" type="checkbox"' +
+			'<tr><td><b>&nbsp;Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
 				(GM_getValue("showCompletedQuests")?' checked':'') + '/></b></td></tr>'+
 			'</table>' +
-			'<div style="font-size:small;" id="ssHelper:QuestManagerOutput">' +
+			'<div style="font-size:small;" id="Helper:QuestManagerOutput">' +
 			'Loading quest book...' +
 			'</div>';
-		ssData.questMatrix();
-		ssHelper.parseQuestBookStart(0);
-		// ssHelper.injectQuestTable();
+		Data.questMatrix();
+		Helper.parseQuestBookStart(0);
+		// Helper.injectQuestTable();
 	},
 
 	parseQuestBookStart: function(questPage) {
 		calfSystem.xmlhttp("index.php?cmd=questbook&page=" + questPage, function(responseDetails, callback) {
-				ssHelper.parseQuestBookDone(responseDetails.responseText, this.callback);
+				Helper.parseQuestBookDone(responseDetails.responseText, this.callback);
 			}, {"page": questPage});
 	},
 
 	parseQuestBookDone: function(responseText, callback) {
 		var questPage=calfSystem.createDocument(responseText);
 		var currentPage=callback.page;
-		document.getElementById("ssHelper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1)
+		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1)
 		var pages=calfSystem.findNode("//select[@name='page']", questPage);
 		if (!pages) return;
 
@@ -2734,72 +2736,72 @@ var ssHelper = {
 			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
 		}
 
-		for (i=0; i<ssData.questArray.length; i++) {
-			if (questStatus[ssData.questArray[i].questName]!=undefined) {
-				ssData.questArray[i].status=questStatus[ssData.questArray[i].questName];
+		for (i=0; i<Data.questArray.length; i++) {
+			if (questStatus[Data.questArray[i].questName]!=undefined) {
+				Data.questArray[i].status=questStatus[Data.questArray[i].questName];
 			}
-			if (questHref[ssData.questArray[i].questName]!=undefined) {
-				ssData.questArray[i].href=questHref[ssData.questArray[i].questName];
+			if (questHref[Data.questArray[i].questName]!=undefined) {
+				Data.questArray[i].href=questHref[Data.questArray[i].questName];
 			}
 		}
 
 		var nextPage=currentPage+1; //pages[currentPage];
 		if (nextPage<pages.options.length) {
-			ssHelper.parseQuestBookStart(nextPage)
+			Helper.parseQuestBookStart(nextPage)
 		}
 		else {
-			ssHelper.injectQuestTable();
+			Helper.injectQuestTable();
 		}
 	},
 
 
 	injectQuestTable: function() {
-		document.getElementById('ssHelper:QuestManagerOutput').innerHTML=ssHelper.generateQuestTable();
-		var questTable=document.getElementById('ssHelper:QuestTable');
+		document.getElementById('Helper:QuestManagerOutput').innerHTML=Helper.generateQuestTable();
+		var questTable=document.getElementById('Helper:QuestTable');
 		for (var i=0; i<questTable.rows[0].cells.length; i++) {
 			var cell=questTable.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
-			cell.addEventListener('click', ssHelper.sortQuestTable, true);
+			cell.addEventListener('click', Helper.sortQuestTable, true);
 		}
-		document.getElementById("ssHelper:showCompletedQuests").addEventListener('click', ssHelper.toggleShowHiddenQuests, true);
+		document.getElementById("Helper:showCompletedQuests").addEventListener('click', Helper.toggleShowHiddenQuests, true);
 	},
 
 	toggleShowHiddenQuests: function(evt) {
 		GM_setValue("showCompletedQuests", evt.target.checked);
-		ssHelper.injectQuestTable();
+		Helper.injectQuestTable();
 	},
 
 	sortQuestTable: function(evt) {
 		var headerClicked=evt.target.getAttribute("sortKey")
 
-		if (ssHelper.sortAsc==undefined) ssHelper.sortAsc=true;
-		if (ssHelper.sortBy && ssHelper.sortBy==headerClicked) {
-			ssHelper.sortAsc=!ssHelper.sortAsc;
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
 		}
-		ssHelper.sortBy=headerClicked;
+		Helper.sortBy=headerClicked;
 
 		GM_log(headerClicked)
 
 		if (headerClicked=="level") {
-			ssHelper.questArray.sort(ssHelper.numberSort)
+			Data.questArray.sort(Helper.numberSort);
 		}
 		else if (headerClicked=="status") {
-			ssHelper.questArray.sort(ssHelper.questStatusSort)
+			Data.questArray.sort(Helper.questStatusSort);
 		}
 		else {
-			ssHelper.questArray.sort(ssHelper.stringSort)
+			Data.questArray.sort(Helper.stringSort);
 		}
-		ssHelper.injectQuestTable();
+		Helper.injectQuestTable();
 	},
 
 	generateQuestTable: function() {
-		var quests = ssData.questMatrix();
+		var quests = Data.questMatrix();
 		var q, bgColor;
-		//GM_log(ssHelper.characterLevel);
+		//GM_log(Helper.characterLevel);
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
-		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="ssHelper:QuestTable">';
+		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="Helper:QuestTable">';
 		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
 			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
 		var c=0;
@@ -2808,8 +2810,8 @@ var ssHelper = {
 			if (hideQuests.indexOf(q.questName)<0) {
 				var img="";
 				// if (q.status==undefined) img="";
-				if (q.status=="Completed") img=ssHelper.imageServer + "/skin/quest_complete.gif";
-				if (q.status=="Incomplete") img=ssHelper.imageServer + "/skin/quest_incomplete.gif";
+				if (q.status=="Completed") img=calfSystem.imageServer + "/skin/quest_complete.gif";
+				if (q.status=="Incomplete") img=calfSystem.imageServer + "/skin/quest_incomplete.gif";
 				if (q.status==undefined) img='data:image/png;base64,' +
 					'iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC5UlEQVR4nG1UX2sT' +
 					'QRD/7V5yub0kUi4mFFJfWq2i2Jb+0bZYoX2wgk+C6IvfwQf9AH4HP4KCgopvglIK' +
@@ -2828,7 +2830,7 @@ var ssHelper = {
 					'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
 					'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
 					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
-				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=ssHelper.characterLevel) {
+				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=Helper.characterLevel) {
 					bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
 					output+='<tr style="background-color:' + bgColor + '"><td>';
 					if (q.href!=undefined) {
@@ -2861,7 +2863,7 @@ var ssHelper = {
 		var type=reResult[3];
 		var pid=reResult[4];
 		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
-		theUrl = ssHelper.server + theUrl;
+		theUrl = calfSystem.server + theUrl;
 		return theUrl
 	},
 
@@ -2874,48 +2876,48 @@ var ssHelper = {
 		var pid      = reResult[4];
 		var vcode    = reResult[5];
 		var theUrl   = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p=" + pid + "&vcode=" + vcode
-		theUrl = ssHelper.server + theUrl;
+		theUrl = calfSystem.server + theUrl;
 		return theUrl
 	},
 
 
 	injectInventoryManager: function() {
 		var content=calfSystem.findNode("//table[@width='640']/..");
-		ssHelper.inventory=calfSystem.getValueJSON("inventory");
+		Helper.inventory=calfSystem.getValueJSON("inventory");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="ssHelper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="ssHelper:showUseableItems" type="checkbox"' +
+			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox"' +
 				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+
 			'</table>' +
-			'<div style="font-size:small;" id="ssHelper:InventoryManagerOutput">' +
+			'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
 			'' +
 			'</div>';
-		document.getElementById("ssHelper:InventoryManagerRefresh").addEventListener('click', ssHelper.parseProfileStart, true);
-		ssHelper.generateInventoryTable("self");
-		document.getElementById("ssHelper:showUseableItems").addEventListener('click', ssHelper.toggleShowUseableItems, true);
+		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
+		Helper.generateInventoryTable("self");
+		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
 	},
 
 	injectGuildInventoryManager: function() {
 		var content=calfSystem.findNode("//table[@width='640']/..");
 		var guildItemCount = "unknown"
-		ssHelper.guildinventory=calfSystem.getValueJSON("guildinventory");
-		if (ssHelper.guildinventory) guildItemCount = ssHelper.guildinventory.items.length;
+		Helper.guildinventory=calfSystem.getValueJSON("guildinventory");
+		if (Helper.guildinventory) guildItemCount = Helper.guildinventory.items.length;
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="ssHelper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="ssHelper:showUseableItems" type="checkbox" linkto="showUseableItems"' +
+			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox" linkto="showUseableItems"' +
 				(GM_getValue("showUseableItems")?' checked':'') + '/></b>&nbsp;Guild Item Count:&nbsp;' + guildItemCount +
 				'</td></tr>'+
 			'</table>' +
-			'<div style="font-size:small;" id="ssHelper:GuildInventoryManagerOutput">' +
+			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
 			'' +
 			'</div>';
-		document.getElementById("ssHelper:GuildInventoryManagerRefresh").addEventListener('click', ssHelper.parseGuildStart, true);
-		ssHelper.generateInventoryTable("guild");
-		document.getElementById("ssHelper:showUseableItems").addEventListener('click', ssHelper.toggleShowUseableItems, true);
+		document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
+		Helper.generateInventoryTable("guild");
+		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
 	},
 
 	toggleShowUseableItems: function(evt) {
@@ -2924,27 +2926,27 @@ var ssHelper = {
 	},
 
 	parseProfileStart: function(){
-		ssHelper.inventory = new Object;
-		ssHelper.inventory.items = new Array();
-		var output=document.getElementById('ssHelper:InventoryManagerOutput')
+		Helper.inventory = new Object;
+		Helper.inventory.items = new Array();
+		var output=document.getElementById('Helper:InventoryManagerOutput')
 		output.innerHTML='<br/>Parsing profile...';
-		calfSystem.xmlhttp('index.php?cmd=profile', function(responseDetails) {ssHelper.parseProfileDone(responseDetails.responseText);})
+		calfSystem.xmlhttp('index.php?cmd=profile', function(responseDetails) {Helper.parseProfileDone(responseDetails.responseText);})
 	},
 
 	parseProfileDone: function(responseText) {
 		var doc=calfSystem.createDocument(responseText);
-		var output=document.getElementById('ssHelper:InventoryManagerOutput');
+		var output=document.getElementById('Helper:InventoryManagerOutput');
 		var currentlyWorn=calfSystem.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
-			var item={"url": ssHelper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
+			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
 				"type":"worn", "index":(i+1),
 				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
 			if (i==0) output.innerHTML+="<br/>Found worn item "
 			output.innerHTML+=(i+1) + " ";
-			ssHelper.inventory.items.push(item);
+			Helper.inventory.items.push(item);
 		}
 		var	folderIDs = new Array();
-		ssHelper.folderIDs = folderIDs; //clear out the array before starting.
+		Helper.folderIDs = folderIDs; //clear out the array before starting.
 		GM_setValue("currentFolder", 1);
 		var folderLinks = calfSystem.findNodes("//a[contains(@href,'index.php?cmd=profile&folder_id=')]", doc);
 		//if folders are enabled then save the ID's in an array
@@ -2954,15 +2956,15 @@ var ssHelper = {
 				href = folderLink.getAttribute("href")
 				var folderID = /folder_id=([-0-9]+)/.exec(href)[1]*1;
 				folderIDs.push(folderID);
-				ssHelper.folderIDs = folderIDs;
+				Helper.folderIDs = folderIDs;
 			}
 		}
-		ssHelper.parseInventoryPage(responseText);
+		Helper.parseInventoryPage(responseText);
 	},
 
 	parseInventoryPage: function(responseText) {
 		var doc=calfSystem.createDocument(responseText);
-		var output=document.getElementById('ssHelper:InventoryManagerOutput');
+		var output=document.getElementById('Helper:InventoryManagerOutput');
 		var backpackItems = calfSystem.findNodes("//td[contains(@background,'2x3.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
 		var pages = calfSystem.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
 		var pageElement = calfSystem.findNode("//a[contains(@href,'backpack_page=')]/font", doc);
@@ -2970,24 +2972,24 @@ var ssHelper = {
 		if (pageElement) currentPage = parseInt(calfSystem.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent);
 		var currentFolder = GM_getValue("currentFolder");
 		var folderCount = 0, folderID = -1;
-		if (ssHelper.folderIDs.length<=1) {
+		if (Helper.folderIDs.length<=1) {
 			folderCount = 1;
 			folderID = -1;
 		} else {
-			folderCount = ssHelper.folderIDs.length;
-			folderID = ssHelper.folderIDs[currentFolder-1];
+			folderCount = Helper.folderIDs.length;
+			folderID = Helper.folderIDs[currentFolder-1];
 		}
 		if (backpackItems) {
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 
 			for (var i=0; i<backpackItems.length;i++) {
-				var theUrl=ssHelper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
 					"type":"backpack", "index":(i+1), "page":currentPage,
 					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found wearable item "
 				output.innerHTML+=(i+1) + " ";
-				ssHelper.inventory.items.push(item);
+				Helper.inventory.items.push(item);
 			}
 			} else {
 				output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
@@ -2995,29 +2997,29 @@ var ssHelper = {
 		if (currentPage<pages.length || currentFolder<folderCount) {
 			if (currentPage==pages.length && currentFolder<folderCount) {
 				currentPage = 0;
-				folderID = ssHelper.folderIDs[currentFolder];
+				folderID = Helper.folderIDs[currentFolder];
 				GM_setValue("currentFolder", currentFolder+1);
 			}
 			calfSystem.xmlhttp('index.php?cmd=profile&backpack_page='+(currentPage)+'&folder_id='+(folderID),
-				function(responseDetails) {ssHelper.parseInventoryPage(responseDetails.responseText);});
+				function(responseDetails) {Helper.parseInventoryPage(responseDetails.responseText);});
 		}
 		else {
 			output.innerHTML+="<br/>Parsing inventory item "
-			ssHelper.retrieveInventoryItem(0, "self");
+			Helper.retrieveInventoryItem(0, "self");
 		}
 	},
 
 	parseGuildStart: function(){
-		ssHelper.guildinventory = new Object;
-		ssHelper.guildinventory.items = new Array();
-		var output=document.getElementById('ssHelper:GuildInventoryManagerOutput')
+		Helper.guildinventory = new Object;
+		Helper.guildinventory.items = new Array();
+		var output=document.getElementById('Helper:GuildInventoryManagerOutput')
 		output.innerHTML='<br/>Parsing guild store ...';
-		calfSystem.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', function(responseDetails) {ssHelper.parseGuildStorePage(responseDetails.responseText);});
+		calfSystem.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', function(responseDetails) {Helper.parseGuildStorePage(responseDetails.responseText);});
 	},
 
 	parseGuildStorePage: function(responseText) {
 		var doc=calfSystem.createDocument(responseText);
-		var output=document.getElementById('ssHelper:GuildInventoryManagerOutput');
+		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		var guildstoreItems = calfSystem.findNodes("//a[contains(@href,'subcmd2=takeitem')]/img", doc);
 		var pages = calfSystem.findNodes("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]", doc);
 		var currentPage = parseInt(calfSystem.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent);
@@ -3025,61 +3027,61 @@ var ssHelper = {
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
 
 			for (var i=0; i<guildstoreItems.length;i++) {
-				var theUrl=ssHelper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
 					"type":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
 					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild store item "
 				output.innerHTML+=(i+1) + " ";
-				ssHelper.guildinventory.items.push(item);
+				Helper.guildinventory.items.push(item);
 			}
 		} else {
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
 		}
 		if (currentPage<pages.length) {
-			calfSystem.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), function(responseDetails) {ssHelper.parseGuildStorePage(responseDetails.responseText);});
+			calfSystem.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), function(responseDetails) {Helper.parseGuildStorePage(responseDetails.responseText);});
 		}
 		else {
 			output.innerHTML+='<br/>Parsing guild report page ...';
-			calfSystem.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', function(responseDetails) {ssHelper.parseGuildReportPage(responseDetails.responseText);})
+			calfSystem.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', function(responseDetails) {Helper.parseGuildReportPage(responseDetails.responseText);})
 		}
 	},
 
 	parseGuildReportPage: function(responseText) {
 		var doc=calfSystem.createDocument(responseText);
-		var output=document.getElementById('ssHelper:GuildInventoryManagerOutput');
+		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		var guildreportItems = calfSystem.findNodes("//img[contains(@src,'items')]", doc);
 		if (guildreportItems) {
 			for (var i=0; i<guildreportItems.length;i++) {
-				var theUrl=ssHelper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
 					"type":"guildreport", "index":(i+1), "worn":false,
 					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild report item "
 				output.innerHTML+=(i+1) + " ";
-				ssHelper.guildinventory.items.push(item);
+				Helper.guildinventory.items.push(item);
 			}
 		}
 		output.innerHTML+="<br/>Parsing guild inventory item "
-		ssHelper.retrieveInventoryItem(0, "guild");
+		Helper.retrieveInventoryItem(0, "guild");
 	},
 
 	retrieveInventoryItem: function(invIndex, reporttype) {
 		if (reporttype == "guild") {
-			targetInventory = ssHelper.guildinventory;
+			targetInventory = Helper.guildinventory;
 		} else {
-			targetInventory = ssHelper.inventory;
+			targetInventory = Helper.inventory;
 		}
-		calfSystem.xmlhttp(targetInventory.items[invIndex].url, function(responseDetails) {ssHelper.parseInventoryItem(responseDetails.responseText, this.callback, reporttype);}, {"invIndex": invIndex});
+		calfSystem.xmlhttp(targetInventory.items[invIndex].url, function(responseDetails) {Helper.parseInventoryItem(responseDetails.responseText, this.callback, reporttype);}, {"invIndex": invIndex});
 	},
 
 	parseInventoryItem: function(responseText, callback, reporttype) {
 		if (reporttype == "guild") {
-			targetId = 'ssHelper:GuildInventoryManagerOutput';
-			targetInventory = ssHelper.guildinventory;
+			targetId = 'Helper:GuildInventoryManagerOutput';
+			targetInventory = Helper.guildinventory;
 		} else {
-			targetId = 'ssHelper:InventoryManagerOutput';
-			targetInventory = ssHelper.inventory;
+			targetId = 'Helper:InventoryManagerOutput';
+			targetInventory = Helper.inventory;
 		}
 		var output=document.getElementById(targetId);
 		var doc=calfSystem.createDocument(responseText);
@@ -3123,27 +3125,27 @@ if (!nameNode) GM_log(responseText);
 		}
 
 		if (callback.invIndex<targetInventory.items.length-1) {
-			ssHelper.retrieveInventoryItem(callback.invIndex+1, reporttype);
+			Helper.retrieveInventoryItem(callback.invIndex+1, reporttype);
 		}
 		else {
 			output.innerHTML+="Parsing done!";
-			ssHelper.generateInventoryTable(reporttype);
+			Helper.generateInventoryTable(reporttype);
 		}
 	},
 
 	generateInventoryTable: function(reporttype) {
 		if (reporttype == "guild") {
-			targetId = 'ssHelper:GuildInventoryManagerOutput';
-			targetInventory = ssHelper.guildinventory;
+			targetId = 'Helper:GuildInventoryManagerOutput';
+			targetInventory = Helper.guildinventory;
 			inventoryShell = 'guildinventory';
 		} else {
-			targetId = 'ssHelper:InventoryManagerOutput';
-			targetInventory = ssHelper.inventory;
+			targetId = 'Helper:InventoryManagerOutput';
+			targetInventory = Helper.inventory;
 			inventoryShell = 'inventory';
 		}
 		if (!targetInventory) return;
 		var output=document.getElementById(targetId);
-		var result='<table id="ssHelper:InventoryTable"><tr>' +
+		var result='<table id="Helper:InventoryTable"><tr>' +
 			'<th width="10"></th><th width="180" align="left" sortkey="name">Name</th>' +
 			'<th width="10"></th><th sortkey="minLevel">Level</th>' +
 			'<th width="10"></th><th sortkey="attack">Att</th>' +
@@ -3161,10 +3163,10 @@ if (!nameNode) GM_log(responseText);
 			if (item.type=="worn") color='green';
 			if (item.type=="backpack") color='blue';
 
-			if (showUseableItems && item.minLevel > ssHelper.characterLevel) {
+			if (showUseableItems && item.minLevel > Helper.characterLevel) {
 			} else {
 				result+='<tr style="color:'+ color +'">' +
-					'<td>' + '<img src="' + ssHelper.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
+					'<td>' + '<img src="' + calfSystem.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 					'</td><td>' + item.name + '</td>' +
 					'<td></td><td align="right">' + item.minLevel + '</td>' +
 					'<td></td><td align="right">' + item.attack + '</td>' +
@@ -3172,7 +3174,7 @@ if (!nameNode) GM_log(responseText);
 					'<td></td><td align="right">' + item.armor + '</td>' +
 					'<td></td><td align="right">' + item.damage + '</td>' +
 					'<td></td><td align="right">' + item.forgelevel + '</td>' +
-					'<td>' + ((item.forgelevel>0)? "<img src='" + ssHelper.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+					'<td>' + ((item.forgelevel>0)? "<img src='" + calfSystem.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 						'<td align="right">' + item.craftlevel + '</td>' +
 					'<td></td>' +
 					'</tr>';
@@ -3184,12 +3186,12 @@ if (!nameNode) GM_log(responseText);
 		targetInventory.lastUpdate = (new Date()).getTime();
 		GM_setValue(inventoryShell, JSON.stringify(targetInventory));
 
-		var inventoryTable=document.getElementById('ssHelper:InventoryTable');
+		var inventoryTable=document.getElementById('Helper:InventoryTable');
 		for (var i=0; i<inventoryTable.rows[0].cells.length; i++) {
 			var cell=inventoryTable.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
-			cell.addEventListener('click', ssHelper.sortInventoryTable, true);
+			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
 	},
 
@@ -3200,63 +3202,63 @@ if (!nameNode) GM_log(responseText);
 		if (subPageIdRE)
 			subPageId=subPageIdRE[1];
 		if (subPageId == "guildinvmanager") {
-			ssHelper.guildinventory=calfSystem.getValueJSON("guildinventory");
-			targetInventory = ssHelper.guildinventory;
+			Helper.guildinventory=calfSystem.getValueJSON("guildinventory");
+			targetInventory = Helper.guildinventory;
 		} else {
-			ssHelper.inventory=calfSystem.getValueJSON("inventory");
-			targetInventory = ssHelper.inventory;
+			Helper.inventory=calfSystem.getValueJSON("inventory");
+			targetInventory = Helper.inventory;
 		}
 		var headerClicked=evt.target.getAttribute("sortKey")
-		if (ssHelper.sortAsc==undefined) ssHelper.sortAsc=true;
-		if (ssHelper.sortBy && ssHelper.sortBy==headerClicked) {
-			ssHelper.sortAsc=!ssHelper.sortAsc;
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
 		}
-		ssHelper.sortBy="name";
-		targetInventory.items.sort(ssHelper.stringSort)
-		ssHelper.sortBy=headerClicked;
+		Helper.sortBy="name";
+		targetInventory.items.sort(Helper.stringSort)
+		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
 			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel") {
-			targetInventory.items.sort(ssHelper.numberSort)
+			targetInventory.items.sort(Helper.numberSort)
 		}
 		else {
-			targetInventory.items.sort(ssHelper.stringSort)
+			targetInventory.items.sort(Helper.stringSort)
 		}
 		if (subPageId == "guildinvmanager") {
-			ssHelper.generateInventoryTable("guild");
+			Helper.generateInventoryTable("guild");
 		} else {
-			ssHelper.generateInventoryTable("self");
+			Helper.generateInventoryTable("self");
 		}
 	},
 
 	injectRecipeManager: function() {
 		var content=calfSystem.findNode("//table[@width='640']/..");
-		ssHelper.recipebook=calfSystem.getValueJSON("recipebook");
+		Helper.recipebook=calfSystem.getValueJSON("recipebook");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Recipe Manager</b></td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="ssHelper:RecipeManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:RecipeManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
 			'</table>' +
-			'<div style="font-size:small;" id="ssHelper:RecipeManagerOutput">' +
+			'<div style="font-size:small;" id="Helper:RecipeManagerOutput">' +
 			'' +
 			'</div>';
-		document.getElementById("ssHelper:RecipeManagerRefresh").addEventListener('click', ssHelper.parseInventingStart, true);
-		ssHelper.generateRecipeTable();
+		document.getElementById("Helper:RecipeManagerRefresh").addEventListener('click', Helper.parseInventingStart, true);
+		Helper.generateRecipeTable();
 	},
 
 	parseInventingStart: function(){
-		ssHelper.recipebook = new Object;
-		ssHelper.recipebook.recipe = new Array();
-		var output=document.getElementById('ssHelper:RecipeManagerOutput')
+		Helper.recipebook = new Object;
+		Helper.recipebook.recipe = new Array();
+		var output=document.getElementById('Helper:RecipeManagerOutput')
 		output.innerHTML='<br/>Parsing inventing screen ...';
 		calfSystem.xmlhttp('index.php?cmd=inventing&subcmd=&subcmd2=&page=0&search_text=', function(responseDetails, callback) {
-				ssHelper.parseInventingPage(responseDetails.responseText, this.callback);
+				Helper.parseInventingPage(responseDetails.responseText, this.callback);
 			}, {"page": 0});
 	},
 
 	parseInventingPage: function(responseText, callback) {
 		var doc=calfSystem.createDocument(responseText);
-		var output=document.getElementById('ssHelper:RecipeManagerOutput');
+		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentPage = callback.page;
 		var pages=calfSystem.findNode("//select[@name='page']", doc);
 		if (!pages) return;
@@ -3277,24 +3279,24 @@ if (!nameNode) GM_log(responseText);
 						"link": recipeLink,
 						"name":recipeName};
 					output.innerHTML+="Found recipe: "+ recipeName +"<br>";
-					ssHelper.recipebook.recipe.push(recipe);
+					Helper.recipebook.recipe.push(recipe);
 				}
 			}
 		}
 
 		var nextPage=currentPage+1; //pages[currentPage];
 		if (nextPage<pages.options.length) {
-			calfSystem.xmlhttp('index.php?cmd=inventing&page='+nextPage, function(responseDetails, callback) {ssHelper.parseInventingPage(responseDetails.responseText, this.callback);});
+			calfSystem.xmlhttp('index.php?cmd=inventing&page='+nextPage, function(responseDetails, callback) {Helper.parseInventingPage(responseDetails.responseText, this.callback);});
 		}
 		else {
 			output.innerHTML+='Finished parsing ... formatting ...';
-			ssHelper.generateRecipeTable();
+			Helper.generateRecipeTable();
 		}
 	},
 
 	generateRecipeTable: function() {
-		var output=document.getElementById('ssHelper:RecipeManagerOutput');
-		var result='<table id="ssHelper:RecipeTable"><tr>' +
+		var output=document.getElementById('Helper:RecipeManagerOutput');
+		var result='<table id="Helper:RecipeTable"><tr>' +
 			'<th width="10"></th><th align="left" sortkey="img"></th>' +
 			'<th width="10"></th><th align="left" sortkey="name">Name</th>' +
 			'<th width="10"></th>';
@@ -3303,8 +3305,8 @@ if (!nameNode) GM_log(responseText);
 		if (GM_getValue("hideRecipes")) hideRecipes=GM_getValue("hideRecipeNames").split(",");
 
 		var recipe;
-		for (var i=0; i<ssHelper.recipebook.recipe.length;i++) {
-			recipe=ssHelper.recipebook.recipe[i];
+		for (var i=0; i<Helper.recipebook.recipe.length;i++) {
+			recipe=Helper.recipebook.recipe[i];
 
 			if (hideRecipes.indexOf(recipe.name) == -1) {
 				result+='<tr>' +
@@ -3317,29 +3319,29 @@ if (!nameNode) GM_log(responseText);
 		result+='</table>';
 		output.innerHTML=result;
 
-		ssHelper.recipebook.lastUpdate = (new Date()).getTime();
-		GM_setValue("recipebook", JSON.stringify(ssHelper.recipebook));
+		Helper.recipebook.lastUpdate = (new Date()).getTime();
+		GM_setValue("recipebook", JSON.stringify(Helper.recipebook));
 
-		var recipeTable=document.getElementById('ssHelper:RecipeTable');
+		var recipeTable=document.getElementById('Helper:RecipeTable');
 		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
 			var cell=recipeTable.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
-			cell.addEventListener('click', ssHelper.sortRecipeTable, true);
+			cell.addEventListener('click', Helper.sortRecipeTable, true);
 		}
 	},
 
 	sortRecipeTable: function(evt) {
-		ssHelper.recipebook=calfSystem.getValueJSON("recipebook");
+		Helper.recipebook=calfSystem.getValueJSON("recipebook");
 		var headerClicked=evt.target.getAttribute("sortKey")
-		if (ssHelper.sortAsc==undefined) ssHelper.sortAsc=true;
-		if (ssHelper.sortBy && ssHelper.sortBy==headerClicked) {
-			ssHelper.sortAsc=!ssHelper.sortAsc;
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
 		}
-		ssHelper.sortBy=headerClicked;
+		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
-		ssHelper.recipebook.recipe.sort(ssHelper.stringSort)
-		ssHelper.generateRecipeTable();
+		Helper.recipebook.recipe.sort(Helper.stringSort)
+		Helper.generateRecipeTable();
 	},
 
 	injectGroupStats: function() {
@@ -3369,7 +3371,7 @@ if (!nameNode) GM_log(responseText);
 			"</td><td>(</td><td title='hpValue'>" + hpValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		calfSystem.xmlhttp("index.php?cmd=guild&subcmd=mercs", function(responseDetails) {
-				ssHelper.parseMercStats(responseDetails.responseText);
+				Helper.parseMercStats(responseDetails.responseText);
 			});
 	},
 
@@ -3406,19 +3408,19 @@ if (!nameNode) GM_log(responseText);
 		}
 		var attackValue = calfSystem.findNode("//td[@title='attackValue']");
 		attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-		attackValue.innerHTML = ssHelper.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
+		attackValue.innerHTML = Helper.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
 		var defenseValue = calfSystem.findNode("//td[@title='defenseValue']");
 		defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-		defenseValue.innerHTML = ssHelper.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
+		defenseValue.innerHTML = Helper.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
 		var armorValue = calfSystem.findNode("//td[@title='armorValue']");
 		armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-		armorValue.innerHTML = ssHelper.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
+		armorValue.innerHTML = Helper.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
 		var damageValue = calfSystem.findNode("//td[@title='damageValue']");
 		damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-		damageValue.innerHTML = ssHelper.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
+		damageValue.innerHTML = Helper.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
 		var hpValue = calfSystem.findNode("//td[@title='hpValue']");
 		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-		hpValue.innerHTML = ssHelper.addCommas(hpNumber - Math.round(totalMercHP*0.2));
+		hpValue.innerHTML = Helper.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
 
 	addCommas: function(nStr) {
@@ -3461,7 +3463,7 @@ if (!nameNode) GM_log(responseText);
 		var buttonElement = calfSystem.findNode("//td[input[@value='Join All Available Groups']]");
 		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
 
-		document.getElementById('fetchgroupstats').addEventListener('click', ssHelper.fetchGroupData, true);
+		document.getElementById('fetchgroupstats').addEventListener('click', Helper.fetchGroupData, true);
 
 	},
 
@@ -3471,7 +3473,7 @@ if (!nameNode) GM_log(responseText);
 		var allItems = calfSystem.findNodes("//img[@title='View Group Stats']");
 		for (var i=0; i<allItems.length; i++) {
 			calfSystem.xmlhttp(allItems[i].parentNode.getAttribute("href"), function(responseDetails) {
-				ssHelper.parseGroupData(responseDetails.responseText, this.callback);
+				Helper.parseGroupData(responseDetails.responseText, this.callback);
 			}, allItems[i].parentNode);
 		}
 	},
@@ -3527,7 +3529,7 @@ if (!nameNode) GM_log(responseText);
 		newCell.colSpan = "2";
 		newCell.align = "center";
 
-		document.getElementById('price').addEventListener('keyup', ssHelper.addMarketplaceWarning, true);
+		document.getElementById('price').addEventListener('keyup', Helper.addMarketplaceWarning, true);
 	},
 
 	addMarketplaceWarning: function(evt) {
@@ -3545,7 +3547,7 @@ if (!nameNode) GM_log(responseText);
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
 			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" +
-				ssHelper.addCommas(sellPrice) + warningText + "</span>";
+				Helper.addCommas(sellPrice) + warningText + "</span>";
 		}
 	},
 
@@ -3554,9 +3556,9 @@ if (!nameNode) GM_log(responseText);
 		var playerID = playerIDRE.exec(location);
 		if (playerID) {
 			var playerID = playerID[1];
-			calfSystem.xmlhttp("index.php?cmd=profile&player_id=" + playerID, function(responseDetails) {ssHelper.getPlayerBuffs(responseDetails.responseText);})
+			calfSystem.xmlhttp("index.php?cmd=profile&player_id=" + playerID, function(responseDetails) {Helper.getPlayerBuffs(responseDetails.responseText);})
 		}
-		calfSystem.xmlhttp("index.php?cmd=profile", function(responseDetails) {ssHelper.getSustain(responseDetails.responseText);})
+		calfSystem.xmlhttp("index.php?cmd=profile", function(responseDetails) {Helper.getSustain(responseDetails.responseText);})
 	},
 
 	getPlayerBuffs: function(responseText) {
@@ -3618,12 +3620,12 @@ if (!nameNode) GM_log(responseText);
 			resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
 
-		//var playerLevel=ssHelper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
-		//var playerXP=ssHelper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
+		//var playerLevel=Helper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
+		//var playerXP=Helper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
 		resultText += "</table>"
 
 		var statistics = calfSystem.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
-		statistics.style.backgroundImage = 'url(' + ssHelper.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
+		statistics.style.backgroundImage = 'url(' + calfSystem.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
 
 		var lastActivity = calfSystem.findNode("//font[contains(.,'Last Activity:')]", doc);
 		if (lastActivity) {
@@ -3670,7 +3672,7 @@ if (!nameNode) GM_log(responseText);
 			var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
 		}
 		var killStreakElement = calfSystem.findNode("//span[@findme='killstreak']");
-		killStreakElement.innerHTML = ssHelper.addCommas(playerKillStreakValue);
+		killStreakElement.innerHTML = Helper.addCommas(playerKillStreakValue);
 		GM_setValue("lastKillStreak", playerKillStreakValue);
 		var deathDealerBuff = calfSystem.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
@@ -3686,7 +3688,7 @@ if (!nameNode) GM_log(responseText);
 
 	injectCreature: function() {
 		calfSystem.xmlhttp("index.php?cmd=profile", function(responseDetails) {
-				ssHelper.getCreaturePlayerData(responseDetails.responseText);
+				Helper.getCreaturePlayerData(responseDetails.responseText);
 			})
 	},
 
@@ -3855,7 +3857,7 @@ if (!nameNode) GM_log(responseText);
 		textArea.cols=60;
 		textArea.id = "biotext";
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
-		var bioPreviewHTML = ssHelper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
@@ -3872,9 +3874,9 @@ if (!nameNode) GM_log(responseText);
 		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" +
 			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'>255</span>";
 
-		document.getElementById('biotext').addEventListener('keyup', ssHelper.updateBioCharacters, true);
+		document.getElementById('biotext').addEventListener('keyup', Helper.updateBioCharacters, true);
 		calfSystem.xmlhttp("index.php?cmd=points", function(responseDetails) {
-				ssHelper.getTotalBioCharacters(responseDetails.responseText);
+				Helper.getTotalBioCharacters(responseDetails.responseText);
 			})
 	},
 
@@ -3895,7 +3897,7 @@ if (!nameNode) GM_log(responseText);
 			characterCount.style.color = "blue";
 		}
 		var previewArea = calfSystem.findNode("//span[@findme='biopreview']");
-		var bioPreviewHTML = ssHelper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
 		previewArea.innerHTML = bioPreviewHTML;
 	},
 
@@ -3923,7 +3925,7 @@ if (!nameNode) GM_log(responseText);
 		var textArea = calfSystem.findNode("//textarea[@name='history']");
 		if (!textArea) return;
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
-		var bioPreviewHTML = ssHelper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
@@ -3941,9 +3943,9 @@ if (!nameNode) GM_log(responseText);
 		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='historylength' style='color:blue;'>" +
 			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='historytotal' style='color:blue;'>255</span>";
 
-		document.getElementById('historytext').addEventListener('keyup', ssHelper.updateHistoryCharacters, true);
+		document.getElementById('historytext').addEventListener('keyup', Helper.updateHistoryCharacters, true);
 		calfSystem.xmlhttp("index.php?cmd=points&subcmd=guildupgrades", function(responseDetails) {
-				ssHelper.getTotalHistoryCharacters(responseDetails.responseText);
+				Helper.getTotalHistoryCharacters(responseDetails.responseText);
 			});
 	},
 
@@ -3964,7 +3966,7 @@ if (!nameNode) GM_log(responseText);
 			characterCount.style.color = "blue";
 		}
 		var previewArea = calfSystem.findNode("//span[@findme='biopreview']");
-		var bioPreviewHTML = ssHelper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
 		previewArea.innerHTML = bioPreviewHTML;
 	},
 
@@ -4011,7 +4013,7 @@ if (!nameNode) GM_log(responseText);
 		mainTitle.innerHTML += '&nbsp<input id="findOnlinePlayers" type="button" value="Find Online Players" ' +
 			'title="Fetch the online status of the top 250 players (warning ... takes a few seconds)." class="custombutton">';
 
-		document.getElementById('findOnlinePlayers').addEventListener('click', ssHelper.findOnlinePlayers, true);
+		document.getElementById('findOnlinePlayers').addEventListener('click', Helper.findOnlinePlayers, true);
 	},
 
 	findOnlinePlayers: function() {
@@ -4033,7 +4035,7 @@ if (!nameNode) GM_log(responseText);
 				if (guildsChecked.search(playerGuildName) == -1) {
 					//GM_log(i+"::"+playerGuildName + "::" + playerGuildHref + "::" + aRow.innerHTML + "::" + guildsChecked);
 					calfSystem.xmlhttp(playerGuildHref, function(responseDetails) {
-							ssHelper.parseGuildOnline(responseDetails.responseText);
+							Helper.parseGuildOnline(responseDetails.responseText);
 						});
 					//log current guild as checked.
 					guildsChecked += ' ' + playerGuildName;
@@ -4109,16 +4111,16 @@ if (!nameNode) GM_log(responseText);
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="ssHelper:CheckUpdate"></td></tr>'+
-			'<tr><td colspan="4" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + ssHelper.formatDateTime(lastCheck) +
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
+			'<tr><td colspan="4" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + Helper.formatDateTime(lastCheck) +
 			')</span></td></tr>' +
 			'<tr><td colspan="4" align="left"><b>Enter guild names, seperated by commas</td></tr>' +
-			'<tr><td>Own Guild</td><td colspan="3">'+ ssHelper.injectSettingsGuildData("Self") + '</td></tr>' +
-			'<tr><td>Friendly Guilds</td><td colspan="3">'+ ssHelper.injectSettingsGuildData("Frnd") + '</td></tr>' +
-			'<tr><td>Old Guilds</td><td colspan="3">'+ ssHelper.injectSettingsGuildData("Past") + '</td></tr>' +
-			'<tr><td>Enemy Guilds</td><td colspan="3">'+ ssHelper.injectSettingsGuildData("Enmy") + '</td></tr>' +
+			'<tr><td>Own Guild</td><td colspan="3">'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
+			'<tr><td>Friendly Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
+			'<tr><td>Old Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
+			'<tr><td>Enemy Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
-			'<tr><td align="right">Quick Kill Style' + ssHelper.helpLink('Quick Kill Style', 'Unchecking the checkbox will prevent this option from displaying on the world screen.<br/>'+
+			'<tr><td align="right">Quick Kill Style' + Helper.helpLink('Quick Kill Style', 'Unchecking the checkbox will prevent this option from displaying on the world screen.<br/>'+
 				'<b><u>single</u></b> will fast kill a single monster<br>' +
 				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>off</b></u> returns control to game normal.') +
 				':</td><td><table><tbody>' +
@@ -4128,65 +4130,65 @@ if (!nameNode) GM_log(responseText);
 				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td>'+
 				'<td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
 				'</tbody></table></td>' +
-			'<td align="right">Hide Top Banner' + ssHelper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
+			'<td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Move FS box' + ssHelper.helpLink('Move SS2 Box', 'This will move the SS2 box to the left, under the menu, for better visibility (unless it is already hidden.') +
+			'<tr><td align="right">Move FS box' + Helper.helpLink('Move SS2 Box', 'This will move the SS2 box to the left, under the menu, for better visibility (unless it is already hidden.') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td>' +
-			'<td align="right">Hide \"New?\" box' + ssHelper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
+			'<td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
 				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Keep Combat Logs' + ssHelper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
+			'<tr><td align="right">Keep Combat Logs' + Helper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
-			'<td align="right" colspan="2"><input type="button" class="custombutton" value="Show Logs" id="ssHelper:ShowLogs"></td></td></tr>' +
-			'<tr><td align="right">Show Administrative Options' + ssHelper.helpLink('Show Admininstrative Options', 'Show ranking controls for guild managemenet in member profile page - ' +
+			'<td align="right" colspan="2"><input type="button" class="custombutton" value="Show Logs" id="Helper:ShowLogs"></td></td></tr>' +
+			'<tr><td align="right">Show Administrative Options' + Helper.helpLink('Show Admininstrative Options', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Dim Non Player<br/>Guild Log Messages' + ssHelper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
+			'<td align="right">Dim Non Player<br/>Guild Log Messages' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
 				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Disable Item Coloring' + ssHelper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
+			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
 				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
-			'<td align="right">Enable Log Coloring' + ssHelper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
+			'<td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Show Completed Quests' + ssHelper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
+			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
 				'quests you might have missed.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + ssHelper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' +
-				((ssHelper.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
+			'<td align="right">Show chat lines' + Helper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' +
+				((calfSystem.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
-			'<tr><td align="right">Show Combat Log' + ssHelper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
+			'<tr><td align="right">Show Combat Log' + Helper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + ssHelper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
-				((ssHelper.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+			'<td align="right">Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
+				((calfSystem.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Disable Guild Online List' + ssHelper.helpLink('Disable Guild Online List', 'This will disable the guild online list.') +
+			'<tr><td align="right">Disable Guild Online List' + Helper.helpLink('Disable Guild Online List', 'This will disable the guild online list.') +
 				':</td><td><input name="disableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("disableGuildOnlineList")?" checked":"") + '></td>' +
-			'<td align="right">Show Debug Info' + ssHelper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
+			'<td align="right">Show Debug Info' + Helper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Hide Krul Portal' + ssHelper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
+			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
 			'<td align="right"></td><td></td></tr>' +
-			'<tr><td align="right">Hunting Buffs' + ssHelper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
+			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
-			'<tr><td align="right">Hide Specific Quests' + ssHelper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
+			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
 				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
-			'<tr><td align="right">Hide Specific Recipes' + ssHelper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
+			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
 				'This works on Recipe Manager') +
 				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
 				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			//save button
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="ssHelper:SaveOptions"></td></tr>' +
+			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
-			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + ssHelper.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a> and ' +
-			'<a href="' + ssHelper.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
-			'with valuable contributions by <a href="' + ssHelper.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
-			'<a href="' + ssHelper.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
-			'<a href="' + ssHelper.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
+			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + calfSystem.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a> and ' +
+			'<a href="' + calfSystem.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'with valuable contributions by <a href="' + calfSystem.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
+			'<a href="' + calfSystem.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
+			'<a href="' + calfSystem.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions or bug reports<span></td></tr>' +
@@ -4197,14 +4199,14 @@ if (!nameNode) GM_log(responseText);
 		newCell.colSpan=3;
 		newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
-		document.getElementById('ssHelper:SaveOptions').addEventListener('click', ssHelper.saveConfig, true);
-		document.getElementById('ssHelper:CheckUpdate').addEventListener('click', ssHelper.checkForUpdate, true);
-		document.getElementById('ssHelper:ShowLogs').addEventListener('click', ssHelper.showLogs, true);
+		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
+		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
+		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 
-		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', ssHelper.toggleVisibilty, true);
-		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', ssHelper.toggleVisibilty, true);
-		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', ssHelper.toggleVisibilty, true);
-		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', ssHelper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', Helper.toggleVisibilty, true);
 
 		var krulButton = calfSystem.findNode('//input[@value="Instant Teleport back to Taulin Rad Lands"]');
 		onClick = krulButton.getAttribute("onclick");
@@ -4267,33 +4269,33 @@ if (!nameNode) GM_log(responseText);
 	},
 
 	showLogs: function(evt) {
-		document.location=ssHelper.server + "index.php?cmd=notepad&subcmd=showlogs"
+		document.location=calfSystem.server + "index.php?cmd=notepad&subcmd=showlogs"
 	},
 
 	injectNotepadShowLogs: function() {
 		var content=calfSystem.findNode("//table[@width='100%']/..");
 		var combatLog=GM_getValue("CombatLog");
 		content.innerHTML='<div align="center"><textarea align="center" cols="80" rows="25" '+
-			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="ssHelper:CombatLog">' + combatLog + '</textarea></div>' +
+			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog">' + combatLog + '</textarea></div>' +
 			'<br /><br /><table width="100%"><tr>'+
 			'<td colspan="2" align=center>' +
-			'<input type="button" class="custombutton" value="Select All" id="ssHelper:CopyLog"></td>' +
+			'<input type="button" class="custombutton" value="Select All" id="Helper:CopyLog"></td>' +
 			'<td colspan="2" align=center>' +
-			'<input type="button" class="custombutton" value="Clear" id="ssHelper:ClearLog"></td>' +
+			'<input type="button" class="custombutton" value="Clear" id="Helper:ClearLog"></td>' +
 			'</tr></table>';
-		document.getElementById("ssHelper:CopyLog").addEventListener("click", ssHelper.notepadCopyLog, true);
-		document.getElementById("ssHelper:ClearLog").addEventListener("click", ssHelper.notepadClearLog, true);
+		document.getElementById("Helper:CopyLog").addEventListener("click", Helper.notepadCopyLog, true);
+		document.getElementById("Helper:ClearLog").addEventListener("click", Helper.notepadClearLog, true);
 	},
 
 	notepadCopyLog: function() {
-		var combatLog=document.getElementById("ssHelper:CombatLog")
+		var combatLog=document.getElementById("Helper:CombatLog")
 		combatLog.focus();
 		combatLog.select();
 	},
 
 	notepadClearLog: function() {
 		if (window.confirm("Are you sure you want to clear your log?")) {
-			var combatLog=document.getElementById("ssHelper:CombatLog");
+			var combatLog=document.getElementById("Helper:CombatLog");
 			combatLog.innerHTML="";
 			GM_setValue("CombatLog", "");
 		}
@@ -4332,4 +4334,4 @@ if (!nameNode) GM_log(responseText);
 	}
 };
 
-ssHelper.onPageLoad(null);
+Helper.onPageLoad(null);
