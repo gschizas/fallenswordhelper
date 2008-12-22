@@ -942,7 +942,7 @@ var Helper = {
 						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
 				} else {
 					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + Helper.addCommas(lastKillStreak) +
-						"</span> Damage bonus: <span findme='damagebonus'>" + lastDeathDealerPercentage + "</span>%</td></tr>";
+						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%</td></tr>";
 					System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
 				}
 			}
