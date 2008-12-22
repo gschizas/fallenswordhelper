@@ -163,6 +163,9 @@ var Helper = {
 			case "viewcreature":
 				Helper.injectCreature();
 				break;
+			case "map":
+				Helper.injectWorldMap();
+				break;
 			case "-":
 				Helper.injectWorld();
 			}
@@ -707,35 +710,78 @@ var Helper = {
 	},
 
 	position: function() {
-		var result = new Object();
-		var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
-		if (!posit) return;
-		var thePosition=posit.innerHTML;
-		var positionRE=/\((\d+),\s*(\d+)\)/
-		var positionX = parseInt(thePosition.match(positionRE)[1]);
-		var positionY = parseInt(thePosition.match(positionRE)[2]);
-		result.X=positionX;
-		result.Y=positionY;
+		var result = {};
+		if (Helper.page=="world/map/-(-)") {
+			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/..");
+			result.X=playerTile.cellIndex;
+			result.Y=playerTile.parentNode.rowIndex;
+			result.type="worldmap";
+		}
+		else {
+			var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
+			if (!posit) return;
+			var thePosition=posit.innerHTML;
+			var positionRE=/\((\d+),\s*(\d+)\)/
+			var positionX = parseInt(thePosition.match(positionRE)[1]);
+			var positionY = parseInt(thePosition.match(positionRE)[2]);
+			result.X=positionX;
+			result.Y=positionY;
+			result.type="normal";
+		}
 		return result
 	},
 
 	mapThis: function() {
 		return;
 		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
-		// if ((realm) && (posit)>0) {
+		var posit = Helper.position();
+		// GM_log(JSON.stringify(posit));
+		if ((realm) && (posit)) {
 			var levelName=realm.innerHTML;
+			Helper.levelName = levelName;
 			var theMap = System.getValueJSON("map")
-			// GM_log(GM_getValue("map"))
-			// theMap = null;
 			if (!theMap) {
-				theMap = new Object;
+				theMap = {};
 				theMap["levels"] = {};
 			}
 			if (!theMap["levels"][levelName]) theMap["levels"][levelName] = {};
-			if (!theMap["levels"][levelName][positionX]) theMap["levels"][levelName][positionX]={};
-			theMap["levels"][levelName][positionX][positionY]="!";
+			if (!theMap["levels"][levelName][posit.X]) theMap["levels"][levelName][posit.X]={};
+			theMap["levels"][levelName][posit.X][posit.Y]="!";
+			GM_log(JSON.stringify(theMap))
 			GM_setValue("map", JSON.stringify(theMap));
-		// }
+		}
+	},
+
+	showMap: function(isLarge) {
+		return;
+		if (isLarge) {
+			var realm = System.findNode("//b");
+			Helper.levelName=realm.textContent.replace(" Map Overview", "");
+		}
+		GM_log(Helper.levelName);
+		var theMap = System.getValueJSON("map");
+		var displayedMap = System.findNode(isLarge?"//table[@width='1000']":"//table[@width='200']");
+		var posit = Helper.position();
+		GM_log(JSON.stringify(posit))
+		for (var y=0; y<displayedMap.rows.length; y++) {
+			var aRow = displayedMap.rows[y];
+			for (var x=0; x<aRow.cells.length; x++) {
+				var aCell = aRow.cells[x];
+				var dx=isLarge?x:posit.X+(x-2);
+				var dy=isLarge?y:posit.Y+(y-2);
+				// GM_log(dx + ":" + dy)
+				if (theMap["levels"][Helper.levelName] && theMap["levels"][Helper.levelName][dx] && theMap["levels"][Helper.levelName][dx][dy] && (theMap["levels"][Helper.levelName][dx][dy]=="!")) {
+					// aCell.setAttribute("background", "http://66.7.192.165/tiles/9_50.gif");
+
+					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
+						aCell.style.color="silver";
+						aCell.innerHTML="**";
+					};
+
+				}
+				// GM_log(x + ":" + y + " >> " + aCell.getAttribute("background"));
+			}
+		}
 	},
 
 	injectViewRecipe: function() {
@@ -1180,7 +1226,8 @@ var Helper = {
 	},
 
 	injectWorld: function() {
-		// Helper.mapThis();
+		Helper.mapThis();
+		Helper.showMap(false);
 		var realmRightBottom = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]");
 		if (!realmRightBottom) return;
 		var injectHere = realmRightBottom.parentNode.parentNode
@@ -1220,6 +1267,10 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
+	},
+
+	injectWorldMap: function() {
+		Helper.showMap(true);
 	},
 
 	prepareCombatLog: function() {
@@ -1712,14 +1763,12 @@ var Helper = {
 	moveMe: function(dx, dy) {
 		var pos=Helper.position();
 		if (pos) {
-			window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
-		}
-		if (Helper.page=="world/map/-(-)") {
-			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/..");
-			var pos = {};
-			pos.X=playerTile.cellIndex;
-			pos.Y=playerTile.parentNode.rowIndex;
-			System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
+			if (pos.type=="normal") {
+				window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
+			}
+			if (pos.type=="worldmap") {
+				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
+			}
 		}
 	},
 
@@ -2568,8 +2617,21 @@ var Helper = {
 		};
 		if (GM_getValue("disableItemColoring")) return;
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
-		var fontLineRX=fontLineRE.exec(responseText)
-		textNode.style.color=fontLineRX[1];
+		var fontLineRX=fontLineRE.exec(responseText);
+		var color=fontLineRX[1];
+		if (color=="#FFFFFF") {
+			var fontLineRE2=/<br>\s*<font color='([a-z]+)'>/i;
+			var fontLineRX2=fontLineRE2.exec(responseText);
+			if (fontLineRX2) {
+				color=fontLineRX2[1];
+			}
+		}
+		GM_log("bef:"+color);
+		if (color=="#40FFFF") color="#00A0A0";
+		if (color=="orange") color="#FF6000";
+		if (color=="#00FF00") color="#00B000";
+		GM_log("aft:"+color);
+		textNode.style.color=color;
 	},
 
 	injectProfile: function() {
