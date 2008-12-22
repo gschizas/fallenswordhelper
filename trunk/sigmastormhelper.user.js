@@ -2331,7 +2331,8 @@ var Helper = {
 					if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
 						var winningBidTable = aRow.cells[3].firstChild.firstChild;
 						var winningBidCell = winningBidTable.rows[0].cells[0];
-						var winningBidValue = winningBidCell.textContent.replace(/,/,"")*1;
+						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
+						var winningBidValue = parseInt(winningBidCell.textContent.replace(/,/,""));
 						newRow = winningBidTable.insertRow(2);
 						winningBidBuyoutCell = newRow.insertCell(0);
 						winningBidBuyoutCell.colSpan = "2";
@@ -2354,11 +2355,11 @@ var Helper = {
 					buyNowBuyoutCell.colSpan = "2";
 					buyNowBuyoutCell.align = "right";
 					var bidCell = bidBuyoutTable.rows[0].cells[0];
-					var bidValue = bidCell.textContent*1;
+					var bidValue = parseInt(bidCell.textContent);
 					var buyoutCell = bidBuyoutTable.rows[0].cells[3];
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
-						var overBid = Math.ceil(winningBidValue * 1.05);
+						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
 						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + Helper.addCommas(overBid) + '</span>&nbsp';
 					}
