@@ -2476,17 +2476,17 @@ var Helper = {
 		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID, Helper.recallItemReturnMessage, {"item": itemID, "target": evt.target});
 	},
 
-	recallItemReturnMessage: function(responseDetails, callback) {
+	recallItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
-		var info=responseDetails.responseText.match(infoRE)
+		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var info = responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
-			itemCellElement.innerHTML += " <span style='color:lime; font-weight:bold;'>" + info + "</span>";
-		} else {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+		} else {
+			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
 		}
 	},
 
