@@ -1417,9 +1417,7 @@ var Helper = {
 		// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
 		var specials=System.findNodes("//div[@id='specialsDiv']", doc);
 
-		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
-		var playerId=document.body.innerHTML.match(playerIdRE)[1];
-		GM_setValue("playerID",playerId);
+		var playerId = Layout.playerId();
 
 		var xpGain=responseText.match(/var\s+xpGain=(-?[0-9]+);/)
 		if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
@@ -2022,10 +2020,7 @@ var Helper = {
 
 	addGuildLogWidgets: function() {
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
-		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
-		var playerId=document.body.innerHTML.match(playerIdRE)[1]*1;
-		GM_setValue("playerID",playerId);
-
+		var playerId=Layout.playerId();
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var hideNextRows = 0;
 		for (var i=0;i<logTable.rows.length;i++) {
@@ -2076,11 +2071,7 @@ var Helper = {
 			.filterBy("status", "Online")
 			.map(function(element, index, array) {return element.id});
 
-		var playerId = GM_getValue("playerID");
-		if (!playerId) {
-			var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
-			playerId=document.body.innerHTML.match(playerIdRE)[1];
-		}
+		var playerId = Layout.playerId();
 		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
@@ -2342,9 +2333,7 @@ var Helper = {
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1')]");
 		var auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
 
-		var playerIdRE = /\.fallensword.com\/\?ref=(\d+)/
-		var playerId = document.body.innerHTML.match(playerIdRE)[1];
-		GM_setValue("playerID",playerId);
+		var playerId = Layout.playerId();
 
 		var newRow, newCell, bidMinBuyoutCell, buyNowBuyoutCell,winningBidBuyoutCell;
 		for (var i=0;i<auctionTable.rows.length;i++) {
@@ -2370,7 +2359,7 @@ var Helper = {
 						var winningBidTable = aRow.cells[3].firstChild.firstChild;
 						var winningBidCell = winningBidTable.rows[0].cells[0];
 						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
-						var winningBidValue = parseInt(winningBidCell.textContent.replace(/,/g,""));
+						var winningBidValue = System.intValue(winningBidCell.textContent);
 						newRow = winningBidTable.insertRow(2);
 						winningBidBuyoutCell = newRow.insertCell(0);
 						winningBidBuyoutCell.colSpan = "2";
@@ -3451,21 +3440,21 @@ var Helper = {
 				totalMercHP += mercHPValue;
 			}
 		}
-		var attackValue = System.findNode("//td[@title='attackValue']");
-		attackNumber=attackValue.innerHTML.replace(/,/g,"")*1;
-		attackValue.innerHTML = System.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
-		var defenseValue = System.findNode("//td[@title='defenseValue']");
-		defenseNumber=defenseValue.innerHTML.replace(/,/g,"")*1;
+		var attackValue        = System.findNode("//td[@title='attackValue']");
+		attackNumber           = System.intValue(attackValue.innerHTML);
+		attackValue.innerHTML  = System.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
+		var defenseValue       = System.findNode("//td[@title='defenseValue']");
+		defenseNumber          = System.intValue(defenseValue.innerHTML);
 		defenseValue.innerHTML = System.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
-		var armorValue = System.findNode("//td[@title='armorValue']");
-		armorNumber=armorValue.innerHTML.replace(/,/g,"")*1;
-		armorValue.innerHTML = System.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
-		var damageValue = System.findNode("//td[@title='damageValue']");
-		damageNumber=damageValue.innerHTML.replace(/,/g,"")*1;
-		damageValue.innerHTML = System.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
-		var hpValue = System.findNode("//td[@title='hpValue']");
-		hpNumber=hpValue.innerHTML.replace(/,/g,"")*1;
-		hpValue.innerHTML = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
+		var armorValue         = System.findNode("//td[@title='armorValue']");
+		armorNumber            = System.intValue(armorValue.innerHTML);
+		armorValue.innerHTML   = System.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
+		var damageValue        = System.findNode("//td[@title='damageValue']");
+		damageNumber           = System.intValue(damageValue.innerHTML);
+		damageValue.innerHTML  = System.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
+		var hpValue            = System.findNode("//td[@title='hpValue']");
+		hpNumber               = System.intValue(hpValue.innerHTML);
+		hpValue.innerHTML      = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
 
 	injectGroups: function() {
@@ -3700,7 +3689,7 @@ var Helper = {
 		var killStreakText = System.findNode("//b[contains(.,'Kill')]", doc);
 		if (killStreakText) {
 			var killStreakLocation = killStreakText.parentNode.nextSibling;
-			var playerKillStreakValue = killStreakLocation.textContent.replace(/,/g,"")*1;
+			var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
 		}
 		var killStreakElement = System.findNode("//span[@findme='killstreak']");
 		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
@@ -3747,7 +3736,7 @@ var Helper = {
 			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
 				var killStreakText = anItem;
 				var killStreakLocation = killStreakText.parentNode.nextSibling;
-				var playerKillStreakValue = killStreakLocation.textContent.replace(/,/g,"")*1;
+				var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
 			}
 		}
 		//get buffs here later ... DD, CA, DC, Constitution, etc
@@ -3803,13 +3792,13 @@ var Helper = {
 		//creaturedata
 		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
 		if (!creatureStatTable) {return;}
-		var creatureClass = creatureStatTable.rows[1].cells[1].textContent;
-		var creatureLevel = creatureStatTable.rows[1].cells[3].textContent;
-		var creatureAttack = creatureStatTable.rows[2].cells[1].textContent.replace(/,/g,"")*1;
-		var creatureDefense = creatureStatTable.rows[2].cells[3].textContent.replace(/,/g,"")*1;
-		var creatureArmor = creatureStatTable.rows[3].cells[1].textContent.replace(/,/g,"")*1;
-		var creatureDamage = creatureStatTable.rows[3].cells[3].textContent.replace(/,/g,"")*1;
-		var creatureHP = creatureStatTable.rows[4].cells[1].textContent.replace(/,/g,"")*1;
+		var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
+		var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
+		var creatureAttack  = System.intValue(creatureStatTable.rows[2].cells[1].textContent);
+		var creatureDefense = System.intValue(creatureStatTable.rows[2].cells[3].textContent);
+		var creatureArmor   = System.intValue(creatureStatTable.rows[3].cells[1].textContent);
+		var creatureDamage  = System.intValue(creatureStatTable.rows[3].cells[3].textContent);
+		var creatureHP      = System.intValue(creatureStatTable.rows[4].cells[1].textContent);
 		//math section ... analysis
 		//Holy Flame adds its bonus after the armor of the creature has been taken off.
 		var extraNotes = "";

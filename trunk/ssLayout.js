@@ -56,4 +56,11 @@ var Layout = {
 	notebookContent: function() {
 		return System.findNode("//table[@width='640']/..");
 	},
+
+	playerId: function() {
+		var playerIdRE = /sigmastorm2.com\/\?ref=(\d+)/
+		var playerId=parseInt(document.body.innerHTML.match(playerIdRE)[1]);
+		GM_setValue("playerID",playerId);
+	},
+
 }

@@ -163,6 +163,9 @@ var Helper = {
 			case "viewcreature":
 				Helper.injectCreature();
 				break;
+			case "map":
+				Helper.injectWorldMap();
+				break;
 			case "-":
 				Helper.injectWorld();
 			}
@@ -373,16 +376,12 @@ var Helper = {
 
 		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
 		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
-		var curStamina = staminaRE.exec(mouseoverText)[1];
-		curStamina = curStamina.replace(/,/,"")*1;
-		var maxStamina = staminaRE.exec(mouseoverText)[2];
-		maxStamina = maxStamina.replace(/,/,"")*1;
+		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
+		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
 		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
-		var gainPerHour = gainPerHourRE.exec(mouseoverText)[1];
-		gainPerHour = gainPerHour.replace(/,/,"")*1;
+		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
 		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m/
-		var nextGainMinutes = nextGainRE.exec(mouseoverText)[1];
-		nextGainMinutes = nextGainMinutes.replace(/,/,"")*1;
+		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
 		nextGainHours = nextGainMinutes/60;
 		//get the max hours to still be inside stamina maximum
 		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
@@ -707,35 +706,78 @@ var Helper = {
 	},
 
 	position: function() {
-		var result = new Object();
-		var posit = System.findNode("//td[contains(@background, '/sigma2/coord_bg_0.gif')]/font/center");
-		if (!posit) return;
-		var thePosition=posit.textContent;
-		var positionRE=/-\s*\((\d+),\s*(\d+)\)/
-		var positionX = parseInt(thePosition.match(positionRE)[1]);
-		var positionY = parseInt(thePosition.match(positionRE)[2]);
-		result.X=positionX;
-		result.Y=positionY;
+		var result = {};
+		if (Helper.page=="world/map/-(-)") {
+			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/..");
+			result.X=playerTile.cellIndex;
+			result.Y=playerTile.parentNode.rowIndex;
+			result.type="worldmap";
+		}
+		else {
+			var posit = System.findNode("//td[contains(@background, '/sigma2/coord_bg_0.gif')]/font/center");
+			if (!posit) return;
+			var thePosition=posit.textContent;
+			var positionRE=/-\s*\((\d+),\s*(\d+)\)/
+			var positionX = parseInt(thePosition.match(positionRE)[1]);
+			var positionY = parseInt(thePosition.match(positionRE)[2]);
+			result.X=positionX;
+			result.Y=positionY;
+			result.type="normal";
+		}
 		return result
 	},
 
 	mapThis: function() {
 		return;
 		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
-		// if ((realm) && (posit)>0) {
+		var posit = Helper.position();
+		// GM_log(JSON.stringify(posit));
+		if ((realm) && (posit)) {
 			var levelName=realm.innerHTML;
+			Helper.levelName = levelName;
 			var theMap = System.getValueJSON("map")
-			// GM_log(GM_getValue("map"))
-			// theMap = null;
 			if (!theMap) {
-				theMap = new Object;
+				theMap = {};
 				theMap["levels"] = {};
 			}
 			if (!theMap["levels"][levelName]) theMap["levels"][levelName] = {};
-			if (!theMap["levels"][levelName][positionX]) theMap["levels"][levelName][positionX]={};
-			theMap["levels"][levelName][positionX][positionY]="!";
+			if (!theMap["levels"][levelName][posit.X]) theMap["levels"][levelName][posit.X]={};
+			theMap["levels"][levelName][posit.X][posit.Y]="!";
+			GM_log(JSON.stringify(theMap))
 			GM_setValue("map", JSON.stringify(theMap));
-		// }
+		}
+	},
+
+	showMap: function(isLarge) {
+		return;
+		if (isLarge) {
+			var realm = System.findNode("//b");
+			Helper.levelName=realm.textContent.replace(" Map Overview", "");
+		}
+		GM_log(Helper.levelName);
+		var theMap = System.getValueJSON("map");
+		var displayedMap = System.findNode(isLarge?"//table[@width='1000']":"//table[@width='200']");
+		var posit = Helper.position();
+		GM_log(JSON.stringify(posit))
+		for (var y=0; y<displayedMap.rows.length; y++) {
+			var aRow = displayedMap.rows[y];
+			for (var x=0; x<aRow.cells.length; x++) {
+				var aCell = aRow.cells[x];
+				var dx=isLarge?x:posit.X+(x-2);
+				var dy=isLarge?y:posit.Y+(y-2);
+				// GM_log(dx + ":" + dy)
+				if (theMap["levels"][Helper.levelName] && theMap["levels"][Helper.levelName][dx] && theMap["levels"][Helper.levelName][dx][dy] && (theMap["levels"][Helper.levelName][dx][dy]=="!")) {
+					// aCell.setAttribute("background", "http://66.7.192.165/tiles/9_50.gif");
+
+					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
+						aCell.style.color="silver";
+						aCell.innerHTML="**";
+					};
+
+				}
+				// GM_log(x + ":" + y + " >> " + aCell.getAttribute("background"));
+			}
+		}
 	},
 
 	injectViewRecipe: function() {
@@ -1180,7 +1222,8 @@ var Helper = {
 	},
 
 	injectWorld: function() {
-		// Helper.mapThis();
+		Helper.mapThis();
+		Helper.showMap(false);
 		var realmRightBottom = System.findNode("//tr[contains(td/@background, 'location_header.gif')]");
 		if (!realmRightBottom) return;
 		var injectHere = realmRightBottom.parentNode.parentNode
@@ -1220,6 +1263,10 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
+	},
+
+	injectWorldMap: function() {
+		Helper.showMap(true);
 	},
 
 	prepareCombatLog: function() {
@@ -1333,7 +1380,6 @@ var Helper = {
 			}
 		}
 		*/
-
 		var recolor=System.findNodes("//td[contains(@style,'statistics_head_bg.gif')]/..", statsNode);
 		for (var i=0; i<recolor.length; i++) {
 			recolor[i].style.color="#84ADAC";
@@ -1377,9 +1423,7 @@ var Helper = {
 		// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
 		var specials=System.findNodes("//div[@id='specialsDiv']", doc);
 
-		var playerIdRE = /sigmastorm2.com\/\?ref=(\d+)/
-		var playerId=document.body.innerHTML.match(playerIdRE)[1];
-		GM_setValue("playerID",playerId);
+		var playerId = Layout.playerId();
 
 		var xpGain=responseText.match(/var\s+xpGain=(-?[0-9]+);/)
 		if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
@@ -1719,14 +1763,12 @@ var Helper = {
 	moveMe: function(dx, dy) {
 		var pos=Helper.position();
 		if (pos) {
-			window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
-		}
-		if (Helper.page=="world/map/-(-)") {
-			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/..");
-			var pos = {};
-			pos.X=playerTile.cellIndex;
-			pos.Y=playerTile.parentNode.rowIndex;
-			System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
+			if (pos.type=="normal") {
+				window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
+			}
+			if (pos.type=="worldmap") {
+				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
+			}
 		}
 	},
 
@@ -1984,10 +2026,7 @@ var Helper = {
 
 	addGuildLogWidgets: function() {
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
-		var playerIdRE = /sigmastorm2.com\/\?ref=(\d+)/
-		var playerId=document.body.innerHTML.match(playerIdRE)[1]*1;
-		GM_setValue("playerID",playerId);
-
+		var playerId=Layout.playerId();
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var hideNextRows = 0;
 		for (var i=0;i<logTable.rows.length;i++) {
@@ -2038,11 +2077,7 @@ var Helper = {
 			.filterBy("status", "Online")
 			.map(function(element, index, array) {return element.id});
 
-		var playerId = GM_getValue("playerID");
-		if (!playerId) {
-			var playerIdRE = /\.sigmastorm2.com\/\?ref=(\d+)/
-			playerId=document.body.innerHTML.match(playerIdRE)[1];
-		}
+		var playerId = Layout.playerId();
 		GM_setValue("memberlist", JSON.stringify(memberList));
 		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
@@ -2304,9 +2339,7 @@ var Helper = {
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1')]");
 		var auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
 
-		var playerIdRE = /\.sigmastorm2.com\/\?ref=(\d+)/
-		var playerId = document.body.innerHTML.match(playerIdRE)[1];
-		GM_setValue("playerID",playerId);
+		var playerId = Layout.playerId();
 
 		var newRow, newCell, bidMinBuyoutCell, buyNowBuyoutCell,winningBidBuyoutCell;
 		for (var i=0;i<auctionTable.rows.length;i++) {
@@ -2332,7 +2365,7 @@ var Helper = {
 						var winningBidTable = aRow.cells[3].firstChild.firstChild;
 						var winningBidCell = winningBidTable.rows[0].cells[0];
 						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
-						var winningBidValue = parseInt(winningBidCell.textContent.replace(/,/,""));
+						var winningBidValue = System.intValue(winningBidCell.textContent);
 						newRow = winningBidTable.insertRow(2);
 						winningBidBuyoutCell = newRow.insertCell(0);
 						winningBidBuyoutCell.colSpan = "2";
@@ -3401,32 +3434,20 @@ var Helper = {
 			}
 		}
 		var attackValue = System.findNode("//td[@title='attackValue']");
-		attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
+		attackNumber           = System.intValue(attackValue.innerHTML);
 		attackValue.innerHTML = System.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
 		var defenseValue = System.findNode("//td[@title='defenseValue']");
-		defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
+		defenseNumber          = System.intValue(defenseValue.innerHTML);
 		defenseValue.innerHTML = System.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
 		var armorValue = System.findNode("//td[@title='armorValue']");
-		armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
+		armorNumber            = System.intValue(armorValue.innerHTML);
 		armorValue.innerHTML = System.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
 		var damageValue = System.findNode("//td[@title='damageValue']");
-		damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
+		damageNumber           = System.intValue(damageValue.innerHTML);
 		damageValue.innerHTML = System.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
 		var hpValue = System.findNode("//td[@title='hpValue']");
-		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
+		hpNumber               = System.intValue(hpValue.innerHTML);
 		hpValue.innerHTML = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
-	},
-
-	addCommas: function(nStr) {
-		nStr += '';
-		x = nStr.split('.');
-		x1 = x[0];
-		x2 = x.length > 1 ? '.' + x[1] : '';
-		var rgx = /(\d+)(\d{3})/;
-		while (rgx.test(x1)) {
-			x1 = x1.replace(rgx, '$1' + ',' + '$2');
-		}
-		return x1 + x2;
 	},
 
 	injectGroups: function() {
@@ -3661,7 +3682,7 @@ var Helper = {
 		var killStreakText = System.findNode("//b[contains(.,'Kill')]", doc);
 		if (killStreakText) {
 			var killStreakLocation = killStreakText.parentNode.nextSibling;
-			var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
+			var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
 		}
 		var killStreakElement = System.findNode("//span[@findme='killstreak']");
 		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
@@ -3708,7 +3729,7 @@ var Helper = {
 			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
 				var killStreakText = anItem;
 				var killStreakLocation = killStreakText.parentNode.nextSibling;
-				var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
+				var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
 			}
 		}
 		//get buffs here later ... DD, CA, DC, Constitution, etc
@@ -3766,11 +3787,11 @@ var Helper = {
 		if (!creatureStatTable) {return;}
 		var creatureClass = creatureStatTable.rows[1].cells[1].textContent;
 		var creatureLevel = creatureStatTable.rows[1].cells[3].textContent;
-		var creatureAttack = creatureStatTable.rows[2].cells[1].textContent.replace(/,/,"")*1;
-		var creatureDefense = creatureStatTable.rows[2].cells[3].textContent.replace(/,/,"")*1;
-		var creatureArmor = creatureStatTable.rows[3].cells[1].textContent.replace(/,/,"")*1;
-		var creatureDamage = creatureStatTable.rows[3].cells[3].textContent.replace(/,/,"")*1;
-		var creatureHP = creatureStatTable.rows[4].cells[1].textContent.replace(/,/,"")*1;
+		var creatureAttack  = System.intValue(creatureStatTable.rows[2].cells[1].textContent);
+		var creatureDefense = System.intValue(creatureStatTable.rows[2].cells[3].textContent);
+		var creatureArmor   = System.intValue(creatureStatTable.rows[3].cells[1].textContent);
+		var creatureDamage  = System.intValue(creatureStatTable.rows[3].cells[3].textContent);
+		var creatureHP      = System.intValue(creatureStatTable.rows[4].cells[1].textContent);
 		//math section ... analysis
 		//Holy Flame adds its bonus after the armor of the creature has been taken off.
 		var extraNotes = "";

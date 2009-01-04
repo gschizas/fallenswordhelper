@@ -58,4 +58,11 @@ var Layout = {
 		return System.findNode("//table[@width='100%']/..");
 	},
 
+	playerId: function() {
+		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
+		var playerId=parseInt(document.body.innerHTML.match(playerIdRE)[1]);
+		GM_setValue("playerID",playerId);
+		return playerId;
+	},
+
 }
