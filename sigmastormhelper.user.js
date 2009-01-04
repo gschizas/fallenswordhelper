@@ -554,36 +554,36 @@ var Helper = {
 		}
 		var LDProcessedValue = System.findNode("//td[@title='LDProcessed']");
 		if (LDProcessedValue.innerHTML == "1") {
-			var attackValue = System.findNode("//td[@title='attackValue']");
-			var LDattackValue = System.findNode("//td[@title='LDattackValue']");
-			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-			LDattackNumber=LDattackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
-			var defenseValue = System.findNode("//td[@title='defenseValue']");
-			var LDdefenseValue = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-			LDdefenseNumber=LDdefenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
-			var armorValue = System.findNode("//td[@title='armorValue']");
-			var LDarmorValue = System.findNode("//td[@title='LDarmorValue']");
-			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-			LDarmorNumber=LDarmorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
-			var damageValue = System.findNode("//td[@title='damageValue']");
-			var LDdamageValue = System.findNode("//td[@title='LDdamageValue']");
-			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-			LDdamageNumber=LDdamageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
-			var hpValue = System.findNode("//td[@title='hpValue']");
-			var LDhpValue = System.findNode("//td[@title='LDhpValue']");
-			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-			LDhpNumber=LDhpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
-			var defendersProcessed = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
-			var LDpercentageValue = System.findNode("//td[@title='LDPercentage']");
-			LDpercentageValue.innerHTML = (relicMultiplier*100) + "%";
+			var attackValue              = System.findNode("//td[@title='attackValue']");
+			var LDattackValue            = System.findNode("//td[@title='LDattackValue']");
+			attackNumber                 = System.intValue(attackValue.innerHTML);
+			LDattackNumber               = System.intValue(LDattackValue.innerHTML);
+			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
+			var defenseValue             = System.findNode("//td[@title='defenseValue']");
+			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
+			defenseNumber                = System.intValue(defenseValue.innerHTML);
+			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
+			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			var armorValue               = System.findNode("//td[@title='armorValue']");
+			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
+			armorNumber                  = System.intValue(armorValue.innerHTML);
+			LDarmorNumber                = System.intValue(LDarmorValue.innerHTML);
+			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
+			var damageValue              = System.findNode("//td[@title='damageValue']");
+			var LDdamageValue            = System.findNode("//td[@title='LDdamageValue']");
+			damageNumber                 = System.intValue(damageValue.innerHTML);
+			LDdamageNumber               = System.intValue(LDdamageValue.innerHTML);
+			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+			var hpValue                  = System.findNode("//td[@title='hpValue']");
+			var LDhpValue                = System.findNode("//td[@title='LDhpValue']");
+			hpNumber                     = System.intValue(hpValue.innerHTML);
+			LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
+			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
+			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
+			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
+			var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
+			LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
 		}
 	},
 
@@ -620,49 +620,49 @@ var Helper = {
 
 		if (defenderCount != 0) {
 			var defenderMultiplier = 0.2;
-			var attackValue = System.findNode("//td[@title='attackValue']");
-			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
-			var defenseValue = System.findNode("//td[@title='defenseValue']");
-			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
-			var armorValue = System.findNode("//td[@title='armorValue']");
-			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
-			var damageValue = System.findNode("//td[@title='damageValue']");
-			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
-			var hpValue = System.findNode("//td[@title='hpValue']");
-			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
-			var defendersProcessed = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
+			var attackValue              = System.findNode("//td[@title='attackValue']");
+			attackNumber                 = System.intValue(attackValue.innerHTML);
+			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+			var defenseValue             = System.findNode("//td[@title='defenseValue']");
+			defenseNumber                = System.intValue(defenseValue.innerHTML);
+			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			var armorValue               = System.findNode("//td[@title='armorValue']");
+			armorNumber                  = System.intValue(armorValue.innerHTML);
+			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+			var damageValue              = System.findNode("//td[@title='damageValue']");
+			damageNumber                 = System.intValue(damageValue.innerHTML);
+			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+			var hpValue                  = System.findNode("//td[@title='hpValue']");
+			hpNumber                     = System.intValue(hpValue.innerHTML);
+			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
+			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
+			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 		}
 		else {
 			var defenderMultiplier = 1;
 			var attackValue = System.findNode("//td[@title='LDattackValue']");
-			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
+			attackNumber = System.intValue(attackValue.innerHTML);
+			attackValue.innerHTML = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
 			var defenseValue = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			defenseNumber=System.intValue(defenseValue.innerHTML);
+			defenseValue.innerHTML = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
 			var armorValue = System.findNode("//td[@title='LDarmorValue']");
-			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
+			armorNumber=System.intValue(armorValue.innerHTML);
+			armorValue.innerHTML = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
 			var damageValue = System.findNode("//td[@title='LDdamageValue']");
-			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
+			damageNumber=System.intValue(damageValue.innerHTML);
+			damageValue.innerHTML = System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
 			var hpValue = System.findNode("//td[@title='LDhpValue']");
-			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
+			hpNumber=System.intValue(hpValue.innerHTML);
+			hpValue.innerHTML = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
 			var defendersProcessed = System.findNode("//td[@title='LDProcessed']");
-			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
+			defendersProcessedNumber=System.intValue(defendersProcessed.innerHTML);
+			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 		}
 		var relicProcessedValue = System.findNode("//td[@title='relicProcessed']");
 		var relicCountValue = System.findNode("//td[@title='relicCount']");
-		var relicCount = relicCountValue.innerHTML.replace(/,/,"")*1;
+		var relicCount = System.intValue(relicCountValue.innerHTML);
 
 		var relicMultiplier = 1;
 		if (relicCount == 1) {
@@ -673,36 +673,36 @@ var Helper = {
 		}
 
 		if (defenderCount == 0 && relicProcessedValue.innerHTML == "1") {
-			var attackValue = System.findNode("//td[@title='attackValue']");
-			var LDattackValue = System.findNode("//td[@title='LDattackValue']");
-			attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-			LDattackNumber=LDattackValue.innerHTML.replace(/,/,"")*1;
-			attackValue.innerHTML = Helper.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
-			var defenseValue = System.findNode("//td[@title='defenseValue']");
-			var LDdefenseValue = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-			LDdefenseNumber=LDdefenseValue.innerHTML.replace(/,/,"")*1;
-			defenseValue.innerHTML = Helper.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
-			var armorValue = System.findNode("//td[@title='armorValue']");
-			var LDarmorValue = System.findNode("//td[@title='LDarmorValue']");
-			armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-			LDarmorNumber=LDarmorValue.innerHTML.replace(/,/,"")*1;
-			armorValue.innerHTML = Helper.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
-			var damageValue = System.findNode("//td[@title='damageValue']");
-			var LDdamageValue = System.findNode("//td[@title='LDdamageValue']");
-			damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-			LDdamageNumber=LDdamageValue.innerHTML.replace(/,/,"")*1;
-			damageValue.innerHTML = Helper.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
-			var hpValue = System.findNode("//td[@title='hpValue']");
-			var LDhpValue = System.findNode("//td[@title='LDhpValue']");
-			hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-			LDhpNumber=LDhpValue.innerHTML.replace(/,/,"")*1;
-			hpValue.innerHTML = Helper.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
-			var defendersProcessed = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber=defendersProcessed.innerHTML.replace(/,/,"")*1;
-			defendersProcessed.innerHTML = Helper.addCommas(defendersProcessedNumber + 1);
-			var LDpercentageValue = System.findNode("//td[@title='LDPercentage']");
-			LDpercentageValue.innerHTML = (relicMultiplier*100) + "%";
+			var attackValue              = System.findNode("//td[@title='attackValue']");
+			var LDattackValue            = System.findNode("//td[@title='LDattackValue']");
+			attackNumber                 = System.intValue(attackValue.innerHTML);
+			LDattackNumber               = System.intValue(LDattackValue.innerHTML);
+			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
+			var defenseValue             = System.findNode("//td[@title='defenseValue']");
+			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
+			defenseNumber                = System.intValue(defenseValue.innerHTML);
+			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
+			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			var armorValue               = System.findNode("//td[@title='armorValue']");
+			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
+			armorNumber                  = System.intValue(armorValue.innerHTML);
+			LDarmorNumber                = System.intValue(LDarmorValue.innerHTML);
+			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
+			var damageValue              = System.findNode("//td[@title='damageValue']");
+			var LDdamageValue            = System.findNode("//td[@title='LDdamageValue']");
+			damageNumber                 = System.intValue(damageValue.innerHTML);
+			LDdamageNumber               = System.intValue(LDdamageValue.innerHTML);
+			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+			var hpValue                  = System.findNode("//td[@title='hpValue']");
+			var LDhpValue                = System.findNode("//td[@title='LDhpValue']");
+			hpNumber                     = System.intValue(hpValue.innerHTML);
+			LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
+			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
+			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
+			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
+			var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
+			LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
 		}
 	},
 
@@ -938,10 +938,10 @@ var Helper = {
 				var lastDeathDealerPercentage = GM_getValue("lastDeathDealerPercentage");
 				var lastKillStreak = GM_getValue("lastKillStreak");
 				if (impsRemaining>0 && lastDeathDealerPercentage == 20) {
-					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + Helper.addCommas(lastKillStreak) +
+					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + System.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
 				} else {
-					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + Helper.addCommas(lastKillStreak) +
+					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%</td></tr>";
 					System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
 				}
@@ -2361,7 +2361,7 @@ var Helper = {
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
 						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + Helper.addCommas(overBid) + '</span>&nbsp';
+							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + System.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
 						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
@@ -3402,19 +3402,19 @@ var Helper = {
 		}
 		var attackValue = System.findNode("//td[@title='attackValue']");
 		attackNumber=attackValue.innerHTML.replace(/,/,"")*1;
-		attackValue.innerHTML = Helper.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
+		attackValue.innerHTML = System.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
 		var defenseValue = System.findNode("//td[@title='defenseValue']");
 		defenseNumber=defenseValue.innerHTML.replace(/,/,"")*1;
-		defenseValue.innerHTML = Helper.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
+		defenseValue.innerHTML = System.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
 		var armorValue = System.findNode("//td[@title='armorValue']");
 		armorNumber=armorValue.innerHTML.replace(/,/,"")*1;
-		armorValue.innerHTML = Helper.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
+		armorValue.innerHTML = System.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
 		var damageValue = System.findNode("//td[@title='damageValue']");
 		damageNumber=damageValue.innerHTML.replace(/,/,"")*1;
-		damageValue.innerHTML = Helper.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
+		damageValue.innerHTML = System.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
 		var hpValue = System.findNode("//td[@title='hpValue']");
 		hpNumber=hpValue.innerHTML.replace(/,/,"")*1;
-		hpValue.innerHTML = Helper.addCommas(hpNumber - Math.round(totalMercHP*0.2));
+		hpValue.innerHTML = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
 
 	addCommas: function(nStr) {
@@ -3539,7 +3539,7 @@ var Helper = {
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
 			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" +
-				Helper.addCommas(sellPrice) + warningText + "</span>";
+				System.addCommas(sellPrice) + warningText + "</span>";
 		}
 	},
 
@@ -3664,7 +3664,7 @@ var Helper = {
 			var playerKillStreakValue = killStreakLocation.textContent.replace(/,/,"")*1;
 		}
 		var killStreakElement = System.findNode("//span[@findme='killstreak']");
-		killStreakElement.innerHTML = Helper.addCommas(playerKillStreakValue);
+		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
 		GM_setValue("lastKillStreak", playerKillStreakValue);
 		var deathDealerBuff = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
