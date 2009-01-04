@@ -3294,6 +3294,7 @@ var Helper = {
 			'<div style="font-size:small;" id="Helper:RecipeManagerOutput">' +
 			'' +
 			'</div>';
+		if (!Helper.recipebook) Helper.parseInventingStart();
 		document.getElementById("Helper:RecipeManagerRefresh").addEventListener('click', Helper.parseInventingStart, true);
 		Helper.generateRecipeTable();
 	},
@@ -3303,7 +3304,7 @@ var Helper = {
 		Helper.recipebook.recipe = new Array();
 		var output=document.getElementById('Helper:RecipeManagerOutput')
 		output.innerHTML='<br/>Parsing inventing screen ...';
-		System.xmlhttp('index.php?cmd=inventing&subcmd=&subcmd2=&page=0&search_text=', Helper.parseInventingPage, {"page": 0});
+		System.xmlhttp('index.php?cmd=inventing&page=0', Helper.parseInventingPage, {"page": 0});
 	},
 
 	parseInventingPage: function(responseText, callback) {
@@ -3336,7 +3337,7 @@ var Helper = {
 
 		var nextPage=currentPage+1; //pages[currentPage];
 		if (nextPage<pages.options.length) {
-			System.xmlhttp('index.php?cmd=inventing&page='+nextPage, Helper.parseInventingPage);
+			System.xmlhttp('index.php?cmd=inventing&page='+nextPage, Helper.parseInventingPage, {"page": nextPage});
 		}
 		else {
 			output.innerHTML+='Finished parsing ... formatting ...';
