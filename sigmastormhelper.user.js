@@ -2933,6 +2933,10 @@ var Helper = {
 	injectGuildInventoryManager: function() {
 		var content=Layout.notebookContent();
 		var guildItemCount = "unknown"
+		unsafeWindow.changeMenu(0,'menu_character');
+		unsafeWindow.changeMenu(5,'menu_guild');
+		unsafeWindow.changeMenu(0,'menu_character');
+		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 		Helper.guildinventory=System.getValueJSON("guildinventory");
 		if (Helper.guildinventory) guildItemCount = Helper.guildinventory.items.length;
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
