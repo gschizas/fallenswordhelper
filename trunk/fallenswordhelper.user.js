@@ -1843,14 +1843,16 @@ var Helper = {
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
 		case 19: // quick buffs
-			openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 800, ",scrollbars");
+			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
+			GM_openInTab(System.server + "index.php?cmd=quickbuff");
 			break;
 		case 48: // return to world
 			window.location = 'index.php?cmd=world';
 			break;
 		case 109: // map
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
-			openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
+			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
+			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
 		case 0: // special key
 			switch (s) {
@@ -2940,6 +2942,10 @@ var Helper = {
 	injectGuildInventoryManager: function() {
 		var content=Layout.notebookContent();
 		var guildItemCount = "unknown"
+		unsafeWindow.changeMenu(0,'menu_character');
+		unsafeWindow.changeMenu(5,'menu_guild');
+		unsafeWindow.changeMenu(0,'menu_character');
+		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 		Helper.guildinventory=System.getValueJSON("guildinventory");
 		if (Helper.guildinventory) guildItemCount = Helper.guildinventory.items.length;
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
