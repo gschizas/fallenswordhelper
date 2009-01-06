@@ -743,22 +743,22 @@ var Helper = {
 			if (!theMap["levels"][levelName]) theMap["levels"][levelName] = {};
 			if (!theMap["levels"][levelName][posit.X]) theMap["levels"][levelName][posit.X]={};
 			theMap["levels"][levelName][posit.X][posit.Y]="!";
-			GM_log(JSON.stringify(theMap))
+			// GM_log(JSON.stringify(theMap))
 			GM_setValue("map", JSON.stringify(theMap));
 		}
 	},
 
 	showMap: function(isLarge) {
-		return;
+		if (!GM_getValue("footprints")) return;
 		if (isLarge) {
 			var realm = System.findNode("//b");
 			Helper.levelName=realm.textContent.replace(" Map Overview", "");
 		}
-		GM_log(Helper.levelName);
+		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
 		var displayedMap = System.findNode(isLarge?"//table[@width='1000']":"//table[@width='200']");
 		var posit = Helper.position();
-		GM_log(JSON.stringify(posit))
+		// GM_log(JSON.stringify(posit))
 		for (var y=0; y<displayedMap.rows.length; y++) {
 			var aRow = displayedMap.rows[y];
 			for (var x=0; x<aRow.cells.length; x++) {
@@ -1010,9 +1010,8 @@ var Helper = {
 		}
 		replacementText += "</td>" ;
 
-		var realmRightBottom = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]");
-		if (!realmRightBottom) return;
-		var injectHere = realmRightBottom.parentNode.parentNode
+		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		if (!injectHere) return;
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
 
@@ -1224,10 +1223,9 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
-		var realmRightBottom = System.findNode("//tr[contains(td/@background, 'location_header.gif')]");
-		if (!realmRightBottom) return;
-		var injectHere = realmRightBottom.parentNode.parentNode
-		var newRow=injectHere.insertRow(2);
+		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		if (!injectHere) return;
+		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		// newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
@@ -1251,6 +1249,7 @@ var Helper = {
 			document.getElementById('Helper:QuickKillType').addEventListener('click', Helper.worldChangeQuickKill, true);
 		}
 
+		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
 		if (!GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
@@ -1258,12 +1257,16 @@ var Helper = {
 		}
 		var footprints = GM_getValue("footprints");
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + System.imageServer +
-				'/temple/3.gif" title="Instant Teleport to Taulin Rad Lands" border="1"></span></td>';
-			document.getElementById('portaltokrul').addEventListener('click', Helper.portalToKrul, true);
+			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
+			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+		if (!GM_getValue("hideKrulPortal")) {
+			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 		}
 
-		// injectHere.style.display='none';
+		// One may ask why the separation of creating the button and the event handling code.
+		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
+		// a region, all attached events are destroyed (because the original elements are also destroyed)
+		document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
@@ -1271,6 +1274,25 @@ var Helper = {
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
+	},
+	toggleFootprints: function() {
+		var footprints = GM_getValue("footprints");
+		if (footprints == undefined) footprints=false;
+		footprints = !footprints;
+		GM_setValue("footprints", footprints);
+
+		if (!footprints) { // clear footprints
+			var theMap = System.getValueJSON("map");
+			var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+			var levelName=realm.innerHTML;
+			Helper.levelName = levelName;
+			theMap["levels"][Helper.levelName]={};
+			GM_setValue("map", JSON.stringify(theMap))
+		}
+
+		document.getElementById('Helper:toggleFootprints').src =
+			System.imageServer +
+			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
 	},
 
 	prepareCombatLog: function() {
@@ -1396,8 +1418,6 @@ var Helper = {
 		var killButtons=System.findNode("tbody/tr[td/input]", statsNode);
 		var killButtonHeader=System.findNode("tbody/tr[contains(td/@style,'actions_head_bg.gif')]/following-sibling::tr", statsNode);
 		var killButtonHeader=System.findNode("tbody/tr", statsNode);
-		GM_log(statsNode);
-		GM_log(killButtonHeader);
 		var killButtonParent=killButtonHeader.parentNode;
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
@@ -1853,14 +1873,16 @@ var Helper = {
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
 		case 19: // quick buffs
-			openWindow("index.php?cmd=quickbuff", "fsQuickBuff", 618, 800, ",scrollbars");
+			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
+			GM_openInTab(System.server + "index.php?cmd=quickbuff");
 			break;
 		case 48: // return to world
 			window.location = 'index.php?cmd=world';
 			break;
 		case 109: // map
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
-			openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
+			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
+			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
 		case 0: // special key
 			switch (s) {
@@ -2612,8 +2634,19 @@ var Helper = {
 		};
 		if (GM_getValue("disableItemColoring")) return;
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
-		var fontLineRX=fontLineRE.exec(responseText)
-		textNode.style.color=fontLineRX[1];
+		var fontLineRX=fontLineRE.exec(responseText);
+		var color=fontLineRX[1];
+		if (color=="#FFFFFF") {
+			var fontLineRE2=/<br>\s*<font color='([a-z]+)'>/i;
+			var fontLineRX2=fontLineRE2.exec(responseText);
+			if (fontLineRX2) {
+				color=fontLineRX2[1];
+			}
+		}
+		if (color=="#40FFFF") color="#00A0A0";
+		if (color=="orange") color="#FF6000";
+		if (color=="#00FF00") color="#00B000";
+		textNode.style.color=color;
 	},
 
 	injectProfile: function() {
@@ -3995,14 +4028,13 @@ var Helper = {
 		historyTotal.innerHTML = (historyCharactersValue * 20) + 255;
 	},
 
-	portalToKrul: function(evt) {
-		var answer = window.confirm('Are you sure you with to use a special portal back to Krul Island?');
-		if (answer) {
+	portalToStartArea: function() {
+		if (window.confirm('Are you sure you with to use a special portal back to Taulin Rad Lands?')) {
 			var krulXCV = GM_getValue("krulXCV");
 			if (krulXCV) {
 				System.xmlhttp("index.php?cmd=settings&subcmd=fix&xcv=" + krulXCV, function() {window.location="index.php?cmd=world";})
 			} else {
-				alert("Please visit the preferences page to cache your Krul Portal link");
+				window.alert("Please visit the preferences page to cache your Krul Portal link");
 			}
 		}
 	},

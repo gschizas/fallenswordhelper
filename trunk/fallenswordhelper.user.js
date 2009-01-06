@@ -2645,11 +2645,9 @@ var Helper = {
 				color=fontLineRX2[1];
 			}
 		}
-		GM_log("bef:"+color);
 		if (color=="#40FFFF") color="#00A0A0";
 		if (color=="orange") color="#FF6000";
 		if (color=="#00FF00") color="#00B000";
-		GM_log("aft:"+color);
 		textNode.style.color=color;
 	},
 
