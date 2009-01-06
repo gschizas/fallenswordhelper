@@ -135,7 +135,9 @@ var System = {
 				"Cookie" : document.cookie
 			},
 			onload: function(responseDetails) {
-				func.call(this, responseDetails.responseText, this.callback)
+				if (func) {
+					func.call(this, responseDetails.responseText, this.callback)
+				}
 			},
 		})
 	},

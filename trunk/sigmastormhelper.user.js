@@ -1239,20 +1239,24 @@ var Helper = {
 					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
 					'<b><u>off</u></b> returns control to game normal.') +
 				':' +
-				'<input type="radio" id="killAllAdvancedWorldOff" name="killAllAdvancedWorld" value="off"' +
+				'<input type="radio" id="Helper:QuickKillOff" name="Helper:QuickKill" value="off"' +
 					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +
-				'<input type="radio" id="killAllAdvancedWorldSingle" name="killAllAdvancedWorld" value="single"' +
+				'<input type="radio" id="Helper:QuickKillSingle" name="Helper:QuickKill" value="single"' +
 					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +
-				'<input type="radio" id="killAllAdvancedWorldType" name="killAllAdvancedWorld"  value="type"' +
+				'<input type="radio" id="Helper:QuickKillType" name="Helper:QuickKill"  value="type"' +
 					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +
 				'</div>';
-			document.getElementById('killAllAdvancedWorldOff').addEventListener('click', Helper.killAllAdvancedChangeFromWorld, true);
-			document.getElementById('killAllAdvancedWorldSingle').addEventListener('click', Helper.killAllAdvancedChangeFromWorld, true);
-			document.getElementById('killAllAdvancedWorldType').addEventListener('click', Helper.killAllAdvancedChangeFromWorld, true);
+			document.getElementById('Helper:QuickKillOff').addEventListener('click', Helper.worldChangeQuickKill, true);
+			document.getElementById('Helper:QuickKillSingle').addEventListener('click', Helper.worldChangeQuickKill, true);
+			document.getElementById('Helper:QuickKillType').addEventListener('click', Helper.worldChangeQuickKill, true);
 		}
 
 		if (!GM_getValue("hideKrulPortal")) {
-			var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
+				'/temple/3.gif" title="Instant Teleport to Taulin Rad Lands" border="1" /></span></td>';
+		}
+		var footprints = GM_getValue("footprints");
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><span style="cursor:pointer;" id="portaltokrul"><img src="' + System.imageServer +
 				'/temple/3.gif" title="Instant Teleport to Taulin Rad Lands" border="1"></span></td>';
