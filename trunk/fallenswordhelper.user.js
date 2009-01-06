@@ -1296,7 +1296,7 @@ var Helper = {
 			GM_setValue("map", JSON.stringify(theMap))
 		}
 
-		document.getElementById('Helper:toggleFootprints').src =
+		document.getElementById('Helper:ToggleFootprints').src =
 			System.imageServer +
 			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
 	},
