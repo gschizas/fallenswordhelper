@@ -618,7 +618,7 @@ var Helper = {
 		}
 
 		if (defenderCount != 0) {
-			var defenderMultiplier = 0.2;
+			var defenderMultiplier       = 0.2;
 			var attackValue              = System.findNode("//td[@title='attackValue']");
 			attackNumber                 = System.intValue(attackValue.innerHTML);
 			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
@@ -1255,10 +1255,13 @@ var Helper = {
 				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
 				'/temple/3.gif" title="Instant Teleport to Taulin Rad Lands" border="1" /></span></td>';
 		}
+
 		var footprints = GM_getValue("footprints");
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+
+		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
 			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+
 		if (!GM_getValue("hideKrulPortal")) {
 			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 		}
@@ -1266,7 +1269,9 @@ var Helper = {
 		// One may ask why the separation of creating the button and the event handling code.
 		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
 		// a region, all attached events are destroyed (because the original elements are also destroyed)
+
 		document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
+
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
@@ -1275,6 +1280,7 @@ var Helper = {
 	injectWorldMap: function() {
 		Helper.showMap(true);
 	},
+
 	toggleFootprints: function() {
 		var footprints = GM_getValue("footprints");
 		if (footprints == undefined) footprints=false;
@@ -1290,7 +1296,7 @@ var Helper = {
 			GM_setValue("map", JSON.stringify(theMap))
 		}
 
-		document.getElementById('Helper:toggleFootprints').src =
+		document.getElementById('Helper:ToggleFootprints').src =
 			System.imageServer +
 			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
 	},
@@ -1317,7 +1323,7 @@ var Helper = {
 		is.textAlign = 'justify';
 	},
 
-	killAllAdvancedChangeFromWorld: function(evt) {
+	worldChangeQuickKill: function(evt) {
 		var killAllAdvanced = GM_getValue("killAllAdvanced");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		GM_setValue("killAllAdvanced", evt.target.value);
@@ -3474,21 +3480,21 @@ var Helper = {
 				totalMercHP += mercHPValue;
 			}
 		}
-		var attackValue = System.findNode("//td[@title='attackValue']");
+		var attackValue        = System.findNode("//td[@title='attackValue']");
 		attackNumber           = System.intValue(attackValue.innerHTML);
-		attackValue.innerHTML = System.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
-		var defenseValue = System.findNode("//td[@title='defenseValue']");
+		attackValue.innerHTML  = System.addCommas(attackNumber - Math.round(totalMercAttack*0.2));
+		var defenseValue       = System.findNode("//td[@title='defenseValue']");
 		defenseNumber          = System.intValue(defenseValue.innerHTML);
 		defenseValue.innerHTML = System.addCommas(defenseNumber - Math.round(totalMercDefense*0.2));
-		var armorValue = System.findNode("//td[@title='armorValue']");
+		var armorValue         = System.findNode("//td[@title='armorValue']");
 		armorNumber            = System.intValue(armorValue.innerHTML);
-		armorValue.innerHTML = System.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
-		var damageValue = System.findNode("//td[@title='damageValue']");
+		armorValue.innerHTML   = System.addCommas(armorNumber - Math.round(totalMercArmor*0.2));
+		var damageValue        = System.findNode("//td[@title='damageValue']");
 		damageNumber           = System.intValue(damageValue.innerHTML);
-		damageValue.innerHTML = System.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
-		var hpValue = System.findNode("//td[@title='hpValue']");
+		damageValue.innerHTML  = System.addCommas(damageNumber - Math.round(totalMercDamage*0.2));
+		var hpValue            = System.findNode("//td[@title='hpValue']");
 		hpNumber               = System.intValue(hpValue.innerHTML);
-		hpValue.innerHTML = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
+		hpValue.innerHTML      = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
 
 	injectGroups: function() {
@@ -3826,8 +3832,8 @@ var Helper = {
 		//creaturedata
 		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
 		if (!creatureStatTable) {return;}
-		var creatureClass = creatureStatTable.rows[1].cells[1].textContent;
-		var creatureLevel = creatureStatTable.rows[1].cells[3].textContent;
+		var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
+		var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
 		var creatureAttack  = System.intValue(creatureStatTable.rows[2].cells[1].textContent);
 		var creatureDefense = System.intValue(creatureStatTable.rows[2].cells[3].textContent);
 		var creatureArmor   = System.intValue(creatureStatTable.rows[3].cells[1].textContent);
