@@ -1342,9 +1342,9 @@ var Helper = {
 			kills+=1;
 			System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
 		}
-		if (kills>0) {
-			System.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
-		}
+		//if (kills>0) {
+		//	System.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
+		//}
 	},
 
 	killSingleMonsterType: function(monsterType) {
@@ -1360,9 +1360,9 @@ var Helper = {
 				}
 			}
 		}
-		if (kills>0) {
-			System.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
-		}
+		//if (kills>0) {
+		//	System.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
+		//}
 	},
 
 	prepareCheckMonster: function() {
@@ -2421,8 +2421,7 @@ var Helper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" title="Click to overbid last bid value" bidvalue="' + overBid + '">Bid ' + System.addCommas(overBid) + '</span>&nbsp';
+						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
 						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
