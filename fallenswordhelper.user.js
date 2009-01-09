@@ -755,7 +755,7 @@ var Helper = {
 		}
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
-		var displayedMap = System.findNode(isLarge?"//table[@width='1000']":"//table[@width='200']");
+		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='200']");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit))
 		for (var y=0; y<displayedMap.rows.length; y++) {
