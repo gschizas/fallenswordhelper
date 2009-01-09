@@ -5,6 +5,11 @@ var System = {
 		Date.prototype.toFormatString = System.formatDate;
 		Number.prototype.padZero = System.padZero;
 		String.prototype.repeat = System.repeatString;
+		if (!String.trim) {
+			String.prototype.trimLeft  = System.trimLeft;
+			String.prototype.trimRight = System.trimRight;
+			String.prototype.trim      = System.trim;
+		}
 		Array.prototype.filterBy = System.filterBy;
 
 		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
@@ -157,6 +162,18 @@ var System = {
 			x1 = x1.replace(rgx, '$1' + ',' + '$2');
 		}
 		return x1 + x2;
+	},
+
+	trim: function() {
+	    return this.trimLeft().trimRight();
+	},
+
+	trimLeft: function() {
+	    return this.replace(/^\s*/,"");
+	},
+
+	trimRight: function() {
+	    return this.replace(/\s*$/,"");
 	},
 
 }
