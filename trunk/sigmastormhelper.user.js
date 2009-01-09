@@ -1957,16 +1957,16 @@ var Helper = {
 			var addBuffTag = true;
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
-				var cellContents = aRow.cells[dateColumn].innerHTML;
-				cellContents = cellContents.substring(0,17); // fix for player log screen.
+				var cellContents = aRow.cells[dateColumn].textContent.trim().substring(0,17);
+				GM_log(cellContents);
 				postDateAsDate = Helper.textDateToDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 				if (postDateAsLocalMilli > localLastCheckMilli) {
-					aRow.style.backgroundColor = "#F5F298";
+					aRow.style.backgroundColor = "#202020";
 				}
 				else if (postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
-					aRow.style.backgroundColor = "#CD9E4B";
+					aRow.style.backgroundColor = "#404040";
 					addBuffTag = false;
 				}
 				if (logScreen == 'Chat' && addBuffTag) {
