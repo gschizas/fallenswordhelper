@@ -87,8 +87,7 @@ var Helper = {
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce="+now,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Referer": document.location,
-				"Cookie" : document.cookie
+				"Referer": document.location
 			},
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
@@ -104,14 +103,49 @@ var Helper = {
 		if (!currentVersion) currentVersion=0;
 		var versionRE=/Revision\s*([0-9]+):/;
 		var latestVersion=responseDetails.responseText.match(versionRE)[1]
-		GM_log("Current version:" + currentVersion);
-		GM_log("Found version:" + latestVersion);
+		GM_log("Current version: " + currentVersion);
+		GM_log("Found version: " + latestVersion);
+
 		if (currentVersion!=latestVersion) {
-			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
-				GM_setValue("currentVersion", latestVersion)
-				document.location="http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js";
-			}
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce="+now,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Referer": document.location
+				},
+				onload: function(responseDetails) {
+					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
+				},
+			})
 		}
+	},
+
+	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
+		var theChanges=System.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+		if (window.confirm("New version (" + newVersion + ") found.\n" + theChanges + "Update from version " + oldVersion + "?")) {
+			GM_setValue("currentVersion", newVersion);
+			Helper.autoUpdatePreloadFiles(["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
+		}
+	},
+
+	autoUpdatePreloadFiles: function(scriptArray) {
+		if (scriptArray.length==0) {
+			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js");
+			return;
+		}
+		var scriptName=scriptArray.shift();
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": document.location
+			},
+			onload: function(responseDetails) {
+				Helper.autoUpdatePreloadFiles(scriptArray);
+			},
+		})
 	},
 
 	// main event dispatcher
