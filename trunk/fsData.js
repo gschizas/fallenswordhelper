@@ -331,4 +331,20 @@ var Data = {
 		}
 		return Data.questArray;
 	},
+
+	plantFromComponent: function(aComponent) {
+		switch(aComponent) {
+			case "Amber Essense": return "Amber Plant"; break;
+			case "Blood Bloom Flower": return "Blood Bloom Plant"; break;
+			case "Dark Shade ": return "Dark Shade Plant"; break;
+			case "Snake Eye": return "Elya Snake Head"; break;
+			case "Snake Venom Fang": return "Elya Snake Head"; break;
+			case "Heffle Wart": return "Heffle Wart Plant"; break;
+			case "Jademare Blossom": return "Jademare Plant"; break;
+			case "Trinettle Leaf": return "Trinettle Plant"; break;
+			case "Purplet Flower": return "Purplet Plant"; break;
+			default: return aComponent;
+		}
+	},
+
 }
