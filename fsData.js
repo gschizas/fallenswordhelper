@@ -137,7 +137,7 @@ var Data = {
 				{'questName':'Improved Fireball', 'level':497, 'location':'Forest of Ral (Depths)'},
 				{'questName':'In Search of Rebirth', 'level':361, 'location':'Burning Sands (North)'},
 				{'questName':'Job Lot', 'level':381, 'location':'Wasteland (South)'},
-				{'questName':'Jungle Overgrowth', 'level':594, 'location':'Corrupt Islands (North)'}
+				{'questName':'Jungle Overgrowth', 'level':594, 'location':'Corrupt Islands (North)'},
 				{'questName':'Keeper of the Old Ways', 'level':340, 'location':'Luivak (South)'},
 				{'questName':'Keepsake', 'level':398, 'location':'Catacombs of Dar GromSol'},
 				{'questName':'Kidnapped Citizen', 'level':529, 'location':'The Secret Kingdom (Preserve)'},
@@ -337,7 +337,7 @@ var Data = {
 				{'questName':'Weapon of Significance', 'level':373, 'location':'Canyon Depths'},
 				{'questName':'Wrap Up Warm', 'level':3, 'location':'Mountain Path'},
 				{'questName':'Wrongly Accused', 'level':501, 'location':'Ralthien (Gate)'},
-				{'questName':'Zombie Treasure', 'level':218, 'location':'Yuzha (East)'},
+				{'questName':'Zombie Treasure', 'level':218, 'location':'Yuzha (East)'}
 			];
 			Data.questArray = questArray.sort();
 		}
