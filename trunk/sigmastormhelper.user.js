@@ -56,7 +56,7 @@ var Helper = {
 	},
 
 	readInfo: function() {
-		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]");
+		var charInfo = System.findNode("//img[contains(@src,'sigma2/skin/quicklinks/4.gi')]");
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
 		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
@@ -406,7 +406,7 @@ var Helper = {
 	},
 
 	injectStaminaCalculator: function() {
-		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
+		var staminaImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/icon_stamina.gif')]");
 		if (!staminaImageElement) return;
 
 		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
@@ -434,7 +434,7 @@ var Helper = {
 	},
 
 	injectLevelupCalculator: function() {
-		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
+		var levelupImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/icon_xp.gif')]");
 		if (!levelupImageElement) return;
 		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
 		var remainingXPRE = /Remaining:\s<\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
@@ -763,7 +763,7 @@ var Helper = {
 	},
 
 	mapThis: function() {
-		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+		var realm = System.findNode("//td[contains(@background,'/sigma2/skin/realm_top_b2.jpg')]/center/nobr/b");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit));
 		if ((realm) && (posit)) {
@@ -987,7 +987,7 @@ var Helper = {
 	checkBuffs: function() {
 		//
 
-		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
+		var replacementText = "<td background='" + System.imageServer + "/sigma2/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
@@ -1262,7 +1262,7 @@ var Helper = {
 		if (!injectHere) return;
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
-		// newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
+		// newCell.setAttribute("background", System.imageServer + "/sigma2/skin/realm_right_bg.jpg");
 		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced");
 		if (GM_getValue("showQuickKillOnWorld")) {
@@ -1295,7 +1295,7 @@ var Helper = {
 
 		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
-			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+			'/sigma2/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
 
 		if (!GM_getValue("hideKrulPortal")) {
 			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
@@ -1324,7 +1324,7 @@ var Helper = {
 
 		if (!footprints) { // clear footprints
 			var theMap = System.getValueJSON("map");
-			var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+			var realm = System.findNode("//td[contains(@background,'/sigma2/skin/realm_top_b2.jpg')]/center/nobr/b");
 			var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
 			theMap["levels"][Helper.levelName]={};
@@ -1333,7 +1333,7 @@ var Helper = {
 
 		document.getElementById('Helper:ToggleFootprints').src =
 			System.imageServer +
-			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
+			'/sigma2/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
 	},
 
 	prepareCombatLog: function() {
@@ -1345,7 +1345,7 @@ var Helper = {
 		var injLog=reportsTable.appendChild(tempLog);
 		var is=injLog.style;
 		is.color = 'black';
-		is.backgroundImage='url(' + System.imageServer + '/skin/realm_right_bg.jpg)';
+		is.backgroundImage='url(' + System.imageServer + '/sigma2/skin/realm_right_bg.jpg)';
 		is.maxHeight = '240px';
 		is.width = '277px';
 		is.maxWidth = is.width;
@@ -2315,7 +2315,7 @@ var Helper = {
 		//GM_log(JSON.stringify(potions));
 
 		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
-			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
+			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#110011'>Quick Potion Search</td></tr>"
 		var lp=0;
 		var rowCount = 0;
 		for (var p=0;p<potions.length;p++) {
@@ -2325,7 +2325,7 @@ var Helper = {
 				rowCount++;
 			}
 			if (rowCount == 7 && lp % 3==0) {
-				finalHTML += "<td><span style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Plant Search</span>" +
+				finalHTML += "<td><span style='text-align:center;color:#7D2252;background-color:#110011'>Quick Plant Search</span>" +
 					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
 						"searchtext='Blood Bloom' title='Blood Bloom Plant'>Blood Bloom</span> |" +
 					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
@@ -2754,13 +2754,13 @@ var Helper = {
 			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
+			newhtml += System.imageServer + "/sigma2/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
 			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
-			newhtml += System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
+			newhtml += System.imageServer + "/sigma2/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" ;
 			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
-			newhtml += System.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
+			newhtml += System.imageServer + "/sigma2/skin/gold_button.gif></a>&nbsp;&nbsp;";
 			newhtml += "<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
 			newhtml += playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=';
 			newhtml += System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
@@ -2809,12 +2809,12 @@ var Helper = {
 	injectQuestManager: function() {
 		var content=Layout.notebookContent();
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Quest Manager</b></td></tr>'+
+			'<tr><td colspan="2" nobr bgcolor="#110011"><b>&nbsp;Quest Manager</b></td></tr>'+
 			'<tr><td><b>&nbsp;Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
 				(GM_getValue("showCompletedQuests")?' checked':'') + '/></b></td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:QuestManagerOutput">' +
-			'Loading quest book...' +
+			'Loading mission log...' +
 			'</div>';
 		Data.questMatrix();
 		Helper.parseQuestBookStart(0);
@@ -2828,7 +2828,7 @@ var Helper = {
 	parseQuestBookDone: function(responseText, callback) {
 		var questPage=System.createDocument(responseText);
 		var currentPage=callback.page;
-		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1)
+		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1);
 		var pages=System.findNode("//select[@name='page']", questPage);
 		if (!pages) return;
 
@@ -2861,9 +2861,8 @@ var Helper = {
 		}
 	},
 
-
 	injectQuestTable: function() {
-		document.getElementById('Helper:QuestManagerOutput').innerHTML=Helper.generateQuestTable();
+		document.getElementById('Helper:QuestManagerOutput').innerHTML = Helper.generateQuestTable();
 		var questTable=document.getElementById('Helper:QuestTable');
 		for (var i=0; i<questTable.rows[0].cells.length; i++) {
 			var cell=questTable.rows[0].cells[i];
@@ -2880,7 +2879,7 @@ var Helper = {
 	},
 
 	sortQuestTable: function(evt) {
-		var headerClicked=evt.target.getAttribute("sortKey")
+		var headerClicked=evt.target.getAttribute("sortKey");
 
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==headerClicked) {
@@ -2909,7 +2908,7 @@ var Helper = {
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="Helper:QuestTable">';
-		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
+		output += '<tr style="background-color:#110011;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
 			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
 		var c=0;
 		for (var i=0;i<quests.length;i++) {
@@ -2936,9 +2935,9 @@ var Helper = {
 					'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
 					'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
 					'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
-					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
+					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC';
 				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=Helper.characterLevel) {
-					bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
+					bgColor = ((c++)%2==0)?"#000000":"#110011";
 					output+='<tr style="background-color:' + bgColor + '"><td>';
 					if (q.href!=undefined) {
 						output+= '<a href="' + q.href + '">' + q.questName + '</a>';
@@ -2949,10 +2948,11 @@ var Helper = {
 					fsgQuestName = fsgQuestName.replace(/ /g,"+");
 					var wikiQuestName = q.questName.replace(/  /g,"_");
 					wikiQuestName = wikiQuestName.replace(/ /g,"_");
-					output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
-							'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
-							'&nbsp<a href="http://wiki.sigmastorm2.com/index.php/' + wikiQuestName +
-							'" target="_blank" title="Look up this quest on the wiki">w</a>' +
+					output+=
+						/*'</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
+						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
+						'&nbsp<a href="http://wiki.sigmastorm2.com/index.php/' + wikiQuestName +
+						'" target="_blank" title="Look up this quest on the wiki">w</a>' +*/
 						'</td><td align="right">' + q.level +
 						'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
 				}
@@ -2991,7 +2991,7 @@ var Helper = {
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
@@ -3015,7 +3015,7 @@ var Helper = {
 		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 		Helper.guildinventory=System.getValueJSON("guildinventory");
 		if (Helper.guildinventory) guildItemCount = Helper.guildinventory.items.length;
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
@@ -3344,7 +3344,7 @@ var Helper = {
 	injectRecipeManager: function() {
 		var content=Layout.notebookContent();
 		Helper.recipebook=System.getValueJSON("recipebook");
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;Recipe Manager</b></td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:RecipeManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
@@ -3718,7 +3718,7 @@ var Helper = {
 		resultText += "</table>"
 
 		var statistics = System.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
-		statistics.style.backgroundImage = 'url(' + System.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
+		statistics.style.backgroundImage = 'url(' + System.imageServer + '/sigma2/skin/realm_top_b2.jpg)'; //Color='white';
 
 		var lastActivity = System.findNode("//font[contains(.,'Last Activity:')]", doc);
 		if (lastActivity) {
@@ -3923,7 +3923,7 @@ var Helper = {
 		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = '4';
-		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>Combat Evaluation</td></tr>" +
+		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#110011' colspan='4' align='center'>Combat Evaluation</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Will I hit it? </td><td align='left'>" + (hitByHowMuch > 0? "Yes":"No") + "</td>" +
 				"<td align='right'><span style='color:#333333'>Extra Attack: </td><td align='left'>( " + hitByHowMuch + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Hits to kill it? </td><td align='left'>" + numberOfHitsRequired + "</td>" +
@@ -3952,7 +3952,7 @@ var Helper = {
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
-			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
+			'<tr><td style="text-align:center;color:#7D2252;background-color:#110011">Preview</td></tr>' +
 			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
@@ -4018,7 +4018,7 @@ var Helper = {
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
-			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
+			'<tr><td style="text-align:center;color:#7D2252;background-color:#110011">Preview</td></tr>' +
 			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		textArea.id = "historytext";

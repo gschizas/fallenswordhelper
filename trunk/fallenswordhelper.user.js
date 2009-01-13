@@ -2826,7 +2826,7 @@ var Helper = {
 	parseQuestBookDone: function(responseText, callback) {
 		var questPage=System.createDocument(responseText);
 		var currentPage=callback.page;
-		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1)
+		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1);
 		var pages=System.findNode("//select[@name='page']", questPage);
 		if (!pages) return;
 
@@ -2859,7 +2859,6 @@ var Helper = {
 		}
 	},
 
-
 	injectQuestTable: function() {
 		document.getElementById('Helper:QuestManagerOutput').innerHTML=Helper.generateQuestTable();
 		var questTable=document.getElementById('Helper:QuestTable');
@@ -2878,7 +2877,7 @@ var Helper = {
 	},
 
 	sortQuestTable: function(evt) {
-		var headerClicked=evt.target.getAttribute("sortKey")
+		var headerClicked=evt.target.getAttribute("sortKey");
 
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==headerClicked) {
@@ -2934,7 +2933,7 @@ var Helper = {
 					'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
 					'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
 					'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
-					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC'
+					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC';
 				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=Helper.characterLevel) {
 					bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
 					output+='<tr style="background-color:' + bgColor + '"><td>';
