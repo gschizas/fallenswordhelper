@@ -25,7 +25,7 @@ var Data = {
 				{'questName':'Assimilation', 'level':20, 'location':'Taulin Outskirts (Dunes)'},
 				{'questName':'Settlement Defense', 'level':22, 'location':'Taulin Gamma Wastes (Straights)'},
 				{'questName':'Down Lines', 'level':25, 'location':'Taulin Gamma Wastes (Plateau)'},
-				{'questName':'Revenge of the G27', 'level':26, 'location':'Taulin Gamma Wastes (Towers)'},
+				{'questName':'Revenge of the G27\'s', 'level':26, 'location':'Taulin Gamma Wastes (Towers)'},
 				{'questName':'Desiccator Prototype', 'level':28, 'location':'Taulin Gamma Wastes (Sands)'},
 				{'questName':'Money from the Mines', 'level':29, 'location':'Higridge Mines (Mouth)'},
 				{'questName':'Hiding from the Hand', 'level':34, 'location':'Highridge Mines (Rock Layer)'},

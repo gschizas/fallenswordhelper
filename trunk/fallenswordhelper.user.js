@@ -3266,9 +3266,14 @@ var Helper = {
 		var showUseableItems = GM_getValue("showUseableItems");
 		for (var i=0; i<targetInventory.items.length;i++) {
 			item=targetInventory.items[i];
-			color='black'
-			if (item.type=="worn") color='green';
-			if (item.type=="backpack") color='blue';
+
+			switch (item.type+"") {
+				case "worn":        color = "green";  break;
+				case "backpack":    color = "blue";   break;
+				case "guildstore":  color = "navy";  break;
+				case "guildreport": color = "maroon"; break;
+				default: color = "black";
+			}
 
 			if (showUseableItems && item.minLevel > Helper.characterLevel) {
 			} else {

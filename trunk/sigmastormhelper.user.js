@@ -2809,7 +2809,7 @@ var Helper = {
 	injectQuestManager: function() {
 		var content=Layout.notebookContent();
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#110011"><b>&nbsp;Quest Manager</b></td></tr>'+
+			'<tr><td colspan="2" nobr bgcolor="#110011"><b>&nbsp;Mission Manager</b></td></tr>'+
 			'<tr><td><b>&nbsp;Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
 				(GM_getValue("showCompletedQuests")?' checked':'') + '/></b></td></tr>'+
 			'</table>' +
@@ -3269,9 +3269,16 @@ var Helper = {
 		var showUseableItems = GM_getValue("showUseableItems");
 		for (var i=0; i<targetInventory.items.length;i++) {
 			item=targetInventory.items[i];
-			color='black'
-			if (item.type=="worn") color='green';
-			if (item.type=="backpack") color='blue';
+
+			GM_log(item.type);
+
+			switch (item.type) {
+				case "worn":        color = "green";  break;
+				case "backpack":    color = "blue";   break;
+				case "guildstore":  color = "lime";   break;
+				case "guildreport": color = "yellow"; break;
+				default: color = "84ADAC";
+			}
 
 			if (showUseableItems && item.minLevel > Helper.characterLevel) {
 			} else {
