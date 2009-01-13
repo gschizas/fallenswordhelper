@@ -52,6 +52,7 @@ var Helper = {
 		System.setDefault("hideQuestNames", "");
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
+		System.setDefault("footprintsColor", "silver");
 	},
 
 	readInfo: function() {
@@ -790,6 +791,7 @@ var Helper = {
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
 		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='200']");
+		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit))
 		for (var y=0; y<displayedMap.rows.length; y++) {
@@ -803,7 +805,7 @@ var Helper = {
 					// aCell.setAttribute("background", "http://66.7.192.165/tiles/9_50.gif");
 
 					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
-						aCell.style.color="silver";
+						aCell.style.color=footprintsColor;
 						aCell.innerHTML="**";
 					};
 
@@ -4246,7 +4248,7 @@ var Helper = {
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
-			'<td align="right"></td><td></td></tr>' +
+			'<td align="right">Footprints Color:</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -4341,6 +4343,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideQuestNames");
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
+		System.saveValueForm(oForm, "footprintsColor");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
