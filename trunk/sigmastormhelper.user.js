@@ -1570,7 +1570,7 @@ var Helper = {
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
-					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
+					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%M-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
 				}
 			}
 			monsterParent.innerHTML = "";
@@ -2908,7 +2908,7 @@ var Helper = {
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="Helper:QuestTable">';
-		output += '<tr style="background-color:#110011;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
+		output += '<tr style="background-color:#110011;"><th sortkey="questName">Name</th>' + /* '<th></th>' + */ '<th sortKey="level">Level</th><th></th>' +
 			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
 		var c=0;
 		for (var i=0;i<quests.length;i++) {
