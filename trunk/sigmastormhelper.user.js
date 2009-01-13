@@ -52,6 +52,7 @@ var Helper = {
 		System.setDefault("hideQuestNames", "");
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
+		System.setDefault("footprintsColor", "silver");
 	},
 
 	readInfo: function() {
@@ -87,8 +88,7 @@ var Helper = {
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce="+now,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Referer": document.location,
-				"Cookie" : document.cookie
+				"Referer": document.location
 			},
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
@@ -104,14 +104,49 @@ var Helper = {
 		if (!currentVersion) currentVersion=0;
 		var versionRE=/Revision\s*([0-9]+):/;
 		var latestVersion=responseDetails.responseText.match(versionRE)[1]
-		GM_log("Current version:" + currentVersion);
-		GM_log("Found version:" + latestVersion);
+		GM_log("Current version: " + currentVersion);
+		GM_log("Found version: " + latestVersion);
+
 		if (currentVersion!=latestVersion) {
-			if (window.confirm("New version (" + latestVersion + ") found. Update from version " + currentVersion + "?")) {
-				GM_setValue("currentVersion", latestVersion)
-				document.location="http://fallenswordhelper.googlecode.com/svn/trunk/sigmastormhelper.user.js";
-			}
+			GM_xmlhttpRequest({
+				method: 'GET',
+				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce="+now,
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Referer": document.location
+				},
+				onload: function(responseDetails) {
+					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
+				},
+			})
 		}
+	},
+
+	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
+		var theChanges=System.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+		if (window.confirm("New version (" + newVersion + ") found.\n" + theChanges + "Update from version " + oldVersion + "?")) {
+			GM_setValue("currentVersion", newVersion);
+			Helper.autoUpdatePreloadFiles(["json2.js", "calfSystem.js", "ssLayout.js", "ssData.js"]);
+		}
+	},
+
+	autoUpdatePreloadFiles: function(scriptArray) {
+		if (scriptArray.length==0) {
+			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/sigmastormhelper.user.js");
+			return;
+		}
+		var scriptName=scriptArray.shift();
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": document.location
+			},
+			onload: function(responseDetails) {
+				Helper.autoUpdatePreloadFiles(scriptArray);
+			},
+		})
 	},
 
 	// main event dispatcher
@@ -728,7 +763,6 @@ var Helper = {
 	},
 
 	mapThis: function() {
-		return;
 		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit));
@@ -756,7 +790,8 @@ var Helper = {
 		}
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
-		var displayedMap = System.findNode(isLarge?"//table[@width='1000']":"//table[@width='200']");
+		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='200']");
+		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit))
 		for (var y=0; y<displayedMap.rows.length; y++) {
@@ -770,7 +805,7 @@ var Helper = {
 					// aCell.setAttribute("background", "http://66.7.192.165/tiles/9_50.gif");
 
 					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
-						aCell.style.color="silver";
+						aCell.style.color=footprintsColor;
 						aCell.innerHTML="**";
 					};
 
@@ -1958,7 +1993,6 @@ var Helper = {
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].textContent.trim().substring(0,17);
-				GM_log(cellContents);
 				postDateAsDate = Helper.textDateToDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
@@ -2551,7 +2585,7 @@ var Helper = {
 	recallItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
 		var info = responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
@@ -4216,7 +4250,7 @@ var Helper = {
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
-			'<td align="right"></td><td></td></tr>' +
+			'<td align="right">Footprints Color:</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -4311,6 +4345,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideQuestNames");
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
+		System.saveValueForm(oForm, "footprintsColor");
 
 		window.alert("FS Helper Settings Saved");
 		return false;
