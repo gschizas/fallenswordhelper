@@ -10,6 +10,7 @@ var Layout = {
 		if (GM_getValue("keepLogs")) {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17, "menuSource_0")
 		}
+		Layout.injectOneMenu("AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31, "menuSource_2");
 	},
 
 	injectOneMenu: function(text, href, position, insertAt) {

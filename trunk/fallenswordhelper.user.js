@@ -53,6 +53,44 @@ var Helper = {
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
+		try {
+			var quickSearchList = System.getValueJSON("quickSearchList");
+		} catch(err) {
+			quickSearchList="";
+		}
+
+		if (!quickSearchList) {
+			quickSearchList = [
+				{"category":"Potions","searchname":"Potion of the Wise",             "nickname":"Lib 200"},
+				{"category":"Potions","searchname":"Potion of the Bookworm",         "nickname":"Lib 225"},
+				{"category":"Potions","searchname":"Potion of Shattering",           "nickname":"SA"},
+				{"category":"Potions","searchname":"Dragons Blood Potion",           "nickname":"ZK 200"},
+				{"category":"Potions","searchname":"Berserkers Potion",              "nickname":"ZK 300"},
+				{"category":"Potions","searchname":"Potion of Fury",                 "nickname":"ZK 350"},
+				{"category":"Potions","searchname":"Sludge Brew",                    "nickname":"DC 200"},
+				{"category":"Potions","searchname":"Potion of Black Death",          "nickname":"DC 225"},
+				{"category":"Potions","searchname":"Potion of Aid",                  "nickname":"Assist"},
+				{"category":"Potions","searchname":"Potion of Supreme Doubling",     "nickname":"DB 450"},
+				{"category":"Potions","searchname":"Potion of Acceleration",         "nickname":"DB 500"},
+				{"category":"Potions","searchname":"Potion of Lesser Death Dealer",  "nickname":"DD"},
+				{"category":"Potions","searchname":"Runic Potion",                   "nickname":"FI 250"},
+				{"category":"Potions","searchname":"Potion of Supreme Luck",         "nickname":"FI 1k"},
+				{"category":"Potions","searchname":"Potion of Truth",                "nickname":"EW 1k"},
+				{"category":"Potions","searchname":"Dull Edge",                      "nickname":"DE 25"},
+				{"category":"Potions","searchname":"Notched Blade",                  "nickname":"DE 80"},
+				{"category":"Potions","searchname":"Potion of Death",                "nickname":"DW 125"},
+				{"category":"Potions","searchname":"Potion of Decay",                "nickname":"WI 150"},
+				{"category":"Potions","searchname":"Potion of Fatality",             "nickname":"WI 350"},
+				{"category":"Potions","searchname":"Potion of Annihilation",         "nickname":"DW 150"},
+				{"category":"Plants", "searchname":"Blood Bloom",                    "nickname":""},
+				{"category":"Plants", "searchname":"Jademare",         	             "nickname":""},
+				{"category":"Plants", "searchname":"Dark Shade",                     "nickname":""},
+				{"category":"Plants", "searchname":"Trinettle",                      "nickname":""},
+				{"category":"Plants", "searchname":"Heffle Wart",                    "nickname":""},
+				{"category":"Plants", "searchname":"Amber",                          "nickname":""}
+			];
+			GM_setValue("quickSearchList", JSON.stringify(quickSearchList));
+		}
 	},
 
 	readInfo: function() {
@@ -212,6 +250,13 @@ var Helper = {
 				break;
 			}
 			break;
+		case "arena":
+			switch (subPageId) {
+			case "-":
+				Helper.injectArena();
+				break;
+			}
+			break;
 		case "questbook":
 			switch(subsequentPageId) {
 			case "-":
@@ -320,6 +365,9 @@ var Helper = {
 				break;
 			case "questmanager":
 				Helper.injectQuestManager();
+				break;
+			case "auctionsearch":
+				Helper.injectAuctionSearch();
 				break;
 			}
 			break;
@@ -843,26 +891,13 @@ var Helper = {
 		if (itemName) itemName=itemName[1];
 		var itemLinks = document.createElement("td");
 		itemLinks.innerHTML =
-			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&search_text='
+			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='
 			+ escape(Helper.plantFromComponent(itemName))
 			+ '">AH</a>';
 		var counter=System.findNode("../../../../tr[2]/td", callback);
 		counter.setAttribute("colspan", "2");
 		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
 	},
-/*
-			linkFromMouseover: function(mouseOver) {
-		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
-		var reResult=reParams.exec(mouseOver);
-		var itemId=reResult[1];
-		var invId=reResult[2];
-		var type=reResult[3];
-		var pid=reResult[4];
-		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
-		theUrl = System.server + theUrl;
-		return theUrl
-	},
-*/
 
 	injectAdvisor: function() {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
@@ -2323,19 +2358,10 @@ var Helper = {
 				rowCount++;
 			}
 			if (rowCount == 7 && lp % 3==0) {
-				finalHTML += "<td><span style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Plant Search</span>" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Blood Bloom' title='Blood Bloom Plant'>Blood Bloom</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Jademare' title='Jademare Plant'>Jademare</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Dark Shade' title='Dark Shade Plant'>Dark Shade</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Trinettle' title='Trinettle Plant'>Trinettle</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Heffle Wart' title='Heffle Wart Plant'>Heffle Wart</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Amber' title='Amber Plant'>Amber</span>" +
+				finalHTML += "<td><a href='" + 
+					System.server +
+					"index.php?cmd=notepad&subcmd=auctionsearch'>" +
+					"<span style='cursor:pointer;text-decoration:underline;color:#7D2252'>Configurable AH quick search</span></a>" +
 					"</td>";
 			}
 			finalHTML += "<td";
@@ -2349,29 +2375,8 @@ var Helper = {
 			if (lp % 3==2) finalHTML += "</tr>";
 			lp++;
 		}
-		// if (!/</tr>$/.exec(finalHTML)) finalHTML+="</tr>"
-		/*
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Wise' title='Librarian'>Lib 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Bookworm' title='Librarian'>Lib 225</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Shatter' title='Shatter Armor'>SA</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Dragons Blood' title='Berserk'>ZK 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Berserkers' title='Berserk'>ZK 300</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Fury' title='Berserk'>ZK 350</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Sludge' title='Dark Curse'>DC 200</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Black Death' title='Dark Curse'>DC 225</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Doubling' title='Doubler'>DB 450</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Acceleration' title='Doubler'>DB 500</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Truth' title='Enchant Weapon'>EW 1000</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Death Dealer' title='Death Dealer'>DD</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Aid' title='Assist'>Assist</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Dull Edge' title='Dull Edge'>Dull Edge</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Potion of Death' title='Death Wish'>DW</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Supreme Luck' title='Find Item'>FI 1000</span></td></tr>" +
-			"</tbody></table></span>";
-        */
 		imageCell.innerHTML = finalHTML;
 
-		//GM_log(imageCell.parentNode.innerHTML);
 		var quickSearchList = System.findNodes("//span[@cat='quickPotionSearch']");
 		for (var i=0; i<quickSearchList.length; i++) {
 			quickSearchItem = quickSearchList[i];
@@ -2611,7 +2616,7 @@ var Helper = {
 				theTextNode = System.findNode("../../td[3]", anItem);
 				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
 				var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
-				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&search_text="
+				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 					+ escape(itemName)
 					+ "'>AH</a>]</span> "
 					+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
@@ -2783,8 +2788,13 @@ var Helper = {
 				numberOfAllies ++;
 				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
+			startIndex = 0;
+			while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+				numberOfAllies ++;
+				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+			}
 			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
-			if (alliesTotal) {
+			if (alliesTotal && alliesTotal >= numberOfAllies) {
 				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
@@ -2797,8 +2807,13 @@ var Helper = {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
+			var startIndex = 0;
+			while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+				numberOfEnemies ++;
+				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+			}
 			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>";
-			if (enemiesTotal) {
+			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
 				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
@@ -2959,6 +2974,61 @@ var Helper = {
 		return output;
 	},
 
+	injectAuctionSearch: function() {
+		var content=Layout.notebookContent();
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
+			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Auction Quick Search</b></td></tr>'+
+			'<tr><td></td></tr>'+
+			'</table>' +
+			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
+			'</div>';
+		var injectHere = document.getElementById('Helper:Auction Search Output');
+		var quickSearchList = System.getValueJSON("quickSearchList");
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
+		//quickSearchList.sort();
+		var currentCategory = "";
+		var output = "<table><tbody>";
+		for (j=0; j<quickSearchList.length; j++) {
+			var quickSearchItem=quickSearchList[j];
+			if (currentCategory != quickSearchItem.category)
+				output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
+			//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
+			output += "<tr><td width='10'></td><td><a href='" + System.server + 
+				"index.php?cmd=auctionhouse&type=-1&search_text=" +
+				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+				quickSearchItem.searchname + "</span></a></td>" +
+				"<td><a href='" + System.server + 
+				"index.php?cmd=auctionhouse&type=-1&search_text=" +
+				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+				((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
+				"<td></td></tr>";
+			currentCategory = quickSearchItem.category;
+		}
+		output += "<tr><td colspan=4 height=10></td></tr>";
+		output += "<tr><td colspan=4 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
+		output += "<tr><td colspan=4 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
+					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
+		output += "</tbody></table>";
+		injectHere.innerHTML = output;
+		document.getElementById("Helper:saveauctionsearch").addEventListener('click', Helper.saveAuctionSearch, true);
+		document.getElementById("Helper:resetauctionsearch").addEventListener('click', Helper.resetAuctionSearch, true);
+	},
+
+	saveAuctionSearch: function(evt) {
+		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
+		GM_setValue("quickSearchList",auctionsearchtextarea.value);
+		window.location=window.location;
+	},
+
+	resetAuctionSearch: function(evt) {
+		GM_setValue("quickSearchList","");
+		window.location=window.location;
+	},
+	
 	linkFromMouseover: function(mouseOver) {
 		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
@@ -3756,6 +3826,10 @@ var Helper = {
 		var furyCasterLevelRE = /Level<br>(\d+)%/
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
+		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc))				    		
+			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master:	On</span>";
+		else
+			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
 	},
 
 	getKillStreak: function(responseText) {
@@ -4152,6 +4226,11 @@ var Helper = {
 		}
 	},
 
+	injectArena: function() {
+		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]");
+		//GM_log(arenaTable.innerHTML);
+	},
+	
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
