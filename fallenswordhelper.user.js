@@ -2358,7 +2358,7 @@ var Helper = {
 				rowCount++;
 			}
 			if (rowCount == 7 && lp % 3==0) {
-				finalHTML += "<td><a href='" + 
+				finalHTML += "<td><a href='" +
 					System.server +
 					"index.php?cmd=notepad&subcmd=auctionsearch'>" +
 					"<span style='cursor:pointer;text-decoration:underline;color:#7D2252'>Configurable AH quick search</span></a>" +
@@ -2601,28 +2601,32 @@ var Helper = {
 
 	injectDropItems: function() {
 		var mainTable = System.findNode("//table[@width='600']");
-		var insertHere = mainTable.rows[5].cells[0];
-		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
-			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
+		if (mainTable) {
+			var insertHere = mainTable.rows[5].cells[0];
+			insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
+				(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
+		}
 		document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
 
 		//function to add links to all the items in the drop items list
 		if (GM_getValue("showExtraLinks")) {
 			var itemName, itemInvId, theTextNode, newLink;
 			var allItems=System.findNodes("//input[@type='checkbox']");
-			for (var i=0; i<allItems.length; i++) {
-				anItem = allItems[i];
-				itemInvId = anItem.value;
-				theTextNode = System.findNode("../../td[3]", anItem);
-				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-				var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
-				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
-					+ escape(itemName)
-					+ "'>AH</a>]</span> "
-					+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
-					+ "Sell</a>]</span> "
-					+ theTextNode.innerHTML
-					+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+			if (allItems) {
+				for (var i=0; i<allItems.length; i++) {
+					anItem = allItems[i];
+					itemInvId = anItem.value;
+					theTextNode = System.findNode("../../td[3]", anItem);
+					itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
+					var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
+						+ escape(itemName)
+						+ "'>AH</a>]</span> "
+						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+						+ "Sell</a>]</span> "
+						+ theTextNode.innerHTML
+						+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+				}
 			}
 		}
 
@@ -2995,12 +2999,12 @@ var Helper = {
 			if (currentCategory != quickSearchItem.category)
 				output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
 			//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
-			output += "<tr><td width='10'></td><td><a href='" + System.server + 
+			output += "<tr><td width='10'></td><td><a href='" + System.server +
 				"index.php?cmd=auctionhouse&type=-1&search_text=" +
 				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
 				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
 				quickSearchItem.searchname + "</span></a></td>" +
-				"<td><a href='" + System.server + 
+				"<td><a href='" + System.server +
 				"index.php?cmd=auctionhouse&type=-1&search_text=" +
 				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
 				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
@@ -3028,7 +3032,7 @@ var Helper = {
 		GM_setValue("quickSearchList","");
 		window.location=window.location;
 	},
-	
+
 	linkFromMouseover: function(mouseOver) {
 		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
@@ -3826,7 +3830,7 @@ var Helper = {
 		var furyCasterLevelRE = /Level<br>(\d+)%/
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
-		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc))				    		
+		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc))
 			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master:	On</span>";
 		else
 			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
@@ -4233,7 +4237,7 @@ var Helper = {
 			var row = arenaTable.rows[i];
 			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
 		}
-		
+
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
@@ -4318,7 +4322,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
