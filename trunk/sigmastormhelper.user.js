@@ -2287,29 +2287,7 @@ var Helper = {
 		var potions = System.getValueJSON("potions");
 
 		if (!potions) {
-			potions = [
-				{"searchname":"Potion of the Wise",         "shortname":"Lib 200",   "buff":"Librarian",      "level":200,  "duration":120, "minlevel":5, "bound":true},
-				{"searchname":"Potion of the Bookworm",     "shortname":"Lib 225",   "buff":"Librarian",      "level":225,  "duration":90,  "minlevel":5},
-				{"searchname":"Potion of Shattering",       "shortname":"SA",        "buff":"Shatter Armor",  "level":150,  "duration":20,  "minlevel":5, "bound":true},
-				{"searchname":"Dragons Blood Potion",       "shortname":"ZK 200",    "buff":"Berzerk",        "level":200,  "duration":30,  "minlevel":5, "bound":true},
-				{"searchname":"Berserkers Potion",          "shortname":"ZK 300",    "buff":"Berserk",        "level":300,  "duration":45,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Fury",             "shortname":"ZK 350",    "buff":"Berserk",        "level":350,  "duration":60,  "minlevel":5},
-				{"searchname":"Sludge Brew",                "shortname":"DC 200",    "buff":"Dark Curse",     "level":200,  "duration":45,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Black Death",      "shortname":"DC 225",    "buff":"Dark Curse",     "level":225,  "duration":60,  "minlevel":5},
-				{"searchname":"Potion of Aid",              "shortname":"Assist",    "buff":"Assist",         "level":150,  "duration":30,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Supreme Doubling", "shortname":"DB 450",    "buff":"Doubler",        "level":450,  "duration":00,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Acceleration",     "shortname":"DB 500",    "buff":"Doubler",        "level":500,  "duration":120, "minlevel":5},
-				{"searchname":"Potion of Lesser Death Dealer",  "shortname":"DD",    "buff":"Death Dealer",   "level":25,   "duration":45,  "minlevel":20},
-				{"searchname":"Runic Potion",               "shortname":"FI 250",    "buff":"Find Item",      "level":250,  "duration":60,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Supreme Luck",     "shortname":"FI 1k",     "buff":"Find Item",      "level":1000, "duration":60,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Truth",            "shortname":"EW 1k",     "buff":"Enchant Weapon", "level":1000, "duration":90,  "minlevel":5, "bound":true},
-				{"searchname":"Dull Edge",                  "shortname":"DE 25",     "buff":"Dull Edge",      "level":25,   "duration":60,  "minlevel":1},
-				{"searchname":"Notched Blade",              "shortname":"DE 80",     "buff":"Dull Edge",      "level":80,   "duration":45,  "minlevel":10, "bound":true},
-				{"searchname":"Potion of Death",            "shortname":"DW 125",    "buff":"Death Wish",     "level":125,  "duration":15,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Decay",            "shortname":"WI 150",    "buff":"Wither",         "level":150,  "duration":15,  "minlevel":5, "bound":true},
-				{"searchname":"Potion of Fatality",         "shortname":"WI 350",    "buff":"Wither",         "level":350,  "duration":90,  "minlevel":10, "bound":true},
-				{"searchname":"Potion of Annihilation",     "shortname":"DW 150",    "buff":"Death Wish",     "level":150,  "duration":30,  "minlevel":5}
-			];
+			potions = Data.potionList();
 		}
 
 		//GM_log(JSON.stringify(potions));
@@ -2488,6 +2466,98 @@ var Helper = {
 			bidOnItemItem = bidOnItemList[i];
 			bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
 		}
+
+		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
+		var preparePreferences = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]/../../../..");
+		searchPrefs.setAttribute("href", "#prefs");
+
+
+		var newRow = document.createElement("TR");
+		var newCell = newRow.insertCell(0);
+		newCell.setAttribute("colspan", 5);
+
+		newCell.innerHTML = '<div id="Helper:AuctionHousePreferences" style="font-size:xx-small;text-align:right;visibility:hidden;display:none;">' +
+			'<form onsubmit="return false;">' +
+			'&nbsp;Min: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_minlevel value="wait" />' +
+			'&nbsp;Max: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_maxlevel value="wait" />' +
+			'&nbsp;Gold: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidegold value="1" />' +
+			'&nbsp;FSP: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
+			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form></div>';
+
+		// preparePreferences.appendChild(prefArea);
+		preparePreferences.appendChild(newRow);
+
+		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
+		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
+	},
+
+	auctionHouseTogglePreferences: function(evt) {
+		var prefArea = document.getElementById("Helper:AuctionHousePreferences");
+		if (prefArea.style.display!="none") {
+			prefArea.style.visibility="hidden";
+			prefArea.style.display="none";
+		} else {
+			prefArea.style.visibility="visible";
+			prefArea.style.display="block";
+		}
+		if (prefArea.getAttribute("populated")!="done") {
+			System.xmlhttp('index.php?cmd=auctionhouse&subcmd=preferences', Helper.auctionHouseGetPreferences)
+		}
+		return false;
+	},
+
+	auctionHouseGetPreferences: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var minLevel = System.findNode("//input[@name='pref_minlevel']", doc).value;
+		var maxLevel = System.findNode("//input[@name='pref_maxlevel']", doc).value;
+		var hideGold = System.findNode("//input[@name='pref_hidegold']", doc).checked;
+		var hideFsp = System.findNode("//input[@name='pref_hidefsp']", doc).checked;
+		var prefArea = document.createElement("DIV");
+
+		System.findNode("//input[@name='pref_minlevel']").value   = minLevel;
+		System.findNode("//input[@name='pref_maxlevel']").value   = maxLevel;
+		System.findNode("//input[@name='pref_hidegold']").checked = hideGold;
+		System.findNode("//input[@name='pref_hidefsp']").checked   = hideFsp;
+		document.getElementById("Helper:AuctionHousePreferences").setAttribute("populated", "done");
+	},
+
+	auctionHouseSavePreferences: function(evt) {
+		var minLevel = System.findNode("//input[@name='pref_minlevel']").value;
+		var maxLevel = System.findNode("//input[@name='pref_maxlevel']").value;
+		var hideGold = System.findNode("//input[@name='pref_hidegold']").checked;
+		var hideFsp = System.findNode("//input[@name='pref_hidefsp']").checked;
+
+		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences")
+		submitButton.disabled=true;
+		submitButton.value="Saving..."
+
+		var postData = "cmd=auctionhouse&subcmd=savepreferences" +
+				"&pref_minlevel=" + minLevel +
+				"&pref_maxlevel=" + maxLevel +
+				(hideGold?"&pref_hidegold=1":"") +
+				(hideFsp?"&pref_hidefsp=1":"")
+
+		GM_xmlhttpRequest({
+			method: 'POST',
+			url: System.server + "index.php",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=preferences",
+				"Cookie" : document.cookie,
+				"Content-Type": "application/x-www-form-urlencoded",
+			},
+			data: postData,
+			onload: function(responseDetails) {
+				Helper.auctionHouseSavePreferencesDone(responseDetails.responseText);
+			},
+		})
+	},
+
+	auctionHouseSavePreferencesDone: function(responseText) {
+		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences")
+		submitButton.disabled=false;
+		submitButton.value="Save";
+		submitButton.blur();
 	},
 
 	quickAuctionSearch: function(evt) {
@@ -2598,28 +2668,32 @@ var Helper = {
 
 	injectDropItems: function() {
 		var mainTable = System.findNode("//table[@width='100%']");
-		var insertHere = mainTable.rows[5].cells[0];
-		insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
-			(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
+		if (mainTable) {
+			var insertHere = mainTable.rows[5].cells[0];
+			insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
+				(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
 		document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
+		}
 
 		//function to add links to all the items in the drop items list
 		if (GM_getValue("showExtraLinks")) {
 			var itemName, itemInvId, theTextNode, newLink;
 			var allItems=System.findNodes("//input[@type='checkbox']");
-			for (var i=0; i<allItems.length; i++) {
-				anItem = allItems[i];
-				itemInvId = anItem.value;
-				theTextNode = System.findNode("../../td[3]", anItem);
-				itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-				var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
-				theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&search_text="
-					+ escape(itemName)
-					+ "'>AH</a>]</span> "
-					+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
-					+ "Sell</a>]</span> "
-					+ theTextNode.innerHTML
-					+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+			if (allItems) {
+				for (var i=0; i<allItems.length; i++) {
+					anItem = allItems[i];
+					itemInvId = anItem.value;
+					theTextNode = System.findNode("../../td[3]", anItem);
+					itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
+					var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
+						+ escape(itemName)
+						+ "'>AH</a>]</span> "
+						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+						+ "Sell</a>]</span> "
+						+ theTextNode.innerHTML
+						+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+				}
 			}
 		}
 
@@ -2633,11 +2707,13 @@ var Helper = {
 		}
 
 		var allItems = System.findNodes("//input[@type='checkbox']");
-		for (var i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			theLocation=anItem.parentNode.nextSibling.nextSibling;
-			theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-			System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
+		if (allItems) {
+			for (var i=0; i<allItems.length; i++) {
+				anItem = allItems[i];
+				theLocation=anItem.parentNode.nextSibling.nextSibling;
+				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
+				System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
+			}
 		}
 	},
 
@@ -2962,6 +3038,61 @@ var Helper = {
 		return output;
 	},
 
+	injectAuctionSearch: function() {
+		var content=Layout.notebookContent();
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
+			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Auction Quick Search</b></td></tr>'+
+			'<tr><td></td></tr>'+
+			'</table>' +
+			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
+			'</div>';
+		var injectHere = document.getElementById('Helper:Auction Search Output');
+		var quickSearchList = System.getValueJSON("quickSearchList");
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
+		//quickSearchList.sort();
+		var currentCategory = "";
+		var output = "<table><tbody>";
+		for (j=0; j<quickSearchList.length; j++) {
+			var quickSearchItem=quickSearchList[j];
+			if (currentCategory != quickSearchItem.category)
+				output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
+			//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
+			output += "<tr><td width='10'></td><td><a href='" + System.server +
+				"index.php?cmd=auctionhouse&type=-1&search_text=" +
+				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+				quickSearchItem.searchname + "</span></a></td>" +
+				"<td><a href='" + System.server +
+				"index.php?cmd=auctionhouse&type=-1&search_text=" +
+				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+				((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
+				"<td></td></tr>";
+			currentCategory = quickSearchItem.category;
+		}
+		output += "<tr><td colspan=4 height=10></td></tr>";
+		output += "<tr><td colspan=4 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
+		output += "<tr><td colspan=4 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
+					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
+		output += "</tbody></table>";
+		injectHere.innerHTML = output;
+		document.getElementById("Helper:saveauctionsearch").addEventListener('click', Helper.saveAuctionSearch, true);
+		document.getElementById("Helper:resetauctionsearch").addEventListener('click', Helper.resetAuctionSearch, true);
+	},
+
+	saveAuctionSearch: function(evt) {
+		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
+		GM_setValue("quickSearchList",auctionsearchtextarea.value);
+		window.location=window.location;
+	},
+
+	resetAuctionSearch: function(evt) {
+		GM_setValue("quickSearchList","");
+		window.location=window.location;
+	},
+
 	linkFromMouseover: function(mouseOver) {
 		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
@@ -3270,14 +3401,12 @@ var Helper = {
 		for (var i=0; i<targetInventory.items.length;i++) {
 			item=targetInventory.items[i];
 
-			GM_log(item.type);
-
-			switch (item.type) {
+			switch (item.type+"") {
 				case "worn":        color = "green";  break;
 				case "backpack":    color = "blue";   break;
 				case "guildstore":  color = "lime";   break;
 				case "guildreport": color = "yellow"; break;
-				default: color = "84ADAC";
+				default: color = "#84ADAC";
 			}
 
 			if (showUseableItems && item.minLevel > Helper.characterLevel) {
@@ -4153,6 +4282,105 @@ var Helper = {
 						insertHere.innerHTML += '&nbsp' + onlineStatus;
 					}
 				}
+			}
+		}
+	},
+
+	injectArena: function() {
+		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
+		arenaTable.style.fontSize = 'x-small';
+		for (var i=1; i<arenaTable.rows.length; i++){
+			var row = arenaTable.rows[i];
+			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
+		}
+
+		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
+		for (var i=0; i<titleCells.length; i++) {
+			var cell=titleCells[i];
+			if (cell.innerHTML.search("Max Equip Level") != -1
+				|| cell.innerHTML.search("Join Cost") != -1
+				|| cell.innerHTML.search("Specials") != -1
+				|| cell.innerHTML.search("Hell Forge") != -1
+				) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
+				cell.addEventListener('click', Helper.sortArena, true);
+			}
+		}
+	},
+
+	sortArena: function(evt) {
+		var headerClicked=evt.target.textContent.replace(/[ \s]/g,"");
+		var parentTables=System.findNodes("ancestor::table", evt.target)
+		var list=parentTables[parentTables.length-1];
+
+		Helper.arenaRows = new Array();
+		for (var i=1; i<list.rows.length; i++){
+			var theRow=list.rows[i];
+			Helper.arenaRows[i-1] = {
+				'ArenaID': theRow.cells[0].textContent,
+				'Players': theRow.cells[1].textContent,
+				'JoinCost': theRow.cells[2].textContent.replace(/,/g,"")*1,
+				'JoinCostHTML': theRow.cells[2].innerHTML,
+				'State': theRow.cells[3].textContent,
+				'Specials[?]': (theRow.cells[4].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'SpecialsHTML': theRow.cells[4].innerHTML,
+				'HellForge[?]': (theRow.cells[5].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'HellForgeHTML': theRow.cells[5].innerHTML,
+				'MaxEquipLevel': theRow.cells[6].textContent*1,
+				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
+				'Reward': theRow.cells[7].innerHTML,
+				'Action': theRow.cells[8].innerHTML,
+			};
+		}
+
+		if (Helper.sortAsc==undefined) Helper.sortAsc=false;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+		Helper.sortBy=headerClicked;
+
+		if (headerClicked=="Member") {
+			Helper.arenaRows.sort(Helper.stringSort)
+		}
+		else {
+			Helper.arenaRows.sort(Helper.numberSort)
+		}
+		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
+
+		for (var i=0; i<Helper.arenaRows.length; i++){
+			var r = Helper.arenaRows[i];
+			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
+			if (r.Action.search("View") != -1) {
+				bgColor = 'bgcolor="#f5e2b3"';
+			}
+			result += '<TR>'+
+			'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.JoinCostHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.State+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
+		}
+		//result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
+
+		list.innerHTML=result;
+
+		for (var i=0; i<list.rows[0].cells.length; i++) {
+			var cell=list.rows[0].cells[i];
+			if (cell.innerHTML.search("Max Equip Level") != -1
+				|| cell.innerHTML.search("Join Cost") != -1
+				|| cell.innerHTML.search("Specials") != -1
+				|| cell.innerHTML.search("Hell Forge") != -1
+				) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
+				cell.addEventListener('click', Helper.sortArena, true);
 			}
 		}
 	},
