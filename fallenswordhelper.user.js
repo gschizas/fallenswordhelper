@@ -253,7 +253,7 @@ var Helper = {
 		case "arena":
 			switch (subPageId) {
 			case "-":
-				//Helper.injectArena();
+				Helper.injectArena();
 				break;
 			}
 			break;
@@ -4237,14 +4237,14 @@ var Helper = {
 			var row = arenaTable.rows[i];
 			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
 		}
-
+		
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
 			if (cell.innerHTML.search("Max Equip Level") != -1
 				|| cell.innerHTML.search("Join Cost") != -1
-				//|| cell.innerHTML.search("Specials") != -1
-				//|| cell.innerHTML.search("Hell Forge") != -1
+				|| cell.innerHTML.search("Specials") != -1
+				|| cell.innerHTML.search("Hell Forge") != -1
 				) {
 				cell.style.textDecoration="underline";
 				cell.style.cursor="pointer";
@@ -4255,7 +4255,7 @@ var Helper = {
 	},
 
 	sortArena: function(evt) {
-		var headerClicked=evt.target.textContent.replace(/ /g,"");
+		var headerClicked=evt.target.textContent.replace(/[ \s]/g,"");
 		var parentTables=System.findNodes("ancestor::table", evt.target)
 		var list=parentTables[parentTables.length-1];
 
@@ -4268,9 +4268,12 @@ var Helper = {
 				'JoinCost': theRow.cells[2].textContent.replace(/,/g,"")*1,
 				'JoinCostHTML': theRow.cells[2].innerHTML,
 				'State': theRow.cells[3].textContent,
-				'Specials': theRow.cells[4].innerHTML,
-				'HellForge': theRow.cells[5].innerHTML,
+				'Specials[?]': (theRow.cells[4].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'SpecialsHTML': theRow.cells[4].innerHTML,
+				'HellForge[?]': (theRow.cells[5].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'HellForgeHTML': theRow.cells[5].innerHTML,
 				'MaxEquipLevel': theRow.cells[6].textContent*1,
+				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
 				'Reward': theRow.cells[7].innerHTML,
 				'Action': theRow.cells[8].innerHTML,
 			};
@@ -4293,16 +4296,19 @@ var Helper = {
 		for (var i=0; i<Helper.arenaRows.length; i++){
 			var r = Helper.arenaRows[i];
 			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
+			if (r.Action.search("View") != -1) {
+				bgColor = 'bgcolor="#f5e2b3"';
+			}
 			result += '<TR>'+
-			'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.ArenaID+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Players+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.JoinCostHTML+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.State+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Specials+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.HellForge+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.MaxEquipLevel+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Reward+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Action+'</FONT></TD></TR>';
+			'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.JoinCostHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.State+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
 		}
 		//result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
 
@@ -4312,8 +4318,8 @@ var Helper = {
 			var cell=list.rows[0].cells[i];
 			if (cell.innerHTML.search("Max Equip Level") != -1
 				|| cell.innerHTML.search("Join Cost") != -1
-				//|| cell.innerHTML.search("Specials") != -1
-				//|| cell.innerHTML.search("Hell Forge") != -1
+				|| cell.innerHTML.search("Specials") != -1
+				|| cell.innerHTML.search("Hell Forge") != -1
 				) {
 				cell.style.textDecoration="underline";
 				cell.style.cursor="pointer";
