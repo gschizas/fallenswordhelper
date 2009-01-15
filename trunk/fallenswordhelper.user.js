@@ -2605,9 +2605,9 @@ var Helper = {
 			var insertHere = mainTable.rows[5].cells[0];
 			insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
 				(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
-		}
 		document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
-
+		}
+		
 		//function to add links to all the items in the drop items list
 		if (GM_getValue("showExtraLinks")) {
 			var itemName, itemInvId, theTextNode, newLink;
@@ -2640,11 +2640,13 @@ var Helper = {
 		}
 
 		var allItems = System.findNodes("//input[@type='checkbox']");
-		for (var i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			theLocation=anItem.parentNode.nextSibling.nextSibling;
-			theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-			System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
+		if (allItems) {
+			for (var i=0; i<allItems.length; i++) {
+				anItem = allItems[i];
+				theLocation=anItem.parentNode.nextSibling.nextSibling;
+				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
+				System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
+			}
 		}
 	},
 
