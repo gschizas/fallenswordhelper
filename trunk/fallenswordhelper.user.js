@@ -253,7 +253,7 @@ var Helper = {
 		case "arena":
 			switch (subPageId) {
 			case "-":
-				Helper.injectArena();
+				//Helper.injectArena();
 				break;
 			}
 			break;
