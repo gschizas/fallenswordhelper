@@ -4227,8 +4227,96 @@ var Helper = {
 	},
 
 	injectArena: function() {
-		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]");
-		//GM_log(arenaTable.innerHTML);
+		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
+		arenaTable.style.fontSize = 'x-small';
+		for (var i=1; i<arenaTable.rows.length; i++){
+			var row = arenaTable.rows[i];
+			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
+		}
+		
+		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
+		for (var i=0; i<titleCells.length; i++) {
+			var cell=titleCells[i];
+			if (cell.innerHTML.search("Max Equip Level") != -1
+				|| cell.innerHTML.search("Join Cost") != -1
+				//|| cell.innerHTML.search("Specials") != -1
+				//|| cell.innerHTML.search("Hell Forge") != -1
+				) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
+				cell.addEventListener('click', Helper.sortArena, true);
+			}
+		}
+	},
+
+	sortArena: function(evt) {
+		var headerClicked=evt.target.textContent.replace(/ /g,"");
+		var parentTables=System.findNodes("ancestor::table", evt.target)
+		var list=parentTables[parentTables.length-1];
+
+		Helper.arenaRows = new Array();
+		for (var i=1; i<list.rows.length; i++){
+			var theRow=list.rows[i];
+			Helper.arenaRows[i-1] = {
+				'ArenaID': theRow.cells[0].textContent,
+				'Players': theRow.cells[1].textContent,
+				'JoinCost': theRow.cells[2].textContent.replace(/,/g,"")*1,
+				'JoinCostHTML': theRow.cells[2].innerHTML,
+				'State': theRow.cells[3].textContent,
+				'Specials': theRow.cells[4].innerHTML,
+				'HellForge': theRow.cells[5].innerHTML,
+				'MaxEquipLevel': theRow.cells[6].textContent*1,
+				'Reward': theRow.cells[7].innerHTML,
+				'Action': theRow.cells[8].innerHTML,
+			};
+		}
+
+		if (Helper.sortAsc==undefined) Helper.sortAsc=false;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+		Helper.sortBy=headerClicked;
+
+		if (headerClicked=="Member") {
+			Helper.arenaRows.sort(Helper.stringSort)
+		}
+		else {
+			Helper.arenaRows.sort(Helper.numberSort)
+		}
+		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
+
+		for (var i=0; i<Helper.arenaRows.length; i++){
+			var r = Helper.arenaRows[i];
+			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
+			result += '<TR>'+
+			'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.ArenaID+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Players+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.JoinCostHTML+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.State+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Specials+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.HellForge+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.MaxEquipLevel+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Reward+'</FONT></TD>'+
+			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><FONT size="1">'+r.Action+'</FONT></TD></TR>';
+		}
+		//result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
+
+		list.innerHTML=result;
+
+		for (var i=0; i<list.rows[0].cells.length; i++) {
+			var cell=list.rows[0].cells[i];
+			if (cell.innerHTML.search("Max Equip Level") != -1
+				|| cell.innerHTML.search("Join Cost") != -1
+				//|| cell.innerHTML.search("Specials") != -1
+				//|| cell.innerHTML.search("Hell Forge") != -1
+				) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
+				cell.addEventListener('click', Helper.sortArena, true);
+			}
+		}
 	},
 	
 	toggleVisibilty: function(evt) {
