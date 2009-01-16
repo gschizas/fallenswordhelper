@@ -2237,10 +2237,10 @@ var Helper = {
 		var imageCell = isAuctionPage.parentNode;
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
 
-		var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
+		var auctionTable = System.findNode("//td[contains(@background,'header_tradehub.jpg')]/../../..");
 
 		//Add functionality to hide the text block at the top.
-		var textRow = auctionTable.rows[2];
+		var textRow = auctionTable.rows[1];
 		textRow.id = 'auctionTextControl';
 		var myBidsButton = System.findNode("//input[@value='My Bids']/..");
 		myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
@@ -2291,7 +2291,7 @@ var Helper = {
 		}
 
 		//GM_log(JSON.stringify(potions));
-
+		/*
 		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
 			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#110011'>Quick Potion Search</td></tr>"
 		var lp=0;
@@ -2329,6 +2329,8 @@ var Helper = {
 			if (lp % 3==2) finalHTML += "</tr>";
 			lp++;
 		}
+		*/
+
 		// if (!/</tr>$/.exec(finalHTML)) finalHTML+="</tr>"
 		/*
 			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Wise' title='Librarian'>Lib 200</span></td>" +
@@ -2349,14 +2351,16 @@ var Helper = {
 				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Supreme Luck' title='Find Item'>FI 1000</span></td></tr>" +
 			"</tbody></table></span>";
         */
-		imageCell.innerHTML = finalHTML;
+		// imageCell.innerHTML = finalHTML;
 
 		//GM_log(imageCell.parentNode.innerHTML);
+		/*
 		var quickSearchList = System.findNodes("//span[@cat='quickPotionSearch']");
 		for (var i=0; i<quickSearchList.length; i++) {
 			quickSearchItem = quickSearchList[i];
 			quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
 		}
+		*/
 
 		var allItems = document.getElementsByTagName("IMG");
 		for (var i=0; i<allItems.length; i++) {
