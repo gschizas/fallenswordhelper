@@ -212,6 +212,13 @@ var Helper = {
 				break;
 			}
 			break;
+		case "arena":
+			switch (subPageId) {
+			case "-":
+				Helper.injectArena();
+				break;
+			}
+			break;
 		case "questbook":
 			switch(subsequentPageId) {
 			case "-":
@@ -320,6 +327,9 @@ var Helper = {
 				break;
 			case "questmanager":
 				Helper.injectQuestManager();
+				break;
+			case "auctionsearch":
+				Helper.injectAuctionSearch();
 				break;
 			}
 			break;
@@ -843,26 +853,13 @@ var Helper = {
 		if (itemName) itemName=itemName[1];
 		var itemLinks = document.createElement("td");
 		itemLinks.innerHTML =
-			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&search_text='
+			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='
 			+ escape(Helper.plantFromComponent(itemName))
 			+ '">AH</a>';
 		var counter=System.findNode("../../../../tr[2]/td", callback);
 		counter.setAttribute("colspan", "2");
 		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
 	},
-/*
-			linkFromMouseover: function(mouseOver) {
-		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
-		var reResult=reParams.exec(mouseOver);
-		var itemId=reResult[1];
-		var invId=reResult[2];
-		var type=reResult[3];
-		var pid=reResult[4];
-		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
-		theUrl = System.server + theUrl;
-		return theUrl
-	},
-*/
 
 	injectAdvisor: function() {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
@@ -1258,12 +1255,11 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
-		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-		if (!injectHere) return;
-		var newRow=injectHere.insertRow(1);
+		var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
+		// if (!injectHere) return;
+		var newRow=injectHere.insertRow(2);
 		var newCell=newRow.insertCell(0);
 		// newCell.setAttribute("background", System.imageServer + "/sigma2/skin/realm_right_bg.jpg");
-		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced");
 		if (GM_getValue("showQuickKillOnWorld")) {
 			newCell.innerHTML='<div style="font-size:xx-small;">' +
@@ -1285,6 +1281,7 @@ var Helper = {
 		}
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
+
 		if (!GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
@@ -1366,7 +1363,7 @@ var Helper = {
 	},
 
 	getMonster: function(index) {
-		return System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')]")[index-1];
+		return System.findNode("//a[@id='aLink" + index + "']");
 	},
 
 	killSingleMonster: function(monsterNumber) {
@@ -1411,11 +1408,20 @@ var Helper = {
 				System.xmlhttp(monster.href, Helper.checkedMonster, monster);
 			}
 		}
+		// add id to the kill-monster links
+		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')]");
+		if (!monsters) return;
+		for (var i=0; i<monsters.length; i++) {
+			var monster = monsters[i];
+			if (monster) {
+				monster.id = "aLink" + (i + 1);
+			}
+		}
 	},
 
 	checkedMonster: function(responseText, callback) {
 		var creatureInfo=System.createDocument(responseText);
-		var statsNode = System.findNode("//table[@width='350']", creatureInfo);
+		var statsNode = System.findNode("//table[@width='350' and contains(., 'Attack')]", creatureInfo);
 		if (!statsNode) {return;} // FF2 error fix
 		var classNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'Class:')]/following-sibling::td", creatureInfo);
 		var levelNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'Level:')]/following-sibling::td", creatureInfo);
@@ -1431,35 +1437,10 @@ var Helper = {
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
 		var oneHitNumber = Math.ceil((hitpoints*1.053)+(armorNumber*1.053));
-		/*
-		if (statsNode) reportText += "<div style='color:#FFF380;'>Statistics</div>"
-		if (classNode) reportText += "Class: " + classNode.textContent + "<br/>";
-		if (levelNode) reportText += "Level: " + levelNode.textContent + "<br/>";
-		if (attackNode) reportText += "Attack: " + attackNode.textContent + "<br/>";
-		if (defenseNode) reportText += "Defense: " + defenseNode.textContent + "<br/>";
-		if (armorNode) reportText += "Armor: " + armorNode.textContent + "<br/>";
-		if (damageNode) reportText += "Damage: " + damageNode.textContent + "<br/>";
-		if (goldNode) reportText += "Gold: " + goldNode.textContent + "<br/>";
-		if (enhanceNodes) {
-			if (enhanceNodes) reportText += "<div style='color:#FFF380;'>Enhancements</div>"
-			for (i=0; i<enhanceNodes.length; i++) {
-				reportText += enhanceNodes[i].textContent + "<br/>";
-			}
-		}
-		*/
-		var recolor=System.findNodes("//td[contains(@style,'statistics_head_bg.gif')]/..", statsNode);
-		for (var i=0; i<recolor.length; i++) {
-			recolor[i].style.color="#84ADAC";
-		}
-		recolor=System.findNodes("//font[@color='#333333']", statsNode);
-		//for (var i=0; i<recolor.length; i++) {
-		//	recolor[i].style.color="#84ADAC";
-		//}
 
 		var killButtons=System.findNode("tbody/tr[td/input]", statsNode);
 		var killButtonHeader=System.findNode("tbody/tr[contains(td/@style,'actions_head_bg.gif')]/following-sibling::tr", statsNode);
-		var killButtonHeader=System.findNode("tbody/tr", statsNode);
-		var killButtonParent=killButtonHeader.parentNode;
+		var killButtonParent=killButtonHeader.parentNode.parentNode;
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
 		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
@@ -1469,10 +1450,11 @@ var Helper = {
 		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + Helper.characterHP + "</span>)" +
 			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
 
-		/*
-		killButtonParent.removeChild(killButtons);
-		killButtonParent.removeChild(killButtonHeader);
-		*/
+		// deleteRow(-1) means delete the last row of the table
+		killButtonParent.deleteRow(-1);
+		killButtonParent.deleteRow(-1);
+		killButtonParent.deleteRow(-1);
+
 		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
 		callback.setAttribute("mouseOverWidth", "400");
 		callback.addEventListener("mouseover", Helper.clientTip, true);
@@ -1769,14 +1751,13 @@ var Helper = {
 			result += "</span><br/>";
 		}
 		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">'
-		result += '<input type="hidden" value="' + chat.confirm + '" name="xc"/>'
-		result += '<input type="text" class="custominput" size="14" name="msg"/>'
+		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>'
+		result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>'
 		result += '<input type="submit" class="custominput" value="Send" name="submit"/>'
 		result += '</form>'
 		result += '</div>'
 
 		aCell.innerHTML = result;
-
 
 		if (newTable) {
 			var breaker=document.createElement("BR");
@@ -1794,9 +1775,9 @@ var Helper = {
 	sendChat: function(evt) {
 		var oForm=evt.target;
 
-		var confirm=System.findNode("//input[@name='xc']", evt.target.form).value;
-		var msg=System.findNode("//input[@name='msg']", evt.target.form).value;
-		System.findNode("//input[@name='msg']", evt.target.form).value="";
+		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", evt.target.form).value;
+		var msg=System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value;
+		System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value="";
 		if (msg=="") {
 			Helper.retrieveChat();
 			return false;
@@ -2333,30 +2314,8 @@ var Helper = {
 			lp++;
 		}
 		*/
-
-		// if (!/</tr>$/.exec(finalHTML)) finalHTML+="</tr>"
-		/*
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Wise' title='Librarian'>Lib 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Bookworm' title='Librarian'>Lib 225</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Shatter' title='Shatter Armor'>SA</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Dragons Blood' title='Berserk'>ZK 200</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Berserkers' title='Berserk'>ZK 300</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Fury' title='Berserk'>ZK 350</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Sludge' title='Dark Curse'>DC 200</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Black Death' title='Dark Curse'>DC 225</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Doubling' title='Doubler'>DB 450</span></td>" +
-				"<td colspan='2'><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Acceleration' title='Doubler'>DB 500</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Truth' title='Enchant Weapon'>EW 1000</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Death Dealer' title='Death Dealer'>DD</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Aid' title='Assist'>Assist</span></td></tr>" +
-			"<tr><td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Dull Edge' title='Dull Edge'>Dull Edge</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Potion of Death' title='Death Wish'>DW</span></td>" +
-				"<td><span style='cursor:pointer; text-decoration:underline;' cat='quickPotionSearch' searchtext='Supreme Luck' title='Find Item'>FI 1000</span></td></tr>" +
-			"</tbody></table></span>";
-        */
 		// imageCell.innerHTML = finalHTML;
 
-		//GM_log(imageCell.parentNode.innerHTML);
 		/*
 		var quickSearchList = System.findNodes("//span[@cat='quickPotionSearch']");
 		for (var i=0; i<quickSearchList.length; i++) {
@@ -2868,8 +2827,13 @@ var Helper = {
 				numberOfAllies ++;
 				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
+			startIndex = 0;
+			while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+				numberOfAllies ++;
+				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+			}
 			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
-			if (alliesTotal) {
+			if (alliesTotal && alliesTotal >= numberOfAllies) {
 				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
@@ -2882,8 +2846,13 @@ var Helper = {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
+			var startIndex = 0;
+			while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+				numberOfEnemies ++;
+				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+			}
 			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>";
-			if (enemiesTotal) {
+			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
 				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
@@ -3897,6 +3866,10 @@ var Helper = {
 		var furyCasterLevelRE = /Level<br>(\d+)%/
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
+		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc))
+			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master:	On</span>";
+		else
+			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
 	},
 
 	getKillStreak: function(responseText) {
@@ -4434,7 +4407,7 @@ var Helper = {
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
-			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
+			'<tr><td colspan="4"><b>Sigma Storm Helper configuration</b></td></tr>' +
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
 			'<tr><td colspan="4" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + Helper.formatDateTime(lastCheck) +
 			')</span></td></tr>' +
@@ -4490,7 +4463,7 @@ var Helper = {
 				':</td><td><input name="disableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("disableGuildOnlineList")?" checked":"") + '></td>' +
 			'<td align="right">Show Debug Info' + Helper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
+			'<tr><td align="right">Hide Taulin Rad Lands Portal' + Helper.helpLink('Hide Taulin Rad Lands Portal', 'This will hide the Taulin Rad Lands portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
 			'<td align="right">Footprints Color:</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
@@ -4508,11 +4481,14 @@ var Helper = {
 			//save button
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="4" align=center>' +
-			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a> and ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'<span style="font-size:xx-small">Sigma Storm Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1106198">Coccinella</a> and ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1267797">Tangtop</a> '+
+/*
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a>' +
+*/
+			'</td></tr>' +
 			'<tr><td colspan="4" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions or bug reports<span></td></tr>' +
