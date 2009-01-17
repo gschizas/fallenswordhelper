@@ -1801,14 +1801,13 @@ var Helper = {
 			result += "</span><br/>";
 		}
 		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">'
-		result += '<input type="hidden" value="' + chat.confirm + '" name="xc"/>'
-		result += '<input type="text" class="custominput" size="14" name="msg"/>'
+		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>'
+		result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>'
 		result += '<input type="submit" class="custominput" value="Send" name="submit"/>'
 		result += '</form>'
 		result += '</div>'
 
 		aCell.innerHTML = result;
-
 
 		if (newTable) {
 			var breaker=document.createElement("BR");
@@ -1826,9 +1825,9 @@ var Helper = {
 	sendChat: function(evt) {
 		var oForm=evt.target;
 
-		var confirm=System.findNode("//input[@name='xc']", evt.target.form).value;
-		var msg=System.findNode("//input[@name='msg']", evt.target.form).value;
-		System.findNode("//input[@name='msg']", evt.target.form).value="";
+		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", evt.target.form).value;
+		var msg=System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value;
+		System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value="";
 		if (msg=="") {
 			Helper.retrieveChat();
 			return false;
