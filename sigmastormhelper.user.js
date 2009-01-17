@@ -53,6 +53,9 @@ var Helper = {
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
+		System.setDefault("chatTopToBottom", true);
+		System.setDefault("enableGuildOnlineList", true);
+
 	},
 
 	readInfo: function() {
@@ -1714,6 +1717,7 @@ var Helper = {
 	injectChat: function(chat){
 		var injectHere = document.getElementById("Helper:ChatPlaceholder");
 		var newTable=false;
+		var topToBottom = GM_getValue("chatTopToBottom");
 
 		var displayList = document.getElementById("Helper:ChatWindow");
 		if (!displayList) {
@@ -4411,11 +4415,21 @@ var Helper = {
 			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
 			'<tr><td colspan="4" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + Helper.formatDateTime(lastCheck) +
 			')</span></td></tr>' +
-			'<tr><td colspan="4" align="left"><b>Enter guild names, seperated by commas</td></tr>' +
+			'<tr><td colspan="4" align="left"><b>Social Preferences</b></td></tr>' +
+			'<tr><td colspan="4" align="left">Enter faction names, seperated by commas</td></tr>' +
 			'<tr><td>Own Guild</td><td colspan="3">'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
 			'<tr><td>Friendly Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
+			'<tr><td align="right">Show Faction Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
+				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") + '></td>' +
+			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
+				'When not, messages run as they are in HCS\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
+			'<td align="right">Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
+				'</td><td><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '"></td>' +
+			'<td align="right">Show chat lines' + Helper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' +
+				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
+				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Quick Kill Style' + Helper.helpLink('Quick Kill Style', 'Unchecking the checkbox will prevent this option from displaying on the world screen.<br/>'+
 				'<b><u>single</u></b> will fast kill a single monster<br>' +
@@ -4437,10 +4451,10 @@ var Helper = {
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
 			'<td align="right" colspan="2"><input type="button" class="custombutton" value="Show Logs" id="Helper:ShowLogs"></td></td></tr>' +
-			'<tr><td align="right">Show Administrative Options' + Helper.helpLink('Show Admininstrative Options', 'Show ranking controls for guild managemenet in member profile page - ' +
+			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Dim Non Player<br/>Guild Log Messages' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
+			'<td align="right">Cleanup faction log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
 				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
@@ -4451,16 +4465,11 @@ var Helper = {
 			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
 				'quests you might have missed.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<td align="right">Show chat lines' + Helper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' +
-				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
-				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><td align="right">Show Combat Log' + Helper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
 			'<td align="right">Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Disable Guild Online List' + Helper.helpLink('Disable Guild Online List', 'This will disable the guild online list.') +
-				':</td><td><input name="disableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("disableGuildOnlineList")?" checked":"") + '></td>' +
 			'<td align="right">Show Debug Info' + Helper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
 				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Taulin Rad Lands Portal' + Helper.helpLink('Hide Taulin Rad Lands Portal', 'This will hide the Taulin Rad Lands portal on the world screen.') +
@@ -4532,6 +4541,17 @@ var Helper = {
 
 	saveConfig: function(evt) {
 		var oForm=evt.target.form;
+		var chatLines = System.findNode("//input[@name='chatLines']", oForm);
+		var enableChat = System.findNode("//input[@name='enableChat']", oForm);
+		var chatLinesValue = parseInt(chatLines.value);
+
+		if (enableChat.checked && (isNaN(chatLinesValue) || chatLinesValue<=0)) {
+			chatLines.value="10";
+		}
+		if (!enableChat.checked) {
+			chatLines.value="0";
+		}
+
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
@@ -4541,6 +4561,7 @@ var Helper = {
 		System.saveValueForm(oForm, "guildPastMessage");
 		System.saveValueForm(oForm, "guildEnmyMessage");
 		System.saveValueForm(oForm, "chatLines");
+		System.saveValueForm(oForm, "chatTopToBottom");
 		System.saveValueForm(oForm, "showAdmin");
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
@@ -4550,7 +4571,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
-		System.saveValueForm(oForm, "disableGuildOnlineList");
+		System.saveValueForm(oForm, "enableGuildOnlineList");
 		System.saveValueForm(oForm, "showDebugInfo");
 		System.saveValueForm(oForm, "killAllAdvanced");
 		System.saveValueForm(oForm, "huntingBuffs");
