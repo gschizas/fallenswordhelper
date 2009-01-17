@@ -53,6 +53,7 @@ var Helper = {
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
+
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
 		} catch(err) {
@@ -1298,7 +1299,6 @@ var Helper = {
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
-		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
 		var killStyle = GM_getValue("killAllAdvanced");
 		if (GM_getValue("showQuickKillOnWorld")) {
 			newCell.innerHTML='<div style="margin-left:28px; margin-right:28px;"><table><tbody>' +
@@ -1467,22 +1467,7 @@ var Helper = {
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
 		var oneHitNumber = Math.ceil((hitpoints*1.053)+(armorNumber*1.053));
-		/*
-		if (statsNode) reportText += "<div style='color:#FFF380;'>Statistics</div>"
-		if (classNode) reportText += "Class: " + classNode.textContent + "<br/>";
-		if (levelNode) reportText += "Level: " + levelNode.textContent + "<br/>";
-		if (attackNode) reportText += "Attack: " + attackNode.textContent + "<br/>";
-		if (defenseNode) reportText += "Defense: " + defenseNode.textContent + "<br/>";
-		if (armorNode) reportText += "Armor: " + armorNode.textContent + "<br/>";
-		if (damageNode) reportText += "Damage: " + damageNode.textContent + "<br/>";
-		if (goldNode) reportText += "Gold: " + goldNode.textContent + "<br/>";
-		if (enhanceNodes) {
-			if (enhanceNodes) reportText += "<div style='color:#FFF380;'>Enhancements</div>"
-			for (i=0; i<enhanceNodes.length; i++) {
-				reportText += enhanceNodes[i].textContent + "<br/>";
-			}
-		}
-		*/
+
 		var recolor=System.findNodes("//td[@bgcolor='#cd9e4b']", statsNode);
 		for (var i=0; i<recolor.length; i++) {
 			recolor[i].style.color="black";
@@ -2953,7 +2938,7 @@ var Helper = {
 	},
 
 	injectQuestTable: function() {
-		document.getElementById('Helper:QuestManagerOutput').innerHTML=Helper.generateQuestTable();
+		document.getElementById('Helper:QuestManagerOutput').innerHTML = Helper.generateQuestTable();
 		var questTable=document.getElementById('Helper:QuestTable');
 		for (var i=0; i<questTable.rows[0].cells.length; i++) {
 			var cell=questTable.rows[0].cells[i];
