@@ -419,11 +419,11 @@ var Helper = {
 	},
 
 	injectStaminaCalculator: function() {
-		var staminaImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/icon_stamina.gif')]");
+		var staminaImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/animation_cell.gif')]");
 		if (!staminaImageElement) return;
 
 		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
-		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
+		var staminaRE = /Energy:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
 		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
 		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
@@ -762,7 +762,7 @@ var Helper = {
 			result.type="worldmap";
 		}
 		else {
-			var posit = System.findNode("//td[contains(@background, '/sigma2/coord_bg_0.gif')]/font/center");
+			var posit = System.findNode("//td[contains(@background, '/sigma2/coord_bg_')]/font/center");
 			if (!posit) return;
 			var thePosition=posit.textContent;
 			var positionRE=/-\s*\((\d+),\s*(\d+)\)/
@@ -1483,7 +1483,12 @@ var Helper = {
 		if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
 		var levelUp=responseText.match(/var\s+levelUp=(-?[0-9]+);/)
 		if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
-		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
+// 	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
+//	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
+//	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
+// <font color="#dbd6d1" size="2"><b>You looted the item '<font color="#009900">Steel Leg Armor</font>'</b><br/><br/><img onmouseover="ajaxLoadItem(11, -1, 2, 1106198, '');" src="http://66.7.192.165/sigma2/items/11c47de5e9.gif"/><br/><br/><font size="1">Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></font>
+
+		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
 		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
 		var info=responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
@@ -1493,8 +1498,8 @@ var Helper = {
 		var lootedItemVerify="";
 		if (lootMatch && lootMatch.length>0) {
 			lootedItem=lootMatch[2];
-			lootedItemId=lootMatch[3];
-			lootedItemVerify=lootMatch[4];
+			lootedItemId=lootMatch[4];
+			lootedItemVerify=lootMatch[5];
 		}
 		var shieldImpDeathRE = /Shield Imp absorbed all damage/;
 		var shieldImpDeath = responseText.match(shieldImpDeathRE);
