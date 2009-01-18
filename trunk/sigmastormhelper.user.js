@@ -447,7 +447,7 @@ var Helper = {
 	},
 
 	injectLevelupCalculator: function() {
-		var levelupImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/icon_xp.gif')]");
+		var levelupImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/xp_progress.gif')]/..");
 		if (!levelupImageElement) return;
 		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
 		var remainingXPRE = /Remaining:\s<\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
@@ -464,7 +464,7 @@ var Helper = {
 		var mouseoverTextAddition = "<tr><td><font color=\\'#FFF380\\'>Next Level At: </td><td width=\\'90%\\'>" +
 			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</td></tr><tr>";
 		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-		newMouseoverText = newMouseoverText.replace("tt_setWidth(175)", "tt_setWidth(200)");
+		newMouseoverText = newMouseoverText.replace("tt_setWidth(180)", "tt_setWidth(220)").replace("<table width=180>", "<table width=220>");
 		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
 		return;
 	},
