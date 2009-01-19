@@ -8,7 +8,7 @@ var Layout = {
 		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
 		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
 		if (GM_getValue("keepLogs")) {
-			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0")
+			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0");
 		}
 	},
 
@@ -58,9 +58,10 @@ var Layout = {
 	},
 
 	playerId: function() {
-		var playerIdRE = /sigmastorm2.com\/\?ref=(\d+)/
-		var playerId=parseInt(document.body.innerHTML.match(playerIdRE)[1]);
-		GM_setValue("playerID",playerId);
-	},
+		var playerIdRE = /sigmastorm2.com\/\?ref=(\d+)/i;
+		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1]);
+		GM_setValue("playerID", thePlayerId);
+		return thePlayerId;
+	}
 
-}
+};

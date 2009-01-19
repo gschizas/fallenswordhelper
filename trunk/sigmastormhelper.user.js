@@ -381,15 +381,17 @@ var Helper = {
 	},
 
 	injectGuild: function() {
+		return;
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
 		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
-			"id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
-		var guildLogoElement = System.findNode("//img[contains(@title, 's Logo')]");
+			"id='toggleGuildLogoControl' linkto='logo_1_img'>X</span> ]";
+		var guildLogoElement = System.findNode("//td[contains(@background, 'sigma2//guildlogos/')]");
 		guildLogoElement.id = "guildLogoControl";
 		if (GM_getValue("guildLogoControl")) {
 			guildLogoElement.style.display = "none";
 			guildLogoElement.style.visibility = "hidden";
 		}
+
 		var leaveGuild = System.findNode("//a[contains(.,'Leave')]").parentNode;
 		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
@@ -1626,8 +1628,8 @@ var Helper = {
 	},
 
 	prepareGuildList: function() {
-		if (GM_getValue("disableGuildOnlineList")) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+		if (!GM_getValue("enableGuildOnlineList")) return;
+		var injectHere = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
 		if (!injectHere) return;
 		var info = injectHere.insertRow(0);
 		var cell = info.insertCell(0);
@@ -1662,17 +1664,21 @@ var Helper = {
 		}
 		if (membersTable) {
 			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
-			var memberList = new Object();
-			memberList.members = new Array();
-			memberList.lookupByName = new Array();
-			memberList.lookupById = new Array();
+			var memberList = {};
+			memberList.members = [];
+			memberList.lookupByName = [];
+			memberList.lookupById = [];
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
 					var aMember = new Object;
 					aMember.status = aRow.cells[0].firstChild.title;
-					aMember.id = (/[0-9]+$/).exec(aRow.cells[1].firstChild.nextSibling.href)[0]
-					aMember.name=aRow.cells[1].firstChild.nextSibling.textContent;
+					var playerLink =
+						aRow.cells[1].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.nextSibling;
+					aMember.id = (/[0-9]+$/).exec(playerLink.href)[0];
+					aMember.name=playerLink.textContent;
+					// aMember.id = (/[0-9]+$/).exec(aRow.cells[1].firstChild.nextSibling.href)[0]
+					// aMember.name=aRow.cells[1].firstChild.nextSibling.textContent;
 					aMember.level=aRow.cells[2].textContent;
 					aMember.rank=aRow.cells[3].textContent;
 					aMember.xp=aRow.cells[4].textContent;
@@ -1690,7 +1696,7 @@ var Helper = {
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+		var injectHere = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
 		if (!injectHere) return;
 		var info = injectHere.insertRow(GM_getValue("disableGuildOnlineList")?0:1)
 		var cell = info.insertCell(0);
@@ -1713,9 +1719,8 @@ var Helper = {
 		var doc=System.createDocument(chatText);
 		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", doc);
 		if (!chatTable) return;
-		// GM_log(chatTable.innerHTML);
 		var chat = new Object();
-		var chatConfirm=System.findNode("//input[@name='xc']", doc);
+		// var chatConfirm=System.findNode("//input[@name='xc']", doc);
 		chat.isRefreshed=true;
 		chat.lastUpdate = (new Date()).getTime();
 		chat.messages = new Array();
@@ -1729,7 +1734,7 @@ var Helper = {
 				chat.messages.push(aMessage);
 			}
 		}
-		chat.confirm=chatConfirm.value;
+		// chat.confirm=chatConfirm.value;
 		Helper.injectChat(chat);
 	},
 
@@ -1737,14 +1742,15 @@ var Helper = {
 		var injectHere = document.getElementById("Helper:ChatPlaceholder");
 		var newTable=false;
 		var topToBottom = GM_getValue("chatTopToBottom");
+		GM_log(chat.isRefreshed);
 
 		var displayList = document.getElementById("Helper:ChatWindow");
 		if (!displayList) {
 			displayList=document.createElement("TABLE");
 			displayList.id="Helper:ChatWindow";
-			displayList.style.border = "1px solid #c5ad73";
-			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
-			displayList.cellPadding = 1;
+			displayList.style.border = "1px solid gray";
+			displayList.style.backgroundColor = (chat.isRefreshed)?"#151f1e":"#112322";
+			displayList.cellPadding = 2;
 			displayList.width = 125;
 			newTable=true;
 		}
@@ -1752,7 +1758,7 @@ var Helper = {
 			while (displayList.rows.length>0) {
 				displayList.deleteRow(0);
 			}
-			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
+			displayList.style.backgroundColor = (chat.isRefreshed)?"#151f1e":"#112322";
 		}
 
 		var aRow=displayList.insertRow(displayList.rows.length);
@@ -1775,8 +1781,8 @@ var Helper = {
 		}
 		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">'
 		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>'
-		result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>'
-		result += '<input type="submit" class="custominput" value="Send" name="submit"/>'
+		result += '<input type="text" class="custominput" size="18" name="Helper:ChatMessage"/>'
+		result += '<input type="submit" class="custombutton" value="Send" name="submit"/>'
 		result += '</form>'
 		result += '</div>'
 
@@ -2001,10 +2007,10 @@ var Helper = {
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 				if (postDateAsLocalMilli > localLastCheckMilli) {
-					aRow.style.backgroundColor = "#202020";
+					aRow.style.backgroundColor = "#151f1e";
 				}
 				else if (postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
-					aRow.style.backgroundColor = "#404040";
+					aRow.style.backgroundColor = "#112322";
 					addBuffTag = false;
 				}
 				if (logScreen == 'Chat' && addBuffTag) {
@@ -2155,8 +2161,8 @@ var Helper = {
 		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = (memberList.isRefreshed)?"#6a5938":"#4a3918";
+		displayList.style.border = "1px solid gray";
+		displayList.style.backgroundColor = (memberList.isRefreshed)?"#151f1e":"#112322";
 		displayList.cellPadding = 1;
 		displayList.width = 125;
 
@@ -2644,7 +2650,7 @@ var Helper = {
 	recallItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
 		var info = responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
@@ -4294,7 +4300,7 @@ var Helper = {
 		arenaTable.style.fontSize = 'x-small';
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
-			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
+			row.style.backgroundColor = ((i % 2)==0)?"#151f1e":"#112322";
 		}
 
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");

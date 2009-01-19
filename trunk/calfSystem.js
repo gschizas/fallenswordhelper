@@ -14,11 +14,11 @@ var System = {
 
 		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
-		var idindex = imgurls.src.indexOf("/skin/");
-		System.imageServer=imgurls.src.substr(0,idindex);
-		System.server=document.location.protocol + "//" + document.location.host + "/";
-		System.browserVersion=parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
-		System.debug = GM_getValue("showDebugInfo");
+		var idindex             = imgurls.src.indexOf("/skin/");
+		System.imageServer      = imgurls.src.substr(0,idindex);
+		System.server           = document.location.protocol + "//" + document.location.host + "/";
+		System.browserVersion   = parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
+		System.debug            = GM_getValue("showDebugInfo");
 	},
 
 	getValueJSON: function(name) {
@@ -40,7 +40,7 @@ var System = {
 			if (!doc) {
 				doc=document;
 			}
-			var nodes=new Array();
+			var nodes=[];
 			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 			if (findQ.snapshotLength==0) return null;
 			for (var i=0; i<findQ.snapshotLength; i++) {
@@ -52,13 +52,13 @@ var System = {
 	findNodeText: function(xpath, doc) {
 		var node=System.findNode(xpath, doc);
 		if (!node) return null;
-		nodes.textContent;
+		return node.textContent;
 	},
 
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
-		return doc
+		return doc;
 	},
 
 	formatDate: function(dateFormat) {
@@ -68,6 +68,7 @@ var System = {
 		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
 
 		var theDate=this;
+		var h;
 
 		return dateFormat.replace(/(yyyy|MMMM|MMM|MM|dddd|ddd|dd|hh|HH|mm|ss|a)/g,
 			function($1) {
@@ -96,7 +97,7 @@ var System = {
 	},
 
 	filterBy: function(property, value) {
-		return this.filter(function(element, index, array) {return element[property]==value})
+		return this.filter(function(element, index, array) {return element[property]==value;});
 	},
 
 	repeatString: function(times) {
@@ -108,13 +109,13 @@ var System = {
 	},
 
 	saveValueForm: function(oForm, name) {
-		var formElement = System.findNode("//input[@name='" + name + "']", oForm)
+		var formElement = System.findNode("//input[@name='" + name + "']", oForm);
 		if (formElement.getAttribute("type")=="checkbox") {
 			GM_setValue(name, formElement.checked);
 		} else if (formElement.getAttribute("type")=="radio") {
-			radioElements = System.findNodes("//input[@name='" + name + "']", 0, oForm)
+			var radioElements = System.findNodes("//input[@name='" + name + "']", 0, oForm);
 			for (var i=0; i<radioElements.length; i++) {
-				radioElement = radioElements[i];
+				var radioElement = radioElements[i];
 				if (radioElement.checked) {
 					GM_setValue(name, radioElement.value);
 				}
@@ -125,7 +126,7 @@ var System = {
 	},
 
 	setDefault: function(name, value) {
-		if (GM_getValue(name)==undefined) {GM_setValue(name, value)};
+		if (GM_getValue(name)==undefined) GM_setValue(name, value);
 	},
 
 	xmlhttp: function(theUrl, func, theCallback) {
@@ -141,10 +142,10 @@ var System = {
 			},
 			onload: function(responseDetails) {
 				if (func) {
-					func.call(this, responseDetails.responseText, this.callback)
+					func.call(this, responseDetails.responseText, this.callback);
 				}
-			},
-		})
+			}
+		});
 	},
 
 	intValue: function(theText) {
@@ -153,6 +154,7 @@ var System = {
 	},
 
 	addCommas: function(nStr) {
+		var x, x1, x2;
 		nStr += '';
 		x = nStr.split('.');
 		x1 = x[0];
@@ -188,7 +190,7 @@ var System = {
 		var chgTxt = "";
 
 		for (var i=0; i<lines.length; i++){
-			line = lines[i];
+			var line = lines[i];
 			rev=revRX.exec(line);
 			chg=chgRX.exec(line);
 
@@ -196,18 +198,18 @@ var System = {
 			chgTxt = "";
 			if (chg) chgTxt = chg[1];
 			if (chgTxt!="") {
-				if (!changes[revNo]) changes[revNo] = ""
+				if (!changes[revNo]) changes[revNo] = "";
 				changes[revNo] += chgTxt + "\n";
 			}
 		}
 		var result="\n";
-		for (var i=newVersion; i>=oldVersion; i--) {
+		for (i=newVersion; i>=oldVersion; i--) {
 			if (changes[i]) {
 				result += "Version " + i + ": " + changes[i] + "\n";
 			}
 		}
 		return result;
-	},
+	}
 
-}
+};
 System.init();
