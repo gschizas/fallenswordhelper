@@ -871,16 +871,23 @@ var Helper = {
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
 			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-			cell.addEventListener('click', Helper.sortAdvisor, true);
+			cell.addEventListener('click', Helper.advisorHeaderClicked, true);
 		}
-	},
-
-	sortAdvisor: function(evt) {
-		var headerClicked=evt.target.textContent;
-		var parentTables=System.findNodes("ancestor::table", evt.target)
+		GM_addStyle(
+			'.HelperAdvisorRow1 {background-color:#151f1e;font-size:x-small}\n' +
+			'.HelperAdvisorRow1:hover {background-color:white}\n' +
+			'.HelperAdvisorRow2 {background-color:#112322;font-size:x-small}\n' +
+			'.HelperAdvisorRow2:hover {background-color:white}');
+		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
 		var list=parentTables[parentTables.length-1];
 
-		Helper.advisorRows = new Array();
+		Helper.generateAdvisorRows(list);
+		Helper.sortAsc = true;
+		Helper.sortAdvisor(list, "Member");
+	},
+
+	generateAdvisorRows: function(list) {
+		Helper.advisorRows = [];
 		for (var i=1; i<list.rows.length-1; i++){
 			var theRow=list.rows[i];
 			Helper.advisorRows[i-1] = {
@@ -896,14 +903,24 @@ var Helper = {
 				'XPContrib': theRow.cells[9].textContent
 			};
 		}
+	},
+
+	advisorHeaderClicked: function(evt) {
+		var headerClicked=evt.target.textContent;
+		var parentTables=System.findNodes("ancestor::table", evt.target)
+		var list=parentTables[parentTables.length-1];
+		Helper.sortAdvisor(list, headerClicked);
+	},
+
+	sortAdvisor: function(list, sortBy) {
 
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+		if (Helper.sortBy && Helper.sortBy==sortBy) {
 			Helper.sortAsc=!Helper.sortAsc;
 		}
-		Helper.sortBy=headerClicked;
+		Helper.sortBy=sortBy;
 
-		if (headerClicked=="Member") {
+		if (sortBy=="Member") {
 			Helper.advisorRows.sort(Helper.stringSort)
 		}
 		else {
@@ -912,21 +929,19 @@ var Helper = {
 
 		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
 
-
 		for (var i=0; i<Helper.advisorRows.length; i++){
 			var r = Helper.advisorRows[i];
-			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
-			result += '<TR>'+
-			'<TD '+bgColor+' ><FONT size="1"> '+r.Member+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GoldFromDeposits+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GoldFromTax+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GoldTotal+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.FSPs+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.SkillsCast+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GroupsCreated+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.GroupsJoined+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.RelicsCaptured+'</FONT></TD>'+
-			'<TD '+bgColor+' align="center"><FONT size="1">'+r.XPContrib+'</FONT></TD></TR>';
+			result += '<tr class="HelperAdvisorRow'+(1+i % 2)+'">'+
+			'<td> '+r.Member+'</td>'+
+			'<td align="center">'+r.GoldFromDeposits+'</td>'+
+			'<td align="center">'+r.GoldFromTax+'</td>'+
+			'<td align="center">'+r.GoldTotal+'</td>'+
+			'<td align="center">'+r.FSPs+'</td>'+
+			'<td align="center">'+r.SkillsCast+'</td>'+
+			'<td align="center">'+r.GroupsCreated+'</td>'+
+			'<td align="center">'+r.GroupsJoined+'</td>'+
+			'<td align="center">'+r.RelicsCaptured+'</td>'+
+			'<td align="center">'+r.XPContrib+'</td></tr>';
 		}
 		result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
 
@@ -938,7 +953,7 @@ var Helper = {
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
 			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-			cell.addEventListener('click', Helper.sortAdvisor, true);
+			cell.addEventListener('click', Helper.advisorHeaderClicked, true);
 		}
 
 	},
@@ -1514,9 +1529,8 @@ var Helper = {
 				resultText += info + "\n";
 			}
 			if (lootedItem!="") {
-				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-				resultHtml += "<br/><small><small>Looted item:<span onmouseoverDISABLED=\"ajaxLoadCustom(" +
-					lootedItemId + ", -1, '" + lootedItemVerify + "', " + playerId + ", '');\" >" +
+				resultHtml += "<br/><small><small>Looted item:<span onclick=\"ajaxLoadItem(" +
+					lootedItemId + ", -1, 2, " + playerId + ", '');\" >" +
 					lootedItem + "</span></small></small>";
 				resultText += "Looted item:" + lootedItem + "\n";
 			}
