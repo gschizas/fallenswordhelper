@@ -1156,9 +1156,9 @@ var Helper = {
 								aRow.parentNode.removeChild(aRow);
 							} else {
 								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
-									"<span style='color:blue;'>" + quests[j].level +
+									"<span style='color:#ADB5B5;'>" + quests[j].level +
 									"</span> <span style='color:gray;'>Quest location:</span> " +
-									"<span style='color:blue;'>" + quests[j].location + "</span>";
+									"<span style='color:#ADB5B5;'>" + quests[j].location + "</span>";
 							}
 							break;
 						} else if (j==quests.length-1 && imgElement.getAttribute("title") != "Completed") {
@@ -1200,8 +1200,8 @@ var Helper = {
 								aRow.parentNode.removeChild(aRow.nextSibling);
 								aRow.parentNode.removeChild(aRow);
 							} else {
-								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
-									quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
+								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:#ADB5B5;'>" +
+									quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:#ADB5B5;'>" +
 									quests[j].location + "</span>";
 							}
 							break;
@@ -1220,7 +1220,7 @@ var Helper = {
 			}
 			else {
 				var questNameCell = aRow.firstChild.nextSibling;
-				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed quests hidden - " +
+				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:#ADB5B5;'>(Completed quests hidden - " +
 					"see preferences to unhide)</font>"
 			}
 		}
@@ -1279,8 +1279,8 @@ var Helper = {
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
 					if (questName == quests[j].questName) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
-							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
+						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:#ADB5B5;'>" +
+							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:#ADB5B5;'>" +
 							quests[j].location + "</span>";
 					} else if (j==quests.length) {
 						insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
@@ -1309,7 +1309,7 @@ var Helper = {
 			newRow = pageOneQuestTable.insertRow(-1);
 			newCell = newRow.insertCell(0);
 			newCell.colSpan = '2';
-			newCell.innerHTML = "<span style='color:blue;'>List of <u>known</u> missing quests for your level. " +
+			newCell.innerHTML = "<span style='color:#ADB5B5;'>List of <u>known</u> missing quests for your level. " +
 				"If you find an error with this list, or a missing quest, please report it on the google code page related to this script.</span> ";
 			for (var j=0;j<quests.length;j++) {
 				var questName = quests[j].questName;
@@ -1320,9 +1320,9 @@ var Helper = {
 					newCell = newRow.insertCell(0);
 					newCell.colSpan = '2';
 					newCell.innerHTML = "<span style='color:gray;'>Known missing quest: " +
-					"</span><span style='color:blue;'>" + questName +
-					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + questLevel +
-					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + questLocation + "</span>";
+					"</span><span style='color:#ADB5B5;'>" + questName +
+					"</span> <span style='color:gray;'>level:</span> <span style='color:#ADB5B5;'>" + questLevel +
+					"</span> <span style='color:gray;'>location:</span> <span style='color:#ADB5B5;'>" + questLocation + "</span>";
 				}
 			}
 		}
@@ -2090,7 +2090,7 @@ var Helper = {
 				if (logScreen == 'Chat' && addBuffTag) {
 					var playerIDRE = /player_id=(\d+)/;
 					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
-					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID +
+					aRow.cells[1].innerHTML += " <a style='color:#ADB5B5;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID +
 						"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>";
 			}
 		}
@@ -2364,11 +2364,13 @@ var Helper = {
 
 		//insert another page change block at the top of the screen.
 		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+		// auctionTable.setAttribute("background", "red");
 		var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
 		var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
 		newPageChangeBlock += "</form>"
 		var insertPageChangeBlock=document.createElement("SPAN");
 		insertPageChangeBlock.innerHTML = newPageChangeBlock;
+
 		insertPageChangeBlockHere.align = "right";
 		insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
 		var potions = System.getValueJSON("potions");
@@ -2506,17 +2508,17 @@ var Helper = {
 					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-						winningBidBuyoutCell.innerHTML = '<br><span style="color:blue;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
+						winningBidBuyoutCell.innerHTML = '<br><span style="color:#ADB5B5;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
 					}
 					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
-						bidMinBuyoutCell.innerHTML = '<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
+						bidMinBuyoutCell.innerHTML = '<span style="color:#ADB5B5; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" title="Click to bid on this item" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
 					}
 					var buyoutValue = "-";
 					if (buyoutHTML != "-" && !playerListedItem) {
 						newCell.innerHTML = "&nbsp/&nbsp";
 						buyoutValue = (buyoutCell.textContent)*1;
-						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:blue; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
+						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:#ADB5B5; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
 							i + 'text" title="Click to buy this item now!" bidvalue="' + buyoutValue + '">Buy Now</span>';
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
@@ -2649,7 +2651,7 @@ var Helper = {
 
 	injectAuctionExtraText: function(anItem, craft, forgeCount) {
 		var theText=anItem.parentNode.nextSibling.nextSibling;
-		var preText = "<span style='color:blue'>" + craft + "</span>";
+		var preText = "<span style='color:#ADB5B5'>" + craft + "</span>";
 		if (forgeCount != 0) {
 			preText +=  " " + forgeCount + "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>"
 		}
@@ -2934,9 +2936,9 @@ var Helper = {
 				numberOfAllies ++;
 				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
 			}
-			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
+			alliesParent.innerHTML += "&nbsp<span style='color:#ADB5B5'>" + numberOfAllies + "</span>";
 			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
+				alliesParent.innerHTML += "/<span style='color:#ADB5B5' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
 			var enemiesParent = System.findNode("//b[.='Enemies']/..");
@@ -2952,9 +2954,9 @@ var Helper = {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
 			}
-			enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
+			enemiesParent.innerHTML += "&nbsp;<span style='color:#ADB5B5'>" + numberOfEnemies + "</span>";
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
+				enemiesParent.innerHTML += "/<span style='color:#ADB5B5' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
 	},
@@ -3139,12 +3141,12 @@ var Helper = {
 			output += "<tr><td width='10'></td><td><a href='" + System.server +
 				"index.php?cmd=auctionhouse&type=-1&search_text=" +
 				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
 				quickSearchItem.searchname + "</span></a></td>" +
 				"<td><a href='" + System.server +
 				"index.php?cmd=auctionhouse&type=-1&search_text=" +
 				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
 				((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
 				"<td></td></tr>";
 			currentCategory = quickSearchItem.category;
@@ -3674,27 +3676,27 @@ var Helper = {
 	injectGroupStats: function() {
 		var attackTitleElement = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]");
 		attackValueElement = attackTitleElement.nextSibling;
-		attackValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + attackValueElement.innerHTML +
+		attackValueElement.innerHTML = "<table><tbody><tr><td style='color:#ADB5B5;'>" + attackValueElement.innerHTML +
 			"</td><td>(</td><td title='attackValue'>" + attackValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var defenseTitleElement = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Defense:')]");
 		defenseValueElement = defenseTitleElement.nextSibling;
-		defenseValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + defenseValueElement.innerHTML +
+		defenseValueElement.innerHTML = "<table><tbody><tr><td style='color:#ADB5B5;'>" + defenseValueElement.innerHTML +
 			"</td><td>(</td><td title='defenseValue'>" + defenseValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var armorTitleElement = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Armor:')]");
 		armorValueElement = armorTitleElement.nextSibling;
-		armorValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + armorValueElement.innerHTML +
+		armorValueElement.innerHTML = "<table><tbody><tr><td style='color:#ADB5B5;'>" + armorValueElement.innerHTML +
 			"</td><td>(</td><td title='armorValue'>" + armorValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var damageTitleElement = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]");
 		damageValueElement = damageTitleElement.nextSibling;
-		damageValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + damageValueElement.innerHTML +
+		damageValueElement.innerHTML = "<table><tbody><tr><td style='color:#ADB5B5;'>" + damageValueElement.innerHTML +
 			"</td><td>(</td><td title='damageValue'>" + damageValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		var hpTitleElement = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]");
 		hpValueElement = hpTitleElement.nextSibling;
-		hpValueElement.innerHTML = "<table><tbody><tr><td style='color:blue;'>" + hpValueElement.innerHTML +
+		hpValueElement.innerHTML = "<table><tbody><tr><td style='color:#ADB5B5;'>" + hpValueElement.innerHTML +
 			"</td><td>(</td><td title='hpValue'>" + hpValueElement.innerHTML +
 			"</td><td>)</td></tr></tbody></table>";
 		System.xmlhttp("index.php?cmd=guild&subcmd=mercs", Helper.parseMercStats);
@@ -3754,7 +3756,7 @@ var Helper = {
 		var minGroupLevel = GM_getValue("minGroupLevel");
 		if (minGroupLevel) {
 			var textArea = subTable.rows[0].cells[0];
-			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
+			textArea.innerHTML += ' <span style="color:#ADB5B5">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
 
 		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
@@ -4184,8 +4186,8 @@ var Helper = {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'>255</span>";
+		innerTable.rows[4].cells[0].innerHTML += "<span style='color:#ADB5B5;'>Character count = </span><span findme='biolength' style='color:#ADB5B5;'>" +
+			(textArea.value.length + crCount) + "</span><span style='color:#ADB5B5;'>/</span><span findme='biototal' style='color:#ADB5B5;'>255</span>";
 
 		document.getElementById('biotext').addEventListener('keyup', Helper.updateBioCharacters, true);
 		System.xmlhttp("index.php?cmd=points", Helper.getTotalBioCharacters);
@@ -4205,7 +4207,7 @@ var Helper = {
 		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1)) {
 			characterCount.style.color = "red";
 		} else {
-			characterCount.style.color = "blue";
+			characterCount.style.color = "#ADB5B5";
 		}
 		var previewArea = System.findNode("//span[@findme='biopreview']");
 		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
@@ -4251,8 +4253,8 @@ var Helper = {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='historylength' style='color:blue;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='historytotal' style='color:blue;'>255</span>";
+		innerTable.rows[4].cells[0].innerHTML += "<span style='color:#ADB5B5;'>Character count = </span><span findme='historylength' style='color:#ADB5B5;'>" +
+			(textArea.value.length + crCount) + "</span><span style='color:#ADB5B5;'>/</span><span findme='historytotal' style='color:#ADB5B5;'>255</span>";
 
 		document.getElementById('historytext').addEventListener('keyup', Helper.updateHistoryCharacters, true);
 		System.xmlhttp("index.php?cmd=points&subcmd=guildupgrades", Helper.getTotalHistoryCharacters);
@@ -4272,7 +4274,7 @@ var Helper = {
 		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1)) {
 			characterCount.style.color = "red";
 		} else {
-			characterCount.style.color = "blue";
+			characterCount.style.color = "#ADB5B5";
 		}
 		var previewArea = System.findNode("//span[@findme='biopreview']");
 		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
