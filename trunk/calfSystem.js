@@ -171,11 +171,11 @@ var System = {
 	},
 
 	trimLeft: function() {
-	    return this.replace(/^\s*/,"");
+	    return this.replace(/^\s+/,"");
 	},
 
 	trimRight: function() {
-	    return this.replace(/\s*$/,"");
+	    return this.replace(/\s+$/,"");
 	},
 
 	formatWiki: function(aText, oldVersion, newVersion) {
