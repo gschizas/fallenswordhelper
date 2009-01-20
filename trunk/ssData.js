@@ -44,7 +44,7 @@ var Data = {
 				{'questName':'Crystalline Pollution', 'level':54, 'location':'Amethyst Peak (Lower Slope)'},
 				{'questName':'Seek and Retrieve', 'level':56, 'location':'Amethyst Peak (Upper Slope)'},
 				{'questName':'Crystal Gathers', 'level':58, 'location':'Amethyst Peak (Climb)'},
-				{'questName':'Stemming the Tide', 'level':59, 'location':'Amethyst Peak (View)'},
+				{'questName':'Stemming the Tide', 'level':60, 'location':'Amethyst Peak (View)'},
 				{'questName':'Power Hunger', 'level':60, 'location':'Amethyst Peak (Pinnacle)'}
 			];
 			Data.questArray = questArray.sort();
