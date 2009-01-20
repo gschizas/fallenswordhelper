@@ -55,6 +55,7 @@ var Helper = {
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildOnlineList", true);
+		System.setDefault("guildOnlineRefreshTime", 15);
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -454,7 +455,151 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', Helper.toggleVisibilty, true);
 		document.getElementById('toggleStatisticsControl').addEventListener('click', Helper.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', Helper.toggleVisibilty, true);
+		var guildStore = System.findNode("//table[tbody/tr/td[@background='"+System.imageServer+"/inventory/2x3.gif']]");
+        //GM_log(guildStore.rows[0].innerHTML);
+		var guildStoreIDRE = /guildstore_id=(\d+)/
+        var guildStoreBox1 = guildStore.rows[0].cells[0];
+        if (guildStoreBox1) var guildStoreBox1Item = guildStoreBox1.firstChild;
+        if (guildStoreBox1Item) var guildStoreBox1ID = guildStoreIDRE(guildStoreBox1Item.firstChild.getAttribute("href"))[1];
+        var guildStoreBox2 = guildStore.rows[0].cells[1];
+        if (guildStoreBox2) var guildStoreBox2Item = guildStoreBox2.firstChild;
+        if (guildStoreBox2Item) var guildStoreBox2ID = guildStoreIDRE(guildStoreBox2Item.firstChild.getAttribute("href"))[1];
+        var guildStoreBox3 = guildStore.rows[0].cells[2];
+        if (guildStoreBox3) var guildStoreBox3Item = guildStoreBox3.firstChild;
+        if (guildStoreBox3Item) var guildStoreBox3ID = guildStoreIDRE(guildStoreBox3Item.firstChild.getAttribute("href"))[1];
+        var guildStoreBox4 = guildStore.rows[0].cells[3];
+        if (guildStoreBox4) var guildStoreBox4Item = guildStoreBox4.firstChild;
+        if (guildStoreBox4Item) var guildStoreBox4ID = guildStoreIDRE(guildStoreBox4Item.firstChild.getAttribute("href"))[1];
+        if (guildStore.rows[1]) {
+            var guildStoreBox5 = guildStore.rows[1].cells[0];
+            if (guildStoreBox5) var guildStoreBox5Item = guildStoreBox5.firstChild;
+            if (guildStoreBox5Item) var guildStoreBox5ID = guildStoreIDRE(guildStoreBox5Item.firstChild.getAttribute("href"))[1];
+            var guildStoreBox6 = guildStore.rows[1].cells[1];
+            if (guildStoreBox6) var guildStoreBox6Item = guildStoreBox6.firstChild;
+            if (guildStoreBox6Item) var guildStoreBox6ID = guildStoreIDRE(guildStoreBox6Item.firstChild.getAttribute("href"))[1];
+            var guildStoreBox7 = guildStore.rows[1].cells[2];
+            if (guildStoreBox7) var guildStoreBox7Item = guildStoreBox7.firstChild;
+            if (guildStoreBox7Item) var guildStoreBox7ID = guildStoreIDRE(guildStoreBox7Item.firstChild.getAttribute("href"))[1];
+            var guildStoreBox8 = guildStore.rows[1].cells[3];
+            if (guildStoreBox8) var guildStoreBox8Item = guildStoreBox8.firstChild;
+            if (guildStoreBox8Item) var guildStoreBox8ID = guildStoreIDRE(guildStoreBox8Item.firstChild.getAttribute("href"))[1];
+        }
+        if (guildStore.rows[2]) {
+            var guildStoreBox9 = guildStore.rows[2].cells[0];
+            if (guildStoreBox9) var guildStoreBox9Item = guildStoreBox9.firstChild;
+            if (guildStoreBox9Item) var guildStoreBox9ID = guildStoreIDRE(guildStoreBox9Item.firstChild.getAttribute("href"))[1];
+            var guildStoreBox10 = guildStore.rows[2].cells[1];
+            if (guildStoreBox10) var guildStoreBox10Item = guildStoreBox10.firstChild;
+            if (guildStoreBox10Item) var guildStoreBox10ID = guildStoreIDRE(guildStoreBox10Item.firstChild.getAttribute("href"))[1];
+            var guildStoreBox11 = guildStore.rows[2].cells[2];
+            if (guildStoreBox11) var guildStoreBox11Item = guildStoreBox11.firstChild;
+            if (guildStoreBox11Item) var guildStoreBox11ID = guildStoreIDRE(guildStoreBox11Item.firstChild.getAttribute("href"))[1];
+            var guildStoreBox12 = guildStore.rows[2].cells[3];
+            if (guildStoreBox12) var guildStoreBox12Item = guildStoreBox12.firstChild;
+            if (guildStoreBox12Item) var guildStoreBox12ID = guildStoreIDRE(guildStoreBox12Item.firstChild.getAttribute("href"))[1];
+        }
+        if (guildStoreBox1Item) {
+            var newRow = guildStore.insertRow(1);
+            if (guildStoreBox1Item) {
+                var newCell = newRow.insertCell(0);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox1ID + '" ' +
+					'itemID="' + guildStoreBox1ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox1ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox2Item) {
+                var newCell = newRow.insertCell(1);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox2ID + '" ' +
+					'itemID="' + guildStoreBox2ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox2ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox3Item) {
+                var newCell = newRow.insertCell(2);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox3ID + '" ' +
+					'itemID="' + guildStoreBox3ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox3ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox4Item) {
+                var newCell = newRow.insertCell(3);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox4ID + '" ' +
+					'itemID="' + guildStoreBox4ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox4ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+        }
+        if (guildStoreBox5Item) {
+            var newRow = guildStore.insertRow(3);
+            if (guildStoreBox5Item) {
+                var newCell = newRow.insertCell(0);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox5ID + '" ' +
+					'itemID="' + guildStoreBox5ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox5ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox6Item) {
+                var newCell = newRow.insertCell(1);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox6ID + '" ' +
+					'itemID="' + guildStoreBox6ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox6ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox7Item) {
+                var newCell = newRow.insertCell(2);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox7ID + '" ' +
+					'itemID="' + guildStoreBox7ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox7ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox8Item) {
+                var newCell = newRow.insertCell(3);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox8ID + '" ' +
+					'itemID="' + guildStoreBox8ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox8ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+        }
+        if (guildStoreBox9Item) {
+            var newRow = guildStore.insertRow(5);
+            if (guildStoreBox9Item) {
+                var newCell = newRow.insertCell(0);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox9ID + '" ' +
+					'itemID="' + guildStoreBox9ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox9ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox10Item) {
+                var newCell = newRow.insertCell(1);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox10ID + '" ' +
+					'itemID="' + guildStoreBox10ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox10ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox11Item) {
+                var newCell = newRow.insertCell(2);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox11ID + '" ' +
+					'itemID="' + guildStoreBox11ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox11ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+            if (guildStoreBox12Item) {
+                var newCell = newRow.insertCell(3);
+                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox12ID + '" ' +
+					'itemID="' + guildStoreBox12ID + '">Fast Take</span>';
+				document.getElementById('recallGuildStoreItem' + guildStoreBox12ID).addEventListener('click', Helper.recallGuildStoreItem, true);
+            }
+        }
 	},
+
+	recallGuildStoreItem: function(evt) {
+		var guildStoreID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID, Helper.recallGuildStoreItemReturnMessage, {"item": guildStoreID, "target": evt.target});
+	},
+
+	recallGuildStoreItemReturnMessage: function(responseText, callback) {
+		var itemID = callback.item;
+		var target = callback.target;
+		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var info = responseText.match(infoRE)
+		if (info) {info=info[1]} else {info=""};
+		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		if (info!="") {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
+		} else {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
+		}
+	},
+
 
 	injectStaminaCalculator: function() {
 		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
@@ -1667,8 +1812,10 @@ var Helper = {
 
 	retrieveGuildData: function() {
 		var memberList = System.getValueJSON("memberlist");
+		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
+		guildOnlineRefreshTime *= 1000;
 		if (memberList) {
-			if ((new Date()).getTime() - memberList.changedOn > 15000) memberList = null; // invalidate cache
+			if ((new Date()).getTime() - memberList.changedOn > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
 
 		if (!memberList) {
@@ -3365,6 +3512,9 @@ var Helper = {
 			var damageNode=System.findNode("//tr/td[.='Damage:']/../td[2]", doc);
 			targetInventory.items[callback.invIndex].damage=(damageNode)?parseInt(damageNode.textContent):0;
 
+			var hpNode=System.findNode("//tr/td[.='HP:']/../td[2]", doc);
+			targetInventory.items[callback.invIndex].hp=(hpNode)?parseInt(hpNode.textContent):0;
+
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
 			targetInventory.items[callback.invIndex].minLevel=(levelNode)?parseInt(levelNode.textContent):0;
 
@@ -3411,6 +3561,7 @@ var Helper = {
 			'<th width="10"></th><th sortkey="defense">Def</th>' +
 			'<th width="10"></th><th sortkey="armor">Arm</th>' +
 			'<th width="10"></th><th sortkey="damage">Dam</th>' +
+			'<th width="10"></th><th sortkey="hp">HP</th>' +
 			'<th width="10"></th><th sortkey="forgelevel">Forge</th>' +
 			'<th width="10"></th><th sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
@@ -3437,6 +3588,7 @@ var Helper = {
 					'<td></td><td align="right">' + item.defense + '</td>' +
 					'<td></td><td align="right">' + item.armor + '</td>' +
 					'<td></td><td align="right">' + item.damage + '</td>' +
+					'<td></td><td align="right">' + item.hp + '</td>' +
 					'<td></td><td align="right">' + item.forgelevel + '</td>' +
 					'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 						'<td align="right">' + item.craftlevel + '</td>' +
@@ -3789,7 +3941,7 @@ var Helper = {
 			if (sellPrice < 100000) {
 				warningColor = "brown";
 				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
-			} else if (sellPrice > 125000) {
+			} else if (sellPrice > 150000) {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
@@ -4460,7 +4612,8 @@ var Helper = {
 			'<tr><td>Old Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><td align="right">Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
-				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") + '></td>' +
+				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") + 
+				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td>' +
 			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<td align="right">Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
@@ -4587,6 +4740,12 @@ var Helper = {
 			chatLines.value="0";
 		}
 
+		var guildOnlineRefreshTime = System.findNode("//input[@name='guildOnlineRefreshTime']", oForm);
+		var guildOnlineRefreshTimeValue = guildOnlineRefreshTime.value*1;
+		if (isNaN(guildOnlineRefreshTimeValue) || guildOnlineRefreshTimeValue<=0) {
+			guildOnlineRefreshTime.value=15;
+		}
+		
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
@@ -4620,8 +4779,10 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
+		System.saveValueForm(oForm, "guildOnlineRefreshTime");
 
 		window.alert("FS Helper Settings Saved");
+		window.location = window.location;
 		return false;
 	},
 
