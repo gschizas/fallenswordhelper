@@ -2918,8 +2918,7 @@ var Helper = {
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
 			var alliesTotal = GM_getValue("alliestotal");
-			var alliesElement = System.findNode("//b[.='Allies']");
-			var alliesParent = alliesElement.parentNode;
+			var alliesParent = System.findNode("//b[.='Allies']/..");;
 			var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
 			var numberOfAllies = 0;
 			var startIndex = 0;
@@ -2937,8 +2936,7 @@ var Helper = {
 				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
-			var enemiesElement = System.findNode("//b[.='Enemies']");
-			var enemiesParent = enemiesElement.parentNode;
+			var enemiesParent = System.findNode("//b[.='Enemies']/..");
 			var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
 			var numberOfEnemies = 0;
 			var startIndex = 0;
@@ -2951,7 +2949,7 @@ var Helper = {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
 			}
-			enemiesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfEnemies + "</span>";
+			enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
 				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
