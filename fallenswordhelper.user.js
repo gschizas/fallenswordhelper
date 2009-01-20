@@ -1839,10 +1839,10 @@ var Helper = {
 		}
 		if (membersTable) {
 			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
-			var memberList = new Object();
-			memberList.members = new Array();
-			memberList.lookupByName = new Array();
-			memberList.lookupById = new Array();
+			var memberList = {};
+			memberList.members = [];
+			memberList.lookupByName = [];
+			memberList.lookupById = [];
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
@@ -1866,6 +1866,7 @@ var Helper = {
 
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
+		if (Helper.debug) GM_log("prepareChat - showLines=" + showLines);
 		if (showLines==0) return;
 		var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
 		if (!injectHere) return;
@@ -1883,6 +1884,7 @@ var Helper = {
 	},
 
 	retrieveChat: function() {
+		if (Helper.debug) GM_log("retrieveChat called");
 		System.xmlhttp("index.php?cmd=guild&subcmd=chat", Helper.parseChatForWorld);
 	},
 
@@ -1951,12 +1953,14 @@ var Helper = {
 			result += chat.messages[j].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 			result += "</span><br/>";
 		}
-		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">'
-		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>'
-		result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>'
-		result += '<input type="submit" class="custominput" value="Send" name="submit"/>'
-		result += '</form>'
-		result += '</div>'
+		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
+		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>';
+		result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>';
+		result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
+		result += '&nbsp;&nbsp;&nbsp;&nbsp;';
+		result += '<input type="button" name="submitmass" id="Helper:ChatBoxMass" class="custombutton" value="Mass" name="submit"/>';
+		result += '</form>';
+		result += '</div>';
 
 		aCell.innerHTML = result;
 
@@ -1967,22 +1971,38 @@ var Helper = {
 		}
 
 		document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
+		document.getElementById('Helper:ChatBoxMass').addEventListener('click', Helper.sendMassChat, true);
 
 		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
 
 		GM_setValue("chat", JSON.stringify(chat));
 	},
 
+	sendMassChat: function(evt) {
+		if (!window.confirm("Are you sure you want to send a mass message?")) return;
+
+		var oForm=evt.target.form;
+		Helper.sendChatGeneric(oForm, true);
+		return false;
+	},
+
 	sendChat: function(evt) {
 		var oForm=evt.target;
+		Helper.sendChatGeneric(oForm, false);
+		return false;
+	},
 
-		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", evt.target.form).value;
-		var msg=System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value;
-		System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value="";
+	sendChatGeneric: function(oForm, isMass) {
+		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", oForm).value;
+		var msg=System.findNode("//input[@name='Helper:ChatMessage']", oForm).value;
+		System.findNode("//input[@name='Helper:ChatMessage']", oForm).value="";
+
 		if (msg=="") {
 			Helper.retrieveChat();
 			return false;
 		}
+
+		sendType = isMass?"Send as Mass":"Send";
 
 		GM_xmlhttpRequest({
 			method: 'POST',
@@ -1993,13 +2013,11 @@ var Helper = {
 				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
-			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit=Send",
+			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit="+sendType,
 			onload: function() {
 				Helper.retrieveChat();
 			},
 		})
-
-		return false;
 	},
 
 	replaceKeyHandler: function() {
@@ -4612,7 +4630,7 @@ var Helper = {
 			'<tr><td>Old Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><td align="right">Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
-				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") + 
+				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td>' +
 			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
@@ -4745,7 +4763,7 @@ var Helper = {
 		if (isNaN(guildOnlineRefreshTimeValue) || guildOnlineRefreshTimeValue<=0) {
 			guildOnlineRefreshTime.value=15;
 		}
-		
+
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");

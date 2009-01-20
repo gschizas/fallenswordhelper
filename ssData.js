@@ -39,7 +39,13 @@ var Data = {
 				{'questName':'Bomb Disposal', 'level':45, 'location':'Highridge Crag (Yarn Domain)'},
 				{'questName':'Revenge', 'level':45, 'location':'Highridge Crag (Vale)'},
 				{'questName':'The Antidote', 'level':45, 'location':'Highridge Crag (Yarn Retreat)'},
-				{'questName':'Wild Tales', 'level':45, 'location':'Highridge Crag (Shard Gate)'}
+				{'questName':'Wild Tales', 'level':45, 'location':'Highridge Crag (Shard Gate)'},
+				{'questName':'Elders Request', 'level':51, 'location':'Amethyst Peak (Base)'},
+				{'questName':'Crystalline Pollution', 'level':54, 'location':'Amethyst Peak (Lower Slope)'},
+				{'questName':'Seek and Retrieve', 'level':56, 'location':'Amethyst Peak (Upper Slope)'},
+				{'questName':'Crystal Gathers', 'level':58, 'location':'Amethyst Peak (Climb)'},
+				{'questName':'Stemming the Tide', 'level':59, 'location':'Amethyst Peak (View)'},
+				{'questName':'Power Hunger', 'level':60, 'location':'Amethyst Peak (Pinnacle)'}
 			];
 			Data.questArray = questArray.sort();
 		}
