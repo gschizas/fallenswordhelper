@@ -55,6 +55,7 @@ var Helper = {
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildOnlineList", true);
+		System.setDefault("guildOnlineRefreshTime", 15);
 
 	},
 
@@ -1840,7 +1841,7 @@ var Helper = {
 		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>';
 		result += '<input type="text" class="custominput" size="18" name="Helper:ChatMessage"/>';
 		result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
-		result += '&nbsp;&nbsp;&nbsp;&nbsp;';
+		result += '&nbsp;&nbsp;&nbsp;';
 		result += '<input type="button" name="submitmass" id="Helper:ChatBoxMass" class="custombutton" value="Mass" name="submit"/>';
 		result += '</form>';
 		result += '</div>';
@@ -1879,10 +1880,12 @@ var Helper = {
 		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", oForm).value;
 		var msg=System.findNode("//input[@name='Helper:ChatMessage']", oForm).value;
 		System.findNode("//input[@name='Helper:ChatMessage']", oForm).value="";
+
 		if (msg=="") {
 			Helper.retrieveChat();
 			return false;
 		}
+
 		sendType = isMass?"Send as Mass":"Send";
 
 		GM_xmlhttpRequest({
@@ -4521,7 +4524,8 @@ var Helper = {
 			'<tr><td>Old Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><td align="right">Show Faction Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
-				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") + '></td>' +
+				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
+				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td>' +
 			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<td align="right">Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
