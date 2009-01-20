@@ -455,130 +455,34 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', Helper.toggleVisibilty, true);
 		document.getElementById('toggleStatisticsControl').addEventListener('click', Helper.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', Helper.toggleVisibilty, true);
+
+		// Fast Take
+
 		var guildStore = System.findNode("//table[tbody/tr/td[@background='"+System.imageServer+"/inventory/2x3.gif']]");
-        //GM_log(guildStore.rows[0].innerHTML);
-		var guildStoreIDRE = /guildstore_id=(\d+)/
-        var guildStoreBox1 = guildStore.rows[0].cells[0];
-        if (guildStoreBox1) var guildStoreBox1Item = guildStoreBox1.firstChild;
-        if (guildStoreBox1Item) var guildStoreBox1ID = guildStoreIDRE(guildStoreBox1Item.firstChild.getAttribute("href"))[1];
-        var guildStoreBox2 = guildStore.rows[0].cells[1];
-        if (guildStoreBox2) var guildStoreBox2Item = guildStoreBox2.firstChild;
-        if (guildStoreBox2Item) var guildStoreBox2ID = guildStoreIDRE(guildStoreBox2Item.firstChild.getAttribute("href"))[1];
-        var guildStoreBox3 = guildStore.rows[0].cells[2];
-        if (guildStoreBox3) var guildStoreBox3Item = guildStoreBox3.firstChild;
-        if (guildStoreBox3Item) var guildStoreBox3ID = guildStoreIDRE(guildStoreBox3Item.firstChild.getAttribute("href"))[1];
-        var guildStoreBox4 = guildStore.rows[0].cells[3];
-        if (guildStoreBox4) var guildStoreBox4Item = guildStoreBox4.firstChild;
-        if (guildStoreBox4Item) var guildStoreBox4ID = guildStoreIDRE(guildStoreBox4Item.firstChild.getAttribute("href"))[1];
-        if (guildStore.rows[1]) {
-            var guildStoreBox5 = guildStore.rows[1].cells[0];
-            if (guildStoreBox5) var guildStoreBox5Item = guildStoreBox5.firstChild;
-            if (guildStoreBox5Item) var guildStoreBox5ID = guildStoreIDRE(guildStoreBox5Item.firstChild.getAttribute("href"))[1];
-            var guildStoreBox6 = guildStore.rows[1].cells[1];
-            if (guildStoreBox6) var guildStoreBox6Item = guildStoreBox6.firstChild;
-            if (guildStoreBox6Item) var guildStoreBox6ID = guildStoreIDRE(guildStoreBox6Item.firstChild.getAttribute("href"))[1];
-            var guildStoreBox7 = guildStore.rows[1].cells[2];
-            if (guildStoreBox7) var guildStoreBox7Item = guildStoreBox7.firstChild;
-            if (guildStoreBox7Item) var guildStoreBox7ID = guildStoreIDRE(guildStoreBox7Item.firstChild.getAttribute("href"))[1];
-            var guildStoreBox8 = guildStore.rows[1].cells[3];
-            if (guildStoreBox8) var guildStoreBox8Item = guildStoreBox8.firstChild;
-            if (guildStoreBox8Item) var guildStoreBox8ID = guildStoreIDRE(guildStoreBox8Item.firstChild.getAttribute("href"))[1];
-        }
-        if (guildStore.rows[2]) {
-            var guildStoreBox9 = guildStore.rows[2].cells[0];
-            if (guildStoreBox9) var guildStoreBox9Item = guildStoreBox9.firstChild;
-            if (guildStoreBox9Item) var guildStoreBox9ID = guildStoreIDRE(guildStoreBox9Item.firstChild.getAttribute("href"))[1];
-            var guildStoreBox10 = guildStore.rows[2].cells[1];
-            if (guildStoreBox10) var guildStoreBox10Item = guildStoreBox10.firstChild;
-            if (guildStoreBox10Item) var guildStoreBox10ID = guildStoreIDRE(guildStoreBox10Item.firstChild.getAttribute("href"))[1];
-            var guildStoreBox11 = guildStore.rows[2].cells[2];
-            if (guildStoreBox11) var guildStoreBox11Item = guildStoreBox11.firstChild;
-            if (guildStoreBox11Item) var guildStoreBox11ID = guildStoreIDRE(guildStoreBox11Item.firstChild.getAttribute("href"))[1];
-            var guildStoreBox12 = guildStore.rows[2].cells[3];
-            if (guildStoreBox12) var guildStoreBox12Item = guildStoreBox12.firstChild;
-            if (guildStoreBox12Item) var guildStoreBox12ID = guildStoreIDRE(guildStoreBox12Item.firstChild.getAttribute("href"))[1];
-        }
-        if (guildStoreBox1Item) {
-            var newRow = guildStore.insertRow(1);
-            if (guildStoreBox1Item) {
-                var newCell = newRow.insertCell(0);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox1ID + '" ' +
-					'itemID="' + guildStoreBox1ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox1ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox2Item) {
-                var newCell = newRow.insertCell(1);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox2ID + '" ' +
-					'itemID="' + guildStoreBox2ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox2ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox3Item) {
-                var newCell = newRow.insertCell(2);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox3ID + '" ' +
-					'itemID="' + guildStoreBox3ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox3ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox4Item) {
-                var newCell = newRow.insertCell(3);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox4ID + '" ' +
-					'itemID="' + guildStoreBox4ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox4ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-        }
-        if (guildStoreBox5Item) {
-            var newRow = guildStore.insertRow(3);
-            if (guildStoreBox5Item) {
-                var newCell = newRow.insertCell(0);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox5ID + '" ' +
-					'itemID="' + guildStoreBox5ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox5ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox6Item) {
-                var newCell = newRow.insertCell(1);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox6ID + '" ' +
-					'itemID="' + guildStoreBox6ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox6ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox7Item) {
-                var newCell = newRow.insertCell(2);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox7ID + '" ' +
-					'itemID="' + guildStoreBox7ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox7ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox8Item) {
-                var newCell = newRow.insertCell(3);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox8ID + '" ' +
-					'itemID="' + guildStoreBox8ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox8ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-        }
-        if (guildStoreBox9Item) {
-            var newRow = guildStore.insertRow(5);
-            if (guildStoreBox9Item) {
-                var newCell = newRow.insertCell(0);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox9ID + '" ' +
-					'itemID="' + guildStoreBox9ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox9ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox10Item) {
-                var newCell = newRow.insertCell(1);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox10ID + '" ' +
-					'itemID="' + guildStoreBox10ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox10ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox11Item) {
-                var newCell = newRow.insertCell(2);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox11ID + '" ' +
-					'itemID="' + guildStoreBox11ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox11ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-            if (guildStoreBox12Item) {
-                var newCell = newRow.insertCell(3);
-                newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" id="recallGuildStoreItem' + guildStoreBox12ID + '" ' +
-					'itemID="' + guildStoreBox12ID + '">Fast Take</span>';
-				document.getElementById('recallGuildStoreItem' + guildStoreBox12ID).addEventListener('click', Helper.recallGuildStoreItem, true);
-            }
-        }
+		var guildStoreIDRE = /guildstore_id=(\d+)/i;
+
+		var guildStoreBox = [];
+		var guildStoreBoxItem = [];
+		var guildStoreBoxID = [];
+		for (var i=0;i<12;i++) {
+			if (guildStore.rows[i >> 2]) guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];
+			if (guildStoreBox[i]) guildStoreBoxItem[i] = guildStoreBox[i].firstChild;
+			if (guildStoreBoxItem[i]) guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
+		}
+
+		var newRow;
+
+		for (var i=0;i<12;i++) {
+			if ((i % 4==0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
+			if (guildStoreBoxItem[i]) {
+				var newCell = newRow.insertCell(i % 4);
+				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+					'id="Helper:recallGuildStoreItem' + guildStoreBoxID[i] + '" ' +
+					'itemID="' + guildStoreBoxID[i] + '">Fast Take</span>';
+				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i])
+					.addEventListener('click', Helper.recallGuildStoreItem, true);
+			}
+		}
 	},
 
 	recallGuildStoreItem: function(evt) {

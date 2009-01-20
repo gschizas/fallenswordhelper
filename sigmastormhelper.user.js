@@ -381,17 +381,17 @@ var Helper = {
 	},
 
 	injectGuild: function() {
-		return;
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
 		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
-			"id='toggleGuildLogoControl' linkto='logo_1_img'>X</span> ]";
-		var guildLogoElement = System.findNode("//td[contains(@background, 'sigma2//guildlogos/')]");
+			"id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
+		var guildLogoElement = document.getElementById("logo_0_img").parentNode.parentNode.parentNode;
+		// System.findNode("//table[contains(tbody/tr/td/@background, 'sigma2//guildlogos/')]");
 		guildLogoElement.id = "guildLogoControl";
 		if (GM_getValue("guildLogoControl")) {
 			guildLogoElement.style.display = "none";
 			guildLogoElement.style.visibility = "hidden";
 		}
-
+/*
 		var leaveGuild = System.findNode("//a[contains(.,'Leave')]").parentNode;
 		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
@@ -403,6 +403,8 @@ var Helper = {
 			statisticsControl.style.display = "none";
 			statisticsControl.style.visibility = "hidden";
 		}
+*/
+
 		var build = System.findNode("//a[contains(.,'Build')]").parentNode;
 		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildStructureControl' linkto='guildStructureControl'>X</span> ]";
@@ -416,19 +418,52 @@ var Helper = {
 		}
 
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', Helper.toggleVisibilty, true);
-		document.getElementById('toggleStatisticsControl').addEventListener('click', Helper.toggleVisibilty, true);
+//		document.getElementById('toggleStatisticsControl').addEventListener('click', Helper.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', Helper.toggleVisibilty, true);
+
+		// Fast Take
+
+		var guildStore = System.findNode("//table[contains(tbody/tr/td/@background,'inventory/small.gif')]");
+		var guildStoreIDRE = /guildstore_id=(\d+)/i;
+
+		var guildStoreBox = [];
+		var guildStoreBoxItem = [];
+		var guildStoreBoxID = [];
+		for (var i=0;i<12;i++) {
+			if (guildStore.rows[i >> 2]) guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];
+			if (guildStoreBox[i]) guildStoreBoxItem[i] = guildStoreBox[i].firstChild;
+			if (guildStoreBoxItem[i]) guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
+		}
+
+		var newRow;
+
+		for (var i=0;i<12;i++) {
+			if ((i % 4==0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
+			if (guildStoreBoxItem[i]) {
+				var newCell = newRow.insertCell(i % 4);
+				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:#84ADAC; font-size:x-small;" '+
+					'id="Helper:recallGuildStoreItem' + guildStoreBoxID[i] + '" ' +
+					'itemID="' + guildStoreBoxID[i] + '">Fast Take</span>';
+				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i])
+					.addEventListener('click', Helper.recallGuildStoreItem, true);
+			}
+		}
 	},
 
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute("itemID");
-		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID, Helper.recallGuildStoreItemReturnMessage, {"item": guildStoreID, "target": evt.target});
+		GM_log("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID)
+		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID,
+			Helper.recallGuildStoreItemReturnMessage,
+			{"item": guildStoreID, "target": evt.target});
+
 	},
+
 
 	recallGuildStoreItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
 		var info = responseText.match(infoRE)
 		if (info) {info=info[1]} else {info=""};
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
@@ -2767,7 +2802,7 @@ var Helper = {
 		var textNode = System.findNode("../../../td[3]", callback);
 		var auctionHouseLink=System.findNode("span[@findme='AH']", textNode);
 		var sellLink=System.findNode("span[@findme='Sell']", textNode);
-		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
+		var guildLockedRE = /<center>Faction Locked: <font color="#00FF00">/i;
 		if (guildLockedRE.exec(responseText)) {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
