@@ -420,6 +420,26 @@ var Helper = {
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', Helper.toggleVisibilty, true);
 	},
 
+	recallGuildStoreItem: function(evt) {
+		var guildStoreID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID, Helper.recallGuildStoreItemReturnMessage, {"item": guildStoreID, "target": evt.target});
+	},
+
+	recallGuildStoreItemReturnMessage: function(responseText, callback) {
+		var itemID = callback.item;
+		var target = callback.target;
+		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
+		var info = responseText.match(infoRE)
+		if (info) {info=info[1]} else {info=""};
+		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		if (info!="") {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
+		} else {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
+		}
+	},
+
+
 	injectStaminaCalculator: function() {
 		var staminaImageElement = System.findNode("//img[contains(@src,'/sigma2/skin/animation_cell.gif')]");
 		if (!staminaImageElement) return;
@@ -1639,8 +1659,10 @@ var Helper = {
 
 	retrieveGuildData: function() {
 		var memberList = System.getValueJSON("memberlist");
+		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
+		guildOnlineRefreshTime *= 1000;
 		if (memberList) {
-			if ((new Date()).getTime() - memberList.changedOn > 15000) memberList = null; // invalidate cache
+			if ((new Date()).getTime() - memberList.changedOn > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
 
 		if (!memberList) {
@@ -1695,6 +1717,7 @@ var Helper = {
 
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
+		if (Helper.debug) GM_log("prepareChat - showLines=" + showLines);
 		if (showLines==0) return;
 		var injectHere = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
 		if (!injectHere) return;
@@ -1742,7 +1765,6 @@ var Helper = {
 		var injectHere = document.getElementById("Helper:ChatPlaceholder");
 		var newTable=false;
 		var topToBottom = GM_getValue("chatTopToBottom");
-		GM_log(chat.isRefreshed);
 
 		var displayList = document.getElementById("Helper:ChatWindow");
 		if (!displayList) {
@@ -1779,12 +1801,14 @@ var Helper = {
 			result += chat.messages[i].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 			result += "</span><br/>";
 		}
-		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">'
-		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>'
-		result += '<input type="text" class="custominput" size="18" name="Helper:ChatMessage"/>'
-		result += '<input type="submit" class="custombutton" value="Send" name="submit"/>'
-		result += '</form>'
-		result += '</div>'
+		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
+		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>';
+		result += '<input type="text" class="custominput" size="18" name="Helper:ChatMessage"/>';
+		result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
+		result += '&nbsp;&nbsp;&nbsp;&nbsp;';
+		result += '<input type="button" name="submitmass" id="Helper:ChatBoxMass" class="custombutton" value="Mass" name="submit"/>';
+		result += '</form>';
+		result += '</div>';
 
 		aCell.innerHTML = result;
 
@@ -1795,22 +1819,36 @@ var Helper = {
 		}
 
 		document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
+		document.getElementById('Helper:ChatBoxMass').addEventListener('click', Helper.sendMassChat, true);
 
 		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
 
 		GM_setValue("chat", JSON.stringify(chat));
 	},
 
+	sendMassChat: function(evt) {
+		if (!window.confirm("Are you sure you want to send a mass message?")) return;
+
+		var oForm=evt.target.form;
+		Helper.sendChatGeneric(oForm, true);
+		return false;
+	},
+
 	sendChat: function(evt) {
 		var oForm=evt.target;
+		Helper.sendChatGeneric(oForm, false);
+		return false;
+	},
 
-		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", evt.target.form).value;
-		var msg=System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value;
-		System.findNode("//input[@name='Helper:ChatMessage']", evt.target.form).value="";
+	sendChatGeneric: function(oForm, isMass) {
+		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", oForm).value;
+		var msg=System.findNode("//input[@name='Helper:ChatMessage']", oForm).value;
+		System.findNode("//input[@name='Helper:ChatMessage']", oForm).value="";
 		if (msg=="") {
 			Helper.retrieveChat();
 			return false;
 		}
+		sendType = isMass?"Send as Mass":"Send";
 
 		GM_xmlhttpRequest({
 			method: 'POST',
@@ -1821,13 +1859,11 @@ var Helper = {
 				"Referer": document.location,
 				"Cookie" : document.cookie
 			},
-			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit=Send",
+			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit="+sendType,
 			onload: function() {
 				Helper.retrieveChat();
 			},
 		})
-
-		return false;
 	},
 
 	replaceKeyHandler: function() {
@@ -3352,6 +3388,9 @@ var Helper = {
 			var damageNode=System.findNode("//tr/td[.='Damage:']/../td[2]", doc);
 			targetInventory.items[callback.invIndex].damage=(damageNode)?parseInt(damageNode.textContent):0;
 
+			var hpNode=System.findNode("//tr/td[.='HP:']/../td[2]", doc);
+			targetInventory.items[callback.invIndex].hp=(hpNode)?parseInt(hpNode.textContent):0;
+
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
 			targetInventory.items[callback.invIndex].minLevel=(levelNode)?parseInt(levelNode.textContent):0;
 
@@ -3398,6 +3437,7 @@ var Helper = {
 			'<th width="10"></th><th sortkey="defense">Def</th>' +
 			'<th width="10"></th><th sortkey="armor">Arm</th>' +
 			'<th width="10"></th><th sortkey="damage">Dam</th>' +
+			'<th width="10"></th><th sortkey="hp">HP</th>' +
 			'<th width="10"></th><th sortkey="forgelevel">Forge</th>' +
 			'<th width="10"></th><th sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
@@ -3424,6 +3464,7 @@ var Helper = {
 					'<td></td><td align="right">' + item.defense + '</td>' +
 					'<td></td><td align="right">' + item.armor + '</td>' +
 					'<td></td><td align="right">' + item.damage + '</td>' +
+					'<td></td><td align="right">' + item.hp + '</td>' +
 					'<td></td><td align="right">' + item.forgelevel + '</td>' +
 					'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 						'<td align="right">' + item.craftlevel + '</td>' +
@@ -3776,7 +3817,7 @@ var Helper = {
 			if (sellPrice < 100000) {
 				warningColor = "brown";
 				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
-			} else if (sellPrice > 125000) {
+			} else if (sellPrice > 150000) {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
@@ -4577,6 +4618,12 @@ var Helper = {
 			chatLines.value="0";
 		}
 
+		var guildOnlineRefreshTime = System.findNode("//input[@name='guildOnlineRefreshTime']", oForm);
+		var guildOnlineRefreshTimeValue = guildOnlineRefreshTime.value*1;
+		if (isNaN(guildOnlineRefreshTimeValue) || guildOnlineRefreshTimeValue<=0) {
+			guildOnlineRefreshTime.value=15;
+		}
+
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
@@ -4610,8 +4657,10 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
+		System.saveValueForm(oForm, "guildOnlineRefreshTime");
 
 		window.alert("FS Helper Settings Saved");
+		window.location = window.location;
 		return false;
 	},
 
