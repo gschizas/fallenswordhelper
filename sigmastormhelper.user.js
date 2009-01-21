@@ -2836,6 +2836,12 @@ var Helper = {
 	},
 
 	injectProfile: function() {
+		// add avatar img element with player name in title
+		// so that the page is similar to FS
+		var playerArea = System.findNode("//font[contains(.,'Last Activity')]");
+		var playerName = playerArea.parentNode.firstChild.nextSibling.textContent.replace(/^=/,"").replace(/ =$/,"");
+		playerArea.parentNode.innerHTML = "<img title=\"" + playerName + "'s Avatar\" src='' style='display:none'>" + playerArea.parentNode.innerHTML;
+
 		var allLinks = document.getElementsByTagName("A");
 		for (var i=0; i<allLinks.length; i++) {
 			aLink=allLinks[i];
@@ -2901,13 +2907,13 @@ var Helper = {
 			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
 			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
 			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += System.imageServer + "/sigma2/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
+			newhtml += System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
 			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
-			newhtml += System.imageServer + "/sigma2/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
+			newhtml += System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
 			newhtml += "<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" ;
-			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
-			newhtml += System.imageServer + "/sigma2/skin/gold_button.gif></a>&nbsp;&nbsp;";
+			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="';
+			newhtml += System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;';
 			newhtml += "<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
 			newhtml += playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=';
 			newhtml += System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
