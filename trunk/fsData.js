@@ -386,6 +386,18 @@ var Data = {
 				];
 		}
 		return Data.potionArray;
+	},
+
+	buffList: function() {
+		if (!Data.buffArray) {
+			Data.buffArray = [
+				{"name": "Rage", "stamina": 10, "duration": 90, "treeId": 0, "skillId": 0, "buff": "+0.2% base attack per point"},
+				{"name": "Stun", "stamina": 15, "duration": 90, "treeId": 0, "skillId": 1, "buff": "+0.1% chance per point to half opponents chance to hit"},
+
+				];
+		}
+		return Data.buffArray;
+
 	}
 
 }
