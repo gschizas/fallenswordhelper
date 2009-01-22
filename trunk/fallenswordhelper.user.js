@@ -247,6 +247,16 @@ var Helper = {
 				Helper.injectWorld();
 			}
 			break;
+		case "news":
+			switch (subPageId) {
+				case "fsbox":
+					Helper.injectShoutboxWidgets('fsbox_input', 100);
+					break;
+				case "shoutbox":
+					Helper.injectShoutboxWidgets('shoutbox_input', 150);
+					break;
+			}
+			break;
 		case "blacksmith":
 			switch (subPageId) {
 			case "repairall":
@@ -275,7 +285,7 @@ var Helper = {
 				Helper.injectDropItems();
 				break;
 			case "changebio":
-				Helper.addBioWidgets();
+				Helper.injectBioWidgets();
 				break;
 			case "-":
 				Helper.injectProfile();
@@ -4172,13 +4182,13 @@ var Helper = {
 			"</tbody></table>";
 	},
 
-	addBioWidgets: function() {
+	injectBioWidgets: function() {
 		var textArea = System.findNode("//textarea[@name='bio']");
 		//textArea.rows=15;
 		textArea.cols=60;
 		textArea.id = "biotext";
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
-		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
@@ -4199,6 +4209,35 @@ var Helper = {
 		System.xmlhttp("index.php?cmd=points", Helper.getTotalBioCharacters);
 	},
 
+	injectShoutboxWidgets: function(textboxname, maxcharacters) {
+		var textArea = System.findNode("//textarea[@name='" + textboxname + "']");
+		textArea.setAttribute("findme", "Helper:InputText");
+		textArea.setAttribute("maxcharacters", maxcharacters);
+		var textAreaTable = System.findNode("../../../..", textArea);
+		textAreaTable.insertRow(-1).insertCell(0).setAttribute("id", "Helper:ShoutboxPreview");
+		textArea.addEventListener('keyup', Helper.updateShoutboxPreview, true);
+	},
+
+	updateShoutboxPreview: function(evt) {
+		var textArea = System.findNode("//textarea[@findme='Helper:InputText']");
+		var textContent = textArea.value;
+		var chars = textContent.length;
+		var maxchars = parseInt(textArea.getAttribute("maxcharacters"));
+		if (chars>maxchars) {
+			textContent=textContent.substring(0,maxchars);
+			textArea.value=textContent;
+			chars=maxchars;
+		}
+
+		document.
+			getElementById("Helper:ShoutboxPreview")
+			.innerHTML = '<table align="center" width="325" border="0"><tbody>' +
+			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview (' + chars + '/' + maxchars + ' characters)</td></tr>' +
+			'<tr><td width="325"><span style="font-size:x-small;" findme="biopreview">' + textContent +
+			'</span></td></tr></tbody></table>';
+
+	},
+
 	updateBioCharacters: function(evt) {
 		var textArea = System.findNode("//textarea[@name='bio']");
 		var characterCount = System.findNode("//span[@findme='biolength']");
@@ -4216,7 +4255,7 @@ var Helper = {
 			characterCount.style.color = "blue";
 		}
 		var previewArea = System.findNode("//span[@findme='biopreview']");
-		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		previewArea.innerHTML = bioPreviewHTML;
 	},
 
@@ -4230,21 +4269,11 @@ var Helper = {
 		bioTotal.innerHTML = (bioCharactersValue * 25) + 255;
 	},
 
-	convertBioToHTML: function(inputText) {
-		var outputHTML = inputText;
-		outputHTML = outputHTML.replace(/</g,"&lt");
-		outputHTML = outputHTML.replace(/>/g,"&gt");
-		outputHTML = outputHTML.replace(/\n/g,"<br>");
-		outputHTML = outputHTML.replace(/\[\/([a-z])]/g,"<\/\$1>");
-		outputHTML = outputHTML.replace(/\[([a-z])\]/g,"<\$1>");
-		return outputHTML
-	},
-
 	addHistoryWidgets: function() {
 		var textArea = System.findNode("//textarea[@name='history']");
 		if (!textArea) return;
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
-		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
@@ -4283,7 +4312,7 @@ var Helper = {
 			characterCount.style.color = "blue";
 		}
 		var previewArea = System.findNode("//span[@findme='biopreview']");
-		var bioPreviewHTML = Helper.convertBioToHTML(textArea.value);
+		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		previewArea.innerHTML = bioPreviewHTML;
 	},
 
