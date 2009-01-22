@@ -108,6 +108,7 @@ var Helper = {
 		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		GM_setValue("CharacterName", Helper.characterName);
 	},
 
 	// Autoupdate
@@ -3881,18 +3882,39 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
+		var playerInput = System.findNode("//input[@name='targetPlayers']");
+		var buffMe = document.createElement("SPAN");
+		buffMe.innerHTML="[self]";
+		buffMe.style.color="white";
+		buffMe.style.cursor="pointer";
+		buffMe.addEventListener("click", Helper.quickBuffMe, true);
+		playerInput.parentNode.appendChild(buffMe);
+
 		var playerIDRE = /tid=(\d+)/;
 		var playerID = playerIDRE.exec(location);
 		if (playerID) {
 			var playerID = playerID[1];
-			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs)
+			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
 	},
 
-	getPlayerBuffs: function(responseText) {
+	quickBuffMe: function() {
+		var playerInput = System.findNode("//input[@name='targetPlayers']");
+		playerInput.value=GM_getValue("CharacterName");
+		if (Helper.tmpSelfProfile) {
+			Helper.getPlayerBuffs(Helper.tmpSelfProfile, true);
+		}
+	},
+
+	getPlayerBuffs: function(responseText, keepPlayerInput) {
 		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
 		var resultText = "<table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
+
+		if (keepPlayerInput) {
+			var playerInput = System.findNode("//input[@name='targetPlayers']");
+			var playerName = playerInput.value;
+		}
 
 		//low level buffs used to get the buff above are not really worth casting.
 		var myBuffs = System.findNodes("//font[@size='1']");
@@ -3971,14 +3993,18 @@ var Helper = {
 
 		resultText += statistics.parentNode.innerHTML;
 
-
 		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 		injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 
+		if (keepPlayerInput) {
+			playerInput = System.findNode("//input[@name='targetPlayers']");
+			playerInput.value = playerName;
+		}
 	},
 
 	getSustain: function(responseText) {
 		var doc=System.createDocument(responseText);
+		Helper.tmpSelfProfile=responseText;
 		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
 		if (!sustainText) return;
 		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
