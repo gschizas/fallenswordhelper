@@ -2373,7 +2373,9 @@ var Helper = {
 		};
 
 		//insert another page change block at the top of the screen.
-		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+		var insertPageChangeBlockHere = auctionTable.rows[4].cells[0];
+		insertPageChangeBlockHere.parentNode.parentNode.parentNode.cellPadding = 0;
+
 		// auctionTable.setAttribute("background", "red");
 		var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
 		var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
