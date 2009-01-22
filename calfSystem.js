@@ -209,6 +209,15 @@ var System = {
 			}
 		}
 		return result;
+	},
+
+	convertTextToHtml: function(inputText) {
+		return inputText
+			.replace(/</g,"&lt")
+			.replace(/>/g,"&gt")
+			.replace(/\n/g,"<br>")
+			.replace(/\[\/([a-z])]/g,"<\/\$1>")
+			.replace(/\[([a-z])\]/g,"<\$1>");
 	}
 
 };
