@@ -94,6 +94,12 @@ var Data = {
 				];
 		}
 		return Data.potionArray;
-	}
+	},
 
+	creatureList: function() {
+
+	},
+
+	buffList: function() {
+	}
 }
