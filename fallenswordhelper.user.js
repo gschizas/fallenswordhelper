@@ -270,6 +270,9 @@ var Helper = {
 			case "-":
 				Helper.injectArena();
 				break;
+			case "setup":
+                Helper.storeCombatMoves();
+                break;
 			}
 			break;
 		case "questbook":
@@ -4461,6 +4464,12 @@ var Helper = {
 				cell.addEventListener('click', Helper.sortArena, true);
 			}
 		}
+		
+		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
+		var combatMovesTableHtml = GM_getValue("combatMovesTable");
+		if (combatMovesTableHtml) {
+			injectHere.innerHTML = combatMovesTableHtml;
+		}
 	},
 
 	sortArena: function(evt) {
@@ -4538,6 +4547,11 @@ var Helper = {
 		}
 	},
 
+	storeCombatMoves: function() {
+        var combatMovesTable = System.findNode("//table[@width='10']/..");
+        GM_setValue("combatMovesTable", combatMovesTable.innerHTML);
+    },		
+		
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
