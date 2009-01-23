@@ -387,6 +387,9 @@ var Helper = {
 			case "auctionsearch":
 				Helper.injectAuctionSearch();
 				break;
+			case "onlineplayers":
+				Helper.injectOnlinePlayers();
+				break;
 			}
 			break;
 		case "points":
@@ -3261,6 +3264,119 @@ var Helper = {
 		Helper.generateInventoryTable("guild");
 		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
 	},
+
+	injectOnlinePlayers: function() {
+		var content=Layout.notebookContent();
+		unsafeWindow.changeMenu(0,'menu_character');
+		unsafeWindow.changeMenu(2,'menu_actions');
+		unsafeWindow.changeMenu(0,'menu_character');
+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+			'<td width="90%" nobr><b>&nbsp;Online Players</b> (takes a while to refresh so only do it if you really need to)</td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'</tr>' +
+			'</table>' +
+			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
+			'' +
+			'</div>';
+		document.getElementById("Helper:OnlinePlayersRefresh").addEventListener('click', Helper.parseOnlinePlayersStart, true);
+		GM_addStyle(
+			'.HelperTableRow1 {background-color:#e7c473;font-size:small}\n' +
+			'.HelperTableRow1:hover {background-color:white}\n' +
+			'.HelperTableRow2 {background-color:#e2b960;font-size:small}\n' +
+			'.HelperTableRow2:hover {background-color:white}');
+		Helper.onlinePlayers = System.getValueJSON("onlinePlayers");
+		Helper.generateOnlinePlayersTable();
+	},
+
+	parseOnlinePlayersStart: function() {
+		Helper.onlinePlayers = {players:[]};
+		var output=document.getElementById('Helper:OnlinePlayersOutput')
+		output.innerHTML='<br/>Parsing online players ...';
+		System.xmlhttp('index.php?cmd=onlineplayers&page=1', Helper.parseOnlinePlayersStorePage, {"page":1});
+	},
+
+	parseOnlinePlayersStorePage: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var output=document.getElementById('Helper:OnlinePlayersOutput')
+		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=4 and td[1]/a]", doc);
+		var maxPage = parseInt(System.findNode("//table[@width='400']//td[input]", doc).textContent.replace(/\D/g, ""));
+		output.innerHTML+=callback.page + " ";
+		for (var i=0; i<playerRows.length; i++) {
+			var newPlayer = {
+				guildId: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"")),
+				id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,"")),
+				name: playerRows[i].cells[1].textContent,
+				level: parseInt(playerRows[i].cells[2].textContent)
+			}
+			Helper.onlinePlayers.players.push(newPlayer);
+		}
+		if (callback.page<maxPage/*-maxPage+15*/) {
+			var newPage = callback.page+1;
+			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
+		}
+		else {
+			GM_setValue("onlinePlayers", JSON.stringify(Helper.onlinePlayers));
+			Helper.generateOnlinePlayersTable();
+		}
+	},
+
+	generateOnlinePlayersTable: function() {
+		if (!Helper.onlinePlayers) return;
+		var output=document.getElementById("Helper:OnlinePlayersOutput");
+		var result='<table id="Helper:OnlinePlayersTable"><tr>' +
+			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
+			'<th sortkey="name">Name</th>' +
+			'<th sortkey="level" sortType="number">Level</th></tr>';
+		var player, color;
+		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
+			player=Helper.onlinePlayers.players[i];
+
+			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
+				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
+					'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
+				'<td align="right">' + player.level + '</td>' +
+				'</tr>';
+		}
+		result+='</table>';
+		output.innerHTML=result;
+
+		var theTable=document.getElementById('Helper:OnlinePlayersTable');
+		for (var i=0; i<theTable.rows[0].cells.length; i++) {
+			var cell=theTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
+		}
+	},
+
+	sortOnlinePlayersTable: function(evt) {
+		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
+		var headerClicked = evt.target.getAttribute("sortKey");
+		var sortType = evt.target.getAttribute("sortType");
+		if (!sortType) sortType="string";
+		GM_log(headerClicked);
+		// GM_log(Helper.sortBy);
+		GM_log(sortType);
+		// numberSort
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+		Helper.sortBy=headerClicked;
+
+		switch(sortType) {
+			case "string":
+				Helper.onlinePlayers.players.sort(Helper.stringSort);
+				break;
+			case "number":
+				Helper.onlinePlayers.players.sort(Helper.numberSort);
+				break;
+		}
+		Helper.generateOnlinePlayersTable();
+	},
+
 
 	toggleShowUseableItems: function(evt) {
 		GM_setValue("showUseableItems", evt.target.checked);

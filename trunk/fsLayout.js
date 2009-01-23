@@ -11,6 +11,7 @@ var Layout = {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17, "menuSource_0")
 		}
 		Layout.injectOneMenu("AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31, "menuSource_2");
+		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7, "menuSource_2");
 	},
 
 	injectOneMenu: function(text, href, position, insertAt) {
