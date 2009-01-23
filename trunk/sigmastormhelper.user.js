@@ -373,7 +373,7 @@ var Helper = {
 			if (isRelicPage) {
 				Helper.injectRelic(isRelicPage);
 			}
-			var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
+			var isAuctionPage = System.findNode("//td[contains(@background,'header_tradehub.jpg')]");
 			if (isAuctionPage) {
 				Helper.injectAuctionHouse();
 			}
@@ -2544,16 +2544,16 @@ var Helper = {
 			}
 		}
 		var bidOnItemList = System.findNodes("//span[@findme='bidOnItem']");
-		if (!bidOnItemList) return;
-		for (var i=0; i<bidOnItemList.length; i++) {
-			bidOnItemItem = bidOnItemList[i];
-			bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
+		if (bidOnItemList) {
+			for (var i=0; i<bidOnItemList.length; i++) {
+				bidOnItemItem = bidOnItemList[i];
+				bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
+			}
 		}
 
 		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
 		var preparePreferences = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]/../../../..");
 		searchPrefs.setAttribute("href", "#prefs");
-
 
 		var newRow = document.createElement("TR");
 		var newCell = newRow.insertCell(0);
@@ -2851,7 +2851,7 @@ var Helper = {
 		// add avatar img element with player name in title
 		// so that the page is similar to FS
 		var playerArea = System.findNode("//font[contains(.,'Last Activity')]");
-		var playerName = playerArea.parentNode.firstChild.nextSibling.textContent.replace(/^=/,"").replace(/ =$/,"");
+		var playerName = playerArea.parentNode.firstChild.nextSibling.textContent.replace(/^= /,"").replace(/ =$/,"");
 		playerArea.parentNode.innerHTML = "<img title=\"" + playerName + "'s Avatar\" src='' style='display:none'>" + playerArea.parentNode.innerHTML;
 
 		var allLinks = document.getElementsByTagName("A");

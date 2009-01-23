@@ -2553,10 +2553,11 @@ var Helper = {
 			}
 		}
 		var bidOnItemList = System.findNodes("//span[@findme='bidOnItem']");
-		if (!bidOnItemList) return;
-		for (var i=0; i<bidOnItemList.length; i++) {
-			bidOnItemItem = bidOnItemList[i];
-			bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
+		if (bidOnItemList) {
+			for (var i=0; i<bidOnItemList.length; i++) {
+				bidOnItemItem = bidOnItemList[i];
+				bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
+			}
 		}
 
 		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
@@ -4464,7 +4465,7 @@ var Helper = {
 				cell.addEventListener('click', Helper.sortArena, true);
 			}
 		}
-		
+
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var combatMovesTableHtml = GM_getValue("combatMovesTable");
 		if (combatMovesTableHtml) {
@@ -4550,8 +4551,8 @@ var Helper = {
 	storeCombatMoves: function() {
         var combatMovesTable = System.findNode("//table[@width='10']/..");
         GM_setValue("combatMovesTable", combatMovesTable.innerHTML);
-    },		
-		
+    },
+
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
 		var anItem=document.getElementById(anItemId);
