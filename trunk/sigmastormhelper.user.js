@@ -2,9 +2,10 @@
 // @name           SigmaStormHelper
 // @namespace      terrasoft.gr
 // @description    Sigma Storm Helper
-// @include        http://www.sigmastorm2.com/*
 // @include        http://sigmastorm2.com/*
 // @include        http://*.sigmastorm2.com/*
+// @exclude        http://sigmastorm2.com/areachat.php
+// @exclude        http://*.sigmastorm2.com/areachat.php
 // @exclude        http://forum.sigmastorm2.com/*
 // @exclude        http://wiki.sigmastorm2.com/*
 // @require        json2.js
@@ -70,6 +71,9 @@ var Helper = {
 		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		var charClassNode = System.findNode("//img[contains(@src,'sigma2/skin/classes/')]");
+		var charClasses = ["", "Mutant", "Soldier", "Purist", "Cyborg"];
+		Helper.characterClass = charClasses[parseInt(charClassNode.src.substr(charClassNode.src.length-5,1))];
 	},
 
 	// Autoupdate
@@ -165,6 +169,7 @@ var Helper = {
 		Layout.injectMenu();
 		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
+		Helper.injectQuickHeal();
 
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
@@ -389,6 +394,36 @@ var Helper = {
 			}
 			break;
 		}
+	},
+
+	injectQuickHeal: function() {
+		var heartImage = System.findNode("//td[@width='49']");
+		if (!heartImage) return;
+		heartImage.style.cursor="pointer";
+		heartImage.setAttribute("title", "Quick Heal");
+		heartImage.addEventListener('click', Helper.quickHeal, true);
+	},
+
+	quickHeal: function() {
+		var skillId=0;
+		switch (Helper.characterClass) {
+			case "Mutant":
+				skillId=23;
+				break;
+			case "Soldier":
+				skillId=41;
+				break;
+			case "Purist":
+				skillId=60;
+				break;
+			case "Cyborg":
+				skillId=77;
+				break;
+			default:
+				// return // no class found
+		}
+		window.location="index.php?cmd=skills&subcmd=cast&skill_id=" + skillId;
+		// System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=" + skillId, function() {window.location=window.location});
 	},
 
 	injectGuild: function() {
@@ -2005,6 +2040,9 @@ var Helper = {
 					Helper.killSingleMonsterType(monsterType);
 				}
 			}
+			break;
+		case 104: // quickheal
+			Helper.quickHeal();
 			break;
 		case 57: // debug
 			Helper.appendCombatLog('test<br/>')
