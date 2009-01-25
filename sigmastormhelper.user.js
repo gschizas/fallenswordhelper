@@ -64,13 +64,16 @@ var Helper = {
 		var charInfo = System.findNode("//img[contains(@src,'skin/quicklinks/4.gif')]");
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
-		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
-		Helper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterName =    charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
+		GM_log(Helper.characterName)
+		Helper.characterLevel =   System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterAttack =  System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		var rxHitPoints = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)\s*\/\s*(\d+)/i)
+		Helper.characterHP    = parseInt(rxHitPoints[1]);
+		Helper.characterMaxHP = parseInt(rxHitPoints[2]);
+		Helper.characterArmor    = System.getIntFromRegExp(charInfoText, /Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterDamage   = System.getIntFromRegExp(charInfoText, /Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		var charClassNode = System.findNode("//img[contains(@src,'sigma2/skin/classes/')]");
 		var charClasses = ["", "Mutant", "Soldier", "Purist", "Cyborg"];
 		Helper.characterClass = charClasses[parseInt(charClassNode.src.substr(charClassNode.src.length-5,1))];
@@ -169,7 +172,7 @@ var Helper = {
 		Layout.injectMenu();
 		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
-		Helper.injectQuickHeal();
+		Helper.injectWorldWidgets();
 
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
@@ -350,6 +353,9 @@ var Helper = {
 			case "auctionsearch":
 				Helper.injectAuctionSearch();
 				break;
+			case "onlineplayers":
+				Helper.injectOnlinePlayers();
+				break;
 			}
 			break;
 		case "points":
@@ -396,6 +402,10 @@ var Helper = {
 		}
 	},
 
+	injectWorldWidgets: function() {
+		Helper.injectQuickHeal();
+	},
+
 	injectQuickHeal: function() {
 		var heartImage = System.findNode("//td[@width='49']");
 		if (!heartImage) return;
@@ -422,8 +432,19 @@ var Helper = {
 			default:
 				// return // no class found
 		}
-		window.location="index.php?cmd=skills&subcmd=cast&skill_id=" + skillId;
-		// System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=" + skillId, function() {window.location=window.location});
+		// window.location="index.php?cmd=skills&subcmd=cast&skill_id=" + skillId;
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=" + skillId, Helper.quickHealDone);
+	},
+
+	quickHealDone: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		unsafeWindow.tt_setWidth(200);
+		unsafeWindow.Tip(infoMessage);
+
+		var healHP = parseInt(infoMessage.replace(/\D/g, ""));
+
+		var indicatorHP = System.findNode("//img[contains(@src,'hp_progress.gif')]");
+		indicatorHP.setAttribute("width", Math.round(100 * (healHP + Helper.characterHP) / Helper.characterMaxHP) + "%");
 	},
 
 	injectGuild: function() {
@@ -431,7 +452,6 @@ var Helper = {
 		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
 		var guildLogoElement = document.getElementById("logo_0_img").parentNode.parentNode.parentNode;
-		// System.findNode("//table[contains(tbody/tr/td/@background, 'sigma2//guildlogos/')]");
 		guildLogoElement.id = "guildLogoControl";
 		if (GM_getValue("guildLogoControl")) {
 			guildLogoElement.style.display = "none";
@@ -498,20 +518,15 @@ var Helper = {
 
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute("itemID");
-		GM_log("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID)
 		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID,
 			Helper.recallGuildStoreItemReturnMessage,
 			{"item": guildStoreID, "target": evt.target});
-
 	},
-
 
 	recallGuildStoreItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
-		var info = responseText.match(infoRE)
-		if (info) {info=info[1]} else {info=""};
+		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
@@ -542,7 +557,7 @@ var Helper = {
 
 		var d = new Date(nextHuntMilliseconds);
 		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-		var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" +
+		var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Energy At: </td><td width=\\'90%\\'>" +
 			nextHuntTimeText + "</td></tr><tr>";
 		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
@@ -1593,23 +1608,32 @@ var Helper = {
 
 		var playerId = Layout.playerId();
 
-		var xpGain=responseText.match(/var\s+xpGain=(-?[0-9]+);/)
-		if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
-		var goldGain=responseText.match(/var\s+goldGain=(-?[0-9]+);/)
-		if (goldGain) {goldGain=goldGain[1]} else {goldGain=0};
-		var guildTaxGain=responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)
-		if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
-		var levelUp=responseText.match(/var\s+levelUp=(-?[0-9]+);/)
-		if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
+		var xpGain = System.getIntFromRegExp(responseText, /var\s+xpGain=(-?\d+);/i);
+		var goldGain = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?\d+);/i);
+		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?\d+);/i);
+		var levelUp = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?\d+);/i);
+		var surgeGain = System.getIntFromRegExp(responseText, /var\s+surgeGain=(-?\d+);/i);
+		// var finalHP = System.getIntFromRegExp(responseText, /^HP\[1\]=(-?[0-9]+);/i);
+		var hpNode = System.findNode("//div[@id='current_hp_0']", doc);
+		if (hpNode) {
+			var finalHP = parseInt(hpNode.textContent.split("/")[0]);
+			var maxHP = parseInt(hpNode.textContent.split("/")[1]);
+
+			var ammoNode= System.findNode("//div[@id='current_ammo_0']", doc);
+			var finalAmmo = parseInt(ammoNode.textContent.split("/")[0]);
+			var maxAmmo = parseInt(ammoNode.textContent.split("/")[1]);
+
+			var indicatorHP = System.findNode("//img[contains(@src,'hp_progress.gif')]");
+			indicatorHP.setAttribute("width", Math.round(100 * finalHP / maxHP) + "%");
+		}
+
 // 	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
 //	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
 //	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
 // <font color="#dbd6d1" size="2"><b>You looted the item '<font color="#009900">Steel Leg Armor</font>'</b><br/><br/><img onmouseover="ajaxLoadItem(11, -1, 2, 1106198, '');" src="http://66.7.192.165/sigma2/items/11c47de5e9.gif"/><br/><br/><font size="1">Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></font>
 
 		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
-		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
-		var info=responseText.match(infoRE)
-		if (info) {info=info[1]} else {info=""};
+		var info = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE)
 		var lootedItem = "";
 		var lootedItemId = "";
@@ -1800,10 +1824,7 @@ var Helper = {
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (Helper.debug) GM_log("prepareChat - showLines=" + showLines);
 		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
-
 		var injectHere = System.findNode("//table[@width='133' and contains(@style, '/sigma2/skin/community_header.gif')]")
-		if (!injectHere) return;
 		injectHere = injectHere.parentNode.parentNode.parentNode;
 
 		if (!injectHere) return;
@@ -1881,10 +1902,11 @@ var Helper = {
 		}
 		var startFrom = (chat.messages.length>showLines)?chat.messages.length-showLines:0;
 		for (var i=startFrom; i<chat.messages.length; i++) {
-			result += "<span style='color:#F5F298' title='"+chat.messages[i].time+"'>"
-			result += chat.messages[i].from
+			var j = topToBottom?i:chat.messages.length-i+startFrom-1; // chat.messages.length-i;
+			result += "<span style='color:#F5F298' title='"+chat.messages[j].time+"'>"
+			result += chat.messages[j].from
 			result += ":</span><span style='color:white'>"
-			result += chat.messages[i].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
+			result += chat.messages[j].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 			result += "</span><br/>";
 		}
 		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
@@ -2781,9 +2803,7 @@ var Helper = {
 	recallItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
-		var info = responseText.match(infoRE)
-		if (info) {info=info[1]} else {info=""};
+		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
@@ -3301,6 +3321,119 @@ var Helper = {
 		Helper.generateInventoryTable("guild");
 		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
 	},
+
+	injectOnlinePlayers: function() {
+		var content=Layout.notebookContent();
+		unsafeWindow.changeMenu(0,'menu_character');
+		unsafeWindow.changeMenu(2,'menu_actions');
+		unsafeWindow.changeMenu(0,'menu_character');
+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+			'<td width="90%" nobr><b>&nbsp;Online Players</b> (takes a while to refresh so only do it if you really need to)</td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			'</tr>' +
+			'</table>' +
+			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
+			'' +
+			'</div>';
+		document.getElementById("Helper:OnlinePlayersRefresh").addEventListener('click', Helper.parseOnlinePlayersStart, true);
+		GM_addStyle(
+			'.HelperTableRow1 {background-color:#e7c473;font-size:small}\n' +
+			'.HelperTableRow1:hover {background-color:white}\n' +
+			'.HelperTableRow2 {background-color:#e2b960;font-size:small}\n' +
+			'.HelperTableRow2:hover {background-color:white}');
+		Helper.onlinePlayers = System.getValueJSON("onlinePlayers");
+		Helper.generateOnlinePlayersTable();
+	},
+
+	parseOnlinePlayersStart: function() {
+		Helper.onlinePlayers = {players:[]};
+		var output=document.getElementById('Helper:OnlinePlayersOutput')
+		output.innerHTML='<br/>Parsing online players ...';
+		System.xmlhttp('index.php?cmd=onlineplayers&page=1', Helper.parseOnlinePlayersStorePage, {"page":1});
+	},
+
+	parseOnlinePlayersStorePage: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var output=document.getElementById('Helper:OnlinePlayersOutput')
+		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=4 and td[1]/a]", doc);
+		var maxPage = parseInt(System.findNode("//table[@width='400']//td[input]", doc).textContent.replace(/\D/g, ""));
+		output.innerHTML+=callback.page + " ";
+		for (var i=0; i<playerRows.length; i++) {
+			var newPlayer = {
+				guildId: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"")),
+				id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,"")),
+				name: playerRows[i].cells[1].textContent,
+				level: parseInt(playerRows[i].cells[2].textContent)
+			}
+			Helper.onlinePlayers.players.push(newPlayer);
+		}
+		if (callback.page<maxPage/*-maxPage+15*/) {
+			var newPage = callback.page+1;
+			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
+		}
+		else {
+			GM_setValue("onlinePlayers", JSON.stringify(Helper.onlinePlayers));
+			Helper.generateOnlinePlayersTable();
+		}
+	},
+
+	generateOnlinePlayersTable: function() {
+		if (!Helper.onlinePlayers) return;
+		var output=document.getElementById("Helper:OnlinePlayersOutput");
+		var result='<table id="Helper:OnlinePlayersTable"><tr>' +
+			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
+			'<th sortkey="name">Name</th>' +
+			'<th sortkey="level" sortType="number">Level</th></tr>';
+		var player, color;
+		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
+			player=Helper.onlinePlayers.players[i];
+
+			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
+				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
+					'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
+				'<td align="right">' + player.level + '</td>' +
+				'</tr>';
+		}
+		result+='</table>';
+		output.innerHTML=result;
+
+		var theTable=document.getElementById('Helper:OnlinePlayersTable');
+		for (var i=0; i<theTable.rows[0].cells.length; i++) {
+			var cell=theTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
+		}
+	},
+
+	sortOnlinePlayersTable: function(evt) {
+		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
+		var headerClicked = evt.target.getAttribute("sortKey");
+		var sortType = evt.target.getAttribute("sortType");
+		if (!sortType) sortType="string";
+		GM_log(headerClicked);
+		// GM_log(Helper.sortBy);
+		GM_log(sortType);
+		// numberSort
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+		Helper.sortBy=headerClicked;
+
+		switch(sortType) {
+			case "string":
+				Helper.onlinePlayers.players.sort(Helper.stringSort);
+				break;
+			case "number":
+				Helper.onlinePlayers.players.sort(Helper.numberSort);
+				break;
+		}
+		Helper.generateOnlinePlayersTable();
+	},
+
 
 	toggleShowUseableItems: function(evt) {
 		GM_setValue("showUseableItems", evt.target.checked);
@@ -3822,7 +3955,6 @@ var Helper = {
 
 		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
 		var memberList=System.getValueJSON("memberlist");
-		// window.alert(typeof(memberList.members));
 		// memberList.lookupByName.find
 		for (i=0; i<allItems.length; i++) {
 			var theItem=allItems[i].cells[0];

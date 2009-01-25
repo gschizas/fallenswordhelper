@@ -67,4 +67,14 @@ var Layout = {
 		return thePlayerId;
 	},
 
+	infoBox: function(documentText) {
+		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
+		var infoMatch = documentText.match(infoRE);
+		var result="";
+		if (infoMatch) {
+			result=infoMatch[1];
+		}
+		return result;
+	}
+
 }

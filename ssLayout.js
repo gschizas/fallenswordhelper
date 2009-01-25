@@ -62,6 +62,15 @@ var Layout = {
 		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1]);
 		GM_setValue("playerID", thePlayerId);
 		return thePlayerId;
-	}
+	},
 
+	infoBox: function(documentText) {
+		var infoRE = /<center><b>INFORMATION\s*ALERT<\/b><\/center><\/font><\/td>\s*<\/tr>\s*<tr>\s*<td><font size=2 color=\"\#D1D5D6\"><center>([^<]+)<\/center>/i;
+		var infoMatch = documentText.match(infoRE);
+		var result="";
+		if (infoMatch) {
+			result=infoMatch[1];
+		}
+		return result;
+	}
 };
