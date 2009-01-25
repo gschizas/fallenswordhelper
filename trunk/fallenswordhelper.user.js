@@ -101,9 +101,9 @@ var Helper = {
 		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]");
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
-		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
-		Helper.characterLevel = charInfoText.match(/Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterAttack = charInfoText.match(/Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterName   = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
+		Helper.characterLevel  = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		Helper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
@@ -1590,16 +1590,12 @@ var Helper = {
 
 		var playerId = Layout.playerId();
 
-		var xpGain=responseText.match(/var\s+xpGain=(-?[0-9]+);/)
-		if (xpGain) {xpGain=xpGain[1]} else {xpGain=0};
-		var goldGain=responseText.match(/var\s+goldGain=(-?[0-9]+);/)
-		if (goldGain) {goldGain=goldGain[1]} else {goldGain=0};
-		var guildTaxGain=responseText.match(/var\s+guildTaxGain=(-?[0-9]+);/)
-		if (guildTaxGain) {guildTaxGain=guildTaxGain[1]} else {guildTaxGain=0};
-		var levelUp=responseText.match(/var\s+levelUp=(-?[0-9]+);/)
-		if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
+		var xpGain       = System.getIntFromRegExp(responseText, /var\s+xpGain=(-?[0-9]+);/i);
+		var goldGain     = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
+		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
+		var levelUp      = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
 		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
-		var info = Layout.infoBox(responseText);
+		var info         = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE)
 		var lootedItem = "";
 		var lootedItemId = "";
