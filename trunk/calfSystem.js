@@ -153,6 +153,16 @@ var System = {
 		return parseInt(theText.replace(/,/g,""));
 	},
 
+	getIntFromRegExp: function(theText, rxSearch) {
+		var matches = theText.match(rxSearch);
+		if (matches) {
+			result = matches[1];
+		} else {
+			result = 0;
+		}
+		return result;
+	},
+
 	addCommas: function(nStr) {
 		var x, x1, x2;
 		nStr += '';
@@ -218,6 +228,63 @@ var System = {
 			.replace(/\n/g,"<br>")
 			.replace(/\[\/([a-z])]/g,"<\/\$1>")
 			.replace(/\[([a-z])\]/g,"<\$1>");
+	},
+
+	generateLiveTable: function(dataArray, outputElement, itemProperty) {
+		throw new Exception("Not ready yet!");
+		if (!dataArray) return;
+		var result='<table id="Helper:LiveTableOutput"><tr>' +
+			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
+			'<th sortkey="name">Name</th>' +
+			'<th sortkey="level" sortType="number">Level</th></tr>';
+		var item, color;
+		for (var i=0; i<dataArray[itemProperty].length;i++) {
+			item=dataArray[itemProperty][i];
+
+			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
+				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
+					'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
+				'<td align="right">' + player.level + '</td>' +
+				'</tr>';
+		}
+		result+='</table>';
+		outputElement.innerHTML=result;
+
+		var theTable=document.getElementById('Helper:OnlinePlayersTable');
+		for (var i=0; i<theTable.rows[0].cells.length; i++) {
+			var cell=theTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
+		}
+	},
+
+	sortLiveTable: function(evt) {
+		throw new Exception("Not ready yet!");
+		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
+		var headerClicked = evt.target.getAttribute("sortKey");
+		var sortType = evt.target.getAttribute("sortType");
+		if (!sortType) sortType="string";
+		GM_log(headerClicked);
+		// GM_log(Helper.sortBy);
+		GM_log(sortType);
+		// numberSort
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+		Helper.sortBy=headerClicked;
+
+		switch(sortType) {
+			case "string":
+				Helper.onlinePlayers.players.sort(Helper.stringSort);
+				break;
+			case "number":
+				Helper.onlinePlayers.players.sort(Helper.numberSort);
+				break;
+		}
+		System.generateOnlinePlayersTable();
 	}
 
 };

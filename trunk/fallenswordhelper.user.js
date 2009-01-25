@@ -271,7 +271,7 @@ var Helper = {
 				Helper.injectArena();
 				break;
 			case "setup":
-                Helper.storeCombatMoves();
+                	Helper.storeCombatMoves();
                 break;
 			}
 			break;
@@ -504,20 +504,20 @@ var Helper = {
 
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute("itemID");
-		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID, Helper.recallGuildStoreItemReturnMessage, {"item": guildStoreID, "target": evt.target});
+		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID,
+			Helper.recallGuildStoreItemReturnMessage,
+			{"item": guildStoreID, "target": evt.target});
 	},
 
 	recallGuildStoreItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
-		var info = responseText.match(infoRE)
-		if (info) {info=info[1]} else {info=""};
+		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
 		} else {
-			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		}
 	},
 
@@ -1599,9 +1599,7 @@ var Helper = {
 		var levelUp=responseText.match(/var\s+levelUp=(-?[0-9]+);/)
 		if (levelUp) {levelUp=levelUp[1]} else {levelUp=0};
 		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
-		var infoRE=/<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
-		var info=responseText.match(infoRE)
-		if (info) {info=info[1]} else {info=""};
+		var info = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE)
 		var lootedItem = "";
 		var lootedItemId = "";
@@ -2751,9 +2749,7 @@ var Helper = {
 	recallItemReturnMessage: function(responseText, callback) {
 		var itemID = callback.item;
 		var target = callback.target;
-		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t+<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)<\/center>/i;
-		var info = responseText.match(infoRE)
-		if (info) {info=info[1]} else {info=""};
+		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info!="") {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
