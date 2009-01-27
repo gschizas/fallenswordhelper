@@ -29,7 +29,7 @@ var Helper = {
 		System.setDefault("showCombatLog", true);
 		System.setDefault("showCreatureInfo", true);
 		System.setDefault("keepLogs", false);
-		System.setDefault("showDebugInfo", false);
+
 		System.setDefault("showCompletedQuests", true);
 		System.setDefault("showExtraLinks", true);
 		System.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
@@ -2077,11 +2077,13 @@ var Helper = {
 				}
 				break;
 			default:
-				if (System.debug) GM_log('special key: ' +s);
+				// GM_log('special key: ' +s);
+				break;
 			}
 			break;
 		default:
-			if (System.debug) GM_log('standard key: ' +r);
+			// GM_log('standard key: ' +r);
+			break;
 		}
 		return true;
 	},
@@ -4763,8 +4765,6 @@ var Helper = {
 			'<td align="right">Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<td align="right">Show Debug Info' + Helper.helpLink('Show Debug Info', 'This will show debug messages in the Error Console. This is only meant for use by developers.') +
-				':</td><td><input name="showDebugInfo" type="checkbox" value="on"' + (GM_getValue("showDebugInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
 			'<td align="right">Footprints Color:</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
@@ -4868,7 +4868,6 @@ var Helper = {
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
-		System.saveValueForm(oForm, "showDebugInfo");
 		System.saveValueForm(oForm, "killAllAdvanced");
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
