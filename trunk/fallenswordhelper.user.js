@@ -244,7 +244,7 @@ var Helper = {
 			case "map":
 				Helper.injectWorldMap();
 				break;
-			case "-":
+			default:
 				Helper.injectWorld();
 			}
 			break;
