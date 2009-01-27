@@ -389,6 +389,371 @@ var Data = {
 	},
 
 	creatureList: function() {
+		if (!Data.creatureArray) {
+			Data.creatureArray=[
+				{"level":186, "name":"Cacti Cat", "defense":608, "armor":655, "hp":3104},
+				{"level":187, "name":"Nazum", "defense":920, "armor":726, "hp":3101},
+				{"level":188, "name":"Pelsar Ogre", "defense":794, "armor":889, "hp":3290},
+				{"level":189, "name":"Thunder Bird", "defense":922, "armor":889, "hp":3127},
+				{"level":190, "name":"Black Dog of Crombe", "defense":745, "armor":790, "hp":3260},
+				{"level":191, "name":"Crow Flock", "defense":913, "armor":841, "hp":3179},
+				{"level":192, "name":"Soil Golem", "defense":706, "armor":662, "hp":3400},
+				{"level":193, "name":"Arms of Crombe", "defense":697, "armor":998, "hp":3319},
+				{"level":194, "name":"Khazal Gargoyle", "defense":960, "armor":734, "hp":3319},
+				{"level":195, "name":"Carnivorous Slime", "defense":779, "armor":882, "hp":3456},
+				{"level":196, "name":"Narkort Moose", "defense":926, "armor":779, "hp":3333},
+				{"level":197, "name":"Plains Troll", "defense":923, "armor":939, "hp":3575},
+				{"level":198, "name":"Mega Worm", "defense":987, "armor":780, "hp":3256},
+				{"level":199, "name":"Narkortian Shade", "defense":865, "armor":921, "hp":3562},
+				{"level":200, "name":"Giant Khel Bear", "defense":978, "armor":910, "hp":3396},
+				{"level":201, "name":"Itzsu Goblin", "defense":960, "armor":900, "hp":3361},
+				{"level":202, "name":"Orca", "defense":951, "armor":912, "hp":3560},
+				{"level":203, "name":"Ice Man", "defense":872, "armor":832, "hp":3536},
+				{"level":204, "name":"Lava Raptor", "defense":886, "armor":826, "hp":3619},
+				{"level":205, "name":"Sulphur Bats", "defense":952, "armor":965, "hp":3436},
+				{"level":206, "name":"Maedos Boar", "defense":1049, "armor":742, "hp":3619},
+				{"level":207, "name":"Maedos Elf Scout", "defense":786, "armor":1039, "hp":3588},
+				{"level":208, "name":"Ruir Orc", "defense":802, "armor":923, "hp":3667},
+				{"level":209, "name":"Timberman", "defense":937, "armor":862, "hp":3550},
+				{"level":210, "name":"Malefor Bomber", "defense":1087, "armor":852, "hp":3630},
+				{"level":211, "name":"Malefor Asphyxiator", "defense":813, "armor":819, "hp":3633},
+				{"level":212, "name":"Ruir Orcont", "defense":812, "armor":778, "hp":3586},
+				{"level":213, "name":"Malefor Enforcer", "defense":1013, "armor":981, "hp":3700},
+				{"level":214, "name":"Malefor Techno Magi", "defense":739, "armor":939, "hp":3602},
+				{"level":215, "name":"Malefor Ascended Magi", "defense":830, "armor":1113, "hp":3734},
+				{"level":216, "name":"Yuzha Giant Crab", "defense":1040, "armor":876, "hp":3792},
+				{"level":217, "name":"Zombie Pirate", "defense":793, "armor":809, "hp":3623},
+				{"level":218, "name":"Zombie Swashbuckler", "defense":868, "armor":1032, "hp":3710},
+				{"level":219, "name":"Lobsteroid", "defense":1005, "armor":861, "hp":3850},
+				{"level":220, "name":"Twin Headed Spitting Cobra", "defense":1152, "armor":786, "hp":3701},
+				{"level":221, "name":"Flesh Eating Ant Swarm", "defense":856, "armor":1117, "hp":3780},
+				{"level":222, "name":"Bone Face Goblin", "defense":946, "armor":875, "hp":3757},
+				{"level":223, "name":"Greater Jaguar", "defense":897, "armor":792, "hp":3916},
+				{"level":224, "name":"Glow Worm", "defense":934, "armor":837, "hp":3779},
+				{"level":225, "name":"Kozyu Crystal Beast", "defense":873, "armor":926, "hp":3970},
+				{"level":226, "name":"Falagi Death Demon", "defense":975, "armor":893, "hp":3952},
+				{"level":227, "name":"Spiked Fiend", "defense":1118, "armor":1181, "hp":3918},
+				{"level":228, "name":"Asura of Falagi", "defense":1038, "armor":879, "hp":3806},
+				{"level":229, "name":"Hathi Colossus", "defense":1181, "armor":860, "hp":3967},
+				{"level":230, "name":"Hamurin Monkey", "defense":1101, "armor":1026, "hp":3999},
+				{"level":231, "name":"Ankurian Bull Rider", "defense":952, "armor":1059, "hp":4057},
+				{"level":232, "name":"Ankura Head", "defense":897, "armor":870, "hp":3884},
+				{"level":233, "name":"Karka", "defense":1185, "armor":1089, "hp":3952},
+				{"level":234, "name":"Blue Tiger", "defense":1128, "armor":897, "hp":3898},
+				{"level":235, "name":"Steel Naga", "defense":865, "armor":1127, "hp":4025},
+				{"level":236, "name":"The Forgotten", "defense":970, "armor":815, "hp":4547},
+				{"level":237, "name":"The Invisible", "defense":1549, "armor":841, "hp":4559},
+				{"level":238, "name":"The Flayer", "defense":1216, "armor":773, "hp":4508},
+				{"level":239, "name":"Feral Flame", "defense":679, "armor":666, "hp":4634},
+				{"level":240, "name":"Xexk Magi", "defense":428, "armor":1507, "hp":5401},
+				{"level":241, "name":"Xexk Shaman", "defense":575, "armor":1152, "hp":5441},
+				{"level":242, "name":"Xexk Water Master", "defense":678, "armor":655, "hp":4595},
+				{"level":243, "name":"Xexk Hound", "defense":1278, "armor":1261, "hp":4502},
+				{"level":244, "name":"Bobasaur", "defense":301, "armor":1692, "hp":5481},
+				{"level":245, "name":"The Mauler", "defense":1015, "armor":1188, "hp":4747},
+				{"level":246, "name":"Lava Meld Demon", "defense":912, "armor":1239, "hp":4742},
+				{"level":247, "name":"Ralath Inferno", "defense":1030, "armor":912, "hp":4602},
+				{"level":248, "name":"Fire Doll", "defense":1288, "armor":955, "hp":4656},
+				{"level":249, "name":"Eagle of Conflagration", "defense":561, "armor":638, "hp":4673},
+				{"level":250, "name":"Strike Bee", "defense":1486, "armor":1079, "hp":4725},
+				{"level":251, "name":"Gralli Warrior", "defense":1229, "armor":1030, "hp":4716},
+				{"level":252, "name":"Gralli Shaman", "defense":763, "armor":1380, "hp":4793},
+				{"level":253, "name":"Man Eating Mantis", "defense":548, "armor":710, "hp":4850},
+				{"level":254, "name":"Swamp Worm", "defense":752, "armor":932, "hp":4775},
+				{"level":255, "name":"Swamp Elemental", "defense":1086, "armor":1166, "hp":5772},
+				{"level":256, "name":"Cave Bear", "defense":566, "armor":743, "hp":4884},
+				{"level":257, "name":"Skin Flayer", "defense":1664, "armor":1153, "hp":4826},
+				{"level":258, "name":"Ghelmot Bearcat", "defense":947, "armor":1484, "hp":4786},
+				{"level":259, "name":"Sabercat", "defense":577, "armor":717, "hp":5022},
+				{"level":260, "name":"Ice Spider", "defense":1338, "armor":958, "hp":4912},
+				{"level":261, "name":"Ice Wisps", "defense":773, "armor":721, "hp":4973},
+				{"level":262, "name":"Ossrand Bearcat", "defense":1260, "armor":992, "hp":4924},
+				{"level":263, "name":"Snow Wanderer", "defense":310, "armor":1659, "hp":5885},
+				{"level":264, "name":"Giant Walrus", "defense":510, "armor":1445, "hp":5833},
+				{"level":265, "name":"Kaneq Fiends", "defense":1319, "armor":1218, "hp":5102},
+				{"level":266, "name":"Ice Kraken", "defense":601, "armor":671, "hp":4930},
+				{"level":267, "name":"Poison Swamp Worm", "defense":655, "armor":1744, "hp":6039},
+				{"level":268, "name":"Ashen Cloud", "defense":750, "armor":1749, "hp":5724},
+				{"level":269, "name":"Blue Mamba", "defense":1642, "armor":1450, "hp":5048},
+				{"level":270, "name":"Horned Acolyte", "defense":1255, "armor":915, "hp":4985},
+				{"level":271, "name":"Quicksand Demon", "defense":1619, "armor":1363, "hp":4892},
+				{"level":272, "name":"Sand Crab Swarm", "defense":589, "armor":666, "hp":5223},
+				{"level":273, "name":"Salt Jinni", "defense":845, "armor":933, "hp":5240},
+				{"level":274, "name":"Benthius", "defense":799, "armor":1026, "hp":5159},
+				{"level":275, "name":"Centurion Beetle Larva", "defense":690, "armor":2102, "hp":6067},
+				{"level":276, "name":"Surfron Centaur Hunter", "defense":1018, "armor":1107, "hp":5267},
+				{"level":277, "name":"Fire Sentinel", "defense":1544, "armor":1027, "hp":5271},
+				{"level":278, "name":"Centurion Beetle", "defense":533, "armor":610, "hp":5034},
+				{"level":279, "name":"Ghoul Looter", "defense":1150, "armor":1123, "hp":5178},
+				{"level":280, "name":"Zombie Crusader", "defense":1656, "armor":1537, "hp":5381},
+				{"level":281, "name":"Marsh Specter", "defense":1219, "armor":1315, "hp":5254},
+				{"level":282, "name":"Bitter Leech", "defense":697, "armor":594, "hp":5425},
+				{"level":283, "name":"Will o the Wisp", "defense":1105, "armor":1502, "hp":5330},
+				{"level":284, "name":"Giant Snapping Turtle", "defense":1710, "armor":1682, "hp":5239},
+				{"level":285, "name":"Ephal Venom Frog Swarm", "defense":771, "armor":631, "hp":5497},
+				{"level":286, "name":"Deschala Dragonfly", "defense":1591, "armor":1636, "hp":5371},
+				{"level":287, "name":"Giant Ephal Crocodile", "defense":655, "armor":721, "hp":5435},
+				{"level":288, "name":"Shenrall", "defense":1242, "armor":957, "hp":5319},
+				{"level":289, "name":"Black Auroch", "defense":1291, "armor":1385, "hp":6564},
+				{"level":290, "name":"Grothan Cyclops", "defense":1171, "armor":1122, "hp":5421},
+				{"level":291, "name":"Dipsoshell Tortoise", "defense":2167, "armor":1789, "hp":5456},
+				{"level":292, "name":"Theotis Beast", "defense":871, "armor":2067, "hp":6540},
+				{"level":293, "name":"Giant Theotis Lynx", "defense":1024, "armor":1425, "hp":5543},
+				{"level":294, "name":"Pugot", "defense":731, "armor":623, "hp":5618},
+				{"level":295, "name":"Hog Hound", "defense":602, "armor":635, "hp":5495},
+				{"level":296, "name":"Neanderthal Hunter", "defense":1558, "armor":1360, "hp":5576},
+				{"level":297, "name":"Hellos Terror Bird", "defense":762, "armor":708, "hp":5522},
+				{"level":298, "name":"Giant Ground Sloth", "defense":502, "armor":1834, "hp":6694},
+				{"level":299, "name":"Dire Wolf", "defense":1661, "armor":1792, "hp":5693},
+				{"level":300, "name":"Apepinos", "defense":1400, "armor":1494, "hp":5616},
+				{"level":301, "name":"Neanderthal Rockman", "defense":1428, "armor":1717, "hp":5573},
+				{"level":302, "name":"Proto Orc", "defense":1031, "armor":1566, "hp":5649},
+				{"level":303, "name":"Smilodon", "defense":751, "armor":648, "hp":5731},
+				{"level":304, "name":"Megalania", "defense":1946, "armor":1654, "hp":5612},
+				{"level":305, "name":"Eosi Slime Worm", "defense":2136, "armor":1018, "hp":5633},
+				{"level":306, "name":"Eosi Troglodyte Spider", "defense":1295, "armor":1671, "hp":5698},
+				{"level":307, "name":"Shadow Cave Crawler", "defense":1947, "armor":1463, "hp":5866},
+				{"level":308, "name":"Black Cave Bear", "defense":1132, "armor":1392, "hp":6828},
+				{"level":309, "name":"Costal Ammonite", "defense":2717, "armor":1202, "hp":5689},
+				{"level":310, "name":"Giant Sea Scorpion", "defense":864, "armor":1405, "hp":6893},
+				{"level":311, "name":"Plesiosaur", "defense":2156, "armor":1487, "hp":5777},
+				{"level":312, "name":"Cerenian", "defense":2401, "armor":1041, "hp":5799},
+				{"level":313, "name":"Thetos Warrior", "defense":367, "armor":1975, "hp":6967},
+				{"level":314, "name":"Liopleurodon", "defense":877, "armor":881, "hp":5972},
+				{"level":315, "name":"Giant Iguana", "defense":1613, "armor":1904, "hp":5943},
+				{"level":316, "name":"Bog Demon", "defense":1339, "armor":1026, "hp":6002},
+				{"level":317, "name":"Liverwort", "defense":1189, "armor":2303, "hp":6990},
+				{"level":318, "name":"Dimetrodon", "defense":1629, "armor":1451, "hp":5859},
+				{"level":319, "name":"Doomsaur", "defense":1916, "armor":1974, "hp":5943},
+				{"level":320, "name":"Aquiasaur", "defense":980, "armor":1269, "hp":5933},
+				{"level":321, "name":"Peitha Apparition", "defense":1038, "armor":1916, "hp":5955},
+				{"level":322, "name":"Mist Scorpion", "defense":824, "armor":878, "hp":6111},
+				{"level":323, "name":"Ankylosaurus", "defense":1274, "armor":1730, "hp":7141},
+				{"level":324, "name":"Stegosaurus", "defense":804, "armor":898, "hp":6153},
+				{"level":325, "name":"Strikosaurus", "defense":1136, "armor":1455, "hp":7305},
+				{"level":326, "name":"Tyali Goilem", "defense":2365, "armor":1057, "hp":6018},
+				{"level":327, "name":"Brachiosaurus", "defense":2155, "armor":1643, "hp":6030},
+				{"level":328, "name":"Allosaurus", "defense":1154, "armor":1997, "hp":6205},
+				{"level":329, "name":"Dinosauroid", "defense":1514, "armor":1626, "hp":6189},
+				{"level":330, "name":"Troodon Pack", "defense":800, "armor":689, "hp":6284},
+				{"level":331, "name":"Pterosaur", "defense":1613, "armor":2049, "hp":6264},
+				{"level":332, "name":"Dinosauroid Bezerker", "defense":741, "armor":857, "hp":6246},
+				{"level":333, "name":"Dinosauroid Skeleton", "defense":2018, "armor":1743, "hp":6164},
+				{"level":334, "name":"Haurez", "defense":1522, "armor":2684, "hp":7576},
+				{"level":335, "name":"Dipsoshell Guard Tortoise", "defense":704, "armor":2258, "hp":7377},
+				{"level":336, "name":"Inudum Hunter", "defense":2131, "armor":1897, "hp":6206},
+				{"level":337, "name":"Inudum Scout Rider", "defense":913, "armor":895, "hp":6294},
+				{"level":338, "name":"Inudum Shaman", "defense":1682, "armor":1411, "hp":6327},
+				{"level":339, "name":"Inudum Guard", "defense":1837, "armor":1508, "hp":6405},
+				{"level":340, "name":"Inudum Heavy Guard", "defense":935, "armor":952, "hp":6260},
+				{"level":341, "name":"Dwarf Armor Golem", "defense":918, "armor":936, "hp":7003},
+				{"level":342, "name":"Dwarf Warrior Ghost", "defense":2135, "armor":1415, "hp":7040},
+				{"level":343, "name":"Dwarf Treasure Hunter", "defense":1320, "armor":2518, "hp":8524},
+				{"level":344, "name":"Shadow Lurker", "defense":2457, "armor":2108, "hp":7049},
+				{"level":345, "name":"Ghoul", "defense":858, "armor":848, "hp":7106},
+				{"level":346, "name":"Dark Vale Vines", "defense":1033, "armor":1686, "hp":7119},
+				{"level":347, "name":"Skeletal Spider", "defense":1693, "armor":1771, "hp":7277},
+				{"level":348, "name":"Dark Vale Treeman", "defense":1026, "armor":2381, "hp":8541},
+				{"level":349, "name":"Necromantic Terror", "defense":2368, "armor":1769, "hp":7292},
+				{"level":350, "name":"Root Pooka", "defense":2663, "armor":1374, "hp":7175},
+				{"level":351, "name":"Wolfin", "defense":2408, "armor":1999, "hp":7387},
+				{"level":352, "name":"Crystal Worm", "defense":1990, "armor":2320, "hp":7333},
+				{"level":353, "name":"Underling", "defense":791, "armor":1050, "hp":7257},
+				{"level":354, "name":"Dark Pteron", "defense":2014, "armor":1560, "hp":7442},
+				{"level":355, "name":"Underling Acolyte", "defense":2264, "armor":2060, "hp":7171},
+				{"level":356, "name":"Dusk Goblin Warrior", "defense":1813, "armor":2567, "hp":7327},
+				{"level":357, "name":"Dusk Goblin Rider", "defense":1091, "armor":943, "hp":7331},
+				{"level":358, "name":"Willow Nymph", "defense":3263, "armor":2053, "hp":7362},
+				{"level":359, "name":"Ragarim", "defense":1298, "armor":1395, "hp":7472},
+				{"level":360, "name":"Lonital", "defense":1664, "armor":1689, "hp":7325},
+				{"level":361, "name":"Scarab", "defense":2976, "armor":1832, "hp":7311},
+				{"level":362, "name":"Horus", "defense":932, "armor":941, "hp":7493},
+				{"level":363, "name":"Sobek", "defense":2427, "armor":1576, "hp":7410},
+				{"level":364, "name":"Anubis", "defense":1240, "armor":2783, "hp":8802},
+				{"level":365, "name":"Gremlin", "defense":2363, "armor":1716, "hp":7440},
+				{"level":366, "name":"Druid", "defense":2077, "armor":2232, "hp":7466},
+				{"level":367, "name":"Ja Quan", "defense":1606, "armor":1909, "hp":7537},
+				{"level":368, "name":"Ji Quan", "defense":1903, "armor":1332, "hp":7543},
+				{"level":369, "name":"Horned Lizard", "defense":2514, "armor":1700, "hp":7670},
+				{"level":370, "name":"Dried Husk", "defense":1161, "armor":870, "hp":7533},
+				{"level":371, "name":"Scarlet Strike", "defense":2313, "armor":1186, "hp":7651},
+				{"level":372, "name":"Giant Scorpion", "defense":1112, "armor":1804, "hp":9140},
+				{"level":373, "name":"Dark Stalker", "defense":1568, "armor":1487, "hp":7590},
+				{"level":374, "name":"Kamardo Lizard", "defense":2223, "armor":2553, "hp":7752},
+				{"level":375, "name":"Sepharom Halfspear", "defense":2401, "armor":1936, "hp":7658},
+				{"level":376, "name":"Sepharom Blade", "defense":1629, "armor":1795, "hp":7668},
+				{"level":377, "name":"Sepharom Weaver", "defense":1204, "armor":2517, "hp":7707},
+				{"level":378, "name":"Sepharom Battle Caster", "defense":1146, "armor":1201, "hp":7720},
+				{"level":379, "name":"Dune Howler", "defense":1636, "armor":2446, "hp":7800},
+				{"level":380, "name":"Lanqeeth", "defense":2312, "armor":1865, "hp":7914},
+				{"level":381, "name":"Outcast Orc", "defense":2495, "armor":1858, "hp":7911},
+				{"level":382, "name":"Greater Boar", "defense":1719, "armor":2516, "hp":9308},
+				{"level":383, "name":"Ravaged Tree Elemental", "defense":3004, "armor":1526, "hp":7859},
+				{"level":384, "name":"Orc Clan Scout", "defense":2391, "armor":2512, "hp":7998},
+				{"level":385, "name":"Orc Wolf Rider", "defense":1476, "armor":2289, "hp":9491},
+				{"level":386, "name":"Crushing Fist Orc", "defense":1868, "armor":1528, "hp":7846},
+				{"level":387, "name":"Blood Eye Orc", "defense":3777, "armor":2208, "hp":7864},
+				{"level":388, "name":"Broken Fang Orc", "defense":2148, "armor":1242, "hp":8050},
+				{"level":389, "name":"Dark Blade Orc", "defense":955, "armor":1153, "hp":8070},
+				{"level":390, "name":"Ug Grash Guard", "defense":1581, "armor":1867, "hp":9543},
+				{"level":391, "name":"Skeleton of Dar GromSol", "defense":1834, "armor":1420, "hp":8103},
+				{"level":392, "name":"Undead Cellar Snake", "defense":1102, "armor":1010, "hp":8210},
+				{"level":393, "name":"Dar GromSol Bat Swarm", "defense":2308, "armor":2111, "hp":7742},
+				{"level":394, "name":"Spirit Host", "defense":2524, "armor":1768, "hp":8207},
+				{"level":395, "name":"Sewer Thing", "defense":2047, "armor":2182, "hp":8040},
+				{"level":396, "name":"Dar GromSol Treasure Guard", "defense":1008, "armor":1108, "hp":8059},
+				{"level":397, "name":"Eternal Tormented", "defense":658, "armor":3616, "hp":9807},
+				{"level":398, "name":"Ectoplasmic Horror", "defense":2207, "armor":1781, "hp":8172},
+				{"level":399, "name":"Angra Warrior", "defense":2145, "armor":2244, "hp":8126},
+				{"level":400, "name":"Xinderoth Watcher", "defense":1269, "armor":2461, "hp":8087},
+				{"level":401, "name":"Decapoid", "defense":2675, "armor":2021, "hp":8157},
+				{"level":402, "name":"Xinderoth Friar", "defense":3775, "armor":2373, "hp":8191},
+				{"level":403, "name":"Laughing Feind", "defense":1872, "armor":1586, "hp":8302},
+				{"level":404, "name":"Xinderoth Anchorite", "defense":1140, "armor":1083, "hp":8265},
+				{"level":405, "name":"Citadel Slime", "defense":2544, "armor":1790, "hp":8987},
+				{"level":406, "name":"Xinderoth Cenobite", "defense":2639, "armor":1586, "hp":8356},
+				{"level":407, "name":"Stone Hippogriff", "defense":1556, "armor":2605, "hp":8387},
+				{"level":408, "name":"Opticor Guard", "defense":1296, "armor":2079, "hp":8356},
+				{"level":409, "name":"Void Being", "defense":3557, "armor":2882, "hp":8336},
+				{"level":410, "name":"Exalted Xindor", "defense":1246, "armor":1305, "hp":8551},
+				{"level":411, "name":"Theorem", "defense":1352, "armor":1329, "hp":8347},
+				{"level":412, "name":"Xind Warrior", "defense":2261, "armor":1437, "hp":8396},
+				{"level":413, "name":"Xind Beacon", "defense":982, "armor":1060, "hp":8446},
+				{"level":414, "name":"Citadel Observer", "defense":3166, "armor":2886, "hp":8470},
+				{"level":415, "name":"Xinderoth Sarabaite", "defense":1787, "armor":1679, "hp":8525},
+				{"level":416, "name":"Xind Puppeteer", "defense":750, "armor":2904, "hp":10266},
+				{"level":417, "name":"Citadel Construct", "defense":1730, "armor":1848, "hp":8428},
+				{"level":418, "name":"Figure of Xinderoth", "defense":2038, "armor":1786, "hp":8647},
+				{"level":419, "name":"Glass Maiden", "defense":3875, "armor":2345, "hp":8492},
+				{"level":420, "name":"Eye of Xinderoth", "defense":1429, "armor":3102, "hp":10327},
+				{"level":421, "name":"Spine Grofflesnout", "defense":3365, "armor":2087, "hp":8561},
+				{"level":422, "name":"Warped Grofflesnout", "defense":1645, "armor":1681, "hp":8561},
+				{"level":423, "name":"Sky Elemental", "defense":1419, "armor":2858, "hp":10456},
+				{"level":424, "name":"Plains Screecher", "defense":1991, "armor":2200, "hp":8726},
+				{"level":425, "name":"Killer Clam", "defense":4019, "armor":2477, "hp":8661},
+				{"level":426, "name":"Hook Pirate", "defense":1399, "armor":3268, "hp":10456},
+				{"level":427, "name":"Pirate Bomber", "defense":118, "armor":119, "hp":8748},
+				{"level":428, "name":"Elven Shade", "defense":1524, "armor":1974, "hp":8677},
+				{"level":429, "name":"Pistol Pirate", "defense":1126, "armor":1005, "hp":8814},
+				{"level":430, "name":"Grofflesnout Shark", "defense":2985, "armor":2289, "hp":8775},
+				{"level":431, "name":"Pirate Strongman", "defense":1150, "armor":1260, "hp":8885},
+				{"level":432, "name":"Pirate Bosun", "defense":1590, "armor":1901, "hp":10587},
+				{"level":433, "name":"Gobbler", "defense":1142, "armor":1206, "hp":8927},
+				{"level":434, "name":"Hydrorion Plesiosaur", "defense":1252, "armor":930, "hp":8865},
+				{"level":435, "name":"Tower of Petrification", "defense":1830, "armor":2148, "hp":8797},
+				{"level":436, "name":"Petrified Warrior", "defense":1403, "armor":1954, "hp":9004},
+				{"level":437, "name":"Petrified Hero", "defense":1911, "armor":1914, "hp":10694},
+				{"level":438, "name":"Gorgon", "defense":1152, "armor":1206, "hp":8951},
+				{"level":439, "name":"Gorgon Isle Basilisk", "defense":2056, "armor":3047, "hp":10724},
+				{"level":440, "name":"Rock Colossus", "defense":3635, "armor":1686, "hp":9030},
+				{"level":441, "name":"Kreth Slime", "defense":1317, "armor":1063, "hp":9121},
+				{"level":442, "name":"Kreth Cave Crawler", "defense":1387, "armor":2511, "hp":10859},
+				{"level":443, "name":"Kreth Creeper", "defense":3086, "armor":2439, "hp":9034},
+				{"level":444, "name":"Kreth Puff Mushrooms", "defense":2462, "armor":2094, "hp":9046},
+				{"level":445, "name":"Kreth Coleoptera", "defense":1969, "armor":2571, "hp":10924},
+				{"level":446, "name":"Kreth Two-Headed Mamba", "defense":2587, "armor":3124, "hp":9044},
+				{"level":447, "name":"Kreth Goo Cube", "defense":2601, "armor":1454, "hp":9170},
+				{"level":448, "name":"Kreth Cave Hands", "defense":3069, "armor":2665, "hp":9068},
+				{"level":449, "name":"Kreth Vistage Minion", "defense":1302, "armor":1140, "hp":9310},
+				{"level":450, "name":"Kreth Gloom Gaunt", "defense":1253, "armor":1001, "hp":9315},
+				{"level":451, "name":"Sabre Horn Goat", "defense":2617, "armor":2271, "hp":9065},
+				{"level":452, "name":"Plague Carrier", "defense":2462, "armor":3104, "hp":9237},
+				{"level":453, "name":"Forest Hundra", "defense":1517, "armor":2818, "hp":10840},
+				{"level":454, "name":"Thorn Demon", "defense":893, "armor":1326, "hp":8887},
+				{"level":455, "name":"Enraged Grizzle Bear", "defense":661, "armor":3273, "hp":11089},
+				{"level":456, "name":"Ravaged Forest Guardian", "defense":2809, "armor":2385, "hp":9235},
+				{"level":457, "name":"Escaped Slave", "defense":2704, "armor":1835, "hp":9252},
+				{"level":458, "name":"Forest Darkling", "defense":2596, "armor":1416, "hp":9039},
+				{"level":459, "name":"Forest Troll", "defense":1612, "armor":2887, "hp":11000},
+				{"level":460, "name":"Forest Wisp", "defense":2803, "armor":3091, "hp":9264},
+				{"level":461, "name":"Ice Crab", "defense":1064, "armor":985, "hp":9246},
+				{"level":462, "name":"Dread Claw Eagle", "defense":2562, "armor":2625, "hp":9364},
+				{"level":463, "name":"Qawi Savage", "defense":2464, "armor":3052, "hp":9509},
+				{"level":464, "name":"Killer Penguin", "defense":914, "armor":3015, "hp":11251},
+				{"level":465, "name":"Were Killer Penguin", "defense":2156, "armor":2675, "hp":9567},
+				{"level":466, "name":"Ice Leaper", "defense":2523, "armor":2663, "hp":9146},
+				{"level":467, "name":"Ice Knight", "defense":1013, "armor":1058, "hp":9157},
+				{"level":468, "name":"Giant Elephant Seal", "defense":2868, "armor":2550, "hp":9440},
+				{"level":469, "name":"Dread Claw Sea Serpent", "defense":2425, "armor":3006, "hp":9551},
+				{"level":470, "name":"Dread Whale", "defense":2184, "armor":3370, "hp":11385},
+				{"level":471, "name":"Charging Mactherium", "defense":680, "armor":3589, "hp":11469},
+				{"level":472, "name":"Mactherium Rider", "defense":2900, "armor":1596, "hp":9740},
+				{"level":473, "name":"Hemovore", "defense":3399, "armor":1529, "hp":9415},
+				{"level":474, "name":"Hemovore Blood Cultist", "defense":2994, "armor":3034, "hp":9684},
+				{"level":475, "name":"Hemovore Blood Shaman", "defense":1017, "armor":1127, "hp":9323},
+				{"level":476, "name":"Blood Tick", "defense":1274, "armor":1090, "hp":9428},
+				{"level":477, "name":"Caprabeast", "defense":3930, "armor":2491, "hp":9491},
+				{"level":478, "name":"Atshen", "defense":2249, "armor":2384, "hp":11460},
+				{"level":479, "name":"Kruz Mammoth", "defense":2839, "armor":1619, "hp":9538},
+				{"level":480, "name":"Blood Ancestor", "defense":2192, "armor":3384, "hp":9713},
+				{"level":481, "name":"Giant Slug", "defense":2579, "armor":1924, "hp":9699},
+				{"level":482, "name":"Hammerer of Morbidstein", "defense":3484, "armor":1877, "hp":9772},
+				{"level":483, "name":"Screaming Visage", "defense":1347, "armor":1257, "hp":9478},
+				{"level":484, "name":"Undun Specter", "defense":3882, "armor":1893, "hp":9916},
+				{"level":485, "name":"Blood Bat Swarm", "defense":1491, "armor":2718, "hp":9919},
+				{"level":486, "name":"Shadow Puka", "defense":2425, "armor":1953, "hp":9841},
+				{"level":487, "name":"Lobotomized Worker", "defense":1411, "armor":1405, "hp":10042},
+				{"level":488, "name":"Lobotomized Thug", "defense":932, "armor":2761, "hp":11802},
+				{"level":489, "name":"Brain Abomination", "defense":2290, "armor":2089, "hp":9877},
+				{"level":490, "name":"Son of Morbidstein", "defense":1412, "armor":1374, "hp":10095},
+				{"level":491, "name":"Leopard Centaur", "defense":3018, "armor":2392, "hp":9958},
+				{"level":492, "name":"Ralthian Archer", "defense":1196, "armor":1180, "hp":9905},
+				{"level":493, "name":"Paua Gryphon", "defense":1658, "armor":4112, "hp":11971},
+				{"level":494, "name":"Woad Forest Elf", "defense":1938, "armor":1828, "hp":9979},
+				{"level":495, "name":"Ral Faun", "defense":1739, "armor":2169, "hp":12073},
+				{"level":496, "name":"Elf Shadow Guard", "defense":1438, "armor":968, "hp":10218},
+				{"level":497, "name":"Ormr Dragon", "defense":1168, "armor":1304, "hp":10125},
+				{"level":498, "name":"River Troll", "defense":1243, "armor":1129, "hp":10143},
+				{"level":499, "name":"Fey of the Grove", "defense":1265, "armor":3776, "hp":12207},
+				{"level":500, "name":"Ancient Grove Treeman", "defense":3239, "armor":1938, "hp":10100},
+				{"level":501, "name":"Ralthian Sword Guard", "defense":2391, "armor":3290, "hp":10175},
+				{"level":502, "name":"Ralthien Swordsman", "defense":1530, "armor":1176, "hp":10100},
+				{"level":503, "name":"Ralthien Heavy Spearman", "defense":3503, "armor":3533, "hp":10196},
+				{"level":504, "name":"Silent Moon Monk", "defense":4397, "armor":1833, "hp":10303},
+				{"level":505, "name":"Ralthien Hired Centaur", "defense":3457, "armor":2093, "hp":10244},
+				{"level":506, "name":"Ormr Claw Assassin", "defense":4507, "armor":2013, "hp":10348},
+				{"level":507, "name":"Ralthien Light Cavalry", "defense":1401, "armor":1414, "hp":10087},
+				{"level":508, "name":"Ralthien Sorceress", "defense":1566, "armor":1858, "hp":10222},
+				{"level":509, "name":"Ralthien House Guard", "defense":1732, "armor":1786, "hp":10317},
+				{"level":510, "name":"Ralthien Dragon Lord", "defense":1369, "armor":1198, "hp":10282},
+				{"level":511, "name":"Sisimite", "defense":1597, "armor":3882, "hp":12365},
+				{"level":512, "name":"Teotal Scout", "defense":2758, "armor":2310, "hp":10310},
+				{"level":513, "name":"Teotal Brujo", "defense":3216, "armor":2736, "hp":10388},
+				{"level":514, "name":"Otoomie Shorn One", "defense":2241, "armor":2676, "hp":10442},
+				{"level":515, "name":"Cursed Specter", "defense":3442, "armor":1710, "hp":10430},
+				{"level":516, "name":"Nagual", "defense":3282, "armor":2864, "hp":10527},
+				{"level":517, "name":"Teotal Death Warrior", "defense":2058, "armor":4306, "hp":12497},
+				{"level":518, "name":"Teotal Jaguar Warrior", "defense":1412, "armor":1491, "hp":10669},
+				{"level":519, "name":"Feathered Serpent", "defense":2399, "armor":2357, "hp":12723},
+				{"level":520, "name":"Living Idol of Teocalli", "defense":2327, "armor":2363, "hp":12717},
+				{"level":521, "name":"Bloom Encrusted Snuffler", "defense":2055, "armor":1624, "hp":10576},
+				{"level":522, "name":"Spell Fury", "defense":3555, "armor":2938, "hp":10716},
+				{"level":523, "name":"Fae Tree Shaman", "defense":1579, "armor":1341, "hp":10653},
+				{"level":524, "name":"Rune Scarred Archer", "defense":3217, "armor":3065, "hp":10605},
+				{"level":525, "name":"Fae Moon Caster", "defense":1551, "armor":2927, "hp":12872},
+				{"level":526, "name":"Fae Grove Warden", "defense":3498, "armor":2626, "hp":10712},
+				{"level":527, "name":"Odonta Rider", "defense":1382, "armor":1328, "hp":10815},
+				{"level":528, "name":"Fae Enchantress", "defense":4236, "armor":2002, "hp":10839},
+				{"level":529, "name":"Fae Blade Dancer", "defense":1018, "armor":4472, "hp":12960},
+				{"level":530, "name":"Giggle Snipe", "defense":1161, "armor":1324, "hp":10725},
+				{"level":531, "name":"Greater Poison Starfish", "defense":3241, "armor":1996, "hp":10830},
+				{"level":532, "name":"Man Eating Sponge", "defense":2635, "armor":3540, "hp":10724},
+				{"level":533, "name":"Globster", "defense":1649, "armor":3411, "hp":13033},
+				{"level":534, "name":"Glaucus Pirate", "defense":3236, "armor":1991, "hp":10835},
+				{"level":535, "name":"Octo Sapiens", "defense":1857, "armor":3879, "hp":12970},
+				{"level":536, "name":"Sea Monk", "defense":1435, "armor":1529, "hp":10975},
+				{"level":537, "name":"Needle Tooth Eel", "defense":3546, "armor":2083, "hp":10850},
+				{"level":538, "name":"Harbinger of Storms", "defense":2646, "armor":3543, "hp":10994},
+				{"level":539, "name":"Chelonian Pirate", "defense":1334, "armor":1541, "hp":10831},
+				{"level":540, "name":"Chelonian Battle Turret", "defense":2249, "armor":2817, "hp":10814},
+				{"level":541, "name":"Dragon Claw Monk", "defense":2544, "armor":3120, "hp":10884},
+				{"level":542, "name":"Dragon Fire Monk", "defense":1514, "armor":1522, "hp":10872},
+				{"level":543, "name":"Dragon Scale Monk", "defense":1305, "armor":3424, "hp":13070}
+			];
+		}
+		return Data.creatureArray;
+	},
+
 /*
 <?xml version="1.0" encoding="UTF-8" ?>
 <Module>
@@ -400,364 +765,6 @@ var Data = {
 
 <script type="text/javascript">
   var creatures = new Array();
-creatures[186] = new Array( "Cacti Cat",608,655,3104);
-creatures[187] = new Array( "Nazum",920,726,3101);
-creatures[188] = new Array( "Pelsar Ogre",794,889,3290);
-creatures[189] = new Array( "Thunder Bird",922,889,3127);
-creatures[190] = new Array( "Black Dog of Crombe",745,790,3260);
-creatures[191] = new Array( "Crow Flock",913,841,3179);
-creatures[192] = new Array( "Soil Golem",706,662,3400);
-creatures[193] = new Array( "Arms of Crombe",697,998,3319);
-creatures[194] = new Array( "Khazal Gargoyle",960,734,3319);
-creatures[195] = new Array( "Carnivorous Slime",779,882,3456);
-creatures[196] = new Array( "Narkort Moose",926,779,3333);
-creatures[197] = new Array( "Plains Troll",923,939,3575);
-creatures[198] = new Array( "Mega Worm",987,780,3256);
-creatures[199] = new Array( "Narkortian Shade",865,921,3562);
-creatures[200] = new Array( "Giant Khel Bear",978,910,3396);
-creatures[201] = new Array( "Itzsu Goblin",960,900,3361);
-creatures[202] = new Array( "Orca",951,912,3560);
-creatures[203] = new Array( "Ice Man",872,832,3536);
-creatures[204] = new Array( "Lava Raptor",886,826,3619);
-creatures[205] = new Array( "Sulphur Bats",952,965,3436);
-creatures[206] = new Array( "Maedos Boar",1049,742,3619);
-creatures[207] = new Array( "Maedos Elf Scout",786,1039,3588);
-creatures[208] = new Array( "Ruir Orc",802,923,3667);
-creatures[209] = new Array( "Timberman",937,862,3550);
-creatures[210] = new Array( "Malefor Bomber",1087,852,3630);
-creatures[211] = new Array( "Malefor Asphyxiator",813,819,3633);
-creatures[212] = new Array( "Ruir Orcont",812,778,3586);
-creatures[213] = new Array( "Malefor Enforcer",1013,981,3700);
-creatures[214] = new Array( "Malefor Techno Magi",739,939,3602);
-creatures[215] = new Array( "Malefor Ascended Magi",830,1113,3734);
-creatures[216] = new Array( "Yuzha Giant Crab",1040,876,3792);
-creatures[217] = new Array( "Zombie Pirate",793,809,3623);
-creatures[218] = new Array( "Zombie Swashbuckler",868,1032,3710);
-creatures[219] = new Array( "Lobsteroid",1005,861,3850);
-creatures[220] = new Array( "Twin Headed Spitting Cobra",1152,786,3701);
-creatures[221] = new Array( "Flesh Eating Ant Swarm",856,1117,3780);
-creatures[222] = new Array( "Bone Face Goblin",946,875,3757);
-creatures[223] = new Array( "Greater Jaguar",897,792,3916);
-creatures[224] = new Array( "Glow Worm",934,837,3779);
-creatures[225] = new Array( "Kozyu Crystal Beast",873,926,3970);
-creatures[226] = new Array( "Falagi Death Demon",975,893,3952);
-creatures[227] = new Array( "Spiked Fiend",1118,1181,3918);
-creatures[228] = new Array( "Asura of Falagi",1038,879,3806);
-creatures[229] = new Array( "Hathi Colossus",1181,860,3967);
-creatures[230] = new Array( "Hamurin Monkey",1101,1026,3999);
-creatures[231] = new Array( "Ankurian Bull Rider",952,1059,4057);
-creatures[232] = new Array( "Ankura Head",897,870,3884);
-creatures[233] = new Array( "Karka",1185,1089,3952);
-creatures[234] = new Array( "Blue Tiger",1128,897,3898);
-creatures[235] = new Array( "Steel Naga",865,1127,4025);
-creatures[236] = new Array( "The Forgotten",970,815,4547);
-creatures[237] = new Array( "The Invisible",1549,841,4559);
-creatures[238] = new Array( "The Flayer",1216,773,4508);
-creatures[239] = new Array( "Feral Flame",679,666,4634);
-creatures[240] = new Array( "Xexk Magi",428,1507,5401);
-creatures[241] = new Array( "Xexk Shaman",575,1152,5441);
-creatures[242] = new Array( "Xexk Water Master",678,655,4595);
-creatures[243] = new Array( "Xexk Hound",1278,1261,4502);
-creatures[244] = new Array( "Bobasaur",301,1692,5481);
-creatures[245] = new Array( "The Mauler",1015,1188,4747);
-creatures[246] = new Array( "Lava Meld Demon",912,1239,4742);
-creatures[247] = new Array( "Ralath Inferno",1030,912,4602);
-creatures[248] = new Array( "Fire Doll",1288,955,4656);
-creatures[249] = new Array( "Eagle of Conflagration",561,638,4673);
-creatures[250] = new Array( "Strike Bee",1486,1079,4725);
-creatures[251] = new Array( "Gralli Warrior",1229,1030,4716);
-creatures[252] = new Array( "Gralli Shaman",763,1380,4793);
-creatures[253] = new Array( "Man Eating Mantis",548,710,4850);
-creatures[254] = new Array( "Swamp Worm",752,932,4775);
-creatures[255] = new Array( "Swamp Elemental",1086,1166,5772);
-creatures[256] = new Array( "Cave Bear",566,743,4884);
-creatures[257] = new Array( "Skin Flayer",1664,1153,4826);
-creatures[258] = new Array( "Ghelmot Bearcat",947,1484,4786);
-creatures[259] = new Array( "Sabercat",577,717,5022);
-creatures[260] = new Array( "Ice Spider",1338,958,4912);
-creatures[261] = new Array( "Ice Wisps",773,721,4973);
-creatures[262] = new Array( "Ossrand Bearcat",1260,992,4924);
-creatures[263] = new Array( "Snow Wanderer",310,1659,5885);
-creatures[264] = new Array( "Giant Walrus",510,1445,5833);
-creatures[265] = new Array( "Kaneq Fiends",1319,1218,5102);
-creatures[266] = new Array( "Ice Kraken",601,671,4930);
-creatures[267] = new Array( "Poison Swamp Worm",655,1744,6039);
-creatures[268] = new Array( "Ashen Cloud",750,1749,5724);
-creatures[269] = new Array( "Blue Mamba",1642,1450,5048);
-creatures[270] = new Array( "Horned Acolyte",1255,915,4985);
-creatures[271] = new Array( "Quicksand Demon",1619,1363,4892);
-creatures[272] = new Array( "Sand Crab Swarm",589,666,5223);
-creatures[273] = new Array( "Salt Jinni",845,933,5240);
-creatures[274] = new Array( "Benthius",799,1026,5159);
-creatures[275] = new Array( "Centurion Beetle Larva",690,2102,6067);
-creatures[276] = new Array( "Surfron Centaur Hunter",1018,1107,5267);
-creatures[277] = new Array( "Fire Sentinel",1544,1027,5271);
-creatures[278] = new Array( "Centurion Beetle",533,610,5034);
-creatures[279] = new Array( "Ghoul Looter",1150,1123,5178);
-creatures[280] = new Array( "Zombie Crusader",1656,1537,5381);
-creatures[281] = new Array( "Marsh Specter",1219,1315,5254);
-creatures[282] = new Array( "Bitter Leech",697,594,5425);
-creatures[283] = new Array( "Will o the Wisp",1105,1502,5330);
-creatures[284] = new Array( "Giant Snapping Turtle",1710,1682,5239);
-creatures[285] = new Array( "Ephal Venom Frog Swarm",771,631,5497);
-creatures[286] = new Array( "Deschala Dragonfly",1591,1636,5371);
-creatures[287] = new Array( "Giant Ephal Crocodile",655,721,5435);
-creatures[288] = new Array( "Shenrall",1242,957,5319);
-creatures[289] = new Array( "Black Auroch",1291,1385,6564);
-creatures[290] = new Array( "Grothan Cyclops",1171,1122,5421);
-creatures[291] = new Array( "Dipsoshell Tortoise",2167,1789,5456);
-creatures[292] = new Array( "Theotis Beast",871,2067,6540);
-creatures[293] = new Array( "Giant Theotis Lynx",1024,1425,5543);
-creatures[294] = new Array( "Pugot",731,623,5618);
-creatures[295] = new Array( "Hog Hound",602,635,5495);
-creatures[296] = new Array( "Neanderthal Hunter",1558,1360,5576);
-creatures[297] = new Array( "Hellos Terror Bird",762,708,5522);
-creatures[298] = new Array( "Giant Ground Sloth",502,1834,6694);
-creatures[299] = new Array( "Dire Wolf",1661,1792,5693);
-creatures[300] = new Array( "Apepinos",1400,1494,5616);
-creatures[301] = new Array( "Neanderthal Rockman",1428,1717,5573);
-creatures[302] = new Array( "Proto Orc",1031,1566,5649);
-creatures[303] = new Array( "Smilodon",751,648,5731);
-creatures[304] = new Array( "Megalania",1946,1654,5612);
-creatures[305] = new Array( "Eosi Slime Worm",2136,1018,5633);
-creatures[306] = new Array( "Eosi Troglodyte Spider",1295,1671,5698);
-creatures[307] = new Array( "Shadow Cave Crawler",1947,1463,5866);
-creatures[308] = new Array( "Black Cave Bear",1132,1392,6828);
-creatures[309] = new Array( "Costal Ammonite",2717,1202,5689);
-creatures[310] = new Array( "Giant Sea Scorpion",864,1405,6893);
-creatures[311] = new Array( "Plesiosaur",2156,1487,5777);
-creatures[312] = new Array( "Cerenian",2401,1041,5799);
-creatures[313] = new Array( "Thetos Warrior",367,1975,6967);
-creatures[314] = new Array( "Liopleurodon",877,881,5972);
-creatures[315] = new Array( "Giant Iguana",1613,1904,5943);
-creatures[316] = new Array( "Bog Demon",1339,1026,6002);
-creatures[317] = new Array( "Liverwort",1189,2303,6990);
-creatures[318] = new Array( "Dimetrodon",1629,1451,5859);
-creatures[319] = new Array( "Doomsaur",1916,1974,5943);
-creatures[320] = new Array( "Aquiasaur",980,1269,5933);
-creatures[321] = new Array( "Peitha Apparition",1038,1916,5955);
-creatures[322] = new Array( "Mist Scorpion",824,878,6111);
-creatures[323] = new Array( "Ankylosaurus",1274,1730,7141);
-creatures[324] = new Array( "Stegosaurus",804,898,6153);
-creatures[325] = new Array( "Strikosaurus",1136,1455,7305);
-creatures[326] = new Array( "Tyali Goilem",2365,1057,6018);
-creatures[327] = new Array( "Brachiosaurus",2155,1643,6030);
-creatures[328] = new Array( "Allosaurus",1154,1997,6205);
-creatures[329] = new Array( "Dinosauroid",1514,1626,6189);
-creatures[330] = new Array( "Troodon Pack",800,689,6284);
-creatures[331] = new Array( "Pterosaur",1613,2049,6264);
-creatures[332] = new Array( "Dinosauroid Bezerker",741,857,6246);
-creatures[333] = new Array( "Dinosauroid Skeleton",2018,1743,6164);
-creatures[334] = new Array( "Haurez",1522,2684,7576);
-creatures[335] = new Array( "Dipsoshell Guard Tortoise",704,2258,7377);
-creatures[336] = new Array( "Inudum Hunter",2131,1897,6206);
-creatures[337] = new Array( "Inudum Scout Rider",913,895,6294);
-creatures[338] = new Array( "Inudum Shaman",1682,1411,6327);
-creatures[339] = new Array( "Inudum Guard",1837,1508,6405);
-creatures[340] = new Array( "Inudum Heavy Guard",935,952,6260);
-creatures[341] = new Array( "Dwarf Armor Golem",918,936,7003);
-creatures[342] = new Array( "Dwarf Warrior Ghost",2135,1415,7040);
-creatures[343] = new Array( "Dwarf Treasure Hunter",1320,2518,8524);
-creatures[344] = new Array( "Shadow Lurker",2457,2108,7049);
-creatures[345] = new Array( "Ghoul",858,848,7106);
-creatures[346] = new Array( "Dark Vale Vines",1033,1686,7119);
-creatures[347] = new Array( "Skeletal Spider",1693,1771,7277);
-creatures[348] = new Array( "Dark Vale Treeman",1026,2381,8541);
-creatures[349] = new Array( "Necromantic Terror",2368,1769,7292);
-creatures[350] = new Array( "Root Pooka",2663,1374,7175);
-creatures[351] = new Array( "Wolfin",2408,1999,7387);
-creatures[352] = new Array( "Crystal Worm",1990,2320,7333);
-creatures[353] = new Array( "Underling",791,1050,7257);
-creatures[354] = new Array( "Dark Pteron",2014,1560,7442);
-creatures[355] = new Array( "Underling Acolyte",2264,2060,7171);
-creatures[356] = new Array( "Dusk Goblin Warrior",1813,2567,7327);
-creatures[357] = new Array( "Dusk Goblin Rider",1091,943,7331);
-creatures[358] = new Array( "Willow Nymph",3263,2053,7362);
-creatures[359] = new Array( "Ragarim",1298,1395,7472);
-creatures[360] = new Array( "Lonital",1664,1689,7325);
-creatures[361] = new Array( "Scarab",2976,1832,7311);
-creatures[362] = new Array( "Horus",932,941,7493);
-creatures[363] = new Array( "Sobek",2427,1576,7410);
-creatures[364] = new Array( "Anubis",1240,2783,8802);
-creatures[365] = new Array( "Gremlin",2363,1716,7440);
-creatures[366] = new Array( "Druid",2077,2232,7466);
-creatures[367] = new Array( "Ja Quan",1606,1909,7537);
-creatures[368] = new Array( "Ji Quan",1903,1332,7543);
-creatures[369] = new Array( "Horned Lizard",2514,1700,7670);
-creatures[370] = new Array( "Dried Husk",1161,870,7533);
-creatures[371] = new Array( "Scarlet Strike",2313,1186,7651);
-creatures[372] = new Array( "Giant Scorpion",1112,1804,9140);
-creatures[373] = new Array( "Dark Stalker",1568,1487,7590);
-creatures[374] = new Array( "Kamardo Lizard",2223,2553,7752);
-creatures[375] = new Array( "Sepharom Halfspear",2401,1936,7658);
-creatures[376] = new Array( "Sepharom Blade",1629,1795,7668);
-creatures[377] = new Array( "Sepharom Weaver",1204,2517,7707);
-creatures[378] = new Array( "Sepharom Battle Caster",1146,1201,7720);
-creatures[379] = new Array( "Dune Howler",1636,2446,7800);
-creatures[380] = new Array( "Lanqeeth",2312,1865,7914);
-creatures[381] = new Array( "Outcast Orc",2495,1858,7911);
-creatures[382] = new Array( "Greater Boar",1719,2516,9308);
-creatures[383] = new Array( "Ravaged Tree Elemental",3004,1526,7859);
-creatures[384] = new Array( "Orc Clan Scout",2391,2512,7998);
-creatures[385] = new Array( "Orc Wolf Rider",1476,2289,9491);
-creatures[386] = new Array( "Crushing Fist Orc",1868,1528,7846);
-creatures[387] = new Array( "Blood Eye Orc",3777,2208,7864);
-creatures[388] = new Array( "Broken Fang Orc",2148,1242,8050);
-creatures[389] = new Array( "Dark Blade Orc",955,1153,8070);
-creatures[390] = new Array( "Ug Grash Guard",1581,1867,9543);
-creatures[391] = new Array( "Skeleton of Dar GromSol",1834,1420,8103);
-creatures[392] = new Array( "Undead Cellar Snake",1102,1010,8210);
-creatures[393] = new Array( "Dar GromSol Bat Swarm",2308,2111,7742);
-creatures[394] = new Array( "Spirit Host",2524,1768,8207);
-creatures[395] = new Array( "Sewer Thing",2047,2182,8040);
-creatures[396] = new Array( "Dar GromSol Treasure Guard",1008,1108,8059);
-creatures[397] = new Array( "Eternal Tormented",658,3616,9807);
-creatures[398] = new Array( "Ectoplasmic Horror",2207,1781,8172);
-creatures[399] = new Array( "Angra Warrior",2145,2244,8126);
-creatures[400] = new Array( "Xinderoth Watcher",1269,2461,8087);
-creatures[401] = new Array( "Decapoid",2675,2021,8157);
-creatures[402] = new Array( "Xinderoth Friar",3775,2373,8191);
-creatures[403] = new Array( "Laughing Feind",1872,1586,8302);
-creatures[404] = new Array( "Xinderoth Anchorite",1140,1083,8265);
-creatures[405] = new Array( "Citadel Slime",2544,1790,8987);
-creatures[406] = new Array( "Xinderoth Cenobite",2639,1586,8356);
-creatures[407] = new Array( "Stone Hippogriff",1556,2605,8387);
-creatures[408] = new Array( "Opticor Guard",1296,2079,8356);
-creatures[409] = new Array( "Void Being",3557,2882,8336);
-creatures[410] = new Array( "Exalted Xindor",1246,1305,8551);
-creatures[411] = new Array( "Theorem",1352,1329,8347);
-creatures[412] = new Array( "Xind Warrior",2261,1437,8396);
-creatures[413] = new Array( "Xind Beacon",982,1060,8446);
-creatures[414] = new Array( "Citadel Observer",3166,2886,8470);
-creatures[415] = new Array( "Xinderoth Sarabaite",1787,1679,8525);
-creatures[416] = new Array( "Xind Puppeteer",750,2904,10266);
-creatures[417] = new Array( "Citadel Construct",1730,1848,8428);
-creatures[418] = new Array( "Figure of Xinderoth",2038,1786,8647);
-creatures[419] = new Array( "Glass Maiden",3875,2345,8492);
-creatures[420] = new Array( "Eye of Xinderoth",1429,3102,10327);
-creatures[421] = new Array( "Spine Grofflesnout",3365,2087,8561);
-creatures[422] = new Array( "Warped Grofflesnout",1645,1681,8561);
-creatures[423] = new Array( "Sky Elemental",1419,2858,10456);
-creatures[424] = new Array( "Plains Screecher",1991,2200,8726);
-creatures[425] = new Array( "Killer Clam",4019,2477,8661);
-creatures[426] = new Array( "Hook Pirate",1399,3268,10456);
-creatures[427] = new Array( "Pirate Bomber",118,119,8748);
-creatures[428] = new Array( "Elven Shade",1524,1974,8677);
-creatures[429] = new Array( "Pistol Pirate",1126,1005,8814);
-creatures[430] = new Array( "Grofflesnout Shark",2985,2289,8775);
-creatures[431] = new Array( "Pirate Strongman",1150,1260,8885);
-creatures[432] = new Array( "Pirate Bosun",1590,1901,10587);
-creatures[433] = new Array( "Gobbler",1142,1206,8927);
-creatures[434] = new Array( "Hydrorion Plesiosaur",1252,930,8865);
-creatures[435] = new Array( "Tower of Petrification",1830,2148,8797);
-creatures[436] = new Array( "Petrified Warrior",1403,1954,9004);
-creatures[437] = new Array( "Petrified Hero",1911,1914,10694);
-creatures[438] = new Array( "Gorgon",1152,1206,8951);
-creatures[439] = new Array( "Gorgon Isle Basilisk",2056,3047,10724);
-creatures[440] = new Array( "Rock Colossus",3635,1686,9030);
-creatures[441] = new Array( "Kreth Slime",1317,1063,9121);
-creatures[442] = new Array( "Kreth Cave Crawler",1387,2511,10859);
-creatures[443] = new Array( "Kreth Creeper",3086,2439,9034);
-creatures[444] = new Array( "Kreth Puff Mushrooms",2462,2094,9046);
-creatures[445] = new Array( "Kreth Coleoptera",1969,2571,10924);
-creatures[446] = new Array( "Kreth Two-Headed Mamba",2587,3124,9044);
-creatures[447] = new Array( "Kreth Goo Cube",2601,1454,9170);
-creatures[448] = new Array( "Kreth Cave Hands",3069,2665,9068);
-creatures[449] = new Array( "Kreth Vistage Minion",1302,1140,9310);
-creatures[450] = new Array( "Kreth Gloom Gaunt",1253,1001,9315);
-creatures[451] = new Array( "Sabre Horn Goat",2617,2271,9065);
-creatures[452] = new Array( "Plague Carrier",2462,3104,9237);
-creatures[453] = new Array( "Forest Hundra",1517,2818,10840);
-creatures[454] = new Array( "Thorn Demon",893,1326,8887);
-creatures[455] = new Array( "Enraged Grizzle Bear",661,3273,11089);
-creatures[456] = new Array( "Ravaged Forest Guardian",2809,2385,9235);
-creatures[457] = new Array( "Escaped Slave",2704,1835,9252);
-creatures[458] = new Array( "Forest Darkling",2596,1416,9039);
-creatures[459] = new Array( "Forest Troll",1612,2887,11000);
-creatures[460] = new Array( "Forest Wisp",2803,3091,9264);
-creatures[461] = new Array( "Ice Crab",1064,985,9246);
-creatures[462] = new Array( "Dread Claw Eagle",2562,2625,9364);
-creatures[463] = new Array( "Qawi Savage",2464,3052,9509);
-creatures[464] = new Array( "Killer Penguin",914,3015,11251);
-creatures[465] = new Array( "Were Killer Penguin",2156,2675,9567);
-creatures[466] = new Array( "Ice Leaper",2523,2663,9146);
-creatures[467] = new Array( "Ice Knight",1013,1058,9157);
-creatures[468] = new Array( "Giant Elephant Seal",2868,2550,9440);
-creatures[469] = new Array( "Dread Claw Sea Serpent",2425,3006,9551);
-creatures[470] = new Array( "Dread Whale",2184,3370,11385);
-creatures[471] = new Array( "Charging Mactherium",680,3589,11469);
-creatures[472] = new Array( "Mactherium Rider",2900,1596,9740);
-creatures[473] = new Array( "Hemovore",3399,1529,9415);
-creatures[474] = new Array( "Hemovore Blood Cultist",2994,3034,9684);
-creatures[475] = new Array( "Hemovore Blood Shaman",1017,1127,9323);
-creatures[476] = new Array( "Blood Tick",1274,1090,9428);
-creatures[477] = new Array( "Caprabeast",3930,2491,9491);
-creatures[478] = new Array( "Atshen",2249,2384,11460);
-creatures[479] = new Array( "Kruz Mammoth",2839,1619,9538);
-creatures[480] = new Array( "Blood Ancestor",2192,3384,9713);
-creatures[481] = new Array( "Giant Slug",2579,1924,9699);
-creatures[482] = new Array( "Hammerer of Morbidstein",3484,1877,9772);
-creatures[483] = new Array( "Screaming Visage",1347,1257,9478);
-creatures[484] = new Array( "Undun Specter",3882,1893,9916);
-creatures[485] = new Array( "Blood Bat Swarm",1491,2718,9919);
-creatures[486] = new Array( "Shadow Puka",2425,1953,9841);
-creatures[487] = new Array( "Lobotomized Worker",1411,1405,10042);
-creatures[488] = new Array( "Lobotomized Thug",932,2761,11802);
-creatures[489] = new Array( "Brain Abomination",2290,2089,9877);
-creatures[490] = new Array( "Son of Morbidstein",1412,1374,10095);
-creatures[491] = new Array( "Leopard Centaur",3018,2392,9958);
-creatures[492] = new Array( "Ralthian Archer",1196,1180,9905);
-creatures[493] = new Array( "Paua Gryphon",1658,4112,11971);
-creatures[494] = new Array( "Woad Forest Elf",1938,1828,9979);
-creatures[495] = new Array( "Ral Faun",1739,2169,12073);
-creatures[496] = new Array( "Elf Shadow Guard",1438,968,10218);
-creatures[497] = new Array( "Ormr Dragon",1168,1304,10125);
-creatures[498] = new Array( "River Troll",1243,1129,10143);
-creatures[499] = new Array( "Fey of the Grove",1265,3776,12207);
-creatures[500] = new Array( "Ancient Grove Treeman",3239,1938,10100);
-creatures[501] = new Array( "Ralthian Sword Guard",2391,3290,10175);
-creatures[502] = new Array( "Ralthien Swordsman",1530,1176,10100);
-creatures[503] = new Array( "Ralthien Heavy Spearman",3503,3533,10196);
-creatures[504] = new Array( "Silent Moon Monk",4397,1833,10303);
-creatures[505] = new Array( "Ralthien Hired Centaur",3457,2093,10244);
-creatures[506] = new Array( "Ormr Claw Assassin",4507,2013,10348);
-creatures[507] = new Array( "Ralthien Light Cavalry",1401,1414,10087);
-creatures[508] = new Array( "Ralthien Sorceress",1566,1858,10222);
-creatures[509] = new Array( "Ralthien House Guard",1732,1786,10317);
-creatures[510] = new Array( "Ralthien Dragon Lord",1369,1198,10282);
-creatures[511] = new Array( "Sisimite",1597,3882,12365);
-creatures[512] = new Array( "Teotal Scout",2758,2310,10310);
-creatures[513] = new Array( "Teotal Brujo",3216,2736,10388);
-creatures[514] = new Array( "Otoomie Shorn One",2241,2676,10442);
-creatures[515] = new Array( "Cursed Specter",3442,1710,10430);
-creatures[516] = new Array( "Nagual",3282,2864,10527);
-creatures[517] = new Array( "Teotal Death Warrior",2058,4306,12497);
-creatures[518] = new Array( "Teotal Jaguar Warrior",1412,1491,10669);
-creatures[519] = new Array( "Feathered Serpent",2399,2357,12723);
-creatures[520] = new Array( "Living Idol of Teocalli",2327,2363,12717);
-creatures[521] = new Array( "Bloom Encrusted Snuffler",2055,1624,10576);
-creatures[522] = new Array( "Spell Fury",3555,2938,10716);
-creatures[523] = new Array( "Fae Tree Shaman",1579,1341,10653);
-creatures[524] = new Array( "Rune Scarred Archer",3217,3065,10605);
-creatures[525] = new Array( "Fae Moon Caster",1551,2927,12872);
-creatures[526] = new Array( "Fae Grove Warden",3498,2626,10712);
-creatures[527] = new Array( "Odonta Rider",1382,1328,10815);
-creatures[528] = new Array( "Fae Enchantress",4236,2002,10839);
-creatures[529] = new Array( "Fae Blade Dancer",1018,4472,12960);
-creatures[530] = new Array( "Giggle Snipe",1161,1324,10725);
-creatures[531] = new Array( "Greater Poison Starfish",3241,1996,10830);
-creatures[532] = new Array( "Man Eating Sponge",2635,3540,10724);
-creatures[533] = new Array( "Globster",1649,3411,13033);
-creatures[534] = new Array( "Glaucus Pirate",3236,1991,10835);
-creatures[535] = new Array( "Octo Sapiens",1857,3879,12970);
-creatures[536] = new Array( "Sea Monk",1435,1529,10975);
-creatures[537] = new Array( "Needle Tooth Eel",3546,2083,10850);
-creatures[538] = new Array( "Harbinger of Storms",2646,3543,10994);
-creatures[539] = new Array( "Chelonian Pirate",1334,1541,10831);
-creatures[540] = new Array( "Chelonian Battle Turret",2249,2817,10814);
-creatures[541] = new Array( "Dragon Claw Monk",2544,3120,10884);
-creatures[542] = new Array( "Dragon Fire Monk",1514,1522,10872);
-creatures[543] = new Array( "Dragon Scale Monk",1305,3424,13070);
 
   function load() {
       var creature = creatures[lvl.value];
@@ -861,7 +868,6 @@ creatures[543] = new Array( "Dragon Scale Monk",1305,3424,13070);
   </Content>
 </Module>
 */
-	},
 
 	buffList: function() {
 		if (!Data.buffArray) {
