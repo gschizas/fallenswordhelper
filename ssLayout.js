@@ -22,12 +22,6 @@ var Layout = {
 		newCell.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&#xbb;&nbsp;&nbsp;<A href="' + href + '">' + text + '</A>';
 	},
 
-	hideBanner: function() {
-		if (!GM_getValue("hideBanner")) return;
-		var bannerElement = System.findNode("//img[(@title='Fallen Sword RPG')]");
-		if (bannerElement) bannerElement.style.display = "none";
-	},
-
 	moveFSBox: function() {
 		if (!GM_getValue("moveFSBox")) return;
 		var src=System.findNode("//b[.='FSBox']/../../../../..");
@@ -72,5 +66,19 @@ var Layout = {
 			result=infoMatch[1];
 		}
 		return result;
+	},
+
+	networkIcon: function() {
+		return '<img title="This function retrieves data from the network. Disable this to increase speed" '+
+			' src="data:image/png;base64,' +
+			'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA' +
+			'B3RJTUUH1QgGDTMWk1twEwAAAAlwSFlzAAALEgAACxIB0t1+' +
+			'/AAAAARnQU1BAACxjwv8YQUAAAC8SURBVHjahVPBEcQgCEQn' +
+			'HdmTqUlr0qe16I8cufOiCGZnGCcIy4LEICJwmGgWJ3o0IOCQ' +
+			'EqVg9Y4U3CoCHQhvxuPUZEiA3XYkxyI1/6S6R6rke8AlJbkV' +
+			'7u95lleXq3yrdyUjLGxwnifmnHEXY3fJIQSIMcKOZCLgMltr' +
+			'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
+			'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
+			'egAAAABJRU5ErkJggg==" width="16" height="16" />';
 	}
 };

@@ -18,7 +18,6 @@ var System = {
 		System.imageServer      = imgurls.src.substr(0,idindex);
 		System.server           = document.location.protocol + "//" + document.location.host + "/";
 		System.browserVersion   = parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
-		System.debug            = GM_getValue("showDebugInfo");
 	},
 
 	getValueJSON: function(name) {
