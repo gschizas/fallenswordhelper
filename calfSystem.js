@@ -55,6 +55,12 @@ var System = {
 		return node.textContent;
 	},
 
+	findNodeInt: function(xpath, doc) {
+		var node=System.findNode(xpath, doc);
+		if (!node) return null;
+		return System.intValue(node.textContent);
+	},
+
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
