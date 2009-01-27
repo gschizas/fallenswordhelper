@@ -404,6 +404,12 @@ var Helper = {
 	injectWorldWidgets: function() {
 		Helper.injectQuickHeal();
 		Helper.injectClassCast();
+		GM_addStyle(
+			'.HelperTableRow1 {background-color:#151f1e;font-size:small}\n' +
+			'.HelperTableRow1:hover {background-color:black}\n' +
+			'.HelperTableRow2 {background-color:#112322;font-size:small}\n' +
+			'.HelperTableRow2:hover {background-color:black}'
+		);
 	},
 
 	injectClassCast: function() {
@@ -3817,7 +3823,7 @@ var Helper = {
 					"type": aRow.cells[2].firstChild.textContent,
 					"level": parseInt(aRow.cells[3].firstChild.textContent),
 					"id": recipeId};
-				output.innerHTML+="Found recipe: "+ recipe.name + "<br/>";
+				output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
 				Helper.recipebook.recipe.push(recipe);
 			}
 		}
@@ -3845,8 +3851,8 @@ var Helper = {
 				var result = {
 					img: resultNode.firstChild.firstChild.src,
 					id: mouseOver.match(/ajaxLoadItem\((\d+),\s*-1,\s*2,\s*\d+,\s*\'\'\);/i)[1],
-					amountNeeded: parseInt(resultAmounts.split("/")[1]),
-					amountPresent: parseInt(resultAmounts.split("/")[0])
+					amountPresent: parseInt(resultAmounts.split("/")[0]),
+					amountNeeded: parseInt(resultAmounts.split("/")[1])
 				}
 				results.push(result);
 			}
@@ -3916,7 +3922,7 @@ var Helper = {
 				result += '<td>';
 				if (recipe.items) {
 					for (var j=0; j<recipe.items.length; j++) {
-						result += recipe.items[j].amountNeeded + "/" + recipe.items[j].amountPresent +
+						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded+
 							' <img border="0" align="middle" onmouseover="ajaxLoadItem(' +
 							recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
 							'src="' + recipe.items[j].img + '"/><br/>';
@@ -3960,8 +3966,9 @@ var Helper = {
 	sortRecipeTable: function(evt) {
 		Helper.recipebook=System.getValueJSON("recipebook");
 		var headerClicked = evt.target.getAttribute("sortKey");
-		var sortType = evt.target.getAttribute("sorttype").toLowerCase();
+		var sortType = evt.target.getAttribute("sorttype");
 		if (!sortType) sortType="string";
+		sortType = sortType.toLowerCase();
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==headerClicked) {
 			Helper.sortAsc=!Helper.sortAsc;
