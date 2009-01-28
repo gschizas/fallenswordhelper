@@ -1498,21 +1498,21 @@ var Helper = {
 
 	prepareCombatLog: function() {
 		if (!GM_getValue("showCombatLog")) return;
-		var reportsTable=System.findNode("//table[@width='320']/parent::*");
+		var reportsTable=System.findNode("//td[contains(@background,'sigma2/chatbox_header.gif')]/../../tr[7]/td");
 		if (!reportsTable) return;
 		var tempLog=document.createElement("div");
 		tempLog.id="reportsLog";
 		var injLog=reportsTable.appendChild(tempLog);
 		var is=injLog.style;
-		is.color = 'black';
+		is.color = '#D4FAFF';
 		is.backgroundImage='url(' + System.imageServer + '/sigma2/skin/realm_right_bg.jpg)';
 		is.maxHeight = '240px';
-		is.width = '277px';
+		// is.width = '277px';
 		is.maxWidth = is.width;
 		is.marginLeft = '0px';
 		is.marginRight = '0px';
-		is.paddingLeft = '26px';
-		is.paddingRight = '24px';
+		is.paddingLeft = '12px';
+		is.paddingRight = '12px';
 		is.overflow = 'hidden';
 		is.fontSize = 'xx-small';
 		is.textAlign = 'justify';
@@ -2544,9 +2544,9 @@ var Helper = {
 					function(responseText, callback) {
 						var craft="";
 						if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-							var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/
-							var fontLineRX=fontLineRE.exec(responseText)
-							craft = fontLineRX[3];
+							var fontLineRE=/<\/b><\/font><br>([^<]+)(<font color='(#[0-9A-F]{6})'>[^<]+<\/font>)/;
+							var fontLineRX=fontLineRE.exec(responseText);
+							craft = fontLineRX[2];
 						}
 						var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 						while(re.exec(responseText)) {
@@ -2585,7 +2585,7 @@ var Helper = {
 					if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
 						var winningBidTable = aRow.cells[3].firstChild.firstChild;
 						var winningBidCell = winningBidTable.rows[0].cells[0];
-						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
+						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Credits";
 						var winningBidValue = System.intValue(winningBidCell.textContent);
 						newRow = winningBidTable.insertRow(2);
 						winningBidBuyoutCell = newRow.insertCell(0);
@@ -3245,21 +3245,23 @@ var Helper = {
 		var output = "<table><tbody>";
 		for (j=0; j<quickSearchList.length; j++) {
 			var quickSearchItem=quickSearchList[j];
-			if (currentCategory != quickSearchItem.category)
-				output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
-			//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
-			output += "<tr><td width='10'></td><td><a href='" + System.server +
-				"index.php?cmd=auctionhouse&type=-1&search_text=" +
-				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
-				quickSearchItem.searchname + "</span></a></td>" +
-				"<td><a href='" + System.server +
-				"index.php?cmd=auctionhouse&type=-1&search_text=" +
-				quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-				quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
-				((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
-				"<td></td></tr>";
-			currentCategory = quickSearchItem.category;
+			if (quickSearchItem) {
+				if (currentCategory != quickSearchItem.category)
+					output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
+				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
+				output += "<tr><td width='10'></td><td><a href='" + System.server +
+					"index.php?cmd=auctionhouse&type=-1&search_text=" +
+					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
+					quickSearchItem.searchname + "</span></a></td>" +
+					"<td><a href='" + System.server +
+					"index.php?cmd=auctionhouse&type=-1&search_text=" +
+					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
+					((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
+					"<td></td></tr>";
+				currentCategory = quickSearchItem.category;
+			}
 		}
 		output += "<tr><td colspan=4 height=10></td></tr>";
 		output += "<tr><td colspan=4 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
@@ -4353,31 +4355,15 @@ var Helper = {
 		//playerdata
 		var doc=System.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("B");
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.innerHTML == "Attack:&nbsp;"){
-				var attackText = anItem;
-				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerAttackValue = parseInt(attackLocation.textContent);
-				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDefenseValue = parseInt(defenseLocation.textContent);
-				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerArmorValue = parseInt(armorLocation.textContent);
-				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDamageValue = parseInt(damageLocation.textContent);
-				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerHPValue = parseInt(hpLocation.textContent);
-			}
-			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
-				var killStreakText = anItem;
-				var killStreakLocation = killStreakText.parentNode.nextSibling;
-				var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
-			}
-		}
+
+		// get player stats
+		var playerAttackValue  = Helper.characterAttack;
+		var playerDefenseValue = Helper.characterDefense;
+		var playerArmorValue   = Helper.characterArmor;
+		var playerDamageValue  = Helper.characterDamage;
+		var playerHPValue      = Helper.characterHP;
+		var playerKillStreakValue = 0;
+
 		//get buffs here later ... DD, CA, DC, Constitution, etc
 		var allItems = doc.getElementsByTagName("IMG");
 		var counterAttackLevel = 0;
@@ -4428,8 +4414,9 @@ var Helper = {
 				}
 			}
 		}
-		//creaturedata
-		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
+		//Creature Data
+		var creatureStatTable = System.findNode("//table[tbody/tr/td[contains(@style,'sigma2/statistics_head_bg.gif')]]");
+
 		if (!creatureStatTable) {return;}
 		var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
 		var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
