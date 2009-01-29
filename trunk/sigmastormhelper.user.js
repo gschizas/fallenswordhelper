@@ -1561,6 +1561,16 @@ var Helper = {
 	},
 
 	prepareCheckMonster: function() {
+		// add id to the kill-monster links
+		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')]");
+		if (!monsters) return;
+		for (var i=0; i<monsters.length; i++) {
+			var monster = monsters[i];
+			if (monster) {
+				monster.id = "aLink" + (i + 1);
+			}
+		}
+
 		if (!GM_getValue("showCreatureInfo")) return;
 		var monsters = System.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
 		if (!monsters) return;
@@ -1569,15 +1579,6 @@ var Helper = {
 			if (monster) {
 				var href=monster.href;
 				System.xmlhttp(monster.href, Helper.checkedMonster, monster);
-			}
-		}
-		// add id to the kill-monster links
-		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')]");
-		if (!monsters) return;
-		for (var i=0; i<monsters.length; i++) {
-			var monster = monsters[i];
-			if (monster) {
-				monster.id = "aLink" + (i + 1);
 			}
 		}
 	},
@@ -1653,11 +1654,6 @@ var Helper = {
 			var indicatorHP = System.findNode("//img[contains(@src,'hp_progress.gif')]");
 			indicatorHP.setAttribute("width", Math.round(100 * finalHP / maxHP) + "%");
 		}
-
-// 	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
-//	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
-//	<td colspan="3" align="center"><div id="itemDiv" style="position:relative; display:none;"><font color="#DBD6D1" size=2><b>You looted the item '<font color='#009900'>Health Reinforcement</font>'</b><br><br><img src="http://66.7.192.165/sigma2/items/1203a0cafe.gif" onmouseover="ajaxLoadItem(12, -1, 2, 1106198, '');"><br><br><font size=1>Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></div></td>
-// <font color="#dbd6d1" size="2"><b>You looted the item '<font color="#009900">Steel Leg Armor</font>'</b><br/><br/><img onmouseover="ajaxLoadItem(11, -1, 2, 1106198, '');" src="http://66.7.192.165/sigma2/items/11c47de5e9.gif"/><br/><br/><font size="1">Note: Item stats may be higher due to augment bonuses - check in your inventory.</font></font>
 
 		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
 		var info = Layout.infoBox(responseText);
@@ -2093,9 +2089,6 @@ var Helper = {
 		case 104: // quickheal
 			Helper.quickHeal();
 			break;
-		case 57: // debug
-			Helper.appendCombatLog('test<br/>')
-			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
@@ -2110,6 +2103,17 @@ var Helper = {
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
+			break;
+		case 33: // Shift+1
+		case 64: // Shift+2
+		case 34: // Shift+2 -- for UK keyboards, I think
+		case 35: // Shift+3
+		case 36: // Shift+4
+		case 37: // Shift+5
+			var keyMap = {"key33":1, "key64":2, "key34":2, "key35":3, "key36":4, "key37":5};
+			// I'm using "key??" because I don't feel comfortable of naming properties with integers
+			var itemIndex = keyMap["key" + r];
+			System.xmlhttp("index.php?cmd=profile", Helper.changeCombatSet, itemIndex);
 			break;
 		case 0: // special key
 			switch (s) {
@@ -2839,6 +2843,34 @@ var Helper = {
 		} else {
 			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
 		}
+	},
+
+	changeCombatSet: function(responseText, itemIndex) {
+		var doc=System.createDocument(responseText);
+
+		GM_log(responseText);
+
+		var cbsSelect = System.findNode("//select[@name='combatSetId']", doc);
+
+		// find the combat set id value
+		var allItems = cbsSelect.getElementsByTagName("option");
+		if (itemIndex >= allItems.length) return;
+		var cbsIndex = allItems[itemIndex].value;
+
+		GM_xmlhttpRequest({
+				method: 'POST',
+				url: System.server + "index.php",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Content-Type": "application/x-www-form-urlencoded",
+					"Referer": System.server + "index.php?cmd=profile",
+					"Cookie" : document.cookie
+				},
+				data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
+				onload: function() {
+					window.location="index.php?cmd=profile";
+				},
+		})
 	},
 
 	injectDropItems: function() {
@@ -4935,8 +4967,9 @@ var Helper = {
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
-			'<span style="font-size:xx-small">Sigma Storm Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1106198">Coccinella</a> and ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1267797">Tangtop</a> '+
+			'<span style="font-size:xx-small">Sigma Storm Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1106198">Coccinella</a>, ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1267797">Tangtop</a> and '+
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1191381">dkwizard</a> '+
 /*
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
