@@ -7,6 +7,7 @@ var Layout = {
 		Layout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 9, "menuSource_0");
 		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
 		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
+		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
 		if (GM_getValue("keepLogs")) {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0");
 		}

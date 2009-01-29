@@ -3414,15 +3414,15 @@ var Helper = {
 	parseOnlinePlayersStorePage: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var output=document.getElementById('Helper:OnlinePlayersOutput')
-		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=4 and td[1]/a]", doc);
+		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=3 and td[1]/a]", doc);
 		var maxPage = parseInt(System.findNode("//table[@width='400']//td[input]", doc).textContent.replace(/\D/g, ""));
 		output.innerHTML+=callback.page + " ";
 		for (var i=0; i<playerRows.length; i++) {
 			var newPlayer = {
-				guildId: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"")),
-				id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,"")),
-				name: playerRows[i].cells[1].textContent,
-				level: parseInt(playerRows[i].cells[2].textContent)
+				guildId: (callback.page - 1) * 15 + i + 1,
+				id: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"").replace(/^2/,"")),
+				name: playerRows[i].cells[0].textContent,
+				level: parseInt(playerRows[i].cells[1].textContent)
 			}
 			Helper.onlinePlayers.players.push(newPlayer);
 		}
@@ -3440,7 +3440,7 @@ var Helper = {
 		if (!Helper.onlinePlayers) return;
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
 		var result='<table id="Helper:OnlinePlayersTable"><tr>' +
-			'<th align="left" sortkey="guildId" sortType="number">Faction</th>' +
+			'<th align="left" sortkey="guildId" sortType="number">Index</th>' +
 			'<th sortkey="name">Name</th>' +
 			'<th sortkey="level" sortType="number">Level</th></tr>';
 		var player, color;
@@ -3448,8 +3448,7 @@ var Helper = {
 			player=Helper.onlinePlayers.players[i];
 
 			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
-				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
-					'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+				'<td>' + player.guildId + '</td>'+
 				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
 				'<td align="right">' + player.level + '</td>' +
 				'</tr>';
@@ -4389,10 +4388,10 @@ var Helper = {
 		var allItems = doc.getElementsByTagName("B");
 
 		// get player stats
-		var playerAttackValue  = Helper.characterAttack;
-		var playerDefenseValue = Helper.characterDefense;
-		var playerArmorValue   = Helper.characterArmor;
-		var playerDamageValue  = Helper.characterDamage;
+		var playerAttackValue  = parseInt(paHelper.characterAttack);
+		var playerDefenseValue = parseInt(Helper.characterDefense);
+		var playerArmorValue   = parseInt(Helper.characterArmor);
+		var playerDamageValue  = parseInt(Helper.characterDamage);
 		var playerHPValue      = Helper.characterHP;
 		var playerKillStreakValue = 0;
 
