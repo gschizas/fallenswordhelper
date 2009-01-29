@@ -926,7 +926,7 @@ var Helper = {
 	},
 
 	mapThis: function() {
-		var realm = System.findNode("//td[contains(@background,'/sigma2/skin/realm_top_b2.jpg')]/center/nobr/b");
+		var realm = System.findNode("//td[contains(@background,'/sigma2/coord_bg_')]/font/center/b");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit));
 		if ((realm) && (posit)) {
@@ -953,7 +953,7 @@ var Helper = {
 		}
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
-		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='200']");
+		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='325' and @height='325']");
 		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
 		// GM_log(JSON.stringify(posit))
@@ -1455,7 +1455,7 @@ var Helper = {
 
 		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
-			'/sigma2/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
 
 		if (!GM_getValue("hideKrulPortal")) {
 			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
@@ -1484,7 +1484,7 @@ var Helper = {
 
 		if (!footprints) { // clear footprints
 			var theMap = System.getValueJSON("map");
-			var realm = System.findNode("//td[contains(@background,'/sigma2/skin/realm_top_b2.jpg')]/center/nobr/b");
+			var realm = System.findNode("//td[contains(@background,'/sigma2/coord_bg_')]/font/center/b");
 			var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
 			theMap["levels"][Helper.levelName]={};
@@ -1493,7 +1493,7 @@ var Helper = {
 
 		document.getElementById('Helper:ToggleFootprints').src =
 			System.imageServer +
-			'/sigma2/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
+			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
 	},
 
 	prepareCombatLog: function() {
@@ -1568,6 +1568,7 @@ var Helper = {
 			var monster = monsters[i];
 			if (monster) {
 				monster.id = "aLink" + (i + 1);
+				monster.parentNode.innerHTML += "<font style='font-size:8px'>" + (i+1) + "</font>";
 			}
 		}
 
@@ -4388,7 +4389,7 @@ var Helper = {
 		var allItems = doc.getElementsByTagName("B");
 
 		// get player stats
-		var playerAttackValue  = parseInt(paHelper.characterAttack);
+		var playerAttackValue  = parseInt(Helper.characterAttack);
 		var playerDefenseValue = parseInt(Helper.characterDefense);
 		var playerArmorValue   = parseInt(Helper.characterArmor);
 		var playerDamageValue  = parseInt(Helper.characterDamage);
