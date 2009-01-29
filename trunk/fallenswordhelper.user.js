@@ -2022,8 +2022,6 @@ var Helper = {
 				}
 			}
 			break;
-		case 57: // debug
-			Helper.appendCombatLog('test<br/>')
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
@@ -2039,6 +2037,17 @@ var Helper = {
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
+			break;
+		case 33: // Shift+1
+		case 64: // Shift+2
+		case 34: // Shift+2 -- for UK keyboards, I think
+		case 35: // Shift+3
+		case 36: // Shift+4
+		case 37: // Shift+5
+			var keyMap = {"key33":1, "key64":2, "key34":2, "key35":3, "key36":4, "key37":5};
+			// I'm using "key??" because I don't feel comfortable of naming properties with integers
+			var itemIndex = keyMap["key" + r];
+			System.xmlhttp("index.php?cmd=profile", Helper.changeCombatSet, itemIndex);
 			break;
 		case 0: // special key
 			switch (s) {
@@ -2754,6 +2763,34 @@ var Helper = {
 		} else {
 			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
 		}
+	},
+
+	changeCombatSet: function(responseText, itemIndex) {
+		var doc=System.createDocument(responseText);
+
+		GM_log(responseText);
+
+		var cbsSelect = System.findNode("//select[@name='combatSetId']", doc);
+
+		// find the combat set id value
+		var allItems = cbsSelect.getElementsByTagName("option");
+		if (itemIndex >= allItems.length) return;
+		var cbsIndex = allItems[itemIndex].value;
+
+		GM_xmlhttpRequest({
+				method: 'POST',
+				url: System.server + "index.php",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Content-Type": "application/x-www-form-urlencoded",
+					"Referer": System.server + "index.php?cmd=profile",
+					"Cookie" : document.cookie
+				},
+				data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
+				onload: function() {
+					window.location="index.php?cmd=profile";
+				},
+		})
 	},
 
 	injectDropItems: function() {
