@@ -56,6 +56,7 @@ var Helper = {
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
+		System.setDefault("hideMatchesForCompletedMoves", false);
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -271,7 +272,10 @@ var Helper = {
 				Helper.injectArena();
 				break;
 			case "setup":
-                	Helper.storeCombatMoves();
+               	Helper.storeCombatMoves();
+                break;
+			case "pickmove":
+               	Helper.storeArenaMoves();
                 break;
 			}
 			break;
@@ -4594,10 +4598,32 @@ var Helper = {
 	},
 
 	injectArena: function() {
+		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
+		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves")
+		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
+				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
+				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves</span>';
+		document.getElementById("Helper:hideMatchesForCompletedMoves").addEventListener('click', Helper.hideMatchesForCompletedMoves, true);
+		
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 		arenaTable.style.fontSize = 'x-small';
+		var arenaMoves = System.getValueJSON("arenaMoves");
+		
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
+			var prizeSRC = row.cells[7].firstChild.getAttribute("src");
+			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
+				//GM_log("main" + prizeSRC);
+				for (var j=0; j<arenaMoves.length; j++){
+					var searchText = System.imageServer + "/pvp/" + arenaMoves[j].moveID+ ".gif";
+					if (prizeSRC == searchText && arenaMoves[j].moveCount == 3){
+						row.style.visibility = "hidden";
+						//cannot get blocking to work correctly.
+						//row.style.display = "table-row";
+						//row.style.display = "block";
+					}
+				}
+			}
 			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
 		}
 
@@ -4616,13 +4642,19 @@ var Helper = {
 			}
 		}
 
+/*		//going to do something different with this later ... leaving it here for now.
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var combatMovesTableHtml = GM_getValue("combatMovesTable");
 		if (combatMovesTableHtml) {
 			injectHere.innerHTML = combatMovesTableHtml;
-		}
+		}*/
 	},
 
+	hideMatchesForCompletedMoves: function(evt) {
+		GM_setValue("hideMatchesForCompletedMoves", evt.target.checked);
+		window.location=window.location;
+	},
+	
 	sortArena: function(evt) {
 		var headerClicked=evt.target.textContent.replace(/[ \s]/g,"");
 		var parentTables=System.findNodes("ancestor::table", evt.target)
@@ -4645,6 +4677,7 @@ var Helper = {
 				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
 				'Reward': theRow.cells[7].innerHTML,
 				'Action': theRow.cells[8].innerHTML,
+				'Visibility': theRow.style.visibility
 			};
 		}
 
@@ -4668,16 +4701,18 @@ var Helper = {
 			if (r.Action.search("View") != -1) {
 				bgColor = 'bgcolor="#f5e2b3"';
 			}
-			result += '<TR>'+
-			'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.JoinCostHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.State+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
+			if (r.Visibility!="hidden") {
+				result += '<TR>'+
+				'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.JoinCostHTML+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.State+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
+			}
 		}
 		//result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
 
@@ -4701,6 +4736,25 @@ var Helper = {
 	storeCombatMoves: function() {
         var combatMovesTable = System.findNode("//table[@width='10']/..");
         GM_setValue("combatMovesTable", combatMovesTable.innerHTML);
+    },
+
+	storeArenaMoves: function(){
+        var arenaMoves = System.findNodes("//img[@vspace='4']");
+		var moves = new Array();
+        for (var i=1; i<arenaMoves.length; i++) {
+            arenaMove = arenaMoves[i];
+			aMove = new Object();
+            var moveGifNumberRE = /(\d+).gif/;
+            var moveGifNumber = moveGifNumberRE.exec(arenaMove.getAttribute("src"))[1];
+            var moveCountRE = /<\/a><br>(\d)\&nbsp;\/\&nbsp;(\d)/;
+            var moveCount = moveCountRE.exec(arenaMove.parentNode.parentNode.innerHTML);
+            aMove.moveID = moveGifNumber;
+			aMove.moveCount = moveCount[2];
+            aMove.moveHREF = arenaMove.getAttribute("src");
+			moves.push(aMove);
+        }
+		GM_log(JSON.stringify(moves));
+		GM_setValue("arenaMoves", JSON.stringify(moves));
     },
 
 	toggleVisibilty: function(evt) {
