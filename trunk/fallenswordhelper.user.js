@@ -3718,7 +3718,8 @@ var Helper = {
 		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
-			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel") {
+			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel" ||
+			headerClicked=="hp") {
 			targetInventory.items.sort(Helper.numberSort)
 		}
 		else {
