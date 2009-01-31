@@ -4628,10 +4628,6 @@ var Helper = {
 			aMatch = new Object();
 			var arenaIDRE = /#\s(\d+)/;
 			var arenaID = arenaIDRE.exec(row.cells[0].textContent)[1]*1;
-			var arenaHTML = '';
-			for (m=0; m<8; m++){
-				arenaHTML += '<td>'+row.cells[m].innerHTML+'</td>';
-			}
 			if (oldArenaMatches){
 				for (var k=0; k<oldArenaMatches.length; k++){
 					if (oldArenaMatches[k].arenaID == arenaID) {
@@ -4642,7 +4638,16 @@ var Helper = {
 			}
 			if (!matchFound) {
 				aMatch.arenaID = arenaID;
-				aMatch.arenaHTML = arenaHTML;
+				aMatch.arenaJoinCostHTML = row.cells[2].innerHTML;
+				aMatch.arenaSpecialsHTML = row.cells[4].innerHTML;
+				if (row.cells[4].innerHTML.search("/pvp/specials_1.gif") != -1) {
+					aMatch.arenaSpecials = true;
+				} else {
+					aMatch.arenaSpecials = false;
+				}
+				aMatch.arenaHellForgeHTML = row.cells[5].innerHTML;
+				aMatch.arenaMaxEquipHTML = row.cells[6].innerHTML;
+				aMatch.arenaRewardHTML = row.cells[7].innerHTML;
 				arenaMatches.push(aMatch);
 			}
 			
@@ -4676,13 +4681,6 @@ var Helper = {
 				cell.addEventListener('click', Helper.sortArena, true);
 			}
 		}
-
-/*		//going to do something different with this later ... leaving it here for now.
-		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
-		var combatMovesTableHtml = GM_getValue("combatMovesTable");
-		if (combatMovesTableHtml) {
-			injectHere.innerHTML = combatMovesTableHtml;
-		}*/
 	},
 
 	hideMatchesForCompletedMoves: function(evt) {
@@ -4768,11 +4766,6 @@ var Helper = {
 		}
 	},
 
-	storeCombatMoves: function() {
-        var combatMovesTable = System.findNode("//table[@width='10']/..");
-        GM_setValue("combatMovesTable", combatMovesTable.innerHTML);
-    },
-
 	storeArenaMoves: function(){
         var arenaMoves = System.findNodes("//img[@vspace='4']");
 		var moves = new Array();
@@ -4793,6 +4786,7 @@ var Helper = {
 
 	injectTournament: function() {
 		var mainTable = System.findNode("//table[tbody/tr/td/a[.='Back to PvP Arena']]");
+		var joinPage = System.findNode("//b[.='Your Tournament Stats']");
 		var injectHere = mainTable.rows[4].cells[0];
 		injectHere.align='center';
 		
@@ -4802,17 +4796,29 @@ var Helper = {
 		var arenaMatches = System.getValueJSON("arenaMatches");
 		if (!arenaMatches) return;
 		for (var k=0; k<arenaMatches.length; k++){
-			if (arenaMatches[k].arenaID == tournamentID) {
+			if (arenaMatches[k].arenaID == tournamentID && !arenaMatches[k].arenaHTML) {
 				var tournamentHTML = '<table><tbody>'+
-					'<tr bgcolor="#CD9E4B"><td>Id</td><td>Players</td><td>Join Cost</td><td>State</td>'+
-						'<td>Specials</td><td>Hell Forge</td><td>Max Equip</td><td>Reward</td></tr>'+
-					'<tr>'+arenaMatches[k].arenaHTML+'</tr>'+
-					'</tbody></table>';
+					'<tr bgcolor="#CD9E4B"><td>Join Cost</td><td>Specials</td><td>Hell Forge</td><td>Max Equip</td><td>Reward</td></tr>'+
+					'<tr><td>'+arenaMatches[k].arenaJoinCostHTML+'</td><td>'+arenaMatches[k].arenaSpecialsHTML+
+						'</td><td>'+arenaMatches[k].arenaHellForgeHTML+'</td><td>'+arenaMatches[k].arenaMaxEquipHTML+
+						'</td><td>'+arenaMatches[k].arenaRewardHTML+'</td></tr>';
+				if (arenaMatches[k].arenaSpecials && joinPage) {
+					tournamentHTML+='<tr><td colspan=5><span id="Helper:combatMoves"></span></td></tr>';
+					System.xmlhttp("index.php?cmd=arena&subcmd=setup", Helper.getCombatMoves);
+				}
+				tournamentHTML+='</tbody></table>';
 				injectHere.innerHTML = tournamentHTML;
 				break;
 			}
 		}
 	},
+
+	getCombatMoves: function(responseText, callback) {
+        var doc=System.createDocument(responseText);
+		var combatMovesTable = System.findNode("//table[@width='10']/..", doc);
+		var injectHere = System.findNode("//span[@id='Helper:combatMoves']");
+		injectHere.innerHTML = combatMovesTable.innerHTML
+    },
 
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
