@@ -277,6 +277,9 @@ var Helper = {
 			case "pickmove":
                	Helper.storeArenaMoves();
                 break;
+			case "results":
+               	Helper.injectTournament();
+                break;
 			}
 			break;
 		case "questbook":
@@ -435,6 +438,10 @@ var Helper = {
 			var isAdvisorPageClue2 = System.findNode(clue2);
 			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
 				Helper.injectAdvisor();
+			}
+			var isArenaTournamentPage = System.findNode("//b[contains(.,'Tournament #')]");
+			if (isArenaTournamentPage) {
+				Helper.injectTournament();
 			}
 			break;
 		}
@@ -622,19 +629,13 @@ var Helper = {
 		var defendingGuildHref = defendingGuild.getAttribute("href");
 		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
 
-		//code specifically to see if guild members are guarding the relic - only applies to PANIC
-		if (defendingGuildHref == "index.php?cmd=guild&subcmd=view&guild_id=40769") {
-			var panicGuild = true;
-		}
 		var validMemberString = "";
-		if (panicGuild) {
-			var memberList = System.getValueJSON("memberlist");
-			for (var i=0;i<memberList.members.length;i++) {
-				var member=memberList.members[i];
-				if (member.status == "Offline"
-					&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
-					validMemberString += member.name + " ";
-				}
+		var memberList = System.getValueJSON("memberlist");
+		for (var i=0;i<memberList.members.length;i++) {
+			var member=memberList.members[i];
+			if (member.status == "Offline"
+				&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
+				validMemberString += member.name + " ";
 			}
 		}
 
@@ -672,10 +673,8 @@ var Helper = {
 			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>"
-		if (panicGuild) {
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
-			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
-		}
+		extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
+		extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
 
@@ -4119,7 +4118,8 @@ var Helper = {
 				if (hasThisBuff) {
 					var buffLevelRE = /\[(\d+)\]/
 					var buffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
-					if (buffLevel > 11) {
+					if (buffLevel > 11 ||
+					    buffName == 'Quest Finder') {
 						hasThisBuff.style.color='lime';
 					}
 				}
@@ -4607,13 +4607,47 @@ var Helper = {
 		
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 		arenaTable.style.fontSize = 'x-small';
+
 		var arenaMoves = System.getValueJSON("arenaMoves");
+		var oldArenaMatches = System.getValueJSON("arenaMatches");
+		if (!oldArenaMatches) {
+			arenaMatches = new Array();
+		} else {
+			while (oldArenaMatches.length>1000)
+			{
+				oldArenaMatches.shift();
+			}
+			arenaMatches = oldArenaMatches;
+		}
+		var matchFound = false;
 		
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
+			
+			matchFound = false;
+			aMatch = new Object();
+			var arenaIDRE = /#\s(\d+)/;
+			var arenaID = arenaIDRE.exec(row.cells[0].textContent)[1]*1;
+			var arenaHTML = '';
+			for (m=0; m<8; m++){
+				arenaHTML += '<td>'+row.cells[m].innerHTML+'</td>';
+			}
+			if (oldArenaMatches){
+				for (var k=0; k<oldArenaMatches.length; k++){
+					if (oldArenaMatches[k].arenaID == arenaID) {
+						matchFound = true;
+						break;
+					}
+				}
+			}
+			if (!matchFound) {
+				aMatch.arenaID = arenaID;
+				aMatch.arenaHTML = arenaHTML;
+				arenaMatches.push(aMatch);
+			}
+			
 			var prizeSRC = row.cells[7].firstChild.getAttribute("src");
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
-				//GM_log("main" + prizeSRC);
 				for (var j=0; j<arenaMoves.length; j++){
 					var searchText = System.imageServer + "/pvp/" + arenaMoves[j].moveID+ ".gif";
 					if (prizeSRC == searchText && arenaMoves[j].moveCount == 3){
@@ -4626,6 +4660,7 @@ var Helper = {
 			}
 			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
 		}
+		GM_setValue("arenaMatches", JSON.stringify(arenaMatches));
 
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
@@ -4753,9 +4788,31 @@ var Helper = {
             aMove.moveHREF = arenaMove.getAttribute("src");
 			moves.push(aMove);
         }
-		GM_log(JSON.stringify(moves));
 		GM_setValue("arenaMoves", JSON.stringify(moves));
     },
+
+	injectTournament: function() {
+		var mainTable = System.findNode("//table[tbody/tr/td/a[.='Back to PvP Arena']]");
+		var injectHere = mainTable.rows[4].cells[0];
+		injectHere.align='center';
+		
+		var tournamentTitle = System.findNode("//b[contains(.,'Tournament #')]");
+		var tournamentIDRE = /Tournament #(\d+)/;
+		var tournamentID = tournamentIDRE.exec(tournamentTitle.innerHTML)[1]*1;
+		var arenaMatches = System.getValueJSON("arenaMatches");
+		if (!arenaMatches) return;
+		for (var k=0; k<arenaMatches.length; k++){
+			if (arenaMatches[k].arenaID == tournamentID) {
+				var tournamentHTML = '<table><tbody>'+
+					'<tr bgcolor="#CD9E4B"><td>Id</td><td>Players</td><td>Join Cost</td><td>State</td>'+
+						'<td>Specials</td><td>Hell Forge</td><td>Max Equip</td><td>Reward</td></tr>'+
+					'<tr>'+arenaMatches[k].arenaHTML+'</tr>'+
+					'</tbody></table>';
+				injectHere.innerHTML = tournamentHTML;
+				break;
+			}
+		}
+	},
 
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
