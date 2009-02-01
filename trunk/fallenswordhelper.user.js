@@ -525,7 +525,7 @@ var Helper = {
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
-		if (info!="") {
+		if (info.search("You successfully took the item into your backpack") != -1) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
@@ -2684,6 +2684,10 @@ var Helper = {
 
 	injectAuctionExtraText: function(anItem, craft, forgeCount) {
 		var theText=anItem.parentNode.nextSibling.nextSibling;
+		//Excellent color does not show up well so change Perfect to Green and Excellent takes the yellow color
+		// to show up better in the AH.
+		craft = craft.replace(/\#F6ED00/,"#00B600");
+		craft = craft.replace(/\#F6AE00/,"#F6ED00");
 		var preText = "<span style='color:blue'>" + craft + "</span>";
 		if (forgeCount != 0) {
 			preText +=  " " + forgeCount + "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>"
@@ -2761,10 +2765,10 @@ var Helper = {
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
-		if (info!="") {
-			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
-		} else {
+		if (info.search("You successfully recalled the item") != -1) {
 			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+		} else {
+			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 		}
 	},
 
@@ -4808,6 +4812,7 @@ var Helper = {
 					var searchText = System.imageServer + "/pvp/" + arenaMoves[j].moveID+ ".gif";
 					if (prizeSRC == searchText && arenaMoves[j].moveCount == 3){
 						row.style.visibility = "hidden";
+						row.style.display = "none";
 						//cannot get blocking to work correctly.
 						//row.style.display = "table-row";
 						//row.style.display = "block";
