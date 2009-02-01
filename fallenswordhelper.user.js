@@ -4068,6 +4068,8 @@ var Helper = {
 		buffMe.style.cursor="pointer";
 		buffMe.addEventListener("click", Helper.quickBuffMe, true);
 		playerInput.parentNode.appendChild(buffMe);
+		
+		Helper.injectBuffPackArea();
 
 		var playerIDRE = /tid=(\d+)/;
 		var playerID = playerIDRE.exec(location);
@@ -4076,6 +4078,130 @@ var Helper = {
 			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
+	},
+	
+	injectBuffPackArea: function() {
+		Helper.injectBuffPackList();
+		Helper.injectBuffPackAddButton();
+	},
+	
+	injectBuffPackList: function() {
+		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
+		var bpArea = document.createElement("SPAN");
+		bpArea.innerHTML="<br><div align='center'>Buff Packs<table id='bpTable' width='350' style='border:1px solid #A07720;' rules=rows><tbody>" +
+			"<tr><td></td><td><span id=bpSelectAll>[All&nbsp;Buffs]</span>&nbsp;<span id=bpClear>[Clear]</span></td></tr>" +
+			"</tbody></table></div>";
+		bpArea.style.color="white";
+		injectHere.appendChild(bpArea);
+		
+		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
+		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
+		
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) return;
+		
+		var bpTable = document.getElementById("bpTable");
+		for (var i = 0; i < theBuffPack["size"]; i++) {
+			var myRow = bpTable.insertRow(-1);
+			myRow.innerHTML = "<td>" + theBuffPack["bp"][i] + 
+				"</td><td><span id=bpSelect" + i + " buffId=" + i + ">[Select]</span> " +
+				"<span id=bpDelete" + i + " buffId=" + i + ">[X]</span></td>"
+			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPack, true);
+			document.getElementById("bpDelete" + i).addEventListener("click", Helper.deleteBuffPack, true);
+		}
+	},
+	
+	setAllSkills: function(value) {
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+		
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			skillNodes[i].checked = value;
+		}
+	},
+	
+	useBuffPack: function(evt) {
+		var bpIndex=evt.target.getAttribute("buffId");
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) return;
+		if (bpIndex >= theBuffPack["size"]) return;
+		
+		var buffList = theBuffPack["bp"][bpIndex];
+		if (!buffList) return;
+		
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+		
+		GM_log(skillNodes.length);
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
+			if (buffList.indexOf(skillName) >= 0) {
+				skillNodes[i].checked = true;
+			}
+		}
+	},
+	
+	deleteBuffPack: function(evt) {
+		
+		if (!window.confirm("Are you sure you want to delete the buff pack?")) return;
+		
+		var bpIndex=parseInt(evt.target.getAttribute("buffId"));
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) return;
+		if (!theBuffPack["size"]) return;
+		
+		theBuffPack["size"] --;
+		if (theBuffPack["size"] == 0) { // avoid bugs :)
+			delete theBuffPack["bp"];
+			theBuffPack["bp"] = {};
+		}
+		for (var i = bpIndex; i < theBuffPack["size"]; i++) {
+			theBuffPack["bp"][i] =  theBuffPack["bp"][i + 1];
+		}
+		
+		delete theBuffPack["bp"][theBuffPack["size"]];
+		
+		GM_setValue("buffpack", JSON.stringify(theBuffPack));
+		location.reload(true);
+	},
+	
+	injectBuffPackAddButton: function() {
+		var bpTable = document.getElementById("bpTable");
+		var myRow = bpTable.insertRow(-1);
+		myRow.innerHTML = "<td><input size=60 id='newBuffPack' name='newBuffPack' value='full buff names, separated by comma'></td>" + 
+			"<td><span id=bpSave>[Save]</span><span id=bpAdd>[add]</span></td>";
+		
+		// button handlers
+		document.getElementById("bpAdd").addEventListener("click", Helper.displayAddBuffPack, true);
+		document.getElementById("bpSave").addEventListener("click", Helper.saveBuffPack, true);
+		
+		// display [add] only
+		document.getElementById("newBuffPack").style.visibility = "hidden";
+		document.getElementById("bpAdd").style.visibility = "";
+		document.getElementById("bpSave").style.visibility = "hidden";
+	},
+	
+	displayAddBuffPack: function() {
+		document.getElementById("newBuffPack").style.visibility = "";
+		document.getElementById("bpAdd").style.visibility = "hidden";
+		document.getElementById("bpSave").style.visibility = "";
+	},
+	
+	saveBuffPack: function() {
+		if (!document.getElementById("newBuffPack").value) return;
+		
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) {
+			theBuffPack = {};
+			theBuffPack["size"] = 0;
+			theBuffPack["bp"] = {};
+		}
+		theBuffPack["bp"][theBuffPack["size"]] = document.getElementById("newBuffPack").value;
+		theBuffPack["size"] += 1;
+
+		// save and reload
+		GM_setValue("buffpack", JSON.stringify(theBuffPack));
+		location.reload(true);
 	},
 
 	quickBuffMe: function() {
@@ -4174,7 +4300,10 @@ var Helper = {
 		resultText += statistics.parentNode.innerHTML;
 
 		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
-		injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
+		// injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
+		var newNode = document.createElement("SPAN");
+		newNode.innerHTML = resultText;
+		injectHere.appendChild(newNode);
 
 		if (keepPlayerInput) {
 			playerInput = System.findNode("//input[@name='targetPlayers']");
