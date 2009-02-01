@@ -3392,20 +3392,42 @@ var Helper = {
 		unsafeWindow.changeMenu(2,'menu_actions');
 		unsafeWindow.changeMenu(0,'menu_character');
 
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td width="90%" nobr><b>&nbsp;Online Players</b> (takes a while to refresh so only do it if you really need to)</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+		var lastCheck=GM_getValue("lastOnlineCheck")
+		var now=(new Date()).getTime();
+		if (!lastCheck) lastCheck=0;
+		var haveToCheck=((now - lastCheck) > 5*60*1000)
+		if (haveToCheck) {
+			var refreshButton = '<td> (takes a while to refresh so only do it if you really need to) </td>'+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right"><span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">[Refresh]</span></td>';
+		} else {
+			var refreshButton = "<td> (please wait 5 minutes before the [Refresh] button available again)</td>"
+		}
+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>'+
+			'<td nobr><b>&nbsp;Online Players</b></td>' + 
+			refreshButton + 
 			'</tr>' +
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
 			'' +
 			'</div>';
-		document.getElementById("Helper:OnlinePlayersRefresh").addEventListener('click', Helper.parseOnlinePlayersStart, true);
+		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
+		if (refreshButton)
+			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
+
 		Helper.onlinePlayers = System.getValueJSON("onlinePlayers");
 		Helper.generateOnlinePlayersTable();
 	},
 
 	parseOnlinePlayersStart: function() {
+	
+		// set timer to redisplay the [refresh] button
+		var now=(new Date()).getTime();
+		GM_setValue("lastOnlineCheck", now.toString());
+		
+		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
+		refreshButton.style.visibility = "hidden";
+
 		Helper.onlinePlayers = {players:[]};
 		var output=document.getElementById('Helper:OnlinePlayersOutput')
 		output.innerHTML='<br/>Parsing online players ...';
@@ -3428,7 +3450,7 @@ var Helper = {
 			Helper.onlinePlayers.players.push(newPlayer);
 		}
 		if (callback.page<maxPage/*-maxPage+15*/) {
-			var newPage = callback.page+1;
+			var newPage = (callback.page == 1) ? Math.round(2 * maxPage / 3) : (callback.page+1);
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
 		}
 		else {
