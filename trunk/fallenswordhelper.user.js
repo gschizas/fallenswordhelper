@@ -2041,6 +2041,9 @@ var Helper = {
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
+		case 110: // mini map [b]
+			Helper.displayMiniMap();
+			break;
 		case 33: // Shift+1
 		case 64: // Shift+2
 		case 34: // Shift+2 -- for UK keyboards, I think
@@ -5263,6 +5266,36 @@ var Helper = {
 		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
 		if (guildEnmy.indexOf(txt.toLowerCase())!=-1) return "enemy";
 		return "";
+	},
+	
+	displayMiniMap: function() {
+	
+		var miniMap = document.getElementById("miniMap");
+		if (!miniMap) {
+			miniMap = document.createElement("div");
+			miniMap.style.position = "absolute";
+			miniMap.style.left = 0;
+			miniMap.style.top = 0;
+			miniMap.style.display = 'none';
+			miniMap.id = "miniMap";
+			miniMap.style.zIndex = '90';
+			miniMap.style.filter = "alpha";
+			miniMap.style.opacity = "0.9";
+			
+			var objBody = document.getElementsByTagName("body").item(0);
+			objBody.insertBefore(miniMap, objBody.firstChild);
+		}
+		
+		if (miniMap.style.display != "") {
+			System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
+		} else
+			miniMap.style.display = "none";
+	},
+	
+	loadMiniMap: function(responseText) {
+		var miniMap = document.getElementById("miniMap");
+		miniMap.innerHTML = responseText;
+		miniMap.style.display = "";
 	}
 };
 
