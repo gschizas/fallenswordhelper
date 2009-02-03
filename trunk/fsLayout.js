@@ -12,6 +12,25 @@ var Layout = {
 		}
 		Layout.injectOneMenu("AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31, "menuSource_2");
 		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7, "menuSource_2");
+		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 23, "menuSource_0");
+
+		Layout.injectQuickLinks();
+	},
+
+	injectQuickLinks: function() {
+		var quickLinks = System.getValueJSON("quickLinks");
+		if (!quickLinks) quickLinks=[];
+		if (quickLinks.length<=0) return;
+		var injectHere1 = System.findNode("//table[@width='703' and contains(tbody/tr/td/img/@src,'realm_top_a.jpg')]/tbody/tr[1]/td");
+		var injectHere2 = System.findNode("//table[@width='705' and contains(tbody/tr/td/img/@src,'inner_top.jpg')]/tbody/tr[1]/td");
+		if (!injectHere1 && !injectHere2) return;
+		if (injectHere2) injectHere2.setAttribute("colspan", 3);
+		result="&nbsp;&nbsp;";
+		for (var i=0; i<quickLinks.length; i++) {
+			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '">' + quickLinks[i].name + '</a>&nbsp;'
+		}
+		if (injectHere1) injectHere1.innerHTML=result;
+		if (injectHere2) injectHere2.innerHTML=result;
 	},
 
 	injectOneMenu: function(text, href, position, insertAt) {
@@ -78,6 +97,11 @@ var Layout = {
 			result=infoMatch[1];
 		}
 		return result;
-	}
+	},
+
+	quickBuffHref: function(playerId, innerText) {
+		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
+			"', 'fsQuickBuff', 618, 800, 'scrollbars=yes')\"";
+	},
 
 }
