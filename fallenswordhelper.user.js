@@ -2002,6 +2002,8 @@ var Helper = {
 		case 103: // create group
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
+		case 106: // join all group [j]
+		  window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
 		case 49:
 		case 50:
 		case 51:

@@ -2060,6 +2060,8 @@ var Helper = {
 		case 103: // create group
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
+		case 106: // join all group [j]
+		  window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
 		case 49:
 		case 50:
 		case 51:
@@ -2249,11 +2251,11 @@ var Helper = {
 				if (aRow.cells[0].innerHTML) {
 					firstCell = aRow.cells[0];
 					//Valid Types: General, Chat, Guild
-					messageType = firstCell.firstChild.getAttribute("title");
+					messageType = firstCell.firstChild.nextSibling.getAttribute("title");
 					if (messageType == "Chat") {
-						var playerName = aRow.cells[2].firstChild.innerHTML;
+						var playerName = aRow.cells[2].firstChild.nextSibling.firstChild.innerHTML;
 						if (memberNameString.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.style.color="green";
+							aRow.cells[2].firstChild.nextSibling.firstChild.style.color="green";
 							isGuildmate = true;
 						}
 						var messageHTML = aRow.cells[2].innerHTML;
