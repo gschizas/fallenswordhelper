@@ -61,7 +61,8 @@ var Helper = {
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
 		} catch(err) {
-			quickSearchList="";
+			GM_log(err);
+			quickSearchList=null;
 		}
 
 		if (!quickSearchList) {
@@ -396,6 +397,9 @@ var Helper = {
 				break;
 			case "onlineplayers":
 				Helper.injectOnlinePlayers();
+				break;
+			case "quicklinkmanager":
+				Helper.injectQuickLinkManager();
 				break;
 			}
 			break;
@@ -2041,7 +2045,7 @@ var Helper = {
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
-		case 110: // mini map [b]
+		case 110: // mini map [n]
 			Helper.displayMiniMap();
 			break;
 		case 33: // Shift+1
@@ -2139,8 +2143,8 @@ var Helper = {
 				if (logScreen == 'Chat' && addBuffTag) {
 					var playerIDRE = /player_id=(\d+)/;
 					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
-					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID +
-						"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>";
+					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' " +
+						Layout.quickBuffHref(playerID) + ">[b]</a>";
 			}
 		}
 		}
@@ -2194,6 +2198,7 @@ var Helper = {
 							isGuildmate = true;
 						}
 						var messageHTML = aRow.cells[2].innerHTML;
+
 						var firstPart = messageHTML.split(">Reply</a>")[0];
 						var secondPart = messageHTML.split(">Reply</a>")[1];
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
@@ -2213,8 +2218,7 @@ var Helper = {
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
 							"'>ST</a> | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-							"'>Ignore</a> | <a href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + buffingPlayerID +
-							"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">Buff</a> ]</span>";
+							"'>Ignore</a> | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</span>";
 				}
 			}
 			}
@@ -2300,7 +2304,7 @@ var Helper = {
 				}
 				output += "<li style='padding-bottom:0px;'>"
 				output += "<a style='color:#CCFF99;font-size:10px;' "
-				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>&nbsp;";
+				output += Layout.quickBuffHref(member.id) + ">[b]</a>&nbsp;";
 				if (member.id!=playerId) {
 					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
 					output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
@@ -2964,23 +2968,25 @@ var Helper = {
 			var ranktext = "Rank " +playername + "" ;
 			var securetradetext = "Create Secure Trade to " + playername;
 
-			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
-			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
-			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
-			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
-			newhtml += System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" ;
-			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=';
-			newhtml += System.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;";
-			newhtml += "<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
-			newhtml += playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=';
-			newhtml += System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
+			newhtml = avyrow.parentNode.innerHTML +
+				"</td></tr><tr><td align='center' colspan='2'>" +
+				"<a " + Layout.quickBuffHref(playerid) + ">" +
+				"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
+				System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" +
+				"<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
+				"');'><img alt='Join All Groups' title='Join All Groups' src=" +
+				System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" +
+				"<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
+				playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=' +
+				System.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;" +
+				"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
+				playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
+				System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
-				newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
-				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
-				newhtml += System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>" ;
+				newhtml +=
+					"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
+					playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
+					System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
@@ -3313,7 +3319,7 @@ var Helper = {
 		unsafeWindow.changeMenu(0,'menu_character');
 		unsafeWindow.changeMenu(2,'menu_actions');
 		unsafeWindow.changeMenu(0,'menu_character');
-		
+
 		var lastCheck=GM_getValue("lastOnlineCheck")
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
@@ -3326,8 +3332,8 @@ var Helper = {
 		}
 
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td nobr><b>&nbsp;Online Players</b></td>' + 
-			refreshButton + 
+			'<td nobr><b>&nbsp;Online Players</b></td>' +
+			refreshButton +
 			'</tr>' +
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
@@ -3336,7 +3342,7 @@ var Helper = {
 		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
 		if (refreshButton)
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
-		
+
 		GM_addStyle(
 			'.HelperTableRow1 {background-color:#e7c473;font-size:small}\n' +
 			'.HelperTableRow1:hover {background-color:white}\n' +
@@ -3347,14 +3353,14 @@ var Helper = {
 	},
 
 	parseOnlinePlayersStart: function() {
-	
+
 		// set timer to redisplay the [refresh] button
 		var now=(new Date()).getTime();
 		GM_setValue("lastOnlineCheck", now.toString());
-		
+
 		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
 		refreshButton.style.visibility = "hidden";
-	
+
 		Helper.onlinePlayers = {players:[]};
 		var output=document.getElementById('Helper:OnlinePlayersOutput')
 		output.innerHTML='<br/>Parsing online players ...';
@@ -4068,14 +4074,15 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
+		GM_addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
+			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		var playerInput = System.findNode("//input[@name='targetPlayers']");
 		var buffMe = document.createElement("SPAN");
 		buffMe.innerHTML="[self]";
-		buffMe.style.color="white";
-		buffMe.style.cursor="pointer";
+		buffMe.className='HelperTextLink';
 		buffMe.addEventListener("click", Helper.quickBuffMe, true);
 		playerInput.parentNode.appendChild(buffMe);
-		
+
 		Helper.injectBuffPackArea();
 
 		var playerIDRE = /tid=(\d+)/;
@@ -4086,59 +4093,59 @@ var Helper = {
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
 	},
-	
+
 	injectBuffPackArea: function() {
 		Helper.injectBuffPackList();
 		Helper.injectBuffPackAddButton();
 	},
-	
+
 	injectBuffPackList: function() {
 		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
 		var bpArea = document.createElement("SPAN");
 		bpArea.innerHTML="<br><div align='center'>Buff Packs<table id='bpTable' width='350' style='border:1px solid #A07720;' rules=rows><tbody>" +
-			"<tr><td></td><td><span id=bpSelectAll>[All&nbsp;Buffs]</span>&nbsp;<span id=bpClear>[Clear]</span></td></tr>" +
+			"<tr><td></td><td><span id=bpSelectAll class='HelperTextLink'>[All&nbsp;Buffs]</span>&nbsp;<span id=bpClear class='HelperTextLink'>[Clear]</span></td></tr>" +
 			"</tbody></table></div>";
 		bpArea.style.color="white";
 		injectHere.appendChild(bpArea);
-		
+
 		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
 		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
-		
+
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) return;
-		
+
 		var bpTable = document.getElementById("bpTable");
 		for (var i = 0; i < theBuffPack["size"]; i++) {
 			var myRow = bpTable.insertRow(-1);
-			myRow.innerHTML = "<td>" + theBuffPack["bp"][i] + 
-				"</td><td><span id=bpSelect" + i + " buffId=" + i + ">[Select]</span> " +
-				"<span id=bpDelete" + i + " buffId=" + i + ">[X]</span></td>"
+			myRow.innerHTML = "<td>" + theBuffPack["bp"][i] +
+				"</td><td><span id=bpSelect" + i + " class='HelperTextLink' buffId=" + i + ">[Select]</span> " +
+				"<span id=bpDelete" + i + " buffId=" + i + " class='HelperTextLink'>[X]</span></td>"
 			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPack, true);
 			document.getElementById("bpDelete" + i).addEventListener("click", Helper.deleteBuffPack, true);
 		}
 	},
-	
+
 	setAllSkills: function(value) {
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
 		if (!skillNodes) return;
-		
+
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			skillNodes[i].checked = value;
 		}
 	},
-	
+
 	useBuffPack: function(evt) {
 		var bpIndex=evt.target.getAttribute("buffId");
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) return;
 		if (bpIndex >= theBuffPack["size"]) return;
-		
+
 		var buffList = theBuffPack["bp"][bpIndex];
 		if (!buffList) return;
-		
+
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
 		if (!skillNodes) return;
-		
+
 		GM_log(skillNodes.length);
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
@@ -4147,16 +4154,16 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	deleteBuffPack: function(evt) {
-		
+
 		if (!window.confirm("Are you sure you want to delete the buff pack?")) return;
-		
+
 		var bpIndex=parseInt(evt.target.getAttribute("buffId"));
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) return;
 		if (!theBuffPack["size"]) return;
-		
+
 		theBuffPack["size"] --;
 		if (theBuffPack["size"] == 0) { // avoid bugs :)
 			delete theBuffPack["bp"];
@@ -4165,38 +4172,38 @@ var Helper = {
 		for (var i = bpIndex; i < theBuffPack["size"]; i++) {
 			theBuffPack["bp"][i] =  theBuffPack["bp"][i + 1];
 		}
-		
+
 		delete theBuffPack["bp"][theBuffPack["size"]];
-		
+
 		GM_setValue("buffpack", JSON.stringify(theBuffPack));
 		location.reload(true);
 	},
-	
+
 	injectBuffPackAddButton: function() {
 		var bpTable = document.getElementById("bpTable");
 		var myRow = bpTable.insertRow(-1);
-		myRow.innerHTML = "<td><input size=60 id='newBuffPack' name='newBuffPack' value='full buff names, separated by comma'></td>" + 
-			"<td><span id=bpSave>[Save]</span><span id=bpAdd>[add]</span></td>";
-		
+		myRow.innerHTML = "<td><input size=60 id='newBuffPack' name='newBuffPack' value='full buff names, separated by comma'></td>" +
+			"<td><span id=bpSave class='HelperTextLink'>[Save]</span><span id=bpAdd class='HelperTextLink'>[add]</span></td>";
+
 		// button handlers
 		document.getElementById("bpAdd").addEventListener("click", Helper.displayAddBuffPack, true);
 		document.getElementById("bpSave").addEventListener("click", Helper.saveBuffPack, true);
-		
+
 		// display [add] only
 		document.getElementById("newBuffPack").style.visibility = "hidden";
 		document.getElementById("bpAdd").style.visibility = "";
 		document.getElementById("bpSave").style.visibility = "hidden";
 	},
-	
+
 	displayAddBuffPack: function() {
 		document.getElementById("newBuffPack").style.visibility = "";
 		document.getElementById("bpAdd").style.visibility = "hidden";
 		document.getElementById("bpSave").style.visibility = "";
 	},
-	
+
 	saveBuffPack: function() {
 		if (!document.getElementById("newBuffPack").value) return;
-		
+
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) {
 			theBuffPack = {};
@@ -4762,7 +4769,7 @@ var Helper = {
 				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
 				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves</span>';
 		document.getElementById("Helper:hideMatchesForCompletedMoves").addEventListener('click', Helper.hideMatchesForCompletedMoves, true);
-		
+
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 		arenaTable.style.fontSize = 'x-small';
 
@@ -4778,10 +4785,10 @@ var Helper = {
 			arenaMatches = oldArenaMatches;
 		}
 		var matchFound = false;
-		
+
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
-			
+
 			matchFound = false;
 			aMatch = new Object();
 			var arenaIDRE = /#\s(\d+)/;
@@ -4808,7 +4815,7 @@ var Helper = {
 				aMatch.arenaRewardHTML = row.cells[7].innerHTML;
 				arenaMatches.push(aMatch);
 			}
-			
+
 			var prizeSRC = row.cells[7].firstChild.getAttribute("src");
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 				for (var j=0; j<arenaMoves.length; j++){
@@ -4846,7 +4853,7 @@ var Helper = {
 		GM_setValue("hideMatchesForCompletedMoves", evt.target.checked);
 		window.location=window.location;
 	},
-	
+
 	sortArena: function(evt) {
 		var headerClicked=evt.target.textContent.replace(/[ \s]/g,"");
 		var parentTables=System.findNodes("ancestor::table", evt.target)
@@ -4948,7 +4955,7 @@ var Helper = {
 		var joinPage = System.findNode("//b[.='Your Tournament Stats']");
 		var injectHere = mainTable.rows[4].cells[0];
 		injectHere.align='center';
-		
+
 		var tournamentTitle = System.findNode("//b[contains(.,'Tournament #')]");
 		var tournamentIDRE = /Tournament #(\d+)/;
 		var tournamentID = tournamentIDRE.exec(tournamentTitle.innerHTML)[1]*1;
@@ -5267,9 +5274,8 @@ var Helper = {
 		if (guildEnmy.indexOf(txt.toLowerCase())!=-1) return "enemy";
 		return "";
 	},
-	
+
 	displayMiniMap: function() {
-	
 		var miniMap = document.getElementById("miniMap");
 		if (!miniMap) {
 			miniMap = document.createElement("div");
@@ -5281,22 +5287,65 @@ var Helper = {
 			miniMap.style.zIndex = '90';
 			miniMap.style.filter = "alpha";
 			miniMap.style.opacity = "0.9";
-			
+
 			var objBody = document.getElementsByTagName("body").item(0);
 			objBody.insertBefore(miniMap, objBody.firstChild);
 		}
-		
+
 		if (miniMap.style.display != "") {
 			System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
 		} else
 			miniMap.style.display = "none";
 	},
-	
+
 	loadMiniMap: function(responseText) {
 		var miniMap = document.getElementById("miniMap");
 		miniMap.innerHTML = responseText;
 		miniMap.style.display = "";
+	},
+
+	injectQuickLinkManager: function() {
+		GM_addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
+			'.HelperTextLink:hover {text-decoration:underline;}\n');
+		var quickLinks = System.getValueJSON("quickLinks");
+		if (!quickLinks) quickLinks=[];
+		Helper.quickLinks = quickLinks;
+		Helper.tmpContent=Layout.notebookContent();
+		Helper.generateQuickLinkTable();
+	},
+
+	generateQuickLinkTable: function() {
+		var result='<table><tr><th>Name</th><th>URL</th><th>&nbsp;</th></tr>';
+		for (var i=0;i<Helper.quickLinks.length;i++) {
+			result+='<td>' + Helper.quickLinks[i].name + '</td><td>' + Helper.quickLinks[i].url + '</td><td>';
+			result+='<span class=HelperTextLink quickLinkId="' + i + '" id="Helper:DeleteLink' + i + '">[Del]</span></td></tr>';
+		}
+		result +=
+			'<tr><td><input size=10 type=textbox class=custominput id="Helper:LinkName"></td>' +
+			'<td><input size=75 type=textbox class=custominput id="Helper:LinkUrl"></td>' +
+			'<td><span class=HelperTextLink id="Helper:AddLink">[Add]</span></td></tr>';
+		Helper.tmpContent.innerHTML = result;
+		for (var i=0;i<Helper.quickLinks.length;i++) {
+			document.getElementById("Helper:DeleteLink" + i).addEventListener('click', Helper.deleteQuickLink, true);
+		}
+		document.getElementById("Helper:AddLink").addEventListener('click', Helper.addQuickLink, true);
+		GM_setValue("quickLinks", JSON.stringify(Helper.quickLinks));
+	},
+
+	deleteQuickLink: function(evt) {
+		// if (!window.confirm('Are you sure you want to delete this link?')) return;
+		var quickLinkId = evt.target.getAttribute("quickLinkId")
+		Helper.quickLinks.splice(quickLinkId, 1);
+		Helper.generateQuickLinkTable();
+	},
+
+	addQuickLink: function(evt) {
+		var quickLinkName = document.getElementById("Helper:LinkName").value;
+		var quickLinkUrl = document.getElementById("Helper:LinkUrl").value;
+		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
+		Helper.generateQuickLinkTable();
 	}
+
 };
 
 Helper.onPageLoad(null);

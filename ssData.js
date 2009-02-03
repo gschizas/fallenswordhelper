@@ -45,7 +45,12 @@ var Data = {
 				{'questName':'Seek and Retrieve', 'level':56, 'location':'Amethyst Peak (Upper Slope)'},
 				{'questName':'Crystal Gathers', 'level':58, 'location':'Amethyst Peak (Climb)'},
 				{'questName':'Stemming the Tide', 'level':60, 'location':'Amethyst Peak (View)'},
-				{'questName':'Power Hunger', 'level':60, 'location':'Amethyst Peak (Pinnacle)'}
+				{'questName':'Power Hunger', 'level':60, 'location':'Amethyst Peak (Pinnacle)'},
+				{'questName':'Heartless Crystal', 'level':61, 'location':'Raga Domain (West Quadrant)'},
+				{'questName':'Silent Guns', 'level':63, 'location':'Raga Domain (North Quadrant)'},
+				{'questName':'Out Flanked', 'level':65, 'location':'Raga Domain (East Quadrant)'},
+				{'questName':'Heart of Rad', 'level':67, 'location':'Raga Hills (Edge)'},
+				{'questName':'Rebellious Son', 'level':70, 'location':'Raga Hills (Depths)'}
 			];
 			Data.questArray = questArray.sort();
 		}
