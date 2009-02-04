@@ -4773,7 +4773,6 @@ var Helper = {
 		document.getElementById("Helper:hideMatchesForCompletedMoves").addEventListener('click', Helper.hideMatchesForCompletedMoves, true);
 
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
-		arenaTable.style.fontSize = 'x-small';
 
 		var arenaMoves = System.getValueJSON("arenaMoves");
 		var oldArenaMatches = System.getValueJSON("arenaMatches");
@@ -4831,13 +4830,17 @@ var Helper = {
 					}
 				}
 			}
-			row.style.backgroundColor = ((i % 2)==0)?'#e2b960':'#e7c473';
+			if (!matchFound) {
+				//color new matches since last visit
+				row.style.backgroundColor = '#F5F298';
+			}
 		}
 		GM_setValue("arenaMatches", JSON.stringify(arenaMatches));
 
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
+			cell.innerHTML = cell.innerHTML.replace(/\[/,"<br>[");
 			if (cell.innerHTML.search("Max Equip Level") != -1
 				|| cell.innerHTML.search("Join Cost") != -1
 				|| cell.innerHTML.search("Specials") != -1
@@ -4878,7 +4881,8 @@ var Helper = {
 				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
 				'Reward': theRow.cells[7].innerHTML,
 				'Action': theRow.cells[8].innerHTML,
-				'Visibility': theRow.style.visibility
+				'Visibility': theRow.style.visibility,
+				'BackgroundColor': theRow.style.backgroundColor
 			};
 		}
 
@@ -4898,7 +4902,8 @@ var Helper = {
 
 		for (var i=0; i<Helper.arenaRows.length; i++){
 			var r = Helper.arenaRows[i];
-			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
+			//var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
+			var bgColor='bgcolor="'+r.BackgroundColor+'"';
 			if (r.Action.search("View") != -1) {
 				bgColor = 'bgcolor="#f5e2b3"';
 			}
