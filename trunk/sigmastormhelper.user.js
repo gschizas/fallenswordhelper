@@ -33,7 +33,7 @@ var Helper = {
 
 		System.setDefault("showCompletedQuests", true);
 		System.setDefault("showExtraLinks", true);
-		System.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
+		System.setDefault("huntingBuffs", "Data Processor, Researcher");
 		System.setDefault("showHuntingBuffs", true);
 		System.setDefault("moveFSBox", false);
 		System.setDefault("hideNewBox", false);
@@ -414,6 +414,7 @@ var Helper = {
 
 	injectClassCast: function() {
 		var charClassNode = System.findNode("//img[contains(@src,'sigma2/skin/classes/')]");
+		if (!charClassNode) return;
 		charClassNode.style.cursor="pointer";
 		charClassNode.setAttribute("title", Helper.characterClass + " Skills");
 		charClassNode.addEventListener('click', Helper.quickClassCast, true);
@@ -1148,7 +1149,7 @@ var Helper = {
 		//
 
 		var replacementText = "<td background='" + System.imageServer + "/sigma2/skin/realm_right_bg.jpg'>"
-		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
+		replacementText += "<table width=218 cellpadding='1' style='margin-left:5px; margin-right:5px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
 			"colspan='2'></td></tr><tr>";
@@ -1190,12 +1191,12 @@ var Helper = {
 			var buffAry=buffs.split(",")
 			var missingBuffs = new Array();
 			for (var i=0;i<buffAry.length;i++) {
-				if (!System.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
+				if (!System.findNode("//img[contains(@onmouseover,'" + buffAry[i].replace(/^\s+|\s+$/g,"") + "')]")) {
 					missingBuffs.push(buffAry[i]);
 				}
 			}
 			if (missingBuffs.length>0) {
-				replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>" +
+				replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:#FFF380;'>" +
 					"You are missing some hunting buffs<br/>("
 				replacementText += missingBuffs.join(", ")
 				replacementText += ")</span></td></tr>"
@@ -1205,10 +1206,10 @@ var Helper = {
 		}
 		replacementText += "</td>" ;
 
-		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		var injectHere = System.findNode("//tr/td[contains(@background, '/sigma2/coord_bg_')]/../..");
 		if (!injectHere) return;
 		//insert after kill all monsters image and text
-		newRow=injectHere.insertRow(2);
+		newRow=injectHere.insertRow(0);
 
 		newRow.innerHTML=replacementText;
 	},
