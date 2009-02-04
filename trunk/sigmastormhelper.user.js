@@ -1567,6 +1567,15 @@ var Helper = {
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
+				// add monster color based on elite types
+				var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
+				if (monsterText.textContent.match(/\(Champion\)/i))
+					monsterText.style.color = 'green';
+				if (monsterText.textContent.match(/\(Elite\)/i))
+					monsterText.style.color = 'yellow';
+				if (monsterText.textContent.match(/\(HK\)/i))
+					monsterText.style.color = 'red';
+				
 				monster.id = "aLink" + (i + 1);
 				monster.parentNode.innerHTML += "<font style='font-size:8px'>" + (i+1) + "</font>";
 			}
