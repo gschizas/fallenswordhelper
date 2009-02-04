@@ -5245,8 +5245,8 @@ var Helper = {
 	notepadClearLog: function() {
 		if (window.confirm("Are you sure you want to clear your log?")) {
 			var combatLog=document.getElementById("Helper:CombatLog");
-			combatLog.innerHTML="";
 			GM_setValue("CombatLog", "");
+			window.location = window.location;
 		}
 	},
 
@@ -5300,15 +5300,45 @@ var Helper = {
 		}
 
 		if (miniMap.style.display != "") {
-			System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
+			if (Helper.levelName == GM_getValue("miniMapName")) {
+				miniMap.innerHTML = GM_getValue("miniMapSource");
+				Helper.markPlayerOnMiniMap();
+				miniMap.style.display = "";
+			} else {
+				System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
+			}
 		} else
 			miniMap.style.display = "none";
 	},
 
 	loadMiniMap: function(responseText) {
+		var size = 16;
 		var miniMap = document.getElementById("miniMap");
-		miniMap.innerHTML = responseText;
+		var docu = System.createDocument(responseText);
+		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + docu.getElementsByTagName("table")[0].innerHTML + '</table>';
+		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
+		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
+		doc = doc.replace("<center></center>", "");
+		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
+		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
+		miniMap.innerHTML = doc;
+		
+		Helper.markPlayerOnMiniMap();
 		miniMap.style.display = "";
+		
+		GM_setValue("miniMapName", Helper.levelName);
+		GM_setValue("miniMapSource", doc);
+	},
+	
+	markPlayerOnMiniMap: function() {
+		var miniMap = document.getElementById("miniMap");
+		var posit = Helper.position();
+		if (!miniMap || !posit) return;
+		var position = miniMap.firstChild.rows[posit.Y].cells[posit.X];
+		var background = position.firstChild.src;
+		position.innerHTML = '<center><img width=16 height=16 src="' + System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
+		position.style.backgroundImage = 'url("' + background + '")';
+		position.style.backgroundPosition = "center";
 	},
 
 	injectQuickLinkManager: function() {
