@@ -272,8 +272,8 @@ var Helper = {
 			case "-":
 				Helper.injectArena();
 				break;
-			case "setup":
-               	Helper.storeCombatMoves();
+			case "completed":
+               	Helper.storeCompletedArenas();
                 break;
 			case "pickmove":
                	Helper.storeArenaMoves();
@@ -4992,6 +4992,78 @@ var Helper = {
 		var injectHere = System.findNode("//span[@id='Helper:combatMoves']");
 		injectHere.innerHTML = combatMovesTable.innerHTML
     },
+
+	storeCompletedArenas: function() {
+		//fix button class and add go to first and last
+		var prevButton = System.findNode("//input[@value='<']");
+		var nextButton = System.findNode("//input[@value='>']");
+		if (prevButton) {
+			prevButton.setAttribute("class", "custombutton");
+			var startButton = document.createElement("input");
+			startButton.setAttribute("type", "button");
+			startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
+			startButton.setAttribute("class", "custombutton");
+			startButton.setAttribute("value", "<<");
+			prevButton.parentNode.insertBefore(startButton,prevButton);
+		};
+		if (nextButton) {
+			nextButton.setAttribute("class", "custombutton");
+			var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
+			lastPage = lastPageNode.textContent.replace(/\D/g,"");
+			var finishButton = document.createElement("input");
+			finishButton.setAttribute("type", "button");
+			finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
+			finishButton.setAttribute("class", "custombutton");
+			finishButton.setAttribute("value", ">>");
+			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
+		};
+		
+		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
+
+		var arenaMoves = System.getValueJSON("arenaMoves");
+		var oldArenaMatches = System.getValueJSON("arenaMatches");
+		if (!oldArenaMatches) {
+			arenaMatches = new Array();
+		} else {
+			while (oldArenaMatches.length>1000)
+			{
+				oldArenaMatches.shift();
+			}
+			arenaMatches = oldArenaMatches;
+		}
+		var matchFound = false;
+
+		for (var i=1; i<arenaTable.rows.length-1; i++){
+			var row = arenaTable.rows[i];
+			matchFound = false;
+			aMatch = new Object();
+			var arenaIDRE = /#\s(\d+)/;
+			var arenaID = arenaIDRE.exec(row.cells[0].textContent)[1]*1;
+			if (oldArenaMatches){
+				for (var k=0; k<oldArenaMatches.length; k++){
+					if (oldArenaMatches[k].arenaID == arenaID) {
+						matchFound = true;
+						break;
+					}
+				}
+			}
+			if (!matchFound) {
+				aMatch.arenaID = arenaID;
+				aMatch.arenaJoinCostHTML = row.cells[2].innerHTML;
+				aMatch.arenaSpecialsHTML = row.cells[4].innerHTML;
+				if (row.cells[4].innerHTML.search("/pvp/specials_1.gif") != -1) {
+					aMatch.arenaSpecials = true;
+				} else {
+					aMatch.arenaSpecials = false;
+				}
+				aMatch.arenaHellForgeHTML = row.cells[5].innerHTML;
+				aMatch.arenaMaxEquipHTML = row.cells[6].innerHTML;
+				aMatch.arenaRewardHTML = row.cells[7].innerHTML;
+				arenaMatches.push(aMatch);
+			}
+		}
+		GM_setValue("arenaMatches", JSON.stringify(arenaMatches));
+	},
 
 	toggleVisibilty: function(evt) {
 		var anItemId=evt.target.getAttribute("linkto")
