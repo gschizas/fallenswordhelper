@@ -115,7 +115,7 @@ var Helper = {
 
 	// Autoupdate
 	beginAutoUpdate: function() {
-		var lastCheck=GM_getValue("lastVersionCheck")
+		var lastCheck=GM_getValue("lastVersionCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
 		var haveToCheck=((now - lastCheck) > 6*60*60*1000)
@@ -148,7 +148,7 @@ var Helper = {
 		var currentVersion=GM_getValue("currentVersion");
 		if (!currentVersion) currentVersion=0;
 		var versionRE=/Revision\s*([0-9]+):/;
-		var latestVersion=responseDetails.responseText.match(versionRE)[1]
+		var latestVersion=responseDetails.responseText.match(versionRE)[1];
 		GM_log("Current version: " + currentVersion);
 		GM_log("Found version: " + latestVersion);
 
@@ -168,28 +168,73 @@ var Helper = {
 	},
 
 	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-		var theChanges=System.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-		if (window.confirm("New version (" + newVersion + ") found.\n" + theChanges + "Update from version " + oldVersion + "?")) {
-			GM_setValue("currentVersion", newVersion);
-			Helper.autoUpdatePreloadFiles(["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
-		}
+		var theChanges=Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+		var confirmAlert = document.createElement("DIV");
+		confirmAlert.id = 'Helper:ConfirmAlert';
+		var divHeight = window.innerHeight-160;
+
+		confirmAlert.style.position = "absolute";
+		confirmAlert.style.left = (window.innerWidth - 500)/2 + "px";
+		confirmAlert.style.top = (80+window.scrollY) + "px";
+		confirmAlert.style.width = "500px";
+		confirmAlert.style.height = divHeight + "px";
+		confirmAlert.style.display = 'block';
+		confirmAlert.style.zIndex = '90';
+		confirmAlert.style.filter = 'alpha';
+		confirmAlert.style.opacity = '0.7';
+		confirmAlert.style.background = 'black';
+		confirmAlert.style.color = 'white';
+		confirmAlert.style.border = 'ridge';
+
+		confirmAlert.innerHTML = '<div height="20" style="background-color:#4a3918;">' +
+			'<div style="color:yellow;position:absolute;top:0px;left:0px">New version (' + newVersion + ') found. Update from version ' + oldVersion + '?' +
+			'</div><div style="position:absolute;top:0px;right:0px">' +
+			'<input type="button" id="Helper:AutoUpdateOk" value="Ok" class="custombutton">' +
+			'&nbsp;<input type="button" id="Helper:AutoUpdateCancel" value="Cancel" class="custombutton"></div></div>' +
+			'<div style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
+		document.body.insertBefore(confirmAlert, document.body.firstChild);
+		document.getElementById("Helper:AutoUpdateOk").addEventListener("click", Helper.autoUpdateConfirmOk, true);
+		document.getElementById("Helper:AutoUpdateOk").setAttribute("newVersion", newVersion);
+		document.getElementById("Helper:AutoUpdateCancel").addEventListener("click", Helper.autoUpdateConfirmCancel, true);
 	},
 
-	autoUpdatePreloadFiles: function(scriptArray) {
+	autoUpdateConfirmOk: function(evt) {
+		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
+		GM_setValue("currentVersion", newVersion);
+		Helper.autoUpdatePreloadFiles(null, ["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
+	},
+
+	autoUpdateConfirmCancel: function(evt) {
+		var confirmAlert=document.getElementById("Helper:ConfirmAlert");
+		confirmAlert.style.display="none";
+		confirmAlert.visibility="hidden";
+	},
+
+
+	autoUpdatePreloadFiles: function(responseDetails, scriptArray) {
+		if (responseDetails) {
+			GM_log("Status = " + responseDetails.status)
+		}
+		else {
+			GM_log("Preloading scripts...");
+		}
 		if (scriptArray.length==0) {
+			GM_log("Done preloading, opening install dialog.");
 			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js");
 			return;
 		}
 		var scriptName=scriptArray.shift();
+		GM_log("Loading " + scriptName);
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Referer": document.location
+				"Referer": document.location,
+				"If-Modified-Since": new Date()
 			},
 			onload: function(responseDetails) {
-				Helper.autoUpdatePreloadFiles(scriptArray);
+				Helper.autoUpdatePreloadFiles(responseDetails, scriptArray);
 			},
 		})
 	},
@@ -273,14 +318,14 @@ var Helper = {
 				Helper.injectArena();
 				break;
 			case "completed":
-               	Helper.storeCompletedArenas();
-                break;
+				Helper.storeCompletedArenas();
+				break;
 			case "pickmove":
-               	Helper.storeArenaMoves();
-                break;
+				Helper.storeArenaMoves();
+				break;
 			case "results":
-               	Helper.injectTournament();
-                break;
+				Helper.injectTournament();
+				break;
 			}
 			break;
 		case "questbook":
@@ -5017,7 +5062,7 @@ var Helper = {
 			finishButton.setAttribute("value", ">>");
 			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
 		};
-		
+
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 
 		var arenaMoves = System.getValueJSON("arenaMoves");
@@ -5106,70 +5151,67 @@ var Helper = {
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
-			'<tr><td colspan="4" height="1" bgcolor="#333333"></td></tr>' +
-			'<tr><td colspan="4"><b>Fallen Sword Helper configuration</b></td></tr>' +
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
-			'<tr><td colspan="4" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + Helper.formatDateTime(lastCheck) +
+			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
+			'<tr><td colspan="2"><b>Fallen Sword Helper configuration</b></td></tr>' +
+			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
+			'<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + Helper.formatDateTime(lastCheck) +
 			')</span></td></tr>' +
-			'<tr><td colspan="4" align="left"><b>Social Preferences</b></td></tr>' +
-			'<tr><td colspan="4" align="left">Enter guild names, seperated by commas</td></tr>' +
-			'<tr><td>Own Guild</td><td colspan="3">'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
-			'<tr><td>Friendly Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
-			'<tr><td>Old Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
-			'<tr><td>Enemy Guilds</td><td colspan="3">'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
+			'<tr><td colspan="2" align="left"><b>Social Preferences</b></td></tr>' +
+			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
+			'<tr><td>Own Guild</td><td>'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
+			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
+			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
+			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
-				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td>' +
-			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
+				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
+				'</td><td colspan="3"><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">' +
+			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
+			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
-			'<td align="right">Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
-				'</td><td><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '"></td>' +
-			'<td align="right">Show chat lines' + Helper.helpLink('Chat lines', 'Display the last {n} lines from guild chat (set to 0 to disable).' +
-				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
-				':</td><td><input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
-			'<tr><th colspan="4" align="left">Other preferences</th></tr>' +
+			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Quick Kill Style' + Helper.helpLink('Quick Kill Style', 'Unchecking the checkbox will prevent this option from displaying on the world screen.<br/>'+
 				'<b><u>single</u></b> will fast kill a single monster<br>' +
 				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>off</b></u> returns control to game normal.') +
-				':</td><td><table><tbody>' +
-				'<tr>' +
-				'<td><input name="showQuickKillOnWorld" type="checkbox" value="on"' + (GM_getValue("showQuickKillOnWorld")?" checked":"") + '></td>' +
-				'<td><input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off</td>' +
-				'<td><input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single</td>'+
-				'<td><input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type</td>' +
-				'</tbody></table></td>' +
-			'<td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
-				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
-				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td>' +
-			'<td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
-				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
+				':</td><td><input name="showQuickKillOnWorld" type="checkbox" value="on"' + (GM_getValue("showQuickKillOnWorld")?" checked":"") + '>' +
+				'<input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off' +
+				'<input type="radio" name="killAllAdvanced"  value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single'+
+				'<input type="radio" name="killAllAdvanced"  value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type' +
+				'</td></tr>' +
 			'<tr><td align="right">Keep Combat Logs' + Helper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them') +
-				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '></td>' +
-			'<td align="right" colspan="2"><input type="button" class="custombutton" value="Show Logs" id="Helper:ShowLogs"></td></td></tr>' +
+				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '>' +
+				'<input type="button" class="custombutton" value="Show Logs" id="Helper:ShowLogs"></td></tr>' +
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
-				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td>' +
-			'<td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
+				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
 				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
-				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td>' +
-			'<td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
+				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
 				'quests you might have missed.') +
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
 			'<tr><td align="right">Show Combat Log' + Helper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
-				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td>' +
-			'<td align="right">Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
+				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
-				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td>' +
-			'<td align="right">Footprints Color:</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Footprints Color' + Helper.helpLink('Footprints Color', 'Changes the color of the footprints, useful if you can\\\'t see them in some maps') +
+				':</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
+				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
+				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
+				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -5183,14 +5225,14 @@ var Helper = {
 				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
 				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			//save button
-			'<tr><td colspan="4" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
-			'<tr><td colspan="4" align=center>' +
+			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
+			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a> and ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
-			'<tr><td colspan="4" align=center>' +
+			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions or bug reports<span></td></tr>' +
 			'</table></form>';
@@ -5384,24 +5426,24 @@ var Helper = {
 	},
 
 	loadMiniMap: function(responseText) {
-		var size = 16;
+		var size = 20;
 		var miniMap = document.getElementById("miniMap");
 		var docu = System.createDocument(responseText);
-		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + docu.getElementsByTagName("table")[0].innerHTML + '</table>';
+		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + System.findNode("//table", docu).innerHTML + '</table>';
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		doc = doc.replace("<center></center>", "");
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
 		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
-		
+
 		Helper.markPlayerOnMiniMap();
 		miniMap.style.display = "";
-		
+
 		GM_setValue("miniMapName", Helper.levelName);
 		GM_setValue("miniMapSource", doc);
 	},
-	
+
 	markPlayerOnMiniMap: function() {
 		var miniMap = document.getElementById("miniMap");
 		var posit = Helper.position();

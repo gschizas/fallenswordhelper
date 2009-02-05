@@ -80,7 +80,7 @@ var Helper = {
 
 	// Autoupdate
 	beginAutoUpdate: function() {
-		var lastCheck=GM_getValue("lastVersionCheck")
+		var lastCheck=GM_getValue("lastVersionCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
 		var haveToCheck=((now - lastCheck) > 6*60*60*1000)
@@ -113,7 +113,7 @@ var Helper = {
 		var currentVersion=GM_getValue("currentVersion");
 		if (!currentVersion) currentVersion=0;
 		var versionRE=/Revision\s*([0-9]+):/;
-		var latestVersion=responseDetails.responseText.match(versionRE)[1]
+		var latestVersion=responseDetails.responseText.match(versionRE)[1];
 		GM_log("Current version: " + currentVersion);
 		GM_log("Found version: " + latestVersion);
 
@@ -133,28 +133,68 @@ var Helper = {
 	},
 
 	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-		var theChanges=System.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-		if (window.confirm("New version (" + newVersion + ") found.\n" + theChanges + "Update from version " + oldVersion + "?")) {
-			GM_setValue("currentVersion", newVersion);
-			Helper.autoUpdatePreloadFiles(["json2.js", "calfSystem.js", "ssLayout.js", "ssData.js"]);
-		}
+		var theChanges=Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+		var confirmAlert = document.createElement("DIV");
+		confirmAlert.id = 'Helper:ConfirmAlert';
+		var divHeight = window.innerHeight-160;
+		confirmAlert.style.position = "absolute";
+		confirmAlert.style.left = (window.innerWidth - 500)/2 + "px";
+		confirmAlert.style.top = (80+window.scrollY) + "px";
+		confirmAlert.style.width = "500px";
+		confirmAlert.style.height = divHeight + "px";
+		confirmAlert.style.display = 'block';
+		confirmAlert.style.zIndex = '90';
+		confirmAlert.style.filter = 'alpha';
+		confirmAlert.style.opacity = '0.7';
+		confirmAlert.style.background = 'black';
+		confirmAlert.style.color = 'white';
+		confirmAlert.style.border = 'ridge';
+		confirmAlert.innerHTML = '<div height="20" style="background-color:#4a3918;">' +
+			'<div style="color:yellow;position:absolute;top:0px;left:0px">New version (' + newVersion + ') found. Update from version ' + oldVersion + '?' +
+			'</div><div style="position:absolute;top:0px;right:0px">' +
+			'<input type="button" id="Helper:AutoUpdateOk" value="Ok" class="custombutton">' +
+			'&nbsp;<input type="button" id="Helper:AutoUpdateCancel" value="Cancel" class="custombutton"></div></div>' +
+			'<div style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
+		document.body.insertBefore(confirmAlert, document.body.firstChild);
+		document.getElementById("Helper:AutoUpdateOk").addEventListener("click", Helper.autoUpdateConfirmOk, true);
+		document.getElementById("Helper:AutoUpdateOk").setAttribute("newVersion", newVersion);
+		document.getElementById("Helper:AutoUpdateCancel").addEventListener("click", Helper.autoUpdateConfirmCancel, true);
 	},
 
-	autoUpdatePreloadFiles: function(scriptArray) {
+	autoUpdateConfirmOk: function(evt) {
+		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
+		GM_setValue("currentVersion", newVersion);
+		Helper.autoUpdatePreloadFiles(null, ["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
+	},
+	autoUpdateConfirmCancel: function(evt) {
+		var confirmAlert=document.getElementById("Helper:ConfirmAlert");
+		confirmAlert.style.display="none";
+		confirmAlert.visibility="hidden";
+	},
+	autoUpdatePreloadFiles: function(responseDetails, scriptArray) {
+		if (responseDetails) {
+			GM_log("Status = " + responseDetails.status)
+		}
+		else {
+			GM_log("Preloading scripts...");
+		}
 		if (scriptArray.length==0) {
+			GM_log("Done preloading, opening install dialog.");
 			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/sigmastormhelper.user.js");
 			return;
 		}
 		var scriptName=scriptArray.shift();
+		GM_log("Loading " + scriptName);
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
 			headers: {
 				"User-Agent" : navigator.userAgent,
-				"Referer": document.location
+				"Referer": document.location,
+				"If-Modified-Since": new Date()
 			},
 			onload: function(responseDetails) {
-				Helper.autoUpdatePreloadFiles(scriptArray);
+				Helper.autoUpdatePreloadFiles(responseDetails, scriptArray);
 			},
 		})
 	},
@@ -5214,10 +5254,10 @@ var Helper = {
 	},
 	
 	loadMiniMap: function(responseText) {
-		var size = 16;
+		var size = 20;
 		var miniMap = document.getElementById("miniMap");
 		var docu = System.createDocument(responseText);
-		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + docu.getElementsByTagName("table")[0].innerHTML + '</table>';
+		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + System.findNode("//table", docu).innerHTML + '</table>';
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		doc = doc.replace("<center></center>", "");
