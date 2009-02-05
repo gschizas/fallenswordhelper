@@ -7,10 +7,13 @@ var Layout = {
 		Layout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 9, "menuSource_0");
 		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
 		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
-		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
 		if (GM_getValue("keepLogs")) {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0");
 		}
+		
+		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
+		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 11, "menuSource_0");
+		Layout.injectQuickLinks();
 	},
 
 	injectOneMenu: function(text, href, position, insertAt) {
@@ -21,6 +24,22 @@ var Layout = {
 		newRow.setAttribute("height", 20);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&#xbb;&nbsp;&nbsp;<A href="' + href + '">' + text + '</A>';
+	},
+	
+	injectQuickLinks: function() {
+		var quickLinks = System.getValueJSON("quickLinks");
+		if (!quickLinks) quickLinks=[];
+		if (quickLinks.length<=0) return;
+		var injectHere1 = System.findNode("//table[@width='700' and contains(tbody/tr/td/img/@src,'content_bg_top.gif')]/tbody/tr[1]/td");
+		var injectHere2 = System.findNode("//table[@width='705' and contains(tbody/tr/td/img/@src,'inner_top.jpg')]/tbody/tr[1]/td");
+		if (!injectHere1 && !injectHere2) return;
+		if (injectHere2) injectHere2.setAttribute("colspan", 3);
+		result="&nbsp;&nbsp;";
+		for (var i=0; i<quickLinks.length; i++) {
+			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '">' + quickLinks[i].name + '</a>&nbsp;'
+		}
+		if (injectHere1) injectHere1.innerHTML=result;
+		if (injectHere2) injectHere2.innerHTML=result;
 	},
 
 	moveFSBox: function() {
