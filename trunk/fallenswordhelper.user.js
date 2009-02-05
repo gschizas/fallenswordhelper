@@ -2829,7 +2829,7 @@ var Helper = {
 	changeCombatSet: function(responseText, itemIndex) {
 		var doc=System.createDocument(responseText);
 
-		GM_log(responseText);
+		//GM_log(responseText);
 
 		var cbsSelect = System.findNode("//select[@name='combatSetId']", doc);
 
@@ -3077,6 +3077,65 @@ var Helper = {
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
 				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
+			
+			// Fast Wear
+			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
+			if (profileInventory) {
+				var profileInventoryIDRE = /inventory_id=(\d+)/i;
+				var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
+
+				var profileInventoryBox = [];
+				var profileInventoryBoxItem = [];
+				var profileInventoryBoxID = [];
+				for (var i=0;i<12;i++) {
+					if (foldersEnabled) {
+						if (profileInventory.rows[2*(i >> 2)]) profileInventoryBox[i]=profileInventory.rows[2*(i >> 2)].cells[i % 4];
+					} else {
+						if (profileInventory.rows[i >> 2]) profileInventoryBox[i]=profileInventory.rows[i >> 2].cells[i % 4];
+					}
+					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
+					if (profileInventoryBoxItem[i]) profileInventoryBoxID[i] = profileInventoryIDRE(profileInventoryBoxItem[i].firstChild.getAttribute("href"))[1];
+				}
+
+				var newRow;
+
+				for (var i=0;i<12;i++) {
+					if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
+					if (profileInventoryBoxItem[i]) {
+						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
+						if (!foldersEnabled) {
+							var newCell = newRow.insertCell(i % 4);
+							newCell.align = 'right';
+							newCell.innerHTML = output;
+						} else {
+							profileInventory.rows[2*(i >> 2)+1].cells[i % 4].innerHTML += output;
+						}
+							document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
+								.addEventListener('click', Helper.equipProfileInventoryItem, true);
+					}
+				}
+			}
+		}
+	},
+
+	equipProfileInventoryItem: function(evt) {
+		var InventoryItemID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=profile&subcmd=equipitem&inventory_id=" + InventoryItemID,
+			Helper.equipProfileInventoryItemReturnMessage,
+			{"item": InventoryItemID, "target": evt.target});
+	},
+
+	equipProfileInventoryItemReturnMessage: function(responseText, callback) {
+		var itemID = callback.item;
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		if (!info) {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Worn</span>";
+		} else {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		}
 	},
 
