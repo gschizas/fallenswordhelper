@@ -3101,19 +3101,16 @@ var Helper = {
 
 				for (var i=0;i<12;i++) {
 					if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
+					if ((i % 4==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
 					if (profileInventoryBoxItem[i]) {
 						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
 								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
-						if (!foldersEnabled) {
-							var newCell = newRow.insertCell(i % 4);
-							newCell.align = 'right';
-							newCell.innerHTML = output;
-						} else {
-							profileInventory.rows[2*(i >> 2)+1].cells[i % 4].innerHTML += output;
-						}
-							document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
-								.addEventListener('click', Helper.equipProfileInventoryItem, true);
+						var newCell = newRow.insertCell(i % 4);
+						newCell.align = 'center';
+						newCell.innerHTML = output;
+						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
+							.addEventListener('click', Helper.equipProfileInventoryItem, true);
 					}
 				}
 			}
