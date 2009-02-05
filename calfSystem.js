@@ -193,39 +193,6 @@ var System = {
 	    return this.replace(/\s+$/,"");
 	},
 
-	formatWiki: function(aText, oldVersion, newVersion) {
-		var lines=aText.replace("\r","").split("\n");
-		if (newVersion-oldVersion>25) oldVersion = newVersion-25;
-		var changes=[];
-		var revRX = /^==Revision\s*(\d+)/i;
-		var chgRX = /^\s*\#\s+(.*)$/i;
-		var rev = null;
-		var chg = null;
-		var revNo = 0;
-		var chgTxt = "";
-
-		for (var i=0; i<lines.length; i++){
-			var line = lines[i];
-			rev=revRX.exec(line);
-			chg=chgRX.exec(line);
-
-			if (rev) revNo = parseInt(rev[1]);
-			chgTxt = "";
-			if (chg) chgTxt = chg[1];
-			if (chgTxt!="") {
-				if (!changes[revNo]) changes[revNo] = "";
-				changes[revNo] += chgTxt + "\n";
-			}
-		}
-		var result="\n";
-		for (i=newVersion; i>=oldVersion; i--) {
-			if (changes[i]) {
-				result += "Version " + i + ": " + changes[i] + "\n";
-			}
-		}
-		return result;
-	},
-
 	convertTextToHtml: function(inputText) {
 		return inputText
 			.replace(/</g,"&lt")

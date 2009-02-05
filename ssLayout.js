@@ -12,7 +12,7 @@ var Layout = {
 		}
 		
 		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
-		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 11, "menuSource_0");
+		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 10, "menuSource_0");
 		Layout.injectQuickLinks();
 	},
 
@@ -100,5 +100,44 @@ var Layout = {
 			'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
 			'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
 			'egAAAABJRU5ErkJggg==" width="16" height="16" />';
+	},
+
+	quickBuffHref: function(playerId, innerText) {
+		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
+			"', 'fsQuickBuff', 618, 800, 'scrollbars=yes')\"";
+	},
+
+	formatWiki: function(aText, oldVersion, newVersion) {
+		var lines=aText.replace("\r","").split("\n");
+		var changes=[];
+		var revRX = /^==Revision\s*(\d+)/i;
+		var chgRX = /^\s*\#\s+(.*)$/i;
+		var rev = null;
+		var chg = null;
+		var revNo = 0;
+		var chgTxt = "";
+
+		for (var i=0; i<lines.length; i++){
+			var line = lines[i];
+			rev=revRX.exec(line);
+			chg=chgRX.exec(line);
+
+			if (rev) revNo = parseInt(rev[1]);
+			chgTxt = "";
+			if (chg) chgTxt = chg[1];
+			if (chgTxt!="") {
+				if (!changes[revNo]) changes[revNo] = "";
+				changes[revNo] += "<li>" + chgTxt + "</li>";
+			}
+		}
+		var result='<ol>';
+		for (i=newVersion; i>=oldVersion; i--) {
+			if (changes[i]) {
+				result += '<li value='+i+'><ul type=square>' + changes[i] + '</ul></li>';
+			}
+		}
+		result += "</ol>"
+		return result;
 	}
+
 };
