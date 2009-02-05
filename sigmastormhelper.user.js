@@ -355,6 +355,9 @@ var Helper = {
 			case "onlineplayers":
 				Helper.injectOnlinePlayers();
 				break;
+			case "quicklinkmanager":
+				Helper.injectQuickLinkManager();
+				break;
 			}
 			break;
 		case "points":
@@ -2284,7 +2287,7 @@ var Helper = {
 					if (aRow.cells[2].innerHTML.search("activated") != -1 && aRow.cells[2].getAttribute("width") == "80%") {
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
-						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
+						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling.innerHTML;
 						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
@@ -5238,6 +5241,48 @@ var Helper = {
 		position.innerHTML = '<center><img width=16 height=16 src="' + System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
 		position.style.backgroundImage = 'url("' + background + '")';
 		position.style.backgroundPosition = "center";
+	},
+
+	injectQuickLinkManager: function() {
+		GM_addStyle('.HelperTextLink {color:#84ADAC;font-size:x-small;cursor:pointer;}\n' +
+			'.HelperTextLink:hover {text-decoration:underline;}\n');
+		var quickLinks = System.getValueJSON("quickLinks");
+		if (!quickLinks) quickLinks=[];
+		Helper.quickLinks = quickLinks;
+		Helper.tmpContent=Layout.notebookContent();
+		Helper.generateQuickLinkTable();
+	},
+
+	generateQuickLinkTable: function() {
+		var result='<table><tr><th>Name</th><th>URL</th><th>&nbsp;</th></tr>';
+		for (var i=0;i<Helper.quickLinks.length;i++) {
+			result+='<td>' + Helper.quickLinks[i].name + '</td><td>' + Helper.quickLinks[i].url + '</td><td>';
+			result+='<span class=HelperTextLink quickLinkId="' + i + '" id="Helper:DeleteLink' + i + '">[Del]</span></td></tr>';
+		}
+		result +=
+			'<tr><td><input size=10 type=textbox class=custominput id="Helper:LinkName"></td>' +
+			'<td><input size=75 type=textbox class=custominput id="Helper:LinkUrl"></td>' +
+			'<td><span class=HelperTextLink id="Helper:AddLink">[Add]</span></td></tr>';
+		Helper.tmpContent.innerHTML = result;
+		for (var i=0;i<Helper.quickLinks.length;i++) {
+			document.getElementById("Helper:DeleteLink" + i).addEventListener('click', Helper.deleteQuickLink, true);
+		}
+		document.getElementById("Helper:AddLink").addEventListener('click', Helper.addQuickLink, true);
+		GM_setValue("quickLinks", JSON.stringify(Helper.quickLinks));
+	},
+
+	deleteQuickLink: function(evt) {
+		// if (!window.confirm('Are you sure you want to delete this link?')) return;
+		var quickLinkId = evt.target.getAttribute("quickLinkId")
+		Helper.quickLinks.splice(quickLinkId, 1);
+		Helper.generateQuickLinkTable();
+	},
+
+	addQuickLink: function(evt) {
+		var quickLinkName = document.getElementById("Helper:LinkName").value;
+		var quickLinkUrl = document.getElementById("Helper:LinkUrl").value;
+		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
+		Helper.generateQuickLinkTable();
 	}
 
 };
