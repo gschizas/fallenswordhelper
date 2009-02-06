@@ -1463,7 +1463,7 @@ var Helper = {
 		Helper.mapThis();
 		Helper.showMap(false);
 		var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
-		// if (!injectHere) return;
+		if (!injectHere) return;
 		var newRow=injectHere.insertRow(2);
 		var newCell=newRow.insertCell(0);
 		// newCell.setAttribute("background", System.imageServer + "/sigma2/skin/realm_right_bg.jpg");
@@ -2142,6 +2142,9 @@ var Helper = {
 					Helper.killSingleMonsterType(monsterType);
 				}
 			}
+			break;
+		case 61: // view shop in map [=]
+			Helper.worldMapAction();
 			break;
 		case 104: // quickheal
 			Helper.quickHeal();
@@ -5323,6 +5326,24 @@ var Helper = {
 		var quickLinkUrl = document.getElementById("Helper:LinkUrl").value;
 		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
 		Helper.generateQuickLinkTable();
+	},
+	
+	worldMapAction: function() {
+		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='stairway_id']", "index.php?cmd=world&subcmd=usestairs&stairway_id=", 1);
+		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='shop_id']", "index.php?cmd=shop&shop_id=", 1);
+		Helper.worldDoAction("//img[@title='Vault']", "//td[contains(.,'Assembly')]", "index.php?cmd=inventing", 0);
+		Helper.worldDoAction("//img[@title='Vault']", "//td[contains(.,'Engineering')]", "index.php?cmd=hellforge", 0);
+		Helper.worldDoAction("//img[@title='Cloning Facility']", "//td[.='Medical Center']", "index.php?cmd=world&subcmd=heal", 0);
+	},
+	
+	worldDoAction: function(validateNode, idNode, newUrl, needId) {
+		var vNode = System.findNode(validateNode);
+		var iNode = System.findNode(idNode);
+		if (vNode && iNode)
+			if (needId)
+				window.location = newUrl + iNode.value;
+			else
+				window.location = newUrl;
 	}
 
 };
