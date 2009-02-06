@@ -5331,9 +5331,11 @@ var Helper = {
 	worldMapAction: function() {
 		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='stairway_id']", "index.php?cmd=world&subcmd=usestairs&stairway_id=", 1);
 		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='shop_id']", "index.php?cmd=shop&shop_id=", 1);
-		Helper.worldDoAction("//img[@title='Vault']", "//td[contains(.,'Assembly')]", "index.php?cmd=inventing", 0);
-		Helper.worldDoAction("//img[@title='Vault']", "//td[contains(.,'Engineering')]", "index.php?cmd=hellforge", 0);
-		Helper.worldDoAction("//img[@title='Cloning Facility']", "//td[.='Medical Center']", "index.php?cmd=world&subcmd=heal", 0);
+		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='inventing']", "index.php?cmd=inventing", 0);
+		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='hellforge']", "index.php?cmd=hellforge", 0);
+		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='bank']", "index.php?cmd=bank", 0);
+		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='crafting']", "index.php?cmd=crafting", 0);
+		Helper.worldDoAction("//img[@title='Cloning Facility']", "//input[@value='heal']", "index.php?cmd=world&subcmd=heal", 0);
 	},
 	
 	worldDoAction: function(validateNode, idNode, newUrl, needId) {
