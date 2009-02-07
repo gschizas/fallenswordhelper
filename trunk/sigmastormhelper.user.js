@@ -145,7 +145,7 @@ var Helper = {
 		confirmAlert.style.display = 'block';
 		confirmAlert.style.zIndex = '90';
 		confirmAlert.style.filter = 'alpha';
-		confirmAlert.style.opacity = '0.7';
+		confirmAlert.style.opacity = '0.9';
 		confirmAlert.style.background = 'black';
 		confirmAlert.style.color = 'white';
 		confirmAlert.style.border = 'ridge';
@@ -154,7 +154,7 @@ var Helper = {
 			'</div><div style="position:absolute;top:0px;right:0px">' +
 			'<input type="button" id="Helper:AutoUpdateOk" value="Ok" class="custombutton">' +
 			'&nbsp;<input type="button" id="Helper:AutoUpdateCancel" value="Cancel" class="custombutton"></div></div>' +
-			'<div style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
+			'<div id="Helper:Output" style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
 		document.body.insertBefore(confirmAlert, document.body.firstChild);
 		document.getElementById("Helper:AutoUpdateOk").addEventListener("click", Helper.autoUpdateConfirmOk, true);
 		document.getElementById("Helper:AutoUpdateOk").setAttribute("newVersion", newVersion);
@@ -166,25 +166,31 @@ var Helper = {
 		GM_setValue("currentVersion", newVersion);
 		Helper.autoUpdatePreloadFiles(null, ["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
 	},
+
 	autoUpdateConfirmCancel: function(evt) {
 		var confirmAlert=document.getElementById("Helper:ConfirmAlert");
 		confirmAlert.style.display="none";
 		confirmAlert.visibility="hidden";
 	},
+
 	autoUpdatePreloadFiles: function(responseDetails, scriptArray) {
+		var output = document.getElementById("Helper:Output");
 		if (responseDetails) {
 			GM_log("Status = " + responseDetails.status)
 		}
 		else {
-			GM_log("Preloading scripts...");
+			output.innerHTML = "<br/>Preloading scripts...<br/><br/>"
 		}
 		if (scriptArray.length==0) {
-			GM_log("Done preloading, opening install dialog.");
+			output.innerHTML += "<br/>Done preloading, opening install dialog.";
 			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/sigmastormhelper.user.js");
+			var confirmAlert=document.getElementById("Helper:ConfirmAlert");
+			confirmAlert.style.display="none";
+			confirmAlert.visibility="hidden";
 			return;
 		}
 		var scriptName=scriptArray.shift();
-		GM_log("Loading " + scriptName);
+		output.innerHTML += "<br/>Loading " + scriptName;
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
@@ -1619,7 +1625,7 @@ var Helper = {
 					monsterText.style.color = 'yellow';
 				if (monsterText.textContent.match(/\(HK\)/i))
 					monsterText.style.color = 'red';
-				
+
 				monster.id = "aLink" + (i + 1);
 				monster.parentNode.innerHTML += "<font style='font-size:8px'>" + (i+1) + "</font>";
 			}
@@ -2035,7 +2041,7 @@ var Helper = {
 			return false;
 		}
 
-		sendType = isMass?"Send as Mass":"Send";
+		sendType = isMass?"Send As Mass":"Send";
 
 		GM_xmlhttpRequest({
 			method: 'POST',
@@ -3466,8 +3472,8 @@ var Helper = {
 		}
 
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>'+
-			'<td nobr><b>&nbsp;Online Players</b></td>' + 
-			refreshButton + 
+			'<td nobr><b>&nbsp;Online Players</b></td>' +
+			refreshButton +
 			'</tr>' +
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
@@ -3482,11 +3488,11 @@ var Helper = {
 	},
 
 	parseOnlinePlayersStart: function() {
-	
+
 		// set timer to redisplay the [refresh] button
 		var now=(new Date()).getTime();
 		GM_setValue("lastOnlineCheck", now.toString());
-		
+
 		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
 		refreshButton.style.visibility = "hidden";
 
@@ -3884,7 +3890,7 @@ var Helper = {
 		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
-			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel" || 
+			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel" ||
 			headerClicked=="hp") {
 			targetInventory.items.sort(Helper.numberSort)
 		}
@@ -5225,9 +5231,9 @@ var Helper = {
 		if (guildEnmy.indexOf(txt.toLowerCase())!=-1) return "enemy";
 		return "";
 	},
-	
+
 	displayMiniMap: function() {
-	
+
 		var miniMap = document.getElementById("miniMap");
 		if (!miniMap) {
 			miniMap = document.createElement("div");
@@ -5239,11 +5245,11 @@ var Helper = {
 			miniMap.style.zIndex = '90';
 			miniMap.style.filter = "alpha";
 			miniMap.style.opacity = "0.9";
-			
+
 			var objBody = document.getElementsByTagName("body").item(0);
 			objBody.insertBefore(miniMap, objBody.firstChild);
 		}
-		
+
 		if (miniMap.style.display != "") {
 			if (Helper.levelName == GM_getValue("miniMapName")) {
 				miniMap.innerHTML = GM_getValue("miniMapSource");
@@ -5255,7 +5261,7 @@ var Helper = {
 		} else
 			miniMap.style.display = "none";
 	},
-	
+
 	loadMiniMap: function(responseText) {
 		var size = 20;
 		var miniMap = document.getElementById("miniMap");
@@ -5267,14 +5273,14 @@ var Helper = {
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
 		doc = doc.replace(/width="65"/g, 'width="' + size + '"').replace(/height="65"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
-		
+
 		Helper.markPlayerOnMiniMap();
 		miniMap.style.display = "";
-		
+
 		GM_setValue("miniMapName", Helper.levelName);
 		GM_setValue("miniMapSource", doc);
 	},
-	
+
 	markPlayerOnMiniMap: function() {
 		var miniMap = document.getElementById("miniMap");
 		var posit = Helper.position();
@@ -5327,7 +5333,7 @@ var Helper = {
 		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
 		Helper.generateQuickLinkTable();
 	},
-	
+
 	worldMapAction: function() {
 		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='stairway_id']", "index.php?cmd=world&subcmd=usestairs&stairway_id=", 1);
 		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='shop_id']", "index.php?cmd=shop&shop_id=", 1);
@@ -5337,7 +5343,7 @@ var Helper = {
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='crafting']", "index.php?cmd=crafting", 0);
 		Helper.worldDoAction("//img[@title='Cloning Facility']", "//input[@value='heal']", "index.php?cmd=world&subcmd=heal", 0);
 	},
-	
+
 	worldDoAction: function(validateNode, idNode, newUrl, needId) {
 		var vNode = System.findNode(validateNode);
 		var iNode = System.findNode(idNode);
