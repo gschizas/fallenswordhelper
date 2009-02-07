@@ -181,7 +181,7 @@ var Helper = {
 		confirmAlert.style.display = 'block';
 		confirmAlert.style.zIndex = '90';
 		confirmAlert.style.filter = 'alpha';
-		confirmAlert.style.opacity = '0.7';
+		confirmAlert.style.opacity = '0.9';
 		confirmAlert.style.background = 'black';
 		confirmAlert.style.color = 'white';
 		confirmAlert.style.border = 'ridge';
@@ -191,7 +191,7 @@ var Helper = {
 			'</div><div style="position:absolute;top:0px;right:0px">' +
 			'<input type="button" id="Helper:AutoUpdateOk" value="Ok" class="custombutton">' +
 			'&nbsp;<input type="button" id="Helper:AutoUpdateCancel" value="Cancel" class="custombutton"></div></div>' +
-			'<div style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
+			'<div id="Helper:Output" style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
 		document.body.insertBefore(confirmAlert, document.body.firstChild);
 		document.getElementById("Helper:AutoUpdateOk").addEventListener("click", Helper.autoUpdateConfirmOk, true);
 		document.getElementById("Helper:AutoUpdateOk").setAttribute("newVersion", newVersion);
@@ -210,21 +210,24 @@ var Helper = {
 		confirmAlert.visibility="hidden";
 	},
 
-
 	autoUpdatePreloadFiles: function(responseDetails, scriptArray) {
+		var output = document.getElementById("Helper:Output");
 		if (responseDetails) {
 			GM_log("Status = " + responseDetails.status)
 		}
 		else {
-			GM_log("Preloading scripts...");
+			output.innerHTML = "<br/>Preloading scripts...<br/><br/>"
 		}
 		if (scriptArray.length==0) {
-			GM_log("Done preloading, opening install dialog.");
+			output.innerHTML += "<br/>Done preloading, opening install dialog.";
 			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js");
+			var confirmAlert=document.getElementById("Helper:ConfirmAlert");
+			confirmAlert.style.display="none";
+			confirmAlert.visibility="hidden";
 			return;
 		}
 		var scriptName=scriptArray.shift();
-		GM_log("Loading " + scriptName);
+		output.innerHTML += "<br/>Loading " + scriptName;
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
@@ -1969,7 +1972,10 @@ var Helper = {
 			return false;
 		}
 
-		sendType = isMass?"Send as Mass":"Send";
+		sendType = isMass?"Send As Mass":"Send";
+
+//		window.alert(sendType);
+//		return;
 
 		GM_xmlhttpRequest({
 			method: 'POST',
@@ -3077,7 +3083,7 @@ var Helper = {
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
 				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
-			
+
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
 			if (profileInventory) {
