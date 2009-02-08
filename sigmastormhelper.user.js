@@ -3593,6 +3593,7 @@ var Helper = {
 		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
 		if (!evt) {
 			var sortCriteria = System.getValueJSON("onlinePlayerSortBy");
+			if (!sortCriteria) return;
 			var sortType = sortCriteria["sortType"];
 			Helper.sortBy = sortCriteria["sortBy"];
 			Helper.sortAsc = sortCriteria["sortAsc"];
