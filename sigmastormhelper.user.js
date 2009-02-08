@@ -3484,6 +3484,7 @@ var Helper = {
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
 
 		Helper.onlinePlayers = System.getValueJSON("onlinePlayers");
+		Helper.sortOnlinePlayersTable();
 		Helper.generateOnlinePlayersTable();
 	},
 
@@ -3508,44 +3509,58 @@ var Helper = {
 		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=3 and td[1]/a]", doc);
 		var maxPage = parseInt(System.findNode("//table[@width='400']//td[input]", doc).textContent.replace(/\D/g, ""));
 		output.innerHTML+=callback.page + " ";
-		for (var i=0; i<playerRows.length; i++) {
-			var newPlayer = {
-				guildId: (callback.page - 1) * 15 + i + 1,
-				id: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"").replace(/^2/,"")),
-				name: playerRows[i].cells[0].textContent,
-				level: parseInt(playerRows[i].cells[1].textContent)
+		if (playerRows)
+			for (var i=0; i<playerRows.length; i++) {
+				var newPlayer = {
+					guildId: (callback.page - 1) * 15 + i + 1,
+					id: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"").replace(/^2/,"")),
+					name: playerRows[i].cells[0].textContent,
+					level: parseInt(playerRows[i].cells[1].textContent)
+				}
+				Helper.onlinePlayers.players.push(newPlayer);
 			}
-			Helper.onlinePlayers.players.push(newPlayer);
-		}
 		if (callback.page<maxPage/*-maxPage+15*/) {
 			var newPage = (callback.page == 1) ? Math.round(2 * maxPage / 3) : (callback.page+1);
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
 		}
 		else {
 			GM_setValue("onlinePlayers", JSON.stringify(Helper.onlinePlayers));
+			Helper.sortOnlinePlayersTable();
 			Helper.generateOnlinePlayersTable();
 		}
 	},
 
 	generateOnlinePlayersTable: function() {
 		if (!Helper.onlinePlayers) return;
+		var minLvl = GM_getValue("onlinePlayerMinLvl", 1);
+		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 1000);
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
-		var result='<table id="Helper:OnlinePlayersTable"><tr>' +
+		var result=
+			'<div align=right><form id=Helper:onlinePlayerFilterForm>' +
+			'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.onlinePlayerMinLvl" id="Helper.onlinePlayerMinLvl" style=custominput/> ' +
+			'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.onlinePlayerMaxLvl" id="Helper.onlinePlayerMaxLvl" style=custominput/> ' +
+			'<input id="Helper:onlinePlayerFilter" class="custombutton" type="submit" value="Filter"/>' + 
+			'<input id="Helper:onlinePlayerFilterReset" class="custombutton" type="button" value="Reset"/></form></div>' + 
+			'<table id="Helper:OnlinePlayersTable"><tr>' +
 			'<th align="left" sortkey="guildId" sortType="number">Index</th>' +
 			'<th sortkey="name">Name</th>' +
 			'<th sortkey="level" sortType="number">Level</th></tr>';
 		var player, color;
 		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
 			player=Helper.onlinePlayers.players[i];
-
-			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
-				'<td>' + player.guildId + '</td>'+
-				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
-				'<td align="right">' + player.level + '</td>' +
-				'</tr>';
+			if (player.level >= minLvl && player.level <= maxLvl)
+				result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
+					'<td>' + player.guildId + '</td>'+
+					'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
+					'<td align="right">' + player.level + '</td>' +
+					'</tr>';
 		}
 		result+='</table>';
 		output.innerHTML=result;
+		
+		// document.getElementById("Helper:onlinePlayerFilter").addEventListener('click', Helper.setOnlinePlayerFilter, true);
+		document.getElementById("Helper:onlinePlayerFilterReset").addEventListener('click', Helper.resetOnlinePlayerFilter, true);
+		document.getElementById("Helper:onlinePlayerFilterForm").addEventListener('submit', Helper.setOnlinePlayerFilter, true);
 
 		var theTable=document.getElementById('Helper:OnlinePlayersTable');
 		for (var i=0; i<theTable.rows[0].cells.length; i++) {
@@ -3555,21 +3570,47 @@ var Helper = {
 			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
 		}
 	},
+	
+	setOnlinePlayerFilter: function() {
+		var onlinePlayerMinLvl = document.getElementById("Helper.onlinePlayerMinLvl");
+		var onlinePlayerMaxLvl = document.getElementById("Helper.onlinePlayerMaxLvl");
+		if (onlinePlayerMinLvl.value == '') onlinePlayerMinLvl.value = '0';
+		if (onlinePlayerMaxLvl.value == '') onlinePlayerMaxLvl.value = '1000';
+		if (!isNaN(onlinePlayerMinLvl.value))
+			GM_setValue("onlinePlayerMinLvl", parseInt(onlinePlayerMinLvl.value));
+		if (!isNaN(onlinePlayerMaxLvl.value))
+			GM_setValue("onlinePlayerMaxLvl", parseInt(onlinePlayerMaxLvl.value));
+		Helper.generateOnlinePlayersTable();
+	},
+	
+	resetOnlinePlayerFilter: function() {
+		GM_setValue("onlinePlayerMinLvl", 1);
+		GM_setValue("onlinePlayerMaxLvl", 1000);
+		Helper.generateOnlinePlayersTable();
+	},
 
 	sortOnlinePlayersTable: function(evt) {
 		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
-		var headerClicked = evt.target.getAttribute("sortKey");
-		var sortType = evt.target.getAttribute("sortType");
-		if (!sortType) sortType="string";
-		GM_log(headerClicked);
-		// GM_log(Helper.sortBy);
-		GM_log(sortType);
-		// numberSort
-		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
+		if (!evt) {
+			var sortCriteria = System.getValueJSON("onlinePlayerSortBy");
+			var sortType = sortCriteria["sortType"];
+			Helper.sortBy = sortCriteria["sortBy"];
+			Helper.sortAsc = sortCriteria["sortAsc"];
+		} else {
+			var headerClicked = evt.target.getAttribute("sortKey");
+			var sortType = evt.target.getAttribute("sortType");
+			if (!sortType) sortType="string";
+			GM_log(headerClicked);
+			// GM_log(Helper.sortBy);
+			GM_log(sortType);
+			// numberSort
+			if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+			if (Helper.sortBy && Helper.sortBy==headerClicked) {
+				Helper.sortAsc=!Helper.sortAsc;
+			}
+			Helper.sortBy=headerClicked;
 		}
-		Helper.sortBy=headerClicked;
+		GM_setValue("onlinePlayerSortBy", JSON.stringify({"sortBy": Helper.sortBy, "sortType": sortType, "sortAsc": Helper.sortAsc}));
 
 		switch(sortType) {
 			case "string":
@@ -5340,7 +5381,7 @@ var Helper = {
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='inventing']", "index.php?cmd=inventing", 0);
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='hellforge']", "index.php?cmd=hellforge", 0);
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='bank']", "index.php?cmd=bank", 0);
-		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='crafting']", "index.php?cmd=crafting", 0);
+		Helper.worldDoAction("//img[@title='Augmentation Terminal']", "//input[@value='crafting']", "index.php?cmd=crafting", 0);
 		Helper.worldDoAction("//img[@title='Cloning Facility']", "//input[@value='heal']", "index.php?cmd=world&subcmd=heal", 0);
 	},
 
