@@ -5355,14 +5355,15 @@ var Helper = {
 			guildEnmy="";
 			GM_setValue("guildEnmy", guildEnmy);
 		}
-		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
-		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
-		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
-		if (guildEnmy.indexOf(txt.toLowerCase())!=-1) return "enemy";
+		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		txt = txt.toLowerCase().replace(/\s\s*/g," ");
+		if (guildSelf.indexOf(txt)!=-1) return "self";
+		if (guildFrnd.indexOf(txt)!=-1) return "friendly";
+		if (guildPast.indexOf(txt)!=-1) return "old";
+		if (guildEnmy.indexOf(txt)!=-1) return "enemy";
 		return "";
 	},
 
