@@ -1494,7 +1494,7 @@ var Helper = {
 				'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
-				
+
 		}
 	},
 
@@ -2980,7 +2980,7 @@ var Helper = {
 				var warning = document.createElement('span');
 				var color = "";
 				var changeAppearance = true;
-				var relationship = Helper.guildRelationship(aLink.text)
+				var relationship = Helper.guildRelationship(aLink.text);
 				switch (relationship) {
 					case "self":
 						var settings="guildSelfMessage";
@@ -3528,8 +3528,8 @@ var Helper = {
 			'<div align=right><form id=Helper:onlinePlayerFilterForm>' +
 			'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.onlinePlayerMinLvl" id="Helper.onlinePlayerMinLvl" style=custominput/> ' +
 			'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.onlinePlayerMaxLvl" id="Helper.onlinePlayerMaxLvl" style=custominput/> ' +
-			'<input id="Helper:onlinePlayerFilter" class="custombutton" type="submit" value="Filter"/>' + 
-			'<input id="Helper:onlinePlayerFilterReset" class="custombutton" type="button" value="Reset"/></form></div>' + 
+			'<input id="Helper:onlinePlayerFilter" class="custombutton" type="submit" value="Filter"/>' +
+			'<input id="Helper:onlinePlayerFilterReset" class="custombutton" type="button" value="Reset"/></form></div>' +
 			'<table id="Helper:OnlinePlayersTable"><tr>' +
 			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
 			'<th sortkey="name">Name</th>' +
@@ -3547,7 +3547,7 @@ var Helper = {
 		}
 		result+='</table>';
 		output.innerHTML=result;
-		
+
 		// document.getElementById("Helper:onlinePlayerFilter").addEventListener('click', Helper.setOnlinePlayerFilter, true);
 		document.getElementById("Helper:onlinePlayerFilterReset").addEventListener('click', Helper.resetOnlinePlayerFilter, true);
 		document.getElementById("Helper:onlinePlayerFilterForm").addEventListener('submit', Helper.setOnlinePlayerFilter, true);
@@ -3560,7 +3560,7 @@ var Helper = {
 			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
 		}
 	},
-	
+
 	setOnlinePlayerFilter: function() {
 		var onlinePlayerMinLvl = document.getElementById("Helper.onlinePlayerMinLvl");
 		var onlinePlayerMaxLvl = document.getElementById("Helper.onlinePlayerMaxLvl");
@@ -3572,7 +3572,7 @@ var Helper = {
 			GM_setValue("onlinePlayerMaxLvl", parseInt(onlinePlayerMaxLvl.value));
 		Helper.generateOnlinePlayersTable();
 	},
-	
+
 	resetOnlinePlayerFilter: function() {
 		GM_setValue("onlinePlayerMinLvl", 1);
 		GM_setValue("onlinePlayerMaxLvl", 1000);
@@ -5529,14 +5529,15 @@ var Helper = {
 			guildEnmy="";
 			GM_setValue("guildEnmy", guildEnmy);
 		}
-		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").split(",");
-		if (guildSelf.indexOf(txt.toLowerCase())!=-1) return "self";
-		if (guildFrnd.indexOf(txt.toLowerCase())!=-1) return "friendly";
-		if (guildPast.indexOf(txt.toLowerCase())!=-1) return "old";
-		if (guildEnmy.indexOf(txt.toLowerCase())!=-1) return "enemy";
+		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
+		txt = txt.toLowerCase().replace(/\s\s*/g," ");
+		if (guildSelf.indexOf(txt)!=-1) return "self";
+		if (guildFrnd.indexOf(txt)!=-1) return "friendly";
+		if (guildPast.indexOf(txt)!=-1) return "old";
+		if (guildEnmy.indexOf(txt)!=-1) return "enemy";
 		return "";
 	},
 
