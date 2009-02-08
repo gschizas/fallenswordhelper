@@ -3103,7 +3103,10 @@ var Helper = {
 						if (profileInventory.rows[i >> 2]) profileInventoryBox[i]=profileInventory.rows[i >> 2].cells[i % 4];
 					}
 					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
-					if (profileInventoryBoxItem[i]) profileInventoryBoxID[i] = profileInventoryIDRE(profileInventoryBoxItem[i].firstChild.getAttribute("href"))[1];
+					if (profileInventoryBoxItem[i]) {
+						var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
+						if (itemHREF && profileInventoryIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+					}
 				}
 
 				var newRow;
@@ -3111,7 +3114,7 @@ var Helper = {
 				for (var i=0;i<12;i++) {
 					if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
 					if ((i % 4==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
-					if (profileInventoryBoxItem[i]) {
+					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
 						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
 								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
