@@ -1487,6 +1487,15 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
+
+		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+		if (mapName) {
+			mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
+				'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
+				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
+				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
+				
+		}
 	},
 
 	injectWorldMap: function() {
