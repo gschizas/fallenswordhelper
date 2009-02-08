@@ -404,6 +404,9 @@ var Helper = {
 			case "quicklinkmanager":
 				Helper.injectQuickLinkManager();
 				break;
+			case "monsterlog":
+				Helper.injectMonsterLog();
+				break;
 			}
 			break;
 		case "points":
@@ -1655,9 +1658,11 @@ var Helper = {
 		var armorNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'Armor:')]/following-sibling::td", creatureInfo);
 		var damageNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'Damage:')]/following-sibling::td", creatureInfo);
 		var hitpointsNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'HP:')]/following-sibling::td", creatureInfo);
-		var goldNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'Gold:')]/following-sibling::td", creatureInfo);
+		var goldNode = System.findNode("//table[@width='350']/tbody/tr/td[contains(.,'Credits:')]/following-sibling::td", creatureInfo);
 		var enhanceNodesXpath = "//table[@width='350']/tbody/tr[contains(td,'Enhancements')]/following-sibling::*[td/font[@color='#333333']]"
 		var enhanceNodes = System.findNodes(enhanceNodesXpath, creatureInfo);
+		var imageNode = System.findNode("//img[contains(@src,'/sigma2/creatures/')]", creatureInfo);
+		var nameNode = imageNode.nextSibling.nextSibling;
 
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
@@ -1666,6 +1671,10 @@ var Helper = {
 		var killButtons=System.findNode("tbody/tr[td/input]", statsNode);
 		var killButtonHeader=System.findNode("tbody/tr[contains(td/@style,'actions_head_bg.gif')]/following-sibling::tr", statsNode);
 		var killButtonParent=killButtonHeader.parentNode.parentNode;
+		if (GM_getValue("showMonsterLog"))
+			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent, 
+				"key4":attackNode.textContent, "key5":defenseNode.textContent, "key6":armorNode.textContent, "key7":damageNode.textContent, 
+				"key8":hitpointsNode.textContent, "key9":goldNode.textContent});
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
 		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
@@ -1683,6 +1692,79 @@ var Helper = {
 		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
 		callback.setAttribute("mouseOverWidth", "400");
 		callback.addEventListener("mouseover", Helper.clientTip, true);
+	},
+	
+	pushMonsterInfo: function(monster) {
+		// name, img, cls, lvl, atk, def, arm, dmg, hp, gold
+		var name = monster.key0;
+		var monsterLog = System.getValueJSON("monsterLog");
+		if (!monsterLog) monsterLog = {};
+		if (!monsterLog[name]) {
+			monsterLog[name] = {"min":{}, "max":{}};
+			for (i = 1; i < 10; i++) {
+				monsterLog[name]["min"]["key" + i] = 1e+100;
+				monsterLog[name]["max"]["key" + i] = 0;
+			}
+			//monsterLog[name]["min"] = {"cls":1e+100, "lvl":1e+100, "atk":1e+100, "def":1e+100, "arm":1e+100, "dmg":1e+100, "hp":1e+100, "gold":1e+100};
+			//monsterLog[name]["max"] = {"cls":0, "lvl":0, "atk":0, "def":0, "arm":0, "dmg":0, "hp":0, "gold":0};
+		}
+		for (i = 1; i < 4; i++)
+			monsterLog[name]["min"]["key" + i] = monster["key" + i];
+		for (i = 4; i < 10; i++) {
+			var value = parseInt(monster["key" + i]);
+			monsterLog[name]["min"]["key" + i] = monsterLog[name]["min"]["key" + i] < value
+				? monsterLog[name]["min"]["key" + i] : value;
+			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value
+				? monsterLog[name]["max"]["key" + i] : value;
+		}
+		GM_setValue("monsterLog", JSON.stringify(monsterLog));
+	},
+	
+	injectMonsterLog: function() {
+		var monsterLog = System.getValueJSON("monsterLog");
+		var content=Layout.notebookContent();
+		content.innerHTML = 'No monster information! Please enable monster log and travel a bit to see the world';
+		if (!monsterLog) return;
+		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
+			'<td width="90%" nobr align=center><b>&nbsp;Monster Information</b></td>'+
+			'<td width="10%" nobr>[<span id="Helper.clearMonsterLog">Clear</span>]</td>'+
+			'</tr>' +
+			'</table>'+
+			'<table id="Helper:MonsterInfo" cellspacing="0" cellpadding="0" border="0" ><tr>' +
+			'<th width="25%" align="left" sortkey="name">Name</th>' +
+			'<th align="center">Img</th>' +
+			'<th align="center" sortkey="class">Class</th>' +
+			'<th align="center" sortkey="Level" sorttype="number">Lvl</th>' +
+			'<th align="center">Min Atk</th>' +
+			'<th align="center">Max Atk</th>' +
+			'<th align="center">Min Def</th>' +
+			'<th align="center">Max Def</th>' +
+			'<th align="center">Min Arm</th>' +
+			'<th align="center">Max Arm</th>' +
+			'<th align="center">Min Dmg</th>' +
+			'<th align="center">Max Dmg</th>' +
+			'<th align="center">Min HP</th>' +
+			'<th align="center">Max HP</th>' +
+			'<th align="center">Min Cr</th>' +
+			'<th align="center">Max Cr</th>' +
+			'</tr>';
+		for (var name in monsterLog) {
+			result += '<tr><td align="left">' + name + '</td>';
+			result += '<td align="center"><img width=40 height=40 src="' + monsterLog[name]["min"]["key1"] + '"/></td>';
+			for (i = 2; i < 4; i++)
+				result += '<td align="center">' + monsterLog[name]["min"]["key"+i] + '</td>';
+			for (i = 4; i < 10; i++)
+				result += '<td align="center">' + monsterLog[name]["min"]["key"+i] + '</td>' +
+					'<td align="center">' + monsterLog[name]["max"]["key"+i] + '</td>';
+		}
+		result += "</table>";
+		content.innerHTML = result;
+		document.getElementById("Helper.clearMonsterLog").addEventListener("click", Helper.clearMonsterLog, true);
+	},
+	
+	clearMonsterLog: function() {
+		GM_setValue("monsterLog", "");
+		window.location="index.php?cmd=notepad&subcmd=monsterlog";
 	},
 
 	killedMonster: function(responseText, callback) {
@@ -5083,6 +5165,9 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Show Monster Log' + Helper.helpLink('Show Monster Log', 'This will show the monster log for each monster you see when you travel. This requires Show Creature Info enable!') +
+				':</td><td><input name="showMonsterLog" type="checkbox" value="on"' + (GM_getValue("showMonsterLog")?" checked":"") + '>'+
+				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 			'<tr><td align="right">Hide <small>Taulin Rad Lands</small> Portal' + Helper.helpLink('Hide Taulin Rad Lands Portal', 'This will hide the Taulin Rad Lands portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Footprints Color:</td><td><input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
@@ -5123,6 +5208,7 @@ var Helper = {
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
+		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
 
 		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', Helper.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', Helper.toggleVisibilty, true);
@@ -5187,6 +5273,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 
 		System.saveValueForm(oForm, "showCombatLog");
+		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
@@ -5212,6 +5299,10 @@ var Helper = {
 
 	showLogs: function(evt) {
 		document.location=System.server + "index.php?cmd=notepad&subcmd=showlogs"
+	},
+	
+	showMonsterLogs: function(evt) {
+		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog"
 	},
 
 	injectNotepadShowLogs: function() {
