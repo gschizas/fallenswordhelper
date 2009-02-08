@@ -1066,6 +1066,7 @@ var Helper = {
 
 	injectAdvisor: function() {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
+		if (!titleCells) return;
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
 			cell.style.textDecoration="underline";
@@ -1087,14 +1088,14 @@ var Helper = {
 			var theRow=list.rows[i];
 			Helper.advisorRows[i-1] = {
 				'Member': theRow.cells[0].textContent,
-				'GoldFromDeposits': theRow.cells[1].textContent,
-				'GoldFromTax': theRow.cells[2].textContent,
-				'GoldTotal': theRow.cells[3].textContent,
-				'FSPs': theRow.cells[4].textContent,
+				'CreditsFromDeposits': theRow.cells[1].textContent,
+				'CreditsFromTax': theRow.cells[2].textContent,
+				'CreditsTotal': theRow.cells[3].textContent,
+				'Crystals': theRow.cells[4].textContent,
 				'SkillsCast': theRow.cells[5].textContent,
-				'GroupsCreated': theRow.cells[6].textContent,
-				'GroupsJoined': theRow.cells[7].textContent,
-				'RelicsCaptured': theRow.cells[8].textContent,
+				'SquadsCreated': theRow.cells[6].textContent,
+				'SquadsJoined': theRow.cells[7].textContent,
+				'ArtifactsCaptured': theRow.cells[8].textContent,
 				'XPContrib': theRow.cells[9].textContent
 			};
 		}
@@ -1128,14 +1129,14 @@ var Helper = {
 			var r = Helper.advisorRows[i];
 			result += '<tr class="HelperTableRow'+(1+i % 2)+'">'+
 			'<td> '+r.Member+'</td>'+
-			'<td align="center">'+r.GoldFromDeposits+'</td>'+
-			'<td align="center">'+r.GoldFromTax+'</td>'+
-			'<td align="center">'+r.GoldTotal+'</td>'+
-			'<td align="center">'+r.FSPs+'</td>'+
+			'<td align="center">'+r.CreditsFromDeposits+'</td>'+
+			'<td align="center">'+r.CreditsFromTax+'</td>'+
+			'<td align="center">'+r.CreditsTotal+'</td>'+
+			'<td align="center">'+r.Crystals+'</td>'+
 			'<td align="center">'+r.SkillsCast+'</td>'+
-			'<td align="center">'+r.GroupsCreated+'</td>'+
-			'<td align="center">'+r.GroupsJoined+'</td>'+
-			'<td align="center">'+r.RelicsCaptured+'</td>'+
+			'<td align="center">'+r.SquadsCreated+'</td>'+
+			'<td align="center">'+r.SquadsJoined+'</td>'+
+			'<td align="center">'+r.ArtifactsCaptured+'</td>'+
 			'<td align="center">'+r.XPContrib+'</td></tr>';
 		}
 		result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
