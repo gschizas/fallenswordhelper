@@ -66,6 +66,17 @@ var System = {
 		return doc;
 	},
 
+	formatDateTime: function(aDate) {
+		var result=aDate.toDateString()
+		result += " "
+		var hh=aDate.getHours();
+		if (hh<10) hh = "0" + hh;
+		var mm=aDate.getMinutes();
+		if (mm<10) mm = "0" + mm
+		result += hh + ":" + mm
+		return result
+	},
+
 	formatDate: function(dateFormat) {
 	    if (!this.valueOf()) return;
 		var months = ['January', 'February', 'March', 'April', 'May', 'June',
