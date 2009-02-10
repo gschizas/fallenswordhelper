@@ -1632,9 +1632,11 @@ var Helper = {
 		var killButtonHeader=System.findNode("tbody/tr[contains(td/@style,'actions_head_bg.gif')]/following-sibling::tr", statsNode);
 		var killButtonParent=killButtonHeader.parentNode.parentNode;
 		if (GM_getValue("showMonsterLog"))
-			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent, 
-				"key4":attackNode.textContent, "key5":defenseNode.textContent, "key6":armorNode.textContent, "key7":damageNode.textContent, 
+			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent,
+				"key4":attackNode.textContent, "key5":defenseNode.textContent, "key6":armorNode.textContent, "key7":damageNode.textContent,
 				"key8":hitpointsNode.textContent, "key9":goldNode.textContent});
+
+		var imageNode = System.findNode("//table[@bordercolor='#323236']/..", creatureInfo);
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
 		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
@@ -1649,11 +1651,11 @@ var Helper = {
 		killButtonParent.deleteRow(-1);
 		killButtonParent.deleteRow(-1);
 
-		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
-		callback.setAttribute("mouseOverWidth", "400");
+		callback.setAttribute("mouseOverText", "<table><tr><td valign=top>" + imageNode.innerHTML + "</td><td>" + statsNode.parentNode.innerHTML + "</td></tr></table>");
+		callback.setAttribute("mouseOverWidth", "600");
 		callback.addEventListener("mouseover", Helper.clientTip, true);
 	},
-	
+
 	pushMonsterInfo: function(monster) {
 		// name, img, cls, lvl, atk, def, arm, dmg, hp, gold
 		var name = monster.key0;
@@ -1679,7 +1681,7 @@ var Helper = {
 		}
 		GM_setValue("monsterLog", JSON.stringify(monsterLog));
 	},
-	
+
 	injectMonsterLog: function() {
 		var monsterLog = System.getValueJSON("monsterLog");
 		var content=Layout.notebookContent();
@@ -1721,7 +1723,7 @@ var Helper = {
 		content.innerHTML = result;
 		document.getElementById("Helper.clearMonsterLog").addEventListener("click", Helper.clearMonsterLog, true);
 	},
-	
+
 	clearMonsterLog: function() {
 		GM_setValue("monsterLog", "");
 		window.location="index.php?cmd=notepad&subcmd=monsterlog";
@@ -3533,8 +3535,8 @@ var Helper = {
 			'<div align=right><form id=Helper:onlinePlayerFilterForm>' +
 			'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.onlinePlayerMinLvl" id="Helper.onlinePlayerMinLvl" style=custominput/> ' +
 			'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.onlinePlayerMaxLvl" id="Helper.onlinePlayerMaxLvl" style=custominput/> ' +
-			'<input id="Helper:onlinePlayerFilter" class="custombutton" type="submit" value="Filter"/>' + 
-			'<input id="Helper:onlinePlayerFilterReset" class="custombutton" type="button" value="Reset"/></form></div>' + 
+			'<input id="Helper:onlinePlayerFilter" class="custombutton" type="submit" value="Filter"/>' +
+			'<input id="Helper:onlinePlayerFilterReset" class="custombutton" type="button" value="Reset"/></form></div>' +
 			'<table id="Helper:OnlinePlayersTable"><tr>' +
 			'<th align="left" sortkey="guildId" sortType="number">Index</th>' +
 			'<th sortkey="name">Name</th>' +
@@ -3551,7 +3553,7 @@ var Helper = {
 		}
 		result+='</table>';
 		output.innerHTML=result;
-		
+
 		// document.getElementById("Helper:onlinePlayerFilter").addEventListener('click', Helper.setOnlinePlayerFilter, true);
 		document.getElementById("Helper:onlinePlayerFilterReset").addEventListener('click', Helper.resetOnlinePlayerFilter, true);
 		document.getElementById("Helper:onlinePlayerFilterForm").addEventListener('submit', Helper.setOnlinePlayerFilter, true);
@@ -3564,7 +3566,7 @@ var Helper = {
 			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
 		}
 	},
-	
+
 	setOnlinePlayerFilter: function() {
 		var onlinePlayerMinLvl = document.getElementById("Helper.onlinePlayerMinLvl");
 		var onlinePlayerMaxLvl = document.getElementById("Helper.onlinePlayerMaxLvl");
@@ -3576,7 +3578,7 @@ var Helper = {
 			GM_setValue("onlinePlayerMaxLvl", parseInt(onlinePlayerMaxLvl.value));
 		Helper.generateOnlinePlayersTable();
 	},
-	
+
 	resetOnlinePlayerFilter: function() {
 		GM_setValue("onlinePlayerMinLvl", 1);
 		GM_setValue("onlinePlayerMaxLvl", 1000);
@@ -5192,7 +5194,7 @@ var Helper = {
 	showLogs: function(evt) {
 		document.location=System.server + "index.php?cmd=notepad&subcmd=showlogs"
 	},
-	
+
 	showMonsterLogs: function(evt) {
 		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog"
 	},
