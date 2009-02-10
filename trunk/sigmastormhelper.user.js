@@ -2670,7 +2670,7 @@ var Helper = {
 
 		var playerId = Layout.playerId();
 
-		var newRow, newCell, bidMinBuyoutCell, buyNowBuyoutCell,winningBidBuyoutCell;
+		var newRow, newCell, winningBidBuyoutCell;
 		for (var i=0;i<auctionTable.rows.length;i++) {
 			var aRow = auctionTable.rows[i];
 			if (i>0 && // the title row - ignore this
@@ -2706,34 +2706,9 @@ var Helper = {
 							playerListedItem = true;
 						}
 					}
-					var bidBuyoutTable = aRow.cells[4].firstChild.firstChild;
-					newRow = bidBuyoutTable.insertRow(1);
-					bidMinBuyoutCell = newRow.insertCell(0);
-					bidMinBuyoutCell.colSpan = "2";
-					bidMinBuyoutCell.align = "left";
-					// = newRow.insertCell(1);
-					newCell = newRow.insertCell(1);
-					buyNowBuyoutCell = newRow.insertCell(2);
-					buyNowBuyoutCell.colSpan = "2";
-					buyNowBuyoutCell.align = "right";
-					var bidCell = bidBuyoutTable.rows[0].cells[0];
-					var bidValue = parseInt(bidCell.textContent);
-					var buyoutCell = bidBuyoutTable.rows[0].cells[3];
-					var buyoutHTML = buyoutCell.innerHTML;
 					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
 						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-						winningBidBuyoutCell.innerHTML = '<br><span style="color:#ADB5B5;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
-					}
-					if (winningBidValue == "-" && !bidExistsOnItem && !playerListedItem) {
-						bidMinBuyoutCell.innerHTML = '<span style="color:#ADB5B5; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" title="Click to bid on this item" bidvalue="' + bidValue + '">Bid Now</span>&nbsp';
-					}
-					var buyoutValue = "-";
-					if (buyoutHTML != "-" && !playerListedItem) {
-						newCell.innerHTML = "&nbsp/&nbsp";
-						buyoutValue = (buyoutCell.textContent)*1;
-						buyNowBuyoutCell.innerHTML = '&nbsp<span style="color:#ADB5B5; cursor:pointer; text-decoration:underline;" findme="bidOnItem" linkto="auction' +
-							i + 'text" title="Click to buy this item now!" bidvalue="' + buyoutValue + '">Buy Now</span>';
+						winningBidBuyoutCell.innerHTML = '<span style="color:#ADB5B5;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
 					if (!playerListedItem) {
@@ -2743,13 +2718,6 @@ var Helper = {
 					}
 					var inputText = aRow.cells[6]
 				}
-			}
-		}
-		var bidOnItemList = System.findNodes("//span[@findme='bidOnItem']");
-		if (bidOnItemList) {
-			for (var i=0; i<bidOnItemList.length; i++) {
-				bidOnItemItem = bidOnItemList[i];
-				bidOnItemItem.addEventListener('click', Helper.bidOnItem, true);
 			}
 		}
 
@@ -2851,15 +2819,6 @@ var Helper = {
 		var searchInputTextField = System.findNode("//input[@name='search_text' and @class='custominput']");
 		searchInputTextField.value = searchText;
 		thisForm = searchInputTextField.form;
-		thisForm.submit();
-	},
-
-	bidOnItem: function(evt) {
-		var bidValue = evt.target.getAttribute("bidvalue");
-		var auctionLink = evt.target.getAttribute("linkto");
-		var textInput = System.findNode("//input[@id='" + auctionLink + "']");
-		textInput.value = bidValue;
-		thisForm = textInput.form;
 		thisForm.submit();
 	},
 
