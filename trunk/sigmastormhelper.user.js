@@ -2176,19 +2176,11 @@ var Helper = {
 			var index	= r-48;
 			var linkObj	= Helper.getMonster(index);
 			if (linkObj!=null) {
-				var killStyle = GM_getValue("killAllAdvanced");
-				//kill style off
-				if (killStyle == "off") {
-					window.location = linkObj.href
-				}
-				//kill style single
-				if (killStyle == "single") {
+				if (GM_getValue("quickKill")) {
 					Helper.killSingleMonster(index);
-				}1
-				//kill style type
-				if (killStyle == "type") {
-					var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
-					Helper.killSingleMonsterType(monsterType);
+				}
+				else {
+					window.location = linkObj.href
 				}
 			}
 			break;
