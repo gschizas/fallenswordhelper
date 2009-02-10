@@ -1587,6 +1587,9 @@ var Helper = {
 		var killButtonHeader=System.findNode("tbody/tr[contains(td,'Actions')]", statsNode);
 		var killButtonParent=killButtonHeader.parentNode;
 
+		var imageNode = System.findNode("//img[contains(@src, '/creatures/')]/..", creatureInfo);
+		var nameNode = System.findNode("//img[contains(@src, '/creatures/')]/../../following-sibling::tr[1]/td", creatureInfo);
+
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
 		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
 		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + Helper.characterAttack + "</span>)"
@@ -1597,8 +1600,11 @@ var Helper = {
 
 		killButtonParent.removeChild(killButtons);
 		killButtonParent.removeChild(killButtonHeader);
-		callback.setAttribute("mouseOverText", statsNode.parentNode.innerHTML);
-		callback.setAttribute("mouseOverWidth", "400");
+		callback.setAttribute("mouseOverText", "<table>" +
+			"<tr><td valign=top>" + imageNode.innerHTML + "</td>" +
+			"<td rowspan=2>" + statsNode.parentNode.innerHTML + "</td></tr>" +
+			"<tr><td align=center valign=top>" + nameNode.innerHTML + "</td></tr></table>");
+		callback.setAttribute("mouseOverWidth", "600");
 		callback.addEventListener("mouseover", Helper.clientTip, true);
 	},
 
