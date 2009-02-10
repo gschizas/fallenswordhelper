@@ -167,7 +167,7 @@ var Helper = {
 	autoUpdateConfirmOk: function(evt) {
 		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
 		GM_setValue("currentVersion", newVersion);
-		Helper.autoUpdatePreloadFiles(null, ["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
+		Helper.autoUpdatePreloadFiles(null, ["json2.js", "calfSystem.js", "ssLayout.js", "ssData.js"]);
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
