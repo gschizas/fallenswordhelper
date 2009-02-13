@@ -415,6 +415,7 @@ var Helper = {
 		case "points":
 			switch(subPageId) {
 			case "-":
+			case "shop":
 				Helper.storePlayerUpgrades();
 				break;
 			}
@@ -3130,40 +3131,36 @@ var Helper = {
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
 			var alliesTotal = GM_getValue("alliestotal");
-			var alliesParent = System.findNode("//b[.='Allies']/..");;
-			var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+			var alliesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/allies_head.jpg')]");;
+			var alliesTable = alliesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
 			var numberOfAllies = 0;
 			var startIndex = 0;
-			while (alliesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+			while (alliesTable.innerHTML.indexOf("player_id=", startIndex+1) != -1) {
 				numberOfAllies ++;
-				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+				startIndex = alliesTable.innerHTML.indexOf("player_id=",startIndex+1);
 			}
 			startIndex = 0;
-			while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
-				numberOfAllies ++;
-				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
-			}
-			alliesParent.innerHTML += "&nbsp<span style='color:#ADB5B5'>" + numberOfAllies + "</span>";
+			alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+				"<span style='color:#ADB5B5; font-size:x-small' >" + numberOfAllies + "</span>";
 			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesParent.innerHTML += "/<span style='color:#ADB5B5' findme='alliestotal'>" + alliesTotal + "</span>";
+				alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+					"/<span style='color:#ADB5B5; font-size:x-small' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
-			var enemiesParent = System.findNode("//b[.='Enemies']/..");
-			var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+			var enemiesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/enemies_head.jpg')]");
+			var enemiesTable = enemiesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
 			var numberOfEnemies = 0;
 			var startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+			while (enemiesTable.innerHTML.indexOf("player_id=", startIndex+1) != -1) {
 				numberOfEnemies ++;
-				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+				startIndex = enemiesTable.innerHTML.indexOf("player_id=",startIndex+1);
 			}
 			var startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
-				numberOfEnemies ++;
-				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
-			}
-			enemiesParent.innerHTML += "&nbsp;<span style='color:#ADB5B5'>" + numberOfEnemies + "</span>";
+			enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+				"&nbsp;<span style='color:#ADB5B5; font-size:x-small'>" + numberOfEnemies + "</span>";
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesParent.innerHTML += "/<span style='color:#ADB5B5' findme='enemiestotal'>" + enemiesTotal + "</span>";
+				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
 	},
@@ -4661,7 +4658,7 @@ var Helper = {
 		//textArea.rows=15;
 		textArea.cols=60;
 		textArea.id = "biotext";
-		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
+		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
@@ -4669,15 +4666,15 @@ var Helper = {
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#110011">Preview</td></tr>' +
 			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
-		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
+		var innerTable = System.findNode("//table[tbody/tr/td[contains(@background, 'sigma2/skin/header_updatebio.jpg')]]");
 		var crCount = 0;
 		var startIndex = 0;
 		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:#ADB5B5;'>Character count = </span><span findme='biolength' style='color:#ADB5B5;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:#ADB5B5;'>/</span><span findme='biototal' style='color:#ADB5B5;'>255</span>";
+		innerTable.rows[2].cells[0].innerHTML += "<div align=right><span style='color:#ADB5B5;'>Character count = </span><span findme='biolength' style='color:#ADB5B5;'>" +
+			(textArea.value.length + crCount) + "</span><span style='color:#ADB5B5;'>/</span><span findme='biototal' style='color:#ADB5B5;'>255</span></div>";
 
 		document.getElementById('biotext').addEventListener('keyup', Helper.updateBioCharacters, true);
 		System.xmlhttp("index.php?cmd=points", Helper.getTotalBioCharacters);
@@ -4814,12 +4811,12 @@ var Helper = {
 	storePlayerUpgrades: function() {
 		var alliesText = System.findNode("//td[.='+1 Max Allies']");
 		var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var alliesValueRE = /(\d+) \/ 115/;
+		var alliesValueRE = /(\d+) \/ 50/;
 		var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
 		GM_setValue("alliestotal",alliesValue+5);
 		var enemiesText = System.findNode("//td[.='+1 Max Enemies']");
 		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var enemiesValueRE = /(\d+) \/ 115/;
+		var enemiesValueRE = /(\d+) \/ 50/;
 		var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
 		GM_setValue("enemiestotal",enemiesValue+5);
 	},
