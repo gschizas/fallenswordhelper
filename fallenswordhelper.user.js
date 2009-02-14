@@ -45,7 +45,7 @@ var Helper = {
 		System.setDefault("guildFrndMessage", "yellow|Do not attack - Guild is friendly!");
 		System.setDefault("guildPastMessage", "gray|Do not attack - You've been in that guild once!");
 		System.setDefault("guildEnmyMessage", "red|Enemy guild. Attack at will!");
-		System.setDefault("killAllAdvanced", "off");
+
 		System.setDefault("hideKrulPortal", false);
 		System.setDefault("hideQuests", false);
 		System.setDefault("hideQuestNames", "");
@@ -1440,7 +1440,6 @@ var Helper = {
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
-		var killStyle = GM_getValue("killAllAdvanced");
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
@@ -3850,7 +3849,7 @@ var Helper = {
 
 	injectRecipeManager: function() {
 		var content=Layout.notebookContent();
-		Helper.recipebook=System.getValueJSON("recipebook");
+		Helper.recipebook = System.getValueJSON("recipebook");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Recipe Manager</b></td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:RecipeManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
@@ -3865,10 +3864,10 @@ var Helper = {
 	},
 
 	parseInventingStart: function(){
-		Helper.recipebook = new Object;
-		Helper.recipebook.recipe = new Array();
+		Helper.recipebook = {};
+		Helper.recipebook.recipe = [];
 		var output=document.getElementById('Helper:RecipeManagerOutput')
-		output.innerHTML='<br/>Parsing inventing screen ...';
+		output.innerHTML='<br/>Parsing inventing screen ...<br/>';
 		System.xmlhttp('index.php?cmd=inventing&page=0', Helper.parseInventingPage, {"page": 0});
 	},
 
@@ -3878,25 +3877,22 @@ var Helper = {
 		var currentPage = callback.page;
 		var pages=System.findNode("//select[@name='page']", doc);
 		if (!pages) return;
-		var recipeTable = System.findNode("//table[tbody/tr/td[.='Recipe Name']]",doc);
+		var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
 
-		output.innerHTML+='Parsing page: '+currentPage +'...<br>';
+		output.innerHTML += 'Page ' + currentPage + '...<br/>';
 
-		if (recipeTable) {
-			for (var i=0; i<recipeTable.rows.length;i++) {
-				if (i!=0 && recipeTable.rows[i].cells[0].innerHTML.search("recipe") != -1) {
-					aRow = recipeTable.rows[i];
-					var innerTable = aRow.firstChild.firstChild;
-					var recipeImg = innerTable.rows[0].cells[0].innerHTML;
-					var recipeLink = innerTable.rows[0].cells[1].innerHTML;
-					var recipeName = innerTable.rows[0].cells[1].firstChild.innerHTML;
-					var recipe={
-						"img": recipeImg,
-						"link": recipeLink,
-						"name":recipeName};
-					output.innerHTML+="Found recipe: "+ recipeName +"<br>";
-					Helper.recipebook.recipe.push(recipe);
-				}
+		if (recipeRows) {
+			for (var i=0; i<recipeRows.length;i++) {
+				aRow = recipeRows[i];
+				var recipeLink = aRow.cells[1].firstChild.href;
+				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1]);
+				var recipe={
+					"img": aRow.cells[0].firstChild.src,
+					"link": recipeLink,
+					"name": aRow.cells[1].firstChild.textContent,
+					"id": recipeId};
+				output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
+				Helper.recipebook.recipe.push(recipe);
 			}
 		}
 
@@ -3905,7 +3901,57 @@ var Helper = {
 			System.xmlhttp('index.php?cmd=inventing&page='+nextPage, Helper.parseInventingPage, {"page": nextPage});
 		}
 		else {
+			output.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
+			// Helper.generateRecipeTable();
+			// GM_log(JSON.stringify(Helper.recipebook));
+			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + Helper.recipebook.recipe[0].id, Helper.parseRecipePage, {"recipeIndex": 0});
+		}
+	},
+
+	parseRecipeItemOrComponent: function(xpath, doc) {
+		var resultNodes = System.findNodes(xpath, doc);
+		var results = [];
+		if (resultNodes) {
+			for (var i=0; i<resultNodes.length; i++) {
+				var resultNode = resultNodes[i];
+				var mouseOver = resultNode.firstChild.firstChild.getAttribute("onmouseover");
+				var resultAmounts = resultNode.parentNode.nextSibling.textContent;
+				var mouseOverRX = mouseOver.match(/ajaxLoadCustom\((\d+),\s*-1,\s*2,\s*\d+,\s*\'([a-z0-9]+)\',\s*\'\'\)/i);
+				var result = {
+					img: resultNode.firstChild.firstChild.src,
+					id: mouseOverRX[1],
+					verify: mouseOverRX[2],
+					amountPresent: parseInt(resultAmounts.split("/")[0]),
+					amountNeeded: parseInt(resultAmounts.split("/")[1])
+				}
+				results.push(result);
+			}
+		}
+		return results;
+	},
+
+	parseRecipePage: function(responseText, callback) {
+		var doc=System.createDocument(responseText);
+		var output=document.getElementById('Helper:RecipeManagerOutput');
+		var currentRecipeIndex = callback.recipeIndex;
+		var recipe = Helper.recipebook.recipe[currentRecipeIndex];
+
+		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
+
+		recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
+		recipe.items = Helper.parseRecipeItemOrComponent("//td[contains(@background,'/inventory/2x3.gif')]", doc);
+		recipe.components  = Helper.parseRecipeItemOrComponent("//td[contains(@background,'/inventory/1x1mini.gif')]", doc);
+		recipe.target = Helper.parseRecipeItemOrComponent("//td[contains(@background,'/hellforge/2x3.gif')]", doc)[0];
+
+		var nextRecipeIndex = currentRecipeIndex+1;
+		if (nextRecipeIndex<Helper.recipebook.recipe.length) {
+			var nextRecipe = Helper.recipebook.recipe[nextRecipeIndex];
+			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + nextRecipe.id, Helper.parseRecipePage, {"recipeIndex": nextRecipeIndex});
+		}
+		else {
 			output.innerHTML+='Finished parsing ... formatting ...';
+			Helper.recipebook.lastUpdate = (new Date()).getTime();
+			GM_setValue("recipebook", JSON.stringify(Helper.recipebook));
 			Helper.generateRecipeTable();
 		}
 	},
@@ -3913,23 +3959,56 @@ var Helper = {
 	generateRecipeTable: function() {
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var result='<table id="Helper:RecipeTable"><tr>' +
-			'<th width="10"></th><th align="left" sortkey="img"></th>' +
-			'<th width="10"></th><th align="left" sortkey="name">Name</th>' +
-			'<th width="10"></th>';
+			'<th align="left" sortkey="name">Name</th>' +
+			'<th align="left">Items</th>' +
+			'<th align="left">Components</th>' +
+			'<th align="left">Target</th>' +
+			'</tr>';
+		if (!Helper.recipebook) return;
 
 		var hideRecipes=[];
 		if (GM_getValue("hideRecipes")) hideRecipes=GM_getValue("hideRecipeNames").split(",");
 
 		var recipe;
+		var c=0;
 		for (var i=0; i<Helper.recipebook.recipe.length;i++) {
 			recipe=Helper.recipebook.recipe[i];
+			c++;
 
 			if (hideRecipes.indexOf(recipe.name) == -1) {
-				result+='<tr>' +
-					'<td></td><td>' + recipe.img + '</td>' +
-					'<td></td><td>' + recipe.link + '</td>' +
-					'<td></td>' +
-					'</tr>';
+				result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
+					'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/>' + recipe.name + '</td>'
+				result += '<td>';
+				if (recipe.items) {
+					for (var j=0; j<recipe.items.length; j++) {
+						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded +
+							' <img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
+							recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'' +
+							recipe.items[j].verify + '\', \'\');" ' +
+							'src="' + recipe.items[j].img + '"/><br/>';
+					}
+				}
+				result += '</td>'
+				result += '<td>';
+				if (recipe.components) {
+					for (var j=0; j<recipe.components.length; j++) {
+						result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
+							' <img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
+							recipe.components[j].id + ', -1, 2, ' + Layout.playerId() + ', \'' +
+							recipe.components[j].verify + '\', \'\');" ' +
+							'src="' + recipe.components[j].img + '"/><br/>';
+					}
+				}
+				result += '</td>'
+				result += '<td>';
+				if (recipe.target) {
+					result += '<img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
+						recipe.target.id + ', -1, 2, ' + Layout.playerId() + ', \'' +
+						recipe.target.verify + '\', \'\');" ' +
+						'src="' + recipe.target.img + '"/>';
+				}
+				result += '</td>'
+				result += '</tr>';
 			}
 		}
 		result+='</table>';
@@ -3941,22 +4020,33 @@ var Helper = {
 		var recipeTable=document.getElementById('Helper:RecipeTable');
 		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
 			var cell=recipeTable.rows[0].cells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.addEventListener('click', Helper.sortRecipeTable, true);
+			if (cell.getAttribute("sortkey")) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.addEventListener('click', Helper.sortRecipeTable, true);
+			}
 		}
 	},
 
 	sortRecipeTable: function(evt) {
 		Helper.recipebook=System.getValueJSON("recipebook");
-		var headerClicked=evt.target.getAttribute("sortKey")
+		var headerClicked = evt.target.getAttribute("sortKey");
+		var sortType = evt.target.getAttribute("sorttype");
+		if (!sortType) sortType="string";
+		sortType = sortType.toLowerCase();
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==headerClicked) {
 			Helper.sortAsc=!Helper.sortAsc;
 		}
 		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
-		Helper.recipebook.recipe.sort(Helper.stringSort)
+		switch (sortType) {
+			case "number":
+				Helper.recipebook.recipe.sort(Helper.numberSort)
+				break;
+			default:
+				Helper.recipebook.recipe.sort(Helper.stringSort)
+		}
 		Helper.generateRecipeTable();
 	},
 
