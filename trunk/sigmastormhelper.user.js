@@ -46,7 +46,7 @@ var Helper = {
 		System.setDefault("guildFrndMessage", "yellow|Do not attack - Faction is friendly!");
 		System.setDefault("guildPastMessage", "gray|Do not attack - You've been in that faction once!");
 		System.setDefault("guildEnmyMessage", "red|Enemy faction. Attack at will!");
-		System.setDefault("killAllAdvanced", "off");
+
 		System.setDefault("hideKrulPortal", false);
 		System.setDefault("hideQuests", false);
 		System.setDefault("hideQuestNames", "");
@@ -1481,7 +1481,6 @@ var Helper = {
 		var newRow=injectHere.insertRow(2);
 		var newCell=newRow.insertCell(0);
 		// newCell.setAttribute("background", System.imageServer + "/sigma2/skin/realm_right_bg.jpg");
-		var killStyle = GM_getValue("killAllAdvanced");
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
 
@@ -3140,10 +3139,10 @@ var Helper = {
 				startIndex = alliesTable.innerHTML.indexOf("player_id=",startIndex+1);
 			}
 			startIndex = 0;
-			alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+			alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 				"<span style='color:#ADB5B5; font-size:x-small' >" + numberOfAllies + "</span>";
 			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+				alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
@@ -3156,10 +3155,10 @@ var Helper = {
 				startIndex = enemiesTable.innerHTML.indexOf("player_id=",startIndex+1);
 			}
 			var startIndex = 0;
-			enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+			enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 				"&nbsp;<span style='color:#ADB5B5; font-size:x-small'>" + numberOfEnemies + "</span>";
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML += 
+				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
@@ -4033,11 +4032,7 @@ var Helper = {
 		recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
 		recipe.items = Helper.parseRecipeItemOrComponent("//td[contains(@background,'small.gif')]", doc);
 		recipe.components  = Helper.parseRecipeItemOrComponent("//td[contains(@background,'1x1mini.gif')]", doc);
-		var targetNode = System.findNode("//td[contains(@background,'2x3.gif')]/center/img", doc);
-		recipe.target = {
-			img: targetNode.src,
-			id: targetNode.getAttribute("onmouseover").match(/ajaxLoadItem\((\d+),\s*-1,\s*2,\s*\d+,\s*\'\'\);/i)[1]
-		}
+		recipe.target = Helper.parseRecipeItemOrComponent("//td[contains(@background,'2x3.gif')]", doc)[0]
 
 		var nextRecipeIndex = currentRecipeIndex+1;
 		if (nextRecipeIndex<Helper.recipebook.recipe.length) {
