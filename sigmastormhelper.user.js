@@ -2210,6 +2210,10 @@ var Helper = {
 		case 110: // mini map [n]
 			Helper.displayMiniMap();
 			break;
+		case 62: // move to next page [>]
+		case 60: // move to prev page [<]
+			Helper.movePage({62:'>', 60:'<'}[r]);
+			break;
 		case 33: // Shift+1
 		case 64: // Shift+2
 		case 34: // Shift+2 -- for UK keyboards, I think
@@ -5373,6 +5377,14 @@ var Helper = {
 				window.location = newUrl + iNode.value;
 			else
 				window.location = newUrl;
+	},
+	
+	movePage: function(dir) {
+		var dirButton = System.findNode("//input[@value='"+dir+"']");
+		if (!dirButton) return;
+		var url = dirButton.getAttribute("onClick");
+		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
+		window.location = url;
 	}
 
 };
