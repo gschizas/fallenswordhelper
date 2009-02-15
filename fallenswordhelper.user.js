@@ -3959,7 +3959,7 @@ var Helper = {
 	generateRecipeTable: function() {
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var result='<table id="Helper:RecipeTable"><tr>' +
-			'<th align="left" sortkey="name">Name</th>' +
+			'<th align="left" colspan="2" sortkey="name">Name</th>' +
 			'<th align="left">Items</th>' +
 			'<th align="left">Components</th>' +
 			'<th align="left">Target</th>' +
@@ -3977,7 +3977,8 @@ var Helper = {
 
 			if (hideRecipes.indexOf(recipe.name) == -1) {
 				result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
-					'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/>' + recipe.name + '</td>'
+					'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/></a></td>' +
+					'<td><a href="' + recipe.link + '">' + recipe.name + '</a></td>';
 				result += '<td>';
 				if (recipe.items) {
 					for (var j=0; j<recipe.items.length; j++) {
