@@ -5192,7 +5192,7 @@ var Helper = {
 	},
 
 	injectNotepadShowLogs: function() {
-		var content=System.findNode("//table[@width='100%']/..");
+		var content=Layout.notebookContent();
 		var combatLog=GM_getValue("CombatLog");
 		content.innerHTML='<div align="center"><textarea align="center" cols="80" rows="25" '+
 			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog">' + combatLog + '</textarea></div>' +
