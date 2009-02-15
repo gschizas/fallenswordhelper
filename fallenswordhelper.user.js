@@ -57,6 +57,7 @@ var Helper = {
 		System.setDefault("guildOnlineRefreshTime", 15);
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", false);
+		System.setDefault("doNotKillList", "");
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -1435,6 +1436,7 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
+		
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
 		if (!injectHere) return;
 		var newRow=injectHere.insertRow(1);
@@ -1476,6 +1478,22 @@ var Helper = {
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
 
+		}
+		var doNotKillList = GM_getValue("doNotKillList");
+		var doNotKillListAry = doNotKillList.split(",")
+		for (var i=0; i<9; i++) {
+			var monster = System.findNode("//a[@id='aLink" + i + "']")
+			if (monster) {
+				var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+				for (var j=0; j<doNotKillListAry.length; j++) {
+					var doNotKillName = doNotKillListAry[j];
+					if (monsterName == doNotKillName){
+						var monsterNameCell = monster.parentNode.parentNode.previousSibling
+						monsterNameCell.innerHTML = '<span style="color:red;">' + monsterNameCell.innerHTML + '</span>';
+						break;
+					}
+				}
+			}
 		}
 	},
 
@@ -1533,13 +1551,24 @@ var Helper = {
 		if (!GM_getValue("quickKill")) return;
 		var kills=0;
 		var monster = Helper.getMonster(monsterNumber);
+		
+		var doNotKillList = GM_getValue("doNotKillList");
+		var doNotKillListAry = doNotKillList.split(",")
+		
 		if (monster) {
-			kills+=1;
-			System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
+			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+			var injectHere = monster.parentNode.parentNode;
+			for (var j=0; j<doNotKillListAry.length; j++) {
+				var doNotKillName = doNotKillListAry[j];
+				if (monsterName == doNotKillName){
+					injectHere.innerHTML = '<nobr><span style="color:blue; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
+					break;
+				} else {
+					kills+=1;
+					System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
+				}
+			}
 		}
-		//if (kills>0) {
-		//	System.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
-		//}
 	},
 
 	prepareCheckMonster: function() {
@@ -3050,6 +3079,8 @@ var Helper = {
 						newCell.innerHTML = output;
 						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
 							.addEventListener('click', Helper.equipProfileInventoryItem, true);
+					} else {
+						var newCell = newRow.insertCell(i % 4);
 					}
 				}
 			}
@@ -5290,6 +5321,7 @@ var Helper = {
 	injectSettings: function() {
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
 		var buffs=GM_getValue("huntingBuffs");
+		var doNotKillList=GM_getValue("doNotKillList");
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -5353,6 +5385,9 @@ var Helper = {
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
+			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
+				'separated by commas. Critters name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick).') +
+				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
@@ -5462,6 +5497,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
 		System.saveValueForm(oForm, "guildOnlineRefreshTime");
+		System.saveValueForm(oForm, "doNotKillList");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
