@@ -2736,7 +2736,7 @@ var Helper = {
 			'&nbsp;Min: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_minlevel value="wait" />' +
 			'&nbsp;Max: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_maxlevel value="wait" />' +
 			'&nbsp;Gold: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidegold value="1" />' +
-			'&nbsp;FSP: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
+			'&nbsp;Crystal: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
 			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form></div>';
 
 		// preparePreferences.appendChild(prefArea);
@@ -4319,16 +4319,16 @@ var Helper = {
 		 var sellPrice = goldPerPoint.value;
 		 if (sellPrice.search(/^[0-9]*$/) != -1) {
 			var warningColor = "green";
-			var warningText = "</b><br>This is probably an offer that will please someone.";
-			if (sellPrice < 100000) {
+			var warningText = "</b><br/>This is probably an offer that will please someone.";
+			if (sellPrice < 500) {
 				warningColor = "brown";
-				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
-			} else if (sellPrice > 150000) {
+				var warningText = "</b><br>This is too low ... it isn't going to sell.";
+			} else if (sellPrice > 15000) {
 				warningColor = "red";
-				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
+				var warningText = "</b><br/>This is way too high a price ... you should reconsider.";
 			}
-			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" +
-				System.addCommas(sellPrice) + warningText + "</span>";
+			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy Crystals for <b>" +
+				System.addCommas(sellPrice) + " credits</b>" + warningText + "</span>";
 		}
 	},
 
