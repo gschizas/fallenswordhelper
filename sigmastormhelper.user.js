@@ -2207,6 +2207,9 @@ var Helper = {
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
+		case 112: // profile
+			window.location = 'index.php?cmd=profile';
+			break;
 		case 110: // mini map [n]
 			Helper.displayMiniMap();
 			break;
@@ -5378,7 +5381,7 @@ var Helper = {
 			else
 				window.location = newUrl;
 	},
-	
+
 	movePage: function(dir) {
 		var dirButton = System.findNode("//input[@value='"+dir+"']");
 		if (!dirButton) return;
