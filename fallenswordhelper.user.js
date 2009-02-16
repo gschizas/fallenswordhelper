@@ -1558,15 +1558,18 @@ var Helper = {
 		if (monster) {
 			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
 			var injectHere = monster.parentNode.parentNode;
+			var monsterFound = false;
 			for (var j=0; j<doNotKillListAry.length; j++) {
 				var doNotKillName = doNotKillListAry[j];
 				if (monsterName == doNotKillName){
 					injectHere.innerHTML = '<nobr><span style="color:blue; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
+					monsterFound = true;
 					break;
-				} else {
-					kills+=1;
-					System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
-				}
+				} 
+			}
+			if (!monsterFound) {
+				kills+=1;
+				System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
 			}
 		}
 	},
@@ -3079,7 +3082,7 @@ var Helper = {
 						newCell.innerHTML = output;
 						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
 							.addEventListener('click', Helper.equipProfileInventoryItem, true);
-					} else {
+					} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
 						var newCell = newRow.insertCell(i % 4);
 					}
 				}
@@ -4572,7 +4575,7 @@ var Helper = {
 		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
 		if (deathDealer) {
 			var deathDealerLevel = deathDealer[1];
-			var deathDealerPercentage = (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20))
+			var deathDealerPercentage = (Math.min(Math.round(Math.floor(playerKillStreakValue/5) * deathDealerLevel) * 0.01, 20))
 		}
 		var deathDealerPercentageElement = System.findNode("//span[@findme='damagebonus']");
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
