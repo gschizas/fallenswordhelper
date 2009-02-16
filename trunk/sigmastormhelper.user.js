@@ -225,14 +225,22 @@ var Helper = {
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
 		var pageId="-";
-		if (pageIdRE)
+		if (pageIdRE) {
 			pageId=pageIdRE[1];
+		} else {
+			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
+			pageId = pageId?pageId.getAttribute("value"):"-";
+		}
 
 		re=/subcmd=([a-z]+)/;
 		var subPageIdRE = re.exec(document.location.search);
 		var subPageId="-";
-		if (subPageIdRE)
+		if (subPageIdRE) {
 			subPageId=subPageIdRE[1];
+		} else {
+			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
+			subPageId=subPageId?subPageId.getAttribute("value"):"-";
+		}
 
 		re=/subcmd2=([a-z]+)/;
 		var subPage2IdRE = re.exec(document.location.search);
