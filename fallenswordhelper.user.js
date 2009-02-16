@@ -259,14 +259,22 @@ var Helper = {
 		var re=/cmd=([a-z]+)/;
 		var pageIdRE = re.exec(document.location.search);
 		var pageId="-";
-		if (pageIdRE)
+		if (pageIdRE) {
 			pageId=pageIdRE[1];
+		} else {
+			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
+			pageId = pageId?pageId.getAttribute("value"):"-";
+		}
 
 		re=/subcmd=([a-z]+)/;
 		var subPageIdRE = re.exec(document.location.search);
 		var subPageId="-";
-		if (subPageIdRE)
+		if (subPageIdRE) {
 			subPageId=subPageIdRE[1];
+		} else {
+			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
+			subPageId=subPageId?subPageId.getAttribute("value"):"-";
+		}
 
 		re=/subcmd2=([a-z]+)/;
 		var subPage2IdRE = re.exec(document.location.search);
@@ -488,12 +496,6 @@ var Helper = {
 			var isQuestBookPage = System.findNode("//td[.='Quest Name']");
 			if (isQuestBookPage) {
 				Helper.injectQuestBookFull();
-			}
-			var isAdvisorPageClue1 = System.findNode("//font[@size=2 and .='Advisor']");
-			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']"
-			var isAdvisorPageClue2 = System.findNode(clue2);
-			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
-				Helper.injectAdvisor();
 			}
 			var isArenaTournamentPage = System.findNode("//b[contains(.,'Tournament #')]");
 			if (isArenaTournamentPage) {
@@ -1436,7 +1438,7 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
-		
+
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
 		if (!injectHere) return;
 		var newRow=injectHere.insertRow(1);
@@ -1551,10 +1553,10 @@ var Helper = {
 		if (!GM_getValue("quickKill")) return;
 		var kills=0;
 		var monster = Helper.getMonster(monsterNumber);
-		
+
 		var doNotKillList = GM_getValue("doNotKillList");
 		var doNotKillListAry = doNotKillList.split(",")
-		
+
 		if (monster) {
 			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
 			var injectHere = monster.parentNode.parentNode;
@@ -1565,7 +1567,7 @@ var Helper = {
 					injectHere.innerHTML = '<nobr><span style="color:blue; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
 					monsterFound = true;
 					break;
-				} 
+				}
 			}
 			if (!monsterFound) {
 				kills+=1;
@@ -5673,7 +5675,7 @@ var Helper = {
 		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
 		Helper.generateQuickLinkTable();
 	},
-	
+
 	movePage: function(dir) {
 		var dirButton = System.findNode("//input[@value='"+dir+"']");
 		if (!dirButton) return;
