@@ -256,32 +256,46 @@ var Helper = {
 		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
 
-		var re=/cmd=([a-z]+)/;
-		var pageIdRE = re.exec(document.location.search);
-		var pageId="-";
-		if (pageIdRE)
-			pageId=pageIdRE[1];
+		var pageId, subPageId, subPage2Id, subsequentPageId
+		if (document.location.search != "") {
+			var re=/cmd=([a-z]+)/;
+			var pageIdRE = re.exec(document.location.search);
+			pageId="-";
+			if (pageIdRE)
+				pageId=pageIdRE[1];
 
-		re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search);
-		var subPageId="-";
-		if (subPageIdRE)
-			subPageId=subPageIdRE[1];
+			re=/subcmd=([a-z]+)/;
+			var subPageIdRE = re.exec(document.location.search);
+			subPageId="-";
+			if (subPageIdRE)
+				subPageId=subPageIdRE[1];
 
-		re=/subcmd2=([a-z]+)/;
-		var subPage2IdRE = re.exec(document.location.search);
-		var subPage2Id="-";
-		if (subPage2IdRE)
-			subPage2Id=subPage2IdRE[1];
+			re=/subcmd2=([a-z]+)/;
+			var subPage2IdRE = re.exec(document.location.search);
+			subPage2Id="-";
+			if (subPage2IdRE)
+				subPage2Id=subPage2IdRE[1];
 
-		re=/page=([0-9]+)/;
-		var subsequentPageIdRE = re.exec(document.location.search);
-		var subsequentPageId="-";
-		if (subsequentPageIdRE)
-			subsequentPageId=subsequentPageIdRE[1];
+			re=/page=([0-9]+)/;
+			var subsequentPageIdRE = re.exec(document.location.search);
+			subsequentPageId="-";
+			if (subsequentPageIdRE)
+				subsequentPageId=subsequentPageIdRE[1];
+		} else {
+			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
+			pageId = pageId?pageId.getAttribute("value"):"-";
+
+			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
+			subPageId=subPageId?subPageId.getAttribute("value"):"-";
+
+			subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
+			subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
+
+			subsequentPageId=System.findNode("//input[@type='hidden' and @name='page']")
+			subsequentPageId=subsequentPageId?subsequentPageId.getAttribute("value"):"-";
+		}
 
 		Helper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")"
-		if (Helper.debug) GM_log(Helper.page);
 
 		switch (pageId) {
 		case "settings":
@@ -1436,7 +1450,7 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
-		
+
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
 		if (!injectHere) return;
 		var newRow=injectHere.insertRow(1);
@@ -1551,10 +1565,10 @@ var Helper = {
 		if (!GM_getValue("quickKill")) return;
 		var kills=0;
 		var monster = Helper.getMonster(monsterNumber);
-		
+
 		var doNotKillList = GM_getValue("doNotKillList");
 		var doNotKillListAry = doNotKillList.split(",")
-		
+
 		if (monster) {
 			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
 			var injectHere = monster.parentNode.parentNode;
@@ -1565,7 +1579,7 @@ var Helper = {
 					injectHere.innerHTML = '<nobr><span style="color:blue; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
 					monsterFound = true;
 					break;
-				} 
+				}
 			}
 			if (!monsterFound) {
 				kills+=1;
@@ -1842,7 +1856,6 @@ var Helper = {
 
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
-		if (Helper.debug) GM_log("prepareChat - showLines=" + showLines);
 		if (showLines==0) return;
 		var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
 		if (!injectHere) return;
@@ -1860,7 +1873,6 @@ var Helper = {
 	},
 
 	retrieveChat: function() {
-		if (Helper.debug) GM_log("retrieveChat called");
 		System.xmlhttp("index.php?cmd=guild&subcmd=chat", Helper.parseChatForWorld);
 	},
 
@@ -5673,7 +5685,7 @@ var Helper = {
 		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
 		Helper.generateQuickLinkTable();
 	},
-	
+
 	movePage: function(dir) {
 		var dirButton = System.findNode("//input[@value='"+dir+"']");
 		if (!dirButton) return;

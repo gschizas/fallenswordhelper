@@ -222,40 +222,46 @@ var Helper = {
 		Helper.replaceKeyHandler();
 		Helper.injectWorldWidgets();
 
-		var re=/cmd=([a-z]+)/;
-		var pageIdRE = re.exec(document.location.search);
-		var pageId="-";
-		if (pageIdRE) {
-			pageId=pageIdRE[1];
+		var pageId, subPageId, subPage2Id, subsequentPageId
+		if (document.location.search != "") {
+			var re=/cmd=([a-z]+)/;
+			var pageIdRE = re.exec(document.location.search);
+			pageId="-";
+			if (pageIdRE)
+				pageId=pageIdRE[1];
+
+			re=/subcmd=([a-z]+)/;
+			var subPageIdRE = re.exec(document.location.search);
+			subPageId="-";
+			if (subPageIdRE)
+				subPageId=subPageIdRE[1];
+
+			re=/subcmd2=([a-z]+)/;
+			var subPage2IdRE = re.exec(document.location.search);
+			subPage2Id="-";
+			if (subPage2IdRE)
+				subPage2Id=subPage2IdRE[1];
+
+			re=/page=([0-9]+)/;
+			var subsequentPageIdRE = re.exec(document.location.search);
+			subsequentPageId="-";
+			if (subsequentPageIdRE)
+				subsequentPageId=subsequentPageIdRE[1];
 		} else {
 			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
 			pageId = pageId?pageId.getAttribute("value"):"-";
-		}
 
-		re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search);
-		var subPageId="-";
-		if (subPageIdRE) {
-			subPageId=subPageIdRE[1];
-		} else {
 			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
 			subPageId=subPageId?subPageId.getAttribute("value"):"-";
+
+			subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
+			subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
+
+			subsequentPageId=System.findNode("//input[@type='hidden' and @name='page']")
+			subsequentPageId=subsequentPageId?subsequentPageId.getAttribute("value"):"-";
 		}
 
-		re=/subcmd2=([a-z]+)/;
-		var subPage2IdRE = re.exec(document.location.search);
-		var subPage2Id="-";
-		if (subPage2IdRE)
-			subPage2Id=subPage2IdRE[1];
-
-		re=/page=([0-9]+)/;
-		var subsequentPageIdRE = re.exec(document.location.search);
-		var subsequentPageId="-";
-		if (subsequentPageIdRE)
-			subsequentPageId=subsequentPageIdRE[1];
-
 		Helper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")"
-		if (Helper.debug) GM_log(Helper.page);
 
 		switch (pageId) {
 		case "settings":
@@ -1958,7 +1964,6 @@ var Helper = {
 
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
-		if (Helper.debug) GM_log("prepareChat - showLines=" + showLines);
 		if (showLines==0) return;
 		var injectHere = System.findNode("//table[@width='133' and contains(@style, '/sigma2/skin/community_header.gif')]")
 		injectHere = injectHere.parentNode.parentNode.parentNode;
