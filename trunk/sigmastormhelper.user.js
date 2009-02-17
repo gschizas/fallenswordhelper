@@ -2933,9 +2933,7 @@ var Helper = {
 	changeCombatSet: function(responseText, itemIndex) {
 		var doc=System.createDocument(responseText);
 
-		GM_log(responseText);
-
-		var cbsSelect = System.findNode("//select[@name='combatSetId']", doc);
+		var cbsSelect = System.findNode("//select[@name='combat_set_id']", doc);
 
 		// find the combat set id value
 		var allItems = cbsSelect.getElementsByTagName("option");
@@ -2951,7 +2949,7 @@ var Helper = {
 					"Referer": System.server + "index.php?cmd=profile",
 					"Cookie" : document.cookie
 				},
-				data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
+				data: "cmd=profile&subcmd=managecombatset&combat_set_id="+cbsIndex+"&submit=Use",
 				onload: function() {
 					window.location="index.php?cmd=profile";
 				},
