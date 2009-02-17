@@ -3589,6 +3589,7 @@ var Helper = {
 		Helper.inventory.items = new Array();
 		var output=document.getElementById('Helper:InventoryManagerOutput')
 		output.innerHTML='<br/>Parsing profile...';
+		Data.itemList();
 		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileDone)
 	},
 
@@ -3598,7 +3599,7 @@ var Helper = {
 		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
 			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
-				"type":"worn", "index":(i+1),
+				"where":"worn", "index":(i+1),
 				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
 			if (i==0) output.innerHTML+="<br/>Found worn item "
 			output.innerHTML+=(i+1) + " ";
@@ -3644,7 +3645,7 @@ var Helper = {
 			for (var i=0; i<backpackItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"backpack", "index":(i+1), "page":currentPage,
+					"where":"backpack", "index":(i+1), "page":currentPage,
 					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found wearable item "
 				output.innerHTML+=(i+1) + " ";
@@ -3671,7 +3672,8 @@ var Helper = {
 		Helper.guildinventory = new Object;
 		Helper.guildinventory.items = new Array();
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput')
-		output.innerHTML='<br/>Parsing guild store ...';
+		output.innerHTML = '<br/>Parsing guild store ...';
+		Data.itemList();
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', Helper.parseGuildStorePage);
 	},
 
@@ -3687,7 +3689,7 @@ var Helper = {
 			for (var i=0; i<guildstoreItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
+					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
 					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild store item "
 				output.innerHTML+=(i+1) + " ";
@@ -3713,7 +3715,7 @@ var Helper = {
 			for (var i=0; i<guildreportItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"guildreport", "index":(i+1), "worn":false,
+					"where":"guildreport", "index":(i+1), "worn":false,
 					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild report item "
 				output.innerHTML+=(i+1) + " ";
@@ -3745,36 +3747,44 @@ var Helper = {
 		var doc=System.createDocument(responseText);
 		output.innerHTML+=(callback.invIndex+1) + " ";
 
-		targetInventory.items[callback.invIndex].html=responseText;
+		var item=targetInventory.items[callback.invIndex];
+		// item.html=responseText;
 
 		var nameNode=System.findNode("//b", doc);
 		if (!nameNode) GM_log(responseText);
 		if (nameNode) {
-			targetInventory.items[callback.invIndex].name=nameNode.textContent
+			item.name=nameNode.textContent
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].attack=(attackNode)?parseInt(attackNode.textContent):0;
+			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
 
 			var defenseNode=System.findNode("//tr/td[.='Defense:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].defense=(defenseNode)?parseInt(defenseNode.textContent):0;
+			item.defense=(defenseNode)?parseInt(defenseNode.textContent):0;
 
 			var armorNode=System.findNode("//tr/td[.='Armor:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].armor=(armorNode)?parseInt(armorNode.textContent):0;
+			item.armor=(armorNode)?parseInt(armorNode.textContent):0;
 
 			var damageNode=System.findNode("//tr/td[.='Damage:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].damage=(damageNode)?parseInt(damageNode.textContent):0;
+			item.damage=(damageNode)?parseInt(damageNode.textContent):0;
 
 			var hpNode=System.findNode("//tr/td[.='HP:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].hp=(hpNode)?parseInt(hpNode.textContent):0;
+			item.hp=(hpNode)?parseInt(hpNode.textContent):0;
 
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
-			targetInventory.items[callback.invIndex].minLevel=(levelNode)?parseInt(levelNode.textContent):0;
+			item.minLevel=(levelNode)?parseInt(levelNode.textContent):0;
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
 				forgeCount++;
 			}
-			targetInventory.items[callback.invIndex].forgelevel=forgeCount;
+			item.forgelevel=forgeCount;
+
+			var findItem = Data.itemArray.filter(function (e,i,a) {return e.name==item.name});
+			if (findItem.length>0) {
+				item.type = findItem[0].type;
+			} else {
+				item.type = "???"
+			};
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -3782,7 +3792,7 @@ var Helper = {
 				var fontLineRX=fontLineRE.exec(responseText)
 				craft = fontLineRX[3];
 			}
-			targetInventory.items[callback.invIndex].craftlevel=craft;
+			item.craftlevel=craft;
 		}
 
 		if (callback.invIndex<targetInventory.items.length-1) {
@@ -3807,22 +3817,30 @@ var Helper = {
 		if (!targetInventory) return;
 		var output=document.getElementById(targetId);
 		var result='<table id="Helper:InventoryTable"><tr>' +
-			'<th width="10"></th><th width="180" align="left" sortkey="name">Name</th>' +
-			'<th width="10"></th><th sortkey="minLevel">Level</th>' +
-			'<th width="10"></th><th sortkey="attack">Att</th>' +
-			'<th width="10"></th><th sortkey="defense">Def</th>' +
-			'<th width="10"></th><th sortkey="armor">Arm</th>' +
-			'<th width="10"></th><th sortkey="damage">Dam</th>' +
-			'<th width="10"></th><th sortkey="hp">HP</th>' +
-			'<th width="10"></th><th sortkey="forgelevel">Forge</th>' +
-			'<th width="10"></th><th sortkey="craftlevel">Craft</th>' +
+			'<th width="180" align="left" sortkey="name" colspan="2">Name</th>' +
+			'<th sortkey="minLevel">Level</th>' +
+			'<th sortkey="where">Where</th>' +
+			'<th sortkey="type">Type</th>' +
+			'<th sortkey="attack">Att</th>' +
+			'<th sortkey="defense">Def</th>' +
+			'<th sortkey="armor">Arm</th>' +
+			'<th sortkey="damage">Dam</th>' +
+			'<th sortkey="hp">HP</th>' +
+			'<th sortkey="forgelevel">Forge</th>' +
+			'<th sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
 		var item, color;
 		var showUseableItems = GM_getValue("showUseableItems");
-		for (var i=0; i<targetInventory.items.length;i++) {
-			item=targetInventory.items[i];
+		var allItems = targetInventory.items;
+		if (showUseableItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.minLevel < Helper.characterLevel});
+			//  && e.minLevel + 50 > Helper.characterLevel}
+		}
 
-			switch (item.type+"") {
+		for (var i=0; i<allItems.length;i++) {
+			item=allItems[i];
+
+			switch (item.where+"") {
 				case "worn":        color = "green";  break;
 				case "backpack":    color = "blue";   break;
 				case "guildstore":  color = "navy";  break;
@@ -3830,23 +3848,22 @@ var Helper = {
 				default: color = "black";
 			}
 
-			if (showUseableItems && item.minLevel > Helper.characterLevel) {
-			} else {
-				result+='<tr style="color:'+ color +'">' +
-					'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-					'</td><td>' + item.name + '</td>' +
-					'<td></td><td align="right">' + item.minLevel + '</td>' +
-					'<td></td><td align="right">' + item.attack + '</td>' +
-					'<td></td><td align="right">' + item.defense + '</td>' +
-					'<td></td><td align="right">' + item.armor + '</td>' +
-					'<td></td><td align="right">' + item.damage + '</td>' +
-					'<td></td><td align="right">' + item.hp + '</td>' +
-					'<td></td><td align="right">' + item.forgelevel + '</td>' +
-					'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
-						'<td align="right">' + item.craftlevel + '</td>' +
-					'<td></td>' +
-					'</tr>';
-			}
+			result+='<tr style="color:'+ color +'">' +
+				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
+				'</td><td>' + item.name + '</td>' +
+				'<td align="right">' + item.minLevel + '</td>' +
+				'<td align="right">' + item.where + '</td>' +
+				'<td align="right">' + item.type + '</td>' +
+				'<td align="right">' + item.attack + '</td>' +
+				'<td align="right">' + item.defense + '</td>' +
+				'<td align="right">' + item.armor + '</td>' +
+				'<td align="right">' + item.damage + '</td>' +
+				'<td align="right">' + item.hp + '</td>' +
+				'<td align="right">' + item.forgelevel + '</td>' +
+				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+					'<td align="right">' + item.craftlevel + '</td>' +
+				'<td></td>' +
+				'</tr>';
 		}
 		result+='</table>';
 		output.innerHTML=result;
@@ -3882,7 +3899,8 @@ var Helper = {
 			Helper.sortAsc=!Helper.sortAsc;
 		}
 		Helper.sortBy="name";
-		targetInventory.items.sort(Helper.stringSort)
+		targetInventory.items.sort(Helper.stringSort);
+
 		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
