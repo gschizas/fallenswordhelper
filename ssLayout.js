@@ -10,7 +10,9 @@ var Layout = {
 		if (GM_getValue("keepLogs")) {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0");
 		}
-		
+		if (GM_getValue("showMonsterLog")) {
+			Layout.injectOneMenu("Entity Logs", "index.php?cmd=notepad&subcmd=monsterlogs", 11, "menuSource_0")
+		}
 		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
 		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 10, "menuSource_0");
 		Layout.injectQuickLinks();
@@ -25,7 +27,7 @@ var Layout = {
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML='&nbsp;&nbsp;&nbsp;&nbsp;&#xbb;&nbsp;&nbsp;<A href="' + href + '">' + text + '</A>';
 	},
-	
+
 	injectQuickLinks: function() {
 		var quickLinks = System.getValueJSON("quickLinks");
 		if (!quickLinks) quickLinks=[];

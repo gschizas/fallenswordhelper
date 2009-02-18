@@ -467,6 +467,9 @@ var Helper = {
 			case "quicklinkmanager":
 				Helper.injectQuickLinkManager();
 				break;
+			case "monsterlog":
+				Helper.injectMonsterLog();
+				break;
 			}
 			break;
 		case "points":
@@ -1591,6 +1594,24 @@ var Helper = {
 	},
 
 	prepareCheckMonster: function() {
+		// add id to the kill-monster links
+		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and not(contains(@href,'max_turns='))]");
+		if (!monsters) return;
+		for (var i=0; i<monsters.length; i++) {
+			var monster = monsters[i];
+			if (monster) {
+				// add monster color based on elite types
+				var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
+				if (monsterText.textContent.match(/\(Champion\)/i))
+					monsterText.style.color = 'green';
+				if (monsterText.textContent.match(/\(Elite\)/i))
+					monsterText.style.color = 'yellow';
+				if (monsterText.textContent.match(/\(HK\)/i))
+					monsterText.style.color = 'red';
+
+			}
+		}
+
 		if (!GM_getValue("showCreatureInfo")) return;
 		var monsters = System.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
 		if (!monsters) return;
@@ -1634,8 +1655,14 @@ var Helper = {
 		var killButtonHeader=System.findNode("tbody/tr[contains(td,'Actions')]", statsNode);
 		var killButtonParent=killButtonHeader.parentNode;
 
-		var imageNode = System.findNode("//img[contains(@src, '/creatures/')]/..", creatureInfo);
+		var imageNode = System.findNode("//img[contains(@src, '/creatures/')]", creatureInfo);
 		var nameNode = System.findNode("//img[contains(@src, '/creatures/')]/../../following-sibling::tr[1]/td", creatureInfo);
+
+		if (GM_getValue("showMonsterLog")) {
+			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent,
+				"key4":attackNode.textContent, "key5":defenseNode.textContent, "key6":armorNode.textContent, "key7":damageNode.textContent,
+				"key8":hitpointsNode.textContent, "key9":goldNode.textContent});
+		}
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
 		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
@@ -1653,6 +1680,79 @@ var Helper = {
 			"<tr><td align=center valign=top>" + nameNode.innerHTML + "</td></tr></table>");
 		callback.setAttribute("mouseOverWidth", "600");
 		callback.addEventListener("mouseover", Helper.clientTip, true);
+	},
+
+	pushMonsterInfo: function(monster) {
+		// name, img, cls, lvl, atk, def, arm, dmg, hp, gold
+		var name = monster.key0;
+		var monsterLog = System.getValueJSON("monsterLog");
+		if (!monsterLog) monsterLog = {};
+		if (!monsterLog[name]) {
+			monsterLog[name] = {"min":{}, "max":{}};
+			for (i = 1; i < 10; i++) {
+				monsterLog[name]["min"]["key" + i] = 1e+100;
+				monsterLog[name]["max"]["key" + i] = 0;
+			}
+			//monsterLog[name]["min"] = {"cls":1e+100, "lvl":1e+100, "atk":1e+100, "def":1e+100, "arm":1e+100, "dmg":1e+100, "hp":1e+100, "gold":1e+100};
+			//monsterLog[name]["max"] = {"cls":0, "lvl":0, "atk":0, "def":0, "arm":0, "dmg":0, "hp":0, "gold":0};
+		}
+		for (i = 1; i < 4; i++)
+			monsterLog[name]["min"]["key" + i] = monster["key" + i];
+		for (i = 4; i < 10; i++) {
+			var value = parseInt(monster["key" + i]);
+			monsterLog[name]["min"]["key" + i] = monsterLog[name]["min"]["key" + i] < value
+				? monsterLog[name]["min"]["key" + i] : value;
+			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value
+				? monsterLog[name]["max"]["key" + i] : value;
+		}
+		GM_setValue("monsterLog", JSON.stringify(monsterLog));
+	},
+
+	injectMonsterLog: function() {
+		var monsterLog = System.getValueJSON("monsterLog");
+		var content=Layout.notebookContent();
+		content.innerHTML = 'No monster information! Please enable creature log and travel a bit to see the world';
+		if (!monsterLog) return;
+		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
+			'<td width="90%" nobr align=center><b>&nbsp;Monster Information</b></td>'+
+			'<td width="10%" nobr>[<span id="Helper.clearMonsterLog">Clear</span>]</td>'+
+			'</tr>' +
+			'</table>'+
+			'<table id="Helper:MonsterInfo" cellspacing="0" cellpadding="0" border="0" ><tr>' +
+			'<th width="25%" align="left" sortkey="name">Name</th>' +
+			'<th align="center">Img</th>' +
+			'<th align="center" sortkey="class">Class</th>' +
+			'<th align="center" sortkey="Level" sorttype="number">Lvl</th>' +
+			'<th align="center">Min Atk</th>' +
+			'<th align="center">Max Atk</th>' +
+			'<th align="center">Min Def</th>' +
+			'<th align="center">Max Def</th>' +
+			'<th align="center">Min Arm</th>' +
+			'<th align="center">Max Arm</th>' +
+			'<th align="center">Min Dmg</th>' +
+			'<th align="center">Max Dmg</th>' +
+			'<th align="center">Min HP</th>' +
+			'<th align="center">Max HP</th>' +
+			'<th align="center">Min Cr</th>' +
+			'<th align="center">Max Cr</th>' +
+			'</tr>';
+		for (var name in monsterLog) {
+			result += '<tr><td align="left">' + name + '</td>';
+			result += '<td align="center"><img width=40 height=40 src="' + monsterLog[name]["min"]["key1"] + '"/></td>';
+			for (i = 2; i < 4; i++)
+				result += '<td align="center">' + monsterLog[name]["min"]["key"+i] + '</td>';
+			for (i = 4; i < 10; i++)
+				result += '<td align="center">' + monsterLog[name]["min"]["key"+i] + '</td>' +
+					'<td align="center">' + monsterLog[name]["max"]["key"+i] + '</td>';
+		}
+		result += "</table>";
+		content.innerHTML = result;
+		document.getElementById("Helper.clearMonsterLog").addEventListener("click", Helper.clearMonsterLog, true);
+	},
+
+	clearMonsterLog: function() {
+		GM_setValue("monsterLog", "");
+		window.location="index.php?cmd=notepad&subcmd=monsterlog";
 	},
 
 	killedMonster: function(responseText, callback) {
@@ -1994,9 +2094,6 @@ var Helper = {
 
 		sendType = isMass?"Send As Mass":"Send";
 
-//		window.alert(sendType);
-//		return;
-
 		GM_xmlhttpRequest({
 			method: 'POST',
 			url: System.server + "index.php",
@@ -2074,7 +2171,8 @@ var Helper = {
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
 		case 106: // join all group [j]
-		  window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
+			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
+			break;
 		case 49:
 		case 50:
 		case 51:
@@ -2811,8 +2909,6 @@ var Helper = {
 	changeCombatSet: function(responseText, itemIndex) {
 		var doc=System.createDocument(responseText);
 
-		//GM_log(responseText);
-
 		var cbsSelect = System.findNode("//select[@name='combatSetId']", doc);
 
 		// find the combat set id value
@@ -3006,8 +3102,8 @@ var Helper = {
 				"');'><img alt='Join All Groups' title='Join All Groups' src=" +
 				System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" +
 				"<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
-				playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src=' +
-				System.imageServer + "/skin/gold_button.gif></a>&nbsp;&nbsp;" +
+				playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="' +
+				System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
 				"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
 				playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
 				System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
@@ -3265,10 +3361,11 @@ var Helper = {
 					fsgQuestName = fsgQuestName.replace(/ /g,"+");
 					var wikiQuestName = q.questName.replace(/  /g,"_");
 					wikiQuestName = wikiQuestName.replace(/ /g,"_");
-					output+= '</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
-							'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
-							'&nbsp<a href="http://wiki.fallensword.com/index.php/' + wikiQuestName +
-							'" target="_blank" title="Look up this quest on the wiki">w</a>' +
+					output+=
+						'</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
+						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
+						'&nbsp<a href="http://wiki.fallensword.com/index.php/' + wikiQuestName +
+						'" target="_blank" title="Look up this quest on the wiki">w</a>' +
 						'</td><td align="right">' + q.level +
 						'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
 				}
@@ -5406,6 +5503,9 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Keep Creature Log' + Helper.helpLink('Keep Creature Log', 'This will show the creature log for each creature you see when you travel. This requires Show Creature Info enabled!') +
+				':</td><td><input name="showMonsterLog" type="checkbox" value="on"' + (GM_getValue("showMonsterLog")?" checked":"") + '>'+
+				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Footprints Color' + Helper.helpLink('Footprints Color', 'Changes the color of the footprints, useful if you can\\\'t see them in some maps') +
@@ -5416,14 +5516,14 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
 				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
+				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
+				'enabled for this function to work.') +
+				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
-			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
-				'separated by commas. Critters name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
-				'enabled for this function to work.') +
-				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
@@ -5518,6 +5618,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		System.saveValueForm(oForm, "hideBanner");
 		System.saveValueForm(oForm, "showCombatLog");
+		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
