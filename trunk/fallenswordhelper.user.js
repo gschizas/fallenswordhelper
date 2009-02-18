@@ -1493,18 +1493,20 @@ var Helper = {
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
 
 		}
-		var doNotKillList = GM_getValue("doNotKillList");
-		var doNotKillListAry = doNotKillList.split(",")
-		for (var i=0; i<9; i++) {
-			var monster = System.findNode("//a[@id='aLink" + i + "']")
-			if (monster) {
-				var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
-				for (var j=0; j<doNotKillListAry.length; j++) {
-					var doNotKillName = doNotKillListAry[j];
-					if (monsterName == doNotKillName){
-						var monsterNameCell = monster.parentNode.parentNode.previousSibling
-						monsterNameCell.innerHTML = '<span style="color:red;">' + monsterNameCell.innerHTML + '</span>';
-						break;
+		if (GM_getValue("quickKill")) {
+			var doNotKillList = GM_getValue("doNotKillList");
+			var doNotKillListAry = doNotKillList.split(",")
+			for (var i=0; i<9; i++) {
+				var monster = System.findNode("//a[@id='aLink" + i + "']")
+				if (monster) {
+					var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+					for (var j=0; j<doNotKillListAry.length; j++) {
+						var doNotKillName = doNotKillListAry[j];
+						if (monsterName == doNotKillName){
+							var monsterNameCell = monster.parentNode.parentNode.previousSibling
+							monsterNameCell.innerHTML = '<span style="color:red;">' + monsterNameCell.innerHTML + '</span>';
+							break;
+						}
 					}
 				}
 			}
@@ -5419,7 +5421,8 @@ var Helper = {
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
-				'separated by commas. Critters name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick).') +
+				'separated by commas. Critters name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
+				'enabled for this function to work.') +
 				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
