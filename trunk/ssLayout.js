@@ -11,7 +11,7 @@ var Layout = {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0");
 		}
 		if (GM_getValue("showMonsterLog")) {
-			Layout.injectOneMenu("Entity Logs", "index.php?cmd=notepad&subcmd=monsterlogs", 11, "menuSource_0")
+			Layout.injectOneMenu("Entity Logs", "index.php?cmd=notepad&subcmd=monsterlog", 11, "menuSource_0")
 		}
 		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
 		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 10, "menuSource_0");
