@@ -58,6 +58,7 @@ var Helper = {
 		System.setDefault("guildOnlineRefreshTime", 15);
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", false);
+		System.setDefault("doNotKillList", "");
 
 	},
 
@@ -735,19 +736,13 @@ var Helper = {
 		var defendingGuildHref = defendingGuild.getAttribute("href");
 		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
 
-		//code specifically to see if guild members are guarding the relic - only applies to PANIC
-		if (defendingGuildHref == "index.php?cmd=guild&subcmd=view&guild_id=40769") {
-			var panicGuild = true;
-		}
 		var validMemberString = "";
-		if (panicGuild) {
-			var memberList = System.getValueJSON("memberlist");
-			for (var i=0;i<memberList.members.length;i++) {
-				var member=memberList.members[i];
-				if (member.status == "Offline"
-					&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
-					validMemberString += member.name + " ";
-				}
+		var memberList = System.getValueJSON("memberlist");
+		for (var i=0;i<memberList.members.length;i++) {
+			var member=memberList.members[i];
+			if (member.status == "Offline"
+				&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
+				validMemberString += member.name + " ";
 			}
 		}
 
@@ -785,10 +780,8 @@ var Helper = {
 			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>"
-		if (panicGuild) {
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
-			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
-		}
+		extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
+		extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
 
@@ -1490,6 +1483,7 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
+
 		var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
 		if (!injectHere) return;
 		var newRow=injectHere.insertRow(2);
@@ -1523,6 +1517,24 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
+		if (GM_getValue("quickKill")) {
+			var doNotKillList = GM_getValue("doNotKillList");
+			var doNotKillListAry = doNotKillList.split(",")
+			for (var i=0; i<9; i++) {
+				var monster = System.findNode("//a[@id='aLink" + i + "']")
+				if (monster) {
+					var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+					for (var j=0; j<doNotKillListAry.length; j++) {
+						var doNotKillName = doNotKillListAry[j];
+						if (monsterName == doNotKillName){
+							var monsterNameCell = monster.parentNode.parentNode.previousSibling
+							monsterNameCell.innerHTML = '<span style="color:red;">' + monsterNameCell.innerHTML + '</span>';
+							break;
+						}
+					}
+				}
+			}
+		}
 	},
 
 	injectWorldMap: function() {
@@ -1579,13 +1591,27 @@ var Helper = {
 		if (!GM_getValue("quickKill")) return;
 		var kills=0;
 		var monster = Helper.getMonster(monsterNumber);
+
+		var doNotKillList = GM_getValue("doNotKillList");
+		var doNotKillListAry = doNotKillList.split(",")
+
 		if (monster) {
-			kills+=1;
-			System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
+			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+			var injectHere = monster.parentNode.parentNode;
+			var monsterFound = false;
+			for (var j=0; j<doNotKillListAry.length; j++) {
+				var doNotKillName = doNotKillListAry[j];
+				if (monsterName == doNotKillName){
+					injectHere.innerHTML = '<nobr><span style="color:cyan; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
+					monsterFound = true;
+					break;
+				}
+			}
+			if (!monsterFound) {
+				kills+=1;
+				System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
+			}
 		}
-		//if (kills>0) {
-		//	System.xmlhttp("index.php?cmd=blacksmith&subcmd=repairall&fromworld=1");
-		//}
 	},
 
 	prepareCheckMonster: function() {
@@ -1605,7 +1631,7 @@ var Helper = {
 					monsterText.style.color = 'red';
 
 				monster.id = "aLink" + (i + 1);
-				monster.parentNode.innerHTML += "<font style='font-size:8px'>" + (i+1) + "</font>";
+				monster.parentNode.innerHTML += "<span style='font-size:6pt;'>" + (i+1) + "</span>";
 			}
 		}
 
@@ -1645,11 +1671,11 @@ var Helper = {
 		var killButtons=System.findNode("tbody/tr[td/input]", statsNode);
 		var killButtonHeader=System.findNode("tbody/tr[contains(td/@style,'actions_head_bg.gif')]/following-sibling::tr", statsNode);
 		var killButtonParent=killButtonHeader.parentNode.parentNode;
-		if (GM_getValue("showMonsterLog"))
+		if (GM_getValue("showMonsterLog")) {
 			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent,
 				"key4":attackNode.textContent, "key5":defenseNode.textContent, "key6":armorNode.textContent, "key7":damageNode.textContent,
 				"key8":hitpointsNode.textContent, "key9":goldNode.textContent});
-
+		}
 		var imageNode = System.findNode("//table[@bordercolor='#323236']/..", creatureInfo);
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
@@ -1699,7 +1725,7 @@ var Helper = {
 	injectMonsterLog: function() {
 		var monsterLog = System.getValueJSON("monsterLog");
 		var content=Layout.notebookContent();
-		content.innerHTML = 'No monster information! Please enable monster log and travel a bit to see the world';
+		content.innerHTML = 'No monster information! Please enable entity log and travel a bit to see the world';
 		if (!monsterLog) return;
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr align=center><b>&nbsp;Monster Information</b></td>'+
@@ -1946,8 +1972,6 @@ var Helper = {
 						aRow.cells[1].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.nextSibling;
 					aMember.id = (/[0-9]+$/).exec(playerLink.href)[0];
 					aMember.name=playerLink.textContent;
-					// aMember.id = (/[0-9]+$/).exec(aRow.cells[1].firstChild.nextSibling.href)[0]
-					// aMember.name=aRow.cells[1].firstChild.nextSibling.textContent;
 					aMember.level=aRow.cells[2].textContent;
 					aMember.rank=aRow.cells[3].textContent;
 					aMember.xp=aRow.cells[4].textContent;
@@ -2485,7 +2509,7 @@ var Helper = {
 				}
 				output += "<li style='padding-bottom:0px;'>"
 				output += "<a style='color:#CCFF99;font-size:10px;' "
-				output += "href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + member.id + "', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>&nbsp;";
+				output += Layout.quickBuffHref(member.id) + ">[b]</a>&nbsp;";
 				if (member.id!=playerId) {
 					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
 					output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
@@ -2734,9 +2758,9 @@ var Helper = {
 					}
 					var inputTable = aRow.cells[6].firstChild.firstChild;
 					if (!playerListedItem) {
-					var inputCell = inputTable.rows[0].cells[0];
-					var textInput = inputCell.firstChild;
-					textInput.id = 'auction' + i + 'text';
+						var inputCell = inputTable.rows[0].cells[0];
+						var textInput = inputCell.firstChild;
+						textInput.id = 'auction' + i + 'text';
 					}
 					var inputText = aRow.cells[6]
 				}
@@ -3070,7 +3094,7 @@ var Helper = {
 				var warning = document.createElement('span');
 				var color = "";
 				var changeAppearance = true;
-				var relationship = Helper.guildRelationship(aLink.text)
+				var relationship = Helper.guildRelationship(aLink.text);
 				switch (relationship) {
 					case "self":
 						var settings="guildSelfMessage";
@@ -3123,23 +3147,25 @@ var Helper = {
 			var ranktext = "Rank " +playername + "" ;
 			var securetradetext = "Create Secure Trade to " + playername;
 
-			newhtml = avyrow.parentNode.innerHTML + "</td></tr><tr><td align='center' colspan='2'>" ;
-			newhtml += "<a href='javaScript:quickBuff(" + playerid ;
-			newhtml += ");'><img alt='Buff " + playername + "' title='Buff " + playername + "' src=" ;
-			newhtml += System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ;
-			newhtml += "');'><img alt='Join All Groups' title='Join All Groups' src=" ;
-			newhtml += System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" ;
-			newhtml += "<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" ;
-			newhtml += playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="';
-			newhtml += System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;';
-			newhtml += "<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" ;
-			newhtml += playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=';
-			newhtml += System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
+			newhtml = avyrow.parentNode.innerHTML +
+				"</td></tr><tr><td align='center' colspan='2'>" +
+				"<a " + Layout.quickBuffHref(playerid) + ">" +
+				"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
+				System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" +
+				"<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
+				"');'><img alt='Join All Groups' title='Join All Groups' src=" +
+				System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" +
+				"<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
+				playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="' +
+				System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
+				"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
+				playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
+				System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
 			if (relationship == "self" && GM_getValue("showAdmin")) {
-				newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" ;
-				newhtml += playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=';
-				newhtml += System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>" ;
+				newhtml +=
+					"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
+					playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
+					System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
@@ -3179,6 +3205,25 @@ var Helper = {
 				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
+		}
+	},
+
+	equipProfileInventoryItem: function(evt) {
+		var InventoryItemID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=profile&subcmd=equipitem&inventory_id=" + InventoryItemID,
+			Helper.equipProfileInventoryItemReturnMessage,
+			{"item": InventoryItemID, "target": evt.target});
+	},
+
+	equipProfileInventoryItemReturnMessage: function(responseText, callback) {
+		var itemID = callback.item;
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		if (!info) {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Worn</span>";
+		} else {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		}
 	},
 
@@ -3654,7 +3699,7 @@ var Helper = {
 		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
 			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
-				"type":"worn", "index":(i+1),
+				"where":"worn", "index":(i+1),
 				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
 			if (i==0) output.innerHTML+="<br/>Found worn item "
 			output.innerHTML+=(i+1) + " ";
@@ -3700,7 +3745,7 @@ var Helper = {
 			for (var i=0; i<backpackItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"backpack", "index":(i+1), "page":currentPage,
+					"where":"backpack", "index":(i+1), "page":currentPage,
 					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found wearable item "
 				output.innerHTML+=(i+1) + " ";
@@ -3727,7 +3772,7 @@ var Helper = {
 		Helper.guildinventory = new Object;
 		Helper.guildinventory.items = new Array();
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput')
-		output.innerHTML='<br/>Parsing guild store ...';
+		output.innerHTML = '<br/>Parsing guild store ...';
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', Helper.parseGuildStorePage);
 	},
 
@@ -3743,7 +3788,7 @@ var Helper = {
 			for (var i=0; i<guildstoreItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
+					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
 					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild store item "
 				output.innerHTML+=(i+1) + " ";
@@ -3769,7 +3814,7 @@ var Helper = {
 			for (var i=0; i<guildreportItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
-					"type":"guildreport", "index":(i+1), "worn":false,
+					"where":"guildreport", "index":(i+1), "worn":false,
 					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
 				if (i==0) output.innerHTML+="<br/>Found guild report item "
 				output.innerHTML+=(i+1) + " ";
@@ -3801,36 +3846,41 @@ var Helper = {
 		var doc=System.createDocument(responseText);
 		output.innerHTML+=(callback.invIndex+1) + " ";
 
-		targetInventory.items[callback.invIndex].html=responseText;
+		var item=targetInventory.items[callback.invIndex];
+		// item.html=responseText;
 
 		var nameNode=System.findNode("//b", doc);
 		if (!nameNode) GM_log(responseText);
+
 		if (nameNode) {
-			targetInventory.items[callback.invIndex].name=nameNode.textContent
+			item.name=nameNode.textContent
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].attack=(attackNode)?parseInt(attackNode.textContent):0;
+			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
 
 			var defenseNode=System.findNode("//tr/td[.='Defense:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].defense=(defenseNode)?parseInt(defenseNode.textContent):0;
+			item.defense=(defenseNode)?parseInt(defenseNode.textContent):0;
 
 			var armorNode=System.findNode("//tr/td[.='Armor:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].armor=(armorNode)?parseInt(armorNode.textContent):0;
+			item.armor=(armorNode)?parseInt(armorNode.textContent):0;
 
 			var damageNode=System.findNode("//tr/td[.='Damage:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].damage=(damageNode)?parseInt(damageNode.textContent):0;
+			item.damage=(damageNode)?parseInt(damageNode.textContent):0;
 
 			var hpNode=System.findNode("//tr/td[.='HP:']/../td[2]", doc);
-			targetInventory.items[callback.invIndex].hp=(hpNode)?parseInt(hpNode.textContent):0;
+			item.hp=(hpNode)?parseInt(hpNode.textContent):0;
 
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
-			targetInventory.items[callback.invIndex].minLevel=(levelNode)?parseInt(levelNode.textContent):0;
+			item.minLevel=(levelNode)?parseInt(levelNode.textContent):0;
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
 				forgeCount++;
 			}
-			targetInventory.items[callback.invIndex].forgelevel=forgeCount;
+			item.forgelevel=forgeCount;
+
+			var typeNode=System.findNode("//font[@size='1' and @color='yellow']", doc);
+			item.type = (typeNode)?typeNode.textContent:"???";
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -3838,7 +3888,7 @@ var Helper = {
 				var fontLineRX=fontLineRE.exec(responseText)
 				craft = fontLineRX[3];
 			}
-			targetInventory.items[callback.invIndex].craftlevel=craft;
+			item.craftlevel=craft;
 		}
 
 		if (callback.invIndex<targetInventory.items.length-1) {
@@ -3863,22 +3913,30 @@ var Helper = {
 		if (!targetInventory) return;
 		var output=document.getElementById(targetId);
 		var result='<table id="Helper:InventoryTable"><tr>' +
-			'<th width="10"></th><th width="180" align="left" sortkey="name">Name</th>' +
-			'<th width="10"></th><th sortkey="minLevel">Level</th>' +
-			'<th width="10"></th><th sortkey="attack">Att</th>' +
-			'<th width="10"></th><th sortkey="defense">Def</th>' +
-			'<th width="10"></th><th sortkey="armor">Arm</th>' +
-			'<th width="10"></th><th sortkey="damage">Dam</th>' +
-			'<th width="10"></th><th sortkey="hp">HP</th>' +
-			'<th width="10"></th><th sortkey="forgelevel">Forge</th>' +
-			'<th width="10"></th><th sortkey="craftlevel">Craft</th>' +
+			'<th width="180" align="left" colspan="2" sortkey="name">Name</th>' +
+			'<th sortkey="minLevel">Level</th>' +
+			'<th sortkey="where">Where</th>' +
+			'<th sortkey="type">Type</th>' +
+			'<th sortkey="attack">Att</th>' +
+			'<th sortkey="defense">Def</th>' +
+			'<th sortkey="armor">Arm</th>' +
+			'<th sortkey="damage">Dam</th>' +
+			'<th sortkey="hp">HP</th>' +
+			'<th sortkey="forgelevel">Upgrade</th>' +
+			'<th sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
 		var item, color;
 		var showUseableItems = GM_getValue("showUseableItems");
-		for (var i=0; i<targetInventory.items.length;i++) {
-			item=targetInventory.items[i];
+		var allItems = targetInventory.items;
+		if (showUseableItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.minLevel < Helper.characterLevel});
+			//  && e.minLevel + 50 > Helper.characterLevel}
+		}
 
-			switch (item.type+"") {
+		for (var i=0; i<allItems.length;i++) {
+			item=allItems[i];
+
+			switch (item.where+"") {
 				case "worn":        color = "green";  break;
 				case "backpack":    color = "blue";   break;
 				case "guildstore":  color = "lime";   break;
@@ -3886,23 +3944,22 @@ var Helper = {
 				default: color = "#84ADAC";
 			}
 
-			if (showUseableItems && item.minLevel > Helper.characterLevel) {
-			} else {
-				result+='<tr style="color:'+ color +'">' +
-					'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-					'</td><td>' + item.name + '</td>' +
-					'<td></td><td align="right">' + item.minLevel + '</td>' +
-					'<td></td><td align="right">' + item.attack + '</td>' +
-					'<td></td><td align="right">' + item.defense + '</td>' +
-					'<td></td><td align="right">' + item.armor + '</td>' +
-					'<td></td><td align="right">' + item.damage + '</td>' +
-					'<td></td><td align="right">' + item.hp + '</td>' +
-					'<td></td><td align="right">' + item.forgelevel + '</td>' +
-					'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
-						'<td align="right">' + item.craftlevel + '</td>' +
-					'<td></td>' +
-					'</tr>';
-			}
+			result+='<tr style="color:'+ color +'">' +
+				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
+				'</td><td>' + item.name + '</td>' +
+				'<td align="right">' + item.minLevel + '</td>' +
+				'<td align="right">' + item.where + '</td>' +
+				'<td align="right">' + item.type + '</td>' +
+				'<td align="right">' + item.attack + '</td>' +
+				'<td align="right">' + item.defense + '</td>' +
+				'<td align="right">' + item.armor + '</td>' +
+				'<td align="right">' + item.damage + '</td>' +
+				'<td align="right">' + item.hp + '</td>' +
+				'<td align="right">' + item.forgelevel + '</td>' +
+				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+					'<td align="right">' + item.craftlevel + '</td>' +
+				'<td></td>' +
+				'</tr>';
 		}
 		result+='</table>';
 		output.innerHTML=result;
@@ -4066,12 +4123,39 @@ var Helper = {
 	},
 
 	generateRecipeTable: function() {
-		GM_log(JSON.stringify(Helper.recipebook));
 		var output=document.getElementById('Helper:RecipeManagerOutput');
+		var filterRecipe = System.getValueJSON("recipeFilter");
+		Helper.ItemTypes = ["Ammo", "Body Armor", "Helmet", "Helmet Add-On", "Leg Armor", "Mission Item", "Weapon", "Weapon Add-On"]
+
+		if (!filterRecipe) filterRecipe={
+			minLevel:0,
+			maxLevel:999,
+			types: Helper.ItemTypes,
+			useLevel: false,
+			useType: false
+		}
+
 		var result='<table id="Helper:RecipeTable"><tr>' +
 			'<th align="left" sortkey="name">Name</th>' +
-			'<th align="left" sortkey="level" sorttype="number">Level</th>' +
-			'<th align="left" sortkey="type">Type</th>' +
+			'<th align="left" sortkey="level" sorttype="number">Level <span id="Helper:FilterLevel" style="text-decoration:underline;cursor:pointer">&#x00bb;</span>'+
+			'<table border=0 cellspacing=0 celpadding=0 id="Helper:LevelFilter" style="visibility:hidden;display:none;text-size:xx-small">'+
+			'<tr><td>Use level filter <input type=checkbox size=1 class=custominput id="Helper:UseLevelFilter" value="yes"'+(filterRecipe.useLevel?' checked':'')+'></td></tr>' +
+			'<tr><td>From</td><td><input type=text size=1 class=custominput id="Helper:LevelFilterMin" value="'+ filterRecipe.minLevel +'"></td></tr>'+
+			'<tr><td>To</td><td><input type=text size=1 class=custominput id="Helper:LevelFilterMax" value="'+ filterRecipe.maxLevel +'"></td></tr>' +
+			'<tr><td><input type=button class=custombutton  id="Helper:LevelFilterOk" value=Ok></td></tr>'+
+			'</table></th>' +
+			'<th align="left" sortkey="type">Type <span id="Helper:FilterType" style="text-decoration:underline;cursor:pointer">&#x00bb;</span>'+
+			'<table border=0 cellspacing=0 celpadding=0 id="Helper:TypeFilter" style="visibility:hidden;display:none;text-size:xx-small;">'+
+			'<tr><td>Use type filter <input type=checkbox size=1 class=custominput id="Helper:UseTypeFilter" value="yes"'+(filterRecipe.useType?' checked':'')+'></td></tr>'
+		for (var i=0;i<Helper.ItemTypes.length;i++) {
+			var typ=Helper.ItemTypes[i];
+			result +=
+				'<tr><td><input type=checkbox id="Helper:TypeFilter:' + typ.replace(/\s\-/ig,"") + '"class=custominput' +
+				((filterRecipe.types.indexOf(typ)>=0)?' checked':'') + '> ' + typ + '</td></tr>'
+		}
+		result +=
+			'<tr><td><input type=button class=custombutton id="Helper:TypeFilterOk" value=Ok></td></tr>'+
+			'</table></th>' +
 			'<th align="left" sortkey="credits" sorttype="number">Credits</th>' +
 			'<th align="left">Items</th>' +
 			'<th align="left">Components</th>' +
@@ -4084,48 +4168,62 @@ var Helper = {
 
 		var recipe;
 		var c=0;
-		for (var i=0; i<Helper.recipebook.recipe.length;i++) {
-			recipe=Helper.recipebook.recipe[i];
+		var showRecipes = Helper.recipebook.recipe.filter(function (e) {return hideRecipes.indexOf(e.name)==-1});
+
+		if (filterRecipe.useLevel) {
+			showRecipes = showRecipes.filter(function (e,i,a) {return e.level >= filterRecipe.minLevel && e.level <= filterRecipe.maxLevel});
+		}
+
+		if (filterRecipe.useType) {
+			showRecipes = showRecipes.filter(function (e,i,a) {return filterRecipe.types.indexOf(e.type) >= 0});
+		}
+
+
+		for (var i=0; i<showRecipes.length;i++) {
+			recipe=showRecipes[i];
 			c++;
 
-			if (hideRecipes.indexOf(recipe.name) == -1) {
-				result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
-					'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/>' + recipe.name + '</td>' +
-					'<td>' + recipe.level + '</td>' +
-					'<td>' + recipe.type + '</td>' +
-					'<td>' + recipe.credits + '</td>'
-				result += '<td>';
-				if (recipe.items) {
-					for (var j=0; j<recipe.items.length; j++) {
-						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded+
-							' <img border="0" align="middle" onmouseover="ajaxLoadItem(' +
-							recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
-							'src="' + recipe.items[j].img + '"/><br/>';
-					}
+			result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
+				'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/>' + recipe.name + '</td>' +
+				'<td>' + recipe.level + '</td>' +
+				'<td>' + recipe.type + '</td>' +
+				'<td>' + recipe.credits + '</td>'
+			result += '<td>';
+			if (recipe.items) {
+				for (var j=0; j<recipe.items.length; j++) {
+					result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded+
+						' <img border="0" align="middle" onmouseover="ajaxLoadItem(' +
+						recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
+						'src="' + recipe.items[j].img + '"/><br/>';
 				}
-				result += '</td>'
-				result += '<td>';
-				if (recipe.components) {
-					for (var j=0; j<recipe.components.length; j++) {
-						result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
-							' <img border="0" align="middle" onmouseover="ajaxLoadItem(' +
-							recipe.components[j].id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
-							'src="' + recipe.components[j].img + '"/><br/>';
-					}
-				}
-				result += '</td>'
-				result += '<td>';
-				if (recipe.target) {
-					result += '<img border="0" align="middle" onmouseover="ajaxLoadItem(' +
-						recipe.target.id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
-						'src="' + recipe.target.img + '"/>';
-				}
-				result += '</td>'
-				result += '</tr>';
 			}
+			result += '</td>'
+			result += '<td>';
+			if (recipe.components) {
+				for (var j=0; j<recipe.components.length; j++) {
+					result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
+						' <img border="0" align="middle" onmouseover="ajaxLoadItem(' +
+						recipe.components[j].id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
+						'src="' + recipe.components[j].img + '"/><br/>';
+				}
+			}
+			result += '</td>'
+			result += '<td>';
+			if (recipe.target) {
+				result += '<img border="0" align="middle" onmouseover="ajaxLoadItem(' +
+					recipe.target.id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
+					'src="' + recipe.target.img + '"/>';
+			}
+			result += '</td>'
+			result += '</tr>';
 		}
 		result+='</table>';
 		output.innerHTML=result;
+
+		document.getElementById('Helper:FilterLevel').addEventListener('click', Helper.filterRecipeByLevel, true);
+		document.getElementById('Helper:FilterType').addEventListener('click', Helper.filterRecipeByType, true);
+		document.getElementById('Helper:LevelFilterOk').addEventListener('click', Helper.filterRecipeOk, true);
+		document.getElementById('Helper:TypeFilterOk').addEventListener('click', Helper.filterRecipeOk, true);
 
 		var recipeTable=document.getElementById('Helper:RecipeTable');
 		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
@@ -4138,10 +4236,55 @@ var Helper = {
 		}
 	},
 
+	filterRecipeOk: function(evt) {
+		var selectedTypes = []
+		for (var i=0; i<Helper.ItemTypes.length; i++) {
+			var typ = Helper.ItemTypes[i]
+			if (document.getElementById("Helper:TypeFilter:"+typ).checked) {
+				selectedTypes.push(typ)
+			}
+		}
+
+		var theMinLevel = parseInt(document.getElementById("Helper:LevelFilterMin").value);
+		var theMaxLevel = parseInt(document.getElementById("Helper:LevelFilterMax").value);
+		if (isNaN(theMinLevel) || theMinLevel == null) theMinLevel=0;
+		if (isNaN(theMaxLevel) || theMaxLevel == null) theMaxLevel=999;
+
+		var filterRecipe={
+			minLevel: theMinLevel,
+			maxLevel: theMaxLevel,
+			types: selectedTypes,
+			useLevel: document.getElementById("Helper:UseLevelFilter").checked,
+			useType: document.getElementById("Helper:UseTypeFilter").checked
+		}
+
+		GM_setValue("recipeFilter", JSON.stringify(filterRecipe))
+		evt.stopPropagation();
+		Helper.generateRecipeTable();
+	},
+
+	filterRecipeByLevel: function(evt) {
+		var levelFilter=document.getElementById("Helper:LevelFilter");
+		var isVisible=levelFilter.style.visibility=="visible";
+		levelFilter.style.visibility=isVisible?"hidden":"visible";
+		levelFilter.style.display=isVisible?"none":"block";
+		evt.stopPropagation();
+	},
+
+
+	filterRecipeByType: function(evt) {
+		var typeFilter=document.getElementById("Helper:TypeFilter");
+		var isVisible=typeFilter.style.visibility=="visible";
+		typeFilter.style.visibility=isVisible?"hidden":"visible";
+		typeFilter.style.display=isVisible?"none":"block";
+		evt.stopPropagation();
+	},
+
 	sortRecipeTable: function(evt) {
 		Helper.recipebook=System.getValueJSON("recipebook");
 		var headerClicked = evt.target.getAttribute("sortKey");
 		var sortType = evt.target.getAttribute("sorttype");
+		if (!headerClicked) return;
 		if (!sortType) sortType="string";
 		sortType = sortType.toLowerCase();
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
@@ -5019,6 +5162,7 @@ var Helper = {
 	injectSettings: function() {
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
 		var buffs=GM_getValue("huntingBuffs");
+		var doNotKillList=GM_getValue("doNotKillList");
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="2" border="0">' +
@@ -5071,12 +5215,16 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show Monster Log' + Helper.helpLink('Show Monster Log', 'This will show the monster log for each monster you see when you travel. This requires Show Creature Info enable!') +
+			'<tr><td align="right">Keep Entity Log' + Helper.helpLink('Keep Entity Log', 'This will show the entity log for each entity you see when you travel. This requires Show Entity Info enabled!') +
 				':</td><td><input name="showMonsterLog" type="checkbox" value="on"' + (GM_getValue("showMonsterLog")?" checked":"") + '>'+
 				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 			'<tr><td align="right">Hide <small>Taulin Rad Lands</small> Portal' + Helper.helpLink('Hide Taulin Rad Lands Portal', 'This will hide the Taulin Rad Lands portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Footprints Color:</td><td><input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
+				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
+				'enabled for this function to work.') +
+				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -5195,6 +5343,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
 		System.saveValueForm(oForm, "guildOnlineRefreshTime");
+		System.saveValueForm(oForm, "doNotKillList");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
