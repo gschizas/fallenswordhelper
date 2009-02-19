@@ -3,6 +3,7 @@
 var System = {
 	init: function() {
 		Date.prototype.toFormatString = System.formatDate;
+
 		Number.prototype.padZero = System.padZero;
 		String.prototype.repeat = System.repeatString;
 		if (!String.trim) {
@@ -24,9 +25,22 @@ var System = {
 		var resultJSON=GM_getValue(name);
 		var result;
 		if (resultJSON) {
-			result = JSON.parse(resultJSON);
+			var reviver = function (key, value) {
+				if (typeof value === 'string') {
+					var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+					if (a) {
+						return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
+					}
+				}
+				return value;
+			}
+			result = JSON.parse(resultJSON, reviver);
 		}
 		return result;
+	},
+
+	setValueJSON: function(name, value) {
+		GM_setValue(name, JSON.stringify(value))
 	},
 
 	findNode: function(xpath, doc) {
@@ -172,7 +186,7 @@ var System = {
 	getIntFromRegExp: function(theText, rxSearch) {
 		var matches = theText.match(rxSearch);
 		if (matches) {
-			result = matches[1];
+			result = parseInt(matches[1]);
 		} else {
 			result = 0;
 		}

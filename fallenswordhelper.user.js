@@ -97,18 +97,21 @@ var Helper = {
 				{"category":"Plants", "searchname":"Heffle Wart",                    "nickname":""},
 				{"category":"Plants", "searchname":"Amber",                          "nickname":""}
 			];
-			GM_setValue("quickSearchList", JSON.stringify(quickSearchList));
+			System.setValueJSON("quickSearchList", quickSearchList);
 		}
+
+		var memberList = System.getValueJSON("memberlist");
+		if (!memberList || !memberList.lastUpdate) GM_setValue("memberlist", "");
 	},
 
 	readInfo: function() {
 		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]");
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
-		Helper.characterName   = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
-		Helper.characterLevel  = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
-		Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
-		Helper.characterDefense = charInfoText.match(/Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		Helper.characterName    = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
+		Helper.characterLevel   = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterAttack  = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
@@ -959,7 +962,7 @@ var Helper = {
 	mapThis: function() {
 		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
 		var posit = Helper.position();
-		// GM_log(JSON.stringify(posit));
+
 		if ((realm) && (posit)) {
 			var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
@@ -971,8 +974,7 @@ var Helper = {
 			if (!theMap["levels"][levelName]) theMap["levels"][levelName] = {};
 			if (!theMap["levels"][levelName][posit.X]) theMap["levels"][levelName][posit.X]={};
 			theMap["levels"][levelName][posit.X][posit.Y]="!";
-			// GM_log(JSON.stringify(theMap))
-			GM_setValue("map", JSON.stringify(theMap));
+			System.setValueJSON("map", theMap);
 		}
 	},
 
@@ -987,7 +989,7 @@ var Helper = {
 		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='200']");
 		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
-		// GM_log(JSON.stringify(posit))
+
 		for (var y=0; y<displayedMap.rows.length; y++) {
 			var aRow = displayedMap.rows[y];
 			for (var x=0; x<aRow.cells.length; x++) {
@@ -1533,7 +1535,7 @@ var Helper = {
 			var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
 			theMap["levels"][Helper.levelName]={};
-			GM_setValue("map", JSON.stringify(theMap))
+			System.setValueJSON("map", theMap)
 		}
 
 		document.getElementById('Helper:ToggleFootprints').src =
@@ -1712,7 +1714,7 @@ var Helper = {
 			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value
 				? monsterLog[name]["max"]["key" + i] : value;
 		}
-		GM_setValue("monsterLog", JSON.stringify(monsterLog));
+		System.setValueJSON("monsterLog", monsterLog);
 	},
 
 	injectMonsterLog: function() {
@@ -1907,7 +1909,7 @@ var Helper = {
 		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
 		guildOnlineRefreshTime *= 1000;
 		if (memberList) {
-			if ((new Date()).getTime() - memberList.changedOn > guildOnlineRefreshTime) memberList = null; // invalidate cache
+			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
 
 		if (!memberList) {
@@ -1929,28 +1931,57 @@ var Helper = {
 				membersTable=oneTable;
 			}
 		}
+
 		if (membersTable) {
 			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
-			var memberList = {};
-			memberList.members = [];
-			memberList.lookupByName = [];
-			memberList.lookupById = [];
+			var memberList = System.getValueJSON("memberlist");
+			if (!memberList) {
+				memberList = {};
+				memberList.members = [];
+			}
+
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
-					var aMember = new Object;
-					aMember.status = aRow.cells[0].firstChild.title;
-					aMember.id = (/[0-9]+$/).exec(aRow.cells[1].firstChild.nextSibling.href)[0]
-					aMember.name=aRow.cells[1].firstChild.nextSibling.textContent;
-					aMember.level=aRow.cells[2].textContent;
-					aMember.rank=aRow.cells[3].textContent;
-					aMember.xp=aRow.cells[4].textContent;
-					memberList.members.push(aMember);
-					memberList.lookupByName.push(aMember.name)
-					memberList.lookupById.push(aMember.id)
+					var playerLink   = aRow.cells[1].firstChild.nextSibling;
+					var memberId     = System.intValue((/[0-9]+$/).exec(playerLink.href)[0]);
+					var memberName   = playerLink.textContent;
+					var memberLevel  = System.intValue(aRow.cells[2].textContent);
+					var memberRank   = aRow.cells[3].textContent;
+					var memberXP     = System.intValue(aRow.cells[4].textContent);
+					var memberStatus = aRow.cells[0].firstChild.title;
+
+					var aMember;
+
+					// find member in member list, to modify data instead of replacing it
+
+					var findMembers = memberList.members.filter(function (e) {return e.id==memberId});
+					if (findMembers.length>0) {
+						aMember = findMembers[0];
+					}
+					else { // member was not found, must be a new player
+						aMember = {};
+						// You can still modify an object, even if you have added it to something else
+						memberList.members.push(aMember);
+						aMember.firstSeen = new Date();
+						aMember.status = "Offline"; // new players are supposed to be offline
+					}
+					Helper.getFullPlayerData(aMember);
+
+					if (aMember.status == "Offline" && memberStatus=="Online") {
+						aMember.loggedInAt = new Date();
+					}
+
+					aMember.status = memberStatus;
+					aMember.id     = memberId;
+					aMember.name   = memberName;
+					aMember.level  = memberLevel;
+					aMember.rank   = memberRank;
+					aMember.xp     = memberXP;
 				}
 			}
-			memberList.changedOn = new Date().getTime();
+
+			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
 			Helper.injectGuildList(memberList);
 		}
@@ -2065,7 +2096,7 @@ var Helper = {
 
 		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
 
-		GM_setValue("chat", JSON.stringify(chat));
+		System.setValueJSON("chat", chat);
 	},
 
 	sendMassChat: function(evt) {
@@ -2445,15 +2476,8 @@ var Helper = {
 	},
 
 	injectGuildList: function(memberList) {
-		var oldMemberList = System.getValueJSON("oldmemberlist");
-		if (!oldMemberList) oldMemberList=memberList;
-
-		var oldIds=oldMemberList.members
-			.filterBy("status", "Online")
-			.map(function(element, index, array) {return element.id});
-
 		var playerId = Layout.playerId();
-		GM_setValue("memberlist", JSON.stringify(memberList));
+		System.setValueJSON("memberlist", memberList);
 		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
@@ -2465,56 +2489,46 @@ var Helper = {
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Guild Members";
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
-			if (member.status=="Online") {
-				if (memberList.isRefreshed) {
-					Helper.getFullPlayerData(member);
-				}
-				output += "<li style='padding-bottom:0px;'>"
-				output += "<a style='color:#CCFF99;font-size:10px;' "
-				output += Layout.quickBuffHref(member.id) + ">[b]</a>&nbsp;";
-				if (member.id!=playerId) {
-					output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
-					output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
-					output += "</a>";
-				}
-				else {
-					output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
-				}
-				output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
-				output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b><br/>XP: " + member.xp + "<br/>Lvl: " + member.level + "<br/>";
-				if (member.hasFullData) {
-
-				}
-				output += "</div>');\" ";
-				output += "style='color:"
-				if (oldIds.indexOf(member.id)<0 /* || member.justLoggedIn */) { // just logged in
-					output += "orange";
-					member.loggedIn=new Date().getTime();
-					member.lastSeen=new Date().getTime();
-					// if (memberList.isRefreshed) {member.justLoggedIn=true; }
-				} else {
-					output += (member.id==playerId)?"#FFF380":"white";
-				}
-				output += ";font-size:10px;'"
-				output += " href='" + System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
-				// output += "<br/>"
-				output += "</li>"
+		var onlineMembers = memberList.members.filter(function (e) {return (e.status=="Online")})
+		for (var i=0;i<onlineMembers.length;i++) {
+			var member=onlineMembers[i];
+			output += "<li style='padding-bottom:0px;'>"
+			output += "<a style='color:#CCFF99;font-size:10px;' "
+			output += Layout.quickBuffHref(member.id) + ">[b]</a>&nbsp;";
+			if (member.id!=playerId) {
+				output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
+				output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
+				output += "</a>";
 			}
 			else {
-				member.loggedIn=0;
+				output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
 			}
+			output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
+			output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b>"+
+				"<br/>XP: " + member.xp +
+				"<br/>Level: " + member.level +
+				"<br/>Logged in:" + member.loggedInAt.toFormatString("ddd HH:mm");
+			if (member.hasFullData) {
+
+			}
+			output += "</div>');\" ";
+			output += "style='color:"
+			if (((new Date()) - member.loggedInAt) < 30000) { // just logged in
+				output += "orange";
+			} 
+			else {
+				output += (member.id==playerId)?"#FFF380":"white";
+			}
+			output += ";font-size:10px;'"
+			output += " href='" + System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
+			// output += "<br/>"
+			output += "</li>"
 		}
 		output += "</ol>";
 		aCell.innerHTML = output;
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-
-		if (memberList.isRefreshed) {
-			GM_setValue("oldmemberlist", JSON.stringify(memberList));
-		}
 	},
 
 	getFullPlayerData: function(member) {
@@ -2598,8 +2612,6 @@ var Helper = {
 		if (!potions) {
 			potions = Data.potionList();
 		}
-
-		//GM_log(JSON.stringify(potions));
 
 		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
 			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
@@ -3576,7 +3588,7 @@ var Helper = {
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
 		}
 		else {
-			GM_setValue("onlinePlayers", JSON.stringify(Helper.onlinePlayers));
+			System.setValueJSON("onlinePlayers", Helper.onlinePlayers);
 			Helper.sortOnlinePlayersTable();
 			Helper.generateOnlinePlayersTable();
 		}
@@ -3664,7 +3676,7 @@ var Helper = {
 			}
 			Helper.sortBy=headerClicked;
 		}
-		GM_setValue("onlinePlayerSortBy", JSON.stringify({"sortBy": Helper.sortBy, "sortType": sortType, "sortAsc": Helper.sortAsc}));
+		System.setValueJSON("onlinePlayerSortBy", {"sortBy": Helper.sortBy, "sortType": sortType, "sortAsc": Helper.sortAsc});
 
 		switch(sortType) {
 			case "string":
@@ -3968,7 +3980,7 @@ var Helper = {
 		output.innerHTML=result;
 
 		targetInventory.lastUpdate = (new Date()).getTime();
-		GM_setValue(inventoryShell, JSON.stringify(targetInventory));
+		System.setValueJSON(inventoryShell, targetInventory);
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
 		for (var i=0; i<inventoryTable.rows[0].cells.length; i++) {
@@ -4073,7 +4085,6 @@ var Helper = {
 		else {
 			output.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
 			// Helper.generateRecipeTable();
-			// GM_log(JSON.stringify(Helper.recipebook));
 			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + Helper.recipebook.recipe[0].id, Helper.parseRecipePage, {"recipeIndex": 0});
 		}
 	},
@@ -4121,7 +4132,7 @@ var Helper = {
 		else {
 			output.innerHTML+='Finished parsing ... formatting ...';
 			Helper.recipebook.lastUpdate = (new Date()).getTime();
-			GM_setValue("recipebook", JSON.stringify(Helper.recipebook));
+			System.setValueJSON("recipebook", Helper.recipebook);
 			Helper.generateRecipeTable();
 		}
 	},
@@ -4186,7 +4197,7 @@ var Helper = {
 		output.innerHTML=result;
 
 		Helper.recipebook.lastUpdate = (new Date()).getTime();
-		GM_setValue("recipebook", JSON.stringify(Helper.recipebook));
+		System.setValueJSON("recipebook", Helper.recipebook);
 
 		var recipeTable=document.getElementById('Helper:RecipeTable');
 		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
@@ -4309,8 +4320,6 @@ var Helper = {
 
 		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
 		var memberList=System.getValueJSON("memberlist");
-		// window.alert(typeof(memberList.members));
-		// memberList.lookupByName.find
 		for (i=0; i<allItems.length; i++) {
 			var theItem=allItems[i].cells[0];
 			var foundName=theItem.textContent;
@@ -4514,7 +4523,7 @@ var Helper = {
 
 		delete theBuffPack["bp"][theBuffPack["size"]];
 
-		GM_setValue("buffpack", JSON.stringify(theBuffPack));
+		System.setValueJSON("buffpack", theBuffPack);
 		location.reload(true);
 	},
 
@@ -4553,7 +4562,7 @@ var Helper = {
 		theBuffPack["size"] += 1;
 
 		// save and reload
-		GM_setValue("buffpack", JSON.stringify(theBuffPack));
+		System.setValueJSON("buffpack", theBuffPack);
 		location.reload(true);
 	},
 
@@ -5172,7 +5181,7 @@ var Helper = {
 				row.style.backgroundColor = '#F5F298';
 			}
 		}
-		GM_setValue("arenaMatches", JSON.stringify(arenaMatches));
+		System.setValueJSON("arenaMatches", arenaMatches);
 
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
@@ -5291,7 +5300,7 @@ var Helper = {
             aMove.moveHREF = arenaMove.getAttribute("src");
 			moves.push(aMove);
         }
-		GM_setValue("arenaMoves", JSON.stringify(moves));
+		System.setValueJSON("arenaMoves", moves);
     },
 
 	injectTournament: function() {
@@ -5399,7 +5408,7 @@ var Helper = {
 				arenaMatches.push(aMatch);
 			}
 		}
-		GM_setValue("arenaMatches", JSON.stringify(arenaMatches));
+		System.setValueJSON("arenaMatches", arenaMatches);
 	},
 
 	injectRelicList: function(){
@@ -5800,7 +5809,7 @@ var Helper = {
 			document.getElementById("Helper:DeleteLink" + i).addEventListener('click', Helper.deleteQuickLink, true);
 		}
 		document.getElementById("Helper:AddLink").addEventListener('click', Helper.addQuickLink, true);
-		GM_setValue("quickLinks", JSON.stringify(Helper.quickLinks));
+		System.setValueJSON("quickLinks", Helper.quickLinks);
 	},
 
 	deleteQuickLink: function(evt) {
