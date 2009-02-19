@@ -27,6 +27,7 @@ var Helper = {
 
 	initSettings: function() {
 		System.setDefault("enableLogColoring", true);
+		System.setDefault("enableCreatureColoring", true);
 		System.setDefault("showCombatLog", true);
 		System.setDefault("showCreatureInfo", true);
 		System.setDefault("keepLogs", false);
@@ -57,7 +58,7 @@ var Helper = {
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
 		System.setDefault("hideMatchesForCompletedMoves", false);
-		System.setDefault("quickKill", false);
+		System.setDefault("quickKill", true);
 		System.setDefault("doNotKillList", "");
 
 	},
@@ -1615,26 +1616,34 @@ var Helper = {
 	},
 
 	prepareCheckMonster: function() {
-		// add id to the kill-monster links
-		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=2')]");
+		Helper.colorMonsters();
+		Helper.getMonsterInfo();
+	},
+
+	colorMonsters: function() {
+		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and not(contains(@href,'max_turns='))]");
 		if (!monsters) return;
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
 				// add monster color based on elite types
-				var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
-				if (monsterText.textContent.match(/\(Champion\)/i))
-					monsterText.style.color = 'green';
-				if (monsterText.textContent.match(/\(Elite\)/i))
-					monsterText.style.color = 'yellow';
-				if (monsterText.textContent.match(/\(HK\)/i))
-					monsterText.style.color = 'red';
+				if (GM_getValue("enableCreatureColoring")) {
+					var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
+					if (monsterText.textContent.match(/\(Champion\)/i))
+						monsterText.style.color = 'green';
+					if (monsterText.textContent.match(/\(Elite\)/i))
+						monsterText.style.color = 'yellow';
+					if (monsterText.textContent.match(/\(HK\)/i))
+						monsterText.style.color = 'red';
+				}
 
 				monster.id = "aLink" + (i + 1);
 				monster.parentNode.innerHTML += "<span style='font-size:6pt;'>" + (i+1) + "</span>";
 			}
 		}
+	},
 
+	getMonsterInfo: function() {
 		if (!GM_getValue("showCreatureInfo")) return;
 		var monsters = System.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
 		if (!monsters) return;
@@ -1713,7 +1722,7 @@ var Helper = {
 		for (i = 1; i < 4; i++)
 			monsterLog[name]["min"]["key" + i] = monster["key" + i];
 		for (i = 4; i < 10; i++) {
-			var value = parseInt(monster["key" + i]);
+			var value = System.intValue(monster["key" + i]);
 			monsterLog[name]["min"]["key" + i] = monsterLog[name]["min"]["key" + i] < value
 				? monsterLog[name]["min"]["key" + i] : value;
 			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value
@@ -1728,40 +1737,33 @@ var Helper = {
 		content.innerHTML = 'No monster information! Please enable entity log and travel a bit to see the world';
 		if (!monsterLog) return;
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr align=center><b>&nbsp;Monster Information</b></td>'+
+			'<td width="90%" nobr align=center><b>&nbsp;Entity Information</b></td>'+
 			'<td width="10%" nobr>[<span id="Helper.clearMonsterLog">Clear</span>]</td>'+
 			'</tr>' +
 			'</table>'+
-			'<table id="Helper:MonsterInfo" cellspacing="0" cellpadding="0" border="0" ><tr>' +
-			'<th width="25%" align="left" sortkey="name">Name</th>' +
-			'<th align="center">Img</th>' +
+			'<table id="Helper:MonsterInfo" cellspacing="1" cellpadding="2" border="0" ><tr>' +
+			'<th width="25%" align="left" sortkey="name" colspan="2">Name</th>' +
 			'<th align="center" sortkey="class">Class</th>' +
 			'<th align="center" sortkey="Level" sorttype="number">Lvl</th>' +
-			'<th align="center">Min Atk</th>' +
-			'<th align="center">Max Atk</th>' +
-			'<th align="center">Min Def</th>' +
-			'<th align="center">Max Def</th>' +
-			'<th align="center">Min Arm</th>' +
-			'<th align="center">Max Arm</th>' +
-			'<th align="center">Min Dmg</th>' +
-			'<th align="center">Max Dmg</th>' +
-			'<th align="center">Min HP</th>' +
-			'<th align="center">Max HP</th>' +
-			'<th align="center">Min Cr</th>' +
-			'<th align="center">Max Cr</th>' +
+			'<th align="center">Attack</th>' +
+			'<th align="center">Defence</th>' +
+			'<th align="center">Armor</th>' +
+			'<th align="center">Damage</th>' +
+			'<th align="center">HP</th>' +
+			'<th align="center">Credits</th>' +
 			'</tr>';
 		for (var name in monsterLog) {
-			result += '<tr><td align="left">' + name + '</td>';
-			result += '<td align="center"><img width=40 height=40 src="' + monsterLog[name]["min"]["key1"] + '"/></td>';
+			result += '<tr><td align="center"><img width=40 height=40 src="' + monsterLog[name]["min"]["key1"] + '"/></td>';
+			result += '<td align="left">' + name + '</td>';
 			for (i = 2; i < 4; i++)
-				result += '<td align="center">' + monsterLog[name]["min"]["key"+i] + '</td>';
+				result += '<td align="center">' + System.addCommas(monsterLog[name]["min"]["key"+i]) + '</td>';
 			for (i = 4; i < 10; i++)
-				result += '<td align="center">' + monsterLog[name]["min"]["key"+i] + '</td>' +
-					'<td align="center">' + monsterLog[name]["max"]["key"+i] + '</td>';
+				result += '<td align="center">' + System.addCommas(monsterLog[name]["min"]["key"+i]) + ' - ' +
+					System.addCommas(monsterLog[name]["max"]["key"+i]) + '</td>';
 		}
 		result += "</table>";
 		content.innerHTML = result;
-		document.getElementById("Helper.clearMonsterLog").addEventListener("click", Helper.clearMonsterLog, true);
+		document.getElementById("Helper:ClearMonsterLog").addEventListener("click", Helper.clearMonsterLog, true);
 	},
 
 	clearMonsterLog: function() {
@@ -5171,6 +5173,9 @@ var Helper = {
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
 			'<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
 			')</span></td></tr>' +
+			'<tr><td colspan="2" align=center>' +
+			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Sigma Storm 2 Helper web site</a> ' +
+			'for any suggestions, requests or bug reports</span></td></tr>' +
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Social Preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter faction names, seperated by commas</td></tr>' +
 			'<tr><td align="right">Own Faction:</td><td>'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
@@ -5212,6 +5217,9 @@ var Helper = {
 				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
 			'<tr><td align="right">Show Combat Log' + Helper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Color Special Entities' + Helper.helpLink('Color Special Entities', 'Entities will be colored according to their rarity. ' +
+				'Champions will be colored green, Elites yellow and Super Elites red.') +
+				':</td><td><input name="enableCreatureColoring" type="checkbox" value="on"' + (GM_getValue("enableCreatureColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
@@ -5249,9 +5257,6 @@ var Helper = {
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a>' +
 */
 			'</td></tr>' +
-			'<tr><td colspan="4" align=center>' +
-			'<span style="font-size:xx-small">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
-			'for any suggestions or bug reports<span></td></tr>' +
 			'</table></form>';
 		var insertHere = System.findNode("//table[@width='500']");
 		var newRow=insertHere.insertRow(insertHere.rows.length);
