@@ -5650,6 +5650,10 @@ var Helper = {
 		document.location=System.server + "index.php?cmd=notepad&subcmd=showlogs"
 	},
 
+	showMonsterLogs: function(evt) {
+		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog"
+	},
+
 	injectNotepadShowLogs: function() {
 		var content=System.findNode("//table[@width='100%']/..");
 		var combatLog=GM_getValue("CombatLog");
