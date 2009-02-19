@@ -1621,7 +1621,7 @@ var Helper = {
 	},
 
 	colorMonsters: function() {
-		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and not(contains(@href,'max_turns='))]");
+		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=')]");
 		if (!monsters) return;
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
