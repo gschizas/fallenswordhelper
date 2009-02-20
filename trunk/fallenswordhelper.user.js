@@ -2199,10 +2199,9 @@ var Helper = {
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			break;
 		case 71: // create group [G]
-			window.alert("create group");
-			// window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
-		case 103:
+		case 103: // go to guild [g]
 			window.location = 'index.php?cmd=guild&subcmd=manage'
 			break;
 		case 106: // join all group [j]
