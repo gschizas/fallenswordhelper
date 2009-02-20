@@ -1743,7 +1743,7 @@ var Helper = {
 			'</tr>' +
 			'</table>'+
 			'<table id="Helper:MonsterInfo" cellspacing="1" cellpadding="2" border="0" ><tr>' +
-			'<th width="25%" align="left" sortkey="name" colspan="2">Name</th>' +
+			'<th width="25%" align="left" sortkey="name" colspan="2">Entity</th>' +
 			'<th align="center" sortkey="class">Class</th>' +
 			'<th align="center" sortkey="Level" sorttype="number">Lvl</th>' +
 			'<th align="center">Attack</th>' +

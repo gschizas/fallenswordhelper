@@ -2198,8 +2198,12 @@ var Helper = {
 		case 114: // repair
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			break;
-		case 103: // create group
-			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+		case 71: // create group [G]
+			window.alert("create group");
+			// window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+			break;
+		case 103:
+			window.location = 'index.php?cmd=guild&subcmd=manage'
 			break;
 		case 106: // join all group [j]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
@@ -2515,7 +2519,7 @@ var Helper = {
 			output += "style='color:"
 			if (((new Date()) - member.loggedInAt) < 30000) { // just logged in
 				output += "orange";
-			} 
+			}
 			else {
 				output += (member.id==playerId)?"#FFF380":"white";
 			}
@@ -2624,10 +2628,11 @@ var Helper = {
 				rowCount++;
 			}
 			if (rowCount == 7 && lp % 3==0) {
-				finalHTML += "<td><a href='" +
+				finalHTML += "<td><a style='color:#7D2252' href='" +
 					System.server +
 					"index.php?cmd=notepad&subcmd=auctionsearch'>" +
-					"<span style='cursor:pointer;text-decoration:underline;color:#7D2252'>Configurable AH quick search</span></a>" +
+					"Configurable Auction House Quick Search</a>&nbsp;" +
+					/* "<span id='Helper:QuickSearch' style='cursor:pointer;text-decoration:underline;color:#7D2252'>[Search]</span>" + */
 					"</td>";
 			}
 			finalHTML += "<td";
@@ -2748,6 +2753,11 @@ var Helper = {
 
 		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
+		// document.getElementById("Helper:QuickSearch").addEventListener("click", Helper.auctionHouseQuickSearch, true);
+	},
+
+	auctionHouseQuickSearch: function() {
+
 	},
 
 	auctionHouseTogglePreferences: function(evt) {
