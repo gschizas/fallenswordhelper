@@ -206,45 +206,13 @@ var Helper = {
 	autoUpdateConfirmOk: function(evt) {
 		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
 		GM_setValue("currentVersion", newVersion);
-		Helper.autoUpdatePreloadFiles(null, ["json2.js", "calfSystem.js", "fsLayout.js", "fsData.js"]);
+		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
 		var confirmAlert=document.getElementById("Helper:ConfirmAlert");
 		confirmAlert.style.display="none";
 		confirmAlert.visibility="hidden";
-	},
-
-	autoUpdatePreloadFiles: function(responseDetails, scriptArray) {
-		var output = document.getElementById("Helper:Output");
-		if (responseDetails) {
-			GM_log("Status = " + responseDetails.status)
-		}
-		else {
-			output.innerHTML = "<br/>Preloading scripts...<br/><br/>"
-		}
-		if (scriptArray.length==0) {
-			output.innerHTML += "<br/>Done preloading, opening install dialog.";
-			GM_openInTab("http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js");
-			var confirmAlert=document.getElementById("Helper:ConfirmAlert");
-			confirmAlert.style.display="none";
-			confirmAlert.visibility="hidden";
-			return;
-		}
-		var scriptName=scriptArray.shift();
-		output.innerHTML += "<br/>Loading " + scriptName;
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: "http://fallenswordhelper.googlecode.com/svn/trunk/" + scriptName,
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Referer": document.location,
-				"If-Modified-Since": new Date()
-			},
-			onload: function(responseDetails) {
-				Helper.autoUpdatePreloadFiles(responseDetails, scriptArray);
-			},
-		})
 	},
 
 	// main event dispatcher
