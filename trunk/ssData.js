@@ -50,7 +50,13 @@ var Data = {
 				{'questName':'Silent Guns', 'level':63, 'location':'Raga Domain (North Quadrant)'},
 				{'questName':'Out Flanked', 'level':65, 'location':'Raga Domain (East Quadrant)'},
 				{'questName':'Heart of Rad', 'level':67, 'location':'Raga Hills (Edge)'},
-				{'questName':'Rebellious Son', 'level':70, 'location':'Raga Hills (Depths)'}
+				{'questName':'Rebellious Son', 'level':70, 'location':'Raga Hills (Depths)'},
+				{'questName':'Infestation', 'level':71, 'location':'Raga Hills (Secret Way)'},
+				{'questName':'Spontaneous Phenomena', 'level':73, 'location':'Scrap Yard (Iron Dump)'},
+				{'questName':'Flooded', 'level':74, 'location':'Scrap Yard (Steel Dump)'},
+				{'questName':'ID Required', 'level':76, 'location':'SureTec (Reception)'},
+				{'questName':'Line Key', 'level':78, 'location':'SureTec (Pistol Lab)'},
+				{'questName':'Virus Killer', 'level':80, 'location':'SureTec (Testing)'}
 			];
 			Data.questArray = questArray.sort();
 		}
