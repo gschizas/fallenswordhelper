@@ -2509,7 +2509,7 @@ var Helper = {
 			}
 			output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
 			output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b>"+
-				"<br/>XP: " + member.xp +
+				"<br/>XP: " + System.addCommas(member.xp) +
 				"<br/>Level: " + member.level +
 				"<br/>Logged in:" + member.loggedInAt.toFormatString("ddd HH:mm");
 			if (member.hasFullData) {
