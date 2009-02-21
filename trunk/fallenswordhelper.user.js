@@ -59,6 +59,9 @@ var Helper = {
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", true);
 		System.setDefault("doNotKillList", "");
+		System.setDefault("enableBioCompressor", false);
+		System.setDefault("maxCompressedCharacters", 1500);
+		System.setDefault("maxCompressedLines", 25);
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -3187,7 +3190,65 @@ var Helper = {
 				}
 			}
 		}
-	},
+		
+		//bio compressor ...
+		var bioCompressorEnabled = GM_getValue("enableBioCompressor");
+		if (bioCompressorEnabled) {
+			var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
+			var bioCell = bioTable.rows[6];
+			if (bioCell) { //non-self profile
+				var bioContents = bioCell.cells[0].innerHTML;
+				var maxCharactersToShow = GM_getValue("maxCompressedCharacters");;
+				var maxRowsToShow = GM_getValue("maxCompressedLines");;
+				var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
+				if (numberOfLines >= maxRowsToShow) {
+					var startIndex = 0;
+					while (maxRowsToShow >= 0) {
+						maxRowsToShow --;
+						startIndex = bioContents.indexOf("<br>\n",startIndex+1);
+					}
+					maxCharactersToShow = startIndex;
+				}
+				if (bioContents.length>maxCharactersToShow) {
+					//find the end of next HTML tag after the max characters to show.
+					var breakPoint = bioContents.indexOf(">",maxCharactersToShow) + 1;
+					var bioStart = bioContents.substring(0,breakPoint);
+					var bioEnd = bioContents.substring(breakPoint,bioContents.length);
+					var extraOpenHTML = "", extraCloseHTML = "";
+					var boldCloseTagIndex = bioEnd.indexOf("</b>");
+					var boldOpenTagIndex = bioEnd.indexOf("<b>");
+					if (boldCloseTagIndex != -1 && boldOpenTagIndex > boldCloseTagIndex) {
+						extraOpenHTML += "<b>";
+						extraCloseHTML += "</b>";
+					}
+					var italicsCloseTagIndex = bioEnd.indexOf("</i>");
+					var italicsOpenTagIndex = bioEnd.indexOf("<i>");
+					if (italicsCloseTagIndex != -1 && italicsOpenTagIndex > italicsCloseTagIndex) {
+						extraOpenHTML += "<i>";
+						extraCloseHTML += "</i>";
+					}
+					var underlineCloseTagIndex = bioEnd.indexOf("</u>");
+					var underlineOpenTagIndex = bioEnd.indexOf("<u>");
+					if (underlineCloseTagIndex != -1 && underlineOpenTagIndex > underlineCloseTagIndex) {
+						extraOpenHTML += "<u>";
+						extraCloseHTML += "</u>";
+					}
+					bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
+						"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
+					document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
+				}
+			}
+		}
+    },
+
+    expandBio: function(evt) {
+        var bioExpander = document.getElementById('Helper:bioExpander');
+        bioExpander.style.display = 'none';
+        bioExpander.style.visibility = 'hidden';
+        var bioHidden = document.getElementById('Helper:bioHidden');
+        bioHidden.style.display = 'block';
+        bioHidden.style.visibility = 'visible';
+    },
 
 	equipProfileInventoryItem: function(evt) {
 		var InventoryItemID=evt.target.getAttribute("itemID");
@@ -3871,6 +3932,7 @@ var Helper = {
 			if (findItem.length>0) {
 				item.type = findItem[0].type;
 			} else {
+				GM_log("Item not found in list: '" + item.name + "'");
 				item.type = "???"
 			};
 
@@ -4598,9 +4660,10 @@ var Helper = {
 					buffName = buff[1];
 					buffLevel = buff[2];
 				}
-				resultText += ((i % 2 == 0)? "<tr>":"");
+				if (!buffLevel) buffLevel = 0; //For when a shield imp runs out but the buff is still there (0HP)
+				resultText += ((i % 4 == 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
-				resultText += ((i % 2 == 1)? "</tr>":"");
+				resultText += ((i % 4 == 3)? "</tr>":"");
 				var hasThisBuff = System.findNode("//font[contains(.,'" + buffName + "')]");
 				if (hasThisBuff) {
 					var buffLevelRE = /\[(\d+)\]/
@@ -4611,7 +4674,7 @@ var Helper = {
 					}
 				}
 			}
-			resultText += ((i % 2 == 1)? "<td></td></tr>":"");
+			resultText += ((i % 4 == 3)? "<td></td></tr>":"");
 		} else {
 			resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
@@ -5508,6 +5571,10 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
 				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
+				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
+				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
+				' Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
 				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
@@ -5591,6 +5658,18 @@ var Helper = {
 			guildOnlineRefreshTime.value=15;
 		}
 
+		//bio compressor validation logic
+		var maxCompressedCharacters = System.findNode("//input[@name='maxCompressedCharacters']", oForm);
+		var maxCompressedCharactersValue = maxCompressedCharacters.value*1;
+		if (isNaN(maxCompressedCharactersValue) || maxCompressedCharactersValue<=50) {
+			maxCompressedCharacters.value=1500;
+		}
+		var maxCompressedLines = System.findNode("//input[@name='maxCompressedLines']", oForm);
+		var maxCompressedLinesValue = maxCompressedLines.value*1;
+		if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue<=1) {
+			maxCompressedLines.value=25;
+		}
+
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
@@ -5626,6 +5705,9 @@ var Helper = {
 		System.saveValueForm(oForm, "footprintsColor");
 		System.saveValueForm(oForm, "guildOnlineRefreshTime");
 		System.saveValueForm(oForm, "doNotKillList");
+		System.saveValueForm(oForm, "enableBioCompressor");
+		System.saveValueForm(oForm, "maxCompressedCharacters");
+		System.saveValueForm(oForm, "maxCompressedLines");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
