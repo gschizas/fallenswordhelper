@@ -107,7 +107,7 @@ var Helper = {
 			},
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
-			},
+			}
 		})
 	},
 
@@ -132,7 +132,7 @@ var Helper = {
 				},
 				onload: function(responseDetails) {
 					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
-				},
+				}
 			})
 		}
 	},
@@ -171,7 +171,8 @@ var Helper = {
 	autoUpdateConfirmOk: function(evt) {
 		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
 		GM_setValue("currentVersion", newVersion);
-		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
+		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/sigmastormhelper.user.js");
+		autoUpdateConfirmCancel(evt);
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
@@ -1937,6 +1938,8 @@ var Helper = {
 				memberList.members = [];
 			}
 
+			memberList.members.forEach(function(e) {e.status="Deleted"});
+
 			for (var i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
@@ -1977,6 +1980,10 @@ var Helper = {
 					aMember.xp     = memberXP;
 				}
 			}
+
+			// remove not existing players
+			memberList.members = memberList.members.filter(function(e) {return e.status!="Deleted"});
+			// damn, I love javascript array functions :)
 
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
@@ -2135,7 +2142,7 @@ var Helper = {
 			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit="+sendType,
 			onload: function() {
 				Helper.retrieveChat();
-			},
+			}
 		})
 	},
 
@@ -2828,12 +2835,12 @@ var Helper = {
 				"User-Agent" : navigator.userAgent,
 				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=preferences",
 				"Cookie" : document.cookie,
-				"Content-Type": "application/x-www-form-urlencoded",
+				"Content-Type": "application/x-www-form-urlencoded"
 			},
 			data: postData,
 			onload: function(responseDetails) {
 				Helper.auctionHouseSavePreferencesDone(responseDetails.responseText);
-			},
+			}
 		})
 	},
 
@@ -2950,18 +2957,18 @@ var Helper = {
 		var cbsIndex = allItems[itemIndex].value;
 
 		GM_xmlhttpRequest({
-				method: 'POST',
-				url: System.server + "index.php",
-				headers: {
-					"User-Agent" : navigator.userAgent,
-					"Content-Type": "application/x-www-form-urlencoded",
-					"Referer": System.server + "index.php?cmd=profile",
-					"Cookie" : document.cookie
-				},
-				data: "cmd=profile&subcmd=managecombatset&combat_set_id="+cbsIndex+"&submit=Use",
-				onload: function() {
-					window.location="index.php?cmd=profile";
-				},
+			method: 'POST',
+			url: System.server + "index.php",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Referer": System.server + "index.php?cmd=profile",
+				"Cookie" : document.cookie
+			},
+			data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
+			onload: function() {
+				window.location="index.php?cmd=profile";
+			}
 		})
 	},
 
@@ -5065,7 +5072,7 @@ var Helper = {
 				'MaxEquipLevel': theRow.cells[6].textContent*1,
 				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
 				'Reward': theRow.cells[7].innerHTML,
-				'Action': theRow.cells[8].innerHTML,
+				'Action': theRow.cells[8].innerHTML
 			};
 		}
 
