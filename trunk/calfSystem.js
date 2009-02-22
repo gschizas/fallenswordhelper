@@ -18,7 +18,7 @@ var System = {
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
 		System.server           = document.location.protocol + "//" + document.location.host + "/";
-		System.browserVersion   = parseInt(navigator.userAgent.match(/Firefox\/(\d+)/i)[1]);
+		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel)\/(\d+)/i)[2]);
 	},
 
 	getValueJSON: function(name) {
