@@ -2969,7 +2969,7 @@ var Helper = {
 				"Referer": System.server + "index.php?cmd=profile",
 				"Cookie" : document.cookie
 			},
-			data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
+			data: "cmd=profile&subcmd=managecombatset&combat_set_id="+cbsIndex+"&submit=Use",
 			onload: function() {
 				window.location="index.php?cmd=profile";
 			}
@@ -4489,13 +4489,6 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
-		var playerInput = System.findNode("//input[@name='targetPlayers']");
-		var buffMe = document.createElement("SPAN");
-		buffMe.innerHTML="[self]";
-		buffMe.style.color="white";
-		buffMe.style.cursor="pointer";
-		buffMe.addEventListener("click", Helper.quickBuffMe, true);
-		playerInput.parentNode.appendChild(buffMe);
 
 		var playerIDRE = /tid=(\d+)/;
 		var playerID = playerIDRE.exec(location);
@@ -4515,7 +4508,7 @@ var Helper = {
 	},
 
 	getPlayerBuffs: function(responseText, keepPlayerInput) {
-		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
+		var injectHere = System.findNode("//input[@value='Activate Selected Skills on Self']/parent::*/parent::*/parent::*");
 		var resultText = "<table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
 
 		if (keepPlayerInput) {
@@ -4582,9 +4575,9 @@ var Helper = {
 		//var playerXP=Helper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
 		resultText += "</table>"
 
-		var statistics = System.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
+		var statistics = System.findNode("//td[contains(@background, 'sigma2/inventory/statistics_head.jpg')]/../../tr[3]/td/table", doc);
 		statistics.style.backgroundImage = 'url(' + System.imageServer + '/sigma2/skin/realm_top_b2.jpg)'; //Color='white';
-		var staminaCell = statistics.rows[7].cells[1].firstChild.rows[0].cells[0];
+		var staminaCell = statistics.rows[6].cells[3];
 		var curStamina = System.intValue(staminaCell.textContent.split("/")[0]);
 		var maxStamina = System.intValue(staminaCell.textContent.split("/")[1]);
 		staminaCell.textContent += "(" + Math.round((100.0*curStamina)/(1.0*maxStamina)) + "%)";
@@ -4601,7 +4594,10 @@ var Helper = {
 		resultText += statistics.parentNode.innerHTML;
 
 		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
-		injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
+		//injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
+		var newNode = document.createElement("SPAN");
+		newNode.innerHTML = resultText;
+		injectHere.appendChild(newNode);
 
 		if (keepPlayerInput) {
 			playerInput = System.findNode("//input[@name='targetPlayers']");
