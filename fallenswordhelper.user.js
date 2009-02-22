@@ -210,7 +210,7 @@ var Helper = {
 		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
 		GM_setValue("currentVersion", newVersion);
 		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
-		autoUpdateConfirmCancel(evt);
+		Helper.autoUpdateConfirmCancel(evt);
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
