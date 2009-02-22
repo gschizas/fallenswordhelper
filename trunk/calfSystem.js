@@ -13,12 +13,13 @@ var System = {
 		}
 		Array.prototype.filterBy = System.filterBy;
 
+		System.server           = document.location.protocol + "//" + document.location.host + "/";
+		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel)\/(\d+)/i)[2]);
+
 		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
-		System.server           = document.location.protocol + "//" + document.location.host + "/";
-		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel)\/(\d+)/i)[2]);
 	},
 
 	getValueJSON: function(name) {
