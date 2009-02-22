@@ -1946,6 +1946,10 @@ var Helper = {
 						aMember.loggedInAt = new Date();
 					}
 
+					if (!aMember.loggedInAt) {
+						aMember.loggedInAt = new Date();
+					}
+
 					aMember.status = memberStatus;
 					aMember.id     = memberId;
 					aMember.name   = memberName;
