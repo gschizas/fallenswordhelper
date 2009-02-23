@@ -1999,9 +1999,9 @@ var Helper = {
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
 		var injectHere = System.findNode("//table[@width='133' and contains(@style, '/sigma2/skin/community_header.gif')]")
+		if (!injectHere) return;
 		injectHere = injectHere.parentNode.parentNode.parentNode;
 
-		if (!injectHere) return;
 		var info = injectHere.insertRow(GM_getValue("disableGuildOnlineList")?0:1)
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
