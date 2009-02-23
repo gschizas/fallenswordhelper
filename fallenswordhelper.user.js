@@ -469,6 +469,9 @@ var Helper = {
 				break;
 			}
 			break;
+		case "message":
+			Helper.injectMessageTemplate();
+			break;
 		case "-":
 			var isRelicPage = System.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
@@ -5902,6 +5905,65 @@ var Helper = {
 		var url = dirButton.getAttribute("onClick");
 		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
 		window.location = url;
+	},
+	
+	injectMessageTemplate: function() {
+		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
+		var table = System.getValueJSON("quickMsg");
+
+		var targetPlayer = System.findNode("//input[@name='target_player']").value;
+		if (!table) {
+			table = ["Thank you very much ^_^", "Happy hunting, {playername}"];
+			System.setValueJSON("quickMsg", table);
+		}
+		
+		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
+				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
+				"<tr><td bgcolor='#cd9e4b'><center>Quick Message</center></td></tr>" +
+				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>"
+
+		for (var i = 0; i < table.length; i++) {
+			textResult += "<tr><td>Msg " + (i+1) + " [<a onmouseover=\"Tip('Click on the message to append the template');\" href='#'>" +
+				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" + 
+				table[i].replace(/{playername}/g, targetPlayer) + "</span></td></tr>";
+		}
+		textResult += "<tr><td valign=top>Template: </td><td><textarea class=customtextarea rows=5 cols=40 id='Helper.quickMsgFullText'>" +
+			JSON.stringify(table) + "</textarea></td></tr>" +
+			"<tr><td align=center colspan=2><input class=custombutton type=button id='Helper.saveQuickMsg' value='Save Quick Message'></td></tr>" + 
+			"</table></td></tr></table>";
+		
+		var newNode = document.createElement("span");
+		newNode.id = "spanQuickMsg";
+		newNode.align = "center"
+		newNode.innerHTML = textResult;
+		injectHere.appendChild(newNode);
+		
+		document.getElementById("Helper.saveQuickMsg").addEventListener("click", Helper.saveQuickMsg, true);
+		
+		for (var i = 0; i < table.length; i++) {
+			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
+		}
+	},
+	
+	saveQuickMsg: function() {
+		var quickMsg = document.getElementById("Helper.quickMsgFullText").value;
+		try {
+			JSON.parse(quickMsg);
+		} catch (err) {
+			alert("Not a valid template");
+			return;
+		}
+		GM_setValue("quickMsg", quickMsg);
+		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
+		injectHere.removeChild(document.getElementById("spanQuickMsg"));
+		Helper.injectMessageTemplate();
+	},
+	
+	useQuickMsg: function(evt) {
+		var targetPlayer = System.findNode("//input[@name='target_player']").value;
+		var quickMsgId = evt.target.getAttribute("quickMsgId");
+		System.findNode("//textarea[@name='msg']").value += 
+			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
 	}
 
 };
