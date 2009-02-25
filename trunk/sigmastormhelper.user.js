@@ -1758,19 +1758,41 @@ var Helper = {
 	},
 
 	injectMonsterLog: function() {
-		var monsterLog = System.getValueJSON("monsterLog");
+		var entityLog = System.getValueJSON("monsterLog");
+		if (entityLog) {
+			Helper.entityLogTable = {entity:[]};
+			for (var name in entityLog) {
+				var newEntity = {};
+				newEntity["name"] = name;
+				newEntity["key1"] = entityLog[name]["min"]["key1"];
+				for (i = 2; i < 4; i++)
+					newEntity["key" + i] = entityLog[name]["min"]["key" + i];
+				for (i = 4; i < 10; i++)
+					newEntity["key" + i] = System.addCommas(entityLog[name]["min"]["key"+i]) + ' - ' +
+						System.addCommas(entityLog[name]["max"]["key"+i]);
+				Helper.entityLogTable.entity.push(newEntity);
+			}
+			Helper.sortBy = 'key3';
+			Helper.sortAsc = false;
+			Helper.entityLogTable.entity.sort(Helper.numberSort);
+		}
 		var content=Layout.notebookContent();
-		content.innerHTML = 'No monster information! Please enable entity log and travel a bit to see the world';
-		if (!monsterLog) return;
+		content.innerHTML = '<span id=Helper.entityTableOutput>No monster information! Please enable entity log and travel a bit to see the world</span>';
+		Helper.generateEntityTable();
+	},
+	
+	generateEntityTable: function() {
+		var content = document.getElementById("Helper.entityTableOutput");
+		if (!Helper.entityLogTable || !content) return;
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr align=center><b>&nbsp;Entity Information</b></td>'+
-			'<td width="10%" nobr>[<span id="Helper.clearMonsterLog">Clear</span>]</td>'+
+			'<td width="10%" nobr>[<span id="Helper.clearEntityLog">Clear</span>]</td>'+
 			'</tr>' +
 			'</table>'+
-			'<table id="Helper:MonsterInfo" cellspacing="1" cellpadding="2" border="0" ><tr>' +
+			'<table id="Helper:EntityInfo" cellspacing="1" cellpadding="2" border="0" ><tr>' +
 			'<th width="25%" align="left" sortkey="name" colspan="2">Entity</th>' +
-			'<th align="center" sortkey="class">Class</th>' +
-			'<th align="center" sortkey="Level" sorttype="number">Lvl</th>' +
+			'<th align="center" sortkey="key2">Class</th>' +
+			'<th align="center" sortkey="key3" sorttype="number">Lvl</th>' +
 			'<th align="center">Attack</th>' +
 			'<th align="center">Defence</th>' +
 			'<th align="center">Armor</th>' +
@@ -1778,23 +1800,57 @@ var Helper = {
 			'<th align="center">HP</th>' +
 			'<th align="center">Credits</th>' +
 			'</tr>';
-		for (var name in monsterLog) {
-			result += '<tr><td align="center"><img width=40 height=40 src="' + monsterLog[name]["min"]["key1"] + '"/></td>';
-			result += '<td align="left">' + name + '</td>';
+		for (var k=0;k<Helper.entityLogTable.entity.length;k++) {
+			result += '<tr><td align="center"><img width=40 height=40 ' + 
+					'onmouseover="tt_setWidth(200);Tip(\'<img src=' + Helper.entityLogTable.entity[k]["key1"] + '/>\');" ' +
+					'src="' + Helper.entityLogTable.entity[k]["key1"] + '"/></td>';
+			result += '<td align="left">' + Helper.entityLogTable.entity[k]["name"] + '</td>';
 			for (i = 2; i < 4; i++)
-				result += '<td align="center">' + System.addCommas(monsterLog[name]["min"]["key"+i]) + '</td>';
+				result += '<td align="center">' + System.addCommas(Helper.entityLogTable.entity[k]["key"+i]) + '</td>';
 			for (i = 4; i < 10; i++)
-				result += '<td align="center">' + System.addCommas(monsterLog[name]["min"]["key"+i]) + ' - ' +
-					System.addCommas(monsterLog[name]["max"]["key"+i]) + '</td>';
+				result += '<td align="center">' + Helper.entityLogTable.entity[k]["key"+i] + '</td>';
 		}
 		result += "</table>";
 		content.innerHTML = result;
-		document.getElementById("Helper:ClearMonsterLog").addEventListener("click", Helper.clearMonsterLog, true);
+		document.getElementById("Helper.clearEntityLog").addEventListener("click", Helper.clearEntityLog, true);
+		
+		var theTable=document.getElementById('Helper:EntityInfo');
+		for (var i=0; i<theTable.rows[0].cells.length; i++) {
+			var cell=theTable.rows[0].cells[i];
+			if (cell.getAttribute("sortkey")) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.addEventListener('click', Helper.sortEntityLogTable, true);
+			}
+		}
 	},
 
-	clearMonsterLog: function() {
+	clearEntityLog: function() {
 		GM_setValue("monsterLog", "");
 		window.location="index.php?cmd=notepad&subcmd=monsterlog";
+	},
+	
+	sortEntityLogTable: function(evt) {
+		var headerClicked = evt.target.getAttribute("sortKey");
+		var sortType = evt.target.getAttribute("sortType");
+		if (!sortType) sortType="string";
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+
+		Helper.sortBy=headerClicked;
+		GM_log(Helper.sortAsc + " " + Helper.sortBy + " " + sortType);
+		
+		switch(sortType) {
+			case "string":
+				Helper.entityLogTable.entity.sort(Helper.stringSort);
+				break;
+			case "number":
+				Helper.entityLogTable.entity.sort(Helper.numberSort);
+				break;
+		}
+		Helper.generateEntityTable();
 	},
 
 	killedMonster: function(responseText, callback) {
@@ -1897,7 +1953,7 @@ var Helper = {
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
-					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%M-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
+					Helper.appendSavedLog("\n================================\n" + now.toLocaleString() + "\n" + resultText + "\n" + reportText);
 				}
 			}
 			monsterParent.innerHTML = "";
