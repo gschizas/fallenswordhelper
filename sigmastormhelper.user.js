@@ -1502,7 +1502,7 @@ var Helper = {
 						var doNotKillName = doNotKillListAry[j];
 						if (monsterName == doNotKillName){
 							var monsterNameCell = monster.parentNode.parentNode.previousSibling
-							monsterNameCell.innerHTML = '<span style="color:red;">' + monsterNameCell.innerHTML + '</span>';
+							monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
 							break;
 						}
 					}
@@ -2010,7 +2010,7 @@ var Helper = {
 		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
 		var chat = System.getValueJSON("chat");
 		var newChat = System.findNode("//table[contains(.,'chat messages')]")
-		if (!chat || newChat || ((new Date()).getTime() - chat.lastUpdate > 15000)) {
+		if (!chat || newChat || ((new Date()) - chat.lastUpdate > 15000)) {
 			Helper.retrieveChat();
 		} else {
 			chat.isRefreshed=false;
@@ -2029,8 +2029,8 @@ var Helper = {
 		var chat = new Object();
 		// var chatConfirm=System.findNode("//input[@name='xc']", doc);
 		chat.isRefreshed=true;
-		chat.lastUpdate = (new Date()).getTime();
-		chat.messages = new Array();
+		chat.lastUpdate = new Date();
+		chat.messages = [];
 		for (var i=chatTable.rows.length-1; i>0; i--) {
 			var aRow = chatTable.rows[i];
 			if (aRow.cells.length==3) {
@@ -3490,8 +3490,11 @@ var Helper = {
 		unsafeWindow.changeMenu(5,'menu_guild');
 		unsafeWindow.changeMenu(0,'menu_character');
 		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
-		Helper.guildinventory=System.getValueJSON("guildinventory");
-		if (Helper.guildinventory) guildItemCount = Helper.guildinventory.items.length;
+		Helper.guildinventory = System.getValueJSON("guildinventory");
+		if (Helper.guildinventory) {
+			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
+			guildItemCount = Helper.guildinventory.items.length;
+		}
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
@@ -3850,7 +3853,6 @@ var Helper = {
 
 		var nameNode=System.findNode("//b", doc);
 		if (!nameNode) GM_log(responseText);
-
 		if (nameNode) {
 			item.name=nameNode.textContent
 
@@ -3910,6 +3912,8 @@ var Helper = {
 			inventoryShell = 'inventory';
 		}
 		if (!targetInventory) return;
+		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name)});
+
 		var output=document.getElementById(targetId);
 		var result='<table id="Helper:InventoryTable"><tr>' +
 			'<th width="180" align="left" colspan="2" sortkey="name">Name</th>' +
@@ -3921,7 +3925,7 @@ var Helper = {
 			'<th sortkey="armor">Arm</th>' +
 			'<th sortkey="damage">Dam</th>' +
 			'<th sortkey="hp">HP</th>' +
-			'<th sortkey="forgelevel">Upgrade</th>' +
+			'<th sortkey="forgelevel" colspan="2">Upgrade</th>' +
 			'<th sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
 		var item, color;
@@ -3936,10 +3940,10 @@ var Helper = {
 			item=allItems[i];
 
 			switch (item.where+"") {
-				case "worn":        color = "green";  break;
-				case "backpack":    color = "blue";   break;
-				case "guildstore":  color = "lime";   break;
-				case "guildreport": color = "yellow"; break;
+				case "worn":        color = "green";  whereText = "Worn"; whereTitle="Wearing it";     break;
+				case "backpack":    color = "blue";   whereText = "BP";   whereTitle="In Backpack";    break;
+				case "guildstore":  color = "lime";   whereText = "FS";   whereTitle="Faction Store";  break;
+				case "guildreport": color = "yellow"; whereText = "Rep";  whereTitle="Faction Report"; break;
 				default: color = "#84ADAC";
 			}
 
@@ -3947,7 +3951,7 @@ var Helper = {
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 				'</td><td>' + item.name + '</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
-				'<td align="right">' + item.where + '</td>' +
+				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
 				'<td align="right">' + item.type + '</td>' +
 				'<td align="right">' + item.attack + '</td>' +
 				'<td align="right">' + item.defense + '</td>' +
@@ -3963,7 +3967,7 @@ var Helper = {
 		result+='</table>';
 		output.innerHTML=result;
 
-		targetInventory.lastUpdate = (new Date()).getTime();
+		targetInventory.lastUpdate = new Date();
 		System.setValueJSON(inventoryShell, targetInventory);
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
@@ -4114,7 +4118,7 @@ var Helper = {
 		}
 		else {
 			output.innerHTML+='Finished parsing ... formatting ...';
-			Helper.recipebook.lastUpdate = (new Date()).getTime();
+			Helper.recipebook.lastUpdate = new Date();
 			System.setValueJSON("recipebook", Helper.recipebook);
 			Helper.generateRecipeTable();
 		}
@@ -5546,7 +5550,7 @@ var Helper = {
 		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
 		window.location = url;
 	},
-	
+
 	injectMessageTemplate: function() {
 		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
 		var table = System.getValueJSON("quickMsg");
@@ -5556,7 +5560,7 @@ var Helper = {
 			table = ["Thank you very much ^_^", "Happy hunting, {playername}"];
 			System.setValueJSON("quickMsg", table);
 		}
-		
+
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#5f5f5f'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
 				"<tr><td bgcolor='#212323'><center>Quick Message</center></td></tr>" +
@@ -5564,27 +5568,27 @@ var Helper = {
 
 		for (var i = 0; i < table.length; i++) {
 			textResult += "<tr><td>Msg " + (i+1) + " [<a onmouseover=\"Tip('Click on the message to append the template');\" href='#'>" +
-				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" + 
+				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" +
 				table[i].replace(/{playername}/g, targetPlayer) + "</span></td></tr>";
 		}
 		textResult += "<tr><td valign=top>Template: </td><td><textarea class=customtextarea rows=5 cols=40 id='Helper.quickMsgFullText'>" +
 			JSON.stringify(table) + "</textarea></td></tr>" +
-			"<tr><td align=center colspan=2><input class=custombutton type=button id='Helper.saveQuickMsg' value='Save Quick Message'></td></tr>" + 
+			"<tr><td align=center colspan=2><input class=custombutton type=button id='Helper.saveQuickMsg' value='Save Quick Message'></td></tr>" +
 			"</table></td></tr></table>";
-		
+
 		var newNode = document.createElement("span");
 		newNode.id = "spanQuickMsg";
 		newNode.align = "center"
 		newNode.innerHTML = textResult;
 		injectHere.appendChild(newNode);
-		
+
 		document.getElementById("Helper.saveQuickMsg").addEventListener("click", Helper.saveQuickMsg, true);
-		
+
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
 		}
 	},
-	
+
 	saveQuickMsg: function() {
 		var quickMsg = document.getElementById("Helper.quickMsgFullText").value;
 		try {
@@ -5598,11 +5602,11 @@ var Helper = {
 		injectHere.removeChild(document.getElementById("spanQuickMsg"));
 		Helper.injectMessageTemplate();
 	},
-	
+
 	useQuickMsg: function(evt) {
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
 		var quickMsgId = evt.target.getAttribute("quickMsgId");
-		System.findNode("//textarea[@name='msg']").value += 
+		System.findNode("//textarea[@name='msg']").value +=
 			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
 	}
 
