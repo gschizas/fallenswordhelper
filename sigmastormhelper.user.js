@@ -3893,7 +3893,7 @@ var Helper = {
 	parseInventoryPage: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
-		var backpackItems = System.findNodes("//td[contains(@background,'2x3.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
+		var backpackItems = System.findNodes("//td[contains(@background,'small.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
 		var pages = System.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
 		var pageElement = System.findNode("//a[contains(@href,'backpack_page=')]/font", doc);
 		var currentPage = 1;
@@ -4107,7 +4107,7 @@ var Helper = {
 
 			switch (item.where+"") {
 				case "worn":        color = "green";  whereText = "Worn"; whereTitle="Wearing it";     break;
-				case "backpack":    color = "blue";   whereText = "BP";   whereTitle="In Backpack";    break;
+				case "backpack":    color = "#D4FAFF";   whereText = "BP";   whereTitle="In Backpack";    break;
 				case "guildstore":  color = "lime";   whereText = "FS";   whereTitle="Faction Store";  break;
 				case "guildreport": color = "yellow"; whereText = "Rep";  whereTitle="Faction Report"; break;
 				default: color = "#84ADAC";
