@@ -3313,6 +3313,49 @@ var Helper = {
 				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
+			
+			// Fast Wear
+			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
+			if (profileInventory) {
+				var profileInventoryIDRE = /inventory_id=(\d+)/i;
+				var wearableIDRE = /subcmd=equipitem/i;
+				var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
+
+				var profileInventoryBox = [];
+				var profileInventoryBoxItem = [];
+				var profileInventoryBoxID = [];
+				for (var i=0;i<15;i++) {
+					if (foldersEnabled) {
+						if (profileInventory.rows[2*Math.floor(i / 5)]) profileInventoryBox[i]=profileInventory.rows[2*Math.floor(i / 5)].cells[i % 5];
+					} else {
+						if (profileInventory.rows[Math.floor(i / 5)]) profileInventoryBox[i]=profileInventory.rows[Math.floor(i / 5)].cells[i % 5];
+					}
+					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
+					if (profileInventoryBoxItem[i]) {
+						var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
+						if (itemHREF && profileInventoryIDRE(itemHREF) && wearableIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+					}
+				}
+
+				var newRow;
+
+				for (var i=0;i<15;i++) {
+					if ((i % 5==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*Math.floor(i / 5)+1);
+					if ((i % 5==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*Math.floor(i / 5)+1);
+					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
+						var output = '<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
+								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
+						var newCell = newRow.insertCell(i % 5);
+						newCell.align = 'center';
+						newCell.innerHTML = output;
+						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
+							.addEventListener('click', Helper.equipProfileInventoryItem, true);
+					} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
+						var newCell = newRow.insertCell(i % 5);
+					}
+				}
+			}
 		}
 
 		//bio compressor ...
