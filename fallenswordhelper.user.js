@@ -42,6 +42,10 @@ var Helper = {
 		System.setDefault("guildFrnd", "");
 		System.setDefault("guildPast", "");
 		System.setDefault("guildEnmy", "");
+		System.setDefault("goldRecipient", "");
+		System.setDefault("goldAmount", "");
+		System.setDefault("sendGoldonWorld", false);
+		System.setDefault("goldConfirm", "");
 		System.setDefault("guildSelfMessage", "green|Member of your own guild");
 		System.setDefault("guildFrndMessage", "yellow|Do not attack - Guild is friendly!");
 		System.setDefault("guildPastMessage", "gray|Do not attack - You've been in that guild once!");
@@ -454,6 +458,9 @@ var Helper = {
 				Helper.storePlayerUpgrades();
 				break;
 			}
+			break;
+		case "trade":
+			Helper.retrieveTradeConfirm();
 			break;
 		case "toprated":
 			switch(subPageId) {
@@ -1440,6 +1447,13 @@ var Helper = {
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
+		if (GM_getValue("sendGoldonWorld")){
+			var recipient_text = "Send " +GM_getValue("goldAmount") + " gold To " + GM_getValue("goldRecipient");
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
+				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
+		}
+
 		if (!GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
@@ -1451,7 +1465,10 @@ var Helper = {
 		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
 			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
-
+		if (GM_getValue("sendGoldonWorld")){
+			//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+			document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
+		}
 		if (!GM_getValue("hideKrulPortal")) {
 			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 		}
@@ -1496,6 +1513,39 @@ var Helper = {
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
+	},
+
+	retrieveTradeConfirm: function() {
+		var xcNumber;
+		xcNumber=System.findNode("//input[@type='hidden' and @name='xc']")
+		xcNumber=xcNumber?xcNumber.getAttribute("value"):"-";
+		GM_setValue("goldConfirm", xcNumber);
+	},
+
+	sendGoldToPlayer: function(){
+		var recipient = GM_getValue("goldRecipient");
+		var amount = GM_getValue("goldAmount");
+		System.xmlhttp('index.php?cmd=trade');
+		var xcNum = GM_getValue("goldConfirm");
+		if (xcNum == "") {
+			window.alert("You have to visit the trade page once to use the send gold functionality");
+			return;
+		}
+		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + recipient +'&gold_amount='+ amount
+		System.xmlhttp(url, Helper.goldToPlayerSent, {"amount": amount, "recipient": recipient} );
+	},
+
+	goldToPlayerSent: function(responseText, callback) {
+		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		if (!injectHere) return;
+		var newRow=injectHere.insertRow(1);
+		var newCell=newRow.insertCell(0);
+		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
+		var info = Layout.infoBox(responseText);
+		if (info=="" || info=="You successfully sent gold!") {
+			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '!';
+		}
+		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
 	},
 
 	toggleFootprints: function() {
@@ -3253,16 +3303,16 @@ var Helper = {
 				}
 			}
 		}
-    },
+	},
 
-    expandBio: function(evt) {
-        var bioExpander = document.getElementById('Helper:bioExpander');
-        bioExpander.style.display = 'none';
-        bioExpander.style.visibility = 'hidden';
-        var bioHidden = document.getElementById('Helper:bioHidden');
-        bioHidden.style.display = 'block';
-        bioHidden.style.visibility = 'visible';
-    },
+	expandBio: function(evt) {
+		var bioExpander = document.getElementById('Helper:bioExpander');
+		bioExpander.style.display = 'none';
+		bioExpander.style.visibility = 'hidden';
+		var bioHidden = document.getElementById('Helper:bioHidden');
+		bioHidden.style.display = 'block';
+		bioHidden.style.visibility = 'visible';
+	},
 
 	equipProfileInventoryItem: function(evt) {
 		var InventoryItemID=evt.target.getAttribute("itemID");
@@ -5584,6 +5634,11 @@ var Helper = {
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Footprints Color' + Helper.helpLink('Footprints Color', 'Changes the color of the footprints, useful if you can\\\'t see them in some maps') +
 				':</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+			'<tr><td align="right">Show Send Gold' + Helper.helpLink('Show Gold on World Screen', 'This will show an icon below the world map to allow you to quickly send gold to a Friend.') +
+				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
+				'Send <input name="goldAmount" size="15" value="'+ GM_getValue("goldAmount") + '" /> '+
+				'gold to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />' +
+				'</td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
@@ -5727,6 +5782,9 @@ var Helper = {
 		System.saveValueForm(oForm, "enableBioCompressor");
 		System.saveValueForm(oForm, "maxCompressedCharacters");
 		System.saveValueForm(oForm, "maxCompressedLines");
+		System.saveValueForm(oForm, "sendGoldonWorld");
+		System.saveValueForm(oForm, "goldRecipient");
+		System.saveValueForm(oForm, "goldAmount");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;

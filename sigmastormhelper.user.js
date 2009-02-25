@@ -43,6 +43,10 @@ var Helper = {
 		System.setDefault("guildFrnd", "");
 		System.setDefault("guildPast", "");
 		System.setDefault("guildEnmy", "");
+		System.setDefault("goldRecipient", "");
+		System.setDefault("goldAmount", "");
+		System.setDefault("sendGoldonWorld", false);
+		System.setDefault("goldConfirm", "");
 		System.setDefault("guildSelfMessage", "green|Member of your own faction");
 		System.setDefault("guildFrndMessage", "yellow|Do not attack - Faction is friendly!");
 		System.setDefault("guildPastMessage", "gray|Do not attack - You've been in that faction once!");
@@ -60,6 +64,9 @@ var Helper = {
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", true);
 		System.setDefault("doNotKillList", "");
+		System.setDefault("enableBioCompressor", false);
+		System.setDefault("maxCompressedCharacters", 1500);
+		System.setDefault("maxCompressedLines", 25);
 
 		var memberList = System.getValueJSON("memberlist");
 		if (!memberList || !memberList.lastUpdate) GM_setValue("memberlist", "");
@@ -406,6 +413,9 @@ var Helper = {
 				Helper.storePlayerUpgrades();
 				break;
 			}
+			break;
+		case "trade":
+			Helper.retrieveTradeConfirm();
 			break;
 		case "toprated":
 			switch(subPageId) {
@@ -1466,6 +1476,13 @@ var Helper = {
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
 
+		if (GM_getValue("sendGoldonWorld")){
+			var recipient_text = "Send " +GM_getValue("goldAmount") + " gold To " + GM_getValue("goldRecipient");
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
+				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
+		}
+
 		if (!GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
@@ -1477,7 +1494,10 @@ var Helper = {
 		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
 			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
-
+		if (GM_getValue("sendGoldonWorld")){
+			//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+			document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
+		}
 		if (!GM_getValue("hideKrulPortal")) {
 			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 		}
@@ -1502,7 +1522,7 @@ var Helper = {
 						var doNotKillName = doNotKillListAry[j];
 						if (monsterName == doNotKillName){
 							var monsterNameCell = monster.parentNode.parentNode.previousSibling
-							monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
+							monsterNameCell.innerHTML = '<span style="color:cyan;">' + monsterNameCell.innerHTML + '</span>';
 							break;
 						}
 					}
@@ -1513,6 +1533,39 @@ var Helper = {
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
+	},
+
+	retrieveTradeConfirm: function() {
+		var xcNumber;
+		xcNumber=System.findNode("//input[@type='hidden' and @name='xc']")
+		xcNumber=xcNumber?xcNumber.getAttribute("value"):"-";
+		GM_setValue("goldConfirm", xcNumber);
+	},
+
+	sendGoldToPlayer: function(){
+		var recipient = GM_getValue("goldRecipient");
+		var amount = GM_getValue("goldAmount");
+		System.xmlhttp('index.php?cmd=trade');
+		var xcNum = GM_getValue("goldConfirm");
+		if (xcNum == "") {
+			window.alert("You have to visit the trade page once to use the send gold functionality");
+			return;
+		}
+		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + recipient +'&gold_amount='+ amount
+		System.xmlhttp(url, Helper.goldToPlayerSent, {"amount": amount, "recipient": recipient} );
+	},
+
+	goldToPlayerSent: function(responseText, callback) {
+		var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
+		if (!injectHere) return;
+		var newRow=injectHere.insertRow(1);
+		var newCell=newRow.insertCell(0);
+		// newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
+		var info = Layout.infoBox(responseText);
+		if (info=="" || info=="You successfully sent credits!") {
+			info = 'You successfully sent ' + callback.amount + ' credits to ' + callback.recipient + '!';
+		}
+		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:xx-small;">' + info + '</div>';
 	},
 
 	toggleFootprints: function() {
@@ -3205,6 +3258,63 @@ var Helper = {
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
+
+		//bio compressor ...
+		var bioCompressorEnabled = GM_getValue("enableBioCompressor");
+		if (bioCompressorEnabled) {
+			var bioCell = System.findNode("//td[contains(@background, '/inventory/biography_head.jpg')]/../following-sibling::tr[1]/td/table/tbody/tr/td[2]");
+			if (bioCell) { //non-self profile
+				var bioContents = bioCell.innerHTML;
+				var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
+				var maxRowsToShow = GM_getValue("maxCompressedLines");
+				var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
+				if (numberOfLines >= maxRowsToShow) {
+					var startIndex = 0;
+					while (maxRowsToShow >= 0) {
+						maxRowsToShow --;
+						startIndex = bioContents.indexOf("<br>\n",startIndex+1);
+					}
+					maxCharactersToShow = startIndex;
+				}
+				if (bioContents.length>maxCharactersToShow) {
+					//find the end of next HTML tag after the max characters to show.
+					var breakPoint = bioContents.indexOf(">",maxCharactersToShow) + 1;
+					var bioStart = bioContents.substring(0,breakPoint);
+					var bioEnd = bioContents.substring(breakPoint,bioContents.length);
+					var extraOpenHTML = "", extraCloseHTML = "";
+					var boldCloseTagIndex = bioEnd.indexOf("</b>");
+					var boldOpenTagIndex = bioEnd.indexOf("<b>");
+					if (boldCloseTagIndex != -1 && boldOpenTagIndex > boldCloseTagIndex) {
+						extraOpenHTML += "<b>";
+						extraCloseHTML += "</b>";
+					}
+					var italicsCloseTagIndex = bioEnd.indexOf("</i>");
+					var italicsOpenTagIndex = bioEnd.indexOf("<i>");
+					if (italicsCloseTagIndex != -1 && italicsOpenTagIndex > italicsCloseTagIndex) {
+						extraOpenHTML += "<i>";
+						extraCloseHTML += "</i>";
+					}
+					var underlineCloseTagIndex = bioEnd.indexOf("</u>");
+					var underlineOpenTagIndex = bioEnd.indexOf("<u>");
+					if (underlineCloseTagIndex != -1 && underlineOpenTagIndex > underlineCloseTagIndex) {
+						extraOpenHTML += "<u>";
+						extraCloseHTML += "</u>";
+					}
+					bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:cyan;'>More ...</span>" +
+						"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
+					document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
+				}
+			}
+		}
+	},
+
+	expandBio: function(evt) {
+		var bioExpander = document.getElementById('Helper:bioExpander');
+		bioExpander.style.display = 'none';
+		bioExpander.style.visibility = 'hidden';
+		var bioHidden = document.getElementById('Helper:bioHidden');
+		bioHidden.style.display = 'block';
+		bioHidden.style.visibility = 'visible';
 	},
 
 	equipProfileInventoryItem: function(evt) {
@@ -3490,7 +3600,7 @@ var Helper = {
 		unsafeWindow.changeMenu(5,'menu_guild');
 		unsafeWindow.changeMenu(0,'menu_character');
 		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
-		Helper.guildinventory = System.getValueJSON("guildinventory");
+		Helper.guildinventory=System.getValueJSON("guildinventory");
 		if (Helper.guildinventory) {
 			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
 			guildItemCount = Helper.guildinventory.items.length;
@@ -5225,6 +5335,21 @@ var Helper = {
 			'<tr><td align="right">Hide <small>Taulin Rad Lands</small> Portal' + Helper.helpLink('Hide Taulin Rad Lands Portal', 'This will hide the Taulin Rad Lands portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Footprints Color:</td><td><input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+			'<tr><td align="right">Show Send Credits' + Helper.helpLink('Show Send Credits on World Screen', 'This will show an icon below the world map to allow you to quickly send credits to a Friend.') +
+				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
+				'Send <input name="goldAmount" size="15" value="'+ GM_getValue("goldAmount") + '" /> '+
+				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />' +
+				'</td></tr>' +
+			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
+				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
+				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
+				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
+				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
+				'><br/>Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
+				'<br/>Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
 				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
@@ -5345,6 +5470,12 @@ var Helper = {
 		System.saveValueForm(oForm, "footprintsColor");
 		System.saveValueForm(oForm, "guildOnlineRefreshTime");
 		System.saveValueForm(oForm, "doNotKillList");
+		System.saveValueForm(oForm, "enableBioCompressor");
+		System.saveValueForm(oForm, "maxCompressedCharacters");
+		System.saveValueForm(oForm, "maxCompressedLines");
+		System.saveValueForm(oForm, "sendGoldonWorld");
+		System.saveValueForm(oForm, "goldRecipient");
+		System.saveValueForm(oForm, "goldAmount");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
