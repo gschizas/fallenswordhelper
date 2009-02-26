@@ -324,6 +324,9 @@ var Helper = {
 			case "results":
 				Helper.injectTournament();
 				break;
+			case "dojoin":
+				Helper.injectTournament();
+				break;
 			}
 			break;
 		case "questbook":
@@ -2471,13 +2474,18 @@ var Helper = {
 	addLogWidgets: function() {
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var memberList = System.getValueJSON("memberlist");
-		if (!memberList) return;
-		var memberNameString;
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
-			memberNameString += member.name + " ";
+		var memberNameString = "";
+		if (memberList) {
+			for (var i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				memberNameString += member.name + " ";
+			}
 		}
 		var isGuildmate = false;
+		var listOfEnemies = GM_getValue("listOfEnemies");
+		if (!listOfEnemies) listOfEnemies = "";
+		var listOfAllies = GM_getValue("listOfAllies");
+		if (!listOfAllies) listOfAllies = "";
 		for (var i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
 			if (i != 0) {
@@ -2490,6 +2498,12 @@ var Helper = {
 						if (memberNameString.search(playerName) !=-1) {
 							aRow.cells[2].firstChild.style.color="green";
 							isGuildmate = true;
+						}
+						if (listOfEnemies.search(playerName) !=-1) {
+							aRow.cells[2].firstChild.style.color="red";
+						}
+						if (listOfAllies.search(playerName) !=-1) {
+							aRow.cells[2].firstChild.style.color="blue";
 						}
 						var messageHTML = aRow.cells[2].innerHTML;
 
@@ -3268,6 +3282,33 @@ var Helper = {
 				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 
+			//store a list of allies and enemies for use in coloring
+			listOfAllies = "";
+			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling
+			for (var i=0;i<alliesTableActual.rows.length;i++) {
+				var aRow = alliesTableActual.rows[i];
+				for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
+					var aCell = aRow.cells[j];
+					var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+					var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
+					listOfAllies += allyName + " ";
+				}
+			}
+			
+			listOfEnemies = "";
+			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
+			for (var i=0;i<enemiesTableActual.rows.length;i++) {
+				var aRow = enemiesTableActual.rows[i];
+				for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
+					var aCell = aRow.cells[j];
+					var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+					var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
+					listOfEnemies += enemyName + " ";
+				}
+			}
+			GM_setValue("listOfAllies", listOfAllies);
+			GM_setValue("listOfEnemies", listOfEnemies);
+					
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
 			if (profileInventory) {
@@ -3658,8 +3699,8 @@ var Helper = {
 			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
 			guildItemCount = Helper.guildinventory.items.length;
 		}
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
+		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
 			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox" linkto="showUseableItems"' +
