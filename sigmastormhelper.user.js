@@ -1078,27 +1078,49 @@ var Helper = {
 	injectAdvisor: function() {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
 		if (!titleCells) return;
-		for (var i=0; i<titleCells.length; i++) {
-			var cell=titleCells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-			cell.addEventListener('click', Helper.advisorHeaderClicked, true);
-		}
 		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
 		var list=parentTables[parentTables.length-1];
 
 		Helper.generateAdvisorRows(list);
+		
+		if (! Helper.advisorHeader) {
+			Helper.advisorHeader = '<tr>';
+			var titleCells = ["Member", "Lvl", "Rank", "Credits From Deposits", "Credits From Tax", "Credits Total", "Crystals", "Skills Cast", "Squads Created", "Squads Joined", "Artifacts Captured", "XP Contrib"];
+			for (var i=0; i<titleCells.length; i++) {
+				Helper.advisorHeader += "<td bgcolor=#0a0f0f align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'><b>" + titleCells[i] + "</b></td>";
+			}
+			Helper.advisorHeader += '</tr>';
+		}
+		
+		if (! Helper.advisorFooter) {
+			Helper.advisorFooter = '<tr><td colspan=3 align=right>Total: </td>';
+			for (var i=1; i<list.rows[list.rows.length-1].cells.length; i++) {
+				Helper.advisorFooter += "<td align=center>" + list.rows[list.rows.length-1].cells[i].innerHTML + '</td>';
+			}
+			Helper.advisorFooter +='</tr>';
+		}
+		
 		Helper.sortAsc = true;
 		Helper.sortAdvisor(list, "Member");
 	},
 
 	generateAdvisorRows: function(list) {
 		Helper.advisorRows = [];
+		var memberList = System.getValueJSON("memberlist");
 		for (var i=1; i<list.rows.length-1; i++){
 			var theRow=list.rows[i];
+			var name = theRow.cells[0].textContent.replace(/\s/, "");
+			for (var j=0; j<memberList.members.length; j++) {
+				if (memberList.members[j].name == name) {
+					var member = memberList.members[j];
+					break;
+				}
+			}
 			Helper.advisorRows[i-1] = {
+				'Id':(member != undefined ? member.id : -1),
 				'Member': theRow.cells[0].textContent,
+				'Lvl':(member != undefined ? member.level : -1),
+				'Rank':(member != undefined ? member.rank : ""),
 				'CreditsFromDeposits': theRow.cells[1].textContent,
 				'CreditsFromTax': theRow.cells[2].textContent,
 				'CreditsTotal': theRow.cells[3].textContent,
@@ -1116,7 +1138,7 @@ var Helper = {
 		var headerClicked=evt.target.textContent;
 		var parentTables=System.findNodes("ancestor::table", evt.target)
 		var list=parentTables[parentTables.length-1];
-		Helper.sortAdvisor(list, headerClicked);
+		Helper.sortAdvisor(list, headerClicked.replace(/ /g, ""));
 	},
 
 	sortAdvisor: function(list, sortBy) {
@@ -1127,19 +1149,21 @@ var Helper = {
 		}
 		Helper.sortBy=sortBy;
 
-		if (sortBy=="Member") {
+		if (sortBy=="Member" || sortBy=="Rank") {
 			Helper.advisorRows.sort(Helper.stringSort)
 		}
 		else {
 			Helper.advisorRows.sort(Helper.numberSort)
 		}
 
-		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
+		var result = Helper.advisorHeader;
 
 		for (var i=0; i<Helper.advisorRows.length; i++){
 			var r = Helper.advisorRows[i];
 			result += '<tr class="HelperTableRow'+(1+i % 2)+'">'+
-			'<td> '+r.Member+'</td>'+
+			'<td> <a href="index.php?cmd=profile&player_id=' + r.Id +'">' +r.Member+ '</a></td>'+
+			'<td align="center"> '+r.Lvl+'</td>'+
+			'<td align="center"> '+r.Rank.substr(0,7)+ (r.Rank.length>7 ? '...' : '') + '</td>'+
 			'<td align="center">'+r.CreditsFromDeposits+'</td>'+
 			'<td align="center">'+r.CreditsFromTax+'</td>'+
 			'<td align="center">'+r.CreditsTotal+'</td>'+
@@ -1150,7 +1174,7 @@ var Helper = {
 			'<td align="center">'+r.ArtifactsCaptured+'</td>'+
 			'<td align="center">'+r.XPContrib+'</td></tr>';
 		}
-		result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
+		result+=Helper.advisorFooter;
 
 		list.innerHTML=result;
 
