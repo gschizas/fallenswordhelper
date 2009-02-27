@@ -352,6 +352,7 @@ var Helper = {
 		case "auctionhouse":
 			switch (subPageId) {
 			case "create":
+				Helper.injectCreateAuctionTemplate();
 				break;
 			case "preferences":
 				break;
@@ -2518,6 +2519,9 @@ var Helper = {
 
 						isGuildmate = false;
 					}
+					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
+						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
+					}
 					if (aRow.cells[2].innerHTML.search("activated") != -1 && aRow.cells[2].getAttribute("width") == "80%") {
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
@@ -3608,29 +3612,70 @@ var Helper = {
 				if (currentCategory != quickSearchItem.category)
 					output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
 				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
-				output += "<tr><td width='10'></td><td><a href='" + System.server +
-					"index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
-					quickSearchItem.searchname + "</span></a></td>" +
+				output += "<tr><td width='10'></td>"+
 					"<td><a href='" + System.server +
 					"index.php?cmd=auctionhouse&type=-1&search_text=" +
 					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
 					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
 					((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
-					"<td></td></tr>";
+					"<td><a href='" + System.server +
+					"index.php?cmd=auctionhouse&type=-1&search_text=" +
+					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
+					quickSearchItem.searchname + "</span></a></td>" +
+					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:delAuctionSearch"+j+"' auctionSearchId="+j+">"+
+						"del</span>]</td></tr>";
 				currentCategory = quickSearchItem.category;
 			}
 		}
 		output += "<tr><td colspan=4 height=10></td></tr>";
+		output += "<tr><td colspan=4>"+
+				"<table cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>"+
+				"<tr><th>Nickname</th><th>Search Name</th><th>Category</th><th></th></tr>"+
+				"<tr align='right'><td><input type='text' class='custominput' size='14' id='Helper:nickname'/></td>"+
+					"<td><input type='text' class='custominput' size='40' id='Helper:searchname'/></td>"+
+					"<td><input type='text' class='custominput' size='14' id='Helper:category'/></td>"+
+					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:addAuctionSearch'>"+
+						"add</span>]</td>"+
+				"</tr></tbody></table>"+
+			"</td></tr>";
 		output += "<tr><td colspan=4 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
 		output += "<tr><td colspan=4 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
 					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
 		output += "</tbody></table>";
 		injectHere.innerHTML = output;
+		for (j=0; j<quickSearchList.length; j++) {
+			document.getElementById("Helper:delAuctionSearch"+j).addEventListener('click', Helper.delAuctionSearch, true);
+		}
+		document.getElementById("Helper:addAuctionSearch").addEventListener('click', Helper.addAuctionSearch, true);
 		document.getElementById("Helper:saveauctionsearch").addEventListener('click', Helper.saveAuctionSearch, true);
 		document.getElementById("Helper:resetauctionsearch").addEventListener('click', Helper.resetAuctionSearch, true);
 	},
+
+	addAuctionSearch: function(evt) {
+		var nickname = document.getElementById("Helper:nickname").value;
+		var searchname = document.getElementById("Helper:searchname").value;
+		var category = document.getElementById("Helper:category").value;
+		if (!nickname || !searchname || !category) return;
+		var quickSearchList = System.getValueJSON("quickSearchList");
+		var theSearch = new Object;
+		theSearch.nickname = nickname;
+		theSearch.searchname = searchname;
+		theSearch.category = category;
+		quickSearchList.push(theSearch);
+		System.setValueJSON("quickSearchList", quickSearchList);
+		window.location=window.location;
+	},
+
+	delAuctionSearch: function(evt) {
+		var auctionSearchId = evt.target.getAttribute("auctionSearchId");
+		var quickSearchList = System.getValueJSON("quickSearchList");
+		quickSearchList.splice(auctionSearchId,1);
+		System.setValueJSON("quickSearchList", quickSearchList);
+		window.location = window.location;
+	},
+
+
 
 	saveAuctionSearch: function(evt) {
 		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
@@ -6065,6 +6110,127 @@ var Helper = {
 		var url = dirButton.getAttribute("onClick");
 		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
 		window.location = url;
+	},
+
+	injectCreateAuctionTemplate: function() {
+		if (window.location.search.search("inv_id") == -1) return;
+		
+		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+		var newRow = auctionTable.insertRow(10);
+		var newCell = newRow.insertCell(0);
+		newCell.colSpan = 2;
+		newCell.align = "center";
+		
+		var table = System.getValueJSON("auctionTemplate");
+		if (!table) {
+			table = [
+				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	default:true}
+				];
+			System.setValueJSON("auctionTemplate", table);
+		}
+		
+		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
+				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
+				"<tr><td bgcolor='#cd9e4b'><center>Auction Templates</center></td></tr>" +
+				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>" +
+				"<tr><th bgcolor='#cd9e4b'>Length</th><th bgcolor='#cd9e4b'>Currency</th>"+
+				"<th bgcolor='#cd9e4b'>Min Bid</th><th bgcolor='#cd9e4b'>Buy Now</th>"+
+				"<th></th></tr>";
+
+		for (var i = 0; i < table.length; i++) {
+			textResult += "<tr align='right'><td>"+Helper.getAuctionLength(table[i].auctionLength)+"</td>"+
+				"<td>"+(table[i].auctionCurrency==0?"Gold":"FSP")+"</td>"+
+				"<td>"+System.addCommas(table[i].auctionMinBid)+"</td>"+
+				"<td>"+System.addCommas(table[i].auctionBuyNow)+"</td>"+
+				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
+					"id='Helper:useAuctionTemplate" + i + "' auctionTemplateId=" + i +
+					" auctionLength=" + table[i].auctionLength +
+					" auctionCurrency=" + table[i].auctionCurrency +
+					" auctionMinBid=" + table[i].auctionMinBid +
+					" auctionBuyNow=" + table[i].auctionBuyNow +
+					">apply</span>]";
+			if (i != 0) {
+				textResult += " [<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
+					"id='Helper:delAuctionTemplate" + i + "' auctionTemplateId=" + i +">del</span>]"
+			}
+			textResult += "</td></tr>";
+		}
+		if (table.length<=10) {
+			textResult += "<tr align='right'>"+
+				"<td><select id='Helper:auctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
+					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
+					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
+				"<td><select id='Helper:auctionCurrency'><option value='0' >Gold</option><option value='1' selected>FSP</option></select></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:minBid'/></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:buyNow'/></td>"+
+				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
+					"id='Helper:saveAuctionTemplate'>save new template</span>]</td></tr>";
+			
+		}
+		textResult += "</table></td></tr></table>";
+
+		newCell.innerHTML = textResult;
+		
+		if (table.length<=10) document.getElementById("Helper:saveAuctionTemplate").addEventListener("click", Helper.saveAuctionTemplate, true);
+		for (var i = 0; i < table.length; i++) {
+			document.getElementById("Helper:useAuctionTemplate" + i).addEventListener("click", Helper.useAuctionTemplate, true);
+			if (i != 0) {
+				document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
+			}
+		}
+	},
+
+	getAuctionLength: function(auctionLength) {
+		if (auctionLength == 1) return '2 Hours';
+		else if (auctionLength == 2) return '4 Hours';
+		else if (auctionLength == 3) return '8 Hours';
+		else if (auctionLength == 4) return '12 Hours';
+		else if (auctionLength == 5) return '24 Hours';
+		else if (auctionLength == 6) return '48 Hours';
+		else return '1 Hour'
+	},
+
+	useAuctionTemplate: function(evt) {
+		var newAuctionLength = evt.target.getAttribute("auctionLength");
+		var newAuctionCurrency = evt.target.getAttribute("auctionCurrency");
+		var newAuctionMinBid = evt.target.getAttribute("auctionMinBid");
+		var newAuctionBuyNow = evt.target.getAttribute("auctionBuyNow");
+		
+		var auctionLength = System.findNode("//select[@name='auction_length']");
+		var auctionCurrency = System.findNode("//select[@name='currency']");
+		var auctionMinBid = System.findNode("//input[@name='minbid']");
+		var auctionBuyNow = System.findNode("//input[@name='buynow']");
+		
+		auctionLength.selectedIndex = newAuctionLength;
+		auctionCurrency.selectedIndex = newAuctionCurrency;
+		auctionMinBid.value = newAuctionMinBid;
+		auctionBuyNow.value = newAuctionBuyNow;
+	},
+
+	saveAuctionTemplate: function(evt) {
+		var auctionLength = document.getElementById("Helper:auctionLength").value;
+		var auctionCurrency = document.getElementById("Helper:auctionCurrency").value;
+		var auctionMinBid = document.getElementById("Helper:minBid").value;
+		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
+		if (!auctionMinBid || !auctionBuyNow) return;
+		var table = System.getValueJSON("auctionTemplate");
+		var theTemplate = new Object;
+		theTemplate.auctionLength = auctionLength;
+		theTemplate.auctionCurrency = auctionCurrency;
+		theTemplate.auctionMinBid = auctionMinBid;
+		theTemplate.auctionBuyNow = auctionBuyNow;
+		theTemplate.default = false;
+		table.push(theTemplate);
+		System.setValueJSON("auctionTemplate", table);
+		window.location = window.location;
+	},
+
+	delAuctionTemplate: function(evt) {
+		var auctionTemplateId = evt.target.getAttribute("auctionTemplateId");
+		var table = System.getValueJSON("auctionTemplate");
+		table.splice(auctionTemplateId,1);
+		System.setValueJSON("auctionTemplate", table);
+		window.location = window.location;
 	},
 
 	injectMessageTemplate: function() {
