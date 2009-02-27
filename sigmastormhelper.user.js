@@ -414,6 +414,13 @@ var Helper = {
 				break;
 			}
 			break;
+		case "skills":
+			switch(subPageId) {
+			case "selfbuff":
+				Helper.injectSelfBuff();
+				break;
+			}
+			break;
 		case "trade":
 			Helper.retrieveTradeConfirm();
 			break;
@@ -477,22 +484,28 @@ var Helper = {
 	},
 
 	quickClassCast: function(evt) {
+		var location;
 		switch(Helper.characterClass) {
 			case "Mutant":
-				window.location = System.server + "index.php?cmd=skills&tree_id=1";
+				location = System.server + "index.php?cmd=skills&tree_id=1&subcmd=selfbuff";
 				break;
 			case "Soldier":
-				window.location = System.server + "index.php?cmd=skills&tree_id=2";
+				location = System.server + "index.php?cmd=skills&tree_id=2&subcmd=selfbuff";
 				break;
 			case "Purist":
-				window.location = System.server + "index.php?cmd=skills&tree_id=3";
+				location = System.server + "index.php?cmd=skills&tree_id=3&subcmd=selfbuff";
 				break;
 			case "Cyborg":
-				window.location = System.server + "index.php?cmd=skills&tree_id=4";
+				location = System.server + "index.php?cmd=skills&tree_id=4&subcmd=selfbuff";
 				break;
 			default:
 				break;
 		}
+		var winWidth = 600;
+		var winHeight = 500;
+		var winLeft = (screen.availWidth - winWidth) / 2
+		var winTop = (screen.availHeight - winHeight) / 2
+		var popWin = window.open(location, "SelfBuff", "width="+winWidth+", height="+winHeight+", left="+winLeft+", top="+winTop+",scrollbars");
 	},
 
 	injectQuickHeal: function() {
@@ -5838,6 +5851,36 @@ var Helper = {
 		var quickMsgId = evt.target.getAttribute("quickMsgId");
 		System.findNode("//textarea[@name='msg']").value +=
 			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
+	},
+	
+	injectSelfBuff: function() {
+		var body = document.getElementsByTagName("body").item(0);
+		var skills = System.findNodes("//table[contains(@background, 'sigma2/skills/skillicon_bg')]");
+		var passiveSkillREG = /^(?:Unique DNA|Bite Mutation|Claw Mutation|Tentacle Mutation|Chomp Mutation|Combat Training|Psionic Sensitivity|Psionic Dart|Psionic Bolt|Sword of Psi|Psionic Missile|Reinforce Skeleton|Port 1|Port 2|Socket Mk 1)$/
+		// should change this regexp to check on id, but I prefer the skill name for easy correction, and regexp is fast anyways
+		var result = "<table width=400 cellspacing=20 align=center>";
+		var count = 0;
+		for (var i = 0; i < skills.length; i++) {
+			var skillId = System.getIntFromRegExp(skills[i].rows[2].cells[0].innerHTML, /skill_id=(\d+)"/i);
+			var skillPoint = System.getIntFromRegExp(skills[i].rows[3].cells[0].innerHTML, />(\d+)</i);
+			var skillName = skills[i].rows[1].cells[0].textContent;
+			if (skillPoint > 0) {
+				GM_log(skillName);
+				if (count % 2 == 0) result += "<tr>";
+				result += "<td align=center width=50%>" + skills[i].parentNode.innerHTML.replace("/skillicon_bg_linked.gif", "/skillicon_bg.gif");
+				if (! passiveSkillREG.test(skillName)) {
+					result += "<input class=custombutton type=button style='width:135px;' onclick=\"window.location='index.php?cmd=skills&subcmd=cast&skill_id=" + skillId + "';\" value='Activate on Self'/>";
+				} else {
+					result += "<span color='#ffff00'>Passive Skill</span>";
+				}
+				result += "</td>";
+				if (count % 2 == 1) result += "</tr>";
+				count ++;
+			}
+		}
+		if (count % 2 == 1) result += "<td></td></tr>";
+		result += "</table>";
+		body.innerHTML = result;
 	}
 
 };
