@@ -4141,7 +4141,7 @@ var Helper = {
 		var showUseableItems = GM_getValue("showUseableItems");
 		var allItems = targetInventory.items;
 		if (showUseableItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.minLevel < Helper.characterLevel});
+			allItems=allItems.filter(function(e,i,a) {return e.minLevel <= Helper.characterLevel});
 			//  && e.minLevel + 50 > Helper.characterLevel}
 		}
 
