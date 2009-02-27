@@ -1032,35 +1032,59 @@ var Helper = {
 		counter.setAttribute("colspan", "2");
 		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
 	},
-
+	
 	injectAdvisor: function() {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
-		for (var i=0; i<titleCells.length; i++) {
-			var cell=titleCells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-			cell.addEventListener('click', Helper.advisorHeaderClicked, true);
-		}
+		if (!titleCells) return;
+		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
+		var list=parentTables[parentTables.length-1];
+
 		GM_addStyle(
 			'.HelperAdvisorRow1 {background-color:#e7c473;font-size:x-small}\n' +
 			'.HelperAdvisorRow1:hover {background-color:white}\n' +
 			'.HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}\n' +
 			'.HelperAdvisorRow2:hover {background-color:white}');
-		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
-		var list=parentTables[parentTables.length-1];
-
+			
 		Helper.generateAdvisorRows(list);
+		
+		if (! Helper.advisorHeader) {
+			Helper.advisorHeader = '<tr>';
+			var titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Squads Created", "Squads Joined", "Artifacts Captured", "XP Contrib"];
+			for (var i=0; i<titleCells.length; i++) {
+				Helper.advisorHeader += "<td bgcolor=#cd9e4b align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'><b>" + titleCells[i] + "</b></td>";
+			}
+			Helper.advisorHeader += '</tr>';
+		}
+		
+		if (! Helper.advisorFooter) {
+			Helper.advisorFooter = '<tr><td colspan=3 align=right>Total: </td>';
+			for (var i=1; i<list.rows[list.rows.length-1].cells.length; i++) {
+				Helper.advisorFooter += "<td align=center>" + list.rows[list.rows.length-1].cells[i].innerHTML + '</td>';
+			}
+			Helper.advisorFooter +='</tr>';
+		}
+		
 		Helper.sortAsc = true;
 		Helper.sortAdvisor(list, "Member");
 	},
 
 	generateAdvisorRows: function(list) {
 		Helper.advisorRows = [];
+		var memberList = System.getValueJSON("memberlist");
 		for (var i=1; i<list.rows.length-1; i++){
 			var theRow=list.rows[i];
+			var name = theRow.cells[0].textContent.replace(/\s/, "");
+			for (var j=0; j<memberList.members.length; j++) {
+				if (memberList.members[j].name == name) {
+					var member = memberList.members[j];
+					break;
+				}
+			}
 			Helper.advisorRows[i-1] = {
+				'Id':(member != undefined ? member.id : -1),
 				'Member': theRow.cells[0].textContent,
+				'Lvl':(member != undefined ? member.level : -1),
+				'Rank':(member != undefined ? member.rank : ""),
 				'GoldFromDeposits': theRow.cells[1].textContent,
 				'GoldFromTax': theRow.cells[2].textContent,
 				'GoldTotal': theRow.cells[3].textContent,
@@ -1078,7 +1102,7 @@ var Helper = {
 		var headerClicked=evt.target.textContent;
 		var parentTables=System.findNodes("ancestor::table", evt.target)
 		var list=parentTables[parentTables.length-1];
-		Helper.sortAdvisor(list, headerClicked);
+		Helper.sortAdvisor(list, headerClicked.replace(/ /g, ""));
 	},
 
 	sortAdvisor: function(list, sortBy) {
@@ -1089,19 +1113,21 @@ var Helper = {
 		}
 		Helper.sortBy=sortBy;
 
-		if (sortBy=="Member") {
+		if (sortBy=="Member" || sortBy=="Rank") {
 			Helper.advisorRows.sort(Helper.stringSort)
 		}
 		else {
 			Helper.advisorRows.sort(Helper.numberSort)
 		}
 
-		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
+		var result = Helper.advisorHeader;
 
 		for (var i=0; i<Helper.advisorRows.length; i++){
 			var r = Helper.advisorRows[i];
 			result += '<tr class="HelperAdvisorRow'+(1+i % 2)+'">'+
-			'<td> '+r.Member+'</td>'+
+			'<td> <a href="index.php?cmd=profile&player_id=' + r.Id +'">' +r.Member+ '</a></td>'+
+			'<td align="center"> '+r.Lvl+'</td>'+
+			'<td align="center"> '+r.Rank.substr(0,9)+ (r.Rank.length>9 ? '...' : '') + '</td>'+
 			'<td align="center">'+r.GoldFromDeposits+'</td>'+
 			'<td align="center">'+r.GoldFromTax+'</td>'+
 			'<td align="center">'+r.GoldTotal+'</td>'+
@@ -1112,16 +1138,14 @@ var Helper = {
 			'<td align="center">'+r.RelicsCaptured+'</td>'+
 			'<td align="center">'+r.XPContrib+'</td></tr>';
 		}
-		result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
+		result+=Helper.advisorFooter;
 
 		list.innerHTML=result;
 
 		for (var i=0; i<list.rows[0].cells.length; i++) {
 			var cell=list.rows[0].cells[i];
-			// GM_log(cell);
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
-			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
 			cell.addEventListener('click', Helper.advisorHeaderClicked, true);
 		}
 
