@@ -1049,7 +1049,7 @@ var Helper = {
 		
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
-			var titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Squads Created", "Squads Joined", "Artifacts Captured", "XP Contrib"];
+			var titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Groups Created", "Groups Joined", "Relics Captured", "XP Contrib"];
 			for (var i=0; i<titleCells.length; i++) {
 				Helper.advisorHeader += "<td bgcolor=#cd9e4b align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'><b>" + titleCells[i] + "</b></td>";
 			}
