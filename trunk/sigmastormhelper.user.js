@@ -3999,11 +3999,11 @@ var Helper = {
 				output.innerHTML+=(i+1) + " ";
 				Helper.inventory.items.push(item);
 			}
-			} else {
-				output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
-			}
-		if (currentPage<pages.length || currentFolder<folderCount) {
-			if (currentPage==pages.length && currentFolder<folderCount) {
+		} else {
+			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
+		}
+		if ((pages && currentPage<pages.length) || currentFolder<folderCount) {
+			if (((pages && currentPage==pages.length) || !pages) && currentFolder<folderCount) {
 				currentPage = 0;
 				folderID = Helper.folderIDs[currentFolder];
 				GM_setValue("currentFolder", currentFolder+1);
