@@ -86,7 +86,7 @@ var Helper = {
 		Helper.characterArmor    = System.getIntFromRegExp(charInfoText, /Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		Helper.characterDamage   = System.getIntFromRegExp(charInfoText, /Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		var charClassNode = System.findNode("//img[contains(@src,'sigma2/skin/classes/')]");
-		var charClasses = ["", "Mutant", "Soldier", "Purist", "Cyborg"];
+		var charClasses = ["Clone", "Mutant", "Soldier", "Purist", "Cyborg"];
 		Helper.characterClass = charClasses[parseInt(charClassNode.src.substr(charClassNode.src.length-5,1))];
 	},
 
@@ -4101,6 +4101,13 @@ var Helper = {
 		if (!nameNode) GM_log(responseText);
 		if (nameNode) {
 			item.name=nameNode.textContent
+			
+			item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*) -/);
+			if (item.class) 
+				item.class = item.class[1];
+			else {
+				item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*)$/)[1];
+			}
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
 			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
@@ -4165,6 +4172,7 @@ var Helper = {
 			'<th width="180" align="left" colspan="2" sortkey="name">Name</th>' +
 			'<th sortkey="minLevel">Level</th>' +
 			'<th sortkey="where">Where</th>' +
+			'<th sortkey="class">Class</th>' +
 			'<th sortkey="type">Type</th>' +
 			'<th sortkey="attack">Att</th>' +
 			'<th sortkey="defense">Def</th>' +
@@ -4178,7 +4186,11 @@ var Helper = {
 		var showUseableItems = GM_getValue("showUseableItems");
 		var allItems = targetInventory.items;
 		if (showUseableItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.minLevel <= Helper.characterLevel});
+			Helper.itemClasses = {"Clone":"Core", "Mutant":"Rad", "Soldier":"Battlesuit", "Purist":"Psi", "Cyborg":"Hardwired"};
+			allItems=allItems.filter(function(e,i,a) {
+				return e.minLevel <= Helper.characterLevel && 
+					(e.class == "Core" || e.class == Helper.itemClasses[Helper.characterClass])
+				});
 			//  && e.minLevel + 50 > Helper.characterLevel}
 		}
 
@@ -4198,6 +4210,7 @@ var Helper = {
 				'</td><td>' + item.name + '</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
+				'<td align="right">' + item.class + '</td>' +
 				'<td align="right">' + item.type + '</td>' +
 				'<td align="right">' + item.attack + '</td>' +
 				'<td align="right">' + item.defense + '</td>' +
