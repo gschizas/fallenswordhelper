@@ -76,27 +76,27 @@ var Helper = {
 
 		if (!quickSearchList) {
 			quickSearchList = [
-				{"category":"Potions","searchname":"Potion of the Wise",             "nickname":"Lib 200"},
-				{"category":"Potions","searchname":"Potion of the Bookworm",         "nickname":"Lib 225"},
-				{"category":"Potions","searchname":"Potion of Shattering",           "nickname":"SA"},
-				{"category":"Potions","searchname":"Dragons Blood Potion",           "nickname":"ZK 200"},
-				{"category":"Potions","searchname":"Berserkers Potion",              "nickname":"ZK 300"},
-				{"category":"Potions","searchname":"Potion of Fury",                 "nickname":"ZK 350"},
-				{"category":"Potions","searchname":"Sludge Brew",                    "nickname":"DC 200"},
-				{"category":"Potions","searchname":"Potion of Black Death",          "nickname":"DC 225"},
-				{"category":"Potions","searchname":"Potion of Aid",                  "nickname":"Assist"},
-				{"category":"Potions","searchname":"Potion of Supreme Doubling",     "nickname":"DB 450"},
-				{"category":"Potions","searchname":"Potion of Acceleration",         "nickname":"DB 500"},
-				{"category":"Potions","searchname":"Potion of Lesser Death Dealer",  "nickname":"DD"},
-				{"category":"Potions","searchname":"Runic Potion",                   "nickname":"FI 250"},
-				{"category":"Potions","searchname":"Potion of Supreme Luck",         "nickname":"FI 1k"},
-				{"category":"Potions","searchname":"Potion of Truth",                "nickname":"EW 1k"},
-				{"category":"Potions","searchname":"Dull Edge",                      "nickname":"DE 25"},
-				{"category":"Potions","searchname":"Notched Blade",                  "nickname":"DE 80"},
-				{"category":"Potions","searchname":"Potion of Death",                "nickname":"DW 125"},
-				{"category":"Potions","searchname":"Potion of Decay",                "nickname":"WI 150"},
-				{"category":"Potions","searchname":"Potion of Fatality",             "nickname":"WI 350"},
-				{"category":"Potions","searchname":"Potion of Annihilation",         "nickname":"DW 150"},
+				{"category":"Potions","searchname":"Potion of the Wise",             "nickname":"Lib 200", "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of the Bookworm",         "nickname":"Lib 225", "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Shattering",           "nickname":"SA",      "displayOnAH":true},
+				{"category":"Potions","searchname":"Dragons Blood Potion",           "nickname":"ZK 200",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Berserkers Potion",              "nickname":"ZK 300",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Fury",                 "nickname":"ZK 350",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Sludge Brew",                    "nickname":"DC 200",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Black Death",          "nickname":"DC 225",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Aid",                  "nickname":"Assist",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Supreme Doubling",     "nickname":"DB 450",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Acceleration",         "nickname":"DB 500",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Lesser Death Dealer",  "nickname":"DD",      "displayOnAH":true},
+				{"category":"Potions","searchname":"Runic Potion",                   "nickname":"FI 250",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Supreme Luck",         "nickname":"FI 1k",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Truth",                "nickname":"EW 1k",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Dull Edge",                      "nickname":"DE 25",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Notched Blade",                  "nickname":"DE 80",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Death",                "nickname":"DW 125",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Decay",                "nickname":"WI 150",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Fatality",             "nickname":"WI 350",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Annihilation",         "nickname":"DW 150",  "displayOnAH":true},
 				{"category":"Plants", "searchname":"Blood Bloom",                    "nickname":""},
 				{"category":"Plants", "searchname":"Jademare",         	             "nickname":""},
 				{"category":"Plants", "searchname":"Dark Shade",                     "nickname":""},
@@ -104,6 +104,9 @@ var Helper = {
 				{"category":"Plants", "searchname":"Heffle Wart",                    "nickname":""},
 				{"category":"Plants", "searchname":"Amber",                          "nickname":""}
 			];
+			Helper.sortAsc=true;
+			Helper.sortBy="category";
+			quickSearchList.sort(Helper.stringSort);
 			System.setValueJSON("quickSearchList", quickSearchList);
 		}
 
@@ -2743,44 +2746,36 @@ var Helper = {
 		insertPageChangeBlock.innerHTML = newPageChangeBlock;
 		insertPageChangeBlockHere.align = "right";
 		insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
-		var potions = System.getValueJSON("potions");
 
-		if (!potions) {
-			potions = Data.potionList();
-		}
+		var quickSearchList = System.getValueJSON("quickSearchList");
 
 		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
-			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'>Quick Potion Search</td></tr>"
+			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
+						System.server +
+						"index.php?cmd=notepad&subcmd=auctionsearch'>" +
+						"Configure Quick Search</a></td></tr>";
 		var lp=0;
 		var rowCount = 0;
-		for (var p=0;p<potions.length;p++) {
-			var pot=potions[p];
-			if (lp % 3==0) {
-				finalHTML += "<tr>";
-				rowCount++;
+		for (var p=0;p<quickSearchList.length;p++) {
+			if (lp % 3==0 && rowCount == 6) break; //18 searches on the screen so don't display any more
+			var quickSearch=quickSearchList[p];
+			if (quickSearch.displayOnAH) {
+				if (lp % 3==0) {
+					finalHTML += "<tr>";
+					rowCount++;
+				}
+				finalHTML += "<td";
+				finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickItemSearch' searchtext='" +
+					quickSearch.searchname + "' title='" + quickSearch.searchname + "'>" +
+					quickSearch.nickname + "</span></td>"
+				if (lp % 3==2) finalHTML += "</tr>";
+				if (lp % 3==2) finalHTML += "</tr>";
+				lp++;
 			}
-			if (rowCount == 7 && lp % 3==0) {
-				finalHTML += "<td><a style='color:#7D2252' href='" +
-					System.server +
-					"index.php?cmd=notepad&subcmd=auctionsearch'>" +
-					"Configurable Auction House Quick Search</a>&nbsp;" +
-					/* "<span id='Helper:QuickSearch' style='cursor:pointer;text-decoration:underline;color:#7D2252'>[Search]</span>" + */
-					"</td>";
-			}
-			finalHTML += "<td";
-			if (pot.wide) finalHTML+=" colspan='2' "
-			finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' searchtext='" +
-				pot.searchname + "' title='" +
-				pot.buff + " " + pot.level.toString() + "'>" +
-				pot.shortname + "</span></td>"
-			if (lp % 3==2) finalHTML += "</tr>";
-			if (pot.wide) lp++;
-			if (lp % 3==2) finalHTML += "</tr>";
-			lp++;
 		}
 		imageCell.innerHTML = finalHTML;
 
-		var quickSearchList = System.findNodes("//span[@cat='quickPotionSearch']");
+		var quickSearchList = System.findNodes("//span[@cat='quickItemSearch']");
 		for (var i=0; i<quickSearchList.length; i++) {
 			quickSearchItem = quickSearchList[i];
 			quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
@@ -2888,10 +2883,6 @@ var Helper = {
 		// document.getElementById("Helper:QuickSearch").addEventListener("click", Helper.auctionHouseQuickSearch, true);
 	},
 
-	auctionHouseQuickSearch: function() {
-
-	},
-
 	auctionHouseTogglePreferences: function(evt) {
 		var prefArea = document.getElementById("Helper:AuctionHousePreferences");
 		if (prefArea.style.display!="none") {
@@ -2965,9 +2956,8 @@ var Helper = {
 		var searchText = evt.target.getAttribute("searchtext");
 		GM_log(searchText);
 		var searchInputTextField = System.findNode("//input[@name='search_text' and @class='custominput']");
-		searchInputTextField.value = searchText;
-		thisForm = searchInputTextField.form;
-		thisForm.submit();
+		var searchURL = System.server + "index.php?cmd=auctionhouse&type=-1&search_text=" + searchText + "&page=1&order_by=1";
+		window.location = searchURL;
 	},
 
 	injectAuctionExtraText: function(anItem, craft, forgeCount) {
@@ -3618,24 +3608,26 @@ var Helper = {
 	injectAuctionSearch: function() {
 		var content=Layout.notebookContent();
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Auction Quick Search</b></td></tr>'+
-			'<tr><td></td></tr>'+
+			'<tr><td colspan="2" nobr bgcolor="#cd9e4b" align="center"><b>&nbsp;Auction Quick Search</b></td></tr>'+
+			'<tr><td>This screen allows you to set up some quick search templates for the Auction House. '+
+				'The Display on AH column indicates if the quick search will show on the short list on the '+
+				'Auction House main screen. A maximum of 18 items can show on this list '+
+				'(It will not show more than 18 even if you have more than 18 flagged). '+
+				'To edit items, either use the large text area below, '+
+				'or add a new entry and delete the old one. You can always reset the list to the default values.</td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
 		var injectHere = document.getElementById('Helper:Auction Search Output');
 		var quickSearchList = System.getValueJSON("quickSearchList");
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		//quickSearchList.sort();
 		var currentCategory = "";
-		var output = "<table><tbody>";
+		var output = "<table  cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>";
+		output += "<tr bgcolor='#cd9e4b'><th></th><th>Nickname</th><th>Quick Search Text</th><th>Display on AH?</th><th>Delete?</th></tr>";
 		for (j=0; j<quickSearchList.length; j++) {
 			var quickSearchItem=quickSearchList[j];
 			if (quickSearchItem) {
 				if (currentCategory != quickSearchItem.category)
-					output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
+					output += "<tr><td colspan=5><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
 				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
 				output += "<tr><td width='10'></td>"+
 					"<td><a href='" + System.server +
@@ -3648,24 +3640,27 @@ var Helper = {
 					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
 					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
 					quickSearchItem.searchname + "</span></a></td>" +
+					"<td><span style='color:blue;'>"+(quickSearchItem.displayOnAH?"True":"False")+"</span></td>" +
 					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:delAuctionSearch"+j+"' auctionSearchId="+j+">"+
 						"del</span>]</td></tr>";
 				currentCategory = quickSearchItem.category;
 			}
 		}
-		output += "<tr><td colspan=4 height=10></td></tr>";
-		output += "<tr><td colspan=4>"+
+		output += "<tr><td colspan=5 height=10></td></tr>";
+		output += "<tr><td colspan=5>"+
 				"<table cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>"+
-				"<tr><th>Nickname</th><th>Search Name</th><th>Category</th><th></th></tr>"+
-				"<tr align='right'><td><input type='text' class='custominput' size='14' id='Helper:nickname'/></td>"+
-					"<td><input type='text' class='custominput' size='40' id='Helper:searchname'/></td>"+
+				"<tr><th>Category</th><th>Nickname</th><th>Search Name</th><th>Display on AH?</th><th></th></tr>"+
+				"<tr align='right'>"+
 					"<td><input type='text' class='custominput' size='14' id='Helper:category'/></td>"+
+					"<td><input type='text' class='custominput' size='8' id='Helper:nickname'/></td>"+
+					"<td><input type='text' class='custominput' size='40' id='Helper:searchname'/></td>"+
+					"<td align='center'><input type='checkbox' class='custominput' id='Helper:displayOnAH'/></td>"+
 					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:addAuctionSearch'>"+
 						"add</span>]</td>"+
 				"</tr></tbody></table>"+
 			"</td></tr>";
-		output += "<tr><td colspan=4 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
-		output += "<tr><td colspan=4 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
+		output += "<tr><td colspan=5 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
+		output += "<tr><td colspan=5 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
 					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
 		output += "</tbody></table>";
 		injectHere.innerHTML = output;
@@ -3681,13 +3676,18 @@ var Helper = {
 		var nickname = document.getElementById("Helper:nickname").value;
 		var searchname = document.getElementById("Helper:searchname").value;
 		var category = document.getElementById("Helper:category").value;
+		var displayOnAH = document.getElementById("Helper:displayOnAH").checked;
 		if (!nickname || !searchname || !category) return;
 		var quickSearchList = System.getValueJSON("quickSearchList");
 		var theSearch = new Object;
 		theSearch.nickname = nickname;
 		theSearch.searchname = searchname;
 		theSearch.category = category;
+		theSearch.displayOnAH = displayOnAH;
 		quickSearchList.push(theSearch);
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
 		System.setValueJSON("quickSearchList", quickSearchList);
 		window.location=window.location;
 	},
@@ -3696,15 +3696,20 @@ var Helper = {
 		var auctionSearchId = evt.target.getAttribute("auctionSearchId");
 		var quickSearchList = System.getValueJSON("quickSearchList");
 		quickSearchList.splice(auctionSearchId,1);
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
 		System.setValueJSON("quickSearchList", quickSearchList);
 		window.location = window.location;
 	},
 
-
-
 	saveAuctionSearch: function(evt) {
 		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
-		GM_setValue("quickSearchList",auctionsearchtextarea.value);
+		var quickSearchList = System.getValueJSON(auctionsearchtextarea.value);
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
+		System.setValueJSON("quickSearchList", quickSearchList);
 		window.location=window.location;
 	},
 
@@ -6174,10 +6179,8 @@ var Helper = {
 					" auctionMinBid=" + table[i].auctionMinBid +
 					" auctionBuyNow=" + table[i].auctionBuyNow +
 					">apply</span>]";
-			if (i != 0) {
 				textResult += " [<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
 					"id='Helper:delAuctionTemplate" + i + "' auctionTemplateId=" + i +">del</span>]"
-			}
 			textResult += "</td></tr>";
 		}
 		if (table.length<=10) {
@@ -6199,9 +6202,7 @@ var Helper = {
 		if (table.length<=10) document.getElementById("Helper:saveAuctionTemplate").addEventListener("click", Helper.saveAuctionTemplate, true);
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper:useAuctionTemplate" + i).addEventListener("click", Helper.useAuctionTemplate, true);
-			if (i != 0) {
-				document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
-			}
+			document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
 		}
 	},
 
@@ -6237,7 +6238,7 @@ var Helper = {
 		var auctionCurrency = document.getElementById("Helper:auctionCurrency").value;
 		var auctionMinBid = document.getElementById("Helper:minBid").value;
 		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
-		if (!auctionMinBid || !auctionBuyNow) return;
+		if (!auctionMinBid) return;
 		var table = System.getValueJSON("auctionTemplate");
 		var theTemplate = new Object;
 		theTemplate.auctionLength = auctionLength;
