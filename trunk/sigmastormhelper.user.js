@@ -3143,8 +3143,9 @@ var Helper = {
 					anItem = allItems[i];
 					itemInvId = anItem.value;
 					theTextNode = System.findNode("../../td[3]", anItem);
-					itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-					var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+					itemName = theTextNode.textContent.trim().replace("\\","");
+					theTextNode.textContent = itemName;
+					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
 					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 						+ escape(itemName)
 						+ "'>AH</a>]</span> "
@@ -4100,7 +4101,7 @@ var Helper = {
 		var nameNode=System.findNode("//b", doc);
 		if (!nameNode) GM_log(responseText);
 		if (nameNode) {
-			item.name=nameNode.textContent
+			item.name=nameNode.textContent.replace(/\\/g,"");
 			
 			item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*) -/);
 			if (item.class) 

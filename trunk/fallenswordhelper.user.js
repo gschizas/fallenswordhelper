@@ -1032,7 +1032,7 @@ var Helper = {
 		counter.setAttribute("colspan", "2");
 		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
 	},
-	
+
 	injectAdvisor: function() {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
 		if (!titleCells) return;
@@ -1044,9 +1044,9 @@ var Helper = {
 			'.HelperAdvisorRow1:hover {background-color:white}\n' +
 			'.HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}\n' +
 			'.HelperAdvisorRow2:hover {background-color:white}');
-			
+
 		Helper.generateAdvisorRows(list);
-		
+
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
 			var titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Groups Created", "Groups Joined", "Relics Captured", "XP Contrib"];
@@ -1055,7 +1055,7 @@ var Helper = {
 			}
 			Helper.advisorHeader += '</tr>';
 		}
-		
+
 		if (! Helper.advisorFooter) {
 			Helper.advisorFooter = '<tr><td colspan=3 align=right>Total: </td>';
 			for (var i=1; i<list.rows[list.rows.length-1].cells.length; i++) {
@@ -1063,7 +1063,7 @@ var Helper = {
 			}
 			Helper.advisorFooter +='</tr>';
 		}
-		
+
 		Helper.sortAsc = true;
 		Helper.sortAdvisor(list, "Member");
 	},
@@ -1793,7 +1793,7 @@ var Helper = {
 		content.innerHTML = '<span id=Helper.entityTableOutput>No monster information! Please enable entity log and travel a bit to see the world</span>';
 		Helper.generateEntityTable();
 	},
-	
+
 	generateEntityTable: function() {
 		var content = document.getElementById("Helper.entityTableOutput");
 		if (!Helper.entityLogTable || !content) return;
@@ -1814,7 +1814,7 @@ var Helper = {
 			'<th align="center">Credits</th>' +
 			'</tr>';
 		for (var k=0;k<Helper.entityLogTable.entity.length;k++) {
-			result += '<tr><td align="center"><img width=40 height=40 ' + 
+			result += '<tr><td align="center"><img width=40 height=40 ' +
 					'onmouseover="tt_setWidth(200);Tip(\'<img src=' + Helper.entityLogTable.entity[k]["key1"] + '/>\');" ' +
 					'src="' + Helper.entityLogTable.entity[k]["key1"] + '"/></td>';
 			result += '<td align="left">' + Helper.entityLogTable.entity[k]["name"] + '</td>';
@@ -1826,7 +1826,7 @@ var Helper = {
 		result += "</table>";
 		content.innerHTML = result;
 		document.getElementById("Helper.clearEntityLog").addEventListener("click", Helper.clearEntityLog, true);
-		
+
 		var theTable=document.getElementById('Helper:EntityInfo');
 		for (var i=0; i<theTable.rows[0].cells.length; i++) {
 			var cell=theTable.rows[0].cells[i];
@@ -1842,7 +1842,7 @@ var Helper = {
 		GM_setValue("monsterLog", "");
 		window.location="index.php?cmd=notepad&subcmd=monsterlog";
 	},
-	
+
 	sortEntityLogTable: function(evt) {
 		var headerClicked = evt.target.getAttribute("sortKey");
 		var sortType = evt.target.getAttribute("sortType");
@@ -1854,7 +1854,7 @@ var Helper = {
 
 		Helper.sortBy=headerClicked;
 		GM_log(Helper.sortAsc + " " + Helper.sortBy + " " + sortType);
-		
+
 		switch(sortType) {
 			case "string":
 				Helper.entityLogTable.entity.sort(Helper.stringSort);
@@ -3104,8 +3104,9 @@ var Helper = {
 					anItem = allItems[i];
 					itemInvId = anItem.value;
 					theTextNode = System.findNode("../../td[3]", anItem);
-					itemName = theTextNode.innerHTML.replace(/\&nbsp;/i,"");
-					var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+					itemName = theTextNode.textContent.trim().replace("\\","");
+					theTextNode.textContent = itemName;
+					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
 					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 						+ escape(itemName)
 						+ "'>AH</a>]</span> "
@@ -3322,7 +3323,7 @@ var Helper = {
 					listOfAllies += allyName + " ";
 				}
 			}
-			
+
 			listOfEnemies = "";
 			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
 			for (var i=0;i<enemiesTableActual.rows.length;i++) {
@@ -3336,7 +3337,7 @@ var Helper = {
 			}
 			GM_setValue("listOfAllies", listOfAllies);
 			GM_setValue("listOfEnemies", listOfEnemies);
-					
+
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
 			if (profileInventory) {
@@ -4135,7 +4136,7 @@ var Helper = {
 		var nameNode=System.findNode("//b", doc);
 		if (!nameNode) GM_log(responseText);
 		if (nameNode) {
-			item.name=nameNode.textContent
+			item.name=nameNode.textContent.replace(/\\/g,"");
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
 			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
@@ -6138,13 +6139,13 @@ var Helper = {
 
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) return;
-		
+
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		var newRow = auctionTable.insertRow(10);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
 		newCell.align = "center";
-		
+
 		var table = System.getValueJSON("auctionTemplate");
 		if (!table) {
 			table = [
@@ -6152,7 +6153,7 @@ var Helper = {
 				];
 			System.setValueJSON("auctionTemplate", table);
 		}
-		
+
 		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
 				"<tr><td bgcolor='#cd9e4b'><center>Auction Templates</center></td></tr>" +
@@ -6189,12 +6190,12 @@ var Helper = {
 				"<td><input type='text' class='custominput' size='6' id='Helper:buyNow'/></td>"+
 				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
 					"id='Helper:saveAuctionTemplate'>save new template</span>]</td></tr>";
-			
+
 		}
 		textResult += "</table></td></tr></table>";
 
 		newCell.innerHTML = textResult;
-		
+
 		if (table.length<=10) document.getElementById("Helper:saveAuctionTemplate").addEventListener("click", Helper.saveAuctionTemplate, true);
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper:useAuctionTemplate" + i).addEventListener("click", Helper.useAuctionTemplate, true);
@@ -6219,12 +6220,12 @@ var Helper = {
 		var newAuctionCurrency = evt.target.getAttribute("auctionCurrency");
 		var newAuctionMinBid = evt.target.getAttribute("auctionMinBid");
 		var newAuctionBuyNow = evt.target.getAttribute("auctionBuyNow");
-		
+
 		var auctionLength = System.findNode("//select[@name='auction_length']");
 		var auctionCurrency = System.findNode("//select[@name='currency']");
 		var auctionMinBid = System.findNode("//input[@name='minbid']");
 		var auctionBuyNow = System.findNode("//input[@name='buynow']");
-		
+
 		auctionLength.selectedIndex = newAuctionLength;
 		auctionCurrency.selectedIndex = newAuctionCurrency;
 		auctionMinBid.value = newAuctionMinBid;
