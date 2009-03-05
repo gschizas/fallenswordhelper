@@ -3705,7 +3705,7 @@ var Helper = {
 
 	saveAuctionSearch: function(evt) {
 		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
-		var quickSearchList = System.getValueJSON(auctionsearchtextarea.value);
+		var quickSearchList = JSON.parse(auctionsearchtextarea.value);
 		Helper.sortAsc=true;
 		Helper.sortBy="category";
 		quickSearchList.sort(Helper.stringSort);
