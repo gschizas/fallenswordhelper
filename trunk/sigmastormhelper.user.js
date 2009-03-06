@@ -4108,7 +4108,11 @@ var Helper = {
 			if (item.class) 
 				item.class = item.class[1];
 			else {
-				item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*)$/)[1];
+				item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*)$/);
+				if (item.class) 
+					item.class = item.class[1];
+				else
+					item.class = "";
 			}
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
