@@ -2776,10 +2776,12 @@ var Helper = {
 		}
 		imageCell.innerHTML = finalHTML;
 
-		var quickSearchList = System.findNodes("//span[@cat='quickItemSearch']");
-		for (var i=0; i<quickSearchList.length; i++) {
-			quickSearchItem = quickSearchList[i];
-			quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
+		var quickItemSearchList = System.findNodes("//span[@cat='quickItemSearch']");
+		if (quickItemSearchList) {
+			for (var i=0; i<quickItemSearchList.length; i++) {
+				quickSearchItem = quickItemSearchList[i];
+				quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
+			}
 		}
 
 		var allItems = document.getElementsByTagName("IMG");
