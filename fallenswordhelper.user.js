@@ -66,6 +66,7 @@ var Helper = {
 		System.setDefault("enableBioCompressor", false);
 		System.setDefault("maxCompressedCharacters", 1500);
 		System.setDefault("maxCompressedLines", 25);
+		System.setDefault("hideArenaPrizes", "");
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -3265,40 +3266,44 @@ var Helper = {
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
 			var alliesTotal = GM_getValue("alliestotal");
-			var alliesParent = System.findNode("//b[.='Allies']/..");;
+			var alliesParent = System.findNode("//b[.='Allies']/..");
 			var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-			var numberOfAllies = 0;
-			var startIndex = 0;
-			while (alliesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
-				numberOfAllies ++;
-				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
-			}
-			startIndex = 0;
-			while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
-				numberOfAllies ++;
-				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
-			}
-			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
-			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
+			if (alliesTable) {
+				var numberOfAllies = 0;
+				var startIndex = 0;
+				while (alliesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+					numberOfAllies ++;
+					startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+				}
+				startIndex = 0;
+				while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+					numberOfAllies ++;
+					startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+				}
+				alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
+				if (alliesTotal && alliesTotal >= numberOfAllies) {
+					alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
+				}
 			}
 			var enemiesTotal = GM_getValue("enemiestotal");
 			var enemiesParent = System.findNode("//b[.='Enemies']/..");
 			var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-			var numberOfEnemies = 0;
-			var startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
-				numberOfEnemies ++;
-				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
-			}
-			var startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
-				numberOfEnemies ++;
-				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
-			}
-			enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
-			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
+			if (enemiesTable) {
+				var numberOfEnemies = 0;
+				var startIndex = 0;
+				while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+					numberOfEnemies ++;
+					startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+				}
+				var startIndex = 0;
+				while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+					numberOfEnemies ++;
+					startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+				}
+				enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
+				if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
+					enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
+				}
 			}
 
 			//store a list of allies and enemies for use in coloring
@@ -4419,7 +4424,7 @@ var Helper = {
 
 	generateRecipeTable: function() {
 		var output=document.getElementById('Helper:RecipeManagerOutput');
-		var result='<table id="Helper:RecipeTable"><tr>' +
+		var result='<table id="Helper:RecipeTable" width="100%"><tr>' +
 			'<th align="left" colspan="2" sortkey="name">Name</th>' +
 			'<th align="left">Items</th>' +
 			'<th align="left">Components</th>' +
@@ -4438,9 +4443,9 @@ var Helper = {
 
 			if (hideRecipes.indexOf(recipe.name) == -1) {
 				result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
-					'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/></a></td>' +
-					'<td><a href="' + recipe.link + '">' + recipe.name + '</a></td>';
-				result += '<td>';
+					'<td style="border-bottom:1px solid #CD9E4B;"><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/></a></td>' +
+					'<td style="border-bottom:1px solid #CD9E4B;"><a href="' + recipe.link + '">' + recipe.name + '</a></td>';
+				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.items) {
 					for (var j=0; j<recipe.items.length; j++) {
 						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded +
@@ -4450,8 +4455,8 @@ var Helper = {
 							'src="' + recipe.items[j].img + '"/><br/>';
 					}
 				}
-				result += '</td>'
-				result += '<td>';
+				result += '</td>';
+				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.components) {
 					for (var j=0; j<recipe.components.length; j++) {
 						result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
@@ -4461,15 +4466,15 @@ var Helper = {
 							'src="' + recipe.components[j].img + '"/><br/>';
 					}
 				}
-				result += '</td>'
-				result += '<td>';
+				result += '</td>';
+				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.target) {
 					result += '<img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
 						recipe.target.id + ', -1, 2, ' + Layout.playerId() + ', \'' +
 						recipe.target.verify + '\', \'\');" ' +
 						'src="' + recipe.target.img + '"/>';
 				}
-				result += '</td>'
+				result += '</td>';
 				result += '</tr>';
 			}
 		}
@@ -5402,6 +5407,10 @@ var Helper = {
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 
 		var arenaMoves = System.getValueJSON("arenaMoves");
+		var hideArenaPrizes = GM_getValue("hideArenaPrizes");
+		if (hideArenaPrizes) {
+			var hideArenaPrizesArray = hideArenaPrizes.split(",");
+		}
 		var oldArenaMatches = System.getValueJSON("arenaMatches");
 		if (!oldArenaMatches) {
 			arenaMatches = new Array();
@@ -5451,9 +5460,25 @@ var Helper = {
 					if (prizeSRC == searchText && arenaMoves[j].moveCount == 3){
 						row.style.visibility = "hidden";
 						row.style.display = "none";
-						//cannot get blocking to work correctly.
-						//row.style.display = "table-row";
-						//row.style.display = "block";
+						break;
+					}
+				}
+			}
+			if (prizeSRC && prizeSRC.search("/items/") != -1) {
+				var prizeImgElement = row.cells[7].firstChild;
+				var prizeOnmouseover = prizeImgElement.getAttribute("onmouseover");
+				var itemIdRE = /ajaxLoadCustom\((\d+)/;
+				var itemId = itemIdRE.exec(prizeOnmouseover)[1];
+				prizeOnmouseover = prizeOnmouseover.replace(/""/,'"ItemId = '+itemId+'"');
+				prizeImgElement.setAttribute("onmouseover", prizeOnmouseover);
+				if (hideArenaPrizes) {
+					for (var k=0; k<hideArenaPrizesArray.length; k++){
+						var compareStr = System.imageServer + "/items/" + hideArenaPrizesArray[k] + ".gif";
+						if (prizeSRC == compareStr) {
+							row.style.visibility = "hidden";
+							row.style.display = "none";
+							break;
+						}
 					}
 				}
 			}
@@ -5744,6 +5769,7 @@ var Helper = {
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
+		var hideArenaPrizes=GM_getValue("hideArenaPrizes");
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -5825,6 +5851,9 @@ var Helper = {
 				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
 				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
+			'<tr><td align="right">Hide Arena Prizes' + Helper.helpLink('Hide Arena Prizes', 'List of the itemIds of arena prizes that should not display on the arena screen ' +
+				'separated by commas. To find the itemId you will have to view the source of the page or mouseover the item on the arena page.') +
+				':</td><td colspan="3"><input name="hideArenaPrizes" size="60" value="'+ hideArenaPrizes + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -5957,7 +5986,8 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
-
+		System.saveValueForm(oForm, "hideArenaPrizes");
+		
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
 		return false;
