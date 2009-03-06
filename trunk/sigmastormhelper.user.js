@@ -306,6 +306,7 @@ var Helper = {
 		case "auctionhouse":
 			switch (subPageId) {
 			case "create":
+				Helper.injectCreateAuctionTemplate();
 				break;
 			case "preferences":
 				break;
@@ -5830,6 +5831,123 @@ var Helper = {
 		var url = dirButton.getAttribute("onClick");
 		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
 		window.location = url;
+	},
+
+	injectCreateAuctionTemplate: function() {
+		if (window.location.search.search("inv_id") == -1) return;
+
+		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+		var newRow = auctionTable.insertRow(6);
+		var newCell = newRow.insertCell(0);
+		newCell.colSpan = 2;
+		newCell.align = "center";
+
+		var table = System.getValueJSON("auctionTemplate");
+		if (!table) {
+			table = [
+				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	default:true}
+				];
+			System.setValueJSON("auctionTemplate", table);
+		}
+
+		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
+				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
+				"<tr><td bgcolor='#212323'><center>Auction Templates</center></td></tr>" +
+				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>" +
+				"<tr><th bgcolor='#212323'>Length</th><th bgcolor='#212323'>Currency</th>"+
+				"<th bgcolor='#212323'>Min Bid</th><th bgcolor='#212323'>Buy Now</th>"+
+				"<th></th></tr>";
+
+		for (var i = 0; i < table.length; i++) {
+			textResult += "<tr align='right'><td>"+Helper.getAuctionLength(table[i].auctionLength)+"</td>"+
+				"<td>"+(table[i].auctionCurrency==0?"Credits":"Flux Crystals")+"</td>"+
+				"<td>"+System.addCommas(table[i].auctionMinBid)+"</td>"+
+				"<td>"+System.addCommas(table[i].auctionBuyNow)+"</td>"+
+				"<td>[<span style='cursor:pointer; text-decoration:underline; color:#84ADAC;' "+
+					"id='Helper:useAuctionTemplate" + i + "' auctionTemplateId=" + i +
+					" auctionLength=" + table[i].auctionLength +
+					" auctionCurrency=" + table[i].auctionCurrency +
+					" auctionMinBid=" + table[i].auctionMinBid +
+					" auctionBuyNow=" + table[i].auctionBuyNow +
+					">apply</span>]";
+				textResult += " [<span style='cursor:pointer; text-decoration:underline; color:#84ADAC;' "+
+					"id='Helper:delAuctionTemplate" + i + "' auctionTemplateId=" + i +">del</span>]"
+			textResult += "</td></tr>";
+		}
+		if (table.length<=10) {
+			textResult += "<tr align='right'>"+
+				"<td><select id='Helper:auctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
+					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
+					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
+				"<td><select id='Helper:auctionCurrency'><option value='0' >Gold</option><option value='1' selected>FSP</option></select></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:minBid'/></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:buyNow'/></td>"+
+				"<td>[<span style='cursor:pointer; text-decoration:underline; color:#84ADAC;' "+
+					"id='Helper:saveAuctionTemplate'>save new template</span>]</td></tr>";
+
+		}
+		textResult += "</table></td></tr></table>";
+
+		newCell.innerHTML = textResult;
+
+		if (table.length<=10) document.getElementById("Helper:saveAuctionTemplate").addEventListener("click", Helper.saveAuctionTemplate, true);
+		for (var i = 0; i < table.length; i++) {
+			document.getElementById("Helper:useAuctionTemplate" + i).addEventListener("click", Helper.useAuctionTemplate, true);
+			document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
+		}
+	},
+
+	getAuctionLength: function(auctionLength) {
+		if (auctionLength == 1) return '2 Hours';
+		else if (auctionLength == 2) return '4 Hours';
+		else if (auctionLength == 3) return '8 Hours';
+		else if (auctionLength == 4) return '12 Hours';
+		else if (auctionLength == 5) return '24 Hours';
+		else if (auctionLength == 6) return '48 Hours';
+		else return '1 Hour'
+	},
+
+	useAuctionTemplate: function(evt) {
+		var newAuctionLength = evt.target.getAttribute("auctionLength");
+		var newAuctionCurrency = evt.target.getAttribute("auctionCurrency");
+		var newAuctionMinBid = evt.target.getAttribute("auctionMinBid");
+		var newAuctionBuyNow = evt.target.getAttribute("auctionBuyNow");
+
+		var auctionLength = System.findNode("//select[@name='auction_length']");
+		var auctionCurrency = System.findNode("//select[@name='currency']");
+		var auctionMinBid = System.findNode("//input[@name='minbid']");
+		var auctionBuyNow = System.findNode("//input[@name='buynow']");
+
+		auctionLength.selectedIndex = newAuctionLength;
+		auctionCurrency.selectedIndex = newAuctionCurrency;
+		auctionMinBid.value = newAuctionMinBid;
+		auctionBuyNow.value = newAuctionBuyNow;
+	},
+
+	saveAuctionTemplate: function(evt) {
+		var auctionLength = document.getElementById("Helper:auctionLength").value;
+		var auctionCurrency = document.getElementById("Helper:auctionCurrency").value;
+		var auctionMinBid = document.getElementById("Helper:minBid").value;
+		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
+		if (!auctionMinBid) return;
+		var table = System.getValueJSON("auctionTemplate");
+		var theTemplate = new Object;
+		theTemplate.auctionLength = auctionLength;
+		theTemplate.auctionCurrency = auctionCurrency;
+		theTemplate.auctionMinBid = auctionMinBid;
+		theTemplate.auctionBuyNow = auctionBuyNow;
+		theTemplate.default = false;
+		table.push(theTemplate);
+		System.setValueJSON("auctionTemplate", table);
+		window.location = window.location;
+	},
+
+	delAuctionTemplate: function(evt) {
+		var auctionTemplateId = evt.target.getAttribute("auctionTemplateId");
+		var table = System.getValueJSON("auctionTemplate");
+		table.splice(auctionTemplateId,1);
+		System.setValueJSON("auctionTemplate", table);
+		window.location = window.location;
 	},
 
 	injectMessageTemplate: function() {
