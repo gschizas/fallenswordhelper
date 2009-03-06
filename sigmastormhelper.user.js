@@ -1011,7 +1011,7 @@ var Helper = {
 		if (!GM_getValue("footprints")) return;
 		if (isLarge) {
 			var realm = System.findNode("//b");
-			Helper.levelName=realm.textContent.replace(" Map Overview", "");
+			Helper.levelName=realm.textContent.replace(" Map Overview ", "");
 		}
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
