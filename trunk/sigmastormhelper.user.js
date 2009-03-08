@@ -2388,6 +2388,12 @@ var Helper = {
 		case 56: // keyed combat
 			Helper.killMonsterAt(r-48);
 			break;
+		case 61: // view shop in map [=]
+			Helper.worldMapAction();
+			break;
+		case 104: // quickheal
+			Helper.quickHeal();
+			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
