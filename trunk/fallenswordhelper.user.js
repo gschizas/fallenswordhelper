@@ -70,43 +70,16 @@ var Helper = {
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
-		} catch(err) {
+		}
+		catch (err) {
 			GM_log(err);
-			quickSearchList=null;
+			quickSearchList = null;
 		}
 
 		if (!quickSearchList) {
-			quickSearchList = [
-				{"category":"Potions","searchname":"Potion of the Wise",             "nickname":"Lib 200", "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of the Bookworm",         "nickname":"Lib 225", "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Shattering",           "nickname":"SA",      "displayOnAH":true},
-				{"category":"Potions","searchname":"Dragons Blood Potion",           "nickname":"ZK 200",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Berserkers Potion",              "nickname":"ZK 300",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Fury",                 "nickname":"ZK 350",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Sludge Brew",                    "nickname":"DC 200",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Black Death",          "nickname":"DC 225",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Aid",                  "nickname":"Assist",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Supreme Doubling",     "nickname":"DB 450",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Acceleration",         "nickname":"DB 500",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Lesser Death Dealer",  "nickname":"DD",      "displayOnAH":true},
-				{"category":"Potions","searchname":"Runic Potion",                   "nickname":"FI 250",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Supreme Luck",         "nickname":"FI 1k",   "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Truth",                "nickname":"EW 1k",   "displayOnAH":true},
-				{"category":"Potions","searchname":"Dull Edge",                      "nickname":"DE 25",   "displayOnAH":true},
-				{"category":"Potions","searchname":"Notched Blade",                  "nickname":"DE 80",   "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Death",                "nickname":"DW 125",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Decay",                "nickname":"WI 150",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Fatality",             "nickname":"WI 350",  "displayOnAH":true},
-				{"category":"Potions","searchname":"Potion of Annihilation",         "nickname":"DW 150",  "displayOnAH":true},
-				{"category":"Plants", "searchname":"Blood Bloom",                    "nickname":""},
-				{"category":"Plants", "searchname":"Jademare",         	             "nickname":""},
-				{"category":"Plants", "searchname":"Dark Shade",                     "nickname":""},
-				{"category":"Plants", "searchname":"Trinettle",                      "nickname":""},
-				{"category":"Plants", "searchname":"Heffle Wart",                    "nickname":""},
-				{"category":"Plants", "searchname":"Amber",                          "nickname":""}
-			];
-			Helper.sortAsc=true;
-			Helper.sortBy="category";
+			quickSearchList = Data.quickSearchList()
+			Helper.sortAsc = true;
+			Helper.sortBy = "category";
 			quickSearchList.sort(Helper.stringSort);
 			System.setValueJSON("quickSearchList", quickSearchList);
 		}
@@ -117,11 +90,11 @@ var Helper = {
 
 	readInfo: function() {
 		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]");
-		if (!charInfo) {return;}
+		if (!charInfo) { return; }
 		var charInfoText = charInfo.getAttribute("onmouseover");
-		Helper.characterName    = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
-		Helper.characterLevel   = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
-		Helper.characterAttack  = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
+		Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
+		Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
 		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
@@ -131,10 +104,10 @@ var Helper = {
 
 	// Autoupdate
 	beginAutoUpdate: function() {
-		var lastCheck=GM_getValue("lastVersionCheck");
-		var now=(new Date()).getTime();
-		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 6*60*60*1000)
+		var lastCheck = GM_getValue("lastVersionCheck");
+		var now = (new Date()).getTime();
+		if (!lastCheck) lastCheck = 0;
+		var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000)
 		if (haveToCheck) {
 			Helper.checkForUpdate();
 		}
@@ -142,13 +115,13 @@ var Helper = {
 
 	checkForUpdate: function() {
 		GM_log("Checking for new version...")
-		var now=(new Date()).getTime();
+		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce="+now,
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce=" + now,
 			headers: {
-				"User-Agent" : navigator.userAgent,
+				"User-Agent": navigator.userAgent,
 				"Referer": document.location
 			},
 			onload: function(responseDetails) {
@@ -158,22 +131,22 @@ var Helper = {
 	},
 
 	autoUpdate: function(responseDetails) {
-		if (responseDetails.status!=200) return;
-		var now=(new Date()).getTime()
+		if (responseDetails.status != 200) return;
+		var now = (new Date()).getTime()
 		GM_setValue("lastVersionCheck", now.toString());
-		var currentVersion=GM_getValue("currentVersion");
-		if (!currentVersion) currentVersion=0;
-		var versionRE=/Revision\s*([0-9]+):/;
-		var latestVersion=responseDetails.responseText.match(versionRE)[1];
+		var currentVersion = GM_getValue("currentVersion");
+		if (!currentVersion) currentVersion = 0;
+		var versionRE = /Revision\s*([0-9]+):/;
+		var latestVersion = responseDetails.responseText.match(versionRE)[1];
 		GM_log("Current version: " + currentVersion);
 		GM_log("Found version: " + latestVersion);
 
-		if (currentVersion!=latestVersion) {
+		if (currentVersion != latestVersion) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce="+now,
+				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
 				headers: {
-					"User-Agent" : navigator.userAgent,
+					"User-Agent": navigator.userAgent,
 					"Referer": document.location
 				},
 				onload: function(responseDetails) {
@@ -184,14 +157,14 @@ var Helper = {
 	},
 
 	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-		var theChanges=Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+		var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
 		var confirmAlert = document.createElement("DIV");
 		confirmAlert.id = 'Helper:ConfirmAlert';
-		var divHeight = window.innerHeight-160;
+		var divHeight = window.innerHeight - 160;
 
 		confirmAlert.style.position = "absolute";
-		confirmAlert.style.left = (window.innerWidth - 500)/2 + "px";
-		confirmAlert.style.top = (80+window.scrollY) + "px";
+		confirmAlert.style.left = (window.innerWidth - 500) / 2 + "px";
+		confirmAlert.style.top = (80 + window.scrollY) + "px";
 		confirmAlert.style.width = "500px";
 		confirmAlert.style.height = divHeight + "px";
 		confirmAlert.style.display = 'block';
@@ -215,16 +188,16 @@ var Helper = {
 	},
 
 	autoUpdateConfirmOk: function(evt) {
-		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
+		var newVersion = parseInt(evt.target.getAttribute("newVersion"));
 		GM_setValue("currentVersion", newVersion);
 		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 		Helper.autoUpdateConfirmCancel(evt);
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
-		var confirmAlert=document.getElementById("Helper:ConfirmAlert");
-		confirmAlert.style.display="none";
-		confirmAlert.visibility="hidden";
+		var confirmAlert = document.getElementById("Helper:ConfirmAlert");
+		confirmAlert.style.display = "none";
+		confirmAlert.visibility = "hidden";
 	},
 
 	// main event dispatcher
@@ -299,12 +272,12 @@ var Helper = {
 			break;
 		case "news":
 			switch (subPageId) {
-				case "fsbox":
-					Helper.injectShoutboxWidgets('fsbox_input', 100);
-					break;
-				case "shoutbox":
-					Helper.injectShoutboxWidgets('shoutbox_input', 150);
-					break;
+			case "fsbox":
+				Helper.injectShoutboxWidgets('fsbox_input', 100);
+				break;
+			case "shoutbox":
+				Helper.injectShoutboxWidgets('shoutbox_input', 150);
+				break;
 			}
 			break;
 		case "blacksmith":
@@ -334,7 +307,7 @@ var Helper = {
 			}
 			break;
 		case "questbook":
-			switch(subsequentPageId) {
+			switch (subsequentPageId) {
 			case "-":
 				Helper.injectQuestBookLite();
 				break;
@@ -365,9 +338,9 @@ var Helper = {
 			}
 			break;
 		case "guild":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "inventory":
-				switch(subPage2Id) {
+				switch (subPage2Id) {
 					case "report":
 						Helper.injectReportPaint();
 						break;
@@ -386,7 +359,7 @@ var Helper = {
 				Helper.addGuildLogWidgets();
 				break;
 			case "groups":
-				switch(subPage2Id) {
+				switch (subPage2Id) {
 					case "viewstats":
 						Helper.injectGroupStats();
 						break;
@@ -420,7 +393,7 @@ var Helper = {
 			}
 			break;
 		case "marketplace":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "createreq":
 				Helper.addMarketplaceWidgets();
 				break;
@@ -430,7 +403,7 @@ var Helper = {
 			Helper.injectQuickBuff();
 			break;
 		case "notepad":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "showlogs":
 				Helper.injectNotepadShowLogs();
 				break;
@@ -461,7 +434,7 @@ var Helper = {
 			}
 			break;
 		case "points":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "-":
 				Helper.storePlayerUpgrades();
 				break;
@@ -471,14 +444,14 @@ var Helper = {
 			Helper.retrieveTradeConfirm();
 			break;
 		case "toprated":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "xp":
 				Helper.injectTopRated();
 				break;
 			}
 			break;
 		case "inventing":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "viewrecipe":
 				Helper.injectViewRecipe();
 				break;
@@ -599,7 +572,6 @@ var Helper = {
 		}
 	},
 
-
 	injectStaminaCalculator: function() {
 		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
 		if (!staminaImageElement) return;
@@ -650,7 +622,6 @@ var Helper = {
 		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
 		return;
 	},
-
 
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
@@ -972,54 +943,40 @@ var Helper = {
 		if (!GM_getValue("footprints")) return;
 		if (isLarge) {
 			var realm = System.findNode("//b");
-			Helper.levelName=realm.textContent.replace(" Map Overview", "");
+			Helper.levelName = realm.textContent.replace(" Map Overview", "");
 		}
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
-		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='200']");
+		var displayedMap = System.findNode(isLarge ? "//table[@width]" : "//table[@width='200']");
 		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
 
-		for (var y=0; y<displayedMap.rows.length; y++) {
+		for (var y = 0; y < displayedMap.rows.length; y++) {
 			var aRow = displayedMap.rows[y];
-			for (var x=0; x<aRow.cells.length; x++) {
+			for (var x = 0; x < aRow.cells.length; x++) {
 				var aCell = aRow.cells[x];
-				var dx=isLarge?x:posit.X+(x-2);
-				var dy=isLarge?y:posit.Y+(y-2);
+				var dx = isLarge ? x : posit.X + (x - 2);
+				var dy = isLarge ? y : posit.Y + (y - 2);
 				// GM_log(dx + ":" + dy)
-				if (theMap["levels"][Helper.levelName] && theMap["levels"][Helper.levelName][dx] && theMap["levels"][Helper.levelName][dx][dy] && (theMap["levels"][Helper.levelName][dx][dy]=="!")) {
+				if (theMap["levels"][Helper.levelName] && theMap["levels"][Helper.levelName][dx] && theMap["levels"][Helper.levelName][dx][dy] && (theMap["levels"][Helper.levelName][dx][dy] == "!")) {
 					// aCell.setAttribute("background", "http://66.7.192.165/tiles/9_50.gif");
 
-					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
-						aCell.style.color=footprintsColor;
-						aCell.innerHTML="**";
+					if (x != (isLarge ? posit.X : 2) || y != (isLarge ? posit.Y : 2)) {
+						aCell.style.color = footprintsColor;
+						aCell.innerHTML = "**";
 					};
 
-				}
+									}
 				// GM_log(x + ":" + y + " >> " + aCell.getAttribute("background"));
 			}
 		}
 	},
 
 	injectViewRecipe: function() {
-		var components=System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
-		for (var i=0; i<components.length; i++) {
-			var mo=components[i].getAttribute("onmouseover");
+		var components = System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
+		for (var i = 0; i < components.length; i++) {
+			var mo = components[i].getAttribute("onmouseover");
 			System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
-		}
-	},
-
-	plantFromComponent: function(aComponent) {
-		switch(aComponent) {
-			case "Amber Essense": return "Amber Plant"; break;
-			case "Blood Bloom Flower": return "Blood Bloom Plant"; break;
-			case "Dark Shade ": return "Dark Shade Plant"; break;
-			case "Snake Eye": return "Elya Snake Head"; break;
-			case "Snake Venom Fang": return "Elya Snake Head"; break;
-			case "Heffle Wart": return "Heffle Wart Plant"; break;
-			case "Jademare Blossom": return "Jademare Plant"; break;
-			case "Trinettle Leaf": return "Trinettle Plant"; break;
-			default: return aComponent;
 		}
 	},
 
@@ -1030,7 +987,7 @@ var Helper = {
 		var itemLinks = document.createElement("td");
 		itemLinks.innerHTML =
 			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='
-			+ escape(Helper.plantFromComponent(itemName))
+			+ escape(Data.plantFromComponent(itemName))
 			+ '">AH</a>';
 		var counter=System.findNode("../../../../tr[2]/td", callback);
 		counter.setAttribute("colspan", "2");
@@ -1197,14 +1154,11 @@ var Helper = {
 	},
 
 	checkBuffs: function() {
-		//
-
 		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
 			"colspan='2'></td></tr><tr>";
-
 		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
 		var hasDeathDealer = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		if (hasDeathDealer || hasShieldImp) {
@@ -1236,7 +1190,6 @@ var Helper = {
 				}
 			}
 		}
-
 		if (GM_getValue("showHuntingBuffs")) {
 			var buffs=GM_getValue("huntingBuffs");
 			var buffAry=buffs.split(",")
@@ -1261,7 +1214,6 @@ var Helper = {
 		if (!injectHere) return;
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
-
 		newRow.innerHTML=replacementText;
 	},
 
@@ -2281,6 +2233,18 @@ var Helper = {
 		}
 	},
 
+	killMonsterAt: function(index) {
+		var linkObj	= Helper.getMonster(index);
+		if (linkObj!=null) {
+			if (GM_getValue("quickKill")) {
+				Helper.killSingleMonster(index);
+			}
+			else {
+				window.location = linkObj.href
+			}
+		}
+	},
+
 	keyPress: function (evt) {
 		var r, s;
 		if (evt.target.tagName!="HTML") return;
@@ -2295,7 +2259,7 @@ var Helper = {
 
 		switch (r) {
 		case 113: // nw
-			Helper.moveMe(-1,-1)
+			Helper.moveMe(-1,-1);
 			break;
 		case 119: // n
 			Helper.moveMe(0,-1);
@@ -2338,16 +2302,7 @@ var Helper = {
 		case 54:
 		case 55:
 		case 56: // keyed combat
-			var index	= r-48;
-			var linkObj	= Helper.getMonster(index);
-			if (linkObj!=null) {
-				if (GM_getValue("quickKill")) {
-					Helper.killSingleMonster(index);
-				}
-				else {
-					window.location = linkObj.href
-				}
-			}
+			Helper.killMonsterAt(r-48);
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
@@ -2456,7 +2411,7 @@ var Helper = {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
 				cellContents = cellContents.substring(0,17); // fix for player log screen.
-				postDateAsDate = Helper.textDateToDate(cellContents);
+				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 				if (postDateAsLocalMilli > localLastCheckMilli) {
@@ -2476,28 +2431,6 @@ var Helper = {
 		}
 		now=(new Date()).getTime()
 		GM_setValue(lastCheckScreen, now.toString());
-	},
-
-	textDateToDate: function(textDate) {
-		timeText = textDate.split(" ")[0];
-		dateText = textDate.split(" ")[1];
-		dayText = dateText.split("/")[0];
-		monthText = dateText.split("/")[1];
-		if (monthText == "Jan") {fullMonthText = "January"};
-		if (monthText == "Feb") {fullMonthText = "February"};
-		if (monthText == "Mar") {fullMonthText = "March"};
-		if (monthText == "Apr") {fullMonthText = "April"};
-		if (monthText == "May") {fullMonthText = "May"};
-		if (monthText == "Jun") {fullMonthText = "June"};
-		if (monthText == "Jul") {fullMonthText = "July"};
-		if (monthText == "Aug") {fullMonthText = "August"};
-		if (monthText == "Sep") {fullMonthText = "September"};
-		if (monthText == "Oct") {fullMonthText = "October"};
-		if (monthText == "Nov") {fullMonthText = "November"};
-		if (monthText == "Dec") {fullMonthText = "December"};
-		yearText = dateText.split("/")[2];
-		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00")
-		return dateAsDate;
 	},
 
 	addLogWidgets: function() {
@@ -4979,10 +4912,12 @@ var Helper = {
 		var furyCasterLevelRE = /Level<br>(\d+)%/
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
-		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc))
+		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc)) {
 			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master:	On</span>";
-		else
+		}
+		else {
 			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
+		}
 	},
 
 	getKillStreak: function(responseText) {
@@ -5989,7 +5924,7 @@ var Helper = {
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
 		System.saveValueForm(oForm, "hideArenaPrizes");
-		
+
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
 		return false;
@@ -6004,9 +5939,9 @@ var Helper = {
 	},
 
 	injectNotepadShowLogs: function() {
-		var content=System.findNode("//table[@width='100%']/..");
-		var combatLog=GM_getValue("CombatLog");
-		content.innerHTML='<div align="center"><textarea align="center" cols="80" rows="25" '+
+		var content = Layout.notebookContent();
+		var combatLog = GM_getValue("CombatLog");
+		content.innerHTML = '<div align="center"><textarea align="center" cols="80" rows="25" ' +
 			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog">' + combatLog + '</textarea></div>' +
 			'<br /><br /><table width="100%"><tr>'+
 			'<td colspan="2" align=center>' +
@@ -6038,30 +5973,30 @@ var Helper = {
 		var guildPast = GM_getValue("guildPast");
 		var guildEnmy = GM_getValue("guildEnmy");
 		if (!guildSelf) {
-			guildSelf="";
+			guildSelf = "";
 			GM_setValue("guildSelf", guildSelf);
 		}
 		if (!guildFrnd) {
-			guildFrnd="";
+			guildFrnd = "";
 			GM_setValue("guildFrnd", guildFrnd);
 		}
 		if (!guildPast) {
-			guildPast="";
+			guildPast = "";
 			GM_setValue("guildPast", guildPast);
 		}
 		if (!guildEnmy) {
-			guildEnmy="";
+			guildEnmy = "";
 			GM_setValue("guildEnmy", guildEnmy);
 		}
-		guildSelf=guildSelf.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
-		guildFrnd=guildFrnd.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
-		guildPast=guildPast.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
-		guildEnmy=guildEnmy.toLowerCase().replace(/\s*,\s*/,",").replace(/\s\s*/g," ").split(",");
-		txt = txt.toLowerCase().replace(/\s\s*/g," ");
-		if (guildSelf.indexOf(txt)!=-1) return "self";
-		if (guildFrnd.indexOf(txt)!=-1) return "friendly";
-		if (guildPast.indexOf(txt)!=-1) return "old";
-		if (guildEnmy.indexOf(txt)!=-1) return "enemy";
+		guildSelf = guildSelf.toLowerCase().replace(/\s*,\s*/, ",").replace(/\s\s*/g, " ").split(",");
+		guildFrnd = guildFrnd.toLowerCase().replace(/\s*,\s*/, ",").replace(/\s\s*/g, " ").split(",");
+		guildPast = guildPast.toLowerCase().replace(/\s*,\s*/, ",").replace(/\s\s*/g, " ").split(",");
+		guildEnmy = guildEnmy.toLowerCase().replace(/\s*,\s*/, ",").replace(/\s\s*/g, " ").split(",");
+		txt = txt.toLowerCase().replace(/\s\s*/g, " ");
+		if (guildSelf.indexOf(txt) != -1) return "self";
+		if (guildFrnd.indexOf(txt) != -1) return "friendly";
+		if (guildPast.indexOf(txt) != -1) return "old";
+		if (guildEnmy.indexOf(txt) != -1) return "enemy";
 		return "";
 	},
 
@@ -6087,11 +6022,12 @@ var Helper = {
 				miniMap.innerHTML = GM_getValue("miniMapSource");
 				Helper.markPlayerOnMiniMap();
 				miniMap.style.display = "";
-			} else {
+			}
+			else {
 				System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
 			}
-		} else
-			miniMap.style.display = "none";
+		}
+		else miniMap.style.display = "none";
 	},
 
 	loadMiniMap: function(responseText) {
@@ -6186,8 +6122,8 @@ var Helper = {
 		var table = System.getValueJSON("auctionTemplate");
 		if (!table) {
 			table = [
-				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	default:true}
-				];
+				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	isDefault:true}
+			];
 			System.setValueJSON("auctionTemplate", table);
 		}
 
@@ -6272,12 +6208,13 @@ var Helper = {
 		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
 		if (!auctionMinBid) return;
 		var table = System.getValueJSON("auctionTemplate");
-		var theTemplate = new Object;
-		theTemplate.auctionLength = auctionLength;
-		theTemplate.auctionCurrency = auctionCurrency;
-		theTemplate.auctionMinBid = auctionMinBid;
-		theTemplate.auctionBuyNow = auctionBuyNow;
-		theTemplate.default = false;
+		var theTemplate = {
+			auctionLength: auctionLength,
+			auctionCurrency: auctionCurrency,
+			auctionMinBid: auctionMinBid,
+			auctionBuyNow: auctionBuyNow,
+			isDefault: false
+		}
 		table.push(theTemplate);
 		System.setValueJSON("auctionTemplate", table);
 		window.location = window.location;

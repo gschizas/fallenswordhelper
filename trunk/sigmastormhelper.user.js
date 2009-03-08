@@ -119,22 +119,22 @@ var Helper = {
 	},
 
 	autoUpdate: function(responseDetails) {
-		if (responseDetails.status!=200) return;
-		var now=(new Date()).getTime()
+		if (responseDetails.status != 200) return;
+		var now = (new Date()).getTime()
 		GM_setValue("lastVersionCheck", now.toString());
-		var currentVersion=GM_getValue("currentVersion");
-		if (!currentVersion) currentVersion=0;
-		var versionRE=/Revision\s*([0-9]+):/;
-		var latestVersion=responseDetails.responseText.match(versionRE)[1];
+		var currentVersion = GM_getValue("currentVersion");
+		if (!currentVersion) currentVersion = 0;
+		var versionRE = /Revision\s*([0-9]+):/;
+		var latestVersion = responseDetails.responseText.match(versionRE)[1];
 		GM_log("Current version: " + currentVersion);
 		GM_log("Found version: " + latestVersion);
 
-		if (currentVersion!=latestVersion) {
+		if (currentVersion != latestVersion) {
 			GM_xmlhttpRequest({
 				method: 'GET',
-				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce="+now,
+				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
 				headers: {
-					"User-Agent" : navigator.userAgent,
+					"User-Agent": navigator.userAgent,
 					"Referer": document.location
 				},
 				onload: function(responseDetails) {
@@ -145,14 +145,14 @@ var Helper = {
 	},
 
 	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-		var theChanges=Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+		var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
 		var confirmAlert = document.createElement("DIV");
 		confirmAlert.id = 'Helper:ConfirmAlert';
-		var divHeight = window.innerHeight-160;
+		var divHeight = window.innerHeight - 160;
 
 		confirmAlert.style.position = "absolute";
-		confirmAlert.style.left = (window.innerWidth - 500)/2 + "px";
-		confirmAlert.style.top = (80+window.scrollY) + "px";
+		confirmAlert.style.left = (window.innerWidth - 500) / 2 + "px";
+		confirmAlert.style.top = (80 + window.scrollY) + "px";
 		confirmAlert.style.width = "500px";
 		confirmAlert.style.height = divHeight + "px";
 		confirmAlert.style.display = 'block';
@@ -176,16 +176,16 @@ var Helper = {
 	},
 
 	autoUpdateConfirmOk: function(evt) {
-		var newVersion=parseInt(evt.target.getAttribute("newVersion"));
+		var newVersion = parseInt(evt.target.getAttribute("newVersion"));
 		GM_setValue("currentVersion", newVersion);
 		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/sigmastormhelper.user.js");
 		Helper.autoUpdateConfirmCancel(evt);
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
-		var confirmAlert=document.getElementById("Helper:ConfirmAlert");
-		confirmAlert.style.display="none";
-		confirmAlert.visibility="hidden";
+		var confirmAlert = document.getElementById("Helper:ConfirmAlert");
+		confirmAlert.style.display = "none";
+		confirmAlert.visibility = "hidden";
 	},
 
 	// main event dispatcher
@@ -261,12 +261,12 @@ var Helper = {
 			break;
 		case "news":
 			switch (subPageId) {
-				case "fsbox":
-					Helper.injectShoutboxWidgets('fsbox_input', 100);
-					break;
-				case "shoutbox":
-					Helper.injectShoutboxWidgets('shoutbox_input', 150);
-					break;
+			case "fsbox":
+				Helper.injectShoutboxWidgets('fsbox_input', 100);
+				break;
+			case "shoutbox":
+				Helper.injectShoutboxWidgets('shoutbox_input', 150);
+				break;
 			}
 			break;
 		case "blacksmith":
@@ -284,7 +284,7 @@ var Helper = {
 			}
 			break;
 		case "questbook":
-			switch(subsequentPageId) {
+			switch (subsequentPageId) {
 			case "-":
 				Helper.injectQuestBookLite();
 				break;
@@ -315,9 +315,9 @@ var Helper = {
 			}
 			break;
 		case "guild":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "inventory":
-				switch(subPage2Id) {
+				switch (subPage2Id) {
 					case "report":
 						Helper.injectReportPaint();
 						break;
@@ -333,7 +333,7 @@ var Helper = {
 				Helper.addGuildLogWidgets();
 				break;
 			case "groups":
-				switch(subPage2Id) {
+				switch (subPage2Id) {
 					case "viewstats":
 						Helper.injectGroupStats();
 						break;
@@ -367,7 +367,7 @@ var Helper = {
 			}
 			break;
 		case "marketplace":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "createreq":
 				Helper.addMarketplaceWidgets();
 				break;
@@ -377,7 +377,7 @@ var Helper = {
 			Helper.injectQuickBuff();
 			break;
 		case "notepad":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "showlogs":
 				Helper.injectNotepadShowLogs();
 				break;
@@ -408,7 +408,7 @@ var Helper = {
 			}
 			break;
 		case "points":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "-":
 			case "shop":
 				Helper.storePlayerUpgrades();
@@ -426,14 +426,14 @@ var Helper = {
 			Helper.retrieveTradeConfirm();
 			break;
 		case "toprated":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "xp":
 				Helper.injectTopRated();
 				break;
 			}
 			break;
 		case "inventing":
-			switch(subPageId) {
+			switch (subPageId) {
 			case "viewrecipe":
 				Helper.injectViewRecipe();
 				break;
@@ -1083,7 +1083,7 @@ var Helper = {
 		var list=parentTables[parentTables.length-1];
 
 		Helper.generateAdvisorRows(list);
-		
+
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
 			var titleCells = ["Member", "Lvl", "Rank", "Credits From Deposits", "Credits From Tax", "Credits Total", "Crystals", "Skills Cast", "Squads Created", "Squads Joined", "Artifacts Captured", "XP Contrib"];
@@ -1092,7 +1092,7 @@ var Helper = {
 			}
 			Helper.advisorHeader += '</tr>';
 		}
-		
+
 		if (! Helper.advisorFooter) {
 			Helper.advisorFooter = '<tr><td colspan=3 align=right>Total: </td>';
 			for (var i=1; i<list.rows[list.rows.length-1].cells.length; i++) {
@@ -1100,7 +1100,7 @@ var Helper = {
 			}
 			Helper.advisorFooter +='</tr>';
 		}
-		
+
 		Helper.sortAsc = true;
 		Helper.sortAdvisor(list, "Member");
 	},
@@ -1818,7 +1818,7 @@ var Helper = {
 		content.innerHTML = '<span id=Helper.entityTableOutput>No monster information! Please enable entity log and travel a bit to see the world</span>';
 		Helper.generateEntityTable();
 	},
-	
+
 	generateEntityTable: function() {
 		var content = document.getElementById("Helper.entityTableOutput");
 		if (!Helper.entityLogTable || !content) return;
@@ -1839,7 +1839,7 @@ var Helper = {
 			'<th align="center">Credits</th>' +
 			'</tr>';
 		for (var k=0;k<Helper.entityLogTable.entity.length;k++) {
-			result += '<tr><td align="center"><img width=40 height=40 ' + 
+			result += '<tr><td align="center"><img width=40 height=40 ' +
 					'onmouseover="tt_setWidth(200);Tip(\'<img src=' + Helper.entityLogTable.entity[k]["key1"] + '/>\');" ' +
 					'src="' + Helper.entityLogTable.entity[k]["key1"] + '"/></td>';
 			result += '<td align="left">' + Helper.entityLogTable.entity[k]["name"] + '</td>';
@@ -1851,7 +1851,7 @@ var Helper = {
 		result += "</table>";
 		content.innerHTML = result;
 		document.getElementById("Helper.clearEntityLog").addEventListener("click", Helper.clearEntityLog, true);
-		
+
 		var theTable=document.getElementById('Helper:EntityInfo');
 		for (var i=0; i<theTable.rows[0].cells.length; i++) {
 			var cell=theTable.rows[0].cells[i];
@@ -1867,7 +1867,7 @@ var Helper = {
 		GM_setValue("monsterLog", "");
 		window.location="index.php?cmd=notepad&subcmd=monsterlog";
 	},
-	
+
 	sortEntityLogTable: function(evt) {
 		var headerClicked = evt.target.getAttribute("sortKey");
 		var sortType = evt.target.getAttribute("sortType");
@@ -1879,7 +1879,7 @@ var Helper = {
 
 		Helper.sortBy=headerClicked;
 		GM_log(Helper.sortAsc + " " + Helper.sortBy + " " + sortType);
-		
+
 		switch(sortType) {
 			case "string":
 				Helper.entityLogTable.entity.sort(Helper.stringSort);
@@ -2317,6 +2317,18 @@ var Helper = {
 		}
 	},
 
+	killMonsterAt: function(index) {
+		var linkObj	= Helper.getMonster(index);
+		if (linkObj!=null) {
+			if (GM_getValue("quickKill")) {
+				Helper.killSingleMonster(index);
+			}
+			else {
+				window.location = linkObj.href
+			}
+		}
+	},
+
 	keyPress: function (evt) {
 		var r, s;
 		if (evt.target.tagName!="HTML") return;
@@ -2331,7 +2343,7 @@ var Helper = {
 
 		switch (r) {
 		case 113: // nw
-			Helper.moveMe(-1,-1)
+			Helper.moveMe(-1,-1);
 			break;
 		case 119: // n
 			Helper.moveMe(0,-1);
@@ -2374,22 +2386,7 @@ var Helper = {
 		case 54:
 		case 55:
 		case 56: // keyed combat
-			var index	= r-48;
-			var linkObj	= Helper.getMonster(index);
-			if (linkObj!=null) {
-				if (GM_getValue("quickKill")) {
-					Helper.killSingleMonster(index);
-				}
-				else {
-					window.location = linkObj.href
-				}
-			}
-			break;
-		case 61: // view shop in map [=]
-			Helper.worldMapAction();
-			break;
-		case 104: // quickheal
-			Helper.quickHeal();
+			Helper.killMonsterAt(r-48);
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
@@ -2497,7 +2494,7 @@ var Helper = {
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].textContent.trim().substring(0,17);
-				postDateAsDate = Helper.textDateToDate(cellContents);
+				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 				if (postDateAsLocalMilli > localLastCheckMilli) {
@@ -2519,38 +2516,21 @@ var Helper = {
 		GM_setValue(lastCheckScreen, now.toString());
 	},
 
-	textDateToDate: function(textDate) {
-		timeText = textDate.split(" ")[0];
-		dateText = textDate.split(" ")[1];
-		dayText = dateText.split("/")[0];
-		monthText = dateText.split("/")[1];
-		if (monthText == "Jan") {fullMonthText = "January"};
-		if (monthText == "Feb") {fullMonthText = "February"};
-		if (monthText == "Mar") {fullMonthText = "March"};
-		if (monthText == "Apr") {fullMonthText = "April"};
-		if (monthText == "May") {fullMonthText = "May"};
-		if (monthText == "Jun") {fullMonthText = "June"};
-		if (monthText == "Jul") {fullMonthText = "July"};
-		if (monthText == "Aug") {fullMonthText = "August"};
-		if (monthText == "Sep") {fullMonthText = "September"};
-		if (monthText == "Oct") {fullMonthText = "October"};
-		if (monthText == "Nov") {fullMonthText = "November"};
-		if (monthText == "Dec") {fullMonthText = "December"};
-		yearText = dateText.split("/")[2];
-		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00")
-		return dateAsDate;
-	},
-
 	addLogWidgets: function() {
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var memberList = System.getValueJSON("memberlist");
-		if (!memberList) return;
-		var memberNameString;
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
-			memberNameString += member.name + " ";
+		var memberNameString = "";
+		if (memberList) {
+			for (var i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				memberNameString += member.name + " ";
+			}
 		}
 		var isGuildmate = false;
+		var listOfEnemies = GM_getValue("listOfEnemies");
+		if (!listOfEnemies) listOfEnemies = "";
+		var listOfAllies = GM_getValue("listOfAllies");
+		if (!listOfAllies) listOfAllies = "";
 		for (var i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
 			if (i != 0) {
@@ -2564,6 +2544,12 @@ var Helper = {
 							aRow.cells[2].firstChild.nextSibling.firstChild.style.color="green";
 							isGuildmate = true;
 						}
+						if (listOfEnemies.search(playerName) !=-1) {
+							aRow.cells[2].firstChild.style.color="red";
+						}
+						if (listOfAllies.search(playerName) !=-1) {
+							aRow.cells[2].firstChild.style.color="blue";
+						}
 						var messageHTML = aRow.cells[2].innerHTML;
 
 						var firstPart = messageHTML.split(">Reply</a>")[0];
@@ -2576,6 +2562,9 @@ var Helper = {
 						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
 
 						isGuildmate = false;
+					}
+					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
+						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
 					if (aRow.cells[2].innerHTML.search("activated") != -1 && aRow.cells[2].getAttribute("width") == "80%") {
 						var buffingPlayerIDRE = /player_id=(\d+)/;
@@ -3352,7 +3341,7 @@ var Helper = {
 				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
-			
+
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
 			if (profileInventory) {
@@ -4103,13 +4092,13 @@ var Helper = {
 		if (!nameNode) GM_log(responseText);
 		if (nameNode) {
 			item.name=nameNode.textContent.replace(/\\/g,"");
-			
+
 			item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*) -/);
-			if (item.class) 
+			if (item.class)
 				item.class = item.class[1];
 			else {
 				item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*)$/);
-				if (item.class) 
+				if (item.class)
 					item.class = item.class[1];
 				else
 					item.class = "";
@@ -4194,7 +4183,7 @@ var Helper = {
 		if (showUseableItems) {
 			Helper.itemClasses = {"Clone":"Core", "Mutant":"Rad", "Soldier":"Battlesuit", "Purist":"Psi", "Cyborg":"Hardwired"};
 			allItems=allItems.filter(function(e,i,a) {
-				return e.minLevel <= Helper.characterLevel && 
+				return e.minLevel <= Helper.characterLevel &&
 					(e.class == "Core" || e.class == Helper.itemClasses[Helper.characterClass])
 				});
 			//  && e.minLevel + 50 > Helper.characterLevel}
@@ -5708,7 +5697,6 @@ var Helper = {
 	},
 
 	displayMiniMap: function() {
-
 		var miniMap = document.getElementById("miniMap");
 		if (!miniMap) {
 			miniMap = document.createElement("div");
@@ -5849,8 +5837,8 @@ var Helper = {
 		var table = System.getValueJSON("auctionTemplate");
 		if (!table) {
 			table = [
-				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	default:true}
-				];
+				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	isDefault:true}
+			];
 			System.setValueJSON("auctionTemplate", table);
 		}
 
@@ -5935,12 +5923,13 @@ var Helper = {
 		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
 		if (!auctionMinBid) return;
 		var table = System.getValueJSON("auctionTemplate");
-		var theTemplate = new Object;
-		theTemplate.auctionLength = auctionLength;
-		theTemplate.auctionCurrency = auctionCurrency;
-		theTemplate.auctionMinBid = auctionMinBid;
-		theTemplate.auctionBuyNow = auctionBuyNow;
-		theTemplate.default = false;
+		var theTemplate = {
+			auctionLength: auctionLength,
+			auctionCurrency: auctionCurrency,
+			auctionMinBid: auctionMinBid,
+			auctionBuyNow: auctionBuyNow,
+			isDefault: false
+		}
 		table.push(theTemplate);
 		System.setValueJSON("auctionTemplate", table);
 		window.location = window.location;
@@ -6012,7 +6001,7 @@ var Helper = {
 		System.findNode("//textarea[@name='msg']").value +=
 			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
 	},
-	
+
 	injectSelfBuff: function() {
 		var body = document.getElementsByTagName("body").item(0);
 		var skills = System.findNodes("//table[contains(@background, 'sigma2/skills/skillicon_bg')]");

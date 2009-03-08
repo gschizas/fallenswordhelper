@@ -283,7 +283,28 @@ var System = {
 				break;
 		}
 		System.generateOnlinePlayersTable();
-	}
+	},
 
+	parseDate: function(textDate) {
+		timeText = textDate.split(" ")[0];
+		dateText = textDate.split(" ")[1];
+		dayText = dateText.split("/")[0];
+		monthText = dateText.split("/")[1];
+		if (monthText == "Jan") {fullMonthText = "January"};
+		if (monthText == "Feb") {fullMonthText = "February"};
+		if (monthText == "Mar") {fullMonthText = "March"};
+		if (monthText == "Apr") {fullMonthText = "April"};
+		if (monthText == "May") {fullMonthText = "May"};
+		if (monthText == "Jun") {fullMonthText = "June"};
+		if (monthText == "Jul") {fullMonthText = "July"};
+		if (monthText == "Aug") {fullMonthText = "August"};
+		if (monthText == "Sep") {fullMonthText = "September"};
+		if (monthText == "Oct") {fullMonthText = "October"};
+		if (monthText == "Nov") {fullMonthText = "November"};
+		if (monthText == "Dec") {fullMonthText = "December"};
+		yearText = dateText.split("/")[2];
+		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00")
+		return dateAsDate;
+	}
 };
 System.init();
