@@ -2443,7 +2443,6 @@ var Helper = {
 				memberNameString += member.name + " ";
 			}
 		}
-		var isGuildmate = false;
 		var listOfEnemies = GM_getValue("listOfEnemies");
 		if (!listOfEnemies) listOfEnemies = "";
 		var listOfAllies = GM_getValue("listOfAllies");
@@ -2455,51 +2454,75 @@ var Helper = {
 					firstCell = aRow.cells[0];
 					//Valid Types: General, Chat, Guild
 					messageType = firstCell.firstChild.getAttribute("title");
+					var colorPlayerName = false;
+					var isGuildMate = false;
 					if (messageType == "Chat") {
-						var playerName = aRow.cells[2].firstChild.innerHTML;
+						var playerElement = aRow.cells[2].firstChild;
+						var playerName = playerElement.innerHTML;
+						colorPlayerName = true;
+					}
+					if (messageType == "General") {
+						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
+							playerElement = aRow.cells[2].firstChild.nextSibling;
+							playerName = playerElement.innerHTML
+							colorPlayerName = true;
+						}
+					}
+					
+					if (colorPlayerName) {
 						if (memberNameString.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.style.color="green";
-							isGuildmate = true;
+							playerElement.style.color="green";
+							isGuildMate = true;
 						}
 						if (listOfEnemies.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.style.color="red";
+							playerElement.style.color="red";
 						}
 						if (listOfAllies.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.style.color="blue";
+							playerElement.style.color="blue";
 						}
+					}
+					if (messageType == "Chat") {
 						var messageHTML = aRow.cells[2].innerHTML;
-
-						var firstPart = messageHTML.split(">Reply</a>")[0];
-						var secondPart = messageHTML.split(">Reply</a>")[1];
+						var firstPart = messageHTML.substring(0, messageHTML.indexOf("<small>") + 7);
+						var secondPart = messageHTML.substring(messageHTML.indexOf("<small>") + 7, messageHTML.indexOf(">Reply</a>") + 10);
+						var thirdPart = messageHTML.substring(messageHTML.indexOf(">Reply</a>") + 10, messageHTML.indexOf("</small>"));
+						var lastPart = messageHTML.substring(messageHTML.indexOf("</small>"), messageHTML.length);
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
-							"'>ST</a> | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+							"'>ST</a>"
+						if (!isGuildMate) {
+							extraPart += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 							"'>Ignore</a>";
-
-						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
-
-						isGuildmate = false;
+						}
+						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
-					if (aRow.cells[2].innerHTML.search("activated") != -1 && aRow.cells[2].getAttribute("width") == "80%") {
+					if (messageType == "General" && 
+							aRow.cells[2].firstChild.nextSibling && 
+							aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1){
+						
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
 						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
-						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
+						var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
-							"'>ST</a> | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-							"'>Ignore</a> | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</span>";
+							"'>ST</a>";
+						if (!isGuildMate) {
+							extraText += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+							"'>Ignore</a>";
+						}
+						extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
+						aRow.cells[2].innerHTML += extraText;
+					}
 				}
-			}
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
 				messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>"
 			}
-
 		}
 	},
 
@@ -2561,7 +2584,8 @@ var Helper = {
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Guild Members";
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
+			"Guild Members <span id='Helper:resetGuildList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span>";
 		var onlineMembers = memberList.members.filter(function (e) {return (e.status=="Online")})
 		for (var i=0;i<onlineMembers.length;i++) {
 			var member=onlineMembers[i];
@@ -2602,8 +2626,15 @@ var Helper = {
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		document.getElementById('Helper:resetGuildList').addEventListener('click', Helper.resetGuildList, true);		
 	},
 
+	resetGuildList: function(evt) {
+		GM_setValue("memberlist","");
+		GM_setValue("oldmemberlist","");
+		window.location = window.location;
+	},
+	
 	getFullPlayerData: function(member) {
 		return;
 		System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
@@ -3243,26 +3274,30 @@ var Helper = {
 
 			//store a list of allies and enemies for use in coloring
 			listOfAllies = "";
-			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling
-			for (var i=0;i<alliesTableActual.rows.length;i++) {
-				var aRow = alliesTableActual.rows[i];
-				for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
-					var aCell = aRow.cells[j];
-					var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-					var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
-					listOfAllies += allyName + " ";
+			if (alliesTable) {
+				var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling
+				for (var i=0;i<alliesTableActual.rows.length;i++) {
+					var aRow = alliesTableActual.rows[i];
+					for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
+						var aCell = aRow.cells[j];
+						var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+						var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
+						listOfAllies += allyName + " ";
+					}
 				}
 			}
 
 			listOfEnemies = "";
-			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
-			for (var i=0;i<enemiesTableActual.rows.length;i++) {
-				var aRow = enemiesTableActual.rows[i];
-				for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
-					var aCell = aRow.cells[j];
-					var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-					var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
-					listOfEnemies += enemyName + " ";
+			if (enemiesTable) {
+				var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
+				for (var i=0;i<enemiesTableActual.rows.length;i++) {
+					var aRow = enemiesTableActual.rows[i];
+					for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
+						var aCell = aRow.cells[j];
+						var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+						var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
+						listOfEnemies += enemyName + " ";
+					}
 				}
 			}
 			GM_setValue("listOfAllies", listOfAllies);
@@ -4551,6 +4586,21 @@ var Helper = {
 						theItem.innerHTML + "</span> [" + aMember.level + "]";
 				}
 			}
+			var theDateCell=allItems[i].cells[2];
+			var theDate=theDateCell.firstChild;
+			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			var xRE=/([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
+			var x=xRE.exec(theDate.innerHTML);
+			var month = months.indexOf(x[3]);
+			var curYear = new Date().getFullYear();
+			var groupDate = new Date();
+			groupDate.setUTCDate(x[2]);
+			groupDate.setUTCMonth(month);
+			groupDate.setUTCFullYear(curYear);
+			groupDate.setUTCHours(x[4]);
+			groupDate.setUTCMinutes(x[5]);
+			theDateCell.innerHTML += '<br><nobr><span style="color:blue; font-size:x-small">Local: '+
+				groupDate.toString().substr(0,21)+'</span></nobr>';
 		}
 		var buttonElement = System.findNode("//td[input[@value='Join All Available Groups']]");
 		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
