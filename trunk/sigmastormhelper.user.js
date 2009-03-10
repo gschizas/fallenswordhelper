@@ -5158,23 +5158,24 @@ var Helper = {
 		var textArea = System.findNode("//textarea[@name='history']");
 		if (!textArea) return;
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
+		textArea.value = textArea.value.replace(/<br \/>/g,"");
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
 		var newCell = newRow.insertCell(0);
-		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
+		newCell.innerHTML = '<table align="center" width="310" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#110011">Preview</td></tr>' +
 			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		textArea.id = "historytext";
-		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Edit Faction History']]");
+		var innerTable = System.findNode("//table[tbody/tr/td[contains(@background,'sigma2/skin/header_editfactionhistory.jpg')]]");
 		var crCount = 0;
 		var startIndex = 0;
 		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:#ADB5B5;'>Character count = </span><span findme='historylength' style='color:#ADB5B5;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:#ADB5B5;'>/</span><span findme='historytotal' style='color:#ADB5B5;'>255</span>";
+		innerTable.rows[2].cells[0].innerHTML += "<table width=100%><tr><td align=right><span style='color:#ADB5B5;'>Character count = </span><span findme='historylength' style='color:#ADB5B5;'>" +
+			(textArea.value.length + crCount) + "</span><span style='color:#ADB5B5;'>/</span><span findme='historytotal' style='color:#ADB5B5;'>255</span></td></tr></table>";
 
 		document.getElementById('historytext').addEventListener('keyup', Helper.updateHistoryCharacters, true);
 		System.xmlhttp("index.php?cmd=points&subcmd=guildupgrades", Helper.getTotalHistoryCharacters);
@@ -5205,7 +5206,7 @@ var Helper = {
 		var doc=System.createDocument(responseText)
 		var historyCharactersText = System.findNode("//td[.='+20 History Characters']",doc);
 		var historyCharactersRatio = historyCharactersText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var historyCharactersValueRE = /(\d+) \/ 250/;
+		var historyCharactersValueRE = /(\d+) \/ 100/;
 		var historyCharactersValue = historyCharactersValueRE.exec(historyCharactersRatio.innerHTML)[1]*1;
 		var historyTotal = System.findNode("//span[@findme='historytotal']");
 		historyTotal.innerHTML = (historyCharactersValue * 20) + 255;
