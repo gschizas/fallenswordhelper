@@ -305,6 +305,19 @@ var System = {
 		yearText = dateText.split("/")[2];
 		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00")
 		return dateAsDate;
+	},
+
+	toggleVisibilty: function(evt) {
+		var anItemId=evt.target.getAttribute("linkto")
+		var anItem=document.getElementById(anItemId);
+		var currentVisibility=anItem.style.visibility;
+		anItem.style.visibility=(currentVisibility=="hidden")?"visible":"hidden";
+		anItem.style.display=(currentVisibility=="hidden")?"block":"none";
+		if (GM_getValue(anItemId)) {
+			GM_setValue(anItemId, "");
+		} else{
+			GM_setValue(anItemId, "ON");
+		}
 	}
 };
 System.init();

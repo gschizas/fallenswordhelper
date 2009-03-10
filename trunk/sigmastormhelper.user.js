@@ -586,9 +586,9 @@ var Helper = {
 			guildStructureControl.style.visibility = "hidden";
 		}
 
-		document.getElementById('toggleGuildLogoControl').addEventListener('click', Helper.toggleVisibilty, true);
-//		document.getElementById('toggleStatisticsControl').addEventListener('click', Helper.toggleVisibilty, true);
-		document.getElementById('toggleGuildStructureControl').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
+//		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
 
 		// Fast Take
 
@@ -2735,7 +2735,7 @@ var Helper = {
 			textRow.style.display = "none";
 			textRow.style.visibility = "hidden";
 		}
-		document.getElementById('toggleAuctionTextControl').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
 
 		//fix button class and add go to first and last
 		var prevButton = System.findNode("//input[@value='<']");
@@ -5394,19 +5394,6 @@ var Helper = {
 		}
 	},
 
-	toggleVisibilty: function(evt) {
-		var anItemId=evt.target.getAttribute("linkto")
-		var anItem=document.getElementById(anItemId);
-		var currentVisibility=anItem.style.visibility;
-		anItem.style.visibility=(currentVisibility=="hidden")?"visible":"hidden";
-		anItem.style.display=(currentVisibility=="hidden")?"block":"none";
-		if (GM_getValue(anItemId)) {
-			GM_setValue(anItemId, "");
-		} else{
-			GM_setValue(anItemId, "ON");
-		}
-	},
-
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="50" value="' + GM_getValue("guild" + guildType) + '">'
@@ -5541,10 +5528,10 @@ var Helper = {
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
 
-		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', Helper.toggleVisibilty, true);
-		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', Helper.toggleVisibilty, true);
-		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', Helper.toggleVisibilty, true);
-		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', Helper.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildPastMessage').addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleShowGuildEnmyMessage').addEventListener('click', System.toggleVisibilty, true);
 
 		var krulButton = System.findNode('//input[@value="Instant Teleport back to Taulin Rad Lands"]');
 		onClick = krulButton.getAttribute("onclick");
