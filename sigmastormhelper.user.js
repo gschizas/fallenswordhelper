@@ -424,6 +424,7 @@ var Helper = {
 			break;
 		case "trade":
 			Helper.retrieveTradeConfirm();
+			Helper.insertQuickSelectItems();
 			break;
 		case "toprated":
 			switch (subPageId) {
@@ -1604,6 +1605,48 @@ var Helper = {
 			info = 'You successfully sent ' + callback.amount + ' credits to ' + callback.recipient + '!';
 		}
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:xx-small;">' + info + '</div>';
+	},
+	
+	insertQuickSelectItems: function() {
+	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
+	  if (nodes.length==0) return;
+	  var table=nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+
+    table.parentNode.parentNode.parentNode.parentNode.rows[0].cells[0].innerHTML += "<a name=sendButtonLbl></a>";
+	  var newRow = table.insertRow(-1);
+	  var newCell= newRow.insertCell(0);
+	  newCell.colSpan=6;
+	  newCell.align="right";
+	  newCell.innerHTML="<span id=Helper.QuickSelectItem>[&lt;&nbsp;Select]</span>&nbsp;"+
+	    "<span id=Helper.QuickSelect6>[Select 6]</span>&nbsp;"+
+	    "<span id=Helper.QuickDeSelectItem>[DeSelect&nbsp;&gt;]</span>&nbsp;<a href=#sendButtonLbl>Top</a>";
+	  document.getElementById("Helper.QuickSelectItem").addEventListener("click",Helper.quickSelectItem,true);
+	  document.getElementById("Helper.QuickSelect6").addEventListener("click",Helper.addQuickSelectItems,true);
+	  document.getElementById("Helper.QuickDeSelectItem").addEventListener("click",Helper.quickDeSelectItem,true);
+	},
+	
+	quickSelectItem: function() {
+	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
+	  var i=nodes.length-1;
+	  while (i>=0 && nodes[i].checked) i--;
+	  if (i>=0) nodes[i].checked=true;
+	},
+	
+	quickDeSelectItem: function() {
+	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
+	  var i=0;
+	  while (i<nodes.length && !(nodes[i].checked)) i++;
+	  if (i<nodes.length) {nodes[i].checked=false;}
+	},
+	
+	addQuickSelectItems: function() {
+	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
+	  var defaultN = 6;
+
+	  for (var i = nodes.length; i--; i>=0) {
+	    if (i<nodes.length-defaultN) break;
+	    nodes[i].checked = true;
+	  }
 	},
 
 	toggleFootprints: function() {
