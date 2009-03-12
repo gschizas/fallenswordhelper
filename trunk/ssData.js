@@ -56,7 +56,13 @@ var Data = {
 				{'questName':'Flooded', 'level':74, 'location':'Scrap Yard (Steel Dump)'},
 				{'questName':'ID Required', 'level':76, 'location':'SureTec (Reception)'},
 				{'questName':'Line Key', 'level':78, 'location':'SureTec (Pistol Lab)'},
-				{'questName':'Virus Killer', 'level':80, 'location':'SureTec (Testing)'}
+				{'questName':'Virus Killer', 'level':80, 'location':'SureTec (Testing)'},
+				{'questName':'Crisis Management', 'level':81, 'location':'SureTec (Transfer Bay)'},
+				{'questName':'Perimeter Secured', 'level':83, 'location':'OS 1313 (Barracks)'},
+				{'questName':'Venting Air', 'level':85, 'location':'OS 1313 (Support Deck)'},
+				{'questName':'Launch Permission', 'level':86, 'location':'OS 1313 (Fighter Bay)'},
+				{'questName':'Data Recovery', 'level':88, 'location':'OS 1313 (Bio Lab)'},
+				{'questName':'Results Confirmation', 'level':90, 'location':'OS 1313 (Control Module)'}
 			];
 			Data.questArray = questArray.sort();
 		}
