@@ -1481,9 +1481,9 @@ var Helper = {
 			for (var i=0; i<9; i++) {
 				var monster = System.findNode("//a[@id='aLink" + i + "']")
 				if (monster) {
-					var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+					var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
 					for (var j=0; j<doNotKillListAry.length; j++) {
-						var doNotKillName = doNotKillListAry[j];
+						var doNotKillName = doNotKillListAry[j].trim();
 						if (monsterName == doNotKillName){
 							var monsterNameCell = monster.parentNode.parentNode.previousSibling
 							monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
@@ -1587,11 +1587,11 @@ var Helper = {
 		var doNotKillListAry = doNotKillList.split(",")
 
 		if (monster) {
-			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
+			var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
 			var injectHere = monster.parentNode.parentNode;
 			var monsterFound = false;
 			for (var j=0; j<doNotKillListAry.length; j++) {
-				var doNotKillName = doNotKillListAry[j];
+				var doNotKillName = doNotKillListAry[j].trim();
 				if (monsterName == doNotKillName){
 					injectHere.innerHTML = '<nobr><span style="color:blue; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
 					monsterFound = true;
@@ -3061,13 +3061,25 @@ var Helper = {
 					anItem = allItems[i];
 					itemInvId = anItem.value;
 					theTextNode = System.findNode("../../td[3]", anItem);
+					theImgElement = System.findNode("../../td[2]", anItem).firstChild.firstChild;
+					itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(theImgElement.getAttribute("onmouseover"));
+					if (itemStats) {
+						itemId = itemStats[1];
+						invId = itemStats[2];
+						type = itemStats[3];
+						pid = itemStats[4];
+					}
 					itemName = theTextNode.textContent.trim().replace("\\","");
 					theTextNode.textContent = itemName;
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
 					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 						+ escape(itemName)
 						+ "'>AH</a>]</span> "
-						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
+						+ "&inv_id=" + itemInvId 
+						+ "&item_id=" + itemId
+						+ "&type=" + type
+						+ "&pid=" + pid + "'>"
 						+ "Sell</a>]</span> "
 						+ theTextNode.innerHTML
 						+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
@@ -3280,9 +3292,11 @@ var Helper = {
 					var aRow = alliesTableActual.rows[i];
 					for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
 						var aCell = aRow.cells[j];
-						var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-						var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
-						listOfAllies += allyName + " ";
+						if (aCell.firstChild.firstChild.nextSibling) {
+							var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+							var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
+							listOfAllies += allyName + " ";
+						}
 					}
 				}
 			}
@@ -3294,9 +3308,11 @@ var Helper = {
 					var aRow = enemiesTableActual.rows[i];
 					for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
 						var aCell = aRow.cells[j];
-						var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-						var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
-						listOfEnemies += enemyName + " ";
+						if (aCell.firstChild.firstChild.nextSibling) {
+							var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+							var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
+							listOfEnemies += enemyName + " ";
+						}
 					}
 				}
 			}
@@ -5059,7 +5075,7 @@ var Helper = {
 				if (darkCurse) {
 					darkCurseLevel = darkCurse[1];
 				}
-				var holyFlameRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
+				var holyFlameRE = /<b>Holy Flame<\/b> \(Level: (\d+)\)/
 				var holyFlame = holyFlameRE.exec(onmouseover);
 				if (holyFlame) {
 					holyFlameLevel = holyFlame[1];
@@ -6148,14 +6164,43 @@ var Helper = {
 	},
 
 	injectCreateAuctionTemplate: function() {
-		if (window.location.search.search("inv_id") == -1) return;
-
+		if (window.location.search.search("inv_id") == -1) {
+			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
+			for (var i = 0; i < items.length; i++) {
+				var item = items[i];
+				var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(item.getAttribute("onmouseover"));
+				if (itemStats) {
+					itemId = itemStats[1];
+					invId = itemStats[2];
+					type = itemStats[3];
+					pid = itemStats[4];
+					var itemHref = item.getAttribute("href");
+					var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid
+					item.setAttribute("href",newHref);
+				}
+			}
+			return;
+		}
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+
+		var bidEntryTable = auctionTable.rows[9].cells[0].firstChild.nextSibling;
+		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search)
+		if (itemStats) {
+			var invId = itemStats[1];
+			var itemId = itemStats[2];
+			var type = itemStats[3];
+			var pid = itemStats[4];
+			//GM_log();
+			var newCell = bidEntryTable.rows[0].insertCell(2);
+			newCell.rowSpan = 5;
+			newCell.innerHTML = '<img src="' + System.imageServer + '/items/' + itemId + 
+				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0>';
+		}
+
 		var newRow = auctionTable.insertRow(10);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
 		newCell.align = "center";
-
 		var table = System.getValueJSON("auctionTemplate");
 		if (!table) {
 			table = [
