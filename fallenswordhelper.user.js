@@ -490,7 +490,7 @@ var Helper = {
 	injectGuild: function() {
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
 		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
-			"id='toggleGuildLogoControl' linkto='guildLogoControl'>X</span> ]";
+			"id='toggleGuildLogoControl' linkto='guildLogoControl' title='Toggle Section'>X</span> ]";
 		var guildLogoElement = System.findNode("//img[contains(@title, 's Logo')]");
 		guildLogoElement.id = "guildLogoControl";
 		if (GM_getValue("guildLogoControl")) {
@@ -499,7 +499,7 @@ var Helper = {
 		}
 		var leaveGuild = System.findNode("//a[contains(.,'Leave')]").parentNode;
 		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
-			"id='toggleStatisticsControl' linkto='statisticsControl'>X</span> ]";
+			"id='toggleStatisticsControl' linkto='statisticsControl' title='Toggle Section'>X</span> ]";
 		var linkElement=System.findNode("//a[@href='index.php?cmd=guild&subcmd=changefounder']");
 		statisticsListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
 		statisticsListElement.innerHTML = "<span id='statisticsControl'>" + statisticsListElement.innerHTML + "</span>";
@@ -510,7 +510,7 @@ var Helper = {
 		}
 		var build = System.findNode("//a[contains(.,'Build')]").parentNode;
 		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
-			"id='toggleGuildStructureControl' linkto='guildStructureControl'>X</span> ]";
+			"id='toggleGuildStructureControl' linkto='guildStructureControl' title='Toggle Section'>X</span> ]";
 		var linkElement=System.findNode("//a[@href='index.php?cmd=guild&subcmd=structures']");
 		structureListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
 		structureListElement.innerHTML = "<span id='guildStructureControl'>" + structureListElement.innerHTML + "</span>";
@@ -5010,7 +5010,15 @@ var Helper = {
 	},
 
 	injectCreature: function() {
-		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData)
+		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData);
+
+		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
+		if (creatureName) {
+			creatureName.innerHTML += ' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
+				'<img border=0 title="Search creature in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
+				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
+				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
+		}
 	},
 
 	getCreaturePlayerData: function(responseText) {
@@ -5400,14 +5408,13 @@ var Helper = {
 	},
 
 	injectArena: function() {
+		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves")
 		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
 				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
-				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves</span>';
+				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) + '</span>';
 		document.getElementById("Helper:hideMatchesForCompletedMoves").addEventListener('click', Helper.hideMatchesForCompletedMoves, true);
-
-		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 
 		var arenaMoves = System.getValueJSON("arenaMoves");
 		var hideArenaPrizes = GM_getValue("hideArenaPrizes");
@@ -5425,7 +5432,6 @@ var Helper = {
 			arenaMatches = oldArenaMatches;
 		}
 		var matchFound = false;
-
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
 
