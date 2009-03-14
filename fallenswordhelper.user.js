@@ -1154,6 +1154,23 @@ var Helper = {
 	},
 
 	checkBuffs: function() {
+		//code to remove buffs but stay on the same screen
+		var currentBuffs = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=removeskill&skill_id=')]");
+		for (var i=0;i<currentBuffs.length;i++) {
+			var currentBuff = currentBuffs[i];
+			var buffHref = currentBuff.getAttribute("href");
+			var buffName = /remove\sthe\s([ a-zA-Z]+)\sskill/.exec(currentBuff.getAttribute("onclick"))[1];
+			var imageHTML = currentBuff.innerHTML;
+			var buffCell = currentBuff.parentNode;
+			var buffHTML = buffCell.innerHTML;
+			var lastPart = buffHTML.substring(buffHTML.indexOf("<br>",buffHTML.indexOf("<br>")+1), buffHTML.length);
+			var newCellContents = '<span id="Helper:removeSkill' + i + '" style="cursor:pointer;" buffName="' + buffName + '" buffHref="' + buffHref + '">' + imageHTML + 
+				'</span>' + lastPart;
+			buffCell.innerHTML = newCellContents;
+			buffCell.firstChild.addEventListener('click', Helper.removeSkill, true);
+		}
+
+		//extra world screen text
 		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
@@ -1215,6 +1232,14 @@ var Helper = {
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
 		newRow.innerHTML=replacementText;
+	},
+
+	removeSkill: function(evt) {
+		var buffName = evt.target.parentNode.getAttribute("buffName");
+		var buffHref = evt.target.parentNode.getAttribute("buffHref");
+		if (confirm('Are you sure you wish to remove the ' + buffName + ' skill?')) {
+			System.xmlhttp(buffHref, function() {window.location="index.php?cmd=world";})		
+		}
 	},
 
 	injectQuestBookFull: function() {
@@ -4870,9 +4895,26 @@ var Helper = {
 		}
 
 		//low level buffs used to get the buff above are not really worth casting.
+		var buffs = Data.buffList();
 		var myBuffs = System.findNodes("//font[@size='1']");
 		for (var i=0;i<myBuffs.length;i++) {
 			var myBuff=myBuffs[i];
+			var myBuffName = /([ a-zA-Z]+)\s\[/.exec(myBuff.innerHTML)[1];
+			var buffFound = false;
+			for (var j=0;j<buffs.length;j++) {
+				buffName = buffs[j].name;
+				if (myBuffName == buffName) {
+					var onmouseoverText='Tip(\'' +
+						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + buffName + '</span><br /><br />Stamina: ' +
+						buffs[j].stamina + '<br>Duration: ' +
+						buffs[j].duration + '<br>Effect: ' +
+						buffs[j].buff + '\');'
+					myBuff.setAttribute("onmouseover", onmouseoverText);
+					buffFound = true;
+					break
+				}
+			}
+			if (!buffFound) GM_log("Buff typo in data file: '" + myBuffName + "'");
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
 			if (buffLevel < 75
