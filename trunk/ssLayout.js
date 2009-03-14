@@ -106,7 +106,7 @@ var Layout = {
 
 	quickBuffHref: function(playerId, innerText) {
 		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
-			"', 'fsQuickBuff', 618, 800, 'scrollbars=yes')\"";
+			"', 'fsQuickBuff', 618, 800, ',scrollbars')\"";
 	},
 
 	formatWiki: function(aText, oldVersion, newVersion) {
