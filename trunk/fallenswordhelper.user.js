@@ -1156,18 +1156,20 @@ var Helper = {
 	checkBuffs: function() {
 		//code to remove buffs but stay on the same screen
 		var currentBuffs = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=removeskill&skill_id=')]");
-		for (var i=0;i<currentBuffs.length;i++) {
-			var currentBuff = currentBuffs[i];
-			var buffHref = currentBuff.getAttribute("href");
-			var buffName = /remove\sthe\s([ a-zA-Z]+)\sskill/.exec(currentBuff.getAttribute("onclick"))[1];
-			var imageHTML = currentBuff.innerHTML;
-			var buffCell = currentBuff.parentNode;
-			var buffHTML = buffCell.innerHTML;
-			var lastPart = buffHTML.substring(buffHTML.indexOf("<br>",buffHTML.indexOf("<br>")+1), buffHTML.length);
-			var newCellContents = '<span id="Helper:removeSkill' + i + '" style="cursor:pointer;" buffName="' + buffName + '" buffHref="' + buffHref + '">' + imageHTML + 
-				'</span>' + lastPart;
-			buffCell.innerHTML = newCellContents;
-			buffCell.firstChild.addEventListener('click', Helper.removeSkill, true);
+		if (currentBuffs) {
+			for (var i=0;i<currentBuffs.length;i++) {
+				var currentBuff = currentBuffs[i];
+				var buffHref = currentBuff.getAttribute("href");
+				var buffName = /remove\sthe\s([ a-zA-Z]+)\sskill/.exec(currentBuff.getAttribute("onclick"))[1];
+				var imageHTML = currentBuff.innerHTML;
+				var buffCell = currentBuff.parentNode;
+				var buffHTML = buffCell.innerHTML;
+				var lastPart = buffHTML.substring(buffHTML.indexOf("<br>",buffHTML.indexOf("<br>")+1), buffHTML.length);
+				var newCellContents = '<span id="Helper:removeSkill' + i + '" style="cursor:pointer;" buffName="' + buffName + '" buffHref="' + buffHref + '">' + imageHTML + 
+					'</span>' + lastPart;
+				buffCell.innerHTML = newCellContents;
+				buffCell.firstChild.addEventListener('click', Helper.removeSkill, true);
+			}
 		}
 
 		//extra world screen text
