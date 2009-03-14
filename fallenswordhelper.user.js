@@ -1160,11 +1160,17 @@ var Helper = {
 			for (var i=0;i<currentBuffs.length;i++) {
 				var currentBuff = currentBuffs[i];
 				var buffHref = currentBuff.getAttribute("href");
-				var buffName = /remove\sthe\s([ a-zA-Z]+)\sskill/.exec(currentBuff.getAttribute("onclick"))[1];
+				var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/.exec(currentBuff.getAttribute("onclick"));
+				if (buffTest) {
+					var buffName = buffTest[1];
+				} else {
+					var buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/.exec(currentBuff.getAttribute("onclick"));
+					if (buffTest) var buffName = buffTest[1]; else GM_log("Error getting buff");
+				}
 				var imageHTML = currentBuff.innerHTML;
 				var buffCell = currentBuff.parentNode;
 				var buffHTML = buffCell.innerHTML;
-				var lastPart = buffHTML.substring(buffHTML.indexOf("<br>",buffHTML.indexOf("<br>")+1), buffHTML.length);
+				var lastPart = buffHTML.substring(buffHTML.indexOf("</a>")+4, buffHTML.length);
 				var newCellContents = '<span id="Helper:removeSkill' + i + '" style="cursor:pointer;" buffName="' + buffName + '" buffHref="' + buffHref + '">' + imageHTML + 
 					'</span>' + lastPart;
 				buffCell.innerHTML = newCellContents;
