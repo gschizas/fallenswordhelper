@@ -1032,7 +1032,7 @@ var Helper = {
 
 					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
 						aCell.style.color=footprintsColor;
-						aCell.innerHTML="**";
+						aCell.innerHTML+="**";
 					};
 
 				}
@@ -1608,45 +1608,45 @@ var Helper = {
 	},
 	
 	insertQuickSelectItems: function() {
-	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
-	  if (nodes.length==0) return;
-	  var table=nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+		var nodes = System.findNodes("//input[@name='sendItemList[]']");
+		if (nodes.length==0) return;
+		var table=nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
 
-    table.parentNode.parentNode.parentNode.parentNode.rows[0].cells[0].innerHTML += "<a name=sendButtonLbl></a>";
-	  var newRow = table.insertRow(-1);
-	  var newCell= newRow.insertCell(0);
-	  newCell.colSpan=6;
-	  newCell.align="right";
-	  newCell.innerHTML="<span id=Helper.QuickSelectItem>[&lt;&nbsp;Select]</span>&nbsp;"+
-	    "<span id=Helper.QuickSelect6>[Select 6]</span>&nbsp;"+
-	    "<span id=Helper.QuickDeSelectItem>[DeSelect&nbsp;&gt;]</span>&nbsp;<a href=#sendButtonLbl>Top</a>";
-	  document.getElementById("Helper.QuickSelectItem").addEventListener("click",Helper.quickSelectItem,true);
-	  document.getElementById("Helper.QuickSelect6").addEventListener("click",Helper.addQuickSelectItems,true);
-	  document.getElementById("Helper.QuickDeSelectItem").addEventListener("click",Helper.quickDeSelectItem,true);
+		table.parentNode.parentNode.parentNode.parentNode.rows[0].cells[0].innerHTML += "<a name=sendButtonLbl></a>";
+		var newRow = table.insertRow(-1);
+		var newCell= newRow.insertCell(0);
+		newCell.colSpan=6;
+		newCell.align="right";
+		newCell.innerHTML="<span id=Helper.QuickSelectItem>[&lt;&nbsp;Select]</span>&nbsp;&nbsp;&nbsp;"+
+			"<span id=Helper.QuickSelect6>[Select 6]</span>&nbsp;&nbsp;&nbsp;"+
+			"<span id=Helper.QuickDeSelectItem>[DeSelect&nbsp;&gt;]</span>&nbsp;&nbsp;&nbsp;<a href=#sendButtonLbl>Top</a>";
+		document.getElementById("Helper.QuickSelectItem").addEventListener("click",Helper.quickSelectItem,true);
+		document.getElementById("Helper.QuickSelect6").addEventListener("click",Helper.addQuickSelectItems,true);
+		document.getElementById("Helper.QuickDeSelectItem").addEventListener("click",Helper.quickDeSelectItem,true);
 	},
 	
 	quickSelectItem: function() {
-	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
-	  var i=nodes.length-1;
-	  while (i>=0 && nodes[i].checked) i--;
-	  if (i>=0) nodes[i].checked=true;
+		var nodes = System.findNodes("//input[@name='sendItemList[]']");
+		var i=nodes.length-1;
+		while (i>=0 && nodes[i].checked) i--;
+		if (i>=0) nodes[i].checked=true;
 	},
 	
 	quickDeSelectItem: function() {
-	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
-	  var i=0;
-	  while (i<nodes.length && !(nodes[i].checked)) i++;
-	  if (i<nodes.length) {nodes[i].checked=false;}
+		var nodes = System.findNodes("//input[@name='sendItemList[]']");
+		var i=0;
+		while (i<nodes.length && !(nodes[i].checked)) i++;
+		if (i<nodes.length) {nodes[i].checked=false;}
 	},
 	
 	addQuickSelectItems: function() {
-	  var nodes = System.findNodes("//input[@name='sendItemList[]']");
-	  var defaultN = 6;
+		var nodes = System.findNodes("//input[@name='sendItemList[]']");
+		var defaultN = 6;
 
-	  for (var i = nodes.length; i--; i>=0) {
-	    if (i<nodes.length-defaultN) break;
-	    nodes[i].checked = true;
-	  }
+		for (var i = nodes.length; i--; i>=0) {
+			if (i<nodes.length-defaultN) break;
+			nodes[i].checked = true;
+		}
 	},
 
 	toggleFootprints: function() {
@@ -3356,6 +3356,12 @@ var Helper = {
 		}
 
 		var isSelfRE=/player_id=/.exec(document.location.search);
+		
+		if (isSelfRE) {
+			avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
+			Helper.injectStatCalculator(avyrow.parentNode);
+		}
+		
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
 			var alliesTotal = GM_getValue("alliestotal");
@@ -6067,6 +6073,75 @@ var Helper = {
 		if (count % 2 == 1) result += "<td></td></tr>";
 		result += "</table>";
 		body.innerHTML = result;
+	},
+	
+	injectStatCalculator: function(injectHere) {
+		injectHere.innerHTML += "<span id=statCalculator><input type=button class=custombutton id=calculateStat value='Calculate Evolution Stat'></span>";
+		document.getElementById('calculateStat').addEventListener('click',Helper.calculateStat, true);
+	},
+	
+	calculateStat: function() {
+		var node=System.findNode("//tr[td[b[contains(.,'Attack:')]]]");
+		var atk=System.intValue(node.cells[3].textContent.replace(/\(.*$/g,''));
+		var atk2=System.getIntFromRegExp(node.cells[3].textContent,/\((.*)\)/);
+		atk-=atk2;
+		var def=System.intValue(node.cells[7].textContent.replace(/\(.*$/g,''));
+		var def2=System.getIntFromRegExp(node.cells[7].textContent,/\((.*)\)/);
+		def-=def2;
+		node=System.findNode("//tr[td[b[contains(.,'Armor:')]]]");
+		var arm=System.intValue(node.cells[3].textContent.replace(/\(.*$/g,''));
+		var arm2=System.getIntFromRegExp(node.cells[3].textContent,/\((.*)\)/);
+		arm-=arm2;
+		var dmg=System.intValue(node.cells[7].textContent.replace(/\(.*$/g,''));
+		var dmg2=System.getIntFromRegExp(node.cells[7].textContent,/\((.*)\)/);
+		dmg-=dmg2;
+		node=System.findNode("//tr[td[b[contains(.,'HP:')]]]");
+		var hp=System.intValue(node.cells[3].textContent.replace(/^.*\//g,'').replace(/\(.*$/g,''));
+		var hp2=System.getIntFromRegExp(node.cells[3].textContent,/\((.*)\)/);
+		hp-=hp2;
+		
+		var currentlyWorn=System.findNodes("//img[contains(@src,'/items/')]");
+		Helper.playerItems=new Array();
+		if (currentlyWorn)
+			for (var i=0; i<currentlyWorn.length; i++) {
+				if (currentlyWorn[i].src.indexOf('_x.gif')<0)
+					Helper.playerItems.push(Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")));
+			}
+		
+		Helper.playerStat=[atk,def,arm,dmg,hp];
+		if (Helper.playerItems.length > 0)
+			System.xmlhttp(Helper.playerItems[0], Helper.getPlayerItemStat, 1);
+		else
+			Helper.updatePlayerEvStat();
+	},
+	
+	getPlayerItemStat: function(responseText, id) {
+		var labels=['Attack:','Defense:','Armor:','Damage:','HP:'];
+		var doc = System.createDocument(responseText);
+		for (var i=0;i<labels.length;i++) {
+			var nodes=System.findNodes("//tr[td[.='" + labels[i] + "']]/td[2]",doc);
+			if (nodes) 
+				for (var j=0;j<nodes.length;j++) {
+					if (j==0)
+						Helper.playerStat[i] -= System.intValue(nodes[j].textContent);
+					else
+						Helper.playerStat[i] -= System.intValue(nodes[j].textContent)/3;
+				}
+		}
+
+		if (id==Helper.playerItems.length) 
+			Helper.updatePlayerEvStat();
+		else
+			System.xmlhttp(Helper.playerItems[id], Helper.getPlayerItemStat, id+1);
+	},
+	
+	updatePlayerEvStat: function() {
+		for (var i=0;i<Helper.playerStat.length;i++)
+			Helper.playerStat[i]=Math.round(Helper.playerStat[i]);
+		var result="Atk: "+Helper.playerStat[0]+", Def: "+Helper.playerStat[1]+", Arm: "+Helper.playerStat[2] +
+			", Dmg: "+Helper.playerStat[3]+", HP: "+Helper.playerStat[4]+
+			"<br><span style='font-size:x-small'>(Evolution stats calculation are accurate only if all items are repaired to full durability)</span>";
+		document.getElementById('statCalculator').innerHTML=result;
 	}
 
 };
