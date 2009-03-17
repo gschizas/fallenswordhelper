@@ -2587,46 +2587,68 @@ var Helper = {
 					firstCell = aRow.cells[0];
 					//Valid Types: General, Chat, Guild
 					messageType = firstCell.firstChild.nextSibling.getAttribute("title");
+					var colorPlayerName = false;
+					var isGuildMate = false;
 					if (messageType == "Chat") {
-						var playerName = aRow.cells[2].firstChild.nextSibling.firstChild.innerHTML;
+						var playerElement = aRow.cells[2].firstChild.nextSibling.firstChild;
+						var playerName = playerElement.innerHTML;
+						colorPlayerName = true;
+					}
+					if (messageType == "General") {
+						if (aRow.cells[2].firstChild.nextSibling.innerHTML.search("player_id")!=-1) {
+							playerElement = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling;
+							playerName = playerElement.innerHTML
+							colorPlayerName = true;
+						}
+					}
+					if (colorPlayerName) {
 						if (memberNameString.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.nextSibling.firstChild.style.color="green";
-							isGuildmate = true;
+							playerElement.style.color="green";
+							isGuildMate = true;
 						}
 						if (listOfEnemies.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.style.color="red";
+							playerElement.style.color="red";
 						}
 						if (listOfAllies.search(playerName) !=-1) {
-							aRow.cells[2].firstChild.style.color="blue";
+							playerElement.style.color="blue";
 						}
+					}
+					if (messageType == "Chat") {
 						var messageHTML = aRow.cells[2].innerHTML;
-
-						var firstPart = messageHTML.split(">Reply</a>")[0];
-						var secondPart = messageHTML.split(">Reply</a>")[1];
+						var firstPart = messageHTML.substring(0, messageHTML.indexOf("<small>") + 7);
+						var secondPart = messageHTML.substring(messageHTML.indexOf("<small>") + 7, messageHTML.indexOf(">Reply</a>") + 10);
+						var thirdPart = messageHTML.substring(messageHTML.indexOf(">Reply</a>") + 10, messageHTML.indexOf("</small>"));
+						var lastPart = messageHTML.substring(messageHTML.indexOf("</small>"), messageHTML.length);
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
-							"'>ST</a> | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+							"'>ST</a>"
+						if (!isGuildMate) {
+							extraPart += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 							"'>Ignore</a>";
-
-						aRow.cells[2].innerHTML = firstPart + ">Reply</a>" + extraPart + secondPart;
-
-						isGuildmate = false;
+						}
+						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart + "</nobr>" + lastPart;
 					}
-					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
+					if (aRow.cells[2].innerHTML.search("You have just been outbid at the trade hub") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
-					if (aRow.cells[2].innerHTML.search("activated") != -1 && aRow.cells[2].getAttribute("width") == "80%") {
+					if (messageType == "General" && 
+							aRow.cells[2].firstChild.nextSibling.innerHTML.search("player_id")!=-1){
+						
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
-						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling.innerHTML;
-						aRow.cells[2].innerHTML += " <span style='font-size:x-small;'>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
+						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
+						var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
-							"'>ST</a> | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-							"'>Ignore</a> | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</span>";
-							"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">Buff</a> ]</span>";
+							"'>ST</a>";
+						if (!isGuildMate) {
+							extraText += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+							"'>Ignore</a>";
+						}
+						extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
+						aRow.cells[2].innerHTML += extraText;
+					}
 				}
-			}
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
@@ -3396,6 +3418,29 @@ var Helper = {
 				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
+			
+			//store a list of allies and enemies for use in coloring
+			listOfAllies = "";
+			if (alliesTable) {
+				var newdoc=System.createDocument(alliesTable.innerHTML);
+				var allyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
+				for (var i=0;i<allyLinks.length;i++) {
+					var allyName = allyLinks[i].textContent;
+					listOfAllies += allyName + " ";
+				}
+			}
+
+			listOfEnemies = "";
+			if (enemiesTable) {
+				var newdoc=System.createDocument(enemiesTable.innerHTML);
+				var enermyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
+				for (var i=0;i<enermyLinks.length;i++) {
+					var enemyName = enermyLinks[i].textContent;
+					listOfEnemies += enemyName + " ";
+				}
+			}
+			GM_setValue("listOfAllies", listOfAllies);
+			GM_setValue("listOfEnemies", listOfEnemies);
 
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
