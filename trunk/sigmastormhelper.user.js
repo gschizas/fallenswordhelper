@@ -2610,7 +2610,7 @@ var Helper = {
 							playerElement.style.color="red";
 						}
 						if (listOfAllies.search(playerName) !=-1) {
-							playerElement.style.color="blue";
+							playerElement.style.color="cyan";
 						}
 					}
 					if (messageType == "Chat") {
@@ -2636,7 +2636,7 @@ var Helper = {
 						
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
-						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
+						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling.innerHTML;
 						var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
