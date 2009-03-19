@@ -3424,20 +3424,22 @@ var Helper = {
 			if (alliesTable) {
 				var newdoc=System.createDocument(alliesTable.innerHTML);
 				var allyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
-				for (var i=0;i<allyLinks.length;i++) {
-					var allyName = allyLinks[i].textContent;
-					listOfAllies += allyName + " ";
-				}
+				if (allyLinks)
+					for (var i=0;i<allyLinks.length;i++) {
+						var allyName = allyLinks[i].textContent;
+						listOfAllies += allyName + " ";
+					}
 			}
 
 			listOfEnemies = "";
 			if (enemiesTable) {
 				var newdoc=System.createDocument(enemiesTable.innerHTML);
 				var enermyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
-				for (var i=0;i<enermyLinks.length;i++) {
-					var enemyName = enermyLinks[i].textContent;
-					listOfEnemies += enemyName + " ";
-				}
+				if (enermyLinks)
+					for (var i=0;i<enermyLinks.length;i++) {
+						var enemyName = enermyLinks[i].textContent;
+						listOfEnemies += enemyName + " ";
+					}
 			}
 			GM_setValue("listOfAllies", listOfAllies);
 			GM_setValue("listOfEnemies", listOfEnemies);
