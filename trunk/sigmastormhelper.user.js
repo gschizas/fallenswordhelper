@@ -2717,6 +2717,9 @@ var Helper = {
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Faction Members";
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
+			"Faction Members <a id='Helper:resetGuildList' style='color:cyan; font-size:8px; cursor:pointer; text-decoration:underline;'"+
+			" onmouseover=\"tt_setWidth(105);Tip('Reset online Faction List');\">R</a>";
 		var onlineMembers = memberList.members.filter(function (e) {return (e.status=="Online")})
 		for (var i=0;i<onlineMembers.length;i++) {
 			var member=onlineMembers[i];
@@ -2757,6 +2760,13 @@ var Helper = {
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		document.getElementById('Helper:resetGuildList').addEventListener('click', Helper.resetGuildList, true);
+	},
+	
+	resetGuildList: function(evt) {
+		GM_setValue("memberlist","");
+		GM_setValue("oldmemberlist","");
+		window.location = window.location;
 	},
 
 	getFullPlayerData: function(member) {
@@ -3371,8 +3381,8 @@ var Helper = {
 			if (relationship == "self" && GM_getValue("showAdmin")) {
 				newhtml +=
 					"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
-					playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
-					System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
+					playerid + '><img width=16 height=16 alt="' + ranktext + '" title="' + ranktext + '" src=' +
+					System.imageServer + "/guildlogos/931.gif></a>";
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
