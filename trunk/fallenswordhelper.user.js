@@ -1124,8 +1124,8 @@ var Helper = {
 		var result=0;
 		var valueA=a[Helper.sortBy];
 		var valueB=b[Helper.sortBy];
-		if (typeof valueA=="string") valueA=parseInt(valueA.replace(/,/g,""));
-		if (typeof valueB=="string") valueB=parseInt(valueB.replace(/,/g,""));
+		if (typeof valueA=="string") valueA=parseInt(valueA.replace(/,/g,"").replace(/#/g,""));
+		if (typeof valueB=="string") valueB=parseInt(valueB.replace(/,/g,"").replace(/#/g,""));
 		result = valueA-valueB;
 		if (!Helper.sortAsc) result=-result;
 		return result;
@@ -5463,8 +5463,16 @@ var Helper = {
 		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves")
 		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
 				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
-				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) + '</span>';
+				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) +
+				'<div align=center><form id=Helper:arenaFilterForm onSubmit="javascript:return false;">' +
+				'Min lvl:<input value="' + GM_getValue("arenaMinLvl", 1) + '" size=5 name="Helper.arenaMinLvl" id="Helper.arenaMinLvl" style=custominput/> ' +
+				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 1000) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
+				'<input id="Helper:arenaFilter" class="custombutton" type="submit" value="Filter"/>' +
+				'<input id="Helper:arenaFilterReset" class="custombutton" type="button" value="Reset"/></form></div>'+
+				'</span>';
 		document.getElementById("Helper:hideMatchesForCompletedMoves").addEventListener('click', Helper.hideMatchesForCompletedMoves, true);
+		document.getElementById("Helper:arenaFilterReset").addEventListener('click', Helper.resetArenaFilter, true);
+		document.getElementById("Helper:arenaFilterForm").addEventListener('submit', Helper.setArenaFilter, true);
 
 		var arenaMoves = System.getValueJSON("arenaMoves");
 		var hideArenaPrizes = GM_getValue("hideArenaPrizes");
@@ -5548,14 +5556,42 @@ var Helper = {
 		}
 		System.setValueJSON("arenaMatches", arenaMatches);
 
+		Helper.getArenaTable();
+		Helper.sortArenaByHeader("");
+	},
+
+	setArenaFilter: function() {
+		var onlinePlayerMinLvl = document.getElementById("Helper.arenaMinLvl");
+		var onlinePlayerMaxLvl = document.getElementById("Helper.arenaMaxLvl");
+		if (onlinePlayerMinLvl.value == '') onlinePlayerMinLvl.value = '0';
+		if (onlinePlayerMaxLvl.value == '') onlinePlayerMaxLvl.value = '1000';
+		if (!isNaN(onlinePlayerMinLvl.value))
+			GM_setValue("arenaMinLvl", parseInt(onlinePlayerMinLvl.value));
+		if (!isNaN(onlinePlayerMaxLvl.value))
+			GM_setValue("arenaMaxLvl", parseInt(onlinePlayerMaxLvl.value));
+		Helper.sortAsc=!Helper.sortAsc;
+		Helper.sortArenaByHeader("");
+	},
+
+	resetArenaFilter: function() {
+		GM_setValue("arenaMinLvl", 1);
+		document.getElementById("Helper.arenaMinLvl").value=1;
+		GM_setValue("arenaMaxLvl", 1000);
+		document.getElementById("Helper.arenaMaxLvl").value=1000;
+		Helper.sortAsc=!Helper.sortAsc;
+		Helper.sortArenaByHeader("");
+	},
+	
+	addEventSortArena: function() {
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
-			cell.innerHTML = cell.innerHTML.replace(/\[/,"<br>[");
+			cell.innerHTML = cell.innerHTML.replace(/ \[/,"<br>[");
 			if (cell.innerHTML.search("Max Equip Level") != -1
 				|| cell.innerHTML.search("Join Cost") != -1
 				|| cell.innerHTML.search("Specials") != -1
 				|| cell.innerHTML.search("Hell Forge") != -1
+				|| cell.innerHTML.search("Id") != -1
 				) {
 				cell.style.textDecoration="underline";
 				cell.style.cursor="pointer";
@@ -5569,10 +5605,14 @@ var Helper = {
 		GM_setValue("hideMatchesForCompletedMoves", evt.target.checked);
 		window.location=window.location;
 	},
-
+	
 	sortArena: function(evt) {
-		var headerClicked=evt.target.textContent.replace(/[ \s]/g,"");
-		var parentTables=System.findNodes("ancestor::table", evt.target)
+		Helper.sortArenaByHeader(evt.target.textContent.replace(/[ \s]/g,""));
+	},
+	
+	getArenaTable: function() {
+		var titleCell=System.findNode("//td[@bgcolor='#cd9e4b']");
+		var parentTables=System.findNodes("ancestor::table", titleCell)
 		var list=parentTables[parentTables.length-1];
 
 		Helper.arenaRows = new Array();
@@ -5596,11 +5636,26 @@ var Helper = {
 				'BackgroundColor': theRow.style.backgroundColor
 			};
 		}
+	},
 
-		if (Helper.sortAsc==undefined) Helper.sortAsc=false;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
+	sortArenaByHeader: function(headerClicked) {
+		if (headerClicked=="") {
+			headerClicked = GM_getValue("arenaSortBy");
+			if (headerClicked == undefined) headerClicked="MaxEquipLevel";
+		} else {
+			GM_setValue("arenaSortBy", headerClicked);
 		}
+		if (headerClicked=="Id") headerClicked="ArenaID";
+
+		if (Helper.sortAsc==undefined) {
+			Helper.sortAsc=GM_getValue("arenaSortAsc");
+			if (Helper.sortAsc==undefined) Helper.sortAsc=false;
+		} else {
+			if (Helper.sortBy && Helper.sortBy==headerClicked) {
+				Helper.sortAsc=!Helper.sortAsc;
+			}
+		}
+		GM_setValue("arenaSortAsc",Helper.sortAsc);
 		Helper.sortBy=headerClicked;
 
 		if (headerClicked=="Member") {
@@ -5609,8 +5664,14 @@ var Helper = {
 		else {
 			Helper.arenaRows.sort(Helper.numberSort)
 		}
+		
+		var titleCell=System.findNode("//td[@bgcolor='#cd9e4b']");
+		var parentTables=System.findNodes("ancestor::table", titleCell)
+		var list=parentTables[parentTables.length-1];
 		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
 
+		var minLvl=GM_getValue('arenaMinLvl',1);
+		var maxLvl=GM_getValue('arenaMaxLvl',1000);
 		for (var i=0; i<Helper.arenaRows.length; i++){
 			var r = Helper.arenaRows[i];
 			//var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
@@ -5618,7 +5679,7 @@ var Helper = {
 			if (r.Action.search("View") != -1) {
 				bgColor = 'bgcolor="#f5e2b3"';
 			}
-			if (r.Visibility!="hidden") {
+			if (r.Visibility!="hidden" && r.MaxEquipLevel >= minLvl && r.MaxEquipLevel <= maxLvl) {
 				result += '<TR>'+
 				'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
@@ -5634,20 +5695,8 @@ var Helper = {
 		//result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
 
 		list.innerHTML=result;
-
-		for (var i=0; i<list.rows[0].cells.length; i++) {
-			var cell=list.rows[0].cells[i];
-			if (cell.innerHTML.search("Max Equip Level") != -1
-				|| cell.innerHTML.search("Join Cost") != -1
-				|| cell.innerHTML.search("Specials") != -1
-				|| cell.innerHTML.search("Hell Forge") != -1
-				) {
-				cell.style.textDecoration="underline";
-				cell.style.cursor="pointer";
-				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-				cell.addEventListener('click', Helper.sortArena, true);
-			}
-		}
+		
+		Helper.addEventSortArena();
 	},
 
 	storeArenaMoves: function(){
