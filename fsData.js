@@ -200,7 +200,7 @@ var Data = {
 				{questName:'Restless Honor',             level:555, location:'Catacombs of Quan (Gate)'},
 				{questName:'Restless Souls',             level:349, location:'Maw of Dagoresh'},
 				{questName:'Rites of Passage',           level:475, location:'Wastes of Kruz (Scrublands)'},
-				{questName:'Rouge Leader',               level:408, location:'Citadel of Xinderoth (Floor 8)'},
+				{questName:'Rogue Leader',               level:408, location:'Citadel of Xinderoth (Floor 8)'},
 				{questName:'Runaway Slaves',             level:213, location:'Bahruir (West)'},
 				{questName:'Sacred Shell',               level:135, location:'Reigma Beach (South)'},
 				{questName:'Sand Curse',                 level:138, location:'Anklar Flats (South)'},
@@ -248,7 +248,7 @@ var Data = {
 				{questName:'The Collector',              level:406, location:'Citadel of Xinderoth (Floor 6)'},
 				{questName:'The Cull',                   level:48,  location:'Utapo Flats North'},
 				{questName:'The Dam',                    level:285, location:'Ephal Swamp (North)'},
-				{questName:'The Damed Pit',              level:240, location:'Emyr (North)'},
+				{questName:'The Damned Pit',              level:240, location:'Emyr (North)'},
 				{questName:'The Dekma Orchid',           level:132, location:'Dekma Jungle (East)'},
 				{questName:'The Demon Bone',             level:121, location:'Ethereal Graveyard'},
 				{questName:'The Drying Pool',            level:191, location:'Crombe Moors (South)'},
@@ -6718,19 +6718,5 @@ var Data = {
 			];
 		}
 		return Data.quickSearchArray;
-	},
-
-	plantFromComponent: function(aComponent) {
-		switch(aComponent) {
-			case "Amber Essense": return "Amber Plant"; break;
-			case "Blood Bloom Flower": return "Blood Bloom Plant"; break;
-			case "Dark Shade ": return "Dark Shade Plant"; break;
-			case "Snake Eye": return "Elya Snake Head"; break;
-			case "Snake Venom Fang": return "Elya Snake Head"; break;
-			case "Heffle Wart": return "Heffle Wart Plant"; break;
-			case "Jademare Blossom": return "Jademare Plant"; break;
-			case "Trinettle Leaf": return "Trinettle Plant"; break;
-			default: return aComponent;
-		}
 	}
 }

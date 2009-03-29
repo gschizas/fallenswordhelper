@@ -2368,10 +2368,18 @@ var Helper = {
 		case 35: // Shift+3
 		case 36: // Shift+4
 		case 37: // Shift+5
-			var keyMap = {"key33":1, "key64":2, "key34":2, "key35":3, "key36":4, "key37":5};
+		case 94: // Shift+6
+		case 38: // Shift+7
+		case 42: // Shift+8
+		case 40: // Shift+9
+			var keyMap = {"key33":1, "key64":2, "key34":2, "key35":3, "key36":4, "key37":5,
+				"key94":6, "key38":7, "key42":8, "key40":9};
 			// I'm using "key??" because I don't feel comfortable of naming properties with integers
 			var itemIndex = keyMap["key" + r];
 			System.xmlhttp("index.php?cmd=profile", Helper.changeCombatSet, itemIndex);
+			break;
+		case 41: // Shift+0
+			// TODO: ask for a number, check isnumeric, then call changeCombatSet with that index.
 			break;
 		case 0: // special key
 			switch (s) {
@@ -5589,6 +5597,7 @@ var Helper = {
 			cell.innerHTML = cell.innerHTML.replace(/ \[/,"<br>[");
 			if (cell.innerHTML.search("Max Equip Level") != -1
 				|| cell.innerHTML.search("Join Cost") != -1
+				|| cell.innerHTML.search("State") != -1
 				|| cell.innerHTML.search("Specials") != -1
 				|| cell.innerHTML.search("Hell Forge") != -1
 				|| cell.innerHTML.search("Id") != -1
@@ -5641,7 +5650,7 @@ var Helper = {
 	sortArenaByHeader: function(headerClicked) {
 		if (headerClicked=="") {
 			headerClicked = GM_getValue("arenaSortBy");
-			if (headerClicked == undefined) headerClicked="MaxEquipLevel";
+			if (headerClicked == undefined) headerClicked="State";
 		} else {
 			GM_setValue("arenaSortBy", headerClicked);
 		}
@@ -5658,7 +5667,7 @@ var Helper = {
 		GM_setValue("arenaSortAsc",Helper.sortAsc);
 		Helper.sortBy=headerClicked;
 
-		if (headerClicked=="Member") {
+		if (headerClicked=="Member" || headerClicked=="State") {
 			Helper.arenaRows.sort(Helper.stringSort)
 		}
 		else {
