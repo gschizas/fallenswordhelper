@@ -593,7 +593,8 @@ var Helper = {
 
 		// Fast Take
 
-		var guildStore = System.findNode("//table[contains(tbody/tr/td/@background,'inventory/small.gif')]");
+		var guildStore = System.findNode("//table[tbody/tr/td[@width='45' and @height='45']]");
+		guildStore.innerHTML = guildStore.innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
 		var guildStoreIDRE = /guildstore_id=(\d+)/i;
 
 		var guildStoreBox = [];
@@ -602,14 +603,15 @@ var Helper = {
 		for (var i=0;i<12;i++) {
 			if (guildStore.rows[i >> 2]) guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];
 			if (guildStoreBox[i]) guildStoreBoxItem[i] = guildStoreBox[i].firstChild;
-			if (guildStoreBoxItem[i]) guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
+			if (guildStoreBoxItem[i] && guildStoreBoxItem[i].firstChild) 
+				guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
 		}
 
 		var newRow;
 
 		for (var i=0;i<12;i++) {
 			if ((i % 4==0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
-			if (guildStoreBoxItem[i]) {
+			if (guildStoreBoxItem[i] && guildStoreBoxItem[i].firstChild) {
 				var newCell = newRow.insertCell(i % 4);
 				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:#84ADAC; font-size:x-small;" '+
 					'id="Helper:recallGuildStoreItem' + guildStoreBoxID[i] + '" ' +
@@ -3456,6 +3458,15 @@ var Helper = {
 
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
+			
+			if (!profileInventory) {
+				var profInv = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=useitem')]]");
+			} else {
+				var profInv = profileInventory;
+			}
+			if (profInv) 
+				profInv.innerHTML = profInv.innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
+
 			if (profileInventory) {
 				var profileInventoryIDRE = /inventory_id=(\d+)/i;
 				var wearableIDRE = /subcmd=equipitem/i;
@@ -3471,7 +3482,7 @@ var Helper = {
 						if (profileInventory.rows[Math.floor(i / 5)]) profileInventoryBox[i]=profileInventory.rows[Math.floor(i / 5)].cells[i % 5];
 					}
 					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
-					if (profileInventoryBoxItem[i]) {
+					if (profileInventoryBoxItem[i] && profileInventoryBoxItem[i].firstChild) {
 						var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
 						if (itemHREF && profileInventoryIDRE(itemHREF) && wearableIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
 					}
