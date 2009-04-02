@@ -67,6 +67,7 @@ var Helper = {
 		System.setDefault("maxCompressedCharacters", 1500);
 		System.setDefault("maxCompressedLines", 25);
 		System.setDefault("hideArenaPrizes", "");
+		System.setDefault("autoSortArenaList", false);
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -2526,7 +2527,8 @@ var Helper = {
 						var messageHTML = aRow.cells[2].innerHTML;
 						var firstPart = messageHTML.substring(0, messageHTML.indexOf("<small>") + 7);
 						var secondPart = messageHTML.substring(messageHTML.indexOf("<small>") + 7, messageHTML.indexOf(">Reply</a>") + 10);
-						var thirdPart = messageHTML.substring(messageHTML.indexOf(">Reply</a>") + 10, messageHTML.indexOf("</small>"));
+						var thirdPart = messageHTML.substring(messageHTML.indexOf(">Reply</a>") + 10, messageHTML.indexOf(">Buff</a>") + 9);
+						var fourthPart = messageHTML.substring(messageHTML.indexOf(">Trade</a>") + 10, messageHTML.indexOf("</small>"));
 						var lastPart = messageHTML.substring(messageHTML.indexOf("</small>"), messageHTML.length);
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
@@ -2535,7 +2537,7 @@ var Helper = {
 							extraPart += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 							"'>Ignore</a>";
 						}
-						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart + "</nobr>" + lastPart;
+						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart  + fourthPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
@@ -3388,16 +3390,22 @@ var Helper = {
 					if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
 					if ((i % 4==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
 					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
-						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
-								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
-								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
-						var newCell = newRow.insertCell(i % 4);
-						newCell.align = 'center';
-						newCell.innerHTML = output;
-						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
-							.addEventListener('click', Helper.equipProfileInventoryItem, true);
+						var itemOnmouseover = profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("onmouseover");
+						if (itemOnmouseover.indexOf("Equip") != -1) { // check to see if item is equipable.
+							var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+									'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+									'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
+							var newCell = newRow.insertCell(i % 4);
+							newCell.align = 'center';
+							newCell.innerHTML = output;
+							document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
+								.addEventListener('click', Helper.equipProfileInventoryItem, true);
+						}
+						else {
+							var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
+						}
 					} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
-						var newCell = newRow.insertCell(i % 4);
+						var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
 					}
 				}
 			}
@@ -4934,7 +4942,8 @@ var Helper = {
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
 			if (buffLevel < 75
-			    && myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1) {
+			    && myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1
+				&& myBuff.innerHTML.search("Death Dealer") == -1 && myBuff.innerHTML.search("Vision") == -1) {
 				myBuff.style.color = "gray";
 			}
 		}
@@ -5498,6 +5507,8 @@ var Helper = {
 			arenaMatches = oldArenaMatches;
 		}
 		var matchFound = false;
+		var minLvl=GM_getValue('arenaMinLvl',1);
+		var maxLvl=GM_getValue('arenaMaxLvl',1000);
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
 
@@ -5529,6 +5540,7 @@ var Helper = {
 			}
 
 			var prizeSRC = row.cells[7].firstChild.getAttribute("src");
+			var maxEquipLevel = row.cells[6].textContent*1;
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 				for (var j=0; j<arenaMoves.length; j++){
 					var searchText = System.imageServer + "/pvp/" + arenaMoves[j].moveID+ ".gif";
@@ -5557,6 +5569,11 @@ var Helper = {
 					}
 				}
 			}
+			if (!(maxEquipLevel >= minLvl && maxEquipLevel <= maxLvl)) {
+				row.style.visibility = "hidden";
+				row.style.display = "none";
+			}
+
 			if (!matchFound) {
 				//color new matches since last visit
 				row.style.backgroundColor = '#F5F298';
@@ -5565,7 +5582,10 @@ var Helper = {
 		System.setValueJSON("arenaMatches", arenaMatches);
 
 		Helper.getArenaTable();
-		Helper.sortArenaByHeader("");
+		Helper.addEventSortArena();
+		if (GM_getValue("autoSortArenaList")) {
+			Helper.sortArenaByHeader("");
+		}
 	},
 
 	setArenaFilter: function() {
@@ -5578,7 +5598,11 @@ var Helper = {
 		if (!isNaN(onlinePlayerMaxLvl.value))
 			GM_setValue("arenaMaxLvl", parseInt(onlinePlayerMaxLvl.value));
 		Helper.sortAsc=!Helper.sortAsc;
-		Helper.sortArenaByHeader("");
+		if (GM_getValue("autoSortArenaList")) {
+			Helper.sortArenaByHeader("");
+		} else {
+			window.location = window.location;
+		}
 	},
 
 	resetArenaFilter: function() {
@@ -5587,7 +5611,11 @@ var Helper = {
 		GM_setValue("arenaMaxLvl", 1000);
 		document.getElementById("Helper.arenaMaxLvl").value=1000;
 		Helper.sortAsc=!Helper.sortAsc;
-		Helper.sortArenaByHeader("");
+		if (GM_getValue("autoSortArenaList")) {
+			Helper.sortArenaByHeader("");
+		} else {
+			window.location = window.location
+		}
 	},
 	
 	addEventSortArena: function() {
@@ -5955,6 +5983,8 @@ var Helper = {
 				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
 				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
+			'<tr><td align="right">Auto Sort Arena List' + Helper.helpLink('Auto Sort Arena List', 'This will automatically sort the arena list based on your last preference for sort.') +
+				':</td><td><input name="autoSortArenaList" type="checkbox" value="on"' + (GM_getValue("autoSortArenaList")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Arena Prizes' + Helper.helpLink('Hide Arena Prizes', 'List of the itemIds of arena prizes that should not display on the arena screen ' +
 				'separated by commas. To find the itemId you will have to view the source of the page or mouseover the item on the arena page.') +
 				':</td><td colspan="3"><input name="hideArenaPrizes" size="60" value="'+ hideArenaPrizes + '" /></td></tr>' +
@@ -6091,6 +6121,7 @@ var Helper = {
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
 		System.saveValueForm(oForm, "hideArenaPrizes");
+		System.saveValueForm(oForm, "autoSortArenaList");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
