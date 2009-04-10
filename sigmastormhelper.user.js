@@ -3464,9 +3464,14 @@ var Helper = {
 			} else {
 				var profInv = profileInventory;
 			}
-			if (profInv) 
-				profInv.innerHTML = profInv.innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
-
+			if (profInv) {
+				var bpRows = System.findNodes("//tr[td/center/a]", profInv);
+				if (bpRows)
+					for (var i=0;i<bpRows.length;i++) {
+						bpRows[i].innerHTML = bpRows[i].innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
+					}
+			}
+			
 			if (profileInventory) {
 				var profileInventoryIDRE = /inventory_id=(\d+)/i;
 				var wearableIDRE = /subcmd=equipitem/i;
