@@ -6563,7 +6563,7 @@ var Helper = {
 	},
 	
 	injectAuctionQuickCancel: function() {
-		if (location.search == '?cmd=auctionhouse&type=-2') {
+		if (location.search == '?cmd=auctionhouse' != -1 && location.search == '&type=-2' != -1) {
 			var cancelButtons = System.findNodes("//img[@title='Cancel Auction']");
 			if (cancelButtons) {
 				for (var i = 0; i < cancelButtons.length; i++) {
