@@ -443,6 +443,9 @@ var Helper = {
 		case "message":
 			Helper.injectMessageTemplate();
 			break;
+		case "tempinv":
+			Helper.injectMailbox();
+			break;
 		case "-":
 			var isRelicPage = System.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
@@ -2470,7 +2473,12 @@ var Helper = {
 		case 35: // Shift+3
 		case 36: // Shift+4
 		case 37: // Shift+5
-			var keyMap = {"key33":1, "key64":2, "key34":2, "key35":3, "key36":4, "key37":5};
+		case 94: // Shift+6
+		case 38: // Shift+7
+		case 42: // Shift+8
+		case 40: // Shift+9
+			var keyMap = {"key33":1, "key64":2, "key34":2, "key35":3, "key36":4, "key37":5,
+				"key94":6, "key38":7, "key42":8, "key40":9};
 			// I'm using "key??" because I don't feel comfortable of naming properties with integers
 			var itemIndex = keyMap["key" + r];
 			System.xmlhttp("index.php?cmd=profile", Helper.changeCombatSet, itemIndex);
@@ -3006,6 +3014,8 @@ var Helper = {
 
 		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
+		
+		Helper.injectAuctionQuickCancel();
 	},
 
 	auctionHouseTogglePreferences: function(evt) {
@@ -3216,13 +3226,29 @@ var Helper = {
 					anItem = allItems[i];
 					itemInvId = anItem.value;
 					theTextNode = System.findNode("../../td[3]", anItem);
+					theImgElement = System.findNode("../../td[2]", anItem).firstChild.firstChild;
+					itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(theImgElement.getAttribute("onmouseover"));
+					if (itemStats) {
+						itemId = itemStats[1];
+						invId = itemStats[2];
+						type = itemStats[3];
+						pid = itemStats[4];
+						imgid = /\/([^./]*).gif/.exec(theImgElement.src)[1];
+						text = System.findNode("../../td[2]", anItem).firstChild.textContent;
+					}
 					itemName = theTextNode.textContent.trim().replace("\\","");
 					theTextNode.textContent = itemName;
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
 					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 						+ escape(itemName)
 						+ "'>AH</a>]</span> "
-						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2&inv_id=" + itemInvId + "'>"
+						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
+						+ "&inv_id=" + itemInvId 
+						+ "&item_id=" + itemId
+						+ "&type=" + type
+						+ "&pid=" + pid 
+						+ "&imgid=" + imgid
+						+ "&txt=" + text + "'>"
 						+ "Sell</a>]</span> "
 						+ theTextNode.innerHTML
 						+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
@@ -4092,7 +4118,7 @@ var Helper = {
 	parseInventoryPage: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
-		var backpackItems = System.findNodes("//td[contains(@background,'small.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
+		var backpackItems = System.findNodes("//td[@width='45' and @height='45']/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
 		var pages = System.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
 		var pageElement = System.findNode("//a[contains(@href,'backpack_page=')]/font", doc);
 		var currentPage = 1;
@@ -5942,9 +5968,50 @@ var Helper = {
 	},
 
 	injectCreateAuctionTemplate: function() {
-		if (window.location.search.search("inv_id") == -1) return;
-
+		if (window.location.search.search("inv_id") == -1) {
+			// add item infor to display on the next page
+			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
+			if (items) {
+				for (var i = 0; i < items.length; i++) {
+					var item = items[i];
+					var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(item.getAttribute("onmouseover"));
+					if (itemStats) {
+						itemId = itemStats[1];
+						invId = itemStats[2];
+						type = itemStats[3];
+						pid = itemStats[4];
+						txt = item.parentNode.textContent;
+						imgid = /\/([^./]*).gif/.exec(item.firstChild.src)[1];
+						var itemHref = item.getAttribute("href");
+						var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid + 
+							'&imgid=' + imgid + '&txt=' + txt;
+						item.setAttribute("href",newHref);
+					}
+				}
+			}
+			return;
+		}
+		
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+		
+		// add image & tooltip of the auctioned item
+		var bidEntryTable = auctionTable.rows[5].cells[0].firstChild.nextSibling;
+		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)&imgid=([^&]*)&txt=(.*)/.exec(window.location.search)
+		if (itemStats) {
+			var invId = itemStats[1];
+			var itemId = itemStats[2];
+			var type = itemStats[3];
+			var pid = itemStats[4];
+			var imgid = itemStats[5];
+			var txt = itemStats[6];
+			//GM_log();
+			var newCell = bidEntryTable.rows[0].insertCell(2);
+			newCell.rowSpan = 5;
+			newCell.innerHTML = '<div align=center style="font-size:x-small"><img src="' + System.imageServer + '/items/' + imgid + 
+				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0><br>' + 
+				unescape(txt) + '</div>';
+		}
+
 		var newRow = auctionTable.insertRow(6);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
@@ -6215,6 +6282,91 @@ var Helper = {
 			", Dmg: "+Helper.playerStat[3]+", HP: "+Helper.playerStat[4]+
 			"<br><span style='font-size:x-small'>(Evolution stats calculation are accurate only if all items are repaired to full durability)</span>";
 		document.getElementById('statCalculator').innerHTML=result;
+	},
+	
+	injectMailbox: function() {
+		var items = System.findNodes("//a[contains(@href,'temp_id')]");
+		if (items) {
+			for (var i = 0; i < items.length; i++) {
+				var item = items[i];
+				var itemHref = item.getAttribute('href');
+				var itemTable = item.parentNode.parentNode.parentNode.parentNode.parentNode;
+				itemTable.innerHTML += '<br><span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
+					'id="Helper:recallMailboxItem' + i + '" ' +
+					'itemHref="' + itemHref + '">Fast Take</span>';
+				document.getElementById('Helper:recallMailboxItem' + i)
+					.addEventListener('click', Helper.recallMailboxItem, true);
+			}
+		}
+	},
+
+	recallMailboxItem: function(evt) {
+		var mailboxItemHref = evt.target.getAttribute("itemHref");
+		System.xmlhttp(mailboxItemHref,
+			Helper.recallMailboxReturnMessage,
+			{"target": evt.target});
+	},
+
+	recallMailboxReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		target.style.cursor = 'default';
+		target.style.textDecoration = 'none';
+		if (info.search("Item was transferred to your backpack") != -1) {
+			target.style.color = 'green';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Taken";
+		} else {
+			target.style.color = 'red';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Error:" + info;
+		}
+	},
+	
+	injectAuctionQuickCancel: function() {
+		if (location.search == '?cmd=auctionhouse' != -1 && location.search == '&type=-2' != -1) {
+			var cancelButtons = System.findNodes("//img[@title='Cancel Auction']");
+			if (cancelButtons) {
+				for (var i = 0; i < cancelButtons.length; i++) {
+					var cancelButton = cancelButtons[i];
+					var cancelButtonHref = cancelButton.parentNode.getAttribute('href');
+					var cancelButtonCellElement = cancelButton.parentNode.parentNode.parentNode;
+					cancelButtonCellElement.style.textAlign = 'center';
+					cancelButtonCellElement.innerHTML += '<br><br><span style="cursor:pointer; text-decoration:underline; color:D4FAFF; font-size:x-small;" '+
+						'id="Helper:cancelAuctionItem' + i + '" ' +
+						'cancelButtonHref="' + cancelButtonHref + '">Fast Cancel</span>';
+					document.getElementById('Helper:cancelAuctionItem' + i)
+						.addEventListener('click', Helper.cancelAuctionItem, true);
+				}
+			}
+		}
+	},
+
+	cancelAuctionItem: function(evt) {
+		var cancelButtonHref = evt.target.getAttribute("cancelButtonHref");
+		System.xmlhttp(cancelButtonHref,
+			Helper.cancelAuctionReturnMessage,
+			{"target": evt.target});
+	},
+
+	cancelAuctionReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		target.style.cursor = 'default';
+		target.style.textDecoration = 'none';
+		if (info.search("You cancelled your auction") != -1) {
+			target.style.color = 'green';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Cancelled";
+		} else {
+			target.style.color = 'red';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Error:" + info;
+		}
 	}
 
 };
