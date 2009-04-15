@@ -6249,6 +6249,7 @@ var Helper = {
 			}
 		
 		Helper.playerStat=[atk,def,arm,dmg,hp];
+		Helper.playerSets='';
 		if (Helper.playerItems.length > 0)
 			System.xmlhttp(Helper.playerItems[0], Helper.getPlayerItemStat, 1);
 		else
@@ -6258,15 +6259,29 @@ var Helper = {
 	getPlayerItemStat: function(responseText, id) {
 		var labels=['Attack:','Defense:','Armor:','Damage:','HP:'];
 		var doc = System.createDocument(responseText);
+		var setName=System.findNode("//table/tbody/tr/td",doc).textContent.replace(/ .*$/g,'');
+		var mainStatTable = System.findNode("//tbody/tr/td/table[@width='100%']",doc);
+		if (mainStatTable) mainStatTable = System.createDocument("<table>"+mainStatTable.innerHTML+"</html>");
 		for (var i=0;i<labels.length;i++) {
-			var nodes=System.findNodes("//tr[td[.='" + labels[i] + "']]/td[2]",doc);
-			if (nodes) 
-				for (var j=0;j<nodes.length;j++) {
-					if (j==0)
-						Helper.playerStat[i] -= System.intValue(nodes[j].textContent);
-					else
-						Helper.playerStat[i] -= System.intValue(nodes[j].textContent)/3;
+			if (mainStatTable) {
+				var node=System.findNode("//tr[td[.='" + labels[i] + "']]/td[2]",mainStatTable);
+				if (node) {
+					Helper.playerStat[i] -= System.intValue(node.textContent);
 				}
+			}
+		}
+		if (Helper.playerSets.indexOf(setName)<0) {
+			Helper.playerSets += setName;
+			var bonusStatTable = System.findNode("//table[tbody/tr/td/center[contains(.,'Set Details')]]",doc);
+			if (bonusStatTable) {
+				bonusStatTable = System.createDocument("<table>"+bonusStatTable.innerHTML+"</html>");
+				for (var i=0;i<labels.length;i++) {
+					var node=System.findNode("//tr[td[.='" + labels[i] + "']]/td[2]",bonusStatTable);
+					if (node) {
+						Helper.playerStat[i] -= System.intValue(node.textContent);
+					}
+				}
+			}
 		}
 
 		if (id==Helper.playerItems.length) 
@@ -6278,8 +6293,9 @@ var Helper = {
 	updatePlayerEvStat: function() {
 		for (var i=0;i<Helper.playerStat.length;i++)
 			Helper.playerStat[i]=Math.round(Helper.playerStat[i]);
+		var total=Helper.playerStat[0]+Helper.playerStat[1]+Helper.playerStat[2]+Helper.playerStat[3]+Helper.playerStat[4];
 		var result="Atk: "+Helper.playerStat[0]+", Def: "+Helper.playerStat[1]+", Arm: "+Helper.playerStat[2] +
-			", Dmg: "+Helper.playerStat[3]+", HP: "+Helper.playerStat[4]+
+			", Dmg: "+Helper.playerStat[3]+", HP: "+Helper.playerStat[4]+", Total: "+total+
 			"<br><span style='font-size:x-small'>(Evolution stats calculation are accurate only if all items are repaired to full durability)</span>";
 		document.getElementById('statCalculator').innerHTML=result;
 	},
