@@ -5082,7 +5082,10 @@ var Helper = {
 	},
 
 	injectCreature: function() {
-		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData);
+		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData, 
+			{"groupExists": false, "groupAttackValue": 0, "groupDefenseValue": 0
+				, "groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0});
+		System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
 
 		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
 		if (creatureName) {
@@ -5093,7 +5096,28 @@ var Helper = {
 		}
 	},
 
-	getCreaturePlayerData: function(responseText) {
+	checkIfGroupExists: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var groupExistsIMG = System.findNode("//img[@title='Disband Group (Cancel Attack)']",doc);
+		if (groupExistsIMG) {
+			var groupHref = groupExistsIMG.parentNode.parentNode.firstChild.getAttribute("href");
+			System.xmlhttp(groupHref, Helper.getCreatureGroupData);
+		}
+	},
+
+	getCreatureGroupData: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var groupAttackValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
+		var groupDefenseValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Defense:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
+		var groupArmorValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Armor:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
+		var groupDamageValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
+		var groupHPValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
+		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData, 
+			{"groupExists": true, "groupAttackValue": groupAttackValue, "groupDefenseValue": groupDefenseValue
+				, "groupArmorValue": groupArmorValue, "groupDamageValue": groupDamageValue, "groupHPValue": groupHPValue});
+	},
+	
+	getCreaturePlayerData: function(responseText, callback) {
 		//playerdata
 		var doc=System.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("B");
@@ -5124,13 +5148,8 @@ var Helper = {
 		}
 		//get buffs here later ... DD, CA, DC, Constitution, etc
 		var allItems = doc.getElementsByTagName("IMG");
-		var counterAttackLevel = 0;
-		var doublerLevel = 0;
-		var deathDealerLevel = 0;
-		var darkCurseLevel = 0;
-		var holyFlameLevel = 0;
-		var constitutionLevel = 0;
-		var sanctuaryLevel = 0;
+		var counterAttackLevel = 0, doublerLevel = 0, deathDealerLevel = 0, darkCurseLevel = 0, holyFlameLevel = 0;
+		var constitutionLevel = 0, sanctuaryLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, superEliteSlayerLevel = 0;
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -5139,38 +5158,73 @@ var Helper = {
 				var counterAttack = counterAttackRE.exec(onmouseover);
 				if (counterAttack) {
 					counterAttackLevel = counterAttack[1];
+					continue;
 				}
 				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/
 				var doubler = doublerRE.exec(onmouseover);
 				if (doubler) {
 					doublerLevel = doubler[1];
+					continue;
 				}
 				var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
 				var deathDealer = deathDealerRE.exec(onmouseover);
 				if (deathDealer) {
 					deathDealerLevel = deathDealer[1];
+					continue;
 				}
 				var darkCurseRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
 				var darkCurse = darkCurseRE.exec(onmouseover);
 				if (darkCurse) {
 					darkCurseLevel = darkCurse[1];
+					continue;
 				}
 				var holyFlameRE = /<b>Holy Flame<\/b> \(Level: (\d+)\)/
 				var holyFlame = holyFlameRE.exec(onmouseover);
 				if (holyFlame) {
 					holyFlameLevel = holyFlame[1];
+					continue;
 				}
 				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
 				var constitution = constitutionRE.exec(onmouseover);
 				if (constitution) {
 					constitutionLevel = constitution[1];
+					continue;
 				}
 				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/
 				var sanctuary = sanctuaryRE.exec(onmouseover);
 				if (sanctuary) {
 					sanctuaryLevel = sanctuary[1];
+					continue;
+				}
+				var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/
+				var flinch = flinchRE.exec(onmouseover);
+				if (flinch) {
+					flinchLevel = flinch[1];
+					continue;
+				}
+				var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/
+				var nightmareVisage = nightmareVisageRE.exec(onmouseover);
+				if (nightmareVisage) {
+					nightmareVisageLevel = nightmareVisage[1];
+					continue;
+				}
+				var superEliteSlayerRE = /<b>Super Elite Slayer<\/b> \(Level: (\d+)\)/
+				var superEliteSlayer = superEliteSlayerRE.exec(onmouseover);
+				if (superEliteSlayer) {
+					superEliteSlayerLevel = superEliteSlayer[1];
+					continue;
 				}
 			}
+		}
+		//group data (if appropriate)
+		var groupAttackValue = 0, groupDefenseValue = 0,  groupArmorValue = 0, groupDamageValue = 0, groupHPValue = 0;
+		groupExists = callback.groupExists;
+		if (groupExists) {
+			var groupAttackValue = callback.groupAttackValue;
+			var groupDefenseValue = callback.groupDefenseValue;
+			var groupArmorValue = callback.groupArmorValue;
+			var groupDamageValue = callback.groupDamageValue;
+			var groupHPValue = callback.groupHPValue;
 		}
 		//creaturedata
 		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
@@ -5182,12 +5236,25 @@ var Helper = {
 		var creatureArmor   = System.intValue(creatureStatTable.rows[3].cells[1].textContent);
 		var creatureDamage  = System.intValue(creatureStatTable.rows[3].cells[3].textContent);
 		var creatureHP      = System.intValue(creatureStatTable.rows[4].cells[1].textContent);
+		var extraNotes = "", holyFlameBonusDamage = 0;
+		//reduce stats if critter is a SE and player has SES cast on them.
+		var superEliteSlayerMultiplier = 1;
+		if (superEliteSlayerLevel > 0) {
+			superEliteSlayerMultiplier = Math.round(0.002 * superEliteSlayerLevel*100)/100;
+		}
+		var creatureName = System.findNode("//td/font[@size='3'][b]").textContent.trim();
+		if (creatureName.search("Super Elite") != -1) {
+			creatureAttack -= Math.ceil(creatureAttack * superEliteSlayerMultiplier);
+			creatureDefense -= Math.ceil(creatureDefense * superEliteSlayerMultiplier);
+			creatureDefense -= Math.ceil(creatureDefense * superEliteSlayerMultiplier);
+			creatureArmor -= Math.ceil(creatureArmor * superEliteSlayerMultiplier);
+			creatureHP -= Math.ceil(creatureHP * superEliteSlayerMultiplier);
+			extraNotes += (superEliteSlayerLevel > 0? "SES Stat Reduction Multiplier = " + superEliteSlayerMultiplier + "<br>":"");
+		}
 		//math section ... analysis
 		//Holy Flame adds its bonus after the armor of the creature has been taken off.
-		var extraNotes = "";
 		if (creatureClass == "Undead") {
-			playerDamageValue = playerDamageValue + ((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
-			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
+			holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
 			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + "<br>":"");
 		}
 		//Death Dealer and Counter Attack both applied at the same time
@@ -5195,8 +5262,8 @@ var Helper = {
 		var counterAttackBonusAttack = Math.ceil(playerAttackValue * 0.0025 * counterAttackLevel);
 		var counterAttackBonusDamage = Math.ceil(playerDamageValue * 0.0025 * counterAttackLevel);
 		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(500/50))*0.0025*counterAttackLevel) :0);
-		playerAttackValue += counterAttackBonusAttack;
-		playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
+		//playerAttackValue += counterAttackBonusAttack;
+		//playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
 		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + "<br>":"");
 		if (counterAttackLevel > 0) {
 			extraNotes += "CA Bonus Attack = " + counterAttackBonusAttack + "<br>";
@@ -5205,17 +5272,25 @@ var Helper = {
 		}
 		//Attack:
 		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + "<br>":"");
-		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
+		var nightmareVisageAttackMovedToDefense = Math.floor(playerAttackValue * nightmareVisageLevel * 0.0025);
+		extraNotes += (nightmareVisageLevel > 0? "NV Attack moved to Defense = " + nightmareVisageAttackMovedToDefense + "<br>":"");
+		var overallAttackValue = (groupExists?groupAttackValue:playerAttackValue) + counterAttackBonusAttack - nightmareVisageAttackMovedToDefense;
+		var hitByHowMuch = (overallAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
 		//Damage:
-		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
-		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
+		var overallDamageValue = (groupExists?groupDamageValue:playerDamageValue) + deathDealerBonusDamage + counterAttackBonusDamage + holyFlameBonusDamage;
+		var damageDone = Math.floor(overallDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
+		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((overallDamageValue < (1.1053*creatureArmor))? 1: overallDamageValue - (1.1053*creatureArmor))):"-");
 		//Defense:
+		var overallDefenseValue = (groupExists?groupDefenseValue:playerDefenseValue) + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + nightmareVisageAttackMovedToDefense;
 		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + "<br>":"");
-		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack) - (playerDefenseValue + (playerDefenseValue * constitutionLevel * 0.001)));
+		extraNotes += (flinchLevel > 0? "Flinch Bonus Attack Reduction = " + Math.floor(creatureAttack * flinchLevel * 0.001) + "<br>":"");
+		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
 		//Armor and HP:
+		var overallArmorValue = (groupExists?groupArmorValue:playerArmorValue) + Math.floor(playerArmorValue * sanctuaryLevel * 0.001);
 		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
-		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001) + playerHPValue));
-		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(playerHPValue/(((1.1053*creatureDamage) < (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))? 1: (1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))):"-");
+		var overallHPValue = (groupExists?groupHPValue:playerHPValue);
+		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (overallArmorValue + overallHPValue));
+		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(overallHPValue/(((1.1053*creatureDamage) < (overallArmorValue))? 1: (1.1053*creatureDamage) - (overallArmorValue))):"-");
 		//Analysis:
 		var playerHits = (numberOfCreatureHitsTillDead=="-"? numberOfHitsRequired:(numberOfHitsRequired=="-"?"-":(numberOfHitsRequired>numberOfCreatureHitsTillDead?"-":numberOfHitsRequired)));
 		var creatureHits = (numberOfHitsRequired=="-"?numberOfCreatureHitsTillDead:(numberOfCreatureHitsTillDead=="-"?"-":(numberOfCreatureHitsTillDead>numberOfHitsRequired?"-":numberOfCreatureHitsTillDead)));
@@ -5233,22 +5308,22 @@ var Helper = {
 		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = '4';
-		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>Combat Evaluation</td></tr>" +
+		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>" + (groupExists? "Group ":"") + "Combat Evaluation</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Will I hit it? </td><td align='left'>" + (hitByHowMuch > 0? "Yes":"No") + "</td>" +
 				"<td align='right'><span style='color:#333333'>Extra Attack: </td><td align='left'>( " + hitByHowMuch + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Hits to kill it? </td><td align='left'>" + numberOfHitsRequired + "</td>" +
 				"<td align='right'><span style='color:#333333'>Extra Damage: </td><td align='left'>( " + damageDone + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Will I be hit? </td><td align='left'>" + (creatureHitByHowMuch >= 0? "Yes":"No") + "</td>" +
-				"<td align='right'><span style='color:#333333'>Extra Defense: </td><td align='left'>( " + creatureHitByHowMuch + " )</td></tr>" +
+				"<td align='right'><span style='color:#333333'>Extra Defense: </td><td align='left'>( " + (-1 * creatureHitByHowMuch) + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Hits to kill me? </td><td align='left'>" + numberOfCreatureHitsTillDead + "</td>" +
-				"<td align='right'><span style='color:#333333'>Extra Armor + HP: </td><td align='left'>( " + creatureDamageDone + " )</td></tr>" +
+				"<td align='right'><span style='color:#333333'>Extra Armor + HP: </td><td align='left'>( " + (-1 * creatureDamageDone) + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Player Hits? </td><td align='left'>" + playerHits + "</td>" +
 				"<td align='right'><span style='color:#333333'># Creature Hits? </td><td align='left'>" + creatureHits + "</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Fight Status: </span></td><td align='left' colspan='3'><span>" + fightStatus + "</span></td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" +
 				extraNotes + "</span></td></tr>" +
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>" +
-				"*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
+				"*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NV, Sanctuary and Constitution (if active) and allow for randomness (1.1053). Does not include Chi Strike or Terrorize (because I haven't done them yet).</span></td></tr>" +
 			"</tbody></table>";
 	},
 
