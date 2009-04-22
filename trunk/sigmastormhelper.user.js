@@ -5658,8 +5658,8 @@ var Helper = {
 			'<span style="font-size:xx-small">Sigma Storm Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1106198">Coccinella</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1267797">Tangtop</a> and '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1191381">dkwizard</a> '+
+			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=1133910">Jesiegel</a>' +
 /*
-			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a>' +
 */

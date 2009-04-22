@@ -62,7 +62,18 @@ var Data = {
 				{'questName':'Venting Air', 'level':85, 'location':'OS 1313 (Support Deck)'},
 				{'questName':'Launch Permission', 'level':86, 'location':'OS 1313 (Fighter Bay)'},
 				{'questName':'Data Recovery', 'level':88, 'location':'OS 1313 (Bio Lab)'},
-				{'questName':'Results Confirmation', 'level':90, 'location':'OS 1313 (Control Module)'}
+				{'questName':'Results Confirmation', 'level':90, 'location':'OS 1313 (Control Module)'},
+				{'questName':'The Path We Walk', 'level':91, 'location':'Plain of the Void'},
+				{'questName':'A Sense of Foreboding', 'level':92, 'location':'Way of the Void'},
+				{'questName':'An Honest Trade', 'level':93, 'location':'Snabith Clan Lands (Plain)'},
+				{'questName':'A Light in the Gloom', 'level':93, 'location':'Desolation of Nuwa (Vale)'},
+				{'questName':'Border War', 'level':95, 'location':'Snabith Clan Lands (Tableland)'},
+				{'questName':'Crashed Life Pod', 'level':95, 'location':'Mount Nuwa (Ascent)'},
+				{'questName':'Shields of Our Enemies', 'level':97, 'location':'Veron Vale (Gate)'},
+				{'questName':'AWOL', 'level':97, 'location':'Mount Nuwa (Crater)'},
+				{'questName':'Ascent', 'level':98, 'location':'Obsidian Tower (Level 1)'},
+				{'questName':'The Cleansing', 'level':99, 'location':'Veron Vale (Sacred Ground)'},
+				{'questName':'A Shadow Burned', 'level':100, 'location':'Obsidian Tower (Apex)'}
 			];
 			Data.questArray = questArray.sort();
 		}
