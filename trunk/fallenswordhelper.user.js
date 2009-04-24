@@ -69,6 +69,16 @@ var Helper = {
 		System.setDefault("hideArenaPrizes", "");
 		System.setDefault("autoSortArenaList", false);
 
+		System.setDefault("showGloveTypeItems", true);
+		System.setDefault("showHelmetTypeItems", true);
+		System.setDefault("showAmuletTypeItems", true);
+		System.setDefault("showWeaponTypeItems", true);
+		System.setDefault("showAmorTypeItems", true);
+		System.setDefault("showShieldTypeItems", true);
+		System.setDefault("showRingTypeItems", true);
+		System.setDefault("showBootTypeItems", true);
+		System.setDefault("showRuneTypeItems", true);
+
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
 		}
@@ -1266,13 +1276,13 @@ var Helper = {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
 				if (aRow.cells[0].innerHTML) {
-					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ");
+					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ").trim();
 					var insertHere = aRow.cells[0];
 					questNamesOnPage.push(questName);
 					for (var j=0;j<quests.length;j++) {
 						var aCell = aRow.cells[0]
 						var imgElement = aCell.nextSibling.firstChild;
-						var matrixQuestName = quests[j].questName.replace(/  /g," ");
+						var matrixQuestName = quests[j].questName.replace(/  /g," ").trim();
 
 						// GM_log(questName + "\t" + hideQuests.indexOf(questName));
 
@@ -1316,11 +1326,11 @@ var Helper = {
 					hideNextRows --;
 				}
 				if (aRow.cells[0].innerHTML) {
-					var questName = aRow.cells[0].firstChild.innerHTML;
+					var questName = aRow.cells[0].firstChild.innerHTML.trim();
 					var insertHere = aRow.cells[0];
 					var killThis = false;
 					for (var j=0;j<quests.length;j++) {
-						var matrixQuestName = quests[j].questName;
+						var matrixQuestName = quests[j].questName.trim();
 						if (questName == matrixQuestName) {
 							if (hideQuests.indexOf(matrixQuestName)>=0) {
 								aRow.parentNode.removeChild(aRow.nextSibling);
@@ -1403,10 +1413,10 @@ var Helper = {
 				insertNextRows --;
 			}
 			if (aRow.cells[0].innerHTML) {
-				var questName = aRow.cells[0].firstChild.textContent.replace(/  /g," ");
+				var questName = aRow.cells[0].firstChild.textContent.replace(/  /g," ").trim();
 				var insertHere = aRow.cells[0];
 				for (var j=0;j<quests.length;j++) {
-					if (questName == quests[j].questName) {
+					if (questName == quests[j].questName.trim()) {
 						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
 							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
 							quests[j].location + "</span>";
@@ -3796,15 +3806,48 @@ var Helper = {
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+
+			'<tr><td colspan=2>&nbsp;<b>Show Items:</b>' +
+				'&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+				(GM_getValue("showUseableItems")?' checked':'') + '/>' + 
+				'&nbsp;Gloves:<input id="showGloveTypeItems" type="checkbox" linkto="showGloveTypeItems"' +
+				(GM_getValue("showGloveTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Helmets:<input id="showHelmetTypeItems" type="checkbox" linkto="showHelmetTypeItems"' +
+				(GM_getValue("showHelmetTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Amulets:<input id="showAmuletTypeItems" type="checkbox" linkto="showAmuletTypeItems"' +
+				(GM_getValue("showAmuletTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Weapons:<input id="showWeaponTypeItems" type="checkbox" linkto="showWeaponTypeItems"' +
+				(GM_getValue("showWeaponTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Armors:<input id="showAmorTypeItems" type="checkbox" linkto="showAmorTypeItems"' +
+				(GM_getValue("showAmorTypeItems")?' checked':'') + '/>' + 
+				'</td></tr>'+
+			'<tr><td colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+				'&nbsp;Shields:<input id="showShieldTypeItems" type="checkbox" linkto="showShieldTypeItems"' +
+				(GM_getValue("showShieldTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Rings:<input id="showRingTypeItems" type="checkbox" linkto="showRingTypeItems"' +
+				(GM_getValue("showRingTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Boots:<input id="showBootTypeItems" type="checkbox" linkto="showBootTypeItems"' +
+				(GM_getValue("showBootTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Runes:<input id="showRuneTypeItems" type="checkbox" linkto="showRuneTypeItems"' +
+				(GM_getValue("showRuneTypeItems")?' checked':'') + '/>' + 
+				'</td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
 			'' +
 			'</div>';
 		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
-		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
+		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showGloveTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showHelmetTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showAmuletTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showWeaponTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showAmorTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showShieldTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showRingTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showBootTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showRuneTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 	},
 
 	injectGuildInventoryManager: function() {
@@ -3823,8 +3866,33 @@ var Helper = {
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox" linkto="showUseableItems"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b>&nbsp;Guild Item Count:&nbsp;' + guildItemCount +
+			'<tr><td colspan=2>&nbsp;<b>Show Items:</b>' +
+				'&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+				(GM_getValue("showUseableItems")?' checked':'') + '/>' + 
+				'&nbsp;Gloves:<input id="showGloveTypeItems" type="checkbox" linkto="showGloveTypeItems"' +
+				(GM_getValue("showGloveTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Helmets:<input id="showHelmetTypeItems" type="checkbox" linkto="showHelmetTypeItems"' +
+				(GM_getValue("showHelmetTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Amulets:<input id="showAmuletTypeItems" type="checkbox" linkto="showAmuletTypeItems"' +
+				(GM_getValue("showAmuletTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Weapons:<input id="showWeaponTypeItems" type="checkbox" linkto="showWeaponTypeItems"' +
+				(GM_getValue("showWeaponTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Armors:<input id="showAmorTypeItems" type="checkbox" linkto="showAmorTypeItems"' +
+				(GM_getValue("showAmorTypeItems")?' checked':'') + '/>' + 
+				'</td></tr>'+
+			'<tr><td colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
+				'&nbsp;Shields:<input id="showShieldTypeItems" type="checkbox" linkto="showShieldTypeItems"' +
+				(GM_getValue("showShieldTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Rings:<input id="showRingTypeItems" type="checkbox" linkto="showRingTypeItems"' +
+				(GM_getValue("showRingTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Boots:<input id="showBootTypeItems" type="checkbox" linkto="showBootTypeItems"' +
+				(GM_getValue("showBootTypeItems")?' checked':'') + '/>' + 
+				'&nbsp;Runes:<input id="showRuneTypeItems" type="checkbox" linkto="showRuneTypeItems"' +
+				(GM_getValue("showRuneTypeItems")?' checked':'') + '/>' + 
+				'</td></tr>'+
+			'<tr><td colspan=2>&nbsp;Guild Item Count:&nbsp;' + guildItemCount +
 				'</td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
@@ -3832,7 +3900,16 @@ var Helper = {
 			'</div>';
 		document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
 		Helper.generateInventoryTable("guild");
-		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
+		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showGloveTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showHelmetTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showAmuletTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showWeaponTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showAmorTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showShieldTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showRingTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showBootTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("showRuneTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 	},
 
 	injectOnlinePlayers: function() {
@@ -4011,9 +4088,8 @@ var Helper = {
 		Helper.generateOnlinePlayersTable();
 	},
 
-
-	toggleShowUseableItems: function(evt) {
-		GM_setValue("showUseableItems", evt.target.checked);
+	toggleCheckboxAndRefresh: function(evt) {
+		GM_setValue(evt.target.id, evt.target.checked);
 		window.location=window.location;
 	},
 
@@ -4212,7 +4288,7 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			var findItem = Data.itemArray.filter(function (e,i,a) {return e.name==item.name});
+			var findItem = Data.itemArray.filter(function (e,i,a) {return e.name.trim()==item.name.trim()});
 			if (findItem.length>0) {
 				item.type = findItem[0].type;
 			} else {
@@ -4271,6 +4347,42 @@ var Helper = {
 		if (showUseableItems) {
 			allItems=allItems.filter(function(e,i,a) {return e.minLevel <= Helper.characterLevel});
 			//  && e.minLevel + 50 > Helper.characterLevel}
+		}
+		var showGloveTypeItems = GM_getValue("showGloveTypeItems");
+		if (!showGloveTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'gloves'});
+		}
+		var showHelmetTypeItems = GM_getValue("showHelmetTypeItems");
+		if (!showHelmetTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'helmet'});
+		}
+		var showAmuletTypeItems = GM_getValue("showAmuletTypeItems");
+		if (!showAmuletTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'amulet'});
+		}
+		var showWeaponTypeItems = GM_getValue("showWeaponTypeItems");
+		if (!showWeaponTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'weapon'});
+		}
+		var showAmorTypeItems = GM_getValue("showAmorTypeItems");
+		if (!showAmorTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'armor'});
+		}
+		var showShieldTypeItems = GM_getValue("showShieldTypeItems");
+		if (!showShieldTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'shield'});
+		}
+		var showRingTypeItems = GM_getValue("showRingTypeItems");
+		if (!showRingTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'ring'});
+		}
+		var showBootTypeItems = GM_getValue("showBootTypeItems");
+		if (!showBootTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'boots'});
+		}
+		var showRuneTypeItems = GM_getValue("showRuneTypeItems");
+		if (!showRuneTypeItems) {
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'rune'});
 		}
 
 		for (var i=0; i<allItems.length;i++) {
@@ -5948,11 +6060,11 @@ var Helper = {
 		var relicFound = false;
 		for (var i=0; i<relicImages.length; i++){
 			var relicImage = relicImages[i];
-			var relicName = relicImage.parentNode.nextSibling.nextSibling.textContent;
+			var relicName = relicImage.parentNode.nextSibling.nextSibling.textContent.trim();
 			relicFound = false;
 			for (var j=0; j<relics.length; j++){
 				var relic = relics[j];
-				if (relicName == relic.Name){
+				if (relicName == relic.Name.trim()){
 					var onmouseoverText='Tip(\'' +
 						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + relic.Name + '</span><br /><br />' +
 						relic.Realm + '<br><br>' +
