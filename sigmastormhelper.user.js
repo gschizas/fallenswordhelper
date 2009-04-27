@@ -68,6 +68,19 @@ var Helper = {
 		System.setDefault("maxCompressedCharacters", 1500);
 		System.setDefault("maxCompressedLines", 25);
 
+		Helper.itemFilters = [
+		{"id":"showBodyTypeItems", "type":"Body Armor"},
+		{"id":"showHelmetTypeItems", "type":"Helmet"},
+		{"id":"showHelmetAddOnTypeItems", "type":"Helmet Add-On"},
+		{"id":"showLegTypeItems", "type":"Leg Armor"},
+		{"id":"showWeaponTypeItems", "type":"Weapon"},
+		{"id":"showWeaponAddOnTypeItems", "type":"Weapon Add-On"},
+		];
+
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			System.setDefault(Helper.itemFilters[i].id, true);
+		}
+
 		var memberList = System.getValueJSON("memberlist");
 		if (!memberList || !memberList.lastUpdate) GM_setValue("memberlist", "");
 	},
@@ -606,7 +619,7 @@ var Helper = {
 		for (var i=0;i<12;i++) {
 			if (guildStore.rows[i >> 2]) guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];
 			if (guildStoreBox[i]) guildStoreBoxItem[i] = guildStoreBox[i].firstChild;
-			if (guildStoreBoxItem[i] && guildStoreBoxItem[i].firstChild) 
+			if (guildStoreBoxItem[i] && guildStoreBoxItem[i].firstChild)
 				guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
 		}
 
@@ -1611,7 +1624,7 @@ var Helper = {
 		}
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:xx-small;">' + info + '</div>';
 	},
-	
+
 	insertQuickSelectItems: function() {
 		var nodes = System.findNodes("//input[@name='sendItemList[]']");
 		if (nodes.length==0) return;
@@ -1629,21 +1642,21 @@ var Helper = {
 		document.getElementById("Helper.QuickSelect6").addEventListener("click",Helper.addQuickSelectItems,true);
 		document.getElementById("Helper.QuickDeSelectItem").addEventListener("click",Helper.quickDeSelectItem,true);
 	},
-	
+
 	quickSelectItem: function() {
 		var nodes = System.findNodes("//input[@name='sendItemList[]']");
 		var i=nodes.length-1;
 		while (i>=0 && nodes[i].checked) i--;
 		if (i>=0) nodes[i].checked=true;
 	},
-	
+
 	quickDeSelectItem: function() {
 		var nodes = System.findNodes("//input[@name='sendItemList[]']");
 		var i=0;
 		while (i<nodes.length && !(nodes[i].checked)) i++;
 		if (i<nodes.length) {nodes[i].checked=false;}
 	},
-	
+
 	addQuickSelectItems: function() {
 		var nodes = System.findNodes("//input[@name='sendItemList[]']");
 		var defaultN = 6;
@@ -2641,9 +2654,9 @@ var Helper = {
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the trade hub") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
-					if (messageType == "General" && 
+					if (messageType == "General" &&
 							aRow.cells[2].firstChild.nextSibling.innerHTML.search("player_id")!=-1){
-						
+
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
 						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling.innerHTML;
@@ -2772,7 +2785,7 @@ var Helper = {
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
 		document.getElementById('Helper:resetGuildList').addEventListener('click', Helper.resetGuildList, true);
 	},
-	
+
 	resetGuildList: function(evt) {
 		GM_setValue("memberlist","");
 		GM_setValue("oldmemberlist","");
@@ -3014,7 +3027,7 @@ var Helper = {
 
 		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
-		
+
 		Helper.injectAuctionQuickCancel();
 	},
 
@@ -3243,10 +3256,10 @@ var Helper = {
 						+ escape(itemName)
 						+ "'>AH</a>]</span> "
 						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
-						+ "&inv_id=" + itemInvId 
+						+ "&inv_id=" + itemInvId
 						+ "&item_id=" + itemId
 						+ "&type=" + type
-						+ "&pid=" + pid 
+						+ "&pid=" + pid
 						+ "&imgid=" + imgid
 						+ "&txt=" + text + "'>"
 						+ "Sell</a>]</span> "
@@ -3416,12 +3429,12 @@ var Helper = {
 		}
 
 		var isSelfRE=/player_id=/.exec(document.location.search);
-		
+
 		if (isSelfRE) {
 			avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
 			Helper.injectStatCalculator(avyrow.parentNode);
 		}
-		
+
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
 			var alliesTotal = GM_getValue("alliestotal");
@@ -3456,7 +3469,7 @@ var Helper = {
 				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
 					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
-			
+
 			//store a list of allies and enemies for use in coloring
 			listOfAllies = "";
 			if (alliesTable) {
@@ -3484,7 +3497,7 @@ var Helper = {
 
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
-			
+
 			if (!profileInventory) {
 				var profInv = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=useitem')]]");
 			} else {
@@ -3497,7 +3510,7 @@ var Helper = {
 						bpRows[i].innerHTML = bpRows[i].innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
 					}
 			}
-			
+
 			if (profileInventory) {
 				var profileInventoryIDRE = /inventory_id=(\d+)/i;
 				var wearableIDRE = /subcmd=equipitem/i;
@@ -3859,19 +3872,31 @@ var Helper = {
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
+		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
-			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b></td></tr>'+
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
-			'' +
-			'</div>';
+			'<tr><td colspan=2>' +
+			'<table><tr><td><b>Show Items:</b></td>' +
+			'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+			(GM_getValue("showUseableItems")?' checked':'') + '/>';
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			newhtml += (i % 3 ==0) ? '</td></tr><tr><td>' : '';
+			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
+					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
+		}
+		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
+				'</td></tr></table></td></tr></table>' +
+				'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
+				'</div>';
+		content.innerHTML=newhtml;
 		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
-		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
+		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		}
+		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
 	injectGuildInventoryManager: function() {
@@ -3886,20 +3911,52 @@ var Helper = {
 			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
 			guildItemCount = Helper.guildinventory.items.length;
 		}
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
+
+		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'</tr>' +
-			'<tr><td><b>&nbsp;Show Only Useable Items<input id="Helper:showUseableItems" type="checkbox" linkto="showUseableItems"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/></b>&nbsp;Faction Item Count:&nbsp;' + guildItemCount +
-				'</td></tr>'+
-			'</table>' +
+			'<tr><td colspan=2>' +
+				'<table><tr><td><b>Show Items:</b></td>' +
+				'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+				(GM_getValue("showUseableItems")?' checked':'') + '/>';
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			newhtml += (i % 3 ==0) ? '</td></tr><tr><td>' : '';
+			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
+					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
+		}
+		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
+				'</td></tr></table></td></tr>'+
+			'<tr><td colspan=2>&nbsp;Faction Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
 			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
-			'' +
 			'</div>';
+		content.innerHTML=newhtml;
 		document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
 		Helper.generateInventoryTable("guild");
-		document.getElementById("Helper:showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
+		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		}
+		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
+	},
+
+	InventorySelectFilters: function(evt) {
+		var checkedValue = (evt.target.id=="GuildInventorySelectAll");
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			GM_setValue(Helper.itemFilters[i].id, checkedValue);
+		}
+		if (checkedValue)
+			window.location=window.location;
+		else
+			for (var i=0; i<Helper.itemFilters.length; i++) {
+				document.getElementById(Helper.itemFilters[i].id).checked = checkedValue;
+			}
+	},
+
+	toggleCheckboxAndRefresh: function(evt) {
+		GM_setValue(evt.target.id, evt.target.checked);
+		window.location=window.location;
 	},
 
 	injectOnlinePlayers: function() {
@@ -4341,6 +4398,12 @@ var Helper = {
 					(e.class == "Core" || e.class == Helper.itemClasses[Helper.characterClass])
 				});
 			//  && e.minLevel + 50 > Helper.characterLevel}
+		}
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			if (!GM_getValue(Helper.itemFilters[i].id)) {
+				Helper.invFilterType = Helper.itemFilters[i].type;
+				allItems=allItems.filter(function(e,i,a) {return e.type != Helper.invFilterType;});
+			}
 		}
 
 		for (var i=0; i<allItems.length;i++) {
@@ -5983,7 +6046,7 @@ var Helper = {
 						txt = item.parentNode.textContent;
 						imgid = /\/([^./]*).gif/.exec(item.firstChild.src)[1];
 						var itemHref = item.getAttribute("href");
-						var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid + 
+						var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid +
 							'&imgid=' + imgid + '&txt=' + txt;
 						item.setAttribute("href",newHref);
 					}
@@ -5991,9 +6054,9 @@ var Helper = {
 			}
 			return;
 		}
-		
+
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		
+
 		// add image & tooltip of the auctioned item
 		var bidEntryTable = auctionTable.rows[5].cells[0].firstChild.nextSibling;
 		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)&imgid=([^&]*)&txt=(.*)/.exec(window.location.search)
@@ -6007,8 +6070,8 @@ var Helper = {
 			//GM_log();
 			var newCell = bidEntryTable.rows[0].insertCell(2);
 			newCell.rowSpan = 5;
-			newCell.innerHTML = '<div align=center style="font-size:x-small"><img src="' + System.imageServer + '/items/' + imgid + 
-				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0><br>' + 
+			newCell.innerHTML = '<div align=center style="font-size:x-small"><img src="' + System.imageServer + '/items/' + imgid +
+				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0><br>' +
 				unescape(txt) + '</div>';
 		}
 
@@ -6214,12 +6277,12 @@ var Helper = {
 		result += "</table>";
 		body.innerHTML = result;
 	},
-	
+
 	injectStatCalculator: function(injectHere) {
 		injectHere.innerHTML += "<span id=statCalculator><input type=button class=custombutton id=calculateStat value='Calculate Evolution Stat'></span>";
 		document.getElementById('calculateStat').addEventListener('click',Helper.calculateStat, true);
 	},
-	
+
 	calculateStat: function() {
 		var node=System.findNode("//tr[td[b[contains(.,'Attack:')]]]");
 		var atk=System.intValue(node.cells[3].textContent.replace(/\(.*$/g,''));
@@ -6239,7 +6302,7 @@ var Helper = {
 		var hp=System.intValue(node.cells[3].textContent.replace(/^.*\//g,'').replace(/\(.*$/g,''));
 		var hp2=System.getIntFromRegExp(node.cells[3].textContent,/\((.*)\)/);
 		hp-=hp2;
-		
+
 		var currentlyWorn=System.findNodes("//img[contains(@src,'/items/')]");
 		Helper.playerItems=new Array();
 		if (currentlyWorn)
@@ -6247,7 +6310,7 @@ var Helper = {
 				if (currentlyWorn[i].src.indexOf('_x.gif')<0)
 					Helper.playerItems.push(Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")));
 			}
-		
+
 		Helper.playerStat=[atk,def,arm,dmg,hp];
 		Helper.playerSets='';
 		if (Helper.playerItems.length > 0)
@@ -6255,7 +6318,7 @@ var Helper = {
 		else
 			Helper.updatePlayerEvStat();
 	},
-	
+
 	getPlayerItemStat: function(responseText, id) {
 		var labels=['Attack:','Defense:','Armor:','Damage:','HP:'];
 		var doc = System.createDocument(responseText);
@@ -6284,12 +6347,12 @@ var Helper = {
 			}
 		}
 
-		if (id==Helper.playerItems.length) 
+		if (id==Helper.playerItems.length)
 			Helper.updatePlayerEvStat();
 		else
 			System.xmlhttp(Helper.playerItems[id], Helper.getPlayerItemStat, id+1);
 	},
-	
+
 	updatePlayerEvStat: function() {
 		for (var i=0;i<Helper.playerStat.length;i++)
 			Helper.playerStat[i]=Math.round(Helper.playerStat[i]);
@@ -6299,7 +6362,7 @@ var Helper = {
 			"<br><span style='font-size:x-small'>(Evolution stats calculation are accurate only if all items are repaired to full durability)</span>";
 		document.getElementById('statCalculator').innerHTML=result;
 	},
-	
+
 	injectMailbox: function() {
 		var items = System.findNodes("//a[contains(@href,'temp_id')]");
 		if (items) {
@@ -6340,7 +6403,7 @@ var Helper = {
 			target.innerHTML = "Error:" + info;
 		}
 	},
-	
+
 	injectAuctionQuickCancel: function() {
 		if (location.search == '?cmd=auctionhouse' != -1 && location.search == '&type=-2' != -1) {
 			var cancelButtons = System.findNodes("//img[@title='Cancel Auction']");
