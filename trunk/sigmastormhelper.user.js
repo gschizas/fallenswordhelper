@@ -85,8 +85,9 @@ var Helper = {
 		if (!memberList || !memberList.lastUpdate) GM_setValue("memberlist", "");
 	},
 
-	readInfo: function() {
-		var charInfo = System.findNode("//img[contains(@src,'skin/quicklinks/4.gif')]");
+	readInfo: function(doc) {
+		if (!doc) doc=document;
+		var charInfo = System.findNode("//img[contains(@src,'skin/quicklinks/4.gif')]",doc);
 		if (!charInfo) {return;}
 		var charInfoText = charInfo.getAttribute("onmouseover");
 		Helper.characterName    = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
@@ -1954,7 +1955,6 @@ var Helper = {
 
 	killedMonster: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
-
 		var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
 		var report=responseText.match(reportRE);
 		if (report) report=report[0]
@@ -1972,12 +1972,20 @@ var Helper = {
 		// var finalHP = System.getIntFromRegExp(responseText, /^HP\[1\]=(-?[0-9]+);/i);
 		var hpNode = System.findNode("//div[@id='current_hp_0']", doc);
 		if (hpNode) {
-			var finalHP = parseInt(hpNode.textContent.split("/")[0]);
+			// get HP from combat aninmation script
+			var hpRE=/(hp[[0-9]+]=[0-9]+;)/g
+			var hps=responseText.match(hpRE);
+			if (hps) hps=hps[hps.length-2];
+			if (hps) hps=(hps.match(/=[0-9]+;/)[0]).replace('=','').replace(';','');
+
+			var finalHP = hps ? parseInt(hps) : parseInt(hpNode.textContent.split("/")[0]);
 			var maxHP = parseInt(hpNode.textContent.split("/")[1]);
 
 			var ammoNode= System.findNode("//div[@id='current_ammo_0']", doc);
 			var finalAmmo = parseInt(ammoNode.textContent.split("/")[0]);
 			var maxAmmo = parseInt(ammoNode.textContent.split("/")[1]);
+			var reportAmmo=(maxAmmo>0)?"<div style='font-size:x-small;width:120px;overflow:hidden;'>Ammo: "+ammoNode.textContent+"</div>":"";
+			if (maxAmmo>0 && finalAmmo<5) reportAmmo="<font color=yellow>"+reportAmmo+"</font>";
 
 			var indicatorHP = System.findNode("//img[contains(@src,'hp_progress.gif')]");
 			indicatorHP.setAttribute("width", Math.round(100 * finalHP / maxHP) + "%");
@@ -2017,13 +2025,14 @@ var Helper = {
 				resultText += "Shield Imp Death\n"
 			}
 			if (xpGain<0) result.style.color='red';
-			result.innerHTML=resultHtml
 			var monsterParent = monster.parentNode;
 			result.id = "result" + callback.index;
 			if (report) {
 				var reportLines=report.split("\n");
 				var reportHtml="";
 				var reportText="";
+				var reportCombat="";
+				var combatIndex=1;
 				if (specials) {
 					reportHtml += "<div style='color:red'>"
 					for (var i=0; i<specials.length; i++) {
@@ -2037,8 +2046,20 @@ var Helper = {
 					if (reportMatch) {
 						reportHtml += "<br/>" + reportMatch[1];
 						reportText += reportMatch[1].replace(/<br>/g, "\n") + "\n";
+						if (reportMatch[1].indexOf("hits")>=0)
+							reportCombat += "<font color="+(combatIndex?"green":"yellow")+">hit</font>-";
+						if (reportMatch[1].indexOf("misses")>=0)
+							reportCombat += "<font color="+(combatIndex?"yellow":"green")+"><i>miss</i></font>-";
+						if (reportMatch[1].indexOf("reloaded.")>=0)
+							reportCombat += "<font color="+(combatIndex?"yellow":"green")+"><i>reload</i></font>-";
+						if (reportMatch[1].indexOf("victorious")>=0)
+							reportCombat += "Vic";
+						if (reportMatch[1].indexOf("defeated")>=0)
+							reportCombat += "Def";
+						combatIndex=1-combatIndex;
 					}
 				}
+				if (reportCombat!="") reportCombat="<div style='font-size:xx-small;width:120px;overflow:hidden;'>" + reportCombat + "</div>";
 				if (levelUp=="1") {
 					reportHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
 					reportText += "Your level has increased!\n";
@@ -2049,11 +2070,16 @@ var Helper = {
 				}
 				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
 				Helper.appendCombatLog(reportHtml);
+				result.innerHTML=reportCombat+reportAmmo+resultHtml;
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
-					Helper.appendSavedLog("\n================================\n" + now.toLocaleString() + "\n" + resultText + "\n" + reportText);
+					Helper.readInfo(doc);
+					var reportStat = "Atk:"+Helper.characterAttack+" Def:"+Helper.characterDefense+" Armor:"+Helper.characterArmor+" HP:"+Helper.characterHP+" Dmg:"+Helper.characterDamage;
+					Helper.appendSavedLog("\n================================\n" + now.toLocaleString() + "\n" + resultText + "\n" + reportText + "\n" + reportStat);
 				}
+			} else {
+				result.innerHTML=resultHtml;
 			}
 			monsterParent.innerHTML = "";
 			monsterParent.insertBefore(result, monsterParent.nextSibling);
