@@ -73,7 +73,12 @@ var Data = {
 				{'questName':'AWOL', 'level':97, 'location':'Mount Nuwa (Crater)'},
 				{'questName':'Ascent', 'level':98, 'location':'Obsidian Tower (Level 1)'},
 				{'questName':'The Cleansing', 'level':99, 'location':'Veron Vale (Sacred Ground)'},
-				{'questName':'A Shadow Burned', 'level':100, 'location':'Obsidian Tower (Apex)'}
+				{'questName':'A Shadow Burned', 'level':100, 'location':'Obsidian Tower (Apex)'},
+				{'questName':'Newborn', 'level':101, 'location':'Lava Field (Edge)'},
+				{'questName':'Spheksophobia', 'level':103, 'location':'Lava Field (Fence)'},
+				{'questName':'Stalemate', 'level':105, 'location':'Ashstorm Wilds (Colony)'},
+				{'questName':'Bill of Sale', 'level':107, 'location':'Ashstorm Wilds (Plain)'},
+				{'questName':'A Friend in Need', 'level':108, 'location':'Varion City (Outskirts)'}
 			];
 			Data.questArray = questArray.sort();
 		}
