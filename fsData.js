@@ -5151,6 +5151,7 @@ var Data = {
 				{name:'Xinderoth Eye Rune', type:'rune'},
 				{name:'Gurgriss Armor of Wrath', type:'armor'},
 				{name:'Gurgriss Shield of Vengance', type:'shield'},
+				{name:'Gurgriss Shield of Vengeance', type:'shield'},
 				{name:'Gurgriss Rune of Endurance', type:'rune'},
 				{name:'Maximus Helm of Honor', type:'helmet'},
 				{name:'Maximus Boots of Glory', type:'boots'},
@@ -6650,6 +6651,7 @@ var Data = {
 				{name:'Dwarf Skin Clawed Boots', type:'boots'},
 				{name:'Dwarf Skin Howling Shield', type:'shield'},
 				{name:'Dwarven War Mask', type:'helmet'},
+				{name:'Dwarven War Gauntlets', type:'gloves'},
 				{name:'Emissaries Armored Grasp', type:'gloves'},
 				{name:'Emissaries Death Head Mace', type:'weapon'},
 				{name:'Emissaries Knot Work Plate', type:'armor'},
@@ -6705,7 +6707,16 @@ var Data = {
 				{name:'Witches Amulet of Deflection', type:'amulet'},
 				{name:'Witches Ring of Destruction', type:'ring'},
 				{name:'Witches Rune of Decimation', type:'rune'},
-				{name:'Ahuitz Amulet of the Sun', type:'amulet'}
+				{name:'Ahuitz Amulet of the Sun', type:'amulet'},
+				{name:'Farn org Ring', type:'ring'},
+				{name:'Farn-org Helmet', type:'helmet'},
+				{name:'Farn-org Shield', type:'shield'},
+				{name:'Gloves of Gialle', type:'gloves'},
+				{name:'Heitwars Amulet', type:'amulet'},
+				{name:'Lagarto Axe', type:'weapon'},
+				{name:'Lagarto Rune', type:'rune'},
+				{name:'Lord Eltwiers Helmet', type:'helmet'},
+				{name:'Lord Eltwiers Rune', type:'rune'}
 			]
 		}
 		return Data.itemArray;

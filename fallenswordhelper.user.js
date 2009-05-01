@@ -3801,10 +3801,21 @@ var Helper = {
 
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
+
+		var lastCheck=GM_getValue("lastInventoryCheck")
+		var now=(new Date()).getTime();
+		if (!lastCheck) lastCheck=0;
+		var haveToCheck=((now - lastCheck) > 5*60*1000)
+		if (haveToCheck) {
+			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
+		} else {
+			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
+		}
+
 		Helper.inventory=System.getValueJSON("inventory");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			refreshButton+
 			'</tr>' +
 			'<tr><td colspan=2>&nbsp;<b>Show Items:</b>' +
 				'&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
@@ -3836,7 +3847,9 @@ var Helper = {
 			'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
 			'' +
 			'</div>';
-		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
+		if (haveToCheck) {
+			document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
+		}
 		Helper.generateInventoryTable("self");
 		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		document.getElementById("showGloveTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
@@ -3852,6 +3865,17 @@ var Helper = {
 
 	injectGuildInventoryManager: function() {
 		var content=Layout.notebookContent();
+
+		var lastCheck=GM_getValue("lastGuildInventoryCheck")
+		var now=(new Date()).getTime();
+		if (!lastCheck) lastCheck=0;
+		var haveToCheck=((now - lastCheck) > 15*60*1000)
+		if (haveToCheck) {
+			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
+		} else {
+			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(900 - ((now - lastCheck)/1000)) +'s ]</td>';
+		}
+
 		var guildItemCount = "unknown"
 		unsafeWindow.changeMenu(0,'menu_character');
 		unsafeWindow.changeMenu(5,'menu_guild');
@@ -3864,7 +3888,7 @@ var Helper = {
 		}
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
+			refreshButton+
 			'</tr>' +
 			'<tr><td colspan=2>&nbsp;<b>Show Items:</b>' +
 				'&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
@@ -3898,7 +3922,9 @@ var Helper = {
 			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
 			'' +
 			'</div>';
-		document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
+		if (haveToCheck) {
+			document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
+		}
 		Helper.generateInventoryTable("guild");
 		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		document.getElementById("showGloveTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
@@ -3926,7 +3952,7 @@ var Helper = {
 			var refreshButton = '<td> (takes a while to refresh so only do it if you really need to) </td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right"><span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">[Refresh]</span></td>';
 		} else {
-			var refreshButton = "<td> (please wait 5 minutes before the [Refresh] button available again)</td>"
+			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
 		}
 
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
@@ -4094,6 +4120,9 @@ var Helper = {
 	},
 
 	parseProfileStart: function(){
+		var now=(new Date()).getTime();
+		GM_setValue("lastInventoryCheck", now.toString());
+
 		Helper.inventory = new Object;
 		Helper.inventory.items = new Array();
 		var output=document.getElementById('Helper:InventoryManagerOutput')
@@ -4178,6 +4207,9 @@ var Helper = {
 	},
 
 	parseGuildStart: function(){
+		var now=(new Date()).getTime();
+		GM_setValue("lastGuildInventoryCheck", now.toString());
+
 		Helper.guildinventory = new Object;
 		Helper.guildinventory.items = new Array();
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput')
@@ -4264,19 +4296,21 @@ var Helper = {
 		if (nameNode) {
 			item.name=nameNode.textContent.replace(/\\/g,"");
 
-			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
+			var itemBonuses=System.findNode("//table[tbody/tr/td/center/font='Bonuses']", doc);
+
+			var attackNode=System.findNode("tbody/tr/td[.='Attack:']/../td[2]", itemBonuses);
 			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
 
-			var defenseNode=System.findNode("//tr/td[.='Defense:']/../td[2]", doc);
+			var defenseNode=System.findNode("tbody/tr/td[.='Defense:']/../td[2]", itemBonuses);
 			item.defense=(defenseNode)?parseInt(defenseNode.textContent):0;
 
-			var armorNode=System.findNode("//tr/td[.='Armor:']/../td[2]", doc);
+			var armorNode=System.findNode("tbody/tr/td[.='Armor:']/../td[2]", itemBonuses);
 			item.armor=(armorNode)?parseInt(armorNode.textContent):0;
 
-			var damageNode=System.findNode("//tr/td[.='Damage:']/../td[2]", doc);
+			var damageNode=System.findNode("tbody/tr/td[.='Damage:']/../td[2]", itemBonuses);
 			item.damage=(damageNode)?parseInt(damageNode.textContent):0;
 
-			var hpNode=System.findNode("//tr/td[.='HP:']/../td[2]", doc);
+			var hpNode=System.findNode("tbody/tr/td[.='HP:']/../td[2]", itemBonuses);
 			item.hp=(hpNode)?parseInt(hpNode.textContent):0;
 
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
@@ -5373,7 +5407,7 @@ var Helper = {
 		var deathDealerBonusDamage = Math.floor(playerDamageValue * (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20)/100));
 		var counterAttackBonusAttack = Math.ceil(playerAttackValue * 0.0025 * counterAttackLevel);
 		var counterAttackBonusDamage = Math.ceil(playerDamageValue * 0.0025 * counterAttackLevel);
-		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(500/50))*0.0025*counterAttackLevel) :0);
+		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(doublerLevel/50))*0.0025*counterAttackLevel) :0);
 		//playerAttackValue += counterAttackBonusAttack;
 		//playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
 		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + "<br>":"");
