@@ -448,6 +448,7 @@ var Helper = {
 			switch (subPageId) {
 			case "-":
 				Helper.storePlayerUpgrades();
+				Helper.injectPoints();
 				break;
 			}
 			break;
@@ -2450,6 +2451,7 @@ var Helper = {
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 
 		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		if (!chatTable) return;
 
 		var localDateMilli = (new Date()).getTime();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
@@ -2871,15 +2873,42 @@ var Helper = {
 						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
 						winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
 					}
-					var inputTable = aRow.cells[6].firstChild.firstChild;
+					var inputTableCell;
 					if (!playerListedItem) {
+						var inputTable = aRow.cells[6].firstChild.firstChild;
 						var inputCell = inputTable.rows[0].cells[0];
 						var textInput = inputCell.firstChild;
 						textInput.id = 'auction' + i + 'text';
+						var bidCell = inputTable.rows[0].cells[1];
+						bidCell.align = "right";
+						//spacer row
+						newRow = inputTable.insertRow(1);
+						inputTableCell = newRow.insertCell(0);
+						inputTableCell.colSpan = "2";
+						inputTableCell.height = "2";
+						//get itemID for bid no refresh
+						var itemIMG = aRow.cells[0].firstChild;
+						var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(itemIMG.getAttribute("onmouseover"));
+						invID = itemStats[2];
+						//new bid no refresh button
+						newRow = inputTable.insertRow(2);
+						inputTableCell = newRow.insertCell(0);
+						inputTableCell.colSpan = "2";
+						inputTableCell.align = "center";
+						inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
+							'<input id="bidNoRefresh" invID="'+ invID +
+								'" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
 					}
 					var inputText = aRow.cells[6]
 				}
 			}
+		}
+		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");		
+		if (bidNoRefreshList) {		
+			for (var i=0; i<bidNoRefreshList.length; i++) {		
+				var bidNoRefreshItem = bidNoRefreshList[i];		
+				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);		
+			}		
 		}
 
 		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
@@ -2908,6 +2937,37 @@ var Helper = {
 		Helper.injectAuctionQuickCancel();
 	},
 
+	bidNoRefresh: function(evt) {
+		var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
+		var invID = evt.target.getAttribute("invID");
+		var postData = "cmd=auctionhouse&subcmd=placebid" +
+				"&auction_id=" + invID +
+				"&page=" +
+				"&type=-1" +
+				"&bid=" + inputValue.value;
+
+		GM_xmlhttpRequest({
+			method: 'POST',
+			url: System.server + "index.php",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
+				"Cookie" : document.cookie,
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			data: postData,
+			onload: function(responseDetails) {
+				var info = Layout.infoBox(responseDetails.responseText);
+				var infoElement = evt.target.parentNode;
+				if (info.search("Bid placed successfully!") != -1) {
+					infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+				} else {
+					infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+				}
+			}
+		})
+	},
+	
 	auctionHouseTogglePreferences: function(evt) {
 		var prefArea = document.getElementById("Helper:AuctionHousePreferences");
 		if (prefArea.style.display!="none") {
@@ -6825,6 +6885,42 @@ var Helper = {
 			target.style.fontSize = 'small';
 			target.innerHTML = "Error:" + info;
 		}
+	},
+	
+	injectPoints: function() {
+		Helper.currentFSP = System.findNode("//tr[td/a/img[@src='"+System.imageServer+"/skin/icon_points.gif']]/td[4]").textContent*1;
+		
+		var stamForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+25 Current Stamina')]/../td[4]");
+		var stamForFSPInjectHere = System.findNode("//td[@width='60%' and contains(.,'+25 Current Stamina')]");
+		var stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
+		stamFSPTextField.type='current';
+		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
+		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="current"><span>';
+
+		var stamForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+10 Maximum Stamina')]/../td[4]");
+		var stamForFSPInjectHere = System.findNode("//td[@width='60%' and contains(.,'+10 Maximum Stamina')]");
+		var stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
+		stamFSPTextField.type='maximum';
+		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
+		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="maximum"><span>';
+		
+		var goldForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+50,000')]/../td[4]");
+		goldForFSPElement.innerHTML = '<a href="' + System.server + '?cmd=marketplace">Sell at Marketplace</a>';
+	},
+	
+	updateStamCount: function(evt) {
+		var FSPvalue = evt.target.value*1;
+		var type = evt.target.getAttribute("type");
+		var injectHere = System.findNode("//span[@id='totalStam' and @type='"+type+"']");
+		//cap the value if the user goes over his current FSP
+		var color = 'red';
+		var extraStam = Helper.currentFSP*(type=='current'?25:10);
+		if (FSPvalue <= Helper.currentFSP) {
+			extraStam = FSPvalue*(type=='current'?25:10);
+			color = 'blue';
+		}
+		injectHere.style.color = color;
+		injectHere.innerHTML = '(+' + extraStam + ' stamina)';
 	}
 	
 };
