@@ -4604,9 +4604,9 @@ var Helper = {
 		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
 
 		recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
-		recipe.items = Helper.parseRecipeItemOrComponent("//td[contains(@background,'small.gif')]", doc);
+		recipe.items = Helper.parseRecipeItemOrComponent("//tbody/tr[10]//td[contains(@style,'background-color: rgb(13, 9, 5);')]", doc);
 		recipe.components  = Helper.parseRecipeItemOrComponent("//td[contains(@background,'1x1mini.gif')]", doc);
-		recipe.target = Helper.parseRecipeItemOrComponent("//td[contains(@background,'2x3.gif')]", doc)[0]
+		recipe.target = Helper.parseRecipeItemOrComponent("//tbody/tr[19]/td/table/tbody/tr/td[contains(@style,'background-color: rgb(13, 9, 5);')]", doc)[0]
 
 		var nextRecipeIndex = currentRecipeIndex+1;
 		if (nextRecipeIndex<Helper.recipebook.recipe.length) {
