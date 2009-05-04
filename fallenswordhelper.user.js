@@ -503,6 +503,10 @@ var Helper = {
 	},
 
 	injectGuild: function() {
+		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
+		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
+		GM_setValue("guildID",guildID);
+
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
 		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildLogoControl' linkto='guildLogoControl' title='Toggle Section'>X</span> ]";
@@ -682,13 +686,19 @@ var Helper = {
 		var defendingGuildHref = defendingGuild.getAttribute("href");
 		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
 
-		var validMemberString = "";
-		var memberList = System.getValueJSON("memberlist");
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
-			if (member.status == "Offline"
-				&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
-				validMemberString += member.name + " ";
+		var defendingGuildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
+		var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
+		var myGuildID = GM_getValue("guildID");
+
+		if (defendingGuildID == myGuildID) {
+			var validMemberString = "";
+			var memberList = System.getValueJSON("memberlist");
+			for (var i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				if (member.status == "Offline"
+					&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
+					validMemberString += member.name + " ";
+				}
 			}
 		}
 
@@ -702,7 +712,7 @@ var Helper = {
 				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
 			//}
 			testList += listOfDefenders[i].innerHTML + " ";
-			validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
+			if (defendingGuildID == myGuildID) validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
 			defenderCount++;
 		}
 		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
@@ -726,8 +736,10 @@ var Helper = {
 			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>"
-		extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
-		extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
+		if (defendingGuildID == myGuildID) {
+			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
+			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
+		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
 
@@ -803,25 +815,26 @@ var Helper = {
 		var extraTextInsertPoint = callback.extraTextInsertPoint;
 		var href = callback.href;
 		var doc = System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName("B")
+		var allItems = doc.getElementsByTagName("B");
+		var playerAttackValue = 0, playerDefenseValue = 0, playerArmorValue = 0, playerDamageValue = 0, playerHPValue = 0;
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.innerHTML == "Attack:&nbsp;"){
 				var attackText = anItem;
 				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerAttackValue = attackLocation.textContent;
+				playerAttackValue = attackLocation.textContent;
 				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDefenseValue = defenseLocation.textContent;
+				playerDefenseValue = defenseLocation.textContent;
 				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerArmorValue = armorLocation.textContent;
+				playerArmorValue = armorLocation.textContent;
 				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDamageValue = damageLocation.textContent;
+				playerDamageValue = damageLocation.textContent;
 				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerHPValue = hpLocation.textContent;
+				playerHPValue = hpLocation.textContent;
 			}
 		}
 
@@ -3312,6 +3325,7 @@ var Helper = {
 
 		var player = System.findNode("//textarea[@id='holdtext']");
 		var avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
+		if (!avyrow) return;
 		var playeridRE = document.URL.match(/player_id=(\d+)/);
 		if (playeridRE) var playerid=playeridRE[1];
 		var idindex, newhtml;
@@ -6888,7 +6902,7 @@ var Helper = {
 	},
 	
 	injectPoints: function() {
-		Helper.currentFSP = System.findNode("//tr[td/a/img[@src='"+System.imageServer+"/skin/icon_points.gif']]/td[4]").textContent*1;
+		Helper.currentFSP = System.findNode("//tr[td/a/img[@src='"+System.imageServer+"/skin/icon_points.gif']]/td[4]").textContent.replace(/,/g,"")*1;
 		
 		var stamForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+25 Current Stamina')]/../td[4]");
 		var stamForFSPInjectHere = System.findNode("//td[@width='60%' and contains(.,'+25 Current Stamina')]");

@@ -118,7 +118,7 @@ var Data = {
 				{questName:'Guardian of The King',       level:399, location:'Treasure Rooms of Dar GromSol'},
 				{questName:'Guards of the Past',         level:412, location:'Citadel of Xinderoth (Floor 12)'},
 				{questName:'Gypsies Grill',              level:354, location:'Morukan'},
-				{questName:'Harvest',                    level:488, location:'Castle Morbidstein (South Tower Upper)'},
+				{questName:'Harvest',                    level:489, location:'Castle Morbidstein (South Tower Upper)'},
 				{questName:'Heart of Gem',               level:341, location:'Korundor (North)'},
 				{questName:'Hidden Rage',                level:114, location:'Lenzwer Forest (Depths)'},
 				{questName:'Hidden Ruins',               level:70,  location:'Motaur Forests West'},
