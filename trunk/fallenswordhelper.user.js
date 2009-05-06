@@ -4069,13 +4069,16 @@ var Helper = {
 	parseOnlinePlayersStorePage: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var output=document.getElementById('Helper:OnlinePlayersOutput')
-		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=4 and td[1]/a]", doc);
+		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=4 and td[2]/a]", doc);
 		var maxPage = parseInt(System.findNode("//table[@width='400']//td[input]", doc).textContent.replace(/\D/g, ""));
 		output.innerHTML+=callback.page + " ";
 		if (playerRows)
 			for (var i=0; i<playerRows.length; i++) {
+				var guildId;
+				if (playerRows[i].cells[0].innerHTML.search("href") == -1) guildId = -1;
+				else guildId = parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,""));
 				var newPlayer = {
-					guildId: parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,"")),
+					guildId: guildId,
 					id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,"")),
 					name: playerRows[i].cells[1].textContent,
 					level: parseInt(playerRows[i].cells[2].textContent)
