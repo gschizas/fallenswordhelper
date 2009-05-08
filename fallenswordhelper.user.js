@@ -5013,8 +5013,9 @@ var Helper = {
 	injectBuffPackList: function() {
 		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
 		var bpArea = document.createElement("SPAN");
-		bpArea.innerHTML="<br><div align='center'>Buff Packs<table id='bpTable' width='350' style='border:1px solid #A07720;' rules=rows><tbody>" +
-			"<tr><td></td><td><span id=bpSelectAll class='HelperTextLink'>[All&nbsp;Buffs]</span>&nbsp;<span id=bpClear class='HelperTextLink'>[Clear]</span></td></tr>" +
+		bpArea.innerHTML="<br><div align='center'><span style='color:lime; font-size:large;'>Buff Packs</span><table id='bpTable' width='600' style='border:1px solid #A07720;' rules=rows><tbody>" +
+			"<tr><td style='color:gold; font-weight:bold;'>Nickname</td><td style='color:gold; font-weight:bold;'>Buffs included in the pack</td>" +
+			"<td><span id=bpSelectAll class='HelperTextLink'>[All]</span>&nbsp;<span id=bpClear class='HelperTextLink'>[Clear]</span></td></tr>" +
 			"</tbody></table></div>";
 		bpArea.style.color="white";
 		injectHere.appendChild(bpArea);
@@ -5025,10 +5026,20 @@ var Helper = {
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) return;
 
+		if (!theBuffPack["nickname"]) { //avoid bugs if the new array is not populated yet
+			theBuffPack["nickname"] = {};
+		}
+		if (!theBuffPack["staminaTotal"]) { //avoid bugs if the new array is not populated yet
+			theBuffPack["staminaTotal"] = {};
+		}
+
 		var bpTable = document.getElementById("bpTable");
 		for (var i = 0; i < theBuffPack["size"]; i++) {
 			var myRow = bpTable.insertRow(-1);
-			myRow.innerHTML = "<td>" + theBuffPack["bp"][i] +
+			var nickname = (theBuffPack["nickname"][i]? theBuffPack["nickname"][i]:"");
+			var listOfBuffs = theBuffPack["bp"][i];
+			var staminaTotal = (theBuffPack["staminaTotal"][i]? theBuffPack["staminaTotal"][i]:"");
+			myRow.innerHTML = "<td>" + nickname + "</td><td style='font-size:x-small;'>" + listOfBuffs + "&nbsp;" + staminaTotal + "&nbsp" +
 				"</td><td><span id=bpSelect" + i + " class='HelperTextLink' buffId=" + i + ">[Select]</span> " +
 				"<span id=bpDelete" + i + " buffId=" + i + " class='HelperTextLink'>[X]</span></td>"
 			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPack, true);
@@ -5078,13 +5089,28 @@ var Helper = {
 		theBuffPack["size"] --;
 		if (theBuffPack["size"] == 0) { // avoid bugs :)
 			delete theBuffPack["bp"];
+			delete theBuffPack["nickname"];
+			delete theBuffPack["staminaTotal"];
 			theBuffPack["bp"] = {};
+			theBuffPack["nickname"] = {};
+			theBuffPack["staminaTotal"] = {};
+		}
+		if (!theBuffPack["nickname"]) { //avoid bugs
+			theBuffPack["nickname"] = {};
+		}
+		if (!theBuffPack["staminaTotal"]) { //avoid bugs
+			theBuffPack["staminaTotal"] = {};
 		}
 		for (var i = bpIndex; i < theBuffPack["size"]; i++) {
-			theBuffPack["bp"][i] =  theBuffPack["bp"][i + 1];
+			theBuffPack["bp"][i] = theBuffPack["bp"][i + 1];
+			//old buff packs won't have the next two values.
+			theBuffPack["nickname"][i] = (theBuffPack["nickname"][i + 1]? theBuffPack["nickname"][i + 1]:"");
+			theBuffPack["staminaTotal"][i] = (theBuffPack["staminaTotal"][i + 1]? theBuffPack["staminaTotal"][i + 1]:"");
 		}
 
 		delete theBuffPack["bp"][theBuffPack["size"]];
+		if (theBuffPack["nickname"][theBuffPack["size"]]) delete theBuffPack["nickname"][theBuffPack["size"]];
+		if (theBuffPack["staminaTotal"][theBuffPack["size"]]) delete theBuffPack["staminaTotal"][theBuffPack["size"]];
 
 		System.setValueJSON("buffpack", theBuffPack);
 		location.reload(true);
@@ -5093,7 +5119,8 @@ var Helper = {
 	injectBuffPackAddButton: function() {
 		var bpTable = document.getElementById("bpTable");
 		var myRow = bpTable.insertRow(-1);
-		myRow.innerHTML = "<td><input size=60 id='newBuffPack' name='newBuffPack' value='full buff names, separated by comma'></td>" +
+		myRow.innerHTML = "<td><input size=10 id='newBuffPackNickname' name='newBuffPackNickname' value='nickname'></td>"+
+			"<td><input size=60 id='newBuffPack' name='newBuffPack' value='full buff names, separated by comma'></td>" +
 			"<td><span id=bpSave class='HelperTextLink'>[Save]</span><span id=bpAdd class='HelperTextLink'>[add]</span></td>";
 
 		// button handlers
@@ -5102,26 +5129,53 @@ var Helper = {
 
 		// display [add] only
 		document.getElementById("newBuffPack").style.visibility = "hidden";
+		document.getElementById("newBuffPackNickname").style.visibility = "hidden";
 		document.getElementById("bpAdd").style.visibility = "";
 		document.getElementById("bpSave").style.visibility = "hidden";
 	},
 
 	displayAddBuffPack: function() {
 		document.getElementById("newBuffPack").style.visibility = "";
+		document.getElementById("newBuffPackNickname").style.visibility = "";
 		document.getElementById("bpAdd").style.visibility = "hidden";
 		document.getElementById("bpSave").style.visibility = "";
 	},
 
 	saveBuffPack: function() {
 		if (!document.getElementById("newBuffPack").value) return;
+		if (!document.getElementById("newBuffPackNickname").value) return;
 
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) {
 			theBuffPack = {};
 			theBuffPack["size"] = 0;
 			theBuffPack["bp"] = {};
+			theBuffPack["nickname"] = {};
+			theBuffPack["staminaTotal"] = {};
+		}
+		if (!theBuffPack["nickname"]) { //avoid bugs
+			theBuffPack["nickname"] = {};
+		}
+		if (!theBuffPack["staminaTotal"]) { //avoid bugs
+			theBuffPack["staminaTotal"] = {};
 		}
 		theBuffPack["bp"][theBuffPack["size"]] = document.getElementById("newBuffPack").value;
+		theBuffPack["nickname"][theBuffPack["size"]] = document.getElementById("newBuffPackNickname").value;
+		var listOfBuffs = theBuffPack["bp"][theBuffPack["size"]];
+		var buffArray = listOfBuffs.split(",");
+		var buffList = Data.buffList();
+		var staminaTotal = 0;
+		for (var j = 0; j < buffArray.length; j++) {
+			for (var k = 0; k < buffList.length; k++) {
+				if (buffArray[j].trim() == buffList[k].name) {
+					staminaTotal += buffList[k].stamina;
+					break;
+				}
+			}
+		}
+		theBuffPack["staminaTotal"][theBuffPack["size"]] = "<span style='color:blue;'>(" + staminaTotal + ")</span>";
+		
+		//increase the size of the array
 		theBuffPack["size"] += 1;
 
 		// save and reload
