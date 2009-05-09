@@ -205,7 +205,6 @@ var Helper = {
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		Helper.init();
-
 		Layout.moveFSBox();
 		Helper.prepareGuildList();
 		Helper.prepareChat();
@@ -426,6 +425,7 @@ var Helper = {
 			case "-":
 			case "shop":
 				Helper.storePlayerUpgrades();
+				Helper.injectPoints();
 				break;
 			}
 			break;
@@ -3021,15 +3021,42 @@ var Helper = {
 						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
 						winningBidBuyoutCell.innerHTML = '<span style="color:#ADB5B5;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
 					}
-					var inputTable = aRow.cells[6].firstChild.firstChild;
 					if (!playerListedItem) {
+						var inputTable = aRow.cells[6].firstChild.firstChild;
 						var inputCell = inputTable.rows[0].cells[0];
 						var textInput = inputCell.firstChild;
 						textInput.id = 'auction' + i + 'text';
+						var bidCell = inputTable.rows[0].cells[1];
+						bidCell.align = "right";
+						//spacer row
+						newRow = inputTable.insertRow(1);
+						inputTableCell = newRow.insertCell(0);
+						inputTableCell.colSpan = "2";
+						inputTableCell.height = "2";
+						//get itemID for bid no refresh
+						var itemIMG = aRow.cells[0].firstChild;
+						var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(itemIMG.getAttribute("onmouseover"));
+						invID = itemStats[2];
+						//new bid no refresh button
+						newRow = inputTable.insertRow(2);
+						inputTableCell = newRow.insertCell(0);
+						inputTableCell.colSpan = "2";
+						inputTableCell.align = "center";
+						inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
+							'<input id="bidNoRefresh" invID="'+ invID +
+								'" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
 					}
 					var inputText = aRow.cells[6]
 				}
 			}
+		}
+		
+		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");		
+		if (bidNoRefreshList) {		
+			for (var i=0; i<bidNoRefreshList.length; i++) {		
+				var bidNoRefreshItem = bidNoRefreshList[i];		
+				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);		
+			}		
 		}
 
 		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
@@ -3055,6 +3082,37 @@ var Helper = {
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
 
 		Helper.injectAuctionQuickCancel();
+	},
+	
+	bidNoRefresh: function(evt) {
+		var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
+		var invID = evt.target.getAttribute("invID");
+		var postData = "cmd=auctionhouse&subcmd=placebid" +
+				"&auction_id=" + invID +
+				"&page=" +
+				"&type=-1" +
+				"&bid=" + inputValue.value;
+
+		GM_xmlhttpRequest({
+			method: 'POST',
+			url: System.server + "index.php",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
+				"Cookie" : document.cookie,
+				"Content-Type": "application/x-www-form-urlencoded"
+			},
+			data: postData,
+			onload: function(responseDetails) {
+				var info = Layout.infoBox(responseDetails.responseText);
+				var infoElement = evt.target.parentNode;
+				if (info.search("Bid placed successfully!") != -1) {
+					infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+				} else {
+					infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+				}
+			}
+		})
 	},
 
 	auctionHouseTogglePreferences: function(evt) {
@@ -4880,17 +4938,16 @@ var Helper = {
 	},
 
 	injectGroups: function() {
-		var mainTable = System.findNode("//table[@width='650']");
-		var subTable = System.findNode("//table[@width='650']/tbody/tr/td/table");
+		var mainTable = System.findNode("//table[@width='640']");
+		var subTable = System.findNode("//table[@width='640']/tbody/tr/td/table");
 		var minGroupLevel = GM_getValue("minGroupLevel");
 		if (minGroupLevel) {
 			var textArea = subTable.rows[0].cells[0];
-			textArea.innerHTML += ' <span style="color:#ADB5B5">Current Min Level Setting: '+ minGroupLevel +'</span>';
+			textArea.innerHTML += ' <span style="color:cyan">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
 
-		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
+		allItems = System.findNodes("//tr[td/a/img/@title='View Squad Stats']");
 		var memberList=System.getValueJSON("memberlist");
-		// memberList.lookupByName.find
 		for (i=0; i<allItems.length; i++) {
 			var theItem=allItems[i].cells[0];
 			var foundName=theItem.textContent;
@@ -4902,9 +4959,24 @@ var Helper = {
 						theItem.innerHTML + "</span> [" + aMember.level + "]";
 				}
 			}
+			var theDateCell=allItems[i].cells[2];
+			var theDate=theDateCell.firstChild;
+			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+			var xRE=/([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
+			var x=xRE.exec(theDate.innerHTML);
+			var month = months.indexOf(x[3]);
+			var curYear = new Date().getFullYear();
+			var groupDate = new Date();
+			groupDate.setUTCDate(x[2]);
+			groupDate.setUTCMonth(month);
+			groupDate.setUTCFullYear(curYear);
+			groupDate.setUTCHours(x[4]);
+			groupDate.setUTCMinutes(x[5]);
+			theDateCell.innerHTML += '<br><nobr><span style="color:cyan; font-size:x-small">Local: '+
+				groupDate.toString().substr(0,21)+'</span></nobr>';
 		}
-		var buttonElement = System.findNode("//td[input[@value='Join All Available Groups']]");
-		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
+		var buttonElement = System.findNode("//td[input[@value='Join All Available Squads']]");
+		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Squad Stats" class="custombutton">';
 
 		document.getElementById('fetchgroupstats').addEventListener('click', Helper.fetchGroupData, true);
 
@@ -4913,7 +4985,7 @@ var Helper = {
 	fetchGroupData: function(evt) {
 		var calcButton = System.findNode("//input[@id='fetchgroupstats']");
 		calcButton.style.display = "none";
-		var allItems = System.findNodes("//img[@title='View Group Stats']");
+		var allItems = System.findNodes("//img[@title='View Squad Stats']");
 		for (var i=0; i<allItems.length; i++) {
 			System.xmlhttp(allItems[i].parentNode.getAttribute("href"), Helper.parseGroupData, allItems[i].parentNode);
 		}
@@ -4926,23 +4998,23 @@ var Helper = {
 
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
-			if (anItem.innerHTML == '<font color="#333333">Attack:&nbsp;</font>'){
+			if (anItem.innerHTML == '<font color="#c9c9c9">Attack:&nbsp;</font>'){
 				var attackLocation = anItem.nextSibling;
 				var attackValue = attackLocation.textContent;
 			}
-			if (anItem.innerHTML == '<font color="#333333">Defense:&nbsp;</font>'){
+			if (anItem.innerHTML == '<font color="#c9c9c9">Defense:&nbsp;</font>'){
 				var defenseLocation = anItem.nextSibling;
 				var defenseValue = defenseLocation.textContent;
 			}
-			if (anItem.innerHTML == '<font color="#333333">Armor:&nbsp;</font>'){
+			if (anItem.innerHTML == '<font color="#c9c9c9">Armor:&nbsp;</font>'){
 				var armorLocation = anItem.nextSibling;
 				var armorValue = armorLocation.textContent;
 			}
-			if (anItem.innerHTML == '<font color="#333333">Damage:&nbsp;</font>'){
+			if (anItem.innerHTML == '<font color="#c9c9c9">Damage:&nbsp;</font>'){
 				var damageLocation = anItem.nextSibling;
 				var damageValue = damageLocation.textContent;
 			}
-			if (anItem.innerHTML == '<font color="#333333">HP:&nbsp;</font>'){
+			if (anItem.innerHTML == '<font color="#c9c9c9">HP:&nbsp;</font>'){
 				var hpLocation = anItem.nextSibling;
 				var hpValue = hpLocation.textContent;
 			}
@@ -6472,6 +6544,45 @@ var Helper = {
 			target.style.fontSize = 'small';
 			target.innerHTML = "Error:" + info;
 		}
+	},
+	
+	injectPoints: function() {
+		Helper.currentFSP = System.findNode("//td[@width=108 and //table[@height=150]]").textContent.replace(/,/g,"")*1;
+		
+		var stamForFSPElement = System.findNode("//td[@width='40%' and contains(.,'+25 Current Energy')]/../td[4]");
+		var stamForFSPInjectHere = System.findNode("//td[@width='40%' and contains(.,'+25 Current Energy')]");
+		var stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
+		stamFSPTextField.type='current';
+		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
+		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="current"><span>';
+
+		var stamForFSPElement = System.findNode("//td[@width='40%' and contains(.,'+10 Maximum Energy')]/../td[4]");
+		var stamForFSPInjectHere = System.findNode("//td[@width='40%' and contains(.,'+10 Maximum Energy')]");
+		var stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
+		stamFSPTextField.type='maximum';
+		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
+		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="maximum"><span>';
+		
+		var goldForFSPElement = System.findNode("//td[@width='40%' and contains(.,'+1,000')]/../td[4]");
+		goldForFSPElement.innerHTML = '<a href="' + System.server + '?cmd=marketplace">Sell at Crystal Market</a>';
+	},
+	
+	updateStamCount: function(evt) {
+		var FSPvalue = evt.target.value*1;
+		var type = evt.target.getAttribute("type");
+		var injectHere = System.findNode("//span[@id='totalStam' and @type='"+type+"']");
+		//cap the value if the user goes over his current FSP
+		var color = 'red';
+		var extraStam = Helper.currentFSP*(type=='current'?25:10);
+		if (FSPvalue <= Helper.currentFSP) {
+			extraStam = FSPvalue*(type=='current'?25:10);
+			color = 'blue';
+		}
+		injectHere.style.color = color;
+		if (extraStam > 0)
+			injectHere.innerHTML = '(+' + extraStam + ' stamina)';
+		else 
+			injectHere.innerHTML = '';
 	}
 
 };
