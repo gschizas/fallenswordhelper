@@ -5003,8 +5003,39 @@ var Helper = {
 			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
+		
+		var buffList = Data.buffList();
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (skillNodes) {
+			for (var i = 0; i < skillNodes.length; i++ ) {
+				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
+				skillNodes[i].setAttribute("skillName", skillName);
+				for (var k = 0; k < buffList.length; k++) {
+					if (buffList[k].name == skillName) {
+						skillNodes[i].setAttribute("staminaCost",buffList[k].stamina);
+						break;
+					}
+				}
+				skillNodes[i].addEventListener("click", Helper.toggleBuffStatus, true);
+			}
+		}
+		var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
+		activateButton.parentNode.innerHTML += "<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
+			"<span id='staminaTotal' style='color:blue;'>0</span>";
 	},
 
+	toggleBuffStatus: function(evt) {
+		var staminaTotal = System.findNode("//span[@id='staminaTotal']");
+		if (evt.target.checked == false) {
+			evt.target.checked = false;
+			staminaTotal.innerHTML = ((staminaTotal.textContent*1) - (evt.target.getAttribute("staminaCost")*1));
+		}
+		else if (evt.target.checked == true) {
+			evt.target.checked = true;
+			staminaTotal.innerHTML = ((staminaTotal.textContent*1) + (evt.target.getAttribute("staminaCost")*1));
+		}
+	},
+	
 	injectBuffPackArea: function() {
 		Helper.injectBuffPackList();
 		Helper.injectBuffPackAddButton();
@@ -5054,6 +5085,22 @@ var Helper = {
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			skillNodes[i].checked = value;
 		}
+		Helper.sumStamCostOfSelectedBuffs();
+	},
+
+	sumStamCostOfSelectedBuffs: function() {
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+
+		staminaRunningTotal = 0;
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			if (skillNodes[i].checked) {
+				staminaRunningTotal += (skillNodes[i].getAttribute("staminaCost")*1);
+			}
+		}
+
+		var staminaTotal = System.findNode("//span[@id='staminaTotal']");
+		staminaTotal.innerHTML = staminaRunningTotal;
 	},
 
 	useBuffPack: function(evt) {
@@ -5068,13 +5115,13 @@ var Helper = {
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
 		if (!skillNodes) return;
 
-		GM_log(skillNodes.length);
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
 			if (buffList.indexOf(skillName) >= 0) {
 				skillNodes[i].checked = true;
 			}
 		}
+		Helper.sumStamCostOfSelectedBuffs();
 	},
 
 	deleteBuffPack: function(evt) {
