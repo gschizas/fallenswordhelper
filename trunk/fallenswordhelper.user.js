@@ -2842,7 +2842,19 @@ var Helper = {
 			}
 		}
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1')]");
+		var buyNowLink = System.findNode("//a[contains(@href,'&order_by=2')]");
+		var timeLeftLink = System.findNode("//a[contains(@href,'&order_by=0')]");
 		var auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
+		//fix min bid, bid now and time left links from the player AH page
+		var thisLink = window.location.href;
+		var regExpr = new RegExp("tid=([0-9]+)");
+		if (thisLink.match(regExpr)){
+			var rezReg = regExpr.exec(thisLink);
+			//correct links
+			minBidLink.href = minBidLink.href+'&'+rezReg[0];
+			buyNowLink.href = buyNowLink.href+'&'+rezReg[0];
+			timeLeftLink.href = timeLeftLink.href+'&'+rezReg[0];
+		}
 
 		var playerId = Layout.playerId();
 
@@ -5366,19 +5378,23 @@ var Helper = {
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
-		inputTable.rows[3].cells[0].align = "center";
-		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
+		var injectHere = inputTable.rows[3].cells[0];
+		injectHere.align = "center";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
 		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
 		if (!furyCasterText) return;
 		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
 		var furyCasterLevelRE = /Level<br>(\d+)%/
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
-		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
-		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc)) {
-			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master:	On</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
+		var hasBuffMasterBuff = System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc);
+		if (hasBuffMasterBuff) {
+			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:	On</span>";
+			var buffMasterTimeToExpire = hasBuffMasterBuff.parentNode.nextSibling.nextSibling.innerHTML
+			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + buffMasterTimeToExpire +")</span>";
 		}
 		else {
-			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
+			injectHere.innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
 		}
 	},
 
