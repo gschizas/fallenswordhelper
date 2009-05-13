@@ -1040,7 +1040,7 @@ var Helper = {
 			Helper.advisorHeader = '<tr>';
 			var titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Groups Created", "Groups Joined", "Relics Captured", "XP Contrib"];
 			for (var i=0; i<titleCells.length; i++) {
-				Helper.advisorHeader += "<td bgcolor=#cd9e4b align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'><b>" + titleCells[i] + "</b></td>";
+				Helper.advisorHeader += "<th bgcolor=#cd9e4b align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'>" + titleCells[i] + "</td>";
 			}
 			Helper.advisorHeader += '</tr>';
 		}
@@ -1095,7 +1095,6 @@ var Helper = {
 	},
 
 	sortAdvisor: function(list, sortBy) {
-
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==sortBy) {
 			Helper.sortAsc=!Helper.sortAsc;
@@ -1248,7 +1247,7 @@ var Helper = {
 			var buffAry=buffs.split(",")
 			var missingBuffs = new Array();
 			for (var i=0;i<buffAry.length;i++) {
-				if (!System.findNode("//img[contains(@onmouseover,'" + buffAry[i] + "')]")) {
+				if (!System.findNode("//img[contains(@onmouseover,'" + buffAry[i].trim() + "')]")) {
 					missingBuffs.push(buffAry[i]);
 				}
 			}
@@ -2958,7 +2957,11 @@ var Helper = {
 		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
 		// document.getElementById("Helper:QuickSearch").addEventListener("click", Helper.auctionHouseQuickSearch, true);
-		
+
+		//litte something to default to sorting by min bid
+		var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
+		hiddenOrderByInput.value = 1;
+
 		Helper.injectAuctionQuickCancel();
 	},
 
