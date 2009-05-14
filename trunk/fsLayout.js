@@ -41,7 +41,9 @@ var Layout = {
 		if (injectHere2) injectHere2.setAttribute("colspan", 3);
 		result="&nbsp;&nbsp;";
 		for (var i=0; i<quickLinks.length; i++) {
-			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '">' + quickLinks[i].name + '</a>&nbsp;'
+			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
+				(quickLinks[i].newWindow?' target=new':"") +
+				'>' + quickLinks[i].name + '</a>&nbsp;'
 		}
 		if (injectHere1) injectHere1.innerHTML=result;
 		if (injectHere2) injectHere2.innerHTML=result;

@@ -2020,16 +2020,21 @@ var Helper = {
 	},
 
 	prepareGuildList: function() {
-		if (!GM_getValue("enableGuildOnlineList")) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
-		if (!injectHere) return;
-		var info = injectHere.insertRow(0);
-		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-		Helper.retrieveGuildData();
+		if (!GM_getValue("enableGuildOnlineList")) {
+			GM_setValue("guildOnlineRefreshTime", 300);
+			Helper.retrieveGuildData(true); //Refresh guild data every 5 mins but don't inject online guild list
+		} 
+		else {
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			if (!injectHere) return;
+			var info = injectHere.insertRow(0);
+			var cell = info.insertCell(0);
+			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+			Helper.retrieveGuildData(false);
+		}
 	},
 
-	retrieveGuildData: function() {
+	retrieveGuildData: function(refreshGuildDataOnly) {
 		var memberList = System.getValueJSON("memberlist");
 		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
 		guildOnlineRefreshTime *= 1000;
@@ -2037,8 +2042,8 @@ var Helper = {
 			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
 
-		if (!memberList) {
-			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld);
+		if (!memberList || refreshGuildDataOnly) {
+			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, refreshGuildDataOnly);
 		} else {
 			var memberList = System.getValueJSON("memberlist");
 			memberList.isRefreshed = false;
@@ -2046,7 +2051,7 @@ var Helper = {
 		}
 	},
 
-	parseGuildForWorld: function(details) {
+	parseGuildForWorld: function(details, refreshGuildDataOnly) {
 		var doc=System.createDocument(details);
 		var allTables = doc.getElementsByTagName("TABLE")
 		var membersTable;
@@ -2118,7 +2123,7 @@ var Helper = {
 
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
-			Helper.injectGuildList(memberList);
+			if (!refreshGuildDataOnly) Helper.injectGuildList(memberList);
 		}
 	},
 
@@ -5602,15 +5607,14 @@ var Helper = {
 		}
 		//Death Dealer and Counter Attack both applied at the same time
 		var deathDealerBonusDamage = Math.floor(playerDamageValue * (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20)/100));
-		var counterAttackBonusAttack = Math.ceil(playerAttackValue * 0.0025 * counterAttackLevel);
-		var counterAttackBonusDamage = Math.ceil(playerDamageValue * 0.0025 * counterAttackLevel);
+		var counterAttackBonusAttack = Math.floor(playerAttackValue * 0.0025 * counterAttackLevel);
+		var counterAttackBonusDamage = Math.floor(playerDamageValue * 0.0025 * counterAttackLevel);
 		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(doublerLevel/50))*0.0025*counterAttackLevel) :0);
 		//playerAttackValue += counterAttackBonusAttack;
 		//playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
 		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + "<br>":"");
 		if (counterAttackLevel > 0) {
-			extraNotes += "CA Bonus Attack = " + counterAttackBonusAttack + "<br>";
-			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + "<br>";
+			extraNotes += "CA Bonus Attack/Damage = " + counterAttackBonusAttack + " / " + counterAttackBonusDamage + "<br>";
 			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + "<br>";
 		}
 		//Attack:
@@ -5647,6 +5651,25 @@ var Helper = {
 		} else if (playerHits > 1) {
 			fightStatus = "Player > 1 hits" + (numberOfCreatureHitsTillDead-numberOfHitsRequired<=1? ", dies on miss":", survives a miss");
 		}
+		if (counterAttackLevel > 0 && numberOfHitsRequired == "1") {
+			var lowestCALevelToStillHit = Math.max(Math.ceil((counterAttackBonusAttack-hitByHowMuch + 1)/playerAttackValue/0.0025), 0);
+			var lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/playerDamageValue/0.0025), 0);
+			var lowestFeasibleCALevel = Math.max(lowestCALevelToStillHit,lowestCALevelToStillKill);
+			extraNotes += "Lowest CA to still 1-hit this creature = " + lowestFeasibleCALevel + "<br>";
+			if (lowestFeasibleCALevel != 0) {
+				var extraAttackAtLowestFeasibleCALevel = Math.floor(playerAttackValue * 0.0025 * lowestFeasibleCALevel);
+				var extraDamageAtLowestFeasibleCALevel = Math.floor(playerDamageValue * 0.0025 * lowestFeasibleCALevel);
+				extraNotes += "Extra CA Att/Dam at this lowered CA level = " + extraAttackAtLowestFeasibleCALevel + " / " + extraDamageAtLowestFeasibleCALevel + "<br>";
+			}
+			var extraStaminaPerHitAtLowestFeasibleCALevel = (counterAttackLevel > 0? Math.ceil((1+(doublerLevel/50))*0.0025*lowestFeasibleCALevel) :0);
+			if (extraStaminaPerHitAtLowestFeasibleCALevel < extraStaminaPerHit) {
+				extraNotes += "Extra Stam Used at this lowered CA level = " + extraStaminaPerHitAtLowestFeasibleCALevel + "<br>";
+			}
+			else {
+				extraNotes += "No reduction of stam used at the lower CA level<br>";
+			}
+		}
+		
 		//display data
 		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
 		var newCell = newRow.insertCell(0);
@@ -6692,15 +6715,19 @@ var Helper = {
 	},
 
 	generateQuickLinkTable: function() {
-		var result='<table><tr><th>Name</th><th>URL</th><th>&nbsp;</th></tr>';
+		var result='<table><tr><th>Name</th><th>URL</th>' +
+			'<th>New [<span style="cursor:pointer; text-decoration:underline;" title="Open page in a new window">?</span>]</th><th>&nbsp;</th></tr>';
 		for (var i=0;i<Helper.quickLinks.length;i++) {
-			result+='<td>' + Helper.quickLinks[i].name + '</td><td>' + Helper.quickLinks[i].url + '</td><td>';
-			result+='<span class=HelperTextLink quickLinkId="' + i + '" id="Helper:DeleteLink' + i + '">[Del]</span></td></tr>';
+			var newWindow = Helper.quickLinks[i].newWindow;
+			result+='<td>' + Helper.quickLinks[i].name + '</td><td style="font-size:x-small;">' + Helper.quickLinks[i].url + '</td>';
+			result+='<td style="font-size:x-small;" align=center>' + (newWindow?newWindow:"false") + '</td><td>';
+			result+='[<span style="cursor:pointer; text-decoration:underline;" class=HelperTextLink quickLinkId="' + i + '" id="Helper:DeleteLink' + i + '">Del</span>]</td></tr>';
 		}
 		result +=
-			'<tr><td><input size=10 type=textbox class=custominput id="Helper:LinkName"></td>' +
+			'<tr><td><input size=8 type=textbox class=custominput id="Helper:LinkName"></td>' +
 			'<td><input size=75 type=textbox class=custominput id="Helper:LinkUrl"></td>' +
-			'<td><span class=HelperTextLink id="Helper:AddLink">[Add]</span></td></tr>';
+			'<td align=center><input type=checkbox style="font-size:xx-small" class=custominput id="Helper:newWindow" /></td>' +
+			'<td>[<span style="cursor:pointer; text-decoration:underline;" class=HelperTextLink id="Helper:AddLink">Add</span>]</td></tr>';
 		Helper.tmpContent.innerHTML = result;
 		for (var i=0;i<Helper.quickLinks.length;i++) {
 			document.getElementById("Helper:DeleteLink" + i).addEventListener('click', Helper.deleteQuickLink, true);
@@ -6719,7 +6746,8 @@ var Helper = {
 	addQuickLink: function(evt) {
 		var quickLinkName = document.getElementById("Helper:LinkName").value;
 		var quickLinkUrl = document.getElementById("Helper:LinkUrl").value;
-		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
+		var quickLinkNewWindow = document.getElementById("Helper:newWindow").checked;
+		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl, "newWindow": quickLinkNewWindow});
 		Helper.generateQuickLinkTable();
 	},
 
