@@ -940,7 +940,7 @@ var Data = {
 				{name: "Stun",               stamina: 15, "duration": 90,   treeId: 0, skillId: 1,  buff: "+0.1% chance per point to half opponents chance to hit."},
 				{name: "Fury",               stamina: 10, "duration": 90,   treeId: 0, skillId: 2,  buff: "+0.1% base Attack and +0.1% base Damage per point."},
 				{name: "Berserk",            stamina: 15, "duration": 90,   treeId: 0, skillId: 3,  buff: "+0.2% base Damage per point."},
-				{name: "Blood Thirst",       stamina: 10, "duration": 45,   treeId: 0, skillId: 4,  buff: "+0.2% chance per point to drain 5% of your opponents current HP per combat turn from your opponent."},
+				{name: "Bloodthirst",        stamina: 10, "duration": 45,   treeId: 0, skillId: 4,  buff: "+0.2% chance per point to drain 5% of your opponents current HP per combat turn from your opponent."},
 				{name: "Enchant Weapon",     stamina: 10, "duration": 90,   treeId: 0, skillId: 5,  buff: "+0.1% per point stat bonus increase to your equipped weapon. (Excludes \\'Gain\\' bonuses)."},
 				{name: "Holy Flame",         stamina: 15, "duration": 90,   treeId: 0, skillId: 6,  buff: "+0.2% extra damage vs. undead per point."},
 				{name: "Dark Curse",         stamina: 20, "duration": 60,   treeId: 0, skillId: 7,  buff: "+0.2% reduction of opponents defence per point."},
