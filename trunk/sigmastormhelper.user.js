@@ -67,6 +67,22 @@ var Helper = {
 		System.setDefault("enableBioCompressor", false);
 		System.setDefault("maxCompressedCharacters", 1500);
 		System.setDefault("maxCompressedLines", 25);
+		
+		try {
+			var quickSearchList = System.getValueJSON("quickSearchList");
+		}
+		catch (err) {
+			GM_log(err);
+			quickSearchList = null;
+		}
+
+		if (!quickSearchList) {
+			quickSearchList = Data.quickSearchList()
+			Helper.sortAsc = true;
+			Helper.sortBy = "category";
+			quickSearchList.sort(Helper.stringSort);
+			System.setValueJSON("quickSearchList", quickSearchList);
+		}
 
 		Helper.itemFilters = [
 		{"id":"showBodyTypeItems", "type":"Body Armor"},
@@ -2850,8 +2866,10 @@ var Helper = {
 		var auctionTable = System.findNode("//td[contains(@background,'header_tradehub.jpg')]/../../..");
 
 		//Add functionality to hide the text block at the top.
-		var textRow = auctionTable.rows[1];
-		textRow.id = 'auctionTextControl';
+		var textRow = auctionTable.rows[1].cells[0];
+		textRow.innerHTML = '<table cellspacing=10><tr><td width=60%><span id=auctionTextControl>' + textRow.innerHTML + 
+			'</span></td><td id=quickSearchLayout style="text-align:center;color:#FFF380;background-color:black"></td></tr></table>';
+		textRow=document.getElementById("auctionTextControl");
 		var myBidsButton = System.findNode("//input[@value='My Bids']/..");
 		myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
@@ -2898,61 +2916,34 @@ var Helper = {
 
 		insertPageChangeBlockHere.align = "right";
 		insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
-		var potions = System.getValueJSON("potions");
 
-		if (!potions) {
-			potions = Data.potionList();
-		}
+		var quickSearchList = System.getValueJSON("quickSearchList");
 
-		//GM_log(JSON.stringify(potions));
-		/*
-		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
-			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#110011'>Quick Potion Search</td></tr>"
+		var colNumber = 5;
+		var injectHere=document.getElementById("quickSearchLayout");
+		var finalHTML = "<table cellpadding=2 style='font-size:x-small'><tr><td colspan="+colNumber+"><a style='color:#B5B1AB' href='" +
+				System.server +
+				"index.php?cmd=notepad&subcmd=auctionsearch'>" +
+				"Configure Quick Search</a></td></tr>";
 		var lp=0;
 		var rowCount = 0;
-		for (var p=0;p<potions.length;p++) {
-			var pot=potions[p];
-			if (lp % 3==0) {
-				finalHTML += "<tr>";
-				rowCount++;
+		for (var p=0;p<quickSearchList.length;p++) {
+			if (lp % colNumber==0 && rowCount == 4) break; //18 searches on the screen so don't display any more
+			var quickSearch=quickSearchList[p];
+			if (quickSearch.displayOnAH) {
+				if (lp % colNumber==0) {
+					finalHTML += "<tr>";
+					rowCount++;
+				}
+				finalHTML += '<td nowrap><a style="color:white" href="'+
+					System.server + 'index.php?cmd=auctionhouse&type=-1&search_text=' + quickSearch.searchname + '">'+
+					quickSearch.nickname+'</a></td>';
+				if (lp % colNumber==colNumber-1) finalHTML += "</tr>";
+				lp++;
 			}
-			if (rowCount == 7 && lp % 3==0) {
-				finalHTML += "<td><span style='text-align:center;color:#7D2252;background-color:#110011'>Quick Plant Search</span>" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Blood Bloom' title='Blood Bloom Plant'>Blood Bloom</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Jademare' title='Jademare Plant'>Jademare</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Dark Shade' title='Dark Shade Plant'>Dark Shade</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Trinettle' title='Trinettle Plant'>Trinettle</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Heffle Wart' title='Heffle Wart Plant'>Heffle Wart</span> |" +
-					" <span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' " +
-						"searchtext='Amber' title='Amber Plant'>Amber</span>" +
-					"</td>";
-			}
-			finalHTML += "<td";
-			if (pot.wide) finalHTML+=" colspan='2' "
-			finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickPotionSearch' searchtext='" +
-				pot.searchname + "' title='" +
-				pot.buff + " " + pot.level.toString() + "'>" +
-				pot.shortname + "</span></td>"
-			if (lp % 3==2) finalHTML += "</tr>";
-			if (pot.wide) lp++;
-			if (lp % 3==2) finalHTML += "</tr>";
-			lp++;
 		}
-		*/
-		// imageCell.innerHTML = finalHTML;
-
-		/*
-		var quickSearchList = System.findNodes("//span[@cat='quickPotionSearch']");
-		for (var i=0; i<quickSearchList.length; i++) {
-			quickSearchItem = quickSearchList[i];
-			quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
-		}
-		*/
+		finalHTML+="</table>";
+		injectHere.innerHTML = finalHTML;
 
 		var allItems = document.getElementsByTagName("IMG");
 		for (var i=0; i<allItems.length; i++) {
@@ -3873,52 +3864,107 @@ var Helper = {
 	injectAuctionSearch: function() {
 		var content=Layout.notebookContent();
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Auction Quick Search</b></td></tr>'+
-			'<tr><td></td></tr>'+
+			'<tr><td colspan="2" nobr bgcolor="#212323" align="center"><b>&nbsp;Trade Hub Quick Search</b></td></tr>'+
+			'<tr><td>This screen allows you to set up some quick search templates for the Trade Hub. '+
+				'The Display on TH column indicates if the quick search will show on the short list on the '+
+				'Trade Hub main screen. A maximum of 20 items can show on this list '+
+				'(It will not show more than 20even if you have more than 20 flagged). '+
+				'To edit items, either use the large text area below, '+
+				'or add a new entry and delete the old one. You can always reset the list to the default values.</td></tr>'+
 			'</table>' +
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
 		var injectHere = document.getElementById('Helper:Auction Search Output');
 		var quickSearchList = System.getValueJSON("quickSearchList");
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		//quickSearchList.sort();
 		var currentCategory = "";
-		var output = "<table><tbody>";
+		var output = "<table  cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>";
+		output += "<tr bgcolor='#212323'><th></th><th>Nickname</th><th>Quick Search Text</th><th>Display on TH?</th><th>Delete?</th></tr>";
 		for (j=0; j<quickSearchList.length; j++) {
 			var quickSearchItem=quickSearchList[j];
 			if (quickSearchItem) {
 				if (currentCategory != quickSearchItem.category)
-					output += "<tr><td colspan=4><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
-				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
-				output += "<tr><td width='10'></td><td><a href='" + System.server +
-					"index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
-					quickSearchItem.searchname + "</span></a></td>" +
+					output += "<tr><td colspan=5><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
+				output += "<tr><td width='10'></td>"+
 					"<td><a href='" + System.server +
 					"index.php?cmd=auctionhouse&type=-1&search_text=" +
 					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#ADB5B5;'>" +
+					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#CCFF99;'>" +
 					((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
-					"<td></td></tr>";
+					"<td><a href='" + System.server +
+					"index.php?cmd=auctionhouse&type=-1&search_text=" +
+					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
+					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#CCFF99;'>" +
+					quickSearchItem.searchname + "</span></a></td>" +
+					"<td><span style='color:#CCFF99;'>"+(quickSearchItem.displayOnAH?"True":"False")+"</span></td>" +
+					"<td>[<span style='cursor:pointer; text-decoration:underline; color:#CCFF99;' id='Helper:delAuctionSearch"+j+"' auctionSearchId="+j+">"+
+						"del</span>]</td></tr>";
 				currentCategory = quickSearchItem.category;
 			}
 		}
-		output += "<tr><td colspan=4 height=10></td></tr>";
-		output += "<tr><td colspan=4 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
-		output += "<tr><td colspan=4 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
+		output += "<tr><td colspan=5 height=10></td></tr>";
+		output += "<tr><td colspan=5>"+
+				"<table cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>"+
+				"<tr><th>Category</th><th>Nickname</th><th>Search Name</th><th>Display on AH?</th><th></th></tr>"+
+				"<tr align='right'>"+
+					"<td><input type='text' class='custominput' size='14' id='Helper:category'/></td>"+
+					"<td><input type='text' class='custominput' size='8' id='Helper:nickname'/></td>"+
+					"<td><input type='text' class='custominput' size='40' id='Helper:searchname'/></td>"+
+					"<td align='center'><input type='checkbox' class='custominput' id='Helper:displayOnAH'/></td>"+
+					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:addAuctionSearch'>"+
+						"add</span>]</td>"+
+				"</tr></tbody></table>"+
+			"</td></tr>";
+		output += "<tr><td colspan=5 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
+		output += "<tr><td colspan=5 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
 					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
 		output += "</tbody></table>";
 		injectHere.innerHTML = output;
+		for (j=0; j<quickSearchList.length; j++) {
+			document.getElementById("Helper:delAuctionSearch"+j).addEventListener('click', Helper.delAuctionSearch, true);
+		}
+		document.getElementById("Helper:addAuctionSearch").addEventListener('click', Helper.addAuctionSearch, true);
 		document.getElementById("Helper:saveauctionsearch").addEventListener('click', Helper.saveAuctionSearch, true);
 		document.getElementById("Helper:resetauctionsearch").addEventListener('click', Helper.resetAuctionSearch, true);
 	},
 
+	addAuctionSearch: function(evt) {
+		var nickname = document.getElementById("Helper:nickname").value;
+		var searchname = document.getElementById("Helper:searchname").value;
+		var category = document.getElementById("Helper:category").value;
+		var displayOnAH = document.getElementById("Helper:displayOnAH").checked;
+		if (!nickname || !searchname || !category) return;
+		var quickSearchList = System.getValueJSON("quickSearchList");
+		var theSearch = new Object;
+		theSearch.nickname = nickname;
+		theSearch.searchname = searchname;
+		theSearch.category = category;
+		theSearch.displayOnAH = displayOnAH;
+		quickSearchList.push(theSearch);
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
+		System.setValueJSON("quickSearchList", quickSearchList);
+		window.location=window.location;
+	},
+
+	delAuctionSearch: function(evt) {
+		var auctionSearchId = evt.target.getAttribute("auctionSearchId");
+		var quickSearchList = System.getValueJSON("quickSearchList");
+		quickSearchList.splice(auctionSearchId,1);
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
+		System.setValueJSON("quickSearchList", quickSearchList);
+		window.location = window.location;
+	},
+
 	saveAuctionSearch: function(evt) {
 		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
-		GM_setValue("quickSearchList",auctionsearchtextarea.value);
+		var quickSearchList = JSON.parse(auctionsearchtextarea.value);
+		Helper.sortAsc=true;
+		Helper.sortBy="category";
+		quickSearchList.sort(Helper.stringSort);
+		System.setValueJSON("quickSearchList", quickSearchList);
 		window.location=window.location;
 	},
 
