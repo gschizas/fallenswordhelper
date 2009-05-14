@@ -2840,7 +2840,12 @@ var Helper = {
 						while(re.exec(responseText)) {
 							forgeCount++;
 						}
-						Helper.injectAuctionExtraText(this.callback,craft,forgeCount);
+						if (responseText.search(/Crystalline/) != -1) {
+							var durabilityRE =/<font color='#999999'>Durability:<\/font><\/nobr><\/td><td width='50%' align='right'>(\d+)\&nbsp;\/\&nbsp;(\d+)\&nbsp;/;
+							var durability = '<span style="font-size:x-small; color:gray;"><br>Dur: ' + 
+								durabilityRE.exec(responseText)[1] + '/' + durabilityRE.exec(responseText)[2] + '</span>';
+						}
+						Helper.injectAuctionExtraText(this.callback,craft,forgeCount,durability);
 					},
 					theImage);
 			}
@@ -3078,7 +3083,7 @@ var Helper = {
 		window.location = searchURL;
 	},
 
-	injectAuctionExtraText: function(anItem, craft, forgeCount) {
+	injectAuctionExtraText: function(anItem, craft, forgeCount, durability) {
 		var theText=anItem.parentNode.nextSibling.nextSibling;
 		//Excellent color does not show up well so change Perfect to Green and Excellent takes the yellow color
 		// to show up better in the AH.
@@ -3088,6 +3093,7 @@ var Helper = {
 		if (forgeCount != 0) {
 			preText +=  " " + forgeCount + "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>"
 		}
+		if (durability) preText += durability;
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
 	},
 
