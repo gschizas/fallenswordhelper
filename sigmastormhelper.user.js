@@ -291,7 +291,7 @@ var Helper = {
 		case "news":
 			switch (subPageId) {
 			case "fsbox":
-				Helper.injectShoutboxWidgets('fsbox_input', 100);
+				Helper.injectShoutboxWidgets('fsbox_input', 150);
 				break;
 			case "shoutbox":
 				Helper.injectShoutboxWidgets('shoutbox_input', 150);
@@ -740,266 +740,18 @@ var Helper = {
 	},
 
 	calculateRelicDefenderStats: function(evt) {
-		var calcButton = System.findNode("//input[@id='calculatedefenderstats']");
-		calcButton.style.display = "none";
-		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
-		relicNameElement.parentNode.style.fontSize = "x-small";
-		var tableElement = System.findNode("//table[@width='600']");
-		for (var i=0;i<tableElement.rows.length;i++) {
-			var aRow = tableElement.rows[i];
-			if (i==2 ||
-				i==3 || //Relic picture
-				i==4 ||
-				i==5 || //back to world
-				i==6 ||
-				i==7 || //Relic instructions
-				i==8 ||
-				i==10 ||
-				i==11) { // attempt group capture button
-				aRow.firstChild.colSpan = '3';
-			}
-		}
-		var relicName = relicNameElement.innerHTML;
-		var tableWithBorderElement = System.findNode("//table[@cellpadding='5']");
-		tableWithBorderElement.align = "left";
-		tableWithBorderElement.parentNode.colSpan = "2";
-		var tableInsertPoint = tableWithBorderElement.parentNode.parentNode;
-		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'>" +
-			"<tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
-		var extraTextInsertPoint = System.findNode("//td[@title='InsertSpot']");
-		var defendingGuild = System.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
-		var defendingGuildHref = defendingGuild.getAttribute("href");
-		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
-
-		var validMemberString = "";
-		var memberList = System.getValueJSON("memberlist");
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
-			if (member.status == "Offline"
-				&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
-				validMemberString += member.name + " ";
-			}
-		}
-
-		var listOfDefenders = System.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
-		var defenderCount = 0;
-		var testList = "";
-		for (var i=0; i<listOfDefenders.length; i++) {
-			var href = listOfDefenders[i].getAttribute("href");
-			//if (i<3) { //I put this in to limit the number of calls this function makes.
-					//I don't want to hammer the server too much.
-				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
-			//}
-			testList += listOfDefenders[i].innerHTML + " ";
-			validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
-			defenderCount++;
-		}
-		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
-		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:small; border-top:2px black solid;'>" +
-			"<tr><td>Number of Defenders:</td><td>" + defenderCount + "</td></tr>" +
-			"<tr><td>Defending Faction Relic Count:</td><td title='relicCount'>0</td></tr>" +
-			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
-			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
-			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet)</td></tr>" +
-			"<tr style='display:none;'><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Armor:</td><td align='right' title='LDarmorValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
-			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Defense:</td><td align='right' title='defenseValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Armor:</td><td align='right' title='armorValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>"
-		extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
-		extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
-		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
 
 	getRelicGuildData: function(extraTextInsertPoint,href) {
-		System.xmlhttp(href, Helper.parseRelicGuildData, {"extraTextInsertPoint":extraTextInsertPoint,"href":href});
 	},
 
 	parseRelicGuildData: function(responseText, callback) {
-		var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var href = callback.href;
-		var doc=System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName("IMG");
-		var relicCount = 0;
-		for (var i=0;i<allItems.length-1;i++) {
-			var anItem=allItems[i];
-			var mouseoverText = anItem.getAttribute("onmouseover")
-			if (mouseoverText && mouseoverText.search("Relic Bonuses") != -1){
-				relicCount++;
-			}
-		}
-		var relicCountValue = System.findNode("//td[@title='relicCount']");
-		relicCountValue.innerHTML = relicCount;
-		var relicProcessedValue = System.findNode("//td[@title='relicProcessed']");
-		relicProcessedValue.innerHTML = 1;
-		var relicMultiplier = 1;
-		if (relicCount == 1) {
-			relicMultiplier = 1.5;
-		}
-		else if (relicCount >= 3) {
-			relicMultiplier = 0.9;
-		}
-		var LDProcessedValue = System.findNode("//td[@title='LDProcessed']");
-		if (LDProcessedValue.innerHTML == "1") {
-			var attackValue              = System.findNode("//td[@title='attackValue']");
-			var LDattackValue            = System.findNode("//td[@title='LDattackValue']");
-			attackNumber                 = System.intValue(attackValue.innerHTML);
-			LDattackNumber               = System.intValue(LDattackValue.innerHTML);
-			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
-			var defenseValue             = System.findNode("//td[@title='defenseValue']");
-			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber                = System.intValue(defenseValue.innerHTML);
-			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
-			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
-			var armorValue               = System.findNode("//td[@title='armorValue']");
-			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
-			armorNumber                  = System.intValue(armorValue.innerHTML);
-			LDarmorNumber                = System.intValue(LDarmorValue.innerHTML);
-			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
-			var damageValue              = System.findNode("//td[@title='damageValue']");
-			var LDdamageValue            = System.findNode("//td[@title='LDdamageValue']");
-			damageNumber                 = System.intValue(damageValue.innerHTML);
-			LDdamageNumber               = System.intValue(LDdamageValue.innerHTML);
-			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
-			var hpValue                  = System.findNode("//td[@title='hpValue']");
-			var LDhpValue                = System.findNode("//td[@title='LDhpValue']");
-			hpNumber                     = System.intValue(hpValue.innerHTML);
-			LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
-			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
-			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
-			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
-			var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
-			LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
-		}
 	},
 
 	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
-		System.xmlhttp(href, Helper.parseRelicPlayerData, {"defenderCount": defenderCount, "extraTextInsertPoint": extraTextInsertPoint, "href": href});
 	},
 
 	parseRelicPlayerData: function(responseText, callback) {
-		var defenderCount = callback.defenderCount;
-		var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var href = callback.href;
-		var doc = System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName("B")
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.innerHTML == "Attack:&nbsp;"){
-				var attackText = anItem;
-				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerAttackValue = attackLocation.textContent;
-				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDefenseValue = defenseLocation.textContent;
-				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerArmorValue = armorLocation.textContent;
-				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDamageValue = damageLocation.textContent;
-				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerHPValue = hpLocation.textContent;
-			}
-		}
-
-		if (defenderCount != 0) {
-			var defenderMultiplier       = 0.2;
-			var attackValue              = System.findNode("//td[@title='attackValue']");
-			attackNumber                 = System.intValue(attackValue.innerHTML);
-			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
-			var defenseValue             = System.findNode("//td[@title='defenseValue']");
-			defenseNumber                = System.intValue(defenseValue.innerHTML);
-			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
-			var armorValue               = System.findNode("//td[@title='armorValue']");
-			armorNumber                  = System.intValue(armorValue.innerHTML);
-			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
-			var damageValue              = System.findNode("//td[@title='damageValue']");
-			damageNumber                 = System.intValue(damageValue.innerHTML);
-			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
-			var hpValue                  = System.findNode("//td[@title='hpValue']");
-			hpNumber                     = System.intValue(hpValue.innerHTML);
-			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
-			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
-			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
-		}
-		else {
-			var defenderMultiplier = 1;
-			var attackValue = System.findNode("//td[@title='LDattackValue']");
-			attackNumber = System.intValue(attackValue.innerHTML);
-			attackValue.innerHTML = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
-			var defenseValue = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber=System.intValue(defenseValue.innerHTML);
-			defenseValue.innerHTML = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
-			var armorValue = System.findNode("//td[@title='LDarmorValue']");
-			armorNumber=System.intValue(armorValue.innerHTML);
-			armorValue.innerHTML = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
-			var damageValue = System.findNode("//td[@title='LDdamageValue']");
-			damageNumber=System.intValue(damageValue.innerHTML);
-			damageValue.innerHTML = System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
-			var hpValue = System.findNode("//td[@title='LDhpValue']");
-			hpNumber=System.intValue(hpValue.innerHTML);
-			hpValue.innerHTML = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
-			var defendersProcessed = System.findNode("//td[@title='LDProcessed']");
-			defendersProcessedNumber=System.intValue(defendersProcessed.innerHTML);
-			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
-		}
-		var relicProcessedValue = System.findNode("//td[@title='relicProcessed']");
-		var relicCountValue = System.findNode("//td[@title='relicCount']");
-		var relicCount = System.intValue(relicCountValue.innerHTML);
-
-		var relicMultiplier = 1;
-		if (relicCount == 1) {
-			relicMultiplier = 1.5;
-		}
-		else if (relicCount >= 3) {
-			relicMultiplier = 0.9;
-		}
-
-		if (defenderCount == 0 && relicProcessedValue.innerHTML == "1") {
-			var attackValue              = System.findNode("//td[@title='attackValue']");
-			var LDattackValue            = System.findNode("//td[@title='LDattackValue']");
-			attackNumber                 = System.intValue(attackValue.innerHTML);
-			LDattackNumber               = System.intValue(LDattackValue.innerHTML);
-			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
-			var defenseValue             = System.findNode("//td[@title='defenseValue']");
-			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber                = System.intValue(defenseValue.innerHTML);
-			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
-			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
-			var armorValue               = System.findNode("//td[@title='armorValue']");
-			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
-			armorNumber                  = System.intValue(armorValue.innerHTML);
-			LDarmorNumber                = System.intValue(LDarmorValue.innerHTML);
-			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
-			var damageValue              = System.findNode("//td[@title='damageValue']");
-			var LDdamageValue            = System.findNode("//td[@title='LDdamageValue']");
-			damageNumber                 = System.intValue(damageValue.innerHTML);
-			LDdamageNumber               = System.intValue(LDdamageValue.innerHTML);
-			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
-			var hpValue                  = System.findNode("//td[@title='hpValue']");
-			var LDhpValue                = System.findNode("//td[@title='LDhpValue']");
-			hpNumber                     = System.intValue(hpValue.innerHTML);
-			LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
-			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
-			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
-			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
-			var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
-			LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
-		}
 	},
 
 	position: function() {
@@ -1077,23 +829,16 @@ var Helper = {
 	},
 
 	injectViewRecipe: function() {
-		var components=System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
-		for (var i=0; i<components.length; i++) {
-			var mo=components[i].getAttribute("onmouseover");
-			System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
-		}
+		var components=System.findNodes("//td[contains(@background,'1x1mini.gif')]/center/img");
+		if (components && 0) //TODO later when we have the database of components from resources
+			for (var i=0; i<components.length; i++) {
+				var mo=components[i].getAttribute("onmouseover");
+				System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
+			}
 	},
 
 	plantFromComponent: function(aComponent) {
 		switch(aComponent) {
-			case "Amber Essense": return "Amber Plant"; break;
-			case "Blood Bloom Flower": return "Blood Bloom Plant"; break;
-			case "Dark Shade ": return "Dark Shade Plant"; break;
-			case "Snake Eye": return "Elya Snake Head"; break;
-			case "Snake Venom Fang": return "Elya Snake Head"; break;
-			case "Heffle Wart": return "Heffle Wart Plant"; break;
-			case "Jademare Blossom": return "Jademare Plant"; break;
-			case "Trinettle Leaf": return "Trinettle Plant"; break;
 			default: return aComponent;
 		}
 	},
@@ -1275,38 +1020,6 @@ var Helper = {
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
 			"colspan='2'></td></tr><tr>";
-
-		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
-		var hasDeathDealer = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
-		if (hasDeathDealer || hasShieldImp) {
-			var re=/(\d) HP remaining/;
-			var impsRemaining = 0;
-			if (hasShieldImp) {
-				//textToTest = "tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>2 HP remaining<br></b> (Level: 150)</b><br>[Click to De-Activate]</center>');";
-				textToTest = hasShieldImp.getAttribute("onmouseover");
-				impsRemainingRE = re.exec(textToTest);
-				impsRemaining = impsRemainingRE[1];
-			}
-			var applyImpWarningColor = " style='color:green; font-size:medium;'";
-			if (impsRemaining<2){
-				applyImpWarningColor = " style='color:red; font-size:large; font-weight:bold'";
-			}
-			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
-			if (hasDeathDealer) {
-				if (GM_getValue("lastDeathDealerPercentage")==undefined) GM_setValue("lastDeathDealerPercentage", 0);
-				if (GM_getValue("lastKillStreak")==undefined) GM_setValue("lastKillStreak", 0);
-				var lastDeathDealerPercentage = GM_getValue("lastDeathDealerPercentage");
-				var lastKillStreak = GM_getValue("lastKillStreak");
-				if (impsRemaining>0 && lastDeathDealerPercentage == 20) {
-					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + System.addCommas(lastKillStreak) +
-						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
-				} else {
-					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
-						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%</td></tr>";
-					System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
-				}
-			}
-		}
 
 		if (GM_getValue("showHuntingBuffs")) {
 			var buffs=GM_getValue("huntingBuffs");
@@ -2018,7 +1731,7 @@ var Helper = {
 			lootedItemId=lootMatch[4];
 			lootedItemVerify=lootMatch[5];
 		}
-		var shieldImpDeathRE = /Shield Imp absorbed all damage/;
+		var shieldImpDeathRE = /Psi Shield was destroyed/;
 		var shieldImpDeath = responseText.match(shieldImpDeathRE);
 
 		var monster = callback.node;
@@ -2037,8 +1750,8 @@ var Helper = {
 				resultText += "Looted item:" + lootedItem + "\n";
 			}
 			if (shieldImpDeath) {
-				resultHtml += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>";
-				resultText += "Shield Imp Death\n"
+				resultHtml += "<br/><small><small><span style='color:red;'>Psi Shield was destroyed</span></small></small>";
+				resultText += "Psi Shield was destroyed\n"
 			}
 			if (xpGain<0) result.style.color='red';
 			var monsterParent = monster.parentNode;
@@ -3986,7 +3699,7 @@ var Helper = {
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
-		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]+)\'/i;
+		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]*)\'/i;
 		var reResult =reParams.exec(mouseOver);
 		var itemId   = reResult[1];
 		var invId    = reResult[2];
@@ -5118,7 +4831,6 @@ var Helper = {
 			var playerID = playerID[1];
 			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
 		}
-		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
 	},
 
 	quickBuffMe: function() {
@@ -5145,7 +4857,7 @@ var Helper = {
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
 			if (buffLevel < 75
-			    && myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1) {
+			    && myBuff.innerHTML.search("Mission Finder") == -1) {
 				myBuff.style.color = "gray";
 			}
 		}
@@ -5158,24 +4870,10 @@ var Helper = {
 			for (var i=0;i<buffs.length;i++) {
 				var aBuff=buffs[i];
 				var onmouseover = aBuff.getAttribute("onmouseover");
-				if (onmouseover.search("Summon Shield Imp") != -1) {
-					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
-					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
-					buffRE = /<b>([ a-zA-Z]+)<br>([0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/
-					buff = buffRE.exec(onmouseover);
-					if (!buff) {
-						buffRE = /<b>([ a-zA-Z]+)<br> HP remaining<br><\/b> \(Level: (\d+)\)/
-						buff = buffRE.exec(onmouseover);
-					}
-					if (!buff) GM_log(onmouseover);
-					buffName = buff[1];
-					buffLevel = buff[3];
-				} else {
-					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
-					buff = buffRE.exec(onmouseover);
-					buffName = buff[1];
-					buffLevel = buff[2];
-				}
+				buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
+				buff = buffRE.exec(onmouseover);
+				buffName = buff[1];
+				buffLevel = buff[2];
 				resultText += ((i % 2 == 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
 				resultText += ((i % 2 == 1)? "</tr>":"");
@@ -5193,8 +4891,6 @@ var Helper = {
 			resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
 
-		//var playerLevel=Helper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
-		//var playerXP=Helper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
 		resultText += "</table>"
 
 		var statistics = System.findNode("//td[contains(@background, 'sigma2/inventory/statistics_head.jpg')]/../../tr[3]/td/table", doc);
@@ -5215,8 +4911,6 @@ var Helper = {
 
 		resultText += statistics.parentNode.innerHTML;
 
-		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
-		//injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 		var newNode = document.createElement("SPAN");
 		newNode.innerHTML = resultText;
 		injectHere.appendChild(newNode);
@@ -5225,53 +4919,6 @@ var Helper = {
 			playerInput = System.findNode("//input[@name='targetPlayers']");
 			playerInput.value = playerName;
 		}
-	},
-
-	getSustain: function(responseText) {
-		var doc=System.createDocument(responseText);
-		Helper.tmpSelfProfile=responseText;
-		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
-		if (!sustainText) return;
-		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
-		var sustainLevelRE = /Level<br>(\d+)%/
-		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
-		var activateInput = System.findNode("//input[@value='activate']");
-		var inputTable = activateInput.nextSibling.nextSibling;
-		inputTable.rows[3].cells[0].align = "center";
-		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
-		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
-		if (!furyCasterText) return;
-		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
-		var furyCasterLevelRE = /Level<br>(\d+)%/
-		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
-		inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
-		if (System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc))
-			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master:	On</span>";
-		else
-			inputTable.rows[3].cells[0].innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
-	},
-
-	getKillStreak: function(responseText) {
-		var doc=System.createDocument(responseText);
-		//Kill&nbsp;Streak:&nbsp;
-		var killStreakText = System.findNode("//b[contains(.,'Kill')]", doc);
-		if (killStreakText) {
-			var killStreakLocation = killStreakText.parentNode.nextSibling;
-			var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
-		}
-		var killStreakElement = System.findNode("//span[@findme='killstreak']");
-		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
-		GM_setValue("lastKillStreak", playerKillStreakValue);
-		var deathDealerBuff = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
-		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
-		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
-		if (deathDealer) {
-			var deathDealerLevel = deathDealer[1];
-			var deathDealerPercentage = (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20))
-		}
-		var deathDealerPercentageElement = System.findNode("//span[@findme='damagebonus']");
-		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
-		GM_setValue("lastDeathDealerPercentage", deathDealerPercentage);
 	},
 
 	injectCreature: function() {
@@ -5293,51 +4940,34 @@ var Helper = {
 
 		//get buffs here later ... DD, CA, DC, Constitution, etc
 		var allItems = doc.getElementsByTagName("IMG");
-		var counterAttackLevel = 0;
 		var doublerLevel = 0;
-		var deathDealerLevel = 0;
-		var darkCurseLevel = 0;
-		var holyFlameLevel = 0;
-		var constitutionLevel = 0;
-		var sanctuaryLevel = 0;
+		var corrodeLevel = 0;
+		var robotHunterLevel = 0;
+		var radHunterLevel = 0;
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
 				var onmouseover = anItem.getAttribute("onmouseover")
-				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
-				var counterAttack = counterAttackRE.exec(onmouseover);
-				if (counterAttack) {
-					counterAttackLevel = counterAttack[1];
-				}
-				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/
+
+				var doublerRE = /<b>Intensifier<\/b> \(Level: (\d+)\)/
 				var doubler = doublerRE.exec(onmouseover);
 				if (doubler) {
 					doublerLevel = doubler[1];
 				}
-				var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
-				var deathDealer = deathDealerRE.exec(onmouseover);
-				if (deathDealer) {
-					deathDealerLevel = deathDealer[1];
+				var corrodeRE = /<b>Corrode<\/b> \(Level: (\d+)\)/
+				var corrode = corrodeRE.exec(onmouseover);
+				if (corrode) {
+					corrodeLevel = corrode[1];
 				}
-				var darkCurseRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
-				var darkCurse = darkCurseRE.exec(onmouseover);
-				if (darkCurse) {
-					darkCurseLevel = darkCurse[1];
+				var robotHunterRE = /<b>Robot Hunter<\/b> \(Level: (\d+)\)/
+				var robotHunter = robotHunterRE.exec(onmouseover);
+				if (robotHunter) {
+					robotHunterLevel = robotHunter[1];
 				}
-				var holyFlameRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
-				var holyFlame = holyFlameRE.exec(onmouseover);
-				if (holyFlame) {
-					holyFlameLevel = holyFlame[1];
-				}
-				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
-				var constitution = constitutionRE.exec(onmouseover);
-				if (constitution) {
-					constitutionLevel = constitution[1];
-				}
-				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/
-				var sanctuary = sanctuaryRE.exec(onmouseover);
-				if (sanctuary) {
-					sanctuaryLevel = sanctuary[1];
+				var radHunterRE = /<b>Rad Hunter<\/b> \(Level: (\d+)\)/
+				var radHunter = radHunterRE.exec(onmouseover);
+				if (radHunter) {
+					radHunterLevel = radHunter[1];
 				}
 			}
 		}
@@ -5355,37 +4985,26 @@ var Helper = {
 		//math section ... analysis
 		//Holy Flame adds its bonus after the armor of the creature has been taken off.
 		var extraNotes = "";
-		if (creatureClass == "Undead") {
-			playerDamageValue = playerDamageValue + ((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
-			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
-			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + "<br>":"");
+		if (creatureClass == "Robotic") {
+			playerDamageValue = playerDamageValue + (playerDamageValue * robotHunterLevel * 0.002);
+			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * robotHunterLevel * 0.002);
+			extraNotes += (holyFlameLevel > 0? "RH Bonus Damage = " + holyFlameBonusDamage + "<br>":"");
 		}
-		//Death Dealer and Counter Attack both applied at the same time
-		var deathDealerBonusDamage = Math.floor(playerDamageValue * (Math.min(Math.floor(playerKillStreakValue/5) * 0.01 * deathDealerLevel, 20)/100));
-		var counterAttackBonusAttack = Math.ceil(playerAttackValue * 0.0025 * counterAttackLevel);
-		var counterAttackBonusDamage = Math.ceil(playerDamageValue * 0.0025 * counterAttackLevel);
-		var extraStaminaPerHit = (counterAttackLevel > 0? Math.ceil((1+(500/50))*0.0025*counterAttackLevel) :0);
-		playerAttackValue += counterAttackBonusAttack;
-		playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
-		extraNotes += (deathDealerLevel > 0? "DD Bonus Damage = " + deathDealerBonusDamage + "<br>":"");
-		if (counterAttackLevel > 0) {
-			extraNotes += "CA Bonus Attack = " + counterAttackBonusAttack + "<br>";
-			extraNotes += "CA Bonus Damage = " + counterAttackBonusDamage + "<br>";
-			extraNotes += "CA Extra Stam Used = " + extraStaminaPerHit + "<br>";
+		if (creatureClass == "Irradiated") {
+			playerDamageValue = playerDamageValue + (playerDamageValue * radHunterLevel * 0.002);
+			var holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * radHunterLevel * 0.002);
+			extraNotes += (holyFlameLevel > 0? "RadH Bonus Damage = " + holyFlameBonusDamage + "<br>":"");
 		}
-		//Attack:
-		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + "<br>":"");
-		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
+		//Attack: TODO with STR skill
+		var hitByHowMuch = (playerAttackValue - Math.ceil(1.1053*creatureDefense));
 		//Damage:
-		var damageDone = Math.floor(playerDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
-		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? 1: playerDamageValue - (1.1053*creatureArmor))):"-");
-		//Defense:
-		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + "<br>":"");
-		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack) - (playerDefenseValue + (playerDefenseValue * constitutionLevel * 0.001)));
-		//Armor and HP:
-		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
-		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001) + playerHPValue));
-		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(playerHPValue/(((1.1053*creatureDamage) < (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))? 1: (1.1053*creatureDamage) - (playerArmorValue + (playerArmorValue * sanctuaryLevel * 0.001)))):"-");
+		var damageDone = Math.floor(((playerDamageValue < (1.1053*creatureArmor))? (playerDamageValue/5): (6*playerDamageValue/5) - (1.1053*creatureArmor)) - (1.053*creatureHP));
+		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((playerDamageValue < (1.1053*creatureArmor))? (playerDamageValue/5): (6*playerDamageValue/5) - (1.1053*creatureArmor))):"-");
+		//Defense: TODO with some skills
+		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack) - playerDefenseValue);
+		//Armor and HP: TODO with IR and some class skills
+		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (playerArmorValue + playerHPValue));
+		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(playerHPValue/(((1.1053*creatureDamage) < playerArmorValue)? 1: (1.1053*creatureDamage) - playerArmorValue)):"-");
 		//Analysis:
 		var playerHits = (numberOfCreatureHitsTillDead=="-"? numberOfHitsRequired:(numberOfHitsRequired=="-"?"-":(numberOfHitsRequired>numberOfCreatureHitsTillDead?"-":numberOfHitsRequired)));
 		var creatureHits = (numberOfHitsRequired=="-"?numberOfCreatureHitsTillDead:(numberOfCreatureHitsTillDead=="-"?"-":(numberOfCreatureHitsTillDead>numberOfHitsRequired?"-":numberOfCreatureHitsTillDead)));
@@ -5418,7 +5037,10 @@ var Helper = {
 			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" +
 				extraNotes + "</span></td></tr>" +
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>" +
-				"*Does include CA, DD, HF, DC, Sanctuary and Constitution (if active) and allow for randomness (1.1053).</span></td></tr>" +
+				"*Does NOT include any skills (if active) (YET), allow for randomness (1.1053)<br>" +
+				"The script developers does not have infor on how to calcuate these values for SS2 yet, "+
+				"so if you can derive some values / formula for these calculation, please contact dkwizard.<br> "+
+				"Thank you very much!</span></td></tr>" +
 			"</tbody></table>";
 	},
 
@@ -5471,9 +5093,9 @@ var Helper = {
 
 		document.
 			getElementById("Helper:ShoutboxPreview")
-			.innerHTML = '<table align="center" width="325" border="0"><tbody>' +
+			.innerHTML = '<table align="center" width="119" border="0"><tbody>' +
 			'<tr><td style="text-align:center;color:#B5B1AB;background-color:#181A1B;">Preview (' + chars + '/' + maxchars + ' characters)</td></tr>' +
-			'<tr><td width="325"><span style="font-size:x-small;" findme="biopreview">' + textContent +
+			'<tr><td width="125"><span style="font-size:x-small" findme="biopreview">' + textContent +
 			'</span></td></tr></tbody></table>';
 
 	},
@@ -5592,161 +5214,9 @@ var Helper = {
 	},
 
 	injectTopRated: function() {
-		var mainTable = System.findNode("//table[tbody/tr/td/font/b[.='Top 250 Players']]");
-		var mainTitle = mainTable.rows[0].cells[0];
-		mainTitle.innerHTML += '&nbsp<input id="findOnlinePlayers" type="button" value="Find Online Players" ' +
-			'title="Fetch the online status of the top 250 players (warning ... takes a few seconds)." class="custombutton">';
-
-		document.getElementById('findOnlinePlayers').addEventListener('click', Helper.findOnlinePlayers, true);
-	},
-
-	findOnlinePlayers: function() {
-		var findPlayersButton = System.findNode("//input[@id='findOnlinePlayers']");
-		findPlayersButton.style.display = "none";
-		var topPlayerTable = System.findNode("//table[@width='500']");
-		var lowestLevel = topPlayerTable.rows[topPlayerTable.rows.length-4].cells[3].textContent*1;
-		GM_setValue("lowestLevelInTop250",lowestLevel);
-		var guildsChecked = "";
-		for (var i=0; i<topPlayerTable.rows.length; i++) {
-			var aRow = topPlayerTable.rows[i];
-			if (aRow.cells[1] && i!=0) {
-				var playerTable = topPlayerTable.rows[i].cells[1].firstChild;
-				var playerElement = playerTable.rows[0].cells[0];
-				var playerGuildHref = playerElement.firstChild.getAttribute("href");
-				var playerGuildName = playerElement.firstChild.firstChild.getAttribute("title");
-				//GM_log(guildsChecked.indexOf(playerGuildName));
-				//if we haven't already checked this guild, then go ahead and check it
-				if (guildsChecked.search(playerGuildName) == -1) {
-					//GM_log(i+"::"+playerGuildName + "::" + playerGuildHref + "::" + aRow.innerHTML + "::" + guildsChecked);
-					System.xmlhttp(playerGuildHref, Helper.parseGuildOnline);
-					//log current guild as checked.
-					guildsChecked += ' ' + playerGuildName;
-				}
-			}
-		}
-	},
-
-	parseGuildOnline: function(responseText) {
-		var topPlayerTable = System.findNode("//table[@width='500']");
-		var lowestLevel = GM_getValue("lowestLevelInTop250");
-		var doc=System.createDocument(responseText);
-		memberTable = System.findNode("//table[tbody/tr/td[.='Rank']]", doc);
-		for (var i=0; i<memberTable.rows.length; i++) {
-			aRow = memberTable.rows[i];
-			if (aRow.cells[1] && i!= 0) {
-				onlineStatus = aRow.cells[0].innerHTML;
-				playerName = aRow.cells[1].firstChild.nextSibling.innerHTML;
-				playerLevel = aRow.cells[2].textContent*1;
-				if (playerLevel >= lowestLevel) { // don't bother looking if they are a low level
-					//var playerInTopPlayerList = System.findNode("//a[.='" + playerName +"']", topPlayerTable); // didn't work so had to comprimise.
-					var playerInTopPlayerList = System.findNode("//a[.='" + playerName +"']");
-					var inTopPlayerTable = System.findNode("//table[@width='500' and contains(.,'" + playerName +"')]");
-					if (playerInTopPlayerList && inTopPlayerTable) {
-						insertHere = playerInTopPlayerList.parentNode;
-						insertHere.innerHTML += '&nbsp' + onlineStatus;
-					}
-				}
-			}
-		}
 	},
 
 	injectArena: function() {
-		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
-		arenaTable.style.fontSize = 'x-small';
-		for (var i=1; i<arenaTable.rows.length; i++){
-			var row = arenaTable.rows[i];
-			row.style.backgroundColor = ((i % 2)==0)?"#151f1e":"#112322";
-		}
-
-		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
-		for (var i=0; i<titleCells.length; i++) {
-			var cell=titleCells[i];
-			if (cell.innerHTML.search("Max Equip Level") != -1
-				|| cell.innerHTML.search("Join Cost") != -1
-				|| cell.innerHTML.search("Specials") != -1
-				|| cell.innerHTML.search("Hell Forge") != -1
-				) {
-				cell.style.textDecoration="underline";
-				cell.style.cursor="pointer";
-				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-				cell.addEventListener('click', Helper.sortArena, true);
-			}
-		}
-	},
-
-	sortArena: function(evt) {
-		var headerClicked=evt.target.textContent.replace(/[ \s]/g,"");
-		var parentTables=System.findNodes("ancestor::table", evt.target)
-		var list=parentTables[parentTables.length-1];
-
-		Helper.arenaRows = new Array();
-		for (var i=1; i<list.rows.length; i++){
-			var theRow=list.rows[i];
-			Helper.arenaRows[i-1] = {
-				'ArenaID': theRow.cells[0].textContent,
-				'Players': theRow.cells[1].textContent,
-				'JoinCost': theRow.cells[2].textContent.replace(/,/g,"")*1,
-				'JoinCostHTML': theRow.cells[2].innerHTML,
-				'State': theRow.cells[3].textContent,
-				'Specials[?]': (theRow.cells[4].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
-				'SpecialsHTML': theRow.cells[4].innerHTML,
-				'HellForge[?]': (theRow.cells[5].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
-				'HellForgeHTML': theRow.cells[5].innerHTML,
-				'MaxEquipLevel': theRow.cells[6].textContent*1,
-				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
-				'Reward': theRow.cells[7].innerHTML,
-				'Action': theRow.cells[8].innerHTML
-			};
-		}
-
-		if (Helper.sortAsc==undefined) Helper.sortAsc=false;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
-		}
-		Helper.sortBy=headerClicked;
-
-		if (headerClicked=="Member") {
-			Helper.arenaRows.sort(Helper.stringSort)
-		}
-		else {
-			Helper.arenaRows.sort(Helper.numberSort)
-		}
-		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
-
-		for (var i=0; i<Helper.arenaRows.length; i++){
-			var r = Helper.arenaRows[i];
-			var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
-			if (r.Action.search("View") != -1) {
-				bgColor = 'bgcolor="#f5e2b3"';
-			}
-			result += '<TR>'+
-			'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.JoinCostHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.State+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
-			'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
-		}
-		//result+='<tr>' + list.rows[list.rows.length-1].innerHTML + '</tr>'
-
-		list.innerHTML=result;
-
-		for (var i=0; i<list.rows[0].cells.length; i++) {
-			var cell=list.rows[0].cells[i];
-			if (cell.innerHTML.search("Max Equip Level") != -1
-				|| cell.innerHTML.search("Join Cost") != -1
-				|| cell.innerHTML.search("Specials") != -1
-				|| cell.innerHTML.search("Hell Forge") != -1
-				) {
-				cell.style.textDecoration="underline";
-				cell.style.cursor="pointer";
-				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
-				cell.addEventListener('click', Helper.sortArena, true);
-			}
-		}
 	},
 
 	injectSettingsGuildData: function(guildType) {
