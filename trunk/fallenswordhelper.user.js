@@ -78,6 +78,7 @@ var Helper = {
 		System.setDefault("showRingTypeItems", true);
 		System.setDefault("showBootTypeItems", true);
 		System.setDefault("showRuneTypeItems", true);
+		System.setDefault("showQuickDropLinks", false);
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -3107,6 +3108,16 @@ var Helper = {
 		window.location = window.location;
 	},
 
+	toggleShowQuickDropLinks: function(evt) {
+		var showQuickDropLinksElement = System.findNode("//span[@id='Helper:showQuickDropLinks']");
+		if (showQuickDropLinksElement.textContent == "Show Quick Drop links") {
+			if (window.confirm("Are you sure you want to show the quick drop links?")) GM_setValue("showQuickDropLinks", true);
+		} else {
+			GM_setValue("showQuickDropLinks", false);
+		}
+		window.location = window.location;
+	},
+
 	injectReportPaint: function() {
 		var mainTable = System.findNode("//table[@width='600']");
 		for (var i=0;i<mainTable.rows.length;i++) {
@@ -3202,15 +3213,20 @@ var Helper = {
 
 	injectDropItems: function() {
 		var mainTable = System.findNode("//table[@width='600']");
+		var showExtraLinks = GM_getValue("showExtraLinks");
+		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		if (mainTable) {
 			var insertHere = mainTable.rows[5].cells[0];
-			insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
-				(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
-		document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
+			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:showExtraLinks">' +
+				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;';
+			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:showQuickDropLinks">' +
+				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;';
+			document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
+			document.getElementById("Helper:showQuickDropLinks").addEventListener('click', Helper.toggleShowQuickDropLinks, true);
 		}
 
 		//function to add links to all the items in the drop items list
-		if (GM_getValue("showExtraLinks")) {
+		if (showExtraLinks || showQuickDropLinks) {
 			var itemName, itemInvId, theTextNode, newLink;
 			var allItems=System.findNodes("//input[@type='checkbox']");
 			if (allItems) {
@@ -3229,17 +3245,36 @@ var Helper = {
 					itemName = theTextNode.textContent.trim().replace("\\","");
 					theTextNode.textContent = itemName;
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
-					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
-						+ escape(itemName)
-						+ "'>AH</a>]</span> "
-						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
-						+ "&inv_id=" + itemInvId 
-						+ "&item_id=" + itemId
-						+ "&type=" + type
-						+ "&pid=" + pid + "'>"
-						+ "Sell</a>]</span> "
+					var preText = "", postText1 = "", postText2 = "";
+					if (showExtraLinks) {
+						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
+							+ escape(itemName)
+							+ "'>AH</a>]</span> "
+							+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
+							+ "&inv_id=" + itemInvId 
+							+ "&item_id=" + itemId
+							+ "&type=" + type
+							+ "&pid=" + pid + "'>"
+							+ "Sell</a>]</span> ";
+					}
+					postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="'
+						+ itemName
+						+ '" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+					if (showQuickDropLinks) {
+						postText2 = "&nbsp;<span  title='INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickDrop"
+							+ itemInvId
+							+ "' itemInvId="
+							+ itemInvId
+							+ " findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
+					}
+					
+					theTextNode.innerHTML = preText
 						+ theTextNode.innerHTML
-						+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+						+ postText1
+						+ postText2;
+					if (showQuickDropLinks) {
+						document.getElementById("Helper:QuickDrop"+itemInvId).addEventListener('click', Helper.quickDropItem, true);
+					}
 				}
 			}
 		}
@@ -3264,6 +3299,32 @@ var Helper = {
 		}
 	},
 
+	quickDropItem: function(evt){
+		var itemInvId = evt.target.getAttribute("itemInvId");
+		var dropItemHref = "http://www.fallensword.com/index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
+		System.xmlhttp(dropItemHref,
+			Helper.quickDropItemReturnMessage,
+			{"target": evt.target});
+	},
+
+	quickDropItemReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		target.style.cursor = 'default';
+		target.style.textDecoration = 'none';
+		if (info.search("Items dropped and destroyed.") != -1) {
+			target.style.color = 'green';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Item Dropped";
+		} else {
+			target.style.color = 'red';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Error:" + info;
+		}
+	},
+
 	checkAll: function(evt){
 		var itemName = evt.target.getAttribute("linkto");
 		var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
@@ -3283,16 +3344,19 @@ var Helper = {
 		var textNode = System.findNode("../../../td[3]", callback);
 		var auctionHouseLink=System.findNode("span[@findme='AH']", textNode);
 		var sellLink=System.findNode("span[@findme='Sell']", textNode);
+		var quickDropLink=System.findNode("span[@findme='QuickDrop']", textNode);
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
 		if (guildLockedRE.exec(responseText)) {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
+			if (quickDropLink) quickDropLink.style.visibility='hidden';
 		};
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
 		if (boundItemRE.exec(responseText)) {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
+			if (quickDropLink) quickDropLink.style.visibility='hidden';
 		};
 		if (GM_getValue("disableItemColoring")) return;
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
