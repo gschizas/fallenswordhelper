@@ -6752,8 +6752,8 @@ var Helper = {
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		//doc = doc.replace("<center></center>", "");
-		doc = doc.replace(/<table border="0" cellpadding="0" cellspacing="0" width="40" height="40"><tbody><tr><td><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
+		doc = doc.replace(/<table border="0" cellpadding="0" cellspacing="0" width="40" height="40"><tbody><tr><td><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
 

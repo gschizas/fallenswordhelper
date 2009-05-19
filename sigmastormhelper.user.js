@@ -819,7 +819,10 @@ var Helper = {
 
 					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
 						aCell.style.color=footprintsColor;
-						aCell.innerHTML+="**";
+						if (aCell.innerHTML.indexOf("table") > 0)
+							aCell.firstChild.firstChild.firstChild.firstChild.firstChild.innerHTML +="**";
+						else
+							aCell.innerHTML+="**";
 					};
 
 				}
