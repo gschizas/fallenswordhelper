@@ -5551,7 +5551,8 @@ var Helper = {
 		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + System.findNode("//table", docu).innerHTML + '</table>';
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
-		doc = doc.replace("<center></center>", "");
+		//doc = doc.replace("<center></center>", "");
+		doc = doc.replace(/<table border="0" cellpadding="0" cellspacing="0" width="65" height="65"><tbody><tr><td><center><\/center><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
 		doc = doc.replace(/width="65"/g, 'width="' + size + '"').replace(/height="65"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
