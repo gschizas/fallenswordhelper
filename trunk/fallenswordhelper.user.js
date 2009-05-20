@@ -930,7 +930,7 @@ var Helper = {
 	position: function() {
 		var result = {};
 		if (Helper.page=="world/map/-(-)") {
-			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/..");
+			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/../../../../../..");
 			result.X=playerTile.cellIndex;
 			result.Y=playerTile.parentNode.rowIndex;
 			result.type="worldmap";
@@ -992,7 +992,10 @@ var Helper = {
 
 					if (x != (isLarge ? posit.X : 2) || y != (isLarge ? posit.Y : 2)) {
 						aCell.style.color = footprintsColor;
-						aCell.innerHTML = "**";
+						if (aCell.innerHTML.indexOf("table") > 0)
+							aCell.firstChild.firstChild.firstChild.firstChild.firstChild.innerHTML +="**";
+						else
+							aCell.innerHTML+="**";
 					};
 
 									}
@@ -6753,7 +6756,7 @@ var Helper = {
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		//doc = doc.replace("<center></center>", "");
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
-		doc = doc.replace(/<table border="0" cellpadding="0" cellspacing="0" width="40" height="40"><tbody><tr><td><\/td><\/tr><\/tbody><\/table>/g,'');
+		doc = doc.replace(/<table border="0" cellpadding="0" cellspacing="0" width="40" height="40"><tbody><tr><td[^>]*><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
 
