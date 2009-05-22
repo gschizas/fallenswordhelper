@@ -456,6 +456,9 @@ var Helper = {
 		case "trade":
 			Helper.retrieveTradeConfirm();
 			break;
+		case "titan":
+			Helper.injectTitan();
+			break;
 		case "toprated":
 			switch (subPageId) {
 			case "xp":
@@ -7220,6 +7223,26 @@ var Helper = {
 		}
 		injectHere.style.color = color;
 		injectHere.innerHTML = '(+' + extraStam + ' stamina)';
+	},
+	
+	injectTitan: function() {
+		System.xmlhttp("index.php?cmd=guild&subcmd=scouttower", Helper.getScoutTowerDetails);
+	},
+	
+	getScoutTowerDetails: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[@src='"+System.imageServer+"/skin/scouttower_header.jpg']]", doc);
+		if (scoutTowerTable) {
+			var titanTable = System.findNode("//table[tbody/tr/td/img[@src='"+System.imageServer+"/skin/titankilllog_banner.jpg']]");
+			var newRow = titanTable.insertRow(-1);
+			var newCell = newRow.insertCell(0);
+			newCell.align = "center";
+			newCell.innerHTML = "<span style='font-weight:bold; font-size:large; color:blue;'>Scout Tower Info</span>";
+			
+			var newRow = titanTable.insertRow(-1);
+			var newCell = newRow.insertCell(0);
+			newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
+		}
 	}
 	
 };
