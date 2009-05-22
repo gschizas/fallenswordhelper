@@ -650,7 +650,7 @@ var Helper = {
 		var injectHere = buttonElement.parentNode;
 		injectHere.align = 'center';
 		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
-			'class="custombutton">' + injectHere.innerHTML;
+			'class="custombutton"><br>' + injectHere.innerHTML;
 
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
@@ -722,7 +722,7 @@ var Helper = {
 			"<tr><td>Defending Guild Relic Count:</td><td title='relicCount'>0</td></tr>" +
 			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
 			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
-			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet)</td></tr>" +
+			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet), but does include Constitution bonus calculation on lead defender</td></tr>" +
 			"<tr style='display:none;'><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
 			"<tr style='display:none;'><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
 			"<tr style='display:none;'><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
@@ -736,10 +736,13 @@ var Helper = {
 			"<tr><td align='right' style='color:brown;'>Armor:</td><td align='right' title='armorValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
-			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>"
+			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>" +
+			"<tr><td style='border-top:2px black solid;' colspan=2>DC adjusted defense values:</td></tr>" +
+			"<tr><td style='font-size:x-small;' align='right'>DC225:</td><td style='font-size:x-small;' align='right' title='DC225'>0</td></tr>" +
+			"<tr><td style='font-size:x-small;' align='right'>DC175:</td><td style='font-size:x-small;' align='right' title='DC175'>0</td></tr>";
 		if (defendingGuildID == myGuildID) {
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;'>Offline guild members not at relic:<td><tr>";
-			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;'>" + validMemberString + "<td><tr>";
+			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>";
+			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;' colspan=2>" + validMemberString + "</td></tr>";
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
@@ -783,7 +786,12 @@ var Helper = {
 			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber                = System.intValue(defenseValue.innerHTML);
 			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
-			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier)
+			defenseValue.innerHTML       = System.addCommas(overallDefense);
+			var dc225                    = System.findNode("//td[@title='DC225']");
+			var dc175                    = System.findNode("//td[@title='DC175']");
+			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
+			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
 			var armorValue               = System.findNode("//td[@title='armorValue']");
 			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
@@ -846,7 +854,12 @@ var Helper = {
 			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
 			var defenseValue             = System.findNode("//td[@title='defenseValue']");
 			defenseNumber                = System.intValue(defenseValue.innerHTML);
-			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
+			var overallDefense           = defenseNumber + Math.round(playerDefenseValue*defenderMultiplier);
+			defenseValue.innerHTML       = System.addCommas(overallDefense);
+			var dc225                    = System.findNode("//td[@title='DC225']");
+			var dc175                    = System.findNode("//td[@title='DC175']");
+			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
+			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
 			var armorValue               = System.findNode("//td[@title='armorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
 			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
@@ -861,12 +874,29 @@ var Helper = {
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 		}
 		else {
+			//get relavent buffs here later ... just Constitution atm
+			var allItems = doc.getElementsByTagName("IMG");
+			var constitutionLevel = 0;
+			for (var i=0;i<allItems.length;i++) {
+				var anItem=allItems[i];
+				if (anItem.getAttribute("src").search("/skills/") != -1) {
+					var onmouseover = anItem.getAttribute("onmouseover")
+					var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
+					var constitution =  constitutionRE.exec(onmouseover);
+					if (constitution) {
+						constitutionLevel = constitution[1];
+						break;
+					}
+				}
+			}
+
 			var defenderMultiplier = 1;
 			var attackValue = System.findNode("//td[@title='LDattackValue']");
 			attackNumber = System.intValue(attackValue.innerHTML);
 			attackValue.innerHTML = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
 			var defenseValue = System.findNode("//td[@title='LDdefenseValue']");
-			defenseNumber=System.intValue(defenseValue.innerHTML);
+			defenseNumber = System.intValue(defenseValue.innerHTML);
+			playerDefenseValue = Math.ceil(System.intValue(playerDefenseValue) * (1 + constitutionLevel * 0.001));
 			defenseValue.innerHTML = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
 			var armorValue = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber=System.intValue(armorValue.innerHTML);
@@ -880,6 +910,7 @@ var Helper = {
 			var defendersProcessed = System.findNode("//td[@title='LDProcessed']");
 			defendersProcessedNumber=System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
+
 		}
 		var relicProcessedValue = System.findNode("//td[@title='relicProcessed']");
 		var relicCountValue = System.findNode("//td[@title='relicCount']");
@@ -903,7 +934,12 @@ var Helper = {
 			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber                = System.intValue(defenseValue.innerHTML);
 			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
-			defenseValue.innerHTML       = System.addCommas(defenseNumber + Math.round(LDdefenseNumber*relicMultiplier));
+			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier)
+			defenseValue.innerHTML       = System.addCommas(overallDefense);
+			var dc225                    = System.findNode("//td[@title='DC225']");
+			var dc175                    = System.findNode("//td[@title='DC175']");
+			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
+			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
 			var armorValue               = System.findNode("//td[@title='armorValue']");
 			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
@@ -2871,6 +2907,19 @@ var Helper = {
 
 		var playerId = Layout.playerId();
 
+		var memberList = System.getValueJSON("memberlist");
+		var memberNameString = "";
+		if (memberList) {
+			for (var i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				memberNameString += member.name + " ";
+			}
+		}
+		var listOfEnemies = GM_getValue("listOfEnemies");
+		if (!listOfEnemies) listOfEnemies = "";
+		var listOfAllies = GM_getValue("listOfAllies");
+		if (!listOfAllies) listOfAllies = "";
+
 		var newRow, newCell, winningBidBuyoutCell;
 		for (var i=0;i<auctionTable.rows.length;i++) {
 			var aRow = auctionTable.rows[i];
@@ -2894,6 +2943,17 @@ var Helper = {
 					if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
 						var winningBidTable = aRow.cells[3].firstChild.firstChild;
 						var winningBidCell = winningBidTable.rows[0].cells[0];
+						var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
+						var winningBidder = winningBidderCell.innerHTML;
+						if (memberNameString.search(winningBidder) !=-1) {
+							winningBidderCell.style.color="green";
+						}
+						if (listOfEnemies.search(winningBidder) !=-1) {
+							winningBidderCell.style.color="red";
+						}
+						if (listOfAllies.search(winningBidder) !=-1) {
+							winningBidderCell.style.color="blue";
+						}
 						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
 						var winningBidValue = System.intValue(winningBidCell.textContent);
 						newRow = winningBidTable.insertRow(2);
