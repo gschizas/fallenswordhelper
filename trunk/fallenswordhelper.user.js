@@ -2579,10 +2579,12 @@ var Helper = {
 						colorPlayerName = true;
 					}
 					if (messageType == "General") {
-						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
-							playerElement = aRow.cells[2].firstChild.nextSibling;
-							playerName = playerElement.innerHTML
-							colorPlayerName = true;
+						if (aRow.cells[2].firstChild.nextSibling) {
+							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
+								playerElement = aRow.cells[2].firstChild.nextSibling;
+								playerName = playerElement.innerHTML
+								colorPlayerName = true;
+							}
 						}
 					}
 					
@@ -2617,23 +2619,24 @@ var Helper = {
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
-					if (messageType == "General" && 
-							aRow.cells[2].firstChild.nextSibling && 
-							aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1){
-						
-						var buffingPlayerIDRE = /player_id=(\d+)/;
-						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
-						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
-						var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
-							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
-							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
-							"'>ST</a>";
-						if (!isGuildMate) {
-							extraText += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-							"'>Ignore</a>";
+					if (messageType == "General") {
+						if (aRow.cells[2].firstChild.nextSibling) {
+							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
+								var buffingPlayerIDRE = /player_id=(\d+)/;
+								var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
+								var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
+								var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
+									"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
+									"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
+									"'>ST</a>";
+								if (!isGuildMate) {
+									extraText += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+									"'>Ignore</a>";
+								}
+								extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
+								aRow.cells[2].innerHTML += extraText;
+							}
 						}
-						extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
-						aRow.cells[2].innerHTML += extraText;
 					}
 				}
 			}
