@@ -2579,7 +2579,7 @@ var Helper = {
 						colorPlayerName = true;
 					}
 					if (messageType == "General") {
-						if (aRow.cells[2].firstChild.nextSibling) {
+						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.getAttribute("href")) {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								playerElement = aRow.cells[2].firstChild.nextSibling;
 								playerName = playerElement.innerHTML
@@ -2620,7 +2620,7 @@ var Helper = {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
 					if (messageType == "General") {
-						if (aRow.cells[2].firstChild.nextSibling) {
+						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.getAttribute("href")) {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								var buffingPlayerIDRE = /player_id=(\d+)/;
 								var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
