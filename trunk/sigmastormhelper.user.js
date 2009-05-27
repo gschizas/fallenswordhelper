@@ -1360,7 +1360,7 @@ var Helper = {
 
 	insertQuickSelectItems: function() {
 		var nodes = System.findNodes("//input[@name='sendItemList[]']");
-		if (nodes.length==0) return;
+		if (nodes == null || nodes.length==0) return;
 		var table=nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
 
 		table.parentNode.parentNode.parentNode.parentNode.rows[0].cells[0].innerHTML += "<a name=sendButtonLbl></a>";
@@ -2921,10 +2921,17 @@ var Helper = {
 
 	injectReportPaint: function() {
 		var mainTable = System.findNode("//table[@width='600']");
+		var searchItemRE = /&item=(.*)$/
+		var searchItem = searchItemRE.exec(location);
+		if (searchItem) searchItem = unescape(searchItem[1]);
 		for (var i=0;i<mainTable.rows.length;i++) {
 			var aRow = mainTable.rows[i];
 			if (aRow.cells[1]) { // itemRow
 				var itemCell = aRow.cells[1];
+				if (searchItem && itemCell.textContent.indexOf(searchItem)<0) {
+					itemCell.parentNode.innerHTML='';
+					continue;
+				}
 				var itemElement = itemCell.firstChild;
 				var href = itemElement.getAttribute("href");
 				//GM_log(href);
@@ -4265,7 +4272,7 @@ var Helper = {
 
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td>' + item.name + '</td>' +
+				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a></td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
 				'<td align="right">' + item.class + '</td>' +
@@ -5674,7 +5681,7 @@ var Helper = {
 		}
 
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-
+		if (auctionTable == null) return;
 		// add image & tooltip of the auctioned item
 		var bidEntryTable = auctionTable.rows[5].cells[0].firstChild.nextSibling;
 		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)&imgid=([^&]*)&txt=(.*)/.exec(window.location.search)
@@ -5878,14 +5885,16 @@ var Helper = {
 			var skillPoint = System.getIntFromRegExp(skills[i].rows[3].cells[0].innerHTML, />(\d+)</i);
 			var skillName = skills[i].rows[1].cells[0].textContent;
 			if (skillPoint > 0) {
-				GM_log(skillName);
 				if (count % 2 == 0) result += "<tr>";
-				result += "<td align=center width=50%>" + skills[i].parentNode.innerHTML.replace("/skillicon_bg_linked.gif", "/skillicon_bg.gif");
+				result += "<td align=center width=50%><table width=100%><tr><td align=center>"+
+						skills[i].parentNode.innerHTML.replace("/skillicon_bg_linked.gif", "/skillicon_bg.gif")+
+						"</td></tr><tr><td align=center>";
 				if (! passiveSkillREG.test(skillName)) {
-					result += "<input class=custombutton type=button style='width:135px;' onclick=\"window.location='index.php?cmd=skills&subcmd=cast&skill_id=" + skillId + "';\" value='Activate on Self'/>";
+					result += "<input class=custombutton type=button style='width:135px;' skillId="+skillId+" value='Activate on Self'/>";
 				} else {
 					result += "<span color='#ffff00'>Passive Skill</span>";
 				}
+				result += "</td></tr></table>";
 				result += "</td>";
 				if (count % 2 == 1) result += "</tr>";
 				count ++;
@@ -5894,6 +5903,21 @@ var Helper = {
 		if (count % 2 == 1) result += "<td></td></tr>";
 		result += "</table>";
 		body.innerHTML = result;
+		
+		var buttons=System.findNodes("//input[@class='custombutton']");
+		for (var i=0; i<buttons.length; i++){
+			buttons[i].addEventListener("click", Helper.selfBuffClassSkill, true);
+		}
+	},
+	
+	selfBuffClassSkill: function(evt) {
+		var skillId = parseInt(evt.target.getAttribute("skillId"));
+		
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=" + skillId, 
+				function(responseText) {
+					var info = Layout.infoBox(responseText);
+					evt.target.parentNode.innerHTML = info;
+				});
 	},
 
 	injectStatCalculator: function(injectHere) {
