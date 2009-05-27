@@ -78,7 +78,12 @@ var Data = {
 				{'questName':'Spheksophobia', 'level':103, 'location':'Lava Field (Fence)'},
 				{'questName':'Stalemate', 'level':105, 'location':'Ashstorm Wilds (Colony)'},
 				{'questName':'Bill of Sale', 'level':107, 'location':'Ashstorm Wilds (Plain)'},
-				{'questName':'A Friend in Need', 'level':108, 'location':'Varion City (Outskirts)'}
+				{'questName':'A Friend in Need', 'level':108, 'location':'Varion City (Outskirts)'},
+				{'questName':'Sigil of Eons', 'level':111, 'location':'Ashstorm Wilds (Snare) @ 2,13'},
+				{'questName':'Epic Mount', 'level':113, 'location':'Ashstorm Wilds (Plateau) @ 9,13'},
+				{'questName':'Programmed Drive', 'level':115, 'location':'Ashstorm Wilds (Oasis) @ 7,13'},
+				{'questName':'Command Clash', 'level':117, 'location':'Karano (Showroom) @ 8,2'},
+				{'questName':'Unit Expectations', 'level':119, 'location':'Karano (Growth Vats) @ 10,6'}
 			];
 			Data.questArray = questArray.sort();
 		}
