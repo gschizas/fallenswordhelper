@@ -5293,7 +5293,7 @@ var Helper = {
 
 	injectSettingsGuildData: function(guildType) {
 		var result='';
-		result += '<input name="guild' + guildType + '" size="50" value="' + GM_getValue("guild" + guildType) + '">'
+		result += '<input name="guild' + guildType + '" size="45" value="' + GM_getValue("guild" + guildType) + '">'
 		result += '<span style="cursor:pointer;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
 			guildType + 'Message"> &#x00bb;</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
@@ -5307,6 +5307,7 @@ var Helper = {
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
 
+		var inputSize=45;
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
@@ -5372,7 +5373,7 @@ var Helper = {
 			'<tr><td align="right">Footprints Color:</td><td><input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
 			'<tr><td align="right">Show Send Credits' + Helper.helpLink('Show Send Credits on World Screen', 'This will show an icon below the world map to allow you to quickly send credits to a Friend.') +
 				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
-				'Send <input name="goldAmount" size="15" value="'+ GM_getValue("goldAmount") + '" /> '+
+				'Send <input name="goldAmount" size="8" value="'+ GM_getValue("goldAmount") + '" /> '+
 				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />' +
 				'</td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
@@ -5388,19 +5389,19 @@ var Helper = {
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
 				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
-				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
+				':</td><td><input name="doNotKillList" size="'+inputSize+'" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
-				'<input name="huntingBuffs" size="50" value="'+ buffs + '" /></td></tr>' +
+				'<input name="huntingBuffs" size="'+inputSize+'" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
-				'<input name="hideQuestNames" size="50" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
+				'<input name="hideQuestNames" size="'+inputSize+'" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
 			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
 				'This works on Recipe Manager') +
 				':</td><td><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
-				'<input name="hideRecipeNames" size="50" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
+				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -5408,13 +5409,9 @@ var Helper = {
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1267797">Tangtop</a> and '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1191381">dkwizard</a> '+
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=1133910">Jesiegel</a>' +
-/*
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a>' +
-*/
 			'</td></tr>' +
 			'</table></form>';
-		var insertHere = System.findNode("//table[@width='500']");
+		var insertHere = System.findNode("//table[@width='500' and @cellpadding=2]");
 		var newRow=insertHere.insertRow(insertHere.rows.length);
 		var newCell=newRow.insertCell(0);
 		newCell.colSpan=3;
