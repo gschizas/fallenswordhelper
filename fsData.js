@@ -6740,7 +6740,22 @@ var Data = {
 				{name:'Lagarto Axe', type:'weapon'},
 				{name:'Lagarto Rune', type:'rune'},
 				{name:'Lord Eltwiers Helmet', type:'helmet'},
-				{name:'Lord Eltwiers Rune', type:'rune'}
+				{name:'Lord Eltwiers Rune', type:'rune'},
+
+				{name:'Amulet of Sawarl', type:'amulet'},
+				{name:'Amulet of Tinale', type:'amulet'},
+				{name:'Boots of Aviale', type:'boots'},
+				{name:'Fuvayus Vortex Stone', type:'rune'},
+				{name:'Helmet of Colarr', type:'helmet'},
+				{name:'King Zelrokhs Amulet', type:'amulet'},
+				{name:'King Zelrokhs Boots', type:'boots'},
+				{name:'King Zelrokhs Helmet', type:'helmet'},
+				{name:'Ziprael Amulet', type:'amulet'},
+				{name:'Jai Ton Gauntlets', type:'gloves'},
+				{name:'Amulet of Graldig', type:'amulet'},
+				{name:'Weapon of Oranical', type:'weapon'},
+				{name:'Shield of Stalia', type:'shield'},
+				{name:'Ring of Aeslam', type:'ring'}
 			]
 		}
 		return Data.itemArray;

@@ -319,9 +319,12 @@ var Helper = {
 			}
 			break;
 		case "questbook":
-			switch (subsequentPageId) {
+			switch (subPageId) {
 			case "-":
 				Helper.injectQuestBookLite();
+				break;
+			case "viewquest":
+				Helper.injectQuestTracker();
 				break;
 			}
 			Helper.injectQuestBookFull();
@@ -653,14 +656,14 @@ var Helper = {
 		var injectHere = buttonElement.parentNode;
 		injectHere.align = 'center';
 		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
-			'class="custombutton"><br>' + injectHere.innerHTML;
+			'class="custombutton">' + injectHere.innerHTML;
 
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
 
 	calculateRelicDefenderStats: function(evt) {
 		var calcButton = System.findNode("//input[@id='calculatedefenderstats']");
-		calcButton.style.display = "none";
+		calcButton.style.visibility = "hidden";
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 		relicNameElement.parentNode.style.fontSize = "x-small";
 		var tableElement = System.findNode("//table[@width='600']");
@@ -697,11 +700,13 @@ var Helper = {
 		if (defendingGuildID == myGuildID) {
 			var validMemberString = "";
 			var memberList = System.getValueJSON("memberlist");
-			for (var i=0;i<memberList.members.length;i++) {
-				var member=memberList.members[i];
-				if (member.status == "Offline"
-					&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
-					validMemberString += member.name + " ";
+			if (memberList) {
+				for (var i=0;i<memberList.members.length;i++) {
+					var member=memberList.members[i];
+					if (member.status == "Offline"
+						&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
+						validMemberString += member.name + " ";
+					}
 				}
 			}
 		}
@@ -1077,7 +1082,8 @@ var Helper = {
 			'.HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}\n' +
 			'.HelperAdvisorRow2:hover {background-color:white}');
 
-		Helper.generateAdvisorRows(list);
+		var memberList = System.getValueJSON("memberlist");
+		if (memberList) Helper.generateAdvisorRows(list);
 
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
@@ -1097,7 +1103,7 @@ var Helper = {
 		}
 
 		Helper.sortAsc = true;
-		Helper.sortAdvisor(list, "Member");
+		if (memberList) Helper.sortAdvisor(list, "Member");
 	},
 
 	generateAdvisorRows: function(list) {
@@ -1253,7 +1259,7 @@ var Helper = {
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
-			"colspan='2'></td></tr><tr>";
+			"colspan='2'></td></tr>";
 		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
 		var hasDeathDealer = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		if (hasDeathDealer || hasShieldImp) {
@@ -1266,7 +1272,13 @@ var Helper = {
 				impsRemaining = impsRemainingRE[1];
 			}
 			var applyImpWarningColor = " style='color:green; font-size:medium;'";
-			if (impsRemaining<2){
+			if (impsRemaining==2){
+				applyImpWarningColor = " style='color:Orangered; font-size:medium; font-weight:bold;'";
+			}
+			if (impsRemaining==1){
+				applyImpWarningColor = " style='color:Orangered; font-size:large; font-weight:bold'";
+			}
+			if (impsRemaining==0){
 				applyImpWarningColor = " style='color:red; font-size:large; font-weight:bold'";
 			}
 			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
@@ -1277,7 +1289,7 @@ var Helper = {
 				var lastKillStreak = GM_getValue("lastKillStreak");
 				if (impsRemaining>0 && lastDeathDealerPercentage == 20) {
 					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + System.addCommas(lastKillStreak) +
-						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>"
+						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>";
 				} else {
 					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%</td></tr>";
@@ -1285,6 +1297,19 @@ var Helper = {
 				}
 			}
 		}
+		var hasCounterAttack = System.findNode("//img[contains(@onmouseover,'Counter Attack')]");
+		if (hasCounterAttack) {
+			if (hasCounterAttack.getAttribute("src").search("/skills/") != -1) {
+				var onmouseover = hasCounterAttack.getAttribute("onmouseover")
+				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
+				var counterAttack = counterAttackRE.exec(onmouseover);
+				if (counterAttack) {
+					counterAttackLevel = counterAttack[1];
+				}
+			}
+			replacementText += "<tr><td style='font-size:small; color:blue'>CA" + counterAttackLevel + " active</td></tr>";
+		}
+		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
 		if (GM_getValue("showHuntingBuffs")) {
 			var buffs=GM_getValue("huntingBuffs");
 			var buffAry=buffs.split(",")
@@ -1570,6 +1595,28 @@ var Helper = {
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
 
+		//quest tracker
+		var questBeingTracked = GM_getValue("questBeingTracked");
+		if (questBeingTracked) {
+			var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+			if (!injectHere) return;
+			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
+			replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
+				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
+			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
+				"colspan='2'></td></tr>";
+			replacementText += "<tr><td style='font-size:small; color:black'><a href=" + questBeingTracked + ">Quest Info:</a>&nbsp;"
+			replacementText += "<input id='dontTrackThisQuest' type='button' value='Stop Tracking Quest' title='Stops tracking quest progress.' class='custombutton'><br>";
+			replacementText += "<span findme='questinfo'></span></td></tr>"
+			replacementText += "</table>";
+			replacementText += "</td>";
+
+			newRow=injectHere.insertRow(2);
+			newRow.innerHTML=replacementText;
+			System.xmlhttp(questBeingTracked, Helper.getQuestInfo);
+			document.getElementById("dontTrackThisQuest").addEventListener("click", Helper.dontTrackThisQuest, true);
+		}
+		
 		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
 		if (mapName) {
 			mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
@@ -2166,6 +2213,7 @@ var Helper = {
 
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
+			System.setValueJSON("memberlist", memberList);
 			if (!refreshGuildDataOnly) Helper.injectGuildList(memberList);
 		}
 	},
@@ -2694,7 +2742,6 @@ var Helper = {
 
 	injectGuildList: function(memberList) {
 		var playerId = Layout.playerId();
-		System.setValueJSON("memberlist", memberList);
 		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
 		// injectHere.innerHTML=memberList.length;
 		var displayList = document.createElement("TABLE");
@@ -3216,21 +3263,23 @@ var Helper = {
 		var memberList = System.getValueJSON("memberlist");
 
 		var injectHere, searchString;
-		for (var i=0;i<memberList.members.length;i++) {
-			var member=memberList.members[i];
-			if (member.status=="Online") {
-				var player=System.findNode("//b[contains(., '" + member.name + "')]");
-				if (player) {
-					player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
-						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
-					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
+		if (memberList) {
+			for (var i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				if (member.status=="Online") {
+					var player=System.findNode("//b[contains(., '" + member.name + "')]");
+					if (player) {
+						player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
+							System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+						player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
+					}
 				}
-			}
-			else {
-				var player=System.findNode("//b[contains(., '" + member.name + "')]");
-				if (player) {
-					player.innerHTML = "<a href='" +
-						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+				else {
+					var player=System.findNode("//b[contains(., '" + member.name + "')]");
+					if (player) {
+						player.innerHTML = "<a href='" +
+							System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+					}
 				}
 			}
 		}
@@ -5030,12 +5079,14 @@ var Helper = {
 		for (i=0; i<allItems.length; i++) {
 			var theItem=allItems[i].cells[0];
 			var foundName=theItem.textContent;
-			for (j=0; j<memberList.members.length; j++) {
-				var aMember=memberList.members[j];
-				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
-				if (aMember.name==foundName) {
-					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" +
-						theItem.innerHTML + "</span> [" + aMember.level + "]";
+			if (memberList) {
+				for (j=0; j<memberList.members.length; j++) {
+					var aMember=memberList.members[j];
+					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+					if (aMember.name==foundName) {
+						theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" +
+							theItem.innerHTML + "</span> [" + aMember.level + "]";
+					}
 				}
 			}
 			var theDateCell=allItems[i].cells[2];
@@ -7246,8 +7297,42 @@ var Helper = {
 			var newCell = newRow.insertCell(0);
 			newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
 		}
-	}
+	},
 	
+	injectQuestTracker: function() {
+		var injectHere = System.findNode("//td[font/b[.='Quest Details']]");
+		
+		var currentTrackedQuest = GM_getValue("questBeingTracked");
+		if (currentTrackedQuest != location.search) {
+			injectHere.innerHTML += '<br><input id="trackThisQuest" type="button" value="Track Quest" title="Tracks quest progress." class="custombutton">';
+			document.getElementById("trackThisQuest").addEventListener("click", Helper.trackThisQuest, true);
+		} else {
+			injectHere.innerHTML += '<br><input id="dontTrackThisQuest" type="button" value="Stop Tracking Quest" title="Tracks quest progress." class="custombutton">';
+			document.getElementById("dontTrackThisQuest").addEventListener("click", Helper.dontTrackThisQuest, true);
+		}
+	},
+	
+	trackThisQuest: function(evt) {
+		GM_setValue("questBeingTracked", location.search);
+		window.location = window.location;
+	},
+
+	dontTrackThisQuest: function(evt) {
+		GM_setValue("questBeingTracked", "");
+		window.location = window.location;
+	},
+
+	getQuestInfo: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var questInfoElement = System.findNode("//span[@findme='questinfo']");
+		var trackingHTMLElement = System.findNode("//font[@color='#003300']", doc);
+		if (trackingHTMLElement) {
+			questInfoElement.innerHTML = trackingHTMLElement.innerHTML;
+		} else {
+			questInfoElement.innerHTML = 'None';
+		}
+	}
+
 };
 
 Helper.onPageLoad(null);
