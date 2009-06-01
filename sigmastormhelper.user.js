@@ -3294,7 +3294,7 @@ var Helper = {
 			GM_setValue("listOfEnemies", listOfEnemies);
 
 			// Fast Wear
-			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
+			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem') or contains(@href,'subcmd=useitem')]]");
 
 			if (!profileInventory) {
 				var profInv = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=useitem')]]");
@@ -3312,11 +3312,14 @@ var Helper = {
 			if (profileInventory) {
 				var profileInventoryIDRE = /inventory_id=(\d+)/i;
 				var wearableIDRE = /subcmd=equipitem/i;
+				var usableIDRE = /subcmd=useitem/i;
+				var itemImgRE = /\/([^\/]*)\.gif/i;
 				var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
 
 				var profileInventoryBox = [];
 				var profileInventoryBoxItem = [];
 				var profileInventoryBoxID = [];
+				var profileInventoryResID = [];
 				for (var i=0;i<15;i++) {
 					if (foldersEnabled) {
 						if (profileInventory.rows[2*Math.floor(i / 5)]) profileInventoryBox[i]=profileInventory.rows[2*Math.floor(i / 5)].cells[i % 5];
@@ -3326,7 +3329,13 @@ var Helper = {
 					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
 					if (profileInventoryBoxItem[i] && profileInventoryBoxItem[i].firstChild) {
 						var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
-						if (itemHREF && profileInventoryIDRE(itemHREF) && wearableIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+						if (itemHREF && profileInventoryIDRE(itemHREF)) {
+							if (wearableIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+							if (usableIDRE(itemHREF)) {
+								profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+								profileInventoryResID[i] = itemImgRE(profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("src"))[1];
+							}
+						}
 					}
 				}
 
@@ -3335,7 +3344,7 @@ var Helper = {
 				for (var i=0;i<15;i++) {
 					if ((i % 5==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*Math.floor(i / 5)+1);
 					if ((i % 5==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*Math.floor(i / 5)+1);
-					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
+					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i] && !profileInventoryResID[i]) {
 						var output = '<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
 								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
 								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
@@ -3344,8 +3353,19 @@ var Helper = {
 						newCell.innerHTML = output;
 						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
 							.addEventListener('click', Helper.equipProfileInventoryItem, true);
-					} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
+					} else if (profileInventoryBoxItem[i] && profileInventoryBoxID[i] && profileInventoryResID[i]){
+						var output = '<span style="cursor:pointer; color:#D4FAFF; font-size:xx-small;">'+
+								'<span id="Helper:selectAllProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+								'itemID="' + profileInventoryResID[i] + '" onmouseover="Tip(\'Select all items of the same type\')">S</span> | '+
+								'<span id="Helper:useProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+								'itemID="' + profileInventoryBoxID[i] + '" onmouseover="Tip(\'Use item / Extract resource (with your confirmation)\')">U</span></span>';
 						var newCell = newRow.insertCell(i % 5);
+						newCell.align = 'center';
+						newCell.innerHTML = output;
+						document.getElementById('Helper:selectAllProfileInventoryItem' + profileInventoryBoxID[i])
+							.addEventListener('click', Helper.selectAllProfileInventoryItem, true);
+						document.getElementById('Helper:useProfileInventoryItem' + profileInventoryBoxID[i])
+							.addEventListener('click', Helper.useProfileInventoryItem, true);
 					}
 				}
 			}
@@ -3414,6 +3434,29 @@ var Helper = {
 		System.xmlhttp("index.php?cmd=profile&subcmd=equipitem&inventory_id=" + InventoryItemID,
 			Helper.equipProfileInventoryItemReturnMessage,
 			{"item": InventoryItemID, "target": evt.target});
+	},
+	
+	selectAllProfileInventoryItem: function(evt) {
+		var imgID=evt.target.getAttribute("itemID");
+		var nodes = System.findNodes("//td/center/a[img[contains(@src,'/"+imgID+".gif')]]");
+		if (nodes && nodes.length > 0){
+			var profileInventoryIDRE = /inventory_id=(\d+)/i;
+			for (var i=0; i<nodes.length; i++) {
+				itemId = profileInventoryIDRE(nodes[i].getAttribute("href"))[1];
+				var ckbNode = System.findNode("//input[@type='checkbox' and @value='"+itemId+"']");
+				if (ckbNode) ckbNode.checked = ! ckbNode.checked;
+			}
+		}
+	},
+	
+	useProfileInventoryItem: function(evt) {
+		if (!window.confirm("Are you sure you want to use/extract the item?")) return;
+		var InventoryItemID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + InventoryItemID,
+			function(responseText) {
+				var info = Layout.infoBox(responseText);
+				evt.target.parentNode.innerHTML = info;
+			});
 	},
 
 	equipProfileInventoryItemReturnMessage: function(responseText, callback) {
