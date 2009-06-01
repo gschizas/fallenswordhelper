@@ -1257,6 +1257,7 @@ var Helper = {
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
+		Helper.injectPersonalData(document);
 
 		var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
 		if (!injectHere) return;
@@ -1323,6 +1324,24 @@ var Helper = {
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
+	},
+	
+	injectPersonalData: function(doc) {
+		var injectHere = System.findNode("//table[contains(@background,'large_content_bg.jpg')]/tbody/tr[1]/td",doc);
+		if (injectHere) {
+			var skillInfo = System.findNode("//table[@height=22]/tbody/tr/td[@width=130]",doc);
+			var skillInfoText = skillInfo.getAttribute("onmouseover");
+			Helper.skillPower = System.getIntFromRegExp(skillInfoText, /Skill Power<\/b>: (\d+) \/ \d+<br>/i);
+			injectHere.innerHTML = "<div style='font-size:x-small;color:yellow;font-weight:bold'>"+
+				"Atk:"+Helper.characterAttack+", "+
+				"Def:"+Helper.characterDefense+", "+
+				"Arm:"+Helper.characterArmor+", "+
+				"Dmg:"+Helper.characterDamage+"&nbsp;&nbsp;&nbsp;<br>"+
+				"Hp:"+Helper.characterHP+"/"+Helper.characterMaxHP+", "+
+				"Skill:"+Helper.skillPower+"&nbsp;&nbsp;&nbsp;</div><br>";
+			injectHere.style.verticalAlign="bottom";
+			injectHere.style.textAlign="right";
+		}
 	},
 
 	retrieveTradeConfirm: function() {
