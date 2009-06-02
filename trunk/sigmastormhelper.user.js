@@ -1329,16 +1329,24 @@ var Helper = {
 	injectPersonalData: function(doc) {
 		var injectHere = System.findNode("//table[contains(@background,'large_content_bg.jpg')]/tbody/tr[1]/td",doc);
 		if (injectHere) {
-			var skillInfo = System.findNode("//table[@height=22]/tbody/tr/td[@width=130]",doc);
+			// skill power
+			var skillInfo = System.findNodes("//table[@height=22]/tbody/tr/td[@width=130]",doc);
+			if (skillInfo) skillInfo = skillInfo[skillInfo.length-1];
 			var skillInfoText = skillInfo.getAttribute("onmouseover");
 			Helper.skillPower = System.getIntFromRegExp(skillInfoText, /Skill Power<\/b>: (\d+) \/ \d+<br>/i);
+			
+			// backpack
+			var bpInfo = System.findNode("//td[a/img[contains(@src,'quicklinks/3.gif')]]/font");
+			Helper.bpInfo = bpInfo.textContent.replace(/[\[\]\s]/g,'');
 			injectHere.innerHTML = "<div style='font-size:x-small;color:yellow;font-weight:bold'>"+
-				"Atk:"+Helper.characterAttack+", "+
-				"Def:"+Helper.characterDefense+", "+
-				"Arm:"+Helper.characterArmor+", "+
-				"Dmg:"+Helper.characterDamage+"&nbsp;&nbsp;&nbsp;<br>"+
-				"Hp:"+Helper.characterHP+"/"+Helper.characterMaxHP+", "+
-				"Skill:"+Helper.skillPower+"&nbsp;&nbsp;&nbsp;</div><br>";
+				"Atk: "+Helper.characterAttack+", "+
+				"Def: "+Helper.characterDefense+", "+
+				"Arm: "+Helper.characterArmor+", "+
+				"Dmg: "+Helper.characterDamage+"&nbsp;&nbsp;&nbsp;<br>"+
+				"Hp: "+Helper.characterHP+"/"+Helper.characterMaxHP+", "+
+				"Skill: "+Helper.skillPower+", "+
+				"BP: "+Helper.bpInfo+
+				"&nbsp;&nbsp;&nbsp;</div><br>";
 			injectHere.style.verticalAlign="bottom";
 			injectHere.style.textAlign="right";
 		}
@@ -3474,6 +3482,7 @@ var Helper = {
 		System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + InventoryItemID,
 			function(responseText) {
 				var info = Layout.infoBox(responseText);
+				if (!info) info = "<font color=red>Error</font>";
 				evt.target.parentNode.innerHTML = info;
 			});
 	},
