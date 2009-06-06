@@ -374,7 +374,7 @@ var Helper = {
 				Helper.injectGuild();
 				break;
 			case "advisor":
-				Helper.injectAdvisor();
+				Helper.injectAdvisor(subPage2Id);
 				break;
 			case "history":
 				Helper.addHistoryWidgets();
@@ -493,7 +493,7 @@ var Helper = {
 			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']"
 			var isAdvisorPageClue2 = System.findNode(clue2);
 			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
-				Helper.injectAdvisor();
+				Helper.injectAdvisor(subPage2Id);
 			}
 			break;
 		}
@@ -860,13 +860,16 @@ var Helper = {
 		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
 	},
 
-	injectAdvisor: function() {
+	injectAdvisor: function(subPage2Id) {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
 		if (!titleCells) return;
 		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
 		var list=parentTables[parentTables.length-1];
-
-		Helper.generateAdvisorRows(list);
+		
+		// insert weekly summary link
+		var injectHere=System.findNode("//td/form");
+		if (injectHere)
+			injectHere.innerHTML+=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
 
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
@@ -884,9 +887,62 @@ var Helper = {
 			}
 			Helper.advisorFooter +='</tr>';
 		}
-
+		if (subPage2Id!='-') {
+			Helper.advisorFooter='';
+		}
+		
 		Helper.sortAsc = true;
-		Helper.sortAdvisor(list, "Member");
+		if (subPage2Id == '-') {
+			Helper.generateAdvisorRows(list);
+			Helper.sortAdvisor(list, "Member");
+		} else {
+			list.innerHTML='Retrieving daily data ...';
+			Helper.generateWeeklyAdvisorRows('',{'day':0,'inject':list});
+		}
+	},
+	
+	generateWeeklyAdvisorRows: function(responseText, callback) {
+		var day=callback.day;
+		if (day <= 7) {
+			if (day > 0) {
+				callback.inject.innerHTML+=' day '+day+',';
+				var doc=System.createDocument(responseText);
+				var titleCells=System.findNodes("//tr[td/b='Member']/td",doc);
+				if (!titleCells) return;
+				var parentTables=System.findNodes("ancestor::table", titleCells[0],doc);
+				var list=parentTables[parentTables.length-1];
+				Helper.generateAdvisorRows(list);
+				if (day == 1) {
+					Helper.weeklyAdvisorRows = Helper.advisorRows;
+					Helper.advisorColumns = ['CreditsFromDeposits','CreditsFromTax',
+						'CreditsTotal','Crystals','SkillsCast','SquadsCreated',
+						'SquadsJoined','ArtifactsCaptured','XPContrib'];
+				}
+				for (var i=1; i<list.rows.length-1; i++){
+					for (var id=0; id<Helper.advisorColumns.length; id++){
+						var columnName=Helper.advisorColumns[id];
+						if (day==1)
+							Helper.weeklyAdvisorRows[i-1][columnName]=
+								System.intValue(Helper.weeklyAdvisorRows[i-1][columnName]);
+						else
+							Helper.weeklyAdvisorRows[i-1][columnName]+=
+								System.intValue(Helper.advisorRows[i-1][columnName]);
+					}
+				}
+			}
+			System.xmlhttp("index.php?cmd=guild&subcmd=advisor&period="+(day+1), 
+				Helper.generateWeeklyAdvisorRows, {'day':(day+1),'inject':callback.inject});
+		} else {
+			Helper.advisorRows = Helper.weeklyAdvisorRows;
+			for (var i=1; i<=Helper.advisorRows.length; i++){
+				for (var id=0; id<Helper.advisorColumns.length; id++){
+					var columnName=Helper.advisorColumns[id];
+					Helper.advisorRows[i-1][columnName]=
+						System.addCommas(Helper.advisorRows[i-1][columnName]);
+				}
+			}
+			Helper.sortAdvisor(callback.inject, "Member");
+		}
 	},
 
 	generateAdvisorRows: function(list) {
@@ -959,13 +1015,25 @@ var Helper = {
 			'<td align="center">'+r.ArtifactsCaptured+'</td>'+
 			'<td align="center">'+r.XPContrib+'</td></tr>';
 		}
-		result+=Helper.advisorFooter;
+		if (Helper.advisorFooter!='')
+			result+=Helper.advisorFooter;
+		else {
+			Helper.advisorFooter='<tr><td align="right" colspan="3">Total: </td>';
+			for (var id=0; id<Helper.advisorColumns.length; id++){
+				var sum=0;
+				var columnName=Helper.advisorColumns[id];
+				for (var i=0; i<Helper.advisorRows.length; i++)
+					sum+=System.intValue(Helper.advisorRows[i][columnName]);
+				Helper.advisorFooter+='<td align="center" style="text-decoration:underline;font-weight:bold;font-size:x-small">'+System.addCommas(sum)+'</td>';
+			}
+			Helper.advisorFooter+='</tr>';
+			result+=Helper.advisorFooter;
+		}
 
 		list.innerHTML=result;
 
 		for (var i=0; i<list.rows[0].cells.length; i++) {
 			var cell=list.rows[0].cells[i];
-			// GM_log(cell);
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
 			cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
