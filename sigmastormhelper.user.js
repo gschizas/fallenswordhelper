@@ -67,6 +67,7 @@ var Helper = {
 		System.setDefault("enableBioCompressor", false);
 		System.setDefault("maxCompressedCharacters", 1500);
 		System.setDefault("maxCompressedLines", 25);
+		System.setDefault("minPSStats",JSON.stringify({"atk":0,"def":0,"arm":0,"dmg":0,"cHP":0,"mHP":0,"skill":0}));
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -1406,18 +1407,26 @@ var Helper = {
 			// backpack
 			var bpInfo = System.findNode("//td[a/img[contains(@src,'quicklinks/3.gif')]]/font");
 			Helper.bpInfo = bpInfo.textContent.replace(/[\[\]\s]/g,'');
-			injectHere.innerHTML = "<div style='font-size:x-small;color:yellow;font-weight:bold'>"+
-				"Atk: "+Helper.characterAttack+", "+
-				"Def: "+Helper.characterDefense+", "+
-				"Arm: "+Helper.characterArmor+", "+
-				"Dmg: "+Helper.characterDamage+"&nbsp;&nbsp;&nbsp;<br>"+
-				"Hp: "+Helper.characterHP+"/"+Helper.characterMaxHP+", "+
-				"Skill: "+Helper.skillPower+", "+
-				"BP: "+Helper.bpInfo+
+			if (Helper.bpInfo.match(/^(\d+)\/\1$/)) Helper.bpInfo=Helper.wrapStyle(Helper.bpInfo,"color:red");
+			var minPS=System.getValueJSON("minPSStats");
+			injectHere.innerHTML = "<div style='font-size:x-small;color:yellow'>"+
+				"Atk: "+Helper.wrapStyle(Helper.characterAttack, (Helper.characterAttack<minPS.atk ? 'color:red' : ''))+", "+
+				"Def: "+Helper.wrapStyle(Helper.characterDefense, (Helper.characterDefense<minPS.def ? 'color:red' : ''))+", "+
+				"Arm: "+Helper.wrapStyle(Helper.characterArmor, (Helper.characterArmor<minPS.arm ? 'color:red' : ''))+", "+
+				"Dmg: "+Helper.wrapStyle(Helper.characterDamage, (Helper.characterDamage<minPS.dmg ? 'color:red' : ''))+"&nbsp;&nbsp;&nbsp;<br>"+
+				"Hp: "+Helper.wrapStyle(Helper.characterHP, (Helper.characterHP<minPS.cHP ? 'color:red' : ''))+"/"
+					+Helper.wrapStyle(Helper.characterMaxHP, (Helper.characterMaxHP<minPS.mHP ? 'color:red' : ''))+", "+
+				"Skill: "+Helper.wrapStyle(Helper.skillPower, (Helper.skillPower<minPS.skill ? 'color:red' : ''))+", "+
+				"BP: "+Helper.wrapStyle(Helper.bpInfo)+
 				"&nbsp;&nbsp;&nbsp;</div><br>";
 			injectHere.style.verticalAlign="bottom";
 			injectHere.style.textAlign="right";
 		}
+	},
+	
+	wrapStyle: function(data,style) {
+		if (style==undefined || style=='') style="font-weight:bolder";
+		return '<span style="'+style+'">'+data+'</span>';
 	},
 
 	retrieveTradeConfirm: function() {
@@ -5383,6 +5392,7 @@ var Helper = {
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
+		var minPS=System.getValueJSON("minPSStats");
 
 		var inputSize=45;
 		var configData=
@@ -5467,6 +5477,17 @@ var Helper = {
 				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
 				':</td><td><input name="doNotKillList" size="'+inputSize+'" value="'+ doNotKillList + '" /></td></tr>' +
+			'<tr><td align="right">Minimum Personal Status' + Helper.helpLink('Minimum Personal Status', 'Minimum attack, defense, armor, HP, damage, skill power before these status on world page turn to red.'+
+				'<br/>Note that backpack counter will turn red if backpack is full') +
+				':</td><td>'+
+				'Atk: <input name="minPSatk" size=1 value="'+ minPS.atk + '" />, '+
+				'Def: <input name="minPSdef" size=1 value="'+ minPS.def + '" />, '+
+				'Arm: <input name="minPSarm" size=1 value="'+ minPS.arm + '" />, '+
+				'Dmg: <input name="minPSdmg" size=1 value="'+ minPS.dmg + '" /><br/> '+
+				'Current HP: <input name="minPScHP" size=1 value="'+ minPS.cHP + '" />, '+
+				'Max HP: <input name="minPSmHP" size=1 value="'+ minPS.mHP + '" />, '+
+				'Skill Power: <input name="minPSskill" size=1 value="'+ minPS.skill + '" />, '+
+				'</td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
 				':</td><td><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
@@ -5585,6 +5606,15 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
+		
+		var minPSstatNames=['atk','def','arm','dmg','cHP','mHP','skill'];
+		var minPS={};
+		for (var i=0; i<minPSstatNames.length; i++){
+			var name=minPSstatNames[i];
+			var formElement = System.findNode("//input[@name='minPS" + name + "']", oForm);
+			minPS[name]=formElement.value;
+		}
+		GM_setValue('minPSStats', JSON.stringify(minPS));
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
