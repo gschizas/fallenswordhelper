@@ -453,6 +453,9 @@ var Helper = {
 			case "monsterlog":
 				Helper.injectMonsterLog();
 				break;
+			case "quickwear":
+				Helper.insertQuickWear();
+				break
 			}
 			break;
 		case "points":
@@ -1761,6 +1764,73 @@ var Helper = {
 		}
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
 	},
+	
+	insertQuickWear: function() {
+		Helper.itemList = {};
+		var layout=Layout.notebookContent();
+		layout.innerHTML="Getting item list from: ";
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getItemFromBackpack, {"inject":layout});
+	},
+	
+	getItemFromBackpack: function(responseText, callback) {
+		var layout=callback.inject;
+		layout.innerHTML+="backpack page, ";
+		var doc=System.createDocument(responseText);
+		if (responseText.indexOf('Back to Profile') > 0){
+			Helper.retrieveItemInfor(doc);
+		}
+		System.xmlhttp("/index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems",
+			Helper.getItemFromStoreItemPage, callback);
+	},
+	
+	getItemFromStoreItemPage: function(responseText, callback) {
+		var layout=callback.inject;
+		layout.innerHTML+="store item page.";
+		var doc=System.createDocument(responseText);
+		if (responseText.indexOf('Store Items') > 0){
+			Helper.retrieveItemInfor(doc);
+		}
+		Helper.showQuickWear(callback);
+	},
+	
+	showQuickWear: function(callback) {
+		var output='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b> Quick Wear / Use / Extract Manager</b></td></tr></table>'+
+			'Please select the appropriate action for each item. When inappropriate action is selected, unexpected output can be displayed<br/>'+
+			'<table width=100%><tr><th width=20%>Actions</th><th colspan=4>Items</th></tr>';
+		for (var key in Helper.itemList) {
+			var itemID=Helper.itemList[key].id;
+			output+='<tr><td align=center>'+
+				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
+				'id="Helper:equipProfileInventoryItem' + itemID + '" ' +
+				'itemID="' + itemID + '">Wear</span>&nbsp;|&nbsp;' +
+				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
+				'id="Helper:useProfileInventoryItem' + itemID + '" ' +
+				'itemID="' + itemID + '">Use/Ext</span>'+
+				'</td>'+Helper.itemList[key].html+'</tr>';
+		}
+		output+='</table>';
+		callback.inject.innerHTML=output;
+		for (var key in Helper.itemList) {
+			var itemID=Helper.itemList[key].id;
+			document.getElementById('Helper:equipProfileInventoryItem' + itemID)
+				.addEventListener('click', Helper.equipProfileInventoryItem, true);
+			document.getElementById('Helper:useProfileInventoryItem' + itemID)
+				.addEventListener('click', Helper.useProfileInventoryItem, true);
+		}
+	},
+	
+	retrieveItemInfor: function(doc) {
+		var table=System.findNode("//td[@colspan=3]/table[@width='100%']",doc);
+		for (var i=0; i<table.rows.length/2; i++){
+			var row=table.rows[i*2];
+			var item={
+				"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
+				"html":row.innerHTML.replace(/<input[^>]*>/g, '')
+				};
+			GM_log(item.id+' '+item.html);
+			Helper.itemList["id"+item.id]=item;
+		}
+	},
 
 	toggleFootprints: function() {
 		var footprints = GM_getValue("footprints");
@@ -2542,6 +2612,9 @@ var Helper = {
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+			break;
+		case 118: // fast wear manager [v]
+			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
 			break;
 		case 19: // quick buffs
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
@@ -3786,6 +3859,12 @@ var Helper = {
 					}
 				}
 			}
+			
+			// quick wear manager link
+			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
+			if (node) {
+				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]";
+			}
 		}
 
 		//bio compressor ...
@@ -3864,6 +3943,17 @@ var Helper = {
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		}
+	},
+	
+	useProfileInventoryItem: function(evt) {
+		if (!window.confirm("Are you sure you want to use/extract the item?")) return;
+		var InventoryItemID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + InventoryItemID,
+			function(responseText) {
+				var info = Layout.infoBox(responseText);
+				if (!info) info = "<font color=red>Error</font>";
+				evt.target.parentNode.innerHTML = info;
+			});
 	},
 
 	injectQuestManager: function() {
