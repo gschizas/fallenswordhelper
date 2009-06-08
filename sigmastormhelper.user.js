@@ -869,8 +869,11 @@ var Helper = {
 		
 		// insert weekly summary link
 		var injectHere=System.findNode("//td/form");
-		if (injectHere)
-			injectHere.innerHTML+=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
+		if (injectHere) {
+			var elem=document.createElement("span");
+			elem.innerHTML=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
+			injectHere.appendChild(elem);
+		}
 
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
@@ -3869,7 +3872,6 @@ var Helper = {
 		return theUrl
 	},
 
-
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
@@ -3892,7 +3894,7 @@ var Helper = {
 		content.innerHTML=newhtml;
 		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
-		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleShowUseableItems, true);
+		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		}
@@ -4128,12 +4130,6 @@ var Helper = {
 				break;
 		}
 		Helper.generateOnlinePlayersTable();
-	},
-
-
-	toggleShowUseableItems: function(evt) {
-		GM_setValue("showUseableItems", evt.target.checked);
-		window.location=window.location;
 	},
 
 	parseProfileStart: function(){
