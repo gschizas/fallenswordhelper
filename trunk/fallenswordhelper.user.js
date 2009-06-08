@@ -69,15 +69,22 @@ var Helper = {
 		System.setDefault("hideArenaPrizes", "");
 		System.setDefault("autoSortArenaList", false);
 
-		System.setDefault("showGloveTypeItems", true);
-		System.setDefault("showHelmetTypeItems", true);
-		System.setDefault("showAmuletTypeItems", true);
-		System.setDefault("showWeaponTypeItems", true);
-		System.setDefault("showAmorTypeItems", true);
-		System.setDefault("showShieldTypeItems", true);
-		System.setDefault("showRingTypeItems", true);
-		System.setDefault("showBootTypeItems", true);
-		System.setDefault("showRuneTypeItems", true);
+		Helper.itemFilters = [
+		{"id":"showGloveTypeItems", "type":"glove"},
+		{"id":"showHelmetTypeItems", "type":"helm"},
+		{"id":"showAmuletTypeItems", "type":"amulet"},
+		{"id":"showWeaponTypeItems", "type":"weapon"},
+		{"id":"showAmorTypeItems", "type":"armor"},
+		{"id":"showShieldTypeItems", "type":"shield"},
+		{"id":"showRingTypeItems", "type":"ring"},
+		{"id":"showBootTypeItems", "type":"boot"},
+		{"id":"showRuneTypeItems", "type":"rune"},
+		];
+
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			System.setDefault(Helper.itemFilters[i].id, true);
+		}
+		
 		System.setDefault("showQuickDropLinks", false);
 
 		try {
@@ -1078,9 +1085,11 @@ var Helper = {
 
 		// insert weekly summary link
 		var injectHere=System.findNode("//td/select/..");
-		if (injectHere)
-			injectHere.innerHTML+=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
-
+		if (injectHere) {
+			var elem=document.createElement("span");
+			elem.innerHTML=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
+			injectHere.appendChild(elem);
+		}
 		GM_addStyle(
 			'.HelperAdvisorRow1 {background-color:#e7c473;font-size:x-small}\n' +
 			'.HelperAdvisorRow1:hover {background-color:white}\n' +
@@ -4151,7 +4160,6 @@ var Helper = {
 		return theUrl
 	},
 
-
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 
@@ -4166,54 +4174,32 @@ var Helper = {
 		}
 
 		Helper.inventory=System.getValueJSON("inventory");
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
 			refreshButton+
-			'</tr>' +
-			'<tr><td colspan=2>&nbsp;<b>Show Items:</b>' +
-				'&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/>' + 
-				'&nbsp;Gloves:<input id="showGloveTypeItems" type="checkbox" linkto="showGloveTypeItems"' +
-				(GM_getValue("showGloveTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Helmets:<input id="showHelmetTypeItems" type="checkbox" linkto="showHelmetTypeItems"' +
-				(GM_getValue("showHelmetTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Amulets:<input id="showAmuletTypeItems" type="checkbox" linkto="showAmuletTypeItems"' +
-				(GM_getValue("showAmuletTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Weapons:<input id="showWeaponTypeItems" type="checkbox" linkto="showWeaponTypeItems"' +
-				(GM_getValue("showWeaponTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Armors:<input id="showAmorTypeItems" type="checkbox" linkto="showAmorTypeItems"' +
-				(GM_getValue("showAmorTypeItems")?' checked':'') + '/>' + 
-				'</td></tr>'+
-			'<tr><td colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-				'&nbsp;Shields:<input id="showShieldTypeItems" type="checkbox" linkto="showShieldTypeItems"' +
-				(GM_getValue("showShieldTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Rings:<input id="showRingTypeItems" type="checkbox" linkto="showRingTypeItems"' +
-				(GM_getValue("showRingTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Boots:<input id="showBootTypeItems" type="checkbox" linkto="showBootTypeItems"' +
-				(GM_getValue("showBootTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Runes:<input id="showRuneTypeItems" type="checkbox" linkto="showRuneTypeItems"' +
-				(GM_getValue("showRuneTypeItems")?' checked':'') + '/>' + 
-				'</td></tr>'+
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
-			'' +
-			'</div>';
-		if (haveToCheck) {
-			document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
+			'<tr><td colspan=2>' +
+			'<table><tr><td><b>Show Items:</b></td>' +
+			'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+			(GM_getValue("showUseableItems")?' checked':'') + '/>';
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			newhtml += (i % 5 ==0) ? '</td></tr><tr><td>' : '';
+			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
+					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
+		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
+				'</td></tr></table></td></tr></table>' +
+				'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
+				'</div>';
+		content.innerHTML=newhtml;
+		if (haveToCheck)
+			document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
 		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showGloveTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showHelmetTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showAmuletTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showWeaponTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showAmorTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showShieldTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showRingTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showBootTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showRuneTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		}
+		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
 	injectGuildInventoryManager: function() {
@@ -4239,56 +4225,53 @@ var Helper = {
 			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
 			guildItemCount = Helper.guildinventory.items.length;
 		}
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
+		
+		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
+			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			refreshButton+
 			'</tr>' +
-			'<tr><td colspan=2>&nbsp;<b>Show Items:</b>' +
-				'&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/>' + 
-				'&nbsp;Gloves:<input id="showGloveTypeItems" type="checkbox" linkto="showGloveTypeItems"' +
-				(GM_getValue("showGloveTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Helmets:<input id="showHelmetTypeItems" type="checkbox" linkto="showHelmetTypeItems"' +
-				(GM_getValue("showHelmetTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Amulets:<input id="showAmuletTypeItems" type="checkbox" linkto="showAmuletTypeItems"' +
-				(GM_getValue("showAmuletTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Weapons:<input id="showWeaponTypeItems" type="checkbox" linkto="showWeaponTypeItems"' +
-				(GM_getValue("showWeaponTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Armors:<input id="showAmorTypeItems" type="checkbox" linkto="showAmorTypeItems"' +
-				(GM_getValue("showAmorTypeItems")?' checked':'') + '/>' + 
-				'</td></tr>'+
-			'<tr><td colspan=2>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-				'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;' +
-				'&nbsp;Shields:<input id="showShieldTypeItems" type="checkbox" linkto="showShieldTypeItems"' +
-				(GM_getValue("showShieldTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Rings:<input id="showRingTypeItems" type="checkbox" linkto="showRingTypeItems"' +
-				(GM_getValue("showRingTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Boots:<input id="showBootTypeItems" type="checkbox" linkto="showBootTypeItems"' +
-				(GM_getValue("showBootTypeItems")?' checked':'') + '/>' + 
-				'&nbsp;Runes:<input id="showRuneTypeItems" type="checkbox" linkto="showRuneTypeItems"' +
-				(GM_getValue("showRuneTypeItems")?' checked':'') + '/>' + 
-				'</td></tr>'+
-			'<tr><td colspan=2>&nbsp;Guild Item Count:&nbsp;' + guildItemCount +
-				'</td></tr>'+
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
-			'' +
-			'</div>';
-		if (haveToCheck) {
-			document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
+			'<tr><td colspan=2>' +
+				'<table><tr><td><b>Show Items:</b></td>' +
+				'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+				(GM_getValue("showUseableItems")?' checked':'') + '/>';
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			newhtml += (i % 5 ==0) ? '</td></tr><tr><td>' : '';
+			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
+					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
+		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
+				'</td></tr></table></td></tr>'+
+			'<tr><td colspan=2>&nbsp;Faction Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
+			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
+			'</div>';
+		content.innerHTML=newhtml;
+		if (haveToCheck) 
+			document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
 		Helper.generateInventoryTable("guild");
 		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showGloveTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showHelmetTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showAmuletTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showWeaponTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showAmorTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showShieldTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showRingTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showBootTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		document.getElementById("showRuneTypeItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		}
+		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
+	},
+	
+	InventorySelectFilters: function(evt) {
+		var checkedValue = (evt.target.id=="GuildInventorySelectAll");
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			GM_setValue(Helper.itemFilters[i].id, checkedValue);
+		}
+		if (checkedValue)
+			window.location=window.location;
+		else
+			for (var i=0; i<Helper.itemFilters.length; i++) {
+				document.getElementById(Helper.itemFilters[i].id).checked = checkedValue;
+			}
+	},
+	
+	toggleCheckboxAndRefresh: function(evt) {
+		GM_setValue(evt.target.id, evt.target.checked);
+		window.location=window.location;
 	},
 
 	injectOnlinePlayers: function() {
