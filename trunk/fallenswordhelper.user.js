@@ -1769,18 +1769,23 @@ var Helper = {
 		Helper.itemList = {};
 		var layout=Layout.notebookContent();
 		layout.innerHTML="Getting item list from: ";
-		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getItemFromBackpack, {"inject":layout});
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getItemFromBackpack, {"inject":layout,"id":0});
 	},
 	
 	getItemFromBackpack: function(responseText, callback) {
 		var layout=callback.inject;
-		layout.innerHTML+="backpack page, ";
+		layout.innerHTML+="backpack folder "+(callback.id+1)+", ";
 		var doc=System.createDocument(responseText);
 		if (responseText.indexOf('Back to Profile') > 0){
 			Helper.retrieveItemInfor(doc);
 		}
-		System.xmlhttp("/index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems",
-			Helper.getItemFromStoreItemPage, callback);
+		var folderNodes=System.findNodes("//a[contains(@href,'cmd=profile&subcmd=dropitems&folder_id=')]",doc);
+		if (folderNodes && folderNodes.length > 0 && callback.id < folderNodes.length - 1)
+			System.xmlhttp(folderNodes[callback.id+1].getAttribute("href"), 
+				Helper.getItemFromBackpack, {"inject":layout,"id":callback.id+1});
+		else
+			System.xmlhttp("/index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems",
+				Helper.getItemFromStoreItemPage, callback);
 	},
 	
 	getItemFromStoreItemPage: function(responseText, callback) {
@@ -1827,7 +1832,6 @@ var Helper = {
 				"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
 				"html":row.innerHTML.replace(/<input[^>]*>/g, '')
 				};
-			GM_log(item.id+' '+item.html);
 			Helper.itemList["id"+item.id]=item;
 		}
 	},
