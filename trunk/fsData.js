@@ -999,7 +999,7 @@ var Data = {
 				{name: "Buff Master",        stamina: 10, "duration": 60,   treeId: 2, skillId: 65, buff: "0.2% per point chance to half the stamina cost (rounding up) when casting skills on other players. (Does not work on self!)"},
 				{name: "Reflection",         stamina: 10, "duration": 90,   treeId: 2, skillId: 66, buff: "0.1% per point of enemies damage inflicted is added to your next combat strike."},
 				{name: "Light Foot",         stamina: 15, "duration": 120,  treeId: 2, skillId: 67, buff: "0.05% chance to use no stamina while moving on the world map."},
-				{name: "Mesmerise",          stamina: 20, "duration": 60,   treeId: 2, skillId: 68, buff: "0.1% per point chance to reduce a creatures armor and defense by 50% (vs. creature only)."}
+				{name: "Mesmerize",          stamina: 20, "duration": 60,   treeId: 2, skillId: 68, buff: "0.1% per point chance to reduce a creatures armor and defense by 50% (vs. creature only)."}
 			];
 		}
 		return Data.buffArray;
@@ -6741,7 +6741,6 @@ var Data = {
 				{name:'Lagarto Rune', type:'rune'},
 				{name:'Lord Eltwiers Helmet', type:'helmet'},
 				{name:'Lord Eltwiers Rune', type:'rune'},
-
 				{name:'Amulet of Sawarl', type:'amulet'},
 				{name:'Amulet of Tinale', type:'amulet'},
 				{name:'Boots of Aviale', type:'boots'},
@@ -6755,7 +6754,11 @@ var Data = {
 				{name:'Amulet of Graldig', type:'amulet'},
 				{name:'Weapon of Oranical', type:'weapon'},
 				{name:'Shield of Stalia', type:'shield'},
-				{name:'Ring of Aeslam', type:'ring'}
+				{name:'Ring of Aeslam', type:'ring'},
+				
+				{name:'Guardian of Meidos Armor', type:'armor'},
+				{name:'Meidos Amulet', type:'amulet'},
+				{name:'Meidos Helmet', type:'helmet'}
 			]
 		}
 		return Data.itemArray;
