@@ -83,7 +83,12 @@ var Data = {
 				{'questName':'Epic Mount', 'level':113, 'location':'Ashstorm Wilds (Plateau) @ 9,13'},
 				{'questName':'Programmed Drive', 'level':115, 'location':'Ashstorm Wilds (Oasis) @ 7,13'},
 				{'questName':'Command Clash', 'level':117, 'location':'Karano (Showroom) @ 8,2'},
-				{'questName':'Unit Expectations', 'level':119, 'location':'Karano (Growth Vats) @ 10,6'}
+				{'questName':'Unit Expectations', 'level':119, 'location':'Karano (Growth Vats) @ 10,6'},
+				{'questName':'Maintenance Survey', 'level':121, 'location':'Ullgath Caves (Mouth) @ 2,10'},
+				{'questName':'Weapon of Strength', 'level':123, 'location':'Ullgath Caves (Creep)@ 2,5'},
+				{'questName':'The Hard Path', 'level':125, 'location':'Ullgath Caves (Halls) @ 14,5'},
+				{'questName':'Stood in the Gloom', 'level':127, 'location':'Ullgath Caves (Gloom) @ 2,16'},
+				{'questName':'Verification of Findings', 'level':129, 'location':'Ullgath Caves (Murk) @ 4,10'}
 			];
 			Data.questArray = questArray.sort();
 		}
