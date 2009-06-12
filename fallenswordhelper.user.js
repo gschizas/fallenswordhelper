@@ -1031,6 +1031,7 @@ var Helper = {
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
 		var displayedMap = System.findNode(isLarge ? "//table[@width]" : "//table[@width='200']");
+		if (!displayedMap) return;
 		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
 
@@ -1857,7 +1858,7 @@ var Helper = {
 	},
 
 	prepareCombatLog: function() {
-		if (!GM_getValue("showCombatLog")) return;
+		//if (!GM_getValue("showCombatLog")) return;
 		var reportsTable=System.findNode("//table[@width='320']/parent::*");
 		if (!reportsTable) return;
 		var tempLog=document.createElement("div");
@@ -2157,6 +2158,7 @@ var Helper = {
 		var shieldImpDeath = responseText.match(shieldImpDeathRE);
 
 		var monster = callback.node;
+		var showCombatLog = false;
 		if (monster) {
 			var result=document.createElement("div");
 			var resultHtml = "<small><small>"+callback.index+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
@@ -2174,7 +2176,8 @@ var Helper = {
 			}
 			if (shieldImpDeath) {
 				resultHtml += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>";
-				resultText += "Shield Imp Death\n"
+				resultText += "Shield Imp Death\n";
+				showCombatLog = true;
 			}
 			if (xpGain<0) result.style.color='red';
 			result.innerHTML=resultHtml
@@ -2208,7 +2211,7 @@ var Helper = {
 					reportText += "Your level has decreased!\n";
 				}
 				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
-				Helper.appendCombatLog(reportHtml);
+				Helper.appendCombatLog(reportHtml, showCombatLog);
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
@@ -2230,10 +2233,10 @@ var Helper = {
 		GM_setValue("CombatLog", theLog);
 	},
 
-	appendCombatLog: function(text) {
+	appendCombatLog: function(text, showCombatLog) {
 		var reportLog = System.findNode("//div[@id='reportsLog']");
 		if (!reportLog) return;
-		reportLog.innerHTML += text + "<br/>";
+		if (!GM_getValue("showCombatLog") || showCombatLog) reportLog.innerHTML += text + "<br/>";
 	},
 
 	scrollUpCombatLog: function() {
@@ -2757,6 +2760,7 @@ var Helper = {
 
 	addLogWidgets: function() {
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		if (!logTable) return;
 		var memberList = System.getValueJSON("memberlist");
 		var memberNameString = "";
 		if (memberList) {
@@ -2784,7 +2788,7 @@ var Helper = {
 						colorPlayerName = true;
 					}
 					if (messageType == "General") {
-						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.getAttribute("href")) {
+						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName == 'A') {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								playerElement = aRow.cells[2].firstChild.nextSibling;
 								playerName = playerElement.innerHTML
@@ -2806,6 +2810,16 @@ var Helper = {
 						}
 					}
 					if (messageType == "Chat") {
+						var dateHTML = aRow.cells[1].innerHTML;
+						var dateFirstPart = dateHTML.substring(0, dateHTML.indexOf(">Report") + 7);
+						var dateLastPart = dateHTML.substring(dateHTML.indexOf("Message</a>") + 11, dateHTML.length);
+						var extraPart = "";
+						if (!isGuildMate) {
+							extraPart = " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+							"'>Ignore</a>";
+						}						
+						aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart + dateLastPart;
+						
 						var messageHTML = aRow.cells[2].innerHTML;
 						var firstPart = messageHTML.substring(0, messageHTML.indexOf("<small>") + 7);
 						var secondPart = messageHTML.substring(messageHTML.indexOf("<small>") + 7, messageHTML.indexOf(">Reply</a>") + 10);
@@ -2815,18 +2829,20 @@ var Helper = {
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
 							"'>ST</a>"
-						if (!isGuildMate) {
-							extraPart += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-							"'>Ignore</a>";
-						}
 						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart  + fourthPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
 					if (messageType == "General") {
-						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.getAttribute("href")) {
+						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName == 'A') {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
+								if (!isGuildMate) {
+									var dateHTML = aRow.cells[1].innerHTML;
+									var dateExtraText = "<nobr><span style='font-size:x-small;'>[ <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+									"'>Ignore</a> ]</span></nobr>";
+									aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' + dateExtraText;
+								}
 								var buffingPlayerIDRE = /player_id=(\d+)/;
 								var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
 								var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
@@ -2834,10 +2850,6 @@ var Helper = {
 									"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 									"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
 									"'>ST</a>";
-								if (!isGuildMate) {
-									extraText += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-									"'>Ignore</a>";
-								}
 								extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
 								aRow.cells[2].innerHTML += extraText;
 							}
@@ -3597,6 +3609,8 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Error:" + info;
+			//debugging message to try and help track down the issue where you get an error (because you shouldn't be able to ...
+			GM_log(responseText);
 		}
 	},
 
@@ -6007,6 +6021,20 @@ var Helper = {
 				extraNotes += "No reduction of stam used at the lower CA level<br>";
 			}
 		}
+		if (numberOfHitsRequired == "-" || numberOfHitsRequired != "1") {
+			var lowestCALevelToStillHit = Math.max(Math.ceil((counterAttackBonusAttack-hitByHowMuch + 1)/playerAttackValue/0.0025), 0);
+			var lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/playerDamageValue/0.0025), 0);
+			if (lowestCALevelToStillHit >175) {
+				extraNotes += "Even with CA175 you cannot hit this creature<br>";
+			} else if (lowestCALevelToStillHit != 0) {
+				extraNotes += "You need a minimum of CA" + lowestCALevelToStillHit + " to hit this creature<br>";
+			}
+			if (lowestCALevelToStillKill >175) {
+				extraNotes += "Even with CA175 you cannot 1-hit kill this creature<br>";
+			} else if (lowestCALevelToStillKill != 0) {
+				extraNotes += "You need a minimum of CA" + lowestCALevelToStillKill + " to 1-hit kill this creature<br>";
+			}
+		}
 		
 		//display data
 		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
@@ -6710,7 +6738,7 @@ var Helper = {
 				'</td><td colspan="3"><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">' +
 			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
-				'When not, messages run as they are in HCS\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
+				'When not, messages run as they are in HCS\\\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
