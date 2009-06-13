@@ -2236,7 +2236,7 @@ var Helper = {
 	appendCombatLog: function(text, showCombatLog) {
 		var reportLog = System.findNode("//div[@id='reportsLog']");
 		if (!reportLog) return;
-		if (!GM_getValue("showCombatLog") || showCombatLog) reportLog.innerHTML += text + "<br/>";
+		if (GM_getValue("showCombatLog") || showCombatLog) reportLog.innerHTML += text + "<br/>";
 	},
 
 	scrollUpCombatLog: function() {
