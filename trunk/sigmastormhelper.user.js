@@ -824,7 +824,7 @@ var Helper = {
 					if (x!=(isLarge?posit.X:2) || y!=(isLarge?posit.Y:2)) {
 						aCell.style.color=footprintsColor;
 						if (aCell.innerHTML.indexOf("table") > 0)
-							aCell.firstChild.firstChild.firstChild.firstChild.firstChild.innerHTML +="**";
+							aCell.firstChild.firstChild.firstChild.firstChild.innerHTML +="**";
 						else
 							aCell.innerHTML+="**";
 					};
@@ -1539,7 +1539,13 @@ var Helper = {
 	},
 	
 	showQuickWear: function(callback) {
-		var output='<table width=100%><tr><th width=20%>Actions</th><th colspan=4>Items</th></tr>';
+		Helper.inventoryMap = System.getValueJSON('inventoryMap');
+		if (!Helper.inventoryMap) Helper.inventoryMap = {};
+		var output='<table width=100%><tr><th width=20%>Actions</th><th colspan=3>Items</th>'+
+			'<th>Level</th>'+'<th sortkey="class">Class</th>'+'<th sortkey="type">Type</th>'+
+			'<th>Att</th><th>Def</th>'+'<th>Arm</th>'+'<th>Dam</th>'+'<th>HP</th>' +
+			'<th>Upgrade</th>'+'<th>Craft</th>' +
+			'</tr>';
 		for (var key in Helper.itemList) {
 			var itemID=Helper.itemList[key].id;
 			output+='<tr><td align=center>'+
@@ -1548,8 +1554,24 @@ var Helper = {
 				'itemID="' + itemID + '">Wear</span>&nbsp;|&nbsp;' +
 				'<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
 				'id="Helper:useProfileInventoryItem' + itemID + '" ' +
-				'itemID="' + itemID + '">Use/Ext</span>'+
-				'</td>'+Helper.itemList[key].html+'</tr>';
+				'itemID="' + itemID + '">Use/Ext</span>&nbsp;|&nbsp;' +
+				'<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;">'+
+				'<a href="?cmd=auctionhouse&type=-1&order_by=1&search_text=' + Helper.itemList[key].text +
+				'">AH</a></span>'+
+				'</td>'+Helper.itemList[key].html;
+			if (Helper.inventoryMap['id'+Helper.itemList[key].id]){
+				var item=Helper.inventoryMap['id'+Helper.itemList[key].id];
+				output+='<td>'+
+					item.minLevel+'</td><td>'+item.class+'</td><td>'+
+					item.type+'</td><td>'+item.attack+'</td><td>'+
+					item.defense+'</td><td>'+item.armor+'</td><td>'+
+					item.damage+'</td><td>'+item.hp+'</td><td>'+
+					item.forgelevel+'</td><td>'+item.craftlevel+'</td>';
+			} else {
+				output+='<td></td><td></td><td></td><td></td><td></td>';
+				output+='<td></td><td></td><td></td><td></td><td></td>';
+			}
+			output+='</tr>';
 		}
 		output+='</table>';
 		callback.inject.innerHTML=output;
@@ -1568,7 +1590,8 @@ var Helper = {
 			var row=table.rows[i*2];
 			var item={
 				"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
-				"html":row.innerHTML.replace(/<input[^>]*>/g, '')
+				"html":row.innerHTML.replace(/<input[^>]*>/g, ''),
+				"text":row.textContent.replace(/^\s*\d+\s*\/\s*\d+\s*/,'')
 				};
 			Helper.itemList["id"+item.id]=item;
 		}
@@ -4212,6 +4235,7 @@ var Helper = {
 	parseProfileStart: function(){
 		Helper.inventory = new Object;
 		Helper.inventory.items = new Array();
+		Helper.inventoryMap={};
 		var output=document.getElementById('Helper:InventoryManagerOutput')
 		output.innerHTML='<br/>Parsing profile...';
 		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileDone)
@@ -4222,12 +4246,16 @@ var Helper = {
 		var output=document.getElementById('Helper:InventoryManagerOutput');
 		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
-			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
+			var mouseOver=currentlyWorn[i].getAttribute("onmouseover");
+			var theUrl=Helper.linkFromMouseover(mouseOver);
+			var id=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/.exec(mouseOver)[2];
+			var item={"url": theUrl,
 				"where":"worn", "index":(i+1),
-				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
+				"onmouseover":mouseOver};
 			if (i==0) output.innerHTML+="<br/>Found worn item "
 			output.innerHTML+=(i+1) + " ";
 			Helper.inventory.items.push(item);
+			Helper.inventoryMap['id'+id]=item;
 		}
 		var	folderIDs = new Array();
 		Helper.folderIDs = folderIDs; //clear out the array before starting.
@@ -4267,13 +4295,16 @@ var Helper = {
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 
 			for (var i=0; i<backpackItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
+				var mouseOver=backpackItems[i].getAttribute("onmouseover");
+				var theUrl=Helper.linkFromMouseover(mouseOver);
+				var id=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/.exec(mouseOver)[2];
 				var item={"url": theUrl,
 					"where":"backpack", "index":(i+1), "page":currentPage,
-					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
+					"onmouseover":mouseOver};
 				if (i==0) output.innerHTML+="<br/>Found wearable item "
 				output.innerHTML+=(i+1) + " ";
 				Helper.inventory.items.push(item);
+				Helper.inventoryMap['id'+id]=item;
 			}
 		} else {
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
@@ -4514,6 +4545,8 @@ var Helper = {
 
 		targetInventory.lastUpdate = new Date();
 		System.setValueJSON(inventoryShell, targetInventory);
+		if (Helper.inventoryMap)
+			System.setValueJSON('inventoryMap', Helper.inventoryMap);
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
 		for (var i=0; i<inventoryTable.rows[0].cells.length; i++) {
@@ -5803,6 +5836,7 @@ var Helper = {
 		//doc = doc.replace("<center></center>", "");
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
 		doc = doc.replace(/<table [^>]*><tbody><tr><td><center><\/center><\/td><\/tr><\/tbody><\/table>/g,'');
+		doc = doc.replace(/<table [^>]*><tbody><tr><td><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/width="65"/g, 'width="' + size + '"').replace(/height="65"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
 
