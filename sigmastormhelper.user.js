@@ -588,6 +588,22 @@ var Helper = {
 		indicatorHP.setAttribute("width", Math.round(100 * (healHP + Helper.characterHP) / Helper.characterMaxHP) + "%");
 	},
 
+	quickStone: function(){
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=65", Helper.quickStoneDone);
+	},
+	quickShard: function(){
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=58", Helper.quickStoneDone);
+	},
+	quickStoneDone: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		unsafeWindow.tt_setWidth(200);
+		unsafeWindow.Tip(infoMessage);
+
+		var filledStone = parseInt(infoMessage.replace(/\D/g, ""));
+
+
+	},
+
 	injectGuild: function() {
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
 		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
@@ -2384,6 +2400,12 @@ var Helper = {
 			break;
 		case 114: // repair
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
+			break;
+		case 107: //quickStone
+			Helper.quickStone();
+			break;
+		case 75: //quickShard
+			Helper.quickShard();
 			break;
 		case 71: // create group [G]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
