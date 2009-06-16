@@ -68,6 +68,7 @@ var Helper = {
 		System.setDefault("maxCompressedCharacters", 1500);
 		System.setDefault("maxCompressedLines", 25);
 		System.setDefault("minPSStats",JSON.stringify({"atk":0,"def":0,"arm":0,"dmg":0,"cHP":0,"mHP":0,"skill":0}));
+		System.setDefault("quickWearFilter",JSON.stringify({"enable":false,"value":"pack,stim"}));
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -1557,12 +1558,25 @@ var Helper = {
 	showQuickWear: function(callback) {
 		Helper.inventoryMap = System.getValueJSON('inventoryMap');
 		if (!Helper.inventoryMap) Helper.inventoryMap = {};
-		var output='<table width=100%><tr><th width=20%>Actions</th><th colspan=3>Items</th>'+
+		var filterObj=System.getValueJSON('quickWearFilter');
+		var output='<div align=center>Filter <input type=checkbox '+(filterObj.enable?'checked':'')+
+			' onmouseover="Tip(\'Enable/Disable filter\')" id=quickWearEnable> '+
+			'<input class=custominput size=60 value="'+filterObj.value+'" id=quickWearFilter'+
+			' onmouseover="Tip(\'The filter, can be used with regular expression like Medi*pack,Stim$\')"> '+
+			'<input type=button class=custombutton id=quickWearFilterSave value="Save"></div>'+
+			'<table width=100%><tr><th width=20%>Actions</th><th colspan=3>Items</th>'+
 			'<th>Level</th>'+'<th sortkey="class">Class</th>'+'<th sortkey="type">Type</th>'+
 			'<th>Att</th><th>Def</th>'+'<th>Arm</th>'+'<th>Dam</th>'+'<th>HP</th>' +
 			'<th>Upgrade</th>'+'<th>Craft</th>' +
 			'</tr>';
+		var filterArray=filterObj.value.replace(', ',',').split(',');
 		for (var key in Helper.itemList) {
+			if (filterObj.enable) {
+				var i;
+				for (i=0;i<filterArray.length;i++)
+					if (Helper.itemList[key].text.match(filterArray[i])) break;
+				if (i==filterArray.length) continue;
+			}
 			var itemID=Helper.itemList[key].id;
 			output+='<tr><td align=center>'+
 				'<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
@@ -1593,11 +1607,24 @@ var Helper = {
 		callback.inject.innerHTML=output;
 		for (var key in Helper.itemList) {
 			var itemID=Helper.itemList[key].id;
-			document.getElementById('Helper:equipProfileInventoryItem' + itemID)
-				.addEventListener('click', Helper.equipProfileInventoryItem, true);
-			document.getElementById('Helper:useProfileInventoryItem' + itemID)
-				.addEventListener('click', Helper.useProfileInventoryItem, true);
+			var elem=document.getElementById('Helper:equipProfileInventoryItem' + itemID);
+			if (elem) {
+				elem.addEventListener('click', Helper.equipProfileInventoryItem, true);
+				elem.addEventListener('click', Helper.useProfileInventoryItem, true);
+			}
 		}
+		document.getElementById('quickWearFilterSave').addEventListener('click', 
+			Helper.saveQuickWearFilter, true);
+		document.getElementById('quickWearEnable').addEventListener('click', 
+			Helper.saveQuickWearFilter, true);
+	},
+	
+	saveQuickWearFilter: function() {
+		var filterObj={
+			"enable":document.getElementById('quickWearEnable').checked,
+			"value":document.getElementById('quickWearFilter').value};
+		GM_setValue("quickWearFilter",JSON.stringify(filterObj));
+		window.location=window.location;
 	},
 	
 	retrieveItemInfor: function(doc) {

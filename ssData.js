@@ -105,8 +105,9 @@ var Data = {
 	quickSearchList: function() {
 		if (!Data.quickSearchArray) {
 			Data.quickSearchArray = [
-				{"category":"Stims","searchname":"Internal Reserves", "nickname":"IR 100",  "displayOnAH":true},
-				{"category":"Stims","searchname":"Protection Field", "nickname":"PF 50",  "displayOnAH":true},
+				{"category":"Stims","searchname":"Mk1 Internal Reserves Stim", "nickname":"IR 50",  "displayOnAH":true},
+				{"category":"Stims","searchname":"Mk2 Internal Reserves Stim", "nickname":"IR 100",  "displayOnAH":true},
+				{"category":"Stims","searchname":"Mk1 Protection Field Stim", "nickname":"PF 50",  "displayOnAH":true},
 				{"category":"Stims","searchname":"Mk1 Corrode Stim", "nickname":"CRD 50",  "displayOnAH":true},
 				{"category":"Stims","searchname":"MK2 Corrode Stim", "nickname":"CRD 100",  "displayOnAH":true},
 				{"category":"Stims","searchname":"Lesser Intensifier Stim", "nickname":"ITS 50",  "displayOnAH":true},
