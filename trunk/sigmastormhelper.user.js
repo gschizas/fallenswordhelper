@@ -1610,7 +1610,8 @@ var Helper = {
 			var elem=document.getElementById('Helper:equipProfileInventoryItem' + itemID);
 			if (elem) {
 				elem.addEventListener('click', Helper.equipProfileInventoryItem, true);
-				elem.addEventListener('click', Helper.useProfileInventoryItem, true);
+				document.getElementById('Helper:useProfileInventoryItem' + itemID)
+					.addEventListener('click', Helper.useProfileInventoryItem, true);
 			}
 		}
 		document.getElementById('quickWearFilterSave').addEventListener('click', 
