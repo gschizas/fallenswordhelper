@@ -457,6 +457,9 @@ var Helper = {
 				break;
 			}
 			break;
+		case "shop":
+			Helper.injectShop();
+			break;
 		case "trade":
 			Helper.retrieveTradeConfirm();
 			Helper.insertQuickSelectItems();
@@ -485,6 +488,10 @@ var Helper = {
 			var isRelicPage = System.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
 				Helper.injectRelic(isRelicPage);
+			}
+			var isShopPage = System.findNode("//td[contains(.,'then click to purchase for the price listed below the item.')]");
+			if (isShopPage) {
+				Helper.injectShop();
 			}
 			var isAuctionPage = System.findNode("//td[contains(@background,'header_tradehub.jpg')]");
 			if (isAuctionPage) {
@@ -746,7 +753,48 @@ var Helper = {
 		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
 		return;
 	},
-
+	
+	injectShop: function() {
+		var injectHere=System.findNode("//td/center[img[contains(@src,'_banner.jpg')]]");
+		var itemNodes=System.findNodes("//td/center/a/img[contains(@src,'/items/')]");
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<table cellpadding=2><tr>";
+		for (var i=0;i<itemNodes.length;i++) {
+			var item=itemNodes[i];
+			var src=item.getAttribute("src");
+			var text=item.parentNode.parentNode.textContent;
+			var onmouseover=item.getAttribute("onmouseover").replace("Click to Buy","Click to Select");
+			var itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
+			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
+				"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
+			if (i%6==5 && i!=itemNodes.length-1) selector+="</tr><tr>";
+		}
+		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
+			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
+			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr></table>";
+		injectHere.innerHTML="<table><tr><td>"+injectHere.innerHTML+"</td><td>"+selector+"</td></tr></table>";
+		for (var i=0;i<itemNodes.length;i++) {
+			var itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
+			document.getElementById("select"+itemId).addEventListener("click",Helper.selectShopItem,true);
+		}
+		Helper.shopId=itemNodes[0].parentNode.getAttribute("href").match(/&shop_id=(\d+)/)[1];
+	},
+	
+	selectShopItem: function(evt) {
+		Helper.shopItemId=evt.target.getAttribute("itemId");
+		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the item WITHOUT confirmation!</span>';
+		document.getElementById('selectedItem').innerHTML=
+			document.getElementById("select"+Helper.shopItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
+	},
+	
+	quickBuyItem: function() {
+		if (!Helper.shopItemId || !Helper.shopId) return;
+		System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
+			function(responseText) {
+				var infoMessage = Layout.infoBox(responseText);
+				unsafeWindow.tt_setWidth(200);
+				unsafeWindow.Tip(infoMessage);
+			});
+	},
 
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
@@ -2459,6 +2507,9 @@ var Helper = {
 			break;
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+			break;
+		case 116: // quick buy [t]
+			Helper.quickBuyItem();
 			break;
 		case 118: // fast wear manager [v]
 			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
