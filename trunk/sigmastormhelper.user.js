@@ -695,7 +695,7 @@ var Helper = {
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
-		if (info!="") {
+		if (info.indexOf('You successfully took the item into your backpack') >= 0) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
