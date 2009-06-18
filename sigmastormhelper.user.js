@@ -69,6 +69,7 @@ var Helper = {
 		System.setDefault("maxCompressedLines", 25);
 		System.setDefault("minPSStats",JSON.stringify({"atk":0,"def":0,"arm":0,"dmg":0,"cHP":0,"mHP":0,"skill":0}));
 		System.setDefault("quickWearFilter",JSON.stringify({"enable":false,"value":"pack,stim"}));
+		System.setDefault("invMaxLvlFilter", '');
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -4130,6 +4131,8 @@ var Helper = {
 					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
 		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
+				'</td></tr><tr><td>&nbsp;Max lvl: <input id=maxLvl class=custominput size=1 value='+GM_getValue("invMaxLvlFilter")+'>'+
+				'&nbsp;<input id=maxLvlSave type=button class=custombutton value="Save">'+
 				'</td></tr></table></td></tr>'+
 			'<tr><td colspan=2>&nbsp;Faction Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
 			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
@@ -4143,6 +4146,10 @@ var Helper = {
 		}
 		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
 		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("maxLvlSave").addEventListener('click', function() {
+				GM_setValue("invMaxLvlFilter", document.getElementById("maxLvl").value);
+				window.location=window.location;
+			}, true);
 	},
 
 	InventorySelectFilters: function(evt) {
@@ -4605,6 +4612,14 @@ var Helper = {
 				});
 			//  && e.minLevel + 50 > Helper.characterLevel}
 		}
+		Helper.maxLvlFilter=GM_getValue("invMaxLvlFilter");
+		if (Helper.maxLvlFilter!='') {
+			Helper.maxLvlFilter=parseInt(Helper.maxLvlFilter);
+			if (Helper.maxLvlFilter>0){
+				allItems=allItems.filter(function(e,i,a) {return e.minLevel <= Helper.maxLvlFilter;});
+			}
+		}
+
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			if (!GM_getValue(Helper.itemFilters[i].id)) {
 				Helper.invFilterType = Helper.itemFilters[i].type;
