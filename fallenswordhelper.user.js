@@ -7347,9 +7347,26 @@ var Helper = {
 				document.getElementById('Helper:recallMailboxItem' + i)
 					.addEventListener('click', Helper.recallMailboxItem, true);
 			}
+			var titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Item Mailbox']]");
+			titleTable.rows[4].cells[0].align = 'center';
+			titleTable.rows[4].cells[0].innerHTML = '<span id="Helper:recallAllMailbox" '+
+				'style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;">Take All</span>';
+			document.getElementById('Helper:recallAllMailbox')
+				.addEventListener('click', Helper.recallAllMailbox, true);
 		}
 	},
 
+	recallAllMailbox: function(evt) {
+		var mailItems = System.findNodes("//span[contains(@id,'Helper:recallMailboxItem')]");
+		for (var i = 0; i < mailItems.length; i++) {
+			var mailItem = mailItems[i];
+			var mailboxItemHref = mailItem.getAttribute("itemHref");
+			System.xmlhttp(mailboxItemHref,
+				Helper.recallMailboxReturnMessage,
+				{"target": mailItem});
+		}
+	},
+	
 	recallMailboxItem: function(evt) {
 		var mailboxItemHref = evt.target.getAttribute("itemHref");
 		System.xmlhttp(mailboxItemHref,
