@@ -70,6 +70,7 @@ var Helper = {
 		System.setDefault("minPSStats",JSON.stringify({"atk":0,"def":0,"arm":0,"dmg":0,"cHP":0,"mHP":0,"skill":0}));
 		System.setDefault("quickWearFilter",JSON.stringify({"enable":false,"value":"pack,stim"}));
 		System.setDefault("invMaxLvlFilter", '');
+		System.setDefault("quickUseItems",JSON.stringify({'item0':'','item1':'','item2':''}));
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -326,7 +327,13 @@ var Helper = {
 		case "profile":
 			switch (subPageId) {
 			case "dropitems":
-				Helper.injectDropItems();
+				switch (subPage2Id) {
+				case "quickuseman":
+					Helper.injectQuickUseManager();
+					break;
+				default:
+					Helper.injectDropItems();
+				}
 				break;
 			case "changebio":
 				Helper.injectBioWidgets();
@@ -438,10 +445,10 @@ var Helper = {
 				Helper.injectMonsterLog();
 				break;
 			case "quickwear":
-				Helper.insertQuickWear();
+				Helper.injectQuickWear();
 				break;
 			case "saveconfig":
-				Helper.insertSaveConfig();
+				Helper.injectSaveConfig();
 				break;
 			}
 			break;
@@ -466,7 +473,7 @@ var Helper = {
 			break;
 		case "trade":
 			Helper.retrieveTradeConfirm();
-			Helper.insertQuickSelectItems();
+			Helper.injectQuickSelectItems();
 			break;
 		case "toprated":
 			switch (subPageId) {
@@ -798,6 +805,39 @@ var Helper = {
 				unsafeWindow.tt_setWidth(200);
 				unsafeWindow.Tip(infoMessage);
 			});
+	},
+	
+	quickUse: function(responseText, callback) {
+
+		var quItems=System.getValueJSON("quickUseItems");
+		var item=quItems['item'+callback.id];
+		if (item=='') return;
+		
+		// only applicable when you are hunting (in world screen)
+		if (!System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..")) return;
+		if (responseText=='') {
+			// call again with the backpack droping screen text
+			System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.quickUse, callback);
+			return;
+		}
+		
+		Helper.itemList = {};
+		var doc=System.createDocument(responseText);
+		Helper.retrieveItemInfor(doc);
+		
+		for (var key in Helper.itemList) {
+			if (Helper.itemList[key].text==item) {
+				System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id,
+					function(responseText) {
+						var info = Layout.infoBox(responseText);
+						if (!info) info = "<font color=red>Error</font>";
+						unsafeWindow.tt_setWidth(200);
+						unsafeWindow.Tip(info);
+					});
+				return;
+			}
+		}
+		alert("Cannot find any " + item + " to use!");
 	},
 
 	injectRelic: function(isRelicPage) {
@@ -1537,7 +1577,7 @@ var Helper = {
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:xx-small;">' + info + '</div>';
 	},
 
-	insertQuickSelectItems: function() {
+	injectQuickSelectItems: function() {
 		var nodes = System.findNodes("//input[@name='sendItemList[]']");
 		if (nodes == null || nodes.length==0) return;
 		var table=nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
@@ -1579,7 +1619,64 @@ var Helper = {
 		}
 	},
 	
-	insertQuickWear: function() {
+	injectQuickUseManager: function() {
+		Helper.itemList = {};
+		Helper.retrieveItemInfor(document);
+		var layout=System.findNode("//td[contains(@background,'skin/inner_bg.jpg')]");
+		var output='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
+			'<td nobr colspan=4><b>&nbsp;Quick Use Manager</b></td></tr>'+
+			'<tr><td colspan=4>Select 3 items (can be stims, ammos, resources) to quick-use with hotkeys "{", "}", "|". '+
+			'Note that these hotkey will only be available on World screen (while you are hunting), and WITHOUT confirmation!</td></tr>'+
+			'<tr><td>&nbsp;</td></tr><tr><td align=right>'+
+			'<input type="button" class="custombutton" value="Clear" id="clearQuickUse">'+
+			'&nbsp;&nbsp;Selected items: </td>'+
+			'<td id=item0 style="font-weight:bold;color:green;text-align:center"></td>'+
+			'<td id=item1 style="font-weight:bold;color:green;text-align:center"></td>'+
+			'<td id=item2 style="font-weight:bold;color:green;text-align:center"></td></tr><tr><td>&nbsp;</td></tr>';
+		
+		Helper.tempDict={};
+		var count=0;
+		for (var key in Helper.itemList) {
+			if (Helper.tempDict[Helper.itemList[key].text]==undefined) {
+				if (count%4==0) output+='<tr>';
+				output+='<td><table width=100%><tr>'+
+					Helper.itemList[key].html.replace('width="90%"',' id=id'+count+' itemId="'+key+'"')+
+					'</tr></table></td>';
+				Helper.tempDict[Helper.itemList[key].text]=Helper.itemList[key];
+				if (count%4==3) output+='</tr>';
+				count++;
+			}
+		}
+		output+='</table>';
+		layout.innerHTML=output;
+		Helper.showQuickUseItem();
+		for (var i=0; i<count; i++)
+			document.getElementById('id'+i).addEventListener("click",Helper.addQuickUseItem,true);
+		document.getElementById('clearQuickUse').addEventListener("click", function() {
+				GM_setValue("quickUseItems",JSON.stringify({'item0':'','item1':'','item2':''}));
+				Helper.showQuickUseItem();
+			}, true);
+	},
+	
+	addQuickUseItem: function(evt) {
+		var key = evt.target.getAttribute("itemid");
+		var quItems=System.getValueJSON("quickUseItems");
+		for (var i=0; i<2; i++)
+			quItems['item'+i]=quItems['item'+(i+1)];
+		quItems['item2']=Helper.itemList[key].text;
+		System.setValueJSON("quickUseItems", quItems);
+		Helper.showQuickUseItem();
+	},
+	
+	showQuickUseItem: function() {
+		var hotkeys=['{','}','|'];
+		var quItems=System.getValueJSON("quickUseItems");
+		for (var i=0; i<3; i++) {
+			document.getElementById('item'+i).innerHTML=(quItems['item'+i]==''?'[Not Assigned]':quItems['item'+i]);
+		}
+	},
+	
+	injectQuickWear: function() {
 		Helper.itemList = {};
 		var layout=Layout.notebookContent();
 		layout.innerHTML="Getting item list from: ";
@@ -2520,6 +2617,11 @@ var Helper = {
 			break;
 		case 104: // quickheal
 			Helper.quickHeal();
+			break;
+		case 123: // "{"
+		case 125: // "}"
+		case 124: // quick use items "|"
+			Helper.quickUse('', {'id':((r==124?127:r)-123)/2});
 			break;
 		case 19: // quick buffs
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
@@ -3597,22 +3699,19 @@ var Helper = {
 			}
 			GM_setValue("listOfAllies", listOfAllies);
 			GM_setValue("listOfEnemies", listOfEnemies);
+			
+			// quick wear manager link
+			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
+			if (node) {
+				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Q_Wear</a>]"+
+					"| [<a href='/index.php?cmd=profile&subcmd=dropitems&fromworld=1&subcmd2=quickuseman'>Q_Use</a>]";
+			}
 
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem') or contains(@href,'subcmd=useitem')]]");
 
-			if (!profileInventory) {
-				var profInv = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=useitem')]]");
-			} else {
-				var profInv = profileInventory;
-			}
-			if (profInv) {
-				var bpRows = System.findNodes("//tr[td/center/a]", profInv);
-				if (bpRows)
-					for (var i=0;i<bpRows.length;i++) {
-						bpRows[i].innerHTML = bpRows[i].innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
-					}
-			}
+			if (profileInventory)
+				profileInventory.innerHTML=profileInventory.innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
 
 			if (profileInventory) {
 				var profileInventoryIDRE = /inventory_id=(\d+)/i;
@@ -3671,14 +3770,10 @@ var Helper = {
 							.addEventListener('click', Helper.selectAllProfileInventoryItem, true);
 						document.getElementById('Helper:useProfileInventoryItem' + profileInventoryBoxID[i])
 							.addEventListener('click', Helper.useProfileInventoryItem, true);
+					} else {
+						var newCell = newRow.insertCell(i % 5);
 					}
 				}
-			}
-			
-			// quick wear manager link
-			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
-			if (node) {
-				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]";
 			}
 		}
 
@@ -6539,7 +6634,7 @@ var Helper = {
 			injectHere.innerHTML = '';
 	},
 	
-	insertSaveConfig: function() {
+	injectSaveConfig: function() {
 		var injectHere=Layout.notebookContent();
 		Helper.defaultLabels='auctionTemplate, chatTopToBottom, doNotKillList, enableBioCompressor, enableCreatureColoring, '+
 			'enableGuildOnlineList, enableLogColoring, footprints, footprintsColor, goldAmount, goldConfirm, goldRecipient, '+
@@ -6548,7 +6643,7 @@ var Helper = {
 			'hideRecipeNames, hideRecipes, huntingBuffs, invMaxLvlFilter, keepLogs, krulXCV, '+
 			'maxCompressedCharacters, maxCompressedLines, minPSStats, monsterLog, moveFSBox, '+
 			'onlinePlayerMaxLvl, onlinePlayerMinLvl, quickKill, quickMsg, quickSearchList, quickWearFilter, sendGoldonWorld, '+
-			'showCombatLog, showCompletedQuests, showCreatureInfo, showExtraLinks, showHuntingBuffs';
+			'showCombatLog, showCompletedQuests, showCreatureInfo, showExtraLinks, showHuntingBuffs, quickUseItems';
 		injectHere.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td nobr colspan=2><b>&nbsp;Settings Manager</b></td></tr>'+
 			'<tr><td width=20% valign=top>&nbsp;Setting labels:</td><td align=center>'+
