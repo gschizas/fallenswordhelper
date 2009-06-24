@@ -3710,8 +3710,18 @@ var Helper = {
 			// Fast Wear
 			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem') or contains(@href,'subcmd=useitem')]]");
 
-			if (profileInventory)
-				profileInventory.innerHTML=profileInventory.innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
+			if (!profileInventory) {
+				var profInv = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=useitem')]]");
+			} else {
+				var profInv = profileInventory;
+			}
+			if (profInv) {
+				var bpRows = System.findNodes("//tr[td/center/a]", profInv);
+				if (bpRows) // must go for each row so the submit form will not be broken
+					for (var i=0;i<bpRows.length;i++) {
+						bpRows[i].innerHTML = bpRows[i].innerHTML.replace(/<font size="1">1&nbsp;\/&nbsp;1<\/font>/g, '');
+					}
+			}
 
 			if (profileInventory) {
 				var profileInventoryIDRE = /inventory_id=(\d+)/i;
