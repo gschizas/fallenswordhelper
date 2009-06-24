@@ -3719,7 +3719,7 @@ var Helper = {
 				var usableIDRE = /subcmd=useitem/i;
 				var itemImgRE = /\/([^\/]*)\.gif/i;
 				var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
-
+				
 				var profileInventoryBox = [];
 				var profileInventoryBoxItem = [];
 				var profileInventoryBoxID = [];
@@ -3740,19 +3740,20 @@ var Helper = {
 								profileInventoryResID[i] = itemImgRE(profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("src"))[1];
 							}
 						}
+						if (itemHREF) var itemsCount = i;
 					}
 				}
 
 				var newRow;
 
-				for (var i=0;i<15;i++) {
+				for (var i=0;i<=itemsCount;i++) {
 					if ((i % 5==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*Math.floor(i / 5)+1);
 					if ((i % 5==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*Math.floor(i / 5)+1);
+					var newCell = newRow.insertCell(i % 5);
 					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i] && !profileInventoryResID[i]) {
 						var output = '<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
 								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
 								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
-						var newCell = newRow.insertCell(i % 5);
 						newCell.align = 'center';
 						newCell.innerHTML = output;
 						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
@@ -3763,15 +3764,12 @@ var Helper = {
 								'itemID="' + profileInventoryResID[i] + '" onmouseover="Tip(\'Select all items of the same type\')">S</span> | '+
 								'<span id="Helper:useProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
 								'itemID="' + profileInventoryBoxID[i] + '" onmouseover="Tip(\'Use item / Extract resource (with your confirmation)\')">U</span></span>';
-						var newCell = newRow.insertCell(i % 5);
 						newCell.align = 'center';
 						newCell.innerHTML = output;
 						document.getElementById('Helper:selectAllProfileInventoryItem' + profileInventoryBoxID[i])
 							.addEventListener('click', Helper.selectAllProfileInventoryItem, true);
 						document.getElementById('Helper:useProfileInventoryItem' + profileInventoryBoxID[i])
 							.addEventListener('click', Helper.useProfileInventoryItem, true);
-					} else {
-						var newCell = newRow.insertCell(i % 5);
 					}
 				}
 			}
