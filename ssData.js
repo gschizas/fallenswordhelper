@@ -88,7 +88,12 @@ var Data = {
 				{'questName':'Weapon of Strength', 'level':123, 'location':'Ullgath Caves (Creep)@ 2,5'},
 				{'questName':'The Hard Path', 'level':125, 'location':'Ullgath Caves (Halls) @ 14,5'},
 				{'questName':'Stood in the Gloom', 'level':127, 'location':'Ullgath Caves (Gloom) @ 2,16'},
-				{'questName':'Verification of Findings', 'level':129, 'location':'Ullgath Caves (Murk) @ 4,10'}
+				{'questName':'Verification of Findings', 'level':129, 'location':'Ullgath Caves (Murk) @ 4,10'},
+				{'questName':'Gamma Web', 'level':131, 'location':'Netherdeep (Descent)'},
+				{'questName':'Broken Link', 'level':133, 'location':'Netherdeep (Twisted Halls)'},
+				{'questName':'From the Depths', 'level':135, 'location':'Netherdeep (Pit) @ 2,14'},
+				{'questName':'Walking Wounded', 'level':137, 'location':'Netherdeep (Black Fissures)'},
+				{'questName':'A Tiresome Task', 'level':139, 'location':'Netherdeep (Fractured Galleries)'}
 			];
 			Data.questArray = questArray.sort();
 		}
