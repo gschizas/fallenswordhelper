@@ -12,7 +12,7 @@ var Data = {
 				{'questName':'System Error', 'level':3, 'location':'Security Core'},
 				{'questName':'Powered Down', 'level':4, 'location':'Analytical Layer'},
 				{'questName':'Bit Builder', 'level':5, 'location':'System Edge'},
-				{'questName':'Facility Assault', 'level':5, 'location':'Transfer Pod' @ 2,9},
+				{'questName':'Facility Assault', 'level':5, 'location':'Transfer Pod @ 2,9'},
 				{'questName':'Delivery Note', 'level':8, 'location':'Cloning Facility (Loading Bay) @ 2,13'},
 				{'questName':'Resource Stripping', 'level':7, 'location':'Cloning Facility (East Wing)'},
 				{'questName':'Call to Arms', 'level':10, 'location':'Desert Path (Straights) @ 6,3'},
