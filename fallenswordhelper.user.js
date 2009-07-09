@@ -71,6 +71,12 @@ var Helper = {
 		
 		System.setDefault("currentGoldSentTotal", 0);
 
+		System.setDefault("enableActiveBountyList", false);
+		System.setDefault("bountyListRefreshTime", 30);
+		System.setDefault("enableWantedList", false);
+		System.setDefault("wantedNames", "");
+		System.setDefault("bwNeedsRefresh", true);
+
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
 		{"id":"showHelmetTypeItems", "type":"helm"},
@@ -227,13 +233,14 @@ var Helper = {
 		Layout.hideBanner();
 		Layout.moveFSBox();
 		Helper.prepareGuildList();
+		Helper.prepareBountyData();
 		Helper.prepareChat();
 		Helper.injectStaminaCalculator();
 		Helper.injectLevelupCalculator();
 		Layout.injectMenu();
 		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
-
+		
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
 			var re=/cmd=([a-z]+)/;
@@ -6722,6 +6729,11 @@ var Helper = {
 		var doNotKillList=GM_getValue("doNotKillList");
 		var hideArenaPrizes=GM_getValue("hideArenaPrizes");
 
+		var enableActiveBountyList = GM_getValue("enableActiveBountyList");
+		var bountyListRefreshTime = GM_getValue("bountyListRefreshTime");
+		var enableWantedList = GM_getValue("enableWantedList");
+		var wantedNames = GM_getValue("wantedNames");
+
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
@@ -6820,6 +6832,13 @@ var Helper = {
 				'This works on Recipe Manager') +
 				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
 				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Active Bounties' + Helper.helpLink('Show Active Bounties', 'This will show your active bounties ' +
+				'on the right hand side') + ':</td><td colspan="3"><input name="enableActiveBountyList" type = "checkbox" value = "on"' + (enableActiveBountyList? " checked":"") + '/>' +
+				'<input name="bountyListRefreshTime" size="1" value="'+ bountyListRefreshTime + '" /> seconds refresh</td></tr>' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Wanted Bounties' + Helper.helpLink('Show Wanted Bounties', 'This will show when someone you want is on the bounty board, the list is' +
+				'displayed the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
+			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people u want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
+				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -6943,6 +6962,11 @@ var Helper = {
 		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "hideArenaPrizes");
 		System.saveValueForm(oForm, "autoSortArenaList");
+
+		System.saveValueForm(oForm, "enableActiveBountyList");
+		System.saveValueForm(oForm, "bountyListRefreshTime");
+		System.saveValueForm(oForm, "enableWantedList");
+		System.saveValueForm(oForm, "wantedNames");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
@@ -7533,6 +7557,261 @@ var Helper = {
 		} else {
 			questInfoElement.innerHTML = 'None';
 		}
+	},
+
+	prepareBountyData: function() {
+		enableActiveBountyList = GM_getValue("enableActiveBountyList");
+		enableWantedList = GM_getValue("enableWantedList");
+
+		if (enableWantedList) {
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			if (!injectHere)
+				return;
+			var info = injectHere.insertRow(0);
+			var cell = info.insertCell(0);
+			cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
+		}
+		if (enableActiveBountyList) {
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			if (injectHere) {
+				var info = injectHere.insertRow(0);
+				var cell = info.insertCell(0);
+				cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
+			}
+		}
+		if (enableActiveBountyList || enableWantedList)
+			Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
+	},
+
+	retrieveBountyInfo: function(enableActiveBountyList, enableWantedList) {
+		var bountyList = System.getValueJSON("bountylist");
+		var wantedList = System.getValueJSON("wantedList");
+		var bountyListRefreshTime = GM_getValue("bountyListRefreshTime");
+		var bwNeedsRefresh = GM_getValue("bwNeedsRefresh");
+
+		bountyListRefreshTime *= 1000;
+		if (!bwNeedsRefresh) {
+			if (bountyList) {
+				if ((new Date()).getTime() - bountyList.lastUpdate.getTime() > bountyListRefreshTime) bwNeedsRefresh = true; // invalidate cache
+			}
+			if (wantedList && !bwNeedsRefresh) {
+				if ((new Date()).getTime() - wantedList.lastUpdate.getTime() > bountyListRefreshTime) bwNeedsRefresh = true; // invalidate cache
+			}
+		}
+
+		if (!bountyList || !wantedList || bwNeedsRefresh && (enableActiveBountyList || enableWantedList)) {
+			System.xmlhttp("index.php?cmd=bounty", Helper.parseBountyPageForWorld);
+		} else {
+			if (enableWantedList) {
+				wantedList.isRefreshed = false;
+				Helper.injectWantedList(wantedList);
+//alert("wantedList.isRefreshed = "+ wantedList.isRefreshed);
+			}
+			if (enableActiveBountyList) {
+				bountyList.isRefreshed = false;
+//alert("bountyList.isRefreshed = " + bountyList.isRefreshed);
+				Helper.injectBountyList(bountyList);
+			}
+		}
+	},
+
+	parseBountyPageForWorld: function(details) {
+		var doc=System.createDocument(details);
+		var  enableActiveBountyList = GM_getValue("enableActiveBountyList");
+		var  enableWantedList = GM_getValue("enableWantedList");
+		GM_setValue("bwNeedsRefresh", false);
+
+		if (enableWantedList) {
+			var activeTable = System.findNode("//table[@width = '630' and @cellpadding = '3']", doc);
+			var wantedNames = GM_getValue("wantedNames");
+			var wantedArray = wantedNames.split(",");
+			var wantedList = {};
+			wantedList.bounty = [];
+			wantedList.isRefreshed = true;
+			wantedList.lastUpdate = new Date();
+			wantedList.wantedBounties = false;
+	
+			if (activeTable) {
+				for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+					for (var j = 0; j < wantedArray.length; j++) {
+						var target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
+						if (target == wantedArray[j].trim()) {
+							wantedList.wantedBounties = true;
+							bounty = {};
+							bounty.target = target;
+							bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.href;
+							bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, "").replace(/\]/, "");
+	
+							bounty.offerer = activeTable.rows[i].cells[1].firstChild.firstChild.firstChild.textContent;
+	
+							bounty.reward = activeTable.rows[i].cells[2].textContent;
+							bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
+
+							bounty.rKills = activeTable.rows[i].cells[3].textContent;
+
+							bounty.xpLoss = activeTable.rows[i].cells[4].textContent;
+
+							bounty.posted = activeTable.rows[i].cells[5].textContent;
+						
+							bounty.tickets = activeTable.rows[i].cells[6].textContent;
+
+							if (activeTable.rows[i].cells[7].textContent.trim() == "[active]") {
+								bounty.active = true;
+								bounty.accept = "";
+							}
+							else {
+								bounty.active = false;
+								bounty.accept = activeTable.rows[i].cells[7].firstChild.firstChild.getAttribute("onclick");
+							}
+							wantedList.bounty.push(bounty);
+						}
+					}
+				}
+			}
+			Helper.injectWantedList(wantedList);
+		}
+		if (enableActiveBountyList) {
+			var activeTable = System.findNode("//table[@width = 620]", doc);
+			var bountyList = {};
+			bountyList.bounty = [];
+			bountyList.isRefreshed = true;
+			bountyList.lastUpdate = new Date();
+	
+			if (activeTable) {
+				if (!(/No bounties active/).test(activeTable.rows[1].cells[0].innerHTML)) {
+					bountyList.activeBounties = true;
+					for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+						bounty = {};
+						bounty.target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
+						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.href
+						bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, "").replace(/\]/, "");
+						bounty.reward = activeTable.rows[i].cells[2].textContent
+						bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title
+						bounty.posted = activeTable.rows[i].cells[3].textContent
+						bounty.xpLoss = activeTable.rows[i].cells[4].textContent
+						bounty.progress = activeTable.rows[i].cells[5].textContent;
+						
+						bountyList.bounty.push(bounty);
+					}
+				}
+				else {
+					bountyList.activeBounties = false;
+				}
+			}
+			Helper.injectBountyList(bountyList);
+		}
+	},
+
+	injectBountyList: function(bountyList) {
+		System.setValueJSON("bountylist", bountyList)
+		var injectHere = document.getElementById("Helper:BountyListPlaceholder");
+		var displayList = document.createElement("TABLE");
+		displayList.style.border = "1px solid #c5ad73";
+		displayList.style.backgroundColor = (bountyList.isRefreshed)?"#6a5938":"#4a3918";
+		displayList.cellPadding = 1;
+		displayList.width = 125;
+
+		var aRow=displayList.insertRow(0); //bountyList.rows.length
+		var aCell=aRow.insertCell(0);
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
+			"Active Bounties <span id='Helper:resetBountyList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span>";
+
+		if (bountyList.activeBounties == false) {
+			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:10px;'>" + 
+				"[No Active bounties]</ol>";
+		}
+		else {
+			for (var i = 0; i < bountyList.bounty.length; i++) {
+				var mouseOverText = "\"tt_setWidth(205);";
+				mouseOverText += "Tip('<div style=\\'text-align:center;width:205px;\\'>Level:  " + bountyList.bounty[i].lvl +
+				"<br/>Reward: " + bountyList.bounty[i].reward + " " +bountyList.bounty[i].rewardType + 
+				"<br/>XP Loss Remaining: " + bountyList.bounty[i].xpLoss +
+				"<br/>Progress:  " + bountyList.bounty[i].progress;
+				mouseOverText += "</div>');\"";
+
+//				output += " href='" + bountyList.bounty[i].link + "'>" + bountyList.bounty[i].target +"</a></li>"; 
+				output += "<li style='padding-bottom:0px;'>"
+				output += "<a style='color:red;font-size:10px;'"
+				output += "href='" + System.server + "index.php?cmd=attackplayer&target_username=" + bountyList.bounty[i].target + "'>[a]</a>&nbsp;";
+
+				output += "<a style='color:#A0CFEC;font-size:10px;'"
+				output += "href='" + System.server + "index.php?cmd=message&target_player=" + bountyList.bounty[i].target + "'>[m]";
+				output += "</a> &nbsp;<a onmouseover=" + mouseOverText;
+				output += "style='color:"
+				output += "#FFF380";
+				output += ";font-size:10px;'"
+				output += " href='" + bountyList.bounty[i].link + "'>" + bountyList.bounty[i].target +"</a></li>"; 
+			}
+		}
+
+		aCell.innerHTML = output;
+		var breaker=document.createElement("BR");
+		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
+		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		var test = document.getElementById('Helper:resetBountyList').addEventListener('click', Helper.resetBountyList, true);
+	},
+
+	resetBountyList: function(event) {
+		System.setValueJSON("bountylist", null);
+		window.location = window.location;
+	},
+
+	injectWantedList: function(wantedList) {
+		System.setValueJSON("wantedList", wantedList)
+		var injectHere = document.getElementById("Helper:WantedListPlaceholder");
+		var displayList = document.createElement("TABLE");
+		displayList.style.border = "1px solid #c5ad73";
+		displayList.style.backgroundColor = (wantedList.isRefreshed)?"#6a5938":"#4a3918";
+		displayList.cellPadding = 1;
+		displayList.width = 125;
+
+		var aRow=displayList.insertRow(0);
+		var aCell=aRow.insertCell(0);
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;'>"+
+			"Wanted Bounties <span id='Helper:resetWantedList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span><br>";
+
+		if (wantedList.wantedBounties == false) {
+			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:7px;'>" + 
+				"[No wanted bounties]</ol>";
+		}
+		else {
+			for (var i = 0; i < wantedList.bounty.length; i++) {
+				var mouseOverText = "\"tt_setWidth(205);";
+				mouseOverText += "Tip('<div style=\\'text-align:center;width:205px;\\'>Target Level:  " + wantedList.bounty[i].lvl +
+					"<br/>Offerer: "+ wantedList.bounty[i].offerer + 
+					"<br/>Reward: " + wantedList.bounty[i].reward + " " +wantedList.bounty[i].rewardType +
+					"<br/>Req. Kills: " + wantedList.bounty[i].rKills + 
+					"<br/>XP Loss Remaining: " + wantedList.bounty[i].xpLoss +
+					"<br/>Posted: " + wantedList.bounty[i].posted +
+					"<br/>Tickets Req.:  " + wantedList.bounty[i].tickets;
+				mouseOverText += "</div>');\"";
+
+				output += "<li style='padding-bottom:0px;margin-left:5px;'>"
+				output += "<a style= 'font-size:10px;"
+				if (wantedList.bounty[i].accept)
+					output += "color:rgb(0,255,0); cursor:pointer; text-decoration:underline blink;' title = 'Accept Bounty' 'onclick=\"" + wantedList.bounty[i].accept + "\"'>[a]</a>&nbsp;";
+				else
+					output += "color:red;' href='" + System.server + "index.php?cmd=attackplayer&target_username=" + wantedList.bounty[i].target + "'>[a]</a>&nbsp;";
+				output += "<a style='color:#A0CFEC;font-size:10px;'"
+				output += "href='" + System.server + "index.php?cmd=message&target_player=" + wantedList.bounty[i].target + "'>[m]";
+				output += "</a> &nbsp;<a onmouseover=" + mouseOverText;
+				output += "style='color:"
+				output += "#FFF380";
+				output += ";font-size:10px;'"
+				output += " href='" + wantedList.bounty[i].link + "'>" + wantedList.bounty[i].target +"</a></li>"; 
+			}
+		}
+
+		aCell.innerHTML = output;
+		var breaker=document.createElement("BR");
+		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
+		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		document.getElementById('Helper:resetWantedList').addEventListener('click', Helper.resetWantedList, true);
+	},
+
+	resetWantedList: function(event) {
+		System.setValueJSON("wantedList", null);
+		window.location = window.location;
 	}
 
 };
