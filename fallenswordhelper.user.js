@@ -68,6 +68,8 @@ var Helper = {
 		System.setDefault("maxCompressedLines", 25);
 		System.setDefault("hideArenaPrizes", "");
 		System.setDefault("autoSortArenaList", false);
+		
+		System.setDefault("currentGoldSentTotal", 0);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -1644,7 +1646,9 @@ var Helper = {
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
 		if (GM_getValue("sendGoldonWorld")){
-			var recipient_text = "Send " +GM_getValue("goldAmount") + " gold To " + GM_getValue("goldRecipient");
+			currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
+			var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") + 
+				". Current gold sent total is " + currentGoldSentTotal;
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
 				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
@@ -1761,7 +1765,10 @@ var Helper = {
 		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		var info = Layout.infoBox(responseText);
 		if (info=="" || info=="You successfully sent gold!") {
-			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '!';
+			var currentGoldSentTotal = GM_getValue("currentGoldSentTotal")*1;
+			currentGoldSentTotal += System.intValue(callback.amount);
+			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
+			GM_setValue("currentGoldSentTotal", currentGoldSentTotal);
 		}
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
 	},
@@ -6778,8 +6785,9 @@ var Helper = {
 				':</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
 			'<tr><td align="right">Show Send Gold' + Helper.helpLink('Show Gold on World Screen', 'This will show an icon below the world map to allow you to quickly send gold to a Friend.') +
 				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
-				'Send <input name="goldAmount" size="15" value="'+ GM_getValue("goldAmount") + '" /> '+
-				'gold to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />' +
+				'Send <input name="goldAmount" size="5" value="'+ GM_getValue("goldAmount") + '" /> '+
+				'gold to <input name="goldRecipient" size="10" value="'+ GM_getValue("goldRecipient") + '" />' +
+				'. Current total: <input name="currentGoldSentTotal" size="5" value="'+ GM_getValue("currentGoldSentTotal") + '" />' +
 				'</td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
@@ -6932,6 +6940,7 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
+		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "hideArenaPrizes");
 		System.saveValueForm(oForm, "autoSortArenaList");
 
