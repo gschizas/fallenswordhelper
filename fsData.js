@@ -6755,10 +6755,34 @@ var Data = {
 				{name:'Weapon of Oranical', type:'weapon'},
 				{name:'Shield of Stalia', type:'shield'},
 				{name:'Ring of Aeslam', type:'ring'},
-				
 				{name:'Guardian of Meidos Armor', type:'armor'},
 				{name:'Meidos Amulet', type:'amulet'},
-				{name:'Meidos Helmet', type:'helmet'}
+				{name:'Meidos Helmet', type:'helmet'},
+				
+				{name:'Ai Chay Ke Amulet', type:'amulet'},
+				{name:'Ai Chay Ke Ring', type:'ring'},
+				{name:'Ai Chay Ke Rune', type:'rune'},
+				{name:'Arkl Axe', type:'weapon'},
+				{name:'Dwarven War Plate', type:'armor'},
+				{name:'Gloves of Stalknir', type:'gloves'},
+				{name:'Greater Carnosaur Mace', type:'weapon'},
+				{name:'Greater Carnosaur Shield', type:'shield'},
+				{name:'Heitwars Ring', type:'ring'},
+				{name:'Helmet of Funrao', type:'helmet'},
+				{name:'Mace of Reliha', type:'weapon'},
+				{name:'Meidos Rune', type:'rune'},
+				{name:'Poisoned Blade', type:'weapon'},
+				{name:'Polar Spine Grips', type:'gloves'},
+				{name:'Polar Spine Grips', type:'gloves'},
+				{name:'Polar Spine Neckpiece', type:'amulet'},
+				{name:'Polar Spine Neckpiece', type:'amulet'},
+				{name:'Ring of Baraggal', type:'ring'},
+				{name:'Ring of Cluxal', type:'ring'},
+				{name:'Rune of Derinla', type:'rune'},
+				{name:'Rune of Frokjas', type:'rune'},
+				{name:'Rune of Wholla', type:'rune'},
+				{name:'Scythe of Mourla', type:'weapon'},
+				{name:'Weapon of Ghasst', type:'weapon'}
 			]
 		}
 		return Data.itemArray;

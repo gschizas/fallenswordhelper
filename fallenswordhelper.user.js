@@ -569,6 +569,10 @@ var Helper = {
 		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
 
+		//Update the guild online list, since we are already on the page.
+		doc = System.findNode("//html");
+		Helper.parseGuildForWorld(doc.innerHTML, true);
+
 		// Fast Take
 
 		var guildStore = System.findNode("//table[tbody/tr/td[@background='"+System.imageServer+"/inventory/2x3.gif']]");
