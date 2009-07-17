@@ -2124,7 +2124,9 @@ var Helper = {
 			lootedItemId=lootMatch[4];
 			lootedItemVerify=lootMatch[5];
 		}
-		var shieldImpDeathRE = /Psi Shield was destroyed/;
+		var shieldImpHPRE = /Psi Shield has \d block\(s\) remaining/;
+		var shieldImpHP = responseText.match(shieldImpHPRE);
+		var shieldImpDeathRE = /Psi Shield is destroyed/;
 		var shieldImpDeath = responseText.match(shieldImpDeathRE);
 
 		var monster = callback.node;
@@ -2141,6 +2143,10 @@ var Helper = {
 					lootedItemId + ", -1, 2, " + playerId + ", '');\" >" +
 					lootedItem + "</span></small></small>";
 				resultText += "Looted item:" + lootedItem + "\n";
+			}
+			if (shieldImpHP) {
+				resultHtml += "<br/><small><small><span style='color:red;'>"+shieldImpHP[0]+"</span></small></small>";
+				resultText += shieldImpHP[0]+"\n"
 			}
 			if (shieldImpDeath) {
 				resultHtml += "<br/><small><small><span style='color:red;'>Psi Shield was destroyed</span></small></small>";
@@ -5524,7 +5530,7 @@ var Helper = {
 				extraNotes + "</span></td></tr>" +
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>" +
 				"*Does NOT include any skills (if active) (YET), allow for randomness (1.1053)<br>" +
-				"The script developers does not have infor on how to calcuate these values for SS2 yet, "+
+				"The script developers does not have info on how to calcuate these values for SS2 yet, "+
 				"so if you can derive some values / formula for these calculation, please contact dkwizard.<br> "+
 				"Thank you very much!</span></td></tr>" +
 			"</tbody></table>";
@@ -6153,7 +6159,7 @@ var Helper = {
 
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) {
-			// add item infor to display on the next page
+			// add item info to display on the next page
 			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
 			if (items) {
 				for (var i = 0; i < items.length; i++) {
