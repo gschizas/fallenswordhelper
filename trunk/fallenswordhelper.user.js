@@ -6631,7 +6631,7 @@ var Helper = {
 
 	getCombatMoves: function(responseText, callback) {
         var doc=System.createDocument(responseText);
-		var combatMovesTable = System.findNode("//table[@width='10']/..", doc);
+		var combatMovesTable = System.findNode("//td[table/tbody/tr/td/table/tbody/tr/td/a[@href='index.php?cmd=arena&subcmd=pickmove&slot_id=1']]", doc);
 		var injectHere = System.findNode("//span[@id='Helper:combatMoves']");
 		injectHere.innerHTML = combatMovesTable.innerHTML
     },
