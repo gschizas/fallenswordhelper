@@ -608,12 +608,12 @@ var Helper = {
 	},
 
 	quickStone: function(){
-		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=65", Helper.quickStoneDone);
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=65", Helper.quickDone);
 	},
 	quickShard: function(){
-		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=58", Helper.quickStoneDone);
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=58", Helper.quickDone);
 	},
-	quickStoneDone: function(responseText) {
+	quickDone: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
 		unsafeWindow.tt_setWidth(200);
 		unsafeWindow.Tip(infoMessage);
@@ -622,6 +622,11 @@ var Helper = {
 
 
 	},
+
+	quickMS: function(){
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=64", Helper.quickDone);
+	},
+
 
 	injectGuild: function() {
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
@@ -2581,14 +2586,17 @@ var Helper = {
 		case 99: // se
 			Helper.moveMe(1,1);
 			break;
-		case 114: // repair
+		case 114: // repair [r]
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			break;
-		case 107: //quickStone
+		case 107: //quickStone [k]
 			Helper.quickStone();
 			break;
-		case 75: //quickShard
+		case 75: //quickShard [K]
 			Helper.quickShard();
+			break;
+		case 105: //Quick MS [i]
+			Helper.quickMS();
 			break;
 		case 71: // create group [G]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
@@ -2621,7 +2629,7 @@ var Helper = {
 		case 118: // fast wear manager [v]
 			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
 			break;
-		case 104: // quickheal
+		case 104: // quickheal [h]
 			Helper.quickHeal();
 			break;
 		case 123: // "{"
