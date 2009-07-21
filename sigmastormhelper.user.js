@@ -61,6 +61,11 @@ var Helper = {
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
+
+		System.setDefault("enableAllyOnlineList", false);
+		System.setDefault("enableEnemyOnlineList", false);
+		System.setDefault("allyEnemyOnlineRefreshTime", 60);
+
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", true);
 		System.setDefault("doNotKillList", "");
@@ -227,6 +232,7 @@ var Helper = {
 		Helper.init();
 		Layout.moveFSBox();
 		Helper.prepareGuildList();
+		Helper.prepareAllyEnemyList();
 		Helper.prepareChat();
 		Helper.injectStaminaCalculator();
 		Helper.injectLevelupCalculator();
@@ -667,6 +673,9 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
 //		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
+		
+		doc = System.findNode("//html");
+		Helper.parseGuildForWorld(doc.innerHTML, true);
 
 		// Fast Take
 
@@ -2264,15 +2273,15 @@ var Helper = {
 
 	prepareGuildList: function() {
 		if (!GM_getValue("enableGuildOnlineList")) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
-		if (!injectHere) return;
-		var info = injectHere.insertRow(0);
+		Helper.rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
+		if (!Helper.rightSideBar) return;
+		var info = Helper.rightSideBar.insertRow(0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
 		Helper.retrieveGuildData();
 	},
 
-	retrieveGuildData: function() {
+	retrieveGuildData: function(refreshGuildDataOnly) {
 		var memberList = System.getValueJSON("memberlist");
 		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
 		guildOnlineRefreshTime *= 1000;
@@ -2280,8 +2289,8 @@ var Helper = {
 			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
 
-		if (!memberList) {
-			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld);
+		if (!memberList || refreshGuildDataOnly) {
+			System.xmlhttp("index.php?cmd=guild&subcmd=manage",Helper.parseGuildForWorld,refreshGuildDataOnly);
 		} else {
 			var memberList = System.getValueJSON("memberlist");
 			memberList.isRefreshed = false;
@@ -2289,7 +2298,7 @@ var Helper = {
 		}
 	},
 
-	parseGuildForWorld: function(details) {
+	parseGuildForWorld: function(details,refreshGuildDataOnly) {
 		var doc=System.createDocument(details);
 		var allTables = doc.getElementsByTagName("TABLE")
 		var membersTable;
@@ -2320,6 +2329,7 @@ var Helper = {
 					var memberRank   = aRow.cells[3].textContent;
 					var memberXP     = System.intValue(aRow.cells[4].textContent);
 					var memberStatus = aRow.cells[0].firstChild.title;
+					var memberClass = aRow.cells[1].firstChild.firstChild.firstChild.firstChild.firstChild.getAttribute('title');
 
 					var aMember;
 
@@ -2347,11 +2357,12 @@ var Helper = {
 					}
 
 					aMember.status = memberStatus;
-					aMember.id     = memberId;
-					aMember.name   = memberName;
-					aMember.level  = memberLevel;
-					aMember.rank   = memberRank;
-					aMember.xp     = memberXP;
+					aMember.id = memberId;
+					aMember.name = memberName;
+					aMember.level = memberLevel;
+					aMember.rank = memberRank;
+					aMember.xp = memberXP;
+					aMember.class = memberClass;
 				}
 			}
 
@@ -2361,7 +2372,7 @@ var Helper = {
 
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
-			Helper.injectGuildList(memberList);
+			if (!refreshGuildDataOnly) Helper.injectGuildList(memberList);
 		}
 	},
 
@@ -2918,11 +2929,11 @@ var Helper = {
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>Faction Members";
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
 			"Faction Members <a id='Helper:resetGuildList' style='color:cyan; font-size:8px; cursor:pointer; text-decoration:underline;'"+
 			" onmouseover=\"tt_setWidth(105);Tip('Reset online Faction List');\">R</a>";
 		var onlineMembers = memberList.members.filter(function (e) {return (e.status=="Online")})
+		var class2img = {'Mutant':1,'Soldier':2,'Purist':3,'Cyborg':4};
 		for (var i=0;i<onlineMembers.length;i++) {
 			var member=onlineMembers[i];
 			output += "<li style='padding-bottom:0px;'>"
@@ -2940,6 +2951,7 @@ var Helper = {
 			output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b>"+
 				"<br/>XP: " + System.addCommas(member.xp) +
 				"<br/>Level: " + member.level +
+				"<br/>Class: " + member.class + "&nbsp;<image src=\\'http://66.7.192.165/sigma2/skin/classes/"+class2img[member.class]+".gif\\'>"+
 				"<br/>Logged in:" + member.loggedInAt.toFormatString("ddd HH:mm");
 			if (member.hasFullData) {
 
@@ -3797,6 +3809,9 @@ var Helper = {
 					}
 				}
 			}
+			
+			doc = System.findNode("//html");
+			Helper.parseProfileForWorld(doc.innerHTML, true);
 		}
 
 		//bio compressor ...
@@ -5757,6 +5772,10 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Online Faction Members' + Helper.helpLink('Show Faction Online Members List', 'This will show the faction members online list on the right.') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
+				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
+				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
+				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show chat lines' + Helper.helpLink('Chat lines', 'Display the last {n} lines from faction chat (set to 0 to disable).' +
@@ -5958,6 +5977,10 @@ var Helper = {
 			minPS[name]=formElement.value;
 		}
 		GM_setValue('minPSStats', JSON.stringify(minPS));
+		
+		System.saveValueForm(oForm, "enableAllyOnlineList");
+		System.saveValueForm(oForm, "enableEnemyOnlineList");
+		System.saveValueForm(oForm, "allyEnemyOnlineRefreshTime");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
@@ -6760,6 +6783,171 @@ var Helper = {
 			output+=key+', ';
 		}
 		document.getElementById('stlabels').value=output.replace(/, $/,'');
+	},
+	
+	prepareAllyEnemyList: function() {
+		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
+			if (!Helper.rightSideBar) return;
+			var info = Helper.rightSideBar.insertRow(0);
+			var cell = info.insertCell(0);
+			cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
+			Helper.retrieveAllyEnemyData(false);
+		}
+	},
+
+	retrieveAllyEnemyData: function(refreshAllyEnemyDataOnly) {
+		var contactList = System.getValueJSON("contactList");
+		var allyEnemyOnlineRefreshTime = GM_getValue("allyEnemyOnlineRefreshTime");
+		allyEnemyOnlineRefreshTime *= 1000;
+		if (contactList) {
+			if ((new Date()).getTime() - contactList.lastUpdate.getTime() > allyEnemyOnlineRefreshTime) contactList = null; // invalidate cache
+		}
+
+		if (!contactList || refreshAllyEnemyDataOnly) {
+			System.xmlhttp("index.php?cmd=profile", Helper.parseProfileForWorld, refreshAllyEnemyDataOnly);
+		} else {
+			var contactList = System.getValueJSON("contactList");
+			contactList.isRefreshed = false;
+			Helper.injectAllyEnemyList(contactList);
+		}
+	},
+
+	parseProfileForWorld: function(details, refreshAllyEnemyDataOnly) {
+		var doc=System.createDocument(details);
+		var alliesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/allies_head.jpg')]",doc);
+		var alliesTable = alliesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		var enemiesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/enemies_head.jpg')]",doc);
+		var enemiesTable = enemiesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		
+		var contactList = System.getValueJSON("contactList");
+		if (!contactList) {
+			contactList = {};
+			contactList.contacts = [];
+		}
+		contactList.contacts.forEach(function(e) {e.status="Deleted"});
+		
+		if (alliesTable && enemiesTable) {
+			Helper.processAllyEnemyTable(contactList,alliesTable,"Ally");
+			Helper.processAllyEnemyTable(contactList,enemiesTable,"Enemy");
+			
+			// remove not existing players
+			contactList.contacts = contactList.contacts.filter(function(e) {return e.status!="Deleted"});
+			// damn, I love javascript array functions :)
+
+			contactList.lastUpdate = new Date();
+			contactList.isRefreshed = true;
+			System.setValueJSON("contactList", contactList);
+			if (!refreshAllyEnemyDataOnly) Helper.injectAllyEnemyList(contactList);
+		}
+	},
+	
+	processAllyEnemyTable: function(contactList,table, lable) {
+		var enemiesDetails=System.findNodes('//table[@cellpadding=1]',System.createDocument(table.innerHTML));
+
+		for (var i=0;i<enemiesDetails.length;i++) {
+			var aTable = enemiesDetails[i];
+			var contactLink   = aTable.rows[0].cells[1].firstChild;
+			var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.href)[0]);
+			var contactName   = contactLink.textContent;
+			var contactStatus = aTable.rows[0].cells[0].firstChild.title;
+
+			var aContact;
+
+			// find contact in contact list, to modify data instead of replacing it
+
+			var findContacts = contactList.contacts.filter(function (e) {return e.id==contactId});
+			if (findContacts.length>0) {
+				aContact = findContacts[0];
+			}
+			else { // contact was not found, must be new
+				aContact = {};
+				// You can still modify an object, even if you have added it to something else
+				contactList.contacts.push(aContact);
+				aContact.firstSeen = new Date();
+				aContact.status = "Offline"; // new players are supposed to be offline
+			}
+
+			if (aContact.status == "Offline" && contactStatus=="Online") {
+				aContact.loggedInAt = new Date();
+			}
+
+			if (!aContact.loggedInAt) {
+				aContact.loggedInAt = new Date();
+			}
+
+			aContact.status = contactStatus;
+			aContact.id     = contactId;
+			aContact.name   = contactName;
+			aContact.type   = lable;
+		}
+	},
+	
+	injectAllyEnemyList: function(contactList) {
+		enableAllyOnlineList = GM_getValue("enableAllyOnlineList");
+		enableEnemyOnlineList = GM_getValue("enableEnemyOnlineList");
+		if (!enableAllyOnlineList && !enableEnemyOnlineList) return;
+		var onlineAlliesEnemies = contactList.contacts.filter(function (e) {return (e.status=="Online")})
+		if (!enableAllyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Ally")})
+		if (!enableEnemyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Enemy")})
+		if (onlineAlliesEnemies.length == 0) return;
+		var playerId = Layout.playerId();
+		var injectHere = document.getElementById("Helper:AllyEnemyListPlaceholder");
+		var displayList = document.createElement("TABLE");
+		displayList.style.border = "1px solid gray";
+		displayList.style.backgroundColor = (contactList.isRefreshed)?"#151f1e":"#112322";
+		displayList.cellPadding = 1;
+		displayList.width = 125;
+
+		var aRow=displayList.insertRow(displayList.rows.length);
+		var aCell=aRow.insertCell(0);
+		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
+			"Allies/Enemies <a id='Helper:resetAllyEnemyList' style='color:cyan; font-size:8px; cursor:pointer; text-decoration:underline;'"+
+			" onmouseover=\"tt_setWidth(105);Tip('Reset List');\">R</a>";
+		for (var i=0;i<onlineAlliesEnemies.length;i++) {
+			var contact=onlineAlliesEnemies[i];
+			output += "<li style='padding-bottom:0px;'>"
+			output += "<a style='color:#CCFF99;font-size:10px;' "
+			output += Layout.quickBuffHref(contact.id) + ">[b]</a>&nbsp;";
+			if (contact.id!=playerId) {
+				output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
+				output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + contact.name + "\">[m]";
+				output += "</a>";
+			}
+			else {
+				output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
+			}
+			output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
+			output += "Tip('<div style=\\'text-align:center;width:105px;\\'>Logged in:" + contact.loggedInAt.toFormatString("ddd HH:mm");
+			output += "</div>');\" ";
+			output += "style='color:"
+			if (((new Date()) - contact.loggedInAt) < 30000) { // just logged in
+				output += "orange";
+			}
+			else if (contact.type == "Ally") {
+				output += "DodgerBlue";
+			}
+			else if (contact.type == "Enemy") {
+				output += "red";
+			}
+			else {
+				output += "white";
+			}
+			output += ";font-size:10px;'"
+			output += " href='" + System.server + "index.php?cmd=profile&player_id=" + contact.id + "'>" + contact.name + "</a>";
+			// output += "<br/>"
+			output += "</li>"
+		}
+		output += "</ol>";
+		aCell.innerHTML = output;
+		var breaker=document.createElement("BR");
+		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
+		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
+		document.getElementById('Helper:resetAllyEnemyList').addEventListener('click', Helper.resetAllyEnemyList, true);		
+	},
+
+	resetAllyEnemyList: function(evt) {
+		GM_setValue("contactList","");
+		window.location = window.location;
 	}
 };
 
