@@ -4357,8 +4357,9 @@ var Helper = {
 	parseOnlinePlayersStorePage: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var output=document.getElementById('Helper:OnlinePlayersOutput')
-		var playerRows = System.findNodes("//table[@width='400']/tbody/tr[count(td)=3 and td[1]/a]", doc);
-		var maxPage = parseInt(System.findNode("//table[@width='400']//td[input]", doc).textContent.replace(/\D/g, ""));
+		var playerRows = System.findNodes("//table/tbody/tr[count(td)=3 and td[1]/a]", doc);
+		var tables=System.findNodes("//table");
+		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""));
 		output.innerHTML+=callback.page + " ";
 		if (playerRows)
 			for (var i=0; i<playerRows.length; i++) {
