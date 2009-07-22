@@ -9,9 +9,9 @@
 // @exclude        http://forum.sigmastorm2.com/*
 // @exclude        http://wiki.sigmastorm2.com/*
 // @require        json2.js
-// @require        calfsystem.js
-// @require        sslayout.js
-// @require        ssdata.js
+// @require        calfSystem.js
+// @require        ssLayout.js
+// @require        ssData.js
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
@@ -67,8 +67,7 @@ var Helper = {
 		System.setDefault("allyEnemyOnlineRefreshTime", 60);
 
 		System.setDefault("hideMatchesForCompletedMoves", false);
-		System.setDefault("showQuickKillOnWorld", true);
-		System.setDefault("killAllAdvanced", "off");
+		System.setDefault("quickKill", true);
 		System.setDefault("doNotKillList", "");
 		System.setDefault("enableBioCompressor", false);
 		System.setDefault("maxCompressedCharacters", 1500);
@@ -1464,28 +1463,6 @@ var Helper = {
 		var newCell=newRow.insertCell(0);
 		// newCell.setAttribute("background", System.imageServer + "/sigma2/skin/realm_right_bg.jpg");
 
-		var killStyle = GM_getValue("killAllAdvanced");
-		
-		if (GM_getValue("showQuickKillOnWorld")) {
-			newCell.innerHTML='<div style="font-size:xx-small;">' +
-				'Quick Kill' + Helper.helpLink('Quick Kill Style',
-					'<b><u>single</u></b> will quick kill a single monster<br/> ' +
-					'<b><u>type</u></b> will quick kill a type of monster<br/>' +
-					'<b><u>off</u></b> returns control to game normal.') +
-				':' +
-				'<input type="radio" id="Helper:QuickKillOff" name="Helper:QuickKill" value="off"' +
-					((killStyle == "off")?" checked":"") + '>' + ((killStyle == "off")?" <b>off</b>":"off") +
-				'<input type="radio" id="Helper:QuickKillSingle" name="Helper:QuickKill" value="single"' +
-					((killStyle == "single")?" checked":"") + '>' + ((killStyle == "single")?" <b>single</b>":"single") +
-				'<input type="radio" id="Helper:QuickKillType" name="Helper:QuickKill"  value="type"' +
-					((killStyle == "type")?" checked":"") + '>' + ((killStyle == "type")?" <b>type</b>":"type") +
-				'</div>';
-			document.getElementById('Helper:QuickKillOff').addEventListener('click', Helper.worldChangeQuickKill, true);
-			document.getElementById('Helper:QuickKillSingle').addEventListener('click', Helper.worldChangeQuickKill, true);
-			document.getElementById('Helper:QuickKillType').addEventListener('click', Helper.worldChangeQuickKill, true);
-		}
-
-
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
 
 		if (GM_getValue("sendGoldonWorld")){
@@ -1523,7 +1500,7 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
-		if (GM_getValue("killAllAdvanced")) {
+		if (GM_getValue("quickKill")) {
 			var doNotKillList = GM_getValue("doNotKillList");
 			var doNotKillListAry = doNotKillList.split(",")
 			for (var i=0; i<9; i++) {
@@ -1868,24 +1845,19 @@ var Helper = {
 		is.fontSize = 'xx-small';
 		is.textAlign = 'justify';
 	},
-	worldChangeQuickKill: function(evt) {
-		var killAllAdvanced = GM_getValue("killAllAdvanced");
-		if (!GM_getValue("killAllAdvanced")) {GM_setValue("killAllAdvanced", "off")};
-		GM_setValue("killAllAdvanced", evt.target.value);
-		window.location = 'index.php?cmd=world';
-	},
+
 	getMonster: function(index) {
 		return System.findNode("//a[@id='aLink" + index + "']");
 	},
 
 	killSingleMonster: function(monsterNumber) {
-		if (GM_getValue("killAllAdvanced") != "single") return;
+		if (!GM_getValue("quickKill")) return;
 		var kills=0;
 		var monster = Helper.getMonster(monsterNumber);
-		
+
 		var doNotKillList = GM_getValue("doNotKillList");
 		var doNotKillListAry = doNotKillList.split(",")
-		
+
 		if (monster) {
 			var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
 			var injectHere = monster.parentNode.parentNode;
@@ -1902,38 +1874,6 @@ var Helper = {
 				kills+=1;
 				System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
 			}
-		
-		}
-	},
-
-	killSingleMonsterType: function(monsterType) {
-		if (GM_getValue("killAllAdvanced") != "type") return;
-		var kills=0;
-		for (var i=1; i<=8; i++) {
-			var monster = Helper.getMonster(i);
-			var doNotKillList = GM_getValue("doNotKillList");
-			var doNotKillListAry = doNotKillList.split(",")
-			if (monster) {
-				var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
-			var injectHere = monster.parentNode.parentNode;
-			var monsterFound = false;
-			for (var j=0; j<doNotKillListAry.length; j++) {
-				var doNotKillName = doNotKillListAry[j];
-				if (monsterName == doNotKillName){
-					injectHere.innerHTML = '<nobr><span style="color:cyan; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
-					monsterFound = true;
-					break;
-				}
-			}
-			if (!monsterFound) {
-				thisMonsterType = monster.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML;
-				if (thisMonsterType == monsterType) {
-					kills+=1;
-					System.xmlhttp(monster.href, function(responseDetails, callback) {Helper.killedMonster(responseDetails, this.callback);}, {"node": monster, "index": i});
-				}
-			}
-		}
-		
 		}
 	},
 
@@ -2610,21 +2550,13 @@ var Helper = {
 
 	killMonsterAt: function(index) {
 		var linkObj	= Helper.getMonster(index);
-			if (linkObj!=null) {
-				var killStyle = GM_getValue("killAllAdvanced");
-				//kill style off
-				if (killStyle == "off") {
-					window.location = linkObj.href
-				}
-				//kill style single
-				if (killStyle == "single") {
-					Helper.killSingleMonster(index);
-				}1
-				//kill style type
-				if (killStyle == "type") {
-					var monsterType = linkObj.parentNode.parentNode.parentNode.firstChild.nextSibling.nextSibling.innerHTML
-					Helper.killSingleMonsterType(monsterType);
-				}
+		if (linkObj!=null) {
+			if (GM_getValue("quickKill")) {
+				Helper.killSingleMonster(index);
+			}
+			else {
+				window.location = linkObj.href
+			}
 		}
 	},
 
@@ -4281,7 +4213,7 @@ var Helper = {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, cyan = Faction Locked</td>'+
+			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, lime = Faction Locked</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
@@ -4766,13 +4698,13 @@ var Helper = {
 				craft = fontLineRX[3];
 			}
 			item.craftlevel=craft;
-
+			
 			var Locked = "";
 			if (responseText.search(/Faction Locked:/) != -1){
-				//Locked = "<font color=cyan>Yes</font>";
 				Locked = "Yes";
 			}
 			item.factionLocked=Locked;
+		
 		}
 
 		if (callback.invIndex<targetInventory.items.length-1) {
@@ -4849,7 +4781,10 @@ var Helper = {
 				case "guildreport": color = "yellow"; whereText = "Rep";  whereTitle="Faction Report"; break;
 				default: color = "#84ADAC";
 			}
-			
+
+			switch (item.factionLocked+"") {
+				case "Yes":        color = "lime";    break;
+			}
 
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
@@ -4866,7 +4801,7 @@ var Helper = {
 				'<td align="right">' + item.forgelevel + '</td>' +
 				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 					'<td align="right">' + item.craftlevel + '</td>' +
-				'<td align="right"><font color="cyan">' + item.factionLocked + '</font></td>' +
+				'<td align="right">' + item.factionLocked + '</td>' +
 				'<td></td>' +
 				'</tr>';
 		}
@@ -5862,11 +5797,8 @@ var Helper = {
 				':</td><td><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">'+
 				'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Other preferences</th></tr>' +
-			'<tr><td align="right">Quick Kill ' + Helper.helpLink('QuickKill Style', 'Unchecking the checkbox will prevent this option from displaying on the world screen.<br/>'+
-				'<b><u>single</u></b> will fast kill a single monster<br>' +
-				'<u><b>type</b></u> will fast kill a type of monster<br><u><b>off</b></u> returns control to game normal.') +				':</td><td>' +				'<input name="showQuickKillOnWorld" type="checkbox" value="on"' + (GM_getValue("showQuickKillOnWorld")?" checked":"") + '>' +
-				'<input type="radio" name="killAllAdvanced" value="off"' + ((GM_getValue("killAllAdvanced") == "off")?" checked":"") + '>off' +
-				'<input type="radio" name="killAllAdvanced" value="single"' + ((GM_getValue("killAllAdvanced") == "single")?" checked":"") + '>single'+				'<input type="radio" name="killAllAdvanced" value="type"' + ((GM_getValue("killAllAdvanced") == "type")?" checked":"") + '>type' +
+			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
+				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
 			'<tr><td align="right">Move SS box' + Helper.helpLink('Move SS2 Box', 'This will move the SS2 box to the left, under the menu, for better visibility (unless it is already hidden.') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
@@ -6031,8 +5963,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
-		System.saveValueForm(oForm, "killAllAdvanced");
-		System.saveValueForm(oForm, "huntingBuffs");
+		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
 		System.saveValueForm(oForm, "moveFSBox");
