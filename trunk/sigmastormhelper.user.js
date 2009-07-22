@@ -4213,7 +4213,7 @@ var Helper = {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
+			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, lime = Faction Locked</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
@@ -4698,6 +4698,13 @@ var Helper = {
 				craft = fontLineRX[3];
 			}
 			item.craftlevel=craft;
+			
+			var Locked = "";
+			if (responseText.search(/Faction Locked:/) != -1){
+				Locked = "Yes";
+			}
+			item.factionLocked=Locked;
+		
 		}
 
 		if (callback.invIndex<targetInventory.items.length-1) {
@@ -4736,6 +4743,7 @@ var Helper = {
 			'<th sortkey="hp">HP</th>' +
 			'<th sortkey="forgelevel" colspan="2">Upgrade</th>' +
 			'<th sortkey="craftlevel">Craft</th>' +
+			'<th sortkey="factionLocked">Faction Locked</th>' +
 			'<th width="10"></th>';
 		var item, color;
 		var showUseableItems = GM_getValue("showUseableItems");
@@ -4774,6 +4782,10 @@ var Helper = {
 				default: color = "#84ADAC";
 			}
 
+			switch (item.factionLocked+"") {
+				case "Yes":        color = "lime";    break;
+			}
+
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a></td>' +
@@ -4789,6 +4801,7 @@ var Helper = {
 				'<td align="right">' + item.forgelevel + '</td>' +
 				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 					'<td align="right">' + item.craftlevel + '</td>' +
+				'<td align="right">' + item.factionLocked + '</td>' +
 				'<td></td>' +
 				'</tr>';
 		}
