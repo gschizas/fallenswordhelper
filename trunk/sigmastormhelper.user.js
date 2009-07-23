@@ -4782,10 +4782,7 @@ var Helper = {
 				default: color = "#84ADAC";
 			}
 
-			switch (item.factionLocked+"") {
-				case "Yes":        color = "lime";    break;
-			}
-
+			
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a></td>' +
@@ -4801,7 +4798,7 @@ var Helper = {
 				'<td align="right">' + item.forgelevel + '</td>' +
 				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 					'<td align="right">' + item.craftlevel + '</td>' +
-				'<td align="right">' + item.factionLocked + '</td>' +
+				'<td align="right"><font color="cyan">' + item.factionLocked + '</font></td>' +
 				'<td></td>' +
 				'</tr>';
 		}
