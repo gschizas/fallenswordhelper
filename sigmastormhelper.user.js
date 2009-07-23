@@ -4213,7 +4213,7 @@ var Helper = {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, lime = Faction Locked</td>'+
+			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, cyan = Faction Locked</td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
 			'<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
