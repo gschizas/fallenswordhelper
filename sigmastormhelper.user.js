@@ -706,6 +706,10 @@ var Helper = {
 					.addEventListener('click', Helper.recallGuildStoreItem, true);
 			}
 		}
+		
+		// self recall
+		var selfRecall=System.findNode("//b[.='Faction Store']");
+		selfRecall.innerHTML="Faction Store [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&user="+Helper.characterName+"' title='Self Recall'>SR</a>]";
 	},
 
 	recallGuildStoreItem: function(evt) {
@@ -3351,23 +3355,39 @@ var Helper = {
 		}
 		window.location = window.location;
 	},
+	
+	toggleShowQuickDropLinks: function(evt) {
+		var showQuickDropLinksElement = System.findNode("//span[@id='Helper:showQuickDropLinks']");
+		if (showQuickDropLinksElement.textContent == "Show Quick Drop links") {
+			if (window.confirm("Are you sure you want to show the quick drop links?")) GM_setValue("showQuickDropLinks", true);
+		} else {
+			GM_setValue("showQuickDropLinks", false);
+		}
+		window.location = window.location;
+	},
 
 	injectReportPaint: function() {
 		var mainTable = System.findNode("//table[@width='600']");
 		var searchItemRE = /&item=(.*)$/
+		var searchSetRE = /&set=([a-zA-Z]*)/
+		var searchUserRE = /&user=(.*)$/
 		var searchItem = searchItemRE.exec(location);
+		var searchSet = searchSetRE.exec(location);
+		var searchUser = searchUserRE.exec(location);
 		if (searchItem) searchItem = unescape(searchItem[1]);
+		if (searchSet) searchItem = unescape(searchSet[1]);
+		if (searchUser) searchUser = unescape(searchUser[1]);
+		var isUser=false, startRow=0, stopRow=mainTable.rows.length;
 		for (var i=0;i<mainTable.rows.length;i++) {
 			var aRow = mainTable.rows[i];
 			if (aRow.cells[1]) { // itemRow
 				var itemCell = aRow.cells[1];
-				if (searchItem && itemCell.textContent.indexOf(searchItem)<0) {
-					itemCell.parentNode.innerHTML='';
+				if (searchItem && itemCell.textContent.indexOf(searchItem)<0){
+					aRow.innerHTML='';
 					continue;
 				}
 				var itemElement = itemCell.firstChild;
 				var href = itemElement.getAttribute("href");
-				//GM_log(href);
 				var itemIDRE = /recall\&id=(\d+)/
 				var itemID = itemIDRE.exec(href)[1];
 				var playerIDRE = /player_id=(\d+)/
@@ -3381,7 +3401,17 @@ var Helper = {
 					'itemID="' + itemID + '" ' +
 					'playerID="' + playerID + '">Fast Recall</span> ]'
 				document.getElementById('recallItem' + itemID).addEventListener('click', Helper.recallItem, true);
-			}
+			} else
+				if (searchUser) {
+					if (isUser) stopRow=i;
+					isUser=(aRow.textContent.replace(/\s*/g,'')==searchUser);
+					if (isUser) startRow=i;
+				}
+		}
+		if (searchUser) {
+			var len=mainTable.rows.length;
+			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
+			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
 		}
 
 		//Get the list of online members
@@ -3391,7 +3421,7 @@ var Helper = {
 		for (var i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			if (member.status=="Online") {
-				var player=System.findNode("//b[contains(., '" + member.name + "')]");
+				var player=System.findNode("//td[@bgcolor='#112322']/b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
 						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
@@ -3399,7 +3429,7 @@ var Helper = {
 				}
 			}
 			else {
-				var player=System.findNode("//b[contains(., '" + member.name + "')]");
+				var player=System.findNode("//td[@bgcolor='#112322']/b[contains(., '" + member.name + "')]");
 				if (player) {
 					player.innerHTML = "<a href='" +
 						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
@@ -3453,16 +3483,21 @@ var Helper = {
 	},
 
 	injectDropItems: function() {
-		var mainTable = System.findNode("//table[@width='100%']");
+		var mainTable = System.findNode("//table[contains(@background,'skin/large_content_bg.jpg')]");
+		var showExtraLinks = GM_getValue("showExtraLinks");
+		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		if (mainTable) {
 			var insertHere = mainTable.rows[5].cells[0];
-			insertHere.innerHTML += '<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
-				(GM_getValue("showExtraLinks")?'Hide':'Show') + ' AH and Sell links</span>';
-		document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
+			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
+				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;';
+			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showQuickDropLinks">' +
+				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;';
+			document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
+			document.getElementById("Helper:showQuickDropLinks").addEventListener('click', Helper.toggleShowQuickDropLinks, true);
 		}
 
 		//function to add links to all the items in the drop items list
-		if (GM_getValue("showExtraLinks")) {
+		if (showExtraLinks || showQuickDropLinks) {
 			var itemName, itemInvId, theTextNode, newLink;
 			var allItems=System.findNodes("//input[@type='checkbox']");
 			if (allItems) {
@@ -3483,19 +3518,39 @@ var Helper = {
 					itemName = theTextNode.textContent.trim().replace("\\","");
 					theTextNode.textContent = itemName;
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
-					theTextNode.innerHTML = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
-						+ escape(itemName)
-						+ "'>AH</a>]</span> "
-						+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
-						+ "&inv_id=" + itemInvId
-						+ "&item_id=" + itemId
-						+ "&type=" + type
-						+ "&pid=" + pid
-						+ "&imgid=" + imgid
-						+ "&txt=" + text + "'>"
-						+ "Sell</a>]</span> "
+					var preText = "", postText1 = "", postText2 = "";
+					
+					if (showExtraLinks) {
+						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
+							+ escape(itemName)
+							+ "'>AH</a>]</span> "
+							+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
+							+ "&inv_id=" + itemInvId 
+							+ "&item_id=" + itemId
+							+ "&type=" + type
+							+ "&pid=" + pid + 
+							+ "&imgid=" + imgid
+							+ "&txt=" + text + "'>"
+							+ "Sell</a>]</span> ";
+					}
+					postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="'
+						+ itemName
+						+ '" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+					if (showQuickDropLinks) {
+						postText2 = "&nbsp;<span  title='INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickDrop"
+							+ itemInvId
+							+ "' itemInvId="
+							+ itemInvId
+							+ " findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
+					}
+					
+					theTextNode.innerHTML = preText
 						+ theTextNode.innerHTML
-						+ ((findItems.length>1)?' [<span findme="checkall" linkto="'+itemName+'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+						+ postText1
+						+ postText2;
+					if (showQuickDropLinks) {
+						document.getElementById("Helper:QuickDrop"+itemInvId).addEventListener('click', Helper.quickDropItem, true);
+					}
 				}
 			}
 		}
@@ -3517,6 +3572,34 @@ var Helper = {
 				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
 				System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
 			}
+		}
+	},
+	
+	quickDropItem: function(evt){
+		var itemInvId = evt.target.getAttribute("itemInvId");
+		var dropItemHref = "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
+		System.xmlhttp(dropItemHref,
+			Helper.quickDropItemReturnMessage,
+			{"target": evt.target});
+	},
+
+	quickDropItemReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		target.style.cursor = 'default';
+		target.style.textDecoration = 'none';
+		if (info.search("Items dropped and destroyed.") != -1) {
+			target.style.color = 'green';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Item Dropped";
+		} else {
+			target.style.color = 'red';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Error:" + info;
+			//debugging message to try and help track down the issue where you get an error (because you shouldn't be able to ...
+			GM_log(responseText);
 		}
 	},
 
@@ -4785,7 +4868,9 @@ var Helper = {
 			
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a></td>' +
+				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>'+
+					' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' + item.name + '">set</a>)'+
+					'</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
 				'<td align="right">' + item.class + '</td>' +
@@ -6854,7 +6939,7 @@ var Helper = {
 	
 	processAllyEnemyTable: function(contactList,table, lable) {
 		var enemiesDetails=System.findNodes('//table[@cellpadding=1]',System.createDocument(table.innerHTML));
-
+		if (!enemiesDetails) return;
 		for (var i=0;i<enemiesDetails.length;i++) {
 			var aTable = enemiesDetails[i];
 			var contactLink   = aTable.rows[0].cells[1].firstChild;
