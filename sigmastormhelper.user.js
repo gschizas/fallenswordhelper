@@ -231,9 +231,9 @@ var Helper = {
 	onPageLoad: function(anEvent) {
 		Helper.init();
 		Layout.moveFSBox();
+		Helper.prepareChat();
 		Helper.prepareGuildList();
 		Helper.prepareAllyEnemyList();
-		Helper.prepareChat();
 		Helper.injectStaminaCalculator();
 		Helper.injectLevelupCalculator();
 		Layout.injectMenu();
@@ -2163,7 +2163,7 @@ var Helper = {
 				resultText += "Looted item:" + lootedItem + "\n";
 			}
 			if (shieldImpHP) {
-				resultHtml += "<br/><small><small><span style='color:red;'>"+shieldImpHP[0]+"</span></small></small>";
+				resultHtml += "<br/><small><small><span style='color:red;'>"+shieldImpHP[shieldImpHP.length-1]+"</span></small></small>";
 				resultText += shieldImpHP[0]+"\n"
 			}
 			if (shieldImpDeath) {
@@ -2276,9 +2276,8 @@ var Helper = {
 	},
 
 	prepareGuildList: function() {
-		if (!GM_getValue("enableGuildOnlineList")) return;
-		Helper.rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
 		if (!Helper.rightSideBar) return;
+		if (!GM_getValue("enableGuildOnlineList")) return;
 		var info = Helper.rightSideBar.insertRow(0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
@@ -2381,13 +2380,11 @@ var Helper = {
 	},
 
 	prepareChat: function() {
+		Helper.rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='133' and contains(@style, '/sigma2/skin/community_header.gif')]")
-		if (!injectHere) return;
-		injectHere = injectHere.parentNode.parentNode.parentNode;
-
-		var info = injectHere.insertRow(GM_getValue("disableGuildOnlineList")?0:1)
+		if (!Helper.rightSideBar) return;
+		var info = Helper.rightSideBar.insertRow(0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
 		var chat = System.getValueJSON("chat");
@@ -3378,12 +3375,26 @@ var Helper = {
 		if (searchSet) searchItem = unescape(searchSet[1]);
 		if (searchUser) searchUser = unescape(searchUser[1]);
 		var isUser=false, startRow=0, stopRow=mainTable.rows.length;
-		for (var i=0;i<mainTable.rows.length;i++) {
+		if (searchUser) {
+			for (var i=0;i<mainTable.rows.length;i++) {
+				var aRow = mainTable.rows[i];
+				if (!(aRow.cells[1])) {
+					if (isUser) stopRow=i;
+					isUser=(aRow.textContent.replace(/\s*/g,'')==searchUser);
+					if (isUser) startRow=i;
+				}
+			}
+			var len=mainTable.rows.length;
+			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
+			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
+		}
+		for (var i=mainTable.rows.length-1;i>=0;i--) {
 			var aRow = mainTable.rows[i];
 			if (aRow.cells[1]) { // itemRow
 				var itemCell = aRow.cells[1];
 				if (searchItem && itemCell.textContent.indexOf(searchItem)<0){
-					aRow.innerHTML='';
+					//aRow.innerHTML='';
+					mainTable.deleteRow(i);
 					continue;
 				}
 				var itemElement = itemCell.firstChild;
@@ -3401,17 +3412,7 @@ var Helper = {
 					'itemID="' + itemID + '" ' +
 					'playerID="' + playerID + '">Fast Recall</span> ]'
 				document.getElementById('recallItem' + itemID).addEventListener('click', Helper.recallItem, true);
-			} else
-				if (searchUser) {
-					if (isUser) stopRow=i;
-					isUser=(aRow.textContent.replace(/\s*/g,'')==searchUser);
-					if (isUser) startRow=i;
-				}
-		}
-		if (searchUser) {
-			var len=mainTable.rows.length;
-			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
-			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
+			}
 		}
 
 		//Get the list of online members
@@ -3484,6 +3485,7 @@ var Helper = {
 
 	injectDropItems: function() {
 		var mainTable = System.findNode("//table[contains(@background,'skin/large_content_bg.jpg')]");
+		if (!mainTable.rows[5]) var mainTable = System.findNode("//table[@width=600]");
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		if (mainTable) {
