@@ -186,7 +186,7 @@ var Data = {
 				{questName:'Off Course!',                level:339, location:'Luivak (North)'},
 				{questName:'Omen of Trouble',            level:549, location:'Lao Xan City (Suburb)'},
 				{questName:'One of the Lads',            level:460, location:'One Eyes Guard Tower'},
-				{questName:'Oneupmanship ',              level:6,   location:'Elya Canyon (Mouth)'},
+				{questName:'Oneupmanship',               level:6,   location:'Elya Canyon (Mouth)'},
 				{questName:'Orb of Corruption',          level:22,  location:'Paladir Passageway'},
 				{questName:'Out With the Old',           level:390, location:'Ug Grash Main'},
 				{questName:'Overdue Scout',              level:521, location:'The Secret Kingdom (Border)'},
