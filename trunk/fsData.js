@@ -186,6 +186,7 @@ var Data = {
 				{questName:'Off Course!',                level:339, location:'Luivak (North)'},
 				{questName:'Omen of Trouble',            level:549, location:'Lao Xan City (Suburb)'},
 				{questName:'One of the Lads',            level:460, location:'One Eyes Guard Tower'},
+				{questName:'Oneupmanship ',              level:6,   location:'Elya Canyon (Mouth)'},
 				{questName:'Orb of Corruption',          level:22,  location:'Paladir Passageway'},
 				{questName:'Out With the Old',           level:390, location:'Ug Grash Main'},
 				{questName:'Overdue Scout',              level:521, location:'The Secret Kingdom (Border)'},
@@ -322,6 +323,7 @@ var Data = {
 				{questName:'The Strangling Shroud',      level:321, location:'Peitha (North)'},
 				{questName:'The Swamps Crawling...',     level:254, location:'Nimaos (North)'},
 				{questName:'The Three Magic Stones',     level:120, location:'Ethereal City'},
+				{questName:'The True Word',              level:8,   location:'Elya Canyon (Rise)'},
 				{questName:'The Upper Hand',             level:367, location:'Hidden Valley (East)'},
 				{questName:'The Way Laid Out',           level:581, location:'Truncal Jungle (North)'},
 				{questName:'The Welcome Party',          level:239, location:'Faroth (West)'},
@@ -446,7 +448,21 @@ var Data = {
 				{Name:"Spearing Light",Realm:"Floating Islands of Wu Kong (West Island) (15,5) Lvl 578",Comment:"+25 Attack<br>+10 Armor<br>+10 HP<br>+60 Damage"},
 				{Name:"Wise Willow",Realm:"Truncal Jungle (South) (9,12) Lvl 583",Comment:"+25 Defense<br>+35 Damage<br>+40 Reinforced Armor"},
 				{Name:"Aura Rock",Realm:"Encrow Bay (Inner) (3,4) Lvl 592",Comment:"+20 Defense<br>+30 Damage<br>+20 Piercing Strike<br>+20 Critical Hit<br>+10 Dodge"},
-				{Name:"Shrieking Spire",Realm:"Desert of Brigands (North) (13,3) Lvl 608",Comment:"+25 Armor<br>+35 Damage<br>+20 Piercing Strike<br>+20 Critical Hit"}
+				{Name:"Shrieking Spire",Realm:"Desert of Brigands (North) (13,3) Lvl 608",Comment:"+25 Armor<br>+35 Damage<br>+20 Piercing Strike<br>+20 Critical Hit"},
+				{Name:"Giant Necral Skull",Realm:"Necral Fields (South) (3,13) Lvl 619",Comment:"+35 Defence<br>+25 Damage<br>+20 Piercing Strike<br>+10 Dodge<br>+10 Disarm"},
+				{Name:"Glacier Relic",Realm:"Zrozon Glacier (Edge) (5,7) Lvl 624",Comment:"+100 Defence"},
+				{Name:"Hobba Fort",Realm:"Hobba Marsh (Hobgoblin Ruins) (14,14) Lvl 634",Comment:"+50 Attack<br>+50 Defense"},
+				{Name:"Eohlar Relic",Realm:"Eohlar (???) (??,??) Lvl 64?",Comment:"+25 Attack<br>+75 Damage"},
+				{Name:"Old Ruins",Realm:"The Fire Forest (Valley) (13,16) Lvl 654",Comment:"+30 Attack<br>+30 Armor<br>+10 Damage<br>+10 Piercing Strike<br>+20 Critical Hit<br>+20 Sustain"},
+				{Name:"Barbmore Pillars",Realm:"Barbmore (Highland) (3,3) Lvl 663",Comment:"+20 Attack<br>+50 Armor<br>+10 Damage<br>+20 Reinforced Armor<br>+20 Critical Hit<br>+10 Sustain"},
+				{Name:"Ravaged Cluster",Realm:"Ravaged Forest (Clearing) (10,2) Lvl 673",Comment:"+70 attack<br>+10 damage<br>+40 Piercing Strike<br>+10 Dodge"},
+				{Name:"Mittamurk Spires",Realm:"Forsaken Desert (Wastes) (12,10) Lvl 683",Comment:"+10 Attack<br>+70 Armor<br>+20 Breaker<br>+30 Dodge"},
+				{Name:"Hyrmit Pillar",Realm:"??? (??,??) Lvl ???",Comment:"+50 Defense<br>+30 Damage<br>+20 Piercing Strike<br>+30 Critical Strike"},
+				{Name:"Ossrilan Circle",Realm:"??? (??,??) Lvl ???",Comment:"+30 Attack<br>+50 Armor<br>+25 Piercing Strike<br>+25 Nullify"},
+				{Name:"Ancient Fort",Realm:"??? (??,??) Lvl ???",Comment:"+40 Defense<br>+45 Damage<br>+25 Reinforced Armor<br>+25 Nullify"},
+				{Name:"Crevasse of Souls",Realm:"??? (??,??) Lvl ???",Comment:"+75 Sustain<br>+75 Fury Caster<br>+25 Master Inventor"},
+				{Name:"Huirvast Ruins",Realm:"??? (??,??) Lvl ???",Comment:"+75 Critical Hit<br>+75 Nullify<br>+25 Sustain"},
+				{Name:"Guardian Statue",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+70 Nullify<br>+30 Sustain"}
 			];
 		}
 		return Data.relicArray;
@@ -6758,7 +6774,6 @@ var Data = {
 				{name:'Guardian of Meidos Armor', type:'armor'},
 				{name:'Meidos Amulet', type:'amulet'},
 				{name:'Meidos Helmet', type:'helmet'},
-				
 				{name:'Ai Chay Ke Amulet', type:'amulet'},
 				{name:'Ai Chay Ke Ring', type:'ring'},
 				{name:'Ai Chay Ke Rune', type:'rune'},
@@ -6782,7 +6797,9 @@ var Data = {
 				{name:'Rune of Frokjas', type:'rune'},
 				{name:'Rune of Wholla', type:'rune'},
 				{name:'Scythe of Mourla', type:'weapon'},
-				{name:'Weapon of Ghasst', type:'weapon'}
+				{name:'Weapon of Ghasst', type:'weapon'},
+				
+				{name:'Echibors Turban of Power', type:'helmet'}
 			]
 		}
 		return Data.itemArray;
