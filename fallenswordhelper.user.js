@@ -5266,6 +5266,8 @@ var Helper = {
 
 		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
 		var memberList=System.getValueJSON("memberlist");
+		var onlineIMG = '<img src="' + System.imageServer + '/skin/online.gif" width=10 height="10" title="Online">';
+		var offlineIMG = '<img src="' + System.imageServer + '/skin/offline.gif" width=10 height="10" title="Offline">';
 		for (i=0; i<allItems.length; i++) {
 			var theItem=allItems[i].cells[0];
 			var foundName=theItem.textContent;
@@ -5274,11 +5276,28 @@ var Helper = {
 					var aMember=memberList.members[j];
 					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 					if (aMember.name==foundName) {
-						theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" +
-							theItem.innerHTML + "</span> [" + aMember.level + "]";
+						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) + 
+							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
+							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
 					}
 				}
 			}
+			
+			var theMembersCell=allItems[i].cells[1];
+			var theMembersArray=theMembersCell.innerHTML.split(",");
+			var linkMembersArray = new Array();
+			for (k=0; k<theMembersArray.length; k++) {
+				var theMember = theMembersArray[k].trim();
+				var linkMember;
+				if (theMember.search("<font") == -1) {
+					linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
+				} else {
+					linkMember = " " + theMember;
+				}
+				linkMembersArray.push(linkMember)
+			}
+			theMembersCell.innerHTML = linkMembersArray;
+
 			var theDateCell=allItems[i].cells[2];
 			var theDate=theDateCell.firstChild;
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
