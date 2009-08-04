@@ -20,6 +20,8 @@ var System = {
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
+		
+		Array.prototype.removeDuplicates = System.removeDuplicates;
 	},
 
 	getValueJSON: function(name) {
@@ -217,6 +219,19 @@ var System = {
 
 	trimRight: function() {
 	    return this.replace(/\s+$/,"");
+	},
+	
+	removeDuplicates: function (removeBy){
+		var temp=new Array();
+		Helper.sortBy = removeBy;
+		this.sort();
+		for(i=0;i<this.length;i++) {
+			var first = this[i];
+			var second = (this[i+1]?this[i+1]:"abc");
+			if(i != this.length && first[removeBy]==second[removeBy]) {continue}
+			temp[temp.length]=this[i];
+		}
+		return temp;
 	},
 
 	convertTextToHtml: function(inputText) {
