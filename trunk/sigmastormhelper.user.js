@@ -76,6 +76,7 @@ var Helper = {
 		System.setDefault("quickWearFilter",JSON.stringify({"enable":false,"value":"pack,stim"}));
 		System.setDefault("invMaxLvlFilter", '');
 		System.setDefault("quickUseItems",JSON.stringify({'item0':'','item1':'','item2':''}));
+		System.setDefault("enableBulkSell", false);
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -352,6 +353,7 @@ var Helper = {
 			switch (subPageId) {
 			case "create":
 				Helper.injectCreateAuctionTemplate();
+				Helper.injectCreateAuctionBulkSell();
 				break;
 			case "preferences":
 				break;
@@ -623,16 +625,11 @@ var Helper = {
 		var infoMessage = Layout.infoBox(responseText);
 		unsafeWindow.tt_setWidth(200);
 		unsafeWindow.Tip(infoMessage);
-
-		var filledStone = parseInt(infoMessage.replace(/\D/g, ""));
-
-
 	},
-
-	quickMS: function(){
-		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=64", Helper.quickDone);
+	quickMS: function(cast){
+		var url="index.php?"+(cast?"cmd=skills&subcmd=cast":"cmd=profile&subcmd=removeskill")+"&skill_id=64"
+		System.xmlhttp(url, Helper.quickDone);
 	},
-
 
 	injectGuild: function() {
 		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
@@ -723,7 +720,7 @@ var Helper = {
 		var itemID = callback.item;
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
-		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		var itemCellElement = target.parentNode;
 		if (info.indexOf('You successfully took the item into your backpack') >= 0) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
 		} else {
@@ -818,11 +815,7 @@ var Helper = {
 	quickBuyItem: function() {
 		if (!Helper.shopItemId || !Helper.shopId) return;
 		System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
-			function(responseText) {
-				var infoMessage = Layout.infoBox(responseText);
-				unsafeWindow.tt_setWidth(200);
-				unsafeWindow.Tip(infoMessage);
-			});
+			Helper.quickDone);
 	},
 	
 	quickUse: function(responseText, callback) {
@@ -846,12 +839,7 @@ var Helper = {
 		for (var key in Helper.itemList) {
 			if (Helper.itemList[key].text==item) {
 				System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id,
-					function(responseText) {
-						var info = Layout.infoBox(responseText);
-						if (!info) info = "<font color=red>Error</font>";
-						unsafeWindow.tt_setWidth(200);
-						unsafeWindow.Tip(info);
-					});
+					Helper.quickDone);
 				return;
 			}
 		}
@@ -2607,8 +2595,11 @@ var Helper = {
 		case 75: //quickShard [K]
 			Helper.quickShard();
 			break;
+		case 73: //Quick remove MS [I]
+			Helper.quickMS(false);
+			break;
 		case 105: //Quick MS [i]
-			Helper.quickMS();
+			Helper.quickMS(true);
 			break;
 		case 71: // create group [G]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
@@ -3530,7 +3521,7 @@ var Helper = {
 							+ "&inv_id=" + itemInvId 
 							+ "&item_id=" + itemId
 							+ "&type=" + type
-							+ "&pid=" + pid + 
+							+ "&pid=" + pid
 							+ "&imgid=" + imgid
 							+ "&txt=" + text + "'>"
 							+ "Sell</a>]</span> ";
@@ -5816,14 +5807,19 @@ var Helper = {
 	storePlayerUpgrades: function() {
 		var alliesText = System.findNode("//td[.='+1 Max Allies']");
 		var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var alliesValueRE = /(\d+) \/ 50/;
+		var alliesValueRE = /(\d+) \/ \d+/;
 		var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
 		GM_setValue("alliestotal",alliesValue+5);
 		var enemiesText = System.findNode("//td[.='+1 Max Enemies']");
 		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var enemiesValueRE = /(\d+) \/ 50/;
+		var enemiesValueRE = /(\d+) \/ \d+/;
 		var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
 		GM_setValue("enemiestotal",enemiesValue+5);
+		var maxAuctionsText = System.findNode("//td[.='+1 Max Auctions']");
+		var maxAuctionsRatio = maxAuctionsText.nextSibling.nextSibling.nextSibling.nextSibling;
+		var maxAuctionsValueRE = /(\d+) \/ \d+/;
+		var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
+		GM_setValue("maxAuctions",maxAuctionsValue+2);
 	},
 
 	injectTopRated: function() {
@@ -5960,6 +5956,8 @@ var Helper = {
 				'This works on Recipe Manager') +
 				':</td><td><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
 				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
+			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
+				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -6066,6 +6064,7 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
+		System.saveValueForm(oForm, "enableBulkSell");
 		
 		var minPSstatNames=['atk','def','arm','dmg','cHP','mHP','skill'];
 		var minPS={};
@@ -6312,7 +6311,7 @@ var Helper = {
 		}
 
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (auctionTable == null) return;
+		if (!auctionTable) return;
 		// add image & tooltip of the auctioned item
 		var bidEntryTable = auctionTable.rows[5].cells[0].firstChild.nextSibling;
 		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)&imgid=([^&]*)&txt=(.*)/.exec(window.location.search)
@@ -6416,6 +6415,19 @@ var Helper = {
 		auctionCurrency.selectedIndex = newAuctionCurrency;
 		auctionMinBid.value = newAuctionMinBid;
 		auctionBuyNow.value = newAuctionBuyNow;
+		
+		var enableBulkSell = GM_getValue("enableBulkSell");
+		if (enableBulkSell) {
+			var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
+			var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
+			var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
+			var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
+			
+			bulkSellAuctionLength.selectedIndex = newAuctionLength;
+			bulkSellAuctionCurrency.selectedIndex = newAuctionCurrency;
+			bulkSellAuctionMinBid.value = newAuctionMinBid;
+			bulkSellAuctionBuyNow.value = newAuctionBuyNow;
+		}
 	},
 
 	saveAuctionTemplate: function(evt) {
@@ -7046,6 +7058,133 @@ var Helper = {
 	resetAllyEnemyList: function(evt) {
 		GM_setValue("contactList","");
 		window.location = window.location;
+	},
+	
+	injectCreateAuctionBulkSell: function() {
+		if (window.location.search.search("inv_id") == -1) return;
+		var enableBulkSell = GM_getValue("enableBulkSell");
+		if (!enableBulkSell) return;
+		
+		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+		if (!auctionTable) return;
+
+		var newRow = auctionTable.insertRow(7);
+		var newCell = newRow.insertCell(0);
+		newCell = newRow.insertCell(0);
+		newCell.colSpan = 2;
+		newCell.align = "center";		
+
+		var textResult = "<table cellspacing='0' cellpadding='0'" +
+				" border='0' align='center' width='550'>" +
+				"<tr><td bgcolor='#212323'><center>Bulk Auction List</center></td></tr>" +
+				"<tr><td align='center'><table cellspacing='10' cellpadding='0' border='0' width='100%'>" +
+				"<tr><th bgcolor='#212323'>Length</th><th bgcolor='#212323'>Currency</th>"+
+				"<th bgcolor='#212323'>Min Bid</th><th bgcolor='#212323'>Buy Now</th>"+
+				"<th></th></tr>";
+
+			textResult += "<tr align='right'>"+
+				"<td><select id='Helper:bulkSellAuctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
+					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
+					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
+				"<td><select id='Helper:bulkSellAuctionCurrency'><option value='0' >Credits</option><option value='1' selected>FC</option></select></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellMinBid'/></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellBuyNow'/></td>"+
+				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
+					"id='Helper:bulkListAll'>bulk list all</span>]</td></tr>";
+
+		textResult += "</table></td></tr>";
+		
+		textResult += "<tr><td align='center'><table id='Helper:CreateAuctionBulkSellTable' cellspacing='10' cellpadding='0' border='0' width='100%'";
+		
+		textResult += "</table></td></tr>";
+		
+		textResult += "</table>";
+
+		newCell.innerHTML = textResult;
+		
+		var itemStats = /inv_id=(\d+)&.*&imgid=([0-9a-z]+)&/.exec(window.location.search);
+		var invID = itemStats[1];
+		var itemID = itemStats[2];
+		
+		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID}); 
+		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);		
+	},
+	
+	processAuctionBulkSellItems: function(responseText, callback) {
+		var originalItemID = callback.itemID;
+		var originalInvID = callback.invID;
+
+		var bulkSellTable = System.findNode("//table[@id='Helper:CreateAuctionBulkSellTable']");
+
+		var doc=System.createDocument(responseText);
+		var bulkAuctionItemIMGs = System.findNodes("//img[@src='"+System.imageServer+"/items/"+originalItemID+".gif']", doc);
+		if (!bulkAuctionItemIMGs) return; 
+		var maxAuctions = GM_getValue("maxAuctions");
+		if (!maxAuctions) maxAuctions = 2;
+		
+		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
+			var bulkItemIMG = bulkAuctionItemIMGs[i];
+			var bulkItemMouseover = bulkItemIMG.getAttribute("onmouseover");
+			var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(bulkItemMouseover);
+			var itemId = itemStats[1];
+			var invId = itemStats[2];
+			if ((i % 3 == 0)) newRow = bulkSellTable.insertRow(-1);;
+			//var newRow = bulkSellTable.insertRow(-1);
+			var newCell = newRow.insertCell(-1);
+			newCell.innerHTML = "<center>"+bulkItemIMG.parentNode.innerHTML+"</center>";
+			newCell = newRow.insertCell(-1);
+			newCell.innerHTML = '<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;fontSize=x-small;">auction single</span>';
+			document.getElementById('Helper:bulkListSingle'+invId).addEventListener('click', Helper.bulkListSingle, true);
+			if ((i+2) > maxAuctions && (i+1) != bulkAuctionItemIMGs.length) {
+				var newRow = bulkSellTable.insertRow(-1);
+				var newCell = newRow.insertCell(0);
+				newCell.innerHTML = "You only have " + maxAuctions + " auction slots.";
+				break;
+			}
+		}
+	},
+	
+	bulkListAll: function() {
+		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
+		var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
+		var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
+		var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
+
+		var potentialAuctions = System.findNodes("//span[contains(@id,'Helper:bulkListSingle')]");
+		for (var i=0;i<potentialAuctions.length;i++) {
+			var potentialAuction = potentialAuctions[i];
+			var invID = /Helper:bulkListSingle(\d+)/.exec(potentialAuction.getAttribute("id"))[1];
+			var bulkSellHref = "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + invID + 
+				"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
+				"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
+			System.xmlhttp(bulkSellHref,
+				Helper.bulkListSingleReturnMessage,
+				{"target": potentialAuction});
+		}
+	},
+	
+	bulkListSingle: function(evt) {
+		var itemInvId = evt.target.getAttribute("itemInvId");
+		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
+		var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
+		var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
+		var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
+
+		var bulkSellHref = "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + itemInvId + 
+			"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
+			"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
+		System.xmlhttp(bulkSellHref,
+			Helper.bulkListSingleReturnMessage,
+			{"target": evt.target});
+	},
+	
+	bulkListSingleReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info=Layout.infoBox(responseText);
+		target.innerHTML = info;
+		target.style.color=(info.search("Auction placed successfully!") != -1)?"green":"red";
+		target.style.cursor='';
+		target.removeEventListener('click', Helper.bulkListSingle, true);		
 	}
 };
 

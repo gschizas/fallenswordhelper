@@ -82,7 +82,7 @@ var Layout = {
 	},
 
 	infoBox: function(documentText) {
-		var infoRE = /<center><b>INFORMATION\s*ALERT<\/b><\/center><\/font><\/td>\s*<\/tr>\s*<tr>\s*<td><font size=2 color=\"\#D1D5D6\"><center>([^<]+)<\/center>/i;
+		var infoRE = /<center><b>INFORMATION\s*ALERT<\/b><\/center><\/font><\/td>\s*<\/tr>\s*<tr>\s*<td><font size=2 color=\"\#D1D5D6\"><center>(.+)<\/center><\/font>/i;
 		var infoMatch = documentText.match(infoRE);
 		var result="";
 		if (infoMatch) {
