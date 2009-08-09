@@ -478,6 +478,10 @@ var Helper = {
 			break;
 		case "points":
 			switch (subPageId) {
+			case "shop":
+				Helper.storePlayerUpgrades();
+				Helper.injectPoints();
+				break;
 			case "-":
 				Helper.storePlayerUpgrades();
 				Helper.injectPoints();
@@ -486,6 +490,14 @@ var Helper = {
 			break;
 		case "trade":
 			Helper.retrieveTradeConfirm();
+			switch (subPageId) {
+			case "createsecure":
+				Helper.injectSecureTrade();
+				break;
+			case "-":
+				Helper.injectStandardTrade();
+				break;
+			}
 			break;
 		case "titan":
 			Helper.injectTitan();
@@ -8229,6 +8241,124 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Error:" + info;
+		}
+	},
+	
+	toggleCheckAllItems: function(evt) {
+		var allItems=System.findNodes("//input[@type='checkbox']");
+		if (allItems) {
+			for (var i=0; i<allItems.length; i++) {
+				var checkboxForItem = allItems[i];
+				if (checkboxForItem.style.visibility == "hidden")
+					checkboxForItem.checked = false;
+				else {
+					if (checkboxForItem.checked) {
+						checkboxForItem.checked = false;
+					} else {
+						checkboxForItem.checked = true;
+					}
+				}
+			}
+		}
+	},
+	
+	toggleCheckAllPlants: function(evt) {
+		var plantRE = new RegExp(evt.target.getAttribute("plantRE"));
+		var allItems = System.findNodes("//input[@type='checkbox']");
+		if (allItems) {
+			for (var i = 0; i < allItems.length; i++){
+				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
+				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")), 
+					function (responceText, callBack) {
+						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
+
+						if (plantRE.exec(responceText)) {
+							if (checkbox.checked)
+								checkbox.checked = false;
+							else
+								checkbox.checked = true;
+						}
+					},
+					theImgNode);
+
+			}
+		}
+	},
+	
+	injectStandardTrade: function() {
+		var mainTable = System.findNodes("//table[@width='300']");
+		if (mainTable[2]) {
+			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
+			var newCellAll = newRow.insertCell(0);
+			newCellAll.colSpan = 3
+
+			newCellAll.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
+				'All Items</span> &ensp ' +
+
+				'<span plantRE="Heffle|Trinettle|Blood Bloom|Jademare|DarkShade" style="cursor:pointer; text-decoration:underline;"' +
+				'id="Helper:checkAllPlants">All Plants</span> &ensp ' +
+
+				'<span plantRE="Heffle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllHeffle">' + 
+				'Heffle</span> &ensp ' + 
+
+				'<span plantRE="Trinettle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllTrinettle">' + 
+				'Trinettle</span> &ensp ' +
+
+				'<span plantRE="Blood Bloom" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllBloom">' + 
+				'Blood Bloom</span> \f &emsp &emsp &ensp &ensp' +
+
+				'<span plantRE="Jademare" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllJade">' + 
+				'Jademare</span> &ensp ' +
+	
+				'<span plantRE="Dark Shade" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllShade">' + 
+				'Dark Shade</span>';
+
+			document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
+			document.getElementById("Helper:checkAllPlants").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllHeffle").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllTrinettle").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllBloom").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
+
+		}
+	},
+
+	injectSecureTrade: function() {
+		var mainTable = System.findNode("//table[@width='300']");
+		if (mainTable) {
+			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
+			var newCellAll = newRow.insertCell(0);
+			newCellAll.colSpan = 3
+
+			newCellAll.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
+				'All Items</span> &ensp ' +
+
+				'<span plantRE="Heffle|Trinettle|Blood Bloom|Jademare|DarkShade" style="cursor:pointer; text-decoration:underline;"' +
+				'id="Helper:checkAllPlants">All Plants</span> &ensp ' +
+
+				'<span plantRE="Heffle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllHeffle">' + 
+				'Heffle</span> &ensp ' + 
+
+				'<span plantRE="Trinettle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllTrinettle">' + 
+				'Trinettle</span>\f &emsp &emsp &ensp &ensp' +
+
+				'<span plantRE="Blood Bloom" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllBloom">' + 
+				'Blood Bloom</span> &ensp' +
+
+				'<span plantRE="Jademare" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllJade">' + 
+				'Jademare</span> &ensp ' +
+	
+				'<span plantRE="Dark Shade" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllShade">' + 
+				'Dark Shade</span>';
+
+			document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
+			document.getElementById("Helper:checkAllPlants").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllHeffle").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllTrinettle").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllBloom").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
 		}
 	}
 };
