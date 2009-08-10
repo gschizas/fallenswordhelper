@@ -93,7 +93,11 @@ var Data = {
 				{'questName':'Broken Link', 'level':133, 'location':'Netherdeep (Twisted Halls) @ 2,2'},
 				{'questName':'From the Depths', 'level':135, 'location':'Netherdeep (Pit) @ 2,12'},
 				{'questName':'Walking Wounded', 'level':137, 'location':'Netherdeep (Black Fissures) @ 14,9'},
-				{'questName':'A Tiresome Task', 'level':139, 'location':'Netherdeep (Fractured Galleries) @ 10,6'}
+				{'questName':'A Tiresome Task', 'level':139, 'location':'Netherdeep (Fractured Galleries) @ 10,6'},
+				{'questName':'Path into the Fire', 'level':141, 'location':'Netherdeep (Dark Glyph) @ 3,3'},
+				{'questName':'Wandering the Dark', 'level':141, 'location':'Darkfire (Edge) @ 17,2'},
+				{'questName':'Finding the Lost', 'level':145, 'location':'Sanctuary of Ages (Outer Court) @ 3,2'}
+
 			];
 			Data.questArray = questArray.sort();
 		}
