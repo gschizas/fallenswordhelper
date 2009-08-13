@@ -3444,13 +3444,44 @@ var Helper = {
 
 	injectReportPaint: function() {
 		var mainTable = System.findNode("//table[@width='600']");
-		for (var i=0;i<mainTable.rows.length;i++) {
+		var searchItemRE = /&item=(.*)$/
+		var searchSetRE = /&set=(.*)$/
+		var searchUserRE = /&user=(.*)$/
+		var searchItem = searchItemRE.exec(location);
+		var searchSet = searchSetRE.exec(location);
+		var searchUser = searchUserRE.exec(location);
+		if (searchItem) searchItem = unescape(searchItem[1]);
+		if (searchSet) {
+			searchItem = unescape(searchSet[1]);
+			searchItem=(searchItem.indexOf(' of ')>0)?
+				searchItem.replace(/^.* of /,''):searchItem.replace(/ [a-z]+$/i,'');
+		}
+		if (searchUser) searchUser = unescape(searchUser[1]);
+		var isUser=false, startRow=0, stopRow=mainTable.rows.length;
+		if (searchUser) {
+			for (var i=0;i<mainTable.rows.length;i++) {
+				var aRow = mainTable.rows[i];
+				if (!(aRow.cells[1])) {
+					if (isUser) stopRow=i;
+					isUser=(aRow.textContent.replace(/\s*/g,'')==searchUser);
+					if (isUser) startRow=i;
+				}
+			}
+			var len=mainTable.rows.length;
+			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
+			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
+		}
+		for (var i=mainTable.rows.length-1;i>=0;i--) {
 			var aRow = mainTable.rows[i];
 			if (aRow.cells[1]) { // itemRow
 				var itemCell = aRow.cells[1];
+				if (searchItem && itemCell.textContent.indexOf(searchItem)<0){
+					//aRow.innerHTML='';
+					mainTable.deleteRow(i);
+					continue;
+				}
 				var itemElement = itemCell.firstChild;
 				var href = itemElement.getAttribute("href");
-				//GM_log(href);
 				var itemIDRE = /recall\&id=(\d+)/
 				var itemID = itemIDRE.exec(href)[1];
 				var playerIDRE = /player_id=(\d+)/
@@ -4923,7 +4954,9 @@ var Helper = {
 
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td>' + item.name + '</td>' +
+				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>'+
+					' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' + item.name + '">set</a>)'+
+					'</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
 				'<td align="right">' + item.type + '</td>' +
