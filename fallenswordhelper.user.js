@@ -625,9 +625,10 @@ var Helper = {
 
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute("itemID");
-		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID,
+		var recallHref = "index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID;
+		System.xmlhttp(recallHref,
 			Helper.recallGuildStoreItemReturnMessage,
-			{"item": guildStoreID, "target": evt.target});
+			{"item": guildStoreID, "target": evt.target, "url": recallHref});
 	},
 
 	recallGuildStoreItemReturnMessage: function(responseText, callback) {
@@ -637,8 +638,11 @@ var Helper = {
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info.search("You successfully took the item into your backpack") != -1) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
-		} else {
+		} else if (info!="") {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
+		} else {
+			itemCellElement.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			GM_log(callback.url);
 		}
 	},
 
@@ -3527,7 +3531,8 @@ var Helper = {
 	recallItem: function(evt) {
 		var itemID=evt.target.getAttribute("itemID");
 		var playerID=evt.target.getAttribute("playerID");
-		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID, Helper.recallItemReturnMessage, {"item": itemID, "target": evt.target});
+		var recallHref = "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID;
+		System.xmlhttp(recallHref, Helper.recallItemReturnMessage, {"item": itemID, "target": evt.target, "url": recallHref});
 	},
 
 	recallItemReturnMessage: function(responseText, callback) {
@@ -3537,8 +3542,11 @@ var Helper = {
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info.search("You successfully recalled the item") != -1) {
 			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
-		} else {
+		} else if (info!="") {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+		} else {
+			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>Weird Error: url used = " + callback.url + 
+				"<br>Try this url yourself and see what response you get and post findings to google site or forum</span>";
 		}
 	},
 
@@ -3661,7 +3669,7 @@ var Helper = {
 		var dropItemHref = "http://www.fallensword.com/index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
 		System.xmlhttp(dropItemHref,
 			Helper.quickDropItemReturnMessage,
-			{"target": evt.target});
+			{"target": evt.target, "url": dropItemHref});
 	},
 
 	quickDropItemReturnMessage: function(responseText, callback) {
@@ -3674,13 +3682,16 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Item Dropped";
-		} else {
+		} else if (info!="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Error:" + info;
-			//debugging message to try and help track down the issue where you get an error (because you shouldn't be able to ...
-			GM_log(responseText);
+			target.innerHTML = "Error: " + info;
+		} else {
+			target.style.color = 'red';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			GM_log(callback.url);
 		}
 	},
 
@@ -4003,7 +4014,15 @@ var Helper = {
 				}
 			}
 		}
-		
+
+		//Add select all link to enable user to select all checkboxes on the screen.
+		var injectHere = System.findNode("//input[@value='Go']");
+		if (injectHere) {
+			injectHere = injectHere.parentNode;
+			injectHere.innerHTML += "&nbsp;<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>Select All</span>"
+			document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
+		}
+
 		//Update the ally/enemy online list, since we are already on the page.
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
@@ -4016,6 +4035,11 @@ var Helper = {
 		var bioHidden = document.getElementById('Helper:bioHidden');
 		bioHidden.style.display = 'block';
 		bioHidden.style.visibility = 'visible';
+	},
+	
+	profileSelectAll: function(evt) {
+		var checkboxItems = System.findNodes("//input[@type='checkbox']");
+		checkboxItems.forEach(function(e) {e.checked = e.checked? false:true});
 	},
 
 	equipProfileInventoryItem: function(evt) {
@@ -4356,13 +4380,20 @@ var Helper = {
 		}
 
 		Helper.inventory=System.getValueJSON("inventory");
+		var minLvl = GM_getValue("inventoryMinLvl", 1);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
+
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
 			refreshButton+
 			'<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
-			'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
-			(GM_getValue("showUseableItems")?' checked':'') + '/>';
+				'<td><table><tr><td>' +
+				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" onSubmit="javascript:return false;">' +
+				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
+				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
+				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/>' +
+				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>'
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 ==0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
@@ -4376,7 +4407,9 @@ var Helper = {
 		if (haveToCheck)
 			document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
-		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
+		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
+
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		}
@@ -4407,15 +4440,21 @@ var Helper = {
 			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
 			guildItemCount = Helper.guildinventory.items.length;
 		}
-		
+		var minLvl = GM_getValue("inventoryMinLvl", 1);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
+
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			refreshButton+
 			'</tr>' +
 			'<tr><td colspan=2>' +
 				'<table><tr><td><b>Show Items:</b></td>' +
-				'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/>';
+				'<td><table><tr><td>' +
+				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" onSubmit="javascript:return false;">' +
+				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
+				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
+				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="submit" value="Filter"/>' +
+				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="button" value="Reset"/></form></div>'
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 ==0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
@@ -4430,7 +4469,9 @@ var Helper = {
 		if (haveToCheck) 
 			document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
 		Helper.generateInventoryTable("guild");
-		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
+		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
+
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		}
@@ -4547,11 +4588,11 @@ var Helper = {
 		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 1000);
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
 		var result=
-			'<div align=right><form id=Helper:onlinePlayerFilterForm>' +
+			'<div align=right><form id=Helper:onlinePlayerFilterForm subject="onlinePlayer" href="index.php?cmd=notepad&subcmd=onlineplayers" onSubmit="javascript:return false;">' +
 			'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.onlinePlayerMinLvl" id="Helper.onlinePlayerMinLvl" style=custominput/> ' +
 			'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.onlinePlayerMaxLvl" id="Helper.onlinePlayerMaxLvl" style=custominput/> ' +
-			'<input id="Helper:onlinePlayerFilter" class="custombutton" type="submit" value="Filter"/>' +
-			'<input id="Helper:onlinePlayerFilterReset" class="custombutton" type="button" value="Reset"/></form></div>' +
+			'<input id="Helper:onlinePlayerFilter" subject="onlinePlayer" href="/index.php?cmd=notepad&subcmd=onlineplayers" class="custombutton" type="submit" value="Filter"/>' +
+			'<input id="Helper:onlinePlayerFilterReset" subject="onlinePlayer" href="index.php?cmd=notepad&subcmd=onlineplayers" class="custombutton" type="button" value="Reset"/></form></div>' +
 			'<table id="Helper:OnlinePlayersTable"><tr>' +
 			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
 			'<th sortkey="name">Name</th>' +
@@ -4570,9 +4611,8 @@ var Helper = {
 		result+='</table>';
 		output.innerHTML=result;
 
-		// document.getElementById("Helper:onlinePlayerFilter").addEventListener('click', Helper.setOnlinePlayerFilter, true);
-		document.getElementById("Helper:onlinePlayerFilterReset").addEventListener('click', Helper.resetOnlinePlayerFilter, true);
-		document.getElementById("Helper:onlinePlayerFilterForm").addEventListener('submit', Helper.setOnlinePlayerFilter, true);
+		document.getElementById("Helper:onlinePlayerFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
+		document.getElementById("Helper:onlinePlayerFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
 
 		var theTable=document.getElementById('Helper:OnlinePlayersTable');
 		for (var i=0; i<theTable.rows[0].cells.length; i++) {
@@ -4581,24 +4621,6 @@ var Helper = {
 			cell.style.cursor="pointer";
 			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
 		}
-	},
-
-	setOnlinePlayerFilter: function() {
-		var onlinePlayerMinLvl = document.getElementById("Helper.onlinePlayerMinLvl");
-		var onlinePlayerMaxLvl = document.getElementById("Helper.onlinePlayerMaxLvl");
-		if (onlinePlayerMinLvl.value == '') onlinePlayerMinLvl.value = '0';
-		if (onlinePlayerMaxLvl.value == '') onlinePlayerMaxLvl.value = '1000';
-		if (!isNaN(onlinePlayerMinLvl.value))
-			GM_setValue("onlinePlayerMinLvl", parseInt(onlinePlayerMinLvl.value));
-		if (!isNaN(onlinePlayerMaxLvl.value))
-			GM_setValue("onlinePlayerMaxLvl", parseInt(onlinePlayerMaxLvl.value));
-		Helper.generateOnlinePlayersTable();
-	},
-
-	resetOnlinePlayerFilter: function() {
-		GM_setValue("onlinePlayerMinLvl", 1);
-		GM_setValue("onlinePlayerMaxLvl", 1000);
-		Helper.generateOnlinePlayersTable();
 	},
 
 	sortOnlinePlayersTable: function(evt) {
@@ -4898,12 +4920,14 @@ var Helper = {
 			'<th sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
 		var item, color;
-		var showUseableItems = GM_getValue("showUseableItems");
+
 		var allItems = targetInventory.items;
-		if (showUseableItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.minLevel <= Helper.characterLevel});
-			//  && e.minLevel + 50 > Helper.characterLevel}
-		}
+
+		//apply level filters
+		var minLvl = GM_getValue("inventoryMinLvl", 1);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
+		allItems=allItems.filter(function(e,i,a) {return (e.minLevel >= minLvl && e.minLevel <= maxLvl)});
+
 		var showGloveTypeItems = GM_getValue("showGloveTypeItems");
 		if (!showGloveTypeItems) {
 			allItems=allItems.filter(function(e,i,a) {return e.type != 'gloves'});
@@ -6400,15 +6424,15 @@ var Helper = {
 		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
 				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
 				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) +
-				'<div align=center><form id=Helper:arenaFilterForm onSubmit="javascript:return false;">' +
+				'<div align=center><form id=Helper:arenaFilterForm subject="arena" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + GM_getValue("arenaMinLvl", 1) + '" size=5 name="Helper.arenaMinLvl" id="Helper.arenaMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 1000) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
-				'<input id="Helper:arenaFilter" class="custombutton" type="submit" value="Filter"/>' +
-				'<input id="Helper:arenaFilterReset" class="custombutton" type="button" value="Reset"/></form></div>'+
+				'<input id="Helper:arenaFilter" subject="arena" class="custombutton" type="submit" value="Filter"/>' +
+				'<input id="Helper:arenaFilterReset" subject="arena" class="custombutton" type="button" value="Reset"/></form></div>'+
 				'</span>';
 		document.getElementById("Helper:hideMatchesForCompletedMoves").addEventListener('click', Helper.hideMatchesForCompletedMoves, true);
-		document.getElementById("Helper:arenaFilterReset").addEventListener('click', Helper.resetArenaFilter, true);
-		document.getElementById("Helper:arenaFilterForm").addEventListener('submit', Helper.setArenaFilter, true);
+		document.getElementById("Helper:arenaFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
+		document.getElementById("Helper:arenaFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
 
 		var arenaMoves = System.getValueJSON("arenaMoves");
 		var hideArenaPrizes = GM_getValue("hideArenaPrizes");
@@ -6453,13 +6477,14 @@ var Helper = {
 					aMatch.arenaSpecials = false;
 				}
 				aMatch.arenaHellForgeHTML = row.cells[5].innerHTML;
-				aMatch.arenaMaxEquipHTML = row.cells[6].innerHTML;
-				aMatch.arenaRewardHTML = row.cells[7].innerHTML;
+				aMatch.arenaEpicHTML = row.cells[6].innerHTML;
+				aMatch.arenaMaxEquipHTML = row.cells[7].innerHTML;
+				aMatch.arenaRewardHTML = row.cells[8].innerHTML;
 				arenaMatches.push(aMatch);
 			}
 
-			var prizeSRC = row.cells[7].firstChild.getAttribute("src");
-			var maxEquipLevel = row.cells[6].textContent*1;
+			var prizeSRC = row.cells[8].firstChild.getAttribute("src");
+			var maxEquipLevel = row.cells[7].textContent*1;
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 				for (var j=0; j<arenaMoves.length; j++){
 					var searchText = System.imageServer + "/pvp/" + arenaMoves[j].moveID+ ".gif";
@@ -6471,7 +6496,7 @@ var Helper = {
 				}
 			}
 			if (prizeSRC && prizeSRC.search("/items/") != -1) {
-				var prizeImgElement = row.cells[7].firstChild;
+				var prizeImgElement = row.cells[8].firstChild;
 				var prizeOnmouseover = prizeImgElement.getAttribute("onmouseover");
 				var itemIdRE = /ajaxLoadCustom\((\d+)/;
 				var itemId = itemIdRE.exec(prizeOnmouseover)[1];
@@ -6506,37 +6531,37 @@ var Helper = {
 			Helper.sortArenaByHeader("");
 		}
 	},
-
-	setArenaFilter: function() {
-		var onlinePlayerMinLvl = document.getElementById("Helper.arenaMinLvl");
-		var onlinePlayerMaxLvl = document.getElementById("Helper.arenaMaxLvl");
-		if (onlinePlayerMinLvl.value == '') onlinePlayerMinLvl.value = '0';
-		if (onlinePlayerMaxLvl.value == '') onlinePlayerMaxLvl.value = '1000';
-		if (!isNaN(onlinePlayerMinLvl.value))
-			GM_setValue("arenaMinLvl", parseInt(onlinePlayerMinLvl.value));
-		if (!isNaN(onlinePlayerMaxLvl.value))
-			GM_setValue("arenaMaxLvl", parseInt(onlinePlayerMaxLvl.value));
-		Helper.sortAsc=!Helper.sortAsc;
-		if (GM_getValue("autoSortArenaList")) {
-			Helper.sortArenaByHeader("");
-		} else {
-			window.location = window.location;
-		}
-	},
-
-	resetArenaFilter: function() {
-		GM_setValue("arenaMinLvl", 1);
-		document.getElementById("Helper.arenaMinLvl").value=1;
-		GM_setValue("arenaMaxLvl", 1000);
-		document.getElementById("Helper.arenaMaxLvl").value=1000;
-		Helper.sortAsc=!Helper.sortAsc;
-		if (GM_getValue("autoSortArenaList")) {
-			Helper.sortArenaByHeader("");
-		} else {
-			window.location = window.location
-		}
-	},
 	
+	setLevelFilter: function(evt) {
+		var filterSubject = evt.target.getAttribute("subject");
+		var href = evt.target.getAttribute("href");
+		var minLvlSearchText = filterSubject + "MinLvl";
+		var maxLvlSearchText = filterSubject + "MaxLvl";
+		var playerMinLvl = document.getElementById("Helper." + minLvlSearchText);
+		var playerMaxLvl = document.getElementById("Helper." + maxLvlSearchText);
+		if (playerMinLvl.value == '') playerMinLvl.value = '0';
+		if (playerMaxLvl.value == '') playerMaxLvl.value = '1000';
+		if (!isNaN(playerMinLvl.value))
+			GM_setValue(minLvlSearchText, parseInt(playerMinLvl.value));
+		if (!isNaN(playerMaxLvl.value))
+			GM_setValue(maxLvlSearchText, parseInt(playerMaxLvl.value));
+		if (href) window.location = System.server + href;
+		else window.location = window.location;
+	},
+
+	resetLevelFilter: function(evt) {
+		var filterSubject = evt.target.getAttribute("subject");
+		var href = evt.target.getAttribute("href");
+		var minLvlSearchText = filterSubject + "MinLvl";
+		var maxLvlSearchText = filterSubject + "MaxLvl";
+		GM_setValue(minLvlSearchText, 1);
+		document.getElementById("Helper." + minLvlSearchText).value=1;
+		GM_setValue(maxLvlSearchText, 1000);
+		document.getElementById("Helper." + maxLvlSearchText).value=1000;
+		if (href) window.location = System.server + href;
+		else window.location = window.location;
+	},
+
 	addEventSortArena: function() {
 		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
 		for (var i=0; i<titleCells.length; i++) {
@@ -6547,6 +6572,7 @@ var Helper = {
 				|| cell.innerHTML.search("State") != -1
 				|| cell.innerHTML.search("Specials") != -1
 				|| cell.innerHTML.search("Hell Forge") != -1
+				|| cell.innerHTML.search("Epic") != -1
 				|| cell.innerHTML.search("Id") != -1
 				) {
 				cell.style.textDecoration="underline";
@@ -6584,10 +6610,12 @@ var Helper = {
 				'SpecialsHTML': theRow.cells[4].innerHTML,
 				'HellForge[?]': (theRow.cells[5].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
 				'HellForgeHTML': theRow.cells[5].innerHTML,
-				'MaxEquipLevel': theRow.cells[6].textContent*1,
-				'MaxEquipLevelHTML': theRow.cells[6].innerHTML,
-				'Reward': theRow.cells[7].innerHTML,
-				'Action': theRow.cells[8].innerHTML,
+				'Epic[?]': (theRow.cells[6].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'EpicHTML': theRow.cells[6].innerHTML,
+				'MaxEquipLevel': theRow.cells[7].textContent*1,
+				'MaxEquipLevelHTML': theRow.cells[7].innerHTML,
+				'Reward': theRow.cells[8].innerHTML,
+				'Action': theRow.cells[9].innerHTML,
 				'Visibility': theRow.style.visibility,
 				'BackgroundColor': theRow.style.backgroundColor
 			};
@@ -6643,6 +6671,7 @@ var Helper = {
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.State+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.EpicHTML+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
@@ -7522,7 +7551,7 @@ var Helper = {
 		var mailboxItemHref = evt.target.getAttribute("itemHref");
 		System.xmlhttp(mailboxItemHref,
 			Helper.recallMailboxReturnMessage,
-			{"target": evt.target});
+			{"target": evt.target, "url": mailboxItemHref});
 	},
 
 	recallMailboxReturnMessage: function(responseText, callback) {
@@ -7535,11 +7564,16 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Taken";
-		} else {
+		} else if (info!="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Error:" + info;
+			target.innerHTML = "Error: " + info;
+		} else {
+			target.style.color = 'red';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			GM_log(callback.url);
 		}
 	},
 	
@@ -7566,7 +7600,7 @@ var Helper = {
 		var cancelButtonHref = evt.target.getAttribute("cancelButtonHref");
 		System.xmlhttp(cancelButtonHref,
 			Helper.cancelAuctionReturnMessage,
-			{"target": evt.target});
+			{"target": evt.target, "url": cancelButtonHref});
 	},
 
 	cancelAuctionReturnMessage: function(responseText, callback) {
@@ -7579,11 +7613,16 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Cancelled";
-		} else {
+		} else if (info!="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Error:" + info;
+			target.innerHTML = "Error: " + info;
+		} else {
+			target.style.color = 'red';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			GM_log(callback.url);
 		}
 	},
 	
@@ -8258,7 +8297,7 @@ var Helper = {
 			"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
 		System.xmlhttp(bulkSellHref,
 			Helper.bulkListSingleReturnMessage,
-			{"target": evt.target});
+			{"target": evt.target, "url": bulkSellHref});
 	},
 	
 	bulkListSingleReturnMessage: function(responseText, callback) {
@@ -8269,11 +8308,16 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Auction Listed";
-		} else {
+		} else if (info!="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Error:" + info;
+			target.innerHTML = "Error: " + info;
+		} else {
+			target.style.color = 'red';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			GM_log(callback.url);
 		}
 	},
 	
