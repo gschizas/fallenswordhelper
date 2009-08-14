@@ -104,6 +104,19 @@ var Data = {
 		return Data.questArray;
 	},
 
+	relicList: function() {
+		if (!Data.relicArray) {
+			Data.relicArray=[
+				{Name:"Unearthed Inkari War Machine",Realm:"Highridge Mines (Maze) (17,11) Lvl 32",Comment:"Artifact Gain +1<p>Portal &gt; Highridge Mines Mastermap &gt; Highridge Mines (Maze)"},
+				{Name:"G27 Cooling Tower",Realm:"Desert Path (Mouth) (2,12) Lvl 9",Comment:"Artifact Gain +1<p>Getting there: Teleport to Taulin Rad Lands &gt; Desert Path (Mouth)"},
+				{Name:"Crashed Aircraft",Realm:"Taulin Gamma Wastes (Razor Plain) (2,2) Lvl 26",Comment:"Artifact Gain +1<p>Getting there: Portal &gt; Taulin Gamma Wastes Mastermap &gt; Taulin Gamma Wastes (Towers) &gt; Taulin Gamma Wastes (Razor Plain)"},
+				{Name:"Fossilized Seinesaur",Realm:"Phantom Lake (Outer) (5,2) Lvl 17",Comment:"Artifact Gain +1<p>Getting there: Teleport to Taulin Rad Lands > Phantom Lake (Shore) > Phantom Lake (Outer)"},
+				{Name:"Raga Watchtower",Realm:"Highridge Crag (Trail) (9, 10) Lvl 44",Comment:"Artifact Gain +1<p>Getting there: Portal > Highridge Crag Mastermap > Highridge Crag (Trail)<br>PVP"}
+			];
+		}
+		return Data.relicArray;
+	},
+
 	creatureList: function() {
 
 	},

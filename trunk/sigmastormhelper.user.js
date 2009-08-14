@@ -375,6 +375,9 @@ var Helper = {
 			case "chat":
 				Helper.addLogColoring("Chat", 0);
 				break;
+			case "reliclist":
+				Helper.injectRelicList();
+				break;
 			case "log":
 				Helper.addLogColoring("GuildLog", 1);
 				Helper.addGuildLogWidgets();
@@ -5826,6 +5829,30 @@ var Helper = {
 	},
 
 	injectArena: function() {
+	},
+	
+	injectRelicList: function(){
+		var relics = Data.relicList();
+		var relicImages = System.findNodes("//img[contains(@src,'/relics/')]");
+		var relicFound = false;
+		for (var i=0; i<relicImages.length; i++){
+			var relicImage = relicImages[i];
+			var relicName = relicImage.parentNode.nextSibling.nextSibling.textContent.trim();
+			relicFound = false;
+			for (var j=0; j<relics.length; j++){
+				var relic = relics[j];
+				if (relicName == relic.Name.trim()){
+					var onmouseoverText='Tip(\'' +
+						'<span style=\\\'font-weight:bold; color:#A7FFFD;\\\'>' + relic.Name + '</span><br /><br />' +
+						relic.Realm + '<br><br>' +
+						relic.Comment + '\');'
+					relicImage.setAttribute("onmouseover", onmouseoverText);
+					relicFound = true;
+					break;
+				}
+			}
+			if (!relicFound) GM_log("Relic:'" + relicName + "' not found in data set");
+		}
 	},
 
 	injectSettingsGuildData: function(guildType) {
