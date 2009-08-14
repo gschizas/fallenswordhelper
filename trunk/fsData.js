@@ -121,7 +121,7 @@ var Data = {
 				{questName:'Gate to the Darkness',       level:534, location:'Cursed Isle of Darkwater (Gloomy Vale)'},
 				{questName:'Gathering Harvest',          level:198, location:'Narkort (East)'},
 				{questName:'Glaciated Village',          level:262, location:'Ossrand (East)'},
-				{questName:'Glamour of the Dragon',      level:580, location:'Floating Islands of Wu Kong (South Island)'},
+				{questName:'Glamour of the Dragon',      level:577, location:'Floating Islands of Wu Kong (South Island)'},
 				{questName:'Glazed Iguana Steaks',       level:315, location:'Inual (North)'},
 				{questName:'Glimpse of the Shroud',      level:445, location:'Caves of Kreth (Level 5)'},
 				{questName:'Gloomy Gem',                 level:45,  location:'Moot Forest North'},
@@ -6798,8 +6798,11 @@ var Data = {
 				{name:'Rune of Wholla', type:'rune'},
 				{name:'Scythe of Mourla', type:'weapon'},
 				{name:'Weapon of Ghasst', type:'weapon'},
+				{name:'Echibors Turban of Power', type:'helmet'},
 				
-				{name:'Echibors Turban of Power', type:'helmet'}
+				{name:'Flamebreath Gloves', type:'gloves'},
+				{name:'Flamebreath Rune', type:'rune'},
+				{name:'Rune of Haetmophin', type:'rune'}
 			]
 		}
 		return Data.itemArray;
