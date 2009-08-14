@@ -3959,10 +3959,12 @@ var Helper = {
 				}
 			}
 			
-			// quick wear manager link
+			// quick wear manager link and select all link
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (node) {
-				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]";
+				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]"+
+					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>"
+				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 			}
 		}
 
@@ -4013,14 +4015,6 @@ var Helper = {
 					document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
 				}
 			}
-		}
-
-		//Add select all link to enable user to select all checkboxes on the screen.
-		var injectHere = System.findNode("//input[@value='Go']");
-		if (injectHere) {
-			injectHere = injectHere.parentNode;
-			injectHere.innerHTML += "&nbsp;<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>Select All</span>"
-			document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 		}
 
 		//Update the ally/enemy online list, since we are already on the page.
