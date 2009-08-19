@@ -77,6 +77,8 @@ var Helper = {
 		System.setDefault("invMaxLvlFilter", '');
 		System.setDefault("quickUseItems",JSON.stringify({'item0':'','item1':'','item2':''}));
 		System.setDefault("enableBulkSell", false);
+		System.setDefault("fsboxlog", true);
+		System.setDefault("fsboxcontent", "");
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -241,6 +243,7 @@ var Helper = {
 		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
 		Helper.injectWorldWidgets();
+		Helper.injectFSBoxLog();
 
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -461,6 +464,12 @@ var Helper = {
 			case "saveconfig":
 				Helper.injectSaveConfig();
 				break;
+			case "fsboxcontent":
+				Helper.injectFsBoxContent();
+				break;
+			case "guildlog":
+				Helper.injectGuildLogSummary();
+				break;
 			}
 			break;
 		case "points":
@@ -545,6 +554,26 @@ var Helper = {
 			'.HelperTableRow2 {background-color:#112322;font-size:small}\n' +
 			'.HelperTableRow2:hover {background-color:black}'
 		);
+	},
+	
+	injectFSBoxLog: function() {
+		if (GM_getValue("fsboxlog")) {
+			var node=System.findNode("//input[@value='Send Msg']/../font[1]");
+			if (node) {
+				var fsbox=node.innerHTML.replace('<br><br>',' ');
+				var boxList=GM_getValue("fsboxcontent");
+				if (boxList.indexOf(fsbox)<0) boxList+=fsbox;
+				if (boxList.length>10000) boxList=boxList.substring(0,10000);
+				GM_setValue("fsboxcontent",boxList);
+				node.innerHTML+="<a href='index.php?cmd=notepad&subcmd=fsboxcontent'>[Log]</a>";
+			}
+		}
+	},
+	
+	injectFsBoxContent: function() {
+		Layout.notebookContent().innerHTML='<table width=100%><tr><td align=right id=fsboxclear>[Clear]</td></tr><tr><td id=fsboxdetail></td></tr></table>';
+		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue("fsboxcontent",'');window.location=window.location;},true);
+		document.getElementById('fsboxdetail').innerHTML=GM_getValue("fsboxcontent");
 	},
 
 	injectClassCast: function() {
@@ -3120,6 +3149,8 @@ var Helper = {
 	},
 
 	addGuildLogWidgets: function() {
+		var node=System.findNode("//a[.='Back to Manage Faction']/..");
+		node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Faction Log Summary</a> ]';
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
 		var playerId=Layout.playerId();
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
@@ -3162,6 +3193,56 @@ var Helper = {
 			}
 
 		}
+	},
+	
+	injectGuildLogSummary: function() {
+		Layout.notebookContent().innerHTML='<table width=100%><tr><td align=right id=guillogrefresh>[Refresh]</td></tr><tr><td id=guildlogdetail></td></tr></table>';
+		
+		var lastCheck=GM_getValue("lastGuildLogCheck")
+		var now=(new Date()).getTime();
+		if (!lastCheck) lastCheck=0;
+		var haveToCheck=((now - lastCheck) > 60*60*1000);
+		if (haveToCheck)
+			document.getElementById('guillogrefresh').addEventListener('click',Helper.guildLogSummaryRefresh,true);
+		else
+			document.getElementById('guillogrefresh').innerHTML='[ Wait '+ Math.round(60 - ((now - lastCheck)/60000)) +'m ]'
+		var logDetail=GM_getValue("guildlogdetail");
+		if (logDetail) 
+			Helper.guildLogDisplay(logDetail);
+		else
+			Helper.guildLogSummaryRefresh();
+	},
+	
+	guildLogSummaryRefresh: function() {
+		var now=(new Date()).getTime();
+		GM_setValue("lastGuildLogCheck", now.toString());
+		GM_setValue("guildlogdetail",'');
+		document.getElementById('guillogrefresh').innerHTML='';
+		document.getElementById('guildlogdetail').innerHTML='Parsing page 1';
+		System.xmlhttp('index.php?cmd=guild&subcmd=log&page=0',Helper.guidLogRetrieve,1);
+	},
+	
+	guidLogRetrieve: function(responseText, callback) {
+		var doc=System.createDocument(responseText);
+		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
+		logTable.deleteRow(0);
+		log=logTable.innerHTML.replace('<tbody>','').replace('</tbody>','');
+		var logDetail=GM_getValue("guildlogdetail");
+		if (!logDetail) logDetail='';
+		logDetail+=log;
+		GM_setValue("guildlogdetail", logDetail);
+		var page=System.findNode("//select",doc);
+		if (callback==15 || callback==page.length)
+			Helper.guildLogDisplay(logDetail);
+		else {
+			document.getElementById('guildlogdetail').innerHTML+=', '+(callback+1);
+			System.xmlhttp('index.php?cmd=guild&subcmd=log&page='+callback,Helper.guidLogRetrieve,callback+1);
+		}
+	},
+	
+	guildLogDisplay: function(logDetail) {
+		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'
+			+logDetail+'</table>';
 	},
 
 	injectGuildList: function(memberList) {
@@ -6238,6 +6319,8 @@ var Helper = {
 				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Sigma Box Log' + Helper.helpLink('Enable Sigma Box Log', 'This enables the functionality to keep a log of recent seen Sigma Box message.') +
+				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -6345,6 +6428,7 @@ var Helper = {
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
 		System.saveValueForm(oForm, "enableBulkSell");
+		System.saveValueForm(oForm, "fsboxlog");
 		
 		var minPSstatNames=['atk','def','arm','dmg','cHP','mHP','skill'];
 		var minPS={};
