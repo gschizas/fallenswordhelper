@@ -651,6 +651,10 @@ var Helper = {
 					.addEventListener('click', Helper.recallGuildStoreItem, true);
 			}
 		}
+		
+		// self recall
+		var selfRecall=System.findNode("//b[.='Guild Store']/..");
+		selfRecall.innerHTML+=" [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&user="+Helper.characterName+"' title='Self Recall'>SR</a>]";
 	},
 
 	recallGuildStoreItem: function(evt) {
@@ -3540,7 +3544,7 @@ var Helper = {
 		if (searchSet) {
 			searchItem = unescape(searchSet[1]);
 			searchItem=(searchItem.indexOf(' of ')>0)?
-				searchItem.replace(/^.* of /,''):searchItem.replace(/ [a-z]+$/i,'');
+				searchItem.replace(/^.* of /,''):(searchItem.replace(/ .*$/ig,'')+' ');
 		}
 		if (searchUser) searchUser = unescape(searchUser[1]);
 		var isUser=false, startRow=0, stopRow=mainTable.rows.length;

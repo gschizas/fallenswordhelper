@@ -571,8 +571,10 @@ var Helper = {
 	},
 	
 	injectFsBoxContent: function() {
-		Layout.notebookContent().innerHTML='<table width=100%><tr><td align=right id=fsboxclear>[Clear]</td></tr><tr><td id=fsboxdetail></td></tr></table>';
-		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue("fsboxcontent",'');window.location=window.location;},true);
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Sigma Box Log','','fsboxclear','Clear','fsboxdetail');
+		document.getElementById('fsboxclear').addEventListener('click',
+			function() {GM_setValue("fsboxcontent",'');window.location=window.location;},
+			true);
 		document.getElementById('fsboxdetail').innerHTML=GM_getValue("fsboxcontent");
 	},
 
@@ -3196,7 +3198,7 @@ var Helper = {
 	},
 	
 	injectGuildLogSummary: function() {
-		Layout.notebookContent().innerHTML='<table width=100%><tr><td align=right id=guillogrefresh>[Refresh]</td></tr><tr><td id=guildlogdetail></td></tr></table>';
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
 		
 		var lastCheck=GM_getValue("lastGuildLogCheck")
 		var now=(new Date()).getTime();
@@ -4331,14 +4333,9 @@ var Helper = {
 
 	injectQuestManager: function() {
 		var content=Layout.notebookContent();
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#110011"><b>&nbsp;Mission Manager</b></td></tr>'+
-			'<tr><td><b>&nbsp;Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
-				(GM_getValue("showCompletedQuests")?' checked':'') + '/></b></td></tr>'+
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:QuestManagerOutput">' +
-			'Loading mission log...' +
-			'</div>';
+		content.innerHTML=Helper.makePageTemplate('Mission Manager',
+			'Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
+				(GM_getValue("showCompletedQuests")?' checked':'') + '/>','','','Helper:QuestManagerOutput');
 		Data.questMatrix();
 		Helper.parseQuestBookStart(0);
 		// Helper.injectQuestTable();
@@ -4487,15 +4484,13 @@ var Helper = {
 
 	injectAuctionSearch: function() {
 		var content=Layout.notebookContent();
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#212323" align="center"><b>&nbsp;Trade Hub Quick Search</b></td></tr>'+
-			'<tr><td>This screen allows you to set up some quick search templates for the Trade Hub. '+
+		content.innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
+			'<div>This screen allows you to set up some quick search templates for the Trade Hub. '+
 				'The Display on TH column indicates if the quick search will show on the short list on the '+
 				'Trade Hub main screen. A maximum of 20 items can show on this list '+
 				'(It will not show more than 20even if you have more than 20 flagged). '+
 				'To edit items, either use the large text area below, '+
-				'or add a new entry and delete the old one. You can always reset the list to the default values.</td></tr>'+
-			'</table>' +
+				'or add a new entry and delete the old one. You can always reset the list to the default values.</div>'+
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
 		var injectHere = document.getElementById('Helper:Auction Search Output');
@@ -4625,54 +4620,18 @@ var Helper = {
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
-		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack, cyan = Faction Locked</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
-			'<tr><td colspan=2>' +
-			'<table><tr><td><b>Show Items:</b></td>' +
-			'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
-			(GM_getValue("showUseableItems")?' checked':'') + '/>';
-		for (var i=0; i<Helper.itemFilters.length; i++) {
-			newhtml += (i % 3 ==0) ? '</td></tr><tr><td>' : '';
-			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
-					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
-		}
-		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
-				'</td></tr></table></td></tr></table>' +
-				'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
-				'</div>';
-		content.innerHTML=newhtml;
+		content.innerHTML=Helper.makePageTemplate('Inventory Manager','green = worn, blue = backpack, cyan = Faction Locked',
+				'Helper:InventoryManagerRefresh','Refresh')+
+				Helper.makeInvFilterTemplate(Helper.inventory.items.length);
 		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
-		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		for (var i=0; i<Helper.itemFilters.length; i++) {
-			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		}
-		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
-		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
+		Helper.makeInvFilterEvent();
 	},
-
-	injectGuildInventoryManager: function() {
-		var content=Layout.notebookContent();
-		var guildItemCount = "unknown"
-		unsafeWindow.changeMenu(0,'menu_character');
-		unsafeWindow.changeMenu(5,'menu_guild');
-		unsafeWindow.changeMenu(0,'menu_character');
-		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
-		Helper.guildinventory=System.getValueJSON("guildinventory");
-		if (Helper.guildinventory) {
-			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
-			guildItemCount = Helper.guildinventory.items.length;
-		}
-
-		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
-			'</tr>' +
-			'<tr><td colspan=2>' +
-				'<table><tr><td><b>Show Items:</b></td>' +
-				'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
-				(GM_getValue("showUseableItems")?' checked':'') + '/>';
+	
+	makeInvFilterTemplate: function(guildItemCount) {
+		var newhtml='<table width=100%><tr><td><b>Show Items:</b></td>' +
+			'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
+			(GM_getValue("showUseableItems")?' checked':'') + '/>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 3 ==0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
@@ -4682,12 +4641,12 @@ var Helper = {
 				'</td></tr><tr><td>&nbsp;Max lvl: <input id=maxLvl class=custominput size=1 value='+GM_getValue("invMaxLvlFilter")+'>'+
 				'&nbsp;<input id=maxLvlSave type=button class=custombutton value="Save">'+
 				'</td></tr></table></td></tr>'+
-			'<tr><td colspan=2>&nbsp;Faction Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
-			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
-			'</div>';
-		content.innerHTML=newhtml;
-		document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
-		Helper.generateInventoryTable("guild");
+				'<tr><td colspan=2>&nbsp;Item Count:&nbsp;' + guildItemCount + '</table>' +
+				'<div style="font-size:small;" id="Helper:InventoryManagerOutput"></div>';
+		return newhtml;
+	},
+
+	makeInvFilterEvent: function() {
 		document.getElementById("showUseableItems").addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
@@ -4698,6 +4657,23 @@ var Helper = {
 				GM_setValue("invMaxLvlFilter", document.getElementById("maxLvl").value);
 				window.location=window.location;
 			}, true);
+	},
+
+	injectGuildInventoryManager: function() {
+		var content=Layout.notebookContent();
+		var guildItemCount = "unknown"
+		unsafeWindow.changeMenu(0,'menu_character');
+		unsafeWindow.changeMenu(5,'menu_guild');
+		unsafeWindow.changeMenu(0,'menu_character');
+		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
+		Helper.guildinventory=System.getValueJSON("guildinventory");
+		content.innerHTML=Helper.makePageHeader('Faction Inventory Manager','takes a while to refresh so only do it if you really need to',
+				'Helper:GuildInventoryManagerRefresh','Refresh')+
+				Helper.makeInvFilterTemplate((Helper.guildinventory?Helper.guildinventory.items.length:0))+
+				'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput"></div>';
+		document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
+		Helper.generateInventoryTable("guild");
+		Helper.makeInvFilterEvent();
 	},
 
 	InventorySelectFilters: function(evt) {
@@ -4727,22 +4703,11 @@ var Helper = {
 		var lastCheck=GM_getValue("lastOnlineCheck")
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 5*60*1000)
-		if (haveToCheck) {
-			var refreshButton = '<td> (takes a while to refresh so only do it if you really need to) </td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right"><span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">[Refresh]</span></td>';
-		} else {
-			var refreshButton = "<td> (please wait 5 minutes before the [Refresh] button available again)</td>"
-		}
+		var haveToCheck=((now - lastCheck) > 5*60*1000);
 
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr>'+
-			'<td nobr><b>&nbsp;Online Players</b></td>' +
-			refreshButton +
-			'</tr>' +
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
-			'' +
-			'</div>';
+		content.innerHTML=Helper.makePageTemplate('Online Players','takes a while to refresh so only do it if you really need to',
+			haveToCheck?'Helper:OnlinePlayersRefresh':'1',haveToCheck?'Refresh':'wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s',
+			'Helper:OnlinePlayersOutput');
 		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
 		if (refreshButton)
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
@@ -5274,14 +5239,7 @@ var Helper = {
 	injectRecipeManager: function() {
 		var content=Layout.notebookContent();
 		Helper.recipebook = System.getValueJSON("recipebook");
-		content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td width="90%" nobr><b>&nbsp;Blueprint Manager</b></td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">[<span id="Helper:RecipeManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span>]</td>'+
-			'</tr>' +
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:RecipeManagerOutput">' +
-			'' +
-			'</div>';
+		content.innerHTML = Helper.makePageTemplate('Blueprint Manager','','Helper:RecipeManagerRefresh','Refresh','Helper:RecipeManagerOutput');
 		if (!Helper.recipebook) Helper.parseInventingStart();
 		document.getElementById("Helper:RecipeManagerRefresh").addEventListener('click', Helper.parseInventingStart, true);
 		Helper.generateRecipeTable();
@@ -7550,6 +7508,19 @@ var Helper = {
 		target.style.color=(info.search("Auction placed successfully!") != -1)?"green":"red";
 		target.style.cursor='';
 		target.removeEventListener('click', Helper.bulkListSingle, true);		
+	},
+	
+	makePageHeader: function(title, comment, spanId, button) {
+		return '<table width=100%><tr style="background-color:#110011">'+
+			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
+			(comment==''?'':'&nbsp;('+comment+')')+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
+			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
+			'</td></tr>';
+	},
+	makePageTemplate: function(title, comment, spanId, button, divId) {
+		return Helper.makePageHeader(title, comment, spanId, button)+
+			'<div style="font-size:small;" id="'+divId+'"></div>';
 	}
 };
 
