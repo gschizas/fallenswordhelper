@@ -1276,13 +1276,15 @@ var Helper = {
 		var injectHere=System.findNode("//td/form");
 		if (injectHere) {
 			var elem=document.createElement("span");
-			elem.innerHTML=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
+			elem.innerHTML=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>"+
+				"<div style='font-size:x-small'>(note that gained level is good in 7-day summary only, "+
+				"and about 95% correct, with the assumption that 25% tax rate is applied)</div>";
 			injectHere.appendChild(elem);
 		}
 
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
-			var titleCells = ["Member", "Lvl", "Rank", "Credits From Deposits", "Credits From Tax", "Credits Total", "Crystals", "Skills Cast", "Squads Created", "Squads Joined", "Artifacts Captured", "XP Contrib"];
+			var titleCells = ["Member", "Lvl", "Rank", "Credits From Deposits", "Credits From Tax", "Credits Total", "Crystals", "Skills Cast", "Squads Created", "Squads Joined", "Artifacts Captured", "XP Contrib", "Lvl Gain"];
 			for (var i=0; i<titleCells.length; i++) {
 				Helper.advisorHeader += "<td bgcolor=#0a0f0f align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'><b>" + titleCells[i] + "</b></td>";
 			}
@@ -1410,6 +1412,13 @@ var Helper = {
 
 		for (var i=0; i<Helper.advisorRows.length; i++){
 			var r = Helper.advisorRows[i];
+			
+			var lvl=r.Lvl - 1;
+			var lvlExp=(lvl>11)?(lvl*lvl*lvl*10):(lvl*lvl*100);
+			lvl--;
+			var prevLvlExp=(lvl>11)?(lvl*lvl*lvl*10):(lvl*lvl*100);
+			r.LvlGain=System.addCommas(Math.round((System.intValue(r.XPContrib)*4/(lvlExp-prevLvlExp))*100));
+
 			result += '<tr class="HelperTableRow'+(1+i % 2)+'">'+
 			'<td> <a href="index.php?cmd=profile&player_id=' + r.Id +'">' +r.Member+ '</a></td>'+
 			'<td align="center"> '+r.Lvl+'</td>'+
@@ -1422,7 +1431,8 @@ var Helper = {
 			'<td align="center">'+r.SquadsCreated+'</td>'+
 			'<td align="center">'+r.SquadsJoined+'</td>'+
 			'<td align="center">'+r.ArtifactsCaptured+'</td>'+
-			'<td align="center">'+r.XPContrib+'</td></tr>';
+			'<td align="center">'+r.XPContrib+'</td>'+
+			'<td align="center">'+System.addCommas(System.intValue(r.LvlGain)/100)+'</td></tr>';
 		}
 		if (Helper.advisorFooter!='')
 			result+=Helper.advisorFooter;
