@@ -675,7 +675,8 @@ var Helper = {
 		} else if (info!="") {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		} else {
-			itemCellElement.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			itemCellElement.innerHTML = "Weird Error: check the Tools>Error Console";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -1785,19 +1786,23 @@ var Helper = {
 		}
 		if (GM_getValue("quickKill")) {
 			var doNotKillList = GM_getValue("doNotKillList");
-			var doNotKillListAry = doNotKillList.split(",")
-			for (var i=0; i<9; i++) {
-				var monster = System.findNode("//a[@id='aLink" + i + "']")
-				if (monster) {
-					var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
-					for (var j=0; j<doNotKillListAry.length; j++) {
-						var doNotKillName = doNotKillListAry[j].trim();
-						if (monsterName == doNotKillName){
-							var monsterNameCell = monster.parentNode.parentNode.previousSibling
-							monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
-							break;
+			var doNotKillListAry = doNotKillList.split(",");
+			if (doNotKillListAry.length > 0) {
+				for (var i=1; i<9; i++) {			  
+					var monster = System.findNode("//a[@id='aLink" + i + "']")
+					if (monster) {
+						var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
+						for (var j=0; j<doNotKillListAry.length; j++) {
+							var doNotKillName = doNotKillListAry[j].trim();
+							if (monsterName == doNotKillName){
+								var monsterNameCell = monster.parentNode.parentNode.previousSibling
+								monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
+								break;
+							}
 						}
 					}
+					else
+						break;
 				}
 			}
 		}
@@ -3631,8 +3636,9 @@ var Helper = {
 		} else if (info!="") {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
-			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>Weird Error: url used = " + callback.url + 
-				"<br>Try this url yourself and see what response you get and post findings to google site or forum</span>";
+			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log(callback.url);
 		}
 	},
 
@@ -3776,7 +3782,8 @@ var Helper = {
 		} else {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			target.innerHTML = "Weird Error: check the Tools>Error Console";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -7655,7 +7662,8 @@ var Helper = {
 		} else {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			target.innerHTML = "Weird Error: check the Tools>Error Console";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -7704,7 +7712,8 @@ var Helper = {
 		} else {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			target.innerHTML = "Weird Error: check the Tools>Error Console";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -8399,7 +8408,8 @@ var Helper = {
 		} else {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
-			target.innerHTML = "Weird Error: url used = " + callback.url + "<br>Try this url yourself and see what response you get and post findings to google site or forum";
+			target.innerHTML = "Weird Error: check the Tools>Error Console";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
