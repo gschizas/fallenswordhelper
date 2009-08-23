@@ -562,7 +562,7 @@ var Helper = {
 			if (node) {
 				var fsbox=node.innerHTML.replace('<br><br>',' ');
 				var boxList=GM_getValue("fsboxcontent");
-				if (boxList.indexOf(fsbox)<0) boxList+=fsbox;
+				if (boxList.indexOf(fsbox)<0) boxList=fsbox+boxList;
 				if (boxList.length>10000) boxList=boxList.substring(0,10000);
 				GM_setValue("fsboxcontent",boxList);
 				node.innerHTML+="<a href='index.php?cmd=notepad&subcmd=fsboxcontent'>[Log]</a>";
@@ -3210,7 +3210,7 @@ var Helper = {
 	injectGuildLogSummary: function() {
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
 		
-		var lastCheck=GM_getValue("lastGuildLogCheck")
+		var lastCheck=GM_getValue("lastGuildLogSumCheck")
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
 		var haveToCheck=((now - lastCheck) > 60*60*1000);
@@ -3227,7 +3227,7 @@ var Helper = {
 	
 	guildLogSummaryRefresh: function() {
 		var now=(new Date()).getTime();
-		GM_setValue("lastGuildLogCheck", now.toString());
+		GM_setValue("lastGuildLogSumCheck", now.toString());
 		GM_setValue("guildlogdetail",'');
 		document.getElementById('guillogrefresh').innerHTML='';
 		document.getElementById('guildlogdetail').innerHTML='Parsing page 1';
