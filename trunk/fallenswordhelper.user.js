@@ -86,6 +86,7 @@ var Helper = {
 		
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
+		System.setDefault("enableCountdownTimer", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -691,8 +692,9 @@ var Helper = {
 		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
 		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
 		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m/
+		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m ([,0-9]+)s/
 		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
+		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
 		nextGainHours = nextGainMinutes/60;
 		//get the max hours to still be inside stamina maximum
 		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
@@ -707,8 +709,33 @@ var Helper = {
 		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
 		staminaImageElement.setAttribute("onmouseover", newMouseoverText);
+
+		//add time to title bar
+		if (GM_getValue("enableCountdownTimer")) {
+			Helper.title = document.title;
+			Helper.seconds = nextGainSeconds; 
+			Helper.minutes = nextGainMinutes;
+			Helper.addCountdownTimerToTitleBar();
+		}
 	},
 
+	addCountdownTimerToTitleBar: function() {
+		 if (Helper.seconds <= 0){ 
+			Helper.seconds = 59; 
+			Helper.minutes -= 1; 
+		 } 
+		 if (Helper.minutes <= -1){
+			Helper.seconds = 59;
+			Helper.minutes = 59;
+			document.title = Helper.minutes + 'm ' + Helper.seconds + 's' + " - " + Helper.title;
+			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) 
+		 } else {
+			Helper.seconds -= 1; 
+			document.title = Helper.minutes + 'm ' + Helper.seconds + 's' + " - " + Helper.title;
+			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) 
+		}
+	},
+	
 	injectLevelupCalculator: function() {
 		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
 		if (!levelupImageElement) return;
@@ -3758,7 +3785,7 @@ var Helper = {
 
 	quickDropItem: function(evt){
 		var itemInvId = evt.target.getAttribute("itemInvId");
-		var dropItemHref = "http://www.fallensword.com/index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
+		var dropItemHref = System.server + "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
 		System.xmlhttp(dropItemHref,
 			Helper.quickDropItemReturnMessage,
 			{"target": evt.target, "url": dropItemHref});
@@ -7056,6 +7083,8 @@ var Helper = {
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
 				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
+				':</td><td><input name="enableCountdownTimer" type="checkbox" value="on"' + (GM_getValue("enableCountdownTimer")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -7190,6 +7219,7 @@ var Helper = {
 		System.saveValueForm(oForm, "wantedNames");
 		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
+		System.saveValueForm(oForm, "enableCountdownTimer");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
@@ -8368,7 +8398,7 @@ var Helper = {
 		for (var i=0;i<potentialAuctions.length;i++) {
 			var potentialAuction = potentialAuctions[i];
 			var invID = /Helper:bulkListSingle(\d+)/.exec(potentialAuction.getAttribute("id"))[1];
-			var bulkSellHref = "http://www.fallensword.com/index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + invID + 
+			var bulkSellHref = System.server + "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + invID + 
 				"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
 				"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
 			System.xmlhttp(bulkSellHref,
@@ -8384,7 +8414,7 @@ var Helper = {
 		var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
 		var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
 
-		var bulkSellHref = "http://www.fallensword.com/index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + itemInvId + 
+		var bulkSellHref = System.server + "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + itemInvId + 
 			"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
 			"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
 		System.xmlhttp(bulkSellHref,
