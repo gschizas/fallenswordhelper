@@ -96,7 +96,12 @@ var Data = {
 				{'questName':'A Tiresome Task', 'level':139, 'location':'Netherdeep (Fractured Galleries) @ 10,6'},
 				{'questName':'Path into the Fire', 'level':141, 'location':'Netherdeep (Dark Glyph) @ 3,3'},
 				{'questName':'Wandering the Dark', 'level':141, 'location':'Darkfire (Edge) @ 17,2'},
-				{'questName':'Finding the Lost', 'level':145, 'location':'Sanctuary of Ages (Outer Court) @ 3,2'}
+				{'questName':'Finding the Lost', 'level':145, 'location':'Sanctuary of Ages (Outer Court) @ 3,2'},
+				{'questName':'Blockage Run', 'level':151, 'location':'Ashstorm CZ (Ground Zero) @ 4, 8'},
+				{'questName':'A Place to Hide', 'level':152, 'location':'Ashstorm CZ (Forward Position) @ 3, 2'},
+				{'questName':'Psychers Pride', 'level':155, 'location':'Ashstorm CZ (Trenches) @ 2, 8'},
+				{'questName':'Broken Soldiers', 'level':156, 'location':'Ashstorm CZ (Terrace) @ 16, 15'},
+				{'questName':'Strike at the Hive', 'level':158, 'location':'Ashstorm CZ (Amethyst Vale) * 2, 2'}
 
 			];
 			Data.questArray = questArray.sort();
