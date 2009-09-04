@@ -116,9 +116,13 @@ var Data = {
 				{Name:"G27 Cooling Tower",Realm:"Desert Path (Mouth) (2,12) Lvl 9",Comment:"Artifact Gain +1<p>Getting there: Teleport to Taulin Rad Lands &gt; Desert Path (Mouth)"},
 				{Name:"Crashed Aircraft",Realm:"Taulin Gamma Wastes (Razor Plain) (2,2) Lvl 26",Comment:"Artifact Gain +1<p>Getting there: Portal &gt; Taulin Gamma Wastes Mastermap &gt; Taulin Gamma Wastes (Towers) &gt; Taulin Gamma Wastes (Razor Plain)"},
 				{Name:"Fossilized Seinesaur",Realm:"Phantom Lake (Outer) (5,2) Lvl 17",Comment:"Artifact Gain +1<p>Getting there: Teleport to Taulin Rad Lands > Phantom Lake (Shore) > Phantom Lake (Outer)"},
-				{Name:"Raga Watchtower",Realm:"Highridge Crag (Trail) (9, 10) Lvl 44",Comment:"Artifact Gain +1<p>Getting there: Portal > Highridge Crag Mastermap > Highridge Crag (Trail)<br>PVP"}
-			];
-		}
+				{Name:"Raga Watchtower",Realm:"Highridge Crag (Trail) (9, 10) Lvl 44",Comment:"Artifact Gain +1<p>Getting there: Portal > Highridge Crag Mastermap > Highridge Crag (Trail)<br>PVP"},
+				{Name:"Experimental TIU Stealth Ship",Realm:"OS 1313 (Fighter Bay) (4, 6) Lvl 86",Comment:"Artifact Gain +1<p>Getting there: Portal > Orbital Station 1313 > Fighter Bay"},
+				{Name:"Shard Stronghold",Realm:"Amethyst Peak(Edge) (14,7) Lvl 54",Comment:"Artifact Gain +1<p>Getting there: Portal > Amethyst > Edge "},
+				{Name:"Memorial of the Ancients",Realm:"Ullgath Caves (Gloom) (2,3). Lvl 127",Comment:"Artifact Gain +1<p>Getting there: Portal > Ullgath Caves > Ullgath Lake > Ullgath Caves (Gloom)"},				
+				{Name:"Colossal Fedomeera",Realm:"Raga Domain (Lonely Road) (15,5) Lvl 66",Comment:"Artifact Gain +1<p>Getting there: Portal >  Raga Domain > Lonely Road "}
+						];
+				}
 		return Data.relicArray;
 	},
 
