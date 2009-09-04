@@ -5249,17 +5249,30 @@ var Helper = {
 	injectRecipeManager: function() {
 		var content=Layout.notebookContent();
 		Helper.recipebook = System.getValueJSON("recipebook");
-		content.innerHTML = Helper.makePageTemplate('Blueprint Manager','','Helper:RecipeManagerRefresh','Refresh','Helper:RecipeManagerOutput');
+		content.innerHTML = Helper.makePageHeaderTwo('Blueprint Manager','',
+			'Helper:RecipeManagerRefresh','Refresh','Helper:RecipeManagerReset','Reset')+
+			'<dive style="font-size:small" id=Helper:RecipeManagerOutput></div>';
 		if (!Helper.recipebook) Helper.parseInventingStart();
 		document.getElementById("Helper:RecipeManagerRefresh").addEventListener('click', Helper.parseInventingStart, true);
+		document.getElementById("Helper:RecipeManagerReset").addEventListener('click', 
+			function() {
+				GM_setValue("recipebook",'');
+				window.location=window.location;
+			}, true);
 		Helper.generateRecipeTable();
 	},
 
 	parseInventingStart: function(){
-		Helper.recipebook = {};
-		Helper.recipebook.recipe = [];
-		var output=document.getElementById('Helper:RecipeManagerOutput')
-		output.innerHTML='<br/>Parsing inventing screen ...<br/>';
+		Helper.recipebook = System.getValueJSON("recipebook");
+		if (!Helper.recipebook) {
+			Helper.recipebook = {};
+			Helper.recipebook.recipe = [];
+		}
+		Helper.recipeHash={};
+		for (var i=0;i<Helper.recipebook.recipe.length;i++){
+			Helper.recipeHash[Helper.recipebook.recipe[i].id]=1;
+		}
+		document.getElementById('Helper:RecipeManagerOutput').innerHTML='<br/>Parsing inventing screen ...<br/>';
 		System.xmlhttp('index.php?cmd=inventing&page=0', Helper.parseInventingPage, {"page": 0});
 	},
 
@@ -5285,8 +5298,12 @@ var Helper = {
 					"type": aRow.cells[2].firstChild.textContent,
 					"level": parseInt(aRow.cells[3].firstChild.textContent),
 					"id": recipeId};
-				output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
-				Helper.recipebook.recipe.push(recipe);
+				output.innerHTML+="Found blueprint: "+ recipe.name
+				if (!Helper.recipeHash[recipeId]) {
+					Helper.recipebook.recipe.push(recipe);
+					output.innerHTML+="<br/>";
+				} else 
+					output.innerHTML+=" already known<br/>";
 			}
 		}
 
@@ -5296,9 +5313,16 @@ var Helper = {
 		}
 		else {
 			output.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
-			// Helper.generateRecipeTable();
-			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + Helper.recipebook.recipe[0].id, Helper.parseRecipePage, {"recipeIndex": 0});
+			Helper.checkRecipePage(0);
 		}
+	},
+	
+	checkRecipePage: function(recipeId){
+		while (recipeId<Helper.recipebook.recipe.length && Helper.recipeHash[Helper.recipebook.recipe[recipeId].id]) recipeId++;
+		if (recipeId>=Helper.recipebook.recipe.length) 
+			Helper.finishParseRecipePage();
+		else
+			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + Helper.recipebook.recipe[recipeId].id, Helper.parseRecipePage, {"recipeIndex": recipeId});
 	},
 
 	parseRecipeItemOrComponent: function(xpath, doc) {
@@ -5337,14 +5361,16 @@ var Helper = {
 		var nextRecipeIndex = currentRecipeIndex+1;
 		if (nextRecipeIndex<Helper.recipebook.recipe.length) {
 			var nextRecipe = Helper.recipebook.recipe[nextRecipeIndex];
-			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + nextRecipe.id, Helper.parseRecipePage, {"recipeIndex": nextRecipeIndex});
-		}
-		else {
-			output.innerHTML+='Finished parsing ... formatting ...';
-			Helper.recipebook.lastUpdate = new Date();
-			System.setValueJSON("recipebook", Helper.recipebook);
-			Helper.generateRecipeTable();
-		}
+			Helper.checkRecipePage(nextRecipeIndex);
+		} else 
+			Helper.finishParseRecipePage();
+	},
+	
+	finishParseRecipePage: function(){
+		document.getElementById('Helper:RecipeManagerOutput').innerHTML+='Finished parsing ... formatting ...';
+		Helper.recipebook.lastUpdate = new Date();
+		System.setValueJSON("recipebook", Helper.recipebook);
+		Helper.generateRecipeTable();
 	},
 
 	generateRecipeTable: function() {
@@ -5404,7 +5430,7 @@ var Helper = {
 		}
 
 
-		for (var i=0; i<showRecipes.length;i++) {
+		for (var i=0; i<(showRecipes.length>20?20:showRecipes.length);i++) {
 			recipe=showRecipes[i];
 			c++;
 
@@ -7526,6 +7552,15 @@ var Helper = {
 			(comment==''?'':'&nbsp;('+comment+')')+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
 			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
+			'</td></tr>';
+	},
+	makePageHeaderTwo: function(title, comment, spanId, button, spanId2, button2) {
+		return '<table width=100%><tr style="background-color:#110011">'+
+			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
+			(comment==''?'':'&nbsp;('+comment+')')+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
+			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
+			(spanId2?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId2+'">'+button2+'</span>]':'')+
 			'</td></tr>';
 	},
 	makePageTemplate: function(title, comment, spanId, button, divId) {
