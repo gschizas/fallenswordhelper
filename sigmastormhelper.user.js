@@ -519,7 +519,7 @@ var Helper = {
 			Helper.injectMailbox();
 			break;
 		case "-":
-			var isRelicPage = System.findNode("//input[contains(@title,'Use your current squad to capture the artifact')]");
+			var isRelicPage = System.findNode("//td[contains(.,'Below is the current status for the artifact')]/b");
 			if (isRelicPage) {
 				Helper.injectRelic(isRelicPage);
 			}
@@ -885,14 +885,16 @@ var Helper = {
 
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the artifact')]/b");
-		var buttonElement = System.findNode("//input[@value='Attempt Capture']");
-		var injectHere = buttonElement.parentNode;
+		// var buttonElement = System.findNode("//input[@value='Attempt Capture']");
+		var buttonElement = System.findNode("//td[contains(.,'Artifact Information')]/b");
+		var injectHere = buttonElement.parentNode.parentNode.parentNode.parentNode.parentNode;
 		injectHere.align = 'center';
 		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the artifact." ' +
-			'class="custombutton">' + injectHere.innerHTML;
+			'class="custombutton">'+ '<br>' + '<br>' + injectHere.innerHTML;
 
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
+
 
 	calculateRelicDefenderStats: function(evt) {
 		var calcButton = System.findNode("//input[@id='calculatedefenderstats']");
@@ -915,7 +917,7 @@ var Helper = {
 			}
 		}
 		var relicName = relicNameElement.innerHTML;
-		var tableInsertPoint = System.findNode("//input[@value='Attempt Capture']").parentNode;
+		var tableInsertPoint = System.findNode("//td[contains(.,'Artifact Information')]/b").parentNode.parentNode.parentNode.parentNode.parentNode;
 		tableInsertPoint.innerHTML += "<br><span><table width='200' style='border:1px solid #A07720;'>" +
 			"<tbody><tr><td title='InsertSpot'></td></tr></tbody></table></span>";
 		var extraTextInsertPoint = System.findNode("//td[@title='InsertSpot']");
