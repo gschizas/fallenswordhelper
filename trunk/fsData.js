@@ -402,12 +402,12 @@ var Data = {
 				{Name:"Temple of the Gods",Realm:"Eldora Plains (East) (7,9) Lvl 98",Comment:"+10 Attack<br>+5 Defense<br>+10 Armor<br>+5 Hp<br>+5 Damage<br>+50 Stamina<br>+1 Stamina Gain<br>+5 Nullify<br>+20 Protect Gold<br>+25 Dodge<br>+15 Master Blacksmith"},
 				{Name:"Elven Forge",Realm:"Elven Hideout (11,12) Lvl 30",Comment:"+1 Atk<br>+1 Def<br>+1 Armor<br>+1 HP<br>+1 Dmg<br>+100 Gold"},
 				{Name:"Feidal Power Obelisk",Realm:"Feidal Swamps North (12,3) Lvl 65",Comment:"+10 Dmg<br>+30 Critical Hit"},
-				{Name:"Ruined Crypt",Realm:"Enkmar Scrubland (North) (8,4) Lvl 107",Comment:"+12 attack<br>+12 Armor<br>+4 HP<br>+12 Damage<br>+10 Piercing Strike<br>+10 Reinforced Armor<br>+10 Thievery<br>+10 Critical Hit<br>+10 Breaker<br>+5 Nullify<br>+15 Dodge<br>+5 Disarm<br>+15 Sustain"},
+				{Name:"Ruined Crypt",Realm:"Enkmar Scrubland (North) (8,4) Lvl 107",Comment:"+12 Attack<br>+12 Armor<br>+4 HP<br>+12 Damage<br>+10 Piercing Strike<br>+10 Reinforced Armor<br>+10 Thievery<br>+10 Critical Hit<br>+10 Breaker<br>+5 Nullify<br>+15 Dodge<br>+5 Disarm<br>+15 Sustain"},
 				{Name:"Ethereal Pillars",Realm:"Ethereal Gateway (7,7) Lvl 1",Comment:"+15 Def<br>+15 Armor<br>+200 xp Gain<br>+25 Reinforced Armor<br>+25 Protection<br>+25 Protect Gold<br>+25 Sustain"},
 				{Name:"Kentlor Mine",Realm:"Kentlor Caves (North) (11,4) Lvl 113",Comment:"+25 Defense<br>+10 HP<br>+5 Damage<br>+10 Gold Gain<br>+25 Master Blacksmith<br>+25 Master Crafter"},
 				{Name:"Spirit Bog",Realm:"Jahd Swamps (North) (10,7) Lvl 125",Comment:"+15 Armor<br>+15 Hp<br>+10 Damage<br>+5 Breaker<br>+35 Nullify<br>+35 Banishment"},
 				{Name:"Sacrificial Altar",Realm:"Dekma Jungle (North (4,12) Lvl 130",Comment:"+25 Attack<br>+15 Armor<br>+5 HP<br>+15 Damage<br>+15 Piercing Strike<br>+15 Thievery<br>+15 Critical Hit"},
-				{Name:"Lookout Menhir",Realm:"Metlair (North) (6,3) Lvl 140",Comment:"+5 attack<br>-5Defense<br>+45 armor<br>+2 HP<br>+15 Damage<br>+20 Holy<br>+20 Breaker<br>+25 Dodge<br>+15 Disarm"},
+				{Name:"Lookout Menhir",Realm:"Metlair (North) (6,3) Lvl 140",Comment:"+5 Attack<br>-5 Defense<br>+45 Armor<br>+2 HP<br>+15 Damage<br>+20 Holy<br>+20 Breaker<br>+25 Dodge<br>+15 Disarm"},
 				{Name:"Ruined Temple",Realm:"Ekloren (South) (8,4) Lvl 152",Comment:"+25 Attack<br>+40 Defense<br>+25 Critical Hit<br>+25 Holy<br>+50 Dodge<br>+25 Disarm<br>+25 Sustain"},
 				{Name:"Serpent Tree",Realm:"Emerye (North) (3,12) Lvl 160",Comment:"+20 Armor<br>+15 HP<br>+30 Damage<br>+15 Thievery<br>+15 Holy<br>+15 Nullify<br>+15 Oceanic<br>+15 Master Crafter"},
 				{Name:"Demonic Idol",Realm:"Brale (South) (8,9) Lvl 181",Comment:"+25 Attack<br>+30 Armor<br>+35 Damage<br>+35 Reinforced Armour<br>+35 Critical Hit"},
@@ -425,11 +425,11 @@ var Data = {
 				{Name:"Enchanted Cottage",Realm:"Mountain Heights (2,2) Lvl 351",Comment:"+45 Attack<br>+45 Defense<br>+45 Sustain"},
 				{Name:"Elithra Crystal Cluster",Realm:"Hidden Valley (East) (14,8) Lvl 367",Comment:"+10 Attack<br>+15 Armor<br>+35 Damage<br>+15 Nullify<br>+35 Banishment<br>+35 Disarm"},
 				{Name:"Glowing Lava Crystal",Realm:"Broken Lands (South) (10,3) Lvl 375",Comment:"+45 Defense<br>+45 Armor<br>+30 Sustain<br>+30 Fury Caster"},
-				{Name:"Searing Orb",Realm:"Wasteland (South) (13,3) Lvl 381",Comment:"+80 defense<br>+100 XP Gain<br>+10 Awareness"},
+				{Name:"Searing Orb",Realm:"Wasteland (South) (13,3) Lvl 381",Comment:"+80 Defense<br>+100 XP Gain<br>+10 Awareness"},
 				{Name:"Aspiring Formation",Realm:"Fractured Foundations (4,2) Lvl 393",Comment:"+45 Dodge<br>+45 Disarm<br>+45 Duelist"},
 				{Name:"Wretched Abyss",Realm:"Seething Caverns (10,5) Lvl 399",Comment:"+40 Defense<br>+40 Armor<br>+10 HP<br>+45 Green skin Slayer<br>+45 Beast Slayer"},
 				{Name:"Crossroads",Realm:"City of Xinderoth (26,35) Lvl 400",Comment:"+10 Attack<br>+25 Protect Gold<br>+45 Armor<br>+5 HP<br>+60 Damage"},
-				{Name:"Tower Orb",Realm:"Citadel of Xinderoth (Floor 13) (15,17) Lvl 413",Comment:"+90 attack<br>+25 Critical Hit<br>+25 Glory Seeker<br>+25 First Strike"},
+				{Name:"Tower Orb",Realm:"Citadel of Xinderoth (Floor 13) (15,17) Lvl 413",Comment:"+90 Attack<br>+25 Critical Hit<br>+25 Glory Seeker<br>+25 First Strike"},
 				{Name:"The Jolly Rodger",Realm:"Craggy Coastline (Upper) (12,3) Lvl 425",Comment:"+25 Attack<br>+10 Armor<br>+15 Damage<br>+15 Sustain<br>+30 Master Crafter<br>+15 First Strike"},
 				{Name:"Emblazoned Warrior",Realm:"Stheno Lake (Edge) (10,2) Lvl 438",Comment:"+35 Damage<br>+10 Piercing Strike<br>+10 Critical Hit<br>+35 First Strike"},
 				{Name:"Kreth Crystals",Realm:"Caves of Kreth (Level 8) (15,10) Lvl 448",Comment:"+200 HP<br>+125 Damage"},
@@ -440,7 +440,7 @@ var Data = {
 				{Name:"Holy Crystals",Realm:"Castle Morbidstein (Fortress Upper) (15,9) Lvl 488",Comment:"+40 Attack<br>+30 Damage<br>+30 Holy"},
 				{Name:"Castle of the Sorceress",Realm:"Ralthien (District of Magic) (6,2) Lvl 508",Comment:"+20 Attack<br>+40 HP<br>+20 Reinforced Armor<br>+10 Critical Hit<br>+10 Master Blacksmith"},
 				{Name:"Circle of Virtue",Realm:"Teotal (Clearing) (16,10) Lvl 513",Comment:"+30 Defence<br>+20 Armor<br>+20 Reinforced Armor<br>+30 Nullify"},
-				{Name:"Oak of Ages",Realm:"The Secret Kingdom (Thicket) (16,8) Lvl 523",Comment:"+20 Attack<br>+30 defense<br>+20 Critical hit<br>+20 Nullify<br>+10 Disarm"},
+				{Name:"Oak of Ages",Realm:"The Secret Kingdom (Thicket) (16,8) Lvl 523",Comment:"+20 Attack<br>+30 Defense<br>+20 Critical hit<br>+20 Nullify<br>+10 Disarm"},
 				{Name:"Holy Atholhu Pillar",Realm:"Dark Atholhu (Edge) (2,2) Lvl 538",Comment:"+20 Damage<br>+20 Nullify<br>+25 Dodge<br>+20 Master Crafter<br>+15 Master Inventor"},
 				{Name:"Temple of Inner Light",Realm:"Yanyi Woods (Inner) (8,9) Lvl 546",Comment:"+30 Attack<br>+30 Damage<br>+30 Critical Hit<br>+10 Master Inventor"},
 				{Name:"Greater Statue",Realm:"Gao Tain Lake (View) (15,2) Lvl 554",Comment:"+30 Amour<br>+20 Damage<br>+20 Critical Hit<br>+10 Sustain<br>+20 Glory Seeker"},
@@ -455,14 +455,16 @@ var Data = {
 				{Name:"Eohlar Relic",Realm:"Eohlar (???) (??,??) Lvl 64?",Comment:"+25 Attack<br>+75 Damage"},
 				{Name:"Old Ruins",Realm:"The Fire Forest (Valley) (13,16) Lvl 654",Comment:"+30 Attack<br>+30 Armor<br>+10 Damage<br>+10 Piercing Strike<br>+20 Critical Hit<br>+20 Sustain"},
 				{Name:"Barbmore Pillars",Realm:"Barbmore (Highland) (3,3) Lvl 663",Comment:"+20 Attack<br>+50 Armor<br>+10 Damage<br>+20 Reinforced Armor<br>+20 Critical Hit<br>+10 Sustain"},
-				{Name:"Ravaged Cluster",Realm:"Ravaged Forest (Clearing) (10,2) Lvl 673",Comment:"+70 attack<br>+10 damage<br>+40 Piercing Strike<br>+10 Dodge"},
+				{Name:"Ravaged Cluster",Realm:"Ravaged Forest (Clearing) (10,2) Lvl 673",Comment:"+70 Attack<br>+10 Damage<br>+40 Piercing Strike<br>+10 Dodge"},
 				{Name:"Mittamurk Spires",Realm:"Forsaken Desert (Wastes) (12,10) Lvl 683",Comment:"+10 Attack<br>+70 Armor<br>+20 Breaker<br>+30 Dodge"},
-				{Name:"Hyrmit Pillar",Realm:"??? (??,??) Lvl ???",Comment:"+50 Defense<br>+30 Damage<br>+20 Piercing Strike<br>+30 Critical Strike"},
+				{Name:"Hyrmit Pillar",Realm:"Hyrmit Swamps (Verge) (7,2) Lvl 694",Comment:"+50 Defense<br>+30 Damage<br>+20 Piercing Strike<br>+30 Critical Strike"},
 				{Name:"Ossrilan Circle",Realm:"??? (??,??) Lvl ???",Comment:"+30 Attack<br>+50 Armor<br>+25 Piercing Strike<br>+25 Nullify"},
 				{Name:"Ancient Fort",Realm:"??? (??,??) Lvl ???",Comment:"+40 Defense<br>+45 Damage<br>+25 Reinforced Armor<br>+25 Nullify"},
 				{Name:"Crevasse of Souls",Realm:"??? (??,??) Lvl ???",Comment:"+75 Sustain<br>+75 Fury Caster<br>+25 Master Inventor"},
 				{Name:"Huirvast Ruins",Realm:"??? (??,??) Lvl ???",Comment:"+75 Critical Hit<br>+75 Nullify<br>+25 Sustain"},
-				{Name:"Guardian Statue",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+70 Nullify<br>+30 Sustain"}
+				{Name:"Guardian Statue",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+70 Nullify<br>+30 Sustain"},
+				{Name:"Azlatha Artifact",Realm:"??? (??,??) Lvl ???",Comment:"+75 Piercing Strike<br>+30 Nullify<br>+70 Dodge"},
+				{Name:"Pillars of Lindorik",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+50 Breaker<br>+50 Dodge"}
 			];
 		}
 		return Data.relicArray;
@@ -6799,10 +6801,12 @@ var Data = {
 				{name:'Scythe of Mourla', type:'weapon'},
 				{name:'Weapon of Ghasst', type:'weapon'},
 				{name:'Echibors Turban of Power', type:'helmet'},
-				
 				{name:'Flamebreath Gloves', type:'gloves'},
 				{name:'Flamebreath Rune', type:'rune'},
-				{name:'Rune of Haetmophin', type:'rune'}
+				{name:'Rune of Haetmophin', type:'rune'},
+				
+				{name:'Celestial Punch Claws', type:'gloves'},
+				{name:'Lagarto Helmet', type:'helmet'}
 			]
 		}
 		return Data.itemArray;

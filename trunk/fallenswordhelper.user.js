@@ -87,6 +87,7 @@ var Helper = {
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("enableCountdownTimer", true);
+		System.setDefault("itemRecipient", "");
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -3699,6 +3700,7 @@ var Helper = {
 		var mainTable = System.findNode("//table[@width='600']");
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
+		var showQuickSendLinks = GM_getValue("showQuickSendLinks");
 		if (mainTable) {
 			var insertHere = mainTable.rows[5].cells[0];
 			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:showExtraLinks">' +
@@ -3710,7 +3712,7 @@ var Helper = {
 		}
 
 		//function to add links to all the items in the drop items list
-		if (showExtraLinks || showQuickDropLinks) {
+		if (showExtraLinks || showQuickDropLinks || showQuickSendLinks) {
 			var itemName, itemInvId, theTextNode, newLink;
 			var allItems=System.findNodes("//input[@type='checkbox']");
 			if (allItems) {
@@ -3729,7 +3731,7 @@ var Helper = {
 					itemName = theTextNode.textContent.trim().replace("\\","");
 					theTextNode.textContent = itemName;
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
-					var preText = "", postText1 = "", postText2 = "";
+					var preText = "", postText1 = "", postText2 = "", postText3 = "";
 					if (showExtraLinks) {
 						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 							+ escape(itemName)
@@ -3751,13 +3753,24 @@ var Helper = {
 							+ itemInvId
 							+ " findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
 					}
-					
+					if (showQuickSendLinks) {
+						postText3 = "&nbsp;<span  title='INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickSend"
+							+ itemInvId
+							+ "' itemInvId="
+							+ itemInvId
+							+ " findme='QuickSend' style='color:blue; cursor:pointer; text-decoration:underline;'>[Quick Send]</span> ";
+					}
+
 					theTextNode.innerHTML = preText
 						+ theTextNode.innerHTML
 						+ postText1
-						+ postText2;
+						+ postText2
+						+ postText3;
 					if (showQuickDropLinks) {
 						document.getElementById("Helper:QuickDrop"+itemInvId).addEventListener('click', Helper.quickDropItem, true);
+					}
+					if (showQuickSendLinks) {
+						document.getElementById("Helper:QuickSend"+itemInvId).addEventListener('click', Helper.quickSendItem, true);
 					}
 				}
 			}
@@ -3801,6 +3814,41 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Item Dropped";
+		} else if (info!="") {
+			target.style.color = 'red';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Error: " + info;
+		} else {
+			target.style.color = 'red';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Weird Error: check the Tools>Error Console";
+			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log(callback.url);
+		}
+	},
+
+	quickSendItem: function(evt){
+		var itemInvId = evt.target.getAttribute("itemInvId");
+		var xcNum = GM_getValue("goldConfirm");
+		var itemRecipient = GM_getValue("itemRecipient");
+		var sendItemHref = System.server + "index.php?cmd=trade&subcmd=senditems&xc=" + xcNum + "&target_username=" + itemRecipient + "&sendItemList[]=" + itemInvId;
+		System.xmlhttp(sendItemHref,
+			Helper.quickSendItemReturnMessage,
+			{"target": evt.target, "url": sendItemHref});
+	},
+
+	quickSendItemReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		var itemRecipient = GM_getValue("itemRecipient");
+		target.style.cursor = 'default';
+		target.style.textDecoration = 'none';
+		if (info=="Items sent successfully!") {
+			target.style.color = 'green';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Item sent to " + itemRecipient + "!";
 		} else if (info!="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
@@ -7041,6 +7089,9 @@ var Helper = {
 				'gold to <input name="goldRecipient" size="10" value="'+ GM_getValue("goldRecipient") + '" />' +
 				'. Current total: <input name="currentGoldSentTotal" size="5" value="'+ GM_getValue("currentGoldSentTotal") + '" />' +
 				'</td></tr>' +
+			'<tr><td align="right">Show Quick Send Item' + Helper.helpLink('Show Quick Send on Manage Backpack', 'This will show a link beside each item which gives the option to quick send the item to this person') +
+				':</td><td><input name="showQuickSendLinks" type="checkbox" value="on"' + (GM_getValue("showQuickSendLinks")?" checked":"") + '>'+
+				'Send Items To <input name="itemRecipient" size="10" value="'+ GM_getValue("itemRecipient") + '" />' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
@@ -7205,6 +7256,8 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
+		System.saveValueForm(oForm, "showQuickSendLinks");
+		System.saveValueForm(oForm, "itemRecipient");
 		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "hideArenaPrizes");
 		System.saveValueForm(oForm, "autoSortArenaList");
