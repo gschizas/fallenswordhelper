@@ -79,6 +79,7 @@ var Helper = {
 		System.setDefault("enableBulkSell", false);
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
+		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoCredit","min":"","max":"","gold":true,"fsp":false},{"name":"NoFC","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -469,6 +470,9 @@ var Helper = {
 				break;
 			case "guildlog":
 				Helper.injectGuildLogSummary();
+				break;
+			case "quickahpreftemplate":
+				Helper.injectAHPrefTemplate();
 				break;
 			}
 			break;
@@ -3556,7 +3560,9 @@ var Helper = {
 			'&nbsp;Max: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_maxlevel value="wait" />' +
 			'&nbsp;Gold: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidegold value="1" />' +
 			'&nbsp;Crystal: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
-			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form></div>';
+			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form>'+
+			'<div style="font-size:x-small"><a href="index.php?cmd=notepad&subcmd=quickahpreftemplate">Template</a>:&nbsp;<span id=Helper:AHquickPref></span>' +
+			'</div></div>';
 
 		// preparePreferences.appendChild(prefArea);
 		preparePreferences.appendChild(newRow);
@@ -3565,6 +3571,90 @@ var Helper = {
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
 
 		Helper.injectAuctionQuickCancel();
+		Helper.injectAuctionQuickPreference();
+	},
+	
+	injectAuctionQuickPreference: function() {
+		Helper.qAHPref=System.getValueJSON("quickAHPref");
+		if (!Helper.qAHPref || Helper.qAHPref.length<=0) return;
+		
+		var injectHere = document.getElementById("Helper:AHquickPref");
+		for (var i=0; i<Helper.qAHPref.length; i++) {
+			injectHere.innerHTML+="[ <span id=qAHPref"+i+" prefId="+i+">"+Helper.qAHPref[i].name+"</span> ] ";
+		}
+		for (var i=0; i<Helper.qAHPref.length; i++) {
+			document.getElementById("qAHPref"+i).addEventListener("click", Helper.changeAuctionQuickPreference, true);
+		}
+	},
+	
+	changeAuctionQuickPreference: function(evt) {
+		var pref=Helper.qAHPref[evt.target.getAttribute("prefId")];
+		System.findNode("//input[@name='pref_minlevel']").value=pref.min;
+		System.findNode("//input[@name='pref_maxlevel']").value=pref.max;
+		System.findNode("//input[@name='pref_hidegold']").checked=pref.gold;
+		System.findNode("//input[@name='pref_hidefsp']").checked=pref.fsp;
+		Helper.auctionHouseSavePreferences();
+	},
+	
+	injectAHPrefTemplate: function() {
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick TH Preference Template','','','','qTHPrefTempId');
+
+		// global parameters for the meta function generateManageTable
+		Helper.param={};
+		Helper.param={'id':'qTHPrefTempId',
+			'headers':["Name","Min","Max","Credit","FC"],
+			'fields':["name","min","max","gold","fsp"],
+			'tags':["textbox","textbox","textbox","checkbox","checkbox"],
+			'currentItems':System.getValueJSON("quickAHPref"),
+			'gmname':"quickAHPref"};
+		Helper.generateManageTable();
+	},
+	
+	generateManageTable: function() {
+		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr>';
+		for (i=0;i<Helper.param.headers.length;i++)
+			result+='<th>'+Helper.param.headers[i]+'</th>';
+		result+='<th>&nbsp;</th></tr>';
+		for (i=0;i<Helper.param.currentItems.length;i++) {
+			result+="<tr>";
+			for (j=0;j<Helper.param.fields.length;j++) {
+				result+='<td align=center>';
+				if (Helper.param.tags[j]=="checkbox")
+					result+=(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'unchecked');
+				else
+					result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+				result+='</td>';
+			}
+			result+='<td><span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
+		}
+		result+='<tr>';
+		for (i=0;i<Helper.param.tags.length;i++)
+			result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
+		result+='<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
+
+		document.getElementById(Helper.param.id).innerHTML = result;
+		for (i=0;i<Helper.param.currentItems.length;i++)
+			document.getElementById("Helper:DeleteItem" + i).addEventListener('click', Helper.deleteQuickItem, true);
+		document.getElementById("Helper:AddItem").addEventListener('click', Helper.addQuickItem, true);
+		System.setValueJSON(Helper.param.gmname, Helper.param.currentItems);
+	},
+
+	deleteQuickItem: function(evt) {
+		// if (!window.confirm('Are you sure you want to delete this link?')) return;
+		var itemId = evt.target.getAttribute("itemId")
+		Helper.param.currentItems.splice(itemId, 1);
+		Helper.generateManageTable();
+	},
+
+	addQuickItem: function(evt) {
+		var newItem={};
+		for (var i=0;i<Helper.param.fields.length;i++)
+			if (Helper.param.tags[i]=="checkbox")
+				newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).checked;
+			else 
+				newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).value;
+		Helper.param.currentItems.push(newItem);
+		Helper.generateManageTable();
 	},
 	
 	bidNoRefresh: function(evt) {
@@ -6578,43 +6668,17 @@ var Helper = {
 	injectQuickLinkManager: function() {
 		GM_addStyle('.HelperTextLink {color:#84ADAC;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
-		var quickLinks = System.getValueJSON("quickLinks");
-		if (!quickLinks) quickLinks=[];
-		Helper.quickLinks = quickLinks;
-		Helper.tmpContent=Layout.notebookContent();
-		Helper.generateQuickLinkTable();
-	},
-
-	generateQuickLinkTable: function() {
-		var result='<table><tr><th>Name</th><th>URL</th><th>&nbsp;</th></tr>';
-		for (var i=0;i<Helper.quickLinks.length;i++) {
-			result+='<td>' + Helper.quickLinks[i].name + '</td><td>' + Helper.quickLinks[i].url + '</td><td>';
-			result+='<span class=HelperTextLink quickLinkId="' + i + '" id="Helper:DeleteLink' + i + '">[Del]</span></td></tr>';
-		}
-		result +=
-			'<tr><td><input size=10 type=textbox class=custominput id="Helper:LinkName"></td>' +
-			'<td><input size=75 type=textbox class=custominput id="Helper:LinkUrl"></td>' +
-			'<td><span class=HelperTextLink id="Helper:AddLink">[Add]</span></td></tr>';
-		Helper.tmpContent.innerHTML = result;
-		for (var i=0;i<Helper.quickLinks.length;i++) {
-			document.getElementById("Helper:DeleteLink" + i).addEventListener('click', Helper.deleteQuickLink, true);
-		}
-		document.getElementById("Helper:AddLink").addEventListener('click', Helper.addQuickLink, true);
-		System.setValueJSON("quickLinks", Helper.quickLinks);
-	},
-
-	deleteQuickLink: function(evt) {
-		// if (!window.confirm('Are you sure you want to delete this link?')) return;
-		var quickLinkId = evt.target.getAttribute("quickLinkId")
-		Helper.quickLinks.splice(quickLinkId, 1);
-		Helper.generateQuickLinkTable();
-	},
-
-	addQuickLink: function(evt) {
-		var quickLinkName = document.getElementById("Helper:LinkName").value;
-		var quickLinkUrl = document.getElementById("Helper:LinkUrl").value;
-		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl});
-		Helper.generateQuickLinkTable();
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
+		
+		// global parameters for the meta function generateManageTable
+		Helper.param={};
+		Helper.param={'id':'quickLinkAreaId',
+			'headers':["Name","URL"],
+			'fields':["name","url"],
+			'tags':["textbox","textbox"],
+			'currentItems':System.getValueJSON("quickLinks"),
+			'gmname':"quickLinks"};
+		Helper.generateManageTable();
 	},
 
 	worldMapAction: function() {
