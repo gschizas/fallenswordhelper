@@ -88,6 +88,8 @@ var Helper = {
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("enableCountdownTimer", true);
 		System.setDefault("itemRecipient", "");
+		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoGold","min":"","max":"","gold":true,"fsp":false},{"name":"NoFSP","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
+		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -486,6 +488,9 @@ var Helper = {
 			case "guildlog":
 				Helper.injectGuildLogSummary();
 				break;
+			case "quickahpreftemplate":
+				Helper.injectAHPrefTemplate();
+				break;
 			}
 			break;
 		case "points":
@@ -576,7 +581,7 @@ var Helper = {
 	},
 	
 	injectFsBoxContent: function() {
-		Layout.notebookContent().innerHTML='<table width=100%><tr><td align=right id=fsboxclear>[Clear]</td></tr><tr><td id=fsboxdetail></td></tr></table>';
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
 		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue("fsboxcontent",'');window.location=window.location;},true);
 		document.getElementById('fsboxdetail').innerHTML=GM_getValue("fsboxcontent");
 	},
@@ -3022,7 +3027,7 @@ var Helper = {
 	},
 	
 	injectGuildLogSummary: function() {
-		Layout.notebookContent().innerHTML='<table width=100%><tr><td align=right id=guillogrefresh>[Refresh]</td></tr><tr><td id=guildlogdetail></td></tr></table>';
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
 		
 		var lastCheck=GM_getValue("lastGuildLogSumCheck")
 		var now=(new Date()).getTime();
@@ -3407,7 +3412,9 @@ var Helper = {
 			'&nbsp;Max: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_maxlevel value="wait" />' +
 			'&nbsp;Gold: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidegold value="1" />' +
 			'&nbsp;FSP: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
-			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form></div>';
+			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form>'+
+			'<div style="font-size:x-small"><a href="index.php?cmd=notepad&subcmd=quickahpreftemplate">Template</a>:&nbsp;<span id=Helper:AHquickPref></span>' +
+			'</div></div>';
 
 		// preparePreferences.appendChild(prefArea);
 		preparePreferences.appendChild(newRow);
@@ -3421,6 +3428,144 @@ var Helper = {
 		hiddenOrderByInput.value = 1;
 
 		Helper.injectAuctionQuickCancel();
+		Helper.injectAuctionQuickPreference();
+	},
+	
+	injectAuctionQuickPreference: function() {
+		Helper.qAHPref=System.getValueJSON("quickAHPref");
+		if (!Helper.qAHPref || Helper.qAHPref.length<=0) return;
+		
+		var injectHere = document.getElementById("Helper:AHquickPref");
+		for (var i=0; i<Helper.qAHPref.length; i++) {
+			injectHere.innerHTML+="[ <span id=qAHPref"+i+" prefId="+i+">"+Helper.qAHPref[i].name+"</span> ] ";
+		}
+		for (var i=0; i<Helper.qAHPref.length; i++) {
+			document.getElementById("qAHPref"+i).addEventListener("click", Helper.changeAuctionQuickPreference, true);
+		}
+	},
+	
+	changeAuctionQuickPreference: function(evt) {
+		var pref=Helper.qAHPref[evt.target.getAttribute("prefId")];
+		System.findNode("//input[@name='pref_minlevel']").value=pref.min;
+		System.findNode("//input[@name='pref_maxlevel']").value=pref.max;
+		System.findNode("//input[@name='pref_hidegold']").checked=pref.gold;
+		System.findNode("//input[@name='pref_hidefsp']").checked=pref.fsp;
+		Helper.auctionHouseSavePreferences();
+	},
+	
+	injectAHPrefTemplate: function() {
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick TH Preference Template','','','','qTHPrefTempId');
+
+		// global parameters for the meta function generateManageTable
+		Helper.param={};
+		Helper.param={'id':'qTHPrefTempId',
+			'headers':["Name","Min","Max","Credit","FC"],
+			'fields':["name","min","max","gold","fsp"],
+			'tags':["textbox","textbox","textbox","checkbox","checkbox"],
+			'currentItems':System.getValueJSON("quickAHPref"),
+			'gmname':"quickAHPref"};
+		Helper.generateManageTable();
+	},
+	
+	generateManageTable: function() {
+		GM_addStyle('.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}\n' +
+			'.HelperTextLink:hover {text-decoration:underline;}\n');
+		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr bgcolor=#CD9E4B>';
+		var isArrayOnly=(Helper.param.fields.length==0);
+		for (i=0;i<Helper.param.headers.length;i++)
+			result+='<th>'+Helper.param.headers[i]+'</th>';
+		result+='<th>Action</th></tr>';
+		var currentCategory = "";
+		for (i=0;i<Helper.param.currentItems.length;i++) {
+			result+="<tr>";
+			if (isArrayOnly) {
+				result+='<td align=center>'+Helper.param.currentItems[i]+'</td>';
+			} else {
+				if (Helper.param.categoryField && currentCategory != Helper.param.currentItems[i][Helper.param.categoryField]) {
+					currentCategory = Helper.param.currentItems[i][Helper.param.categoryField];
+					result += "<td><span style='font-weight:bold; font-size:large;'>" + currentCategory + "</span></td></tr><tr>";
+				}
+				for (j=0;j<Helper.param.fields.length;j++) {
+					result+='<td align=center>';
+					if (Helper.param.fields[j]!=Helper.param.categoryField)
+						if (Helper.param.tags[j]=="checkbox")
+							result+=(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'unchecked');
+						else
+							result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+					result+='</td>';
+				}
+			}
+			result+='<td>[<span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">Del</span>]</td></tr>';
+		}
+		result+='<tr>';
+		if (isArrayOnly)
+			result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input0></td>';
+		else
+			for (i=0;i<Helper.param.tags.length;i++)
+				result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
+		result+='<td>[<span class=HelperTextLink id="Helper:AddItem">Add</span>]</td></tr></table>';
+		
+		if (Helper.param.showRawEditor) {
+			result+="<table width=100%><tr><td align=center><textarea cols=70 rows=20 name='Helper:rawEditor'>" + 
+				JSON.stringify(Helper.param.currentItems) + "</textarea></td></tr>"+
+				"<tr><td align=center><input id='Helper:saveRawEditor' type='button' value='Save' class='custombutton'>"+
+				"&nbsp;<input id='Helper:resetRawEditor' type='button' value='Reset' class='custombutton'></td></tr>"+
+				"</tbody></table>";
+		}
+		
+		document.getElementById(Helper.param.id).innerHTML = result;
+		for (i=0;i<Helper.param.currentItems.length;i++)
+			document.getElementById("Helper:DeleteItem" + i).addEventListener('click', Helper.deleteQuickItem, true);
+		document.getElementById("Helper:AddItem").addEventListener('click', Helper.addQuickItem, true);
+		if (Helper.param.showRawEditor) {
+			document.getElementById("Helper:saveRawEditor").addEventListener('click', Helper.saveRawEditor, true);
+			document.getElementById("Helper:resetRawEditor").addEventListener('click', Helper.resetRawEditor, true);
+		}
+		
+		System.setValueJSON(Helper.param.gmname, Helper.param.currentItems);
+	},
+
+	deleteQuickItem: function(evt) {
+		// if (!window.confirm('Are you sure you want to delete this link?')) return;
+		var itemId = evt.target.getAttribute("itemId")
+		Helper.param.currentItems.splice(itemId, 1);
+		Helper.generateManageTable();
+	},
+
+	addQuickItem: function(evt) {
+		var isArrayOnly=(Helper.param.fields.length==0);
+		var newItem={};
+		if (isArrayOnly) {
+			newItem=document.getElementById("Helper:input0").value;
+		} else {
+			for (var i=0;i<Helper.param.fields.length;i++)
+				if (Helper.param.tags[i]=="checkbox")
+					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).checked;
+				else 
+					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).value;
+		}
+		Helper.param.currentItems.push(newItem);
+		if (Helper.param.sortField) {
+			Helper.sortAsc=true;
+			Helper.sortBy=Helper.param.sortField;
+			Helper.param.currentItems.sort(Helper.stringSort);
+		}
+		Helper.generateManageTable();
+	},
+	
+	saveRawEditor: function(evt) {
+		Helper.param.currentItems = JSON.parse(System.findNode("//textarea[@name='Helper:rawEditor']").value);
+		if (Helper.param.sortField) {
+			Helper.sortAsc=true;
+			Helper.sortBy=Helper.param.sortField;
+			Helper.param.currentItems.sort(Helper.stringSort);
+		}
+		Helper.generateManageTable();
+	},
+
+	resetRawEditor: function(evt) {
+		Helper.param.currentItems=[];
+		Helper.generateManageTable();
 	},
 
 	bidNoRefresh: function(evt) {
@@ -4235,15 +4380,9 @@ var Helper = {
 	},
 
 	injectQuestManager: function() {
-		var content=Layout.notebookContent();
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#cd9e4b"><b>&nbsp;Quest Manager</b></td></tr>'+
-			'<tr><td><b>&nbsp;Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
-				(GM_getValue("showCompletedQuests")?' checked':'') + '/></b></td></tr>'+
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:QuestManagerOutput">' +
-			'Loading quest book...' +
-			'</div>';
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quest Manager',
+			'Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
+				(GM_getValue("showCompletedQuests")?' checked':'') + '/>','','','Helper:QuestManagerOutput');
 		Data.questMatrix();
 		Helper.parseQuestBookStart(0);
 		// Helper.injectQuestTable();
@@ -4391,16 +4530,13 @@ var Helper = {
 	},
 
 	injectAuctionSearch: function() {
-		var content=Layout.notebookContent();
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%">'+
-			'<tr><td colspan="2" nobr bgcolor="#cd9e4b" align="center"><b>&nbsp;Auction Quick Search</b></td></tr>'+
-			'<tr><td>This screen allows you to set up some quick search templates for the Auction House. '+
+		Layout.notebookContent().innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
+			'<div>This screen allows you to set up some quick search templates for the Auction House. '+
 				'The Display on AH column indicates if the quick search will show on the short list on the '+
 				'Auction House main screen. A maximum of 18 items can show on this list '+
 				'(It will not show more than 18 even if you have more than 18 flagged). '+
 				'To edit items, either use the large text area below, '+
-				'or add a new entry and delete the old one. You can always reset the list to the default values.</td></tr>'+
-			'</table>' +
+				'or add a new entry and delete the old one. You can always reset the list to the default values.</div>'+
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
 		var injectHere = document.getElementById('Helper:Auction Search Output');
@@ -7415,46 +7551,18 @@ var Helper = {
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		var quickLinks = System.getValueJSON("quickLinks");
 		if (!quickLinks) quickLinks=[];
-		Helper.quickLinks = quickLinks;
-		Helper.tmpContent=Layout.notebookContent();
-		Helper.generateQuickLinkTable();
-	},
-
-	generateQuickLinkTable: function() {
-		var result='<table><tr><th>Name</th><th>URL</th>' +
-			'<th>New [<span style="cursor:pointer; text-decoration:underline;" title="Open page in a new window">?</span>]</th><th>&nbsp;</th></tr>';
-		for (var i=0;i<Helper.quickLinks.length;i++) {
-			var newWindow = Helper.quickLinks[i].newWindow;
-			result+='<td>' + Helper.quickLinks[i].name + '</td><td style="font-size:x-small;">' + Helper.quickLinks[i].url + '</td>';
-			result+='<td style="font-size:x-small;" align=center>' + (newWindow?newWindow:"false") + '</td><td>';
-			result+='[<span style="cursor:pointer; text-decoration:underline;" class=HelperTextLink quickLinkId="' + i + '" id="Helper:DeleteLink' + i + '">Del</span>]</td></tr>';
-		}
-		result +=
-			'<tr><td><input size=8 type=textbox class=custominput id="Helper:LinkName"></td>' +
-			'<td><input size=75 type=textbox class=custominput id="Helper:LinkUrl"></td>' +
-			'<td align=center><input type=checkbox style="font-size:xx-small" class=custominput id="Helper:newWindow" /></td>' +
-			'<td>[<span style="cursor:pointer; text-decoration:underline;" class=HelperTextLink id="Helper:AddLink">Add</span>]</td></tr>';
-		Helper.tmpContent.innerHTML = result;
-		for (var i=0;i<Helper.quickLinks.length;i++) {
-			document.getElementById("Helper:DeleteLink" + i).addEventListener('click', Helper.deleteQuickLink, true);
-		}
-		document.getElementById("Helper:AddLink").addEventListener('click', Helper.addQuickLink, true);
-		System.setValueJSON("quickLinks", Helper.quickLinks);
-	},
-
-	deleteQuickLink: function(evt) {
-		// if (!window.confirm('Are you sure you want to delete this link?')) return;
-		var quickLinkId = evt.target.getAttribute("quickLinkId")
-		Helper.quickLinks.splice(quickLinkId, 1);
-		Helper.generateQuickLinkTable();
-	},
-
-	addQuickLink: function(evt) {
-		var quickLinkName = document.getElementById("Helper:LinkName").value;
-		var quickLinkUrl = document.getElementById("Helper:LinkUrl").value;
-		var quickLinkNewWindow = document.getElementById("Helper:newWindow").checked;
-		Helper.quickLinks.push({"name": quickLinkName, "url": quickLinkUrl, "newWindow": quickLinkNewWindow});
-		Helper.generateQuickLinkTable();
+		
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
+		
+		// global parameters for the meta function generateManageTable
+		Helper.param={};
+		Helper.param={'id':'quickLinkAreaId',
+			'headers':["Name","URL",'New [<span style="cursor:pointer; text-decoration:underline;" title="Open page in a new window">?</span>]'],
+			'fields':["name","url","newWindow"],
+			'tags':["textbox","textbox","checkbox"],
+			'currentItems':System.getValueJSON("quickLinks"),
+			'gmname':"quickLinks"};
+		Helper.generateManageTable();
 	},
 
 	movePage: function(dir) {
@@ -7633,10 +7741,6 @@ var Helper = {
 		var table = System.getValueJSON("quickMsg");
 
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
-		if (!table) {
-			table = ["Thank you very much ^_^", "Happy hunting, {playername}"];
-			System.setValueJSON("quickMsg", table);
-		}
 
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
@@ -7648,9 +7752,8 @@ var Helper = {
 				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" +
 				table[i].replace(/{playername}/g, targetPlayer) + "</span></td></tr>";
 		}
-		textResult += "<tr><td valign=top>Template: </td><td><textarea class=customtextarea rows=5 cols=40 id='Helper.quickMsgFullText'>" +
-			JSON.stringify(table) + "</textarea></td></tr>" +
-			"<tr><td align=center colspan=2><input class=custombutton type=button id='Helper.saveQuickMsg' value='Save Quick Message'></td></tr>" +
+		textResult += "<tr><td valign=top colspan=2>Edit Templates: </td></tr>" +
+			"<tr><td align=center colspan=2 id=quickMsgTemplAreaId>&nbsp;</td></tr>" +
 			"</table></td></tr></table>";
 
 		var newNode = document.createElement("span");
@@ -7659,11 +7762,18 @@ var Helper = {
 		newNode.innerHTML = textResult;
 		injectHere.appendChild(newNode);
 
-		document.getElementById("Helper.saveQuickMsg").addEventListener("click", Helper.saveQuickMsg, true);
-
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
 		}
+		
+		Helper.param={};
+		Helper.param={'id':'quickMsgTemplAreaId',
+			'headers':["Quick Message",],
+			'fields':[],
+			'tags':["textbox"],
+			'currentItems':System.getValueJSON("quickMsg"),
+			'gmname':"quickMsg"};
+		Helper.generateManageTable();
 	},
 
 	saveQuickMsg: function() {
@@ -8613,6 +8723,28 @@ var Helper = {
 			document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
 			document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
 		}
+	},
+	
+	makePageHeader: function(title, comment, spanId, button) {
+		return '<table width=100%><tr style="background-color:#CD9E4B">'+
+			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
+			(comment==''?'':'&nbsp;('+comment+')')+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
+			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
+			'</td></tr></table>';
+	},
+	makePageHeaderTwo: function(title, comment, spanId, button, spanId2, button2) {
+		return '<table width=100%><tr style="background-color:#CD9E4B">'+
+			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
+			(comment==''?'':'&nbsp;('+comment+')')+
+			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
+			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
+			(spanId2?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId2+'">'+button2+'</span>]':'')+
+			'</td></tr></table>';
+	},
+	makePageTemplate: function(title, comment, spanId, button, divId) {
+		return Helper.makePageHeader(title, comment, spanId, button)+
+			'<div style="font-size:small;" id="'+divId+'"></div>';
 	}
 };
 
