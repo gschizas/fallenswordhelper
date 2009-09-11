@@ -90,6 +90,7 @@ var Helper = {
 		System.setDefault("itemRecipient", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoGold","min":"","max":"","gold":true,"fsp":false},{"name":"NoFSP","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
+		System.setDefault("quickLinks","[]");
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -7549,8 +7550,6 @@ var Helper = {
 	injectQuickLinkManager: function() {
 		GM_addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
-		var quickLinks = System.getValueJSON("quickLinks");
-		if (!quickLinks) quickLinks=[];
 		
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
 		
