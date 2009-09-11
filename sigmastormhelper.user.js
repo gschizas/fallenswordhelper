@@ -80,6 +80,7 @@ var Helper = {
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoCredit","min":"","max":"","gold":true,"fsp":false},{"name":"NoFC","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
+		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -3612,30 +3613,57 @@ var Helper = {
 	
 	generateManageTable: function() {
 		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr>';
+		var isArrayOnly=(Helper.param.fields.length==0);
 		for (i=0;i<Helper.param.headers.length;i++)
-			result+='<th>'+Helper.param.headers[i]+'</th>';
-		result+='<th>&nbsp;</th></tr>';
+			result+='<th bgcolor="#212323">'+Helper.param.headers[i]+'</th>';
+		result+='<th bgcolor="#212323">Action</th></tr>';
+		var currentCategory = "";
 		for (i=0;i<Helper.param.currentItems.length;i++) {
 			result+="<tr>";
-			for (j=0;j<Helper.param.fields.length;j++) {
-				result+='<td align=center>';
-				if (Helper.param.tags[j]=="checkbox")
-					result+=(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'unchecked');
-				else
-					result+=Helper.param.currentItems[i][Helper.param.fields[j]];
-				result+='</td>';
+			if (isArrayOnly) {
+				result+='<td align=center>'+Helper.param.currentItems[i]+'</td>';
+			} else {
+				if (Helper.param.categoryField && currentCategory != Helper.param.currentItems[i][Helper.param.categoryField]) {
+					currentCategory = Helper.param.currentItems[i][Helper.param.categoryField];
+					result += "<td><span style='font-weight:bold; font-size:large;'>" + currentCategory + "</span></td></tr><tr>";
+				}
+				for (j=0;j<Helper.param.fields.length;j++) {
+					result+='<td align=center>';
+					if (Helper.param.fields[j]!=Helper.param.categoryField)
+						if (Helper.param.tags[j]=="checkbox")
+							result+=(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'unchecked');
+						else
+							result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+					result+='</td>';
+				}
 			}
 			result+='<td><span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
 		}
 		result+='<tr>';
-		for (i=0;i<Helper.param.tags.length;i++)
-			result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
+		if (isArrayOnly)
+			result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input0></td>';
+		else
+			for (i=0;i<Helper.param.tags.length;i++)
+				result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
 		result+='<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
-
+		
+		if (Helper.param.showRawEditor) {
+			result+="<table width=100%><tr><td align=center><textarea cols=70 rows=20 name='Helper:rawEditor'>" + 
+				JSON.stringify(Helper.param.currentItems) + "</textarea></td></tr>"+
+				"<tr><td align=center><input id='Helper:saveRawEditor' type='button' value='Save' class='custombutton'>"+
+				"&nbsp;<input id='Helper:resetRawEditor' type='button' value='Reset' class='custombutton'></td></tr>"+
+				"</tbody></table>";
+		}
+		
 		document.getElementById(Helper.param.id).innerHTML = result;
 		for (i=0;i<Helper.param.currentItems.length;i++)
 			document.getElementById("Helper:DeleteItem" + i).addEventListener('click', Helper.deleteQuickItem, true);
 		document.getElementById("Helper:AddItem").addEventListener('click', Helper.addQuickItem, true);
+		if (Helper.param.showRawEditor) {
+			document.getElementById("Helper:saveRawEditor").addEventListener('click', Helper.saveRawEditor, true);
+			document.getElementById("Helper:resetRawEditor").addEventListener('click', Helper.resetRawEditor, true);
+		}
+		
 		System.setValueJSON(Helper.param.gmname, Helper.param.currentItems);
 	},
 
@@ -3647,13 +3675,38 @@ var Helper = {
 	},
 
 	addQuickItem: function(evt) {
+		var isArrayOnly=(Helper.param.fields.length==0);
 		var newItem={};
-		for (var i=0;i<Helper.param.fields.length;i++)
-			if (Helper.param.tags[i]=="checkbox")
-				newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).checked;
-			else 
-				newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).value;
+		if (isArrayOnly) {
+			newItem=document.getElementById("Helper:input0").value;
+		} else {
+			for (var i=0;i<Helper.param.fields.length;i++)
+				if (Helper.param.tags[i]=="checkbox")
+					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).checked;
+				else 
+					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).value;
+		}
 		Helper.param.currentItems.push(newItem);
+		if (Helper.param.sortField) {
+			Helper.sortAsc=true;
+			Helper.sortBy=Helper.param.sortField;
+			Helper.param.currentItems.sort(Helper.stringSort);
+		}
+		Helper.generateManageTable();
+	},
+	
+	saveRawEditor: function(evt) {
+		Helper.param.currentItems = JSON.parse(System.findNode("//textarea[@name='Helper:rawEditor']").value);
+		if (Helper.param.sortField) {
+			Helper.sortAsc=true;
+			Helper.sortBy=Helper.param.sortField;
+			Helper.param.currentItems.sort(Helper.stringSort);
+		}
+		Helper.generateManageTable();
+	},
+
+	resetRawEditor: function(evt) {
+		Helper.param.currentItems=[];
 		Helper.generateManageTable();
 	},
 	
@@ -4596,102 +4649,18 @@ var Helper = {
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
 		var injectHere = document.getElementById('Helper:Auction Search Output');
-		var quickSearchList = System.getValueJSON("quickSearchList");
-		var currentCategory = "";
-		var output = "<table  cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>";
-		output += "<tr bgcolor='#212323'><th></th><th>Nickname</th><th>Quick Search Text</th><th>Display on TH?</th><th>Delete?</th></tr>";
-		for (j=0; j<quickSearchList.length; j++) {
-			var quickSearchItem=quickSearchList[j];
-			if (quickSearchItem) {
-				if (currentCategory != quickSearchItem.category)
-					output += "<tr><td colspan=5><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
-				output += "<tr><td width='10'></td>"+
-					"<td><a href='" + System.server +
-					"index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#CCFF99;'>" +
-					((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
-					"<td><a href='" + System.server +
-					"index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:#CCFF99;'>" +
-					quickSearchItem.searchname + "</span></a></td>" +
-					"<td><span style='color:#CCFF99;'>"+(quickSearchItem.displayOnAH?"True":"False")+"</span></td>" +
-					"<td>[<span style='cursor:pointer; text-decoration:underline; color:#CCFF99;' id='Helper:delAuctionSearch"+j+"' auctionSearchId="+j+">"+
-						"del</span>]</td></tr>";
-				currentCategory = quickSearchItem.category;
-			}
-		}
-		output += "<tr><td colspan=5 height=10></td></tr>";
-		output += "<tr><td colspan=5>"+
-				"<table cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>"+
-				"<tr><th>Category</th><th>Nickname</th><th>Search Name</th><th>Display on AH?</th><th></th></tr>"+
-				"<tr align='right'>"+
-					"<td><input type='text' class='custominput' size='14' id='Helper:category'/></td>"+
-					"<td><input type='text' class='custominput' size='8' id='Helper:nickname'/></td>"+
-					"<td><input type='text' class='custominput' size='40' id='Helper:searchname'/></td>"+
-					"<td align='center'><input type='checkbox' class='custominput' id='Helper:displayOnAH'/></td>"+
-					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:addAuctionSearch'>"+
-						"add</span>]</td>"+
-				"</tr></tbody></table>"+
-			"</td></tr>";
-		output += "<tr><td colspan=5 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
-		output += "<tr><td colspan=5 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
-					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
-		output += "</tbody></table>";
-		injectHere.innerHTML = output;
-		for (j=0; j<quickSearchList.length; j++) {
-			document.getElementById("Helper:delAuctionSearch"+j).addEventListener('click', Helper.delAuctionSearch, true);
-		}
-		document.getElementById("Helper:addAuctionSearch").addEventListener('click', Helper.addAuctionSearch, true);
-		document.getElementById("Helper:saveauctionsearch").addEventListener('click', Helper.saveAuctionSearch, true);
-		document.getElementById("Helper:resetauctionsearch").addEventListener('click', Helper.resetAuctionSearch, true);
-	},
-
-	addAuctionSearch: function(evt) {
-		var nickname = document.getElementById("Helper:nickname").value;
-		var searchname = document.getElementById("Helper:searchname").value;
-		var category = document.getElementById("Helper:category").value;
-		var displayOnAH = document.getElementById("Helper:displayOnAH").checked;
-		if (!nickname || !searchname || !category) return;
-		var quickSearchList = System.getValueJSON("quickSearchList");
-		var theSearch = new Object;
-		theSearch.nickname = nickname;
-		theSearch.searchname = searchname;
-		theSearch.category = category;
-		theSearch.displayOnAH = displayOnAH;
-		quickSearchList.push(theSearch);
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		System.setValueJSON("quickSearchList", quickSearchList);
-		window.location=window.location;
-	},
-
-	delAuctionSearch: function(evt) {
-		var auctionSearchId = evt.target.getAttribute("auctionSearchId");
-		var quickSearchList = System.getValueJSON("quickSearchList");
-		quickSearchList.splice(auctionSearchId,1);
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		System.setValueJSON("quickSearchList", quickSearchList);
-		window.location = window.location;
-	},
-
-	saveAuctionSearch: function(evt) {
-		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
-		var quickSearchList = JSON.parse(auctionsearchtextarea.value);
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		System.setValueJSON("quickSearchList", quickSearchList);
-		window.location=window.location;
-	},
-
-	resetAuctionSearch: function(evt) {
-		GM_setValue("quickSearchList","");
-		window.location=window.location;
+		// global parameters for the meta function generateManageTable
+		Helper.param={};
+		Helper.param={'id':'Helper:Auction Search Output',
+			'headers':["Category","Nickname","Quick Search Text","Display on TH?"],
+			'fields':["category","nickname","searchname","displayOnAH"],
+			'tags':["textbox","textbox","textbox","checkbox"],
+			'currentItems':System.getValueJSON("quickSearchList"),
+			'gmname':"quickSearchList",
+			'sortField':"category",
+			'categoryField':'category',
+			'showRawEditor':true};
+		Helper.generateManageTable();
 	},
 
 	linkFromMouseover: function(mouseOver) {
@@ -6887,10 +6856,6 @@ var Helper = {
 		var table = System.getValueJSON("quickMsg");
 
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
-		if (!table) {
-			table = ["Thank you very much ^_^", "Happy hunting, {playername}"];
-			System.setValueJSON("quickMsg", table);
-		}
 
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#5f5f5f'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
@@ -6902,9 +6867,8 @@ var Helper = {
 				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" +
 				table[i].replace(/{playername}/g, targetPlayer) + "</span></td></tr>";
 		}
-		textResult += "<tr><td valign=top>Template: </td><td><textarea class=customtextarea rows=5 cols=40 id='Helper.quickMsgFullText'>" +
-			JSON.stringify(table) + "</textarea></td></tr>" +
-			"<tr><td align=center colspan=2><input class=custombutton type=button id='Helper.saveQuickMsg' value='Save Quick Message'></td></tr>" +
+		textResult += "<tr><td valign=top colspan=2>Edit Templates: </td></tr>" +
+			"<tr><td align=center colspan=2 id=quickMsgTemplAreaId>&nbsp;</td></tr>" +
 			"</table></td></tr></table>";
 
 		var newNode = document.createElement("span");
@@ -6913,25 +6877,18 @@ var Helper = {
 		newNode.innerHTML = textResult;
 		injectHere.appendChild(newNode);
 
-		document.getElementById("Helper.saveQuickMsg").addEventListener("click", Helper.saveQuickMsg, true);
-
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
 		}
-	},
-
-	saveQuickMsg: function() {
-		var quickMsg = document.getElementById("Helper.quickMsgFullText").value;
-		try {
-			JSON.parse(quickMsg);
-		} catch (err) {
-			alert("Not a valid template");
-			return;
-		}
-		GM_setValue("quickMsg", quickMsg);
-		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
-		injectHere.removeChild(document.getElementById("spanQuickMsg"));
-		Helper.injectMessageTemplate();
+		
+		Helper.param={};
+		Helper.param={'id':'quickMsgTemplAreaId',
+			'headers':["Quick Message",],
+			'fields':[],
+			'tags':["textbox"],
+			'currentItems':System.getValueJSON("quickMsg"),
+			'gmname':"quickMsg"};
+		Helper.generateManageTable();
 	},
 
 	useQuickMsg: function(evt) {
