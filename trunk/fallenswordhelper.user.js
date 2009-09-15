@@ -833,10 +833,10 @@ var Helper = {
 		var testList = "";
 		for (var i=0; i<listOfDefenders.length; i++) {
 			var href = listOfDefenders[i].getAttribute("href");
-			//if (i<3) { //I put this in to limit the number of calls this function makes.
+//if (i<3) { //I put this in to limit the number of calls this function makes.
 					//I don't want to hammer the server too much.
 				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
-			//}
+//}
 			testList += listOfDefenders[i].innerHTML + " ";
 			if (defendingGuildID == myGuildID) validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
 			defenderCount++;
@@ -847,7 +847,6 @@ var Helper = {
 			"<tr><td>Defending Guild Relic Count:</td><td title='relicCount'>0</td></tr>" +
 			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
 			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
-			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet), but does include Constitution bonus calculation on lead defender</td></tr>" +
 			"<tr style='display:none;'><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
 			"<tr style='display:none;'><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
 			"<tr style='display:none;'><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
@@ -855,6 +854,7 @@ var Helper = {
 			"<tr style='display:none;'><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
 			"<tr style='display:none;'><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
 			"<tr style='display:none;'><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
+			"<tr style='display:none;'><td align='right' style='color:brown;'>LDFlinchLevel:</td><td align='right' title='LDFlinchLevel'>0</td></tr>" +
 			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Defense:</td><td align='right' title='defenseValue'>0</td></tr>" +
@@ -862,16 +862,51 @@ var Helper = {
 			"<tr><td align='right' style='color:brown;'>Damage:</td><td align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>" +
-			"<tr><td style='border-top:2px black solid;' colspan=2>DC adjusted defense values:</td></tr>" +
+			"<tr><td style='border-top:2px black solid;' colspan=2>DC and Flinch adjusted defense values:</td></tr>" +
 			"<tr><td style='font-size:x-small;' align='right'>DC225:</td><td style='font-size:x-small;' align='right' title='DC225'>0</td></tr>" +
-			"<tr><td style='font-size:x-small;' align='right'>DC175:</td><td style='font-size:x-small;' align='right' title='DC175'>0</td></tr>";
+			"<tr><td style='font-size:x-small;' align='right'>DC175:</td><td style='font-size:x-small;' align='right' title='DC175'>0</td></tr>" +
+			"<tr><td style='font-size:x-small;' align='right'>Flinch effect:</td><td style='font-size:x-small;' align='right' title='FlinchEffect'>0</td></tr>" +
+			"<tr><td style='font-size:x-small;' align='right'>DC225 + Flinch effect:</td><td style='font-size:x-small;' align='right' title='DC225Flinch'>0</td></tr>" +
+			"<tr><td style='font-size:x-small;' align='right'>DC175 + Flinch effect:</td><td style='font-size:x-small;' align='right' title='DC175Flinch'>0</td></tr>" +
+			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Above calculations include Constitution, Flinch and Nightmare Visage bonus calculations on lead defender. " +
+				"Note: Assumption is that for these three buffs, the effects only apply to the lead defender/attacker.</td></tr>";
 		if (defendingGuildID == myGuildID) {
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>";
-			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;' colspan=2>" + validMemberString + "</td></tr>";
+			var validMemberArray = validMemberString.split(" ");
+			for (var i=0;i<validMemberArray.length-1;i++) {
+				var guildMemberName = validMemberArray[i];
+				var href = System.server + "?cmd=findplayer&subcmd=dofindplayer&target_username=" + guildMemberName;
+				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName});
+			}
+			extraTextInsertPoint.innerHTML += "<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
+				"<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayersProcessed:</td><td align='right' title='offlinePlayersProcessed'>0</td></tr>" +
+				"<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
+				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2 title='offlinePlayerList'>Processing ...</td></tr>";
+				"<tr title='offlinePlayerListControl' style='display:none;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>";
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
 
+	checkPlayerActivity: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var lastActivity = System.findNode("//font[contains(.,'Last Activity:')]", doc);
+		var playerName = callback.playerName;
+		var offlinePlayerList = System.findNode("//td[@title='offlinePlayerList']");
+		var offlinePlayerCount = System.intValue(System.findNode("//td[@title='offlinePlayerCount']").innerHTML);
+		var offlinePlayersProcessed = System.findNode("//td[@title='offlinePlayersProcessed']");
+		offlinePlayersProcessed.innerHTML = System.intValue(offlinePlayersProcessed.innerHTML) + 1;
+		if (System.intValue(offlinePlayersProcessed.innerHTML) == (offlinePlayerCount - 1)) {
+			var offlinePlayerListControl = System.findNode("//tr[@title='offlinePlayerListControl']");
+			var offlinePlayerListControlTemp = System.findNode("//tr[@title='offlinePlayerListControlTemp']");
+			offlinePlayerListControl.style.display = "block";
+			offlinePlayerListControlTemp.style.display = "none";
+		}
+		if (!lastActivity || lastActivity.innerHTML == 'Last Activity: Inactive Account') {
+			offlinePlayerList.innerHTML = offlinePlayerList.innerHTML.replace(playerName + " ","");
+		} else if (lastActivity.innerHTML.search("days") != -1 && /(\d+) days/.exec(lastActivity.innerHTML)[1] >= 7) {
+			offlinePlayerList.innerHTML = offlinePlayerList.innerHTML.replace(playerName + " ","");
+		}
+	},
+	
 	getRelicGuildData: function(extraTextInsertPoint,href) {
 		System.xmlhttp(href, Helper.parseRelicGuildData, {"extraTextInsertPoint":extraTextInsertPoint,"href":href});
 	},
@@ -913,10 +948,18 @@ var Helper = {
 			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
 			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier)
 			defenseValue.innerHTML       = System.addCommas(overallDefense);
+			var storedFlinchLevel        = System.intValue(System.findNode("//td[@title='LDFlinchLevel']").textContent);
 			var dc225                    = System.findNode("//td[@title='DC225']");
 			var dc175                    = System.findNode("//td[@title='DC175']");
 			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
 			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
+			var flinchEffect             = System.findNode("//td[@title='FlinchEffect']");
+			var flinchEffectValue        = Helper.characterAttack * storedFlinchLevel * 0.001;
+			flinchEffect.innerHTML       = Math.ceil(flinchEffectValue);
+			var dc225Flinch              = System.findNode("//td[@title='DC225Flinch']");
+			var dc175Flinch              = System.findNode("//td[@title='DC175Flinch']");
+			dc225Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002)) + flinchEffectValue));
+			dc175Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002)) + flinchEffectValue));
 			var armorValue               = System.findNode("//td[@title='armorValue']");
 			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
@@ -981,10 +1024,18 @@ var Helper = {
 			defenseNumber                = System.intValue(defenseValue.innerHTML);
 			var overallDefense           = defenseNumber + Math.round(playerDefenseValue*defenderMultiplier);
 			defenseValue.innerHTML       = System.addCommas(overallDefense);
+			var storedFlinchLevel        = System.intValue(System.findNode("//td[@title='LDFlinchLevel']").textContent);
 			var dc225                    = System.findNode("//td[@title='DC225']");
 			var dc175                    = System.findNode("//td[@title='DC175']");
 			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
 			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
+			var flinchEffect             = System.findNode("//td[@title='FlinchEffect']");
+			var flinchEffectValue        = Helper.characterAttack * storedFlinchLevel * 0.001;
+			flinchEffect.innerHTML       = Math.ceil(flinchEffectValue);
+			var dc225Flinch              = System.findNode("//td[@title='DC225Flinch']");
+			var dc175Flinch              = System.findNode("//td[@title='DC175Flinch']");
+			dc225Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002)) + flinchEffectValue));
+			dc175Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002)) + flinchEffectValue));
 			var armorValue               = System.findNode("//td[@title='armorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
 			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
@@ -1001,7 +1052,7 @@ var Helper = {
 		else {
 			//get relavent buffs here later ... just Constitution atm
 			var allItems = doc.getElementsByTagName("IMG");
-			var constitutionLevel = 0;
+			var constitutionLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0;
 			for (var i=0;i<allItems.length;i++) {
 				var anItem=allItems[i];
 				if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -1010,7 +1061,19 @@ var Helper = {
 					var constitution =  constitutionRE.exec(onmouseover);
 					if (constitution) {
 						constitutionLevel = constitution[1];
-						break;
+						continue;
+					}
+					var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/
+					var flinch = flinchRE.exec(onmouseover);
+					if (flinch) {
+						flinchLevel = flinch[1];
+						continue;
+					}
+					var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/
+					var nightmareVisage = nightmareVisageRE.exec(onmouseover);
+					if (nightmareVisage) {
+						nightmareVisageLevel = nightmareVisage[1];
+						continue;
 					}
 				}
 			}
@@ -1018,10 +1081,12 @@ var Helper = {
 			var defenderMultiplier = 1;
 			var attackValue = System.findNode("//td[@title='LDattackValue']");
 			attackNumber = System.intValue(attackValue.innerHTML);
+			var nightmareVisageEffect = Math.ceil(System.intValue(playerAttackValue)*(nightmareVisageLevel * 0.0025));
+			playerAttackValue = playerAttackValue - nightmareVisageEffect;
 			attackValue.innerHTML = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
 			var defenseValue = System.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber = System.intValue(defenseValue.innerHTML);
-			playerDefenseValue = Math.ceil(System.intValue(playerDefenseValue) * (1 + constitutionLevel * 0.001));
+			playerDefenseValue = Math.ceil(System.intValue(playerDefenseValue) * (1 + constitutionLevel * 0.001)) + nightmareVisageEffect;
 			defenseValue.innerHTML = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
 			var armorValue = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber=System.intValue(armorValue.innerHTML);
@@ -1035,7 +1100,8 @@ var Helper = {
 			var defendersProcessed = System.findNode("//td[@title='LDProcessed']");
 			defendersProcessedNumber=System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
-
+			var storedFlinchLevel = System.findNode("//td[@title='LDFlinchLevel']");
+			storedFlinchLevel.innerHTML = System.intValue(flinchLevel);
 		}
 		var relicProcessedValue = System.findNode("//td[@title='relicProcessed']");
 		var relicCountValue = System.findNode("//td[@title='relicCount']");
@@ -1061,10 +1127,18 @@ var Helper = {
 			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
 			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier)
 			defenseValue.innerHTML       = System.addCommas(overallDefense);
+			var storedFlinchLevel        = System.intValue(System.findNode("//td[@title='LDFlinchLevel']").textContent);
 			var dc225                    = System.findNode("//td[@title='DC225']");
 			var dc175                    = System.findNode("//td[@title='DC175']");
 			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
 			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
+			var flinchEffect             = System.findNode("//td[@title='FlinchEffect']");
+			var flinchEffectValue        = Helper.characterAttack * storedFlinchLevel * 0.001;
+			flinchEffect.innerHTML       = Math.ceil(flinchEffectValue);
+			var dc225Flinch              = System.findNode("//td[@title='DC225Flinch']");
+			var dc175Flinch              = System.findNode("//td[@title='DC175Flinch']");
+			dc225Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002)) + flinchEffectValue));
+			dc175Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002)) + flinchEffectValue));
 			var armorValue               = System.findNode("//td[@title='armorValue']");
 			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
@@ -2321,10 +2395,12 @@ var Helper = {
 				if (levelUp=="1") {
 					reportHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
 					reportText += "Your level has increased!\n";
+					showCombatLog = true;
 				}
 				if (levelUp=="-1") {
 					reportHtml += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
 					reportText += "Your level has decreased!\n";
+					showCombatLog = true;
 				}
 				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
 				Helper.appendCombatLog(reportHtml, showCombatLog);
@@ -8747,4 +8823,4 @@ var Helper = {
 	}
 };
 
-Helper.onPageLoad(null);
+Helper.onPageLoad(null); 
