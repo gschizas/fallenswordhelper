@@ -872,16 +872,23 @@ var Helper = {
 				"Note: Assumption is that for these three buffs, the effects only apply to the lead defender/attacker.</td></tr>";
 		if (defendingGuildID == myGuildID) {
 			var validMemberArray = validMemberString.split(" ");
+			var memberList = System.getValueJSON("memberlist");
 			for (var i=0;i<validMemberArray.length-1;i++) {
 				var guildMemberName = validMemberArray[i];
-				var href = System.server + "?cmd=findplayer&subcmd=dofindplayer&target_username=" + guildMemberName;
+				for (var j=0; j<memberList.members.length; j++) {
+					if (memberList.members[j].name == guildMemberName) {
+						var memberId = memberList.members[j].id;
+						break;
+					}
+				}
+				var href = System.server + "?cmd=profile&player_id=" + memberId;
 				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName});
 			}
-			extraTextInsertPoint.innerHTML += "<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
+			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
+				"<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
 				"<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayersProcessed:</td><td align='right' title='offlinePlayersProcessed'>0</td></tr>" +
-				"<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
-				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2 title='offlinePlayerList'>Processing ...</td></tr>";
-				"<tr title='offlinePlayerListControl' style='display:none;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>";
+				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2>Processing ...</td></tr>" +
+				"<tr title='offlinePlayerListControl' style='display:none;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>";		
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
