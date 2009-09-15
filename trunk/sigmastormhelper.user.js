@@ -81,6 +81,7 @@ var Helper = {
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoCredit","min":"","max":"","gold":true,"fsp":false},{"name":"NoFC","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
+		System.setDefault("quickLinks","[]");
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
