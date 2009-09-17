@@ -3573,13 +3573,18 @@ var Helper = {
 					result+='<td align=center>';
 					if (Helper.param.fields[j]!=Helper.param.categoryField)
 						if (Helper.param.tags[j]=="checkbox")
-							result+=(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'unchecked');
-						else
-							result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+							result+="<input type=checkbox "+(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'')+" disabled>";
+						else {
+							if (Helper.param.url && Helper.param.url[j] != '')
+								result+="<a href='"+Helper.param.url[j].replace("@replaceme@",Helper.param.currentItems[i][Helper.param.fields[j]])+"'>"+
+									Helper.param.currentItems[i][Helper.param.fields[j]]+"</a>";
+							else
+								result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+						}
 					result+='</td>';
 				}
 			}
-			result+='<td>[<span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">Del</span>]</td></tr>';
+			result+='<td><span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
 		}
 		result+='<tr>';
 		if (isArrayOnly)
@@ -3587,7 +3592,7 @@ var Helper = {
 		else
 			for (i=0;i<Helper.param.tags.length;i++)
 				result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
-		result+='<td>[<span class=HelperTextLink id="Helper:AddItem">Add</span>]</td></tr></table>';
+		result+='<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
 		
 		if (Helper.param.showRawEditor) {
 			result+="<table width=100%><tr><td align=center><textarea cols=70 rows=20 name='Helper:rawEditor'>" + 
@@ -4623,104 +4628,19 @@ var Helper = {
 				'or add a new entry and delete the old one. You can always reset the list to the default values.</div>'+
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
-		var injectHere = document.getElementById('Helper:Auction Search Output');
-		var quickSearchList = System.getValueJSON("quickSearchList");
-		var currentCategory = "";
-		var output = "<table  cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>";
-		output += "<tr bgcolor='#cd9e4b'><th></th><th>Nickname</th><th>Quick Search Text</th><th>Display on AH?</th><th>Delete?</th></tr>";
-		for (j=0; j<quickSearchList.length; j++) {
-			var quickSearchItem=quickSearchList[j];
-			if (quickSearchItem) {
-				if (currentCategory != quickSearchItem.category)
-					output += "<tr><td colspan=5><span style='font-weight:bold; font-size:large;'>" + quickSearchItem.category + "</span></td></tr>";
-				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Potion of Truth&page=1&order_by=1
-				output += "<tr><td width='10'></td>"+
-					"<td><a href='" + System.server +
-					"index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
-					((quickSearchItem.nickname)? quickSearchItem.nickname:"") + "</span></a></td>" +
-					"<td><a href='" + System.server +
-					"index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearchItem.searchname + "&page=1&order_by=1' title='" +
-					quickSearchItem.searchname + "'><span style='cursor:pointer; text-decoration:underline; color:blue;'>" +
-					quickSearchItem.searchname + "</span></a></td>" +
-					"<td><span style='color:blue;'>"+(quickSearchItem.displayOnAH?"True":"False")+"</span></td>" +
-					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:delAuctionSearch"+j+"' auctionSearchId="+j+">"+
-						"del</span>]</td></tr>";
-				currentCategory = quickSearchItem.category;
-			}
-		}
-		output += "<tr><td colspan=5 height=10></td></tr>";
-		output += "<tr><td colspan=5>"+
-				"<table cellspacing='0' cellpadding='0' border='0' width='100%'><tbody>"+
-				"<tr><th>Category</th><th>Nickname</th><th>Search Name</th><th>Display on AH?</th><th></th></tr>"+
-				"<tr align='right'>"+
-					"<td><input type='text' class='custominput' size='14' id='Helper:category'/></td>"+
-					"<td><input type='text' class='custominput' size='8' id='Helper:nickname'/></td>"+
-					"<td><input type='text' class='custominput' size='40' id='Helper:searchname'/></td>"+
-					"<td align='center'><input type='checkbox' class='custominput' id='Helper:displayOnAH'/></td>"+
-					"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' id='Helper:addAuctionSearch'>"+
-						"add</span>]</td>"+
-				"</tr></tbody></table>"+
-			"</td></tr>";
-		output += "<tr><td colspan=5 align=center><textarea cols=70 rows=20 name='auctionsearch'>" + JSON.stringify(quickSearchList) + "</textarea></td></tr>";
-		output += "<tr><td colspan=5 align=center><input id='Helper:saveauctionsearch' type='button' value='Save' class='custombutton'>"+
-					"&nbsp;<input id='Helper:resetauctionsearch' type='button' value='Reset' class='custombutton'></td></tr>";
-		output += "</tbody></table>";
-		injectHere.innerHTML = output;
-		for (j=0; j<quickSearchList.length; j++) {
-			document.getElementById("Helper:delAuctionSearch"+j).addEventListener('click', Helper.delAuctionSearch, true);
-		}
-		document.getElementById("Helper:addAuctionSearch").addEventListener('click', Helper.addAuctionSearch, true);
-		document.getElementById("Helper:saveauctionsearch").addEventListener('click', Helper.saveAuctionSearch, true);
-		document.getElementById("Helper:resetauctionsearch").addEventListener('click', Helper.resetAuctionSearch, true);
-	},
-
-	addAuctionSearch: function(evt) {
-		var nickname = document.getElementById("Helper:nickname").value;
-		var searchname = document.getElementById("Helper:searchname").value;
-		var category = document.getElementById("Helper:category").value;
-		var displayOnAH = document.getElementById("Helper:displayOnAH").checked;
-		if (!nickname || !searchname || !category) return;
-		var quickSearchList = System.getValueJSON("quickSearchList");
-		var theSearch = new Object;
-		theSearch.nickname = nickname;
-		theSearch.searchname = searchname;
-		theSearch.category = category;
-		theSearch.displayOnAH = displayOnAH;
-		quickSearchList.push(theSearch);
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		System.setValueJSON("quickSearchList", quickSearchList);
-		window.location=window.location;
-	},
-
-	delAuctionSearch: function(evt) {
-		var auctionSearchId = evt.target.getAttribute("auctionSearchId");
-		var quickSearchList = System.getValueJSON("quickSearchList");
-		quickSearchList.splice(auctionSearchId,1);
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		System.setValueJSON("quickSearchList", quickSearchList);
-		window.location = window.location;
-	},
-
-	saveAuctionSearch: function(evt) {
-		auctionsearchtextarea = System.findNode("//textarea[@name='auctionsearch']");
-		var quickSearchList = JSON.parse(auctionsearchtextarea.value);
-		Helper.sortAsc=true;
-		Helper.sortBy="category";
-		quickSearchList.sort(Helper.stringSort);
-		System.setValueJSON("quickSearchList", quickSearchList);
-		window.location=window.location;
-	},
-
-	resetAuctionSearch: function(evt) {
-		GM_setValue("quickSearchList","");
-		window.location=window.location;
+		// global parameters for the meta function generateManageTable
+		Helper.param={};
+		Helper.param={'id':'Helper:Auction Search Output',
+			'headers':["Category","Nickname","Quick Search Text","Display on TH?"],
+			'fields':["category","nickname","searchname","displayOnAH"],
+			'tags':["textbox","textbox","textbox","checkbox"],
+			'url':["","","index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@",""],
+			'currentItems':System.getValueJSON("quickSearchList"),
+			'gmname':"quickSearchList",
+			'sortField':"category",
+			'categoryField':'category',
+			'showRawEditor':true};
+		Helper.generateManageTable();
 	},
 
 	linkFromMouseover: function(mouseOver) {

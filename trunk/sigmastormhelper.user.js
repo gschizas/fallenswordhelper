@@ -1934,9 +1934,8 @@ var Helper = {
 		Helper.itemList = {};
 		Helper.retrieveItemInfor(document);
 		var layout=System.findNode("//td[contains(@background,'skin/inner_bg.jpg')]");
-		var output='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
-			'<td nobr colspan=4><b>&nbsp;Quick Use Manager</b></td></tr>'+
-			'<tr><td colspan=4>Select 3 items (can be stims, ammos, resources) to quick-use with hotkeys "{", "}", "|". '+
+		var output=Helper.makePageHeader('Trade Hub Quick Search','','','')+
+			'<table width=100%><tr><td colspan=4>Select 3 items (can be stims, ammos, resources) to quick-use with hotkeys "{", "}", "|". '+
 			'Note that these hotkey will only be available on World screen (while you are hunting), and WITHOUT confirmation!</td></tr>'+
 			'<tr><td>&nbsp;</td></tr><tr><td align=right>'+
 			'<input type="button" class="custombutton" value="Clear" id="clearQuickUse">'+
@@ -1983,7 +1982,7 @@ var Helper = {
 		var hotkeys=['{','}','|'];
 		var quItems=System.getValueJSON("quickUseItems");
 		for (var i=0; i<3; i++) {
-			document.getElementById('item'+i).innerHTML=(quItems['item'+i]==''?'[Not Assigned]':quItems['item'+i]);
+			document.getElementById('item'+i).innerHTML="<span onmouseover=\"Tip('Hotkey: "+hotkeys[i]+"')\">"+(quItems['item'+i]==''?'[Not Assigned]':quItems['item'+i])+"</span>";
 		}
 	},
 	
@@ -3632,9 +3631,14 @@ var Helper = {
 					result+='<td align=center>';
 					if (Helper.param.fields[j]!=Helper.param.categoryField)
 						if (Helper.param.tags[j]=="checkbox")
-							result+=(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'unchecked');
-						else
-							result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+							result+="<input type=checkbox "+(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'')+" disabled>";
+						else {
+							if (Helper.param.url && Helper.param.url[j] != '')
+								result+="<a href='"+Helper.param.url[j].replace("@replaceme@",Helper.param.currentItems[i][Helper.param.fields[j]])+"'>"+
+									Helper.param.currentItems[i][Helper.param.fields[j]]+"</a>";
+							else
+								result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+						}
 					result+='</td>';
 				}
 			}
@@ -4656,6 +4660,7 @@ var Helper = {
 			'headers':["Category","Nickname","Quick Search Text","Display on TH?"],
 			'fields':["category","nickname","searchname","displayOnAH"],
 			'tags':["textbox","textbox","textbox","checkbox"],
+			'url':["","","index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@",""],
 			'currentItems':System.getValueJSON("quickSearchList"),
 			'gmname':"quickSearchList",
 			'sortField':"category",
