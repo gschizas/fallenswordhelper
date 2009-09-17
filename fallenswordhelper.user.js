@@ -540,6 +540,15 @@ var Helper = {
 		case "tempinv":
 			Helper.injectMailbox();
 			break;
+		case "scavenging":
+			switch (subPageId) {
+			case "process":
+				Helper.injectScavenging();
+				break;
+			default:
+				Helper.injectQuickScavenging();
+			}
+			break;
 		case "-":
 			var isRelicPage = System.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
 			if (isRelicPage) {
@@ -562,6 +571,9 @@ var Helper = {
 			var isArenaTournamentPage = System.findNode("//b[contains(.,'Tournament #')]");
 			if (isArenaTournamentPage) {
 				Helper.injectTournament();
+			}
+			if (System.findNode("//a[.='Back to Scavenging']")) {
+				Helper.injectScavenging();
 			}
 			break;
 		}
@@ -8634,10 +8646,10 @@ var Helper = {
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
 				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")), 
-					function (responceText, callBack) {
+					function (responseText, callBack) {
 						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
 
-						if (plantRE.exec(responceText)) {
+						if (plantRE.exec(responseText)) {
 							if (checkbox.checked)
 								checkbox.checked = false;
 							else
@@ -8747,6 +8759,74 @@ var Helper = {
 	makePageTemplate: function(title, comment, spanId, button, divId) {
 		return Helper.makePageHeader(title, comment, spanId, button)+
 			'<div style="font-size:small;" id="'+divId+'"></div>';
+	},
+	
+	injectScavenging: function() {
+		System.xmlhttp("index.php?cmd=world", Helper.getBpCountFromWorld);
+	},
+	getBpCountFromWorld: function(responseText) {
+	
+		// backpack counter
+		var doc=System.createDocument(responseText);
+		var bp=System.findNode("//td[a/img[contains(@src,'_manageitems.gif')]]",doc);
+		var injectHere=document.getElementById("reportDiv");
+		injectHere.appendChild(bp);
+	},
+	
+	injectQuickScavenging: function() {
+		var injectHere=document.createElement("div");
+		injectHere.innerHTML="<hr>"+Helper.makePageTemplate('Quick Scavenging','','scvlogclear','Clear Log','scvlog');
+		System.findNode("//td[table/tbody/tr/td/input[contains(@value,'Scavenge')]]").appendChild(injectHere)
+		
+		injectHere=document.getElementById('scvlog');
+		injectHere.innerHTML="<input class=custombutton type=button value='Quick Scavenge' id=quickScavenge><br>"+
+			"<textarea id=scvLogText cols=50 rows=15 class=custominput></textarea>";
+		document.getElementById("scvlogclear").addEventListener("click",function() {
+				document.getElementById("scvLogText").value="";
+			},true);
+		document.getElementById("quickScavenge").addEventListener("click", Helper.quickScavenging,true);
+	},
+	quickScavenging: function() {
+		// get cave id
+		var cave_id=-1;
+		var caves = System.findNodes("//input[@type='radio' and @name='cave_id']");
+		for (var i=0;i<caves.length;i++)
+			if (caves[i].checked) {cave_id=caves[i].value; break;}
+		if (cave_id<0) {
+			alert("You need to select a cave type to scavenge in."); return;
+		}
+		
+		// get gold
+		var gold=System.findNode("//input[@name='gold']").value;
+		
+		System.xmlhttp("index.php?cmd=scavenging&subcmd=process&cave_id="+cave_id+"&gold="+gold,
+			Helper.quickScvGetResult);
+	},
+	quickScvGetResult: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var report=System.findNode("//div[@id='reportDiv']",doc);
+		var item=System.findNode("//div[@id='itemDiv']",doc);
+		var output='';
+		
+		if (report) {
+			if (item)
+				output=item.textContent+'\n'+output;
+			var fightlogs=responseText.match(/report\[\d+\]="[^"]+";/ig);
+			if (fightlogs) {
+				for (var i=fightlogs.length-1;i>=0;i--)
+					output+=fightlogs[i].replace(/report\[\d+\]="([^"]+)";/i,'$1')+'\n';
+			}
+		} else
+			output=Layout.infoBox(responseText)+output;
+		output+='\n===============\n\n';
+		
+		// back pack counter
+		System.xmlhttp("index.php?cmd=world", function(responseText) {
+				var doc=System.createDocument(responseText);
+				var bp=System.findNode("//td[a/img[contains(@src,'_manageitems.gif')]]",doc);
+				var injectHere=document.getElementById("scvLogText");
+				injectHere.value = "Backpack: "+bp.textContent+'\n'+output+injectHere.value;
+			});
 	}
 };
 
