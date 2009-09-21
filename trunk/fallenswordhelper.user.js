@@ -247,6 +247,7 @@ var Helper = {
 		Helper.init();
 		Layout.hideBanner();
 		Layout.moveFSBox();
+		Layout.hideHCSOnline();
 		Helper.prepareGuildList();
 		Helper.prepareAllyEnemyList();
 		Helper.prepareBountyData();
@@ -2483,7 +2484,7 @@ var Helper = {
 			Helper.retrieveGuildData(true); //Refresh guild data every 5 mins but don't inject online guild list
 		} 
 		else {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 			if (!injectHere) return;
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
@@ -2589,7 +2590,7 @@ var Helper = {
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
+		var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 		if (!injectHere) return;
 		var info = injectHere.insertRow(GM_getValue("enableGuildOnlineList")?1:0)
 		var cell = info.insertCell(0);
@@ -7186,7 +7187,7 @@ var Helper = {
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.  Enabling this option will Disable the Version Provided by HCS') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
@@ -8020,7 +8021,7 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 
 		if (enableWantedList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 			if (!injectHere)
 				return;
 			var info = injectHere.insertRow(0);
@@ -8028,7 +8029,7 @@ var Helper = {
 			cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
 		}
 		if (enableActiveBountyList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 			if (injectHere) {
 				var info = injectHere.insertRow(0);
 				var cell = info.insertCell(0);
@@ -8272,7 +8273,7 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 			if (!injectHere) return;
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
