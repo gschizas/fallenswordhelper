@@ -4243,63 +4243,7 @@ var Helper = {
 
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
-			var alliesTotal = GM_getValue("alliestotal");
-			var alliesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/allies_head.jpg')]");;
-			var alliesTable = alliesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-			var numberOfAllies = 0;
-			var startIndex = 0;
-			while (alliesTable.innerHTML.indexOf("player_id=", startIndex+1) != -1) {
-				numberOfAllies ++;
-				startIndex = alliesTable.innerHTML.indexOf("player_id=",startIndex+1);
-			}
-			startIndex = 0;
-			alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
-				"<span style='color:#ADB5B5; font-size:x-small' >" + numberOfAllies + "</span>";
-			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
-					"/<span style='color:#ADB5B5; font-size:x-small' findme='alliestotal'>" + alliesTotal + "</span>";
-			}
-			var enemiesTotal = GM_getValue("enemiestotal");
-			var enemiesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/enemies_head.jpg')]");
-			var enemiesTable = enemiesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-			var numberOfEnemies = 0;
-			var startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf("player_id=", startIndex+1) != -1) {
-				numberOfEnemies ++;
-				startIndex = enemiesTable.innerHTML.indexOf("player_id=",startIndex+1);
-			}
-			var startIndex = 0;
-			enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
-				"&nbsp;<span style='color:#ADB5B5; font-size:x-small'>" + numberOfEnemies + "</span>";
-			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
-					"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
-			}
-
-			//store a list of allies and enemies for use in coloring
-			listOfAllies = "";
-			if (alliesTable) {
-				var newdoc=System.createDocument(alliesTable.innerHTML);
-				var allyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
-				if (allyLinks)
-					for (var i=0;i<allyLinks.length;i++) {
-						var allyName = allyLinks[i].textContent;
-						listOfAllies += allyName + " ";
-					}
-			}
-
-			listOfEnemies = "";
-			if (enemiesTable) {
-				var newdoc=System.createDocument(enemiesTable.innerHTML);
-				var enermyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
-				if (enermyLinks)
-					for (var i=0;i<enermyLinks.length;i++) {
-						var enemyName = enermyLinks[i].textContent;
-						listOfEnemies += enemyName + " ";
-					}
-			}
-			GM_setValue("listOfAllies", listOfAllies);
-			GM_setValue("listOfEnemies", listOfEnemies);
+			Helper.countAllyEnemy();
 			
 			// quick wear manager link
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
@@ -4391,49 +4335,158 @@ var Helper = {
 
 		//bio compressor ...
 		var bioCompressorEnabled = GM_getValue("enableBioCompressor");
-		if (bioCompressorEnabled) {
-			var bioCell = System.findNode("//td[contains(@background, '/inventory/biography_head.jpg')]/../following-sibling::tr[1]/td/table/tbody/tr/td[2]");
-			if (bioCell) { //non-self profile
-				var bioContents = bioCell.innerHTML;
-				var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
-				var maxRowsToShow = GM_getValue("maxCompressedLines");
-				var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
-				if (numberOfLines >= maxRowsToShow) {
-					var startIndex = 0;
-					while (maxRowsToShow >= 0) {
-						maxRowsToShow --;
-						startIndex = bioContents.indexOf("<br>\n",startIndex+1);
-					}
-					maxCharactersToShow = startIndex;
+		if (bioCompressorEnabled) Helper.bioCompress();
+		
+		var componentDiv=document.getElementById('componentDiv');
+		if (componentDiv) {
+			componentDiv.parentNode.innerHTML+='<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Count Components</span>]</div>';
+			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
+		}
+	},
+	
+	countComponent: function() {
+		var compPage=System.findNodes("//a[contains(@href,'index.php?cmd=profile&component_page=')]");
+		if (compPage) 
+			Helper.compPage = compPage.length;
+		else 
+			Helper.compPage = 0;
+		document.getElementById('compSum').innerHTML='Retrieve page: ';
+		Helper.componentList={};
+		System.xmlhttp("index.php?cmd=profile&component_page=0", Helper.retriveComponent, 0);
+	},
+	
+	retriveComponent: function(responseText, currentPage) {
+		var nextPage=currentPage+1;
+		document.getElementById('compSum').innerHTML+=nextPage+', ';
+		var doc=System.createDocument(responseText);
+		var compList = System.findNodes("//a[contains(@href,'cmd=profile&subcmd=destroycomponent&component_id=')]/img",doc);
+		if (compList) {
+			for (var i=0;i<compList.length;i++) {
+				var mouseover=compList[i].getAttribute('onmouseover');
+				var id=mouseover.match(/ajaxLoadItem\((\d+).*/)[1];
+				if (Helper.componentList[id])
+					Helper.componentList[id].count++;
+				else {
+					Helper.componentList[id]={'count':1,'src':compList[i].getAttribute('src'),
+						'onmouseover':mouseover.replace("<br><center><b>[Click to Destroy]</b></center>","")};
 				}
-				if (bioContents.length>maxCharactersToShow) {
-					//find the end of next HTML tag after the max characters to show.
-					var breakPoint = bioContents.indexOf(">",maxCharactersToShow) + 1;
-					var bioStart = bioContents.substring(0,breakPoint);
-					var bioEnd = bioContents.substring(breakPoint,bioContents.length);
-					var extraOpenHTML = "", extraCloseHTML = "";
-					var boldCloseTagIndex = bioEnd.indexOf("</b>");
-					var boldOpenTagIndex = bioEnd.indexOf("<b>");
-					if (boldCloseTagIndex != -1 && boldOpenTagIndex > boldCloseTagIndex) {
-						extraOpenHTML += "<b>";
-						extraCloseHTML += "</b>";
-					}
-					var italicsCloseTagIndex = bioEnd.indexOf("</i>");
-					var italicsOpenTagIndex = bioEnd.indexOf("<i>");
-					if (italicsCloseTagIndex != -1 && italicsOpenTagIndex > italicsCloseTagIndex) {
-						extraOpenHTML += "<i>";
-						extraCloseHTML += "</i>";
-					}
-					var underlineCloseTagIndex = bioEnd.indexOf("</u>");
-					var underlineOpenTagIndex = bioEnd.indexOf("<u>");
-					if (underlineCloseTagIndex != -1 && underlineOpenTagIndex > underlineCloseTagIndex) {
-						extraOpenHTML += "<u>";
-						extraCloseHTML += "</u>";
-					}
-					bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:cyan;'>More ...</span>" +
-						"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
-					document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
+			}
+		}
+		if (currentPage < Helper.compPage - 1) {
+			System.xmlhttp("index.php?cmd=profile&component_page="+nextPage, Helper.retriveComponent, nextPage);
+		} else {
+			var output='Component Summary<br/><table>';
+			for (var id in Helper.componentList) {
+				var comp=Helper.componentList[id];
+				output+="<tr><td align=center><img src="+comp.src+" onmouseover=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
+			}
+			output+="</table>";
+			document.getElementById('compSum').innerHTML=output;
+		}
+	},
+	
+	countAllyEnemy: function() {
+		var alliesTotal = GM_getValue("alliestotal");
+		var alliesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/allies_head.jpg')]");;
+		var alliesTable = alliesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		var numberOfAllies = 0;
+		var startIndex = 0;
+		while (alliesTable.innerHTML.indexOf("player_id=", startIndex+1) != -1) {
+			numberOfAllies ++;
+			startIndex = alliesTable.innerHTML.indexOf("player_id=",startIndex+1);
+		}
+		startIndex = 0;
+		alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
+			"<span style='color:#ADB5B5; font-size:x-small' >" + numberOfAllies + "</span>";
+		if (alliesTotal && alliesTotal >= numberOfAllies) {
+			alliesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
+				"/<span style='color:#ADB5B5; font-size:x-small' findme='alliestotal'>" + alliesTotal + "</span>";
+		}
+		var enemiesTotal = GM_getValue("enemiestotal");
+		var enemiesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/enemies_head.jpg')]");
+		var enemiesTable = enemiesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		var numberOfEnemies = 0;
+		var startIndex = 0;
+		while (enemiesTable.innerHTML.indexOf("player_id=", startIndex+1) != -1) {
+			numberOfEnemies ++;
+			startIndex = enemiesTable.innerHTML.indexOf("player_id=",startIndex+1);
+		}
+		var startIndex = 0;
+		enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
+			"&nbsp;<span style='color:#ADB5B5; font-size:x-small'>" + numberOfEnemies + "</span>";
+		if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
+			enemiesParent.firstChild.nextSibling.rows[0].cells[0].innerHTML +=
+				"/<span style='color:#ADB5B5; font-size:x-small' findme='enemiestotal'>" + enemiesTotal + "</span>";
+		}
+
+		//store a list of allies and enemies for use in coloring
+		listOfAllies = "";
+		if (alliesTable) {
+			var newdoc=System.createDocument(alliesTable.innerHTML);
+			var allyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
+			if (allyLinks)
+				for (var i=0;i<allyLinks.length;i++) {
+					var allyName = allyLinks[i].textContent;
+					listOfAllies += allyName + " ";
 				}
+		}
+
+		listOfEnemies = "";
+		if (enemiesTable) {
+			var newdoc=System.createDocument(enemiesTable.innerHTML);
+			var enermyLinks = System.findNodes("//a[contains(@href,'player_id=')]",newdoc);
+			if (enermyLinks)
+				for (var i=0;i<enermyLinks.length;i++) {
+					var enemyName = enermyLinks[i].textContent;
+					listOfEnemies += enemyName + " ";
+				}
+		}
+		GM_setValue("listOfAllies", listOfAllies);
+		GM_setValue("listOfEnemies", listOfEnemies);
+	},
+	
+	bioCompress: function() {
+		var bioCell = System.findNode("//td[contains(@background, '/inventory/biography_head.jpg')]/../following-sibling::tr[1]/td/table/tbody/tr/td[2]");
+		if (bioCell) { //non-self profile
+			var bioContents = bioCell.innerHTML;
+			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
+			var maxRowsToShow = GM_getValue("maxCompressedLines");
+			var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
+			if (numberOfLines >= maxRowsToShow) {
+				var startIndex = 0;
+				while (maxRowsToShow >= 0) {
+					maxRowsToShow --;
+					startIndex = bioContents.indexOf("<br>\n",startIndex+1);
+				}
+				maxCharactersToShow = startIndex;
+			}
+			if (bioContents.length>maxCharactersToShow) {
+				//find the end of next HTML tag after the max characters to show.
+				var breakPoint = bioContents.indexOf(">",maxCharactersToShow) + 1;
+				var bioStart = bioContents.substring(0,breakPoint);
+				var bioEnd = bioContents.substring(breakPoint,bioContents.length);
+				var extraOpenHTML = "", extraCloseHTML = "";
+				var boldCloseTagIndex = bioEnd.indexOf("</b>");
+				var boldOpenTagIndex = bioEnd.indexOf("<b>");
+				if (boldCloseTagIndex != -1 && boldOpenTagIndex > boldCloseTagIndex) {
+					extraOpenHTML += "<b>";
+					extraCloseHTML += "</b>";
+				}
+				var italicsCloseTagIndex = bioEnd.indexOf("</i>");
+				var italicsOpenTagIndex = bioEnd.indexOf("<i>");
+				if (italicsCloseTagIndex != -1 && italicsOpenTagIndex > italicsCloseTagIndex) {
+					extraOpenHTML += "<i>";
+					extraCloseHTML += "</i>";
+				}
+				var underlineCloseTagIndex = bioEnd.indexOf("</u>");
+				var underlineOpenTagIndex = bioEnd.indexOf("<u>");
+				if (underlineCloseTagIndex != -1 && underlineOpenTagIndex > underlineCloseTagIndex) {
+					extraOpenHTML += "<u>";
+					extraCloseHTML += "</u>";
+				}
+				bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:cyan;'>More ...</span>" +
+					"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
+				document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
 			}
 		}
 	},
