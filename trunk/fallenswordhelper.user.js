@@ -58,6 +58,7 @@ var Helper = {
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
+		System.setDefault("hideHCSGuildOnlineList", false);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
 
@@ -247,7 +248,7 @@ var Helper = {
 		Helper.init();
 		Layout.hideBanner();
 		Layout.moveFSBox();
-		Layout.hideHCSOnline();
+		Layout.hideHCSGuildOnline();
 		Helper.prepareGuildList();
 		Helper.prepareAllyEnemyList();
 		Helper.prepareBountyData();
@@ -7187,9 +7188,12 @@ var Helper = {
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.  Enabling this option will Disable the Version Provided by HCS') +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+			'<tr><td align="right">'+'Hide HCS Online Guild Members List' + Helper.helpLink('Hide HCS Online Guild Members List', 'Enabling this option will Disable the HCS Guild Online Players List') +
+				':</td><td><input name="hideHCSGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("hideHCSGuildOnlineList")?" checked":"") +
+				'></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
@@ -7389,6 +7393,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
+		System.saveValueForm(oForm, "hideHCSGuildOnlineList");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");

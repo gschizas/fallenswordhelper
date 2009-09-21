@@ -83,12 +83,21 @@ var Layout = {
 	hideHCSOnline: function() {
 		if (!GM_getValue("enableGuildOnlineList")) return;
 		var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
-		//var removeThis = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
 		if (!removeThis) return;
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis);
 	},
+
+	hideHCSGuildOnline: function() {
+		if (!GM_getValue("hideHCSGuildOnlineList")) return;
+		var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
+		if (!removeThis) return;
+		removeThis.parentNode.removeChild(removeThis.nextSibling);
+		removeThis.parentNode.removeChild(removeThis.nextSibling);
+		removeThis.parentNode.removeChild(removeThis);
+	},
+
 
 	notebookContent: function() {
 		return System.findNode("//table[@width='100%']/..");
