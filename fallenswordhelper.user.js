@@ -2483,7 +2483,7 @@ var Helper = {
 			Helper.retrieveGuildData(true); //Refresh guild data every 5 mins but don't inject online guild list
 		} 
 		else {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
 			if (!injectHere) return;
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
@@ -2589,7 +2589,7 @@ var Helper = {
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+		var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
 		if (!injectHere) return;
 		var info = injectHere.insertRow(GM_getValue("enableGuildOnlineList")?1:0)
 		var cell = info.insertCell(0);
@@ -8020,7 +8020,7 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 
 		if (enableWantedList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
 			if (!injectHere)
 				return;
 			var info = injectHere.insertRow(0);
@@ -8028,7 +8028,7 @@ var Helper = {
 			cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
 		}
 		if (enableActiveBountyList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
 			if (injectHere) {
 				var info = injectHere.insertRow(0);
 				var cell = info.insertCell(0);
@@ -8272,7 +8272,7 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'New?')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
 			if (!injectHere) return;
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
