@@ -79,6 +79,16 @@ var Layout = {
 		removeThis.parentNode.removeChild(removeThis.nextSibling);
 		removeThis.parentNode.removeChild(removeThis);
 	},
+	
+	hideHCSOnline: function() {
+		if (!GM_getValue("enableGuildOnlineList")) return;
+		var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
+		//var removeThis = System.findNode("//table[@width='120' and contains(.,'Online Members')]")
+		if (!removeThis) return;
+		removeThis.parentNode.removeChild(removeThis.nextSibling);
+		removeThis.parentNode.removeChild(removeThis.nextSibling);
+		removeThis.parentNode.removeChild(removeThis);
+	},
 
 	notebookContent: function() {
 		return System.findNode("//table[@width='100%']/..");
@@ -92,13 +102,14 @@ var Layout = {
 	},
 
 	infoBox: function(documentText) {
-		var doc = System.createDocument(documentText);
-		var informationTable = System.findNode("//table[tbody/tr/td/font/center[contains(.,'INFORMATION')]]", doc);
+		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
+		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)</i;
+		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully recalled the item.</center>
+		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully took the item into your backpack.</center>
+		var infoMatch = documentText.match(infoRE);
 		var result="";
-		if (informationTable) {
-			result=informationTable.rows[1].textContent;
-		} else {
-			GM_log(documentText);
+		if (infoMatch) {
+			result=infoMatch[1];
 		}
 		return result;
 	},
