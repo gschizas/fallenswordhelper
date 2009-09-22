@@ -248,10 +248,10 @@ var Helper = {
 		Layout.hideBanner();
 		Layout.moveFSBox();
 		Layout.hideHCSGuildOnline();
-		Helper.prepareGuildList();
 		Helper.prepareAllyEnemyList();
-		Helper.prepareBountyData();
 		Helper.prepareChat();
+		Helper.prepareGuildList();
+		Helper.prepareBountyData();
 		Helper.injectStaminaCalculator();
 		Helper.injectLevelupCalculator();
 		Layout.injectMenu();
@@ -2512,8 +2512,10 @@ var Helper = {
 		else {
 			var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 			if (!injectHere) return;
-			var info = injectHere.insertRow(0);
+			var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0)
 			var cell = info.insertCell(0);
+			//var info = injectHere.insertRow(0);
+			//var cell = info.insertCell(0);
 			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
 			Helper.retrieveGuildData(false);
 		}
@@ -2618,7 +2620,7 @@ var Helper = {
 		if (showLines==0) return;
 		var injectHere = System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
 		if (!injectHere) return;
-		var info = injectHere.insertRow(GM_getValue("enableGuildOnlineList")?1:0)
+		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0)
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
 		var chat = System.getValueJSON("chat");
@@ -7344,10 +7346,10 @@ var Helper = {
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a> and '+
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a> '+
-			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a> and '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
+			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'</table></form>';
 		var insertHere = System.findNode("//table[@width='100%']");
