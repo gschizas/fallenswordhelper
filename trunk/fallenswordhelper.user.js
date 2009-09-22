@@ -36,7 +36,6 @@ var Helper = {
 		System.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		System.setDefault("showHuntingBuffs", true);
 		System.setDefault("moveFSBox", false);
-		System.setDefault("hideNewBox", false);
 
 		System.setDefault("guildSelf", "");
 		System.setDefault("guildFrnd", "");
@@ -256,9 +255,9 @@ var Helper = {
 		Helper.injectStaminaCalculator();
 		Helper.injectLevelupCalculator();
 		Layout.injectMenu();
-		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
 		Helper.injectFSBoxLog();
+		Helper.fixOnlineGuildBuffLinks();
 		
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -1937,6 +1936,20 @@ var Helper = {
 		}
 	},
 
+	fixOnlineGuildBuffLinks: function() {
+		var buffLinks = System.findNodes("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
+		if (buffLinks) {
+			for (var i=0; i<buffLinks.length; i++){
+				var buffLink = buffLinks[i];
+				var oldHref = buffLink.getAttribute('href');
+				var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
+				if (playerName) {
+					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&t=" + playerName[1] + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+				} 
+			}
+		}
+	},
+
 	injectWorldMap: function() {
 		Helper.showMap(true);
 	},
@@ -2390,6 +2403,16 @@ var Helper = {
 				resultText += "Shield Imp Death\n";
 				showCombatLog = true;
 			}
+			if (levelUp=="1") {
+				resultHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
+				resultText += "Your level has increased!\n";
+				showCombatLog = true;
+			}
+			if (levelUp=="-1") {
+				resultHtml += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
+				resultText += "Your level has decreased!\n";
+				showCombatLog = true;
+			}
 			if (xpGain<0) result.style.color='red';
 			result.innerHTML=resultHtml
 			var monsterParent = monster.parentNode;
@@ -2412,16 +2435,6 @@ var Helper = {
 						reportHtml += "<br/>" + reportMatch[1];
 						reportText += reportMatch[1].replace(/<br>/g, "\n") + "\n";
 					}
-				}
-				if (levelUp=="1") {
-					reportHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
-					reportText += "Your level has increased!\n";
-					showCombatLog = true;
-				}
-				if (levelUp=="-1") {
-					reportHtml += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
-					reportText += "Your level has decreased!\n";
-					showCombatLog = true;
 				}
 				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
 				Helper.appendCombatLog(reportHtml, showCombatLog);
@@ -5810,6 +5823,11 @@ var Helper = {
 			var playerID = playerID[1];
 			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
 		}
+		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
+		if (playerName) {
+			var playerName = playerName[1];
+			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false)
+		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
 		
 		var buffList = Data.buffList();
@@ -7253,8 +7271,6 @@ var Helper = {
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
-				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
 				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
@@ -7399,7 +7415,6 @@ var Helper = {
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
 		System.saveValueForm(oForm, "moveFSBox");
-		System.saveValueForm(oForm, "hideNewBox");
 		System.saveValueForm(oForm, "hideKrulPortal");
 		System.saveValueForm(oForm, "hideQuests");
 		System.saveValueForm(oForm, "hideQuestNames");
@@ -8565,7 +8580,12 @@ var Helper = {
 			if ((i+2) > maxAuctions && (i+1) != bulkAuctionItemIMGs.length) {
 				var newRow = bulkSellTable.insertRow(-1);
 				var newCell = newRow.insertCell(0);
-				newCell.innerHTML = "You only have " + maxAuctions + " auction slots.";
+				newCell.colSpan = 4;
+				var newText = "You only have " + maxAuctions + " auction slots.";
+				if (maxAuctions == 2) {
+					newText += " Check the updates page to add more (or to fix this number if you think it is wrong)";
+				}
+				newCell.innerHTML = newText;
 				break;
 			}
 		}

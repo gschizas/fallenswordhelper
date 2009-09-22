@@ -71,15 +71,6 @@ var Layout = {
 		cell.appendChild(src);
 	},
 
-	hideNewBox: function() {
-		if (!GM_getValue("hideNewBox")) return;
-		var removeThis = System.findNode("//font[b='New?']/../../../..");
-		if (!removeThis) return;
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis);
-	},
-	
 	hideHCSOnline: function() {
 		if (!GM_getValue("enableGuildOnlineList")) return;
 		var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
