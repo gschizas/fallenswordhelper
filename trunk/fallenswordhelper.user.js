@@ -787,7 +787,19 @@ var Helper = {
 		injectHere.align = 'center';
 		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
 			'class="custombutton">' + injectHere.innerHTML;
-
+		injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Defended')]");
+		if (injectHere) {
+			var defendingGuildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
+			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
+			var myGuildID = GM_getValue("guildID");
+			if (defendingGuildID == myGuildID) {
+				var listOfDefenders = injectHere.nextSibling.textContent;
+				injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll'><span style='color:blue; font-size:x-small;'>"+
+					"Buff All</span></a></nobr>";
+				var buffAllLink = System.findNode("//a[@id='buffAll']");
+				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+			}
+		}
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
 
@@ -5678,9 +5690,17 @@ var Helper = {
 					var aMember=memberList.members[j];
 					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 					if (aMember.name==foundName) {
+						var listOfDefenders = allItems[i].cells[1].textContent;
 						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) + 
-							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
+							//"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
+							//direct call to player_id is faster link - server doesn't have to do a search.
+							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
 							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
+						theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + "'><span style='color:blue; font-size:x-small;'>"+
+							"Buff All</span></a></nobr>";
+						var buffAllLink = System.findNode("//a[@id='buffAll" + i + "']");
+						buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+						break;
 					}
 				}
 			}
@@ -5692,7 +5712,18 @@ var Helper = {
 				var theMember = theMembersArray[k].trim();
 				var linkMember;
 				if (theMember.search("<font") == -1) {
-					linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
+					if (memberList) {
+						for (j=0; j<memberList.members.length; j++) {
+							var aMember=memberList.members[j];
+							// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+							if (aMember.name==theMember) {
+								//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
+								//direct call to player_id is faster link - server doesn't have to do a search.
+								linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
+								break;
+							}
+						}
+					}
 				} else {
 					linkMember = " " + theMember;
 				}

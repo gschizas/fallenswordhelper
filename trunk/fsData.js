@@ -363,7 +363,40 @@ var Data = {
 				{questName:'Weapon of Significance',     level:373, location:'Canyon Depths'},
 				{questName:'Wrap Up Warm',               level:3,   location:'Mountain Path'},
 				{questName:'Wrongly Accused',            level:501, location:'Ralthien (Gate)'},
-				{questName:'Zombie Treasure',            level:218, location:'Yuzha (East)'}
+				{questName:'Zombie Treasure',            level:218, location:'Yuzha (East)'},
+				
+				{questName:'Lament of Sorrow',level:710,location:'Sorrows Abyss (Fissure)'},
+				{questName:'Perfecting Poison',level:708,location:'Sorrows Abyss (Steppes)'},
+				{questName:'Trolls Abound',level:706,location:'Ossrilan Labyrinth (Chambers)'},
+				{questName:'Lost in the Labyrinth',level:704,location:'Ossrilan Labyrinth (Entrance)'},
+				{questName:'Satyr Defense',level:702,location:'Stygian Flats (Plateau)'},
+				{questName:'Cease the Resurrection',level:700,location:'City of Torgais (Temple)'},
+				{questName:'Dousing the Flames',level:698,location:'City of Torgais (Outskirts)'},
+				{questName:'Hunting Season',level:697,location:'Torgais Mountains (Summit)'},
+				{questName:'Wailing Threat',level:694,location:'Hyrmit Swamps (Verge)'},
+				{questName:'Mixture Cure',level:692,location:'Hyrmit Swamps (Mire)'},
+				{questName:'Threat from the Sewers',level:690,location:'Mittamurk Sewers (Lower Chambers)'},
+				{questName:'Breaking the Flood',level:688,location:'Mittamurk Sewers (Inner Tunnels)'},
+				{questName:'Threat Rising',level:686,location:'Vapid Caves (Depths)'},
+				{questName:'Arid Saving',level:684,location:'Forsaken Desert (Badlands)'},
+				{questName:'Free the Slaves',level:682,location:'Forsaken Desert (Dunes)'},
+				{questName:'Corruption of Eltwier',level:680,location:'Eltwier Fortress (Great Hall)'},
+				{questName:'Threat from the Skies',level:678,location:'Eltwier Fortress (Courtyard)'},
+				{questName:'Thievery in Meirfur',level:676,location:'Meirfur Town (Center)'},
+				{questName:'Defending the Frontier',level:674,location:'Meirfur Town (Outskirts)'},
+				{questName:'Halting the Siege',level:672,location:'Ravaged Forest (Outskirts)'},
+				{questName:'Fall of Heitwar',level:670,location:'Heitwar Bastion (Great Hall)'},
+				{questName:'Fighting Back',level:668,location:'Ecrulym Flats (Plateau)'},
+				{questName:'Documents Abound',level:666,location:'Ecrulym Flats (Slopes)'},
+				{questName:'An Ogres Bounty',level:664,location:'Barbmore (Maze)'},
+				{questName:'Strife of the Lost',level:662,location:'Barbmore (Range)'},
+				{questName:'Influence of the Dark',level:660,location:'Caliginous Forests (Thicket)'},
+				{questName:'Dark Falling',level:658,location:'Caliginous Forests (Murk)'},
+				{questName:'Lost Caravan',level:656,location:'The Fire Forest (Waterfall)'},
+				{questName:'Gnome Defense',level:654,location:'The Fire Forest (Valley)'},
+				{questName:'Aiding the Gnomes',level:652,location:'The Fire Forest (Ridge)'},
+				{questName:'The Fey Portal',level:650,location:'Elrill Dungeon (Outer)'},
+				{questName:'Hidden Enemy',level:647,location:'Audinar Depths (Inner)'}
 			];
 			Data.questArray = questArray.sort();
 		}
@@ -6804,9 +6837,19 @@ var Data = {
 				{name:'Flamebreath Gloves', type:'gloves'},
 				{name:'Flamebreath Rune', type:'rune'},
 				{name:'Rune of Haetmophin', type:'rune'},
-				
 				{name:'Celestial Punch Claws', type:'gloves'},
-				{name:'Lagarto Helmet', type:'helmet'}
+				{name:'Lagarto Helmet', type:'helmet'},
+				
+				{name:'Armor of Portala', type:'armor'},
+				{name:'Echibors Robes of Office', type:'armor'},
+				{name:'Lord Huistrel Amulet', type:'amulet'},
+				{name:'Lord Huistrel Rune', type:'rune'},
+				{name:'Lord Huistrel Shield', type:'shield'},
+				{name:'Shield of Nouiban', type:'shield'},
+				{name:'Sword of Gheddical', type:'weapon'},
+				{name:'Ornate Bracers of the Lamia', type:'gloves'},
+				{name:'Ornate Choker of the Lamia', type:'amulet'},
+				{name:'Rune of Hofall', type:'rune'}
 			]
 		}
 		return Data.itemArray;
