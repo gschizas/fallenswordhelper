@@ -45,31 +45,6 @@ var Layout = {
 		if (injectHere2) injectHere2.innerHTML=result;
 	},
 
-	moveFSBox: function() {
-		if (!GM_getValue("moveFSBox")) return;
-		var src=System.findNode("//b[.='FSBox']/../../../../..");
-		if (!src) return;
-		src.parentNode.removeChild(src.nextSibling);
-		var dest=System.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
-		// window.alert(dest);
-		var info = dest.insertRow(26);
-		var cell = info.insertCell(0);
-		cell.innerHTML="&nbsp;";
-		info = dest.insertRow(26);
-		cell = info.insertCell(0);
-		cell.setAttribute("align", "center");
-		cell.appendChild(src);
-	},
-
-	hideNewBox: function() {
-		if (!GM_getValue("hideNewBox")) return;
-		var removeThis = System.findNode("//font[b='New?']/../../../..");
-		if (!removeThis) return;
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis);
-	},
-
 	notebookContent: function() {
 		return System.findNode("//table[@width='640']/..");
 	},

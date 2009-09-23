@@ -131,6 +131,31 @@ var Data = {
 	},
 
 	buffList: function() {
+		if (!Data.buffArray) {
+			Data.buffArray = [
+				{name: "Strike", stamina: 10, "duration": 60,   treeId: 0, skillId: 0,  buff: "need help"},
+				{name: "Mission Finder", stamina: 10, "duration": 60,   treeId: 0, skillId: 1,  buff: "need help"},
+				{name: "Find Item", stamina: 10, "duration": 60,   treeId: 0, skillId: 2,  buff: "need help"},
+				{name: "Internal Reserves", stamina: 10, "duration": 60,   treeId: 0, skillId: 3,  buff: "need help"},
+				{name: "Data Processor", stamina: 15, "duration": 60,   treeId: 0, skillId: 4,  buff: "need help"},
+				{name: "Defiance", stamina: 15, "duration": 60,   treeId: 0, skillId: 5,  buff: "need help"},
+				{name: "Absorption", stamina: 15, "duration": 60,   treeId: 0, skillId: 6,  buff: "need help"},
+				{name: "Salvage", stamina: 15, "duration": 60,   treeId: 0, skillId: 7,  buff: "need help"},
+				{name: "Researcher", stamina: 20, "duration": 60,   treeId: 0, skillId: 8,  buff: "need help"},
+				{name: "Brinkmanship", stamina: 20, "duration": 60,   treeId: 0, skillId: 9,  buff: "need help"},
+				{name: "Kinetic Reserves", stamina: 20, "duration": 60,   treeId: 0, skillId: 10,  buff: "need help"},
+				{name: "Rad Hunter", stamina: 20, "duration": 60,   treeId: 0, skillId: 11,  buff: "need help"},
+				{name: "Robot Hunter", stamina: 20, "duration": 60,   treeId: 0, skillId: 12,  buff: "need help"},
+				{name: "Haggle", stamina: 25, "duration": 60,   treeId: 0, skillId: 13,  buff: "need help"},
+				{name: "Corrode", stamina: 25, "duration": 60,   treeId: 0, skillId: 14,  buff: "need help"},
+				{name: "Protection Field", stamina: 25, "duration": 60,   treeId: 0, skillId: 15,  buff: "need help"},
+				{name: "Deflect", stamina: 25, "duration": 60,   treeId: 0, skillId: 16,  buff: "need help"},
+				{name: "Intensifier", stamina: 30, "duration": 60,   treeId: 0, skillId: 17,  buff: "need help"},
+				{name: "Entity Seeker", stamina: 30, "duration": 60,   treeId: 0, skillId: 16,  buff: "need help"},
+				{name: "Traverse", stamina: 30, "duration": 60,   treeId: 0, skillId: 16,  buff: "need help"}
+			];
+		}
+		return Data.buffArray;
 	},
 	
 	quickSearchList: function() {
