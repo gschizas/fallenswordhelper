@@ -58,6 +58,8 @@ var Helper = {
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("hideHCSGuildOnlineList", false);
+		System.setDefault("enableGuildInfoWidgets", true);
+		System.setDefault("hideHCSChatSection", false);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
 
@@ -247,7 +249,7 @@ var Helper = {
 		Helper.init();
 		Layout.hideBanner();
 		Layout.moveFSBox();
-		Layout.hideHCSGuildOnline();
+		Layout.hideHCSGuildInfoStuff();
 		Helper.prepareAllyEnemyList();
 		Helper.prepareChat();
 		Helper.prepareGuildList();
@@ -258,6 +260,7 @@ var Helper = {
 		Helper.replaceKeyHandler();
 		Helper.injectFSBoxLog();
 		Helper.fixOnlineGuildBuffLinks();
+		Helper.addGuildInfoWidgets();
 		
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -404,6 +407,10 @@ var Helper = {
 			case "reliclist":
 				Helper.injectRelicList();
 				break;
+//temporary fix for relic screen while HCS sort out their stuff.
+case "dochat":
+	Helper.injectRelic();
+	break;
 			case "log":
 				Helper.addLogColoring("GuildLog", 1);
 				Helper.addGuildLogWidgets();
@@ -1961,6 +1968,42 @@ var Helper = {
 			}
 		}
 	},
+	
+	addGuildInfoWidgets: function() {
+		if (!GM_getValue("enableGuildInfoWidgets")) return;
+        var guildInfoTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Info']]");
+		if (guildInfoTable) {
+			var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
+			for (var i=0; i<onlineMembersTable.rows.length; i++){
+				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
+				if (onlineMemberSecondCell) {
+					var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
+					var playerNameLinkElement = onlineMemberFirstCell.firstChild.nextSibling;
+					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+					if (lastActivityMinutes < 2) {
+						playerNameLinkElement.style.color = 'green';
+						playerNameLinkElement.firstChild.style.color = 'green';
+					} else if (lastActivityMinutes < 5) {
+						playerNameLinkElement.style.color = 'white';
+						playerNameLinkElement.firstChild.style.color = 'white';
+					} else {
+						playerNameLinkElement.style.color = 'gray';
+						playerNameLinkElement.firstChild.style.color = 'gray';
+					}
+					if (onlineMemberFirstCell.textContent.trim() == Helper.characterName.trim()) {
+						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						messageLink.style.visibility = 'hidden';
+						var buffLink = messageLink.nextSibling.nextSibling;
+						var secureTradeLink = buffLink.nextSibling.nextSibling;
+						secureTradeLink.style.visibility = 'hidden';
+						var tradeLink = secureTradeLink.nextSibling.nextSibling;
+						tradeLink.style.visibility = 'hidden';
+					}
+				}
+			}
+		}
+    },
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
@@ -7242,8 +7285,14 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
-			'<tr><td align="right">'+'Hide HCS Online Guild Members List' + Helper.helpLink('Hide HCS Online Guild Members List', 'Enabling this option will Disable the HCS Guild Online Players List') +
+			'<tr><td align="right">Hide HCS Online Members' + Helper.helpLink('Hide HCS Online Guild Members List', 'Enabling this option will Disable the HCS Guild Online Players List') +
 				':</td><td><input name="hideHCSGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("hideHCSGuildOnlineList")?" checked":"") +
+				'></td></tr>'  +
+			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
+				'></td></tr>'  +
+			'<tr><td align="right">Hide HCS Chat Section' + Helper.helpLink('Hide HCS Chat Sction', 'Enabling this option will Disable the HCS Chat section') +
+				':</td><td><input name="hideHCSChatSection" type="checkbox" value="on"' + (GM_getValue("hideHCSChatSection")?" checked":"") +
 				'></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
@@ -7443,6 +7492,8 @@ var Helper = {
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "hideHCSGuildOnlineList");
+		System.saveValueForm(oForm, "enableGuildInfoWidgets");
+		System.saveValueForm(oForm, "hideHCSChatSection");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
