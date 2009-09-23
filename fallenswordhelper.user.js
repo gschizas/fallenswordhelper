@@ -57,9 +57,7 @@ var Helper = {
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
-		System.setDefault("hideHCSGuildOnlineList", false);
 		System.setDefault("enableGuildInfoWidgets", true);
-		System.setDefault("hideHCSChatSection", false);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
 
@@ -249,7 +247,6 @@ var Helper = {
 		Helper.init();
 		Layout.hideBanner();
 		Layout.moveFSBox();
-		Layout.hideHCSGuildInfoStuff();
 		Helper.prepareAllyEnemyList();
 		Helper.prepareChat();
 		Helper.prepareGuildList();
@@ -293,6 +290,7 @@ var Helper = {
 
 			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
 			subPageId=subPageId?subPageId.getAttribute("value"):"-";
+			if (subPageId=="dochat") {pageId="-"; subPageId="-";}
 
 			subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
 			subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
@@ -407,10 +405,6 @@ var Helper = {
 			case "reliclist":
 				Helper.injectRelicList();
 				break;
-//temporary fix for relic screen while HCS sort out their stuff.
-case "dochat":
-	Helper.injectRelic();
-	break;
 			case "log":
 				Helper.addLogColoring("GuildLog", 1);
 				Helper.addGuildLogWidgets();
@@ -7285,14 +7279,8 @@ case "dochat":
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
-			'<tr><td align="right">Hide HCS Online Members' + Helper.helpLink('Hide HCS Online Guild Members List', 'Enabling this option will Disable the HCS Guild Online Players List') +
-				':</td><td><input name="hideHCSGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("hideHCSGuildOnlineList")?" checked":"") +
-				'></td></tr>'  +
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
-				'></td></tr>'  +
-			'<tr><td align="right">Hide HCS Chat Section' + Helper.helpLink('Hide HCS Chat Sction', 'Enabling this option will Disable the HCS Chat section') +
-				':</td><td><input name="hideHCSChatSection" type="checkbox" value="on"' + (GM_getValue("hideHCSChatSection")?" checked":"") +
 				'></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
@@ -7491,9 +7479,7 @@ case "dochat":
 		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
-		System.saveValueForm(oForm, "hideHCSGuildOnlineList");
 		System.saveValueForm(oForm, "enableGuildInfoWidgets");
-		System.saveValueForm(oForm, "hideHCSChatSection");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
@@ -8890,7 +8876,7 @@ case "dochat":
 		
 		injectHere=document.getElementById('scvlog');
 		injectHere.innerHTML="<input class=custombutton type=button value='Quick Scavenge' id=quickScavenge><br>"+
-			"<textarea id=scvLogText cols=50 rows=15 class=custominput></textarea>";
+			"<textarea id=scvLogText cols=50 rows=15 class=custominput></textarea><div id=scvScreen></div>";
 		document.getElementById("scvlogclear").addEventListener("click",function() {
 				document.getElementById("scvLogText").value="";
 			},true);
@@ -8929,6 +8915,8 @@ case "dochat":
 		} else
 			output=Layout.infoBox(responseText)+output;
 		output+='\n===============\n\n';
+		document.getElementById("scvScreen").innerHTML=report.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
+		if (item) document.getElementById("itemDiv").style.display='block';
 		
 		// back pack counter
 		System.xmlhttp("index.php?cmd=world", function(responseText) {
