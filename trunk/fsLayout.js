@@ -71,24 +71,32 @@ var Layout = {
 		cell.appendChild(src);
 	},
 
-	hideHCSOnline: function() {
-		if (!GM_getValue("enableGuildOnlineList")) return;
-		var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
-		if (!removeThis) return;
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis);
+	hideHCSGuildInfoStuff: function() {
+		var hideHCSChatSection = GM_getValue("hideHCSChatSection");
+		var hideHCSGuildOnlineList = GM_getValue("hideHCSGuildOnlineList")
+		if (hideHCSChatSection && hideHCSGuildOnlineList) {
+			var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
+			if (!removeThis) return;
+			removeThis.style.display='none';
+		}
+		else if (hideHCSChatSection) {
+			var removeThis = System.findNode("//font/i[b='Chat (Last 3)']/..");
+			if (!removeThis) return;
+			removeThis.style.display='none';
+		}
+		else if (hideHCSGuildOnlineList) {
+			var removeThis = System.findNode("//font/i[b='Online Members']");
+			if (!removeThis) return;
+			removeThis.style.display='none'; // title
+			removeThis.nextSibling.nextSibling.style.display='none'; //table
+			removeThis.nextSibling.nextSibling.nextSibling.nextSibling.style.display='none'; //<br>
+			var removeThis = System.findNode("//font/i[b='Actions']");
+			if (!removeThis) return;
+			removeThis.style.display='none'; // title
+			removeThis.nextSibling.nextSibling.style.display='none'; //table
+			removeThis.nextSibling.nextSibling.nextSibling.nextSibling.style.display='none'; //<br>
+		}
 	},
-
-	hideHCSGuildOnline: function() {
-		if (!GM_getValue("hideHCSGuildOnlineList")) return;
-		var removeThis = System.findNode("//font[b='Guild Info']/../../../..");
-		if (!removeThis) return;
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis.nextSibling);
-		removeThis.parentNode.removeChild(removeThis);
-	},
-
 
 	notebookContent: function() {
 		return System.findNode("//table[@width='100%']/..");
