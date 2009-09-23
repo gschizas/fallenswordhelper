@@ -36,8 +36,6 @@ var Helper = {
 		System.setDefault("showExtraLinks", true);
 		System.setDefault("huntingBuffs", "Data Processor, Researcher");
 		System.setDefault("showHuntingBuffs", true);
-		System.setDefault("moveFSBox", false);
-		System.setDefault("hideNewBox", false);
 
 		System.setDefault("guildSelf", "");
 		System.setDefault("guildFrnd", "");
@@ -59,6 +57,7 @@ var Helper = {
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
+		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
 
@@ -236,17 +235,17 @@ var Helper = {
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		Helper.init();
-		Layout.moveFSBox();
 		Helper.prepareChat();
 		Helper.prepareGuildList();
 		Helper.prepareAllyEnemyList();
 		Helper.injectStaminaCalculator();
 		Helper.injectLevelupCalculator();
 		Layout.injectMenu();
-		Layout.hideNewBox();
 		Helper.replaceKeyHandler();
 		Helper.injectWorldWidgets();
 		Helper.injectFSBoxLog();
+		Helper.fixOnlineGuildBuffLinks();
+		Helper.addGuildInfoWidgets();
 
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -279,6 +278,7 @@ var Helper = {
 
 			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
 			subPageId=subPageId?subPageId.getAttribute("value"):"-";
+			if (subPageId=="dochat") {pageId="-"; subPageId="-";}
 
 			subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
 			subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
@@ -550,6 +550,56 @@ var Helper = {
 			break;
 		}
 	},
+	
+	fixOnlineGuildBuffLinks: function() {
+		var buffLinks = System.findNodes("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
+		if (buffLinks) {
+			for (var i=0; i<buffLinks.length; i++){
+				var buffLink = buffLinks[i];
+				var oldHref = buffLink.getAttribute('href');
+				var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
+				if (playerName) {
+					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&t=" + playerName[1] + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+				} 
+			}
+		}
+	},
+	
+	addGuildInfoWidgets: function() {
+		if (!GM_getValue("enableGuildInfoWidgets")) return;
+        var guildInfoTable = System.findNode("//table[tbody/tr/td/font/font/i/b[.='Online Members']]");
+		if (guildInfoTable) {
+			var onlineMembersTable = System.findNode("//table[tbody/tr/td/font/font/i/b[.='Online Members']]//table");
+			for (var i=0; i<onlineMembersTable.rows.length; i++){
+				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
+				if (onlineMemberSecondCell) {
+					var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
+					var playerNameLinkElement = onlineMemberFirstCell.firstChild.nextSibling;
+					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+					if (lastActivityMinutes < 2) {
+						playerNameLinkElement.style.color = 'green';
+						playerNameLinkElement.firstChild.style.color = 'green';
+					} else if (lastActivityMinutes < 5) {
+						playerNameLinkElement.style.color = 'white';
+						playerNameLinkElement.firstChild.style.color = 'white';
+					} else {
+						playerNameLinkElement.style.color = 'gray';
+						playerNameLinkElement.firstChild.style.color = 'gray';
+					}
+					if (onlineMemberFirstCell.textContent.trim() == Helper.characterName.trim()) {
+						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						messageLink.style.visibility = 'hidden';
+						var buffLink = messageLink.nextSibling.nextSibling;
+						var secureTradeLink = buffLink.nextSibling.nextSibling;
+						secureTradeLink.style.visibility = 'hidden';
+						var tradeLink = secureTradeLink.nextSibling.nextSibling;
+						tradeLink.style.visibility = 'hidden';
+					}
+				}
+			}
+		}
+    },
 
 	injectWorldWidgets: function() {
 		Helper.injectQuickHeal();
@@ -2400,8 +2450,23 @@ var Helper = {
 		var goldGain = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?\d+);/i);
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?\d+);/i);
 		var levelUp = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?\d+);/i);
+		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
+		var info = Layout.infoBox(responseText);
+		var lootMatch=responseText.match(lootRE)
+		var lootedItem = "";
+		var lootedItemId = "";
+		var lootedItemVerify="";
+		if (lootMatch && lootMatch.length>0) {
+			lootedItem=lootMatch[2];
+			lootedItemId=lootMatch[4];
+			lootedItemVerify=lootMatch[5];
+		}
+		var shieldImpHPRE = /Psi Shield has \d block\(s\) remaining/;
+		var shieldImpHP = responseText.match(shieldImpHPRE);
+		var shieldImpDeathRE = /Psi Shield is destroyed/;
+		var shieldImpDeath = responseText.match(shieldImpDeathRE);
+		
 		var surgeGain = System.getIntFromRegExp(responseText, /var\s+surgeGain=(-?\d+);/i);
-		// var finalHP = System.getIntFromRegExp(responseText, /^HP\[1\]=(-?[0-9]+);/i);
 		var hpNode = System.findNode("//div[@id='current_hp_0']", doc);
 		if (hpNode) {
 			// get HP from combat aninmation script
@@ -2423,23 +2488,8 @@ var Helper = {
 			indicatorHP.setAttribute("width", Math.round(100 * finalHP / maxHP) + "%");
 		}
 
-		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
-		var info = Layout.infoBox(responseText);
-		var lootMatch=responseText.match(lootRE)
-		var lootedItem = "";
-		var lootedItemId = "";
-		var lootedItemVerify="";
-		if (lootMatch && lootMatch.length>0) {
-			lootedItem=lootMatch[2];
-			lootedItemId=lootMatch[4];
-			lootedItemVerify=lootMatch[5];
-		}
-		var shieldImpHPRE = /Psi Shield has \d block\(s\) remaining/;
-		var shieldImpHP = responseText.match(shieldImpHPRE);
-		var shieldImpDeathRE = /Psi Shield is destroyed/;
-		var shieldImpDeath = responseText.match(shieldImpDeathRE);
-
 		var monster = callback.node;
+		var showCombatLog = false;
 		if (monster) {
 			var result=document.createElement("div");
 			var resultHtml = "<small><small>"+callback.index+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
@@ -2449,20 +2499,33 @@ var Helper = {
 				resultText += info + "\n";
 			}
 			if (lootedItem!="") {
-				resultHtml += "<br/><small><small>Looted item:<span onclick=\"ajaxLoadItem(" +
+				resultHtml += "<br/><small><small>Looted item:<span onclickDISABLED=\"ajaxLoadItem(" +
 					lootedItemId + ", -1, 2, " + playerId + ", '');\" >" +
 					lootedItem + "</span></small></small>";
 				resultText += "Looted item:" + lootedItem + "\n";
 			}
 			if (shieldImpHP) {
 				resultHtml += "<br/><small><small><span style='color:red;'>"+shieldImpHP[shieldImpHP.length-1]+"</span></small></small>";
-				resultText += shieldImpHP[0]+"\n"
+				resultText += shieldImpHP[0]+"\n";
+				showCombatLog = true;
 			}
 			if (shieldImpDeath) {
 				resultHtml += "<br/><small><small><span style='color:red;'>Psi Shield was destroyed</span></small></small>";
-				resultText += "Psi Shield was destroyed\n"
+				resultText += "Psi Shield was destroyed\n";
+				showCombatLog = true;
+			}
+			if (levelUp=="1") {
+				resultHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
+				resultText += "Your level has increased!\n";
+				showCombatLog = true;
+			}
+			if (levelUp=="-1") {
+				resultHtml += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
+				resultText += "Your level has decreased!\n";
+				showCombatLog = true;
 			}
 			if (xpGain<0) result.style.color='red';
+			result.innerHTML=resultHtml;
 			var monsterParent = monster.parentNode;
 			result.id = "result" + callback.index;
 			if (report) {
@@ -2507,7 +2570,7 @@ var Helper = {
 					reportText += "Your level has decreased!\n";
 				}
 				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
-				Helper.appendCombatLog(reportHtml);
+				Helper.appendCombatLog(reportHtml, showCombatLog);
 				result.innerHTML=reportCombat+reportAmmo+resultHtml;
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
@@ -2534,10 +2597,10 @@ var Helper = {
 		GM_setValue("CombatLog", theLog);
 	},
 
-	appendCombatLog: function(text) {
+	appendCombatLog: function(text, appendCombatLog) {
 		var reportLog = System.findNode("//div[@id='reportsLog']");
 		if (!reportLog) return;
-		reportLog.innerHTML += text + "<br/>";
+		if (GM_getValue("showCombatLog") || showCombatLog) reportLog.innerHTML += text + "<br/>";
 	},
 
 	scrollUpCombatLog: function() {
@@ -5757,22 +5820,62 @@ var Helper = {
 		var minGroupLevel = GM_getValue("minGroupLevel");
 		if (minGroupLevel) {
 			var textArea = subTable.rows[0].cells[0];
-			textArea.innerHTML += ' <span style="color:cyan">Current Min Level Setting: '+ minGroupLevel +'</span>';
+			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
 
 		allItems = System.findNodes("//tr[td/a/img/@title='View Squad Stats']");
 		var memberList=System.getValueJSON("memberlist");
+		var onlineIMG = '<img src="' + System.imageServer + '/skin/online.gif" width=10 height="10" title="Online">';
+		var offlineIMG = '<img src="' + System.imageServer + '/skin/offline.gif" width=10 height="10" title="Offline">';
 		for (i=0; i<allItems.length; i++) {
 			var theItem=allItems[i].cells[0];
 			var foundName=theItem.textContent;
-			for (j=0; j<memberList.members.length; j++) {
-				var aMember=memberList.members[j];
-				// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
-				if (aMember.name==foundName) {
-					theItem.innerHTML = "<span style='font-size:small; " + ((aMember.status == "Online")?"color:green;":"") + "'>" +
-						theItem.innerHTML + "</span> [" + aMember.level + "]";
+			if (memberList) {
+				for (j=0; j<memberList.members.length; j++) {
+					var aMember=memberList.members[j];
+					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+					if (aMember.name==foundName) {
+						var listOfDefenders = allItems[i].cells[1].textContent;
+						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) + 
+							//"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
+							//direct call to player_id is faster link - server doesn't have to do a search.
+							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
+							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
+						theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + "'><span style='color:blue; font-size:x-small;'>"+
+							"Buff All</span></a></nobr>";
+						var buffAllLink = System.findNode("//a[@id='buffAll" + i + "']");
+						buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+						break;
+					}
 				}
 			}
+			
+			var theMembersCell=allItems[i].cells[1];
+			var theMembersArray=theMembersCell.innerHTML.split(",");
+			var linkMembersArray = new Array();
+			for (k=0; k<theMembersArray.length; k++) {
+				var theMember = theMembersArray[k].trim();
+				var linkMember;
+				if (theMember.search("<font") == -1) {
+					if (memberList) {
+						for (j=0; j<memberList.members.length; j++) {
+							var aMember=memberList.members[j];
+							// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+							if (aMember.name==theMember) {
+								//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
+								//direct call to player_id is faster link - server doesn't have to do a search.
+								linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
+								break;
+							}
+						}
+					}
+				} else {
+					linkMember = " " + theMember;
+				}
+				linkMembersArray.push(linkMember)
+			}
+			theMembersCell.innerHTML = linkMembersArray;
+
 			var theDateCell=allItems[i].cells[2];
 			var theDate=theDateCell.firstChild;
 			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
@@ -5793,7 +5896,6 @@ var Helper = {
 		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Squad Stats" class="custombutton">';
 
 		document.getElementById('fetchgroupstats').addEventListener('click', Helper.fetchGroupData, true);
-
 	},
 
 	fetchGroupData: function(evt) {
@@ -5879,6 +5981,10 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
+		GM_addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
+			'.HelperTextLink:hover {text-decoration:underline;}\n');
+
+		Helper.injectBuffPackArea();
 
 		var playerIDRE = /tid=(\d+)/;
 		var playerID = playerIDRE.exec(location);
@@ -5886,6 +5992,239 @@ var Helper = {
 			var playerID = playerID[1];
 			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
 		}
+		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
+		if (playerName) {
+			var playerName = playerName[1];
+			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false)
+		}
+		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
+		
+		var buffList = Data.buffList();
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		
+		if (skillNodes) {
+			for (var i = 0; i < skillNodes.length; i++ ) {
+				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\s+([A-Z].*) \[/)[1];
+				skillNodes[i].setAttribute("skillName", skillName);
+				for (var k = 0; k < buffList.length; k++) {
+					if (buffList[k].name == skillName) {
+						skillNodes[i].setAttribute("staminaCost",buffList[k].stamina);
+						break;
+					}
+				}
+				skillNodes[i].addEventListener("click", Helper.toggleBuffStatus, true);
+			}
+		}
+		var activateButton = System.findNode("//input[@value='Activate Selected Skills on Self']");
+		activateButton.parentNode.innerHTML += "<br><span style='color:white;'>Energy to activate selected skills: <span>" +
+			"<span id='staminaTotal' style='color:blue;'>0</span>";
+	},
+
+	toggleBuffStatus: function(evt) {
+		var staminaTotal = System.findNode("//span[@id='staminaTotal']");
+		if (evt.target.checked == false) {
+			evt.target.checked = false;
+			staminaTotal.innerHTML = ((staminaTotal.textContent*1) - (evt.target.getAttribute("staminaCost")*1));
+		}
+		else if (evt.target.checked == true) {
+			evt.target.checked = true;
+			staminaTotal.innerHTML = ((staminaTotal.textContent*1) + (evt.target.getAttribute("staminaCost")*1));
+		}
+	},
+	
+	injectBuffPackArea: function() {
+		Helper.injectBuffPackList();
+		Helper.injectBuffPackAddButton();
+	},
+
+	injectBuffPackList: function() {
+		var injectHere = System.findNode("//input[@value='Activate Selected Skills on Self']/parent::*/parent::*/parent::*");
+		var bpArea = document.createElement("SPAN");
+		bpArea.innerHTML="<br><div align='center'><span style='color:lime; font-size:large;'>Buff Packs</span><table id='bpTable' width='370' style='border:1px solid #A07720;' rules=rows><tbody>" +
+			"<tr><td style='color:gold; font-weight:bold;'>Nickname</td><td style='color:gold; font-weight:bold;'>Buffs included in the pack</td>" +
+			"<td><span id=bpSelectAll class='HelperTextLink'>[All]</span>&nbsp;<span id=bpClear class='HelperTextLink'>[Clear]</span></td></tr>" +
+			"</tbody></table></div>";
+		bpArea.style.color="white";
+		injectHere.appendChild(bpArea);
+
+		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
+		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
+
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) return;
+
+		if (!theBuffPack["nickname"]) { //avoid bugs if the new array is not populated yet
+			theBuffPack["nickname"] = {};
+		}
+		if (!theBuffPack["staminaTotal"]) { //avoid bugs if the new array is not populated yet
+			theBuffPack["staminaTotal"] = {};
+		}
+
+		var bpTable = document.getElementById("bpTable");
+		for (var i = 0; i < theBuffPack["size"]; i++) {
+			var myRow = bpTable.insertRow(-1);
+			var nickname = (theBuffPack["nickname"][i]? theBuffPack["nickname"][i]:"");
+			var listOfBuffs = theBuffPack["bp"][i];
+			var staminaTotal = (theBuffPack["staminaTotal"][i]? theBuffPack["staminaTotal"][i]:"");
+			myRow.innerHTML = "<td>" + nickname + "</td><td style='font-size:x-small;'>" + listOfBuffs + "&nbsp;" + staminaTotal + "&nbsp" +
+				"</td><td><span id=bpSelect" + i + " class='HelperTextLink' buffId=" + i + ">[Select]</span> " +
+				"<span id=bpDelete" + i + " buffId=" + i + " class='HelperTextLink'>[X]</span></td>"
+			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPack, true);
+			document.getElementById("bpDelete" + i).addEventListener("click", Helper.deleteBuffPack, true);
+		}
+	},
+
+	setAllSkills: function(value) {
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			skillNodes[i].checked = value;
+		}
+		Helper.sumStamCostOfSelectedBuffs();
+	},
+
+	sumStamCostOfSelectedBuffs: function() {
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+
+		staminaRunningTotal = 0;
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			if (skillNodes[i].checked) {
+				staminaRunningTotal += (skillNodes[i].getAttribute("staminaCost")*1);
+			}
+		}
+
+		var staminaTotal = System.findNode("//span[@id='staminaTotal']");
+		staminaTotal.innerHTML = staminaRunningTotal;
+	},
+
+	useBuffPack: function(evt) {
+		var bpIndex=evt.target.getAttribute("buffId");
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) return;
+		if (bpIndex >= theBuffPack["size"]) return;
+
+		var buffList = theBuffPack["bp"][bpIndex];
+		if (!buffList) return;
+
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			GM_log(skillNodes[i].parentNode.parentNode.textContent);
+			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\s+([A-Z].*) \[/)[1];
+			if (buffList.indexOf(skillName) >= 0) {
+				skillNodes[i].checked = true;
+			}
+		}
+		Helper.sumStamCostOfSelectedBuffs();
+	},
+
+	deleteBuffPack: function(evt) {
+
+		if (!window.confirm("Are you sure you want to delete the buff pack?")) return;
+
+		var bpIndex=parseInt(evt.target.getAttribute("buffId"));
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) return;
+		if (!theBuffPack["size"]) return;
+
+		theBuffPack["size"] --;
+		if (theBuffPack["size"] == 0) { // avoid bugs :)
+			delete theBuffPack["bp"];
+			delete theBuffPack["nickname"];
+			delete theBuffPack["staminaTotal"];
+			theBuffPack["bp"] = {};
+			theBuffPack["nickname"] = {};
+			theBuffPack["staminaTotal"] = {};
+		}
+		if (!theBuffPack["nickname"]) { //avoid bugs
+			theBuffPack["nickname"] = {};
+		}
+		if (!theBuffPack["staminaTotal"]) { //avoid bugs
+			theBuffPack["staminaTotal"] = {};
+		}
+		for (var i = bpIndex; i < theBuffPack["size"]; i++) {
+			theBuffPack["bp"][i] = theBuffPack["bp"][i + 1];
+			//old buff packs won't have the next two values.
+			theBuffPack["nickname"][i] = (theBuffPack["nickname"][i + 1]? theBuffPack["nickname"][i + 1]:"");
+			theBuffPack["staminaTotal"][i] = (theBuffPack["staminaTotal"][i + 1]? theBuffPack["staminaTotal"][i + 1]:"");
+		}
+
+		delete theBuffPack["bp"][theBuffPack["size"]];
+		if (theBuffPack["nickname"][theBuffPack["size"]]) delete theBuffPack["nickname"][theBuffPack["size"]];
+		if (theBuffPack["staminaTotal"][theBuffPack["size"]]) delete theBuffPack["staminaTotal"][theBuffPack["size"]];
+
+		System.setValueJSON("buffpack", theBuffPack);
+		location.reload(true);
+	},
+
+	injectBuffPackAddButton: function() {
+		var bpTable = document.getElementById("bpTable");
+		var myRow = bpTable.insertRow(-1);
+		myRow.innerHTML = "<td><input size=10 id='newBuffPackNickname' name='newBuffPackNickname' value='nickname'></td>"+
+			"<td><input size=60 id='newBuffPack' name='newBuffPack' value='full buff names, separated by comma'></td>" +
+			"<td><span id=bpSave class='HelperTextLink'>[Save]</span><span id=bpAdd class='HelperTextLink'>[add]</span></td>";
+
+		// button handlers
+		document.getElementById("bpAdd").addEventListener("click", Helper.displayAddBuffPack, true);
+		document.getElementById("bpSave").addEventListener("click", Helper.saveBuffPack, true);
+
+		// display [add] only
+		document.getElementById("newBuffPack").style.visibility = "hidden";
+		document.getElementById("newBuffPackNickname").style.visibility = "hidden";
+		document.getElementById("bpAdd").style.visibility = "";
+		document.getElementById("bpSave").style.visibility = "hidden";
+	},
+
+	displayAddBuffPack: function() {
+		document.getElementById("newBuffPack").style.visibility = "";
+		document.getElementById("newBuffPackNickname").style.visibility = "";
+		document.getElementById("bpAdd").style.visibility = "hidden";
+		document.getElementById("bpSave").style.visibility = "";
+	},
+
+	saveBuffPack: function() {
+		if (!document.getElementById("newBuffPack").value) return;
+		if (!document.getElementById("newBuffPackNickname").value) return;
+
+		var theBuffPack = System.getValueJSON("buffpack")
+		if (!theBuffPack) {
+			theBuffPack = {};
+			theBuffPack["size"] = 0;
+			theBuffPack["bp"] = {};
+			theBuffPack["nickname"] = {};
+			theBuffPack["staminaTotal"] = {};
+		}
+		if (!theBuffPack["nickname"]) { //avoid bugs
+			theBuffPack["nickname"] = {};
+		}
+		if (!theBuffPack["staminaTotal"]) { //avoid bugs
+			theBuffPack["staminaTotal"] = {};
+		}
+		theBuffPack["bp"][theBuffPack["size"]] = document.getElementById("newBuffPack").value;
+		theBuffPack["nickname"][theBuffPack["size"]] = document.getElementById("newBuffPackNickname").value;
+		var listOfBuffs = theBuffPack["bp"][theBuffPack["size"]];
+		var buffArray = listOfBuffs.split(",");
+		var buffList = Data.buffList();
+		var staminaTotal = 0;
+		for (var j = 0; j < buffArray.length; j++) {
+			for (var k = 0; k < buffList.length; k++) {
+				if (buffArray[j].trim() == buffList[k].name) {
+					staminaTotal += buffList[k].stamina;
+					break;
+				}
+			}
+		}
+		theBuffPack["staminaTotal"][theBuffPack["size"]] = "<span style='color:blue;'>(" + staminaTotal + ")</span>";
+		
+		//increase the size of the array
+		theBuffPack["size"] += 1;
+
+		// save and reload
+		System.setValueJSON("buffpack", theBuffPack);
+		location.reload(true);
 	},
 
 	quickBuffMe: function() {
@@ -6341,6 +6680,9 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Online Faction Members' + Helper.helpLink('Show Faction Online Members List', 'This will show the faction members online list on the right.') +
 				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
 				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
+				'></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
@@ -6355,8 +6697,6 @@ var Helper = {
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
-			'<tr><td align="right">Move SS box' + Helper.helpLink('Move SS2 Box', 'This will move the SS2 box to the left, under the menu, for better visibility (unless it is already hidden.') +
-				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Keep Combat Logs' + Helper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '>' +
@@ -6394,12 +6734,6 @@ var Helper = {
 				'Send <input name="goldAmount" size="8" value="'+ GM_getValue("goldAmount") + '" /> '+
 				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />' +
 				'</td></tr>' +
-			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
-				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.') +
-				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Hide \"New?\" box' + Helper.helpLink('Hide New? Box', 'This will hide the New? box, useful to gain some space if you have already read it.') +
-				':</td><td><input name="hideNewBox" type="checkbox" value="on"' + (GM_getValue("hideNewBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
 				'><br/>Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
@@ -6521,11 +6855,11 @@ var Helper = {
 		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
+		System.saveValueForm(oForm, "enableGuildInfoWidgets");
 		System.saveValueForm(oForm, "enableGuildOnlineList");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
-		System.saveValueForm(oForm, "moveFSBox");
 
 		System.saveValueForm(oForm, "hideKrulPortal");
 		System.saveValueForm(oForm, "hideQuests");
@@ -7235,9 +7569,9 @@ var Helper = {
 		Helper.defaultLabels='auctionTemplate, chatTopToBottom, doNotKillList, enableBioCompressor, enableCreatureColoring, '+
 			'enableGuildOnlineList, enableLogColoring, footprints, footprintsColor, goldAmount, goldConfirm, goldRecipient, '+
 			'guildEnmy, guildEnmyMessage, guildFrnd, guildFrndMessage, guildOnlineRefreshTime, guildPast, guildPastMessage, '+
-			'guildSelf, guildSelfMessage, hideKrulPortal, hideMatchesForCompletedMoves, hideNewBox, hideQuestNames, hideQuests, '+
+			'guildSelf, guildSelfMessage, hideKrulPortal, hideMatchesForCompletedMoves, hideQuestNames, hideQuests, '+
 			'hideRecipeNames, hideRecipes, huntingBuffs, invMaxLvlFilter, keepLogs, krulXCV, '+
-			'maxCompressedCharacters, maxCompressedLines, minPSStats, monsterLog, moveFSBox, '+
+			'maxCompressedCharacters, maxCompressedLines, minPSStats, monsterLog, '+
 			'onlinePlayerMaxLvl, onlinePlayerMinLvl, quickKill, quickMsg, quickSearchList, quickWearFilter, sendGoldonWorld, '+
 			'showCombatLog, showCompletedQuests, showCreatureInfo, showExtraLinks, showHuntingBuffs, quickUseItems';
 		injectHere.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
@@ -7579,7 +7913,12 @@ var Helper = {
 			if ((i+2) > maxAuctions && (i+1) != bulkAuctionItemIMGs.length) {
 				var newRow = bulkSellTable.insertRow(-1);
 				var newCell = newRow.insertCell(0);
-				newCell.innerHTML = "You only have " + maxAuctions + " auction slots.";
+				newCell.colSpan = 4;
+				var newText = "You only have " + maxAuctions + " auction slots.";
+				if (maxAuctions == 2) {
+					newText += " Check the updates page to add more (or to fix this number if you think it is wrong).";
+				}
+				newCell.innerHTML = newText;
 				break;
 			}
 		}
