@@ -1969,10 +1969,15 @@ var Helper = {
 		if (guildInfoTable) {
 			var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
+				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
 				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
 				if (onlineMemberSecondCell) {
-					var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
-					var playerNameLinkElement = onlineMemberFirstCell.firstChild.nextSibling;
+					var playerTable = onlineMemberFirstCell.firstChild.nextSibling;
+					var checkboxColumn = onlineMemberFirstCell.firstChild.nextSibling.rows[0].cells[0];
+					var playernameColumn = onlineMemberFirstCell.firstChild.nextSibling.rows[0].cells[1];
+					checkboxColumn.style.display = 'none';
+					checkboxColumn.style.visibility = 'hidden';
+					var playerNameLinkElement = playernameColumn.firstChild;
 					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
 					if (lastActivityMinutes < 2) {
@@ -1985,7 +1990,7 @@ var Helper = {
 						playerNameLinkElement.style.color = 'gray';
 						playerNameLinkElement.firstChild.style.color = 'gray';
 					}
-					if (onlineMemberFirstCell.textContent.trim() == Helper.characterName.trim()) {
+					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
 						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
 						messageLink.style.visibility = 'hidden';
 						var buffLink = messageLink.nextSibling.nextSibling;
@@ -1996,6 +2001,9 @@ var Helper = {
 					}
 				}
 			}
+			var actionsTitle = System.findNode("//font[i/b[.='Actions']]");
+			actionsTitle.style.display = 'none';
+			actionsTitle.style.visibility = 'hidden';
 		}
     },
 
