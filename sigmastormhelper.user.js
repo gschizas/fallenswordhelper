@@ -2631,12 +2631,18 @@ var Helper = {
 	},
 
 	prepareGuildList: function() {
-		if (!Helper.rightSideBar) return;
-		if (!GM_getValue("enableGuildOnlineList")) return;
-		var info = Helper.rightSideBar.insertRow(0);
-		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-		Helper.retrieveGuildData();
+		if (!GM_getValue("enableGuildOnlineList")) {
+			GM_setValue("guildOnlineRefreshTime", 300);
+			Helper.retrieveGuildData(true); //Refresh guild data every 5 mins but don't inject online guild list
+		} 
+		else {
+			if (!Helper.rightSideBar) return;
+			if (!GM_getValue("enableGuildOnlineList")) return;
+			var info = Helper.rightSideBar.insertRow(0);
+			var cell = info.insertCell(0);
+			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+			Helper.retrieveGuildData(false);
+		}
 	},
 
 	retrieveGuildData: function(refreshGuildDataOnly) {
