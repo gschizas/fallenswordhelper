@@ -2735,7 +2735,7 @@ var Helper = {
 	},
 
 	prepareChat: function() {
-		Helper.rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/community_header.gif')]")
+		Helper.rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/infobox_sigmabox.gif')]")
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
 		if (!Helper.rightSideBar) return;
