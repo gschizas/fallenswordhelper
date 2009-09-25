@@ -1972,11 +1972,9 @@ var Helper = {
 				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
 				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
 				if (onlineMemberSecondCell) {
-					var playerTable = onlineMemberFirstCell.firstChild.nextSibling;
-					var checkboxColumn = onlineMemberFirstCell.firstChild.nextSibling.rows[0].cells[0];
-					var playernameColumn = onlineMemberFirstCell.firstChild.nextSibling.rows[0].cells[1];
-					checkboxColumn.style.display = 'none';
-					checkboxColumn.style.visibility = 'hidden';
+					var playerTable = onlineMemberFirstCell.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling;
+					var checkboxColumn = playerTable.rows[0].cells[0];
+					var playernameColumn = playerTable.rows[0].cells[1];
 					var playerNameLinkElement = playernameColumn.firstChild;
 					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
@@ -2001,9 +1999,6 @@ var Helper = {
 					}
 				}
 			}
-			var actionsTitle = System.findNode("//font[i/b[.='Actions']]");
-			actionsTitle.style.display = 'none';
-			actionsTitle.style.visibility = 'hidden';
 		}
     },
 
