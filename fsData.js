@@ -6839,7 +6839,7 @@ var Data = {
 				{name:'Rune of Haetmophin', type:'rune'},
 				{name:'Celestial Punch Claws', type:'gloves'},
 				{name:'Lagarto Helmet', type:'helmet'},
-				
+				{name:'Steamwork Cuirass', type:'armor'},
 				{name:'Armor of Portala', type:'armor'},
 				{name:'Echibors Robes of Office', type:'armor'},
 				{name:'Lord Huistrel Amulet', type:'amulet'},
