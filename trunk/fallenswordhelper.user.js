@@ -3104,6 +3104,8 @@ var Helper = {
 						var firstPart = messageHTML.substring(0, messageHTML.indexOf("<small>") + 7);
 						var secondPart = messageHTML.substring(messageHTML.indexOf("<small>") + 7, messageHTML.indexOf(">Reply</a>") + 10);
 						var thirdPart = messageHTML.substring(messageHTML.indexOf(">Reply</a>") + 10, messageHTML.indexOf(">Buff</a>") + 9);
+						var targetPlayerID = /quickBuff\((\d+)\)/.exec(thirdPart)[1];
+						thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID) + ">Buff</a> ]</nobr></span>";
 						var fourthPart = messageHTML.substring(messageHTML.indexOf(">Trade</a>") + 10, messageHTML.indexOf("</small>"));
 						var lastPart = messageHTML.substring(messageHTML.indexOf("</small>"), messageHTML.length);
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
