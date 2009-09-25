@@ -2736,6 +2736,7 @@ var Helper = {
 
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
+			System.setValueJSON("memberlist", memberList);
 			if (!refreshGuildDataOnly) Helper.injectGuildList(memberList);
 		}
 	},
@@ -4444,12 +4445,17 @@ var Helper = {
 		if (currentPage < Helper.compPage - 1) {
 			System.xmlhttp("index.php?cmd=profile&component_page="+nextPage, Helper.retriveComponent, nextPage);
 		} else {
+			var totalCount = System.findNodes("//td[contains(@background,'sigma2/inventory/1x1mini.gif')]");
+			if (totalCount) totalCount=totalCount.length; else totalCount=0;
+			totalCount+=currentPage*20;
 			var output='Component Summary<br/><table>';
+			var usedCount=0;
 			for (var id in Helper.componentList) {
 				var comp=Helper.componentList[id];
 				output+="<tr><td align=center><img src="+comp.src+" onmouseover=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
+				usedCount+=comp.count;
 			}
-			output+="</table>";
+			output+="<tr><td align=center>Total:</td><td>"+usedCount+" / "+totalCount+"</td></tr></table>";
 			document.getElementById('compSum').innerHTML=output;
 		}
 	},
@@ -5861,7 +5867,7 @@ var Helper = {
 			var linkMembersArray = new Array();
 			for (k=0; k<theMembersArray.length; k++) {
 				var theMember = theMembersArray[k].trim();
-				var linkMember;
+				var linkMember=" " + theMember;;
 				if (theMember.search("<font") == -1) {
 					if (memberList) {
 						for (j=0; j<memberList.members.length; j++) {
@@ -5875,8 +5881,6 @@ var Helper = {
 							}
 						}
 					}
-				} else {
-					linkMember = " " + theMember;
 				}
 				linkMembersArray.push(linkMember)
 			}
