@@ -547,8 +547,6 @@ var Helper = {
 			case "process":
 				Helper.injectScavenging();
 				break;
-			default:
-				Helper.injectQuickScavenging();
 			}
 			break;
 		case "-":
@@ -8863,73 +8861,36 @@ var Helper = {
 	},
 	
 	injectScavenging: function() {
+		var injectHere=System.findNode("//b[contains(.,'Multiple Scavenging Results')]/..");
+		if (injectHere) { // multi scavenging
+			var victories=System.findNodes("//td[contains(.,'victorious')]");
+			if (victories) injectHere.innerHTML+="<br/>Victories: "+victories.length;
+			var defeats=System.findNodes("//td[contains(.,'defeated')]");
+			if (defeats) injectHere.innerHTML+=", Defeated: "+defeats.length;
+			var gains=System.findNodes("//td[contains(.,'Item Gained')]/b");
+			if (gains) {
+				injectHere.innerHTML+="<br/>"+gains.length+" item(s): ";
+				var gainHash={};
+				for (var i=0;i<gains.length;i++) {
+					if (gainHash[gains[i].textContent])
+						gainHash[gains[i].textContent]++;
+					else
+						gainHash[gains[i].textContent]=1;
+				}
+				for (var item in gainHash) {
+					injectHere.innerHTML+=gainHash[item]+" "+item+"(s), "
+				}
+			}
+		}
 		System.xmlhttp("index.php?cmd=world", Helper.getBpCountFromWorld);
 	},
 	getBpCountFromWorld: function(responseText) {
-	
 		// backpack counter
 		var doc=System.createDocument(responseText);
 		var bp=System.findNode("//td[a/img[contains(@src,'_manageitems.gif')]]",doc);
 		var injectHere=document.getElementById("reportDiv");
+		if (!injectHere) injectHere=System.findNode("//b[contains(.,'Multiple Scavenging Results')]/..");
 		injectHere.appendChild(bp);
-	},
-	
-	injectQuickScavenging: function() {
-		var injectHere=document.createElement("div");
-		injectHere.innerHTML="<hr>"+Helper.makePageTemplate('Quick Scavenging','','scvlogclear','Clear Log','scvlog');
-		System.findNode("//td[table/tbody/tr/td/input[contains(@value,'Scavenge')]]").appendChild(injectHere)
-		
-		injectHere=document.getElementById('scvlog');
-		injectHere.innerHTML="<input class=custombutton type=button value='Quick Scavenge' id=quickScavenge><br>"+
-			"<textarea id=scvLogText cols=50 rows=15 class=custominput></textarea><div id=scvScreen></div>";
-		document.getElementById("scvlogclear").addEventListener("click",function() {
-				document.getElementById("scvLogText").value="";
-			},true);
-		document.getElementById("quickScavenge").addEventListener("click", Helper.quickScavenging,true);
-	},
-	quickScavenging: function() {
-		// get cave id
-		var cave_id=-1;
-		var caves = System.findNodes("//input[@type='radio' and @name='cave_id']");
-		for (var i=0;i<caves.length;i++)
-			if (caves[i].checked) {cave_id=caves[i].value; break;}
-		if (cave_id<0) {
-			alert("You need to select a cave type to scavenge in."); return;
-		}
-		
-		// get gold
-		var gold=System.findNode("//input[@name='gold']").value;
-		
-		System.xmlhttp("index.php?cmd=scavenging&subcmd=process&cave_id="+cave_id+"&gold="+gold,
-			Helper.quickScvGetResult);
-	},
-	quickScvGetResult: function(responseText) {
-		var doc=System.createDocument(responseText);
-		var report=System.findNode("//div[@id='reportDiv']",doc);
-		var item=System.findNode("//div[@id='itemDiv']",doc);
-		var output='';
-		
-		if (report) {
-			if (item)
-				output=item.textContent+'\n'+output;
-			var fightlogs=responseText.match(/report\[\d+\]="[^"]+";/ig);
-			if (fightlogs) {
-				for (var i=fightlogs.length-1;i>=0;i--)
-					output+=fightlogs[i].replace(/report\[\d+\]="([^"]+)";/i,'$1')+'\n';
-			}
-		} else
-			output=Layout.infoBox(responseText)+output;
-		output+='\n===============\n\n';
-		document.getElementById("scvScreen").innerHTML=report.parentNode.parentNode.parentNode.parentNode.parentNode.innerHTML;
-		if (item) document.getElementById("itemDiv").style.display='block';
-		
-		// back pack counter
-		System.xmlhttp("index.php?cmd=world", function(responseText) {
-				var doc=System.createDocument(responseText);
-				var bp=System.findNode("//td[a/img[contains(@src,'_manageitems.gif')]]",doc);
-				var injectHere=document.getElementById("scvLogText");
-				injectHere.value = "Backpack: "+bp.textContent+'\n'+output+injectHere.value;
-			});
 	}
 };
 
