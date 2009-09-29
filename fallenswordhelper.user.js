@@ -64,6 +64,8 @@ var Helper = {
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
 		System.setDefault("renderOtherBios", true);
+		System.setDefault("playNewMessageSound", false);
+		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
 		
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -580,6 +582,17 @@ var Helper = {
 				Helper.injectScavenging();
 			}
 			break;
+		}
+		if (GM_getValue("playNewMessageSound")) {
+			var unreadLog = System.findNode("//html/body/table/tbody/tr[3]/td/table/tbody/tr[2]/td/table/tbody/tr[27]/td/table/tbody/tr/td/a/font");
+
+			if (unreadLog)
+			{		
+			  if (unreadLog.innerHTML == ("You have unread log messages."))
+			  {
+				unreadLog.innerHTML += "<audio src='" + GM_getValue("defaultMessageSound") + "' autoplay=true />";
+			  }
+			}
 		}
 	},
 	
@@ -1847,6 +1860,16 @@ var Helper = {
 		}
 	},
 
+	toggleSound: function() {
+		if (GM_getValue("playNewMessageSound"))
+		{
+			GM_setValue("playNewMessageSound", false);
+		} else {
+			GM_setValue("playNewMessageSound", true);
+		}
+		window.location.reload()
+	},
+
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
@@ -1926,6 +1949,19 @@ var Helper = {
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
 
+			var uaStr = navigator.userAgent;
+			var FFindex = uaStr.indexOf("Firefox");
+
+			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5") {
+				if (GM_getValue("playNewMessageSound"))
+				{
+					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="http://upload.wikimedia.org/wikipedia/commons/5/57/Sound_mute.png"/></a>';
+				} else {
+					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="http://upload.wikimedia.org/wikipedia/commons/e/ee/Sound.png"/></a>';
+				}
+				document.getElementById("toggleSoundLink").addEventListener("click", Helper.toggleSound, true);
+
+			}
 		}
 		if (GM_getValue("quickKill")) {
 			var doNotKillList = GM_getValue("doNotKillList");
@@ -7571,6 +7607,8 @@ var Helper = {
 			'<tr><td align="right">Buy Buffs Greeting' + Helper.helpLink('Buy Buffs Greeting', 'This is the default text to open a message with when asking to buy buffs. You can use {playername} to insert the target players name. You can also use' +
 				' {buffs} to insert the list of buffs') +
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +			
+			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
+				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +			
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
 				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
@@ -7705,6 +7743,7 @@ var Helper = {
 		System.saveValueForm(oForm, "buyBuffsGreeting");
 		System.saveValueForm(oForm, "renderSelfBio");
 		System.saveValueForm(oForm, "renderOtherBios");
+		System.saveValueForm(oForm, "defaultMessageSound");
 		
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
