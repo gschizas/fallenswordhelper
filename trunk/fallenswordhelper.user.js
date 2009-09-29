@@ -61,6 +61,7 @@ var Helper = {
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 15);
 
+		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I please buy ");
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
 		System.setDefault("allyEnemyOnlineRefreshTime", 60);
@@ -4311,6 +4312,47 @@ var Helper = {
 					"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
 					playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
 					System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
+			} else if (relationship != "self") {
+				GM_setValue("buffsToBuy", "");
+				var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
+				
+				var bioCell = bioTable.rows[6];
+				
+				if (bioCell) { //non-self profile
+				
+					var bioContents = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td[2]/table/tbody/tr[7]/td/font").innerHTML;
+					var pos1 = 0;
+                    //iterate through the bio text, looking for all {b} and {/b} tags
+					while ((pos1 = bioContents.indexOf("{b}", pos1)) != -1) {
+						var pos2 = bioContents.indexOf("{/b}", pos1);
+						if (pos2 == -1) {
+							break;
+						}
+						//TODO: should this also stop parsing if their bio text isn't well formed, like the preview??
+						var buffName = Helper.removeHTML(bioContents.substring(pos1 + 3, pos2));						
+						var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
+							buffName + '" value="' + buffName + '"/>';
+						bioContents = bioContents.substring(0, pos2) + 
+							cbString + bioContents.substring(pos2);
+						pos1 = pos2 + cbString.length;
+						
+					}
+					var bioNode = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td[2]/table/tbody/tr[7]/td/font");
+					//remove our tags (be friendly to other curly braces =)
+					bioNode.innerHTML = bioContents.replace(/{b}/g, "").replace(/{\/b}/g,"");
+					
+					var allCBs = document.getElementsByTagName("input");
+					var buffCount = 0;
+					for (var i = 0; i < allCBs.length; i++) {
+						if (allCBs[i].id.indexOf("chkbox") != -1) {
+							buffCount++;
+						}
+					}
+					if (buffCount > 0) {
+						bioNode.innerHTML += '<br/><input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>' 
+						document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
+					}
+				}
 			}
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
@@ -4503,6 +4545,40 @@ var Helper = {
 		//Update the ally/enemy online list, since we are already on the page.
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
+	},
+
+	getBuffsToBuy: function(evt) {
+		var bioContents = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td[2]/table/tbody/tr[7]/td/font").innerHTML;
+	
+		var allCBs = document.getElementsByTagName("input");
+		
+		var buffsToBuy = "";
+		var buffCount = 0;
+		for (var i=0; i<allCBs.length; i++) {
+			var aCB=allCBs[i];
+			if (aCB.id.indexOf("chkbox") != -1 && aCB.checked) {
+				buffsToBuy += aCB.value + ",";
+				buffCount++;
+			}
+		}
+				
+		if (buffsToBuy.lastIndexOf(",") == buffsToBuy.length - 1) {
+			buffsToBuy = buffsToBuy.substring(0, buffsToBuy.length - 1);
+		}
+		GM_setValue("buffsToBuy", buffsToBuy);
+		var href = evt.target.getAttribute("href");
+		
+		if (href && buffCount > 0) {
+			window.location = System.server + href;
+		} else {
+			alert("You have not selected any buffs!");
+			GM_setValue("buffsToBuy", "");
+			return;
+		}
+	}, 
+	removeHTML: function(buffName) {
+		
+		return buffName.replace(/<\/?[^>]+(>|$)/g, "").replace(/[^a-zA-Z 0-9]+/g,"");
 	},
 
 	expandBio: function(evt) {
@@ -6608,6 +6684,12 @@ var Helper = {
 		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
 		var crCount = 0;
 		var startIndex = 0;
+		//Add description text for the new tags
+		var advancedEditing = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[9]/td");
+		advancedEditing.innerHTML += "<br/>{b}This will allow FSH Script users to select buffs from your bio{/b}<br/>" +
+			"&nbsp;&nbsp;- Note: Inner text will not contain special characters (non-alphanumeric).<br/>" + 
+			"&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff pack names in them to make buffing even easier!";
+
 		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
@@ -6617,6 +6699,8 @@ var Helper = {
 
 		document.getElementById('biotext').addEventListener('keyup', Helper.updateBioCharacters, true);
 		System.xmlhttp("index.php?cmd=points", Helper.getTotalBioCharacters);
+		//Force the preview area to render
+		Helper.updateBioCharacters(null);
 	},
 
 	injectShoutboxWidgets: function(textboxname, maxcharacters) {
@@ -6659,14 +6743,65 @@ var Helper = {
 		}
 		characterCount.innerHTML = (textArea.value.length + crCount);
 		var bioTotal = System.findNode("//span[@findme='biototal']");
-		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1)) {
+		//if evt is null, then this is a forced call
+		//if we don't check this, the HTTP request to get the number of bio character upgrades
+        //might not have finished before this executes, resulting in red text
+		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1) && evt != null) {
 			characterCount.style.color = "red";
 		} else {
 			characterCount.style.color = "blue";
 		}
 		var previewArea = System.findNode("//span[@findme='biopreview']");
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
+				
+		var pos1 = 0;
+		var wellFormed = true;
+		while ((pos1 = bioPreviewHTML.indexOf("{b}", pos1)) != -1) {
+			var pos2 = bioPreviewHTML.indexOf("{/b}", pos1);
+			
+			if (pos2 == -1) {
+				break;
+			} else {
+				var testPos = bioPreviewHTML.indexOf("{b}", pos1 + 3);
+				if (testPos < pos2 && pos1 != bioPreviewHTML.lastIndexOf("{b}")) {
+					var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
+					previewHeader.innerHTML = "Preview - Malformed FSH Bio Tags";
+					wellFormed = false;
+					break;
+				}
+				
+			}
+			var buffName = Helper.removeHTML(bioPreviewHTML.substring(pos1 + 3, pos2));			
+			var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
+				buffName + '" value="' + buffName + '"/>';
+			bioPreviewHTML = bioPreviewHTML.substring(0, pos2) + 
+				cbString + bioPreviewHTML.substring(pos2);
+			pos1 = pos2 + cbString.length;
+			
+		}
+		if (wellFormed) {
+			var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
+			previewHeader.innerHTML = "Preview";
+			//remove our tags			 
+			bioPreviewHTML = bioPreviewHTML.replace(/{b}/g, "").replace(/{\/b}/g,"");
+		} else {
+			bioPreviewHTML = bioPreviewHTML.substring(0, pos1) + '<font color="red">' + bioPreviewHTML.substring(pos1, pos1 +3) + '</font>' + bioPreviewHTML.substring(pos1+3);
+		}		 
 		previewArea.innerHTML = bioPreviewHTML;
+		if (wellFormed) {
+			var allCBs = previewArea.getElementsByTagName("input");
+			var buffCount = 0;
+			
+			for (var i = 0; i < allCBs.length; i++) {
+				if (allCBs[i].id.indexOf("chkbox") != -1) {
+					buffCount++;
+				}
+			}
+			
+			if (buffCount > 0) {
+				previewArea.innerHTML += '<br/><input id="Helper:sendBuffMsg" class="custombutton" type="submit" value="Ask For Buffs"/>' 			
+			}		
+		}
 	},
 
 	getTotalBioCharacters: function(responseText) {
@@ -7348,6 +7483,8 @@ var Helper = {
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
 				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
 				' Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
+			'<tr><td align="right">Buy Buffs Greeting' + Helper.helpLink('Buy Buffs Greeting', 'This is the default text to open a message with when asking to buy buffs. You can use {playername} to insert the target player\'s name.') +
+				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +			
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
 				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
@@ -7387,8 +7524,9 @@ var Helper = {
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a> and '+
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>, ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a> and ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +			
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'</table></form>';
@@ -7478,6 +7616,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showCompletedQuests");
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		System.saveValueForm(oForm, "hideBanner");
+		System.saveValueForm(oForm, "buyBuffsGreeting");
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
@@ -7845,6 +7984,8 @@ var Helper = {
 	},
 
 	injectMessageTemplate: function() {
+		//will only insert if we have a buff list (when button on profile is clicked)
+		Helper.insertBuffsInMsg();
 		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
 		var table = System.getValueJSON("quickMsg");
 
@@ -7903,6 +8044,17 @@ var Helper = {
 		var quickMsgId = evt.target.getAttribute("quickMsgId");
 		System.findNode("//textarea[@name='msg']").value +=
 			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
+	},
+	
+	insertBuffsInMsg: function() {
+		var buffsToBuy = GM_getValue("buffsToBuy");
+		if (buffsToBuy && buffsToBuy.length > 0) {
+			var targetPlayer = System.findNode("//input[@name='target_player']").value;
+			var greetingText = GM_getValue("buyBuffsGreeting");
+			greetingText = greetingText.replace(/{playername}/g, targetPlayer);
+			System.findNode("//textarea[@name='msg']").value =  greetingText + " " + GM_getValue("buffsToBuy");
+			GM_setValue("buffsToBuy", "");
+		}
 	},
 	
 	injectMailbox: function() {
