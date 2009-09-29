@@ -433,7 +433,7 @@ var Data = {
 				{Name:"Endlore Giants Reach",Realm:"Endlore Valley North (9,7) Lvl 70",Comment:"+2 Attack<br>+2 Hp<br>+8 Damage<br>+10 Gold Gain<br>+100 Breaker"},
 				{Name:"Utapo Death Skull",Realm:"Utapo Flats West (10,7) Lvl 48",Comment:"+10 Attack<br>+(-5HP)<br>+10 Damage<br>+10 Piercing strike<br>+20 Critical Hit<br>+25 Breaker<br>+20 Disarm"},
 				{Name:"Temple of the Gods",Realm:"Eldora Plains (East) (7,9) Lvl 98",Comment:"+10 Attack<br>+5 Defense<br>+10 Armor<br>+5 Hp<br>+5 Damage<br>+50 Stamina<br>+1 Stamina Gain<br>+5 Nullify<br>+20 Protect Gold<br>+25 Dodge<br>+15 Master Blacksmith"},
-				{Name:"Elven Forge",Realm:"Elven Hideout (11,12) Lvl 30",Comment:"+1 Atk<br>+1 Def<br>+1 Armor<br>+1 HP<br>+1 Dmg<br>+100 Gold"},
+				{Name:"Elven Forge",Realm:"Elven Hideout (11,12) Lvl 30",Comment:"+1 Atk<br>+1 Def<br>+1 Armor<br>+1 HP<br>+1 Dmg<br>+10 Protect Gold"},
 				{Name:"Feidal Power Obelisk",Realm:"Feidal Swamps North (12,3) Lvl 65",Comment:"+10 Dmg<br>+30 Critical Hit"},
 				{Name:"Ruined Crypt",Realm:"Enkmar Scrubland (North) (8,4) Lvl 107",Comment:"+12 Attack<br>+12 Armor<br>+4 HP<br>+12 Damage<br>+10 Piercing Strike<br>+10 Reinforced Armor<br>+10 Thievery<br>+10 Critical Hit<br>+10 Breaker<br>+5 Nullify<br>+15 Dodge<br>+5 Disarm<br>+15 Sustain"},
 				{Name:"Ethereal Pillars",Realm:"Ethereal Gateway (7,7) Lvl 1",Comment:"+15 Def<br>+15 Armor<br>+200 xp Gain<br>+25 Reinforced Armor<br>+25 Protection<br>+25 Protect Gold<br>+25 Sustain"},
