@@ -69,6 +69,7 @@ var Helper = {
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
 		System.setDefault("allyEnemyOnlineRefreshTime", 60);
+		System.setDefault("moveGuildList", false);
 
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", true);
@@ -254,6 +255,7 @@ var Helper = {
 		Layout.moveFSBox();
 		Helper.prepareAllyEnemyList();
 		Helper.prepareChat();
+		Layout.moveGuildOnlineList();
 		Helper.prepareGuildList();
 		Helper.prepareBountyData();
 		Helper.injectStaminaCalculator();
@@ -7491,6 +7493,11 @@ var Helper = {
 			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\\\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
+			
+			'<tr><td align="right">Move Guild Online List' + Helper.helpLink('Move Guild Online List', 'This will Move the Guild Online List higher on the bar on the right') +
+				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
+				'</td></tr>' +
+
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -7691,6 +7698,7 @@ var Helper = {
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
+		System.saveValueForm(oForm, "moveGuildList");
 		System.saveValueForm(oForm, "moveFSBox");
 		System.saveValueForm(oForm, "hideKrulPortal");
 		System.saveValueForm(oForm, "hideQuests");
