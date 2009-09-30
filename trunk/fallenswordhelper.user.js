@@ -585,7 +585,7 @@ var Helper = {
 			break;
 		}
 		if (GM_getValue("playNewMessageSound")) {
-			var unreadLog = System.findNode("//html/body/table/tbody/tr[3]/td/table/tbody/tr[2]/td/table/tbody/tr[27]/td/table/tbody/tr/td/a/font");
+			var unreadLog = System.findNode("//font[contains(.,'unread log messages.')]");
 
 			if (unreadLog)
 			{		
