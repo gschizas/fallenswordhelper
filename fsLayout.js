@@ -71,6 +71,29 @@ var Layout = {
 		cell.appendChild(src);
 	},
 
+	moveGuildOnlineList: function() {
+       	    	if (!GM_getValue("moveGuildList")) return;
+      	    	var src=System.findNode("//font[b='Guild Info']/../../../..");
+     	    	if (!src) return;
+     	    	src.parentNode.removeChild(src.nextSibling);
+    	    	src.parentNode.removeChild(src.nextSibling);
+        	src.parentNode.removeChild(src.nextSibling);
+        	src.parentNode.removeChild(src);
+        	var dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
+        	if (!dest) return;
+        	var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
+        	var info = dest.insertRow(startRow);
+        	if (!info) return;
+        	var cell = info.insertCell(0);
+        //cell = info.insertCell(0);
+        //cell = info.insertCell(0);
+        	cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+        	cell.appendChild(src);
+        	var breaker = dest.insertRow(startRow+1);
+        	var cell = breaker.insertCell(0);
+        	cell.innerHTML = "<br/>";
+     },
+
 	notebookContent: function() {
 		return System.findNode("//table[@width='100%']/..");
 	},
