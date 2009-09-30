@@ -3522,6 +3522,23 @@ var Helper = {
 				if (aRow.cells[5].innerHTML == '<font size="1">[ended]</font>') { //time left column
 					aRow.cells[6].innerHTML = ""; // text field and button column
 				} else {
+					var timeLeft = aRow.cells[5].firstChild.innerHTML;
+					var secondsLeft = timeLeft.substring(timeLeft.indexOf('m')+1).trim();
+					timeLeft = timeLeft.substring(0, timeLeft.indexOf('m'));
+					if (timeLeft >= 60) {
+						var hoursLeft = Math.floor(timeLeft / 60);
+						if (hoursLeft < 24) {
+							var minutesLeft = timeLeft - (hoursLeft * 60);
+							aRow.cells[5].firstChild.innerHTML = hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
+						} else {
+							var daysLeft = Math.floor(hoursLeft / 24);
+							hoursLeft = hoursLeft - (daysLeft * 24);
+							minutesLeft = timeLeft - (hoursLeft * 60) - (daysLeft * 1440);
+							aRow.cells[5].firstChild.innerHTML = daysLeft + "d " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
+						}
+						
+					}
+
 					winningBidValue = "-";
 					var bidExistsOnItem = false;
 					var playerListedItem = false;
