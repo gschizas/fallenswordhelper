@@ -63,6 +63,7 @@ var Helper = {
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
 		System.setDefault("renderOtherBios", true);
+		System.setDefault("renderCheckboxOnLeft", false);
 		System.setDefault("playNewMessageSound", false);
 		System.setDefault("showSpeakerOnWorld", true);
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
@@ -4334,8 +4335,13 @@ var Helper = {
 						var buffName = Helper.removeHTML(bioContents.substring(pos1 + 3, pos2));						
 						var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
 							buffName + '" value="' + buffName + '"/>';
+						if (GM_getValue("renderCheckboxOnLeft")) {
+							bioContents = bioContents.substring(0, pos1) + 
+								cbString + bioContents.substring(pos1);
+						} else {
 						bioContents = bioContents.substring(0, pos2) + 
 							cbString + bioContents.substring(pos2);
+						}
 						pos1 = pos2 + cbString.length;
 						
 					}
@@ -4348,8 +4354,13 @@ var Helper = {
 					var buffName = Helper.removeHTML(bioContents.substring(pos1 + 2, pos2));			
 					var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
 						buffName + '" value="' + buffName + '"/>';
+					if (GM_getValue("renderCheckboxOnLeft")) {
+						bioContents = bioContents.substring(0, pos1) + 
+							cbString + bioContents.substring(pos1);
+					} else {
 					bioContents = bioContents.substring(0, pos2) + 
 						cbString + bioContents.substring(pos2);
+					}
 					pos1 = pos2 + cbString.length;
 					
 				}
@@ -6793,8 +6804,9 @@ var Helper = {
 		while ((pos1 = bioPreviewHTML.indexOf("{b}", pos1)) != -1) {
 			var pos2 = bioPreviewHTML.indexOf("{/b}", pos1);
 			
+			var testPos = bioPreviewHTML.indexOf("{b}", pos1 + 3);
 			if (pos2 == -1 || (testPos < pos2 && pos1 != bioPreviewHTML.lastIndexOf("{b}"))) {
-				var testPos = bioPreviewHTML.indexOf("{b}", pos1 + 3);
+				
 				
 					var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
 					previewHeader.innerHTML = "Preview - Malformed FSH Bio Tags";
@@ -6817,9 +6829,9 @@ var Helper = {
 			while ((pos1 = bioPreviewHTML.indexOf("`~", pos1)) != -1) {
 				var pos2 = bioPreviewHTML.indexOf("~`", pos1);
 				
+				var testPos = bioPreviewHTML.indexOf("`~", pos1 + 2);
 				if (pos2 == -1 || (testPos < pos2 && pos1 != bioPreviewHTML.lastIndexOf("`~"))) {
 					
-					var testPos = bioPreviewHTML.indexOf("`~", pos1 + 2);
 					var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
 					previewHeader.innerHTML = "Preview - Malformed FSH Bio Tags";
 					bioPreviewHTML = bioPreviewHTML.substring(0, pos1) + '<font color="red">' + bioPreviewHTML.substring(pos1, pos1 +2) + '</font>' + bioPreviewHTML.substring(pos1+2);
@@ -6831,8 +6843,13 @@ var Helper = {
 				var buffName = Helper.removeHTML(bioPreviewHTML.substring(pos1 + 2, pos2));			
 				var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
 					buffName + '" value="' + buffName + '"/>';
+				if (GM_getValue("renderCheckboxOnLeft")) {
+					bioPreviewHTML = bioPreviewHTML.substring(0, pos1) + 
+						cbString + bioPreviewHTML.substring(pos1);
+				} else {
 				bioPreviewHTML = bioPreviewHTML.substring(0, pos2) + 
 					cbString + bioPreviewHTML.substring(pos2);
+				}
 				pos1 = pos2 + cbString.length;
 				
 			}
@@ -7550,8 +7567,10 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other playerss bios will render the FSH special bio tags.') +
+			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
 				':</td><td><input name="renderOtherBios" type="checkbox" value="on"' + (GM_getValue("renderOtherBios")?" checked":"") + '></td></tr>' +							
+			'<tr><td align="right">Render checkbox on left' + Helper.helpLink('Render checkbox on left', 'If checked, checkboxes will render on the left side of the buff name, if not checked, they will render on the right.') +
+				':</td><td><input name="renderCheckboxOnLeft" type="checkbox" value="on"' + (GM_getValue("renderCheckboxOnLeft")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
 				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
@@ -7693,6 +7712,7 @@ var Helper = {
 		System.saveValueForm(oForm, "buyBuffsGreeting");
 		System.saveValueForm(oForm, "renderSelfBio");
 		System.saveValueForm(oForm, "renderOtherBios");
+		System.saveValueForm(oForm, "renderCheckboxOnLeft");
 		System.saveValueForm(oForm, "defaultMessageSound");
 		System.saveValueForm(oForm, "showSpeakerOnWorld");
 		System.saveValueForm(oForm, "playNewMessageSound");
