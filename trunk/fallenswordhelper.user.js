@@ -4376,7 +4376,8 @@ var Helper = {
 				}
 			}
 			GM_setValue("buffsToBuy", "");
-			if (renderBio) {
+			if (renderBio && System.findNode(bioXPath)) {
+			
 				var bioContents = System.findNode(bioXPath).innerHTML;
 					var pos1 = 0;
 				var cmdTagExists = false;
