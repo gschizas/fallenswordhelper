@@ -64,6 +64,7 @@ var Helper = {
 		System.setDefault("renderSelfBio", true);
 		System.setDefault("renderOtherBios", true);
 		System.setDefault("playNewMessageSound", false);
+		System.setDefault("showSpeakerOnWorld", true);
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
 		
 		System.setDefault("enableAllyOnlineList", false);
@@ -1957,7 +1958,7 @@ var Helper = {
 			var uaStr = navigator.userAgent;
 			var FFindex = uaStr.indexOf("Firefox");
 
-			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5") {
+			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5" && GM_getValue("showSpeakerOnWorld")) {
 				if (GM_getValue("playNewMessageSound"))
 				{
 					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="http://upload.wikimedia.org/wikipedia/commons/5/57/Sound_mute.png"/></a>';
@@ -7560,6 +7561,10 @@ var Helper = {
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +			
 			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
 				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +			
+			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should a the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
+				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
+				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
+				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
 			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
 				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.') +
@@ -7689,6 +7694,8 @@ var Helper = {
 		System.saveValueForm(oForm, "renderSelfBio");
 		System.saveValueForm(oForm, "renderOtherBios");
 		System.saveValueForm(oForm, "defaultMessageSound");
+		System.saveValueForm(oForm, "showSpeakerOnWorld");
+		System.saveValueForm(oForm, "playNewMessageSound");
 		
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
