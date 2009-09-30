@@ -59,7 +59,7 @@ var Helper = {
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("enableGuildOnlineList", true);
-		System.setDefault("guildOnlineRefreshTime", 15);
+		System.setDefault("guildOnlineRefreshTime", 300);
 
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
@@ -809,9 +809,9 @@ var Helper = {
 			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
 			var myGuildID = GM_getValue("guildID");
 			if (defendingGuildID == myGuildID) {
-				var listOfDefenders = injectHere.nextSibling.textContent;
-				injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll'><span style='color:blue; font-size:x-small;'>"+
-					"Buff All</span></a></nobr>";
+				var listOfDefenders = injectHere.nextSibling.textContent.split(",", 16); // quick buff only supports 16
+				injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+					"Buff first 16</span></a></nobr>";
 				var buffAllLink = System.findNode("//a[@id='buffAll']");
 				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 			}
@@ -845,8 +845,8 @@ var Helper = {
 		tableWithBorderElement.parentNode.colSpan = "2";
 		var tableInsertPoint = tableWithBorderElement.parentNode.parentNode;
 		tableInsertPoint.innerHTML += "<td colspan='1'><table width='200' style='border:1px solid #A07720;'>" +
-			"<tbody><tr><td title='InsertSpot'></td></tr></tbody></table></td>";
-		var extraTextInsertPoint = System.findNode("//td[@title='InsertSpot']");
+			"<tbody><tr><td id='InsertSpot'></td></tr></tbody></table></td>";
+		var extraTextInsertPoint = System.findNode("//td[@id='InsertSpot']");
 		var defendingGuild = System.findNode("//a[contains(@href,'index.php?cmd=guild&subcmd=view&guild_id=')]");
 		var defendingGuildHref = defendingGuild.getAttribute("href");
 		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
@@ -923,7 +923,7 @@ var Helper = {
 					}
 				}
 				var href = System.server + "?cmd=profile&player_id=" + memberId;
-				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName});
+				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName,"playerId":memberId});
 			}
 			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
 				"<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
@@ -938,6 +938,7 @@ var Helper = {
 		var doc = System.createDocument(responseText);
 		var lastActivity = System.findNode("//font[contains(.,'Last Activity:')]", doc);
 		var playerName = callback.playerName;
+		var playerId = callback.playerId;
 		var offlinePlayerList = System.findNode("//td[@title='offlinePlayerList']");
 		var offlinePlayerCount = System.intValue(System.findNode("//td[@title='offlinePlayerCount']").innerHTML);
 		var offlinePlayersProcessed = System.findNode("//td[@title='offlinePlayersProcessed']");
@@ -952,6 +953,9 @@ var Helper = {
 			offlinePlayerList.innerHTML = offlinePlayerList.innerHTML.replace(playerName + " ","");
 		} else if (lastActivity.innerHTML.search("days") != -1 && /(\d+) days/.exec(lastActivity.innerHTML)[1] >= 7) {
 			offlinePlayerList.innerHTML = offlinePlayerList.innerHTML.replace(playerName + " ","");
+		} else {
+			offlinePlayerList.innerHTML = 
+				offlinePlayerList.innerHTML.replace(playerName + " ", "<a style='color:red;' href='index.php?cmd=profile&player_id=" + playerId + "'><span style='color:red;'>" + playerName + "</span></a> ");
 		}
 	},
 	
@@ -2585,38 +2589,25 @@ var Helper = {
 	prepareGuildList: function() {
 		if (!GM_getValue("enableGuildOnlineList")) {
 			GM_setValue("guildOnlineRefreshTime", 300);
-			Helper.retrieveGuildData(true); //Refresh guild data every 5 mins but don't inject online guild list
 		} 
-		else {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support FallenSword!') ]")
-			if (!injectHere) return;
-			var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0)
-			var cell = info.insertCell(0);
-			//var info = injectHere.insertRow(0);
-			//var cell = info.insertCell(0);
-			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-			Helper.retrieveGuildData(false);
-		}
+		Helper.retrieveGuildData();
 	},
 
-	retrieveGuildData: function(refreshGuildDataOnly) {
+	retrieveGuildData: function() {
 		var memberList = System.getValueJSON("memberlist");
 		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
+		if (guildOnlineRefreshTime != 300) GM_setValue("guildOnlineRefreshTime", 300); //set refresh to 300 if not equal to 300
 		guildOnlineRefreshTime *= 1000;
 		if (memberList) {
 			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
 
-		if (!memberList || refreshGuildDataOnly) {
-			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, refreshGuildDataOnly);
-		} else {
-			var memberList = System.getValueJSON("memberlist");
-			memberList.isRefreshed = false;
-			Helper.injectGuildList(memberList);
-		}
+		if (!memberList) {
+			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
+		} 
 	},
 
-	parseGuildForWorld: function(details, refreshGuildDataOnly) {
+	parseGuildForWorld: function(details) {
 		var doc=System.createDocument(details);
 		var allTables = doc.getElementsByTagName("TABLE")
 		var membersTable;
@@ -2689,7 +2680,6 @@ var Helper = {
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
 			System.setValueJSON("memberlist", memberList);
-			if (!refreshGuildDataOnly) Helper.injectGuildList(memberList);
 		}
 	},
 
@@ -3143,7 +3133,7 @@ var Helper = {
 						var secondPart = messageHTML.substring(messageHTML.indexOf("<small>") + 7, messageHTML.indexOf(">Reply</a>") + 10);
 						var thirdPart = messageHTML.substring(messageHTML.indexOf(">Reply</a>") + 10, messageHTML.indexOf(">Buff</a>") + 9);
 						var targetPlayerID = /quickBuff\((\d+)\)/.exec(thirdPart)[1];
-						thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID) + ">Buff</a> ]</nobr></span>";
+						thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID) + ">Buff</a></span>";
 						var fourthPart = messageHTML.substring(messageHTML.indexOf(">Trade</a>") + 10, messageHTML.indexOf("</small>"));
 						var lastPart = messageHTML.substring(messageHTML.indexOf("</small>"), messageHTML.length);
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
@@ -3281,69 +3271,6 @@ var Helper = {
 			+logDetail+'</table>';
 	},
 
-	injectGuildList: function(memberList) {
-		var playerId = Layout.playerId();
-		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
-		// injectHere.innerHTML=memberList.length;
-		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = (memberList.isRefreshed)?"#6a5938":"#4a3918";
-		displayList.cellPadding = 1;
-		displayList.width = 125;
-
-		var aRow=displayList.insertRow(displayList.rows.length);
-		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
-			"Guild Members <span id='Helper:resetGuildList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span>";
-		var onlineMembers = memberList.members.filter(function (e) {return (e.status=="Online")})
-		for (var i=0;i<onlineMembers.length;i++) {
-			var member=onlineMembers[i];
-			output += "<li style='padding-bottom:0px;'>"
-			output += "<a style='color:#CCFF99;font-size:10px;' "
-			output += Layout.quickBuffHref(member.id) + ">[b]</a>&nbsp;";
-			if (member.id!=playerId) {
-				output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
-				output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
-				output += "</a>";
-			}
-			else {
-				output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
-			}
-			output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
-			output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b>"+
-				"<br/>XP: " + System.addCommas(member.xp) +
-				"<br/>Level: " + member.level +
-				"<br/>Logged in:" + member.loggedInAt.toFormatString("ddd HH:mm");
-			if (member.hasFullData) {
-
-			}
-			output += "</div>');\" ";
-			output += "style='color:"
-			if (((new Date()) - member.loggedInAt) < 30000) { // just logged in
-				output += "orange";
-			}
-			else {
-				output += (member.id==playerId)?"#FFF380":"white";
-			}
-			output += ";font-size:10px;'"
-			output += " href='" + System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
-			// output += "<br/>"
-			output += "</li>"
-		}
-		output += "</ol>";
-		aCell.innerHTML = output;
-		var breaker=document.createElement("BR");
-		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetGuildList').addEventListener('click', Helper.resetGuildList, true);		
-	},
-
-	resetGuildList: function(evt) {
-		GM_setValue("memberlist","");
-		GM_setValue("oldmemberlist","");
-		window.location = window.location;
-	},
-	
 	getFullPlayerData: function(member) {
 		return;
 		System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
@@ -5902,18 +5829,22 @@ var Helper = {
 			var theItem=allItems[i].cells[0];
 			var foundName=theItem.textContent;
 			if (memberList) {
+				var listOfDefenders = "", listOfDefendersHTML = "";
 				for (j=0; j<memberList.members.length; j++) {
 					var aMember=memberList.members[j];
 					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 					if (aMember.name==foundName) {
-						var listOfDefenders = allItems[i].cells[1].textContent;
+						listOfDefendersHTML = allItems[i].cells[1].innerHTML;
+						listOfDefenders = listOfDefendersHTML.substring(0, listOfDefendersHTML.indexOf("<font") - 2); //strip off mercs as they don't need buffs
+						listOfDefenders = listOfDefenders.split(",", 16); // quick buff only supports 16
+						if (listOfDefenders == "[none]") break;
 						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) + 
 							//"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
 							//direct call to player_id is faster link - server doesn't have to do a search.
 							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
 							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
-						theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + "'><span style='color:blue; font-size:x-small;'>"+
-							"Buff All</span></a></nobr>";
+						theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+							"Buff first 16</span></a></nobr>";
 						var buffAllLink = System.findNode("//a[@id='buffAll" + i + "']");
 						buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 						break;
@@ -5922,30 +5853,32 @@ var Helper = {
 			}
 			
 			var theMembersCell=allItems[i].cells[1];
-			var theMembersArray=theMembersCell.innerHTML.split(",");
-			var linkMembersArray = new Array();
-			for (k=0; k<theMembersArray.length; k++) {
-				var theMember = theMembersArray[k].trim();
-				var linkMember;
-				if (theMember.search("<font") == -1) {
-					if (memberList) {
-						for (j=0; j<memberList.members.length; j++) {
-							var aMember=memberList.members[j];
-							// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
-							if (aMember.name==theMember) {
-								//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
-								//direct call to player_id is faster link - server doesn't have to do a search.
-								linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
-								break;
+			if (theMembersCell.textContent != "[none]") {
+				var theMembersArray=theMembersCell.innerHTML.split(",");
+				var linkMembersArray = new Array();
+				for (k=0; k<theMembersArray.length; k++) {
+					var theMember = theMembersArray[k].trim();
+					var linkMember;
+					if (theMember.search("<font") == -1) {
+						if (memberList) {
+							for (j=0; j<memberList.members.length; j++) {
+								var aMember=memberList.members[j];
+								// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+								if (aMember.name==theMember) {
+									//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
+									//direct call to player_id is faster link - server doesn't have to do a search.
+									linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
+									break;
+								}
 							}
 						}
+					} else {
+						linkMember = " " + theMember;
 					}
-				} else {
-					linkMember = " " + theMember;
+					linkMembersArray.push(linkMember)
 				}
-				linkMembersArray.push(linkMember)
+				theMembersCell.innerHTML = linkMembersArray;
 			}
-			theMembersCell.innerHTML = linkMembersArray;
 
 			var theDateCell=allItems[i].cells[2];
 			var theDate=theDateCell.firstChild;
@@ -7549,9 +7482,7 @@ var Helper = {
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Guild Online List' + Helper.helpLink('Show Guild Online List', 'This will show the guild members online list on the right.') +
-				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
-				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'></td></tr>'  +
@@ -7564,7 +7495,7 @@ var Helper = {
 			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\\\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
-			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
+
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -7723,12 +7654,6 @@ var Helper = {
 			chatLines.value="0";
 		}
 
-		var guildOnlineRefreshTime = System.findNode("//input[@name='guildOnlineRefreshTime']", oForm);
-		var guildOnlineRefreshTimeValue = guildOnlineRefreshTime.value*1;
-		if (isNaN(guildOnlineRefreshTimeValue) || guildOnlineRefreshTimeValue<=0) {
-			guildOnlineRefreshTime.value=15;
-		}
-
 		//bio compressor validation logic
 		var maxCompressedCharacters = System.findNode("//input[@name='maxCompressedCharacters']", oForm);
 		var maxCompressedCharactersValue = maxCompressedCharacters.value*1;
@@ -7779,7 +7704,6 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
-		System.saveValueForm(oForm, "guildOnlineRefreshTime");
 		System.saveValueForm(oForm, "doNotKillList");
 		System.saveValueForm(oForm, "enableBioCompressor");
 		System.saveValueForm(oForm, "maxCompressedCharacters");
@@ -8817,48 +8741,47 @@ var Helper = {
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
 		displayList.style.backgroundColor = (contactList.isRefreshed)?"#6a5938":"#4a3918";
-		displayList.cellPadding = 1;
+		displayList.cellPadding = 3;
 		displayList.width = 125;
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
-			"Allies/Enemies <span id='Helper:resetAllyEnemyList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span>";
+		output = '<center><font color="white"><b>Allies/Enemies</b></font><br/><font color="white" size=1><i><b>Online Contacts</b> <span id="Helper:resetAllyEnemyList" style="color:blue; font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span></i></font></center>'+
+		'<table width="110" cellpadding="0" cellspacing="0"><tbody>'+
+			'<tr><td colspan="2" height="5"></td></tr>';
+		
 		for (var i=0;i<onlineAlliesEnemies.length;i++) {
 			var contact=onlineAlliesEnemies[i];
-			output += "<li style='padding-bottom:0px;'>"
-			output += "<a style='color:#CCFF99;font-size:10px;' "
-			output += Layout.quickBuffHref(contact.id) + ">[b]</a>&nbsp;";
-			if (contact.id!=playerId) {
-				output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
-				output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + contact.name + "\">[m]";
-				output += "</a>";
-			}
-			else {
-				output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
-			}
-			output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
-			output += "Tip('<div style=\\'text-align:center;width:105px;\\'>Logged in:" + contact.loggedInAt.toFormatString("ddd HH:mm");
-			output += "</div>');\" ";
-			output += "style='color:"
+			var contactColor = "";
 			if (((new Date()) - contact.loggedInAt) < 30000) { // just logged in
-				output += "orange";
+				contactColor = "orange";
 			}
 			else if (contact.type == "Ally") {
-				output += "DodgerBlue";
+				contactColor = "DodgerBlue";
 			}
 			else if (contact.type == "Enemy") {
-				output += "red";
+				contactColor = "red";
 			}
 			else {
-				output += "white";
+				contactColor = "white";
 			}
-			output += ";font-size:10px;'"
-			output += " href='" + System.server + "index.php?cmd=profile&player_id=" + contact.id + "'>" + contact.name + "</a>";
-			// output += "<br/>"
-			output += "</li>"
+			output += 
+				'<tr>'+
+					'<td align="left">'+
+						'<span style="color:' + contactColor + '; font-size:x-small; visibility:hidden;">+</span>'+
+						'<span style="color:' + contactColor + '; font-size:x-small; cursor:pointer; text-decoration:underline;">' + contact.name + '</span>'+
+					'</td>'+
+					'<td align="right"><span style="color:#FFFF00; font-size:x-small;">'+
+						'<a href="index.php?cmd=message&target_player=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Send Message\')"><font color="#FFFF00">M</font></a>'+
+						'&nbsp;<a href="javascript:openWindow(\'index.php?cmd=quickbuff&t=' + contact.name + '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" onmouseover="tt_setWidth(100); Tip(\'Quick Buff\')"><font color="#FFFF00">B</font></a>'+
+						'&nbsp;<a href="index.php?cmd=trade&subcmd=createsecure&target_username=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Secure Trade\')"><font color="#FFFF00">S</font></a>'+
+						'&nbsp;<a href="index.php?cmd=trade&target_player=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Send to Player\')"><font color="#FFFF00">T</font></a>'+
+					'</span></td>'+
+				'</tr>';
 		}
-		output += "</ol>";
+		output += '</tbody></table>';
+
+		
 		aCell.innerHTML = output;
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
