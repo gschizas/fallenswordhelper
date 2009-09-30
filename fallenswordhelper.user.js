@@ -8769,7 +8769,7 @@ var Helper = {
 				'<tr>'+
 					'<td align="left">'+
 						'<span style="color:' + contactColor + '; font-size:x-small; visibility:hidden;">+</span>'+
-						'<span style="color:' + contactColor + '; font-size:x-small; cursor:pointer; text-decoration:underline;">' + contact.name + '</span>'+
+						'<a style="color:' + contactColor + '; font-size:x-small;" href="index.php?cmd=profile&player_id=' + contact.id + '">' + contact.name + '</a>'+
 					'</td>'+
 					'<td align="right"><span style="color:#FFFF00; font-size:x-small;">'+
 						'<a href="index.php?cmd=message&target_player=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Send Message\')"><font color="#FFFF00">M</font></a>'+
