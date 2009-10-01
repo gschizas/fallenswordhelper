@@ -945,9 +945,10 @@ var Helper = {
 		var buttonElement = System.findNode("//td[contains(.,'Artifact Information')]/b");
 		var injectHere = buttonElement.parentNode.parentNode.parentNode.parentNode.parentNode;
 		injectHere.align = 'center';
-		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the artifact." ' +
-			'class="custombutton">'+ '<br>' + '<br>' + injectHere.innerHTML;
-
+		var node=document.createElement('div');
+		node.innerHTML='<br><input id="calculatedefenderstats" type="button" value="Calculate Defender Stats"'+
+			' title="Calculate the stats of the players defending the artifact." class="custombutton">';
+		injectHere.appendChild(node);
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
 
