@@ -67,6 +67,7 @@ var Helper = {
 		System.setDefault("playNewMessageSound", false);
 		System.setDefault("showSpeakerOnWorld", true);
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
+		System.setDefault("highlightPlayersNearMyLvl", true);
 		
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -436,6 +437,9 @@ var Helper = {
 			case "history":
 				Helper.addHistoryWidgets();
 				break;
+			case "view":
+				Helper.injectViewGuild();
+				break;
 			}
 			break;
 		case "bank":
@@ -596,6 +600,22 @@ var Helper = {
 				unreadLog.innerHTML += "<audio src='" + GM_getValue("defaultMessageSound") + "' autoplay=true />";
 			  }
 			}
+		}
+	},
+	
+	injectViewGuild: function() {
+	                                       
+		var memberList = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody");
+		
+		for (var i=2;i<memberList.rows.length;i+=4) {
+			var iplus1 = i+1;
+			var xPath = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody/tr[" + iplus1 + "]/td[3]";			
+			var level = System.findNode(xPath).innerHTML;
+			var aRow = memberList.rows[i];
+			if (Math.abs(level - Helper.characterLevel) <= 5) {
+				aRow.style.backgroundColor = "#4671C8";
+			}
+			
 		}
 	},
 	
@@ -7502,15 +7522,17 @@ var Helper = {
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'></td></tr>'  +
+			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP.') +
+				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	'></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
 				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
-				'</td><td colspan="3"><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">' +
+				':</td><td colspan="3"><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">' +
 			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
-				'When not, messages run as they are in HCS\\\'s chat') + '</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
+				'When not, messages run as they are in HCS\\\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			
 			'<tr><td align="right">Move Guild Online List' + Helper.helpLink('Move Guild Online List', 'This will Move the Guild Online List higher on the bar on the right') +
 				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
@@ -7716,6 +7738,7 @@ var Helper = {
 		System.saveValueForm(oForm, "defaultMessageSound");
 		System.saveValueForm(oForm, "showSpeakerOnWorld");
 		System.saveValueForm(oForm, "playNewMessageSound");
+		System.saveValueForm(oForm, "highlightPlayersNearMyLvl");
 		
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
