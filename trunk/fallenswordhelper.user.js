@@ -3101,6 +3101,7 @@ var Helper = {
 		if (!listOfEnemies) listOfEnemies = "";
 		var listOfAllies = GM_getValue("listOfAllies");
 		if (!listOfAllies) listOfAllies = "";
+		var buffList = Data.buffList();
 		for (var i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
 			if (i != 0) {
@@ -3159,6 +3160,36 @@ var Helper = {
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
 							"'>ST</a>"
+						
+						var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
+						var quickBuff = "";
+						if (buffsSent) {
+
+							buffsSent = new String(buffsSent).replace("`~","").replace("~`", "").split(",");
+							
+							for (var j = 0; j < buffsSent.length; j++) {
+								
+								for (var m = 0; m < buffList.length; m++) {
+									var nicks = buffList[m].nicks.split(",");
+									var exitOuter = false;
+									
+									for (var k = 0; k < nicks.length; k++) {										
+										if (buffsSent[j].toLowerCase().trim() == nicks[k].toLowerCase().trim()) {
+											
+											quickBuff += m + ";"
+											exitOuter = true;
+											break;
+											
+										}					
+									}
+									if (exitOuter) {
+										break;
+									}
+								}
+								
+							}
+							thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID, quickBuff) + ">Buff</a></span>";
+						}							
 						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart  + fourthPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
@@ -6042,12 +6073,25 @@ var Helper = {
 		
 		var buffList = Data.buffList();
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		var buffIndex = new String(window.location).indexOf("&blist=");
+		var addr;
+		
+		if (buffIndex != -1) {
+			addr = new String(window.location).substring(buffIndex + 7).split(";");
+		}
 		if (skillNodes) {
 			for (var i = 0; i < skillNodes.length; i++ ) {
 				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
 				skillNodes[i].setAttribute("skillName", skillName);
 				for (var k = 0; k < buffList.length; k++) {
 					if (buffList[k].name == skillName) {
+						if (addr) {
+					    	for (var p = 0; p < addr.length; p++) {
+								if (addr[p] == k) {
+									skillNodes[i].setAttribute("checked", true);
+								}
+							}
+						}
 						skillNodes[i].setAttribute("staminaCost",buffList[k].stamina);
 						break;
 					}
@@ -8178,7 +8222,7 @@ var Helper = {
 			if (!hasBuffTag) {
 			System.findNode("//textarea[@name='msg']").value =  greetingText + " " + GM_getValue("buffsToBuy");
 			} else {
-				System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, GM_getValue("buffsToBuy"));
+				System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
 			}
 			GM_setValue("buffsToBuy", "");
 		}
