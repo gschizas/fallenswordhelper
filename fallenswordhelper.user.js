@@ -6135,7 +6135,7 @@ var Helper = {
 			var playerName = playerName[1];
 			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false)
 		}
-		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
+		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
 		
 		var buffList = Data.buffList();
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
@@ -6510,29 +6510,46 @@ var Helper = {
 		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
 		var sustainLevelRE = /Level<br>(\d+)%/
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
+		var sustainColor = "lime";
+		if (sustainLevel < 100) sustainColor = "red";
 		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
 		var injectHere = inputTable.rows[3].cells[0];
 		injectHere.align = "center";
-		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Sustain level: " + sustainLevel + "%</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Sustain level:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
 		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
 		if (!furyCasterText) return;
 		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
 		var furyCasterLevelRE = /Level<br>(\d+)%/
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
-		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Fury Caster level: " + furyCasterLevel + "%</span>";
+		var furyCasterColor = "lime";
+		if (furyCasterLevel < 100) furyCasterColor = "red";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Fury Caster level:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span>";
 		var hasBuffMasterBuff = System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc);
 		if (hasBuffMasterBuff) {
-			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:	On</span>";
+			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
 			var buffMasterTimeToExpire = hasBuffMasterBuff.parentNode.nextSibling.nextSibling.innerHTML
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + buffMasterTimeToExpire +")</span>";
 		}
 		else {
-			injectHere.innerHTML += " <span style='color:orange;'>Buff Master: Off</span>";
+			injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> <span style='color:red;'>Off</span>";
 		}
-		
+		var canCastCounterAttack = System.findNode("//td/font[contains(.,'Counter Attack')]");
+		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
+
 		//refresh ally/enemy list while you are here.
 		Helper.parseProfileForWorld(doc.innerHTML, true);
+	},
+	
+	getCounterAttackSetting: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var counterAttackTextElement = System.findNode("//input[@name='ca_default']", doc);
+		if (!counterAttackTextElement) return;
+		var counterAttackValue = counterAttackTextElement.getAttribute("value");
+		var activateInput = System.findNode("//input[@value='activate']");
+		var inputTable = activateInput.nextSibling.nextSibling;
+		var injectHere = inputTable.rows[3].cells[0];
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default CA level:</span> <span style='color:white;'>" + counterAttackValue + "</span>";
 	},
 
 	getKillStreak: function(responseText) {
@@ -7622,26 +7639,18 @@ var Helper = {
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions, requests or bug reports</span></td></tr>' +
-			'<tr><td colspan="2" align="left"><b>Social Preferences</b></td></tr>' +
-			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
-			'<tr><td>Own Guild</td><td>'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
-			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
-			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
-			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
+			//General Prefs
+			'<tr><th colspan="2" align="left">General preferences (apply to most screens)</th></tr>' +
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
-				'>  Hide Message <input name="hideGuildInfoMessage" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoMessage")?" checked":"") +
-				'>  Hide Buff  <input name="hideGuildInfoBuff" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoBuff")?" checked":"") +
-				'>  Hide ST  <input name="hideGuildInfoSecureTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoSecureTrade")?" checked":"") +
-				'>  Hide Trade  <input name="hideGuildInfoTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoTrade")?" checked":"") +
+				'>  Hide Message&gt;<input name="hideGuildInfoMessage" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoMessage")?" checked":"") +
+				'>  Hide Buff&gt;<input name="hideGuildInfoBuff" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoBuff")?" checked":"") +
+				'>  Hide ST&gt;<input name="hideGuildInfoSecureTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoSecureTrade")?" checked":"") +
+				'>  Hide Trade&gt;<input name="hideGuildInfoTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoTrade")?" checked":"") +
 				'></td></tr>'  +
 			'<tr><td align="right">Move Guild Info List' + Helper.helpLink('Move Guild Info List', 'This will Move the Guild Info List higher on the bar on the right') +
 				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
 				'</td></tr>' +
-			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP.') +
-				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	
-				'> Level difference:<input name="lvlDiffToHighlight" size="1" value="'+ GM_getValue("lvlDiffToHighlight") + '" /></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
@@ -7651,6 +7660,27 @@ var Helper = {
 			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\\\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
+				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
+				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
+				':</td><td><input name="enableCountdownTimer" type="checkbox" value="on"' + (GM_getValue("enableCountdownTimer")?" checked":"") + '></td></tr>' +
+			//Guild Manage
+			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
+			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
+			'<tr><td>Own Guild</td><td>'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
+			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
+			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
+			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
+			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP.') +
+				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	
+				'> Level difference:<input name="lvlDiffToHighlight" size="1" value="'+ GM_getValue("lvlDiffToHighlight") + '" /></td></tr>'  +
+			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
+				'this works for guild founders only') +
+				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
+			//World Screen
+			'<tr><th colspan="2" align="left">World screen/Hunting preferences</th></tr>' +
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -7658,20 +7688,6 @@ var Helper = {
 				'Press <u>Show logs</u> on the right to display and copy them') +
 				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '>' +
 				'<input type="button" class="custombutton" value="Show Logs" id="Helper:ShowLogs"></td></tr>' +
-			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
-				'this works for guild founders only') +
-				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
-				'current player will be dimmed (e.g. recall messages from guild store)') +
-				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
-				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
-				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
-				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
-				'quests you might have missed.') +
-				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
 			'<tr><td align="right">Show Combat Log' + Helper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
 				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Color Special Creatures' + Helper.helpLink('Color Special Creatures', 'Creatures will be colored according to their rarity. ' +
@@ -7691,15 +7707,50 @@ var Helper = {
 				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
 				'Send <input name="goldAmount" size="5" value="'+ GM_getValue("goldAmount") + '" /> '+
 				'gold to <input name="goldRecipient" size="10" value="'+ GM_getValue("goldRecipient") + '" />' +
-				'. Current total: <input name="currentGoldSentTotal" size="5" value="'+ GM_getValue("currentGoldSentTotal") + '" />' +
+				' Current total: <input name="currentGoldSentTotal" size="5" value="'+ GM_getValue("currentGoldSentTotal") + '" />' +
 				'</td></tr>' +
+			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
+				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
+				'enabled for this function to work.') +
+				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
+			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
+				'separated by commas. Use the checkbox to enable/disable them.') +
+				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
+				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
+			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
+				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
+			//Log screen prefs
+			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
+			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
+				'current player will be dimmed (e.g. recall messages from guild store)') +
+				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
+				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
+				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
+				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +			
+			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should a the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
+				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
+				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
+				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
+			//Equipment screen prefs
+			'<tr><th colspan="2" align="left">Equipment screen preferences</th></tr>' +
+			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
+				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show Quick Send Item' + Helper.helpLink('Show Quick Send on Manage Backpack', 'This will show a link beside each item which gives the option to quick send the item to this person') +
 				':</td><td><input name="showQuickSendLinks" type="checkbox" value="on"' + (GM_getValue("showQuickSendLinks")?" checked":"") + '>'+
 				'Send Items To <input name="itemRecipient" size="10" value="'+ GM_getValue("itemRecipient") + '" />' +
-			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
-				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
-				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
+			//Quest prefs
+			'<tr><th colspan="2" align="left">Quest preferences</th></tr>' +
+			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
+				'quests you might have missed.') +
+				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
+			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
+				'This works on Quest Manager and Quest Book.') +
+				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
+				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
+			//Bio prefs
+			'<tr><th colspan="2" align="left">Bio preferences</th></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
@@ -7713,33 +7764,15 @@ var Helper = {
 			'<tr><td align="right">Buy Buffs Greeting' + Helper.helpLink('Buy Buffs Greeting', 'This is the default text to open a message with when asking to buy buffs. You can use {playername} to insert the target players name. You can also use' +
 				' {buffs} to insert the list of buffs') +
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +			
-			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
-				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +			
-			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should a the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
-				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
-				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
-				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
-			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of creatures that will not be killed by quick kill. You must type the full name of each creature, ' +
-				'separated by commas. Creature name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
-				'enabled for this function to work.') +
-				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
+			//Arena prefs
+			'<tr><th colspan="2" align="left">Arena preferences</th></tr>' +
 			'<tr><td align="right">Auto Sort Arena List' + Helper.helpLink('Auto Sort Arena List', 'This will automatically sort the arena list based on your last preference for sort.') +
 				':</td><td><input name="autoSortArenaList" type="checkbox" value="on"' + (GM_getValue("autoSortArenaList")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Arena Prizes' + Helper.helpLink('Hide Arena Prizes', 'List of the itemIds of arena prizes that should not display on the arena screen ' +
 				'separated by commas. To find the itemId you will have to view the source of the page or mouseover the item on the arena page.') +
 				':</td><td colspan="3"><input name="hideArenaPrizes" size="60" value="'+ hideArenaPrizes + '" /></td></tr>' +
-			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
-				'separated by commas. Use the checkbox to enable/disable them.') +
-				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
-				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
-			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
-				'This works on Quest Manager and Quest Book.') +
-				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
-				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
-			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
-				'This works on Recipe Manager') +
-				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
-				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
+			//Bounty hunting prefs
+			'<tr><th colspan="2" align="left">Bounty hunting preferences</th></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Active Bounties' + Helper.helpLink('Show Active Bounties', 'This will show your active bounties ' +
 				'on the right hand side') + ':</td><td colspan="3"><input name="enableActiveBountyList" type = "checkbox" value = "on"' + (enableActiveBountyList? " checked":"") + '/>' +
 				'<input name="bountyListRefreshTime" size="1" value="'+ bountyListRefreshTime + '" /> seconds refresh</td></tr>' +
@@ -7747,12 +7780,16 @@ var Helper = {
 				'displayed the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
 			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people u want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
+			//Auction house prefs
+			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
-				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
-				':</td><td><input name="enableCountdownTimer" type="checkbox" value="on"' + (GM_getValue("enableCountdownTimer")?" checked":"") + '></td></tr>' +
+			//Other prefs
+			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
+			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
+				'This works on Recipe Manager') +
+				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
+				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
