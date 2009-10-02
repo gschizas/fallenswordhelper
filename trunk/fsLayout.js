@@ -79,8 +79,12 @@ var Layout = {
     	    	src.parentNode.removeChild(src.nextSibling);
         	src.parentNode.removeChild(src.nextSibling);
         	src.parentNode.removeChild(src);
-        	var dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
-        	if (!dest) return;
+        	var dest=System.findNode("//table[@width='120' and contains(.,'Support FallenSword')]")
+        	if (!dest)
+			{
+			var dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
+			}
+		if (!dest) return;
         	var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
         	var info = dest.insertRow(startRow);
         	if (!info) return;
