@@ -4089,6 +4089,10 @@ var Helper = {
 	},
 
 	injectDropItems: function() {
+		
+		var subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
+		subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
+		
 		var mainTable = System.findNode("//table[@width='600']");
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
@@ -4099,6 +4103,12 @@ var Helper = {
 				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;';
 			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:showQuickDropLinks">' +
 				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;';
+			
+			if (subPage2Id && subPage2Id == "dostoreitems") {
+				insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:selectAllGuildLocked">' +
+					' Select All Guild Locked</span>]&nbsp;';
+				document.getElementById("Helper:selectAllGuildLocked").addEventListener('click', Helper.selectAllGuildLocked, true);
+			}
 			document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
 			document.getElementById("Helper:showQuickDropLinks").addEventListener('click', Helper.toggleShowQuickDropLinks, true);
 		}
@@ -4255,6 +4265,13 @@ var Helper = {
 		}
 	},
 
+	selectAllGuildLocked: function(evt) {
+		var allGuildLockedItems = System.findNodes("//input[@type='checkbox' and @guildlocked='true']");
+		for (var i = 0; i < allGuildLockedItems.length; i++) {
+			allGuildLockedItems[i].checked = true;
+		}
+	},
+
 	checkAll: function(evt){
 		var itemName = evt.target.getAttribute("linkto");
 		var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
@@ -4280,6 +4297,9 @@ var Helper = {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
+			var cbNode = System.findNode("../../../td[1]",callback);
+			cbNode.innerHTML = cbNode.innerHTML.substring(0, cbNode.innerHTML.lastIndexOf(">")) + ' guildLocked="true"/>';
+			
 		};
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
