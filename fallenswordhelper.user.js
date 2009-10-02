@@ -59,6 +59,10 @@ var Helper = {
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("guildOnlineRefreshTime", 300);
+		System.setDefault("hideGuildInfoSecureTrade", false);
+		System.setDefault("hideGuildInfoTrade", false);
+		System.setDefault("hideGuildInfoMessage", false);
+		System.setDefault("hideGuildInfoBuff", false);
 
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
@@ -2048,6 +2052,39 @@ var Helper = {
 					var playerNameLinkElement = playernameColumn.firstChild;
 					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+			//Hide the Guild info Links
+					if (GM_getValue("hideGuildInfoTrade")) {
+						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						var buffLink = messageLink.nextSibling.nextSibling;
+						var secureTradeLink = buffLink.nextSibling.nextSibling;	
+						var tradeLink = secureTradeLink.nextSibling.nextSibling;
+						tradeLink.style.display = 'none';
+						tradeLink.style.visibility = 'hidden';
+					}
+					if (GM_getValue("hideGuildInfoSecureTrade")) {
+						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						var buffLink = messageLink.nextSibling.nextSibling;
+						var secureTradeLink = buffLink.nextSibling.nextSibling;	
+						secureTradeLink.style.display = 'none';
+						secureTradeLink.style.visibility = 'hidden';
+					}
+					if (GM_getValue("hideGuildInfoBuff")) {
+						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						var buffLink = messageLink.nextSibling.nextSibling;
+						buffLink.style.display = 'none';
+						buffLink.style.visibility = 'hidden';
+					}
+				
+					if (GM_getValue("hideGuildInfoMessage")) {
+						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						messageLink.style.display = 'none';
+						messageLink.style.visibility = 'hidden';
+					}
+					
+					
+
+										
+				// Set Color for Activity
 					if (lastActivityMinutes < 2) {
 						playerNameLinkElement.style.color = 'green';
 						playerNameLinkElement.firstChild.style.color = 'green';
@@ -7570,7 +7607,14 @@ var Helper = {
 			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
+				'>  Hide Message <input name="hideGuildInfoMessage" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoMessage")?" checked":"") +
+				'>  Hide Buff  <input name="hideGuildInfoBuff" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoBuff")?" checked":"") +
+				'>  Hide ST  <input name="hideGuildInfoSecureTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoSecureTrade")?" checked":"") +
+				'>  Hide Trade  <input name="hideGuildInfoTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoTrade")?" checked":"") +
 				'></td></tr>'  +
+			'<tr><td align="right">Move Guild Info List' + Helper.helpLink('Move Guild Info List', 'This will Move the Guild Info List higher on the bar on the right') +
+				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
+				'</td></tr>' +
 			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP.') +
 				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	
 				'> Level difference:<input name="lvlDiffToHighlight" size="1" value="'+ GM_getValue("lvlDiffToHighlight") + '" /></td></tr>'  +
@@ -7583,11 +7627,6 @@ var Helper = {
 			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\\\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
-			
-			'<tr><td align="right">Move Guild Online List' + Helper.helpLink('Move Guild Online List', 'This will Move the Guild Online List higher on the bar on the right') +
-				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
-				'</td></tr>' +
-
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -7795,6 +7834,10 @@ var Helper = {
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildInfoWidgets");
+		System.saveValueForm(oForm, "hideGuildInfoMessage");
+		System.saveValueForm(oForm, "hideGuildInfoBuff");
+		System.saveValueForm(oForm, "hideGuildInfoSecureTrade");
+		System.saveValueForm(oForm, "hideGuildInfoTrade");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
