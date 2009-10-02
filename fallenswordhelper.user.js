@@ -68,6 +68,7 @@ var Helper = {
 		System.setDefault("showSpeakerOnWorld", true);
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
 		System.setDefault("highlightPlayersNearMyLvl", true);
+		System.setDefault("lvlDiffToHighlight", 5);
 		
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -604,7 +605,7 @@ var Helper = {
 	},
 	
 	injectViewGuild: function() {
-	                                       
+	    if (GM_getValue("highlightPlayersNearMyLvl")) {
 		var memberList = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody");
 		
 		for (var i=2;i<memberList.rows.length;i+=4) {
@@ -612,10 +613,14 @@ var Helper = {
 			var xPath = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody/tr[" + iplus1 + "]/td[3]";			
 			var level = System.findNode(xPath).innerHTML;
 			var aRow = memberList.rows[i];
-			if (Math.abs(level - Helper.characterLevel) <= 5) {
+				if (!isNaN(GM_getValue("lvlDiffToHighlight"))) {
+					if (Math.abs(level - Helper.characterLevel) <= GM_getValue("lvlDiffToHighlight")) {
 				aRow.style.backgroundColor = "#4671C8";
 			}
-			
+				} else {
+					GM_log("Current value for level difference to highlight is not a number.");
+				}
+			}
 		}
 	},
 	
@@ -7567,7 +7572,8 @@ var Helper = {
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'></td></tr>'  +
 			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP.') +
-				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	'></td></tr>'  +
+				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	
+				'> Level difference:<input name="lvlDiffToHighlight" size="1" value="'+ GM_getValue("lvlDiffToHighlight") + '" /></td></tr>'  +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
@@ -7783,7 +7789,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showSpeakerOnWorld");
 		System.saveValueForm(oForm, "playNewMessageSound");
 		System.saveValueForm(oForm, "highlightPlayersNearMyLvl");
-		
+		System.saveValueForm(oForm, "lvlDiffToHighlight");
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
