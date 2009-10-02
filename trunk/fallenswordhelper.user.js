@@ -4267,10 +4267,11 @@ var Helper = {
 
 	selectAllGuildLocked: function(evt) {
 		var allGuildLockedItems = System.findNodes("//span[@id='guildLocked']");
-		
+		if (allGuildLockedItems) {
 		for (var i = 0; i < allGuildLockedItems.length; i++) {
 			var cbNode = System.findNode("../../td/input[@type='checkbox']", allGuildLockedItems[i]);
 			cbNode.checked = true;		
+		}
 		}
 	},
 
@@ -6091,9 +6092,11 @@ var Helper = {
 		newCell.align = "center";
 
 		document.getElementById('price').addEventListener('keyup', Helper.addMarketplaceWarning, true);
+		document.getElementById('amount').addEventListener('keyup', Helper.addMarketplaceWarning, true);
 	},
 
 	addMarketplaceWarning: function(evt) {
+		 var amount = System.findNode("//input[@id='amount']").value;
 		 var goldPerPoint = System.findNode("//input[@id='price']");
 		 var warningField = System.findNode("//td[@id='warningfield']");
 		 var sellPrice = goldPerPoint.value;
@@ -6107,8 +6110,9 @@ var Helper = {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
-			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy FSP for >> <b>" +
-				System.addCommas(sellPrice) + warningText + "</span>";
+			
+			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy <b>" + amount + "</b> FSP for >> <b>" +
+				System.addCommas(sellPrice) + warningText + " (Total: " + System.addCommas((amount * sellPrice) + Math.ceil(sellPrice * .005)) +  ")</span>";
 		}
 	},
 
@@ -6146,6 +6150,11 @@ var Helper = {
 			addr = new String(window.location).substring(buffIndex + 7).split(";");
 		}
 		if (skillNodes) {
+			
+			
+			var targetPlayers = System.findNode("//input[@name='targetPlayers']");
+			var targetPlayersCount = targetPlayers.value.split(",").length*1;
+			var newStaminaTotal = 0;
 			for (var i = 0; i < skillNodes.length; i++ ) {
 				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
 				skillNodes[i].setAttribute("skillName", skillName);
@@ -6154,7 +6163,9 @@ var Helper = {
 						if (addr) {
 					    	for (var p = 0; p < addr.length; p++) {
 								if (addr[p] == k) {
-									skillNodes[i].setAttribute("checked", true);
+									
+									newStaminaTotal += buffList[k].stamina*1;
+									skillNodes[i].checked = true;
 								}
 							}
 						}
@@ -6167,7 +6178,8 @@ var Helper = {
 		}
 		var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
 		activateButton.parentNode.innerHTML += "<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
-			"<span id='staminaTotal' style='display:none; color:blue;'>0</span>&nbsp;<span id='staminaTotalAll' style='color:blue;'>0</span>";
+			"<span id='staminaTotal' style='display:none; color:blue;'>" + newStaminaTotal + 
+			"</span>&nbsp;<span id='staminaTotalAll' style='color:blue;'>" + newStaminaTotal * targetPlayersCount + "</span>";
 	},
 
 	toggleBuffStatus: function(evt) {

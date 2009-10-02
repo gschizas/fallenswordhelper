@@ -136,15 +136,16 @@ var Layout = {
 			'egAAAABJRU5ErkJggg==" width="16" height="16" />';
 	},
 
-	quickBuffHref: function(playerId) {
+	quickBuffHref: function(playerId, buffList) {
+		if (buffList) {
 		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
+				"&blist=" + buffList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
+		} else {
+			return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
 			"', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
+		}
 	},
 	
-	quickBuffHref: function(playerId, buffList) {
-		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
-			"&blist=" + buffList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
-	},
 
 	formatWiki: function(aText, oldVersion, newVersion) {
 		var lines=aText.replace("\r","").split("\n");
