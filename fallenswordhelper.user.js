@@ -6167,18 +6167,26 @@ var Helper = {
 		}
 		var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
 		activateButton.parentNode.innerHTML += "<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
-			"<span id='staminaTotal' style='color:blue;'>0</span>";
+			"<span id='staminaTotal' style='display:none; color:blue;'>0</span>&nbsp;<span id='staminaTotalAll' style='color:blue;'>0</span>";
 	},
 
 	toggleBuffStatus: function(evt) {
 		var staminaTotal = System.findNode("//span[@id='staminaTotal']");
+		var staminaTotalAll = System.findNode("//span[@id='staminaTotalAll']");
+		var targetPlayers = System.findNode("//input[@name='targetPlayers']");
+		var targetPlayersCount = targetPlayers.value.split(",").length*1;
+		var newStaminaTotal = 0;
 		if (evt.target.checked == false) {
 			evt.target.checked = false;
-			staminaTotal.innerHTML = ((staminaTotal.textContent*1) - (evt.target.getAttribute("staminaCost")*1));
+			newStaminaTotal = ((staminaTotal.textContent*1) - (evt.target.getAttribute("staminaCost")*1));
+			staminaTotal.innerHTML = newStaminaTotal;
+			staminaTotalAll.innerHTML = newStaminaTotal * targetPlayersCount;
 		}
 		else if (evt.target.checked == true) {
 			evt.target.checked = true;
-			staminaTotal.innerHTML = ((staminaTotal.textContent*1) + (evt.target.getAttribute("staminaCost")*1));
+			newStaminaTotal = ((staminaTotal.textContent*1) + (evt.target.getAttribute("staminaCost")*1));
+			staminaTotal.innerHTML = newStaminaTotal;
+			staminaTotalAll.innerHTML = newStaminaTotal * targetPlayersCount;
 		}
 	},
 	
@@ -6247,6 +6255,10 @@ var Helper = {
 
 		var staminaTotal = System.findNode("//span[@id='staminaTotal']");
 		staminaTotal.innerHTML = staminaRunningTotal;
+		var staminaTotalAll = System.findNode("//span[@id='staminaTotalAll']");
+		var targetPlayers = System.findNode("//input[@name='targetPlayers']");
+		var targetPlayersCount = targetPlayers.value.split(",").length*1;
+		staminaTotalAll.innerHTML = staminaRunningTotal * targetPlayersCount;
 	},
 
 	useBuffPack: function(evt) {
