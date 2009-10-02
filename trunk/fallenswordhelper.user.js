@@ -4266,9 +4266,11 @@ var Helper = {
 	},
 
 	selectAllGuildLocked: function(evt) {
-		var allGuildLockedItems = System.findNodes("//input[@type='checkbox' and @guildlocked='true']");
+		var allGuildLockedItems = System.findNodes("//span[@id='guildLocked']");
+		
 		for (var i = 0; i < allGuildLockedItems.length; i++) {
-			allGuildLockedItems[i].checked = true;
+			var cbNode = System.findNode("../../td/input[@type='checkbox']", allGuildLockedItems[i]);
+			cbNode.checked = true;		
 		}
 	},
 
@@ -4293,12 +4295,14 @@ var Helper = {
 		var sellLink=System.findNode("span[@findme='Sell']", textNode);
 		var quickDropLink=System.findNode("span[@findme='QuickDrop']", textNode);
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
+		
 		if (guildLockedRE.exec(responseText)) {
+			
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
 			var cbNode = System.findNode("../../../td[1]",callback);
-			cbNode.innerHTML = cbNode.innerHTML.substring(0, cbNode.innerHTML.lastIndexOf(">")) + ' guildLocked="true"/>';
+			textNode.innerHTML += '<span id="guildLocked" visibility="hidden"/>';
 			
 		};
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
