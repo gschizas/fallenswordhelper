@@ -1250,6 +1250,7 @@ var Helper = {
 	},
 
 	mapThis: function() {
+		if (!GM_getValue("footprints")) return;
 		var realm = System.findNode("//td[contains(@background,'/sigma2/coord_bg_')]/font/center/b");
 		var posit = Helper.position();
 
