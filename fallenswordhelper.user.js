@@ -51,7 +51,6 @@ var Helper = {
 		System.setDefault("guildEnmyMessage", "red|Enemy guild. Attack at will!");
 
 		System.setDefault("hideKrulPortal", false);
-		System.setDefault("trackFootprints", true);
 		System.setDefault("hideQuests", false);
 		System.setDefault("hideQuestNames", "");
 		System.setDefault("hideRecipes", false);
@@ -1270,7 +1269,7 @@ var Helper = {
 	},
 
 	mapThis: function() {
-		if (!GM_getValue("trackFootprints")) return;
+		if (!GM_getValue("footprints")) return;
 		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
 		var posit = Helper.position();
 
@@ -7727,11 +7726,8 @@ var Helper = {
 				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right"><font color="#CCFF22"><b>NEW</b></font> Track Footprints' + Helper.helpLink('Track Footprints', 'If checked, your location will be tracked in order to show footprints, if not checked, your location will not be tracked. ' +
-				'Disabling this in conjunction with not displaying footprints will speed up the world page loading.') +
-				':</td><td><input name="trackFootprints" type="checkbox" value="on"' + (GM_getValue("trackFootprints")?" checked":"") + 
-				'> Footprints Color' + Helper.helpLink('Footprints Color', 'Changes the color of the footprints, useful if you can\\\'t see them in some maps') +
-				':<input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+			'<tr><td align="right">Footprints Color' + Helper.helpLink('Footprints Color', 'Changes the color of the footprints, useful if you can\\\'t see them in some maps') +
+				':</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
 			'<tr><td align="right">Show Send Gold' + Helper.helpLink('Show Gold on World Screen', 'This will show an icon below the world map to allow you to quickly send gold to a Friend.') +
 				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
 				'Send <input name="goldAmount" size="5" value="'+ GM_getValue("goldAmount") + '" /> '+
@@ -7934,7 +7930,6 @@ var Helper = {
 		System.saveValueForm(oForm, "moveGuildList");
 		System.saveValueForm(oForm, "moveFSBox");
 		System.saveValueForm(oForm, "hideKrulPortal");
-		System.saveValueForm(oForm, "trackFootprints");
 		System.saveValueForm(oForm, "hideQuests");
 		System.saveValueForm(oForm, "hideQuestNames");
 		System.saveValueForm(oForm, "hideRecipes");
