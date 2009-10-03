@@ -59,7 +59,7 @@ var Helper = {
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("enableGuildOnlineList", true);
-		System.setDefault("guildOnlineRefreshTime", 15);
+		System.setDefault("guildOnlineRefreshTime", 300);
 
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -2644,36 +2644,24 @@ var Helper = {
 	prepareGuildList: function() {
 		if (!GM_getValue("enableGuildOnlineList")) {
 			GM_setValue("guildOnlineRefreshTime", 300);
-			Helper.retrieveGuildData(true); //Refresh guild data every 5 mins but don't inject online guild list
-		} 
-		else {
-			if (!Helper.rightSideBar) return;
-			if (!GM_getValue("enableGuildOnlineList")) return;
-			var info = Helper.rightSideBar.insertRow(0);
-			var cell = info.insertCell(0);
-			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-			Helper.retrieveGuildData(false);
 		}
+		Helper.retrieveGuildData();
 	},
 
-	retrieveGuildData: function(refreshGuildDataOnly) {
+	retrieveGuildData: function() {
 		var memberList = System.getValueJSON("memberlist");
 		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
+		if (guildOnlineRefreshTime != 300) GM_setValue("guildOnlineRefreshTime", 300);
 		guildOnlineRefreshTime *= 1000;
 		if (memberList) {
 			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
-
-		if (!memberList || refreshGuildDataOnly) {
-			System.xmlhttp("index.php?cmd=guild&subcmd=manage",Helper.parseGuildForWorld,refreshGuildDataOnly);
-		} else {
-			var memberList = System.getValueJSON("memberlist");
-			memberList.isRefreshed = false;
-			Helper.injectGuildList(memberList);
+		if (!memberList) {
+			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
 		}
 	},
 
-	parseGuildForWorld: function(details,refreshGuildDataOnly) {
+	parseGuildForWorld: function(details) {
 		var doc=System.createDocument(details);
 		var allTables = doc.getElementsByTagName("TABLE")
 		var membersTable;
@@ -2748,7 +2736,6 @@ var Helper = {
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
 			System.setValueJSON("memberlist", memberList);
-			if (!refreshGuildDataOnly) Helper.injectGuildList(memberList);
 		}
 	},
 
@@ -3343,67 +3330,6 @@ var Helper = {
 	guildLogDisplay: function(logDetail) {
 		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'
 			+logDetail+'</table>';
-	},
-
-	injectGuildList: function(memberList) {
-		var playerId = Layout.playerId();
-		System.setValueJSON("memberlist", memberList);
-		var injectHere = document.getElementById("Helper:GuildListPlaceholder");
-		// injectHere.innerHTML=memberList.length;
-		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid gray";
-		displayList.style.backgroundColor = (memberList.isRefreshed)?"#151f1e":"#112322";
-		displayList.cellPadding = 1;
-		displayList.width = 125;
-
-		var aRow=displayList.insertRow(displayList.rows.length);
-		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
-			"Faction Members <a id='Helper:resetGuildList' style='color:cyan; font-size:8px; cursor:pointer; text-decoration:underline;'"+
-			" onmouseover=\"tt_setWidth(105);Tip('Reset online Faction List');\">R</a>";
-		var onlineMembers = memberList.members.filter(function (e) {return (e.status=="Online")})
-		var class2img = {'Mutant':1,'Soldier':2,'Purist':3,'Cyborg':4};
-		for (var i=0;i<onlineMembers.length;i++) {
-			var member=onlineMembers[i];
-			output += "<li style='padding-bottom:0px;'>"
-			output += "<a style='color:#CCFF99;font-size:10px;' "
-			output += Layout.quickBuffHref(member.id) + ">[b]</a>&nbsp;";
-			if (member.id!=playerId) {
-				output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
-				output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + member.name + "\">[m]";
-				output += "</a>";
-			}
-			else {
-				output += "<span style='color:" + displayList.style.backgroundColor + ";'>[m]</span>";
-			}
-			output += "&nbsp;<a onmouseover=\"tt_setWidth(105);";
-			output += "Tip('<div style=\\'text-align:center;width:105px;\\'><b>" + member.rank + "</b>"+
-				"<br/>XP: " + System.addCommas(member.xp) +
-				"<br/>Level: " + member.level +
-				"<br/>Class: " + member.class + "&nbsp;<image src=\\'http://66.7.192.165/sigma2/skin/classes/"+class2img[member.class]+".gif\\'>"+
-				"<br/>Logged in:" + member.loggedInAt.toFormatString("ddd HH:mm");
-			if (member.hasFullData) {
-
-			}
-			output += "</div>');\" ";
-			output += "style='color:"
-			if (((new Date()) - member.loggedInAt) < 30000) { // just logged in
-				output += "orange";
-			}
-			else {
-				output += (member.id==playerId)?"#FFF380":"white";
-			}
-			output += ";font-size:10px;'"
-			output += " href='" + System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + member.name + "</a>";
-			// output += "<br/>"
-			output += "</li>"
-		}
-		output += "</ol>";
-		aCell.innerHTML = output;
-		var breaker=document.createElement("BR");
-		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetGuildList').addEventListener('click', Helper.resetGuildList, true);
 	},
 
 	resetGuildList: function(evt) {
@@ -5874,28 +5800,30 @@ var Helper = {
 			}
 			
 			var theMembersCell=allItems[i].cells[1];
-			var theMembersArray=theMembersCell.innerHTML.split(",");
-			var linkMembersArray = new Array();
-			for (k=0; k<theMembersArray.length; k++) {
-				var theMember = theMembersArray[k].trim();
-				var linkMember=" " + theMember;;
-				if (theMember.search("<font") == -1) {
-					if (memberList) {
-						for (j=0; j<memberList.members.length; j++) {
-							var aMember=memberList.members[j];
-							// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
-							if (aMember.name==theMember) {
-								//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
-								//direct call to player_id is faster link - server doesn't have to do a search.
-								linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
-								break;
+			if (theMembersCell.textContent != "[none]") {
+				var theMembersArray=theMembersCell.innerHTML.split(",");
+				var linkMembersArray = new Array();
+				for (k=0; k<theMembersArray.length; k++) {
+					var theMember = theMembersArray[k].trim();
+					var linkMember=" " + theMember;;
+					if (theMember.search("<font") == -1) {
+						if (memberList) {
+							for (j=0; j<memberList.members.length; j++) {
+								var aMember=memberList.members[j];
+								// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
+								if (aMember.name==theMember) {
+									//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
+									//direct call to player_id is faster link - server doesn't have to do a search.
+									linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
+									break;
+								}
 							}
 						}
 					}
+					linkMembersArray.push(linkMember)
 				}
-				linkMembersArray.push(linkMember)
+				theMembersCell.innerHTML = linkMembersArray;
 			}
-			theMembersCell.innerHTML = linkMembersArray;
 
 			var theDateCell=allItems[i].cells[2];
 			var theDate=theDateCell.firstChild;
@@ -6698,9 +6626,6 @@ var Helper = {
 			'<tr><td align="right">Friendly Factions:</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td align="right">Old Factions:</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td align="right">Enemy Factions:</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Online Faction Members' + Helper.helpLink('Show Faction Online Members List', 'This will show the faction members online list on the right.') +
-				':</td><td><input name="enableGuildOnlineList" type="checkbox" value="on"' + (GM_getValue("enableGuildOnlineList")?" checked":"") +
-				'> <input name="guildOnlineRefreshTime" size="1" value="'+ GM_getValue("guildOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'></td></tr>'  +
@@ -6850,12 +6775,6 @@ var Helper = {
 			chatLines.value="0";
 		}
 
-		var guildOnlineRefreshTime = System.findNode("//input[@name='guildOnlineRefreshTime']", oForm);
-		var guildOnlineRefreshTimeValue = guildOnlineRefreshTime.value*1;
-		if (isNaN(guildOnlineRefreshTimeValue) || guildOnlineRefreshTimeValue<=0) {
-			guildOnlineRefreshTime.value=15;
-		}
-
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
@@ -6888,7 +6807,6 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
-		System.saveValueForm(oForm, "guildOnlineRefreshTime");
 		System.saveValueForm(oForm, "doNotKillList");
 		System.saveValueForm(oForm, "enableBioCompressor");
 		System.saveValueForm(oForm, "maxCompressedCharacters");
