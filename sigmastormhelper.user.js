@@ -500,6 +500,14 @@ var Helper = {
 		case "trade":
 			Helper.retrieveTradeConfirm();
 			Helper.injectQuickSelectItems();
+			switch (subPageId) {
+			case "createsecure":
+				Helper.injectSecureTrade();
+				break;
+			case "-":
+				Helper.injectStandardTrade();
+				break;
+			}
 			break;
 		case "toprated":
 			switch (subPageId) {
@@ -1949,6 +1957,7 @@ var Helper = {
 		var newCell= newRow.insertCell(0);
 		newCell.colSpan=6;
 		newCell.align="right";
+		newCell.noWrap="true";
 		newCell.innerHTML="<span id=Helper.QuickSelectItem>[&lt;&nbsp;Select]</span>&nbsp;&nbsp;&nbsp;"+
 			"<span id=Helper.QuickSelect6>[Select 6]</span>&nbsp;&nbsp;&nbsp;"+
 			"<span id=Helper.QuickDeSelectItem>[DeSelect&nbsp;&gt;]</span>&nbsp;&nbsp;&nbsp;<a href=#sendButtonLbl>Top</a>";
@@ -7974,6 +7983,81 @@ var Helper = {
 		target.style.color=(info.search("Auction placed successfully!") != -1)?"green":"red";
 		target.style.cursor='';
 		target.removeEventListener('click', Helper.bulkListSingle, true);		
+	},
+
+	toggleCheckAllItems: function(evt) {
+		var allItems=System.findNodes("//input[@type='checkbox']");
+		if (allItems) {
+			for (var i=0; i<allItems.length; i++) {
+				var checkboxForItem = allItems[i];
+				if (checkboxForItem.style.visibility == "hidden")
+					checkboxForItem.checked = false;
+				else {
+					if (checkboxForItem.checked) {
+						checkboxForItem.checked = false;
+					} else {
+						checkboxForItem.checked = true;
+					}
+				}
+			}
+		}
+	},
+	
+	toggleCheckAllPlants: function(evt) {
+		var plantRE = new RegExp(evt.target.getAttribute("plantRE"));
+		var allItems = System.findNodes("//input[@type='checkbox']");
+		if (allItems) {
+			for (var i = 0; i < allItems.length; i++){
+				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
+				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")), 
+					function (responseText, callBack) {
+						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
+						if (plantRE.exec(responseText)) {
+							if (checkbox.checked)
+								checkbox.checked = false;
+							else
+								checkbox.checked = true;
+						}
+					},
+					theImgNode);
+
+			}
+		}
+	},
+	
+	injectStandardTrade: function() {
+		var mainTable = System.findNodes("//table[@width='450']");
+		if (mainTable[2]) {
+			var newRow = mainTable[2].insertRow(2);
+			var newCellAll = newRow.insertCell(0);
+			newCellAll.colSpan = 3;
+			Helper.makeSelectAllInTrade(newCellAll);
+		}
+	},
+
+	injectSecureTrade: function() {
+		var mainTable = System.findNode("//table[@width='300']");
+		if (mainTable) {
+			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
+			var newCellAll = newRow.insertCell(0);
+			newCellAll.colSpan = 3;
+			Helper.makeSelectAllInTrade(newCellAll);
+		}
+	},
+	
+	makeSelectAllInTrade: function(injectHere) {
+		var itemList=[[" Stim<", "Stim"], [">Ammo<", "Ammo"], [">Resource<", "Resource"]];
+		var output = 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
+			'All Items</span> &ensp ';
+		for (var i=0;i<itemList.length;i++) {
+			output += '<span plantRE="'+itemList[i][0]+'" style="cursor:pointer; text-decoration:underline;"' +
+				'id="Helper:checkAll'+i+'">'+itemList[i][1]+'</span> &ensp ' ;
+		}
+		injectHere.innerHTML += output;
+		for (var i=0;i<itemList.length;i++) {
+			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
+		}
+		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
 	},
 	
 	makePageHeader: function(title, comment, spanId, button) {
