@@ -6148,7 +6148,8 @@ var Helper = {
 		var addr;
 		
 		if (buffIndex != -1) {
-			addr = new String(window.location).substring(buffIndex + 7).split(";");
+			addr = new String(window.location).substring(buffIndex + 7);
+			addr = addr.substring(0, addr.length - 1).split(";");
 		}
 		if (skillNodes) {
 			
