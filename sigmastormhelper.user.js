@@ -4382,7 +4382,7 @@ var Helper = {
 		if (currentPage < Helper.compPage - 1) {
 			System.xmlhttp("index.php?cmd=profile&component_page="+nextPage, Helper.retriveComponent, nextPage);
 		} else {
-			var totalCount = System.findNodes("//td[contains(@background,'sigma2/inventory/1x1mini.gif')]");
+			var totalCount = System.findNodes("//td[contains(@background,'sigma2/inventory/1x1mini.gif')]",doc);
 			if (totalCount) totalCount=totalCount.length; else totalCount=0;
 			totalCount+=currentPage*20;
 			var output='Component Summary<br/><table>';
@@ -6796,7 +6796,6 @@ var Helper = {
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildInfoWidgets");
-		System.saveValueForm(oForm, "enableGuildOnlineList");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
