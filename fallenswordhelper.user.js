@@ -560,6 +560,9 @@ var Helper = {
 		case "tempinv":
 			Helper.injectMailbox();
 			break;
+		case "attackplayer":
+			Helper.injectAttackPlayer();
+			break;
 		case "scavenging":
 			switch (subPageId) {
 			case "process":
@@ -609,7 +612,7 @@ var Helper = {
 	},
 	
 	injectViewGuild: function() {
-	    if (GM_getValue("highlightPlayersNearMyLvl")) {
+		if (GM_getValue("highlightPlayersNearMyLvl")) {
 		var memberList = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody");
 		
 		for (var i=2;i<memberList.rows.length;i+=4) {
@@ -2040,7 +2043,7 @@ var Helper = {
 	
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) return;
-        var guildInfoTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Info']]");
+		var guildInfoTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Info']]");
 		if (guildInfoTable) {
 			var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
@@ -2108,7 +2111,7 @@ var Helper = {
 				}
 			}
 		}
-    },
+	},
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
@@ -4444,7 +4447,7 @@ var Helper = {
 				var bioContents = System.findNode(bioXPath).innerHTML;
 					var pos1 = 0;
 				var cmdTagExists = false;
-                    //iterate through the bio text, looking for all {b} and {/b} tags
+					//iterate through the bio text, looking for all {b} and {/b} tags
 					while ((pos1 = bioContents.indexOf("{b}", pos1)) != -1) {
 						var pos2 = bioContents.indexOf("{/b}", pos1);
 						if (pos2 == -1) {
@@ -6163,7 +6166,7 @@ var Helper = {
 				for (var k = 0; k < buffList.length; k++) {
 					if (buffList[k].name == skillName) {
 						if (addr) {
-					    	for (var p = 0; p < addr.length; p++) {
+							for (var p = 0; p < addr.length; p++) {
 								if (addr[p] == k) {
 									
 									newStaminaTotal += buffList[k].stamina*1;
@@ -6443,7 +6446,7 @@ var Helper = {
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
 			if (buffLevel < 75
-			    && myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1
+				&& myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1
 				&& myBuff.innerHTML.search("Death Dealer") == -1 && myBuff.innerHTML.search("Vision") == -1) {
 				myBuff.style.color = "gray";
 			}
@@ -6484,7 +6487,7 @@ var Helper = {
 					var buffLevelRE = /\[(\d+)\]/
 					var buffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
 					if (buffLevel > 11 ||
-					    buffName == 'Quest Finder') {
+						buffName == 'Quest Finder') {
 						hasThisBuff.style.color='lime';
 					}
 				}
@@ -6962,7 +6965,7 @@ var Helper = {
 		var bioTotal = System.findNode("//span[@findme='biototal']");
 		//if evt is null, then this is a forced call
 		//if we don't check this, the HTTP request to get the number of bio character upgrades
-        //might not have finished before this executes, resulting in red text
+		//might not have finished before this executes, resulting in red text
 		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1) && evt != null) {
 			characterCount.style.color = "red";
 		} else {
@@ -7484,22 +7487,22 @@ var Helper = {
 	},
 
 	storeArenaMoves: function(){
-        var arenaMoves = System.findNodes("//img[@vspace='4']");
+		var arenaMoves = System.findNodes("//img[@vspace='4']");
 		var moves = new Array();
-        for (var i=1; i<arenaMoves.length; i++) {
-            arenaMove = arenaMoves[i];
+		for (var i=1; i<arenaMoves.length; i++) {
+			arenaMove = arenaMoves[i];
 			aMove = new Object();
-            var moveGifNumberRE = /(\d+).gif/;
-            var moveGifNumber = moveGifNumberRE.exec(arenaMove.getAttribute("src"))[1];
-            var moveCountRE = /<\/a><br>(\d)\&nbsp;\/\&nbsp;(\d)/;
-            var moveCount = moveCountRE.exec(arenaMove.parentNode.parentNode.innerHTML);
-            aMove.moveID = moveGifNumber;
+			var moveGifNumberRE = /(\d+).gif/;
+			var moveGifNumber = moveGifNumberRE.exec(arenaMove.getAttribute("src"))[1];
+			var moveCountRE = /<\/a><br>(\d)\&nbsp;\/\&nbsp;(\d)/;
+			var moveCount = moveCountRE.exec(arenaMove.parentNode.parentNode.innerHTML);
+			aMove.moveID = moveGifNumber;
 			aMove.moveCount = moveCount[2];
-            aMove.moveHREF = arenaMove.getAttribute("src");
+			aMove.moveHREF = arenaMove.getAttribute("src");
 			moves.push(aMove);
-        }
+		}
 		System.setValueJSON("arenaMoves", moves);
-    },
+	},
 
 	injectTournament: function() {
 		var mainTable = System.findNode("//table[tbody/tr/td/a[.='Back to PvP Arena']]");
@@ -7531,11 +7534,11 @@ var Helper = {
 	},
 
 	getCombatMoves: function(responseText, callback) {
-        var doc=System.createDocument(responseText);
+		var doc=System.createDocument(responseText);
 		var combatMovesTable = System.findNode("//td[table/tbody/tr/td/table/tbody/tr/td/a[@href='index.php?cmd=arena&subcmd=pickmove&slot_id=1']]", doc);
 		var injectHere = System.findNode("//span[@id='Helper:combatMoves']");
 		injectHere.innerHTML = combatMovesTable.innerHTML
-    },
+	},
 
 	storeCompletedArenas: function() {
 		//fix button class and add go to first and last
@@ -7683,7 +7686,7 @@ var Helper = {
 				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
 				':</td><td colspan="3"><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">' +
-			    '&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
+				'&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
 			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
 				'When not, messages run as they are in HCS\\\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
@@ -9316,6 +9319,71 @@ var Helper = {
 	makePageTemplate: function(title, comment, spanId, button, divId) {
 		return Helper.makePageHeader(title, comment, spanId, button)+
 			'<div style="font-size:small;" id="'+divId+'"></div>';
+	},
+	
+	injectAttackPlayer: function() {
+		//inject current stats, buffs and equipment
+		var attackPlayerTable = System.findNode("//table[tbody/tr/td/font/b[.='Attack Player (PvP)']]");
+		if (!attackPlayerTable) return;
+		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.href);
+		if (targetPlayer) {
+			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>"
+			output += "<tr style='text-align:center;' bgcolor='#cd9e4b'><td width='275' style='border-style: solid; border-width: 1px;'>Attacker</td><td width='275' style='border-style: solid; border-width: 1px;'>Defender</td></tr>";
+			output += "<tr style='text-align:center;'><td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerSelfStatData'><font color='green'>Gathering your stats ...</font></span></td>"+
+				"<td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerDefenderStatData'><font color='green'>Gathering defender stats ...</font></span></td></tr>";
+			output += "<tr style='text-align:center;'><td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerSelfBuffData'><font color='green'>Gathering your buffs ...</font></span></td>" +
+				"<td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerDefenderBuffData'><font color='green'>Gathering defender buffs ...</font></span></td></tr>";
+			output += "</tbody></table><center>";
+   
+			attackPlayerTable.rows[4].cells[0].innerHTML = output;
+			//System.xmlhttp("index.php?cmd=profile", Helper.getSelfProfileStatsAndBuffs);
+			System.xmlhttp("index.php?cmd=profile", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerSelfStatData","anchor2":"attackPlayerSelfBuffData"});
+			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username="+targetPlayer[1], Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerDefenderStatData","anchor2":"attackPlayerDefenderBuffData"});
+			//insert blank row
+			var newRow = attackPlayerTable.insertRow(5);
+			var newCell = newRow.insertCell(0);
+			newCell.innerHTML = "&nbsp;";
+		}
+	},
+
+	getProfileStatsAndBuffs: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		//stats
+		var vlTextElement = System.findNode("//td[b[contains(.,'VL')]]", doc);
+		var vlValueElement = vlTextElement.nextSibling;
+		var pvpTextElement = System.findNode("//td[b[contains(.,'PvP')]]", doc);
+		var pvpValueElement = pvpTextElement.nextSibling;
+		var attackTextElement = System.findNode("//td[b[contains(.,'Attack:')]]", doc);
+		var attackValueElement = attackTextElement.nextSibling;
+		var defenseTextElement = System.findNode("//td[b[contains(.,'Defense:')]]", doc);
+		var defenseValueElement = defenseTextElement.nextSibling;
+		var armorTextElement = System.findNode("//td[b[contains(.,'Armor:')]]", doc);
+		var armorValueElement = armorTextElement.nextSibling;
+		var damageTextElement = System.findNode("//td[b[contains(.,'Damage:')]]", doc);
+		var damageValueElement = damageTextElement.nextSibling;
+		var hpTextElement = System.findNode("//td[b[contains(.,'HP:')]]", doc);
+		var hpValueElement = hpTextElement.nextSibling;
+		var goldTextElement = System.findNode("//td[b[contains(.,'Gold:')]]", doc);
+		var goldValueElement = goldTextElement.nextSibling;
+		var output = "<table width='100%'><tbody>";
+		output += "<tr><td width='25%' style='text-align:right;'>" + vlTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + vlValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + pvpTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + pvpValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='25%' style='text-align:right;'>" + attackTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + attackValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + defenseTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + defenseValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='25%' style='text-align:right;'>" + armorTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + armorValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + damageTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + damageValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='25%' style='text-align:right;'>" + hpTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + hpValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + goldTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + goldValueElement.innerHTML + "</td></tr>";
+		output += "</tbody></table>";
+		var anchor1 = callback.anchor1;
+		var injectHere = System.findNode("//span[@id='Helper:"+anchor1+"']");
+		injectHere.innerHTML = output;
+		//buffs
+		var activeBuffsTitleRow = System.findNode("//tr[td/b[.='Active Buffs']]", doc);
+		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling.firstChild.nextSibling.firstChild.nextSibling;
+		var anchor2 = callback.anchor2;
+		var injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
+		injectHere.innerHTML = activeBuffsElement.innerHTML;
 	},
 	
 	injectScavenging: function() {

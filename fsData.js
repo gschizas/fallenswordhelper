@@ -491,13 +491,14 @@ var Data = {
 				{Name:"Ravaged Cluster",Realm:"Ravaged Forest (Clearing) (10,2) Lvl 673",Comment:"+70 Attack<br>+10 Damage<br>+40 Piercing Strike<br>+10 Dodge"},
 				{Name:"Mittamurk Spires",Realm:"Forsaken Desert (Wastes) (12,10) Lvl 683",Comment:"+10 Attack<br>+70 Armor<br>+20 Breaker<br>+30 Dodge"},
 				{Name:"Hyrmit Pillar",Realm:"Hyrmit Swamps (Verge) (7,2) Lvl 694",Comment:"+50 Defense<br>+30 Damage<br>+20 Piercing Strike<br>+30 Critical Strike"},
-				{Name:"Ossrilan Circle",Realm:"??? (??,??) Lvl ???",Comment:"+30 Attack<br>+50 Armor<br>+25 Piercing Strike<br>+25 Nullify"},
-				{Name:"Ancient Fort",Realm:"??? (??,??) Lvl ???",Comment:"+40 Defense<br>+45 Damage<br>+25 Reinforced Armor<br>+25 Nullify"},
+				{Name:"Ossrilan Circle",Realm:"Ossrilan Labyrinth (Cistern) (8,10) Lvl 707",Comment:"+30 Attack<br>+50 Armor<br>+25 Piercing Strike<br>+25 Nullify"},
+				{Name:"Ancient Fort",Realm:"Black Glades (Valley)  (10,8) Lvl 714",Comment:"+40 Defense<br>+45 Damage<br>+25 Reinforced Armor<br>+25 Nullify"},
 				{Name:"Crevasse of Souls",Realm:"??? (??,??) Lvl ???",Comment:"+75 Sustain<br>+75 Fury Caster<br>+25 Master Inventor"},
 				{Name:"Huirvast Ruins",Realm:"??? (??,??) Lvl ???",Comment:"+75 Critical Hit<br>+75 Nullify<br>+25 Sustain"},
 				{Name:"Guardian Statue",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+70 Nullify<br>+30 Sustain"},
 				{Name:"Azlatha Artifact",Realm:"??? (??,??) Lvl ???",Comment:"+75 Piercing Strike<br>+30 Nullify<br>+70 Dodge"},
-				{Name:"Pillars of Lindorik",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+50 Breaker<br>+50 Dodge"}
+				{Name:"Pillars of Lindorik",Realm:"??? (??,??) Lvl ???",Comment:"+75 Reinforced Armor<br>+50 Breaker<br>+50 Dodge"},
+				{Name:"Statue of Elidoia",Realm:"??? (??,??) Lvl ???",Comment:"+75 Piercing Strike<br>+50 Nullify<br>+50 Disarm"}
 			];
 		}
 		return Data.relicArray;
