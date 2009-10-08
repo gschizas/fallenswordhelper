@@ -258,21 +258,27 @@ var Helper = {
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
-		Helper.init();
-		Layout.hideBanner();
-		Layout.moveFSBox();
-		Helper.prepareAllyEnemyList();
-		Helper.prepareChat();
-		Layout.moveGuildOnlineList();
-		Helper.prepareGuildList();
-		Helper.prepareBountyData();
-		Helper.injectStaminaCalculator();
-		Helper.injectLevelupCalculator();
-		Layout.injectMenu();
-		Helper.replaceKeyHandler();
-		Helper.injectFSBoxLog();
-		Helper.fixOnlineGuildBuffLinks();
-		Helper.addGuildInfoWidgets();
+		if (GM_getValue("huntingMode")) {
+			Helper.readInfo();
+			Helper.replaceKeyHandler();
+			Helper.insertHModeIndicator();
+		} else {
+			Helper.init();
+			Layout.hideBanner();
+			Layout.moveFSBox();
+			Helper.prepareAllyEnemyList();
+			Helper.prepareChat();
+			Layout.moveGuildOnlineList();
+			Helper.prepareGuildList();
+			Helper.prepareBountyData();
+			Helper.injectStaminaCalculator();
+			Helper.injectLevelupCalculator();
+			Layout.injectMenu();
+			Helper.replaceKeyHandler();
+			Helper.injectFSBoxLog();
+			Helper.fixOnlineGuildBuffLinks();
+			Helper.addGuildInfoWidgets();
+		}
 		
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -609,6 +615,26 @@ var Helper = {
 			  }
 			}
 		}
+	},
+	
+	insertHModeIndicator: function() {
+		var modeIndc= document.createElement("div");
+		//modeIndc.style={"position":"absolute","left":0,"top":0,"display":"none","zIndex":90,"filter":"alpha","opacity":0.9};
+		modeIndc.style.position = "absolute";
+		modeIndc.style.left = window.innerWidth * 7 / 8 + "px";
+		modeIndc.style.top = 0;
+		modeIndc.style.display = '';
+		modeIndc.style.zIndex = '90';
+		modeIndc.style.filter = "alpha";
+		modeIndc.style.opacity = "0.9";
+		modeIndc.id = "modeIndc";
+		modeIndc.innerHTML='<font color=white>Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;">ON</span>]</font>';
+		var objBody = document.getElementsByTagName("body").item(0);
+		objBody.insertBefore(modeIndc, objBody.firstChild);
+		document.getElementById('turnOffHMode').addEventListener('click',
+			function() {
+				GM_setValue("huntingMode",false); window.location=window.location;
+			},true);
 	},
 	
 	injectViewGuild: function() {
@@ -7748,6 +7774,8 @@ var Helper = {
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
 				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual features to speed up the Helper.') +
+				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
 			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
 			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
@@ -7963,6 +7991,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
 		System.saveValueForm(oForm, "enableCountdownTimer");
+		System.saveValueForm(oForm, "huntingMode");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
