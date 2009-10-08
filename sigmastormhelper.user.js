@@ -77,6 +77,7 @@ var Helper = {
 		System.setDefault("quickUseItems",JSON.stringify({'item0':'','item1':'','item2':''}));
 		System.setDefault("enableBulkSell", false);
 		System.setDefault("fsboxlog", true);
+		System.setDefault("huntingMode", false);
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoCredit","min":"","max":"","gold":true,"fsp":false},{"name":"NoFC","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
@@ -234,18 +235,25 @@ var Helper = {
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
-		Helper.init();
-		Helper.prepareChat();
-		Helper.prepareGuildList();
-		Helper.prepareAllyEnemyList();
-		Helper.injectStaminaCalculator();
-		Helper.injectLevelupCalculator();
-		Layout.injectMenu();
-		Helper.replaceKeyHandler();
-		Helper.injectWorldWidgets();
-		Helper.injectFSBoxLog();
-		Helper.fixOnlineGuildBuffLinks();
-		Helper.addGuildInfoWidgets();
+		if (GM_getValue("huntingMode")) {
+			Helper.readInfo();
+			Helper.replaceKeyHandler();
+			Helper.insertHModeIndicator();
+		} else {
+			// normal mode
+			Helper.init();
+			Helper.prepareChat();
+			Helper.prepareGuildList();
+			Helper.prepareAllyEnemyList();
+			Helper.injectStaminaCalculator();
+			Helper.injectLevelupCalculator();
+			Layout.injectMenu();
+			Helper.replaceKeyHandler();
+			Helper.injectWorldWidgets();
+			Helper.injectFSBoxLog();
+			Helper.fixOnlineGuildBuffLinks();
+			Helper.addGuildInfoWidgets();
+		}
 
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -557,6 +565,26 @@ var Helper = {
 			}
 			break;
 		}
+	},
+	
+	insertHModeIndicator: function() {
+		var modeIndc= document.createElement("div");
+		//modeIndc.style={"position":"absolute","left":0,"top":0,"display":"none","zIndex":90,"filter":"alpha","opacity":0.9};
+		modeIndc.style.position = "absolute";
+		modeIndc.style.left = window.innerWidth * 7 / 8 + "px";
+		modeIndc.style.top = 0;
+		modeIndc.style.display = '';
+		modeIndc.style.zIndex = '90';
+		modeIndc.style.filter = "alpha";
+		modeIndc.style.opacity = "0.9";
+		modeIndc.id = "modeIndc";
+		modeIndc.innerHTML='Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;">ON</span>]';
+		var objBody = document.getElementsByTagName("body").item(0);
+		objBody.insertBefore(modeIndc, objBody.firstChild);
+		document.getElementById('turnOffHMode').addEventListener('click',
+			function() {
+				GM_setValue("huntingMode",false); window.location=window.location;
+			},true);
 	},
 	
 	fixOnlineGuildBuffLinks: function() {
@@ -1861,7 +1889,7 @@ var Helper = {
 			var doNotKillList = GM_getValue("doNotKillList");
 			var doNotKillListAry = doNotKillList.split(",")
 			for (var i=0; i<9; i++) {
-				var monster = System.findNode("//a[@id='aLink" + i + "']")
+				var monster = document.getElementById("aLink" + i);
 				if (monster) {
 					var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
 					for (var j=0; j<doNotKillListAry.length; j++) {
@@ -2204,7 +2232,7 @@ var Helper = {
 	},
 
 	getMonster: function(index) {
-		return System.findNode("//a[@id='aLink" + index + "']");
+		return document.getElementById("aLink" + index);
 	},
 
 	killSingleMonster: function(monsterNumber) {
@@ -6715,6 +6743,8 @@ var Helper = {
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Sigma Box Log' + Helper.helpLink('Enable Sigma Box Log', 'This enables the functionality to keep a log of recent seen Sigma Box message.') +
 				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual feature to speed up the Helper.') +
+				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -6815,6 +6845,7 @@ var Helper = {
 		System.saveValueForm(oForm, "goldAmount");
 		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
+		System.saveValueForm(oForm, "huntingMode");
 		
 		var minPSstatNames=['atk','def','arm','dmg','cHP','mHP','skill'];
 		var minPS={};
@@ -6829,7 +6860,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableEnemyOnlineList");
 		System.saveValueForm(oForm, "allyEnemyOnlineRefreshTime");
 
-		window.alert("FS Helper Settings Saved");
+		window.alert("SS2 Helper Settings Saved");
 		window.location = window.location;
 		return false;
 	},
@@ -6982,6 +7013,7 @@ var Helper = {
 	worldMapAction: function() {
 		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='stairway_id']", "index.php?cmd=world&subcmd=usestairs&stairway_id=", 1);
 		Helper.worldDoAction("//img[@title='Stairway']", "//input[@name='shop_id']", "index.php?cmd=shop&shop_id=", 1);
+		Helper.worldDoAction("//input[@title='Examine Portal']", "//input[@name='portal_id']", "index.php?cmd=portal&portal_id=", 1);
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='inventing']", "index.php?cmd=inventing", 0);
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='hellforge']", "index.php?cmd=hellforge", 0);
 		Helper.worldDoAction("//img[@title='Vault']", "//input[@value='bank']", "index.php?cmd=bank", 0);
