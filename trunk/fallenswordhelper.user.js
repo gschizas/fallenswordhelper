@@ -628,7 +628,7 @@ var Helper = {
 		modeIndc.style.filter = "alpha";
 		modeIndc.style.opacity = "0.9";
 		modeIndc.id = "modeIndc";
-		modeIndc.innerHTML='<font color=white>Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;">ON</span>]</font>';
+		modeIndc.innerHTML='<font color=white>Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;" title="click to turn off">ON</span>]</font>';
 		var objBody = document.getElementsByTagName("body").item(0);
 		objBody.insertBefore(modeIndc, objBody.firstChild);
 		document.getElementById('turnOffHMode').addEventListener('click',
@@ -1611,6 +1611,7 @@ var Helper = {
 	checkBuffs: function() {
 		//code to remove buffs but stay on the same screen
 		var currentBuffs = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=removeskill&skill_id=')]");
+		var buffHash={};
 		if (currentBuffs) {
 			for (var i=0;i<currentBuffs.length;i++) {
 				var currentBuff = currentBuffs[i];
@@ -1622,6 +1623,7 @@ var Helper = {
 					var buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/.exec(currentBuff.getAttribute("onclick"));
 					if (buffTest) var buffName = buffTest[1]; else GM_log("Error getting buff");
 				}
+				buffHash[buffName]=true;
 				var imageHTML = currentBuff.innerHTML;
 				var buffCell = currentBuff.parentNode;
 				var buffHTML = buffCell.innerHTML;
@@ -1694,7 +1696,7 @@ var Helper = {
 			var buffAry=buffs.split(",")
 			var missingBuffs = new Array();
 			for (var i=0;i<buffAry.length;i++) {
-				if (!System.findNode("//img[contains(@onmouseover,'" + buffAry[i].trim() + "')]")) {
+				if (!buffHash[buffAry[i].trim()]) {
 					missingBuffs.push(buffAry[i]);
 				}
 			}
