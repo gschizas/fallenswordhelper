@@ -6635,6 +6635,45 @@ var Helper = {
 			if (!relicFound) GM_log("Relic:'" + relicName + "' not found in data set");
 		}
 	},
+	
+	tpBodyOnLoad: function() {
+		Helper.tabPanelArray = new Array(5);
+		Helper.tabMenuArray = new Array(5);
+		Helper.currentMenuIndex = 0;
+		for (var i=0;i<Helper.tabPanelArray.length;i++) {
+			Helper.tabPanelArray[i] = document.getElementById('tabPane'+i);
+			var tabMenu = document.getElementById('tabMenu'+i);
+			Helper.tabMenuArray[i] = tabMenu;
+			tabMenu.addEventListener('click',Helper.raisePanel,true);
+		}
+		Helper.raisePanel(Helper.currentMenuIndex);
+	},
+	
+	raisePanel: function(evt){
+		if (evt==0) panelIndex=0; else panelIndex=evt.target.getAttribute('menuIndex');
+		for (var i=0; i<Helper.tabPanelArray.length; i++ ) {
+			if (i == panelIndex) {
+				Helper.raiseObject (Helper.tabPanelArray[i],4);
+				Helper.tabMenuArray[i].className = 'tabMenuActive';
+			} else {
+				Helper.raiseObject (Helper.tabPanelArray[i], 2);
+				Helper.tabMenuArray[i].className = 'tabMenu';
+			}
+		}
+		Helper.currentMenuIndex=panelIndex;
+	},
+	
+	raiseObject: function(target, level) {
+		var safeMargin = 6;
+		var obj = document.getElementById('tabFiller');
+		var newWidth = obj.offsetWidth - safeMargin;
+		if ( newWidth < safeMargin ) newWidth = safeMargin;
+		target.style.width = newWidth+'px';
+		var newHeight =obj.offsetHeight - safeMargin;
+		if ( newHeight < safeMargin ) newHeight = safeMargin;
+		//target.style.height = newHeight+'px';
+		target.style.zIndex=level;
+	},
 
 	injectSettingsGuildData: function(guildType) {
 		var result='';
@@ -6652,58 +6691,30 @@ var Helper = {
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
 		var minPS=System.getValueJSON("minPSStats");
+		
+		// create tab panels
+		GM_addStyle('.tabFrame {position:relative;}\n'+
+			'.tabMenuDiv {position:relative;z-index:4;}\n'+
+			'.tabFiller {position:relative;background:#E8FFFF;border:2px solid white;height:11em;z-index:1;}\n'+
+			'.tabMenu,.tabMenuActive,.tabMenuOver {background:#333333;border:2px solid E8FFFF;margin:0px 0px 0px 12px;padding:0px 12px 0px 10px;cursor:pointer;}\n'+
+			'.tabMenuActive{border-bottom:5px solid #111111;background:#111111}\n'+
+			'.tabMenuOver{background:#FFCC66;color:#FFFFFF;}\n'+
+			'.tabPane{position:absolute;margin:4px;overflow:auto;background:#111111;}\n');
+		// done create tab panels
 
 		var inputSize=40;
-		var configData=
-			'<form><table width="100%" cellspacing="0" cellpadding="2" border="0">' +
-			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
-			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Sigma Storm Helper configuration</th></tr>' +
-			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
-			'<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
-			')</span></td></tr>' +
-			'<tr><td colspan="2" align=center><a href="index.php?cmd=notepad&subcmd=saveconfig">Import/Export Config</a></td></tr>' +
-			'<tr><td colspan="2" align=center>' +
-			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Sigma Storm 2 Helper web site</a> ' +
-			'for any suggestions, requests or bug reports</span></td></tr>' +
-			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Social Preferences</th></tr>' +
-			'<tr><td colspan="2" align="left">Enter faction names, seperated by commas</td></tr>' +
-			Helper.helpTDwithHTML('Own Faction','','',Helper.injectSettingsGuildData("Self"))+
-			Helper.helpTDwithHTML('Friendly Factions','','',Helper.injectSettingsGuildData("Frnd"))+
-			Helper.helpTDwithHTML('Old Factions','','',Helper.injectSettingsGuildData("Past"))+
-			Helper.helpTDwithHTML('Enemy Factions','','',Helper.injectSettingsGuildData("Enmy"))+
-			Helper.helpTDwithCB('Enable Guild Info Widgets','Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)',
-				'enableGuildInfoWidgets')+
-			Helper.helpTDwithCB('Show Online Allies/Enemies','This will show the allies/enemies online list on the right.',
-				'enableAllyOnlineList',Layout.networkIcon(),
-				' Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
-				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh')+
-			Helper.helpTDwithCB('Chat top to bottom','When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
-				'When not, messages run as they are in HCS\\\'s chat','chatTopToBottom')+
-			Helper.helpTDwithCB('Show chat lines','Display the last {n} lines from faction chat (set to 0 to disable).' +
-				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':''),
-				'enableChat',Layout.networkIcon(),'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '">')+
-			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Other preferences</th></tr>' +
+		var huntingCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			Helper.helpTDwithCB('Quick Kill','This will kill monsters without opening a new page','quickKill')+
 			Helper.helpTDwithCB('Keep Combat Logs','Save combat logs to a temporary variable. '+
 				'Press <u>Show logs</u> on the right to display and copy them','keepLogs','',
 				'<input type="button" class="custombutton" value="Show" id="Helper:ShowLogs">') +
-			Helper.helpTDwithCB('Show rank controls','Show ranking controls for guild managemenet in member profile page - ' +
-				'this works for guild founders only','showAdmin')+
-			Helper.helpTDwithCB('Cleanup faction log','Any log messages not related to the ' +
-				'current player will be dimmed (e.g. recall messages from guild store)','hideNonPlayerGuildLogMessages')+
-			Helper.helpTDwithCB('Disable Item Coloring','Disable the code that colors the item text based on the rarity of the item.',
-				'disableItemColoring')+
-			Helper.helpTDwithCB('Enable Log Coloring','Three logs will be colored if this is enabled, Faction Chat, Faction Log and Player Log. ' +
-				'It will show any new messages in yellow and anything 20 minutes old ones in brown.','enableLogColoring')+
-			Helper.helpTDwithCB('Show Completed Quests','This will show completed quests that have been hidden and will also show any ' +
-				'quests you might have missed.','showCompletedQuests')+
 			Helper.helpTDwithCB('Show Combat Log','This will show the combat log for each automatic battle below the monster list.',
 				'showCombatLog')+
 			Helper.helpTDwithCB('Color Special Entities','Entities will be colored according to their rarity. ' +
 				'Champions will be colored green, Elites yellow and HK red.','enableCreatureColoring')+
-			Helper.helpTDwithCB('Show Creature Info','This will show the information from the view creature link when you mouseover the link.' +
+			Helper.helpTDwithCB('Show Entity Info','This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':''),'showCreatureInfo',Layout.networkIcon())+
-			Helper.helpTDwithCB('Keep Entity Log','This will show the entity log for each entity you see when you travel. This requires Show Entity Info enabled!',
+			Helper.helpTDwithCB('Keep Entity Log','This will show the entity log for each entity you see when you travel. This requires Show Creature Info enabled!',
 				'showMonsterLog','','<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs">')+
 			Helper.helpTDwithCB('Hide <small>TaulinRadLands</small> Portal','This will hide the Taulin Rad Lands portal on the world screen.',
 				'hideKrulPortal')+
@@ -6712,10 +6723,6 @@ var Helper = {
 				'sendGoldonWorld','',
 				'Send <input name="goldAmount" size="8" value="'+ GM_getValue("goldAmount") + '" /> '+
 				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />')+
-			Helper.helpTDwithCB('Enable Bio Compressor','This will compress long bios according to settings and provide a link to expand the compressed section.',
-				'enableBioCompressor','',
-				'<br/>Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
-				'<br/>Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" />')+
 			Helper.helpTDwithHTML('Do Not Kill List','List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
 				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.','','<input name="doNotKillList" size="'+inputSize+'" value="'+ doNotKillList + '" />')+
@@ -6731,16 +6738,90 @@ var Helper = {
 			Helper.helpTDwithCB('Hunting Buffs','Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.','showHuntingBuffs','',
 				'<input name="huntingBuffs" size="'+inputSize+'" value="'+ buffs + '" />')+
-			Helper.helpTDwithCB('Hide Specific Quests','If enabled, this hides quests whose name matches the list (separated by commas). ' +
-				'This works on Quest Manager and Quest Book.','hideQuests','',
+			Helper.helpTDwithCB('Hunting Mode','This disable menu and some visual feature to speed up the Helper.','huntingMode')+
+			'</table>';
+		var generalCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
+			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Mission Config</th></tr>' +
+			Helper.helpTDwithCB('Show Completed Missions','This will show completed missions that have been hidden and will also show any ' +
+				'quests you might have missed.','showCompletedQuests')+
+			Helper.helpTDwithCB('Hide Specific Missions','If enabled, this hides missions whose name matches the list (separated by commas). ' +
+				'This works on Mission Manager and Mission Book.','hideQuests','',
 				'<input name="hideQuestNames" size="'+inputSize+'" value="'+ GM_getValue("hideQuestNames") + '" />')+
+			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Sigma Box Config</th></tr>' +
+			Helper.helpTDwithCB('Enable Sigma Box Log','This enables the functionality to keep a log of recent seen Sigma Box message.','fsboxlog')+
+			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Bio Config</th></tr>' +
+			Helper.helpTDwithCB('Enable Bio Compressor','This will compress long bios according to settings and provide a link to expand the compressed section.',
+				'enableBioCompressor','',
+				'<br/>Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
+				'<br/>Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" />')+
+			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Recipe Config</th></tr>' +
 			Helper.helpTDwithCB('Hide Specific Recipes','If enabled, this hides recipes whose name matches the list (separated by commas). ' +
 				'This works on Recipe Manager','hideRecipes','',
 				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" />')+
+			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Auction Config</th></tr>' +
 			Helper.helpTDwithCB('Enable Bulk Sell','This enables the functionality for the user to bulk sell items.','enableBulkSell')+
-			Helper.helpTDwithCB('Enable Sigma Box Log','This enables the functionality to keep a log of recent seen Sigma Box message.','fsboxlog')+
-			Helper.helpTDwithCB('Enable Hunting Mode','This disable menu and some visual feature to speed up the Helper.','huntingMode')+
-			//save button
+			'</table>';
+		var factionCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
+			'<tr><td colspan="2" align="left">Enter faction names, seperated by commas</td></tr>' +
+			Helper.helpTDwithHTML('Own Faction','','',Helper.injectSettingsGuildData("Self"))+
+			Helper.helpTDwithHTML('Friendly Factions','','',Helper.injectSettingsGuildData("Frnd"))+
+			Helper.helpTDwithHTML('Old Factions','','',Helper.injectSettingsGuildData("Past"))+
+			Helper.helpTDwithHTML('Enemy Factions','','',Helper.injectSettingsGuildData("Enmy"))+
+			Helper.helpTDwithCB('Show rank controls','Show ranking controls for guild managemenet in member profile page - ' +
+				'this works for guild founders only','showAdmin')+
+			'</table>';
+		var logCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
+			Helper.helpTDwithCB('Cleanup faction log','Any log messages not related to the ' +
+				'current player will be dimmed (e.g. recall messages from guild store)','hideNonPlayerGuildLogMessages')+
+			Helper.helpTDwithCB('Disable Item Coloring','Disable the code that colors the item text based on the rarity of the item.',
+				'disableItemColoring')+
+			Helper.helpTDwithCB('Enable Log Coloring','Three logs will be colored if this is enabled, Faction Chat, Faction Log and Player Log. ' +
+				'It will show any new messages in yellow and anything 20 minutes old ones in brown.','enableLogColoring')+
+			'</table>';
+		var socialCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
+			Helper.helpTDwithHTML('Show Online<br/>Allies/Enemies','This will show the allies/enemies online list on the right.',
+				//'enableAllyOnlineList',
+				Layout.networkIcon(),
+				' Allies:'+Helper.makeCBButton('enableAllyOnlineList')+
+				' Enemies:'+Helper.makeCBButton('enableEnemyOnlineList')+
+				' <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh')+
+			Helper.helpTDwithCB('Chat top to bottom','When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
+				'When not, messages run as they are in HCS\\\'s chat','chatTopToBottom')+
+			Helper.helpTDwithCB('Show chat lines','Display the last {n} lines from faction chat (set to 0 to disable).' +
+				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':''),
+				'enableChat',Layout.networkIcon(),'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '">')+
+			Helper.helpTDwithCB('Enable Guild Info Widgets','Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)',
+				'enableGuildInfoWidgets')+
+			'</table>';
+			
+		var configData='<form>'+
+			'<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
+			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
+			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Sigma Storm Helper configuration</th></tr>' +
+			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
+			'<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
+			')</span></td></tr>' +
+			'<tr><td colspan="2" align=center><a href="index.php?cmd=notepad&subcmd=saveconfig">Import/Export Config</a></td></tr>' +
+			'<tr><td colspan="2" align=center>' +
+			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Sigma Storm 2 Helper web site</a> ' +
+			'for any suggestions, requests or bug reports</span></td></tr></table>' +
+			'<div id="tabFrame">'+
+				'<div id="tabMenuDiv">'+
+					'<span id="tabMenu0" menuIndex=0 class="tabMenuActive">World Screen</span>'+
+					'<span id="tabMenu1" menuIndex=1 class="tabMenuActive">General</span>'+
+					'<span id="tabMenu2" menuIndex=2 class="tabMenuActive">Faction</span>'+
+					'<span id="tabMenu3" menuIndex=3 class="tabMenuActive">Log Screen</span>'+
+					'<span id="tabMenu4" menuIndex=4 class="tabMenuActive">Others</span>'+
+				'</div>'+
+				'<div id="tabPane0" class="tabPane" style="height: 400px;">'+huntingCfg+'</div>'+
+				'<div id="tabPane1" class="tabPane" style="height: 400px;">'+generalCfg+'</div>'+
+				'<div id="tabPane2" class="tabPane" style="height: 400px;">'+factionCfg+'</div>'+
+				'<div id="tabPane3" class="tabPane" style="height: 400px;">'+logCfg+'</div>'+
+				'<div id="tabPane4" class="tabPane" style="height: 400px;">'+socialCfg+'</div>'+
+				'<div id="tabFiller" style="height: 420px;"></div>'+
+			'</div>'+
+			// save button
+			'<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Sigma Storm Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1106198">Coccinella</a>, ' +
@@ -6755,6 +6836,9 @@ var Helper = {
 		newCell.colSpan=3;
 		newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
+		
+		Helper.tpBodyOnLoad();
+		Helper.enableCBButton();
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
@@ -6791,8 +6875,26 @@ var Helper = {
 			':</td><td>'+html+'</td></td></tr>';
 	},
 	helpTDwithCB: function(title,tip,name,preTitle,postHtml) {
-		return Helper.helpTDwithHTML(title,tip,preTitle,
-			'<input name="'+name+'" type="checkbox" value="on"' + (GM_getValue(name)?" checked":"") + '> '+(postHtml?postHtml:''));
+		return Helper.helpTDwithHTML(title,tip,preTitle,Helper.makeCBButton(name)+(postHtml?postHtml:''));
+	},
+	makeCBButton: function(name) {
+		return '<input style="display:none" id=chkbox'+name+' name="'+name+'" type="checkbox" value="on"' + (GM_getValue(name)?" checked":"") + '> '+
+			'<input type=button class=custombutton gmname='+name+' id=checboxButton'+name+' value='+(GM_getValue(name)?"ON":"off")+'>'
+	},
+	enableCBButton: function() {
+		var buttons=System.findNodes("//input[contains(@id,'checboxButton')]");
+		if (buttons) {
+			for (var i=0;i<buttons.length;i++) {
+				buttons[i].addEventListener('click',function(evt) {
+					var gmname=evt.target.getAttribute('gmname');
+					var cbox=document.getElementById('chkbox'+gmname);
+					GM_setValue(gmname,!(cbox.checked));
+					evt.target.value=(GM_getValue(gmname)?"ON":"off");
+					evt.target.blur();
+					cbox.checked=!(cbox.checked);
+				},true);
+			}
+		}
 	},
 
 	saveConfig: function(evt) {
