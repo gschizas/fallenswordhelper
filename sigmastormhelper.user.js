@@ -578,7 +578,7 @@ var Helper = {
 		modeIndc.style.filter = "alpha";
 		modeIndc.style.opacity = "0.9";
 		modeIndc.id = "modeIndc";
-		modeIndc.innerHTML='Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;">ON</span>]';
+		modeIndc.innerHTML='Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;" title="click to turn off">ON</span>]';
 		var objBody = document.getElementsByTagName("body").item(0);
 		objBody.insertBefore(modeIndc, objBody.firstChild);
 		document.getElementById('turnOffHMode').addEventListener('click',
@@ -1599,7 +1599,24 @@ var Helper = {
 	},
 
 	checkBuffs: function() {
-		//
+		if (!GM_getValue("showHuntingBuffs")) return;
+		
+		var currentBuffs = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=removeskill&skill_id=')]");
+		var buffHash={};
+		if (currentBuffs) {
+			for (var i=0;i<currentBuffs.length;i++) {
+				var currentBuff = currentBuffs[i];
+				var buffHref = currentBuff.getAttribute("href");
+				var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/.exec(currentBuff.getAttribute("onclick"));
+				if (buffTest) {
+					var buffName = buffTest[1];
+				} else {
+					var buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/.exec(currentBuff.getAttribute("onclick"));
+					if (buffTest) var buffName = buffTest[1]; else GM_log("Error getting buff");
+				}
+				buffHash[buffName]=true;
+			}
+		}
 
 		var replacementText = "<td background='" + System.imageServer + "/sigma2/skin/realm_right_bg.jpg'>"
 		replacementText += "<table width=218 cellpadding='1' style='margin-left:5px; margin-right:5px; " +
@@ -1612,7 +1629,7 @@ var Helper = {
 			var buffAry=buffs.split(",")
 			var missingBuffs = new Array();
 			for (var i=0;i<buffAry.length;i++) {
-				if (!System.findNode("//img[contains(@onmouseover,'" + buffAry[i].replace(/^\s+|\s+$/g,"") + "')]")) {
+				if (!buffHash[buffAry[i].trim()]) {
 					missingBuffs.push(buffAry[i]);
 				}
 			}
@@ -6621,7 +6638,7 @@ var Helper = {
 
 	injectSettingsGuildData: function(guildType) {
 		var result='';
-		result += '<input name="guild' + guildType + '" size="45" value="' + GM_getValue("guild" + guildType) + '">'
+		result += '<input name="guild' + guildType + '" size="40" value="' + GM_getValue("guild" + guildType) + '">'
 		result += '<span style="cursor:pointer;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
 			guildType + 'Message"> &#x00bb;</span>'
 		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
@@ -6636,7 +6653,7 @@ var Helper = {
 		var doNotKillList=GM_getValue("doNotKillList");
 		var minPS=System.getValueJSON("minPSStats");
 
-		var inputSize=45;
+		var inputSize=40;
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
@@ -6650,101 +6667,79 @@ var Helper = {
 			'for any suggestions, requests or bug reports</span></td></tr>' +
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Social Preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter faction names, seperated by commas</td></tr>' +
-			'<tr><td align="right">Own Faction:</td><td>'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
-			'<tr><td align="right">Friendly Factions:</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
-			'<tr><td align="right">Old Factions:</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
-			'<tr><td align="right">Enemy Factions:</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
-				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
-				'></td></tr>'  +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
-				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
-				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
-				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
-			'<td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
-				'When not, messages run as they are in HCS\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show chat lines' + Helper.helpLink('Chat lines', 'Display the last {n} lines from faction chat (set to 0 to disable).' +
-				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':'')) +
-				':</td><td><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">'+
-				'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"></td></tr>' +
+			Helper.helpTDwithHTML('Own Faction','','',Helper.injectSettingsGuildData("Self"))+
+			Helper.helpTDwithHTML('Friendly Factions','','',Helper.injectSettingsGuildData("Frnd"))+
+			Helper.helpTDwithHTML('Old Factions','','',Helper.injectSettingsGuildData("Past"))+
+			Helper.helpTDwithHTML('Enemy Factions','','',Helper.injectSettingsGuildData("Enmy"))+
+			Helper.helpTDwithCB('Enable Guild Info Widgets','Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)',
+				'enableGuildInfoWidgets')+
+			Helper.helpTDwithCB('Show Online Allies/Enemies','This will show the allies/enemies online list on the right.',
+				'enableAllyOnlineList',Layout.networkIcon(),
+				' Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
+				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh')+
+			Helper.helpTDwithCB('Chat top to bottom','When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
+				'When not, messages run as they are in HCS\\\'s chat','chatTopToBottom')+
+			Helper.helpTDwithCB('Show chat lines','Display the last {n} lines from faction chat (set to 0 to disable).' +
+				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':''),
+				'enableChat',Layout.networkIcon(),'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '">')+
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Other preferences</th></tr>' +
-			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
-				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
-				'</td></tr>' +
-			'<tr><td align="right">Keep Combat Logs' + Helper.helpLink('Keep Combat Logs', 'Save combat logs to a temporary variable. '+
-				'Press <u>Show logs</u> on the right to display and copy them') +
-				':</td><td><input name="keepLogs" type="checkbox" value="on"' + (GM_getValue("keepLogs")?" checked":"") + '>' +
-				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowLogs"></td></tr>' +
-			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
-				'this works for guild founders only') +
-				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Cleanup faction log' + Helper.helpLink('Dim Non Player Faction Log Messages', 'Any log messages not related to the ' +
-				'current player will be dimmed (e.g. recall messages from guild store)') +
-				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
-				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Faction Chat, Faction Log and Player Log. ' +
-				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
-				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
-				'quests you might have missed.') +
-				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
-			'<tr><td align="right">Show Combat Log' + Helper.helpLink('Show Combat Log', 'This will show the combat log for each automatic battle below the monster list.') +
-				':</td><td><input name="showCombatLog" type="checkbox" value="on"' + (GM_getValue("showCombatLog")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Color Special Entities' + Helper.helpLink('Color Special Entities', 'Entities will be colored according to their rarity. ' +
-				'Champions will be colored green, Elites yellow and Super Elites red.') +
-				':</td><td><input name="enableCreatureColoring" type="checkbox" value="on"' + (GM_getValue("enableCreatureColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
-				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
-				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Keep Entity Log' + Helper.helpLink('Keep Entity Log', 'This will show the entity log for each entity you see when you travel. This requires Show Entity Info enabled!') +
-				':</td><td><input name="showMonsterLog" type="checkbox" value="on"' + (GM_getValue("showMonsterLog")?" checked":"") + '>'+
-				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
-			'<tr><td align="right">Hide <small>Taulin Rad Lands</small> Portal' + Helper.helpLink('Hide Taulin Rad Lands Portal', 'This will hide the Taulin Rad Lands portal on the world screen.') +
-				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Footprints Color:</td><td><input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
-			'<tr><td align="right">Show Send Credits' + Helper.helpLink('Show Send Credits on World Screen', 'This will show an icon below the world map to allow you to quickly send credits to a Friend.') +
-				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
+			Helper.helpTDwithCB('Quick Kill','This will kill monsters without opening a new page','quickKill')+
+			Helper.helpTDwithCB('Keep Combat Logs','Save combat logs to a temporary variable. '+
+				'Press <u>Show logs</u> on the right to display and copy them','keepLogs','',
+				'<input type="button" class="custombutton" value="Show" id="Helper:ShowLogs">') +
+			Helper.helpTDwithCB('Show rank controls','Show ranking controls for guild managemenet in member profile page - ' +
+				'this works for guild founders only','showAdmin')+
+			Helper.helpTDwithCB('Cleanup faction log','Any log messages not related to the ' +
+				'current player will be dimmed (e.g. recall messages from guild store)','hideNonPlayerGuildLogMessages')+
+			Helper.helpTDwithCB('Disable Item Coloring','Disable the code that colors the item text based on the rarity of the item.',
+				'disableItemColoring')+
+			Helper.helpTDwithCB('Enable Log Coloring','Three logs will be colored if this is enabled, Faction Chat, Faction Log and Player Log. ' +
+				'It will show any new messages in yellow and anything 20 minutes old ones in brown.','enableLogColoring')+
+			Helper.helpTDwithCB('Show Completed Quests','This will show completed quests that have been hidden and will also show any ' +
+				'quests you might have missed.','showCompletedQuests')+
+			Helper.helpTDwithCB('Show Combat Log','This will show the combat log for each automatic battle below the monster list.',
+				'showCombatLog')+
+			Helper.helpTDwithCB('Color Special Entities','Entities will be colored according to their rarity. ' +
+				'Champions will be colored green, Elites yellow and HK red.','enableCreatureColoring')+
+			Helper.helpTDwithCB('Show Creature Info','This will show the information from the view creature link when you mouseover the link.' +
+				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':''),'showCreatureInfo',Layout.networkIcon())+
+			Helper.helpTDwithCB('Keep Entity Log','This will show the entity log for each entity you see when you travel. This requires Show Entity Info enabled!',
+				'showMonsterLog','','<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs">')+
+			Helper.helpTDwithCB('Hide <small>TaulinRadLands</small> Portal','This will hide the Taulin Rad Lands portal on the world screen.',
+				'hideKrulPortal')+
+			Helper.helpTDwithHTML('Footprints Color','','','<input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" />')+
+			Helper.helpTDwithCB('Show Send Credits','This will show an icon below the world map to allow you to quickly send credits to a Friend.',
+				'sendGoldonWorld','',
 				'Send <input name="goldAmount" size="8" value="'+ GM_getValue("goldAmount") + '" /> '+
-				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />' +
-				'</td></tr>' +
-			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
-				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
-				'><br/>Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
-				'<br/>Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
-			'<tr><td align="right">Do Not Kill List' + Helper.helpLink('Do Not Kill List', 'List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
+				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />')+
+			Helper.helpTDwithCB('Enable Bio Compressor','This will compress long bios according to settings and provide a link to expand the compressed section.',
+				'enableBioCompressor','',
+				'<br/>Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
+				'<br/>Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" />')+
+			Helper.helpTDwithHTML('Do Not Kill List','List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
 				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
-				'enabled for this function to work.') +
-				':</td><td><input name="doNotKillList" size="'+inputSize+'" value="'+ doNotKillList + '" /></td></tr>' +
-			'<tr><td align="right">Minimum Personal Status' + Helper.helpLink('Minimum Personal Status', 'Minimum attack, defense, armor, HP, damage, skill power before these status on world page turn to red.'+
-				'<br/>Note that backpack counter will turn red if backpack is full') +
-				':</td><td>'+
+				'enabled for this function to work.','','<input name="doNotKillList" size="'+inputSize+'" value="'+ doNotKillList + '" />')+
+			Helper.helpTDwithHTML('Min Personal Status','Minimum attack, defense, armor, HP, damage, skill power before these status on world page turn to red.'+
+				'<br/>Note that backpack counter will turn red if backpack is full','',
 				'Atk: <input name="minPSatk" size=1 value="'+ minPS.atk + '" />, '+
 				'Def: <input name="minPSdef" size=1 value="'+ minPS.def + '" />, '+
 				'Arm: <input name="minPSarm" size=1 value="'+ minPS.arm + '" />, '+
 				'Dmg: <input name="minPSdmg" size=1 value="'+ minPS.dmg + '" /><br/> '+
-				'Current HP: <input name="minPScHP" size=1 value="'+ minPS.cHP + '" />, '+
-				'Max HP: <input name="minPSmHP" size=1 value="'+ minPS.mHP + '" />, '+
-				'Skill Power: <input name="minPSskill" size=1 value="'+ minPS.skill + '" />, '+
-				'</td></tr>' +
-			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
-				'separated by commas. Use the checkbox to enable/disable them.') +
-				':</td><td><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
-				'<input name="huntingBuffs" size="'+inputSize+'" value="'+ buffs + '" /></td></tr>' +
-			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
-				'This works on Quest Manager and Quest Book.') +
-				':</td><td><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
-				'<input name="hideQuestNames" size="'+inputSize+'" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
-			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
-				'This works on Recipe Manager') +
-				':</td><td><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
-				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
-			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
-				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Sigma Box Log' + Helper.helpLink('Enable Sigma Box Log', 'This enables the functionality to keep a log of recent seen Sigma Box message.') +
-				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual feature to speed up the Helper.') +
-				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
+				'CurrentHP: <input name="minPScHP" size=1 value="'+ minPS.cHP + '" />, '+
+				'MaxHP: <input name="minPSmHP" size=1 value="'+ minPS.mHP + '" />, '+
+				'SkillPower: <input name="minPSskill" size=1 value="'+ minPS.skill + '" />')+
+			Helper.helpTDwithCB('Hunting Buffs','Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
+				'separated by commas. Use the checkbox to enable/disable them.','showHuntingBuffs','',
+				'<input name="huntingBuffs" size="'+inputSize+'" value="'+ buffs + '" />')+
+			Helper.helpTDwithCB('Hide Specific Quests','If enabled, this hides quests whose name matches the list (separated by commas). ' +
+				'This works on Quest Manager and Quest Book.','hideQuests','',
+				'<input name="hideQuestNames" size="'+inputSize+'" value="'+ GM_getValue("hideQuestNames") + '" />')+
+			Helper.helpTDwithCB('Hide Specific Recipes','If enabled, this hides recipes whose name matches the list (separated by commas). ' +
+				'This works on Recipe Manager','hideRecipes','',
+				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" />')+
+			Helper.helpTDwithCB('Enable Bulk Sell','This enables the functionality for the user to bulk sell items.','enableBulkSell')+
+			Helper.helpTDwithCB('Enable Sigma Box Log','This enables the functionality to keep a log of recent seen Sigma Box message.','fsboxlog')+
+			Helper.helpTDwithCB('Enable Hunting Mode','This disable menu and some visual feature to speed up the Helper.','huntingMode')+
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -6790,6 +6785,14 @@ var Helper = {
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
 			' ]'
+	},
+	helpTDwithHTML: function(title,tip,preTitle,html) {
+		return '<tr><td align=right valign=top>' + (preTitle?preTitle:'')+title + Helper.helpLink(title, tip) +
+			':</td><td>'+html+'</td></td></tr>';
+	},
+	helpTDwithCB: function(title,tip,name,preTitle,postHtml) {
+		return Helper.helpTDwithHTML(title,tip,preTitle,
+			'<input name="'+name+'" type="checkbox" value="on"' + (GM_getValue(name)?" checked":"") + '> '+(postHtml?postHtml:''));
 	},
 
 	saveConfig: function(evt) {
