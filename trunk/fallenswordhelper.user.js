@@ -105,6 +105,7 @@ var Helper = {
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoGold","min":"","max":"","gold":true,"fsp":false},{"name":"NoFSP","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 		System.setDefault("quickLinks","[]");
+		System.setDefault("enableAttackHelper", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -639,12 +640,10 @@ var Helper = {
 	
 	injectViewGuild: function() {
 		if (GM_getValue("highlightPlayersNearMyLvl")) {
-		var memberList = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody");
-		
+		var memberList = System.findNode("//tr[td/b[.='Members']]/following-sibling::tr/td/table");
 		for (var i=2;i<memberList.rows.length;i+=4) {
 			var iplus1 = i+1;
-			var xPath = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[2]/td/table/tbody/tr[4]/td[2]/table/tbody/tr[7]/td/table/tbody/tr[" + iplus1 + "]/td[3]";			
-			var level = System.findNode(xPath).innerHTML;
+			var level = memberList.rows[i].cells[2].innerHTML;
 			var aRow = memberList.rows[i];
 				if (!isNaN(GM_getValue("lvlDiffToHighlight"))) {
 					if (Math.abs(level - Helper.characterLevel) <= GM_getValue("lvlDiffToHighlight")) {
@@ -2071,9 +2070,8 @@ var Helper = {
 	
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) return;
-		var guildInfoTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Info']]");
-		if (guildInfoTable) {
-			var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
+		var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
+		if (onlineMembersTable) {
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
 				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
 				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
@@ -2366,35 +2364,41 @@ var Helper = {
 		var creatureInfo=System.createDocument(responseText);
 		var statsNode = System.findNode("//table[@width='400']", creatureInfo);
 		if (!statsNode) {return;} // FF2 error fix
-		var classNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Class:')]/following-sibling::td", creatureInfo);
-		var levelNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Level:')]/following-sibling::td", creatureInfo);
-		var attackNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Attack:')]/following-sibling::td", creatureInfo);
-		var defenseNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Defense:')]/following-sibling::td", creatureInfo);
-		var armorNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Armor:')]/following-sibling::td", creatureInfo);
-		var damageNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]/following-sibling::td", creatureInfo);
-		var hitpointsNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]/following-sibling::td", creatureInfo);
-		var goldNode = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Gold:')]/following-sibling::td", creatureInfo);
-		var enhanceNodesXpath = "//table[@width='400']/tbody/tr[contains(td,'Enhancements')]/following-sibling::*[td/font[@color='#333333']]"
-		var enhanceNodes = System.findNodes(enhanceNodesXpath, creatureInfo);
-
+		//store the stats
+		var classNode = statsNode.rows[1].cells[1];
+		var levelNode = statsNode.rows[1].cells[3];
+		var attackNode = statsNode.rows[2].cells[1];
+		var defenseNode = statsNode.rows[2].cells[3];
+		var armorNode = statsNode.rows[3].cells[1];
+		var damageNode = statsNode.rows[3].cells[3];
+		var hitpointsNode = statsNode.rows[4].cells[1];
+		var goldNode = statsNode.rows[4].cells[3];
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
 		var oneHitNumber = Math.ceil((hitpoints*1.053)+(armorNumber*1.053));
-
-		var recolor=System.findNodes("//td[@bgcolor='#cd9e4b']", statsNode);
-		for (var i=0; i<recolor.length; i++) {
-			recolor[i].style.color="black";
+		
+		var hideRestOfRows = false;
+		for (var i=0; i<statsNode.rows.length; i++) {
+			var firstCell = statsNode.rows[i].cells[0];
+			var thirdCell = statsNode.rows[i].cells[2];
+			//color titles black
+			if (firstCell.getAttribute("bgcolor") == "#cd9e4b") firstCell.style.color="black";
+			//color text white so it can be read
+			if (firstCell.firstChild && firstCell.firstChild.tagName) firstCell.firstChild.style.color="#cccccc";
+			if (thirdCell && thirdCell.firstChild && thirdCell.firstChild.tagName) thirdCell.firstChild.style.color="#cccccc";
+			//
+			if (firstCell.textContent == 'Actions') {
+				hideRestOfRows = true;
+			}
+			if (hideRestOfRows) {
+				firstCell.style.display = 'none';
+				firstCell.style.visibility = 'hidden';
+			}
 		}
-		recolor=System.findNodes("//font[@color='#333333']", statsNode);
-		for (var i=0; i<recolor.length; i++) {
-			recolor[i].style.color="#cccccc";
-		}
-		var killButtons=System.findNode("tbody/tr[td/input]", statsNode);
-		var killButtonHeader=System.findNode("tbody/tr[contains(td,'Actions')]", statsNode);
-		var killButtonParent=killButtonHeader.parentNode;
 
-		var imageNode = System.findNode("//img[contains(@src, '/creatures/')]", creatureInfo);
-		var nameNode = System.findNode("//img[contains(@src, '/creatures/')]/../../following-sibling::tr[1]/td", creatureInfo);
+		var imageTable = System.findNode("//table[tbody/tr/td/img[contains(@src, '/creatures/')]]", creatureInfo);
+		var imageNode = imageTable.rows[0].cells[0].firstChild;
+		var nameNode = imageTable.rows[1].cells[0].firstChild;
 
 		if (GM_getValue("showMonsterLog")) {
 			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent,
@@ -2410,8 +2414,6 @@ var Helper = {
 		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + Helper.characterHP + "</span>)" +
 			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
 
-		killButtonParent.removeChild(killButtons);
-		killButtonParent.removeChild(killButtonHeader);
 		callback.setAttribute("mouseOverText", "<table>" +
 			"<tr><td valign=top>" + imageNode.parentNode.innerHTML + "</td>" +
 			"<td rowspan=2>" + statsNode.parentNode.innerHTML + "</td></tr>" +
@@ -5973,8 +5975,8 @@ var Helper = {
 	},
 
 	injectGroups: function() {
-		var mainTable = System.findNode("//table[@width='650']");
 		var subTable = System.findNode("//table[@width='650']/tbody/tr/td/table");
+		if (!subTable) return;
 		var minGroupLevel = GM_getValue("minGroupLevel");
 		if (minGroupLevel) {
 			var textArea = subTable.rows[0].cells[0];
@@ -7839,6 +7841,8 @@ var Helper = {
 				'displayed the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
 			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people u want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
+			'<tr><td align= "right"><span style="color:green;"><b>*New*</b></span>' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen' +
+				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
@@ -7994,6 +7998,7 @@ var Helper = {
 		System.saveValueForm(oForm, "fsboxlog");
 		System.saveValueForm(oForm, "enableCountdownTimer");
 		System.saveValueForm(oForm, "huntingMode");
+		System.saveValueForm(oForm, "enableAttackHelper");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
@@ -9353,6 +9358,7 @@ var Helper = {
 	},
 	
 	injectAttackPlayer: function() {
+		if (!GM_getValue("enableAttackHelper")) return;
 		//inject current stats, buffs and equipment
 		var attackPlayerTable = System.findNode("//table[tbody/tr/td/font/b[.='Attack Player (PvP)']]");
 		if (!attackPlayerTable) return;

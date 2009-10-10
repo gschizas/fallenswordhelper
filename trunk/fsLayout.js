@@ -1,32 +1,42 @@
 var Layout = {
 
 	injectMenu: function() {
-		Layout.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11, "menuSource_0");
-		Layout.injectOneMenu("Quest Manager", "index.php?cmd=notepad&subcmd=questmanager", 13, "menuSource_0");
-		Layout.injectOneMenu("Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15, "menuSource_0");
-		Layout.injectOneMenu("Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 17, "menuSource_0");
-		Layout.injectOneMenu("Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3, "menuSource_5");
-		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3, "menuSource_3");
+		//"menuSource_0"
+		var tableElement = System.findNode("//div[@id='menuSource_0']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
+		Layout.injectItemIntoMenuTable(tableElement, "Quest Manager", "index.php?cmd=notepad&subcmd=questmanager", 13);
+		Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 15);
+		Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 17);
 		if (GM_getValue("keepLogs")) {
-			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17, "menuSource_0")
+			Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 19)
 		}
 		if (GM_getValue("showMonsterLog")) {
-			Layout.injectOneMenu("Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19, "menuSource_0")
+			Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 21)
 		}
-		Layout.injectOneMenu("AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31, "menuSource_2");
-		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7, "menuSource_2");
-		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 23, "menuSource_0");
+		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 23, "menuSource_0");
+		//"menuSource_5"
+		var tableElement = System.findNode("//div[@id='menuSource_5']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
+		//"menuSource_3"
+		var tableElement = System.findNode("//div[@id='menuSource_3']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
+		//"menuSource_2"
+		var tableElement = System.findNode("//div[@id='menuSource_2']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
+		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7);
 
 		Layout.injectQuickLinks();
 	},
-
-	injectOneMenu: function(text, href, position, insertAt) {
-		var menuTable = System.findNode("//div[@id='" + insertAt + "']/table");
-		if (!menuTable) return;
+	
+	injectItemIntoMenuTable: function(tableElement, text, href, position) {
 		var newRow;
-		newRow = menuTable.insertRow(position);
+		newRow = tableElement.insertRow(position);
 		newRow.innerHTML='<td height="5"></td>';
-		newRow = menuTable.insertRow(position);
+		newRow = tableElement.insertRow(position);
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML='<font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font>';
 	},
@@ -72,30 +82,29 @@ var Layout = {
 	},
 
 	moveGuildOnlineList: function() {
-       	    	if (!GM_getValue("moveGuildList")) return;
-      	    	var src=System.findNode("//font[b='Guild Info']/../../../..");
-     	    	if (!src) return;
-     	    	src.parentNode.removeChild(src.nextSibling);
-    	    	src.parentNode.removeChild(src.nextSibling);
-        	src.parentNode.removeChild(src.nextSibling);
-        	src.parentNode.removeChild(src);
-        	var dest=System.findNode("//table[@width='120' and contains(.,'Support FallenSword')]")
-        	if (!dest)
-			{
+		if (!GM_getValue("moveGuildList")) return;
+		var src=System.findNode("//font[b='Guild Info']/../../../..");
+		if (!src) return;
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src);
+		var dest=System.findNode("//table[@width='120' and contains(.,'Support FallenSword')]")
+		if (!dest) {
 			var dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
-			}
+		}
 		if (!dest) return;
-        	var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
-        	var info = dest.insertRow(startRow);
-        	if (!info) return;
-        	var cell = info.insertCell(0);
+		var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
+		var info = dest.insertRow(startRow);
+		if (!info) return;
+		var cell = info.insertCell(0);
         //cell = info.insertCell(0);
         //cell = info.insertCell(0);
-        	cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-        	cell.appendChild(src);
-        	var breaker = dest.insertRow(startRow+1);
-        	var cell = breaker.insertCell(0);
-        	cell.innerHTML = "<br/>";
+		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+		cell.appendChild(src);
+		var breaker = dest.insertRow(startRow+1);
+		var cell = breaker.insertCell(0);
+		cell.innerHTML = "<br/>";
      },
 
 	notebookContent: function() {
