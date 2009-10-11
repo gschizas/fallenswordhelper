@@ -106,6 +106,7 @@ var Helper = {
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 		System.setDefault("quickLinks","[]");
 		System.setDefault("enableAttackHelper", false);
+		System.setDefault("minGroupLevel", 1);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -681,36 +682,33 @@ var Helper = {
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
 		GM_setValue("guildID",guildID);
 
-		var guildLogo = System.findNode("//a[contains(.,'Change Logo')]").parentNode;
-		guildLogo.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
+		var leftHandSideColumnTable = System.findNode("//table[tbody/tr/td/font/a[contains(.,'Change Logo')]]");
+		var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
+		changeLogoCell.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildLogoControl' linkto='guildLogoControl' title='Toggle Section'>X</span> ]";
-		var guildLogoElement = System.findNode("//img[contains(@title, 's Logo')]");
+		var guildLogoElement = leftHandSideColumnTable.rows[2].cells[0].firstChild.nextSibling;
 		guildLogoElement.id = "guildLogoControl";
 		if (GM_getValue("guildLogoControl")) {
 			guildLogoElement.style.display = "none";
 			guildLogoElement.style.visibility = "hidden";
 		}
-		var leaveGuild = System.findNode("//a[contains(.,'Leave')]").parentNode;
-		leaveGuild.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
+		var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
+		leaveGuildCell.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleStatisticsControl' linkto='statisticsControl' title='Toggle Section'>X</span> ]";
-		var linkElement=System.findNode("//a[@href='index.php?cmd=guild&subcmd=changefounder']");
-		statisticsListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
-		statisticsListElement.innerHTML = "<span id='statisticsControl'>" + statisticsListElement.innerHTML + "</span>";
+		statisticsControlElement = leftHandSideColumnTable.rows[6].cells[0].firstChild.nextSibling;
+		statisticsControlElement.id = "statisticsControl";
 		if (GM_getValue("statisticsControl")) {
-			var statisticsControl = document.getElementById("statisticsControl");
-			statisticsControl.style.display = "none";
-			statisticsControl.style.visibility = "hidden";
+			statisticsControlElement.style.display = "none";
+			statisticsControlElement.style.visibility = "hidden";
 		}
-		var build = System.findNode("//a[contains(.,'Build')]").parentNode;
-		build.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
+		var buildCell = leftHandSideColumnTable.rows[11].cells[1].firstChild;
+		buildCell.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildStructureControl' linkto='guildStructureControl' title='Toggle Section'>X</span> ]";
-		var linkElement=System.findNode("//a[@href='index.php?cmd=guild&subcmd=structures']");
-		structureListElement = linkElement.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling.firstChild.nextSibling;
-		structureListElement.innerHTML = "<span id='guildStructureControl'>" + structureListElement.innerHTML + "</span>";
+		guildStructureControlElement = leftHandSideColumnTable.rows[13].cells[0].firstChild.nextSibling;
+		guildStructureControlElement.id = "guildStructureControl";
 		if (GM_getValue("guildStructureControl")) {
-			var guildStructureControl = document.getElementById("guildStructureControl");
-			guildStructureControl.style.display = "none";
-			guildStructureControl.style.visibility = "hidden";
+			guildStructureControlElement.style.display = "none";
+			guildStructureControlElement.style.visibility = "hidden";
 		}
 
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
@@ -718,12 +716,12 @@ var Helper = {
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
 
 		//Update the guild online list, since we are already on the page.
-		doc = System.findNode("//html");
+		doc = document.firstChild.nextSibling;
 		Helper.parseGuildForWorld(doc.innerHTML, true);
 
 		// Fast Take
 
-		var guildStore = System.findNode("//table[tbody/tr/td[@background='"+System.imageServer+"/inventory/2x3.gif']]");
+		var guildStore = leftHandSideColumnTable.rows[23].cells[0].firstChild.nextSibling;
 		var guildStoreIDRE = /guildstore_id=(\d+)/i;
 
 		var guildStoreBox = [];
@@ -750,7 +748,7 @@ var Helper = {
 		}
 		
 		// self recall
-		var selfRecall=System.findNode("//b[.='Guild Store']/..");
+		var selfRecall = leftHandSideColumnTable.rows[22].cells[0];
 		selfRecall.innerHTML+=" [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&user="+Helper.characterName+"' title='Self Recall'>SR</a>]";
 	},
 
