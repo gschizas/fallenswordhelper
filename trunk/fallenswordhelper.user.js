@@ -6523,10 +6523,11 @@ var Helper = {
 				var hasThisBuff = System.findNode("//font[contains(.,'" + buffName + "')]");
 				if (hasThisBuff) {
 					var buffLevelRE = /\[(\d+)\]/
-					var buffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
-					if (buffLevel > 11 ||
+					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
+					if (myBuffLevel > 11 ||
 						buffName == 'Quest Finder') {
 						hasThisBuff.style.color='lime';
+						hasThisBuff.innerHTML += " (<font color='#FFFF00'>" + buffLevel + "</font>)";
 					}
 				}
 			}
