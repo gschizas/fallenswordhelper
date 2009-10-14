@@ -107,6 +107,8 @@ var Helper = {
 		System.setDefault("quickLinks","[]");
 		System.setDefault("enableAttackHelper", false);
 		System.setDefault("minGroupLevel", 1);
+		System.setDefault("combatEvaluatorBias", 0);
+		System.setDefault("hideRelicOffline", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -913,7 +915,8 @@ var Helper = {
 		var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
 		var myGuildID = GM_getValue("guildID");
 
-		if (defendingGuildID == myGuildID) {
+		var hideRelicOffline = GM_getValue("hideRelicOffline");
+		if (defendingGuildID == myGuildID && !hideRelicOffline) {
 			var validMemberString = "";
 			var memberList = System.getValueJSON("memberlist");
 			if (memberList) {
@@ -937,7 +940,7 @@ var Helper = {
 				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
 //}
 			testList += listOfDefenders[i].innerHTML + " ";
-			if (defendingGuildID == myGuildID) validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
+			if (defendingGuildID == myGuildID && !hideRelicOffline) validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
 			defenderCount++;
 		}
 		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
@@ -969,7 +972,7 @@ var Helper = {
 			"<tr><td style='font-size:x-small;' align='right'>DC175 + Flinch effect:</td><td style='font-size:x-small;' align='right' title='DC175Flinch'>0</td></tr>" +
 			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Above calculations include Constitution, Flinch and Nightmare Visage bonus calculations on lead defender. " +
 				"Note: Assumption is that for these three buffs, the effects only apply to the lead defender/attacker.</td></tr>";
-		if (defendingGuildID == myGuildID) {
+		if (defendingGuildID == myGuildID && !hideRelicOffline) {
 			var validMemberArray = validMemberString.split(" ");
 			var memberList = System.getValueJSON("memberlist");
 			for (var i=0;i<validMemberArray.length-1;i++) {
@@ -2373,7 +2376,14 @@ var Helper = {
 		var goldNode = statsNode.rows[4].cells[3];
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
-		var oneHitNumber = Math.ceil((hitpoints*1.053)+(armorNumber*1.053));
+		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
+		var generalVariable = 1.1053, hpVariable = 1.1;
+		if (combatEvaluatorBias == 1) {
+			generalVariable = 1.1, hpVariable = 1.053;
+		} else if (combatEvaluatorBias == 2) {
+			generalVariable = 1.053, hpVariable = 1;
+		}
+		var oneHitNumber = Math.ceil((hitpoints*hpVariable)+(armorNumber*generalVariable));
 		
 		var hideRestOfRows = false;
 		for (var i=0; i<statsNode.rows.length; i++) {
@@ -6783,6 +6793,13 @@ var Helper = {
 		//creaturedata
 		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
 		if (!creatureStatTable) {return;}
+		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
+		var generalVariable = 1.1053, hpVariable = 1.1;
+		if (combatEvaluatorBias == 1) {
+			generalVariable = 1.1, hpVariable = 1.053;
+		} else if (combatEvaluatorBias == 2) {
+			generalVariable = 1.053, hpVariable = 1;
+		}
 		var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
 		var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
 		var creatureAttack  = System.intValue(creatureStatTable.rows[2].cells[1].textContent);
@@ -6828,22 +6845,22 @@ var Helper = {
 		var nightmareVisageAttackMovedToDefense = Math.floor(playerAttackValue * nightmareVisageLevel * 0.0025);
 		extraNotes += (nightmareVisageLevel > 0? "NV Attack moved to Defense = " + nightmareVisageAttackMovedToDefense + "<br>":"");
 		var overallAttackValue = (groupExists?groupAttackValue:playerAttackValue) + counterAttackBonusAttack - nightmareVisageAttackMovedToDefense;
-		var hitByHowMuch = (overallAttackValue - Math.ceil(1.1053*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
+		var hitByHowMuch = (overallAttackValue - Math.ceil(generalVariable*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
 		//Damage:
 		var overallDamageValue = (groupExists?groupDamageValue:playerDamageValue) + deathDealerBonusDamage + counterAttackBonusDamage + holyFlameBonusDamage;
-		var damageDone = Math.floor(overallDamageValue - ((1.1053*creatureArmor) + (1.053*creatureHP)));
-		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((1.053*creatureHP)/((overallDamageValue < (1.1053*creatureArmor))? 1: overallDamageValue - (1.1053*creatureArmor))):"-");
+		var damageDone = Math.floor(overallDamageValue - ((generalVariable*creatureArmor) + (hpVariable*creatureHP)));
+		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((hpVariable*creatureHP)/((overallDamageValue < (generalVariable*creatureArmor))? 1: overallDamageValue - (generalVariable*creatureArmor))):"-");
 		//Defense:
 		var overallDefenseValue = (groupExists?groupDefenseValue:playerDefenseValue) + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + nightmareVisageAttackMovedToDefense;
 		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + "<br>":"");
 		extraNotes += (flinchLevel > 0? "Flinch Bonus Attack Reduction = " + Math.floor(creatureAttack * flinchLevel * 0.001) + "<br>":"");
-		var creatureHitByHowMuch = Math.floor((1.1053*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
+		var creatureHitByHowMuch = Math.floor((generalVariable*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
 		//Armor and HP:
 		var overallArmorValue = (groupExists?groupArmorValue:playerArmorValue) + Math.floor(playerArmorValue * sanctuaryLevel * 0.001);
 		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
 		var overallHPValue = (groupExists?groupHPValue:playerHPValue);
-		var creatureDamageDone = Math.ceil((1.1053*creatureDamage) - (overallArmorValue + overallHPValue));
-		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(overallHPValue/(((1.1053*creatureDamage) < (overallArmorValue))? 1: (1.1053*creatureDamage) - (overallArmorValue))):"-");
+		var creatureDamageDone = Math.ceil((generalVariable*creatureDamage) - (overallArmorValue + overallHPValue));
+		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(overallHPValue/(((generalVariable*creatureDamage) < (overallArmorValue))? 1: (generalVariable*creatureDamage) - (overallArmorValue))):"-");
 		//Analysis:
 		var playerHits = (numberOfCreatureHitsTillDead=="-"? numberOfHitsRequired:(numberOfHitsRequired=="-"?"-":(numberOfHitsRequired>numberOfCreatureHitsTillDead?"-":numberOfHitsRequired)));
 		var creatureHits = (numberOfHitsRequired=="-"?numberOfCreatureHitsTillDead:(numberOfCreatureHitsTillDead=="-"?"-":(numberOfCreatureHitsTillDead>numberOfHitsRequired?"-":numberOfCreatureHitsTillDead)));
@@ -7685,6 +7702,7 @@ var Helper = {
 		var bountyListRefreshTime = GM_getValue("bountyListRefreshTime");
 		var enableWantedList = GM_getValue("enableWantedList");
 		var wantedNames = GM_getValue("wantedNames");
+		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -7753,6 +7771,14 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span> Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator.'+
+					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
+					'<br>Semi-Conservative = 1.1 and 1.053'+
+					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)') +
+				':</td><td><select name="combatEvaluatorBias"><option value="0"' + (combatEvaluatorBias==0?" SELECTED":"") + 
+					'>Conservative</option><option value="1"' + (combatEvaluatorBias==1?" SELECTED":"") + 
+					'>Semi-Conservative</option><option value="2"' + (combatEvaluatorBias==2?" SELECTED":"") + 
+					'>Adventurous</option></select></td></tr>' +
 			'<tr><td align="right">Keep Creature Log' + Helper.helpLink('Keep Creature Log', 'This will show the creature log for each creature you see when you travel. This requires Show Creature Info enabled!') +
 				':</td><td><input name="showMonsterLog" type="checkbox" value="on"' + (GM_getValue("showMonsterLog")?" checked":"") + '>'+
 				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
@@ -7839,7 +7865,7 @@ var Helper = {
 				'displayed the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
 			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people u want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
-			'<tr><td align= "right"><span style="color:green;"><b>*New*</b></span>' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen' +
 				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
@@ -7851,6 +7877,8 @@ var Helper = {
 				'This works on Recipe Manager') +
 				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
 				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
+			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span> Hide Relic Offline' + Helper.helpLink('Hide Relic Offline', 'This hides the relic offline defenders checker.') +
+				':</td><td><input name="hideRelicOffline" type="checkbox" value="on"' + (GM_getValue("hideRelicOffline")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -7924,6 +7952,10 @@ var Helper = {
 		if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue<=1) {
 			maxCompressedLines.value=25;
 		}
+		
+		var combatEvaluatorBiasElement = System.findNode("//select[@name='combatEvaluatorBias']", oForm);
+		var combatEvaluatorBias = combatEvaluatorBiasElement.value;
+		GM_setValue("combatEvaluatorBias", combatEvaluatorBias);
 
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
@@ -7997,6 +8029,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableCountdownTimer");
 		System.saveValueForm(oForm, "huntingMode");
 		System.saveValueForm(oForm, "enableAttackHelper");
+		System.saveValueForm(oForm, "hideRelicOffline");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
