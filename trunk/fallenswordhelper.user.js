@@ -8594,12 +8594,12 @@ var Helper = {
 		var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[@src='"+System.imageServer+"/skin/scouttower_header.jpg']]", doc);
 		if (scoutTowerTable) {
 			var titanTable = System.findNode("//table[tbody/tr/td/img[@src='"+System.imageServer+"/skin/titankilllog_banner.jpg']]");
-			var newRow = titanTable.insertRow(-1);
+			var newRow = titanTable.insertRow(0);
 			var newCell = newRow.insertCell(0);
 			newCell.align = "center";
-			newCell.innerHTML = "<span style='font-weight:bold; font-size:large; color:blue;'>Scout Tower Info</span>";
+			newCell.innerHTML = "<img src='http://72.29.91.222/skin/scouttower_header.jpg'><br><br>" ;
 			
-			var newRow = titanTable.insertRow(-1);
+			var newRow = titanTable.insertRow(1);
 			var newCell = newRow.insertCell(0);
 			newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
 		}
