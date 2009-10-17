@@ -6395,6 +6395,20 @@ var Helper = {
 	},
 
 	displayAddBuffPack: function() {
+		var skillNodes = System.findNodes("//input[@name='skills[]']");
+		if (!skillNodes) return;
+		var buffListBox = document.getElementById("newBuffPack");
+		var buffListText = "";
+		for (var i = 0; i < skillNodes.length; i++ ) {
+			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
+			if (skillNodes[i].checked == true) {
+				buffListText += skillName + ",";
+			}			
+		}
+		if (buffListText.length > 0) {
+			buffListText = buffListText.substring(0,buffListText.lastIndexOf(','));
+			buffListBox.value = buffListText;
+		}
 		document.getElementById("newBuffPack").style.visibility = "";
 		document.getElementById("newBuffPackNickname").style.visibility = "";
 		document.getElementById("bpAdd").style.visibility = "hidden";
