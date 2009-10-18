@@ -3250,9 +3250,9 @@ var Helper = {
 						if (buffsSent) {
 
 							buffsSent = new String(buffsSent).replace("`~","").replace("~`", "").split(",");
-							
+							var theBuffPack = System.getValueJSON("buffpack");
 							for (var j = 0; j < buffsSent.length; j++) {
-								
+								var bBuffFound = false;
 								for (var m = 0; m < buffList.length; m++) {
 									var nicks = buffList[m].nicks.split(",");
 									var exitOuter = false;
@@ -3262,12 +3262,33 @@ var Helper = {
 											
 											quickBuff += m + ";"
 											exitOuter = true;
+											bBuffFound = true;
 											break;
 											
 										}					
 									}
 									if (exitOuter) {
 										break;
+									}
+								}
+								if (!bBuffFound) {
+									
+									if (!theBuffPack) continue;
+
+									if (!theBuffPack["nickname"]) { //avoid bugs if the new array is not populated yet
+										theBuffPack["nickname"] = {};
+									}
+									if (!theBuffPack["staminaTotal"]) { //avoid bugs if the new array is not populated yet
+										theBuffPack["staminaTotal"] = {};
+									}
+
+									for (var idx = 0; idx < theBuffPack["size"]; idx++) {
+										var nickname = (theBuffPack["nickname"][idx]? theBuffPack["nickname"][idx]:"");
+										if (nickname.toLowerCase().trim() == buffsSent[j].toLowerCase().trim()) {
+											//64 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
+											quickBuff += (64+idx) + ";"
+											break;
+										}
 									}
 								}
 								
@@ -6194,10 +6215,11 @@ var Helper = {
 		}
 		if (skillNodes) {
 			
-			
+			var buffPacksToUse = new Array();
 			var targetPlayers = System.findNode("//input[@name='targetPlayers']");
 			var targetPlayersCount = targetPlayers.value.split(",").length*1;
 			var newStaminaTotal = 0;
+			var theBuffPack = System.getValueJSON("buffpack"); // cache it now in case we have a buff pack to find.
 			for (var i = 0; i < skillNodes.length; i++ ) {
 				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
 				skillNodes[i].setAttribute("skillName", skillName);
@@ -6209,6 +6231,27 @@ var Helper = {
 									
 									newStaminaTotal += buffList[k].stamina*1;
 									skillNodes[i].checked = true;
+								} else if (addr[p] >= 64) {
+									if (theBuffPack) {
+									
+										var bpIndex = addr[p] - 64;
+										var bpButton = document.getElementById("bpSelect" + bpIndex);
+										
+										if (bpButton) {
+											var foundMe = false;
+											for (var indx = 0; indx < buffPacksToUse.length; indx++) {
+												if (buffPacksToUse[indx] == bpIndex) {
+													foundMe = true;
+													break;
+												}
+											}
+											if (!foundMe) {
+												buffPacksToUse.push(bpIndex);
+											}
+											
+											continue;
+										}
+									}
 								}
 							}
 						}
@@ -6221,8 +6264,13 @@ var Helper = {
 		}
 		var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
 		activateButton.parentNode.innerHTML += "<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
-			"<span id='staminaTotal' style='display:none; color:blue;'>" + newStaminaTotal + 
-			"</span>&nbsp;<span id='staminaTotalAll' style='color:blue;'>" + newStaminaTotal * targetPlayersCount + "</span>";
+			"<span id='staminaTotal' style='display:none; color:orange;'>" + newStaminaTotal + 
+			"</span>&nbsp;<span id='staminaTotalAll' style='color:orange;'>" + newStaminaTotal * targetPlayersCount + "</span>";
+		if (buffPacksToUse.length > 0) {
+			for (var i = 0; i < buffPacksToUse.length; i++ ) {
+				Helper.useBuffPack(buffPacksToUse[i]);
+			}
+		}
 	},
 
 	toggleBuffStatus: function(evt) {
@@ -6263,7 +6311,7 @@ var Helper = {
 		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
 		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
 
-		var theBuffPack = System.getValueJSON("buffpack")
+		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) return;
 
 		if (!theBuffPack["nickname"]) { //avoid bugs if the new array is not populated yet
@@ -6279,10 +6327,10 @@ var Helper = {
 			var nickname = (theBuffPack["nickname"][i]? theBuffPack["nickname"][i]:"");
 			var listOfBuffs = theBuffPack["bp"][i];
 			var staminaTotal = (theBuffPack["staminaTotal"][i]? theBuffPack["staminaTotal"][i]:"");
-			myRow.innerHTML = "<td>" + nickname + "</td><td style='font-size:x-small;'>" + listOfBuffs + "&nbsp;" + staminaTotal + "&nbsp" +
+			myRow.innerHTML = "<td>" + nickname + "</td><td style='font-size:x-small;'>" + listOfBuffs + "&nbsp;" + staminaTotal + "&nbsp;" +
 				"</td><td><span id=bpSelect" + i + " class='HelperTextLink' buffId=" + i + ">[Select]</span> " +
 				"<span id=bpDelete" + i + " buffId=" + i + " class='HelperTextLink'>[X]</span></td>"
-			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPack, true);
+			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPackHandler, true);
 			document.getElementById("bpDelete" + i).addEventListener("click", Helper.deleteBuffPack, true);
 		}
 	},
@@ -6316,8 +6364,13 @@ var Helper = {
 		staminaTotalAll.innerHTML = staminaRunningTotal * targetPlayersCount;
 	},
 
-	useBuffPack: function(evt) {
+	useBuffPackHandler: function(evt) {
 		var bpIndex=evt.target.getAttribute("buffId");
+		Helper.useBuffPack(bpIndex);
+	},
+
+	useBuffPack: function(bpIndex) {
+		
 		var theBuffPack = System.getValueJSON("buffpack")
 		if (!theBuffPack) return;
 		if (bpIndex >= theBuffPack["size"]) return;
@@ -6447,7 +6500,7 @@ var Helper = {
 				}
 			}
 		}
-		theBuffPack["staminaTotal"][theBuffPack["size"]] = "<span style='color:blue;'>(" + staminaTotal + ")</span>";
+		theBuffPack["staminaTotal"][theBuffPack["size"]] = "<span style='color:orange;'>(" + staminaTotal + ")</span>";
 		
 		//increase the size of the array
 		theBuffPack["size"] += 1;
@@ -6969,7 +7022,7 @@ var Helper = {
 			"&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br/>" +  
 			"&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special characters (non-alphanumeric).<br/>" +  			
 			"&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff pack names in them to make buffing even easier!";
-
+		textArea.rows = 10;
 		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
