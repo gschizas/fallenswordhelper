@@ -380,9 +380,6 @@ var Helper = {
 			break;
 		case "questbook":
 			switch (subPageId) {
-			case "-":
-				Helper.injectQuestBookLite();
-				break;
 			case "viewquest":
 				Helper.injectQuestTracker();
 				break;
@@ -1727,13 +1724,15 @@ var Helper = {
 	},
 
 	injectQuestBookFull: function() {
-		if (!GM_getValue("showCompletedQuests")) return;
 		var quests = Data.questMatrix();
-		var questTable = System.findNode("//table[@width='100%' and @cellPadding='2']");
+		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
 		questTable.setAttribute("findme","questTable");
 		var questNamesOnPage = [];
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
+		questTable.rows[0].cells[0].width = '80%';
+		questTable.rows[0].cells[1].width = '10%';
+		questTable.rows[0].cells[2].width = '10%';
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
@@ -1741,188 +1740,28 @@ var Helper = {
 					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ").trim();
 					var insertHere = aRow.cells[0];
 					questNamesOnPage.push(questName);
+					var imgElement = aRow.cells[1].firstChild;
 					for (var j=0;j<quests.length;j++) {
-						var aCell = aRow.cells[0]
-						var imgElement = aCell.nextSibling.firstChild;
+						var aCell = aRow.cells[0];
 						var matrixQuestName = quests[j].questName.replace(/  /g," ").trim();
-
-						// GM_log(questName + "\t" + hideQuests.indexOf(questName));
-
-						if (questName == matrixQuestName && imgElement.getAttribute("title") != "Completed") {
+						if (questName == matrixQuestName) {
 							if (hideQuests.indexOf(matrixQuestName)>=0) {
-								aRow.parentNode.removeChild(aRow.nextSibling);
 								aRow.parentNode.removeChild(aRow.nextSibling);
 								aRow.parentNode.removeChild(aRow.nextSibling);
 								aRow.parentNode.removeChild(aRow);
 							} else {
 								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
-									"<span style='color:blue;'>" + quests[j].level +
-									"</span> <span style='color:gray;'>Quest location:</span> " +
-									"<span style='color:blue;'>" + quests[j].location + "</span>";
+									"<span style='color:blue;'>" + quests[j].level + "</span>";
+								if (aRow.cells[1].innerHTML.indexOf("Incomplete") != -1) {
+									insertHere.innerHTML += " <span style='color:gray;'>Quest location:</span> " +
+										"<span style='color:blue;'>" + quests[j].location + "</span>";
+								}
 							}
 							break;
-						} else if (j==quests.length-1 && imgElement.getAttribute("title") != "Completed") {
-							insertHere.innerHTML += " <span style='color:red;'>Quest not in array sorry (or error in array).</span>";
+						} else if (j==quests.length-1) {
+							insertHere.innerHTML += " <span style='color:red;'>Quest not in helper yet sorry.</span>";
 						}
 					}
-				}
-			}
-		}
-	},
-
-	injectQuestBookLite: function() {
-		if (GM_getValue("showCompletedQuests")) return;
-		var quests = Data.questMatrix();
-		var questTable = System.findNode("//table[@width='100%' and @cellPadding='2']");
-		questTable.setAttribute("findme","questTable");
-		var hideNextRows = 0;
-		var playerQuestList = [];
-		var hideQuests=[];
-		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
-
-		for (var i=0;i<questTable.rows.length;i++) {
-			var aRow = questTable.rows[i];
-			if (i!=0) {
-				if (hideNextRows > 0) {
-					aRow.style.display = "none";
-					hideNextRows --;
-				}
-				if (aRow.cells[0].innerHTML) {
-					var questName = aRow.cells[0].firstChild.innerHTML.trim();
-					var insertHere = aRow.cells[0];
-					var killThis = false;
-					for (var j=0;j<quests.length;j++) {
-						var matrixQuestName = quests[j].questName.trim();
-						if (questName == matrixQuestName) {
-							if (hideQuests.indexOf(matrixQuestName)>=0) {
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow);
-							} else {
-								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
-									quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
-									quests[j].location + "</span>";
-							}
-							break;
-						} else if (j==quests.length) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
-						}
-					}
-					var aCell = aRow.cells[0]
-					var imgElement = aCell.nextSibling.firstChild;
-					if (imgElement.getAttribute("title") == "Completed") {
-						aRow.style.display = "none";
-						hideNextRows = 3;
-					}
-					playerQuestList.push(questName);
-				}
-			}
-			else {
-				var questNameCell = aRow.firstChild.nextSibling;
-				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:blue;'>(Completed quests hidden - " +
-					"see preferences to unhide)</font>"
-			}
-		}
-
-		var currentPageElement = System.findNode("//option[@selected]");
-		var pageText = currentPageElement.parentNode.parentNode.innerHTML;
-		var lastPageNumberRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
-		var lastPageNumber = lastPageNumberRE.exec(pageText)[1]*1;
-		newRow = questTable.insertRow(-1);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = '2';
-		newCell.style.display = 'none';
-		newCell.innerHTML = "<span style='color:red;' findme='pagesProcessed'>1</span><span style='color:red;' findme='totalPages'>" + lastPageNumber + "</span>";
-
-		newRow = questTable.insertRow(-1);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = '2';
-		newCell.style.display = 'none';
-		newCell.innerHTML = "<span style='color:red;' findme='playerQuestList'>" + playerQuestList.join() + "</span>";
-
-		var pageCountElement = System.findNode("//select[@class='customselect']");
-		//&nbsp;of&nbsp;5&nbsp;
-		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
-		var pageCount=parseInt(pageCountElement.parentNode.innerHTML.match(pageRE)[1]);
-		for (var i=1;i<pageCount;i++) {
-			System.xmlhttp("index.php?cmd=questbook&page=" + i, Helper.injectQuestData);
-		}
-	},
-
-	injectQuestData: function(responseText) {
-		var playerQuestListElement = System.findNode("//span[@findme='playerQuestList']");
-		var playerQuestList = playerQuestListElement.innerHTML.split();
-
-		var quests = Data.questMatrix();
-		var doc=System.createDocument(responseText)
-		var allItems = doc.getElementsByTagName("TD");
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.innerHTML=="Quest Name") {
-				var questTable = anItem.parentNode.parentNode;
-			}
-		}
-		var OriginalQuestTable = System.findNode("//table[@findme='questTable']");
-		var newRow, newCell;
-		var insertNextRows = 0;
-		for (var i=1;i<questTable.rows.length;i++) {
-			var aRow = questTable.rows[i];
-			if (insertNextRows > 0) {
-				newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
-				//newCell=newRow.insertCell(0);
-				newRow.innerHTML = aRow.innerHTML;
-				insertNextRows --;
-			}
-			if (aRow.cells[0].innerHTML) {
-				var questName = aRow.cells[0].firstChild.textContent.replace(/  /g," ").trim();
-				var insertHere = aRow.cells[0];
-				for (var j=0;j<quests.length;j++) {
-					if (questName == quests[j].questName.trim()) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:blue;'>" +
-							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:blue;'>" +
-							quests[j].location + "</span>";
-					} else if (j==quests.length) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
-					}
-				}
-				var aCell = aRow.cells[0]
-				var imgElement = aCell.nextSibling.firstChild;
-				if (imgElement.getAttribute("title") != "Completed") {
-					newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
-					newRow.innerHTML = aRow.innerHTML;
-					insertNextRows = 3;
-				}
-				playerQuestList.push(questName);
-			}
-		}
-		var pagesProcessedElement = System.findNode("//span[@findme='pagesProcessed']");
-		var pagesProcessed = pagesProcessedElement.textContent*1;
-		pagesProcessedElement.innerHTML = pagesProcessed + 1;
-		playerQuestListElement.innerHTML = playerQuestList.join();
-		var totalPagesElement = System.findNode("//span[@findme='totalPages']");
-		var totalPages = totalPagesElement.textContent*1;
-		var characterLevel = Helper.characterLevel;
-		var pageOneQuestTable = System.findNode("//table[@findme='questTable']");
-
-		if ((pagesProcessed+1) == totalPages) { //all pages processed so now we can find missing quests
-			newRow = pageOneQuestTable.insertRow(-1);
-			newCell = newRow.insertCell(0);
-			newCell.colSpan = '2';
-			newCell.innerHTML = "<span style='color:blue;'>List of <u>known</u> missing quests for your level. " +
-				"If you find an error with this list, or a missing quest, please report it on the google code page related to this script.</span> ";
-			for (var j=0;j<quests.length;j++) {
-				var questName = quests[j].questName;
-				var questLevel = quests[j].level;
-				var questLocation = quests[j].location;
-				if (playerQuestList.join().search(questName) == -1 && questLevel <= characterLevel) {
-					newRow = pageOneQuestTable.insertRow(-1);
-					newCell = newRow.insertCell(0);
-					newCell.colSpan = '2';
-					newCell.innerHTML = "<span style='color:gray;'>Known missing quest: " +
-					"</span><span style='color:blue;'>" + questName +
-					"</span> <span style='color:gray;'>level:</span> <span style='color:blue;'>" + questLevel +
-					"</span> <span style='color:gray;'>location:</span> <span style='color:blue;'>" + questLocation + "</span>";
 				}
 			}
 		}
@@ -4846,18 +4685,25 @@ var Helper = {
 			'Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
 				(GM_getValue("showCompletedQuests")?' checked':'') + '/>','','','Helper:QuestManagerOutput');
 		Data.questMatrix();
-		Helper.parseQuestBookStart(0);
+		Helper.parseQuestBookStart(0, 0);
 		// Helper.injectQuestTable();
 	},
 
-	parseQuestBookStart: function(questPage) {
-		System.xmlhttp("index.php?cmd=questbook&page=" + questPage, Helper.parseQuestBookDone, {"page": questPage});
+	parseQuestBookStart: function(questPage, questMode) {
+		//&subcmd=&subcmd2=&page=1&search_text=&mode=1&letter=*
+		//System.xmlhttp("index.php?cmd=questbook&page=" + questPage, Helper.parseQuestBookDone, {"page": questPage});
+		var hrefToParse = "index.php?cmd=questbook&&subcmd=&subcmd2=&page=" + questPage + "&search_text=&mode=" + questMode + "&letter=*";
+		System.xmlhttp(hrefToParse, Helper.parseQuestBookDone, {"page": questPage, "mode": questMode});
 	},
 
 	parseQuestBookDone: function(responseText, callback) {
 		var questPage=System.createDocument(responseText);
-		var currentPage=callback.page;
-		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1);
+		var currentPage=callback.page*1;
+		var currentMode=callback.mode*1;
+		var modeName = "Active";
+		if (currentMode == 1) modeName = "Completed";
+		if (currentMode == 2) modeName = "Not Started";
+		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded " + modeName + " quests ... parsing page " + (currentPage+1);
 		var pages=System.findNode("//select[@name='page']", questPage);
 		if (!pages) return;
 
@@ -4868,7 +4714,7 @@ var Helper = {
 		for (var i=0; i<questRows.length; i++) {
 			var questRow=questRows[i];
 			var questPageQuestName = questRow.cells[0].textContent.replace(/  /g," ");
-			questStatus[questPageQuestName]=questRow.cells[1].firstChild.getAttribute("title");
+			questStatus[questPageQuestName]=(currentMode==1?"Completed":"Incomplete");
 			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
 		}
 
@@ -4883,9 +4729,10 @@ var Helper = {
 
 		var nextPage=currentPage+1; //pages[currentPage];
 		if (nextPage<pages.options.length) {
-			Helper.parseQuestBookStart(nextPage)
-		}
-		else {
+			Helper.parseQuestBookStart(nextPage,currentMode)
+		} else if (currentMode < 1) {
+			Helper.parseQuestBookStart(0,currentMode+1)
+		} else {
 			Helper.injectQuestTable();
 		}
 	},
