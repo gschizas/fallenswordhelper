@@ -4391,9 +4391,34 @@ var Helper = {
 		
 		var componentDiv=document.getElementById('componentDiv');
 		if (componentDiv) {
-			componentDiv.parentNode.innerHTML+='<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Count Components</span>]</div>';
+			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Enable Quick Del</span>]</div>'+
+				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Count Components</span>]</div>';
+			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		}
+	},
+	
+	enableDelComponent: function() {
+		var nodes=System.findNodes('//a[contains(@href,"cmd=profile&subcmd=destroycomponent&component_id=")]');
+		if (nodes) {
+			for (var i=0;i<nodes.length;i++) {
+				nodes[i].parentNode.innerHTML+='<span id=compDelBtn'+i+' compid='+
+					nodes[i].getAttribute('href').match(/destroycomponent&component_id=(\d+)/i)[0]+
+					' style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Del</span>';
+				document.getElementById('compDelBtn'+i).addEventListener('click',Helper.delComponent,true);
+			}
+		}
+		document.getElementById('compDel').innerHTML='';
+	},
+	delComponent: function(evt) {
+		var id=evt.target.getAttribute('compid');
+		System.xmlhttp('index.php?cmd=profile&subcmd=destroycomponent&component_id='+id,
+			function(responseText) {
+				if (Layout.infoBox(responseText)=='Component destroyed.')
+					evt.target.parentNode.innerHTML='';
+				else
+					evt.target.innerHTML=Layout.infoBox(responseText);
+			});
 	},
 	
 	countComponent: function() {
@@ -6271,6 +6296,7 @@ var Helper = {
 					var buffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
 					if (buffLevel > 11) {
 						hasThisBuff.style.color='lime';
+						hasThisBuff.innerHTML += " (<font color='#FFFF00'>" + buffLevel + "</font>)";
 					}
 				}
 			}
