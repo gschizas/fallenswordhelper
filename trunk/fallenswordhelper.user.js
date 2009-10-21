@@ -31,7 +31,6 @@ var Helper = {
 		System.setDefault("showCreatureInfo", true);
 		System.setDefault("keepLogs", false);
 
-		System.setDefault("showCompletedQuests", true);
 		System.setDefault("showExtraLinks", true);
 		System.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
 		System.setDefault("showHuntingBuffs", true);
@@ -1724,43 +1723,18 @@ var Helper = {
 	},
 
 	injectQuestBookFull: function() {
-		var quests = Data.questMatrix();
 		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
-		questTable.setAttribute("findme","questTable");
-		var questNamesOnPage = [];
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
-		questTable.rows[0].cells[0].width = '80%';
-		questTable.rows[0].cells[1].width = '10%';
-		questTable.rows[0].cells[2].width = '10%';
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
 				if (aRow.cells[0].innerHTML) {
 					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ").trim();
-					var insertHere = aRow.cells[0];
-					questNamesOnPage.push(questName);
-					var imgElement = aRow.cells[1].firstChild;
-					for (var j=0;j<quests.length;j++) {
-						var aCell = aRow.cells[0];
-						var matrixQuestName = quests[j].questName.replace(/  /g," ").trim();
-						if (questName == matrixQuestName) {
-							if (hideQuests.indexOf(matrixQuestName)>=0) {
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow);
-							} else {
-								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
-									"<span style='color:blue;'>" + quests[j].level + "</span>";
-								if (aRow.cells[1].innerHTML.indexOf("Incomplete") != -1) {
-									insertHere.innerHTML += " <span style='color:gray;'>Quest location:</span> " +
-										"<span style='color:blue;'>" + quests[j].location + "</span>";
-								}
-							}
-							break;
-						} else if (j==quests.length-1) {
-							insertHere.innerHTML += " <span style='color:red;'>Quest not in helper yet sorry.</span>";
-						}
+					if (hideQuests.indexOf(questName)>=0) {
+						aRow.parentNode.removeChild(aRow.nextSibling);
+						aRow.parentNode.removeChild(aRow.nextSibling);
+						aRow.parentNode.removeChild(aRow);
 					}
 				}
 			}
@@ -3878,7 +3852,7 @@ var Helper = {
 		if (searchUser) {
 			for (var i=0;i<mainTable.rows.length;i++) {
 				var aRow = mainTable.rows[i];
-				if (!(aRow.cells[1])) {
+				if (!(aRow.cells[2])) {
 					if (isUser) stopRow=i;
 					isUser=(aRow.textContent.replace(/\s*/g,'')==searchUser);
 					if (isUser) startRow=i;
@@ -3890,28 +3864,38 @@ var Helper = {
 		}
 		for (var i=mainTable.rows.length-1;i>=0;i--) {
 			var aRow = mainTable.rows[i];
-			if (aRow.cells[1]) { // itemRow
+			if (aRow.cells[2]) { // itemRow
 				var itemCell = aRow.cells[1];
 				if (searchItem && itemCell.textContent.indexOf(searchItem)<0){
 					//aRow.innerHTML='';
 					mainTable.deleteRow(i);
 					continue;
 				}
-				var itemElement = itemCell.firstChild;
-				var href = itemElement.getAttribute("href");
-				var itemIDRE = /recall\&id=(\d+)/
-				var itemID = itemIDRE.exec(href)[1];
-				var playerIDRE = /player_id=(\d+)/
-				var playerID = playerIDRE.exec(href)[1];
-				//itemCell.title = itemID;
-				//ajaxLoadItem(2758, 84063685, 1, 1346893 - report link
-				//ajaxLoadItem(2758, 6569239, 4, 40769 - guild store link
-				//unfortunately the itemID for the report link is different than the guild store link so you cannot script
-				//grabbing items from the guild store easily with one click.
-				itemCell.innerHTML += ' [ <span style="cursor:pointer; text-decoration:underline;" id="recallItem' + itemID + '" ' +
-					'itemID="' + itemID + '" ' +
-					'playerID="' + playerID + '">Fast Recall</span> ]'
-				document.getElementById('recallItem' + itemID).addEventListener('click', Helper.recallItem, true);
+				var recallCell = aRow.cells[2];
+				var recallToBackpack = "";
+				if (recallCell.firstChild.nextSibling.innerHTML == 'Backpack') {
+					recallToBackpack = recallCell.firstChild.nextSibling;
+					var recallToBackpackHREF = recallToBackpack.getAttribute('href');
+					var recallToGuildStore = recallToBackpack.nextSibling.nextSibling;
+					var recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
+				} else {
+					var recallToGuildStore = recallCell.firstChild.nextSibling;
+					var recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
+				}
+				if (recallToBackpack) {
+					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + 
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast BP</span> |'+
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span></nobr>';
+					var fastBPSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling;
+					fastBPSpan.addEventListener('click', Helper.recallItem, true);
+					var fastGSSpan = fastBPSpan.nextSibling.nextSibling;
+					fastGSSpan.addEventListener('click', Helper.recallItem, true);
+				} else {
+					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + 
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span></nobr>';
+					var fastGSSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling;
+					fastGSSpan.addEventListener('click', Helper.recallItem, true);
+				}
 			}
 		}
 
@@ -3942,23 +3926,20 @@ var Helper = {
 	},
 
 	recallItem: function(evt) {
-		var itemID=evt.target.getAttribute("itemID");
-		var playerID=evt.target.getAttribute("playerID");
-		var recallHref = "index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=" + itemID + "&player_id=" + playerID;
-		System.xmlhttp(recallHref, Helper.recallItemReturnMessage, {"item": itemID, "target": evt.target, "url": recallHref});
+		var href=evt.target.getAttribute("href");
+		System.xmlhttp(href, Helper.recallItemReturnMessage, {"target": evt.target, "url": href});
 	},
 
 	recallItemReturnMessage: function(responseText, callback) {
-		var itemID = callback.item;
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
-		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		var itemCellElement = target.parentNode;
 		if (info.search("You successfully recalled the item") != -1) {
-			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>" + info + "</span>";
 		} else if (info!="") {
-			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
-			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
 			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
@@ -4678,164 +4659,6 @@ var Helper = {
 				if (!info) info = "<font color=red>Error</font>";
 				evt.target.parentNode.innerHTML = info;
 			});
-	},
-
-	injectQuestManager: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quest Manager',
-			'Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
-				(GM_getValue("showCompletedQuests")?' checked':'') + '/>','','','Helper:QuestManagerOutput');
-		Data.questMatrix();
-		Helper.parseQuestBookStart(0, 0);
-		// Helper.injectQuestTable();
-	},
-
-	parseQuestBookStart: function(questPage, questMode) {
-		//&subcmd=&subcmd2=&page=1&search_text=&mode=1&letter=*
-		//System.xmlhttp("index.php?cmd=questbook&page=" + questPage, Helper.parseQuestBookDone, {"page": questPage});
-		var hrefToParse = "index.php?cmd=questbook&&subcmd=&subcmd2=&page=" + questPage + "&search_text=&mode=" + questMode + "&letter=*";
-		System.xmlhttp(hrefToParse, Helper.parseQuestBookDone, {"page": questPage, "mode": questMode});
-	},
-
-	parseQuestBookDone: function(responseText, callback) {
-		var questPage=System.createDocument(responseText);
-		var currentPage=callback.page*1;
-		var currentMode=callback.mode*1;
-		var modeName = "Active";
-		if (currentMode == 1) modeName = "Completed";
-		if (currentMode == 2) modeName = "Not Started";
-		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded " + modeName + " quests ... parsing page " + (currentPage+1);
-		var pages=System.findNode("//select[@name='page']", questPage);
-		if (!pages) return;
-
-		var questRows=System.findNodes("//a[contains(@href,'subcmd=viewquest')]/../..", questPage);
-		var questStatus = new Array();
-		var questHref = new Array();
-
-		for (var i=0; i<questRows.length; i++) {
-			var questRow=questRows[i];
-			var questPageQuestName = questRow.cells[0].textContent.replace(/  /g," ");
-			questStatus[questPageQuestName]=(currentMode==1?"Completed":"Incomplete");
-			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
-		}
-
-		for (i=0; i<Data.questArray.length; i++) {
-			if (questStatus[Data.questArray[i].questName]!=undefined) {
-				Data.questArray[i].status=questStatus[Data.questArray[i].questName];
-			}
-			if (questHref[Data.questArray[i].questName]!=undefined) {
-				Data.questArray[i].href=questHref[Data.questArray[i].questName];
-			}
-		}
-
-		var nextPage=currentPage+1; //pages[currentPage];
-		if (nextPage<pages.options.length) {
-			Helper.parseQuestBookStart(nextPage,currentMode)
-		} else if (currentMode < 1) {
-			Helper.parseQuestBookStart(0,currentMode+1)
-		} else {
-			Helper.injectQuestTable();
-		}
-	},
-
-	injectQuestTable: function() {
-		document.getElementById('Helper:QuestManagerOutput').innerHTML = Helper.generateQuestTable();
-		var questTable=document.getElementById('Helper:QuestTable');
-		for (var i=0; i<questTable.rows[0].cells.length; i++) {
-			var cell=questTable.rows[0].cells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.addEventListener('click', Helper.sortQuestTable, true);
-		}
-		document.getElementById("Helper:showCompletedQuests").addEventListener('click', Helper.toggleShowHiddenQuests, true);
-	},
-
-	toggleShowHiddenQuests: function(evt) {
-		GM_setValue("showCompletedQuests", evt.target.checked);
-		Helper.injectQuestTable();
-	},
-
-	sortQuestTable: function(evt) {
-		var headerClicked=evt.target.getAttribute("sortKey");
-
-		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
-		}
-		Helper.sortBy=headerClicked;
-
-		GM_log(headerClicked)
-
-		if (headerClicked=="level") {
-			Data.questArray.sort(Helper.numberSort);
-		}
-		else if (headerClicked=="status") {
-			Data.questArray.sort(Helper.questStatusSort);
-		}
-		else {
-			Data.questArray.sort(Helper.stringSort);
-		}
-		Helper.injectQuestTable();
-	},
-
-	generateQuestTable: function() {
-		var quests = Data.questMatrix();
-		var q, bgColor;
-		//GM_log(Helper.characterLevel);
-		var hideQuests=[];
-		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
-		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="Helper:QuestTable">';
-		output += '<tr style="background-color:#cd9e4b;"><th sortkey="questName">Name</th><th></th><th sortKey="level">Level</th><th></th>' +
-			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
-		var c=0;
-		for (var i=0;i<quests.length;i++) {
-			q = quests[i];
-			if (hideQuests.indexOf(q.questName)<0) {
-				var img="";
-				// if (q.status==undefined) img="";
-				if (q.status=="Completed") img=System.imageServer + "/skin/quest_complete.gif";
-				if (q.status=="Incomplete") img=System.imageServer + "/skin/quest_incomplete.gif";
-				if (q.status==undefined) img='data:image/png;base64,' +
-					'iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC5UlEQVR4nG1UX2sT' +
-					'QRD/7V5yub0kUi4mFFJfWq2i2Jb+0bZYoX2wgk+C6IvfwQf9AH4HP4KCgopvglIK' +
-					'FqVafFPf1AdFH7TpH2huzzTJOrObi6npcHd7Nzvzm5nfzJ54dmfWAHSRNPdbcCLQ' +
-					'K81mA4FSHZv9Q2wE6ZsQj2/NmEfr30jRhtfYRU427LbOVpyd+efXSBp9MH5G2vX6' +
-					'hRFknKqNqwsnugaNuNUN7ivPIdIlpQ/f9/qCPFz5YBWSgYxpkWEW/6wOFwYSgXS3' +
-					'cqsX+uTftn6Zrj9HFh1Ao+1S/bjRBxgvX+4J2knNGLoIjB+s9H2J/VbbbZBm6NMG' +
-					'Lq3u9IG9XBrA3sUlSOXb74znAIUQ9J7NwXgZ+mAyiQ8VIFpfs0Ds+L+k+k0C1DpG' +
-					'QkXkvCxkwU8bQBpuvU5QePG86/BrfM5WEh6hPbqSLZdZuv99ZhY5lXKsuAExlRUc' +
-					'yr3IGghXDba3YgvYK4YDIY/E5hO7zJQlkrILBTanz9uov8/Nwfwx2K3HKH9eR+GQ' +
-					'MtnFBXANy/CXChXlprATUwwVYm95EbomEA0GqHTK7m2ABaJEozAtgfxVxGCaiNQ2' +
-					'1YA2ueCdGiXJhsHBLrJwJ+uxQT4kNCpRp5yTSK460dopaD+xJdNt6kSUPsDR5vSi' +
-					'XUslblbe+qRVJuz59PaEebDyFdeuTDmQ9OBxYFGH8AKU3r6ynZXFgAcKQRQg+UG1' +
-					'SDYK8eTNe9ycP41Moo0dC6YrJNtY1xGqvAUCraW11QOk28qTxAbV2vbR8s2ZSTsO' +
-					'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
-					'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
-					'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
-					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC';
-				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=Helper.characterLevel) {
-					bgColor = ((c++)%2==0)?"#e2b960":"#e7c473";
-					output+='<tr style="background-color:' + bgColor + '"><td>';
-					if (q.href!=undefined) {
-						output+= '<a href="' + q.href + '">' + q.questName + '</a>';
-					} else {
-						output+= q.questName;
-					}
-					var fsgQuestName = q.questName.replace(/  /g,"+");
-					fsgQuestName = fsgQuestName.replace(/ /g,"+");
-					var wikiQuestName = q.questName.replace(/  /g,"_");
-					wikiQuestName = wikiQuestName.replace(/ /g,"_");
-					output+=
-						'</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
-						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
-						'&nbsp<a href="http://wiki.fallensword.com/index.php/' + wikiQuestName +
-						'" target="_blank" title="Look up this quest on the wiki">w</a>' +
-						'</td><td align="right">' + q.level +
-						'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
-				}
-			}
-		}
-		output+='</table>';
-		return output;
 	},
 
 	injectAuctionSearch: function() {
@@ -7742,9 +7565,6 @@ var Helper = {
 				'Send Items To <input name="itemRecipient" size="10" value="'+ GM_getValue("itemRecipient") + '" />' +
 			//Quest prefs
 			'<tr><th colspan="2" align="left">Quest preferences</th></tr>' +
-			'<tr><td align="right">Show Completed Quests' + Helper.helpLink('Show Completed Quests', 'This will show completed quests that have been hidden and will also show any ' +
-				'quests you might have missed.') +
-				':</td><td><input name="showCompletedQuests" type="checkbox" value="on"' + (GM_getValue("showCompletedQuests")?" checked":"") + '></td>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
@@ -7886,7 +7706,6 @@ var Helper = {
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
 		System.saveValueForm(oForm, "enableCreatureColoring");
-		System.saveValueForm(oForm, "showCompletedQuests");
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		System.saveValueForm(oForm, "hideBanner");
 		System.saveValueForm(oForm, "buyBuffsGreeting");
