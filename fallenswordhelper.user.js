@@ -1724,6 +1724,7 @@ var Helper = {
 
 	injectQuestBookFull: function() {
 		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
+		if (!questTable) return;
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		for (var i=0;i<questTable.rows.length;i++) {
@@ -1736,6 +1737,8 @@ var Helper = {
 						aRow.parentNode.removeChild(aRow.nextSibling);
 						aRow.parentNode.removeChild(aRow);
 					}
+					aRow.cells[4].innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
+						'" target="_blank"><img border=0 title="Search map in FSG" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
 				}
 			}
 		}
@@ -6390,12 +6393,34 @@ var Helper = {
 		System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
 
 		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
+		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
 			creatureName.innerHTML += ' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
 				'<img border=0 title="Search creature in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
+			var extraText = 'Add to the do not kill list';
+			if (doNotKillList.indexOf(creatureName.textContent.trim()) != -1) extraText = 'Remove from do not kill list';
+			creatureName.innerHTML += '&nbsp;<span style="cursor:pointer;text-decoration:underline;color:blue;font-size:x-small;" ' +
+				'id="addRemoveCreatureToDoNotKillList" creatureName="' + creatureName.textContent.trim() + '">' + extraText + '</span>';
+			document.getElementById('addRemoveCreatureToDoNotKillList').addEventListener('click', Helper.addRemoveCreatureToDoNotKillList, true);
 		}
+	},
+
+	addRemoveCreatureToDoNotKillList: function(evt) {
+		creatureName = evt.target.getAttribute('creatureName');
+		var doNotKillList = GM_getValue("doNotKillList");
+		var newDoNotKillList = "";
+		if (doNotKillList.indexOf(creatureName) != -1) {
+			newDoNotKillList = doNotKillList.replace(creatureName, "");
+			newDoNotKillList = newDoNotKillList.replace(",,", ",");
+			if (newDoNotKillList.charAt(0) == ",") newDoNotKillList = newDoNotKillList.substring(1,newDoNotKillList.length);
+		} else {
+			newDoNotKillList = doNotKillList + (doNotKillList.length != 0?",":"") + creatureName;
+			newDoNotKillList = newDoNotKillList.replace(",,", ",");
+		}
+		GM_setValue("doNotKillList",newDoNotKillList);
+		window.location = window.location
 	},
 
 	checkIfGroupExists: function(responseText) {
@@ -6945,6 +6970,7 @@ var Helper = {
 
 	injectTopRated: function() {
 		var mainTable = System.findNode("//table[tbody/tr/td/font/b[.='Top 250 Players']]");
+		if (!mainTable) return;
 		var mainTitle = mainTable.rows[0].cells[0];
 		mainTitle.innerHTML += '&nbsp<input id="findOnlinePlayers" type="button" value="Find Online Players" ' +
 			'title="Fetch the online status of the top 250 players (warning ... takes a few seconds)." class="custombutton">';
