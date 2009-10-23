@@ -3888,11 +3888,14 @@ var Helper = {
 				if (recallToBackpack) {
 					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + 
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast BP</span> |'+
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span></nobr>';
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span> |'+
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast Wear</span></nobr>';
 					var fastBPSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling;
 					fastBPSpan.addEventListener('click', Helper.recallItem, true);
 					var fastGSSpan = fastBPSpan.nextSibling.nextSibling;
 					fastGSSpan.addEventListener('click', Helper.recallItem, true);
+					var fastWearSpan = fastGSSpan.nextSibling.nextSibling;
+					fastWearSpan.addEventListener('click', Helper.recallItemNWear, true);
 				} else {
 					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + 
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span></nobr>';
@@ -3945,6 +3948,37 @@ var Helper = {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
 			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
 			GM_log(callback.url);
+		}
+	},
+	
+	recallItemNWear: function(evt) {
+		var href=evt.target.getAttribute("href");
+		System.xmlhttp(href, Helper.recallItemNWearReturnMessage, {"target": evt.target, "url": href});
+	},
+	recallItemNWearReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode;
+		if (info.search("You successfully recalled the item") != -1) {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>" + info + "</span>";
+			System.xmlhttp(System.server+'?cmd=trade', Helper.wearRecall, itemCellElement);
+		} else if (info!="") {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>" + info + "</span>";
+		}
+	},
+	wearRecall: function(responseText, callback) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes('//input[@name="sendItemList[]"]',doc);
+		if (items) {
+			var itemId=items[items.length-1].getAttribute('value');
+			System.xmlhttp(System.server+'?cmd=profile&subcmd=equipitem&inventory_id='+itemId+'&folder_id=0&backpack_page=0',
+				function(responseText) {
+					var info = Layout.infoBox(responseText);
+					if (info=="")
+						callback.innerHTML += "<br><span style='color:green; font-weight:bold;'>Worn</span>";
+					else
+						callback.innerHTML += "<br><span style='color:red; font-weight:bold;'>" + info + "</span>";
+				});
 		}
 	},
 
@@ -4295,7 +4329,9 @@ var Helper = {
 				System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
 				"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
 				playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
-				System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;";
+				System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;" +
+				"<a href=" + System.server + "?cmd=guild&subcmd=inventory&subcmd2=report&user=" +
+				playername + '>[SR]</a>&nbsp;&nbsp;';
 			if (guildRelationship == "self" && GM_getValue("showAdmin")) {
 				newhtml +=
 					"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
