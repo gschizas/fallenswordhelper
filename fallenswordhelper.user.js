@@ -4360,77 +4360,37 @@ var Helper = {
 				}
 			}
 			GM_setValue("buffsToBuy", "");
-			if (renderBio && System.findNode(bioXPath)) {
 			
+			if (renderBio && System.findNode(bioXPath)) {
 				var bioContents = System.findNode(bioXPath).innerHTML;
-					var pos1 = 0;
-				var cmdTagExists = false;
-					//iterate through the bio text, looking for all {b} and {/b} tags
-					while ((pos1 = bioContents.indexOf("{b}", pos1)) != -1) {
-						var pos2 = bioContents.indexOf("{/b}", pos1);
-						if (pos2 == -1) {
-							break;
-						}
-						//TODO: should this also stop parsing if their bio text isn't well formed, like the preview??
-						var buffName = Helper.removeHTML(bioContents.substring(pos1 + 3, pos2));						
-						var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
-							buffName + '" value="' + buffName + '"/>';
-						if (GM_getValue("renderCheckboxOnLeft")) {
-							bioContents = bioContents.substring(0, pos1) + 
-								cbString + bioContents.substring(pos1);
-						} else {
-						bioContents = bioContents.substring(0, pos2) + 
-							cbString + bioContents.substring(pos2);
-						}
-						pos1 = pos2 + cbString.length;
-						
-					}
-				while ((pos1 = bioContents.indexOf("`~", pos1)) != -1) {
-					var pos2 = bioContents.indexOf("~`", pos1);
-					
-					if (pos2 == -1) {
-						break;
-					} 
-					var buffName = Helper.removeHTML(bioContents.substring(pos1 + 2, pos2));			
-					var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
-						buffName + '" value="' + buffName + '"/>';
-					if (GM_getValue("renderCheckboxOnLeft")) {
-						bioContents = bioContents.substring(0, pos1) + 
-							cbString + bioContents.substring(pos1);
-					} else {
-					bioContents = bioContents.substring(0, pos2) + 
-						cbString + bioContents.substring(pos2);
-					}
-					pos1 = pos2 + cbString.length;
-					
-				}
-				if (bioContents.indexOf("{cmd}") != -1) {
 				
-					cmdTagExists = true;
-					
-				}
-				var bioNode = System.findNode(bioXPath);
-				//remove our tags (be friendly to other curly braces =)
-				bioNode.innerHTML = bioContents.replace(/{b}/g, "").replace(/{\/b}/g,"").replace(/`~/g,"").replace(/~`/g,"");
-					
-				var allCBs = document.getElementsByTagName("input");
-				var hasBuffs = false;
-				for (var i = 0; i < allCBs.length; i++) {
-					if (allCBs[i].id.indexOf("chkbox") != -1) {
-						//just need to make sure we have at least one buff tag to put a button						
-						hasBuffs = true;
-						break;
+				var buffs=bioContents.match(/`~[^(~`)]*~`/g);
+				if (!buffs) buffs=bioContents.match(/\{b\}[^(\{\/b\})]*\{\/b\}/g);
+				if (buffs) {
+					for (var i=0;i<buffs.length;i++) {
+						var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'')
+						var buffName = Helper.removeHTML(fullName);
+						var cbString = 
+							'<span id="Helper:buff'+i+'" style="color:blue;cursor:pointer">'+
+							'<input style="display:none" id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
+							buffName + '" value="' + buffName + '"/>'+
+							fullName+'</span>';
+						bioContents=bioContents.replace(buffs[i], cbString);
 					}
-				}
-				
-				if (hasBuffs && (bioCompressorEnabled || !cmdTagExists) && bioCell) {
-					System.findNode(xpathForButton).innerHTML += '<br/><input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>';
+					
+					if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
+					
+					bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>');
+					System.findNode(bioXPath).innerHTML = bioContents;
 					document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
-				} else if (hasBuffs > 0 && cmdTagExists) {
-					bioNode.innerHTML = bioNode.innerHTML.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>');
-						document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
+					
+					for (var i=0;i<buffs.length;i++) {
+						var buff=document.getElementById('Helper:buff'+i);
+						if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
 					}
-				}
+				}	
+			}
+			
 			avyrow.parentNode.innerHTML = newhtml ;
 		}
 
@@ -4621,6 +4581,12 @@ var Helper = {
 		//Update the ally/enemy online list, since we are already on the page.
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
+	},
+	
+	toggleBuffsToBuy: function(evt) {
+		var cbox=evt.target.firstChild;
+		cbox.checked=!cbox.checked;
+		evt.target.style.color=cbox.checked ? 'yellow' : 'blue';
 	},
 
 	getBuffsToBuy: function(evt) {
