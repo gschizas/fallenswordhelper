@@ -66,7 +66,6 @@ var Helper = {
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
 		System.setDefault("renderOtherBios", true);
-		System.setDefault("renderCheckboxOnLeft", false);
 		System.setDefault("playNewMessageSound", false);
 		System.setDefault("showSpeakerOnWorld", true);
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
@@ -6713,6 +6712,13 @@ var Helper = {
 		var startIndex = 0;
 		//Add description text for the new tags
 		var advancedEditing = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[9]/td");
+		/* TODO: Add a way to hide the advanced editing 'note' box dynamically.
+		advancedEditing.addEventListener('mouseover', function(event) { 
+			event.target.style.backgroundColor = "#8EE5EE";
+		}, false);
+		advancedEditing.addEventListener('mouseout', function(event) { 
+			event.target.style.backgroundColor = "";
+		}, false);*/
 		advancedEditing.innerHTML += "<br/>{b}This will allow FSH Script users to select buffs from your bio{/b}<br/>" +
 			"`~This will <b>also</b> allow FSH Script users to select buffs from your bio~`<br/>" +
 			"You can use the {cmd} tag as well to determine where to put the 'Ask For Buffs' button<br/><br/>" +
@@ -6782,96 +6788,35 @@ var Helper = {
 			characterCount.style.color = "blue";
 		}
 		var previewArea = System.findNode("//span[@findme='biopreview']");
-		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
-				
-		var pos1 = 0;
-		var cmdTagExists = false;
-		var wellFormed = true;
-		while ((pos1 = bioPreviewHTML.indexOf("{b}", pos1)) != -1) {
-			var pos2 = bioPreviewHTML.indexOf("{/b}", pos1);
-			
-			var testPos = bioPreviewHTML.indexOf("{b}", pos1 + 3);
-			if (pos2 == -1 || (testPos < pos2 && pos1 != bioPreviewHTML.lastIndexOf("{b}"))) {
-				
-				
-					var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
-					previewHeader.innerHTML = "Preview - Malformed FSH Bio Tags";
-				bioPreviewHTML = bioPreviewHTML.substring(0, pos1) + '<font color="red">' + bioPreviewHTML.substring(pos1, pos1 +3) + '</font>' + bioPreviewHTML.substring(pos1+3);
-					wellFormed = false;
-					break;
-				
-				
-			}
-			var buffName = Helper.removeHTML(bioPreviewHTML.substring(pos1 + 3, pos2));			
-			var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
-				buffName + '" value="' + buffName + '"/>';
-			bioPreviewHTML = bioPreviewHTML.substring(0, pos2) + 
-				cbString + bioPreviewHTML.substring(pos2);
-			pos1 = pos2 + cbString.length;
-			
-		}
-		if (wellFormed) {
-			pos1 = 0;
-			while ((pos1 = bioPreviewHTML.indexOf("`~", pos1)) != -1) {
-				var pos2 = bioPreviewHTML.indexOf("~`", pos1);
-				
-				var testPos = bioPreviewHTML.indexOf("`~", pos1 + 2);
-				if (pos2 == -1 || (testPos < pos2 && pos1 != bioPreviewHTML.lastIndexOf("`~"))) {
-					
-					var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
-					previewHeader.innerHTML = "Preview - Malformed FSH Bio Tags";
-					bioPreviewHTML = bioPreviewHTML.substring(0, pos1) + '<font color="red">' + bioPreviewHTML.substring(pos1, pos1 +2) + '</font>' + bioPreviewHTML.substring(pos1+2);
-					wellFormed = false;
-					break;
-					
-					
-				}
-				var buffName = Helper.removeHTML(bioPreviewHTML.substring(pos1 + 2, pos2));			
-				var cbString = '<input id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
-					buffName + '" value="' + buffName + '"/>';
-				if (GM_getValue("renderCheckboxOnLeft")) {
-					bioPreviewHTML = bioPreviewHTML.substring(0, pos1) + 
-						cbString + bioPreviewHTML.substring(pos1);
-				} else {
-				bioPreviewHTML = bioPreviewHTML.substring(0, pos2) + 
-					cbString + bioPreviewHTML.substring(pos2);
-				}
-				pos1 = pos2 + cbString.length;
-				
-			}
-		}
 		
-		if (bioPreviewHTML.indexOf("{cmd}") != -1) {
+		var bioContents = System.convertTextToHtml(textArea.value);
 				
-			cmdTagExists = true;
-			
-		}
-		if (wellFormed) {
-			var previewHeader = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr/td");
-			previewHeader.innerHTML = "Preview";
-			//remove our tags			 
-			bioPreviewHTML = bioPreviewHTML.replace(/{b}/g, "").replace(/{\/b}/g,"").replace(/`~/g,"").replace(/~`/g,"");
-		}		 
-		previewArea.innerHTML = bioPreviewHTML;
-		if (wellFormed) {
-			var allCBs = previewArea.getElementsByTagName("input");
-			var hasBuffs = false;
-			
-			for (var i = 0; i < allCBs.length; i++) {
-				if (allCBs[i].id.indexOf("chkbox") != -1) {
-					hasBuffs = true;
-					break;
-				}
+		bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
+		var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
+		if (buffs) {
+			for (var i=0;i<buffs.length;i++) {
+				var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'')
+				var buffName = Helper.removeHTML(fullName);
+				var cbString = 
+					'<span id="Helper:buff'+i+'" style="color:blue;cursor:pointer">'+
+					'<input style="display:none" id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
+					buffName + '" value="' + buffName + '"/>'+
+					fullName+'</span>';
+				bioContents=bioContents.replace(buffs[i], cbString);
 			}
-			if (hasBuffs && !cmdTagExists) {
-					previewArea.innerHTML += '<br/><input id="Helper:sendBuffMsg" class="custombutton" type="submit" value="Ask For Buffs" title="Not functional in preview"/>';
 			
-			} else if (hasBuffs && cmdTagExists) {
-				previewArea.innerHTML = previewArea.innerHTML.replace("{cmd}",'<input id="Helper:sendBuffMsg" class="custombutton" type="submit" value="Ask For Buffs" title="Not functional in preview"/>');
+			if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
 			
+			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=" class="custombutton" type="submit" value="Ask For Buffs"/>');
+			previewArea.innerHTML = bioContents;
+			
+			
+			for (var i=0;i<buffs.length;i++) {
+				var buff=document.getElementById('Helper:buff'+i);
+				if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
 			}		
+		}	
 				
-		}
 	},
 
 	getTotalBioCharacters: function(responseText) {
@@ -7603,8 +7548,6 @@ var Helper = {
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
 				':</td><td><input name="renderOtherBios" type="checkbox" value="on"' + (GM_getValue("renderOtherBios")?" checked":"") + '></td></tr>' +							
-			'<tr><td align="right">Render checkbox on left' + Helper.helpLink('Render checkbox on left', 'If checked, checkboxes will render on the left side of the buff name, if not checked, they will render on the right.') +
-				':</td><td><input name="renderCheckboxOnLeft" type="checkbox" value="on"' + (GM_getValue("renderCheckboxOnLeft")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
 				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
@@ -7739,7 +7682,6 @@ var Helper = {
 		System.saveValueForm(oForm, "buyBuffsGreeting");
 		System.saveValueForm(oForm, "renderSelfBio");
 		System.saveValueForm(oForm, "renderOtherBios");
-		System.saveValueForm(oForm, "renderCheckboxOnLeft");
 		System.saveValueForm(oForm, "defaultMessageSound");
 		System.saveValueForm(oForm, "showSpeakerOnWorld");
 		System.saveValueForm(oForm, "playNewMessageSound");
