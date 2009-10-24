@@ -4364,8 +4364,8 @@ var Helper = {
 			if (renderBio && System.findNode(bioXPath)) {
 				var bioContents = System.findNode(bioXPath).innerHTML;
 				
-				var buffs=bioContents.match(/`~[^(~`)]*~`/g);
-				if (!buffs) buffs=bioContents.match(/\{b\}[^(\{\/b\})]*\{\/b\}/g);
+				bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
+				var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
 				if (buffs) {
 					for (var i=0;i<buffs.length;i++) {
 						var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'')
