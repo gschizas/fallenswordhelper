@@ -602,6 +602,9 @@ var Helper = {
 				Helper.injectScavenging();
 			}
 			break;
+		case "skills":
+			Helper.injectSkillsPage();
+			break;
 		}
 		if (GM_getValue("playNewMessageSound")) {
 			var unreadLog = System.findNode("//font[contains(.,'unread log messages.')]");
@@ -613,6 +616,32 @@ var Helper = {
 				unreadLog.innerHTML += "<audio src='" + GM_getValue("defaultMessageSound") + "' autoplay=true />";
 			  }
 			}
+		}
+	},
+	
+	injectSkillsPage: function() {
+		var table = table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");;
+		var tree_id = window.location.href.match(/tree_id=(\d)/);
+		if (tree_id && tree_id[1] == 2) {
+			table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/table/tbody");
+		}
+		
+		var buffs = table.getElementsByTagName("img");
+		
+		for (var i = 0; i < buffs.length; i++) {
+			var parNode = buffs[i].parentNode;
+			var mouseoverText = buffs[i].getAttribute("onmouseover");				
+			var buffIndex = parNode.getAttribute("href").match(/skill_id=(\d*)/)[1];
+			var buffList = Data.buffList();
+			for (var j = 0; j < buffList.length; j++) {
+				if (buffList[j].skillId == buffIndex) {
+					mouseoverText = mouseoverText.replace("Click for Details", buffList[j].buff);
+					break;
+				}
+			}				
+			mouseoverText = mouseoverText.replace(/tt_setWidth\(\d*\)/, "tt_setWidth(150)");
+			buffs[i].setAttribute("onmouseover", mouseoverText);
+			
 		}
 	},
 	
