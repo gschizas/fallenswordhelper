@@ -4396,12 +4396,10 @@ var Helper = {
 				var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
 				if (buffs) {
 					for (var i=0;i<buffs.length;i++) {
-						var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'')
+						var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
 						var buffName = Helper.removeHTML(fullName);
 						var cbString = 
 							'<span id="Helper:buff'+i+'" style="color:blue;cursor:pointer">'+
-							'<input style="display:none" id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
-							buffName + '" value="' + buffName + '"/>'+
 							fullName+'</span>';
 						bioContents=bioContents.replace(buffs[i], cbString);
 					}
@@ -4612,21 +4610,25 @@ var Helper = {
 	},
 	
 	toggleBuffsToBuy: function(evt) {
-		var cbox=evt.target.firstChild;
-		cbox.checked=!cbox.checked;
-		evt.target.style.color=cbox.checked ? 'yellow' : 'blue';
+		if (evt.target.tagName.toLowerCase() != "span") {
+			evt.target.parentNode.style.color = evt.target.parentNode.style.color == 'blue' ? 'yellow' : 'blue';
+		} else {
+			evt.target.style.color=evt.target.style.color == 'blue' ? 'yellow' : 'blue';
+		}
 	},
 
 	getBuffsToBuy: function(evt) {
 	
-		var allCBs = document.getElementsByTagName("input");
+		var allSpans = document.getElementsByTagName("span");
 		
 		var buffsToBuy = "";
 		var buffCount = 0;
-		for (var i=0; i<allCBs.length; i++) {
-			var aCB=allCBs[i];
-			if (aCB.id.indexOf("chkbox") != -1 && aCB.checked) {
-				buffsToBuy += aCB.value.trim() + ", ";
+		for (var i=0; i<allSpans.length; i++) {
+			var aSpan=allSpans[i];			
+			var spanInner = aSpan.innerHTML.replace(/<[a-zA-Z\/][^>]*>/g, "").replace(/[^a-zA-Z0-9 ]/g,'');
+			
+			if (aSpan.id.match(/Helper:buff\d*/) != -1 && aSpan.style.color == "yellow") {
+				buffsToBuy += spanInner.trim() + ", ";
 				buffCount++;
 			}
 		}
@@ -6824,12 +6826,10 @@ var Helper = {
 		var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
 		if (buffs) {
 			for (var i=0;i<buffs.length;i++) {
-				var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'')
+				var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
 				var buffName = Helper.removeHTML(fullName);
 				var cbString = 
 					'<span id="Helper:buff'+i+'" style="color:blue;cursor:pointer">'+
-					'<input style="display:none" id="Helper:' + buffName + 'chkbox" type="checkbox" title="' + 
-					buffName + '" value="' + buffName + '"/>'+
 					fullName+'</span>';
 				bioContents=bioContents.replace(buffs[i], cbString);
 			}
