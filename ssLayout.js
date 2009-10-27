@@ -2,11 +2,9 @@ var Layout = {
 
 	injectMenu: function() {
 		Layout.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 6, "menuSource_0");
-		Layout.injectOneMenu("Mission Manager", "index.php?cmd=notepad&subcmd=questmanager", 7, "menuSource_0");
-		Layout.injectOneMenu("Backpack Manager", "index.php?cmd=notepad&subcmd=invmanager", 8, "menuSource_0");
-		Layout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 9, "menuSource_0");
-		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
-		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
+		Layout.injectOneMenu("Backpack Manager", "index.php?cmd=notepad&subcmd=invmanager", 7, "menuSource_0");
+		Layout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 8, "menuSource_0");
+		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 9, "menuSource_0");
 		if (GM_getValue("keepLogs")) {
 			Layout.injectOneMenu("Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 10, "menuSource_0");
 		}
@@ -15,7 +13,9 @@ var Layout = {
 		}
 		Layout.injectOneMenu("TH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 5, "menuSource_2");
 		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
-		Layout.injectOneMenu("Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 10, "menuSource_0");
+		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
+		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
+		
 		Layout.injectQuickLinks();
 	},
 
