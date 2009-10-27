@@ -32,7 +32,6 @@ var Helper = {
 		System.setDefault("showCreatureInfo", true);
 		System.setDefault("keepLogs", false);
 
-		System.setDefault("showCompletedQuests", true);
 		System.setDefault("showExtraLinks", true);
 		System.setDefault("huntingBuffs", "Data Processor, Researcher");
 		System.setDefault("showHuntingBuffs", true);
@@ -338,11 +337,6 @@ var Helper = {
 			}
 			break;
 		case "questbook":
-			switch (subsequentPageId) {
-			case "-":
-				Helper.injectQuestBookLite();
-				break;
-			}
 			Helper.injectQuestBookFull();
 			break;
 		case "profile":
@@ -453,9 +447,6 @@ var Helper = {
 				break;
 			case "recipemanager":
 				Helper.injectRecipeManager();
-				break;
-			case "questmanager":
-				Helper.injectQuestManager();
 				break;
 			case "auctionsearch":
 				Helper.injectAuctionSearch();
@@ -1653,202 +1644,21 @@ var Helper = {
 	},
 
 	injectQuestBookFull: function() {
-		if (!GM_getValue("showCompletedQuests")) return;
-		var quests = Data.questMatrix();
-		var questTable = System.findNode("//table[@width='100%' and @cellPadding='2']");
-		questTable.setAttribute("findme","questTable");
-		var questNamesOnPage = [];
+		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
+		if (!questTable) return;
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
 			if (i!=0) {
-				if (aRow.cells[0].innerHTML) {
-					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ");
-					var insertHere = aRow.cells[0];
-					questNamesOnPage.push(questName);
-					for (var j=0;j<quests.length;j++) {
-						var aCell = aRow.cells[0]
-						var imgElement = aCell.nextSibling.firstChild;
-						var matrixQuestName = quests[j].questName.replace(/  /g," ");
-
-						// GM_log(questName + "\t" + hideQuests.indexOf(questName));
-
-						if (questName == matrixQuestName && imgElement.getAttribute("title") != "Completed") {
-							if (hideQuests.indexOf(matrixQuestName)>=0) {
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow);
-							} else {
-								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> " +
-									"<span style='color:#ADB5B5;'>" + quests[j].level +
-									"</span> <span style='color:gray;'>Quest location:</span> " +
-									"<span style='color:#ADB5B5;'>" + quests[j].location + "</span>";
-							}
-							break;
-						} else if (j==quests.length-1 && imgElement.getAttribute("title") != "Completed") {
-							insertHere.innerHTML += " <span style='color:red;'>Quest not in array sorry (or error in array).</span>";
-						}
+				if (aRow.cells[0].innerHTML && aRow.cells[0].firstChild.innerHTML) {
+					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ").trim();
+					if (hideQuests.indexOf(questName)>=0) {
+						aRow.parentNode.removeChild(aRow.nextSibling);
+						aRow.parentNode.removeChild(aRow.nextSibling);
+						aRow.parentNode.removeChild(aRow);
 					}
-				}
-			}
-		}
-	},
-
-	injectQuestBookLite: function() {
-		if (GM_getValue("showCompletedQuests")) return;
-		var quests = Data.questMatrix();
-		var questTable = System.findNode("//table[@width='100%' and @cellPadding='2']");
-		questTable.setAttribute("findme","questTable");
-		var hideNextRows = 0;
-		var playerQuestList = [];
-		var hideQuests=[];
-		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
-
-		for (var i=0;i<questTable.rows.length;i++) {
-			var aRow = questTable.rows[i];
-			if (i!=0) {
-				if (hideNextRows > 0) {
-					aRow.style.display = "none";
-					hideNextRows --;
-				}
-				if (aRow.cells[0].innerHTML) {
-					var questName = aRow.cells[0].firstChild.innerHTML;
-					var insertHere = aRow.cells[0];
-					var killThis = false;
-					for (var j=0;j<quests.length;j++) {
-						var matrixQuestName = quests[j].questName;
-						if (questName == matrixQuestName) {
-							if (hideQuests.indexOf(matrixQuestName)>=0) {
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow.nextSibling);
-								aRow.parentNode.removeChild(aRow);
-							} else {
-								insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:#ADB5B5;'>" +
-									quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:#ADB5B5;'>" +
-									quests[j].location + "</span>";
-							}
-							break;
-						} else if (j==quests.length) {
-							insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
-						}
-					}
-					var aCell = aRow.cells[0]
-					var imgElement = aCell.nextSibling.firstChild;
-					if (imgElement.getAttribute("title") == "Completed") {
-						aRow.style.display = "none";
-						hideNextRows = 3;
-					}
-					playerQuestList.push(questName);
-				}
-			}
-			else {
-				var questNameCell = aRow.firstChild.nextSibling;
-				questNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:#ADB5B5;'>(Completed quests hidden - " +
-					"see preferences to unhide)</font>"
-			}
-		}
-
-		var currentPageElement = System.findNode("//option[@selected]");
-		var pageText = currentPageElement.parentNode.parentNode.innerHTML;
-		var lastPageNumberRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
-		var lastPageNumber = lastPageNumberRE.exec(pageText)[1]*1;
-		newRow = questTable.insertRow(-1);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = '2';
-		newCell.style.display = 'none';
-		newCell.innerHTML = "<span style='color:red;' findme='pagesProcessed'>1</span><span style='color:red;' findme='totalPages'>" + lastPageNumber + "</span>";
-
-		newRow = questTable.insertRow(-1);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = '2';
-		newCell.style.display = 'none';
-		newCell.innerHTML = "<span style='color:red;' findme='playerQuestList'>" + playerQuestList.join() + "</span>";
-
-		var pageCountElement = System.findNode("//select[@class='customselect']");
-		//&nbsp;of&nbsp;5&nbsp;
-		var pageRE = /\&nbsp;of\&nbsp;(\d+)\&nbsp;/
-		var pageCount=parseInt(pageCountElement.parentNode.innerHTML.match(pageRE)[1]);
-		for (var i=1;i<pageCount;i++) {
-			System.xmlhttp("index.php?cmd=questbook&page=" + i, Helper.injectQuestData);
-		}
-	},
-
-	injectQuestData: function(responseText) {
-		var playerQuestListElement = System.findNode("//span[@findme='playerQuestList']");
-		var playerQuestList = playerQuestListElement.innerHTML.split();
-
-		var quests = Data.questMatrix();
-		var doc=System.createDocument(responseText)
-		var allItems = doc.getElementsByTagName("TD");
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.innerHTML=="Quest Name") {
-				var questTable = anItem.parentNode.parentNode;
-			}
-		}
-		var OriginalQuestTable = System.findNode("//table[@findme='questTable']");
-		var newRow, newCell;
-		var insertNextRows = 0;
-		for (var i=1;i<questTable.rows.length;i++) {
-			var aRow = questTable.rows[i];
-			if (insertNextRows > 0) {
-				newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
-				//newCell=newRow.insertCell(0);
-				newRow.innerHTML = aRow.innerHTML;
-				insertNextRows --;
-			}
-			if (aRow.cells[0].innerHTML) {
-				var questName = aRow.cells[0].firstChild.textContent.replace(/  /g," ");
-				var insertHere = aRow.cells[0];
-				for (var j=0;j<quests.length;j++) {
-					if (questName == quests[j].questName) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest level:</span> <span style='color:#ADB5B5;'>" +
-							quests[j].level + "</span> <span style='color:gray;'>Quest location:</span> <span style='color:#ADB5B5;'>" +
-							quests[j].location + "</span>";
-					} else if (j==quests.length) {
-						insertHere.innerHTML += " <span style='color:gray;'>Quest not in array sorry.</span>";
-					}
-				}
-				var aCell = aRow.cells[0]
-				var imgElement = aCell.nextSibling.firstChild;
-				if (imgElement.getAttribute("title") != "Completed") {
-					newRow = OriginalQuestTable.insertRow(OriginalQuestTable.rows.length);
-					newRow.innerHTML = aRow.innerHTML;
-					insertNextRows = 3;
-				}
-				playerQuestList.push(questName);
-			}
-		}
-		var pagesProcessedElement = System.findNode("//span[@findme='pagesProcessed']");
-		var pagesProcessed = pagesProcessedElement.textContent*1;
-		pagesProcessedElement.innerHTML = pagesProcessed + 1;
-		playerQuestListElement.innerHTML = playerQuestList.join();
-		var totalPagesElement = System.findNode("//span[@findme='totalPages']");
-		var totalPages = totalPagesElement.textContent*1;
-		var characterLevel = Helper.characterLevel;
-		var pageOneQuestTable = System.findNode("//table[@findme='questTable']");
-
-		if ((pagesProcessed+1) == totalPages) { //all pages processed so now we can find missing quests
-			newRow = pageOneQuestTable.insertRow(-1);
-			newCell = newRow.insertCell(0);
-			newCell.colSpan = '2';
-			newCell.innerHTML = "<span style='color:#ADB5B5;'>List of <u>known</u> missing quests for your level. " +
-				"If you find an error with this list, or a missing quest, please report it on the google code page related to this script.</span> ";
-			for (var j=0;j<quests.length;j++) {
-				var questName = quests[j].questName;
-				var questLevel = quests[j].level;
-				var questLocation = quests[j].location;
-				if (playerQuestList.join().search(questName) == -1 && questLevel <= characterLevel) {
-					newRow = pageOneQuestTable.insertRow(-1);
-					newCell = newRow.insertCell(0);
-					newCell.colSpan = '2';
-					newCell.innerHTML = "<span style='color:gray;'>Known missing quest: " +
-					"</span><span style='color:#ADB5B5;'>" + questName +
-					"</span> <span style='color:gray;'>level:</span> <span style='color:#ADB5B5;'>" + questLevel +
-					"</span> <span style='color:gray;'>location:</span> <span style='color:#ADB5B5;'>" + questLocation + "</span>";
+					
 				}
 			}
 		}
@@ -4626,157 +4436,6 @@ var Helper = {
 		}
 	},
 
-	injectQuestManager: function() {
-		var content=Layout.notebookContent();
-		content.innerHTML=Helper.makePageTemplate('Mission Manager',
-			'Show Completed Quests <input id="Helper:showCompletedQuests" type="checkbox"' +
-				(GM_getValue("showCompletedQuests")?' checked':'') + '/>','','','Helper:QuestManagerOutput');
-		Data.questMatrix();
-		Helper.parseQuestBookStart(0);
-		// Helper.injectQuestTable();
-	},
-
-	parseQuestBookStart: function(questPage) {
-		System.xmlhttp("index.php?cmd=questbook&page=" + questPage, Helper.parseQuestBookDone, {"page": questPage});
-	},
-
-	parseQuestBookDone: function(responseText, callback) {
-		var questPage=System.createDocument(responseText);
-		var currentPage=callback.page;
-		document.getElementById("Helper:QuestManagerOutput").innerHTML+="<br/>Loaded page " + (currentPage+1);
-		var pages=System.findNode("//select[@name='page']", questPage);
-		if (!pages) return;
-
-		var questRows=System.findNodes("//a[contains(@href,'subcmd=viewquest')]/../..", questPage);
-		var questStatus = new Array();
-		var questHref = new Array();
-
-		for (var i=0; i<questRows.length; i++) {
-			var questRow=questRows[i];
-			var questPageQuestName = questRow.cells[0].textContent.replace(/  /g," ");
-			questStatus[questPageQuestName]=questRow.cells[1].firstChild.getAttribute("title");
-			questHref[questPageQuestName]=questRow.cells[0].firstChild.getAttribute("href");
-		}
-
-		for (i=0; i<Data.questArray.length; i++) {
-			if (questStatus[Data.questArray[i].questName]!=undefined) {
-				Data.questArray[i].status=questStatus[Data.questArray[i].questName];
-			}
-			if (questHref[Data.questArray[i].questName]!=undefined) {
-				Data.questArray[i].href=questHref[Data.questArray[i].questName];
-			}
-		}
-
-		var nextPage=currentPage+1; //pages[currentPage];
-		if (nextPage<pages.options.length) {
-			Helper.parseQuestBookStart(nextPage)
-		}
-		else {
-			Helper.injectQuestTable();
-		}
-	},
-
-	injectQuestTable: function() {
-		document.getElementById('Helper:QuestManagerOutput').innerHTML = Helper.generateQuestTable();
-		var questTable=document.getElementById('Helper:QuestTable');
-		for (var i=0; i<questTable.rows[0].cells.length; i++) {
-			var cell=questTable.rows[0].cells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.addEventListener('click', Helper.sortQuestTable, true);
-		}
-		document.getElementById("Helper:showCompletedQuests").addEventListener('click', Helper.toggleShowHiddenQuests, true);
-	},
-
-	toggleShowHiddenQuests: function(evt) {
-		GM_setValue("showCompletedQuests", evt.target.checked);
-		Helper.injectQuestTable();
-	},
-
-	sortQuestTable: function(evt) {
-		var headerClicked=evt.target.getAttribute("sortKey");
-
-		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
-		}
-		Helper.sortBy=headerClicked;
-
-		GM_log(headerClicked)
-
-		if (headerClicked=="level") {
-			Data.questArray.sort(Helper.numberSort);
-		}
-		else if (headerClicked=="status") {
-			Data.questArray.sort(Helper.questStatusSort);
-		}
-		else {
-			Data.questArray.sort(Helper.stringSort);
-		}
-		Helper.injectQuestTable();
-	},
-
-	generateQuestTable: function() {
-		var quests = Data.questMatrix();
-		var q, bgColor;
-		//GM_log(Helper.characterLevel);
-		var hideQuests=[];
-		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
-		var output='<br/><table border=0 cellpadding=0 cellspacing=0 width=100% id="Helper:QuestTable">';
-		output += '<tr style="background-color:#110011;"><th sortkey="questName">Name</th>' + /* '<th></th>' + */ '<th sortKey="level">Level</th><th></th>' +
-			'<th sortKey="location">Location</th><th sortKey="status">Status</th></tr>';
-		var c=0;
-		for (var i=0;i<quests.length;i++) {
-			q = quests[i];
-			if (hideQuests.indexOf(q.questName)<0) {
-				var img="";
-				// if (q.status==undefined) img="";
-				if (q.status=="Completed") img=System.imageServer + "/skin/quest_complete.gif";
-				if (q.status=="Incomplete") img=System.imageServer + "/skin/quest_incomplete.gif";
-				if (q.status==undefined) img='data:image/png;base64,' +
-					'iVBORw0KGgoAAAANSUhEUgAAABMAAAATCAYAAAByUDbMAAAC5UlEQVR4nG1UX2sT' +
-					'QRD/7V5yub0kUi4mFFJfWq2i2Jb+0bZYoX2wgk+C6IvfwQf9AH4HP4KCgopvglIK' +
-					'FqVafFPf1AdFH7TpH2huzzTJOrObi6npcHd7Nzvzm5nfzJ54dmfWAHSRNPdbcCLQ' +
-					'K81mA4FSHZv9Q2wE6ZsQj2/NmEfr30jRhtfYRU427LbOVpyd+efXSBp9MH5G2vX6' +
-					'hRFknKqNqwsnugaNuNUN7ivPIdIlpQ/f9/qCPFz5YBWSgYxpkWEW/6wOFwYSgXS3' +
-					'cqsX+uTftn6Zrj9HFh1Ao+1S/bjRBxgvX+4J2knNGLoIjB+s9H2J/VbbbZBm6NMG' +
-					'Lq3u9IG9XBrA3sUlSOXb74znAIUQ9J7NwXgZ+mAyiQ8VIFpfs0Ds+L+k+k0C1DpG' +
-					'QkXkvCxkwU8bQBpuvU5QePG86/BrfM5WEh6hPbqSLZdZuv99ZhY5lXKsuAExlRUc' +
-					'yr3IGghXDba3YgvYK4YDIY/E5hO7zJQlkrILBTanz9uov8/Nwfwx2K3HKH9eR+GQ' +
-					'MtnFBXANy/CXChXlprATUwwVYm95EbomEA0GqHTK7m2ABaJEozAtgfxVxGCaiNQ2' +
-					'1YA2ueCdGiXJhsHBLrJwJ+uxQT4kNCpRp5yTSK460dopaD+xJdNt6kSUPsDR5vSi' +
-					'XUslblbe+qRVJuz59PaEebDyFdeuTDmQ9OBxYFGH8AKU3r6ynZXFgAcKQRQg+UG1' +
-					'SDYK8eTNe9ycP41Moo0dC6YrJNtY1xGqvAUCraW11QOk28qTxAbV2vbR8s2ZSTsO' +
-					'VGYUKctZyA/bpTxcz/tlKx0TIt5OOwPSu+T/FOMNDASdKJ122/NaR21hyQ3wxBy2' +
-					'f9awTTwKuvk9HTttj6Smbgo3Dvfuv6bXxJ2E7gBpeG2Gp3/buy9oSdGz55g3JnBl' +
-					'k3g35gfvniyXMTUcYGykirGjObeWaR2u4sxQEacGQ0wer+DssYj0RdIXMVqpYJLW' +
-					'8UoB46NVYqqFv5bkGr3XAAPaAAAAAElFTkSuQmCC';
-				if ( (q.status!="Completed" || GM_getValue("showCompletedQuests")) && q.level<=Helper.characterLevel) {
-					bgColor = ((c++)%2==0)?"#000000":"#110011";
-					output+='<tr style="background-color:' + bgColor + '"><td>';
-					if (q.href!=undefined) {
-						output+= '<a href="' + q.href + '">' + q.questName + '</a>';
-					} else {
-						output+= q.questName;
-					}
-					var fsgQuestName = q.questName.replace(/  /g,"+");
-					fsgQuestName = fsgQuestName.replace(/ /g,"+");
-					var wikiQuestName = q.questName.replace(/  /g,"_");
-					wikiQuestName = wikiQuestName.replace(/ /g,"_");
-					output+=
-						/*'</td><td><a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + fsgQuestName +
-						'" target="_blank" title="Look up this quest on Fallen Sword Guide">f</a>' +
-						'&nbsp<a href="http://wiki.sigmastorm2.com/index.php/' + wikiQuestName +
-						'" target="_blank" title="Look up this quest on the wiki">w</a>' +*/
-						'</td><td align="right">' + q.level +
-						'</td><td width="20"></td><td>' + q.location + '</td><td align="right"><img src="' + img + '"></td></tr>';
-				}
-			}
-		}
-		output+='</table>';
-		return output;
-	},
-
 	injectAuctionSearch: function() {
 		var content=Layout.notebookContent();
 		content.innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
@@ -6769,10 +6428,8 @@ var Helper = {
 			'</table>';
 		var generalCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Mission Config</th></tr>' +
-			Helper.helpTDwithCB('Show Completed Missions','This will show completed missions that have been hidden and will also show any ' +
-				'quests you might have missed.','showCompletedQuests')+
 			Helper.helpTDwithCB('Hide Specific Missions','If enabled, this hides missions whose name matches the list (separated by commas). ' +
-				'This works on Mission Manager and Mission Book.','hideQuests','',
+				'This works on Mission Log.','hideQuests','',
 				'<input name="hideQuestNames" size="'+inputSize+'" value="'+ GM_getValue("hideQuestNames") + '" />')+
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Sigma Box Config</th></tr>' +
 			Helper.helpTDwithCB('Enable Sigma Box Log','This enables the functionality to keep a log of recent seen Sigma Box message.','fsboxlog')+
@@ -6950,7 +6607,6 @@ var Helper = {
 		System.saveValueForm(oForm, "showAdmin");
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
-		System.saveValueForm(oForm, "showCompletedQuests");
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 
 		System.saveValueForm(oForm, "showCombatLog");
