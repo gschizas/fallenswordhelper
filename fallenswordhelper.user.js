@@ -4368,25 +4368,11 @@ var Helper = {
 			}
 			var renderSelf = GM_getValue("renderSelfBio");
 			var renderOthers = GM_getValue("renderOtherBios");
-			var renderBio = true;
-				var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
-				var bioCell = bioTable.rows[6];
-				
-			var bioXPath;
-			var xpathForButton;
-			if (!bioCell) { //self profile
-				bioXPath = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[4]/td[2]/table/tbody/tr[3]/td/font";
-				xpathForButton = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[4]/td[2]/table/tbody/tr[4]/td";
-				if (!renderSelf) {
-					renderBio = false;
-				}
-			} else {
-				bioXPath = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td[2]/table/tbody/tr[7]/td/font";
-				xpathForButton = "//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td[2]/table/tbody/tr[8]/td";
-				if (!renderOthers) {
-					renderBio = false;
-				}
-			}
+			var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
+			var bioCell = bioTable.rows[6];
+
+			var bioXPath="//tr[td/b[.='Biography'] or td/table/tbody/tr/td/b[.='Biography']]/following-sibling::tr[2]/td/font";
+			var renderBio=(bioCell && renderSelf) || (!bioCell && renderOthers)
 			GM_setValue("buffsToBuy", "");
 			
 			if (renderBio && System.findNode(bioXPath)) {
@@ -4406,7 +4392,9 @@ var Helper = {
 					
 					if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
 					
-					bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>');
+					bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +
+						playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
+						'<span id=buffCost style="color:red"></span>');
 					System.findNode(bioXPath).innerHTML = bioContents;
 					document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
 					
@@ -4414,7 +4402,8 @@ var Helper = {
 						var buff=document.getElementById('Helper:buff'+i);
 						if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
 					}
-				}	
+					Helper.buffCost={'count':0,'buffs':{}};
+				}
 			}
 			
 			avyrow.parentNode.innerHTML = newhtml ;
@@ -4610,11 +4599,65 @@ var Helper = {
 	},
 	
 	toggleBuffsToBuy: function(evt) {
-		if (evt.target.tagName.toLowerCase() != "span") {
-			evt.target.parentNode.style.color = evt.target.parentNode.style.color == 'blue' ? 'yellow' : 'blue';
+		var buffNameNode=evt.target;
+		while (buffNameNode.tagName.toLowerCase()!='span') buffNameNode=buffNameNode.parentNode;
+		var node=buffNameNode;
+		var selected = node.style.color=='blue';
+		node.style.color=selected?'yellow':'blue';
+		
+		var buffName=node.textContent;
+		if (selected) {
+			var text='';
+			// get the whole line from the buff name towards the end (even after the ',', in case of "AL, Lib, Mer: 10k each"
+			while (node && node.nodeName.toLowerCase()!='br') {
+				var newtext=node.textContent;
+				node=node.nextSibling;
+				text+=newtext;
+			}
+			var price=text.toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
+			if (!price) { // some players have prices BEFORE the buff names
+				node=buffNameNode;
+				while (node && node.nodeName.toLowerCase()!='br') {
+					var newtext=node.textContent;
+					node=node.previousSibling;
+					text=newtext+text;
+				}
+				price=text.toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
+			}
+			var type, cost;
+			if (price) {
+				type=price[0].indexOf('k')>0 ? 'k' : 'fsp';
+				cost=price[0].match(/([\.\d]+)/)[0];
+			} else {
+				type='unknown'; cost='1';
+			}
+			Helper.buffCost.buffs[buffName]=[parseFloat(cost),type];
+			Helper.buffCost.count+=1;
 		} else {
-			evt.target.style.color=evt.target.style.color == 'blue' ? 'yellow' : 'blue';
+			Helper.buffCost.count-=1;
+			delete(Helper.buffCost.buffs[buffName]);
 		}
+		Helper.updateBuffCost();
+	},
+	
+	updateBuffCost: function() {
+		if (Helper.buffCost.count>0) {
+			var total={'k':0,'fsp':0,'unknown':0};
+			var html='This is an estimated cost based on how the script finds the cost associated with buffs from viewing bio.'+
+				'It can be incorrect, please use with discretion.<br/><hr/>'+
+				'<table border=0>';
+			for (buff in Helper.buffCost.buffs) {
+				total[Helper.buffCost.buffs[buff][1]]+=Helper.buffCost.buffs[buff][0];
+				html+='<tr><td>'+buff+'</td><td>: '+Helper.buffCost.buffs[buff][0]+Helper.buffCost.buffs[buff][1]+'</td></tr>';
+			}
+			var totalText=(total.fsp>0)?total.fsp+' FSP':'';
+			if (total.fsp > 0 && total.k > 0) totalText+=' and ';
+			totalText+=(total.k>0)?total.k+' k':'';
+			if (total.unknown>0) totalText+=' ('+total.unknown+' buff(s) with unknown cost)';
+			html+='</table><b>Total: '+totalText+'</b>';
+			document.getElementById('buffCost').innerHTML='<br/><span onmouseover=\'Tip("'+html+'");\'>Estimated Cost: <b>'+totalText+'</b></span>';
+		} else 
+			document.getElementById('buffCost').innerHTML='';
 	},
 
 	getBuffsToBuy: function(evt) {
