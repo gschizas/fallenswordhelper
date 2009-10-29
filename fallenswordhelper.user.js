@@ -8923,7 +8923,7 @@ var Helper = {
 		var invID = itemStats[1];
 		var itemID = itemStats[2];
 		
-		System.xmlhttp("index.php?cmd=auctionhouse&subcmd=create", Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID}); 
+		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems", Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID}); 
 		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);		
 	},
 	
@@ -8941,7 +8941,7 @@ var Helper = {
 		
 		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
 			var bulkItemIMG = bulkAuctionItemIMGs[i];
-			var bulkItemMouseover = bulkItemIMG.parentNode.getAttribute("onmouseover");
+			var bulkItemMouseover = bulkItemIMG.getAttribute("onmouseover");
 			var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(bulkItemMouseover);
 			var itemId = itemStats[1];
 			var invId = itemStats[2];
