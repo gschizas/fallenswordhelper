@@ -4614,7 +4614,8 @@ var Helper = {
 				node=node.nextSibling;
 				text+=newtext;
 			}
-			var price=text.toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
+			
+			var price=text.replace(/[^a-zA-Z0-9 ]/g, '').toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
 			if (!price) { // some players have prices BEFORE the buff names
 				node=buffNameNode;
 				while (node && node.nodeName.toLowerCase()!='br') {
@@ -4622,7 +4623,7 @@ var Helper = {
 					node=node.previousSibling;
 					text=newtext+text;
 				}
-				price=text.toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
+				price=text.replace(/[^a-zA-Z0-9 ]/g, '').toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
 			}
 			var type, cost;
 			if (price) {
@@ -6843,6 +6844,7 @@ var Helper = {
 	},
 
 	updateBioCharacters: function(evt) {
+		Helper.buffCost={'count':0,'buffs':{}};
 		var textArea = System.findNode("//textarea[@name='bio']");
 		var characterCount = System.findNode("//span[@findme='biolength']");
 		var crCount = 0;
@@ -6879,7 +6881,8 @@ var Helper = {
 			
 			if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
 			
-			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=" class="custombutton" type="submit" value="Ask For Buffs"/>');
+			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=" class="custombutton" type="submit" value="Ask For Buffs"/>' + 
+			'<span id=buffCost style="color:red"></span>');
 			previewArea.innerHTML = bioContents;
 			
 			
