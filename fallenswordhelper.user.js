@@ -576,7 +576,7 @@ var Helper = {
 			}
 			break;
 		case "-":
-			var isRelicPage = System.findNode("//input[contains(@title,'Use your current group to capture the relic')]");
+			var isRelicPage = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 			if (isRelicPage) {
 				Helper.injectRelic(isRelicPage);
 			}
@@ -882,12 +882,8 @@ var Helper = {
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 		relicNameElement.parentNode.style.fontSize = "x-small";
-		var buttonElement = System.findNode("//input[@value='Attempt Group Capture']");
-		var injectHere = buttonElement.parentNode;
-		injectHere.align = 'center';
-		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
-			'class="custombutton">' + injectHere.innerHTML;
-		injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Defended')]");
+		
+		var injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Defended')]");
 		if (injectHere) {
 			var defendingGuildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
 			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
@@ -899,6 +895,15 @@ var Helper = {
 				var buffAllLink = System.findNode("//a[@id='buffAll']");
 				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 			}
+		var buttonElement = System.findNode("//input[@value='Attempt Group Capture']");
+		if (!buttonElement){
+			var buttonElement = System.findNode("//input[@value='Attempt Empower (50,000 Gold)']");
+				}
+		var injectHere = buttonElement.parentNode;
+		injectHere.align = 'center';
+		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
+			'class="custombutton">' + injectHere.innerHTML;
+
 		}
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 	},
