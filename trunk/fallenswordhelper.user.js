@@ -1833,8 +1833,8 @@ var Helper = {
 		Helper.prepareCombatLog();
 
 		//quest tracker
-		var questBeingTracked = GM_getValue("questBeingTracked");
-		if (questBeingTracked) {
+		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
+		if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
 			var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
 			if (!injectHere) return;
 			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
@@ -1842,16 +1842,27 @@ var Helper = {
 				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
 			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
 				"colspan='2'></td></tr>";
-			replacementText += "<tr><td style='font-size:small; color:black'><a href=" + questBeingTracked + ">Quest Info:</a>&nbsp;"
-			replacementText += "<input id='dontTrackThisQuest' type='button' value='Stop Tracking Quest' title='Stops tracking quest progress.' class='custombutton'><br>";
-			replacementText += "<span findme='questinfo'></span></td></tr>"
+			for (var i = 0; i < questBeingTracked.length; i++) {
+			
+				replacementText += "<tr><td style='font-size:small; color:black'><a id='qiLink" + i + "' href=" + questBeingTracked[i] + "></a>&nbsp;"
+				replacementText += "<input id='dontTrackThisQuest" + i + "' data='" + questBeingTracked[i] + "' type='button' value='Stop Tracking' title='Stops tracking quest progress.' class='custombutton'><br>";
+				replacementText += "<span findme='questinfo" + i + "'></span></td></tr>";
+				if (i != questBeingTracked.length - 1) {
+					replacementText += '<tr><td height="10" colspan="2"/></tr>' +
+					'<tr><td height="1" bgcolor="#393527" colspan="2"/></tr>'
+					'<tr><td height="10" colspan="2"/></tr>';
+				}
+			}
+			
 			replacementText += "</table>";
 			replacementText += "</td>";
 
 			newRow=injectHere.insertRow(2);
 			newRow.innerHTML=replacementText;
-			System.xmlhttp(questBeingTracked, Helper.getQuestInfo);
-			document.getElementById("dontTrackThisQuest").addEventListener("click", Helper.dontTrackThisQuest, true);
+			for (var i = 0; i < questBeingTracked.length; i++) {
+				System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {"data" : i});
+			}
+						
 		}
 		
 		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
@@ -8385,36 +8396,76 @@ var Helper = {
 	
 	injectQuestTracker: function() {
 		var injectHere = System.findNode("//td[font/b[.='Quest Details']]");
+		var tracking = false;
+		var currentTrackedQuest = GM_getValue("questBeingTracked").split(";");
+		for (var i = 0; i < currentTrackedQuest.length; i++) {
+			if (currentTrackedQuest[i] == location.search) {
+				tracking = true;
+				break;
+			} 
+		}
+		if (tracking == true) {
 		
-		var currentTrackedQuest = GM_getValue("questBeingTracked");
-		if (currentTrackedQuest != location.search) {
+			injectHere.innerHTML += '<br><input id="dontTrackThisQuest" data="' + location.search + '" type="button" value="Stop Tracking Quest" title="Tracks quest progress." class="custombutton">';
+			document.getElementById("dontTrackThisQuest").addEventListener("click", Helper.dontTrackThisQuest, true);
+
+		} else {
 			injectHere.innerHTML += '<br><input id="trackThisQuest" type="button" value="Track Quest" title="Tracks quest progress." class="custombutton">';
 			document.getElementById("trackThisQuest").addEventListener("click", Helper.trackThisQuest, true);
-		} else {
-			injectHere.innerHTML += '<br><input id="dontTrackThisQuest" type="button" value="Stop Tracking Quest" title="Tracks quest progress." class="custombutton">';
-			document.getElementById("dontTrackThisQuest").addEventListener("click", Helper.dontTrackThisQuest, true);
 		}
 	},
 	
 	trackThisQuest: function(evt) {
+		
+		var currentTrackedQuest = GM_getValue("questBeingTracked").split(";");
+		if (currentTrackedQuest.length > 0 && currentTrackedQuest[0].trim().length > 0) {
+			GM_setValue("questBeingTracked", GM_getValue("questBeingTracked") + ";" + location.search);
+		} else {
 		GM_setValue("questBeingTracked", location.search);
+		}
 		window.location = window.location;
 	},
 
 	dontTrackThisQuest: function(evt) {
+		var questNotToTrack = evt.target.getAttribute("data");
+		var currentTrackedQuest = GM_getValue("questBeingTracked").split(";");
+		if (currentTrackedQuest.length > 0) {
+			var newTracked = "";
+			for (var i = 0; i < currentTrackedQuest.length; i++) {
+				if (currentTrackedQuest[i] != questNotToTrack) {
+					if (newTracked.trim().length > 0) {
+						newTracked += ";";
+					}
+					newTracked += currentTrackedQuest[i];
+					
+				}
+			}
+			GM_setValue("questBeingTracked", newTracked);
+		} else {
 		GM_setValue("questBeingTracked", "");
+		}
+		
 		window.location = window.location;
 	},
 
-	getQuestInfo: function(responseText) {
+	getQuestInfo: function(responseText, callback) {
+		var idx = callback.data;
 		var doc=System.createDocument(responseText);
-		var questInfoElement = System.findNode("//span[@findme='questinfo']");
+		var questInfoLink = System.findNode("//a[@id='qiLink" + idx + "']");
+		var questNameNode = System.findNode("//table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr/td/font[2]", doc);
+		if (questNameNode) {
+			questInfoLink.innerHTML = questNameNode.innerHTML.replace (/"/g, "");
+		} else {
+			questInfoLink.innerHTML = "Unnamed Quest";
+		}
+		var questInfoElement = System.findNode("//span[@findme='questinfo" + idx + "']");
 		var trackingHTMLElement = System.findNode("//font[@color='#003300']", doc);
 		if (trackingHTMLElement) {
 			questInfoElement.innerHTML = trackingHTMLElement.innerHTML;
 		} else {
 			questInfoElement.innerHTML = 'None';
 		}
+		document.getElementById("dontTrackThisQuest" + idx).addEventListener("click", Helper.dontTrackThisQuest, true);
 	},
 
 	prepareBountyData: function() {
