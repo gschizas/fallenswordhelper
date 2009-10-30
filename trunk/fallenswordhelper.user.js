@@ -4295,9 +4295,268 @@ var Helper = {
 	},
 
 	injectProfile: function() {
+		var player = System.findNode("//textarea[@id='holdtext']");
+		var avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
+		if (!avyrow) return;
+		var playeridRE = document.URL.match(/player_id=(\d+)/);
+		if (playeridRE) var playerid=playeridRE[1];
+		var idindex;
+		
+		Helper.profileInjectGuildRel();
+		if (GM_getValue("enableBioCompressor")) Helper.compressBio();
+
+		if (player) {
+			if (!playerid) {
+				playerid = player.innerHTML;
+				idindex = playerid.indexOf("?ref=") + 5;
+				playerid = playerid.substr(idindex);
+			}
+
+			var playeravy = avyrow.parentNode.firstChild ;
+			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue))) {
+				playeravy = playeravy.nextSibling ;
+			}
+			var playername = playeravy.getAttribute("title");
+			playeravy.style.borderStyle="none";
+			playername = playername.substr(0, playername.indexOf("'s Avatar"));
+			
+			Helper.profileInjectQuickButton(avyrow, playerid, playername);
+			Helper.profileRenderBio(playername);
+			Helper.buffCost={'count':0,'buffs':{}};
+			
+			Helper.bioAddEventListener();
+		}
+
+		var isSelfRE=/player_id=/.exec(document.location.search);
+		if (!isSelfRE) { // self inventory
+		
+			Helper.profileParseAllyEnemy();
+			Helper.profileInjectFastWear();
+			
+			// quick wear manager link and select all link
+			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
+			if (node) {
+				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]"+
+					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>"
+				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
+			}
+		}
+
+		//Update the ally/enemy online list, since we are already on the page.
+		doc = System.findNode("//html");
+		Helper.parseProfileForWorld(doc.innerHTML, true);
+	},
+	
+	profileInjectFastWear: function() {
+		// Fast Wear
+		var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
+		if (profileInventory) {
+			var profileInventoryIDRE = /inventory_id=(\d+)/i;
+			var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
+
+			var profileInventoryBox = [];
+			var profileInventoryBoxItem = [];
+			var profileInventoryBoxID = [];
+			for (var i=0;i<12;i++) {
+				if (foldersEnabled) {
+					if (profileInventory.rows[2*(i >> 2)]) profileInventoryBox[i]=profileInventory.rows[2*(i >> 2)].cells[i % 4];
+				} else {
+					if (profileInventory.rows[i >> 2]) profileInventoryBox[i]=profileInventory.rows[i >> 2].cells[i % 4];
+				}
+				if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
+				if (profileInventoryBoxItem[i]) {
+					var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
+					if (itemHREF && profileInventoryIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+				}
+			}
+
+			var newRow;
+
+			for (var i=0;i<12;i++) {
+				if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
+				if ((i % 4==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
+				if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
+					var itemOnmouseover = profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("onmouseover");
+					if (itemOnmouseover.indexOf("Equip") != -1) { // check to see if item is equipable.
+						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+								'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
+						var newCell = newRow.insertCell(i % 4);
+						newCell.align = 'center';
+						newCell.innerHTML = output;
+						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
+							.addEventListener('click', Helper.equipProfileInventoryItem, true);
+					}
+					else {
+						var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
+					}
+				} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
+					var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
+				}
+			}
+		}
+	},
+	
+	profileParseAllyEnemy: function() {
+		// Allies/Enemies count/total function
+		var alliesTotal = GM_getValue("alliestotal");
+		var alliesParent = System.findNode("//b[.='Allies']/..");
+		var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		if (alliesTable) {
+			var numberOfAllies = 0;
+			var startIndex = 0;
+			while (alliesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+				numberOfAllies ++;
+				startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+			}
+			startIndex = 0;
+			while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+				numberOfAllies ++;
+				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+			}
+			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
+			if (alliesTotal && alliesTotal >= numberOfAllies) {
+				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
+			}
+		}
+		var enemiesTotal = GM_getValue("enemiestotal");
+		var enemiesParent = System.findNode("//b[.='Enemies']/..");
+		var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		if (enemiesTable) {
+			var numberOfEnemies = 0;
+			var startIndex = 0;
+			while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
+				numberOfEnemies ++;
+				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+			}
+			var startIndex = 0;
+			while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
+				numberOfEnemies ++;
+				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
+			}
+			enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
+			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
+				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
+			}
+		}
+
+		//store a list of allies and enemies for use in coloring
+		listOfAllies = "";
+		if (alliesTable) {
+			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling
+			for (var i=0;i<alliesTableActual.rows.length;i++) {
+				var aRow = alliesTableActual.rows[i];
+				for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
+					var aCell = aRow.cells[j];
+					if (aCell.firstChild.firstChild.nextSibling) {
+						var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+						var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
+						listOfAllies += allyName + " ";
+					}
+				}
+			}
+		}
+
+		listOfEnemies = "";
+		if (enemiesTable) {
+			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
+			for (var i=0;i<enemiesTableActual.rows.length;i++) {
+				var aRow = enemiesTableActual.rows[i];
+				for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
+					var aCell = aRow.cells[j];
+					if (aCell.firstChild.firstChild.nextSibling) {
+						var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
+						var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
+						listOfEnemies += enemyName + " ";
+					}
+				}
+			}
+		}
+		GM_setValue("listOfAllies", listOfAllies);
+		GM_setValue("listOfEnemies", listOfEnemies);
+	},
+	
+	addClickListener: function(id, listener) {
+		var node=document.getElementById(id);
+		if (node) node.addEventListener('click', listener, true);
+	},
+	
+	bioAddEventListener: function() {
+		Helper.addClickListener("Helper:sendBuffMsg", Helper.getBuffsToBuy);
+		var i=0;
+		while (true) {
+			var buff=document.getElementById('Helper:buff'+i);
+			if (buff) {
+				buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
+				i++;
+			} else
+				break;
+		}
+		Helper.addClickListener('Helper:bioExpander', Helper.expandBio);
+	},
+	
+	profileRenderBio: function(playername) {
+		var bioCell = System.findNode("//table[tbody/tr/td/b[.='Biography']]").rows[6];
+		var bioXPath="//tr[td/b[.='Biography'] or td/table/tbody/tr/td/b[.='Biography']]/following-sibling::tr[2]/td/font";
+		var renderBio=(bioCell && GM_getValue("renderSelfBio")) || (!bioCell && GM_getValue("renderOtherBios"))
+		GM_setValue("buffsToBuy", "");
+		var bioNode=System.findNode(bioXPath);
+		var bioContents = bioNode.innerHTML;
+		if (!renderBio || !bioNode) return;
+		
+		bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
+		var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
+		if (buffs) {
+			for (var i=0;i<buffs.length;i++) {
+				var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+				var buffName = Helper.removeHTML(fullName);
+				var cbString = 
+					'<span id="Helper:buff'+i+'" style="color:blue;cursor:pointer">'+
+					fullName+'</span>';
+				bioContents=bioContents.replace(buffs[i], cbString);
+			}
+			
+			if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
+			
+			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +
+				playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
+				'<span id=buffCost style="color:red"></span>');
+		}
+		bioNode.innerHTML = bioContents;
+	},
+	
+	profileInjectQuickButton: function(avyrow, playerid, playername) {
+		var auctiontext = "Go to " + playername + "'s auctions" ;
+		var ranktext = "Rank " +playername + "" ;
+		var securetradetext = "Create Secure Trade to " + playername;
+
+		var newhtml = avyrow.parentNode.innerHTML +
+			"</td></tr><tr><td align='center' colspan='2'>" +
+			"<a " + Layout.quickBuffHref(playerid) + ">" +
+			"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
+			System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" +
+			"<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
+			"');'><img alt='Join All Groups' title='Join All Groups' src=" +
+			System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" +
+			"<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
+			playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="' +
+			System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
+			"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
+			playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
+			System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;" +
+			"<a href=" + System.server + "?cmd=guild&subcmd=inventory&subcmd2=report&user=" +
+			playername + '>[SR]</a>&nbsp;&nbsp;';
+		if (Helper.currentGuildRelationship == "self" && GM_getValue("showAdmin")) {
+			newhtml +=
+				"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
+				playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
+				System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
+		}
+		avyrow.parentNode.innerHTML = newhtml ;
+	},
+	
+	profileInjectGuildRel: function() {
 		var allLinks = document.getElementsByTagName("A");
-		var bioCompressorEnabled = GM_getValue("enableBioCompressor");
-		var buffsToSync;
 		for (var i=0; i<allLinks.length; i++) {
 			aLink=allLinks[i];
 			if (aLink.href.search("cmd=guild&subcmd=view") != -1) {
@@ -4306,8 +4565,8 @@ var Helper = {
 				var warning = document.createElement('span');
 				var color = "";
 				var changeAppearance = true;
-				var guildRelationship = Helper.guildRelationship(aLink.text);
-				switch (guildRelationship) {
+				Helper.currentGuildRelationship = Helper.guildRelationship(aLink.text);
+				switch (Helper.currentGuildRelationship) {
 					case "self":
 						var settings="guildSelfMessage";
 						break;
@@ -4333,295 +4592,44 @@ var Helper = {
 				}
 			}
 		}
-
-		var player = System.findNode("//textarea[@id='holdtext']");
-		var avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
-		if (!avyrow) return;
-		var playeridRE = document.URL.match(/player_id=(\d+)/);
-		if (playeridRE) var playerid=playeridRE[1];
-		var idindex, newhtml;
-
-		if (player) {
-			if (!playerid) {
-				playerid = player.innerHTML;
-				idindex = playerid.indexOf("?ref=") + 5;
-				playerid = playerid.substr(idindex);
-			}
-
-			var playeravy = avyrow.parentNode.firstChild ;
-			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue))) {
-				playeravy = playeravy.nextSibling ;
-			}
-			var playername = playeravy.getAttribute("title");
-			playeravy.style.borderStyle="none";
-			playername = playername.substr(0, playername.indexOf("'s Avatar"));
-
-			var auctiontext = "Go to " + playername + "'s auctions" ;
-			var ranktext = "Rank " +playername + "" ;
-			var securetradetext = "Create Secure Trade to " + playername;
-
-			newhtml = avyrow.parentNode.innerHTML +
-				"</td></tr><tr><td align='center' colspan='2'>" +
-				"<a " + Layout.quickBuffHref(playerid) + ">" +
-				"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
-				System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" +
-				"<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
-				"');'><img alt='Join All Groups' title='Join All Groups' src=" +
-				System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" +
-				"<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
-				playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="' +
-				System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
-				"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
-				playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
-				System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;" +
-				"<a href=" + System.server + "?cmd=guild&subcmd=inventory&subcmd2=report&user=" +
-				playername + '>[SR]</a>&nbsp;&nbsp;';
-			if (guildRelationship == "self" && GM_getValue("showAdmin")) {
-				newhtml +=
-					"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
-					playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
-					System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
-			}
-			var renderSelf = GM_getValue("renderSelfBio");
-			var renderOthers = GM_getValue("renderOtherBios");
-			var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
-			var bioCell = bioTable.rows[6];
-
-			var bioXPath="//tr[td/b[.='Biography'] or td/table/tbody/tr/td/b[.='Biography']]/following-sibling::tr[2]/td/font";
-			var renderBio=(bioCell && renderSelf) || (!bioCell && renderOthers)
-			GM_setValue("buffsToBuy", "");
-			
-			if (renderBio && System.findNode(bioXPath)) {
-				var bioContents = System.findNode(bioXPath).innerHTML;
-				
-				bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
-				var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
-				if (buffs) {
-					buffsToSync = buffs;
-					for (var i=0;i<buffs.length;i++) {
-						var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
-						var buffName = Helper.removeHTML(fullName);
-						var cbString = 
-							'<span id="Helper:buff'+i+'" style="color:blue;cursor:pointer">'+
-							fullName+'</span>';
-						bioContents=bioContents.replace(buffs[i], cbString);
-					}
-					
-					if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
-					
-					bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +
-						playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
-						'<span id=buffCost style="color:red"></span>');
-					System.findNode(bioXPath).innerHTML = bioContents;
-					
-					
-				}
-			}
-			
-			avyrow.parentNode.innerHTML = newhtml ;
-		}
-
-		var isSelfRE=/player_id=/.exec(document.location.search);
-		if (!isSelfRE) { // self inventory
-			// Allies/Enemies count/total function
-			var alliesTotal = GM_getValue("alliestotal");
-			var alliesParent = System.findNode("//b[.='Allies']/..");
-			var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-			if (alliesTable) {
-				var numberOfAllies = 0;
+	},
+	
+	compressBio: function() {
+		var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
+		var bioCell = bioTable.rows[6];
+		if (bioCell) { //non-self profile
+			var bioContents = bioCell.cells[0].innerHTML;
+			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");;
+			var maxRowsToShow = GM_getValue("maxCompressedLines");;
+			var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
+			if (numberOfLines >= maxRowsToShow) {
 				var startIndex = 0;
-				while (alliesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
-					numberOfAllies ++;
-					startIndex = alliesTable.innerHTML.indexOf("/avatars/",startIndex+1);
+				while (maxRowsToShow >= 0) {
+					maxRowsToShow --;
+					startIndex = bioContents.indexOf("<br>\n",startIndex+1);
 				}
-				startIndex = 0;
-				while (alliesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
-					numberOfAllies ++;
-					startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
-				}
-				alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
-				if (alliesTotal && alliesTotal >= numberOfAllies) {
-					alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
-				}
+				maxCharactersToShow = startIndex;
 			}
-			var enemiesTotal = GM_getValue("enemiestotal");
-			var enemiesParent = System.findNode("//b[.='Enemies']/..");
-			var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-			if (enemiesTable) {
-				var numberOfEnemies = 0;
-				var startIndex = 0;
-				while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
-					numberOfEnemies ++;
-					startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
-				}
-				var startIndex = 0;
-				while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
-					numberOfEnemies ++;
-					startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
-				}
-				enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
-				if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-					enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
-				}
-			}
-
-			//store a list of allies and enemies for use in coloring
-			listOfAllies = "";
-			if (alliesTable) {
-				var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling
-				for (var i=0;i<alliesTableActual.rows.length;i++) {
-					var aRow = alliesTableActual.rows[i];
-					for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
-						var aCell = aRow.cells[j];
-						if (aCell.firstChild.firstChild.nextSibling) {
-							var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-							var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
-							listOfAllies += allyName + " ";
-						}
-					}
-				}
-			}
-
-			listOfEnemies = "";
-			if (enemiesTable) {
-				var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
-				for (var i=0;i<enemiesTableActual.rows.length;i++) {
-					var aRow = enemiesTableActual.rows[i];
-					for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
-						var aCell = aRow.cells[j];
-						if (aCell.firstChild.firstChild.nextSibling) {
-							var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-							var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
-							listOfEnemies += enemyName + " ";
-						}
-					}
-				}
-			}
-			GM_setValue("listOfAllies", listOfAllies);
-			GM_setValue("listOfEnemies", listOfEnemies);
-
-			// Fast Wear
-			var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
-			if (profileInventory) {
-				var profileInventoryIDRE = /inventory_id=(\d+)/i;
-				var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
-
-				var profileInventoryBox = [];
-				var profileInventoryBoxItem = [];
-				var profileInventoryBoxID = [];
-				for (var i=0;i<12;i++) {
-					if (foldersEnabled) {
-						if (profileInventory.rows[2*(i >> 2)]) profileInventoryBox[i]=profileInventory.rows[2*(i >> 2)].cells[i % 4];
-					} else {
-						if (profileInventory.rows[i >> 2]) profileInventoryBox[i]=profileInventory.rows[i >> 2].cells[i % 4];
-					}
-					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
-					if (profileInventoryBoxItem[i]) {
-						var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
-						if (itemHREF && profileInventoryIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+			if (bioContents.length>maxCharactersToShow) {
+				//find the end of next HTML tag after the max characters to show.
+				var breakPoint = bioContents.indexOf("<br>",maxCharactersToShow) + 4;
+				var bioStart = bioContents.substring(0,breakPoint);
+				var bioEnd = bioContents.substring(breakPoint,bioContents.length);
+				var extraOpenHTML = "", extraCloseHTML = "";
+				var tagList=['b','i','u','span'];
+				for (var i=0;i<tagList.length;i++){
+					var closeTagIndex = bioEnd.indexOf("</"+tagList[i]+">");
+					var openTagIndex = bioEnd.indexOf("<"+tagList[i]+">");
+					if (closeTagIndex != -1 && openTagIndex > closeTagIndex) {
+						extraOpenHTML += "<"+tagList[i]+">";
+						extraCloseHTML += "</"+tagList[i]+">";
 					}
 				}
 
-				var newRow;
-
-				for (var i=0;i<12;i++) {
-					if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
-					if ((i % 4==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
-					if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
-						var itemOnmouseover = profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("onmouseover");
-						if (itemOnmouseover.indexOf("Equip") != -1) { // check to see if item is equipable.
-							var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
-									'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
-									'itemID="' + profileInventoryBoxID[i] + '">Wear</span>';
-							var newCell = newRow.insertCell(i % 4);
-							newCell.align = 'center';
-							newCell.innerHTML = output;
-							document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
-								.addEventListener('click', Helper.equipProfileInventoryItem, true);
-						}
-						else {
-							var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
-						}
-					} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
-						var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
-					}
-				}
-			}
-			
-			// quick wear manager link and select all link
-			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
-			if (node) {
-				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]"+
-					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>"
-				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
+				bioCell.cells[0].innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
+					"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
 			}
 		}
-
-		//bio compressor ...
-		if (bioCompressorEnabled) {
-			var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
-			var bioCell = bioTable.rows[6];
-			if (bioCell) { //non-self profile
-				var bioContents = bioCell.cells[0].innerHTML;
-				var maxCharactersToShow = GM_getValue("maxCompressedCharacters");;
-				var maxRowsToShow = GM_getValue("maxCompressedLines");;
-				var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
-				if (numberOfLines >= maxRowsToShow) {
-					var startIndex = 0;
-					while (maxRowsToShow >= 0) {
-						maxRowsToShow --;
-						startIndex = bioContents.indexOf("<br>\n",startIndex+1);
-					}
-					maxCharactersToShow = startIndex;
-				}
-				if (bioContents.length>maxCharactersToShow) {
-					//find the end of next HTML tag after the max characters to show.
-					var breakPoint = bioContents.indexOf("<br>",maxCharactersToShow) + 4;
-					var bioStart = bioContents.substring(0,breakPoint);
-					var bioEnd = bioContents.substring(breakPoint,bioContents.length);
-					var extraOpenHTML = "", extraCloseHTML = "";
-					var boldCloseTagIndex = bioEnd.indexOf("</b>");
-					var boldOpenTagIndex = bioEnd.indexOf("<b>");
-					if (boldCloseTagIndex != -1 && boldOpenTagIndex > boldCloseTagIndex) {
-						extraOpenHTML += "<b>";
-						extraCloseHTML += "</b>";
-					}
-					var italicsCloseTagIndex = bioEnd.indexOf("</i>");
-					var italicsOpenTagIndex = bioEnd.indexOf("<i>");
-					if (italicsCloseTagIndex != -1 && italicsOpenTagIndex > italicsCloseTagIndex) {
-						extraOpenHTML += "<i>";
-						extraCloseHTML += "</i>";
-					}
-					var underlineCloseTagIndex = bioEnd.indexOf("</u>");
-					var underlineOpenTagIndex = bioEnd.indexOf("<u>");
-					if (underlineCloseTagIndex != -1 && underlineOpenTagIndex > underlineCloseTagIndex) {
-						extraOpenHTML += "<u>";
-						extraCloseHTML += "</u>";
-					}
-					var buffTagEndIndex = bioEnd.indexOf("</span>");
-					var buffTagOpenIndex = bioEnd.indexOf("<span>");
-					if (buffTagEndIndex != -1 && buffTagOpenIndex > buffTagEndIndex) {
-						extraOpenHTML += "<span>";
-						extraCloseHTML += "</span>";
-					}
-					
-					bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
-						"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
-					document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
-				}
-			}
-		}
-		if (buffsToSync) {
-			for (var i=0;i<buffs.length;i++) {
-				var buff=document.getElementById('Helper:buff'+i);
-				if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
-			}
-			Helper.buffCost={'count':0,'buffs':{}};
-			document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
-		}
-		//Update the ally/enemy online list, since we are already on the page.
-		doc = System.findNode("//html");
-		Helper.parseProfileForWorld(doc.innerHTML, true);
 	},
 	
 	toggleBuffsToBuy: function(evt) {
