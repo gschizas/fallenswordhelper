@@ -4631,7 +4631,7 @@ var Helper = {
 				text+=newtext;
 			}
 			
-			var price=text.replace(/[^a-zA-Z0-9 ]/g, '').toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
+			var price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)/);
 			if (!price) { // some players have prices BEFORE the buff names
 				node=buffNameNode;
 				while (node && node.nodeName.toLowerCase()!='br') {
@@ -4639,12 +4639,12 @@ var Helper = {
 					node=node.previousSibling;
 					text=newtext+text;
 				}
-				price=text.replace(/[^a-zA-Z0-9 ]/g, '').toLowerCase().match(/([\.\d]+ *k)|([\.\d]+ *fsp)/);
+				var price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)/);
 			}
 			var type, cost;
 			if (price) {
 				type=price[0].indexOf('k')>0 ? 'k' : 'fsp';
-				cost=price[0].match(/([\.\d]+)/)[0];
+				cost=price[0].match(/([+\-]{0,1}[\.\d]+)/)[0];
 			} else {
 				type='unknown'; cost='1';
 			}
