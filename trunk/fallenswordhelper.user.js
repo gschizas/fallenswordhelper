@@ -95,6 +95,7 @@ var Helper = {
 		System.setDefault("bwNeedsRefresh", true);
 		
 		System.setDefault("enableBulkSell", false);
+		System.setDefault("bulkSellAllBags", false);
 		
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
@@ -8005,8 +8006,24 @@ var Helper = {
 		window.location = url;
 	},
 
+	toggleSellFromAllBags: function(evt) {
+		GM_setValue("bulkSellAllBags", document.getElementById("Helper:bulkCheck").checked);
+	},
+
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) {
+			if (GM_getValue("enableBulkSell") == true) {
+				var table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table");
+				if (table) {
+				table.width = "50%";
+					var newRow = table.insertRow(-1);
+					var newCell = newRow.insertCell(-1);
+					
+					newRow.innerHTML = "<td width='5%' ><input id='Helper:bulkCheck' type='checkbox' " + (GM_getValue("bulkSellAllBags") == true ? "checked" : "") + "'>" + 
+					"</input></td><td width='95%' colSpan='2' >Bulk sell from all folders. Uncheck if you only want items in your main folder to be included.</td>";
+					document.getElementById("Helper:bulkCheck").addEventListener("click", Helper.toggleSellFromAllBags, true);
+				}
+			}
 			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
 			if (items) {
 				for (var i = 0; i < items.length; i++) {
@@ -8996,8 +9013,14 @@ var Helper = {
 		var itemStats = /inv_id=(\d+)&item_id=(\d+)/.exec(window.location.search);
 		var invID = itemStats[1];
 		var itemID = itemStats[2];
+		var xmlhttpAddress;
 		
-		System.xmlhttp("index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems", Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID}); 
+		if (GM_getValue("bulkSellAllBags") == true) {
+			xmlhttpAddress = "index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems";
+		} else {
+			xmlhttpAddress = "index.php?cmd=auctionhouse&subcmd=create";
+		}
+		System.xmlhttp(xmlhttpAddress, Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID}); 
 		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);		
 	},
 	
