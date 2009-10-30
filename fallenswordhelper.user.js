@@ -9038,6 +9038,9 @@ var Helper = {
 		
 		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
 			var bulkItemIMG = bulkAuctionItemIMGs[i];
+			if (GM_getValue("bulkSellAllBags") == false) {
+				bulkItemIMG = bulkItemIMG.parentNode;
+			}
 			var bulkItemMouseover = bulkItemIMG.getAttribute("onmouseover");
 			var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(bulkItemMouseover);
 			var itemId = itemStats[1];
