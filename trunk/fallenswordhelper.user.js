@@ -4297,7 +4297,7 @@ var Helper = {
 	injectProfile: function() {
 		var allLinks = document.getElementsByTagName("A");
 		var bioCompressorEnabled = GM_getValue("enableBioCompressor");
-		
+		var buffsToSync;
 		for (var i=0; i<allLinks.length; i++) {
 			aLink=allLinks[i];
 			if (aLink.href.search("cmd=guild&subcmd=view") != -1) {
@@ -4397,6 +4397,7 @@ var Helper = {
 				bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
 				var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
 				if (buffs) {
+					buffsToSync = buffs;
 					for (var i=0;i<buffs.length;i++) {
 						var fullName=buffs[i].replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
 						var buffName = Helper.removeHTML(fullName);
@@ -4412,13 +4413,8 @@ var Helper = {
 						playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
 						'<span id=buffCost style="color:red"></span>');
 					System.findNode(bioXPath).innerHTML = bioContents;
-					document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
 					
-					for (var i=0;i<buffs.length;i++) {
-						var buff=document.getElementById('Helper:buff'+i);
-						if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
-					}
-					Helper.buffCost={'count':0,'buffs':{}};
+					
 				}
 			}
 			
@@ -4580,7 +4576,7 @@ var Helper = {
 				}
 				if (bioContents.length>maxCharactersToShow) {
 					//find the end of next HTML tag after the max characters to show.
-					var breakPoint = bioContents.indexOf(">",maxCharactersToShow) + 1;
+					var breakPoint = bioContents.indexOf("<br>",maxCharactersToShow) + 4;
 					var bioStart = bioContents.substring(0,breakPoint);
 					var bioEnd = bioContents.substring(breakPoint,bioContents.length);
 					var extraOpenHTML = "", extraCloseHTML = "";
@@ -4602,13 +4598,27 @@ var Helper = {
 						extraOpenHTML += "<u>";
 						extraCloseHTML += "</u>";
 					}
+					var buffTagEndIndex = bioEnd.indexOf("</span>");
+					var buffTagOpenIndex = bioEnd.indexOf("<span>");
+					if (buffTagEndIndex != -1 && buffTagOpenIndex > buffTagEndIndex) {
+						extraOpenHTML += "<span>";
+						extraCloseHTML += "</span>";
+					}
+					
 					bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
 						"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
 					document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
 				}
 			}
 		}
-
+		if (buffsToSync) {
+			for (var i=0;i<buffs.length;i++) {
+				var buff=document.getElementById('Helper:buff'+i);
+				if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
+			}
+			Helper.buffCost={'count':0,'buffs':{}};
+			document.getElementById("Helper:sendBuffMsg").addEventListener('click', Helper.getBuffsToBuy, true);
+		}
 		//Update the ally/enemy online list, since we are already on the page.
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
