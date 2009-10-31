@@ -2217,9 +2217,21 @@ var Helper = {
 			var monster = monsters[i];
 			if (monster) {
 				var href=monster.href;
-				System.xmlhttp(monster.href, Helper.checkedMonster, monster);
+				if (GM_getValue("showMonsterLog"))
+					System.xmlhttp(monster.href, Helper.checkedMonster, {'monster':monster,'showTip':false});
+				else
+					monster.addEventListener("mouseover", Helper.showTipCreatureInfo, true);
 			}
 		}
+	},
+	
+	showTipCreatureInfo: function(evt) {
+		var monster=evt.target.parentNode;
+		if (monster.getAttribute("mouseovertext")!=undefined) {
+			evt.target.removeEventListener("mouseover", Helper.showTipCreatureInfo, true);
+			return;
+		}
+		System.xmlhttp(monster.href, Helper.checkedMonster, {'monster':monster,'showTip':true});
 	},
 
 	checkedMonster: function(responseText, callback) {
@@ -2283,12 +2295,13 @@ var Helper = {
 		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + Helper.characterHP + "</span>)" +
 			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
 
-		callback.setAttribute("mouseOverText", "<table>" +
+		callback.monster.setAttribute("mouseOverText", "<table>" +
 			"<tr><td valign=top>" + imageNode.parentNode.innerHTML + "</td>" +
 			"<td rowspan=2>" + statsNode.parentNode.innerHTML + "</td></tr>" +
 			"<tr><td align=center valign=top>" + nameNode.innerHTML + "</td></tr></table>");
-		callback.setAttribute("mouseOverWidth", "600");
-		callback.addEventListener("mouseover", Helper.clientTip, true);
+		callback.monster.setAttribute("mouseOverWidth", "600");
+		callback.monster.addEventListener("mouseover", Helper.clientTip, true);
+		if (callback.showTip) Helper.clientTip({'target':callback.monster});
 	},
 
 	pushMonsterInfo: function(monster) {

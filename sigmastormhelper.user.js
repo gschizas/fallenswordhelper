@@ -1715,8 +1715,8 @@ var Helper = {
 		if (GM_getValue("quickKill")) {
 			var doNotKillList = GM_getValue("doNotKillList");
 			var doNotKillListAry = doNotKillList.split(",")
-			for (var i=0; i<9; i++) {
-				var monster = document.getElementById("aLink" + i);
+			for (var i=1; i<9; i++) {
+				var monster = document.getElementById("attackLink" + i);
 				if (monster) {
 					var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
 					for (var j=0; j<doNotKillListAry.length; j++) {
@@ -1727,7 +1727,8 @@ var Helper = {
 							break;
 						}
 					}
-				}
+				} else 
+					break;
 			}
 		}
 	},
@@ -2059,7 +2060,7 @@ var Helper = {
 	},
 
 	getMonster: function(index) {
-		return document.getElementById("aLink" + index);
+		return document.getElementById("attackLink" + index);
 	},
 
 	killSingleMonster: function(monsterNumber) {
@@ -2095,24 +2096,20 @@ var Helper = {
 	},
 
 	colorMonsters: function() {
+		if (!GM_getValue("enableCreatureColoring")) return;
 		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and contains(@href,'max_turns=')]");
 		if (!monsters) return;
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
 				// add monster color based on elite types
-				if (GM_getValue("enableCreatureColoring")) {
-					var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
-					if (monsterText.textContent.match(/\(Champion\)/i))
-						monsterText.style.color = 'green';
-					if (monsterText.textContent.match(/\(Elite\)/i))
-						monsterText.style.color = 'yellow';
-					if (monsterText.textContent.match(/\(HK\)/i))
-						monsterText.style.color = 'red';
-				}
-
-				monster.id = "aLink" + (i + 1);
-				monster.parentNode.innerHTML += "<span style='font-size:6pt;'>" + (i+1) + "</span>";
+				var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
+				if (monsterText.textContent.match(/\(Champion\)/i))
+					monsterText.style.color = 'green';
+				if (monsterText.textContent.match(/\(Elite\)/i))
+					monsterText.style.color = 'yellow';
+				if (monsterText.textContent.match(/\(HK\)/i))
+					monsterText.style.color = 'red';
 			}
 		}
 	},
@@ -2125,9 +2122,21 @@ var Helper = {
 			var monster = monsters[i];
 			if (monster) {
 				var href=monster.href;
-				System.xmlhttp(monster.href, Helper.checkedMonster, monster);
+				if (GM_getValue("showMonsterLog"))
+					System.xmlhttp(monster.href, Helper.checkedMonster, {'monster':monster,'showTip':false});
+				else
+					monster.addEventListener("mouseover", Helper.showTipCreatureInfo, true);
 			}
 		}
+	},
+	
+	showTipCreatureInfo: function(evt) {
+		var monster=evt.target.parentNode;
+		if (monster.getAttribute("mouseovertext")!=undefined) {
+			evt.target.removeEventListener("mouseover", Helper.showTipCreatureInfo, true);
+			return;
+		}
+		System.xmlhttp(monster.href, Helper.checkedMonster, {'monster':monster,'showTip':true});
 	},
 
 	checkedMonster: function(responseText, callback) {
@@ -2174,9 +2183,10 @@ var Helper = {
 		killButtonParent.deleteRow(-1);
 		killButtonParent.deleteRow(-1);
 
-		callback.setAttribute("mouseOverText", "<table><tr><td valign=top>" + imageNode.innerHTML + "</td><td>" + statsNode.parentNode.innerHTML + "</td></tr></table>");
-		callback.setAttribute("mouseOverWidth", "600");
-		callback.addEventListener("mouseover", Helper.clientTip, true);
+		callback.monster.setAttribute("mouseOverText", "<table><tr><td valign=top>" + imageNode.innerHTML + "</td><td>" + statsNode.parentNode.innerHTML + "</td></tr></table>");
+		callback.monster.setAttribute("mouseOverWidth", "600");
+		callback.monster.addEventListener("mouseover", Helper.clientTip, true);
+		if (callback.showTip) Helper.clientTip({'target':callback.monster});
 	},
 
 	pushMonsterInfo: function(monster) {
