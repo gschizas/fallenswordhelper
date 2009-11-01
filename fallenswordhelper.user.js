@@ -4564,7 +4564,7 @@ var Helper = {
 			newhtml +=
 				"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
 				playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
-				System.imageServer + "/guilds/" + guildId + "_mini.jpg></a>";
+				System.imageServer + "/guilds/" + Helper.guildId + "_mini.jpg></a>";
 		}
 		avyrow.parentNode.innerHTML = newhtml ;
 	},
@@ -4575,7 +4575,7 @@ var Helper = {
 			aLink=allLinks[i];
 			if (aLink.href.search("cmd=guild&subcmd=view") != -1) {
 				var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
-				if (guildIdResult) var guildId = parseInt(guildIdResult[1], 10);
+				if (guildIdResult) Helper.guildId = parseInt(guildIdResult[1], 10);
 				var warning = document.createElement('span');
 				var color = "";
 				var changeAppearance = true;
