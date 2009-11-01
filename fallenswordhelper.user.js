@@ -264,7 +264,6 @@ var Helper = {
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
-			Helper.insertHModeIndicator();
 		} else {
 			Helper.init();
 			Layout.hideBanner();
@@ -646,26 +645,6 @@ var Helper = {
 		}
 	},
 	
-	insertHModeIndicator: function() {
-		var modeIndc= document.createElement("div");
-		//modeIndc.style={"position":"absolute","left":0,"top":0,"display":"none","zIndex":90,"filter":"alpha","opacity":0.9};
-		modeIndc.style.position = "absolute";
-		modeIndc.style.left = window.innerWidth * 7 / 8 + "px";
-		modeIndc.style.top = 0;
-		modeIndc.style.display = '';
-		modeIndc.style.zIndex = '90';
-		modeIndc.style.filter = "alpha";
-		modeIndc.style.opacity = "0.9";
-		modeIndc.id = "modeIndc";
-		modeIndc.innerHTML='<font color=white>Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;" title="click to turn off">ON</span>]</font>';
-		var objBody = document.getElementsByTagName("body").item(0);
-		objBody.insertBefore(modeIndc, objBody.firstChild);
-		document.getElementById('turnOffHMode').addEventListener('click',
-			function() {
-				GM_setValue("huntingMode",false); window.location=window.location;
-			},true);
-	},
-	
 	injectViewGuild: function() {
 		if (GM_getValue("highlightPlayersNearMyLvl")) {
 		var memberList = System.findNode("//tr[td/b[.='Members']]/following-sibling::tr/td/table");
@@ -881,6 +860,16 @@ var Helper = {
 	},
 
 	injectRelic: function(isRelicPage) {
+		var empowerThing = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr[5]/td/a");
+		if (empowerThing) {
+			var mouseover = empowerThing.getAttribute("onmouseover");
+			var indx1 = mouseover.indexOf("'");
+			var indx2 = mouseover.lastIndexOf("'");
+			var insideText = mouseover.substring(indx1 + 1, indx2);
+			empowerThing.setAttribute("onmouseover", mouseover.substring(0, indx1 + 1) 
+				+ insideText.replace(/'/g, "&#39;")
+				+ mouseover.substring(indx2))
+		}
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 		relicNameElement.parentNode.style.fontSize = "x-small";
 		
@@ -1880,6 +1869,10 @@ var Helper = {
 
 			var uaStr = navigator.userAgent;
 			var FFindex = uaStr.indexOf("Firefox");
+			var huntingMode = GM_getValue("huntingMode");
+			var imgSource = huntingMode == true ? "http://dl.getdropbox.com/u/2144065/huntingOn.gif" : "http://dl.getdropbox.com/u/2144065/huntOff.png";
+			var altText = huntingMode == true ? "Hunting mode is ON" : "Hunting mode is OFF";
+			mapName.innerHTML += " <a href=# id='Helper:ToggleHuntingMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
 
 			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5" && GM_getValue("showSpeakerOnWorld")) {
 				if (GM_getValue("playNewMessageSound"))
@@ -1891,6 +1884,11 @@ var Helper = {
 				document.getElementById("toggleSoundLink").addEventListener("click", Helper.toggleSound, true);
 
 			}
+			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
+				function() {
+					GM_setValue("huntingMode",!GM_getValue("huntingMode")); window.location.reload();
+				},true);
+			
 		}
 		if (GM_getValue("quickKill")) {
 			var doNotKillList = GM_getValue("doNotKillList");
