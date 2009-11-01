@@ -8020,22 +8020,24 @@ var Helper = {
 	},
 
 	toggleSellFromAllBags: function(evt) {
-		GM_setValue("bulkSellAllBags", document.getElementById("Helper:bulkCheck").checked);
+		var newValue = !GM_getValue("bulkSellAllBags");
+		GM_setValue("bulkSellAllBags", newValue);
+		var theSpan = document.getElementById("Helper:bulkCheck");
+		theSpan.innerHTML = (newValue == true ? "Selling from all bags" : "Selling only from main folder");
 	},
 
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) {
 			if (GM_getValue("enableBulkSell") == true) {
-				var table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table");
-				if (table) {
-				table.width = "50%";
-					var newRow = table.insertRow(-1);
-					var newCell = newRow.insertCell(-1);
-					
-					newRow.innerHTML = "<td width='5%' ><input id='Helper:bulkCheck' type='checkbox' " + (GM_getValue("bulkSellAllBags") == true ? "checked" : "") + "'>" + 
-					"</input></td><td width='95%' colSpan='2' >Bulk sell from all folders. Uncheck if you only want items in your main folder to be included.</td>";
+				var row = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td");
+				if (row) {
+					var sellFromAll = GM_getValue("bulkSellAllBags");
+					var toggleSellAllHTML = "<span id='Helper:bulkCheck' style='cursor: pointer; text-decoration: underline; color: blue;'>" + 
+					(sellFromAll == true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
+					row.innerHTML = row.innerHTML.replace("]", " | " + toggleSellAllHTML + " ]");				
 					document.getElementById("Helper:bulkCheck").addEventListener("click", Helper.toggleSellFromAllBags, true);
 				}
+				
 			}
 			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
 			if (items) {
