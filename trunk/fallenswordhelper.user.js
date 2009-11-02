@@ -880,11 +880,25 @@ var Helper = {
 			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
 			var myGuildID = GM_getValue("guildID");
 			if (defendingGuildID == myGuildID) {
-				var listOfDefenders = injectHere.nextSibling.textContent.split(",", 16); // quick buff only supports 16
-				injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
-					"Buff first 16</span></a></nobr>";
-				var buffAllLink = System.findNode("//a[@id='buffAll']");
-				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+				var listOfDefenders = injectHere.nextSibling.textContent.split(","); // quick buff only supports 16
+				var shortList = new Array();
+				if (listOfDefenders) {
+					var modifierWord;
+					for (var i = 0; i < listOfDefenders.length; i++) {
+						shortList.push(listOfDefenders[i]);
+						if (((i + 1) % 16 == 0 && i != 0) || (i == listOfDefenders.length - 1)) {
+							modifierWord = Helper.getGroupBuffModifierWord(i);
+							injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll" + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+							"Buff " + modifierWord + " 16</span></a></nobr>";
+							var buffAllLink = System.findNode("//a[@id='buffAll" + modifierWord + "']");
+							buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+							shortList = new Array();
+						}
+					
+					}
+
+				}
+				
 			}
 
 		injectHere.innerHTML = injectHere.innerHTML + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
@@ -5817,18 +5831,32 @@ var Helper = {
 					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 					if (aMember.name==foundName) {
 						listOfDefendersHTML = allItems[i].cells[1].innerHTML;
+						if (listOfDefenders.indexOf("<font") != -1) {
 						listOfDefenders = listOfDefendersHTML.substring(0, listOfDefendersHTML.indexOf("<font") - 2); //strip off mercs as they don't need buffs
-						listOfDefenders = listOfDefenders.split(",", 16); // quick buff only supports 16
+						} else {
+							listOfDefenders = listOfDefendersHTML;
+						}
+						listOfDefenders = listOfDefenders.split(","); // quick buff only supports 16
 						if (listOfDefenders == "[none]") break;
 						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) + 
 							//"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
 							//direct call to player_id is faster link - server doesn't have to do a search.
 							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
 							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
-						theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
-							"Buff first 16</span></a></nobr>";
-						var buffAllLink = System.findNode("//a[@id='buffAll" + i + "']");
-						buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+						var shortList = new Array();
+						var modifierWord;
+						for (var k = 0; k < listOfDefenders.length; k++) {
+							shortList.push(listOfDefenders[k]);
+							if (((k + 1) % 16 == 0 && k != 0) || (k == listOfDefenders.length - 1)) {
+								modifierWord = Helper.getGroupBuffModifierWord(i);
+								theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+									"Buff " + modifierWord + " 16</span></a></nobr>";
+								var buffAllLink = System.findNode("//a[@id='buffAll" + i + modifierWord + "']");
+								buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+								shortList = new Array();
+							}
+						}
+						
 						break;
 					}
 				}
@@ -9385,6 +9413,7 @@ var Helper = {
 		}
 		System.xmlhttp("index.php?cmd=world", Helper.getBpCountFromWorld);
 	},
+	
 	getBpCountFromWorld: function(responseText) {
 		// backpack counter
 		var doc=System.createDocument(responseText);
@@ -9392,7 +9421,61 @@ var Helper = {
 		var injectHere=document.getElementById("reportDiv");
 		if (!injectHere) injectHere=System.findNode("//b[contains(.,'Multiple Scavenging Results')]/..");
 		injectHere.appendChild(bp);
+	},
+	
+	getGroupBuffModifierWord: function(defenderIdx) {
+		var modifierWord = "";
+		switch (Math.ceil(( defenderIdx+1) / 16)) {
+			case 1:
+				modifierWord = "first";
+				break;
+			case 2:
+				modifierWord = "second";
+				break;
+			case 3:
+				modifierWord = "third";
+				break;
+			case 4:
+				modifierWord = "fourth";
+				break;
+			case 5:
+				modifierWord = "fifth";
+				break;
+			case 6:
+				modifierWord = "sixth";
+				break;
+			case 7:
+				modifierWord = "seventh";
+				break;
+			case 8:
+				modifierWord = "eighth";
+				break;
+			case 9:
+				modifierWord = "ninth";
+				break;
+			case 10:
+				modifierWord = "tenth";
+				break;
+			case 11:
+				modifierWord = "eleventh";
+				break;
+			case 12:
+				modifierWord = "twelfth";
+				break;
+			case 13:
+				modifierWord = "thirteenth";
+				break;
+			case 14:
+				modifierWord = "fourteenth";
+				break;
+			default:
+				modifierWord = "";
+				break;
 	}
+		return modifierWord;
+				
+	}
+	
 };
 
 Helper.onPageLoad(null); 
