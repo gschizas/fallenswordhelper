@@ -886,17 +886,12 @@ var Helper = {
 				var buffAllLink = System.findNode("//a[@id='buffAll']");
 				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 			}
-		var buttonElement = System.findNode("//input[@value='Attempt Group Capture']");
-		if (!buttonElement){
-			var buttonElement = System.findNode("//input[@value='Attempt Empower (50,000 Gold)']");
-				}
-		var injectHere = buttonElement.parentNode;
-		injectHere.align = 'center';
-		injectHere.innerHTML = '<input id="calculatedefenderstats" type="button" value="Calculate Defender Stats" title="Calculate the stats of the players defending the relic." ' +
-			'class="custombutton">' + injectHere.innerHTML;
 
-		}
+		injectHere.innerHTML = injectHere.innerHTML + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
+			'class="custombutton">';
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
+		}
+		
 	},
 
 	calculateRelicDefenderStats: function(evt) {
@@ -6848,7 +6843,7 @@ var Helper = {
 			"&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special characters (non-alphanumeric).<br/>" +  			
 			"&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff pack names in them to make buffing even easier!";
 		textArea.rows = GM_getValue("bioEditLines");
-		textArea.parentNode.innerHTML += " <input size=2 maxlength=2 id='Helper:linesToShow' type='text' value='" + GM_getValue("bioEditLines") + "'/>"  +
+		System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td").innerHTML += " Display <input size=2 maxlength=2 id='Helper:linesToShow' type='text' value='" + GM_getValue("bioEditLines") + "'/> Lines"  +
 		" <input type='button' style='display:none' id='Helper:saveLines' value='Update Rows To Show' class='custombutton'/>";
 		document.getElementById("Helper:saveLines").addEventListener('click', 
 			function (event) {
