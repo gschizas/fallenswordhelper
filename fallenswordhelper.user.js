@@ -65,6 +65,7 @@ var Helper = {
 
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
+		System.setDefault("bioEditLines", 10);
 		System.setDefault("renderOtherBios", true);
 		System.setDefault("playNewMessageSound", false);
 		System.setDefault("showSpeakerOnWorld", true);
@@ -6846,7 +6847,26 @@ var Helper = {
 			"&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br/>" +  
 			"&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special characters (non-alphanumeric).<br/>" +  			
 			"&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff pack names in them to make buffing even easier!";
-		textArea.rows = 10;
+		textArea.rows = GM_getValue("bioEditLines");
+		textArea.parentNode.innerHTML += " <input size=2 maxlength=2 id='Helper:linesToShow' type='text' value='" + GM_getValue("bioEditLines") + "'/>"  +
+		" <input type='button' style='display:none' id='Helper:saveLines' value='Update Rows To Show' class='custombutton'/>";
+		document.getElementById("Helper:saveLines").addEventListener('click', 
+			function (event) {
+				var theBox = document.getElementById("Helper:linesToShow");
+				if (theBox.value.trim().length == 0) {
+					return;
+				}
+				GM_setValue("bioEditLines", theBox.value);				
+				window.location.reload();
+			}, true);
+			
+		
+		unsafeWindow.document.getElementById("Helper:linesToShow").onkeypress = function (event) {
+			event = ( event ) ? event : window.event;
+			var charkey = String.fromCharCode(( event.which ) ? event.which : event.keyCode);
+			document.getElementById("Helper:saveLines").style.display = "";
+			return ((("0123456789").indexOf(charkey) > -1));
+		};
 		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
