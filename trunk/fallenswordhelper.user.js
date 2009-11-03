@@ -25,6 +25,10 @@ var Helper = {
 	},
 
 	initSettings: function() {
+		System.setDefault("lastWorld", "");
+		System.setDefault("questsNotStarted", false);
+		System.setDefault("questsNotComplete", false);
+		System.setDefault("checkForQuestsInWorld", false);
 		System.setDefault("enableLogColoring", true);
 		System.setDefault("enableCreatureColoring", true);
 		System.setDefault("showCombatLog", true);
@@ -1787,6 +1791,93 @@ var Helper = {
 		window.location.reload()
 	},
 
+	isQuestBeingTracked: function (questHREF) {
+		//quests are stored as their address after index.php: ?cmd=questbook....
+		var questsBeingTracked = GM_getValue("questBeingTracked").split(";");
+		for (var i = 0; i < questsBeingTracked.length; i++) {			
+			if (questsBeingTracked[i] == questHREF) {
+				return true;
+			}
+		}
+		return false;
+	},
+	
+	checkForNotCompletedQuests: function(responseText, callback) {
+		//gets the maximum page number and goes through the pages.
+		var doc=System.createDocument(responseText); 
+		var page = System.findNode("//td[contains(.,'Page:')]", doc);
+		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
+		
+		
+		if (maxPage && maxPage.length >= 2) {
+			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ""); i++) {
+				System.xmlhttp("index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=&mode=0&letter=*&sortby=min_level&sortbydir=0", 
+				Helper.checkForNotCompletedQuestRecurse,
+				{"insertHere" : callback.insertHere});
+			}
+		}
+	},
+	
+	checkForNotCompletedQuestRecurse: function(responseText, callback) {
+		var doc=System.createDocument(responseText); 
+		var insertHere = callback.insertHere;
+		
+		var table = System.findNode("//table[@width='100%' and @cellspacing=0 and @cellpadding=0 and @border=0]", doc);
+		if (table) {
+			table = table.lastChild.getElementsByTagName("TABLE")[2];
+			
+			for (var i = 2; i < table.rows.length; i+=2) {
+				if (table.rows[i].cells.length > 1) {
+					var questHREF = table.rows[i].cells[0].getElementsByTagName("a")[0].href.match(/(\?.*)/)[1];
+					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld") && !Helper.isQuestBeingTracked(questHREF)) {
+						if (GM_getValue("questsNotComplete") == false) {
+							insertHere.innerHTML += "<span style='color:red;font-size:12px;'>Quest(s) in zone not completed:</span><br>";
+							GM_setValue("questsNotComplete", true);
+						}
+						insertHere.innerHTML += "<span style='font-size:12px;'>" +table.rows[i].cells[0].innerHTML + "</span><br>";
+					}
+				}
+			}
+		}
+	},
+	
+	checkForNotStartedQuests: function(responseText, callback) {
+		
+		var doc=System.createDocument(responseText); 
+		var page = System.findNode("//td[contains(.,'Page:')]", doc);
+		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/g);		
+		
+		if (maxPage && maxPage.length >= 2) {
+			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ""); i++) {
+				System.xmlhttp("index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=&mode=2&letter=*&sortby=min_level&sortbydir=0", 
+				Helper.checkForQuestRecurse,
+				{"insertHere" : callback.insertHere});
+			}
+		}
+	},
+	
+	checkForQuestRecurse: function(responseText, callback) {
+		var doc=System.createDocument(responseText); 
+		var insertHere = callback.insertHere;
+		
+		var table = System.findNode("//table[@width='100%' and @cellspacing=0 and @cellpadding=0 and @border=0]", doc);
+		if (table) {
+			table = table.lastChild.getElementsByTagName("TABLE")[2];
+			
+			for (var i = 2; i < table.rows.length; i+=2) {
+				if (table.rows[i].cells.length > 1) {					
+					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld")) {
+						if (GM_getValue("questsNotStarted") == false) {
+							insertHere.innerHTML += "<span style='color:red;font-size:12px;'>Quest(s) in zone not started:</span><br>";
+							GM_setValue("questsNotStarted", true);
+						}
+						insertHere.innerHTML += "<span style='font-size:12px;'>" + Helper.removeHTML(table.rows[i].cells[0].innerHTML) + "</span><br>";
+					}
+				}
+			}
+		}
+	},
+
 	injectWorld: function() {
 		Helper.mapThis();
 		Helper.showMap(false);
@@ -1836,7 +1927,21 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
-
+		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+		//Checking if there are quests on current map
+		if (GM_getValue("checkForQuestsInWorld") == true) {
+		if (mapName.textContent != null && 
+			(GM_getValue("lastWorld") != mapName.textContent.trim() || 
+				GM_getValue("questsNotStarted") == true || 
+				GM_getValue("questsNotComplete") == true)) {
+			GM_setValue("lastWorld", mapName.textContent.trim());
+			GM_setValue("questsNotStarted", false);
+			GM_setValue("questsNotComplete", false);
+			var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
+			System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
+			System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
+		}
+		}
 		//quest tracker
 		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
 		if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
@@ -1870,7 +1975,7 @@ var Helper = {
 						
 		}
 		
-		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+		
 		if (mapName) {
 			mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
 				'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
@@ -1922,6 +2027,8 @@ var Helper = {
 				}
 			}
 		}
+		
+		
 	},
 
 	fixOnlineGuildBuffLinks: function() {
@@ -5848,10 +5955,10 @@ var Helper = {
 						for (var k = 0; k < listOfDefenders.length; k++) {
 							shortList.push(listOfDefenders[k]);
 							if (((k + 1) % 16 == 0 && k != 0) || (k == listOfDefenders.length - 1)) {
-								modifierWord = Helper.getGroupBuffModifierWord(i);
-								theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+								modifierWord = Helper.getGroupBuffModifierWord(k);
+								theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + k + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
 									"Buff " + modifierWord + " 16</span></a></nobr>";
-								var buffAllLink = System.findNode("//a[@id='buffAll" + i + modifierWord + "']");
+								var buffAllLink = System.findNode("//a[@id='buffAll" + k + modifierWord + "']");
 								buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 								shortList = new Array();
 							}
@@ -7706,6 +7813,10 @@ var Helper = {
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
 				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
+			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span> Show Incomplete/Not Started Quests' + Helper.helpLink('Show Incomplete/Not Started Quests', 'If checked, the helper will check to see if you have quests that are not started, or are started, not complete and not being tracked.' +
+				'<br>The helper will only check this when you change worlds, or if when it last checked, there were quests it detected for the current world.') +
+				':</td><td colspan="3"><input name="checkForQuestsInWorld" type="checkbox" value="on"' + (GM_getValue("checkForQuestsInWorld")?" checked":"") + '>' +
+				'</td></tr>' +
 			//Bio prefs
 			'<tr><th colspan="2" align="left">Bio preferences</th></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
@@ -7868,6 +7979,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideKrulPortal");
 		System.saveValueForm(oForm, "hideQuests");
 		System.saveValueForm(oForm, "hideQuestNames");
+		System.saveValueForm(oForm, "checkForQuestsInWorld");
 		System.saveValueForm(oForm, "hideRecipes");
 		System.saveValueForm(oForm, "hideRecipeNames");
 		System.saveValueForm(oForm, "footprintsColor");
@@ -8493,13 +8605,8 @@ var Helper = {
 	injectQuestTracker: function() {
 		var injectHere = System.findNode("//td[font/b[.='Quest Details']]");
 		var tracking = false;
-		var currentTrackedQuest = GM_getValue("questBeingTracked").split(";");
-		for (var i = 0; i < currentTrackedQuest.length; i++) {
-			if (currentTrackedQuest[i] == location.search) {
-				tracking = true;
-				break;
-			} 
-		}
+		tracking = Helper.isQuestBeingTracked(location.search);
+		
 		if (tracking == true) {
 		
 			injectHere.innerHTML += '<br><input id="dontTrackThisQuest" data="' + location.search + '" type="button" value="Stop Tracking Quest" title="Tracks quest progress." class="custombutton">';
