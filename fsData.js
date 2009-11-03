@@ -94,9 +94,9 @@ var Data = {
 				{Name:"Huirvast Ruins",Realm:"Huirvast Jungle (Grove) (15,9) Lvl 733",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Critical Hit<br>+25 Nullify<br>+25 Sustain"},
 				{Name:"Guardian Statue",Realm:"Avithral Caves (Entrance) (12,2) Lvl 745",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Sustain"},
 				{Name:"Azlatha Artifact",Realm:"Azlatha Kingdom (Thicket) (15,12) Lvl 752",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge"},
-				{Name:"Pillars of Lindorik",Realm:"??? (??,??) Lvl ???",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge"},
-				{Name:"Statue of Elidoia",Realm:"??? (??,??) Lvl ???",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Disarm"},
-				{Name:"Darghei Statue",Realm:"??? (??,??) Lvl ???",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Pillars of Lindorik",Realm:"Lindorik Kingdom (Edge) (2,2) Lvl 763",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge"},
+				{Name:"Statue of Elidoia",Realm:"Muisru Kingdom (North) (12, 2) Lvl 775",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Disarm"},
+				{Name:"Darghei Statue",Realm:"Darghei Desert (South) (12, 2) Lvl 783",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
 				{Name:"Shimmering Circle",Realm:"The Lost Ascent (Entrance) (13, 2) Lvl 791",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"}
 			];
 		}
