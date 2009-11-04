@@ -1775,7 +1775,7 @@ var Helper = {
 						aRow.parentNode.removeChild(aRow);
 					}
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
-						'" target="_blank"><img border=0 title="Search map in FSG" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
+						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
 				}
 			}
 		}
@@ -1810,6 +1810,7 @@ var Helper = {
 		
 		
 		if (maxPage && maxPage.length >= 2) {
+			GM_setValue("questsNotComplete", false);
 			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ""); i++) {
 				System.xmlhttp("index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=&mode=0&letter=*&sortby=min_level&sortbydir=0", 
 				Helper.checkForNotCompletedQuestRecurse,
@@ -1848,6 +1849,7 @@ var Helper = {
 		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/g);		
 		
 		if (maxPage && maxPage.length >= 2) {
+			GM_setValue("questsNotStarted", false);
 			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ""); i++) {
 				System.xmlhttp("index.php?cmd=questbook&subcmd=&subcmd2=&page=" + i + "&search_text=&mode=2&letter=*&sortby=min_level&sortbydir=0", 
 				Helper.checkForQuestRecurse,
@@ -1935,8 +1937,6 @@ var Helper = {
 				GM_getValue("questsNotStarted") == true || 
 				GM_getValue("questsNotComplete") == true)) {
 			GM_setValue("lastWorld", mapName.textContent.trim());
-			GM_setValue("questsNotStarted", false);
-			GM_setValue("questsNotComplete", false);
 			var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
 			System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
 			System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
@@ -8606,6 +8606,19 @@ var Helper = {
 		var injectHere = System.findNode("//td[font/b[.='Quest Details']]");
 		var tracking = false;
 		tracking = Helper.isQuestBeingTracked(location.search);
+		var questName = System.findNode("//font[@size='2']", injectHere);
+		if (questName) {
+			questName = questName.innerHTML;
+			questName = questName.match(/"(.*)"/);
+			if (questName && questName.length > 1) {
+				questName = questName[1];
+		injectHere.innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
+						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';		
+		injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + 
+						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Wiki" src=' + System.imageServer + '/skin/fs_wiki.gif /></a>';
+			}
+			
+		}
 		
 		if (tracking == true) {
 		
