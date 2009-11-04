@@ -25,6 +25,10 @@ var Helper = {
 	},
 
 	initSettings: function() {
+		System.setDefault("lastActiveQuestPage", "");
+		System.setDefault("lastCompletedQuestPage", "");
+		System.setDefault("lastNotStartedQuestPage", "");
+		System.setDefault("questBeingTracked", "");
 		System.setDefault("lastWorld", "");
 		System.setDefault("questsNotStarted", false);
 		System.setDefault("questsNotComplete", false);
@@ -1760,6 +1764,29 @@ var Helper = {
 	},
 
 	injectQuestBookFull: function() {
+		
+		var lastQBPage = location.search;
+		//TODO: Make this configurable on/off
+		if (lastQBPage.indexOf("&mode=0") != -1) {
+			GM_setValue("lastActiveQuestPage", lastQBPage);
+		} else if (lastQBPage.indexOf("&mode=1") != -1) {
+			GM_setValue("lastCompletedQuestPage", lastQBPage);
+		} else if (lastQBPage.indexOf("&mode=2") != -1) {
+			GM_setValue("lastNotStartedQuestPage", lastQBPage);
+		}
+		if (GM_getValue("lastActiveQuestPage").length > 0) {
+			var activeLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=0")]');
+			activeLink.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+		} 
+		if (GM_getValue("lastCompletedQuestPage").length > 0) {
+			var completedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=1")]');
+			completedLink.setAttribute("href", GM_getValue("lastCompletedQuestPage"));
+		} 
+		if (GM_getValue("lastNotStartedQuestPage").length > 0) {
+			var notStartedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=2")]');
+			notStartedLink.setAttribute("href", GM_getValue("lastNotStartedQuestPage"));
+		}
+		
 		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
 		if (!questTable) return;
 		var hideQuests=[];
