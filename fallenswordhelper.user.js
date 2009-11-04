@@ -1985,16 +1985,16 @@ var Helper = {
 			var uaStr = navigator.userAgent;
 			var FFindex = uaStr.indexOf("Firefox");
 			var huntingMode = GM_getValue("huntingMode");
-			var imgSource = huntingMode == true ? "http://dl.getdropbox.com/u/2144065/huntingOn.gif" : "http://dl.getdropbox.com/u/2144065/huntOff.png";
+			var imgSource = huntingMode == true ? Data.huntingOnImage() : Data.huntingOffImage();
 			var altText = huntingMode == true ? "Hunting mode is ON" : "Hunting mode is OFF";
 			mapName.innerHTML += " <a href=# id='Helper:ToggleHuntingMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
 
 			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5" && GM_getValue("showSpeakerOnWorld")) {
 				if (GM_getValue("playNewMessageSound"))
 				{
-					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="http://upload.wikimedia.org/wikipedia/commons/5/57/Sound_mute.png"/></a>';
+					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/></a>';
 				} else {
-					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="http://upload.wikimedia.org/wikipedia/commons/e/ee/Sound.png"/></a>';
+					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/></a>';
 				}
 				document.getElementById("toggleSoundLink").addEventListener("click", Helper.toggleSound, true);
 
