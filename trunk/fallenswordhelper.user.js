@@ -291,6 +291,12 @@ var Helper = {
 			Helper.addGuildInfoWidgets();
 		}
 		
+		if (GM_getValue("lastActiveQuestPage").length > 0) {
+			var questBookNode = System.findNode('//a[@href="index.php?cmd=questbook"]');
+			questBookNode.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+			
+		}
+		
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
 			var re=/cmd=([a-z]+)/;
