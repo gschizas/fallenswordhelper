@@ -34,6 +34,7 @@ var Helper = {
 		System.setDefault("questsNotComplete", false);
 		System.setDefault("checkForQuestsInWorld", false);
 		System.setDefault("enableLogColoring", true);
+		System.setDefault("enableChatParsing", true);
 		System.setDefault("enableCreatureColoring", true);
 		System.setDefault("showCombatLog", true);
 		System.setDefault("showCreatureInfo", true);
@@ -290,15 +291,6 @@ var Helper = {
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
 		}
-		
-		if (GM_getValue("lastActiveQuestPage").length > 0) {
-			var questBookNode = System.findNode('//a[@href="index.php?cmd=questbook"]');
-			if (questBookNode) {
-			questBookNode.setAttribute("href", GM_getValue("lastActiveQuestPage"));
-			}
-			
-		}
-		
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
 			var re=/cmd=([a-z]+)/;
@@ -3164,7 +3156,7 @@ var Helper = {
 		var newRow = chatTable.insertRow(1);
 		var newCell = newRow.insertCell(0);
 
-		for (var i=1;i<chatTable.rows.length;i++) {
+		for (var i=2;i<chatTable.rows.length;i+=4) {
 			var aRow = chatTable.rows[i];
 			//GM_log(aRow.innerHTML);
 			var addBuffTag = true;
@@ -3319,7 +3311,10 @@ var Helper = {
 							}
 							thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID, quickBuff) + ">Buff</a></span>";
 						}							
-						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart  + fourthPart + "</nobr>" + lastPart;
+						
+						var msgReplyTo = (GM_getValue("enableChatParsing") == true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" + 
+							Helper.removeHTML(firstPart.replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
+						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart  + fourthPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
@@ -7835,6 +7830,8 @@ var Helper = {
 				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
 				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
 				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
+			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span>Enable Chat Parsing' + Helper.helpLink('Enable Chat Parsing', 'If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message.') +
+				':</td><td><input name="enableChatParsing" type="checkbox" value="on"' + (GM_getValue("enableChatParsing")?" checked":"") + '></td></td></tr>' +
 			//Equipment screen prefs
 			'<tr><th colspan="2" align="left">Equipment screen preferences</th></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
@@ -7986,6 +7983,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showAdmin");
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
+		System.saveValueForm(oForm, "enableChatParsing");
 		System.saveValueForm(oForm, "enableCreatureColoring");
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		System.saveValueForm(oForm, "hideBanner");
@@ -8396,6 +8394,14 @@ var Helper = {
 
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
 
+		if (location.search.indexOf("&replyTo") != -1) {
+			var tableForInsert = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td/table/tbody/tr[2]/td/table");
+			var newRow = tableForInsert.insertRow(2);
+			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
+			newRow.innerHTML = '<td>Replying To[<a href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg + 
+			'</td>';
+		}
+										
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
 				"<tr><td bgcolor='#cd9e4b'><center>Quick Message</center></td></tr>" +

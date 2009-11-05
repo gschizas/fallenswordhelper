@@ -1,6 +1,12 @@
 var Layout = {
 
 	injectMenu: function() {
+		if (GM_getValue("lastActiveQuestPage").length > 0) {
+			var questBookNode = System.findNode('//a[@href="index.php?cmd=questbook"]');
+			if (questBookNode) {
+				questBookNode.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+			}			
+		}
 		//"menuSource_0"
 		var tableElement = System.findNode("//div[@id='menuSource_0']/table");
 		if (!tableElement) return;
