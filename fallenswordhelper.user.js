@@ -293,7 +293,9 @@ var Helper = {
 		
 		if (GM_getValue("lastActiveQuestPage").length > 0) {
 			var questBookNode = System.findNode('//a[@href="index.php?cmd=questbook"]');
+			if (questBookNode) {
 			questBookNode.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+			}
 			
 		}
 		
