@@ -2138,6 +2138,7 @@ var Helper = {
 						var tradeLink = secureTradeLink.nextSibling.nextSibling;
 						tradeLink.style.visibility = 'hidden';
 					}
+					onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
 				}
 			}
 		}
