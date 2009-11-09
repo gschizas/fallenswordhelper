@@ -424,6 +424,9 @@ var Helper = {
 					case "report":
 						Helper.injectReportPaint();
 						break;
+					case "addtags":
+						Helper.injectGuildAddTagsWidgets();
+						break;
 					default:
 						Helper.injectDropItems();
 				}
@@ -4186,6 +4189,20 @@ var Helper = {
 		}
 	},
 
+	injectGuildAddTagsWidgets: function() {
+		var mainTable = System.findNode("//table[@width='600']");
+		var itemTable = mainTable.rows[6].cells[0].firstChild.nextSibling;
+		for (var i=0;i<itemTable.rows.length;i++) {
+			var aRow = itemTable.rows[i];
+			if (aRow.cells[2]) { // itemRow
+				itemId = aRow.cells[0].firstChild.getAttribute("value");
+				aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" itemID="' + itemId + '">Fast BP</span>';
+				itemRecall = aRow.cells[2].firstChild.nextSibling;
+				itemRecall.addEventListener('click', Helper.recallGuildStoreItem, true);
+			}
+		}
+	},
+	
 	changeCombatSet: function(responseText, itemIndex) {
 		var doc=System.createDocument(responseText);
 
