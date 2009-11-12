@@ -97,6 +97,8 @@ var Helper = {
 		System.setDefault("autoSortArenaList", false);
 		
 		System.setDefault("currentGoldSentTotal", 0);
+		System.setDefault("keepBuffLog", true);
+		System.setDefault("buffLog", "");
 
 		System.setDefault("enableActiveBountyList", false);
 		System.setDefault("bountyListRefreshTime", 30);
@@ -523,6 +525,9 @@ var Helper = {
 			case "fsboxcontent":
 				Helper.injectFsBoxContent();
 				break;
+			case "bufflogcontent":
+				Helper.injectBuffLog();
+				break;
 			case "guildlog":
 				Helper.injectGuildLogSummary();
 				break;
@@ -592,9 +597,17 @@ var Helper = {
 			if (isRelicPage) {
 				Helper.injectRelic(isRelicPage);
 			}
+			var isBuffResult = System.findNode("//td[contains(.,'Back to Quick Buff Menu')]");
+			if (isBuffResult) {
+				Helper.updateBuffLog();
+			}
 			var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
 			if (isAuctionPage) {
 				Helper.injectAuctionHouse();
+			}
+			var isShopPage = System.findNode("//td[contains(.,'then click to purchase for the price listed below the item.')]");
+			if (isShopPage) {
+				Helper.injectShop();
 			}
 			var isQuestBookPage = System.findNode("//td[.='Quest Name']");
 			if (isQuestBookPage) {
@@ -673,6 +686,40 @@ var Helper = {
 				}
 			}
 		}
+	},
+	updateBuffLog: function() {
+		if (GM_getValue("keepBuffLog")) {
+			//Skill Inventor level 175 was activated on 'yuuzhan'.
+			var buffLog=GM_getValue("buffLog");
+			var buffsAttepmted = document.body.innerHTML.split('<li>');
+			document.body.innerHTML+= "<span id='buff_Log' style='color:yellow'></span>";
+			var buffsNotCastRE = /The skill ([\w ]*) of current or higher level is currently active on \'(\w*)\'/
+			var buffsCastRE = /Skill ([\w ]*) level (\d*) was activated on \'(\w*)\'/
+			//var buffsNotCast = buffsCastRE.exec(document.body.innerHTML);
+			for (var i=0;i<buffsAttepmted.length ;i++ )
+			{
+				var buffsCast = buffsCastRE.exec(buffsAttepmted[i]);
+				var buffsNotCast = buffsNotCastRE.exec(buffsAttepmted[i]);
+				if (buffsCast) {
+					//document.getElementById('buff_Log').innerHTML+='<br>'+buffsCast[0];
+					buffLog=buffsCast[0]+'<br>'+buffLog;
+				}
+				if (buffsNotCast) {
+					//document.getElementById('buff_Log').innerHTML+='<br>'+buffsNotCast[0];
+					buffLog=buffsNotCast[0]+'<br>'+buffLog;
+
+				}
+
+			}
+			GM_setValue("buffLog",buffLog);
+			//document.getElementById('buff_Log').innerHTML+='<br><br><br>'+buffLog;
+		}
+
+	},
+	injectBuffLog: function() {
+		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Buff Log','','clearBuffs','Clear','bufflog');
+		document.getElementById('clearBuffs').addEventListener('click',function() {GM_setValue("buffLog",'');window.location=window.location;},true);
+		document.getElementById('bufflog').innerHTML=GM_getValue("buffLog");
 	},
 	
 	injectFSBoxLog: function() {
@@ -869,6 +916,56 @@ var Helper = {
 		newMouseoverText = newMouseoverText.replace("tt_setWidth(175)", "tt_setWidth(200)");
 		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
 		return;
+	},
+
+	injectShop: function() {
+		var injectHere=System.findNode("//td/center[img[contains(@src,'_banner.jpg')]]");
+		var itemNodes=System.findNodes("//td/center/a/img[contains(@src,'/items/')]");
+
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=1 class='custominput'><table cellpadding=2><tr>";
+		for (var i=0;i<itemNodes.length;i++) {
+			var item=itemNodes[i];
+			var src=item.getAttribute("src");
+			var text=item.parentNode.parentNode.textContent;
+			var onmouseover=item.getAttribute("onmouseover").replace("Click to Buy","Click to Select");
+			var itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
+			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
+				"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
+			if (i%6==5 && i!=itemNodes.length-1) selector+="</tr><tr>";
+		}
+		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
+			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
+			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>";
+		injectHere.innerHTML="<table><tr><td>"+injectHere.innerHTML+"</td><td>"+selector+"</td></tr></table>";
+		for (var i=0;i<itemNodes.length;i++) {
+			var itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
+			document.getElementById("select"+itemId).addEventListener("click",Helper.selectShopItem,true);
+		}
+		Helper.shopId=itemNodes[0].parentNode.getAttribute("href").match(/&shop_id=(\d+)/)[1];
+	},
+	
+	selectShopItem: function(evt) {
+		Helper.shopItemId=evt.target.getAttribute("itemId");
+		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the '+document.getElementById('buy_amount').value+' item(s) WITHOUT confirmation!</span>';
+		document.getElementById('selectedItem').innerHTML=
+			document.getElementById("select"+Helper.shopItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
+	},
+	
+	quickBuyItem: function() {
+		//
+		if (!Helper.shopItemId || !Helper.shopId) return;
+		document.getElementById('buy_result').innerHTML="Buying "+document.getElementById('buy_amount').value+" Items";
+		for (var i=0;i<document.getElementById('buy_amount').value;i++) {
+			System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
+				Helper.quickDone);
+			
+		}
+	},
+	quickDone: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		//unsafeWindow.tt_setWidth(200);
+		//unsafeWindow.Tip(infoMessage);
+		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
 
 	injectRelic: function(isRelicPage) {
@@ -3052,6 +3149,9 @@ var Helper = {
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
+		case 116: // quick buy [t]
+			Helper.quickBuyItem();
+			break;
 		case 118: // fast wear manager [v]
 			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
 			break;
@@ -4509,6 +4609,7 @@ var Helper = {
 		
 			Helper.profileParseAllyEnemy();
 			Helper.profileInjectFastWear();
+			Helper.profileComponents();
 			
 			// quick wear manager link and select all link
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
@@ -4572,6 +4673,29 @@ var Helper = {
 				}
 			}
 		}
+	},
+
+	enableDelComponent: function() {
+		var nodes=System.findNodes('//a[contains(@href,"cmd=profile&subcmd=destroycomponent&component_id=")]');
+		if (nodes) {
+			for (var i=0;i<nodes.length;i++) {
+				nodes[i].parentNode.innerHTML+='<span id=compDelBtn'+i+' compid='+
+					nodes[i].getAttribute('href').match(/destroycomponent&component_id=(\d+)/i)[0]+
+					' style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Del</span>';
+				document.getElementById('compDelBtn'+i).addEventListener('click',Helper.delComponent,true);
+			}
+		}
+		document.getElementById('compDel').innerHTML='';
+	},
+	delComponent: function(evt) {
+		var id=evt.target.getAttribute('compid');
+		System.xmlhttp('index.php?cmd=profile&subcmd=destroycomponent&component_id='+id,
+			function(responseText) {
+				if (Layout.infoBox(responseText)=='Component destroyed.')
+					evt.target.parentNode.innerHTML='';
+				else
+					evt.target.innerHTML=Layout.infoBox(responseText);
+			});
 	},
 	
 	profileParseAllyEnemy: function() {
@@ -4768,6 +4892,62 @@ var Helper = {
 					aLink.parentNode.insertBefore(warning, aLink.nextSibling);
 				}
 			}
+		}
+	},
+
+	profileComponents: function() {
+		var componentDiv=document.getElementById('componentDiv');
+		if (componentDiv) {
+			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
+				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>';
+			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
+			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
+		}
+	},
+
+	countComponent: function() {
+		var compPage=System.findNodes("//a[contains(@href,'index.php?cmd=profile&component_page=')]");
+		if (compPage) 
+			Helper.compPage = compPage.length;
+		else 
+			Helper.compPage = 0;
+		document.getElementById('compSum').innerHTML='Retrieve page: ';
+		Helper.componentList={};
+		System.xmlhttp("index.php?cmd=profile&component_page=0", Helper.retriveComponent, 0);
+	},
+	
+	retriveComponent: function(responseText, currentPage) {
+		var nextPage=currentPage+1;
+		document.getElementById('compSum').innerHTML+=nextPage+', ';
+		var doc=System.createDocument(responseText);
+		var compList = System.findNodes("//a[contains(@href,'cmd=profile&subcmd=destroycomponent&component_id=')]/img",doc);
+		if (compList) {
+			for (var i=0;i<compList.length;i++) {
+				var mouseover=compList[i].getAttribute('onmouseover');
+				var id=mouseover.match(/ajaxLoadCustom\((\d+).*/)[1];
+				if (Helper.componentList[id])
+					Helper.componentList[id].count++;
+				else {
+					Helper.componentList[id]={'count':1,'src':compList[i].getAttribute('src'),
+						'onmouseover':mouseover.replace("<br><center><b>[Click to Destroy]</b></center>","")};
+				}
+			}
+		}
+		if (currentPage < Helper.compPage - 1) {
+			System.xmlhttp("index.php?cmd=profile&component_page="+nextPage, Helper.retriveComponent, nextPage);
+		} else {
+			var totalCount = System.findNodes("//td[contains(@background,'inventory/1x1mini.gif')]",doc);
+			if (totalCount) totalCount=totalCount.length; else totalCount=0;
+			totalCount+=currentPage*50;
+			var output='Component Summary<br/><table>';
+			var usedCount=0;
+			for (var id in Helper.componentList) {
+				var comp=Helper.componentList[id];
+				output+="<tr><td align=center><img src="+comp.src+" onmouseover=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
+				usedCount+=comp.count;
+			}
+			output+="<tr><td align=center>Total:</td><td>"+usedCount+" / "+totalCount+"</td></tr></table>";
+			document.getElementById('compSum').innerHTML=output;
 		}
 	},
 	
@@ -7832,6 +8012,8 @@ var Helper = {
 				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
 			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
 				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Buff Log' + Helper.helpLink('Enable Buff Log', 'This enables the functionality to keep a log of recently casted buffs') +
+				':</td><td><input name="keepBuffLog" type="checkbox" value="on"' + (GM_getValue("keepBuffLog")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual features to speed up the Helper.') +
 				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
@@ -8041,6 +8223,7 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
+		System.saveValueForm(oForm, "keepBuffLog");
 		System.saveValueForm(oForm, "showQuickSendLinks");
 		System.saveValueForm(oForm, "itemRecipient");
 		System.saveValueForm(oForm, "currentGoldSentTotal");

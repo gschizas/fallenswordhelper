@@ -10,6 +10,7 @@ var Layout = {
 		//"menuSource_0"
 		var tableElement = System.findNode("//div[@id='menuSource_0']/table");
 		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
 		Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
 		Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13);
 		Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 15);
