@@ -6323,7 +6323,7 @@ var Helper = {
 			if (sellPrice < 100000) {
 				warningColor = "brown";
 				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
-			} else if (sellPrice > 150000) {
+			} else if (sellPrice > 200000) {
 				warningColor = "red";
 				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
