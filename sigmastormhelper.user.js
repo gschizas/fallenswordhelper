@@ -4480,7 +4480,7 @@ var Helper = {
 	},
 
 	linkFromMouseover: function(mouseOver) {
-		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
+		var reParams=/(\d+),\s*([+-]*\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
 		var itemId=reResult[1];
 		var invId=reResult[2];
