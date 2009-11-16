@@ -2823,6 +2823,9 @@ var Helper = {
 		case 99: // se
 			Helper.moveMe(1,1);
 			break;
+		case 102: // repair kit [f]
+			window.location = System.server + 'index.php?cmd=profile&subcmd=useitem&mode=worldrepairkit';
+			break;
 		case 114: // repair [r]
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			break;
@@ -2881,10 +2884,13 @@ var Helper = {
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
 			GM_openInTab(System.server + "index.php?cmd=quickbuff");
 			break;
-		case 48: // return to world
+		case 48: // return to world [0]
 			window.location = 'index.php?cmd=world';
 			break;
-		case 109: // map
+		case 109: // medikit [m]
+			window.location = System.server+'index.php?cmd=profile&subcmd=useitem&mode=worldmedipack'
+			break;
+		case 77: // map [M]
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
