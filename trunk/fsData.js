@@ -5993,7 +5993,7 @@ var Data = {
 				{name:'Ring of Heibala', type:'ring'},
 				{name:'Rune of Pudhal', type:'rune'},
 				{name:'Rune of Teuio', type:'rune'},
-				{name:'Amulet of Lihhal', type:'amulet'}
+				{name:'Amulet of Lihhal', type:'amulet'},
 				{name:'Tsukiyaomos Benighted Helm', type:'helmet'},
 				{name:'Helmet of Huoral', type:'helmet'},
 				{name:'Shield of Caldoura', type:'shield'},
