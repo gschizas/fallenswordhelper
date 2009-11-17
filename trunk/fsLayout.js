@@ -114,7 +114,7 @@ var Layout = {
      },
 
 	notebookContent: function() {
-		return System.findNode("//table[@width='100%']/..");
+		return System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='0' and @border='0']/..");
 	},
 
 	playerId: function() {
