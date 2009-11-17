@@ -522,6 +522,9 @@ var Helper = {
 			case "monsterlog":
 				Helper.injectMonsterLog();
 				break;
+			case "quickextract":
+				Helper.insertQuickExtract();
+				break
 			case "quickwear":
 				Helper.insertQuickWear();
 				break
@@ -2346,6 +2349,75 @@ var Helper = {
 		}
 	},
 	
+	insertQuickExtract: function() {
+		Helper.itemList = {};
+		var layout=Layout.notebookContent();
+		layout.innerHTML="Getting item list from: ";
+		Helper.resourceList={};
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":layout,"id":0});
+	},
+
+	getPlantsFromBackpack: function(responseText, callback) {
+		var layout=callback.inject;
+		layout.innerHTML+="Parsing main pack for plants.";
+		var doc=System.createDocument(responseText);
+		if (responseText.indexOf('Back to Profile') > 0){
+			Helper.retrieveItemInfor(doc);
+		}
+		Helper.showQuickExtract(callback);
+	},
+	
+	showQuickExtract: function(callback) {
+		var output='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>'+
+			'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
+			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=buy_result colspan=12></td></tr>';
+		for (var key in Helper.itemList) {
+			var itemID=Helper.itemList[key].id;
+			var	itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html); //add this line
+			var plantType = itemStats[1];
+			if (Helper.resourceList[plantType]){
+				Helper.resourceList[plantType].invIDs+=","+itemID;
+				Helper.resourceList[plantType].count++;
+			}
+			else {
+				Helper.resourceList[plantType]={'count':1,'invIDs':itemID,'src':Helper.itemList[key].html};
+			}
+		}
+
+		for (var id in Helper.resourceList) {
+			var res=Helper.resourceList[id];
+			output+='<tr><td align=center>'+
+				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
+				'id="Helper:extractAllSimilar' + id + '" invIDs="'+res.invIDs+'">Extract all '+res.count +'</span></td>'+res.src+'</tr>';		
+		}
+		output+='</table>';
+
+		callback.inject.innerHTML=output;
+		for (var id in Helper.resourceList) {
+			document.getElementById('Helper:extractAllSimilar' + id)
+				.addEventListener('click', Helper.extractAllSimilar, true);	
+			}
+	},
+	
+	extractAllSimilar: function(evt) {
+		if (!window.confirm("Are you sure you want to extract all similar items?")) return;
+		var InventoryIDs=evt.target.getAttribute("invIDs").split(",");
+		//evt.target.parentNode.innerHTML = InventoryIDs;
+		var output= '';
+		evt.target.parentNode.innerHTML = 'extracting all ' + InventoryIDs.length + ' resources';
+		for (var i=0; i<InventoryIDs.length; i++){
+			//output+='index.php?cmd=profile&subcmd=useitem&inventory_id='+InventoryIDs[i]+'<br>';
+			System.xmlhttp('index.php?cmd=profile&subcmd=useitem&inventory_id='+InventoryIDs[i], Helper.quickDoneExtracted);
+		}
+		//evt.target.parentNode.innerHTML = output;
+	},
+	quickDoneExtracted: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		//unsafeWindow.tt_setWidth(200);
+		//unsafeWindow.Tip(infoMessage);
+		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
+	},
+
 	retrieveItemInfor: function(doc) {
 		var table=System.findNode("//td[@colspan=3]/table[@width='100%']",doc);
 		for (var i=0; i<table.rows.length/2; i++){
@@ -4918,7 +4990,9 @@ var Helper = {
 		var componentDiv=document.getElementById('componentDiv');
 		if (componentDiv) {
 			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
-				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>';
+				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>'+
+				'<a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a>';
+;
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		}
