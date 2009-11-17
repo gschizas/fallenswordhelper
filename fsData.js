@@ -5985,7 +5985,6 @@ var Data = {
 				{name:'Ornate Bracers of the Lamia', type:'gloves'},
 				{name:'Ornate Choker of the Lamia', type:'amulet'},
 				{name:'Rune of Hofall', type:'rune'},
-				
 				{name:'Boots of Dronaglh', type:'boots'},
 				{name:'Helmet of Heigha', type:'helmet'},
 				{name:'Orrotaui Drake Armor', type:'armor'},
@@ -5993,7 +5992,27 @@ var Data = {
 				{name:'Orrotaui Drake Helmet', type:'helmet'},
 				{name:'Ring of Heibala', type:'ring'},
 				{name:'Rune of Pudhal', type:'rune'},
-				{name:'Rune of Teuio', type:'rune'}
+				{name:'Rune of Teuio', type:'rune'},
+				
+				{name:'Tsukiyaomos Benighted Helm', type:'helmet'},
+				{name:'Helmet of Huoral', type:'helmet'},
+				{name:'Shield of Caldoura', type:'shield'},
+				{name:'Guardian of Meidos Shield', type:'shield'},
+				{name:'Guardian of Meidos Amulet', type:'amulet'},
+				{name:'Dimcriee Roc Amulet', type:'amulet'},
+				{name:'Dimcriee Roc Armor', type:'armor'},
+				{name:'Dimcriee Roc Rune', type:'rune'},
+				{name:'Rune of Yuahe', type:'rune'},
+				{name:'Rune of Teesael', type:'rune'},
+				{name:'Rune of Autpel', type:'rune'},
+				{name:'Echigal Rune', type:'rune'},
+				{name:'Echigal Helmet', type:'helmet'},
+				{name:'Gloves of Rocuia', type:'gloves'},
+				{name:'Fist Blade of Chebula', type:'weapon'},
+				{name:'Boots of Eightar', type:'boots'},
+				{name:'Armor of Jutindou', type:'armor'},
+				{name:'Pumpkin Ring', type:'ring'},
+				{name:'Amulet of Dargeic', type:'armor'}
 			]
 		}
 		return Data.itemArray;
