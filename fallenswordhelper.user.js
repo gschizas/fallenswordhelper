@@ -8119,7 +8119,7 @@ var Helper = {
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'</table></form>';
-		var insertHere = System.findNode("//table[@width='100%']");
+		var insertHere = System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='5' and @border='0']");
 		var newRow=insertHere.insertRow(insertHere.rows.length);
 		var newCell=newRow.insertCell(0);
 		newCell.colSpan=3;
