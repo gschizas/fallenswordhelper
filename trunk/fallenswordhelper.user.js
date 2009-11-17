@@ -429,6 +429,9 @@ var Helper = {
 					case "addtags":
 						Helper.injectGuildAddTagsWidgets();
 						break;
+					case "removetags":
+						Helper.injectGuildAddTagsWidgets();
+						break;
 					default:
 						Helper.injectDropItems();
 				}
@@ -3490,6 +3493,15 @@ var Helper = {
 						aRow.style.color = "gray";
 						hideNextRows = 3;
 					}
+					if (aRow.cells[2].textContent.charAt(0) == '\'') {
+						message = aRow.cells[2].innerHTML
+						firstQuote = message.indexOf('\'');
+						secondQuote = message.indexOf('\'',firstQuote+1);
+						targetPlayerName = message.substring(firstQuote+1,secondQuote);
+						aRow.cells[2].innerHTML = '\'' + 
+							'<a href="index.php?cmd=findplayer&subcmd=dofindplayer&target_username=' + targetPlayerName + '">' + targetPlayerName + '</a>' + 
+							message.substring(secondQuote, message.length);
+					}
 				}
 			}
 			else {
@@ -3997,7 +4009,10 @@ var Helper = {
 	},
 
 	resetRawEditor: function(evt) {
-		Helper.param.currentItems=[];
+		if (location.search == '?cmd=notepad&subcmd=auctionsearch') {
+			Helper.param.currentItems = Data.quickSearchList();
+		}
+		else Helper.param.currentItems=[];
 		Helper.generateManageTable();
 	},
 
@@ -5597,6 +5612,7 @@ var Helper = {
 			}
 		} else {
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
+			currentPage = pages.length; // go to end automatically since the rest of the pages will be empty too.
 		}
 		if (currentPage<pages.length) {
 			System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), Helper.parseGuildStorePage);
@@ -7981,7 +7997,7 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span> Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator.'+
+			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator.'+
 					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
 					'<br>Semi-Conservative = 1.1 and 1.053'+
 					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)') +
@@ -8030,7 +8046,7 @@ var Helper = {
 				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
 				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
 				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
-			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span>Enable Chat Parsing' + Helper.helpLink('Enable Chat Parsing', 'If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message.') +
+			'<tr><td align="right">Enable Chat Parsing' + Helper.helpLink('Enable Chat Parsing', 'If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message.') +
 				':</td><td><input name="enableChatParsing" type="checkbox" value="on"' + (GM_getValue("enableChatParsing")?" checked":"") + '></td></td></tr>' +
 			//Equipment screen prefs
 			'<tr><th colspan="2" align="left">Equipment screen preferences</th></tr>' +
@@ -8045,7 +8061,7 @@ var Helper = {
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
 				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
-			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span> Show Incomplete/Not Started Quests' + Helper.helpLink('Show Incomplete/Not Started Quests', 'If checked, the helper will check to see if you have quests that are not started, or are started, not complete and not being tracked.' +
+			'<tr><td align="right">Show Incomplete/Not <br>Started Quests' + Helper.helpLink('Show Incomplete/Not Started Quests', 'If checked, the helper will check to see if you have quests that are not started, or are started, not complete and not being tracked.' +
 				'<br>The helper will only check this when you change worlds, or if when it last checked, there were quests it detected for the current world.') +
 				':</td><td colspan="3"><input name="checkForQuestsInWorld" type="checkbox" value="on"' + (GM_getValue("checkForQuestsInWorld")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -8090,7 +8106,7 @@ var Helper = {
 				'This works on Recipe Manager') +
 				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
 				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
-			'<tr><td align="right"><span style="color:green;"><b>*New*</b></span> Hide Relic Offline' + Helper.helpLink('Hide Relic Offline', 'This hides the relic offline defenders checker.') +
+			'<tr><td align="right">Hide Relic Offline' + Helper.helpLink('Hide Relic Offline', 'This hides the relic offline defenders checker.') +
 				':</td><td><input name="hideRelicOffline" type="checkbox" value="on"' + (GM_getValue("hideRelicOffline")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
