@@ -5993,17 +5993,20 @@ var Data = {
 				{name:'Ring of Heibala', type:'ring'},
 				{name:'Rune of Pudhal', type:'rune'},
 				{name:'Rune of Teuio', type:'rune'},
-				
+				{name:'Amulet of Lihhal', type:'amulet'}
 				{name:'Tsukiyaomos Benighted Helm', type:'helmet'},
 				{name:'Helmet of Huoral', type:'helmet'},
 				{name:'Shield of Caldoura', type:'shield'},
+				{name:'Shield of Amola', type:'shield'},
 				{name:'Guardian of Meidos Shield', type:'shield'},
 				{name:'Guardian of Meidos Amulet', type:'amulet'},
 				{name:'Dimcriee Roc Amulet', type:'amulet'},
 				{name:'Dimcriee Roc Armor', type:'armor'},
 				{name:'Dimcriee Roc Rune', type:'rune'},
+				{name:'Rune of Staveal', type:'rune'},
 				{name:'Rune of Yuahe', type:'rune'},
 				{name:'Rune of Teesael', type:'rune'},
+				{name:'Rune of Eassel', type:'rune'},
 				{name:'Rune of Autpel', type:'rune'},
 				{name:'Echigal Rune', type:'rune'},
 				{name:'Echigal Helmet', type:'helmet'},
@@ -6011,6 +6014,7 @@ var Data = {
 				{name:'Fist Blade of Chebula', type:'weapon'},
 				{name:'Boots of Eightar', type:'boots'},
 				{name:'Armor of Jutindou', type:'armor'},
+				{name:'Ring of Male', type:'ring'},
 				{name:'Pumpkin Ring', type:'ring'},
 				{name:'Amulet of Dargeic', type:'armor'}
 			]
