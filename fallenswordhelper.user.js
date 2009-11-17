@@ -697,22 +697,31 @@ var Helper = {
 		if (GM_getValue("keepBuffLog")) {
 			//Skill Inventor level 175 was activated on 'yuuzhan'.
 			var buffLog=GM_getValue("buffLog");
-			var buffsAttepmted = document.body.innerHTML.split('<li>');
+			var buffsAttempted = document.body.innerHTML.split('<li>');
 			document.body.innerHTML+= "<span id='buff_Log' style='color:yellow'></span>";
 			var buffsNotCastRE = /The skill ([\w ]*) of current or higher level is currently active on \'(\w*)\'/
 			var buffsCastRE = /Skill ([\w ]*) level (\d*) was activated on \'(\w*)\'/
+			var buffList = Data.buffList();
 			//var buffsNotCast = buffsCastRE.exec(document.body.innerHTML);
-			for (var i=0;i<buffsAttepmted.length ;i++ )
+			for (var i=0;i<buffsAttempted.length ;i++ )
 			{
-				var buffsCast = buffsCastRE.exec(buffsAttepmted[i]);
-				var buffsNotCast = buffsNotCastRE.exec(buffsAttepmted[i]);
+				var buffsCast = buffsCastRE.exec(buffsAttempted[i]);
+				var buffsNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
+				var stamina = 0;
 				if (buffsCast) {
 					//document.getElementById('buff_Log').innerHTML+='<br>'+buffsCast[0];
-					buffLog=buffsCast[0]+'<br>'+buffLog;
+					
+				for (var j = 0; j < buffList.length; j++) {
+					if (buffList[j].name == buffsCast[1]) {
+						stamina = buffList[j].stamina;
+						break;
+					}
+				}
+					buffLog=buffsCast[0] + ' (' + stamina + ' stamina) <br>'+buffLog;
 				}
 				if (buffsNotCast) {
-					//document.getElementById('buff_Log').innerHTML+='<br>'+buffsNotCast[0];
-					buffLog=buffsNotCast[0]+'<br>'+buffLog;
+				
+					buffLog='<span style="color: red;">' + buffsNotCast[0] + '</span><br>' + buffLog;
 
 				}
 
