@@ -3680,7 +3680,11 @@ var Helper = {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
 				var theImage = anItem;
-				System.xmlhttp(Helper.linkFromMouseover(anItem.getAttribute("onmouseover")),
+				var theUrl = Helper.linkFromMouseover(anItem.getAttribute("onmouseover"));
+				if (theUrl == null) {
+					continue;
+				}
+				System.xmlhttp(theUrl,
 					function(responseText, callback) {
 						var craft="";
 						if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -5174,6 +5178,9 @@ var Helper = {
 	linkFromMouseover: function(mouseOver) {
 		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
+		if (reResult == null) {
+			return null;
+		}
 		var itemId=reResult[1];
 		var invId=reResult[2];
 		var type=reResult[3];
@@ -5186,6 +5193,9 @@ var Helper = {
 	linkFromMouseoverCustom: function(mouseOver) {
 		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]+)\'/i;
 		var reResult =reParams.exec(mouseOver);
+		if (reResult == null) {
+			return null;
+		}
 		var itemId   = reResult[1];
 		var invId    = reResult[2];
 		var type     = reResult[3];
