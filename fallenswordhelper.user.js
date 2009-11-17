@@ -5358,7 +5358,7 @@ var Helper = {
 		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td width="90%" nobr><b>&nbsp;Faction Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
+			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
 			refreshButton+
 			'</tr>' +
 			'<tr><td colspan=2>' +
@@ -5376,7 +5376,7 @@ var Helper = {
 		}
 		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
 				'</td></tr></table></td></tr>'+
-			'<tr><td colspan=2>&nbsp;Faction Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
+			'<tr><td colspan=2>&nbsp;Guild Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
 			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
 			'</div>';
 		content.innerHTML=newhtml;
@@ -5732,6 +5732,9 @@ var Helper = {
 		} else {
 			targetInventory = Helper.inventory;
 		}
+		if (targetInventory.items[invIndex].url == null) {
+			invIndex++;
+		}
 		System.xmlhttp(targetInventory.items[invIndex].url, Helper.parseInventoryItem, {"invIndex": invIndex, "reportType": reportType});
 	},
 
@@ -5787,7 +5790,7 @@ var Helper = {
 			} else {
 				GM_log("Item not found in list: '" + item.name + "'");
 				item.type = "???"
-			};
+			}
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
