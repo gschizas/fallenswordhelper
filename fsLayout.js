@@ -68,7 +68,14 @@ var Layout = {
 	hideBanner: function() {
 		if (!GM_getValue("hideBanner")) return;
 		var bannerElement = System.findNode("//img[(@title='Fallen Sword RPG')]");
-		if (bannerElement) bannerElement.style.display = "none";
+		if (bannerElement) {
+			bannerElement.style.display = "none";
+		} else {
+			bannerElement = System.findNode("//html/body/table/tbody/tr/td");
+			if (bannerElement) {
+				bannerElement.style.display = "none";
+			}
+		}
 	},
 
 	moveFSBox: function() {
