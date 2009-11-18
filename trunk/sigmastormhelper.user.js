@@ -2824,7 +2824,7 @@ var Helper = {
 			Helper.moveMe(1,1);
 			break;
 		case 102: // repair kit [f]
-			window.location = System.server + 'index.php?cmd=profile&subcmd=useitem&mode=worldrepairkit';
+			window.location = System.server + 'index.php?cmd=profile&subcmd=useitem&mode=worldrepair';
 			break;
 		case 114: // repair [r]
 			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
