@@ -121,6 +121,8 @@ var Helper = {
 		System.setDefault("combatEvaluatorBias", 0);
 		System.setDefault("hideRelicOffline", false);
 
+		System.setDefault("enterForSendMessage", false);
+
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
 		{"id":"showHelmetTypeItems", "type":"helm"},
@@ -8204,6 +8206,9 @@ var Helper = {
 				'<input name="hideRecipeNames" size="60" value="'+ GM_getValue("hideRecipeNames") + '" /></td></tr>' +
 			'<tr><td align="right">Hide Relic Offline' + Helper.helpLink('Hide Relic Offline', 'This hides the relic offline defenders checker.') +
 				':</td><td><input name="hideRelicOffline" type="checkbox" value="on"' + (GM_getValue("hideRelicOffline")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enter Sends Message' + Helper.helpLink('Enter Sends Message', 'If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift' +
+			' when you press enter.') +
+				':</td><td><input name="enterForSendMessage" type="checkbox" value="on"' + (GM_getValue("enterForSendMessage")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8356,6 +8361,7 @@ var Helper = {
 		System.saveValueForm(oForm, "huntingMode");
 		System.saveValueForm(oForm, "enableAttackHelper");
 		System.saveValueForm(oForm, "hideRelicOffline");
+		System.saveValueForm(oForm, "enterForSendMessage");
 
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
@@ -8711,7 +8717,7 @@ var Helper = {
 			var tableForInsert = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td/table/tbody/tr[2]/td/table");
 			var newRow = tableForInsert.insertRow(2);
 			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
-			newRow.innerHTML = '<td>Replying To[<a href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg + 
+			newRow.innerHTML = '<td>Replying To[<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg + 
 			'</td>';
 		}
 										
@@ -8731,12 +8737,26 @@ var Helper = {
 
 		var newNode = document.createElement("span");
 		newNode.id = "spanQuickMsg";
-		newNode.align = "center"
+		newNode.align = "center";
 		newNode.innerHTML = textResult;
 		injectHere.appendChild(newNode);
 
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
+		}
+		if (GM_getValue("enterForSendMessage") == true) {
+			document.getElementsByName("msg")[0].addEventListener('keypress', function(evt) {
+				var r = evt.charCode;
+				var s = evt.keyCode;
+				if (r == 0 & s == 13 & !evt.shiftKey) {
+					var button = System.findNode("//input[@value='Send Message']");
+					if (button) {
+						evt.preventDefault();
+						evt.stopPropagation();
+						button.click();
+					}
+				}
+			}, true);
 		}
 		
 		Helper.param={};
