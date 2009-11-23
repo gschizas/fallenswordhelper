@@ -9818,6 +9818,11 @@ var Helper = {
 	},
 	
 	injectAttackPlayer: function() {
+		var b = System.findNode("//input[contains(@value, 'Activate!')]");
+		if (b != null) {
+			var oldOnclick = b.getAttribute("onClick");
+			b.setAttribute("onClick", "if (confirm('Are you sure you want to activate PvP Prestige?')) { " + oldOnclick + "}");
+		}
 		if (!GM_getValue("enableAttackHelper")) return;
 		//inject current stats, buffs and equipment
 		var attackPlayerTable = System.findNode("//table[tbody/tr/td/font/b[.='Attack Player (PvP)']]");
