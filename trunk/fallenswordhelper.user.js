@@ -74,6 +74,7 @@ var Helper = {
 
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
 		System.setDefault("renderSelfBio", true);
+		System.setDefault("showBPSlotsOnProfile", false);
 		System.setDefault("bioEditLines", 10);
 		System.setDefault("renderOtherBios", true);
 		System.setDefault("playNewMessageSound", false);
@@ -4723,15 +4724,38 @@ var Helper = {
 			// quick wear manager link and select all link
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (node) {
-				node.parentNode.innerHTML+="| [<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick Wear</a>]"+
+				node.parentNode.innerHTML+="|&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick&nbsp;Wear</a>]"+
 					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>"
 				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
+			}
+			if (GM_getValue("showBPSlotsOnProfile") == true) {
+				System.xmlhttp("index.php?cmd=world", Helper.injectEmptySlots, 0);
 			}
 		}
 
 		//Update the ally/enemy online list, since we are already on the page.
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
+	},
+	
+	injectEmptySlots: function(responseText) {
+		var doc = System.createDocument(responseText);
+		var bpslots = System.findNode("//font[contains(.,'/')]", doc);
+		if (bpslots) {
+			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
+			if (bpslots) {
+				try {
+					var theText = bpslots.innerHTML.replace("&nbsp;","").replace("&nbsp;","");
+					var slots = theText.split("/");					
+					var color = (slots[0] == slots[1]) ? "#FF0000" : "#000000";
+					node.parentNode.parentNode.parentNode.firstChild.innerHTML += "&nbsp;<font color='" + color + "' size='1'>[" + theText + "]</font>&nbsp;";
+					node.parentNode.parentNode.parentNode.lastChild.setAttribute("width", "90%");
+				} catch (err) {
+					GM_log(err);
+				}
+			}
+		}
+		
 	},
 	
 	profileInjectFastWear: function() {
@@ -8172,6 +8196,8 @@ var Helper = {
 				'</td></tr>' +
 			//Bio prefs
 			'<tr><th colspan="2" align="left">Bio preferences</th></tr>' +
+			'<tr><td align="right">Show BP Slots In Profile' + Helper.helpLink('Show BP Slots In Profile', 'This determines if the backpack counter will be displayed on your profile page') +
+				':</td><td><input name="showBPSlotsOnProfile" type="checkbox" value="on"' + (GM_getValue("showBPSlotsOnProfile")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
@@ -8369,7 +8395,8 @@ var Helper = {
 		System.saveValueForm(oForm, "enableAttackHelper");
 		System.saveValueForm(oForm, "hideRelicOffline");
 		System.saveValueForm(oForm, "enterForSendMessage");
-
+		System.saveValueForm(oForm, "showBPSlotsOnProfile");
+		
 		window.alert("FS Helper Settings Saved");
 		window.location = window.location;
 		return false;
