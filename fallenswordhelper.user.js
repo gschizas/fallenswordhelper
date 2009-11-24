@@ -652,6 +652,11 @@ var Helper = {
 			  }
 			}
 		}
+		
+		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
+		if (GM_getValue("huntingMode") == false) {
+			Layout.injectQuickLinks();
+		}
 	},
 	
 	injectSkillsPage: function() {
