@@ -35,9 +35,7 @@ var Layout = {
 		var tableElement = System.findNode("//div[@id='menuSource_2']/table");
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
-		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7);
-
-		Layout.injectQuickLinks();
+		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7);		
 	},
 	
 	injectItemIntoMenuTable: function(tableElement, text, href, position) {
