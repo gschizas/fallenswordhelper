@@ -395,7 +395,9 @@ var Helper = {
 				Helper.injectQuestTracker();
 				break;
 			}
-			Helper.injectQuestBookFull();
+			if (subPageId == "-") {
+				Helper.injectQuestBookFull();
+			}
 			break;
 		case "profile":
 			switch (subPageId) {
@@ -8980,15 +8982,15 @@ var Helper = {
 		var injectHere = System.findNode("//td[font/b[.='Quest Details']]");
 		var tracking = false;
 		tracking = Helper.isQuestBeingTracked(location.search);
-		var questName = System.findNode("//font[@size='2']", injectHere);
+		var questName = System.findNode("//font[@size='2' and contains(.,'\"')]", injectHere);
 		if (questName) {
 			questName = questName.innerHTML;
 			questName = questName.match(/"(.*)"/);
 			if (questName && questName.length > 1) {
 				questName = questName[1];
-		injectHere.innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
-						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';		
-		injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + 
+				/*injectHere.innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
+						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';		*/
+				injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + 
 						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Wiki" src=' + System.imageServer + '/skin/fs_wiki.gif /></a>';
 			}
 			
