@@ -16,6 +16,17 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
+Array.prototype.unique = function (idfield) {
+	var r = new Array();
+	o:for(var i = 0, n = this.length; i < n; i++) {
+		for(var x = 0, y = r.length; x < y; x++)
+			if(r[x][idfield]==this[i][idfield])
+				continue o;
+		r[r.length] = this[i];
+	}
+	return r;
+}
+
 var Helper = {
 	// System functions
 	init: function(e) {
@@ -1297,7 +1308,6 @@ var Helper = {
 			var realm = System.findNode("//b");
 			Helper.levelName=realm.textContent.replace(" Map Overview ", "");
 		}
-		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
 		var displayedMap = System.findNode(isLarge?"//table[@width]":"//table[@width='325' and @height='325']");
 		var footprintsColor = GM_getValue("footprintsColor");
@@ -1309,7 +1319,6 @@ var Helper = {
 				var aCell = aRow.cells[x];
 				var dx=isLarge?x:posit.X+(x-2);
 				var dy=isLarge?y:posit.Y+(y-2);
-				// GM_log(dx + ":" + dy)
 				if (theMap["levels"][Helper.levelName] && theMap["levels"][Helper.levelName][dx] && theMap["levels"][Helper.levelName][dx][dy] && (theMap["levels"][Helper.levelName][dx][dy]=="!")) {
 					// aCell.setAttribute("background", "http://66.7.192.165/tiles/9_50.gif");
 
@@ -1322,7 +1331,6 @@ var Helper = {
 					};
 
 				}
-				// GM_log(x + ":" + y + " >> " + aCell.getAttribute("background"));
 			}
 		}
 	},
@@ -2301,7 +2309,6 @@ var Helper = {
 		}
 
 		Helper.sortBy=headerClicked;
-		GM_log(Helper.sortAsc + " " + Helper.sortBy + " " + sortType);
 
 		switch(sortType) {
 			case "string":
@@ -2989,10 +2996,8 @@ var Helper = {
 
 		for (var i=1;i<chatTable.rows.length;i++) {
 			var aRow = chatTable.rows[i];
-			//GM_log(aRow.innerHTML);
 			var addBuffTag = true;
 			if (aRow.cells[0].innerHTML) {
-				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].textContent.trim().substring(0,17);
 				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
@@ -3224,8 +3229,6 @@ var Helper = {
 		var statistics = System.findNode("//table[contains(tbody/tr/td/b,'Level:')]",0,doc);
 		var levelNode = System.findNode("//td[contains(b,'Level:')]",0,statistics);
 		var levelValue = levelNode.nextSibling.innerHTML;
-		GM_log(levelValue);
-		// GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
 	},
 
 	injectBank: function() {
@@ -3698,7 +3701,6 @@ var Helper = {
 
 	quickAuctionSearch: function(evt) {
 		var searchText = evt.target.getAttribute("searchtext");
-		GM_log(searchText);
 		var searchInputTextField = System.findNode("//input[@name='search_text' and @class='custominput']");
 		searchInputTextField.value = searchText;
 		thisForm = searchInputTextField.form;
@@ -4721,10 +4723,6 @@ var Helper = {
 			var headerClicked = evt.target.getAttribute("sortKey");
 			var sortType = evt.target.getAttribute("sortType");
 			if (!sortType) sortType="string";
-			GM_log(headerClicked);
-			// GM_log(Helper.sortBy);
-			GM_log(sortType);
-			// numberSort
 			if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 			if (Helper.sortBy && Helper.sortBy==headerClicked) {
 				Helper.sortAsc=!Helper.sortAsc;
@@ -5110,7 +5108,6 @@ var Helper = {
 		Helper.sortBy="name";
 		targetInventory.items.sort(Helper.stringSort)
 		Helper.sortBy=headerClicked;
-		//GM_log(headerClicked)
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
 			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel" ||
 			headerClicked=="hp") {
@@ -5131,7 +5128,7 @@ var Helper = {
 		Helper.recipebook = System.getValueJSON("recipebook");
 		content.innerHTML = Helper.makePageHeaderTwo('Blueprint Manager','',
 			'Helper:RecipeManagerRefresh','Refresh','Helper:RecipeManagerReset','Reset')+
-			'<dive style="font-size:small" id=Helper:RecipeManagerOutput></div>';
+			'<div style="font-size:small" id=Helper:RecipeManagerOutput></div>';
 		if (!Helper.recipebook) Helper.parseInventingStart();
 		document.getElementById("Helper:RecipeManagerRefresh").addEventListener('click', Helper.parseInventingStart, true);
 		document.getElementById("Helper:RecipeManagerReset").addEventListener('click', 
@@ -5231,7 +5228,7 @@ var Helper = {
 		var currentRecipeIndex = callback.recipeIndex;
 		var recipe = Helper.recipebook.recipe[currentRecipeIndex];
 
-		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
+		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>'; 
 
 		recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
 		recipe.items = Helper.parseRecipeItemOrComponent("//tbody/tr[10]//td[contains(@style,'background-color: rgb(13, 9, 5);')]", doc);
@@ -5249,6 +5246,7 @@ var Helper = {
 	finishParseRecipePage: function(){
 		document.getElementById('Helper:RecipeManagerOutput').innerHTML+='Finished parsing ... formatting ...';
 		Helper.recipebook.lastUpdate = new Date();
+		Helper.recipebook.recipe=Helper.recipebook.recipe.unique("id");
 		System.setValueJSON("recipebook", Helper.recipebook);
 		Helper.generateRecipeTable();
 	},
@@ -5262,43 +5260,18 @@ var Helper = {
 			minLevel:0,
 			maxLevel:999,
 			types: Helper.ItemTypes,
+			useName: false,
 			useLevel: false,
-			useType: false
+			useType: false,
+			useTable: false
 		}
-
-		var result='<table id="Helper:RecipeTable"><tr>' +
-			'<th align="left" sortkey="name">Name</th>' +
-			'<th align="left" sortkey="level" sorttype="number">Level <span id="Helper:FilterLevel" style="text-decoration:underline;cursor:pointer">&#x00bb;</span>'+
-			'<table border=0 cellspacing=0 celpadding=0 id="Helper:LevelFilter" style="visibility:hidden;display:none;text-size:xx-small">'+
-			'<tr><td>Use level filter <input type=checkbox size=1 class=custominput id="Helper:UseLevelFilter" value="yes"'+(filterRecipe.useLevel?' checked':'')+'></td></tr>' +
-			'<tr><td>From</td><td><input type=text size=1 class=custominput id="Helper:LevelFilterMin" value="'+ filterRecipe.minLevel +'"></td></tr>'+
-			'<tr><td>To</td><td><input type=text size=1 class=custominput id="Helper:LevelFilterMax" value="'+ filterRecipe.maxLevel +'"></td></tr>' +
-			'<tr><td><input type=button class=custombutton  id="Helper:LevelFilterOk" value=Ok></td></tr>'+
-			'</table></th>' +
-			'<th align="left" sortkey="type">Type <span id="Helper:FilterType" style="text-decoration:underline;cursor:pointer">&#x00bb;</span>'+
-			'<table border=0 cellspacing=0 celpadding=0 id="Helper:TypeFilter" style="visibility:hidden;display:none;text-size:xx-small;">'+
-			'<tr><td>Use type filter <input type=checkbox size=1 class=custominput id="Helper:UseTypeFilter" value="yes"'+(filterRecipe.useType?' checked':'')+'></td></tr>'
-		for (var i=0;i<Helper.ItemTypes.length;i++) {
-			var typ=Helper.ItemTypes[i];
-			result +=
-				'<tr><td><input type=checkbox id="Helper:TypeFilter:' + typ.replace(/\s\-/ig,"") + '"class=custominput' +
-				((filterRecipe.types.indexOf(typ)>=0)?' checked':'') + '> ' + typ + '</td></tr>'
-		}
-		result +=
-			'<tr><td><input type=button class=custombutton id="Helper:TypeFilterOk" value=Ok></td></tr>'+
-			'</table></th>' +
-			'<th align="left" sortkey="credits" sorttype="number">Credits</th>' +
-			'<th align="left">Items</th>' +
-			'<th align="left">Components</th>' +
-			'<th align="left">Target</th>' +
-			'</tr>';
+		
 		if (!Helper.recipebook) return;
 
 		var hideRecipes=[];
 		if (GM_getValue("hideRecipes")) hideRecipes=GM_getValue("hideRecipeNames").split(",");
 
 		var recipe;
-		var c=0;
 		var showRecipes = Helper.recipebook.recipe.filter(function (e) {return hideRecipes.indexOf(e.name)==-1});
 
 		if (filterRecipe.useLevel) {
@@ -5308,7 +5281,185 @@ var Helper = {
 		if (filterRecipe.useType) {
 			showRecipes = showRecipes.filter(function (e,i,a) {return filterRecipe.types.indexOf(e.type) >= 0});
 		}
+		
+		if (filterRecipe.useName) {
+			showRecipes = showRecipes.filter(function (e,i,a) {return e.name.toLowerCase().match(filterRecipe.nameFilter)});
+		}
 
+		var result='<table boder=0><tr><th>Filter</th></tr>'+
+			'<tr><th>Name:</th><td nowrap>Use name filter <input type=checkbox size=1 class=custominput id="Helper:UseNameFilter" value=yes'+(filterRecipe.useName?' checked':'')+'></td>' +
+				'<td><input type=text size=20 class=custominput id="Helper:NameFilter" value="'+(filterRecipe.nameFilter?filterRecipe.nameFilter:'')+'"></tr>'+
+			'<tr><th>Level:</th><td nowrap>Use level filter <input type=checkbox size=1 class=custominput id="Helper:UseLevelFilter" value="yes"'+(filterRecipe.useLevel?' checked':'')+'></td>' +
+				'<td>From <input type=text size=1 class=custominput id="Helper:LevelFilterMin" value="'+ filterRecipe.minLevel +'">'+
+				' To <input type=text size=1 class=custominput id="Helper:LevelFilterMax" value="'+ filterRecipe.maxLevel +'"></td></tr>'+
+			'<tr><th>Type:</th><td nowrap>Use type filter <input type=checkbox size=1 class=custominput id="Helper:UseTypeFilter" value="yes"'+(filterRecipe.useType?' checked':'')+'></td><td>';
+		for (var i=0;i<Helper.ItemTypes.length;i++) {
+			var typ=Helper.ItemTypes[i];
+			result +=
+				'<input type=checkbox id="Helper:TypeFilter:' + typ.replace(/\s\-/ig,"") + '"class=custominput' +
+				((filterRecipe.types.indexOf(typ)>=0)?' checked':'') + '>' + typ + ', '
+		}
+		result+='</td></tr><tr><th>Display Mode:</th><td nowrap colspan=2>Use table mode <input type=checkbox size=1 id="Helper:UseTableMode" value=yes'+(filterRecipe.useTable?' checked':'')+'></td>' +
+			'</td></tr>'+
+			'<tr><td colspan=3 align=center><input type=button class=custombutton id="Helper:AllFilterOk" value="Update Filter"></td></table>';
+		
+		if (filterRecipe.useTable) {
+			result+=Helper.generateRecipeTableByComponent(showRecipes);
+		} else {
+			result+=Helper.generateRecipeTableByRecipe(showRecipes);
+		}
+			
+		output.innerHTML=result;
+
+		document.getElementById('Helper:AllFilterOk').addEventListener('click', Helper.filterRecipeOk, true);
+		//document.getElementById('Helper:FixRecipeSet').addEventListener('click', Helper.findMissingBPrint, true);
+
+		var recipeTable=document.getElementById('Helper:RecipeTable');
+		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
+			var cell=recipeTable.rows[0].cells[i];
+			if (cell.getAttribute("sortkey")) {
+				cell.style.textDecoration="underline";
+				cell.style.cursor="pointer";
+				cell.addEventListener('click', Helper.sortRecipeTable, true);
+			}
+		}
+	},
+	
+	findMissingBPrint: function() {
+		var setName=document.getElementById('Helper:NameFilter').value;
+		if (setName.length<3) {
+			alert('Please enter set name to find missing blueprints');
+			return;
+		}
+		
+		var minId=10000,maxId=0;
+		Helper.recipebook = System.getValueJSON("recipebook");
+		var showRecipes = Helper.recipebook.recipe.filter(function (e,i,a) {return e.name.toLowerCase().match(setName)});
+		for (var i=0; i<showRecipes.length; i++) {
+			if (minId > showRecipes[i].id) minId = showRecipes[i].id;
+			if (maxId < showRecipes[i].id) maxId = showRecipes[i].id;
+		}
+		if (maxId - minId > 10) {
+			alert('Cannot fix the blueprint, sorry!');
+			return;
+		}
+
+		Helper.recipeHash={};
+		for (var i=0;i<Helper.recipebook.recipe.length;i++){
+			Helper.recipeHash[Helper.recipebook.recipe[i].id]=i;
+		}
+		
+		for (var recipeId=minId; recipeId<=maxId; recipeId++) {
+			GM_log(Helper.recipeHash[recipeId]);
+			if (! Helper.recipeHash[recipeId]) {
+				var recipe={"img": '',
+					"link": System.server+'index.php?cmd=inventing&subcmd=viewrecipe&recipe_id='+recipeId,
+					"name": '',
+					"type": '',
+					"level": 0,
+					"id": recipeId};
+				Helper.recipebook.recipe.push(recipe);
+			}
+		}
+		Helper.checkRecipePage(1);
+	},
+	
+	generateRecipeTableByComponent: function(showRecipes) {
+		var c=0, i, j;
+		var n=showRecipes.length>50?50:showRecipes.length;
+		
+		// get all components in the list
+		var compHeaderId=[];
+		var compHeaderSum=[];
+		var compHeaderHash={};
+		for (i=0; i<n; i++) {
+			recipe=showRecipes[i];
+			if (recipe.components)
+				for (j=0; j<recipe.components.length; j++) {
+					if (! (compHeaderHash[recipe.components[j].id])) {
+						compHeaderId.push(recipe.components[j].id);
+						compHeaderSum.push(0);
+						compHeaderHash[recipe.components[j].id]=recipe.components[j].img;
+					}
+				}
+		}
+		compHeaderId.sort();
+
+		var result='<table id="Helper:RecipeTable"><tr>' +
+			'<th align="left" sortkey="name">Name</th>' +
+			'<th align="left" sortkey="level" sorttype="number">Level</th>' +
+			'<th align="left" sortkey="type">Type</th>' +
+			'<th align="left" sortkey="credits" sorttype="number">Credits</th>' +
+			'<th align="left">Items</th>';
+		for (j=0; j<compHeaderId.length; j++)
+			result+='<th align=left><img border="0" align="middle" onmouseover="ajaxLoadItem(' +
+				compHeaderId[j] + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
+				'src="' + compHeaderHash[compHeaderId[j]] + '"/></th>';
+		result+='<th align="left">Target</th></tr>';
+
+		for (var i=0; i<n; i++) {
+			recipe=showRecipes[i];
+			c++;
+
+			result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
+				'<td><a href="' + recipe.link + '"><img border="0" align="middle" src="' + recipe.img + '"/>' + recipe.name + '</td>' +
+				'<td>' + recipe.level + '</td>' +
+				'<td>' + recipe.type + '</td>' +
+				'<td>' + recipe.credits + '</td>';
+			result += '<td>';
+			if (recipe.items) {
+				for (var j=0; j<recipe.items.length; j++) {
+					result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded+
+						' <img border="0" align="middle" onmouseover="ajaxLoadItem(' +
+						recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
+						'src="' + recipe.items[j].img + '"/><br/>';
+				}
+			}
+			result += '</td>'
+			//==== 2 nested loops, hope it won't be too slow
+			for (j=0; j<compHeaderId.length; j++) {
+				result += '<td>';
+				if (recipe.components) {
+					for (var j1=0; j1<recipe.components.length; j1++)
+						if (recipe.components[j1].id == compHeaderId[j]) {
+							result+=recipe.components[j1].amountNeeded;
+							compHeaderSum[j]+=recipe.components[j1].amountNeeded;
+							break;
+						}
+				} else {
+					result += '';
+				}
+				result += '</td>';
+			}
+			//====
+			result += '<td>';
+			if (recipe.target) {
+				result += '<img border="0" align="middle" onmouseover="ajaxLoadItem(' +
+					recipe.target.id + ', -1, 2, ' + Layout.playerId() + ', \'\');" ' +
+					'src="' + recipe.target.img + '"/>';
+			}
+			result += '</td>'
+			result += '</tr>';
+		}
+		result+='<tr><td></td><td></td><td></td><td></td><td>Total:</td>';
+		for (j=0; j<compHeaderSum.length; j++) {
+			result+='<td>'+compHeaderSum[j]+'</td>';
+		}
+		result+='</tr></table>';
+		return result;
+	},
+	
+	generateRecipeTableByRecipe: function(showRecipes) {
+		var c=0;
+		var result='<table id="Helper:RecipeTable"><tr>' +
+			'<th align="left" sortkey="name">Name</th>' +
+			'<th align="left" sortkey="level" sorttype="number">Level</th>' +
+			'<th align="left" sortkey="type">Type</th>' +
+			'<th align="left" sortkey="credits" sorttype="number">Credits</th>' +
+			'<th align="left">Items</th>' +
+			'<th align="left">Components</th>' +
+			'<th align="left">Target</th>' +
+			'</tr>';
 
 		for (var i=0; i<(showRecipes.length>20?20:showRecipes.length);i++) {
 			recipe=showRecipes[i];
@@ -5349,22 +5500,7 @@ var Helper = {
 			result += '</tr>';
 		}
 		result+='</table>';
-		output.innerHTML=result;
-
-		document.getElementById('Helper:FilterLevel').addEventListener('click', Helper.filterRecipeByLevel, true);
-		document.getElementById('Helper:FilterType').addEventListener('click', Helper.filterRecipeByType, true);
-		document.getElementById('Helper:LevelFilterOk').addEventListener('click', Helper.filterRecipeOk, true);
-		document.getElementById('Helper:TypeFilterOk').addEventListener('click', Helper.filterRecipeOk, true);
-
-		var recipeTable=document.getElementById('Helper:RecipeTable');
-		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
-			var cell=recipeTable.rows[0].cells[i];
-			if (cell.getAttribute("sortkey")) {
-				cell.style.textDecoration="underline";
-				cell.style.cursor="pointer";
-				cell.addEventListener('click', Helper.sortRecipeTable, true);
-			}
-		}
+		return result;
 	},
 
 	filterRecipeOk: function(evt) {
@@ -5376,17 +5512,21 @@ var Helper = {
 			}
 		}
 
+		var theName=document.getElementById("Helper:NameFilter").value.toLowerCase();
 		var theMinLevel = parseInt(document.getElementById("Helper:LevelFilterMin").value);
 		var theMaxLevel = parseInt(document.getElementById("Helper:LevelFilterMax").value);
 		if (isNaN(theMinLevel) || theMinLevel == null) theMinLevel=0;
 		if (isNaN(theMaxLevel) || theMaxLevel == null) theMaxLevel=999;
 
 		var filterRecipe={
+			nameFilter: theName,
 			minLevel: theMinLevel,
 			maxLevel: theMaxLevel,
 			types: selectedTypes,
+			useName: document.getElementById("Helper:UseNameFilter").checked,
 			useLevel: document.getElementById("Helper:UseLevelFilter").checked,
-			useType: document.getElementById("Helper:UseTypeFilter").checked
+			useType: document.getElementById("Helper:UseTypeFilter").checked,
+			useTable: document.getElementById("Helper:UseTableMode").checked
 		}
 
 		System.setValueJSON("recipeFilter", filterRecipe)
@@ -5423,7 +5563,6 @@ var Helper = {
 			Helper.sortAsc=!Helper.sortAsc;
 		}
 		Helper.sortBy=headerClicked;
-		//GM_log(headerClicked)
 		switch (sortType) {
 			case "number":
 				Helper.recipebook.recipe.sort(Helper.numberSort)
@@ -5809,7 +5948,6 @@ var Helper = {
 		if (!skillNodes) return;
 
 		for (var i = 0; i < skillNodes.length; i++ ) {
-			GM_log(skillNodes[i].parentNode.parentNode.textContent);
 			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\s+([A-Z].*) \[/)[1];
 			if (buffList.indexOf(skillName) >= 0) {
 				skillNodes[i].checked = true;
@@ -6884,7 +7022,6 @@ var Helper = {
 			var pid = itemStats[4];
 			var imgid = itemStats[5];
 			var txt = itemStats[6];
-			//GM_log();
 			var newCell = bidEntryTable.rows[0].insertCell(2);
 			newCell.rowSpan = 5;
 			newCell.innerHTML = '<div align=center style="font-size:x-small"><img src="' + System.imageServer + '/items/' + imgid +
@@ -7829,7 +7966,7 @@ var Helper = {
 		return '<table width=100%><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
 			(comment==''?'':'&nbsp;('+comment+')')+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
+			'<td width="10%" nowrap style="font-size:x-small;text-align:right">'+
 			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
 			(spanId2?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId2+'">'+button2+'</span>]':'')+
 			'</td></tr>';
