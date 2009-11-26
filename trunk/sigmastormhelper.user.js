@@ -3862,11 +3862,11 @@ var Helper = {
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		if (mainTable) {
-			var insertHere = mainTable.rows[5].cells[0];
-			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
-				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;';
-			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showQuickDropLinks">' +
-				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;';
+			var insertHere = mainTable.rows[3].cells[0];
+			insertHere.innerHTML += '<div align=center nowrap>[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
+				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;'+
+				'[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showQuickDropLinks">' +
+				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;</div>';
 			document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
 			document.getElementById("Helper:showQuickDropLinks").addEventListener('click', Helper.toggleShowQuickDropLinks, true);
 		}
