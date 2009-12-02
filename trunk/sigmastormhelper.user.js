@@ -251,7 +251,6 @@ var Helper = {
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
-			Helper.insertHModeIndicator();
 		} else {
 			// normal mode
 			Helper.init();
@@ -362,6 +361,7 @@ var Helper = {
 					break;
 				default:
 					Helper.injectDropItems();
+					Helper.injectMoveItems();
 				}
 				break;
 			case "changebio":
@@ -570,26 +570,6 @@ var Helper = {
 			}
 			break;
 		}
-	},
-	
-	insertHModeIndicator: function() {
-		var modeIndc= document.createElement("div");
-		//modeIndc.style={"position":"absolute","left":0,"top":0,"display":"none","zIndex":90,"filter":"alpha","opacity":0.9};
-		modeIndc.style.position = "absolute";
-		modeIndc.style.left = window.innerWidth * 7 / 8 + "px";
-		modeIndc.style.top = 0;
-		modeIndc.style.display = '';
-		modeIndc.style.zIndex = '90';
-		modeIndc.style.filter = "alpha";
-		modeIndc.style.opacity = "0.9";
-		modeIndc.id = "modeIndc";
-		modeIndc.innerHTML='Hunting mode is [<span id=turnOffHMode style="color:red;font-weight:bold;cursor:pointer;text-decoration:underline;" title="click to turn off">ON</span>]';
-		var objBody = document.getElementsByTagName("body").item(0);
-		objBody.insertBefore(modeIndc, objBody.firstChild);
-		document.getElementById('turnOffHMode').addEventListener('click',
-			function() {
-				GM_setValue("huntingMode",false); window.location=window.location;
-			},true);
 	},
 	
 	fixOnlineGuildBuffLinks: function() {
@@ -1679,6 +1659,7 @@ var Helper = {
 		Helper.mapThis();
 		Helper.showMap(false);
 		Helper.injectPersonalData(document);
+		Helper.injectHuntingMode();
 
 		var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
 		if (!injectHere) return;
@@ -1743,6 +1724,17 @@ var Helper = {
 			}
 		}
 	},
+	
+	injectHuntingMode: function() {
+		document.getElementById('personalData').innerHTML+='<span onmouseover=\'tt_setWidth(100);Tip("Hunting Mode");\'>'+
+			'[<span id=toggleHMode style="font-weight:bold;cursor:pointer;text-decoration:underline;">'+
+			(GM_getValue("huntingMode")?"ON":"off")+
+			'</span>]';
+		document.getElementById('toggleHMode').addEventListener('click',
+			function() {
+				GM_setValue("huntingMode",! GM_getValue("huntingMode")); window.location=window.location;
+			},true);
+	},
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
@@ -1762,7 +1754,7 @@ var Helper = {
 			Helper.bpInfo = bpInfo.textContent.replace(/[\[\]\s]/g,'');
 			if (Helper.bpInfo.match(/^(\d+)\/\1$/)) Helper.bpInfo=Helper.wrapStyle(Helper.bpInfo,"color:red");
 			var minPS=System.getValueJSON("minPSStats");
-			injectHere.innerHTML = "<div style='font-size:x-small;color:yellow'>"+
+			injectHere.innerHTML = "<div style='font-size:x-small;color:yellow' id=personalData>"+
 				"Atk: "+Helper.wrapStyle(Helper.characterAttack, (Helper.characterAttack<minPS.atk ? 'color:red' : ''))+", "+
 				"Def: "+Helper.wrapStyle(Helper.characterDefense, (Helper.characterDefense<minPS.def ? 'color:red' : ''))+", "+
 				"Arm: "+Helper.wrapStyle(Helper.characterArmor, (Helper.characterArmor<minPS.arm ? 'color:red' : ''))+", "+
@@ -3364,7 +3356,7 @@ var Helper = {
 					winningBidValue = "-";
 					var bidExistsOnItem = false;
 					var playerListedItem = false;
-					if (aRow.cells[1].innerHTML != '<font size="1">Auction House</font>') {
+					if (aRow.cells[1].innerHTML != '<font size="1">Trade Hub</font>') {
 						var sellerElement = aRow.cells[1].firstChild.firstChild;
 						sellerHref = sellerElement.getAttribute("href");
 						var sellerIDRE = /player_id=(\d+)/;
@@ -3950,6 +3942,61 @@ var Helper = {
 		}
 	},
 	
+	injectMoveItems: function() {
+		var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
+		if (! foldersEnabled) return;
+		var otherFolders = System.findNodes("//td/center/a/img[@src='"+System.imageServer+"/folder.gif']");
+		if (! otherFolders) return;
+		var cell=foldersEnabled.parentNode.parentNode.parentNode.parentNode.parentNode.insertRow(-1).insertCell(-1);
+		cell.colSpan = otherFolders.length + 1;
+		cell.align='center';
+		cell.noWrap = true;
+		var newHtml='Move selected items to: <select name=folder id=selectFolderId class=customselect>';
+		for (var i=0; i<otherFolders.length; i++) {
+			//GM_log(otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(\d+)/i)[1]);
+			newHtml+='<option value='+otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
+				otherFolders[i].parentNode.parentNode.textContent+'</option>';
+		}
+		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>';
+		cell.innerHTML=newHtml;
+		document.getElementById("Helper::moveItems").addEventListener('click', Helper.moveItemsToFolder, true);
+	},
+	
+	moveItemsToFolder: function() {
+		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
+		var selectElem = document.getElementById('selectFolderId');
+		var postData = 'cmd=profile&split_amount=&subcmd=backpackaction&submit=Go&folder_id='+selectElem.options[selectElem.selectedIndex].value;
+		var haveItems = false;
+		var postItems = '';
+		var countItems = 0;
+		for (var i=0; i<itemsList.length; i++) {
+			if (itemsList[i].checked) {
+				countItems++;
+				postItems+='&folderItem[]='+itemsList[i].value;
+			}
+			if (countItems == 12 || (countItems > 0 && i == itemsList.length - 1)) {
+				// multiple posts since HCS only move the first 12 items to other folder
+				GM_xmlhttpRequest({
+					method: 'POST',
+					url: System.server + "index.php",
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Content-Type": "application/x-www-form-urlencoded",
+						"Referer": document.location,
+						"Cookie" : document.cookie
+					},
+					data: postData+postItems
+				});
+				countItems = 0;
+				postItems = '';
+				haveItems = true;
+			}
+		}
+		if (haveItems) 
+			setTimeout(function() {window.location=window.location;}, 1000);
+		
+	},
+	
 	quickDropItem: function(evt){
 		var itemInvId = evt.target.getAttribute("itemInvId");
 		var dropItemHref = "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
@@ -3980,7 +4027,7 @@ var Helper = {
 
 	checkAll: function(evt){
 		var itemName = evt.target.getAttribute("linkto");
-		var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+		var findItems = System.findNodes("//td[@width='90%' and contains(.,'] "+itemName+" [')]");
 		for (var i=0; i<findItems.length; i++) {
 			var item = findItems[i];
 			var checkboxForItem = item.previousSibling.previousSibling.firstChild;
@@ -6153,7 +6200,35 @@ var Helper = {
 	},
 
 	injectCreature: function() {
-		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData)
+		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData);
+		
+		var creatureName = System.findNode('//td/font[@size=3]/b/center');
+		var doNotKillList=GM_getValue("doNotKillList");
+		if (creatureName) {
+			creatureName.innerHTML += ' <a href="http://sigmastorm2.wikia.com/wiki/Special:Search?go=1&search=' + creatureName.textContent + '" target="_blank">' +
+				'<img border=0 title="Search creature in Wikia" width=10 height=10 src="http://images.wikia.com/sigmastorm2/images/6/64/Favicon.ico"/></a>';
+			var extraText = 'Add to the do not kill list';
+			if (doNotKillList.indexOf(creatureName.textContent.trim()) != -1) extraText = 'Remove from do not kill list';
+			creatureName.innerHTML += '<br/><span style="cursor:pointer;text-decoration:underline;color:#CCFF99;font-size:x-small;" ' +
+				'id="addRemoveCreatureToDoNotKillList" creatureName="' + creatureName.textContent.trim() + '">' + extraText + '</span>';
+			document.getElementById('addRemoveCreatureToDoNotKillList').addEventListener('click', Helper.addRemoveCreatureToDoNotKillList, true);
+		}
+	},
+	
+	addRemoveCreatureToDoNotKillList: function(evt) {
+		creatureName = evt.target.getAttribute('creatureName');
+		var doNotKillList = GM_getValue("doNotKillList");
+		var newDoNotKillList = "";
+		if (doNotKillList.indexOf(creatureName) != -1) {
+			newDoNotKillList = doNotKillList.replace(creatureName, "");
+			newDoNotKillList = newDoNotKillList.replace(",,", ",");
+			if (newDoNotKillList.charAt(0) == ",") newDoNotKillList = newDoNotKillList.substring(1,newDoNotKillList.length);
+		} else {
+			newDoNotKillList = doNotKillList + (doNotKillList.length != 0?",":"") + creatureName;
+			newDoNotKillList = newDoNotKillList.replace(",,", ",");
+		}
+		GM_setValue("doNotKillList",newDoNotKillList);
+		window.location = window.location
 	},
 
 	getCreaturePlayerData: function(responseText) {
