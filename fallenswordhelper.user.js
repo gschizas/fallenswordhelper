@@ -404,6 +404,7 @@ var Helper = {
 			switch (subPageId) {
 			case "dropitems":
 				Helper.injectDropItems();
+				Helper.injectMoveItems();
 				break;
 			case "changebio":
 				Helper.injectBioWidgets();
@@ -4547,6 +4548,59 @@ var Helper = {
 				System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
 			}
 		}
+	},
+	
+	injectMoveItems: function() {
+		var foldersEnabled = System.findNode("//img[contains(@src,'/folder_on.gif')]");
+		if (! foldersEnabled) return;
+		var otherFolders = System.findNodes("//td/center/a/img[contains(@src,'/folder.gif')]");
+		if (! otherFolders) return;
+		var cell=foldersEnabled.parentNode.parentNode.parentNode.parentNode.parentNode.insertRow(-1).insertCell(-1);
+		cell.colSpan = otherFolders.length + 1;
+		cell.align='center';
+		cell.noWrap = true;
+		var newHtml='Move selected items to: <select name=folder id=selectFolderId class=customselect>';
+		for (var i=0; i<otherFolders.length; i++) {
+			newHtml+='<option value='+otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
+				otherFolders[i].parentNode.parentNode.textContent+'</option>';
+		}
+		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>';
+		cell.innerHTML=newHtml;
+		document.getElementById("Helper::moveItems").addEventListener('click', Helper.moveItemsToFolder, true);
+	},
+	
+	moveItemsToFolder: function() {
+		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
+		var selectElem = document.getElementById('selectFolderId');
+		var postData = 'cmd=profile&subcmd=sendtofolder&folder_id='+selectElem.options[selectElem.selectedIndex].value;
+		var haveItems = false;
+		var postItems = '';
+		var countItems = 0;
+		for (var i=0; i<itemsList.length; i++) {
+			if (itemsList[i].checked) {
+				countItems++;
+				postItems+='&folderItem[]='+itemsList[i].value;
+			}
+			if (countItems == 12 || (countItems > 0 && i == itemsList.length - 1)) {
+				// multiple posts since HCS only move the first 12 items to other folder
+				GM_xmlhttpRequest({
+					method: 'POST',
+					url: System.server + "index.php",
+					headers: {
+						"User-Agent" : navigator.userAgent,
+						"Content-Type": "application/x-www-form-urlencoded",
+						"Referer": document.location,
+						"Cookie" : document.cookie
+					},
+					data: postData+postItems
+				});
+				countItems = 0;
+				postItems = '';
+				haveItems = true;
+			}
+		}
+		if (haveItems) 
+			setTimeout(function() {window.location=window.location;}, 1000);		
 	},
 
 	quickDropItem: function(evt){
