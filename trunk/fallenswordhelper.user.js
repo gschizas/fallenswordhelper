@@ -275,7 +275,29 @@ var Helper = {
 	},
 
 	// main event dispatcher
-	onPageLoad: function(anEvent) {
+	onPageLoad: function(anEvent) {		
+		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
+		if (System.imageServer != System.imageServerHTTP) {			
+			var changeCount = 0;
+			var td = System.findNodes("//td[contains(@background, 'file://') and contains(@background, 'tiles')]");
+			if (td) {
+				for (var i = 0; i < td.length; i++) {			
+					var src = td[i].getAttribute("background");
+					if (src) {
+						if (src.indexOf("file://") != -1 && src.indexOf("\\") != -1) {
+							td[i].setAttribute("src", src.replace(/\\/g, "/"));
+							changeCount++;
+						}
+					}
+				}
+			}
+			if (changeCount == 0 && td != null) {
+				GM_log("Time to remove the temporary HCS tile image slash fix.");
+			} /*else {
+				GM_log("Changed " + changeCount + " references.");
+			}*/
+		}
+		
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
