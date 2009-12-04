@@ -20,6 +20,7 @@ var System = {
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
+		System.imageServerHTTP  = "http://72.29.91.222";
 		
 		Array.prototype.removeDuplicates = System.removeDuplicates;
 	},
@@ -256,7 +257,7 @@ var System = {
 
 			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
 				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
-					'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+					'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
 				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
 				'<td align="right">' + player.level + '</td>' +
 				'</tr>';

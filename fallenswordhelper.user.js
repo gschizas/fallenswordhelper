@@ -2056,7 +2056,7 @@ var Helper = {
 
 		if (!GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTP +
 				'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
 		}
 
@@ -4228,7 +4228,7 @@ var Helper = {
 		craft = craft.replace(/\#F6AE00/,"#F6ED00");
 		var preText = "<span style='color:blue'>" + craft + "</span>";
 		if (forgeCount != 0) {
-			preText +=  " " + forgeCount + "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>"
+			preText +=  " " + forgeCount + "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>"
 		}
 		if (durability) preText += durability;
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
@@ -4817,7 +4817,7 @@ var Helper = {
 		var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
 		if (profileInventory) {
 			var profileInventoryIDRE = /inventory_id=(\d+)/i;
-			var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
+			var foldersEnabled = System.findNode("//img[contains(@src,'folder_on.gif')]");
 
 			var profileInventoryBox = [];
 			var profileInventoryBoxItem = [];
@@ -5031,14 +5031,14 @@ var Helper = {
 			System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
 			"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
 			playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
-			System.imageServer + "/temple/2.gif></a>&nbsp;&nbsp;" +
+			System.imageServerHTTP + "/temple/2.gif></a>&nbsp;&nbsp;" +
 			"<a href=" + System.server + "?cmd=guild&subcmd=inventory&subcmd2=report&user=" +
 			playername + '>[SR]</a>&nbsp;&nbsp;';
 		if (Helper.currentGuildRelationship == "self" && GM_getValue("showAdmin")) {
 			newhtml +=
 				"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
 				playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
-				System.imageServer + "/guilds/" + Helper.guildId + "_mini.jpg></a>";
+				System.imageServerHTTP + "/guilds/" + Helper.guildId + "_mini.jpg></a>";
 		}
 		avyrow.parentNode.innerHTML = newhtml ;
 	},
@@ -5613,7 +5613,7 @@ var Helper = {
 			if (player.level >= minLvl && player.level <= maxLvl)
 				result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
 					'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
-						'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+						'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
 					'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
 					'<td align="right">' + player.level + '</td>' +
 					'</tr>';
@@ -5991,7 +5991,7 @@ var Helper = {
 			}
 
 			result+='<tr style="color:'+ color +'">' +
-				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
+				'<td>' + '<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>'+
 					' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' + item.name + '">set</a>)'+
 					'</td>' +
@@ -6004,7 +6004,7 @@ var Helper = {
 				'<td align="right">' + item.damage + '</td>' +
 				'<td align="right">' + item.hp + '</td>' +
 				'<td align="right">' + item.forgelevel + '</td>' +
-				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 					'<td align="right">' + item.craftlevel + '</td>' +
 				'<td></td>' +
 				'</tr>';
@@ -7743,7 +7743,7 @@ var Helper = {
 			var maxEquipLevel = row.cells[7].textContent*1;
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 				for (var j=0; j<arenaMoves.length; j++){
-					var searchText = System.imageServer + "/pvp/" + arenaMoves[j].moveID+ ".gif";
+					var searchText = System.imageServerHTTP + "/pvp/" + arenaMoves[j].moveID+ ".gif";
 					if (prizeSRC == searchText && arenaMoves[j].moveCount == 3){
 						row.style.visibility = "hidden";
 						row.style.display = "none";
@@ -7760,7 +7760,7 @@ var Helper = {
 				prizeImgElement.setAttribute("onmouseover", prizeOnmouseover);
 				if (hideArenaPrizes) {
 					for (var k=0; k<hideArenaPrizesArray.length; k++){
-						var compareStr = System.imageServer + "/items/" + hideArenaPrizesArray[k] + ".gif";
+						var compareStr = System.imageServerHTTP + "/items/" + hideArenaPrizesArray[k] + ".gif";
 						if (prizeSRC == compareStr) {
 							row.style.visibility = "hidden";
 							row.style.display = "none";
@@ -8663,7 +8663,7 @@ var Helper = {
 			//GM_log();
 			var newCell = bidEntryTable.rows[0].insertCell(2);
 			newCell.rowSpan = 5;
-			newCell.innerHTML = '<img src="' + System.imageServer + '/items/' + itemId + 
+			newCell.innerHTML = '<img src="' + System.imageServerHTTP + '/items/' + itemId + 
 				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0>';
 		}
 
@@ -9669,7 +9669,7 @@ var Helper = {
 		var bulkSellTable = System.findNode("//table[@id='Helper:CreateAuctionBulkSellTable']");
 
 		var doc=System.createDocument(responseText);
-		var bulkAuctionItemIMGs = System.findNodes("//img[@src='"+System.imageServer+"/items/"+originalItemID+".gif']", doc);
+		var bulkAuctionItemIMGs = System.findNodes("//img[contains(@src,'items/"+originalItemID+".gif')]", doc);
 		if (!bulkAuctionItemIMGs) return;
 		var maxAuctions = GM_getValue("maxAuctions");
 		if (!maxAuctions) maxAuctions = 2;
@@ -9689,7 +9689,7 @@ var Helper = {
 			//var newRow = bulkSellTable.insertRow(-1);
 			var newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
-			newCell.innerHTML = '<img src="'+System.imageServer+'/items/'+itemId+'.gif" border=0 ' +
+			newCell.innerHTML = '<img src="'+System.imageServerHTTP+'/items/'+itemId+'.gif" border=0 ' +
 				'onmouseover="ajaxLoadItem('+itemId+', '+invId+', '+type+', '+pid+', \'\');">';
 			newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
