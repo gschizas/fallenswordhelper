@@ -285,7 +285,7 @@ var Helper = {
 					var src = td[i].getAttribute("background");
 					if (src) {
 						if (src.indexOf("file://") != -1 && src.indexOf("\\") != -1) {
-							td[i].setAttribute("src", src.replace(/\\/g, "/"));
+							td[i].setAttribute("background", src.replace(/\\/g, "/"));
 							changeCount++;
 						}
 					}
