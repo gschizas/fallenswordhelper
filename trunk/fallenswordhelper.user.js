@@ -301,7 +301,9 @@ var Helper = {
 		}
 		if (GM_getValue("gameHelpLink") == true) {
 			var gameHelpNode = System.findNode("//b[contains(.,'Game Help')]");
-			gameHelpNode.innerHTML = "<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.innerHTML + "</a>";
+			if (gameHelpNode) {
+				gameHelpNode.innerHTML = "<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.innerHTML + "</a>";
+			}
 		}
 		
 		if (GM_getValue("huntingMode")) {
