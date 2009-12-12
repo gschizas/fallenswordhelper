@@ -84,6 +84,7 @@ var Helper = {
 		System.setDefault("lvlDiffToHighlight", 5);
 		System.setDefault("detailedConflictInfo", false);
 		System.setDefault("gameHelpLink", true);
+		System.setDefault("navigateToLogAfterMsg", true);
 		
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -8363,6 +8364,8 @@ var Helper = {
 			'<tr><td align="right">Enter Sends Message' + Helper.helpLink('Enter Sends Message', 'If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift' +
 			' when you press enter.') +
 				':</td><td><input name="enterForSendMessage" type="checkbox" value="on"' + (GM_getValue("enterForSendMessage")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Go To Log After Message' + Helper.helpLink('Go To Log After Message', 'If enabled, will navigate to your character log after a successful message is sent.') +
+				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8440,6 +8443,7 @@ var Helper = {
 		var combatEvaluatorBiasElement = System.findNode("//select[@name='combatEvaluatorBias']", oForm);
 		var combatEvaluatorBias = combatEvaluatorBiasElement.value;
 		GM_setValue("combatEvaluatorBias", combatEvaluatorBias);
+		System.saveValueForm(oForm, "navigateToLogAfterMsg");
 		System.saveValueForm(oForm, "gameHelpLink");
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
@@ -8862,6 +8866,13 @@ var Helper = {
 	},
 
 	injectMessageTemplate: function() {
+		if (GM_getValue("navigateToLogAfterMsg") == true) {
+			var messageSent = System.findNode("//center[contains(.,'Message sent to target player!')]");
+			if (messageSent) {
+				location.href = "http://www.fallensword.com/index.php?cmd=log";
+				return;
+			}
+		}
 		//will only insert if we have a buff list (when button on profile is clicked)
 		Helper.insertBuffsInMsg();
 		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
