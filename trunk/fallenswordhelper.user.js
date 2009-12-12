@@ -82,6 +82,8 @@ var Helper = {
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
 		System.setDefault("highlightPlayersNearMyLvl", true);
 		System.setDefault("lvlDiffToHighlight", 5);
+		System.setDefault("detailedConflictInfo", false);
+		System.setDefault("gameHelpLink", true);
 		
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -296,6 +298,10 @@ var Helper = {
 			} /*else {
 				GM_log("Changed " + changeCount + " references.");
 			}*/
+		}
+		if (GM_getValue("gameHelpLink") == true) {
+			var gameHelpNode = System.findNode("//b[contains(.,'Game Help')]");
+			gameHelpNode.innerHTML = "<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.innerHTML + "</a>";
 		}
 		
 		if (GM_getValue("huntingMode")) {
@@ -863,7 +869,40 @@ var Helper = {
 		// self recall
 		var selfRecall = leftHandSideColumnTable.rows[22].cells[0];
 		selfRecall.innerHTML+=" [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&user="+Helper.characterName+"' title='Self Recall'>SR</a>]";
+		
+		//Detailed conflict information
+		if (GM_getValue("detailedConflictInfo") == true) {
+			var confNode = System.findNode("//table[contains(@id,'statisticsControl')]");
+			var activeConflicts = Helper.removeHTML(confNode.rows[4].cells[1].innerHTML);
+			if (activeConflicts > 0) {
+				System.xmlhttp("index.php?cmd=guild&subcmd=conflicts",
+					Helper.getConflictInfo,
+					{"node": confNode});
+			}
+		}
 	},
+	
+	getConflictInfo: function(responseText, callback) {
+		var insertHere = callback.node;
+		
+		var doc = System.createDocument(responseText);
+		var conflictTable = System.findNode("//table[@width='600' and @cellspacing='0' and @cellpadding='3' and @border='0' and @align='center']", doc);
+		if (conflictTable) { 
+			var newNode = insertHere.insertRow(insertHere.rows.length-2);
+			newNode.insertCell(0);
+			newNode.insertCell(0);
+			newNode.cells[0].innerHTML = "Active Conflicts";
+			newNode.cells[1].innerHTML = "Score";
+			for (var i = 1; i <= conflictTable.rows.length - 4; i+=2) {
+				var newRow = insertHere.insertRow(insertHere.rows.length-2);
+				newRow.insertCell(0);
+				newRow.insertCell(0);
+				newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
+				newRow.cells[1].innerHTML = "<b>" + conflictTable.rows[i].cells[5].innerHTML + "</b>";
+			}
+		}
+	},
+	
 
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute("itemID");
@@ -8172,6 +8211,8 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
 				':</td><td><input name="enableCountdownTimer" type="checkbox" value="on"' + (GM_getValue("enableCountdownTimer")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
+				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -8185,6 +8226,8 @@ var Helper = {
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Show Conflict Details' + Helper.helpLink('Show Conflict Details', 'Inserts detailed conflict information onto your guild\\\'s manage page. Currently displays the target guild as well as the current score.') +
+				':</td><td><input name="detailedConflictInfo" type="checkbox" value="on"' + (GM_getValue("detailedConflictInfo")?" checked":"") + '></td></tr>' +
 			//World Screen
 			'<tr><th colspan="2" align="left">World screen/Hunting preferences</th></tr>' +
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
@@ -8247,7 +8290,7 @@ var Helper = {
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
 				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +			
-			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should a the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
+			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
 				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
 				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
 				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
@@ -8395,7 +8438,7 @@ var Helper = {
 		var combatEvaluatorBiasElement = System.findNode("//select[@name='combatEvaluatorBias']", oForm);
 		var combatEvaluatorBias = combatEvaluatorBiasElement.value;
 		GM_setValue("combatEvaluatorBias", combatEvaluatorBias);
-
+		System.saveValueForm(oForm, "gameHelpLink");
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
@@ -8407,6 +8450,7 @@ var Helper = {
 		System.saveValueForm(oForm, "chatLines");
 		System.saveValueForm(oForm, "chatTopToBottom");
 		System.saveValueForm(oForm, "showAdmin");
+		System.saveValueForm(oForm, "detailedConflictInfo");
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
 		System.saveValueForm(oForm, "enableChatParsing");
