@@ -8867,10 +8867,19 @@ var Helper = {
 
 	injectMessageTemplate: function() {
 		if (GM_getValue("navigateToLogAfterMsg") == true) {
+		
+			if (document.referrer.indexOf("?cmd=message") == -1) {
+				GM_setValue("msgReferringPage", document.referrer);
+			}
 			var messageSent = System.findNode("//center[contains(.,'Message sent to target player!')]");
 			if (messageSent) {
-				location.href = "http://www.fallensword.com/index.php?cmd=log";
-				return;
+				if (GM_getValue("msgReferringPage")) {
+					location.href = GM_getValue("msgReferringPage");
+					return;
+				} else {
+					location.href = "http://www.fallensword.com/index.php?cmd=log";
+					return;
+				}
 			}
 		}
 		//will only insert if we have a buff list (when button on profile is clicked)
