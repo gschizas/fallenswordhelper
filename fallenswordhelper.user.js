@@ -803,6 +803,30 @@ var Helper = {
 		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
 		GM_setValue("guildID",guildID);
+		
+		var xpLock = System.findNode('//a[contains(@onmouseover,"tt_setWidth(150); Tip\(\'<b>Guild XP</b><br><br>")]');
+		if (xpLock) {
+			var xpLockmouseover = xpLock.getAttribute("onmouseover");
+			var xpLockXP = xpLockmouseover.replace(/,/g,"").match(/XP Lock: <b>(\d*)/);
+			if (xpLockXP && xpLockXP.length == 2) {
+				xpLockXP = xpLockXP[1];
+				var actualXP = xpLockmouseover.replace(/,/g,"").match(/XP: <b>(\d*)/);
+				if (actualXP && actualXP.length == 2) {
+					actualXP = actualXP[1];
+					if (actualXP < xpLockXP) {
+						try {
+							var xpNode = xpLock.parentNode.parentNode;						
+							xpNode.cells[1].innerHTML += ' (<b>' + System.addCommas(xpLockXP - actualXP) + '</b>)';
+						} catch (err) {
+							GM_log(err);
+						}
+					}
+				}
+			}
+			
+			
+		}
+		
 
 		var leftHandSideColumnTable = System.findNode("//table[tbody/tr/td/font/a[contains(.,'Change Logo')]]");
 		var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
@@ -8364,7 +8388,8 @@ var Helper = {
 			'<tr><td align="right">Enter Sends Message' + Helper.helpLink('Enter Sends Message', 'If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift' +
 			' when you press enter.') +
 				':</td><td><input name="enterForSendMessage" type="checkbox" value="on"' + (GM_getValue("enterForSendMessage")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Go To Log After Message' + Helper.helpLink('Go To Log After Message', 'If enabled, will navigate to your character log after a successful message is sent.') +
+			'<tr><td align="right">Navigate After Message Sent' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
+				' if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen.') + 
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
