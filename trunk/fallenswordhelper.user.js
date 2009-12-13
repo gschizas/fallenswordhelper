@@ -900,33 +900,34 @@ var Helper = {
 		//Detailed conflict information
 		if (GM_getValue("detailedConflictInfo") == true) {
 			var confNode = System.findNode("//table[contains(@id,'statisticsControl')]");
-			var activeConflicts = Helper.removeHTML(confNode.rows[4].cells[1].innerHTML);
-			if (activeConflicts > 0) {
-				System.xmlhttp("index.php?cmd=guild&subcmd=conflicts",
-					Helper.getConflictInfo,
-					{"node": confNode});
-			}
+			System.xmlhttp("index.php?cmd=guild&subcmd=conflicts",
+				Helper.getConflictInfo,	{"node": confNode});
+			
 		}
 	},
 	
 	getConflictInfo: function(responseText, callback) {
-		var insertHere = callback.node;
-		
-		var doc = System.createDocument(responseText);
-		var conflictTable = System.findNode("//table[@width='600' and @cellspacing='0' and @cellpadding='3' and @border='0' and @align='center']", doc);
-		if (conflictTable) { 
-			var newNode = insertHere.insertRow(insertHere.rows.length-2);
-			newNode.insertCell(0);
-			newNode.insertCell(0);
-			newNode.cells[0].innerHTML = "Active Conflicts";
-			newNode.cells[1].innerHTML = "Score";
-			for (var i = 1; i <= conflictTable.rows.length - 4; i+=2) {
-				var newRow = insertHere.insertRow(insertHere.rows.length-2);
-				newRow.insertCell(0);
-				newRow.insertCell(0);
-				newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-				newRow.cells[1].innerHTML = "<b>" + conflictTable.rows[i].cells[5].innerHTML + "</b>";
+		try {
+			var insertHere = callback.node;
+			
+			var doc = System.createDocument(responseText);
+			var conflictTable = System.findNode("//table[@width='600' and @cellspacing='0' and @cellpadding='3' and @border='0' and @align='center']", doc);
+			if (conflictTable) { 
+				var newNode = insertHere.insertRow(insertHere.rows.length-2);
+				newNode.insertCell(0);
+				newNode.insertCell(0);
+				newNode.cells[0].innerHTML = "<a href='index.php?cmd=guild&subcmd=conflicts'>Active Conflicts</a>";
+				newNode.cells[1].innerHTML = "Score";
+				for (var i = 1; i <= conflictTable.rows.length - 4; i+=2) {
+					var newRow = insertHere.insertRow(insertHere.rows.length-2);
+					newRow.insertCell(0);
+					newRow.insertCell(0);
+					newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
+					newRow.cells[1].innerHTML = "<b>" + conflictTable.rows[i].cells[5].innerHTML + "</b>";
+				}
 			}
+		} catch (err) {
+			GM_log(err);
 		}
 	},
 	
