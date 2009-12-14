@@ -38,6 +38,7 @@ var Helper = {
 
 	initSettings: function() {
 		System.setDefault("enableLogColoring", true);
+		System.setDefault("enableChatParsing", true);
 		System.setDefault("enableCreatureColoring", true);
 		System.setDefault("showCombatLog", true);
 		System.setDefault("showCreatureInfo", true);
@@ -70,6 +71,7 @@ var Helper = {
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 300);
+		System.setDefault("navigateToLogAfterMsg", true);
 
 		System.setDefault("enableAllyOnlineList", false);
 		System.setDefault("enableEnemyOnlineList", false);
@@ -350,7 +352,14 @@ var Helper = {
 			}
 			break;
 		case "questbook":
-			Helper.injectQuestBookFull();
+			switch (subPageId) {
+			case "viewquest":
+				Helper.injectQuestTracker();
+				break;
+			default:
+				Helper.injectQuestBookFull();
+				break;
+			}
 			break;
 		case "profile":
 			switch (subPageId) {
@@ -3074,7 +3083,10 @@ var Helper = {
 							extraPart += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 							"'>Ignore</a>";
 						}
-						aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart + "</nobr>" + lastPart;
+						//aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart + "</nobr>" + lastPart;
+						var msgReplyTo = (GM_getValue("enableChatParsing") == true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" + 
+							Helper.removeHTML(firstPart.replace(/^ +/g,"").replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
+						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the trade hub") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
@@ -4449,6 +4461,10 @@ var Helper = {
 				document.getElementById('Helper:bioExpander').addEventListener('click', Helper.expandBio, true);
 			}
 		}
+	},
+
+	removeHTML: function(buffName) {
+		return buffName.replace(/<\/?[^>]+(>|$)/g, "").replace(/[^a-zA-Z 0-9]+/g,"");
 	},
 
 	expandBio: function(evt) {
@@ -5851,10 +5867,10 @@ var Helper = {
 		 if (sellPrice.search(/^[0-9]*$/) != -1) {
 			var warningColor = "green";
 			var warningText = "</b><br/>This is probably an offer that will please someone.";
-			if (sellPrice < 500) {
+			if (sellPrice < 20000) {
 				warningColor = "brown";
 				var warningText = "</b><br>This is too low ... it isn't going to sell.";
-			} else if (sellPrice > 15000) {
+			} else if (sellPrice > 100000) {
 				warningColor = "red";
 				var warningText = "</b><br/>This is way too high a price ... you should reconsider.";
 			}
@@ -6693,6 +6709,8 @@ var Helper = {
 				'disableItemColoring')+
 			Helper.helpTDwithCB('Enable Log Coloring','Three logs will be colored if this is enabled, Faction Chat, Faction Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.','enableLogColoring')+
+			Helper.helpTDwithCB('Enable Chat Parsing','If this is checked, your character log will be parsed for chat messages '+
+				'and show the chat message on the screen if you reply to that message.','enableChatParsing')+
 			'</table>';
 		var socialCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			Helper.helpTDwithHTML('Show Online<br/>Allies/Enemies','This will show the allies/enemies online list on the right.',
@@ -6708,6 +6726,8 @@ var Helper = {
 				'enableChat',Layout.networkIcon(),'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '">')+
 			Helper.helpTDwithCB('Enable Guild Info Widgets','Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)',
 				'enableGuildInfoWidgets')+
+			Helper.helpTDwithCB('Navigate After Message Sent','If enabled, will try to navigate to the referring page after a successful message is sent.',
+				'navigateToLogAfterMsg')+
 			'</table>';
 			
 		var configData='<form>'+
@@ -7232,10 +7252,34 @@ var Helper = {
 	},
 
 	injectMessageTemplate: function() {
+		if (GM_getValue("navigateToLogAfterMsg") == true) {
+		
+			if (document.referrer.indexOf("?cmd=message") == -1) {
+				GM_setValue("msgReferringPage", document.referrer);
+			}
+			var messageSent = System.findNode("//center[contains(.,'Message sent to target player!')]");
+			if (messageSent) {
+				if (GM_getValue("msgReferringPage")) {
+					location.href = GM_getValue("msgReferringPage");
+					return;
+				} else {
+					location.href = System.server + "/index.php?cmd=log";
+					return;
+				}
+			}
+		}
+
 		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
 		var table = System.getValueJSON("quickMsg");
 
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
+		if (location.search.indexOf("&replyTo") != -1) {
+			var tableForInsert = System.findNode("//table[tbody/tr/td/input[@value='Send Message']]");
+			var newRow = tableForInsert.insertRow(2);
+			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
+			newRow.innerHTML = '<td>Replying To[<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg + 
+			'</td>';
+		}
 
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#5f5f5f'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
@@ -7549,6 +7593,21 @@ var Helper = {
 			injectHere.innerHTML = '(+' + extraStam + ' stamina)';
 		else 
 			injectHere.innerHTML = '';
+	},
+	
+	injectQuestTracker: function() {
+		var injectHere = System.findNode("//tbody[tr/td[contains(@background,'skin/header_missiondetails.jpg')]]/tr[3]/td");
+		if (injectHere) {
+			questName = injectHere.textContent;
+			questName = questName.match(/"(.*)"/);
+			if (questName && questName.length > 1) {
+				questName = questName[1];
+				injectHere.innerHTML += '&nbsp;<a href="http://sigmastorm2.wikia.com/wiki/' + questName.replace(/ /g,'_') + 
+						'" target="_blank"><img border=0 title="Search for this quest on the Unofficial Sigmastorm 2 Wiki. '+
+						'Please note this is an external site." src=' + System.imageServer + '/skin/wiki.gif /></a>';
+			}
+			
+		}
 	},
 	
 	injectSaveConfig: function() {
