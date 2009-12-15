@@ -744,10 +744,15 @@ var Helper = {
 	quickShard: function(){
 		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=58", Helper.quickDone);
 	},
-	quickDone: function(responseText) {
+	quickDone: function(responseText, showMsgBox) {
+		if (showMsgBox==null) showMsgBox = false;
 		var infoMessage = Layout.infoBox(responseText);
-		unsafeWindow.tt_setWidth(200);
-		unsafeWindow.Tip(infoMessage);
+		if (showMsgBox)
+			alert(infoMessage);
+		else {
+			unsafeWindow.tt_setWidth(200);
+			unsafeWindow.Tip(infoMessage);
+		}
 	},
 	quickMS: function(cast){
 		var url="index.php?"+(cast?"cmd=skills&subcmd=cast":"cmd=profile&subcmd=removeskill")+"&skill_id=64"
@@ -962,10 +967,27 @@ var Helper = {
 		for (var key in Helper.itemList) {
 			if (Helper.itemList[key].text==item) {
 				System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id,
-					Helper.quickDone);
+					Helper.quickDone, true);
 				return;
 			}
 		}
+		
+		if (callback.arrayId == 0) {
+			Helper.folderHrefs = new Array(); //clear out the array before starting.
+			var folderLinks = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=dropitems&folder_id=')]", doc);
+			if (folderLinks) {
+				for (var i=0; i<folderLinks.length;i++) {
+					Helper.folderHrefs.push(folderLinks[i].getAttribute("href"));
+				}
+			}
+		}
+
+		if (Helper.folderHrefs.length > 1 && callback.arrayId + 1 < Helper.folderHrefs.length) {
+			System.xmlhttp(Helper.folderHrefs[callback.arrayId+1], 
+				Helper.quickUse, {'id':callback.id,'arrayId':callback.arrayId+1});
+			return;
+		}
+		
 		alert("Cannot find any " + item + " to use!");
 	},
 
@@ -2889,7 +2911,7 @@ var Helper = {
 		case 123: // "{"
 		case 125: // "}"
 		case 124: // quick use items "|"
-			Helper.quickUse('', {'id':((r==124?127:r)-123)/2});
+			Helper.quickUse('', {'id':((r==124?127:r)-123)/2,'arrayId':0});
 			break;
 		case 19: // quick buffs
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
