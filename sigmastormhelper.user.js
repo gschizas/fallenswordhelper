@@ -5007,16 +5007,19 @@ var Helper = {
 		if (nameNode) {
 			item.name=nameNode.textContent.replace(/\\/g,"");
 
-			item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*) -/);
-			if (item.class)
-				item.class = item.class[1];
-			else {
-				item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*)$/);
+			if (nameNode.parentNode.nextSibling.nextSibling) {
+				item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*) -/);
 				if (item.class)
 					item.class = item.class[1];
-				else
-					item.class = "";
-			}
+				else {
+					item.class=nameNode.parentNode.nextSibling.nextSibling.textContent.match(/- (.*)$/);
+					if (item.class)
+						item.class = item.class[1];
+					else
+						item.class = "";
+				}
+			} else 
+				item.class = "";
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
 			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
