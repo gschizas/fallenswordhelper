@@ -531,6 +531,9 @@ var Helper = {
 				break;
 			}
 			break;
+		case "titan":
+			Helper.injectTitan();
+			break;
 		case "toprated":
 			switch (subPageId) {
 			case "xp":
@@ -7615,6 +7618,23 @@ var Helper = {
 			injectHere.innerHTML = '(+' + extraStam + ' stamina)';
 		else 
 			injectHere.innerHTML = '';
+	},
+	
+	injectTitan: function() {
+		System.xmlhttp("index.php?cmd=guild&subcmd=dopplerarray", Helper.getScoutTowerDetails);
+	},
+	
+	getScoutTowerDetails: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var scoutTowerTable = System.findNode("//table[tbody/tr/td[contains(.,'Behemoth HP') and @width='25%']]", doc);
+		if (scoutTowerTable) {
+			var titanTable = System.findNode("//table[tbody/tr/td[contains(.,'Creature') and @width=150]]");
+			var newRow = titanTable.insertRow(0);
+			var newCell = newRow.insertCell(0);
+			newCell.colSpan=3;
+			newCell.innerHTML = '<table width="500" cellspacing="1" cellpadding="2" border="0">'+
+				scoutTowerTable.innerHTML+'</table>';
+		}
 	},
 	
 	injectQuestTracker: function() {
