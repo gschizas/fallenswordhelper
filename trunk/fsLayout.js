@@ -66,7 +66,18 @@ var Layout = {
 	},
 
 	hideBanner: function() {
-		if (!GM_getValue("hideBanner")) return;
+		if (!GM_getValue("hideBanner")) {
+			if (GM_getValue("showSTUpTop") == true) {
+				var overlayTable = System.findNode("//html/body/table/tbody/tr/td/table/tbody/tr/td");
+				if (overlayTable) {
+					var STnode = System.findNode("//html/body/table/tbody/tr[3]/td[3]/table/tbody/tr[3]/td/table/tbody/tr/td/table[4]/tbody/tr/td/table/tbody/tr[10]/td/font/font/nobr/b");
+					if (STnode) {
+						overlayTable.innerHTML = "<font color=#FFFFFF size='3'>ST: " + STnode.innerHTML + "</font>";
+					}
+				}
+			}
+			return;
+		}
 		var bannerElement = System.findNode("//img[(@title='Fallen Sword RPG')]");
 		if (bannerElement) {
 			bannerElement.style.display = "none";
