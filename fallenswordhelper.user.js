@@ -63,6 +63,8 @@ var Helper = {
 		System.setDefault("hideQuestNames", "");
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
+		System.setDefault("hideBanner", false);
+		System.setDefault("showSTUpTop", true);
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildInfoWidgets", true);
@@ -311,7 +313,7 @@ var Helper = {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
 		} else {
-			Helper.init();
+			Helper.init();			
 			Layout.hideBanner();
 			Layout.moveFSBox();
 			Helper.prepareAllyEnemyList();
@@ -8235,6 +8237,9 @@ var Helper = {
 				'When not, messages run as they are in HCS\\\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Show ST/Date At Top' + Helper.helpLink('Show ST/Date At Top', 'Adds the current server time on the top banner over the dragon\\\'s head. Does nothing if you hide the top banner. ' +
+				'Also, if you have the HCS option to hide the Game Stats box, this will not work either.') +
+				':</td><td><input name="showSTUpTop" type="checkbox" value="on"' + (GM_getValue("showSTUpTop")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
@@ -8489,6 +8494,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableCreatureColoring");
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
 		System.saveValueForm(oForm, "hideBanner");
+		System.saveValueForm(oForm, "showSTUpTop");
 		System.saveValueForm(oForm, "buyBuffsGreeting");
 		System.saveValueForm(oForm, "renderSelfBio");
 		System.saveValueForm(oForm, "renderOtherBios");
