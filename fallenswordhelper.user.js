@@ -3093,7 +3093,7 @@ var Helper = {
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"))
 		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support FallenSword!')]")
+		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
 		if (!injectHere) return;
 		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0)
 		var cell = info.insertCell(0);
@@ -9271,7 +9271,7 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 
 		if (enableWantedList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support FallenSword!')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
 			if (!injectHere)
 				return;
 			var info = injectHere.insertRow(0);
@@ -9279,7 +9279,7 @@ var Helper = {
 			cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
 		}
 		if (enableActiveBountyList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support FallenSword!')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
 			if (injectHere) {
 				var info = injectHere.insertRow(0);
 				var cell = info.insertCell(0);
@@ -9523,7 +9523,7 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support FallenSword!')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
 			if (!injectHere) return;
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
