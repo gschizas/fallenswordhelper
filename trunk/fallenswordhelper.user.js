@@ -2855,6 +2855,16 @@ var Helper = {
 		Helper.generateEntityTable();
 	},
 
+	backpackUpdater: function(count){
+		var slots = System.findNode(".//font[contains(.,'/') and @size='1']");
+		if (slots != null){
+			bpslots = slots.childNodes[0].nodeValue.split("/");
+			//note the - 0 is to insure that math is used
+			slots.childNodes[0].nodeValue = (bpslots[0] - 0 + count) + " /" + bpslots[1] 
+		}
+	},
+
+	
 	killedMonster: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
 
@@ -2896,6 +2906,7 @@ var Helper = {
 				resultText += info + "\n";
 			}
 			if (lootedItem!="") {
+				Helper.backpackUpdater(1);
 				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
 				resultHtml += "<br/><small><small>Looted item:<span onclickDISABLED=\"ajaxLoadItem(" +
 					lootedItemId + ", -1, 2, " + playerId + ", '');\" >" +
