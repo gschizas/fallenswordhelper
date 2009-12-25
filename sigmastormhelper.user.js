@@ -4600,9 +4600,11 @@ var Helper = {
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
+		var length=0;
+		if (Helper.inventory) length=Helper.inventory.items.length;
 		content.innerHTML=Helper.makePageTemplate('Inventory Manager','green = worn, blue = backpack, cyan = Faction Locked',
 				'Helper:InventoryManagerRefresh','Refresh')+
-				Helper.makeInvFilterTemplate(Helper.inventory.items.length);
+				Helper.makeInvFilterTemplate(length);
 		document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
 		Helper.generateInventoryTable("self");
 		Helper.makeInvFilterEvent();
