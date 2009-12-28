@@ -914,7 +914,7 @@ var Helper = {
 			
 			var doc = System.createDocument(responseText);
 			var conflictTable = System.findNode("//table[@width='600' and @cellspacing='0' and @cellpadding='3' and @border='0' and @align='center']", doc);
-			if (conflictTable) { 
+			if (conflictTable && conflictTable.rows.length > 3) {				
 				var newNode = insertHere.insertRow(insertHere.rows.length-2);
 				newNode.insertCell(0);
 				newNode.insertCell(0);
@@ -2076,7 +2076,7 @@ var Helper = {
 					var questHREF = table.rows[i].cells[0].getElementsByTagName("a")[0].href.match(/(\?.*)/)[1];
 					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld") && !Helper.isQuestBeingTracked(questHREF)) {
 						if (GM_getValue("questsNotComplete") == false) {
-							insertHere.innerHTML += "<span style='color:red;font-size:12px;'>Quest(s) in zone not completed:</span><br>";
+							insertHere.innerHTML += "<br><span style='color:red;font-size:12px;'>Quest(s) in zone not completed:</span><br>";
 							GM_setValue("questsNotComplete", true);
 						}
 						insertHere.innerHTML += "<span style='font-size:12px;'>" +table.rows[i].cells[0].innerHTML + "</span><br>";
