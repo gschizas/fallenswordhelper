@@ -130,6 +130,7 @@ var Helper = {
 		System.setDefault("hideRelicOffline", false);
 
 		System.setDefault("enterForSendMessage", false);
+		System.setDefault("trackKillStreak", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -1928,9 +1929,13 @@ var Helper = {
 					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + System.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>";
 				} else {
-					replacementText += "<tr><td style='font-size:small; color:navy'>Kill Streak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
-						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%</td></tr>";
-					System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
+					if (!GM_getValue('trackKillStreak')) {lastKillStreak='_'; lastDeathDealerPercentage='_';}
+					replacementText += "<tr><td style='font-size:small; color:navy' nowrap>KillStreak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
+						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%&nbsp;"+
+						"<span style='font-size:xx-small'>Track: <span id=Helper:toggleKStracker style='color:navy;cursor:pointer;text-decoration:underline;' title='Click to toggle'>"+
+						(GM_getValue('trackKillStreak')?"ON":"off")+
+						"</span></span></td></tr>";
+					if (GM_getValue('trackKillStreak')) System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
 				}
 			}
 		}
@@ -1972,6 +1977,12 @@ var Helper = {
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
 		newRow.innerHTML=replacementText;
+		
+		var trackKS=document.getElementById('Helper:toggleKStracker');
+		if (trackKS) trackKS.addEventListener('click', function() {
+				GM_setValue('trackKillStreak', GM_getValue('trackKillStreak')?false:true);
+				window.location=window.location;
+			},true);
 	},
 
 	removeSkill: function(evt) {
@@ -2383,6 +2394,8 @@ var Helper = {
 	},
 
 	sendGoldToPlayer: function(){
+		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		if (!injectHere) return;
 		var recipient = GM_getValue("goldRecipient");
 		var amount = GM_getValue("goldAmount");
 		System.xmlhttp('index.php?cmd=trade');
@@ -3361,6 +3374,9 @@ var Helper = {
 			break;
 		case 118: // fast wear manager [v]
 			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
+			break;
+		case 121: // fast send gold [y]
+			Helper.sendGoldToPlayer();
 			break;
 		case 19: // quick buffs
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
