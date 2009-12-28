@@ -25,6 +25,8 @@ var Helper = {
 	},
 
 	initSettings: function() {
+		
+		System.setDefault("currentTile", "");
 		System.setDefault("lastActiveQuestPage", "");
 		System.setDefault("lastCompletedQuestPage", "");
 		System.setDefault("lastNotStartedQuestPage", "");
@@ -1559,7 +1561,7 @@ var Helper = {
 		if ((realm) && (posit)) {
 			var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
-			var theMap = System.getValueJSON("map")
+			var theMap = System.getValueJSON("map");
 			if (!theMap) {
 				theMap = {};
 				theMap["levels"] = {};
@@ -2032,7 +2034,7 @@ var Helper = {
 		} else {
 			GM_setValue("playNewMessageSound", true);
 		}
-		window.location.reload()
+		window.location.reload();
 	},
 
 	isQuestBeingTracked: function (questHREF) {
@@ -2125,6 +2127,14 @@ var Helper = {
 	},
 
 	injectWorld: function() {
+		try {
+			var curTile = System.findNode("//img[contains(@title, 'You are here')]/ancestor::td[@width='40' and @height='40']").getAttribute("background");
+			if (GM_getValue("currentTile") != curTile) {
+				GM_setValue("currentTile", curTile);
+			}
+		} catch (err) {
+			//just eat it and move on
+		}
 		Helper.mapThis();
 		Helper.showMap(false);
 
@@ -8303,7 +8313,9 @@ var Helper = {
 			'<tr><td align="right">Hide Krul Portal' + Helper.helpLink('Hide Krul Portal', 'This will hide the Krul portal on the world screen.') +
 				':</td><td><input name="hideKrulPortal" type="checkbox" value="on"' + (GM_getValue("hideKrulPortal")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Footprints Color' + Helper.helpLink('Footprints Color', 'Changes the color of the footprints, useful if you can\\\'t see them in some maps') +
-				':</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /></td></tr>' +
+				':</td><td><input name="footprintsColor" size="12" value="'+ GM_getValue("footprintsColor") + '" /><input type="button" class="custombutton" value="Update Color" id="Helper:updateFpColor"><table width="40" height="40" cellspacing="0" cellpadding="0" border="0"><td width="40" height="40" background="' + GM_getValue("currentTile") + '" align="center" style="color:' + GM_getValue("footprintsColor") + ';"><center><table width="40" height="40" cellspacing="0" cellpadding="0" border="0"><tbody><tr><td align="center">**</td></tr></tbody></table></center></td></table></td></tr>' +
+			'<tr><td align="right">Reset Footprints' + Helper.helpLink('Reset Footprints', 'Resets the footprints variable.') +
+				':</td><td>Current Size: ' + (!GM_getValue("map") ? 'N/A' : GM_getValue("map").length + ' <input type="button" class="custombutton" value="Reset" id="Helper:ResetFootprints">') + '</td></tr></td></tr>' +
 			'<tr><td align="right">Show Send Gold' + Helper.helpLink('Show Gold on World Screen', 'This will show an icon below the world map to allow you to quickly send gold to a Friend.') +
 				':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' + (GM_getValue("sendGoldonWorld")?" checked":"") + '>'+
 				'Send <input name="goldAmount" size="5" value="'+ GM_getValue("goldAmount") + '" /> '+
@@ -8429,6 +8441,10 @@ var Helper = {
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
+		document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);
+		document.getElementById('Helper:updateFpColor').addEventListener('click', Helper.updateFpColor, true);
+		
+		
 
 		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', System.toggleVisibilty, true);
@@ -8448,13 +8464,31 @@ var Helper = {
 			GM_setValue("minGroupLevel",minGroupLevel);
 		}
 	},
+	
+	resetFootprints: function(evt) {
+		if (window.confirm("Are you sure you want to reset your footprints?")) {
+			var theMap = System.getValueJSON("map");
+			if (theMap) {
+				theMap = {};
+				theMap["levels"] = {};
+				System.setValueJSON("map", theMap);
+			}
+			window.location.reload();
+		}
+		
+	}, 
+	
+	updateFpColor: function(evt) {
+		GM_setValue("footprintsColor", System.findNode("//input[@name='footprintsColor']").value);
+		window.location.reload();
+	},
 
 	helpLink: function(title, text) {
 		return ' [ ' +
 			'<span style="text-decoration:underline;cursor:pointer;" onmouseover="Tip(\'' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
-			' ]'
+			' ]';
 	},
 
 	saveConfig: function(evt) {
@@ -8567,7 +8601,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		
 		window.alert("FS Helper Settings Saved");
-		window.location = window.location;
+		window.location.reload();
 		return false;
 	},
 
