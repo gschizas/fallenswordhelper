@@ -8228,8 +8228,41 @@ var Helper = {
 		result += '</div>'
 		return result;
 	},
+	
+	saveImgLoc: function (evt) {
+		try {
+			var imgLocText = System.findNode("//input[@name='local_dir']");
+			if (imgLocText && imgLocText.value.trim().length > 0) {
+				GM_setValue("lastImgLoc", imgLocText.value.trim());
+			}
+		} catch (err) {
+			GM_log(err);
+		}
+	},
+	
+	setImgLoc: function (evt) {
+		try {
+			var imgLocText = System.findNode("//input[@name='local_dir']");
+			if (imgLocText) {
+				imgLocText.value = GM_getValue("lastImgLoc");
+			}
+		} catch (err) {
+			GM_log(err);
+		}
+	},
 
 	injectSettings: function() {
+		try {
+			var exNode = System.findNode("//font[contains(.,'Example:')]");
+			var saveButton = System.findNode("//input[contains(@value, 'Save Settings')]");
+			saveButton.addEventListener('click', Helper.saveImgLoc, true);
+			if (GM_getValue("lastImgLoc")) {
+				exNode.innerHTML = "Last Location Set:<br><a href='#' id='Helper.lastImgLocLink'>" + GM_getValue("lastImgLoc") + "</a>";
+				document.getElementById('Helper.lastImgLocLink').addEventListener('click', Helper.setImgLoc, true);
+			}
+		} catch (err) {
+			GM_log(err);
+		}
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
