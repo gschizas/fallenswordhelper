@@ -2127,7 +2127,7 @@ var Helper = {
 				if (table.rows[i].cells.length > 1) {					
 					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld")) {
 						if (GM_getValue("questsNotStarted") == false) {
-							insertHere.innerHTML += "<span style='color:red;font-size:12px;'>Quest(s) in zone not started:</span><br>";
+							insertHere.innerHTML += "<br><span style='color:red;font-size:12px;'>Quest(s) in zone not started:</span><br>";
 							GM_setValue("questsNotStarted", true);
 						}
 						insertHere.innerHTML += "<span style='font-size:12px;'>" + Helper.removeHTML(table.rows[i].cells[0].innerHTML) + "</span><br>";
