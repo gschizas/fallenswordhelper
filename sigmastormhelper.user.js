@@ -1356,6 +1356,23 @@ var Helper = {
 				var mo=components[i].getAttribute("onmouseover");
 				System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
 			}
+		var items=System.findNodes("//center/img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]/..");
+		if (items)
+			for (var i=0; i<items.length; i++) {
+				items[i].addEventListener('click', Helper.searchTHforItem, true);
+				items[i].style.cursor='pointer';
+			}
+	},
+	
+	searchTHforItem: function(evt) {
+		var mo=evt.target.getAttribute("onmouseover");
+		System.xmlhttp(Helper.linkFromMouseoverCustom(mo), function(responseText) {
+				var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
+				if (responseText.indexOf('Bound (Non-Tradable)') > 0)
+					if (!confirm(name + " is Bound (Non-Tradable), cannot be found in TH!\n"+
+						"Do you still want to try?")) return;
+				window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
+			});
 	},
 
 	plantFromComponent: function(aComponent) {
@@ -1772,6 +1789,17 @@ var Helper = {
 
 	injectWorldMap: function() {
 		Helper.showMap(true);
+		var node=System.findNode('//font[//b[contains(.,"Overview")]]');
+		if (!node) return;
+		node.innerHTML += " <div id=toogleMapPOI style='cursor:pointer;color:cyan'>Toogle Map POI</div>";
+		document.getElementById('toogleMapPOI').addEventListener('click', function() {
+				var nodes = System.findNodes("//td[contains(@onmouseover,'Tip')]");
+				if (!nodes) return;
+				var style=(nodes[0].firstChild.style.border=='')?'1px solid red':'';
+				for (var i=0; i<nodes.length; i++) {
+					nodes[i].firstChild.style.border = style;
+				}
+			}, true);
 	},
 	
 	injectPersonalData: function(doc) {
@@ -5416,6 +5444,14 @@ var Helper = {
 				cell.addEventListener('click', Helper.sortRecipeTable, true);
 			}
 		}
+		
+		
+		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]");
+		if (items)
+			for (var i=0; i<items.length; i++) {
+				items[i].addEventListener('click', Helper.searchTHforItem, true);
+				items[i].style.cursor='pointer';
+			}
 	},
 	
 	findMissingBPrint: function() {
@@ -7026,6 +7062,7 @@ var Helper = {
 			if (Helper.levelName == GM_getValue("miniMapName")) {
 				miniMap.innerHTML = GM_getValue("miniMapSource");
 				Helper.markPlayerOnMiniMap();
+				Helper.makeMiniMapFooter();
 				miniMap.style.display = "";
 			} else {
 				System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
@@ -7038,7 +7075,7 @@ var Helper = {
 		var size = 20;
 		var miniMap = document.getElementById("miniMap");
 		var docu = System.createDocument(responseText);
-		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + System.findNode("//table", docu).innerHTML + '</table>';
+		var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + System.findNode("//table", docu).innerHTML + '</table>';
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		doc = doc.replace(/<center><\/center>/g,'');
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
@@ -7047,10 +7084,46 @@ var Helper = {
 		miniMap.innerHTML = doc;
 
 		Helper.markPlayerOnMiniMap();
+		Helper.makeMiniMapFooter();
 		miniMap.style.display = "";
 
 		GM_setValue("miniMapName", Helper.levelName);
 		GM_setValue("miniMapSource", doc);
+	},
+	
+	makeMiniMapFooter: function() {
+		var miniMap = document.getElementById("miniMap");
+		miniMap.innerHTML += '<div align=center id=toogleMiniMapPOI style="cursor:pointer;font-size=small;color:cyan">Toogle MiniMap POI</div>';
+		document.getElementById("toogleMiniMapPOI").addEventListener('click', Helper.toogleMiniMapPOI, true);
+	},
+	
+	toogleMiniMapPOI: function() {
+		var miniMap = document.getElementById("miniMap");
+		var miniMapTable = document.getElementById("miniMapTable");
+		var miniMapCover = document.getElementById("miniMapCover");
+		if (!miniMapCover) {
+			miniMapCover = document.createElement("div");
+			miniMapCover.style.position = "absolute";
+			miniMapCover.style.left = 0;
+			miniMapCover.style.top = 0;
+			miniMapCover.id = "miniMapCover";
+			miniMapCover.style.zIndex = '100';
+			miniMapCover.style.filter = "alpha";
+			miniMapCover.style.opacity = "0.4";
+			miniMapCover.innerHTML = '<table cellspacing="0" cellpadding="0" align="center">'+
+				miniMapTable.innerHTML+'</table>';
+			miniMap.insertBefore(miniMapCover, miniMap.firstChild);
+		} else {
+			miniMap.removeChild(miniMapCover);
+			return;
+		}
+
+		var nodes = System.findNodes("//div[@id='miniMapCover']//td[contains(@onmouseover,'Tip')]");
+		if (!nodes) return;
+		for (var i=0; i<nodes.length; i++) {
+			nodes[i].innerHTML = '';
+			nodes[i].style.backgroundColor ='red';
+		}
 	},
 
 	markPlayerOnMiniMap: function() {
