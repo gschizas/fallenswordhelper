@@ -119,7 +119,7 @@ var Helper = {
 		
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
-		System.setDefault("enableCountdownTimer", true);
+		System.setDefault("enableCountdownTimer", false);
 		System.setDefault("itemRecipient", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoGold","min":"","max":"","gold":true,"fsp":false},{"name":"NoFSP","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
@@ -131,6 +131,7 @@ var Helper = {
 
 		System.setDefault("enterForSendMessage", false);
 		System.setDefault("trackKillStreak", true);
+		System.setDefault("showFSGIcon", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -2242,10 +2243,13 @@ var Helper = {
 		
 		
 		if (mapName) {
-			mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
-				//'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
-				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
-				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
+			
+			if (GM_getValue("showFSGIcon")) {
+				mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
+					'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>';
+			}
+			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
+				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 
 			var uaStr = navigator.userAgent;
 			var FFindex = uaStr.indexOf("Firefox");
@@ -2702,7 +2706,7 @@ var Helper = {
 		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
 		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
-		var generalVariable = 1.1053, hpVariable = 1.1;
+		var attackVariable = 1.1053, generalVariable = 1.1053, hpVariable = 1.1;
 		if (combatEvaluatorBias == 1) {
 			generalVariable = 1.1, hpVariable = 1.053;
 		} else if (combatEvaluatorBias == 2) {
@@ -7365,7 +7369,7 @@ var Helper = {
 		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
 		if (!creatureStatTable) {return;}
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
-		var generalVariable = 1.1053, hpVariable = 1.1;
+		var attackVariable = 1.1053, generalVariable = 1.1053, hpVariable = 1.1;
 		if (combatEvaluatorBias == 1) {
 			generalVariable = 1.1, hpVariable = 1.053;
 		} else if (combatEvaluatorBias == 2) {
@@ -7416,7 +7420,7 @@ var Helper = {
 		var nightmareVisageAttackMovedToDefense = Math.floor(playerAttackValue * nightmareVisageLevel * 0.0025);
 		extraNotes += (nightmareVisageLevel > 0? "NV Attack moved to Defense = " + nightmareVisageAttackMovedToDefense + "<br>":"");
 		var overallAttackValue = (groupExists?groupAttackValue:playerAttackValue) + counterAttackBonusAttack - nightmareVisageAttackMovedToDefense;
-		var hitByHowMuch = (overallAttackValue - Math.ceil(generalVariable*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
+		var hitByHowMuch = (overallAttackValue - Math.ceil(attackVariable*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
 		//Damage:
 		var overallDamageValue = (groupExists?groupDamageValue:playerDamageValue) + deathDealerBonusDamage + counterAttackBonusDamage + holyFlameBonusDamage;
 		var damageDone = Math.floor(overallDamageValue - ((generalVariable*creatureArmor) + (hpVariable*creatureHP)));
@@ -7425,7 +7429,7 @@ var Helper = {
 		var overallDefenseValue = (groupExists?groupDefenseValue:playerDefenseValue) + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + nightmareVisageAttackMovedToDefense;
 		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + "<br>":"");
 		extraNotes += (flinchLevel > 0? "Flinch Bonus Attack Reduction = " + Math.floor(creatureAttack * flinchLevel * 0.001) + "<br>":"");
-		var creatureHitByHowMuch = Math.floor((generalVariable*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
+		var creatureHitByHowMuch = Math.floor((attackVariable*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
 		//Armor and HP:
 		var overallArmorValue = (groupExists?groupArmorValue:playerArmorValue) + Math.floor(playerArmorValue * sanctuaryLevel * 0.001);
 		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
@@ -8312,7 +8316,7 @@ var Helper = {
 				':</td><td><input name="showSTUpTop" type="checkbox" value="on"' + (GM_getValue("showSTUpTop")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
+			'<tr><td align="right">'+Layout.networkIcon()+'Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
 				':</td><td><input name="enableCountdownTimer" type="checkbox" value="on"' + (GM_getValue("enableCountdownTimer")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
@@ -8348,7 +8352,7 @@ var Helper = {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator.'+
+			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator for the damage and HP evaluation. It will not change the attack bias (1.1053).'+
 					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
 					'<br>Semi-Conservative = 1.1 and 1.053'+
 					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)') +
@@ -8385,6 +8389,8 @@ var Helper = {
 				':</td><td><input name="keepBuffLog" type="checkbox" value="on"' + (GM_getValue("keepBuffLog")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual features to speed up the Helper.') +
 				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Show FSG icon' + Helper.helpLink('Show FSG icon', 'This will show the FSG icon on the world page that links to the map for the page.') +
+				':</td><td><input name="showFSGIcon" type="checkbox" value="on"' + (GM_getValue("showFSGIcon")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
 			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
 			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
@@ -8648,6 +8654,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRelicOffline");
 		System.saveValueForm(oForm, "enterForSendMessage");
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
+		System.saveValueForm(oForm, "showFSGIcon");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
