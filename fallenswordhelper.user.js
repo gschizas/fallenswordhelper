@@ -1933,13 +1933,19 @@ var Helper = {
 					replacementText += "<tr><td style='font-size:small; color:black'>Kill Streak: <span findme='killstreak'>&gt;" + System.addCommas(lastKillStreak) +
 						"</span> Damage bonus: <span findme='damagebonus'>20</span>%</td></tr>";
 				} else {
-					if (!GM_getValue('trackKillStreak')) {lastKillStreak='_'; lastDeathDealerPercentage='_';}
-					replacementText += "<tr><td style='font-size:small; color:navy' nowrap>KillStreak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
-						"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%&nbsp;"+
-						"<span style='font-size:xx-small'>Track: <span id=Helper:toggleKStracker style='color:navy;cursor:pointer;text-decoration:underline;' title='Click to toggle'>"+
-						(GM_getValue('trackKillStreak')?"ON":"off")+
-						"</span></span></td></tr>";
-					if (GM_getValue('trackKillStreak')) System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
+					if (!GM_getValue('trackKillStreak')) {
+						replacementText += "<tr><td style='font-size:small; color:navy' nowrap>KillStreak tracker disabled. "+
+							"<span style='font-size:xx-small'>Track: <span id=Helper:toggleKStracker style='color:navy;cursor:pointer;text-decoration:underline;' title='Click to toggle'>"+
+							(GM_getValue('trackKillStreak')?"ON":"off")+
+							"</span></span></td></tr>";
+					} else {
+						replacementText += "<tr><td style='font-size:small; color:navy' nowrap>KillStreak: <span findme='killstreak'>" + System.addCommas(lastKillStreak) +
+							"</span> Damage bonus: <span findme='damagebonus'>" + Math.round(lastDeathDealerPercentage*100)/100 + "</span>%&nbsp;"+
+							"<span style='font-size:xx-small'>Track: <span id=Helper:toggleKStracker style='color:navy;cursor:pointer;text-decoration:underline;' title='Click to toggle'>"+
+							(GM_getValue('trackKillStreak')?"ON":"off")+
+							"</span></span></td></tr>";
+						System.xmlhttp("index.php?cmd=profile", Helper.getKillStreak);
+					}
 				}
 			}
 		}
