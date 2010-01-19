@@ -54,12 +54,13 @@ var Layout = {
 		var injectHere1 = System.findNode("//table[@width='703' and contains(tbody/tr/td/img/@src,'realm_top_a.jpg')]/tbody/tr[1]/td");
 		var injectHere2 = System.findNode("//table[@width='705' and contains(tbody/tr/td/img/@src,'inner_top.jpg')]/tbody/tr[1]/td");
 		if (!injectHere1 && !injectHere2) return;
-		if (injectHere2) injectHere2.setAttribute("colspan", 3);
+		if (injectHere1) injectHere1.setAttribute("colspan", 3), injectHere1.setAttribute("width", 703);
+		if (injectHere2) injectHere2.setAttribute("colspan", 3), injectHere2.setAttribute("width", 705);
 		result="&nbsp;&nbsp;";
 		for (var i=0; i<quickLinks.length; i++) {
 			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
 				(quickLinks[i].newWindow?' target=new':"") +
-				'>' + quickLinks[i].name + '</a>&nbsp;'
+				'>' + quickLinks[i].name + '</a> ;'
 		}
 		if (injectHere1) injectHere1.innerHTML=result;
 		if (injectHere2) injectHere2.innerHTML=result;
