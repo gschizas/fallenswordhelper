@@ -510,6 +510,9 @@ var Helper = {
 			case "view":
 				Helper.injectViewGuild();
 				break;
+			case "scouttower":
+				Helper.injectScouttower();
+				break;
 			}
 			break;
 		case "bank":
@@ -9281,6 +9284,34 @@ var Helper = {
 			var newRow = titanTable.insertRow(1);
 			var newCell = newRow.insertCell(0);
 			newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
+		}
+		Helper.injectScouttowerBuffLinks();
+	},
+
+	injectScouttower: function() {
+		Helper.injectScouttowerBuffLinks();
+	},
+
+	injectScouttowerBuffLinks: function() {
+		var titanTables = System.findNodes("//table[tbody/tr/td/font[.='Guild Member']]");
+		if (titanTables) {
+			for (var i = 0; i < titanTables.length; i++) {
+				titanTable = titanTables[i];
+				var shortList = new Array();
+				if (titanTable.rows.length <= 1) continue;
+				for (var j = 1; j < titanTable.rows.length; j++) {
+					if (titanTable.rows[j].cells[1]) {
+						var firstCell = titanTable.rows[j].cells[0];
+						var playerID = /player_id=(\d+)/.exec(firstCell.innerHTML)[1];
+						shortList.push(firstCell.textContent);
+						firstCell.innerHTML += " <a style='color:blue;font-size:10px;' " +
+							Layout.quickBuffHref(playerID) + ">[b]</a>";
+					}
+				}
+				titanTable.rows[0].cells[0].innerHTML += " <a style='color:blue;font-size:10px;'>all</a>";
+				var buffAllLink = titanTable.rows[0].cells[0].firstChild.nextSibling.nextSibling;
+				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+			}
 		}
 	},
 	
