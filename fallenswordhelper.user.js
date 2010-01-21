@@ -9239,7 +9239,7 @@ var Helper = {
 	},
 	
 	injectPoints: function() {
-		Helper.currentFSP = System.findNode("//tr[td/a/img[@src='"+System.imageServer+"/skin/icon_points.gif']]/td[4]").textContent.replace(/,/g,"")*1;
+		Helper.currentFSP = System.findNode("//tr[td/a/img[contains(@src,'/skin/icon_points.gif')]]/td[4]").textContent.replace(/,/g,"")*1;
 		
 		var stamForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+25 Current Stamina')]/../td[4]");
 		var stamForFSPInjectHere = System.findNode("//td[@width='60%' and contains(.,'+25 Current Stamina')]");
