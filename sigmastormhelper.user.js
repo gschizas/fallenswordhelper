@@ -8,6 +8,7 @@
 // @exclude        http://*.sigmastorm2.com/areachat.php
 // @exclude        http://forum.sigmastorm2.com/*
 // @exclude        http://wiki.sigmastorm2.com/*
+// @exclude        http://guide.sigmastorm2.com/*
 // @require        json2.js
 // @require        calfSystem.js
 // @require        ssLayout.js
@@ -4022,9 +4023,36 @@ var Helper = {
 			newHtml+='<option value='+otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
 				otherFolders[i].parentNode.parentNode.textContent+'</option>';
 		}
-		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>';
+		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>'+
+			'<br/><input type=button class=custombutton id="Helper::combineItems" value="Combine Selected">';
 		cell.innerHTML=newHtml;
 		document.getElementById("Helper::moveItems").addEventListener('click', Helper.moveItemsToFolder, true);
+		document.getElementById("Helper::combineItems").addEventListener('click', Helper.combineItems, true);
+	},
+	
+	combineItems: function() {
+		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
+		var foldersEnabled = System.findNode("//a[img[@src='"+System.imageServer+"/folder_on.gif']]");
+		if (! foldersEnabled) return;
+		var currentFolder = foldersEnabled.href.match(/&folder_id=(-*\d+)/)[1];
+		var postData = 'cmd=profile&subcmd=backpackaction&folder_id='+currentFolder+'&submit=Combine+Selected&split_amount=';
+		var postItems = '';
+		for (var i=0; i<itemsList.length; i++)
+			if (itemsList[i].checked)
+				postItems+='&folderItem[]='+itemsList[i].value;
+		GM_xmlhttpRequest({
+			method: 'POST',
+			url: System.server + "index.php",
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Content-Type": "application/x-www-form-urlencoded",
+				"Referer": document.location,
+				"Cookie" : document.cookie
+			},
+			data: postData+postItems
+		});
+		if (postItems != '') 
+			setTimeout(function() {window.location=window.location;}, 1000);
 	},
 	
 	moveItemsToFolder: function() {
