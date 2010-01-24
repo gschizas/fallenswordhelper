@@ -828,11 +828,16 @@ var Helper = {
 			if ((i % 4==0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
 			if (guildStoreBoxItem[i] && guildStoreBoxItem[i].firstChild) {
 				var newCell = newRow.insertCell(i % 4);
-				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:#84ADAC; font-size:x-small;" '+
+				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:#84ADAC; font-size:xx-small;" '+
 					'id="Helper:recallGuildStoreItem' + guildStoreBoxID[i] + '" ' +
-					'itemID="' + guildStoreBoxID[i] + '">Fast Take</span>';
+					'itemID="' + guildStoreBoxID[i] + '">Take</span>|'+
+					'<span style="cursor:pointer; text-decoration:underline; color:#84ADAC; font-size:xx-small;" '+
+					'id="Helper:wearGuildStoreItem' + guildStoreBoxID[i] + '" ' +
+					'href="index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' + guildStoreBoxID[i] + '">Wear</span>';
 				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i])
 					.addEventListener('click', Helper.recallGuildStoreItem, true);
+				document.getElementById('Helper:wearGuildStoreItem' + guildStoreBoxID[i])
+					.addEventListener('click', Helper.recallItemNWear, true);
 			}
 		}
 		
@@ -3805,7 +3810,7 @@ var Helper = {
 		if (searchItem) searchItem = unescape(searchItem[1]);
 		if (searchSet) searchItem = unescape(searchSet[1]);
 		if (searchUser) searchUser = unescape(searchUser[1]);
-		var isUser=false, startRow=0, stopRow=mainTable.rows.length;
+		var isUser=false, startRow=0, stopRow=mainTable.rows.length, j;
 		if (searchUser) {
 			for (var i=0;i<mainTable.rows.length;i++) {
 				var aRow = mainTable.rows[i];
@@ -3819,14 +3824,19 @@ var Helper = {
 			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
 			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
 		}
+		if (searchItem) var searchItemArr = searchItem.split('|');
 		for (var i=mainTable.rows.length-1;i>=0;i--) {
 			var aRow = mainTable.rows[i];
 			if (aRow.cells[1]) { // itemRow
 				var itemCell = aRow.cells[1];
-				if (searchItem && itemCell.textContent.indexOf(searchItem)<0){
-					//aRow.innerHTML='';
-					mainTable.deleteRow(i);
-					continue;
+				if (searchItem) {
+					for (j=0; j<searchItemArr.length; j++) {
+						if (itemCell.textContent.indexOf(searchItemArr[j])>=0) break;
+					}
+					if (j==searchItemArr.length) {
+						mainTable.deleteRow(i);
+						continue;
+					}
 				}
 				var itemElement = itemCell.firstChild;
 				var href = itemElement.getAttribute("href");
@@ -3885,6 +3895,37 @@ var Helper = {
 			itemCellElement.innerHTML += " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+		}
+	},
+	
+	recallItemNWear: function(evt) {
+		var href=evt.target.getAttribute("href");
+		System.xmlhttp(href, Helper.recallItemNWearReturnMessage, {"target": evt.target, "url": href});
+	},
+	recallItemNWearReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode;
+		if (info.search("You successfully") != -1) {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
+			System.xmlhttp(System.server+'?cmd=trade', Helper.wearRecall, itemCellElement);
+		} else if (info!="") {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
+		}
+	},
+	wearRecall: function(responseText, callback) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes('//input[@name="sendItemList[]"]',doc);
+		if (items) {
+			var itemId=items[items.length-1].getAttribute('value');
+			System.xmlhttp(System.server+'?cmd=profile&subcmd=equipitem&inventory_id='+itemId+'&folder_id=0&backpack_page=0',
+				function(responseText) {
+					var info = Layout.infoBox(responseText);
+					if (info=="")
+						callback.innerHTML += "<br><span style='color:green; font-weight:bold;'>Worn</span>";
+					else
+						callback.innerHTML += "<br><span style='color:red; font-weight:bold;'>" + info + "</span>";
+				});
 		}
 	},
 
