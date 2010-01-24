@@ -896,9 +896,14 @@ var Helper = {
 				var newCell = newRow.insertCell(i % 4);
 				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 					'id="Helper:recallGuildStoreItem' + guildStoreBoxID[i] + '" ' +
-					'itemID="' + guildStoreBoxID[i] + '">Fast Take</span>';
+					'itemID="' + guildStoreBoxID[i] + '">Take</span> | '+
+					'<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+					'id="Helper:wearGuildStoreItem' + guildStoreBoxID[i] + '" ' +
+					'href="index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' + guildStoreBoxID[i] + '">Wear</span>';
 				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i])
 					.addEventListener('click', Helper.recallGuildStoreItem, true);
+				document.getElementById('Helper:wearGuildStoreItem' + guildStoreBoxID[i])
+					.addEventListener('click', Helper.recallItemNWear, true);
 			}
 		}
 		
@@ -4410,7 +4415,7 @@ var Helper = {
 				searchItem.replace(/^.* of /,''):(searchItem.replace(/ .*$/ig,'')+' ');
 		}
 		if (searchUser) searchUser = unescape(searchUser[1]);
-		var isUser=false, startRow=0, stopRow=mainTable.rows.length;
+		var isUser=false, startRow=0, stopRow=mainTable.rows.length, j;
 		if (searchUser) {
 			for (var i=0;i<mainTable.rows.length;i++) {
 				var aRow = mainTable.rows[i];
@@ -4424,14 +4429,19 @@ var Helper = {
 			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
 			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
 		}
+		if (searchItem) var searchItemArr = searchItem.split('|');
 		for (var i=mainTable.rows.length-1;i>=0;i--) {
 			var aRow = mainTable.rows[i];
 			if (aRow.cells[2]) { // itemRow
 				var itemCell = aRow.cells[1];
-				if (searchItem && itemCell.textContent.indexOf(searchItem)<0){
-					//aRow.innerHTML='';
-					mainTable.deleteRow(i);
-					continue;
+				if (searchItem) {
+					for (j=0; j<searchItemArr.length; j++) {
+						if (itemCell.textContent.indexOf(searchItemArr[j])>=0) break;
+					}
+					if (j==searchItemArr.length) {
+						mainTable.deleteRow(i);
+						continue;
+					}
 				}
 				var recallCell = aRow.cells[2];
 				var recallToBackpack = "";
@@ -4518,11 +4528,11 @@ var Helper = {
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
 		var itemCellElement = target.parentNode;
-		if (info.search("You successfully recalled the item") != -1) {
-			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>" + info + "</span>";
+		if (info.search("You successfully") != -1) {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
 			System.xmlhttp(System.server+'?cmd=trade', Helper.wearRecall, itemCellElement);
 		} else if (info!="") {
-			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>" + info + "</span>";
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
 		}
 	},
 	wearRecall: function(responseText, callback) {
