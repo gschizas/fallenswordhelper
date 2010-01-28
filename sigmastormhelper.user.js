@@ -920,7 +920,9 @@ var Helper = {
 	injectShop: function() {
 		var injectHere=System.findNode("//td/center[img[contains(@src,'_banner.jpg')]]");
 		var itemNodes=System.findNodes("//td/center/a/img[contains(@src,'/items/')]");
-		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<table cellpadding=2><tr>";
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:"+
+			"<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=1 class='custominput'>"+
+			"<table cellpadding=2><tr>";
 		for (var i=0;i<itemNodes.length;i++) {
 			var item=itemNodes[i];
 			var src=item.getAttribute("src");
@@ -933,7 +935,7 @@ var Helper = {
 		}
 		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
 			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
-			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr></table>";
+			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>";
 		injectHere.innerHTML="<table><tr><td>"+injectHere.innerHTML+"</td><td>"+selector+"</td></tr></table>";
 		for (var i=0;i<itemNodes.length;i++) {
 			var itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
@@ -944,15 +946,24 @@ var Helper = {
 	
 	selectShopItem: function(evt) {
 		Helper.shopItemId=evt.target.getAttribute("itemId");
-		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the item WITHOUT confirmation!</span>';
+		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the '+
+			'<span id=buyItemCount style="font-size:x-large;">'+document.getElementById('buy_amount').value+'</span> item(s) WITHOUT confirmation!</span>';
+		document.getElementById('buy_amount').addEventListener('keyup', function() {
+				document.getElementById('buyItemCount').innerHTML=document.getElementById('buy_amount').value;
+			},true);
 		document.getElementById('selectedItem').innerHTML=
 			document.getElementById("select"+Helper.shopItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
 	},
 	
 	quickBuyItem: function() {
 		if (!Helper.shopItemId || !Helper.shopId) return;
-		System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
-			Helper.quickDone);
+		document.getElementById('buy_result').innerHTML+="<br/>Buying "+document.getElementById('buy_amount').value+" Items";
+		for (var i=0;i<document.getElementById('buy_amount').value;i++)
+			System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
+				function(responseText) {
+					var infoMessage = Layout.infoBox(responseText);
+					document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
+				});
 	},
 	
 	quickUse: function(responseText, callback) {
@@ -1368,6 +1379,31 @@ var Helper = {
 				items[i].addEventListener('click', Helper.searchTHforItem, true);
 				items[i].style.cursor='pointer';
 			}
+		var node=System.findNode("//tr/td[input[contains(@value,'Invent (') and contains(@value,'chance of success)')]]");
+		var multiInvent=document.createElement("div");
+		multiInvent.innerHTML="<br/>Invent for <input class=custominput size=5 id=multiInventN value=0> time(s) "+
+			"<input type=button class=custombutton id=multiInventSubmit value='Invent multiple times'>"+
+			"<br/><table width=100%><tr><td id=inventResult align=center></td></tr></table>";
+		node.appendChild(multiInvent);
+		document.getElementById('multiInventSubmit').addEventListener('click', Helper.inventMulti, true);
+		document.getElementById('multiInventN').addEventListener('keyup', function() {
+				document.getElementById('multiInventSubmit').value=
+					'Invent '+document.getElementById('multiInventN').value+' times';
+			}, true);
+	},
+	
+	inventMulti: function() {
+		var n=System.intValue(document.getElementById('multiInventN').value);
+		if (n>0) {
+			var receiptId=document.getElementsByName('recipe_id')[0].value;
+			for (var i=0; i<n; i++) {
+				System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+receiptId, 
+					function(responseText)  {
+						var infoMessage = Layout.infoBox(responseText);
+						document.getElementById('inventResult').innerHTML+="<br />"+infoMessage;
+					});
+			}
+		}
 	},
 	
 	searchTHforItem: function(evt) {
@@ -2941,6 +2977,9 @@ var Helper = {
 			break;
 		case 118: // fast wear manager [v]
 			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
+			break;
+		case 121: // fast send gold [y]
+			Helper.sendGoldToPlayer();
 			break;
 		case 104: // quickheal [h]
 			Helper.quickHeal();
