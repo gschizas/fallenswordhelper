@@ -3605,6 +3605,9 @@ var Helper = {
 						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
 							"'>ST</a>"
+
+						var attackPart = " | <a href='index.php?cmd=attackplayer&target_username=" + playerName +"'>Attack</a>"; // ]</nobr></span>";
+
 						
 						var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
 						var quickBuff = "";
@@ -3659,7 +3662,7 @@ var Helper = {
 						
 						var msgReplyTo = (GM_getValue("enableChatParsing") == true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" + 
 							Helper.removeHTML(firstPart.replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
-						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart  + fourthPart + "</nobr>" + lastPart;
+						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart + attackPart + fourthPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
@@ -3680,7 +3683,8 @@ var Helper = {
 									"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 									"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
 									"'>ST</a>";
-								extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
+								extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a>";
+								extraText += " | <a href='index.php?cmd=attackplayer&target_username=" + buffingPlayerName +"'>Attack</a> ]</nobr></span>";
 								aRow.cells[2].innerHTML += extraText;
 							}
 						}
@@ -8500,8 +8504,9 @@ var Helper = {
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a> and ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +			
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>,  ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, and ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2156859">ByteBoy</a> ' + 			
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'</table></form>';
