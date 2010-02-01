@@ -130,7 +130,17 @@ var Layout = {
 		var breaker = dest.insertRow(startRow+1);
 		var cell = breaker.insertCell(0);
 		cell.innerHTML = "<br/>";
-     },
+    },
+
+	hideRecruitingBox: function() {
+		if (!GM_getValue("hideRecruitingBox")) return;
+		var src=System.findNode("//table[tbody/tr/td/table/tbody/tr/td/font[b='Recruiting']]");
+		if (!src) return;
+		src.style.display = "none";
+		src.style.visibility = "hidden";
+		src.nextSibling.nextSibling.style.display = "none";
+		src.nextSibling.nextSibling.style.visibility = "hidden";
+	},
 
 	notebookContent: function() {
 		return System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='0' and @border='0']/..");
