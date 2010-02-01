@@ -132,6 +132,7 @@ var Helper = {
 		System.setDefault("enterForSendMessage", false);
 		System.setDefault("trackKillStreak", true);
 		System.setDefault("showFSGIcon", false);
+		System.setDefault("hideRecruitingBox", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -323,6 +324,7 @@ var Helper = {
 			Helper.prepareAllyEnemyList();
 			Helper.prepareChat();
 			Layout.moveGuildOnlineList();
+			Layout.hideRecruitingBox();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
 			Helper.injectStaminaCalculator();
@@ -8323,6 +8325,9 @@ var Helper = {
 			'<tr><td align="right">Move Guild Info List' + Helper.helpLink('Move Guild Info List', 'This will Move the Guild Info List higher on the bar on the right') +
 				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
 				'</td></tr>' +
+			'<tr><td align="right">Hide Recruiting Box' + Helper.helpLink('Hide Recruiting Box', 'This will hide the Recruiting Box') +
+				':</td><td><input name="hideRecruitingBox" type="checkbox" value="on"' + (GM_getValue("hideRecruitingBox")?" checked":"") + '>' +
+				'</td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
@@ -8679,6 +8684,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enterForSendMessage");
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		System.saveValueForm(oForm, "showFSGIcon");
+		System.saveValueForm(oForm, "hideRecruitingBox");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
