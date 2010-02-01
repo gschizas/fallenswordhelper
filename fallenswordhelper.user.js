@@ -2050,6 +2050,8 @@ var Helper = {
 					}
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
 						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
+					aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&search_name=' + questName.replace(/ /g,'+') + '&search_level_min=&search_level_max=" target="_blank">' +
+						'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
 				}
 			}
 		}
@@ -2260,6 +2262,8 @@ var Helper = {
 		
 		if (mapName) {
 			
+			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&search_name=' + mapName.textContent + '&search_level_min=&search_level_max=" target="_blank">' +
+				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
 			if (GM_getValue("showFSGIcon")) {
 				mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
 					'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>';
@@ -7232,7 +7236,9 @@ var Helper = {
 		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
 		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
-			creatureName.innerHTML += ' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
+			creatureName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=creatures&search_name=' + creatureName.textContent + 'search_level_min=&search_level_max=&search_class=-1" target="_blank">' +
+				'<img border=0 title="Search creature in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>' +
+				' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
 				'<img border=0 title="Search creature in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
@@ -9352,10 +9358,14 @@ var Helper = {
 			questName = questName.match(/"(.*)"/);
 			if (questName && questName.length > 1) {
 				questName = questName[1];
-				/*injectHere.innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
-						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';		*/
+				injectHere.innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&search_name=' + questName.replace(/ /g,'+') + '&search_level_min=&search_level_max=" target="_blank">' +
+					'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
+				if (GM_getValue("showFSGIcon")) {
+					injectHere.innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
+						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
+				}
 				injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + 
-						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Wiki" src=' + System.imageServer + '/skin/fs_wiki.gif /></a>';
+					'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Wiki" src=' + System.imageServer + '/skin/fs_wiki.gif /></a>';
 			}
 			
 		}
