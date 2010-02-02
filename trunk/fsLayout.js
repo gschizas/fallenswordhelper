@@ -10,29 +10,29 @@ var Layout = {
 		//"menuSource_0"
 		var tableElement = System.findNode("//div[@id='menuSource_0']/table");
 		if (!tableElement) return;
-		if (GM_getValue("keepBuffLog") == true) {
+		if (GM_getValue("keepBuffLog")) {
 			Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
 		}
 		Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
 		Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13);
 		Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 15);
 		if (GM_getValue("keepLogs")) {
-			Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17)
+			Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17);
 		}
 		if (GM_getValue("showMonsterLog")) {
-			Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19)
+			Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19);
 		}
 		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
 		//"menuSource_5"
-		var tableElement = System.findNode("//div[@id='menuSource_5']/table");
+		tableElement = System.findNode("//div[@id='menuSource_5']/table");
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
 		//"menuSource_3"
-		var tableElement = System.findNode("//div[@id='menuSource_3']/table");
+		tableElement = System.findNode("//div[@id='menuSource_3']/table");
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
 		//"menuSource_2"
-		var tableElement = System.findNode("//div[@id='menuSource_2']/table");
+		tableElement = System.findNode("//div[@id='menuSource_2']/table");
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
 		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7);		
@@ -54,13 +54,19 @@ var Layout = {
 		var injectHere1 = System.findNode("//table[@width='703' and contains(tbody/tr/td/img/@src,'realm_top_a.jpg')]/tbody/tr[1]/td");
 		var injectHere2 = System.findNode("//table[@width='705' and contains(tbody/tr/td/img/@src,'inner_top.jpg')]/tbody/tr[1]/td");
 		if (!injectHere1 && !injectHere2) return;
-		if (injectHere1) injectHere1.setAttribute("colspan", 3), injectHere1.setAttribute("width", 703);
-		if (injectHere2) injectHere2.setAttribute("colspan", 3), injectHere2.setAttribute("width", 705);
+		if (injectHere1) {
+			injectHere1.setAttribute("colspan", 3); 
+			injectHere1.setAttribute("width", 703);
+		}
+		if (injectHere2) {
+			injectHere2.setAttribute("colspan", 3); 
+			injectHere2.setAttribute("width", 705);
+		}
 		result="&nbsp;&nbsp;";
 		for (var i=0; i<quickLinks.length; i++) {
 			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
 				(quickLinks[i].newWindow?' target=new':"") +
-				'>' + quickLinks[i].name + '</a> ;'
+				'>' + quickLinks[i].name + '</a> ;';
 		}
 		if (injectHere1) injectHere1.innerHTML=result;
 		if (injectHere2) injectHere2.innerHTML=result;
@@ -68,7 +74,7 @@ var Layout = {
 
 	hideBanner: function() {
 		if (!GM_getValue("hideBanner")) {
-			if (GM_getValue("showSTUpTop") == true) {
+			if (GM_getValue("showSTUpTop")) {
 				var overlayTable = System.findNode("//html/body/table/tbody/tr/td/table/tbody/tr/td");
 				if (overlayTable) {
 					var STnode = System.findNode("//font[contains(., 'Server:')]/nobr/b");
@@ -114,9 +120,9 @@ var Layout = {
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src);
-		var dest=System.findNode("//table[@width='120' and contains(.,'Support FallenSword')]")
+		var dest=System.findNode("//table[@width='120' and contains(.,'Support FallenSword')]");
 		if (!dest) {
-			var dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]")
+			dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]");
 		}
 		if (!dest) return;
 		var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
@@ -128,7 +134,7 @@ var Layout = {
 		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
 		cell.appendChild(src);
 		var breaker = dest.insertRow(startRow+1);
-		var cell = breaker.insertCell(0);
+		cell = breaker.insertCell(0);
 		cell.innerHTML = "<br/>";
     },
 
@@ -147,15 +153,15 @@ var Layout = {
 	},
 
 	playerId: function() {
-		var playerIdRE = /fallensword.com\/\?ref=(\d+)/
-		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1]);
+		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
+		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
 		GM_setValue("playerID",thePlayerId);
 		return thePlayerId;
 	},
 
 	infoBox: function(documentText) {
 		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
-		var infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)</i;
+		infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)</i;
 		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully recalled the item.</center>
 		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully took the item into your backpack.</center>
 		var infoMatch = documentText.match(infoRE);
@@ -206,10 +212,10 @@ var Layout = {
 			rev=revRX.exec(line);
 			chg=chgRX.exec(line);
 
-			if (rev) revNo = parseInt(rev[1]);
+			if (rev) revNo = parseInt(rev[1],10);
 			chgTxt = "";
 			if (chg) chgTxt = chg[1];
-			if (chgTxt!="") {
+			if (chgTxt!=="") {
 				if (!changes[revNo]) changes[revNo] = "";
 				changes[revNo] += "<li>" + chgTxt + "</li>";
 			}
@@ -220,7 +226,7 @@ var Layout = {
 				result += '<li value='+i+'><ul type=square>' + changes[i] + '</ul></li>';
 			}
 		}
-		result += "</ol>"
+		result += "</ol>";
 		return result;
 	}
 

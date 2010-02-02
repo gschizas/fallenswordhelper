@@ -6017,7 +6017,6 @@ var Data = {
 				{name:'Ring of Male', type:'ring'},
 				{name:'Pumpkin Ring', type:'ring'},
 				{name:'Amulet of Dargeic', type:'armor'},
-				
 				{name:'Armor of Mongg', type:'armor'},
 				{name:'Abrafos Boots', type:'boots'},
 				{name:'Abrafos Neck Piece', type:'amulet'},
@@ -6074,8 +6073,19 @@ var Data = {
 				{name:'Gazant Shield', type:'shield'},
 				{name:'Zlat Ooly Helmet', type:'helmet'},
 				{name:'Zlat Ooly Ring', type:'ring'},
-				{name:'Zlat Ooly Rune', type:'rune'}
-			]
+				{name:'Zlat Ooly Rune', type:'rune'},
+				
+				{name:'Armor of Remanle', type:'armor'},
+				{name:'Boots of Baliora', type:'boots'},
+				{name:'Helmet of Ertya', type:'helmet'},
+				{name:'Von Schwarzhurg Blade', type:'weapon'},
+				{name:'Boots of Veruila', type:'boots'},
+				{name:'Helmet of Ruianla', type:'helmet'},
+				{name:'Amulet of Ofghera', type:'amulet'},
+				{name:'Ormarrs Axe', type:'weapon'},
+				{name:'Ormarrs Helm', type:'helmet'},
+				{name:'Weapon of Learsa', type:'weapon'}
+			];
 		}
 		return Data.itemArray;
 	},
@@ -6114,4 +6124,4 @@ var Data = {
 		}
 		return Data.quickSearchArray;
 	}
-}
+};
