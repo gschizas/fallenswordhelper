@@ -143,7 +143,7 @@ var Helper = {
 		{"id":"showShieldTypeItems", "type":"shield"},
 		{"id":"showRingTypeItems", "type":"ring"},
 		{"id":"showBootTypeItems", "type":"boot"},
-		{"id":"showRuneTypeItems", "type":"rune"},
+		{"id":"showRuneTypeItems", "type":"rune"}
 		];
 
 		for (var i=0; i<Helper.itemFilters.length; i++) {
@@ -161,7 +161,7 @@ var Helper = {
 		}
 
 		if (!quickSearchList) {
-			quickSearchList = Data.quickSearchList()
+			quickSearchList = Data.quickSearchList();
 			Helper.sortAsc = true;
 			Helper.sortBy = "category";
 			quickSearchList.sort(Helper.stringSort);
@@ -191,14 +191,14 @@ var Helper = {
 		var lastCheck = GM_getValue("lastVersionCheck");
 		var now = (new Date()).getTime();
 		if (!lastCheck) lastCheck = 0;
-		var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000)
+		var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000);
 		if (haveToCheck) {
 			Helper.checkForUpdate();
 		}
 	},
 
 	checkForUpdate: function() {
-		GM_log("Checking for new version...")
+		GM_log("Checking for new version...");
 		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		GM_xmlhttpRequest({
@@ -211,12 +211,12 @@ var Helper = {
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
 			}
-		})
+		});
 	},
 
 	autoUpdate: function(responseDetails) {
 		if (responseDetails.status != 200) return;
-		var now = (new Date()).getTime()
+		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion = GM_getValue("currentVersion");
 		if (!currentVersion) currentVersion = 0;
@@ -236,7 +236,7 @@ var Helper = {
 				onload: function(responseDetails) {
 					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
 				}
-			})
+			});
 		}
 	},
 
@@ -272,7 +272,7 @@ var Helper = {
 	},
 
 	autoUpdateConfirmOk: function(evt) {
-		var newVersion = parseInt(evt.target.getAttribute("newVersion"));
+		var newVersion = parseInt(evt.target.getAttribute("newVersion"),10);
 		GM_setValue("currentVersion", newVersion);
 		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 		Helper.autoUpdateConfirmCancel(evt);
@@ -301,13 +301,13 @@ var Helper = {
 					}
 				}
 			}
-			if (changeCount == 0 && td != null) {
+			if (changeCount === 0 && td !== null) {
 				GM_log("Time to remove the temporary HCS tile image slash fix.");
 			} /*else {
 				GM_log("Changed " + changeCount + " references.");
 			}*/
 		}
-		if (GM_getValue("gameHelpLink") == true) {
+		if (GM_getValue("gameHelpLink")) {
 			var gameHelpNode = System.findNode("//b[contains(.,'Game Help')]");
 			if (gameHelpNode) {
 				gameHelpNode.innerHTML = "<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.innerHTML + "</a>";
@@ -335,8 +335,8 @@ var Helper = {
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
 		}
-		var pageId, subPageId, subPage2Id, subsequentPageId
-		if (document.location.search != "") {
+		var pageId, subPageId, subPage2Id, subsequentPageId;
+		if (document.location.search !== "") {
 			var re=/cmd=([a-z]+)/;
 			var pageIdRE = re.exec(document.location.search);
 			pageId="-";
@@ -364,18 +364,18 @@ var Helper = {
 			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
 			pageId = pageId?pageId.getAttribute("value"):"-";
 
-			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']")
+			subPageId=System.findNode("//input[@type='hidden' and @name='subcmd']");
 			subPageId=subPageId?subPageId.getAttribute("value"):"-";
 			if (subPageId=="dochat") {pageId="-"; subPageId="-";}
 
 			subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
 			subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
 
-			subsequentPageId=System.findNode("//input[@type='hidden' and @name='page']")
+			subsequentPageId=System.findNode("//input[@type='hidden' and @name='page']");
 			subsequentPageId=subsequentPageId?subsequentPageId.getAttribute("value"):"-";
 		}
 
-		Helper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")"
+		Helper.page = pageId + "/" + subPageId + "/" + subPage2Id + "(" + subsequentPageId + ")";
 
 		switch (pageId) {
 		case "settings":
@@ -391,6 +391,7 @@ var Helper = {
 				break;
 			default:
 				Helper.injectWorld();
+				break;
 			}
 			break;
 		case "news":
@@ -401,12 +402,16 @@ var Helper = {
 			case "shoutbox":
 				Helper.injectShoutboxWidgets('shoutbox_input', 150);
 				break;
+			default:
+				break;
 			}
 			break;
 		case "blacksmith":
 			switch (subPageId) {
 			case "repairall":
 				Helper.injectWorld();
+				break;
+			default:
 				break;
 			}
 			break;
@@ -427,12 +432,16 @@ var Helper = {
 			case "dojoin":
 				Helper.injectTournament();
 				break;
+			default:
+				break;
 			}
 			break;
 		case "questbook":
 			switch (subPageId) {
 			case "viewquest":
 				Helper.injectQuestTracker();
+				break;
+			default:
 				break;
 			}
 			if (subPageId == "-") {
@@ -450,6 +459,9 @@ var Helper = {
 				break;
 			case "-":
 				Helper.injectProfile();
+				break;
+			default:
+				break;
 			}
 			break;
 		case "auctionhouse":
@@ -462,6 +474,7 @@ var Helper = {
 				break;
 			default:
 				Helper.injectAuctionHouse();
+				break;
 			}
 			break;
 		case "guild":
@@ -479,6 +492,7 @@ var Helper = {
 						break;
 					default:
 						Helper.injectDropItems();
+						break;
 				}
 				break;
 			case "chat":
@@ -498,6 +512,7 @@ var Helper = {
 						break;
 					default:
 						Helper.injectGroups();
+						break;
 				}
 				break;
 			case "manage":
@@ -515,6 +530,8 @@ var Helper = {
 			case "scouttower":
 				Helper.injectScouttower();
 				break;
+			default:
+				break;
 			}
 			break;
 		case "bank":
@@ -529,12 +546,16 @@ var Helper = {
 				Helper.addLogColoring("PlayerLog", 1);
 				Helper.addLogWidgets();
 				break;
+			default:
+				break;
 			}
 			break;
 		case "marketplace":
 			switch (subPageId) {
 			case "createreq":
 				Helper.addMarketplaceWidgets();
+				break;
+			default:
 				break;
 			}
 			break;
@@ -572,10 +593,10 @@ var Helper = {
 				break;
 			case "quickextract":
 				Helper.insertQuickExtract();
-				break
+				break;
 			case "quickwear":
 				Helper.insertQuickWear();
-				break
+				break;
 			case "fsboxcontent":
 				Helper.injectFsBoxContent();
 				break;
@@ -587,6 +608,8 @@ var Helper = {
 				break;
 			case "quickahpreftemplate":
 				Helper.injectAHPrefTemplate();
+				break;
+			default:
 				break;
 			}
 			break;
@@ -600,6 +623,8 @@ var Helper = {
 				Helper.storePlayerUpgrades();
 				Helper.injectPoints();
 				break;
+			default:
+				break;
 			}
 			break;
 		case "trade":
@@ -611,6 +636,8 @@ var Helper = {
 			case "-":
 				Helper.injectStandardTrade();
 				break;
+			default:
+				break;
 			}
 			break;
 		case "titan":
@@ -621,12 +648,16 @@ var Helper = {
 			case "xp":
 				Helper.injectTopRated();
 				break;
+			default:
+				break;
 			}
 			break;
 		case "inventing":
 			switch (subPageId) {
 			case "viewrecipe":
 				Helper.injectViewRecipe();
+				break;
+			default:
 				break;
 			}
 			break;
@@ -643,6 +674,8 @@ var Helper = {
 			switch (subPageId) {
 			case "process":
 				Helper.injectScavenging();
+				break;
+			default:
 				break;
 			}
 			break;
@@ -668,7 +701,7 @@ var Helper = {
 				Helper.injectQuestBookFull();
 			}
 			var isAdvisorPageClue1 = System.findNode("//font[@size=2 and .='Advisor']");
-			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']"
+			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']";
 			var isAdvisorPageClue2 = System.findNode(clue2);
 			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
 				Helper.injectAdvisor(subPage2Id);
@@ -684,6 +717,8 @@ var Helper = {
 		case "skills":
 			Helper.injectSkillsPage();
 			break;
+		default:
+			break;
 		}
 		if (GM_getValue("playNewMessageSound")) {
 			var unreadLog = System.findNode("//font[contains(.,'unread log messages.')]");
@@ -698,13 +733,13 @@ var Helper = {
 		}
 		
 		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
-		if (GM_getValue("huntingMode") == false) {
+		if (GM_getValue("huntingMode") === false) {
 			Layout.injectQuickLinks();
 		}
 	},
 	
 	injectSkillsPage: function() {
-		var table = table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");;
+		var table = table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");
 		var tree_id = window.location.href.match(/tree_id=(\d)/);
 		if (tree_id && tree_id[1] == 2) {
 			table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/table/tbody");
@@ -752,8 +787,8 @@ var Helper = {
 			var buffLog=GM_getValue("buffLog");
 			var buffsAttempted = document.body.innerHTML.split('<li>');
 			document.body.innerHTML+= "<span id='buff_Log' style='color:yellow'></span>";
-			var buffsNotCastRE = /The skill ([\w ]*) of current or higher level is currently active on \'(\w*)\'/
-			var buffsCastRE = /Skill ([\w ]*) level (\d*) was activated on \'(\w*)\'/
+			var buffsNotCastRE = /The skill ([\w ]*) of current or higher level is currently active on \'(\w*)\'/;
+			var buffsCastRE = /Skill ([\w ]*) level (\d*) was activated on \'(\w*)\'/;
 			var buffList = Data.buffList();
 			//var buffsNotCast = buffsCastRE.exec(document.body.innerHTML);
 			for (var i=0;i<buffsAttempted.length ;i++ )
@@ -892,8 +927,8 @@ var Helper = {
 
 		var newRow;
 
-		for (var i=0;i<12;i++) {
-			if ((i % 4==0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
+		for (i=0;i<12;i++) {
+			if ((i % 4===0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
 			if (guildStoreBoxItem[i]) {
 				var newCell = newRow.insertCell(i % 4);
 				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
@@ -902,10 +937,10 @@ var Helper = {
 					'<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 					'id="Helper:wearGuildStoreItem' + guildStoreBoxID[i] + '" ' +
 					'href="index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' + guildStoreBoxID[i] + '">Wear</span>';
-				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i])
-					.addEventListener('click', Helper.recallGuildStoreItem, true);
-				document.getElementById('Helper:wearGuildStoreItem' + guildStoreBoxID[i])
-					.addEventListener('click', Helper.recallItemNWear, true);
+				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i]).
+					addEventListener('click', Helper.recallGuildStoreItem, true);
+				document.getElementById('Helper:wearGuildStoreItem' + guildStoreBoxID[i]).
+					addEventListener('click', Helper.recallItemNWear, true);
 			}
 		}
 		
@@ -914,7 +949,7 @@ var Helper = {
 		selfRecall.innerHTML+=" [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&user="+Helper.characterName+"' title='Self Recall'>SR</a>]";
 		
 		//Detailed conflict information
-		if (GM_getValue("detailedConflictInfo") == true) {
+		if (GM_getValue("detailedConflictInfo") === true) {
 			var confNode = System.findNode("//table[contains(@id,'statisticsControl')]");
 			System.xmlhttp("index.php?cmd=guild&subcmd=conflicts",
 				Helper.getConflictInfo,	{"node": confNode});
@@ -963,7 +998,7 @@ var Helper = {
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (info.search("You successfully took the item into your backpack") != -1) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
-		} else if (info!="") {
+		} else if (info!=="") {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "Weird Error: check the Tools>Error Console";
@@ -977,12 +1012,12 @@ var Helper = {
 		if (!staminaImageElement) return;
 
 		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
-		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
+		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
 		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
+		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/;
 		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m ([,0-9]+)s/
+		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m ([,0-9]+)s/;
 		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
 		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
 		nextGainHours = nextGainMinutes/60;
@@ -1018,11 +1053,11 @@ var Helper = {
 			Helper.seconds = 59;
 			Helper.minutes = 59;
 			document.title = Helper.minutes + 'm ' + Helper.seconds + 's' + " - " + Helper.title;
-			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) 
+			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) ;
 		 } else {
 			Helper.seconds -= 1; 
 			document.title = Helper.minutes + 'm ' + Helper.seconds + 's' + " - " + Helper.title;
-			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) 
+			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) ;
 		}
 	},
 	
@@ -1032,11 +1067,11 @@ var Helper = {
 		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
 		var remainingXPRE = /Remaining:\s<\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
 		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\\\'90%\\\'>\+([0-9,]+)/i;
-		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\\\'90%\\\'>([0-9]*)m\s*([0-9]*)s/i
-		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""));
-		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""));
-		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1]);
-		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[1]);
+		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\\\'90%\\\'>([0-9]*)m\s*([0-9]*)s/i;
+		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
+		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
+		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
+		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[1],10);
 		var hoursToNextLevel = Math.ceil(remainingXP/gain);
 		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 
@@ -1068,8 +1103,8 @@ var Helper = {
 			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
 			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>";
 		injectHere.innerHTML="<table><tr><td>"+injectHere.innerHTML+"</td><td>"+selector+"</td></tr></table>";
-		for (var i=0;i<itemNodes.length;i++) {
-			var itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
+		for (i=0;i<itemNodes.length;i++) {
+			itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			document.getElementById("select"+itemId).addEventListener("click",Helper.selectShopItem,true);
 		}
 		Helper.shopId=itemNodes[0].parentNode.getAttribute("href").match(/&shop_id=(\d+)/)[1];
@@ -1106,9 +1141,9 @@ var Helper = {
 			var indx1 = mouseover.indexOf("'");
 			var indx2 = mouseover.lastIndexOf("'");
 			var insideText = mouseover.substring(indx1 + 1, indx2);
-			empowerThing.setAttribute("onmouseover", mouseover.substring(0, indx1 + 1) 
-				+ insideText.replace(/'/g, "&#39;")
-				+ mouseover.substring(indx2))
+			empowerThing.setAttribute("onmouseover", mouseover.substring(0, indx1 + 1) +
+				insideText.replace(/'/g, "&#39;") +
+				mouseover.substring(indx2));
 		}
 		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 		relicNameElement.parentNode.style.fontSize = "x-small";
@@ -1125,7 +1160,7 @@ var Helper = {
 					var modifierWord;
 					for (var i = 0; i < listOfDefenders.length; i++) {
 						shortList.push(listOfDefenders[i]);
-						if (((i + 1) % 16 == 0 && i != 0) || (i == listOfDefenders.length - 1)) {
+						if (((i + 1) % 16 === 0 && i !== 0) || (i == listOfDefenders.length - 1)) {
 							modifierWord = Helper.getGroupBuffModifierWord(i);
 							injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll" + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
 							"Buff " + modifierWord + " 16</span></a></nobr>";
@@ -1188,10 +1223,10 @@ var Helper = {
 			var validMemberString = "";
 			var memberList = System.getValueJSON("memberlist");
 			if (memberList) {
-				for (var i=0;i<memberList.members.length;i++) {
+				for (i=0;i<memberList.members.length;i++) {
 					var member=memberList.members[i];
-					if (member.status == "Offline"
-						&& (member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
+					if (member.status == "Offline" &&
+						(member.level < 400 || (member.level > 421 && member.level < 441 ) || member.level > 450)) {
 						validMemberString += member.name + " ";
 					}
 				}
@@ -1201,7 +1236,7 @@ var Helper = {
 		var listOfDefenders = System.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
 		var testList = "";
-		for (var i=0; i<listOfDefenders.length; i++) {
+		for (i=0; i<listOfDefenders.length; i++) {
 			var href = listOfDefenders[i].getAttribute("href");
 //if (i<3) { //I put this in to limit the number of calls this function makes.
 					//I don't want to hammer the server too much.
@@ -1242,8 +1277,8 @@ var Helper = {
 				"Note: Assumption is that for these three buffs, the effects only apply to the lead defender/attacker.</td></tr>";
 		if (defendingGuildID == myGuildID && !hideRelicOffline) {
 			var validMemberArray = validMemberString.split(" ");
-			var memberList = System.getValueJSON("memberlist");
-			for (var i=0;i<validMemberArray.length-1;i++) {
+			memberList = System.getValueJSON("memberlist");
+			for (i=0;i<validMemberArray.length-1;i++) {
 				var guildMemberName = validMemberArray[i];
 				for (var j=0; j<memberList.members.length; j++) {
 					if (memberList.members[j].name == guildMemberName) {
@@ -1251,7 +1286,7 @@ var Helper = {
 						break;
 					}
 				}
-				var href = System.server + "?cmd=profile&player_id=" + memberId;
+				href = System.server + "?cmd=profile&player_id=" + memberId;
 				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName,"playerId":memberId});
 			}
 			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
@@ -1300,7 +1335,7 @@ var Helper = {
 		var relicCount = 0;
 		for (var i=0;i<allItems.length-1;i++) {
 			var anItem=allItems[i];
-			var mouseoverText = anItem.getAttribute("onmouseover")
+			var mouseoverText = anItem.getAttribute("onmouseover");
 			if (mouseoverText && mouseoverText.search("Relic Bonuses") != -1){
 				relicCount++;
 			}
@@ -1327,7 +1362,7 @@ var Helper = {
 			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber                = System.intValue(defenseValue.innerHTML);
 			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
-			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier)
+			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier);
 			defenseValue.innerHTML       = System.addCommas(overallDefense);
 			var storedFlinchLevel        = System.intValue(System.findNode("//td[@title='LDFlinchLevel']").textContent);
 			var dc225                    = System.findNode("//td[@title='DC225']");
@@ -1396,7 +1431,7 @@ var Helper = {
 			}
 		}
 
-		if (defenderCount != 0) {
+		if (defenderCount !== 0) {
 			var defenderMultiplier       = 0.2;
 			var attackValue              = System.findNode("//td[@title='attackValue']");
 			attackNumber                 = System.intValue(attackValue.innerHTML);
@@ -1432,25 +1467,25 @@ var Helper = {
 		}
 		else {
 			//get relavent buffs here later ... just Constitution atm
-			var allItems = doc.getElementsByTagName("IMG");
+			allItems = doc.getElementsByTagName("IMG");
 			var constitutionLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0;
-			for (var i=0;i<allItems.length;i++) {
-				var anItem=allItems[i];
+			for (i=0;i<allItems.length;i++) {
+				anItem=allItems[i];
 				if (anItem.getAttribute("src").search("/skills/") != -1) {
-					var onmouseover = anItem.getAttribute("onmouseover")
-					var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
+					var onmouseover = anItem.getAttribute("onmouseover");
+					var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
 					var constitution =  constitutionRE.exec(onmouseover);
 					if (constitution) {
 						constitutionLevel = constitution[1];
 						continue;
 					}
-					var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/
+					var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/;
 					var flinch = flinchRE.exec(onmouseover);
 					if (flinch) {
 						flinchLevel = flinch[1];
 						continue;
 					}
-					var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/
+					var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/;
 					var nightmareVisage = nightmareVisageRE.exec(onmouseover);
 					if (nightmareVisage) {
 						nightmareVisageLevel = nightmareVisage[1];
@@ -1459,29 +1494,29 @@ var Helper = {
 				}
 			}
 
-			var defenderMultiplier = 1;
-			var attackValue = System.findNode("//td[@title='LDattackValue']");
+			defenderMultiplier = 1;
+			attackValue = System.findNode("//td[@title='LDattackValue']");
 			attackNumber = System.intValue(attackValue.innerHTML);
 			var nightmareVisageEffect = Math.ceil(System.intValue(playerAttackValue)*(nightmareVisageLevel * 0.0025));
 			playerAttackValue = playerAttackValue - nightmareVisageEffect;
 			attackValue.innerHTML = System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier));
-			var defenseValue = System.findNode("//td[@title='LDdefenseValue']");
+			defenseValue = System.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber = System.intValue(defenseValue.innerHTML);
 			playerDefenseValue = Math.ceil(System.intValue(playerDefenseValue) * (1 + constitutionLevel * 0.001)) + nightmareVisageEffect;
 			defenseValue.innerHTML = System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier));
-			var armorValue = System.findNode("//td[@title='LDarmorValue']");
+			armorValue = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber=System.intValue(armorValue.innerHTML);
 			armorValue.innerHTML = System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier));
-			var damageValue = System.findNode("//td[@title='LDdamageValue']");
+			damageValue = System.findNode("//td[@title='LDdamageValue']");
 			damageNumber=System.intValue(damageValue.innerHTML);
 			damageValue.innerHTML = System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier));
-			var hpValue = System.findNode("//td[@title='LDhpValue']");
+			hpValue = System.findNode("//td[@title='LDhpValue']");
 			hpNumber=System.intValue(hpValue.innerHTML);
 			hpValue.innerHTML = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
-			var defendersProcessed = System.findNode("//td[@title='LDProcessed']");
+			efendersProcessed = System.findNode("//td[@title='LDProcessed']");
 			defendersProcessedNumber=System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
-			var storedFlinchLevel = System.findNode("//td[@title='LDFlinchLevel']");
+			storedFlinchLevel = System.findNode("//td[@title='LDFlinchLevel']");
 			storedFlinchLevel.innerHTML = System.intValue(flinchLevel);
 		}
 		var relicProcessedValue = System.findNode("//td[@title='relicProcessed']");
@@ -1496,46 +1531,46 @@ var Helper = {
 			relicMultiplier = 0.9;
 		}
 
-		if (defenderCount == 0 && relicProcessedValue.innerHTML == "1") {
-			var attackValue              = System.findNode("//td[@title='attackValue']");
+		if (defenderCount === 0 && relicProcessedValue.innerHTML == "1") {
+			attackValue              = System.findNode("//td[@title='attackValue']");
 			var LDattackValue            = System.findNode("//td[@title='LDattackValue']");
 			attackNumber                 = System.intValue(attackValue.innerHTML);
 			LDattackNumber               = System.intValue(LDattackValue.innerHTML);
 			attackValue.innerHTML        = System.addCommas(attackNumber + Math.round(LDattackNumber*relicMultiplier));
-			var defenseValue             = System.findNode("//td[@title='defenseValue']");
+			defenseValue             = System.findNode("//td[@title='defenseValue']");
 			var LDdefenseValue           = System.findNode("//td[@title='LDdefenseValue']");
 			defenseNumber                = System.intValue(defenseValue.innerHTML);
 			LDdefenseNumber              = System.intValue(LDdefenseValue.innerHTML);
-			var overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier)
+			overallDefense           = defenseNumber + Math.round(LDdefenseNumber*relicMultiplier);
 			defenseValue.innerHTML       = System.addCommas(overallDefense);
-			var storedFlinchLevel        = System.intValue(System.findNode("//td[@title='LDFlinchLevel']").textContent);
-			var dc225                    = System.findNode("//td[@title='DC225']");
-			var dc175                    = System.findNode("//td[@title='DC175']");
+			storedFlinchLevel        = System.intValue(System.findNode("//td[@title='LDFlinchLevel']").textContent);
+			dc225                    = System.findNode("//td[@title='DC225']");
+			dc175                    = System.findNode("//td[@title='DC175']");
 			dc225.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002))));
 			dc175.innerHTML              = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002))));
-			var flinchEffect             = System.findNode("//td[@title='FlinchEffect']");
-			var flinchEffectValue        = Helper.characterAttack * storedFlinchLevel * 0.001;
+			flinchEffect             = System.findNode("//td[@title='FlinchEffect']");
+			flinchEffectValue        = Helper.characterAttack * storedFlinchLevel * 0.001;
 			flinchEffect.innerHTML       = Math.ceil(flinchEffectValue);
-			var dc225Flinch              = System.findNode("//td[@title='DC225Flinch']");
-			var dc175Flinch              = System.findNode("//td[@title='DC175Flinch']");
+			dc225Flinch              = System.findNode("//td[@title='DC225Flinch']");
+			dc175Flinch              = System.findNode("//td[@title='DC175Flinch']");
 			dc225Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (225 * 0.002)) + flinchEffectValue));
 			dc175Flinch.innerHTML        = System.addCommas(Math.ceil(overallDefense * (1 - (175 * 0.002)) + flinchEffectValue));
-			var armorValue               = System.findNode("//td[@title='armorValue']");
+			armorValue               = System.findNode("//td[@title='armorValue']");
 			var LDarmorValue             = System.findNode("//td[@title='LDarmorValue']");
 			armorNumber                  = System.intValue(armorValue.innerHTML);
 			LDarmorNumber                = System.intValue(LDarmorValue.innerHTML);
 			armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
-			var damageValue              = System.findNode("//td[@title='damageValue']");
+			damageValue              = System.findNode("//td[@title='damageValue']");
 			var LDdamageValue            = System.findNode("//td[@title='LDdamageValue']");
 			damageNumber                 = System.intValue(damageValue.innerHTML);
 			LDdamageNumber               = System.intValue(LDdamageValue.innerHTML);
 			damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
-			var hpValue                  = System.findNode("//td[@title='hpValue']");
+			hpValue                  = System.findNode("//td[@title='hpValue']");
 			var LDhpValue                = System.findNode("//td[@title='LDhpValue']");
 			hpNumber                     = System.intValue(hpValue.innerHTML);
 			LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
 			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
-			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
+			defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
 			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 			var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
@@ -1555,14 +1590,14 @@ var Helper = {
 			var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
 			if (!posit) return;
 			var thePosition=posit.innerHTML;
-			var positionRE=/\((\d+),\s*(\d+)\)/
-			var positionX = parseInt(thePosition.match(positionRE)[1]);
-			var positionY = parseInt(thePosition.match(positionRE)[2]);
+			var positionRE=/\((\d+),\s*(\d+)\)/;
+			var positionX = parseInt(thePosition.match(positionRE)[1],10);
+			var positionY = parseInt(thePosition.match(positionRE)[2],10);
 			result.X=positionX;
 			result.Y=positionY;
 			result.type="normal";
 		}
-		return result
+		return result;
 	},
 
 	mapThis: function() {
@@ -1614,7 +1649,7 @@ var Helper = {
 							aCell.firstChild.firstChild.firstChild.firstChild.firstChild.innerHTML +="**";
 						else
 							aCell.innerHTML+="**";
-					};
+					}
 
 									}
 				// GM_log(x + ":" + y + " >> " + aCell.getAttribute("background"));
@@ -1636,9 +1671,9 @@ var Helper = {
 		if (itemName) itemName=itemName[1];
 		var itemLinks = document.createElement("td");
 		itemLinks.innerHTML =
-			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='
-			+ escape(Data.plantFromComponent(itemName))
-			+ '">AH</a>';
+			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='+
+			escape(Data.plantFromComponent(itemName))+
+			'">AH</a>';
 		var counter=System.findNode("../../../../tr[2]/td", callback);
 		counter.setAttribute("colspan", "2");
 		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
@@ -1668,7 +1703,7 @@ var Helper = {
 
 		if (! Helper.advisorHeader) {
 			Helper.advisorHeader = '<tr>';
-			var titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Groups Created", "Groups Joined", "Relics Captured", "XP Contrib"];
+			titleCells = ["Member", "Lvl", "Rank", "Gold From Deposits", "Gold From Tax", "Gold Total", "FSPs", "Skills Cast", "Groups Created", "Groups Joined", "Relics Captured", "XP Contrib"];
 			for (var i=0; i<titleCells.length; i++) {
 				Helper.advisorHeader += "<th bgcolor=#cd9e4b align=center width=8% style='text-decoration: underline; cursor: pointer; font-size:x-small;'>" + titleCells[i] + "</td>";
 			}
@@ -1677,7 +1712,7 @@ var Helper = {
 
 		if (! Helper.advisorFooter) {
 			Helper.advisorFooter = '<tr><td colspan=3 align=right>Total: </td>';
-			for (var i=1; i<list.rows[list.rows.length-1].cells.length; i++) {
+			for (i=1; i<list.rows[list.rows.length-1].cells.length; i++) {
 				Helper.advisorFooter += "<td align=center>" + list.rows[list.rows.length-1].cells[i].innerHTML + '</td>';
 			}
 			Helper.advisorFooter +='</tr>';
@@ -1729,9 +1764,9 @@ var Helper = {
 				Helper.generateWeeklyAdvisorRows, {'day':(day+1),'inject':callback.inject});
 		} else {
 			Helper.advisorRows = Helper.weeklyAdvisorRows;
-			for (var i=1; i<=Helper.advisorRows.length; i++){
-				for (var id=0; id<Helper.advisorColumns.length; id++){
-					var columnName=Helper.advisorColumns[id];
+			for (i=1; i<=Helper.advisorRows.length; i++){
+				for (id=0; id<Helper.advisorColumns.length; id++){
+					columnName=Helper.advisorColumns[id];
 					Helper.advisorRows[i-1][columnName]=
 						System.addCommas(Helper.advisorRows[i-1][columnName]);
 				}
@@ -1772,7 +1807,7 @@ var Helper = {
 
 	advisorHeaderClicked: function(evt) {
 		var headerClicked=evt.target.textContent;
-		var parentTables=System.findNodes("ancestor::table", evt.target)
+		var parentTables=System.findNodes("ancestor::table", evt.target);
 		var list=parentTables[parentTables.length-1];
 		Helper.sortAdvisor(list, headerClicked.replace(/ /g, ""));
 	},
@@ -1785,10 +1820,10 @@ var Helper = {
 		Helper.sortBy=sortBy;
 
 		if (sortBy=="Member" || sortBy=="Rank") {
-			Helper.advisorRows.sort(Helper.stringSort)
+			Helper.advisorRows.sort(Helper.stringSort);
 		}
 		else {
-			Helper.advisorRows.sort(Helper.numberSort)
+			Helper.advisorRows.sort(Helper.numberSort);
 		}
 
 		var result = Helper.advisorHeader;
@@ -1809,14 +1844,14 @@ var Helper = {
 			'<td align="center">'+r.RelicsCaptured+'</td>'+
 			'<td align="center">'+r.XPContrib+'</td></tr>';
 		}
-		if (Helper.advisorFooter!='')
+		if (Helper.advisorFooter!=='')
 			result+=Helper.advisorFooter;
 		else {
 			Helper.advisorFooter='<tr><td align="right" colspan="3">Total: </td>';
 			for (var id=0; id<Helper.advisorColumns.length; id++){
 				var sum=0;
 				var columnName=Helper.advisorColumns[id];
-				for (var i=0; i<Helper.advisorRows.length; i++)
+				for (i=0; i<Helper.advisorRows.length; i++)
 					sum+=System.intValue(Helper.advisorRows[i][columnName]);
 				Helper.advisorFooter+='<td align="center" style="text-decoration:underline;font-weight:bold;font-size:x-small">'+System.addCommas(sum)+'</td>';
 			}
@@ -1826,7 +1861,7 @@ var Helper = {
 
 		list.innerHTML=result;
 
-		for (var i=0; i<list.rows[0].cells.length; i++) {
+		for (i=0; i<list.rows[0].cells.length; i++) {
 			var cell=list.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
@@ -1847,8 +1882,8 @@ var Helper = {
 		var result=0;
 		var valueA=a[Helper.sortBy];
 		var valueB=b[Helper.sortBy];
-		if (typeof valueA=="string") valueA=parseInt(valueA.replace(/,/g,"").replace(/#/g,""));
-		if (typeof valueB=="string") valueB=parseInt(valueB.replace(/,/g,"").replace(/#/g,""));
+		if (typeof valueA=="string") valueA=parseInt(valueA.replace(/,/g,"").replace(/#/g,""),10);
+		if (typeof valueB=="string") valueB=parseInt(valueB.replace(/,/g,"").replace(/#/g,""),10);
 		result = valueA-valueB;
 		if (!Helper.sortAsc) result=-result;
 		return result;
@@ -1859,13 +1894,13 @@ var Helper = {
 		var valueA,valueB;
 		var statuses = ["Incomplete", "Complete", ""];
 		if (!a[Helper.sortBy]) {
-			valueA=Helper.sortAsc?50:-50
+			valueA=Helper.sortAsc?50:-50;
 		}
 		else {
 			valueA=statuses.indexOf(a[Helper.sortBy]);
 		}
 		if (!b[Helper.sortBy]) {
-			valueB=Helper.sortAsc?50:-50
+			valueB=Helper.sortAsc?50:-50;
 		}
 		else {
 			valueB=statuses.indexOf(b[Helper.sortBy]);
@@ -1888,8 +1923,8 @@ var Helper = {
 				if (buffTest) {
 					var buffName = buffTest[1];
 				} else {
-					var buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/.exec(currentBuff.getAttribute("onclick"));
-					if (buffTest) var buffName = buffTest[1]; else GM_log("Error getting buff");
+					buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/.exec(currentBuff.getAttribute("onclick"));
+					if (buffTest) buffName = buffTest[1]; else GM_log("Error getting buff");
 				}
 				buffHash[buffName]=true;
 				var imageHTML = currentBuff.innerHTML;
@@ -1904,9 +1939,9 @@ var Helper = {
 		}
 
 		//extra world screen text
-		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
+		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
-			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
+			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
 			"colspan='2'></td></tr>";
 		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
@@ -1927,10 +1962,10 @@ var Helper = {
 			if (impsRemaining==1){
 				applyImpWarningColor = " style='color:Orangered; font-size:large; font-weight:bold'";
 			}
-			if (impsRemaining==0){
+			if (impsRemaining===0){
 				applyImpWarningColor = " style='color:red; font-size:large; font-weight:bold'";
 			}
-			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>"
+			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>";
 			if (hasDeathDealer) {
 				if (GM_getValue("lastDeathDealerPercentage")==undefined) GM_setValue("lastDeathDealerPercentage", 0);
 				if (GM_getValue("lastKillStreak")==undefined) GM_setValue("lastKillStreak", 0);
@@ -1959,8 +1994,8 @@ var Helper = {
 		var hasCounterAttack = System.findNode("//img[contains(@onmouseover,'Counter Attack')]");
 		if (hasCounterAttack) {
 			if (hasCounterAttack.getAttribute("src").search("/skills/") != -1) {
-				var onmouseover = hasCounterAttack.getAttribute("onmouseover")
-				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
+				var onmouseover = hasCounterAttack.getAttribute("onmouseover");
+				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
 				var counterAttack = counterAttackRE.exec(onmouseover);
 				if (counterAttack) {
 					counterAttackLevel = counterAttack[1];
@@ -1971,18 +2006,18 @@ var Helper = {
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
 		if (GM_getValue("showHuntingBuffs")) {
 			var buffs=GM_getValue("huntingBuffs");
-			var buffAry=buffs.split(",")
+			var buffAry=buffs.split(",");
 			var missingBuffs = new Array();
-			for (var i=0;i<buffAry.length;i++) {
+			for (i=0;i<buffAry.length;i++) {
 				if (!buffHash[buffAry[i].trim()]) {
 					missingBuffs.push(buffAry[i]);
 				}
 			}
 			if (missingBuffs.length>0) {
 				replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>" +
-					"You are missing some hunting buffs<br/>("
-				replacementText += missingBuffs.join(", ")
-				replacementText += ")</span></td></tr>"
+					"You are missing some hunting buffs<br/>(";
+				replacementText += missingBuffs.join(", ");
+				replacementText += ")</span></td></tr>";
 			}
 			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
 			replacementText += "</table>";
@@ -2006,7 +2041,7 @@ var Helper = {
 		var buffName = evt.target.parentNode.getAttribute("buffName");
 		var buffHref = evt.target.parentNode.getAttribute("buffHref");
 		if (confirm('Are you sure you wish to remove the ' + buffName + ' skill?')) {
-			System.xmlhttp(buffHref, function() {window.location="index.php?cmd=world";})		
+			System.xmlhttp(buffHref, function() {window.location="index.php?cmd=world";});
 		}
 	},
 
@@ -2040,7 +2075,7 @@ var Helper = {
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		for (var i=0;i<questTable.rows.length;i++) {
 			var aRow = questTable.rows[i];
-			if (i!=0) {
+			if (i!==0) {
 				if (aRow.cells[0].innerHTML) {
 					var questName = aRow.cells[0].firstChild.innerHTML.replace(/  /g," ").trim();
 					if (hideQuests.indexOf(questName)>=0) {
@@ -2107,7 +2142,7 @@ var Helper = {
 				if (table.rows[i].cells.length > 1) {
 					var questHREF = table.rows[i].cells[0].getElementsByTagName("a")[0].href.match(/(\?.*)/)[1];
 					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld") && !Helper.isQuestBeingTracked(questHREF)) {
-						if (GM_getValue("questsNotComplete") == false) {
+						if (GM_getValue("questsNotComplete") === false) {
 							insertHere.innerHTML += "<br><span style='color:red;font-size:12px;'>Quest(s) in zone not completed:</span><br>";
 							GM_setValue("questsNotComplete", true);
 						}
@@ -2145,7 +2180,7 @@ var Helper = {
 			for (var i = 2; i < table.rows.length; i+=2) {
 				if (table.rows[i].cells.length > 1) {					
 					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld")) {
-						if (GM_getValue("questsNotStarted") == false) {
+						if (GM_getValue("questsNotStarted") === false) {
 							insertHere.innerHTML += "<br><span style='color:red;font-size:12px;'>Quest(s) in zone not started:</span><br>";
 							GM_setValue("questsNotStarted", true);
 						}
@@ -2215,11 +2250,11 @@ var Helper = {
 		Helper.prepareCombatLog();
 		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
 		//Checking if there are quests on current map
-		if (GM_getValue("checkForQuestsInWorld") == true) {
-		if (mapName.textContent != null && 
+		if (GM_getValue("checkForQuestsInWorld") === true) {
+		if (mapName.textContent !== null && 
 			(GM_getValue("lastWorld") != mapName.textContent.trim() || 
-				GM_getValue("questsNotStarted") == true || 
-				GM_getValue("questsNotComplete") == true)) {
+				GM_getValue("questsNotStarted") === true || 
+				GM_getValue("questsNotComplete") === true)) {
 			GM_setValue("lastWorld", mapName.textContent.trim());
 			var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
 			System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
@@ -2229,21 +2264,21 @@ var Helper = {
 		//quest tracker
 		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
 		if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
-			var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+			injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
 			if (!injectHere) return;
-			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>"
+			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
 			replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
-				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>"
+				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
 			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
 				"colspan='2'></td></tr>";
 			for (var i = 0; i < questBeingTracked.length; i++) {
 			
-				replacementText += "<tr><td style='font-size:small; color:black'><a id='qiLink" + i + "' href=" + questBeingTracked[i] + "></a>&nbsp;"
+				replacementText += "<tr><td style='font-size:small; color:black'><a id='qiLink" + i + "' href=" + questBeingTracked[i] + "></a>&nbsp;";
 				replacementText += "<input id='dontTrackThisQuest" + i + "' data='" + questBeingTracked[i] + "' type='button' value='Stop Tracking' title='Stops tracking quest progress.' class='custombutton'><br>";
 				replacementText += "<span findme='questinfo" + i + "'></span></td></tr>";
 				if (i != questBeingTracked.length - 1) {
 					replacementText += '<tr><td height="10" colspan="2"/></tr>' +
-					'<tr><td height="1" bgcolor="#393527" colspan="2"/></tr>'
+					'<tr><td height="1" bgcolor="#393527" colspan="2"/></tr>'+
 					'<tr><td height="10" colspan="2"/></tr>';
 				}
 			}
@@ -2253,7 +2288,7 @@ var Helper = {
 
 			newRow=injectHere.insertRow(2);
 			newRow.innerHTML=replacementText;
-			for (var i = 0; i < questBeingTracked.length; i++) {
+			for (i = 0; i < questBeingTracked.length; i++) {
 				System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {"data" : i});
 			}
 						
@@ -2274,8 +2309,8 @@ var Helper = {
 			var uaStr = navigator.userAgent;
 			var FFindex = uaStr.indexOf("Firefox");
 			var huntingMode = GM_getValue("huntingMode");
-			var imgSource = huntingMode == true ? Data.huntingOnImage() : Data.huntingOffImage();
-			var altText = huntingMode == true ? "Hunting mode is ON" : "Hunting mode is OFF";
+			var imgSource = huntingMode === true ? Data.huntingOnImage() : Data.huntingOffImage();
+			var altText = huntingMode === true ? "Hunting mode is ON" : "Hunting mode is OFF";
 			mapName.innerHTML += " <a href=# id='Helper:ToggleHuntingMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
 
 			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5" && GM_getValue("showSpeakerOnWorld")) {
@@ -2298,14 +2333,14 @@ var Helper = {
 			var doNotKillList = GM_getValue("doNotKillList");
 			var doNotKillListAry = doNotKillList.split(",");
 			if (doNotKillListAry.length > 0) {
-				for (var i=1; i<9; i++) {			  
-					var monster = System.findNode("//a[@id='aLink" + i + "']")
+				for (i=1; i<9; i++) {			  
+					var monster = System.findNode("//a[@id='aLink" + i + "']");
 					if (monster) {
 						var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
 						for (var j=0; j<doNotKillListAry.length; j++) {
 							var doNotKillName = doNotKillListAry[j].trim();
 							if (monsterName == doNotKillName){
-								var monsterNameCell = monster.parentNode.parentNode.previousSibling
+								var monsterNameCell = monster.parentNode.parentNode.previousSibling;
 								monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
 								break;
 							}
@@ -2358,28 +2393,25 @@ var Helper = {
 						tradeLink.style.visibility = 'hidden';
 					}
 					if (GM_getValue("hideGuildInfoSecureTrade")) {
-						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						var buffLink = messageLink.nextSibling.nextSibling;
-						var secureTradeLink = buffLink.nextSibling.nextSibling;	
+						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						buffLink = messageLink.nextSibling.nextSibling;
+						secureTradeLink = buffLink.nextSibling.nextSibling;	
 						secureTradeLink.style.display = 'none';
 						secureTradeLink.style.visibility = 'hidden';
 					}
 					if (GM_getValue("hideGuildInfoBuff")) {
-						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						var buffLink = messageLink.nextSibling.nextSibling;
+						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						buffLink = messageLink.nextSibling.nextSibling;
 						buffLink.style.display = 'none';
 						buffLink.style.visibility = 'hidden';
 					}
 				
 					if (GM_getValue("hideGuildInfoMessage")) {
-						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
 						messageLink.style.display = 'none';
 						messageLink.style.visibility = 'hidden';
 					}
-					
-					
 
-										
 				// Set Color for Activity
 					if (lastActivityMinutes < 2) {
 						playerNameLinkElement.style.color = 'green';
@@ -2392,12 +2424,12 @@ var Helper = {
 						playerNameLinkElement.firstChild.style.color = 'gray';
 					}
 					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
-						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
 						messageLink.style.visibility = 'hidden';
-						var buffLink = messageLink.nextSibling.nextSibling;
-						var secureTradeLink = buffLink.nextSibling.nextSibling;
+						buffLink = messageLink.nextSibling.nextSibling;
+						secureTradeLink = buffLink.nextSibling.nextSibling;
 						secureTradeLink.style.visibility = 'hidden';
-						var tradeLink = secureTradeLink.nextSibling.nextSibling;
+						tradeLink = secureTradeLink.nextSibling.nextSibling;
 						tradeLink.style.visibility = 'hidden';
 					}
 					onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
@@ -2412,7 +2444,7 @@ var Helper = {
 
 	retrieveTradeConfirm: function() {
 		var xcNumber;
-		xcNumber=System.findNode("//input[@type='hidden' and @name='xc']")
+		xcNumber=System.findNode("//input[@type='hidden' and @name='xc']");
 		xcNumber=xcNumber?xcNumber.getAttribute("value"):"-";
 		GM_setValue("goldConfirm", xcNumber);
 	},
@@ -2424,11 +2456,11 @@ var Helper = {
 		var amount = GM_getValue("goldAmount");
 		System.xmlhttp('index.php?cmd=trade');
 		var xcNum = GM_getValue("goldConfirm");
-		if (xcNum == "") {
+		if (xcNum === "") {
 			window.alert("You have to visit the trade page once to use the send gold functionality");
 			return;
 		}
-		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + recipient +'&gold_amount='+ amount
+		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + recipient +'&gold_amount='+ amount;
 		System.xmlhttp(url, Helper.goldToPlayerSent, {"amount": amount, "recipient": recipient} );
 	},
 
@@ -2439,7 +2471,7 @@ var Helper = {
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		var info = Layout.infoBox(responseText);
-		if (info=="" || info=="You successfully sent gold!") {
+		if (info==="" || info==="You successfully sent gold!") {
 			var currentGoldSentTotal = GM_getValue("currentGoldSentTotal")*1;
 			currentGoldSentTotal += System.intValue(callback.amount);
 			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
@@ -2498,12 +2530,12 @@ var Helper = {
 		}
 		output+='</table>';
 		callback.inject.innerHTML=output;
-		for (var key in Helper.itemList) {
-			var itemID=Helper.itemList[key].id;
-			document.getElementById('Helper:equipProfileInventoryItem' + itemID)
-				.addEventListener('click', Helper.equipProfileInventoryItem, true);
-			document.getElementById('Helper:useProfileInventoryItem' + itemID)
-				.addEventListener('click', Helper.useProfileInventoryItem, true);
+		for (key in Helper.itemList) {
+			itemID=Helper.itemList[key].id;
+			document.getElementById('Helper:equipProfileInventoryItem' + itemID).
+				addEventListener('click', Helper.equipProfileInventoryItem, true);
+			document.getElementById('Helper:useProfileInventoryItem' + itemID).
+				addEventListener('click', Helper.useProfileInventoryItem, true);
 		}
 	},
 	
@@ -2551,9 +2583,9 @@ var Helper = {
 		output+='</table>';
 
 		callback.inject.innerHTML=output;
-		for (var id in Helper.resourceList) {
-			document.getElementById('Helper:extractAllSimilar' + id)
-				.addEventListener('click', Helper.extractAllSimilar, true);	
+		for (id in Helper.resourceList) {
+			document.getElementById('Helper:extractAllSimilar' + id).
+				addEventListener('click', Helper.extractAllSimilar, true);	
 			}
 	},
 	
@@ -2600,12 +2632,12 @@ var Helper = {
 			var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
 			theMap["levels"][Helper.levelName]={};
-			System.setValueJSON("map", theMap)
+			System.setValueJSON("map", theMap);
 		}
 
 		document.getElementById('Helper:ToggleFootprints').src =
 			System.imageServer +
-			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif'
+			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif';
 	},
 
 	prepareCombatLog: function() {
@@ -2640,7 +2672,7 @@ var Helper = {
 		var monster = Helper.getMonster(monsterNumber);
 
 		var doNotKillList = GM_getValue("doNotKillList");
-		var doNotKillListAry = doNotKillList.split(",")
+		var doNotKillListAry = doNotKillList.split(",");
 
 		if (monster) {
 			var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
@@ -2723,14 +2755,16 @@ var Helper = {
 		var damageNode = statsNode.rows[3].cells[3];
 		var hitpointsNode = statsNode.rows[4].cells[1];
 		var goldNode = statsNode.rows[4].cells[3];
-		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""));
-		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""));
+		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,""),10);
+		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,""),10);
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var attackVariable = 1.1053, generalVariable = 1.1053, hpVariable = 1.1;
 		if (combatEvaluatorBias == 1) {
-			generalVariable = 1.1, hpVariable = 1.053;
+			generalVariable = 1.1;
+			hpVariable = 1.053;
 		} else if (combatEvaluatorBias == 2) {
-			generalVariable = 1.053, hpVariable = 1;
+			generalVariable = 1.053;
+			hpVariable = 1;
 		}
 		var oneHitNumber = Math.ceil((hitpoints*hpVariable)+(armorNumber*generalVariable));
 		
@@ -2763,13 +2797,13 @@ var Helper = {
 				"key8":hitpointsNode.textContent, "key9":goldNode.textContent});
 		}
 
-		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)"
-		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) "
-		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + Helper.characterAttack + "</span>)"
-		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + Helper.characterDamage + "</span>)"
-		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + Helper.characterArmor + "</span>)"
+		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)";
+		attackNode.innerHTML += " (your defense:<span style='color:yellow'>" + Helper.characterDefense + "</span>) ";
+		defenseNode.innerHTML += " (your attack:<span style='color:yellow'>" + Helper.characterAttack + "</span>)";
+		armorNode.innerHTML += " (your damage:<span style='color:yellow'>" + Helper.characterDamage + "</span>)";
+		damageNode.innerHTML += " (your armor:<span style='color:yellow'>" + Helper.characterArmor + "</span>)";
 		hitpointsNode.innerHTML += " (your HP:<span style='color:yellow'>" + Helper.characterHP + "</span>)" +
-			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)"
+			"(1H: <span style='color:red'>" + oneHitNumber + "</span>)";
 
 		callback.monster.setAttribute("mouseOverText", "<table>" +
 			"<tr><td valign=top>" + imageNode.parentNode.innerHTML + "</td>" +
@@ -2798,10 +2832,10 @@ var Helper = {
 			monsterLog[name]["min"]["key" + i] = monster["key" + i];
 		for (i = 4; i < 10; i++) {
 			var value = System.intValue(monster["key" + i]);
-			monsterLog[name]["min"]["key" + i] = monsterLog[name]["min"]["key" + i] < value
-				? monsterLog[name]["min"]["key" + i] : value;
-			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value
-				? monsterLog[name]["max"]["key" + i] : value;
+			monsterLog[name]["min"]["key" + i] = monsterLog[name]["min"]["key" + i] < value?
+				monsterLog[name]["min"]["key" + i] : value;
+			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value?
+				monsterLog[name]["max"]["key" + i] : value;
 		}
 		System.setValueJSON("monsterLog", monsterLog);
 	},
@@ -2898,16 +2932,18 @@ var Helper = {
 			case "number":
 				Helper.entityLogTable.entity.sort(Helper.numberSort);
 				break;
+			default:
+				break;
 		}
 		Helper.generateEntityTable();
 	},
 
 	backpackUpdater: function(count){
 		var slots = System.findNode(".//font[contains(.,'/') and @size='1']");
-		if (slots != null){
+		if (slots !== null){
 			bpslots = slots.childNodes[0].nodeValue.split("/");
 			//note the - 0 is to insure that math is used
-			slots.childNodes[0].nodeValue = (bpslots[0] - 0 + count) + " /" + bpslots[1] 
+			slots.childNodes[0].nodeValue = (bpslots[0] - 0 + count) + " /" + bpslots[1];
 		}
 	},
 
@@ -2917,7 +2953,7 @@ var Helper = {
 
 		var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
 		var report=responseText.match(reportRE);
-		if (report) report=report[0]
+		if (report) report=report[0];
 
 		// var specialsRE=/<div id="specialsDiv" style="position:relative; display:block;"><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
 		var specials=System.findNodes("//div[@id='specialsDiv']", doc);
@@ -2928,9 +2964,9 @@ var Helper = {
 		var goldGain     = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
 		var levelUp      = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
-		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/
+		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/;
 		var info         = Layout.infoBox(responseText);
-		var lootMatch=responseText.match(lootRE)
+		var lootMatch=responseText.match(lootRE);
 		var lootedItem = "";
 		var lootedItemId = "";
 		var lootedItemVerify="";
@@ -2947,12 +2983,12 @@ var Helper = {
 		if (monster) {
 			var result=document.createElement("div");
 			var resultHtml = "<small><small>"+callback.index+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
-			var resultText = "XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")\n"
-			if (info!="") {
+			var resultText = "XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")\n";
+			if (info!=="") {
 				resultHtml += "<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
 				resultText += info + "\n";
 			}
-			if (lootedItem!="") {
+			if (lootedItem!=="") {
 				Helper.backpackUpdater(1);
 				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
 				resultHtml += "<br/><small><small>Looted item:<span onclickDISABLED=\"ajaxLoadItem(" +
@@ -2976,7 +3012,7 @@ var Helper = {
 				showCombatLog = true;
 			}
 			if (xpGain<0) result.style.color='red';
-			result.innerHTML=resultHtml
+			result.innerHTML=resultHtml;
 			var monsterParent = monster.parentNode;
 			result.id = "result" + callback.index;
 			if (report) {
@@ -2984,14 +3020,14 @@ var Helper = {
 				var reportHtml="";
 				var reportText="";
 				if (specials) {
-					reportHtml += "<div style='color:red'>"
+					reportHtml += "<div style='color:red'>";
 					for (var i=0; i<specials.length; i++) {
 						reportHtml += specials[i].textContent + "<br/>";
 						reportText += specials[i].textContent + "\n";
 					}
 					reportHtml += "</div>";
 				}
-				for (var i=0; i<reportLines.length; i++) {
+				for (i=0; i<reportLines.length; i++) {
 					var reportMatch = reportLines[i].match(/\"(.*)\"/);
 					if (reportMatch) {
 						reportHtml += "<br/>" + reportMatch[1];
@@ -3049,7 +3085,7 @@ var Helper = {
 		} while (!value && target);
 		if (value) {
 			if (!width) width="250";
-			unsafeWindow.tt_setWidth(parseInt(width));
+			unsafeWindow.tt_setWidth(parseInt(width,10));
 			unsafeWindow.Tip(value);
 		}
 	},
@@ -3074,7 +3110,7 @@ var Helper = {
 
 	parseGuildForWorld: function(details) {
 		var doc=System.createDocument(details);
-		var allTables = doc.getElementsByTagName("TABLE")
+		var allTables = doc.getElementsByTagName("TABLE");
 		var membersTable;
 		for (var i=0;i<allTables.length;i++) {
 			var oneTable=allTables[i];
@@ -3091,9 +3127,9 @@ var Helper = {
 				memberList.members = [];
 			}
 
-			memberList.members.forEach(function(e) {e.status="Deleted"});
+			memberList.members.forEach(function(e) {e.status="Deleted";});
 
-			for (var i=0;i<membersDetails.rows.length;i++) {
+			for (i=0;i<membersDetails.rows.length;i++) {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
 					var playerLink   = aRow.cells[1].firstChild.nextSibling;
@@ -3108,7 +3144,7 @@ var Helper = {
 
 					// find member in member list, to modify data instead of replacing it
 
-					var findMembers = memberList.members.filter(function (e) {return e.id==memberId});
+					var findMembers = memberList.members.filter(function (e) {return e.id==memberId;});
 					if (findMembers.length>0) {
 						aMember = findMembers[0];
 					}
@@ -3139,7 +3175,7 @@ var Helper = {
 			}
 
 			// remove not existing players
-			memberList.members = memberList.members.filter(function(e) {return e.status!="Deleted"});
+			memberList.members = memberList.members.filter(function(e) {return e.status!="Deleted";});
 			// damn, I love javascript array functions :)
 
 			memberList.lastUpdate = new Date();
@@ -3149,15 +3185,15 @@ var Helper = {
 	},
 
 	prepareChat: function() {
-		var showLines = parseInt(GM_getValue("chatLines"))
-		if (showLines==0) return;
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
+		var showLines = parseInt(GM_getValue("chatLines"),10);
+		if (showLines===0) return;
+		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
 		if (!injectHere) return;
-		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0)
+		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
 		var chat = System.getValueJSON("chat");
-		var newChat = System.findNode("//table[contains(.,'chat messages')]")
+		var newChat = System.findNode("//table[contains(.,'chat messages')]");
 		if (!chat || newChat || ((new Date()) - chat.lastUpdate > 15000)) {
 			Helper.retrieveChat();
 		} else {
@@ -3221,17 +3257,17 @@ var Helper = {
 
 		var result="<div style='font-size:xx-small' id='chatFrame'>";
 
-		var showLines = parseInt(GM_getValue("chatLines"));
+		var showLines = parseInt(GM_getValue("chatLines"),10);
 		if (isNaN(showLines)) {
-			showLines=10
-			GM_setValue("chatLines", showLines)
+			showLines=10;
+			GM_setValue("chatLines", showLines);
 		}
 		var startFrom = (chat.messages.length>showLines)?chat.messages.length-showLines:0;
 		for (var i=startFrom; i<chat.messages.length; i++) {
 			var j = topToBottom?i:chat.messages.length-i+startFrom-1; // chat.messages.length-i;
 			result += "<span style='color:#F5F298' title='"+chat.messages[j].time+"'>";
-			result += chat.messages[j].from
-			result += ":</span><span style='color:white'>"
+			result += chat.messages[j].from;
+			result += ":</span><span style='color:white'>";
 			result += chat.messages[j].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
 			result += "</span><br/>";
 		}
@@ -3265,7 +3301,7 @@ var Helper = {
 
 		var oForm=evt.target.form;
 		Helper.sendChatGeneric(oForm, true);
-		return false;
+//		return false;
 	},
 
 	sendChat: function(evt) {
@@ -3279,7 +3315,7 @@ var Helper = {
 		var msg=System.findNode("//input[@name='Helper:ChatMessage']", oForm).value;
 		System.findNode("//input[@name='Helper:ChatMessage']", oForm).value="";
 
-		if (msg=="") {
+		if (msg==="") {
 			Helper.retrieveChat();
 			return false;
 		}
@@ -3299,7 +3335,8 @@ var Helper = {
 			onload: function() {
 				Helper.retrieveChat();
 			}
-		})
+		});
+		return true;
 	},
 
 	replaceKeyHandler: function() {
@@ -3321,12 +3358,12 @@ var Helper = {
 
 	killMonsterAt: function(index) {
 		var linkObj	= Helper.getMonster(index);
-		if (linkObj!=null) {
+		if (linkObj!==null) {
 			if (GM_getValue("quickKill")) {
 				Helper.killSingleMonster(index);
 			}
 			else {
-				window.location = linkObj.href
+				window.location = linkObj.href;
 			}
 		}
 	},
@@ -3375,7 +3412,7 @@ var Helper = {
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
 		case 103: // go to guild [g]
-			window.location = 'index.php?cmd=guild&subcmd=manage'
+			window.location = 'index.php?cmd=guild&subcmd=manage';
 			break;
 		case 106: // join all group [j]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
@@ -3488,7 +3525,7 @@ var Helper = {
 			// GM_log('standard key: ' +r);
 			break;
 		}
-		return true;
+		//return true;
 	},
 
 	addLogColoring: function(logScreen, dateColumn) {
@@ -3533,7 +3570,7 @@ var Helper = {
 			}
 		}
 		}
-		now=(new Date()).getTime()
+		now=(new Date()).getTime();
 		GM_setValue(lastCheckScreen, now.toString());
 	},
 
@@ -3553,9 +3590,9 @@ var Helper = {
 		var listOfAllies = GM_getValue("listOfAllies");
 		if (!listOfAllies) listOfAllies = "";
 		var buffList = Data.buffList();
-		for (var i=0;i<logTable.rows.length;i++) {
+		for (i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
-			if (i != 0) {
+			if (i !== 0) {
 				if (aRow.cells[0].innerHTML) {
 					firstCell = aRow.cells[0];
 					//Valid Types: General, Chat, Guild
@@ -3571,7 +3608,7 @@ var Helper = {
 						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName == 'A') {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								playerElement = aRow.cells[2].firstChild.nextSibling;
-								playerName = playerElement.innerHTML
+								playerName = playerElement.innerHTML;
 								colorPlayerName = true;
 							}
 						}
@@ -3608,9 +3645,9 @@ var Helper = {
 						thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID) + ">Buff</a></span>";
 						var fourthPart = messageHTML.substring(messageHTML.indexOf(">Trade</a>") + 10, messageHTML.indexOf("</small>"));
 						var lastPart = messageHTML.substring(messageHTML.indexOf("</small>"), messageHTML.length);
-						var extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
+						extraPart = " | <a href='index.php?cmd=trade&target_player=" + playerName + "'>Trade</a> | " +
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
-							"'>ST</a>"
+							"'>ST</a>";
 
 						var attackPart = " | <a href='index.php?cmd=attackplayer&target_username=" + playerName +"'>Attack</a>"; // ]</nobr></span>";
 
@@ -3630,7 +3667,7 @@ var Helper = {
 									for (var k = 0; k < nicks.length; k++) {										
 										if (buffsSent[j].toLowerCase().trim() == nicks[k].toLowerCase().trim()) {
 											
-											quickBuff += m + ";"
+											quickBuff += m + ";";
 											exitOuter = true;
 											bBuffFound = true;
 											break;
@@ -3656,7 +3693,7 @@ var Helper = {
 										var nickname = (theBuffPack["nickname"][idx]? theBuffPack["nickname"][idx]:"");
 										if (nickname.toLowerCase().trim() == buffsSent[j].toLowerCase().trim()) {
 											//64 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
-											quickBuff += (64+idx) + ";"
+											quickBuff += (64+idx) + ";";
 											break;
 										}
 									}
@@ -3666,7 +3703,7 @@ var Helper = {
 							thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID, quickBuff) + ">Buff</a></span>";
 						}							
 						
-						var msgReplyTo = (GM_getValue("enableChatParsing") == true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" + 
+						var msgReplyTo = (GM_getValue("enableChatParsing") === true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" + 
 							Helper.removeHTML(firstPart.replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
 						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart + attackPart + fourthPart + "</nobr>" + lastPart;
 					}
@@ -3677,7 +3714,7 @@ var Helper = {
 						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName == 'A') {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								if (!isGuildMate) {
-									var dateHTML = aRow.cells[1].innerHTML;
+									dateHTML = aRow.cells[1].innerHTML;
 									var dateExtraText = "<nobr><span style='font-size:x-small;'>[ <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 									"'>Ignore</a> ]</span></nobr>";
 									aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' + dateExtraText;
@@ -3699,7 +3736,7 @@ var Helper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>"
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
 			}
 		}
 	},
@@ -3715,16 +3752,16 @@ var Helper = {
 			var aRow = logTable.rows[i];
 			var firstPlayerID = 0;
 			var secondPlayerID = 0;
-			if (i != 0) {
+			if (i !== 0) {
 				if (hideNextRows>0) {
 					//aRow.style.display = "none";
 					hideNextRows --;
 				}
 				if (aRow.cells[0].innerHTML) {
 					var messageHTML = aRow.cells[2].innerHTML;
-					var doublerPlayerMessageRE = /member\s<a\shref="index.php\?cmd=profile\&amp;player_id=(\d+)/
+					var doublerPlayerMessageRE = /member\s<a\shref="index.php\?cmd=profile\&amp;player_id=(\d+)/;
 					secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
-					var singlePlayerMessageRE = /<a\shref="index.php\?cmd=profile\&amp;player_id=(\d+)/
+					var singlePlayerMessageRE = /<a\shref="index.php\?cmd=profile\&amp;player_id=(\d+)/;
 					firstPlayer = singlePlayerMessageRE.exec(messageHTML);
 					if (secondPlayer) {
 						firstPlayerID = firstPlayer[1]*1;
@@ -3733,8 +3770,6 @@ var Helper = {
 					if (firstPlayer && !secondPlayer) {
 						firstPlayerID = firstPlayer[1]*1;
 					}
-					if (firstPlayerID == playerId || secondPlayerID == playerId) {
-					}
 					else if (firstPlayer) {
 						//aRow.style.display = "none";
 						aRow.style.fontSize = "x-small";
@@ -3742,7 +3777,7 @@ var Helper = {
 						hideNextRows = 3;
 					}
 					if (aRow.cells[2].textContent.charAt(0) == '\'') {
-						message = aRow.cells[2].innerHTML
+						message = aRow.cells[2].innerHTML;
 						firstQuote = message.indexOf('\'');
 						secondQuote = message.indexOf('\'',firstQuote+1);
 						targetPlayerName = message.substring(firstQuote+1,secondQuote);
@@ -3754,7 +3789,7 @@ var Helper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild Log messages not involving self are dimmed!)</font>"
+				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild Log messages not involving self are dimmed!)</font>";
 			}
 
 		}
@@ -3763,14 +3798,14 @@ var Helper = {
 	injectGuildLogSummary: function() {
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
 		
-		var lastCheck=GM_getValue("lastGuildLogSumCheck")
+		var lastCheck=GM_getValue("lastGuildLogSumCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
 		var haveToCheck=((now - lastCheck) > 60*60*1000);
 		if (haveToCheck)
 			document.getElementById('guillogrefresh').addEventListener('click',Helper.guildLogSummaryRefresh,true);
 		else
-			document.getElementById('guillogrefresh').innerHTML='[ Wait '+ Math.round(60 - ((now - lastCheck)/60000)) +'m ]'
+			document.getElementById('guillogrefresh').innerHTML='[ Wait '+ Math.round(60 - ((now - lastCheck)/60000)) +'m ]';
 		var logDetail=GM_getValue("guildlogdetail");
 		if (logDetail) 
 			Helper.guildLogDisplay(logDetail);
@@ -3806,18 +3841,18 @@ var Helper = {
 	},
 	
 	guildLogDisplay: function(logDetail) {
-		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'
-			+logDetail+'</table>';
+		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'+
+			logDetail+'</table>';
 	},
 
 	getFullPlayerData: function(member) {
 		return;
-		System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
+		//System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
 	},
 
 	parsePlayerData: function(responseText, memberId) {
 		// return;
-		var doc=System.createDocument(responseText)
+		var doc=System.createDocument(responseText);
 		// var statistics = System.findNode("//table[contains(tr/td/b,'Level:')]",0,doc);
 		var statistics = System.findNode("//table[contains(tbody/tr/td/b,'Level:')]",0,doc);
 		var levelNode = System.findNode("//td[contains(b,'Level:')]",0,statistics);
@@ -3864,7 +3899,7 @@ var Helper = {
 			startButton.setAttribute("class", "custombutton");
 			startButton.setAttribute("value", "<<");
 			prevButton.parentNode.insertBefore(startButton,prevButton);
-		};
+		}
 		if (nextButton) {
 			nextButton.setAttribute("class", "custombutton");
 			var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
@@ -3875,13 +3910,13 @@ var Helper = {
 			finishButton.setAttribute("class", "custombutton");
 			finishButton.setAttribute("value", ">>");
 			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
-		};
+		}
 
 		//insert another page change block at the top of the screen.
 		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
 		var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
 		var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
-		newPageChangeBlock += "</form>"
+		newPageChangeBlock += "</form>";
 		var insertPageChangeBlock=document.createElement("SPAN");
 		insertPageChangeBlock.innerHTML = newPageChangeBlock;
 		insertPageChangeBlockHere.align = "right";
@@ -3897,17 +3932,17 @@ var Helper = {
 		var lp=0;
 		var rowCount = 0;
 		for (var p=0;p<quickSearchList.length;p++) {
-			if (lp % 3==0 && rowCount == 6) break; //18 searches on the screen so don't display any more
+			if (lp % 3===0 && rowCount == 6) break; //18 searches on the screen so don't display any more
 			var quickSearch=quickSearchList[p];
 			if (quickSearch.displayOnAH) {
-				if (lp % 3==0) {
+				if (lp % 3===0) {
 					finalHTML += "<tr>";
 					rowCount++;
 				}
 				finalHTML += "<td";
 				finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickItemSearch' searchtext='" +
 					quickSearch.searchname + "' title='" + quickSearch.searchname + "'>" +
-					quickSearch.nickname + "</span></td>"
+					quickSearch.nickname + "</span></td>";
 				if (lp % 3==2) finalHTML += "</tr>";
 				if (lp % 3==2) finalHTML += "</tr>";
 				lp++;
@@ -3924,12 +3959,12 @@ var Helper = {
 		}
 
 		var allItems = document.getElementsByTagName("IMG");
-		for (var i=0; i<allItems.length; i++) {
+		for (i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
 				var theImage = anItem;
 				var theUrl = Helper.linkFromMouseover(anItem.getAttribute("onmouseover"));
-				if (theUrl == null) {
+				if (theUrl === null) {
 					continue;
 				}
 				System.xmlhttp(theUrl,
@@ -3957,7 +3992,7 @@ var Helper = {
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1')]");
 		var buyNowLink = System.findNode("//a[contains(@href,'&order_by=2')]");
 		var timeLeftLink = System.findNode("//a[contains(@href,'&order_by=0')]");
-		var auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
+		auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
 		//fix min bid, bid now and time left links from the player AH page
 		var thisLink = window.location.href;
 		var regExpr = new RegExp("tid=([0-9]+)");
@@ -3974,7 +4009,7 @@ var Helper = {
 		var memberList = System.getValueJSON("memberlist");
 		var memberNameString = "";
 		if (memberList) {
-			for (var i=0;i<memberList.members.length;i++) {
+			for (i=0;i<memberList.members.length;i++) {
 				var member=memberList.members[i];
 				memberNameString += member.name + " ";
 			}
@@ -3985,7 +4020,7 @@ var Helper = {
 		if (!listOfAllies) listOfAllies = "";
 
 		var newRow, newCell, winningBidBuyoutCell;
-		for (var i=0;i<auctionTable.rows.length;i++) {
+		for (i=0;i<auctionTable.rows.length;i++) {
 			var aRow = auctionTable.rows[i];
 			if (i>0 && // the title row - ignore this
 				aRow.cells[1]) { // a separator row - ignore this
@@ -4078,13 +4113,13 @@ var Helper = {
 							'<input id="bidNoRefresh" invID="'+ invID +
 								'" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
 					}
-					var inputText = aRow.cells[6]
+					var inputText = aRow.cells[6];
 				}
 			}
 		}
 		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");		
 		if (bidNoRefreshList) {		
-			for (var i=0; i<bidNoRefreshList.length; i++) {		
+			for (i=0; i<bidNoRefreshList.length; i++) {		
 				var bidNoRefreshItem = bidNoRefreshList[i];		
 				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);		
 			}		
@@ -4094,8 +4129,8 @@ var Helper = {
 		var preparePreferences = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]/../../../..");
 		searchPrefs.setAttribute("href", "#prefs");
 
-		var newRow = document.createElement("TR");
-		var newCell = newRow.insertCell(0);
+		newRow = document.createElement("TR");
+		newCell = newRow.insertCell(0);
 		newCell.setAttribute("colspan", 5);
 
 		newCell.innerHTML = '<div id="Helper:AuctionHousePreferences" style="font-size:xx-small;text-align:right;visibility:hidden;display:none;">' +
@@ -4131,7 +4166,7 @@ var Helper = {
 		for (var i=0; i<Helper.qAHPref.length; i++) {
 			injectHere.innerHTML+="[ <span id=qAHPref"+i+" prefId="+i+">"+Helper.qAHPref[i].name+"</span> ] ";
 		}
-		for (var i=0; i<Helper.qAHPref.length; i++) {
+		for (i=0; i<Helper.qAHPref.length; i++) {
 			document.getElementById("qAHPref"+i).addEventListener("click", Helper.changeAuctionQuickPreference, true);
 		}
 	},
@@ -4163,7 +4198,7 @@ var Helper = {
 		GM_addStyle('.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr bgcolor=#CD9E4B>';
-		var isArrayOnly=(Helper.param.fields.length==0);
+		var isArrayOnly=(Helper.param.fields.length===0);
 		for (i=0;i<Helper.param.headers.length;i++)
 			result+='<th>'+Helper.param.headers[i]+'</th>';
 		result+='<th>Action</th></tr>';
@@ -4179,27 +4214,32 @@ var Helper = {
 				}
 				for (j=0;j<Helper.param.fields.length;j++) {
 					result+='<td align=center>';
-					if (Helper.param.fields[j]!=Helper.param.categoryField)
-						if (Helper.param.tags[j]=="checkbox")
+					if (Helper.param.fields[j]!=Helper.param.categoryField){
+						if (Helper.param.tags[j]=="checkbox"){
 							result+="<input type=checkbox "+(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'')+" disabled>";
-						else {
-							if (Helper.param.url && Helper.param.url[j] != '')
+						} else {
+							if (Helper.param.url && Helper.param.url[j] !== ''){
 								result+="<a href='"+Helper.param.url[j].replace("@replaceme@",Helper.param.currentItems[i][Helper.param.fields[j]])+"'>"+
 									Helper.param.currentItems[i][Helper.param.fields[j]]+"</a>";
-							else
+							} else {
 								result+=Helper.param.currentItems[i][Helper.param.fields[j]];
+							}
 						}
 					result+='</td>';
+					}
 				}
 			}
 			result+='<td><span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
 		}
 		result+='<tr>';
-		if (isArrayOnly)
+		if (isArrayOnly){
 			result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input0></td>';
-		else
-			for (i=0;i<Helper.param.tags.length;i++)
+		}
+		else {
+			for (i=0;i<Helper.param.tags.length;i++){
 				result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
+			}
+		}
 		result+='<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
 		
 		if (Helper.param.showRawEditor) {
@@ -4224,22 +4264,23 @@ var Helper = {
 
 	deleteQuickItem: function(evt) {
 		// if (!window.confirm('Are you sure you want to delete this link?')) return;
-		var itemId = evt.target.getAttribute("itemId")
+		var itemId = evt.target.getAttribute("itemId");
 		Helper.param.currentItems.splice(itemId, 1);
 		Helper.generateManageTable();
 	},
 
 	addQuickItem: function(evt) {
-		var isArrayOnly=(Helper.param.fields.length==0);
+		var isArrayOnly=(Helper.param.fields.length===0);
 		var newItem={};
 		if (isArrayOnly) {
 			newItem=document.getElementById("Helper:input0").value;
 		} else {
-			for (var i=0;i<Helper.param.fields.length;i++)
+			for (var i=0;i<Helper.param.fields.length;i++){
 				if (Helper.param.tags[i]=="checkbox")
 					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).checked;
 				else 
 					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).value;
+			}
 		}
 		Helper.param.currentItems.push(newItem);
 		if (Helper.param.sortField) {
@@ -4296,7 +4337,7 @@ var Helper = {
 					infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
 				}
 			}
-		})
+		});
 	},
 	
 	auctionHouseTogglePreferences: function(evt) {
@@ -4309,7 +4350,7 @@ var Helper = {
 			prefArea.style.display="block";
 		}
 		if (prefArea.getAttribute("populated")!="done") {
-			System.xmlhttp('index.php?cmd=auctionhouse&subcmd=preferences', Helper.auctionHouseGetPreferences)
+			System.xmlhttp('index.php?cmd=auctionhouse&subcmd=preferences', Helper.auctionHouseGetPreferences);
 		}
 		return false;
 	},
@@ -4335,15 +4376,15 @@ var Helper = {
 		var hideGold = System.findNode("//input[@name='pref_hidegold']").checked;
 		var hideFsp = System.findNode("//input[@name='pref_hidefsp']").checked;
 
-		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences")
+		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences");
 		submitButton.disabled=true;
-		submitButton.value="Saving..."
+		submitButton.value="Saving...";
 
 		var postData = "cmd=auctionhouse&subcmd=savepreferences" +
 				"&pref_minlevel=" + minLevel +
 				"&pref_maxlevel=" + maxLevel +
 				(hideGold?"&pref_hidegold=1":"") +
-				(hideFsp?"&pref_hidefsp=1":"")
+				(hideFsp?"&pref_hidefsp=1":"");
 
 		GM_xmlhttpRequest({
 			method: 'POST',
@@ -4358,11 +4399,11 @@ var Helper = {
 			onload: function(responseDetails) {
 				Helper.auctionHouseSavePreferencesDone(responseDetails.responseText);
 			}
-		})
+		});
 	},
 
 	auctionHouseSavePreferencesDone: function(responseText) {
-		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences")
+		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences");
 		submitButton.disabled=false;
 		submitButton.value="Save";
 		submitButton.blur();
@@ -4383,8 +4424,8 @@ var Helper = {
 		craft = craft.replace(/\#F6ED00/,"#00B600");
 		craft = craft.replace(/\#F6AE00/,"#F6ED00");
 		var preText = "<span style='color:blue'>" + craft + "</span>";
-		if (forgeCount != 0) {
-			preText +=  " " + forgeCount + "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>"
+		if (forgeCount !== 0) {
+			preText +=  " " + forgeCount + "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>";
 		}
 		if (durability) preText += durability;
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
@@ -4412,9 +4453,9 @@ var Helper = {
 
 	injectReportPaint: function() {
 		var mainTable = System.findNode("//table[@width='600']");
-		var searchItemRE = /&item=(.*)$/
-		var searchSetRE = /&set=(.*)$/
-		var searchUserRE = /&user=(.*)$/
+		var searchItemRE = /&item=(.*)$/;
+		var searchSetRE = /&set=(.*)$/;
+		var searchUserRE = /&user=(.*)$/;
 		var searchItem = searchItemRE.exec(location);
 		var searchSet = searchSetRE.exec(location);
 		var searchUser = searchUserRE.exec(location);
@@ -4436,12 +4477,12 @@ var Helper = {
 				}
 			}
 			var len=mainTable.rows.length;
-			for (var i=0;i<startRow;i++) mainTable.deleteRow(0);
-			for (var i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
+			for (i=0;i<startRow;i++) mainTable.deleteRow(0);
+			for (i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
 		}
 		if (searchItem) var searchItemArr = searchItem.split('|');
-		for (var i=mainTable.rows.length-1;i>=0;i--) {
-			var aRow = mainTable.rows[i];
+		for (i=mainTable.rows.length-1;i>=0;i--) {
+			aRow = mainTable.rows[i];
 			if (aRow.cells[2]) { // itemRow
 				var itemCell = aRow.cells[1];
 				if (searchItem) {
@@ -4461,8 +4502,8 @@ var Helper = {
 					var recallToGuildStore = recallToBackpack.nextSibling.nextSibling;
 					var recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
 				} else {
-					var recallToGuildStore = recallCell.firstChild.nextSibling;
-					var recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
+					recallToGuildStore = recallCell.firstChild.nextSibling;
+					recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
 				}
 				if (recallToBackpack) {
 					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + 
@@ -4478,7 +4519,7 @@ var Helper = {
 				} else {
 					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + 
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span></nobr>';
-					var fastGSSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling;
+					fastGSSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling;
 					fastGSSpan.addEventListener('click', Helper.recallItem, true);
 				}
 			}
@@ -4489,7 +4530,7 @@ var Helper = {
 
 		var injectHere, searchString;
 		if (memberList) {
-			for (var i=0;i<memberList.members.length;i++) {
+			for (i=0;i<memberList.members.length;i++) {
 				var member=memberList.members[i];
 				if (member.status=="Online") {
 					var player=System.findNode("//b[contains(., '" + member.name + "')]");
@@ -4500,7 +4541,7 @@ var Helper = {
 					}
 				}
 				else {
-					var player=System.findNode("//b[contains(., '" + member.name + "')]");
+					player=System.findNode("//b[contains(., '" + member.name + "')]");
 					if (player) {
 						player.innerHTML = "<a href='" +
 							System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
@@ -4521,7 +4562,7 @@ var Helper = {
 		var itemCellElement = target.parentNode;
 		if (info.search("You successfully recalled the item") != -1) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>" + info + "</span>";
-		} else if (info!="") {
+		} else if (info!=="") {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
@@ -4541,7 +4582,7 @@ var Helper = {
 		if (info.search("You successfully") != -1) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Taken</span>";
 			System.xmlhttp(System.server+'?cmd=trade', Helper.wearRecall, itemCellElement);
-		} else if (info!="") {
+		} else if (info!=="") {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
 		}
 	},
@@ -4553,7 +4594,7 @@ var Helper = {
 			System.xmlhttp(System.server+'?cmd=profile&subcmd=equipitem&inventory_id='+itemId+'&folder_id=0&backpack_page=0',
 				function(responseText) {
 					var info = Layout.infoBox(responseText);
-					if (info=="")
+					if (info==="")
 						callback.innerHTML += "<br><span style='color:green; font-weight:bold;'>Worn</span>";
 					else
 						callback.innerHTML += "<br><span style='color:red; font-weight:bold;'>" + info + "</span>";
@@ -4598,7 +4639,7 @@ var Helper = {
 			onload: function() {
 				window.location="index.php?cmd=profile";
 			}
-		})
+		});
 	},
 
 	injectDropItems: function() {
@@ -4648,39 +4689,39 @@ var Helper = {
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
 					var preText = "", postText1 = "", postText2 = "", postText3 = "";
 					if (showExtraLinks) {
-						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
-							+ escape(itemName)
-							+ "'>AH</a>]</span> "
-							+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
-							+ "&inv_id=" + itemInvId 
-							+ "&item_id=" + itemId
-							+ "&type=" + type
-							+ "&pid=" + pid + "'>"
-							+ "Sell</a>]</span> ";
+						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text=" +
+							escape(itemName) +
+							"'>AH</a>]</span> " +
+							"<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2" +
+							"&inv_id=" + itemInvId  +
+							"&item_id=" + itemId +
+							"&type=" + type +
+							"&pid=" + pid + "'>" +
+							"Sell</a>]</span> ";
 					}
-					postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="'
-						+ itemName
-						+ '" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+					postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="' +
+						itemName +
+						'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
 					if (showQuickDropLinks) {
-						postText2 = "&nbsp;<span  title='INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickDrop"
-							+ itemInvId
-							+ "' itemInvId="
-							+ itemInvId
-							+ " findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
+						postText2 = "&nbsp;<span  title='INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickDrop" +
+							itemInvId +
+							"' itemInvId=" +
+							itemInvId +
+							" findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
 					}
 					if (showQuickSendLinks) {
-						postText3 = "&nbsp;<span  title='INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickSend"
-							+ itemInvId
-							+ "' itemInvId="
-							+ itemInvId
-							+ " findme='QuickSend' style='color:blue; cursor:pointer; text-decoration:underline;'>[Quick Send]</span> ";
+						postText3 = "&nbsp;<span  title='INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickSend" +
+							itemInvId +
+							"' itemInvId=" +
+							itemInvId +
+							" findme='QuickSend' style='color:blue; cursor:pointer; text-decoration:underline;'>[Quick Send]</span> ";
 					}
 
-					theTextNode.innerHTML = preText
-						+ theTextNode.innerHTML
-						+ postText1
-						+ postText2
-						+ postText3;
+					theTextNode.innerHTML = preText +
+						theTextNode.innerHTML +
+						postText1 +
+						postText2 +
+						postText3;
 					if (showQuickDropLinks) {
 						document.getElementById("Helper:QuickDrop"+itemInvId).addEventListener('click', Helper.quickDropItem, true);
 					}
@@ -4693,16 +4734,16 @@ var Helper = {
 
 		var checkAllElements = System.findNodes("//span[@findme='checkall']");
 		if (checkAllElements) {
-			for (var i=0; i<checkAllElements.length; i++) {
+			for (i=0; i<checkAllElements.length; i++) {
 				checkAllElement = checkAllElements[i];
 				itemName = checkAllElement.linkto;
 				checkAllElement.addEventListener('click', Helper.checkAll, true);
 			}
 		}
 
-		var allItems = System.findNodes("//input[@type='checkbox']");
+		allItems = System.findNodes("//input[@type='checkbox']");
 		if (allItems) {
-			for (var i=0; i<allItems.length; i++) {
+			for (i=0; i<allItems.length; i++) {
 				anItem = allItems[i];
 				theLocation=anItem.parentNode.nextSibling.nextSibling;
 				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
@@ -4782,7 +4823,7 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Item Dropped";
-		} else if (info!="") {
+		} else if (info!=="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
@@ -4812,12 +4853,12 @@ var Helper = {
 		var itemRecipient = GM_getValue("itemRecipient");
 		target.style.cursor = 'default';
 		target.style.textDecoration = 'none';
-		if (info=="Items sent successfully!") {
+		if (info==="Items sent successfully!") {
 			target.style.color = 'green';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Item sent to " + itemRecipient + "!";
-		} else if (info!="") {
+		} else if (info!=="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
@@ -4871,14 +4912,14 @@ var Helper = {
 			var cbNode = System.findNode("../../../td[1]",callback);
 			textNode.innerHTML += '<span id="guildLocked" visibility="hidden"/>';
 			
-		};
+		}
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
 		if (boundItemRE.exec(responseText)) {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
-		};
+		}
 		if (GM_getValue("disableItemColoring")) return;
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
 		var fontLineRX=fontLineRE.exec(responseText);
@@ -4916,7 +4957,7 @@ var Helper = {
 
 			var playeravy = avyrow.parentNode.firstChild ;
 			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue))) {
-				playeravy = playeravy.nextSibling ;
+				playeravy = playeravy.nextSibling;
 			}
 			var playername = playeravy.getAttribute("title");
 			playeravy.style.borderStyle="none";
@@ -4940,10 +4981,10 @@ var Helper = {
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (node) {
 				node.parentNode.innerHTML+="|&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick&nbsp;Wear</a>]"+
-					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>"
+					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>";
 				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 			}
-			if (GM_getValue("showBPSlotsOnProfile") == true) {
+			if (GM_getValue("showBPSlotsOnProfile") === true) {
 				System.xmlhttp("index.php?cmd=world", Helper.injectEmptySlots, 0);
 			}
 		}
@@ -4998,9 +5039,9 @@ var Helper = {
 
 			var newRow;
 
-			for (var i=0;i<12;i++) {
-				if ((i % 4==0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
-				if ((i % 4==0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
+			for (i=0;i<12;i++) {
+				if ((i % 4===0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
+				if ((i % 4===0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
 				if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
 					var itemOnmouseover = profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("onmouseover");
 					if (itemOnmouseover.indexOf("Equip") != -1) { // check to see if item is equipable.
@@ -5010,14 +5051,14 @@ var Helper = {
 						var newCell = newRow.insertCell(i % 4);
 						newCell.align = 'center';
 						newCell.innerHTML = output;
-						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i])
-							.addEventListener('click', Helper.equipProfileInventoryItem, true);
+						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i]).
+							addEventListener('click', Helper.equipProfileInventoryItem, true);
 					}
 					else {
-						var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
+						newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
 					}
 				} else if (profileInventoryBoxItem[i] && !profileInventoryBoxID[i]){
-					var newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
+					newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
 				}
 			}
 		}
@@ -5073,12 +5114,12 @@ var Helper = {
 		var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
 		if (enemiesTable) {
 			var numberOfEnemies = 0;
-			var startIndex = 0;
+			startIndex = 0;
 			while (enemiesTable.innerHTML.indexOf("/avatars/", startIndex+1) != -1) {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/avatars/",startIndex+1);
 			}
-			var startIndex = 0;
+			startIndex = 0;
 			while (enemiesTable.innerHTML.indexOf("/skin/player_default.jpg", startIndex+1) != -1) {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
@@ -5092,7 +5133,7 @@ var Helper = {
 		//store a list of allies and enemies for use in coloring
 		listOfAllies = "";
 		if (alliesTable) {
-			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling
+			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling;
 			for (var i=0;i<alliesTableActual.rows.length;i++) {
 				var aRow = alliesTableActual.rows[i];
 				for (var j=0;j<alliesTableActual.rows[i].cells.length;j++) {
@@ -5108,11 +5149,11 @@ var Helper = {
 
 		listOfEnemies = "";
 		if (enemiesTable) {
-			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling
-			for (var i=0;i<enemiesTableActual.rows.length;i++) {
-				var aRow = enemiesTableActual.rows[i];
-				for (var j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
-					var aCell = aRow.cells[j];
+			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling;
+			for (i=0;i<enemiesTableActual.rows.length;i++) {
+				aRow = enemiesTableActual.rows[i];
+				for (j=0;j<enemiesTableActual.rows[i].cells.length;j++) {
+					aCell = aRow.cells[j];
 					if (aCell.firstChild.firstChild.nextSibling) {
 						var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
 						var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
@@ -5147,7 +5188,7 @@ var Helper = {
 	profileRenderBio: function(playername) {
 		var bioCell = System.findNode("//table[tbody/tr/td/b[.='Biography']]").rows[6];
 		var bioXPath="//tr[td/b[.='Biography'] or td/table/tbody/tr/td/b[.='Biography']]/following-sibling::tr[2]/td/font";
-		var renderBio=(bioCell && GM_getValue("renderSelfBio")) || (!bioCell && GM_getValue("renderOtherBios"))
+		var renderBio=(bioCell && GM_getValue("renderSelfBio")) || (!bioCell && GM_getValue("renderOtherBios"));
 		GM_setValue("buffsToBuy", "");
 		var bioNode=System.findNode(bioXPath);
 		var bioContents = bioNode.innerHTML;
@@ -5215,21 +5256,23 @@ var Helper = {
 				var color = "";
 				var changeAppearance = true;
 				Helper.currentGuildRelationship = Helper.guildRelationship(aLink.text);
+				var settings;
 				switch (Helper.currentGuildRelationship) {
 					case "self":
-						var settings="guildSelfMessage";
+						settings="guildSelfMessage";
 						break;
 					case "friendly":
-						var settings="guildFrndMessage";
+						settings="guildFrndMessage";
 						break;
 					case "old":
-						var settings="guildPastMessage";
+						settings="guildPastMessage";
 						break;
 					case "enemy":
-						var settings="guildEnmyMessage";
+						settings="guildEnmyMessage";
 						break;
 					default:
 						changeAppearance = false;
+						break;
 				}
 				if (changeAppearance) {
 					var settingsAry=GM_getValue(settings).split("|");
@@ -5249,7 +5292,6 @@ var Helper = {
 			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
 				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>'+
 				'<a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a>';
-;
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		}
@@ -5291,7 +5333,7 @@ var Helper = {
 			totalCount+=currentPage*50;
 			var output='Component Summary<br/><table>';
 			var usedCount=0;
-			for (var id in Helper.componentList) {
+			for (id in Helper.componentList) {
 				var comp=Helper.componentList[id];
 				output+="<tr><td align=center><img src="+comp.src+" onmouseover=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
 				usedCount+=comp.count;
@@ -5306,8 +5348,8 @@ var Helper = {
 		var bioCell = bioTable.rows[6];
 		if (bioCell) { //non-self profile
 			var bioContents = bioCell.cells[0].innerHTML;
-			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");;
-			var maxRowsToShow = GM_getValue("maxCompressedLines");;
+			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
+			var maxRowsToShow = GM_getValue("maxCompressedLines");
 			var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
 			if (numberOfLines >= maxRowsToShow) {
 				var startIndex = 0;
@@ -5360,11 +5402,11 @@ var Helper = {
 			if (!price) { // some players have prices BEFORE the buff names
 				node=buffNameNode;
 				while (node && node.nodeName.toLowerCase()!='br') {
-					var newtext=node.textContent;
+					newtext=node.textContent;
 					node=node.previousSibling;
 					text=newtext+text;
 				}
-				var price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)/);
+				price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)/);
 			}
 			var type, cost;
 			if (price) {
@@ -5448,7 +5490,7 @@ var Helper = {
 	
 	profileSelectAll: function(evt) {
 		var checkboxItems = System.findNodes("//input[@type='checkbox']");
-		checkboxItems.forEach(function(e) {e.checked = e.checked? false:true});
+		checkboxItems.forEach(function(e) {e.checked = e.checked? false:true;});
 	},
 
 	equipProfileInventoryItem: function(evt) {
@@ -5509,22 +5551,22 @@ var Helper = {
 	linkFromMouseover: function(mouseOver) {
 		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
-		if (reResult == null) {
+		if (reResult === null) {
 			return null;
 		}
 		var itemId=reResult[1];
 		var invId=reResult[2];
 		var type=reResult[3];
 		var pid=reResult[4];
-		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
+		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid;
 		theUrl = System.server + theUrl;
-		return theUrl
+		return theUrl;
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
 		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]+)\'/i;
 		var reResult =reParams.exec(mouseOver);
-		if (reResult == null) {
+		if (reResult === null) {
 			return null;
 		}
 		var itemId   = reResult[1];
@@ -5532,22 +5574,23 @@ var Helper = {
 		var type     = reResult[3];
 		var pid      = reResult[4];
 		var vcode    = reResult[5];
-		var theUrl   = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p=" + pid + "&vcode=" + vcode
+		var theUrl   = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p=" + pid + "&vcode=" + vcode;
 		theUrl = System.server + theUrl;
-		return theUrl
+		return theUrl;
 	},
 
 	injectInventoryManager: function() {
 		var content=Layout.notebookContent();
 
-		var lastCheck=GM_getValue("lastInventoryCheck")
+		var lastCheck=GM_getValue("lastInventoryCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 5*60*1000)
+		var haveToCheck=((now - lastCheck) > 5*60*1000);
+		var refreshButton;
 		if (haveToCheck) {
-			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
+			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
 		} else {
-			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
+			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
 		}
 
 		Helper.inventory=System.getValueJSON("inventory");
@@ -5564,9 +5607,9 @@ var Helper = {
 				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
 				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/>' +
-				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>'
+				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
-			newhtml += (i % 5 ==0) ? '</td></tr><tr><td>' : '';
+			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
 					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
@@ -5581,7 +5624,7 @@ var Helper = {
 		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
 		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
 
-		for (var i=0; i<Helper.itemFilters.length; i++) {
+		for (i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		}
 		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
@@ -5591,24 +5634,25 @@ var Helper = {
 	injectGuildInventoryManager: function() {
 		var content=Layout.notebookContent();
 
-		var lastCheck=GM_getValue("lastGuildInventoryCheck")
+		var lastCheck=GM_getValue("lastGuildInventoryCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 15*60*1000)
+		var haveToCheck=((now - lastCheck) > 15*60*1000);
+		var refreshButton;
 		if (haveToCheck) {
-			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
+			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
 		} else {
-			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(900 - ((now - lastCheck)/1000)) +'s ]</td>';
+			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(900 - ((now - lastCheck)/1000)) +'s ]</td>';
 		}
 
-		var guildItemCount = "unknown"
+		var guildItemCount = "unknown";
 		unsafeWindow.changeMenu(0,'menu_character');
 		unsafeWindow.changeMenu(5,'menu_guild');
 		unsafeWindow.changeMenu(0,'menu_character');
 		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 		Helper.guildinventory = System.getValueJSON("guildinventory");
 		if (Helper.guildinventory) {
-			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name)});
+			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name);});
 			guildItemCount = Helper.guildinventory.items.length;
 		}
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
@@ -5625,9 +5669,9 @@ var Helper = {
 				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
 				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="submit" value="Filter"/>' +
-				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="button" value="Reset"/></form></div>'
+				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
-			newhtml += (i % 5 ==0) ? '</td></tr><tr><td>' : '';
+			newhtml += (i % 5 === 0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
 					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
@@ -5643,7 +5687,7 @@ var Helper = {
 		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
 		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
 
-		for (var i=0; i<Helper.itemFilters.length; i++) {
+		for (i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		}
 		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
@@ -5657,10 +5701,11 @@ var Helper = {
 		}
 		if (checkedValue)
 			window.location=window.location;
-		else
-			for (var i=0; i<Helper.itemFilters.length; i++) {
+		else {
+			for (i=0; i<Helper.itemFilters.length; i++) {
 				document.getElementById(Helper.itemFilters[i].id).checked = checkedValue;
 			}
+		}
 	},
 	
 	toggleCheckboxAndRefresh: function(evt) {
@@ -5674,15 +5719,16 @@ var Helper = {
 		unsafeWindow.changeMenu(2,'menu_actions');
 		unsafeWindow.changeMenu(0,'menu_character');
 
-		var lastCheck=GM_getValue("lastOnlineCheck")
+		var lastCheck=GM_getValue("lastOnlineCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 5*60*1000)
+		var haveToCheck=((now - lastCheck) > 5*60*1000);
+		var refreshButton;
 		if (haveToCheck) {
-			var refreshButton = '<td> (takes a while to refresh so only do it if you really need to) </td>'+
+			refreshButton = '<td> (takes a while to refresh so only do it if you really need to) </td>'+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right"><span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">[Refresh]</span></td>';
 		} else {
-			var refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
+			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
 		}
 
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
@@ -5693,7 +5739,7 @@ var Helper = {
 			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
 			'' +
 			'</div>';
-		var refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
+		refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
 		if (refreshButton)
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
 
@@ -5716,30 +5762,31 @@ var Helper = {
 		refreshButton.style.visibility = "hidden";
 
 		Helper.onlinePlayers = {players:[]};
-		var output=document.getElementById('Helper:OnlinePlayersOutput')
+		var output=document.getElementById('Helper:OnlinePlayersOutput');
 		output.innerHTML='<br/>Parsing online players ...';
 		System.xmlhttp('index.php?cmd=onlineplayers&page=1', Helper.parseOnlinePlayersStorePage, {"page":1});
 	},
 
 	parseOnlinePlayersStorePage: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var output=document.getElementById('Helper:OnlinePlayersOutput')
+		var output=document.getElementById('Helper:OnlinePlayersOutput');
 		var playerRows = System.findNodes("//table/tbody/tr[count(td)=4 and td[2]/a]", doc);
-		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""));
+		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""),10);
 		output.innerHTML+=callback.page + " ";
-		if (playerRows)
+		if (playerRows){
 			for (var i=0; i<playerRows.length; i++) {
 				var guildId;
 				if (playerRows[i].cells[0].innerHTML.search("href") == -1) guildId = -1;
-				else guildId = parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,""));
+				else guildId = parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,""),10);
 				var newPlayer = {
 					guildId: guildId,
-					id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,"")),
+					id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,""),10),
 					name: playerRows[i].cells[1].textContent,
-					level: parseInt(playerRows[i].cells[2].textContent)
-				}
+					level: parseInt(playerRows[i].cells[2].textContent,10)
+				};
 				Helper.onlinePlayers.players.push(newPlayer);
 			}
+		}
 		if (callback.page<maxPage/*-maxPage+15*/) {
 			var newPage = (callback.page == 1) ? Math.round(4 * maxPage / 5) : (callback.page+1);
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
@@ -5786,7 +5833,7 @@ var Helper = {
 		document.getElementById("Helper:onlinePlayerFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
 
 		var theTable=document.getElementById('Helper:OnlinePlayersTable');
-		for (var i=0; i<theTable.rows[0].cells.length; i++) {
+		for (i=0; i<theTable.rows[0].cells.length; i++) {
 			var cell=theTable.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
@@ -5804,7 +5851,7 @@ var Helper = {
 			Helper.sortAsc = sortCriteria["sortAsc"];
 		} else {
 			var headerClicked = evt.target.getAttribute("sortKey");
-			var sortType = evt.target.getAttribute("sortType");
+			sortType = evt.target.getAttribute("sortType");
 			if (!sortType) sortType="string";
 			GM_log(headerClicked);
 			// GM_log(Helper.sortBy);
@@ -5825,6 +5872,8 @@ var Helper = {
 			case "number":
 				Helper.onlinePlayers.players.sort(Helper.numberSort);
 				break;
+			default:
+				break;
 		}
 		Helper.generateOnlinePlayersTable();
 	},
@@ -5840,10 +5889,10 @@ var Helper = {
 
 		Helper.inventory = new Object;
 		Helper.inventory.items = new Array();
-		var output=document.getElementById('Helper:InventoryManagerOutput')
+		var output=document.getElementById('Helper:InventoryManagerOutput');
 		output.innerHTML='<br/>Parsing profile...';
 		Data.itemList();
-		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileDone)
+		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileDone);
 	},
 
 	parseProfileDone: function(responseText) {
@@ -5854,7 +5903,7 @@ var Helper = {
 			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
 				"where":"worn", "index":(i+1),
 				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
-			if (i==0) output.innerHTML+="<br/>Found worn item "
+			if (i===0) output.innerHTML+="<br/>Found worn item ";
 			output.innerHTML+=(i+1) + " ";
 			Helper.inventory.items.push(item);
 		}
@@ -5864,9 +5913,9 @@ var Helper = {
 		var folderLinks = System.findNodes("//a[contains(@href,'index.php?cmd=profile&folder_id=')]", doc);
 		//if folders are enabled then save the ID's in an array
 		if (folderLinks) {
-			for (var i=0; i<folderLinks.length;i++) {
+			for (i=0; i<folderLinks.length;i++) {
 				folderLink = folderLinks[i];
-				href = folderLink.getAttribute("href")
+				href = folderLink.getAttribute("href");
 				var folderID = /folder_id=([-0-9]+)/.exec(href)[1]*1;
 				folderIDs.push(folderID);
 				Helper.folderIDs = folderIDs;
@@ -5882,7 +5931,7 @@ var Helper = {
 		var pages = System.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
 		var pageElement = System.findNode("//a[contains(@href,'backpack_page=')]/font", doc);
 		var currentPage = 1;
-		if (pageElement) currentPage = parseInt(System.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent);
+		if (pageElement) currentPage = parseInt(System.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent,10);
 		var currentFolder = GM_getValue("currentFolder");
 		var folderCount = 0, folderID = -1;
 		if (Helper.folderIDs.length<=1) {
@@ -5896,11 +5945,11 @@ var Helper = {
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 
 			for (var i=0; i<backpackItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"));
 				var item={"url": theUrl,
 					"where":"backpack", "index":(i+1), "page":currentPage,
 					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
-				if (i==0) output.innerHTML+="<br/>Found wearable item "
+				if (i===0) output.innerHTML+="<br/>Found wearable item ";
 				output.innerHTML+=(i+1) + " ";
 				Helper.inventory.items.push(item);
 			}
@@ -5916,7 +5965,7 @@ var Helper = {
 			System.xmlhttp('index.php?cmd=profile&backpack_page='+(currentPage)+'&folder_id='+(folderID), Helper.parseInventoryPage);
 		}
 		else {
-			output.innerHTML+="<br/>Parsing inventory item "
+			output.innerHTML+="<br/>Parsing inventory item ";
 			Helper.retrieveInventoryItem(0, "self");
 		}
 	},
@@ -5927,7 +5976,7 @@ var Helper = {
 
 		Helper.guildinventory = new Object;
 		Helper.guildinventory.items = new Array();
-		var output=document.getElementById('Helper:GuildInventoryManagerOutput')
+		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		output.innerHTML = '<br/>Parsing guild store ...';
 		Data.itemList();
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', Helper.parseGuildStorePage);
@@ -5938,16 +5987,16 @@ var Helper = {
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		var guildstoreItems = System.findNodes("//a[contains(@href,'subcmd2=takeitem')]/img", doc);
 		var pages = System.findNodes("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]", doc);
-		var currentPage = parseInt(System.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent);
+		var currentPage = parseInt(System.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent,10);
 		if (guildstoreItems) {
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
 
 			for (var i=0; i<guildstoreItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"));
 				var item={"url": theUrl,
 					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
 					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
-				if (i==0) output.innerHTML+="<br/>Found guild store item "
+				if (i===0) output.innerHTML+="<br/>Found guild store item ";
 				output.innerHTML+=(i+1) + " ";
 				Helper.guildinventory.items.push(item);
 			}
@@ -5960,7 +6009,7 @@ var Helper = {
 		}
 		else {
 			output.innerHTML+='<br/>Parsing guild report page ...';
-			System.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', Helper.parseGuildReportPage)
+			System.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', Helper.parseGuildReportPage);
 		}
 	},
 
@@ -5970,16 +6019,16 @@ var Helper = {
 		var guildreportItems = System.findNodes("//img[contains(@src,'items')]", doc);
 		if (guildreportItems) {
 			for (var i=0; i<guildreportItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"));
 				var item={"url": theUrl,
 					"where":"guildreport", "index":(i+1), "worn":false,
 					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
-				if (i==0) output.innerHTML+="<br/>Found guild report item "
+				if (i===0) output.innerHTML+="<br/>Found guild report item ";
 				output.innerHTML+=(i+1) + " ";
 				Helper.guildinventory.items.push(item);
 			}
 		}
-		output.innerHTML+="<br/>Parsing guild inventory item "
+		output.innerHTML+="<br/>Parsing guild inventory item ";
 		Helper.retrieveInventoryItem(0, "guild");
 	},
 
@@ -5989,7 +6038,7 @@ var Helper = {
 		} else {
 			targetInventory = Helper.inventory;
 		}
-		if (targetInventory.items[invIndex].url == null) {
+		if (targetInventory.items[invIndex].url === null) {
 			invIndex++;
 		}
 		System.xmlhttp(targetInventory.items[invIndex].url, Helper.parseInventoryItem, {"invIndex": invIndex, "reportType": reportType});
@@ -6018,22 +6067,22 @@ var Helper = {
 			var itemBonuses=System.findNode("//table[tbody/tr/td/center/font='Bonuses']", doc);
 
 			var attackNode=System.findNode("tbody/tr/td[.='Attack:']/../td[2]", itemBonuses);
-			item.attack=(attackNode)?parseInt(attackNode.textContent):0;
+			item.attack=(attackNode)?parseInt(attackNode.textContent,10):0;
 
 			var defenseNode=System.findNode("tbody/tr/td[.='Defense:']/../td[2]", itemBonuses);
-			item.defense=(defenseNode)?parseInt(defenseNode.textContent):0;
+			item.defense=(defenseNode)?parseInt(defenseNode.textContent,10):0;
 
 			var armorNode=System.findNode("tbody/tr/td[.='Armor:']/../td[2]", itemBonuses);
-			item.armor=(armorNode)?parseInt(armorNode.textContent):0;
+			item.armor=(armorNode)?parseInt(armorNode.textContent,10):0;
 
 			var damageNode=System.findNode("tbody/tr/td[.='Damage:']/../td[2]", itemBonuses);
-			item.damage=(damageNode)?parseInt(damageNode.textContent):0;
+			item.damage=(damageNode)?parseInt(damageNode.textContent,10):0;
 
 			var hpNode=System.findNode("tbody/tr/td[.='HP:']/../td[2]", itemBonuses);
-			item.hp=(hpNode)?parseInt(hpNode.textContent):0;
+			item.hp=(hpNode)?parseInt(hpNode.textContent,10):0;
 
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
-			item.minLevel=(levelNode)?parseInt(levelNode.textContent):0;
+			item.minLevel=(levelNode)?parseInt(levelNode.textContent,10):0;
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
@@ -6041,18 +6090,18 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			var findItem = Data.itemArray.filter(function (e,i,a) {return e.name.trim()==item.name.trim()});
+			var findItem = Data.itemArray.filter(function (e,i,a) {return e.name.trim()==item.name.trim();});
 			if (findItem.length>0) {
 				item.type = findItem[0].type;
 			} else {
 				GM_log("Item not found in list: '" + item.name + "'");
-				item.type = "???"
+				item.type = "???";
 			}
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-				var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/
-				var fontLineRX=fontLineRE.exec(responseText)
+				var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
+				var fontLineRX=fontLineRE.exec(responseText);
 				craft = fontLineRX[3];
 			}
 			item.craftlevel=craft;
@@ -6078,7 +6127,7 @@ var Helper = {
 			inventoryShell = 'inventory';
 		}
 		if (!targetInventory) return;
-		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name)});
+		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
 
 		var output=document.getElementById(targetId);
 		var result='<table id="Helper:InventoryTable"><tr>' +
@@ -6101,43 +6150,43 @@ var Helper = {
 		//apply level filters
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
 		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
-		allItems=allItems.filter(function(e,i,a) {return (e.minLevel >= minLvl && e.minLevel <= maxLvl)});
+		allItems=allItems.filter(function(e,i,a) {return (e.minLevel >= minLvl && e.minLevel <= maxLvl);});
 
 		var showGloveTypeItems = GM_getValue("showGloveTypeItems");
 		if (!showGloveTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'gloves'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'gloves';});
 		}
 		var showHelmetTypeItems = GM_getValue("showHelmetTypeItems");
 		if (!showHelmetTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'helmet'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'helmet';});
 		}
 		var showAmuletTypeItems = GM_getValue("showAmuletTypeItems");
 		if (!showAmuletTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'amulet'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'amulet';});
 		}
 		var showWeaponTypeItems = GM_getValue("showWeaponTypeItems");
 		if (!showWeaponTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'weapon'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'weapon';});
 		}
 		var showAmorTypeItems = GM_getValue("showAmorTypeItems");
 		if (!showAmorTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'armor'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'armor';});
 		}
 		var showShieldTypeItems = GM_getValue("showShieldTypeItems");
 		if (!showShieldTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'shield'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'shield';});
 		}
 		var showRingTypeItems = GM_getValue("showRingTypeItems");
 		if (!showRingTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'ring'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'ring';});
 		}
 		var showBootTypeItems = GM_getValue("showBootTypeItems");
 		if (!showBootTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'boots'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'boots';});
 		}
 		var showRuneTypeItems = GM_getValue("showRuneTypeItems");
 		if (!showRuneTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'rune'});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'rune';});
 		}
 
 		for (var i=0; i<allItems.length;i++) {
@@ -6148,7 +6197,7 @@ var Helper = {
 				case "backpack":    color = "blue";   whereText = "BP";   whereTitle="In Backpack";    break;
 				case "guildstore":  color = "navy";   whereText = "GS";   whereTitle="Guild Store";  break;
 				case "guildreport": color = "maroon"; whereText = "Rep";  whereTitle="Guild Report"; break;
-				default: color = "black";
+				default: color = "black"; break;
 			}
 
 			result+='<tr style="color:'+ color +'">' +
@@ -6177,7 +6226,7 @@ var Helper = {
 		System.setValueJSON(inventoryShell, targetInventory);
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
-		for (var i=0; i<inventoryTable.rows[0].cells.length; i++) {
+		for (i=0; i<inventoryTable.rows[0].cells.length; i++) {
 			var cell=inventoryTable.rows[0].cells[i];
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
@@ -6198,7 +6247,7 @@ var Helper = {
 			Helper.inventory=System.getValueJSON("inventory");
 			targetInventory = Helper.inventory;
 		}
-		var headerClicked=evt.target.getAttribute("sortKey")
+		var headerClicked=evt.target.getAttribute("sortKey");
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==headerClicked) {
 			Helper.sortAsc=!Helper.sortAsc;
@@ -6211,10 +6260,10 @@ var Helper = {
 		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
 			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel" ||
 			headerClicked=="hp") {
-			targetInventory.items.sort(Helper.numberSort)
+			targetInventory.items.sort(Helper.numberSort);
 		}
 		else {
-			targetInventory.items.sort(Helper.stringSort)
+			targetInventory.items.sort(Helper.stringSort);
 		}
 		if (subPageId == "guildinvmanager") {
 			Helper.generateInventoryTable("guild");
@@ -6242,7 +6291,7 @@ var Helper = {
 	parseInventingStart: function(){
 		Helper.recipebook = {};
 		Helper.recipebook.recipe = [];
-		var output=document.getElementById('Helper:RecipeManagerOutput')
+		var output=document.getElementById('Helper:RecipeManagerOutput');
 		output.innerHTML='<br/>Parsing inventing screen ...<br/>';
 		System.xmlhttp('index.php?cmd=inventing&page=0', Helper.parseInventingPage, {"page": 0});
 	},
@@ -6261,7 +6310,7 @@ var Helper = {
 			for (var i=0; i<recipeRows.length;i++) {
 				aRow = recipeRows[i];
 				var recipeLink = aRow.cells[1].firstChild.href;
-				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1]);
+				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
 				var recipe={
 					"img": aRow.cells[0].firstChild.src,
 					"link": recipeLink,
@@ -6296,9 +6345,9 @@ var Helper = {
 					img: resultNode.firstChild.firstChild.src,
 					id: mouseOverRX[1],
 					verify: mouseOverRX[2],
-					amountPresent: parseInt(resultAmounts.split("/")[0]),
-					amountNeeded: parseInt(resultAmounts.split("/")[1])
-				}
+					amountPresent: parseInt(resultAmounts.split("/")[0],10),
+					amountNeeded: parseInt(resultAmounts.split("/")[1],10)
+				};
 				results.push(result);
 			}
 		}
@@ -6367,7 +6416,7 @@ var Helper = {
 				result += '</td>';
 				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.components) {
-					for (var j=0; j<recipe.components.length; j++) {
+					for (j=0; j<recipe.components.length; j++) {
 						result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
 							' <img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
 							recipe.components[j].id + ', -1, 2, ' + Layout.playerId() + ', \'' +
@@ -6394,7 +6443,7 @@ var Helper = {
 		System.setValueJSON("recipebook", Helper.recipebook);
 
 		var recipeTable=document.getElementById('Helper:RecipeTable');
-		for (var i=0; i<recipeTable.rows[0].cells.length; i++) {
+		for (i=0; i<recipeTable.rows[0].cells.length; i++) {
 			var cell=recipeTable.rows[0].cells[i];
 			if (cell.getAttribute("sortkey")) {
 				cell.style.textDecoration="underline";
@@ -6418,10 +6467,11 @@ var Helper = {
 		//GM_log(headerClicked)
 		switch (sortType) {
 			case "number":
-				Helper.recipebook.recipe.sort(Helper.numberSort)
+				Helper.recipebook.recipe.sort(Helper.numberSort);
 				break;
 			default:
-				Helper.recipebook.recipe.sort(Helper.stringSort)
+				Helper.recipebook.recipe.sort(Helper.stringSort);
+				break;
 		}
 		Helper.generateRecipeTable();
 	},
@@ -6465,8 +6515,8 @@ var Helper = {
 		var totalMercHP = 0;
 		for (var i=0; i<mercElements.length; i++) {
 			merc = mercElements[i];
-			var mouseoverText = merc.getAttribute("onmouseover")
-			var src = merc.getAttribute("src")
+			var mouseoverText = merc.getAttribute("onmouseover");
+			var src = merc.getAttribute("src");
 			if (mouseoverText && src.search("/merc/") != -1){
 				//<td>Attack:</td><td>1919</td>
 				var attackRE=/<td>Attack:<\/td><td>(\d+)<\/td>/;
@@ -6542,7 +6592,7 @@ var Helper = {
 						var modifierWord;
 						for (var k = 0; k < listOfDefenders.length; k++) {
 							shortList.push(listOfDefenders[k]);
-							if (((k + 1) % 16 == 0 && k != 0) || (k == listOfDefenders.length - 1)) {
+							if (((k + 1) % 16 === 0 && k !== 0) || (k == listOfDefenders.length - 1)) {
 								modifierWord = Helper.getGroupBuffModifierWord(k);
 								theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + k + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
 									"Buff " + modifierWord + " 16</span></a></nobr>";
@@ -6567,12 +6617,12 @@ var Helper = {
 					if (theMember.search("<font") == -1) {
 						if (memberList) {
 							for (j=0; j<memberList.members.length; j++) {
-								var aMember=memberList.members[j];
+								aMember=memberList.members[j];
 								// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 								if (aMember.name==theMember) {
 									//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
 									//direct call to player_id is faster link - server doesn't have to do a search.
-									linkMember = (k==0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
+									linkMember = (k===0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
 									break;
 								}
 							}
@@ -6580,7 +6630,7 @@ var Helper = {
 					} else {
 						linkMember = " " + theMember;
 					}
-					linkMembersArray.push(linkMember)
+					linkMembersArray.push(linkMember);
 				}
 				theMembersCell.innerHTML = linkMembersArray;
 			}
@@ -6619,7 +6669,7 @@ var Helper = {
 
 	parseGroupData: function(responseText, linkElement) {
 		var doc=System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName("TD")
+		var allItems = doc.getElementsByTagName("TD");
 		//<td><font color="#333333">Attack:&nbsp;</font></td>
 
 		for (var i=0;i<allItems.length;i++) {
@@ -6645,7 +6695,7 @@ var Helper = {
 				var hpValue = hpLocation.textContent;
 			}
 		}
-		extraText = "<table cellpadding='1' style='font-size:x-small; border-top:2px black solid; border-spacing: 1px; border-collapse: collapse;'>"
+		extraText = "<table cellpadding='1' style='font-size:x-small; border-top:2px black solid; border-spacing: 1px; border-collapse: collapse;'>";
 		extraText += "<tr>";
 		extraText += "<td style='color:brown;'>Attack</td><td align='right'>" + attackValue + "</td>";
 		extraText += "<td style='color:brown;'>Defense</td><td align='right'>" + defenseValue + "</td></tr>";
@@ -6682,14 +6732,14 @@ var Helper = {
 			var warningText = "</b><br>This is probably an offer that will please someone.";
 			if (sellPrice < 100000) {
 				warningColor = "brown";
-				var warningText = "</b><br>This is too low ... it just ain't gonna sell.";
+				warningText = "</b><br>This is too low ... it just ain't gonna sell.";
 			} else if (sellPrice > 200000) {
 				warningColor = "red";
-				var warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
+				warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
 			
 			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy <b>" + amount + "</b> FSP for >> <b>" +
-				System.addCommas(sellPrice) + warningText + " (Total: " + System.addCommas((amount * sellPrice) + Math.ceil(sellPrice * .005)) +  ")</span>";
+				System.addCommas(sellPrice) + warningText + " (Total: " + System.addCommas((amount * sellPrice) + Math.ceil(sellPrice * 0.005)) +  ")</span>";
 		}
 	},
 
@@ -6708,13 +6758,13 @@ var Helper = {
 		var playerIDRE = /tid=(\d+)/;
 		var playerID = playerIDRE.exec(location);
 		if (playerID) {
-			var playerID = playerID[1];
-			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false)
+			playerID = playerID[1];
+			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false);
 		}
 		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
 		if (playerName) {
-			var playerName = playerName[1];
-			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false)
+			playerName = playerName[1];
+			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false);
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
 		
@@ -6781,7 +6831,7 @@ var Helper = {
 			"<span id='staminaTotal' style='display:none; color:orange;'>" + newStaminaTotal + 
 			"</span>&nbsp;<span id='staminaTotalAll' style='color:orange;'>" + newStaminaTotal * targetPlayersCount + "</span>";
 		if (buffPacksToUse.length > 0) {
-			for (var i = 0; i < buffPacksToUse.length; i++ ) {
+			for (i = 0; i < buffPacksToUse.length; i++ ) {
 				Helper.useBuffPack(buffPacksToUse[i]);
 			}
 		}
@@ -6793,13 +6843,13 @@ var Helper = {
 		var targetPlayers = System.findNode("//input[@name='targetPlayers']");
 		var targetPlayersCount = targetPlayers.value.split(",").length*1;
 		var newStaminaTotal = 0;
-		if (evt.target.checked == false) {
+		if (evt.target.checked === false) {
 			evt.target.checked = false;
 			newStaminaTotal = ((staminaTotal.textContent*1) - (evt.target.getAttribute("staminaCost")*1));
 			staminaTotal.innerHTML = newStaminaTotal;
 			staminaTotalAll.innerHTML = newStaminaTotal * targetPlayersCount;
 		}
-		else if (evt.target.checked == true) {
+		else if (evt.target.checked === true) {
 			evt.target.checked = true;
 			newStaminaTotal = ((staminaTotal.textContent*1) + (evt.target.getAttribute("staminaCost")*1));
 			staminaTotal.innerHTML = newStaminaTotal;
@@ -6843,7 +6893,7 @@ var Helper = {
 			var staminaTotal = (theBuffPack["staminaTotal"][i]? theBuffPack["staminaTotal"][i]:"");
 			myRow.innerHTML = "<td>" + nickname + "</td><td style='font-size:x-small;'>" + listOfBuffs + "&nbsp;" + staminaTotal + "&nbsp;" +
 				"</td><td><span id=bpSelect" + i + " class='HelperTextLink' buffId=" + i + ">[Select]</span> " +
-				"<span id=bpDelete" + i + " buffId=" + i + " class='HelperTextLink'>[X]</span></td>"
+				"<span id=bpDelete" + i + " buffId=" + i + " class='HelperTextLink'>[X]</span></td>";
 			document.getElementById("bpSelect" + i).addEventListener("click", Helper.useBuffPackHandler, true);
 			document.getElementById("bpDelete" + i).addEventListener("click", Helper.deleteBuffPack, true);
 		}
@@ -6885,7 +6935,7 @@ var Helper = {
 
 	useBuffPack: function(bpIndex) {
 		
-		var theBuffPack = System.getValueJSON("buffpack")
+		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) return;
 		if (bpIndex >= theBuffPack["size"]) return;
 
@@ -6908,13 +6958,13 @@ var Helper = {
 
 		if (!window.confirm("Are you sure you want to delete the buff pack?")) return;
 
-		var bpIndex=parseInt(evt.target.getAttribute("buffId"));
-		var theBuffPack = System.getValueJSON("buffpack")
+		var bpIndex=parseInt(evt.target.getAttribute("buffId"),10);
+		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) return;
 		if (!theBuffPack["size"]) return;
 
 		theBuffPack["size"] --;
-		if (theBuffPack["size"] == 0) { // avoid bugs :)
+		if (theBuffPack["size"] === 0) { // avoid bugs :)
 			delete theBuffPack["bp"];
 			delete theBuffPack["nickname"];
 			delete theBuffPack["staminaTotal"];
@@ -6968,7 +7018,7 @@ var Helper = {
 		var buffListText = "";
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
-			if (skillNodes[i].checked == true) {
+			if (skillNodes[i].checked === true) {
 				buffListText += skillName + ",";
 			}			
 		}
@@ -6986,7 +7036,7 @@ var Helper = {
 		if (!document.getElementById("newBuffPack").value) return;
 		if (!document.getElementById("newBuffPackNickname").value) return;
 
-		var theBuffPack = System.getValueJSON("buffpack")
+		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) {
 			theBuffPack = {};
 			theBuffPack["size"] = 0;
@@ -7055,56 +7105,56 @@ var Helper = {
 						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + buffName + '</span><br /><br />Stamina: ' +
 						buffs[j].stamina + '<br>Duration: ' +
 						buffs[j].duration + '<br>Effect: ' +
-						buffs[j].buff + '\');'
+						buffs[j].buff + '\');';
 					myBuff.setAttribute("onmouseover", onmouseoverText);
 					buffFound = true;
-					break
+					break;
 				}
 			}
 			if (!buffFound) GM_log("Buff typo in data file: '" + myBuffName + "'");
-			var buffLevelRE = /\[(\d+)\]/
+			var buffLevelRE = /\[(\d+)\]/;
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
-			if (buffLevel < 75
-				&& myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1
-				&& myBuff.innerHTML.search("Death Dealer") == -1 && myBuff.innerHTML.search("Vision") == -1) {
+			if (buffLevel < 75 &&
+				myBuff.innerHTML.search("Counter Attack") == -1 && myBuff.innerHTML.search("Quest Finder") == -1 &&
+				myBuff.innerHTML.search("Death Dealer") == -1 && myBuff.innerHTML.search("Vision") == -1) {
 				myBuff.style.color = "gray";
 			}
 		}
 
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
 		var doc=System.createDocument(responseText);
-		var buffs = System.findNodes("//img[contains(@onmouseover,'tt_setWidth(105)')]", doc);
+		buffs = System.findNodes("//img[contains(@onmouseover,'tt_setWidth(105)')]", doc);
 		if (buffs) {
-			var buffRE, buff, buffName, buffLevel;
-			for (var i=0;i<buffs.length;i++) {
+			var buffRE, buff, buffName;
+			for (i=0;i<buffs.length;i++) {
 				var aBuff=buffs[i];
 				var onmouseover = aBuff.getAttribute("onmouseover");
 				if (onmouseover.search("Summon Shield Imp") != -1) {
 					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
 					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
-					buffRE = /<b>([ a-zA-Z]+)<br>([0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/
+					buffRE = /<b>([ a-zA-Z]+)<br>([0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/;
 					buff = buffRE.exec(onmouseover);
 					if (!buff) {
-						buffRE = /<b>([ a-zA-Z]+)<br> HP remaining<br><\/b> \(Level: (\d+)\)/
+						buffRE = /<b>([ a-zA-Z]+)<br> HP remaining<br><\/b> \(Level: (\d+)\)/;
 						buff = buffRE.exec(onmouseover);
 					}
 					if (!buff) GM_log(onmouseover);
 					buffName = buff[1];
 					buffLevel = buff[3];
 				} else {
-					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
+					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/;
 					buff = buffRE.exec(onmouseover);
 					buffName = buff[1];
 					buffLevel = buff[2];
 				}
 				if (!buffLevel) buffLevel = 0; //For when a shield imp runs out but the buff is still there (0HP)
-				resultText += ((i % 4 == 0)? "<tr>":"");
+				resultText += ((i % 4 === 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
 				resultText += ((i % 4 == 3)? "</tr>":"");
 				var hasThisBuff = System.findNode("//font[contains(.,'" + buffName + "')]");
 				if (hasThisBuff) {
-					var buffLevelRE = /\[(\d+)\]/
-					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1]);
+					buffLevelRE = /\[(\d+)\]/;
+					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1],10);
 					if (myBuffLevel > 11 ||
 						buffName == 'Quest Finder') {
 						hasThisBuff.style.color='lime';
@@ -7119,7 +7169,7 @@ var Helper = {
 
 		//var playerLevel=Helper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
 		//var playerXP=Helper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
-		resultText += "</table>"
+		resultText += "</table>";
 
 		var statistics = System.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
 		statistics.style.backgroundImage = 'url(' + System.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
@@ -7157,7 +7207,7 @@ var Helper = {
 		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
 		if (!sustainText) return;
 		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
-		var sustainLevelRE = /Level<br>(\d+)%/
+		var sustainLevelRE = /Level<br>(\d+)%/;
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		var sustainColor = "lime";
 		if (sustainLevel < 100) sustainColor = "red";
@@ -7169,7 +7219,7 @@ var Helper = {
 		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
 		if (!furyCasterText) return;
 		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
-		var furyCasterLevelRE = /Level<br>(\d+)%/
+		var furyCasterLevelRE = /Level<br>(\d+)%/;
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		var furyCasterColor = "lime";
 		if (furyCasterLevel < 100) furyCasterColor = "red";
@@ -7177,7 +7227,7 @@ var Helper = {
 		var hasBuffMasterBuff = System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc);
 		if (hasBuffMasterBuff) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
-			var buffMasterTimeToExpire = hasBuffMasterBuff.parentNode.nextSibling.nextSibling.innerHTML
+			var buffMasterTimeToExpire = hasBuffMasterBuff.parentNode.nextSibling.nextSibling.innerHTML;
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + buffMasterTimeToExpire +")</span>";
 		}
 		else {
@@ -7213,11 +7263,11 @@ var Helper = {
 		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
 		GM_setValue("lastKillStreak", playerKillStreakValue);
 		var deathDealerBuff = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
-		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
+		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
 		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
 		if (deathDealer) {
 			var deathDealerLevel = deathDealer[1];
-			var deathDealerPercentage = (Math.min(Math.round(Math.floor(playerKillStreakValue/5) * deathDealerLevel) * 0.01, 20))
+			var deathDealerPercentage = (Math.min(Math.round(Math.floor(playerKillStreakValue/5) * deathDealerLevel) * 0.01, 20));
 		}
 		var deathDealerPercentageElement = System.findNode("//span[@findme='damagebonus']");
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
@@ -7229,8 +7279,8 @@ var Helper = {
 
 	injectCreature: function() {
 		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData, 
-			{"groupExists": false, "groupAttackValue": 0, "groupDefenseValue": 0
-				, "groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0});
+			{"groupExists": false, "groupAttackValue": 0, "groupDefenseValue": 0,
+				"groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0});
 		System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
 
 		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
@@ -7241,7 +7291,7 @@ var Helper = {
 				' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
 				'<img border=0 title="Search creature in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
-				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>'
+				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 			var extraText = 'Add to the do not kill list';
 			if (doNotKillList.indexOf(creatureName.textContent.trim()) != -1) extraText = 'Remove from do not kill list';
 			creatureName.innerHTML += '&nbsp;<span style="cursor:pointer;text-decoration:underline;color:blue;font-size:x-small;" ' +
@@ -7259,11 +7309,11 @@ var Helper = {
 			newDoNotKillList = newDoNotKillList.replace(",,", ",");
 			if (newDoNotKillList.charAt(0) == ",") newDoNotKillList = newDoNotKillList.substring(1,newDoNotKillList.length);
 		} else {
-			newDoNotKillList = doNotKillList + (doNotKillList.length != 0?",":"") + creatureName;
+			newDoNotKillList = doNotKillList + (doNotKillList.length !== 0?",":"") + creatureName;
 			newDoNotKillList = newDoNotKillList.replace(",,", ",");
 		}
 		GM_setValue("doNotKillList",newDoNotKillList);
-		window.location = window.location
+		window.location = window.location;
 	},
 
 	checkIfGroupExists: function(responseText) {
@@ -7283,8 +7333,8 @@ var Helper = {
 		var groupDamageValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'Damage:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
 		var groupHPValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
 		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData, 
-			{"groupExists": true, "groupAttackValue": groupAttackValue, "groupDefenseValue": groupDefenseValue
-				, "groupArmorValue": groupArmorValue, "groupDamageValue": groupDamageValue, "groupHPValue": groupHPValue});
+			{"groupExists": true, "groupAttackValue": groupAttackValue, "groupDefenseValue": groupDefenseValue,
+				"groupArmorValue": groupArmorValue, "groupDamageValue": groupDamageValue, "groupHPValue": groupHPValue});
 	},
 	
 	getCreaturePlayerData: function(responseText, callback) {
@@ -7296,19 +7346,19 @@ var Helper = {
 			if (anItem.innerHTML == "Attack:&nbsp;"){
 				var attackText = anItem;
 				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerAttackValue = parseInt(attackLocation.textContent);
+				var playerAttackValue = parseInt(attackLocation.textContent,10);
 				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDefenseValue = parseInt(defenseLocation.textContent);
+				var playerDefenseValue = parseInt(defenseLocation.textContent,10);
 				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerArmorValue = parseInt(armorLocation.textContent);
+				var playerArmorValue = parseInt(armorLocation.textContent,10);
 				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
 				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDamageValue = parseInt(damageLocation.textContent);
+				var playerDamageValue = parseInt(damageLocation.textContent,10);
 				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
 				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerHPValue = parseInt(hpLocation.textContent);
+				var playerHPValue = parseInt(hpLocation.textContent,10);
 			}
 			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
 				var killStreakText = anItem;
@@ -7317,68 +7367,68 @@ var Helper = {
 			}
 		}
 		//get buffs here later ... DD, CA, DC, Constitution, etc
-		var allItems = doc.getElementsByTagName("IMG");
+		allItems = doc.getElementsByTagName("IMG");
 		var counterAttackLevel = 0, doublerLevel = 0, deathDealerLevel = 0, darkCurseLevel = 0, holyFlameLevel = 0;
 		var constitutionLevel = 0, sanctuaryLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, superEliteSlayerLevel = 0;
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
+		for (i=0;i<allItems.length;i++) {
+			anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
-				var onmouseover = anItem.getAttribute("onmouseover")
-				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/
+				var onmouseover = anItem.getAttribute("onmouseover");
+				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
 				var counterAttack = counterAttackRE.exec(onmouseover);
 				if (counterAttack) {
 					counterAttackLevel = counterAttack[1];
 					continue;
 				}
-				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/
+				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
 				var doubler = doublerRE.exec(onmouseover);
 				if (doubler) {
 					doublerLevel = doubler[1];
 					continue;
 				}
-				var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/
+				var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
 				var deathDealer = deathDealerRE.exec(onmouseover);
 				if (deathDealer) {
 					deathDealerLevel = deathDealer[1];
 					continue;
 				}
-				var darkCurseRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/
+				var darkCurseRE = /<b>Dark Curse<\/b> \(Level: (\d+)\)/;
 				var darkCurse = darkCurseRE.exec(onmouseover);
 				if (darkCurse) {
 					darkCurseLevel = darkCurse[1];
 					continue;
 				}
-				var holyFlameRE = /<b>Holy Flame<\/b> \(Level: (\d+)\)/
+				var holyFlameRE = /<b>Holy Flame<\/b> \(Level: (\d+)\)/;
 				var holyFlame = holyFlameRE.exec(onmouseover);
 				if (holyFlame) {
 					holyFlameLevel = holyFlame[1];
 					continue;
 				}
-				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/
+				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
 				var constitution = constitutionRE.exec(onmouseover);
 				if (constitution) {
 					constitutionLevel = constitution[1];
 					continue;
 				}
-				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/
+				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/;
 				var sanctuary = sanctuaryRE.exec(onmouseover);
 				if (sanctuary) {
 					sanctuaryLevel = sanctuary[1];
 					continue;
 				}
-				var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/
+				var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/;
 				var flinch = flinchRE.exec(onmouseover);
 				if (flinch) {
 					flinchLevel = flinch[1];
 					continue;
 				}
-				var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/
+				var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/;
 				var nightmareVisage = nightmareVisageRE.exec(onmouseover);
 				if (nightmareVisage) {
 					nightmareVisageLevel = nightmareVisage[1];
 					continue;
 				}
-				var superEliteSlayerRE = /<b>Super Elite Slayer<\/b> \(Level: (\d+)\)/
+				var superEliteSlayerRE = /<b>Super Elite Slayer<\/b> \(Level: (\d+)\)/;
 				var superEliteSlayer = superEliteSlayerRE.exec(onmouseover);
 				if (superEliteSlayer) {
 					superEliteSlayerLevel = superEliteSlayer[1];
@@ -7390,11 +7440,11 @@ var Helper = {
 		var groupAttackValue = 0, groupDefenseValue = 0,  groupArmorValue = 0, groupDamageValue = 0, groupHPValue = 0;
 		groupExists = callback.groupExists;
 		if (groupExists) {
-			var groupAttackValue = callback.groupAttackValue;
-			var groupDefenseValue = callback.groupDefenseValue;
-			var groupArmorValue = callback.groupArmorValue;
-			var groupDamageValue = callback.groupDamageValue;
-			var groupHPValue = callback.groupHPValue;
+			groupAttackValue = callback.groupAttackValue;
+			groupDefenseValue = callback.groupDefenseValue;
+			groupArmorValue = callback.groupArmorValue;
+			groupDamageValue = callback.groupDamageValue;
+			groupHPValue = callback.groupHPValue;
 		}
 		//creaturedata
 		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
@@ -7402,9 +7452,11 @@ var Helper = {
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var attackVariable = 1.1053, generalVariable = 1.1053, hpVariable = 1.1;
 		if (combatEvaluatorBias == 1) {
-			generalVariable = 1.1, hpVariable = 1.053;
+			generalVariable = 1.1;
+			hpVariable = 1.053;
 		} else if (combatEvaluatorBias == 2) {
-			generalVariable = 1.053, hpVariable = 1;
+			generalVariable = 1.053;
+			hpVariable = 1;
 		}
 		var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
 		var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
@@ -7485,7 +7537,7 @@ var Helper = {
 			var lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/playerDamageValue/0.0025), 0);
 			var lowestFeasibleCALevel = Math.max(lowestCALevelToStillHit,lowestCALevelToStillKill);
 			extraNotes += "Lowest CA to still 1-hit this creature = " + lowestFeasibleCALevel + "<br>";
-			if (lowestFeasibleCALevel != 0) {
+			if (lowestFeasibleCALevel !== 0) {
 				var extraAttackAtLowestFeasibleCALevel = Math.floor(playerAttackValue * 0.0025 * lowestFeasibleCALevel);
 				var extraDamageAtLowestFeasibleCALevel = Math.floor(playerDamageValue * 0.0025 * lowestFeasibleCALevel);
 				extraNotes += "Extra CA Att/Dam at this lowered CA level = " + extraAttackAtLowestFeasibleCALevel + " / " + extraDamageAtLowestFeasibleCALevel + "<br>";
@@ -7499,16 +7551,16 @@ var Helper = {
 			}
 		}
 		if (numberOfHitsRequired == "-" || numberOfHitsRequired != "1") {
-			var lowestCALevelToStillHit = Math.max(Math.ceil((counterAttackBonusAttack-hitByHowMuch + 1)/playerAttackValue/0.0025), 0);
-			var lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/playerDamageValue/0.0025), 0);
+			lowestCALevelToStillHit = Math.max(Math.ceil((counterAttackBonusAttack-hitByHowMuch + 1)/playerAttackValue/0.0025), 0);
+			lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/playerDamageValue/0.0025), 0);
 			if (lowestCALevelToStillHit >175) {
 				extraNotes += "Even with CA175 you cannot hit this creature<br>";
-			} else if (lowestCALevelToStillHit != 0) {
+			} else if (lowestCALevelToStillHit !== 0) {
 				extraNotes += "You need a minimum of CA" + lowestCALevelToStillHit + " to hit this creature<br>";
 			}
 			if (lowestCALevelToStillKill >175) {
 				extraNotes += "Even with CA175 you cannot 1-hit kill this creature<br>";
-			} else if (lowestCALevelToStillKill != 0) {
+			} else if (lowestCALevelToStillKill !== 0) {
 				extraNotes += "You need a minimum of CA" + lowestCALevelToStillKill + " to 1-hit kill this creature<br>";
 			}
 		}
@@ -7573,7 +7625,7 @@ var Helper = {
 		document.getElementById("Helper:saveLines").addEventListener('click', 
 			function (event) {
 				var theBox = document.getElementById("Helper:linesToShow");
-				if (theBox.value.trim().length == 0) {
+				if (theBox.value.trim().length === 0) {
 					return;
 				}
 				GM_setValue("bioEditLines", theBox.value);				
@@ -7613,16 +7665,14 @@ var Helper = {
 		var textArea = System.findNode("//textarea[@findme='Helper:InputText']");
 		var textContent = textArea.value;
 		var chars = textContent.length;
-		var maxchars = parseInt(textArea.getAttribute("maxcharacters"));
+		var maxchars = parseInt(textArea.getAttribute("maxcharacters"),10);
 		if (chars>maxchars) {
 			textContent=textContent.substring(0,maxchars);
 			textArea.value=textContent;
 			chars=maxchars;
 		}
 
-		document.
-			getElementById("Helper:ShoutboxPreview")
-			.innerHTML = '<table align="center" width="325" border="0"><tbody>' +
+		document.getElementById("Helper:ShoutboxPreview").innerHTML = '<table align="center" width="325" border="0"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview (' + chars + '/' + maxchars + ' characters)</td></tr>' +
 			'<tr><td width="325"><span style="font-size:x-small;" findme="biopreview">' + textContent +
 			'</span></td></tr></tbody></table>';
@@ -7644,7 +7694,7 @@ var Helper = {
 		//if evt is null, then this is a forced call
 		//if we don't check this, the HTTP request to get the number of bio character upgrades
 		//might not have finished before this executes, resulting in red text
-		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1) && evt != null) {
+		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1) && evt !== null) {
 			characterCount.style.color = "red";
 		} else {
 			characterCount.style.color = "blue";
@@ -7671,8 +7721,7 @@ var Helper = {
 			'<span id=buffCost style="color:red"></span>');
 			previewArea.innerHTML = bioContents;
 			
-			
-			for (var i=0;i<buffs.length;i++) {
+			for (i=0;i<buffs.length;i++) {
 				var buff=document.getElementById('Helper:buff'+i);
 				if (buff) buff.addEventListener('click', Helper.toggleBuffsToBuy,true);
 			}		
@@ -7681,7 +7730,7 @@ var Helper = {
 	},
 
 	getTotalBioCharacters: function(responseText) {
-		var doc=System.createDocument(responseText)
+		var doc=System.createDocument(responseText);
 		var bioCharactersText = System.findNode("//td[.='+25 Bio Characters']",doc);
 		var bioCharactersRatio = bioCharactersText.nextSibling.nextSibling.nextSibling.nextSibling;
 		var bioCharactersValueRE = /(\d+) \/ 75/;
@@ -7738,7 +7787,7 @@ var Helper = {
 	},
 
 	getTotalHistoryCharacters: function(responseText) {
-		var doc=System.createDocument(responseText)
+		var doc=System.createDocument(responseText);
 		var historyCharactersText = System.findNode("//td[.='+20 History Characters']",doc);
 		var historyCharactersRatio = historyCharactersText.nextSibling.nextSibling.nextSibling.nextSibling;
 		var historyCharactersValueRE = /(\d+) \/ 250/;
@@ -7751,7 +7800,7 @@ var Helper = {
 		if (window.confirm('Are you sure you with to use a special portal back to Krul Island?')) {
 			var krulXCV = GM_getValue("krulXCV");
 			if (krulXCV) {
-				System.xmlhttp("index.php?cmd=settings&subcmd=fix&xcv=" + krulXCV, function() {window.location="index.php?cmd=world";})
+				System.xmlhttp("index.php?cmd=settings&subcmd=fix&xcv=" + krulXCV, function() {window.location="index.php?cmd=world";});
 			} else {
 				window.alert("Please visit the preferences page to cache your Krul Portal link");
 			}
@@ -7795,7 +7844,7 @@ var Helper = {
 		var guildsChecked = "";
 		for (var i=0; i<topPlayerTable.rows.length; i++) {
 			var aRow = topPlayerTable.rows[i];
-			if (aRow.cells[1] && i!=0) {
+			if (aRow.cells[1] && i!==0) {
 				var playerTable = topPlayerTable.rows[i].cells[1].firstChild;
 				var playerElement = playerTable.rows[0].cells[0];
 				var playerGuildHref = playerElement.firstChild.getAttribute("href");
@@ -7819,7 +7868,7 @@ var Helper = {
 		memberTable = System.findNode("//table[tbody/tr/td[.='Rank']]", doc);
 		for (var i=0; i<memberTable.rows.length; i++) {
 			aRow = memberTable.rows[i];
-			if (aRow.cells[1] && i!= 0) {
+			if (aRow.cells[1] && i!== 0) {
 				onlineStatus = aRow.cells[0].innerHTML;
 				playerName = aRow.cells[1].firstChild.nextSibling.innerHTML;
 				playerLevel = aRow.cells[2].textContent*1;
@@ -7839,7 +7888,7 @@ var Helper = {
 	injectArena: function() {
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
-		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves")
+		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves");
 		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
 				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
 				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) +
@@ -7922,7 +7971,7 @@ var Helper = {
 				prizeOnmouseover = prizeOnmouseover.replace(/""/,'"ItemId = '+itemId+'"');
 				prizeImgElement.setAttribute("onmouseover", prizeOnmouseover);
 				if (hideArenaPrizes) {
-					for (var k=0; k<hideArenaPrizesArray.length; k++){
+					for (k=0; k<hideArenaPrizesArray.length; k++){
 						var compareStr = System.imageServerHTTP + "/items/" + hideArenaPrizesArray[k] + ".gif";
 						if (prizeSRC == compareStr) {
 							row.style.visibility = "hidden";
@@ -7958,12 +8007,12 @@ var Helper = {
 		var maxLvlSearchText = filterSubject + "MaxLvl";
 		var playerMinLvl = document.getElementById("Helper." + minLvlSearchText);
 		var playerMaxLvl = document.getElementById("Helper." + maxLvlSearchText);
-		if (playerMinLvl.value == '') playerMinLvl.value = '0';
-		if (playerMaxLvl.value == '') playerMaxLvl.value = '1000';
+		if (playerMinLvl.value === '') playerMinLvl.value = '0';
+		if (playerMaxLvl.value === '') playerMaxLvl.value = '1000';
 		if (!isNaN(playerMinLvl.value))
-			GM_setValue(minLvlSearchText, parseInt(playerMinLvl.value));
+			GM_setValue(minLvlSearchText, parseInt(playerMinLvl.value,10));
 		if (!isNaN(playerMaxLvl.value))
-			GM_setValue(maxLvlSearchText, parseInt(playerMaxLvl.value));
+			GM_setValue(maxLvlSearchText, parseInt(playerMaxLvl.value,10));
 		if (href) window.location = System.server + href;
 		else window.location = window.location;
 	},
@@ -7986,14 +8035,13 @@ var Helper = {
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
 			cell.innerHTML = cell.innerHTML.replace(/ \[/,"<br>[");
-			if (cell.innerHTML.search("Max Equip Level") != -1
-				|| cell.innerHTML.search("Join Cost") != -1
-				|| cell.innerHTML.search("State") != -1
-				|| cell.innerHTML.search("Specials") != -1
-				|| cell.innerHTML.search("Hell Forge") != -1
-				|| cell.innerHTML.search("Epic") != -1
-				|| cell.innerHTML.search("Id") != -1
-				) {
+			if (cell.innerHTML.search("Max Equip Level") != -1 ||
+				cell.innerHTML.search("Join Cost") != -1 ||
+				cell.innerHTML.search("State") != -1 ||
+				cell.innerHTML.search("Specials") != -1 ||
+				cell.innerHTML.search("Hell Forge") != -1 ||
+				cell.innerHTML.search("Epic") != -1 ||
+				cell.innerHTML.search("Id") != -1){
 				cell.style.textDecoration="underline";
 				cell.style.cursor="pointer";
 				cell.innerHTML=cell.innerHTML.replace(/^&nbsp;/,"");
@@ -8013,7 +8061,7 @@ var Helper = {
 	
 	getArenaTable: function() {
 		var titleCell=System.findNode("//td[@bgcolor='#cd9e4b']");
-		var parentTables=System.findNodes("ancestor::table", titleCell)
+		var parentTables=System.findNodes("ancestor::table", titleCell);
 		var list=parentTables[parentTables.length-1];
 
 		Helper.arenaRows = new Array();
@@ -8042,7 +8090,7 @@ var Helper = {
 	},
 
 	sortArenaByHeader: function(headerClicked) {
-		if (headerClicked=="") {
+		if (headerClicked==="") {
 			headerClicked = GM_getValue("arenaSortBy");
 			if (headerClicked == undefined) headerClicked="State";
 		} else {
@@ -8062,16 +8110,16 @@ var Helper = {
 		Helper.sortBy=headerClicked;
 
 		if (headerClicked=="Member" || headerClicked=="State") {
-			Helper.arenaRows.sort(Helper.stringSort)
+			Helper.arenaRows.sort(Helper.stringSort);
 		}
 		else {
-			Helper.arenaRows.sort(Helper.numberSort)
+			Helper.arenaRows.sort(Helper.numberSort);
 		}
 		
 		var titleCell=System.findNode("//td[@bgcolor='#cd9e4b']");
-		var parentTables=System.findNodes("ancestor::table", titleCell)
+		var parentTables=System.findNodes("ancestor::table", titleCell);
 		var list=parentTables[parentTables.length-1];
-		var result='<tr>' + list.rows[0].innerHTML + '</tr>'
+		var result='<tr>' + list.rows[0].innerHTML + '</tr>';
 
 		var minLvl=GM_getValue('arenaMinLvl',1);
 		var maxLvl=GM_getValue('arenaMaxLvl',1000);
@@ -8154,7 +8202,7 @@ var Helper = {
 		var doc=System.createDocument(responseText);
 		var combatMovesTable = System.findNode("//td[table/tbody/tr/td/table/tbody/tr/td/a[@href='index.php?cmd=arena&subcmd=pickmove&slot_id=1']]", doc);
 		var injectHere = System.findNode("//span[@id='Helper:combatMoves']");
-		injectHere.innerHTML = combatMovesTable.innerHTML
+		injectHere.innerHTML = combatMovesTable.innerHTML;
 	},
 
 	storeCompletedArenas: function() {
@@ -8169,7 +8217,7 @@ var Helper = {
 			startButton.setAttribute("class", "custombutton");
 			startButton.setAttribute("value", "<<");
 			prevButton.parentNode.insertBefore(startButton,prevButton);
-		};
+		}
 		if (nextButton) {
 			nextButton.setAttribute("class", "custombutton");
 			var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
@@ -8180,7 +8228,7 @@ var Helper = {
 			finishButton.setAttribute("class", "custombutton");
 			finishButton.setAttribute("value", ">>");
 			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
-		};
+		}
 
 		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 
@@ -8243,7 +8291,7 @@ var Helper = {
 					var onmouseoverText='Tip(\'' +
 						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + relic.Name + '</span><br /><br />' +
 						relic.Realm + '<br><br>' +
-						relic.Comment + '\');'
+						relic.Comment + '\');';
 					relicImage.setAttribute("onmouseover", onmouseoverText);
 					relicFound = true;
 					break;
@@ -8255,12 +8303,12 @@ var Helper = {
 
 	injectSettingsGuildData: function(guildType) {
 		var result='';
-		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">'
+		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">';
 		result += '<span style="cursor:pointer;text-decoration:none;" id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
-			guildType + 'Message"> &#x00bb;</span>'
-		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">'
-		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">'
-		result += '</div>'
+			guildType + 'Message"> &#x00bb;</span>';
+		result += '<div id="showGuild' + guildType + 'Message" style="visibility:hidden;display:none">';
+		result += '<input name="guild' + guildType + 'Message" size="60" value="' + GM_getValue("guild" + guildType + "Message") + '">';
+		result += '</div>';
 		return result;
 	},
 	
@@ -8298,7 +8346,7 @@ var Helper = {
 		} catch (err) {
 			GM_log(err);
 		}
-		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck")));
+		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck"),10));
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
 		var hideArenaPrizes=GM_getValue("hideArenaPrizes");
@@ -8390,7 +8438,7 @@ var Helper = {
 					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
 					'<br>Semi-Conservative = 1.1 and 1.053'+
 					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)') +
-				':</td><td><select name="combatEvaluatorBias"><option value="0"' + (combatEvaluatorBias==0?" SELECTED":"") + 
+				':</td><td><select name="combatEvaluatorBias"><option value="0"' + (combatEvaluatorBias===0?" SELECTED":"") + 
 					'>Conservative</option><option value="1"' + (combatEvaluatorBias==1?" SELECTED":"") + 
 					'>Semi-Conservative</option><option value="2"' + (combatEvaluatorBias==2?" SELECTED":"") + 
 					'>Adventurous</option></select></td></tr>' +
@@ -8544,7 +8592,7 @@ var Helper = {
 		var krulButton = System.findNode('//input[@value="Instant Portal back to Krul Island"]');
 		onClick = krulButton.getAttribute("onclick");
 		//window.location='index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163';
-		krulXCVRE = /xcv=([a-z0-9]+)'/
+		krulXCVRE = /xcv=([a-z0-9]+)'/;
 		krulXCV = krulXCVRE.exec(onClick);
 		if (krulXCV) GM_setValue("krulXCV",krulXCV[1]);
 
@@ -8585,7 +8633,7 @@ var Helper = {
 		var oForm=evt.target.form;
 		var chatLines = System.findNode("//input[@name='chatLines']", oForm);
 		var enableChat = System.findNode("//input[@name='enableChat']", oForm);
-		var chatLinesValue = parseInt(chatLines.value);
+		var chatLinesValue = parseInt(chatLines.value,10);
 
 		if (enableChat.checked && (isNaN(chatLinesValue) || chatLinesValue<=0)) {
 			chatLines.value="10";
@@ -8698,11 +8746,11 @@ var Helper = {
 	},
 
 	showLogs: function(evt) {
-		document.location=System.server + "index.php?cmd=notepad&subcmd=showlogs"
+		document.location=System.server + "index.php?cmd=notepad&subcmd=showlogs";
 	},
 
 	showMonsterLogs: function(evt) {
-		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog"
+		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog";
 	},
 
 	injectNotepadShowLogs: function() {
@@ -8721,7 +8769,7 @@ var Helper = {
 	},
 
 	notepadCopyLog: function() {
-		var combatLog=document.getElementById("Helper:CombatLog")
+		var combatLog=document.getElementById("Helper:CombatLog");
 		combatLog.focus();
 		combatLog.select();
 	},
@@ -8784,7 +8832,7 @@ var Helper = {
 			objBody.insertBefore(miniMap, objBody.firstChild);
 		}
 
-		if (miniMap.style.display != "") {
+		if (miniMap.style.display !== "") {
 			if (Helper.levelName == GM_getValue("miniMapName")) {
 				miniMap.innerHTML = GM_getValue("miniMapSource");
 				Helper.markPlayerOnMiniMap();
@@ -8857,17 +8905,17 @@ var Helper = {
 		var newValue = !GM_getValue("bulkSellAllBags");
 		GM_setValue("bulkSellAllBags", newValue);
 		var theSpan = document.getElementById("Helper:bulkCheck");
-		theSpan.innerHTML = (newValue == true ? "Selling from all bags" : "Selling only from main folder");
+		theSpan.innerHTML = (newValue === true ? "Selling from all bags" : "Selling only from main folder");
 	},
 
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) {
-			if (GM_getValue("enableBulkSell") == true) {
+			if (GM_getValue("enableBulkSell")) {
 				var row = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td");
 				if (row) {
 					var sellFromAll = GM_getValue("bulkSellAllBags");
 					var toggleSellAllHTML = "<span id='Helper:bulkCheck' style='cursor: pointer; text-decoration: underline; color: blue;'>" + 
-					(sellFromAll == true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
+					(sellFromAll === true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
 					row.innerHTML = row.innerHTML.replace("]", " | " + toggleSellAllHTML + " ]");				
 					document.getElementById("Helper:bulkCheck").addEventListener("click", Helper.toggleSellFromAllBags, true);
 				}
@@ -8884,7 +8932,7 @@ var Helper = {
 						type = itemStats[3];
 						pid = itemStats[4];
 						var itemHref = item.getAttribute("href");
-						var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid
+						var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid;
 						item.setAttribute("href",newHref);
 					}
 				}
@@ -8895,7 +8943,7 @@ var Helper = {
 		if (!auctionTable) return;
 
 		var bidEntryTable = auctionTable.rows[9].cells[0].firstChild.nextSibling;
-		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search)
+		itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search);
 		if (itemStats) {
 			var invId = itemStats[1];
 			var itemId = itemStats[2];
@@ -8909,7 +8957,7 @@ var Helper = {
 		}
 
 		var newRow = auctionTable.insertRow(10);
-		var newCell = newRow.insertCell(0);
+		newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
 		newCell.align = "center";
 		var table = System.getValueJSON("auctionTemplate");
@@ -8928,9 +8976,9 @@ var Helper = {
 				"<th bgcolor='#cd9e4b'>Min Bid</th><th bgcolor='#cd9e4b'>Buy Now</th>"+
 				"<th></th></tr>";
 
-		for (var i = 0; i < table.length; i++) {
+		for (i = 0; i < table.length; i++) {
 			textResult += "<tr align='right'><td>"+Helper.getAuctionLength(table[i].auctionLength)+"</td>"+
-				"<td>"+(table[i].auctionCurrency==0?"Gold":"FSP")+"</td>"+
+				"<td>"+(table[i].auctionCurrency===0?"Gold":"FSP")+"</td>"+
 				"<td>"+System.addCommas(table[i].auctionMinBid)+"</td>"+
 				"<td>"+System.addCommas(table[i].auctionBuyNow)+"</td>"+
 				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
@@ -8941,7 +8989,7 @@ var Helper = {
 					" auctionBuyNow=" + table[i].auctionBuyNow +
 					">apply</span>]";
 				textResult += " [<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
-					"id='Helper:delAuctionTemplate" + i + "' auctionTemplateId=" + i +">del</span>]"
+					"id='Helper:delAuctionTemplate" + i + "' auctionTemplateId=" + i +">del</span>]";
 			textResult += "</td></tr>";
 		}
 		if (table.length<=10) {
@@ -8961,7 +9009,7 @@ var Helper = {
 		newCell.innerHTML = textResult;
 
 		if (table.length<=10) document.getElementById("Helper:saveAuctionTemplate").addEventListener("click", Helper.saveAuctionTemplate, true);
-		for (var i = 0; i < table.length; i++) {
+		for (i = 0; i < table.length; i++) {
 			document.getElementById("Helper:useAuctionTemplate" + i).addEventListener("click", Helper.useAuctionTemplate, true);
 			document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
 		}
@@ -8974,7 +9022,7 @@ var Helper = {
 		else if (auctionLength == 4) return '12 Hours';
 		else if (auctionLength == 5) return '24 Hours';
 		else if (auctionLength == 6) return '48 Hours';
-		else return '1 Hour'
+		else return '1 Hour';
 	},
 
 	useAuctionTemplate: function(evt) {
@@ -9020,7 +9068,7 @@ var Helper = {
 			auctionMinBid: auctionMinBid,
 			auctionBuyNow: auctionBuyNow,
 			isDefault: false
-		}
+		};
 		table.push(theTemplate);
 		System.setValueJSON("auctionTemplate", table);
 		window.location = window.location;
@@ -9035,7 +9083,7 @@ var Helper = {
 	},
 
 	injectMessageTemplate: function() {
-		if (GM_getValue("navigateToLogAfterMsg") == true) {
+		if (GM_getValue("navigateToLogAfterMsg")) {
 		
 			if (document.referrer.indexOf("?cmd=message") == -1) {
 				GM_setValue("msgReferringPage", document.referrer);
@@ -9069,7 +9117,7 @@ var Helper = {
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
 				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
 				"<tr><td bgcolor='#cd9e4b'><center>Quick Message</center></td></tr>" +
-				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>"
+				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>";
 
 		for (var i = 0; i < table.length; i++) {
 			textResult += "<tr><td>Msg " + (i+1) + " [<a onmouseover=\"Tip('Click on the message to append the template');\" href='#'>" +
@@ -9086,14 +9134,14 @@ var Helper = {
 		newNode.innerHTML = textResult;
 		injectHere.appendChild(newNode);
 
-		for (var i = 0; i < table.length; i++) {
+		for (i = 0; i < table.length; i++) {
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
 		}
-		if (GM_getValue("enterForSendMessage") == true) {
+		if (GM_getValue("enterForSendMessage")) {
 			document.getElementsByName("msg")[0].addEventListener('keypress', function(evt) {
 				var r = evt.charCode;
 				var s = evt.keyCode;
-				if (r == 0 & s == 13 & !evt.shiftKey) {
+				if (r === 0 & s == 13 & !evt.shiftKey) {
 					var button = System.findNode("//input[@value='Send Message']");
 					if (button) {
 						evt.preventDefault();
@@ -9106,7 +9154,7 @@ var Helper = {
 		
 		Helper.param={};
 		Helper.param={'id':'quickMsgTemplAreaId',
-			'headers':["Quick Message",],
+			'headers':["Quick Message"],
 			'fields':[],
 			'tags':["textbox"],
 			'currentItems':System.getValueJSON("quickMsg"),
@@ -9161,15 +9209,13 @@ var Helper = {
 				itemTable.innerHTML += '<br><span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 					'id="Helper:recallMailboxItem' + i + '" ' +
 					'itemHref="' + itemHref + '">Fast Take</span>';
-				document.getElementById('Helper:recallMailboxItem' + i)
-					.addEventListener('click', Helper.recallMailboxItem, true);
+				document.getElementById('Helper:recallMailboxItem' + i).addEventListener('click', Helper.recallMailboxItem, true);
 			}
 			var titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Item Mailbox']]");
 			titleTable.rows[4].cells[0].align = 'center';
 			titleTable.rows[4].cells[0].innerHTML = '<span id="Helper:recallAllMailbox" '+
 				'style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;">Take All</span>';
-			document.getElementById('Helper:recallAllMailbox')
-				.addEventListener('click', Helper.recallAllMailbox, true);
+			document.getElementById('Helper:recallAllMailbox').addEventListener('click', Helper.recallAllMailbox, true);
 		}
 	},
 
@@ -9186,9 +9232,7 @@ var Helper = {
 	
 	recallMailboxItem: function(evt) {
 		var mailboxItemHref = evt.target.getAttribute("itemHref");
-		System.xmlhttp(mailboxItemHref,
-			Helper.recallMailboxReturnMessage,
-			{"target": evt.target, "url": mailboxItemHref});
+		System.xmlhttp(mailboxItemHref,Helper.recallMailboxReturnMessage,{"target": evt.target, "url": mailboxItemHref});
 	},
 
 	recallMailboxReturnMessage: function(responseText, callback) {
@@ -9201,7 +9245,7 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Taken";
-		} else if (info!="") {
+		} else if (info!=="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
@@ -9227,8 +9271,7 @@ var Helper = {
 					cancelButtonCellElement.innerHTML += '<br><br><span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 						'id="Helper:cancelAuctionItem' + i + '" ' +
 						'cancelButtonHref="' + cancelButtonHref + '">Fast Cancel</span>';
-					document.getElementById('Helper:cancelAuctionItem' + i)
-						.addEventListener('click', Helper.cancelAuctionItem, true);
+					document.getElementById('Helper:cancelAuctionItem' + i).addEventListener('click', Helper.cancelAuctionItem, true);
 				}
 			}
 		}
@@ -9251,7 +9294,7 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Cancelled";
-		} else if (info!="") {
+		} else if (info!=="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
@@ -9275,9 +9318,9 @@ var Helper = {
 		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
 		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="current"><span>';
 
-		var stamForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+10 Maximum Stamina')]/../td[4]");
-		var stamForFSPInjectHere = System.findNode("//td[@width='60%' and contains(.,'+10 Maximum Stamina')]");
-		var stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
+		stamForFSPElement = System.findNode("//td[@width='60%' and contains(.,'+10 Maximum Stamina')]/../td[4]");
+		stamForFSPInjectHere = System.findNode("//td[@width='60%' and contains(.,'+10 Maximum Stamina')]");
+		stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
 		stamFSPTextField.type='maximum';
 		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
 		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="maximum"><span>';
@@ -9314,8 +9357,8 @@ var Helper = {
 			var newCell = newRow.insertCell(0);
 			newCell.align = "center";
 			newCell.innerHTML = scoutTowerTable.rows[1].cells[0].innerHTML + "<br><br>" ;
-			var newRow = titanTable.insertRow(1);
-			var newCell = newRow.insertCell(0);
+			newRow = titanTable.insertRow(1);
+			newCell = newRow.insertCell(0);
 			newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
 		}
 		Helper.injectScouttowerBuffLinks();
@@ -9370,7 +9413,7 @@ var Helper = {
 			
 		}
 		
-		if (tracking == true) {
+		if (tracking === true) {
 		
 			injectHere.innerHTML += '<br><input id="dontTrackThisQuest" data="' + location.search + '" type="button" value="Stop Tracking Quest" title="Tracks quest progress." class="custombutton">';
 			document.getElementById("dontTrackThisQuest").addEventListener("click", Helper.dontTrackThisQuest, true);
@@ -9439,7 +9482,7 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 
 		if (enableWantedList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
 			if (!injectHere)
 				return;
 			var info = injectHere.insertRow(0);
@@ -9447,10 +9490,10 @@ var Helper = {
 			cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
 		}
 		if (enableActiveBountyList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
+			injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
 			if (injectHere) {
-				var info = injectHere.insertRow(0);
-				var cell = info.insertCell(0);
+				info = injectHere.insertRow(0);
+				cell = info.insertCell(0);
 				cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
 			}
 		}
@@ -9546,7 +9589,7 @@ var Helper = {
 			Helper.injectWantedList(wantedList);
 		}
 		if (enableActiveBountyList) {
-			var activeTable = System.findNode("//table[@width = 620]", doc);
+			activeTable = System.findNode("//table[@width = 620]", doc);
 			var bountyList = {};
 			bountyList.bounty = [];
 			bountyList.isRefreshed = true;
@@ -9555,15 +9598,15 @@ var Helper = {
 			if (activeTable) {
 				if (!(/No bounties active/).test(activeTable.rows[1].cells[0].innerHTML)) {
 					bountyList.activeBounties = true;
-					for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+					for (i = 1; i < activeTable.rows.length - 2; i+=2) {
 						bounty = {};
 						bounty.target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
-						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.href
+						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.href;
 						bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, "").replace(/\]/, "");
-						bounty.reward = activeTable.rows[i].cells[2].textContent
-						bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title
-						bounty.posted = activeTable.rows[i].cells[3].textContent
-						bounty.xpLoss = activeTable.rows[i].cells[4].textContent
+						bounty.reward = activeTable.rows[i].cells[2].textContent;
+						bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
+						bounty.posted = activeTable.rows[i].cells[3].textContent;
+						bounty.xpLoss = activeTable.rows[i].cells[4].textContent;
 						bounty.progress = activeTable.rows[i].cells[5].textContent;
 						
 						bountyList.bounty.push(bounty);
@@ -9578,7 +9621,7 @@ var Helper = {
 	},
 
 	injectBountyList: function(bountyList) {
-		System.setValueJSON("bountylist", bountyList)
+		System.setValueJSON("bountylist", bountyList);
 		var injectHere = document.getElementById("Helper:BountyListPlaceholder");
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
@@ -9591,7 +9634,7 @@ var Helper = {
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
 			"Active Bounties <span id='Helper:resetBountyList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span>";
 
-		if (bountyList.activeBounties == false) {
+		if (bountyList.activeBounties === false) {
 			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:10px;'>" + 
 				"[No Active bounties]</ol>";
 		}
@@ -9605,16 +9648,16 @@ var Helper = {
 				mouseOverText += "</div>');\"";
 
 //				output += " href='" + bountyList.bounty[i].link + "'>" + bountyList.bounty[i].target +"</a></li>"; 
-				output += "<li style='padding-bottom:0px;'>"
-				output += "<a style='color:red;font-size:10px;'"
+				output += "<li style='padding-bottom:0px;'>";
+				output += "<a style='color:red;font-size:10px;'";
 				output += "href='" + System.server + "index.php?cmd=attackplayer&target_username=" + bountyList.bounty[i].target + "'>[a]</a>&nbsp;";
 
-				output += "<a style='color:#A0CFEC;font-size:10px;'"
+				output += "<a style='color:#A0CFEC;font-size:10px;'";
 				output += "href='" + System.server + "index.php?cmd=message&target_player=" + bountyList.bounty[i].target + "'>[m]";
 				output += "</a> &nbsp;<a onmouseover=" + mouseOverText;
-				output += "style='color:"
+				output += "style='color:";
 				output += "#FFF380";
-				output += ";font-size:10px;'"
+				output += ";font-size:10px;'";
 				output += " href='" + bountyList.bounty[i].link + "'>" + bountyList.bounty[i].target +"</a></li>"; 
 			}
 		}
@@ -9632,7 +9675,7 @@ var Helper = {
 	},
 
 	injectWantedList: function(wantedList) {
-		System.setValueJSON("wantedList", wantedList)
+		System.setValueJSON("wantedList", wantedList);
 		var injectHere = document.getElementById("Helper:WantedListPlaceholder");
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
@@ -9645,7 +9688,7 @@ var Helper = {
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;'>"+
 			"Wanted Bounties <span id='Helper:resetWantedList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span><br>";
 
-		if (wantedList.wantedBounties == false) {
+		if (wantedList.wantedBounties === false) {
 			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:7px;'>" + 
 				"[No wanted bounties]</ol>";
 		}
@@ -9661,18 +9704,18 @@ var Helper = {
 					"<br/>Tickets Req.:  " + wantedList.bounty[i].tickets;
 				mouseOverText += "</div>');\"";
 
-				output += "<li style='padding-bottom:0px;margin-left:5px;'>"
-				output += "<a style= 'font-size:10px;"
+				output += "<li style='padding-bottom:0px;margin-left:5px;'>";
+				output += "<a style= 'font-size:10px;";
 				if (wantedList.bounty[i].accept)
 					output += "color:rgb(0,255,0); cursor:pointer; text-decoration:underline blink;' title = 'Accept Bounty' 'onclick=\"" + wantedList.bounty[i].accept + "\"'>[a]</a>&nbsp;";
 				else
 					output += "color:red;' href='" + System.server + "index.php?cmd=attackplayer&target_username=" + wantedList.bounty[i].target + "'>[a]</a>&nbsp;";
-				output += "<a style='color:#A0CFEC;font-size:10px;'"
+				output += "<a style='color:#A0CFEC;font-size:10px;'";
 				output += "href='" + System.server + "index.php?cmd=message&target_player=" + wantedList.bounty[i].target + "'>[m]";
 				output += "</a> &nbsp;<a onmouseover=" + mouseOverText;
-				output += "style='color:"
+				output += "style='color:";
 				output += "#FFF380";
-				output += ";font-size:10px;'"
+				output += ";font-size:10px;'";
 				output += " href='" + wantedList.bounty[i].link + "'>" + wantedList.bounty[i].target +"</a></li>"; 
 			}
 		}
@@ -9691,7 +9734,7 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]")
+			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
 			if (!injectHere) return;
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
@@ -9711,7 +9754,7 @@ var Helper = {
 		if (!contactList || refreshAllyEnemyDataOnly) {
 			System.xmlhttp("index.php?cmd=profile", Helper.parseProfileForWorld, refreshAllyEnemyDataOnly);
 		} else {
-			var contactList = System.getValueJSON("contactList");
+			contactList = System.getValueJSON("contactList");
 			contactList.isRefreshed = false;
 			Helper.injectAllyEnemyList(contactList);
 		}
@@ -9719,7 +9762,7 @@ var Helper = {
 
 	parseProfileForWorld: function(details, refreshAllyEnemyDataOnly) {
 		var doc=System.createDocument(details);
-		var allTables = doc.getElementsByTagName("TABLE")
+		var allTables = doc.getElementsByTagName("TABLE");
 		var alliesTable, enemiesTable;
 		for (var i=0;i<allTables.length;i++) {
 			var oneTable=allTables[i];
@@ -9737,11 +9780,11 @@ var Helper = {
 			contactList.contacts = [];
 		}
 
-		contactList.contacts.forEach(function(e) {e.status="Deleted"});
+		contactList.contacts.forEach(function(e) {e.status="Deleted";});
 		if (alliesTable && enemiesTable) {
 			var alliesDetails=alliesTable.getElementsByTagName("TABLE");
 
-			for (var i=0;i<alliesDetails.length;i++) {
+			for (i=0;i<alliesDetails.length;i++) {
 				var aTable = alliesDetails[i];
 				var contactLink   = aTable.rows[0].cells[1].firstChild;
 				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.href)[0]);
@@ -9752,7 +9795,7 @@ var Helper = {
 
 				// find contact in contact list, to modify data instead of replacing it
 
-				var findContacts = contactList.contacts.filter(function (e) {return e.id==contactId});
+				var findContacts = contactList.contacts.filter(function (e) {return e.id==contactId;});
 				if (findContacts.length>0) {
 					aContact = findContacts[0];
 				}
@@ -9779,18 +9822,18 @@ var Helper = {
 			}
 			var enemiesDetails=enemiesTable.getElementsByTagName("TABLE");
 
-			for (var i=0;i<enemiesDetails.length;i++) {
-				var aTable = enemiesDetails[i];
-				var contactLink   = aTable.rows[0].cells[1].firstChild;
-				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.href)[0]);
-				var contactName   = contactLink.textContent;
-				var contactStatus = aTable.rows[0].cells[0].firstChild.title;
+			for (i=0;i<enemiesDetails.length;i++) {
+				aTable = enemiesDetails[i];
+				contactLink   = aTable.rows[0].cells[1].firstChild;
+				contactId     = System.intValue((/[0-9]+$/).exec(contactLink.href)[0]);
+				contactName   = contactLink.textContent;
+				contactStatus = aTable.rows[0].cells[0].firstChild.title;
 
-				var aContact;
+				aContact;
 
 				// find contact in contact list, to modify data instead of replacing it
 
-				var findContacts = contactList.contacts.filter(function (e) {return e.id==contactId});
+				findContacts = contactList.contacts.filter(function (e) {return e.id==contactId;});
 				if (findContacts.length>0) {
 					aContact = findContacts[0];
 				}
@@ -9816,7 +9859,7 @@ var Helper = {
 				aContact.type   = "Enemy";
 			}
 			// remove not existing players
-			contactList.contacts = contactList.contacts.filter(function(e) {return e.status!="Deleted"});
+			contactList.contacts = contactList.contacts.filter(function(e) {return e.status!="Deleted";});
 			// damn, I love javascript array functions :)
 
 			contactList.lastUpdate = new Date();
@@ -9830,10 +9873,10 @@ var Helper = {
 		enableAllyOnlineList = GM_getValue("enableAllyOnlineList");
 		enableEnemyOnlineList = GM_getValue("enableEnemyOnlineList");
 		if (!enableAllyOnlineList && !enableEnemyOnlineList) return;
-		var onlineAlliesEnemies = contactList.contacts.filter(function (e) {return (e.status=="Online")})
-		if (!enableAllyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Ally")})
-		if (!enableEnemyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Enemy")})
-		if (onlineAlliesEnemies.length == 0) return;
+		var onlineAlliesEnemies = contactList.contacts.filter(function (e) {return (e.status=="Online");});
+		if (!enableAllyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Ally");});
+		if (!enableEnemyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Enemy");});
+		if (onlineAlliesEnemies.length === 0) return;
 		var playerId = Layout.playerId();
 		var injectHere = document.getElementById("Helper:AllyEnemyListPlaceholder");
 		var displayList = document.createElement("TABLE");
@@ -9941,7 +9984,7 @@ var Helper = {
 		var itemID = itemStats[2];
 		var xmlhttpAddress;
 		
-		if (GM_getValue("bulkSellAllBags") == true) {
+		if (GM_getValue("bulkSellAllBags")) {
 			xmlhttpAddress = "index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems";
 		} else {
 			xmlhttpAddress = "index.php?cmd=auctionhouse&subcmd=create";
@@ -9964,7 +10007,7 @@ var Helper = {
 		
 		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
 			var bulkItemIMG = bulkAuctionItemIMGs[i];
-			if (GM_getValue("bulkSellAllBags") == false) {
+			if (!GM_getValue("bulkSellAllBags")) {
 				bulkItemIMG = bulkItemIMG.parentNode;
 			}
 			var bulkItemMouseover = bulkItemIMG.getAttribute("onmouseover");
@@ -9973,7 +10016,7 @@ var Helper = {
 			var invId = itemStats[2];
 			var type = itemStats[3];
 			var pid = itemStats[4];
-			if ((i % 3 == 0)) newRow = bulkSellTable.insertRow(-1);;
+			if ((i % 3 === 0)) newRow = bulkSellTable.insertRow(-1);
 			//var newRow = bulkSellTable.insertRow(-1);
 			var newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
@@ -9981,11 +10024,11 @@ var Helper = {
 				'onmouseover="ajaxLoadItem('+itemId+', '+invId+', '+type+', '+pid+', \'\');">';
 			newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
-			newCell.innerHTML = '<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>';;
+			newCell.innerHTML = '<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>';
 			document.getElementById('Helper:bulkListSingle'+invId).addEventListener('click', Helper.bulkListSingle, true);		
 			if ((i+2) > maxAuctions && (i+1) != bulkAuctionItemIMGs.length) {
 				var newRow = bulkSellTable.insertRow(-1);
-				var newCell = newRow.insertCell(0);
+				newCell = newRow.insertCell(0);
 				newCell.colSpan = 4;
 				var newText = "You only have " + maxAuctions + " auction slots.";
 				if (maxAuctions == 2) {
@@ -10039,7 +10082,7 @@ var Helper = {
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Auction Listed";
-		} else if (info!="") {
+		} else if (info!=="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
@@ -10099,7 +10142,7 @@ var Helper = {
 		if (mainTable[2]) {
 			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
 			var newCellAll = newRow.insertCell(0);
-			newCellAll.colSpan = 3
+			newCellAll.colSpan = 3;
 
 			newCellAll.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
 				'All Items</span> &ensp ' +
@@ -10138,7 +10181,7 @@ var Helper = {
 		if (mainTable) {
 			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
 			var newCellAll = newRow.insertCell(0);
-			newCellAll.colSpan = 3
+			newCellAll.colSpan = 3;
 
 			newCellAll.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
 				'All Items</span> &ensp ' +
@@ -10174,7 +10217,7 @@ var Helper = {
 	makePageHeader: function(title, comment, spanId, button) {
 		return '<table width=100%><tr style="background-color:#CD9E4B">'+
 			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
-			(comment==''?'':'&nbsp;('+comment+')')+
+			(comment===''?'':'&nbsp;('+comment+')')+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
 			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
 			'</td></tr></table>';
@@ -10182,7 +10225,7 @@ var Helper = {
 	makePageHeaderTwo: function(title, comment, spanId, button, spanId2, button2) {
 		return '<table width=100%><tr style="background-color:#CD9E4B">'+
 			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
-			(comment==''?'':'&nbsp;('+comment+')')+
+			(comment===''?'':'&nbsp;('+comment+')')+
 			'<td width="10%" nobr style="font-size:x-small;text-align:right">'+
 			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
 			(spanId2?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId2+'">'+button2+'</span>]':'')+
@@ -10195,7 +10238,7 @@ var Helper = {
 	
 	injectAttackPlayer: function() {
 		var b = System.findNode("//input[contains(@value, 'Activate!')]");
-		if (b != null) {
+		if (b !== null) {
 			var oldOnclick = b.getAttribute("onClick");
 			b.setAttribute("onClick", "if (confirm('Are you sure you want to activate PvP Prestige?')) { " + oldOnclick + "}");
 		}
@@ -10205,7 +10248,7 @@ var Helper = {
 		if (!attackPlayerTable) return;
 		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.href);
 		if (targetPlayer) {
-			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>"
+			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>";
 			output += "<tr style='text-align:center;' bgcolor='#cd9e4b'><td width='275' style='border-style: solid; border-width: 1px;'>Attacker</td><td width='275' style='border-style: solid; border-width: 1px;'>Defender</td></tr>";
 			output += "<tr style='text-align:center;'><td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerSelfStatData'><font color='green'>Gathering your stats ...</font></span></td>"+
 				"<td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerDefenderStatData'><font color='green'>Gathering defender stats ...</font></span></td></tr>";
@@ -10260,7 +10303,7 @@ var Helper = {
 		var activeBuffsTitleRow = System.findNode("//tr[td/b[.='Active Buffs']]", doc);
 		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling.firstChild.nextSibling.firstChild.nextSibling;
 		var anchor2 = callback.anchor2;
-		var injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
+		injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
 		injectHere.innerHTML = activeBuffsElement.innerHTML;
 	},
 	
@@ -10282,7 +10325,7 @@ var Helper = {
 						gainHash[gains[i].textContent]=1;
 				}
 				for (var item in gainHash) {
-					injectHere.innerHTML+=gainHash[item]+" "+item+"(s), "
+					injectHere.innerHTML+=gainHash[item]+" "+item+"(s), ";
 				}
 			}
 		}
