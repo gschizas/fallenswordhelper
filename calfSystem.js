@@ -14,7 +14,7 @@ var System = {
 		Array.prototype.filterBy = System.filterBy;
 
 		System.server           = document.location.protocol + "//" + document.location.host + "/";
-		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel)\/(\d+)/i)[2]);
+		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel)\/(\d+)/i)[2],10);
 
 		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -37,14 +37,14 @@ var System = {
 					}
 				}
 				return value;
-			}
+			};
 			result = JSON.parse(resultJSON, reviver);
 		}
 		return result;
 	},
 
 	setValueJSON: function(name, value) {
-		GM_setValue(name, JSON.stringify(value))
+		GM_setValue(name, JSON.stringify(value));
 	},
 
 	findNode: function(xpath, doc) {
@@ -59,7 +59,7 @@ var System = {
 			}
 			var nodes=[];
 			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-			if (findQ.snapshotLength==0) return null;
+			if (findQ.snapshotLength===0) return null;
 			for (var i=0; i<findQ.snapshotLength; i++) {
 				nodes.push(findQ.snapshotItem(i));
 			}
@@ -85,14 +85,14 @@ var System = {
 	},
 
 	formatDateTime: function(aDate) {
-		var result=aDate.toDateString()
-		result += " "
+		var result=aDate.toDateString();
+		result += " ";
 		var hh=aDate.getHours();
 		if (hh<10) hh = "0" + hh;
 		var mm=aDate.getMinutes();
-		if (mm<10) mm = "0" + mm
-		result += hh + ":" + mm
-		return result
+		if (mm<10) mm = "0" + mm;
+		result += hh + ":" + mm;
+		return result;
 	},
 
 	formatDate: function(dateFormat) {
@@ -184,13 +184,13 @@ var System = {
 
 	intValue: function(theText) {
 		if (!theText) return 0;
-		return parseInt(theText.replace(/,/g,""));
+		return parseInt(theText.replace(/,/g,""),10);
 	},
 
 	getIntFromRegExp: function(theText, rxSearch) {
 		var matches = theText.match(rxSearch);
 		if (matches) {
-			result = parseInt(matches[1]);
+			result = parseInt(matches[1],10);
 		} else {
 			result = 0;
 		}
@@ -229,24 +229,24 @@ var System = {
 		for(i=0;i<this.length;i++) {
 			var first = this[i];
 			var second = (this[i+1]?this[i+1]:"abc");
-			if(i != this.length && first[removeBy]==second[removeBy]) {continue}
+			if(i != this.length && first[removeBy]==second[removeBy]) {continue;}
 			temp[temp.length]=this[i];
 		}
 		return temp;
 	},
 
 	convertTextToHtml: function(inputText) {
-		return inputText
-			.replace(/</g,"&lt")
-			.replace(/>/g,"&gt")
-			.replace(/\n/g,"<br>")
-			.replace(/\[\/([a-z])]/g,"<\/\$1>")
-			.replace(/\[([a-z])\]/g,"<\$1>");
+		return inputText.
+			replace(/</g,"&lt").
+			replace(/>/g,"&gt").
+			replace(/\n/g,"<br>").
+			replace(/\[\/([a-z])]/g,"<\/\$1>").
+			replace(/\[([a-z])\]/g,"<\$1>");
 	},
 
 	generateLiveTable: function(dataArray, outputElement, itemProperty) {
 		throw new Exception("Not ready yet!");
-		if (!dataArray) return;
+		/*if (!dataArray) return;
 		var result='<table id="Helper:LiveTableOutput"><tr>' +
 			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
 			'<th sortkey="name">Name</th>' +
@@ -271,12 +271,12 @@ var System = {
 			cell.style.textDecoration="underline";
 			cell.style.cursor="pointer";
 			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
-		}
+		}*/
 	},
 
 	sortLiveTable: function(evt) {
 		throw new Exception("Not ready yet!");
-		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
+		/*Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
 		var headerClicked = evt.target.getAttribute("sortKey");
 		var sortType = evt.target.getAttribute("sortType");
 		if (!sortType) sortType="string";
@@ -298,7 +298,7 @@ var System = {
 				Helper.onlinePlayers.players.sort(Helper.numberSort);
 				break;
 		}
-		System.generateOnlinePlayersTable();
+		System.generateOnlinePlayersTable();*/
 	},
 
 	parseDate: function(textDate) {
@@ -306,25 +306,25 @@ var System = {
 		dateText = textDate.split(" ")[1];
 		dayText = dateText.split("/")[0];
 		monthText = dateText.split("/")[1];
-		if (monthText == "Jan") {fullMonthText = "January"};
-		if (monthText == "Feb") {fullMonthText = "February"};
-		if (monthText == "Mar") {fullMonthText = "March"};
-		if (monthText == "Apr") {fullMonthText = "April"};
-		if (monthText == "May") {fullMonthText = "May"};
-		if (monthText == "Jun") {fullMonthText = "June"};
-		if (monthText == "Jul") {fullMonthText = "July"};
-		if (monthText == "Aug") {fullMonthText = "August"};
-		if (monthText == "Sep") {fullMonthText = "September"};
-		if (monthText == "Oct") {fullMonthText = "October"};
-		if (monthText == "Nov") {fullMonthText = "November"};
-		if (monthText == "Dec") {fullMonthText = "December"};
+		if (monthText == "Jan") fullMonthText = "January";
+		if (monthText == "Feb") fullMonthText = "February";
+		if (monthText == "Mar") fullMonthText = "March";
+		if (monthText == "Apr") fullMonthText = "April";
+		if (monthText == "May") fullMonthText = "May";
+		if (monthText == "Jun") fullMonthText = "June";
+		if (monthText == "Jul") fullMonthText = "July";
+		if (monthText == "Aug") fullMonthText = "August";
+		if (monthText == "Sep") fullMonthText = "September";
+		if (monthText == "Oct") fullMonthText = "October";
+		if (monthText == "Nov") fullMonthText = "November";
+		if (monthText == "Dec") fullMonthText = "December";
 		yearText = dateText.split("/")[2];
-		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00")
+		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00");
 		return dateAsDate;
 	},
 
 	toggleVisibilty: function(evt) {
-		var anItemId=evt.target.getAttribute("linkto")
+		var anItemId=evt.target.getAttribute("linkto");
 		var anItem=document.getElementById(anItemId);
 		var currentVisibility=anItem.style.visibility;
 		anItem.style.visibility=(currentVisibility=="hidden")?"visible":"hidden";

@@ -1179,7 +1179,12 @@ var Helper = {
 			'class="custombutton">';
 		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 		}
-		
+		injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Empower')]");
+		if (injectHere) {
+			injectHere.innerHTML = "Empower&nbsp;Level <nobr>" + 
+				injectHere.innerHTML.substring(injectHere.innerHTML.indexOf("["),injectHere.innerHTML.length) + 
+				"</nobr>";
+		}
 	},
 
 	calculateRelicDefenderStats: function(evt) {
@@ -1392,7 +1397,7 @@ var Helper = {
 			LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
 			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
 			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
+			var defendersProcessedNumber = System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 			var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
 			LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
@@ -1462,7 +1467,7 @@ var Helper = {
 			hpNumber                     = System.intValue(hpValue.innerHTML);
 			hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
 			var defendersProcessed       = System.findNode("//td[@title='defendersProcessed']");
-			defendersProcessedNumber     = System.intValue(defendersProcessed.innerHTML);
+			var defendersProcessedNumber = System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 		}
 		else {
@@ -1513,7 +1518,7 @@ var Helper = {
 			hpValue = System.findNode("//td[@title='LDhpValue']");
 			hpNumber=System.intValue(hpValue.innerHTML);
 			hpValue.innerHTML = System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier));
-			efendersProcessed = System.findNode("//td[@title='LDProcessed']");
+			defendersProcessed = System.findNode("//td[@title='LDProcessed']");
 			defendersProcessedNumber=System.intValue(defendersProcessed.innerHTML);
 			defendersProcessed.innerHTML = System.addCommas(defendersProcessedNumber + 1);
 			storedFlinchLevel = System.findNode("//td[@title='LDFlinchLevel']");
@@ -3770,7 +3775,7 @@ var Helper = {
 					if (firstPlayer && !secondPlayer) {
 						firstPlayerID = firstPlayer[1]*1;
 					}
-					else if (firstPlayer) {
+					if (firstPlayer && firstPlayerID != playerId && secondPlayerID != playerId) {	
 						//aRow.style.display = "none";
 						aRow.style.fontSize = "x-small";
 						aRow.style.color = "gray";
@@ -6084,6 +6089,9 @@ var Helper = {
 			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
 			item.minLevel=(levelNode)?parseInt(levelNode.textContent,10):0;
 
+			var itemPartOfSetNode=System.findNode("//font[contains(.,'Set Details')]", doc);
+			item.partOfSet=(itemPartOfSetNode)?true:false;
+
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
 				forgeCount++;
@@ -6202,9 +6210,15 @@ var Helper = {
 
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>'+
-					' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' + item.name + '">set</a>)'+
-					'</td>' +
+				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>';
+			if (item.partOfSet) {
+				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' + 
+					item.name.replace(/gloves/gi,'').replace(/gauntlets/gi,'').replace(/helmet/gi,'').replace(/helm/gi,'').replace(/amulet/gi,'').replace(/necklace/gi,'').
+						replace(/weapon/gi,'').replace(/axe/gi,'').replace(/sword/gi,'').replace(/fist/gi,'').replace(/armor/gi,'').replace(/shield/gi,'').
+						replace(/ring/gi,'').replace(/boots/gi,'').replace(/rune/gi,'').
+						replace(/the/gi,'').replace(/of/gi,'').trim().replace(/ /g,'|') + '">set</a>)';
+			}
+			result+='</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
 				'<td align="right">' + item.type + '</td>' +
