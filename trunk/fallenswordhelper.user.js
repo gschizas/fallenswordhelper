@@ -17,14 +17,14 @@
 
 var Helper = {
 	// System functions
-	init: function(e) {
+	init: function (e) {
 		Helper.initSettings();
 		Helper.beginAutoUpdate();
 		Helper.readInfo();
 		this.initialized = true;
 	},
 
-	initSettings: function() {
+	initSettings: function () {
 		
 		System.setDefault("currentTile", "");
 		System.setDefault("lastActiveQuestPage", "");
@@ -169,7 +169,7 @@ var Helper = {
 		}
 
 		var memberList = System.getValueJSON("memberlist");
-		if (!memberList || !memberList.lastUpdate) GM_setValue("memberlist", "");
+		if (!memberList || !memberList.lastUpdate) {GM_setValue("memberlist", "");}
 	},
 
 	readInfo: function() {
@@ -190,7 +190,7 @@ var Helper = {
 	beginAutoUpdate: function() {
 		var lastCheck = GM_getValue("lastVersionCheck");
 		var now = (new Date()).getTime();
-		if (!lastCheck) lastCheck = 0;
+		if (!lastCheck) {lastCheck = 0;}
 		var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000);
 		if (haveToCheck) {
 			Helper.checkForUpdate();
@@ -215,11 +215,11 @@ var Helper = {
 	},
 
 	autoUpdate: function(responseDetails) {
-		if (responseDetails.status != 200) return;
+		if (responseDetails.status != 200) {return;}
 		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion = GM_getValue("currentVersion");
-		if (!currentVersion) currentVersion = 0;
+		if (!currentVersion) {currentVersion = 0;}
 		var versionRE = /Revision\s*([0-9]+):/;
 		var latestVersion = responseDetails.responseText.match(versionRE)[1];
 		GM_log("Current version: " + currentVersion);
@@ -334,32 +334,29 @@ var Helper = {
 			Helper.injectFSBoxLog();
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
+			Helper.injectJoinAllLink();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
 			var re=/cmd=([a-z]+)/;
 			var pageIdRE = re.exec(document.location.search);
 			pageId="-";
-			if (pageIdRE)
-				pageId=pageIdRE[1];
+			if (pageIdRE) {pageId=pageIdRE[1];}
 
 			re=/subcmd=([a-z]+)/;
 			var subPageIdRE = re.exec(document.location.search);
 			subPageId="-";
-			if (subPageIdRE)
-				subPageId=subPageIdRE[1];
+			if (subPageIdRE){subPageId=subPageIdRE[1];}
 
 			re=/subcmd2=([a-z]+)/;
 			var subPage2IdRE = re.exec(document.location.search);
 			subPage2Id="-";
-			if (subPage2IdRE)
-				subPage2Id=subPage2IdRE[1];
+			if (subPage2IdRE) {subPage2Id=subPage2IdRE[1];}
 
 			re=/page=([0-9]+)/;
 			var subsequentPageIdRE = re.exec(document.location.search);
 			subsequentPageId="-";
-			if (subsequentPageIdRE)
-				subsequentPageId=subsequentPageIdRE[1];
+			if (subsequentPageIdRE) {subsequentPageId=subsequentPageIdRE[1];}
 		} else {
 			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
 			pageId = pageId?pageId.getAttribute("value"):"-";
@@ -739,7 +736,7 @@ var Helper = {
 	},
 	
 	injectSkillsPage: function() {
-		var table = table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");
+		var table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");
 		var tree_id = window.location.href.match(/tree_id=(\d)/);
 		if (tree_id && tree_id[1] == 2) {
 			table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/table/tbody");
@@ -831,8 +828,8 @@ var Helper = {
 			if (node) {
 				var fsbox=node.innerHTML.replace('<br><br>',' ');
 				var boxList=GM_getValue("fsboxcontent");
-				if (boxList.indexOf(fsbox)<0) boxList=fsbox+boxList;
-				if (boxList.length>10000) boxList=boxList.substring(0,10000);
+				if (boxList.indexOf(fsbox)<0) {boxList=fsbox+boxList;}
+				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
 				GM_setValue("fsboxcontent",boxList);
 				node.innerHTML+="<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[Log]</a>";
 			}
@@ -920,15 +917,15 @@ var Helper = {
 		var guildStoreBoxItem = [];
 		var guildStoreBoxID = [];
 		for (var i=0;i<12;i++) {
-			if (guildStore.rows[i >> 2]) guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];
-			if (guildStoreBox[i]) guildStoreBoxItem[i] = guildStoreBox[i].firstChild;
-			if (guildStoreBoxItem[i]) guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
+			if (guildStore.rows[i >> 2]) {guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];}
+			if (guildStoreBox[i]) {guildStoreBoxItem[i] = guildStoreBox[i].firstChild;}
+			if (guildStoreBoxItem[i]) {guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];}
 		}
 
 		var newRow;
 
 		for (i=0;i<12;i++) {
-			if ((i % 4===0) && guildStoreBoxItem[i]) newRow = guildStore.insertRow(2*(i >> 2)+1);
+			if ((i % 4===0) && guildStoreBoxItem[i]) {newRow = guildStore.insertRow(2*(i >> 2)+1);}
 			if (guildStoreBoxItem[i]) {
 				var newCell = newRow.insertCell(i % 4);
 				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
@@ -1009,7 +1006,7 @@ var Helper = {
 
 	injectStaminaCalculator: function() {
 		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
-		if (!staminaImageElement) return;
+		if (!staminaImageElement) {return;}
 
 		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
 		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
@@ -1063,7 +1060,7 @@ var Helper = {
 	
 	injectLevelupCalculator: function() {
 		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
-		if (!levelupImageElement) return;
+		if (!levelupImageElement) {return;}
 		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
 		var remainingXPRE = /Remaining:\s<\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
 		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\\\'90%\\\'>\+([0-9,]+)/i;
@@ -1089,15 +1086,16 @@ var Helper = {
 		var itemNodes=System.findNodes("//td/center/a/img[contains(@src,'/items/')]");
 
 		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=1 class='custominput'><table cellpadding=2><tr>";
+		var itemId;
 		for (var i=0;i<itemNodes.length;i++) {
 			var item=itemNodes[i];
 			var src=item.getAttribute("src");
 			var text=item.parentNode.parentNode.textContent;
 			var onmouseover=item.getAttribute("onmouseover").replace("Click to Buy","Click to Select");
-			var itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
+			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
 				"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
-			if (i%6==5 && i!=itemNodes.length-1) selector+="</tr><tr>";
+			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
 		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
 			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
@@ -1119,7 +1117,7 @@ var Helper = {
 	
 	quickBuyItem: function() {
 		//
-		if (!Helper.shopItemId || !Helper.shopId) return;
+		if (!Helper.shopItemId || !Helper.shopId) {return;}
 		document.getElementById('buy_result').innerHTML="Buying "+document.getElementById('buy_amount').value+" Items";
 		for (var i=0;i<document.getElementById('buy_amount').value;i++) {
 			System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
@@ -1593,7 +1591,7 @@ var Helper = {
 		}
 		else {
 			var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
-			if (!posit) return;
+			if (!posit) {return;}
 			var thePosition=posit.innerHTML;
 			var positionRE=/\((\d+),\s*(\d+)\)/;
 			var positionX = parseInt(thePosition.match(positionRE)[1],10);
@@ -1606,7 +1604,7 @@ var Helper = {
 	},
 
 	mapThis: function() {
-		if (!GM_getValue("footprints")) return;
+		if (!GM_getValue("footprints")) {return;}
 		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
 		var posit = Helper.position();
 
@@ -1626,7 +1624,7 @@ var Helper = {
 	},
 
 	showMap: function(isLarge) {
-		if (!GM_getValue("footprints")) return;
+		if (!GM_getValue("footprints")) {return;}
 		if (isLarge) {
 			var realm = System.findNode("//b");
 			Helper.levelName = realm.textContent.replace(" Map Overview", "");
@@ -1634,7 +1632,7 @@ var Helper = {
 		// GM_log(Helper.levelName);
 		var theMap = System.getValueJSON("map");
 		var displayedMap = System.findNode(isLarge ? "//table[@width]" : "//table[@width='200']");
-		if (!displayedMap) return;
+		if (!displayedMap) {return;}
 		var footprintsColor = GM_getValue("footprintsColor");
 		var posit = Helper.position();
 
@@ -1686,7 +1684,7 @@ var Helper = {
 
 	injectAdvisor: function(subPage2Id) {
 		var titleCells=System.findNodes("//tr[td/b='Member']/td");
-		if (!titleCells) return;
+		if (!titleCells) {return;}
 		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
 		var list=parentTables[parentTables.length-1];
 
@@ -1743,7 +1741,7 @@ var Helper = {
 				callback.inject.innerHTML+=' day '+day+',';
 				var doc=System.createDocument(responseText);
 				var titleCells=System.findNodes("//tr[td/b='Member']/td",doc);
-				if (!titleCells) return;
+				if (!titleCells) {return;}
 				var parentTables=System.findNodes("ancestor::table", titleCells[0],doc);
 				var list=parentTables[parentTables.length-1];
 				Helper.generateAdvisorRows(list);
@@ -2030,7 +2028,7 @@ var Helper = {
 		replacementText += "</td>" ;
 
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-		if (!injectHere) return;
+		if (!injectHere) {return;}
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
 		newRow.innerHTML=replacementText;
@@ -2075,7 +2073,7 @@ var Helper = {
 		}
 		
 		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
-		if (!questTable) return;
+		if (!questTable) {return;}
 		var hideQuests=[];
 		if (GM_getValue("hideQuests")) hideQuests=GM_getValue("hideQuestNames").split(",");
 		for (var i=0;i<questTable.rows.length;i++) {
@@ -2209,7 +2207,7 @@ var Helper = {
 		Helper.showMap(false);
 
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-		if (!injectHere) return;
+		if (!injectHere) {return;}
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
@@ -2270,7 +2268,7 @@ var Helper = {
 		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
 		if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
 			injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-			if (!injectHere) return;
+			if (!injectHere) {return;}
 			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
 			replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
@@ -2375,7 +2373,7 @@ var Helper = {
 	},
 	
 	addGuildInfoWidgets: function() {
-		if (!GM_getValue("enableGuildInfoWidgets")) return;
+		if (!GM_getValue("enableGuildInfoWidgets")) {return;}
 		var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
 		if (onlineMembersTable) {
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
@@ -2456,7 +2454,7 @@ var Helper = {
 
 	sendGoldToPlayer: function(){
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-		if (!injectHere) return;
+		if (!injectHere) {return;}
 		var recipient = GM_getValue("goldRecipient");
 		var amount = GM_getValue("goldAmount");
 		System.xmlhttp('index.php?cmd=trade');
@@ -2471,7 +2469,7 @@ var Helper = {
 
 	goldToPlayerSent: function(responseText, callback) {
 		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-		if (!injectHere) return;
+		if (!injectHere) {return;}
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
 		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
@@ -2595,7 +2593,7 @@ var Helper = {
 	},
 	
 	extractAllSimilar: function(evt) {
-		if (!window.confirm("Are you sure you want to extract all similar items?")) return;
+		if (!window.confirm("Are you sure you want to extract all similar items?")) {return;}
 		var InventoryIDs=evt.target.getAttribute("invIDs").split(",");
 		//evt.target.parentNode.innerHTML = InventoryIDs;
 		var output= '';
@@ -2646,9 +2644,9 @@ var Helper = {
 	},
 
 	prepareCombatLog: function() {
-		//if (!GM_getValue("showCombatLog")) return;
+		//if (!GM_getValue("showCombatLog")) {return;}
 		var reportsTable=System.findNode("//table[@width='320']/parent::*");
-		if (!reportsTable) return;
+		if (!reportsTable) {return;}
 		var tempLog=document.createElement("div");
 		tempLog.id="reportsLog";
 		var injLog=reportsTable.appendChild(tempLog);
@@ -2672,7 +2670,7 @@ var Helper = {
 	},
 
 	killSingleMonster: function(monsterNumber) {
-		if (!GM_getValue("quickKill")) return;
+		if (!GM_getValue("quickKill")) {return;}
 		var kills=0;
 		var monster = Helper.getMonster(monsterNumber);
 
@@ -2704,9 +2702,9 @@ var Helper = {
 	},
 
 	colorMonsters: function() {
-		if (!GM_getValue("enableCreatureColoring")) return;
+		if (!GM_getValue("enableCreatureColoring")) {return;}
 		monsters = System.findNodes("//a[contains(@href,'cmd=combat') and not(contains(@href,'max_turns='))]");
-		if (!monsters) return;
+		if (!monsters) {return;}
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
@@ -2723,9 +2721,9 @@ var Helper = {
 	},
 
 	getMonsterInfo: function() {
-		if (!GM_getValue("showCreatureInfo")) return;
+		if (!GM_getValue("showCreatureInfo")) {return;}
 		var monsters = System.findNodes("//a[contains(@href,'cmd=world&subcmd=viewcreature&creature_id=')]");
-		if (!monsters) return;
+		if (!monsters) {return;}
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
@@ -2871,7 +2869,7 @@ var Helper = {
 
 	generateEntityTable: function() {
 		var content = document.getElementById("Helper.entityTableOutput");
-		if (!Helper.entityLogTable || !content) return;
+		if (!Helper.entityLogTable || !content) {return;}
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
 			'<td width="90%" nobr align=center><b>&nbsp;Entity Information</b></td>'+
 			'<td width="10%" nobr>[<span id="Helper.clearEntityLog">Clear</span>]</td>'+
@@ -3064,7 +3062,7 @@ var Helper = {
 
 	appendCombatLog: function(text, showCombatLog) {
 		var reportLog = System.findNode("//div[@id='reportsLog']");
-		if (!reportLog) return;
+		if (!reportLog) {return;}
 		if (GM_getValue("showCombatLog") || showCombatLog) reportLog.innerHTML += text + "<br/>";
 	},
 
@@ -3191,9 +3189,9 @@ var Helper = {
 
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"),10);
-		if (showLines===0) return;
+		if (showLines===0) {return;}
 		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
-		if (!injectHere) return;
+		if (!injectHere) {return;}
 		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0);
 		var cell = info.insertCell(0);
 		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
@@ -3214,7 +3212,7 @@ var Helper = {
 	parseChatForWorld: function(chatText) {
 		var doc=System.createDocument(chatText);
 		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", doc);
-		if (!chatTable) return;
+		if (!chatTable) {return;}
 		// GM_log(chatTable.innerHTML);
 		var chat = new Object();
 		var chatConfirm=System.findNode("//input[@name='xc']", doc);
@@ -3302,7 +3300,7 @@ var Helper = {
 	},
 
 	sendMassChat: function(evt) {
-		if (!window.confirm("Are you sure you want to send a mass message?")) return;
+		if (!window.confirm("Are you sure you want to send a mass message?")) {return;}
 
 		var oForm=evt.target.form;
 		Helper.sendChatGeneric(oForm, true);
@@ -3375,12 +3373,12 @@ var Helper = {
 
 	keyPress: function (evt) {
 		var r, s;
-		if (evt.target.tagName!="HTML") return;
+		if (evt.target.tagName!="HTML") {return;}
 
 		// ignore control, alt and meta keys (I think meta is the command key in Macintoshes)
-		if (evt.ctrlKey) return;
-		if (evt.metaKey) return;
-		if (evt.altKey) return;
+		if (evt.ctrlKey) {return;}
+		if (evt.metaKey) {return;}
+		if (evt.altKey) {return;}
 
 		r = evt.charCode;
 		s = evt.keyCode;
@@ -3534,13 +3532,13 @@ var Helper = {
 	},
 
 	addLogColoring: function(logScreen, dateColumn) {
-		if (!GM_getValue("enableLogColoring")) return;
+		if (!GM_getValue("enableLogColoring")) {return;}
 		var lastCheckScreen = "last" + logScreen + "Check";
 		var localLastCheckMilli=GM_getValue(lastCheckScreen);
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 
 		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
-		if (!chatTable) return;
+		if (!chatTable) {return;}
 
 		var localDateMilli = (new Date()).getTime();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
@@ -3581,7 +3579,7 @@ var Helper = {
 
 	addLogWidgets: function() {
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
-		if (!logTable) return;
+		if (!logTable) {return;}
 		var memberList = System.getValueJSON("memberlist");
 		var memberNameString = "";
 		if (memberList) {
@@ -3749,7 +3747,7 @@ var Helper = {
 	addGuildLogWidgets: function() {
 		var node=System.findNode("//font[@size=3]/b[contains(.,'s Log')]/..");
 		node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Guild Log Summary</a> ]';
-		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
+		if (!GM_getValue("hideNonPlayerGuildLogMessages")) {return;}
 		var playerId=Layout.playerId();
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		var hideNextRows = 0;
@@ -4165,7 +4163,7 @@ var Helper = {
 	
 	injectAuctionQuickPreference: function() {
 		Helper.qAHPref=System.getValueJSON("quickAHPref");
-		if (!Helper.qAHPref || Helper.qAHPref.length<=0) return;
+		if (!Helper.qAHPref || Helper.qAHPref.length<=0) {return;}
 		
 		var injectHere = document.getElementById("Helper:AHquickPref");
 		for (var i=0; i<Helper.qAHPref.length; i++) {
@@ -4268,7 +4266,7 @@ var Helper = {
 	},
 
 	deleteQuickItem: function(evt) {
-		// if (!window.confirm('Are you sure you want to delete this link?')) return;
+		// if (!window.confirm('Are you sure you want to delete this link?')) {return;}
 		var itemId = evt.target.getAttribute("itemId");
 		Helper.param.currentItems.splice(itemId, 1);
 		Helper.generateManageTable();
@@ -4628,7 +4626,7 @@ var Helper = {
 
 		// find the combat set id value
 		var allItems = cbsSelect.getElementsByTagName("option");
-		if (itemIndex >= allItems.length) return;
+		if (itemIndex >= allItems.length) {return;}
 		var cbsIndex = allItems[itemIndex].value;
 
 		GM_xmlhttpRequest({
@@ -4759,9 +4757,9 @@ var Helper = {
 	
 	injectMoveItems: function() {
 		var foldersEnabled = System.findNode("//img[contains(@src,'/folder_on.gif')]");
-		if (! foldersEnabled) return;
+		if (! foldersEnabled) {return;}
 		var otherFolders = System.findNodes("//td/center/a/img[contains(@src,'/folder.gif')]");
-		if (! otherFolders) return;
+		if (! otherFolders) {return;}
 		var cell=foldersEnabled.parentNode.parentNode.parentNode.parentNode.parentNode.insertRow(-1).insertCell(-1);
 		cell.colSpan = otherFolders.length + 1;
 		cell.align='center';
@@ -4925,7 +4923,7 @@ var Helper = {
 			if (sellLink) sellLink.style.visibility='hidden';
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
 		}
-		if (GM_getValue("disableItemColoring")) return;
+		if (GM_getValue("disableItemColoring")) {return;}
 		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
 		var fontLineRX=fontLineRE.exec(responseText);
 		var color=fontLineRX[1];
@@ -4945,7 +4943,7 @@ var Helper = {
 	injectProfile: function() {
 		var player = System.findNode("//textarea[@id='holdtext']");
 		var avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
-		if (!avyrow) return;
+		if (!avyrow) {return;}
 		var playeridRE = document.URL.match(/player_id=(\d+)/);
 		if (playeridRE) var playerid=playeridRE[1];
 		var idindex;
@@ -5197,7 +5195,7 @@ var Helper = {
 		GM_setValue("buffsToBuy", "");
 		var bioNode=System.findNode(bioXPath);
 		var bioContents = bioNode.innerHTML;
-		if (!renderBio || !bioNode) return;
+		if (!renderBio || !bioNode) {return;}
 		
 		bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
 		var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
@@ -5518,7 +5516,7 @@ var Helper = {
 	},
 	
 	useProfileInventoryItem: function(evt) {
-		if (!window.confirm("Are you sure you want to use/extract the item?")) return;
+		if (!window.confirm("Are you sure you want to use/extract the item?")) {return;}
 		var InventoryItemID=evt.target.getAttribute("itemID");
 		System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + InventoryItemID,
 			function(responseText) {
@@ -5805,7 +5803,7 @@ var Helper = {
 	},
 
 	generateOnlinePlayersTable: function() {
-		if (!Helper.onlinePlayers) return;
+		if (!Helper.onlinePlayers) {return;}
 		Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
 		var minLvl = GM_getValue("onlinePlayerMinLvl", 1);
 		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 1000);
@@ -5850,7 +5848,7 @@ var Helper = {
 		Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
 		if (!evt) {
 			var sortCriteria = System.getValueJSON("onlinePlayerSortBy");
-			if (!sortCriteria) return;
+			if (!sortCriteria) {return;}
 			var sortType = sortCriteria["sortType"];
 			Helper.sortBy = sortCriteria["sortBy"];
 			Helper.sortAsc = sortCriteria["sortAsc"];
@@ -6134,7 +6132,7 @@ var Helper = {
 			targetInventory = Helper.inventory;
 			inventoryShell = 'inventory';
 		}
-		if (!targetInventory) return;
+		if (!targetInventory) {return;}
 		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
 
 		var output=document.getElementById(targetId);
@@ -6315,7 +6313,7 @@ var Helper = {
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentPage = callback.page;
 		var pages=System.findNode("//select[@name='page']", doc);
-		if (!pages) return;
+		if (!pages) {return;}
 		var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
 
 		output.innerHTML += 'Page ' + currentPage + '...<br/>';
@@ -6402,7 +6400,7 @@ var Helper = {
 			'<th align="left">Components</th>' +
 			'<th align="left">Target</th>' +
 			'</tr>';
-		if (!Helper.recipebook) return;
+		if (!Helper.recipebook) {return;}
 
 		var hideRecipes=[];
 		if (GM_getValue("hideRecipes")) hideRecipes=GM_getValue("hideRecipeNames").split(",");
@@ -6569,7 +6567,7 @@ var Helper = {
 
 	injectGroups: function() {
 		var subTable = System.findNode("//table[@width='650']/tbody/tr/td/table");
-		if (!subTable) return;
+		if (!subTable) {return;}
 		var minGroupLevel = GM_getValue("minGroupLevel");
 		if (minGroupLevel) {
 			var textArea = subTable.rows[0].cells[0];
@@ -6890,7 +6888,7 @@ var Helper = {
 		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
 
 		var theBuffPack = System.getValueJSON("buffpack");
-		if (!theBuffPack) return;
+		if (!theBuffPack) {return;}
 
 		if (!theBuffPack["nickname"]) { //avoid bugs if the new array is not populated yet
 			theBuffPack["nickname"] = {};
@@ -6915,7 +6913,7 @@ var Helper = {
 
 	setAllSkills: function(value) {
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
-		if (!skillNodes) return;
+		if (!skillNodes) {return;}
 
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			skillNodes[i].checked = value;
@@ -6925,7 +6923,7 @@ var Helper = {
 
 	sumStamCostOfSelectedBuffs: function() {
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
-		if (!skillNodes) return;
+		if (!skillNodes) {return;}
 
 		staminaRunningTotal = 0;
 		for (var i = 0; i < skillNodes.length; i++ ) {
@@ -6950,14 +6948,14 @@ var Helper = {
 	useBuffPack: function(bpIndex) {
 		
 		var theBuffPack = System.getValueJSON("buffpack");
-		if (!theBuffPack) return;
-		if (bpIndex >= theBuffPack["size"]) return;
+		if (!theBuffPack) {return;}
+		if (bpIndex >= theBuffPack["size"]) {return;}
 
 		var buffList = theBuffPack["bp"][bpIndex];
-		if (!buffList) return;
+		if (!buffList) {return;}
 
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
-		if (!skillNodes) return;
+		if (!skillNodes) {return;}
 
 		for (var i = 0; i < skillNodes.length; i++ ) {
 			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
@@ -6970,12 +6968,12 @@ var Helper = {
 
 	deleteBuffPack: function(evt) {
 
-		if (!window.confirm("Are you sure you want to delete the buff pack?")) return;
+		if (!window.confirm("Are you sure you want to delete the buff pack?")) {return;}
 
 		var bpIndex=parseInt(evt.target.getAttribute("buffId"),10);
 		var theBuffPack = System.getValueJSON("buffpack");
-		if (!theBuffPack) return;
-		if (!theBuffPack["size"]) return;
+		if (!theBuffPack) {return;}
+		if (!theBuffPack["size"]) {return;}
 
 		theBuffPack["size"] --;
 		if (theBuffPack["size"] === 0) { // avoid bugs :)
@@ -7027,7 +7025,7 @@ var Helper = {
 
 	displayAddBuffPack: function() {
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
-		if (!skillNodes) return;
+		if (!skillNodes) {return;}
 		var buffListBox = document.getElementById("newBuffPack");
 		var buffListText = "";
 		for (var i = 0; i < skillNodes.length; i++ ) {
@@ -7047,8 +7045,8 @@ var Helper = {
 	},
 
 	saveBuffPack: function() {
-		if (!document.getElementById("newBuffPack").value) return;
-		if (!document.getElementById("newBuffPackNickname").value) return;
+		if (!document.getElementById("newBuffPack").value) {return;}
+		if (!document.getElementById("newBuffPackNickname").value) {return;}
 
 		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) {
@@ -7219,7 +7217,7 @@ var Helper = {
 		var doc=System.createDocument(responseText);
 		Helper.tmpSelfProfile=responseText;
 		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
-		if (!sustainText) return;
+		if (!sustainText) {return;}
 		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
 		var sustainLevelRE = /Level<br>(\d+)%/;
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
@@ -7231,7 +7229,7 @@ var Helper = {
 		injectHere.align = "center";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Sustain level:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
 		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
-		if (!furyCasterText) return;
+		if (!furyCasterText) {return;}
 		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
 		var furyCasterLevelRE = /Level<br>(\d+)%/;
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
@@ -7257,7 +7255,7 @@ var Helper = {
 	getCounterAttackSetting: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var counterAttackTextElement = System.findNode("//input[@name='ca_default']", doc);
-		if (!counterAttackTextElement) return;
+		if (!counterAttackTextElement) {return;}
 		var counterAttackValue = counterAttackTextElement.getAttribute("value");
 		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
@@ -7755,7 +7753,7 @@ var Helper = {
 
 	addHistoryWidgets: function() {
 		var textArea = System.findNode("//textarea[@name='history']");
-		if (!textArea) return;
+		if (!textArea) {return;}
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
@@ -7841,7 +7839,7 @@ var Helper = {
 
 	injectTopRated: function() {
 		var mainTable = System.findNode("//table[tbody/tr/td/font/b[.='Top 250 Players']]");
-		if (!mainTable) return;
+		if (!mainTable) {return;}
 		var mainTitle = mainTable.rows[0].cells[0];
 		mainTitle.innerHTML += '&nbsp<input id="findOnlinePlayers" type="button" value="Find Online Players" ' +
 			'title="Fetch the online status of the top 250 players (warning ... takes a few seconds)." class="custombutton">';
@@ -8193,7 +8191,7 @@ var Helper = {
 		var tournamentIDRE = /Tournament #(\d+)/;
 		var tournamentID = tournamentIDRE.exec(tournamentTitle.innerHTML)[1]*1;
 		var arenaMatches = System.getValueJSON("arenaMatches");
-		if (!arenaMatches) return;
+		if (!arenaMatches) {return;}
 		for (var k=0; k<arenaMatches.length; k++){
 			if (arenaMatches[k].arenaID == tournamentID && !arenaMatches[k].arenaHTML) {
 				var tournamentHTML = '<table><tbody>'+
@@ -8882,7 +8880,7 @@ var Helper = {
 	markPlayerOnMiniMap: function() {
 		var miniMap = document.getElementById("miniMap");
 		var posit = Helper.position();
-		if (!miniMap || !posit) return;
+		if (!miniMap || !posit) {return;}
 		var position = miniMap.firstChild.rows[posit.Y].cells[posit.X];
 		var background = position.firstChild.src;
 		position.innerHTML = '<center><img width=16 height=16 src="' + System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
@@ -8909,7 +8907,7 @@ var Helper = {
 
 	movePage: function(dir) {
 		var dirButton = System.findNode("//input[@value='"+dir+"']");
-		if (!dirButton) return;
+		if (!dirButton) {return;}
 		var url = dirButton.getAttribute("onClick");
 		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
 		window.location = url;
@@ -8954,7 +8952,7 @@ var Helper = {
 			return;
 		}
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (!auctionTable) return;
+		if (!auctionTable) {return;}
 
 		var bidEntryTable = auctionTable.rows[9].cells[0].firstChild.nextSibling;
 		itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search);
@@ -9074,7 +9072,7 @@ var Helper = {
 		var auctionCurrency = document.getElementById("Helper:auctionCurrency").value;
 		var auctionMinBid = document.getElementById("Helper:minBid").value;
 		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
-		if (!auctionMinBid) return;
+		if (!auctionMinBid) {return;}
 		var table = System.getValueJSON("auctionTemplate");
 		var theTemplate = {
 			auctionLength: auctionLength,
@@ -9749,7 +9747,7 @@ var Helper = {
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
 			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
-			if (!injectHere) return;
+			if (!injectHere) {return;}
 			var info = injectHere.insertRow(0);
 			var cell = info.insertCell(0);
 			cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
@@ -9886,11 +9884,11 @@ var Helper = {
 	injectAllyEnemyList: function(contactList) {
 		enableAllyOnlineList = GM_getValue("enableAllyOnlineList");
 		enableEnemyOnlineList = GM_getValue("enableEnemyOnlineList");
-		if (!enableAllyOnlineList && !enableEnemyOnlineList) return;
+		if (!enableAllyOnlineList && !enableEnemyOnlineList) {return;}
 		var onlineAlliesEnemies = contactList.contacts.filter(function (e) {return (e.status=="Online");});
 		if (!enableAllyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Ally");});
 		if (!enableEnemyOnlineList) onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return (e.type!="Enemy");});
-		if (onlineAlliesEnemies.length === 0) return;
+		if (onlineAlliesEnemies.length === 0) {return;}
 		var playerId = Layout.playerId();
 		var injectHere = document.getElementById("Helper:AllyEnemyListPlaceholder");
 		var displayList = document.createElement("TABLE");
@@ -9950,12 +9948,12 @@ var Helper = {
 	},
 	
 	injectCreateAuctionBulkSell: function() {
-		if (window.location.search.search("inv_id") == -1) return;
+		if (window.location.search.search("inv_id") == -1) {return;}
 		var enableBulkSell = GM_getValue("enableBulkSell");
-		if (!enableBulkSell) return;
+		if (!enableBulkSell) {return;}
 		
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (!auctionTable) return;
+		if (!auctionTable) {return;}
 
 		var newRow = auctionTable.insertRow(11);
 		var newCell = newRow.insertCell(0);
@@ -10015,7 +10013,7 @@ var Helper = {
 
 		var doc=System.createDocument(responseText);
 		var bulkAuctionItemIMGs = System.findNodes("//img[contains(@src,'items/"+originalItemID+".gif')]", doc);
-		if (!bulkAuctionItemIMGs) return;
+		if (!bulkAuctionItemIMGs) {return;}
 		var maxAuctions = GM_getValue("maxAuctions");
 		if (!maxAuctions) maxAuctions = 2;
 		
@@ -10256,10 +10254,10 @@ var Helper = {
 			var oldOnclick = b.getAttribute("onClick");
 			b.setAttribute("onClick", "if (confirm('Are you sure you want to activate PvP Prestige?')) { " + oldOnclick + "}");
 		}
-		if (!GM_getValue("enableAttackHelper")) return;
+		if (!GM_getValue("enableAttackHelper")) {return;}
 		//inject current stats, buffs and equipment
 		var attackPlayerTable = System.findNode("//table[tbody/tr/td/font/b[.='Attack Player (PvP)']]");
-		if (!attackPlayerTable) return;
+		if (!attackPlayerTable) {return;}
 		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.href);
 		if (targetPlayer) {
 			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>";
@@ -10403,9 +10401,16 @@ var Helper = {
 			default:
 				modifierWord = "";
 				break;
-	}
+		}
 		return modifierWord;
-				
+	},
+	
+	injectJoinAllLink: function() {
+		var attackGroupLink = System.findNode("//td[a/font[.='A new guild attack group has been formed.']]");
+		if (attackGroupLink) {
+			attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&m=3'>"+
+				"<span style='color:yellow; font-size:x-small;'>[Join All]</span></a></nobr>";
+		}
 	}
 	
 };

@@ -89,7 +89,7 @@ var Layout = {
 		if (bannerElement) {
 			bannerElement.style.display = "none";
 		} else {
-			bannerElement = System.findNode("//html/body/table/tbody/tr/td");
+			bannerElement = System.findNode("//html/body/table/tbody/tr/td[contains(@background,'top_banner_loggedin.jpg')]");
 			if (bannerElement) {
 				bannerElement.style.display = "none";
 			}
