@@ -10416,7 +10416,7 @@ var Helper = {
 	injectJoinAllLink: function() {
 		var attackGroupLink = System.findNode("//td[a/font[.='A new guild attack group has been formed.']]");
 		if (attackGroupLink) {
-			attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&m=3'>"+
+			attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
 				"<span style='color:yellow; font-size:x-small;'>[Join All]</span></a></nobr>";
 		}
 	}
