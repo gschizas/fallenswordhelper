@@ -133,6 +133,7 @@ var Helper = {
 		System.setDefault("trackKillStreak", true);
 		System.setDefault("showFSGIcon", false);
 		System.setDefault("hideRecruitingBox", false);
+		System.setDefault("storeLastQuestPage", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -2059,17 +2060,19 @@ var Helper = {
 		} else if (lastQBPage.indexOf("&mode=2") != -1) {
 			GM_setValue("lastNotStartedQuestPage", lastQBPage);
 		}
-		if (GM_getValue("lastActiveQuestPage").length > 0) {
-			var activeLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=0")]');
-			activeLink.setAttribute("href", GM_getValue("lastActiveQuestPage"));
-		} 
-		if (GM_getValue("lastCompletedQuestPage").length > 0) {
-			var completedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=1")]');
-			completedLink.setAttribute("href", GM_getValue("lastCompletedQuestPage"));
-		} 
-		if (GM_getValue("lastNotStartedQuestPage").length > 0) {
-			var notStartedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=2")]');
-			notStartedLink.setAttribute("href", GM_getValue("lastNotStartedQuestPage"));
+		if (GM_getValue("storeLastQuestPage")) {
+			if (GM_getValue("lastActiveQuestPage").length > 0) {
+				var activeLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=0")]');
+				activeLink.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+			} 
+			if (GM_getValue("lastCompletedQuestPage").length > 0) {
+				var completedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=1")]');
+				completedLink.setAttribute("href", GM_getValue("lastCompletedQuestPage"));
+			} 
+			if (GM_getValue("lastNotStartedQuestPage").length > 0) {
+				var notStartedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=2")]');
+				notStartedLink.setAttribute("href", GM_getValue("lastNotStartedQuestPage"));
+			}
 		}
 		
 		var questTable = System.findNode("//table[tbody/tr/td[.='Guide']]");
@@ -8518,6 +8521,9 @@ var Helper = {
 				'<br>The helper will only check this when you change worlds, or if when it last checked, there were quests it detected for the current world.') +
 				':</td><td colspan="3"><input name="checkForQuestsInWorld" type="checkbox" value="on"' + (GM_getValue("checkForQuestsInWorld")?" checked":"") + '>' +
 				'</td></tr>' +
+			'<tr><td align="right">Store Last Quest Page' + Helper.helpLink('Store Last Quest Page', 'This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, '+
+				'click on the link you wish to reset and then turn this option back on again.') +
+				':</td><td><input name="storeLastQuestPage" type="checkbox" value="on"' + (GM_getValue("storeLastQuestPage")?" checked":"") + '></td></tr>' +
 			//Bio prefs
 			'<tr><th colspan="2" align="left">Bio preferences</th></tr>' +
 			'<tr><td align="right">Show BP Slots In Profile' + Helper.helpLink('Show BP Slots In Profile', 'This determines if the backpack counter will be displayed on your profile page') +
@@ -8751,6 +8757,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		System.saveValueForm(oForm, "showFSGIcon");
 		System.saveValueForm(oForm, "hideRecruitingBox");
+		System.saveValueForm(oForm, "storeLastQuestPage");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
