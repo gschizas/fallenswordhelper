@@ -140,7 +140,7 @@ var Layout = {
 
 	hideRecruitingBox: function() {
 		if (!GM_getValue("hideRecruitingBox")) return;
-		var src=System.findNode("//table[tbody/tr/td/table/tbody/tr/td/font[b='Recruiting']]");
+		var src=System.findNode("//table[tbody/tr/td/table/tbody/tr/td/font[@color='white' and b='Recruiting']]");
 		if (!src) return;
 		src.style.display = "none";
 		src.style.visibility = "hidden";

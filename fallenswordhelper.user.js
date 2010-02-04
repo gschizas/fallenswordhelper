@@ -8843,10 +8843,11 @@ var Helper = {
 			var objBody = document.getElementsByTagName("body").item(0);
 			objBody.insertBefore(miniMap, objBody.firstChild);
 		}
-
+		var miniMapName = GM_getValue("miniMapName");
+		var miniMapSource = GM_getValue("miniMapSource");
 		if (miniMap.style.display !== "") {
-			if (Helper.levelName == GM_getValue("miniMapName")) {
-				miniMap.innerHTML = GM_getValue("miniMapSource");
+			if (miniMapName && Helper.levelName == miniMapName) {
+				miniMap.innerHTML = miniMapSource;
 				Helper.markPlayerOnMiniMap();
 				miniMap.style.display = "";
 			}
@@ -8873,7 +8874,7 @@ var Helper = {
 		Helper.markPlayerOnMiniMap();
 		miniMap.style.display = "";
 
-		GM_setValue("miniMapName", Helper.levelName);
+		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
 		GM_setValue("miniMapSource", doc);
 	},
 
