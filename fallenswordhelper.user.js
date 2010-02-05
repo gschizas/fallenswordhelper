@@ -3192,7 +3192,7 @@ var Helper = {
 
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"),10);
-		if (showLines===0) {return;}
+		if (showLines==0) {return;}
 		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
 		if (!injectHere) {return;}
 		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0);
@@ -5197,9 +5197,9 @@ var Helper = {
 		var renderBio=(bioCell && GM_getValue("renderSelfBio")) || (!bioCell && GM_getValue("renderOtherBios"));
 		GM_setValue("buffsToBuy", "");
 		var bioNode=System.findNode(bioXPath);
-		var bioContents = bioNode.innerHTML;
 		if (!renderBio || !bioNode) {return;}
-		
+
+		var bioContents = bioNode.innerHTML;		
 		bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
 		var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
 		if (buffs) {
@@ -8453,7 +8453,7 @@ var Helper = {
 					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
 					'<br>Semi-Conservative = 1.1 and 1.053'+
 					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)') +
-				':</td><td><select name="combatEvaluatorBias"><option value="0"' + (combatEvaluatorBias===0?" SELECTED":"") + 
+				':</td><td><select name="combatEvaluatorBias"><option value="0"' + (combatEvaluatorBias==0?" SELECTED":"") + 
 					'>Conservative</option><option value="1"' + (combatEvaluatorBias==1?" SELECTED":"") + 
 					'>Semi-Conservative</option><option value="2"' + (combatEvaluatorBias==2?" SELECTED":"") + 
 					'>Adventurous</option></select></td></tr>' +
@@ -8597,7 +8597,7 @@ var Helper = {
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
-		document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);
+		if (GM_getValue("map")) {document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);}
 		document.getElementById('Helper:updateFpColor').addEventListener('click', Helper.updateFpColor, true);
 		
 		
@@ -8998,7 +8998,7 @@ var Helper = {
 
 		for (i = 0; i < table.length; i++) {
 			textResult += "<tr align='right'><td>"+Helper.getAuctionLength(table[i].auctionLength)+"</td>"+
-				"<td>"+(table[i].auctionCurrency===0?"Gold":"FSP")+"</td>"+
+				"<td>"+(table[i].auctionCurrency==0?"Gold":"FSP")+"</td>"+
 				"<td>"+System.addCommas(table[i].auctionMinBid)+"</td>"+
 				"<td>"+System.addCommas(table[i].auctionBuyNow)+"</td>"+
 				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
