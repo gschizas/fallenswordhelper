@@ -1301,6 +1301,10 @@ var Helper = {
 		}
 		else {
 			var posit = System.findNode("//td[contains(@background, '/sigma2/coord_bg_')]/font/center");
+			if (!posit) {
+				posit = System.findNode("//td[contains(@background,'/sigma2/coord_bg_')]/center/font");
+			}
+
 			if (!posit) return;
 			var thePosition=posit.textContent;
 			var positionRE=/-\s*\((\d+),\s*(\d+)\)/
@@ -7229,8 +7233,11 @@ var Helper = {
 		var nodes = System.findNodes("//div[@id='miniMapCover']//td[contains(@onmouseover,'Tip')]");
 		if (!nodes) return;
 		for (var i=0; i<nodes.length; i++) {
+			var tip=nodes[i].getAttribute("onmouseover");
+			var color=tip.indexOf(': ') > 0 ? 'red' : 
+				tip.indexOf("Tip('Stairway to ") > 0 ? 'green' : 'blue';
 			nodes[i].innerHTML = '';
-			nodes[i].style.backgroundColor ='red';
+			nodes[i].style.backgroundColor = color;
 		}
 	},
 
@@ -7536,7 +7543,7 @@ var Helper = {
 	injectSelfBuff: function() {
 		var body = document.getElementsByTagName("body").item(0);
 		var skills = System.findNodes("//table[contains(@background, 'sigma2/skills/skillicon_bg')]");
-		var passiveSkillREG = /^(?:Unique DNA|Bite Mutation|Claw Mutation|Tentacle Mutation|Chomp Mutation|Combat Training|Psionic Sensitivity|Psionic Dart|Psionic Bolt|Sword of Psi|Psionic Missile|Reinforce Skeleton|Port 1|Port 2|Socket Mk 1)$/
+		var passiveSkillREG = /^(?:Unique DNA|Bite Mutation|Claw Mutation|Tentacle Mutation|Chomp Mutation|Combat Training|Psionic Sensitivity|Psionic Dart|Psionic Bolt|Sword of Psi|Psionic Missile|Reinforce Skeleton)$/
 		// should change this regexp to check on id, but I prefer the skill name for easy correction, and regexp is fast anyways
 		var result = "<table width=400 cellspacing=20 align=center>";
 		var count = 0;
