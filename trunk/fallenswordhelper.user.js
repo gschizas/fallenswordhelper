@@ -133,6 +133,7 @@ var Helper = {
 		System.setDefault("trackKillStreak", true);
 		System.setDefault("showFSGIcon", false);
 		System.setDefault("storeLastQuestPage", true);
+		System.setDefault("shrinkGuildInfoChatText", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -2446,7 +2447,7 @@ var Helper = {
 	addGuildInfoChatWidgets: function() {
 		var guildInfoChatTable = System.findNode("//font[i/b[.='Chat (Last 3)']]//table");
 		if (guildInfoChatTable) {
-			guildInfoChatTable.style.fontSize = 'xx-small';
+			if (GM_getValue("shrinkGuildInfoChatText")) {guildInfoChatTable.style.fontSize = 'xx-small';}
 			guildInfoChatTable.width = 115;
 			
 			var chatConfirm=System.findNode("//input[@name='xc']");
@@ -8416,6 +8417,9 @@ var Helper = {
 				'>  Hide ST&gt;<input name="hideGuildInfoSecureTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoSecureTrade")?" checked":"") +
 				'>  Hide Trade&gt;<input name="hideGuildInfoTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoTrade")?" checked":"") +
 				'></td></tr>'  +
+			'<tr><td align="right">Shrink Guild Info Chat Text' + Helper.helpLink('Shrink Guild Info Chat Text', 'This will shrink the guild info chat text down a font size.') +
+				':</td><td><input name="shrinkGuildInfoChatText" type="checkbox" value="on"' + (GM_getValue("shrinkGuildInfoChatText")?" checked":"") + '>' +
+				'</td></tr>' +
 			'<tr><td align="right">Move Guild Info List' + Helper.helpLink('Move Guild Info List', 'This will Move the Guild Info List higher on the bar on the right') +
 				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -8779,6 +8783,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		System.saveValueForm(oForm, "showFSGIcon");
 		System.saveValueForm(oForm, "storeLastQuestPage");
+		System.saveValueForm(oForm, "shrinkGuildInfoChatText");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
