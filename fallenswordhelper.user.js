@@ -333,6 +333,7 @@ var Helper = {
 			Helper.injectFSBoxLog();
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
+			Helper.addGuildInfoChatWidgets();
 			Helper.injectJoinAllLink();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -2375,7 +2376,7 @@ var Helper = {
 	
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) {return;}
-		var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/b[.='Guild Info']]//table");
+		var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/i/b[.='Online Members']]//table");
 		if (onlineMembersTable) {
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
 				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
@@ -2439,6 +2440,30 @@ var Helper = {
 					onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
 				}
 			}
+		}
+	},
+	
+	addGuildInfoChatWidgets: function() {
+		var guildInfoChatTable = System.findNode("//font[i/b[.='Chat (Last 3)']]//table");
+		if (guildInfoChatTable) {
+			guildInfoChatTable.style.fontSize = 'xx-small';
+			guildInfoChatTable.width = 115;
+			
+			var chatConfirm=System.findNode("//input[@name='xc']");
+			
+			result = '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
+			result += '<input type="hidden" value="' + chatConfirm.value + '" name="Helper:ChatConfirm"/>';
+			result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>';
+			result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
+			result += '&nbsp;&nbsp;&nbsp;&nbsp;Count: <span id="Helper:sentMessageCount">0</span>';
+			result += '</form>';
+
+			var oldChatTextEntryCell = guildInfoChatTable.rows[5].cells[0];
+			oldChatTextEntryCell.innerHTML = '';
+			var sendChatButtonCell = guildInfoChatTable.rows[7].cells[0];
+			sendChatButtonCell.innerHTML = result;
+
+			document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
 		}
 	},
 
@@ -3191,18 +3216,21 @@ var Helper = {
 	prepareChat: function() {
 		var showLines = parseInt(GM_getValue("chatLines"),10);
 		if (showLines==0) {return;}
-		var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
-		if (!injectHere) {return;}
-		var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0);
-		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
-		var chat = System.getValueJSON("chat");
-		var newChat = System.findNode("//table[contains(.,'chat messages')]");
-		if (!chat || newChat || ((new Date()) - chat.lastUpdate > 15000)) {
-			Helper.retrieveChat();
-		} else {
-			chat.isRefreshed=false;
-			Helper.injectChat(chat);
+		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
+		if (mainTable) {
+			var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			if (!injectHere) {return;}
+			var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0);
+			var cell = info.insertCell(0);
+			cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
+			var chat = System.getValueJSON("chat");
+			var newChat = System.findNode("//table[contains(.,'chat messages')]");
+			if (!chat || newChat || ((new Date()) - chat.lastUpdate > 15000)) {
+				Helper.retrieveChat();
+			} else {
+				chat.isRefreshed=false;
+				Helper.injectChat(chat);
+			}
 		}
 	},
 
@@ -3305,13 +3333,11 @@ var Helper = {
 
 		var oForm=evt.target.form;
 		Helper.sendChatGeneric(oForm, true);
-//		return false;
 	},
 
 	sendChat: function(evt) {
 		var oForm=evt.target;
 		Helper.sendChatGeneric(oForm, false);
-		return false;
 	},
 
 	sendChatGeneric: function(oForm, isMass) {
@@ -3340,7 +3366,8 @@ var Helper = {
 				Helper.retrieveChat();
 			}
 		});
-		return true;
+		var sentMessageCount = System.findNode("//span[@id='Helper:sentMessageCount']");
+		if (sentMessageCount) {sentMessageCount.innerHTML = parseInt(sentMessageCount.textContent,10) + 1;}
 	},
 
 	replaceKeyHandler: function() {
@@ -9494,25 +9521,27 @@ var Helper = {
 	prepareBountyData: function() {
 		enableActiveBountyList = GM_getValue("enableActiveBountyList");
 		enableWantedList = GM_getValue("enableWantedList");
-
-		if (enableWantedList) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
-			if (!injectHere)
-				return;
-			var info = injectHere.insertRow(0);
-			var cell = info.insertCell(0);
-			cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
-		}
-		if (enableActiveBountyList) {
-			injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
-			if (injectHere) {
-				info = injectHere.insertRow(0);
-				cell = info.insertCell(0);
-				cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
+		if (enableWantedList || enableActiveBountyList) {
+			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
+			if (mainTable) {
+				var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+				if (enableWantedList) {
+					if (!injectHere)
+						return;
+					var info = injectHere.insertRow(0);
+					var cell = info.insertCell(0);
+					cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
+				}
+				if (enableActiveBountyList) {
+					if (injectHere) {
+						info = injectHere.insertRow(0);
+						cell = info.insertCell(0);
+						cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
+					}
+				}
+				Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
 			}
 		}
-		if (enableActiveBountyList || enableWantedList)
-			Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
 	},
 
 	retrieveBountyInfo: function(enableActiveBountyList, enableWantedList) {
@@ -9748,12 +9777,15 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var injectHere = System.findNode("//table[@width='120' and contains(.,'Support Fallen Sword!')]");
-			if (!injectHere) {return;}
-			var info = injectHere.insertRow(0);
-			var cell = info.insertCell(0);
-			cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
-			Helper.retrieveAllyEnemyData(false);
+			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
+			if (mainTable) {
+				var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+				if (!injectHere) {return;}
+				var info = injectHere.insertRow(0);
+				var cell = info.insertCell(0);
+				cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
+				Helper.retrieveAllyEnemyData(false);
+			}
 		}
 	},
 
