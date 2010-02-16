@@ -6074,7 +6074,6 @@ var Data = {
 				{name:'Zlat Ooly Helmet', type:'helmet'},
 				{name:'Zlat Ooly Ring', type:'ring'},
 				{name:'Zlat Ooly Rune', type:'rune'},
-				
 				{name:'Armor of Remanle', type:'armor'},
 				{name:'Boots of Baliora', type:'boots'},
 				{name:'Helmet of Ertya', type:'helmet'},
@@ -6084,7 +6083,25 @@ var Data = {
 				{name:'Amulet of Ofghera', type:'amulet'},
 				{name:'Ormarrs Axe', type:'weapon'},
 				{name:'Ormarrs Helm', type:'helmet'},
-				{name:'Weapon of Learsa', type:'weapon'}
+				{name:'Weapon of Learsa', type:'weapon'},
+				
+				{name:'Amulet of Krul', type:'amulet'},
+				{name:'Balaurs Broad Axe', type:'weapon'},
+				{name:'Balaurs Coiled Ring', type:'ring'},
+				{name:'Balaurs Reptilian Shield', type:'shield'},
+				{name:'Balaurs Scaled Helm', type:'helmet'},
+				{name:'Blue Man of War Sword', type:'weapon'},
+				{name:'Echigal Amulet', type:'amulet'},
+				{name:'General Bhaltairs Neckpiece', type:'amulet'},
+				{name:'General Bhaltairs Signet Ring', type:'ring'},
+				{name:'Gloves of Bannical', type:'gloves'},
+				{name:'Heartwood Amber Pendant', type:'amulet'},
+				{name:'Heartwood Cuirass', type:'armor'},
+				{name:'Heartwood Hand Wraps', type:'gloves'},
+				{name:'Ice Maiden Armor', type:'armor'},
+				{name:'Sneek Boots', type:'boots'},
+				{name:'Sneek Ring', type:'ring'},
+				{name:'Sneek Spear', type:'weapon'}
 			];
 		}
 		return Data.itemArray;

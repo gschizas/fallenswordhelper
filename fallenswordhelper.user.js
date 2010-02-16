@@ -4519,7 +4519,7 @@ var Helper = {
 				var itemCell = aRow.cells[1];
 				if (searchItem) {
 					for (j=0; j<searchItemArr.length; j++) {
-						if (itemCell.textContent.indexOf(searchItemArr[j])>=0) break;
+						if (itemCell.textContent.indexOf(searchItemArr[j].trim())>=0) break;
 					}
 					if (j==searchItemArr.length) {
 						mainTable.deleteRow(i);
@@ -6241,9 +6241,10 @@ var Helper = {
 			if (item.partOfSet) {
 				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' + 
 					item.name.replace(/gloves/gi,'').replace(/gauntlets/gi,'').replace(/helmet/gi,'').replace(/helm/gi,'').replace(/amulet/gi,'').replace(/necklace/gi,'').
-						replace(/weapon/gi,'').replace(/axe/gi,'').replace(/sword/gi,'').replace(/fist/gi,'').replace(/armor/gi,'').replace(/shield/gi,'').
+						replace(/weapon/gi,'').replace(/axe/gi,'').replace(/sword/gi,'').replace(/fist/gi,'').replace(/hammer/gi,'').replace(/mace/gi,'').
+						replace(/armored/gi,'').replace(/armor/gi,'').replace(/plate/gi,'').replace(/shield/gi,'').
 						replace(/ring/gi,'').replace(/boots/gi,'').replace(/rune/gi,'').
-						replace(/the/gi,'').replace(/of/gi,'').trim().replace(/ /g,'|') + '">set</a>)';
+						replace(/the/gi,'').replace(/of/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
 			}
 			result+='</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
@@ -7524,7 +7525,7 @@ var Helper = {
 		//math section ... analysis
 		//Holy Flame adds its bonus after the armor of the creature has been taken off.
 		if (creatureClass == "Undead") {
-			holyFlameBonusDamage = Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002);
+			holyFlameBonusDamage = Math.max(Math.floor((playerDamageValue - creatureArmor) * holyFlameLevel * 0.002),0);
 			extraNotes += (holyFlameLevel > 0? "HF Bonus Damage = " + holyFlameBonusDamage + "<br>":"");
 		}
 		//Death Dealer and Counter Attack both applied at the same time
