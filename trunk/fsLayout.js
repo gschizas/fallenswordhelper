@@ -120,22 +120,22 @@ var Layout = {
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src);
-		var dest=System.findNode("//table[@width='120' and contains(.,'Support FallenSword')]");
-		if (!dest) {
-			dest=System.findNode("//table[@width='120' and contains(.,'Game Stats')]");
+		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
+		if (mainTable) {
+			var dest = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			if (!dest) return;
+			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
+			var info = dest.insertRow(startRow);
+			if (!info) return;
+			var cell = info.insertCell(0);
+			//cell = info.insertCell(0);
+			//cell = info.insertCell(0);
+			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+			cell.appendChild(src);
+			var breaker = dest.insertRow(startRow+1);
+			cell = breaker.insertCell(0);
+			cell.innerHTML = "<br/>";
 		}
-		if (!dest) return;
-		var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
-		var info = dest.insertRow(startRow);
-		if (!info) return;
-		var cell = info.insertCell(0);
-        //cell = info.insertCell(0);
-        //cell = info.insertCell(0);
-		cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-		cell.appendChild(src);
-		var breaker = dest.insertRow(startRow+1);
-		cell = breaker.insertCell(0);
-		cell.innerHTML = "<br/>";
     },
 
 	notebookContent: function() {
