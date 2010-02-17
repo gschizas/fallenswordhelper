@@ -2459,12 +2459,14 @@ var Helper = {
 			result += '&nbsp;&nbsp;&nbsp;&nbsp;Count: <span id="Helper:sentMessageCount">0</span>';
 			result += '</form>';
 
-			var oldChatTextEntryCell = guildInfoChatTable.rows[5].cells[0];
-			oldChatTextEntryCell.innerHTML = '';
-			var sendChatButtonCell = guildInfoChatTable.rows[7].cells[0];
-			sendChatButtonCell.innerHTML = result;
+			if (guildInfoChatTable.rows[7]) {
+				var oldChatTextEntryCell = guildInfoChatTable.rows[5].cells[0];
+				oldChatTextEntryCell.innerHTML = '';
+				var sendChatButtonCell = guildInfoChatTable.rows[7].cells[0];
+				sendChatButtonCell.innerHTML = result;
 
-			document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
+				document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
+			}
 		}
 	},
 
