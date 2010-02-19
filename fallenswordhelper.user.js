@@ -68,7 +68,6 @@ var Helper = {
 		System.setDefault("hideBanner", false);
 		System.setDefault("showSTUpTop", true);
 		System.setDefault("footprintsColor", "silver");
-		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("guildOnlineRefreshTime", 300);
 		System.setDefault("hideGuildInfoSecureTrade", false);
@@ -133,7 +132,8 @@ var Helper = {
 		System.setDefault("trackKillStreak", true);
 		System.setDefault("showFSGIcon", false);
 		System.setDefault("storeLastQuestPage", true);
-		System.setDefault("shrinkGuildInfoChatText", true);
+		System.setDefault("enableAHItemWidgets", false);
+		System.setDefault("addAttackLinkToLog", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -323,7 +323,6 @@ var Helper = {
 			Layout.hideBanner();
 			Layout.moveFSBox();
 			Helper.prepareAllyEnemyList();
-			Helper.prepareChat();
 			Layout.moveGuildOnlineList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
@@ -334,7 +333,6 @@ var Helper = {
 			Helper.injectFSBoxLog();
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
-			Helper.addGuildInfoChatWidgets();
 			Helper.injectJoinAllLink();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -527,6 +525,9 @@ var Helper = {
 				break;
 			case "scouttower":
 				Helper.injectScouttower();
+				break;
+			case "mailbox":
+				Helper.injectMailbox();
 				break;
 			default:
 				break;
@@ -2444,32 +2445,6 @@ var Helper = {
 		}
 	},
 	
-	addGuildInfoChatWidgets: function() {
-		var guildInfoChatTable = System.findNode("//font[i/b[.='Chat (Last 3)']]//table");
-		if (guildInfoChatTable) {
-			if (GM_getValue("shrinkGuildInfoChatText")) {guildInfoChatTable.style.fontSize = 'xx-small';}
-			guildInfoChatTable.width = 115;
-			
-			var chatConfirm=System.findNode("//input[@name='xc']");
-			
-			result = '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
-			result += '<input type="hidden" value="' + chatConfirm.value + '" name="Helper:ChatConfirm"/>';
-			result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>';
-			result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
-			result += '&nbsp;&nbsp;&nbsp;&nbsp;Count: <span id="Helper:sentMessageCount">0</span>';
-			result += '</form>';
-
-			if (guildInfoChatTable.rows[7]) {
-				var oldChatTextEntryCell = guildInfoChatTable.rows[5].cells[0];
-				oldChatTextEntryCell.innerHTML = '';
-				var sendChatButtonCell = guildInfoChatTable.rows[7].cells[0];
-				sendChatButtonCell.innerHTML = result;
-
-				document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
-			}
-		}
-	},
-
 	injectWorldMap: function() {
 		Helper.showMap(true);
 	},
@@ -3216,163 +3191,6 @@ var Helper = {
 		}
 	},
 
-	prepareChat: function() {
-		var showLines = parseInt(GM_getValue("chatLines"),10);
-		if (showLines==0) {return;}
-		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-		if (mainTable) {
-			var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
-			if (!injectHere) {return;}
-			var info = injectHere.insertRow(GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0);
-			var cell = info.insertCell(0);
-			cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
-			var chat = System.getValueJSON("chat");
-			var newChat = System.findNode("//table[contains(.,'chat messages')]");
-			if (!chat || newChat || ((new Date()) - chat.lastUpdate > 15000)) {
-				Helper.retrieveChat();
-			} else {
-				chat.isRefreshed=false;
-				Helper.injectChat(chat);
-			}
-		}
-	},
-
-	retrieveChat: function() {
-		System.xmlhttp("index.php?cmd=guild&subcmd=chat", Helper.parseChatForWorld);
-	},
-
-	parseChatForWorld: function(chatText) {
-		var doc=System.createDocument(chatText);
-		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", doc);
-		if (!chatTable) {return;}
-		// GM_log(chatTable.innerHTML);
-		var chat = new Object();
-		var chatConfirm=System.findNode("//input[@name='xc']", doc);
-		chat.isRefreshed=true;
-		chat.lastUpdate = new Date();
-		chat.messages = [];
-		for (var i=chatTable.rows.length-1; i>0; i--) {
-			var aRow = chatTable.rows[i];
-			if (aRow.cells.length==3) {
-				var aMessage=new Object();
-				aMessage.time=aRow.cells[0].textContent;
-				aMessage.from=aRow.cells[1].textContent;
-				aMessage.text=aRow.cells[2].textContent;
-				chat.messages.push(aMessage);
-			}
-		}
-		chat.confirm=chatConfirm.value;
-		Helper.injectChat(chat);
-	},
-
-	injectChat: function(chat){
-		var injectHere = document.getElementById("Helper:ChatPlaceholder");
-		var newTable=false;
-		var topToBottom = GM_getValue("chatTopToBottom");
-
-		var displayList = document.getElementById("Helper:ChatWindow");
-		if (!displayList) {
-			displayList=document.createElement("TABLE");
-			displayList.id="Helper:ChatWindow";
-			displayList.style.border = "1px solid #c5ad73";
-			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
-			displayList.cellPadding = 1;
-			displayList.width = 125;
-			newTable=true;
-		}
-		else {
-			while (displayList.rows.length>0) {
-				displayList.deleteRow(0);
-			}
-			displayList.style.backgroundColor = (chat.isRefreshed)?"#6a5938":"#4a3918";
-		}
-
-		var aRow=displayList.insertRow(displayList.rows.length);
-		var aCell=aRow.insertCell(0);
-
-		var result="<div style='font-size:xx-small' id='chatFrame'>";
-
-		var showLines = parseInt(GM_getValue("chatLines"),10);
-		if (isNaN(showLines)) {
-			showLines=10;
-			GM_setValue("chatLines", showLines);
-		}
-		var startFrom = (chat.messages.length>showLines)?chat.messages.length-showLines:0;
-		for (var i=startFrom; i<chat.messages.length; i++) {
-			var j = topToBottom?i:chat.messages.length-i+startFrom-1; // chat.messages.length-i;
-			result += "<span style='color:#F5F298' title='"+chat.messages[j].time+"'>";
-			result += chat.messages[j].from;
-			result += ":</span><span style='color:white'>";
-			result += chat.messages[j].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-			result += "</span><br/>";
-		}
-		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
-		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>';
-		result += '<input type="text" class="custominput" size="14" name="Helper:ChatMessage"/>';
-		result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
-		result += '&nbsp;&nbsp;&nbsp;&nbsp;';
-		result += '<input type="button" name="submitmass" id="Helper:ChatBoxMass" class="custombutton" value="Mass" name="submit"/>';
-		result += '</form>';
-		result += '</div>';
-
-		aCell.innerHTML = result;
-
-		if (newTable) {
-			var breaker=document.createElement("BR");
-			injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-			injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		}
-
-		document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
-		document.getElementById('Helper:ChatBoxMass').addEventListener('click', Helper.sendMassChat, true);
-
-		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
-
-		System.setValueJSON("chat", chat);
-	},
-
-	sendMassChat: function(evt) {
-		if (!window.confirm("Are you sure you want to send a mass message?")) {return;}
-
-		var oForm=evt.target.form;
-		Helper.sendChatGeneric(oForm, true);
-	},
-
-	sendChat: function(evt) {
-		var oForm=evt.target;
-		Helper.sendChatGeneric(oForm, false);
-	},
-
-	sendChatGeneric: function(oForm, isMass) {
-		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", oForm).value;
-		var msg=System.findNode("//input[@name='Helper:ChatMessage']", oForm).value;
-		System.findNode("//input[@name='Helper:ChatMessage']", oForm).value="";
-
-		if (msg==="") {
-			Helper.retrieveChat();
-			return false;
-		}
-
-		sendType = isMass?"Send As Mass":"Send";
-
-		GM_xmlhttpRequest({
-			method: 'POST',
-			url: System.server + "index.php",
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
-				"Referer": document.location,
-				"Cookie" : document.cookie
-			},
-			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit="+sendType,
-			onload: function() {
-				Helper.retrieveChat();
-			}
-		});
-		var sentMessageCount = System.findNode("//span[@id='Helper:sentMessageCount']");
-		if (sentMessageCount) {sentMessageCount.innerHTML = parseInt(sentMessageCount.textContent,10) + 1;}
-	},
-
 	replaceKeyHandler: function() {
 		unsafeWindow.document.onkeypress = null;
 		unsafeWindow.document.onkeypress = Helper.keyPress;
@@ -3609,6 +3427,7 @@ var Helper = {
 	},
 
 	addLogWidgets: function() {
+		var addAttackLinkToLog = GM_getValue('addAttackLinkToLog');
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
 		if (!logTable) {return;}
 		var memberList = System.getValueJSON("memberlist");
@@ -3683,8 +3502,10 @@ var Helper = {
 							"<a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + playerName +
 							"'>ST</a>";
 
-						var attackPart = " | <a href='index.php?cmd=attackplayer&target_username=" + playerName +"'>Attack</a>"; // ]</nobr></span>";
-
+						var attackPart = "";
+						if  (addAttackLinkToLog) {
+							var attackPart = " | <a href='index.php?cmd=attackplayer&target_username=" + playerName +"'>Attack</a>";
+						}
 						
 						var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
 						var quickBuff = "";
@@ -3761,7 +3582,11 @@ var Helper = {
 									"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
 									"'>ST</a>";
 								extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a>";
-								extraText += " | <a href='index.php?cmd=attackplayer&target_username=" + buffingPlayerName +"'>Attack</a> ]</nobr></span>";
+								if (addAttackLinkToLog) {
+									extraText += " | <a href='index.php?cmd=attackplayer&target_username=" + buffingPlayerName +"'>Attack</a>"
+								}
+								extraText += " ]</nobr></span>";
+								
 								aRow.cells[2].innerHTML += extraText;
 							}
 						}
@@ -3991,36 +3816,41 @@ var Helper = {
 				quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
 			}
 		}
-
-		var allItems = document.getElementsByTagName("IMG");
-		for (i=0; i<allItems.length; i++) {
-			anItem = allItems[i];
-			if (anItem.src.search("items") != -1) {
-				var theImage = anItem;
-				var theUrl = Helper.linkFromMouseover(anItem.getAttribute("onmouseover"));
-				if (theUrl === null) {
-					continue;
+		if (GM_getValue('enableAHItemWidgets')) {
+			var allItems = document.getElementsByTagName("IMG");
+			for (i=0; i<allItems.length; i++) {
+				anItem = allItems[i];
+				if (anItem.src.search("items") != -1) {
+					var theImage = anItem;
+					var theUrl = Helper.linkFromMouseover(anItem.getAttribute("onmouseover"));
+					if (theUrl === null) {
+						continue;
+					}
+					System.xmlhttp(theUrl,
+						function(responseText, callback) {
+							var itemNameRE = /<td colspan=6><center><font color='(#[0-9A-F]{6})' size=2><b>([^<]+)<\/b>/;
+							if (itemNameRE) {
+								var itemName = itemNameRE.exec(responseText)[2];
+							}
+							var craft="";
+							if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
+								var fontLineRE=/<\/b><\/font><br>([^<]+)(<font color='(#[0-9A-F]{6})'>[^<]+<\/font>)/;
+								var fontLineRX=fontLineRE.exec(responseText);
+								craft = fontLineRX[2];
+							}
+							var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
+							while(re.exec(responseText)) {
+								forgeCount++;
+							}
+							if (responseText.search(/Crystalline/) != -1) {
+								var durabilityRE =/<font color='#999999'>Durability:<\/font><\/nobr><\/td><td width='50%' align='right'>(\d+)\&nbsp;\/\&nbsp;(\d+)\&nbsp;/;
+								var durability = '<span style="font-size:x-small; color:gray;"><br>Dur: ' + 
+									durabilityRE.exec(responseText)[1] + '/' + durabilityRE.exec(responseText)[2] + '</span>';
+							}
+							Helper.injectAuctionExtraText(this.callback,itemName,craft,forgeCount,durability);
+						},
+						theImage);
 				}
-				System.xmlhttp(theUrl,
-					function(responseText, callback) {
-						var craft="";
-						if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-							var fontLineRE=/<\/b><\/font><br>([^<]+)(<font color='(#[0-9A-F]{6})'>[^<]+<\/font>)/;
-							var fontLineRX=fontLineRE.exec(responseText);
-							craft = fontLineRX[2];
-						}
-						var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
-						while(re.exec(responseText)) {
-							forgeCount++;
-						}
-						if (responseText.search(/Crystalline/) != -1) {
-							var durabilityRE =/<font color='#999999'>Durability:<\/font><\/nobr><\/td><td width='50%' align='right'>(\d+)\&nbsp;\/\&nbsp;(\d+)\&nbsp;/;
-							var durability = '<span style="font-size:x-small; color:gray;"><br>Dur: ' + 
-								durabilityRE.exec(responseText)[1] + '/' + durabilityRE.exec(responseText)[2] + '</span>';
-						}
-						Helper.injectAuctionExtraText(this.callback,craft,forgeCount,durability);
-					},
-					theImage);
 			}
 		}
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1')]");
@@ -4451,7 +4281,7 @@ var Helper = {
 		window.location = searchURL;
 	},
 
-	injectAuctionExtraText: function(anItem, craft, forgeCount, durability) {
+	injectAuctionExtraText: function(anItem, itemName, craft, forgeCount, durability) {
 		var theText=anItem.parentNode.nextSibling.nextSibling;
 		//Excellent color does not show up well so change Perfect to Green and Excellent takes the yellow color
 		// to show up better in the AH.
@@ -4463,6 +4293,11 @@ var Helper = {
 		}
 		if (durability) preText += durability;
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
+		
+		//turn the item IMG into a link to search for itself.
+		var itemIMGCell = anItem.parentNode;
+		itemIMGCell.innerHTML = '<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text=' +
+			escape(itemName) + '">' + itemIMGCell.innerHTML + '</a>';
 	},
 
 	toggleShowExtraLinks: function(evt) {
@@ -8420,9 +8255,6 @@ var Helper = {
 				'>  Hide ST&gt;<input name="hideGuildInfoSecureTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoSecureTrade")?" checked":"") +
 				'>  Hide Trade&gt;<input name="hideGuildInfoTrade" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoTrade")?" checked":"") +
 				'></td></tr>'  +
-			'<tr><td align="right">Shrink Guild Info Chat Text' + Helper.helpLink('Shrink Guild Info Chat Text', 'This will shrink the guild info chat text down a font size.') +
-				':</td><td><input name="shrinkGuildInfoChatText" type="checkbox" value="on"' + (GM_getValue("shrinkGuildInfoChatText")?" checked":"") + '>' +
-				'</td></tr>' +
 			'<tr><td align="right">Move Guild Info List' + Helper.helpLink('Move Guild Info List', 'This will Move the Guild Info List higher on the bar on the right') +
 				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -8430,11 +8262,6 @@ var Helper = {
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") + 
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
 				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show guild chat' + Helper.helpLink('Show guild chat', 'Display guild chat on the right') +
-				':</td><td colspan="3"><input name="enableChat" type="checkbox" value="on"' + (GM_getValue("chatLines")>0?" checked":"") + '">' +
-				'&nbsp;Show <input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '"> lines</td></tr>' +
-			'<tr><td align="right">Chat top to bottom' + Helper.helpLink('Chat top to bottom', 'When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
-				'When not, messages run as they are in HCS\\\'s chat') + ':</td><td><input name="chatTopToBottom" type="checkbox" value="on"' + (GM_getValue("chatTopToBottom")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show ST/Date At Top' + Helper.helpLink('Show ST/Date At Top', 'Adds the current server time on the top banner over the dragon\\\'s head. Does nothing if you hide the top banner. ' +
@@ -8533,6 +8360,8 @@ var Helper = {
 				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
 			'<tr><td align="right">Enable Chat Parsing' + Helper.helpLink('Enable Chat Parsing', 'If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message.') +
 				':</td><td><input name="enableChatParsing" type="checkbox" value="on"' + (GM_getValue("enableChatParsing")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Add attack link to log' + Helper.helpLink('Add attack link to log', 'If checked, this will add an Attack link to each message in your log.') +
+				':</td><td><input name="addAttackLinkToLog" type="checkbox" value="on"' + (GM_getValue("addAttackLinkToLog")?" checked":"") + '></td></td></tr>' +
 			//Equipment screen prefs
 			'<tr><th colspan="2" align="left">Equipment screen preferences</th></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
@@ -8590,6 +8419,8 @@ var Helper = {
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable AH Item Widgets' + Helper.helpLink('Enable AH Item Widgets', 'This enables the functionality for looking up the craft and forge of an item and also turning the image into a link to search for the item.') +
+				':</td><td><input name="enableAHItemWidgets" type="checkbox" value="on"' + (GM_getValue("enableAHItemWidgets")?" checked":"") + '></td></tr>' +
 			//Other prefs
 			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
@@ -8678,16 +8509,6 @@ var Helper = {
 
 	saveConfig: function(evt) {
 		var oForm=evt.target.form;
-		var chatLines = System.findNode("//input[@name='chatLines']", oForm);
-		var enableChat = System.findNode("//input[@name='enableChat']", oForm);
-		var chatLinesValue = parseInt(chatLines.value,10);
-
-		if (enableChat.checked && (isNaN(chatLinesValue) || chatLinesValue<=0)) {
-			chatLines.value="10";
-		}
-		if (!enableChat.checked) {
-			chatLines.value="0";
-		}
 
 		//bio compressor validation logic
 		var maxCompressedCharacters = System.findNode("//input[@name='maxCompressedCharacters']", oForm);
@@ -8714,8 +8535,6 @@ var Helper = {
 		System.saveValueForm(oForm, "guildFrndMessage");
 		System.saveValueForm(oForm, "guildPastMessage");
 		System.saveValueForm(oForm, "guildEnmyMessage");
-		System.saveValueForm(oForm, "chatLines");
-		System.saveValueForm(oForm, "chatTopToBottom");
 		System.saveValueForm(oForm, "showAdmin");
 		System.saveValueForm(oForm, "detailedConflictInfo");
 		System.saveValueForm(oForm, "disableItemColoring");
@@ -8786,7 +8605,8 @@ var Helper = {
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		System.saveValueForm(oForm, "showFSGIcon");
 		System.saveValueForm(oForm, "storeLastQuestPage");
-		System.saveValueForm(oForm, "shrinkGuildInfoChatText");
+		System.saveValueForm(oForm, "enableAHItemWidgets");
+		System.saveValueForm(oForm, "addAttackLinkToLog");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
