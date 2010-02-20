@@ -959,15 +959,21 @@ var Helper = {
 	getConflictInfo: function(responseText, callback) {
 		try {
 			var insertHere = callback.node;
-			
 			var doc = System.createDocument(responseText);
+			
+			var page = System.findNode("//td[contains(.,'Page:')]", doc);
+			var curPage = parseInt(System.findNode("//input[@name='page']", doc).value,10);
+			var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
+		
 			var conflictTable = System.findNode("//table[@width='600' and @cellspacing='0' and @cellpadding='3' and @border='0' and @align='center']", doc);
 			if (conflictTable && conflictTable.rows.length > 3) {				
-				var newNode = insertHere.insertRow(insertHere.rows.length-2);
-				newNode.insertCell(0);
-				newNode.insertCell(0);
-				newNode.cells[0].innerHTML = "<a href='index.php?cmd=guild&subcmd=conflicts'>Active Conflicts</a>";
-				newNode.cells[1].innerHTML = "Score";
+				if (curPage == 1) {
+					var newNode = insertHere.insertRow(insertHere.rows.length-2);
+					newNode.insertCell(0);
+					newNode.insertCell(0);
+					newNode.cells[0].innerHTML = "<a href='index.php?cmd=guild&subcmd=conflicts'>Active Conflicts</a>";
+					newNode.cells[1].innerHTML = "Score";
+				}
 				for (var i = 1; i <= conflictTable.rows.length - 4; i+=2) {
 					var newRow = insertHere.insertRow(insertHere.rows.length-2);
 					newRow.insertCell(0);
@@ -975,6 +981,12 @@ var Helper = {
 					newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
 					newRow.cells[1].innerHTML = "<b>" + conflictTable.rows[i].cells[5].innerHTML + "</b>";
 				}
+			}
+			if (maxPage && parseInt(maxPage[1],10) > curPage) {
+				//http://www.fallensword.com/index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=2&search_text=
+				System.xmlhttp("index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=" + (curPage + 1) + "&search_text=", 
+					Helper.getConflictInfo,
+					{"node": callback.node});
 			}
 		} catch (err) {
 			GM_log(err);
