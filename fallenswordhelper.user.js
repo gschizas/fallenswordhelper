@@ -3828,13 +3828,13 @@ var Helper = {
 					}
 					System.xmlhttp(theUrl,
 						function(responseText, callback) {
-							var itemNameRE = /<td colspan=6><center><font color='(#[0-9A-F]{6})' size=2><b>([^<]+)<\/b>/;
+							var itemNameRE = /<td colspan=6><center><font color='(#[0-9a-fA-F]{6})' size=2><b>([^<]+)<\/b>/;
 							if (itemNameRE) {
 								var itemName = itemNameRE.exec(responseText)[2];
 							}
 							var craft="";
 							if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-								var fontLineRE=/<\/b><\/font><br>([^<]+)(<font color='(#[0-9A-F]{6})'>[^<]+<\/font>)/;
+								var fontLineRE=/<\/b><\/font><br>([^<]+)(<font color='(#[0-9a-fA-F]{6})'>[^<]+<\/font>)/;
 								var fontLineRX=fontLineRE.exec(responseText);
 								craft = fontLineRX[2];
 							}
