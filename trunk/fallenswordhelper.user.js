@@ -118,7 +118,6 @@ var Helper = {
 		
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
-		System.setDefault("enableCountdownTimer", false);
 		System.setDefault("itemRecipient", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoGold","min":"","max":"","gold":true,"fsp":false},{"name":"NoFSP","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
@@ -765,15 +764,15 @@ var Helper = {
 	
 	injectViewGuild: function() {
 		if (GM_getValue("highlightPlayersNearMyLvl")) {
-		var memberList = System.findNode("//tr[td/b[.='Members']]/following-sibling::tr/td/table");
-		for (var i=2;i<memberList.rows.length;i+=4) {
-			var iplus1 = i+1;
-			var level = memberList.rows[i].cells[2].innerHTML;
-			var aRow = memberList.rows[i];
+			var memberList = System.findNode("//tr[td/b[.='Members']]/following-sibling::tr/td/table");
+			for (var i=2;i<memberList.rows.length;i+=4) {
+				var iplus1 = i+1;
+				var level = memberList.rows[i].cells[2].innerHTML;
+				var aRow = memberList.rows[i];
 				if (!isNaN(GM_getValue("lvlDiffToHighlight"))) {
 					if (Math.abs(level - Helper.characterLevel) <= GM_getValue("lvlDiffToHighlight")) {
-				aRow.style.backgroundColor = "#4671C8";
-			}
+						aRow.style.backgroundColor = "#4671C8";
+					}
 				} else {
 					GM_log("Current value for level difference to highlight is not a number.");
 				}
@@ -1045,33 +1044,8 @@ var Helper = {
 		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
 		staminaImageElement.setAttribute("onmouseover", newMouseoverText);
-
-		//add time to title bar
-		if (GM_getValue("enableCountdownTimer")) {
-			Helper.title = document.title;
-			Helper.seconds = nextGainSeconds; 
-			Helper.minutes = nextGainMinutes;
-			Helper.addCountdownTimerToTitleBar();
-		}
 	},
 
-	addCountdownTimerToTitleBar: function() {
-		 if (Helper.seconds <= 0){ 
-			Helper.seconds = 59; 
-			Helper.minutes -= 1; 
-		 } 
-		 if (Helper.minutes <= -1){
-			Helper.seconds = 59;
-			Helper.minutes = 59;
-			document.title = Helper.minutes + 'm ' + Helper.seconds + 's' + " - " + Helper.title;
-			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) ;
-		 } else {
-			Helper.seconds -= 1; 
-			document.title = Helper.minutes + 'm ' + Helper.seconds + 's' + " - " + Helper.title;
-			ID = setTimeout(Helper.addCountdownTimerToTitleBar,1000) ;
-		}
-	},
-	
 	injectLevelupCalculator: function() {
 		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
 		if (!levelupImageElement) {return;}
@@ -5315,7 +5289,7 @@ var Helper = {
 				total[Helper.buffCost.buffs[buff][1]]+=Helper.buffCost.buffs[buff][0];
 				html+='<tr><td>'+buff+'</td><td>: '+Helper.buffCost.buffs[buff][0]+Helper.buffCost.buffs[buff][1]+'</td></tr>';
 			}
-			var totalText=(total.fsp>0)?total.fsp+' FSP':'';
+			var totalText=(total.fsp>0)?(Math.round(total.fsp*100)/100) +' FSP':'';
 			if (total.fsp > 0 && total.k > 0) totalText+=' and ';
 			totalText+=(total.k>0)?total.k+' k':'';
 			if (total.unknown>0) totalText+=' ('+total.unknown+' buff(s) with unknown cost)';
@@ -5696,7 +5670,13 @@ var Helper = {
 			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
 			'<th sortkey="name">Name</th>' +
 			'<th sortkey="level" sortType="number">Level</th></tr>';
-		var player, color;
+		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
+		var lvlDiffToHighlight = GM_getValue("lvlDiffToHighlight");
+		if (isNaN(lvlDiffToHighlight)) {
+			lvlDiffToHighlight = 5;
+		}
+
+		var player;
 		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
 			player=Helper.onlinePlayers.players[i];
 			if (player.level >= minLvl && player.level <= maxLvl)
@@ -5704,7 +5684,8 @@ var Helper = {
 					'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
 						'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
 					'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
-					'<td align="right">' + player.level + '</td>' +
+					'<td align="right"' + (highlightPlayersNearMyLvl?(Math.abs(player.level - Helper.characterLevel) <= lvlDiffToHighlight?' style="background-color:#4671C8"':''):'') +
+						'>' + player.level + '</td>' +
 					'</tr>';
 		}
 		result+='</table>';
@@ -8281,8 +8262,6 @@ var Helper = {
 				':</td><td><input name="showSTUpTop" type="checkbox" value="on"' + (GM_getValue("showSTUpTop")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Enable Countdown Timer' + Helper.helpLink('Enable Countdown Timer', 'This adds a countdown timer to the title bar that shows time till next stamina gain.') +
-				':</td><td><input name="enableCountdownTimer" type="checkbox" value="on"' + (GM_getValue("enableCountdownTimer")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
 			//Guild Manage
@@ -8609,7 +8588,6 @@ var Helper = {
 		System.saveValueForm(oForm, "wantedNames");
 		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
-		System.saveValueForm(oForm, "enableCountdownTimer");
 		System.saveValueForm(oForm, "huntingMode");
 		System.saveValueForm(oForm, "enableAttackHelper");
 		System.saveValueForm(oForm, "hideRelicOffline");
