@@ -268,6 +268,7 @@ var Helper = {
 			Helper.injectFSBoxLog();
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
+			Helper.injectTHsearch();
 		}
 
 		var pageId, subPageId, subPage2Id, subsequentPageId
@@ -1377,12 +1378,6 @@ var Helper = {
 				var mo=components[i].getAttribute("onmouseover");
 				System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
 			}
-		var items=System.findNodes("//center/img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]/..");
-		if (items)
-			for (var i=0; i<items.length; i++) {
-				items[i].addEventListener('click', Helper.searchTHforItem, true);
-				items[i].style.cursor='pointer';
-			}
 		var node=System.findNode("//tr/td[input[contains(@value,'Invent (') and contains(@value,'chance of success)')]]");
 		var multiInvent=document.createElement("div");
 		multiInvent.innerHTML="<br/>Invent for <input class=custominput size=5 id=multiInventN value=0> time(s) "+
@@ -1408,6 +1403,17 @@ var Helper = {
 					});
 			}
 		}
+	},
+	
+	injectTHsearch: function() {
+		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]");
+		if (items)
+			for (var i=0; i<items.length; i++) {
+				if (items[i].parentNode.tagName!='A') {
+					items[i].addEventListener('click', Helper.searchTHforItem, true);
+					items[i].style.cursor='pointer';
+				}
+			}
 	},
 	
 	searchTHforItem: function(evt) {

@@ -333,6 +333,7 @@ var Helper = {
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
 			Helper.injectJoinAllLink();
+			Helper.injectTHsearch();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
@@ -1646,6 +1647,28 @@ var Helper = {
 				// GM_log(x + ":" + y + " >> " + aCell.getAttribute("background"));
 			}
 		}
+	},
+	
+	injectTHsearch: function() {
+		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]");
+		if (items)
+			for (var i=0; i<items.length; i++) {
+				if (items[i].parentNode.tagName!='A') {
+					items[i].addEventListener('click', Helper.searchTHforItem, true);
+					items[i].style.cursor='pointer';
+				}
+			}
+	},
+	
+	searchTHforItem: function(evt) {
+		var mo=evt.target.getAttribute("onmouseover");
+		System.xmlhttp(Helper.linkFromMouseoverCustom(mo), function(responseText) {
+				var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
+				if (responseText.indexOf('Bound (Non-Tradable)') > 0)
+					if (!confirm(name + " is Bound (Non-Tradable), cannot be found in TH!\n"+
+						"Do you still want to try?")) return;
+				window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
+			});
 	},
 
 	injectViewRecipe: function() {
@@ -4279,11 +4302,6 @@ var Helper = {
 		}
 		if (durability) preText += durability;
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
-		
-		//turn the item IMG into a link to search for itself.
-		var itemIMGCell = anItem.parentNode;
-		itemIMGCell.innerHTML = '<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text=' +
-			escape(itemName) + '">' + itemIMGCell.innerHTML + '</a>';
 	},
 
 	toggleShowExtraLinks: function(evt) {
@@ -5419,7 +5437,7 @@ var Helper = {
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
-		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]+)\'/i;
+		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]*)\'/i;
 		var reResult =reParams.exec(mouseOver);
 		if (reResult === null) {
 			return null;
@@ -8410,7 +8428,7 @@ var Helper = {
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable AH Item Widgets' + Helper.helpLink('Enable AH Item Widgets', 'This enables the functionality for looking up the craft and forge of an item and also turning the image into a link to search for the item.') +
+			'<tr><td align="right">Enable AH Item Widgets' + Helper.helpLink('Enable AH Item Widgets', 'This enables the functionality for looking up the craft and forge of an item.') +
 				':</td><td><input name="enableAHItemWidgets" type="checkbox" value="on"' + (GM_getValue("enableAHItemWidgets")?" checked":"") + '></td></tr>' +
 			//Other prefs
 			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
