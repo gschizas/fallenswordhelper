@@ -2952,7 +2952,8 @@ var Helper = {
 			Helper.quickMS(true);
 			break;
 		case 71: // create group [G]
-			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+			if (window.confirm('Are you sure you want to CREATE SQUAD?'))
+				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
 		case 103: // go to guild [g]
 			window.location = 'index.php?cmd=guild&subcmd=manage'
@@ -5388,13 +5389,13 @@ var Helper = {
 
 	parseInventingPage: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
-		var output=document.getElementById('Helper:RecipeManagerOutput');
+		var output='';
 		var currentPage = callback.page;
 		var pages=System.findNode("//select[@name='page']", doc);
 		if (!pages) return;
 		var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
 
-		output.innerHTML += 'Page ' + currentPage + '...<br/>';
+		output += 'Page ' + currentPage + '...<br/>';
 
 		if (recipeRows) {
 			for (var i=0; i<recipeRows.length;i++) {
@@ -5408,21 +5409,25 @@ var Helper = {
 					"type": aRow.cells[2].firstChild.textContent,
 					"level": parseInt(aRow.cells[3].firstChild.textContent),
 					"id": recipeId};
-				output.innerHTML+="Found blueprint: "+ recipe.name
+				output+="Found blueprint: "+ recipe.name
 				if (!Helper.recipeHash[recipeId]) {
 					Helper.recipebook.recipe.push(recipe);
-					output.innerHTML+="<br/>";
+					output+="<br/>";
 				} else 
-					output.innerHTML+=" already known<br/>";
+					output+=" already known<br/>";
 			}
 		}
+
+		var newNode=document.createElement('div');
+		newNode.innerHTML=output;
+		document.getElementById('Helper:RecipeManagerOutput').appendChild(newNode);
 
 		var nextPage=currentPage+1; //pages[currentPage];
 		if (nextPage<pages.options.length) {
 			System.xmlhttp('index.php?cmd=inventing&page='+nextPage, Helper.parseInventingPage, {"page": nextPage});
 		}
 		else {
-			output.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
+			newNode.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
 			Helper.checkRecipePage(0);
 		}
 	},
@@ -7174,7 +7179,7 @@ var Helper = {
 			if (Helper.levelName == GM_getValue("miniMapName")) {
 				miniMap.innerHTML = GM_getValue("miniMapSource");
 				Helper.markPlayerOnMiniMap();
-				Helper.makeMiniMapFooter();
+				Helper.toogleMiniMapPOI();
 				miniMap.style.display = "";
 			} else {
 				System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
@@ -7196,17 +7201,11 @@ var Helper = {
 		miniMap.innerHTML = doc;
 
 		Helper.markPlayerOnMiniMap();
-		Helper.makeMiniMapFooter();
+		Helper.toogleMiniMapPOI();
 		miniMap.style.display = "";
 
 		GM_setValue("miniMapName", Helper.levelName);
 		GM_setValue("miniMapSource", doc);
-	},
-	
-	makeMiniMapFooter: function() {
-		var miniMap = document.getElementById("miniMap");
-		miniMap.innerHTML += '<div align=center id=toogleMiniMapPOI style="cursor:pointer;font-size=small;color:cyan">Toogle MiniMap POI</div>';
-		document.getElementById("toogleMiniMapPOI").addEventListener('click', Helper.toogleMiniMapPOI, true);
 	},
 	
 	toogleMiniMapPOI: function() {
