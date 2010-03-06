@@ -25,7 +25,8 @@ var Helper = {
 	},
 
 	initSettings: function () {
-		
+		Helper.savedItemData = [];
+
 		System.setDefault("currentTile", "");
 		System.setDefault("lastActiveQuestPage", "");
 		System.setDefault("lastCompletedQuestPage", "");
@@ -133,6 +134,7 @@ var Helper = {
 		System.setDefault("storeLastQuestPage", true);
 		System.setDefault("enableAHItemWidgets", false);
 		System.setDefault("addAttackLinkToLog", false);
+		System.setDefault("showStatBonusTotal", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -4623,6 +4625,32 @@ var Helper = {
 				System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
 			}
 		}
+		
+		if (GM_getValue("showStatBonusTotal")) {
+			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
+			for (var i=0;i<profileItems.length;i++) {
+				var mouseOver = profileItems[i].getAttribute("onmouseover");
+				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)'/;
+				var reResult=reParams.exec(mouseOver);
+				if (reResult === null) {
+					return null;
+				}
+				var itemId=reResult[1];
+				var invId=reResult[2];
+				var type=reResult[3];
+				var pid=reResult[4];
+				var finalStr = reResult[5];
+				//terrasoft.gr/FallenSwordHelper: ajaxLoadItem(7236, 199346003, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>');
+				var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid;
+				index = itemId+"_"+invId;
+				profileItems[i].setAttribute("id",index);
+				profileItems[i].setAttribute("theURL",theURL);
+				profileItems[i].setAttribute("finalStr",finalStr);
+				profileItems[i].setAttribute("onmouseover","Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>')");
+				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
+			}
+		}
+
 	},
 	
 	injectMoveItems: function() {
@@ -4865,8 +4893,61 @@ var Helper = {
 		//Update the ally/enemy online list, since we are already on the page.
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
+		
+		if (GM_getValue("showStatBonusTotal")) {
+			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
+			for (var i=0;i<profileItems.length;i++) {
+				var mouseOver = profileItems[i].getAttribute("onmouseover");
+				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)'/;
+				var reResult=reParams.exec(mouseOver);
+				if (reResult === null) {
+					return null;
+				}
+				var itemId=reResult[1];
+				var invId=reResult[2];
+				var type=reResult[3];
+				var pid=reResult[4];
+				var finalStr = reResult[5];
+				//terrasoft.gr/FallenSwordHelper: ajaxLoadItem(7236, 199346003, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>');
+				var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid;
+				index = itemId+"_"+invId;
+				profileItems[i].setAttribute("id",index);
+				profileItems[i].setAttribute("theURL",theURL);
+				profileItems[i].setAttribute("finalStr",finalStr);
+				profileItems[i].setAttribute("onmouseover","Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>')");
+				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
+			}
+		}
 	},
-	
+
+	setProfileItemMouseover: function (evt) {
+		var index = evt.target.getAttribute('id');
+		var theURL = evt.target.getAttribute('theURL');
+		var finalStr = evt.target.getAttribute('finalStr');
+		var mouseoverHTML = document.getElementById("mouseovertext"+index);
+		if(Helper.savedItemData[index]==undefined) {
+			System.xmlhttp(theURL,
+			function(responseText) {
+				var doc = System.createDocument(responseText);
+				var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",doc);
+				var extraText = "";
+				if (bonusTable) {
+					var subTotal = 0;
+					for (var i=2;i<bonusTable.rows.length;i++) {
+						aRow = bonusTable.rows[i];
+						bonusValue = parseInt(/\+(\d+)/.exec(aRow.cells[1].textContent)[1],10);
+						subTotal += bonusValue;
+					}
+					extraText = "<br>Individual item stats subtotal: " + subTotal;
+				}
+				mouseoverHTML.innerHTML = responseText+extraText+finalStr;
+				Helper.savedItemData[index] = responseText+extraText+finalStr;
+			});
+		} else {
+			mouseoverHTML.innerHTML = Helper.savedItemData[index];
+		}
+	},
+
 	injectEmptySlots: function(responseText) {
 		var doc = System.createDocument(responseText);
 		var bpslots = System.findNode("//font[contains(.,'/')]", doc);
@@ -7357,7 +7438,7 @@ var Helper = {
 		var creatureHP      = System.intValue(creatureStatTable.rows[4].cells[1].textContent);
 		var extraNotes = "", holyFlameBonusDamage = 0;
 		//reduce stats if critter is a SE and player has SES cast on them.
-		var superEliteSlayerMultiplier = 1;
+		var superEliteSlayerMultiplier = 0;
 		if (superEliteSlayerLevel > 0) {
 			superEliteSlayerMultiplier = Math.round(0.002 * superEliteSlayerLevel*100)/100;
 		}
@@ -8391,8 +8472,8 @@ var Helper = {
 			'<tr><td align="right">Store Last Quest Page' + Helper.helpLink('Store Last Quest Page', 'This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, '+
 				'click on the link you wish to reset and then turn this option back on again.') +
 				':</td><td><input name="storeLastQuestPage" type="checkbox" value="on"' + (GM_getValue("storeLastQuestPage")?" checked":"") + '></td></tr>' +
-			//Bio prefs
-			'<tr><th colspan="2" align="left">Bio preferences</th></tr>' +
+			//profile prefs
+			'<tr><th colspan="2" align="left">Profile preferences</th></tr>' +
 			'<tr><td align="right">Show BP Slots In Profile' + Helper.helpLink('Show BP Slots In Profile', 'This determines if the backpack counter will be displayed on your profile page') +
 				':</td><td><input name="showBPSlotsOnProfile" type="checkbox" value="on"' + (GM_getValue("showBPSlotsOnProfile")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
@@ -8406,6 +8487,8 @@ var Helper = {
 			'<tr><td align="right">Buy Buffs Greeting' + Helper.helpLink('Buy Buffs Greeting', 'This is the default text to open a message with when asking to buy buffs. You can use {playername} to insert the target players name. You can also use' +
 				' {buffs} to insert the list of buffs') +
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +			
+			'<tr><td align="right">Show Stat Bonus Total' + Helper.helpLink('Show Stat Bonus Total', 'This will show a total of the item stats when you mouseover an item on the profile screen.') +
+				':</td><td><input name="showStatBonusTotal" type="checkbox" value="on"' + (GM_getValue("showStatBonusTotal")?" checked":"") + '></td></tr>' +							
 			//Arena prefs
 			'<tr><th colspan="2" align="left">Arena preferences</th></tr>' +
 			'<tr><td align="right">Auto Sort Arena List' + Helper.helpLink('Auto Sort Arena List', 'This will automatically sort the arena list based on your last preference for sort.') +
@@ -8615,6 +8698,7 @@ var Helper = {
 		System.saveValueForm(oForm, "storeLastQuestPage");
 		System.saveValueForm(oForm, "enableAHItemWidgets");
 		System.saveValueForm(oForm, "addAttackLinkToLog");
+		System.saveValueForm(oForm, "showStatBonusTotal");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
