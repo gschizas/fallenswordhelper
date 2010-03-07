@@ -20,13 +20,14 @@ var Helper = {
 	init: function (e) {
 		Helper.initSettings();
 		Helper.beginAutoUpdate();
+		if (GM_getValue("monitorGuildMailbox")) {
+			Helper.checkGuildMailbox();
+		}
 		Helper.readInfo();
 		this.initialized = true;
 	},
 
 	initSettings: function () {
-		Helper.savedItemData = [];
-
 		System.setDefault("currentTile", "");
 		System.setDefault("lastActiveQuestPage", "");
 		System.setDefault("lastCompletedQuestPage", "");
@@ -135,6 +136,7 @@ var Helper = {
 		System.setDefault("enableAHItemWidgets", false);
 		System.setDefault("addAttackLinkToLog", false);
 		System.setDefault("showStatBonusTotal", true);
+		System.setDefault("monitorGuildMailbox", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -186,6 +188,8 @@ var Helper = {
 		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
 		GM_setValue("CharacterName", Helper.characterName);
+		
+		Helper.savedItemData = [];
 	},
 
 	// Autoupdate
@@ -4626,31 +4630,7 @@ var Helper = {
 			}
 		}
 		
-		if (GM_getValue("showStatBonusTotal")) {
-			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
-			for (var i=0;i<profileItems.length;i++) {
-				var mouseOver = profileItems[i].getAttribute("onmouseover");
-				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)'/;
-				var reResult=reParams.exec(mouseOver);
-				if (reResult === null) {
-					return null;
-				}
-				var itemId=reResult[1];
-				var invId=reResult[2];
-				var type=reResult[3];
-				var pid=reResult[4];
-				var finalStr = reResult[5];
-				//terrasoft.gr/FallenSwordHelper: ajaxLoadItem(7236, 199346003, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>');
-				var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid;
-				index = itemId+"_"+invId;
-				profileItems[i].setAttribute("id",index);
-				profileItems[i].setAttribute("theURL",theURL);
-				profileItems[i].setAttribute("finalStr",finalStr);
-				profileItems[i].setAttribute("onmouseover","Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>')");
-				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
-			}
-		}
-
+		Helper.addStatTotalToMouseover();
 	},
 	
 	injectMoveItems: function() {
@@ -4894,6 +4874,10 @@ var Helper = {
 		doc = System.findNode("//html");
 		Helper.parseProfileForWorld(doc.innerHTML, true);
 		
+		Helper.addStatTotalToMouseover();
+	},
+
+	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
 			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
 			for (var i=0;i<profileItems.length;i++) {
@@ -4919,7 +4903,7 @@ var Helper = {
 			}
 		}
 	},
-
+	
 	setProfileItemMouseover: function (evt) {
 		var index = evt.target.getAttribute('id');
 		var theURL = evt.target.getAttribute('theURL');
@@ -4950,8 +4934,9 @@ var Helper = {
 
 	injectEmptySlots: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var bpslots = System.findNode("//font[contains(.,'/')]", doc);
-		if (bpslots) {
+		var bpImage = System.findNode("//img[contains(@title,'Manage Backpack')]",doc);
+		if (bpImage) {
+			var bpslots = bpImage.parentNode.nextSibling.nextSibling
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (bpslots) {
 				try {
@@ -8363,6 +8348,8 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Monitor Guild Mailbox' + Helper.helpLink('Monitor Guild Mailbox', 'If this is on, the helper will check the guild mailbox once each hour to see if there are any items in it.') +
+				':</td><td><input name="monitorGuildMailbox" type="checkbox" value="on"' + (GM_getValue("monitorGuildMailbox")?" checked":"") + '></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -8699,6 +8686,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableAHItemWidgets");
 		System.saveValueForm(oForm, "addAttackLinkToLog");
 		System.saveValueForm(oForm, "showStatBonusTotal");
+		System.saveValueForm(oForm, "monitorGuildMailbox");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -9173,10 +9161,24 @@ var Helper = {
 				document.getElementById('Helper:recallMailboxItem' + i).addEventListener('click', Helper.recallMailboxItem, true);
 			}
 			var titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Item Mailbox']]");
+			if (!titleTable) titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Mailbox']]");
 			titleTable.rows[4].cells[0].align = 'center';
 			titleTable.rows[4].cells[0].innerHTML = '<span id="Helper:recallAllMailbox" '+
 				'style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;">Take All</span>';
 			document.getElementById('Helper:recallAllMailbox').addEventListener('click', Helper.recallAllMailbox, true);
+		}
+		//check mailbox for items
+		var titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Mailbox']]");
+		if (titleTable) {
+			var now = (new Date()).getTime();
+			GM_setValue("lastGuildMailboxCheck", now.toString());
+			var mailboxItemImageNodes = System.findNodes("//img[contains(@src,'/items/')]");
+			if (mailboxItemImageNodes) {
+				GM_setValue("itemsInGuildMailbox", true);
+				Helper.displayMessageIndicatingItemsInGuildMailbox();
+			} else {
+				GM_setValue("itemsInGuildMailbox", false);
+			}
 		}
 	},
 
@@ -9202,6 +9204,11 @@ var Helper = {
 		target.style.cursor = 'default';
 		target.style.textDecoration = 'none';
 		if (info.search("Item was transferred to your backpack") != -1) {
+			target.style.color = 'green';
+			target.style.fontWeight = 'bold';
+			target.style.fontSize = 'small';
+			target.innerHTML = "Taken";
+		} else if (info.search("Item was transferred to the guild store!") != -1) {
 			target.style.color = 'green';
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
@@ -10365,6 +10372,46 @@ var Helper = {
 			attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
 				"<span style='color:yellow; font-size:x-small;'>[Join All]</span></a></nobr>";
 		}
+	},
+	
+	checkGuildMailbox: function() {
+		var lastCheck = GM_getValue("lastGuildMailboxCheck");
+		var now = (new Date()).getTime();
+		if (!lastCheck) {lastCheck = 0;}
+		var haveToCheck = ((now - lastCheck) > 60 * 60 * 1000); //1 hour
+		if (haveToCheck && location.search != "?cmd=guild&subcmd=mailbox") {
+			var now = (new Date()).getTime();
+			GM_setValue("lastGuildMailboxCheck", now.toString());
+			System.xmlhttp("http://www.fallensword.com/index.php?cmd=guild&subcmd=mailbox", Helper.checkForItemsInGuildMailbox);
+		} else if (GM_getValue("itemsInGuildMailbox") && location.search != "?cmd=guild&subcmd=mailbox") {
+			Helper.displayMessageIndicatingItemsInGuildMailbox();
+		}
+	},
+
+	checkForItemsInGuildMailbox: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var mailboxItemImageNodes = System.findNodes("//img[contains(@src,'/items/')]", doc);
+		if (mailboxItemImageNodes) {
+			GM_setValue("itemsInGuildMailbox", true);
+			Helper.displayMessageIndicatingItemsInGuildMailbox();
+		} else {
+			GM_setValue("itemsInGuildMailbox", false);
+		}
+	},
+
+	displayMessageIndicatingItemsInGuildMailbox: function() {
+		var dest=System.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
+		var info = dest.insertRow(26);
+		var cell = info.insertCell(0);
+		cell.innerHTML="&nbsp;";
+		info = dest.insertRow(26);
+		cell = info.insertCell(0);
+		cell.setAttribute("align", "center");
+		var mailboxWarningText = '<table border=0 cellpadding="3" bgcolor="#4A3918" width="125" style="border-width:1px; border-style:solid; border-color:#C6AD73"><tr><td align="center">'+
+			'<font color="#FFFFFF" size="2"><center><b>IMPORTANT</b></center><br>'+
+			'<a href="index.php?cmd=guild&subcmd=mailbox"><font color="#00FF00">There are items awaiting collection in the Guild Mailbox.</font></a>'+
+			'</font></td></tr></table>';
+		cell.innerHTML = mailboxWarningText;
 	}
 	
 };
