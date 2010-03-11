@@ -87,7 +87,6 @@ var Helper = {
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
 		System.setDefault("highlightPlayersNearMyLvl", true);
 		System.setDefault("highlightGvGPlayersNearMyLvl", true);
-		System.setDefault("lvlDiffToHighlight", 5);
 		System.setDefault("detailedConflictInfo", false);
 		System.setDefault("gameHelpLink", true);
 		System.setDefault("navigateToLogAfterMsg", true);
@@ -5729,10 +5728,7 @@ var Helper = {
 			'<th sortkey="name">Name</th>' +
 			'<th sortkey="level" sortType="number">Level</th></tr>';
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
-		var lvlDiffToHighlight = GM_getValue("lvlDiffToHighlight");
-		if (isNaN(lvlDiffToHighlight)) {
-			lvlDiffToHighlight = 5;
-		}
+		var lvlDiffToHighlight = 5;
 
 		var player;
 		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
@@ -8605,7 +8601,6 @@ var Helper = {
 		System.saveValueForm(oForm, "playNewMessageSound");
 		System.saveValueForm(oForm, "highlightPlayersNearMyLvl");
 		System.saveValueForm(oForm, "highlightGvGPlayersNearMyLvl");
-		System.saveValueForm(oForm, "lvlDiffToHighlight");
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
 		System.saveValueForm(oForm, "showCreatureInfo");
