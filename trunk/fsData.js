@@ -6152,7 +6152,6 @@ var Data = {
 				{name:'Wraiths Touch Bone Ring', type:'ring'},
 				{name:'Wraiths Touch Death Rune', type:'rune'},
 				{name:'Wraiths Touch Reaping Scythe', type:'weapon'},
-				
 				{name:'Gloves of Telluous', type:'gloves'},
 				{name:'Amulet of Hordius', type:'amulet'},
 				{name:'Weapon of Epihal', type:'weapon'},
@@ -6209,7 +6208,14 @@ var Data = {
 				{name:'Brices Amulet', type:'amulet'},
 				{name:'Brices Boots', type:'boots'},
 				{name:'Brices Helm', type:'helmet'},
-				{name:'Rune of Kapwel', type:'rune'}
+				{name:'Rune of Kapwel', type:'rune'},
+				
+				{name:'Torils Weapon', type:'weapon'},
+				{name:'Takeos Sword', type:'weapon'},
+				{name:'Takeos Rune', type:'rune'},
+				{name:'Phellans Shield', type:'shield'},
+				{name:'Phellans Rune', type:'rune'},
+				{name:'Phellans Armor', type:'armor'}
 			];
 		}
 		return Data.itemArray;
