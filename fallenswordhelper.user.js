@@ -86,6 +86,7 @@ var Helper = {
 		System.setDefault("showSpeakerOnWorld", true);
 		System.setDefault("defaultMessageSound", "http://dl.getdropbox.com/u/2144065/chimes.wav");
 		System.setDefault("highlightPlayersNearMyLvl", true);
+		System.setDefault("highlightGvGPlayersNearMyLvl", true);
 		System.setDefault("lvlDiffToHighlight", 5);
 		System.setDefault("detailedConflictInfo", false);
 		System.setDefault("gameHelpLink", true);
@@ -770,18 +771,18 @@ var Helper = {
 	},
 	
 	injectViewGuild: function() {
-		if (GM_getValue("highlightPlayersNearMyLvl")) {
+		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
+		var highlightGvGPlayersNearMyLvl = GM_getValue("highlightGvGPlayersNearMyLvl");
+		if (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl) {
 			var memberList = System.findNode("//tr[td/b[.='Members']]/following-sibling::tr/td/table");
 			for (var i=2;i<memberList.rows.length;i+=4) {
 				var iplus1 = i+1;
 				var level = memberList.rows[i].cells[2].innerHTML;
 				var aRow = memberList.rows[i];
-				if (!isNaN(GM_getValue("lvlDiffToHighlight"))) {
-					if (Math.abs(level - Helper.characterLevel) <= GM_getValue("lvlDiffToHighlight")) {
-						aRow.style.backgroundColor = "#4671C8";
-					}
-				} else {
-					GM_log("Current value for level difference to highlight is not a number.");
+				if (highlightPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 5) {
+					aRow.style.backgroundColor = "#4671C8";
+				} else if (highlightGvGPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 25) {
+					aRow.style.backgroundColor = "#FF9900";
 				}
 			}
 		}
@@ -999,7 +1000,6 @@ var Helper = {
 		}
 	},
 	
-
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute("itemID");
 		var recallHref = "index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=" + guildStoreID;
@@ -1668,7 +1668,7 @@ var Helper = {
 	
 	searchTHforItem: function(evt) {
 		var mo=evt.target.getAttribute("onmouseover");
-		System.xmlhttp(Helper.linkFromMouseoverCustom(mo), function(responseText) {
+		System.xmlhttp(Helper.linkFromMouseover(mo), function(responseText) {
 				var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
 				if (responseText.indexOf('Bound (Non-Tradable)') > 0)
 					if (!confirm(name + " is Bound (Non-Tradable), cannot be found in TH!\n"+
@@ -3814,9 +3814,9 @@ var Helper = {
 					rowCount++;
 				}
 				finalHTML += "<td";
-				finalHTML += "><span style='cursor:pointer;text-decoration:underline;color:#7D2252' cat='quickItemSearch' searchtext='" +
-					quickSearch.searchname + "' title='" + quickSearch.searchname + "'>" +
-					quickSearch.nickname + "</span></td>";
+				finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
+					quickSearch.searchname + "&page=1&order_by=1'>" +
+					quickSearch.nickname + "</a></td>";
 				if (lp % 3==2) finalHTML += "</tr>";
 				if (lp % 3==2) finalHTML += "</tr>";
 				lp++;
@@ -3824,13 +3824,6 @@ var Helper = {
 		}
 		imageCell.innerHTML = finalHTML;
 
-		var quickItemSearchList = System.findNodes("//span[@cat='quickItemSearch']");
-		if (quickItemSearchList) {
-			for (var i=0; i<quickItemSearchList.length; i++) {
-				quickSearchItem = quickItemSearchList[i];
-				quickSearchItem.addEventListener('click', Helper.quickAuctionSearch, true);
-			}
-		}
 		if (GM_getValue('enableAHItemWidgets')) {
 			var allItems = document.getElementsByTagName("IMG");
 			for (i=0; i<allItems.length; i++) {
@@ -3868,20 +3861,8 @@ var Helper = {
 				}
 			}
 		}
-		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1')]");
-		var buyNowLink = System.findNode("//a[contains(@href,'&order_by=2')]");
-		var timeLeftLink = System.findNode("//a[contains(@href,'&order_by=0')]");
+		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
 		auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
-		//fix min bid, bid now and time left links from the player AH page
-		var thisLink = window.location.href;
-		var regExpr = new RegExp("tid=([0-9]+)");
-		if (thisLink.match(regExpr)){
-			var rezReg = regExpr.exec(thisLink);
-			//correct links
-			minBidLink.href = minBidLink.href+'&'+rezReg[0];
-			buyNowLink.href = buyNowLink.href+'&'+rezReg[0];
-			timeLeftLink.href = timeLeftLink.href+'&'+rezReg[0];
-		}
 
 		var playerId = Layout.playerId();
 
@@ -4286,14 +4267,6 @@ var Helper = {
 		submitButton.disabled=false;
 		submitButton.value="Save";
 		submitButton.blur();
-	},
-
-	quickAuctionSearch: function(evt) {
-		var searchText = evt.target.getAttribute("searchtext");
-		GM_log(searchText);
-		var searchInputTextField = System.findNode("//input[@name='search_text' and @class='custominput']");
-		var searchURL = System.server + "index.php?cmd=auctionhouse&type=-1&search_text=" + searchText + "&page=1&order_by=1";
-		window.location = searchURL;
 	},
 
 	injectAuctionExtraText: function(anItem, itemName, craft, forgeCount, durability) {
@@ -4898,7 +4871,8 @@ var Helper = {
 				profileItems[i].setAttribute("id",index);
 				profileItems[i].setAttribute("theURL",theURL);
 				profileItems[i].setAttribute("finalStr",finalStr);
-				profileItems[i].setAttribute("onmouseover","Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>')");
+				profileItems[i].setAttribute("onmouseover","Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>"+
+					"<span style=\"display:none; visibility:hidden;\">" + mouseOver.replace(/\'/ig,"\\\'") + "</span>')");
 				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
 			}
 		}
@@ -8357,9 +8331,9 @@ var Helper = {
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP.') +
-				':</td><td><input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	
-				'> Level difference:<input name="lvlDiffToHighlight" size="1" value="'+ GM_getValue("lvlDiffToHighlight") + '" /></td></tr>'  +
+			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP or GvG.') +
+				':</td><td>PvP: <input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +	
+				'> GvG: <input name="highlightGvGPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightGvGPlayersNearMyLvl")?" checked":"") + '" /></td></tr>'  +
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
@@ -8630,6 +8604,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showSpeakerOnWorld");
 		System.saveValueForm(oForm, "playNewMessageSound");
 		System.saveValueForm(oForm, "highlightPlayersNearMyLvl");
+		System.saveValueForm(oForm, "highlightGvGPlayersNearMyLvl");
 		System.saveValueForm(oForm, "lvlDiffToHighlight");
 		System.saveValueForm(oForm, "showCombatLog");
 		System.saveValueForm(oForm, "showMonsterLog");
