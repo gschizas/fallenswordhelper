@@ -535,6 +535,9 @@ var Helper = {
 			case "mailbox":
 				Helper.injectMailbox();
 				break;
+			case "ranks":
+				System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
+				break;
 			default:
 				break;
 			}
@@ -3202,6 +3205,10 @@ var Helper = {
 			memberList.lastUpdate = new Date();
 			memberList.isRefreshed = true;
 			System.setValueJSON("memberlist", memberList);
+
+			if (location.search == "?cmd=guild&subcmd=ranks") {
+				Helper.injectGuildRanks(memberList);
+			}
 		}
 	},
 
@@ -10382,6 +10389,46 @@ var Helper = {
 			'<a href="index.php?cmd=guild&subcmd=mailbox"><font color="#00FF00">There are items awaiting collection in the Guild Mailbox.</font></a>'+
 			'</font></td></tr></table>';
 		cell.innerHTML = mailboxWarningText;
+	},
+	
+	injectGuildRanks: function(memberList) {
+		//first build up a relationship from rank to names
+		Helper.sortAsc = true;
+		Helper.sortBy = "rank".trim();
+		memberList.members.sort(Helper.stringSort);
+		var rankList = {};
+		rankList.rank = [];
+		var tempList = [];
+		var prevRank = memberList.members[0].rank;
+		var curRank = "";
+		for (i=0;i<memberList.members.length;i++) {
+			var member=memberList.members[i];
+			curRank = member.rank;
+			if (curRank != prevRank) {
+				aRank = {};
+				aRank.rank = prevRank;
+				aRank.names = tempList;
+				rankList.rank.push(aRank);
+				tempList = [];
+			}
+			tempList.push(" " + member.name);
+			prevRank = member.rank;
+		}
+		//then for each of the ranks, find the rank on screen and append the names next to it.
+		var rankNameTable = System.findNode("//table[tbody/tr/td[.='Rank Name']]");
+		for (i=0;i<rankNameTable.rows.length;i++) {
+			aRow = rankNameTable.rows[i];
+			if (aRow.cells[1]) {
+				rankName = aRow.cells[0].textContent;
+				for (j=0;j<rankList.rank.length;j++) {
+					rankListName = rankList.rank[j].rank;
+					if (rankName == rankListName) {
+						aRow.cells[0].innerHTML += " <span style='color:blue;'>- " + rankList.rank[j].names + "</span>";
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 };
