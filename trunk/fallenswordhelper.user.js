@@ -10399,11 +10399,11 @@ var Helper = {
 		var rankList = {};
 		rankList.rank = [];
 		var tempList = [];
-		var prevRank = memberList.members[0].rank;
+		var prevRank = memberList.members[0].rank.replace(/Profile Unavailable/ig,"");
 		var curRank = "";
 		for (i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
-			curRank = member.rank;
+			curRank = member.rank.replace(/Profile Unavailable/ig,"");
 			if (curRank != prevRank) {
 				aRank = {};
 				aRank.rank = prevRank;
@@ -10411,8 +10411,14 @@ var Helper = {
 				rankList.rank.push(aRank);
 				tempList = [];
 			}
+			if (i == memberList.members.length-1) {
+				aRank = {};
+				aRank.rank = curRank;
+				aRank.names = " " + member.name;
+				rankList.rank.push(aRank);
+			}
 			tempList.push(" " + member.name);
-			prevRank = member.rank;
+			prevRank = member.rank.replace(/Profile Unavailable/ig,"");
 		}
 		//then for each of the ranks, find the rank on screen and append the names next to it.
 		var rankNameTable = System.findNode("//table[tbody/tr/td[.='Rank Name']]");
