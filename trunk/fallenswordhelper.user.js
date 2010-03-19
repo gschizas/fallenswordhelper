@@ -536,7 +536,7 @@ var Helper = {
 				Helper.injectMailbox();
 				break;
 			case "ranks":
-				System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
+				Helper.injectGuildRanks();
 				break;
 			default:
 				break;
@@ -3207,7 +3207,7 @@ var Helper = {
 			System.setValueJSON("memberlist", memberList);
 
 			if (location.search == "?cmd=guild&subcmd=ranks") {
-				Helper.injectGuildRanks(memberList);
+				Helper.injectGuildRanksMembers(memberList);
 			}
 		}
 	},
@@ -4899,7 +4899,7 @@ var Helper = {
 					var subTotal = 0;
 					for (var i=2;i<bonusTable.rows.length;i++) {
 						aRow = bonusTable.rows[i];
-						bonusValue = parseInt(/\+(\d+)/.exec(aRow.cells[1].textContent)[1],10);
+						bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
 						subTotal += bonusValue;
 					}
 					extraText = "<br>Individual item stats subtotal: " + subTotal;
@@ -7675,6 +7675,7 @@ var Helper = {
 	addHistoryWidgets: function() {
 		var textArea = System.findNode("//textarea[@name='history']");
 		if (!textArea) {return;}
+		textArea.value = textArea.value.replace(/<br \/>/ig,"");
 		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		var newRow = textAreaTable.insertRow(-1);
@@ -8465,11 +8466,11 @@ var Helper = {
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Active Bounties' + Helper.helpLink('Show Active Bounties', 'This will show your active bounties ' +
 				'on the right hand side') + ':</td><td colspan="3"><input name="enableActiveBountyList" type = "checkbox" value = "on"' + (enableActiveBountyList? " checked":"") + '/>' +
 				'<input name="bountyListRefreshTime" size="1" value="'+ bountyListRefreshTime + '" /> seconds refresh</td></tr>' +
-			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Wanted Bounties' + Helper.helpLink('Show Wanted Bounties', 'This will show when someone you want is on the bounty board, the list is' +
-				'displayed the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
-			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people u want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Wanted Bounties' + Helper.helpLink('Show Wanted Bounties', 'This will show when someone you want is on the bounty board, the list is ' +
+				'displayed on the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
+			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people you want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
-			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen ' +
 				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
@@ -10391,7 +10392,71 @@ var Helper = {
 		cell.innerHTML = mailboxWarningText;
 	},
 	
-	injectGuildRanks: function(memberList) {
+	injectGuildRanks: function() {
+		//update the guild member list and insert a list of members next to each rank
+		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
+
+		var rankNameTable = System.findNode("//table[tbody/tr/td[.='Rank Name']]");
+		for (i=0;i<rankNameTable.rows.length;i++) {
+			aRow = rankNameTable.rows[i];
+			if (aRow.cells[1]) {
+				rankName = aRow.cells[0].textContent;
+//GM_log(aRow.innerHTML);
+			}
+		}
+
+		//gather rank info
+		var newRankElement = System.findNode("//td[a[@href='index.php?cmd=guild&subcmd=ranks&subcmd2=add']]");
+		newRankElement.innerHTML += '&nbsp;<input id="getrankweightings" type="button" value="Get Rank Weightings" class="custombutton">';
+
+		document.getElementById('getrankweightings').addEventListener('click', Helper.fetchRankData, true);
+		
+	},
+
+	fetchRankData: function(evt) {
+		var calcButton = System.findNode("//input[@id='getrankweightings']");
+		calcButton.style.display = "none";
+		var allItems = System.findNodes("//input[@value='Edit']");
+		for (var i=0; i<allItems.length; i++) {
+			anItem = allItems[i];
+			var targetNode = anItem.parentNode.previousSibling;
+			var href = /window\.location='(.*)';/.exec(anItem.getAttribute("onclick"))[1];
+			System.xmlhttp(href, Helper.parseRankData, targetNode);
+		}
+	},
+
+	parseRankData: function(responseText, linkElement) {
+		var doc=System.createDocument(responseText);
+		var checkBoxes = System.findNodes("//input[@type='checkbox']",doc);
+		var count = 0;
+		for (var i=0;i<checkBoxes.length;i++) {
+			var checkbox=checkBoxes[i];
+			if (checkbox.checked) {
+				//terrasoft.gr/FallenSwordHelper: Can Un-Tag Items
+				var privName = checkbox.nextSibling.textContent.trim();
+				if (privName == 'Bank Withdraw' ||
+					privName == 'Build/Upgrade/Demolish Structures' ||
+					privName == 'Can Un-Tag Items') {
+					count += 5;
+				} else if (privName == 'Can Mass Messages') {
+					count += 0.5;
+				} else if (privName == 'Take Items' ||
+					privName == 'Can Tag Items' ||
+					privName == 'Can Recall Tagged Items' ||
+					privName == 'Can Tag Items') {
+					count += 0.2;
+				} else if (privName == 'Store Items' ||
+					privName == 'Can View Advisor') {
+					count += 0.1;
+				} else {
+					count++;
+				}
+			}
+		}
+		linkElement.innerHTML = "<span style='color:blue;'>(" + Math.round(10*count)/10 + ")</span> " + linkElement.innerHTML;
+	},
+	
+	injectGuildRanksMembers: function(memberList) {
 		//first build up a relationship from rank to names
 		Helper.sortAsc = true;
 		Helper.sortBy = "rank".trim();
