@@ -27,6 +27,7 @@ var Layout = {
 		tableElement = System.findNode("//div[@id='menuSource_5']/table");
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
+		Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
 		//"menuSource_3"
 		tableElement = System.findNode("//div[@id='menuSource_3']/table");
 		if (!tableElement) return;
