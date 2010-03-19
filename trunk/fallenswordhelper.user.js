@@ -137,6 +137,8 @@ var Helper = {
 		System.setDefault("addAttackLinkToLog", false);
 		System.setDefault("showStatBonusTotal", true);
 		System.setDefault("monitorGuildMailbox", true);
+		
+		System.setDefault("newGuildLogHistoryPages", 5);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -152,6 +154,21 @@ var Helper = {
 
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			System.setDefault(Helper.itemFilters[i].id, true);
+		}
+
+		Helper.guildLogFilters = [
+		{"id":"showRecallMessages", "type":"Store/Recall"},
+		{"id":"showRelicMessages", "type":"Relic"},
+		{"id":"showMercenaryMessages", "type":"Mercenary"},
+		{"id":"showGroupCombatMessages", "type":"Group Combat"},
+		{"id":"showDonationMessages", "type":"Donation"},
+		{"id":"showRankingMessages", "type":"Ranking"},
+		{"id":"showGvGMessages", "type":"GvG"},
+		{"id":"showTaggingMessages", "type":"Tag/UnTag"}
+		];
+
+		for (var i=0; i<Helper.guildLogFilters.length; i++) {
+			System.setDefault(Helper.guildLogFilters[i].id, true);
 		}
 		
 		System.setDefault("showQuickDropLinks", false);
@@ -616,6 +633,9 @@ var Helper = {
 				break;
 			case "quickahpreftemplate":
 				Helper.injectAHPrefTemplate();
+				break;
+			case "newguildlog":
+				Helper.injectNewGuildLog();
 				break;
 			default:
 				break;
@@ -3616,14 +3636,14 @@ var Helper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
+				if (messageNameCell) messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
 			}
 		}
 	},
 
 	addGuildLogWidgets: function() {
 		var node=System.findNode("//font[@size=3]/b[contains(.,'s Log')]/..");
-		node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Guild Log Summary</a> ]';
+		if (node) node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Guild Log Summary</a> ]';
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) {return;}
 		var playerId=Layout.playerId();
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
@@ -3669,7 +3689,7 @@ var Helper = {
 			}
 			else {
 				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
-				messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild Log messages not involving self are dimmed!)</font>";
+				if (messageNameCell) messageNameCell.innerHTML += "&nbsp;&nbsp;<font style='color:white;'>(Guild Log messages not involving self are dimmed!)</font>";
 			}
 
 		}
@@ -8404,6 +8424,8 @@ var Helper = {
 			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
 				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">New Guild Log History' + Helper.helpLink('New Guild Log History (pages)', 'This is the number of pages that the new guild log screen will go back in history.') +
+				':</td><td><input name="newGuildLogHistoryPages" size="1" value="'+ GM_getValue("newGuildLogHistoryPages") + '" /></td></td></tr>' +
 			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
@@ -8578,7 +8600,11 @@ var Helper = {
 		if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue<=1) {
 			maxCompressedLines.value=25;
 		}
-		
+		var newGuildLogHistoryPages = System.findNode("//input[@name='newGuildLogHistoryPages']", oForm);
+		var newGuildLogHistoryPagesValue = newGuildLogHistoryPages.value*1;
+		if (isNaN(newGuildLogHistoryPagesValue) || newGuildLogHistoryPagesValue<=1) {
+			newGuildLogHistoryPages.value=25;
+		}
 		var combatEvaluatorBiasElement = System.findNode("//select[@name='combatEvaluatorBias']", oForm);
 		var combatEvaluatorBias = combatEvaluatorBiasElement.value;
 		GM_setValue("combatEvaluatorBias", combatEvaluatorBias);
@@ -8665,6 +8691,7 @@ var Helper = {
 		System.saveValueForm(oForm, "addAttackLinkToLog");
 		System.saveValueForm(oForm, "showStatBonusTotal");
 		System.saveValueForm(oForm, "monitorGuildMailbox");
+		System.saveValueForm(oForm, "newGuildLogHistoryPages");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -10499,6 +10526,166 @@ var Helper = {
 					}
 				}
 			}
+		}
+	},
+	
+	injectNewGuildLog: function(){
+		var content=Layout.notebookContent();
+
+		unsafeWindow.changeMenu(0,'menu_character');
+		unsafeWindow.changeMenu(5,'menu_guild');
+		unsafeWindow.changeMenu(0,'menu_character');
+		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
+		
+		
+		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%">' +
+			'<tr style="background-color:#cd9e4b"><td width="90%" nobr><b>&nbsp;Guild Log Version 2</b></td></tr>' +
+			'<tr><td colspan=2>' +
+				'<table><tbody><tr><td><b>Filters:</b></td>' +
+				'<td><table><tbody><tr><td>';
+		for (var i=0; i<Helper.guildLogFilters.length; i++) {
+			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
+			newhtml+='&nbsp;' +Helper.guildLogFilters[i].type+ 's:<input id="'+Helper.guildLogFilters[i].id+'" type="checkbox" linkto="'+Helper.guildLogFilters[i].id+'"' +
+					(GM_getValue(Helper.guildLogFilters[i].id)?' checked':'') + '/>';
+		}
+		newhtml += '</td></tr><tr><td>&nbsp;<span id=GuildLogSelectAll>[Select All]</span>&nbsp;<span id=GuildLogSelectNone>[Select None]</span>' +
+				'</td></tr></tbody></table></td></tr>'+
+			'<tr><td colspan=2><span style="color:blue;" id="Helper:NewGuildLogLoadingMessage">Loading Page 1 ...</span></td></tr>' +
+			'</tbody></table>';
+		newhtml += '<table width="100%" cellspacing="0" cellpadding="2" border="0" id="Helper:GuildLogInjectTable"><tbody>' +
+			'<tr><td width="16" bgcolor="#cd9e4b"></td><td width="20%" bgcolor="#cd9e4b">Date</td><td width="80%" bgcolor="#cd9e4b">Message</td></tr>' +
+			'</tbody></table>';
+		content.innerHTML=newhtml;
+		
+		var guildLogInjectTable = document.getElementById("Helper:GuildLogInjectTable");
+		var loadingMessageInjectHere = document.getElementById("Helper:NewGuildLogLoadingMessage");
+		
+		for (i=0; i<Helper.guildLogFilters.length; i++) {
+			document.getElementById(Helper.guildLogFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+		}
+		document.getElementById("GuildLogSelectAll").addEventListener('click', Helper.guildLogSelectFilters, true);
+		document.getElementById("GuildLogSelectNone").addEventListener('click', Helper.guildLogSelectFilters, true);
+		
+		//fetch guild log page and apply filters
+		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage, {"guildLogInjectTable": guildLogInjectTable, "pageNumber": 0, "loadingMessageInjectHere": loadingMessageInjectHere});
+	},
+	
+	guildLogSelectFilters: function(evt) {
+		var checkedValue = (evt.target.id=="GuildLogSelectAll");
+		for (var i=0; i<Helper.guildLogFilters.length; i++) {
+			GM_setValue(Helper.guildLogFilters[i].id, checkedValue);
+		}
+		if (checkedValue)
+			window.location=window.location;
+		else {
+			for (i=0; i<Helper.guildLogFilters.length; i++) {
+				document.getElementById(Helper.guildLogFilters[i].id).checked = checkedValue;
+			}
+		}
+	},
+
+	parseGuildLogPage: function(responseText, callback) {
+		var pageNumber = callback.pageNumber;
+		var guildLogInjectTable = callback.guildLogInjectTable;
+		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
+		var doc=System.createDocument(responseText);
+		
+		var showRecallMessages = GM_getValue("showRecallMessages");
+		var showTaggingMessages = GM_getValue("showTaggingMessages");
+		var showRelicMessages = GM_getValue("showRelicMessages");
+		var showMercenaryMessages = GM_getValue("showRelicMessages");
+		var showGroupCombatMessages = GM_getValue("showRelicMessages");
+		var showDonationMessages = GM_getValue("showRelicMessages");
+		var showRankingMessages = GM_getValue("showRelicMessages");
+		var showGvGMessages = GM_getValue("showGvGMessages");
+
+		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
+		for (i=1;i<logTable.rows.length;i++) {
+			aRow = logTable.rows[i];
+			var displayRow = true;
+			//if recall message, check to see if showRecallMessages is checked.
+			if (aRow.innerHTML.search("recalled the item") != -1 ||
+				aRow.innerHTML.search("took the item") != -1 ||
+				aRow.innerHTML.search("stored the item") != -1) {
+				if (!showRecallMessages) {
+					displayRow = false;
+				}
+			} 
+			//Tag/Untag (showTaggingMessages)
+			else if (aRow.innerHTML.search("has added flags to some of guild's stored items costing a total of") != -1 ||
+				aRow.innerHTML.search("has removed flags to the guild's stored items.") != -1) {
+				if (!showTaggingMessages) {
+					displayRow = false;
+				}
+			} 
+			//Relic messages (showRelicMessages)
+			else if (aRow.innerHTML.search("relic. This relic now has an empower level of") != -1 ||
+				aRow.innerHTML.search("relic. The relic empower level has been reset to zero.") != -1 ||
+				aRow.innerHTML.search(/has captured (.*) relic/) != -1 ||
+				aRow.innerHTML.search("has captured the undefended relic") != -1 ||
+				aRow.innerHTML.search("attempted to capture your relic") != -1) {
+				if (!showRelicMessages) {
+					displayRow = false;
+				}
+			} 
+			//Mercenary messages (showMercenaryMessages)
+			else if (aRow.innerHTML.search("disbanded a mercenary.") != -1 ||
+				aRow.innerHTML.search("hired the mercenary") != -1) {
+				if (!showMercenaryMessages) {
+					displayRow = false;
+				}
+			} 
+			//Group Combat messages (showGroupCombatMessages)
+			else if (aRow.innerHTML.search(/A group from your guild was (.*) in combat./) != -1) {
+				if (!showGroupCombatMessages) {
+					displayRow = false;
+				}
+			} 
+			//Donation messages (showDonationMessages)
+			else if (aRow.innerHTML.search(/deposited ([,0-9]+) FallenSword Points into the guild./) != -1 ||
+				aRow.innerHTML.search(/deposited ([,0-9]+) gold into the guild bank/) != -1) {
+				if (!showDonationMessages) {
+					displayRow = false;
+				}
+			} 
+			//Ranking messages (showRankingMessages)
+			else if (aRow.innerHTML.search("has added a new rank entitled") != -1 ||
+				aRow.innerHTML.search("has been assigned the rank") != -1) {
+				if (!showRankingMessages) {
+					displayRow = false;
+				}
+			} 
+			//GvG messages (showGvGMessages)
+			else if (aRow.innerHTML.search("resulted in a draw. Your GvG rating and Guild RP was unaffected.") != -1 ||
+				aRow.innerHTML.search(/resulted in (.*) with a final score of/) != -1 ||
+				aRow.innerHTML.search("is participating in the conflict against the guild") != -1) {
+				if (!showGvGMessages) {
+					displayRow = false;
+				}
+			} 
+			
+			//display the row or effectively hide it
+			if (displayRow) {
+				var newRow=guildLogInjectTable.insertRow(-1);
+				newRow.innerHTML = aRow.innerHTML;
+			} else {
+				i += 3;
+			}
+		}
+		
+		var page = System.findNode("//select[@name='page']/..", doc);
+		var curPage = parseInt(System.findNode("//select[@name='page']", doc).value,10);
+		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/)[1];
+		var maxPagesToFetch = parseInt(GM_getValue("newGuildLogHistoryPages") - 1,10);
+		//need control here later for how many pages to fetch (newGuildLogHistoryPages)
+		if (pageNumber < maxPage && pageNumber < maxPagesToFetch) {
+			var nextPage = parseInt(pageNumber+1,10);
+			loadingMessageInjectHere.innerHTML = 'Loading Page ' + (nextPage + 1) + " of " + Math.floor(maxPagesToFetch+1,maxPage) + "...";
+			System.xmlhttp('index.php?cmd=guild&subcmd=log&subcmd2=&page=' + nextPage + '&search_text=', Helper.parseGuildLogPage, {"guildLogInjectTable": guildLogInjectTable, "pageNumber": nextPage, "loadingMessageInjectHere": loadingMessageInjectHere});
+		} else {
+			loadingMessageInjectHere.innerHTML = 'Loading Complete.';
+			Helper.addLogColoring("GuildLog", 1);
+			Helper.addGuildLogWidgets();
 		}
 	}
 	
