@@ -41,6 +41,7 @@ var Layout = {
 	
 	injectItemIntoMenuTable: function(tableElement, text, href, position) {
 		var newRow;
+		if (position > tableElement.rows.length) position = tableElement.rows.length;
 		newRow = tableElement.insertRow(position);
 		newRow.innerHTML='<td height="5"></td>';
 		newRow = tableElement.insertRow(position);
