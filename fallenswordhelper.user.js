@@ -2127,9 +2127,13 @@ var Helper = {
 						aRow.parentNode.removeChild(aRow.nextSibling);
 						aRow.parentNode.removeChild(aRow);
 					}
+					//<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=17&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank"><img src="http://72.29.91.222//skin/fs_wiki.gif" title="Search for this quest on the Ultimate Fallen Sword Guide" border="0"></a>
+					var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
+					aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + '" target="_blank">' +
+						'<img src="http://72.29.91.222//skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') + 
 						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
-					aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&search_name=' + questName.replace(/ /g,'+') + '&search_level_min=&search_level_max=" target="_blank">' +
+					aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
 						'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
 				}
 			}
