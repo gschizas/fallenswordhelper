@@ -10597,14 +10597,14 @@ var Helper = {
 		var showRecallMessages = GM_getValue("showRecallMessages");
 		var showTaggingMessages = GM_getValue("showTaggingMessages");
 		var showRelicMessages = GM_getValue("showRelicMessages");
-		var showMercenaryMessages = GM_getValue("showRelicMessages");
-		var showGroupCombatMessages = GM_getValue("showRelicMessages");
-		var showDonationMessages = GM_getValue("showRelicMessages");
-		var showRankingMessages = GM_getValue("showRelicMessages");
+		var showMercenaryMessages = GM_getValue("showMercenaryMessages");
+		var showGroupCombatMessages = GM_getValue("showGroupCombatMessages");
+		var showDonationMessages = GM_getValue("showDonationMessages");
+		var showRankingMessages = GM_getValue("showRankingMessages");
 		var showGvGMessages = GM_getValue("showGvGMessages");
 
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
-		for (i=1;i<logTable.rows.length;i++) {
+		for (i=1;i<logTable.rows.length;i+=4) {
 			aRow = logTable.rows[i];
 			var displayRow = true;
 			//if recall message, check to see if showRecallMessages is checked.
@@ -10672,11 +10672,18 @@ var Helper = {
 			if (displayRow) {
 				var newRow=guildLogInjectTable.insertRow(-1);
 				newRow.innerHTML = aRow.innerHTML;
-			} else {
-				i += 3;
+				aRowPlus1 = logTable.rows[i+1];
+				newRow=guildLogInjectTable.insertRow(-1);
+				newRow.innerHTML = aRowPlus1.innerHTML;
+				aRowPlus2 = logTable.rows[i+2];
+				newRow=guildLogInjectTable.insertRow(-1);
+				newRow.innerHTML = aRowPlus2.innerHTML;
+				aRowPlus3 = logTable.rows[i+3];
+				newRow=guildLogInjectTable.insertRow(-1);
+				newRow.innerHTML = aRowPlus3.innerHTML;
 			}
 		}
-		
+
 		var page = System.findNode("//select[@name='page']/..", doc);
 		var curPage = parseInt(System.findNode("//select[@name='page']", doc).value,10);
 		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/)[1];
