@@ -95,6 +95,7 @@ var Helper = {
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoCredit","min":"","max":"","gold":true,"fsp":false},{"name":"NoFC","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 		System.setDefault("quickLinks","[]");
+		System.setDefault("currentGoldSentTotal", 0);
 
 		System.setDefault("miniMapName","");
 		System.setDefault("miniMapSource","");
@@ -346,13 +347,6 @@ var Helper = {
 				break;
 			}
 			break;
-		case "arena":
-			switch (subPageId) {
-			case "-":
-				Helper.injectArena();
-				break;
-			}
-			break;
 		case "questbook":
 			switch (subPageId) {
 			case "viewquest":
@@ -535,13 +529,6 @@ var Helper = {
 			break;
 		case "titan":
 			Helper.injectTitan();
-			break;
-		case "toprated":
-			switch (subPageId) {
-			case "xp":
-				Helper.injectTopRated();
-				break;
-			}
 			break;
 		case "inventing":
 			switch (subPageId) {
@@ -1773,7 +1760,9 @@ var Helper = {
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Area Map']]");
 
 		if (GM_getValue("sendGoldonWorld")){
-			var recipient_text = "Send " +GM_getValue("goldAmount") + " gold To " + GM_getValue("goldRecipient");
+			currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
+			var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") + 
+				". Current gold sent total is " + currentGoldSentTotal;
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
 				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
@@ -1916,7 +1905,10 @@ var Helper = {
 		// newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		var info = Layout.infoBox(responseText);
 		if (info=="" || info=="You successfully sent credits!") {
-			info = 'You successfully sent ' + callback.amount + ' credits to ' + callback.recipient + '!';
+			var currentGoldSentTotal = GM_getValue("currentGoldSentTotal")*1;
+			currentGoldSentTotal += System.intValue(callback.amount);
+			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
+			GM_setValue("currentGoldSentTotal", currentGoldSentTotal);
 		}
 		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:xx-small;">' + info + '</div>';
 	},
@@ -6314,14 +6306,6 @@ var Helper = {
 		location.reload(true);
 	},
 
-	quickBuffMe: function() {
-		var playerInput = System.findNode("//input[@name='targetPlayers']");
-		playerInput.value=GM_getValue("CharacterName");
-		if (Helper.tmpSelfProfile) {
-			Helper.getPlayerBuffs(Helper.tmpSelfProfile, true);
-		}
-	},
-
 	getPlayerBuffs: function(responseText, keepPlayerInput) {
 		var injectHere = System.findNode("//input[@value='Activate Selected Skills on Self']/parent::*/parent::*/parent::*");
 		var resultText = "<table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
@@ -6350,8 +6334,8 @@ var Helper = {
 			var buffRE, buff, buffName, buffLevel;
 			for (var i=0;i<buffs.length;i++) {
 				var aBuff=buffs[i];
-				var onmouseover = aBuff.getAttribute("onmouseover");
-				buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/
+				var onmouseover = aBuff.getAttribute("onmouseover").replace(/<br>[ a-zA-Z0-9]+<br>/,'');
+				buffRE = /<b>([ a-zA-Z0-9]+)<\/b> \(Level: (\d+)\)/
 				buff = buffRE.exec(onmouseover);
 				buffName = buff[1];
 				buffLevel = buff[2];
@@ -6728,12 +6712,6 @@ var Helper = {
 		var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
 		GM_setValue("maxAuctions",maxAuctionsValue+2);
 	},
-
-	injectTopRated: function() {
-	},
-
-	injectArena: function() {
-	},
 	
 	injectRelicList: function(){
 		var relics = Data.relicList();
@@ -6842,10 +6820,13 @@ var Helper = {
 			Helper.helpTDwithCB('Hide <small>TaulinRadLands</small> Portal','This will hide the Taulin Rad Lands portal on the world screen.',
 				'hideKrulPortal')+
 			Helper.helpTDwithHTML('Footprints Color','','','<input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" />')+
+			Helper.helpTDwithHTML('Reset Footprints', 'Resets the footprints variable.', '', 
+				'Current Size: ' + (!GM_getValue("map") ? 'N/A' : GM_getValue("map").length + ' <input type="button" class="custombutton" value="Reset" id="Helper:ResetFootprints">'))+
 			Helper.helpTDwithCB('Show Send Credits','This will show an icon below the world map to allow you to quickly send credits to a Friend.',
 				'sendGoldonWorld','',
-				'Send <input name="goldAmount" size="8" value="'+ GM_getValue("goldAmount") + '" /> '+
-				'credits to <input name="goldRecipient" size="15" value="'+ GM_getValue("goldRecipient") + '" />')+
+				'Send <input name="goldAmount" size="5" value="'+ GM_getValue("goldAmount") + '" /> '+
+				'credits to <input name="goldRecipient" size="5" value="'+ GM_getValue("goldRecipient") + '" /><br/>'+
+				'Current total: <input name="currentGoldSentTotal" size="5" value="'+ GM_getValue("currentGoldSentTotal") + '" />')+
 			Helper.helpTDwithHTML('Do Not Kill List','List of entities that will not be killed by quick kill. You must type the full name of each entity, ' +
 				'separated by commas. Entity name will show up in red color on world screen and will not be killed by keyboard entry (but can still be killed by mouseclick). Quick kill must be '+
 				'enabled for this function to work.','','<input name="doNotKillList" size="'+inputSize+'" value="'+ doNotKillList + '" />')+
@@ -6938,12 +6919,12 @@ var Helper = {
 					'<span id="tabMenu3" menuIndex=3 class="tabMenuActive">Log Screen</span>'+
 					'<span id="tabMenu4" menuIndex=4 class="tabMenuActive">Others</span>'+
 				'</div>'+
-				'<div id="tabPane0" class="tabPane" style="height: 400px;">'+huntingCfg+'</div>'+
-				'<div id="tabPane1" class="tabPane" style="height: 400px;">'+generalCfg+'</div>'+
-				'<div id="tabPane2" class="tabPane" style="height: 400px;">'+factionCfg+'</div>'+
-				'<div id="tabPane3" class="tabPane" style="height: 400px;">'+logCfg+'</div>'+
-				'<div id="tabPane4" class="tabPane" style="height: 400px;">'+socialCfg+'</div>'+
-				'<div id="tabFiller" style="height: 420px;"></div>'+
+				'<div id="tabPane0" class="tabPane" style="height: 470px;">'+huntingCfg+'</div>'+
+				'<div id="tabPane1" class="tabPane" style="height: 470px;">'+generalCfg+'</div>'+
+				'<div id="tabPane2" class="tabPane" style="height: 470px;">'+factionCfg+'</div>'+
+				'<div id="tabPane3" class="tabPane" style="height: 470px;">'+logCfg+'</div>'+
+				'<div id="tabPane4" class="tabPane" style="height: 470px;">'+socialCfg+'</div>'+
+				'<div id="tabFiller" style="height: 500px;"></div>'+
 			'</div>'+
 			// save button
 			'<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
@@ -6968,6 +6949,7 @@ var Helper = {
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
+		if (GM_getValue("map")) {document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);}
 
 		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', System.toggleVisibilty, true);
@@ -6987,6 +6969,18 @@ var Helper = {
 			GM_setValue("minGroupLevel",minGroupLevel);
 		}
 	},
+	
+	resetFootprints: function(evt) {
+		if (window.confirm("Are you sure you want to reset your footprints?")) {
+			var theMap = System.getValueJSON("map");
+			if (theMap) {
+				theMap = {};
+				theMap["levels"] = {};
+				System.setValueJSON("map", theMap);
+			}
+			window.location.reload();
+		}
+	}, 
 
 	helpLink: function(title, text) {
 		return ' [ ' +
@@ -7072,6 +7066,7 @@ var Helper = {
 		System.saveValueForm(oForm, "sendGoldonWorld");
 		System.saveValueForm(oForm, "goldRecipient");
 		System.saveValueForm(oForm, "goldAmount");
+		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
 		System.saveValueForm(oForm, "huntingMode");
