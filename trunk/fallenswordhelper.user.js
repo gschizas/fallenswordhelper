@@ -135,6 +135,7 @@ var Helper = {
 		System.setDefault("showStatBonusTotal", true);
 		
 		System.setDefault("newGuildLogHistoryPages", 5);
+		System.setDefault("useNewGuildLog", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -352,6 +353,7 @@ var Helper = {
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
 			Helper.injectJoinAllLink();
+			Helper.changeGuildLogHREF();
 			Helper.injectTHsearch();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -8419,9 +8421,11 @@ var Helper = {
 				':</td><td><input name="showFSGIcon" type="checkbox" value="on"' + (GM_getValue("showFSGIcon")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
 			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
-			'<tr><td align="right">Cleanup guild log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
+			'<tr><td align="right">Cleanup Guild Log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
 				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Use New Guild Log' + Helper.helpLink('Use New Guild Log', 'This will replace the standard guild log with the helper version of the guild log.') +
+				':</td><td><input name="useNewGuildLog" type="checkbox" value="on"' + (GM_getValue("useNewGuildLog")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">New Guild Log History' + Helper.helpLink('New Guild Log History (pages)', 'This is the number of pages that the new guild log screen will go back in history.') +
 				':</td><td><input name="newGuildLogHistoryPages" size="1" value="'+ GM_getValue("newGuildLogHistoryPages") + '" /></td></td></tr>' +
 			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
@@ -8689,6 +8693,7 @@ var Helper = {
 		System.saveValueForm(oForm, "addAttackLinkToLog");
 		System.saveValueForm(oForm, "showStatBonusTotal");
 		System.saveValueForm(oForm, "newGuildLogHistoryPages");
+		System.saveValueForm(oForm, "useNewGuildLog");
 		
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -8868,7 +8873,8 @@ var Helper = {
 					var toggleSellAllHTML = "<span id='Helper:bulkCheck' style='cursor: pointer; text-decoration: underline; color: blue;'>" + 
 					(sellFromAll === true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
 					row.innerHTML = row.innerHTML.replace("]", " | " + toggleSellAllHTML + " ]");				
-					document.getElementById("Helper:bulkCheck").addEventListener("click", Helper.toggleSellFromAllBags, true);
+					var bulkCheck = document.getElementById("Helper:bulkCheck")
+					if (bulkCheck) bulkCheck.addEventListener("click", Helper.toggleSellFromAllBags, true);
 				}
 				
 			}
@@ -9230,7 +9236,29 @@ var Helper = {
 						'cancelButtonHref="' + cancelButtonHref + '">Fast Cancel</span>';
 					document.getElementById('Helper:cancelAuctionItem' + i).addEventListener('click', Helper.cancelAuctionItem, true);
 				}
+				var buttonCell = System.findNode("//input[contains(@value,'My Auctions')]/..");
+				var insertCancelAllHere = buttonCell;
+				var insertCancelAllBlock = document.createElement("SPAN");
+				insertCancelAllBlock.innerHTML = "Cancel All";
+				insertCancelAllBlock.style.cursor = "pointer";
+				insertCancelAllBlock.style.textDecoration = "underline";
+				insertCancelAllBlock.style.color = "blue";
+				insertCancelAllBlock.style.fontSize = "x-small";
+				insertCancelAllHere.innerHTML += "&nbsp;";
+				insertCancelAllHere.appendChild(insertCancelAllBlock);
+				insertCancelAllBlock.addEventListener('click', Helper.cancelAllAuction, true);
 			}
+		}
+	},
+
+	cancelAllAuction: function(evt) {
+		var auctionItems = System.findNodes("//span[contains(@id,'Helper:cancelAuctionItem')]");
+		for (var i = 0; i < auctionItems.length; i++) {
+			var auctionItem = auctionItems[i];
+			var cancelButtonHref = auctionItem.getAttribute("cancelButtonHref");
+			System.xmlhttp(cancelButtonHref,
+				Helper.cancelAuctionReturnMessage,
+				{"target": auctionItem, "url": cancelButtonHref});
 		}
 	},
 
@@ -10363,6 +10391,24 @@ var Helper = {
 		}
 	},
 	
+	changeGuildLogHREF: function() {
+		var guildLogNodes = System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
+		if (guildLogNodes) {
+			for (i=0;i<guildLogNodes.length;i++) {
+				guildLogNode = guildLogNodes[i];
+				guildLogNode.setAttribute("href", "index.php?cmd=notepad&subcmd=newguildlog");
+			}
+			//hide the lhs box
+			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.innerHTML == "You have unread guild log messages.") {
+				messageBox = guildLogNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+				messageBox.style.display = "none";
+				messageBox.style.visibility = "hidden";
+				messageBox.nextSibling.style.display = "none";
+				messageBox.nextSibling.style.visibility = "hidden";
+			}
+		}
+	},
+	
 	injectGuildRanks: function() {
 		//update the guild member list and insert a list of members next to each rank
 		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
@@ -10504,7 +10550,7 @@ var Helper = {
 		var loadingMessageInjectHere = document.getElementById("Helper:NewGuildLogLoadingMessage");
 		
 		for (i=0; i<Helper.guildLogFilters.length; i++) {
-			document.getElementById(Helper.guildLogFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
+			document.getElementById(Helper.guildLogFilters[i].id).addEventListener('click', Helper.toggleGuildLogFilterVisibility, true);
 		}
 		document.getElementById("GuildLogSelectAll").addEventListener('click', Helper.guildLogSelectFilters, true);
 		document.getElementById("GuildLogSelectNone").addEventListener('click', Helper.guildLogSelectFilters, true);
@@ -10513,18 +10559,46 @@ var Helper = {
 		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage, {"guildLogInjectTable": guildLogInjectTable, "pageNumber": 0, "loadingMessageInjectHere": loadingMessageInjectHere});
 	},
 	
+	toggleGuildLogFilterVisibility: function(evt) {
+		var filterID = evt.target.id;
+		var filterChecked = evt.target.checked;
+		var logRows = System.findNodes("//tr[@id='GuildLogFilter:" + filterID + "']");
+		if (logRows) {
+			for (i=0;i<logRows.length;i++) {
+				logRow = logRows[i];
+				if (filterChecked) {
+					logRow.style.display = "";
+					logRow.style.visibility = "visible";
+				} else {
+					logRow.style.display = "none";
+					logRow.style.visibility = "hidden";
+				}
+			}
+		}
+		GM_setValue(filterID,filterChecked);
+	},
+
 	guildLogSelectFilters: function(evt) {
 		var checkedValue = (evt.target.id=="GuildLogSelectAll");
 		for (var i=0; i<Helper.guildLogFilters.length; i++) {
 			GM_setValue(Helper.guildLogFilters[i].id, checkedValue);
+			document.getElementById(Helper.guildLogFilters[i].id).checked = checkedValue;
 		}
-		if (checkedValue)
-			window.location=window.location;
-		else {
-			for (i=0; i<Helper.guildLogFilters.length; i++) {
-				document.getElementById(Helper.guildLogFilters[i].id).checked = checkedValue;
+		var logRows = System.findNodes("//tr[contains(@id,'GuildLogFilter:')]");
+		if (logRows) {
+			for (i=0;i<logRows.length;i++) {
+				logRow = logRows[i];
+				rowID = logRow.getAttribute("id");
+				if (checkedValue) {
+					logRow.style.display = "";
+					logRow.style.visibility = "visible";
+				} else if (rowID != "GuildLogFilter:Unknown") {
+					logRow.style.display = "none";
+					logRow.style.visibility = "hidden";
+				}
 			}
 		}
+
 	},
 
 	parseGuildLogPage: function(responseText, callback) {
@@ -10546,6 +10620,7 @@ var Helper = {
 		for (i=1;i<logTable.rows.length;i+=4) {
 			aRow = logTable.rows[i];
 			var displayRow = true;
+			var rowTypeID = "GuildLogFilter:Unknown";
 			//if recall message, check to see if showRecallMessages is checked.
 			if (aRow.innerHTML.search("recalled the item") != -1 ||
 				aRow.innerHTML.search("took the item") != -1 ||
@@ -10553,6 +10628,7 @@ var Helper = {
 				if (!showRecallMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showRecallMessages";
 			} 
 			//Tag/Untag (showTaggingMessages)
 			else if (aRow.innerHTML.search("has added flags to some of guild's stored items costing a total of") != -1 ||
@@ -10560,6 +10636,7 @@ var Helper = {
 				if (!showTaggingMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showTaggingMessages";
 			} 
 			//Relic messages (showRelicMessages)
 			else if (aRow.innerHTML.search("relic. This relic now has an empower level of") != -1 ||
@@ -10570,6 +10647,7 @@ var Helper = {
 				if (!showRelicMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showRelicMessages";
 			} 
 			//Mercenary messages (showMercenaryMessages)
 			else if (aRow.innerHTML.search("disbanded a mercenary.") != -1 ||
@@ -10577,12 +10655,14 @@ var Helper = {
 				if (!showMercenaryMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showMercenaryMessages";
 			} 
 			//Group Combat messages (showGroupCombatMessages)
 			else if (aRow.innerHTML.search(/A group from your guild was (.*) in combat./) != -1) {
 				if (!showGroupCombatMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showGroupCombatMessages";
 			} 
 			//Donation messages (showDonationMessages)
 			else if (aRow.innerHTML.search(/deposited ([,0-9]+) FallenSword Points into the guild./) != -1 ||
@@ -10590,6 +10670,7 @@ var Helper = {
 				if (!showDonationMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showDonationMessages";
 			} 
 			//Ranking messages (showRankingMessages)
 			else if (aRow.innerHTML.search("has added a new rank entitled") != -1 ||
@@ -10597,30 +10678,51 @@ var Helper = {
 				if (!showRankingMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showRankingMessages";
 			} 
 			//GvG messages (showGvGMessages)
 			else if (aRow.innerHTML.search("resulted in a draw. Your GvG rating and Guild RP was unaffected.") != -1 ||
 				aRow.innerHTML.search(/resulted in (.*) with a final score of/) != -1 ||
+				aRow.innerHTML.search("has just initiated a conflict with the guild") != -1 ||
 				aRow.innerHTML.search("is participating in the conflict against the guild") != -1) {
 				if (!showGvGMessages) {
 					displayRow = false;
 				}
+				rowTypeID = "GuildLogFilter:showGvGMessages";
 			} 
 			
 			//display the row or effectively hide it
-			if (displayRow) {
-				var newRow=guildLogInjectTable.insertRow(-1);
-				newRow.innerHTML = aRow.innerHTML;
-				aRowPlus1 = logTable.rows[i+1];
-				newRow=guildLogInjectTable.insertRow(-1);
-				newRow.innerHTML = aRowPlus1.innerHTML;
-				aRowPlus2 = logTable.rows[i+2];
-				newRow=guildLogInjectTable.insertRow(-1);
-				newRow.innerHTML = aRowPlus2.innerHTML;
-				aRowPlus3 = logTable.rows[i+3];
-				newRow=guildLogInjectTable.insertRow(-1);
-				newRow.innerHTML = aRowPlus3.innerHTML;
+			newRow = aRow.cloneNode(true);
+			if (!displayRow) {
+				newRow.style.display = "none";
+				newRow.style.visibility = "hidden";
 			}
+			newRow.id = rowTypeID
+			guildLogInjectTable.appendChild(newRow);
+			aRowPlus1 = logTable.rows[i+1];
+			newRow = aRowPlus1.cloneNode(true);
+			if (!displayRow) {
+				newRow.style.display = "none";
+				newRow.style.visibility = "hidden";
+			}
+			newRow.id = rowTypeID
+			guildLogInjectTable.appendChild(newRow);
+			aRowPlus2 = logTable.rows[i+2];
+			newRow = aRowPlus2.cloneNode(true);
+			if (!displayRow) {
+				newRow.style.display = "none";
+				newRow.style.visibility = "hidden";
+			}
+			newRow.id = rowTypeID
+			guildLogInjectTable.appendChild(newRow);
+			aRowPlus3 = logTable.rows[i+3];
+			newRow = aRowPlus3.cloneNode(true);
+			if (!displayRow) {
+				newRow.style.display = "none";
+				newRow.style.visibility = "hidden";
+			}
+			newRow.id = rowTypeID
+			guildLogInjectTable.appendChild(newRow);
 		}
 
 		var page = System.findNode("//select[@name='page']/..", doc);
@@ -10638,7 +10740,7 @@ var Helper = {
 			Helper.addGuildLogWidgets();
 		}
 	}
-	
+
 };
 
 Helper.onPageLoad(null); 

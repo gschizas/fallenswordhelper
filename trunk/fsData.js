@@ -75,7 +75,7 @@ var Data = {
 				{Name:"Aspiring Formation",Realm:"Fractured Foundations (4,2) Lvl 393",Comment:"+45 Dodge<br>+45 Disarm<br>+45 Duelist"},
 				{Name:"Wretched Abyss",Realm:"Seething Caverns (10,5) Lvl 399",Comment:"+1% Defense<br>+1% Armor<br>+1% HP<br>+45 Greenskin Slayer<br>+45 Beast Slayer"},
 				{Name:"Crossroads",Realm:"City of Xinderoth (26,35) Lvl 400",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+25 Protect Gold"},
-				{Name:"Tower Orb",Realm:"Citadel of Xinderoth (Floor 13) (15,17) Lvl 413",Comment:"+901% Attack<br>+25 Critical Hit<br>+25 Glory Seeker<br>+25 First Strike"},
+				{Name:"Tower Orb",Realm:"Citadel of Xinderoth (Floor 13) (15,17) Lvl 413",Comment:"+1% Attack<br>+25 Critical Hit<br>+25 Glory Seeker<br>+25 First Strike"},
 				{Name:"The Jolly Rodger",Realm:"Craggy Coastline (Upper) (12,3) Lvl 425",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+15 Sustain<br>+30 Master Crafter<br>+15 First Strike"},
 				{Name:"Emblazoned Warrior",Realm:"Stheno Lake (Edge) (10,2) Lvl 438",Comment:"+1% Damage<br>+10 Piercing Strike<br>+10 Critical Hit<br>+35 First Strike"},
 				{Name:"Kreth Crystals",Realm:"Caves of Kreth (Level 8) (15,10) Lvl 448",Comment:"+1% HP<br>+1% Damage"},
@@ -113,7 +113,19 @@ var Data = {
 				{Name:"Pillars of Lindorik",Realm:"Lindorik Kingdom (Edge) (2,2) Lvl 763",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge"},
 				{Name:"Statue of Elidoia",Realm:"Muisru Kingdom (North) (12, 2) Lvl 775",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Disarm"},
 				{Name:"Darghei Statue",Realm:"Darghei Desert (South) (12, 2) Lvl 783",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Shimmering Circle",Realm:"The Lost Ascent (Entrance) (13, 2) Lvl 791",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"}
+				{Name:"Shimmering Circle",Realm:"The Lost Ascent (Entrance) (13, 2) Lvl 791",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Statue of Falzwort",Realm:"Falzwort Labyrinth (Halls) (2, 14) Lvl 803",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Abroia Fissure",Realm:"Forest of Abroia (Plateau) (9, 11) Lvl 818",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Enchanted Willow",Realm:"Nualgiath Forest (Thicket) (11, 9) Lvl 827",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Mystical Cluster",Realm:"Gritloar Burrows (Central Chamber) Lvl 846",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Piercing Strike<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Doujin Haunt",Realm:"Doujin Swamps (Murk) Lvl 853",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Outlores Pillar",Realm:"Outlore Flats (Valley) Lvl 866",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Ever Ice Stones",Realm:"Farmane Shore (Slopes) Lvl 878",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Goitha Vault",Realm:"Town of Goitha (Courtyard) Lvl 834",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Nullify<br>+25 Disarm"},
+				{Name:"Ancient Ruins of Zorx",Realm:"Nualgiath Forest (Ridge) Lvl 828",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Enchanted Circle of Pelgarir",Realm:"Pelgarir Valley (Verge) Lvl 874",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Sapher Fissure",Realm:"Sapher Flow (Upper) Lvl 885",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"}
 			];
 		}
 		return Data.relicArray;
