@@ -10392,6 +10392,7 @@ var Helper = {
 	},
 	
 	changeGuildLogHREF: function() {
+		if (!GM_getValue("useNewGuildLog")) return;
 		var guildLogNodes = System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
 		if (guildLogNodes) {
 			for (i=0;i<guildLogNodes.length;i++) {
