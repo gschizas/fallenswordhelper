@@ -134,7 +134,7 @@ var Helper = {
 		System.setDefault("addAttackLinkToLog", false);
 		System.setDefault("showStatBonusTotal", true);
 		
-		System.setDefault("newGuildLogHistoryPages", 5);
+		System.setDefault("newGuildLogHistoryPages", 3);
 		System.setDefault("useNewGuildLog", true);
 
 		Helper.itemFilters = [
@@ -10400,7 +10400,7 @@ var Helper = {
 				guildLogNode.setAttribute("href", "index.php?cmd=notepad&subcmd=newguildlog");
 			}
 			//hide the lhs box
-			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.innerHTML == "You have unread guild log messages.") {
+			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.textContent == "You have unread guild log messages.") {
 				messageBox = guildLogNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
 				messageBox.style.display = "none";
 				messageBox.style.visibility = "hidden";
@@ -10415,6 +10415,7 @@ var Helper = {
 		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
 
 		var rankNameTable = System.findNode("//table[tbody/tr/td[.='Rank Name']]");
+		if (!rankNameTable) return;
 		for (i=0;i<rankNameTable.rows.length;i++) {
 			aRow = rankNameTable.rows[i];
 			if (aRow.cells[1]) {
@@ -10428,6 +10429,62 @@ var Helper = {
 
 		document.getElementById('getrankweightings').addEventListener('click', Helper.fetchRankData, true);
 		
+		//up buttons
+		var upButtons = System.findNodes("//input[@value='Up']");
+		for (i=0;i<upButtons.length;i++) {
+			upButton = upButtons[i];
+			onclickText = upButton.getAttribute("onclick");
+			onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
+			upButton.setAttribute("onclickhref", onclickHREF);
+			upButton.setAttribute("onclick", "");
+			upButton.addEventListener('click', Helper.moveRankUpOneSlotOnScreen, true);
+		}
+		//down buttons
+		var downButtons = System.findNodes("//input[@value='Down']");
+		for (i=0;i<downButtons.length;i++) {
+			downButton = downButtons[i];
+			onclickText = downButton.getAttribute("onclick");
+			onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
+			downButton.setAttribute("onclickhref", onclickHREF);
+			downButton.setAttribute("onclick", "");
+			downButton.addEventListener('click', Helper.moveRankDownOneSlotOnScreen, true);
+		}
+	},
+	
+	moveRankUpOneSlotOnScreen: function(evt) {
+		onclickHREF = evt.target.getAttribute("onclickhref");
+		thisRankRow = evt.target.parentNode.parentNode;
+		prevRow = thisRankRow.previousSibling;
+		nextRow1 = thisRankRow.nextSibling;
+		nextRow2 = nextRow1.nextSibling;
+		parentTable = thisRankRow.parentNode;
+		thisRankRowNum = thisRankRow.rowIndex;
+		previousRankRowNum = parseInt(thisRankRowNum - 4, 10);
+		if (previousRankRowNum <= 1) return;
+		injectRow = parentTable.rows[previousRankRowNum - 1];
+		parentTable.insertBefore(prevRow, injectRow);
+		parentTable.insertBefore(thisRankRow, injectRow);
+		parentTable.insertBefore(nextRow1, injectRow);
+		parentTable.insertBefore(nextRow2, injectRow);
+		System.xmlhttp(onclickHREF);
+	},
+
+	moveRankDownOneSlotOnScreen: function(evt) {
+		onclickHREF = evt.target.getAttribute("onclickhref");
+		thisRankRow = evt.target.parentNode.parentNode;
+		prevRow = thisRankRow.previousSibling;
+		nextRow1 = thisRankRow.nextSibling;
+		nextRow2 = nextRow1.nextSibling;
+		parentTable = thisRankRow.parentNode;
+		thisRankRowNum = thisRankRow.rowIndex;
+		previousRankRowNum = parseInt(thisRankRowNum + 8, 10);
+		if (previousRankRowNum - 1 > parentTable.rows.length) return;
+		injectRow = parentTable.rows[previousRankRowNum - 1];
+		parentTable.insertBefore(prevRow, injectRow);
+		parentTable.insertBefore(thisRankRow, injectRow);
+		parentTable.insertBefore(nextRow1, injectRow);
+		parentTable.insertBefore(nextRow2, injectRow);
+		System.xmlhttp(onclickHREF);
 	},
 
 	fetchRankData: function(evt) {
