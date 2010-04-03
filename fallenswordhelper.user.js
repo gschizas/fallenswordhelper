@@ -8792,6 +8792,7 @@ var Helper = {
 			if (miniMapName && Helper.levelName == miniMapName) {
 				miniMap.innerHTML = miniMapSource;
 				Helper.markPlayerOnMiniMap();
+				Helper.toogleMiniMapPOI();
 				miniMap.style.display = "";
 			}
 			else {
@@ -8805,7 +8806,7 @@ var Helper = {
 		var size = 20;
 		var miniMap = document.getElementById("miniMap");
 		var docu = System.createDocument(responseText);
-		var doc = '<table cellspacing="0" cellpadding="0" align="center">' + System.findNode("//table", docu).innerHTML + '</table>';
+		var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + System.findNode("//table", docu).innerHTML + '</table>';
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		//doc = doc.replace("<center></center>", "");
@@ -8815,10 +8816,43 @@ var Helper = {
 		miniMap.innerHTML = doc;
 
 		Helper.markPlayerOnMiniMap();
+		Helper.toogleMiniMapPOI();
 		miniMap.style.display = "";
 
 		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
 		GM_setValue("miniMapSource", doc);
+	},
+
+	toogleMiniMapPOI: function() {
+		var miniMap = document.getElementById("miniMap");
+		var miniMapTable = document.getElementById("miniMapTable");
+		var miniMapCover = document.getElementById("miniMapCover");
+		if (!miniMapCover) {
+			miniMapCover = document.createElement("div");
+			miniMapCover.style.position = "absolute";
+			miniMapCover.style.left = 0;
+			miniMapCover.style.top = 0;
+			miniMapCover.id = "miniMapCover";
+			miniMapCover.style.zIndex = '100';
+			miniMapCover.style.filter = "alpha";
+			miniMapCover.style.opacity = "0.4";
+			miniMapCover.innerHTML = '<table cellspacing="0" cellpadding="0" align="center">'+
+				miniMapTable.innerHTML+'</table>';
+			miniMap.insertBefore(miniMapCover, miniMap.firstChild);
+		} else {
+			miniMap.removeChild(miniMapCover);
+			return;
+		}
+
+		var nodes = System.findNodes("//div[@id='miniMapCover']//td[contains(@onmouseover,'Tip')]");
+		if (!nodes) return;
+		for (var i=0; i<nodes.length; i++) {
+			var tip=nodes[i].getAttribute("onmouseover");
+			var color=tip.indexOf(': ') > 0 ? 'red' : 
+				tip.indexOf("Tip('Stairway to ") > 0 ? 'green' : 'blue';
+			nodes[i].innerHTML = '';
+			nodes[i].style.backgroundColor = color;
+		}
 	},
 
 	markPlayerOnMiniMap: function() {
@@ -10543,18 +10577,12 @@ var Helper = {
 		for (i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			curRank = member.rank.replace(/Profile Unavailable/ig,"");
-			if (curRank != prevRank) {
+			if (curRank != prevRank || i == memberList.members.length-1) {
 				aRank = {};
 				aRank.rank = prevRank;
 				aRank.names = tempList;
 				rankList.rank.push(aRank);
 				tempList = [];
-			}
-			if (i == memberList.members.length-1) {
-				aRank = {};
-				aRank.rank = curRank;
-				aRank.names = " " + member.name;
-				rankList.rank.push(aRank);
 			}
 			tempList.push(" " + member.name);
 			prevRank = member.rank.replace(/Profile Unavailable/ig,"");
