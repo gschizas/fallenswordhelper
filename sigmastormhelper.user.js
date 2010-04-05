@@ -1914,19 +1914,16 @@ var Helper = {
 	},
 
 	injectQuickSelectItems: function() {
-		var nodes = System.findNodes("//input[@name='sendItemList[]']");
-		if (nodes == null || nodes.length==0) return;
-		var table=nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-
-		table.parentNode.parentNode.parentNode.parentNode.rows[0].cells[0].innerHTML += "<a name=sendButtonLbl></a>";
-		var newRow = table.insertRow(-1);
-		var newCell= newRow.insertCell(0);
-		newCell.colSpan=6;
-		newCell.align="right";
-		newCell.noWrap="true";
-		newCell.innerHTML="<span id=Helper.QuickSelectItem>[&lt;&nbsp;Select]</span>&nbsp;&nbsp;&nbsp;"+
+		var td = System.findNode("//input[@name='sendItemList[]']/../../../../../../../../../../../../..");
+		var archor = System.findNode("//img[contains(@src,'skin/trading_itemhead.gif')]/..");
+		if (!td || !archor) return;
+		archor.innerHTML += "<a name=sendButtonLbl></a>";
+		var node=document.createElement('div');
+		node.align='right';
+		node.innerHTML = "<span id=Helper.QuickSelectItem>[&lt;&nbsp;Select]</span>&nbsp;&nbsp;&nbsp;"+
 			"<span id=Helper.QuickSelect6>[Select 6]</span>&nbsp;&nbsp;&nbsp;"+
 			"<span id=Helper.QuickDeSelectItem>[DeSelect&nbsp;&gt;]</span>&nbsp;&nbsp;&nbsp;<a href=#sendButtonLbl>Top</a>";
+		td.appendChild(node);
 		document.getElementById("Helper.QuickSelectItem").addEventListener("click",Helper.quickSelectItem,true);
 		document.getElementById("Helper.QuickSelect6").addEventListener("click",Helper.addQuickSelectItems,true);
 		document.getElementById("Helper.QuickDeSelectItem").addEventListener("click",Helper.quickDeSelectItem,true);
@@ -8291,7 +8288,12 @@ var Helper = {
 	injectStandardTrade: function() {
 		var mainTable = System.findNodes("//table[@width='450']");
 		if (mainTable[2]) {
-			var newRow = mainTable[2].insertRow(2);
+			var td=mainTable[2].parentNode;
+			td.innerHTML = '<form method="post" action="index.php" name="sendItemForm">'+
+				td.innerHTML.replace('<form method="post" action="index.php" name="sendItemForm"></form>','')+
+				'</form>'; // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
+			mainTable = System.findNode("//form/table[@width='450']");
+			var newRow = mainTable.insertRow(2);
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
 			Helper.makeSelectAllInTrade(newCellAll);
@@ -8301,6 +8303,11 @@ var Helper = {
 	injectSecureTrade: function() {
 		var mainTable = System.findNode("//table[@width='300']");
 		if (mainTable) {
+			var td=mainTable.parentNode;
+			td.innerHTML = '<form method="post" action="index.php" name="createOffer" onsubmit="if(confirm(\'Are you sure you wish send this offer?\')) return true; else return false;">'+
+				td.innerHTML.replace('<form method="post" action="index.php" name="createOffer" onsubmit="if(confirm(\'Are you sure you wish send this offer?\')) return true; else return false;"></form>','')+
+				'</form>'; // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
+			mainTable = System.findNode("//table[@width='300']");
 			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
@@ -8310,17 +8317,62 @@ var Helper = {
 	
 	makeSelectAllInTrade: function(injectHere) {
 		var itemList=[[" Stim<", "Stim"], [">Ammo<", "Ammo"], [">Resource<", "Resource"]];
-		var output = 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
+		var output = 'Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
 			'All Items</span> &ensp ';
 		for (var i=0;i<itemList.length;i++) {
 			output += '<span plantRE="'+itemList[i][0]+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'">'+itemList[i][1]+'</span> &ensp ' ;
+				'id="Helper:checkAll'+i+'">'+itemList[i][1]+'</span> &ensp' ;
 		}
+		output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
 		injectHere.innerHTML += output;
 		for (var i=0;i<itemList.length;i++) {
 			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
 		}
 		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
+		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getFolderName2Trade, true);
+	},
+	
+	getFolderName2Trade: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var otherFolders = System.findNodes("//td/center/a/img[@src='"+System.imageServer+"/folder.gif']",doc);
+		var newHtml='<span id="Folder-2" fid=-2 style="cursor:pointer; text-decoration:underline;">All</span> '+
+			'<span id="Folder-1" fid=-1 style="cursor:pointer; text-decoration:underline;">Main</span> ';
+		for (var i=0; i<otherFolders.length; i++) {
+			//GM_log(otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(\d+)/i)[1]);
+			newHtml+='<span id="Folder'+i+'" fid='+
+				otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+
+				' style="cursor:pointer; text-decoration:underline;">'+
+				otherFolders[i].parentNode.parentNode.textContent+'</span> ';
+		}
+		document.getElementById("Helper:getFolder").innerHTML=newHtml;
+		for (var i=-2; i<otherFolders.length; i++) {
+			document.getElementById("Folder"+i).addEventListener('click', Helper.getFolderContent2Trade, true);
+		}
+	},
+	
+	getFolderContent2Trade: function(evt) {
+		var fid=evt.target.getAttribute('fid');
+		if (fid==-2) 
+			window.location.reload();
+		else
+			System.xmlhttp('index.php?cmd=profile&subcmd=dropitems&folder_id='+fid, function(responseText) {
+				var table=System.findNode('//td[@colspan=3 or @colspan=2]/table[@cellspacing=8]');
+				var newHtml = '<table cellspacing="8" cellpadding="0" border="0" align="center"><tbody><tr>';
+				var doc=System.createDocument(responseText);
+				Helper.itemList = {};
+				Helper.retrieveItemInfor(doc);
+				var counter = 0;
+				for (var key in Helper.itemList) {
+					newHtml+='<td align="center"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
+						'<td width="45" height="45" style="background-color: rgb(13, 9, 5); border: 1px solid rgb(32, 33, 34);">'+
+						Helper.itemList[key].html.match(/(<center><img [^>]*><br><font size="1">[^<]*<\/font><\/center>)/)[1]+
+						'</td></tr><tr><td align="center"><input type="checkbox" name="sendItemList[]" value="'+Helper.itemList[key].id+'"></td></tr></tbody></table></td>';
+					counter++;
+					if (counter % 6 == 0) newHtml+='</tr><tr>';
+				}
+				newHtml+='</tr></tbody></table>';
+				table.innerHTML = newHtml;
+			});
 	},
 	
 	makePageHeader: function(title, comment, spanId, button) {
