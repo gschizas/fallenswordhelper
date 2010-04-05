@@ -10164,78 +10164,109 @@ var Helper = {
 	injectStandardTrade: function() {
 		var mainTable = System.findNodes("//table[@width='300']");
 		if (mainTable[2]) {
+			var td=mainTable[2].parentNode;
+			td.innerHTML = '<form method="post" action="index.php" name="sendItemForm">'+
+				td.innerHTML.replace('<form method="post" action="index.php" name="sendItemForm"></form>','')+
+				'</form>'; // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
+			mainTable = System.findNodes("//table[@width='300']");
 			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
-
-			newCellAll.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
-				'All Items</span> &ensp ' +
-
-				'<span plantRE="Heffle|Trinettle|Blood Bloom|Jademare|DarkShade" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAllPlants">All Plants</span> &ensp ' +
-
-				'<span plantRE="Heffle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllHeffle">' + 
-				'Heffle</span> &ensp ' + 
-
-				'<span plantRE="Trinettle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllTrinettle">' + 
-				'Trinettle</span> &ensp ' +
-
-				'<span plantRE="Blood Bloom" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllBloom">' + 
-				'Blood Bloom</span> \f &emsp &emsp &ensp &ensp' +
-
-				'<span plantRE="Jademare" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllJade">' + 
-				'Jademare</span> &ensp ' +
-	
-				'<span plantRE="Dark Shade" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllShade">' + 
-				'Dark Shade</span>';
-
-			document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
-			document.getElementById("Helper:checkAllPlants").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllHeffle").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllTrinettle").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllBloom").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
-
+			Helper.makeSelectAllInTrade(newCellAll);
 		}
 	},
 
 	injectSecureTrade: function() {
 		var mainTable = System.findNode("//table[@width='300']");
 		if (mainTable) {
+			var td=mainTable.parentNode;
+			td.innerHTML = '<form method="post" action="index.php" name="createOffer" onsubmit="if(confirm(\'Are you sure you wish send this offer?\')) return true; else return false;">'+
+				td.innerHTML.replace('<form method="post" action="index.php" name="createOffer" onsubmit="if(confirm(\'Are you sure you wish send this offer?\')) return true; else return false;"></form>','')+
+				'</form>'; // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
+			mainTable = System.findNode("//table[@width='300']");
 			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
-
-			newCellAll.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
-				'All Items</span> &ensp ' +
-
-				'<span plantRE="Heffle|Trinettle|Blood Bloom|Jademare|DarkShade" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAllPlants">All Plants</span> &ensp ' +
-
-				'<span plantRE="Heffle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllHeffle">' + 
-				'Heffle</span> &ensp ' + 
-
-				'<span plantRE="Trinettle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllTrinettle">' + 
-				'Trinettle</span>\f &emsp &emsp &ensp &ensp' +
-
-				'<span plantRE="Blood Bloom" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllBloom">' + 
-				'Blood Bloom</span> &ensp' +
-
-				'<span plantRE="Jademare" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllJade">' + 
-				'Jademare</span> &ensp ' +
-	
-				'<span plantRE="Dark Shade" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllShade">' + 
-				'Dark Shade</span>';
-
-			document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
-			document.getElementById("Helper:checkAllPlants").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllHeffle").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllTrinettle").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllBloom").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
-			document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
+			Helper.makeSelectAllInTrade(newCellAll);
 		}
+	},
+	
+	makeSelectAllInTrade: function(injectHere) { // currently reuse FSH code, this should be changed to SS2H code which is cleaner
+		injectHere.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
+			'All Items</span> &ensp ' +
+
+			'<span plantRE="Heffle|Trinettle|Blood Bloom|Jademare|DarkShade" style="cursor:pointer; text-decoration:underline;"' +
+			'id="Helper:checkAllPlants">All Plants</span> &ensp ' +
+
+			'<span plantRE="Heffle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllHeffle">' + 
+			'Heffle</span> &ensp ' + 
+
+			'<span plantRE="Trinettle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllTrinettle">' + 
+			'Trinettle</span>\f &emsp &emsp &ensp &ensp' +
+
+			'<span plantRE="Blood Bloom" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllBloom">' + 
+			'Blood Bloom</span> &ensp' +
+
+			'<span plantRE="Jademare" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllJade">' + 
+			'Jademare</span> &ensp ' +
+
+			'<span plantRE="Dark Shade" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllShade">' + 
+			'Dark Shade</span>' +
+			
+			'<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
+
+		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
+		document.getElementById("Helper:checkAllPlants").addEventListener('click', Helper.toggleCheckAllPlants, true);
+		document.getElementById("Helper:checkAllHeffle").addEventListener('click', Helper.toggleCheckAllPlants, true);
+		document.getElementById("Helper:checkAllTrinettle").addEventListener('click', Helper.toggleCheckAllPlants, true);
+		document.getElementById("Helper:checkAllBloom").addEventListener('click', Helper.toggleCheckAllPlants, true);
+		document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
+		document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
+		
+		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getFolderName2Trade, true);
+	},
+	
+	getFolderName2Trade: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var otherFolders = System.findNodes("//td/center/a/img[contains(@src,'/folder.gif')]",doc);
+		var newHtml='<span id="Folder-2" fid=-2 style="cursor:pointer; text-decoration:underline;">All</span> '+
+			'<span id="Folder-1" fid=-1 style="cursor:pointer; text-decoration:underline;">Main</span> ';
+		for (var i=0; i<otherFolders.length; i++) {
+			//GM_log(otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(\d+)/i)[1]);
+			newHtml+='<span id="Folder'+i+'" fid='+
+				otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+
+				' style="cursor:pointer; text-decoration:underline;">'+
+				otherFolders[i].parentNode.parentNode.textContent+'</span> ';
+		}
+		document.getElementById("Helper:getFolder").innerHTML=newHtml;
+		for (var i=-2; i<otherFolders.length; i++) {
+			document.getElementById("Folder"+i).addEventListener('click', Helper.getFolderContent2Trade, true);
+		}
+	},
+	
+	getFolderContent2Trade: function(evt) {
+		var fid=evt.target.getAttribute('fid');
+		if (fid==-2) 
+			window.location.reload();
+		else
+			System.xmlhttp('index.php?cmd=profile&subcmd=dropitems&folder_id='+fid, function(responseText) {
+				var table=System.findNode('//td[@colspan=3 or @colspan=2]/table[@cellspacing=8]');
+				var newHtml = '<table cellspacing="8" cellpadding="0" border="0" align="center"><tbody><tr>';
+				var doc=System.createDocument(responseText);
+				Helper.itemList = {};
+				Helper.retrieveItemInfor(doc);
+				var counter = 0;
+				for (var key in Helper.itemList) {
+					newHtml+='<td align="center"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
+						'<td background="http://72.29.91.222/inventory/2x3.gif" width="60" height="90">'+
+						Helper.itemList[key].html.match(/(<center><img [^>]*><\/center>)/)[1]+
+						'</td></tr><tr><td align="center"><input type="checkbox" name="sendItemList[]" value="'+Helper.itemList[key].id+'"></td></tr></tbody></table></td>';
+					counter++;
+					if (counter % 6 == 0) newHtml+='</tr><tr>';
+				}
+				newHtml+='</tr></tbody></table>';
+				table.innerHTML = newHtml;
+			});
 	},
 	
 	makePageHeader: function(title, comment, spanId, button) {
