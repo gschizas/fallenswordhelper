@@ -10467,10 +10467,14 @@ var Helper = {
 			//hide the lhs box
 			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.textContent == "You have unread guild log messages.") {
 				messageBox = guildLogNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
-				messageBox.style.display = "none";
-				messageBox.style.visibility = "hidden";
-				messageBox.nextSibling.style.display = "none";
-				messageBox.nextSibling.style.visibility = "hidden";
+				if (messageBox) {
+					messageBox.style.display = "none";
+					messageBox.style.visibility = "hidden";
+				}
+				if (messageBox.nextSibling) {
+					messageBox.nextSibling.style.display = "none";
+					messageBox.nextSibling.style.visibility = "hidden";
+				}
 			}
 		}
 	},
