@@ -4031,7 +4031,7 @@ var Helper = {
 		Helper.retrieveItemInfor(document);
 		var table=System.findNode("//form//td[@colspan=3]/table");
 		var showExtraLinks = GM_getValue("showExtraLinks");
-		var newHtml = '<table cellspacing="8" cellpadding="0" border="0" align="center"><tbody><tr>';
+		var newHtml = '<table cellspacing="8" cellpadding="4" border="0" align="center"><tbody><tr>';
 		var counter = 0, preText='';
 		for (var key in Helper.itemList) {
 			if (showExtraLinks) {
@@ -4044,10 +4044,10 @@ var Helper = {
 					imgid = /\/([^./]*).gif/.exec(Helper.itemList[key].html)[1];
 					text = /<font size="1">([^<]*)<\/font>/.exec(Helper.itemList[key].html)[1];
 				}
-				preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
+				preText = "<span id=THSell"+Helper.itemList[key].id+">[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 					+ escape(Helper.itemList[key].text)
-					+ "'>TH</a>]</span> "
-					+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
+					+ "'>TH</a>] "
+					+ "[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
 					+ "&inv_id=" + invId 
 					+ "&item_id=" + itemId
 					+ "&type=" + type
@@ -4056,18 +4056,20 @@ var Helper = {
 					+ "&txt=" + text + "'>"
 					+ "Sell</a>]</span> ";
 			}
-			newHtml+='<td align="center"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
+			newHtml+='<td align="center">'+
+				'<table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
 				'<td width="45" height="45" style="background-color: rgb(13, 9, 5); border: 1px solid rgb(32, 33, 34);">'+
-				Helper.itemList[key].html.match(/(<center><img [^>]*><br><font size="1">[^<]*<\/font><\/center>)/)[1]+
-				'</td></tr><tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="removeIndex[]" value="'+Helper.itemList[key].id+'">'+
-				'<br/>[<span id=item'+Helper.itemList[key].id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
-				'onmouseover="Tip(\'Select all items of the same type\')">S</span>] '+
-				preText+
-				'</td></tr></tbody></table></td>';
+					Helper.itemList[key].html.match(/(<center><img [^>]*><br><font size="1">[^<]*<\/font><\/center>)/)[1]+'</td>'+
+				'<td rowspan=2 style="font-size:x-small" align=center width=70><b>'+Helper.itemList[key].text+'</b><br/><br/>[<span id=item'+Helper.itemList[key].id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
+					'onmouseover="Tip(\'Select all items of the same type\')">Select All</span>]<br/><br/>'+
+					preText+'</td></tr>'+
+				'<tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="removeIndex[]" value="'+Helper.itemList[key].id+'"></td></tr>'+
+				'</tbody></table></td>';
 			counter++;
-			if (counter % 10 == 0) newHtml+='</tr><tr>';
+			if (counter % 4 == 0) newHtml+='</tr><tr>';
 		}
 		newHtml+='</tr></tbody></table>';
+		GM_log(newHtml);
 		table.innerHTML = newHtml;
 		for (var key in Helper.itemList) {
 			document.getElementById('item'+Helper.itemList[key].id).addEventListener('click', Helper.selectAllProfileInventoryItem, true);
