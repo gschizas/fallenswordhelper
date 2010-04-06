@@ -2117,7 +2117,7 @@ var Helper = {
 			var item={
 				"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
 				"html":row.innerHTML.replace(/<input[^>]*>/g, ''),
-				"text":row.textContent.replace(/^\s*\d+\s*\/\s*\d+\s*/,'')
+				"text":row.textContent.replace(/^\s*\d*\s*\/\s*\d+\s*/,'')
 				};
 			Helper.itemList["id"+item.id]=item;
 		}
@@ -3817,23 +3817,19 @@ var Helper = {
 		}
 		theText.innerHTML = preText + "<br>" + theText.innerHTML;
 	},
-
-	toggleShowExtraLinks: function(evt) {
-		var showExtraLinksElement = System.findNode("//span[@id='Helper:showExtraLinks']");
-		if (showExtraLinksElement.textContent == "Show AH and Sell links") {
-			GM_setValue("showExtraLinks", true);
-		} else {
-			GM_setValue("showExtraLinks", false);
-		}
-		window.location = window.location;
-	},
 	
-	toggleShowQuickDropLinks: function(evt) {
-		var showQuickDropLinksElement = System.findNode("//span[@id='Helper:showQuickDropLinks']");
-		if (showQuickDropLinksElement.textContent == "Show Quick Drop links") {
-			if (window.confirm("Are you sure you want to show the quick drop links?")) GM_setValue("showQuickDropLinks", true);
+	toggleGMValueLink: function(evt) { 
+		// target.id is the GM variable name, target.confirmMsg is the confirmation msg, the text should be "Show/Hide ..."
+		var varName = evt.target.id;
+		if (evt.target.textContent.match(/^Show/)) {
+			var msg = evt.target.getAttribute("confirmMsg");
+			if (msg == "") {
+				GM_setValue(varName, true);
+			} else {
+				if (window.confirm(msg)) GM_setValue(varName, true);
+			}
 		} else {
-			GM_setValue("showQuickDropLinks", false);
+			GM_setValue(varName, false);
 		}
 		window.location = window.location;
 	},
@@ -3995,20 +3991,92 @@ var Helper = {
 	},
 
 	injectDropItems: function() {
+		var td=System.findNode("//td[contains(@background,'inner_bg.jpg')]");
+		if (td) { // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
+			td.innerHTML='<form onsubmit="return confirmDestroy();" action="index.php" method="post">'+
+				td.innerHTML.replace('<form onsubmit="return confirmDestroy();" action="index.php" method="post"></form>','')+'</form>';
+		}
+		
+		Helper.injectDropItemMenu();
+		if (GM_getValue("showBpCompact")) 
+			Helper.injectDropItemCompact();
+		else
+			Helper.injectDropItemAHSellCheckAll();
+	},
+	
+	injectDropItemMenu: function() {
 		var mainTable = System.findNode("//table[contains(@background,'skin/large_content_bg.jpg')]");
 		if (!mainTable.rows[5]) var mainTable = System.findNode("//table[@width=600]");
-		var showExtraLinks = GM_getValue("showExtraLinks");
-		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		if (mainTable) {
 			var insertHere = mainTable.rows[3].cells[0];
-			insertHere.innerHTML += '<div align=center nowrap>[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showExtraLinks">' +
-				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;'+
-				'[<span style="cursor:pointer; text-decoration:underline;" id="Helper:showQuickDropLinks">' +
-				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;</div>';
-			document.getElementById("Helper:showExtraLinks").addEventListener('click', Helper.toggleShowExtraLinks, true);
-			document.getElementById("Helper:showQuickDropLinks").addEventListener('click', Helper.toggleShowQuickDropLinks, true);
+			var menuList = [["showExtraLinks", "TH and Sell links", ""], 
+				["showQuickDropLinks", "Quick Drop links", "Are you sure you want to show the quick drop links?"], 
+				["showBpCompact", "BP Compact", ""]];
+			var newHtml = "<div align=center nowrap><a name=top></a>";
+			for (var i=0; i<menuList.length; i++) {
+				newHtml += '[<span style="cursor:pointer; text-decoration:underline;font-size:x-small;color:cyan" '+
+					'id="'+menuList[i][0]+'" confirmMsg="'+menuList[i][2]+'">' +
+					(GM_getValue(menuList[i][0])?'Hide':'Show') + ' '+menuList[i][1]+'</span>]&nbsp;'
+			}
+			insertHere.innerHTML += newHtml + "</div>";
+			for (var i=0; i<menuList.length; i++) {
+				document.getElementById(menuList[i][0]).addEventListener('click', Helper.toggleGMValueLink, true);
+			}
+			window.scrollTo(0,300);
 		}
-
+	},
+	
+	injectDropItemCompact: function() {
+		Helper.itemList = {};
+		Helper.retrieveItemInfor(document);
+		var table=System.findNode("//form//td[@colspan=3]/table");
+		var showExtraLinks = GM_getValue("showExtraLinks");
+		var newHtml = '<table cellspacing="8" cellpadding="0" border="0" align="center"><tbody><tr>';
+		var counter = 0, preText='';
+		for (var key in Helper.itemList) {
+			if (showExtraLinks) {
+				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html);
+				if (itemStats) {
+					itemId = itemStats[1];
+					invId = itemStats[2];
+					type = itemStats[3];
+					pid = itemStats[4];
+					imgid = /\/([^./]*).gif/.exec(Helper.itemList[key].html)[1];
+					text = /<font size="1">([^<]*)<\/font>/.exec(Helper.itemList[key].html)[1];
+				}
+				preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
+					+ escape(Helper.itemList[key].text)
+					+ "'>TH</a>]</span> "
+					+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
+					+ "&inv_id=" + invId 
+					+ "&item_id=" + itemId
+					+ "&type=" + type
+					+ "&pid=" + pid
+					+ "&imgid=" + imgid
+					+ "&txt=" + text + "'>"
+					+ "Sell</a>]</span> ";
+			}
+			newHtml+='<td align="center"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
+				'<td width="45" height="45" style="background-color: rgb(13, 9, 5); border: 1px solid rgb(32, 33, 34);">'+
+				Helper.itemList[key].html.match(/(<center><img [^>]*><br><font size="1">[^<]*<\/font><\/center>)/)[1]+
+				'</td></tr><tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="removeIndex[]" value="'+Helper.itemList[key].id+'">'+
+				'<br/>[<span id=item'+Helper.itemList[key].id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
+				'onmouseover="Tip(\'Select all items of the same type\')">S</span>] '+
+				preText+
+				'</td></tr></tbody></table></td>';
+			counter++;
+			if (counter % 10 == 0) newHtml+='</tr><tr>';
+		}
+		newHtml+='</tr></tbody></table>';
+		table.innerHTML = newHtml;
+		for (var key in Helper.itemList) {
+			document.getElementById('item'+Helper.itemList[key].id).addEventListener('click', Helper.selectAllProfileInventoryItem, true);
+		}
+	},
+	
+	injectDropItemAHSellCheckAll: function() {
+		var showExtraLinks = GM_getValue("showExtraLinks");
+		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		//function to add links to all the items in the drop items list
 		if (showExtraLinks || showQuickDropLinks) {
 			var itemName, itemInvId, theTextNode, newLink;
@@ -4243,7 +4311,7 @@ var Helper = {
 		if (color=="orange") color="#FF6000";
 		if (color=="#00FF00") color="#00B000";
 		textNode.style.color=color;
-	},
+	}, 
 
 	injectProfile: function() {
 		// add avatar img element with player name in title
@@ -4646,11 +4714,12 @@ var Helper = {
 	
 	selectAllProfileInventoryItem: function(evt) {
 		var imgID=evt.target.getAttribute("itemID");
-		var nodes = System.findNodes("//td/center/a[img[contains(@src,'/"+imgID+".gif')]]");
+		var nodes = System.findNodes("//td/center/a/img[contains(@src,'/"+imgID+".gif')]");
+		if (!nodes) nodes = System.findNodes("//td/center/img[contains(@src,'/"+imgID+".gif')]");
 		if (nodes && nodes.length > 0){
-			var profileInventoryIDRE = /inventory_id=(\d+)/i;
+			var profileInventoryIDRE = /ajaxLoadItem\(\d+, (\d+), \d+, \d+/;
 			for (var i=0; i<nodes.length; i++) {
-				itemId = profileInventoryIDRE(nodes[i].getAttribute("href"))[1];
+				itemId = profileInventoryIDRE(nodes[i].getAttribute("onmouseover"))[1];
 				var ckbNode = System.findNode("//input[@type='checkbox' and @value='"+itemId+"']");
 				if (ckbNode) ckbNode.checked = ! ckbNode.checked;
 			}
