@@ -2077,8 +2077,7 @@ var Helper = {
 			var recastImpAndRefresh=document.getElementById('Helper:recastImpAndRefresh');
 			var impHref = "index.php?cmd=quickbuff&subcmd=activate&targetPlayers=" + Helper.characterName + "&skills%5B%5D=55";
 			recastImpAndRefresh.addEventListener('click', function() {
-				System.xmlhttp(impHref);
-				window.location=window.location;
+				System.xmlhttp(impHref, Helper.recastImpAndRefresh, true);
 			},true);
 		}
 		
@@ -2089,6 +2088,13 @@ var Helper = {
 			},true);
 	},
 
+	recastImpAndRefresh: function(responseText) {
+		var doc=System.createDocument(responseText);
+		if (doc) {
+			window.location=window.location;
+		}
+	},
+	
 	removeSkill: function(evt) {
 		var buffName = evt.target.parentNode.getAttribute("buffName");
 		var buffHref = evt.target.parentNode.getAttribute("buffHref");
