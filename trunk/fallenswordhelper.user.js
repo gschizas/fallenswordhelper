@@ -10494,10 +10494,9 @@ var Helper = {
 				if (messageBox) {
 					messageBox.style.display = "none";
 					messageBox.style.visibility = "hidden";
-				}
-				if (messageBox.nextSibling) {
-					messageBox.nextSibling.style.display = "none";
-					messageBox.nextSibling.style.visibility = "hidden";
+					//hide the empty row before it too (can't do after in case there is no after row)
+					messageBox.previousSibling.style.display = "none";
+					messageBox.previousSibling.style.visibility = "hidden";
 				}
 			}
 		}
