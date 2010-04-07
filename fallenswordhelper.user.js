@@ -136,6 +136,8 @@ var Helper = {
 		
 		System.setDefault("newGuildLogHistoryPages", 3);
 		System.setDefault("useNewGuildLog", true);
+		
+		System.setDefault("ajaxifyRankControls", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -2005,7 +2007,8 @@ var Helper = {
 			if (impsRemaining===0){
 				applyImpWarningColor = " style='color:red; font-size:large; font-weight:bold'";
 			}
-			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + "</td></tr>";
+			replacementText += "<tr><td" + applyImpWarningColor + ">Shield Imps Remaining: " +  impsRemaining + 
+				(impsRemaining === 0?"&nbsp;<span id='Helper:recastImpAndRefresh' style='color:blue;cursor:pointer;text-decoration:underline;font-size:xx-small;'>Recast</span>":"") + "</td></tr>";
 			if (hasDeathDealer) {
 				if (GM_getValue("lastDeathDealerPercentage")==undefined) GM_setValue("lastDeathDealerPercentage", 0);
 				if (GM_getValue("lastKillStreak")==undefined) GM_setValue("lastKillStreak", 0);
@@ -2069,6 +2072,15 @@ var Helper = {
 		//insert after kill all monsters image and text
 		newRow=injectHere.insertRow(2);
 		newRow.innerHTML=replacementText;
+		
+		if ((hasDeathDealer || hasShieldImp) && impsRemaining ===0) {
+			var recastImpAndRefresh=document.getElementById('Helper:recastImpAndRefresh');
+			var impHref = "index.php?cmd=quickbuff&subcmd=activate&targetPlayers=" + Helper.characterName + "&skills%5B%5D=55";
+			recastImpAndRefresh.addEventListener('click', function() {
+				System.xmlhttp(impHref);
+				window.location=window.location;
+			},true);
+		}
 		
 		var trackKS=document.getElementById('Helper:toggleKStracker');
 		if (trackKS) trackKS.addEventListener('click', function() {
@@ -4766,7 +4778,7 @@ var Helper = {
 
 	checkAll: function(evt){
 		var itemName = evt.target.getAttribute("linkto");
-		var findItems = System.findNodes("//td[@width='90%' and contains(.,'"+itemName+"')]");
+		var findItems = System.findNodes("//td[@width='90%' and contains(.,'] "+itemName+" [')]");
 		for (var i=0; i<findItems.length; i++) {
 			var item = findItems[i];
 			var checkboxForItem = item.previousSibling.previousSibling.firstChild;
@@ -6702,6 +6714,7 @@ var Helper = {
 		GM_addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		var playerInput = System.findNode("//input[@name='targetPlayers']");
+		if (!playerInput) return;
 		var buffMe = document.createElement("SPAN");
 		buffMe.innerHTML="[self]";
 		buffMe.className='HelperTextLink';
@@ -8361,6 +8374,8 @@ var Helper = {
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">AJAXify rank controls' + Helper.helpLink('AJAXify rank controls', 'Enables guild founders with ranking rights to change rank positions without a screen refresh.') +
+				':</td><td><input name="ajaxifyRankControls" type="checkbox" value="on"' + (GM_getValue("ajaxifyRankControls")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show Conflict Details' + Helper.helpLink('Show Conflict Details', 'Inserts detailed conflict information onto your guild\\\'s manage page. Currently displays the target guild as well as the current score.') +
 				':</td><td><input name="detailedConflictInfo" type="checkbox" value="on"' + (GM_getValue("detailedConflictInfo")?" checked":"") + '></td></tr>' +
 			//World Screen
@@ -8620,7 +8635,10 @@ var Helper = {
 		System.saveValueForm(oForm, "guildFrndMessage");
 		System.saveValueForm(oForm, "guildPastMessage");
 		System.saveValueForm(oForm, "guildEnmyMessage");
+		
 		System.saveValueForm(oForm, "showAdmin");
+		System.saveValueForm(oForm, "ajaxifyRankControls");
+		
 		System.saveValueForm(oForm, "detailedConflictInfo");
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
@@ -10485,10 +10503,24 @@ var Helper = {
 
 		var rankNameTable = System.findNode("//table[tbody/tr/td[.='Rank Name']]");
 		if (!rankNameTable) return;
-		for (i=0;i<rankNameTable.rows.length;i++) {
-			aRow = rankNameTable.rows[i];
-			if (aRow.cells[1]) {
-				rankName = aRow.cells[0].textContent;
+		var memberList = System.getValueJSON("memberlist");
+		if (memberList) {
+			for (i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				if (member.name.trim() == Helper.characterName.trim()) {
+					Helper.characterRank = member.rank;
+					break;
+				}
+			}
+			for (i=0;i<rankNameTable.rows.length;i++) {
+				aRow = rankNameTable.rows[i];
+				if (aRow.cells[1]) {
+					rankName = aRow.cells[0].textContent;
+					if (rankName.trim() == Helper.characterRank.trim()) {
+						Helper.characterRow = i;
+						break;
+					}
+				}
 			}
 		}
 
@@ -10498,25 +10530,27 @@ var Helper = {
 
 		document.getElementById('getrankweightings').addEventListener('click', Helper.fetchRankData, true);
 		
-		//up buttons
-		var upButtons = System.findNodes("//input[@value='Up']");
-		for (i=0;i<upButtons.length;i++) {
-			upButton = upButtons[i];
-			onclickText = upButton.getAttribute("onclick");
-			onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
-			upButton.setAttribute("onclickhref", onclickHREF);
-			upButton.setAttribute("onclick", "");
-			upButton.addEventListener('click', Helper.moveRankUpOneSlotOnScreen, true);
-		}
-		//down buttons
-		var downButtons = System.findNodes("//input[@value='Down']");
-		for (i=0;i<downButtons.length;i++) {
-			downButton = downButtons[i];
-			onclickText = downButton.getAttribute("onclick");
-			onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
-			downButton.setAttribute("onclickhref", onclickHREF);
-			downButton.setAttribute("onclick", "");
-			downButton.addEventListener('click', Helper.moveRankDownOneSlotOnScreen, true);
+		if (GM_getValue("ajaxifyRankControls")) {
+			//up buttons
+			var upButtons = System.findNodes("//input[@value='Up']");
+			for (i=0;i<upButtons.length;i++) {
+				upButton = upButtons[i];
+				onclickText = upButton.getAttribute("onclick");
+				onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
+				upButton.setAttribute("onclickhref", onclickHREF);
+				upButton.setAttribute("onclick", "");
+				upButton.addEventListener('click', Helper.moveRankUpOneSlotOnScreen, true);
+			}
+			//down buttons
+			var downButtons = System.findNodes("//input[@value='Down']");
+			for (i=0;i<downButtons.length;i++) {
+				downButton = downButtons[i];
+				onclickText = downButton.getAttribute("onclick");
+				onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
+				downButton.setAttribute("onclickhref", onclickHREF);
+				downButton.setAttribute("onclick", "");
+				downButton.addEventListener('click', Helper.moveRankDownOneSlotOnScreen, true);
+			}
 		}
 	},
 	
@@ -10529,13 +10563,14 @@ var Helper = {
 		parentTable = thisRankRow.parentNode;
 		thisRankRowNum = thisRankRow.rowIndex;
 		previousRankRowNum = parseInt(thisRankRowNum - 4, 10);
-		if (previousRankRowNum <= 1) return;
+		if (previousRankRowNum <= 1 || Helper.characterRow > thisRankRowNum) return;
 		injectRow = parentTable.rows[previousRankRowNum - 1];
 		parentTable.insertBefore(prevRow, injectRow);
 		parentTable.insertBefore(thisRankRow, injectRow);
 		parentTable.insertBefore(nextRow1, injectRow);
 		parentTable.insertBefore(nextRow2, injectRow);
 		System.xmlhttp(onclickHREF);
+		window.scrollBy(0,-57);
 	},
 
 	moveRankDownOneSlotOnScreen: function(evt) {
@@ -10547,13 +10582,14 @@ var Helper = {
 		parentTable = thisRankRow.parentNode;
 		thisRankRowNum = thisRankRow.rowIndex;
 		previousRankRowNum = parseInt(thisRankRowNum + 8, 10);
-		if (previousRankRowNum - 1 > parentTable.rows.length) return;
+		if (previousRankRowNum - 1 > parentTable.rows.length || Helper.characterRow > thisRankRowNum) return;
 		injectRow = parentTable.rows[previousRankRowNum - 1];
 		parentTable.insertBefore(prevRow, injectRow);
 		parentTable.insertBefore(thisRankRow, injectRow);
 		parentTable.insertBefore(nextRow1, injectRow);
 		parentTable.insertBefore(nextRow2, injectRow);
 		System.xmlhttp(onclickHREF);
+		window.scrollBy(0,57);
 	},
 
 	fetchRankData: function(evt) {
