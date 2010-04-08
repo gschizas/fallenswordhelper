@@ -10,10 +10,13 @@ var Data = {
 				{Name:"Raga Watchtower",Realm:"Highridge Crag (Trail) (9, 10) Lvl 44",Comment:"Artifact Gain +1<p>Getting there: Portal > Highridge Crag Mastermap > Highridge Crag (Trail)<br>PVP"},
 				{Name:"Experimental TIU Stealth Ship",Realm:"OS 1313 (Fighter Bay) (4, 6) Lvl 86",Comment:"Artifact Gain +1<p>Getting there: Portal > Orbital Station 1313 > Fighter Bay"},
 				{Name:"Shard Stronghold",Realm:"Amethyst Peak(Edge) (14,7) Lvl 54",Comment:"Artifact Gain +1<p>Getting there: Portal > Amethyst > Edge "},
-				{Name:"Memorial of the Ancients",Realm:"Ullgath Caves (Gloom) (2,3). Lvl 127",Comment:"Artifact Gain +1<p>Getting there: Portal > Ullgath Caves > Ullgath Lake > Ullgath Caves (Gloom)"},				
-				{Name:"Colossal Fedomeera",Realm:"Raga Domain (Lonely Road) (15,5) Lvl 66",Comment:"Artifact Gain +1<p>Getting there: Portal >  Raga Domain > Lonely Road "}
-						];
-				}
+				{Name:"Memorial of the Ancients",Realm:"Ullgath Caves (Gloom) (2,3). Lvl 127",Comment:"Artifact Gain +1<p>Getting there: Portal > Ullgath Caves > Ullgath Lake > Ullgath Caves (Gloom)"},
+				{Name:"Colossal Fedomeera",Realm:"Raga Domain (Lonely Road) (15,5) Lvl 66",Comment:"Artifact Gain +1<p>Getting there: Portal >  Raga Domain > Lonely Road "},
+				{Name:"Altus Galactic Archive",Realm:"Sanctuary of Ages (Mantapa) (9,13) Lvl 180",Comment:"Artifact Gain +1<p>Getting there: Portal > Sanctuary of Ages Inner Halls > Sanctuary of Ages (Narthex) > Sanctuary of Ages (Mantapa)"},
+				{Name:"Metro Defence System",Realm:"Varion City (Heights) (5,2) Lvl 110",Comment:"Artifact Gain +1<p>Getting there: Portal > Ashstorm Wilds > Varion City (Heights)"},
+				{Name:"Ancient Geothermal Tap",Realm:"Lava Field (Crust) (2,16) Lvl 102",Comment:"Artifact Gain +1<p>Getting there: Portal > Ashstorm Wilds > Lava Field (Edge) > Lava Field (Crust)"}
+			];
+		}
 		return Data.relicArray;
 	},
 

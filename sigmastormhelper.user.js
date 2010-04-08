@@ -3429,6 +3429,7 @@ var Helper = {
 		injectHere.innerHTML = finalHTML;
 
 		var allItems = document.getElementsByTagName("IMG");
+		Helper.class2img={"Core":0,"Rad":1,"Battlesuit":2,"Psi":3,"Hardwired":4};
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
@@ -3441,11 +3442,16 @@ var Helper = {
 							var fontLineRX=fontLineRE.exec(responseText);
 							craft = fontLineRX[2];
 						}
+						var classType=/(Core|Rad|Battlesuit|Psi|Hardwired)/.exec(responseText);
+						if (classType) {
+							classType=Helper.class2img[classType[0]];
+						} else
+							classType = -1;
 						var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 						while(re.exec(responseText)) {
 							forgeCount++;
 						}
-						Helper.injectAuctionExtraText(this.callback,craft,forgeCount);
+						Helper.injectAuctionExtraText(this.callback,craft,forgeCount,classType);
 					},
 					theImage);
 			}
@@ -3809,13 +3815,14 @@ var Helper = {
 		thisForm.submit();
 	},
 
-	injectAuctionExtraText: function(anItem, craft, forgeCount) {
-		var theText=anItem.parentNode.nextSibling.nextSibling;
-		var preText = "<span style='color:#ADB5B5'>" + craft + "</span>";
+	injectAuctionExtraText: function(anItem, craft, forgeCount, classType) {
+		var theText=anItem.parentNode.nextSibling.nextSibling;GM_log(classType);
+		var preText = (classType>0?"<img src="+System.imageServer+"/skin/classes/"+classType+".gif>":"")+" "+
+			"<div style='font-size:small'>" + craft + "</div>";
 		if (forgeCount != 0) {
-			preText +=  " " + forgeCount + "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>"
+			preText +=  "<div valign=center>" + forgeCount + "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'></div>"
 		}
-		theText.innerHTML = preText + "<br>" + theText.innerHTML;
+		theText.innerHTML = preText + theText.innerHTML;
 	},
 	
 	toggleGMValueLink: function(evt) { 
@@ -3993,8 +4000,12 @@ var Helper = {
 	injectDropItems: function() {
 		var td=System.findNode("//td[contains(@background,'inner_bg.jpg')]");
 		if (td) { // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
-			td.innerHTML='<form onsubmit="return confirmDestroy();" action="index.php" method="post">'+
-				td.innerHTML.replace('<form onsubmit="return confirmDestroy();" action="index.php" method="post"></form>','')+'</form>';
+			if (td.innerHTML.search('<form onsubmit="return confirmDestroy();"')>0)
+				td.innerHTML='<form onsubmit="return confirmDestroy();" action="index.php" method="post">'+
+					td.innerHTML.replace('<form onsubmit="return confirmDestroy();" action="index.php" method="post"></form>','')+'</form>';
+			else
+				td.innerHTML='<form action="index.php" method="post">'+
+					td.innerHTML.replace('<form action="index.php" method="post"></form>','')+'</form>';
 		}
 		
 		Helper.injectDropItemMenu();
@@ -4033,6 +4044,7 @@ var Helper = {
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var newHtml = '<table cellspacing="8" cellpadding="4" border="0" align="center"><tbody><tr>';
 		var counter = 0, preText='';
+		var cbName=document.body.innerHTML.match(/(storeIndex\[\]|removeIndex\[\])/)[0];
 		for (var key in Helper.itemList) {
 			if (showExtraLinks) {
 				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html);
@@ -4063,13 +4075,12 @@ var Helper = {
 				'<td rowspan=2 style="font-size:x-small" align=center width=70><b>'+Helper.itemList[key].text+'</b><br/><br/>[<span id=item'+Helper.itemList[key].id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
 					'onmouseover="Tip(\'Select all items of the same type\')">Select All</span>]<br/><br/>'+
 					preText+'</td></tr>'+
-				'<tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="removeIndex[]" value="'+Helper.itemList[key].id+'"></td></tr>'+
+				'<tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="'+cbName+'" value="'+Helper.itemList[key].id+'"></td></tr>'+
 				'</tbody></table></td>';
 			counter++;
 			if (counter % 4 == 0) newHtml+='</tr><tr>';
 		}
 		newHtml+='</tr></tbody></table>';
-		GM_log(newHtml);
 		table.innerHTML = newHtml;
 		for (var key in Helper.itemList) {
 			document.getElementById('item'+Helper.itemList[key].id).addEventListener('click', Helper.selectAllProfileInventoryItem, true);
