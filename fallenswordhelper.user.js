@@ -10699,7 +10699,7 @@ var Helper = {
 
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%">' +
-			'<tr style="background-color:#cd9e4b"><td width="90%" nobr><b>&nbsp;Guild Log Version 2</b></td></tr>' +
+			'<tr style="background-color:#cd9e4b"><td width="80%" nobr><b>&nbsp;Guild Log Version 2</b></td><td><a href="index.php?cmd=guild&subcmd=log"><span style="color:blue;">Old Guild Log</span></a></td></tr>' +
 			'<tr><td colspan=2>' +
 				'<table><tbody><tr><td><b>Filters:</b></td>' +
 				'<td><table><tbody><tr><td>';
