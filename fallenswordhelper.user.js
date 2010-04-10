@@ -3078,7 +3078,7 @@ var Helper = {
 				resultText += "Your level has decreased!\n";
 				showCombatLog = true;
 			}
-			if (xpGain<0) result.style.color='red';
+			if (xpGain<0) {result.style.color='red'; showCombatLog = true;}
 			result.innerHTML=resultHtml;
 			var monsterParent = monster.parentNode;
 			result.id = "result" + callback.index;
@@ -10948,11 +10948,12 @@ var Helper = {
 		if (Helper.wearingItems[type]) {
 			System.xmlhttp(Helper.linkFromMouseover(Helper.wearingItems[type]), function(responseText) {
 					var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-					Helper.wearingItems[type]={};
+					var mo=Helper.wearingItems[type].replace("'<br><center><b>[Click to Unequip]</b></center>'","''");
+					Helper.wearingItems[type]={"mo":mo};
 					Helper.wearingItems[type].wear=name;
 					Helper.wearingItems[type].fullSet=responseText.match(/>Set Details \((\d)\/\1\)</)!=null;
 					document.getElementById("checkwear").innerHTML+=" comparing "+name+" ...<br/>";
-					var stype=[2,0,7,4,1,5,6,3][type];
+					var stype=[2,0,7,4,1,5,6,3,8][type];
 					var url="http://guide.fallensword.com/index.php?cmd=items&index=0&search_name=&search_level_min=&"+
 						"search_level_max="+Helper.wearingItems.lvl+
 						"&search_type="+stype+"&search_rarity=-1&sort_by=1&sort_by=5";
@@ -10968,11 +10969,14 @@ var Helper = {
 							var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=items&subcmd=view')]",doc);
 							Helper.wearingItems[type].suggest="";
 							for (var i=0; i<5; i++) {
-								Helper.wearingItems[type].suggest+=nodes[i].textContent+
+								Helper.wearingItems[type].suggest+=
+									"<span onmouseover=\"Tip('"+nodes[i].parentNode.parentNode.textContent+"');\">"+
+										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
 									"[<a href='"+nodes[i].href.replace("//www","//guide")+"'>UFG</a>]</span>, ";
 							}
+							GM_log(Helper.wearingItems[type].suggest);
 							Helper.getEachWearingItem(type+1);
 						}
 					});
@@ -10994,9 +10998,10 @@ var Helper = {
 			"<ul><li>Analysis based on availability of items in the Ultimate Fallensword Guide</li>"+
 			"<li>Item sorted by damage stat in no-forge, no-craft condition</li>"+
 			"<li>Set bonus, other stats are not considered</li></ul>"+
-			"Please use at your own risk ^_^<br/>"+
+			"Please use at your own risk ^_^<p/>"+
+			"Tooltip format: Name  	Level  	Type 	Rarity 	Attack  	Defense  	Armor  	Damage  	HP<p/>"+
 			"<table width=100% cellspacing=2>";
-		for (var type=0; type<8; type++) {
+		for (var type=0; type<9; type++) {
 			newHtml+="<tr><th align=left>"+pos2type[type]+"</th>";
 			if (Helper.wearingItems[type]) {
 				if (Helper.wearingItems[type].suggest.indexOf(Helper.wearingItems[type].wear)==0 ||  Helper.wearingItems[type].fullSet) {
@@ -11006,7 +11011,7 @@ var Helper = {
 					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(Helper.wearingItems[type].wear, 
 						"<font color=yellow>"+Helper.wearingItems[type].wear+"</font>");
 				}
-				newHtml+="<td><span style='color:"+color+"'>"+Helper.wearingItems[type].wear+"</span>"+
+				newHtml+="<td><span style='color:"+color+"' onmouseover=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
 					(Helper.wearingItems[type].fullSet?" (<span style='color:blue'>Full Set</span>)":"")+"</td></tr>"+
 					"<tr><td align=right>Suggested</td><td>"+Helper.wearingItems[type].suggest+"</td></tr>";
 			} else
