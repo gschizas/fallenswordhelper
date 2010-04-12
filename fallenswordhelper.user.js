@@ -5413,8 +5413,7 @@ var Helper = {
 	},
 
 	getBuffsToBuy: function(evt) {
-
-		var allSpans = document.getElementsByTagName("span");
+		var allSpans = System.findNodes("//span[contains(@id,'Helper:buff')]");
 
 		var buffsToBuy = "";
 		var buffCount = 0;
@@ -5422,7 +5421,7 @@ var Helper = {
 			var aSpan=allSpans[i];
 			var spanInner = aSpan.innerHTML.replace(/<[a-zA-Z\/][^>]*>/g, "").replace(/[^a-zA-Z0-9 ]/g,'');
 
-			if (aSpan.id.match(/Helper:buff\d*/) != -1 && aSpan.style.color == "yellow") {
+			if (aSpan.id && aSpan.id.match(/Helper:buff\d*/) != -1 && aSpan.style.color == "yellow") {
 				buffsToBuy += spanInner.trim() + ", ";
 				buffCount++;
 			}
@@ -9215,7 +9214,7 @@ var Helper = {
 			var hasBuffTag = greetingText.indexOf("{buffs}") != -1;
 			greetingText = greetingText.replace(/{playername}/g, targetPlayer);
 			if (!hasBuffTag) {
-			System.findNode("//textarea[@name='msg']").value =  greetingText + " " + GM_getValue("buffsToBuy");
+				System.findNode("//textarea[@name='msg']").value =  greetingText + " " + GM_getValue("buffsToBuy");
 			} else {
 				System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
 			}
@@ -10974,9 +10973,9 @@ var Helper = {
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
-									"[<a href='"+nodes[i].href.replace("//www","//guide")+"'>UFG</a>]</span>, ";
+									"[<a href='"+nodes[i].href.replace(/http:\/\/(.*)\//,"http://guide.fallensword.com/")+"'>UFG</a>]</span>, ";
 							}
-							GM_log(Helper.wearingItems[type].suggest);
+							//GM_log(Helper.wearingItems[type].suggest);
 							Helper.getEachWearingItem(type+1);
 						}
 					});
