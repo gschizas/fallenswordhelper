@@ -771,7 +771,7 @@ var Helper = {
 
 	injectSkillsPage: function() {
 		var table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");
-		var tree_id = window.location.href.match(/tree_id=(\d)/);
+		var tree_id = window.location.getAttribute("href").match(/tree_id=(\d)/);
 		if (tree_id && tree_id[1] == 2) {
 			table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/table/tbody");
 		}
@@ -1352,7 +1352,7 @@ var Helper = {
 
 	parseRelicGuildData: function(responseText, callback) {
 		var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var href = callback.href;
+		var href = callback.getAttribute("href");
 		var doc=System.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("IMG");
 		var relicCount = 0;
@@ -1429,7 +1429,7 @@ var Helper = {
 	parseRelicPlayerData: function(responseText, callback) {
 		var defenderCount = callback.defenderCount;
 		var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var href = callback.href;
+		var href = callback.getAttribute("href");
 		var doc = System.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("B");
 		var playerAttackValue = 0, playerDefenseValue = 0, playerArmorValue = 0, playerDamageValue = 0, playerHPValue = 0;
@@ -2207,7 +2207,7 @@ var Helper = {
 
 			for (var i = 2; i < table.rows.length; i+=2) {
 				if (table.rows[i].cells.length > 1) {
-					var questHREF = table.rows[i].cells[0].getElementsByTagName("a")[0].href.match(/(\?.*)/)[1];
+					var questHREF = table.rows[i].cells[0].getElementsByTagName("a")[0].getAttribute("href").match(/(\?.*)/)[1];
 					if (table.rows[i].cells[2].innerHTML == GM_getValue("lastWorld") && !Helper.isQuestBeingTracked(questHREF)) {
 						if (GM_getValue("questsNotComplete") === false) {
 							insertHere.innerHTML += "<br><span style='color:red;font-size:12px;'>Quest(s) in zone not completed:</span><br>";
@@ -2755,7 +2755,7 @@ var Helper = {
 			}
 			if (!monsterFound) {
 				kills+=1;
-				System.xmlhttp(monster.href, Helper.killedMonster, {"node": monster, "index": monsterNumber});
+				System.xmlhttp(monster.getAttribute("href"), Helper.killedMonster, {"node": monster, "index": monsterNumber});
 			}
 		}
 	},
@@ -2791,9 +2791,9 @@ var Helper = {
 		for (var i=0; i<monsters.length; i++) {
 			var monster = monsters[i];
 			if (monster) {
-				var href=monster.href;
+				var href=monster.getAttribute("href");
 				if (GM_getValue("showMonsterLog"))
-					System.xmlhttp(monster.href, Helper.checkedMonster, {'monster':monster,'showTip':false});
+					System.xmlhttp(monster.getAttribute("href"), Helper.checkedMonster, {'monster':monster,'showTip':false});
 				else
 					monster.addEventListener("mouseover", Helper.showTipCreatureInfo, true);
 			}
@@ -2806,7 +2806,7 @@ var Helper = {
 			evt.target.removeEventListener("mouseover", Helper.showTipCreatureInfo, true);
 			return;
 		}
-		System.xmlhttp(monster.href, Helper.checkedMonster, {'monster':monster,'showTip':true});
+		System.xmlhttp(monster.getAttribute("href"), Helper.checkedMonster, {'monster':monster,'showTip':true});
 	},
 
 	checkedMonster: function(responseText, callback) {
@@ -3200,7 +3200,7 @@ var Helper = {
 				var aRow = membersDetails.rows[i];
 				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
 					var playerLink   = aRow.cells[1].firstChild.nextSibling;
-					var memberId     = System.intValue((/[0-9]+$/).exec(playerLink.href)[0]);
+					var memberId     = System.intValue((/[0-9]+$/).exec(playerLink.getAttribute("href"))[0]);
 					var memberName   = playerLink.textContent;
 					var memberLevel  = System.intValue(aRow.cells[2].textContent);
 					var memberRank   = aRow.cells[3].textContent;
@@ -3279,14 +3279,14 @@ var Helper = {
 				Helper.killSingleMonster(index);
 			}
 			else {
-				window.location = linkObj.href;
+				window.location = linkObj.getAttribute("href");
 			}
 		}
 	},
 
 	keyPress: function (evt) {
 		var r, s;
-		if (evt.target.tagName!="HTML") {return;}
+		if (evt.target.tagName!="HTML" && evt.target.tagName!="BODY") {return;}
 
 		// ignore control, alt and meta keys (I think meta is the command key in Macintoshes)
 		if (evt.ctrlKey) {return;}
@@ -4666,7 +4666,7 @@ var Helper = {
 		cell.noWrap = true;
 		var newHtml='Move selected items to: <select name=folder id=selectFolderId class=customselect>';
 		for (var i=0; i<otherFolders.length; i++) {
-			newHtml+='<option value='+otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
+			newHtml+='<option value='+otherFolders[i].parentNode.getAttribute("href").match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
 				otherFolders[i].parentNode.parentNode.textContent+'</option>';
 		}
 		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>';
@@ -4908,6 +4908,7 @@ var Helper = {
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
 			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
+			if (!profileItems) return;
 			for (var i=0;i<profileItems.length;i++) {
 				var mouseOver = profileItems[i].getAttribute("onmouseover");
 				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)'/;
@@ -5217,8 +5218,8 @@ var Helper = {
 		var allLinks = document.getElementsByTagName("A");
 		for (var i=0; i<allLinks.length; i++) {
 			aLink=allLinks[i];
-			if (aLink.href.search("cmd=guild&subcmd=view") != -1) {
-				var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
+			if (aLink.getAttribute("href").search("cmd=guild&subcmd=view") != -1) {
+				var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute("href"));
 				if (guildIdResult) Helper.guildId = parseInt(guildIdResult[1], 10);
 				var warning = document.createElement('span');
 				var color = "";
@@ -5744,10 +5745,10 @@ var Helper = {
 			for (var i=0; i<playerRows.length; i++) {
 				var guildId;
 				if (playerRows[i].cells[0].innerHTML.search("href") == -1) guildId = -1;
-				else guildId = parseInt(playerRows[i].cells[0].firstChild.href.replace(/\D/g,""),10);
+				else guildId = parseInt(playerRows[i].cells[0].firstChild.getAttribute("href").replace(/\D/g,""),10);
 				var newPlayer = {
 					guildId: guildId,
-					id: parseInt(playerRows[i].cells[1].firstChild.href.replace(/\D/g,""),10),
+					id: parseInt(playerRows[i].cells[1].firstChild.getAttribute("href").replace(/\D/g,""),10),
 					name: playerRows[i].cells[1].textContent,
 					level: parseInt(playerRows[i].cells[2].textContent,10)
 				};
@@ -6290,7 +6291,7 @@ var Helper = {
 		if (recipeRows) {
 			for (var i=0; i<recipeRows.length;i++) {
 				aRow = recipeRows[i];
-				var recipeLink = aRow.cells[1].firstChild.href;
+				var recipeLink = aRow.cells[1].firstChild.getAttribute("href");
 				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
 				var recipe={
 					"img": aRow.cells[0].firstChild.src,
@@ -9114,10 +9115,10 @@ var Helper = {
 			var messageSent = System.findNode("//center[contains(.,'Message sent to target player!')]");
 			if (messageSent) {
 				if (GM_getValue("msgReferringPage")) {
-					location.href = GM_getValue("msgReferringPage");
+					location.getAttribute("href") = GM_getValue("msgReferringPage");
 					return;
 				} else {
-					location.href = "http://www.fallensword.com/index.php?cmd=log";
+					location.getAttribute("href") = "http://www.fallensword.com/index.php?cmd=log";
 					return;
 				}
 			}
@@ -9610,7 +9611,7 @@ var Helper = {
 							wantedList.wantedBounties = true;
 							bounty = {};
 							bounty.target = target;
-							bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.href;
+							bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.getAttribute("href");
 							bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, "").replace(/\]/, "");
 
 							bounty.offerer = activeTable.rows[i].cells[1].firstChild.firstChild.firstChild.textContent;
@@ -9654,7 +9655,7 @@ var Helper = {
 					for (i = 1; i < activeTable.rows.length - 2; i+=2) {
 						bounty = {};
 						bounty.target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
-						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.href;
+						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.getAttribute("href");
 						bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, "").replace(/\]/, "");
 						bounty.reward = activeTable.rows[i].cells[2].textContent;
 						bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
@@ -9843,7 +9844,7 @@ var Helper = {
 			for (i=0;i<alliesDetails.length;i++) {
 				var aTable = alliesDetails[i];
 				var contactLink   = aTable.rows[0].cells[1].firstChild;
-				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.href)[0]);
+				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				var contactName   = contactLink.textContent;
 				var contactStatus = aTable.rows[0].cells[0].firstChild.title;
 
@@ -9881,7 +9882,7 @@ var Helper = {
 			for (i=0;i<enemiesDetails.length;i++) {
 				aTable = enemiesDetails[i];
 				contactLink   = aTable.rows[0].cells[1].firstChild;
-				contactId     = System.intValue((/[0-9]+$/).exec(contactLink.href)[0]);
+				contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				contactName   = contactLink.textContent;
 				contactStatus = aTable.rows[0].cells[0].firstChild.title;
 
@@ -10264,9 +10265,9 @@ var Helper = {
 		var newHtml='<span id="Folder-2" fid=-2 style="cursor:pointer; text-decoration:underline;">All</span> '+
 			'<span id="Folder-1" fid=-1 style="cursor:pointer; text-decoration:underline;">Main</span> ';
 		for (var i=0; i<otherFolders.length; i++) {
-			//GM_log(otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(\d+)/i)[1]);
+			//GM_log(otherFolders[i].parentNode.getAttribute("href").match(/cmd=profile&subcmd=dropitems&folder_id=(\d+)/i)[1]);
 			newHtml+='<span id="Folder'+i+'" fid='+
-				otherFolders[i].parentNode.href.match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+
+				otherFolders[i].parentNode.getAttribute("href").match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+
 				' style="cursor:pointer; text-decoration:underline;">'+
 				otherFolders[i].parentNode.parentNode.textContent+'</span> ';
 		}
@@ -10333,7 +10334,7 @@ var Helper = {
 		//inject current stats, buffs and equipment
 		var attackPlayerTable = System.findNode("//table[tbody/tr/td/font/b[.='Attack Player (PvP)']]");
 		if (!attackPlayerTable) {return;}
-		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.href);
+		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.getAttribute("href"));
 		if (targetPlayer) {
 			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>";
 			output += "<tr style='text-align:center;' bgcolor='#cd9e4b'><td width='275' style='border-style: solid; border-width: 1px;'>Attacker</td><td width='275' style='border-style: solid; border-width: 1px;'>Defender</td></tr>";
@@ -10925,9 +10926,9 @@ var Helper = {
 		var doc=System.createDocument(responseText);
 		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]",doc);
 		for (var i=0; i<items.length; i++) {
-			if (!(items[i].parentNode.href) || items[i].parentNode.href.indexOf("subcmd=unequipitem&")>0) {
+			if (!(items[i].parentNode.getAttribute("href")) || items[i].parentNode.getAttribute("href").indexOf("subcmd=unequipitem&")>0) {
 				var item=items[i], type, onmo=item.getAttribute("onmouseover");
-				if (item.parentNode.href) item=item.parentNode;
+				if (item.parentNode.getAttribute("href")) item=item.parentNode;
 				if (item.parentNode.width != 60) item=item.parentNode.parentNode.parentNode.parentNode;
 				type = item.parentNode.cellIndex + item.parentNode.parentNode.rowIndex*3;
 				Helper.wearingItems[type]=onmo;
@@ -10967,15 +10968,15 @@ var Helper = {
 							var doc=System.createDocument(responseDetails.responseText);
 							var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=items&subcmd=view')]",doc);
 							Helper.wearingItems[type].suggest="";
+							Helper.wearingItems[type].best=nodes[0].textContent;
 							for (var i=0; i<5; i++) {
 								Helper.wearingItems[type].suggest+=
 									"<span onmouseover=\"Tip('"+nodes[i].parentNode.parentNode.textContent+"');\">"+
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
-									"[<a href='"+nodes[i].href.replace(/http:\/\/(.*)\//,"http://guide.fallensword.com/")+"'>UFG</a>]</span>, ";
+									"[<a href='"+nodes[i].getAttribute("href").replace(/http:\/\/(.*)\//,"http://guide.fallensword.com/")+"'>UFG</a>]</span>, ";
 							}
-							//GM_log(Helper.wearingItems[type].suggest);
 							Helper.getEachWearingItem(type+1);
 						}
 					});
@@ -11003,12 +11004,14 @@ var Helper = {
 		for (var type=0; type<9; type++) {
 			newHtml+="<tr><th align=left>"+pos2type[type]+"</th>";
 			if (Helper.wearingItems[type]) {
-				if (Helper.wearingItems[type].suggest.indexOf(Helper.wearingItems[type].wear)==0 ||  Helper.wearingItems[type].fullSet) {
+				if (Helper.wearingItems[type].wear == Helper.wearingItems[type].best ||  Helper.wearingItems[type].fullSet) {
 					color="green";
 				} else {
 					color="yellow";
-					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(Helper.wearingItems[type].wear, 
-						"<font color=yellow>"+Helper.wearingItems[type].wear+"</font>");
+					GM_log(Helper.wearingItems[type].suggest);
+					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(">"+Helper.wearingItems[type].wear+"<", 
+						"><font color=yellow>"+Helper.wearingItems[type].wear+"</font><");
+					GM_log(Helper.wearingItems[type].suggest);
 				}
 				newHtml+="<td><span style='color:"+color+"' onmouseover=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
 					(Helper.wearingItems[type].fullSet?" (<span style='color:blue'>Full Set</span>)":"")+"</td></tr>"+
