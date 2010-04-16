@@ -771,7 +771,7 @@ var Helper = {
 
 	injectSkillsPage: function() {
 		var table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");
-		var tree_id = window.location.getAttribute("href").match(/tree_id=(\d)/);
+		var tree_id = location.search.match(/tree_id=(\d)/);
 		if (tree_id && tree_id[1] == 2) {
 			table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/table/tbody");
 		}
@@ -1260,10 +1260,10 @@ var Helper = {
 		var defenderCount = 0;
 		var testList = "";
 		for (i=0; i<listOfDefenders.length; i++) {
-			var href = listOfDefenders[i].getAttribute("href");
+			var hrefpointer = listOfDefenders[i].getAttribute("href");
 //if (i<3) { //I put this in to limit the number of calls this function makes.
 					//I don't want to hammer the server too much.
-				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,href);
+				Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,hrefpointer);
 //}
 			testList += listOfDefenders[i].innerHTML + " ";
 			if (defendingGuildID == myGuildID && !hideRelicOffline) validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + " ","");
@@ -1346,13 +1346,12 @@ var Helper = {
 		}
 	},
 
-	getRelicGuildData: function(extraTextInsertPoint,href) {
-		System.xmlhttp(href, Helper.parseRelicGuildData, {"extraTextInsertPoint":extraTextInsertPoint,"href":href});
+	getRelicGuildData: function(extraTextInsertPoint,hrefpointer) {
+		System.xmlhttp(hrefpointer, Helper.parseRelicGuildData, {"extraTextInsertPoint":extraTextInsertPoint});
 	},
 
 	parseRelicGuildData: function(responseText, callback) {
 		var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var href = callback.getAttribute("href");
 		var doc=System.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("IMG");
 		var relicCount = 0;
@@ -1422,14 +1421,13 @@ var Helper = {
 		}
 	},
 
-	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,href) {
-		System.xmlhttp(href, Helper.parseRelicPlayerData, {"defenderCount": defenderCount, "extraTextInsertPoint": extraTextInsertPoint, "href": href});
+	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,hrefpointer) {
+		System.xmlhttp(hrefpointer, Helper.parseRelicPlayerData, {"defenderCount": defenderCount, "extraTextInsertPoint": extraTextInsertPoint});
 	},
 
 	parseRelicPlayerData: function(responseText, callback) {
 		var defenderCount = callback.defenderCount;
 		var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var href = callback.getAttribute("href");
 		var doc = System.createDocument(responseText);
 		var allItems = doc.getElementsByTagName("B");
 		var playerAttackValue = 0, playerDefenseValue = 0, playerArmorValue = 0, playerDamageValue = 0, playerHPValue = 0;
@@ -2318,15 +2316,15 @@ var Helper = {
 		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
 		//Checking if there are quests on current map
 		if (GM_getValue("checkForQuestsInWorld") === true) {
-		if (mapName.textContent !== null &&
-			(GM_getValue("lastWorld") != mapName.textContent.trim() ||
-				GM_getValue("questsNotStarted") === true ||
-				GM_getValue("questsNotComplete") === true)) {
-			GM_setValue("lastWorld", mapName.textContent.trim());
-			var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
-			System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
-			System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
-		}
+			if (mapName.textContent !== null &&
+				(GM_getValue("lastWorld") != mapName.textContent.trim() ||
+					GM_getValue("questsNotStarted") === true ||
+					GM_getValue("questsNotComplete") === true)) {
+				GM_setValue("lastWorld", mapName.textContent.trim());
+				var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
+				System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
+				System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
+			}
 		}
 		//quest tracker
 		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
@@ -5215,42 +5213,39 @@ var Helper = {
 	},
 
 	profileInjectGuildRel: function() {
-		var allLinks = document.getElementsByTagName("A");
-		for (var i=0; i<allLinks.length; i++) {
-			aLink=allLinks[i];
-			if (aLink.getAttribute("href").search("cmd=guild&subcmd=view") != -1) {
-				var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute("href"));
-				if (guildIdResult) Helper.guildId = parseInt(guildIdResult[1], 10);
-				var warning = document.createElement('span');
-				var color = "";
-				var changeAppearance = true;
-				Helper.currentGuildRelationship = Helper.guildRelationship(aLink.text);
-				var settings;
-				switch (Helper.currentGuildRelationship) {
-					case "self":
-						settings="guildSelfMessage";
-						break;
-					case "friendly":
-						settings="guildFrndMessage";
-						break;
-					case "old":
-						settings="guildPastMessage";
-						break;
-					case "enemy":
-						settings="guildEnmyMessage";
-						break;
-					default:
-						changeAppearance = false;
-						break;
-				}
-				if (changeAppearance) {
-					var settingsAry=GM_getValue(settings).split("|");
-					warning.innerHTML="<br/>" + settingsAry[1];
-					color = settingsAry[0];
-					aLink.parentNode.style.color=color;
-					aLink.style.color=color;
-					aLink.parentNode.insertBefore(warning, aLink.nextSibling);
-				}
+		var aLink = System.findNode("//a[contains(@href,'cmd=guild&subcmd=view')]");
+		if (aLink) {
+			var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute("href"));
+			if (guildIdResult) Helper.guildId = parseInt(guildIdResult[1], 10);
+			var warning = document.createElement('span');
+			var color = "";
+			var changeAppearance = true;
+			Helper.currentGuildRelationship = Helper.guildRelationship(aLink.text);
+			var settings;
+			switch (Helper.currentGuildRelationship) {
+				case "self":
+					settings="guildSelfMessage";
+					break;
+				case "friendly":
+					settings="guildFrndMessage";
+					break;
+				case "old":
+					settings="guildPastMessage";
+					break;
+				case "enemy":
+					settings="guildEnmyMessage";
+					break;
+				default:
+					changeAppearance = false;
+					break;
+			}
+			if (changeAppearance) {
+				var settingsAry=GM_getValue(settings).split("|");
+				warning.innerHTML="<br/>" + settingsAry[1];
+				color = settingsAry[0];
+				aLink.parentNode.style.color=color;
+				aLink.style.color=color;
+				aLink.parentNode.insertBefore(warning, aLink.nextSibling);
 			}
 		}
 	},
@@ -9115,10 +9110,10 @@ var Helper = {
 			var messageSent = System.findNode("//center[contains(.,'Message sent to target player!')]");
 			if (messageSent) {
 				if (GM_getValue("msgReferringPage")) {
-					location.getAttribute("href") = GM_getValue("msgReferringPage");
+					window.location = GM_getValue("msgReferringPage");
 					return;
 				} else {
-					location.getAttribute("href") = "http://www.fallensword.com/index.php?cmd=log";
+					window.location = "http://www.fallensword.com/index.php?cmd=log";
 					return;
 				}
 			}
@@ -10334,7 +10329,7 @@ var Helper = {
 		//inject current stats, buffs and equipment
 		var attackPlayerTable = System.findNode("//table[tbody/tr/td/font/b[.='Attack Player (PvP)']]");
 		if (!attackPlayerTable) {return;}
-		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.getAttribute("href"));
+		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.search);
 		if (targetPlayer) {
 			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>";
 			output += "<tr style='text-align:center;' bgcolor='#cd9e4b'><td width='275' style='border-style: solid; border-width: 1px;'>Attacker</td><td width='275' style='border-style: solid; border-width: 1px;'>Defender</td></tr>";
