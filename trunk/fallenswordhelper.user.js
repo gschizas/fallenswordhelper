@@ -2442,7 +2442,7 @@ var Helper = {
 				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
 				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
 				if (onlineMemberSecondCell) {
-					var playerTable = onlineMemberFirstCell.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling;
+					var playerTable = onlineMemberFirstCell.getElementsByTagName('TABLE')[0];
 					var checkboxColumn = playerTable.rows[0].cells[0];
 					var playernameColumn = playerTable.rows[0].cells[1];
 					var playerNameLinkElement = playernameColumn.firstChild;
@@ -10692,16 +10692,32 @@ var Helper = {
 		unsafeWindow.changeMenu(0,'menu_character');
 		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 
+		//store the time zone for use in processing date/times
+		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
+		Helper.gmtOffsetMilli = gmtOffsetMinutes*60*1000;
+		
+		//find the time the guild log was stored last
+		Helper.storedGuildLog = System.getValueJSON("storedGuildLog");
+		if (Helper.storedGuildLog) {
+			var lastMessageIndex = Helper.storedGuildLog.logMessage.length;
+			Helper.lastStoredGuildLogMessage = Helper.storedGuildLog.logMessage[0].logMessage;
+			Helper.lastStoredGuildLogMessagePostTime = Helper.storedGuildLog.logMessage[0].postDateAsLocalMilli;
+		}
+		
+		
+		Helper.newStoredGuildLog = {logMessage:[]};
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%">' +
-			'<tr style="background-color:#cd9e4b"><td width="80%" nobr><b>&nbsp;Guild Log Version 2</b></td><td><a href="index.php?cmd=guild&subcmd=log"><span style="color:blue;">Old Guild Log</span></a></td></tr>' +
+			'<tr style="background-color:#cd9e4b"><td width="80%" nobr><b>&nbsp;Guild Log Version 3</b></td><td><a href="index.php?cmd=guild&subcmd=log"><span style="color:blue;">Old Guild Log</span></a></td></tr>' +
 			'<tr><td colspan=2>' +
 				'<table><tbody><tr><td><b>Filters:</b></td>' +
 				'<td><table><tbody><tr><td>';
 		for (var i=0; i<Helper.guildLogFilters.length; i++) {
+			var guildLogFilterID = Helper.guildLogFilters[i].id;
+			Helper[guildLogFilterID] = GM_getValue(guildLogFilterID);
 			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
-			newhtml+='&nbsp;' +Helper.guildLogFilters[i].type+ 's:<input id="'+Helper.guildLogFilters[i].id+'" type="checkbox" linkto="'+Helper.guildLogFilters[i].id+'"' +
-					(GM_getValue(Helper.guildLogFilters[i].id)?' checked':'') + '/>';
+			newhtml+='&nbsp;' +Helper.guildLogFilters[i].type+ 's:<input id="'+guildLogFilterID+'" type="checkbox" linkto="'+guildLogFilterID+'"' +
+					(Helper[guildLogFilterID]?' checked':'') + '/>';
 		}
 		newhtml += '</td></tr><tr><td>&nbsp;<span id=GuildLogSelectAll>[Select All]</span>&nbsp;<span id=GuildLogSelectNone>[Select None]</span>' +
 				'</td></tr></tbody></table></td></tr>'+
@@ -10720,9 +10736,16 @@ var Helper = {
 		}
 		document.getElementById("GuildLogSelectAll").addEventListener('click', Helper.guildLogSelectFilters, true);
 		document.getElementById("GuildLogSelectNone").addEventListener('click', Helper.guildLogSelectFilters, true);
-
+		
+		var oldMaxPagesToFetch = GM_getValue("oldNewGuildLogHistoryPages");
+		oldMaxPagesToFetch? parseInt(oldMaxPagesToFetch,10):oldMaxPagesToFetch = 100; 
+		var maxPagesToFetch = parseInt(GM_getValue("newGuildLogHistoryPages") - 1,10);
+		GM_setValue("oldNewGuildLogHistoryPages", maxPagesToFetch);
+		var completeReload = false;
+		if (maxPagesToFetch > oldMaxPagesToFetch) completeReload = true;
 		//fetch guild log page and apply filters
-		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage, {"guildLogInjectTable": guildLogInjectTable, "pageNumber": 0, "loadingMessageInjectHere": loadingMessageInjectHere});
+		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage, 
+			{"guildLogInjectTable": guildLogInjectTable, "pageNumber": 0, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
 	},
 
 	toggleGuildLogFilterVisibility: function(evt) {
@@ -10742,6 +10765,7 @@ var Helper = {
 			}
 		}
 		GM_setValue(filterID,filterChecked);
+		Helper[filterID] = filterChecked;
 	},
 
 	guildLogSelectFilters: function(evt) {
@@ -10769,29 +10793,54 @@ var Helper = {
 
 	parseGuildLogPage: function(responseText, callback) {
 		var pageNumber = callback.pageNumber;
+		var maxPagesToFetch = callback.maxPagesToFetch;
+		var completeReload = callback.completeReload;
 		var guildLogInjectTable = callback.guildLogInjectTable;
 		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
 		var doc=System.createDocument(responseText);
-
-		var showRecallMessages = GM_getValue("showRecallMessages");
-		var showTaggingMessages = GM_getValue("showTaggingMessages");
-		var showRelicMessages = GM_getValue("showRelicMessages");
-		var showMercenaryMessages = GM_getValue("showMercenaryMessages");
-		var showGroupCombatMessages = GM_getValue("showGroupCombatMessages");
-		var showDonationMessages = GM_getValue("showDonationMessages");
-		var showRankingMessages = GM_getValue("showRankingMessages");
-		var showGvGMessages = GM_getValue("showGvGMessages");
-
+		
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
+
+		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
+		if (pageNumber == 0) {
+			var lastRowInTable = logTable.rows[logTable.rows.length-4];
+			var lastRowCellContents = lastRowInTable.cells[1].innerHTML;
+			lastRowPostDateAsDate = System.parseDate(lastRowCellContents);
+			lastRowPostDateAsLocalMilli = lastRowPostDateAsDate.getTime() - Helper.gmtOffsetMilli;
+			if (lastRowPostDateAsLocalMilli > Helper.lastStoredGuildLogMessagePostTime) completeReload = true;
+		} else {
+			completeReload = false;
+		}
+		
+		var enableLogColoring = GM_getValue("enableLogColoring");
+		if (enableLogColoring) {
+			var lastCheckScreen = "lastGuildLogCheck";
+			var localLastCheckMilli=GM_getValue(lastCheckScreen);
+			if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
+			var localDateMilli = (new Date()).getTime();
+		}
+
 		for (i=1;i<logTable.rows.length;i+=4) {
 			aRow = logTable.rows[i];
+			
+			var cellContents = aRow.cells[1].innerHTML;
+			postDateAsDate = System.parseDate(cellContents);
+			postDateAsLocalMilli = postDateAsDate.getTime() - Helper.gmtOffsetMilli;
+			
+			//if the post date is the same as last one in the stored list and the message is the same, then break out
+			//and start appending the stored values instead of parsing.
+			var stopProcessingLogPages = false;
+			if (postDateAsLocalMilli == Helper.lastStoredGuildLogMessagePostTime && aRow.innerHTML == Helper.lastStoredGuildLogMessage && !completeReload) {
+				stopProcessingLogPages = true;
+				break;
+			}
 			var displayRow = true;
 			var rowTypeID = "GuildLogFilter:Unknown";
 			//if recall message, check to see if showRecallMessages is checked.
 			if (aRow.innerHTML.search("recalled the item") != -1 ||
 				aRow.innerHTML.search("took the item") != -1 ||
 				aRow.innerHTML.search("stored the item") != -1) {
-				if (!showRecallMessages) {
+				if (!Helper.showRecallMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showRecallMessages";
@@ -10799,7 +10848,7 @@ var Helper = {
 			//Tag/Untag (showTaggingMessages)
 			else if (aRow.innerHTML.search("has added flags to some of guild's stored items costing a total of") != -1 ||
 				aRow.innerHTML.search("has removed flags to the guild's stored items.") != -1) {
-				if (!showTaggingMessages) {
+				if (!Helper.showTaggingMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showTaggingMessages";
@@ -10810,7 +10859,7 @@ var Helper = {
 				aRow.innerHTML.search(/has captured (.*) relic/) != -1 ||
 				aRow.innerHTML.search("has captured the undefended relic") != -1 ||
 				aRow.innerHTML.search("attempted to capture your relic") != -1) {
-				if (!showRelicMessages) {
+				if (!Helper.showRelicMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showRelicMessages";
@@ -10818,14 +10867,14 @@ var Helper = {
 			//Mercenary messages (showMercenaryMessages)
 			else if (aRow.innerHTML.search("disbanded a mercenary.") != -1 ||
 				aRow.innerHTML.search("hired the mercenary") != -1) {
-				if (!showMercenaryMessages) {
+				if (!Helper.showMercenaryMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showMercenaryMessages";
 			}
 			//Group Combat messages (showGroupCombatMessages)
 			else if (aRow.innerHTML.search(/A group from your guild was (.*) in combat./) != -1) {
-				if (!showGroupCombatMessages) {
+				if (!Helper.showGroupCombatMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showGroupCombatMessages";
@@ -10833,7 +10882,7 @@ var Helper = {
 			//Donation messages (showDonationMessages)
 			else if (aRow.innerHTML.search(/deposited ([,0-9]+) FallenSword Points into the guild./) != -1 ||
 				aRow.innerHTML.search(/deposited ([,0-9]+) gold into the guild bank/) != -1) {
-				if (!showDonationMessages) {
+				if (!Helper.showDonationMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showDonationMessages";
@@ -10841,7 +10890,7 @@ var Helper = {
 			//Ranking messages (showRankingMessages)
 			else if (aRow.innerHTML.search("has added a new rank entitled") != -1 ||
 				aRow.innerHTML.search("has been assigned the rank") != -1) {
-				if (!showRankingMessages) {
+				if (!Helper.showRankingMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showRankingMessages";
@@ -10851,7 +10900,7 @@ var Helper = {
 				aRow.innerHTML.search(/resulted in (.*) with a final score of/) != -1 ||
 				aRow.innerHTML.search("has just initiated a conflict with the guild") != -1 ||
 				aRow.innerHTML.search("is participating in the conflict against the guild") != -1) {
-				if (!showGvGMessages) {
+				if (!Helper.showGvGMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showGvGMessages";
@@ -10865,45 +10914,92 @@ var Helper = {
 			}
 			newRow.id = rowTypeID
 			guildLogInjectTable.appendChild(newRow);
-			aRowPlus1 = logTable.rows[i+1];
-			newRow = aRowPlus1.cloneNode(true);
-			if (!displayRow) {
-				newRow.style.display = "none";
-				newRow.style.visibility = "hidden";
+			postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
+			if (enableLogColoring && postDateAsLocalMilli > localLastCheckMilli) {
+				newRow.style.backgroundColor = "#F5F298";
 			}
-			newRow.id = rowTypeID
-			guildLogInjectTable.appendChild(newRow);
-			aRowPlus2 = logTable.rows[i+2];
-			newRow = aRowPlus2.cloneNode(true);
-			if (!displayRow) {
-				newRow.style.display = "none";
-				newRow.style.visibility = "hidden";
+			else if (enableLogColoring && postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
+				newRow.style.backgroundColor = "#CD9E4B";
 			}
-			newRow.id = rowTypeID
-			guildLogInjectTable.appendChild(newRow);
-			aRowPlus3 = logTable.rows[i+3];
-			newRow = aRowPlus3.cloneNode(true);
+			var newLogMessage = {
+				postDateAsLocalMilli: postDateAsLocalMilli,
+				rowTypeID: rowTypeID,
+				logMessage: newRow.innerHTML,
+			};
+			Helper.newStoredGuildLog.logMessage.push(newLogMessage);
+			//create following spacer row
+			var spacerRow = document.createElement("TR");
 			if (!displayRow) {
-				newRow.style.display = "none";
-				newRow.style.visibility = "hidden";
+				spacerRow.style.display = "none";
+				spacerRow.style.visibility = "hidden";
 			}
-			newRow.id = rowTypeID
-			guildLogInjectTable.appendChild(newRow);
+			spacerRow.id = rowTypeID
+			guildLogInjectTable.appendChild(spacerRow);
+			spacerRow.innerHTML = '<td height="1" bgcolor="#634229" colspan="3"></td>'
+			newLogMessage = {
+				postDateAsLocalMilli: postDateAsLocalMilli,
+				rowTypeID: rowTypeID,
+				logMessage: spacerRow.innerHTML,
+			};
+			Helper.newStoredGuildLog.logMessage.push(newLogMessage);
+		}
+
+		if (stopProcessingLogPages) {
+			loadingMessageInjectHere.innerHTML = 'Processing stored logs ...';
+			for (i=0;i<Helper.storedGuildLog.logMessage.length;i++) {
+				var logMessageArrayItem = Helper.storedGuildLog.logMessage[i];
+				var newRow = document.createElement("TR");
+				var displayRow = true;
+				for (var j=0; j<Helper.guildLogFilters.length; j++) {
+					var guildLogFilterID = Helper.guildLogFilters[j].id;
+					var rowTypeID = "GuildLogFilter:" + guildLogFilterID;
+					if (logMessageArrayItem.rowTypeID == rowTypeID) {
+						displayRow = Helper[guildLogFilterID];
+						break;
+					}
+				}
+				newRow.style.display = "";
+				newRow.style.visibility = "";
+				if (!displayRow) {
+					newRow.style.display = "none";
+					newRow.style.visibility = "hidden";
+				}
+				newRow.id = logMessageArrayItem.rowTypeID
+				guildLogInjectTable.appendChild(newRow);
+				newRow.innerHTML = logMessageArrayItem.logMessage;
+				postAge = (localDateMilli - logMessageArrayItem.postDateAsLocalMilli)/(1000*60);
+				if (enableLogColoring && newRow.cells[2] && logMessageArrayItem.postDateAsLocalMilli > localLastCheckMilli) {
+					newRow.style.backgroundColor = "#F5F298";
+				}
+				else if (enableLogColoring && newRow.cells[2] && postAge > 20 && logMessageArrayItem.postDateAsLocalMilli <= localLastCheckMilli) {
+					newRow.style.backgroundColor = "#CD9E4B";
+				}
+				var newLogMessage = {
+					postDateAsLocalMilli: logMessageArrayItem.postDateAsLocalMilli,
+					rowTypeID: logMessageArrayItem.rowTypeID,
+					logMessage: logMessageArrayItem.logMessage,
+				};
+				Helper.newStoredGuildLog.logMessage.push(newLogMessage);
+			}
 		}
 
 		var page = System.findNode("//select[@name='page']/..", doc);
 		var curPage = parseInt(System.findNode("//select[@name='page']", doc).value,10);
 		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/)[1];
-		var maxPagesToFetch = parseInt(GM_getValue("newGuildLogHistoryPages") - 1,10);
-		//need control here later for how many pages to fetch (newGuildLogHistoryPages)
-		if (pageNumber < maxPage && pageNumber < maxPagesToFetch) {
+		
+		//fetch the next page (if necessary)
+		if (pageNumber < maxPage && pageNumber < maxPagesToFetch && !stopProcessingLogPages) {
 			var nextPage = parseInt(pageNumber+1,10);
 			loadingMessageInjectHere.innerHTML = 'Loading Page ' + (nextPage + 1) + " of " + Math.floor(maxPagesToFetch+1,maxPage) + "...";
-			System.xmlhttp('index.php?cmd=guild&subcmd=log&subcmd2=&page=' + nextPage + '&search_text=', Helper.parseGuildLogPage, {"guildLogInjectTable": guildLogInjectTable, "pageNumber": nextPage, "loadingMessageInjectHere": loadingMessageInjectHere});
+			System.xmlhttp('index.php?cmd=guild&subcmd=log&subcmd2=&page=' + nextPage + '&search_text=', Helper.parseGuildLogPage, 
+				{"guildLogInjectTable": guildLogInjectTable, "pageNumber": nextPage, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
 		} else {
 			loadingMessageInjectHere.innerHTML = 'Loading Complete.';
-			Helper.addLogColoring("GuildLog", 1);
+			//Helper.addLogColoring("GuildLog", 1);
 			Helper.addGuildLogWidgets();
+			System.setValueJSON("storedGuildLog", Helper.newStoredGuildLog);
+			now=(new Date()).getTime();
+			GM_setValue("lastGuildLogCheck", now.toString());
 		}
 	},
 
@@ -11016,7 +11112,6 @@ var Helper = {
 		}
 		content.innerHTML=newHtml+"</table>";
 	}
-
 };
 
 Helper.onPageLoad(null);
