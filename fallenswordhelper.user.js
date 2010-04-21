@@ -1608,7 +1608,7 @@ var Helper = {
 			result.type="worldmap";
 		}
 		else {
-			var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]/center/nobr/font");
+			var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]//center/nobr");
 			if (!posit) {return;}
 			var thePosition=posit.innerHTML;
 			var positionRE=/\((\d+),\s*(\d+)\)/;
@@ -1723,10 +1723,8 @@ var Helper = {
 	},
 
 	injectAdvisor: function(subPage2Id) {
-		var titleCells=System.findNodes("//tr[td/b='Member']/td");
-		if (!titleCells) {return;}
-		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
-		var list=parentTables[parentTables.length-1];
+		var list=System.findNode("//tr[td/b='Member']/../..");
+		if (!list) return;
 
 		// insert weekly summary link
 		var injectHere=System.findNode("//td/select/..");
@@ -1780,10 +1778,7 @@ var Helper = {
 			if (day > 0) {
 				callback.inject.innerHTML+=' day '+day+',';
 				var doc=System.createDocument(responseText);
-				var titleCells=System.findNodes("//tr[td/b='Member']/td",doc);
-				if (!titleCells) {return;}
-				var parentTables=System.findNodes("ancestor::table", titleCells[0],doc);
-				var list=parentTables[parentTables.length-1];
+				var list=System.findNode("//tr[td/b='Member']/../..",doc);
 				Helper.generateAdvisorRows(list);
 				if (day == 1) {
 					Helper.weeklyAdvisorRows = Helper.advisorRows;
@@ -1850,8 +1845,7 @@ var Helper = {
 
 	advisorHeaderClicked: function(evt) {
 		var headerClicked=evt.target.textContent;
-		var parentTables=System.findNodes("ancestor::table", evt.target);
-		var list=parentTables[parentTables.length-1];
+		var list=evt.target.parentNode.parentNode;
 		Helper.sortAdvisor(list, headerClicked.replace(/ /g, ""));
 	},
 
@@ -5609,10 +5603,6 @@ var Helper = {
 		}
 
 		var guildItemCount = "unknown";
-		unsafeWindow.changeMenu(0,'menu_character');
-		unsafeWindow.changeMenu(5,'menu_guild');
-		unsafeWindow.changeMenu(0,'menu_character');
-		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 		Helper.guildinventory = System.getValueJSON("guildinventory");
 		if (Helper.guildinventory) {
 			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name);});
@@ -5678,9 +5668,6 @@ var Helper = {
 
 	injectOnlinePlayers: function() {
 		var content=Layout.notebookContent();
-		unsafeWindow.changeMenu(0,'menu_character');
-		unsafeWindow.changeMenu(2,'menu_actions');
-		unsafeWindow.changeMenu(0,'menu_character');
 
 		var lastCheck=GM_getValue("lastOnlineCheck");
 		var now=(new Date()).getTime();
@@ -8010,7 +7997,7 @@ var Helper = {
 	},
 
 	addEventSortArena: function() {
-		var titleCells=System.findNodes("//td[@bgcolor='#cd9e4b']");
+		var titleCells=System.findNodes("//td[.='Id']/../td");
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
 			cell.innerHTML = cell.innerHTML.replace(/ \[/,"<br>[");
@@ -8039,9 +8026,7 @@ var Helper = {
 	},
 
 	getArenaTable: function() {
-		var titleCell=System.findNode("//td[@bgcolor='#cd9e4b']");
-		var parentTables=System.findNodes("ancestor::table", titleCell);
-		var list=parentTables[parentTables.length-1];
+		var list=System.findNode("//td[.='Id']/../..");
 
 		Helper.arenaRows = new Array();
 		for (var i=1; i<list.rows.length; i++){
@@ -8095,9 +8080,7 @@ var Helper = {
 			Helper.arenaRows.sort(Helper.numberSort);
 		}
 
-		var titleCell=System.findNode("//td[@bgcolor='#cd9e4b']");
-		var parentTables=System.findNodes("ancestor::table", titleCell);
-		var list=parentTables[parentTables.length-1];
+		var list=System.findNode("//td[.='Id']/../..");
 		var result='<tr>' + list.rows[0].innerHTML + '</tr>';
 
 		var minLvl=GM_getValue('arenaMinLvl',1);
@@ -8960,8 +8943,7 @@ var Helper = {
 		}
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		if (!auctionTable) {return;}
-
-		var bidEntryTable = auctionTable.rows[9].cells[0].firstChild.nextSibling;
+    var bidEntryTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]/tbody/tr[10]/td[1]/table");
 		itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search);
 		if (itemStats) {
 			var invId = itemStats[1];
@@ -10686,11 +10668,6 @@ var Helper = {
 
 	injectNewGuildLog: function(){
 		var content=Layout.notebookContent();
-
-		unsafeWindow.changeMenu(0,'menu_character');
-		unsafeWindow.changeMenu(5,'menu_guild');
-		unsafeWindow.changeMenu(0,'menu_character');
-		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
 
 		//store the time zone for use in processing date/times
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
