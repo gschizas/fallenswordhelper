@@ -6028,7 +6028,7 @@ var Data = {
 				{name:'Armor of Jutindou', type:'armor'},
 				{name:'Ring of Male', type:'ring'},
 				{name:'Pumpkin Ring', type:'ring'},
-				{name:'Amulet of Dargeic', type:'armor'},
+				{name:'Amulet of Dargeic', type:'amulet'},
 				{name:'Armor of Mongg', type:'armor'},
 				{name:'Abrafos Boots', type:'boots'},
 				{name:'Abrafos Neck Piece', type:'amulet'},
@@ -6227,7 +6227,6 @@ var Data = {
 				{name:'Phellans Shield', type:'shield'},
 				{name:'Phellans Rune', type:'rune'},
 				{name:'Phellans Armor', type:'armor'},
-
 				{name:'Acherons Deathly Cowl', type:'helmet'},
 				{name:'Acherons Deathly Ward', type:'shield'},
 				{name:'Aether Air Rune', type:'rune'},
@@ -6262,7 +6261,10 @@ var Data = {
 				{name:'Xind Imperial Demon Rune', type:'rune'},
 				{name:'Xind Imperial Demon Sword', type:'weapon'},
 				{name:'Yojimbos Gloves', type:'gloves'},
-				{name:'Yojimbos Helm', type:'helmet'}
+				{name:'Yojimbos Helm', type:'helmet'},
+				{name:'Pinoldar the Centaur Rune', type:'rune'},
+				{name:'Pinoldar the Centaur Vambrace', type:'gloves'},
+				{name:'Pinoldar the Centaur Saber', type:'weapon'}
 
 			];
 		}
