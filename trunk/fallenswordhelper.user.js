@@ -136,6 +136,7 @@ var Helper = {
 
 		System.setDefault("newGuildLogHistoryPages", 3);
 		System.setDefault("useNewGuildLog", true);
+		System.setDefault("enhanceChatTextEntry", true);
 
 		System.setDefault("ajaxifyRankControls", true);
 
@@ -515,6 +516,7 @@ var Helper = {
 				}
 				break;
 			case "chat":
+				Helper.addChatTextArea();
 				Helper.addLogColoring("Chat", 0);
 				break;
 			case "reliclist":
@@ -535,6 +537,7 @@ var Helper = {
 				}
 				break;
 			case "manage":
+				Helper.parseGuildForWorld();
 				Helper.injectGuild();
 				break;
 			case "advisor":
@@ -8449,6 +8452,8 @@ var Helper = {
 				':</td><td><input name="enableChatParsing" type="checkbox" value="on"' + (GM_getValue("enableChatParsing")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">Add attack link to log' + Helper.helpLink('Add attack link to log', 'If checked, this will add an Attack link to each message in your log.') +
 				':</td><td><input name="addAttackLinkToLog" type="checkbox" value="on"' + (GM_getValue("addAttackLinkToLog")?" checked":"") + '></td></td></tr>' +
+			'<tr><td align="right">Enhance Chat Text Entry' + Helper.helpLink('Enhance Chat Text Entry', 'If checked, this will enhance the entry field for entering chat text on the guild chat page.') +
+				':</td><td><input name="enhanceChatTextEntry" type="checkbox" value="on"' + (GM_getValue("enhanceChatTextEntry")?" checked":"") + '></td></td></tr>' +
 			//Equipment screen prefs
 			'<tr><th colspan="2" align="left">Equipment screen preferences</th></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
@@ -8705,6 +8710,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showStatBonusTotal");
 		System.saveValueForm(oForm, "newGuildLogHistoryPages");
 		System.saveValueForm(oForm, "useNewGuildLog");
+		System.saveValueForm(oForm, "enhanceChatTextEntry");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -10642,6 +10648,8 @@ var Helper = {
 			if (curRank != prevRank || i == memberList.members.length-1) {
 				aRank = {};
 				aRank.rank = prevRank;
+				//last name on the list, so add it to the list of names
+				if (i == memberList.members.length-1) tempList.push(" " + member.name);
 				aRank.names = tempList;
 				rankList.rank.push(aRank);
 				tempList = [];
@@ -11088,6 +11096,28 @@ var Helper = {
 				newHtml+="<td><span style='color:red'>NOTHING</span></td></tr>";
 		}
 		content.innerHTML=newHtml+"</table>";
+	},
+	
+	addChatTextArea: function() {
+		if (!GM_getValue("enhanceChatTextEntry")) return;
+		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
+		var chatConfirm=System.findNode("//input[@name='xc']");
+		result = '<form name="dochat" action="index.php" method="post">';
+		result += '<table border="0"><tbody><tr><td rowspan="2">';
+		result += '<input type="hidden" value="guild" name="cmd"/>';
+		result += '<input type="hidden" value="dochat" name="subcmd"/>';
+		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
+		result += '<textarea align="center" cols="60" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		result += '</td><td>';
+		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
+		result += '</td><tr><td>';
+		result += '<input class="custominput" type="submit" value="Send As Mass" name="submit" ' +
+			'onClick="window.confirm(\'Are you sure you want to send a mass message?\')"/>';
+		result += '</td></tr></tbody></table>';
+		result += '</form>';
+		messageCell.innerHTML = result;
+		
+		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
 	}
 };
 
