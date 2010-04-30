@@ -139,6 +139,7 @@ var Helper = {
 		System.setDefault("enhanceChatTextEntry", true);
 
 		System.setDefault("ajaxifyRankControls", true);
+		System.setDefault("disablePageShiftToGuildStore", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -940,6 +941,16 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
+		
+		//Add functionality to remove the skip to guildstoresection
+		if (GM_getValue("disablePageShiftToGuildStore")) {
+			var guildStoreLinks = System.findNodes("//a[contains(@href,'#guildStoreSection')]");
+			for (var i=0;i<guildStoreLinks.length ;i++ ) {
+				var guildStoreLink = guildStoreLinks[i];
+				var linkHREF = guildStoreLink.getAttribute("href");
+				guildStoreLink.setAttribute("href", linkHREF.replace(/#guildStoreSection/,""));
+			}
+		}
 
 		//Update the guild online list, since we are already on the page.
 		doc = document.firstChild.nextSibling;
@@ -8529,6 +8540,8 @@ var Helper = {
 			'<tr><td align="right">Navigate After Message Sent' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
 				' if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen.') +
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Disable GS page shift' + Helper.helpLink('Disable GS page shift', 'This will disable the page shift on the manage page to shift to the guild store.') +
+				':</td><td><input name="disablePageShiftToGuildStore" type="checkbox" value="on"' + (GM_getValue("disablePageShiftToGuildStore")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8711,6 +8724,7 @@ var Helper = {
 		System.saveValueForm(oForm, "newGuildLogHistoryPages");
 		System.saveValueForm(oForm, "useNewGuildLog");
 		System.saveValueForm(oForm, "enhanceChatTextEntry");
+		System.saveValueForm(oForm, "disablePageShiftToGuildStore");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
