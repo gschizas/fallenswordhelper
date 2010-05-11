@@ -2481,8 +2481,10 @@ var Helper = {
 
 					if (GM_getValue("hideGuildInfoMessage")) {
 						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						messageLink.style.display = 'none';
-						messageLink.style.visibility = 'hidden';
+						if (messageLink.style) {
+							messageLink.style.display = 'none';
+							messageLink.style.visibility = 'hidden';
+						}
 					}
 
 				// Set Color for Activity
@@ -2498,7 +2500,7 @@ var Helper = {
 					}
 					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
 						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						messageLink.style.visibility = 'hidden';
+						if (messageLink.style) messageLink.style.visibility = 'hidden';
 						buffLink = messageLink.nextSibling.nextSibling;
 						secureTradeLink = buffLink.nextSibling.nextSibling;
 						secureTradeLink.style.visibility = 'hidden';
@@ -3800,84 +3802,86 @@ var Helper = {
 
 	injectAuctionHouse: function() {
 		var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
-		var imageCell = isAuctionPage.parentNode;
-		var imageHTML = imageCell.innerHTML; //hold on to this for later.
+		if (isAuctionPage) {
+			var imageCell = isAuctionPage.parentNode;
+			var imageHTML = imageCell.innerHTML; //hold on to this for later.
 
-		var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
+			var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
 
-		//Add functionality to hide the text block at the top.
-		var textRow = auctionTable.rows[2];
-		textRow.id = 'auctionTextControl';
-		var myBidsButton = System.findNode("//input[@value='My Bids']/..");
-		myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
-			"id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
-		if (GM_getValue("auctionTextControl")) {
-			textRow.style.display = "none";
-			textRow.style.visibility = "hidden";
-		}
-		document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
-
-		//fix button class and add go to first and last
-		var prevButton = System.findNode("//input[@value='<']");
-		var nextButton = System.findNode("//input[@value='>']");
-		if (prevButton) {
-			prevButton.setAttribute("class", "custombutton");
-			var startButton = document.createElement("input");
-			startButton.setAttribute("type", "button");
-			startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
-			startButton.setAttribute("class", "custombutton");
-			startButton.setAttribute("value", "<<");
-			prevButton.parentNode.insertBefore(startButton,prevButton);
-		}
-		if (nextButton) {
-			nextButton.setAttribute("class", "custombutton");
-			var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
-			lastPage = lastPageNode.textContent.replace(/\D/g,"");
-			var finishButton = document.createElement("input");
-			finishButton.setAttribute("type", "button");
-			finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
-			finishButton.setAttribute("class", "custombutton");
-			finishButton.setAttribute("value", ">>");
-			nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
-		}
-
-		//insert another page change block at the top of the screen.
-		var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
-		var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
-		var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
-		newPageChangeBlock += "</form>";
-		var insertPageChangeBlock=document.createElement("SPAN");
-		insertPageChangeBlock.innerHTML = newPageChangeBlock;
-		insertPageChangeBlockHere.align = "right";
-		insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
-
-		var quickSearchList = System.getValueJSON("quickSearchList");
-
-		var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
-			"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
-						System.server +
-						"index.php?cmd=notepad&subcmd=auctionsearch'>" +
-						"Configure Quick Search</a></td></tr>";
-		var lp=0;
-		var rowCount = 0;
-		for (var p=0;p<quickSearchList.length;p++) {
-			if (lp % 3===0 && rowCount == 6) break; //18 searches on the screen so don't display any more
-			var quickSearch=quickSearchList[p];
-			if (quickSearch.displayOnAH) {
-				if (lp % 3===0) {
-					finalHTML += "<tr>";
-					rowCount++;
-				}
-				finalHTML += "<td";
-				finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
-					quickSearch.searchname + "&page=1&order_by=1'>" +
-					quickSearch.nickname + "</a></td>";
-				if (lp % 3==2) finalHTML += "</tr>";
-				if (lp % 3==2) finalHTML += "</tr>";
-				lp++;
+			//Add functionality to hide the text block at the top.
+			var textRow = auctionTable.rows[2];
+			textRow.id = 'auctionTextControl';
+			var myBidsButton = System.findNode("//input[@value='My Bids']/..");
+			myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
+				"id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
+			if (GM_getValue("auctionTextControl")) {
+				textRow.style.display = "none";
+				textRow.style.visibility = "hidden";
 			}
+			document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
+
+			//fix button class and add go to first and last
+			var prevButton = System.findNode("//input[@value='<']");
+			var nextButton = System.findNode("//input[@value='>']");
+			if (prevButton) {
+				prevButton.setAttribute("class", "custombutton");
+				var startButton = document.createElement("input");
+				startButton.setAttribute("type", "button");
+				startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
+				startButton.setAttribute("class", "custombutton");
+				startButton.setAttribute("value", "<<");
+				prevButton.parentNode.insertBefore(startButton,prevButton);
+			}
+			if (nextButton) {
+				nextButton.setAttribute("class", "custombutton");
+				var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
+				lastPage = lastPageNode.textContent.replace(/\D/g,"");
+				var finishButton = document.createElement("input");
+				finishButton.setAttribute("type", "button");
+				finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
+				finishButton.setAttribute("class", "custombutton");
+				finishButton.setAttribute("value", ">>");
+				nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
+			}
+
+			//insert another page change block at the top of the screen.
+			var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+			var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
+			var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
+			newPageChangeBlock += "</form>";
+			var insertPageChangeBlock=document.createElement("SPAN");
+			insertPageChangeBlock.innerHTML = newPageChangeBlock;
+			insertPageChangeBlockHere.align = "right";
+			insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
+
+			var quickSearchList = System.getValueJSON("quickSearchList");
+
+			var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
+				"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
+							System.server +
+							"index.php?cmd=notepad&subcmd=auctionsearch'>" +
+							"Configure Quick Search</a></td></tr>";
+			var lp=0;
+			var rowCount = 0;
+			for (var p=0;p<quickSearchList.length;p++) {
+				if (lp % 3===0 && rowCount == 6) break; //18 searches on the screen so don't display any more
+				var quickSearch=quickSearchList[p];
+				if (quickSearch.displayOnAH) {
+					if (lp % 3===0) {
+						finalHTML += "<tr>";
+						rowCount++;
+					}
+					finalHTML += "<td";
+					finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
+						quickSearch.searchname + "&page=1&order_by=1'>" +
+						quickSearch.nickname + "</a></td>";
+					if (lp % 3==2) finalHTML += "</tr>";
+					if (lp % 3==2) finalHTML += "</tr>";
+					lp++;
+				}
+			}
+			imageCell.innerHTML = finalHTML;
 		}
-		imageCell.innerHTML = finalHTML;
 
 		if (GM_getValue('enableAHItemWidgets')) {
 			var allItems = document.getElementsByTagName("IMG");
