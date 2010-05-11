@@ -10643,7 +10643,9 @@ var Helper = {
 				}
 			}
 		}
-		linkElement.innerHTML = "<span style='color:blue;'>(" + Math.round(10*count)/10 + ")</span> " + linkElement.innerHTML;
+		var taxRate = System.findNode("//input[@name='rank_tax']",doc);
+		
+		linkElement.innerHTML = "<span style='color:blue;'>(" + Math.round(10*count)/10 + ") Tax:(" + taxRate.value + "%)</span> " + linkElement.innerHTML;
 	},
 
 	injectGuildRanksMembers: function(memberList) {
