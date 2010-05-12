@@ -3388,6 +3388,9 @@ var Helper = {
 		case 110: // mini map [n]
 			Helper.displayMiniMap();
 			break;
+		case 78: // auto move in mini map [N]
+			Helper.autoMoveMiniMap();
+			break;
 		case 62: // move to next page [>]
 		case 60: // move to prev page [<]
 			Helper.movePage({62:'>', 60:'<'}[r]);
@@ -8916,13 +8919,77 @@ var Helper = {
 		doc = doc.replace(/<table [^>]*><tbody><tr><td[^>]*><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
+		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
+		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
+		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
+			"<br/><h1>Auto-Walk</h1><br/>Draw a path starting from player's position<br/>Press N (capital N) to start auto-walk</span>";
 
 		Helper.markPlayerOnMiniMap();
 		Helper.toogleMiniMapPOI();
+		Helper.miniMapTableEvents();
 		miniMap.style.display = "";
 
 		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
 		GM_setValue("miniMapSource", doc);
+	},
+	
+	miniMapTableEvents: function(){
+		Helper.mouse = 0;
+		Helper.moveList=[Helper.position()];
+		document.getElementById('miniMap').addEventListener("mouseup", function(e){Helper.mouse = 0},false);
+		// collect table cells from the drawing_table div element  
+		var td = document.getElementById('miniMap').getElementsByTagName('td');  
+		// attach onMouseDown and onMouseOver event for collected table cells  
+		for (var i=0; i<td.length; i++){
+			td[i].addEventListener("mousedown", Helper.mousedown, true);
+			// colorize table cell if left mouse button is pressed  
+			td[i].addEventListener("mouseover", function (e){if (Helper.mouse == 1) Helper.markPos(this);}, true);
+		}  
+	},
+	
+	mousedown: function (evt){  
+		// needed for FF to disable dragging 
+		evt.preventDefault();
+		// set pressed mouse button 
+		Helper.mouse = evt.which;
+		// colorize pixel on mousedown event for TD element
+		if (this.tagName == 'TD' && Helper.mouse == 1) Helper.markPos(this);
+	},
+	
+	markPos: function(td) {
+		var pos={'X':td.cellIndex,'Y':td.parentNode.rowIndex};
+		if (!Helper.moveList[0]) return;
+		var lastPos=Helper.moveList[Helper.moveList.length - 1];
+		var dx=pos.X-lastPos.X, dy=pos.Y-lastPos.Y;
+		if (dx>=-1 && dx <=1 && dy>=-1 && dy<=1 && (dx!=0 || dy!=0)) {
+			Helper.moveList.push(pos);
+			td.innerHTML='';
+			td.style.backgroundColor = "red";
+		}
+	},
+	
+	autoMoveMiniMap: function() {
+		if (Helper.moveList && Helper.moveList.length > 1)
+			System.xmlhttp("index.php?cmd=world&subcmd=move&x="+Helper.moveList[1].X+"&y="+Helper.moveList[1].Y,
+				Helper.autoMoveNext, 1);
+	},
+	
+	autoMoveNext: function(responseText, id) {
+		var currentPos = "("+Helper.moveList[id].X+", "+Helper.moveList[id].Y+")";
+		if (responseText.indexOf(currentPos)<0) {
+			alert("Cannot move via " + currentPos);
+			window.location = window.location;
+		} else {
+			// update current pos
+			Helper.markPosOnMiniMap(Helper.moveList[id]);
+			// move next
+			var nextId = id+1;
+			if (nextId < Helper.moveList.length)
+				System.xmlhttp("index.php?cmd=world&subcmd=move&x="+Helper.moveList[nextId].X+"&y="+Helper.moveList[nextId].Y,
+					Helper.autoMoveNext, nextId);
+			else
+				window.location = window.location;
+		}
 	},
 
 	toogleMiniMapPOI: function() {
@@ -8958,10 +9025,15 @@ var Helper = {
 	},
 
 	markPlayerOnMiniMap: function() {
-		var miniMap = document.getElementById("miniMap");
 		var posit = Helper.position();
-		if (!miniMap || !posit) {return;}
-		var position = miniMap.firstChild.rows[posit.Y].cells[posit.X];
+		if (!posit) {return;}
+		Helper.markPosOnMiniMap(posit);
+	},
+	
+	markPosOnMiniMap: function(posit) {
+		var miniMapTable = document.getElementById("miniMapTable");
+		if (!miniMapTable) return;
+		var position = miniMapTable.rows[posit.Y].cells[posit.X];
 		var background = position.firstChild.src;
 		position.innerHTML = '<center><img width=16 height=16 src="' + System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
 		position.style.backgroundImage = 'url("' + background + '")';
