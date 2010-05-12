@@ -140,6 +140,9 @@ var Helper = {
 
 		System.setDefault("ajaxifyRankControls", true);
 		System.setDefault("disablePageShiftToGuildStore", false);
+		
+		System.setDefault("enableMaxGroupSizeToJoin", true);
+		System.setDefault("maxGroupSizeToJoin", 11);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -3339,7 +3342,11 @@ var Helper = {
 			window.location = 'index.php?cmd=guild&subcmd=manage';
 			break;
 		case 106: // join all group [j]
-			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
+			if (!GM_getValue("enableMaxGroupSizeToJoin")) {
+				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
+			} else {
+				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
+			}
 			break;
 		case 49:
 		case 50:
@@ -5203,11 +5210,18 @@ var Helper = {
 			"</td></tr><tr><td align='center' colspan='2'>" +
 			"<a " + Layout.quickBuffHref(playerid) + ">" +
 			"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
-			System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" +
-			"<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
-			"');'><img alt='Join All Groups' title='Join All Groups' src=" +
-			System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;" +
-			"<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
+			System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;";
+		if (!GM_getValue("enableMaxGroupSizeToJoin")) {
+			newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
+				"');'><img alt='Join All Groups' title='Join All Groups' src=" +
+				System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;";
+		} else {
+			var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
+			newhtml += "<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize" +
+				"');'><img alt='Join All Groups' title='Join All Groups < " + maxGroupSizeToJoin + " Members' src=" +
+				System.imageServer + "/skin/icon_action_join.gif></a>&nbsp;&nbsp;";
+		}
+		newhtml += "<a href=" + System.server + "?cmd=auctionhouse&type=-3&tid=" +
 			playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="' +
 			System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
 			"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
@@ -6634,10 +6648,52 @@ var Helper = {
 				groupDate.toString().substr(0,21)+'</span></nobr>';
 		}
 		var buttonElement = System.findNode("//td[input[@value='Join All Available Groups']]");
-		buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
-
+		var enableMaxGroupSizeToJoin = GM_getValue("enableMaxGroupSizeToJoin");
+		if (enableMaxGroupSizeToJoin) {
+			var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
+			var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
+			joinAllInput.style.display = "none";
+			joinAllInput.style.visibility = "hidden";
+			buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsundersize" type="button" value="Join All Groups < ' + maxGroupSizeToJoin + 
+				' Members" class="custombutton">&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
+			document.getElementById('joinallgroupsundersize').addEventListener('click', Helper.joinAllGroupsUnderSize, true);
+		} else {
+			buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
+		}
 		document.getElementById('fetchgroupstats').addEventListener('click', Helper.fetchGroupData, true);
-
+		
+		re=/subcmd2=([a-z]+)/;
+		var subPage2IdRE = re.exec(document.location.search);
+		if (subPage2IdRE && subPage2IdRE[1] == 'joinallgroupsundersize') {
+			Helper.joinAllGroupsUnderSize();
+		}
+	},
+	
+	joinAllGroupsUnderSize: function(evt) {
+		var joinButtons = System.findNodes("//img[@title='5 Stamina to join Group']");
+		for (var i=0; i<joinButtons.length; i++) {
+			var joinButton = joinButtons[i];
+			var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
+			var memberListArrayWithMercs = memberList.innerHTML.split(",");
+			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
+			if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin")) {
+				var groupID = /confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
+				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
+				GM_xmlhttpRequest({
+					method: 'GET',
+					url: groupJoinURL,
+					headers: {
+						"User-Agent": navigator.userAgent,
+						"Referer": document.location
+					},
+					onload: function(responseDetails) {
+						joinButton.style.display = "none";
+						joinButton.style.visibility = "hidden";
+					}
+				});
+			}
+		}
+		window.location = System.server + 'index.php?cmd=guild&subcmd=groups';
 	},
 
 	fetchGroupData: function(evt) {
@@ -8546,6 +8602,9 @@ var Helper = {
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Disable GS page shift' + Helper.helpLink('Disable GS page shift', 'This will disable the page shift on the manage page to shift to the guild store.') +
 				':</td><td><input name="disablePageShiftToGuildStore" type="checkbox" value="on"' + (GM_getValue("disablePageShiftToGuildStore")?" checked":"") + '></td></tr>' +
+			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
+				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
+				'Max Size: <input name="maxGroupSizeToJoin" size="1" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8636,6 +8695,11 @@ var Helper = {
 		var newGuildLogHistoryPagesValue = newGuildLogHistoryPages.value*1;
 		if (isNaN(newGuildLogHistoryPagesValue) || newGuildLogHistoryPagesValue<=1) {
 			newGuildLogHistoryPages.value=25;
+		}
+		var maxGroupSizeToJoin = System.findNode("//input[@name='maxGroupSizeToJoin']", oForm);
+		var maxGroupSizeToJoinValue = maxGroupSizeToJoin.value*1;
+		if (isNaN(maxGroupSizeToJoinValue) || maxGroupSizeToJoinValue<=1) {
+			maxGroupSizeToJoin.value=11;
 		}
 		var combatEvaluatorBiasElement = System.findNode("//select[@name='combatEvaluatorBias']", oForm);
 		var combatEvaluatorBias = combatEvaluatorBiasElement.value;
@@ -8729,6 +8793,9 @@ var Helper = {
 		System.saveValueForm(oForm, "useNewGuildLog");
 		System.saveValueForm(oForm, "enhanceChatTextEntry");
 		System.saveValueForm(oForm, "disablePageShiftToGuildStore");
+		
+		System.saveValueForm(oForm, "enableMaxGroupSizeToJoin");
+		System.saveValueForm(oForm, "maxGroupSizeToJoin");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -10485,8 +10552,14 @@ var Helper = {
 	injectJoinAllLink: function() {
 		var attackGroupLink = System.findNode("//td[a/font[.='A new guild attack group has been formed.']]");
 		if (attackGroupLink) {
-			attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
-				"<span style='color:yellow; font-size:x-small;'>[Join All]</span></a></nobr>";
+			if (!GM_getValue("enableMaxGroupSizeToJoin")) {
+				attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
+					"<span style='color:yellow; font-size:x-small;'>[Join All]</span></a></nobr>";
+			} else {
+				var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
+				attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize'>"+
+					"<span style='color:yellow; font-size:x-small;'>[Join < " + maxGroupSizeToJoin + "]</span></a></nobr>";
+			}
 		}
 	},
 
