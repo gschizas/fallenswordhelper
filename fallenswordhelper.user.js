@@ -6696,7 +6696,8 @@ var Helper = {
 				});
 			}
 		}
-		window.location = System.server + 'index.php?cmd=guild&subcmd=groups';
+		//refresh after a slight delay
+		setTimeout("window.location = '" + System.server + "index.php?cmd=guild&subcmd=groups';",1250);
 	},
 
 	fetchGroupData: function(evt) {
@@ -7853,19 +7854,25 @@ var Helper = {
 	storePlayerUpgrades: function() {
 		var alliesText = System.findNode("//td[.='+1 Max Allies']");
 		var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var alliesValueRE = /(\d+) \/ 115/;
-		var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
-		GM_setValue("alliestotal",alliesValue+5);
+		if (alliesRatio) {
+			var alliesValueRE = /(\d+) \/ 115/;
+			var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
+			GM_setValue("alliestotal",alliesValue+5);
+		}
 		var enemiesText = System.findNode("//td[.='+1 Max Enemies']");
 		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var enemiesValueRE = /(\d+) \/ 115/;
-		var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
-		GM_setValue("enemiestotal",enemiesValue+5);
+		if (enemiesRatio) {		
+			var enemiesValueRE = /(\d+) \/ 115/;
+			var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
+			GM_setValue("enemiestotal",enemiesValue+5);
+		}
 		var maxAuctionsText = System.findNode("//td[.='+1 Max Auctions']");
 		var maxAuctionsRatio = maxAuctionsText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var maxAuctionsValueRE = /(\d+) \/ 100/;
-		var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
-		GM_setValue("maxAuctions",maxAuctionsValue+2);
+		if (maxAuctionsRatio) {
+			var maxAuctionsValueRE = /(\d+) \/ 100/;
+			var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
+			GM_setValue("maxAuctions",maxAuctionsValue+2);
+		}
 	},
 
 	injectTopRated: function() {
@@ -8896,9 +8903,7 @@ var Helper = {
 		if (miniMap.style.display !== "") {
 			if (miniMapName && Helper.levelName == miniMapName) {
 				miniMap.innerHTML = miniMapSource;
-				Helper.markPlayerOnMiniMap();
-				Helper.toogleMiniMapPOI();
-				miniMap.style.display = "";
+				Helper.addMiniMapExtras(miniMap);
 			}
 			else {
 				System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
@@ -8919,18 +8924,21 @@ var Helper = {
 		doc = doc.replace(/<table [^>]*><tbody><tr><td[^>]*><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
-		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
-		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
-		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
-			"<br/><h1>Auto-Walk</h1><br/>Draw a path starting from player's position<br/>Press N (capital N) to start auto-walk</span>";
-
-		Helper.markPlayerOnMiniMap();
-		Helper.toogleMiniMapPOI();
-		Helper.miniMapTableEvents();
-		miniMap.style.display = "";
+		Helper.addMiniMapExtras(miniMap);
 
 		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
 		GM_setValue("miniMapSource", doc);
+	},
+	
+	addMiniMapExtras: function(miniMap) {
+		Helper.markPlayerOnMiniMap();
+		Helper.toogleMiniMapPOI();
+		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
+		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
+		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
+			"<br/><h1>Auto-Walk</h1><br/>Draw a path starting from player's<br/> positionPress N (capital N) to start<br/> auto-walk</span>";
+		Helper.miniMapTableEvents();
+		miniMap.style.display = "";
 	},
 	
 	miniMapTableEvents: function(){
@@ -11006,7 +11014,8 @@ var Helper = {
 			//Relic messages (showRelicMessages)
 			else if (aRow.innerHTML.search("relic. This relic now has an empower level of") != -1 ||
 				aRow.innerHTML.search("relic. The relic empower level has been reset to zero.") != -1 ||
-				aRow.innerHTML.search(/has captured (.*) relic/) != -1 ||
+				aRow.innerHTML.search("captured the relic") != -1 ||
+				aRow.innerHTML.search("captured your relic") != -1 ||
 				aRow.innerHTML.search("has captured the undefended relic") != -1 ||
 				aRow.innerHTML.search("attempted to capture your relic") != -1) {
 				if (!Helper.showRelicMessages) {
@@ -11049,6 +11058,7 @@ var Helper = {
 			else if (aRow.innerHTML.search("resulted in a draw. Your GvG rating and Guild RP was unaffected.") != -1 ||
 				aRow.innerHTML.search(/resulted in (.*) with a final score of/) != -1 ||
 				aRow.innerHTML.search("has just initiated a conflict with the guild") != -1 ||
+				aRow.innerHTML.search("has initiated a conflict with your guild") != -1 ||
 				aRow.innerHTML.search("is participating in the conflict against the guild") != -1) {
 				if (!Helper.showGvGMessages) {
 					displayRow = false;
