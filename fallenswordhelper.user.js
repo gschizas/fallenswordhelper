@@ -2824,6 +2824,7 @@ var Helper = {
 		var creatureInfo=System.createDocument(responseText);
 		var statsNode = System.findNode("//table[@width='400']", creatureInfo);
 		if (!statsNode) {return;} // FF2 error fix
+		var showMonsterLog = GM_getValue("showMonsterLog");
 		//store the stats
 		var classNode = statsNode.rows[1].cells[1];
 		var levelNode = statsNode.rows[1].cells[3];
@@ -2847,7 +2848,10 @@ var Helper = {
 		var oneHitNumber = Math.ceil((hitpoints*hpVariable)+(armorNumber*generalVariable));
 
 		var hideRestOfRows = false;
+		var collectEnchantments = true;
+		var enchantmentsList = [];
 		for (var i=0; i<statsNode.rows.length; i++) {
+			var enchantment = {};
 			var firstCell = statsNode.rows[i].cells[0];
 			var thirdCell = statsNode.rows[i].cells[2];
 			//color titles black
@@ -2863,16 +2867,31 @@ var Helper = {
 				firstCell.style.display = 'none';
 				firstCell.style.visibility = 'hidden';
 			}
+			
+			//store the enchantment min and max values in the monster log (if enabled)
+			if (showMonsterLog && i >= 7 && collectEnchantments) { //first enchantment row
+				var ThisRowFirstCell = statsNode.rows[i].cells[0];
+				if (ThisRowFirstCell.textContent != '[no enhancements]') {
+					var SecondNextRowFirstCell = statsNode.rows[i+2].cells[0];
+					if (SecondNextRowFirstCell.textContent == 'Description') collectEnchantments = false;
+					enchantment.name = statsNode.rows[i].cells[0].textContent;
+					enchantment.value = statsNode.rows[i].cells[1].textContent*1;
+					enchantmentsList.push(enchantment);
+				} else {
+					collectEnchantments = false;
+				}
+			}
 		}
 
 		var imageTable = System.findNode("//table[tbody/tr/td/img[contains(@src, '/creatures/')]]", creatureInfo);
 		var imageNode = imageTable.rows[0].cells[0].firstChild;
 		var nameNode = imageTable.rows[1].cells[0].firstChild;
+		var imageNodeSRC = imageNode.src.replace(/.jpg(.*)/,".jpg");
 
-		if (GM_getValue("showMonsterLog")) {
-			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNode.src, "key2":classNode.textContent, "key3":levelNode.textContent,
+		if (showMonsterLog) {
+			Helper.pushMonsterInfo({"key0":nameNode.textContent, "key1":imageNodeSRC, "key2":classNode.textContent, "key3":levelNode.textContent,
 				"key4":attackNode.textContent, "key5":defenseNode.textContent, "key6":armorNode.textContent, "key7":damageNode.textContent,
-				"key8":hitpointsNode.textContent, "key9":goldNode.textContent});
+				"key8":hitpointsNode.textContent, "key9":goldNode.textContent, "key10":enchantmentsList});
 		}
 
 		levelNode.innerHTML += " (your level:<span style='color:yellow'>" + Helper.characterLevel + "</span>)";
@@ -2905,6 +2924,12 @@ var Helper = {
 			}
 			//monsterLog[name]["min"] = {"cls":1e+100, "lvl":1e+100, "atk":1e+100, "def":1e+100, "arm":1e+100, "dmg":1e+100, "hp":1e+100, "gold":1e+100};
 			//monsterLog[name]["max"] = {"cls":0, "lvl":0, "atk":0, "def":0, "arm":0, "dmg":0, "hp":0, "gold":0};
+			for (i = 10; i < 11; i++) {// enchantments
+				if (monster["key" + i]) { //does this critter have enchantments, if so, then see min and max with the initial list
+					monsterLog[name]["min"]["key" + i] = monster["key" + i];
+					monsterLog[name]["max"]["key" + i] = monster["key" + i];
+				}
+			}
 		}
 		for (i = 1; i < 4; i++)
 			monsterLog[name]["min"]["key" + i] = monster["key" + i];
@@ -2914,6 +2939,22 @@ var Helper = {
 				monsterLog[name]["min"]["key" + i] : value;
 			monsterLog[name]["max"]["key" + i] = monsterLog[name]["max"]["key" + i] > value?
 				monsterLog[name]["max"]["key" + i] : value;
+		}
+		for (i = 10; i < 11; i++) {// enchantments
+			if (monster["key" + i]) { //does this critter have enchantments
+				if (!monsterLog[name]["min"]["key" + i] || !monsterLog[name]["min"]["key" + i]) {
+					monsterLog[name]["min"]["key" + i] = monster["key" + i];
+					monsterLog[name]["max"]["key" + i] = monster["key" + i];
+				}
+				for (j = 0; j < monster["key" + i].length; j++) {
+					var enchantName = monster["key" + i][j].name;
+					var enchantValue = monster["key" + i][j].value*1;
+					monsterLog[name]["min"]["key" + i][j].value = monsterLog[name]["min"]["key" + i][j].value*1 < enchantValue?
+						monsterLog[name]["min"]["key" + i][j].value : enchantValue;
+					monsterLog[name]["max"]["key" + i][j].value = monsterLog[name]["max"]["key" + i][j].value*1 > enchantValue?
+						monsterLog[name]["max"]["key" + i][j].value : enchantValue;
+				}
+			}
 		}
 		System.setValueJSON("monsterLog", monsterLog);
 	},
@@ -2931,6 +2972,15 @@ var Helper = {
 				for (i = 4; i < 10; i++)
 					newEntity["key" + i] = System.addCommas(entityLog[name]["min"]["key"+i]) + ' - ' +
 						System.addCommas(entityLog[name]["max"]["key"+i]);
+				for (i = 10; i < 11; i++) {
+					if (entityLog[name]["min"]["key" + i]) {
+						newEntity["key" + i] = "";
+						for (j = 0; j < entityLog[name]["min"]["key" + i].length; j++) {
+							newEntity["key" + i] += entityLog[name]["min"]["key"+i][j].name + ' ' + 
+								entityLog[name]["min"]["key"+i][j].value + ' - ' + entityLog[name]["max"]["key"+i][j].value + '<br/>';
+						}
+					}
+				}
 				Helper.entityLogTable.entity.push(newEntity);
 			}
 			Helper.sortBy = 'key3';
@@ -2945,12 +2995,18 @@ var Helper = {
 	generateEntityTable: function() {
 		var content = document.getElementById("Helper.entityTableOutput");
 		if (!Helper.entityLogTable || !content) {return;}
-		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011">'+
+		GM_addStyle(
+			'.HelperMonsterLogRow1 {background-color:#e7c473;font-size:xx-small}\n' +
+			'.HelperMonsterLogRow1:hover {background-color:white}\n' +
+			'.HelperMonsterLogRow2 {background-color:#e2b960;font-size:xx-small}\n' +
+			'.HelperMonsterLogRow2:hover {background-color:white}');
+		
+		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011; color:white;">'+
 			'<td width="90%" nobr align=center><b>&nbsp;Entity Information</b></td>'+
 			'<td width="10%" nobr>[<span id="Helper.clearEntityLog">Clear</span>]</td>'+
 			'</tr>' +
 			'</table>'+
-			'<table id="Helper:EntityInfo" cellspacing="1" cellpadding="2" border="0" ><tr>' +
+			'<table id="Helper:EntityInfo" cellspacing="1" cellpadding="2" border="0" style="font-size:xx-small;"><tr style="background-color:#e2b960;">' +
 			'<th width="25%" align="left" sortkey="name" colspan="2">Entity</th>' +
 			'<th align="center" sortkey="key2">Class</th>' +
 			'<th align="center" sortkey="key3" sorttype="number">Lvl</th>' +
@@ -2959,17 +3015,26 @@ var Helper = {
 			'<th align="center">Armor</th>' +
 			'<th align="center">Damage</th>' +
 			'<th align="center">HP</th>' +
-			'<th align="center">Credits</th>' +
+			//'<th align="center">Gold</th>' +
+			'<th align="center">Enchantments</th>' +
 			'</tr>';
 		for (var k=0;k<Helper.entityLogTable.entity.length;k++) {
-			result += '<tr><td align="center"><img width=40 height=40 ' +
+			result += '<tr class="HelperMonsterLogRow'+(1+k % 2)+'"><td align="center"><img width=40 height=40 ' +
 					'onmouseover="tt_setWidth(200);Tip(\'<img src=' + Helper.entityLogTable.entity[k]["key1"] + '/>\');" ' +
 					'src="' + Helper.entityLogTable.entity[k]["key1"] + '"/></td>';
 			result += '<td align="left">' + Helper.entityLogTable.entity[k]["name"] + '</td>';
 			for (i = 2; i < 4; i++)
 				result += '<td align="center">' + System.addCommas(Helper.entityLogTable.entity[k]["key"+i]) + '</td>';
-			for (i = 4; i < 10; i++)
+			for (i = 4; i < 9; i++) // 10 is gold, we don't need to show this
 				result += '<td align="center">' + Helper.entityLogTable.entity[k]["key"+i] + '</td>';
+			for (i = 10; i < 11; i++) {
+				var entityInformationValue = Helper.entityLogTable.entity[k]["key"+i];
+				if (!entityInformationValue) {
+					result += '<td align="center" style="color:gray;">**Missing**</td>';
+				} else {
+					result += '<td align="center">' + entityInformationValue + '</td>';
+				}
+			}
 		}
 		result += "</table>";
 		content.innerHTML = result;
@@ -7329,7 +7394,7 @@ var Helper = {
 		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
 		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
-			creatureName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=creatures&search_name=' + creatureName.textContent + 'search_level_min=&search_level_max=&search_class=-1" target="_blank">' +
+			creatureName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=creatures&search_name=' + creatureName.textContent + '&search_level_min=&search_level_max=&search_class=-1" target="_blank">' +
 				'<img border=0 title="Search creature in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>' +
 				' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
 				'<img border=0 title="Search creature in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
@@ -8936,7 +9001,9 @@ var Helper = {
 		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
 		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
 		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
-			"<br/><h1>Auto-Walk</h1><br/>Draw a path starting from player's<br/> positionPress N (capital N) to start<br/> auto-walk</span>";
+			"<br/><h1 onmouseover=\"Tip('Click on the player icon and left click drag the path you want to walk. If you walk into a wall or make an error, " +
+				"close and reopen the mini map and start again. Push N (capital n) to activate the auto-walk and watch the mini map as you walk to your " +
+				"new location. The screen will refresh when you get there.');\">Auto-Walk</h1></span>";
 		Helper.miniMapTableEvents();
 		miniMap.style.display = "";
 	},
