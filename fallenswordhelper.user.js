@@ -2976,8 +2976,9 @@ var Helper = {
 					if (entityLog[name]["min"]["key" + i]) {
 						newEntity["key" + i] = "";
 						for (j = 0; j < entityLog[name]["min"]["key" + i].length; j++) {
-							newEntity["key" + i] += entityLog[name]["min"]["key"+i][j].name + ' ' + 
-								entityLog[name]["min"]["key"+i][j].value + ' - ' + entityLog[name]["max"]["key"+i][j].value + '<br/>';
+							newEntity["key" + i] += '<nobr>' + entityLog[name]["min"]["key"+i][j].name + ' ' + 
+								entityLog[name]["min"]["key"+i][j].value + ' - ' + entityLog[name]["max"]["key"+i][j].value + '<nobr>' + 
+								(j != entityLog[name]["min"]["key" + i].length - 1? '<br/>':'');
 						}
 					}
 				}
@@ -3032,7 +3033,7 @@ var Helper = {
 				if (!entityInformationValue) {
 					result += '<td align="center" style="font-size:small; color:gray;">**Missing**</td>';
 				} else {
-					result += '<td align="center" style="font-size:x-small;>' + entityInformationValue + '</td>';
+					result += '<td align="center" style="font-size:xx-small;">' + entityInformationValue + '</td>';
 				}
 			}
 		}
@@ -4654,66 +4655,64 @@ var Helper = {
 		}
 
 		//function to add links to all the items in the drop items list
-		if (showExtraLinks || showQuickDropLinks || showQuickSendLinks) {
-			var itemName, itemInvId, theTextNode, newLink;
-			var allItems=System.findNodes("//input[@type='checkbox']");
-			if (allItems) {
-				for (var i=0; i<allItems.length; i++) {
-					anItem = allItems[i];
-					itemInvId = anItem.value;
-					theTextNode = System.findNode("../../td[3]", anItem);
-					theImgElement = System.findNode("../../td[2]", anItem).firstChild.firstChild;
-					itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(theImgElement.getAttribute("onmouseover"));
-					if (itemStats) {
-						itemId = itemStats[1];
-						invId = itemStats[2];
-						type = itemStats[3];
-						pid = itemStats[4];
-					}
-					itemName = theTextNode.textContent.trim().replace("\\","");
-					theTextNode.textContent = itemName;
-					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
-					var preText = "", postText1 = "", postText2 = "", postText3 = "";
-					if (showExtraLinks) {
-						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text=" +
-							escape(itemName) +
-							"'>AH</a>]</span> " +
-							"<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2" +
-							"&inv_id=" + itemInvId  +
-							"&item_id=" + itemId +
-							"&type=" + type +
-							"&pid=" + pid + "'>" +
-							"Sell</a>]</span> ";
-					}
-					postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="' +
-						itemName +
-						'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
-					if (showQuickDropLinks) {
-						postText2 = "&nbsp;<span  title='INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickDrop" +
-							itemInvId +
-							"' itemInvId=" +
-							itemInvId +
-							" findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
-					}
-					if (showQuickSendLinks) {
-						postText3 = "&nbsp;<span  title='INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickSend" +
-							itemInvId +
-							"' itemInvId=" +
-							itemInvId +
-							" findme='QuickSend' style='color:blue; cursor:pointer; text-decoration:underline;'>[Quick Send]</span> ";
-					}
+		var itemName, itemInvId, theTextNode, newLink;
+		var allItems=System.findNodes("//input[@type='checkbox']");
+		if (allItems) {
+			for (var i=0; i<allItems.length; i++) {
+				anItem = allItems[i];
+				itemInvId = anItem.value;
+				theTextNode = System.findNode("../../td[3]", anItem);
+				theImgElement = System.findNode("../../td[2]", anItem).firstChild.firstChild;
+				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(theImgElement.getAttribute("onmouseover"));
+				if (itemStats) {
+					itemId = itemStats[1];
+					invId = itemStats[2];
+					type = itemStats[3];
+					pid = itemStats[4];
+				}
+				itemName = theTextNode.textContent.trim().replace("\\","");
+				theTextNode.textContent = itemName;
+				var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
+				var preText = "", postText1 = "", postText2 = "", postText3 = "";
+				if (showExtraLinks) {
+					preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text=" +
+						escape(itemName) +
+						"'>AH</a>]</span> " +
+						"<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2" +
+						"&inv_id=" + itemInvId  +
+						"&item_id=" + itemId +
+						"&type=" + type +
+						"&pid=" + pid + "'>" +
+						"Sell</a>]</span> ";
+				}
+				postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="' +
+					itemName +
+					'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'');
+				if (showQuickDropLinks) {
+					postText2 = "&nbsp;<span  title='INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickDrop" +
+						itemInvId +
+						"' itemInvId=" +
+						itemInvId +
+						" findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
+				}
+				if (showQuickSendLinks) {
+					postText3 = "&nbsp;<span  title='INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.' id='Helper:QuickSend" +
+						itemInvId +
+						"' itemInvId=" +
+						itemInvId +
+						" findme='QuickSend' style='color:blue; cursor:pointer; text-decoration:underline;'>[Quick Send]</span> ";
+				}
 
-					theTextNode.innerHTML = preText +
-						theTextNode.innerHTML +
-						postText1 +
-						postText2 +
-						postText3;
-					if (showQuickDropLinks) {
-						document.getElementById("Helper:QuickDrop"+itemInvId).addEventListener('click', Helper.quickDropItem, true);
-					}
-					if (showQuickSendLinks) {
-						document.getElementById("Helper:QuickSend"+itemInvId).addEventListener('click', Helper.quickSendItem, true);
-					}
+				theTextNode.innerHTML = preText +
+					theTextNode.innerHTML +
+					postText1 +
+					postText2 +
+					postText3;
+				if (showQuickDropLinks) {
+					document.getElementById("Helper:QuickDrop"+itemInvId).addEventListener('click', Helper.quickDropItem, true);
+				}
+				if (showQuickSendLinks) {
+					document.getElementById("Helper:QuickSend"+itemInvId).addEventListener('click', Helper.quickSendItem, true);
 				}
 			}
 		}
