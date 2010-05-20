@@ -2996,9 +2996,9 @@ var Helper = {
 		var content = document.getElementById("Helper.entityTableOutput");
 		if (!Helper.entityLogTable || !content) {return;}
 		GM_addStyle(
-			'.HelperMonsterLogRow1 {background-color:#e7c473;font-size:xx-small}\n' +
+			'.HelperMonsterLogRow1 {background-color:#e7c473;font-size:small}\n' +
 			'.HelperMonsterLogRow1:hover {background-color:white}\n' +
-			'.HelperMonsterLogRow2 {background-color:#e2b960;font-size:xx-small}\n' +
+			'.HelperMonsterLogRow2 {background-color:#e2b960;font-size:small}\n' +
 			'.HelperMonsterLogRow2:hover {background-color:white}');
 		
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011; color:white;">'+
@@ -3006,7 +3006,7 @@ var Helper = {
 			'<td width="10%" nobr>[<span id="Helper.clearEntityLog">Clear</span>]</td>'+
 			'</tr>' +
 			'</table>'+
-			'<table id="Helper:EntityInfo" cellspacing="1" cellpadding="2" border="0" style="font-size:xx-small;"><tr style="background-color:#e2b960;">' +
+			'<table id="Helper:EntityInfo" cellspacing="1" cellpadding="2" border="0" style="font-size:small;"><tr style="background-color:#e2b960;">' +
 			'<th width="25%" align="left" sortkey="name" colspan="2">Entity</th>' +
 			'<th align="center" sortkey="key2">Class</th>' +
 			'<th align="center" sortkey="key3" sorttype="number">Lvl</th>' +
@@ -3016,7 +3016,7 @@ var Helper = {
 			'<th align="center">Damage</th>' +
 			'<th align="center">HP</th>' +
 			//'<th align="center">Gold</th>' +
-			'<th align="center">Enchantments</th>' +
+			'<th align="center">Enhancements</th>' +
 			'</tr>';
 		for (var k=0;k<Helper.entityLogTable.entity.length;k++) {
 			result += '<tr class="HelperMonsterLogRow'+(1+k % 2)+'"><td align="center"><img width=40 height=40 ' +
@@ -3030,9 +3030,9 @@ var Helper = {
 			for (i = 10; i < 11; i++) {
 				var entityInformationValue = Helper.entityLogTable.entity[k]["key"+i];
 				if (!entityInformationValue) {
-					result += '<td align="center" style="color:gray;">**Missing**</td>';
+					result += '<td align="center" style="font-size:small; color:gray;">**Missing**</td>';
 				} else {
-					result += '<td align="center">' + entityInformationValue + '</td>';
+					result += '<td align="center" style="font-size:x-small;>' + entityInformationValue + '</td>';
 				}
 			}
 		}
@@ -6749,7 +6749,7 @@ var Helper = {
 				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
 				GM_xmlhttpRequest({
 					method: 'GET',
-					url: groupJoinURL,
+					url: System.server + groupJoinURL,
 					headers: {
 						"User-Agent": navigator.userAgent,
 						"Referer": document.location
