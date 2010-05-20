@@ -3010,6 +3010,9 @@ var Helper = {
 		case 110: // mini map [n]
 			Helper.displayMiniMap();
 			break;
+		case 78: // auto move in mini map [N]
+			Helper.autoMoveMiniMap();
+			break;
 		case 62: // move to next page [>]
 		case 60: // move to prev page [<]
 			Helper.movePage({62:'>', 60:'<'}[r]);
@@ -4861,11 +4864,7 @@ var Helper = {
 
 	injectGuildInventoryManager: function() {
 		var content=Layout.notebookContent();
-		var guildItemCount = "unknown"
-		unsafeWindow.changeMenu(0,'menu_character');
-		unsafeWindow.changeMenu(5,'menu_guild');
-		unsafeWindow.changeMenu(0,'menu_character');
-		// I don't know why changeMenu(0) needs to be called twice, but it seems it does...
+		var guildItemCount = "unknown";
 		Helper.guildinventory=System.getValueJSON("guildinventory");
 		content.innerHTML=Helper.makePageHeader('Faction Inventory Manager','takes a while to refresh so only do it if you really need to',
 				'Helper:GuildInventoryManagerRefresh','Refresh')+
@@ -4896,9 +4895,6 @@ var Helper = {
 
 	injectOnlinePlayers: function() {
 		var content=Layout.notebookContent();
-		unsafeWindow.changeMenu(0,'menu_character');
-		unsafeWindow.changeMenu(2,'menu_actions');
-		unsafeWindow.changeMenu(0,'menu_character');
 
 		var lastCheck=GM_getValue("lastOnlineCheck")
 		var now=(new Date()).getTime();
@@ -7256,11 +7252,10 @@ var Helper = {
 		}
 
 		if (miniMap.style.display != "") {
-			if (Helper.levelName == GM_getValue("miniMapName")) {
+			var miniMapName = GM_getValue("miniMapName");
+			if (miniMapName && Helper.levelName == miniMapName) {
 				miniMap.innerHTML = GM_getValue("miniMapSource");
-				Helper.markPlayerOnMiniMap();
-				Helper.toogleMiniMapPOI();
-				miniMap.style.display = "";
+				Helper.addMiniMapExtras(miniMap);
 			} else {
 				System.xmlhttp("index.php?cmd=world&subcmd=map", Helper.loadMiniMap, true);
 			}
@@ -7279,13 +7274,82 @@ var Helper = {
 		doc = doc.replace(/<table[^>]*><tbody><tr[^>]*><td[^>]*><\/td><\/tr><\/tbody><\/table>/g,'');
 		doc = doc.replace(/width="65"/g, 'width="' + size + '"').replace(/height="65"/g, 'height="' + size + '"');
 		miniMap.innerHTML = doc;
+		Helper.addMiniMapExtras(miniMap);
 
+		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
+		GM_setValue("miniMapSource", doc);
+	},
+	
+	addMiniMapExtras: function(miniMap) {
 		Helper.markPlayerOnMiniMap();
 		Helper.toogleMiniMapPOI();
+		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
+		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
+		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
+			"<br/><h1 onmouseover=\"Tip('Click on the player icon and left click drag the path you want to walk. If you walk into a wall or make an error, " +
+				"close and reopen the mini map and start again. Push N (capital n) to activate the auto-walk and watch the mini map as you walk to your " +
+				"new location. The screen will refresh when you get there.');\">Auto-Walk</h1></span>";
+		Helper.miniMapTableEvents();
 		miniMap.style.display = "";
-
-		GM_setValue("miniMapName", Helper.levelName);
-		GM_setValue("miniMapSource", doc);
+	},
+	
+	miniMapTableEvents: function(){
+		Helper.mouse = 0;
+		Helper.moveList=[Helper.position()];
+		document.getElementById('miniMap').addEventListener("mouseup", function(e){Helper.mouse = 0},false);
+		// collect table cells from the drawing_table div element  
+		var td = document.getElementById('miniMap').getElementsByTagName('td');  
+		// attach onMouseDown and onMouseOver event for collected table cells  
+		for (var i=0; i<td.length; i++){
+			td[i].addEventListener("mousedown", Helper.mousedown, true);
+			// colorize table cell if left mouse button is pressed  
+			td[i].addEventListener("mouseover", function (e){if (Helper.mouse == 1) Helper.markPos(this);}, true);
+		}  
+	},
+	
+	mousedown: function (evt){  
+		// needed for FF to disable dragging 
+		evt.preventDefault();
+		// set pressed mouse button 
+		Helper.mouse = evt.which;
+		// colorize pixel on mousedown event for TD element
+		if (this.tagName == 'TD' && Helper.mouse == 1) Helper.markPos(this);
+	},
+	
+	markPos: function(td) {
+		var pos={'X':td.cellIndex,'Y':td.parentNode.rowIndex};
+		if (!Helper.moveList[0]) return;
+		var lastPos=Helper.moveList[Helper.moveList.length - 1];
+		var dx=pos.X-lastPos.X, dy=pos.Y-lastPos.Y;
+		if (dx>=-1 && dx <=1 && dy>=-1 && dy<=1 && (dx!=0 || dy!=0)) {
+			Helper.moveList.push(pos);
+			td.innerHTML='';
+			td.style.backgroundColor = "red";
+		}
+	},
+	
+	autoMoveMiniMap: function() {
+		if (Helper.moveList && Helper.moveList.length > 1)
+			System.xmlhttp("index.php?cmd=world&subcmd=move&x="+Helper.moveList[1].X+"&y="+Helper.moveList[1].Y,
+				Helper.autoMoveNext, 1);
+	},
+	
+	autoMoveNext: function(responseText, id) {
+		var currentPos = "("+Helper.moveList[id].X+", "+Helper.moveList[id].Y+")";
+		if (responseText.indexOf(currentPos)<0) {
+			alert("Cannot move via " + currentPos);
+			window.location = window.location;
+		} else {
+			// update current pos
+			Helper.markPosOnMiniMap(Helper.moveList[id]);
+			// move next
+			var nextId = id+1;
+			if (nextId < Helper.moveList.length)
+				System.xmlhttp("index.php?cmd=world&subcmd=move&x="+Helper.moveList[nextId].X+"&y="+Helper.moveList[nextId].Y,
+					Helper.autoMoveNext, nextId);
+			else
+				window.location = window.location;
+		}
 	},
 	
 	toogleMiniMapPOI: function() {
@@ -7321,10 +7385,15 @@ var Helper = {
 	},
 
 	markPlayerOnMiniMap: function() {
-		var miniMap = document.getElementById("miniMap");
 		var posit = Helper.position();
-		if (!miniMap || !posit) return;
-		var position = miniMap.firstChild.rows[posit.Y].cells[posit.X];
+		if (!posit) {return;}
+		Helper.markPosOnMiniMap(posit);
+	},
+	
+	markPosOnMiniMap: function(posit) {
+		var miniMapTable = document.getElementById("miniMapTable");
+		if (!miniMapTable) return;
+		var position = miniMapTable.rows[posit.Y].cells[posit.X];
 		var background = position.firstChild.src;
 		position.innerHTML = '<center><img width=16 height=16 src="' + System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
 		position.style.backgroundImage = 'url("' + background + '")';
