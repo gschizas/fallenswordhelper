@@ -143,6 +143,9 @@ var Helper = {
 		
 		System.setDefault("enableMaxGroupSizeToJoin", true);
 		System.setDefault("maxGroupSizeToJoin", 11);
+		
+		System.setDefault("enableTitanLog", false);
+		System.setDefault("titanLogRefreshTime", 5);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"glove"},
@@ -362,6 +365,7 @@ var Helper = {
 			Helper.injectJoinAllLink();
 			Helper.changeGuildLogHREF();
 			Helper.injectTHsearch();
+			Helper.updateTitanLogs();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
@@ -8679,6 +8683,11 @@ var Helper = {
 			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
 				'Max Size: <input name="maxGroupSizeToJoin" size="1" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
+				'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' + 
+				'will mean that it will not refresh until the next page load after that many minutes have elapsed.') + 
+				':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
+				'<input name="titanLogRefreshTime" size="1" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8870,6 +8879,9 @@ var Helper = {
 		
 		System.saveValueForm(oForm, "enableMaxGroupSizeToJoin");
 		System.saveValueForm(oForm, "maxGroupSizeToJoin");
+		
+		System.saveValueForm(oForm, "enableTitanLog");
+		System.saveValueForm(oForm, "titanLogRefreshTime");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -9632,6 +9644,7 @@ var Helper = {
 
 	injectScouttower: function() {
 		Helper.injectScouttowerBuffLinks();
+		Helper.parseScoutTower();
 	},
 
 	injectScouttowerBuffLinks: function() {
@@ -11359,6 +11372,113 @@ var Helper = {
 		messageCell.innerHTML = result;
 		
 		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
+	},
+	
+	updateTitanLogs: function() {
+		if (!GM_getValue("enableTitanLog")) return;
+		//need timer function
+		var titanLogRefreshTime = GM_getValue("titanLogRefreshTime");
+		var titanLog = System.getValueJSON("titanLog");
+		if (titanLog && titanLog.lastUpdate) {
+			if ((new Date()).getTime() - titanLog.lastUpdate.getTime() > (titanLogRefreshTime * 60 * 1000)) {
+				//bring up the scout tower page and parse it
+				//index.php?cmd=guild&subcmd=scouttower
+				System.xmlhttp("index.php?cmd=guild&subcmd=scouttower", Helper.parseScoutTower);
+			}
+		}
+	},
+	
+	parseScoutTower: function(responseText) {
+		if (responseText) {
+			var doc = System.createDocument(responseText);
+			var titanTable = System.findNode("//table[tbody/tr/td/font[.='Titan']]", doc);
+		} else {	
+			var titanTable = System.findNode("//table[tbody/tr/td/font[.='Titan']]");
+		}
+		var titanLog = System.getValueJSON("titanLog");
+		if (!titanLog) titanLog = {}, titanLog.titans = [];
+		if (titanTable) {
+			var titanName = "", titanRealm = "", titanHP = "";
+			for (var i=1; i<titanTable.rows.length; i++) { //ignore title row
+				var titan = {};
+				var aRow = titanTable.rows[i];
+				if (aRow.cells[3]) { // titan row
+					titan.name = aRow.cells[0].firstChild.getAttribute('title');
+					titan.realm = aRow.cells[1].textContent;
+					titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
+					titan.currentHP = titanHP[1]*1;
+					titan.maxHP = titanHP[2]*1;
+					titan.firstRow = aRow.innerHTML;
+					titan.nextRow = titanTable.rows[i+1].innerHTML;
+
+					//if the titan is already in the array, then update the record
+					var titanFoundInLog = false;
+					for (var j=0; j<titanLog.titans.length; j++) {
+						if (titan.name == titanLog.titans[j].name && titan.realm == titanLog.titans[j].realm && titan.maxHP == titanLog.titans[j].maxHP) {
+							if (titan.currentHP < titanLog.titans[j].currentHP) titanLog.titans.splice(j,1,titan);
+							titanFoundInLog = true;
+							break;
+						}
+					}
+					
+					//if not already in the array, then add the titan to the array
+					if (!titanFoundInLog) {
+						titanLog.titans.push(titan);
+					}
+				}
+			}
+			//if there are more than 20 titans in the log, then purge the oldest ones
+			if (titanLog.titans.length > 19) {
+				titanLog.titans.splice(0, titanLog.length - 19);
+			}
+			
+			//save the titanLog
+			titanLog.lastUpdate = new Date();
+			System.setValueJSON("titanLog", titanLog);
+			
+			//if on the scout tower screen, show the log
+			if (location.search == "?cmd=guild&subcmd=scouttower") {
+				var newRow = titanTable.insertRow(-1);
+				newRow.innerHTML = '<td bgcolor="#cd9e4b" style="height: 1px;" colspan="4">Killed Titan History</td>';
+				for (var j=titanLog.titans.length-1; j>=0; j--) {
+					var titanLogTitan = {};
+					titanLogTitan.name = titanLog.titans[j].name;
+					titanLogTitan.realm = titanLog.titans[j].realm;
+					titanLogTitan.maxHP = titanLog.titans[j].maxHP;
+					//if the titan is already on the screen, then don't display it again
+					var displayTitan = true;
+					for (var i=1; i<titanTable.rows.length; i++) {
+						var aRow = titanTable.rows[i];
+						if (aRow.cells[3]) { // titan row
+							var scoutTowerTitan = {};
+							scoutTowerTitan.name = aRow.cells[0].firstChild.getAttribute('title');
+							scoutTowerTitan.realm = aRow.cells[1].textContent;
+							titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
+							scoutTowerTitan.maxHP = titanHP[2]*1;
+							if (titanLogTitan.name == scoutTowerTitan.name && titanLogTitan.realm == scoutTowerTitan.realm 
+								&& titanLogTitan.maxHP == scoutTowerTitan.maxHP) {
+								displayTitan = false;
+								break;
+							}
+						}
+					}
+					if (displayTitan) {
+						var newRow = titanTable.insertRow(-1);
+						newRow.innerHTML = titanLog.titans[j].firstRow;
+						newRow = titanTable.insertRow(-1);
+						newRow.innerHTML = titanLog.titans[j].nextRow;
+						newRow = titanTable.insertRow(-1);
+						newRow.innerHTML = '<td height="2" colspan="3"></td>';
+						newRow = titanTable.insertRow(-1);
+						newRow.innerHTML = '<td bgcolor="#cd9e4b" style="height: 1px;" colspan="4"></td>';
+						newRow = titanTable.insertRow(-1);
+						newRow.innerHTML = '<td height="2" colspan="3"></td>';
+					}
+				}
+			}
+		}
+
+
 	}
 };
 
