@@ -1295,15 +1295,15 @@ var Helper = {
 			"<tr><td>Number of Defenders:</td><td>" + defenderCount + "</td></tr>" +
 			"<tr><td>Defending Guild Relic Count:</td><td title='relicCount'>0</td></tr>" +
 			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
-			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
-			"<tr style='display:none;'><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Armor:</td><td align='right' title='LDarmorValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
-			"<tr style='display:none;'><td align='right' style='color:brown;'>LDFlinchLevel:</td><td align='right' title='LDFlinchLevel'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td colspan='2' style='border-top:2px black solid;'>Lead Defender Full Stats</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>Attack:</td><td align='right' title='LDattackValue'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>Defense:</td><td align='right' title='LDdefenseValue'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>Armor:</td><td align='right' title='LDarmorValue'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>Damage:</td><td align='right' title='LDdamageValue'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>HP:</td><td align='right' title='LDhpValue'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>Processed:</td><td align='right' title='LDProcessed'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>LDFlinchLevel:</td><td align='right' title='LDFlinchLevel'>0</td></tr>" +
 			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Attack:</td><td align='right' title='attackValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Defense:</td><td align='right' title='defenseValue'>0</td></tr>" +
@@ -1334,10 +1334,10 @@ var Helper = {
 				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName,"playerId":memberId});
 			}
 			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
-				"<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
-				"<tr style='display:none;'><td align='right' style='color:brown;'>OfflinePlayersProcessed:</td><td align='right' title='offlinePlayersProcessed'>0</td></tr>" +
+				"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
+				"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>OfflinePlayersProcessed:</td><td align='right' title='offlinePlayersProcessed'>0</td></tr>" +
 				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2>Processing ...</td></tr>" +
-				"<tr title='offlinePlayerListControl' style='display:none;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>";
+				"<tr title='offlinePlayerListControl' style='display:none; visibility:hidden;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>";
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
@@ -1355,7 +1355,9 @@ var Helper = {
 			var offlinePlayerListControl = System.findNode("//tr[@title='offlinePlayerListControl']");
 			var offlinePlayerListControlTemp = System.findNode("//tr[@title='offlinePlayerListControlTemp']");
 			offlinePlayerListControl.style.display = "block";
+			offlinePlayerListControl.style.visibility = "visible";
 			offlinePlayerListControlTemp.style.display = "none";
+			offlinePlayerListControlTemp.style.visibility = "hidden";
 		}
 		if (!lastActivity || lastActivity.innerHTML == 'Last Activity: Inactive Account') {
 			offlinePlayerList.innerHTML = offlinePlayerList.innerHTML.replace(playerName + " ","");
@@ -7326,7 +7328,7 @@ var Helper = {
 		var inputTable = activateInput.nextSibling.nextSibling;
 		var injectHere = inputTable.rows[3].cells[0];
 		injectHere.align = "center";
-		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Sustain level:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
 		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
 		if (!furyCasterText) {return;}
 		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
@@ -7334,7 +7336,7 @@ var Helper = {
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		var furyCasterColor = "lime";
 		if (furyCasterLevel < 100) furyCasterColor = "red";
-		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Your Fury Caster level:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span>";
 		var hasBuffMasterBuff = System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc);
 		if (hasBuffMasterBuff) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
@@ -7343,6 +7345,15 @@ var Helper = {
 		}
 		else {
 			injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> <span style='color:red;'>Off</span>";
+		}
+		var hasExtendBuff = System.findNode("//img[contains(@onmouseover,'Extend')]", doc);
+		if (hasExtendBuff) {
+			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Extend:</span>	<span style='color:lime;'>On</span>";
+			var ExtendTimeToExpire = hasExtendBuff.parentNode.nextSibling.nextSibling.innerHTML;
+			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + ExtendTimeToExpire +")</span>";
+		}
+		else {
+			injectHere.innerHTML += " <span style='color:orange;'>Extend:</span> <span style='color:red;'>Off</span>";
 		}
 		var canCastCounterAttack = System.findNode("//td/font[contains(.,'Counter Attack')]");
 		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
