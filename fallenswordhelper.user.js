@@ -366,6 +366,7 @@ var Helper = {
 			Helper.changeGuildLogHREF();
 			Helper.injectTHsearch();
 			Helper.updateTitanLogs();
+			Helper.injectHomePageTwoLink();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
@@ -1334,10 +1335,10 @@ var Helper = {
 				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName,"playerId":memberId});
 			}
 			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
+				"<tr title='offlinePlayerListControl' style='display:none; visibility:hidden;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>" +
 				"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
 				"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>OfflinePlayersProcessed:</td><td align='right' title='offlinePlayersProcessed'>0</td></tr>" +
-				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2>Processing ...</td></tr>" +
-				"<tr title='offlinePlayerListControl' style='display:none; visibility:hidden;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>";
+				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2>Processing ...</td></tr>";
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
@@ -1393,8 +1394,8 @@ var Helper = {
 		if (relicCount == 1) {
 			relicMultiplier = 1.5;
 		}
-		else if (relicCount >= 3) {
-			relicMultiplier = 0.9;
+		else if (relicCount >= 2) {
+			relicMultiplier = 1.1 - (relicCount/10);
 		}
 		var LDProcessedValue = System.findNode("//td[@title='LDProcessed']");
 		if (LDProcessedValue.innerHTML == "1") {
@@ -1571,8 +1572,8 @@ var Helper = {
 		if (relicCount == 1) {
 			relicMultiplier = 1.5;
 		}
-		else if (relicCount >= 3) {
-			relicMultiplier = 0.9;
+		else if (relicCount >= 2) {
+			relicMultiplier = 1.1 - (relicCount/10);
 		}
 
 		if (defenderCount === 0 && relicProcessedValue.innerHTML == "1") {
@@ -3701,8 +3702,8 @@ var Helper = {
 									for (var idx = 0; idx < theBuffPack["size"]; idx++) {
 										var nickname = (theBuffPack["nickname"][idx]? theBuffPack["nickname"][idx]:"");
 										if (nickname.toLowerCase().trim() == buffsSent[j].toLowerCase().trim()) {
-											//64 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
-											quickBuff += (64+idx) + ";";
+											//82 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
+											quickBuff += (82+idx) + ";";
 											break;
 										}
 									}
@@ -6890,9 +6891,8 @@ var Helper = {
 			addr = new String(window.location).substring(buffIndex + 7);
 			addr = addr.substring(0, addr.length - 1).split(";");
 		}
+		var buffPacksToUse = new Array();
 		if (skillNodes) {
-
-			var buffPacksToUse = new Array();
 			var targetPlayers = System.findNode("//input[@name='targetPlayers']");
 			var targetPlayersCount = targetPlayers.value.split(",").length*1;
 			var newStaminaTotal = 0;
@@ -6904,14 +6904,15 @@ var Helper = {
 					if (buffList[k].name == skillName) {
 						if (addr) {
 							for (var p = 0; p < addr.length; p++) {
+
 								if (addr[p] == k) {
 
 									newStaminaTotal += buffList[k].stamina*1;
 									skillNodes[i].checked = true;
-								} else if (addr[p] >= 64) {
+								} else if (addr[p] >= 82) {
 									if (theBuffPack) {
 
-										var bpIndex = addr[p] - 64;
+										var bpIndex = addr[p] - 82;
 										var bpButton = document.getElementById("bpSelect" + bpIndex);
 
 										if (bpButton) {
@@ -6925,7 +6926,6 @@ var Helper = {
 											if (!foundMe) {
 												buffPacksToUse.push(bpIndex);
 											}
-
 											continue;
 										}
 									}
@@ -11490,6 +11490,13 @@ var Helper = {
 		}
 
 
+	},
+	
+	injectHomePageTwoLink: function() {
+		var viewNewsArchiveLink = System.findNode("//a[@href='index.php?cmd=&subcmd=viewarchive']");
+		if (viewNewsArchiveLink) {
+			viewNewsArchiveLink.parentNode.innerHTML += '&nbsp;<a href="index.php?cmd=&subcmd=viewarchive&subcmd2=&page=2&search_text=">View Archive Page 2</a>'
+		}
 	}
 };
 
