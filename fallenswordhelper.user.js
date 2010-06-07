@@ -1395,7 +1395,7 @@ var Helper = {
 			relicMultiplier = 1.5;
 		}
 		else if (relicCount >= 2) {
-			relicMultiplier = 1.1 - (relicCount/10);
+			relicMultiplier = Math.round((1.1 - (relicCount/10))*100)/100;
 		}
 		var LDProcessedValue = System.findNode("//td[@title='LDProcessed']");
 		if (LDProcessedValue.innerHTML == "1") {
@@ -1573,7 +1573,7 @@ var Helper = {
 			relicMultiplier = 1.5;
 		}
 		else if (relicCount >= 2) {
-			relicMultiplier = 1.1 - (relicCount/10);
+			relicMultiplier = Math.round((1.1 - (relicCount/10))*100)/100;
 		}
 
 		if (defenderCount === 0 && relicProcessedValue.innerHTML == "1") {
