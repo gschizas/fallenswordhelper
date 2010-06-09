@@ -10908,11 +10908,25 @@ var Helper = {
 		for (i=0;i<memberList.members.length;i++) {
 			var member=memberList.members[i];
 			curRank = member.rank.replace(/Profile Unavailable/ig,"");
-			if (curRank != prevRank || i == memberList.members.length-1) {
+			if (curRank != prevRank) {
 				aRank = {};
 				aRank.rank = prevRank;
+				aRank.names = tempList;
+				rankList.rank.push(aRank);
+				tempList = [];
 				//last name on the list, so add it to the list of names
-				if (i == memberList.members.length-1) tempList.push(" " + member.name);
+				if (i == memberList.members.length-1) {
+					aRank = {};
+					aRank.rank = curRank;
+					tempList.push(" " + member.name);
+					aRank.names = tempList;
+					rankList.rank.push(aRank);
+					tempList = [];
+				}
+			} else if (curRank == prevRank && i == memberList.members.length-1) {
+				aRank = {};
+				aRank.rank = prevRank;
+				tempList.push(" " + member.name);
 				aRank.names = tempList;
 				rankList.rank.push(aRank);
 				tempList = [];
