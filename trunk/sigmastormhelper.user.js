@@ -7474,7 +7474,7 @@ var Helper = {
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		if (!auctionTable) return;
 		// add image & tooltip of the auctioned item
-		var bidEntryTable = auctionTable.rows[5].cells[0].firstChild.nextSibling;
+		var bidEntryTable = auctionTable.rows[6].cells[0].firstChild.nextSibling;
 		var itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)&imgid=([^&]*)&txt=(.*)/.exec(window.location.search)
 		if (itemStats) {
 			var invId = itemStats[1];
@@ -7490,7 +7490,7 @@ var Helper = {
 				unescape(txt) + '</div>';
 		}
 
-		var newRow = auctionTable.insertRow(6);
+		var newRow = auctionTable.insertRow(7);
 		var newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
 		newCell.align = "center";
@@ -8272,7 +8272,7 @@ var Helper = {
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		if (!auctionTable) return;
 
-		var newRow = auctionTable.insertRow(7);
+		var newRow = auctionTable.insertRow(8);
 		var newCell = newRow.insertCell(0);
 		newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
