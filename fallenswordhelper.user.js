@@ -74,7 +74,7 @@ var Helper = {
 		System.setDefault("hideGuildInfoMessage", false);
 		System.setDefault("hideGuildInfoBuff", false);
 
-		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} please?");
+		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} for {cost} please?");
 		System.setDefault("renderSelfBio", true);
 		System.setDefault("showBPSlotsOnProfile", false);
 		System.setDefault("bioEditLines", 10);
@@ -3790,12 +3790,14 @@ var Helper = {
 						aRow.style.color = "gray";
 						hideNextRows = 3;
 					}
-					if (aRow.cells[2].textContent.charAt(0) == '\'') {
+					if (aRow.cells[2].textContent.charAt(0) == '\'' || aRow.cells[2].textContent.search("has invited the player") != -1) {
 						message = aRow.cells[2].innerHTML;
 						firstQuote = message.indexOf('\'');
+						var firstPart = '';
+						firstPart = message.substring(0,firstQuote);
 						secondQuote = message.indexOf('\'',firstQuote+1);
 						targetPlayerName = message.substring(firstQuote+1,secondQuote);
-						aRow.cells[2].innerHTML = '\'' +
+						aRow.cells[2].innerHTML = firstPart + '\'' +
 							'<a href="index.php?cmd=findplayer&subcmd=dofindplayer&target_username=' + targetPlayerName + '">' + targetPlayerName + '</a>' +
 							message.substring(secondQuote, message.length);
 					}
@@ -5504,8 +5506,11 @@ var Helper = {
 			if (total.unknown>0) totalText+=' ('+total.unknown+' buff(s) with unknown cost)';
 			html+='</table><b>Total: '+totalText+'</b>';
 			document.getElementById('buffCost').innerHTML='<br/><span onmouseover=\'Tip("'+html+'");\'>Estimated Cost: <b>'+totalText+'</b></span>';
-		} else
+			GM_setValue("buffCostTotalText", totalText);
+		} else {
 			document.getElementById('buffCost').innerHTML='';
+			GM_setValue("buffCostTotalText", '');
+		}
 	},
 
 	getBuffsToBuy: function(evt) {
@@ -8647,7 +8652,7 @@ var Helper = {
 				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
 				' Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
 			'<tr><td align="right">Buy Buffs Greeting' + Helper.helpLink('Buy Buffs Greeting', 'This is the default text to open a message with when asking to buy buffs. You can use {playername} to insert the target players name. You can also use' +
-				' {buffs} to insert the list of buffs') +
+				' {buffs} to insert the list of buffs. You can use {cost} to insert the total cost of the buffs.') +
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +
 			'<tr><td align="right">Show Stat Bonus Total' + Helper.helpLink('Show Stat Bonus Total', 'This will show a total of the item stats when you mouseover an item on the profile screen.') +
 				':</td><td><input name="showStatBonusTotal" type="checkbox" value="on"' + (GM_getValue("showStatBonusTotal")?" checked":"") + '></td></tr>' +
@@ -9450,11 +9455,16 @@ var Helper = {
 			var targetPlayer = System.findNode("//input[@name='target_player']").value;
 			var greetingText = GM_getValue("buyBuffsGreeting").trim();
 			var hasBuffTag = greetingText.indexOf("{buffs}") != -1;
+			var hasCostTag = greetingText.indexOf("{cost}") != -1;
 			greetingText = greetingText.replace(/{playername}/g, targetPlayer);
 			if (!hasBuffTag) {
 				System.findNode("//textarea[@name='msg']").value =  greetingText + " " + GM_getValue("buffsToBuy");
 			} else {
-				System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
+				if (!hasCostTag) {
+					System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
+				} else {
+					System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`").replace(/{cost}/g, GM_getValue("buffCostTotalText"));
+				}
 			}
 			GM_setValue("buffsToBuy", "");
 		}
