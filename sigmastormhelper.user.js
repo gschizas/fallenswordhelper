@@ -3349,10 +3349,10 @@ var Helper = {
 		var imageCell = isAuctionPage.parentNode;
 		var imageHTML = imageCell.innerHTML; //hold on to this for later.
 
-		var auctionTable = System.findNode("//td[contains(@background,'header_tradehub.jpg')]/../../..");
+		var auctionTable = System.findNode("//td[p[contains(.,'The Trade Hub is the centre')]]/../../..");
 
 		//Add functionality to hide the text block at the top.
-		var textRow = auctionTable.rows[1].cells[0];
+		var textRow = auctionTable.rows[0].cells[0];
 		textRow.innerHTML = '<table cellspacing=10><tr><td width=60%><span id=auctionTextControl>' + textRow.innerHTML + 
 			'</span></td><td id=quickSearchLayout style="text-align:center;color:#FFF380;background-color:black"></td></tr></table>';
 		textRow=document.getElementById("auctionTextControl");
@@ -3390,7 +3390,7 @@ var Helper = {
 		};
 
 		//insert another page change block at the top of the screen.
-		var insertPageChangeBlockHere = auctionTable.rows[4].cells[0];
+		var insertPageChangeBlockHere = auctionTable.rows[3].cells[0];
 		insertPageChangeBlockHere.parentNode.parentNode.parentNode.cellPadding = 0;
 
 		// auctionTable.setAttribute("background", "red");
@@ -7335,7 +7335,7 @@ var Helper = {
 	},
 	
 	autoMoveNext: function(responseText, id) {
-		var currentPos = "("+Helper.moveList[id].X+", "+Helper.moveList[id].Y+")";
+		var currentPos = "("+Helper.moveList[id].X+",\n\t\t\t\t\t\t\t\t\t\t"+Helper.moveList[id].Y+")";
 		if (responseText.indexOf(currentPos)<0) {
 			alert("Cannot move via " + currentPos);
 			window.location = window.location;
