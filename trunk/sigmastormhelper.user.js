@@ -535,6 +535,9 @@ var Helper = {
 			case "viewrecipe":
 				Helper.injectViewRecipe();
 				break;
+            default:
+                Helper.injectViewRecipeList();
+                break;
 			}
 			break;
 		case "message":
@@ -1377,6 +1380,19 @@ var Helper = {
 					'Invent '+document.getElementById('multiInventN').value+' times';
 			}, true);
 	},
+    
+    injectViewRecipeList: function() {
+        var node=System.findNode("//td[.='Recipe Name']");
+        if (!node) return;
+        node = node.parentNode.cells[0];
+        node.innerHTML = "<input type=checkbox name=rcpSelectAll id=rcpSelectAll>";
+        document.getElementById('rcpSelectAll').addEventListener("click", function() {
+                var value=document.getElementById('rcpSelectAll').checked;
+                var nodes = System.findNodes("//input[@name='recipe_selected[]']");
+                for (var i=0; i<nodes.length; i++)
+                    nodes[i].checked = value;
+            }, true);
+    },
 	
 	inventMulti: function() {
 		var n=System.intValue(document.getElementById('multiInventN').value);
@@ -5473,14 +5489,14 @@ var Helper = {
 		if (recipeRows) {
 			for (var i=0; i<recipeRows.length;i++) {
 				aRow = recipeRows[i];
-				var recipeLink = aRow.cells[1].firstChild.href;
+				var recipeLink = aRow.cells[2].firstChild.href;
 				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1]);
 				var recipe={
-					"img": aRow.cells[0].firstChild.src,
+					"img": aRow.cells[1].firstChild.src,
 					"link": recipeLink,
-					"name": aRow.cells[1].firstChild.textContent,
-					"type": aRow.cells[2].firstChild.textContent,
-					"level": parseInt(aRow.cells[3].firstChild.textContent),
+					"name": aRow.cells[2].firstChild.textContent,
+					"type": aRow.cells[3].firstChild.textContent,
+					"level": parseInt(aRow.cells[4].firstChild.textContent),
 					"id": recipeId};
 				output+="Found blueprint: "+ recipe.name
 				if (!Helper.recipeHash[recipeId]) {
@@ -7691,7 +7707,7 @@ var Helper = {
 	injectSelfBuff: function() {
 		var body = document.getElementsByTagName("body").item(0);
 		var skills = System.findNodes("//table[contains(@background, 'sigma2/skills/skillicon_bg')]");
-		var passiveSkillREG = /^(?:Unique DNA|Bite Mutation|Claw Mutation|Tentacle Mutation|Chomp Mutation|Combat Training|Psionic Sensitivity|Psionic Dart|Psionic Bolt|Sword of Psi|Psionic Missile|Reinforce Skeleton)$/
+		var passiveSkillREG = /^(?:Unique DNA|Bite Mutation|Claw Mutation|Tentacle Mutation|Chomp Mutation|Combat Training|Psionic Sensitivity|Sword of Psi|Reinforce Skeleton)$/
 		// should change this regexp to check on id, but I prefer the skill name for easy correction, and regexp is fast anyways
 		var result = "<table width=400 cellspacing=20 align=center>";
 		var count = 0;
