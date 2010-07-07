@@ -9782,7 +9782,7 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 		if (enableWantedList || enableActiveBountyList) {
 			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable) {
+			if (mainTable.rows[2]) {
 				var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 				if (enableWantedList) {
 					if (!injectHere)
@@ -10037,7 +10037,7 @@ var Helper = {
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
 			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable) {
+			if (mainTable.rows[2]) {
 				var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 				if (!injectHere) {return;}
 				var info = injectHere.insertRow(0);

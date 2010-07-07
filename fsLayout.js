@@ -132,7 +132,7 @@ var Layout = {
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src);
 		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-		if (mainTable) {
+		if (mainTable.rows[2]) {
 			var dest = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 			if (!dest) return;
 			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
@@ -150,7 +150,7 @@ var Layout = {
     },
 
 	notebookContent: function() {
-		return System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='0' and @border='0']/..");
+		return System.findNode("//div[@class='innerContentMiddle']");
 	},
 
 	playerId: function() {
