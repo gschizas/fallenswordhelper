@@ -80,7 +80,7 @@ var Layout = {
 	hideBanner: function() {
 		if (!GM_getValue("hideBanner")) {
 			if (GM_getValue("showSTUpTop")) {
-				var overlayTable = System.findNode("//html/body/table/tbody/tr/td/table/tbody/tr/td");
+				var overlayTable = System.findNode("//div[@class='top_banner']");
 				if (overlayTable) {
 					var STnode = System.findNode("//font[contains(., 'Server:')]/nobr/b");
 					if (STnode) {
@@ -96,14 +96,9 @@ var Layout = {
 			}
 			return;
 		}
-		var bannerElement = System.findNode("//img[(@title='Fallen Sword RPG')]");
+		var bannerElement = System.findNode("//div[@class='top_banner']");
 		if (bannerElement) {
 			bannerElement.style.display = "none";
-		} else {
-			bannerElement = System.findNode("//html/body/table/tbody/tr/td[contains(@background,'top_banner_loggedin.jpg')]");
-			if (bannerElement) {
-				bannerElement.style.display = "none";
-			}
 		}
 	},
 
@@ -132,8 +127,8 @@ var Layout = {
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src);
 		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-		if (mainTable.rows[2]) {
-			var dest = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+		if (mainTable.rows[1]) {
+			var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 			if (!dest) return;
 			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
 			var info = dest.insertRow(startRow);
