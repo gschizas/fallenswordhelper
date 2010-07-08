@@ -3540,8 +3540,8 @@ var Helper = {
 		var lastCheckScreen = "last" + logScreen + "Check";
 		var localLastCheckMilli=GM_getValue(lastCheckScreen);
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
-
 		var chatTable = System.findNode("//table[@class='width_full']");
+		if (!chatTable) {chatTable = System.findNode("//table[tbody/tr/td[.='Message']]");}
 		if (!chatTable) {return;}
 
 		var localDateMilli = (new Date()).getTime();
@@ -3550,15 +3550,13 @@ var Helper = {
 
 		var newRow = chatTable.insertRow(1);
 		var newCell = newRow.insertCell(0);
-
-		for (var i=2;i<chatTable.rows.length;i+=4) {
+		for (var i=2;i<chatTable.rows.length;i+=2) {
 			var aRow = chatTable.rows[i];
-			//GM_log(aRow.innerHTML);
 			var addBuffTag = true;
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
-				cellContents = cellContents.substring(6,23); // fix for player log screen.
+				if (logScreen != 'Chat') cellContents = cellContents.substring(6,23); // fix for player log screen.
 				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
@@ -3574,8 +3572,8 @@ var Helper = {
 					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
 					aRow.cells[1].innerHTML += " <a style='color:blue;font-size:10px;' " +
 						Layout.quickBuffHref(playerID) + ">[b]</a>";
+				}
 			}
-		}
 		}
 		now=(new Date()).getTime();
 		GM_setValue(lastCheckScreen, now.toString());
@@ -3749,7 +3747,7 @@ var Helper = {
 				}
 			}
 			else {
-				var messageNameCell = aRow.firstChild.nextSibling.nextSibling.nextSibling;
+				var messageNameCell = aRow.cells[2];
 				if (messageNameCell) messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
 			}
 		}
@@ -9367,17 +9365,16 @@ var Helper = {
 		}
 		//will only insert if we have a buff list (when button on profile is clicked)
 		Helper.insertBuffsInMsg();
-		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
+		var injectHere = System.findNode("//div[@class='innerContentPage']");
 		var table = System.getValueJSON("quickMsg");
 
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
 
 		if (location.search.indexOf("&replyTo") != -1) {
-			var tableForInsert = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td/table/tbody/tr[2]/td/table");
-			var newRow = tableForInsert.insertRow(2);
+			var newDev = document.createElement("div")
+			injectHere.appendChild(newDev);
 			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
-			newRow.innerHTML = '<td>Replying To[<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg +
-			'</td>';
+			newDev.innerHTML = '<b>Replying To</b> [<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]: ' + msg;
 		}
 
 		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
@@ -9782,8 +9779,8 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 		if (enableWantedList || enableActiveBountyList) {
 			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable.rows[2]) {
-				var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			if (mainTable.rows[1]) {
+				var injectHere = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 				if (enableWantedList) {
 					if (!injectHere)
 						return;
@@ -10037,8 +10034,8 @@ var Helper = {
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
 			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable.rows[2]) {
-				var injectHere = mainTable.rows[2].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			if (mainTable.rows[1]) {
+				var injectHere = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 				if (!injectHere) {return;}
 				var info = injectHere.insertRow(0);
 				var cell = info.insertCell(0);
