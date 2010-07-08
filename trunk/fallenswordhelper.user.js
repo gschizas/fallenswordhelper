@@ -2003,8 +2003,7 @@ var Helper = {
 		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
-		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
-			"colspan='2'></td></tr>";
+		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr>";
 		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
 		var hasDeathDealer = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		if (hasDeathDealer || hasShieldImp) {
@@ -2065,7 +2064,7 @@ var Helper = {
 			}
 			replacementText += "<tr><td style='font-size:small; color:blue'>CA" + counterAttackLevel + " active</td></tr>";
 		}
-		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
+		replacementText += "<tr><td colspan='2' height='10'></td></tr>";
 		if (GM_getValue("showHuntingBuffs")) {
 			var buffs=GM_getValue("huntingBuffs");
 			var buffAry=buffs.split(",");
@@ -2081,16 +2080,17 @@ var Helper = {
 				replacementText += missingBuffs.join(", ");
 				replacementText += ")</span></td></tr>";
 			}
-			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><td height='1' bgcolor='#393527' colspan='2'></td></tr>";
+			replacementText += "<tr><td colspan='2' height='10'></td></tr>";
 			replacementText += "</table>";
 		}
 		replacementText += "</td>" ;
 
-		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
 		if (!injectHere) {return;}
 		//insert after kill all monsters image and text
-		newRow=injectHere.insertRow(2);
-		newRow.innerHTML=replacementText;
+		var newSpan = document.createElement("SPAN");
+		newSpan.innerHTML=replacementText;
+		injectHere.appendChild(newSpan);
 
 		if ((hasDeathDealer || hasShieldImp) && impsRemaining ===0) {
 			var recastImpAndRefresh=document.getElementById('Helper:recastImpAndRefresh');
@@ -2286,11 +2286,11 @@ var Helper = {
 		Helper.mapThis();
 		Helper.showMap(false);
 
-		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		/*var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
 		if (!injectHere) {return;}
 		var newRow=injectHere.insertRow(1);
 		var newCell=newRow.insertCell(0);
-		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
+		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");*/
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
@@ -2347,13 +2347,12 @@ var Helper = {
 		//quest tracker
 		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
 		if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
-			injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+			var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
 			if (!injectHere) {return;}
 			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
 			replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
-			replacementText += "<tr><td colspan='2' height='10'></td></tr><tr><tr><td height='1' bgcolor='#393527' " +
-				"colspan='2'></td></tr>";
+			replacementText += "<tr><td colspan='2' height='10'></td>";
 			for (var i = 0; i < questBeingTracked.length; i++) {
 
 				replacementText += "<tr><td style='font-size:small; color:black'><a id='qiLink" + i + "' href=" + questBeingTracked[i] + "></a>&nbsp;";
@@ -2361,7 +2360,6 @@ var Helper = {
 				replacementText += "<span findme='questinfo" + i + "'></span></td></tr>";
 				if (i != questBeingTracked.length - 1) {
 					replacementText += '<tr><td height="10" colspan="2"/></tr>' +
-					'<tr><td height="1" bgcolor="#393527" colspan="2"/></tr>'+
 					'<tr><td height="10" colspan="2"/></tr>';
 				}
 			}
@@ -2369,12 +2367,13 @@ var Helper = {
 			replacementText += "</table>";
 			replacementText += "</td>";
 
-			newRow=injectHere.insertRow(2);
-			newRow.innerHTML=replacementText;
+			var newSpan = document.createElement("SPAN");
+			newSpan.innerHTML=replacementText;
+			injectHere.appendChild(newSpan);
+
 			for (i = 0; i < questBeingTracked.length; i++) {
 				System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {"data" : i});
 			}
-
 		}
 
 
@@ -2727,7 +2726,7 @@ var Helper = {
 
 	prepareCombatLog: function() {
 		//if (!GM_getValue("showCombatLog")) {return;}
-		var reportsTable=System.findNode("//table[@width='320']/parent::*");
+		var reportsTable=System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
 		if (!reportsTable) {return;}
 		var tempLog=document.createElement("div");
 		tempLog.id="reportsLog";
@@ -9779,7 +9778,7 @@ var Helper = {
 		enableWantedList = GM_getValue("enableWantedList");
 		if (enableWantedList || enableActiveBountyList) {
 			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable.rows[1]) {
+			if (mainTable && mainTable.rows[1]) {
 				var injectHere = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 				if (enableWantedList) {
 					if (!injectHere)
@@ -10034,7 +10033,7 @@ var Helper = {
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
 			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable.rows[1]) {
+			if (mainTable && mainTable.rows[1]) {
 				var injectHere = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 				if (!injectHere) {return;}
 				var info = injectHere.insertRow(0);

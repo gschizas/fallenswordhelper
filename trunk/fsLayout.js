@@ -127,7 +127,7 @@ var Layout = {
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src);
 		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-		if (mainTable.rows[1]) {
+		if (mainTable && mainTable.rows[1]) {
 			var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
 			if (!dest) return;
 			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
