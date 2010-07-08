@@ -3541,7 +3541,7 @@ var Helper = {
 		var localLastCheckMilli=GM_getValue(lastCheckScreen);
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 
-		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var chatTable = System.findNode("//table[@class='width_full']");
 		if (!chatTable) {return;}
 
 		var localDateMilli = (new Date()).getTime();
@@ -3558,7 +3558,7 @@ var Helper = {
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
-				cellContents = cellContents.substring(0,17); // fix for player log screen.
+				cellContents = cellContents.substring(6,23); // fix for player log screen.
 				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
@@ -3583,7 +3583,7 @@ var Helper = {
 
 	addLogWidgets: function() {
 		var addAttackLinkToLog = GM_getValue('addAttackLinkToLog');
-		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var logTable = System.findNode("//table[@class='width_full']");
 		if (!logTable) {return;}
 		var memberList = System.getValueJSON("memberlist");
 		var memberNameString = "";
