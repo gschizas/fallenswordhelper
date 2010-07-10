@@ -2534,7 +2534,7 @@ var Helper = {
 	},
 
 	sendGoldToPlayer: function(){
-		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
 		if (!injectHere) {return;}
 		var recipient = GM_getValue("goldRecipient");
 		var amount = GM_getValue("goldAmount");
@@ -2549,11 +2549,11 @@ var Helper = {
 	},
 
 	goldToPlayerSent: function(responseText, callback) {
-		var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
+		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
 		if (!injectHere) {return;}
-		var newRow=injectHere.insertRow(1);
-		var newCell=newRow.insertCell(0);
-		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
+		var newSpan = document.createElement("SPAN");
+		injectHere.appendChild(newSpan);
+		newSpan.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		var info = Layout.infoBox(responseText);
 		if (info==="" || info==="You successfully sent gold!") {
 			var currentGoldSentTotal = GM_getValue("currentGoldSentTotal")*1;
@@ -2561,7 +2561,7 @@ var Helper = {
 			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
 			GM_setValue("currentGoldSentTotal", currentGoldSentTotal);
 		}
-		newCell.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
+		newSpan.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
 	},
 
 	insertQuickWear: function() {
@@ -5650,7 +5650,7 @@ var Helper = {
 		var lastCheck=GM_getValue("lastInventoryCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 5*60*1000);
+		var haveToCheck=((now - lastCheck) > 2*60*1000);
 		var refreshButton;
 		if (haveToCheck) {
 			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
@@ -6143,13 +6143,16 @@ var Helper = {
 			var itemPartOfSetNode=System.findNode("//font[contains(.,'Set Details')]", doc);
 			item.partOfSet=(itemPartOfSetNode)?true:false;
 
+			var durabilityNode=System.findNode("//tbody/tr/td[nobr/font[.='Durability:']]/../td[2]", doc);
+			item.durability=(durabilityNode)?durabilityNode.textContent:'0/100';
+
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
 				forgeCount++;
 			}
 			item.forgelevel=forgeCount;
 
-			item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-')-responseText.indexOf('<br>')-5);
+			item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -6195,6 +6198,7 @@ var Helper = {
 			'<th sortkey="hp">HP</th>' +
 			'<th sortkey="forgelevel" colspan="2">Forge</th>' +
 			'<th align="left" sortkey="craftlevel">Craft</th>' +
+			'<th align="right" sortkey="durability">Dur%</th>' +
 			'<th width="10"></th>';
 		var item, color;
 
@@ -6264,6 +6268,24 @@ var Helper = {
 						replace(/ring/gi,'').replace(/boots/gi,'').replace(/rune/gi,'').
 						replace(/the/gi,'').replace(/of/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
 			}
+			var craftColor = "";
+			switch(item.craftlevel) {
+				case 'Perfect': craftColor = '#00b600'; break;
+				case 'Excellent': craftColor = '#f6ed00'; break;
+				case 'Very Good': craftColor = '#f67a00'; break;
+				case 'Good': craftColor = '#f65d00'; break;
+				case 'Average': craftColor = '#f64500'; break;
+				case 'Poor': craftColor = '#f61d00'; break;
+				case 'Very Poor': craftColor = '#b21500'; break;
+				case 'Uncrafted': craftColor = '#666666'; break;
+			}
+			
+			var durabilityPercent = "";
+			if (item.durability) {
+				var durabilityExec = /(.*)\/(.*)/.exec(item.durability);
+				durabilityPercent = parseInt(100*durabilityExec[1]/durabilityExec[2],10);
+				var durabilityColor = (durabilityPercent<20)?'red':'gray';
+			}
 			result+='</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
@@ -6275,7 +6297,8 @@ var Helper = {
 				'<td align="right">' + item.hp + '</td>' +
 				'<td align="right">' + item.forgelevel + '</td>' +
 				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>":"") + '</td>' +
-				'<td align="left">' + item.craftlevel + '</td>' +
+				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craftlevel + '</span>' + '</td>' +
+				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>' +
 				'<td></td>' +
 				'</tr>';
 		}
@@ -6353,18 +6376,41 @@ var Helper = {
 		Helper.recipebook.recipe = [];
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		output.innerHTML='<br/>Parsing inventing screen ...<br/>';
+		var currentFolder = 1;
+		GM_setValue("currentFolder", currentFolder);
+
 		System.xmlhttp('index.php?cmd=inventing&page=0', Helper.parseInventingPage, {"page": 0});
+
 	},
 
 	parseInventingPage: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
+
+		var	folderIDs = new Array();
+		Helper.folderIDs = folderIDs; //clear out the array before starting.
+		var currentFolder = GM_getValue("currentFolder");
+		var folderLinks = System.findNodes("//a[contains(@href,'index.php?cmd=inventing&folder_id=')]", doc);
+		//if folders are enabled then save the ID's in an array
+		if (folderLinks) {
+			for (i=0; i<folderLinks.length;i++) {
+				folderLink = folderLinks[i];
+				href = folderLink.getAttribute("href");
+				var folderID = /folder_id=([-0-9]+)/.exec(href)[1]*1;
+				folderIDs.push(folderID);
+				Helper.folderIDs = folderIDs;
+			}
+		}
+		folderCount = Helper.folderIDs.length;
+		folderID = Helper.folderIDs[currentFolder-1];
+		
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentPage = callback.page;
 		var pages=System.findNode("//select[@name='page']", doc);
 		if (!pages) {return;}
 		var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
 
-		output.innerHTML += 'Page ' + currentPage + '...<br/>';
+		var nextPage=currentPage+1;
+		output.innerHTML += 'Parsing folder '+ currentFolder + ' ... Page ' + nextPage + '... <br/>';
 
 		if (recipeRows) {
 			for (var i=0; i<recipeRows.length;i++) {
@@ -6380,10 +6426,13 @@ var Helper = {
 				Helper.recipebook.recipe.push(recipe);
 			}
 		}
-
-		var nextPage=currentPage+1; //pages[currentPage];
-		if (nextPage<pages.options.length) {
-			System.xmlhttp('index.php?cmd=inventing&page='+nextPage, Helper.parseInventingPage, {"page": nextPage});
+		if ((nextPage<=pages.options.length && currentFolder!=folderCount) || currentFolder<folderCount) {
+			if (nextPage==pages.options.length && currentFolder<folderCount) {
+				nextPage = 0;
+				folderID = Helper.folderIDs[currentFolder];
+				GM_setValue("currentFolder", currentFolder+1);
+			}
+			System.xmlhttp('index.php?cmd=inventing&page='+nextPage+'&folder_id='+(folderID), Helper.parseInventingPage, {"page": nextPage});
 		}
 		else {
 			output.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
