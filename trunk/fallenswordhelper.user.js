@@ -148,15 +148,15 @@ var Helper = {
 		System.setDefault("titanLogRefreshTime", 5);
 
 		Helper.itemFilters = [
-		{"id":"showGloveTypeItems", "type":"glove"},
-		{"id":"showHelmetTypeItems", "type":"helm"},
-		{"id":"showAmuletTypeItems", "type":"amulet"},
-		{"id":"showWeaponTypeItems", "type":"weapon"},
-		{"id":"showAmorTypeItems", "type":"armor"},
-		{"id":"showShieldTypeItems", "type":"shield"},
-		{"id":"showRingTypeItems", "type":"ring"},
-		{"id":"showBootTypeItems", "type":"boot"},
-		{"id":"showRuneTypeItems", "type":"rune"}
+		{"id":"showGloveTypeItems", "type":"Gloves"},
+		{"id":"showHelmetTypeItems", "type":"Helmet"},
+		{"id":"showAmuletTypeItems", "type":"Amulet"},
+		{"id":"showWeaponTypeItems", "type":"Weapon"},
+		{"id":"showAmorTypeItems", "type":"Armor"},
+		{"id":"showShieldTypeItems", "type":"Shield"},
+		{"id":"showRingTypeItems", "type":"Ring"},
+		{"id":"showBootTypeItems", "type":"Boots"},
+		{"id":"showRuneTypeItems", "type":"Rune"}
 		];
 
 		for (var i=0; i<Helper.itemFilters.length; i++) {
@@ -5675,7 +5675,7 @@ var Helper = {
 				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
-			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
+			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ ':<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
 					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
 		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
@@ -5733,7 +5733,7 @@ var Helper = {
 				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 === 0) ? '</td></tr><tr><td>' : '';
-			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ 's:<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
+			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ ':<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
 					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
 		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
@@ -5953,7 +5953,6 @@ var Helper = {
 		Helper.inventory.items = new Array();
 		var output=document.getElementById('Helper:InventoryManagerOutput');
 		output.innerHTML='<br/>Parsing profile...';
-		Data.itemList();
 		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileDone);
 	},
 
@@ -5963,8 +5962,7 @@ var Helper = {
 		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
 			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
-				"where":"worn", "index":(i+1),
-				"onmouseover":currentlyWorn[i].getAttribute("onmouseover")};
+				"where":"worn", "index":(i+1)};
 			if (i===0) output.innerHTML+="<br/>Found worn item ";
 			output.innerHTML+=(i+1) + " ";
 			Helper.inventory.items.push(item);
@@ -6009,8 +6007,7 @@ var Helper = {
 			for (var i=0; i<backpackItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"));
 				var item={"url": theUrl,
-					"where":"backpack", "index":(i+1), "page":currentPage,
-					"onmouseover":backpackItems[i].getAttribute("onmouseover")};
+					"where":"backpack", "index":(i+1), "page":currentPage};
 				if (i===0) output.innerHTML+="<br/>Found wearable item ";
 				output.innerHTML+=(i+1) + " ";
 				Helper.inventory.items.push(item);
@@ -6040,7 +6037,6 @@ var Helper = {
 		Helper.guildinventory.items = new Array();
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		output.innerHTML = '<br/>Parsing guild store ...';
-		Data.itemList();
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', Helper.parseGuildStorePage);
 	},
 
@@ -6056,8 +6052,7 @@ var Helper = {
 			for (var i=0; i<guildstoreItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"));
 				var item={"url": theUrl,
-					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
-					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
+					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false};
 				if (i===0) output.innerHTML+="<br/>Found guild store item ";
 				output.innerHTML+=(i+1) + " ";
 				Helper.guildinventory.items.push(item);
@@ -6083,8 +6078,7 @@ var Helper = {
 			for (var i=0; i<guildreportItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"));
 				var item={"url": theUrl,
-					"where":"guildreport", "index":(i+1), "worn":false,
-					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
+					"where":"guildreport", "index":(i+1), "worn":false};
 				if (i===0) output.innerHTML+="<br/>Found guild report item ";
 				output.innerHTML+=(i+1) + " ";
 				Helper.guildinventory.items.push(item);
@@ -6155,13 +6149,7 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			var findItem = Data.itemArray.filter(function (e,i,a) {return e.name.trim()==item.name.trim();});
-			if (findItem.length>0) {
-				item.type = findItem[0].type;
-			} else {
-				GM_log("Item not found in list: '" + item.name + "'");
-				item.type = "???";
-			}
+			item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-')-responseText.indexOf('<br>')-5);
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -6198,15 +6186,15 @@ var Helper = {
 		var result='<table id="Helper:InventoryTable"><tr>' +
 			'<th width="180" align="left" sortkey="name" colspan="2">Name</th>' +
 			'<th sortkey="minLevel">Level</th>' +
-			'<th sortkey="where">Where</th>' +
-			'<th sortkey="type">Type</th>' +
+			'<th align="left" sortkey="where">Where</th>' +
+			'<th align="left" sortkey="type">Type</th>' +
 			'<th sortkey="attack">Att</th>' +
 			'<th sortkey="defense">Def</th>' +
 			'<th sortkey="armor">Arm</th>' +
 			'<th sortkey="damage">Dam</th>' +
 			'<th sortkey="hp">HP</th>' +
 			'<th sortkey="forgelevel" colspan="2">Forge</th>' +
-			'<th sortkey="craftlevel">Craft</th>' +
+			'<th align="left" sortkey="craftlevel">Craft</th>' +
 			'<th width="10"></th>';
 		var item, color;
 
@@ -6219,39 +6207,39 @@ var Helper = {
 
 		var showGloveTypeItems = GM_getValue("showGloveTypeItems");
 		if (!showGloveTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'gloves';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Gloves';});
 		}
 		var showHelmetTypeItems = GM_getValue("showHelmetTypeItems");
 		if (!showHelmetTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'helmet';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Helmet';});
 		}
 		var showAmuletTypeItems = GM_getValue("showAmuletTypeItems");
 		if (!showAmuletTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'amulet';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Amulet';});
 		}
 		var showWeaponTypeItems = GM_getValue("showWeaponTypeItems");
 		if (!showWeaponTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'weapon';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Weapon';});
 		}
 		var showAmorTypeItems = GM_getValue("showAmorTypeItems");
 		if (!showAmorTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'armor';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Armor';});
 		}
 		var showShieldTypeItems = GM_getValue("showShieldTypeItems");
 		if (!showShieldTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'shield';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Shield';});
 		}
 		var showRingTypeItems = GM_getValue("showRingTypeItems");
 		if (!showRingTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'ring';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Ring';});
 		}
 		var showBootTypeItems = GM_getValue("showBootTypeItems");
 		if (!showBootTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'boots';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Boots';});
 		}
 		var showRuneTypeItems = GM_getValue("showRuneTypeItems");
 		if (!showRuneTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'rune';});
+			allItems=allItems.filter(function(e,i,a) {return e.type != 'Rune';});
 		}
 
 		for (var i=0; i<allItems.length;i++) {
@@ -6266,7 +6254,7 @@ var Helper = {
 			}
 
 			result+='<tr style="color:'+ color +'">' +
-				'<td>' + '<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
+				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>';
 			if (item.partOfSet) {
 				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
@@ -6278,8 +6266,8 @@ var Helper = {
 			}
 			result+='</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
-				'<td align="right" title="' + whereTitle + '">' + whereText + '</td>' +
-				'<td align="right">' + item.type + '</td>' +
+				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
+				'<td align="left">' + item.type + '</td>' +
 				'<td align="right">' + item.attack + '</td>' +
 				'<td align="right">' + item.defense + '</td>' +
 				'<td align="right">' + item.armor + '</td>' +
@@ -6287,7 +6275,7 @@ var Helper = {
 				'<td align="right">' + item.hp + '</td>' +
 				'<td align="right">' + item.forgelevel + '</td>' +
 				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>":"") + '</td>' +
-					'<td align="right">' + item.craftlevel + '</td>' +
+				'<td align="left">' + item.craftlevel + '</td>' +
 				'<td></td>' +
 				'</tr>';
 		}
@@ -11459,8 +11447,8 @@ var Helper = {
 				}
 			}
 			//if there are more than 20 titans in the log, then purge the oldest ones
-			if (titanLog.titans.length > 19) {
-				titanLog.titans.splice(0, titanLog.length - 19);
+			if (titanLog.titans.length > 15) {
+				titanLog.titans.splice(0, titanLog.titans.length - 15);
 			}
 			
 			//save the titanLog
