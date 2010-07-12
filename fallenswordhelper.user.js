@@ -146,6 +146,8 @@ var Helper = {
 		
 		System.setDefault("enableTitanLog", false);
 		System.setDefault("titanLogRefreshTime", 5);
+		
+		System.setDefault("enableTempleAlert", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -367,6 +369,7 @@ var Helper = {
 			Helper.injectTHsearch();
 			Helper.updateTitanLogs();
 			Helper.injectHomePageTwoLink();
+			Helper.injectTempleAlert();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
@@ -653,6 +656,7 @@ var Helper = {
 				Helper.injectCheckWearingItem();
 				break;
 			default:
+				Helper.injectNotepad();
 				break;
 			}
 			break;
@@ -782,17 +786,11 @@ var Helper = {
 	},
 
 	injectSkillsPage: function() {
-		var table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/center/table/tbody");
-		var tree_id = location.search.match(/tree_id=(\d)/);
-		if (tree_id && tree_id[1] == 2) {
-			table = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[11]/td/table/tbody/tr[2]/td/center/table/tbody/tr/td/table/tbody");
-		}
-
-		var buffs = table.getElementsByTagName("img");
+		var buffs = System.findNodes("//a[contains(@href,'index.php?cmd=skills&tree_id=0&skill_id=')][img[@border=0]]");
 
 		for (var i = 0; i < buffs.length; i++) {
-			var parNode = buffs[i].parentNode;
-			var mouseoverText = buffs[i].getAttribute("onmouseover");
+			var parNode = buffs[i];
+			var mouseoverText = buffs[i].firstChild.getAttribute("onmouseover");
 			var buffIndex = parNode.getAttribute("href").match(/skill_id=(\d*)/)[1];
 			var buffList = Data.buffList();
 			for (var j = 0; j < buffList.length; j++) {
@@ -4932,8 +4930,8 @@ var Helper = {
 
 	injectProfile: function() {
 		var player = System.findNode("//textarea[@id='holdtext']");
-		var avyrow = System.findNode("//img[contains(@title, 's Avatar')]");
-		if (!avyrow) {return;}
+		var avyImg = System.findNode("//img[contains(@title, 's Avatar')]");
+		if (!avyImg) {return;}
 		var playeridRE = document.URL.match(/player_id=(\d+)/);
 		if (playeridRE) var playerid=playeridRE[1];
 		var idindex;
@@ -4948,15 +4946,14 @@ var Helper = {
 				playerid = playerid.substr(idindex);
 			}
 
-			var playeravy = avyrow.parentNode.firstChild ;
-			while ((playeravy.nodeType == 3)&&(!/\S/.test(playeravy.nodeValue))) {
-				playeravy = playeravy.nextSibling;
-			}
-			var playername = playeravy.getAttribute("title");
-			playeravy.style.borderStyle="none";
+			var playername = avyImg.getAttribute("title");
+			avyImg.style.borderStyle="none";
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
-			Helper.profileInjectQuickButton(avyrow, playerid, playername);
+			var avyExtrasDiv = document.createElement("DIV");
+			avyImg.parentNode.appendChild(avyExtrasDiv);
+			avyExtrasDiv.align = 'center';
+			Helper.profileInjectQuickButton(avyExtrasDiv, playerid, playername);
 			Helper.profileRenderBio(playername);
 			Helper.buffCost={'count':0,'buffs':{}};
 
@@ -5149,8 +5146,8 @@ var Helper = {
 	profileParseAllyEnemy: function() {
 		// Allies/Enemies count/total function
 		var alliesTotal = GM_getValue("alliestotal");
-		var alliesParent = System.findNode("//b[.='Allies']/..");
-		var alliesTable = alliesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		var alliesTitle = System.findNode("//div[strong[.='Allies']]");
+		var alliesTable = alliesTitle.nextSibling.nextSibling;
 		if (alliesTable) {
 			var numberOfAllies = 0;
 			var startIndex = 0;
@@ -5163,14 +5160,14 @@ var Helper = {
 				numberOfAllies ++;
 				startIndex = alliesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
 			}
-			alliesParent.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
+			alliesTitle.innerHTML += "&nbsp<span style='color:blue'>" + numberOfAllies + "</span>";
 			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesParent.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
+				alliesTitle.innerHTML += "/<span style='color:blue' findme='alliestotal'>" + alliesTotal + "</span>";
 			}
 		}
 		var enemiesTotal = GM_getValue("enemiestotal");
-		var enemiesParent = System.findNode("//b[.='Enemies']/..");
-		var enemiesTable = enemiesParent.parentNode.parentNode.parentNode.parentNode.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
+		var enemiesTitle = System.findNode("//div[strong[.='Enemies']]");
+		var enemiesTable = enemiesTitle.nextSibling.nextSibling;
 		if (enemiesTable) {
 			var numberOfEnemies = 0;
 			startIndex = 0;
@@ -5183,9 +5180,9 @@ var Helper = {
 				numberOfEnemies ++;
 				startIndex = enemiesTable.innerHTML.indexOf("/skin/player_default.jpg",startIndex+1);
 			}
-			enemiesParent.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
+			enemiesTitle.innerHTML += "&nbsp;<span style='color:blue'>" + numberOfEnemies + "</span>";
 			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesParent.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
+				enemiesTitle.innerHTML += "/<span style='color:blue' findme='enemiestotal'>" + enemiesTotal + "</span>";
 			}
 		}
 
@@ -5245,14 +5242,13 @@ var Helper = {
 	},
 
 	profileRenderBio: function(playername) {
-		var bioCell = System.findNode("//table[tbody/tr/td/b[.='Biography']]").rows[6];
-		var bioXPath="//tr[td/b[.='Biography'] or td/table/tbody/tr/td/b[.='Biography']]/following-sibling::tr[2]/td/font";
+		var bioDiv = System.findNode("//div[strong[.='Biography']]");
+		var bioCell = bioDiv.nextSibling.nextSibling;
 		var renderBio=(bioCell && GM_getValue("renderSelfBio")) || (!bioCell && GM_getValue("renderOtherBios"));
 		GM_setValue("buffsToBuy", "");
-		var bioNode=System.findNode(bioXPath);
-		if (!renderBio || !bioNode) {return;}
+		if (!renderBio || !bioCell) {return;}
 
-		var bioContents = bioNode.innerHTML;
+		var bioContents = bioCell.innerHTML;
 		bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
 		var buffs=bioContents.match(/`~([^~]|~(?!`))*~`/g);
 		if (buffs) {
@@ -5271,7 +5267,7 @@ var Helper = {
 				playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
 				'<span id=buffCost style="color:red"></span>');
 		}
-		bioNode.innerHTML = bioContents;
+		bioCell.innerHTML = bioContents;
 	},
 
 	profileInjectQuickButton: function(avyrow, playerid, playername) {
@@ -5279,8 +5275,7 @@ var Helper = {
 		var ranktext = "Rank " +playername + "" ;
 		var securetradetext = "Create Secure Trade to " + playername;
 
-		var newhtml = avyrow.parentNode.innerHTML +
-			"</td></tr><tr><td align='center' colspan='2'>" +
+		var newhtml = avyrow.innerHTML +
 			"<a " + Layout.quickBuffHref(playerid) + ">" +
 			"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
 			System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;";
@@ -5308,7 +5303,7 @@ var Helper = {
 				playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
 				System.imageServerHTTP + "/guilds/" + Helper.guildId + "_mini.jpg></a>";
 		}
-		avyrow.parentNode.innerHTML = newhtml ;
+		avyrow.innerHTML = newhtml ;
 	},
 
 	profileInjectGuildRel: function() {
@@ -5350,11 +5345,13 @@ var Helper = {
 	},
 
 	profileComponents: function() {
-		var componentDiv=document.getElementById('componentDiv');
-		if (componentDiv) {
-			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
+		var injectHere = System.findNode("//div[strong[.='Components']]/following-sibling::div[1]");
+		if (injectHere) {
+			var componentExtrasDiv = document.createElement("DIV");
+			injectHere.appendChild(componentExtrasDiv);
+			componentExtrasDiv.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
 				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>'+
-				'<a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a>';
+				'<div align=center><a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a></div>';
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		}
@@ -5407,10 +5404,10 @@ var Helper = {
 	},
 
 	compressBio: function() {
-		var bioTable = System.findNode("//table[tbody/tr/td/b[.='Biography']]");
-		var bioCell = bioTable.rows[6];
+		var bioDiv = System.findNode("//div[strong[.='Biography']]");
+		var bioCell = bioDiv.nextSibling.nextSibling;
 		if (bioCell) { //non-self profile
-			var bioContents = bioCell.cells[0].innerHTML;
+			var bioContents = bioCell.innerHTML;
 			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
 			var maxRowsToShow = GM_getValue("maxCompressedLines");
 			var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
@@ -5438,7 +5435,7 @@ var Helper = {
 					}
 				}
 
-				bioCell.cells[0].innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
+				bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
 					"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
 			}
 		}
@@ -7752,13 +7749,18 @@ var Helper = {
 	injectBioWidgets: function() {
 		var textArea = System.findNode("//textarea[@name='bio']");
 		//textArea.rows=15;
-		textArea.cols=60;
+		textArea.cols=100;
 		textArea.id = "biotext";
-		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
+		var textAreaDev = textArea.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
-		var newRow = textAreaTable.insertRow(-1);
-		var newCell = newRow.insertCell(0);
-		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
+		var counterDiv = document.createElement("DIV")
+		textAreaDev.appendChild(counterDiv);
+		counterDiv.innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" +
+			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'>255</span>";
+
+		var previewDiv = document.createElement("DIV")
+		textAreaDev.appendChild(previewDiv);
+		previewDiv.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
 			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
@@ -7766,7 +7768,7 @@ var Helper = {
 		var crCount = 0;
 		var startIndex = 0;
 		//Add description text for the new tags
-		var advancedEditing = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[9]/td");
+		var advancedEditing = System.findNode("//div[h2[.='Advanced Editing:']]");
 		/* TODO: Add a way to hide the advanced editing 'note' box dynamically.
 		advancedEditing.addEventListener('mouseover', function(event) {
 			event.target.style.backgroundColor = "#8EE5EE";
@@ -7774,14 +7776,18 @@ var Helper = {
 		advancedEditing.addEventListener('mouseout', function(event) {
 			event.target.style.backgroundColor = "";
 		}, false);*/
-		advancedEditing.innerHTML += "<br/>{b}This will allow FSH Script users to select buffs from your bio{/b}<br/>" +
-			"`~This will <b>also</b> allow FSH Script users to select buffs from your bio~`<br/>" +
+		var advancedEditingDiv = document.createElement("DIV")
+		advancedEditing.appendChild(advancedEditingDiv);
+		advancedEditingDiv.style.align = 'left';
+		advancedEditingDiv.innerHTML += "`~This will allow FSH Script users to select buffs from your bio~`<br/>" +
 			"You can use the {cmd} tag as well to determine where to put the 'Ask For Buffs' button<br/><br/>" +
 			"&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br/>" +
 			"&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special characters (non-alphanumeric).<br/>" +
 			"&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff pack names in them to make buffing even easier!";
+		var bioEditLinesDiv = document.createElement("DIV")
+		advancedEditing.appendChild(bioEditLinesDiv);
 		textArea.rows = GM_getValue("bioEditLines");
-		System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td").innerHTML += " Display <input size=2 maxlength=2 id='Helper:linesToShow' type='text' value='" + GM_getValue("bioEditLines") + "'/> Lines"  +
+		bioEditLinesDiv.innerHTML += " Display <input size=2 maxlength=2 id='Helper:linesToShow' type='text' value='" + GM_getValue("bioEditLines") + "'/> Lines"  +
 		" <input type='button' style='display:none' id='Helper:saveLines' value='Update Rows To Show' class='custombutton'/>";
 		document.getElementById("Helper:saveLines").addEventListener('click',
 			function (event) {
@@ -7804,8 +7810,6 @@ var Helper = {
 			crCount++;
 			startIndex = textArea.value.indexOf('\n',startIndex+1);
 		}
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'>255</span>";
 
 		document.getElementById('biotext').addEventListener('keyup', Helper.updateBioCharacters, true);
 		System.xmlhttp("index.php?cmd=points", Helper.getTotalBioCharacters);
@@ -8556,6 +8560,8 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
+				':</td><td><input name="enableTempleAlert" type="checkbox" value="on"' + (GM_getValue("enableTempleAlert")?" checked":"") + '></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -8932,6 +8938,7 @@ var Helper = {
 		
 		System.saveValueForm(oForm, "enableTitanLog");
 		System.saveValueForm(oForm, "titanLogRefreshTime");
+		System.saveValueForm(oForm, "enableTempleAlert");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -9794,7 +9801,7 @@ var Helper = {
 		var idx = callback.data;
 		var doc=System.createDocument(responseText);
 		var questInfoLink = System.findNode("//a[@id='qiLink" + idx + "']");
-		var questNameNode = System.findNode("//table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr/td/font[2]", doc);
+		var questNameNode = System.findNode("//font[b[.='Quest Details']]/following-sibling::font[1]", doc);
 		if (questNameNode) {
 			questInfoLink.innerHTML = questNameNode.innerHTML.replace (/"/g, "");
 		} else {
@@ -10069,11 +10076,9 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable && mainTable.rows[1]) {
-				var injectHere = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
-				if (!injectHere) {return;}
-				var info = injectHere.insertRow(0);
+			var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+			if (rightColumnTable) {
+				var info = rightColumnTable.insertRow(2);
 				var cell = info.insertCell(0);
 				cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
 				Helper.retrieveAllyEnemyData(false);
@@ -10100,24 +10105,13 @@ var Helper = {
 
 	parseProfileForWorld: function(details, refreshAllyEnemyDataOnly) {
 		var doc=System.createDocument(details);
-		var allTables = doc.getElementsByTagName("TABLE");
-		var alliesTable, enemiesTable;
-		for (var i=0;i<allTables.length;i++) {
-			var oneTable=allTables[i];
-			if (oneTable.rows.length>=1 && oneTable.rows[0].cells.length>=1 && (/<b>Allies<\/b>/i).test(oneTable.rows[0].cells[0].innerHTML)) {
-				alliesTable=allTables[i+1];
-			}
-			if (oneTable.rows.length>=1 && oneTable.rows[0].cells.length>=1 && (/<b>Enemies<\/b>/i).test(oneTable.rows[0].cells[0].innerHTML)) {
-				enemiesTable=allTables[i+1];
-			}
-		}
-
+		var alliesTable = System.findNode("//div[strong[.='Allies']]/following-sibling::div[1]/table[1]",doc);
+		var enemiesTable = System.findNode("//div[strong[.='Enemies']]/following-sibling::div[1]/table[1]",doc);
 		var contactList = System.getValueJSON("contactList");
 		if (!contactList) {
 			contactList = {};
 			contactList.contacts = [];
 		}
-
 		contactList.contacts.forEach(function(e) {e.status="Deleted";});
 		if (alliesTable && enemiesTable) {
 			var alliesDetails=alliesTable.getElementsByTagName("TABLE");
@@ -10262,6 +10256,9 @@ var Helper = {
 
 
 		aCell.innerHTML = output;
+		injectHere.parentNode.align = 'center';
+		injectHere.parentNode.width = '120';
+
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
@@ -11554,6 +11551,48 @@ var Helper = {
 		if (viewNewsArchiveLink) {
 			viewNewsArchiveLink.parentNode.innerHTML += '&nbsp;<a href="index.php?cmd=&subcmd=viewarchive&subcmd2=&page=2&search_text=">View Archive Page 2</a>'
 		}
+	},
+	
+	injectNotepad: function() {
+		var textAreaNode = System.findNode("//textarea[@name='notes']");
+		textAreaNode.cols = 115;
+		textAreaNode.rows = 30;
+	},
+	
+	injectTempleAlert: function() {
+		//Checks to see if the temple is open for business.
+		if (!GM_getValue("enableTempleAlert")) return;
+		//need timer function
+		var templeAlertLastUpdate = System.getValueJSON("templeAlertLastUpdate");
+		if (templeAlertLastUpdate) {
+			if ((new Date()).getTime() - templeAlertLastUpdate.getTime() > (60 * 60 * 1000)) {
+				//bring up the temple page and parse it
+				System.xmlhttp("index.php?cmd=temple", Helper.parseTemplePage);
+			}
+		} else {
+			System.xmlhttp("index.php?cmd=temple", Helper.parseTemplePage);
+		}
+	},
+	
+	parseTemplePage: function(responseText) {
+		var doc = System.createDocument(responseText);
+		//if need to pray is set then put an alert in the LHS sidebar
+		var needToPray = System.findNode("//input[@value='Pray to Osverin']", doc);
+		if (needToPray) {
+			var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
+			var LHSSidebarTable = logoutRow.parentNode.parentNode;
+			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
+			var newCell=newRow.insertCell(0);
+			newCell.height = 10;
+			newCell.align = 'center';
+			newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
+				'<tr><td align="center"><a href="index.php?cmd=temple"><font color="#ffffff">You feel disconnected from the gods.</font></a></td></tr>' +
+				'</tbody></table>';
+			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
+			var newCell=newRow.insertCell(0);
+			newCell.height = 10;
+		}
+		System.setValueJSON("templeAlertLastUpdate", new Date());
 	}
 };
 
