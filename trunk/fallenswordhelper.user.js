@@ -4983,11 +4983,11 @@ var Helper = {
 			if (GM_getValue("showBPSlotsOnProfile") === true) {
 				System.xmlhttp("index.php?cmd=world", Helper.injectEmptySlots, 0);
 			}
-		}
 
-		//Update the ally/enemy online list, since we are already on the page.
-		doc = System.findNode("//html");
-		Helper.parseProfileForWorld(doc.innerHTML, true);
+			//Update the ally/enemy online list, since we are already on the page.
+			doc = System.findNode("//html");
+			Helper.parseProfileForWorld(doc.innerHTML, true);
+		}
 
 		Helper.addStatTotalToMouseover();
 	},
