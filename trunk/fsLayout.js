@@ -56,7 +56,7 @@ var Layout = {
 		var quickLinks = System.getValueJSON("quickLinks");
 		if (!quickLinks) quickLinks=[];
 		if (quickLinks.length<=0) return;
-		var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg')]");
+		var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg') or contains(@src,'realm_top_a.jpg')]");
 		if (!insertBeforeHere) return;
 		result="&nbsp;&nbsp;";
 		for (var i=0; i<quickLinks.length; i++) {
@@ -68,7 +68,7 @@ var Layout = {
 		var newDiv = document.createElement("DIV");
 		newDiv.innerHTML=result;
 		newDiv.style.background = 'black';
-		newDiv.style.align = 'left';
+		newDiv.style.textAlign = 'left';
 		insertBeforeHere.parentNode.insertBefore(newDiv, insertBeforeHere);
 	},
 
@@ -121,16 +121,17 @@ var Layout = {
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src.nextSibling);
 		src.parentNode.removeChild(src);
-		var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-		if (mainTable && mainTable.rows[1]) {
-			var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+		var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+		if (rightColumnTable) {
+			//var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			var dest = rightColumnTable;
 			if (!dest) return;
-			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?1:0;
+			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?3:1;
 			var info = dest.insertRow(startRow);
 			if (!info) return;
 			var cell = info.insertCell(0);
-			//cell = info.insertCell(0);
-			//cell = info.insertCell(0);
+			cell.align = 'center';
+			cell.width = '120';
 			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
 			cell.appendChild(src);
 			var breaker = dest.insertRow(startRow+1);
