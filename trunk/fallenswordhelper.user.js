@@ -2436,15 +2436,16 @@ var Helper = {
 	},
 
 	fixOnlineGuildBuffLinks: function() {
-		var buffLinks = System.findNodes("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
-		if (buffLinks) {
-			for (var i=0; i<buffLinks.length; i++){
-				var buffLink = buffLinks[i];
+		var guildInfoOnlineMembersTable = System.findNodes("//tr[td/a[contains(@href,'index.php?cmd=quickbuff&t=')]/font[.='B']]");
+		if (guildInfoOnlineMembersTable) {
+			for (var i=0; i<guildInfoOnlineMembersTable.length; i++){
+				var guildInfoOnlineMember = guildInfoOnlineMembersTable[i];
+				var playerLink = System.findNode("./td/table/tbody/tr/td/a[contains(@href,'index.php?cmd=profile&player_id=')]", guildInfoOnlineMember);
+				var playerID = /player_id=(\d+)/.exec(playerLink)[1];
+				var buffLink = System.findNode("./td/a[contains(@href,'index.php?cmd=quickbuff&t=')]", guildInfoOnlineMember);
 				var oldHref = buffLink.getAttribute('href');
 				var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
-				if (playerName) {
-					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&t=" + playerName[1] + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
-				}
+				buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 			}
 		}
 	},
@@ -4958,8 +4959,13 @@ var Helper = {
 			Helper.buffCost={'count':0,'buffs':{}};
 
 			Helper.bioAddEventListener();
+			
+			var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
+			if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 		}
 
+		//Needs to be fixed ... the link can be fixed as follows, but the underlying code is still broken.
+		//var tdInv=System.findNode("//div/strong[.='Inventory']/..");
 		var tdInv=System.findNode("//td/b[.='Inventory']/..");
 		if (tdInv) {
 			tdInv.width="50%";
@@ -4974,9 +4980,9 @@ var Helper = {
 			Helper.profileComponents();
 
 			// quick wear manager link and select all link
-			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
+			var node=System.findNode("//span/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (node) {
-				node.parentNode.innerHTML+="|&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'>Quick&nbsp;Wear</a>]"+
+				node.parentNode.innerHTML+="|&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'><span style='color:blue;'>Quick&nbsp;Wear</span></a>]"+
 					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>";
 				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 			}
@@ -5054,14 +5060,13 @@ var Helper = {
 		var bpImage = System.findNode("//img[contains(@title,'Manage Backpack')]",doc);
 		if (bpImage) {
 			var bpslots = bpImage.parentNode.nextSibling.nextSibling
-			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
+			var node=System.findNode("//span/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (bpslots) {
 				try {
 					var theText = bpslots.innerHTML.replace("&nbsp;","").replace("&nbsp;","");
 					var slots = theText.split("/");
 					var color = (slots[0] == slots[1]) ? "#FF0000" : "#000000";
-					node.parentNode.parentNode.parentNode.firstChild.innerHTML += "&nbsp;<font color='" + color + "' size='1'>[" + theText + "]</font>&nbsp;";
-					node.parentNode.parentNode.parentNode.lastChild.setAttribute("width", "90%");
+					node.innerHTML += "&nbsp;<font color='" + color + "' size='1'>[" + theText + "]</font>&nbsp;";
 				} catch (err) {
 					GM_log(err);
 				}
@@ -7320,7 +7325,7 @@ var Helper = {
 		//var playerXP=Helper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
 		resultText += "</table>";
 
-		var statistics = System.findNode("//tr[contains(td/b,'Statistics')]/following-sibling::tr[2]/td/table", doc);
+		var statistics = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
 		statistics.style.backgroundImage = 'url(' + System.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
 		var staminaCell = statistics.rows[7].cells[1].firstChild.rows[0].cells[0];
 		var curStamina = System.intValue(staminaCell.textContent.split("/")[0]);
@@ -7762,7 +7767,7 @@ var Helper = {
 		textAreaDev.appendChild(previewDiv);
 		previewDiv.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
-			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
+			'<tr><td align="left" width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
 		var crCount = 0;
@@ -7914,7 +7919,7 @@ var Helper = {
 		var newCell = newRow.insertCell(0);
 		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
-			'<tr><td width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
+			'<tr><td align="left" width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
 		textArea.id = "historytext";
 		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Edit Guild History']]");
