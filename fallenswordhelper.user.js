@@ -1343,7 +1343,7 @@ var Helper = {
 
 	checkPlayerActivity: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var lastActivity = System.findNode("//font[contains(.,'Last Activity:')]", doc);
+		var lastActivity = System.findNode("//h2[contains(.,'Last Activity:')]", doc);
 		var playerName = callback.playerName;
 		var playerId = callback.playerId;
 		var offlinePlayerList = System.findNode("//td[@title='offlinePlayerList']");
@@ -4979,11 +4979,15 @@ var Helper = {
 			Helper.profileInjectFastWear();
 			Helper.profileComponents();
 
-			// quick wear manager link and select all link
+			// quick wear manager link
+			var node=System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
+			if (node) {
+				node.parentNode.innerHTML+="&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'><span style='color:blue;'>Quick&nbsp;Wear</span></a>]";
+			}
+			//select all link
 			var node=System.findNode("//span/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (node) {
-				node.parentNode.innerHTML+="|&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'><span style='color:blue;'>Quick&nbsp;Wear</span></a>]"+
-					"&nbsp|&nbsp<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>";
+				node.parentNode.innerHTML+="&nbsp;<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>";
 				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 			}
 			if (GM_getValue("showBPSlotsOnProfile") === true) {
@@ -5065,7 +5069,7 @@ var Helper = {
 				try {
 					var theText = bpslots.innerHTML.replace("&nbsp;","").replace("&nbsp;","");
 					var slots = theText.split("/");
-					var color = (slots[0] == slots[1]) ? "#FF0000" : "#000000";
+					var color = (slots[0] == slots[1]) ? "#FF0000" : "blue";
 					node.innerHTML += "&nbsp;<font color='" + color + "' size='1'>[" + theText + "]</font>&nbsp;";
 				} catch (err) {
 					GM_log(err);
