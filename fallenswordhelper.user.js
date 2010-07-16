@@ -3554,7 +3554,7 @@ var Helper = {
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
-				if (logScreen != 'Chat') cellContents = cellContents.substring(6,23); // fix for player log screen.
+				if (logScreen != 'Chat' && logScreen != 'GuildLog') cellContents = cellContents.substring(6,23); // fix for player log screen.
 				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
@@ -3794,7 +3794,7 @@ var Helper = {
 						secondQuote = message.indexOf('\'',firstQuote+1);
 						targetPlayerName = message.substring(firstQuote+1,secondQuote);
 						aRow.cells[2].innerHTML = firstPart + '\'' +
-							'<a href="index.php?cmd=findplayer&subcmd=dofindplayer&target_username=' + targetPlayerName + '">' + targetPlayerName + '</a>' +
+							'<a href="index.php?cmd=findplayer&search_active=1&search_username=' + targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>' +
 							message.substring(secondQuote, message.length);
 					}
 				}
@@ -6699,7 +6699,6 @@ var Helper = {
 						listOfDefenders = listOfDefenders.split(","); // quick buff only supports 16
 						if (listOfDefenders == "[none]") break;
 						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) +
-							//"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
 							//direct call to player_id is faster link - server doesn't have to do a search.
 							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
 							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
@@ -6735,7 +6734,6 @@ var Helper = {
 								aMember=memberList.members[j];
 								// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 								if (aMember.name==theMember) {
-									//linkMember = (k==0?"":" ") + "<a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + theMember + "'>" + theMember + "</a>";
 									//direct call to player_id is faster link - server doesn't have to do a search.
 									linkMember = (k===0?"":" ") + "<a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" + theMember + "</a>";
 									break;
@@ -6923,7 +6921,7 @@ var Helper = {
 		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
 		if (playerName) {
 			playerName = playerName[1];
-			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false);
+			System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
 
@@ -10634,7 +10632,7 @@ var Helper = {
 			attackPlayerTable.rows[4].cells[0].innerHTML = output;
 			//System.xmlhttp("index.php?cmd=profile", Helper.getSelfProfileStatsAndBuffs);
 			System.xmlhttp("index.php?cmd=profile", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerSelfStatData","anchor2":"attackPlayerSelfBuffData"});
-			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username="+targetPlayer[1], Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerDefenderStatData","anchor2":"attackPlayerDefenderBuffData"});
+			System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username="+targetPlayer[1]+"&search_show_first=1", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerDefenderStatData","anchor2":"attackPlayerDefenderBuffData"});
 			//insert blank row
 			var newRow = attackPlayerTable.insertRow(5);
 			var newCell = newRow.insertCell(0);
@@ -10675,8 +10673,8 @@ var Helper = {
 		var injectHere = System.findNode("//span[@id='Helper:"+anchor1+"']");
 		injectHere.innerHTML = output;
 		//buffs
-		var activeBuffsTitleRow = System.findNode("//tr[td/b[.='Active Buffs']]", doc);
-		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling.firstChild.nextSibling.firstChild.nextSibling;
+		var activeBuffsTitleRow = System.findNode("//div[strong[.='Active Buffs']]", doc);
+		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling;
 		var anchor2 = callback.anchor2;
 		injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
 		injectHere.innerHTML = activeBuffsElement.innerHTML;
