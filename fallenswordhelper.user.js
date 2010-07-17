@@ -148,6 +148,7 @@ var Helper = {
 		System.setDefault("titanLogRefreshTime", 5);
 		
 		System.setDefault("enableTempleAlert", true);
+		System.setDefault("showGoldOnFindPlayer", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -716,6 +717,9 @@ var Helper = {
 			break;
 		case "attackplayer":
 			Helper.injectAttackPlayer();
+			break;
+		case "findplayer":
+			Helper.injectFindPlayer();
 			break;
 		case "scavenging":
 			switch (subPageId) {
@@ -8751,6 +8755,8 @@ var Helper = {
 				'will mean that it will not refresh until the next page load after that many minutes have elapsed.') + 
 				':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
 				'<input name="titanLogRefreshTime" size="1" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
+			'<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.') +
+				':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + (GM_getValue("showGoldOnFindPlayer")?" checked":"") + '></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8946,6 +8952,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableTitanLog");
 		System.saveValueForm(oForm, "titanLogRefreshTime");
 		System.saveValueForm(oForm, "enableTempleAlert");
+		System.saveValueForm(oForm, "showGoldOnFindPlayer");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -11600,6 +11607,43 @@ var Helper = {
 			newCell.height = 10;
 		}
 		System.setValueJSON("templeAlertLastUpdate", new Date());
+	},
+
+	injectFindPlayer: function() {
+		var findPlayerButton = System.findNode("//input[@value='Find Player']");
+		findPlayerButton.parentNode.innerHTML += "&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
+			(Helper.characterLevel - 5) + "&search_level_max=" + (Helper.characterLevel + 5) + 
+			"&search_in_guild=0'><span style='color:blue;'>Get PvP targets</span></a>";
+		if (!GM_getValue("showGoldOnFindPlayer")) return;
+		var findPlayerTable = System.findNode("//table[tbody/tr/td[.='Guild']]");
+		for (var i=0; i<findPlayerTable.rows.length; i++) {
+			var aRow = findPlayerTable.rows[i];
+			if (i == 0) {
+				var newCell = aRow.insertCell(4);
+				newCell.style.backgroundColor = '#CD9E4B';
+				newCell.style.fontSize = '12px';
+				newCell.align = 'right';
+				newCell.innerHTML = 'Gold';
+			}
+			if (i != 0 && aRow.cells[1]) {
+				var playerHREF = aRow.cells[0].firstChild.nextSibling.getAttribute("href");
+					var newCell = aRow.insertCell(4);
+					newCell.style.fontSize = '12px';
+					newCell.align = 'right';
+					newCell.innerHTML = '<span style="color:blue;" id="' + playerHREF + '">?</span>';
+					System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
+			} else if (!aRow.cells[1]) {
+				aRow.cells[0].colSpan = 6;
+			}
+		}
+	},
+	
+	findPlayerParseProfile: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
+		var goldElement = System.findNode("./tbody/tr/td[b[contains(.,'Gold:')]]", statisticsTable);
+		var goldValue = goldElement.nextSibling;
+		document.getElementById(callback.href).innerHTML = goldValue.textContent;
 	}
 };
 
