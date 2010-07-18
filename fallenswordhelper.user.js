@@ -10681,6 +10681,8 @@ var Helper = {
 		injectHere.innerHTML = output;
 		//buffs
 		var activeBuffsTitleRow = System.findNode("//div[strong[.='Active Buffs']]", doc);
+		//fix to cover bad HTML by HCS.
+		if (!activeBuffsTitleRow) activeBuffsTitleRow = System.findNode("//div[b/b/strong[.='Active Buffs']]", doc);
 		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling;
 		var anchor2 = callback.anchor2;
 		injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
@@ -11623,6 +11625,14 @@ var Helper = {
 				newCell.style.backgroundColor = '#CD9E4B';
 				newCell.style.fontSize = '12px';
 				newCell.align = 'right';
+				newCell.innerHTML = 'PvP';
+				var newCell = aRow.insertCell(5);
+				newCell.style.backgroundColor = '#CD9E4B';
+				newCell.innerHTML = '&nbsp;';
+				var newCell = aRow.insertCell(6);
+				newCell.style.backgroundColor = '#CD9E4B';
+				newCell.style.fontSize = '12px';
+				newCell.align = 'right';
 				newCell.innerHTML = 'Gold';
 			}
 			if (i != 0 && aRow.cells[1]) {
@@ -11630,10 +11640,17 @@ var Helper = {
 					var newCell = aRow.insertCell(4);
 					newCell.style.fontSize = '12px';
 					newCell.align = 'right';
-					newCell.innerHTML = '<span style="color:blue;" id="' + playerHREF + '">?</span>';
+					newCell.innerHTML = '<span style="color:green;" id="PvP' + playerHREF + '">?</span>';
+					System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
+					var newCell = aRow.insertCell(5);
+					newCell.innerHTML = '&nbsp;';
+					var newCell = aRow.insertCell(6);
+					newCell.style.fontSize = '12px';
+					newCell.align = 'right';
+					newCell.innerHTML = '<span style="color:blue;" id="Gold' + playerHREF + '">?</span>';
 					System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
 			} else if (!aRow.cells[1]) {
-				aRow.cells[0].colSpan = 6;
+				aRow.cells[0].colSpan = 8;
 			}
 		}
 	},
@@ -11641,9 +11658,12 @@ var Helper = {
 	findPlayerParseProfile: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
+		var pvpElement = System.findNode("./tbody/tr/td[b[contains(.,'PvP')]]", statisticsTable);
+		var pvpValue = pvpElement.nextSibling;
+		document.getElementById("PvP" + callback.href).innerHTML = pvpValue.textContent;
 		var goldElement = System.findNode("./tbody/tr/td[b[contains(.,'Gold:')]]", statisticsTable);
 		var goldValue = goldElement.nextSibling;
-		document.getElementById(callback.href).innerHTML = goldValue.textContent;
+		document.getElementById("Gold" + callback.href).innerHTML = goldValue.textContent;
 	}
 };
 
