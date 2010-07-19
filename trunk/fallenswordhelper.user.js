@@ -790,7 +790,7 @@ var Helper = {
 	},
 
 	injectSkillsPage: function() {
-		var buffs = System.findNodes("//a[contains(@href,'index.php?cmd=skills&tree_id=0&skill_id=')][img[@border=0]]");
+		var buffs = System.findNodes("//a[contains(@href,'index.php?cmd=skills&tree_id=') and contains(@href,'&skill_id=')][img[@border=0]]");
 
 		for (var i = 0; i < buffs.length; i++) {
 			var parNode = buffs[i];
@@ -3544,6 +3544,7 @@ var Helper = {
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 		var chatTable = System.findNode("//table[@class='width_full']");
 		if (!chatTable) {chatTable = System.findNode("//table[tbody/tr/td[.='Message']]");}
+		if (!chatTable) {chatTable = System.findNode("//table[tbody/tr/td/span[contains(.,'Currently showing:')]]");} //personal log
 		if (!chatTable) {return;}
 
 		var localDateMilli = (new Date()).getTime();
@@ -3583,7 +3584,7 @@ var Helper = {
 
 	addLogWidgets: function() {
 		var addAttackLinkToLog = GM_getValue('addAttackLinkToLog');
-		var logTable = System.findNode("//table[@class='width_full']");
+		var logTable = System.findNode("//table[tbody/tr/td/span[contains(.,'Currently showing:')]]");
 		if (!logTable) {return;}
 		var memberList = System.getValueJSON("memberlist");
 		var memberNameString = "";
