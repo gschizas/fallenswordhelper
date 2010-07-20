@@ -1731,6 +1731,8 @@ var Helper = {
 		for (var i = 0; i < components.length; i++) {
 			var mo = components[i].getAttribute("onmouseover");
 			System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
+			var componentCountElement = components[i].parentNode.parentNode.parentNode.nextSibling.firstChild;
+			componentCountElement.innerHTML = '<nobr>' + componentCountElement.innerHTML + '</nobr>';
 		}
 	},
 
@@ -1738,14 +1740,17 @@ var Helper = {
 		var itemRE = /<b>([^<]+)<\/b>/i;
 		var itemName = itemRE.exec(responseText);
 		if (itemName) itemName=itemName[1];
-		var itemLinks = document.createElement("td");
-		itemLinks.innerHTML =
-			'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='+
-			escape(Data.plantFromComponent(itemName))+
-			'">AH</a>';
-		var counter=System.findNode("../../../../tr[2]/td", callback);
-		counter.setAttribute("colspan", "2");
-		callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
+		var plantFromComponent = Data.plantFromComponent(itemName);
+		if (itemName != plantFromComponent) {
+			var itemLinks = document.createElement("td");
+			itemLinks.innerHTML =
+				'<a href="' + System.server + '?cmd=auctionhouse&type=-1&order_by=1&search_text='+
+				escape(plantFromComponent)+
+				'">AH</a>';
+			var counter=System.findNode("../../../../tr[2]/td", callback);
+			counter.setAttribute("colspan", "2");
+			callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
+		}
 	},
 
 	injectAdvisor: function(subPage2Id) {
@@ -9836,20 +9841,23 @@ var Helper = {
 		enableActiveBountyList = GM_getValue("enableActiveBountyList");
 		enableWantedList = GM_getValue("enableWantedList");
 		if (enableWantedList || enableActiveBountyList) {
-			var mainTable = System.findNode("//table[tbody/tr/td[contains(@background,'/skin/sidebar_bg.gif')]]");
-			if (mainTable && mainTable.rows[1]) {
-				var injectHere = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+			if (rightColumnTable) {
 				if (enableWantedList) {
-					if (!injectHere)
+					if (!rightColumnTable)
 						return;
-					var info = injectHere.insertRow(0);
+					var info = rightColumnTable.insertRow(1);
 					var cell = info.insertCell(0);
+					cell.width = 120;
+					cell.align = 'center';
 					cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
 				}
 				if (enableActiveBountyList) {
-					if (injectHere) {
-						info = injectHere.insertRow(0);
+					if (rightColumnTable) {
+						info = rightColumnTable.insertRow(1);
 						cell = info.insertCell(0);
+						cell.width = 120;
+						cell.align = 'center';
 						cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
 					}
 				}
@@ -10037,7 +10045,7 @@ var Helper = {
 		var displayList = document.createElement("TABLE");
 		displayList.style.border = "1px solid #c5ad73";
 		displayList.style.backgroundColor = (wantedList.isRefreshed)?"#6a5938":"#4a3918";
-		displayList.cellPadding = 1;
+		displayList.cellPadding = 3;
 		displayList.width = 125;
 
 		var aRow=displayList.insertRow(0);
