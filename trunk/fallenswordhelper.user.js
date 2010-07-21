@@ -130,7 +130,6 @@ var Helper = {
 		System.setDefault("trackKillStreak", true);
 		System.setDefault("showFSGIcon", false);
 		System.setDefault("storeLastQuestPage", true);
-		System.setDefault("enableAHItemWidgets", false);
 		System.setDefault("addAttackLinkToLog", false);
 		System.setDefault("showStatBonusTotal", true);
 
@@ -3564,7 +3563,7 @@ var Helper = {
 			if (aRow.cells[0].innerHTML) {
 				//GM_log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
-				if (logScreen != 'Chat' && logScreen != 'GuildLog') cellContents = cellContents.substring(6,23); // fix for player log screen.
+				if (logScreen != 'Chat') cellContents = cellContents.substring(6,23); // fix for player log screen.
 				postDateAsDate = System.parseDate(cellContents);
 				postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
 				postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
@@ -3726,7 +3725,7 @@ var Helper = {
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
-					if (messageType == "General") {
+					if (messageType == "Notification") {
 						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName == 'A') {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								if (!isGuildMate) {
@@ -3766,7 +3765,7 @@ var Helper = {
 		if (node) node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Guild Log Summary</a> ]';
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) {return;}
 		var playerId=Layout.playerId();
-		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var logTable = System.findNode("//table[tbody/tr/td[.='Message']]");
 		var hideNextRows = 0;
 		for (var i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
@@ -3973,44 +3972,29 @@ var Helper = {
 			}
 			imageCell.innerHTML = finalHTML;
 		}
-
-		if (GM_getValue('enableAHItemWidgets')) {
-			var allItems = document.getElementsByTagName("IMG");
-			for (i=0; i<allItems.length; i++) {
-				anItem = allItems[i];
-				if (anItem.src.search("items") != -1) {
-					var theImage = anItem;
-					var theUrl = Helper.linkFromMouseover(anItem.getAttribute("onmouseover"));
-					if (theUrl === null) {
-						continue;
-					}
-					System.xmlhttp(theUrl,
-						function(responseText, callback) {
-							var itemNameRE = /<td colspan=6><center><font color='(#[0-9a-fA-F]{6})' size=2><b>([^<]+)<\/b>/;
-							if (itemNameRE) {
-								var itemName = itemNameRE.exec(responseText)[2];
-							}
-							var craft="";
-							if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-								var fontLineRE=/<\/b><\/font><br>([^<]+)(<font color='(#[0-9a-fA-F]{6})'>[^<]+<\/font>)/;
-								var fontLineRX=fontLineRE.exec(responseText);
-								craft = fontLineRX[2];
-							}
-							var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
-							while(re.exec(responseText)) {
-								forgeCount++;
-							}
-							if (responseText.search(/Crystalline/) != -1) {
-								var durabilityRE =/<font color='#999999'>Durability:<\/font><\/nobr><\/td><td width='50%' align='right'>(\d+)\&nbsp;\/\&nbsp;(\d+)\&nbsp;/;
-								var durability = '<span style="font-size:x-small; color:gray;"><br>Dur: ' +
-									durabilityRE.exec(responseText)[1] + '/' + durabilityRE.exec(responseText)[2] + '</span>';
-							}
-							Helper.injectAuctionExtraText(this.callback,itemName,craft,forgeCount,durability);
-						},
-						theImage);
+		
+		//add coloring for item craft and durability
+		var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
+		for (i=0; i<auctionCellCraftElements.length; i++) {
+			var auctionCellCraftElement = auctionCellCraftElements[i];
+			if (auctionCellCraftElement.textContent){
+				switch(auctionCellCraftElement.textContent) {
+					case 'Perfect': craftColor = '#00b600'; break;
+					case 'Excellent': craftColor = '#f6ed00'; break;
+					case 'Very Good': craftColor = '#f67a00'; break;
+					case 'Good': craftColor = '#f65d00'; break;
+					case 'Average': craftColor = '#f64500'; break;
+					case 'Poor': craftColor = '#f61d00'; break;
+					case 'Very Poor': craftColor = '#b21500'; break;
+					case 'Uncrafted': craftColor = '#666666'; break;
 				}
+				auctionCellCraftElement.style.color = craftColor;
 			}
+			var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
+			auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
+			auctionCellDurabilityElement.style.color = 'gray';
 		}
+
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
 		auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
 
@@ -4134,9 +4118,9 @@ var Helper = {
 				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
 			}
 		}
-
-		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
-		var preparePreferences = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]/../../../..");
+		// commenting out for now until it can be fixed.
+/*		var searchPrefs = System.findNode("//a[@id='showAdvSearchLink']");
+		var preparePreferences = searchPrefs.parentNode.parentNode;
 		searchPrefs.setAttribute("href", "#prefs");
 
 		newRow = document.createElement("TR");
@@ -4144,12 +4128,12 @@ var Helper = {
 		newCell.setAttribute("colspan", 5);
 
 		newCell.innerHTML = '<div id="Helper:AuctionHousePreferences" style="font-size:xx-small;text-align:right;visibility:hidden;display:none;">' +
-			'<form onsubmit="return false;">' +
+			'<form onsubmit="return false;"><nobr>' +
 			'&nbsp;Min: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_minlevel value="wait" />' +
 			'&nbsp;Max: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_maxlevel value="wait" />' +
 			'&nbsp;Gold: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidegold value="1" />' +
 			'&nbsp;FSP: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
-			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></form>'+
+			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></nobr></form>'+
 			'<div style="font-size:x-small"><a href="index.php?cmd=notepad&subcmd=quickahpreftemplate">Template</a>:&nbsp;<span id=Helper:AHquickPref></span>' +
 			'</div></div>';
 
@@ -4159,13 +4143,13 @@ var Helper = {
 		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
 		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
 		// document.getElementById("Helper:QuickSearch").addEventListener("click", Helper.auctionHouseQuickSearch, true);
-
+*/
 		//litte something to default to sorting by min bid
 		var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
 		hiddenOrderByInput.value = 1;
 
 		Helper.injectAuctionQuickCancel();
-		Helper.injectAuctionQuickPreference();
+//		Helper.injectAuctionQuickPreference();
 	},
 
 	injectAuctionQuickPreference: function() {
@@ -4417,20 +4401,6 @@ var Helper = {
 		submitButton.disabled=false;
 		submitButton.value="Save";
 		submitButton.blur();
-	},
-
-	injectAuctionExtraText: function(anItem, itemName, craft, forgeCount, durability) {
-		var theText=anItem.parentNode.nextSibling.nextSibling;
-		//Excellent color does not show up well so change Perfect to Green and Excellent takes the yellow color
-		// to show up better in the AH.
-		craft = craft.replace(/\#F6ED00/,"#00B600");
-		craft = craft.replace(/\#F6AE00/,"#F6ED00");
-		var preText = "<span style='color:blue'>" + craft + "</span>";
-		if (forgeCount !== 0) {
-			preText +=  " " + forgeCount + "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>";
-		}
-		if (durability) preText += durability;
-		theText.innerHTML = preText + "<br>" + theText.innerHTML;
 	},
 
 	toggleShowExtraLinks: function(evt) {
@@ -5365,6 +5335,7 @@ var Helper = {
 
 	profileComponents: function() {
 		var injectHere = System.findNode("//div[strong[.='Components']]/following-sibling::div[1]");
+		if (!injectHere) injectHere = System.findNode("//div[b/strong[.='Components']]/following-sibling::div[1]");
 		if (injectHere) {
 			var componentExtrasDiv = document.createElement("DIV");
 			injectHere.appendChild(componentExtrasDiv);
@@ -5373,6 +5344,8 @@ var Helper = {
 				'<div align=center><a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a></div>';
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
+		} else {
+			GM_log("Components div not found! Please let Tangtop know.");
 		}
 	},
 
@@ -7764,16 +7737,10 @@ var Helper = {
 	},
 
 	injectBioWidgets: function() {
-		var textArea = System.findNode("//textarea[@name='bio']");
-		//textArea.rows=15;
+		var textArea = System.findNode("//textarea[@id='textInputBox']");
 		textArea.cols=100;
-		textArea.id = "biotext";
 		var textAreaDev = textArea.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
-		var counterDiv = document.createElement("DIV")
-		textAreaDev.appendChild(counterDiv);
-		counterDiv.innerHTML += "<span style='color:blue;'>Character count = </span><span findme='biolength' style='color:blue;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='biototal' style='color:blue;'>255</span>";
 
 		var previewDiv = document.createElement("DIV")
 		textAreaDev.appendChild(previewDiv);
@@ -7781,9 +7748,6 @@ var Helper = {
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
 			'<tr><td align="left" width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
-		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Update your Character Biography']]");
-		var crCount = 0;
-		var startIndex = 0;
 		//Add description text for the new tags
 		var advancedEditing = System.findNode("//div[h2[.='Advanced Editing:']]");
 		/* TODO: Add a way to hide the advanced editing 'note' box dynamically.
@@ -7816,20 +7780,14 @@ var Helper = {
 				window.location.reload();
 			}, true);
 
-
 		unsafeWindow.document.getElementById("Helper:linesToShow").onkeypress = function (event) {
 			event = ( event ) ? event : window.event;
 			var charkey = String.fromCharCode(( event.which ) ? event.which : event.keyCode);
 			document.getElementById("Helper:saveLines").style.display = "";
 			return ((("0123456789").indexOf(charkey) > -1));
 		};
-		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
-			crCount++;
-			startIndex = textArea.value.indexOf('\n',startIndex+1);
-		}
 
-		document.getElementById('biotext').addEventListener('keyup', Helper.updateBioCharacters, true);
-		System.xmlhttp("index.php?cmd=points", Helper.getTotalBioCharacters);
+		document.getElementById('textInputBox').addEventListener('keyup', Helper.updateBioCharacters, true);
 		//Force the preview area to render
 		Helper.updateBioCharacters(null);
 	},
@@ -7863,26 +7821,8 @@ var Helper = {
 
 	updateBioCharacters: function(evt) {
 		Helper.buffCost={'count':0,'buffs':{}};
-		var textArea = System.findNode("//textarea[@name='bio']");
-		var characterCount = System.findNode("//span[@findme='biolength']");
-		var crCount = 0;
-		var startIndex = 0;
-		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
-			crCount++;
-			startIndex = textArea.value.indexOf('\n',startIndex+1);
-		}
-		characterCount.innerHTML = (textArea.value.length + crCount);
-		var bioTotal = System.findNode("//span[@findme='biototal']");
-		//if evt is null, then this is a forced call
-		//if we don't check this, the HTTP request to get the number of bio character upgrades
-		//might not have finished before this executes, resulting in red text
-		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1) && evt !== null) {
-			characterCount.style.color = "red";
-		} else {
-			characterCount.style.color = "blue";
-		}
+		var textArea = System.findNode("//textarea[@id='textInputBox']");
 		var previewArea = System.findNode("//span[@findme='biopreview']");
-
 		var bioContents = System.convertTextToHtml(textArea.value);
 
 		bioContents=bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
@@ -7911,59 +7851,24 @@ var Helper = {
 
 	},
 
-	getTotalBioCharacters: function(responseText) {
-		var doc=System.createDocument(responseText);
-		var bioCharactersText = System.findNode("//td[.='+25 Bio Characters']",doc);
-		var bioCharactersRatio = bioCharactersText.nextSibling.nextSibling.nextSibling.nextSibling;
-		var bioCharactersValueRE = /(\d+) \/ 75/;
-		var bioCharactersValue = bioCharactersValueRE.exec(bioCharactersRatio.innerHTML)[1]*1;
-		var bioTotal = System.findNode("//span[@findme='biototal']");
-		bioTotal.innerHTML = (bioCharactersValue * 25) + 255;
-	},
-
 	addHistoryWidgets: function() {
 		var textArea = System.findNode("//textarea[@name='history']");
 		if (!textArea) {return;}
 		textArea.value = textArea.value.replace(/<br \/>/ig,"");
-		var textAreaTable = textArea.parentNode.parentNode.parentNode.parentNode;
+		var textAreaDiv = textArea.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
-		var newRow = textAreaTable.insertRow(-1);
-		var newCell = newRow.insertCell(0);
-		newCell.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
+		var newDiv = document.createElement("div")
+		textAreaDiv.appendChild(newDiv);
+		newDiv.innerHTML = '<table align="center" width="325" border="1"><tbody>' +
 			'<tr><td style="text-align:center;color:#7D2252;background-color:#CD9E4B">Preview</td></tr>' +
 			'<tr><td align="left" width="325"><span style="font-size:small;" findme="biopreview">' + bioPreviewHTML +
 			'</span></td></tr></tbody></table>';
-		textArea.id = "historytext";
-		var innerTable = System.findNode("//table[tbody/tr/td/font/b[.='Edit Guild History']]");
-		var crCount = 0;
-		var startIndex = 0;
-		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
-			crCount++;
-			startIndex = textArea.value.indexOf('\n',startIndex+1);
-		}
-		innerTable.rows[4].cells[0].innerHTML += "<span style='color:blue;'>Character count = </span><span findme='historylength' style='color:blue;'>" +
-			(textArea.value.length + crCount) + "</span><span style='color:blue;'>/</span><span findme='historytotal' style='color:blue;'>255</span>";
 
-		document.getElementById('historytext').addEventListener('keyup', Helper.updateHistoryCharacters, true);
-		System.xmlhttp("index.php?cmd=points&subcmd=guildupgrades", Helper.getTotalHistoryCharacters);
+		document.getElementById('textInputBox').addEventListener('keyup', Helper.updateHistoryCharacters, true);
 	},
 
 	updateHistoryCharacters: function(evt) {
-		var textArea = System.findNode("//textarea[@name='history']");
-		var characterCount = System.findNode("//span[@findme='historylength']");
-		var crCount = 0;
-		var startIndex = 0;
-		while (textArea.value.indexOf('\n',startIndex+1) != -1) {
-			crCount++;
-			startIndex = textArea.value.indexOf('\n',startIndex+1);
-		}
-		characterCount.innerHTML = (textArea.value.length + crCount);
-		var bioTotal = System.findNode("//span[@findme='historytotal']");
-		if ((characterCount.innerHTML*1) > (bioTotal.innerHTML*1)) {
-			characterCount.style.color = "red";
-		} else {
-			characterCount.style.color = "blue";
-		}
+		var textArea = System.findNode("//textarea[@id='textInputBox']");
 		var previewArea = System.findNode("//span[@findme='biopreview']");
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 		previewArea.innerHTML = bioPreviewHTML;
@@ -8735,8 +8640,6 @@ var Helper = {
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable AH Item Widgets' + Helper.helpLink('Enable AH Item Widgets', 'This enables the functionality for looking up the craft and forge of an item.') +
-				':</td><td><input name="enableAHItemWidgets" type="checkbox" value="on"' + (GM_getValue("enableAHItemWidgets")?" checked":"") + '></td></tr>' +
 			//Other prefs
 			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
@@ -8944,7 +8847,6 @@ var Helper = {
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		System.saveValueForm(oForm, "showFSGIcon");
 		System.saveValueForm(oForm, "storeLastQuestPage");
-		System.saveValueForm(oForm, "enableAHItemWidgets");
 		System.saveValueForm(oForm, "addAttackLinkToLog");
 		System.saveValueForm(oForm, "showStatBonusTotal");
 		System.saveValueForm(oForm, "newGuildLogHistoryPages");
@@ -11126,7 +11028,7 @@ var Helper = {
 		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
 		var doc=System.createDocument(responseText);
 		
-		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
+		var logTable = System.findNode("//table[tbody/tr/td[.='Message']]",doc);
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
 		if (pageNumber == 0) {
@@ -11151,6 +11053,7 @@ var Helper = {
 			aRow = logTable.rows[i];
 			
 			var cellContents = aRow.cells[1].innerHTML;
+			cellContents = cellContents.substring(6,23);
 			postDateAsDate = System.parseDate(cellContents);
 			postDateAsLocalMilli = postDateAsDate.getTime() - Helper.gmtOffsetMilli;
 			
@@ -11312,9 +11215,9 @@ var Helper = {
 			}
 		}
 
-		var page = System.findNode("//select[@name='page']/..", doc);
-		var curPage = parseInt(System.findNode("//select[@name='page']", doc).value,10);
-		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/)[1];
+		var page = System.findNode("//input[@name='page']", doc);
+		var curPage = parseInt(page.value,10);
+		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
 		
 		//fetch the next page (if necessary)
 		if (pageNumber < maxPage && pageNumber < maxPagesToFetch && !stopProcessingLogPages) {
