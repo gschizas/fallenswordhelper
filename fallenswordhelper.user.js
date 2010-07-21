@@ -10937,7 +10937,9 @@ var Helper = {
 		Helper.newStoredGuildLog = {logMessage:[]};
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%">' +
-			'<tr style="background-color:#cd9e4b"><td width="80%" nobr><b>&nbsp;Guild Log Version 3</b></td><td><a href="index.php?cmd=guild&subcmd=log"><span style="color:blue;">Old Guild Log</span></a></td></tr>' +
+			'<tr style="background-color:#cd9e4b"><td width="80%" nobr><b>&nbsp;Guild Log Version 3</b></td>' +
+				'<td><span id="Helper:ResetNewGuildLog" style="text-decoration:underline;cursor:pointer;color:blue;">Reset</span>' +
+				'&nbsp;<a href="index.php?cmd=guild&subcmd=log"><span style="color:blue;">Old Guild Log</span></a></td></tr>' +
 			'<tr><td colspan=2>' +
 				'<table><tbody><tr><td><b>Filters:</b></td>' +
 				'<td><table><tbody><tr><td>';
@@ -10956,6 +10958,8 @@ var Helper = {
 			'<tr><td width="16" bgcolor="#cd9e4b"></td><td width="20%" bgcolor="#cd9e4b">Date</td><td width="80%" bgcolor="#cd9e4b">Message</td></tr>' +
 			'</tbody></table>';
 		content.innerHTML=newhtml;
+		
+		document.getElementById("Helper:ResetNewGuildLog").addEventListener('click', Helper.resetNewGuildLog, true);
 
 		var guildLogInjectTable = document.getElementById("Helper:GuildLogInjectTable");
 		var loadingMessageInjectHere = document.getElementById("Helper:NewGuildLogLoadingMessage");
@@ -10977,6 +10981,11 @@ var Helper = {
 			{"guildLogInjectTable": guildLogInjectTable, "pageNumber": 0, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
 	},
 
+	resetNewGuildLog: function(evt) {
+		System.setValueJSON("storedGuildLog", "");
+		window.location = window.location;
+	},
+	
 	toggleGuildLogFilterVisibility: function(evt) {
 		var filterID = evt.target.id;
 		var filterChecked = evt.target.checked;
@@ -11032,7 +11041,7 @@ var Helper = {
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
 		if (pageNumber == 0) {
-			var lastRowInTable = logTable.rows[logTable.rows.length-4];
+			var lastRowInTable = logTable.rows[logTable.rows.length-2];
 			var lastRowCellContents = lastRowInTable.cells[1].innerHTML;
 			lastRowPostDateAsDate = System.parseDate(lastRowCellContents);
 			lastRowPostDateAsLocalMilli = lastRowPostDateAsDate.getTime() - Helper.gmtOffsetMilli;
@@ -11049,7 +11058,7 @@ var Helper = {
 			var localDateMilli = (new Date()).getTime();
 		}
 
-		for (i=1;i<logTable.rows.length;i+=4) {
+		for (i=1;i<logTable.rows.length;i+=2) {
 			aRow = logTable.rows[i];
 			
 			var cellContents = aRow.cells[1].innerHTML;
@@ -11553,7 +11562,6 @@ var Helper = {
 					newCell.style.fontSize = '12px';
 					newCell.align = 'right';
 					newCell.innerHTML = '<span style="color:green;" id="PvP' + playerHREF + '">?</span>';
-					System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
 					var newCell = aRow.insertCell(5);
 					newCell.innerHTML = '&nbsp;';
 					var newCell = aRow.insertCell(6);
@@ -11572,10 +11580,19 @@ var Helper = {
 		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
 		var pvpElement = System.findNode("./tbody/tr/td[b[contains(.,'PvP')]]", statisticsTable);
 		var pvpValue = pvpElement.nextSibling;
-		document.getElementById("PvP" + callback.href).innerHTML = pvpValue.textContent;
+		var findPlayerPvPElement = document.getElementById("PvP" + callback.href);
+		findPlayerPvPElement.innerHTML = pvpValue.textContent;
 		var goldElement = System.findNode("./tbody/tr/td[b[contains(.,'Gold:')]]", statisticsTable);
 		var goldValue = goldElement.nextSibling;
 		document.getElementById("Gold" + callback.href).innerHTML = goldValue.textContent;
+		//add VL if not equal to current level
+		var levelElement = System.findNode("./tbody/tr/td[b[contains(.,'Level:')]]", statisticsTable);
+		var levelValue = levelElement.nextSibling;
+		var virtualLevelElement = System.findNode("./tbody/tr/td[b[.='VL']]", statisticsTable);
+		var virtualLevelValue = virtualLevelElement.nextSibling;
+		if (parseInt(levelValue.textContent,10) != parseInt(virtualLevelValue.textContent,10)) {
+			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>'
+		}
 	}
 };
 
