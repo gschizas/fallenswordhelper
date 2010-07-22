@@ -148,6 +148,7 @@ var Helper = {
 		
 		System.setDefault("enableTempleAlert", true);
 		System.setDefault("showGoldOnFindPlayer", true);
+		System.setDefault("titanLogLength", 15);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -8666,6 +8667,8 @@ var Helper = {
 				'<input name="titanLogRefreshTime" size="1" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
 			'<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.') +
 				':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + (GM_getValue("showGoldOnFindPlayer")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
+				':</td><td><input name="titanLogLength" size="1" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
 			//save button
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
@@ -8861,6 +8864,7 @@ var Helper = {
 		System.saveValueForm(oForm, "titanLogRefreshTime");
 		System.saveValueForm(oForm, "enableTempleAlert");
 		System.saveValueForm(oForm, "showGoldOnFindPlayer");
+		System.saveValueForm(oForm, "titanLogLength");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -9138,9 +9142,9 @@ var Helper = {
 	},
 
 	injectCreateAuctionTemplate: function() {
-		if (window.location.search.search("inv_id") == -1) {
+		if (window.location.search.search("inv_id") != -1) {
 			if (GM_getValue("enableBulkSell")) {
-				var row = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[6]/td");
+				var row = System.findNode("//tr[td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 				if (row) {
 					var sellFromAll = GM_getValue("bulkSellAllBags");
 					var toggleSellAllHTML = "<span id='Helper:bulkCheck' style='cursor: pointer; text-decoration: underline; color: blue;'>" +
@@ -9151,6 +9155,8 @@ var Helper = {
 				}
 
 			}
+		}
+		if (window.location.search.search("inv_id") == -1) {
 			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
 			if (items) {
 				for (var i = 0; i < items.length; i++) {
@@ -9171,7 +9177,7 @@ var Helper = {
 		}
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		if (!auctionTable) {return;}
-    var bidEntryTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]/tbody/tr[10]/td[1]/table");
+		var bidEntryTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]/tbody/tr[10]/td[1]/table");
 		itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search);
 		if (itemStats) {
 			var invId = itemStats[1];
@@ -10593,7 +10599,9 @@ var Helper = {
 		//buffs
 		var activeBuffsTitleRow = System.findNode("//div[strong[.='Active Buffs']]", doc);
 		//fix to cover bad HTML by HCS.
+		if (!activeBuffsTitleRow) activeBuffsTitleRow = System.findNode("//div[b/strong[.='Active Buffs']]", doc);
 		if (!activeBuffsTitleRow) activeBuffsTitleRow = System.findNode("//div[b/b/strong[.='Active Buffs']]", doc);
+		//end fix
 		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling;
 		var anchor2 = callback.anchor2;
 		injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
@@ -11429,9 +11437,10 @@ var Helper = {
 					}
 				}
 			}
-			//if there are more than 20 titans in the log, then purge the oldest ones
-			if (titanLog.titans.length > 15) {
-				titanLog.titans.splice(0, titanLog.titans.length - 15);
+			//if there are more than x titans in the log, then purge the oldest ones
+			var titanLogLength = GM_getValue("titanLogLength")
+			if (titanLog.titans.length > titanLogLength) {
+				titanLog.titans.splice(0, titanLog.titans.length - titanLogLength);
 			}
 			
 			//save the titanLog
