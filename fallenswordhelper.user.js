@@ -3617,7 +3617,7 @@ var Helper = {
 						var playerName = playerElement.innerHTML;
 						colorPlayerName = true;
 					}
-					if (messageType == "General") {
+					if (messageType == "General" || messageType == "Notification") {
 						if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName == 'A') {
 							if (aRow.cells[2].firstChild.nextSibling.getAttribute("href").search("player_id") != -1) {
 								playerElement = aRow.cells[2].firstChild.nextSibling;
