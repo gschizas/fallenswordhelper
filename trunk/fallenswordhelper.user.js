@@ -5337,8 +5337,7 @@ var Helper = {
 	},
 
 	profileComponents: function() {
-		var injectHere = System.findNode("//div[strong[.='Components']]/following-sibling::div[1]");
-		if (!injectHere) injectHere = System.findNode("//div[b/strong[.='Components']]/following-sibling::div[1]");
+		var injectHere = System.findNode("//strong[.='Components']/ancestor::div[1]/following-sibling::div[1]");
 		if (injectHere) {
 			var componentExtrasDiv = document.createElement("DIV");
 			injectHere.appendChild(componentExtrasDiv);
@@ -10599,11 +10598,7 @@ var Helper = {
 		var injectHere = System.findNode("//span[@id='Helper:"+anchor1+"']");
 		injectHere.innerHTML = output;
 		//buffs
-		var activeBuffsTitleRow = System.findNode("//div[strong[.='Active Buffs']]", doc);
-		//fix to cover bad HTML by HCS.
-		if (!activeBuffsTitleRow) activeBuffsTitleRow = System.findNode("//div[b/strong[.='Active Buffs']]", doc);
-		if (!activeBuffsTitleRow) activeBuffsTitleRow = System.findNode("//div[b/b/strong[.='Active Buffs']]", doc);
-		//end fix
+		var activeBuffsTitleRow = System.findNode("//strong[.='Active Buffs']/ancestor::div[1]", doc);
 		var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling;
 		var anchor2 = callback.anchor2;
 		injectHere = System.findNode("//span[@id='Helper:"+anchor2+"']");
