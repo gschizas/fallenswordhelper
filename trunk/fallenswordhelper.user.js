@@ -4989,7 +4989,7 @@ var Helper = {
 			if (!profileItems) return;
 			for (var i=0;i<profileItems.length;i++) {
 				var mouseOver = profileItems[i].getAttribute("onmouseover");
-				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)'/;
+				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)',\s*(\d+)/;
 				var reResult=reParams.exec(mouseOver);
 				if (reResult === null) {
 					return null;
@@ -4999,13 +4999,15 @@ var Helper = {
 				var type=reResult[3];
 				var pid=reResult[4];
 				var finalStr = reResult[5];
-				//terrasoft.gr/FallenSwordHelper: ajaxLoadItem(7236, 199346003, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>');
-				var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid;
+				var currentPlayerId = reResult[6];
+				//ajaxLoadItem(8082, 228497247, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>', 1346893);
+				//fetchitem.php?item_id=8082&inv_id=228497247&t=type&p=1346893&currentPlayerId=1346893
+				var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid + "&currentPlayerId="+currentPlayerId;
 				index = itemId+"_"+invId;
 				profileItems[i].setAttribute("id",index);
 				profileItems[i].setAttribute("theURL",theURL);
 				profileItems[i].setAttribute("finalStr",finalStr);
-				profileItems[i].setAttribute("onmouseover","Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>"+
+				profileItems[i].setAttribute("onmouseover","tt_setWidth(800); Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>"+
 					"<span style=\"display:none; visibility:hidden;\">" + mouseOver.replace(/\'/ig,"\\\'") + "</span>')");
 				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
 			}
