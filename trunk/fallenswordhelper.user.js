@@ -5007,8 +5007,6 @@ var Helper = {
 				profileItems[i].setAttribute("id",index);
 				profileItems[i].setAttribute("theURL",theURL);
 				profileItems[i].setAttribute("finalStr",finalStr);
-				profileItems[i].setAttribute("onmouseover","tt_setWidth(800); Tip('<span id=\"mouseovertext"+index+"\"><center><br>&nbsp;&nbsp;Loading Stats...</center><br></span>"+
-					"<span style=\"display:none; visibility:hidden;\">" + mouseOver.replace(/\'/ig,"\\\'") + "</span>')");
 				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
 			}
 		}
@@ -5018,7 +5016,6 @@ var Helper = {
 		var index = evt.target.getAttribute('id');
 		var theURL = evt.target.getAttribute('theURL');
 		var finalStr = evt.target.getAttribute('finalStr');
-		var mouseoverHTML = document.getElementById("mouseovertext"+index);
 		if(Helper.savedItemData[index]==undefined) {
 			System.xmlhttp(theURL,
 			function(responseText) {
@@ -5034,11 +5031,11 @@ var Helper = {
 					}
 					extraText = "<br>Individual item stats subtotal: " + subTotal;
 				}
-				mouseoverHTML.innerHTML = responseText+extraText+finalStr;
+				unsafeWindow.Tip(responseText+extraText+finalStr);
 				Helper.savedItemData[index] = responseText+extraText+finalStr;
 			});
 		} else {
-			mouseoverHTML.innerHTML = Helper.savedItemData[index];
+			unsafeWindow.Tip(Helper.savedItemData[index]);
 		}
 	},
 
