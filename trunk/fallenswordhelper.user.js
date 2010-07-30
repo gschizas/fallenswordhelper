@@ -149,6 +149,7 @@ var Helper = {
 		System.setDefault("enableTempleAlert", true);
 		System.setDefault("showGoldOnFindPlayer", true);
 		System.setDefault("titanLogLength", 15);
+		System.setDefault("autoFillMinBidPrice", false);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -4015,6 +4016,7 @@ var Helper = {
 		if (!listOfAllies) listOfAllies = "";
 
 		var newRow, newCell, winningBidBuyoutCell;
+		var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
 		for (i=0;i<auctionTable.rows.length;i++) {
 			var aRow = auctionTable.rows[i];
 			if (i>0 && // the title row - ignore this
@@ -4078,9 +4080,19 @@ var Helper = {
 							playerListedItem = true;
 						}
 					}
-					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
-						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-						winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
+					if (!bidExistsOnItem && !playerListedItem) {
+						var bidValueButton = aRow.cells[6].getElementsByTagName("input");
+						if (winningBidValue != "-") {
+							var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
+							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' + 
+								System.addCommas(overBid) + '</span>&nbsp';
+							if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
+							bidValueButton[0].size = 6;
+						} else {
+							var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
+							if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
+							bidValueButton[0].size = 6;
+						}
 					}
 					var inputTableCell;
 					if (!playerListedItem) {
@@ -4945,14 +4957,11 @@ var Helper = {
 			if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 		}
 
-		//Needs to be fixed ... the link can be fixed as follows, but the underlying code is still broken.
-		//var tdInv=System.findNode("//div/strong[.='Inventory']/..");
-		var tdInv=System.findNode("//td/b[.='Inventory']/..");
-		if (tdInv) {
-			tdInv.width="50%";
-			tdInv.innerHTML+=" | <a href='index.php?cmd=notepad&subcmd=checkwear&playerid="+playerid+"'>Check Items</a>";
+		var invSectionToggle = System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
+		if (invSectionToggle) {
+			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
-
+		
 		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
 
@@ -8639,6 +8648,8 @@ var Helper = {
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Auto Fill Min Bid Price' + Helper.helpLink('Auto Fill Min Bid Price', 'This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed.') +
+				':</td><td><input name="autoFillMinBidPrice" type="checkbox" value="on"' + (GM_getValue("autoFillMinBidPrice")?" checked":"") + '></td></tr>' +
 			//Other prefs
 			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
 			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
@@ -8863,6 +8874,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableTempleAlert");
 		System.saveValueForm(oForm, "showGoldOnFindPlayer");
 		System.saveValueForm(oForm, "titanLogLength");
+		System.saveValueForm(oForm, "autoFillMinBidPrice");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -11178,7 +11190,7 @@ var Helper = {
 			}
 			spacerRow.id = rowTypeID
 			guildLogInjectTable.appendChild(spacerRow);
-			spacerRow.innerHTML = '<td height="1" bgcolor="#634229" colspan="3"></td>'
+			spacerRow.innerHTML = '<td class="divider" colspan="3"></td>'
 			newLogMessage = {
 				postDateAsLocalMilli: postDateAsLocalMilli,
 				rowTypeID: rowTypeID,
@@ -11268,11 +11280,7 @@ var Helper = {
 				Helper.wearingItems[type]=onmo;
 			}
 		}
-		Helper.wearingItems.name=System.findNode("//td[@width=666]/table/tbody/tr/td[@colspan=2]/font/b",doc);
-		if (Helper.wearingItems.name) 
-			Helper.wearingItems.name = Helper.wearingItems.name.textContent;
-		else
-			Helper.wearingItems.name = System.findNode("//td[@colspan=3]/center/table[@width=500]/tbody/tr/td/font/b",doc).textContent;
+		Helper.wearingItems.name=System.findNode("//div[@class='innerContentMiddle']/div/h1",doc).textContent;
 		Helper.wearingItems.lvl=System.findNode("//b[contains(.,'Level:')]",doc).parentNode.nextSibling.textContent;
 		document.getElementById("checkwear").innerHTML+="Getting items from "+Helper.wearingItems.name+"'s profile ... <br/>";
 		Helper.getEachWearingItem(0);
@@ -11309,7 +11317,7 @@ var Helper = {
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
-									"[<a href='"+nodes[i].getAttribute("href").replace(/http:\/\/(.*)\//,"http://guide.fallensword.com/")+"'>UFG</a>]</span>, ";
+									"[<a href='http://guide.fallensword.com/index.php?cmd=items&index=0&search_name="+nodes[i].textContent+"'>UFG</a>]</span>, "; 
 							}
 							Helper.getEachWearingItem(type+1);
 						}
@@ -11342,10 +11350,10 @@ var Helper = {
 					color="green";
 				} else {
 					color="yellow";
-					GM_log(Helper.wearingItems[type].suggest);
+					//GM_log(Helper.wearingItems[type].suggest);
 					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(">"+Helper.wearingItems[type].wear+"<", 
 						"><font color=yellow>"+Helper.wearingItems[type].wear+"</font><");
-					GM_log(Helper.wearingItems[type].suggest);
+					//GM_log(Helper.wearingItems[type].suggest);
 				}
 				newHtml+="<td><span style='color:"+color+"' onmouseover=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
 					(Helper.wearingItems[type].fullSet?" (<span style='color:blue'>Full Set</span>)":"")+"</td></tr>"+
