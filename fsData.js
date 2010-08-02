@@ -184,7 +184,7 @@ var Data = {
 				{name: "Sanctuary",          stamina: 25, "duration": 30,   treeId: 1, skillId: 44, buff: "+0.1% per point increase to your armor", nicks: "sanctuary,sanc"},
 				{name: "Dull Edge",          stamina: 10, "duration": 60,   treeId: 1, skillId: 46, buff: "+0.4% per point reduction to creatures \\'Piercing Strike\\' enhancement.", nicks: "dull edge,de"},
 				{name: "Erosion",            stamina: 25, "duration": 180,  treeId: 1, skillId: 80, buff: "+0.1% per point chance to reduce an attackers item durability to 1 if durability damage is inflicted. Note this skill only works in PvP and if you are defending.", nicks: "erosion,ero"},
-				{name: "Avert Gaze",         stamina: 25, "duration": 180,  treeId: 1, skillId: 71, buff: "+0.5% per point chance of not being affected by Hypnotize.", nicks: "avert gaze,ag"},
+				{name: "Avert Gaze",         stamina: 10, "duration": 180,  treeId: 1, skillId: 71, buff: "+0.5% per point chance of not being affected by Hypnotize.", nicks: "avert gaze,ag"},
 				{name: "Enchant Shield",     stamina: 25, "duration": 60,   treeId: 1, skillId: 77, buff: "+0.1% per point stat bonus increase to your equipped shield. (Excludes \\'Gain\\' bonuses).", nicks: "enchant shield,es"},
 				{name: "Find Item",          stamina: 10, "duration": 60,   treeId: 2, skillId: 16, buff: "+0.1% per point increase of creatures current drop rate.", nicks: "find item,fi"},
 				{name: "Treasure Hunter",    stamina: 15, "duration": 120,  treeId: 2, skillId: 17, buff: "+0.2% per point additional gold from creatures.", nicks: "treasure hunter,th,treas hunter"},

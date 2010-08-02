@@ -10992,7 +10992,7 @@ var Helper = {
 		if (maxPagesToFetch > oldMaxPagesToFetch) completeReload = true;
 		//fetch guild log page and apply filters
 		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage, 
-			{"guildLogInjectTable": guildLogInjectTable, "pageNumber": 0, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
+			{"guildLogInjectTable": guildLogInjectTable, "pageNumber": 1, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
 	},
 
 	resetNewGuildLog: function(evt) {
@@ -11071,7 +11071,6 @@ var Helper = {
 			if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 			var localDateMilli = (new Date()).getTime();
 		}
-
 		for (i=1;i<logTable.rows.length;i+=2) {
 			aRow = logTable.rows[i];
 			
@@ -11079,7 +11078,7 @@ var Helper = {
 			cellContents = cellContents.substring(6,23);
 			postDateAsDate = System.parseDate(cellContents);
 			postDateAsLocalMilli = postDateAsDate.getTime() - Helper.gmtOffsetMilli;
-			
+
 			//if the post date is the same as last one in the stored list and the message is the same, then break out
 			//and start appending the stored values instead of parsing.
 			var stopProcessingLogPages = false;
