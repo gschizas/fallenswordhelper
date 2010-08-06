@@ -118,7 +118,6 @@ var Helper = {
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("itemRecipient", "");
-		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoGold","min":"","max":"","gold":true,"fsp":false},{"name":"NoFSP","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 		System.setDefault("quickLinks","[]");
 		System.setDefault("enableAttackHelper", false);
@@ -150,6 +149,7 @@ var Helper = {
 		System.setDefault("showGoldOnFindPlayer", true);
 		System.setDefault("titanLogLength", 15);
 		System.setDefault("autoFillMinBidPrice", false);
+		System.setDefault("showPvPSummaryInLog", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -647,9 +647,6 @@ var Helper = {
 				break;
 			case "guildlog":
 				Helper.injectGuildLogSummary();
-				break;
-			case "quickahpreftemplate":
-				Helper.injectAHPrefTemplate();
 				break;
 			case "newguildlog":
 				Helper.injectNewGuildLog();
@@ -2072,6 +2069,8 @@ var Helper = {
 			}
 			replacementText += "<tr><td style='font-size:small; color:blue'>CA" + counterAttackLevel + " active</td></tr>";
 		}
+		var huntingMode = GM_getValue("huntingMode");
+		replacementText += (huntingMode === true)?"<tr><td style='font-size:small; color:red'>Hunting mode enabled</td></tr>":""
 		replacementText += "<tr><td colspan='2' height='10'></td></tr>";
 		if (GM_getValue("showHuntingBuffs")) {
 			var buffs=GM_getValue("huntingBuffs");
@@ -3605,6 +3604,7 @@ var Helper = {
 		var listOfAllies = GM_getValue("listOfAllies");
 		if (!listOfAllies) listOfAllies = "";
 		var buffList = Data.buffList();
+		var showPvPSummaryInLog = GM_getValue("showPvPSummaryInLog");
 		for (i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
 			if (i !== 0) {
@@ -3628,7 +3628,6 @@ var Helper = {
 							}
 						}
 					}
-
 					if (colorPlayerName) {
 						if (memberNameString.search(playerName) !=-1) {
 							playerElement.style.color="green";
@@ -3753,6 +3752,14 @@ var Helper = {
 							}
 						}
 					}
+					//add PvP combat log summary
+					if (messageType == "Notification" && aRow.cells[2] && showPvPSummaryInLog && aRow.cells[2].innerHTML.search("combat_id=") != -1) {
+						var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+						var combatSummarySpan = document.createElement("SPAN");
+						combatSummarySpan.style.color = "gray";
+						aRow.cells[2].appendChild(combatSummarySpan);
+						System.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id='+combatID, Helper.retrievePvPCombatSummary, {"target": combatSummarySpan});
+					}
 				}
 			}
 			else {
@@ -3760,6 +3767,23 @@ var Helper = {
 				if (messageNameCell) messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
 			}
 		}
+	},
+	
+	retrievePvPCombatSummary: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var winner = System.getIntFromRegExp(responseText, /var\s+winner=(-?[0-9]+);/i);
+		var xpGain = System.getIntFromRegExp(responseText, /var\s+xpGain=(-?[0-9]+);/i);
+		var goldGain = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
+		var prestigeGain = System.getIntFromRegExp(responseText, /var\s+prestigeGain=(-?[0-9]+);/i);
+		var goldStolen = System.getIntFromRegExp(responseText, /var\s+goldStolen=(-?[0-9]+);/i);
+		var pvpRatingChange = System.getIntFromRegExp(responseText, /var\s+pvpRatingChange=(-?[0-9]+);/i);
+		var output = '<br> ';
+		if (xpGain != 0) output += 'XP gain:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(xpGain) + ' </span>';
+		if (goldGain != 0) output += 'Gold gain:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(goldGain) + ' </span>';
+		if (goldStolen != 0) output += 'Gold stolen:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(goldStolen) + ' </span>';
+		if (prestigeGain != 0) output += 'Prestige gain:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + prestigeGain + ' </span>';
+		if (pvpRatingChange != 0) output += 'PvP change:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + pvpRatingChange + ' </span>';
+		callback.target.innerHTML = output;
 	},
 
 	addGuildLogWidgets: function() {
@@ -3977,24 +4001,26 @@ var Helper = {
 		
 		//add coloring for item craft and durability
 		var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
-		for (i=0; i<auctionCellCraftElements.length; i++) {
-			var auctionCellCraftElement = auctionCellCraftElements[i];
-			if (auctionCellCraftElement.textContent){
-				switch(auctionCellCraftElement.textContent) {
-					case 'Perfect': craftColor = '#00b600'; break;
-					case 'Excellent': craftColor = '#f6ed00'; break;
-					case 'Very Good': craftColor = '#f67a00'; break;
-					case 'Good': craftColor = '#f65d00'; break;
-					case 'Average': craftColor = '#f64500'; break;
-					case 'Poor': craftColor = '#f61d00'; break;
-					case 'Very Poor': craftColor = '#b21500'; break;
-					case 'Uncrafted': craftColor = '#666666'; break;
+		if (auctionCellCraftElements) {
+			for (i=0; i<auctionCellCraftElements.length; i++) {
+				var auctionCellCraftElement = auctionCellCraftElements[i];
+				if (auctionCellCraftElement.textContent){
+					switch(auctionCellCraftElement.textContent) {
+						case 'Perfect': craftColor = '#00b600'; break;
+						case 'Excellent': craftColor = '#f6ed00'; break;
+						case 'Very Good': craftColor = '#f67a00'; break;
+						case 'Good': craftColor = '#f65d00'; break;
+						case 'Average': craftColor = '#f64500'; break;
+						case 'Poor': craftColor = '#f61d00'; break;
+						case 'Very Poor': craftColor = '#b21500'; break;
+						case 'Uncrafted': craftColor = '#666666'; break;
+					}
+					auctionCellCraftElement.style.color = craftColor;
 				}
-				auctionCellCraftElement.style.color = craftColor;
+				var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
+				auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
+				auctionCellDurabilityElement.style.color = 'gray';
 			}
-			var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
-			auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
-			auctionCellDurabilityElement.style.color = 'gray';
 		}
 
 		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
@@ -4131,74 +4157,42 @@ var Helper = {
 				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
 			}
 		}
-		// commenting out for now until it can be fixed.
-/*		var searchPrefs = System.findNode("//a[@id='showAdvSearchLink']");
-		var preparePreferences = searchPrefs.parentNode.parentNode;
-		searchPrefs.setAttribute("href", "#prefs");
-
-		newRow = document.createElement("TR");
-		newCell = newRow.insertCell(0);
-		newCell.setAttribute("colspan", 5);
-
-		newCell.innerHTML = '<div id="Helper:AuctionHousePreferences" style="font-size:xx-small;text-align:right;visibility:hidden;display:none;">' +
-			'<form onsubmit="return false;"><nobr>' +
-			'&nbsp;Min: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_minlevel value="wait" />' +
-			'&nbsp;Max: <input type=text size=3 style="font-size:xx-small" class=custominput name=pref_maxlevel value="wait" />' +
-			'&nbsp;Gold: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidegold value="1" />' +
-			'&nbsp;FSP: <input type=checkbox style="font-size:xx-small" class=custominput name=pref_hidefsp value="1" />' +
-			'<input type=submit class=custombutton id="Helper:AuctionHouseSavePreferences" value="Save" /></nobr></form>'+
-			'<div style="font-size:x-small"><a href="index.php?cmd=notepad&subcmd=quickahpreftemplate">Template</a>:&nbsp;<span id=Helper:AHquickPref></span>' +
-			'</div></div>';
-
-		// preparePreferences.appendChild(prefArea);
-		preparePreferences.appendChild(newRow);
-
-		searchPrefs.addEventListener("click", Helper.auctionHouseTogglePreferences, true);
-		document.getElementById("Helper:AuctionHouseSavePreferences").addEventListener("click", Helper.auctionHouseSavePreferences, true);
-		// document.getElementById("Helper:QuickSearch").addEventListener("click", Helper.auctionHouseQuickSearch, true);
-*/
+		//show saved prefs if not default values
+		var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
+		var pref_minlevel = System.findNode("//input[@name='pref_minlevel']").value;
+		var pref_maxlevel = System.findNode("//input[@name='pref_maxlevel']").value
+		var pref_hidegold = System.findNode("//input[@name='pref_hidegold']").checked;
+		var pref_hidefsp = System.findNode("//input[@name='pref_hidefsp']").checked;
+		var pref_minforge = System.findNode("//select[@name='pref_minforge']").selectedIndex;
+		var pref_mincraft = System.findNode("//select[@name='pref_mincraft']").selectedIndex;
+		var output = '';
+		if (pref_minlevel > 1 || (pref_maxlevel > 0 && pref_maxlevel != 1000) || pref_hidegold || pref_hidefsp || pref_minforge != 0 || pref_mincraft != 0) {
+			output = '<nobr><span style="color:blue; font-size:x-small;">Enabled filters (' +
+				'<span id="Helper.resetAHprefs" style="cursor:pointer; text-decoration:underline; color:blue;">Reset</span>' +
+				'):</span> <span style="color:orangered; font-size:x-small;">';
+			if (pref_minlevel > 1) output += 'MinLevel('+pref_minlevel+') ';
+			if (pref_maxlevel > 0 && pref_maxlevel != 1000) output += 'MaxLevel('+pref_maxlevel+') ';
+			if (pref_hidegold) output += pref_hidefsp?'<span style="color:magenta; font-weight:900;">Gold</span> ':'Gold ';
+			if (pref_hidefsp) output += pref_hidegold?'<span style="color:magenta; font-weight:900;">FSP</span> ':'FSP ';
+			if (pref_minforge != 0) output += 'Forge('+pref_minforge+') ';
+			if (pref_mincraft != 0) output += 'Craft('+pref_mincraft+') ';
+			output += '</span></nobr>';
+			searchPrefsFirstCell.innerHTML = output;
+			document.getElementById("Helper.resetAHprefs").addEventListener('click', Helper.resetAHquickPrefsAndReload, true);
+		}
 		//litte something to default to sorting by min bid
 		var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
 		hiddenOrderByInput.value = 1;
 
 		Helper.injectAuctionQuickCancel();
-//		Helper.injectAuctionQuickPreference();
 	},
 
-	injectAuctionQuickPreference: function() {
-		Helper.qAHPref=System.getValueJSON("quickAHPref");
-		if (!Helper.qAHPref || Helper.qAHPref.length<=0) {return;}
-
-		var injectHere = document.getElementById("Helper:AHquickPref");
-		for (var i=0; i<Helper.qAHPref.length; i++) {
-			injectHere.innerHTML+="[ <span id=qAHPref"+i+" prefId="+i+">"+Helper.qAHPref[i].name+"</span> ] ";
-		}
-		for (i=0; i<Helper.qAHPref.length; i++) {
-			document.getElementById("qAHPref"+i).addEventListener("click", Helper.changeAuctionQuickPreference, true);
-		}
-	},
-
-	changeAuctionQuickPreference: function(evt) {
-		var pref=Helper.qAHPref[evt.target.getAttribute("prefId")];
-		System.findNode("//input[@name='pref_minlevel']").value=pref.min;
-		System.findNode("//input[@name='pref_maxlevel']").value=pref.max;
-		System.findNode("//input[@name='pref_hidegold']").checked=pref.gold;
-		System.findNode("//input[@name='pref_hidefsp']").checked=pref.fsp;
-		Helper.auctionHouseSavePreferences();
-	},
-
-	injectAHPrefTemplate: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick TH Preference Template','','','','qTHPrefTempId');
-
-		// global parameters for the meta function generateManageTable
-		Helper.param={};
-		Helper.param={'id':'qTHPrefTempId',
-			'headers':["Name","Min","Max","Credit","FC"],
-			'fields':["name","min","max","gold","fsp"],
-			'tags':["textbox","textbox","textbox","checkbox","checkbox"],
-			'currentItems':System.getValueJSON("quickAHPref"),
-			'gmname':"quickAHPref"};
-		Helper.generateManageTable();
+	resetAHquickPrefsAndReload: function(evt) {
+		//POSTDATA=cmd=auctionhouse&order_by=1&search_text=hunter&pref_save=1&pref_minlevel=&pref_maxlevel=&pref_minforge=0&pref_mincraft=-1
+		var searchText = System.findNode("//input[@name='search_text']").value;
+		var destURL = 'index.php?cmd=auctionhouse&order_by=1&search_text=' + searchText +
+			'&pref_save=1&pref_minlevel=&pref_maxlevel=&pref_minforge=0&pref_mincraft=-1';
+		window.location = destURL;
 	},
 
 	generateManageTable: function() {
@@ -4345,75 +4339,6 @@ var Helper = {
 				}
 			}
 		});
-	},
-
-	auctionHouseTogglePreferences: function(evt) {
-		var prefArea = document.getElementById("Helper:AuctionHousePreferences");
-		if (prefArea.style.display!="none") {
-			prefArea.style.visibility="hidden";
-			prefArea.style.display="none";
-		} else {
-			prefArea.style.visibility="visible";
-			prefArea.style.display="block";
-		}
-		if (prefArea.getAttribute("populated")!="done") {
-			System.xmlhttp('index.php?cmd=auctionhouse&subcmd=preferences', Helper.auctionHouseGetPreferences);
-		}
-		return false;
-	},
-
-	auctionHouseGetPreferences: function(responseText) {
-		var doc=System.createDocument(responseText);
-		var minLevel = System.findNode("//input[@name='pref_minlevel']", doc).value;
-		var maxLevel = System.findNode("//input[@name='pref_maxlevel']", doc).value;
-		var hideGold = System.findNode("//input[@name='pref_hidegold']", doc).checked;
-		var hideFsp = System.findNode("//input[@name='pref_hidefsp']", doc).checked;
-		var prefArea = document.createElement("DIV");
-
-		System.findNode("//input[@name='pref_minlevel']").value   = minLevel;
-		System.findNode("//input[@name='pref_maxlevel']").value   = maxLevel;
-		System.findNode("//input[@name='pref_hidegold']").checked = hideGold;
-		System.findNode("//input[@name='pref_hidefsp']").checked   = hideFsp;
-		document.getElementById("Helper:AuctionHousePreferences").setAttribute("populated", "done");
-	},
-
-	auctionHouseSavePreferences: function(evt) {
-		var minLevel = System.findNode("//input[@name='pref_minlevel']").value;
-		var maxLevel = System.findNode("//input[@name='pref_maxlevel']").value;
-		var hideGold = System.findNode("//input[@name='pref_hidegold']").checked;
-		var hideFsp = System.findNode("//input[@name='pref_hidefsp']").checked;
-
-		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences");
-		submitButton.disabled=true;
-		submitButton.value="Saving...";
-
-		var postData = "cmd=auctionhouse&subcmd=savepreferences" +
-				"&pref_minlevel=" + minLevel +
-				"&pref_maxlevel=" + maxLevel +
-				(hideGold?"&pref_hidegold=1":"") +
-				(hideFsp?"&pref_hidefsp=1":"");
-
-		GM_xmlhttpRequest({
-			method: 'POST',
-			url: System.server + "index.php",
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=preferences",
-				"Cookie" : document.cookie,
-				"Content-Type": "application/x-www-form-urlencoded"
-			},
-			data: postData,
-			onload: function(responseDetails) {
-				Helper.auctionHouseSavePreferencesDone(responseDetails.responseText);
-			}
-		});
-	},
-
-	auctionHouseSavePreferencesDone: function(responseText) {
-		var submitButton=document.getElementById("Helper:AuctionHouseSavePreferences");
-		submitButton.disabled=false;
-		submitButton.value="Save";
-		submitButton.blur();
 	},
 
 	toggleShowExtraLinks: function(evt) {
@@ -8644,6 +8569,8 @@ var Helper = {
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen ' +
 				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' + 
+				'<input name="showPvPSummaryInLog" type = "checkbox" value = "on"' + (GM_getValue("showPvPSummaryInLog")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
@@ -8875,6 +8802,7 @@ var Helper = {
 		System.saveValueForm(oForm, "showGoldOnFindPlayer");
 		System.saveValueForm(oForm, "titanLogLength");
 		System.saveValueForm(oForm, "autoFillMinBidPrice");
+		System.saveValueForm(oForm, "showPvPSummaryInLog");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
