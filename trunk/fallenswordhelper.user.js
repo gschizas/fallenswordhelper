@@ -816,7 +816,7 @@ var Helper = {
 				var iplus1 = i+1;
 				var level = memberList.rows[i].cells[2].innerHTML;
 				var aRow = memberList.rows[i];
-				if (highlightPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 5) {
+				if (highlightPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 10) {
 					aRow.style.backgroundColor = "#4671C8";
 				} else if (highlightGvGPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 25) {
 					aRow.style.backgroundColor = "#FF9900";
@@ -5796,7 +5796,7 @@ var Helper = {
 			'<th sortkey="name">Name</th>' +
 			'<th sortkey="level" sortType="number">Level</th></tr>';
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
-		var lvlDiffToHighlight = 5;
+		var lvlDiffToHighlight = 10;
 
 		var player;
 		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
@@ -11473,8 +11473,11 @@ var Helper = {
 	injectFindPlayer: function() {
 		var findPlayerButton = System.findNode("//input[@value='Find Player']");
 		findPlayerButton.parentNode.innerHTML += "&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
-			(Helper.characterLevel - 5) + "&search_level_max=" + (Helper.characterLevel + 5) + 
-			"&search_in_guild=0'><span style='color:blue;'>Get PvP targets</span></a>";
+			(Helper.characterLevel - 10) + "&search_level_max=" + (Helper.characterLevel + 10) + 
+			"&search_in_guild=0'><span style='color:blue;'>Get PvP targets</span></a>" +
+			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
+			(Helper.characterLevel - 25) + "&search_level_max=" + (Helper.characterLevel + 25) + 
+			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>";
 		if (!GM_getValue("showGoldOnFindPlayer")) return;
 		var findPlayerTable = System.findNode("//table[tbody/tr/td[.='Guild']]");
 		for (var i=0; i<findPlayerTable.rows.length; i++) {
