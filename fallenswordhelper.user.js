@@ -819,7 +819,7 @@ var Helper = {
 				var iplus1 = i+1;
 				var level = memberList.rows[i].cells[2].innerHTML;
 				var aRow = memberList.rows[i];
-				if (highlightPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 10) {
+				if (highlightPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= ((Helper.characterLevel <= 205)?5:10)) {
 					aRow.style.backgroundColor = "#4671C8";
 				} else if (highlightGvGPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 25) {
 					aRow.style.backgroundColor = "#FF9900";
@@ -1253,12 +1253,14 @@ var Helper = {
 	empowerRelic: function(evt) {
 		var relicID = evt.target.getAttribute("relicID");
 		var targetEmpowerLevel = System.findNode("//input[@name='targetEmpowerLevel']").value;
-		var currentLevel = parseInt(System.findNode("//td[contains(.,'Level')][nobr]/following-sibling::td/b").textContent, 10);
+		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td").textContent, 10);
 		if (targetEmpowerLevel <= currentLevel) return;
 		evt.target.innerHTML = "Processing ... ";
 		evt.target.removeEventListener('click', Helper.empowerRelic, true);
 		evt.target.style.cursor = "default";
 		evt.target.style.textDecoration = "none";
+		Helper.empowerRelicMaxTries = 20;
+		Helper.empowerRelicCurrentTries = 1;
 		//index.php?cmd=relic&subcmd=empower&relic_id=12
 		System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":evt.target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
 	},
@@ -1271,11 +1273,12 @@ var Helper = {
 		relicID = callback.relicID;
 		targetEmpowerLevel = callback.targetEmpowerLevel;
 		var info = Layout.infoBox(responseText);
-GM_log(info);
 		var doc = System.createDocument(responseText);
-		var currentLevel = parseInt(System.findNode("//td[contains(.,'Level')][nobr]/following-sibling::td/b").textContent, 10, doc);
+		var currentLevel = System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent;
+GM_log("Current level: " + currentLevel +"::" + info);
 		target.innerHTML += currentLevel + " -> ";
-		if (currentLevel < targetEmpowerLevel) {
+		if (currentLevel < targetEmpowerLevel && Helper.empowerRelicCurrentTries < Helper.empowerRelicMaxTries) {
+			Helper.empowerRelicCurrentTries ++;
 			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
 		} else {
 			//http://www.fallensword.com/index.php?cmd=relic&relic_id=87
@@ -5905,6 +5908,7 @@ GM_log(info);
 			'<th sortkey="level" sortType="number">Level</th></tr>';
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
 		var lvlDiffToHighlight = 10;
+		if (Helper.characterLevel <= 205) lvlDiffToHighlight = 5;
 
 		var player;
 		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
