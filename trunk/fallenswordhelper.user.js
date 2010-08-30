@@ -8094,8 +8094,9 @@ GM_log("Current level: " + currentLevel +"::" + info);
 			var maxEquipLevel = row.cells[7].textContent*1;
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 				for (var j=0; j<arenaMoves.length; j++){
-					var searchText = System.imageServerHTTP + "/pvp/" + arenaMoves[j].moveID+ ".gif";
-					if (prizeSRC == searchText && arenaMoves[j].moveCount == 3){
+					var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/pvp/"),prizeSRC.length);
+					var searchText = "/pvp/" + arenaMoves[j].moveID+ ".gif";
+					if (prizeSRCShort == searchText && arenaMoves[j].moveCount == 3){
 						row.style.visibility = "hidden";
 						row.style.display = "none";
 						break;
@@ -8111,8 +8112,9 @@ GM_log("Current level: " + currentLevel +"::" + info);
 				prizeImgElement.setAttribute("onmouseover", prizeOnmouseover);
 				if (hideArenaPrizes) {
 					for (k=0; k<hideArenaPrizesArray.length; k++){
-						var compareStr = System.imageServerHTTP + "/items/" + hideArenaPrizesArray[k] + ".gif";
-						if (prizeSRC == compareStr) {
+						var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/items/"),prizeSRC.length);
+						var compareStr = "/items/" + hideArenaPrizesArray[k] + ".gif";
+						if (prizeSRCShort == compareStr) {
 							row.style.visibility = "hidden";
 							row.style.display = "none";
 							break;
