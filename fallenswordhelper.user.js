@@ -3233,7 +3233,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var goldGain     = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
 		var levelUp      = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
-		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/;
+		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/(.*)\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/;
 		var info         = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE);
 		var lootedItem = "";
@@ -4527,7 +4527,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 					recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
 				}
 				if (recallToBackpack) {
-					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML +
+					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + '|' +
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast BP</span> |'+
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span> |'+
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast Wear</span></nobr>';
@@ -4538,8 +4538,9 @@ GM_log("Current level: " + currentLevel +"::" + info);
 					var fastWearSpan = fastGSSpan.nextSibling.nextSibling;
 					fastWearSpan.addEventListener('click', Helper.recallItemNWear, true);
 				} else {
-					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML +
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span></nobr>';
+					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + '|' +
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span> |'+
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast Wear</span></nobr>';
 					fastGSSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling;
 					fastGSSpan.addEventListener('click', Helper.recallItem, true);
 				}
