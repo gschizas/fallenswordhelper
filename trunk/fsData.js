@@ -125,7 +125,15 @@ var Data = {
 				{Name:"Ancient Ruins of Zorx",Realm:"Nualgiath Forest (Ridge) Lvl 828",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
 				{Name:"Enchanted Circle of Pelgarir",Realm:"Pelgarir Valley (Verge) Lvl 874",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
 				{Name:"Sapher Fissure",Realm:"Sapher Flow (Upper) Lvl 885",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"}
+				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"},
+				
+				{Name:"Menhir of Gore",Realm:"Krudar Crags (West) Lvl 904",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+30 Critical Hit<br>+25 Breaker<br>+25 Protection"},
+				{Name:"Riangi Cluster",Realm:"Mount Riangi (Flats) Lvl 913",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+45 Reinforced Armor<br>+10 Piercing Strike<br>+45 Breaker"},
+				{Name:"Yozahn Growth",Realm:"Isle of Yozahn (Shores) Lvl 925",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+15 Breaker<br>+45 Dodge"},
+				{Name:"Barnacle Buckler",Realm:"Dead Dogs Island (Port) Lvl 934",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+40 Piercing Strike<br>+25 Critical Strike<br>+15 Dodge<br>+10 Disarm"},
+				{Name:"Sacred Rocks of Zxl",Realm:"Xanlin Plain (Rise) Lvl 948",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+35 Piercing Strike<br>+30 Reinforced Armor<br>+15 Critical Hit<br>+15 Dodge"},
+				{Name:"The Blazing Statue",Realm:"Karthak (Mausoleum) Lvl 962",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Reinforced Armor<br>+20 Critical Hit<br>+30 Dodge<br>+30 Disarm"},
+				{Name:"Volmar Dark Crystal",Realm:"Unknown (Unknown) Lvl xyz",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Piercing Strike<br>+40 Reinforced Armor<br>+40 Critical Hit"}
 			];
 		}
 		return Data.relicArray;

@@ -826,13 +826,16 @@ var Helper = {
 		var highlightGvGPlayersNearMyLvl = GM_getValue("highlightGvGPlayersNearMyLvl");
 		if (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl) {
 			var memberList = System.findNode("//tr[td/b[.='Members']]/following-sibling::tr/td/table");
+			var levelToTest = Helper.characterLevel;
+			var characterVirtualLevel = GM_getValue('characterVirtualLevel');
+			if (characterVirtualLevel) levelToTest = characterVirtualLevel;
 			for (var i=2;i<memberList.rows.length;i+=4) {
 				var iplus1 = i+1;
 				var level = memberList.rows[i].cells[2].innerHTML;
 				var aRow = memberList.rows[i];
-				if (highlightPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= ((Helper.characterLevel <= 205)?5:10)) {
+				if (highlightPlayersNearMyLvl && Math.abs(level - levelToTest) <= ((levelToTest <= 205)?5:10)) {
 					aRow.style.backgroundColor = "#4671C8";
-				} else if (highlightGvGPlayersNearMyLvl && Math.abs(level - Helper.characterLevel) <= 25) {
+				} else if (highlightGvGPlayersNearMyLvl && Math.abs(level - levelToTest) <= 25) {
 					aRow.style.backgroundColor = "#FF9900";
 				}
 			}
@@ -5035,6 +5038,14 @@ GM_log("Current level: " + currentLevel +"::" + info);
 			//Update the ally/enemy online list, since we are already on the page.
 			doc = System.findNode("//html");
 			Helper.parseProfileForWorld(doc.innerHTML, true);
+			
+			// store the VL of the player
+			var virtualLevel = parseInt(System.findNode("//td[b[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
+			if (Helper.characterLevel == virtualLevel) {
+				GM_setValue('characterVirtualLevel',"");
+			} else {
+				GM_setValue('characterVirtualLevel',virtualLevel);
+			}
 		}
 
 		Helper.addStatTotalToMouseover();
@@ -5705,7 +5716,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 
 		Helper.inventory=System.getValueJSON("inventory");
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
-		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
@@ -5762,7 +5773,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 			guildItemCount = Helper.guildinventory.items.length;
 		}
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
-		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
@@ -5906,7 +5917,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		if (!Helper.onlinePlayers) {return;}
 		Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
 		var minLvl = GM_getValue("onlinePlayerMinLvl", 1);
-		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 1000);
+		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 2000);
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
 		var result=
 			'<div align=right><form id=Helper:onlinePlayerFilterForm subject="onlinePlayer" href="index.php?cmd=notepad&subcmd=onlineplayers" onSubmit="javascript:return false;">' +
@@ -5920,7 +5931,10 @@ GM_log("Current level: " + currentLevel +"::" + info);
 			'<th sortkey="level" sortType="number">Level</th></tr>';
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
 		var lvlDiffToHighlight = 10;
-		if (Helper.characterLevel <= 205) lvlDiffToHighlight = 5;
+		var levelToTest = Helper.characterLevel;
+		var characterVirtualLevel = GM_getValue('characterVirtualLevel');
+		if (characterVirtualLevel) levelToTest = characterVirtualLevel;
+		if (levelToTest <= 205) lvlDiffToHighlight = 5;
 
 		var player;
 		for (var i=0; i<Helper.onlinePlayers.players.length;i++) {
@@ -5930,7 +5944,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 					'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
 						'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
 					'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
-					'<td align="right"' + (highlightPlayersNearMyLvl?(Math.abs(player.level - Helper.characterLevel) <= lvlDiffToHighlight?' style="background-color:#4671C8"':''):'') +
+					'<td align="right"' + (highlightPlayersNearMyLvl?(Math.abs(player.level - levelToTest) <= lvlDiffToHighlight?' style="background-color:#4671C8"':''):'') +
 						'>' + player.level + '</td>' +
 					'</tr>';
 		}
@@ -6252,7 +6266,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 
 		//apply level filters
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
-		var maxLvl = GM_getValue("inventoryMaxLvl", 1000);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
 		allItems=allItems.filter(function(e,i,a) {return (e.minLevel >= minLvl && e.minLevel <= maxLvl);});
 
 		var showGloveTypeItems = GM_getValue("showGloveTypeItems");
@@ -6929,7 +6943,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 			if (sellPrice < 100000) {
 				warningColor = "brown";
 				warningText = "</b><br>This is too low ... it just ain't gonna sell.";
-			} else if (sellPrice > 200000) {
+			} else if (sellPrice > 250000) {
 				warningColor = "red";
 				warningText = "</b><br>Hold up there ... this is way to high a price ... you should reconsider.";
 			}
@@ -8045,7 +8059,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) +
 				'<div align=center><form id=Helper:arenaFilterForm subject="arena" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + GM_getValue("arenaMinLvl", 1) + '" size=5 name="Helper.arenaMinLvl" id="Helper.arenaMinLvl" style=custominput/> ' +
-				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 1000) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
+				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 2000) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
 				'<input id="Helper:arenaFilter" subject="arena" class="custombutton" type="submit" value="Filter"/>' +
 				'<input id="Helper:arenaFilterReset" subject="arena" class="custombutton" type="button" value="Reset"/></form></div>'+
 				'</span>';
@@ -8070,7 +8084,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		}
 		var matchFound = false;
 		var minLvl=GM_getValue('arenaMinLvl',1);
-		var maxLvl=GM_getValue('arenaMaxLvl',1000);
+		var maxLvl=GM_getValue('arenaMaxLvl',2000);
 		for (var i=1; i<arenaTable.rows.length; i++){
 			var row = arenaTable.rows[i];
 
@@ -8161,7 +8175,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var playerMinLvl = document.getElementById("Helper." + minLvlSearchText);
 		var playerMaxLvl = document.getElementById("Helper." + maxLvlSearchText);
 		if (playerMinLvl.value === '') playerMinLvl.value = '0';
-		if (playerMaxLvl.value === '') playerMaxLvl.value = '1000';
+		if (playerMaxLvl.value === '') playerMaxLvl.value = '2000';
 		if (!isNaN(playerMinLvl.value))
 			GM_setValue(minLvlSearchText, parseInt(playerMinLvl.value,10));
 		if (!isNaN(playerMaxLvl.value))
@@ -8177,8 +8191,8 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var maxLvlSearchText = filterSubject + "MaxLvl";
 		GM_setValue(minLvlSearchText, 1);
 		document.getElementById("Helper." + minLvlSearchText).value=1;
-		GM_setValue(maxLvlSearchText, 1000);
-		document.getElementById("Helper." + maxLvlSearchText).value=1000;
+		GM_setValue(maxLvlSearchText, 2000);
+		document.getElementById("Helper." + maxLvlSearchText).value=2000;
 		if (href) window.location = System.server + href;
 		else window.location = window.location;
 	},
@@ -8271,7 +8285,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var result='<tr>' + list.rows[0].innerHTML + '</tr>';
 
 		var minLvl=GM_getValue('arenaMinLvl',1);
-		var maxLvl=GM_getValue('arenaMaxLvl',1000);
+		var maxLvl=GM_getValue('arenaMaxLvl',2000);
 		for (var i=0; i<Helper.arenaRows.length; i++){
 			var r = Helper.arenaRows[i];
 			//var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
@@ -11601,13 +11615,16 @@ GM_log("Current level: " + currentLevel +"::" + info);
 
 	injectFindPlayer: function() {
 		var findPlayerButton = System.findNode("//input[@value='Find Player']");
-		var pvpLowerLevelModifier = (Helper.characterLevel > 205)? 10:5;
-		var pvpUpperLevelModifier = (Helper.characterLevel >= 200)? 10:5;
+		var levelToTest = Helper.characterLevel;
+		var characterVirtualLevel = GM_getValue('characterVirtualLevel');
+		if (characterVirtualLevel) levelToTest = characterVirtualLevel;
+		var pvpLowerLevelModifier = (levelToTest > 205)? 10:5;
+		var pvpUpperLevelModifier = (levelToTest >= 200)? 10:5;
 		findPlayerButton.parentNode.innerHTML += "&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
-			(Helper.characterLevel - pvpLowerLevelModifier) + "&search_level_max=" + (Helper.characterLevel + pvpUpperLevelModifier) + 
+			(levelToTest - pvpLowerLevelModifier) + "&search_level_max=" + (levelToTest + pvpUpperLevelModifier) + 
 			"&search_in_guild=0'><span style='color:blue;'>Get PvP targets</span></a>" +
 			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
-			(Helper.characterLevel - 25) + "&search_level_max=" + (Helper.characterLevel + 25) + 
+			(levelToTest - 25) + "&search_level_max=" + (levelToTest + 25) + 
 			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>";
 		if (!GM_getValue("showGoldOnFindPlayer")) return;
 		var findPlayerTable = System.findNode("//table[tbody/tr/td[.='Guild']]");
