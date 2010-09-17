@@ -721,6 +721,9 @@ var Helper = {
 		case "findplayer":
 			Helper.injectFindPlayer();
 			break;
+		case "pvpladder":
+			Helper.injectPvPLadder();
+			break;
 		case "relic":
 			Helper.injectRelic();
 			break;
@@ -11662,17 +11665,17 @@ GM_log("Current level: " + currentLevel +"::" + info);
 			}
 			if (i != 0 && aRow.cells[1]) {
 				var playerHREF = aRow.cells[0].firstChild.nextSibling.getAttribute("href");
-					var newCell = aRow.insertCell(4);
-					newCell.style.fontSize = '12px';
-					newCell.align = 'right';
-					newCell.innerHTML = '<span style="color:green;" id="PvP' + playerHREF + '">?</span>';
-					var newCell = aRow.insertCell(5);
-					newCell.innerHTML = '&nbsp;';
-					var newCell = aRow.insertCell(6);
-					newCell.style.fontSize = '12px';
-					newCell.align = 'right';
-					newCell.innerHTML = '<span style="color:blue;" id="Gold' + playerHREF + '">?</span>';
-					System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
+				var newCell = aRow.insertCell(4);
+				newCell.style.fontSize = '12px';
+				newCell.align = 'right';
+				newCell.innerHTML = '<span style="color:green;" id="PvP' + playerHREF + '">?</span>';
+				var newCell = aRow.insertCell(5);
+				newCell.innerHTML = '&nbsp;';
+				var newCell = aRow.insertCell(6);
+				newCell.style.fontSize = '12px';
+				newCell.align = 'right';
+				newCell.innerHTML = '<span style="color:blue;" id="Gold' + playerHREF + '">?</span>';
+				System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
 			} else if (!aRow.cells[1]) {
 				aRow.cells[0].colSpan = 8;
 			}
@@ -11769,6 +11772,57 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		target.cells[5].innerHTML = armorText;
 		target.cells[6].innerHTML = damageText;
 		target.cells[7].innerHTML = hpText;
+	},
+	
+	injectPvPLadder: function() {
+		var injectHere = System.findNode("//div[@class='innerContentPage']/p[2]");
+		space = document.createTextNode(' ');
+		injectHere.appendChild(space);
+		var pvpLadderLookupVirtualLevelsSpan = document.createElement("SPAN");
+		pvpLadderLookupVirtualLevelsSpan.innerHTML = "Lookup Virtual Levels";
+		pvpLadderLookupVirtualLevelsSpan.style.cursor = "pointer";
+		pvpLadderLookupVirtualLevelsSpan.style.textDecoration = "underline";
+		pvpLadderLookupVirtualLevelsSpan.style.color = "blue";
+		pvpLadderLookupVirtualLevelsSpan.style.fontSize = "x-small";
+		pvpLadderLookupVirtualLevelsSpan.id = "pvpLadderLookupVirtualLevelsSpan";
+		injectHere.appendChild(pvpLadderLookupVirtualLevelsSpan);
+		pvpLadderLookupVirtualLevelsSpan.addEventListener('click', Helper.pvpLadderLookupVirtualLevels, true);
+	},
+	
+	pvpLadderLookupVirtualLevels: function() {
+		var pvpLadderLookupVirtualLevelsSpan = System.findNode("//span[@id='pvpLadderLookupVirtualLevelsSpan']");
+		pvpLadderLookupVirtualLevelsSpan.style.display = "none";
+		pvpLadderLookupVirtualLevelsSpan.visibility = "hidden";
+		var currentLadderTable = System.findNode("//td[h2[.='Current PvP Ladder']]/table");
+		var newCell = currentLadderTable.rows[0].insertCell(2);
+		newCell.className = "header";
+		newCell.innerHTML = "VL";
+		for (var i=1; i<currentLadderTable.rows.length; i++) {
+			aRow = currentLadderTable.rows[i];
+			if (aRow.cells[1]) {
+				newCell = aRow.insertCell(2);
+				var playerHREF = aRow.cells[1].firstChild.getAttribute("href");
+				System.xmlhttp(playerHREF, Helper.pvpLadderParseProfile, {"injectNode": newCell});
+			} else {
+				aRow.cells[0].colSpan = 4;
+			}
+		}		
+	},
+	
+	pvpLadderParseProfile: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
+		var virtualLevelElement = System.findNode("./tbody/tr/td[b[.='VL']]", statisticsTable);
+		var virtualLevelValue = virtualLevelElement.nextSibling;
+		var target = callback.injectNode;
+		var playerVirtualLevel = parseInt(virtualLevelValue.textContent,10);
+		target.innerHTML = '&nbsp;<span style="color:blue;">' + playerVirtualLevel + '</span>';
+		var levelToTest = Helper.characterLevel;
+		var characterVirtualLevel = GM_getValue('characterVirtualLevel');
+		if (characterVirtualLevel) levelToTest = characterVirtualLevel;
+		if (Math.abs(playerVirtualLevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
+			target.style.backgroundColor = "#4671C8";
+		}
 	}
 };
 
