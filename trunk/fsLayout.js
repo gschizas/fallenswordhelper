@@ -79,12 +79,12 @@ var Layout = {
 				if (overlayTable) {
 					var STnode = System.findNode("//font[contains(., 'Server:')]/nobr/b");
 					if (STnode) {
-						overlayTable.innerHTML = "<font color=#FFFFFF size='3'>ST: " + STnode.innerHTML + "</font>";
+						overlayTable.innerHTML += "<div><font color=#FFFFFF size='3'>ST: " + STnode.innerHTML + "</font></div>";
 					} else {
 						var STnode1 = System.findNode("//table[tbody/tr/td/font[.='Server:']]//tr[4]/td[2]/font");
 						var STnode2 = System.findNode("//table[tbody/tr/td/font[.='Server:']]//tr[5]/td[2]/font");
 						if (STnode1 && STnode2) {
-							overlayTable.innerHTML = "<font color=#FFFFFF size='3'>ST: " + STnode1.innerHTML + " " + STnode2.innerHTML + "</font>";
+							overlayTable.innerHTML += "<div><font color=#FFFFFF size='3'>ST: " + STnode1.innerHTML + " " + STnode2.innerHTML + "</font></div>";
 						}
 					}
 				}

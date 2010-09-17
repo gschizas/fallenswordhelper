@@ -4539,6 +4539,11 @@ GM_log("Current level: " + currentLevel +"::" + info);
 				} else {
 					recallToGuildStore = recallCell.firstChild.nextSibling;
 					recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
+					inventoryItemID = /&id=(\d+)/.exec(recallToGuildStoreHREF)[1];
+				}
+				var itemWorn = false;
+				if (aRow.cells[1].firstChild.nodeName == 'B') {
+					itemWorn = true;
 				}
 				if (recallToBackpack) {
 					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + '|' +
@@ -4552,11 +4557,20 @@ GM_log("Current level: " + currentLevel +"::" + info);
 					var fastWearSpan = fastGSSpan.nextSibling.nextSibling;
 					fastWearSpan.addEventListener('click', Helper.recallItemNWear, true);
 				} else {
-					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + '|' +
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span> |'+
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast Wear</span></nobr>';
+					output = '<nobr>' + recallCell.innerHTML + '|' +
+						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span>';
+					if (!itemWorn) {
+						output += ' |&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:equipProfileInventoryItem' + inventoryItemID + 
+							'" itemID="' + inventoryItemID + '">Fast Wear</span>';
+					}
+					output += '</nobr>';
+					recallCell.innerHTML = output;
 					fastGSSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling;
 					fastGSSpan.addEventListener('click', Helper.recallItem, true);
+					if (!itemWorn) {
+						fastWearSpan = fastGSSpan.nextSibling.nextSibling;
+						fastWearSpan.addEventListener('click', Helper.equipProfileInventoryItem, true);
+					}
 				}
 			}
 		}
@@ -4611,6 +4625,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var href=evt.target.getAttribute("href");
 		System.xmlhttp(href, Helper.recallItemNWearReturnMessage, {"target": evt.target, "url": href});
 	},
+	
 	recallItemNWearReturnMessage: function(responseText, callback) {
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
