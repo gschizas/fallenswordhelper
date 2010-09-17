@@ -152,6 +152,7 @@ var Helper = {
 		System.setDefault("autoFillMinBidPrice", false);
 		System.setDefault("showPvPSummaryInLog", true);
 		System.setDefault("addUFSGWidgets", true);
+		System.setDefault("enableQuickDrink", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -5147,7 +5148,8 @@ GM_log("Current level: " + currentLevel +"::" + info);
 
 	profileInjectFastWear: function() {
 		// Fast Wear
-		var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem')]]");
+		var profileInventory = System.findNode("//table[tbody/tr/td/center/a[contains(@href,'subcmd=equipitem') or contains(@onclick,'subcmd=useitem')]]");
+		var enableQuickDrink = GM_getValue("enableQuickDrink")
 		if (profileInventory) {
 			var profileInventoryIDRE = /inventory_id=(\d+)/i;
 			var foldersEnabled = System.findNode("//img[contains(@src,'folder_on.gif')]");
@@ -5164,6 +5166,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 				if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
 				if (profileInventoryBoxItem[i]) {
 					var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
+					if (itemHREF == '#') itemHREF = /window.location = \'(.*)\'/.exec(profileInventoryBoxItem[i].firstChild.getAttribute("onclick"))[1];
 					if (itemHREF && profileInventoryIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
 				}
 			}
@@ -5184,6 +5187,16 @@ GM_log("Current level: " + currentLevel +"::" + info);
 						newCell.innerHTML = output;
 						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i]).
 							addEventListener('click', Helper.equipProfileInventoryItem, true);
+					}
+					else if (enableQuickDrink && itemOnmouseover.indexOf("Click to Use") != -1) { // check to see if item is useable (potion).
+						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+								'id="Helper:drinkProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
+								'itemID="' + profileInventoryBoxID[i] + '">Drink</span>';
+						var newCell = newRow.insertCell(i % 4);
+						newCell.align = 'center';
+						newCell.innerHTML = output;
+						document.getElementById('Helper:drinkProfileInventoryItem' + profileInventoryBoxID[i]).
+							addEventListener('click', Helper.drinkProfileInventoryItem, true);
 					}
 					else {
 						newCell = newRow.insertCell(i % 4); // dummy cell if we don't put a wear link up.
@@ -5646,6 +5659,25 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
 		if (!info) {
 			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Worn</span>";
+		} else {
+			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
+		}
+	},
+
+	drinkProfileInventoryItem: function(evt) {
+		var InventoryItemID=evt.target.getAttribute("itemID");
+		System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + InventoryItemID,
+			Helper.drinkProfileInventoryItemReturnMessage,
+			{"item": InventoryItemID, "target": evt.target});
+	},
+
+	drinkProfileInventoryItemReturnMessage: function(responseText, callback) {
+		var itemID = callback.item;
+		var target = callback.target;
+		var info = Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode; //System.findNode("//td[@title='" + itemID + "']");
+		if (info == 'You successfully used the item!') {
+			itemCellElement.innerHTML = "<span style='color:green; font-weight:bold;'>Drunk</span>";
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		}
@@ -8709,6 +8741,8 @@ GM_log("Current level: " + currentLevel +"::" + info);
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +
 			'<tr><td align="right">Show Stat Bonus Total' + Helper.helpLink('Show Stat Bonus Total', 'This will show a total of the item stats when you mouseover an item on the profile screen.') +
 				':</td><td><input name="showStatBonusTotal" type="checkbox" value="on"' + (GM_getValue("showStatBonusTotal")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Quick Drink' + Helper.helpLink('Enable Quick Drink On Profile', 'This enables the quick drink functionality on the profile page.') +
+				':</td><td><input name="enableQuickDrink" type="checkbox" value="on"' + (GM_getValue("enableQuickDrink")?" checked":"") + '></td></tr>' +
 			//Arena prefs
 			'<tr><th colspan="2" align="left">Arena preferences</th></tr>' +
 			'<tr><td align="right">Auto Sort Arena List' + Helper.helpLink('Auto Sort Arena List', 'This will automatically sort the arena list based on your last preference for sort.') +
@@ -8964,6 +8998,7 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		System.saveValueForm(oForm, "autoFillMinBidPrice");
 		System.saveValueForm(oForm, "showPvPSummaryInLog");
 		System.saveValueForm(oForm, "addUFSGWidgets");
+		System.saveValueForm(oForm, "enableQuickDrink");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
