@@ -1292,8 +1292,8 @@ var Helper = {
 		targetEmpowerLevel = callback.targetEmpowerLevel;
 		var info = Layout.infoBox(responseText);
 		var doc = System.createDocument(responseText);
-		var currentLevel = System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent;
-GM_log("Current level: " + currentLevel +"::" + info);
+		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent,10);
+GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +"::" + info);
 		target.innerHTML += currentLevel + " -> ";
 		if (currentLevel < targetEmpowerLevel && Helper.empowerRelicCurrentTries < Helper.empowerRelicMaxTries) {
 			Helper.empowerRelicCurrentTries ++;
@@ -2141,10 +2141,10 @@ GM_log("Current level: " + currentLevel +"::" + info);
 		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
 		var hasDeathDealer = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
 		if (hasDeathDealer || hasShieldImp) {
-			var re=/(\d) HP remaining/;
+			var re=/(\d+) HP remaining/;
 			var impsRemaining = 0;
 			if (hasShieldImp) {
-				//textToTest = "tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>2 HP remaining<br></b> (Level: 150)</b><br>[Click to De-Activate]</center>');";
+				//textToTest = "tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>11 HP remaining<br></b> (Level: 150)</b><br>[Click to De-Activate]</center>');";
 				textToTest = hasShieldImp.getAttribute("onmouseover");
 				impsRemainingRE = re.exec(textToTest);
 				impsRemaining = impsRemainingRE[1];
