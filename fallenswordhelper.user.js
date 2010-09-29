@@ -5002,7 +5002,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 		Helper.profileInjectGuildRel();
 		if (GM_getValue("enableBioCompressor")) Helper.compressBio();
-
+		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (player) {
 			if (!playerid) {
 				playerid = player.innerHTML;
@@ -5023,8 +5023,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 			Helper.bioAddEventListener();
 			
-			var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
-			if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+			if (isSelfRE) {
+				var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
+				if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+			}
 		}
 
 		var invSectionToggle = System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
@@ -5032,7 +5034,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
 		
-		var isSelfRE=/player_id=/.exec(document.location.search);
 		if (!isSelfRE) { // self inventory
 
 			Helper.profileParseAllyEnemy();
@@ -11491,12 +11492,14 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (!GM_getValue("enhanceChatTextEntry")) return;
 		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
 		var chatConfirm=System.findNode("//input[@name='xc']");
+		var chatType=System.findNode("//input[@name='chat_type']");
 		result = '<form name="dochat" action="index.php" method="post">';
 		result += '<table border="0"><tbody><tr><td rowspan="2">';
 		result += '<input type="hidden" value="guild" name="cmd"/>';
 		result += '<input type="hidden" value="dochat" name="subcmd"/>';
+		result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
 		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		result += '<textarea align="center" cols="60" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		result += '<textarea align="center" cols="80" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
 		result += '</td><td>';
 		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
 		result += '</td><tr><td>';
