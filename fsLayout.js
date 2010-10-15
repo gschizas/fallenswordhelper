@@ -140,6 +140,33 @@ var Layout = {
 		}
     },
 
+	moveOnlineAlliesList: function() {
+		if (!GM_getValue("moveOnlineAlliesList")) return;
+		var src=System.findNode("//font[b='Online Allies']/../../../..");
+		if (!src) return;
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src);
+		var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+		if (rightColumnTable) {
+			//var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			var dest = rightColumnTable;
+			if (!dest) return;
+			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?3:1;
+			var info = dest.insertRow(startRow);
+			if (!info) return;
+			var cell = info.insertCell(0);
+			cell.align = 'center';
+			cell.width = '120';
+			cell.innerHTML="<span id='Helper:OnlineAlliesListPlaceholder'></span>";
+			cell.appendChild(src);
+			var breaker = dest.insertRow(startRow+1);
+			cell = breaker.insertCell(0);
+			cell.innerHTML = "<br/>";
+		}
+    },
+
 	notebookContent: function() {
 		return System.findNode("//div[@class='innerContentMiddle']");
 	},

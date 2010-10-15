@@ -69,6 +69,7 @@ var Helper = {
 		System.setDefault("showSTUpTop", true);
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("enableGuildInfoWidgets", true);
+		System.setDefault("enableOnlineAlliesWidgets", true);
 		System.setDefault("guildOnlineRefreshTime", 300);
 		System.setDefault("hideGuildInfoSecureTrade", false);
 		System.setDefault("hideGuildInfoTrade", false);
@@ -93,6 +94,7 @@ var Helper = {
 		System.setDefault("enableEnemyOnlineList", false);
 		System.setDefault("allyEnemyOnlineRefreshTime", 60);
 		System.setDefault("moveGuildList", false);
+		System.setDefault("moveOnlineAlliesList", false);
 
 		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", true);
@@ -360,6 +362,7 @@ var Helper = {
 			Layout.moveFSBox();
 			Helper.prepareAllyEnemyList();
 			Layout.moveGuildOnlineList();
+			Layout.moveOnlineAlliesList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
 			Helper.injectStaminaCalculator();
@@ -369,6 +372,7 @@ var Helper = {
 			Helper.injectFSBoxLog();
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
+			Helper.addOnlineAlliesWidgets();
 			Helper.injectJoinAllLink();
 			Helper.changeGuildLogHREF();
 			Helper.injectTHsearch();
@@ -746,6 +750,9 @@ var Helper = {
 				break;
 			}
 			break;
+		case "temple":
+			Helper.parseTemplePage();
+			break;
 		case "-":
 			var isRelicPage = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
 			if (isRelicPage) {
@@ -788,14 +795,11 @@ var Helper = {
 			break;
 		}
 		if (GM_getValue("playNewMessageSound")) {
-			var unreadLog = System.findNode("//font[contains(.,'unread log messages.')]");
+			var unreadLog = System.findNode("//img[@title='You have unread log messages.']");
 
 			if (unreadLog)
 			{
-			  if (unreadLog.innerHTML == ("You have unread log messages."))
-			  {
 				unreadLog.innerHTML += "<audio src='" + GM_getValue("defaultMessageSound") + "' autoplay=true />";
-			  }
 			}
 		}
 
@@ -2654,6 +2658,46 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						tradeLink.style.visibility = 'hidden';
 					}
 					onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
+				}
+			}
+		}
+	},
+
+	addOnlineAlliesWidgets: function() {
+		if (!GM_getValue("enableOnlineAlliesWidgets")) {return;}
+		var onlineAlliesTable = System.findNode("//table/tbody[tr/td/font/b[.='Online Allies']]//table");
+		if (onlineAlliesTable) {
+			for (var i=0; i<onlineAlliesTable.rows.length; i++){
+				var onlineAlliesFirstCell = onlineAlliesTable.rows[i].cells[0];
+				var onlineAlliesSecondCell = onlineAlliesTable.rows[i].cells[1];
+				if (onlineAlliesSecondCell) {
+					var playerTable = onlineAlliesFirstCell.getElementsByTagName('TABLE')[0];
+					var checkboxColumn = playerTable.rows[0].cells[0];
+					var playernameColumn = playerTable.rows[0].cells[1];
+					var playerNameLinkElement = playernameColumn.firstChild;
+					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+					// Set Color for Activity
+					if (lastActivityMinutes < 2) {
+						playerNameLinkElement.style.color = 'green';
+						playerNameLinkElement.firstChild.style.color = 'green';
+					} else if (lastActivityMinutes < 5) {
+						playerNameLinkElement.style.color = 'white';
+						playerNameLinkElement.firstChild.style.color = 'white';
+					} else {
+						playerNameLinkElement.style.color = 'gray';
+						playerNameLinkElement.firstChild.style.color = 'gray';
+					}
+					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
+						messageLink = onlineAlliesSecondCell.firstChild.nextSibling;
+						if (messageLink.style) messageLink.style.visibility = 'hidden';
+						buffLink = messageLink.nextSibling.nextSibling;
+						secureTradeLink = buffLink.nextSibling.nextSibling;
+						secureTradeLink.style.visibility = 'hidden';
+						tradeLink = secureTradeLink.nextSibling.nextSibling;
+						tradeLink.style.visibility = 'hidden';
+					}
+					onlineAlliesSecondCell.innerHTML = '<nobr>' + onlineAlliesSecondCell.innerHTML + '</nobr>';
 				}
 			}
 		}
@@ -8593,10 +8637,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'<tr><td align="right">Move Guild Info List' + Helper.helpLink('Move Guild Info List', 'This will Move the Guild Info List higher on the bar on the right') +
 				':</td><td><input name="moveGuildList" type="checkbox" value="on"' + (GM_getValue("moveGuildList")?" checked":"") + '>' +
 				'</td></tr>' +
+			'<tr><td align="right">Move Online Allies List' + Helper.helpLink('Move Guild Info List', 'This will Move the Online Allies List higher on the bar on the right') +
+				':</td><td><input name="moveOnlineAlliesList" type="checkbox" value="on"' + (GM_getValue("moveOnlineAlliesList")?" checked":"") + '>' +
+				'</td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") +
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
 				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (GM_getValue("enableOnlineAlliesWidgets")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
 				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show ST/Date At Top' + Helper.helpLink('Show ST/Date At Top', 'Adds the current server time on the top banner over the dragon\\\'s head. Does nothing if you hide the top banner. ' +
@@ -8934,6 +8983,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "showCreatureInfo");
 		System.saveValueForm(oForm, "keepLogs");
 		System.saveValueForm(oForm, "enableGuildInfoWidgets");
+		System.saveValueForm(oForm, "enableOnlineAlliesWidgets");
 		System.saveValueForm(oForm, "hideGuildInfoMessage");
 		System.saveValueForm(oForm, "hideGuildInfoBuff");
 		System.saveValueForm(oForm, "hideGuildInfoSecureTrade");
@@ -8942,6 +8992,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "huntingBuffs");
 		System.saveValueForm(oForm, "showHuntingBuffs");
 		System.saveValueForm(oForm, "moveGuildList");
+		System.saveValueForm(oForm, "moveOnlineAlliesList");
 		System.saveValueForm(oForm, "moveFSBox");
 		System.saveValueForm(oForm, "hideKrulPortal");
 		System.saveValueForm(oForm, "hideQuests");
@@ -10826,16 +10877,29 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	injectJoinAllLink: function() {
-		var attackGroupLink = System.findNode("//td[a/font[.='A new guild attack group has been formed.']]");
+		var attackGroupLink = System.findNode("//tr[td/a/img[@title='A new guild attack group has been formed.']]");
 		if (attackGroupLink) {
+			var groupJoinHTML = '';
 			if (!GM_getValue("enableMaxGroupSizeToJoin")) {
-				attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
-					"<span style='color:yellow; font-size:x-small;'>[Join All]</span></a></nobr>";
+				groupJoinHTML = "<a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
+					"<span style='color:white; font-size:x-small;'>Join all attack groups.</span></a></nobr>";
 			} else {
 				var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
-				attackGroupLink.innerHTML += " <nobr><a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize'>"+
-					"<span style='color:yellow; font-size:x-small;'>[Join < " + maxGroupSizeToJoin + "]</span></a></nobr>";
+				groupJoinHTML = " <a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize'>"+
+					"<span style='color:white; font-size:x-small;'>Join all attack groups less than size " + maxGroupSizeToJoin + ".</span></a></nobr>";
 			}
+			var LHSSidebarTable = attackGroupLink.parentNode.parentNode;
+			var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
+			var newCell=newRow.insertCell(0);
+			newCell.height = 10;
+			newCell.align = 'center';
+			newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
+				'<tr><td align="center">' + groupJoinHTML + '</td></tr>' +
+				'</tbody></table>';
+			var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
+			var newCell=newRow.insertCell(0);
+			newCell.height = 10;
+
 		}
 	},
 
@@ -10848,8 +10912,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				guildLogNode.setAttribute("href", "index.php?cmd=notepad&subcmd=newguildlog");
 			}
 			//hide the lhs box
-			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.textContent == "You have unread guild log messages.") {
-				messageBox = guildLogNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.firstChild.getAttribute("title") == "You have unread guild log messages.") {
+				messageBox = guildLogNode.parentNode.parentNode;
 				if (messageBox) {
 					messageBox.style.display = "none";
 					messageBox.style.visibility = "hidden";
@@ -11638,10 +11702,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (!GM_getValue("enableTempleAlert")) return;
 		//need timer function
 		var templeAlertLastUpdate = System.getValueJSON("templeAlertLastUpdate");
+		var needToPray = GM_getValue("needToPray");
 		if (templeAlertLastUpdate) {
-			if ((new Date()).getTime() - templeAlertLastUpdate.getTime() > (60 * 60 * 1000)) {
+			if (((new Date()).getTime() - templeAlertLastUpdate.getTime() > (60 * 60 * 1000))) {
 				//bring up the temple page and parse it
 				System.xmlhttp("index.php?cmd=temple", Helper.parseTemplePage);
+			} else if (needToPray && window.location.search.search("cmd=temple") != -1) {
+				Helper.displayDisconnectedFromGodsMessage();
 			}
 		} else {
 			System.xmlhttp("index.php?cmd=temple", Helper.parseTemplePage);
@@ -11649,24 +11716,35 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 	
 	parseTemplePage: function(responseText) {
-		var doc = System.createDocument(responseText);
-		//if need to pray is set then put an alert in the LHS sidebar
-		var needToPray = System.findNode("//input[@value='Pray to Osverin']", doc);
-		if (needToPray) {
-			var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
-			var LHSSidebarTable = logoutRow.parentNode.parentNode;
-			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
-			var newCell=newRow.insertCell(0);
-			newCell.height = 10;
-			newCell.align = 'center';
-			newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
-				'<tr><td align="center"><a href="index.php?cmd=temple"><font color="#ffffff">You feel disconnected from the gods.</font></a></td></tr>' +
-				'</tbody></table>';
-			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
-			var newCell=newRow.insertCell(0);
-			newCell.height = 10;
+		if (window.location.search.search("cmd=temple") != -1) {
+			var doc = System.createDocument(responseText);
+			var checkNeedToPray = System.findNode("//input[@value='Pray to Osverin']", doc);
+		} else {
+			var checkNeedToPray = System.findNode("//input[@value='Pray to Osverin']");
 		}
+		//if need to pray is set then put an alert in the LHS sidebar
+		var needToPray = false;
+		if (checkNeedToPray) {
+			Helper.displayDisconnectedFromGodsMessage();
+			needToPray = true;
+		}
+		GM_setValue("needToPray",needToPray);
 		System.setValueJSON("templeAlertLastUpdate", new Date());
+	},
+	
+	displayDisconnectedFromGodsMessage: function() {
+		var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
+		var LHSSidebarTable = logoutRow.parentNode.parentNode;
+		var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
+		var newCell=newRow.insertCell(0);
+		newCell.height = 10;
+		newCell.align = 'center';
+		newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
+			'<tr><td align="center"><a href="index.php?cmd=temple"><font size="x-small" color="#ffffff">You feel disconnected from the gods.</font></a></td></tr>' +
+			'</tbody></table>';
+		var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
+		var newCell=newRow.insertCell(0);
+		newCell.height = 10;
 	},
 
 	injectFindPlayer: function() {
