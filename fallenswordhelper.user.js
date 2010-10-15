@@ -2679,11 +2679,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
 					// Set Color for Activity
 					if (lastActivityMinutes < 2) {
-						playerNameLinkElement.style.color = 'green';
-						playerNameLinkElement.firstChild.style.color = 'green';
+						playerNameLinkElement.style.color = 'DodgerBlue';
+						playerNameLinkElement.firstChild.style.color = 'DodgerBlue';
 					} else if (lastActivityMinutes < 5) {
-						playerNameLinkElement.style.color = 'white';
-						playerNameLinkElement.firstChild.style.color = 'white';
+						playerNameLinkElement.style.color = 'LightCyan';
+						playerNameLinkElement.firstChild.style.color = 'LightCyan';
 					} else {
 						playerNameLinkElement.style.color = 'gray';
 						playerNameLinkElement.firstChild.style.color = 'gray';
