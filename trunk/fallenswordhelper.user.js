@@ -11707,7 +11707,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			if (((new Date()).getTime() - templeAlertLastUpdate.getTime() > (60 * 60 * 1000))) {
 				//bring up the temple page and parse it
 				System.xmlhttp("index.php?cmd=temple", Helper.parseTemplePage);
-			} else if (needToPray && window.location.search.search("cmd=temple") != -1) {
+			} else if (needToPray && window.location.search.search("cmd=temple") == -1) {
 				Helper.displayDisconnectedFromGodsMessage();
 			}
 		} else {
@@ -11716,7 +11716,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 	
 	parseTemplePage: function(responseText) {
-		if (window.location.search.search("cmd=temple") != -1) {
+		if (window.location.search.search("cmd=temple") == -1) {
 			var doc = System.createDocument(responseText);
 			var checkNeedToPray = System.findNode("//input[@value='Pray to Osverin']", doc);
 		} else {
