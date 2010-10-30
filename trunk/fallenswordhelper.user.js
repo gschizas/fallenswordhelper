@@ -839,11 +839,12 @@ var Helper = {
 			if (characterVirtualLevel) levelToTest = characterVirtualLevel;
 			for (var i=2;i<memberList.rows.length;i+=4) {
 				var iplus1 = i+1;
+				var vlevel = /VL:<\/td><td>(\d+)<\/td>/.exec(memberList.rows[i].cells[1].innerHTML)[1];
 				var level = memberList.rows[i].cells[2].innerHTML;
 				var aRow = memberList.rows[i];
-				if (highlightPlayersNearMyLvl && Math.abs(level - levelToTest) <= ((levelToTest <= 205)?5:10)) {
+				if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
 					aRow.style.backgroundColor = "#4671C8";
-				} else if (highlightGvGPlayersNearMyLvl && Math.abs(level - levelToTest) <= 25) {
+				} else if (highlightGvGPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= 25) {
 					aRow.style.backgroundColor = "#FF9900";
 				}
 			}
@@ -2682,11 +2683,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						playerNameLinkElement.style.color = 'DodgerBlue';
 						playerNameLinkElement.firstChild.style.color = 'DodgerBlue';
 					} else if (lastActivityMinutes < 5) {
-						playerNameLinkElement.style.color = 'LightCyan';
-						playerNameLinkElement.firstChild.style.color = 'LightCyan';
+						playerNameLinkElement.style.color = 'LightSkyBlue';
+						playerNameLinkElement.firstChild.style.color = 'LightSkyBlue';
 					} else {
-						playerNameLinkElement.style.color = 'gray';
-						playerNameLinkElement.firstChild.style.color = 'gray';
+						playerNameLinkElement.style.color = 'PowderBlue';
+						playerNameLinkElement.firstChild.style.color = 'PowderBlue';
 					}
 					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
 						messageLink = onlineAlliesSecondCell.firstChild.nextSibling;
@@ -5991,7 +5992,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					guildId: guildId,
 					id: parseInt(playerRows[i].cells[1].firstChild.getAttribute("href").replace(/\D/g,""),10),
 					name: playerRows[i].cells[1].textContent,
-					level: parseInt(playerRows[i].cells[2].textContent,10)
+					level: parseInt(playerRows[i].cells[2].textContent.replace(/,/g,""),10)
 				};
 				Helper.onlinePlayers.players.push(newPlayer);
 			}
@@ -10239,6 +10240,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				var contactName   = contactLink.textContent;
 				var contactStatus = aTable.rows[0].cells[0].firstChild.title;
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivityDays = parseInt(lastActivity[1],10);
+				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 
 				var aContact;
 
@@ -10268,6 +10273,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				aContact.id     = contactId;
 				aContact.name   = contactName;
 				aContact.type   = "Ally";
+				aContact.lastActivityMinutes = lastActivityMinutes;
 			}
 			var enemiesDetails=enemiesTable.getElementsByTagName("TABLE");
 
@@ -10277,6 +10283,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				contactName   = contactLink.textContent;
 				contactStatus = aTable.rows[0].cells[0].firstChild.title;
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivityDays = parseInt(lastActivity[1],10);
+				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 
 				aContact;
 
@@ -10306,6 +10316,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				aContact.id     = contactId;
 				aContact.name   = contactName;
 				aContact.type   = "Enemy";
+				aContact.lastActivityMinutes = lastActivityMinutes;
 			}
 			// remove not existing players
 			contactList.contacts = contactList.contacts.filter(function(e) {return e.status!="Deleted";});
@@ -10347,10 +10358,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				contactColor = "orange";
 			}
 			else if (contact.type == "Ally") {
-				contactColor = "DodgerBlue";
+				if (contact.lastActivityMinutes < 2) contactColor = "DodgerBlue";
+				else if (contact.lastActivityMinutes < 5) contactColor = "LightSkyBlue";
+				else  contactColor = "PowderBlue";
 			}
 			else if (contact.type == "Enemy") {
 				contactColor = "red";
+				if (contact.lastActivityMinutes < 2) contactColor = "red";
+				else if (contact.lastActivityMinutes < 5) contactColor = "PaleVioletRed";
+				else contactColor = "Pink";
 			}
 			else {
 				contactColor = "white";
