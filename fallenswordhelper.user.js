@@ -11571,6 +11571,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	addChatTextArea: function() {
 		if (!GM_getValue("enhanceChatTextEntry")) return;
 		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
+		if (!messageCell) { 
+			Helper.addChatTextAreaLeader();
+			return;
+				}	
+		Helper.addChatTextAreaNormal();
+		},
+			
+	addChatTextAreaNormal: function () {	
+		if (!GM_getValue("enhanceChatTextEntry")) return;
+		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
 		var chatConfirm=System.findNode("//input[@name='xc']");
 		var chatType=System.findNode("//input[@name='chat_type']");
 		result = '<form name="dochat" action="index.php" method="post">';
@@ -11591,6 +11601,29 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		
 		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
 	},
+
+	addChatTextAreaLeader: function() {
+		if (!GM_getValue("enhanceChatTextEntry")) return;
+		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send']]");
+		var chatConfirm=System.findNode("//input[@name='xc']");
+		var chatType=System.findNode("//input[@name='chat_type']");
+		result = '<form name="dochat" action="index.php" method="post">';
+		result += '<table border="0"><tbody><tr><td rowspan="2">';
+		result += '<input type="hidden" value="guild" name="cmd"/>';
+		result += '<input type="hidden" value="dochat" name="subcmd"/>';
+		result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
+		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
+		result += '<textarea align="center" cols="80" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		result += '</td><td>';
+		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
+		result += '</td><tr><td>';
+		result += '</td></tr></tbody></table>';
+		result += '</form>';
+		messageCell.innerHTML = result;
+		
+		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
+		;
+},
 	
 	updateTitanLogs: function() {
 		if (!GM_getValue("enableTitanLog")) return;
