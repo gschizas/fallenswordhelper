@@ -99,6 +99,7 @@ var Helper = {
 
 		System.setDefault("miniMapName","");
 		System.setDefault("miniMapSource","");
+        System.setDefault("loadAmmoUrl", "index.php?cmd=profile");
 		
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -479,6 +480,9 @@ var Helper = {
 			case "monsterlog":
 				Helper.injectMonsterLog();
 				break;
+			case "quickextract":
+				Helper.insertQuickExtract();
+				break;
 			case "quickwear":
 				Helper.injectQuickWear();
 				break;
@@ -742,12 +746,14 @@ var Helper = {
 	quickDone: function(responseText, showMsgBox) {
 		if (showMsgBox==null) showMsgBox = false;
 		var infoMessage = Layout.infoBox(responseText);
-		if (showMsgBox)
+		if (showMsgBox==true)
 			alert(infoMessage);
-		else {
+        else if (showMsgBox==false) {
 			unsafeWindow.tt_setWidth(200);
 			unsafeWindow.Tip(infoMessage);
-		}
+		} else {
+            showMsgBox.innerHTML = '<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:x-small;">' + infoMessage + '</div>';
+        }
 	},
 	quickMS: function(cast){
 		var url="index.php?"+(cast?"cmd=skills&subcmd=cast":"cmd=profile&subcmd=removeskill")+"&skill_id=64"
@@ -959,9 +965,12 @@ var Helper = {
 	
 	quickUse: function(responseText, callback) {
 
-		var quItems=System.getValueJSON("quickUseItems");
-		var item=quItems['item'+callback.id];
-		if (item=='') return;
+        var item=callback.item;
+        if (item==null) {
+            var quItems=System.getValueJSON("quickUseItems");
+            item=quItems['item'+callback.id];
+            if (item=='') return;
+        }
 		
 		// only applicable when you are hunting (in world screen)
 		if (!System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..")) return;
@@ -976,9 +985,13 @@ var Helper = {
 		Helper.retrieveItemInfor(doc);
 		
 		for (var key in Helper.itemList) {
-			if (Helper.itemList[key].text==item) {
+			if (Helper.itemList[key].text==item || (callback.item && item.test(Helper.itemList[key].text))) {
+                var showMsgBox=true;
+                var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
+                if (injectHere) showMsgBox=injectHere.insertRow(1);
+                GM_setValue("loadAmmoUrl", "index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id);
 				System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id,
-					Helper.quickDone, true);
+					Helper.quickDone, showMsgBox);
 				return;
 			}
 		}
@@ -994,12 +1007,12 @@ var Helper = {
 		}
 
 		if (Helper.folderHrefs.length > 1 && callback.arrayId + 1 < Helper.folderHrefs.length) {
-			System.xmlhttp(Helper.folderHrefs[callback.arrayId+1], 
-				Helper.quickUse, {'id':callback.id,'arrayId':callback.arrayId+1});
+            callback.arrayId++;
+			System.xmlhttp(Helper.folderHrefs[callback.arrayId], 
+				Helper.quickUse, callback);
 			return;
 		}
-		
-		alert("Cannot find any " + item + " to use!");
+        alert("Cannot find any " + (item+"").replace("/^(?:","").replace(")$/","") + " to use!");
 	},
 
 	injectRelic: function(isRelicPage) {
@@ -2126,6 +2139,75 @@ var Helper = {
 		window.location=window.location;
 	},
 	
+	insertQuickExtract: function() {
+		Helper.itemList = {};
+		var layout=Layout.notebookContent();
+		layout.innerHTML="Getting item list from: ";
+		Helper.resourceList={};
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":layout,"id":0});
+	},
+
+	getPlantsFromBackpack: function(responseText, callback) {
+		var layout=callback.inject;
+		layout.innerHTML+="Parsing main pack for plants.";
+		var doc=System.createDocument(responseText);
+		if (responseText.indexOf('Back to Data Sheet') > 0){
+			Helper.retrieveItemInfor(doc);
+		}
+		Helper.showQuickExtract(callback);
+	},
+
+	showQuickExtract: function(callback) {
+		var output=Helper.makePageHeader('Quick Extract','','','')+
+			'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
+			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=buy_result colspan=12></td></tr>';
+		for (var key in Helper.itemList) {
+			var itemID=Helper.itemList[key].id;
+			var	itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html); //add this line
+			var plantType = itemStats[1];
+			if (Helper.resourceList[plantType]){
+				Helper.resourceList[plantType].invIDs+=","+itemID;
+				Helper.resourceList[plantType].count++;
+			}
+			else {
+				Helper.resourceList[plantType]={'count':1,'invIDs':itemID,'src':Helper.itemList[key].html};
+			}
+		}
+
+		for (var id in Helper.resourceList) {
+			var res=Helper.resourceList[id];
+			output+='<tr><td align=center>'+
+				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
+				'id="Helper:extractAllSimilar' + id + '" invIDs="'+res.invIDs+'">Extract all '+res.count +'</span></td>'+res.src+'</tr>';
+		}
+		output+='</table>';
+
+		callback.inject.innerHTML=output;
+		for (id in Helper.resourceList) {
+			document.getElementById('Helper:extractAllSimilar' + id).
+				addEventListener('click', Helper.extractAllSimilar, true);
+		}
+	},
+
+	extractAllSimilar: function(evt) {
+		if (!window.confirm("Are you sure you want to extract all similar items?")) {return;}
+		var InventoryIDs=evt.target.getAttribute("invIDs").split(",");
+		//evt.target.parentNode.innerHTML = InventoryIDs;
+		var output= '';
+		evt.target.parentNode.innerHTML = 'extracting all ' + InventoryIDs.length + ' resources';
+		for (var i=0; i<InventoryIDs.length; i++){
+			//output+='index.php?cmd=profile&subcmd=useitem&inventory_id='+InventoryIDs[i]+'<br>';
+			System.xmlhttp('index.php?cmd=profile&subcmd=useitem&inventory_id='+InventoryIDs[i], Helper.quickDoneExtracted);
+		}
+		//evt.target.parentNode.innerHTML = output;
+	},
+	quickDoneExtracted: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		//unsafeWindow.tt_setWidth(200);
+		//unsafeWindow.Tip(infoMessage);
+		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
+	},
+	
 	retrieveItemInfor: function(doc) {
 		var table=System.findNode("//td[@colspan=3]/table[@width='100%']",doc);
 		for (var i=0; i<table.rows.length/2; i++){
@@ -2447,7 +2529,7 @@ var Helper = {
 		var goldGain = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?\d+);/i);
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?\d+);/i);
 		var levelUp = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?\d+);/i);
-		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/[0-9.]+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
+		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/([a-z0-9.]*)+\/sigma2\/items\/([0-9a-f]+).gif\"\s+onmouseover="ajaxLoadItem\(([0-9]+),\s-1,\s+2,\s+([0-9]+),\s+''\);\">/i
 		var info = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE)
 		var lootedItem = "";
@@ -3012,6 +3094,12 @@ var Helper = {
 		case 48: // return to world [0]
 			window.location = 'index.php?cmd=world';
 			break;
+        case 108: // load ammo [l]
+            System.xmlhttp(GM_getValue("loadAmmoUrl"), Helper.tryToLoadAmmo);
+            break;
+        case 76: // combine psi ammo [L]
+            System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.combinePsiAmmo);
+            break;
 		case 109: // medikit [m]
 			window.location = System.server+'index.php?cmd=profile&subcmd=useitem&mode=worldmedipack'
 			break;
@@ -4065,6 +4153,7 @@ var Helper = {
 		var counter = 0, preText='';
 		var cbName=document.body.innerHTML.match(/(storeIndex\[\]|removeIndex\[\])/)[0];
 		for (var key in Helper.itemList) {
+            var id = Helper.itemList[key].id;
 			if (showExtraLinks) {
 				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html);
 				if (itemStats) {
@@ -4085,15 +4174,22 @@ var Helper = {
 					+ "&pid=" + pid
 					+ "&imgid=" + imgid
 					+ "&txt=" + text + "'>"
-					+ "Sell</a>]</span> ";
+					+ "Sell</a>]</span>";
 			}
 			newHtml+='<td align="center">'+
 				'<table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
 				'<td width="45" height="45" style="background-color: rgb(13, 9, 5); border: 1px solid rgb(32, 33, 34);">'+
 					Helper.itemList[key].html.match(/(<center><img [^>]*><br><font size="1">[^<]*<\/font><\/center>)/)[1]+'</td>'+
-				'<td rowspan=2 style="font-size:x-small" align=center width=70><b>'+Helper.itemList[key].text+'</b><br/><br/>[<span id=item'+Helper.itemList[key].id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
+				'<td rowspan=2 style="font-size:x-small" align=center width=70><b>'+Helper.itemList[key].text+'</b><br/><br/>[<span id=item'+id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
 					'onmouseover="Tip(\'Select all items of the same type\')">Select All</span>]<br/><br/>'+
-					preText+'</td></tr>'+
+					preText+
+                    '[<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
+                    'id="Helper:equipProfileInventoryItem' + id + '" ' +
+                    'itemID="' + id + '">Wear</span>]&nbsp;' +
+                    '[<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
+                    'id="Helper:useProfileInventoryItem' + id + '" ' +
+                    'itemID="' + id + '">Use</span>]'+
+                    '</td></tr>'+
 				'<tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="'+cbName+'" value="'+Helper.itemList[key].id+'"></td></tr>'+
 				'</tbody></table></td>';
 			counter++;
@@ -4103,6 +4199,13 @@ var Helper = {
 		table.innerHTML = newHtml;
 		for (var key in Helper.itemList) {
 			document.getElementById('item'+Helper.itemList[key].id).addEventListener('click', Helper.selectAllProfileInventoryItem, true);
+			var itemID=Helper.itemList[key].id;
+			var elem=document.getElementById('Helper:equipProfileInventoryItem' + itemID);
+			if (elem) {
+				elem.addEventListener('click', Helper.equipProfileInventoryItem, true);
+				document.getElementById('Helper:useProfileInventoryItem' + itemID)
+					.addEventListener('click', Helper.useProfileInventoryItem, true);
+			}
 		}
 	},
 	
@@ -4543,7 +4646,8 @@ var Helper = {
 		var componentDiv=document.getElementById('componentDiv');
 		if (componentDiv) {
 			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Enable Quick Del</span>]</div>'+
-				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Count Components</span>]</div>';
+				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Count Components</span>]</div>'+
+				'<div align=center><a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Quick Extract Components</span>]</a></div>';
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		}
@@ -8541,6 +8645,83 @@ var Helper = {
 				table.innerHTML = newHtml;
 			});
 	},
+    
+    tryToLoadAmmo: function(responseText) {
+        var info = Layout.infoBox(responseText);
+        if (info.indexOf("successfully")>0 || info.indexOf("already at maximum ammo")>0 ) {
+            var showMsgBox=true;
+            var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
+            if (injectHere) showMsgBox=injectHere.insertRow(1);
+            Helper.quickDone(responseText, showMsgBox);
+            return;
+        }
+        var doc = System.createDocument(responseText);
+        var weapon=System.findNode("//td[@height=165]/img[contains(@src,'/items/')]", doc);
+		if (weapon) {
+            System.xmlhttp(Helper.linkFromMouseover(weapon.getAttribute("onmouseover")), Helper.findAmmoTypeNLoad);
+        } else {
+            alert("You do not have a weapon equipped. Ammo loading failed!");
+            return;
+        }
+    },
+    
+    findAmmoTypeNLoad: function(responseText) {
+        var doc = System.createDocument(responseText);
+        var typeNode=System.findNode("//font[@size='1' and @color='yellow']", doc);
+		if (typeNode.textContent == "Weapon") {
+            var ammoType = System.findNode("//tr[td/nobr/font[.='Damage\u00A0Type:']]/td[2]", doc);
+            if (ammoType == null) return;
+            var ammoCount = System.findNode("//tr[td/nobr/font[.='Ammo:']]/td[2]", doc);
+            if (ammoCount == null) return;
+            if (ammoCount.textContent.indexOf("n/a")>=0) {
+                alert("Weapon does NOT need ammo!");
+                return;
+            }
+            ammoType = ammoType.textContent;
+            ammoType = ammoType.substr(0, ammoType.length - 1);
+            var ammoDict={'Venom':/^Toxin Slug$/,'Plasma':/^Plasma Cartridge$/,'Crushing':/^Shell Mag$/, 
+                'Piercing':/^(?:Thorn Darts|Alloy Tipped Bullets)$/,
+                'Slashing':/^Rotorkin$/, 'Flame':/^(?:Inferno Rounds|Flame Pack)$/, 
+                'Psionic':/^(?:Charged Mind Shard|Charged Mind Stone|Charged Mind Orb)$/,
+                'Solid':/^Bullet Mag$/, 'Energy':/^Shocker Slug$/ }
+            if (ammoDict[ammoType])
+                System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", 
+                    Helper.quickUse, {'arrayId':0,'item':ammoDict[ammoType]});
+            else {
+                alert("Unknown ammo type: '"+ammoType+"', please pm dkwizard about this!");
+                return;
+            }
+        } else {
+            alert("Error finding worn weapon!");
+            return;
+        }
+    },
+    
+    combinePsiAmmo: function(responseText) {
+        Helper.itemList = {};
+		var doc=System.createDocument(responseText);
+		Helper.retrieveItemInfor(doc);
+        
+        var postData = 'cmd=profile&subcmd=backpackaction&folder_id=-1&submit=Combine+Selected&split_amount=';
+        var psiAmmo=["Charged Mind Shard","Charged Mind Stone","Charged Mind Orb"];
+        for (var i=0; i<psiAmmo.length; i++) {
+            var postItems = '';
+            for (var key in Helper.itemList)
+                if (Helper.itemList[key].text == psiAmmo[i])
+                    postItems+='&folderItem[]='+Helper.itemList[key].id;
+            GM_xmlhttpRequest({
+                method: 'POST',
+                url: System.server + "index.php",
+                headers: {
+                    "User-Agent" : navigator.userAgent,
+                    "Content-Type": "application/x-www-form-urlencoded",
+                    "Referer": document.location,
+                    "Cookie" : document.cookie
+                },
+                data: postData+postItems
+            });
+		}
+    },
 	
 	makePageHeader: function(title, comment, spanId, button) {
 		return '<table width=100%><tr style="background-color:#110011">'+
