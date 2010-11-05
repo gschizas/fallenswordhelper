@@ -155,6 +155,7 @@ var Helper = {
 		System.setDefault("showPvPSummaryInLog", true);
 		System.setDefault("addUFSGWidgets", true);
 		System.setDefault("enableQuickDrink", true);
+		System.setDefault("enhanceOnlineDots", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -849,7 +850,9 @@ var Helper = {
 				}
 			}
 		}
+		Helper.changeGuildListOfflineBallColor();
 	},
+	
 	updateBuffLog: function() {
 		if (GM_getValue("keepBuffLog")) {
 			//Skill Inventor level 175 was activated on 'yuuzhan'.
@@ -938,8 +941,6 @@ var Helper = {
 					}
 				}
 			}
-
-
 		}
 
 
@@ -1032,10 +1033,35 @@ var Helper = {
 			var confNode = System.findNode("//table[contains(@id,'statisticsControl')]");
 			System.xmlhttp("index.php?cmd=guild&subcmd=conflicts",
 				Helper.getConflictInfo,	{"node": confNode});
-
 		}
+		Helper.changeGuildListOfflineBallColor();
 	},
 
+	changeGuildListOfflineBallColor: function() {
+		//Code to change the colored balls based on last activity
+		if (!GM_getValue("enhanceOnlineDots")) return;
+		var memberTable = System.findNode("//table[tbody/tr/td[.='Rank']]");
+		for (var i=2;i<memberTable.rows.length ;i++ ) {
+			var aRow = memberTable.rows[i];
+			if (aRow.cells[1]) {
+				var contactLink   = aRow.cells[1].firstChild.nextSibling;
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivityDays = parseInt(lastActivity[1],10);
+				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+				if (lastActivityMinutes < 2) {
+					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+				} else if (lastActivityMinutes < 5) {
+					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+				} else if (lastActivityMinutes < 30) {
+					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+				} else {
+					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+				}
+			}
+		}
+	},
+	
 	getConflictInfo: function(responseText, callback) {
 		try {
 			var insertHere = callback.node;
@@ -3471,6 +3497,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var memberRank   = aRow.cells[3].textContent;
 					var memberXP     = System.intValue(aRow.cells[4].textContent);
 					var memberStatus = aRow.cells[0].firstChild.title;
+					
+					var contactLink   = aRow.cells[1].firstChild.nextSibling;
+					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+					var lastActivityDays = parseInt(lastActivity[1],10);
+					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 
 					var aMember;
 
@@ -3503,6 +3535,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					aMember.level  = memberLevel;
 					aMember.rank   = memberRank;
 					aMember.xp     = memberXP;
+					aMember.lastActivityMinutes = lastActivityMinutes;
 				}
 			}
 
@@ -4631,20 +4664,25 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (memberList) {
 			for (i=0;i<memberList.members.length;i++) {
 				var member=memberList.members[i];
-				if (member.status=="Online") {
-					var player=System.findNode("//b[contains(., '" + member.name + "')]");
-					if (player) {
-						player.innerHTML = "<span style='font-size:large; color:green;'>[Online]</span> <a href='" +
-							System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
-						player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
+				var lastActivityMinutes = 30;
+				var lastActivityIMG = "";
+				if (!isNaN(member.lastActivityMinutes)) var lastActivityMinutes = member.lastActivityMinutes;
+				if (GM_getValue("enhanceOnlineDots")) {
+					var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+					if (lastActivityMinutes < 2) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+					} else if (lastActivityMinutes < 5) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+					} else if (lastActivityMinutes < 30) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
 					}
 				}
-				else {
-					player=System.findNode("//b[contains(., '" + member.name + "')]");
-					if (player) {
-						player.innerHTML = "<a href='" +
-							System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
-					}
+
+				var player=System.findNode("//b[contains(., '" + member.name + "')]");
+				if (player) {
+					player.innerHTML = lastActivityIMG + "&nbsp;<a href='" +
+						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
+					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
 				}
 			}
 		}
@@ -5114,6 +5152,29 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 
 		Helper.addStatTotalToMouseover();
+		
+		//enhance colored dots
+		var enhanceOnlineDots = GM_getValue("enhanceOnlineDots");
+		if (enhanceOnlineDots) {
+			var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@onmouseover,'Last Activity')]");
+			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
+				var testProfile = profileAlliesEnemies[i];
+				var contactLink   = testProfile;
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivityDays = parseInt(lastActivity[1],10);
+				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+				if (lastActivityMinutes < 2) {
+					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+				} else if (lastActivityMinutes < 5) {
+					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+				} else if (lastActivityMinutes < 30) {
+					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+				} else {
+					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+				}
+			}
+		}
 	},
 
 	addStatTotalToMouseover: function() {
@@ -6848,7 +6909,20 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						}
 						listOfDefenders = listOfDefenders.split(","); // quick buff only supports 16
 						if (listOfDefenders == "[none]") break;
-						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) +
+						var lastActivityMinutes = 30;
+						var lastActivityIMG = "";
+						if (!isNaN(aMember.lastActivityMinutes)) var lastActivityMinutes = aMember.lastActivityMinutes;
+						if (GM_getValue("enhanceOnlineDots")) {
+							var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+							if (lastActivityMinutes < 2) {
+								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+							} else if (lastActivityMinutes < 5) {
+								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+							} else if (lastActivityMinutes < 30) {
+								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+							}
+						}
+						theItem.innerHTML = lastActivityIMG +
 							//direct call to player_id is faster link - server doesn't have to do a search.
 							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
 							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
@@ -8658,6 +8732,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
 				':</td><td><input name="enableTempleAlert" type="checkbox" value="on"' + (GM_getValue("enableTempleAlert")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enhance Online Dots' + Helper.helpLink('Enhance Online Dots', 'Enhances the green/grey dots by player names to show online/offline status.') +
+				':</td><td><input name="enhanceOnlineDots" type="checkbox" value="on"' + (GM_getValue("enhanceOnlineDots")?" checked":"") + '></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -9052,6 +9128,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "showPvPSummaryInLog");
 		System.saveValueForm(oForm, "addUFSGWidgets");
 		System.saveValueForm(oForm, "enableQuickDrink");
+		System.saveValueForm(oForm, "enhanceOnlineDots");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
