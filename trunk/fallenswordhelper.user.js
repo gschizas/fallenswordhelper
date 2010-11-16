@@ -10241,21 +10241,21 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 							bounty.reward = activeTable.rows[i].cells[2].textContent;
 							bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
 
-							bounty.rKills = activeTable.rows[i].cells[3].textContent;
+							//bounty.rKills = activeTable.rows[i].cells[3].textContent;
 
-							bounty.xpLoss = activeTable.rows[i].cells[4].textContent;
+							bounty.xpLoss = activeTable.rows[i].cells[3].textContent;
 
-							bounty.posted = activeTable.rows[i].cells[5].textContent;
+							bounty.posted = activeTable.rows[i].cells[4].textContent;
 
-							bounty.tickets = activeTable.rows[i].cells[6].textContent;
+							bounty.tickets = activeTable.rows[i].cells[5].textContent;
 
-							if (activeTable.rows[i].cells[7].textContent.trim() == "[active]") {
+							if (activeTable.rows[i].cells[6].textContent.trim() == "[active]") {
 								bounty.active = true;
 								bounty.accept = "";
 							}
 							else {
 								bounty.active = false;
-								bounty.accept = activeTable.rows[i].cells[7].firstChild.firstChild.getAttribute("onclick");
+								bounty.accept = activeTable.rows[i].cells[6].firstChild.firstChild.getAttribute("onclick");
 							}
 							wantedList.bounty.push(bounty);
 						}
