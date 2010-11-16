@@ -1418,13 +1418,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			"<tr style='display:none; visibility:hidden;'><td align='right'>LDConstitutionLevel:</td><td align='right' title='LDConstitutionLevel'>0</td></tr>" +
 			"<tr style='display:none; visibility:hidden;'><td align='right'>LDNightmareVisageLevel:</td><td align='right' title='LDNightmareVisageLevel'>0</td></tr>" +
 			"<tr style='display:none; visibility:hidden;'><td align='right'>LDFortitudeLevel:</td><td align='right' title='LDFortitudeLevel'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right'>LDChiStrikeLevel:</td><td align='right' title='LDChiStrikeLevel'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right'>LDTerrorizeLevel:</td><td align='right' title='LDTerrorizeLevel'>0</td></tr>" +
 			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Attack:</td><td style='font-size:x-small; color:gray;' align='right' title='attackValue'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Attack w/ buffs:</td><td style='font-size:x-small;' align='right' title='attackValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Defense:</td><td style='font-size:x-small; color:gray;' align='right' title='defenseValue'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Defense w/buffs:</td><td style='font-size:x-small;' align='right' title='defenseValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Armor:</td><td style='font-size:x-small;' align='right' title='armorValue'>0</td></tr>" +
-			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Damage:</td><td style='font-size:x-small;' align='right' title='damageValue'>0</td></tr>" +
+			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Damage:</td><td style='font-size:x-small; color:gray;' align='right' title='damageValue'>0</td></tr>" +
+			"<tr><td style='font-size:x-small; color:brown;' align='right'>Damage w/ buffs:</td><td style='font-size:x-small;' align='right' title='damageValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw HP:</td><td style='font-size:x-small; color:gray;' align='right' title='hpValue'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>HP w/ buffs:</td><td style='font-size:x-small;' align='right' title='hpValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Processed:</td><td style='font-size:x-small;' align='right' title='defendersProcessed'>0</td></tr>" +
@@ -1437,13 +1440,14 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Defense:</td><td style='font-size:x-small; color:gray;' align='right' title='GroupDefense'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Group Defense w/ buffs:</td><td style='font-size:x-small;' align='right' title='GroupDefenseBuffed'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Armor:</td><td style='font-size:x-small;' align='right' title='GroupArmor'></td></tr>" +
-			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Damage:</td><td style='font-size:x-small;' align='right' title='GroupDamage'></td></tr>" +
+			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Damage:</td><td style='font-size:x-small; color:gray;' align='right' title='GroupDamage'></td></tr>" +
+			"<tr><td style='font-size:x-small; color:brown;' align='right'>Group Damage w/ buffs:</td><td style='font-size:x-small;' align='right' title='GroupDamageBuffed'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group HP:</td><td style='font-size:x-small; color:gray;' align='right' title='GroupHP'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Group HP w/ buffs:</td><td style='font-size:x-small;' align='right' title='GroupHPBuffed'></td></tr>" +
 			"<tr><td style='border-top:2px black solid;' colspan=2>Processing:</td></tr>" +
 			"<tr><td style='font-size:x-small; color:green;' colspan='2' title='ProcessingStatus'>Parsing defending guild stats ...</td></tr>" +
 			"<tr><td style='border-top:2px black solid;' colspan=2>Assumptions:</td></tr>" +
-			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Above calculations include Constitution, Fortitude, Nightmare Visage and Flinch bonus calculations" +
+			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Above calculations include Constitution, Fortitude, Nightmare Visage, Chi Strike, Terrorize and Flinch bonus calculations" +
 				" (in that order) on both the defending group and attacking group.</td></tr>";
 		if (defendingGuildID == myGuildID && !hideRelicOffline) {
 			var validMemberArray = validMemberString.split(" ");
@@ -1580,6 +1584,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			//get relavent buffs here later ... just Constitution atm
 			allItems = doc.getElementsByTagName("IMG");
 			var constitutionLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, fortitudeLevel = 0;
+			var chiStrikeLevel = 0, terrorizeLevel = 0;
 			for (i=0;i<allItems.length;i++) {
 				anItem=allItems[i];
 				if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -1606,6 +1611,18 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var fortitude = fortitudeRE.exec(onmouseover);
 					if (fortitude) {
 						fortitudeLevel = fortitude[1];
+						continue;
+					}
+					var chiStrikeRE = /<b>Chi Strike<\/b> \(Level: (\d+)\)/;
+					var chiStrike = chiStrikeRE.exec(onmouseover);
+					if (chiStrike) {
+						chiStrikeLevel = chiStrike[1];
+						continue;
+					}
+					var terrorizeRE = /<b>Terrorize<\/b> \(Level: (\d+)\)/;
+					var terrorize = terrorizeRE.exec(onmouseover);
+					if (terrorize) {
+						terrorizeLevel = terrorize[1];
 						continue;
 					}
 				}
@@ -1666,6 +1683,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var LDConstitutionLevel      = System.intValue(System.findNode("//td[@title='LDConstitutionLevel']").textContent);
 		var LDNightmareVisageLevel   = System.intValue(System.findNode("//td[@title='LDNightmareVisageLevel']").textContent);
 		var LDFortitudeLevel         = System.intValue(System.findNode("//td[@title='LDFortitudeLevel']").textContent);
+		var LDChiStrikeLevel         = System.intValue(System.findNode("//td[@title='LDChiStrikeLevel']").textContent);
 		var attackValue              = System.findNode("//td[@title='attackValue']");
 		var attackValueBuffed        = System.findNode("//td[@title='attackValueBuffed']");
 		var LDattackValue            = System.findNode("//td[@title='LDattackValue']");
@@ -1695,18 +1713,21 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		LDarmorNumber                = System.intValue(LDarmorValue.innerHTML);
 		armorValue.innerHTML         = System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier));
 		var damageValue              = System.findNode("//td[@title='damageValue']");
+		var damageValueBuffed        = System.findNode("//td[@title='damageValueBuffed']");
 		var LDdamageValue            = System.findNode("//td[@title='LDdamageValue']");
 		damageNumber                 = System.intValue(damageValue.innerHTML);
 		LDdamageNumber               = System.intValue(LDdamageValue.innerHTML);
-		damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
 		var hpValue                  = System.findNode("//td[@title='hpValue']");
 		var hpValueBuffed            = System.findNode("//td[@title='hpValueBuffed']");
 		var LDhpValue                = System.findNode("//td[@title='LDhpValue']");
 		hpNumber                     = System.intValue(hpValue.innerHTML);
 		LDhpNumber                   = System.intValue(LDhpValue.innerHTML);
-		hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
 		var fortitudeBonusHP         = Math.ceil(defenseWithConstitution * LDFortitudeLevel * 0.001);
-		hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier) + fortitudeBonusHP);
+		var chiStrikeBonusDamage     = Math.ceil((hpNumber + Math.round(LDhpNumber*relicMultiplier) + fortitudeBonusHP) * LDChiStrikeLevel * 0.001);
+		damageValue.innerHTML        = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier));
+		damageValueBuffed.innerHTML  = System.addCommas(damageNumber + Math.round(LDdamageNumber*relicMultiplier) + chiStrikeBonusDamage);
+		hpValue.innerHTML            = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier));
+		hpValueBuffed.innerHTML      = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier) + fortitudeBonusHP);
 		var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
 		LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
 		
@@ -1789,35 +1810,48 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var doc=System.createDocument(responseText);
 		allItems = doc.getElementsByTagName("IMG");
 		var constitutionLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, fortitudeLevel = 0;
+		var chiStrikeLevel = 0, terrorizeLevel = 0;
 		for (i=0;i<allItems.length;i++) {
 			anItem=allItems[i];
-				if (anItem.getAttribute("src").search("/skills/") != -1) {
-					var onmouseover = anItem.getAttribute("onmouseover");
-					var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
-					var constitution =  constitutionRE.exec(onmouseover);
-					if (constitution) {
-						constitutionLevel = constitution[1];
-						continue;
-					}
-					var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/;
-					var flinch = flinchRE.exec(onmouseover);
-					if (flinch) {
-						flinchLevel = flinch[1];
-						continue;
-					}
-					var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/;
-					var nightmareVisage = nightmareVisageRE.exec(onmouseover);
-					if (nightmareVisage) {
-						nightmareVisageLevel = nightmareVisage[1];
-						continue;
-					}
-					var fortitudeRE = /<b>Fortitude<\/b> \(Level: (\d+)\)/;
-					var fortitude = fortitudeRE.exec(onmouseover);
-					if (fortitude) {
-						fortitudeLevel = fortitude[1];
-						continue;
-					}
+			if (anItem.getAttribute("src").search("/skills/") != -1) {
+				var onmouseover = anItem.getAttribute("onmouseover");
+				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
+				var constitution =  constitutionRE.exec(onmouseover);
+				if (constitution) {
+					constitutionLevel = constitution[1];
+					continue;
 				}
+				var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/;
+				var flinch = flinchRE.exec(onmouseover);
+				if (flinch) {
+					flinchLevel = flinch[1];
+					continue;
+				}
+				var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/;
+				var nightmareVisage = nightmareVisageRE.exec(onmouseover);
+				if (nightmareVisage) {
+					nightmareVisageLevel = nightmareVisage[1];
+					continue;
+				}
+				var fortitudeRE = /<b>Fortitude<\/b> \(Level: (\d+)\)/;
+				var fortitude = fortitudeRE.exec(onmouseover);
+				if (fortitude) {
+					fortitudeLevel = fortitude[1];
+					continue;
+				}
+				var chiStrikeRE = /<b>Chi Strike<\/b> \(Level: (\d+)\)/;
+				var chiStrike = chiStrikeRE.exec(onmouseover);
+				if (chiStrike) {
+					chiStrikeLevel = chiStrike[1];
+					continue;
+				}
+				var terrorizeRE = /<b>Terrorize<\/b> \(Level: (\d+)\)/;
+				var terrorize = terrorizeRE.exec(onmouseover);
+				if (terrorize) {
+					terrorizeLevel = terrorize[1];
+					continue;
+				}
+			}
 		}
 		var groupAttackElement               = System.findNode("//td[@title='GroupAttack']");
 		var groupAttackBuffedElement         = System.findNode("//td[@title='GroupAttackBuffed']");
@@ -1836,10 +1870,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var groupArmorElement                = System.findNode("//td[@title='GroupArmor']");
 		groupArmorElement.innerHTML          = System.addCommas(Helper.relicGroupArmorValue);
 		var groupDamageElement               = System.findNode("//td[@title='GroupDamage']");
-		groupDamageElement.innerHTML         = System.addCommas(Helper.relicGroupDamageValue);
+		var groupDamageBuffedElement         = System.findNode("//td[@title='GroupDamageBuffed']");
 		var groupHPElement                   = System.findNode("//td[@title='GroupHP']");
 		var groupHPBuffedElement             = System.findNode("//td[@title='GroupHPBuffed']");
 		var fortitudeBonusHP                 = Math.ceil(defenseWithConstitution * fortitudeLevel * 0.001);
+		var chiStrikeBonusDamage             = Math.ceil((Helper.relicGroupHPValue + fortitudeBonusHP) * chiStrikeLevel * 0.001);
+		var storedTerrorizeLevel             = System.intValue(System.findNode("//td[@title='LDTerrorizeLevel']").textContent);
+		var storedTerrorizeEffectValue       = Math.ceil(Helper.relicGroupDamageValue * storedTerrorizeLevel * 0.001);
+		groupDamageElement.innerHTML         = System.addCommas(Helper.relicGroupDamageValue);
+		groupDamageBuffedElement.innerHTML   = System.addCommas(Helper.relicGroupDamageValue + chiStrikeBonusDamage - storedTerrorizeEffectValue);
 		groupHPElement.innerHTML             = System.addCommas(Helper.relicGroupHPValue);
 		groupHPBuffedElement.innerHTML       = System.addCommas(Helper.relicGroupHPValue + fortitudeBonusHP);
 
@@ -1848,6 +1887,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var defGuildBuffedAttackValue        = System.intValue(defGuildBuffedAttackElement.textContent);
 		var flinchEffectValue                = Math.ceil(defGuildBuffedAttackValue * flinchLevel * 0.001);
 		defGuildBuffedAttackElement.innerHTML= System.addCommas(defGuildBuffedAttackValue - flinchEffectValue);
+		var defGuildBuffedDamageElement      = System.findNode("//td[@title='damageValueBuffed']");
+		var defGuildBuffedDamageValue        = System.intValue(defGuildBuffedDamageElement.textContent);
+		var terrorizeEffectValue             = Math.ceil(defGuildBuffedDamageValue * terrorizeLevel * 0.001);
+		defGuildBuffedDamageElement.innerHTML= System.addCommas(defGuildBuffedDamageValue - terrorizeEffectValue);
 
 		processingStatus.innerHTML = 'Done.';
 	},
@@ -7828,6 +7871,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		allItems = doc.getElementsByTagName("IMG");
 		var counterAttackLevel = 0, doublerLevel = 0, deathDealerLevel = 0, darkCurseLevel = 0, holyFlameLevel = 0;
 		var constitutionLevel = 0, sanctuaryLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, superEliteSlayerLevel = 0;
+		var fortitudeLevel = 0, chiStrikeLevel = 0, terrorizeLevel = 0;
 		for (i=0;i<allItems.length;i++) {
 			anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -7892,6 +7936,24 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					superEliteSlayerLevel = superEliteSlayer[1];
 					continue;
 				}
+				var fortitudeRE = /<b>Fortitude<\/b> \(Level: (\d+)\)/;
+				var fortitude = fortitudeRE.exec(onmouseover);
+				if (fortitude) {
+					fortitudeLevel = fortitude[1];
+					continue;
+				}
+				var chiStrikeRE = /<b>Chi Strike<\/b> \(Level: (\d+)\)/;
+				var chiStrike = chiStrikeRE.exec(onmouseover);
+				if (chiStrike) {
+					chiStrikeLevel = chiStrike[1];
+					continue;
+				}
+				var terrorizeRE = /<b>Terrorize<\/b> \(Level: (\d+)\)/;
+				var terrorize = terrorizeRE.exec(onmouseover);
+				if (terrorize) {
+					terrorizeLevel = terrorize[1];
+					continue;
+				}
 			}
 		}
 		//group data (if appropriate)
@@ -7933,8 +7995,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (creatureName.search("Super Elite") != -1) {
 			creatureAttack -= Math.ceil(creatureAttack * superEliteSlayerMultiplier);
 			creatureDefense -= Math.ceil(creatureDefense * superEliteSlayerMultiplier);
-			creatureDefense -= Math.ceil(creatureDefense * superEliteSlayerMultiplier);
 			creatureArmor -= Math.ceil(creatureArmor * superEliteSlayerMultiplier);
+			creatureDamage -= Math.ceil(creatureDamage * superEliteSlayerMultiplier);
 			creatureHP -= Math.ceil(creatureHP * superEliteSlayerMultiplier);
 			extraNotes += (superEliteSlayerLevel > 0? "SES Stat Reduction Multiplier = " + superEliteSlayerMultiplier + "<br>":"");
 		}
@@ -7958,23 +8020,30 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		//Attack:
 		extraNotes += (darkCurseLevel > 0? "DC Bonus Attack = " + Math.floor(creatureDefense * darkCurseLevel * 0.002) + "<br>":"");
-		var nightmareVisageAttackMovedToDefense = Math.floor(playerAttackValue * nightmareVisageLevel * 0.0025);
-		extraNotes += (nightmareVisageLevel > 0? "NV Attack moved to Defense = " + nightmareVisageAttackMovedToDefense + "<br>":"");
+		var nightmareVisageAttackMovedToDefense = Math.floor(((groupExists?groupAttackValue:playerAttackValue) + counterAttackBonusAttack) * nightmareVisageLevel * 0.0025);
+		extraNotes += (nightmareVisageLevel > 0? "NMV Attack moved to Defense = " + nightmareVisageAttackMovedToDefense + "<br>":"");
 		var overallAttackValue = (groupExists?groupAttackValue:playerAttackValue) + counterAttackBonusAttack - nightmareVisageAttackMovedToDefense;
 		var hitByHowMuch = (overallAttackValue - Math.ceil(attackVariable*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
 		//Damage:
-		var overallDamageValue = (groupExists?groupDamageValue:playerDamageValue) + deathDealerBonusDamage + counterAttackBonusDamage + holyFlameBonusDamage;
+		var fortitudeExtraHPs = Math.floor((groupExists?groupHPValue:playerHPValue) * fortitudeLevel * 0.001);
+		extraNotes += (fortitudeLevel > 0? "Fortitude Bonus HP = " + fortitudeExtraHPs + "<br>":"");
+		var overallHPValue = (groupExists?groupHPValue:playerHPValue) + fortitudeExtraHPs;
+		var chiStrikeExtraDamage = Math.floor(overallHPValue * chiStrikeLevel * 0.001);
+		extraNotes += (chiStrikeLevel > 0? "Chi Strike Bonus Damage = " + chiStrikeExtraDamage + "<br>":"");
+		var overallDamageValue = (groupExists?groupDamageValue:playerDamageValue) + deathDealerBonusDamage + counterAttackBonusDamage + holyFlameBonusDamage + chiStrikeExtraDamage;
 		var damageDone = Math.floor(overallDamageValue - ((generalVariable*creatureArmor) + (hpVariable*creatureHP)));
 		var numberOfHitsRequired = (hitByHowMuch > 0? Math.ceil((hpVariable*creatureHP)/((overallDamageValue < (generalVariable*creatureArmor))? 1: overallDamageValue - (generalVariable*creatureArmor))):"-");
 		//Defense:
-		var overallDefenseValue = (groupExists?groupDefenseValue:playerDefenseValue) + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + nightmareVisageAttackMovedToDefense;
-		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor(playerDefenseValue * constitutionLevel * 0.001) + "<br>":"");
+		var overallDefenseValue = (groupExists?groupDefenseValue:playerDefenseValue) + Math.floor((groupExists?groupDefenseValue:playerDefenseValue) * constitutionLevel * 0.001) + nightmareVisageAttackMovedToDefense;
+		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor((groupExists?groupDefenseValue:playerDefenseValue) * constitutionLevel * 0.001) + "<br>":"");
 		extraNotes += (flinchLevel > 0? "Flinch Bonus Attack Reduction = " + Math.floor(creatureAttack * flinchLevel * 0.001) + "<br>":"");
 		var creatureHitByHowMuch = Math.floor((attackVariable*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
 		//Armor and HP:
 		var overallArmorValue = (groupExists?groupArmorValue:playerArmorValue) + Math.floor(playerArmorValue * sanctuaryLevel * 0.001);
 		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
-		var overallHPValue = (groupExists?groupHPValue:playerHPValue);
+		var terrrorizeEffect = Math.floor(creatureDamage * terrorizeLevel * 0.001);
+		extraNotes += (terrorizeLevel > 0? "Terrorize Creature Damage Effect = " + (terrrorizeEffect * -1) + "<br>":"");
+		creatureDamage -= terrrorizeEffect;
 		var creatureDamageDone = Math.ceil((generalVariable*creatureDamage) - (overallArmorValue + overallHPValue));
 		var numberOfCreatureHitsTillDead = (creatureHitByHowMuch >= 0? Math.ceil(overallHPValue/(((generalVariable*creatureDamage) < (overallArmorValue))? 1: (generalVariable*creatureDamage) - (overallArmorValue))):"-");
 		//Analysis:
@@ -8042,7 +8111,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			"<tr><td align='right'><span style='color:#333333'>Notes: </span></td><td align='left' colspan='3'><span style='font-size:x-small;'>" +
 				extraNotes + "</span></td></tr>" +
 			"<tr><td colspan='4'><span style='font-size:x-small; color:gray'>" +
-				"*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NV, Sanctuary and Constitution (if active) and allow for randomness (1.1053). Does not include Chi Strike or Terrorize (because I haven't done them yet).</span></td></tr>" +
+				"*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, Sanctuary, Constitution, Fortitude, Chi Strike and Terrorize (if active) and allow for randomness (1.1053). " +
+				"Constitution, NMV, Fortitude and Chi Strike apply to group stats.</span></td></tr>" +
 			"</tbody></table>";
 	},
 
