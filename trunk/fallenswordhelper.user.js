@@ -156,6 +156,7 @@ var Helper = {
 		System.setDefault("addUFSGWidgets", true);
 		System.setDefault("enableQuickDrink", true);
 		System.setDefault("enhanceOnlineDots", true);
+		System.setDefault("hideBuffSelected", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -831,6 +832,9 @@ var Helper = {
 	},
 
 	injectViewGuild: function() {
+		var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+		avyImg.style.borderStyle="none";
+		
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
 		var highlightGvGPlayersNearMyLvl = GM_getValue("highlightGvGPlayersNearMyLvl");
 		if (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl) {
@@ -918,6 +922,9 @@ var Helper = {
 	},
 
 	injectGuild: function() {
+		var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+		avyImg.style.borderStyle="none";
+		
 		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
 		GM_setValue("guildID",guildID);
@@ -2734,6 +2741,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) {return;}
 		var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/i/b[.='Online Members']]//table");
+		var hideBuffSelected = GM_getValue("hideBuffSelected");
 		if (onlineMembersTable) {
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
 				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
@@ -2741,6 +2749,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				if (onlineMemberSecondCell) {
 					var playerTable = onlineMemberFirstCell.getElementsByTagName('TABLE')[0];
 					var checkboxColumn = playerTable.rows[0].cells[0];
+					if (hideBuffSelected) checkboxColumn.innerHTML = '';
 					var playernameColumn = playerTable.rows[0].cells[1];
 					var playerNameLinkElement = playernameColumn.firstChild;
 					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
@@ -2799,12 +2808,21 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
 				}
 			}
+			if (hideBuffSelected) {
+				var lineBreak = onlineMembersTable.nextSibling.nextSibling;
+				lineBreak.style.display = 'none';
+				var actionsFontItalic = lineBreak.nextSibling.nextSibling.firstChild;
+				actionsFontItalic.style.display = 'none';
+				var buffSelectedTable = actionsFontItalic.nextSibling.nextSibling;
+				buffSelectedTable.style.display = 'none';
+			}
 		}
 	},
 
 	addOnlineAlliesWidgets: function() {
 		if (!GM_getValue("enableOnlineAlliesWidgets")) {return;}
 		var onlineAlliesTable = System.findNode("//table/tbody[tr/td/font/b[.='Online Allies']]//table");
+		var hideBuffSelected = GM_getValue("hideBuffSelected");
 		if (onlineAlliesTable) {
 			for (var i=0; i<onlineAlliesTable.rows.length; i++){
 				var onlineAlliesFirstCell = onlineAlliesTable.rows[i].cells[0];
@@ -2812,6 +2830,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				if (onlineAlliesSecondCell) {
 					var playerTable = onlineAlliesFirstCell.getElementsByTagName('TABLE')[0];
 					var checkboxColumn = playerTable.rows[0].cells[0];
+					if (hideBuffSelected) checkboxColumn.innerHTML = '';
 					var playernameColumn = playerTable.rows[0].cells[1];
 					var playerNameLinkElement = playernameColumn.firstChild;
 					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
@@ -2838,6 +2857,14 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					}
 					onlineAlliesSecondCell.innerHTML = '<nobr>' + onlineAlliesSecondCell.innerHTML + '</nobr>';
 				}
+			}
+			if (hideBuffSelected) {
+				var lineBreak = onlineAlliesTable.nextSibling.nextSibling;
+				lineBreak.style.display = 'none';
+				var actionsFont = lineBreak.nextSibling.nextSibling;
+				actionsFont.style.display = 'none';
+				var buffSelectedTable = actionsFont.nextSibling.nextSibling;
+				buffSelectedTable.style.display = 'none';
 			}
 		}
 	},
@@ -7809,12 +7836,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			newDoNotKillList = doNotKillList.replace(creatureName, "");
 			newDoNotKillList = newDoNotKillList.replace(",,", ",");
 			if (newDoNotKillList.charAt(0) == ",") newDoNotKillList = newDoNotKillList.substring(1,newDoNotKillList.length);
+			evt.target.innerHTML = 'Add to the do not kill list';
 		} else {
 			newDoNotKillList = doNotKillList + (doNotKillList.length !== 0?",":"") + creatureName;
 			newDoNotKillList = newDoNotKillList.replace(",,", ",");
+			evt.target.innerHTML = 'Remove from do not kill list';
 		}
 		GM_setValue("doNotKillList",newDoNotKillList);
-		window.location = window.location;
 	},
 
 	checkIfGroupExists: function(responseText) {
@@ -8873,6 +8901,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td><input name="enableTempleAlert" type="checkbox" value="on"' + (GM_getValue("enableTempleAlert")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enhance Online Dots' + Helper.helpLink('Enhance Online Dots', 'Enhances the green/grey dots by player names to show online/offline status.') +
 				':</td><td><input name="enhanceOnlineDots" type="checkbox" value="on"' + (GM_getValue("enhanceOnlineDots")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Hide Buff Selected' + Helper.helpLink('Hide Buff Selected', 'Hides the buff selected functionality in the online allies and guild info section.') +
+				':</td><td><input name="hideBuffSelected" type="checkbox" value="on"' + (GM_getValue("hideBuffSelected")?" checked":"") + '></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -9268,6 +9298,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "addUFSGWidgets");
 		System.saveValueForm(oForm, "enableQuickDrink");
 		System.saveValueForm(oForm, "enhanceOnlineDots");
+		System.saveValueForm(oForm, "hideBuffSelected");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -10567,6 +10598,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		'<table width="110" cellpadding="0" cellspacing="0"><tbody>'+
 			'<tr><td colspan="2" height="5"></td></tr>';
 
+		var hideBuffSelected = GM_getValue("hideBuffSelected");
 		for (var i=0;i<onlineAlliesEnemies.length;i++) {
 			var contact=onlineAlliesEnemies[i];
 			var contactColor = "";
@@ -10590,7 +10622,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			output +=
 				'<tr>'+
 					'<td align="left">'+
-						'<span style="color:' + contactColor + '; font-size:x-small; visibility:hidden;">+</span>'+
+						'<span style="color:' + contactColor + '; font-size:x-small; visibility:hidden;">' + (hideBuffSelected?'':'+') + '</span>'+
 						'<a style="color:' + contactColor + '; font-size:x-small;" href="index.php?cmd=profile&player_id=' + contact.id + '">' + contact.name + '</a>'+
 					'</td>'+
 					'<td align="right"><span style="color:#FFFF00; font-size:x-small;">'+
