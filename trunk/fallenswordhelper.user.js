@@ -1057,11 +1057,13 @@ var Helper = {
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 				if (lastActivityMinutes < 2) {
-					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
 				} else if (lastActivityMinutes < 5) {
 					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
 				} else if (lastActivityMinutes < 30) {
 					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+				} else if (lastActivityMinutes > 10080) {
+					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
 				} else {
 					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
 				}
@@ -4807,13 +4809,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var lastActivityIMG = "";
 				if (!isNaN(member.lastActivityMinutes)) var lastActivityMinutes = member.lastActivityMinutes;
 				if (GM_getValue("enhanceOnlineDots")) {
-					var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+					var lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.offlineDot() + '">';
 					if (lastActivityMinutes < 2) {
 						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
 					} else if (lastActivityMinutes < 5) {
 						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
 					} else if (lastActivityMinutes < 30) {
 						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+					} else if (lastActivityMinutes > 10080) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
 					}
 				}
 
@@ -5304,11 +5308,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 				if (lastActivityMinutes < 2) {
-					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
 				} else if (lastActivityMinutes < 5) {
 					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
 				} else if (lastActivityMinutes < 30) {
 					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+				} else if (lastActivityMinutes > 10080) {
+					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
 				} else {
 					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
 				}
@@ -7052,13 +7058,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						var lastActivityIMG = "";
 						if (!isNaN(aMember.lastActivityMinutes)) var lastActivityMinutes = aMember.lastActivityMinutes;
 						if (GM_getValue("enhanceOnlineDots")) {
-							var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+							var lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.offlineDot() + '">';
 							if (lastActivityMinutes < 2) {
 								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
 							} else if (lastActivityMinutes < 5) {
 								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
 							} else if (lastActivityMinutes < 30) {
 								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+							} else if (lastActivityMinutes > 10080) {
+								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
 							}
 						}
 						theItem.innerHTML = lastActivityIMG +
