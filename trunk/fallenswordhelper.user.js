@@ -12330,7 +12330,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 					//check if they are high enough level to cast the buff
 					var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-					var virtualLevel = parseInt(virtualLevel[1],10);
+					var virtualLevel = parseInt(virtualLevel[1].replace(/,/g,""),10);
 					var minPlayerVirtualLevel = 1;
 					if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
 					if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
@@ -12359,7 +12359,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 				//check if they are high enough level to cast the buff
 				var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-				var virtualLevel = parseInt(virtualLevel[1],10);
+				var virtualLevel = parseInt(virtualLevel[1].replace(/,/g,""),10);
 				var minPlayerVirtualLevel = 1;
 				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
 				if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
