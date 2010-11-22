@@ -663,6 +663,9 @@ var Helper = {
 			case "checkwear":
 				Helper.injectCheckWearingItem();
 				break;
+			case "findbuffs":
+				Helper.injectFindBuffs();
+				break;
 			default:
 				Helper.injectNotepad();
 				break;
@@ -1052,7 +1055,7 @@ var Helper = {
 			var aRow = memberTable.rows[i];
 			if (aRow.cells[1]) {
 				var contactLink   = aRow.cells[1].firstChild.nextSibling;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -3640,7 +3643,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var memberStatus = aRow.cells[0].firstChild.title;
 					
 					var contactLink   = aRow.cells[1].firstChild.nextSibling;
-					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 					var lastActivityDays = parseInt(lastActivity[1],10);
 					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -5303,7 +5306,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
 				var testProfile = profileAlliesEnemies[i];
 				var contactLink   = testProfile;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -10495,7 +10498,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				var contactName   = contactLink.textContent;
 				var contactStatus = aTable.rows[0].cells[0].firstChild.title;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -10538,7 +10541,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				contactName   = contactLink.textContent;
 				contactStatus = aTable.rows[0].cells[0].firstChild.title;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'))
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -12021,6 +12024,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 	
 	parseTemplePage: function(responseText) {
+		//Checks to see if the temple is open for business.
+		if (!GM_getValue("enableTempleAlert")) return;
 		if (window.location.search.search("cmd=temple") == -1) {
 			var doc = System.createDocument(responseText);
 			var checkNeedToPray = System.findNode("//input[@value='Pray to Osverin']", doc);
@@ -12244,6 +12249,283 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (Math.abs(playerVirtualLevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
 			target.style.backgroundColor = "#4671C8";
 		}
+	},
+	
+	injectFindBuffs: function() {
+		var content=Layout.notebookContent();
+		var buffList = Data.buffList();
+		var injectionText = '';
+		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
+		injectionText += '<tr><td rowspan="2" colspan="2" width="50%"><h1>Find Buff</h1></td>' +
+			'<td align="right" style="color:brown;">Select buff to search for:</td>';
+		
+		injectionText += '<td align="left"><select id="selectedBuff">';
+		for (var j = 0; j < buffList.length; j++) {
+			injectionText += '<option value="' + buffList[j].skillId + '">' + buffList[j].name + '</option>';
+		}
+		injectionText += '</select></td></tr>';
+		
+		injectionText += '<tr>' +
+			'<td align="right" style="color:brown;">Level 175 buffers only:</td><td align="left"><input id="level175" type="checkbox"></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;" width="30%">Nicknames of buff searched:&nbsp;</td><td align="left" id="buffNicks">&nbsp;</td>' +
+			'<td align="right" style="color:brown;">Search guild members:</td><td align="left"><input id="guildMembers" type="checkbox" checked></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;"># potential buffers to search:&nbsp;</td><td align="left" id="potentialBuffers"></td>' +
+			'<td align="right" style="color:brown;">Search allies/enemies:</td><td align="left"><input id="alliesEnemies" type="checkbox" checked></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;"># Buffers processed:&nbsp;</td><td align="left" id="buffersProcessed">0</td>' +
+			'<td align="right" style="color:brown;">Search online list:</td><td align="left"><select id="onlinePlayers">' +
+				'<option value="0">Disabled</option>' +
+				'<option value="49">Short (fastest)</option>' +
+				'<option value="47">Medium (medium)</option>' +
+				'<option value="45">Long (slowest)</option>' +
+				'</select></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;">Find buffers progress:&nbsp;</td><td align="left" width="310" id="bufferProgress">Idle</td>'+
+			'<td>&nbsp;</td><td align="center"><input id="findbuffsbutton" class="custombutton" type="button" value="Find Buffers"></td></tr>';
+		injectionText += '</tbody></table><br>';
+		injectionText += '<h1>Potential Buffers and Bio Info</h1><br>';
+		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
+		injectionText += '<tr><th width="120">&nbsp;Name</th><th width="200">&nbsp;Player Info</th><th>&nbsp;Notable Bio Text</th></tr>';
+		injectionText += '</tbody></table><br>';
+		injectionText += '<div style="font-size:xx-small; color:brown; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
+			'It is not as smart as you are, so please do not judge the results too harshly. It does not search all online players, just a subset of those that have been on recently. ' +
+			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
+		content.innerHTML = injectionText;
+		document.getElementById("findbuffsbutton").addEventListener("click", Helper.findBuffsStart, true);
+	},
+	
+	findBuffsStart: function(evt) {
+		var selectedBuff = System.findNode("//select[@id='selectedBuff']").value;
+		//create array of buff nicknames ...
+		var buffList = Data.buffList();
+		for (var j = 0; j < buffList.length; j++) {
+			if (selectedBuff == buffList[j].skillId) {
+				Helper.findBuffNicks = buffList[j].nicks;
+				Helper.findBuffMinCastLevel = buffList[j].minCastLevel;
+				break;
+			}
+		}
+		document.getElementById("buffNicks").innerHTML = Helper.findBuffNicks;
+		var bufferProgress = document.getElementById("bufferProgress");
+		bufferProgress.innerHTML = 'Gathering list of potential buffers ...';
+		bufferProgress.style.color = 'green';
+		Helper.findBuffsLevel175Only = document.getElementById("level175").checked;
+		document.getElementById("buffersProcessed").innerHTML = 0;
+		Helper.onlinePlayers = new Array();
+
+		//get list of players to search, starting with guild>manage page
+		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.findBuffsParseGuildManagePage);
+	},
+	
+	findBuffsParseGuildManagePage: function(responseText) {
+		var doc = System.createDocument(responseText);
+		var memberTable = System.findNode("//table[tbody/tr/td[.='Rank']]", doc);
+		if (document.getElementById("guildMembers").checked) {
+			for (var i=2;i<memberTable.rows.length ;i++ ) {
+				var aRow = memberTable.rows[i];
+				if (aRow.cells[1]) {
+					var contactLink = aRow.cells[1].firstChild.nextSibling;
+					var onMouseOver = contactLink.getAttribute('onmouseover');
+					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
+					var lastActivityDays = parseInt(lastActivity[1],10);
+					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+					//check if they are high enough level to cast the buff
+					var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
+					var virtualLevel = parseInt(virtualLevel[1],10);
+					var minPlayerVirtualLevel = 1;
+					if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
+					if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
+						//add online player to search list (all but self)
+						var onlinePlayer = contactLink.getAttribute('href');
+						if (Helper.characterName != aRow.cells[1].textContent.trim()) Helper.onlinePlayers.push(onlinePlayer);
+					}
+				}
+			}
+		}
+		//continue with profilepage
+		System.xmlhttp("index.php?cmd=profile", Helper.findBuffsParseProfilePage);
+	},
+	
+	findBuffsParseProfilePage: function(responseText) {
+		var doc = System.createDocument(responseText);
+		var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@onmouseover,'Last Activity')]", doc);
+		if (document.getElementById("alliesEnemies").checked) {
+			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
+				var testProfile = profileAlliesEnemies[i];
+				var contactLink   = testProfile;
+				var onMouseOver = contactLink.getAttribute('onmouseover');
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
+				var lastActivityDays = parseInt(lastActivity[1],10);
+				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+				//check if they are high enough level to cast the buff
+				var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
+				var virtualLevel = parseInt(virtualLevel[1],10);
+				var minPlayerVirtualLevel = 1;
+				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
+				if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
+					//add online player to search list (all but self)
+					var onlinePlayer = contactLink.getAttribute('href');
+					if (Helper.characterName != contactLink.textContent.trim()) Helper.onlinePlayers.push(onlinePlayer);
+				}
+			}
+		}
+		//continue with online players
+		Helper.findBuffsParseOnlinePlayersStart();
+	},
+	
+	findBuffsParseOnlinePlayersStart: function() {
+		//if option enabled then parse online players
+		Helper.onlinePlayersSetting = document.getElementById("onlinePlayers").value;
+		if (Helper.onlinePlayersSetting != 0) {
+			System.xmlhttp('index.php?cmd=onlineplayers&page=1', Helper.findBuffsParseOnlinePlayers, {"page":1});
+		} else {
+			Helper.findBuffsParsePlayersForBuffs();
+		}
+	},
+	
+	findBuffsParseOnlinePlayers: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var playerRows = System.findNodes("//table/tbody/tr[count(td)=4 and td[2]/a]", doc);
+		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""),10);
+		output.innerHTML+=callback.page + " ";
+		if (playerRows && callback.page != 1){
+			for (var i=0; i<playerRows.length; i++) {
+				var onlinePlayer = playerRows[i].cells[1].firstChild.getAttribute("href");
+				var onlinePlayerLevel = parseInt(playerRows[i].cells[2].textContent.replace(/,/g,""),10);
+				var onlinePlayerName = playerRows[i].cells[1].textContent;
+				var minPlayerVirtualLevel = 1;
+				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
+				if (onlinePlayerLevel >= Helper.findBuffMinCastLevel && onlinePlayerLevel >= minPlayerVirtualLevel) {
+					//add online player to search list (all but self)
+					if (Helper.characterName != onlinePlayerName.trim()) Helper.onlinePlayers.push(onlinePlayer);
+				}
+			}
+		}
+		if (callback.page<maxPage/*-maxPage+15*/) {
+			var newPage = (callback.page == 1) ? Math.round(Helper.onlinePlayersSetting * maxPage / 50) : (callback.page+1);
+			var bufferProgress = document.getElementById("bufferProgress");
+			bufferProgress.innerHTML = 'Parsing online page ' + callback.page + ' ...';
+			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.findBuffsParseOnlinePlayers, {"page":newPage});
+		}
+		else {
+			//all done so moving on
+			Helper.findBuffsParsePlayersForBuffs();
+		}
+	},
+	
+	findBuffsParsePlayersForBuffs: function() {
+		//remove duplicates
+		Helper.onlinePlayers = Helper.onlinePlayers.removeDuplicates();
+		var bufferProgress = document.getElementById("bufferProgress");
+		//now need to parse player pages for buff ...
+		document.getElementById("potentialBuffers").innerHTML = Helper.onlinePlayers.length;
+		if (Helper.onlinePlayers.length <= 0) {
+			bufferProgress.innerHTML = 'Done.';
+			bufferProgress.style.color = 'blue';
+			return
+		}
+		bufferProgress.innerHTML = 'Parsing player data ...';
+		bufferProgress.style.color = 'green';
+
+		for (var j = 0; j < Helper.onlinePlayers.length; j++) {
+			System.xmlhttp(Helper.onlinePlayers[j], Helper.findBuffsParseProfileAndDisplay, {"href": Helper.onlinePlayers[j]});
+		}
+	},
+	
+	findBuffsParseProfileAndDisplay: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		//name and level
+		var playerName = System.findNode("//h1", doc).textContent;
+		var levelElement = System.findNode("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
+		var levelValue = parseInt(levelElement.textContent.replace(/,/g,""),10);
+		var virtualLevelElement = System.findNode("//td[contains(b,'VL')]/following-sibling::td[1]", doc);
+		var virtualLevelValue = parseInt(virtualLevelElement.textContent.replace(/,/g,""),10);
+		//last activity
+		var lastActivityElement = System.findNode("//h2[@class='centered tiny']", doc);
+		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
+		var lastActivityMinutes = parseInt(lastActivity[1],10);
+		var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+		if (lastActivityMinutes < 2) {
+			lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+		}
+		//buffs
+		var bioDiv = System.findNode("//div[strong[.='Biography']]", doc);
+		var bioCell = bioDiv.nextSibling.nextSibling;
+		var buffNickArray = Helper.findBuffNicks.split(",");
+		var buffTable = document.getElementById("buffTable")
+		var textLineArray = new Array();
+		for (var j = 0; j < buffNickArray.length; j++) {
+			var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
+			var bioTextToSearch = bioCell.innerHTML;
+			if (buffNickArray[j].length < 3) {
+				var buffRE = new RegExp(buffNickArray[j].toUpperCase());
+			} else {
+				var buffRE = new RegExp(buffNickArray[j], 'i');
+			}
+			while (buffPosition != -1) {
+				bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
+				buffPosition = bioTextToSearch.search(buffRE);
+				if (buffPosition != -1) {
+					startingPosition = buffPosition + 1;
+					runningTotalPosition += buffPosition;
+					var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition);
+					var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
+					var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
+					textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+					textLineArray.push(textLine);
+				}
+			}
+		}
+		textLineArray = textLineArray.removeDuplicates();
+		//sustain
+		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
+		if (sustainText) {
+			var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+			var sustainLevelRE = /Level<br>(\d+)%/;
+			var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
+		} else {	
+			sustainLevel = -1;
+		}
+		//extend
+		var hasExtendBuff = System.findNode("//img[contains(@onmouseover,'Extend')]", doc);
+
+		//add row to table
+		if (textLineArray.length > 0) {
+			var newRow = buffTable.insertRow(-1);
+			//name cell
+			var newCell = newRow.insertCell(0);
+			newCell.style.verticalAlign = 'top';
+			var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+			if (lastActivityMinutes < 2) {
+				lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+			}
+			playerHREF = callback.href;
+			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new">' + playerName + '</a>' + 
+				'&nbsp;<span style="color:blue;">[<a href="index.php?cmd=message&target_player=' + playerName +'" target="new">m</a>]</span>' + '</nobr><br>' +
+				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
+			//player info cell
+			var newCell = newRow.insertCell(1);
+			var playerInfo = '<table><tbody><tr><td colspan="2" style="color:gray;" align="right" width="50%">Last Activity:</td><td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>';
+			playerInfo += '<tr><td style="color:gray;" align="right" width="25%">Sustain:</td><td width="25%" style="color:' + (sustainLevel>=100?'green':'red') + ';">' + sustainLevel + '%</td>' + 
+				'<td width="25%" style="color:gray;" align="right">Extend:</td><td width="25%">' + (hasExtendBuff?'<span style="color:green;">Yes</span>':'<span style="color:red;">No</span>') + '</td></tr>';
+			newCell.innerHTML = playerInfo;
+			newCell.style.verticalAlign = 'top';
+			//buff cell
+			var newCell = newRow.insertCell(2);
+			for (var i = 0; i < textLineArray.length; i++) {
+				newCell.innerHTML += textLineArray[i] + '<br>';
+			}
+		}
+		var processedBuffers = document.getElementById("buffersProcessed");
+		var potentialBuffers = parseInt(document.getElementById("potentialBuffers").textContent,10);
+		var processedBuffersCount = parseInt(processedBuffers.textContent,10);
+		processedBuffers.innerHTML = (processedBuffersCount + 1);
+		if (potentialBuffers == (processedBuffersCount + 1)) {
+			var bufferProgress = document.getElementById("bufferProgress");
+			bufferProgress.innerHTML = 'Done.';
+			bufferProgress.style.color = 'blue';
+		}
+		
 	}
 };
 
