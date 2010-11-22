@@ -297,13 +297,23 @@ var System = {
 	
 	removeDuplicates: function (removeBy){
 		var temp=new Array();
-		Helper.sortBy = removeBy;
-		this.sort();
-		for(i=0;i<this.length;i++) {
-			var first = this[i];
-			var second = (this[i+1]?this[i+1]:"abc");
-			if(i != this.length && first[removeBy]==second[removeBy]) {continue;}
-			temp[temp.length]=this[i];
+		if (removeBy) {
+			Helper.sortBy = removeBy;
+			this.sort();
+			for(i=0;i<this.length;i++) {
+				var first = this[i];
+				var second = (this[i+1]?this[i+1]:"abc");
+				if(i != this.length && first[removeBy]==second[removeBy]) {continue;}
+				temp[temp.length]=this[i];
+			}
+		} else {
+			this.sort();
+			for(i=0;i<this.length;i++) {
+				var first = this[i];
+				var second = (this[i+1]?this[i+1]:"abc");
+				if(i != this.length && first==second) {continue;}
+				temp[temp.length]=this[i];
+			}
 		}
 		return temp;
 	},
