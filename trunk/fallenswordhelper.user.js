@@ -12387,7 +12387,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var doc = System.createDocument(responseText);
 		var playerRows = System.findNodes("//table/tbody/tr[count(td)=4 and td[2]/a]", doc);
 		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""),10);
-		output.innerHTML+=callback.page + " ";
 		if (playerRows && callback.page != 1){
 			for (var i=0; i<playerRows.length; i++) {
 				var onlinePlayer = playerRows[i].cells[1].firstChild.getAttribute("href");
