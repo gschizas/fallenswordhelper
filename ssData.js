@@ -24,34 +24,59 @@ var Data = {
 
 	},
 
+	greenDiamond: function() {
+		return "data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D";
+	},
+
+	yellowDiamond: function() {
+		return "data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D";
+	},
+
+	orangeDiamond: function() {
+		return "data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D";
+	},
+
+	offlineDot: function() {
+		return "data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SEhK2trbW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpjYxghISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAWGICAChCINxihm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3E0GD8rzSK6XDicDNqMdIoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PEBIKFYEeAAoJGRUTdJc1FgIiAx1mZhtHHQMqIgQCHAGtKiEAOw%3D%3D";
+	},
+
+	sevenDayDot: function() {
+		return "data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNrazEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQAV8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8UYxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7";
+	},
+
 	buffList: function() {
 		if (!Data.buffArray) {
 			Data.buffArray = [
-				{name: "Strike", stamina: 10, "duration": 60,   treeId: 0, skillId: 0,  buff: "need help"},
-				{name: "Mission Finder", stamina: 10, "duration": 60,   treeId: 0, skillId: 1,  buff: "need help"},
-				{name: "Find Item", stamina: 10, "duration": 60,   treeId: 0, skillId: 2,  buff: "need help"},
-				{name: "Internal Reserves", stamina: 10, "duration": 60,   treeId: 0, skillId: 3,  buff: "need help"},
-				{name: "Data Processor", stamina: 15, "duration": 60,   treeId: 0, skillId: 4,  buff: "need help"},
-				{name: "Defiance", stamina: 15, "duration": 60,   treeId: 0, skillId: 5,  buff: "need help"},
-				{name: "Absorption", stamina: 15, "duration": 60,   treeId: 0, skillId: 6,  buff: "need help"},
-				{name: "Salvage", stamina: 15, "duration": 60,   treeId: 0, skillId: 7,  buff: "need help"},
-				{name: "Researcher", stamina: 20, "duration": 60,   treeId: 0, skillId: 8,  buff: "need help"},
-				{name: "Brinkmanship", stamina: 20, "duration": 60,   treeId: 0, skillId: 9,  buff: "need help"},
-				{name: "Kinetic Reserves", stamina: 20, "duration": 60,   treeId: 0, skillId: 10,  buff: "need help"},
-				{name: "Rad Hunter", stamina: 20, "duration": 60,   treeId: 0, skillId: 11,  buff: "need help"},
-				{name: "Robot Hunter", stamina: 20, "duration": 60,   treeId: 0, skillId: 12,  buff: "need help"},
-				{name: "Haggle", stamina: 25, "duration": 60,   treeId: 0, skillId: 13,  buff: "need help"},
-				{name: "Corrode", stamina: 25, "duration": 60,   treeId: 0, skillId: 14,  buff: "need help"},
-				{name: "Protection Field", stamina: 25, "duration": 60,   treeId: 0, skillId: 15,  buff: "need help"},
-				{name: "Deflect", stamina: 25, "duration": 60,   treeId: 0, skillId: 16,  buff: "need help"},
-				{name: "Intensifier", stamina: 30, "duration": 60,   treeId: 0, skillId: 17,  buff: "need help"},
-				{name: "Entity Seeker", stamina: 30, "duration": 60,   treeId: 0, skillId: 16,  buff: "need help"},
-				{name: "Traverse", stamina: 30, "duration": 60,   treeId: 0, skillId: 16,  buff: "need help"}
+				{name: "Strike", stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 0, skillId: 0,  buff: "need help", nicks: "strike"},
+				{name: "Mission Finder", stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 0, skillId: 1,  buff: "need help", nicks: "mission finder,mf"},
+				{name: "Find Item", stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 0, skillId: 2,  buff: "need help", nicks: "find item,fi"},
+				{name: "Internal Reserves", stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 0, skillId: 3,  buff: "need help", nicks: "iternal reserves,ir"},
+				{name: "Data Processor", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 4,  buff: "need help", nicks: "data processor,dp"},
+				{name: "Defiance", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 5,  buff: "need help", nicks: "defiance"},
+				{name: "Absorption", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 6,  buff: "need help", nicks: "absorption,abs"},
+				{name: "Salvage", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 7,  buff: "need help", nicks: "salvage,sal,salv"},
+				{name: "Researcher", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 8,  buff: "need help", nicks: "researcher,rs"},
+				{name: "Brinkmanship", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 9,  buff: "need help", nicks: "brinkmanship,brink,brk"},
+				{name: "Kinetic Reserves", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 10,  buff: "need help", nicks: "kinetic reserves,kr"},
+				{name: "Rad Hunter", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 11,  buff: "need help", nicks: "rad hunter,radh"},
+				{name: "Robot Hunter", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 12,  buff: "need help", nicks: "robot hunter,roboth"},
+				{name: "Haggle", stamina: 25, "duration": 60,   minCastLevel: 150,   treeId: 0, skillId: 13,  buff: "need help", nicks: "haggle"},
+				{name: "Corrode", stamina: 25, "duration": 60,   minCastLevel: 150,   treeId: 0, skillId: 14,  buff: "need help", nicks: "corrode,cor"},
+				{name: "Protection Field", stamina: 25, "duration": 60,   minCastLevel: 150,   treeId: 0, skillId: 15,  buff: "need help", nicks: "protection field,pf"},
+				{name: "Deflect", stamina: 25, "duration": 60,   minCastLevel: 150,   treeId: 0, skillId: 16,  buff: "need help", nicks: "deflect,defl"},
+				{name: "Intensifier", stamina: 30, "duration": 60,   minCastLevel: 200,   treeId: 0, skillId: 17,  buff: "need help", nicks: "intensifier,int"},
+				{name: "Entity Seeker", stamina: 30, "duration": 60,   minCastLevel: 200,   treeId: 0, skillId: 18,  buff: "need help", nicks: "entity seeker,es"},
+				{name: "Traverse", stamina: 30, "duration": 60,   minCastLevel: 200,   treeId: 0, skillId: 19,  buff: "need help", nicks: "traverse,trav"},
+				{name: "Lightning Reflexes", stamina: 10, "duration": 120,   minCastLevel: 300,   treeId: 0, skillId: 96,  buff: "need help", nicks: "lightning reflexes"},
+				{name: "Hardened", stamina: 10, "duration": 120,   minCastLevel: 300,   treeId: 0, skillId: 97,  buff: "need help", nicks: "hardened"},
+				{name: "Diagnostic", stamina: 5, "duration": 120,   minCastLevel: 400,   treeId: 0, skillId: 98,  buff: "need help", nicks: "diagnostic"},
+				{name: "Vibroblade", stamina: 10, "duration": 120,   minCastLevel: 400,   treeId: 0, skillId: 99,  buff: "need help", nicks: "vibroblade"},
+				{name: "Razordisc", stamina: 15, "duration": 90,   minCastLevel: 500,   treeId: 0, skillId: 100,  buff: "need help", nicks: "razordisc"}
 			];
 		}
 		return Data.buffArray;
 	},
-	
+
 	quickSearchList: function() {
 		if (!Data.quickSearchArray) {
 			Data.quickSearchArray = [

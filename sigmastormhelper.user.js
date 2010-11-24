@@ -100,7 +100,7 @@ var Helper = {
 		System.setDefault("miniMapName","");
 		System.setDefault("miniMapSource","");
         System.setDefault("loadAmmoUrl", "index.php?cmd=profile");
-		
+
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
 		}
@@ -498,6 +498,9 @@ var Helper = {
 			case "quickahpreftemplate":
 				Helper.injectAHPrefTemplate();
 				break;
+			case "findbuffs":
+				Helper.injectFindBuffs();
+				break;
 			}
 			break;
 		case "points":
@@ -579,7 +582,7 @@ var Helper = {
 			break;
 		}
 	},
-	
+
 	fixOnlineGuildBuffLinks: function() {
 		var buffLinks = System.findNodes("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
 		if (buffLinks) {
@@ -589,11 +592,11 @@ var Helper = {
 				var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
 				if (playerName) {
 					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&t=" + playerName[1] + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
-				} 
+				}
 			}
 		}
 	},
-	
+
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) return;
         var guildInfoTable = System.findNode("//table[tbody/tr/td/font/font/i/b[.='Online Members']]");
@@ -640,7 +643,7 @@ var Helper = {
 			'.HelperTableRow2:hover {background-color:black}'
 		);
 	},
-	
+
 	injectFSBoxLog: function() {
 		if (GM_getValue("fsboxlog")) {
 			var node=System.findNode("//input[@value='Send Msg']/../font[1]");
@@ -654,7 +657,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	injectFsBoxContent: function() {
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Sigma Box Log','','fsboxclear','Clear','fsboxdetail');
 		document.getElementById('fsboxclear').addEventListener('click',
@@ -799,7 +802,7 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
 //		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
-		
+
 		doc = System.findNode("//html");
 		Helper.parseGuildForWorld(doc.innerHTML, true);
 
@@ -837,7 +840,7 @@ var Helper = {
 					.addEventListener('click', Helper.recallItemNWear, true);
 			}
 		}
-		
+
 		// self recall
 		var selfRecall=System.findNode("//b[.='Faction Store']");
 		selfRecall.innerHTML="Faction Store [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&user="+Helper.characterName+"' title='Self Recall'>SR</a>]";
@@ -913,7 +916,7 @@ var Helper = {
 		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
 		return;
 	},
-	
+
 	injectShop: function() {
 		var injectHere=System.findNode("//td/center[img[contains(@src,'_banner.jpg')]]");
 		var itemNodes=System.findNodes("//td/center/a/img[contains(@src,'/items/')]");
@@ -940,7 +943,7 @@ var Helper = {
 		}
 		Helper.shopId=itemNodes[0].parentNode.getAttribute("href").match(/&shop_id=(\d+)/)[1];
 	},
-	
+
 	selectShopItem: function(evt) {
 		Helper.shopItemId=evt.target.getAttribute("itemId");
 		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the '+
@@ -951,7 +954,7 @@ var Helper = {
 		document.getElementById('selectedItem').innerHTML=
 			document.getElementById("select"+Helper.shopItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
 	},
-	
+
 	quickBuyItem: function() {
 		if (!Helper.shopItemId || !Helper.shopId) return;
 		document.getElementById('buy_result').innerHTML+="<br/>Buying "+document.getElementById('buy_amount').value+" Items";
@@ -962,7 +965,7 @@ var Helper = {
 					document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 				});
 	},
-	
+
 	quickUse: function(responseText, callback) {
 
         var item=callback.item;
@@ -971,7 +974,7 @@ var Helper = {
             item=quItems['item'+callback.id];
             if (item=='') return;
         }
-		
+
 		// only applicable when you are hunting (in world screen)
 		if (!System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..")) return;
 		if (responseText=='') {
@@ -979,11 +982,11 @@ var Helper = {
 			System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.quickUse, callback);
 			return;
 		}
-		
+
 		Helper.itemList = {};
 		var doc=System.createDocument(responseText);
 		Helper.retrieveItemInfor(doc);
-		
+
 		for (var key in Helper.itemList) {
 			if (Helper.itemList[key].text==item || (callback.item && item.test(Helper.itemList[key].text))) {
                 var showMsgBox=true;
@@ -995,7 +998,7 @@ var Helper = {
 				return;
 			}
 		}
-		
+
 		if (callback.arrayId == 0) {
 			Helper.folderHrefs = new Array(); //clear out the array before starting.
 			var folderLinks = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=dropitems&folder_id=')]", doc);
@@ -1008,7 +1011,7 @@ var Helper = {
 
 		if (Helper.folderHrefs.length > 1 && callback.arrayId + 1 < Helper.folderHrefs.length) {
             callback.arrayId++;
-			System.xmlhttp(Helper.folderHrefs[callback.arrayId], 
+			System.xmlhttp(Helper.folderHrefs[callback.arrayId],
 				Helper.quickUse, callback);
 			return;
 		}
@@ -1116,7 +1119,7 @@ var Helper = {
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
 	},
-  
+
 	getRelicGuildData: function(extraTextInsertPoint,href) {
 		System.xmlhttp(href, Helper.parseRelicGuildData, {"extraTextInsertPoint":extraTextInsertPoint,"href":href});
 	},
@@ -1393,7 +1396,7 @@ var Helper = {
 					'Invent '+document.getElementById('multiInventN').value+' times';
 			}, true);
 	},
-    
+
     injectViewRecipeList: function() {
         var node=System.findNode("//td[.='Recipe Name']");
         if (!node) return;
@@ -1406,13 +1409,13 @@ var Helper = {
                     nodes[i].checked = value;
             }, true);
     },
-	
+
 	inventMulti: function() {
 		var n=System.intValue(document.getElementById('multiInventN').value);
 		if (n>0) {
 			var receiptId=document.getElementsByName('recipe_id')[0].value;
 			for (var i=0; i<n; i++) {
-				System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+receiptId, 
+				System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+receiptId,
 					function(responseText)  {
 						var infoMessage = Layout.infoBox(responseText);
 						document.getElementById('inventResult').innerHTML+="<br />"+infoMessage;
@@ -1420,7 +1423,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	injectTHsearch: function() {
 		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]");
 		if (items)
@@ -1431,7 +1434,7 @@ var Helper = {
 				}
 			}
 	},
-	
+
 	searchTHforItem: function(evt) {
 		var mo=evt.target.getAttribute("onmouseover");
 		System.xmlhttp(Helper.linkFromMouseoverCustom(mo), function(responseText) {
@@ -1468,7 +1471,7 @@ var Helper = {
 		if (!titleCells) return;
 		var parentTables=System.findNodes("ancestor::table", titleCells[0]);
 		var list=parentTables[parentTables.length-1];
-		
+
 		// insert weekly summary link
 		var injectHere=System.findNode("//td/form");
 		if (injectHere) {
@@ -1498,7 +1501,7 @@ var Helper = {
 		if (subPage2Id!='-') {
 			Helper.advisorFooter='';
 		}
-		
+
 		Helper.sortAsc = true;
 		if (subPage2Id == '-') {
 			Helper.generateAdvisorRows(list);
@@ -1508,7 +1511,7 @@ var Helper = {
 			Helper.generateWeeklyAdvisorRows('',{'day':0,'inject':list});
 		}
 	},
-	
+
 	generateWeeklyAdvisorRows: function(responseText, callback) {
 		var day=callback.day;
 		if (day <= 7) {
@@ -1538,7 +1541,7 @@ var Helper = {
 					}
 				}
 			}
-			System.xmlhttp("index.php?cmd=guild&subcmd=advisor&period="+(day+1), 
+			System.xmlhttp("index.php?cmd=guild&subcmd=advisor&period="+(day+1),
 				Helper.generateWeeklyAdvisorRows, {'day':(day+1),'inject':callback.inject});
 		} else {
 			Helper.advisorRows = Helper.weeklyAdvisorRows;
@@ -1609,7 +1612,7 @@ var Helper = {
 
 		for (var i=0; i<Helper.advisorRows.length; i++){
 			var r = Helper.advisorRows[i];
-			
+
 			var lvl=r.Lvl - 1;
 			var lvlExp=(lvl>11)?(lvl*lvl*lvl*10):(lvl*lvl*100);
 			lvl--;
@@ -1701,7 +1704,7 @@ var Helper = {
 
 	checkBuffs: function() {
 		if (!GM_getValue("showHuntingBuffs")) return;
-		
+
 		var currentBuffs = System.findNodes("//a[contains(@href,'index.php?cmd=profile&subcmd=removeskill&skill_id=')]");
 		var buffHash={};
 		if (currentBuffs) {
@@ -1768,7 +1771,7 @@ var Helper = {
 						aRow.parentNode.removeChild(aRow.nextSibling);
 						aRow.parentNode.removeChild(aRow);
 					}
-					
+
 				}
 			}
 		}
@@ -1790,7 +1793,7 @@ var Helper = {
 
 		if (GM_getValue("sendGoldonWorld")){
 			currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
-			var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") + 
+			var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") +
 				". Current gold sent total is " + currentGoldSentTotal;
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
@@ -1840,12 +1843,12 @@ var Helper = {
 							break;
 						}
 					}
-				} else 
+				} else
 					break;
 			}
 		}
 	},
-	
+
 	injectHuntingMode: function() {
 		document.getElementById('personalData').innerHTML+='<span onmouseover=\'tt_setWidth(100);Tip("Hunting Mode");\'>'+
 			'[<span id=toggleHMode style="font-weight:bold;cursor:pointer;text-decoration:underline;">'+
@@ -1871,7 +1874,7 @@ var Helper = {
 				}
 			}, true);
 	},
-	
+
 	injectPersonalData: function(doc) {
 		var injectHere = System.findNode("//table[contains(@background,'large_content_bg.jpg')]/tbody/tr[1]/td",doc);
 		if (injectHere) {
@@ -1880,7 +1883,7 @@ var Helper = {
 			if (skillInfo) skillInfo = skillInfo[skillInfo.length-1];
 			var skillInfoText = skillInfo.getAttribute("onmouseover");
 			Helper.skillPower = System.getIntFromRegExp(skillInfoText, /Skill Power<\/b>: (\d+) \/ \d+<br>/i);
-			
+
 			// backpack
 			var bpInfo = System.findNode("//td[a/img[contains(@src,'quicklinks/3.gif')]]/font");
 			Helper.bpInfo = bpInfo.textContent.replace(/[\[\]\s]/g,'');
@@ -1900,7 +1903,7 @@ var Helper = {
 			injectHere.style.textAlign="right";
 		}
 	},
-	
+
 	wrapStyle: function(data,style) {
 		if (style==undefined || style=='') style="font-weight:bolder";
 		return '<span style="'+style+'">'+data+'</span>';
@@ -1981,7 +1984,7 @@ var Helper = {
 			nodes[i].checked = true;
 		}
 	},
-	
+
 	injectQuickUseManager: function() {
 		Helper.itemList = {};
 		Helper.retrieveItemInfor(document);
@@ -1995,7 +1998,7 @@ var Helper = {
 			'<td id=item0 style="font-weight:bold;color:green;text-align:center"></td>'+
 			'<td id=item1 style="font-weight:bold;color:green;text-align:center"></td>'+
 			'<td id=item2 style="font-weight:bold;color:green;text-align:center"></td></tr><tr><td>&nbsp;</td></tr>';
-		
+
 		Helper.tempDict={};
 		var count=0;
 		for (var key in Helper.itemList) {
@@ -2019,7 +2022,7 @@ var Helper = {
 				Helper.showQuickUseItem();
 			}, true);
 	},
-	
+
 	addQuickUseItem: function(evt) {
 		var key = evt.target.getAttribute("itemid");
 		var quItems=System.getValueJSON("quickUseItems");
@@ -2029,7 +2032,7 @@ var Helper = {
 		System.setValueJSON("quickUseItems", quItems);
 		Helper.showQuickUseItem();
 	},
-	
+
 	showQuickUseItem: function() {
 		var hotkeys=['{','}','|'];
 		var quItems=System.getValueJSON("quickUseItems");
@@ -2037,14 +2040,14 @@ var Helper = {
 			document.getElementById('item'+i).innerHTML="<span onmouseover=\"Tip('Hotkey: "+hotkeys[i]+"')\">"+(quItems['item'+i]==''?'[Not Assigned]':quItems['item'+i])+"</span>";
 		}
 	},
-	
+
 	injectQuickWear: function() {
 		Helper.itemList = {};
 		var layout=Layout.notebookContent();
 		layout.innerHTML="Getting item list from: ";
 		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getItemFromBackpack, {"inject":layout});
 	},
-	
+
 	getItemFromBackpack: function(responseText, callback) {
 		var layout=callback.inject;
 		layout.innerHTML+="backpack page, ";
@@ -2055,7 +2058,7 @@ var Helper = {
 		System.xmlhttp("/index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems",
 			Helper.getItemFromStoreItemPage, callback);
 	},
-	
+
 	getItemFromStoreItemPage: function(responseText, callback) {
 		var layout=callback.inject;
 		layout.innerHTML+="store item page.";
@@ -2065,7 +2068,7 @@ var Helper = {
 		}
 		Helper.showQuickWear(callback);
 	},
-	
+
 	showQuickWear: function(callback) {
 		Helper.inventoryMap = System.getValueJSON('inventoryMap');
 		if (!Helper.inventoryMap) Helper.inventoryMap = {};
@@ -2125,12 +2128,12 @@ var Helper = {
 					.addEventListener('click', Helper.useProfileInventoryItem, true);
 			}
 		}
-		document.getElementById('quickWearFilterSave').addEventListener('click', 
+		document.getElementById('quickWearFilterSave').addEventListener('click',
 			Helper.saveQuickWearFilter, true);
-		document.getElementById('quickWearEnable').addEventListener('click', 
+		document.getElementById('quickWearEnable').addEventListener('click',
 			Helper.saveQuickWearFilter, true);
 	},
-	
+
 	saveQuickWearFilter: function() {
 		var filterObj={
 			"enable":document.getElementById('quickWearEnable').checked,
@@ -2138,7 +2141,7 @@ var Helper = {
 		GM_setValue("quickWearFilter",JSON.stringify(filterObj));
 		window.location=window.location;
 	},
-	
+
 	insertQuickExtract: function() {
 		Helper.itemList = {};
 		var layout=Layout.notebookContent();
@@ -2207,7 +2210,7 @@ var Helper = {
 		//unsafeWindow.Tip(infoMessage);
 		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
-	
+
 	retrieveItemInfor: function(doc) {
 		var table=System.findNode("//td[@colspan=3]/table[@width='100%']",doc);
 		for (var i=0; i<table.rows.length/2; i++){
@@ -2220,7 +2223,7 @@ var Helper = {
 			Helper.itemList["id"+item.id]=item;
 		}
 	},
-	
+
 	toggleFootprints: function() {
 		var footprints = GM_getValue("footprints");
 		if (footprints == undefined) footprints=false;
@@ -2333,7 +2336,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	showTipCreatureInfo: function(evt) {
 		var monster=evt.target.parentNode;
 		if (monster.getAttribute("mouseovertext")!=undefined) {
@@ -2544,7 +2547,7 @@ var Helper = {
 		var shieldImpHP = responseText.match(shieldImpHPRE);
 		var shieldImpDeathRE = /Psi Shield is destroyed/;
 		var shieldImpDeath = responseText.match(shieldImpDeathRE);
-		
+
 		var surgeGain = System.getIntFromRegExp(responseText, /var\s+surgeGain=(-?\d+);/i);
 		var hpNode = System.findNode("//div[@id='current_hp_0']", doc);
 		if (hpNode) {
@@ -3289,7 +3292,7 @@ var Helper = {
 							"'>Ignore</a>";
 						}
 						//aRow.cells[2].innerHTML = firstPart + "<nobr>" + secondPart + extraPart + thirdPart + "</nobr>" + lastPart;
-						var msgReplyTo = (GM_getValue("enableChatParsing") == true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" + 
+						var msgReplyTo = (GM_getValue("enableChatParsing") == true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" +
 							Helper.removeHTML(firstPart.replace(/^ +/g,"").replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
 						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart + "</nobr>" + lastPart;
 					}
@@ -3369,10 +3372,10 @@ var Helper = {
 
 		}
 	},
-	
+
 	injectGuildLogSummary: function() {
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
-		
+
 		var lastCheck=GM_getValue("lastGuildLogSumCheck")
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
@@ -3382,12 +3385,12 @@ var Helper = {
 		else
 			document.getElementById('guillogrefresh').innerHTML='[ Wait '+ Math.round(60 - ((now - lastCheck)/60000)) +'m ]'
 		var logDetail=GM_getValue("guildlogdetail");
-		if (logDetail) 
+		if (logDetail)
 			Helper.guildLogDisplay(logDetail);
 		else
 			Helper.guildLogSummaryRefresh();
 	},
-	
+
 	guildLogSummaryRefresh: function() {
 		var now=(new Date()).getTime();
 		GM_setValue("lastGuildLogSumCheck", now.toString());
@@ -3396,7 +3399,7 @@ var Helper = {
 		document.getElementById('guildlogdetail').innerHTML='Parsing page 1';
 		System.xmlhttp('index.php?cmd=guild&subcmd=log&page=0',Helper.guidLogRetrieve,1);
 	},
-	
+
 	guidLogRetrieve: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
 		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
@@ -3414,7 +3417,7 @@ var Helper = {
 			System.xmlhttp('index.php?cmd=guild&subcmd=log&page='+callback,Helper.guidLogRetrieve,callback+1);
 		}
 	},
-	
+
 	guildLogDisplay: function(logDetail) {
 		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'
 			+logDetail+'</table>';
@@ -3457,7 +3460,7 @@ var Helper = {
 
 		//Add functionality to hide the text block at the top.
 		var textRow = auctionTable.rows[0].cells[0];
-		textRow.innerHTML = '<table cellspacing=10><tr><td width=60%><span id=auctionTextControl>' + textRow.innerHTML + 
+		textRow.innerHTML = '<table cellspacing=10><tr><td width=60%><span id=auctionTextControl>' + textRow.innerHTML +
 			'</span></td><td id=quickSearchLayout style="text-align:center;color:#FFF380;background-color:black"></td></tr></table>';
 		textRow=document.getElementById("auctionTextControl");
 		var myBidsButton = System.findNode("//input[@value='My Bids']/..");
@@ -3637,13 +3640,13 @@ var Helper = {
 				}
 			}
 		}
-		
-		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");		
-		if (bidNoRefreshList) {		
-			for (var i=0; i<bidNoRefreshList.length; i++) {		
-				var bidNoRefreshItem = bidNoRefreshList[i];		
-				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);		
-			}		
+
+		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");
+		if (bidNoRefreshList) {
+			for (var i=0; i<bidNoRefreshList.length; i++) {
+				var bidNoRefreshItem = bidNoRefreshList[i];
+				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
+			}
 		}
 
 		var searchPrefs = System.findNode("//a[contains(@href, 'cmd=auctionhouse&subcmd=preferences')]");
@@ -3673,11 +3676,11 @@ var Helper = {
 		Helper.injectAuctionQuickCancel();
 		Helper.injectAuctionQuickPreference();
 	},
-	
+
 	injectAuctionQuickPreference: function() {
 		Helper.qAHPref=System.getValueJSON("quickAHPref");
 		if (!Helper.qAHPref || Helper.qAHPref.length<=0) return;
-		
+
 		var injectHere = document.getElementById("Helper:AHquickPref");
 		for (var i=0; i<Helper.qAHPref.length; i++) {
 			injectHere.innerHTML+="[ <span id=qAHPref"+i+" prefId="+i+">"+Helper.qAHPref[i].name+"</span> ] ";
@@ -3686,7 +3689,7 @@ var Helper = {
 			document.getElementById("qAHPref"+i).addEventListener("click", Helper.changeAuctionQuickPreference, true);
 		}
 	},
-	
+
 	changeAuctionQuickPreference: function(evt) {
 		var pref=Helper.qAHPref[evt.target.getAttribute("prefId")];
 		System.findNode("//input[@name='pref_minlevel']").value=pref.min;
@@ -3695,7 +3698,7 @@ var Helper = {
 		System.findNode("//input[@name='pref_hidefsp']").checked=pref.fsp;
 		Helper.auctionHouseSavePreferences();
 	},
-	
+
 	injectAHPrefTemplate: function() {
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick TH Preference Template','','','','qTHPrefTempId');
 
@@ -3709,7 +3712,7 @@ var Helper = {
 			'gmname':"quickAHPref"};
 		Helper.generateManageTable();
 	},
-	
+
 	generateManageTable: function() {
 		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr>';
 		var isArrayOnly=(Helper.param.fields.length==0);
@@ -3750,15 +3753,15 @@ var Helper = {
 			for (i=0;i<Helper.param.tags.length;i++)
 				result+='<td align=center><input type='+Helper.param.tags[i]+' class=custominput id=Helper:input'+Helper.param.fields[i]+'></td>';
 		result+='<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
-		
+
 		if (Helper.param.showRawEditor) {
-			result+="<table width=100%><tr><td align=center><textarea cols=70 rows=20 name='Helper:rawEditor'>" + 
+			result+="<table width=100%><tr><td align=center><textarea cols=70 rows=20 name='Helper:rawEditor'>" +
 				JSON.stringify(Helper.param.currentItems) + "</textarea></td></tr>"+
 				"<tr><td align=center><input id='Helper:saveRawEditor' type='button' value='Save' class='custombutton'>"+
 				"&nbsp;<input id='Helper:resetRawEditor' type='button' value='Reset' class='custombutton'></td></tr>"+
 				"</tbody></table>";
 		}
-		
+
 		document.getElementById(Helper.param.id).innerHTML = result;
 		for (i=0;i<Helper.param.currentItems.length;i++)
 			document.getElementById("Helper:DeleteItem" + i).addEventListener('click', Helper.deleteQuickItem, true);
@@ -3767,7 +3770,7 @@ var Helper = {
 			document.getElementById("Helper:saveRawEditor").addEventListener('click', Helper.saveRawEditor, true);
 			document.getElementById("Helper:resetRawEditor").addEventListener('click', Helper.resetRawEditor, true);
 		}
-		
+
 		System.setValueJSON(Helper.param.gmname, Helper.param.currentItems);
 	},
 
@@ -3787,7 +3790,7 @@ var Helper = {
 			for (var i=0;i<Helper.param.fields.length;i++)
 				if (Helper.param.tags[i]=="checkbox")
 					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).checked;
-				else 
+				else
 					newItem[Helper.param.fields[i]]=document.getElementById("Helper:input"+Helper.param.fields[i]).value;
 		}
 		Helper.param.currentItems.push(newItem);
@@ -3798,7 +3801,7 @@ var Helper = {
 		}
 		Helper.generateManageTable();
 	},
-	
+
 	saveRawEditor: function(evt) {
 		Helper.param.currentItems = JSON.parse(System.findNode("//textarea[@name='Helper:rawEditor']").value);
 		if (Helper.param.sortField) {
@@ -3813,7 +3816,7 @@ var Helper = {
 		Helper.param.currentItems=[];
 		Helper.generateManageTable();
 	},
-	
+
 	bidNoRefresh: function(evt) {
 		var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
 		var invID = evt.target.getAttribute("invID");
@@ -3931,8 +3934,8 @@ var Helper = {
 		}
 		theText.innerHTML = preText + theText.innerHTML;
 	},
-	
-	toggleGMValueLink: function(evt) { 
+
+	toggleGMValueLink: function(evt) {
 		// target.id is the GM variable name, target.confirmMsg is the confirmation msg, the text should be "Show/Hide ..."
 		var varName = evt.target.id;
 		if (evt.target.textContent.match(/^Show/)) {
@@ -4046,7 +4049,7 @@ var Helper = {
 			itemCellElement.innerHTML += " <span style='color:green; font-weight:bold;'>" + info + "</span>";
 		}
 	},
-	
+
 	recallItemNWear: function(evt) {
 		var href=evt.target.getAttribute("href");
 		System.xmlhttp(href, Helper.recallItemNWearReturnMessage, {"target": evt.target, "url": href});
@@ -4114,21 +4117,21 @@ var Helper = {
 				td.innerHTML='<form action="index.php" method="post">'+
 					td.innerHTML.replace('<form action="index.php" method="post"></form>','')+'</form>';
 		}
-		
+
 		Helper.injectDropItemMenu();
-		if (GM_getValue("showBpCompact")) 
+		if (GM_getValue("showBpCompact"))
 			Helper.injectDropItemCompact();
 		else
 			Helper.injectDropItemAHSellCheckAll();
 	},
-	
+
 	injectDropItemMenu: function() {
 		var mainTable = System.findNode("//table[contains(@background,'skin/large_content_bg.jpg')]");
 		if (!mainTable.rows[5]) var mainTable = System.findNode("//table[@width=600]");
 		if (mainTable) {
 			var insertHere = mainTable.rows[3].cells[0];
-			var menuList = [["showExtraLinks", "TH and Sell links", ""], 
-				["showQuickDropLinks", "Quick Drop links", "Are you sure you want to show the quick drop links?"], 
+			var menuList = [["showExtraLinks", "TH and Sell links", ""],
+				["showQuickDropLinks", "Quick Drop links", "Are you sure you want to show the quick drop links?"],
 				["showBpCompact", "BP Compact", ""]];
 			var newHtml = "<div align=center nowrap><a name=top></a>";
 			for (var i=0; i<menuList.length; i++) {
@@ -4143,7 +4146,7 @@ var Helper = {
 			window.scrollTo(0,300);
 		}
 	},
-	
+
 	injectDropItemCompact: function() {
 		Helper.itemList = {};
 		Helper.retrieveItemInfor(document);
@@ -4168,7 +4171,7 @@ var Helper = {
 					+ escape(Helper.itemList[key].text)
 					+ "'>TH</a>] "
 					+ "[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
-					+ "&inv_id=" + invId 
+					+ "&inv_id=" + invId
 					+ "&item_id=" + itemId
 					+ "&type=" + type
 					+ "&pid=" + pid
@@ -4208,7 +4211,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	injectDropItemAHSellCheckAll: function() {
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
@@ -4235,13 +4238,13 @@ var Helper = {
 					theTextNode.textContent = itemName;
 					var findItems = System.findNodes('//td[@width="90%" and contains(.,"'+itemName+'")]');
 					var preText = "", postText1 = "", postText2 = "";
-					
+
 					if (showExtraLinks) {
 						preText = "<span findme='AH'>[<a href='" + System.server + "?cmd=auctionhouse&type=-1&order_by=1&search_text="
 							+ escape(itemName)
 							+ "'>AH</a>]</span> "
 							+ "<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2"
-							+ "&inv_id=" + itemInvId 
+							+ "&inv_id=" + itemInvId
 							+ "&item_id=" + itemId
 							+ "&type=" + type
 							+ "&pid=" + pid
@@ -4259,7 +4262,7 @@ var Helper = {
 							+ itemInvId
 							+ " findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Quick Drop]</span> ";
 					}
-					
+
 					theTextNode.innerHTML = preText
 						+ theTextNode.innerHTML
 						+ postText1
@@ -4290,7 +4293,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	injectMoveItems: function() {
 		var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
 		if (! foldersEnabled) return;
@@ -4312,7 +4315,7 @@ var Helper = {
 		document.getElementById("Helper::moveItems").addEventListener('click', Helper.moveItemsToFolder, true);
 		document.getElementById("Helper::combineItems").addEventListener('click', Helper.combineItems, true);
 	},
-	
+
 	combineItems: function() {
 		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
 		var foldersEnabled = System.findNode("//a[img[@src='"+System.imageServer+"/folder_on.gif']]");
@@ -4334,10 +4337,10 @@ var Helper = {
 			},
 			data: postData+postItems
 		});
-		if (postItems != '') 
+		if (postItems != '')
 			setTimeout(function() {window.location=window.location;}, 1000);
 	},
-	
+
 	moveItemsToFolder: function() {
 		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
 		var selectElem = document.getElementById('selectFolderId');
@@ -4368,11 +4371,11 @@ var Helper = {
 				haveItems = true;
 			}
 		}
-		if (haveItems) 
+		if (haveItems)
 			setTimeout(function() {window.location=window.location;}, 1000);
-		
+
 	},
-	
+
 	quickDropItem: function(evt){
 		var itemInvId = evt.target.getAttribute("itemInvId");
 		var dropItemHref = "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
@@ -4446,7 +4449,7 @@ var Helper = {
 		if (color=="orange") color="#FF6000";
 		if (color=="#00FF00") color="#00B000";
 		textNode.style.color=color;
-	}, 
+	},
 
 	injectProfile: function() {
 		// add avatar img element with player name in title
@@ -4550,7 +4553,7 @@ var Helper = {
 		if (!isSelfRE) { // self inventory
 			// Allies/Enemies count/total function
 			Helper.countAllyEnemy();
-			
+
 			// quick wear manager link
 			var node=System.findNode("//font/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
 			if (node) {
@@ -4580,7 +4583,7 @@ var Helper = {
 				var usableIDRE = /subcmd=useitem/i;
 				var itemImgRE = /\/([^\/]*)\.gif/i;
 				var foldersEnabled = System.findNode("//img[@src='"+System.imageServer+"/folder_on.gif']");
-				
+
 				var profileInventoryBox = [];
 				var profileInventoryBoxItem = [];
 				var profileInventoryBoxID = [];
@@ -4634,7 +4637,7 @@ var Helper = {
 					}
 				}
 			}
-			
+
 			doc = System.findNode("//html");
 			Helper.parseProfileForWorld(doc.innerHTML, true);
 		}
@@ -4642,7 +4645,7 @@ var Helper = {
 		//bio compressor ...
 		var bioCompressorEnabled = GM_getValue("enableBioCompressor");
 		if (bioCompressorEnabled) Helper.bioCompress();
-		
+
 		var componentDiv=document.getElementById('componentDiv');
 		if (componentDiv) {
 			componentDiv.parentNode.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#A0CFEC">Enable Quick Del</span>]</div>'+
@@ -4652,7 +4655,7 @@ var Helper = {
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		}
 	},
-	
+
 	enableDelComponent: function() {
 		var nodes=System.findNodes('//a[contains(@href,"cmd=profile&subcmd=destroycomponent&component_id=")]');
 		if (nodes) {
@@ -4675,18 +4678,18 @@ var Helper = {
 					evt.target.innerHTML=Layout.infoBox(responseText);
 			});
 	},
-	
+
 	countComponent: function() {
 		var compPage=System.findNodes("//a[contains(@href,'index.php?cmd=profile&component_page=')]");
-		if (compPage) 
+		if (compPage)
 			Helper.compPage = compPage.length;
-		else 
+		else
 			Helper.compPage = 0;
 		document.getElementById('compSum').innerHTML='Retrieve page: ';
 		Helper.componentList={};
 		System.xmlhttp("index.php?cmd=profile&component_page=0", Helper.retriveComponent, 0);
 	},
-	
+
 	retriveComponent: function(responseText, currentPage) {
 		var nextPage=currentPage+1;
 		document.getElementById('compSum').innerHTML+=nextPage+', ';
@@ -4721,7 +4724,7 @@ var Helper = {
 			document.getElementById('compSum').innerHTML=output;
 		}
 	},
-	
+
 	countAllyEnemy: function() {
 		var alliesTotal = GM_getValue("alliestotal");
 		var alliesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/allies_head.jpg')]");;
@@ -4781,7 +4784,7 @@ var Helper = {
 		GM_setValue("listOfAllies", listOfAllies);
 		GM_setValue("listOfEnemies", listOfEnemies);
 	},
-	
+
 	bioCompress: function() {
 		var bioCell = System.findNode("//td[contains(@background, '/inventory/biography_head.jpg')]/../following-sibling::tr[1]/td/table/tbody/tr/td[2]");
 		if (bioCell) { //non-self profile
@@ -4847,7 +4850,7 @@ var Helper = {
 			Helper.equipProfileInventoryItemReturnMessage,
 			{"item": InventoryItemID, "target": evt.target});
 	},
-	
+
 	selectAllProfileInventoryItem: function(evt) {
 		var imgID=evt.target.getAttribute("itemID");
 		var nodes = System.findNodes("//td/center/a/img[contains(@src,'/"+imgID+".gif')]");
@@ -4861,7 +4864,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	useProfileInventoryItem: function(evt) {
 		if (!window.confirm("Are you sure you want to use/extract the item?")) return;
 		var InventoryItemID=evt.target.getAttribute("itemID");
@@ -4950,7 +4953,7 @@ var Helper = {
 		Helper.generateInventoryTable("self");
 		Helper.makeInvFilterEvent();
 	},
-	
+
 	makeInvFilterTemplate: function(guildItemCount) {
 		var newhtml='<table width=100%><tr><td><b>Show Items:</b></td>' +
 			'<td><table><tr><td>&nbsp;Only Useable:<input id="showUseableItems" type="checkbox" linkto="showUseableItems"' +
@@ -5354,7 +5357,7 @@ var Helper = {
 					else
 						item.class = "";
 				}
-			} else 
+			} else
 				item.class = "";
 
 			var attackNode=System.findNode("//tr/td[.='Attack:']/../td[2]", doc);
@@ -5391,13 +5394,13 @@ var Helper = {
 				craft = fontLineRX[3];
 			}
 			item.craftlevel=craft;
-			
+
 			var Locked = "";
 			if (responseText.search(/Faction Locked:/) != -1){
 				Locked = "Yes";
 			}
 			item.factionLocked=Locked;
-		
+
 		}
 
 		if (callback.invIndex<targetInventory.items.length-1) {
@@ -5475,7 +5478,7 @@ var Helper = {
 				default: color = "#84ADAC";
 			}
 
-			
+
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + '<img src="' + System.imageServer + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
 				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>'+
@@ -5558,7 +5561,7 @@ var Helper = {
 			'<div style="font-size:small" id=Helper:RecipeManagerOutput></div>';
 		if (!Helper.recipebook) Helper.parseInventingStart();
 		document.getElementById("Helper:RecipeManagerRefresh").addEventListener('click', Helper.parseInventingStart, true);
-		document.getElementById("Helper:RecipeManagerReset").addEventListener('click', 
+		document.getElementById("Helper:RecipeManagerReset").addEventListener('click',
 			function() {
 				GM_setValue("recipebook",'');
 				window.location=window.location;
@@ -5606,7 +5609,7 @@ var Helper = {
 				if (!Helper.recipeHash[recipeId]) {
 					Helper.recipebook.recipe.push(recipe);
 					output+="<br/>";
-				} else 
+				} else
 					output+=" already known<br/>";
 			}
 		}
@@ -5624,10 +5627,10 @@ var Helper = {
 			Helper.checkRecipePage(0);
 		}
 	},
-	
+
 	checkRecipePage: function(recipeId){
 		while (recipeId<Helper.recipebook.recipe.length && Helper.recipeHash[Helper.recipebook.recipe[recipeId].id]) recipeId++;
-		if (recipeId>=Helper.recipebook.recipe.length) 
+		if (recipeId>=Helper.recipebook.recipe.length)
 			Helper.finishParseRecipePage();
 		else
 			System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' + Helper.recipebook.recipe[recipeId].id, Helper.parseRecipePage, {"recipeIndex": recipeId});
@@ -5659,7 +5662,7 @@ var Helper = {
 		var currentRecipeIndex = callback.recipeIndex;
 		var recipe = Helper.recipebook.recipe[currentRecipeIndex];
 
-		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>'; 
+		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
 
 		recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
 		recipe.items = Helper.parseRecipeItemOrComponent("//tbody/tr[10]//td[contains(@style,'background-color: rgb(13, 9, 5);')]", doc);
@@ -5670,10 +5673,10 @@ var Helper = {
 		if (nextRecipeIndex<Helper.recipebook.recipe.length) {
 			var nextRecipe = Helper.recipebook.recipe[nextRecipeIndex];
 			Helper.checkRecipePage(nextRecipeIndex);
-		} else 
+		} else
 			Helper.finishParseRecipePage();
 	},
-	
+
 	finishParseRecipePage: function(){
 		document.getElementById('Helper:RecipeManagerOutput').innerHTML+='Finished parsing ... formatting ...';
 		Helper.recipebook.lastUpdate = new Date();
@@ -5696,7 +5699,7 @@ var Helper = {
 			useType: false,
 			useTable: false
 		}
-		
+
 		if (!Helper.recipebook) return;
 
 		var hideRecipes=[];
@@ -5712,7 +5715,7 @@ var Helper = {
 		if (filterRecipe.useType) {
 			showRecipes = showRecipes.filter(function (e,i,a) {return filterRecipe.types.indexOf(e.type) >= 0});
 		}
-		
+
 		if (filterRecipe.useName) {
 			showRecipes = showRecipes.filter(function (e,i,a) {return e.name.toLowerCase().match(filterRecipe.nameFilter)});
 		}
@@ -5733,13 +5736,13 @@ var Helper = {
 		result+='</td></tr><tr><th>Display Mode:</th><td nowrap colspan=2>Use table mode <input type=checkbox size=1 id="Helper:UseTableMode" value=yes'+(filterRecipe.useTable?' checked':'')+'></td>' +
 			'</td></tr>'+
 			'<tr><td colspan=3 align=center><input type=button class=custombutton id="Helper:AllFilterOk" value="Update Filter"></td></table>';
-		
+
 		if (filterRecipe.useTable) {
 			result+=Helper.generateRecipeTableByComponent(showRecipes);
 		} else {
 			result+=Helper.generateRecipeTableByRecipe(showRecipes);
 		}
-			
+
 		output.innerHTML=result;
 
 		document.getElementById('Helper:AllFilterOk').addEventListener('click', Helper.filterRecipeOk, true);
@@ -5754,8 +5757,8 @@ var Helper = {
 				cell.addEventListener('click', Helper.sortRecipeTable, true);
 			}
 		}
-		
-		
+
+
 		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]");
 		if (items)
 			for (var i=0; i<items.length; i++) {
@@ -5763,14 +5766,14 @@ var Helper = {
 				items[i].style.cursor='pointer';
 			}
 	},
-	
+
 	findMissingBPrint: function() {
 		var setName=document.getElementById('Helper:NameFilter').value;
 		if (setName.length<3) {
 			alert('Please enter set name to find missing blueprints');
 			return;
 		}
-		
+
 		var minId=10000,maxId=0;
 		Helper.recipebook = System.getValueJSON("recipebook");
 		var showRecipes = Helper.recipebook.recipe.filter(function (e,i,a) {return e.name.toLowerCase().match(setName)});
@@ -5787,7 +5790,7 @@ var Helper = {
 		for (var i=0;i<Helper.recipebook.recipe.length;i++){
 			Helper.recipeHash[Helper.recipebook.recipe[i].id]=i;
 		}
-		
+
 		for (var recipeId=minId; recipeId<=maxId; recipeId++) {
 			GM_log(Helper.recipeHash[recipeId]);
 			if (! Helper.recipeHash[recipeId]) {
@@ -5802,11 +5805,11 @@ var Helper = {
 		}
 		Helper.checkRecipePage(1);
 	},
-	
+
 	generateRecipeTableByComponent: function(showRecipes) {
 		var c=0, i, j;
 		var n=showRecipes.length>50?50:showRecipes.length;
-		
+
 		// get all components in the list
 		var compHeaderId=[];
 		var compHeaderSum=[];
@@ -5887,7 +5890,7 @@ var Helper = {
 		result+='</tr></table>';
 		return result;
 	},
-	
+
 	generateRecipeTableByRecipe: function(showRecipes) {
 		var c=0;
 		var result='<table id="Helper:RecipeTable"><tr>' +
@@ -6111,7 +6114,7 @@ var Helper = {
 					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
 					if (aMember.name==foundName) {
 						var listOfDefenders = allItems[i].cells[1].textContent;
-						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) + 
+						theItem.innerHTML = ((aMember.status == "Online")?onlineIMG:offlineIMG) +
 							//"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + foundName + "'>" +
 							//direct call to player_id is faster link - server doesn't have to do a search.
 							"&nbsp;<span style='font-size:small;'><a href='index.php?cmd=profile&player_id=" + aMember.id + "'>" +
@@ -6124,7 +6127,7 @@ var Helper = {
 					}
 				}
 			}
-			
+
 			var theMembersCell=allItems[i].cells[1];
 			if (theMembersCell.textContent != "[none]") {
 				var theMembersArray=theMembersCell.innerHTML.split(",");
@@ -6273,10 +6276,10 @@ var Helper = {
 			System.xmlhttp("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, Helper.getPlayerBuffs, false)
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain)
-		
+
 		var buffList = Data.buffList();
 		var skillNodes = System.findNodes("//input[@name='skills[]']");
-		
+
 		if (skillNodes) {
 			for (var i = 0; i < skillNodes.length; i++ ) {
 				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\s+([A-Z].*) \[/)[1];
@@ -6306,7 +6309,7 @@ var Helper = {
 			staminaTotal.innerHTML = ((staminaTotal.textContent*1) + (evt.target.getAttribute("staminaCost")*1));
 		}
 	},
-	
+
 	injectBuffPackArea: function() {
 		Helper.injectBuffPackList();
 		Helper.injectBuffPackAddButton();
@@ -6492,7 +6495,7 @@ var Helper = {
 			}
 		}
 		theBuffPack["staminaTotal"][theBuffPack["size"]] = "<span style='color:blue;'>(" + staminaTotal + ")</span>";
-		
+
 		//increase the size of the array
 		theBuffPack["size"] += 1;
 
@@ -6585,7 +6588,7 @@ var Helper = {
 
 	injectCreature: function() {
 		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData);
-		
+
 		var creatureName = System.findNode('//td/font[@size=3]/b/center');
 		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
@@ -6598,7 +6601,7 @@ var Helper = {
 			document.getElementById('addRemoveCreatureToDoNotKillList').addEventListener('click', Helper.addRemoveCreatureToDoNotKillList, true);
 		}
 	},
-	
+
 	addRemoveCreatureToDoNotKillList: function(evt) {
 		creatureName = evt.target.getAttribute('creatureName');
 		var doNotKillList = GM_getValue("doNotKillList");
@@ -6907,7 +6910,7 @@ var Helper = {
 		var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
 		GM_setValue("maxAuctions",maxAuctionsValue+2);
 	},
-	
+
 	injectRelicList: function(){
 		var relics = Data.relicList();
 		var relicImages = System.findNodes("//img[contains(@src,'/relics/')]");
@@ -6931,7 +6934,7 @@ var Helper = {
 			if (!relicFound) GM_log("Relic:'" + relicName + "' not found in data set");
 		}
 	},
-	
+
 	tpBodyOnLoad: function() {
 		Helper.tabPanelArray = new Array(5);
 		Helper.tabMenuArray = new Array(5);
@@ -6944,7 +6947,7 @@ var Helper = {
 		}
 		Helper.raisePanel(Helper.currentMenuIndex);
 	},
-	
+
 	raisePanel: function(evt){
 		if (evt==0) panelIndex=0; else panelIndex=evt.target.getAttribute('menuIndex');
 		for (var i=0; i<Helper.tabPanelArray.length; i++ ) {
@@ -6958,7 +6961,7 @@ var Helper = {
 		}
 		Helper.currentMenuIndex=panelIndex;
 	},
-	
+
 	raiseObject: function(target, level) {
 		var safeMargin = 6;
 		var obj = document.getElementById('tabFiller');
@@ -6987,7 +6990,7 @@ var Helper = {
 		var buffs=GM_getValue("huntingBuffs");
 		var doNotKillList=GM_getValue("doNotKillList");
 		var minPS=System.getValueJSON("minPSStats");
-		
+
 		// create tab panels
 		GM_addStyle('.tabFrame {position:relative;}\n'+
 			'.tabMenuDiv {position:relative;z-index:4;}\n'+
@@ -7015,7 +7018,7 @@ var Helper = {
 			Helper.helpTDwithCB('Hide <small>TaulinRadLands</small> Portal','This will hide the Taulin Rad Lands portal on the world screen.',
 				'hideKrulPortal')+
 			Helper.helpTDwithHTML('Footprints Color','','','<input name="footprintsColor" size="9" value="'+ GM_getValue("footprintsColor") + '" />')+
-			Helper.helpTDwithHTML('Reset Footprints', 'Resets the footprints variable.', '', 
+			Helper.helpTDwithHTML('Reset Footprints', 'Resets the footprints variable.', '',
 				'Current Size: ' + (!GM_getValue("map") ? 'N/A' : GM_getValue("map").length + ' <input type="button" class="custombutton" value="Reset" id="Helper:ResetFootprints">'))+
 			Helper.helpTDwithCB('Show Send Credits','This will show an icon below the world map to allow you to quickly send credits to a Friend.',
 				'sendGoldonWorld','',
@@ -7094,7 +7097,7 @@ var Helper = {
 			Helper.helpTDwithCB('Navigate After Message Sent','If enabled, will try to navigate to the referring page after a successful message is sent.',
 				'navigateToLogAfterMsg')+
 			'</table>';
-			
+
 		var configData='<form>'+
 			'<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
@@ -7137,7 +7140,7 @@ var Helper = {
 		newCell.colSpan=3;
 		newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
-		
+
 		Helper.tpBodyOnLoad();
 		Helper.enableCBButton();
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
@@ -7164,7 +7167,7 @@ var Helper = {
 			GM_setValue("minGroupLevel",minGroupLevel);
 		}
 	},
-	
+
 	resetFootprints: function(evt) {
 		if (window.confirm("Are you sure you want to reset your footprints?")) {
 			var theMap = System.getValueJSON("map");
@@ -7175,7 +7178,7 @@ var Helper = {
 			}
 			window.location.reload();
 		}
-	}, 
+	},
 
 	helpLink: function(title, text) {
 		return ' [ ' +
@@ -7265,7 +7268,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
 		System.saveValueForm(oForm, "huntingMode");
-		
+
 		var minPSstatNames=['atk','def','arm','dmg','cHP','mHP','skill'];
 		var minPS={};
 		for (var i=0; i<minPSstatNames.length; i++){
@@ -7274,7 +7277,7 @@ var Helper = {
 			minPS[name]=formElement.value;
 		}
 		GM_setValue('minPSStats', JSON.stringify(minPS));
-		
+
 		System.saveValueForm(oForm, "enableAllyOnlineList");
 		System.saveValueForm(oForm, "enableEnemyOnlineList");
 		System.saveValueForm(oForm, "allyEnemyOnlineRefreshTime");
@@ -7399,7 +7402,7 @@ var Helper = {
 		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
 		GM_setValue("miniMapSource", doc);
 	},
-	
+
 	addMiniMapExtras: function(miniMap) {
 		Helper.markPlayerOnMiniMap();
 		Helper.toogleMiniMapPOI();
@@ -7412,30 +7415,30 @@ var Helper = {
 		Helper.miniMapTableEvents();
 		miniMap.style.display = "";
 	},
-	
+
 	miniMapTableEvents: function(){
 		Helper.mouse = 0;
 		Helper.moveList=[Helper.position()];
 		document.getElementById('miniMap').addEventListener("mouseup", function(e){Helper.mouse = 0},false);
-		// collect table cells from the drawing_table div element  
-		var td = document.getElementById('miniMap').getElementsByTagName('td');  
-		// attach onMouseDown and onMouseOver event for collected table cells  
+		// collect table cells from the drawing_table div element
+		var td = document.getElementById('miniMap').getElementsByTagName('td');
+		// attach onMouseDown and onMouseOver event for collected table cells
 		for (var i=0; i<td.length; i++){
 			td[i].addEventListener("mousedown", Helper.mousedown, true);
-			// colorize table cell if left mouse button is pressed  
+			// colorize table cell if left mouse button is pressed
 			td[i].addEventListener("mouseover", function (e){if (Helper.mouse == 1) Helper.markPos(this);}, true);
-		}  
+		}
 	},
-	
-	mousedown: function (evt){  
-		// needed for FF to disable dragging 
+
+	mousedown: function (evt){
+		// needed for FF to disable dragging
 		evt.preventDefault();
-		// set pressed mouse button 
+		// set pressed mouse button
 		Helper.mouse = evt.which;
 		// colorize pixel on mousedown event for TD element
 		if (this.tagName == 'TD' && Helper.mouse == 1) Helper.markPos(this);
 	},
-	
+
 	markPos: function(td) {
 		var pos={'X':td.cellIndex,'Y':td.parentNode.rowIndex};
 		if (!Helper.moveList[0]) return;
@@ -7447,13 +7450,13 @@ var Helper = {
 			td.style.backgroundColor = "red";
 		}
 	},
-	
+
 	autoMoveMiniMap: function() {
 		if (Helper.moveList && Helper.moveList.length > 1)
 			System.xmlhttp("index.php?cmd=world&subcmd=move&x="+Helper.moveList[1].X+"&y="+Helper.moveList[1].Y,
 				Helper.autoMoveNext, 1);
 	},
-	
+
 	autoMoveNext: function(responseText, id) {
 		var currentPos = "("+Helper.moveList[id].X+",\n\t\t\t\t\t\t\t\t\t\t"+Helper.moveList[id].Y+")";
 		if (responseText.indexOf(currentPos)<0) {
@@ -7471,7 +7474,7 @@ var Helper = {
 				window.location = window.location;
 		}
 	},
-	
+
 	toogleMiniMapPOI: function() {
 		var miniMap = document.getElementById("miniMap");
 		var miniMapTable = document.getElementById("miniMapTable");
@@ -7497,7 +7500,7 @@ var Helper = {
 		if (!nodes) return;
 		for (var i=0; i<nodes.length; i++) {
 			var tip=nodes[i].getAttribute("onmouseover");
-			var color=tip.indexOf(': ') > 0 ? 'red' : 
+			var color=tip.indexOf(': ') > 0 ? 'red' :
 				tip.indexOf("Tip('Stairway to ") > 0 ? 'green' : 'blue';
 			nodes[i].innerHTML = '';
 			nodes[i].style.backgroundColor = color;
@@ -7509,7 +7512,7 @@ var Helper = {
 		if (!posit) {return;}
 		Helper.markPosOnMiniMap(posit);
 	},
-	
+
 	markPosOnMiniMap: function(posit) {
 		var miniMapTable = document.getElementById("miniMapTable");
 		if (!miniMapTable) return;
@@ -7524,7 +7527,7 @@ var Helper = {
 		GM_addStyle('.HelperTextLink {color:#84ADAC;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
-		
+
 		// global parameters for the meta function generateManageTable
 		Helper.param={};
 		Helper.param={'id':'quickLinkAreaId',
@@ -7695,14 +7698,14 @@ var Helper = {
 		auctionCurrency.selectedIndex = newAuctionCurrency;
 		auctionMinBid.value = newAuctionMinBid;
 		auctionBuyNow.value = newAuctionBuyNow;
-		
+
 		var enableBulkSell = GM_getValue("enableBulkSell");
 		if (enableBulkSell) {
 			var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
 			var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
 			var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
 			var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
-			
+
 			bulkSellAuctionLength.selectedIndex = newAuctionLength;
 			bulkSellAuctionCurrency.selectedIndex = newAuctionCurrency;
 			bulkSellAuctionMinBid.value = newAuctionMinBid;
@@ -7739,7 +7742,7 @@ var Helper = {
 
 	injectMessageTemplate: function() {
 		if (GM_getValue("navigateToLogAfterMsg") == true) {
-		
+
 			if (document.referrer.indexOf("?cmd=message") == -1) {
 				GM_setValue("msgReferringPage", document.referrer);
 			}
@@ -7763,7 +7766,7 @@ var Helper = {
 			var tableForInsert = System.findNode("//table[tbody/tr/td/input[@value='Send Message']]");
 			var newRow = tableForInsert.insertRow(2);
 			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
-			newRow.innerHTML = '<td>Replying To[<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg + 
+			newRow.innerHTML = '<td>Replying To[<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]:</td><td width="90%">' + msg +
 			'</td>';
 		}
 
@@ -7790,7 +7793,7 @@ var Helper = {
 		for (var i = 0; i < table.length; i++) {
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
 		}
-		
+
 		Helper.param={};
 		Helper.param={'id':'quickMsgTemplAreaId',
 			'headers':["Quick Message",],
@@ -7838,17 +7841,17 @@ var Helper = {
 		if (count % 2 == 1) result += "<td></td></tr>";
 		result += "</table>";
 		body.innerHTML = result;
-		
+
 		var buttons=System.findNodes("//input[@class='custombutton']");
 		for (var i=0; i<buttons.length; i++){
 			buttons[i].addEventListener("click", Helper.selfBuffClassSkill, true);
 		}
 	},
-	
+
 	selfBuffClassSkill: function(evt) {
 		var skillId = parseInt(evt.target.getAttribute("skillId"));
-		
-		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=" + skillId, 
+
+		System.xmlhttp("index.php?cmd=skills&subcmd=cast&skill_id=" + skillId,
 				function(responseText) {
 					var info = Layout.infoBox(responseText);
 					evt.target.parentNode.innerHTML = info;
@@ -7961,7 +7964,7 @@ var Helper = {
 				.addEventListener('click', Helper.recallAllMailbox, true);
 		}
 	},
-	
+
 	recallAllMailbox: function(evt) {
 		var mailItems = System.findNodes("//span[contains(@id,'Helper:recallMailboxItem')]");
 		for (var i = 0; i < mailItems.length; i++) {
@@ -8041,10 +8044,10 @@ var Helper = {
 			target.innerHTML = "Error:" + info;
 		}
 	},
-	
+
 	injectPoints: function() {
 		Helper.currentFSP = System.findNode("//td[@width=108 and //table[@height=150]]").textContent.replace(/,/g,"")*1;
-		
+
 		var stamForFSPElement = System.findNode("//td[@width='40%' and contains(.,'+25 Current Energy')]/../td[4]");
 		var stamForFSPInjectHere = System.findNode("//td[@width='40%' and contains(.,'+25 Current Energy')]");
 		var stamFSPTextField = System.findNode("table/tbody/tr/td/input[@name='quantity']", stamForFSPElement);
@@ -8058,11 +8061,11 @@ var Helper = {
 		stamFSPTextField.type='maximum';
 		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
 		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="maximum"><span>';
-		
+
 		var goldForFSPElement = System.findNode("//td[@width='40%' and contains(.,'+1,000')]/../td[4]");
 		goldForFSPElement.innerHTML = '<a href="' + System.server + '?cmd=marketplace">Sell at Crystal Market</a>';
 	},
-	
+
 	updateStamCount: function(evt) {
 		var FSPvalue = evt.target.value*1;
 		var type = evt.target.getAttribute("type");
@@ -8077,14 +8080,14 @@ var Helper = {
 		injectHere.style.color = color;
 		if (extraStam > 0)
 			injectHere.innerHTML = '(+' + extraStam + ' stamina)';
-		else 
+		else
 			injectHere.innerHTML = '';
 	},
-	
+
 	injectTitan: function() {
 		System.xmlhttp("index.php?cmd=guild&subcmd=dopplerarray", Helper.getScoutTowerDetails);
 	},
-	
+
 	getScoutTowerDetails: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var scoutTowerTable = System.findNode("//table[tbody/tr/td[contains(.,'Behemoth HP') and @width='25%']]", doc);
@@ -8097,7 +8100,7 @@ var Helper = {
 				scoutTowerTable.innerHTML+'</table>';
 		}
 	},
-	
+
 	injectQuestTracker: function() {
 		var injectHere = System.findNode("//tbody[tr/td[contains(@background,'skin/header_missiondetails.jpg')]]/tr[3]/td");
 		if (injectHere) {
@@ -8105,14 +8108,14 @@ var Helper = {
 			questName = questName.match(/"(.*)"/);
 			if (questName && questName.length > 1) {
 				questName = questName[1];
-				injectHere.innerHTML += '&nbsp;<a href="http://sigmastorm2.wikia.com/wiki/' + questName.replace(/ /g,'_') + 
+				injectHere.innerHTML += '&nbsp;<a href="http://sigmastorm2.wikia.com/wiki/' + questName.replace(/ /g,'_') +
 						'" target="_blank"><img border=0 title="Search for this quest on the Unofficial Sigmastorm 2 Wiki. '+
 						'Please note this is an external site." src=' + System.imageServer + '/skin/wiki.gif /></a>';
 			}
-			
+
 		}
 	},
-	
+
 	injectSaveConfig: function() {
 		var injectHere=Layout.notebookContent();
 		Helper.defaultLabels='auctionTemplate, chatTopToBottom, doNotKillList, enableBioCompressor, enableCreatureColoring, '+
@@ -8145,7 +8148,7 @@ var Helper = {
 		document.getElementById('saveSettings').addEventListener('click',Helper.saveNewSettings,true);
 		document.getElementById('extractLabels').addEventListener('click',Helper.extractLabelsFromSettings,true);
 	},
-	
+
 	loadCurrentSettings: function() {
 		var saveObj={'config':{},'checksum':0};
 		var labelStr=document.getElementById('stlabels').value;
@@ -8160,7 +8163,7 @@ var Helper = {
 		saveObj.checksum=Helper.crc32(JSON.stringify(saveObj.config));
 		document.getElementById('stcontents').value=JSON.stringify(saveObj);
 	},
-	
+
 	saveNewSettings: function() {
 		var saveObj = document.getElementById("stcontents").value;
 		try { JSON.parse(saveObj); }
@@ -8189,7 +8192,7 @@ var Helper = {
 			alert("New settings with given labels imported");
 		}
 	},
-	
+
 	crc32: function(str) {
 		var table = "00000000 77073096 EE0E612C 990951BA 076DC419 706AF48F E963A535 9E6495A3 0EDB8832 79DCB8A4 E0D5E91E 97D2D988 09B64C2B 7EB17CBD E7B82D07 90BF1D91 1DB71064 6AB020F2 F3B97148 84BE41DE 1ADAD47D 6DDDE4EB F4D4B551 83D385C7 136C9856 646BA8C0 FD62F97A 8A65C9EC 14015C4F 63066CD9 FA0F3D63 8D080DF5 3B6E20C8 4C69105E D56041E4 A2677172 3C03E4D1 4B04D447 D20D85FD A50AB56B 35B5A8FA 42B2986C DBBBC9D6 ACBCF940 32D86CE3 45DF5C75 DCD60DCF ABD13D59 26D930AC 51DE003A C8D75180 BFD06116 21B4F4B5 56B3C423 CFBA9599 B8BDA50F 2802B89E 5F058808 C60CD9B2 B10BE924 2F6F7C87 58684C11 C1611DAB B6662D3D 76DC4190 01DB7106 98D220BC EFD5102A 71B18589 06B6B51F 9FBFE4A5 E8B8D433 7807C9A2 0F00F934 9609A88E E10E9818 7F6A0DBB 086D3D2D 91646C97 E6635C01 6B6B51F4 1C6C6162 856530D8 F262004E 6C0695ED 1B01A57B 8208F4C1 F50FC457 65B0D9C6 12B7E950 8BBEB8EA FCB9887C 62DD1DDF 15DA2D49 8CD37CF3 FBD44C65 4DB26158 3AB551CE A3BC0074 D4BB30E2 4ADFA541 3DD895D7 A4D1C46D D3D6F4FB 4369E96A 346ED9FC AD678846 DA60B8D0 44042D73 33031DE5 AA0A4C5F DD0D7CC9 5005713C 270241AA BE0B1010 C90C2086 5768B525 206F85B3 B966D409 CE61E49F 5EDEF90E 29D9C998 B0D09822 C7D7A8B4 59B33D17 2EB40D81 B7BD5C3B C0BA6CAD EDB88320 9ABFB3B6 03B6E20C 74B1D29A EAD54739 9DD277AF 04DB2615 73DC1683 E3630B12 94643B84 0D6D6A3E 7A6A5AA8 E40ECF0B 9309FF9D 0A00AE27 7D079EB1 F00F9344 8708A3D2 1E01F268 6906C2FE F762575D 806567CB 196C3671 6E6B06E7 FED41B76 89D32BE0 10DA7A5A 67DD4ACC F9B9DF6F 8EBEEFF9 17B7BE43 60B08ED5 D6D6A3E8 A1D1937E 38D8C2C4 4FDFF252 D1BB67F1 A6BC5767 3FB506DD 48B2364B D80D2BDA AF0A1B4C 36034AF6 41047A60 DF60EFC3 A867DF55 316E8EEF 4669BE79 CB61B38C BC66831A 256FD2A0 5268E236 CC0C7795 BB0B4703 220216B9 5505262F C5BA3BBE B2BD0B28 2BB45A92 5CB36A04 C2D7FFA7 B5D0CF31 2CD99E8B 5BDEAE1D 9B64C2B0 EC63F226 756AA39C 026D930A 9C0906A9 EB0E363F 72076785 05005713 95BF4A82 E2B87A14 7BB12BAE 0CB61B38 92D28E9B E5D5BE0D 7CDCEFB7 0BDBDF21 86D3D2D4 F1D4E242 68DDB3F8 1FDA836E 81BE16CD F6B9265B 6FB077E1 18B74777 88085AE6 FF0F6A70 66063BCA 11010B5C 8F659EFF F862AE69 616BFFD3 166CCF45 A00AE278 D70DD2EE 4E048354 3903B3C2 A7672661 D06016F7 4969474D 3E6E77DB AED16A4A D9D65ADC 40DF0B66 37D83BF0 A9BCAE53 DEBB9EC5 47B2CF7F 30B5FFE9 BDBDF21C CABAC28A 53B39330 24B4A3A6 BAD03605 CDD70693 54DE5729 23D967BF B3667A2E C4614AB8 5D681B02 2A6F2B94 B40BBE37 C30C8EA1 5A05DF1B 2D02EF8D";
 		crc=0;
@@ -8203,7 +8206,7 @@ var Helper = {
 		}
 		return crc ^ (-1);
 	},
-	
+
 	extractLabelsFromSettings: function() {
 		var saveObj = document.getElementById("stcontents").value;
 		try { JSON.parse(saveObj); }
@@ -8218,7 +8221,7 @@ var Helper = {
 		}
 		document.getElementById('stlabels').value=output.replace(/, $/,'');
 	},
-	
+
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
 			if (!Helper.rightSideBar) return;
@@ -8252,18 +8255,18 @@ var Helper = {
 		var alliesTable = alliesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
 		var enemiesParent = System.findNode("//td[contains(@background, 'sigma2/inventory/enemies_head.jpg')]",doc);
 		var enemiesTable = enemiesParent.parentNode.nextSibling.nextSibling.nextSibling.nextSibling;
-		
+
 		var contactList = System.getValueJSON("contactList");
 		if (!contactList) {
 			contactList = {};
 			contactList.contacts = [];
 		}
 		contactList.contacts.forEach(function(e) {e.status="Deleted"});
-		
+
 		if (alliesTable && enemiesTable) {
 			Helper.processAllyEnemyTable(contactList,alliesTable,"Ally");
 			Helper.processAllyEnemyTable(contactList,enemiesTable,"Enemy");
-			
+
 			// remove not existing players
 			contactList.contacts = contactList.contacts.filter(function(e) {return e.status!="Deleted"});
 			// damn, I love javascript array functions :)
@@ -8274,7 +8277,7 @@ var Helper = {
 			if (!refreshAllyEnemyDataOnly) Helper.injectAllyEnemyList(contactList);
 		}
 	},
-	
+
 	processAllyEnemyTable: function(contactList,table, lable) {
 		var enemiesDetails=System.findNodes('//table[@cellpadding=1]',System.createDocument(table.innerHTML));
 		if (!enemiesDetails) return;
@@ -8315,7 +8318,7 @@ var Helper = {
 			aContact.type   = lable;
 		}
 	},
-	
+
 	injectAllyEnemyList: function(contactList) {
 		enableAllyOnlineList = GM_getValue("enableAllyOnlineList");
 		enableEnemyOnlineList = GM_getValue("enableEnemyOnlineList");
@@ -8376,19 +8379,19 @@ var Helper = {
 		var breaker=document.createElement("BR");
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetAllyEnemyList').addEventListener('click', Helper.resetAllyEnemyList, true);		
+		document.getElementById('Helper:resetAllyEnemyList').addEventListener('click', Helper.resetAllyEnemyList, true);
 	},
 
 	resetAllyEnemyList: function(evt) {
 		GM_setValue("contactList","");
 		window.location = window.location;
 	},
-	
+
 	injectCreateAuctionBulkSell: function() {
 		if (window.location.search.search("inv_id") == -1) return;
 		var enableBulkSell = GM_getValue("enableBulkSell");
 		if (!enableBulkSell) return;
-		
+
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		if (!auctionTable) return;
 
@@ -8396,7 +8399,7 @@ var Helper = {
 		var newCell = newRow.insertCell(0);
 		newCell = newRow.insertCell(0);
 		newCell.colSpan = 2;
-		newCell.align = "center";		
+		newCell.align = "center";
 
 		var textResult = "<table cellspacing='0' cellpadding='0'" +
 				" border='0' align='center' width='550'>" +
@@ -8417,23 +8420,23 @@ var Helper = {
 					"id='Helper:bulkListAll'>bulk list all</span>]</td></tr>";
 
 		textResult += "</table></td></tr>";
-		
+
 		textResult += "<tr><td align='center'><table id='Helper:CreateAuctionBulkSellTable' cellspacing='10' cellpadding='0' border='0' width='100%'";
-		
+
 		textResult += "</table></td></tr>";
-		
+
 		textResult += "</table>";
 
 		newCell.innerHTML = textResult;
-		
+
 		var itemStats = /inv_id=(\d+)&.*&imgid=([0-9a-z]+)&/.exec(window.location.search);
 		var invID = itemStats[1];
 		var itemID = itemStats[2];
-		
-		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID}); 
-		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);		
+
+		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID});
+		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);
 	},
-	
+
 	processAuctionBulkSellItems: function(responseText, callback) {
 		var originalItemID = callback.itemID;
 		var originalInvID = callback.invID;
@@ -8442,10 +8445,10 @@ var Helper = {
 
 		var doc=System.createDocument(responseText);
 		var bulkAuctionItemIMGs = System.findNodes("//img[@src='"+System.imageServer+"/items/"+originalItemID+".gif']", doc);
-		if (!bulkAuctionItemIMGs) return; 
+		if (!bulkAuctionItemIMGs) return;
 		var maxAuctions = GM_getValue("maxAuctions");
 		if (!maxAuctions) maxAuctions = 2;
-		
+
 		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
 			var bulkItemIMG = bulkAuctionItemIMGs[i];
 			var bulkItemMouseover = bulkItemIMG.getAttribute("onmouseover");
@@ -8472,7 +8475,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	bulkListAll: function() {
 		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
 		var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
@@ -8483,7 +8486,7 @@ var Helper = {
 		for (var i=0;i<potentialAuctions.length;i++) {
 			var potentialAuction = potentialAuctions[i];
 			var invID = /Helper:bulkListSingle(\d+)/.exec(potentialAuction.getAttribute("id"))[1];
-			var bulkSellHref = "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + invID + 
+			var bulkSellHref = "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + invID +
 				"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
 				"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
 			System.xmlhttp(bulkSellHref,
@@ -8491,7 +8494,7 @@ var Helper = {
 				{"target": potentialAuction});
 		}
 	},
-	
+
 	bulkListSingle: function(evt) {
 		var itemInvId = evt.target.getAttribute("itemInvId");
 		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
@@ -8499,21 +8502,21 @@ var Helper = {
 		var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
 		var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
 
-		var bulkSellHref = "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + itemInvId + 
+		var bulkSellHref = "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + itemInvId +
 			"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
 			"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
 		System.xmlhttp(bulkSellHref,
 			Helper.bulkListSingleReturnMessage,
 			{"target": evt.target});
 	},
-	
+
 	bulkListSingleReturnMessage: function(responseText, callback) {
 		var target = callback.target;
 		var info=Layout.infoBox(responseText);
 		target.innerHTML = info;
 		target.style.color=(info.search("Auction placed successfully!") != -1)?"green":"red";
 		target.style.cursor='';
-		target.removeEventListener('click', Helper.bulkListSingle, true);		
+		target.removeEventListener('click', Helper.bulkListSingle, true);
 	},
 
 	toggleCheckAllItems: function(evt) {
@@ -8533,14 +8536,14 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	toggleCheckAllPlants: function(evt) {
 		var plantRE = new RegExp(evt.target.getAttribute("plantRE"));
 		var allItems = System.findNodes("//input[@type='checkbox']");
 		if (allItems) {
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
-				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")), 
+				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")),
 					function (responseText, callBack) {
 						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
 						if (plantRE.exec(responseText)) {
@@ -8555,7 +8558,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	injectStandardTrade: function() {
 		var mainTable = System.findNodes("//table[@width='450']");
 		if (mainTable[2]) {
@@ -8585,7 +8588,7 @@ var Helper = {
 			Helper.makeSelectAllInTrade(newCellAll);
 		}
 	},
-	
+
 	makeSelectAllInTrade: function(injectHere) {
 		var itemList=[[" Stim<", "Stim"], [">Ammo<", "Ammo"], [">Resource<", "Resource"]];
 		var output = 'Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
@@ -8602,7 +8605,7 @@ var Helper = {
 		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
 		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getFolderName2Trade, true);
 	},
-	
+
 	getFolderName2Trade: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var otherFolders = System.findNodes("//td/center/a/img[@src='"+System.imageServer+"/folder.gif']",doc);
@@ -8620,10 +8623,10 @@ var Helper = {
 			document.getElementById("Folder"+i).addEventListener('click', Helper.getFolderContent2Trade, true);
 		}
 	},
-	
+
 	getFolderContent2Trade: function(evt) {
 		var fid=evt.target.getAttribute('fid');
-		if (fid==-2) 
+		if (fid==-2)
 			window.location.reload();
 		else
 			System.xmlhttp('index.php?cmd=profile&subcmd=dropitems&folder_id='+fid, function(responseText) {
@@ -8645,7 +8648,7 @@ var Helper = {
 				table.innerHTML = newHtml;
 			});
 	},
-    
+
     tryToLoadAmmo: function(responseText) {
         var info = Layout.infoBox(responseText);
         if (info.indexOf("successfully")>0 || info.indexOf("already at maximum ammo")>0 ) {
@@ -8664,7 +8667,7 @@ var Helper = {
             return;
         }
     },
-    
+
     findAmmoTypeNLoad: function(responseText) {
         var doc = System.createDocument(responseText);
         var typeNode=System.findNode("//font[@size='1' and @color='yellow']", doc);
@@ -8679,13 +8682,13 @@ var Helper = {
             }
             ammoType = ammoType.textContent;
             ammoType = ammoType.substr(0, ammoType.length - 1);
-            var ammoDict={'Venom':/^Toxin Slug$/,'Plasma':/^Plasma Cartridge$/,'Crushing':/^Shell Mag$/, 
+            var ammoDict={'Venom':/^Toxin Slug$/,'Plasma':/^Plasma Cartridge$/,'Crushing':/^Shell Mag$/,
                 'Piercing':/^(?:Thorn Darts|Alloy Tipped Bullets)$/,
-                'Slashing':/^Rotorkin$/, 'Flame':/^(?:Inferno Rounds|Flame Pack)$/, 
+                'Slashing':/^Rotorkin$/, 'Flame':/^(?:Inferno Rounds|Flame Pack)$/,
                 'Psionic':/^(?:Charged Mind Shard|Charged Mind Stone|Charged Mind Orb)$/,
                 'Solid':/^Bullet Mag$/, 'Energy':/^Shocker Slug$/ }
             if (ammoDict[ammoType])
-                System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", 
+                System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1",
                     Helper.quickUse, {'arrayId':0,'item':ammoDict[ammoType]});
             else {
                 alert("Unknown ammo type: '"+ammoType+"', please pm dkwizard about this!");
@@ -8696,12 +8699,12 @@ var Helper = {
             return;
         }
     },
-    
+
     combinePsiAmmo: function(responseText) {
         Helper.itemList = {};
 		var doc=System.createDocument(responseText);
 		Helper.retrieveItemInfor(doc);
-        
+
         var postData = 'cmd=profile&subcmd=backpackaction&folder_id=-1&submit=Combine+Selected&split_amount=';
         var psiAmmo=["Charged Mind Shard","Charged Mind Stone","Charged Mind Orb"];
         for (var i=0; i<psiAmmo.length; i++) {
@@ -8722,7 +8725,224 @@ var Helper = {
             });
 		}
     },
-	
+
+	injectFindBuffs: function() {
+		var content=Layout.notebookContent();
+		var buffList = Data.buffList();
+		var injectionText = '';
+		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
+		injectionText += '<tr><td rowspan="2" colspan="2" width="50%"><h1>Find Buff</h1></td>' +
+			'<td align="right" style="color:yellow;">Select buff to search for:</td>';
+
+		injectionText += '<td align="left"><select id="selectedBuff">';
+		for (var j = 0; j < buffList.length; j++) {
+			injectionText += '<option value="' + buffList[j].skillId + '">' + buffList[j].name + '</option>';
+		}
+		injectionText += '</select></td></tr>';
+
+		injectionText += '<tr>' +
+			'<td align="right" style="color:yellow;">Level 175 buffers only (N/A):</td><td align="left"><input id="level175" type="checkbox" disabled></td></tr>'
+		injectionText += '<tr><td align="right" style="color:yellow;" width="30%">Nicknames of buff searched:&nbsp;</td><td align="left" id="buffNicks">&nbsp;</td>' +
+			'<td align="right" style="color:yellow;">Search guild members (N/A):</td><td align="left"><input id="guildMembers" type="checkbox" disabled></td></tr>';
+		injectionText += '<tr><td align="right" style="color:yellow;"># potential buffers to search:&nbsp;</td><td align="left" id="potentialBuffers"></td>' +
+			'<td align="right" style="color:yellow;">Search allies/enemies (N/A):</td><td align="left"><input id="alliesEnemies" type="checkbox" disabled></td></tr>';
+		injectionText += '<tr><td align="right" style="color:yellow;"># Buffers processed:&nbsp;</td><td align="left" id="buffersProcessed">0</td>' +
+			'<td align="right" style="color:yellow;">Search online list:</td><td align="left"><select id="onlinePlayers">' +
+				'<option value="0">Disabled</option>' +
+				'<option value="40" selected>Short (fastest)</option>' +
+				'<option value="35">Medium (medium)</option>' +
+				'<option value="30">Long (slowest)</option>' +
+				'</select></td></tr>';
+		injectionText += '<tr><td align="right" style="color:yellow;">Find buffers progress:&nbsp;</td><td align="left" width="310" id="bufferProgress">Idle</td>'+
+			'<td>&nbsp;</td><td align="center"><input id="findbuffsbutton" class="custombutton" type="button" value="Find Buffers"></td></tr>';
+		injectionText += '</tbody></table><br>';
+		injectionText += '<h1>Potential Buffers and Bio Info</h1><br>';
+		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
+		injectionText += '<tr><th width="120">&nbsp;Name</th><th width="200">&nbsp;Player Info</th><th>&nbsp;Notable Bio Text</th></tr>';
+		injectionText += '</tbody></table><br>';
+		injectionText += '<div style="font-size:xx-small; color:gray; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
+			'It is not as smart as you are, so please do not judge the results too harshly. It does not search all online players, just a subset of those that have been on recently. ' +
+			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
+		content.innerHTML = injectionText;
+		document.getElementById("findbuffsbutton").addEventListener("click", Helper.findBuffsStart, true);
+	},
+
+	findBuffsStart: function(evt) {
+		var selectedBuff = System.findNode("//select[@id='selectedBuff']").value;
+		//create array of buff nicknames ...
+		var buffList = Data.buffList();
+		for (var j = 0; j < buffList.length; j++) {
+			if (selectedBuff == buffList[j].skillId) {
+				Helper.findBuffNicks = buffList[j].nicks;
+				Helper.findBuffMinCastLevel = buffList[j].minCastLevel;
+				break;
+			}
+		}
+		document.getElementById("buffNicks").innerHTML = Helper.findBuffNicks;
+		var bufferProgress = document.getElementById("bufferProgress");
+		bufferProgress.innerHTML = 'Gathering list of potential buffers ...';
+		bufferProgress.style.color = 'green';
+		Helper.findBuffsLevel175Only = document.getElementById("level175").checked;
+		document.getElementById("buffersProcessed").innerHTML = 0;
+		Helper.onlinePlayers = new Array();
+
+		//get list of players to search, starting with guild>manage page - NOT YET
+		//System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.findBuffsParseGuildManagePage);
+		Helper.findBuffsParseOnlinePlayersStart();
+	},
+
+	findBuffsParseOnlinePlayersStart: function() {
+		//if option enabled then parse online players
+		Helper.onlinePlayersSetting = document.getElementById("onlinePlayers").value;
+		if (Helper.onlinePlayersSetting != 0) {
+			System.xmlhttp('index.php?cmd=onlineplayers&page=1', Helper.findBuffsParseOnlinePlayers, {"page":1});
+		} else {
+			Helper.findBuffsParsePlayersForBuffs();
+		}
+	},
+
+	findBuffsParseOnlinePlayers: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var playerRows = System.findNodes("//table/tbody/tr[count(td)=3 and td[1]/a]", doc);
+		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""),10);
+		if (playerRows && callback.page != 1) {
+			for (var i=0; i<playerRows.length; i++) {
+				var onlinePlayer = playerRows[i].cells[0].firstChild.getAttribute("href");
+				var onlinePlayerLevel = parseInt(playerRows[i].cells[1].textContent.replace(/,/g,""),10);
+				var onlinePlayerName = playerRows[i].cells[0].textContent;
+				var minPlayerVirtualLevel = 1;
+				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
+				if (onlinePlayerLevel >= Helper.findBuffMinCastLevel && onlinePlayerLevel >= minPlayerVirtualLevel) {
+					//add online player to search list (all but self)
+					if (Helper.characterName != onlinePlayerName.trim()) Helper.onlinePlayers.push(onlinePlayer);
+				}
+			}
+		}
+		if (callback.page<maxPage/*-maxPage+15*/) {
+			var newPage = (callback.page == 1) ? Math.round(Helper.onlinePlayersSetting * maxPage / 50) : (callback.page+1);
+			var bufferProgress = document.getElementById("bufferProgress");
+			bufferProgress.innerHTML = 'Parsing online page ' + callback.page + ' ...';
+			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.findBuffsParseOnlinePlayers, {"page":newPage});
+		}
+		else {
+			//all done so moving on
+			Helper.findBuffsParsePlayersForBuffs();
+		}
+	},
+
+	findBuffsParsePlayersForBuffs: function() {
+		//remove duplicates
+		Helper.onlinePlayers = Helper.onlinePlayers.removeDuplicates();
+		var bufferProgress = document.getElementById("bufferProgress");
+		//now need to parse player pages for buff ...
+		document.getElementById("potentialBuffers").innerHTML = Helper.onlinePlayers.length;
+		if (Helper.onlinePlayers.length <= 0) {
+			bufferProgress.innerHTML = 'Done.';
+			bufferProgress.style.color = 'blue';
+			return
+		}
+		bufferProgress.innerHTML = 'Parsing player data ...';
+		bufferProgress.style.color = 'green';
+
+		for (var j = 0; Helper.onlinePlayers.length; j++) {
+			System.xmlhttp(Helper.onlinePlayers[j], Helper.findBuffsParseProfileAndDisplay, {"href": Helper.onlinePlayers[j]});
+		}
+	},
+
+	findBuffsParseProfileAndDisplay: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		//name and level
+		var playerArea = System.findNode("//font[contains(.,'Last Activity')]",doc);
+		var playerName = playerArea.parentNode.firstChild.nextSibling.textContent.replace(/^= /,"").replace(/ =$/,"");
+		var levelElement = System.findNode("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
+		var levelValue = parseInt(levelElement.textContent.replace(/,/g,""),10);
+		var virtualLevelElement = System.findNode("//td[contains(b,'VL')]/following-sibling::td[1]", doc);
+		var virtualLevelValue = parseInt(virtualLevelElement.textContent.replace(/,/g,""),10);
+		//last activity
+		var lastActivityElement = playerArea;
+		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
+		var lastActivityMinutes = parseInt(lastActivity[1],10);
+		var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+		if (lastActivityMinutes < 2) {
+			lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+		}
+		//buffs
+		var bioCell = System.findNode("//td[contains(@background, '/inventory/biography_head.jpg')]/../following-sibling::tr[1]/td/table/tbody/tr/td[2]",doc);
+		var buffNickArray = Helper.findBuffNicks.split(",");
+		var buffTable = document.getElementById("buffTable")
+		var textLineArray = new Array();
+		for (var j = 0; j < buffNickArray.length; j++) {
+			var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
+			var bioTextToSearch = bioCell.innerHTML+" ";
+			var buffRE = new RegExp("[^a-zA-Z]"+buffNickArray[j]+"[^a-zA-Z]", 'i');
+			while (buffPosition != -1) {
+				bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
+				buffPosition = bioTextToSearch.search(buffRE);
+				if (buffPosition != -1) {
+					startingPosition = buffPosition + 1;
+					runningTotalPosition += buffPosition;
+					var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition);
+					if (prevBR==-1) prevBR=0>runningTotalPosition-20?0:runningTotalPosition-20;
+					var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
+					if (nextBR==-1) nextBr=bioCell.innerHTML.length-5;
+					var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
+					textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+					textLineArray.push(textLine);
+				}
+			}
+		}
+		textLineArray = textLineArray.removeDuplicates();
+		//sustain
+		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
+		if (sustainText) {
+			var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+			var sustainLevelRE = /Level<br>(\d+)%/;
+			var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
+		} else {
+			sustainLevel = -1;
+		}
+		//extend
+		var hasExtendBuff = System.findNode("//img[contains(@onmouseover,'Extend')]", doc);
+
+		//add row to table
+		if (textLineArray.length > 0) {
+			var newRow = buffTable.insertRow(-1);
+			//name cell
+			var newCell = newRow.insertCell(0);
+			newCell.style.verticalAlign = 'top';
+			var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+			if (lastActivityMinutes < 2) {
+				lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+			}
+			playerHREF = callback.href;
+			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new">' + playerName + '</a>' +
+				'&nbsp;<span style="color:blue;">[<a href="index.php?cmd=message&target_player=' + playerName +'" target="new">m</a>]</span>' + '</nobr><br>' +
+				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
+			//player info cell
+			var newCell = newRow.insertCell(1);
+			var playerInfo = '<table><tbody><tr><td colspan="2" style="color:gray;" align="right" width="50%">Last Activity:</td><td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>';
+			//playerInfo += '<tr><td style="color:gray;" align="right" width="25%">Sustain:</td><td width="25%" style="color:' + (sustainLevel>=100?'green':'red') + ';">' + sustainLevel + '%</td>' +
+			//	'<td width="25%" style="color:gray;" align="right">Extend:</td><td width="25%">' + (hasExtendBuff?'<span style="color:green;">Yes</span>':'<span style="color:red;">No</span>') + '</td></tr>';
+			newCell.innerHTML = playerInfo;
+			newCell.style.verticalAlign = 'top';
+			//buff cell
+			var newCell = newRow.insertCell(2);
+			for (var i = 0; i < textLineArray.length; i++) {
+				newCell.innerHTML += textLineArray[i] + '<br>';
+			}
+		}
+		var processedBuffers = document.getElementById("buffersProcessed");
+		var potentialBuffers = parseInt(document.getElementById("potentialBuffers").textContent,10);
+		var processedBuffersCount = parseInt(processedBuffers.textContent,10);
+		processedBuffers.innerHTML = (processedBuffersCount + 1);
+		if (potentialBuffers == (processedBuffersCount + 1)) {
+			var bufferProgress = document.getElementById("bufferProgress");
+			bufferProgress.innerHTML = 'Done.';
+			bufferProgress.style.color = 'blue';
+		}
+
+	},
+
 	makePageHeader: function(title, comment, spanId, button) {
 		return '<table width=100%><tr style="background-color:#110011">'+
 			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
