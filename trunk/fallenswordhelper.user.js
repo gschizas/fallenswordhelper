@@ -581,6 +581,15 @@ var Helper = {
 			case "ranks":
 				Helper.injectGuildRanks();
 				break;
+			case "conflicts":
+				switch (subPage2Id) {
+					case "rpupgrades":
+						Helper.injectRPUpgrades();
+						break;
+					default:
+						break;
+				}
+				break;
 			default:
 				break;
 			}
@@ -2352,6 +2361,18 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				}
 			}
 			replacementText += "<tr><td style='font-size:small; color:blue'>CA" + counterAttackLevel + " active</td></tr>";
+		}
+		var hasDoubler = System.findNode("//img[contains(@onmouseover,'Doubler')]");
+		if (hasDoubler) {
+			if (hasDoubler.getAttribute("src").search("/skills/") != -1) {
+				var onmouseover = hasDoubler.getAttribute("onmouseover");
+				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
+				var doubler = doublerRE.exec(onmouseover);
+				if (doubler) {
+					doublerLevel = doubler[1];
+				}
+			}
+			if (doublerLevel == 200) replacementText += "<tr><td style='font-size:small; color:red'>Doubler " + doublerLevel + " active</td></tr>";
 		}
 		var huntingMode = GM_getValue("huntingMode");
 		replacementText += (huntingMode === true)?"<tr><td style='font-size:small; color:red'>Hunting mode enabled</td></tr>":""
@@ -5303,23 +5324,25 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var enhanceOnlineDots = GM_getValue("enhanceOnlineDots");
 		if (enhanceOnlineDots) {
 			var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@onmouseover,'Last Activity')]");
-			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
-				var testProfile = profileAlliesEnemies[i];
-				var contactLink   = testProfile;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
-				var lastActivityDays = parseInt(lastActivity[1],10);
-				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
-				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
-				if (lastActivityMinutes < 2) {
-					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
-				} else if (lastActivityMinutes < 5) {
-					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
-				} else if (lastActivityMinutes < 30) {
-					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
-				} else if (lastActivityMinutes > 10080) {
-					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
-				} else {
-					contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+			if (profileAlliesEnemies) {
+				for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
+					var testProfile = profileAlliesEnemies[i];
+					var contactLink   = testProfile;
+					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+					var lastActivityDays = parseInt(lastActivity[1],10);
+					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+					if (lastActivityMinutes < 2) {
+						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
+					} else if (lastActivityMinutes < 5) {
+						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+					} else if (lastActivityMinutes < 30) {
+						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+					} else if (lastActivityMinutes > 10080) {
+						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
+					} else {
+						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot() + '">';
+					}
 				}
 			}
 		}
@@ -12255,11 +12278,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var content=Layout.notebookContent();
 		var buffList = Data.buffList();
 		var injectionText = '';
+		var extraProfile = GM_getValue("extraProfile");
 		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
 		injectionText += '<tr><td rowspan="2" colspan="2" width="50%"><h1>Find Buff</h1></td>' +
 			'<td align="right" style="color:brown;">Select buff to search for:</td>';
 		
-		injectionText += '<td align="left"><select id="selectedBuff">';
+		injectionText += '<td align="left"><select style="width:140px;" id="selectedBuff">';
 		for (var j = 0; j < buffList.length; j++) {
 			injectionText += '<option value="' + buffList[j].skillId + '">' + buffList[j].name + '</option>';
 		}
@@ -12269,17 +12293,22 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'<td align="right" style="color:brown;">Level 175 buffers only:</td><td align="left"><input id="level175" type="checkbox"></td></tr>';
 		injectionText += '<tr><td align="right" style="color:brown;" width="30%">Nicknames of buff searched:&nbsp;</td><td align="left" id="buffNicks">&nbsp;</td>' +
 			'<td align="right" style="color:brown;">Search guild members:</td><td align="left"><input id="guildMembers" type="checkbox" checked></td></tr>';
-		injectionText += '<tr><td align="right" style="color:brown;"># potential buffers to search:&nbsp;</td><td align="left" id="potentialBuffers"></td>' +
-			'<td align="right" style="color:brown;">Search allies/enemies:</td><td align="left"><input id="alliesEnemies" type="checkbox" checked></td></tr>';
+		injectionText += '<tr>' +
+			'<td align="right" style="color:brown;"># potential buffers to search:&nbsp;</td><td align="left" id="potentialBuffers"></td>' +
+			'<td align="right" style="color:brown;">Search allies/enemies:' + 
+				Helper.helpLink('Search Allies/Enemies', 'The checkbox enables searching your own personal allies/enemies list for buffs.<br><br>' +
+				'Additional profiles to search can be added in the text field to the right, separated by commas.') + '</td>' +
+			'<td align="left"><input id="alliesEnemies" type="checkbox" checked>' +
+				'<input style="width:118px;" class="custominput" id="extraProfile" type="text" title="Extra profiles to search" value="' + (extraProfile?extraProfile:'') + '"></td></tr>';
 		injectionText += '<tr><td align="right" style="color:brown;"># Buffers processed:&nbsp;</td><td align="left" id="buffersProcessed">0</td>' +
-			'<td align="right" style="color:brown;">Search online list:</td><td align="left"><select id="onlinePlayers">' +
+			'<td align="right" style="color:brown;">Search online list:</td><td align="left"><select style="width:140px;" id="onlinePlayers">' +
 				'<option value="0">Disabled</option>' +
 				'<option value="49">Short (fastest)</option>' +
 				'<option value="47">Medium (medium)</option>' +
 				'<option value="45">Long (slowest)</option>' +
 				'</select></td></tr>';
 		injectionText += '<tr><td align="right" style="color:brown;">Find buffers progress:&nbsp;</td><td align="left" width="310" id="bufferProgress">Idle</td>'+
-			'<td>&nbsp;</td><td align="center"><input id="findbuffsbutton" class="custombutton" type="button" value="Find Buffers"></td></tr>';
+			'<td align="center"><input id="clearresultsbutton" class="custombutton" type="button" value="Clear Results"></td><td align="center"><input id="findbuffsbutton" class="custombutton" type="button" value="Find Buffers"></td></tr>';
 		injectionText += '</tbody></table><br>';
 		injectionText += '<h1>Potential Buffers and Bio Info</h1><br>';
 		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
@@ -12290,8 +12319,22 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
 		content.innerHTML = injectionText;
 		document.getElementById("findbuffsbutton").addEventListener("click", Helper.findBuffsStart, true);
+		document.getElementById("clearresultsbutton").addEventListener("click", Helper.findBuffsClearResults, true);
 	},
 	
+	findBuffsClearResults: function(evt) {
+		var buffTable = document.getElementById("buffTable");
+		for (var j = buffTable.rows.length; j > 1; j--) {
+			buffTable.deleteRow(j-1);
+		}
+		document.getElementById("buffNicks").innerHTML = '';
+		var bufferProgress = document.getElementById("bufferProgress");
+		bufferProgress.innerHTML = 'Idle.';
+		bufferProgress.style.color = 'black';
+		document.getElementById("potentialBuffers").innerHTML = '';
+		document.getElementById("buffersProcessed").innerHTML = 0;
+	},
+
 	findBuffsStart: function(evt) {
 		var selectedBuff = System.findNode("//select[@id='selectedBuff']").value;
 		//create array of buff nicknames ...
@@ -12310,7 +12353,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		Helper.findBuffsLevel175Only = document.getElementById("level175").checked;
 		document.getElementById("buffersProcessed").innerHTML = 0;
 		Helper.onlinePlayers = new Array();
-
+		Helper.extraProfile = document.getElementById("extraProfile").value;
+		GM_setValue("extraProfile", Helper.extraProfile);
 		//get list of players to search, starting with guild>manage page
 		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.findBuffsParseGuildManagePage);
 	},
@@ -12341,14 +12385,32 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				}
 			}
 		}
-		//continue with profilepage
-		System.xmlhttp("index.php?cmd=profile", Helper.findBuffsParseProfilePage);
+		//continue with profile pages
+		Helper.findBuffsParseProfilePageStart();
 	},
 	
+	findBuffsParseProfilePageStart: function() {
+		//if option enabled then parse profiles
+		Helper.profilePagesToSearch = new Array();
+		Helper.profilePagesToSearch.push("index.php?cmd=profile");
+		var extraProfileArray = Helper.extraProfile.split(",");
+		for (var i=0;i<extraProfileArray.length ;i++ ) {
+			Helper.profilePagesToSearch.push("index.php?cmd=findplayer&search_active=1&search_username="+extraProfileArray[i]+"&search_show_first=1");
+		}
+		Helper.profilePagesToSearchProcessed = 0;
+		if (document.getElementById("alliesEnemies").checked) {
+			for (var i=0;i<Helper.profilePagesToSearch.length ;i++ ) {
+				System.xmlhttp(Helper.profilePagesToSearch[i], Helper.findBuffsParseProfilePage);
+			}
+		} else {
+			Helper.findBuffsParseOnlinePlayersStart();
+		}
+	},
+
 	findBuffsParseProfilePage: function(responseText) {
 		var doc = System.createDocument(responseText);
 		var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@onmouseover,'Last Activity')]", doc);
-		if (document.getElementById("alliesEnemies").checked) {
+		if (profileAlliesEnemies) {
 			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
 				var testProfile = profileAlliesEnemies[i];
 				var contactLink   = testProfile;
@@ -12370,7 +12432,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 		}
 		//continue with online players
-		Helper.findBuffsParseOnlinePlayersStart();
+		Helper.profilePagesToSearchProcessed ++;
+		if (Helper.profilePagesToSearchProcessed == Helper.profilePagesToSearch.length) {
+			Helper.findBuffsParseOnlinePlayersStart();
+		}
 	},
 	
 	findBuffsParseOnlinePlayersStart: function() {
@@ -12524,7 +12589,37 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			bufferProgress.innerHTML = 'Done.';
 			bufferProgress.style.color = 'blue';
 		}
-		
+	},
+
+	injectRPUpgrades: function() {
+		var guildReputationTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Reputation']]");
+		var injectHere = guildReputationTable.rows[8].cells[0];
+		injectHere.align = 'center';
+		injectHere.innerHTML = '<span id="warningMessage" style="color:green;">Gathering active buffs ... please wait ... </span>';
+		System.xmlhttp("index.php?cmd=profile", Helper.parseProfileAndPostWarnings);
+	},
+	
+	parseProfileAndPostWarnings: function(responseText, callback) {
+		var doc = System.createDocument(responseText);
+		var activeBuffs = System.findNodes("//img[contains(@src,'/skills/')]", doc);
+		if (activeBuffs) {
+			for (i=0;i<activeBuffs.length;i++) {
+				anItem=activeBuffs[i];
+				var onmouseover = anItem.getAttribute("onmouseover");
+				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: ((\d+))\)/;
+				var buffName = buffRE.exec(onmouseover)[1];
+				var buffLevel = buffRE.exec(onmouseover)[2];
+				var rpPackBuff = System.findNodes("//a[contains(@onmouseover,'" + buffName + " Level " + buffLevel + "')]");
+				if (rpPackBuff) {
+					for (j=0;j<rpPackBuff.length;j++) {
+						rpPackBuff[j].parentNode.innerHTML += "<br><nobr><span style='color:red;'>" + buffName + " " + buffLevel + " active</span></nobr>";
+					}
+				}
+			}
+		}
+		var warningMessage = document.getElementById("warningMessage")
+		warningMessage.innerHTML = 'Done';
+		warningMessage.style.color = 'blue';
 	}
 };
 
