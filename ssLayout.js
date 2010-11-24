@@ -11,11 +11,12 @@ var Layout = {
 		if (GM_getValue("showMonsterLog")) {
 			Layout.injectOneMenu("Entity Logs", "index.php?cmd=notepad&subcmd=monsterlog", 11, "menuSource_0")
 		}
-		Layout.injectOneMenu("TH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 5, "menuSource_2");
-		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 3, "menuSource_2");
+		Layout.injectOneMenu("Locate Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 5, "menuSource_2");
+		Layout.injectOneMenu("TH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 6, "menuSource_2");
+		Layout.injectOneMenu("Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 7, "menuSource_2");
 		Layout.injectOneMenu("Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 0, "menuSource_3");
 		Layout.injectOneMenu("Faction Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 2, "menuSource_5");
-		
+
 		Layout.injectQuickLinks();
 	},
 
