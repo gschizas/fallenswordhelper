@@ -6246,10 +6246,10 @@ var Helper = {
 		 if (sellPrice.search(/^[0-9]*$/) != -1) {
 			var warningColor = "green";
 			var warningText = "</b><br/>This is probably an offer that will please someone.";
-			if (sellPrice < 20000) {
+			if (sellPrice < 30000) {
 				warningColor = "brown";
 				var warningText = "</b><br>This is too low ... it isn't going to sell.";
-			} else if (sellPrice > 100000) {
+			} else if (sellPrice > 300000) {
 				warningColor = "red";
 				var warningText = "</b><br/>This is way too high a price ... you should reconsider.";
 			}
@@ -8868,27 +8868,24 @@ var Helper = {
 		}
 		//buffs
 		var bioCell = System.findNode("//td[contains(@background, '/inventory/biography_head.jpg')]/../following-sibling::tr[1]/td/table/tbody/tr/td[2]",doc);
-		var buffNickArray = Helper.findBuffNicks.split(",");
 		var buffTable = document.getElementById("buffTable")
 		var textLineArray = new Array();
-		for (var j = 0; j < buffNickArray.length; j++) {
-			var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
-			var bioTextToSearch = bioCell.innerHTML+" ";
-			var buffRE = new RegExp("[^a-zA-Z]"+buffNickArray[j]+"[^a-zA-Z]", 'i');
-			while (buffPosition != -1) {
-				bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
-				buffPosition = bioTextToSearch.search(buffRE);
-				if (buffPosition != -1) {
-					startingPosition = buffPosition + 1;
-					runningTotalPosition += buffPosition;
-					var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition);
-					if (prevBR==-1) prevBR=0>runningTotalPosition-20?0:runningTotalPosition-20;
-					var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
-					if (nextBR==-1) nextBr=bioCell.innerHTML.length-5;
-					var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
-					textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
-					textLineArray.push(textLine);
-				}
+		var buffPosition = 0, startingPosition = 0, runningTotalPosition = 1; // 1 for the extra space in front
+		var bioTextToSearch = " "+bioCell.innerHTML+" ";
+		var buffRE = new RegExp("[^a-zA-Z](("+Helper.findBuffNicks.replace(/,/g,")|(")+"))[^a-zA-Z]", 'i');
+		while (buffPosition != -1) {
+			bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
+			buffPosition = bioTextToSearch.search(buffRE);
+			if (buffPosition != -1) {
+				startingPosition = buffPosition + 1;
+				runningTotalPosition += buffPosition;
+				var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition-1);
+				if (prevBR==-1) prevBR=0;
+				var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
+				if (nextBR==-1) nextBR=bioCell.innerHTML.length-5;
+				var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
+				textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+				textLineArray.push(textLine);
 			}
 		}
 		textLineArray = textLineArray.removeDuplicates();
@@ -8915,7 +8912,9 @@ var Helper = {
 				lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
 			}
 			playerHREF = callback.href;
-			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new">' + playerName + '</a>' +
+			var bioTip = bioCell.innerHTML.replace(/'|"|\n/g,"");
+			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" '+
+				'onmouseover=\'Tip("'+bioTip+'");\'>' + playerName + '</a>' +
 				'&nbsp;<span style="color:blue;">[<a href="index.php?cmd=message&target_player=' + playerName +'" target="new">m</a>]</span>' + '</nobr><br>' +
 				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
 			//player info cell

@@ -141,13 +141,13 @@ var Helper = {
 
 		System.setDefault("ajaxifyRankControls", true);
 		System.setDefault("disablePageShiftToGuildStore", false);
-		
+
 		System.setDefault("enableMaxGroupSizeToJoin", true);
 		System.setDefault("maxGroupSizeToJoin", 11);
-		
+
 		System.setDefault("enableTitanLog", false);
 		System.setDefault("titanLogRefreshTime", 5);
-		
+
 		System.setDefault("enableTempleAlert", true);
 		System.setDefault("showGoldOnFindPlayer", true);
 		System.setDefault("titanLogLength", 15);
@@ -846,7 +846,7 @@ var Helper = {
 	injectViewGuild: function() {
 		var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
 		avyImg.style.borderStyle="none";
-		
+
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
 		var highlightGvGPlayersNearMyLvl = GM_getValue("highlightGvGPlayersNearMyLvl");
 		if (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl) {
@@ -868,7 +868,7 @@ var Helper = {
 		}
 		Helper.changeGuildListOfflineBallColor();
 	},
-	
+
 	updateBuffLog: function() {
 		if (GM_getValue("keepBuffLog")) {
 			//Skill Inventor level 175 was activated on 'yuuzhan'.
@@ -936,7 +936,7 @@ var Helper = {
 	injectGuild: function() {
 		var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
 		avyImg.style.borderStyle="none";
-		
+
 		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
 		GM_setValue("guildID",guildID);
@@ -995,7 +995,7 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
-		
+
 		//Add functionality to remove the skip to guildstoresection
 		if (GM_getValue("disablePageShiftToGuildStore")) {
 			var guildStoreLinks = System.findNodes("//a[contains(@href,'#guildStoreSection')]");
@@ -1082,7 +1082,7 @@ var Helper = {
 			}
 		}
 	},
-	
+
 	getConflictInfo: function(responseText, callback) {
 		try {
 			var insertHere = callback.node;
@@ -1311,7 +1311,7 @@ var Helper = {
 			insertEmpowerRelicTenTimesSpan.setAttribute("relicID", relicID);
 			empowerButton.parentNode.appendChild(insertEmpowerRelicTenTimesSpan);
 			insertEmpowerRelicTenTimesSpan.addEventListener('click', Helper.empowerRelic, true);
-			
+
 			var targetEmpowerLevelInput = document.createElement("INPUT");
 			targetEmpowerLevelInput.value = '10';
 			targetEmpowerLevelInput.size = '1';
@@ -1355,7 +1355,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			window.location = "index.php?cmd=relic&relic_id=" + relicID
 		}
 	},
-	
+
 	calculateRelicDefenderStats: function(evt) {
 		var calcButton = System.findNode("//input[@id='calculatedefenderstats']");
 		calcButton.style.visibility = "hidden";
@@ -1751,7 +1751,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		hpValueBuffed.innerHTML      = System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier) + fortitudeBonusHP);
 		var LDpercentageValue        = System.findNode("//td[@title='LDPercentage']");
 		LDpercentageValue.innerHTML  = (relicMultiplier*100) + "%";
-		
+
 		System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.relicCheckIfGroupExists);
 	},
 
@@ -1915,7 +1915,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 		processingStatus.innerHTML = 'Done.';
 	},
-	
+
 	position: function() {
 		var result = {};
 		if (Helper.page=="world/map/-(-)") {
@@ -3246,7 +3246,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				firstCell.style.display = 'none';
 				firstCell.style.visibility = 'hidden';
 			}
-			
+
 			//store the enchantment min and max values in the monster log (if enabled)
 			if (showMonsterLog && i >= 7 && collectEnchantments) { //first enchantment row
 				var ThisRowFirstCell = statsNode.rows[i].cells[0];
@@ -3355,8 +3355,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					if (entityLog[name]["min"]["key" + i]) {
 						newEntity["key" + i] = "";
 						for (j = 0; j < entityLog[name]["min"]["key" + i].length; j++) {
-							newEntity["key" + i] += '<nobr>' + entityLog[name]["min"]["key"+i][j].name + ' ' + 
-								entityLog[name]["min"]["key"+i][j].value + ' - ' + entityLog[name]["max"]["key"+i][j].value + '<nobr>' + 
+							newEntity["key" + i] += '<nobr>' + entityLog[name]["min"]["key"+i][j].name + ' ' +
+								entityLog[name]["min"]["key"+i][j].value + ' - ' + entityLog[name]["max"]["key"+i][j].value + '<nobr>' +
 								(j != entityLog[name]["min"]["key" + i].length - 1? '<br/>':'');
 						}
 					}
@@ -3380,7 +3380,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'.HelperMonsterLogRow1:hover {background-color:white}\n' +
 			'.HelperMonsterLogRow2 {background-color:#e2b960;font-size:small}\n' +
 			'.HelperMonsterLogRow2:hover {background-color:white}');
-		
+
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011; color:white;">'+
 			'<td width="90%" nobr align=center><b>&nbsp;Entity Information</b></td>'+
 			'<td width="10%" nobr>[<span id="Helper.clearEntityLog">Clear</span>]</td>'+
@@ -3662,7 +3662,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var memberRank   = aRow.cells[3].textContent;
 					var memberXP     = System.intValue(aRow.cells[4].textContent);
 					var memberStatus = aRow.cells[0].firstChild.title;
-					
+
 					var contactLink   = aRow.cells[1].firstChild.nextSibling;
 					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 					var lastActivityDays = parseInt(lastActivity[1],10);
@@ -4140,7 +4140,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 		}
 	},
-	
+
 	retrievePvPCombatSummary: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var winner = System.getIntFromRegExp(responseText, /var\s+winner=(-?[0-9]+);/i);
@@ -4370,7 +4370,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 			imageCell.innerHTML = finalHTML;
 		}
-		
+
 		//add coloring for item craft and durability
 		var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
 		if (auctionCellCraftElements) {
@@ -4482,7 +4482,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						var bidValueButton = aRow.cells[6].getElementsByTagName("input");
 						if (winningBidValue != "-") {
 							var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' + 
+							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
 								System.addCommas(overBid) + '</span>&nbsp';
 							if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
 							bidValueButton[0].size = 6;
@@ -4807,7 +4807,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					output = '<nobr>' + recallCell.innerHTML + '|' +
 						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span>';
 					if (!itemWorn) {
-						output += ' |&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:equipProfileInventoryItem' + inventoryItemID + 
+						output += ' |&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:equipProfileInventoryItem' + inventoryItemID +
 							'" itemID="' + inventoryItemID + '">Fast Wear</span>';
 					}
 					output += '</nobr>';
@@ -4879,7 +4879,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var href=evt.target.getAttribute("href");
 		System.xmlhttp(href, Helper.recallItemNWearReturnMessage, {"target": evt.target, "url": href});
 	},
-	
+
 	recallItemNWearReturnMessage: function(responseText, callback) {
 		var target = callback.target;
 		var info = Layout.infoBox(responseText);
@@ -5272,7 +5272,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.buffCost={'count':0,'buffs':{}};
 
 			Helper.bioAddEventListener();
-			
+
 			if (isSelfRE) {
 				var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
 				if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
@@ -5283,7 +5283,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (invSectionToggle) {
 			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
-		
+
 		if (!isSelfRE) { // self inventory
 
 			Helper.profileParseAllyEnemy();
@@ -5308,7 +5308,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			//Update the ally/enemy online list, since we are already on the page.
 			doc = System.findNode("//html");
 			Helper.parseProfileForWorld(doc.innerHTML, true);
-			
+
 			// store the VL of the player
 			var virtualLevel = parseInt(System.findNode("//td[b[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
 			if (Helper.characterLevel == virtualLevel) {
@@ -5319,7 +5319,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 
 		Helper.addStatTotalToMouseover();
-		
+
 		//enhance colored dots
 		var enhanceOnlineDots = GM_getValue("enhanceOnlineDots");
 		if (enhanceOnlineDots) {
@@ -6667,7 +6667,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				case 'Very Poor': craftColor = '#b21500'; break;
 				case 'Uncrafted': craftColor = '#666666'; break;
 			}
-			
+
 			var durabilityPercent = "";
 			if (item.durability) {
 				var durabilityExec = /(.*)\/(.*)/.exec(item.durability);
@@ -6790,7 +6790,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		folderCount = Helper.folderIDs.length;
 		folderID = Helper.folderIDs[currentFolder-1];
-		
+
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentPage = callback.page;
 		var pages=System.findNode("//select[@name='page']", doc);
@@ -7168,21 +7168,21 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
 			joinAllInput.style.display = "none";
 			joinAllInput.style.visibility = "hidden";
-			buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsundersize" type="button" value="Join All Groups < ' + maxGroupSizeToJoin + 
+			buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsundersize" type="button" value="Join All Groups < ' + maxGroupSizeToJoin +
 				' Members" class="custombutton">&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
 			document.getElementById('joinallgroupsundersize').addEventListener('click', Helper.joinAllGroupsUnderSize, true);
 		} else {
 			buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
 		}
 		document.getElementById('fetchgroupstats').addEventListener('click', Helper.fetchGroupData, true);
-		
+
 		re=/subcmd2=([a-z]+)/;
 		var subPage2IdRE = re.exec(document.location.search);
 		if (subPage2IdRE && subPage2IdRE[1] == 'joinallgroupsundersize') {
 			Helper.joinAllGroupsUnderSize();
 		}
 	},
-	
+
 	joinAllGroupsUnderSize: function(evt) {
 		var joinButtons = System.findNodes("//img[@title='5 Stamina to join Group']");
 		for (var i=0; i<joinButtons.length; i++) {
@@ -8347,7 +8347,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		var enemiesText = System.findNode("//td[.='+1 Max Enemies']");
 		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
-		if (enemiesRatio) {		
+		if (enemiesRatio) {
 			var enemiesValueRE = /(\d+) \/ 115/;
 			var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
 			GM_setValue("enemiestotal",enemiesValue+5);
@@ -9091,7 +9091,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen ' +
 				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
-			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' + 
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' +
 				'<input name="showPvPSummaryInLog" type = "checkbox" value = "on"' + (GM_getValue("showPvPSummaryInLog")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
@@ -9119,8 +9119,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
 				'Max Size: <input name="maxGroupSizeToJoin" size="1" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
-				'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' + 
-				'will mean that it will not refresh until the next page load after that many minutes have elapsed.') + 
+				'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' +
+				'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
 				':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
 				'<input name="titanLogRefreshTime" size="1" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
 			'<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.') +
@@ -9318,10 +9318,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "useNewGuildLog");
 		System.saveValueForm(oForm, "enhanceChatTextEntry");
 		System.saveValueForm(oForm, "disablePageShiftToGuildStore");
-		
+
 		System.saveValueForm(oForm, "enableMaxGroupSizeToJoin");
 		System.saveValueForm(oForm, "maxGroupSizeToJoin");
-		
+
 		System.saveValueForm(oForm, "enableTitanLog");
 		System.saveValueForm(oForm, "titanLogRefreshTime");
 		System.saveValueForm(oForm, "enableTempleAlert");
@@ -9456,7 +9456,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (Helper.levelName) {GM_setValue("miniMapName", Helper.levelName);}
 		GM_setValue("miniMapSource", doc);
 	},
-	
+
 	addMiniMapExtras: function(miniMap) {
 		Helper.markPlayerOnMiniMap();
 		Helper.toogleMiniMapPOI();
@@ -9469,30 +9469,30 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		Helper.miniMapTableEvents();
 		miniMap.style.display = "";
 	},
-	
+
 	miniMapTableEvents: function(){
 		Helper.mouse = 0;
 		Helper.moveList=[Helper.position()];
 		document.getElementById('miniMap').addEventListener("mouseup", function(e){Helper.mouse = 0},false);
-		// collect table cells from the drawing_table div element  
-		var td = document.getElementById('miniMap').getElementsByTagName('td');  
-		// attach onMouseDown and onMouseOver event for collected table cells  
+		// collect table cells from the drawing_table div element
+		var td = document.getElementById('miniMap').getElementsByTagName('td');
+		// attach onMouseDown and onMouseOver event for collected table cells
 		for (var i=0; i<td.length; i++){
 			td[i].addEventListener("mousedown", Helper.mousedown, true);
-			// colorize table cell if left mouse button is pressed  
+			// colorize table cell if left mouse button is pressed
 			td[i].addEventListener("mouseover", function (e){if (Helper.mouse == 1) Helper.markPos(this);}, true);
-		}  
+		}
 	},
-	
-	mousedown: function (evt){  
-		// needed for FF to disable dragging 
+
+	mousedown: function (evt){
+		// needed for FF to disable dragging
 		evt.preventDefault();
-		// set pressed mouse button 
+		// set pressed mouse button
 		Helper.mouse = evt.which;
 		// colorize pixel on mousedown event for TD element
 		if (this.tagName == 'TD' && Helper.mouse == 1) Helper.markPos(this);
 	},
-	
+
 	markPos: function(td) {
 		var pos={'X':td.cellIndex,'Y':td.parentNode.rowIndex};
 		if (!Helper.moveList[0]) return;
@@ -9504,13 +9504,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			td.style.backgroundColor = "red";
 		}
 	},
-	
+
 	autoMoveMiniMap: function() {
 		if (Helper.moveList && Helper.moveList.length > 1)
 			System.xmlhttp("index.php?cmd=world&subcmd=move&x="+Helper.moveList[1].X+"&y="+Helper.moveList[1].Y,
 				Helper.autoMoveNext, 1);
 	},
-	
+
 	autoMoveNext: function(responseText, id) {
 		var currentPos = "("+Helper.moveList[id].X+", "+Helper.moveList[id].Y+")";
 		if (responseText.indexOf(currentPos)<0) {
@@ -9566,7 +9566,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (!posit) {return;}
 		Helper.markPosOnMiniMap(posit);
 	},
-	
+
 	markPosOnMiniMap: function(posit) {
 		var miniMapTable = document.getElementById("miniMapTable");
 		if (!miniMapTable) return;
@@ -11359,7 +11359,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 		}
 		var taxRate = System.findNode("//input[@name='rank_tax']",doc);
-		
+
 		linkElement.innerHTML = "<span style='color:blue;'>(" + Math.round(10*count)/10 + ") Tax:(" + taxRate.value + "%)</span> " + linkElement.innerHTML;
 	},
 
@@ -11425,7 +11425,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		//store the time zone for use in processing date/times
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
 		Helper.gmtOffsetMilli = gmtOffsetMinutes*60*1000;
-		
+
 		//find the time the guild log was stored last
 		Helper.storedGuildLog = System.getValueJSON("storedGuildLog");
 		if (Helper.storedGuildLog) {
@@ -11433,8 +11433,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.lastStoredGuildLogMessage = Helper.storedGuildLog.logMessage[0].logMessage;
 			Helper.lastStoredGuildLogMessagePostTime = Helper.storedGuildLog.logMessage[0].postDateAsLocalMilli;
 		}
-		
-		
+
+
 		Helper.newStoredGuildLog = {logMessage:[]};
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%">' +
@@ -11459,7 +11459,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'<tr><td width="16" bgcolor="#cd9e4b"></td><td width="20%" bgcolor="#cd9e4b">Date</td><td width="80%" bgcolor="#cd9e4b">Message</td></tr>' +
 			'</tbody></table>';
 		content.innerHTML=newhtml;
-		
+
 		document.getElementById("Helper:ResetNewGuildLog").addEventListener('click', Helper.resetNewGuildLog, true);
 
 		var guildLogInjectTable = document.getElementById("Helper:GuildLogInjectTable");
@@ -11470,15 +11470,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		document.getElementById("GuildLogSelectAll").addEventListener('click', Helper.guildLogSelectFilters, true);
 		document.getElementById("GuildLogSelectNone").addEventListener('click', Helper.guildLogSelectFilters, true);
-		
+
 		var oldMaxPagesToFetch = GM_getValue("oldNewGuildLogHistoryPages");
-		oldMaxPagesToFetch? parseInt(oldMaxPagesToFetch,10):oldMaxPagesToFetch = 100; 
+		oldMaxPagesToFetch? parseInt(oldMaxPagesToFetch,10):oldMaxPagesToFetch = 100;
 		var maxPagesToFetch = parseInt(GM_getValue("newGuildLogHistoryPages") - 1,10);
 		GM_setValue("oldNewGuildLogHistoryPages", maxPagesToFetch);
 		var completeReload = false;
 		if (maxPagesToFetch > oldMaxPagesToFetch) completeReload = true;
 		//fetch guild log page and apply filters
-		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage, 
+		System.xmlhttp('index.php?cmd=guild&subcmd=log', Helper.parseGuildLogPage,
 			{"guildLogInjectTable": guildLogInjectTable, "pageNumber": 1, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
 	},
 
@@ -11486,7 +11486,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.setValueJSON("storedGuildLog", "");
 		window.location = window.location;
 	},
-	
+
 	toggleGuildLogFilterVisibility: function(evt) {
 		var filterID = evt.target.id;
 		var filterChecked = evt.target.checked;
@@ -11537,7 +11537,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var guildLogInjectTable = callback.guildLogInjectTable;
 		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
 		var doc=System.createDocument(responseText);
-		
+
 		var logTable = System.findNode("//table[tbody/tr/td[.='Message']]",doc);
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
@@ -11550,7 +11550,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		} else {
 			completeReload = false;
 		}
-		
+
 		var enableLogColoring = GM_getValue("enableLogColoring");
 		if (enableLogColoring) {
 			var lastCheckScreen = "lastGuildLogCheck";
@@ -11560,7 +11560,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		for (i=1;i<logTable.rows.length;i+=2) {
 			aRow = logTable.rows[i];
-			
+
 			var cellContents = aRow.cells[1].innerHTML;
 			cellContents = cellContents.substring(6,23);
 			postDateAsDate = System.parseDate(cellContents);
@@ -11727,12 +11727,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var page = System.findNode("//input[@name='page']", doc);
 		var curPage = parseInt(page.value,10);
 		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
-		
+
 		//fetch the next page (if necessary)
 		if (pageNumber < maxPage && pageNumber < maxPagesToFetch && !stopProcessingLogPages) {
 			var nextPage = parseInt(pageNumber+1,10);
 			loadingMessageInjectHere.innerHTML = 'Loading Page ' + (nextPage + 1) + " of " + Math.floor(maxPagesToFetch+1,maxPage) + "...";
-			System.xmlhttp('index.php?cmd=guild&subcmd=log&subcmd2=&page=' + nextPage + '&search_text=', Helper.parseGuildLogPage, 
+			System.xmlhttp('index.php?cmd=guild&subcmd=log&subcmd2=&page=' + nextPage + '&search_text=', Helper.parseGuildLogPage,
 				{"guildLogInjectTable": guildLogInjectTable, "pageNumber": nextPage, "loadingMessageInjectHere": loadingMessageInjectHere, "maxPagesToFetch": maxPagesToFetch, "completeReload": completeReload});
 		} else {
 			loadingMessageInjectHere.innerHTML = 'Loading Complete.';
@@ -11803,7 +11803,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
-									"[<a href='http://guide.fallensword.com/index.php?cmd=items&index=0&search_name="+nodes[i].textContent+"'>UFG</a>]</span>, "; 
+									"[<a href='http://guide.fallensword.com/index.php?cmd=items&index=0&search_name="+nodes[i].textContent+"'>UFG</a>]</span>, ";
 							}
 							Helper.getEachWearingItem(type+1);
 						}
@@ -11837,7 +11837,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				} else {
 					color="yellow";
 					//GM_log(Helper.wearingItems[type].suggest);
-					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(">"+Helper.wearingItems[type].wear+"<", 
+					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(">"+Helper.wearingItems[type].wear+"<",
 						"><font color=yellow>"+Helper.wearingItems[type].wear+"</font><");
 					//GM_log(Helper.wearingItems[type].suggest);
 				}
@@ -11849,18 +11849,18 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		content.innerHTML=newHtml+"</table>";
 	},
-	
+
 	addChatTextArea: function() {
 		if (!GM_getValue("enhanceChatTextEntry")) return;
 		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
-		if (!messageCell) { 
+		if (!messageCell) {
 			Helper.addChatTextAreaLeader();
 			return;
-				}	
+				}
 		Helper.addChatTextAreaNormal();
 		},
-			
-	addChatTextAreaNormal: function () {	
+
+	addChatTextAreaNormal: function () {
 		if (!GM_getValue("enhanceChatTextEntry")) return;
 		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
 		var chatConfirm=System.findNode("//input[@name='xc']");
@@ -11880,7 +11880,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		result += '</td></tr></tbody></table>';
 		result += '</form>';
 		messageCell.innerHTML = result;
-		
+
 		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
 	},
 
@@ -11902,11 +11902,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		result += '</td></tr></tbody></table>';
 		result += '</form>';
 		messageCell.innerHTML = result;
-		
+
 		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
 		;
 },
-	
+
 	updateTitanLogs: function() {
 		if (!GM_getValue("enableTitanLog")) return;
 		//need timer function
@@ -11920,12 +11920,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 		}
 	},
-	
+
 	parseScoutTower: function(responseText) {
 		if (responseText) {
 			var doc = System.createDocument(responseText);
 			var titanTable = System.findNode("//table[tbody/tr/td/font[.='Titan']]", doc);
-		} else {	
+		} else {
 			var titanTable = System.findNode("//table[tbody/tr/td/font[.='Titan']]");
 		}
 		var titanLog = System.getValueJSON("titanLog");
@@ -11953,7 +11953,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 							break;
 						}
 					}
-					
+
 					//if not already in the array, then add the titan to the array
 					if (!titanFoundInLog) {
 						titanLog.titans.push(titan);
@@ -11965,11 +11965,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			if (titanLog.titans.length > titanLogLength) {
 				titanLog.titans.splice(0, titanLog.titans.length - titanLogLength);
 			}
-			
+
 			//save the titanLog
 			titanLog.lastUpdate = new Date();
 			System.setValueJSON("titanLog", titanLog);
-			
+
 			//if on the scout tower screen, show the log
 			if (location.search == "?cmd=guild&subcmd=scouttower") {
 				var newRow = titanTable.insertRow(-1);
@@ -11989,7 +11989,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 							scoutTowerTitan.realm = aRow.cells[1].textContent;
 							titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
 							scoutTowerTitan.maxHP = titanHP[2]*1;
-							if (titanLogTitan.name == scoutTowerTitan.name && titanLogTitan.realm == scoutTowerTitan.realm 
+							if (titanLogTitan.name == scoutTowerTitan.name && titanLogTitan.realm == scoutTowerTitan.realm
 								&& titanLogTitan.maxHP == scoutTowerTitan.maxHP) {
 								displayTitan = false;
 								break;
@@ -12014,20 +12014,20 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 
 	},
-	
+
 	injectHomePageTwoLink: function() {
 		var viewNewsArchiveLink = System.findNode("//a[@href='index.php?cmd=&subcmd=viewarchive']");
 		if (viewNewsArchiveLink) {
 			viewNewsArchiveLink.parentNode.innerHTML += '&nbsp;<a href="index.php?cmd=&subcmd=viewarchive&subcmd2=&page=2&search_text=">View Archive Page 2</a>'
 		}
 	},
-	
+
 	injectNotepad: function() {
 		var textAreaNode = System.findNode("//textarea[@name='notes']");
 		textAreaNode.cols = 115;
 		textAreaNode.rows = 30;
 	},
-	
+
 	injectTempleAlert: function() {
 		//Checks to see if the temple is open for business.
 		if (!GM_getValue("enableTempleAlert")) return;
@@ -12045,7 +12045,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			System.xmlhttp("index.php?cmd=temple", Helper.parseTemplePage);
 		}
 	},
-	
+
 	parseTemplePage: function(responseText) {
 		//Checks to see if the temple is open for business.
 		if (!GM_getValue("enableTempleAlert")) return;
@@ -12064,7 +12064,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		GM_setValue("needToPray",needToPray);
 		System.setValueJSON("templeAlertLastUpdate", new Date());
 	},
-	
+
 	displayDisconnectedFromGodsMessage: function() {
 		var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
 		var LHSSidebarTable = logoutRow.parentNode.parentNode;
@@ -12087,11 +12087,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (characterVirtualLevel) levelToTest = characterVirtualLevel;
 		var pvpLowerLevelModifier = (levelToTest > 205)? 10:5;
 		var pvpUpperLevelModifier = (levelToTest >= 200)? 10:5;
-		findPlayerButton.parentNode.innerHTML += "&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
-			(levelToTest - pvpLowerLevelModifier) + "&search_level_max=" + (levelToTest + pvpUpperLevelModifier) + 
+		findPlayerButton.parentNode.innerHTML += "&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
+			(levelToTest - pvpLowerLevelModifier) + "&search_level_max=" + (levelToTest + pvpUpperLevelModifier) +
 			"&search_in_guild=0'><span style='color:blue;'>Get PvP targets</span></a>" +
-			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" + 
-			(levelToTest - 25) + "&search_level_max=" + (levelToTest + 25) + 
+			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
+			(levelToTest - 25) + "&search_level_max=" + (levelToTest + 25) +
 			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>";
 		if (!GM_getValue("showGoldOnFindPlayer")) return;
 		var findPlayerTable = System.findNode("//table[tbody/tr/td[.='Guild']]");
@@ -12130,7 +12130,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 		}
 	},
-	
+
 	findPlayerParseProfile: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
@@ -12150,7 +12150,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>'
 		}
 	},
-	
+
 	injectCreatures: function() {
 		var addUFSGWidgets = GM_getValue("addUFSGWidgets");
 		if (!addUFSGWidgets) return;
@@ -12165,7 +12165,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		creatureForm.appendChild(fetchCreatureDataDiv);
 		fetchCreatureDataDiv.addEventListener('click', Helper.fetchCreatureData, true);
 	},
-	
+
 	fetchCreatureData: function() {
 		var creatureTable = System.findNode("//table[@width='800']");
 		creatureTable.rows[0].cells[0].colSpan = '8';
@@ -12203,9 +12203,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			} else {
 				aRow.cells[0].colSpan = '8';
 			}
-		}		
+		}
 	},
-	
+
 	parseCreatureData: function(responseText, callback) {
 		var target = callback.row;
 		var doc = System.createDocument(responseText);
@@ -12222,7 +12222,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		target.cells[6].innerHTML = damageText;
 		target.cells[7].innerHTML = hpText;
 	},
-	
+
 	injectPvPLadder: function() {
 		var injectHere = System.findNode("//div[@class='innerContentPage']/p[2]");
 		space = document.createTextNode(' ');
@@ -12237,7 +12237,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		injectHere.appendChild(pvpLadderLookupVirtualLevelsSpan);
 		pvpLadderLookupVirtualLevelsSpan.addEventListener('click', Helper.pvpLadderLookupVirtualLevels, true);
 	},
-	
+
 	pvpLadderLookupVirtualLevels: function() {
 		var pvpLadderLookupVirtualLevelsSpan = System.findNode("//span[@id='pvpLadderLookupVirtualLevelsSpan']");
 		pvpLadderLookupVirtualLevelsSpan.style.display = "none";
@@ -12255,9 +12255,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			} else {
 				aRow.cells[0].colSpan = 4;
 			}
-		}		
+		}
 	},
-	
+
 	pvpLadderParseProfile: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
@@ -12273,7 +12273,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			target.style.backgroundColor = "#4671C8";
 		}
 	},
-	
+
 	injectFindBuffs: function() {
 		var content=Layout.notebookContent();
 		var buffList = Data.buffList();
@@ -12282,20 +12282,20 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
 		injectionText += '<tr><td rowspan="2" colspan="2" width="50%"><h1>Find Buff</h1></td>' +
 			'<td align="right" style="color:brown;">Select buff to search for:</td>';
-		
+
 		injectionText += '<td align="left"><select style="width:140px;" id="selectedBuff">';
 		for (var j = 0; j < buffList.length; j++) {
 			injectionText += '<option value="' + buffList[j].skillId + '">' + buffList[j].name + '</option>';
 		}
 		injectionText += '</select></td></tr>';
-		
+
 		injectionText += '<tr>' +
 			'<td align="right" style="color:brown;">Level 175 buffers only:</td><td align="left"><input id="level175" type="checkbox"></td></tr>';
 		injectionText += '<tr><td align="right" style="color:brown;" width="30%">Nicknames of buff searched:&nbsp;</td><td align="left" id="buffNicks">&nbsp;</td>' +
 			'<td align="right" style="color:brown;">Search guild members:</td><td align="left"><input id="guildMembers" type="checkbox" checked></td></tr>';
 		injectionText += '<tr>' +
 			'<td align="right" style="color:brown;"># potential buffers to search:&nbsp;</td><td align="left" id="potentialBuffers"></td>' +
-			'<td align="right" style="color:brown;">Search allies/enemies:' + 
+			'<td align="right" style="color:brown;">Search allies/enemies:' +
 				Helper.helpLink('Search Allies/Enemies', 'The checkbox enables searching your own personal allies/enemies list for buffs.<br><br>' +
 				'Additional profiles to search can be added in the text field to the right, separated by commas.') + '</td>' +
 			'<td align="left"><input id="alliesEnemies" type="checkbox" checked>' +
@@ -12321,7 +12321,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		document.getElementById("findbuffsbutton").addEventListener("click", Helper.findBuffsStart, true);
 		document.getElementById("clearresultsbutton").addEventListener("click", Helper.findBuffsClearResults, true);
 	},
-	
+
 	findBuffsClearResults: function(evt) {
 		var buffTable = document.getElementById("buffTable");
 		for (var j = buffTable.rows.length; j > 1; j--) {
@@ -12358,7 +12358,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		//get list of players to search, starting with guild>manage page
 		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.findBuffsParseGuildManagePage);
 	},
-	
+
 	findBuffsParseGuildManagePage: function(responseText) {
 		var doc = System.createDocument(responseText);
 		var memberTable = System.findNode("//table[tbody/tr/td[.='Rank']]", doc);
@@ -12388,7 +12388,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		//continue with profile pages
 		Helper.findBuffsParseProfilePageStart();
 	},
-	
+
 	findBuffsParseProfilePageStart: function() {
 		//if option enabled then parse profiles
 		Helper.profilePagesToSearch = new Array();
@@ -12437,7 +12437,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.findBuffsParseOnlinePlayersStart();
 		}
 	},
-	
+
 	findBuffsParseOnlinePlayersStart: function() {
 		//if option enabled then parse online players
 		Helper.onlinePlayersSetting = document.getElementById("onlinePlayers").value;
@@ -12447,7 +12447,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.findBuffsParsePlayersForBuffs();
 		}
 	},
-	
+
 	findBuffsParseOnlinePlayers: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var playerRows = System.findNodes("//table/tbody/tr[count(td)=4 and td[2]/a]", doc);
@@ -12476,7 +12476,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.findBuffsParsePlayersForBuffs();
 		}
 	},
-	
+
 	findBuffsParsePlayersForBuffs: function() {
 		//remove duplicates
 		Helper.onlinePlayers = Helper.onlinePlayers.removeDuplicates();
@@ -12495,7 +12495,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			System.xmlhttp(Helper.onlinePlayers[j], Helper.findBuffsParseProfileAndDisplay, {"href": Helper.onlinePlayers[j]});
 		}
 	},
-	
+
 	findBuffsParseProfileAndDisplay: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		//name and level
@@ -12518,26 +12518,22 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var buffNickArray = Helper.findBuffNicks.split(",");
 		var buffTable = document.getElementById("buffTable")
 		var textLineArray = new Array();
-		for (var j = 0; j < buffNickArray.length; j++) {
-			var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
-			var bioTextToSearch = bioCell.innerHTML;
-			if (buffNickArray[j].length < 3) {
-				var buffRE = new RegExp(buffNickArray[j].toUpperCase());
-			} else {
-				var buffRE = new RegExp(buffNickArray[j], 'i');
-			}
-			while (buffPosition != -1) {
-				bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
-				buffPosition = bioTextToSearch.search(buffRE);
-				if (buffPosition != -1) {
-					startingPosition = buffPosition + 1;
-					runningTotalPosition += buffPosition;
-					var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition);
-					var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
-					var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
-					textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
-					textLineArray.push(textLine);
-				}
+		var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
+		var bioTextToSearch = " "+bioCell.innerHTML+" ";
+		var buffRE = new RegExp("[^a-zA-Z](("+Helper.findBuffNicks.replace(/,/g,")|(")+"))[^a-zA-Z]", 'i');
+		while (buffPosition != -1) {
+			bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
+			buffPosition = bioTextToSearch.search(buffRE);
+			if (buffPosition != -1) {
+				startingPosition = buffPosition + 1;
+				runningTotalPosition += buffPosition;
+				var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition-1);
+				if (prevBR==-1) prevBR=0;
+				var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
+				if (nextBR==-1) nextBr=bioCell.innerHTML.length-5;
+				var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
+				textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+				textLineArray.push(textLine);
 			}
 		}
 		textLineArray = textLineArray.removeDuplicates();
@@ -12547,7 +12543,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
 			var sustainLevelRE = /Level<br>(\d+)%/;
 			var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
-		} else {	
+		} else {
 			sustainLevel = -1;
 		}
 		//extend
@@ -12564,13 +12560,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
 			}
 			playerHREF = callback.href;
-			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new">' + playerName + '</a>' + 
+			var bioTip = bioCell.innerHTML.replace(/'|"|\n/g,"");
+			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
+				'onmouseover=\'Tip("'+bioTip+'");\'>' + playerName + '</a>' +
 				'&nbsp;<span style="color:blue;">[<a href="index.php?cmd=message&target_player=' + playerName +'" target="new">m</a>]</span>' + '</nobr><br>' +
 				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
 			//player info cell
 			var newCell = newRow.insertCell(1);
 			var playerInfo = '<table><tbody><tr><td colspan="2" style="color:gray;" align="right" width="50%">Last Activity:</td><td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>';
-			playerInfo += '<tr><td style="color:gray;" align="right" width="25%">Sustain:</td><td width="25%" style="color:' + (sustainLevel>=100?'green':'red') + ';">' + sustainLevel + '%</td>' + 
+			playerInfo += '<tr><td style="color:gray;" align="right" width="25%">Sustain:</td><td width="25%" style="color:' + (sustainLevel>=100?'green':'red') + ';">' + sustainLevel + '%</td>' +
 				'<td width="25%" style="color:gray;" align="right">Extend:</td><td width="25%">' + (hasExtendBuff?'<span style="color:green;">Yes</span>':'<span style="color:red;">No</span>') + '</td></tr>';
 			newCell.innerHTML = playerInfo;
 			newCell.style.verticalAlign = 'top';
@@ -12598,7 +12596,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		injectHere.innerHTML = '<span id="warningMessage" style="color:green;">Gathering active buffs ... please wait ... </span>';
 		System.xmlhttp("index.php?cmd=profile", Helper.parseProfileAndPostWarnings);
 	},
-	
+
 	parseProfileAndPostWarnings: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		var activeBuffs = System.findNodes("//img[contains(@src,'/skills/')]", doc);
