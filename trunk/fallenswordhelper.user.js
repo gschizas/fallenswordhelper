@@ -3813,6 +3813,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		case 98: // backpack [b]
 			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
+		case 115: // use stairs [s]
+			Helper.useStairs();
+			break;
 		case 116: // quick buy [t]
 			Helper.quickBuyItem();
 			break;
@@ -7060,6 +7063,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 
 		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
+		if (!allItems) return;
 		var memberList=System.getValueJSON("memberlist");
 		var onlineIMG = '<img src="' + System.imageServer + '/skin/online.gif" width=10 height="10" title="Online">';
 		var offlineIMG = '<img src="' + System.imageServer + '/skin/offline.gif" width=10 height="10" title="Offline">';
@@ -12067,6 +12071,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	displayDisconnectedFromGodsMessage: function() {
 		var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
+		if (!logoutRow) return;
 		var LHSSidebarTable = logoutRow.parentNode.parentNode;
 		var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
 		var newCell=newRow.insertCell(0);
@@ -12618,6 +12623,14 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var warningMessage = document.getElementById("warningMessage")
 		warningMessage.innerHTML = 'Done';
 		warningMessage.style.color = 'blue';
+	},
+
+	useStairs: function() {
+		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
+		var stairwayIDElement = System.findNode("//input[@name='stairway_id']");
+		if (stairwayIDElement) {
+			window.location = "index.php?cmd=world&subcmd=usestairs&stairway_id=" + stairwayIDElement.value;
+		}
 	}
 };
 
