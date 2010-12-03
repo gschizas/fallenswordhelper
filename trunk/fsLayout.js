@@ -40,7 +40,8 @@ var Layout = {
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
 		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 7);		
-		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 9);		
+		Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 9);		
+		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 11);		
 	},
 	
 	injectItemIntoMenuTable: function(tableElement, text, href, position) {

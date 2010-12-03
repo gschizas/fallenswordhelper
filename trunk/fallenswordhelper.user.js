@@ -675,6 +675,9 @@ var Helper = {
 			case "findbuffs":
 				Helper.injectFindBuffs();
 				break;
+			case "findother":
+				Helper.injectFindOther();
+				break;
 			default:
 				Helper.injectNotepad();
 				break;
@@ -12304,6 +12307,77 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		Helper.findBuffsLevel175Only = document.getElementById("level175").checked;
 		document.getElementById("buffersProcessed").innerHTML = 0;
 		Helper.onlinePlayers = new Array();
+		Helper.extraProfile = document.getElementById("extraProfile").value;
+		GM_setValue("extraProfile", Helper.extraProfile);
+		//get list of players to search, starting with guild>manage page
+		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.findBuffsParseGuildManagePage);
+	},
+
+	injectFindOther: function() {
+		var content=Layout.notebookContent();
+		var buffList = Data.buffList();
+		var injectionText = '';
+		var textToSearchFor = GM_getValue("textToSearchFor");
+		var extraProfile = GM_getValue("extraProfile");
+		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
+		injectionText += '<tr><td rowspan="2" colspan="2" width="50%"><h1>Find Other</h1></td>' +
+			'<td align="right" style="color:brown;">Select text to search for:</td>';
+
+		injectionText += '<td align="left"><input style="width:140px;" class="custominput" id="textToSearchFor" type="text" title="Text to search for" value="' + (textToSearchFor?textToSearchFor:'') + '"></td></tr>';
+
+		injectionText += '<tr>' +
+			'<td align="right" style="color:brown;">Level 500+ players only:</td><td align="left"><input id="level175" type="checkbox"></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;" width="30%">Text searched for:&nbsp;</td><td align="left" id="buffNicks">&nbsp;</td>' +
+			'<td align="right" style="color:brown;">Search guild members:</td><td align="left"><input id="guildMembers" type="checkbox" checked></td></tr>';
+		injectionText += '<tr>' +
+			'<td align="right" style="color:brown;"># potential players to search:&nbsp;</td><td align="left" id="potentialBuffers"></td>' +
+			'<td align="right" style="color:brown;">Search allies/enemies:' +
+				Helper.helpLink('Search Allies/Enemies', 'The checkbox enables searching your own personal allies/enemies list for buffs.<br><br>' +
+				'Additional profiles to search can be added in the text field to the right, separated by commas.') + '</td>' +
+			'<td align="left"><input id="alliesEnemies" type="checkbox" checked>' +
+				'<input style="width:118px;" class="custominput" id="extraProfile" type="text" title="Extra profiles to search" value="' + (extraProfile?extraProfile:'') + '"></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;"># Players processed:&nbsp;</td><td align="left" id="buffersProcessed">0</td>' +
+			'<td align="right" style="color:brown;">Search online list:</td><td align="left"><select style="width:140px;" id="onlinePlayers">' +
+				'<option value="0">Disabled</option>' +
+				'<option value="49">Short (fastest)</option>' +
+				'<option value="47">Medium (medium)</option>' +
+				'<option value="45">Long (slowest)</option>' +
+				'</select></td></tr>';
+		injectionText += '<tr><td align="right" style="color:brown;">Find Other progress:&nbsp;</td><td align="left" width="310" id="bufferProgress">Idle</td>'+
+			'<td align="center"><input id="clearresultsbutton" class="custombutton" type="button" value="Clear Results"></td><td align="center"><input id="findbuffsbutton" class="custombutton" type="button" value="Find Buffers"></td></tr>';
+		injectionText += '</tbody></table><br>';
+		injectionText += '<h1>Potential Players and Bio Info</h1><br>';
+		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
+		injectionText += '<tr><th width="120">&nbsp;Name</th><th width="200">&nbsp;Player Info</th><th>&nbsp;Notable Bio Text</th></tr>';
+		injectionText += '</tbody></table><br>';
+		injectionText += '<div style="font-size:xx-small; color:brown; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
+			'It is not as smart as you are, so please do not judge the results too harshly. It does not search all online players, just a subset of those that have been on recently. ' +
+			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
+		content.innerHTML = injectionText;
+		document.getElementById("findbuffsbutton").addEventListener("click", Helper.findOtherStart, true);
+		document.getElementById("clearresultsbutton").addEventListener("click", Helper.findBuffsClearResults, true);
+	},
+
+	findOtherStart: function(evt) {
+		var textToSearchFor = System.findNode("//input[@id='textToSearchFor']").value;
+		//use existing array structure to save search text ...
+		var textArray=textToSearchFor.split(",");
+		var tempArray = new Array();
+		for (i=0;i<textArray.length;i++) {
+			tempArray.push(textArray[i].trim());
+		}
+		textToSearchFor = tempArray.join(",");
+		Helper.findBuffNicks = textToSearchFor;
+		Helper.findBuffMinCastLevel = 1;
+
+		document.getElementById("buffNicks").innerHTML = Helper.findBuffNicks;
+		var bufferProgress = document.getElementById("bufferProgress");
+		bufferProgress.innerHTML = 'Gathering list of profiles to search ...';
+		bufferProgress.style.color = 'green';
+		Helper.findBuffsLevel175Only = document.getElementById("level175").checked;
+		document.getElementById("buffersProcessed").innerHTML = 0;
+		Helper.onlinePlayers = new Array();
+		GM_setValue("textToSearchFor", textToSearchFor);
 		Helper.extraProfile = document.getElementById("extraProfile").value;
 		GM_setValue("extraProfile", Helper.extraProfile);
 		//get list of players to search, starting with guild>manage page
