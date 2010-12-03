@@ -740,9 +740,6 @@ var Helper = {
 		case "findplayer":
 			Helper.injectFindPlayer();
 			break;
-		case "pvpladder":
-			Helper.injectPvPLadder();
-			break;
 		case "relic":
 			Helper.injectRelic();
 			break;
@@ -11879,8 +11876,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		result += '</td><td>';
 		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
 		result += '</td><tr><td>';
+		//if(!confirm('Are you sure you wish to send this a mass message to all guild members?')) return false;
 		result += '<input class="custominput" type="submit" value="Send As Mass" name="submit" ' +
-			'onClick="window.confirm(\'Are you sure you want to send a mass message?\')"/>';
+			'onClick="if(!confirm(\'Are you sure you wish to send this a mass message to all guild members?\')) return false;"/>';
 		result += '</td></tr></tbody></table>';
 		result += '</form>';
 		messageCell.innerHTML = result;
@@ -12138,18 +12136,17 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	findPlayerParseProfile: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
-		var pvpElement = System.findNode("./tbody/tr/td[b[contains(.,'PvP')]]", statisticsTable);
+		var pvpElement = System.findNode("//tbody/tr/td[b/a[contains(.,'PvP') and contains(.,'Rating')]]", doc);
 		var pvpValue = pvpElement.nextSibling;
 		var findPlayerPvPElement = document.getElementById("PvP" + callback.href);
 		findPlayerPvPElement.innerHTML = pvpValue.textContent;
-		var goldElement = System.findNode("./tbody/tr/td[b[contains(.,'Gold:')]]", statisticsTable);
+		var goldElement = System.findNode("//tbody/tr/td[b[contains(.,'Gold:')]]", doc);
 		var goldValue = goldElement.nextSibling;
 		document.getElementById("Gold" + callback.href).innerHTML = goldValue.textContent;
 		//add VL if not equal to current level
-		var levelElement = System.findNode("./tbody/tr/td[b[contains(.,'Level:')]]", statisticsTable);
+		var levelElement = System.findNode("//tbody/tr/td[b[contains(.,'Level:')]]", doc);
 		var levelValue = levelElement.nextSibling;
-		var virtualLevelElement = System.findNode("./tbody/tr/td[b[.='VL']]", statisticsTable);
+		var virtualLevelElement = System.findNode("//tbody/tr/td[b[.='VL']]", doc);
 		var virtualLevelValue = virtualLevelElement.nextSibling;
 		if (parseInt(levelValue.textContent,10) != parseInt(virtualLevelValue.textContent,10)) {
 			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>'
@@ -12226,57 +12223,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		target.cells[5].innerHTML = armorText;
 		target.cells[6].innerHTML = damageText;
 		target.cells[7].innerHTML = hpText;
-	},
-
-	injectPvPLadder: function() {
-		var injectHere = System.findNode("//div[@class='innerContentPage']/p[2]");
-		space = document.createTextNode(' ');
-		injectHere.appendChild(space);
-		var pvpLadderLookupVirtualLevelsSpan = document.createElement("SPAN");
-		pvpLadderLookupVirtualLevelsSpan.innerHTML = "Lookup Virtual Levels";
-		pvpLadderLookupVirtualLevelsSpan.style.cursor = "pointer";
-		pvpLadderLookupVirtualLevelsSpan.style.textDecoration = "underline";
-		pvpLadderLookupVirtualLevelsSpan.style.color = "blue";
-		pvpLadderLookupVirtualLevelsSpan.style.fontSize = "x-small";
-		pvpLadderLookupVirtualLevelsSpan.id = "pvpLadderLookupVirtualLevelsSpan";
-		injectHere.appendChild(pvpLadderLookupVirtualLevelsSpan);
-		pvpLadderLookupVirtualLevelsSpan.addEventListener('click', Helper.pvpLadderLookupVirtualLevels, true);
-	},
-
-	pvpLadderLookupVirtualLevels: function() {
-		var pvpLadderLookupVirtualLevelsSpan = System.findNode("//span[@id='pvpLadderLookupVirtualLevelsSpan']");
-		pvpLadderLookupVirtualLevelsSpan.style.display = "none";
-		pvpLadderLookupVirtualLevelsSpan.visibility = "hidden";
-		var currentLadderTable = System.findNode("//td[h2[.='Current PvP Ladder']]/table");
-		var newCell = currentLadderTable.rows[0].insertCell(2);
-		newCell.className = "header";
-		newCell.innerHTML = "VL";
-		for (var i=1; i<currentLadderTable.rows.length; i++) {
-			aRow = currentLadderTable.rows[i];
-			if (aRow.cells[1]) {
-				newCell = aRow.insertCell(2);
-				var playerHREF = aRow.cells[1].firstChild.getAttribute("href");
-				System.xmlhttp(playerHREF, Helper.pvpLadderParseProfile, {"injectNode": newCell});
-			} else {
-				aRow.cells[0].colSpan = 4;
-			}
-		}
-	},
-
-	pvpLadderParseProfile: function(responseText, callback) {
-		var doc = System.createDocument(responseText);
-		var statisticsTable = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
-		var virtualLevelElement = System.findNode("./tbody/tr/td[b[.='VL']]", statisticsTable);
-		var virtualLevelValue = virtualLevelElement.nextSibling;
-		var target = callback.injectNode;
-		var playerVirtualLevel = parseInt(virtualLevelValue.textContent,10);
-		target.innerHTML = '&nbsp;<span style="color:blue;">' + playerVirtualLevel + '</span>';
-		var levelToTest = Helper.characterLevel;
-		var characterVirtualLevel = GM_getValue('characterVirtualLevel');
-		if (characterVirtualLevel) levelToTest = characterVirtualLevel;
-		if (Math.abs(playerVirtualLevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
-			target.style.backgroundColor = "#4671C8";
-		}
 	},
 
 	injectFindBuffs: function() {
