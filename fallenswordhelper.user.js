@@ -4486,7 +4486,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						if (winningBidValue != "-") {
 							var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
 							var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
-							overBid = Math.min(overBid,buyNow);
+							if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
 							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
 								System.addCommas(overBid) + '</span>&nbsp';
 							if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
