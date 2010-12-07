@@ -7729,8 +7729,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		resultText += "</table>";
 
 		var statistics = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
+		if (!statistics) statistics = System.findNode("//div[strong[contains(.,'Character Stats')]]/following-sibling::div[1]/table", doc);
 		statistics.style.backgroundImage = 'url(' + System.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
-		var staminaCell = statistics.rows[7].cells[1].firstChild.rows[0].cells[0];
+		var staminaCell = statistics.rows[6].cells[1].firstChild.rows[0].cells[0];
 		var curStamina = System.intValue(staminaCell.textContent.split("/")[0]);
 		var maxStamina = System.intValue(staminaCell.textContent.split("/")[1]);
 		staminaCell.textContent += "(" + Math.round((100.0*curStamina)/(1.0*maxStamina)) + "%)";
