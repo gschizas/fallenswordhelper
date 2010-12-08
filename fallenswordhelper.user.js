@@ -10885,7 +10885,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")),
 					function (responseText, callBack) {
 						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
-
 						if (plantRE.exec(responseText)) {
 							if (checkbox.checked)
 								checkbox.checked = false;
@@ -10929,38 +10928,20 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	makeSelectAllInTrade: function(injectHere) { // currently reuse FSH code, this should be changed to SS2H code which is cleaner
-		injectHere.innerHTML += 'Check: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
-			'All Items</span> &ensp ' +
-
-			'<span plantRE="Heffle|Trinettle|Blood Bloom|Jademare|DarkShade" style="cursor:pointer; text-decoration:underline;"' +
-			'id="Helper:checkAllPlants">All Plants</span> &ensp ' +
-
-			'<span plantRE="Heffle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllHeffle">' +
-			'Heffle</span> &ensp ' +
-
-			'<span plantRE="Trinettle" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllTrinettle">' +
-			'Trinettle</span>\f &emsp &emsp &ensp &ensp' +
-
-			'<span plantRE="Blood Bloom" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllBloom">' +
-			'Blood Bloom</span> &ensp' +
-
-			'<span plantRE="Jademare" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllJade">' +
-			'Jademare</span> &ensp ' +
-
-			'<span plantRE="Dark Shade" style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllShade">' +
-			'Dark Shade</span>' +
-
-			'<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
-
+	makeSelectAllInTrade: function(injectHere) { 
+		var itemList=[[" Trinettle<", "Trinettle"], [">Heffle<", "Heffle"], [">Amber<", "Amber"], [">Amethyst Weed<", "Amethyst Weed"], [">Blood Bloom<", "Blood Bloom"], [">Cerulean Rose<", "Cerulean Rose"], [">Dark Shade<", "Dark Shade"], [">Deathbloom<", "Deathbloom"], [">Deathly Mold<", "Deathly Mold"], [">Greenskin Fungus<", "Greenskin Fungus"], [">Jademare<", "Jademare"], [">Ruby Thistle<", "Ruby Thistle"], [">Viridian Vine<", "Viridian Vine"]];
+		var output = 'Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
+			'All Items</span> &ensp ';
+		for (var i=0;i<itemList.length;i++) {
+			output += '<span plantRE="'+itemList[i][1]+'" style="cursor:pointer; text-decoration:underline;"' +
+				'id="Helper:checkAll'+i+'">'+itemList[i][1]+'</span> &ensp' ;
+		}
+		output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
+		injectHere.innerHTML += output;
+		for (var i=0;i<itemList.length;i++) {
+			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
+		}
 		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
-		document.getElementById("Helper:checkAllPlants").addEventListener('click', Helper.toggleCheckAllPlants, true);
-		document.getElementById("Helper:checkAllHeffle").addEventListener('click', Helper.toggleCheckAllPlants, true);
-		document.getElementById("Helper:checkAllTrinettle").addEventListener('click', Helper.toggleCheckAllPlants, true);
-		document.getElementById("Helper:checkAllBloom").addEventListener('click', Helper.toggleCheckAllPlants, true);
-		document.getElementById("Helper:checkAllJade").addEventListener('click', Helper.toggleCheckAllPlants, true);
-		document.getElementById("Helper:checkAllShade").addEventListener('click', Helper.toggleCheckAllPlants, true);
-
 		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getFolderName2Trade, true);
 	},
 
