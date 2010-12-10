@@ -10929,12 +10929,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	makeSelectAllInTrade: function(injectHere) { 
-		var itemList=[[" Trinettle<", "Trinettle"], [">Heffle<", "Heffle"], [">Amber<", "Amber"], [">Amethyst Weed<", "Amethyst Weed"], [">Blood Bloom<", "Blood Bloom"], [">Cerulean Rose<", "Cerulean Rose"], [">Dark Shade<", "Dark Shade"], [">Deathbloom<", "Deathbloom"], [">Deathly Mold<", "Deathly Mold"], [">Greenskin Fungus<", "Greenskin Fungus"], [">Jademare<", "Jademare"], [">Ruby Thistle<", "Ruby Thistle"], [">Viridian Vine<", "Viridian Vine"]];
+		var space = new String(' &nbsp ');
+		var itemList=[["All Resources", "Resource"], ["Amber", "Amber"], ["Amethyst Weed", "Amethyst Weed"], ["Blood Bloom", "Blood Bloom"], ["Cerulean Rose", "Cerulean Rose"], ["Dark Shade", "Dark Shade"], ["Deathbloom", "Deathbloom"], ["Deathly Mold", "Deathly Mold"], ["Greenskin\u00A0Fungus", "Greenskin Fungus"], ["Heffle", "Heffle"], ["Jademare", "Jademare"], ["Ruby Thistle", "Ruby Thistle"], ["Trinettle", "Trinettle"], ["Viridian\u00A0Vine", "Viridian Vine"]];
 		var output = 'Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
 			'All Items</span> &ensp ';
 		for (var i=0;i<itemList.length;i++) {
 			output += '<span plantRE="'+itemList[i][1]+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'">'+itemList[i][1]+'</span> &ensp' ;
+				'id="Helper:checkAll'+i+'">'+itemList[i][0]+'</span> &ensp' ;
 		}
 		output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
 		injectHere.innerHTML += output;
