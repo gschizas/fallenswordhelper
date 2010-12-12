@@ -12620,6 +12620,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				anItem=activeBuffs[i];
 				var onmouseover = anItem.getAttribute("onmouseover");
 				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: ((\d+))\)/;
+				if (!buffRE.exec(onmouseover)) continue;
 				var buffName = buffRE.exec(onmouseover)[1];
 				var buffLevel = buffRE.exec(onmouseover)[2];
 				var rpPackBuff = System.findNodes("//a[contains(@onmouseover,'" + buffName + " Level " + buffLevel + "')]");
