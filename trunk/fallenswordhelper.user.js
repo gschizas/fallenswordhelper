@@ -9852,7 +9852,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
 		}
 		if (GM_getValue("enterForSendMessage")) {
-			document.getElementsByName("msg")[0].addEventListener('keypress', function(evt) {
+			System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").addEventListener('keypress', function(evt) {
 				var r = evt.charCode;
 				var s = evt.keyCode;
 				if (r === 0 & s == 13 & !evt.shiftKey) {
@@ -9893,7 +9893,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	useQuickMsg: function(evt) {
 		var targetPlayer = System.findNode("//input[@name='target_player']").value;
 		var quickMsgId = evt.target.getAttribute("quickMsgId");
-		System.findNode("//textarea[@name='msg']").value +=
+		System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value +=
 			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
 	},
 
@@ -9906,12 +9906,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var hasCostTag = greetingText.indexOf("{cost}") != -1;
 			greetingText = greetingText.replace(/{playername}/g, targetPlayer);
 			if (!hasBuffTag) {
-				System.findNode("//textarea[@name='msg']").value =  greetingText + " " + GM_getValue("buffsToBuy");
+				System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value =  greetingText + " " + GM_getValue("buffsToBuy");
 			} else {
 				if (!hasCostTag) {
-					System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
+					System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
 				} else {
-					System.findNode("//textarea[@name='msg']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`").replace(/{cost}/g, GM_getValue("buffCostTotalText"));
+					System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`").replace(/{cost}/g, GM_getValue("buffCostTotalText"));
 				}
 			}
 			GM_setValue("buffsToBuy", "");
