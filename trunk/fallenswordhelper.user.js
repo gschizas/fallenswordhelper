@@ -1578,6 +1578,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				playerHPValue = hpLocation.textContent;
 			}
 		}
+		if (playerAttackValue && playerAttackValue.indexOf("Hidden")>0) playerAttackValue = 5000;
+		if (playerDefenseValue && playerDefenseValue.indexOf("Hidden")>0) playerDefenseValue = 5000;
+		if (playerArmorValue && playerArmorValue.indexOf("Hidden")>0) playerArmorValue = 5000;
+		if (playerDamageValue && playerDamageValue.indexOf("Hidden")>0) playerDamageValue = 5000;
+		if (playerHPValue && playerHPValue.indexOf("Hidden")>0) playerHPValue = 200;
 
 		if (defenderCount !== 0) {
 			var defenderMultiplier       = 0.2;
@@ -10928,7 +10933,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	makeSelectAllInTrade: function(injectHere) { 
+	makeSelectAllInTrade: function(injectHere) {
 		var space = new String(' &nbsp ');
 		var itemList=[["All Resources", "Resource"], ["Amber", "Amber"], ["Amethyst Weed", "Amethyst Weed"], ["Blood Bloom", "Blood Bloom"], ["Cerulean Rose", "Cerulean Rose"], ["Dark Shade", "Dark Shade"], ["Deathbloom", "Deathbloom"], ["Deathly Mold", "Deathly Mold"], ["Greenskin\u00A0Fungus", "Greenskin Fungus"], ["Heffle", "Heffle"], ["Jademare", "Jademare"], ["Ruby Thistle", "Ruby Thistle"], ["Trinettle", "Trinettle"], ["Viridian\u00A0Vine", "Viridian Vine"]];
 		var output = 'Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
