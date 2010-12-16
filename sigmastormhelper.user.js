@@ -268,7 +268,6 @@ var Helper = {
 			Helper.replaceKeyHandler();
 			Helper.injectWorldWidgets();
 			Helper.injectFSBoxLog();
-			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
 			Helper.injectTHsearch();
 		}
@@ -580,20 +579,6 @@ var Helper = {
 				Helper.injectAdvisor(subPage2Id);
 			}
 			break;
-		}
-	},
-
-	fixOnlineGuildBuffLinks: function() {
-		var buffLinks = System.findNodes("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
-		if (buffLinks) {
-			for (var i=0; i<buffLinks.length; i++){
-				var buffLink = buffLinks[i];
-				var oldHref = buffLink.getAttribute('href');
-				var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
-				if (playerName) {
-					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&t=" + playerName[1] + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
-				}
-			}
 		}
 	},
 
@@ -3090,10 +3075,6 @@ var Helper = {
 		case 124: // quick use items "|"
 			Helper.quickUse('', {'id':((r==124?127:r)-123)/2,'arrayId':0});
 			break;
-		case 19: // quick buffs
-			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
-			GM_openInTab(System.server + "index.php?cmd=quickbuff");
-			break;
 		case 48: // return to world [0]
 			window.location = 'index.php?cmd=world';
 			break;
@@ -3219,10 +3200,10 @@ var Helper = {
 					addBuffTag = false;
 				}
 				if (logScreen == 'Chat' && addBuffTag) {
-					var playerIDRE = /player_id=(\d+)/;
-					var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
-					aRow.cells[1].innerHTML += " <a style='color:#ADB5B5;font-size:10px;' href=\"javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID +
-						"', 'fsQuickBuff', width=618, height=800, 'scrollbars')\">[b]</a>";
+					var playerIDRE = /player_id=\d+">([^<]+)</;
+					var playerName = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
+					aRow.cells[1].innerHTML += " <a style='color:#ADB5B5;font-size:10px;' href=\"javascript:openQuickBuffDialog('"+playerName+"');" +
+						">[b]</a>";
 			}
 		}
 		}
@@ -3313,7 +3294,7 @@ var Helper = {
 							extraText += " | <a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 							"'>Ignore</a>";
 						}
-						extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a> ]</nobr></span>";
+						extraText += " | <a " + Layout.quickBuffHref(playerName) + ">Buff</a> ]</nobr></span>";
 						aRow.cells[2].innerHTML += extraText;
 					}
 				}
@@ -4522,7 +4503,7 @@ var Helper = {
 
 			newhtml = avyrow.parentNode.innerHTML +
 				"</td></tr><tr><td align='center' colspan='2'>" +
-				"<a " + Layout.quickBuffHref(playerid) + ">" +
+				"<a " + Layout.quickBuffHref(playername) + ">" +
 				"<img alt='Buff " + playername + "' title='Buff " + playername + "' src=" +
 				System.imageServer + "/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;" +
 				"<a href='" + System.server + "index.php?cmd=guild&subcmd=groups&subcmd2=joinall" +
@@ -6122,7 +6103,7 @@ var Helper = {
 						theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + i + "'><span style='color:blue; font-size:x-small;'>"+
 							"Buff All</span></a></nobr>";
 						var buffAllLink = System.findNode("//a[@id='buffAll" + i + "']");
-						buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + listOfDefenders + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+						buffAllLink.setAttribute("href","javascript:openQuickBuffDialog('"+listOfDefenders+"');");
 						break;
 					}
 				}
@@ -8344,7 +8325,7 @@ var Helper = {
 			var contact=onlineAlliesEnemies[i];
 			output += "<li style='padding-bottom:0px;'>"
 			output += "<a style='color:#CCFF99;font-size:10px;' "
-			output += Layout.quickBuffHref(contact.id) + ">[b]</a>&nbsp;";
+			output += Layout.quickBuffHref(contact.name) + ">[b]</a>&nbsp;";
 			if (contact.id!=playerId) {
 				output += "<a style=\"color:#A0CFEC;font-size:10px;\" "
 				output += "href=\"" + System.server + "index.php?cmd=message&target_player=" + contact.name + "\">[m]";

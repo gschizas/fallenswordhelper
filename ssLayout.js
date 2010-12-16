@@ -81,9 +81,8 @@ var Layout = {
 			'egAAAABJRU5ErkJggg==" width="16" height="16" />';
 	},
 
-	quickBuffHref: function(playerId, innerText) {
-		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
-			"', 'fsQuickBuff', 618, 800, ',scrollbars')\"";
+	quickBuffHref: function(playerName, innerText) {
+		return "href=\"javascript:openQuickBuffDialog('" + playerName + "');\"";
 	},
 
 	formatWiki: function(aText, oldVersion, newVersion) {
