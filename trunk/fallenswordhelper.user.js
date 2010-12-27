@@ -2841,11 +2841,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 			if (hideBuffSelected) {
 				var lineBreak = onlineMembersTable.nextSibling.nextSibling;
-				lineBreak.style.display = 'none';
-				var actionsFontItalic = lineBreak.nextSibling.nextSibling.firstChild;
-				actionsFontItalic.style.display = 'none';
-				var buffSelectedTable = actionsFontItalic.nextSibling.nextSibling;
-				buffSelectedTable.style.display = 'none';
+				if (lineBreak) {
+					lineBreak.style.display = 'none';
+					var actionsFontItalic = lineBreak.nextSibling.nextSibling.firstChild;
+					actionsFontItalic.style.display = 'none';
+					var buffSelectedTable = actionsFontItalic.nextSibling.nextSibling;
+					buffSelectedTable.style.display = 'none';
+				}
 			}
 		}
 	},
@@ -2891,11 +2893,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 			if (hideBuffSelected) {
 				var lineBreak = onlineAlliesTable.nextSibling.nextSibling;
-				lineBreak.style.display = 'none';
-				var actionsFont = lineBreak.nextSibling.nextSibling;
-				actionsFont.style.display = 'none';
-				var buffSelectedTable = actionsFont.nextSibling.nextSibling;
-				buffSelectedTable.style.display = 'none';
+				if (lineBreak) {
+					lineBreak.style.display = 'none';
+					var actionsFont = lineBreak.nextSibling.nextSibling;
+					actionsFont.style.display = 'none';
+					var buffSelectedTable = actionsFont.nextSibling.nextSibling;
+					buffSelectedTable.style.display = 'none';
+				}
 			}
 		}
 	},
