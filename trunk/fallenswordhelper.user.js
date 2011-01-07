@@ -157,6 +157,7 @@ var Helper = {
 		System.setDefault("enableQuickDrink", true);
 		System.setDefault("enhanceOnlineDots", true);
 		System.setDefault("hideBuffSelected", true);
+		System.setDefault("enableFastWalk", true);
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
@@ -1924,7 +1925,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	position: function() {
 		var result = {};
 		if (Helper.page=="world/map/-(-)") {
-			var playerTile=System.findNode("//img[contains(@src,'player_tile.gif')]/../../../../../..");
+			var playerTile=System.findNode("//img/ancestor::td[@background]");
 			result.X=playerTile.cellIndex;
 			result.Y=playerTile.parentNode.rowIndex;
 			result.type="worldmap";
@@ -2600,6 +2601,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		} catch (err) {
 			//just eat it and move on
 		}
+		var currentLocation = System.findNode("//td[contains(@background,'/realm_top_b4.jpg')]");
+		if (currentLocation) {
+			var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.textContent)
+			Helper.xLocation = parseInt(locationRE[1],10);
+			Helper.yLocation = parseInt(locationRE[2],10);
+		}
+		
 		Helper.mapThis();
 		Helper.showMap(false);
 
@@ -2905,6 +2913,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	injectWorldMap: function() {
+		var playerTile=System.findNode("//img/ancestor::td[@background]");
+		if (playerTile) {
+			Helper.xLocation = playerTile.cellIndex;
+			Helper.yLocation = playerTile.parentNode.rowIndex;
+		}
 		Helper.showMap(true);
 	},
 
@@ -3734,12 +3747,24 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	moveMe: function(dx, dy) {
 		var pos=Helper.position();
+		var enableFastWalk = GM_getValue('enableFastWalk');
 		if (pos) {
 			if (pos.type=="normal") {
-				window.location = 'index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy);
+				//if fast walk is enabled then use the stored location, otherwise look it up
+				var xCoord = (enableFastWalk?Helper.xLocation:pos.X);
+				var yCoord = (enableFastWalk?Helper.yLocation:pos.Y);
+				window.location = 'index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy);
+				Helper.xLocation+=dx;
+				Helper.yLocation+=dy;
 			}
 			if (pos.type=="worldmap") {
-				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (pos.X+dx) + '&y=' + (pos.Y+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
+				//if fast walk is enabled then use the stored location, otherwise look it up
+				var xCoord = (enableFastWalk?Helper.xLocation:pos.X);
+				var yCoord = (enableFastWalk?Helper.yLocation:pos.Y);
+				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
+				Helper.xLocation+=dx;
+				Helper.yLocation+=dy;
+				
 			}
 		}
 	},
@@ -9031,6 +9056,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show FSG icon' + Helper.helpLink('Show FSG icon', 'This will show the FSG icon on the world page that links to the map for the page.') +
 				':</td><td><input name="showFSGIcon" type="checkbox" value="on"' + (GM_getValue("showFSGIcon")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Enable Fast Walk' + Helper.helpLink('Enable Fast Walk', 'This functionality will allow the user to send multiple move commands, each subsequent one assuming that the previous one succeeded. ' + 
+				'It does not check for blocked squares, not does it check to make sure that the move commands arrived at the server in the right order. Depending on the lag you experience, the user may have to pause slightly ' +
+				'between each move to make sure they reach the server in the right order.') +
+				':</td><td><input name="enableFastWalk" type="checkbox" value="on"' + (GM_getValue("enableFastWalk")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
 			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
 			'<tr><td align="right">Cleanup Guild Log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
@@ -9354,6 +9383,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "enableQuickDrink");
 		System.saveValueForm(oForm, "enhanceOnlineDots");
 		System.saveValueForm(oForm, "hideBuffSelected");
+		System.saveValueForm(oForm, "enableFastWalk");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
