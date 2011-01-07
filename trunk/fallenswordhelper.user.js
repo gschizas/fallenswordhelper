@@ -4947,15 +4947,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	injectGuildAddTagsWidgets: function() {
-		var mainTable = System.findNode("//table[@width='600']");
-		var itemTable = mainTable.rows[6].cells[0].firstChild.nextSibling;
-		for (var i=0;i<itemTable.rows.length;i++) {
-			var aRow = itemTable.rows[i];
-			if (aRow.cells[2]) { // itemRow
-				itemId = aRow.cells[0].firstChild.getAttribute("value");
-				aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" itemID="' + itemId + '">Fast BP</span>';
-				itemRecall = aRow.cells[2].firstChild.nextSibling;
-				itemRecall.addEventListener('click', Helper.recallGuildStoreItem, true);
+		var itemTable = System.findNode("//img[contains(@src,'/items/')]/ancestor::table[1]");
+		if (itemTable) {
+			for (var i=1;i<itemTable.rows.length;i++) {
+				var aRow = itemTable.rows[i];
+				if (aRow.cells[2]) { // itemRow
+					itemId = aRow.cells[0].firstChild.getAttribute("value");
+					aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" itemID="' + itemId + '">Fast BP</span>';
+					itemRecall = aRow.cells[2].firstChild.nextSibling;
+					itemRecall.addEventListener('click', Helper.recallGuildStoreItem, true);
+				}
 			}
 		}
 	},
@@ -12177,11 +12178,15 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		document.getElementById("Gold" + callback.href).innerHTML = goldValue.textContent;
 		//add VL if not equal to current level
 		var levelElement = System.findNode("//tbody/tr/td[b[contains(.,'Level:')]]", doc);
-		var levelValue = levelElement.nextSibling;
+		var levelValue = parseInt(levelElement.nextSibling.textContent.replace(/,/,""),10);
 		var virtualLevelElement = System.findNode("//tbody/tr/td[b[.='VL']]", doc);
 		var virtualLevelValue = virtualLevelElement.nextSibling;
-		if (parseInt(levelValue.textContent,10) != parseInt(virtualLevelValue.textContent,10)) {
-			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>'
+		if (levelValue != parseInt(virtualLevelValue.textContent,10)) {
+			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>';
+		}
+		var pvpProtection = System.findNode("//b[contains(.,'PvP') and contains(.,'Protection')]", doc);
+		if (pvpProtection.nextSibling.textContent != '[not activated]') {
+			findPlayerPvPElement.parentNode.parentNode.cells[0].innerHTML += '&nbsp;<img width="10" height="10" title="Protected" src="' + Data.redDot() + '">'
 		}
 	},
 
