@@ -9,6 +9,8 @@
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
 // @require        json2.js
+// @require        jQuery.js
+// @require        gmApi.js
 // @require        calfSystem.js
 // @require        fsLayout.js
 // @require        fsData.js
@@ -908,6 +910,7 @@ var Helper = {
 		}
 
 	},
+
 	injectBuffLog: function() {
 		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Buff Log','','clearBuffs','Clear','bufflog');
 		document.getElementById('clearBuffs').addEventListener('click',function() {GM_setValue("buffLog",'');window.location=window.location;},true);
@@ -1241,6 +1244,7 @@ var Helper = {
 
 		}
 	},
+
 	quickDone: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
 		//unsafeWindow.tt_setWidth(200);
@@ -3080,6 +3084,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		//evt.target.parentNode.innerHTML = output;
 	},
+
 	quickDoneExtracted: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
 		//unsafeWindow.tt_setWidth(200);
@@ -3491,7 +3496,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			slots.childNodes[0].nodeValue = (bpslots[0] - 0 + count) + " /" + bpslots[1];
 		}
 	},
-
 
 	killedMonster: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
@@ -4930,6 +4934,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error</span>";
 		}
 	},
+
 	wearRecall: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
 		var items=System.findNodes('//input[@name="sendItemList[]"]',doc);
@@ -5538,6 +5543,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		document.getElementById('compDel').innerHTML='';
 	},
+
 	delComponent: function(evt) {
 		var id=evt.target.getAttribute('compid');
 		System.xmlhttp('index.php?cmd=profile&subcmd=destroycomponent&component_id='+id,
@@ -5944,6 +5950,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			return;
 		}
 	},
+
 	removeHTML: function(buffName) {
 
 		return buffName.replace(/<\/?[^>]+(>|$)/g, "").replace(/[^a-zA-Z 0-9]+/g,"");
@@ -11037,6 +11044,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			(spanId?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId+'">'+button+'</span>]':'')+
 			'</td></tr></table>';
 	},
+
 	makePageHeaderTwo: function(title, comment, spanId, button, spanId2, button2) {
 		return '<table width=100%><tr style="background-color:#CD9E4B">'+
 			'<td width="90%" nobr><b>&nbsp;'+title+'</b>'+
@@ -11046,6 +11054,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			(spanId2?'[<span style="text-decoration:underline;cursor:pointer;" id="'+spanId2+'">'+button2+'</span>]':'')+
 			'</td></tr></table>';
 	},
+
 	makePageTemplate: function(title, comment, spanId, button, divId) {
 		return Helper.makePageHeader(title, comment, spanId, button)+
 			'<div style="font-size:small;" id="'+divId+'"></div>';

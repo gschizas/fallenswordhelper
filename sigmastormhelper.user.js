@@ -10,6 +10,8 @@
 // @exclude        http://wiki.sigmastorm2.com/*
 // @exclude        http://guide.sigmastorm2.com/*
 // @require        json2.js
+// @require        jQuery.js
+// @require        gmApi.js
 // @require        calfSystem.js
 // @require        ssLayout.js
 // @require        ssData.js
@@ -99,7 +101,7 @@ var Helper = {
 
 		System.setDefault("miniMapName","");
 		System.setDefault("miniMapSource","");
-        System.setDefault("loadAmmoUrl", "index.php?cmd=profile");
+		System.setDefault("loadAmmoUrl", "index.php?cmd=profile");
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -541,9 +543,9 @@ var Helper = {
 			case "viewrecipe":
 				Helper.injectViewRecipe();
 				break;
-            default:
-                Helper.injectViewRecipeList();
-                break;
+			default:
+				Helper.injectViewRecipeList();
+				break;
 			}
 			break;
 		case "message":
@@ -584,7 +586,7 @@ var Helper = {
 
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) return;
-        var guildInfoTable = System.findNode("//table[tbody/tr/td/font/font/i/b[.='Online Members']]");
+		var guildInfoTable = System.findNode("//table[tbody/tr/td/font/font/i/b[.='Online Members']]");
 		if (guildInfoTable) {
 			var onlineMembersTable = System.findNode("//table[tbody/tr/td/font/font/i/b[.='Online Members']]//table");
 			for (var i=0; i<onlineMembersTable.rows.length; i++){
@@ -616,7 +618,7 @@ var Helper = {
 				}
 			}
 		}
-    },
+	},
 
 	injectWorldWidgets: function() {
 		Helper.injectQuickHeal();
@@ -736,12 +738,12 @@ var Helper = {
 		var infoMessage = Layout.infoBox(responseText);
 		if (showMsgBox==true)
 			alert(infoMessage);
-        else if (showMsgBox==false) {
+		else if (showMsgBox==false) {
 			unsafeWindow.tt_setWidth(200);
 			unsafeWindow.Tip(infoMessage);
 		} else {
-            showMsgBox.innerHTML = '<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:x-small;">' + infoMessage + '</div>';
-        }
+			showMsgBox.innerHTML = '<div style="margin-left:28px; margin-right:28px; color:cyan; font-size:x-small;">' + infoMessage + '</div>';
+		}
 	},
 	quickMS: function(cast){
 		var url="index.php?"+(cast?"cmd=skills&subcmd=cast":"cmd=profile&subcmd=removeskill")+"&skill_id=64"
@@ -953,12 +955,12 @@ var Helper = {
 
 	quickUse: function(responseText, callback) {
 
-        var item=callback.item;
-        if (item==null) {
-            var quItems=System.getValueJSON("quickUseItems");
-            item=quItems['item'+callback.id];
-            if (item=='') return;
-        }
+		var item=callback.item;
+		if (item==null) {
+			var quItems=System.getValueJSON("quickUseItems");
+			item=quItems['item'+callback.id];
+			if (item=='') return;
+		}
 
 		// only applicable when you are hunting (in world screen)
 		if (!System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..")) return;
@@ -974,10 +976,10 @@ var Helper = {
 
 		for (var key in Helper.itemList) {
 			if (Helper.itemList[key].text==item || (callback.item && item.test(Helper.itemList[key].text))) {
-                var showMsgBox=true;
-                var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
-                if (injectHere) showMsgBox=injectHere.insertRow(1);
-                GM_setValue("loadAmmoUrl", "index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id);
+				var showMsgBox=true;
+				var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
+				if (injectHere) showMsgBox=injectHere.insertRow(1);
+				GM_setValue("loadAmmoUrl", "index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id);
 				System.xmlhttp("index.php?cmd=profile&subcmd=useitem&inventory_id=" + Helper.itemList[key].id,
 					Helper.quickDone, showMsgBox);
 				return;
@@ -995,12 +997,12 @@ var Helper = {
 		}
 
 		if (Helper.folderHrefs.length > 1 && callback.arrayId + 1 < Helper.folderHrefs.length) {
-            callback.arrayId++;
+			callback.arrayId++;
 			System.xmlhttp(Helper.folderHrefs[callback.arrayId],
 				Helper.quickUse, callback);
 			return;
 		}
-        alert("Cannot find any " + (item+"").replace("/^(?:","").replace(")$/","") + " to use!");
+		alert("Cannot find any " + (item+"").replace("/^(?:","").replace(")$/","") + " to use!");
 	},
 
 	injectRelic: function(isRelicPage) {
@@ -1382,18 +1384,18 @@ var Helper = {
 			}, true);
 	},
 
-    injectViewRecipeList: function() {
-        var node=System.findNode("//td[.='Recipe Name']");
-        if (!node) return;
-        node = node.parentNode.cells[0];
-        node.innerHTML = "<input type=checkbox name=rcpSelectAll id=rcpSelectAll>";
-        document.getElementById('rcpSelectAll').addEventListener("click", function() {
-                var value=document.getElementById('rcpSelectAll').checked;
-                var nodes = System.findNodes("//input[@name='recipe_selected[]']");
-                for (var i=0; i<nodes.length; i++)
-                    nodes[i].checked = value;
-            }, true);
-    },
+	injectViewRecipeList: function() {
+		var node=System.findNode("//td[.='Recipe Name']");
+		if (!node) return;
+		node = node.parentNode.cells[0];
+		node.innerHTML = "<input type=checkbox name=rcpSelectAll id=rcpSelectAll>";
+		document.getElementById('rcpSelectAll').addEventListener("click", function() {
+				var value=document.getElementById('rcpSelectAll').checked;
+				var nodes = System.findNodes("//input[@name='recipe_selected[]']");
+				for (var i=0; i<nodes.length; i++)
+					nodes[i].checked = value;
+			}, true);
+	},
 
 	inventMulti: function() {
 		var n=System.intValue(document.getElementById('multiInventN').value);
@@ -3078,12 +3080,12 @@ var Helper = {
 		case 48: // return to world [0]
 			window.location = 'index.php?cmd=world';
 			break;
-        case 108: // load ammo [l]
-            System.xmlhttp(GM_getValue("loadAmmoUrl"), Helper.tryToLoadAmmo);
-            break;
-        case 76: // combine psi ammo [L]
-            System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.combinePsiAmmo);
-            break;
+		case 108: // load ammo [l]
+			System.xmlhttp(GM_getValue("loadAmmoUrl"), Helper.tryToLoadAmmo);
+			break;
+		case 76: // combine psi ammo [L]
+			System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.combinePsiAmmo);
+			break;
 		case 109: // medikit [m]
 			window.location = System.server+'index.php?cmd=profile&subcmd=useitem&mode=worldmedipack'
 			break;
@@ -4137,7 +4139,7 @@ var Helper = {
 		var counter = 0, preText='';
 		var cbName=document.body.innerHTML.match(/(storeIndex\[\]|removeIndex\[\])/)[0];
 		for (var key in Helper.itemList) {
-            var id = Helper.itemList[key].id;
+			var id = Helper.itemList[key].id;
 			if (showExtraLinks) {
 				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html);
 				if (itemStats) {
@@ -4167,13 +4169,13 @@ var Helper = {
 				'<td rowspan=2 style="font-size:x-small" align=center width=70><b>'+Helper.itemList[key].text+'</b><br/><br/>[<span id=item'+id+' itemID='+imgid+' linkto="'+Helper.itemList[key].text+'" '+
 					'onmouseover="Tip(\'Select all items of the same type\')">Select All</span>]<br/><br/>'+
 					preText+
-                    '[<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
-                    'id="Helper:equipProfileInventoryItem' + id + '" ' +
-                    'itemID="' + id + '">Wear</span>]&nbsp;' +
-                    '[<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
-                    'id="Helper:useProfileInventoryItem' + id + '" ' +
-                    'itemID="' + id + '">Use</span>]'+
-                    '</td></tr>'+
+					'[<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
+					'id="Helper:equipProfileInventoryItem' + id + '" ' +
+					'itemID="' + id + '">Wear</span>]&nbsp;' +
+					'[<span style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;" '+
+					'id="Helper:useProfileInventoryItem' + id + '" ' +
+					'itemID="' + id + '">Use</span>]'+
+					'</td></tr>'+
 				'<tr><td align="center" style="font-size:xx-small"><input type="checkbox" name="'+cbName+'" value="'+Helper.itemList[key].id+'"></td></tr>'+
 				'</tbody></table></td>';
 			counter++;
@@ -6501,7 +6503,7 @@ var Helper = {
 			var buffLevelRE = /\[(\d+)\]/
 			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
 			if (buffLevel < 75
-			    && myBuff.innerHTML.search("Mission Finder") == -1) {
+				&& myBuff.innerHTML.search("Mission Finder") == -1) {
 				myBuff.style.color = "gray";
 			}
 		}
@@ -8630,82 +8632,82 @@ var Helper = {
 			});
 	},
 
-    tryToLoadAmmo: function(responseText) {
-        var info = Layout.infoBox(responseText);
-        if (info.indexOf("successfully")>0 || info.indexOf("already at maximum ammo")>0 ) {
-            var showMsgBox=true;
-            var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
-            if (injectHere) showMsgBox=injectHere.insertRow(1);
-            Helper.quickDone(responseText, showMsgBox);
-            return;
-        }
-        var doc = System.createDocument(responseText);
-        var weapon=System.findNode("//td[@height=165]/img[contains(@src,'/items/')]", doc);
+	tryToLoadAmmo: function(responseText) {
+		var info = Layout.infoBox(responseText);
+		if (info.indexOf("successfully")>0 || info.indexOf("already at maximum ammo")>0 ) {
+			var showMsgBox=true;
+			var injectHere = System.findNode("//tr[contains(td/@background, 'location_header.gif')]/../..");
+			if (injectHere) showMsgBox=injectHere.insertRow(1);
+			Helper.quickDone(responseText, showMsgBox);
+			return;
+		}
+		var doc = System.createDocument(responseText);
+		var weapon=System.findNode("//td[@height=165]/img[contains(@src,'/items/')]", doc);
 		if (weapon) {
-            System.xmlhttp(Helper.linkFromMouseover(weapon.getAttribute("onmouseover")), Helper.findAmmoTypeNLoad);
-        } else {
-            alert("You do not have a weapon equipped. Ammo loading failed!");
-            return;
-        }
-    },
+			System.xmlhttp(Helper.linkFromMouseover(weapon.getAttribute("onmouseover")), Helper.findAmmoTypeNLoad);
+		} else {
+			alert("You do not have a weapon equipped. Ammo loading failed!");
+			return;
+		}
+	},
 
-    findAmmoTypeNLoad: function(responseText) {
-        var doc = System.createDocument(responseText);
-        var typeNode=System.findNode("//font[@size='1' and @color='yellow']", doc);
+	findAmmoTypeNLoad: function(responseText) {
+		var doc = System.createDocument(responseText);
+		var typeNode=System.findNode("//font[@size='1' and @color='yellow']", doc);
 		if (typeNode.textContent == "Weapon") {
-            var ammoType = System.findNode("//tr[td/nobr/font[.='Damage\u00A0Type:']]/td[2]", doc);
-            if (ammoType == null) return;
-            var ammoCount = System.findNode("//tr[td/nobr/font[.='Ammo:']]/td[2]", doc);
-            if (ammoCount == null) return;
-            if (ammoCount.textContent.indexOf("n/a")>=0) {
-                alert("Weapon does NOT need ammo!");
-                return;
-            }
-            ammoType = ammoType.textContent;
-            ammoType = ammoType.substr(0, ammoType.length - 1);
-            var ammoDict={'Venom':/^Toxin Slug$/,'Plasma':/^Plasma Cartridge$/,'Crushing':/^Shell Mag$/,
-                'Piercing':/^(?:Thorn Darts|Alloy Tipped Bullets)$/,
-                'Slashing':/^Rotorkin$/, 'Flame':/^(?:Inferno Rounds|Flame Pack)$/,
-                'Psionic':/^(?:Charged Mind Shard|Charged Mind Stone|Charged Mind Orb)$/,
-                'Solid':/^Bullet Mag$/, 'Energy':/^Shocker Slug$/ }
-            if (ammoDict[ammoType])
-                System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1",
-                    Helper.quickUse, {'arrayId':0,'item':ammoDict[ammoType]});
-            else {
-                alert("Unknown ammo type: '"+ammoType+"', please pm dkwizard about this!");
-                return;
-            }
-        } else {
-            alert("Error finding worn weapon!");
-            return;
-        }
-    },
+			var ammoType = System.findNode("//tr[td/nobr/font[.='Damage\u00A0Type:']]/td[2]", doc);
+			if (ammoType == null) return;
+			var ammoCount = System.findNode("//tr[td/nobr/font[.='Ammo:']]/td[2]", doc);
+			if (ammoCount == null) return;
+			if (ammoCount.textContent.indexOf("n/a")>=0) {
+				alert("Weapon does NOT need ammo!");
+				return;
+			}
+			ammoType = ammoType.textContent;
+			ammoType = ammoType.substr(0, ammoType.length - 1);
+			var ammoDict={'Venom':/^Toxin Slug$/,'Plasma':/^Plasma Cartridge$/,'Crushing':/^Shell Mag$/,
+				'Piercing':/^(?:Thorn Darts|Alloy Tipped Bullets)$/,
+				'Slashing':/^Rotorkin$/, 'Flame':/^(?:Inferno Rounds|Flame Pack)$/,
+				'Psionic':/^(?:Charged Mind Shard|Charged Mind Stone|Charged Mind Orb)$/,
+				'Solid':/^Bullet Mag$/, 'Energy':/^Shocker Slug$/ }
+			if (ammoDict[ammoType])
+				System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1",
+					Helper.quickUse, {'arrayId':0,'item':ammoDict[ammoType]});
+			else {
+				alert("Unknown ammo type: '"+ammoType+"', please pm dkwizard about this!");
+				return;
+			}
+		} else {
+			alert("Error finding worn weapon!");
+			return;
+		}
+	},
 
-    combinePsiAmmo: function(responseText) {
-        Helper.itemList = {};
+	combinePsiAmmo: function(responseText) {
+		Helper.itemList = {};
 		var doc=System.createDocument(responseText);
 		Helper.retrieveItemInfor(doc);
 
-        var postData = 'cmd=profile&subcmd=backpackaction&folder_id=-1&submit=Combine+Selected&split_amount=';
-        var psiAmmo=["Charged Mind Shard","Charged Mind Stone","Charged Mind Orb"];
-        for (var i=0; i<psiAmmo.length; i++) {
-            var postItems = '';
-            for (var key in Helper.itemList)
-                if (Helper.itemList[key].text == psiAmmo[i])
-                    postItems+='&folderItem[]='+Helper.itemList[key].id;
-            GM_xmlhttpRequest({
-                method: 'POST',
-                url: System.server + "index.php",
-                headers: {
-                    "User-Agent" : navigator.userAgent,
-                    "Content-Type": "application/x-www-form-urlencoded",
-                    "Referer": document.location,
-                    "Cookie" : document.cookie
-                },
-                data: postData+postItems
-            });
+		var postData = 'cmd=profile&subcmd=backpackaction&folder_id=-1&submit=Combine+Selected&split_amount=';
+		var psiAmmo=["Charged Mind Shard","Charged Mind Stone","Charged Mind Orb"];
+		for (var i=0; i<psiAmmo.length; i++) {
+			var postItems = '';
+			for (var key in Helper.itemList)
+				if (Helper.itemList[key].text == psiAmmo[i])
+					postItems+='&folderItem[]='+Helper.itemList[key].id;
+			GM_xmlhttpRequest({
+				method: 'POST',
+				url: System.server + "index.php",
+				headers: {
+					"User-Agent" : navigator.userAgent,
+					"Content-Type": "application/x-www-form-urlencoded",
+					"Referer": document.location,
+					"Cookie" : document.cookie
+				},
+				data: postData+postItems
+			});
 		}
-    },
+	},
 
 	injectFindBuffs: function() {
 		var content=Layout.notebookContent();
