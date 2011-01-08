@@ -10,7 +10,6 @@
 // @exclude        http://wiki.sigmastorm2.com/*
 // @exclude        http://guide.sigmastorm2.com/*
 // @require        json2.js
-// @require        jQuery.js
 // @require        gmApi.js
 // @require        calfSystem.js
 // @require        ssLayout.js

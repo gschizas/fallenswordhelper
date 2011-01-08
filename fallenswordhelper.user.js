@@ -9,7 +9,6 @@
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
 // @require        json2.js
-// @require        jQuery.js
 // @require        gmApi.js
 // @require        calfSystem.js
 // @require        fsLayout.js
