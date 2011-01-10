@@ -8936,7 +8936,7 @@ var Helper = {
 			"<div id=huntDiv>...loading creatures...</div>"+
 			"<div id=mapDiv>...loading maps...</div>"+
 			"<div id=mapDiv>...loading mission (TODO)...</div></div><hr>"+
-			"<span style='color:yellow'>Why map?<br/>There are several maps online available, but not as up-to-date as The Ultimate Guide. Also, one of the high level maps, made by EdTheHead, contains content exhibiting childish behaviors (name calling, back-stabing, etc.). So here goes the dynamic generated map just for your level.</span>";
+			"<span style='color:yellow'>Why map?<br/>There are several maps online available, but not as up-to-date as The Ultimate Guide. Also, one of the high level maps, made by EdTheHead, contains content exhibiting the author's childish behaviors (name calling, back-stabing, etc.). So here goes the dynamic generated map just for your level.</span>";
 		if (huntingGuide.lvl == Helper.characterLevel) {
 			document.getElementById("guideDiv").innerHTML = huntingGuide.html;
 		} else {
