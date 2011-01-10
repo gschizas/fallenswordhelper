@@ -21,7 +21,7 @@ var System = {
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
 		System.imageServerHTTP  = "http://72.29.91.222";
-		
+
 		Array.prototype.removeDuplicates = System.removeDuplicates;
 	},
 
@@ -77,7 +77,7 @@ var System = {
 		if (!node) return null;
 		return System.intValue(node.textContent);
 	},
-	
+
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
@@ -180,9 +180,11 @@ var System = {
 
 	xmlhttp: function(theUrl, func, theCallback) {
 		theUrl=theUrl.replace(System.server, "");
+		if (theUrl.indexOf("http://")<0)
+			theUrl = System.server + theUrl;
 		GM_xmlhttpRequest({
 			method: 'GET',
-			url: System.server + theUrl,
+			url: theUrl,
 			callback: theCallback,
 			headers: {
 				"User-Agent" : navigator.userAgent,
@@ -236,7 +238,7 @@ var System = {
 	trimRight: function() {
 	    return this.replace(/\s+$/,"");
 	},
-	
+
 	removeDuplicates: function (removeBy){
 		var temp=new Array();
 		if (removeBy) {
