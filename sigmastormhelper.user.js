@@ -501,6 +501,9 @@ var Helper = {
 			case "findbuffs":
 				Helper.injectFindBuffs();
 				break;
+			case "huntguide":
+				Helper.createHuntGuide();
+				break;
 			}
 			break;
 		case "points":
@@ -8922,6 +8925,117 @@ var Helper = {
 			bufferProgress.style.color = 'blue';
 		}
 
+	},
+
+	createHuntGuide: function() {
+		System.setDefault("huntingGuide", JSON.stringify({"lvl":0,"html":""}));
+		var huntingGuide = System.getValueJSON("huntingGuide");
+		var content=Layout.notebookContent();
+		content.innerHTML = Helper.makePageHeader('Hunting Guide','','','')+
+			"<div id=guideDiv>Level to check: "+Helper.characterLevel+
+			"<div id=huntDiv>...loading creatures...</div>"+
+			"<div id=mapDiv>...loading maps...</div>"+
+			"<div id=mapDiv>...loading mission (TODO)...</div></div><hr>"+
+			"<span style='color:yellow'>Why map?<br/>There are several maps online available, but not as up-to-date as The Ultimate Guide. Also, one of the high level maps, made by EdTheHead, contains content exhibiting childish behaviors (name calling, back-stabing, etc.). So here goes the dynamic generated map just for your level.</span>";
+		if (huntingGuide.lvl == Helper.characterLevel) {
+			document.getElementById("guideDiv").innerHTML = huntingGuide.html;
+		} else {
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=creatures&search_name=&search_level_min="+
+				Helper.characterLevel+"&search_level_max="+Helper.characterLevel+"&search_class=-1&index=0&sort_by=",
+				Helper.getCurrentLvlMob);
+			Helper.areaMap = {};
+			Helper.mapCount = 0;
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=realms&index=0&search_name=&search_level_min="+
+				(Helper.characterLevel-5)+"&search_level_max="+(Helper.characterLevel+2)+"&sort_by=",
+				Helper.makeAreaMap, 0);
+		}
+	},
+	getCurrentLvlMob: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var mobs=System.findNodes("//a[contains(@href, 'index.php?cmd=creatures&subcmd=view&creature_id=') and (not(contains(.,'('))) and .!='']", doc);
+		if (!mobs) {
+			document.getElementById("huntDiv").innerHTML = "Cannot find info in The Ultimate Guide";
+			return;
+		}
+		var html="";
+		Helper.mobMaps = {};
+		for (var i=0; i<mobs.length; i++) {
+			var url= "http://guide.sigmastorm2.com/"+mobs[i].getAttribute('href');
+			html+="Creature to kill: " +
+				"<a href='"+url+"'>"+mobs[i].textContent +"</a><div id='mapid"+i+"'>(...loading...)</div>";
+			System.xmlhttp(url, Helper.getCurrentMap, i);
+		}
+		document.getElementById("huntDiv").innerHTML = html;
+	},
+	getCurrentMap: function(responseText, id) {
+		var doc=System.createDocument(responseText);
+		var maps=System.findNodes("//a[contains(@href, 'index.php?cmd=realms&subcmd=view&realm_id=') and .!='']", doc);
+		if (!maps) {
+			document.getElementById("mapid"+id).innerHTML = "(not found)";
+			return;
+		}
+		var html="In map(s): ";
+		for (var i=0; i<maps.length; i++) {
+			var url= "http://guide.sigmastorm2.com/"+maps[i].getAttribute('href');
+			html+="<a href='"+url+"'>"+maps[i].textContent +"</a>, ";
+			Helper.mobMaps[maps[i].textContent] = 1;
+		}
+		document.getElementById("mapid"+id).innerHTML = html.substr(0,html.length-2);
+	},
+	makeAreaMap: function(responseText, id) {
+		var doc=System.createDocument(responseText);
+		var maps=System.findNodes("//a[contains(@href, 'index.php?cmd=realms&subcmd=view&realm_id=') and .!='']", doc);
+		if (!maps) {
+			document.getElementById("mapDiv").innerHTML = "Cannot find maps.";
+			return;
+		}
+		for (var i=0; i<maps.length; i++) {
+			var url= "http://guide.sigmastorm2.com/"+maps[i].getAttribute('href');
+			if (!Helper.areaMap[maps[i].textContent]) {
+				Helper.areaMap[maps[i].textContent] = {"url":url, "nb":[], "lvl":maps[i].parentNode.parentNode.cells[1].textContent};
+				Helper.mapCount ++;
+			}
+		}
+		if (id == 0 && System.findNode("//a[contains(@href,'index.php?cmd=realms&index=0&')]"))
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=realms&index=0&search_name=&search_level_min="+
+				(Helper.characterLevel-5)+"&search_level_max="+(Helper.characterLevel+3)+"&sort_by=",
+				Helper.makeAreaMap, id+1);
+		else {
+			var html = "";
+			for (var map in Helper.areaMap) {
+				html += map + ", ";
+				System.xmlhttp(Helper.areaMap[map].url, Helper.getConnectedMaps, map)
+			}
+			document.getElementById("mapDiv").innerHTML = html+"<br/>...loading area map image...<br/>";
+		}
+	},
+	getConnectedMaps: function(responseText, map) {
+		var doc=System.createDocument(responseText);
+		var maps = System.findNodes("//img[contains(@onmouseover,'Stairway to')]", doc);
+		if (maps) {
+			for (var i=0; i<maps.length; i++) {
+				Helper.areaMap[map].nb.push(maps[i].getAttribute("onmouseover").replace(/^.*Stairway to /,'').replace(/'\);/,'').replace(/\\/g,''));
+			}
+		}
+		document.getElementById("mapDiv").innerHTML += map+", ";
+		Helper.mapCount --;
+		if (Helper.mapCount==0)
+			Helper.drawAreaMap(Helper.areaMap);
+	},
+	drawAreaMap: function(areaMap) {
+		var src="http://yuml.me/diagram/scruffy;scale:75/class/";
+		for (var map in Helper.areaMap) {
+			for (var i=0; i<Helper.areaMap[map].nb.length; i++) {
+				if (map < Helper.areaMap[map].nb[i] || Helper.areaMap[map].nb[i].indexOf("Master Realm")>=0) {
+					var nblvl = Helper.areaMap[Helper.areaMap[map].nb[i]] ? (";" + Helper.areaMap[Helper.areaMap[map].nb[i]].lvl) : "";
+					var mapbg = Helper.mobMaps[map] ? "{bg:blue}" : "";
+					var nbbg = Helper.areaMap[map].nb[i].indexOf("Master Realm")>=0 ? "{bg:yellow}" : "";
+					src += "["+map+";"+Helper.areaMap[map].lvl+mapbg+"]-["+Helper.areaMap[map].nb[i]+nblvl+nbbg+"],";
+				}
+			}
+		}
+		document.getElementById("mapDiv").innerHTML = "<img width=650 src=\""+src.substr(0, src.length-1)+".jpg\" alt='...loading image...'>";
+		System.setValueJSON("huntingGuide", {"lvl":Helper.characterLevel, "html":document.getElementById("guideDiv").innerHTML});
 	},
 
 	makePageHeader: function(title, comment, spanId, button) {

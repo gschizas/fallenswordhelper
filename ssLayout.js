@@ -1,6 +1,7 @@
 var Layout = {
 
 	injectMenu: function() {
+		Layout.injectOneMenu("Hunting Guide", "index.php?cmd=notepad&subcmd=huntguide", 5, "menuSource_0");
 		Layout.injectOneMenu("Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 6, "menuSource_0");
 		Layout.injectOneMenu("Backpack Manager", "index.php?cmd=notepad&subcmd=invmanager", 7, "menuSource_0");
 		Layout.injectOneMenu("Blueprint Manager", "index.php?cmd=notepad&subcmd=recipemanager", 8, "menuSource_0");
