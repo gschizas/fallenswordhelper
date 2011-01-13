@@ -1842,7 +1842,7 @@ var Helper = {
 		document.getElementById('personalData').innerHTML+='<span onmouseover=\'tt_setWidth(100);Tip("Hunting Mode");\'>'+
 			'[<span id=toggleHMode style="font-weight:bold;cursor:pointer;text-decoration:underline;">'+
 			(GM_getValue("huntingMode")?"ON":"off")+
-			'</span>]';
+			'</span>]</span> [<a href="index.php?cmd=notepad&subcmd=huntguide" title="Hunting Guide">HG</a>]';
 		document.getElementById('toggleHMode').addEventListener('click',
 			function() {
 				GM_setValue("huntingMode",! GM_getValue("huntingMode")); window.location=window.location;
@@ -8932,10 +8932,15 @@ var Helper = {
 		var huntingGuide = System.getValueJSON("huntingGuide");
 		var content=Layout.notebookContent();
 		content.innerHTML = Helper.makePageHeader('Hunting Guide','','','')+
-			"<div id=guideDiv>Level to check: "+Helper.characterLevel+
-			"<div id=huntDiv>...loading creatures...</div>"+
-			"<div id=mapDiv>...loading maps...</div>"+
-			"<div id=mapDiv>...loading mission (TODO)...</div></div><hr>"+
+			"<div id=guideDiv>"+
+				"<br/><div>Level to check: "+Helper.characterLevel+"</div>"+
+				"<br/><div id=huntDiv>...loading creatures...</div>"+
+				"<br/><div id=setDiv>...loading sets...</div>"+
+				"<br/><div id=weaponDiv>...loading weapons...</div>"+
+				"<br/><div id=mitemDiv>...loading mission items...</div>"+
+				"<br/><div id=bprintDiv>...loading blueprints...</div>"+
+				"<br/><div id=mapDiv>...loading maps...</div>"+
+			"</div><hr>"+
 			"<span style='color:yellow'>Why map?<br/>There are several maps online available, but not as up-to-date as The Ultimate Guide. Also, one of the high level maps, made by EdTheHead, contains content exhibiting the author's childish behaviors (name calling, back-stabing, etc.). So here goes the dynamic generated map just for your level.</span>";
 		if (huntingGuide.lvl == Helper.characterLevel) {
 			document.getElementById("guideDiv").innerHTML = huntingGuide.html;
@@ -8943,6 +8948,19 @@ var Helper = {
 			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=creatures&search_name=&search_level_min="+
 				Helper.characterLevel+"&search_level_max="+Helper.characterLevel+"&search_class=-1&index=0&sort_by=",
 				Helper.getCurrentLvlMob);
+			var classid = {"Clone":0, "Mutant":1, "Soldier":2, "Purist":3, "Cyborg":4}[Helper.characterClass];
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=items&search_name=&search_level_min=&search_level_max="+
+				Helper.characterLevel+"&search_type=0&search_rarity=-1&search_class="+classid+"&index=&sort_by=1",
+				Helper.getCurrentLvlSet);
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=items&index=0&search_name=&search_level_min=&search_level_max="+
+				Helper.characterLevel+"&search_type=3&search_rarity=-1&search_class="+classid+"&sort_by=1&sort_by=5",
+				Helper.getCurrentLvlWeapon);
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=items&search_name=&search_level_min="+
+				Helper.characterLevel+"&search_level_max="+Helper.characterLevel+"&search_type=12&search_rarity=-1&index=",
+				Helper.getCurrentLvlMissionItem);
+			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=items&search_name=&search_level_min="+
+				Helper.characterLevel+"&search_level_max="+Helper.characterLevel+"&search_type=11&search_rarity=2&index=",
+				Helper.getCurrentLvlMBprint);
 			Helper.areaMap = {};
 			Helper.mapCount = 0;
 			System.xmlhttp("http://guide.sigmastorm2.com/index.php?cmd=realms&index=0&search_name=&search_level_min="+
@@ -8952,35 +8970,132 @@ var Helper = {
 	},
 	getCurrentLvlMob: function(responseText) {
 		var doc=System.createDocument(responseText);
-		var mobs=System.findNodes("//a[contains(@href, 'index.php?cmd=creatures&subcmd=view&creature_id=') and (not(contains(.,'('))) and .!='']", doc);
+		var mobs=System.findNodes("//a[contains(@href, 'index.php?cmd=creatures&subcmd=view&creature_id=') and .!='']", doc);
 		if (!mobs) {
 			document.getElementById("huntDiv").innerHTML = "Cannot find info in The Ultimate Guide";
 			return;
 		}
-		var html="";
+		var html2kill="<b>Creature to kill</b> <table>";
+		var html2know="";
 		Helper.mobMaps = {};
 		for (var i=0; i<mobs.length; i++) {
 			var url= "http://guide.sigmastorm2.com/"+mobs[i].getAttribute('href');
-			html+="Creature to kill: " +
-				"<a href='"+url+"'>"+mobs[i].textContent +"</a><div id='mapid"+i+"'>(...loading...)</div>";
+			html="<tr><td><a href='"+url+"'>"+mobs[i].textContent +"</a></td><td><div id='mapid"+i+"'>(...loading...)</div></td>";
 			System.xmlhttp(url, Helper.getCurrentMap, i);
+			if (mobs[i].textContent.indexOf("(")<0) {
+				html2kill+=html;
+			} else {
+				html2know+=html;
+			}
 		}
-		document.getElementById("huntDiv").innerHTML = html;
+		document.getElementById("huntDiv").innerHTML = html2kill+"</table>"+ (html2know == "" ? "" : ("<b>Other creatures</b><table>"+html2know+"</table>"));
 	},
 	getCurrentMap: function(responseText, id) {
 		var doc=System.createDocument(responseText);
 		var maps=System.findNodes("//a[contains(@href, 'index.php?cmd=realms&subcmd=view&realm_id=') and .!='']", doc);
 		if (!maps) {
-			document.getElementById("mapid"+id).innerHTML = "(not found)";
+			document.getElementById("mapid"+id).innerHTML = "(not data found)";
 			return;
 		}
-		var html="In map(s): ";
+		var html="in map(s): ";
 		for (var i=0; i<maps.length; i++) {
 			var url= "http://guide.sigmastorm2.com/"+maps[i].getAttribute('href');
 			html+="<a href='"+url+"'>"+maps[i].textContent +"</a>, ";
 			Helper.mobMaps[maps[i].textContent] = 1;
 		}
 		document.getElementById("mapid"+id).innerHTML = html.substr(0,html.length-2);
+	},
+	getCurrentLvlSet: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes("//a[contains(@href, 'index.php?cmd=items&subcmd=view&item_id=') and .!='']", doc);
+		if (!items) {
+			document.getElementById("setDiv").innerHTML = "No item found in The Ultimate Guide";
+			return;
+		}
+		var html="";
+		for (var i=0; i<items.length && i<6; i++) {
+			var setName = items[i].textContent;
+			setName = setName.substr(0, setName.indexOf(" "));
+			var url= "http://guide.sigmastorm2.com/index.php?cmd=items&search_name="+setName;
+			html+=setName + " [<a href='"+url+"'>UG</a>] [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&set="+setName+"'>Recall</a>], ";
+		}
+		document.getElementById("setDiv").innerHTML = html == "" ? "" : ("<b>Hunting Sets</b> (sorted by level, so you might need to check HK set):<br/>"+html);
+	},
+	getCurrentLvlWeapon: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes("//a[contains(@href, 'index.php?cmd=items&subcmd=view&item_id=') and .!='']", doc);
+		if (!items) {
+			document.getElementById("weaponDiv").innerHTML = "No item found in The Ultimate Guide";
+			return;
+		}
+		var html="";
+		for (var i=0; i<items.length && i<6; i++) {
+			var url= "http://guide.sigmastorm2.com/index.php?cmd=items&search_name="+items[i].textContent;
+			html+=items[i].textContent + " [<a href='"+url+"'>UG</a>] [<a href='index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+items[i].textContent+"'>Recall</a>], ";
+		}
+		document.getElementById("weaponDiv").innerHTML = html == "" ? "" : ("<b>Hunting Weapons</b> (sorted by damage non-crafted, non-engineered):<br/>"+html);
+	},
+	getCurrentLvlMissionItem: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes("//a[contains(@href, 'index.php?cmd=items&subcmd=view&item_id=') and .!='']", doc);
+		if (!items) {
+			document.getElementById("mitemDiv").innerHTML = "No mission item found in The Ultimate Guide";
+			return;
+		}
+		var html="";
+		for (var i=0; i<items.length; i++) {
+			var url= "http://guide.sigmastorm2.com/"+items[i].getAttribute('href');
+			html+="<tr><td><a href='"+url+"'>"+items[i].textContent +"</a></td><td><div id='mitemid"+i+"'>...loading...</div></td></tr>";
+			System.xmlhttp(url, Helper.getCurrentMItem, i);
+		}
+		document.getElementById("mitemDiv").innerHTML = html == "" ? "" : ("<b>Mission items</b><br/><table>"+html+"</table>");
+	},
+	getCurrentMItem: function(responseText, id) {
+		if (responseText.indexOf("[not dropped]")>0) {
+			document.getElementById("mitemid"+id).innerHTML = "[not dropped by any creatures]";
+		} else {
+			var doc=System.createDocument(responseText);
+			var creatures=System.findNodes("//a[contains(@href, 'index.php?cmd=creatures&subcmd=view&creature_id=') and .!='']", doc);
+			if (!creatures) {
+				document.getElementById("mitemid"+id).innerHTML = "[not dropped by any creatures]";
+				return;
+			}
+			var html="dropped by: ";
+			for (var i=0; i<creatures.length; i++) {
+				var url= "http://guide.sigmastorm2.com/"+creatures[i].getAttribute('href');
+				html+="<a href='"+url+"'>"+creatures[i].textContent +"</a>, ";
+			}
+			document.getElementById("mitemid"+id).innerHTML = html.substr(0,html.length-2);
+		}
+	},
+	getCurrentLvlMBprint: function(responseText) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes("//a[contains(@href, 'index.php?cmd=items&subcmd=view&item_id=') and .!='']", doc);
+		if (!items) {
+			document.getElementById("bprintDiv").innerHTML = "No blueprint for mission item found in The Ultimate Guide";
+			return;
+		}
+		var html="";
+		for (var i=0; i<items.length; i++) {
+			var url= "http://guide.sigmastorm2.com/"+items[i].getAttribute('href');
+			html+="<tr><td valign=top><a href='"+url+"'>"+items[i].textContent +"</a></td><td valign=top><div id='mbpid"+i+"'>...loading...</div></td></tr>";
+			System.xmlhttp(url, Helper.getCurrentMBPrint, i);
+		}
+		document.getElementById("bprintDiv").innerHTML = html == "" ? "" : ("<b>Mission Item Blueprint</b><br/><table>"+html+"</table>");
+	},
+	getCurrentMBPrint: function(responseText, id) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes("//a[contains(@href, 'index.php?cmd=items&subcmd=view&item_id=') and .!='']", doc);
+		var html="";
+		for (var i=0; i<items.length-1; i++) {
+			var url= "http://guide.sigmastorm2.com/"+items[i].getAttribute('href');
+			html+="<a href='"+url+"'>"+items[i].textContent +"</a>, ";
+		}
+		var i = items.length-1;
+		var url= "http://guide.sigmastorm2.com/"+items[i].getAttribute('href');
+		document.getElementById("mbpid"+id).innerHTML = "<table>"+
+			html == "" ? "" : ("<tr><td>Items/Components: "+html.substr(0,html.length-2)+"</td></tr>")+
+				"<tr><td>Target: <a href='"+url+"'>"+items[i].textContent +"</a></td></tr>";
 	},
 	makeAreaMap: function(responseText, id) {
 		var doc=System.createDocument(responseText);
@@ -9006,7 +9121,7 @@ var Helper = {
 				html += map + ", ";
 				System.xmlhttp(Helper.areaMap[map].url, Helper.getConnectedMaps, map)
 			}
-			document.getElementById("mapDiv").innerHTML = html+"<br/>...loading area map image...<br/>";
+			document.getElementById("mapDiv").innerHTML = "<br/>...loading area map image...<br/>";
 		}
 	},
 	getConnectedMaps: function(responseText, map) {
@@ -9029,14 +9144,16 @@ var Helper = {
 				if (map < Helper.areaMap[map].nb[i] || Helper.areaMap[map].nb[i].indexOf("Master Realm")>=0) {
 					var nblvl = Helper.areaMap[Helper.areaMap[map].nb[i]] ? (";" + Helper.areaMap[Helper.areaMap[map].nb[i]].lvl) : "";
 					var mapbg = Helper.mobMaps[map] ? "{bg:blue}" : "";
-					var nbbg = Helper.areaMap[map].nb[i].indexOf("Master Realm")>=0 ? "{bg:yellow}" : "";
+					var nbbg = Helper.areaMap[map].nb[i].indexOf("Master Realm")>=0 ? "{bg:yellow}" :
+						(Helper.mobMaps[Helper.areaMap[map].nb[i]] ? "{bg:blue}" : "");
 					src += "["+map+";"+Helper.areaMap[map].lvl+mapbg+"]-["+Helper.areaMap[map].nb[i]+nblvl+nbbg+"],";
 				}
 			}
 		}
-		document.getElementById("mapDiv").innerHTML = "<img width=650 src=\""+src.substr(0, src.length-1)+".jpg\" alt='...loading image...'>";
+		document.getElementById("mapDiv").innerHTML = "<b>Map around your level</b><br/><img width=650 src=\""+src.substr(0, src.length-1)+".jpg\" alt='...loading image...'>";
 		System.setValueJSON("huntingGuide", {"lvl":Helper.characterLevel, "html":document.getElementById("guideDiv").innerHTML});
 	},
+
 
 	makePageHeader: function(title, comment, spanId, button) {
 		return '<table width=100%><tr style="background-color:#110011">'+
