@@ -477,6 +477,9 @@ var Helper = {
 			case "dojoin":
 				Helper.injectTournament();
 				break;
+			case "setup":
+				Helper.injectArenaSetupMove();
+				break;
 			default:
 				break;
 			}
@@ -2610,7 +2613,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.xLocation = parseInt(locationRE[1],10);
 			Helper.yLocation = parseInt(locationRE[2],10);
 		}
-		
+
 		Helper.mapThis();
 		Helper.showMap(false);
 
@@ -3767,7 +3770,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy), function() {window.location = System.server + "index.php?cmd=world&subcmd=map";});
 				Helper.xLocation+=dx;
 				Helper.yLocation+=dy;
-				
+
 			}
 		}
 	},
@@ -4384,27 +4387,26 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 			var quickSearchList = System.getValueJSON("quickSearchList");
 
-			var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML + "</td>" +
-				"<td colspan='3' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
+			var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
+				"<td colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
 							System.server +
 							"index.php?cmd=notepad&subcmd=auctionsearch'>" +
 							"Configure Quick Search</a></td></tr>";
 			var lp=0;
 			var rowCount = 0;
 			for (var p=0;p<quickSearchList.length;p++) {
-				if (lp % 3===0 && rowCount == 6) break; //18 searches on the screen so don't display any more
+				if (lp % 6==0 && rowCount == 6) break; //36 searches on the screen so don't display any more
 				var quickSearch=quickSearchList[p];
 				if (quickSearch.displayOnAH) {
-					if (lp % 3===0) {
+					if (lp % 6==0) {
 						finalHTML += "<tr>";
 						rowCount++;
 					}
-					finalHTML += "<td";
+					finalHTML += "<td nowrap";
 					finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
 						quickSearch.searchname + "&page=1&order_by=1'>" +
 						quickSearch.nickname + "</a></td>";
-					if (lp % 3==2) finalHTML += "</tr>";
-					if (lp % 3==2) finalHTML += "</tr>";
+					if (lp % 6==5) finalHTML += "</tr>";
 					lp++;
 				}
 			}
@@ -8864,6 +8866,81 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.setValueJSON("arenaMatches", arenaMatches);
 	},
 
+	injectArenaSetupMove: function() {
+		var node=System.findNode("//b[.='Setup Combat Moves']");
+		if (!node) return;
+		node.style.textDecoration = "underline";
+		node.style.color = "green";
+		node.style.cursor= "pointer";
+		node.addEventListener("click", Helper.changeArenaMove, true);
+	},
+
+	changeArenaMove: function() {
+		if (document.getElementById("updateMv")) return;
+		var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=arena&subcmd=pickmove&slot_id=')]");
+		var table = nodes[0].parentNode.parentNode.parentNode.parentNode.parentNode.parentNode.parentNode;
+		var imgs = System.findNodes("//img[contains(@src,'pvp/bar_spacer.jpg')]");
+
+		// selection row
+		var row=table.insertRow(-1);
+		var html="<td></td>";
+		var arr=["BL", "CA","CH","DD","DF","DG", "LG","PA","SA","PS","CR", "WK"], i, dict={};; // left out BA
+		//		   0	1	 2	  3		4	5	  6		7	8	 9	  10	11
+		var select = "<option value=x>BA</option>";
+		for (i=0; i<arr.length; i++) {
+			select += "<option value="+i+">"+arr[i]+"</option>";
+		}
+		for (i=0; i<nodes.length; i++) {
+			var s=select;
+			var m=nodes[i].firstChild.getAttribute("src");
+			if (m.indexOf("bar_icon_holder.jpg")>0)
+				m="x";
+			else
+				m=m.match(/pvp\/(\d+).gif$/)[1];
+			html += "<td colspan=3><select id=mv"+i+">"+s.replace("value="+m+">","value="+m+" selected>")+"</select></td>";
+		}
+		row.innerHTML = html;
+
+		// img row
+		for (i=0; i<imgs.length; i++) {
+			imgs[i].width=15;
+			imgs[i].height=50;
+		}
+
+		// action row
+		row=table.insertRow(-1);
+		row.innerHTML="<td colspan=31 align=center><input id=updateMv type=button class=custombutton value=Update name=updateMoves></td>";
+		document.getElementById("updateMv").addEventListener("click", Helper.updateMove, true);
+	},
+
+	updateMove: function(evt, moves) {
+		var mv=[], oldmv=[];
+		for (i=0; i<10; i++) {
+			mv.push(document.getElementById("mv"+i).value);
+		}
+		if (moves) mv = moves;
+		var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=arena&subcmd=pickmove&slot_id=')]");
+		for (i=0; i<nodes.length; i++) {
+			var m=nodes[i].firstChild.getAttribute("src");
+			if (m.indexOf("bar_icon_holder.jpg")>0)
+				m="x";
+			else
+				m=m.match(/pvp\/(\d+).gif$/)[1];
+			oldmv.push(m);
+		}
+		for (i=0; i<10; i++) {
+			if (mv[i] != oldmv[i])
+				System.xmlhttp("index.php?cmd=arena&subcmd=dopickmove&move_id=x&slot_id="+i);
+		}
+		setTimeout(function() {
+			for (i=0; i<10; i++) {
+			if (mv[i] != oldmv[i] && mv[i] != "x")
+				System.xmlhttp("index.php?cmd=arena&subcmd=dopickmove&move_id="+mv[i]+"&slot_id="+i);
+			}
+			setTimeout(function() {window.location = window.location;}, 500);
+			}, 500);
+	},
+
 	injectRelicList: function(){
 		var relics = Data.relicList();
 		var relicImages = System.findNodes("//img[contains(@src,'/relics/')]");
@@ -9063,7 +9140,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show FSG icon' + Helper.helpLink('Show FSG icon', 'This will show the FSG icon on the world page that links to the map for the page.') +
 				':</td><td><input name="showFSGIcon" type="checkbox" value="on"' + (GM_getValue("showFSGIcon")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Enable Fast Walk' + Helper.helpLink('Enable Fast Walk', 'This functionality will allow the user to send multiple move commands, each subsequent one assuming that the previous one succeeded. ' + 
+			'<tr><td align="right">Enable Fast Walk' + Helper.helpLink('Enable Fast Walk', 'This functionality will allow the user to send multiple move commands, each subsequent one assuming that the previous one succeeded. ' +
 				'It does not check for blocked squares, not does it check to make sure that the move commands arrived at the server in the right order. Depending on the lag you experience, the user may have to pause slightly ' +
 				'between each move to make sure they reach the server in the right order.') +
 				':</td><td><input name="enableFastWalk" type="checkbox" value="on"' + (GM_getValue("enableFastWalk")?" checked":"") + '></td></tr>' +

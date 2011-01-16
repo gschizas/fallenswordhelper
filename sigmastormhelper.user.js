@@ -7443,7 +7443,7 @@ var Helper = {
 	},
 
 	autoMoveNext: function(responseText, id) {
-		var currentPos = "("+Helper.moveList[id].X+",\n\t\t\t\t\t\t\t\t\t\t"+Helper.moveList[id].Y+")";
+		var currentPos = "("+Helper.moveList[id].X+", "+Helper.moveList[id].Y+")";
 		if (responseText.indexOf(currentPos)<0) {
 			alert("Cannot move via " + currentPos);
 			window.location = window.location;
