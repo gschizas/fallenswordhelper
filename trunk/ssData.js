@@ -14,7 +14,8 @@ var Data = {
 				{Name:"Colossal Fedomeera",Realm:"Raga Domain (Lonely Road) (15,5) Lvl 66",Comment:"Artifact Gain +1<p>Getting there: Portal >  Raga Domain > Lonely Road "},
 				{Name:"Altus Galactic Archive",Realm:"Sanctuary of Ages (Mantapa) (9,13) Lvl 180",Comment:"Artifact Gain +1<p>Getting there: Portal > Sanctuary of Ages Inner Halls > Sanctuary of Ages (Narthex) > Sanctuary of Ages (Mantapa)"},
 				{Name:"Metro Defence System",Realm:"Varion City (Heights) (5,2) Lvl 110",Comment:"Artifact Gain +1<p>Getting there: Portal > Ashstorm Wilds > Varion City (Heights)"},
-				{Name:"Ancient Geothermal Tap",Realm:"Lava Field (Crust) (2,16) Lvl 102",Comment:"Artifact Gain +1<p>Getting there: Portal > Ashstorm Wilds > Lava Field (Edge) > Lava Field (Crust)"}
+				{Name:"Ancient Geothermal Tap",Realm:"Lava Field (Crust) (2,16) Lvl 102",Comment:"Artifact Gain +1<p>Getting there: Portal > Ashstorm Wilds > Lava Field (Edge) > Lava Field (Crust)"},
+				{Name:"Cerrath Power Core",Realm:"Cerrath (Sub Basement) (14,12) Lvl 271",Comment:"Artifact Gain +1<p>Getting there: Portal > Cerrath Caves > Cerrath (Sub Basement)"}
 			];
 		}
 		return Data.relicArray;
@@ -55,7 +56,7 @@ var Data = {
 				{name: "Defiance", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 5,  buff: "need help", nicks: "defiance"},
 				{name: "Absorption", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 6,  buff: "need help", nicks: "absorption,abs"},
 				{name: "Salvage", stamina: 15, "duration": 60,   minCastLevel: 25,   treeId: 0, skillId: 7,  buff: "need help", nicks: "salvage,sal,salv"},
-				{name: "Researcher", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 8,  buff: "need help", nicks: "researcher,rs"},
+				{name: "Researcher", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 8,  buff: "need help", nicks: "researcher,rs,res"},
 				{name: "Brinkmanship", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 9,  buff: "need help", nicks: "brinkmanship,brink,brk"},
 				{name: "Kinetic Reserves", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 10,  buff: "need help", nicks: "kinetic reserves,kr"},
 				{name: "Rad Hunter", stamina: 20, "duration": 60,   minCastLevel: 75,   treeId: 0, skillId: 11,  buff: "need help", nicks: "rad hunter,radh"},
