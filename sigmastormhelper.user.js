@@ -79,7 +79,6 @@ var Helper = {
 		System.setDefault("enableEnemyOnlineList", false);
 		System.setDefault("allyEnemyOnlineRefreshTime", 60);
 
-		System.setDefault("hideMatchesForCompletedMoves", false);
 		System.setDefault("quickKill", true);
 		System.setDefault("doNotKillList", "");
 		System.setDefault("enableBioCompressor", false);
@@ -89,11 +88,12 @@ var Helper = {
 		System.setDefault("quickWearFilter",JSON.stringify({"enable":false,"value":"pack,stim"}));
 		System.setDefault("invMaxLvlFilter", '');
 		System.setDefault("quickUseItems",JSON.stringify({'item0':'','item1':'','item2':''}));
-		System.setDefault("enableBulkSell", false);
+		System.setDefault("enableBulkSell", true);
 		System.setDefault("fsboxlog", true);
 		System.setDefault("huntingMode", false);
 		System.setDefault("fsboxcontent", "");
 		System.setDefault("quickAHPref",JSON.stringify([{"name":"NoCredit","min":"","max":"","gold":true,"fsp":false},{"name":"NoFC","min":"","max":"","gold":false,"fsp":true},{"name":"All","min":"","max":"","gold":false,"fsp":false}]));
+		System.setDefault("autoFillMinBidPrice", true);
 		System.setDefault("quickMsg",JSON.stringify(["Thank you very much ^_^", "Happy hunting, {playername}"]));
 		System.setDefault("quickLinks","[]");
 		System.setDefault("currentGoldSentTotal", 0);
@@ -3557,6 +3557,7 @@ var Helper = {
 		var playerId = Layout.playerId();
 
 		var newRow, newCell, winningBidBuyoutCell;
+		var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
 		for (var i=0;i<auctionTable.rows.length;i++) {
 			var aRow = auctionTable.rows[i];
 			if (i>0 && // the title row - ignore this
@@ -3592,9 +3593,21 @@ var Helper = {
 							playerListedItem = true;
 						}
 					}
-					if (winningBidValue != "-" && !bidExistsOnItem && !playerListedItem) {
-						var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-						winningBidBuyoutCell.innerHTML = '<span style="color:#ADB5B5;" title="Overbid value">Overbid ' + System.addCommas(overBid) + '</span>&nbsp';
+					if (!bidExistsOnItem && !playerListedItem) {
+						var bidValueButton = aRow.cells[6].getElementsByTagName("input");
+						if (winningBidValue != "-") {
+							var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
+							var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
+							if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
+							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
+								System.addCommas(overBid) + '</span>&nbsp';
+							if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
+							bidValueButton[0].size = 6;
+						} else {
+							var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
+							if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
+							bidValueButton[0].size = 6;
+						}
 					}
 					if (!playerListedItem) {
 						var inputTable = aRow.cells[6].firstChild.firstChild;
@@ -3911,7 +3924,7 @@ var Helper = {
 	},
 
 	injectAuctionExtraText: function(anItem, craft, forgeCount, classType) {
-		var theText=anItem.parentNode.nextSibling.nextSibling;GM_log(classType);
+		var theText=anItem.parentNode.nextSibling.nextSibling;
 		var preText = (classType>0?"<img src="+System.imageServer+"/skin/classes/"+classType+".gif>":"")+" "+
 			"<div style='font-size:small'>" + craft + "</div>";
 		if (forgeCount != 0) {
@@ -6577,7 +6590,10 @@ var Helper = {
 		var creatureName = System.findNode('//td/font[@size=3]/b/center');
 		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
-			creatureName.innerHTML += ' <a href="http://sigmastorm2.wikia.com/wiki/Special:Search?go=1&search=' + creatureName.textContent + '" target="_blank">' +
+			creatureName.innerHTML +=
+				' <a href="http://guide.sigmastorm2.com/index.php?cmd=creatures&search_name=' + creatureName.textContent + '" target="_blank">' +
+				'<img border=0 title="Search creature in the Ultimate Guide" width=10 height=10 src="http://www.sigmastorm2.com/favicon.ico"/></a>'+
+				' <a href="http://sigmastorm2.wikia.com/wiki/Special:Search?go=1&search=' + creatureName.textContent + '" target="_blank">' +
 				'<img border=0 title="Search creature in Wikia" width=10 height=10 src="http://images.wikia.com/sigmastorm2/images/6/64/Favicon.ico"/></a>';
 			var extraText = 'Add to the do not kill list';
 			if (doNotKillList.indexOf(creatureName.textContent.trim()) != -1) extraText = 'Remove from do not kill list';
@@ -7045,6 +7061,7 @@ var Helper = {
 				'<input name="hideRecipeNames" size="'+inputSize+'" value="'+ GM_getValue("hideRecipeNames") + '" />')+
 			'<tr><th colspan="2" align="left" style="color:#D4FAFF;">Auction Config</th></tr>' +
 			Helper.helpTDwithCB('Enable Bulk Sell','This enables the functionality for the user to bulk sell items.','enableBulkSell')+
+			Helper.helpTDwithCB('Auto Fill Min Bid Price','This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed.','autoFillMinBidPrice')+
 			'</table>';
 		var factionCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			'<tr><td colspan="2" align="left">Enter faction names, seperated by commas</td></tr>' +
@@ -7251,6 +7268,7 @@ var Helper = {
 		System.saveValueForm(oForm, "goldAmount");
 		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "enableBulkSell");
+		System.saveValueForm(oForm, "autoFillMinBidPrice");
 		System.saveValueForm(oForm, "fsboxlog");
 		System.saveValueForm(oForm, "huntingMode");
 
@@ -8091,9 +8109,13 @@ var Helper = {
 		if (injectHere) {
 			questName = injectHere.textContent;
 			questName = questName.match(/"(.*)"/);
+			questId = document.location.search.match(/quest_id=(\d+)/)[1];
 			if (questName && questName.length > 1) {
 				questName = questName[1];
-				injectHere.innerHTML += '&nbsp;<a href="http://sigmastorm2.wikia.com/wiki/' + questName.replace(/ /g,'_') +
+				injectHere.innerHTML +=
+					'&nbsp;<a href="http://guide.sigmastorm2.com/index.php?cmd=quests&subcmd=view&quest_id='+questId+'" target=_blank>'+
+						'<img title="Search on the Ultimate Guide" src="http://www.sigmastorm2.com/favicon.ico"></a>'+
+					'&nbsp;<a href="http://sigmastorm2.wikia.com/wiki/' + questName.replace(/ /g,'_') +
 						'" target="_blank"><img border=0 title="Search for this quest on the Unofficial Sigmastorm 2 Wiki. '+
 						'Please note this is an external site." src=' + System.imageServer + '/skin/wiki.gif /></a>';
 			}
