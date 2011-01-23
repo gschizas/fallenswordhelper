@@ -9,11 +9,11 @@
 // @exclude        http://forum.sigmastorm2.com/*
 // @exclude        http://wiki.sigmastorm2.com/*
 // @exclude        http://guide.sigmastorm2.com/*
-// @require        json2.js
-// @require        gmApi.js
-// @require        calfSystem.js
-// @require        ssLayout.js
-// @require        ssData.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/json2.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/gmApi.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/calfSystem.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/ssLayout.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/ssData.js
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
