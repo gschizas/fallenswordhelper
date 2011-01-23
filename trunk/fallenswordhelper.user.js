@@ -8,11 +8,11 @@
 // @include        http://*.fallensword.com/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @require        json2.js
-// @require        gmApi.js
-// @require        calfSystem.js
-// @require        fsLayout.js
-// @require        fsData.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/json2.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/gmApi.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/calfSystem.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/fsLayout.js
+// @require        http://fallenswordhelper.googlecode.com/svn/trunk/fsData.js
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
