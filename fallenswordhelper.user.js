@@ -11048,6 +11048,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
 			Helper.makeSelectAllInTrade(newCellAll);
+			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
+			var newCell = newRow.insertCell(0);
+			newCell.colSpan = 3;
+			newCell.innerHTML = "<span id='SecureTradeCheckMessage' style='color:blue;'>Existing ST check in progress ...</span>";
+			System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
 		}
 	},
 
@@ -11110,6 +11115,43 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				newHtml+='</tr></tbody></table>';
 				table.innerHTML = newHtml;
 			});
+	},
+
+	checkExistingSecureTrades: function(responseText) {
+		var doc = System.createDocument(responseText);
+		var secureTradeTable = System.findNode("//b[contains(.,'Outgoing Trades')]/ancestor::table[1]", doc);
+		Helper.secureTradesToCheckCount = 0;
+		Helper.secureTradesProcessed = 0;
+		for (var i = 2;i < secureTradeTable.rows.length;i+=2) {
+			var aRow = secureTradeTable.rows[i];
+			if (aRow.cells[2]) {
+				var stHREF = aRow.cells[2].firstChild.getAttribute("href");
+				Helper.secureTradesToCheckCount++;
+				System.xmlhttp(stHREF, Helper.markExistingSecureTrades, true);
+			}
+		}
+	},
+
+	markExistingSecureTrades: function(responseText) {
+		var doc = System.createDocument(responseText);
+		var secureTradeIMGElements = System.findNodes("//img[contains(@src,'/items/')]", doc);
+		if (secureTradeIMGElements) {
+			for (var i = 0;i < secureTradeIMGElements.length;i++) {
+				var secureTradeIMGElement = secureTradeIMGElements[i];
+				var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(secureTradeIMGElement.getAttribute("onmouseover"));
+				var itemId = itemStats[1];
+				var invId = itemStats[2];
+				var searchTerm = "//td[center/img[contains(@onmouseover,'(" + itemId + ", " + invId + "')]]";
+				var possibleTradeItem = System.findNode(searchTerm);
+				possibleTradeItem.style.border = "3px solid red";
+			}
+		}
+		Helper.secureTradesProcessed++;
+		if (Helper.secureTradesProcessed == Helper.secureTradesToCheckCount) {
+			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
+			secureTradeCheckMessage.innerHTML = 'Existing ST check complete.';
+			secureTradeCheckMessage.style.color = 'Green';
+		}
 	},
 
 	makePageHeader: function(title, comment, spanId, button) {
