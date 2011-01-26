@@ -517,6 +517,7 @@ var Helper = {
 			case "create":
 				Helper.injectCreateAuctionTemplate();
 				Helper.injectCreateAuctionBulkSell();
+				Helper.injectAuctionSTCheck();
 				break;
 			case "preferences":
 				break;
@@ -10878,6 +10879,17 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);
 	},
 
+	injectAuctionSTCheck: function() {
+		var injectCell = System.findNode("//table[@width='650']/tbody/tr/td[contains(.,'Use the form below')]");
+		if (!injectCell) {
+			var injectCell = System.findNode("//table[@width='650']/tbody/tr/td[contains(.,'Now select the minimum')]");
+		}
+		if (injectCell) {
+			injectCell.innerHTML = "<span id='SecureTradeCheckMessage' style='color:blue;'>Existing ST check in progress ...</span>";
+			System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
+		}
+	},
+
 	processAuctionBulkSellItems: function(responseText, callback) {
 		var originalItemID = callback.itemID;
 		var originalInvID = callback.invID;
@@ -11033,6 +11045,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
 			Helper.makeSelectAllInTrade(newCellAll);
+			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
+			var newCell = newRow.insertCell(0);
+			newCell.colSpan = 3;
+			newCell.innerHTML = "<span id='SecureTradeCheckMessage' style='color:blue;'>Existing ST check in progress ...</span>";
+			System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
 		}
 	},
 
@@ -11141,9 +11158,17 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(secureTradeIMGElement.getAttribute("onmouseover"));
 				var itemId = itemStats[1];
 				var invId = itemStats[2];
-				var searchTerm = "//td[center/img[contains(@onmouseover,'(" + itemId + ", " + invId + "')]]";
-				var possibleTradeItem = System.findNode(searchTerm);
-				possibleTradeItem.style.border = "3px solid red";
+				if (window.location.search.search("subcmd=createsecure") != -1 || 
+					window.location.search.search("inv_id") != -1 || 
+					window.location.search.search("cmd=trade") != -1) {
+					var searchTerm = "//img[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
+				} else {
+					var searchTerm = "//a[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
+				}
+				var possibleTradeItems = System.findNodes(searchTerm);
+				for (var j in possibleTradeItems) {
+					if (possibleTradeItems[j].style) possibleTradeItems[j].style.border = "3px solid red";
+				}
 			}
 		}
 		Helper.secureTradesProcessed++;
