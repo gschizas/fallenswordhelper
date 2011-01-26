@@ -383,6 +383,7 @@ var Helper = {
 			Helper.updateTitanLogs();
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
+			Helper.injectQuickMsgDialogJQ();
 		}
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
@@ -827,6 +828,36 @@ var Helper = {
 		if (GM_getValue("huntingMode") === false) {
 			Layout.injectQuickLinks();
 		}
+	},
+
+	injectQuickMsgDialogJQ: function() {
+		Helper.template = System.getValueJSON("quickMsg");
+		$("a[href*='javascript:openQuickMsgDialog(']").each(function() {
+			$(this).click(function() {
+				var buttons = $("#quickMessageDialog").dialog("option","buttons");
+				buttons["Template"] = function() { Helper.showMsgTemplate() };
+				$("#quickMessageDialog").dialog("option","buttons",buttons);
+				$("#quickMessageDialog").dialog("open");
+			});
+		});
+	},
+
+	showMsgTemplate: function() {
+		var template = Helper.template;
+		var targetPlayer=$("#quickMsgDialog_targetUsername").text();
+		var html="<div id=msgTemplateDialog title='Choose Msg Template' style='display:none'><ol id=msgTemplate>";
+		for (var i = 0; i < template.length; i++) {
+			html += "<li class='ui-widget-content'>"+template[i].replace(/{playername}/g, targetPlayer) + "</li>";
+		}
+		html += "</ol></div>";
+		$("body").append(html);
+		$( "#msgTemplate" ).selectable({
+			stop: function() {
+				$("#quickMsgDialog_msg").val($("#quickMsgDialog_msg").val()+$('#msgTemplate .ui-selected').text()+'\n');
+				$("#msgTemplateDialog").dialog("close");
+			}
+		});
+		$("#msgTemplateDialog").dialog({"buttons":{"Cancel":function() {$("#msgTemplateDialog").dialog("close");}}});
 	},
 
 	injectSkillsPage: function() {
@@ -11158,8 +11189,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(secureTradeIMGElement.getAttribute("onmouseover"));
 				var itemId = itemStats[1];
 				var invId = itemStats[2];
-				if (window.location.search.search("subcmd=createsecure") != -1 || 
-					window.location.search.search("inv_id") != -1 || 
+				if (window.location.search.search("subcmd=createsecure") != -1 ||
+					window.location.search.search("inv_id") != -1 ||
 					window.location.search.search("cmd=trade") != -1) {
 					var searchTerm = "//img[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
 				} else {
@@ -12841,4 +12872,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	}
 };
 
-Helper.onPageLoad(null);
+var $ ;
+
+GM_wait();
+
+// Check if jQuery's loaded
+function GM_wait() {
+	if (typeof unsafeWindow.jQuery == 'undefined') {
+		window.setTimeout(GM_wait, 100);
+	} else {
+		$ = unsafeWindow.jQuery;
+		Helper.onPageLoad(null);
+	}
+}
