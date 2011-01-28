@@ -162,7 +162,7 @@ var Helper = {
 
 		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
-		{"id":"showHelmetTypeItems", "type":"Helmet"},
+			{"id":"showHelmetTypeItems", "type":"Helmet"},
 		{"id":"showAmuletTypeItems", "type":"Amulet"},
 		{"id":"showWeaponTypeItems", "type":"Weapon"},
 		{"id":"showAmorTypeItems", "type":"Armor"},
@@ -831,33 +831,69 @@ var Helper = {
 	},
 
 	injectQuickMsgDialogJQ: function() {
-		Helper.template = System.getValueJSON("quickMsg");
-		$("a[href*='javascript:openQuickMsgDialog(']").each(function() {
-			$(this).click(function() {
-				var buttons = $("#quickMessageDialog").dialog("option","buttons");
-				buttons["Template"] = function() { Helper.showMsgTemplate() };
-				$("#quickMessageDialog").dialog("option","buttons",buttons);
-				$("#quickMessageDialog").dialog("open");
-			});
-		});
+		var nodes = System.findNodes("//a[contains(@href, 'javascript:openQuickMsgDialog(')]");
+		if (!nodes) return;
+		for (var i=0; i<nodes.length; i++) {
+			nodes[i].addEventListener("click", Helper.addTemplateButton, true);
+		}
+	},
+
+	addTemplateButton: function() {
+		setTimeout(function() {Helper.template = System.getValueJSON("quickMsg");}, 0);
+		var buttons = $("#quickMessageDialog").dialog("option","buttons");
+		buttons["Template"] = function() { Helper.showMsgTemplate() };
+		$("#quickMessageDialog").dialog("option","buttons",buttons);
 	},
 
 	showMsgTemplate: function() {
-		var template = Helper.template;
 		var targetPlayer=$("#quickMsgDialog_targetUsername").text();
-		var html="<div id=msgTemplateDialog title='Choose Msg Template' style='display:none'><ol id=msgTemplate>";
-		for (var i = 0; i < template.length; i++) {
-			html += "<li class='ui-widget-content'>"+template[i].replace(/{playername}/g, targetPlayer) + "</li>";
+		$("#msgTemplateDialog").remove();
+
+		// template displayed
+		var html="<div id=msgTemplateDialog title='Choose Msg Template' style='display:none'><style>#msgTemplate .ui-selecting { background: #FECA40; };</style><ol id=msgTemplate valign=center>";
+		for (var i = 0; i < Helper.template.length; i++) {
+			html += "<li class='ui-widget-content'>"+Helper.template[i].replace(/{playername}/g, targetPlayer) + "</li>";
 		}
 		html += "</ol></div>";
 		$("body").append(html);
+
+		// template manager
+		$("#msgTemplate li").prepend("<input type=button class='del-button' value=Del style='display:none'>");
+		$("#msgTemplate").append("<li class='add-button' style='display:none'><input type=button id=newTmplAdd value=Add><input id=newTmpl class=ui-widget-content></li>");
+		$(":button","#msgTemplate").button();
+		$(".del-button").click(function(evt) {
+			Helper.template.splice($("#msgTemplate li").index(evt.target.parentNode), 1);
+			setTimeout(function() {System.setValueJSON("quickMsg", Helper.template);}, 0); // work around GM security check
+			$("#msgTemplateDialog").dialog("close");
+			Helper.showMsgTemplate();
+		});
+		$("#newTmplAdd").click(function() {
+			if ($("#newTmpl").val()=="") return;
+			Helper.template.push($("#newTmpl").val());
+			setTimeout(function() {System.setValueJSON("quickMsg", Helper.template);}, 0);
+			$("#msgTemplateDialog").dialog("close");
+			Helper.showMsgTemplate();
+		});
+
+		// enable selectable template
 		$( "#msgTemplate" ).selectable({
+			filter: "li.ui-widget-content",
 			stop: function() {
+				if ($('.add-button.ui-selected').length>0) return; // click on add row
+				if ($('.ui-selected').length==0) return; // nothing selected yet
 				$("#quickMsgDialog_msg").val($("#quickMsgDialog_msg").val()+$('#msgTemplate .ui-selected').text()+'\n');
 				$("#msgTemplateDialog").dialog("close");
 			}
 		});
-		$("#msgTemplateDialog").dialog({"buttons":{"Cancel":function() {$("#msgTemplateDialog").dialog("close");}}});
+
+		// show the template form
+		$("#msgTemplateDialog").dialog({"buttons":{
+			"Manage":function() {
+				$(".del-button").toggle();
+				$(".add-button").toggle();
+			},
+			"Cancel":function() {$("#msgTemplateDialog").dialog("close");$("#msgTemplateDialog").remove();}
+		}});
 	},
 
 	injectSkillsPage: function() {
@@ -4166,8 +4202,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 							thirdPart = " | <a " + Layout.quickBuffHref(targetPlayerID, quickBuff) + ">Buff</a></span>";
 						}
 
-						var msgReplyTo = (GM_getValue("enableChatParsing") === true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" +
-							Helper.removeHTML(firstPart.replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
+						//var msgReplyTo = (GM_getValue("enableChatParsing") === true) ? secondPart.replace(/"([^"]*?)"/, secondPart.match(/"([^"]*?)"/)[1] + "&replyTo='" +
+						//	Helper.removeHTML(firstPart.replace(/&nbsp;/g, "")).replace(/[\s*]/g, "_") + "'") : secondPart;
+						var msgReplyTo =
+							"[ <span style='cursor:pointer;text-decoration:underline'class='a-reply' target_player='"+playerName+"' replyTo='"+(GM_getValue("enableChatParsing") ? Helper.removeHTML(firstPart.replace(/&nbsp;/g, " ")).substr(0, 140) : "")+"...'>Reply</span>";
 						aRow.cells[2].innerHTML = firstPart + "<nobr>" + msgReplyTo + extraPart + thirdPart + attackPart + fourthPart + "</nobr>" + lastPart;
 					}
 					if (aRow.cells[2].innerHTML.search("You have just been outbid at the auction house") != -1) {
@@ -4185,8 +4223,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 								var buffingPlayerIDRE = /player_id=(\d+)/;
 								var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
 								var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
-								var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
-									"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
+								var extraText = " <span style='font-size:x-small;'><nobr>[ <span style='cursor:pointer;text-decoration:underline' class='a-reply' target_player='"+buffingPlayerName+
+									"'>Reply</span> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 									"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
 									"'>ST</a>";
 								extraText += " | <a " + Layout.quickBuffHref(buffingPlayerID) + ">Buff</a>";
@@ -4214,6 +4252,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				if (messageNameCell) messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
 			}
 		}
+		GM_wait(function() { // just want to be on the safe side
+			$(".a-reply").click(function(evt) {
+				Helper.openQuickMsgDialog(evt.target.getAttribute("target_player"),"", evt.target.getAttribute("replyTo"));
+			});
+		});
 	},
 
 	retrievePvPCombatSummary: function(responseText, callback) {
@@ -5708,7 +5751,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 			if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
 
-			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=' +
+			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" target_player="' +
 				playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
 				'<span id=buffCost style="color:red"></span>');
 		}
@@ -5972,16 +6015,39 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (buffsToBuy.lastIndexOf(",") == buffsToBuy.length - 1) {
 			buffsToBuy = buffsToBuy.substring(0, buffsToBuy.length - 1);
 		}
-		GM_setValue("buffsToBuy", buffsToBuy);
-		var href = evt.target.getAttribute("href");
 
-		if (href && buffCount > 0) {
-			window.location = System.server + href;
+		if (buffCount > 0) {
+				var targetPlayer = evt.target.getAttribute("target_player");
+				var greetingText = GM_getValue("buyBuffsGreeting").trim();
+				var hasBuffTag = greetingText.indexOf("{buffs}") != -1;
+				var hasCostTag = greetingText.indexOf("{cost}") != -1;
+				greetingText = greetingText.replace(/{playername}/g, targetPlayer);
+				if (!hasBuffTag) {
+					greetingText += " " + buffsToBuy;
+				} else {
+					if (!hasCostTag) {
+						greetingText = greetingText.replace(/{buffs}/g, "`~" + buffsToBuy + "~`");
+					} else {
+						greetingText = greetingText.replace(/{buffs}/g, "`~" + buffsToBuy + "~`").replace(/{cost}/g, GM_getValue("buffCostTotalText"));
+					}
+				}
+
+			Helper.openQuickMsgDialog(targetPlayer, greetingText, "");
 		} else {
 			alert("You have not selected any buffs!");
-			GM_setValue("buffsToBuy", "");
 			return;
 		}
+	},
+
+	openQuickMsgDialog: function(name, msg, tip) {
+		$("#quickMsgDialog_targetUsername").html(name);
+		$("#quickMsgDialog_targetPlayer").val(name);
+		$("#quickMsgDialog_msg").val(msg);
+		$("#quickMsgDialog_msg").removeAttr("disabled");
+		if (!tip) tip="";
+		$(".validateTips").text(tip);
+		Helper.addTemplateButton();
+		$("#quickMessageDialog").dialog("open");
 	},
 
 	removeHTML: function(buffName) {
@@ -12875,13 +12941,14 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 var $ ;
 
 GM_wait();
+Helper.onPageLoad(null);
 
 // Check if jQuery's loaded
-function GM_wait() {
+function GM_wait(jqFunction) {
 	if (typeof unsafeWindow.jQuery == 'undefined') {
 		window.setTimeout(GM_wait, 100);
 	} else {
 		$ = unsafeWindow.jQuery;
-		Helper.onPageLoad(null);
+		if (jqFunction) jqFunction.call();
 	}
 }
