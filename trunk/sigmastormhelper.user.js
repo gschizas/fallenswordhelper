@@ -263,7 +263,7 @@ var Helper = {
 			Helper.prepareChat();
 			Helper.prepareGuildList();
 			Helper.prepareAllyEnemyList();
-			Helper.injectStaminaCalculator();
+			// Helper.injectStaminaCalculator();
 			Helper.injectLevelupCalculator();
 			Layout.injectMenu();
 			Helper.replaceKeyHandler();
