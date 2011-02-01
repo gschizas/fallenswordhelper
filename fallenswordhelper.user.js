@@ -10340,6 +10340,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var aRow = titanTable.rows[i];
 			if (aRow.cells[2]) {
 				var titanHP = aRow.cells[2].textContent;
+				if (titanHP.search("-") != -1) break;
 				var guildKills = aRow.cells[3].textContent;
 				if (guildKills) {
 					var titanHPArray = titanHP.split("/");
@@ -12249,6 +12250,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					titan.name = aRow.cells[0].firstChild.getAttribute('title');
 					titan.realm = aRow.cells[1].textContent;
 					titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
+					if (!titanHP) break;
 					titan.currentHP = titanHP[1]*1;
 					titan.maxHP = titanHP[2]*1;
 					titan.firstRow = aRow.innerHTML;
@@ -12298,6 +12300,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 							scoutTowerTitan.name = aRow.cells[0].firstChild.getAttribute('title');
 							scoutTowerTitan.realm = aRow.cells[1].textContent;
 							titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
+							if (!titanHP) break;
 							scoutTowerTitan.maxHP = titanHP[2]*1;
 							if (titanLogTitan.name == scoutTowerTitan.name && titanLogTitan.realm == scoutTowerTitan.realm
 								&& titanLogTitan.maxHP == scoutTowerTitan.maxHP) {
