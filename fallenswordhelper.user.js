@@ -10335,6 +10335,27 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	injectScouttower: function() {
 		Helper.injectScouttowerBuffLinks();
 		Helper.parseScoutTower();
+		var titanTable = System.findNode("//table[@width='500']");
+		for (var i = 1; i < titanTable.rows.length; i+=5) {
+			var aRow = titanTable.rows[i];
+			if (aRow.cells[2]) {
+				var titanHP = aRow.cells[2].textContent;
+				var guildKills = aRow.cells[3].textContent;
+				if (guildKills) {
+					var titanHPArray = titanHP.split("/");
+					var currentHP = parseInt(titanHPArray[0], 10);
+					var totalHP = parseInt(titanHPArray[1], 10);
+					var currentNumberOfKills = totalHP - currentHP;
+					var numberOfKillsToSecure = Math.ceil(totalHP/2 + 1);
+					
+					var titanString = "<span style='color:red;'>" + (numberOfKillsToSecure - guildKills) + "</span> more kills until secured";
+					if (guildKills >= numberOfKillsToSecure) titanString = "Secured";
+					else if ((numberOfKillsToSecure - guildKills) > currentHP) titanString = "<span style='color:red;'>Cannot Secure</span>";
+					var killsPercent = (guildKills * 100/currentNumberOfKills).toFixed(2);
+					aRow.cells[3].innerHTML += "<br><span style='color:blue;'> (" + killsPercent + "% " + titanString + ")"; 
+				}
+			}
+		}
 	},
 
 	injectScouttowerBuffLinks: function() {
@@ -11243,6 +11264,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				Helper.secureTradesToCheckCount++;
 				System.xmlhttp(stHREF, Helper.markExistingSecureTrades, true);
 			}
+		}
+		if (Helper.secureTradesToCheckCount == 0) {
+			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
+			secureTradeCheckMessage.innerHTML = 'No existing ST\'s to check.';
+			secureTradeCheckMessage.style.color = 'Green';
 		}
 	},
 
