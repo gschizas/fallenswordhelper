@@ -385,6 +385,8 @@ var Helper = {
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
 		}
+
+		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId;
 		if (document.location.search !== "") {
 			var re=/cmd=([a-z]+)/;
@@ -981,8 +983,9 @@ var Helper = {
 
 	},
 
-	injectBuffLog: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Buff Log','','clearBuffs','Clear','bufflog');
+	injectBuffLog: function(content) {
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate('Buff Log','','clearBuffs','Clear','bufflog');
 		document.getElementById('clearBuffs').addEventListener('click',function() {GM_setValue("buffLog",'');window.location=window.location;},true);
 		document.getElementById('bufflog').innerHTML=GM_getValue("buffLog");
 	},
@@ -6118,9 +6121,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			});
 	},
 
-	injectAuctionSearch: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
-			'<div>This screen allows you to set up some quick search templates for the Auction House. '+
+	injectAuctionSearch: function(content) {
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
+			'<div class=content>This screen allows you to set up some quick search templates for the Auction House. '+
 				'The Display on AH column indicates if the quick search will show on the short list on the '+
 				'Auction House main screen. A maximum of 18 items can show on this list '+
 				'(It will not show more than 18 even if you have more than 18 flagged). '+
@@ -6174,8 +6178,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		return theUrl;
 	},
 
-	injectInventoryManager: function() {
-		var content=Layout.notebookContent();
+	injectInventoryManager: function(content) {
+		if (!content) content=Layout.notebookContent();
 
 		var lastCheck=GM_getValue("lastInventoryCheck");
 		var now=(new Date()).getTime();
@@ -6226,8 +6230,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
-	injectGuildInventoryManager: function() {
-		var content=Layout.notebookContent();
+	injectGuildInventoryManager: function(content) {
+		if (!content) content=Layout.notebookContent();
 
 		var lastCheck=GM_getValue("lastGuildInventoryCheck");
 		var now=(new Date()).getTime();
@@ -6304,8 +6308,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		window.location=window.location;
 	},
 
-	injectOnlinePlayers: function() {
-		var content=Layout.notebookContent();
+	injectOnlinePlayers: function(content) {
+		if (!content) var content=Layout.notebookContent();
 
 		var lastCheck=GM_getValue("lastOnlineCheck");
 		var now=(new Date()).getTime();
@@ -9580,8 +9584,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog";
 	},
 
-	injectNotepadShowLogs: function() {
-		var content = Layout.notebookContent();
+	injectNotepadShowLogs: function(content) {
+		if (!content) var content = Layout.notebookContent();
 		var combatLog = GM_getValue("CombatLog");
 		content.innerHTML = '<div align="center"><textarea align="center" cols="80" rows="25" ' +
 			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog">' + combatLog + '</textarea></div>' +
@@ -9810,11 +9814,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		position.style.backgroundPosition = "center";
 	},
 
-	injectQuickLinkManager: function() {
+	injectQuickLinkManager: function(content) {
 		GM_addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
 
 		// global parameters for the meta function generateManageTable
 		Helper.param={};
@@ -10348,12 +10353,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var totalHP = parseInt(titanHPArray[1], 10);
 					var currentNumberOfKills = totalHP - currentHP;
 					var numberOfKillsToSecure = Math.ceil(totalHP/2 + 1);
-					
+
 					var titanString = "<span style='color:red;'>" + (numberOfKillsToSecure - guildKills) + "</span> more kills until secured";
 					if (guildKills >= numberOfKillsToSecure) titanString = "Secured";
 					else if ((numberOfKillsToSecure - guildKills) > currentHP) titanString = "<span style='color:red;'>Cannot Secure</span>";
 					var killsPercent = (guildKills * 100/currentNumberOfKills).toFixed(2);
-					aRow.cells[3].innerHTML += "<br><span style='color:blue;'> (" + killsPercent + "% " + titanString + ")"; 
+					aRow.cells[3].innerHTML += "<br><span style='color:blue;'> (" + killsPercent + "% " + titanString + ")";
 				}
 			}
 		}
@@ -11729,8 +11734,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	injectNewGuildLog: function(){
-		var content=Layout.notebookContent();
+	injectNewGuildLog: function(content){
+		if (!content) var content=Layout.notebookContent();
 
 		//store the time zone for use in processing date/times
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
@@ -12540,8 +12545,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		target.cells[7].innerHTML = hpText;
 	},
 
-	injectFindBuffs: function() {
-		var content=Layout.notebookContent();
+	injectFindBuffs: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		var buffList = Data.buffList();
 		var injectionText = '';
 		var extraProfile = GM_getValue("extraProfile");
@@ -12580,7 +12585,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
 		injectionText += '<tr><th width="120">&nbsp;Name</th><th width="200">&nbsp;Player Info</th><th>&nbsp;Notable Bio Text</th></tr>';
 		injectionText += '</tbody></table><br>';
-		injectionText += '<div style="font-size:xx-small; color:brown; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
+		injectionText += '<div class=content style="font-size:xx-small; color:brown; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
 			'It is not as smart as you are, so please do not judge the results too harshly. It does not search all online players, just a subset of those that have been on recently. ' +
 			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
 		content.innerHTML = injectionText;
@@ -12625,8 +12630,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.findBuffsParseGuildManagePage);
 	},
 
-	injectFindOther: function() {
-		var content=Layout.notebookContent();
+	injectFindOther: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		var buffList = Data.buffList();
 		var injectionText = '';
 		var textToSearchFor = GM_getValue("textToSearchFor");
@@ -12662,7 +12667,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
 		injectionText += '<tr><th width="120">&nbsp;Name</th><th width="200">&nbsp;Player Info</th><th>&nbsp;Notable Bio Text</th></tr>';
 		injectionText += '</tbody></table><br>';
-		injectionText += '<div style="font-size:xx-small; color:brown; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
+		injectionText += '<div class=content style="font-size:xx-small; color:brown; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
 			'It is not as smart as you are, so please do not judge the results too harshly. It does not search all online players, just a subset of those that have been on recently. ' +
 			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
 		content.innerHTML = injectionText;
@@ -12964,6 +12969,59 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (stairwayIDElement) {
 			window.location = "index.php?cmd=world&subcmd=usestairs&stairway_id=" + stairwayIDElement.value;
 		}
+	},
+
+	injectHelperMenu: function() {
+		// don't put all the menu code here (but call if clicked) to minimize lag
+		var node=System.findNode("//td[img[contains(@src,'fs/skin/welcome/knight_corner.gif')]]");
+		if (!node) return;
+		node.setAttribute("background","http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif");
+		node.align = "center";
+		node.innerHTML = "<span style='color:yellow;font-weight:bold;' id=helperMenu nowrap>Helper Menu</span></span>";
+		document.getElementById("helperMenu").addEventListener("mouseover", Helper.showHelperMenu, true);
+	},
+
+	showHelperMenu: function(evt) {
+		document.getElementById("helperMenu").removeEventListener("mouseover", Helper.showHelperMenu, true);
+		var actionMenu = {
+			"Character" : [
+				["BL", "Buff Log", "injectBuffLog"], ["CL", "Combat Log", "injectNotepadShowLogs"],
+				["IM", "Inventory Manager", "injectInventoryManager"], ["QLM", "Quick Links", "injectQuickLinkManager"],
+			],
+			"Actions" : [
+				["FB", "Find Buffs", "injectFindBuffs"], ["FO", "Find Other", "injectFindOther"],
+				["OP", "Online Players", "injectOnlinePlayers"], ["QS", "AH Quick Search", "injectAuctionSearch"],
+			],
+			"Guild" : [
+				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"],
+			],
+			};
+		var html = "<div style='display:none; text-align:left; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; width:590px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #000; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		for (var key in actionMenu) {
+			html += "<div class=column><h3>"+key+"</h3><ul>";
+			for (var i=0; i< actionMenu[key].length; i++) {
+				html += "<li><span id=hm"+actionMenu[key][i][0]+" fn="+actionMenu[key][i][2]+">"+actionMenu[key][i][1]+"</span></li>";
+			}
+			html += "</ul></div>";
+		}
+		html += "</div>";
+		$("#helperMenu").append(html);
+		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
+
+		for (var key in actionMenu) {
+			for (var i=0; i< actionMenu[key].length; i++) {
+				document.getElementById("hm"+actionMenu[key][i][0]).addEventListener("click", Helper.callHelperFunction, true);
+			}
+		}
+	},
+
+	callHelperFunction: function(evt) {
+		setTimeout(function() {
+			$("#content").remove();
+			$("body").append($("<style>.content {max-width:600px}</style><div id=content/>").hide());
+			Helper[evt.target.getAttribute("fn")].call(Helper, document.getElementById("content"));
+			$("#content").dialog({ width: 'auto', modal: true });
+		}, 0);
 	}
 };
 
