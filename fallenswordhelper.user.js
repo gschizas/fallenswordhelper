@@ -1169,7 +1169,7 @@ var Helper = {
 			var curPage = parseInt(System.findNode("//input[@name='page']", doc).value,10);
 			var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
 
-			var conflictTable = System.findNode("//table[@width='600' and @cellspacing='0' and @cellpadding='3' and @border='0' and @align='center']", doc);
+			var conflictTable = System.findNode("//font[contains(.,'Participants')]/ancestor::table[1]", doc);
 			if (conflictTable && conflictTable.rows.length > 3) {
 				if (curPage == 1) {
 					var newNode = insertHere.insertRow(insertHere.rows.length-2);
@@ -1183,7 +1183,7 @@ var Helper = {
 					newRow.insertCell(0);
 					newRow.insertCell(0);
 					newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-					newRow.cells[1].innerHTML = "<b>" + conflictTable.rows[i].cells[5].innerHTML + "</b>";
+					newRow.cells[1].innerHTML = "<b>" + conflictTable.rows[i].cells[6].innerHTML + "</b>";
 				}
 			}
 			if (maxPage && parseInt(maxPage[1],10) > curPage) {
@@ -12977,7 +12977,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (!node) return;
 		node.setAttribute("background","http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif");
 		node.align = "center";
-		node.innerHTML = "<span style='color:yellow;font-weight:bold;' id=helperMenu nowrap>Helper Menu</span></span>";
+		node.innerHTML = "<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>";
 		document.getElementById("helperMenu").addEventListener("mouseover", Helper.showHelperMenu, true);
 	},
 
@@ -12996,11 +12996,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"],
 			],
 			};
-		var html = "<div style='display:none; text-align:left; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; width:590px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #000; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; width:590px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #000; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
 		for (var key in actionMenu) {
 			html += "<div class=column><h3>"+key+"</h3><ul>";
 			for (var i=0; i< actionMenu[key].length; i++) {
-				html += "<li><span id=hm"+actionMenu[key][i][0]+" fn="+actionMenu[key][i][2]+">"+actionMenu[key][i][1]+"</span></li>";
+				html += "<li><span style='cursor:pointer; text-decoration:underline;' id=hm"+actionMenu[key][i][0]+" fn="+actionMenu[key][i][2]+">"+actionMenu[key][i][1]+"</span></li>";
 			}
 			html += "</ul></div>";
 		}
