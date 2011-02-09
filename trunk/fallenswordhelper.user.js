@@ -160,21 +160,7 @@ var Helper = {
 		System.setDefault("hideBuffSelected", true);
 		System.setDefault("enableFastWalk", true);
 
-		Helper.itemFilters = [
-		{"id":"showGloveTypeItems", "type":"Gloves"},
-			{"id":"showHelmetTypeItems", "type":"Helmet"},
-		{"id":"showAmuletTypeItems", "type":"Amulet"},
-		{"id":"showWeaponTypeItems", "type":"Weapon"},
-		{"id":"showAmorTypeItems", "type":"Armor"},
-		{"id":"showShieldTypeItems", "type":"Shield"},
-		{"id":"showRingTypeItems", "type":"Ring"},
-		{"id":"showBootTypeItems", "type":"Boots"},
-		{"id":"showRuneTypeItems", "type":"Rune"}
-		];
-
-		for (var i=0; i<Helper.itemFilters.length; i++) {
-			System.setDefault(Helper.itemFilters[i].id, true);
-		}
+		Helper.setItemFilterDefault();
 
 		Helper.guildLogFilters = [
 		{"id":"showRecallMessages", "type":"Store/Recall"},
@@ -211,6 +197,24 @@ var Helper = {
 
 		var memberList = System.getValueJSON("memberlist");
 		if (!memberList || !memberList.lastUpdate) {GM_setValue("memberlist", "");}
+	},
+
+	setItemFilterDefault: function() {
+		Helper.itemFilters = [
+		{"id":"showGloveTypeItems", "type":"Gloves"},
+			{"id":"showHelmetTypeItems", "type":"Helmet"},
+		{"id":"showAmuletTypeItems", "type":"Amulet"},
+		{"id":"showWeaponTypeItems", "type":"Weapon"},
+		{"id":"showAmorTypeItems", "type":"Armor"},
+		{"id":"showShieldTypeItems", "type":"Shield"},
+		{"id":"showRingTypeItems", "type":"Ring"},
+		{"id":"showBootTypeItems", "type":"Boots"},
+		{"id":"showRuneTypeItems", "type":"Rune"}
+		];
+
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			System.setDefault(Helper.itemFilters[i].id, true);
+		}
 	},
 
 	readInfo: function() {
@@ -645,9 +649,6 @@ var Helper = {
 			case "recipemanager":
 				Helper.injectRecipeManager();
 				break;
-			case "questmanager":
-				Helper.injectQuestManager();
-				break;
 			case "auctionsearch":
 				Helper.injectAuctionSearch();
 				break;
@@ -1004,8 +1005,9 @@ var Helper = {
 		}
 	},
 
-	injectFsBoxContent: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
+	injectFsBoxContent: function(content) {
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
 		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue("fsboxcontent",'');window.location=window.location;},true);
 		document.getElementById('fsboxdetail').innerHTML=GM_getValue("fsboxcontent");
 	},
@@ -3036,11 +3038,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		newSpan.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
 	},
 
-	insertQuickWear: function() {
+	insertQuickWear: function(content) {
 		Helper.itemList = {};
-		var layout=Layout.notebookContent();
-		layout.innerHTML="Getting item list from: ";
-		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getItemFromBackpack, {"inject":layout,"id":0});
+		if (!content) var content=Layout.notebookContent();
+		content.innerHTML="Getting item list from: ";
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getItemFromBackpack, {"inject":content,"id":0});
 	},
 
 	getItemFromBackpack: function(responseText, callback) {
@@ -3095,12 +3097,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	insertQuickExtract: function() {
+	insertQuickExtract: function(content) {
 		Helper.itemList = {};
-		var layout=Layout.notebookContent();
-		layout.innerHTML="Getting item list from: ";
+		if (!content) var content=Layout.notebookContent();
+		content.innerHTML="Getting item list from: ";
 		Helper.resourceList={};
-		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":layout,"id":0});
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":content,"id":0});
 	},
 
 	getPlantsFromBackpack: function(responseText, callback) {
@@ -4708,7 +4710,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					result += "<td><span style='font-weight:bold; font-size:large;'>" + currentCategory + "</span></td></tr><tr>";
 				}
 				for (j=0;j<Helper.param.fields.length;j++) {
-					result+='<td align=center>';
+					result+='<td align=center class=content>';
 					if (Helper.param.fields[j]!=Helper.param.categoryField){
 						if (Helper.param.tags[j]=="checkbox"){
 							result+="<input type=checkbox "+(Helper.param.currentItems[i][Helper.param.fields[j]]?'checked':'')+" disabled>";
@@ -6180,6 +6182,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	injectInventoryManager: function(content) {
 		if (!content) content=Layout.notebookContent();
+		Helper.setItemFilterDefault();
 
 		var lastCheck=GM_getValue("lastInventoryCheck");
 		var now=(new Date()).getTime();
@@ -6232,6 +6235,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	injectGuildInventoryManager: function(content) {
 		if (!content) content=Layout.notebookContent();
+		Helper.setItemFilterDefault();
 
 		var lastCheck=GM_getValue("lastGuildInventoryCheck");
 		var now=(new Date()).getTime();
@@ -6290,6 +6294,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	InventorySelectFilters: function(evt) {
+		Helper.setItemFilterDefault();
 		var checkedValue = (evt.target.id=="GuildInventorySelectAll");
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			GM_setValue(Helper.itemFilters[i].id, checkedValue);
@@ -6893,8 +6898,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	injectRecipeManager: function() {
-		var content=Layout.notebookContent();
+	injectRecipeManager: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		Helper.recipebook = System.getValueJSON("recipebook");
 		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			'<td width="90%" nobr><b>&nbsp;Recipe Manager</b></td>'+
@@ -12059,11 +12064,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	injectCheckWearingItem: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate("Check Wearing Items for Best Damage", "", "", "", "checkwear");
+	injectCheckWearingItem: function(content) {
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate("Check Wearing Items for Best Damage", "", "", "", "checkwear");
 
 		document.getElementById("checkwear").innerHTML+="Getting profile ...<br/>";
-		var playerid=/&playerid=(\d+)/.exec(window.location)[1];
+		var playerid=/&playerid=(\d+)/.exec(window.location);
+		if (playerid)
+			playerid = playerid[1];
+		else
+			playerid = "";
 		Helper.wearingItems={};
 		Helper.wearingItems.playerid=playerid;
 		System.xmlhttp("index.php?cmd=profile&player_id="+playerid, Helper.getWearingItems);
@@ -12986,7 +12996,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var actionMenu = {
 			"Character" : [
 				["BL", "Buff Log", "injectBuffLog"], ["CL", "Combat Log", "injectNotepadShowLogs"],
-				["IM", "Inventory Manager", "injectInventoryManager"], ["QLM", "Quick Links", "injectQuickLinkManager"],
+				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
+				["QLM", "Quick Links", "injectQuickLinkManager"],
 			],
 			"Actions" : [
 				["FB", "Find Buffs", "injectFindBuffs"], ["FO", "Find Other", "injectFindOther"],
@@ -12995,8 +13006,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			"Guild" : [
 				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"],
 			],
+			"Extra" : [
+				["BD", "Best Damage Items", "injectCheckWearingItem"], ["QE", "Quick Extract", "insertQuickExtract"],
+				["QW", "Quick Wear", "insertQuickWear"], ["BoxL", "FS Box Log", "injectFsBoxContent"],
+			],
 			};
-		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; width:590px; -moz-border-radius:5px; -webkit-border-radius:5px; border:1px solid #000; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; width:740px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
 		for (var key in actionMenu) {
 			html += "<div class=column><h3>"+key+"</h3><ul>";
 			for (var i=0; i< actionMenu[key].length; i++) {
@@ -13004,6 +13019,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 			html += "</ul></div>";
 		}
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=2536682>dkwizard</a>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
@@ -13013,6 +13029,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				document.getElementById("hm"+actionMenu[key][i][0]).addEventListener("click", Helper.callHelperFunction, true);
 			}
 		}
+		$(".a-reply").click(function(evt) {
+			Helper.openQuickMsgDialog(evt.target.getAttribute("target_player"));
+		});
 	},
 
 	callHelperFunction: function(evt) {
