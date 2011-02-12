@@ -3,12 +3,12 @@
 // @namespace      terrasoft.gr
 // @description    Sigma Storm Helper
 // @include        http://sigmastorm2.com/*
-// @include        http://*.sigmastorm2.com/*
+// @include        http://www.sigmastorm2.com/*
+// @include        http://guide.sigmastorm2.com/*
 // @exclude        http://sigmastorm2.com/areachat.php
 // @exclude        http://*.sigmastorm2.com/areachat.php
 // @exclude        http://forum.sigmastorm2.com/*
 // @exclude        http://wiki.sigmastorm2.com/*
-// @exclude        http://guide.sigmastorm2.com/*
 // @require        http://fallenswordhelper.googlecode.com/svn/trunk/json2.js
 // @require        http://fallenswordhelper.googlecode.com/svn/trunk/gmApi.js
 // @require        http://fallenswordhelper.googlecode.com/svn/trunk/calfSystem.js
@@ -263,7 +263,7 @@ var Helper = {
 			Helper.prepareChat();
 			Helper.prepareGuildList();
 			Helper.prepareAllyEnemyList();
-			// Helper.injectStaminaCalculator();
+			Helper.injectStaminaCalculator();
 			Helper.injectLevelupCalculator();
 			Layout.injectMenu();
 			Helper.replaceKeyHandler();
@@ -272,6 +272,7 @@ var Helper = {
 			Helper.addGuildInfoWidgets();
 			Helper.injectTHsearch();
 		}
+		Helper.injectHelperMenu();
 
 		var pageId, subPageId, subPage2Id, subsequentPageId
 		if (document.location.search != "") {
@@ -556,6 +557,15 @@ var Helper = {
 		case "relic":
 			Helper.injectRelic();
 			break;
+		case "creatures":
+			switch (subPageId) {
+			case "view":
+				break;
+			default:
+				Helper.injectCreatures();
+				break;
+			}
+			break;
 		case "tempinv":
 			Helper.injectMailbox();
 			break;
@@ -584,6 +594,52 @@ var Helper = {
 			}
 			break;
 		}
+
+		if (!GM_getValue("huntingMode")) {
+			Helper.injectQuickBuffJQ();
+		}
+	},
+
+	injectQuickBuffJQ: function() {
+		var nodes = System.findNodes("//a[contains(@href, 'javascript:openQuickBuffDialog(')]");
+		if (!nodes) return;
+		for (var i=0; i<nodes.length; i++) {
+			nodes[i].addEventListener("click", Helper.addBuffedPlayerInfoJQ, true);
+		}
+	},
+
+	addBuffedPlayerInfoJQ: function(evt) {
+		var playerName = evt.target.getAttribute("href").match(/'(.*)'/)[1];
+		$.get("index.php", { cmd: "quickbuff", subcmd: "fetchdialog", t: playerName }, function(data)
+			{$("#quickBuffDialogContent").html(data);
+
+			$.get("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, [], function(responseText) {
+				var doc=$(responseText);
+				var buffRE = /<b>([ a-zA-Z0-9]+)<\/b> \(Level: (\d+)\)/;
+				var buffLevelRE = /\[(\d+)\]/;
+				var resultText = "<table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
+				$("img[src*='/sigma2/skills/'][src*='_small.gif']", doc).each(function(i, img) {
+					var onmouseover = img.getAttribute("onmouseover").replace(/<br>[ a-zA-Z0-9]+<br>/,'');
+					buff = buffRE.exec(onmouseover);
+					buffName = buff[1];
+					buffLevel = buff[2];
+					resultText += ((i % 2 == 0)? "<tr>":"");
+					resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
+					resultText += ((i % 2 == 1)? "</tr>":"");
+					var hasThisBuff = $("font:contains('"+buffName+"')","#quickBuffDialog");
+					if (hasThisBuff.length>0) {
+						var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.html())[1]);
+						if (myBuffLevel > 11 ||
+							buffName == 'Mission Finder') {
+							hasThisBuff.css('color', 'lime');
+							hasThisBuff.append(" (<font color='#FFFF00'>" + buffLevel + "</font>)");
+						}
+					}
+				});
+				resultText += "</table>";
+				$("table[width=450]","#quickBuffDialog").parent().append(resultText);
+			});
+		});
 	},
 
 	addGuildInfoWidgets: function() {
@@ -647,8 +703,9 @@ var Helper = {
 		}
 	},
 
-	injectFsBoxContent: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Sigma Box Log','','fsboxclear','Clear','fsboxdetail');
+	injectFsBoxContent: function(content) {
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate('Sigma Box Log','','fsboxclear','Clear','fsboxdetail');
 		document.getElementById('fsboxclear').addEventListener('click',
 			function() {GM_setValue("fsboxcontent",'');window.location=window.location;},
 			true);
@@ -860,9 +917,11 @@ var Helper = {
 		if (!staminaImageElement) return;
 
 		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
-		var staminaRE = /Energy:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/
-		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
+		var staminaRE = /var currentPlayerStamina\s+= (\d+);/
+		var maxStaminaRE = /currentPlayerStamina\+'\s\/\s([,\d]+)<\/td>/
+		var responseText = document.getElementsByTagName('html')[0].innerHTML;
+		var curStamina = System.intValue(staminaRE.exec(responseText)[1]);
+		var maxStamina = System.intValue(maxStaminaRE.exec(mouseoverText)[1]);
 		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/
 		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
 		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m/
@@ -1870,8 +1929,12 @@ var Helper = {
 			// skill power
 			var skillInfo = System.findNodes("//table[@height=22]/tbody/tr/td[@width=130]",doc);
 			if (skillInfo) skillInfo = skillInfo[skillInfo.length-1];
-			var skillInfoText = skillInfo.getAttribute("onmouseover");
-			Helper.skillPower = System.getIntFromRegExp(skillInfoText, /Skill Power<\/b>: (\d+) \/ \d+<br>/i);
+			var responseText = document.getElementsByTagName('html')[0].innerHTML;
+			Helper.skillPower = System.getIntFromRegExp(responseText, /var currentPlayerSurge\s+= (\d+);/i);
+			// MS count
+			Helper.MScount = 0;
+			var ms = System.findNode("//img[contains(@onmouseover, 'HP remaining<br>')]", doc);
+			if (ms) Helper.MScount = System.getIntFromRegExp(ms.getAttribute('onmouseover'), /<br>(\d+) HP remaining<br>/);
 
 			// backpack
 			var bpInfo = System.findNode("//td[a/img[contains(@src,'quicklinks/3.gif')]]/font");
@@ -1883,6 +1946,7 @@ var Helper = {
 				"Def: "+Helper.wrapStyle(Helper.characterDefense, (Helper.characterDefense<minPS.def ? 'color:red' : ''))+", "+
 				"Arm: "+Helper.wrapStyle(Helper.characterArmor, (Helper.characterArmor<minPS.arm ? 'color:red' : ''))+", "+
 				"Dmg: "+Helper.wrapStyle(Helper.characterDamage, (Helper.characterDamage<minPS.dmg ? 'color:red' : ''))+"&nbsp;&nbsp;&nbsp;<br>"+
+				(Helper.characterClass == "Purist" ? "MS: "+Helper.wrapStyle(Helper.MScount, (Helper.MScount<=1 ? 'color:red;font-size:medium' : 'color:cyan'))+", " : "")+
 				"Hp: "+Helper.wrapStyle(Helper.characterHP, (Helper.characterHP<minPS.cHP ? 'color:red' : ''))+"/"
 					+Helper.wrapStyle(Helper.characterMaxHP, (Helper.characterMaxHP<minPS.mHP ? 'color:red' : ''))+", "+
 				"Skill: "+Helper.wrapStyle(Helper.skillPower, (Helper.skillPower<minPS.skill ? 'color:red' : ''))+", "+
@@ -2030,11 +2094,11 @@ var Helper = {
 		}
 	},
 
-	injectQuickWear: function() {
+	injectQuickWear: function(content) {
 		Helper.itemList = {};
-		var layout=Layout.notebookContent();
-		layout.innerHTML="Getting item list from: ";
-		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getItemFromBackpack, {"inject":layout});
+		if (!content) var content=Layout.notebookContent();
+		content.innerHTML="Getting item list from: ";
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getItemFromBackpack, {"inject":content});
 	},
 
 	getItemFromBackpack: function(responseText, callback) {
@@ -2131,12 +2195,12 @@ var Helper = {
 		window.location=window.location;
 	},
 
-	insertQuickExtract: function() {
+	insertQuickExtract: function(content) {
 		Helper.itemList = {};
-		var layout=Layout.notebookContent();
-		layout.innerHTML="Getting item list from: ";
+		if (!content) var content=Layout.notebookContent();
+		content.innerHTML="Getting item list from: ";
 		Helper.resourceList={};
-		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":layout,"id":0});
+		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":content,"id":0});
 	},
 
 	getPlantsFromBackpack: function(responseText, callback) {
@@ -2151,7 +2215,7 @@ var Helper = {
 
 	showQuickExtract: function(callback) {
 		var output=Helper.makePageHeader('Quick Extract','','','')+
-			'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
+			'<span style="font-size:x-small">Select which type of plants you wish to extract all of.  Only select extractable resources.</span><br/>'+
 			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=buy_result colspan=12></td></tr>';
 		for (var key in Helper.itemList) {
 			var itemID=Helper.itemList[key].id;
@@ -2411,7 +2475,7 @@ var Helper = {
 		System.setValueJSON("monsterLog", monsterLog);
 	},
 
-	injectMonsterLog: function() {
+	injectMonsterLog: function(content) {
 		var entityLog = System.getValueJSON("monsterLog");
 		if (entityLog) {
 			Helper.entityLogTable = {entity:[]};
@@ -2430,7 +2494,7 @@ var Helper = {
 			Helper.sortAsc = false;
 			Helper.entityLogTable.entity.sort(Helper.numberSort);
 		}
-		var content=Layout.notebookContent();
+		if (!content) var content=Layout.notebookContent();
 		content.innerHTML = '<span id=Helper.entityTableOutput>No monster information! Please enable entity log and travel a bit to see the world</span>';
 		Helper.generateEntityTable();
 	},
@@ -3358,8 +3422,9 @@ var Helper = {
 		}
 	},
 
-	injectGuildLogSummary: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
+	injectGuildLogSummary: function(content) {
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
 
 		var lastCheck=GM_getValue("lastGuildLogSumCheck")
 		var now=(new Date()).getTime();
@@ -3537,9 +3602,9 @@ var Helper = {
 							var fontLineRX=fontLineRE.exec(responseText);
 							craft = fontLineRX[2];
 						}
-						var classType=/(Core|Rad|Battlesuit|Psi|Hardwired)/.exec(responseText);
+						var classType=/(Core|Rad|Battlesuit|Psi|Hardwired) -/.exec(responseText);
 						if (classType) {
-							classType=Helper.class2img[classType[0]];
+							classType=Helper.class2img[classType[1]];
 						} else
 							classType = -1;
 						var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
@@ -4887,10 +4952,10 @@ var Helper = {
 		}
 	},
 
-	injectAuctionSearch: function() {
-		var content=Layout.notebookContent();
+	injectAuctionSearch: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		content.innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
-			'<div>This screen allows you to set up some quick search templates for the Trade Hub. '+
+			'<div class=content style="font-size:x-small">This screen allows you to set up some quick search templates for the Trade Hub. '+
 				'The Display on TH column indicates if the quick search will show on the short list on the '+
 				'Trade Hub main screen. A maximum of 20 items can show on this list '+
 				'(It will not show more than 20even if you have more than 20 flagged). '+
@@ -4939,8 +5004,8 @@ var Helper = {
 		return theUrl
 	},
 
-	injectInventoryManager: function() {
-		var content=Layout.notebookContent();
+	injectInventoryManager: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		Helper.inventory=System.getValueJSON("inventory");
 		var length=0;
 		if (Helper.inventory) length=Helper.inventory.items.length;
@@ -4983,8 +5048,8 @@ var Helper = {
 			}, true);
 	},
 
-	injectGuildInventoryManager: function() {
-		var content=Layout.notebookContent();
+	injectGuildInventoryManager: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		var guildItemCount = "unknown";
 		Helper.guildinventory=System.getValueJSON("guildinventory");
 		content.innerHTML=Helper.makePageHeader('Faction Inventory Manager','takes a while to refresh so only do it if you really need to',
@@ -5014,8 +5079,8 @@ var Helper = {
 		window.location=window.location;
 	},
 
-	injectOnlinePlayers: function() {
-		var content=Layout.notebookContent();
+	injectOnlinePlayers: function(content) {
+		if (!content) var content=Layout.notebookContent();
 
 		var lastCheck=GM_getValue("lastOnlineCheck")
 		var now=(new Date()).getTime();
@@ -5551,8 +5616,8 @@ var Helper = {
 		}
 	},
 
-	injectRecipeManager: function() {
-		var content=Layout.notebookContent();
+	injectRecipeManager: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		Helper.recipebook = System.getValueJSON("recipebook");
 		content.innerHTML = Helper.makePageHeaderTwo('Blueprint Manager','',
 			'Helper:RecipeManagerRefresh','Refresh','Helper:RecipeManagerReset','Reset')+
@@ -7298,8 +7363,8 @@ var Helper = {
 		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog"
 	},
 
-	injectNotepadShowLogs: function() {
-		var content=Layout.notebookContent();
+	injectNotepadShowLogs: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		var combatLog=GM_getValue("CombatLog");
 		content.innerHTML='<div align="center"><textarea align="center" cols="80" rows="25" '+
 			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog">' + combatLog + '</textarea></div>' +
@@ -7526,10 +7591,11 @@ var Helper = {
 		position.style.backgroundPosition = "center";
 	},
 
-	injectQuickLinkManager: function() {
+	injectQuickLinkManager: function(content) {
 		GM_addStyle('.HelperTextLink {color:#84ADAC;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
+		if (!content) var content = Layout.notebookContent();
+		content.innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
 
 		// global parameters for the meta function generateManageTable
 		Helper.param={};
@@ -8119,6 +8185,9 @@ var Helper = {
 						'" target="_blank"><img border=0 title="Search for this quest on the Unofficial Sigmastorm 2 Wiki. '+
 						'Please note this is an external site." src=' + System.imageServer + '/skin/wiki.gif /></a>';
 			}
+			var items=System.findNodes("//table[@width=500]/tbody/tr/td/font[@color='#ffffff']");
+			var text = items[items.length-1].innerHTML;
+			// TODO System.xmlhttp('http://guide.sigmastorm2.com/index.php?cmd=quests&subcmd=view&quest_id='+questId,
 
 		}
 	},
@@ -8733,8 +8802,8 @@ var Helper = {
 		}
 	},
 
-	injectFindBuffs: function() {
-		var content=Layout.notebookContent();
+	injectFindBuffs: function(content) {
+		if (!content) var content=Layout.notebookContent();
 		var buffList = Data.buffList();
 		var injectionText = '';
 		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
@@ -8767,7 +8836,7 @@ var Helper = {
 		injectionText += '<table width="620" cellspacing="0" cellpadding="3" border="1" align="center" id="buffTable"><tbody>';
 		injectionText += '<tr><th width="120">&nbsp;Name</th><th width="200">&nbsp;Player Info</th><th>&nbsp;Notable Bio Text</th></tr>';
 		injectionText += '</tbody></table><br>';
-		injectionText += '<div style="font-size:xx-small; color:gray; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
+		injectionText += '<div class=content style="font-size:xx-small; color:gray; margin-left:28px; margin-right:28px;">Disclaimer: This functionality does a simple text search for the terms above. '+
 			'It is not as smart as you are, so please do not judge the results too harshly. It does not search all online players, just a subset of those that have been on recently. ' +
 			'The aim is to be fast and still return a good set of results. This feature is a work in progress, so it may be tweaked and enhanced over time.</div>';
 		content.innerHTML = injectionText;
@@ -8949,10 +9018,10 @@ var Helper = {
 
 	},
 
-	createHuntGuide: function() {
+	createHuntGuide: function(content) {
 		System.setDefault("huntingGuide", JSON.stringify({"lvl":0,"html":""}));
 		var huntingGuide = System.getValueJSON("huntingGuide");
-		var content=Layout.notebookContent();
+		if (!content) var content=Layout.notebookContent();
 		content.innerHTML = Helper.makePageHeader('Hunting Guide','','','')+
 			"<div id=guideDiv>"+
 				"<br/><div>Level to check: "+Helper.characterLevel+"</div>"+
@@ -9176,6 +9245,144 @@ var Helper = {
 		System.setValueJSON("huntingGuide", {"lvl":Helper.characterLevel, "html":document.getElementById("guideDiv").innerHTML});
 	},
 
+	injectCreatures: function() {
+		var creatureForm = System.findNode("//form");
+		var fetchCreatureDataDiv = document.createElement("DIV");
+		fetchCreatureDataDiv.innerHTML = "Fetch All Creature Data";
+		fetchCreatureDataDiv.style.cursor = "pointer";
+		fetchCreatureDataDiv.style.textDecoration = "underline";
+		fetchCreatureDataDiv.style.color = "blue";
+		fetchCreatureDataDiv.style.fontSize = "x-small";
+		fetchCreatureDataDiv.align = "center";
+		creatureForm.appendChild(fetchCreatureDataDiv);
+		fetchCreatureDataDiv.addEventListener('click', Helper.fetchCreatureData, true);
+	},
+
+	fetchCreatureData: function() {
+		var creatureTable = System.findNode("//table[@width='800']");
+		creatureTable.rows[0].cells[0].colSpan = '8';
+		creatureTable.rows[creatureTable.rows.length-1].cells[0].colSpan = '8';
+		//title row
+		var newCell = creatureTable.rows[1].insertCell(1);
+		newCell.innerHTML = 'Class';
+		newCell.style.backgroundColor = 'black';
+		var newCell = creatureTable.rows[1].insertCell(-1);
+		newCell.innerHTML = 'Attack';
+		newCell.style.backgroundColor = 'black';
+		var newCell = creatureTable.rows[1].insertCell(-1);
+		newCell.innerHTML = 'Defense';
+		newCell.style.backgroundColor = 'black';
+		var newCell = creatureTable.rows[1].insertCell(-1);
+		newCell.innerHTML = 'Armor';
+		newCell.style.backgroundColor = 'black';
+		var newCell = creatureTable.rows[1].insertCell(-1);
+		newCell.innerHTML = 'Damage';
+		newCell.style.backgroundColor = 'black';
+		var newCell = creatureTable.rows[1].insertCell(-1);
+		newCell.innerHTML = 'HP';
+		newCell.style.backgroundColor = 'black';
+		var newCell = creatureTable.rows[1].insertCell(-1);
+		newCell.innerHTML = 'Arm+HP';
+		newCell.style.backgroundColor = 'black';
+		for (var i=2; i<creatureTable.rows.length-1; i++) {
+			var aRow = creatureTable.rows[i];
+			if (aRow.cells[1]) {
+				var newCell = aRow.insertCell(1);
+				var newCell = aRow.insertCell(-1);
+				var newCell = aRow.insertCell(-1);
+				var newCell = aRow.insertCell(-1);
+				var newCell = aRow.insertCell(-1);
+				var newCell = aRow.insertCell(-1);
+				var newCell = aRow.insertCell(-1);
+				var href = aRow.cells[0].firstChild.getAttribute("href");
+				System.xmlhttp(href, Helper.parseCreatureData, {"row": aRow});
+			} else {
+				aRow.cells[0].colSpan = '9';
+			}
+		}
+	},
+
+	parseCreatureData: function(responseText, callback) {
+		var target = callback.row;
+		var doc = System.createDocument(responseText);
+		var classText = System.findNode("//td[b[.='Class:']]/following-sibling::td[1]", doc).textContent;
+		var attackText = System.findNode("//td[b[.='Attack:']]/following-sibling::td[3]", doc).textContent;
+		var defenseText = System.findNode("//td[b[.='Defense:']]/following-sibling::td[3]", doc).textContent;
+		var armorText = System.findNode("//td[b[.='Armor:']]/following-sibling::td[3]", doc).textContent;
+		var damageText = System.findNode("//td[b[.='Damage:']]/following-sibling::td[3]", doc).textContent;
+		var hpText = System.findNode("//td[b[.='HP:']]/following-sibling::td[3]", doc).textContent;
+		target.cells[1].innerHTML = classText;
+		target.cells[3].innerHTML = attackText;
+		target.cells[4].innerHTML = defenseText;
+		target.cells[5].innerHTML = armorText;
+		target.cells[6].innerHTML = damageText;
+		target.cells[7].innerHTML = hpText;
+		target.cells[8].innerHTML = parseInt(hpText) + parseInt(armorText);
+	},
+
+	injectHelperMenu: function() {
+		// don't put all the menu code here (but call if clicked) to minimize lag
+		var node=System.findNode("//td[img[contains(@src,'sigma2/skin/sidebar_left_top.gif')]]");
+		if (!node) return;
+		node.setAttribute("background","http://fileserver.huntedcow.com/sigma2/skin/sidebar_left_top.gif");
+		node.height = 32;
+		node.align = "center";
+		node.innerHTML = "<span style='font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>";
+		document.getElementById("helperMenu").addEventListener("mouseover", Helper.showHelperMenu, true);
+	},
+
+	showHelperMenu: function(evt) {
+		document.getElementById("helperMenu").removeEventListener("mouseover", Helper.showHelperMenu, true);
+		var actionMenu = {
+			"Character" : [
+				["CL", "Combat Log", "injectNotepadShowLogs"],
+				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
+				["QLM", "Quick Links", "injectQuickLinkManager"],
+			],
+			"Actions" : [
+				["FB", "Find Buffs", "injectFindBuffs"],
+				["OP", "Online Players", "injectOnlinePlayers"], ["QS", "AH Quick Search", "injectAuctionSearch"],
+			],
+			"Guild" : [
+				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log Summary", "injectGuildLogSummary"],
+			],
+			"Extra" : [
+				["QE", "Quick Extract", "insertQuickExtract"], ["ML", "Creature Log", "injectMonsterLog"],
+				["QW", "Quick Wear", "injectQuickWear"], ["BoxL", "Shout Box Log", "injectFsBoxContent"],
+				["HG", "Hunting Guide", "createHuntGuide"],
+			],
+			};
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:white; background-image:url(\"http://fileserver.huntedcow.com/sigma2/skin/bgalt2.jpg\"); font-size:12px; width:740px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #202020;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		for (var key in actionMenu) {
+			html += "<div class=column><h3>"+key+"</h3><ul>";
+			for (var i=0; i< actionMenu[key].length; i++) {
+				html += "<li><span style='cursor:pointer; text-decoration:underline;' id=hm"+actionMenu[key][i][0]+" fn="+actionMenu[key][i][2]+">"+actionMenu[key][i][1]+"</span></li>";
+			}
+			html += "</ul></div>";
+		}
+		html += "<a href=index.php?cmd=message&target_player=dkwizard>PM</a> <a href=index.php?cmd=profile&player_id=1191381>dkwizard</a>";
+		html += "</div>";
+		$("#helperMenu").append(html);
+		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
+
+		for (var key in actionMenu) {
+			for (var i=0; i< actionMenu[key].length; i++) {
+				document.getElementById("hm"+actionMenu[key][i][0]).addEventListener("click", Helper.callHelperFunction, true);
+			}
+		}
+		$(".a-reply").click(function(evt) {
+			Helper.openQuickMsgDialog(evt.target.getAttribute("target_player"));
+		});
+	},
+
+	callHelperFunction: function(evt) {
+		setTimeout(function() {
+			$("#content").remove();
+			$("body").append($("<style>.content {max-width:600px}</style><div id=content/>").hide());
+			Helper[evt.target.getAttribute("fn")].call(Helper, document.getElementById("content"));
+			$("#content").dialog({ width: 'auto', modal: true });
+		}, 0);
+	},
 
 	makePageHeader: function(title, comment, spanId, button) {
 		return '<table width=100%><tr style="background-color:#110011">'+
@@ -9200,4 +9407,17 @@ var Helper = {
 	}
 };
 
+var $ ;
+
+// Check if jQuery's loaded
+function GM_wait(jqFunction) {
+	if (typeof unsafeWindow.jQuery == 'undefined') {
+		window.setTimeout(GM_wait, 100);
+	} else {
+		$ = unsafeWindow.jQuery;
+		if (jqFunction) jqFunction.call();
+	}
+}
+
+GM_wait();
 Helper.onPageLoad(null);
