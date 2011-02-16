@@ -45,6 +45,11 @@ var Helper = {
 
 		System.setDefault("showExtraLinks", true);
 		System.setDefault("huntingBuffs", "Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve");
+		System.setDefault("huntingBuffsName", "default");
+		System.setDefault("huntingBuffs2", "Deflect");
+		System.setDefault("huntingBuffs2Name", "PvP");
+		System.setDefault("huntingBuffs3", "SE hunting");
+		System.setDefault("huntingBuffs3Name", "Super Elite Slayer");
 		System.setDefault("showHuntingBuffs", true);
 		System.setDefault("moveFSBox", false);
 
@@ -127,6 +132,7 @@ var Helper = {
 		System.setDefault("enableAttackHelper", false);
 		System.setDefault("minGroupLevel", 1);
 		System.setDefault("combatEvaluatorBias", 0);
+		System.setDefault("enabledHuntingMode", 1);
 		System.setDefault("hideRelicOffline", false);
 
 		System.setDefault("enterForSendMessage", false);
@@ -159,6 +165,7 @@ var Helper = {
 		System.setDefault("enhanceOnlineDots", true);
 		System.setDefault("hideBuffSelected", true);
 		System.setDefault("enableFastWalk", true);
+		System.setDefault("hideHelperMenu", false);
 
 		Helper.setItemFilterDefault();
 
@@ -2463,7 +2470,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		replacementText += (huntingMode === true)?"<tr><td style='font-size:small; color:red'>Hunting mode enabled</td></tr>":""
 		replacementText += "<tr><td colspan='2' height='10'></td></tr>";
 		if (GM_getValue("showHuntingBuffs")) {
-			var buffs=GM_getValue("huntingBuffs");
+			var enabledHuntingMode=GM_getValue("enabledHuntingMode");
+			var buffs=GM_getValue("huntingBuffs"); 
+			var buffsName=GM_getValue("huntingBuffsName"); 
+			if (enabledHuntingMode == 2) {buffs=GM_getValue("huntingBuffs2"); buffsName=GM_getValue("huntingBuffs2Name");}
+			if (enabledHuntingMode == 3) {buffs=GM_getValue("huntingBuffs3"); buffsName=GM_getValue("huntingBuffs3Name");}
 			var buffAry=buffs.split(",");
 			var missingBuffs = new Array();
 			for (i=0;i<buffAry.length;i++) {
@@ -2473,7 +2484,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 			if (missingBuffs.length>0) {
 				replacementText += "<tr><td colspan='2' align='center'><span style='font-size:x-small; color:navy;'>" +
-					"You are missing some hunting buffs<br/>(";
+					"You are missing some " + buffsName + " hunting buffs<br/>(";
 				replacementText += missingBuffs.join(", ");
 				replacementText += ")</span></td></tr>";
 			}
@@ -2809,6 +2820,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				document.getElementById("toggleSoundLink").addEventListener("click", Helper.toggleSound, true);
 
 			}
+			if (GM_getValue("showFastWalkIconOnWorld")) {
+				var enableFastWalk = GM_getValue("enableFastWalk");
+				var imgSource = enableFastWalk === true ? Data.runIcon() : Data.stopIcon();
+				var altText = enableFastWalk === true ? "FastWalk mode is ON" : "FastWalk mode is OFF";
+				mapName.innerHTML += " <a href=# id='Helper:ToggleFastWalkMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
+				document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
+					function() {
+						GM_setValue("enableFastWalk",!GM_getValue("enableFastWalk")); window.location.reload();
+					},true);
+			}
 			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
 				function() {
 					GM_setValue("huntingMode",!GM_getValue("huntingMode")); window.location.reload();
@@ -2936,6 +2957,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					buffSelectedTable.style.display = 'none';
 				}
 			}
+			var chatText = System.findNode("//b[contains(.,'Last 5')]");
+			chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
 		}
 	},
 
@@ -9119,6 +9142,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		var lastCheck=new Date(parseInt(GM_getValue("lastVersionCheck"),10));
 		var buffs=GM_getValue("huntingBuffs");
+		var buffsName=GM_getValue("huntingBuffsName");
+		var buffs2=GM_getValue("huntingBuffs2");
+		var buffs2Name=GM_getValue("huntingBuffs2Name");
+		var buffs3=GM_getValue("huntingBuffs3");
+		var buffs3Name=GM_getValue("huntingBuffs3Name");
 		var doNotKillList=GM_getValue("doNotKillList");
 		var hideArenaPrizes=GM_getValue("hideArenaPrizes");
 
@@ -9127,6 +9155,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var enableWantedList = GM_getValue("enableWantedList");
 		var wantedNames = GM_getValue("wantedNames");
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
+		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
 
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
@@ -9174,6 +9203,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td><input name="enhanceOnlineDots" type="checkbox" value="on"' + (GM_getValue("enhanceOnlineDots")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Buff Selected' + Helper.helpLink('Hide Buff Selected', 'Hides the buff selected functionality in the online allies and guild info section.') +
 				':</td><td><input name="hideBuffSelected" type="checkbox" value="on"' + (GM_getValue("hideBuffSelected")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Hide Helper Menu' + Helper.helpLink('Hide Helper Menu', 'Hides the helper menu from top left.') +
+				':</td><td><input name="hideHelperMenu" type="checkbox" value="on"' + (GM_getValue("hideHelperMenu")?" checked":"") + '></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -9237,8 +9268,18 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				':</td><td colspan="3"><input name="doNotKillList" size="60" value="'+ doNotKillList + '" /></td></tr>' +
 			'<tr><td align="right">Hunting Buffs' + Helper.helpLink('Hunting Buffs', 'Customize which buffs are designated as hunting buffs. You must type the full name of each buff, ' +
 				'separated by commas. Use the checkbox to enable/disable them.') +
-				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '>' +
-				'<input name="huntingBuffs" size="60" value="'+ buffs + '" /></td></tr>' +
+				':</td><td colspan="3"><input name="showHuntingBuffs" type="checkbox" value="on"' + (GM_getValue("showHuntingBuffs")?" checked":"") + '> ' +
+				'Enabled Hunting Mode' + Helper.helpLink('Enabled Hunting Mode', 'This will determine which list of buffs gets checked on the world screen.') +
+				':<select name="enabledHuntingMode"><option value="1"' + (enabledHuntingMode==1?" SELECTED":"") +
+					'>' + buffsName + '</option><option value="2"' + (enabledHuntingMode==2?" SELECTED":"") +
+					'>' + buffs2Name + '</option><option value="3"' + (enabledHuntingMode==3?" SELECTED":"") +
+					'>' + buffs3Name + '</option></select></td></tr>' +
+			'<tr><td align="right">' + buffsName + ' Hunting Buff List' + Helper.helpLink(buffsName + ' Hunting Buff List', buffsName + ' list of hunting buffs.') +
+				':</td><td colspan="3"><input name="huntingBuffsName" title="Hunting mode name" size="7" value="'+ buffsName + '" /><input name="huntingBuffs" size="49" value="'+ buffs + '" /></td></tr>' +
+			'<tr><td align="right">' + buffs2Name + ' Hunting Buff List' + Helper.helpLink(buffs2Name + ' Hunting Buff List', 'List of ' + buffs2Name + ' hunting buffs.') +
+				':</td><td colspan="3"><input name="huntingBuffs2Name" title="Hunting mode name" size="7" value="'+ buffs2Name + '" /><input name="huntingBuffs2" size="49" value="'+ buffs2 + '" /></td></tr>' +
+			'<tr><td align="right">' + buffs3Name + ' Hunting Buff List' + Helper.helpLink(buffs3Name + ' Hunting Buff List', 'List of ' + buffs3Name + ' hunting buffs.') +
+				':</td><td colspan="3"><input name="huntingBuffs3Name" title="Hunting mode name" size="7" value="'+ buffs3Name + '" /><input name="huntingBuffs3" size="49" value="'+ buffs3 + '" /></td></tr>' +
 			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
 				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (GM_getValue("fsboxlog")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Buff Log' + Helper.helpLink('Enable Buff Log', 'This enables the functionality to keep a log of recently casted buffs') +
@@ -9250,7 +9291,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'<tr><td align="right">Enable Fast Walk' + Helper.helpLink('Enable Fast Walk', 'This functionality will allow the user to send multiple move commands, each subsequent one assuming that the previous one succeeded. ' +
 				'It does not check for blocked squares, not does it check to make sure that the move commands arrived at the server in the right order. Depending on the lag you experience, the user may have to pause slightly ' +
 				'between each move to make sure they reach the server in the right order.') +
-				':</td><td><input name="enableFastWalk" type="checkbox" value="on"' + (GM_getValue("enableFastWalk")?" checked":"") + '></td></tr>' +
+				':</td><td><input name="enableFastWalk" type="checkbox" value="on"' + (GM_getValue("enableFastWalk")?" checked":"") + '>'+
+				' Show FastWalk icon on world' + Helper.helpLink('Show FastWalk icon on world', 'Should the FastWalk toggle icon show on the world map') +
+				':<input name="showFastWalkIconOnWorld" type="checkbox" value="on"' + (GM_getValue("showFastWalkIconOnWorld")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
 			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
 			'<tr><td align="right">Cleanup Guild Log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
@@ -9469,6 +9512,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var combatEvaluatorBiasElement = System.findNode("//select[@name='combatEvaluatorBias']", oForm);
 		var combatEvaluatorBias = combatEvaluatorBiasElement.value;
 		GM_setValue("combatEvaluatorBias", combatEvaluatorBias);
+		var enabledHuntingModeElement = System.findNode("//select[@name='enabledHuntingMode']", oForm);
+		var enabledHuntingMode = enabledHuntingModeElement.value;
+		GM_setValue("enabledHuntingMode", enabledHuntingMode);
 		System.saveValueForm(oForm, "navigateToLogAfterMsg");
 		System.saveValueForm(oForm, "gameHelpLink");
 		System.saveValueForm(oForm, "guildSelf");
@@ -9511,6 +9557,11 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "hideGuildInfoTrade");
 		System.saveValueForm(oForm, "quickKill");
 		System.saveValueForm(oForm, "huntingBuffs");
+		System.saveValueForm(oForm, "huntingBuffsName");
+		System.saveValueForm(oForm, "huntingBuffs2");
+		System.saveValueForm(oForm, "huntingBuffs2Name");
+		System.saveValueForm(oForm, "huntingBuffs3");
+		System.saveValueForm(oForm, "huntingBuffs3Name");
 		System.saveValueForm(oForm, "showHuntingBuffs");
 		System.saveValueForm(oForm, "moveGuildList");
 		System.saveValueForm(oForm, "moveOnlineAlliesList");
@@ -9575,6 +9626,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		System.saveValueForm(oForm, "enhanceOnlineDots");
 		System.saveValueForm(oForm, "hideBuffSelected");
 		System.saveValueForm(oForm, "enableFastWalk");
+		System.saveValueForm(oForm, "showFastWalkIconOnWorld");
+		System.saveValueForm(oForm, "hideHelperMenu");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -12983,6 +13036,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	injectHelperMenu: function() {
 		// don't put all the menu code here (but call if clicked) to minimize lag
+		if (GM_getValue("hideHelperMenu")) return;
 		var node=System.findNode("//td[img[contains(@src,'fs/skin/welcome/knight_corner.gif')]]");
 		if (!node) return;
 		node.setAttribute("background","http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif");
