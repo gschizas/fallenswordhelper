@@ -2958,7 +2958,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				}
 			}
 			var chatText = System.findNode("//b[contains(.,'Last 5')]");
-			chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
+			if (chatText) chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
 		}
 	},
 
