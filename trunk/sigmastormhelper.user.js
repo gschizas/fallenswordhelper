@@ -8185,10 +8185,53 @@ var Helper = {
 						'" target="_blank"><img border=0 title="Search for this quest on the Unofficial Sigmastorm 2 Wiki. '+
 						'Please note this is an external site." src=' + System.imageServer + '/skin/wiki.gif /></a>';
 			}
-			var items=System.findNodes("//table[@width=500]/tbody/tr/td/font[@color='#ffffff']");
-			var text = items[items.length-1].innerHTML;
-			// TODO System.xmlhttp('http://guide.sigmastorm2.com/index.php?cmd=quests&subcmd=view&quest_id='+questId,
 
+			// insert next step
+			var table = System.findNode("//table[@width=500]");
+			if (!table.textContent.match(/\d+ xp/i)) {
+				System.xmlhttp('http://guide.sigmastorm2.com/index.php?cmd=quests&subcmd=view&quest_id='+questId, Helper.showNextMissionStep);
+			}
+		}
+	},
+
+	showNextMissionStep: function(responseText, b) {
+		var doc=System.createDocument(responseText);
+		var items=System.findNodes("//table[@width=500]/tbody/tr/td//b"), xpath, table, node, html;
+		if (items) {
+			xpath = ('//tr[td/div/table/tbody/tr/td[b[contains(.,"'+items[items.length - 1].textContent+'")]]]/following-sibling::tr');
+			table = System.findNode("//table[@width=500][tbody/tr/td//b]");
+			node = table.insertRow(-1);
+		} else {
+			xpath = ('//tr[td/div/table/tbody/tr/td//b]');
+			node = System.findNode("//tbody[tr/td[contains(@background,'skin/header_missiondetails.jpg')]]/tr[4]/td");
+		}
+		var tr=System.findNode(xpath, doc);
+		node.style.color="yellow";
+		if (tr) {
+			html = "<table width=100%><tr>"+tr.innerHTML.replace('display: none','').replace(/800/g,'100%')
+				.replace(/(Stage \d+)/, 'Mission Helper: What is next (from the UltimateGuide)?<br/>$1') +
+				"</tr></table><table width=100% height><tr align=center>"+
+				"<td width=50%><input type=button class=custombutton id=whatelse value='What else?'></td>"+
+				"<td  width=50%><a href='index.php?cmd=notepad&subcmd=huntguide'>Hunting Guide</a></td>"+
+				"</td></tr></table>";
+			var i = 0;
+			while (tr = tr.nextSibling) {
+				i++;
+				if (tr.innerHTML)
+					html += "<table width=100% style='display: none;' id=tbl"+i+"><tr>"+tr.innerHTML.replace('display: none','').replace(/800/g,'100%')+"</tr></table>";
+				else
+					html += "<div style='display: none' id=tbl"+i+">Done</div>";
+			}
+			node.innerHTML = html;
+			document.getElementById('whatelse').addEventListener('click', function() {
+				for (; i>0; i--) {
+					document.getElementById('tbl'+i).style.color='gray';
+					document.getElementById('tbl'+i).style.display='block';
+				}
+			}, true);
+		} else {
+			html = "Mission is not available in the Ultimate Guide!";
+			node.innerHTML = html;
 		}
 	},
 
