@@ -11914,9 +11914,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var logTable = System.findNode("//table[tbody/tr/td[.='Message']]",doc);
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
-		if (pageNumber == 0) {
+		if (pageNumber == 1) {
 			var lastRowInTable = logTable.rows[logTable.rows.length-2];
-			var lastRowCellContents = lastRowInTable.cells[1].innerHTML;
+			var lastRowCellContents = lastRowInTable.cells[1].textContent;
 			lastRowPostDateAsDate = System.parseDate(lastRowCellContents);
 			lastRowPostDateAsLocalMilli = lastRowPostDateAsDate.getTime() - Helper.gmtOffsetMilli;
 			if (lastRowPostDateAsLocalMilli > Helper.lastStoredGuildLogMessagePostTime) completeReload = true;
