@@ -6968,29 +6968,38 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 		folderCount = Helper.folderIDs.length;
 		folderID = Helper.folderIDs[currentFolder-1];
-
+		var folderTextElement = System.findNode("//a[@href='index.php?cmd=inventing&folder_id=" + folderID + "']/ancestor::td[1]", doc);
+		var folderText = "";
+		if (folderTextElement) {
+			folderText = folderTextElement.textContent;
+		}
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentPage = callback.page;
 		var pages=System.findNode("//select[@name='page']", doc);
-		if (!pages) {return;}
-		var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
+		if (folderText.search(/quest/i) == -1) {
+			if (!pages) {return;}
+			var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
 
-		var nextPage=currentPage+1;
-		output.innerHTML += 'Parsing folder '+ currentFolder + ' ... Page ' + nextPage + '... <br/>';
+			var nextPage=currentPage+1;
+			output.innerHTML += 'Parsing folder '+ currentFolder + ' ... Page ' + nextPage + '... <br/>';
 
-		if (recipeRows) {
-			for (var i=0; i<recipeRows.length;i++) {
-				aRow = recipeRows[i];
-				var recipeLink = aRow.cells[1].firstChild.getAttribute("href");
-				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
-				var recipe={
-					"img": aRow.cells[0].firstChild.src,
-					"link": recipeLink,
-					"name": aRow.cells[1].firstChild.textContent,
-					"id": recipeId};
-				output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
-				Helper.recipebook.recipe.push(recipe);
+			if (recipeRows) {
+				for (var i=0; i<recipeRows.length;i++) {
+					aRow = recipeRows[i];
+					var recipeLink = aRow.cells[1].firstChild.getAttribute("href");
+					var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
+					var recipe={
+						"img": aRow.cells[0].firstChild.src,
+						"link": recipeLink,
+						"name": aRow.cells[1].firstChild.textContent,
+						"id": recipeId};
+					output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
+					Helper.recipebook.recipe.push(recipe);
+				}
 			}
+		} else {
+			output.innerHTML += 'Skipping folder '+ currentFolder + ' as it has the word "quest" in folder name.<br/>';
+			nextPage = pages.options.length;
 		}
 		if ((nextPage<=pages.options.length && currentFolder!=folderCount) || currentFolder<folderCount) {
 			if (nextPage==pages.options.length && currentFolder<folderCount) {
