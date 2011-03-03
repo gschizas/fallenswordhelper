@@ -3686,7 +3686,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
-					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%M-%d %H:%m:%S") + "\n" + resultText + "\n" + reportText);
+					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%M:%S") + "\n" + resultText + "\n" + reportText);
 				}
 			}
 			monsterParent.innerHTML = "";
@@ -12977,8 +12977,12 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var bioTip = bioCell.innerHTML.replace(/'|"|\n/g,"");
 			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
 				'onmouseover=\'Tip("'+bioTip+'");\'>' + playerName + '</a>' +
-				'&nbsp;<span style="color:blue;">[<a href="index.php?cmd=message&target_player=' + playerName +'" target="new">m</a>]</span>' + '</nobr><br>' +
+				'&nbsp;<span style="color:blue;">[<span class="a-reply" target_player="' + playerName +'" style="cursor:pointer; text-decoration:underline;">m</span>]</span>' + '</nobr><br>' +
 				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
+			$(".a-reply").click(function(evt) {
+				Helper.openQuickMsgDialog(evt.target.getAttribute("target_player"));
+			});
+
 			//player info cell
 			var newCell = newRow.insertCell(1);
 			var playerInfo = '<table><tbody><tr><td colspan="2" style="color:gray;" align="right" width="50%">Last Activity:</td><td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>';
