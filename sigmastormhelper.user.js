@@ -3594,7 +3594,9 @@ var Helper = {
 			anItem = allItems[i];
 			if (anItem.src.search("items") != -1) {
 				var theImage = anItem;
-				System.xmlhttp(Helper.linkFromMouseover(anItem.getAttribute("onmouseover")),
+				var url = Helper.linkFromMouseover(anItem.getAttribute("onmouseover"));
+				if (!url) continue;
+				System.xmlhttp(url,
 					function(responseText, callback) {
 						var craft="";
 						if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
@@ -4980,15 +4982,16 @@ var Helper = {
 	},
 
 	linkFromMouseover: function(mouseOver) {
-		var reParams=/(\d+),\s*([+-]*\d+),\s*(\d+),\s*(\d+)/;
+		var reParams=/ajaxLoadItem\((\d+),\s*([+-]*\d+),\s*(\d+),\s*(\d+)/;
 		var reResult=reParams.exec(mouseOver);
+		if (!reResult) return;
 		var itemId=reResult[1];
 		var invId=reResult[2];
 		var type=reResult[3];
 		var pid=reResult[4];
 		var theUrl = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid
 		theUrl = System.server + theUrl;
-		return theUrl
+		return theUrl;
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
