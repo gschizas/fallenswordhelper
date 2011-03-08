@@ -10586,7 +10586,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 
 		if (!bountyList || !wantedList || bwNeedsRefresh && (enableActiveBountyList || enableWantedList)) {
-			System.xmlhttp("index.php?cmd=bounty", Helper.parseBountyPageForWorld);
+			var wantedList = {};
+			wantedList.bounty = [];
+			wantedList.isRefreshed = true;
+			wantedList.lastUpdate = new Date();
+			wantedList.wantedBounties = false;
+			Helper.activeBountyListPosted = false;
+			System.xmlhttp("index.php?cmd=bounty", Helper.parseBountyPageForWorld, {wantedList:wantedList});
 		} else {
 			if (enableWantedList) {
 				wantedList.isRefreshed = false;
@@ -10601,22 +10607,20 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		}
 	},
 
-	parseBountyPageForWorld: function(details) {
-		var doc=System.createDocument(details);
-		var  enableActiveBountyList = GM_getValue("enableActiveBountyList");
-		var  enableWantedList = GM_getValue("enableWantedList");
+	parseBountyPageForWorld: function(details, callback) {
+		var doc = System.createDocument(details);
+		var page = System.findNode("//input[@name='page']", doc);
+		var curPage = parseInt(page.value,10);
+		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+		var enableActiveBountyList = GM_getValue("enableActiveBountyList");
+		var enableWantedList = GM_getValue("enableWantedList");
 		GM_setValue("bwNeedsRefresh", false);
 
 		if (enableWantedList) {
 			var activeTable = System.findNode("//table[@width = '630' and @cellpadding = '3']", doc);
 			var wantedNames = GM_getValue("wantedNames");
 			var wantedArray = wantedNames.split(",");
-			var wantedList = {};
-			wantedList.bounty = [];
-			wantedList.isRefreshed = true;
-			wantedList.lastUpdate = new Date();
-			wantedList.wantedBounties = false;
-
+			var wantedList = callback.wantedList;
 			if (activeTable) {
 				for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
 					for (var j = 0; j < wantedArray.length; j++) {
@@ -10654,9 +10658,13 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					}
 				}
 			}
-			Helper.injectWantedList(wantedList);
+			if (curPage < maxPage) {
+				System.xmlhttp("index.php?cmd=bounty&page=" + (curPage + 1), Helper.parseBountyPageForWorld, {wantedList:wantedList});
+			} else {
+				Helper.injectWantedList(wantedList);
+			}
 		}
-		if (enableActiveBountyList) {
+		if (enableActiveBountyList && !Helper.activeBountyListPosted) {
 			activeTable = System.findNode("//table[@width = 620]", doc);
 			var bountyList = {};
 			bountyList.bounty = [];
@@ -10685,6 +10693,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				}
 			}
 			Helper.injectBountyList(bountyList);
+			Helper.activeBountyListPosted = true;
 		}
 	},
 
@@ -10700,7 +10709,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var aRow=displayList.insertRow(0); //bountyList.rows.length
 		var aCell=aRow.insertCell(0);
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
-			"Active Bounties <span id='Helper:resetBountyList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span>";
+			"<nobr>Active Bounties <span id='Helper:resetBountyList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span><nobr><br>";
 
 		if (bountyList.activeBounties === false) {
 			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:10px;'>" +
@@ -10754,7 +10763,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var aRow=displayList.insertRow(0);
 		var aCell=aRow.insertCell(0);
 		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;'>"+
-			"Wanted Bounties <span id='Helper:resetWantedList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span><br>";
+			"<nobr>Wanted Bounties <span id='Helper:resetWantedList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span></nobr><br>";
 
 		if (wantedList.wantedBounties === false) {
 			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:7px;'>" +
