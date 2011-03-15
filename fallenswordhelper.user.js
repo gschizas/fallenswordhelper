@@ -3155,7 +3155,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=buy_result colspan=12></td></tr>';
 		for (var key in Helper.itemList) {
 			var itemID=Helper.itemList[key].id;
-			var	itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(Helper.itemList[key].html); //add this line
+			var	itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(Helper.itemList[key].html); //add this line
 			var plantType = itemStats[1];
 			if (Helper.resourceList[plantType]){
 				Helper.resourceList[plantType].invIDs+=","+itemID;
@@ -4667,7 +4667,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						inputTableCell.height = "2";
 						//get itemID for bid no refresh
 						var itemIMG = aRow.cells[0].firstChild;
-						var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
+						//var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
+						var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(itemIMG).data("tipped"));
 						invID = itemStats[2];
 						//new bid no refresh button
 						newRow = inputTable.insertRow(2);
@@ -5143,7 +5144,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				itemInvId = anItem.value;
 				theTextNode = System.findNode("../../td[3]", anItem);
 				theImgElement = System.findNode("../../td[2]", anItem).firstChild.firstChild;
-				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(theImgElement).data("tipped"));
+				itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(theImgElement).data("tipped"));
 				if (itemStats) {
 					itemId = itemStats[1];
 					invId = itemStats[2];
