@@ -225,16 +225,19 @@ var Helper = {
 	},
 
 	readInfo: function() {
-		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]");
+		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]/ancestor::td[2]");
 		if (!charInfo) { return; }
-		var charInfoText = charInfo.getAttribute("onmouseover");
-		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\\\'90%\\\'>([0-9a-z]+)/i)[1];
-		Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
-		Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
-		Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i);
-		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
-		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\\\'90%\\\'>(\d+)/i)[1];
+		var charInfoText = $(charInfo).data('tipped');
+		/**
+		<center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>tnka</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%'>973</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>205th</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_up.gif'> +5</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>2401</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>5420</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>116</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>2018</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>6751</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.
+		*/
+		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
+		Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\'>(\d+)/i);
+		Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
+		Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
+		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
+		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
+		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
 		GM_setValue("CharacterName", Helper.characterName);
 
 		Helper.savedItemData = [];
@@ -907,11 +910,12 @@ var Helper = {
 	},
 
 	injectSkillsPage: function() {
-		var buffs = System.findNodes("//a[contains(@href,'index.php?cmd=skills&tree_id=') and contains(@href,'&skill_id=')][img[@border=0]]");
+		var buffs = System.findNodes("//a[contains(@href,'index.php?cmd=skills&tree_id=') and contains(@href,'&skill_id=')][img[@border=0]]/img");
 
 		for (var i = 0; i < buffs.length; i++) {
-			var parNode = buffs[i];
-			var mouseoverText = buffs[i].firstChild.getAttribute("onmouseover");
+			var parNode = buffs[i].parentNode;
+			//var mouseoverText = buffs[i].firstChild.getAttribute("onmouseover");
+			var mouseoverText = $(buffs[i]).data('tipped');
 			var buffIndex = parNode.getAttribute("href").match(/skill_id=(\d*)/)[1];
 			var buffList = Data.buffList();
 			for (var j = 0; j < buffList.length; j++) {
@@ -920,8 +924,7 @@ var Helper = {
 					break;
 				}
 			}
-			mouseoverText = mouseoverText.replace(/tt_setWidth\(\d*\)/, "tt_setWidth(150)");
-			buffs[i].setAttribute("onmouseover", mouseoverText);
+			buffs[i].setAttribute("data-tipped", mouseoverText);
 
 		}
 	},
@@ -1027,9 +1030,10 @@ var Helper = {
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
 		GM_setValue("guildID",guildID);
 
-		var xpLock = System.findNode('//a[contains(@onmouseover,"tt_setWidth(150); Tip\(\'<b>Guild XP</b><br><br>")]');
+		var xpLock = System.findNode("//a[contains(.,'Guild') and contains(.,'XP')]");
 		if (xpLock) {
 			var xpLockmouseover = xpLock.getAttribute("onmouseover");
+			var xpLockmouseover = $(xpLock).data('tipped');
 			var xpLockXP = xpLockmouseover.replace(/,/g,"").match(/XP Lock: <b>(\d*)/);
 			if (xpLockXP && xpLockXP.length == 2) {
 				xpLockXP = xpLockXP[1];
@@ -1038,7 +1042,7 @@ var Helper = {
 					actualXP = actualXP[1];
 					if (actualXP < xpLockXP) {
 						try {
-							var xpNode = xpLock.parentNode.parentNode;
+						var xpNode = xpLock.parentNode.parentNode;
 							xpNode.cells[1].innerHTML += ' (<b>' + System.addCommas(xpLockXP - actualXP) + '</b>)';
 						} catch (err) {
 							GM_log(err);
@@ -1150,7 +1154,8 @@ var Helper = {
 			var aRow = memberTable.rows[i];
 			if (aRow.cells[1]) {
 				var contactLink   = aRow.cells[1].firstChild.nextSibling;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+				//var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -1231,16 +1236,19 @@ var Helper = {
 	},
 
 	injectStaminaCalculator: function() {
-		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]");
+		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
 		if (!staminaImageElement) {return;}
 
-		var mouseoverText = staminaImageElement.getAttribute("onmouseover");
-		var staminaRE = /Stamina:\s<\/td><td width=\\'90%\\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
+		var mouseoverText = $(staminaImageElement).data('tipped');
+		/*
+		<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Stamina: </td><td width='90%'>24,764 / 25,487</td></tr><tr><td><font color='#999999'>Gain Per Hour: </td><td width='90%'>+104</td></tr><tr><td><font color='#999999'>Next Gain : </td><td width='90%'>52m 8s</td></tr></table><br>Stamina is required to perform actions (such as attacking players and creatures).
+		*/
+		var staminaRE = /Stamina:\s<\/td><td width=\'90%\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
 		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\\'90%\\'>\+([,0-9]+)<\/td>/;
+		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;
 		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\\'90%\\'>([,0-9]+)m ([,0-9]+)s/;
+		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\'>([,0-9]+)m ([,0-9]+)s/;
 		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
 		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
 		nextGainHours = nextGainMinutes/60;
@@ -1256,16 +1264,16 @@ var Helper = {
 			nextHuntTimeText + "</td></tr><tr>";
 		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-		staminaImageElement.setAttribute("onmouseover", newMouseoverText);
+		staminaImageElement.setAttribute("data-tipped", newMouseoverText);
 	},
 
 	injectLevelupCalculator: function() {
-		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]");
+		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
 		if (!levelupImageElement) {return;}
-		var mouseoverText = levelupImageElement.getAttribute("onmouseover");
-		var remainingXPRE = /Remaining:\s<\/td><td width=\\\'90%\\\'>([0-9,]+)/i;
-		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\\\'90%\\\'>\+([0-9,]+)/i;
-		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\\\'90%\\\'>([0-9]*)m\s*([0-9]*)s/i;
+		var mouseoverText = $(levelupImageElement).data('tipped');
+		var remainingXPRE = /Remaining:\s<\/td><td width=\'90%\'>([0-9,]+)/i;
+		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([0-9,]+)/i;
+		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\'90%\'>([0-9]*)m\s*([0-9]*)s/i;
 		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
 		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
 		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
@@ -1278,7 +1286,7 @@ var Helper = {
 			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</td></tr><tr>";
 		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
 		newMouseoverText = newMouseoverText.replace("tt_setWidth(175)", "tt_setWidth(200)");
-		levelupImageElement.setAttribute("onmouseover", newMouseoverText);
+		levelupImageElement.setAttribute("data-tipped", newMouseoverText);
 		return;
 	},
 
@@ -1292,10 +1300,11 @@ var Helper = {
 			var item=itemNodes[i];
 			var src=item.getAttribute("src");
 			var text=item.parentNode.parentNode.textContent;
-			var onmouseover=item.getAttribute("onmouseover").replace("Click to Buy","Click to Select");
+			var onmouseover=$(item).data("tipped").replace("Click to Buy","Click to Select");
 			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
-				"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
+				//"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
+				"'>"+text+"</td>";
 			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
 		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
@@ -1337,11 +1346,11 @@ var Helper = {
 	injectRelic: function(isRelicPage) {
 		var empowerThing = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr[5]/td/a");
 		if (empowerThing) {
-			var mouseover = empowerThing.getAttribute("onmouseover");
+			var mouseover = $(empowerThing).data("tipped");
 			var indx1 = mouseover.indexOf("'");
 			var indx2 = mouseover.lastIndexOf("'");
 			var insideText = mouseover.substring(indx1 + 1, indx2);
-			empowerThing.setAttribute("onmouseover", mouseover.substring(0, indx1 + 1) +
+			empowerThing.setAttribute("data-tipped", mouseover.substring(0, indx1 + 1) +
 				insideText.replace(/'/g, "&#39;") +
 				mouseover.substring(indx2));
 		}
@@ -1618,7 +1627,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var relicCount = 0;
 		for (var i=0;i<allItems.length-1;i++) {
 			var anItem=allItems[i];
-			var mouseoverText = anItem.getAttribute("onmouseover");
+			var mouseoverText = $(anItem).data("tipped");
 			if (mouseoverText && mouseoverText.search("Relic Bonuses") != -1){
 				relicCount++;
 			}
@@ -1701,7 +1710,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			for (i=0;i<allItems.length;i++) {
 				anItem=allItems[i];
 				if (anItem.getAttribute("src").search("/skills/") != -1) {
-					var onmouseover = anItem.getAttribute("onmouseover");
+					var onmouseover = $(anItem).data("tipped");
 					var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
 					var constitution =  constitutionRE.exec(onmouseover);
 					if (constitution) {
@@ -1886,7 +1895,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var totalMercHP = 0;
 		for (var i=0; i<mercElements.length; i++) {
 			merc = mercElements[i];
-			var mouseoverText = merc.getAttribute("onmouseover");
+			var mouseoverText = $(merc).data("tipped");
 			var src = merc.getAttribute("src");
 			if (mouseoverText && src.search("/merc/") != -1){
 				//<td>Attack:</td><td>1919</td>
@@ -1927,7 +1936,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		for (i=0;i<allItems.length;i++) {
 			anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
-				var onmouseover = anItem.getAttribute("onmouseover");
+				var onmouseover = $(anItem).data("tipped");
 				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
 				var constitution =  constitutionRE.exec(onmouseover);
 				if (constitution) {
@@ -2088,7 +2097,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	injectTHsearch: function() {
-		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]");
+		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]");
 		if (items)
 			for (var i=0; i<items.length; i++) {
 				if (items[i].parentNode.tagName!='A') {
@@ -2099,6 +2108,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	},
 
 	searchTHforItem: function(evt) {
+		//needs fixing still ...
+		//fix me
 		var mo=evt.target.getAttribute("onmouseover");
 		System.xmlhttp(Helper.linkFromMouseover(mo), function(responseText) {
 				var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
@@ -2112,7 +2123,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	injectViewRecipe: function() {
 		var components = System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
 		for (var i = 0; i < components.length; i++) {
-			var mo = components[i].getAttribute("onmouseover");
+			//fix me
+			var mo = $(components[i]).getAttribute("onmouseover");
 			System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
 			var componentCountElement = components[i].parentNode.parentNode.parentNode.nextSibling.firstChild;
 			componentCountElement.innerHTML = '<nobr>' + componentCountElement.innerHTML + '</nobr>';
@@ -2394,14 +2406,14 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr>";
-		var hasShieldImp = System.findNode("//img[contains(@onmouseover,'Summon Shield Imp')]");
-		var hasDeathDealer = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
+		var hasShieldImp = System.findNode("//img[contains(@src,'55_sm.gif')]");
+		var hasDeathDealer = System.findNode("//img[contains(@src,'50_sm.gif')]");
 		if (hasDeathDealer || hasShieldImp) {
 			var re=/(\d+) HP remaining/;
 			var impsRemaining = 0;
 			if (hasShieldImp) {
 				//textToTest = "tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>11 HP remaining<br></b> (Level: 150)</b><br>[Click to De-Activate]</center>');";
-				textToTest = hasShieldImp.getAttribute("onmouseover");
+				textToTest = $(hasShieldImp).data("tipped");
 				impsRemainingRE = re.exec(textToTest);
 				impsRemaining = impsRemainingRE[1];
 			}
@@ -2442,10 +2454,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				}
 			}
 		}
-		var hasCounterAttack = System.findNode("//img[contains(@onmouseover,'Counter Attack')]");
+		var hasCounterAttack = System.findNode("//img[contains(@src,'54_sm.gif')]");
 		if (hasCounterAttack) {
 			if (hasCounterAttack.getAttribute("src").search("/skills/") != -1) {
-				var onmouseover = hasCounterAttack.getAttribute("onmouseover");
+				var onmouseover = $(hasCounterAttack).data("tipped");
 				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
 				var counterAttack = counterAttackRE.exec(onmouseover);
 				if (counterAttack) {
@@ -2454,10 +2466,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			}
 			replacementText += "<tr><td style='font-size:small; color:blue'>CA" + counterAttackLevel + " active</td></tr>";
 		}
-		var hasDoubler = System.findNode("//img[contains(@onmouseover,'Doubler')]");
+		var hasDoubler = System.findNode("//img[contains(@src,'26_sm.gif')]");
 		if (hasDoubler) {
 			if (hasDoubler.getAttribute("src").search("/skills/") != -1) {
-				var onmouseover = hasDoubler.getAttribute("onmouseover");
+				var onmouseover = $(hasDoubler).data("tipped");
 				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
 				var doubler = doublerRE.exec(onmouseover);
 				if (doubler) {
@@ -2891,7 +2903,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					if (hideBuffSelected) checkboxColumn.innerHTML = '';
 					var playernameColumn = playerTable.rows[0].cells[1];
 					var playerNameLinkElement = playernameColumn.firstChild;
-					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					var onMouseOver = $(playerNameLinkElement).data('tipped');
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
 			//Hide the Guild info Links
 					if (GM_getValue("hideGuildInfoTrade")) {
@@ -2976,7 +2989,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					if (hideBuffSelected) checkboxColumn.innerHTML = '';
 					var playernameColumn = playerTable.rows[0].cells[1];
 					var playerNameLinkElement = playernameColumn.firstChild;
-					var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+					var onMouseOver = $(playerNameLinkElement).data('tipped');
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
 					// Set Color for Activity
 					if (lastActivityMinutes < 2) {
@@ -3788,7 +3802,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var memberStatus = aRow.cells[0].firstChild.title;
 
 					var contactLink   = aRow.cells[1].firstChild.nextSibling;
-					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+					//contactLink   = contactLink.getAttribute('onmouseover');
+					contactLink   = $(contactLink).data('tipped');
+					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink);
 					var lastActivityDays = parseInt(lastActivity[1],10);
 					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -4654,7 +4670,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 						inputTableCell.height = "2";
 						//get itemID for bid no refresh
 						var itemIMG = aRow.cells[0].firstChild;
-						var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(itemIMG.getAttribute("onmouseover"));
+						var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
 						invID = itemStats[2];
 						//new bid no refresh button
 						newRow = inputTable.insertRow(2);
@@ -5130,7 +5146,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				itemInvId = anItem.value;
 				theTextNode = System.findNode("../../td[3]", anItem);
 				theImgElement = System.findNode("../../td[2]", anItem).firstChild.firstChild;
-				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(theImgElement.getAttribute("onmouseover"));
+				itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(theImgElement).data("tipped"));
 				if (itemStats) {
 					itemId = itemStats[1];
 					invId = itemStats[2];
@@ -5199,7 +5215,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				anItem = allItems[i];
 				theLocation=anItem.parentNode.nextSibling.nextSibling;
 				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-				System.xmlhttp(Helper.linkFromMouseover(theImage.getAttribute("onmouseover")), Helper.injectDropItemsPaint, theImage);
+				System.xmlhttp(Helper.linkFromMouseover($(theImage).data("tipped")), Helper.injectDropItemsPaint, theImage);
 			}
 		}
 
@@ -5472,15 +5488,16 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		//enhance colored dots
 		var enhanceOnlineDots = GM_getValue("enhanceOnlineDots");
 		if (enhanceOnlineDots) {
-			var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@onmouseover,'Last Activity')]");
+			var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@data-tipped,'Last Activity')]");
 			if (profileAlliesEnemies) {
 				for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
 					var testProfile = profileAlliesEnemies[i];
-					var contactLink   = testProfile;
-					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+					var contactLink = testProfile;
+					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
 					var lastActivityDays = parseInt(lastActivity[1],10);
 					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+GM_log(lastActivityMinutes);
 					if (lastActivityMinutes < 2) {
 						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
 					} else if (lastActivityMinutes < 5) {
@@ -5604,7 +5621,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				if ((i % 4===0) && profileInventoryBoxItem[i] && !foldersEnabled) newRow = profileInventory.insertRow(2*(i >> 2)+1);
 				if ((i % 4===0) && profileInventoryBoxItem[i] && foldersEnabled) newRow = profileInventory.insertRow(3*(i >> 2)+1);
 				if (profileInventoryBoxItem[i] && profileInventoryBoxID[i]) {
-					var itemOnmouseover = profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("onmouseover");
+					var itemOnmouseover = $(profileInventoryBoxItem[i].firstChild.firstChild).data("tipped");
 					if (itemOnmouseover.indexOf("Equip") != -1) { // check to see if item is equipable.
 						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 								'id="Helper:equipProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
