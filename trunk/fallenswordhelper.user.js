@@ -7397,7 +7397,7 @@ var Helper = {
 			 var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
 			 var memberListArrayWithMercs = memberList.innerHTML.split(",");
 			 var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
-			 if (0 < GM_getValue("maxGroupSizeToJoin")) //memberListArrayWithoutMercs.length
+			 if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin"))
 				{
 			var groupID = /javascript:confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
 				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
