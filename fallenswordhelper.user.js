@@ -1032,7 +1032,7 @@ var Helper = {
 
 		var xpLock = System.findNode("//a[contains(.,'Guild') and contains(.,'XP')]");
 		if (xpLock) {
-			var xpLockmouseover = xpLock.getAttribute("onmouseover");
+			//var xpLockmouseover = xpLock.getAttribute("onmouseover");
 			var xpLockmouseover = $(xpLock).data('tipped');
 			var xpLockXP = xpLockmouseover.replace(/,/g,"").match(/XP Lock: <b>(\d*)/);
 			if (xpLockXP && xpLockXP.length == 2) {
@@ -1285,7 +1285,6 @@ var Helper = {
 		var mouseoverTextAddition = "<tr><td><font color=\\'#FFF380\\'>Next Level At: </td><td width=\\'90%\\'>" +
 			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</td></tr><tr>";
 		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-		newMouseoverText = newMouseoverText.replace("tt_setWidth(175)", "tt_setWidth(200)");
 		levelupImageElement.setAttribute("data-tipped", newMouseoverText);
 		return;
 	},
@@ -1303,6 +1302,7 @@ var Helper = {
 			var onmouseover=$(item).data("tipped").replace("Click to Buy","Click to Select");
 			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
+				//fix me
 				//"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
 				"'>"+text+"</td>";
 			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
@@ -1338,8 +1338,6 @@ var Helper = {
 
 	quickDone: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
-		//unsafeWindow.tt_setWidth(200);
-		//unsafeWindow.Tip(infoMessage);
 		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
 
@@ -2123,7 +2121,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	injectViewRecipe: function() {
 		var components = System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
 		for (var i = 0; i < components.length; i++) {
-			//fix me
+			//fix me - need to somehow get details from mouseover to search AH
 			var mo = $(components[i]).getAttribute("onmouseover");
 			System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
 			var componentCountElement = components[i].parentNode.parentNode.parentNode.nextSibling.firstChild;
@@ -2412,7 +2410,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var re=/(\d+) HP remaining/;
 			var impsRemaining = 0;
 			if (hasShieldImp) {
-				//textToTest = "tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>11 HP remaining<br></b> (Level: 150)</b><br>[Click to De-Activate]</center>');";
 				textToTest = $(hasShieldImp).data("tipped");
 				impsRemainingRE = re.exec(textToTest);
 				impsRemaining = impsRemainingRE[1];
@@ -3199,8 +3196,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	quickDoneExtracted: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
-		//unsafeWindow.tt_setWidth(200);
-		//unsafeWindow.Tip(infoMessage);
 		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
 
@@ -3424,6 +3419,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			"<tr><td valign=top>" + imageNode.parentNode.innerHTML + "</td>" +
 			"<td rowspan=2>" + statsNode.parentNode.innerHTML + "</td></tr>" +
 			"<tr><td align=center valign=top>" + nameNode.innerHTML + "</td></tr></table>");
+		//fix me
 		callback.monster.setAttribute("mouseOverWidth", "600");
 		callback.monster.addEventListener("mouseover", Helper.clientTip, true);
 		if (callback.showTip) Helper.clientTip({'target':callback.monster});
@@ -3539,7 +3535,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			'</tr>';
 		for (var k=0;k<Helper.entityLogTable.entity.length;k++) {
 			result += '<tr class="HelperMonsterLogRow'+(1+k % 2)+'"><td align="center"><img width=40 height=40 ' +
-					'onmouseover="tt_setWidth(200);Tip(\'<img src=' + Helper.entityLogTable.entity[k]["key1"] + '/>\');" ' +
+					'data-tipped="' + Helper.entityLogTable.entity[k]["key1"] + '" ' +
 					'src="' + Helper.entityLogTable.entity[k]["key1"] + '"/></td>';
 			result += '<td align="left">' + Helper.entityLogTable.entity[k]["name"] + '</td>';
 			for (i = 2; i < 4; i++)
@@ -3625,6 +3621,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var goldGain     = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
 		var levelUp      = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
+		//fix me to get item info from mouseover
 		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/(.*)\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/;
 		var info         = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE);
@@ -3746,6 +3743,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		} while (!value && target);
 		if (value) {
 			if (!width) width="250";
+			//fix me
 			unsafeWindow.tt_setWidth(parseInt(width,10));
 			unsafeWindow.Tip(value);
 		}
@@ -3802,7 +3800,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var memberStatus = aRow.cells[0].firstChild.title;
 
 					var contactLink   = aRow.cells[1].firstChild.nextSibling;
-					//contactLink   = contactLink.getAttribute('onmouseover');
 					contactLink   = $(contactLink).data('tipped');
 					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink);
 					var lastActivityDays = parseInt(lastActivity[1],10);
@@ -5475,7 +5472,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.parseProfileForWorld(doc.innerHTML, true);
 
 			// store the VL of the player
-			var virtualLevel = parseInt(System.findNode("//td[b[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
+			var virtualLevel = parseInt(System.findNode("//td[a/b[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
 			if (Helper.characterLevel == virtualLevel) {
 				GM_setValue('characterVirtualLevel',"");
 			} else {
@@ -5497,7 +5494,6 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 					var lastActivityDays = parseInt(lastActivity[1],10);
 					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
-GM_log(lastActivityMinutes);
 					if (lastActivityMinutes < 2) {
 						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
 					} else if (lastActivityMinutes < 5) {
@@ -5516,6 +5512,7 @@ GM_log(lastActivityMinutes);
 
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
+			//fix me - need to get data from mouseover
 			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
 			if (!profileItems) return;
 			for (var i=0;i<profileItems.length;i++) {
@@ -5562,10 +5559,12 @@ GM_log(lastActivityMinutes);
 					}
 					extraText = "<br>Individual item stats subtotal: " + subTotal;
 				}
+				//fix me
 				unsafeWindow.Tip(responseText+extraText+finalStr);
 				Helper.savedItemData[index] = responseText+extraText+finalStr;
 			});
 		} else {
+			//fix me
 			unsafeWindow.Tip(Helper.savedItemData[index]);
 		}
 	},
@@ -5910,7 +5909,7 @@ GM_log(lastActivityMinutes);
 		var compList = System.findNodes("//a[contains(@href,'cmd=profile&subcmd=destroycomponent&component_id=')]/img",doc);
 		if (compList) {
 			for (var i=0;i<compList.length;i++) {
-				var mouseover=compList[i].getAttribute('onmouseover');
+				var mouseover=$(compList[i]).data('tipped');
 				var id=mouseover.match(/ajaxLoadCustom\((\d+).*/)[1];
 				if (Helper.componentList[id])
 					Helper.componentList[id].count++;
@@ -5930,6 +5929,7 @@ GM_log(lastActivityMinutes);
 			var usedCount=0;
 			for (id in Helper.componentList) {
 				var comp=Helper.componentList[id];
+				//fix me - mouseover
 				output+="<tr><td align=center><img src="+comp.src+" onmouseover=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
 				usedCount+=comp.count;
 			}
@@ -6034,6 +6034,7 @@ GM_log(lastActivityMinutes);
 			totalText+=(total.k>0)?total.k+' k':'';
 			if (total.unknown>0) totalText+=' ('+total.unknown+' buff(s) with unknown cost)';
 			html+='</table><b>Total: '+totalText+'</b>';
+			// fix me
 			document.getElementById('buffCost').innerHTML='<br/><span onmouseover=\'Tip("'+html+'");\'>Estimated Cost: <b>'+totalText+'</b></span>';
 			GM_setValue("buffCostTotalText", totalText);
 		} else {
@@ -6544,7 +6545,7 @@ GM_log(lastActivityMinutes);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
 		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
-			var item={"url": Helper.linkFromMouseover(currentlyWorn[i].getAttribute("onmouseover")),
+			var item={"url": Helper.linkFromMouseover($(currentlyWorn[i]).data("tipped")),
 				"where":"worn", "index":(i+1)};
 			if (i===0) output.innerHTML+="<br/>Found worn item ";
 			output.innerHTML+=(i+1) + " ";
@@ -6588,7 +6589,7 @@ GM_log(lastActivityMinutes);
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 
 			for (var i=0; i<backpackItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(backpackItems[i].getAttribute("onmouseover"));
+				var theUrl=Helper.linkFromMouseover($(backpackItems[i]).data("tipped"));
 				var item={"url": theUrl,
 					"where":"backpack", "index":(i+1), "page":currentPage};
 				if (i===0) output.innerHTML+="<br/>Found wearable item ";
@@ -6633,7 +6634,7 @@ GM_log(lastActivityMinutes);
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
 
 			for (var i=0; i<guildstoreItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"));
+				var theUrl=Helper.linkFromMouseover($(guildstoreItems[i]).data("tipped"));
 				var item={"url": theUrl,
 					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false};
 				if (i===0) output.innerHTML+="<br/>Found guild store item ";
@@ -6659,7 +6660,7 @@ GM_log(lastActivityMinutes);
 		var guildreportItems = System.findNodes("//img[contains(@src,'items')]", doc);
 		if (guildreportItems) {
 			for (var i=0; i<guildreportItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"));
+				var theUrl=Helper.linkFromMouseover($(guildreportItems[i]).data("tipped"));
 				var item={"url": theUrl,
 					"where":"guildreport", "index":(i+1), "worn":false};
 				if (i===0) output.innerHTML+="<br/>Found guild report item ";
@@ -7039,7 +7040,7 @@ GM_log(lastActivityMinutes);
 		if (resultNodes) {
 			for (var i=0; i<resultNodes.length; i++) {
 				var resultNode = resultNodes[i];
-				var mouseOver = resultNode.firstChild.firstChild.getAttribute("onmouseover");
+				var mouseOver = $(resultNode.firstChild.firstChild).data("tipped");
 				var resultAmounts = resultNode.parentNode.nextSibling.textContent;
 				var mouseOverRX = mouseOver.match(/ajaxLoadCustom\((\d+),\s*-1,\s*2,\s*\d+,\s*\'([a-z0-9]+)\',\s*\'\'\)/i);
 				var result = {
@@ -7108,6 +7109,7 @@ GM_log(lastActivityMinutes);
 				if (recipe.items) {
 					for (var j=0; j<recipe.items.length; j++) {
 						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded +
+							//fix me
 							' <img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
 							recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'' +
 							recipe.items[j].verify + '\', \'\');" ' +
@@ -7216,7 +7218,7 @@ GM_log(lastActivityMinutes);
 		var totalMercHP = 0;
 		for (var i=0; i<mercElements.length; i++) {
 			merc = mercElements[i];
-			var mouseoverText = merc.getAttribute("onmouseover");
+			var mouseoverText = $(merc).data("tipped");
 			var src = merc.getAttribute("src");
 			if (mouseoverText && src.search("/merc/") != -1){
 				//<td>Attack:</td><td>1919</td>
@@ -7859,6 +7861,7 @@ GM_log(lastActivityMinutes);
 			for (var j=0;j<buffs.length;j++) {
 				buffName = buffs[j].name;
 				if (myBuffName == buffName) {
+					//fix me
 					var onmouseoverText='Tip(\'' +
 						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + buffName + '</span><br /><br />Stamina: ' +
 						buffs[j].stamina + '<br>Duration: ' +
@@ -7881,15 +7884,15 @@ GM_log(lastActivityMinutes);
 
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
 		var doc=System.createDocument(responseText);
-		buffs = System.findNodes("//img[contains(@onmouseover,'tt_setWidth(105)')]", doc);
+		buffs = System.findNodes("//img[contains(@src,'/skills/')]", doc);
 		if (buffs) {
 			var buffRE, buff, buffName;
 			for (i=0;i<buffs.length;i++) {
 				var aBuff=buffs[i];
-				var onmouseover = aBuff.getAttribute("onmouseover");
+				var onmouseover = $(aBuff).data("tipped");
 				if (onmouseover.search("Summon Shield Imp") != -1) {
-					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
-					//tt_setWidth(105); Tip('<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
+					//<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
+					//<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
 					buffRE = /<b>([ a-zA-Z]+)<br>([0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/;
 					buff = buffRE.exec(onmouseover);
 					if (!buff) {
@@ -7968,9 +7971,9 @@ GM_log(lastActivityMinutes);
 	getSustain: function(responseText) {
 		var doc=System.createDocument(responseText);
 		Helper.tmpSelfProfile=responseText;
-		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
+		var sustainText = System.findNode("//a[contains(@data-tipped,'<b>Sustain</b>')]", doc);
 		if (!sustainText) {return;}
-		var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+		var sustainMouseover = $(sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild).data("tipped");
 		var sustainLevelRE = /Level<br>(\d+)%/;
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		var sustainColor = "lime";
@@ -7980,15 +7983,15 @@ GM_log(lastActivityMinutes);
 		var injectHere = inputTable.rows[3].cells[0];
 		injectHere.align = "center";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
-		var furyCasterText = System.findNode("//a[contains(@onmouseover,'<b>Fury Caster</b>')]", doc);
+		var furyCasterText = System.findNode("//a[contains(@data-tipped,'<b>Fury Caster</b>')]", doc);
 		if (!furyCasterText) {return;}
-		var furyCasterMouseover = furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+		var furyCasterMouseover = $(furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild).data("tipped");
 		var furyCasterLevelRE = /Level<br>(\d+)%/;
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		var furyCasterColor = "lime";
 		if (furyCasterLevel < 100) furyCasterColor = "red";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span>";
-		var hasBuffMasterBuff = System.findNode("//img[contains(@onmouseover,'Buff Master')]", doc);
+		var hasBuffMasterBuff = System.findNode("//img[contains(@data-tipped,'Buff Master')]", doc);
 		if (hasBuffMasterBuff) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
 			var buffMasterTimeToExpire = hasBuffMasterBuff.parentNode.nextSibling.nextSibling.innerHTML;
@@ -7997,7 +8000,7 @@ GM_log(lastActivityMinutes);
 		else {
 			injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> <span style='color:red;'>Off</span>";
 		}
-		var hasExtendBuff = System.findNode("//img[contains(@onmouseover,'Extend')]", doc);
+		var hasExtendBuff = System.findNode("//img[contains(@data-tipped,'Extend')]", doc);
 		if (hasExtendBuff) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Extend:</span>	<span style='color:lime;'>On</span>";
 			var ExtendTimeToExpire = hasExtendBuff.parentNode.nextSibling.nextSibling.innerHTML;
@@ -8035,9 +8038,9 @@ GM_log(lastActivityMinutes);
 		var killStreakElement = System.findNode("//span[@findme='killstreak']");
 		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
 		GM_setValue("lastKillStreak", playerKillStreakValue);
-		var deathDealerBuff = System.findNode("//img[contains(@onmouseover,'Death Dealer')]");
+		var deathDealerBuff = System.findNode("//img[contains(@data-tipped,'Death Dealer')]");
 		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
-		var deathDealer = deathDealerRE.exec(deathDealerBuff.getAttribute("onmouseover"));
+		var deathDealer = deathDealerRE.exec($(deathDealerBuff).data("tipped"));
 		if (deathDealer) {
 			var deathDealerLevel = deathDealer[1];
 			var deathDealerPercentage = (Math.min(Math.round(Math.floor(playerKillStreakValue/5) * deathDealerLevel) * 0.01, 20));
@@ -8148,7 +8151,7 @@ GM_log(lastActivityMinutes);
 		for (i=0;i<allItems.length;i++) {
 			anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
-				var onmouseover = anItem.getAttribute("onmouseover");
+				var onmouseover = $(anItem).data("tipped");
 				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
 				var counterAttack = counterAttackRE.exec(onmouseover);
 				if (counterAttack) {
@@ -8713,11 +8716,11 @@ GM_log(lastActivityMinutes);
 			}
 			if (prizeSRC && prizeSRC.search("/items/") != -1) {
 				var prizeImgElement = row.cells[8].firstChild;
-				var prizeOnmouseover = prizeImgElement.getAttribute("onmouseover");
+				var prizeOnmouseover = $(prizeImgElement).data("tipped");
 				var itemIdRE = /ajaxLoadCustom\((\d+)/;
 				var itemId = itemIdRE.exec(prizeOnmouseover)[1];
 				prizeOnmouseover = prizeOnmouseover.replace(/""/,'"ItemId = '+itemId+'"');
-				prizeImgElement.setAttribute("onmouseover", prizeOnmouseover);
+				prizeImgElement.setAttribute("data-tipped", prizeOnmouseover);
 				if (hideArenaPrizes) {
 					for (k=0; k<hideArenaPrizesArray.length; k++){
 						var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/items/"),prizeSRC.length);
@@ -9108,6 +9111,7 @@ GM_log(lastActivityMinutes);
 			for (var j=0; j<relics.length; j++){
 				var relic = relics[j];
 				if (relicName == relic.Name.trim()){
+					//fix me
 					var onmouseoverText='Tip(\'' +
 						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + relic.Name + '</span><br /><br />' +
 						relic.Realm + '<br><br>' +
@@ -9505,6 +9509,7 @@ GM_log(lastActivityMinutes);
 
 	helpLink: function(title, text) {
 		return ' [ ' +
+			//fix me
 			'<span style="text-decoration:underline;cursor:pointer;" onmouseover="Tip(\'' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
@@ -9784,6 +9789,7 @@ GM_log(lastActivityMinutes);
 		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
 		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
 		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
+			//fix me
 			"<br/><h1 onmouseover=\"Tip('Click on the player icon and left click drag the path you want to walk. If you walk into a wall or make an error, " +
 				"close and reopen the mini map and start again. Push N (capital n) to activate the auto-walk and watch the mini map as you walk to your " +
 				"new location. The screen will refresh when you get there.');\">Auto-Walk</h1></span>";
@@ -9801,6 +9807,7 @@ GM_log(lastActivityMinutes);
 		for (var i=0; i<td.length; i++){
 			td[i].addEventListener("mousedown", Helper.mousedown, true);
 			// colorize table cell if left mouse button is pressed
+			//fix me?
 			td[i].addEventListener("mouseover", function (e){if (Helper.mouse == 1) Helper.markPos(this);}, true);
 		}
 	},
@@ -9871,12 +9878,12 @@ GM_log(lastActivityMinutes);
 			return;
 		}
 
-		var nodes = System.findNodes("//div[@id='miniMapCover']//td[contains(@onmouseover,'Tip')]");
+		var nodes = System.findNodes("//div[@id='miniMapCover']//td[contains(@class,'tipped')]");
 		if (!nodes) return;
 		for (var i=0; i<nodes.length; i++) {
-			var tip=nodes[i].getAttribute("onmouseover");
-			var color=tip.indexOf(': ') > 0 ? 'red' :
-				tip.indexOf("Tip('Stairway to ") > 0 ? 'green' : 'blue';
+			var tip=$(nodes[i]).data("tipped");
+			var color=tip.indexOf(': ') >= 0 ? 'red' :
+				tip.indexOf("Stairway to ") >= 0 ? 'green' : 'blue';
 			nodes[i].innerHTML = '';
 			nodes[i].style.backgroundColor = color;
 		}
@@ -9951,7 +9958,8 @@ GM_log(lastActivityMinutes);
 			if (items) {
 				for (var i = 0; i < items.length; i++) {
 					var item = items[i];
-					var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(item.getAttribute("onmouseover"));
+					//var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(item.getAttribute("onmouseover"));
+					var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(item).data("tipped"));
 					if (itemStats) {
 						itemId = itemStats[1];
 						invId = itemStats[2];
@@ -9977,6 +9985,7 @@ GM_log(lastActivityMinutes);
 			//GM_log();
 			var newCell = bidEntryTable.rows[0].insertCell(2);
 			newCell.rowSpan = 5;
+			//fix me?
 			newCell.innerHTML = '<img src="' + System.imageServerHTTP + '/items/' + itemId +
 				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0>';
 		}
@@ -10135,6 +10144,7 @@ GM_log(lastActivityMinutes);
 			var newDev = document.createElement("div")
 			injectHere.appendChild(newDev);
 			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
+			//fix me
 			newDev.innerHTML = '<b>Replying To</b> [<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]: ' + msg;
 		}
 
@@ -10144,6 +10154,7 @@ GM_log(lastActivityMinutes);
 				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>";
 
 		for (var i = 0; i < table.length; i++) {
+			//fix me
 			textResult += "<tr><td>Msg " + (i+1) + " [<a onmouseover=\"Tip('Click on the message to append the template');\" href='#'>" +
 				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" +
 				table[i].replace(/{playername}/g, targetPlayer) + "</span></td></tr>";
@@ -10735,6 +10746,7 @@ GM_log(lastActivityMinutes);
 		else {
 			for (var i = 0; i < bountyList.bounty.length; i++) {
 				var mouseOverText = "\"tt_setWidth(205);";
+				//fix me
 				mouseOverText += "Tip('<div style=\\'text-align:center;width:205px;\\'>Level:  " + bountyList.bounty[i].lvl +
 				"<br/>Reward: " + bountyList.bounty[i].reward + " " +bountyList.bounty[i].rewardType +
 				"<br/>XP Loss Remaining: " + bountyList.bounty[i].xpLoss +
@@ -10789,6 +10801,7 @@ GM_log(lastActivityMinutes);
 		else {
 			for (var i = 0; i < wantedList.bounty.length; i++) {
 				var mouseOverText = "\"tt_setWidth(205);";
+				//fix me
 				mouseOverText += "Tip('<div style=\\'text-align:center;width:205px;\\'>Target Level:  " + wantedList.bounty[i].lvl +
 					"<br/>Offerer: "+ wantedList.bounty[i].offerer +
 					"<br/>Reward: " + wantedList.bounty[i].reward + " " +wantedList.bounty[i].rewardType +
@@ -10874,7 +10887,7 @@ GM_log(lastActivityMinutes);
 				var contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				var contactName   = contactLink.textContent;
 				var contactStatus = aTable.rows[0].cells[0].firstChild.title;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -10917,7 +10930,7 @@ GM_log(lastActivityMinutes);
 				contactId     = System.intValue((/[0-9]+$/).exec(contactLink.getAttribute("href"))[0]);
 				contactName   = contactLink.textContent;
 				contactStatus = aTable.rows[0].cells[0].firstChild.title;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
@@ -11013,6 +11026,7 @@ GM_log(lastActivityMinutes);
 						'<a style="color:' + contactColor + '; font-size:x-small;" href="index.php?cmd=profile&player_id=' + contact.id + '">' + contact.name + '</a>'+
 					'</td>'+
 					'<td align="right"><span style="color:#FFFF00; font-size:x-small;">'+
+//fix me
 						'<a href="index.php?cmd=message&target_player=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Send Message\')"><font color="#FFFF00">M</font></a>'+
 						'&nbsp;<a href="javascript:openWindow(\'index.php?cmd=quickbuff&t=' + contact.name + '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" onmouseover="tt_setWidth(100); Tip(\'Quick Buff\')"><font color="#FFFF00">B</font></a>'+
 						'&nbsp;<a href="index.php?cmd=trade&subcmd=createsecure&target_username=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Secure Trade\')"><font color="#FFFF00">S</font></a>'+
@@ -11124,8 +11138,8 @@ GM_log(lastActivityMinutes);
 			if (!GM_getValue("bulkSellAllBags")) {
 				bulkItemIMG = bulkItemIMG.parentNode;
 			}
-			var bulkItemMouseover = bulkItemIMG.getAttribute("onmouseover");
-			var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(bulkItemMouseover);
+			var bulkItemMouseover = $(bulkItemIMG).data("tipped");
+			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(bulkItemMouseover);
 			var itemId = itemStats[1];
 			var invId = itemStats[2];
 			var type = itemStats[3];
@@ -11134,6 +11148,7 @@ GM_log(lastActivityMinutes);
 			//var newRow = bulkSellTable.insertRow(-1);
 			var newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
+			//fix me?
 			newCell.innerHTML = '<img src="'+System.imageServerHTTP+'/items/'+itemId+'.gif" border=0 ' +
 				'onmouseover="ajaxLoadItem('+itemId+', '+invId+', '+type+', '+pid+', \'\');">';
 			newCell = newRow.insertCell(-1);
@@ -11234,7 +11249,7 @@ GM_log(lastActivityMinutes);
 		if (allItems) {
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
-				System.xmlhttp(Helper.linkFromMouseover(theImgNode.getAttribute("onmouseover")),
+				System.xmlhttp(Helper.linkFromMouseover($(theImgNode).data("tipped")),
 					function (responseText, callBack) {
 						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
 						if (plantRE.exec(responseText)) {
@@ -11377,14 +11392,16 @@ GM_log(lastActivityMinutes);
 		if (secureTradeIMGElements) {
 			for (var i = 0;i < secureTradeIMGElements.length;i++) {
 				var secureTradeIMGElement = secureTradeIMGElements[i];
-				var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(secureTradeIMGElement.getAttribute("onmouseover"));
+				var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(secureTradeIMGElement).data("tipped"));
 				var itemId = itemStats[1];
 				var invId = itemStats[2];
 				if (window.location.search.search("subcmd=createsecure") != -1 ||
 					window.location.search.search("inv_id") != -1 ||
 					window.location.search.search("cmd=trade") != -1) {
+					//fix me
 					var searchTerm = "//img[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
 				} else {
+					//fix me
 					var searchTerm = "//a[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
 				}
 				var possibleTradeItems = System.findNodes(searchTerm);
@@ -11459,7 +11476,7 @@ GM_log(lastActivityMinutes);
 	getProfileStatsAndBuffs: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		//stats
-		var vlTextElement = System.findNode("//td[b[contains(.,'VL')]]", doc);
+		var vlTextElement = System.findNode("//td[a/b[contains(.,'VL')]]", doc);
 		var vlValueElement = vlTextElement.nextSibling;
 		var pvpTextElement = System.findNode("//td[b[contains(.,'PvP')]]", doc);
 		var pvpValueElement = pvpTextElement.nextSibling;
@@ -12169,6 +12186,7 @@ GM_log(lastActivityMinutes);
 
 	getWearingItems: function(responseText) {
 		var doc=System.createDocument(responseText);
+		//fix me
 		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]",doc);
 		for (var i=0; i<items.length; i++) {
 			if (!(items[i].parentNode.getAttribute("href")) || items[i].parentNode.getAttribute("href").indexOf("subcmd=unequipitem&")>0) {
@@ -12212,6 +12230,7 @@ GM_log(lastActivityMinutes);
 							Helper.wearingItems[type].best=nodes[0].textContent;
 							for (var i=0; i<5; i++) {
 								Helper.wearingItems[type].suggest+=
+//fix me
 									"<span onmouseover=\"Tip('"+nodes[i].parentNode.parentNode.textContent+"');\">"+
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
@@ -12560,7 +12579,7 @@ GM_log(lastActivityMinutes);
 		//add VL if not equal to current level
 		var levelElement = System.findNode("//tbody/tr/td[b[contains(.,'Level:')]]", doc);
 		var levelValue = parseInt(levelElement.nextSibling.textContent.replace(/,/,""),10);
-		var virtualLevelElement = System.findNode("//tbody/tr/td[b[.='VL']]", doc);
+		var virtualLevelElement = System.findNode("//tbody/tr/td[a/b[.='VL']]", doc);
 		var virtualLevelValue = virtualLevelElement.nextSibling;
 		if (levelValue != parseInt(virtualLevelValue.textContent,10)) {
 			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>';
@@ -12807,7 +12826,7 @@ GM_log(lastActivityMinutes);
 				var aRow = memberTable.rows[i];
 				if (aRow.cells[1]) {
 					var contactLink = aRow.cells[1].firstChild.nextSibling;
-					var onMouseOver = contactLink.getAttribute('onmouseover');
+					var onMouseOver = $(contactLink).data('tipped');
 					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
 					var lastActivityDays = parseInt(lastActivity[1],10);
 					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
@@ -12854,7 +12873,7 @@ GM_log(lastActivityMinutes);
 			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
 				var testProfile = profileAlliesEnemies[i];
 				var contactLink   = testProfile;
-				var onMouseOver = contactLink.getAttribute('onmouseover');
+				var onMouseOver = $(contactLink).data('tipped');
 				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
@@ -12942,7 +12961,7 @@ GM_log(lastActivityMinutes);
 		var playerName = System.findNode("//h1", doc).textContent;
 		var levelElement = System.findNode("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
 		var levelValue = parseInt(levelElement.textContent.replace(/,/g,""),10);
-		var virtualLevelElement = System.findNode("//td[contains(b,'VL')]/following-sibling::td[1]", doc);
+		var virtualLevelElement = System.findNode("//td[a/b[contains(.,'VL')]]/following-sibling::td[1]", doc);
 		var virtualLevelValue = parseInt(virtualLevelElement.textContent.replace(/,/g,""),10);
 		//last activity
 		var lastActivityElement = System.findNode("//h2[@class='centered tiny']", doc);
@@ -12978,16 +12997,16 @@ GM_log(lastActivityMinutes);
 		}
 		textLineArray = textLineArray.removeDuplicates();
 		//sustain
-		var sustainText = System.findNode("//a[contains(@onmouseover,'<b>Sustain</b>')]", doc);
+		var sustainText = System.findNode("//a[contains(@data-tipped,'<b>Sustain</b>')]", doc);
 		if (sustainText) {
-			var sustainMouseover = sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild.getAttribute("onmouseover");
+			var sustainMouseover = $(sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild).data("tipped");
 			var sustainLevelRE = /Level<br>(\d+)%/;
 			var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		} else {
 			sustainLevel = -1;
 		}
 		//extend
-		var hasExtendBuff = System.findNode("//img[contains(@onmouseover,'Extend')]", doc);
+		var hasExtendBuff = System.findNode("//img[contains(@data-tipped,'Extend')]", doc);
 
 		//add row to table
 		if (textLineArray.length > 0) {
@@ -13002,6 +13021,7 @@ GM_log(lastActivityMinutes);
 			playerHREF = callback.href;
 			var bioTip = bioCell.innerHTML.replace(/'|"|\n/g,"");
 			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
+				//fix me
 				'onmouseover=\'Tip("'+bioTip+'");\'>' + playerName + '</a>' +
 				'&nbsp;<span style="color:blue;">[<span class="a-reply" target_player="' + playerName +'" style="cursor:pointer; text-decoration:underline;">m</span>]</span>' + '</nobr><br>' +
 				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
@@ -13047,12 +13067,12 @@ GM_log(lastActivityMinutes);
 		if (activeBuffs) {
 			for (i=0;i<activeBuffs.length;i++) {
 				anItem=activeBuffs[i];
-				var onmouseover = anItem.getAttribute("onmouseover");
+				var onmouseover = $(anItem).data("tipped");
 				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: ((\d+))\)/;
 				if (!buffRE.exec(onmouseover)) continue;
 				var buffName = buffRE.exec(onmouseover)[1];
 				var buffLevel = buffRE.exec(onmouseover)[2];
-				var rpPackBuff = System.findNodes("//a[contains(@onmouseover,'" + buffName + " Level " + buffLevel + "')]");
+				var rpPackBuff = System.findNodes("//a[contains(@data-tipped,'" + buffName + " Level " + buffLevel + "')]");
 				if (rpPackBuff) {
 					for (j=0;j<rpPackBuff.length;j++) {
 						rpPackBuff[j].parentNode.innerHTML += "<br><nobr><span style='color:red;'>" + buffName + " " + buffLevel + " active</span></nobr>";
