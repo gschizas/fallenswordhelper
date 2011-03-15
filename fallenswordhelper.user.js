@@ -1439,7 +1439,6 @@ var Helper = {
 		var info = Layout.infoBox(responseText);
 		var doc = System.createDocument(responseText);
 		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent,10);
-GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +"::" + info);
 		target.innerHTML += currentLevel + " -> ";
 		if (currentLevel < targetEmpowerLevel && Helper.empowerRelicCurrentTries < Helper.empowerRelicMaxTries) {
 			Helper.empowerRelicCurrentTries ++;
@@ -3761,8 +3760,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (memberList) {
 			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
-
-		if (!memberList) {
+		if (!memberList && location.search.search("quickbuff") == -1) {
 			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
 		}
 	},
@@ -5473,7 +5471,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			Helper.parseProfileForWorld(doc.innerHTML, true);
 
 			// store the VL of the player
-			var virtualLevel = parseInt(System.findNode("//td[a/b[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
+			var virtualLevel = parseInt(System.findNode("//td[b/a[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
 			if (Helper.characterLevel == virtualLevel) {
 				GM_setValue('characterVirtualLevel',"");
 			} else {
@@ -5911,7 +5909,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (compList) {
 			for (var i=0;i<compList.length;i++) {
 				var mouseover=$(compList[i]).data('tipped');
-				var id=mouseover.match(/ajaxLoadCustom\((\d+).*/)[1];
+				var id=mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
 				if (Helper.componentList[id])
 					Helper.componentList[id].count++;
 				else {
@@ -7043,6 +7041,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 				var resultNode = resultNodes[i];
 				var mouseOver = $(resultNode.firstChild.firstChild).data("tipped");
 				var resultAmounts = resultNode.parentNode.nextSibling.textContent;
+				//fix me
 				var mouseOverRX = mouseOver.match(/ajaxLoadCustom\((\d+),\s*-1,\s*2,\s*\d+,\s*\'([a-z0-9]+)\',\s*\'\'\)/i);
 				var result = {
 					img: resultNode.firstChild.firstChild.src,
@@ -7890,7 +7889,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			var buffRE, buff, buffName;
 			for (i=0;i<buffs.length;i++) {
 				var aBuff=buffs[i];
-				var onmouseover = $(aBuff).data("tipped");
+				var onmouseover = aBuff.getAttribute("data-tipped");
 				if (onmouseover.search("Summon Shield Imp") != -1) {
 					//<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
 					//<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
@@ -7972,9 +7971,9 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	getSustain: function(responseText) {
 		var doc=System.createDocument(responseText);
 		Helper.tmpSelfProfile=responseText;
-		var sustainText = System.findNode("//a[contains(@data-tipped,'<b>Sustain</b>')]", doc);
-		if (!sustainText) {return;}
-		var sustainMouseover = $(sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild).data("tipped");
+		var sustainTipped = System.findNode("//a[contains(@data-tipped,'<b>Sustain</b>')]/ancestor::td[1]/following-sibling::td[1]/table", doc);
+		if (!sustainTipped) {return;}
+		var sustainMouseover = sustainTipped.getAttribute("data-tipped");
 		var sustainLevelRE = /Level<br>(\d+)%/;
 		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
 		var sustainColor = "lime";
@@ -7984,9 +7983,10 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var injectHere = inputTable.rows[3].cells[0];
 		injectHere.align = "center";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
-		var furyCasterText = System.findNode("//a[contains(@data-tipped,'<b>Fury Caster</b>')]", doc);
-		if (!furyCasterText) {return;}
-		var furyCasterMouseover = $(furyCasterText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild).data("tipped");
+		//var furyCasterText = System.findNode("//a[contains(@data-tipped,'<b>Fury Caster</b>')]", doc);
+		var furyCasterTipped = System.findNode("//a[contains(@data-tipped,'<b>Fury Caster</b>')]/ancestor::td[1]/following-sibling::td[1]/table", doc);
+		if (!furyCasterTipped) {return;}
+		var furyCasterMouseover = furyCasterTipped.getAttribute("data-tipped");
 		var furyCasterLevelRE = /Level<br>(\d+)%/;
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		var furyCasterColor = "lime";
@@ -8014,7 +8014,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
 
 		//refresh ally/enemy list while you are here.
-		Helper.parseProfileForWorld(doc.innerHTML, true);
+		//Helper.parseProfileForWorld(doc.innerHTML, true);
 	},
 
 	getCounterAttackSetting: function(responseText) {
@@ -8718,7 +8718,8 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 			if (prizeSRC && prizeSRC.search("/items/") != -1) {
 				var prizeImgElement = row.cells[8].firstChild;
 				var prizeOnmouseover = $(prizeImgElement).data("tipped");
-				var itemIdRE = /ajaxLoadCustom\((\d+)/;
+				//var itemIdRE = /ajaxLoadCustom\((\d+)/;
+				var itemIdRE = /fetchitem.php\?item_id=(\d+)/;
 				var itemId = itemIdRE.exec(prizeOnmouseover)[1];
 				prizeOnmouseover = prizeOnmouseover.replace(/""/,'"ItemId = '+itemId+'"');
 				prizeImgElement.setAttribute("data-tipped", prizeOnmouseover);
@@ -11477,7 +11478,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 	getProfileStatsAndBuffs: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		//stats
-		var vlTextElement = System.findNode("//td[a/b[contains(.,'VL')]]", doc);
+		var vlTextElement = System.findNode("//td[b/a[contains(.,'VL')]]", doc);
 		var vlValueElement = vlTextElement.nextSibling;
 		var pvpTextElement = System.findNode("//td[b[contains(.,'PvP')]]", doc);
 		var pvpValueElement = pvpTextElement.nextSibling;
@@ -11708,40 +11709,28 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 
 	moveRankUpOneSlotOnScreen: function(evt) {
 		onclickHREF = evt.target.getAttribute("onclickhref");
-		thisRankRow = evt.target.parentNode.parentNode;
-		prevRow = thisRankRow.previousSibling;
-		nextRow1 = thisRankRow.nextSibling;
-		nextRow2 = nextRow1.nextSibling;
+		thisRankRow = evt.target.parentNode.parentNode.parentNode;
 		parentTable = thisRankRow.parentNode;
 		thisRankRowNum = thisRankRow.rowIndex;
-		previousRankRowNum = parseInt(thisRankRowNum - 4, 10);
+		previousRankRowNum = parseInt(thisRankRowNum, 10);
 		if (previousRankRowNum <= 1 || Helper.characterRow > thisRankRowNum) return;
 		injectRow = parentTable.rows[previousRankRowNum - 1];
-		parentTable.insertBefore(prevRow, injectRow);
 		parentTable.insertBefore(thisRankRow, injectRow);
-		parentTable.insertBefore(nextRow1, injectRow);
-		parentTable.insertBefore(nextRow2, injectRow);
 		System.xmlhttp(onclickHREF);
-		window.scrollBy(0,-57);
+		window.scrollBy(0,-24);
 	},
 
 	moveRankDownOneSlotOnScreen: function(evt) {
 		onclickHREF = evt.target.getAttribute("onclickhref");
-		thisRankRow = evt.target.parentNode.parentNode;
-		prevRow = thisRankRow.previousSibling;
-		nextRow1 = thisRankRow.nextSibling;
-		nextRow2 = nextRow1.nextSibling;
+		thisRankRow = evt.target.parentNode.parentNode.parentNode;
 		parentTable = thisRankRow.parentNode;
 		thisRankRowNum = thisRankRow.rowIndex;
-		previousRankRowNum = parseInt(thisRankRowNum + 8, 10);
+		previousRankRowNum = parseInt(thisRankRowNum + 3, 10);
 		if (previousRankRowNum - 1 > parentTable.rows.length || Helper.characterRow > thisRankRowNum) return;
 		injectRow = parentTable.rows[previousRankRowNum - 1];
-		parentTable.insertBefore(prevRow, injectRow);
 		parentTable.insertBefore(thisRankRow, injectRow);
-		parentTable.insertBefore(nextRow1, injectRow);
-		parentTable.insertBefore(nextRow2, injectRow);
 		System.xmlhttp(onclickHREF);
-		window.scrollBy(0,57);
+		window.scrollBy(0,24);
 	},
 
 	fetchRankData: function(evt) {
@@ -11750,7 +11739,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var allItems = System.findNodes("//input[@value='Edit']");
 		for (var i=0; i<allItems.length; i++) {
 			anItem = allItems[i];
-			var targetNode = anItem.parentNode.previousSibling;
+			var targetNode = anItem.parentNode.parentNode.previousSibling;
 			var href = /window\.location='(.*)';/.exec(anItem.getAttribute("onclick"))[1];
 			System.xmlhttp(href, Helper.parseRankData, targetNode);
 		}
@@ -12580,7 +12569,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		//add VL if not equal to current level
 		var levelElement = System.findNode("//tbody/tr/td[b[contains(.,'Level:')]]", doc);
 		var levelValue = parseInt(levelElement.nextSibling.textContent.replace(/,/,""),10);
-		var virtualLevelElement = System.findNode("//tbody/tr/td[a/b[.='VL']]", doc);
+		var virtualLevelElement = System.findNode("//tbody/tr/td[b/a[.='VL']]", doc);
 		var virtualLevelValue = virtualLevelElement.nextSibling;
 		if (levelValue != parseInt(virtualLevelValue.textContent,10)) {
 			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>';
@@ -12962,7 +12951,7 @@ GM_log("Current level: " + currentLevel +"Target level: " + targetEmpowerLevel +
 		var playerName = System.findNode("//h1", doc).textContent;
 		var levelElement = System.findNode("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
 		var levelValue = parseInt(levelElement.textContent.replace(/,/g,""),10);
-		var virtualLevelElement = System.findNode("//td[a/b[contains(.,'VL')]]/following-sibling::td[1]", doc);
+		var virtualLevelElement = System.findNode("//td[b/a[contains(.,'VL')]]/following-sibling::td[1]", doc);
 		var virtualLevelValue = parseInt(virtualLevelElement.textContent.replace(/,/g,""),10);
 		//last activity
 		var lastActivityElement = System.findNode("//h2[@class='centered tiny']", doc);
