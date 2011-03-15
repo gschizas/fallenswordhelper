@@ -1302,8 +1302,7 @@ var Helper = {
 			var onmouseover=$(item).data("tipped").replace("Click to Buy","Click to Select");
 			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
-				//fix me
-				//"' onmouseover=\""+onmouseover+"\">"+text+"</td>";
+				"' class='tipped' data-tipped=\""+onmouseover+"\">"+text+"</td>";
 				"'>"+text+"</td>";
 			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
@@ -5929,8 +5928,7 @@ var Helper = {
 			var usedCount=0;
 			for (id in Helper.componentList) {
 				var comp=Helper.componentList[id];
-				//fix me - mouseover
-				output+="<tr><td align=center><img src="+comp.src+" onmouseover=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
+				output+="<tr><td align=center><img src="+comp.src+" class='tipped' data-tipped=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
 				usedCount+=comp.count;
 			}
 			output+="<tr><td align=center>Total:</td><td>"+usedCount+" / "+totalCount+"</td></tr></table>";
@@ -6034,8 +6032,7 @@ var Helper = {
 			totalText+=(total.k>0)?total.k+' k':'';
 			if (total.unknown>0) totalText+=' ('+total.unknown+' buff(s) with unknown cost)';
 			html+='</table><b>Total: '+totalText+'</b>';
-			// fix me
-			document.getElementById('buffCost').innerHTML='<br/><span onmouseover=\'Tip("'+html+'");\'>Estimated Cost: <b>'+totalText+'</b></span>';
+			document.getElementById('buffCost').innerHTML='<br/><span class="tipped" data-tipped="'+html+'">Estimated Cost: <b>'+totalText+'</b></span>';
 			GM_setValue("buffCostTotalText", totalText);
 		} else {
 			document.getElementById('buffCost').innerHTML='';
@@ -7042,8 +7039,8 @@ var Helper = {
 				var resultNode = resultNodes[i];
 				var mouseOver = $(resultNode.firstChild.firstChild).data("tipped");
 				var resultAmounts = resultNode.parentNode.nextSibling.textContent;
-				//fix me
-				var mouseOverRX = mouseOver.match(/ajaxLoadCustom\((\d+),\s*-1,\s*2,\s*\d+,\s*\'([a-z0-9]+)\',\s*\'\'\)/i);
+				//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
+				var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)\&inv_id=-1\&t=2\&p=(\d+)\&vcode=([a-z0-9]+)/i);
 				var result = {
 					img: resultNode.firstChild.firstChild.src,
 					id: mouseOverRX[1],
@@ -7110,10 +7107,10 @@ var Helper = {
 				if (recipe.items) {
 					for (var j=0; j<recipe.items.length; j++) {
 						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded +
-							//fix me
-							' <img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
-							recipe.items[j].id + ', -1, 2, ' + Layout.playerId() + ', \'' +
-							recipe.items[j].verify + '\', \'\');" ' +
+							//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
+							//fix me - still needs fixing so fetchdata works ... guess is that we have to setAttribute rather than inserting it as HTML.
+							' <img border="0" align="middle" class="tipped" data-tipped="fetchitem.php?item_id=' + 
+							recipe.items[j].id + '&inv_id=-1&t=2&p=' + Layout.playerId() + '&vcode=' + recipe.items[j].verify + '" ' +
 							'src="' + recipe.items[j].img + '"/><br/>';
 					}
 				}
@@ -7122,19 +7119,21 @@ var Helper = {
 				if (recipe.components) {
 					for (j=0; j<recipe.components.length; j++) {
 						result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
-							' <img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
-							recipe.components[j].id + ', -1, 2, ' + Layout.playerId() + ', \'' +
-							recipe.components[j].verify + '\', \'\');" ' +
+							//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
+							//fix me - still needs fixing so fetchdata works ... guess is that we have to setAttribute rather than inserting it as HTML.
+							' <img border="0" align="middle" class="tipped" data-tipped="fetchitem.php?item_id=' + 
+							recipe.components[j].id + '&inv_id=-1&t=2&p=' + Layout.playerId() + '&vcode=' + recipe.components[j].verify + '" ' +
 							'src="' + recipe.components[j].img + '"/><br/>';
 					}
 				}
 				result += '</td>';
 				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.target) {
-					result += '<img border="0" align="middle" onmouseover="ajaxLoadCustom(' +
-						recipe.target.id + ', -1, 2, ' + Layout.playerId() + ', \'' +
-						recipe.target.verify + '\', \'\');" ' +
-						'src="' + recipe.target.img + '"/>';
+					result += //fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
+					//fix me - still needs fixing so fetchdata works ... guess is that we have to setAttribute rather than inserting it as HTML.
+							' <img border="0" align="middle" class="tipped" data-tipped="fetchitem.php?item_id=' + 
+							recipe.target.id + '&inv_id=-1&t=2&p=' + Layout.playerId() + '&vcode=' + recipe.target.verify + '" ' +
+							'src="' + recipe.target.img + '"/><br/>';
 				}
 				result += '</td>';
 				result += '</tr>';
@@ -7863,13 +7862,13 @@ var Helper = {
 			for (var j=0;j<buffs.length;j++) {
 				buffName = buffs[j].name;
 				if (myBuffName == buffName) {
-					//fix me
-					var onmouseoverText='Tip(\'' +
-						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + buffName + '</span><br /><br />Stamina: ' +
+					//fix me - test again once mouseovers are tested in quick buff screen.
+					var onmouseoverText = '<span style="font-weight:bold; color:#FFF380;">' + buffName + '</span><br /><br />Stamina: ' +
 						buffs[j].stamina + '<br>Duration: ' +
 						buffs[j].duration + '<br>Effect: ' +
-						buffs[j].buff + '\');';
-					myBuff.setAttribute("onmouseover", onmouseoverText);
+						buffs[j].buff;
+					myBuff.setAttribute("class", "tipped");
+					myBuff.setAttribute("data-tipped", onmouseoverText);
 					buffFound = true;
 					break;
 				}
@@ -9513,8 +9512,7 @@ var Helper = {
 
 	helpLink: function(title, text) {
 		return ' [ ' +
-			//fix me
-			'<span style="text-decoration:underline;cursor:pointer;" onmouseover="Tip(\'' +
+			'<span style="text-decoration:underline;cursor:pointer;" class="tipped" data-tipped="' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
 			' ]';
