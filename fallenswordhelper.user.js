@@ -5205,13 +5205,11 @@ var Helper = {
 			}
 		}
 
-		allItems = System.findNodes("//input[@type='checkbox']");
+		allItems = System.findNodes("//input[@type='checkbox']/../.."); // the tr contains all info
 		if (allItems) {
 			for (i=0; i<allItems.length; i++) {
-				anItem = allItems[i];
-				theLocation=anItem.parentNode.nextSibling.nextSibling;
-				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-				System.xmlhttp(Helper.linkFromMouseover($(theImage).data("tipped")), Helper.injectDropItemsPaint, theImage);
+				theImage=$(".tipped", allItems[i]);
+				System.xmlhttp(theImage.data("tipped"), Helper.injectDropItemsPaint, theImage.get(0));
 			}
 		}
 
@@ -5387,7 +5385,7 @@ var Helper = {
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
 		}
 		if (GM_getValue("disableItemColoring")) {return;}
-		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
+		var fontLineRE=/<center>\s*<font color='(#[0-9A-F]{6})' size=2>/i;
 		var fontLineRX=fontLineRE.exec(responseText);
 		var color=fontLineRX[1];
 		if (color=="#FFFFFF") {
@@ -6544,7 +6542,7 @@ var Helper = {
 		var output=document.getElementById('Helper:InventoryManagerOutput');
 		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
 		for (var i=0; i<currentlyWorn.length; i++) {
-			var item={"url": Helper.linkFromMouseover($(currentlyWorn[i]).data("tipped")),
+			var item={"url": $(currentlyWorn[i]).data("tipped"),
 				"where":"worn", "index":(i+1)};
 			if (i===0) output.innerHTML+="<br/>Found worn item ";
 			output.innerHTML+=(i+1) + " ";
@@ -6588,7 +6586,7 @@ var Helper = {
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 
 			for (var i=0; i<backpackItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover($(backpackItems[i]).data("tipped"));
+				var theUrl=$(backpackItems[i]).data("tipped");
 				var item={"url": theUrl,
 					"where":"backpack", "index":(i+1), "page":currentPage};
 				if (i===0) output.innerHTML+="<br/>Found wearable item ";
@@ -6735,13 +6733,14 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
+			item.type = 'error';//responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
 
 			var craft="";
-			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-				var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
-				var fontLineRX=fontLineRE.exec(responseText);
-				craft = fontLineRX[3];
+			var craftNames = "Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect";
+			if (responseText.search(new RegExp(craftNames)) != -1){
+				var fontLineRE= new RegExp("color='(#[0-9A-F]{6})'>("+craftNames+")<\/font>");
+				var fontLineRX=fontLineRE.exec(responseText);GM_log(responseText + " " + fontLineRE)
+				craft = fontLineRX[2];
 			}
 			item.craftlevel=craft;
 		}
