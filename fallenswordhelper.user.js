@@ -7391,14 +7391,15 @@ var Helper = {
 	},
 
 	joinAllGroupsUnderSize: function(evt) {
-		var joinButtons = System.findNodes("//img[@title='5 Stamina to join Group']");
+		var joinButtons = System.findNodes("//img[contains(@src,'skin/icon_action_join.gif')]");
 		for (var i=0; i<joinButtons.length; i++) {
 			var joinButton = joinButtons[i];
-			var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
-			var memberListArrayWithMercs = memberList.innerHTML.split(",");
-			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
-			if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin")) {
-				var groupID = /confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
+			 var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
+			 var memberListArrayWithMercs = memberList.innerHTML.split(",");
+			 var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
+			 if (0 < GM_getValue("maxGroupSizeToJoin")) //memberListArrayWithoutMercs.length
+				{
+			var groupID = /javascript:confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
 				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
 				GM_xmlhttpRequest({
 					method: 'GET',
@@ -7410,7 +7411,7 @@ var Helper = {
 					onload: function(responseDetails) {
 						joinButton.style.display = "none";
 						joinButton.style.visibility = "hidden";
-					}
+										}
 				});
 			}
 		}
@@ -11602,7 +11603,7 @@ var Helper = {
 	},
 
 	injectJoinAllLink: function() {
-		var attackGroupLink = System.findNode("//tr[td/a/img[@title='A new guild attack group has been formed.']]");
+		var attackGroupLink = System.findNode("//tr[td/a/img[@alt='A new guild attack group has been formed.']]");
 		if (attackGroupLink) {
 			var groupJoinHTML = '';
 			if (!GM_getValue("enableMaxGroupSizeToJoin")) {
