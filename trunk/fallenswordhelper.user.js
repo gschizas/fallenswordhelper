@@ -7040,7 +7040,7 @@ var Helper = {
 				var result = {
 					img: resultNode.firstChild.firstChild.src,
 					id: mouseOverRX[1],
-					verify: mouseOverRX[2],
+					verify: mouseOverRX[3],
 					amountPresent: parseInt(resultAmounts.split("/")[0],10),
 					amountNeeded: parseInt(resultAmounts.split("/")[1],10)
 				};
@@ -11499,7 +11499,7 @@ var Helper = {
 				guildLogNode.setAttribute("href", "index.php?cmd=notepad&subcmd=newguildlog");
 			}
 			//hide the lhs box
-			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.firstChild.getAttribute("title") == "You have unread guild log messages.") {
+			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.firstChild.getAttribute("alt") == "You have unread guild log messages.") {
 				messageBox = guildLogNode.parentNode.parentNode;
 				if (messageBox) {
 					messageBox.style.display = "none";
