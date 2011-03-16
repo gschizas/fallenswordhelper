@@ -751,9 +751,6 @@ var Helper = {
 				break;
 			}
 			break;
-		case "message":
-			Helper.injectMessageTemplate();
-			break;
 		case "tempinv":
 			Helper.injectMailbox();
 			break;
@@ -2099,21 +2096,20 @@ var Helper = {
 				if (items[i].parentNode.tagName!='A') {
 					items[i].addEventListener('click', Helper.searchTHforItem, true);
 					items[i].style.cursor='pointer';
+					items[i].setAttribute("data-tipped-options",
+						items[i].getAttribute("data-tipped-options")+
+						", afterUpdate: function(content, element){element.setAttribute('data-tipped-html', content.innerHTML);}");
 				}
 			}
 	},
 
 	searchTHforItem: function(evt) {
-		//needs fixing still ...
-		//fix me
-		var mo=evt.target.getAttribute("onmouseover");
-		System.xmlhttp(Helper.linkFromMouseover(mo), function(responseText) {
-				var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-				if (responseText.indexOf('Bound (Non-Tradable)') > 0)
-					if (!confirm(name + " is Bound (Non-Tradable), cannot be found in TH!\n"+
-						"Do you still want to try?")) return;
-				window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
-			});
+		var responseText = evt.target.getAttribute('data-tipped-html');
+		var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
+		if (responseText.indexOf('Bound (Non-Tradable)') > 0)
+			if (!confirm(name + " is Bound (Non-Tradable), cannot be found in TH!\n"+
+				"Do you still want to try?")) return;
+		window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
 	},
 
 	injectViewRecipe: function() {
@@ -2478,8 +2474,8 @@ var Helper = {
 		replacementText += "<tr><td colspan='2' height='10'></td></tr>";
 		if (GM_getValue("showHuntingBuffs")) {
 			var enabledHuntingMode=GM_getValue("enabledHuntingMode");
-			var buffs=GM_getValue("huntingBuffs"); 
-			var buffsName=GM_getValue("huntingBuffsName"); 
+			var buffs=GM_getValue("huntingBuffs");
+			var buffsName=GM_getValue("huntingBuffsName");
 			if (enabledHuntingMode == 2) {buffs=GM_getValue("huntingBuffs2"); buffsName=GM_getValue("huntingBuffs2Name");}
 			if (enabledHuntingMode == 3) {buffs=GM_getValue("huntingBuffs3"); buffsName=GM_getValue("huntingBuffs3Name");}
 			var buffAry=buffs.split(",");
@@ -3740,10 +3736,10 @@ var Helper = {
 			target=target.parentNode;
 		} while (!value && target);
 		if (value) {
-			if (!width) width="250";
-			//fix me
-			unsafeWindow.tt_setWidth(parseInt(width,10));
-			unsafeWindow.Tip(value);
+			target.setAttribute("data-tipped", value);
+			target.setAttribute("data-tipped-options", "maxWidth:800");
+			target.className += " tipped";
+			$T.show($(target));
 		}
 	},
 
@@ -7107,9 +7103,7 @@ var Helper = {
 				if (recipe.items) {
 					for (var j=0; j<recipe.items.length; j++) {
 						result += recipe.items[j].amountPresent  + "/" + recipe.items[j].amountNeeded +
-							//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
-							//fix me - still needs fixing so fetchdata works ... guess is that we have to setAttribute rather than inserting it as HTML.
-							' <img border="0" align="middle" class="tipped" data-tipped="fetchitem.php?item_id=' + 
+							' <img border="0" align="middle" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' +
 							recipe.items[j].id + '&inv_id=-1&t=2&p=' + Layout.playerId() + '&vcode=' + recipe.items[j].verify + '" ' +
 							'src="' + recipe.items[j].img + '"/><br/>';
 					}
@@ -7119,9 +7113,7 @@ var Helper = {
 				if (recipe.components) {
 					for (j=0; j<recipe.components.length; j++) {
 						result += recipe.components[j].amountPresent + "/" + recipe.components[j].amountNeeded +
-							//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
-							//fix me - still needs fixing so fetchdata works ... guess is that we have to setAttribute rather than inserting it as HTML.
-							' <img border="0" align="middle" class="tipped" data-tipped="fetchitem.php?item_id=' + 
+							' <img border="0" align="middle" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' +
 							recipe.components[j].id + '&inv_id=-1&t=2&p=' + Layout.playerId() + '&vcode=' + recipe.components[j].verify + '" ' +
 							'src="' + recipe.components[j].img + '"/><br/>';
 					}
@@ -7129,9 +7121,7 @@ var Helper = {
 				result += '</td>';
 				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.target) {
-					result += //fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
-					//fix me - still needs fixing so fetchdata works ... guess is that we have to setAttribute rather than inserting it as HTML.
-							' <img border="0" align="middle" class="tipped" data-tipped="fetchitem.php?item_id=' + 
+					result +=' <img border="0" align="middle" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' +
 							recipe.target.id + '&inv_id=-1&t=2&p=' + Layout.playerId() + '&vcode=' + recipe.target.verify + '" ' +
 							'src="' + recipe.target.img + '"/><br/>';
 				}
@@ -9114,12 +9104,11 @@ var Helper = {
 			for (var j=0; j<relics.length; j++){
 				var relic = relics[j];
 				if (relicName == relic.Name.trim()){
-					//fix me
-					var onmouseoverText='Tip(\'' +
-						'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + relic.Name + '</span><br /><br />' +
+					var onmouseoverText='<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + relic.Name + '</span><br /><br />' +
 						relic.Realm + '<br><br>' +
-						relic.Comment + '\');';
-					relicImage.setAttribute("onmouseover", onmouseoverText);
+						relic.Comment + '</span>';
+					$(relicImage).attr("data-tipped", onmouseoverText);
+					$(relicImage).addClass("tipped");
 					relicFound = true;
 					break;
 				}
@@ -9791,10 +9780,9 @@ var Helper = {
 		var last=document.getElementById("miniMapTable").insertRow(-1).insertCell(0);
 		last.colSpan=document.getElementById("miniMapTable").rows[0].cells.length;
 		last.innerHTML = "<span style='color:green;font-size:x-small;font-weight:bolder'>"+
-			//fix me
-			"<br/><h1 onmouseover=\"Tip('Click on the player icon and left click drag the path you want to walk. If you walk into a wall or make an error, " +
+			"<br/><h1 class=tipped data-tipped='Click on the player icon and left click drag the path you want to walk. If you walk into a wall or make an error, " +
 				"close and reopen the mini map and start again. Push N (capital n) to activate the auto-walk and watch the mini map as you walk to your " +
-				"new location. The screen will refresh when you get there.');\">Auto-Walk</h1></span>";
+				"new location. The screen will refresh when you get there.'>Auto-Walk</h1></span>";
 		Helper.miniMapTableEvents();
 		miniMap.style.display = "";
 	},
@@ -10116,129 +10104,6 @@ var Helper = {
 		table.splice(auctionTemplateId,1);
 		System.setValueJSON("auctionTemplate", table);
 		window.location = window.location;
-	},
-
-	injectMessageTemplate: function() {
-		if (GM_getValue("navigateToLogAfterMsg")) {
-
-			if (document.referrer.indexOf("?cmd=message") == -1) {
-				GM_setValue("msgReferringPage", document.referrer);
-			}
-			var messageSent = System.findNode("//center[contains(.,'Message sent to target player!')]");
-			if (messageSent) {
-				if (GM_getValue("msgReferringPage")) {
-					window.location = GM_getValue("msgReferringPage");
-					return;
-				} else {
-					window.location = "http://www.fallensword.com/index.php?cmd=log";
-					return;
-				}
-			}
-		}
-		//will only insert if we have a buff list (when button on profile is clicked)
-		Helper.insertBuffsInMsg();
-		var injectHere = System.findNode("//div[@class='innerContentPage']");
-		var table = System.getValueJSON("quickMsg");
-
-		var targetPlayer = System.findNode("//input[@name='target_player']").value;
-
-		if (location.search.indexOf("&replyTo") != -1) {
-			var newDev = document.createElement("div")
-			injectHere.appendChild(newDev);
-			var msg = location.search.match(/=%27(.*)%27/)[1].replace(/_/g, " ");
-			//fix me
-			newDev.innerHTML = '<b>Replying To</b> [<a tabindex="-1" href="#" onmouseover="Tip(\'The message that was sent to you that you are replying to\');">?</a>]: ' + msg;
-		}
-
-		var textResult = "<br><table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
-				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
-				"<tr><td bgcolor='#cd9e4b'><center>Quick Message</center></td></tr>" +
-				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>";
-
-		for (var i = 0; i < table.length; i++) {
-			//fix me
-			textResult += "<tr><td>Msg " + (i+1) + " [<a onmouseover=\"Tip('Click on the message to append the template');\" href='#'>" +
-				"<font color='white'>?</font></a>]:&nbsp;&nbsp;&nbsp;&nbsp;</td><td><span id='Helper.quickMsg" + i + "' quickMsgId=" + i + ">" +
-				table[i].replace(/{playername}/g, targetPlayer) + "</span></td></tr>";
-		}
-		textResult += "<tr><td valign=top colspan=2>Edit Templates: </td></tr>" +
-			"<tr><td align=center colspan=2 id=quickMsgTemplAreaId>&nbsp;</td></tr>" +
-			"</table></td></tr></table>";
-
-		var newNode = document.createElement("span");
-		newNode.id = "spanQuickMsg";
-		newNode.align = "center";
-		newNode.innerHTML = textResult;
-		injectHere.appendChild(newNode);
-
-		for (i = 0; i < table.length; i++) {
-			document.getElementById("Helper.quickMsg" + i).addEventListener("click", Helper.useQuickMsg, true);
-		}
-		if (GM_getValue("enterForSendMessage")) {
-			System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").addEventListener('keypress', function(evt) {
-				var r = evt.charCode;
-				var s = evt.keyCode;
-				if (r === 0 & s == 13 & !evt.shiftKey) {
-					var button = System.findNode("//input[@value='Send Message']");
-					if (button) {
-						evt.preventDefault();
-						evt.stopPropagation();
-						button.click();
-					}
-				}
-			}, true);
-		}
-
-		Helper.param={};
-		Helper.param={'id':'quickMsgTemplAreaId',
-			'headers':["Quick Message"],
-			'fields':[],
-			'tags':["textbox"],
-			'currentItems':System.getValueJSON("quickMsg"),
-			'gmname':"quickMsg"};
-		Helper.generateManageTable();
-	},
-
-	saveQuickMsg: function() {
-		var quickMsg = document.getElementById("Helper.quickMsgFullText").value;
-		try {
-			JSON.parse(quickMsg);
-		} catch (err) {
-			alert("Not a valid template");
-			return;
-		}
-		GM_setValue("quickMsg", quickMsg);
-		var injectHere = System.findNode("//input[@value='Send Message']/../../../../../../../../..");
-		injectHere.removeChild(document.getElementById("spanQuickMsg"));
-		Helper.injectMessageTemplate();
-	},
-
-	useQuickMsg: function(evt) {
-		var targetPlayer = System.findNode("//input[@name='target_player']").value;
-		var quickMsgId = evt.target.getAttribute("quickMsgId");
-		System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value +=
-			System.getValueJSON("quickMsg")[quickMsgId].replace(/{playername}/g, targetPlayer) + "\n";
-	},
-
-	insertBuffsInMsg: function() {
-		var buffsToBuy = GM_getValue("buffsToBuy");
-		if (buffsToBuy && buffsToBuy.trim().length > 0) {
-			var targetPlayer = System.findNode("//input[@name='target_player']").value;
-			var greetingText = GM_getValue("buyBuffsGreeting").trim();
-			var hasBuffTag = greetingText.indexOf("{buffs}") != -1;
-			var hasCostTag = greetingText.indexOf("{cost}") != -1;
-			greetingText = greetingText.replace(/{playername}/g, targetPlayer);
-			if (!hasBuffTag) {
-				System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value =  greetingText + " " + GM_getValue("buffsToBuy");
-			} else {
-				if (!hasCostTag) {
-					System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`");
-				} else {
-					System.findNode("//td/textarea[@name='msg' and @class='customtextarea']").value =  greetingText.replace(/{buffs}/g, "`~" + GM_getValue("buffsToBuy") + "~`").replace(/{cost}/g, GM_getValue("buffCostTotalText"));
-				}
-			}
-			GM_setValue("buffsToBuy", "");
-		}
 	},
 
 	injectMailbox: function() {
@@ -10802,16 +10667,14 @@ var Helper = {
 		}
 		else {
 			for (var i = 0; i < wantedList.bounty.length; i++) {
-				var mouseOverText = "\"tt_setWidth(205);";
-				//fix me
-				mouseOverText += "Tip('<div style=\\'text-align:center;width:205px;\\'>Target Level:  " + wantedList.bounty[i].lvl +
+				var mouseOverText = "\"<div style=\\'text-align:center;width:205px;\\'>Target Level:  " + wantedList.bounty[i].lvl +
 					"<br/>Offerer: "+ wantedList.bounty[i].offerer +
 					"<br/>Reward: " + wantedList.bounty[i].reward + " " +wantedList.bounty[i].rewardType +
 					"<br/>Req. Kills: " + wantedList.bounty[i].rKills +
 					"<br/>XP Loss Remaining: " + wantedList.bounty[i].xpLoss +
 					"<br/>Posted: " + wantedList.bounty[i].posted +
 					"<br/>Tickets Req.:  " + wantedList.bounty[i].tickets;
-				mouseOverText += "</div>');\"";
+				mouseOverText += "</div>\" ";
 
 				output += "<li style='padding-bottom:0px;margin-left:5px;'>";
 				output += "<a style= 'font-size:10px;";
@@ -10821,7 +10684,7 @@ var Helper = {
 					output += "color:red;' href='" + System.server + "index.php?cmd=attackplayer&target_username=" + wantedList.bounty[i].target + "'>[a]</a>&nbsp;";
 				output += "<a style='color:#A0CFEC;font-size:10px;'";
 				output += "href='" + System.server + "index.php?cmd=message&target_player=" + wantedList.bounty[i].target + "'>[m]";
-				output += "</a> &nbsp;<a onmouseover=" + mouseOverText;
+				output += "</a> &nbsp;<a class=tipped data-tipped=" + mouseOverText;
 				output += "style='color:";
 				output += "#FFF380";
 				output += ";font-size:10px;'";
@@ -13157,6 +13020,7 @@ function GM_wait(jqFunction) {
 		window.setTimeout(GM_wait, 100);
 	} else {
 		$ = unsafeWindow.jQuery;
+		$T = unsafeWindow.Tipped;
 		if (jqFunction) jqFunction.call();
 	}
 }
