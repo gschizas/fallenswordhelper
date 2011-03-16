@@ -1257,8 +1257,8 @@ var Helper = {
 
 		var d = new Date(nextHuntMilliseconds);
 		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-		var newPart = "<tr><td><font color=\\'#FFF380\\'>Max Stam At: </td><td width=\\'90%\\'>" +
-			nextHuntTimeText + "</td></tr><tr>";
+		var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
+			nextHuntTimeText + "</nobr></font></td></tr><tr>";
 		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
 		staminaImageElement.setAttribute("data-tipped", newMouseoverText);
@@ -1279,8 +1279,8 @@ var Helper = {
 		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 
 		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-		var mouseoverTextAddition = "<tr><td><font color=\\'#FFF380\\'>Next Level At: </td><td width=\\'90%\\'>" +
-			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</td></tr><tr>";
+		var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
+			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
 		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
 		levelupImageElement.setAttribute("data-tipped", newMouseoverText);
 		return;
@@ -1496,7 +1496,7 @@ var Helper = {
 			}
 		}
 
-		var listOfDefenders = System.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
+		var listOfDefenders = System.findNodes("//a/b[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
 		var testList = "";
 		for (i=0; i<listOfDefenders.length; i++) {
@@ -3149,7 +3149,7 @@ var Helper = {
 			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=buy_result colspan=12></td></tr>';
 		for (var key in Helper.itemList) {
 			var itemID=Helper.itemList[key].id;
-			var	itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(Helper.itemList[key].html); //add this line
+			var	itemStats = /fetchitem.php\?item_id=(\d+)\&amp;inv_id=(\d+)\&amp;t=(\d+)\&amp;p=(\d+)/.exec(Helper.itemList[key].html); //add this line
 			var plantType = itemStats[1];
 			if (Helper.resourceList[plantType]){
 				Helper.resourceList[plantType].invIDs+=","+itemID;
@@ -5466,7 +5466,7 @@ var Helper = {
 			Helper.parseProfileForWorld(doc.innerHTML, true);
 
 			// store the VL of the player
-			var virtualLevel = parseInt(System.findNode("//td[b/a[contains(.,'VL')]]/following-sibling::td[1]").textContent,10);
+			var virtualLevel = parseInt(System.findNode("//td[a/b[.='VL'] or b/a[.='VL']/following-sibling::td[1]").textContent,10);
 			if (Helper.characterLevel == virtualLevel) {
 				GM_setValue('characterVirtualLevel',"");
 			} else {
@@ -11340,7 +11340,7 @@ var Helper = {
 	getProfileStatsAndBuffs: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		//stats
-		var vlTextElement = System.findNode("//td[b/a[contains(.,'VL')]]", doc);
+		var vlTextElement = System.findNode("//td[a/b[.='VL'] or b/a[.='VL']]", doc);
 		var vlValueElement = vlTextElement.nextSibling;
 		var pvpTextElement = System.findNode("//td[b[contains(.,'PvP')]]", doc);
 		var pvpValueElement = pvpTextElement.nextSibling;
@@ -12421,7 +12421,7 @@ var Helper = {
 
 	findPlayerParseProfile: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var pvpElement = System.findNode("//tbody/tr/td[b/a[contains(.,'PvP') and contains(.,'Rating')]]", doc);
+		var pvpElement = System.findNode("//tbody/tr/td[b/a[contains(.,'Rating')] or a/b[contains(.,'Rating')]]", doc);
 		var pvpValue = pvpElement.nextSibling;
 		var findPlayerPvPElement = document.getElementById("PvP" + callback.href);
 		findPlayerPvPElement.innerHTML = pvpValue.textContent;
@@ -12431,7 +12431,7 @@ var Helper = {
 		//add VL if not equal to current level
 		var levelElement = System.findNode("//tbody/tr/td[b[contains(.,'Level:')]]", doc);
 		var levelValue = parseInt(levelElement.nextSibling.textContent.replace(/,/,""),10);
-		var virtualLevelElement = System.findNode("//tbody/tr/td[b/a[.='VL']]", doc);
+		var virtualLevelElement = System.findNode("//tbody/tr/td[a/b[.='VL'] or b/a[.='VL']]", doc);
 		var virtualLevelValue = virtualLevelElement.nextSibling;
 		if (levelValue != parseInt(virtualLevelValue.textContent,10)) {
 			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>';
@@ -12813,7 +12813,7 @@ var Helper = {
 		var playerName = System.findNode("//h1", doc).textContent;
 		var levelElement = System.findNode("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
 		var levelValue = parseInt(levelElement.textContent.replace(/,/g,""),10);
-		var virtualLevelElement = System.findNode("//td[b/a[contains(.,'VL')]]/following-sibling::td[1]", doc);
+		var virtualLevelElement = System.findNode("//td[a/b[.='VL'] or b/a[.='VL']]/following-sibling::td[1]", doc);
 		var virtualLevelValue = parseInt(virtualLevelElement.textContent.replace(/,/g,""),10);
 		//last activity
 		var lastActivityElement = System.findNode("//h2[@class='centered tiny']", doc);
