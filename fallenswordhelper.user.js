@@ -412,7 +412,6 @@ var Helper = {
 			var subPageIdRE = re.exec(document.location.search);
 			subPageId="-";
 			if (subPageIdRE){subPageId=subPageIdRE[1];}
-
 			re=/subcmd2=([a-z]+)/;
 			var subPage2IdRE = re.exec(document.location.search);
 			subPage2Id="-";
@@ -5509,7 +5508,6 @@ var Helper = {
 			if (!profileItems) return;
 			for (var i=0;i<profileItems.length;i++) {
 				var mouseOver = profileItems[i].getAttribute("data-tipped");
-				//var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)',\s*(\d+)/;
 				var reParams=/(fetchitem\.php\?item_id=([0-9])*\&inv_id=([0-9])*\&t=[0-9]*\&p=[0-9]*\&currentPlayerId=[0-9]*\&extra=[0-9]*)/;
 				var reResult=reParams.exec(mouseOver);
 				if (reParams === null) {
@@ -5518,27 +5516,69 @@ var Helper = {
 				var theURL=reResult[1];
 				var itemId=reResult[2];
 				var invId=reResult[3];
-				//var type=reResult[3];
-				//var pid=reResult[4];
-				//var finalStr = reResult[5];
-				//var currentPlayerId = reResult[6];
-				//ajaxLoadItem(8082, 228497247, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>', 1346893);
-				//fetchitem.php?item_id=8082&inv_id=228497247&t=type&p=1346893&currentPlayerId=1346893
-				//var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid + "&currentPlayerId="+currentPlayerId;
-				//var theURL = mouseOver;
 				var index = itemId+"_"+invId;
 				profileItems[i].setAttribute("id",index);
 				profileItems[i].setAttribute("theURL",theURL);
-				//profileItems[i].setAttribute("finalStr",finalStr);
-				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
+				//profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
+$.subscribe('afterUpdate.Tipped', function(e, data){
+	var $e = $(data.element);
+
+	// already modified || not an item
+	if(!data.skin == 'fsItem' || $e.is('.fsh'))
+		return;
+	//creating a fake DOM object
+	var tmp = document.createElement('div'); 
+	tmp.innerHTML = $(data.content).html();
+
+	var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp);
+
+	var extraText = "";
+	if (bonusTable) {
+		var subTotal = 0;
+		for (var i=2;i<bonusTable.rows.length;i++) {
+			aRow = bonusTable.rows[i];
+			if(aRow.cells.length < 2) {continue; } //single column, so break after stat bonuses kick in
+			bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
+			subTotal += bonusValue;
+		}
+		extraText = "<br>Individual item stats subtotal: " + subTotal;
+	}
+
+
+	var addMe = '<br><center>'+extraText+'</center>';
+
+	// modify the existing tooltip
+	//var newHtml = $($(data.content).html()) // create jQuery context
+	//					.append(addMe) // can modify this to prepend etc <- magic happens here
+	//					.clone(); // required
+
+	// wrap & extract inner html (inefficent?)
+	//var html = $($('<div></div>').html(newHtml)).html();
+	//this works for some reason
+	tmp.innerHTML+=addMe;
+	var html = $(tmp).html();
+
+	// remove old tooltip
+	unsafeWindow.Tipped.remove(data.element);
+
+	// modify the source element & insert the new tooltip
+	$(data.element)
+		.attr({
+				'data-tipped':html,
+				'data-tipped-options':'skin:"fsItem"'
+			  })
+		.addClass('fsh');
+
+	// show/create the new tooltip
+	unsafeWindow.Tipped.show(data.element);
+});
 			}
 		}
 	},
 
-	setProfileItemMouseover: function (evt) {
+	/*setProfileItemMouseover: function (evt) {
 		var index = evt.target.getAttribute('id');
 		var theURL = evt.target.getAttribute('theURL');
-		//var finalStr = evt.target.getAttribute('finalStr');
 		if(Helper.savedItemData[index]==undefined) {
 			System.xmlhttp(theURL,
 			function(responseText) {
@@ -5549,24 +5589,29 @@ var Helper = {
 					var subTotal = 0;
 					for (var i=2;i<bonusTable.rows.length;i++) {
 						aRow = bonusTable.rows[i];
-				//alert("asdf"+bonusTable.rows.length+"-"+i);
+						if(aRow.cells.length < 2) {continue; } //single column, so break after stat bonuses kick in
 						bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
 						subTotal += bonusValue;
 					}
-				//alert("asdf"+subTotal);
 					extraText = "<br>Individual item stats subtotal: " + subTotal;
-				//alert("asdf"+extraText);
 				}
 				//fix me
-				unsafeWindow.Tip(responseText+extraText);
-				//evt.target.getAttribute('theURL')
+				//alert(evt.target.parentNode.innerHTML);
+				//unsafeWindow.Tipped.show(responseText+extraText);
+				//Tipped.remove(responseText);
+				//Tipped.show(responseText+extraText);
+
+				//evt.target.setAttribute("data-tipped",responseText+extraText);
+				//evt.target.setAttribute("data-tipped-options","skin: 'fsItem'");
+
+				//evt.target.getAttribute("data-tipped");
 				Helper.savedItemData[index] = responseText+extraText;
 			});
 		} else {
 			//fix me
 			unsafeWindow.Tip(Helper.savedItemData[index]);
 		}
-	},
+	},*/
 
 	injectEmptySlots: function(responseText) {
 		var doc = System.createDocument(responseText);
@@ -6735,6 +6780,7 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
+			//item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
 			if (responseText.search(/Gloves -/) != -1) item.type = "Gloves";
 			else if (responseText.search(/Helmet -/) != -1) item.type = "Helmet";
 			else if (responseText.search(/Amulet -/) != -1) item.type = "Amulet";
@@ -13002,7 +13048,7 @@ var Helper = {
 			}
 			html += "</ul></div>";
 		}
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=2536682>dkwizard</a>";
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
