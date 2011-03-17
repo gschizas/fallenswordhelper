@@ -5510,7 +5510,7 @@ var Helper = {
 				var mouseOver = profileItems[i].getAttribute("data-tipped");
 				var reParams=/(fetchitem\.php\?item_id=([0-9])*\&inv_id=([0-9])*\&t=[0-9]*\&p=[0-9]*\&currentPlayerId=[0-9]*\&extra=[0-9]*)/;
 				var reResult=reParams.exec(mouseOver);
-				if (reParams === null) {
+				if (reResult === null) {
 					return null;
 				}
 				var theURL=reResult[1];
@@ -5530,7 +5530,7 @@ $.subscribe('afterUpdate.Tipped', function(e, data){
 	var tmp = document.createElement('div'); 
 	tmp.innerHTML = $(data.content).html();
 
-	var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp);
+	var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp); //var bonusTable = $(someelement).find(':contains( Bonuses )'); //jquery equilivant
 
 	var extraText = "";
 	if (bonusTable) {
