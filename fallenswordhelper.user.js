@@ -12995,7 +12995,7 @@ var Helper = {
 			}
 			html += "</ul></div>";
 		}
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=2536682>dkwizard</a>";
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=2536682>dkwizard</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
