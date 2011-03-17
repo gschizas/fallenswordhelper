@@ -826,7 +826,7 @@ var Helper = {
 			break;
 		}
 		if (GM_getValue("playNewMessageSound")) {
-			var unreadLog = System.findNode("//img[@title='You have unread log messages.']");
+			var unreadLog = System.findNode("//img[@alt='You have unread log messages.']");
 
 			if (unreadLog)
 			{
@@ -5505,28 +5505,31 @@ var Helper = {
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
 			//fix me - need to get data from mouseover
-			profileItems = System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem')]");
+			profileItems = System.findNodes("//img[contains(@data-tipped,'fetchitem')]");
 			if (!profileItems) return;
 			for (var i=0;i<profileItems.length;i++) {
-				var mouseOver = profileItems[i].getAttribute("onmouseover");
-				var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)',\s*(\d+)/;
+				var mouseOver = profileItems[i].getAttribute("data-tipped");
+				//var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+),\s*'(.*)',\s*(\d+)/;
+				var reParams=/(fetchitem\.php\?item_id=([0-9])*\&inv_id=([0-9])*\&t=[0-9]*\&p=[0-9]*\&currentPlayerId=[0-9]*\&extra=[0-9]*)/;
 				var reResult=reParams.exec(mouseOver);
-				if (reResult === null) {
+				if (reParams === null) {
 					return null;
 				}
-				var itemId=reResult[1];
-				var invId=reResult[2];
-				var type=reResult[3];
-				var pid=reResult[4];
-				var finalStr = reResult[5];
-				var currentPlayerId = reResult[6];
+				var theURL=reResult[1];
+				var itemId=reResult[2];
+				var invId=reResult[3];
+				//var type=reResult[3];
+				//var pid=reResult[4];
+				//var finalStr = reResult[5];
+				//var currentPlayerId = reResult[6];
 				//ajaxLoadItem(8082, 228497247, 1, 1346893, '<br><center><b>[Click to Equip]</b></center>', 1346893);
 				//fetchitem.php?item_id=8082&inv_id=228497247&t=type&p=1346893&currentPlayerId=1346893
-				var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid + "&currentPlayerId="+currentPlayerId;
-				index = itemId+"_"+invId;
+				//var theURL = "fetchitem.php?item_id=" + itemId + "&inv_id=" + invId + "&t="+type + "&p="+pid + "&currentPlayerId="+currentPlayerId;
+				//var theURL = mouseOver;
+				var index = itemId+"_"+invId;
 				profileItems[i].setAttribute("id",index);
 				profileItems[i].setAttribute("theURL",theURL);
-				profileItems[i].setAttribute("finalStr",finalStr);
+				//profileItems[i].setAttribute("finalStr",finalStr);
 				profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
 			}
 		}
@@ -5535,7 +5538,7 @@ var Helper = {
 	setProfileItemMouseover: function (evt) {
 		var index = evt.target.getAttribute('id');
 		var theURL = evt.target.getAttribute('theURL');
-		var finalStr = evt.target.getAttribute('finalStr');
+		//var finalStr = evt.target.getAttribute('finalStr');
 		if(Helper.savedItemData[index]==undefined) {
 			System.xmlhttp(theURL,
 			function(responseText) {
@@ -5546,14 +5549,18 @@ var Helper = {
 					var subTotal = 0;
 					for (var i=2;i<bonusTable.rows.length;i++) {
 						aRow = bonusTable.rows[i];
+				//alert("asdf"+bonusTable.rows.length+"-"+i);
 						bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
 						subTotal += bonusValue;
 					}
+				//alert("asdf"+subTotal);
 					extraText = "<br>Individual item stats subtotal: " + subTotal;
+				//alert("asdf"+extraText);
 				}
 				//fix me
-				unsafeWindow.Tip(responseText+extraText+finalStr);
-				Helper.savedItemData[index] = responseText+extraText+finalStr;
+				unsafeWindow.Tip(responseText+extraText);
+				//evt.target.getAttribute('theURL')
+				Helper.savedItemData[index] = responseText+extraText;
 			});
 		} else {
 			//fix me
@@ -12995,7 +13002,7 @@ var Helper = {
 			}
 			html += "</ul></div>";
 		}
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=2536682>dkwizard</a> - <span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a>";
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=dkwizard style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=2536682>dkwizard</a>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
