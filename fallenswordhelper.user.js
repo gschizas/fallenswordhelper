@@ -9975,9 +9975,9 @@ var Helper = {
 			//GM_log();
 			var newCell = bidEntryTable.rows[0].insertCell(2);
 			newCell.rowSpan = 5;
-			//fix me?
 			newCell.innerHTML = '<img src="' + System.imageServerHTTP + '/items/' + itemId +
-				'.gif" onmouseover="ajaxLoadItem(' + itemId + ', ' + invId + ', ' + type + ', ' + pid + ', \'\');" border=0>';
+				//fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)
+				'.gif" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t=' + type + '&p=' + pid + '" border=0>';
 		}
 
 		var newRow = auctionTable.insertRow(10);
@@ -10612,13 +10612,12 @@ var Helper = {
 		}
 		else {
 			for (var i = 0; i < bountyList.bounty.length; i++) {
-				var mouseOverText = "\"tt_setWidth(205);";
-				//fix me
-				mouseOverText += "Tip('<div style=\\'text-align:center;width:205px;\\'>Level:  " + bountyList.bounty[i].lvl +
+				var mouseOverText = "";
+				mouseOverText += "<div style=\\'text-align:center;width:205px;\\'>Level:  " + bountyList.bounty[i].lvl +
 				"<br/>Reward: " + bountyList.bounty[i].reward + " " +bountyList.bounty[i].rewardType +
 				"<br/>XP Loss Remaining: " + bountyList.bounty[i].xpLoss +
 				"<br/>Progress:  " + bountyList.bounty[i].progress;
-				mouseOverText += "</div>');\"";
+				mouseOverText += "</div>";
 
 //				output += " href='" + bountyList.bounty[i].link + "'>" + bountyList.bounty[i].target +"</a></li>";
 				output += "<li style='padding-bottom:0px;'>";
@@ -10627,7 +10626,7 @@ var Helper = {
 
 				output += "<a style='color:#A0CFEC;font-size:10px;'";
 				output += "href='" + System.server + "index.php?cmd=message&target_player=" + bountyList.bounty[i].target + "'>[m]";
-				output += "</a> &nbsp;<a onmouseover=" + mouseOverText;
+				output += "</a> &nbsp;<a class=tipped data-tipped=" + mouseOverText;
 				output += "style='color:";
 				output += "#FFF380";
 				output += ";font-size:10px;'";
@@ -10891,11 +10890,10 @@ var Helper = {
 						'<a style="color:' + contactColor + '; font-size:x-small;" href="index.php?cmd=profile&player_id=' + contact.id + '">' + contact.name + '</a>'+
 					'</td>'+
 					'<td align="right"><span style="color:#FFFF00; font-size:x-small;">'+
-//fix me
-						'<a href="index.php?cmd=message&target_player=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Send Message\')"><font color="#FFFF00">M</font></a>'+
-						'&nbsp;<a href="javascript:openWindow(\'index.php?cmd=quickbuff&t=' + contact.name + '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" onmouseover="tt_setWidth(100); Tip(\'Quick Buff\')"><font color="#FFFF00">B</font></a>'+
-						'&nbsp;<a href="index.php?cmd=trade&subcmd=createsecure&target_username=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Secure Trade\')"><font color="#FFFF00">S</font></a>'+
-						'&nbsp;<a href="index.php?cmd=trade&target_player=' + contact.name + '" onmouseover="tt_setWidth(100); Tip(\'Send to Player\')"><font color="#FFFF00">T</font></a>'+
+						'<a href="index.php?cmd=message&target_player=' + contact.name + '" class="tipped" data-tipped="Send Message"><font color="#FFFF00">M</font></a>'+
+						'&nbsp;<a href="javascript:openWindow(\'index.php?cmd=quickbuff&t=' + contact.name + '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" class="tipped" data-tipped="Quick Buff"><font color="#FFFF00">B</font></a>'+
+						'&nbsp;<a href="index.php?cmd=trade&subcmd=createsecure&target_username=' + contact.name + '" class="tipped" data-tipped="Secure Trade"><font color="#FFFF00">S</font></a>'+
+						'&nbsp;<a href="index.php?cmd=trade&target_player=' + contact.name + '" class="tipped" data-tipped="Send to Player"><font color="#FFFF00">T</font></a>'+
 					'</span></td>'+
 				'</tr>';
 		}
@@ -11012,9 +11010,8 @@ var Helper = {
 			//var newRow = bulkSellTable.insertRow(-1);
 			var newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
-			//fix me?
 			newCell.innerHTML = '<img src="'+System.imageServerHTTP+'/items/'+itemId+'.gif" border=0 ' +
-				'onmouseover="ajaxLoadItem('+itemId+', '+invId+', '+type+', '+pid+', \'\');">';
+				'class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t=' + type + '&p=' + pid + '">';
 			newCell = newRow.insertCell(-1);
 			newCell.style.vAlign = "middle";
 			newCell.innerHTML = '<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>';
@@ -11262,11 +11259,11 @@ var Helper = {
 				if (window.location.search.search("subcmd=createsecure") != -1 ||
 					window.location.search.search("inv_id") != -1 ||
 					window.location.search.search("cmd=trade") != -1) {
-					//fix me
-					var searchTerm = "//img[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
+					//var searchTerm = "//img[contains(@data-tipped,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
+					var searchTerm = "//img[contains(@data-tipped,'item_id=" + itemId + "&inv_id=" + invId + "')]/ancestor::td[1]";
 				} else {
-					//fix me
-					var searchTerm = "//a[contains(@onmouseover,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
+					//var searchTerm = "//a[contains(@data-tipped,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
+					var searchTerm = "//a[contains(@data-tipped,'item_id=" + itemId + "&inv_id=" + invId + "')]/ancestor::td[1]";
 				}
 				var possibleTradeItems = System.findNodes(searchTerm);
 				for (var j in possibleTradeItems) {
@@ -12039,10 +12036,10 @@ var Helper = {
 	getWearingItems: function(responseText) {
 		var doc=System.createDocument(responseText);
 		//fix me
-		var items=System.findNodes("//img[contains(@onmouseover,'ajaxLoadItem') and contains(@src,'/items/')]",doc);
+		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]",doc);
 		for (var i=0; i<items.length; i++) {
 			if (!(items[i].parentNode.getAttribute("href")) || items[i].parentNode.getAttribute("href").indexOf("subcmd=unequipitem&")>0) {
-				var item=items[i], type, onmo=item.getAttribute("onmouseover");
+				var item=items[i], type, onmo=item.getAttribute("data-tipped");
 				if (item.parentNode.getAttribute("href")) item=item.parentNode;
 				if (item.parentNode.width != 60) item=item.parentNode.parentNode.parentNode.parentNode;
 				type = item.parentNode.cellIndex + item.parentNode.parentNode.rowIndex*3;
@@ -12083,7 +12080,7 @@ var Helper = {
 							for (var i=0; i<5; i++) {
 								Helper.wearingItems[type].suggest+=
 //fix me
-									"<span onmouseover=\"Tip('"+nodes[i].parentNode.parentNode.textContent+"');\">"+
+									"<span class='tipped' data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
@@ -12866,15 +12863,15 @@ var Helper = {
 			//name cell
 			var newCell = newRow.insertCell(0);
 			newCell.style.verticalAlign = 'top';
-			var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+			var lastActivityIMG = '<img width="10" height="10" title="Recently Online" src="' + Data.yellowDiamond() + '">';
 			if (lastActivityMinutes < 2) {
-				lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+				lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
 			}
 			playerHREF = callback.href;
 			var bioTip = bioCell.innerHTML.replace(/'|"|\n/g,"");
 			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
-				//fix me
-				'onmouseover=\'Tip("'+bioTip+'");\'>' + playerName + '</a>' +
+				//fix me - It kind works now, but not guaranteed?
+				'class="tipped" data-tipped="'+bioTip+'">' + playerName + '</a>' +
 				'&nbsp;<span style="color:blue;">[<span class="a-reply" target_player="' + playerName +'" style="cursor:pointer; text-decoration:underline;">m</span>]</span>' + '</nobr><br>' +
 				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
 			$(".a-reply").click(function(evt) {
