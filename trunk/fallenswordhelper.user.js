@@ -6735,7 +6735,6 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			//item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
 			if (responseText.search(/Gloves -/) != -1) item.type = "Gloves";
 			else if (responseText.search(/Helmet -/) != -1) item.type = "Helmet";
 			else if (responseText.search(/Amulet -/) != -1) item.type = "Amulet";
@@ -6751,13 +6750,14 @@ var Helper = {
 			else if (responseText.search(/Quest Item/) != -1) item.type = "Quest Item";
 
 			var craft="";
-			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-				//var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
-				//var fontLineRE=/<\/font><\/nobr><\/div><div>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
-				var fontLineRE=/<div>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
-				var fontLineRX=fontLineRE.exec(responseText);
-				craft = fontLineRX[3];
-			}
+			if (responseText.search(/>Uncrafted</) != -1) craft = "Uncrafted";
+			else if (responseText.search(/>Very Poor</) != -1) craft = "Very Poor";
+			else if (responseText.search(/>Poor</) != -1) craft = "Poor";
+			else if (responseText.search(/>Average</) != -1) craft = "Average";
+			else if (responseText.search(/>Good</) != -1) craft = "Good";
+			else if (responseText.search(/>Very Good</) != -1) craft = "Very Good";
+			else if (responseText.search(/>Excellent</) != -1) craft = "Excellent";
+			else if (responseText.search(/>Perfect</) != -1) craft = "Perfect";
 			item.craftlevel=craft;
 		}
 
