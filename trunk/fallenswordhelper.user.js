@@ -6182,7 +6182,8 @@ var Helper = {
 	},
 
 	linkFromMouseover: function(mouseOver) {
-		var reParams=/(\d+),\s*(\d+),\s*(\d+),\s*(\d+)/;
+		//fetchitem.php?item_id=9206&inv_id=256710069&t=1&p=1346893&currentPlayerId=1346893&extra=5
+		var reParams=/item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/;
 		var reResult=reParams.exec(mouseOver);
 		if (reResult === null) {
 			return null;
@@ -6197,7 +6198,7 @@ var Helper = {
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
-		var reParams =/(\d+),\s*(-?\d+),\s*(\d+),\s*(\d+),\s*\'([a-z0-9]*)\'/i;
+		var reParams =/item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)\&vcode=([a-z0-9]*)/i;
 		var reResult =reParams.exec(mouseOver);
 		if (reResult === null) {
 			return null;
@@ -6727,11 +6728,26 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
+			//item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
+			if (responseText.search(/Gloves -/) != -1) item.type = "Gloves";
+			else if (responseText.search(/Helmet -/) != -1) item.type = "Helmet";
+			else if (responseText.search(/Amulet -/) != -1) item.type = "Amulet";
+			else if (responseText.search(/Weapon -/) != -1) item.type = "Weapon";
+			else if (responseText.search(/Armor -/) != -1) item.type = "Armor";
+			else if (responseText.search(/Shield -/) != -1) item.type = "Shield";
+			else if (responseText.search(/Ring -/) != -1) item.type = "Ring";
+			else if (responseText.search(/Boots -/) != -1) item.type = "Boots";
+			else if (responseText.search(/Rune -/) != -1) item.type = "Rune";
+			else if (responseText.search(/Potions -/) != -1) item.type = "Potions";
+			else if (responseText.search(/Resource -/) != -1) item.type = "Resource";
+			else if (responseText.search(/Recipe -/) != -1) item.type = "Recipe";
+			else if (responseText.search(/Quest Item/) != -1) item.type = "Quest Item";
 
 			var craft="";
 			if (responseText.search(/Uncrafted|Very Poor|Poor|Average|Good|Very Good|Excellent|Perfect/) != -1){
-				var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
+				//var fontLineRE=/<\/b><\/font><br>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
+				//var fontLineRE=/<\/font><\/nobr><\/div><div>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
+				var fontLineRE=/<div>([^<]+)<font color='(#[0-9A-F]{6})'>([^<]+)<\/font>/;
 				var fontLineRX=fontLineRE.exec(responseText);
 				craft = fontLineRX[3];
 			}
@@ -7410,7 +7426,7 @@ var Helper = {
 	fetchGroupData: function(evt) {
 		var calcButton = System.findNode("//input[@id='fetchgroupstats']");
 		calcButton.style.display = "none";
-		var allItems = System.findNodes("//img[@title='View Group Stats']");
+		var allItems = System.findNodes("//a[contains(@href,'index.php?cmd=guild&subcmd=groups&subcmd2=viewstats&group_id=')]/img");
 		for (var i=0; i<allItems.length; i++) {
 			System.xmlhttp(allItems[i].parentNode.getAttribute("href"), Helper.parseGroupData, allItems[i].parentNode);
 		}
