@@ -3616,16 +3616,15 @@ var Helper = {
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
 		var levelUp      = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
 		//fix me to get item info from mouseover
-		var lootRE=/You looted the item '<font color='(\#[0-9A-F]+)'>([^<]+)<\/font>'<\/b><br><br><img src=\"http:\/\/(.*)\/items\/(\d+).gif\"\s+onmouseover="ajaxLoadCustom\([0-9]+,\s-1,\s+([0-9a-f]+),\s+[0-9]+,\s+''\);\">/;
+		//You looted the item '<font color='#009900'>Amulet of Gazrif</font>'</b><br><br><img src="http://fileserver.huntedcow.com/items/4613.gif" class="tipped" data-tipped-options="skin: 'fsItem', ajax: true" data-tipped="fetchitem.php?item_id=4613&t=2&p=1478403&vcode=249a530a4a8790e924af351c49bcccda">
+		var lootRE=/You looted the item \'<font color=\'\#[0-9A-F]+\'>([^<]+)<\/font>\'.+?(fetchitem\.php\?item_id=[0-9]*\&t=[0-9]*\&p=[0-9]*\&vcode=[0-9a-zA-Z]*)/;//(fetchitem\.php\?item_id=[0-9]*\&t=[0-9]*\&p=[0-9]*\&vcode=[0-9a-zA-Z]*)
 		var info         = Layout.infoBox(responseText);
 		var lootMatch=responseText.match(lootRE);
 		var lootedItem = "";
-		var lootedItemId = "";
-		var lootedItemVerify="";
+		var lootedItemURL = "";
 		if (lootMatch && lootMatch.length>0) {
-			lootedItem=lootMatch[2];
-			lootedItemId=lootMatch[3];
-			lootedItemVerify=lootMatch[4];
+			lootedItem=lootMatch[1];
+			lootedItemURL=lootMatch[2];
 		}
 		var shieldImpDeathRE = /Shield Imp absorbed all damage/;
 		var shieldImpDeath = responseText.match(shieldImpDeathRE);
@@ -3643,9 +3642,8 @@ var Helper = {
 			if (lootedItem!=="") {
 				Helper.backpackUpdater(1);
 				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-				resultHtml += "<br/><small><small>Looted item:<span onclickDISABLED=\"ajaxLoadItem(" +
-					lootedItemId + ", -1, 2, " + playerId + ", '');\" >" +
-					lootedItem + "</span></small></small>";
+				resultHtml += "<br/><small>Looted item:<span class=\"tipped\" data-tipped-options=\"skin: 'fsItem', ajax: true\" data-tipped=\""+lootedItemURL+"\">" +
+					lootedItem + "</span></small>";
 				resultText += "Looted item:" + lootedItem + "\n";
 			}
 			if (shieldImpDeath) {
