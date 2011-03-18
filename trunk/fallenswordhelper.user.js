@@ -1495,7 +1495,7 @@ var Helper = {
 			}
 		}
 
-		var listOfDefenders = System.findNodes("//a/b[contains(@href,'index.php?cmd=profile&player_id=')]");
+		var listOfDefenders = System.findNodes("//a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
 		var testList = "";
 		for (i=0; i<listOfDefenders.length; i++) {
@@ -2113,12 +2113,13 @@ var Helper = {
 
 	injectViewRecipe: function() {
 		var components = System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
-		for (var i = 0; i < components.length; i++) {
-			//fix me - need to somehow get details from mouseover to search AH
-			var mo = $(components[i]).getAttribute("onmouseover");
-			System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
-			var componentCountElement = components[i].parentNode.parentNode.parentNode.nextSibling.firstChild;
-			componentCountElement.innerHTML = '<nobr>' + componentCountElement.innerHTML + '</nobr>';
+		if (components) {
+			for (var i = 0; i < components.length; i++) {
+				var mo = components[i].getAttribute("data-tipped");
+				System.xmlhttp(Helper.linkFromMouseoverCustom(mo), Helper.injectViewRecipeLinks, components[i]);
+				var componentCountElement = components[i].parentNode.parentNode.parentNode.nextSibling.firstChild;
+				componentCountElement.innerHTML = '<nobr>' + componentCountElement.innerHTML + '</nobr>';
+			}
 		}
 	},
 
@@ -3614,7 +3615,6 @@ var Helper = {
 		var goldGain     = System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
 		var guildTaxGain = System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
 		var levelUp      = System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
-		//fix me to get item info from mouseover
 		//You looted the item '<font color='#009900'>Amulet of Gazrif</font>'</b><br><br><img src="http://fileserver.huntedcow.com/items/4613.gif" class="tipped" data-tipped-options="skin: 'fsItem', ajax: true" data-tipped="fetchitem.php?item_id=4613&t=2&p=1478403&vcode=249a530a4a8790e924af351c49bcccda">
 		var lootRE=/You looted the item \'<font color=\'\#[0-9A-F]+\'>([^<]+)<\/font>\'.+?(fetchitem\.php\?item_id=[0-9]*\&t=[0-9]*\&p=[0-9]*\&vcode=[0-9a-zA-Z]*)/;//(fetchitem\.php\?item_id=[0-9]*\&t=[0-9]*\&p=[0-9]*\&vcode=[0-9a-zA-Z]*)
 		var info         = Layout.infoBox(responseText);
@@ -5101,7 +5101,6 @@ var Helper = {
 	},
 
 	injectDropItems: function() {
-
 		var subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
 		subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
 
@@ -5463,14 +5462,13 @@ var Helper = {
 			Helper.parseProfileForWorld(doc.innerHTML, true);
 
 			// store the VL of the player
-			var virtualLevel = parseInt(System.findNode("//td[a/b[.='VL'] or b/a[.='VL']/following-sibling::td[1]").textContent,10);
+			var virtualLevel = parseInt(System.findNode("//td[a/b[.='VL'] or b/a[.='VL']]/following-sibling::td[1]").textContent,10);
 			if (Helper.characterLevel == virtualLevel) {
 				GM_setValue('characterVirtualLevel',"");
 			} else {
 				GM_setValue('characterVirtualLevel',virtualLevel);
 			}
 		}
-
 		Helper.addStatTotalToMouseover();
 
 		//enhance colored dots
@@ -5503,7 +5501,6 @@ var Helper = {
 
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
-			//fix me - need to get data from mouseover
 			profileItems = System.findNodes("//img[contains(@data-tipped,'fetchitem')]");
 			if (!profileItems) return;
 			for (var i=0;i<profileItems.length;i++) {
@@ -5520,98 +5517,60 @@ var Helper = {
 				profileItems[i].setAttribute("id",index);
 				profileItems[i].setAttribute("theURL",theURL);
 				//profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
-$.subscribe('afterUpdate.Tipped', function(e, data){
-	var $e = $(data.element);
+				$.subscribe('afterUpdate.Tipped', function(e, data){
+					var $e = $(data.element);
 
-	// already modified || not an item
-	if(!data.skin == 'fsItem' || $e.is('.fsh'))
-		return;
-	//creating a fake DOM object
-	var tmp = document.createElement('div'); 
-	tmp.innerHTML = $(data.content).html();
+					// already modified || not an item
+					if(!data.skin == 'fsItem' || $e.is('.fsh'))
+						return;
+					//creating a fake DOM object
+					var tmp = document.createElement('div'); 
+					tmp.innerHTML = $(data.content).html();
 
-	var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp); //var bonusTable = $(someelement).find(':contains( Bonuses )'); //jquery equilivant
+					var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp); //var bonusTable = $(someelement).find(':contains( Bonuses )'); //jquery equilivant
 
-	var extraText = "";
-	if (bonusTable) {
-		var subTotal = 0;
-		for (var i=2;i<bonusTable.rows.length;i++) {
-			aRow = bonusTable.rows[i];
-			if(aRow.cells.length < 2) {continue; } //single column, so break after stat bonuses kick in
-			bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
-			subTotal += bonusValue;
-		}
-		extraText = "<br>Individual item stats subtotal: " + subTotal;
-	}
+					var extraText = "";
+					if (bonusTable) {
+						var subTotal = 0;
+						for (var i=2;i<bonusTable.rows.length;i++) {
+							aRow = bonusTable.rows[i];
+							if(aRow.cells.length < 2) {continue; } //single column, so break after stat bonuses kick in
+							bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
+							subTotal += bonusValue;
+						}
+						extraText = "<br>Individual item stats subtotal: " + subTotal;
+					}
 
+					var addMe = '<br><center>'+extraText+'</center>';
 
-	var addMe = '<br><center>'+extraText+'</center>';
+					// modify the existing tooltip
+					//var newHtml = $($(data.content).html()) // create jQuery context
+					//					.append(addMe) // can modify this to prepend etc <- magic happens here
+					//					.clone(); // required
 
-	// modify the existing tooltip
-	//var newHtml = $($(data.content).html()) // create jQuery context
-	//					.append(addMe) // can modify this to prepend etc <- magic happens here
-	//					.clone(); // required
+					// wrap & extract inner html (inefficent?)
+					//var html = $($('<div></div>').html(newHtml)).html();
+					//this works for some reason
+					tmp.innerHTML+=addMe;
+					var html = $(tmp).html();
 
-	// wrap & extract inner html (inefficent?)
-	//var html = $($('<div></div>').html(newHtml)).html();
-	//this works for some reason
-	tmp.innerHTML+=addMe;
-	var html = $(tmp).html();
+					// remove old tooltip
+					unsafeWindow.Tipped.remove(data.element);
 
-	// remove old tooltip
-	unsafeWindow.Tipped.remove(data.element);
+					// modify the source element & insert the new tooltip
+					$(data.element)
+						.attr({
+								'data-tipped':html,
+								'data-tipped-options':'skin:"fsItem"'
+							  })
+						.addClass('fsh');
 
-	// modify the source element & insert the new tooltip
-	$(data.element)
-		.attr({
-				'data-tipped':html,
-				'data-tipped-options':'skin:"fsItem"'
-			  })
-		.addClass('fsh');
-
-	// show/create the new tooltip
-	unsafeWindow.Tipped.show(data.element);
-});
+					// show/create the new tooltip
+					unsafeWindow.Tipped.show(data.element);
+				});
 			}
 		}
 	},
-
-	/*setProfileItemMouseover: function (evt) {
-		var index = evt.target.getAttribute('id');
-		var theURL = evt.target.getAttribute('theURL');
-		if(Helper.savedItemData[index]==undefined) {
-			System.xmlhttp(theURL,
-			function(responseText) {
-				var doc = System.createDocument(responseText);
-				var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",doc);
-				var extraText = "";
-				if (bonusTable) {
-					var subTotal = 0;
-					for (var i=2;i<bonusTable.rows.length;i++) {
-						aRow = bonusTable.rows[i];
-						if(aRow.cells.length < 2) {continue; } //single column, so break after stat bonuses kick in
-						bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
-						subTotal += bonusValue;
-					}
-					extraText = "<br>Individual item stats subtotal: " + subTotal;
-				}
-				//fix me
-				//alert(evt.target.parentNode.innerHTML);
-				//unsafeWindow.Tipped.show(responseText+extraText);
-				//Tipped.remove(responseText);
-				//Tipped.show(responseText+extraText);
-
-				//evt.target.setAttribute("data-tipped",responseText+extraText);
-				//evt.target.setAttribute("data-tipped-options","skin: 'fsItem'");
-
-				//evt.target.getAttribute("data-tipped");
-				Helper.savedItemData[index] = responseText+extraText;
-			});
-		} else {
-			//fix me
-			unsafeWindow.Tip(Helper.savedItemData[index]);
-		}
-	},*/
 
 	injectEmptySlots: function(responseText) {
 		var doc = System.createDocument(responseText);
@@ -6235,7 +6194,7 @@ $.subscribe('afterUpdate.Tipped', function(e, data){
 
 	linkFromMouseover: function(mouseOver) {
 		//fetchitem.php?item_id=9206&inv_id=256710069&t=1&p=1346893&currentPlayerId=1346893&extra=5
-		var reParams=/item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/;
+		var reParams=/item_id=(\d+)\&inv_id=([-0-9]*)\&t=(\d+)\&p=(\d+)/;
 		var reResult=reParams.exec(mouseOver);
 		if (reResult === null) {
 			return null;
@@ -6250,7 +6209,7 @@ $.subscribe('afterUpdate.Tipped', function(e, data){
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
-		var reParams =/item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)\&vcode=([a-z0-9]*)/i;
+		var reParams =/item_id=(\d+)\&inv_id=([-0-9]*)\&t=(\d+)\&p=(\d+)\&vcode=([a-z0-9]*)/i;
 		var reResult =reParams.exec(mouseOver);
 		if (reResult === null) {
 			return null;
