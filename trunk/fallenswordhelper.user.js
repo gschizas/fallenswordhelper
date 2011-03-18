@@ -11296,7 +11296,7 @@ var Helper = {
 		}
 		if (Helper.secureTradesToCheckCount == 0) {
 			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
-			secureTradeCheckMessage.innerHTML = 'No existing ST\'s to check.';
+			secureTradeCheckMessage.innerHTML = 'No existing ST\'s to check.<input type="checkbox" id="Helper:ignoreSTitems" style="display:none;" checked>';
 			secureTradeCheckMessage.style.color = 'Green';
 		}
 	},
