@@ -953,6 +953,8 @@ var Helper = {
 
 	updateBuffLog: function() {
 		if (GM_getValue("keepBuffLog")) {
+			var now=new Date();
+			var timeStamp = now.toLocaleFormat("%Y-%m-%d %H:%M:%S") + " - ";
 			//Skill Inventor level 175 was activated on 'yuuzhan'.
 			var buffLog=GM_getValue("buffLog");
 			var buffsAttempted = document.body.innerHTML.split('<li>');
@@ -975,11 +977,11 @@ var Helper = {
 						break;
 					}
 				}
-					buffLog=buffsCast[0] + ' (' + stamina + ' stamina) <br>'+buffLog;
+					buffLog=timeStamp+buffsCast[0] + ' (' + stamina + ' stamina) <br>'+buffLog;
 				}
 				if (buffsNotCast) {
 
-					buffLog='<span style="color: red;">' + buffsNotCast[0] + '</span><br>' + buffLog;
+					buffLog=timeStamp+'<span style="color: red;">' + buffsNotCast[0] + '</span><br>' + buffLog;
 
 				}
 
@@ -4299,8 +4301,8 @@ var Helper = {
 		var goldStolen = System.getIntFromRegExp(responseText, /var\s+goldStolen=(-?[0-9]+);/i);
 		var pvpRatingChange = System.getIntFromRegExp(responseText, /var\s+pvpRatingChange=(-?[0-9]+);/i);
 		var output = '<br> ';
-		if (xpGain != 0) output += 'XP gain:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(xpGain) + ' </span>';
-		if (goldGain != 0) output += 'Gold gain:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(goldGain) + ' </span>';
+		if (xpGain != 0) output += 'XP stolen:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(xpGain) + ' </span>';
+		if (goldGain != 0) output += 'Gold lost:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(goldGain) + ' </span>';
 		if (goldStolen != 0) output += 'Gold stolen:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + System.addCommas(goldStolen) + ' </span>';
 		if (prestigeGain != 0) output += 'Prestige gain:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + prestigeGain + ' </span>';
 		if (pvpRatingChange != 0) output += 'PvP change:<span style="color:' + ((winner == 1)?'green':'red') + ';">' + pvpRatingChange + ' </span>';
@@ -9160,7 +9162,25 @@ var Helper = {
 			GM_log(err);
 		}
 	},
-
+	toggleTickAllBuffs: function(){
+		var allItems=System.findNodes("//input[@type='checkbox' and @name='blockedSkillList\[\]']");
+		if (allItems) {
+			for (var i=0; i<allItems.length; i++) {
+				var checkboxForItem = allItems[i];
+				if (checkboxForItem.style.visibility == "hidden")
+					checkboxForItem.checked = false;
+				else {
+					if (checkboxForItem.checked) {
+						checkboxForItem.checked = false;
+						document.getElementById("Helper:tickAllBuffs").innerHTML='Tick all buffs';
+					} else {
+						checkboxForItem.checked = true;
+						document.getElementById("Helper:tickAllBuffs").innerHTML='Untick all buffs';
+					}
+				}
+			}
+		}
+	},
 	injectSettings: function() {
 		try {
 			var exNode = System.findNode("//font[contains(.,'Example:')]");
@@ -9170,6 +9190,13 @@ var Helper = {
 				exNode.innerHTML = "Last Location Set:<br><a href='#' id='Helper.lastImgLocLink'>" + GM_getValue("lastImgLoc") + "</a>";
 				document.getElementById('Helper.lastImgLocLink').addEventListener('click', Helper.setImgLoc, true);
 			}
+
+			var tickNode = System.findNode("//td[@height='10' and contains(.,'Tick which skills you do not want cast on you')]");
+			//alert(tickNode.innerHTML);
+			tickNode.innerHTML+='<br><span style="cursor:pointer; text-decoration:underline;" id="Helper:tickAllBuffs">' +
+			'Tick all buffs</span>';
+			document.getElementById("Helper:tickAllBuffs").addEventListener('click', Helper.toggleTickAllBuffs, true);
+
 		} catch (err) {
 			GM_log(err);
 		}
@@ -11095,7 +11122,7 @@ var Helper = {
 	},
 
 	toggleCheckAllItems: function(evt) {
-		var allItems=System.findNodes("//input[@type='checkbox']");
+		var allItems=System.findNodes("//input[@type='checkbox' and @name='sendItemList[]']");
 		if (allItems) {
 			for (var i=0; i<allItems.length; i++) {
 				var checkboxForItem = allItems[i];
@@ -11114,22 +11141,26 @@ var Helper = {
 
 	toggleCheckAllPlants: function(evt) {
 		var plantRE = new RegExp(evt.target.getAttribute("plantRE"));
-		var allItems = System.findNodes("//input[@type='checkbox']");
+		var tradeType = evt.target.getAttribute("tradetype");
+		var allItems = System.findNodes("//input[@type='checkbox' and @name='sendItemList[]']");
+		var ignoreST = document.getElementById("Helper:ignoreSTitems").checked;
+
 		if (allItems) {
+			var itemsLen = allItems.length;
+			if(tradeType=='secure') {itemsLen=Math.min(100,itemsLen);}
+			
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
-				System.xmlhttp(Helper.linkFromMouseover($(theImgNode).data("tipped")),
-					function (responseText, callBack) {
-						var checkbox = callBack.parentNode.parentNode.parentNode.nextSibling.firstChild.firstChild;
-						if (plantRE.exec(responseText)) {
-							if (checkbox.checked)
-								checkbox.checked = false;
-							else
-								checkbox.checked = true;
-						}
-					},
-					theImgNode);
-
+				if(plantRE.exec(theImgNode.getAttribute("src"))) {
+					if((/3px solid red/.exec(theImgNode.parentNode.parentNode.style.border))&&!ignoreST) //item in an ST, skip it
+						continue;//alert("asdf");
+					if (allItems[i].checked)
+						allItems[i].checked = false;
+					else
+						allItems[i].checked = true;
+					if(--itemsLen == 0) 
+						i=allItems.length+1;
+				}
 			}
 		}
 	},
@@ -11145,7 +11176,7 @@ var Helper = {
 			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
-			Helper.makeSelectAllInTrade(newCellAll);
+			Helper.makeSelectAllInTrade(newCellAll,'send');
 			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
 			var newCell = newRow.insertCell(0);
 			newCell.colSpan = 3;
@@ -11165,7 +11196,7 @@ var Helper = {
 			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
 			var newCellAll = newRow.insertCell(0);
 			newCellAll.colSpan = 3;
-			Helper.makeSelectAllInTrade(newCellAll);
+			Helper.makeSelectAllInTrade(newCellAll,'secure');
 			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
 			var newCell = newRow.insertCell(0);
 			newCell.colSpan = 3;
@@ -11174,18 +11205,24 @@ var Helper = {
 		}
 	},
 
-	makeSelectAllInTrade: function(injectHere) {
+	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		var itemList=[["All Resources", "Resource"], ["Amber", "Amber"], ["Amethyst Weed", "Amethyst Weed"], ["Blood Bloom", "Blood Bloom"], ["Cerulean Rose", "Cerulean Rose"], ["Dark Shade", "Dark Shade"], ["Deathbloom", "Deathbloom"], ["Deathly Mold", "Deathly Mold"], ["Greenskin\u00A0Fungus", "Greenskin Fungus"], ["Heffle", "Heffle"], ["Jademare", "Jademare"], ["Ruby Thistle", "Ruby Thistle"], ["Trinettle", "Trinettle"], ["Viridian\u00A0Vine", "Viridian Vine"]];
-		var output = 'Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems">' +
-			'All Items</span> &ensp ';
+		//var itemList=[["All Resources", "Resource"], ["Amber", "Amber"], ["Amethyst Weed", "Amethyst Weed"], ["Blood Bloom", "Blood Bloom"], ["Cerulean Rose", "Cerulean Rose"], ["Dark Shade", "Dark Shade"], ["Deathbloom", "Deathbloom"], ["Deathly Mold", "Deathly Mold"], ["Greenskin\u00A0Fungus", "Greenskin Fungus"], ["Heffle", "Heffle"], ["Jademare", "Jademare"], ["Ruby Thistle", "Ruby Thistle"], ["Trinettle", "Trinettle"], ["Viridian\u00A0Vine", "Viridian Vine"]];
+		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9159"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"]];
+		var output = ''
+		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
 			output += '<span plantRE="'+itemList[i][1]+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'">'+itemList[i][0]+'</span> &ensp' ;
+				'id="Helper:checkAll'+i+'" tradetype="'+type+'">'+itemList[i][0]+'</span> &ensp';
+			allResRE+=itemList[i][1]+'|';
 		}
+		output='Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems" tradetype="'+type+'">' +
+			'All Items</span> &ensp ' +
+			'<span plantRE="'+allResRE.substr(0,allResRE.length-1)+'" style="cursor:pointer; text-decoration:underline;"' +
+				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp' + output;
 		output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
 		injectHere.innerHTML += output;
-		for (var i=0;i<itemList.length;i++) {
+		for (var i=0;i<itemList.length+1;i++) {
 			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
 		}
 		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
@@ -11233,6 +11270,11 @@ var Helper = {
 				newHtml+='</tr></tbody></table>';
 				table.innerHTML = newHtml;
 			});
+		var stmsg = document.getElementById("SecureTradeCheckMessage");
+		stmsg.innerHTML='Existing ST check in progress ...';
+		stmsg.style.color = 'blue';
+
+		System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
 	},
 
 	checkExistingSecureTrades: function(responseText) {
@@ -11282,7 +11324,7 @@ var Helper = {
 		Helper.secureTradesProcessed++;
 		if (Helper.secureTradesProcessed == Helper.secureTradesToCheckCount) {
 			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
-			secureTradeCheckMessage.innerHTML = 'Existing ST check complete.';
+			secureTradeCheckMessage.innerHTML = 'Existing ST check complete. Select items in ST <input type="checkbox" id="Helper:ignoreSTitems" checked>';
 			secureTradeCheckMessage.style.color = 'Green';
 		}
 	},
