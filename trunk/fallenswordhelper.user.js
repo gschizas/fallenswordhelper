@@ -5501,25 +5501,10 @@ var Helper = {
 
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
-			profileItems = System.findNodes("//img[contains(@data-tipped,'fetchitem')]");
-			if (!profileItems) return;
-			for (var i=0;i<profileItems.length;i++) {
-				var mouseOver = profileItems[i].getAttribute("data-tipped");
-				var reParams=/(fetchitem\.php\?item_id=([0-9])*\&inv_id=([0-9])*\&t=[0-9]*\&p=[0-9]*\&currentPlayerId=[0-9]*\&extra=[0-9]*)/;
-				var reResult=reParams.exec(mouseOver);
-				if (reResult === null) {
-					return null;
-				}
-				var theURL=reResult[1];
-				var itemId=reResult[2];
-				var invId=reResult[3];
-				var index = itemId+"_"+invId;
-				profileItems[i].setAttribute("id",index);
-				profileItems[i].setAttribute("theURL",theURL);
-				//profileItems[i].addEventListener("mouseover",Helper.setProfileItemMouseover,false);
-				$.subscribe('afterUpdate.Tipped', function(e, data){
+			$.subscribe('afterUpdate.Tipped', function(e, data){
 					var $e = $(data.element);
 
+					//alert("asdf");
 					// already modified || not an item
 					if(!data.skin == 'fsItem' || $e.is('.fsh'))
 						return;
@@ -5550,6 +5535,7 @@ var Helper = {
 
 					// wrap & extract inner html (inefficent?)
 					//var html = $($('<div></div>').html(newHtml)).html();
+
 					//this works for some reason
 					tmp.innerHTML+=addMe;
 					var html = $(tmp).html();
@@ -5568,7 +5554,6 @@ var Helper = {
 					// show/create the new tooltip
 					unsafeWindow.Tipped.show(data.element);
 				});
-			}
 		}
 	},
 
