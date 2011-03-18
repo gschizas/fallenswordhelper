@@ -9164,20 +9164,24 @@ var Helper = {
 	},
 	toggleTickAllBuffs: function(){
 		var allItems=System.findNodes("//input[@type='checkbox' and @name='blockedSkillList\[\]']");
+		var tckTxt =document.getElementById("Helper:tickAllBuffs");
 		if (allItems) {
 			for (var i=0; i<allItems.length; i++) {
 				var checkboxForItem = allItems[i];
 				if (checkboxForItem.style.visibility == "hidden")
 					checkboxForItem.checked = false;
 				else {
-					if (checkboxForItem.checked) {
-						checkboxForItem.checked = false;
-						document.getElementById("Helper:tickAllBuffs").innerHTML='Tick all buffs';
-					} else {
+					if(tckTxt.innerHTML=='Tick all buffs'){
 						checkboxForItem.checked = true;
-						document.getElementById("Helper:tickAllBuffs").innerHTML='Untick all buffs';
+					}else{
+						checkboxForItem.checked = false;
 					}
 				}
+			}
+			if(tckTxt.innerHTML=='Tick all buffs'){
+				document.getElementById("Helper:tickAllBuffs").innerHTML='Untick all buffs';
+			}else{
+				document.getElementById("Helper:tickAllBuffs").innerHTML='Tick all buffs';
 			}
 		}
 	},
