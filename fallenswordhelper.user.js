@@ -10624,7 +10624,7 @@ var Helper = {
 		else {
 			for (var i = 0; i < bountyList.bounty.length; i++) {
 				var mouseOverText = "";
-				mouseOverText += "<div style=\\'text-align:center;width:205px;\\'>Level:  " + bountyList.bounty[i].lvl +
+				mouseOverText += "<div>Level:  " + bountyList.bounty[i].lvl +
 				"<br/>Reward: " + bountyList.bounty[i].reward + " " +bountyList.bounty[i].rewardType +
 				"<br/>XP Loss Remaining: " + bountyList.bounty[i].xpLoss +
 				"<br/>Progress:  " + bountyList.bounty[i].progress;
@@ -10637,11 +10637,8 @@ var Helper = {
 
 				output += "<a style='color:#A0CFEC;font-size:10px;'";
 				output += "href='" + System.server + "index.php?cmd=message&target_player=" + bountyList.bounty[i].target + "'>[m]";
-				output += "</a> &nbsp;<a class=tipped data-tipped=" + mouseOverText;
-				output += "style='color:";
-				output += "#FFF380";
-				output += ";font-size:10px;'";
-				output += " href='" + bountyList.bounty[i].link + "'>" + bountyList.bounty[i].target +"</a></li>";
+				output += "</a> &nbsp;"
+				output += "<a href='"+bountyList.bounty[i].link+"' class='tipped' data-tipped='"+mouseOverText+"' style='color:#FFF380;font-size:10px;'>" + bountyList.bounty[i].target +"</a></li>";
 			}
 		}
 
