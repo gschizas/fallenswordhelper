@@ -4222,8 +4222,8 @@ var Helper = {
 									for (var idx = 0; idx < theBuffPack["size"]; idx++) {
 										var nickname = (theBuffPack["nickname"][idx]? theBuffPack["nickname"][idx]:"");
 										if (nickname.toLowerCase().trim() == buffsSent[j].toLowerCase().trim()) {
-											//82 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
-											quickBuff += (82+idx) + ";";
+											//126 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
+											quickBuff += (126+idx) + ";";
 											break;
 										}
 									}
@@ -7614,10 +7614,10 @@ $.subscribe('afterUpdate.Tipped', function(e, data){
 
 									newStaminaTotal += buffList[k].stamina*1;
 									skillNodes[i].checked = true;
-								} else if (addr[p] >= 82) {
+								} else if (addr[p] >= 126) {
 									if (theBuffPack) {
 
-										var bpIndex = addr[p] - 82;
+										var bpIndex = addr[p] - 126;
 										var bpButton = document.getElementById("bpSelect" + bpIndex);
 
 										if (bpButton) {
