@@ -12117,7 +12117,7 @@ var Helper = {
 					document.getElementById("checkwear").innerHTML+=" comparing "+name+" ...<br/>";
 					var stype=[2,0,7,4,1,5,6,3,8][type];
 					var url="http://guide.fallensword.com/index.php?cmd=items&index=0&search_name=&search_level_min=&"+
-						"search_level_max="+Helper.wearingItems.lvl+
+						"search_level_max="+parseInt(Helper.wearingItems.lvl.replace(/,/g,""),10)+
 						"&search_type="+stype+"&search_rarity=-1&sort_by=1&sort_by=5";
 					GM_xmlhttpRequest({
 						method: 'GET',
@@ -12133,8 +12133,7 @@ var Helper = {
 							Helper.wearingItems[type].best=nodes[0].textContent;
 							for (var i=0; i<5; i++) {
 								Helper.wearingItems[type].suggest+=
-//fix me
-									"<span class='tipped' data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
+									"<span class=\"tipped\" data-tipped-options=\"skin: 'fsItem', ajax: true\" data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
