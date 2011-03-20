@@ -204,8 +204,7 @@ var Data = {
 				{name: "Coordinated Attack", stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 0, skillId: 118,buff: "+0.05% per point added to Attack and Damage if every piece of equipped gear is part of a set.", nicks: "coordinated attack,coorda"},
 				{name: "Undermine",          stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 0, skillId: 108,buff: "Increases the maximum percentage (above 100%) of the Breaker enhancement by +0.2% per point.", nicks: "undermine,um"},
 				{name: "Cursed Rune",        stamina: 30, "duration": 120,  minCastLevel: 1000,treeId: 0, skillId: 89, buff: "0.2% per point stat bonus to your equipped rune. Excludes \\'Gain\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.", nicks: "cursed rune,crune"},
-				//Anti Deflect moved to the end so it doesn't match first on the quick buff screen (i.e. Deflect matches first instead).
-				//Probably an slicker way of doing this, but this was quick and it worked.
+				{name: "Anti Deflect",       stamina: 30, "duration": 60,   minCastLevel: 1000,treeId: 0, skillId: 105,buff: "+0.2% per point chance to prevent your opponent activating Deflect.", nicks: "anti deflect,ad"},
 				{name: "Overkill",           stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 0, skillId: 109,buff: "When you inflict 2 times or more of the starting hit points in the first round of combat, you have a 0.25% per point chance to gain 0.025% per point extra XP. (PvE Only)", nicks: "overkill,ok"},
 				{name: "Smashing Hammer",    stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 0, skillId: 111,buff: "+0.05% per point added to your damage for each complete set equipped.", nicks: "smashing hammer,sh"},
 				{name: "Mighty Vigor",       stamina: 35, "duration": 60,   minCastLevel: 1200,treeId: 0, skillId: 113,buff: "For every 50 points of the skill, can equip items 1 level higher than your level.", nicks: "mighty vigor,mv"},
@@ -286,8 +285,7 @@ var Data = {
 				{name: "Golden Shield",      stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 2, skillId: 103,buff: "+0.05% per point chance to double your armor and defense at the start of combat.", nicks: "golden shield,gs"},
 				{name: "Stalker",            stamina: 35, "duration": 90,   minCastLevel: 1400,treeId: 2, skillId: 125,buff: "Increases the maximum percentage (above 100%) of the Elite Hunter enhancement by +0.1% per point.", nicks: "stalker,stalk"},
 				{name: "Ageless",            stamina: 30, "duration": 90,   minCastLevel: 1400,treeId: 2, skillId: 100,buff: "+0.2% per point chance of doubling your HP at the start of combat.", nicks: "ageless,age"},
-				{name: "Extractor II",       stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 2, skillId: 104,buff: "+0.05% per point chance to not destroy a resource when extracting components.", nicks: "extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2"},
-				{name: "Anti Deflect",       stamina: 30, "duration": 60,   minCastLevel: 1000,treeId: 0, skillId: 105,buff: "+0.2% per point chance to prevent your opponent activating Deflect.", nicks: "anti deflect,ad"}
+				{name: "Extractor II",       stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 2, skillId: 104,buff: "+0.05% per point chance to not destroy a resource when extracting components.", nicks: "extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2"}
 			];
 		}
 		return Data.buffArray;
