@@ -7918,7 +7918,7 @@ var Helper = {
 				resultText += ((i % 4 === 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
 				resultText += ((i % 4 == 3)? "</tr>":"");
-				var hasThisBuff = System.findNode("//font[contains(.,'" + buffName + "')]");
+				var hasThisBuff = System.findNode("//font[contains(.,'" + buffName + "') and not(contains(.,' " + buffName + "'))]");
 				if (hasThisBuff) {
 					buffLevelRE = /\[(\d+)\]/;
 					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1],10);
