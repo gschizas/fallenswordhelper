@@ -8709,7 +8709,7 @@ var Helper = {
 			}
 
 			var prizeSRC = row.cells[8].firstChild.getAttribute("src");
-			var maxEquipLevel = row.cells[7].textContent*1;
+			var maxEquipLvL = row.cells[7].textContent*1;
 			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 				for (var j=0; j<arenaMoves.length; j++){
 					var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/pvp/"),prizeSRC.length);
@@ -8741,7 +8741,7 @@ var Helper = {
 					}
 				}
 			}
-			if (!(maxEquipLevel >= minLvl && maxEquipLevel <= maxLvl)) {
+			if (!(maxEquipLvL >= minLvl && maxEquipLvL <= maxLvl)) {
 				row.style.visibility = "hidden";
 				row.style.display = "none";
 			}
@@ -8795,7 +8795,7 @@ var Helper = {
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
 			cell.innerHTML = cell.innerHTML.replace(/ \[/,"<br>[");
-			if (cell.innerHTML.search("Max Equip Level") != -1 ||
+			if (cell.innerHTML.search("LvL") != -1 ||
 				cell.innerHTML.search("Join Cost") != -1 ||
 				cell.innerHTML.search("State") != -1 ||
 				cell.innerHTML.search("Specials") != -1 ||
@@ -8837,8 +8837,8 @@ var Helper = {
 				'HellForgeHTML': theRow.cells[5].innerHTML,
 				'Epic[?]': (theRow.cells[6].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
 				'EpicHTML': theRow.cells[6].innerHTML,
-				'MaxEquipLevel': theRow.cells[7].textContent*1,
-				'MaxEquipLevelHTML': theRow.cells[7].innerHTML,
+				'MaxEquipLvL': theRow.cells[7].textContent*1,
+				'MaxEquipLvLHTML': theRow.cells[7].innerHTML,
 				'Reward': theRow.cells[8].innerHTML,
 				'Action': theRow.cells[9].innerHTML,
 				'Visibility': theRow.style.visibility,
@@ -8886,7 +8886,7 @@ var Helper = {
 			if (r.Action.search("View") != -1) {
 				bgColor = 'bgcolor="#f5e2b3"';
 			}
-			if (r.Visibility!="hidden" && r.MaxEquipLevel >= minLvl && r.MaxEquipLevel <= maxLvl) {
+			if (r.Visibility!="hidden" && r.MaxEquipLvL >= minLvl && r.MaxEquipLvL <= maxLvl) {
 				result += '<TR>'+
 				'<TD '+bgColor+' style="border-bottom:1px solid #CD9E4B;">'+r.ArenaID+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Players+'</TD>'+
@@ -8895,7 +8895,7 @@ var Helper = {
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.SpecialsHTML+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.HellForgeHTML+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.EpicHTML+'</TD>'+
-				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLevelHTML+'</TD>'+
+				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.MaxEquipLvLHTML+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;">'+r.Reward+'</TD>'+
 				'<TD '+bgColor+' align="center" style="border-bottom:1px solid #CD9E4B;"><form method="post" action="index.php">'+r.Action+'</form></TD></TR>';
 			}
