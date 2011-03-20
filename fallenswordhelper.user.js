@@ -938,13 +938,15 @@ var Helper = {
 			if (characterVirtualLevel) levelToTest = characterVirtualLevel;
 			for (var i=2;i<memberList.rows.length;i+=4) {
 				var iplus1 = i+1;
-				var vlevel = /VL:<\/td><td>(\d+)<\/td>/.exec(memberList.rows[i].cells[1].innerHTML)[1];
-				var level = memberList.rows[i].cells[2].innerHTML;
-				var aRow = memberList.rows[i];
-				if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
-					aRow.style.backgroundColor = "#4671C8";
-				} else if (highlightGvGPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= 25) {
-					aRow.style.backgroundColor = "#FF9900";
+				if (memberList.rows[i].cells[1]) {
+					var vlevel = /VL:\&lt;\/td\&gt;\&lt;td\&gt;(\d+)/.exec(memberList.rows[i].cells[1].innerHTML)[1];
+					var level = memberList.rows[i].cells[2].innerHTML;
+					var aRow = memberList.rows[i];
+					if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
+						aRow.style.backgroundColor = "#4671C8";
+					} else if (highlightGvGPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= 25) {
+						aRow.style.backgroundColor = "#FF9900";
+					}
 				}
 			}
 		}
@@ -1385,7 +1387,7 @@ var Helper = {
 		}
 		injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Empower')]");
 		if (injectHere) {
-			injectHere.innerHTML = "Empower&nbsp;Level <nobr>" +
+			injectHere.innerHTML = "<nobr>" +
 				injectHere.innerHTML.substring(injectHere.innerHTML.indexOf("["),injectHere.innerHTML.length) +
 				"</nobr>";
 		}
@@ -1497,7 +1499,7 @@ var Helper = {
 			}
 		}
 
-		var listOfDefenders = System.findNodes("//a[contains(@href,'index.php?cmd=profile&player_id=')]");
+		var listOfDefenders = System.findNodes("//b/a[contains(@href,'index.php?cmd=profile&player_id=')]");
 		var defenderCount = 0;
 		var testList = "";
 		for (i=0; i<listOfDefenders.length; i++) {
