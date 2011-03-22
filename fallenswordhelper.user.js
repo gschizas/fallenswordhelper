@@ -259,26 +259,31 @@ var Helper = {
 		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		GM_xmlhttpRequest({
-			method: 'GET',
-			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce=" + now,
+			method: 'PROPFIND',
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js",
 			headers: {
 				"User-Agent": navigator.userAgent,
 				"Referer": document.location
 			},
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
-			}
+			},
+			data: '<?xml version="1.0" encoding="utf-8"?><propfind xmlns="DAV:"><allprop/></propfind>'
 		});
+
 	},
 
 	autoUpdate: function(responseDetails) {
-		if (responseDetails.status != 200) {return;}
+		if (responseDetails.status != 207) {return;}
 		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion = GM_getValue("currentVersion");
 		if (!currentVersion) {currentVersion = 0;}
-		var versionRE = /Revision\s*([0-9]+):/;
-		var latestVersion = responseDetails.responseText.match(versionRE)[1];
+
+		var parser=new DOMParser();
+	  	var xmlDoc=parser.parseFromString(responseDetails.responseText,"text/xml");
+		var latestVersion = xmlDoc.getElementsByTagName("lp1:version-name")[0].textContent;
+
 		GM_log("Current version: " + currentVersion);
 		GM_log("Found version: " + latestVersion);
 
@@ -5513,7 +5518,7 @@ var Helper = {
 					if(!data.skin == 'fsItem' || $e.is('.fsh'))
 						return;
 					//creating a fake DOM object
-					var tmp = document.createElement('div'); 
+					var tmp = document.createElement('div');
 					tmp.innerHTML = $(data.content).html();
 
 					var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp); //var bonusTable = $(someelement).find(':contains( Bonuses )'); //jquery equilivant
@@ -11154,7 +11159,7 @@ var Helper = {
 		if (allItems) {
 			var itemsLen = allItems.length;
 			if(tradeType=='secure') {itemsLen=Math.min(100,itemsLen);}
-			
+
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
 				if(plantRE.exec(theImgNode.getAttribute("src"))) {
@@ -11164,7 +11169,7 @@ var Helper = {
 						allItems[i].checked = false;
 					else
 						allItems[i].checked = true;
-					if(--itemsLen == 0) 
+					if(--itemsLen == 0)
 						i=allItems.length+1;
 				}
 			}
