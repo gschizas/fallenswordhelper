@@ -3017,8 +3017,13 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
-		unsafeWindow.document.onkeypress = null;
-		unsafeWindow.document.onkeypress = Helper.keyPress;
+		if (System.browserVersion==4) {
+			unsafeWindow.onkeypress = null;
+			unsafeWindow.onkeypress = Helper.keyPress;
+		} else {
+			unsafeWindow.document.onkeypress = null;
+			unsafeWindow.document.onkeypress = Helper.keyPress;
+		}
 	},
 
 	moveMe: function(dx, dy) {
