@@ -12985,25 +12985,24 @@ var Helper = {
 
 	useStairs: function() {
 		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
-		var stairwayIDElement = System.findNode("//input[@name='stairway_id']");
-		if (stairwayIDElement) {
-			window.location = "index.php?cmd=world&subcmd=usestairs&stairway_id=" + stairwayIDElement.value;
-		}
+		$('input[name="stairway_id"]:first').each(function(){window.location="index.php?cmd=world&subcmd=usestairs&stairway_id="+$(this).val();}); 
 	},
 
 	injectHelperMenu: function() {
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		if (GM_getValue("hideHelperMenu")) return;
-		var node=System.findNode("//td[img[contains(@src,'fs/skin/welcome/knight_corner.gif')]]");
-		if (!node) return;
-		node.setAttribute("background","http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif");
-		node.align = "center";
-		node.innerHTML = "<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>";
-		document.getElementById("helperMenu").addEventListener("mouseover", Helper.showHelperMenu, true);
+		var node=$('img[src*="knight_corner.gif"]').parent();
+		if (node.length==0) return;
+		node.attr('background','http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif');
+		node.attr('align', 'center');
+		node.html("<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>");
+		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
+
 	},
 
 	showHelperMenu: function(evt) {
-		document.getElementById("helperMenu").removeEventListener("mouseover", Helper.showHelperMenu, true);
+		$('#helperMenu').unbind("mouseover", Helper.showHelperMenu);
+
 		var actionMenu = {
 			"Character" : [
 				["BL", "Buff Log", "injectBuffLog"], ["CL", "Combat Log", "injectNotepadShowLogs"],
@@ -13030,7 +13029,9 @@ var Helper = {
 			}
 			html += "</ul></div>";
 		}
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - <span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a>";
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - ";
+		html += "<span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a> - ";
+		html += "<span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
