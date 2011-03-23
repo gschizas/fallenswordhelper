@@ -832,12 +832,8 @@ var Helper = {
 			break;
 		}
 		if (GM_getValue("playNewMessageSound")) {
-			var unreadLog = System.findNode("//img[@alt='You have unread log messages.']");
-
-			if (unreadLog)
-			{
-				unreadLog.innerHTML += "<audio src='" + GM_getValue("defaultMessageSound") + "' autoplay=true />";
-			}
+			var soundLocation = GM_getValue("defaultMessageSound");
+			 $('img[alt="You have unread log messages."]:first').each(function(){$(this).after("<audio src='" + soundLocation + "' autoplay=true />");});
 		}
 
 		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
