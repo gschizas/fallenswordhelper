@@ -9487,8 +9487,9 @@ var Helper = {
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>,  ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, and ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2156859">ByteBoy</a> ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2156859">ByteBoy</a>, and ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'</table></form>';
@@ -12958,44 +12959,37 @@ var Helper = {
 		}
 	},
 
-	injectRPUpgrades: function() {
-		var guildReputationTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Reputation']]");
-		var injectHere = guildReputationTable.rows[8].cells[0];
-		injectHere.align = 'center';
-		injectHere.innerHTML = '<span id="warningMessage" style="color:green;">Gathering active buffs ... please wait ... </span>';
+	injectRPUpgrades: function() {  //jquery ready, minus xmlhttp
+		var injectHere = $('b:contains("Guild Reputation")').closest('table').find('tr:eq(10) > td:first');
+		injectHere.attr('align','center');
+		injectHere.html('<span id="warningMessage" style="color:green;">Gathering active buffs ... please wait ... </span>');
 		System.xmlhttp("index.php?cmd=profile", Helper.parseProfileAndPostWarnings);
 	},
 
-	parseProfileAndPostWarnings: function(responseText, callback) {
+	parseProfileAndPostWarnings: function(responseText, callback) {//jquery ready, minus xmlhttp
 		var doc = System.createDocument(responseText);
-		var activeBuffs = System.findNodes("//img[contains(@src,'/skills/')]", doc);
-		if (activeBuffs) {
-			for (i=0;i<activeBuffs.length;i++) {
-				anItem=activeBuffs[i];
-				var onmouseover = $(anItem).data("tipped");
-				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: ((\d+))\)/;
-				if (!buffRE.exec(onmouseover)) continue;
-				var buffName = buffRE.exec(onmouseover)[1];
-				var buffLevel = buffRE.exec(onmouseover)[2];
-				var rpPackBuff = System.findNodes("//a[contains(@data-tipped,'" + buffName + " Level " + buffLevel + "')]");
-				if (rpPackBuff) {
-					for (j=0;j<rpPackBuff.length;j++) {
-						rpPackBuff[j].parentNode.innerHTML += "<br><nobr><span style='color:red;'>" + buffName + " " + buffLevel + " active</span></nobr>";
-					}
-				}
-			}
-		}
-		var warningMessage = document.getElementById("warningMessage")
-		warningMessage.innerHTML = 'Done';
-		warningMessage.style.color = 'blue';
+		$(doc).find('img[src*="/skills/"]').each(function(){
+				var onmouseover = $(this).data("tipped");
+				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: (\d+)\)/.exec(onmouseover);
+
+				//if (!buffRE) { continue; } //fails for some reason?  dont need it.
+				var buffName = buffRE[1];
+				var buffLevel = buffRE[2];
+				$('a[data-tipped*="'+buffName+' Level '+buffLevel+'"]').each(function(){
+						$(this).parent().append("<br><nobr><span style='color:red;'>" + buffName + " " + buffLevel + " active</span></nobr>");
+					});
+			});
+		var warningMessage = $("#warningMessage");
+		warningMessage.html('Done');
+		warningMessage.attr('style','color:blue');
 	},
 
-	useStairs: function() {
+	useStairs: function() { //jquery ready
 		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
 		$('input[name="stairway_id"]:first').each(function(){window.location="index.php?cmd=world&subcmd=usestairs&stairway_id="+$(this).val();});
 	},
 
-	injectHelperMenu: function() {
+	injectHelperMenu: function() { //jquery ready
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		if (GM_getValue("hideHelperMenu")) return;
 		var node=$('img[src*="knight_corner.gif"]').parent();
@@ -13007,7 +13001,7 @@ var Helper = {
 
 	},
 
-	showHelperMenu: function(evt) {
+	showHelperMenu: function(evt) { //jqeury ready
 		$('#helperMenu').unbind("mouseover", Helper.showHelperMenu);
 
 		var actionMenu = {
@@ -13036,9 +13030,9 @@ var Helper = {
 			}
 			html += "</ul></div>";
 		}
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a> - ";
-		html += "<span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a> - ";
-		html += "<span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a>";
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a>";
+		html += " - <span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a>";
+		html += " - <span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
@@ -13053,7 +13047,7 @@ var Helper = {
 		});
 	},
 
-	callHelperFunction: function(evt) {
+	callHelperFunction: function(evt) { //jquery ready
 		setTimeout(function() {
 			$("#content").remove();
 			$("body").append($("<style>.content {max-width:600px}</style><div id=content/>").hide());
