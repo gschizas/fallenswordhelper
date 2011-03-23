@@ -225,7 +225,7 @@ var Helper = {
 	},
 
 	readInfo: function() {
-		var charInfo = System.findNode("//img[contains(@src,'skin/icon_player.gif')]/ancestor::td[2]");
+		var charInfo = $('img[src*="skin/icon_player.gif"]').parents('td.help');
 		if (!charInfo) { return; }
 		var charInfoText = $(charInfo).data('tipped');
 		/**
@@ -370,9 +370,9 @@ var Helper = {
 			}*/
 		}
 		if (GM_getValue("gameHelpLink")) {
-			var gameHelpNode = System.findNode("//b[contains(.,'Game Help')]");
-			if (gameHelpNode) {
-				gameHelpNode.innerHTML = "<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.innerHTML + "</a>";
+			var gameHelpNode = $('b:contains("Game Help")');
+			if (gameHelpNode.length > 0) {
+				gameHelpNode.html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.text() + "</a>");
 			}
 		}
 
@@ -845,8 +845,8 @@ var Helper = {
 	},
 
 	injectQuickMsgDialogJQ: function() {
-		var nodes = System.findNodes("//a[contains(@href, 'javascript:openQuickMsgDialog(')]");
-		if (!nodes) return;
+		var nodes = $('a[href*="javascript:openQuickMsgDialog("]');
+		if (nodes.length == 0) return;
 		for (var i=0; i<nodes.length; i++) {
 			nodes[i].addEventListener("click", Helper.addTemplateButton, true);
 		}
@@ -911,8 +911,7 @@ var Helper = {
 	},
 
 	injectSkillsPage: function() {
-		var buffs = System.findNodes("//a[contains(@href,'index.php?cmd=skills&tree_id=') and contains(@href,'&skill_id=')][img[@border=0]]/img");
-
+		var buffs = $('a[href*="index.php?cmd=skills&tree_id="][href*="&skill_id="] img[border*="0"]');
 		for (var i = 0; i < buffs.length; i++) {
 			var parNode = buffs[i].parentNode;
 			//var mouseoverText = buffs[i].firstChild.getAttribute("onmouseover");
@@ -1093,7 +1092,7 @@ var Helper = {
 
 		//Add functionality to remove the skip to guildstoresection
 		if (GM_getValue("disablePageShiftToGuildStore")) {
-			var guildStoreLinks = System.findNodes("//a[contains(@href,'#guildStoreSection')]");
+			var guildStoreLinks = $('a[href*="#guildStoreSection"]');
 			for (var i=0;i<guildStoreLinks.length ;i++ ) {
 				var guildStoreLink = guildStoreLinks[i];
 				var linkHREF = guildStoreLink.getAttribute("href");
@@ -1295,8 +1294,8 @@ var Helper = {
 	},
 
 	injectShop: function() {
-		var injectHere=System.findNode("//td/center[img[contains(@src,'_banner.jpg')]]");
-		var itemNodes=System.findNodes("//td/center/a/img[contains(@src,'/items/')]");
+		var injectHere=$('img[src*="_banner.jpg"]').parents("center:first");
+		var itemNodes=$('td center a img[src*="/items/"]');
 
 		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=1 class='custominput'><table cellpadding=2><tr>";
 		var itemId;
@@ -1314,7 +1313,7 @@ var Helper = {
 		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
 			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
 			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>";
-		injectHere.innerHTML="<table><tr><td>"+injectHere.innerHTML+"</td><td>"+selector+"</td></tr></table>";
+		injectHere.html("<table><tr><td>"+injectHere.html()+"</td><td>"+selector+"</td></tr></table>");
 		for (i=0;i<itemNodes.length;i++) {
 			itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			document.getElementById("select"+itemId).addEventListener("click",Helper.selectShopItem,true);
@@ -1346,26 +1345,17 @@ var Helper = {
 	},
 
 	injectRelic: function(isRelicPage) {
-		var empowerThing = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[3]/td[2]/table/tbody/tr[10]/td/table/tbody/tr[5]/td/a");
-		if (empowerThing) {
-			var mouseover = $(empowerThing).data("tipped");
-			var indx1 = mouseover.indexOf("'");
-			var indx2 = mouseover.lastIndexOf("'");
-			var insideText = mouseover.substring(indx1 + 1, indx2);
-			empowerThing.setAttribute("data-tipped", mouseover.substring(0, indx1 + 1) +
-				insideText.replace(/'/g, "&#39;") +
-				mouseover.substring(indx2));
-		}
-		var relicNameElement = System.findNode("//td[contains(.,'Below is the current status for the relic')]/b");
-		relicNameElement.parentNode.style.fontSize = "x-small";
+		var relicNameElement = $('td:contains("Below is the current status for the relic"):last');
+		relicNameElement.css('font-size', 'x-small');
 
-		var injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Defended')]");
-		if (injectHere) {
-			var defendingGuildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
+		var injectHere = $('td:contains("Defended"):last');
+		if (injectHere.length > 0) {
+			var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
 			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
 			var myGuildID = GM_getValue("guildID");
 			if (defendingGuildID == myGuildID) {
-				var listOfDefenders = injectHere.nextSibling.textContent.split(","); // quick buff only supports 16
+				var listOfDefenders = injectHere.next().text().split(","); // quick buff only supports 16
+				//actually I think it might be text length on the address bar or something like that.
 				var shortList = new Array();
 				if (listOfDefenders) {
 					var modifierWord;
@@ -1373,10 +1363,11 @@ var Helper = {
 						shortList.push(listOfDefenders[i]);
 						if (((i + 1) % 16 === 0 && i !== 0) || (i == listOfDefenders.length - 1)) {
 							modifierWord = Helper.getGroupBuffModifierWord(i);
-							injectHere.innerHTML += "<br><nobr><a href='#' id='buffAll" + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+							var htmlToAppend = "<br><nobr><a href='#' id='buffAll" + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
 							"Buff " + modifierWord + " 16</span></a></nobr>";
-							var buffAllLink = System.findNode("//a[@id='buffAll" + modifierWord + "']");
-							buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+							injectHere.append(htmlToAppend);
+							var buffAllLink = $('#buffAll'+modifierWord);
+							buffAllLink.attr("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 							shortList = new Array();
 						}
 
@@ -1385,52 +1376,44 @@ var Helper = {
 				}
 
 			}
-
-		injectHere.innerHTML = injectHere.innerHTML + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
-			'class="custombutton">';
-		document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
+			injectHere.html(injectHere.html() + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
+				'class="custombutton">');
+			document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
 		}
-		injectHere = System.findNode("//table[@width='400']/tbody/tr/td[@valign = 'top' and contains(.,'Empower')]");
-		if (injectHere) {
-			injectHere.innerHTML = "<nobr>" +
-				injectHere.innerHTML.substring(injectHere.innerHTML.indexOf("["),injectHere.innerHTML.length) +
-				"</nobr>";
-		}
-		var empowerButton = System.findNode("//input[contains(@value,'Attempt Empower')]");
-		if (empowerButton) {
+		var empowerButton = $('input[value*="Attempt Empower"]');
+		if (empowerButton.length > 0) {
 			//window.location='index.php?cmd=relic&subcmd=empower&relic_id=12'
-			var relicID = /relic_id=(\d+)/.exec(empowerButton.getAttribute("onclick"))[1];
-			var insertEmpowerRelicTenTimesSpan = document.createElement("SPAN");
-			insertEmpowerRelicTenTimesSpan.innerHTML = "Empower to level: ";
-			insertEmpowerRelicTenTimesSpan.style.cursor = "pointer";
-			insertEmpowerRelicTenTimesSpan.style.textDecoration = "underline";
-			insertEmpowerRelicTenTimesSpan.style.color = "blue";
-			insertEmpowerRelicTenTimesSpan.style.fontSize = "x-small";
-			insertEmpowerRelicTenTimesSpan.setAttribute("relicID", relicID);
-			empowerButton.parentNode.appendChild(insertEmpowerRelicTenTimesSpan);
-			insertEmpowerRelicTenTimesSpan.addEventListener('click', Helper.empowerRelic, true);
+			var relicID = /relic_id=(\d+)/.exec(empowerButton.attr("onclick"))[1];
+			var insertEmpowerRelicTenTimesSpan = $('<span></span>').attr({
+					'style': 'cursor:pointer;text-decoration:underline;color:blue;font-size:x-small',
+					'relicID': relicID
+				}).appendTo(empowerButton.parent());
+			insertEmpowerRelicTenTimesSpan.text("Empower to level: ");
+			insertEmpowerRelicTenTimesSpan.click(Helper.empowerRelic);
 
-			var targetEmpowerLevelInput = document.createElement("INPUT");
-			targetEmpowerLevelInput.value = '10';
-			targetEmpowerLevelInput.size = '1';
-			targetEmpowerLevelInput.name = 'targetEmpowerLevel';
-			empowerButton.parentNode.appendChild(targetEmpowerLevelInput);
+			var targetEmpowerLevelInput = $('<input></input>');
+			targetEmpowerLevelInput.val(10);
+			targetEmpowerLevelInput.attr("size",1);
+			targetEmpowerLevelInput.attr("name",'targetEmpowerLevel');
+			targetEmpowerLevelInput.appendTo(empowerButton.parent());
 		}
 	},
 
 	empowerRelic: function(evt) {
 		var relicID = evt.target.getAttribute("relicID");
-		var targetEmpowerLevel = System.findNode("//input[@name='targetEmpowerLevel']").value;
-		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td").textContent, 10);
+		var targetEmpowerLevel = $('input[name="targetEmpowerLevel"]');
+		var currentLevel = parseInt($('td:contains("Empower"):contains("Level"):last').next('td').text(),10);
 		if (targetEmpowerLevel <= currentLevel) return;
 		evt.target.innerHTML = "Processing ... ";
 		evt.target.removeEventListener('click', Helper.empowerRelic, true);
 		evt.target.style.cursor = "default";
 		evt.target.style.textDecoration = "none";
-		Helper.empowerRelicMaxTries = 20;
-		Helper.empowerRelicCurrentTries = 1;
-		//index.php?cmd=relic&subcmd=empower&relic_id=12
-		System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":evt.target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
+		setTimeout(function() {
+			Helper.empowerRelicMaxTries = 20;
+			Helper.empowerRelicCurrentTries = 1;
+			//index.php?cmd=relic&subcmd=empower&relic_id=12
+			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":evt.target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
+		}, 0);
 	},
 
 	empowerRelicToTarget: function(responseText, callback) {
@@ -1444,9 +1427,15 @@ var Helper = {
 		var doc = System.createDocument(responseText);
 		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent,10);
 		target.innerHTML += currentLevel + " -> ";
-		if (currentLevel < targetEmpowerLevel && Helper.empowerRelicCurrentTries < Helper.empowerRelicMaxTries) {
-			Helper.empowerRelicCurrentTries ++;
-			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
+		setTimeout(function() {
+			var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries
+			var empowerRelicMaxTries = Helper.empowerRelicMaxTries
+		}, 0);
+		if (currentLevel < targetEmpowerLevel && empowerRelicCurrentTries < empowerRelicMaxTries) {
+			setTimeout(function() {
+				empowerRelicCurrentTries ++;
+				System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
+			}, 0);
 		} else {
 			//http://www.fallensword.com/index.php?cmd=relic&relic_id=87
 			window.location = "index.php?cmd=relic&relic_id=" + relicID
