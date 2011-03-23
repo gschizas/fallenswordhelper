@@ -55,7 +55,7 @@ function GM_ApiBrowserCheck(){
         GM_log = window.opera.postError;
     }
     if (typeof(GM_setValue) != 'undefined'){
-        var gsv = GM_setValue.toString();
+        var gsv; try { gsv=GM_setValue.toString(); } catch(e) { gsv='staticArgs'; }
         if (gsv.indexOf('staticArgs') > 0){
             gvar.isGreaseMonkey = true;
         }

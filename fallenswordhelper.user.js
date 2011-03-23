@@ -3846,8 +3846,13 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
-		unsafeWindow.document.onkeypress = null;
-		unsafeWindow.document.onkeypress = Helper.keyPress;
+		if (System.browserVersion==4) {
+			unsafeWindow.onkeypress = null;
+			unsafeWindow.onkeypress = Helper.keyPress;
+		} else {
+			unsafeWindow.document.onkeypress = null;
+			unsafeWindow.document.onkeypress = Helper.keyPress;
+		}
 	},
 
 	moveMe: function(dx, dy) {
@@ -12987,7 +12992,7 @@ var Helper = {
 
 	useStairs: function() {
 		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
-		$('input[name="stairway_id"]:first').each(function(){window.location="index.php?cmd=world&subcmd=usestairs&stairway_id="+$(this).val();}); 
+		$('input[name="stairway_id"]:first').each(function(){window.location="index.php?cmd=world&subcmd=usestairs&stairway_id="+$(this).val();});
 	},
 
 	injectHelperMenu: function() {
