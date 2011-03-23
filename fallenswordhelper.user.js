@@ -199,7 +199,7 @@ var Helper = {
 			Helper.sortAsc = true;
 			Helper.sortBy = "category";
 			quickSearchList.sort(Helper.stringSort);
-			System.setValueJSON("quickSearchList", quickSearchList);
+			setTimeout(function() {System.setValueJSON("quickSearchList", quickSearchList);}, 0);
 		}
 
 		var memberList = System.getValueJSON("memberlist");
@@ -227,20 +227,22 @@ var Helper = {
 	readInfo: function() {
 		var charInfo = $('img[src*="skin/icon_player.gif"]').parents('td.help');
 		if (charInfo.length == 0) { return; }
-		var charInfoText = $(charInfo).data('tipped');
-		/**
-		<center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>tnka</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%'>973</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>205th</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_up.gif'> +5</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>2401</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>5420</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>116</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>2018</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>6751</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.
-		*/
-		Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
-		Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\'>(\d+)/i);
-		Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
-		Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
-		Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
-		Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
-		Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
-		GM_setValue("CharacterName", Helper.characterName);
+		$(charInfo).each(function() {
+			var charInfoText = $(this).data('tipped');
+			/**
+			<center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>tnka</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%'>973</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>205th</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_up.gif'> +5</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>2401</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>5420</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>116</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>2018</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>6751</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.
+			*/
+			Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
+			Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\'>(\d+)/i);
+			Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
+			Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
+			Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
+			Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
+			Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
+			GM_setValue("CharacterName", Helper.characterName);
 
-		Helper.savedItemData = [];
+			Helper.savedItemData = [];
+		});
 	},
 
 	// Autoupdate
@@ -371,9 +373,9 @@ var Helper = {
 		}
 		if (GM_getValue("gameHelpLink")) {
 			var gameHelpNode = $('b:contains("Game Help")');
-			if (gameHelpNode.length > 0) {
-				gameHelpNode.html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + gameHelpNode.text() + "</a>");
-			}
+			$(gameHelpNode).each(function() {
+				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
+			});
 		}
 
 		if (GM_getValue("huntingMode")) {
