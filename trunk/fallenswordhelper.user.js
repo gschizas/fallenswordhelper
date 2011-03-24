@@ -350,6 +350,7 @@ var Helper = {
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
+		var isBeta = $('html[data-hcs="beta: true"]:first').length;
 		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
 		if (System.imageServer != System.imageServerHTTP) {
 			var changeCount = 0;
@@ -377,7 +378,7 @@ var Helper = {
 				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
 			});
 		}
-
+		if(!isBeta){
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
@@ -405,7 +406,7 @@ var Helper = {
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
-		}
+		}}
 
 		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -458,7 +459,7 @@ var Helper = {
 				Helper.injectWorldMap();
 				break;
 			default:
-				Helper.injectWorld();
+				Helper.injectWorld(isBeta);
 				break;
 			}
 			break;
@@ -2681,7 +2682,13 @@ var Helper = {
 		}
 	},
 
-	injectWorld: function() {
+	injectWorld: function(isBeta) {
+			if (isBeta)
+			{
+			// put all new functions in here. this way we can remove all old once it goes final.
+				alert("BETA");
+			}
+
 		try {
 			var curTile = System.findNode("//img[contains(@title, 'You are here')]/ancestor::td[@width='40' and @height='40']").getAttribute("background");
 			if (GM_getValue("currentTile") != curTile) {
