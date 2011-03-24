@@ -406,7 +406,10 @@ var Helper = {
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
-		}}
+			
+		}
+		//alert("Betas good");
+		}
 
 		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -2686,7 +2689,7 @@ var Helper = {
 			if (isBeta)
 			{
 			// put all new functions in here. this way we can remove all old once it goes final.
-				alert("BETA");
+				// alert("BETA");
 			}
 
 		try {
