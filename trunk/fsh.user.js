@@ -13,6 +13,8 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
+
+var main = function() {
 // System functions
 var System = {
 	init: function() {
@@ -14188,20 +14190,15 @@ var Helper = {
 		}, 0);
 	}
 };
+Helper.onPageLoad(null);
 
-var $ ;
+};
 
-GM_wait();
-//Helper.onPageLoad(null);
-
-// Check if jQuery's loaded
-function GM_wait(jqFunction) {
-	if (typeof unsafeWindow.jQuery == 'undefined') {
-		window.setTimeout(GM_wait, 100);
-	} else {
-		$ = unsafeWindow.jQuery;
-		$T = unsafeWindow.Tipped;
-		if (jqFunction) jqFunction.call();
-		alert($);
-	}
+function insertJS(callback) {
+	var script = document.createElement("script");
+	script.textContent = "(" + callback.toString() + ")();";
+	document.body.appendChild(script);
 }
+
+// load jQuery and execute the main function
+insertJS(main);
