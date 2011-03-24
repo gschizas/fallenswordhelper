@@ -5919,7 +5919,7 @@ var Helper = {
 			var usedCount=0;
 			for (id in Helper.componentList) {
 				var comp=Helper.componentList[id];
-				output+="<tr><td align=center><img src="+comp.src+" class='tipped' data-tipped=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
+				output+="<tr><td align=center><img src="+comp.src+" class='tipped' data-tipped-options=\"skin: 'fsItem', ajax: true\" data-tipped=\""+comp.onmouseover+"\"></td><td>"+comp.count+"</td></tr>";
 				usedCount+=comp.count;
 			}
 			output+="<tr><td align=center>Total:</td><td>"+usedCount+" / "+totalCount+"</td></tr></table>";
