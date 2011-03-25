@@ -12,7 +12,7 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
-
+var isBeta ="0";
 var main = function() {
 // System functions
 var System = {
@@ -1514,7 +1514,7 @@ var Helper = {
 				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
 			});
 		}
-		if(!isBeta){
+		
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
@@ -1544,8 +1544,7 @@ var Helper = {
 			Helper.injectQuickMsgDialogJQ();
 
 		}
-		//alert("Betas good");
-		}
+		
 
 		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -1598,7 +1597,7 @@ var Helper = {
 				Helper.injectWorldMap();
 				break;
 			default:
-				Helper.injectWorld(isBeta);
+				Helper.injectWorld();
 				break;
 			}
 			break;
@@ -2378,6 +2377,42 @@ var Helper = {
 	},
 
 	injectStaminaCalculator: function() {
+		//Check for beta as beta is different
+		if(isBeta){//New Map Style
+		
+		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
+		if (!staminaImageElement) {return;}
+
+		var mouseoverText = $(staminaImageElement).data('tipped');
+		
+		var staminaRE = /Stamina:\s<\/td><td width=\'90%\' class=\'currentmax\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
+		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\' class=\'nextgain\'>([,0-9]+)m ([,0-9]+)s/;
+		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;	
+
+		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
+		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
+		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
+		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
+		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
+		nextGainHours = nextGainMinutes/60;
+
+		//get the max hours to still be inside stamina maximum
+		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+		var now = (new Date()).getTime();
+		var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+
+		var d = new Date(nextHuntMilliseconds);
+		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+		var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
+			nextHuntTimeText + "</nobr></font></td></tr><tr>";
+		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
+		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
+		staminaImageElement.setAttribute("data-tipped", newMouseoverText);
+		return;
+		}
+			
+		//Old Map Style
 		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
 		if (!staminaImageElement) {return;}
 
@@ -2410,6 +2445,28 @@ var Helper = {
 	},
 
 	injectLevelupCalculator: function() {
+		//check for beta as beta has class= additions in the mouse over
+		if(isBeta){ //New Map Style
+		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
+		if (!levelupImageElement) {return;}
+		var mouseoverText = $(levelupImageElement).data('tipped');
+		var remainingXPRE = /Remaining:\s<\/td><td width=\'90%\' class=\'remainingxp\'>([0-9,]+)/i;
+		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([0-9,]+)/i;
+		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\'90%\' class=\'nextgain\'>([0-9]*)m\s*([0-9]*)s/i;
+		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
+		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
+		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
+		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[2],10);
+		var hoursToNextLevel = Math.ceil(remainingXP/gain);
+		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
+		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
+		var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
+			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
+		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
+		levelupImageElement.setAttribute("data-tipped", newMouseoverText);
+		return;
+		}
+		//Old Map Style
 		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
 		if (!levelupImageElement) {return;}
 		var mouseoverText = $(levelupImageElement).data('tipped');
@@ -3821,7 +3878,7 @@ var Helper = {
 		}
 	},
 
-	injectWorld: function(isBeta) {
+	injectWorld: function() {
 			if (isBeta)
 			{
 			// put all new functions in here. this way we can remove all old once it goes final.
