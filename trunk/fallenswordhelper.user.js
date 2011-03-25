@@ -8,7 +8,6 @@
 // @include        http://*.fallensword.com/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @require        http://fallenswordhelper.googlecode.com/svn/trunk/fsLayout.js
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
@@ -1376,7 +1375,7 @@ var Helper = {
 			Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
 			Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
 			Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
-			GM_setValue("CharacterName", Helper.characterName);
+			setTimeout(function() {GM_setValue("CharacterName", Helper.characterName);}, 0);
 
 			Helper.savedItemData = [];
 		});
@@ -4991,9 +4990,13 @@ var Helper = {
 	replaceKeyHandler: function() {
 		if (System.browserVersion==4) {
 			unsafeWindow.onkeypress = null;
+			unsafeWindow.combatKeyHandler = null;
+			unsafeWindow.realmKeyHandler = null;
 			unsafeWindow.onkeypress = Helper.keyPress;
 		} else {
 			unsafeWindow.document.onkeypress = null;
+			unsafeWindow.document.combatKeyHandler = null;
+			unsafeWindow.document.realmKeyHandler = null;
 			unsafeWindow.document.onkeypress = Helper.keyPress;
 		}
 	},
