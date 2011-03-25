@@ -1474,8 +1474,10 @@ var Helper = {
 	autoUpdateConfirmOk: function(evt) {
 		var newVersion = parseInt(evt.target.getAttribute("newVersion"),10);
 		GM_setValue("currentVersion", newVersion);
-		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 		Helper.autoUpdateConfirmCancel(evt);
+		//next line causes the following error, not sure why, or where it is from, but it seems to have no effect
+		//uncaught exception: TypeError: aTab is undefined
+		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 	},
 
 	autoUpdateConfirmCancel: function(evt) {
@@ -2582,14 +2584,14 @@ var Helper = {
 					'style': 'cursor:pointer;text-decoration:underline;color:blue;font-size:x-small',
 					'relicID': relicID
 				}).appendTo(empowerButton.parent());
-			insertEmpowerRelicTenTimesSpan.text("Empower to level: ");
-			insertEmpowerRelicTenTimesSpan.click(Helper.empowerRelic);
+			insertEmpowerRelicTenTimesSpan.text("Empower to level: ")
+				.click(Helper.empowerRelic);
 
 			var targetEmpowerLevelInput = $('<input></input>');
-			targetEmpowerLevelInput.val(10);
-			targetEmpowerLevelInput.attr("size",1);
-			targetEmpowerLevelInput.attr("name",'targetEmpowerLevel');
-			targetEmpowerLevelInput.appendTo(empowerButton.parent());
+			targetEmpowerLevelInput.val(10)
+				.attr("size",1)
+				.attr("name",'targetEmpowerLevel')
+				.appendTo(empowerButton.parent());
 		}
 	},
 
