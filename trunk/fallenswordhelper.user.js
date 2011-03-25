@@ -1486,7 +1486,7 @@ var Helper = {
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
-		var isBeta = $('html[data-hcs="beta: true"]:first').length;
+		isBeta = $('html[data-hcs="beta: true"]:first').length;
 		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
 		if (System.imageServer != System.imageServerHTTP) {
 			var changeCount = 0;
@@ -1542,7 +1542,7 @@ var Helper = {
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
-
+			
 		}
 		
 
@@ -2378,8 +2378,7 @@ var Helper = {
 
 	injectStaminaCalculator: function() {
 		//Check for beta as beta is different
-		if(isBeta){//New Map Style
-		
+		if(isBeta){  //New Map Style
 		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
 		if (!staminaImageElement) {return;}
 
