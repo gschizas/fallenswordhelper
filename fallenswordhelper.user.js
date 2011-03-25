@@ -8,14 +8,1151 @@
 // @include        http://*.fallensword.com/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @require        http://fallenswordhelper.googlecode.com/svn/trunk/json2.js
-// @require        http://fallenswordhelper.googlecode.com/svn/trunk/gmApi.js
-// @require        http://fallenswordhelper.googlecode.com/svn/trunk/calfSystem.js
 // @require        http://fallenswordhelper.googlecode.com/svn/trunk/fsLayout.js
-// @require        http://fallenswordhelper.googlecode.com/svn/trunk/fsData.js
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
+
+
+var main = function() {
+// System functions
+var System = {
+	init: function() {
+		Date.prototype.toFormatString = System.formatDate;
+
+		Number.prototype.padZero = System.padZero;
+		String.prototype.repeat = System.repeatString;
+		if (!String.trim) {
+			String.prototype.trimLeft  = System.trimLeft;
+			String.prototype.trimRight = System.trimRight;
+			String.prototype.trim      = System.trim;
+		}
+		Array.prototype.filterBy = System.filterBy;
+
+		System.server           = document.location.protocol + "//" + document.location.host + "/";
+		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i)[2],10);
+
+		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
+		if (!imgurls) return; //login screen or error loading etc.
+		var idindex             = imgurls.src.indexOf("/skin/");
+		System.imageServer      = imgurls.src.substr(0,idindex);
+		System.imageServerHTTP  = "http://72.29.91.222";
+
+		Array.prototype.removeDuplicates = System.removeDuplicates;
+	},
+
+	getValueJSON: function(name) {
+		var resultJSON=GM_getValue(name);
+		var result;
+		if (resultJSON) {
+			var reviver = function (key, value) {
+				if (typeof value === 'string') {
+					var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
+					if (a) {
+						return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
+					}
+				}
+				return value;
+			};
+			result = JSON.parse(resultJSON, reviver);
+		}
+		return result;
+	},
+
+	setValueJSON: function(name, value) {
+		GM_setValue(name, JSON.stringify(value));
+	},
+
+	findNode: function(xpath, doc) {
+		var nodes=System.findNodes(xpath, doc);
+		if (!nodes) return null;
+		return (nodes[0]);
+	},
+
+	findNodes: function(xpath, doc) {
+			if (!doc) {
+				doc=document;
+			}
+			var nodes=[];
+			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			if (findQ.snapshotLength===0) return null;
+			for (var i=0; i<findQ.snapshotLength; i++) {
+				nodes.push(findQ.snapshotItem(i));
+			}
+			return nodes;
+	},
+
+	findNodeText: function(xpath, doc) {
+		var node=System.findNode(xpath, doc);
+		if (!node) return null;
+		return node.textContent;
+	},
+
+	findNodeInt: function(xpath, doc) {
+		var node=System.findNode(xpath, doc);
+		if (!node) return null;
+		return System.intValue(node.textContent);
+	},
+
+	createDocument: function(details) {
+		var doc=document.createElement("HTML");
+		doc.innerHTML=details;
+		return doc;
+	},
+
+	//~ createDocument: function(str) { // chrome extension must use this createDocument (which not work under Firefox :( )
+		//~ if (document.documentElement.nodeName != 'HTML') {
+		    //~ return new DOMParser().parseFromString(str, 'application/xhtml+xml');
+		//~ }
+		//~ // FIXME
+		//~ var html = str.replace(/<script(?:[ \t\r\n][^>]*)?>[\S\s]*?<\/script[ \t\r\n]*>|<\/?(?:i?frame|html|script|object)(?:[ \t\r\n][^<>]*)?>/gi, ' ')
+		//~ var htmlDoc = document.implementation.createHTMLDocument ?
+			//~ document.implementation.createHTMLDocument('fsh') :
+			//~ document.implementation.createDocument(null, 'html', null)
+		//~ var range = document.createRange()
+		//~ range.selectNodeContents(document.documentElement)
+		//~ htmlDoc.documentElement.appendChild(range.createContextualFragment(html))
+		//~ return htmlDoc
+	//~ },
+
+	formatDateTime: function(aDate) {
+		var result=aDate.toDateString();
+		result += " ";
+		var hh=aDate.getHours();
+		if (hh<10) hh = "0" + hh;
+		var mm=aDate.getMinutes();
+		if (mm<10) mm = "0" + mm;
+		result += hh + ":" + mm;
+		return result;
+	},
+
+	formatDate: function(dateFormat) {
+	    if (!this.valueOf()) return;
+		var months = ['January', 'February', 'March', 'April', 'May', 'June',
+			'July', 'August', 'September', 'October', 'November', 'December'];
+		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+
+		var theDate=this;
+		var h;
+
+		return dateFormat.replace(/(yyyy|MMMM|MMM|MM|dddd|ddd|dd|hh|HH|mm|ss|a)/g,
+			function($1) {
+				switch ($1) {
+					case 'yyyy': return theDate.getFullYear();
+					case 'MMMM': return months[theDate.getMonth()];
+					case 'MMM':  return months[theDate.getMonth()].substr(0, 3);
+					case 'MM':   return (theDate.getMonth() + 1).padZero(2);
+					case 'dddd': return days[theDate.getDay()];
+					case 'ddd':  return days[theDate.getDay()].substr(0, 3);
+					case 'dd':   return theDate.getDate().padZero(2);
+					case 'HH':   return theDate.getHours().padZero(2);
+					case 'hh':   return ((h = theDate.getHours() % 12) ? h : 12).padZero(2);
+					case 'mm':   return theDate.getMinutes().padZero(2);
+					case 'ss':   return theDate.getSeconds().padZero(2);
+					case 'a':  return theDate.getHours() < 12 ? 'am' : 'pm';
+				}
+			}
+		);
+	},
+
+	padZero: function(zeroes) {
+		var s=this.toString();
+		var result="0".repeat(zeroes-s.length) + s;
+		return result;
+	},
+
+	filterBy: function(property, value) {
+		return this.filter(function(element, index, array) {return element[property]==value;});
+	},
+
+	repeatString: function(times) {
+		var s = '';
+		for (var i=0; i<times; i++) {
+			s += this;
+		}
+		return s;
+	},
+
+	saveValueForm: function(oForm, name) {
+		var formElement = System.findNode("//input[@name='" + name + "']", oForm);
+		if (formElement.getAttribute("type")=="checkbox") {
+			GM_setValue(name, formElement.checked);
+		} else if (formElement.getAttribute("type")=="radio") {
+			var radioElements = System.findNodes("//input[@name='" + name + "']", 0, oForm);
+			for (var i=0; i<radioElements.length; i++) {
+				var radioElement = radioElements[i];
+				if (radioElement.checked) {
+					GM_setValue(name, radioElement.value);
+				}
+			}
+		} else {
+			GM_setValue(name, formElement.value);
+		}
+	},
+
+	setDefault: function(name, value) {
+		if (GM_getValue(name)==undefined) GM_setValue(name, value);
+	},
+
+	xmlhttp: function(theUrl, func, theCallback) {
+		theUrl=theUrl.replace(System.server, "");
+		if (theUrl.indexOf("http://")<0)
+			theUrl = System.server + theUrl;
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: theUrl,
+			callback: theCallback,
+			headers: {
+				"User-Agent" : navigator.userAgent,
+				"Referer": document.location,
+				"Cookie" : document.cookie
+			},
+			onload: function(responseDetails) {
+				if (func) {
+					func.call(this, responseDetails.responseText, this.callback);
+				}
+			}
+		});
+	},
+
+	intValue: function(theText) {
+		if (!theText) return 0;
+		return parseInt(theText.replace(/,/g,""),10);
+	},
+
+	getIntFromRegExp: function(theText, rxSearch) {
+		var matches = theText.match(rxSearch);
+		if (matches) {
+			result = parseInt(matches[1],10);
+		} else {
+			result = 0;
+		}
+		return result;
+	},
+
+	addCommas: function(nStr) {
+		var x, x1, x2;
+		nStr += '';
+		x = nStr.split('.');
+		x1 = x[0];
+		x2 = x.length > 1 ? '.' + x[1] : '';
+		var rgx = /(\d+)(\d{3})/;
+		while (rgx.test(x1)) {
+			x1 = x1.replace(rgx, '$1' + ',' + '$2');
+		}
+		return x1 + x2;
+	},
+
+	trim: function() {
+	    return this.trimLeft().trimRight();
+	},
+
+	trimLeft: function() {
+	    return this.replace(/^\s+/,"");
+	},
+
+	trimRight: function() {
+	    return this.replace(/\s+$/,"");
+	},
+
+	removeDuplicates: function (removeBy){
+		var temp=new Array();
+		if (removeBy) {
+			Helper.sortBy = removeBy;
+			this.sort();
+			for(i=0;i<this.length;i++) {
+				var first = this[i];
+				var second = (this[i+1]?this[i+1]:"abc");
+				if(i != this.length && first[removeBy]==second[removeBy]) {continue;}
+				temp[temp.length]=this[i];
+			}
+		} else {
+			this.sort();
+			for(i=0;i<this.length;i++) {
+				var first = this[i];
+				var second = (this[i+1]?this[i+1]:"abc");
+				if(i != this.length && first==second) {continue;}
+				temp[temp.length]=this[i];
+			}
+		}
+		return temp;
+	},
+
+	convertTextToHtml: function(inputText) {
+		return inputText.
+			replace(/</g,"&lt").
+			replace(/>/g,"&gt").
+			replace(/\n/g,"<br>").
+			replace(/\[\/([a-z])]/g,"<\/\$1>").
+			replace(/\[([a-z])\]/g,"<\$1>");
+	},
+
+	generateLiveTable: function(dataArray, outputElement, itemProperty) {
+		throw new Exception("Not ready yet!");
+		/*if (!dataArray) return;
+		var result='<table id="Helper:LiveTableOutput"><tr>' +
+			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
+			'<th sortkey="name">Name</th>' +
+			'<th sortkey="level" sortType="number">Level</th></tr>';
+		var item, color;
+		for (var i=0; i<dataArray[itemProperty].length;i++) {
+			item=dataArray[itemProperty][i];
+
+			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
+				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
+					'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
+				'<td align="right">' + player.level + '</td>' +
+				'</tr>';
+		}
+		result+='</table>';
+		outputElement.innerHTML=result;
+
+		var theTable=document.getElementById('Helper:OnlinePlayersTable');
+		for (var i=0; i<theTable.rows[0].cells.length; i++) {
+			var cell=theTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
+		}*/
+	},
+
+	sortLiveTable: function(evt) {
+		throw new Exception("Not ready yet!");
+		/*Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
+		var headerClicked = evt.target.getAttribute("sortKey");
+		var sortType = evt.target.getAttribute("sortType");
+		if (!sortType) sortType="string";
+		GM_log(headerClicked);
+		// GM_log(Helper.sortBy);
+		GM_log(sortType);
+		// numberSort
+		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
+		if (Helper.sortBy && Helper.sortBy==headerClicked) {
+			Helper.sortAsc=!Helper.sortAsc;
+		}
+		Helper.sortBy=headerClicked;
+
+		switch(sortType) {
+			case "string":
+				Helper.onlinePlayers.players.sort(Helper.stringSort);
+				break;
+			case "number":
+				Helper.onlinePlayers.players.sort(Helper.numberSort);
+				break;
+		}
+		System.generateOnlinePlayersTable();*/
+	},
+
+	parseDate: function(textDate) {
+		timeText = textDate.split(" ")[0];
+		dateText = textDate.split(" ")[1];
+		dayText = dateText.split("/")[0];
+		monthText = dateText.split("/")[1];
+		if (monthText == "Jan") fullMonthText = "January";
+		if (monthText == "Feb") fullMonthText = "February";
+		if (monthText == "Mar") fullMonthText = "March";
+		if (monthText == "Apr") fullMonthText = "April";
+		if (monthText == "May") fullMonthText = "May";
+		if (monthText == "Jun") fullMonthText = "June";
+		if (monthText == "Jul") fullMonthText = "July";
+		if (monthText == "Aug") fullMonthText = "August";
+		if (monthText == "Sep") fullMonthText = "September";
+		if (monthText == "Oct") fullMonthText = "October";
+		if (monthText == "Nov") fullMonthText = "November";
+		if (monthText == "Dec") fullMonthText = "December";
+		yearText = dateText.split("/")[2];
+		dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00");
+		return dateAsDate;
+	},
+
+	toggleVisibilty: function(evt) {
+		var anItemId=evt.target.getAttribute("linkto");
+		var anItem=document.getElementById(anItemId);
+		var currentVisibility=anItem.style.visibility;
+		anItem.style.visibility=(currentVisibility=="hidden")?"visible":"hidden";
+		anItem.style.display=(currentVisibility=="hidden")?"block":"none";
+		if (GM_getValue(anItemId)) {
+			GM_setValue(anItemId, "");
+		} else{
+			GM_setValue(anItemId, "ON");
+		}
+	}
+};
+System.init();
+
+// @author        GIJoe
+// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
+//--- to test localStorage in firefox
+//delete GM_log; delete GM_getValue; delete GM_setValue; delete GM_deleteValue; delete GM_xmlhttpRequest; delete GM_openInTab; delete GM_registerMenuCommand;
+
+var gvar = function(){}
+// Global variables
+function GM_ApiBrowserCheck(){
+    const GMSTORAGE_PATH = 'GM_';
+    // You can change it to avoid conflict with others scripts
+    GM_addStyle = function(css){
+        var style = document.createElement('style');
+        style.textContent = css;
+        document.getElementsByTagName('head')[0].appendChild(style);
+    }
+    if (typeof(unsafeWindow) == 'undefined'){
+        unsafeWindow = window;
+    }
+    if (typeof(GM_log) == 'undefined'){
+        GM_log = function(msg){
+            try{
+                unsafeWindow.console.log('GM_log: ' + msg);
+            } catch(e){}
+        };
+    }
+    GM_clog = function(msg){
+        if (arguments.callee.counter){
+            arguments.callee.counter++;
+        } else{
+            arguments.callee.counter = 1;
+        }
+        GM_log('(' + arguments.callee.counter + ') ' + msg);
+    }
+    GM_addGlobalStyle = function(css){
+        // Redefine GM_addGlobalStyle with a better routine
+        var sel = document.createElement('style');
+        sel.setAttribute('type', 'text/css');
+        sel.appendChild(document.createTextNode(css));
+        var hel = document.documentElement.firstChild;
+        while (hel && hel.nodeName != 'HEAD'){
+            hel = hel.nextSibling;
+        }
+        if (hel && hel.nodeName == 'HEAD'){
+            hel.appendChild(sel);
+        } else{
+            document.body.insertBefore(sel, document.body.firstChild);
+        }
+        return sel;
+    }
+    var needApiUpgrade = false;
+    if (window.navigator.appName.match(/^opera/i) && typeof(window.opera) != 'undefined'){
+        needApiUpgrade = true;
+        gvar.isOpera = true;
+        GM_log = window.opera.postError;
+    }
+    if (typeof(GM_setValue) != 'undefined'){
+        var gsv; try { gsv=GM_setValue.toString(); } catch(e) { gsv='staticArgs'; }
+        if (gsv.indexOf('staticArgs') > 0){
+            gvar.isGreaseMonkey = true;
+        }
+        // test GM_hitch
+        else if (gsv.match(/not\s+supported/)){
+            needApiUpgrade = true;
+            gvar.isBuggedChrome = true;
+        }
+    } else{
+        needApiUpgrade = true;
+    }
+
+    if (needApiUpgrade){
+        var ws = null;
+        try{
+            ws = typeof(unsafeWindow.localStorage);
+            unsafeWindow.localStorage.length;
+        } catch(e){
+            ws = null;
+        }
+        // Catch Security error
+        if (ws == 'object'){
+            GM_getValue = function(name, defValue){
+                var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH + name);
+                if (value == null){
+                    return defValue;
+                } else{
+                    switch (value.substr(0, 2)){
+                    case 'S]':
+                        return value.substr(2);
+                    case 'N]':
+                        return parseInt(value.substr(2));
+                    case 'B]':
+                        return value.substr(2) == 'true';
+                    }
+                }
+                return value;
+            }
+            GM_setValue = function(name, value){
+                switch (typeof(value)){
+                case 'string':
+                    unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'S]' + value);
+                    break;
+                case 'number':
+                    if (value.toString().indexOf('.') < 0){
+                        unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'N]' + value);
+                    }
+                    break;
+                case 'boolean':
+                    unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'B]' + value);
+                    break;
+                }
+            }
+            GM_deleteValue = function(name){
+                unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH + name);
+            }
+        } else if (!gvar.isOpera || typeof(GM_setValue) == 'undefined'){
+            gvar.temporarilyStorage = new Array();
+            GM_getValue = function(name, defValue){
+                if (typeof(gvar.temporarilyStorage[GMSTORAGE_PATH + name]) == 'undefined'){
+                    return defValue;
+                } else{
+                    return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+                }
+            }
+            GM_setValue = function(name, value){
+                switch (typeof(value)){
+                case "string":
+                case "boolean":
+                case "number":
+                    gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
+                }
+            }
+            GM_deleteValue = function(name){
+                delete gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+            };
+        }
+        if (typeof(GM_openInTab) == 'undefined'){
+            GM_openInTab = function(url){
+                unsafeWindow.open(url, "");
+            }
+        }
+        if (typeof(GM_registerMenuCommand) == 'undefined'){
+            GM_registerMenuCommand = function(name, cmd){
+                GM_log("Notice: GM_registerMenuCommand is not supported.");
+            }
+        }
+        // Dummy
+        if (!gvar.isOpera || typeof(GM_xmlhttpRequest) == 'undefined'){
+            GM_xmlhttpRequest = function(obj){
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function(){
+                    if (obj.onreadystatechange){
+                        obj.onreadystatechange(request);
+                    };
+                    if (request.readyState == 4 && obj.onload){
+                        obj.onload(request);
+                    }
+                }
+                request.onerror = function(){
+                    if (obj.onerror){
+                        obj.onerror(request);
+                    }
+                }
+                try{
+                    request.open(obj.method, obj.url, true);
+                } catch(e){
+                    if (obj.onerror){
+                        obj.onerror({
+                            readyState: 4,
+                            responseHeaders: '',
+                            responseText: '',
+                            responseXML: '',
+                            status: 403,
+                            statusText: 'Forbidden'
+                        });
+                    };
+                    return;
+                }
+                if (obj.headers){
+                    for (name in obj.headers){
+                        request.setRequestHeader(name, obj.headers[name]);
+                    }
+                }
+                request.send(obj.data);
+                return request;
+            }
+        }
+    }
+}
+GM_ApiBrowserCheck();
+
+var Data = {
+
+	plantFromComponent: function(aComponent) {
+		switch(aComponent) {
+			case "Amber Essense":      return "Amber Plant"; break;
+			case "Blood Bloom Flower": return "Blood Bloom Plant"; break;
+			case "Dark Shade ":        return "Dark Shade Plant"; break;
+			case "Snake Eye":          return "Elya Snake Head"; break;
+			case "Snake Venom Fang":   return "Elya Snake Head"; break;
+			case "Heffle Wart":        return "Heffle Wart Plant"; break;
+			case "Jademare Blossom":   return "Jademare Plant"; break;
+			case "Trinettle Leaf":     return "Trinettle Plant"; break;
+			case "Purplet Flower":     return "Purplet Plant"; break;
+			default:                   return aComponent;
+		}
+	},
+
+	huntingOnImage: function () {
+		return "data:image/gif;base64,R0lGODlhKAAoALMAAD+yQH3Kf7zjvxCfEMvpzur17qzcry+rMDCsMGLAY9vv3k64T5fUmh+lIPr7/gCZACH5BAAAAAAALAAAAAAoACgAAASsEL1Jq704T6m7/2AojmRpnmiqrtQSBA2rDYJjO4mMBfd9YICXcAEoFn+eQs8WAAoDDIFiSRVYGROqwxAaELTVyXSZCx0ESrBNMFlYpY7CwOQFF67PAABZqqvBBHN9X39aXHSEhUsofoo3KY2OgieRhQAqAy8JAAZ/lzo1amUyoWBNoH+nMmlghzKFbDqwOgOKOgC2MriFkyq7njIDRsPEvTrHyMnKy8zHHM0bEQA7";
+	},
+
+	huntingOffImage: function() {
+		return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtAAAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAAgOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHYzLjM2qefiJQAAAVhJREFUWEftl08OQTEQxrkq5xDHkDiDxAUkrEms7IiNFQtWNiTKJxmppm2mpp33IhXNC9qZX7/50+qaTuf1bvELgG0ekK8CSkSoCkrUexew1EDp9Y0ADpZDg8HZnCrg7DA3t/vja/QW/SioGiAUc+Hoc0zJDyDJbj85IeDOOV3PQcBYuIOAo83YICTbyz5o2KcI1tCADdpASD18P9lNg2FmhXh1XCdBEgxACTC20VgesgDhBM5iYQqpaaeArS4BwyYrB7m5RPM4qsK5He5f8pytoG8DHMhY7tm/wZbPhwgQBnNC+opFDJgb0lUxC2BOyGKAuSCLAuaALA4IB9ROqAEj+bnVrALoOvHdYkLA7qmSrUhijT4F0L04VEAom3KGu81aRUFugWCefQNS+9P0V4DYjF1wrQtxBfT1w5QcbETB1Nu6eg5WQIkC0rUqbUYCWQEl6qmdxRLIJyPitjwjlrDgAAAAAElFTkSuQmCC";
+	},
+
+	soundMuteImage: function() {
+		return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAHNSURBVHjaYvz//z8DJQAggJgYKAQAAUS0Ad3dnZFtbS1P0cUBAoiFkMaenm7m////Nfz9+7f4379/nO/9/XOAwpsEN258BJIHCCAMA/r7+6wYGCDh8u/ffwag5oXCwsIqQkJCDOw7doCE04B4GUw9QABhGADUcJSVlQ1EMzABPSgsLMbAxsbBIHnyNIPMqzcgJVeAtr+DqQcIIAwD/v37y2BoaMjw8+cvIPsfw5MnTxhEjx1gkHv9muEdCwsD19+/acjqAQIIw4A/f/4yPH78mOHhw0dgAwwePmTQAWr+xMHBMF+Yn6Fn8vQvyOoBAgiLAX8Yvn79wnDv3j0Gx0+fGHS+f2d4AUwri/l5GX79/YcRyAABhBGNP358ZwClLV+g7Xa/fjG8YWRgqP78meED0CCQ99ABQABhuODnz58MYsePMRh9+MjwnpmFYamUOAMXMDSZgBjkJXQAEEAYLkh68HiO9bsPH5j//b++ho/L5fOvH3dlZCQZxMSEGbAle4AAQjEAmEgMJH798gemnNvs//+bNcxduJeBgVH9+7fvbW/fvPuOLaEBBBDYVGT8zs/PHYh50MVTUxOjgfgZujhAADFSmhsBAoji3AgQYAAwuNxkuZyGCwAAAABJRU5ErkJggg==";
+	},
+
+	soundImage: function() {
+		return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJZTwAAAI9SURBVHjaYvz//z8DJQAggJgYKAQAAYTTgO7uzsi2tpanhAwACCAWdIGenm7m////Nfz9+7f4379/nNg0PcoqTmH48XOb3LwpzwACiKW/v8+KgQESDv/+/WcAal4oLCysIiQkxHDhwnlMzRmF1dxMf1u+fvtxBsg1BQggFqCGo6ysbCCNDExADwkLizGwsXEwfP78heHnj5+omtMLUoE2b/z153cLD8s/k0duIdkAAcTy799fBkNDQ4afP38BXfCP4cmTJwwPHtxi4OPjY/j1C2HAo9T8FG7Gv7OANlf+/vEzn52dcSLDtx+5AAHE8ufPX4bHjx8zPHz4CGzAjx8/GL5+/Qp0DSPD7z+/wZpfBUbfYeDiTv/7/w8Dw7fv7XJbVzA+svaeCHSNOkAAAQ34A9TwheHevXtAG38xfPnyheHbt28MCgpyDLCwAQJBhu8/gNy/QAN+QERA9M+fDAABxPTjx3cGUFoSFhZiEBDgZwB5CWQACIPYICC2fqkwUIMay9/fII2Vjwwc83i4mRkYvv+8CRBALD+Bpty8eY0B5BKQF6SlJSEJBBiiID4MyO1YNf2RmTsj0NmHWBn/XWb4BbT1x8/JAAHE9PfPb+sf339aAw2C4u93ZWQkGcTEhBnQk7ncqZ3TgLaGsgNTz5dHb8/IPb80FSCAGNEVpaUlMf//978JyCxkYGTgnD17PiNGWhDTyWD49XuT3IebzwACCGwLNpyamhgNxM9wycMwQAAxUpobAQKI4twIEGAA+Mk8nL2QZm8AAAAASUVORK5CYII=";
+	},
+
+	greenDiamond: function() {
+		return "data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D";
+	},
+
+	yellowDiamond: function() {
+		return "data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D";
+	},
+
+	orangeDiamond: function() {
+		return "data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D";
+	},
+
+	offlineDot: function() {
+		return "data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SEhK2trbW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpjYxghISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAWGICAChCINxihm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3E0GD8rzSK6XDicDNqMdIoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PEBIKFYEeAAoJGRUTdJc1FgIiAx1mZhtHHQMqIgQCHAGtKiEAOw%3D%3D";
+	},
+
+	sevenDayDot: function() {
+		return "data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNrazEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQAV8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8UYxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7";
+	},
+
+	redDot: function() {
+		return "data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9znDEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudSa85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiLKpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTHSICFGSeSQcCKiIBDA0MoiohADs%3D";
+	},
+
+	runIcon: function() {
+		return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAAd0SU1FB9gDBhMMFhZz9poAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAABv0lEQVQ4y6WTMWsbQRCFPwUVa5BhBS684MZwzRkVukJFBGkE+QEhpUuVTid1SulSKt3lmvwAl04nF4a4UJCb4GsOXSNYQQS7IIGnU4qzT5JlJ5DMMsXO7ns7O/Om5H5Z/sfKzwNW3GowirlPE2YiABwqxUkQ0mm0Mapa2rxf2syge9NfjdOEj++THLg8Yw+wCyHxGfdTy0kQ0n/XLUjebILtNOO0FgLQq0+YVS5wiwyFJdKa01qInWZ0b/qrLQIrbjVOE5pHBhDelr8UJN5cIYA8rlZgGKcJVtyqIBiMYoxWWHFk3m3VpFefIOaKzLvCm0eawSheZzBOEzTgloJbyk6le/UJJrwtzpXKs9iqgZ/J2sW/SPLpQ4if5Q/4xw6Vi83i4Y/9Hv4c0v06BEDPZVcHsi+vgi9/XPL52znsg1EGqbhtglYtIpsmqFfA8W3MsTbkFxR+LrRq0boGnUYbKwJKIcgWuH99gRMp4qqisOLpNNprAqOqpWYQ4UTQB4cF+Py6DzywpxX6QKMqGjv3NIOokPSOlL+ndxxrjaooqqoKgBOHLIXM5+BNKZeeT+PTMA3TO4rfKGgF0d+H6V/sN7ur7I3UK1cpAAAAAElFTkSuQmCC";
+	},
+
+	stopIcon: function() {
+		return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAAd0SU1FB9gDBhMtH+MwW90AAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAyUlEQVQoz52SLQ4CMRCFv00Qi+tKZCWSI3AE1hEUIWBwhKugCEEBDotEIjlC5dZ13FZRRMOGFQ0/k4yZvC/vZWayEAK/VgfAbHdBruePYjUs0fNZ1gGQy5HBdPkRuu83MJ9FJwA8yOmQdhlP2vGQGiOOwqddjDiQ+g1q3Pz3i3A19I3BO5cU9oxBWvEAxMdOlXhc/QYVAqg8dnITedS9IG8tldYUeTfJVFrjrW3FC1oVsErfSgEWsgZSo/JxW6xT+qwBR2Uc/PN7T+yzRewsE50wAAAAAElFTkSuQmCC";
+	},
+
+	relicList: function() {
+		if (!Data.relicArray) {
+			Data.relicArray=[
+				{Name:"Blue Chasm",Realm:"Mountain Path (7,9) Lvl 1",Comment:"+1% Defense<br>+1% HP<br>+1 Stamina Gain<br>+5 Reinforced Armor"},
+				{Name:"Krul Pyramid",Realm:"Krul Small Cave (4,16) Lvl 14",Comment:"+1% Attack<br>+1% Damage<br>+200 XP Gain<br>+5 Critical Hit"},
+				{Name:"Unholy Shrine",Realm:"Paladir Forest East (2,2) Lvl 20",Comment:"+1% Damage<br>+75 Stamina<br>+50 Gold Gain<br>+200 XP Gain"},
+				{Name:"Udan Sun Orb",Realm:"Udan Forest (17,10) Lvl 28",Comment:"+1% Attack<br>+1 Stamina Gain<br>+50 Gold Gain<br>+5 Critical Hit"},
+				{Name:"Chaotic Symbol",Realm:"Burning Abyss (Level 3) (2,36) Lvl 34",Comment:"+50 Stamina<br>+1 Stamina Gain<br>+25 Thievery<br>+5 Disarm"},
+				{Name:"Moot Crypt",Realm:"Moot Forest East (10,11) Lvl 40",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+10 Master Blacksmith"},
+				{Name:"Klar Worldstone",Realm:"Klar Labyrinth (Level 1) (5,8) Lvl 48",Comment:"+5 Holy<br>+5 Nullify<br>+5 Banishment<br>+5 Protection<br>+5 Oceanic<br>+20 Disarm"},
+				{Name:"Pyramid of Protection",Realm:"Ellan Port Outskirts (2,4) Lvl 55",Comment:"+25 Reinforced Armor<br>+50 Protection<br>+25 Protect Gold<br>+50 Dodge"},
+				{Name:"Despair Crystal",Realm:"Depths of Despair (Level 2) (13,12) Lvl 85",Comment:"+1% Armor<br>+100 Stamina<br>+1 Stamina Gain<br>+20 Gold Gain<br>+200 XP Gain"},
+				{Name:"Endlore Giants Reach",Realm:"Endlore Valley North (9,7) Lvl 70",Comment:"+1% Attack<br>+1% HP<br>+1% Damage<br>+100 Gold Gain<br>+25 Breaker"},
+				{Name:"Utapo Death Skull",Realm:"Utapo Flats West (10,7) Lvl 48",Comment:"+1% Attack<br>+1% Damage<br>+10 Piercing strike<br>+20 Critical Hit<br>+25 Breaker<br>+20 Disarm"},
+				{Name:"Temple of the Gods",Realm:"Eldora Plains (East) (7,9) Lvl 98",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% Hp<br>+1% Damage<br>+50 Stamina<br>+1 Stamina Gain<br>+5 Nullify<br>+20 Protect Gold<br>+25 Dodge<br>+15 Master Blacksmith"},
+				{Name:"Elven Forge",Realm:"Elven Hideout (11,12) Lvl 30",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+10 Protect Gold"},
+				{Name:"Feidal Power Obelisk",Realm:"Feidal Swamps North (12,3) Lvl 65",Comment:"+1% Damage<br>+30 Critical Hit"},
+				{Name:"Ruined Crypt",Realm:"Enkmar Scrubland (North) (8,4) Lvl 107",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+10 Piercing Strike<br>+10 Reinforced Armor<br>+10 Thievery<br>+10 Critical Hit<br>+10 Breaker<br>+5 Nullify<br>+15 Dodge<br>+5 Disarm<br>+15 Sustain"},
+				{Name:"Ethereal Pillars",Realm:"Ethereal Gateway (7,7) Lvl 1",Comment:"+1% Defense<br>+1% Armor<br>+200 XP Gain<br>+25 Reinforced Armor<br>+25 Protection<br>+25 Protect Gold<br>+25 Sustain"},
+				{Name:"Kentlor Mine",Realm:"Kentlor Caves (North) (11,4) Lvl 113",Comment:"+1% Defense<br>+1% HP<br>+1% Damage<br>+100 Gold Gain<br>+25 Master Blacksmith<br>+25 Master Crafter"},
+				{Name:"Spirit Bog",Realm:"Jahd Swamps (North) (10,7) Lvl 125",Comment:"+1% Armor<br>+1% Hp<br>+1% Damage<br>+5 Breaker<br>+35 Nullify<br>+35 Banishment"},
+				{Name:"Sacrificial Altar",Realm:"Dekma Jungle (North (4,12) Lvl 130",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+15 Piercing Strike<br>+15 Thievery<br>+15 Critical Hit"},
+				{Name:"Lookout Menhir",Realm:"Metlair (North) (6,3) Lvl 140",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+20 Holy<br>+20 Breaker<br>+25 Dodge<br>+15 Disarm"},
+				{Name:"Ruined Temple",Realm:"Ekloren (South) (8,4) Lvl 152",Comment:"+1% Attack<br>+1% Defense<br>+1% Damage<br>+25 Critical Hit<br>+25 Holy<br>+50 Dodge<br>+25 Disarm<br>+25 Sustain"},
+				{Name:"Serpent Tree",Realm:"Emerye (North) (3,12) Lvl 160",Comment:"+1% Armor<br>+1% HP<br>+1% Damage<br>+15 Thievery<br>+15 Holy<br>+15 Nullify<br>+15 Oceanic<br>+15 Master Crafter"},
+				{Name:"Demonic Idol",Realm:"Brale (South) (8,9) Lvl 181",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+35 Reinforced Armour<br>+35 Critical Hit"},
+				{Name:"Sun Dial",Realm:"Pelrei (South) (4,8) Lvl 172",Comment:"+1% Attack<br>+1% HP<br>+25 Holy<br>+25 Protection<br>+25 Protect Gold<br>+25 Sustain"},
+				{Name:"Temple of Lightning",Realm:"Ephal Swamp (South) (12,4) Lvl 286",Comment:"+1% Attack<br>+1% Damage<br>+1 Stamina Gain<br>+15 Thievery<br>+45 Dodge<br>+15 Master Crafter"},
+				{Name:"The Fallen Star",Realm:"Krysa (West) (11,4) Lvl 298",Comment:"+1% Defense<br>+1% HP<br>+35 Breaker<br>+35 Banishment<br>+35 Oceanic"},
+				{Name:"Pyramid of Annot",Realm:"Selari (East) (11,5) Lvl 303",Comment:"+1% Attack<br>+1% Damage<br>+25 Breaker<br>+25 Protect Gold<br>+25 Disarm<br>+25 Sustain"},
+				{Name:"Leora Becon",Realm:"Cereas (West) (1,3) Lvl 314",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+20 Stamina<br>+15 Piercing Strike<br>+10 Reinforced Armor<br>+5 Holy<br>+15 Breaker"},
+				{Name:"Tree of Eternal Fire",Realm:"Inual (West) (12.10) Lvl 318",Comment:"+1% Damage<br>+75 Critical Hit<br>+15 Protection"},
+				{Name:"Mists of Concelment",Realm:"Peitha (West) (12,7) Lvl 324",Comment:"+100 Stamina<br>+50 Sustain"},
+				{Name:"Temple of Mar",Realm:"Aeresi (South) (8,3) Lvl 332",Comment:"+1% Attack<br>+1% Defense<br>+5 Holy<br>+25 Nullify"},
+				{Name:"Ice Claws",Realm:"Erodum (South) (12,14) Lvl 336",Comment:"+1% Armor<br>+1% HP<br>+55 Holy"},
+				{Name:"Ruzdum Keep",Realm:"Korundor (West) (9,10) Lvl 344",Comment:"+1% Defense<br>+1% Armor<br>+1% HP<br>+50 Reinforced Armor<br>+15 Fury Caster"},
+				{Name:"Ward of Dagoresh",Realm:"Maw of Dagoresh (12,10) Lvl 349",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+25 Piercing Strike<br>+25 Reinforced Armor<br>+25 Critical Hit<br>+25 Protection"},
+				{Name:"Enchanted Cottage",Realm:"Mountain Heights (2,2) Lvl 351",Comment:"+1% Attack<br>+1% Defense<br>+45 Sustain"},
+				{Name:"Elithra Crystal Cluster",Realm:"Hidden Valley (East) (14,8) Lvl 367",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+15 Nullify<br>+35 Banishment<br>+35 Disarm"},
+				{Name:"Glowing Lava Crystal",Realm:"Broken Lands (South) (10,3) Lvl 375",Comment:"+1% Defense<br>+1% Armor<br>+35 Sustain<br>+35 Fury Caster"},
+				{Name:"Searing Orb",Realm:"Wasteland (South) (13,3) Lvl 381",Comment:"+80 Defense<br>+100 XP Gain<br>+10 Awareness"},
+				{Name:"Aspiring Formation",Realm:"Fractured Foundations (4,2) Lvl 393",Comment:"+45 Dodge<br>+45 Disarm<br>+45 Duelist"},
+				{Name:"Wretched Abyss",Realm:"Seething Caverns (10,5) Lvl 399",Comment:"+1% Defense<br>+1% Armor<br>+1% HP<br>+45 Greenskin Slayer<br>+45 Beast Slayer"},
+				{Name:"Crossroads",Realm:"City of Xinderoth (26,35) Lvl 400",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+25 Protect Gold"},
+				{Name:"Tower Orb",Realm:"Citadel of Xinderoth (Floor 13) (15,17) Lvl 413",Comment:"+1% Attack<br>+25 Critical Hit<br>+25 Glory Seeker<br>+25 First Strike"},
+				{Name:"The Jolly Rodger",Realm:"Craggy Coastline (Upper) (12,3) Lvl 425",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+15 Sustain<br>+30 Master Crafter<br>+15 First Strike"},
+				{Name:"Emblazoned Warrior",Realm:"Stheno Lake (Edge) (10,2) Lvl 438",Comment:"+1% Damage<br>+10 Piercing Strike<br>+10 Critical Hit<br>+35 First Strike"},
+				{Name:"Kreth Crystals",Realm:"Caves of Kreth (Level 8) (15,10) Lvl 448",Comment:"+1% HP<br>+1% Damage"},
+				{Name:"Ritualistic Statue",Realm:"Troll Hold (8,1) Lvl 459",Comment:"+1% Attack <br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage"},
+				{Name:"Resolute Crystal",Realm:"Thundersnow Valley (East) (13,3) Lvl 462",Comment:"+1% Attack<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Disarm"},
+				{Name:"Statue of Degrot",Realm:"Wastes of Kruz (Plain) (15,2) Lvl 472",Comment:"+1% Defense<br>+1% Damage<br>+10 Reinforced Armor"},
+				{Name:"Ral Worldstone",Realm:"Forest of Ral (Depths) (8,8) Lvl 497",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+12 Piercing Strike<br>+13 Reinforced Armor<br>+15 Critical Hit<br>+10 Fury Caster"},
+				{Name:"Holy Crystals",Realm:"Castle Morbidstein (Fortress Upper) (15,9) Lvl 488",Comment:"+1% Attack<br>+1% Damage<br>+30 Holy"},
+				{Name:"Castle of the Sorceress",Realm:"Ralthien (District of Magic) (6,2) Lvl 508",Comment:"+1% Attack<br>+1% HP<br>+20 Reinforced Armor<br>+10 Critical Hit<br>+10 Master Blacksmith"},
+				{Name:"Circle of Virtue",Realm:"Teotal (Clearing) (16,10) Lvl 513",Comment:"+1% Defence<br>+1% Armor<br>+20 Reinforced Armor<br>+30 Nullify"},
+				{Name:"Oak of Ages",Realm:"The Secret Kingdom (Thicket) (16,8) Lvl 523",Comment:"+1% Attack<br>+1% Defense<br>+20 Critical Hit<br>+20 Nullify<br>+10 Disarm"},
+				{Name:"Holy Atholhu Pillar",Realm:"Dark Atholhu (Edge) (2,2) Lvl 538",Comment:"+1% Damage<br>+20 Nullify<br>+25 Dodge<br>+20 Master Crafter<br>+15 Master Inventor"},
+				{Name:"Temple of Inner Light",Realm:"Yanyi Woods (Inner) (8,9) Lvl 546",Comment:"+1% Attack<br>+1% Damage<br>+30 Critical Hit<br>+10 Master Inventor"},
+				{Name:"Greater Statue",Realm:"Gao Tain Lake (View) (15,2) Lvl 554",Comment:"+1% Armor<br>+1% Damage<br>+20 Critical Hit<br>+10 Sustain<br>+20 Glory Seeker"},
+				{Name:"Kyoko Relic",Realm:"Kyoko Island (South) Location (7,3) Lvl 564",Comment:"+1% Defense<br>+1% HP<br>+1% Damage<br>+25 Reinforced Armor<br>+15 Protection"},
+				{Name:"Spearing Light",Realm:"Floating Islands of Wu Kong (West Island) (15,5) Lvl 578",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage"},
+				{Name:"Wise Willow",Realm:"Truncal Jungle (South) (9,12) Lvl 583",Comment:"+1% Defense<br>+1% Damage<br>+40 Reinforced Armor"},
+				{Name:"Aura Rock",Realm:"Encrow Bay (Inner) (3,4) Lvl 592",Comment:"+1% Defense<br>+1% Damage<br>+20 Piercing Strike<br>+20 Critical Hit<br>+10 Dodge"},
+				{Name:"Shrieking Spire",Realm:"Desert of Brigands (North) (13,3) Lvl 608",Comment:"+1% Armor<br>+1% Damage<br>+20 Piercing Strike<br>+20 Critical Hit"},
+				{Name:"Giant Necral Skull",Realm:"Necral Fields (South) (3,13) Lvl 619",Comment:"+1% Defense<br>+1% Damage<br>+20 Piercing Strike<br>+10 Dodge<br>+10 Disarm"},
+				{Name:"Glacier Relic",Realm:"Zrozon Glacier (Edge) (5,7) Lvl 624",Comment:"+1% Defense"},
+				{Name:"Hobba Fort",Realm:"Hobba Marsh (Hobgoblin Ruins) (14,14) Lvl 634",Comment:"+1% Attack<br>+1% Defense"},
+				{Name:"Eohlar Relic",Realm:"Eohlar (South) (11,16) Lvl 643",Comment:"+1% Attack<br>+1% Damage"},
+				{Name:"Old Ruins",Realm:"The Fire Forest (Valley) (13,16) Lvl 654",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+10 Piercing Strike<br>+20 Critical Hit<br>+20 Sustain"},
+				{Name:"Barbmore Pillars",Realm:"Barbmore (Highland) (3,3) Lvl 663",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+20 Reinforced Armor<br>+20 Critical Hit<br>+10 Sustain"},
+				{Name:"Ravaged Cluster",Realm:"Ravaged Forest (Clearing) (10,2) Lvl 673",Comment:"+1% Attack<br>+1% Damage<br>+40 Piercing Strike<br>+10 Dodge"},
+				{Name:"Mittamurk Spires",Realm:"Forsaken Desert (Wastes) (12,10) Lvl 683",Comment:"+1% Attack<br>+1% Armor<br>+20 Breaker<br>+30 Dodge"},
+				{Name:"Hyrmit Pillar",Realm:"Hyrmit Swamps (Verge) (7,2) Lvl 694",Comment:"+1% Defense<br>+1% Damage<br>+20 Piercing Strike<br>+30 Critical Strike"},
+				{Name:"Ossrilan Circle",Realm:"Ossrilan Labyrinth (Cistern) (8,10) Lvl 707",Comment:"+1% Attack<br>+1% Armor<br>+30 Piercing Strike<br>+30 Nullify"},
+				{Name:"Ancient Fort",Realm:"Black Glades (Valley)  (10,8) Lvl 714",Comment:"+1% Defense<br>+1% Damage<br>+25 Reinforced Armor<br>+25 Nullify"},
+				{Name:"Crevasse of Souls",Realm:"Gohar Barrens (Ridge) (2,14) Lvl 728",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Sustain<br>+25 Fury Caster<br>+25 Master Inventor"},
+				{Name:"Huirvast Ruins",Realm:"Huirvast Jungle (Grove) (15,9) Lvl 733",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Critical Hit<br>+25 Nullify<br>+25 Sustain"},
+				{Name:"Guardian Statue",Realm:"Avithral Caves (Entrance) (12,2) Lvl 745",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Sustain"},
+				{Name:"Azlatha Artifact",Realm:"Azlatha Kingdom (Thicket) (15,12) Lvl 752",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge"},
+				{Name:"Pillars of Lindorik",Realm:"Lindorik Kingdom (Edge) (2,2) Lvl 763",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge"},
+				{Name:"Statue of Elidoia",Realm:"Muisru Kingdom (North) (12, 2) Lvl 775",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Disarm"},
+				{Name:"Darghei Statue",Realm:"Darghei Desert (South) (12, 2) Lvl 783",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Shimmering Circle",Realm:"The Lost Ascent (Entrance) (13, 2) Lvl 791",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Statue of Falzwort",Realm:"Falzwort Labyrinth (Halls) (2, 14) Lvl 803",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Abroia Fissure",Realm:"Forest of Abroia (Plateau) (9, 11) Lvl 818",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Enchanted Willow",Realm:"Nualgiath Forest (Thicket) (11, 9) Lvl 827",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Mystical Cluster",Realm:"Gritloar Burrows (Central Chamber) Lvl 846",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Piercing Strike<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Doujin Haunt",Realm:"Doujin Swamps (Murk) Lvl 853",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Outlores Pillar",Realm:"Outlore Flats (Valley) Lvl 866",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Ever Ice Stones",Realm:"Farmane Shore (Slopes) Lvl 878",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Goitha Vault",Realm:"Town of Goitha (Courtyard) Lvl 834",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Nullify<br>+25 Disarm"},
+				{Name:"Ancient Ruins of Zorx",Realm:"Nualgiath Forest (Ridge) Lvl 828",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Enchanted Circle of Pelgarir",Realm:"Pelgarir Valley (Verge) Lvl 874",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Sapher Fissure",Realm:"Sapher Flow (Upper) Lvl 885",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"},
+
+				{Name:"Menhir of Gore",Realm:"Krudar Crags (West) Lvl 904",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+30 Critical Hit<br>+25 Breaker<br>+25 Protection"},
+				{Name:"Riangi Cluster",Realm:"Mount Riangi (Flats) Lvl 913",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+45 Reinforced Armor<br>+10 Piercing Strike<br>+45 Breaker"},
+				{Name:"Yozahn Growth",Realm:"Isle of Yozahn (Shores) Lvl 925",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+15 Breaker<br>+45 Dodge"},
+				{Name:"Barnacle Buckler",Realm:"Dead Dogs Island (Port) Lvl 934",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+40 Piercing Strike<br>+25 Critical Strike<br>+15 Dodge<br>+10 Disarm"},
+				{Name:"Sacred Rocks of Zxl",Realm:"Xanlin Plain (Rise) Lvl 948",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+35 Piercing Strike<br>+30 Reinforced Armor<br>+15 Critical Hit<br>+15 Dodge"},
+				{Name:"The Blazing Statue",Realm:"Karthak (Mausoleum) Lvl 962",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Reinforced Armor<br>+20 Critical Hit<br>+30 Dodge<br>+30 Disarm"},
+				{Name:"Volmar Dark Crystal",Realm:"Unknown (Unknown) Lvl xyz",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Piercing Strike<br>+40 Reinforced Armor<br>+40 Critical Hit"}
+			];
+		}
+		return Data.relicArray;
+	},
+
+	buffList: function() {
+		if (!Data.buffArray) {
+			Data.buffArray = [
+				{name: "Rage",               stamina: 10, "duration": 90,   minCastLevel: 1,   treeId: 0, skillId: 0,  buff: "+0.2% base attack per point.", nicks: "rage"},
+				{name: "Stun",               stamina: 15, "duration": 90,   minCastLevel: 1,   treeId: 0, skillId: 1,  buff: "+0.1% chance per point to half opponents chance to hit.", nicks: "stun,st"},
+				{name: "Fury",               stamina: 10, "duration": 90,   minCastLevel: 25,  treeId: 0, skillId: 2,  buff: "+0.1% base Attack and +0.1% base Damage per point.", nicks: "fury"},
+				{name: "Berserk",            stamina: 15, "duration": 90,   minCastLevel: 75,  treeId: 0, skillId: 3,  buff: "+0.2% base Damage per point.", nicks: "berserk"},
+				{name: "Bloodthirst",        stamina: 10, "duration": 45,   minCastLevel: 25,  treeId: 0, skillId: 4,  buff: "+0.2% chance per point to drain 5% of your opponents current HP per combat turn from your opponent.", nicks: "bloodthirst,bt"},
+				{name: "Enchant Weapon",     stamina: 10, "duration": 90,   minCastLevel: 25,  treeId: 0, skillId: 5,  buff: "+0.1% per point stat bonus increase to your equipped weapon. (Excludes \\'Gain\\' bonuses).", nicks: "enchant weapon,ew"},
+				{name: "Holy Flame",         stamina: 15, "duration": 90,   minCastLevel: 75,  treeId: 0, skillId: 6,  buff: "+0.2% extra damage vs. undead per point.", nicks: "holy flame,hf"},
+				{name: "Dark Curse",         stamina: 20, "duration": 60,   minCastLevel: 150, treeId: 0, skillId: 7,  buff: "+0.2% reduction of opponents defence per point.", nicks: "dark curse,dc"},
+				{name: "Shockwave",          stamina: 20, "duration": 90,   minCastLevel: 200, treeId: 0, skillId: 29, buff: "+0.1% per point chance per point that your opponent will forfeit their next combat turn.", nicks: "shockwave,sw,shock"},
+				{name: "Ignite",             stamina: 10, "duration": 60,   minCastLevel: 200, treeId: 0, skillId: 30, buff: "+0.1% per point chance per point that your opponent will be set on fire. Each successful hit thereafter will inflict between 5% and 10% extra damage.", nicks: "ignite,ign"},
+				{name: "Super Elite Slayer", stamina: 25, "duration": 15,   minCastLevel: 250, treeId: 0, skillId: 31, buff: "+0.2% per point reduction of damage, attack, defence and armor to super elite creatures.", nicks: "super elite slayer,ses,se slayer"},
+				{name: "Wither",             stamina: 15, "duration": 60,   minCastLevel: 250, treeId: 0, skillId: 32, buff: "+0.2% per point chance of a 50% reduction of your opponents HP at the start of combat.", nicks: "wither,with"},
+				{name: "Shatter Armor",      stamina: 20, "duration": 60,   minCastLevel: 300, treeId: 0, skillId: 33, buff: "+0.05% per point chance to reduce opponents armor by 75%.", nicks: "shatter armor,sa"},
+				{name: "Deathwish",          stamina: 20, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 34, buff: "+0.03% per point chance to instantly kill vs. creatures. (Excludes Super Elites)", nicks: "deathwish,dw,deathw,death wish"},
+				{name: "Spell Breaker",      stamina: 35, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 35, buff: "+0.1% per point chance to remove a random buff from PvP target upon a successful attack.", nicks:"spell breaker,sb"},
+				{name: "Keen Edge",          stamina: 10, "duration": 60,   minCastLevel: 400, treeId: 0, skillId: 47, buff: "+0.1% per point to your attack for each complete set equipped.", nicks: "keen edge,ke"},
+				{name: "Spectral Knight",    stamina: 15, "duration": 45,   minCastLevel: 400, treeId: 0, skillId: 48, buff: "+0.1% per point chance to reduce targets armor by 100%. (vs Creature only)", nicks: "spectral knight,sk,spec knight"},
+				{name: "Arterial Strike",    stamina: 20, "duration": 60,   minCastLevel: 500, treeId: 0, skillId: 49, buff: "Gain additional 0.1% xp per point for every additional round of combat. (Note that this does not activate if conserve activated)", nicks: "arterial strike,as,art strike,art str"},
+				{name: "Death Dealer",       stamina: 20, "duration": 60,   minCastLevel: 500, treeId: 0, skillId: 50, buff: "For every 5 kills in a row, without dying, you gain +0.01% extra damage per point (Max 20% and vs. creatures only).", nicks: "death dealer,dd"},
+				{name: "Savagery",           stamina: 15, "duration": 45,   minCastLevel: 600, treeId: 0, skillId: 51, buff: "0.05% chance per point that your defense stat is added to your attack and your armor stat is added to your damage.", nicks: "savagery,savage"},
+				{name: "Chi Strike",         stamina: 20, "duration": 90,   minCastLevel: 700, treeId: 0, skillId: 52, buff: "0.1% per point of your Health total is added to your damage", nicks:"chi strike,chi,chis,chi str"},
+				{name: "Shield Strike",      stamina: 20, "duration": 45,   minCastLevel: 700, treeId: 0, skillId: 53, buff: "0.1% per point chance that your defense stat is reduced to zero and your damage is doubled.", nicks: "shield strike,ss,sh str"},
+				{name: "Demoralize",         stamina: 25, "duration": 30,   minCastLevel: 800, treeId: 0, skillId: 73, buff: "+0.25% per point chance to half the opponents enchancement levels for the battle. Note this skill only takes effect if you initiated the combat.", nicks: "demoralize,dem"},
+				{name: "Poison",             stamina: 25, "duration": 60,   minCastLevel: 800, treeId: 0, skillId: 70, buff: "+0.1% per point chance that your opponent will be poisoned. Each successful hit thereafter will inflict between 10% and 20% extra damage.", nicks: "poison,poi"},
+				{name: "Iron Fist",          stamina: 25, "duration": 60,   minCastLevel: 900, treeId: 0, skillId: 74, buff: "+0.1% per point stat bonus increase to your equipped gloves. (Excludes \\'Gain\\' bonuses).", nicks: "iron fist,if"},
+				{name: "Spell Leech",        stamina: 50, "duration": 60,   minCastLevel: 900, treeId: 0, skillId: 79, buff: "+0.1% per point chance when you defeat an opponent in PvP that you initiated, you will steal a random buff. Note the remaining duration of the buff is reduced by 50% and will not take effect until the next combat. Note also if you already have the buff active, it will replace the existing buff you have active.", nicks: "spell leech,sl"},
+				{name: "Distraction",        stamina: 25, "duration": 60,   minCastLevel: 900, treeId: 0, skillId: 78, buff: "+0.2% per point chance to obtain no gold from a successful combat. +0.05% per point chance to inflict double damage in each round of combat. Note this skill has no effect in PvP.", nicks: "distraction,dis"},
+				{name: "Coordinated Attack", stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 0, skillId: 118,buff: "+0.05% per point added to Attack and Damage if every piece of equipped gear is part of a set.", nicks: "coordinated attack,coorda"},
+				{name: "Undermine",          stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 0, skillId: 108,buff: "Increases the maximum percentage (above 100%) of the Breaker enhancement by +0.2% per point.", nicks: "undermine,um"},
+				{name: "Cursed Rune",        stamina: 30, "duration": 120,  minCastLevel: 1000,treeId: 0, skillId: 89, buff: "0.2% per point stat bonus to your equipped rune. Excludes \\'Gain\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.", nicks: "cursed rune,crune"},
+				{name: "Anti Deflect",       stamina: 30, "duration": 60,   minCastLevel: 1000,treeId: 0, skillId: 105,buff: "+0.2% per point chance to prevent your opponent activating Deflect.", nicks: "anti deflect,ad"},
+				{name: "Overkill",           stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 0, skillId: 109,buff: "When you inflict 2 times or more of the starting hit points in the first round of combat, you have a 0.25% per point chance to gain 0.025% per point extra XP. (PvE Only)", nicks: "overkill,ok"},
+				{name: "Smashing Hammer",    stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 0, skillId: 111,buff: "+0.05% per point added to your damage for each complete set equipped.", nicks: "smashing hammer,sh"},
+				{name: "Mighty Vigor",       stamina: 35, "duration": 60,   minCastLevel: 1200,treeId: 0, skillId: 113,buff: "For every 50 points of the skill, can equip items 1 level higher than your level.", nicks: "mighty vigor,mv"},
+				{name: "Fist Fight",         stamina: 35, "duration": 90,   minCastLevel: 1200,treeId: 0, skillId: 115,buff: "+0.1% per point chance that both players will lose the benefit of ALL skills at the start of combat. This skill takes effect before Sealed. (PvP Only)", nicks: "fist fight,ff"},
+				{name: "Cursed Ring",        stamina: 30, "duration": 120,  minCastLevel: 1400,treeId: 0, skillId: 88, buff: "0.2% per point stat bonus to your equipped ring. Excludes \\'Gain\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.", nicks: "cursed ring,cring"},
+				{name: "Sharpen",            stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 0, skillId: 106,buff: "Increases the maximum percentage (above 100%) of the Piercing Strike enhancement by +0.1% per point.", nicks: "sharpen,sharp"},
+				{name: "Balanced Attack",    stamina: 30, "duration": 90,   minCastLevel: 1400,treeId: 0, skillId: 116,buff: "+0.05% per point added to Attack and Damage if every piece of equipped gear is the same level.", nicks: "balanced attack,ba"},
+				{name: "Fortify",            stamina: 10, "duration": 120,  minCastLevel: 25,  treeId: 1, skillId: 8,  buff: "+0.1% base Armor per point.", nicks: "fortify"},
+				{name: "Enchanted Armor",    stamina: 10, "duration": 90,   minCastLevel: 75,  treeId: 1, skillId: 9,  buff: "+0.1% per point stat bonus increase to your equipped armor. (Excludes \\'Gain\\' bonuses).", nicks: "enchanted armor,enchant armor,ea,ench arm,ench armor"},
+				{name: "Evade",              stamina: 10, "duration": 90,   minCastLevel: 25,  treeId: 1, skillId: 10, buff: "+0.1% base Defence per point.", nicks: "evade"},
+				{name: "Rock Skin",          stamina: 15, "duration": 90,   minCastLevel: 75,  treeId: 1, skillId: 11, buff: "+0.1% base Defence and +0.1 base Armor per point.", nicks: "rock skin,rs"},
+				{name: "Great Vigor",        stamina: 10, "duration": 90,   minCastLevel: 1,   treeId: 1, skillId: 12, buff: "+0.2% base HP per point.", nicks: "great vigor,vigor,gv"},
+				{name: "Absorb",             stamina: 20, "duration": 120,  minCastLevel: 25,  treeId: 1, skillId: 13, buff: "+0.1% chance per point that you will absorb 25% of the damage inflicted on you.", nicks: "absorb,abs"},
+				{name: "Deflect",            stamina: 25, "duration": 300,  minCastLevel: 150, treeId: 1, skillId: 14, buff: "+0.25% chance per point that a player attacking you will automatically fail before combat starts.", nicks: "deflect,defl"},
+				{name: "Aura of Protection", stamina: 20, "duration": 90,   minCastLevel: 150, treeId: 1, skillId: 15, buff: "+0.1% base Defence, +0.1% base Armor and +0.1% base HP per point.", nicks: "aura of protection,aop,aofp"},
+				{name: "Force Shield",       stamina: 10, "duration": 60,   minCastLevel: 200, treeId: 1, skillId: 27, buff: "+0.1% per point chance to reduce damage done to you to 1.", nicks: "force shield,fs"},
+				{name: "Unbreakable",        stamina: 20, "duration": 90,   minCastLevel: 200, treeId: 1, skillId: 28, buff: "+0.5% per point chance per point of equipment not taking durability loss during combat.", nicks: "unbreakable,ub,unb,unbr"},
+				{name: "Assist",             stamina: 30, "duration": 120,  minCastLevel: 250, treeId: 1, skillId: 36, buff: "+0.05% per point chance of one of your allies assisting in combat vs. creatures. (Ally is randomly selected and adds 50% of their attack, defense, damage, armor and hp - note this also excludes allies whom are more than 25 levels above you.).", nicks: "assist,ass"},
+				{name: "Constitution",       stamina: 25, "duration": 30,   minCastLevel: 300, treeId: 1, skillId: 37, buff: "+0.1% per point increase to your defense.", nicks: "constitution,const"},
+				{name: "Counter Attack",     stamina: 20, "duration": 60,   minCastLevel: 400, treeId: 1, skillId: 54, buff: "Uses 0.25% extra stamina (per point) to add 0.25% to both attack and damage. (Both values are rounded up, vs. creature only)", nicks: "counter attack,ca"},
+				{name: "Summon Shield Imp",  stamina: 50, "duration": 60,   minCastLevel: 400, treeId: 1, skillId: 55, buff: "Creates an Imp which can absorb 100% of damage. Each full absorb uses one of the Shield Imp\\'s hit points. The Shield Imp starts with 3 hit points and gains one for each 50 points placed in this skill. The Shield Imp auto-debuffs when it reaches zero hit points. (Note Super-Elites can crush the imp in a single turn regardless of hit points remaining and it only works in PvE.", nicks: "summon shield imp,ssi,imp"},
+				{name: "Vision",             stamina: 20, "duration": 90,   minCastLevel: 500, treeId: 1, skillId: 56, buff: "Lights up dark realms. More skill points allow more vision on the \\'Map\\' screen. (Vision radius increases every 50 levels).", nicks: "vision,vis"},
+				{name: "Fortitude",          stamina: 15, "duration": 90,   minCastLevel: 500, treeId: 1, skillId: 57, buff: "Defense stat is added to HP. (0.1% per point).", nicks: "fortitude,fort"},
+				{name: "Flinch",             stamina: 20, "duration": 60,   minCastLevel: 600, treeId: 1, skillId: 58, buff: "0.1% per point decrease in enemies Attack stat", nicks: "flinch"},
+				{name: "Terrorize",          stamina: 20, "duration": 60,   minCastLevel: 700, treeId: 1, skillId: 59, buff: "0.1% per point decrease in enemies Damage stat.", nicks: "terrorize,terror"},
+				{name: "Nightmare Visage",   stamina: 40, "duration": 1000, minCastLevel: 700, treeId: 1, skillId: 60, buff: "0.25% per point of your Attack will be transferred into Defense. (Great for offline protection!)", nicks: "nightmare visage,nv,visage"},
+				{name: "Honor",              stamina: 10, "duration": 180,  minCastLevel: 800, treeId: 1, skillId: 82, buff: "+0.2% per point decrease to the PvP Rating points transferred upon defeat.", nicks: "honor"},
+				{name: "Sanctuary",          stamina: 25, "duration": 30,   minCastLevel: 800, treeId: 1, skillId: 44, buff: "+0.1% per point increase to your armor", nicks: "sanctuary,sanc"},
+				{name: "Dull Edge",          stamina: 10, "duration": 60,   minCastLevel: 800, treeId: 1, skillId: 46, buff: "+0.4% per point reduction to creatures \\'Piercing Strike\\' enhancement.", nicks: "dull edge,de"},
+				{name: "Erosion",            stamina: 25, "duration": 180,  minCastLevel: 900, treeId: 1, skillId: 80, buff: "+0.1% per point chance to reduce an attackers item durability to 1 if durability damage is inflicted. Note this skill only works in PvP and if you are defending.", nicks: "erosion,ero"},
+				{name: "Avert Gaze",         stamina: 10, "duration": 180,  minCastLevel: 900, treeId: 1, skillId: 71, buff: "+0.5% per point chance of not being affected by Hypnotize.", nicks: "avert gaze,ag"},
+				{name: "Enchant Shield",     stamina: 25, "duration": 60,   minCastLevel: 900, treeId: 1, skillId: 77, buff: "+0.1% per point stat bonus increase to your equipped shield. (Excludes \\'Gain\\' bonuses).", nicks: "enchant shield,es"},
+				{name: "Smite",              stamina: 30, "duration": 60,   minCastLevel: 1000,treeId: 1, skillId: 97, buff: "0.1% per point reduction to attackers armor when defending a PvP attack. (PvP Only).", nicks: "smite,sm"},
+				{name: "Balanced Defense",   stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 1, skillId: 117,buff: "+0.05% per point added to Defense and Armor if every piece of equipped gear is the same level.", nicks: "balanced defense,bd"},
+				{name: "Bastion",            stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 1, skillId: 122,buff: "Increases the maximum percentage (above 100%) of the Protection enhancement by +0.2% per point.", nicks: "bastion,bast"},
+				{name: "Side Step",          stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 1, skillId: 86, buff: "Increases the maximum percentage (above 100%) of the Dodge enhancement by +0.2% per point.", nicks: "side step,sstep"},
+				{name: "High Guard",         stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 1, skillId: 96, buff: "0.05% chance per point that your attack stat is added to your defense and your damage stat is added to your armor.", nicks: "high guard,hg"},
+				{name: "Barricade",          stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 1, skillId: 98, buff: "0.1% per point of Damage is transferred to Defense.", nicks: "barricade,bar"},
+				{name: "Coordinated Defense",stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 1, skillId: 119,buff: "+0.05% per point added to Defense and Armor if every piece of equipped gear is part of a set.", nicks: "coordinated defense,cd"},
+				{name: "Degrade",            stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 1, skillId: 121,buff: "Increases the maximum percentage (above 100%) of the Nullify enhancement by +0.2% per point.", nicks: "degrade,deg,dg"},
+				{name: "Retaliate",          stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 123,buff: "Increases the maximum percentage (above 100%) of the Disarm enhancement by +0.2% per point.", nicks: "retaliate,ret"},
+				{name: "Shame",              stamina: 35, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 110,buff: "If successfully defending an attack, remove a percentage of additional +0.25% per point xp from the attacker. (PvP Only)", nicks: "shame"},
+				{name: "Dispel Curse",       stamina: 35, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 114,buff: "0.2% chance per point that Dark Curse will not work against you. (PvP Only)", nicks: "dispel curse,dispel"},
+				{name: "Find Item",          stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 2, skillId: 16, buff: "+0.1% per point increase of creatures current drop rate.", nicks: "find item,fi"},
+				{name: "Treasure Hunter",    stamina: 15, "duration": 120,  minCastLevel: 1,   treeId: 2, skillId: 17, buff: "+0.2% per point additional gold from creatures.", nicks: "treasure hunter,th,treas hunter"},
+				{name: "Defiance",           stamina: 15, "duration": 120,  minCastLevel: 25,  treeId: 2, skillId: 18, buff: "+0.25% per point reduction in xp lost when defeated in combat vs creatures.", nicks: "defiance"},
+				{name: "Adept Learner",      stamina: 10, "duration": 90,   minCastLevel: 25,  treeId: 2, skillId: 19, buff: "+0.2% per point increase in xp from creature kills.", nicks: "adept learner,al"},
+				{name: "Librarian",          stamina: 10, "duration": 60,   minCastLevel: 75,  treeId: 2, skillId: 20, buff: "+0.1% per point chance to gain double xp from creatures.", nicks: "librarian,lib,libr"},
+				{name: "Merchant",           stamina: 10, "duration": 60,   minCastLevel: 75,  treeId: 2, skillId: 21, buff: "+0.05% per point chance to gain double gold from creatures.", nicks: "merchant,merch,merc"},
+				{name: "Deep Pockets",       stamina: 10, "duration": 90,   minCastLevel: 1,   treeId: 2, skillId: 22, buff: "+0.25% per point reduction in gold lost on failed combat vs creatures.", nicks: "deep pockets,dp"},
+				{name: "Last Ditch",         stamina: 15, "duration": 120,  minCastLevel: 150, treeId: 2, skillId: 23, buff: "+0.2% per point chance to survive death in combat (once per combat).", nicks: "last ditch,ld"},
+				{name: "Animal Magnetism",   stamina: 10, "duration": 60,   minCastLevel: 200, treeId: 2, skillId: 24, buff: "+0.2% per point chance to make certain creatures respawn at your location.", nicks: "animal magnetism,animag,ani mag,am"},
+				{name: "Empower",            stamina: 20, "duration": 60,   minCastLevel: 200, treeId: 2, skillId: 25, buff: "+0.1% per point increase to all currently active enhancements.", nicks: "empower,emp"},
+				{name: "Doubler",            stamina: 5,  "duration": 120,  minCastLevel: 200, treeId: 2, skillId: 26, buff: "At skill level 50+, 2x Stamina usage in combat in return for 2x gold/xp. At level 100+ 3x, and at level 150+ 4x. Note that stamina and xp loss are normal (not multiplied) if you lose a battle.", nicks: "doubler,doub,db"},
+				{name: "Conserve",           stamina: 10, "duration": 45,   minCastLevel: 250, treeId: 2, skillId: 39, buff: "+0.05% per point chance that combat (vs. players and vs. creatures) will use no stamina. (Excludes group/relic combat)", nicks: "conserve,cons,consv,con"},
+				{name: "Brewing Master",     stamina: 10, "duration": 30,   minCastLevel: 250, treeId: 2, skillId: 40, buff: "+0.5% per point to the duration of potions when consumed while active.", nicks: "brewing master,bm,brm,brewm"},
+				{name: "Four Leaf",          stamina: 20, "duration": 60,   minCastLevel: 250, treeId: 2, skillId: 41, buff: "+0.1% per point chance that craftable items are discovered already \\'Perfect\\'.", nicks: "four leaf,4l,fl"},
+				{name: "Extend",             stamina: 30, "duration": 30,   minCastLevel: 300, treeId: 2, skillId: 42, buff: "+0.25% per point increase to skills durations that are cast while this skill is active.", nicks: "extend,ext"},
+				{name: "Quest Finder",       stamina: 5,  "duration": 90,   minCastLevel: 1,   treeId: 2, skillId: 61, buff: "Increases the chance a quest item will drop. (If you fail to obtain an item, an extra roll is given for Quest Finder at a fixed percentage based on the points allocated to the skill. If this second roll is successful, you will obtain one of the available quest items drops (if any)).", nicks: "quest finder,qf"},
+				{name: "Inventor",           stamina: 15, "duration": 60,   minCastLevel: 400, treeId: 2, skillId: 62, buff: "Increases chance of success when attempting to Invent items/potions. (A fixed +0.05% chance per point extra chance of success)", nicks: "inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1"},
+				{name: "Extractor",          stamina: 15, "duration": 60,   minCastLevel: 400, treeId: 2, skillId: 63, buff: "Increases chance of success when attempting to extract Components from Resources. (A fixed +0.05% chance per point extra chance of success).", nicks: "extractor,extr"},
+				{name: "Inventor II",        stamina: 20, "duration": 60,   minCastLevel: 500, treeId: 2, skillId: 64, buff: "Chance not to consume (or consume less) components when inventing items.", nicks: "inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2"},
+				{name: "Buff Master",        stamina: 10, "duration": 60,   minCastLevel: 500, treeId: 2, skillId: 65, buff: "0.2% per point chance to half the stamina cost (rounding up) when casting skills on other players. (Does not work on self!)", nicks: "buff master,buffm,bum"},
+				{name: "Reflection",         stamina: 10, "duration": 90,   minCastLevel: 600, treeId: 2, skillId: 66, buff: "0.1% per point of enemies damage inflicted is added to your next combat strike.", nicks: "reflection,ref,refl,reflect"},
+				{name: "Light Foot",         stamina: 15, "duration": 120,  minCastLevel: 700, treeId: 2, skillId: 67, buff: "0.05% chance to use no stamina while moving on the world map.", nicks: "light foot,lf"},
+				{name: "Mesmerize",          stamina: 20, "duration": 60,   minCastLevel: 700, treeId: 2, skillId: 68, buff: "0.1% per point chance to reduce a creatures armor and defense by 50% (vs. creature only).", nicks: "mesmerize,mesmer,mes,mez"},
+				{name: "Resource Finder",    stamina: 25, "duration": 90,   minCastLevel: 800, treeId: 2, skillId: 76, buff: "Increases the chance a resource item will drop. (If you fail to obtain an item, an extra roll is given for Resource Finder at a fixed percentage based on the points allocated to the skill. If this second roll is successful, you will obtain one of the available resource items drops (if any)). Note if you have Quest Finder active as well, this roll takes place after Quest Finder and only if Quest Finder fails to obtain an item.", nicks: "resource finder,rf"},
+				{name: "Gloat",              stamina: 10, "duration": 60,   minCastLevel: 900, treeId: 2, skillId: 81, buff: "+0.5% per point increase to the PvP Rating points transferred upon victory. Note if you lose to a player who has the Honor skill active, you will lose and additional 50% PvP Rating.", nicks: "gloat"},
+				{name: "Sacrifice",          stamina: 25, "duration": 90,   minCastLevel: 900, treeId: 2, skillId: 75, buff: "+0.04% per point additional xp and -0.25% per point less gold for defeating creatures in combat.", nicks: "sacrifice,sac"},
+				{name: "Reckoning",          stamina: 25, "duration": 60,   minCastLevel: 900, treeId: 2, skillId: 72, buff: "+0.2% per point chance of doubling a random skill level for the battle if you initiate the combat (Note that this skill does not work with Doubler, Summon Shield Imp or Counter Attack.).", nicks: "reckoning,rec,rek"},
+				{name: "Reinforce",          stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 2, skillId: 126,buff: "Increases the maximum percentage (above 100%) of the Sustain enhancement by +0.2% per point.", nicks: "reinforce,rein"},
+				{name: "Bodyguard",          stamina: 30, "duration": 120,  minCastLevel: 1000,treeId: 2, skillId: 120,buff: "0.4% per point of XP lost that would be lost to a non-bounty board PvP attack is lost as gold instead, as long as there is enough unbanked gold. Gold lost because of Bodyguard is sunk: it does not go to attacker. Gold taken by attacker (and gold sunk as a result) is unaffected.", nicks: "bodyguard,bg"},
+				{name: "Riposte",            stamina: 30, "duration": 60,   minCastLevel: 1000,treeId: 2, skillId: 124,buff: "Increases the maximum percentage (above 100%) of the Duelist enhancement by +0.2% per point.", nicks: "riposte,rip"},
+				{name: "Severe Condition",   stamina: 30, "duration": 90,   minCastLevel: 1000,treeId: 2, skillId: 101,buff: "+0.25% per point of your attack, defense, damage and armor stats are transferred to your health at the start of combat.", nicks: "severe condition,sc"},
+				{name: "Sealed",             stamina: 35, "duration": 60,   minCastLevel: 1200,treeId: 2, skillId: 112,buff: "+0.1% per point chance at the start of combat that your opponents skills won't take effect in combat. (PvP Only)", nicks: "sealed,seal"},
+				{name: "Righteous",          stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 2, skillId: 107,buff: "Increases the maximum percentage (above 100%) of the Holy enhancement by +0.2% per point.", nicks: "righteous,right"},
+				{name: "Epic Forge",         stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 2, skillId: 102,buff: "+0.5% per point increase to Hell Forge stat bonuses. Excludes bonuses to enhancements.", nicks: "epic forge,ef"},
+				{name: "Golden Shield",      stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 2, skillId: 103,buff: "+0.05% per point chance to double your armor and defense at the start of combat.", nicks: "golden shield,gs"},
+				{name: "Stalker",            stamina: 35, "duration": 90,   minCastLevel: 1400,treeId: 2, skillId: 125,buff: "Increases the maximum percentage (above 100%) of the Elite Hunter enhancement by +0.1% per point.", nicks: "stalker,stalk"},
+				{name: "Ageless",            stamina: 30, "duration": 90,   minCastLevel: 1400,treeId: 2, skillId: 100,buff: "+0.2% per point chance of doubling your HP at the start of combat.", nicks: "ageless,age"},
+				{name: "Extractor II",       stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 2, skillId: 104,buff: "+0.05% per point chance to not destroy a resource when extracting components.", nicks: "extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2"}
+			];
+		}
+		return Data.buffArray;
+	},
+
+	quickSearchList: function() {
+		if (!Data.quickSearchArray) {
+			Data.quickSearchArray = [
+				{"category":"Potions","searchname":"Potion of the Wise",             "nickname":"Lib 200", "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of the Bookworm",         "nickname":"Lib 225", "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Shattering",           "nickname":"SA",      "displayOnAH":true},
+				{"category":"Potions","searchname":"Dragons Blood Potion",           "nickname":"ZK 200",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Berserkers Potion",              "nickname":"ZK 300",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Fury",                 "nickname":"ZK 350",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Sludge Brew",                    "nickname":"DC 200",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Black Death",          "nickname":"DC 225",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Aid",                  "nickname":"Assist",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Supreme Doubling",     "nickname":"DB 450",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Acceleration",         "nickname":"DB 500",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Lesser Death Dealer",  "nickname":"DD",      "displayOnAH":true},
+				{"category":"Potions","searchname":"Runic Potion",                   "nickname":"FI 250",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Supreme Luck",         "nickname":"FI 1k",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Truth",                "nickname":"EW 1k",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Dull Edge",                      "nickname":"DE 25",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Notched Blade",                  "nickname":"DE 80",   "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Death",                "nickname":"DW 125",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Decay",                "nickname":"WI 150",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Fatality",             "nickname":"WI 350",  "displayOnAH":true},
+				{"category":"Potions","searchname":"Potion of Annihilation",         "nickname":"DW 150",  "displayOnAH":true},
+				{"category":"Plants", "searchname":"Blood Bloom",                    "nickname":""},
+				{"category":"Plants", "searchname":"Jademare",         	             "nickname":""},
+				{"category":"Plants", "searchname":"Dark Shade",                     "nickname":""},
+				{"category":"Plants", "searchname":"Trinettle",                      "nickname":""},
+				{"category":"Plants", "searchname":"Heffle Wart",                    "nickname":""},
+				{"category":"Plants", "searchname":"Amber",                          "nickname":""}
+			];
+		}
+		return Data.quickSearchArray;
+	}
+};
+
+var Layout = {
+
+	injectMenu: function() {
+		if (GM_getValue("lastActiveQuestPage").length > 0) {
+			var questBookNode = System.findNode('//a[@href="index.php?cmd=questbook"]');
+			if (questBookNode) {
+				questBookNode.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+			}
+		}
+		//"menuSource_0"
+		var tableElement = System.findNode("//div[@id='menuSource_0']/table");
+		if (!tableElement) return;
+		if (GM_getValue("keepBuffLog")) {
+			Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
+		}
+		Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
+		Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13);
+		Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 15);
+		if (GM_getValue("keepLogs")) {
+			Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17);
+		}
+		if (GM_getValue("showMonsterLog")) {
+			Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19);
+		}
+		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
+		//"menuSource_5"
+		tableElement = System.findNode("//div[@id='menuSource_5']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
+		if (!GM_getValue("useNewGuildLog")) {
+			//if not using the new guild log, show it as a separate menu entry
+			Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
+		}
+		//"menuSource_3"
+		tableElement = System.findNode("//div[@id='menuSource_3']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
+		//"menuSource_2"
+		tableElement = System.findNode("//div[@id='menuSource_2']/table");
+		if (!tableElement) return;
+		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
+		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 7);
+		Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 9);
+		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 11);
+	},
+
+	injectItemIntoMenuTable: function(tableElement, text, href, position) {
+		var newRow;
+		if (position > tableElement.rows.length) position = tableElement.rows.length;
+		newRow = tableElement.insertRow(position);
+		newRow.innerHTML='<td height="5"></td>';
+		newRow = tableElement.insertRow(position);
+		var newCell = newRow.insertCell(0);
+		newCell.innerHTML='<font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font>';
+	},
+
+	injectQuickLinks: function() {
+		var quickLinks = System.getValueJSON("quickLinks");
+		if (!quickLinks) quickLinks=[];
+		if (quickLinks.length<=0) return;
+		var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg') or contains(@src,'realm_top_a.jpg')]");
+		if (!insertBeforeHere) return;
+		result="&nbsp;&nbsp;";
+		for (var i=0; i<quickLinks.length; i++) {
+			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
+				(quickLinks[i].newWindow?' target=new':"") +
+				'>' + quickLinks[i].name + '</a> ;';
+		}
+		result += '<br/>'
+		var newDiv = document.createElement("DIV");
+		newDiv.innerHTML=result;
+		newDiv.style.background = 'black';
+		newDiv.style.textAlign = 'left';
+		insertBeforeHere.parentNode.insertBefore(newDiv, insertBeforeHere);
+	},
+
+	hideBanner: function() {
+		if (!GM_getValue("hideBanner")) {
+			if (GM_getValue("showSTUpTop")) {
+				var overlayTable = System.findNode("//div[@class='top_banner']");
+				if (overlayTable) {
+					var STnode = System.findNode("//font[contains(., 'Server:')]/nobr/b");
+					if (STnode) {
+						overlayTable.innerHTML += "<div><font color=#FFFFFF size='3'>ST: " + STnode.innerHTML + "</font></div>";
+					} else {
+						var STnode1 = System.findNode("//table[tbody/tr/td/font[.='Server:']]//tr[4]/td[2]/font");
+						var STnode2 = System.findNode("//table[tbody/tr/td/font[.='Server:']]//tr[5]/td[2]/font");
+						if (STnode1 && STnode2) {
+							overlayTable.innerHTML += "<div><font color=#FFFFFF size='3'>ST: " + STnode1.innerHTML + " " + STnode2.innerHTML + "</font></div>";
+						}
+					}
+				}
+			}
+			return;
+		}
+		var bannerElement = System.findNode("//div[@class='top_banner']");
+		if (bannerElement) {
+			bannerElement.style.display = "none";
+		}
+	},
+
+	moveFSBox: function() {
+		if (!GM_getValue("moveFSBox")) return;
+		var src=System.findNode("//b[.='FSBox']/../../../../..");
+		if (!src) return;
+		src.parentNode.removeChild(src.nextSibling);
+		var dest=System.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
+		// window.alert(dest);
+		var info = dest.insertRow(26);
+		var cell = info.insertCell(0);
+		cell.innerHTML="&nbsp;";
+		info = dest.insertRow(26);
+		cell = info.insertCell(0);
+		cell.setAttribute("align", "center");
+		cell.appendChild(src);
+	},
+
+	moveGuildOnlineList: function() {
+		if (!GM_getValue("moveGuildList")) return;
+		var src=System.findNode("//font[b='Guild Info']/../../../..");
+		if (!src) return;
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src);
+		var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+		if (rightColumnTable) {
+			//var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			var dest = rightColumnTable;
+			if (!dest) return;
+			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?3:1;
+			var info = dest.insertRow(startRow);
+			if (!info) return;
+			var cell = info.insertCell(0);
+			cell.align = 'center';
+			cell.width = '120';
+			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
+			cell.appendChild(src);
+			var breaker = dest.insertRow(startRow+1);
+			cell = breaker.insertCell(0);
+			cell.innerHTML = "<br/>";
+		}
+    },
+
+	moveOnlineAlliesList: function() {
+		if (!GM_getValue("moveOnlineAlliesList")) return;
+		var src=System.findNode("//font[b='Online Allies']/../../../..");
+		if (!src) return;
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src.nextSibling);
+		src.parentNode.removeChild(src);
+		var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+		if (rightColumnTable) {
+			//var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
+			var dest = rightColumnTable;
+			if (!dest) return;
+			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?3:1;
+			var info = dest.insertRow(startRow);
+			if (!info) return;
+			var cell = info.insertCell(0);
+			cell.align = 'center';
+			cell.width = '120';
+			cell.innerHTML="<span id='Helper:OnlineAlliesListPlaceholder'></span>";
+			cell.appendChild(src);
+			var breaker = dest.insertRow(startRow+1);
+			cell = breaker.insertCell(0);
+			cell.innerHTML = "<br/>";
+		}
+    },
+
+	notebookContent: function() {
+		return System.findNode("//div[@class='innerContentMiddle']");
+	},
+
+	playerId: function() {
+		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
+		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
+		GM_setValue("playerID",thePlayerId);
+		return thePlayerId;
+	},
+
+	infoBox: function(documentText) {
+		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
+		infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)</i;
+		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully recalled the item.</center>
+		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully took the item into your backpack.</center>
+		var infoMatch = documentText.match(infoRE);
+		var result="";
+		if (infoMatch) {
+			result=infoMatch[1];
+		}
+		return result;
+	},
+
+	networkIcon: function() {
+		return '<img title="This function retrieves data from the network. Disable this to increase speed" '+
+			' src="data:image/png;base64,' +
+			'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA' +
+			'B3RJTUUH1QgGDTMWk1twEwAAAAlwSFlzAAALEgAACxIB0t1+' +
+			'/AAAAARnQU1BAACxjwv8YQUAAAC8SURBVHjahVPBEcQgCEQn' +
+			'HdmTqUlr0qe16I8cufOiCGZnGCcIy4LEICJwmGgWJ3o0IOCQ' +
+			'EqVg9Y4U3CoCHQhvxuPUZEiA3XYkxyI1/6S6R6rke8AlJbkV' +
+			'7u95lleXq3yrdyUjLGxwnifmnHEXY3fJIQSIMcKOZCLgMltr' +
+			'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
+			'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
+			'egAAAABJRU5ErkJggg==" width="16" height="16" />';
+	},
+
+	quickBuffHref: function(playerId, buffList) {
+		if (buffList) {
+		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
+				"&blist=" + buffList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
+		} else {
+			return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
+			"', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
+		}
+	},
+
+
+	formatWiki: function(aText, oldVersion, newVersion) {
+		var lines=aText.replace("\r","").split("\n");
+		var changes=[];
+		var revRX = /^==Revision\s*(\d+)/i;
+		var chgRX = /^\s*\#\s+(.*)$/i;
+		var rev = null;
+		var chg = null;
+		var revNo = 0;
+		var chgTxt = "";
+
+		for (var i=0; i<lines.length; i++){
+			var line = lines[i];
+			rev=revRX.exec(line);
+			chg=chgRX.exec(line);
+
+			if (rev) revNo = parseInt(rev[1],10);
+			chgTxt = "";
+			if (chg) chgTxt = chg[1];
+			if (chgTxt!=="") {
+				if (!changes[revNo]) changes[revNo] = "";
+				changes[revNo] += "<li>" + chgTxt + "</li>";
+			}
+		}
+		var result='<ol>';
+		for (i=newVersion; i>=oldVersion; i--) {
+			if (changes[i]) {
+				result += '<li value='+i+'><ul type=square>' + changes[i] + '</ul></li>';
+			}
+		}
+		result += "</ol>";
+		return result;
+	}
+
+};
 
 var Helper = {
 	// System functions
@@ -406,7 +1543,7 @@ var Helper = {
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
-			
+
 		}
 		//alert("Betas good");
 		}
@@ -13062,19 +14199,31 @@ var Helper = {
 		}, 0);
 	}
 };
-
-var $ ;
-
-GM_wait();
 Helper.onPageLoad(null);
 
-// Check if jQuery's loaded
-function GM_wait(jqFunction) {
-	if (typeof unsafeWindow.jQuery == 'undefined') {
-		window.setTimeout(GM_wait, 100);
-	} else {
-		$ = unsafeWindow.jQuery;
-		$T = unsafeWindow.Tipped;
-		if (jqFunction) jqFunction.call();
+};
+
+if (navigator.userAgent.indexOf("Firefox")>0) {
+	var $ ;
+	// Check if jQuery's loaded
+	function GM_wait(jqFunction) {
+		if (typeof unsafeWindow.jQuery == 'undefined') {
+			window.setTimeout(GM_wait, 100);
+		} else {
+			$ = unsafeWindow.jQuery;
+			$T = unsafeWindow.Tipped;
+			if (jqFunction) jqFunction.call();
+		}
 	}
+	GM_wait();
+	main();
 }
+
+
+function insertJS(callback) {
+	var script = document.createElement("script");
+	script.textContent = "(" + callback.toString() + ")();";
+	document.body.appendChild(script);
+}
+// load jQuery and execute the main function
+if (navigator.userAgent.indexOf("Chrome")>0) insertJS(main);
