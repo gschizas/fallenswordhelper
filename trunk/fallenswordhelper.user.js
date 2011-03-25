@@ -1442,48 +1442,28 @@ var Helper = {
 
 	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
 		var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-		var confirmAlert = document.createElement("DIV");
-		confirmAlert.id = 'Helper:ConfirmAlert';
-		var divHeight = window.innerHeight - 160;
 
-		confirmAlert.style.position = "absolute";
-		confirmAlert.style.left = (window.innerWidth - 500) / 2 + "px";
-		confirmAlert.style.top = (80 + window.scrollY) + "px";
-		confirmAlert.style.width = "500px";
-		confirmAlert.style.height = divHeight + "px";
-		confirmAlert.style.display = 'block';
-		confirmAlert.style.zIndex = '90';
-		confirmAlert.style.filter = 'alpha';
-		confirmAlert.style.opacity = '0.9';
-		confirmAlert.style.background = 'black';
-		confirmAlert.style.color = 'white';
-		confirmAlert.style.border = 'ridge';
-
-		confirmAlert.innerHTML = '<div height="20" style="background-color:#4a3918;">' +
-			'<div style="color:yellow;position:absolute;top:0px;left:0px">New version (' + newVersion + ') found. Update from version ' + oldVersion + '?' +
-			'</div><div style="position:absolute;top:0px;right:0px">' +
-			'<input type="button" id="Helper:AutoUpdateOk" value="Ok" class="custombutton">' +
-			'&nbsp;<input type="button" id="Helper:AutoUpdateCancel" value="Cancel" class="custombutton"></div></div>' +
-			'<div id="Helper:Output" style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
-		document.body.insertBefore(confirmAlert, document.body.firstChild);
-		document.getElementById("Helper:AutoUpdateOk").addEventListener("click", Helper.autoUpdateConfirmOk, true);
-		document.getElementById("Helper:AutoUpdateOk").setAttribute("newVersion", newVersion);
-		document.getElementById("Helper:AutoUpdateCancel").addEventListener("click", Helper.autoUpdateConfirmCancel, true);
-	},
-
-	autoUpdateConfirmOk: function(evt) {
-		var newVersion = parseInt(evt.target.getAttribute("newVersion"),10);
-		GM_setValue("currentVersion", newVersion);
-		Helper.autoUpdateConfirmCancel(evt);
-		//next line causes the following error, not sure why, or where it is from, but it seems to have no effect
-		//uncaught exception: TypeError: aTab is undefined
-		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
-	},
-
-	autoUpdateConfirmCancel: function(evt) {
-		var confirmAlert = document.getElementById("Helper:ConfirmAlert");
-		confirmAlert.style.display = "none";
-		confirmAlert.visibility = "hidden";
+		var $dialog = $('<div></div>')
+			.html(theChanges)
+			.dialog({
+				title: 'Fallen Sword Helper new version (' + newVersion + ') found. Update from version ' + oldVersion + '?',
+				resizable: false,
+				height:500,
+				width:500,
+				modal: true,
+				buttons: {
+					"OK": function() {
+						$( this ).dialog( "close" );
+						setTimeout(function() {
+							GM_setValue("currentVersion", newVersion);
+							GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
+						}, 0);
+					},
+					Cancel: function() {
+						$( this ).dialog( "close" );
+					}
+				}
+		});
 	},
 
 	// main event dispatcher
