@@ -1478,10 +1478,8 @@ var Helper = {
 				buttons: {
 					"OK": function() {
 						$( this ).dialog( "close" );
-						setTimeout(function() {
-							GM_setValue("currentVersion", newVersion);
-							GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
-						}, 0);
+						GM_setValue("currentVersion", newVersion);
+						GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 					},
 					Cancel: function() {
 						$( this ).dialog( "close" );
@@ -2608,12 +2606,10 @@ var Helper = {
 		evt.target.removeEventListener('click', Helper.empowerRelic, true);
 		evt.target.style.cursor = "default";
 		evt.target.style.textDecoration = "none";
-		setTimeout(function() {
-			Helper.empowerRelicMaxTries = 20;
-			Helper.empowerRelicCurrentTries = 1;
-			//index.php?cmd=relic&subcmd=empower&relic_id=12
-			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":evt.target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
-		}, 0);
+		Helper.empowerRelicMaxTries = 20;
+		Helper.empowerRelicCurrentTries = 1;
+		//index.php?cmd=relic&subcmd=empower&relic_id=12
+		System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":evt.target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
 	},
 
 	empowerRelicToTarget: function(responseText, callback) {
@@ -2627,15 +2623,11 @@ var Helper = {
 		var doc = System.createDocument(responseText);
 		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent,10);
 		target.innerHTML += currentLevel + " -> ";
-		setTimeout(function() {
-			var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries
-			var empowerRelicMaxTries = Helper.empowerRelicMaxTries
-		}, 0);
+		var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries
+		var empowerRelicMaxTries = Helper.empowerRelicMaxTries
 		if (currentLevel < targetEmpowerLevel && empowerRelicCurrentTries < empowerRelicMaxTries) {
-			setTimeout(function() {
-				empowerRelicCurrentTries ++;
-				System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
-			}, 0);
+			empowerRelicCurrentTries ++;
+			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
 		} else {
 			//http://www.fallensword.com/index.php?cmd=relic&relic_id=87
 			window.location = "index.php?cmd=relic&relic_id=" + relicID
@@ -9652,13 +9644,12 @@ var Helper = {
 				window.location.reload();
 			}, true);
 
-		unsafeWindow.document.getElementById("Helper:linesToShow").onkeypress = function (event) {
+		unsafeWindow.document.getElementById("Helper:linesToShow").realmKeyHandler = function (event) {
 			event = ( event ) ? event : window.event;
 			var charkey = String.fromCharCode(( event.which ) ? event.which : event.keyCode);
 			document.getElementById("Helper:saveLines").style.display = "";
 			return ((("0123456789").indexOf(charkey) > -1));
 		};
-
 		document.getElementById('textInputBox').addEventListener('keyup', Helper.updateBioCharacters, true);
 		//Force the preview area to render
 		Helper.updateBioCharacters(null);
