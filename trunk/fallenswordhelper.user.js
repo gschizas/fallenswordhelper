@@ -240,8 +240,9 @@ var System = {
 		Array.prototype.filterBy = System.filterBy;
 
 		System.server           = document.location.protocol + "//" + document.location.host + "/";
-		[,System.browserName, System.browserVersion] = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i)
-		System.browserVersion = parseInt(System.browserVersion,10);
+		var uAgent = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i);
+		System.browserName = uAgent[1];
+		System.browserVersion = parseInt(uAgent[2],10);
 
 		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
