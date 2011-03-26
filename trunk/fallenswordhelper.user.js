@@ -6825,7 +6825,7 @@ var Helper = {
 						document.getElementById('Helper:equipProfileInventoryItem' + profileInventoryBoxID[i]).
 							addEventListener('click', Helper.equipProfileInventoryItem, true);
 					}
-					else if (enableQuickDrink && itemOnClick.indexOf("this potion") != -1) { // check to see if item is useable (potion).
+					else if (enableQuickDrink && itemOnClick && itemOnClick.indexOf("this potion") != -1) { // check to see if item is useable (potion).
 						var output = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
 								'id="Helper:drinkProfileInventoryItem' + profileInventoryBoxID[i] + '" ' +
 								'itemID="' + profileInventoryBoxID[i] + '">Drink</span>';
