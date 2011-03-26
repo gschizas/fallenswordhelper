@@ -12,8 +12,219 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
-var isBeta ="0";
+// EVERYTHING MUST BE IN main()
 var main = function() {
+
+var isBeta ="0";
+
+// jquery GM_get/set wrapper
+function GM_JQ_wrapper() {
+	if (typeof(GM_setValue) != 'undefined') {
+		var oldGM_setValue = GM_setValue;
+		GM_setValue = function(name, value){
+			setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		};
+		var oldGM_openInTab = GM_openInTab;
+		GM_openInTab = function(url) {
+			setTimeout(function() {oldGM_openInTab(url);}, 0);
+		};
+		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
+		GM_xmlhttpRequest = function(details) {
+			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
+		};
+		// don't know how to modify GM_getValue yet (how to return value from setTimeout) - TODO
+		// other GM_functions are not needed.
+	}
+}
+GM_JQ_wrapper();
+
+// GM_ApiBrowserCheck
+// @author        GIJoe
+// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
+var gvar = function(){}
+// Global variables
+function GM_ApiBrowserCheck(){
+    const GMSTORAGE_PATH = 'GM_';
+    // You can change it to avoid conflict with others scripts
+    GM_addStyle = function(css){
+        var style = document.createElement('style');
+        style.textContent = css;
+        document.getElementsByTagName('head')[0].appendChild(style);
+    }
+    if (typeof(unsafeWindow) == 'undefined'){
+        unsafeWindow = window;
+    }
+    if (typeof(GM_log) == 'undefined'){
+        GM_log = function(msg){
+            try{
+                unsafeWindow.console.log('GM_log: ' + msg);
+            } catch(e){}
+        };
+    }
+    GM_clog = function(msg){
+        if (arguments.callee.counter){
+            arguments.callee.counter++;
+        } else{
+            arguments.callee.counter = 1;
+        }
+        GM_log('(' + arguments.callee.counter + ') ' + msg);
+    }
+    GM_addGlobalStyle = function(css){
+        // Redefine GM_addGlobalStyle with a better routine
+        var sel = document.createElement('style');
+        sel.setAttribute('type', 'text/css');
+        sel.appendChild(document.createTextNode(css));
+        var hel = document.documentElement.firstChild;
+        while (hel && hel.nodeName != 'HEAD'){
+            hel = hel.nextSibling;
+        }
+        if (hel && hel.nodeName == 'HEAD'){
+            hel.appendChild(sel);
+        } else{
+            document.body.insertBefore(sel, document.body.firstChild);
+        }
+        return sel;
+    }
+    var needApiUpgrade = false;
+    if (window.navigator.appName.match(/^opera/i) && typeof(window.opera) != 'undefined'){
+        needApiUpgrade = true;
+        gvar.isOpera = true;
+        GM_log = window.opera.postError;
+    }
+    if (typeof(GM_setValue) != 'undefined'){
+        var gsv; try { gsv=GM_setValue.toString(); } catch(e) { gsv='staticArgs'; }
+        if (gsv.indexOf('staticArgs') > 0){
+            gvar.isGreaseMonkey = true;
+        }
+        // test GM_hitch
+        else if (gsv.match(/not\s+supported/)){
+            needApiUpgrade = true;
+            gvar.isBuggedChrome = true;
+        }
+    } else{
+        needApiUpgrade = true;
+    }
+
+    if (needApiUpgrade){
+        var ws = null;
+        try{
+            ws = typeof(unsafeWindow.localStorage);
+            unsafeWindow.localStorage.length;
+        } catch(e){
+            ws = null;
+        }
+        // Catch Security error
+        if (ws == 'object'){
+            GM_getValue = function(name, defValue){
+                var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH + name);
+                if (value == null){
+                    return defValue;
+                } else{
+                    switch (value.substr(0, 2)){
+                    case 'S]':
+                        return value.substr(2);
+                    case 'N]':
+                        return parseInt(value.substr(2));
+                    case 'B]':
+                        return value.substr(2) == 'true';
+                    }
+                }
+                return value;
+            }
+            GM_setValue = function(name, value){
+                switch (typeof(value)){
+                case 'string':
+                    unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'S]' + value);
+                    break;
+                case 'number':
+                    if (value.toString().indexOf('.') < 0){
+                        unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'N]' + value);
+                    }
+                    break;
+                case 'boolean':
+                    unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'B]' + value);
+                    break;
+                }
+            }
+            GM_deleteValue = function(name){
+                unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH + name);
+            }
+        } else if (!gvar.isOpera || typeof(GM_setValue) == 'undefined'){
+            gvar.temporarilyStorage = new Array();
+            GM_getValue = function(name, defValue){
+                if (typeof(gvar.temporarilyStorage[GMSTORAGE_PATH + name]) == 'undefined'){
+                    return defValue;
+                } else{
+                    return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+                }
+            }
+            GM_setValue = function(name, value){
+                switch (typeof(value)){
+                case "string":
+                case "boolean":
+                case "number":
+                    gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
+                }
+            }
+            GM_deleteValue = function(name){
+                delete gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+            };
+        }
+        if (typeof(GM_openInTab) == 'undefined'){
+            GM_openInTab = function(url){
+                unsafeWindow.open(url, "");
+            }
+        }
+        if (typeof(GM_registerMenuCommand) == 'undefined'){
+            GM_registerMenuCommand = function(name, cmd){
+                GM_log("Notice: GM_registerMenuCommand is not supported.");
+            }
+        }
+        // Dummy
+        if (!gvar.isOpera || typeof(GM_xmlhttpRequest) == 'undefined'){
+            GM_xmlhttpRequest = function(obj){
+                var request = new XMLHttpRequest();
+                request.onreadystatechange = function(){
+                    if (obj.onreadystatechange){
+                        obj.onreadystatechange(request);
+                    };
+                    if (request.readyState == 4 && obj.onload){
+                        obj.onload(request);
+                    }
+                }
+                request.onerror = function(){
+                    if (obj.onerror){
+                        obj.onerror(request);
+                    }
+                }
+                try{
+                    request.open(obj.method, obj.url, true);
+                } catch(e){
+                    if (obj.onerror){
+                        obj.onerror({
+                            readyState: 4,
+                            responseHeaders: '',
+                            responseText: '',
+                            responseXML: '',
+                            status: 403,
+                            statusText: 'Forbidden'
+                        });
+                    };
+                    return;
+                }
+                if (obj.headers){
+                    for (name in obj.headers){
+                        request.setRequestHeader(name, obj.headers[name]);
+                    }
+                }
+                request.send(obj.data);
+                return request;
+            }
+        }
+    }
+}
+GM_ApiBrowserCheck();
+
 // System functions
 var System = {
 	init: function() {
@@ -29,7 +240,8 @@ var System = {
 		Array.prototype.filterBy = System.filterBy;
 
 		System.server           = document.location.protocol + "//" + document.location.host + "/";
-		System.browserVersion   = parseInt(navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i)[2],10);
+		[,System.browserName, System.browserVersion] = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i)
+		System.browserVersion = parseInt(System.browserVersion,10);
 
 		var imgurls = System.findNode("//img[contains(@src, '/skin/')]");
 		if (!imgurls) return; //login screen or error loading etc.
@@ -379,195 +591,6 @@ var System = {
 	}
 };
 System.init();
-
-// @author        GIJoe
-// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
-//--- to test localStorage in firefox
-//delete GM_log; delete GM_getValue; delete GM_setValue; delete GM_deleteValue; delete GM_xmlhttpRequest; delete GM_openInTab; delete GM_registerMenuCommand;
-
-var gvar = function(){}
-// Global variables
-function GM_ApiBrowserCheck(){
-    const GMSTORAGE_PATH = 'GM_';
-    // You can change it to avoid conflict with others scripts
-    GM_addStyle = function(css){
-        var style = document.createElement('style');
-        style.textContent = css;
-        document.getElementsByTagName('head')[0].appendChild(style);
-    }
-    if (typeof(unsafeWindow) == 'undefined'){
-        unsafeWindow = window;
-    }
-    if (typeof(GM_log) == 'undefined'){
-        GM_log = function(msg){
-            try{
-                unsafeWindow.console.log('GM_log: ' + msg);
-            } catch(e){}
-        };
-    }
-    GM_clog = function(msg){
-        if (arguments.callee.counter){
-            arguments.callee.counter++;
-        } else{
-            arguments.callee.counter = 1;
-        }
-        GM_log('(' + arguments.callee.counter + ') ' + msg);
-    }
-    GM_addGlobalStyle = function(css){
-        // Redefine GM_addGlobalStyle with a better routine
-        var sel = document.createElement('style');
-        sel.setAttribute('type', 'text/css');
-        sel.appendChild(document.createTextNode(css));
-        var hel = document.documentElement.firstChild;
-        while (hel && hel.nodeName != 'HEAD'){
-            hel = hel.nextSibling;
-        }
-        if (hel && hel.nodeName == 'HEAD'){
-            hel.appendChild(sel);
-        } else{
-            document.body.insertBefore(sel, document.body.firstChild);
-        }
-        return sel;
-    }
-    var needApiUpgrade = false;
-    if (window.navigator.appName.match(/^opera/i) && typeof(window.opera) != 'undefined'){
-        needApiUpgrade = true;
-        gvar.isOpera = true;
-        GM_log = window.opera.postError;
-    }
-    if (typeof(GM_setValue) != 'undefined'){
-        var gsv; try { gsv=GM_setValue.toString(); } catch(e) { gsv='staticArgs'; }
-        if (gsv.indexOf('staticArgs') > 0){
-            gvar.isGreaseMonkey = true;
-        }
-        // test GM_hitch
-        else if (gsv.match(/not\s+supported/)){
-            needApiUpgrade = true;
-            gvar.isBuggedChrome = true;
-        }
-    } else{
-        needApiUpgrade = true;
-    }
-
-    if (needApiUpgrade){
-        var ws = null;
-        try{
-            ws = typeof(unsafeWindow.localStorage);
-            unsafeWindow.localStorage.length;
-        } catch(e){
-            ws = null;
-        }
-        // Catch Security error
-        if (ws == 'object'){
-            GM_getValue = function(name, defValue){
-                var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH + name);
-                if (value == null){
-                    return defValue;
-                } else{
-                    switch (value.substr(0, 2)){
-                    case 'S]':
-                        return value.substr(2);
-                    case 'N]':
-                        return parseInt(value.substr(2));
-                    case 'B]':
-                        return value.substr(2) == 'true';
-                    }
-                }
-                return value;
-            }
-            GM_setValue = function(name, value){
-                switch (typeof(value)){
-                case 'string':
-                    unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'S]' + value);
-                    break;
-                case 'number':
-                    if (value.toString().indexOf('.') < 0){
-                        unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'N]' + value);
-                    }
-                    break;
-                case 'boolean':
-                    unsafeWindow.localStorage.setItem(GMSTORAGE_PATH + name, 'B]' + value);
-                    break;
-                }
-            }
-            GM_deleteValue = function(name){
-                unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH + name);
-            }
-        } else if (!gvar.isOpera || typeof(GM_setValue) == 'undefined'){
-            gvar.temporarilyStorage = new Array();
-            GM_getValue = function(name, defValue){
-                if (typeof(gvar.temporarilyStorage[GMSTORAGE_PATH + name]) == 'undefined'){
-                    return defValue;
-                } else{
-                    return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-                }
-            }
-            GM_setValue = function(name, value){
-                switch (typeof(value)){
-                case "string":
-                case "boolean":
-                case "number":
-                    gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
-                }
-            }
-            GM_deleteValue = function(name){
-                delete gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-            };
-        }
-        if (typeof(GM_openInTab) == 'undefined'){
-            GM_openInTab = function(url){
-                unsafeWindow.open(url, "");
-            }
-        }
-        if (typeof(GM_registerMenuCommand) == 'undefined'){
-            GM_registerMenuCommand = function(name, cmd){
-                GM_log("Notice: GM_registerMenuCommand is not supported.");
-            }
-        }
-        // Dummy
-        if (!gvar.isOpera || typeof(GM_xmlhttpRequest) == 'undefined'){
-            GM_xmlhttpRequest = function(obj){
-                var request = new XMLHttpRequest();
-                request.onreadystatechange = function(){
-                    if (obj.onreadystatechange){
-                        obj.onreadystatechange(request);
-                    };
-                    if (request.readyState == 4 && obj.onload){
-                        obj.onload(request);
-                    }
-                }
-                request.onerror = function(){
-                    if (obj.onerror){
-                        obj.onerror(request);
-                    }
-                }
-                try{
-                    request.open(obj.method, obj.url, true);
-                } catch(e){
-                    if (obj.onerror){
-                        obj.onerror({
-                            readyState: 4,
-                            responseHeaders: '',
-                            responseText: '',
-                            responseXML: '',
-                            status: 403,
-                            statusText: 'Forbidden'
-                        });
-                    };
-                    return;
-                }
-                if (obj.headers){
-                    for (name in obj.headers){
-                        request.setRequestHeader(name, obj.headers[name]);
-                    }
-                }
-                request.send(obj.data);
-                return request;
-            }
-        }
-    }
-}
-GM_ApiBrowserCheck();
 
 var Data = {
 
@@ -1335,7 +1358,7 @@ var Helper = {
 			Helper.sortAsc = true;
 			Helper.sortBy = "category";
 			quickSearchList.sort(Helper.stringSort);
-			setTimeout(function() {System.setValueJSON("quickSearchList", quickSearchList);}, 0);
+			System.setValueJSON("quickSearchList", quickSearchList);
 		}
 
 		var memberList = System.getValueJSON("memberlist");
@@ -1375,7 +1398,7 @@ var Helper = {
 			Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
 			Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
 			Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
-			setTimeout(function() {GM_setValue("CharacterName", Helper.characterName);}, 0);
+			GM_setValue("CharacterName", Helper.characterName);
 
 			Helper.savedItemData = [];
 		});
@@ -1496,7 +1519,7 @@ var Helper = {
 				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
 			});
 		}
-		
+
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
@@ -1524,9 +1547,9 @@ var Helper = {
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
-			
+
 		}
-		
+
 
 		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -1996,14 +2019,14 @@ var Helper = {
 		$(":button","#msgTemplate").button();
 		$(".del-button").click(function(evt) {
 			Helper.template.splice($("#msgTemplate li").index(evt.target.parentNode), 1);
-			setTimeout(function() {System.setValueJSON("quickMsg", Helper.template);}, 0); // work around GM security check
+			System.setValueJSON("quickMsg", Helper.template);
 			$("#msgTemplateDialog").dialog("close");
 			Helper.showMsgTemplate();
 		});
 		$("#newTmplAdd").click(function() {
 			if ($("#newTmpl").val()=="") return;
 			Helper.template.push($("#newTmpl").val());
-			setTimeout(function() {System.setValueJSON("quickMsg", Helper.template);}, 0);
+			System.setValueJSON("quickMsg", Helper.template);
 			$("#msgTemplateDialog").dialog("close");
 			Helper.showMsgTemplate();
 		});
@@ -2365,10 +2388,10 @@ var Helper = {
 		if (!staminaImageElement) {return;}
 
 		var mouseoverText = $(staminaImageElement).data('tipped');
-		
+
 		var staminaRE = /Stamina:\s<\/td><td width=\'90%\' class=\'currentmax\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
 		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\' class=\'nextgain\'>([,0-9]+)m ([,0-9]+)s/;
-		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;	
+		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;
 
 		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
@@ -2392,7 +2415,7 @@ var Helper = {
 		staminaImageElement.setAttribute("data-tipped", newMouseoverText);
 		return;
 		}
-			
+
 		//Old Map Style
 		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
 		if (!staminaImageElement) {return;}
