@@ -1477,12 +1477,12 @@ var Helper = {
 				modal: true,
 				buttons: {
 					"OK": function() {
-						$( this ).dialog( "close" );
+						$dialog.dialog( "close" );
 						GM_setValue("currentVersion", newVersion);
 						GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
 					},
 					Cancel: function() {
-						$( this ).dialog( "close" );
+						$dialog.dialog( "close" );
 					}
 				}
 		});
