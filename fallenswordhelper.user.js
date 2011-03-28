@@ -433,7 +433,7 @@ var System = {
 	},
 
 	getIntFromRegExp: function(theText, rxSearch) {
-		var matches = theText.match(rxSearch);
+		var matches = theText.replace(/,/g,"").match(rxSearch);
 		if (matches) {
 			result = parseInt(matches[1],10);
 		} else {
@@ -2081,7 +2081,7 @@ var Helper = {
 			var levelToTest = Helper.characterLevel;
 			var characterVirtualLevel = GM_getValue('characterVirtualLevel');
 			if (characterVirtualLevel) levelToTest = characterVirtualLevel;
-			for (var i=2;i<memberList.rows.length;i+=4) {
+			for (var i=2;i<memberList.rows.length;i++) {
 				var iplus1 = i+1;
 				if (memberList.rows[i].cells[1]) {
 					var vlevel = /VL:\&lt;\/td\&gt;\&lt;td\&gt;(\d+)/.exec(memberList.rows[i].cells[1].innerHTML)[1];
@@ -10422,7 +10422,6 @@ var Helper = {
 		var wantedNames = GM_getValue("wantedNames");
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
-
 		var configData=
 			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
@@ -10480,7 +10479,7 @@ var Helper = {
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
 			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP or GvG.') +
 				':</td><td>PvP: <input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +
-				'> GvG: <input name="highlightGvGPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightGvGPlayersNearMyLvl")?" checked":"") + '" /></td></tr>'  +
+				'> GvG: <input name="highlightGvGPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightGvGPlayersNearMyLvl")?" checked":"") + '/></td></tr>'  +
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
 				'this works for guild founders only') +
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (GM_getValue("showAdmin")?" checked":"") + '></td></tr>' +
