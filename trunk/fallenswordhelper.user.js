@@ -2389,9 +2389,9 @@ var Helper = {
 
 			var mouseoverText = $(staminaImageElement).data('tipped');
 
-			var staminaRE = /Stamina:\s<\/td><td width=\'90%\' class=\'currentmax\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-			var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\' class=\'nextgain\'>([,0-9]+)m ([,0-9]+)s/;
-			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;
+			var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
+			var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
+			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
 
 			var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 			var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
@@ -3590,8 +3590,8 @@ var Helper = {
 		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr>";
-		var hasShieldImp = System.findNode("//img[contains(@src,'55_sm.gif')]");
-		var hasDeathDealer = System.findNode("//img[contains(@src,'50_sm.gif')]");
+		var hasShieldImp = System.findNode("//img[contains(@src,'/55_sm.gif')]");
+		var hasDeathDealer = System.findNode("//img[contains(@src,'/50_sm.gif')]");
 		if (hasDeathDealer || hasShieldImp) {
 			var re=/(\d+) HP remaining/;
 			var impsRemaining = 0;
@@ -3637,7 +3637,7 @@ var Helper = {
 				}
 			}
 		}
-		var hasCounterAttack = System.findNode("//img[contains(@src,'54_sm.gif')]");
+		var hasCounterAttack = System.findNode("//img[contains(@src,'/54_sm.gif')]");
 		if (hasCounterAttack) {
 			if (hasCounterAttack.getAttribute("src").search("/skills/") != -1) {
 				var onmouseover = $(hasCounterAttack).data("tipped");
@@ -3649,7 +3649,7 @@ var Helper = {
 			}
 			replacementText += "<tr><td style='font-size:small; color:blue'>CA" + counterAttackLevel + " active</td></tr>";
 		}
-		var hasDoubler = System.findNode("//img[contains(@src,'26_sm.gif')]");
+		var hasDoubler = System.findNode("//img[contains(@src,'/26_sm.gif')]");
 		if (hasDoubler) {
 			if (hasDoubler.getAttribute("src").search("/skills/") != -1) {
 				var onmouseover = $(hasDoubler).data("tipped");
