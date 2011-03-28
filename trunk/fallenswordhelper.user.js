@@ -1531,8 +1531,8 @@ var Helper = {
 			Layout.moveOnlineAlliesList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
-			Helper.injectStaminaCalculator();
-			Helper.injectLevelupCalculator();
+//			Helper.injectStaminaCalculator();
+//			Helper.injectLevelupCalculator();
 			Layout.injectMenu();
 			Helper.replaceKeyHandler();
 			Helper.injectFSBoxLog();
