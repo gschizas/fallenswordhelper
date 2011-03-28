@@ -1531,8 +1531,8 @@ var Helper = {
 			Layout.moveOnlineAlliesList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
-//			Helper.injectStaminaCalculator();
-//			Helper.injectLevelupCalculator();
+			Helper.injectStaminaCalculator();
+			Helper.injectLevelupCalculator();
 			Layout.injectMenu();
 			Helper.replaceKeyHandler();
 			Helper.injectFSBoxLog();
@@ -2382,53 +2382,53 @@ var Helper = {
 
 	injectStaminaCalculator: function() {
 		//Check for beta as beta is different
+
 		if(isBeta){  //New Map Style
-		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-		if (!staminaImageElement) {return;}
+			var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
+			if (!staminaImageElement) {return;}
 
-		var mouseoverText = $(staminaImageElement).data('tipped');
+			var mouseoverText = $(staminaImageElement).data('tipped');
 
-		var staminaRE = /Stamina:\s<\/td><td width=\'90%\' class=\'currentmax\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\' class=\'nextgain\'>([,0-9]+)m ([,0-9]+)s/;
-		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;
+			var staminaRE = /Stamina:\s<\/td><td width=\'90%\' class=\'currentmax\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
+			var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\' class=\'nextgain\'>([,0-9]+)m ([,0-9]+)s/;
+			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;
 
-		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
-		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
-		nextGainHours = nextGainMinutes/60;
+			var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
+			var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
+			var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
+			var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
+			var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
+			nextGainHours = nextGainMinutes/60;
 
-		//get the max hours to still be inside stamina maximum
-		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-		var now = (new Date()).getTime();
-		var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+			//get the max hours to still be inside stamina maximum
+			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+			var now = (new Date()).getTime();
+			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
 
-		var d = new Date(nextHuntMilliseconds);
-		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-		var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
-			nextHuntTimeText + "</nobr></font></td></tr><tr>";
-		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
-		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-		staminaImageElement.setAttribute("data-tipped", newMouseoverText);
-		return;
+			var d = new Date(nextHuntMilliseconds);
+			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+			var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
+				nextHuntTimeText + "</nobr></font></td></tr><tr>";
+			var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
+			//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
+			staminaImageElement.setAttribute("data-tipped", newMouseoverText);
+			return;
 		}
 
 		//Old Map Style
-		var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-		if (!staminaImageElement) {return;}
+		//var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
+		var staminaImageElement = $('td[id="topBar-Stamina"]');
+		if (staminaImageElement.length < 1) {return;}
 
 		var mouseoverText = $(staminaImageElement).data('tipped');
-		/*
-		<center><b>Stamina</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Stamina: </td><td width='90%'>24,764 / 25,487</td></tr><tr><td><font color='#999999'>Gain Per Hour: </td><td width='90%'>+104</td></tr><tr><td><font color='#999999'>Next Gain : </td><td width='90%'>52m 8s</td></tr></table><br>Stamina is required to perform actions (such as attacking players and creatures).
-		*/
-		var staminaRE = /Stamina:\s<\/td><td width=\'90%\'>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
+		var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
 		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([,0-9]+)<\/td>/;
+		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
 		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-		var nextGainRE = /Next\sGain\s:\s<\/td><td width=\'90%\'>([,0-9]+)m ([,0-9]+)s/;
+
+		var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
 		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
 		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
 		nextGainHours = nextGainMinutes/60;
@@ -2444,38 +2444,40 @@ var Helper = {
 			nextHuntTimeText + "</nobr></font></td></tr><tr>";
 		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-		staminaImageElement.setAttribute("data-tipped", newMouseoverText);
+		$(staminaImageElement).attr("data-tipped", newMouseoverText);
 	},
 
 	injectLevelupCalculator: function() {
 		//check for beta as beta has class= additions in the mouse over
 		if(isBeta){ //New Map Style
-		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
-		if (!levelupImageElement) {return;}
-		var mouseoverText = $(levelupImageElement).data('tipped');
-		var remainingXPRE = /Remaining:\s<\/td><td width=\'90%\' class=\'remainingxp\'>([0-9,]+)/i;
-		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([0-9,]+)/i;
-		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\'90%\' class=\'nextgain\'>([0-9]*)m\s*([0-9]*)s/i;
-		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
-		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[2],10);
-		var hoursToNextLevel = Math.ceil(remainingXP/gain);
-		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
-		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-		var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
-			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
-		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-		levelupImageElement.setAttribute("data-tipped", newMouseoverText);
-		return;
+			var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
+			if (!levelupImageElement) {return;}
+			var mouseoverText = $(levelupImageElement).data('tipped');
+			var remainingXPRE = /Remaining:\s<\/td><td[^>]*>([0-9,]+)/i;
+			var gainRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([0-9,]+)/i;
+			var nextGainRE = /Next\sGain\s*:\s*<\/td><td[^>]*>([0-9]*)m\s*([0-9]*)s/i;
+			var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
+			var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
+			var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
+			var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[2],10);
+			var hoursToNextLevel = Math.ceil(remainingXP/gain);
+			var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
+			var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
+			var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
+				nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
+			newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
+			levelupImageElement.setAttribute("data-tipped", newMouseoverText);
+			return;
 		}
 		//Old Map Style
-		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
-		if (!levelupImageElement) {return;}
+		var levelupImageElement = $('td[id="topBar-XP"]');
+		if (levelupImageElement.length < 1) {return;}
+//		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
+//		if (!levelupImageElement) {return;}
 		var mouseoverText = $(levelupImageElement).data('tipped');
-		var remainingXPRE = /Remaining:\s<\/td><td width=\'90%\'>([0-9,]+)/i;
-		var gainRE = /Gain\sPer\sHour:\s<\/td><td width=\'90%\'>\+([0-9,]+)/i;
-		var nextGainRE = /Next\sGain\s*:\s*<\/td><td width=\'90%\'>([0-9]*)m\s*([0-9]*)s/i;
+		var remainingXPRE = /Remaining:\s<\/td><td[^>]*>([0-9,]+)/i;
+		var gainRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([0-9,]+)/i;
+		var nextGainRE = /Next\sGain\s*:\s*<\/td><td[^>]*>([0-9]*)m\s*([0-9]*)s/i;
 		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
 		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
 		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
@@ -2487,7 +2489,7 @@ var Helper = {
 		var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
 			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
 		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-		levelupImageElement.setAttribute("data-tipped", newMouseoverText);
+		$(levelupImageElement).attr("data-tipped", newMouseoverText);
 		return;
 	},
 
@@ -6716,48 +6718,25 @@ var Helper = {
 					//creating a fake DOM object
 					var tmp = document.createElement('div');
 					tmp.innerHTML = $(data.content).html();
-
+//alert($(data.content).html());
 					var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp); //var bonusTable = $(someelement).find(':contains( Bonuses )'); //jquery equilivant
-
+					//var bonusTable = $(data.content).find('font:contains("Bonuses")').closest('tbody');
 					var extraText = "";
 					if (bonusTable) {
 						var subTotal = 0;
 						for (var i=2;i<bonusTable.rows.length;i++) {
 							aRow = bonusTable.rows[i];
-							if(aRow.cells.length < 2) {continue; } //single column, so break after stat bonuses kick in
+							if(aRow.cells.length < 2) {break; } //single column, so break after stat bonuses kick in
 							bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
 							subTotal += bonusValue;
 						}
-						extraText = "<br>Individual item stats subtotal: " + subTotal;
+						extraText = "<br><font color=#999999>Individual item stats subtotal:</font> " + subTotal;
 					}
 
 					var addMe = '<br><center>'+extraText+'</center>';
+		$(data.content).append(addMe);
+		unsafeWindow.Tipped.refresh(data.element);
 
-					// modify the existing tooltip
-					//var newHtml = $($(data.content).html()) // create jQuery context
-					//					.append(addMe) // can modify this to prepend etc <- magic happens here
-					//					.clone(); // required
-
-					// wrap & extract inner html (inefficent?)
-					//var html = $($('<div></div>').html(newHtml)).html();
-
-					//this works for some reason
-					tmp.innerHTML+=addMe;
-					var html = $(tmp).html();
-
-					// remove old tooltip
-					unsafeWindow.Tipped.remove(data.element);
-
-					// modify the source element & insert the new tooltip
-					$(data.element)
-						.attr({
-								'data-tipped':html,
-								'data-tipped-options':'skin:"fsItem"'
-							  })
-						.addClass('fsh');
-
-					// show/create the new tooltip
-					unsafeWindow.Tipped.show(data.element);
 				});
 		}
 	},
