@@ -2702,7 +2702,7 @@ var Helper = {
 		}
 		Helper.relicDefenderCount = defenderCount;
 		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
-		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:small;'>" +
+		var textToInsert = "<tr><td><table style='font-size:small;'>" +
 			"<tr><td colspan='2' style='border-top:2px black solid;'>Defending Guild Stats</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Number of Defenders:</td><td style='font-size:x-small;' align='right'>" + Helper.relicDefenderCount + "</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Relic Count:</td><td style='font-size:x-small;' align='right' title='relicCount'>0</td></tr>" +
@@ -2764,13 +2764,14 @@ var Helper = {
 				href = System.server + "?cmd=profile&player_id=" + memberId;
 				System.xmlhttp(href, Helper.checkPlayerActivity, {"playerName":guildMemberName,"playerId":memberId});
 			}
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
-				"<tr title='offlinePlayerListControl' style='display:none; visibility:hidden;'><td style='font-size:x-small; color:red;' colspan=2 title='offlinePlayerList'>" + validMemberString + "</td></tr>" +
+			textToInsert += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>" +
+				"<tr title='offlinePlayerListControl'><td colspan=2 style='font-size:x-small; color:red;' title='offlinePlayerList'>" + validMemberString + "</td></tr>" +
 				"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>OfflinePlayerCount:</td><td align='right' title='offlinePlayerCount'>" + validMemberArray.length + "</td></tr>" +
 				"<tr style='display:none; visibility:hidden;'><td align='right' style='color:brown;'>OfflinePlayersProcessed:</td><td align='right' title='offlinePlayersProcessed'>0</td></tr>" +
-				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:small; color:green;' colspan=2>Processing ...</td></tr>";
+				"<tr title='offlinePlayerListControlTemp' style='display:block;'><td style='font-size:x-small; color:green;' colspan=2>Checking offline status ...</td></tr>";
 		}
-		extraTextInsertPoint.innerHTML += "</table><td><tr>";
+		textToInsert += "</table><td><tr>";
+		extraTextInsertPoint.innerHTML += textToInsert;
 	},
 
 	checkPlayerActivity: function(responseText, callback) {
@@ -2785,8 +2786,6 @@ var Helper = {
 		if (System.intValue(offlinePlayersProcessed.innerHTML) == (offlinePlayerCount - 1)) {
 			var offlinePlayerListControl = System.findNode("//tr[@title='offlinePlayerListControl']");
 			var offlinePlayerListControlTemp = System.findNode("//tr[@title='offlinePlayerListControlTemp']");
-			offlinePlayerListControl.style.display = "block";
-			offlinePlayerListControl.style.visibility = "visible";
 			offlinePlayerListControlTemp.style.display = "none";
 			offlinePlayerListControlTemp.style.visibility = "hidden";
 		}
@@ -2983,7 +2982,7 @@ var Helper = {
 			relicMultiplier = 1.5;
 		}
 		else if (relicCount >= 2) {
-			relicMultiplier = Math.round((1.1 - (relicCount/10))*100)/100;
+			relicMultiplier = Math.round((1 - (relicCount/10))*100)/100;
 		}
 
 		var LDConstitutionLevel      = System.intValue(System.findNode("//td[@title='LDConstitutionLevel']").textContent);
