@@ -5730,7 +5730,7 @@ var Helper = {
 		if (auctionCellCraftElements) {
 			for (i=0; i<auctionCellCraftElements.length; i++) {
 				var auctionCellCraftElement = auctionCellCraftElements[i];
-				if (auctionCellCraftElement.textContent){
+				if (auctionCellCraftElement.textContent.length > 0){
 					switch(auctionCellCraftElement.textContent) {
 						case 'Perfect': craftColor = '#00b600'; break;
 						case 'Excellent': craftColor = '#f6ed00'; break;
@@ -5744,8 +5744,10 @@ var Helper = {
 					auctionCellCraftElement.style.color = craftColor;
 				}
 				var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
-				auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
-				auctionCellDurabilityElement.style.color = 'gray';
+				if (auctionCellDurabilityElement.nodeName == 'SPAN') {
+					auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
+					auctionCellDurabilityElement.style.color = 'gray';
+				}
 			}
 		}
 
