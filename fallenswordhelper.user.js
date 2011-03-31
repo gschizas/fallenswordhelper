@@ -12399,13 +12399,13 @@ var Helper = {
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
 			output += '<span plantRE="'+itemList[i][1]+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'" tradetype="'+type+'">'+itemList[i][0]+'</span> &ensp';
+				'id="Helper:checkAll'+i+'" tradetype="'+type+'">'+itemList[i][0]+'</span> &ensp;';
 			allResRE+=itemList[i][1]+'|';
 		}
-		output='Select: &ensp<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems" tradetype="'+type+'">' +
-			'All Items</span> &ensp ' +
+		output='Select: &ensp;<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems" tradetype="'+type+'">' +
+			'All Items</span> &ensp; ' +
 			'<span plantRE="'+allResRE.substr(0,allResRE.length-1)+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp' + output;
+				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp;' + output;
 		output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
 		injectHere.innerHTML += output;
 		for (var i=0;i<itemList.length+1;i++) {
@@ -12465,17 +12465,12 @@ var Helper = {
 
 	checkExistingSecureTrades: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var secureTradeTable = System.findNode("//b[contains(.,'Outgoing Trades')]/ancestor::table[1]", doc);
 		Helper.secureTradesToCheckCount = 0;
 		Helper.secureTradesProcessed = 0;
-		for (var i = 2;i < secureTradeTable.rows.length;i+=2) {
-			var aRow = secureTradeTable.rows[i];
-			if (aRow.cells[2]) {
-				var stHREF = aRow.cells[2].firstChild.getAttribute("href");
-				Helper.secureTradesToCheckCount++;
-				System.xmlhttp(stHREF, Helper.markExistingSecureTrades, true);
-			}
-		}
+		$(doc).find('table:contains("Outgoing"):last').find('tr:gt(1)').find('td:eq(2) a').each(function(){
+			Helper.secureTradesToCheckCount++;
+			System.xmlhttp($(this).attr('href'), Helper.markExistingSecureTrades, true);
+		});
 		if (Helper.secureTradesToCheckCount == 0) {
 			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
 			secureTradeCheckMessage.innerHTML = 'No existing ST\'s to check.<input type="checkbox" id="Helper:ignoreSTitems" style="display:none;" checked>';
@@ -12485,28 +12480,15 @@ var Helper = {
 
 	markExistingSecureTrades: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var secureTradeIMGElements = System.findNodes("//img[contains(@src,'/items/')]", doc);
-		if (secureTradeIMGElements) {
-			for (var i = 0;i < secureTradeIMGElements.length;i++) {
-				var secureTradeIMGElement = secureTradeIMGElements[i];
-				var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(secureTradeIMGElement).data("tipped"));
-				var itemId = itemStats[1];
-				var invId = itemStats[2];
-				if (window.location.search.search("subcmd=createsecure") != -1 ||
-					window.location.search.search("inv_id") != -1 ||
-					window.location.search.search("cmd=trade") != -1) {
-					//var searchTerm = "//img[contains(@data-tipped,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
-					var searchTerm = "//img[contains(@data-tipped,'item_id=" + itemId + "&inv_id=" + invId + "')]/ancestor::td[1]";
-				} else {
-					//var searchTerm = "//a[contains(@data-tipped,'(" + itemId + ", " + invId + "')]/ancestor::td[1]";
-					var searchTerm = "//a[contains(@data-tipped,'item_id=" + itemId + "&inv_id=" + invId + "')]/ancestor::td[1]";
-				}
-				var possibleTradeItems = System.findNodes(searchTerm);
-				for (var j in possibleTradeItems) {
-					if (possibleTradeItems[j].style) possibleTradeItems[j].style.border = "3px solid red";
-				}
-			}
-		}
+		$(doc).find('img[src*="/items/"]').each(function(){
+			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(this).data("tipped"));
+			var itemId = itemStats[1];
+			var invId = itemStats[2];
+			var testString = 'a[href*="'+itemId+'"][href*="'+invId+'"],img[data-tipped*="'+itemId+'"][data-tipped*="'+invId+'"]';
+			$('html').find(testString)
+				.parents('td:first').css('border','3px solid red');
+		});
+
 		Helper.secureTradesProcessed++;
 		if (Helper.secureTradesProcessed == Helper.secureTradesToCheckCount) {
 			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
@@ -14150,7 +14132,7 @@ var Helper = {
 				var onmouseover = $(this).data("tipped");
 				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: (\d+)\)/.exec(onmouseover);
 
-				//if (!buffRE) { continue; } //fails for some reason?  dont need it.
+				if (!buffRE) { return true; } // same as continue in a for loop
 				var buffName = buffRE[1];
 				var buffLevel = buffRE[2];
 				$('a[data-tipped*="'+buffName+' Level '+buffLevel+'"]').each(function(){
