@@ -3943,7 +3943,7 @@ var Helper = {
 		// One may ask why the separation of creating the button and the event handling code.
 		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
 		// a region, all attached events are destroyed (because the original elements are also destroyed)
-		
+
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
@@ -14222,18 +14222,29 @@ Helper.onPageLoad(null);
 
 if (navigator.userAgent.indexOf("Firefox")>0) {
 	var $ ;
+	var jqcounter = 0;
 	// Check if jQuery's loaded
-	function GM_wait(jqFunction) {
-		if (typeof unsafeWindow.jQuery == 'undefined') {
+	function GM_wait() {GM_log(jqcounter);
+		if (typeof unsafeWindow.jQuery == 'undefined' && jqcounter < 10) {
+			jqcounter++;
+			if (jqcounter == 5) { // 1/2 second, must be some error, try to load our own jquery
+				var GM_Head = document.getElementsByTagName('head')[0] || document.documentElement,
+					GM_JQ = document.createElement('script');
+
+				GM_JQ.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js';
+				GM_JQ.type = 'text/javascript';
+				GM_JQ.async = true;
+
+				GM_Head.insertBefore(GM_JQ, GM_Head.firstChild);
+			}
 			window.setTimeout(GM_wait, 100);
 		} else {
 			$ = unsafeWindow.jQuery;
 			$T = unsafeWindow.Tipped;
-			if (jqFunction) jqFunction.call();
+			main();
 		}
 	}
 	GM_wait();
-	main();
 }
 
 
