@@ -7701,39 +7701,30 @@ var Helper = {
 	parseProfileDone: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
-		var currentlyWorn=System.findNodes("//a[contains(@href,'subcmd=unequipitem') and contains(img/@src,'/items/')]/img", doc);
-		for (var i=0; i<currentlyWorn.length; i++) {
-			var item={"url": Helper.linkFromMouseover($(currentlyWorn[i]).data("tipped")),
-				"where":"worn", "index":(i+1)};
-			if (i===0) output.innerHTML+="<br/>Found worn item ";
-			output.innerHTML+=(i+1) + " ";
+		$(doc).find('a[href*="subcmd=unequipitem"] img').each(function(index){
+			var item={"url": $(this).data("tipped"),
+				"where":"worn", "index":(index+1)};
+			if (index===0) output.innerHTML+="<br/>Found worn item ";
+			output.innerHTML+=(index+1) + " ";
 			Helper.inventory.items.push(item);
-		}
+		});
 		var	folderIDs = new Array();
 		Helper.folderIDs = folderIDs; //clear out the array before starting.
 		GM_setValue("currentFolder", 1);
-		var folderLinks = System.findNodes("//a[contains(@href,'index.php?cmd=profile&folder_id=')]", doc);
-		//if folders are enabled then save the ID's in an array
-		if (folderLinks) {
-			for (i=0; i<folderLinks.length;i++) {
-				folderLink = folderLinks[i];
-				href = folderLink.getAttribute("href");
-				var folderID = /folder_id=([-0-9]+)/.exec(href)[1]*1;
-				folderIDs.push(folderID);
-				Helper.folderIDs = folderIDs;
-			}
-		}
+		$(doc).find('a[href*="profile&folder_id="]').each(function(index){
+			var folderID = /folder_id=([-0-9]+)/.exec($(this).attr("href"))[1]*1;
+			folderIDs.push(folderID);
+			Helper.folderIDs = folderIDs;
+		});
 		Helper.parseInventoryPage(responseText);
 	},
 
 	parseInventoryPage: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
-		var backpackItems = System.findNodes("//td[contains(@background,'2x3.gif')]/center/a[contains(@href, 'subcmd=equipitem')]/img", doc);
-		var pages = System.findNodes("//a[contains(@href,'index.php?cmd=profile&backpack_page=')]", doc);
-		var pageElement = System.findNode("//a[contains(@href,'backpack_page=')]/font", doc);
+		var pageElement = $(doc).find('a[href*="backpack_page="] font');
 		var currentPage = 1;
-		if (pageElement) currentPage = parseInt(System.findNode("//a[contains(@href,'backpack_page=')]/font", doc).textContent,10);
+		if (pageElement.length > 0) currentPage = parseInt(pageElement.text(),10);
 		var currentFolder = GM_getValue("currentFolder");
 		var folderCount = 0, folderID = -1;
 		if (Helper.folderIDs.length<=1) {
@@ -7743,20 +7734,21 @@ var Helper = {
 			folderCount = Helper.folderIDs.length;
 			folderID = Helper.folderIDs[currentFolder-1];
 		}
-		if (backpackItems) {
-			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
-
-			for (var i=0; i<backpackItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover($(backpackItems[i]).data("tipped"));
-				var item={"url": theUrl,
-					"where":"backpack", "index":(i+1), "page":currentPage};
-				if (i===0) output.innerHTML+="<br/>Found wearable item ";
-				output.innerHTML+=(i+1) + " ";
-				Helper.inventory.items.push(item);
-			}
-			} else {
-				output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
-			}
+		
+		var backpackItems = $(doc).find('a[href*="subcmd=equipitem"] img');
+		
+		if (backpackItems.length > 0) output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
+		else output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
+		
+		backpackItems.each(function(index){
+			var item={"url": $(this).data("tipped"),
+				"where":"backpack", "index":(index+1), "page":currentPage};
+			if (index===0) output.innerHTML+="<br/>Found wearable item ";
+			output.innerHTML+=(index+1) + " ";
+			Helper.inventory.items.push(item);
+		});
+		
+		var pages = $(doc).find('.centered').children('a[href*="index.php?cmd=profile&backpack_page="]');
 		if (currentPage<pages.length || currentFolder<folderCount) {
 			if (currentPage==pages.length && currentFolder<folderCount) {
 				currentPage = 0;
@@ -7855,38 +7847,37 @@ var Helper = {
 		output.innerHTML+=(callback.invIndex+1) + " ";
 
 		var item=targetInventory.items[callback.invIndex];
-		// item.html=responseText;
 
-		var nameNode=System.findNode("//b", doc);
-		if (!nameNode) GM_log(responseText);
-		if (nameNode) {
-			item.name=nameNode.textContent.replace(/\\/g,"");
+		var nameNode=$(doc).find('b:first');
+		if (nameNode.length == 0) GM_log(responseText);
+		else {
+			item.name=nameNode.text().replace(/\\/g,"");
 
-			var itemBonuses=System.findNode("//table[tbody/tr/td/center/font='Bonuses']", doc);
+			var itemBonuses=$(doc).find('table:contains("Bonuses"):last');
 
-			var attackNode=System.findNode("tbody/tr/td[.='Attack:']/../td[2]", itemBonuses);
-			item.attack=(attackNode)?parseInt(attackNode.textContent,10):0;
+			var attackNode=$(itemBonuses).find('td:contains("Attack:"):last').next();;
+			item.attack=(attackNode.length>0)?parseInt(attackNode.text(),10):0;
 
-			var defenseNode=System.findNode("tbody/tr/td[.='Defense:']/../td[2]", itemBonuses);
-			item.defense=(defenseNode)?parseInt(defenseNode.textContent,10):0;
+			var defenseNode=$(itemBonuses).find('td:contains("Defense:"):last').next();
+			item.defense=(defenseNode.length>0)?parseInt(defenseNode.text(),10):0;
 
-			var armorNode=System.findNode("tbody/tr/td[.='Armor:']/../td[2]", itemBonuses);
-			item.armor=(armorNode)?parseInt(armorNode.textContent,10):0;
+			var armorNode=$(itemBonuses).find('td:contains("Armor:"):last').next();
+			item.armor=(armorNode.length>0)?parseInt(armorNode.text(),10):0;
 
-			var damageNode=System.findNode("tbody/tr/td[.='Damage:']/../td[2]", itemBonuses);
-			item.damage=(damageNode)?parseInt(damageNode.textContent,10):0;
+			var damageNode=$(itemBonuses).find('td:contains("Damage:"):last').next();
+			item.damage=(damageNode.length>0)?parseInt(damageNode.text(),10):0;
 
-			var hpNode=System.findNode("tbody/tr/td[.='HP:']/../td[2]", itemBonuses);
-			item.hp=(hpNode)?parseInt(hpNode.textContent,10):0;
+			var hpNode=$(itemBonuses).find('td:contains("HP:"):last').next();
+			item.hp=(hpNode.length>0)?parseInt(hpNode.text(),10):0;
 
-			var levelNode=System.findNode("//tr[td='Min Level:']/td[2]", doc);
-			item.minLevel=(levelNode)?parseInt(levelNode.textContent,10):0;
+			var levelNode=$(doc).find('td:contains("Min Level:"):last').next();
+			item.minLevel=(levelNode.length>0)?parseInt(levelNode.text(),10):0;
 
-			var itemPartOfSetNode=System.findNode("//font[contains(.,'Set Details')]", doc);
-			item.partOfSet=(itemPartOfSetNode)?true:false;
+			var itemPartOfSetNode=$(doc).find('font:contains("Set Details")');
+			item.partOfSet=(itemPartOfSetNode.length > 0)?true:false;
 
-			var durabilityNode=System.findNode("//tbody/tr/td[nobr/font[.='Durability:']]/../td[2]", doc);
-			item.durability=(durabilityNode)?durabilityNode.textContent:'0/100';
+			var durabilityNode=$(itemBonuses).find('td:contains("Durability:"):last').next();
+			item.durability=(durabilityNode.length>0)?durabilityNode.textContent:'0/100';
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
@@ -7894,7 +7885,6 @@ var Helper = {
 			}
 			item.forgelevel=forgeCount;
 
-			//item.type = responseText.substr(responseText.indexOf('<br>')+4,responseText.indexOf('-',responseText.indexOf('<br>'))-responseText.indexOf('<br>')-5);
 			if (responseText.search(/Gloves -/) != -1) item.type = "Gloves";
 			else if (responseText.search(/Helmet -/) != -1) item.type = "Helmet";
 			else if (responseText.search(/Amulet -/) != -1) item.type = "Amulet";
