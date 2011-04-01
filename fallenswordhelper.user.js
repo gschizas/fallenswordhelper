@@ -7736,9 +7736,13 @@ var Helper = {
 		}
 		
 		var backpackItems = $(doc).find('a[href*="subcmd=equipitem"] img');
+		var pages = $(doc).find('.centered').children('a[href*="index.php?cmd=profile&backpack_page="]');
 		
 		if (backpackItems.length > 0) output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
-		else output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
+		else {
+			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
+			currentPage = pages.length; // go to end automatically since the rest of the pages will be empty too.
+		}
 		
 		backpackItems.each(function(index){
 			var item={"url": $(this).data("tipped"),
@@ -7748,7 +7752,6 @@ var Helper = {
 			Helper.inventory.items.push(item);
 		});
 		
-		var pages = $(doc).find('.centered').children('a[href*="index.php?cmd=profile&backpack_page="]');
 		if (currentPage<pages.length || currentFolder<folderCount) {
 			if (currentPage==pages.length && currentFolder<folderCount) {
 				currentPage = 0;
@@ -7777,24 +7780,25 @@ var Helper = {
 	parseGuildStorePage: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		var guildstoreItems = System.findNodes("//a[contains(@href,'subcmd2=takeitem')]/img", doc);
-		var pages = System.findNodes("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]", doc);
-		var currentPage = parseInt(System.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent,10);
-		if (guildstoreItems) {
-			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
-
-			for (var i=0; i<guildstoreItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover($(guildstoreItems[i]).data("tipped"));
-				var item={"url": theUrl,
-					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false};
-				if (i===0) output.innerHTML+="<br/>Found guild store item ";
-				output.innerHTML+=(i+1) + " ";
-				Helper.guildinventory.items.push(item);
-			}
-		} else {
+		var guildstoreItems = $(doc).find('a[href*="subcmd2=takeitem"] img');
+		var currentPage = parseInt($(doc).find('a[href*="cmd=guild&subcmd=manage&guildstore_page"] font').text(),10);
+		
+		var guildstoreItems = $(doc).find('a[href*="subcmd2=takeitem"] img');
+		var pages = $(doc).find('td').children('a[href*="cmd=guild&subcmd=manage&guildstore_page"]');
+		
+		if (guildstoreItems.length > 0) output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
+		else {
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
 			currentPage = pages.length; // go to end automatically since the rest of the pages will be empty too.
 		}
+		guildstoreItems.each(function(index){
+			var item={"url": $(this).data("tipped"),
+				"where":"guildstore", "index":(index+1), "page":currentPage, "worn":false};
+			if (index===0) output.innerHTML+="<br/>Found guild store item ";
+			output.innerHTML+=(index+1) + " ";
+			Helper.guildinventory.items.push(item);
+		});
+
 		if (currentPage<pages.length) {
 			System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), Helper.parseGuildStorePage);
 		}
@@ -7807,17 +7811,14 @@ var Helper = {
 	parseGuildReportPage: function(responseText) {
 		var doc=System.createDocument(responseText);
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		var guildreportItems = System.findNodes("//img[contains(@src,'items')]", doc);
-		if (guildreportItems) {
-			for (var i=0; i<guildreportItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover($(guildreportItems[i]).data("tipped"));
-				var item={"url": theUrl,
-					"where":"guildreport", "index":(i+1), "worn":false};
-				if (i===0) output.innerHTML+="<br/>Found guild report item ";
-				output.innerHTML+=(i+1) + " ";
-				Helper.guildinventory.items.push(item);
-			}
-		}
+		var guildreportItems = $(doc).find('img[src*="/items/"]');
+		guildreportItems.each(function(index){
+			var item={"url": $(this).data("tipped"),
+				"where":"guildreport", "index":(index+1), "worn":false};
+			if (index===0) output.innerHTML+="<br/>Found guild report item ";
+			output.innerHTML+=(index+1) + " ";
+			Helper.guildinventory.items.push(item);
+		});
 		output.innerHTML+="<br/>Parsing guild inventory item ";
 		Helper.retrieveInventoryItem(0, "guild");
 	},
