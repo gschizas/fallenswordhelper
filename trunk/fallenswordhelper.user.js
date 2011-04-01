@@ -925,14 +925,11 @@ var Data = {
 var Layout = {
 
 	injectMenu: function() {
-		if (GM_getValue("lastActiveQuestPage").length > 0) {
-			var questBookNode = System.findNode('//a[@href="index.php?cmd=questbook"]');
-			if (questBookNode) {
-				questBookNode.setAttribute("href", GM_getValue("lastActiveQuestPage"));
-			}
+		if (GM_getValue("lastActiveQuestPage").length > 0) { //JQuery ready
+			$('a[href="index.php?cmd=questbook"]').attr('href', GM_getValue("lastActiveQuestPage"));
 		}
 		//"menuSource_0"
-		var tableElement = System.findNode("//div[@id='menuSource_0']/table");
+		var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
 		if (!tableElement) return;
 		if (GM_getValue("keepBuffLog")) {
 			Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
@@ -948,7 +945,7 @@ var Layout = {
 		}
 		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
 		//"menuSource_5"
-		tableElement = System.findNode("//div[@id='menuSource_5']/table");
+		tableElement = $('div[id="menuSource_5"]').find('table:first');
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
 		if (!GM_getValue("useNewGuildLog")) {
@@ -956,11 +953,11 @@ var Layout = {
 			Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
 		}
 		//"menuSource_3"
-		tableElement = System.findNode("//div[@id='menuSource_3']/table");
+		tableElement = $('div[id="menuSource_3"]').find('table:first');
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
 		//"menuSource_2"
-		tableElement = System.findNode("//div[@id='menuSource_2']/table");
+		tableElement = $('div[id="menuSource_2"]').find('table:first');
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
 		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 7);
@@ -968,21 +965,18 @@ var Layout = {
 		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 11);
 	},
 
-	injectItemIntoMenuTable: function(tableElement, text, href, position) {
+	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
 		var newRow;
-		if (position > tableElement.rows.length) position = tableElement.rows.length;
-		newRow = tableElement.insertRow(position);
-		newRow.innerHTML='<td height="5"></td>';
-		newRow = tableElement.insertRow(position);
-		var newCell = newRow.insertCell(0);
-		newCell.innerHTML='<font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font>';
+		if (position > tableElement.children().length) position = tableElement.children().length;
+		$(tableElement).find('tr:eq('+position+')').before('<tr><td><font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font></td></tr><tr><td height="5"></td></tr>')
 	},
 
-	injectQuickLinks: function() {
+	injectQuickLinks: function() {//JQuery ready
 		var quickLinks = System.getValueJSON("quickLinks");
 		if (!quickLinks) quickLinks=[];
 		if (quickLinks.length<=0) return;
-		var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg') or contains(@src,'realm_top_a.jpg')]");
+		//var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg') or contains(@src,'realm_top_a.jpg')]");
+		var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
 		if (!insertBeforeHere) return;
 		result="&nbsp;&nbsp;";
 		for (var i=0; i<quickLinks.length; i++) {
@@ -991,52 +985,43 @@ var Layout = {
 				'>' + quickLinks[i].name + '</a> ;';
 		}
 		result += '<br/>'
-		var newDiv = document.createElement("DIV");
-		newDiv.innerHTML=result;
-		newDiv.style.background = 'black';
-		newDiv.style.textAlign = 'left';
-		insertBeforeHere.parentNode.insertBefore(newDiv, insertBeforeHere);
+
+		$(insertBeforeHere).before('<div style="background:black;text-align:left;background-image:none;z-index:100;position:absolute;filter:alpha(opacity=40);" id="fshQuickLinks">'+result+'</div>');
 	},
 
-	hideBanner: function() {
+	hideBanner: function() {//JQuery ready
+
 		if (!GM_getValue("hideBanner")) {
 			if (GM_getValue("showSTUpTop")) {
-				var overlayTable = System.findNode("//div[@class='top_banner']");
+				var overlayTable = $('div[class="top_banner"]');
 				if (overlayTable) {
-					var STnode = System.findNode("//font[contains(., 'Server:')]/nobr/b");
-					if (STnode) {
-						overlayTable.innerHTML += "<div><font color=#FFFFFF size='3'>ST: " + STnode.innerHTML + "</font></div>";
-					} else {
-						var STnode1 = System.findNode("//table[tbody/tr/td/font[.='Server:']]//tr[4]/td[2]/font");
-						var STnode2 = System.findNode("//table[tbody/tr/td/font[.='Server:']]//tr[5]/td[2]/font");
+					var STnode = $('font:contains("Server Time:"):first').closest('tr').next().find('b');
+					
+					if (STnode.length) { //maximized
+						overlayTable.append("<div><font color=#FFFFFF size='3'>ST: " + STnode.html() + "</font></div>");
+					} else { //minimized
+						var STnode1 = $('font:contains("Time:"):first').closest('td').next().find('font');
+						var STnode2 = $('font:contains("Date:"):first').closest('td').next().find('font');
 						if (STnode1 && STnode2) {
-							overlayTable.innerHTML += "<div><font color=#FFFFFF size='3'>ST: " + STnode1.innerHTML + " " + STnode2.innerHTML + "</font></div>";
+							overlayTable.append("<div><font color=#FFFFFF size='3'>ST: " + STnode1.html() + "<br>" + STnode2.html() + "</font></div>");
 						}
 					}
 				}
 			}
 			return;
 		}
-		var bannerElement = System.findNode("//div[@class='top_banner']");
-		if (bannerElement) {
-			bannerElement.style.display = "none";
-		}
+		$('div[class="top_banner"]').attr('style','display:none');
 	},
 
-	moveFSBox: function() {
+	moveFSBox: function() {//JQuery ready, dont use split... but cant get container attributes.. so works for now.
 		if (!GM_getValue("moveFSBox")) return;
-		var src=System.findNode("//b[.='FSBox']/../../../../..");
+		var src=$('b:contains("FSBox"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
 		if (!src) return;
-		src.parentNode.removeChild(src.nextSibling);
-		var dest=System.findNode("//img[contains(@src,'menu_logout.gif')]/../../../../..");
-		// window.alert(dest);
-		var info = dest.insertRow(26);
-		var cell = info.insertCell(0);
-		cell.innerHTML="&nbsp;";
-		info = dest.insertRow(26);
-		cell = info.insertCell(0);
-		cell.setAttribute("align", "center");
-		cell.appendChild(src);
+		//src.parentNode.removeChild(src.nextSibling);
+		var dest=$('img[src*="menu_logout.gif"]').closest('tr');
+		dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+src.parent().html().split('</table>')[0]+'</table>'+'</td></tr>');
+		src.remove();
+
 	},
 
 	moveGuildOnlineList: function() {
@@ -5490,11 +5475,11 @@ var Helper = {
 				if (messageNameCell) messageNameCell.innerHTML += "&nbsp;&nbsp;<span style='color:white;'>(Guild mates show up in <span style='color:green;'>green</span>)</span>";
 			}
 		}
-		GM_wait(function() { // just want to be on the safe side
+		//GM_wait(function() { // just want to be on the safe side
 			$(".a-reply").click(function(evt) {
 				Helper.openQuickMsgDialog(evt.target.getAttribute("target_player"),"", evt.target.getAttribute("replyTo"));
 			});
-		});
+		//});
 	},
 
 	retrievePvPCombatSummary: function(responseText, callback) {
