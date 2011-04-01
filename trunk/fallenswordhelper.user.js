@@ -3909,7 +3909,7 @@ var Helper = {
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
-		if (GM_getValue("sendGoldonWorld")){
+		if (buttonRow && GM_getValue("sendGoldonWorld")){
 			currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
 			var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") +
 				". Current gold sent total is " + currentGoldSentTotal;
@@ -3918,7 +3918,7 @@ var Helper = {
 				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
 		}
 
-		if (!GM_getValue("hideKrulPortal")) {
+		if (buttonRow && !GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
 				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTP +
 				'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
@@ -3926,23 +3926,24 @@ var Helper = {
 
 		var footprints = GM_getValue("footprints");
 
-		buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-			'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
-			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
-		if (GM_getValue("sendGoldonWorld")){
+		if (buttonRow) {
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
+				'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+			document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
+		}
+		if (buttonRow && GM_getValue("sendGoldonWorld")){
 			//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 			document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
 		}
-		if (!GM_getValue("hideKrulPortal")) {
+		if (buttonRow && !GM_getValue("hideKrulPortal")) {
 			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 		}
 
 		// One may ask why the separation of creating the button and the event handling code.
 		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
 		// a region, all attached events are destroyed (because the original elements are also destroyed)
-
-		document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
-
+		
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
@@ -6574,7 +6575,6 @@ var Helper = {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
-			var cbNode = System.findNode("../../../td[1]",callback);
 			textNode.innerHTML += '<span id="guildLocked" visibility="hidden"/>';
 
 		}
@@ -6586,7 +6586,7 @@ var Helper = {
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
 		}
 		if (GM_getValue("disableItemColoring")) {return;}
-		var fontLineRE=/<center><font color='(#[0-9A-F]{6})' size=2>/i;
+		var fontLineRE=/<nobr><font color='(#[0-9A-F]{6})' size=2>/i;
 		var fontLineRX=fontLineRE.exec(responseText);
 		var color=fontLineRX[1];
 		if (color=="#FFFFFF") {
