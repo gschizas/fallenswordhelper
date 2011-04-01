@@ -14224,7 +14224,7 @@ if (navigator.userAgent.indexOf("Firefox")>0) {
 	var $ ;
 	var jqcounter = 0;
 	// Check if jQuery's loaded
-	function GM_wait() {GM_log(jqcounter);
+	function GM_wait() {
 		if (typeof unsafeWindow.jQuery == 'undefined' && jqcounter < 10) {
 			jqcounter++;
 			if (jqcounter == 5) { // 1/2 second, must be some error, try to load our own jquery
@@ -14241,7 +14241,10 @@ if (navigator.userAgent.indexOf("Firefox")>0) {
 		} else {
 			$ = unsafeWindow.jQuery;
 			$T = unsafeWindow.Tipped;
-			main();
+			if (jqcounter>=0) {
+				jqcounter = -1000; // prevent running main twice due to setTimeout effect
+				main();
+			}
 		}
 	}
 	GM_wait();
