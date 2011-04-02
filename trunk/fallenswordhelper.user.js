@@ -7710,7 +7710,7 @@ var Helper = {
 		});
 		var	folderIDs = new Array();
 		Helper.folderIDs = folderIDs; //clear out the array before starting.
-		GM_setValue("currentFolder", 1);
+		Helper.currentFolder=1;
 		$(doc).find('a[href*="profile&folder_id="]').each(function(index){
 			var folderID = /folder_id=([-0-9]+)/.exec($(this).attr("href"))[1]*1;
 			folderIDs.push(folderID);
@@ -7725,7 +7725,7 @@ var Helper = {
 		var pageElement = $(doc).find('a[href*="backpack_page="] font');
 		var currentPage = 1;
 		if (pageElement.length > 0) currentPage = parseInt(pageElement.text(),10);
-		var currentFolder = GM_getValue("currentFolder");
+		var currentFolder = Helper.currentFolder;
 		var folderCount = 0, folderID = -1;
 		if (Helper.folderIDs.length<=1) {
 			folderCount = 1;
@@ -7734,7 +7734,7 @@ var Helper = {
 			folderCount = Helper.folderIDs.length;
 			folderID = Helper.folderIDs[currentFolder-1];
 		}
-		
+
 		var backpackItems = $(doc).find('a[href*="subcmd=equipitem"] img');
 		var pages = $(doc).find('.centered').children('a[href*="index.php?cmd=profile&backpack_page="]');
 		
@@ -7756,7 +7756,7 @@ var Helper = {
 			if (currentPage==pages.length && currentFolder<folderCount) {
 				currentPage = 0;
 				folderID = Helper.folderIDs[currentFolder];
-				GM_setValue("currentFolder", currentFolder+1);
+				Helper.currentFolder=currentFolder+1;
 			}
 			System.xmlhttp('index.php?cmd=profile&backpack_page='+(currentPage)+'&folder_id='+(folderID), Helper.parseInventoryPage);
 		}
@@ -7877,8 +7877,8 @@ var Helper = {
 			var itemPartOfSetNode=$(doc).find('font:contains("Set Details")');
 			item.partOfSet=(itemPartOfSetNode.length > 0)?true:false;
 
-			var durabilityNode=$(itemBonuses).find('td:contains("Durability:"):last').next();
-			item.durability=(durabilityNode.length>0)?durabilityNode.textContent:'0/100';
+			var durabilityNode=$(doc).find('td:contains("Durability:"):last').next();
+			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec(responseText)) {
