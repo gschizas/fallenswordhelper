@@ -7854,30 +7854,30 @@ var Helper = {
 		else {
 			item.name=nameNode.text().replace(/\\/g,"");
 
-			var itemBonuses=$(doc).find('table:contains("Bonuses"):last');
+			var itemDetails=$(doc).find('table:not(:contains("Item Details")):first'); //to avoid item compare item
 
-			var attackNode=$(itemBonuses).find('td:contains("Attack:"):last').next();;
+			var attackNode=$(itemDetails).find('td:contains("Attack:"):last').next();;
 			item.attack=(attackNode.length>0)?parseInt(attackNode.text(),10):0;
 
-			var defenseNode=$(itemBonuses).find('td:contains("Defense:"):last').next();
+			var defenseNode=$(itemDetails).find('td:contains("Defense:"):last').next();
 			item.defense=(defenseNode.length>0)?parseInt(defenseNode.text(),10):0;
 
-			var armorNode=$(itemBonuses).find('td:contains("Armor:"):last').next();
+			var armorNode=$(itemDetails).find('td:contains("Armor:"):last').next();
 			item.armor=(armorNode.length>0)?parseInt(armorNode.text(),10):0;
 
-			var damageNode=$(itemBonuses).find('td:contains("Damage:"):last').next();
+			var damageNode=$(itemDetails).find('td:contains("Damage:"):last').next();
 			item.damage=(damageNode.length>0)?parseInt(damageNode.text(),10):0;
 
-			var hpNode=$(itemBonuses).find('td:contains("HP:"):last').next();
+			var hpNode=$(itemDetails).find('td:contains("HP:"):last').next();
 			item.hp=(hpNode.length>0)?parseInt(hpNode.text(),10):0;
 
-			var levelNode=$(doc).find('td:contains("Min Level:"):last').next();
+			var levelNode=$(itemDetails).find('td:contains("Min Level:"):last').next();
 			item.minLevel=(levelNode.length>0)?parseInt(levelNode.text(),10):0;
 
-			var itemPartOfSetNode=$(doc).find('font:contains("Set Details")');
+			var itemPartOfSetNode=$(itemDetails).find('font:contains("Set Details")');
 			item.partOfSet=(itemPartOfSetNode.length > 0)?true:false;
 
-			var durabilityNode=$(doc).find('td:contains("Durability:"):last').next();
+			var durabilityNode=$(itemDetails).find('td:contains("Durability:"):last').next();
 			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
