@@ -7798,8 +7798,7 @@ var Helper = {
 			output.innerHTML+=(index+1) + " ";
 			Helper.guildinventory.items.push(item);
 		});
-
-		if (currentPage<pages.length) {
+		if (currentPage<pages.length && guildstoreItems.length == 12) { //if there are not 12 items on the page then end of store is reached
 			System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), Helper.parseGuildStorePage);
 		}
 		else {
@@ -7854,38 +7853,40 @@ var Helper = {
 		else {
 			item.name=nameNode.text().replace(/\\/g,"");
 
-			var itemDetails=$(doc).find('table:not(:contains("Item Details")):first'); //to avoid item compare item
+			var itemBonuses=$(doc).find('font:contains("Bonuses"):first').parents('table:first');
+			var itemDetails=$(doc).find('font:contains("Min Level:"):first').parents('table').eq(1); //to avoid item compare item
 
-			var attackNode=$(itemDetails).find('td:contains("Attack:"):last').next();;
+			var attackNode=$(itemBonuses).find('td:contains("Attack:"):not(:contains(" Attack:")):first').next();;
 			item.attack=(attackNode.length>0)?parseInt(attackNode.text(),10):0;
 
-			var defenseNode=$(itemDetails).find('td:contains("Defense:"):last').next();
+			var defenseNode=$(itemBonuses).find('td:contains("Defense:"):not(:contains(" Defense:")):first').next();
 			item.defense=(defenseNode.length>0)?parseInt(defenseNode.text(),10):0;
 
-			var armorNode=$(itemDetails).find('td:contains("Armor:"):last').next();
+			var armorNode=$(itemBonuses).find('td:contains("Armor:"):not(:contains(" Armor:")):first').next();
 			item.armor=(armorNode.length>0)?parseInt(armorNode.text(),10):0;
 
-			var damageNode=$(itemDetails).find('td:contains("Damage:"):last').next();
+			var damageNode=$(itemBonuses).find('td:contains("Damage:"):not(:contains(" Damage:")):first').next();
 			item.damage=(damageNode.length>0)?parseInt(damageNode.text(),10):0;
 
-			var hpNode=$(itemDetails).find('td:contains("HP:"):last').next();
+			var hpNode=$(itemBonuses).find('td:contains("HP:"):not(:contains(" HP:")):first').next();
 			item.hp=(hpNode.length>0)?parseInt(hpNode.text(),10):0;
 
-			var levelNode=$(itemDetails).find('td:contains("Min Level:"):last').next();
+			var levelNode=$(doc).find('font:contains("Min Level:"):first').parents('td:first').next();
 			item.minLevel=(levelNode.length>0)?parseInt(levelNode.text(),10):0;
 
 			var itemPartOfSetNode=$(itemDetails).find('font:contains("Set Details")');
 			item.partOfSet=(itemPartOfSetNode.length > 0)?true:false;
 
-			var durabilityNode=$(itemDetails).find('td:contains("Durability:"):last').next();
+			var durabilityNode=$(doc).find('font:contains("Durability:"):first').parents('td:first').next();
 			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
 
+			if ($(itemDetails).length == 0) itemDetails= $(doc); // to catch resources
+			
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec($(itemDetails).html())) {
 				forgeCount++;
 			}
 			item.forgelevel=forgeCount;
-
 			if ($(itemDetails).text().search(/Gloves -/) != -1) item.type = "Gloves";
 			else if ($(itemDetails).text().search(/Helmet -/) != -1) item.type = "Helmet";
 			else if ($(itemDetails).text().search(/Amulet -/) != -1) item.type = "Amulet";
@@ -12195,9 +12196,10 @@ var Helper = {
 		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
 			var bulkItemIMG = bulkAuctionItemIMGs[i];
 			if (!GM_getValue("bulkSellAllBags")) {
-				bulkItemIMG = bulkItemIMG.parentNode;
+				var bulkItemMouseover = bulkItemIMG.parentNode.parentNode.parentNode.getAttribute("data-tipped");
+			} else {
+				var bulkItemMouseover = bulkItemIMG.getAttribute("data-tipped");
 			}
-			var bulkItemMouseover = bulkItemIMG.parentNode.parentNode.getAttribute("data-tipped");
 			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(bulkItemMouseover);
 			var itemId = itemStats[1];
 			var invId = itemStats[2];
