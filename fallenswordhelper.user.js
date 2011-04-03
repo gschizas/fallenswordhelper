@@ -7853,31 +7853,30 @@ var Helper = {
 		else {
 			item.name=nameNode.text().replace(/\\/g,"");
 
-			var itemBonuses=$(doc).find('font:contains("Bonuses"):first').parents('table:first');
-			var itemDetails=$(doc).find('font:contains("Min Level:"):first').parents('table').eq(1); //to avoid item compare item
+			var itemDetails=$(doc).find('table:not(:contains("Equipped Details")):first'); //to avoid item compare item
 
-			var attackNode=$(itemBonuses).find('td:contains("Attack:"):not(:contains(" Attack:")):first').next();;
+			var attackNode=$(itemDetails).find('font:contains("Attack:"):not(:contains(" Attack:")):first').parents('td:first').next();;
 			item.attack=(attackNode.length>0)?parseInt(attackNode.text(),10):0;
 
-			var defenseNode=$(itemBonuses).find('td:contains("Defense:"):not(:contains(" Defense:")):first').next();
+			var defenseNode=$(itemDetails).find('font:contains("Defense:"):not(:contains(" Defense:")):first').parents('td:first').next();
 			item.defense=(defenseNode.length>0)?parseInt(defenseNode.text(),10):0;
 
-			var armorNode=$(itemBonuses).find('td:contains("Armor:"):not(:contains(" Armor:")):first').next();
+			var armorNode=$(itemDetails).find('font:contains("Armor:"):not(:contains(" Armor:")):first').parents('td:first').next();
 			item.armor=(armorNode.length>0)?parseInt(armorNode.text(),10):0;
 
-			var damageNode=$(itemBonuses).find('td:contains("Damage:"):not(:contains(" Damage:")):first').next();
+			var damageNode=$(itemDetails).find('font:contains("Damage:"):not(:contains(" Damage:")):first').parents('td:first').next();
 			item.damage=(damageNode.length>0)?parseInt(damageNode.text(),10):0;
 
-			var hpNode=$(itemBonuses).find('td:contains("HP:"):not(:contains(" HP:")):first').next();
+			var hpNode=$(itemDetails).find('font:contains("HP:"):not(:contains(" HP:")):first').parents('td:first').next();
 			item.hp=(hpNode.length>0)?parseInt(hpNode.text(),10):0;
 
-			var levelNode=$(doc).find('font:contains("Min Level:"):first').parents('td:first').next();
+			var levelNode=$(itemDetails).find('font:contains("Min Level:"):first').parents('td:first').next();
 			item.minLevel=(levelNode.length>0)?parseInt(levelNode.text(),10):0;
 
 			var itemPartOfSetNode=$(itemDetails).find('font:contains("Set Details")');
 			item.partOfSet=(itemPartOfSetNode.length > 0)?true:false;
 
-			var durabilityNode=$(doc).find('font:contains("Durability:"):first').parents('td:first').next();
+			var durabilityNode=$(itemDetails).find('font:contains("Durability:"):first').parents('td:first').next();
 			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
 
 			if ($(itemDetails).length == 0) itemDetails= $(doc); // to catch resources
