@@ -945,7 +945,7 @@ var Layout = {
 		}
 		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
 		//"menuSource_5"
-		tableElement = $('div[id="menuSource_5"]').find('table:first');
+		tableElement = $('div[id="menuSource_5"]').find('tbody:first');
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
 		if (!GM_getValue("useNewGuildLog")) {
@@ -953,16 +953,16 @@ var Layout = {
 			Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
 		}
 		//"menuSource_3"
-		tableElement = $('div[id="menuSource_3"]').find('table:first');
+		tableElement = $('div[id="menuSource_3"]').find('tbody:first');
 		if (!tableElement) return;
 		Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
 		//"menuSource_2"
-		tableElement = $('div[id="menuSource_2"]').find('table:first');
+		tableElement = $('div[id="menuSource_2"]').find('tbody:first');
 		if (!tableElement) return;
-		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 31);
-		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 7);
-		Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 9);
-		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 11);
+		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 32);
+		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 8);
+		Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 10);
+		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 12);
 	},
 
 	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
