@@ -1016,7 +1016,7 @@ var Layout = {
 	moveFSBox: function() {//JQuery ready, dont use split... but cant get container attributes.. so works for now.
 		if (!GM_getValue("moveFSBox")) return;
 		var src=$('b:contains("FSBox"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
-		if (!src) return;
+		if (src.length == 0) return;
 		//src.parentNode.removeChild(src.nextSibling);
 		var dest=$('img[src*="menu_logout.gif"]').closest('tr');
 		dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+src.parent().html().split('</table>')[0]+'</table>'+'</td></tr>');
@@ -12902,7 +12902,6 @@ var Helper = {
 			Helper.lastStoredGuildLogMessagePostTime = Helper.storedGuildLog.logMessage[0].postDateAsLocalMilli;
 		}
 
-
 		Helper.newStoredGuildLog = {logMessage:[]};
 
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%">' +
@@ -12925,6 +12924,7 @@ var Helper = {
 			'</tbody></table>';
 		newhtml += '<table width="100%" cellspacing="0" cellpadding="2" border="0" id="Helper:GuildLogInjectTable"><tbody>' +
 			'<tr><td width="16" bgcolor="#cd9e4b"></td><td width="20%" bgcolor="#cd9e4b">Date</td><td width="80%" bgcolor="#cd9e4b">Message</td></tr>' +
+			'<tr><td class="divider" colspan="3"></td></tr>' +
 			'</tbody></table>';
 		content.innerHTML=newhtml;
 
@@ -12995,7 +12995,6 @@ var Helper = {
 				}
 			}
 		}
-
 	},
 
 	parseGuildLogPage: function(responseText, callback) {
@@ -13006,12 +13005,12 @@ var Helper = {
 		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
 		var doc=System.createDocument(responseText);
 
-		var logTable = System.findNode("//table[tbody/tr/td[.='Message']]",doc);
+		var logTable = $(doc).find('td[bgcolor="#CD9E4B"]:contains("Message")').parents('table:first');
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
 		if (pageNumber == 1) {
-			var lastRowInTable = logTable.rows[logTable.rows.length-2];
-			var lastRowCellContents = lastRowInTable.cells[1].textContent;
+			var lastRowInTable = logTable.find('td:not(.divider):last').parent('tr');
+			var lastRowCellContents = lastRowInTable.children('td:eq(1)').text();
 			lastRowPostDateAsDate = System.parseDate(lastRowCellContents);
 			lastRowPostDateAsLocalMilli = lastRowPostDateAsDate.getTime() - Helper.gmtOffsetMilli;
 			if (lastRowPostDateAsLocalMilli > Helper.lastStoredGuildLogMessagePostTime) completeReload = true;
@@ -13026,89 +13025,89 @@ var Helper = {
 			if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 			var localDateMilli = (new Date()).getTime();
 		}
-		for (i=1;i<logTable.rows.length;i+=2) {
-			aRow = logTable.rows[i];
-
-			var cellContents = aRow.cells[1].innerHTML;
-			cellContents = cellContents.substring(6,23);
+		
+		logTable.find('td:not(.divider)').parent('tr:gt(3)').each(function(index){
+			var cellContents = $(this).children('td:eq(1)').text();
+			//cellContents = cellContents.substring(6,23);
 			postDateAsDate = System.parseDate(cellContents);
 			postDateAsLocalMilli = postDateAsDate.getTime() - Helper.gmtOffsetMilli;
 
 			//if the post date is the same as last one in the stored list and the message is the same, then break out
 			//and start appending the stored values instead of parsing.
-			var stopProcessingLogPages = false;
-			if (postDateAsLocalMilli == Helper.lastStoredGuildLogMessagePostTime && aRow.innerHTML == Helper.lastStoredGuildLogMessage && !completeReload) {
-				stopProcessingLogPages = true;
-				break;
+			Helper.stopProcessingLogPages = false;
+			if (postDateAsLocalMilli == Helper.lastStoredGuildLogMessagePostTime && $(this).html() == Helper.lastStoredGuildLogMessage && !completeReload) {
+				Helper.stopProcessingLogPages = true;
+				return false;
 			}
 			var displayRow = true;
 			var rowTypeID = "GuildLogFilter:Unknown";
+			var messageText = $(this).children('td:eq(2)').text();
 			//if recall message, check to see if showRecallMessages is checked.
-			if (aRow.innerHTML.search("recalled the item") != -1 ||
-				aRow.innerHTML.search("took the item") != -1 ||
-				aRow.innerHTML.search("stored the item") != -1) {
+			if (messageText.search("recalled the item") != -1 ||
+				messageText.search("took the item") != -1 ||
+				messageText.search("stored the item") != -1) {
 				if (!Helper.showRecallMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showRecallMessages";
 			}
 			//Tag/Untag (showTaggingMessages)
-			else if (aRow.innerHTML.search("has added flags to some of guild's stored items costing a total of") != -1 ||
-				aRow.innerHTML.search("has removed flags to the guild's stored items.") != -1) {
+			else if (messageText.search("has added flags to some of guild's stored items costing a total of") != -1 ||
+				messageText.search("has removed flags to the guild's stored items.") != -1) {
 				if (!Helper.showTaggingMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showTaggingMessages";
 			}
 			//Relic messages (showRelicMessages)
-			else if (aRow.innerHTML.search("relic. This relic now has an empower level of") != -1 ||
-				aRow.innerHTML.search("relic. The relic empower level has been reset to zero.") != -1 ||
-				aRow.innerHTML.search("captured the relic") != -1 ||
-				aRow.innerHTML.search("captured your relic") != -1 ||
-				aRow.innerHTML.search("has captured the undefended relic") != -1 ||
-				aRow.innerHTML.search("attempted to capture your relic") != -1) {
+			else if (messageText.search("relic. This relic now has an empower level of") != -1 ||
+				messageText.search("relic. The relic empower level has been reset to zero.") != -1 ||
+				messageText.search("captured the relic") != -1 ||
+				messageText.search("captured your relic") != -1 ||
+				messageText.search("has captured the undefended relic") != -1 ||
+				messageText.search("attempted to capture your relic") != -1) {
 				if (!Helper.showRelicMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showRelicMessages";
 			}
 			//Mercenary messages (showMercenaryMessages)
-			else if (aRow.innerHTML.search("disbanded a mercenary.") != -1 ||
-				aRow.innerHTML.search("hired the mercenary") != -1) {
+			else if (messageText.search("disbanded a mercenary.") != -1 ||
+				messageText.search("hired the mercenary") != -1) {
 				if (!Helper.showMercenaryMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showMercenaryMessages";
 			}
 			//Group Combat messages (showGroupCombatMessages)
-			else if (aRow.innerHTML.search(/A group from your guild was (.*) in combat./) != -1) {
+			else if (messageText.search(/A group from your guild was (.*) in combat./) != -1) {
 				if (!Helper.showGroupCombatMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showGroupCombatMessages";
 			}
 			//Donation messages (showDonationMessages)
-			else if (aRow.innerHTML.search(/deposited ([,0-9]+) FallenSword Points into the guild./) != -1 ||
-				aRow.innerHTML.search(/deposited ([,0-9]+) gold into the guild bank/) != -1) {
+			else if (messageText.search(/deposited ([,0-9]+) FallenSword Points into the guild./) != -1 ||
+				messageText.search(/deposited ([,0-9]+) gold into the guild bank/) != -1) {
 				if (!Helper.showDonationMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showDonationMessages";
 			}
 			//Ranking messages (showRankingMessages)
-			else if (aRow.innerHTML.search("has added a new rank entitled") != -1 ||
-				aRow.innerHTML.search("has been assigned the rank") != -1) {
+			else if (messageText.search("has added a new rank entitled") != -1 ||
+				messageText.search("has been assigned the rank") != -1) {
 				if (!Helper.showRankingMessages) {
 					displayRow = false;
 				}
 				rowTypeID = "GuildLogFilter:showRankingMessages";
 			}
 			//GvG messages (showGvGMessages)
-			else if (aRow.innerHTML.search("resulted in a draw. Your GvG rating and Guild RP was unaffected.") != -1 ||
-				aRow.innerHTML.search(/resulted in (.*) with a final score of/) != -1 ||
-				aRow.innerHTML.search("has just initiated a conflict with the guild") != -1 ||
-				aRow.innerHTML.search("has initiated a conflict with your guild") != -1 ||
-				aRow.innerHTML.search("is participating in the conflict against the guild") != -1) {
+			else if (messageText.search("resulted in a draw. Your GvG rating and Guild RP was unaffected.") != -1 ||
+				messageText.search(/resulted in (.*) with a final score of/) != -1 ||
+				messageText.search("has just initiated a conflict with the guild") != -1 ||
+				messageText.search("has initiated a conflict with your guild") != -1 ||
+				messageText.search("is participating in the conflict against the guild") != -1) {
 				if (!Helper.showGvGMessages) {
 					displayRow = false;
 				}
@@ -13116,44 +13115,44 @@ var Helper = {
 			}
 
 			//display the row or effectively hide it
-			newRow = aRow.cloneNode(true);
+			newRow = $(this).clone(true);
 			if (!displayRow) {
-				newRow.style.display = "none";
-				newRow.style.visibility = "hidden";
+				newRow.css("display","none")
+					.css("visibility","hidden");
 			}
 			newRow.id = rowTypeID
-			guildLogInjectTable.appendChild(newRow);
+			newRow.appendTo(guildLogInjectTable);
 			postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
 			if (enableLogColoring && postDateAsLocalMilli > localLastCheckMilli) {
-				newRow.style.backgroundColor = "#F5F298";
+				newRow.css("backgroundColor","#F5F298");
 			}
 			else if (enableLogColoring && postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
-				newRow.style.backgroundColor = "#CD9E4B";
+				newRow.css("backgroundColor", "#CD9E4B");
 			}
 			var newLogMessage = {
 				postDateAsLocalMilli: postDateAsLocalMilli,
 				rowTypeID: rowTypeID,
-				logMessage: newRow.innerHTML,
+				logMessage: newRow.html()
 			};
 			Helper.newStoredGuildLog.logMessage.push(newLogMessage);
 			//create following spacer row
-			var spacerRow = document.createElement("TR");
+			var spacerRow = $('<tr></tr>');
 			if (!displayRow) {
-				spacerRow.style.display = "none";
-				spacerRow.style.visibility = "hidden";
+				spacerRow.css("display","none")
+					.css("visibility","hidden");
 			}
 			spacerRow.id = rowTypeID
-			guildLogInjectTable.appendChild(spacerRow);
-			spacerRow.innerHTML = '<td class="divider" colspan="3"></td>'
+			spacerRow.appendTo(guildLogInjectTable);
+			spacerRow.html('<td class="divider" colspan="3"></td>');
 			newLogMessage = {
 				postDateAsLocalMilli: postDateAsLocalMilli,
 				rowTypeID: rowTypeID,
-				logMessage: spacerRow.innerHTML,
+				logMessage: spacerRow.html()
 			};
 			Helper.newStoredGuildLog.logMessage.push(newLogMessage);
-		}
-
-		if (stopProcessingLogPages) {
+		});
+		
+		if (Helper.stopProcessingLogPages) {
 			loadingMessageInjectHere.innerHTML = 'Processing stored logs ...';
 			for (i=0;i<Helper.storedGuildLog.logMessage.length;i++) {
 				var logMessageArrayItem = Helper.storedGuildLog.logMessage[i];
@@ -13192,12 +13191,12 @@ var Helper = {
 			}
 		}
 
-		var page = System.findNode("//input[@name='page']", doc);
-		var curPage = parseInt(page.value,10);
-		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+		var page = $(doc).find('input[name="page"]');
+		var curPage = parseInt(page.val(),10);
+		var maxPage = page.parent().html().match(/of&nbsp;(\d*)/)[1];
 
 		//fetch the next page (if necessary)
-		if (pageNumber < maxPage && pageNumber < maxPagesToFetch && !stopProcessingLogPages) {
+		if (pageNumber < maxPage && pageNumber < maxPagesToFetch && !Helper.stopProcessingLogPages) {
 			var nextPage = parseInt(pageNumber+1,10);
 			loadingMessageInjectHere.innerHTML = 'Loading Page ' + (nextPage + 1) + " of " + Math.floor(maxPagesToFetch+1,maxPage) + "...";
 			System.xmlhttp('index.php?cmd=guild&subcmd=log&subcmd2=&page=' + nextPage + '&search_text=', Helper.parseGuildLogPage,
@@ -14225,7 +14224,6 @@ if (navigator.userAgent.indexOf("Firefox")>0) {
 	}
 	GM_wait();
 }
-
 
 function insertJS(callback) {
 	var script = document.createElement("script");
