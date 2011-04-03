@@ -2586,7 +2586,7 @@ var Helper = {
 
 	empowerRelic: function(evt) {
 		var relicID = evt.target.getAttribute("relicID");
-		var targetEmpowerLevel = $('input[name="targetEmpowerLevel"]');
+		var targetEmpowerLevel = $('input[name="targetEmpowerLevel"]').val();
 		var currentLevel = parseInt($('td:contains("Empower"):contains("Level"):last').next('td').text(),10);
 		if (targetEmpowerLevel <= currentLevel) return;
 		evt.target.innerHTML = "Processing ... ";
@@ -2614,7 +2614,7 @@ var Helper = {
 		var empowerRelicMaxTries = Helper.empowerRelicMaxTries
 		if (currentLevel < targetEmpowerLevel && empowerRelicCurrentTries < empowerRelicMaxTries) {
 			empowerRelicCurrentTries ++;
-			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
+			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {"target":target,"relicID":relicID,"targetEmpowerLevel":targetEmpowerLevel});
 		} else {
 			//http://www.fallensword.com/index.php?cmd=relic&relic_id=87
 			window.location = "index.php?cmd=relic&relic_id=" + relicID
@@ -7881,34 +7881,34 @@ var Helper = {
 			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
 
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
-			while(re.exec(responseText)) {
+			while(re.exec($(itemDetails).html())) {
 				forgeCount++;
 			}
 			item.forgelevel=forgeCount;
 
-			if (responseText.search(/Gloves -/) != -1) item.type = "Gloves";
-			else if (responseText.search(/Helmet -/) != -1) item.type = "Helmet";
-			else if (responseText.search(/Amulet -/) != -1) item.type = "Amulet";
-			else if (responseText.search(/Weapon -/) != -1) item.type = "Weapon";
-			else if (responseText.search(/Armor -/) != -1) item.type = "Armor";
-			else if (responseText.search(/Shield -/) != -1) item.type = "Shield";
-			else if (responseText.search(/Ring -/) != -1) item.type = "Ring";
-			else if (responseText.search(/Boots -/) != -1) item.type = "Boots";
-			else if (responseText.search(/Rune -/) != -1) item.type = "Rune";
-			else if (responseText.search(/Potions -/) != -1) item.type = "Potions";
-			else if (responseText.search(/Resource -/) != -1) item.type = "Resource";
-			else if (responseText.search(/Recipe -/) != -1) item.type = "Recipe";
-			else if (responseText.search(/Quest Item/) != -1) item.type = "Quest Item";
+			if ($(itemDetails).text().search(/Gloves -/) != -1) item.type = "Gloves";
+			else if ($(itemDetails).text().search(/Helmet -/) != -1) item.type = "Helmet";
+			else if ($(itemDetails).text().search(/Amulet -/) != -1) item.type = "Amulet";
+			else if ($(itemDetails).text().search(/Weapon -/) != -1) item.type = "Weapon";
+			else if ($(itemDetails).text().search(/Armor -/) != -1) item.type = "Armor";
+			else if ($(itemDetails).text().search(/Shield -/) != -1) item.type = "Shield";
+			else if ($(itemDetails).text().search(/Ring -/) != -1) item.type = "Ring";
+			else if ($(itemDetails).text().search(/Boots -/) != -1) item.type = "Boots";
+			else if ($(itemDetails).text().search(/Rune -/) != -1) item.type = "Rune";
+			else if ($(itemDetails).text().search(/Potions -/) != -1) item.type = "Potions";
+			else if ($(itemDetails).text().search(/Resource -/) != -1) item.type = "Resource";
+			else if ($(itemDetails).text().search(/Recipe -/) != -1) item.type = "Recipe";
+			else if ($(itemDetails).text().search(/Quest Item/) != -1) item.type = "Quest Item";
 
 			var craft="";
-			if (responseText.search(/>Uncrafted</) != -1) craft = "Uncrafted";
-			else if (responseText.search(/>Very Poor</) != -1) craft = "Very Poor";
-			else if (responseText.search(/>Poor</) != -1) craft = "Poor";
-			else if (responseText.search(/>Average</) != -1) craft = "Average";
-			else if (responseText.search(/>Good</) != -1) craft = "Good";
-			else if (responseText.search(/>Very Good</) != -1) craft = "Very Good";
-			else if (responseText.search(/>Excellent</) != -1) craft = "Excellent";
-			else if (responseText.search(/>Perfect</) != -1) craft = "Perfect";
+			if ($(itemDetails).html().search(/>Uncrafted</) != -1) craft = "Uncrafted";
+			else if ($(itemDetails).html().search(/>Very Poor</) != -1) craft = "Very Poor";
+			else if ($(itemDetails).html().search(/>Poor</) != -1) craft = "Poor";
+			else if ($(itemDetails).html().search(/>Average</) != -1) craft = "Average";
+			else if ($(itemDetails).html().search(/>Good</) != -1) craft = "Good";
+			else if ($(itemDetails).html().search(/>Very Good</) != -1) craft = "Very Good";
+			else if ($(itemDetails).html().search(/>Excellent</) != -1) craft = "Excellent";
+			else if ($(itemDetails).html().search(/>Perfect</) != -1) craft = "Perfect";
 			item.craftlevel=craft;
 		}
 
