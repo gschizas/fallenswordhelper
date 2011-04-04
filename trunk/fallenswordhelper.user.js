@@ -1012,71 +1012,17 @@ var Layout = {
 		}
 		$('div[class="top_banner"]').attr('style','display:none');
 	},
-
-	moveFSBox: function() {//JQuery ready, dont use split... but cant get container attributes.. so works for now.
-		if (!GM_getValue("moveFSBox")) return;
-		var src=$('b:contains("FSBox"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
+	
+	moveRHSBox: function(title) {
+		var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
 		if (src.length == 0) return;
-		//src.parentNode.removeChild(src.nextSibling);
+		src.next('br').remove(); //remove next BR
+		var tmp = document.createElement('div');
+		tmp.appendChild(src[0]);
 		var dest=$('img[src*="menu_logout.gif"]').closest('tr');
-		dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+src.parent().html().split('</table>')[0]+'</table>'+'</td></tr>');
+		dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+tmp.innerHTML+'</td></tr>');
 		src.remove();
-
 	},
-
-	moveGuildOnlineList: function() {
-		if (!GM_getValue("moveGuildList")) return;
-		var src=System.findNode("//font[b='Guild Info']/../../../..");
-		if (!src) return;
-		src.parentNode.removeChild(src.nextSibling);
-		src.parentNode.removeChild(src.nextSibling);
-		src.parentNode.removeChild(src.nextSibling);
-		src.parentNode.removeChild(src);
-		var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
-		if (rightColumnTable) {
-			//var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
-			var dest = rightColumnTable;
-			if (!dest) return;
-			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?3:1;
-			var info = dest.insertRow(startRow);
-			if (!info) return;
-			var cell = info.insertCell(0);
-			cell.align = 'center';
-			cell.width = '120';
-			cell.innerHTML="<span id='Helper:GuildListPlaceholder'></span>";
-			cell.appendChild(src);
-			var breaker = dest.insertRow(startRow+1);
-			cell = breaker.insertCell(0);
-			cell.innerHTML = "<br/>";
-		}
-    },
-
-	moveOnlineAlliesList: function() {
-		if (!GM_getValue("moveOnlineAlliesList")) return;
-		var src=System.findNode("//font[b='Online Allies']/../../../..");
-		if (!src) return;
-		src.parentNode.removeChild(src.nextSibling);
-		src.parentNode.removeChild(src.nextSibling);
-		src.parentNode.removeChild(src.nextSibling);
-		src.parentNode.removeChild(src);
-		var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
-		if (rightColumnTable) {
-			//var dest = mainTable.rows[1].cells[2].firstChild.nextSibling.rows[2].cells[0].firstChild.nextSibling;
-			var dest = rightColumnTable;
-			if (!dest) return;
-			var startRow = GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")?3:1;
-			var info = dest.insertRow(startRow);
-			if (!info) return;
-			var cell = info.insertCell(0);
-			cell.align = 'center';
-			cell.width = '120';
-			cell.innerHTML="<span id='Helper:OnlineAlliesListPlaceholder'></span>";
-			cell.appendChild(src);
-			var breaker = dest.insertRow(startRow+1);
-			cell = breaker.insertCell(0);
-			cell.innerHTML = "<br/>";
-		}
-    },
 
 	notebookContent: function() {
 		return System.findNode("//div[@class='innerContentMiddle']");
@@ -1510,10 +1456,11 @@ var Helper = {
 		} else {
 			Helper.init();
 			Layout.hideBanner();
-			Layout.moveFSBox();
+			//move boxes in opposite order that you want them to appear.
+			if (GM_getValue("moveOnlineAlliesList")) Layout.moveRHSBox('Online Allies');
+			if (GM_getValue("moveGuildList")) Layout.moveRHSBox('Guild Info');
+			if (GM_getValue("moveFSBox")) Layout.moveRHSBox('FSBox');
 			Helper.prepareAllyEnemyList();
-			Layout.moveGuildOnlineList();
-			Layout.moveOnlineAlliesList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
 			Helper.injectStaminaCalculator();
@@ -10379,9 +10326,9 @@ var Helper = {
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
 		var configData=
-			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
-			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
-			'<tr><td colspan="2"><b>Fallen Sword Helper configuration</b></td></tr>' +
+			'<div id="settingsTabs-6"><form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
+//			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
+			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
 			'<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
 			')</span></td></tr>' +
@@ -10646,13 +10593,15 @@ var Helper = {
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
-			'</table></form>';
-		var insertHere = System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='5' and @border='0']");
-		var newRow=insertHere.insertRow(insertHere.rows.length);
-		var newCell=newRow.insertCell(0);
-		newCell.colSpan=3;
-		newCell.innerHTML=configData;
+			'</table></form></div>';
+		//var insertHere = System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='5' and @border='0']");
+		//var newRow=insertHere.insertRow(insertHere.rows.length);
+		//var newCell=newRow.insertCell(0);
+		//newCell.colSpan=3;
+		//newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
+		$('#settingsTabs-5').after(configData);
+		$('a[href*="settingsTabs-5"]').parent().after('<li><a href="#settingsTabs-6">FSH Settings</a></li>');
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
