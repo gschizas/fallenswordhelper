@@ -12184,48 +12184,44 @@ var Helper = {
 		var originalItemID = callback.itemID;
 		var originalInvID = callback.invID;
 
-		var bulkSellTable = System.findNode("//table[@id='Helper:CreateAuctionBulkSellTable']");
+		var bulkSellTable = $('table[id="Helper:CreateAuctionBulkSellTable"]');
 
 		var doc=System.createDocument(responseText);
-		var bulkAuctionItemIMGs = System.findNodes("//img[contains(@src,'items/"+originalItemID+".gif')]", doc);
-		if (!bulkAuctionItemIMGs) {return;}
+		var bulkAuctionItemIMGs = $(doc).find('img[src*="items/'+originalItemID+'.gif"]');
+		if (bulkAuctionItemIMGs.length == 0) {return;}
 		var maxAuctions = GM_getValue("maxAuctions");
 		if (!maxAuctions) maxAuctions = 2;
+		var bulkSellAllBags = GM_getValue("bulkSellAllBags");
 
-		for (var i=0;i<bulkAuctionItemIMGs.length;i++) {
-			var bulkItemIMG = bulkAuctionItemIMGs[i];
-			if (!GM_getValue("bulkSellAllBags")) {
-				var bulkItemMouseover = bulkItemIMG.parentNode.parentNode.parentNode.getAttribute("data-tipped");
+		bulkAuctionItemIMGs.each(function(index){
+			if (!bulkSellAllBags) {
+				var bulkItemMouseover = $(this).parents('td:first').data("tipped");
 			} else {
-				var bulkItemMouseover = bulkItemIMG.getAttribute("data-tipped");
+				var bulkItemMouseover = $(this).data("tipped");
 			}
 			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(bulkItemMouseover);
 			var itemId = itemStats[1];
 			var invId = itemStats[2];
 			var type = itemStats[3];
 			var pid = itemStats[4];
-			if ((i % 3 === 0)) newRow = bulkSellTable.insertRow(-1);
-			//var newRow = bulkSellTable.insertRow(-1);
-			var newCell = newRow.insertCell(-1);
-			newCell.style.vAlign = "middle";
-			newCell.innerHTML = '<img src="'+System.imageServerHTTP+'/items/'+itemId+'.gif" border=0 ' +
-				'class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t=' + type + '&p=' + pid + '">';
-			newCell = newRow.insertCell(-1);
-			newCell.style.vAlign = "middle";
-			newCell.innerHTML = '<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>';
+			if ((index % 3 === 0)) bulkSellTable.append('<tr><td><td><td><td><td><td></td></td></td></td></td></td></tr>');
+			bulkSellTable.find('tr:last').css("vAlign","middle");
+			bulkSellTable.find('tr:last').find('td:eq('+(index%3)*2+')')
+				.html('<img src="'+System.imageServerHTTP+'/items/'+itemId+'.gif" border=0 ' +
+					'class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t=' + type + '&p=' + pid + '">')
+				.next()
+				.html('<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>');
 			document.getElementById('Helper:bulkListSingle'+invId).addEventListener('click', Helper.bulkListSingle, true);
-			if ((i+2) > maxAuctions && (i+1) != bulkAuctionItemIMGs.length) {
-				var newRow = bulkSellTable.insertRow(-1);
-				newCell = newRow.insertCell(0);
-				newCell.colSpan = 4;
+			if ((index+2) > maxAuctions && (index+1) != bulkAuctionItemIMGs.length) {
+				bulkSellTable.append('<tr><td></td></tr>');
 				var newText = "You only have " + maxAuctions + " auction slots.";
 				if (maxAuctions == 2) {
 					newText += " Check the updates page to add more (or to fix this number if you think it is wrong)";
 				}
-				newCell.innerHTML = newText;
-				break;
+				bulkSellTable.find('tr:last').find('td:first').html(newText).attr("colspan",6);
+				return false;
 			}
-		}
+		});
 	},
 
 	bulkListAll: function() {
