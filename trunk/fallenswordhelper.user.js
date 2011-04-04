@@ -8,6 +8,7 @@
 // @include        http://*.fallensword.com/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
+// @exclude        http://alpha.fallensword.com/*
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
