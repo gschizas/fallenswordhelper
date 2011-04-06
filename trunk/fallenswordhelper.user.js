@@ -960,7 +960,7 @@ var Layout = {
 		//"menuSource_2"
 		tableElement = $('div[id="menuSource_2"]').find('tbody:first');
 		if (!tableElement) return;
-		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 32);
+		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 37);
 		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 8);
 		Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 10);
 		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 12);
