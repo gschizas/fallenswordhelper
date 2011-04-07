@@ -558,8 +558,10 @@ var System = {
 	},
 
 	parseDate: function(textDate) {
-		timeText = textDate.split(" ")[0];
-		dateText = textDate.split(" ")[1];
+		textDateSplitSpace = textDate.split(" ");
+		if (textDateSplitSpace.length == 1) GM_log(textDate)
+		timeText = textDateSplitSpace[0];
+		dateText = textDateSplitSpace[1];
 		dayText = dateText.split("/")[0];
 		monthText = dateText.split("/")[1];
 		if (monthText == "Jan") fullMonthText = "January";
@@ -1014,7 +1016,18 @@ var Layout = {
 		$('div[class="top_banner"]').attr('style','display:none');
 	},
 	
-	moveRHSBox: function(title) {
+	moveRHSBoxUpOnRHS: function(title) {
+		var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
+		if (src.length == 0) return;
+		src.next('br').remove(); //remove next BR
+		var tmp = document.createElement('div');
+		tmp.appendChild(src[0]);
+		var dest=$('#rightColumn').find('table:eq(1)').find('tr:first');
+		dest.before('<tr><td align="center">'+tmp.innerHTML+'</td></tr><tr><td>&nbsp;</td></tr>');
+		src.remove();
+	},
+
+	moveRHSBoxToLHS: function(title) {
 		var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
 		if (src.length == 0) return;
 		src.next('br').remove(); //remove next BR
@@ -1458,9 +1471,9 @@ var Helper = {
 			Helper.init();
 			Layout.hideBanner();
 			//move boxes in opposite order that you want them to appear.
-			if (GM_getValue("moveOnlineAlliesList")) Layout.moveRHSBox('Online Allies');
-			if (GM_getValue("moveGuildList")) Layout.moveRHSBox('Guild Info');
-			if (GM_getValue("moveFSBox")) Layout.moveRHSBox('FSBox');
+			if (GM_getValue("moveGuildList")) Layout.moveRHSBoxUpOnRHS('Guild Info');
+			if (GM_getValue("moveOnlineAlliesList")) Layout.moveRHSBoxUpOnRHS('Online Allies');
+			if (GM_getValue("moveFSBox")) Layout.moveRHSBoxToLHS('FSBox');
 			Helper.prepareAllyEnemyList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
@@ -12975,7 +12988,7 @@ var Helper = {
 		
 		logTable.find('td:not(.divider)').parent('tr:gt(2)').each(function(index){
 			var cellContents = $(this).children('td:eq(1)').text();
-			if (!cellContents || cellContents == 'Date') return;
+			if (!cellContents || cellContents == 'Date' || cellContents.split(' ').length == 1) return;
 			postDateAsDate = System.parseDate(cellContents);
 			postDateAsLocalMilli = postDateAsDate.getTime() - Helper.gmtOffsetMilli;
 
