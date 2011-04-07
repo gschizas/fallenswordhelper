@@ -12965,7 +12965,7 @@ var Helper = {
 		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
 		var doc=System.createDocument(responseText);
 
-		var logTable = $(doc).find('td[bgcolor="#CD9E4B"]:contains("Message")').parents('table:first');
+		var logTable = $(doc).find('table:width_full');
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
 		if (pageNumber == 1) {
