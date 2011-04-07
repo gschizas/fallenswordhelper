@@ -12973,9 +12973,9 @@ var Helper = {
 			var localDateMilli = (new Date()).getTime();
 		}
 		
-		logTable.find('td:not(.divider)').parent('tr:gt(3)').each(function(index){
+		logTable.find('td:not(.divider)').parent('tr:gt(2)').each(function(index){
 			var cellContents = $(this).children('td:eq(1)').text();
-			//cellContents = cellContents.substring(6,23);
+			if (!cellContents || cellContents == 'Date') return;
 			postDateAsDate = System.parseDate(cellContents);
 			postDateAsLocalMilli = postDateAsDate.getTime() - Helper.gmtOffsetMilli;
 
