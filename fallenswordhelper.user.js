@@ -12969,8 +12969,8 @@ var Helper = {
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
 		if (pageNumber == 1) {
-			var lastRowInTable = logTable.find('td:not(.divider):last').parent('tr');
-			var lastRowCellContents = lastRowInTable.children('td:eq(1)').text();
+			var lastRowInTable = logTable.find('tr>td:not(.divider)').parent(':last');
+			var lastRowCellContents = lastRowInTable.find('td:eq(1)').text();
 			lastRowPostDateAsDate = System.parseDate(lastRowCellContents);
 			lastRowPostDateAsLocalMilli = lastRowPostDateAsDate.getTime() - Helper.gmtOffsetMilli;
 			if (lastRowPostDateAsLocalMilli > Helper.lastStoredGuildLogMessagePostTime) completeReload = true;
