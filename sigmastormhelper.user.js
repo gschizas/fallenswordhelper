@@ -29,6 +29,27 @@ Array.prototype.unique = function (idfield) {
 	return r;
 }
 
+// jquery GM_get/set wrapper
+function GM_JQ_wrapper() {
+	if (typeof(GM_setValue) != 'undefined') {
+		var oldGM_setValue = GM_setValue;
+		GM_setValue = function(name, value){
+			setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		};
+		var oldGM_openInTab = GM_openInTab;
+		GM_openInTab = function(url) {
+			setTimeout(function() {oldGM_openInTab(url);}, 0);
+		};
+		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
+		GM_xmlhttpRequest = function(details) {
+			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
+		};
+		// don't know how to modify GM_getValue yet (how to return value from setTimeout) - TODO
+		// other GM_functions are not needed.
+	}
+}
+GM_JQ_wrapper();
+
 var Helper = {
 	// System functions
 	init: function(e) {
@@ -69,7 +90,6 @@ var Helper = {
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
 		System.setDefault("footprintsColor", "silver");
-		System.setDefault("chatTopToBottom", true);
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("enableGuildOnlineList", true);
 		System.setDefault("guildOnlineRefreshTime", 300);
@@ -135,6 +155,21 @@ var Helper = {
 		if (!memberList || !memberList.lastUpdate) GM_setValue("memberlist", "");
 	},
 
+	setItemFilterDefault: function() {
+		Helper.itemFilters = [
+		{"id":"showBodyTypeItems", "type":"Body Armor"},
+		{"id":"showHelmetTypeItems", "type":"Helmet"},
+		{"id":"showHelmetAddOnTypeItems", "type":"Helmet Add-On"},
+		{"id":"showLegTypeItems", "type":"Leg Armor"},
+		{"id":"showWeaponTypeItems", "type":"Weapon"},
+		{"id":"showWeaponAddOnTypeItems", "type":"Weapon Add-On"},
+		];
+
+		for (var i=0; i<Helper.itemFilters.length; i++) {
+			System.setDefault(Helper.itemFilters[i].id, true);
+		}
+	},
+
 	readInfo: function(doc) {
 		if (!doc) doc=document;
 		var charInfo = System.findNode("//img[contains(@src,'skin/quicklinks/4.gif')]",doc);
@@ -166,30 +201,35 @@ var Helper = {
 	},
 
 	checkForUpdate: function() {
-		GM_log("Checking for new version...")
-		var now=(new Date()).getTime();
+		GM_log("Checking for new version...");
+		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		GM_xmlhttpRequest({
-			method: 'GET',
-			url: "http://fallenswordhelper.googlecode.com/svn/trunk/?nonce="+now,
+			method: 'PROPFIND',
+			url: "http://fallenswordhelper.googlecode.com/svn/trunk/sigmastormhelper.user.js",
 			headers: {
-				"User-Agent" : navigator.userAgent,
+				"User-Agent": navigator.userAgent,
 				"Referer": document.location
 			},
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
-			}
-		})
+			},
+			data: '<?xml version="1.0" encoding="utf-8"?><propfind xmlns="DAV:"><allprop/></propfind>'
+		});
+
 	},
 
 	autoUpdate: function(responseDetails) {
-		if (responseDetails.status != 200) return;
-		var now = (new Date()).getTime()
+		if (responseDetails.status != 207) {return;}
+		var now = (new Date()).getTime();
 		GM_setValue("lastVersionCheck", now.toString());
 		var currentVersion = GM_getValue("currentVersion");
-		if (!currentVersion) currentVersion = 0;
-		var versionRE = /Revision\s*([0-9]+):/;
-		var latestVersion = responseDetails.responseText.match(versionRE)[1];
+		if (!currentVersion) {currentVersion = 0;}
+
+		var parser=new DOMParser();
+	  	var xmlDoc=parser.parseFromString(responseDetails.responseText,"text/xml");
+		var latestVersion = xmlDoc.getElementsByTagName("lp1:version-name")[0].textContent;
+
 		GM_log("Current version: " + currentVersion);
 		GM_log("Found version: " + latestVersion);
 
@@ -204,52 +244,32 @@ var Helper = {
 				onload: function(responseDetails) {
 					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
 				}
-			})
+			});
 		}
 	},
 
 	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
 		var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-		var confirmAlert = document.createElement("DIV");
-		confirmAlert.id = 'Helper:ConfirmAlert';
-		var divHeight = window.innerHeight - 160;
 
-		confirmAlert.style.position = "absolute";
-		confirmAlert.style.left = (window.innerWidth - 500) / 2 + "px";
-		confirmAlert.style.top = (80 + window.scrollY) + "px";
-		confirmAlert.style.width = "500px";
-		confirmAlert.style.height = divHeight + "px";
-		confirmAlert.style.display = 'block';
-		confirmAlert.style.zIndex = '90';
-		confirmAlert.style.filter = 'alpha';
-		confirmAlert.style.opacity = '0.9';
-		confirmAlert.style.background = 'black';
-		confirmAlert.style.color = 'white';
-		confirmAlert.style.border = 'ridge';
-
-		confirmAlert.innerHTML = '<div height="20" style="background-color:#4a3918;">' +
-			'<div style="color:yellow;position:absolute;top:0px;left:0px">New version (' + newVersion + ') found. Update from version ' + oldVersion + '?' +
-			'</div><div style="position:absolute;top:0px;right:0px">' +
-			'<input type="button" id="Helper:AutoUpdateOk" value="Ok" class="custombutton">' +
-			'&nbsp;<input type="button" id="Helper:AutoUpdateCancel" value="Cancel" class="custombutton"></div></div>' +
-			'<div id="Helper:Output" style="margin-top:20px;height:' + (divHeight-20) + 'px;overflow:auto;">' + theChanges + '</div>';
-		document.body.insertBefore(confirmAlert, document.body.firstChild);
-		document.getElementById("Helper:AutoUpdateOk").addEventListener("click", Helper.autoUpdateConfirmOk, true);
-		document.getElementById("Helper:AutoUpdateOk").setAttribute("newVersion", newVersion);
-		document.getElementById("Helper:AutoUpdateCancel").addEventListener("click", Helper.autoUpdateConfirmCancel, true);
-	},
-
-	autoUpdateConfirmOk: function(evt) {
-		var newVersion = parseInt(evt.target.getAttribute("newVersion"));
-		GM_setValue("currentVersion", newVersion);
-		GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/sigmastormhelper.user.js");
-		Helper.autoUpdateConfirmCancel(evt);
-	},
-
-	autoUpdateConfirmCancel: function(evt) {
-		var confirmAlert = document.getElementById("Helper:ConfirmAlert");
-		confirmAlert.style.display = "none";
-		confirmAlert.visibility = "hidden";
+		var $dialog = $('<div></div>')
+			.html(theChanges)
+			.dialog({
+				title: 'Sigmastorm2 Helper new version (' + newVersion + ') found. Update from version ' + oldVersion + '?',
+				resizable: false,
+				height:500,
+				width:500,
+				modal: true,
+				buttons: {
+					"OK": function() {
+						$dialog.dialog( "close" );
+						GM_setValue("currentVersion", newVersion);
+						GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/sigmastormhelper.user.js");
+					},
+					Cancel: function() {
+						$dialog.dialog( "close" );
+					}
+				}
+		});
 	},
 
 	// main event dispatcher
@@ -260,7 +280,6 @@ var Helper = {
 		} else {
 			// normal mode
 			Helper.init();
-			Helper.prepareChat();
 			Helper.prepareGuildList();
 			Helper.prepareAllyEnemyList();
 			Helper.injectStaminaCalculator();
@@ -587,7 +606,7 @@ var Helper = {
 				Helper.injectQuestBookFull();
 			}
 			var isAdvisorPageClue1 = System.findNode("//font[@size=2 and .='Advisor']");
-			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Guild Management']"
+			var clue2 = "//a[@href='index.php?cmd=guild&amp;subcmd=manage' and .='Back to Faction Management']"
 			var isAdvisorPageClue2 = System.findNode(clue2);
 			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
 				Helper.injectAdvisor(subPage2Id);
@@ -595,9 +614,7 @@ var Helper = {
 			break;
 		}
 
-		if (!GM_getValue("huntingMode")) {
-			Helper.injectQuickBuffJQ();
-		}
+		Helper.injectQuickBuffJQ();
 	},
 
 	injectQuickBuffJQ: function() {
@@ -1143,7 +1160,7 @@ var Helper = {
 		//extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small;'>" + testList + "<td><tr>";
 		extraTextInsertPoint.innerHTML += "<tr><td><table style='font-size:small; border-top:2px black solid;'>" +
 			"<tr><td>Number of Defenders:</td><td>" + defenderCount + "</td></tr>" +
-			"<tr><td>Defending Guild Relic Count:</td><td title='relicCount'>0</td></tr>" +
+			"<tr><td>Defending Faction Artifact Count:</td><td title='relicCount'>0</td></tr>" +
 			"<tr><td>Lead Defender Bonus:</td><td title='LDPercentage'>0</td></tr>" +
 			"<tr style='display:none;'><td>Relic Count Processed:</td><td title='relicProcessed'>0</td></tr>" +
 			"<tr><td colspan='2' style='font-size:x-small; color:gray;'>Does not allow for last logged time (yet)</td></tr>" +
@@ -1162,7 +1179,7 @@ var Helper = {
 			"<tr><td align='right' style='color:brown;'>HP:</td><td align='right' title='hpValue'>0</td></tr>" +
 			"<tr><td align='right' style='color:brown;'>Processed:</td><td align='right' title='defendersProcessed'>0</td></tr>";
 		if (defendingGuildID == myGuildID) {
-			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline guild members not at relic:</td></tr>";
+			extraTextInsertPoint.innerHTML += "<tr><td style='border-top:2px black solid;' colspan=2>Offline faction members not at artifact:</td></tr>";
 			extraTextInsertPoint.innerHTML += "<tr><td style='font-size:x-small; color:red;' colspan=2>" + validMemberString + "</td></tr>";
 		}
 		extraTextInsertPoint.innerHTML += "</table><td><tr>";
@@ -2863,162 +2880,11 @@ var Helper = {
 		}
 	},
 
-	prepareChat: function() {
-		Helper.rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/infobox_sigmabox.gif')]")
-		var showLines = parseInt(GM_getValue("chatLines"))
-		if (showLines==0) return;
-		if (!Helper.rightSideBar) return;
-		var info = Helper.rightSideBar.insertRow(0);
-		var cell = info.insertCell(0);
-		cell.innerHTML="<span id='Helper:ChatPlaceholder'></span>";
-		var chat = System.getValueJSON("chat");
-		var newChat = System.findNode("//table[contains(.,'chat messages')]")
-		if (!chat || newChat || ((new Date()) - chat.lastUpdate > 15000)) {
-			Helper.retrieveChat();
-		} else {
-			chat.isRefreshed=false;
-			Helper.injectChat(chat);
-		}
-	},
-
-	retrieveChat: function() {
-		System.xmlhttp("index.php?cmd=guild&subcmd=chat", Helper.parseChatForWorld);
-	},
-
-	parseChatForWorld: function(chatText) {
-		var doc=System.createDocument(chatText);
-		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']", doc);
-		if (!chatTable) return;
-		var chat = new Object();
-		// var chatConfirm=System.findNode("//input[@name='xc']", doc);
-		chat.isRefreshed=true;
-		chat.lastUpdate = new Date();
-		chat.messages = [];
-		for (var i=chatTable.rows.length-1; i>0; i--) {
-			var aRow = chatTable.rows[i];
-			if (aRow.cells.length==3) {
-				var aMessage=new Object();
-				aMessage.time=aRow.cells[0].textContent;
-				aMessage.from=aRow.cells[1].textContent;
-				aMessage.text=aRow.cells[2].textContent;
-				chat.messages.push(aMessage);
-			}
-		}
-		// chat.confirm=chatConfirm.value;
-		Helper.injectChat(chat);
-	},
-
-	injectChat: function(chat){
-		var injectHere = document.getElementById("Helper:ChatPlaceholder");
-		var newTable=false;
-		var topToBottom = GM_getValue("chatTopToBottom");
-
-		var displayList = document.getElementById("Helper:ChatWindow");
-		if (!displayList) {
-			displayList=document.createElement("TABLE");
-			displayList.id="Helper:ChatWindow";
-			displayList.style.border = "1px solid gray";
-			displayList.style.backgroundColor = (chat.isRefreshed)?"#151f1e":"#112322";
-			displayList.cellPadding = 2;
-			displayList.width = 125;
-			newTable=true;
-		}
-		else {
-			while (displayList.rows.length>0) {
-				displayList.deleteRow(0);
-			}
-			displayList.style.backgroundColor = (chat.isRefreshed)?"#151f1e":"#112322";
-		}
-
-		var aRow=displayList.insertRow(displayList.rows.length);
-		var aCell=aRow.insertCell(0);
-
-		var result="<div style='font-size:xx-small' id='chatFrame'>";
-
-		var showLines = parseInt(GM_getValue("chatLines"));
-		if (isNaN(showLines)) {
-			showLines=10
-			GM_setValue("chatLines", showLines)
-		}
-		var startFrom = (chat.messages.length>showLines)?chat.messages.length-showLines:0;
-		for (var i=startFrom; i<chat.messages.length; i++) {
-			var j = topToBottom?i:chat.messages.length-i+startFrom-1; // chat.messages.length-i;
-			result += "<span style='color:#F5F298' title='"+chat.messages[j].time+"'>"
-			result += chat.messages[j].from
-			result += ":</span><span style='color:white'>"
-			result += chat.messages[j].text.replace(/</g,"&lt;").replace(/>/g,"&gt;");
-			result += "</span><br/>";
-		}
-		result += '<form action="index.php" method="post" id="Helper:ChatBox" onsubmit="return false;">';
-		result += '<input type="hidden" value="' + chat.confirm + '" name="Helper:ChatConfirm"/>';
-		result += '<input type="text" class="custominput" size="18" name="Helper:ChatMessage"/>';
-		result += '<input type="submit" name="submit" class="custombutton" value="Send" name="submit"/>';
-		result += '&nbsp;&nbsp;&nbsp;';
-		result += '<input type="button" name="submitmass" id="Helper:ChatBoxMass" class="custombutton" value="Mass" name="submit"/>';
-		result += '</form>';
-		result += '</div>';
-
-		aCell.innerHTML = result;
-
-		if (newTable) {
-			var breaker=document.createElement("BR");
-			injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-			injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		}
-
-		document.getElementById('Helper:ChatBox').addEventListener('submit', Helper.sendChat, true);
-		document.getElementById('Helper:ChatBoxMass').addEventListener('click', Helper.sendMassChat, true);
-
-		//document.removeEventListener("keypress", unsafeWindow.document.onkeypress, true);
-
-		System.setValueJSON("chat", chat);
-	},
-
-	sendMassChat: function(evt) {
-		if (!window.confirm("Are you sure you want to send a mass message?")) return;
-
-		var oForm=evt.target.form;
-		Helper.sendChatGeneric(oForm, true);
-		return false;
-	},
-
-	sendChat: function(evt) {
-		var oForm=evt.target;
-		Helper.sendChatGeneric(oForm, false);
-		return false;
-	},
-
-	sendChatGeneric: function(oForm, isMass) {
-		var confirm=System.findNode("//input[@name='Helper:ChatConfirm']", oForm).value;
-		var msg=System.findNode("//input[@name='Helper:ChatMessage']", oForm).value;
-		System.findNode("//input[@name='Helper:ChatMessage']", oForm).value="";
-
-		if (msg=="") {
-			Helper.retrieveChat();
-			return false;
-		}
-
-		sendType = isMass?"Send As Mass":"Send";
-
-		GM_xmlhttpRequest({
-			method: 'POST',
-			url: System.server + "index.php",
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Content-Type": "application/x-www-form-urlencoded",
-				"Referer": document.location,
-				"Cookie" : document.cookie
-			},
-			data: "cmd=guild&subcmd=dochat&xc="+confirm+"&msg="+encodeURIComponent(msg)+"&submit="+sendType,
-			onload: function() {
-				Helper.retrieveChat();
-			}
-		})
-	},
-
 	replaceKeyHandler: function() {
 		if (System.browserVersion==4) {
 			unsafeWindow.onkeypress = null;
+			unsafeWindow.combatKeyHandler = null;
+			unsafeWindow.realmKeyHandler = null;
 			unsafeWindow.onkeypress = Helper.keyPress;
 		} else {
 			unsafeWindow.document.onkeypress = null;
@@ -3248,7 +3114,7 @@ var Helper = {
 		var localLastCheckMilli=GM_getValue(lastCheckScreen);
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 
-		var chatTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var chatTable = System.findNode("//table[@border='0' and @cellpadding='5' and @width='100%']");
 
 		var localDateMilli = (new Date()).getTime();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
@@ -3385,7 +3251,7 @@ var Helper = {
 		node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Faction Log Summary</a> ]';
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) return;
 		var playerId=Layout.playerId();
-		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']");
+		var logTable = System.findNode("//table[@border='0' and @cellpadding='5' and @width='100%']");
 		var hideNextRows = 0;
 		for (var i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
@@ -3429,7 +3295,7 @@ var Helper = {
 
 	injectGuildLogSummary: function(content) {
 		if (!content) var content = Layout.notebookContent();
-		content.innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
+		content.innerHTML=Helper.makePageTemplate('Faction Log Summary','','guillogrefresh','Refresh','guildlogdetail');
 
 		var lastCheck=GM_getValue("lastGuildLogSumCheck")
 		var now=(new Date()).getTime();
@@ -5014,6 +4880,7 @@ var Helper = {
 
 	injectInventoryManager: function(content) {
 		if (!content) var content=Layout.notebookContent();
+		Helper.setItemFilterDefault();
 		Helper.inventory=System.getValueJSON("inventory");
 		var length=0;
 		if (Helper.inventory) length=Helper.inventory.items.length;
@@ -5058,6 +4925,7 @@ var Helper = {
 
 	injectGuildInventoryManager: function(content) {
 		if (!content) var content=Layout.notebookContent();
+		Helper.setItemFilterDefault();
 		var guildItemCount = "unknown";
 		Helper.guildinventory=System.getValueJSON("guildinventory");
 		content.innerHTML=Helper.makePageHeader('Faction Inventory Manager','takes a while to refresh so only do it if you really need to',
@@ -5335,7 +5203,7 @@ var Helper = {
 		Helper.guildinventory = new Object;
 		Helper.guildinventory.items = new Array();
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput')
-		output.innerHTML = '<br/>Parsing guild store ...';
+		output.innerHTML = '<br/>Parsing faction store ...';
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', Helper.parseGuildStorePage);
 	},
 
@@ -5346,25 +5214,25 @@ var Helper = {
 		var pages = System.findNodes("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]", doc);
 		var currentPage = parseInt(System.findNode("//a[contains(@href,'cmd=guild&subcmd=manage&guildstore_page')]/font", doc).textContent);
 		if (guildstoreItems) {
-			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
+			output.innerHTML+='<br/>Parsing faction store page '+currentPage+'...';
 
 			for (var i=0; i<guildstoreItems.length;i++) {
 				var theUrl=Helper.linkFromMouseover(guildstoreItems[i].getAttribute("onmouseover"))
 				var item={"url": theUrl,
 					"where":"guildstore", "index":(i+1), "page":currentPage, "worn":false,
 					"onmouseover":guildstoreItems[i].getAttribute("onmouseover")};
-				if (i==0) output.innerHTML+="<br/>Found guild store item "
+				if (i==0) output.innerHTML+="<br/>Found faction store item "
 				output.innerHTML+=(i+1) + " ";
 				Helper.guildinventory.items.push(item);
 			}
 		} else {
-			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
+			output.innerHTML+='<br/>Parsing faction store page '+currentPage+'... Empty';
 		}
 		if (currentPage<pages.length) {
 			System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), Helper.parseGuildStorePage);
 		}
 		else {
-			output.innerHTML+='<br/>Parsing guild report page ...';
+			output.innerHTML+='<br/>Parsing faction report page ...';
 			System.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', Helper.parseGuildReportPage)
 		}
 	},
@@ -5375,16 +5243,17 @@ var Helper = {
 		var guildreportItems = System.findNodes("//img[contains(@src,'items')]", doc);
 		if (guildreportItems) {
 			for (var i=0; i<guildreportItems.length;i++) {
-				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"))
+				var theUrl=Helper.linkFromMouseover(guildreportItems[i].getAttribute("onmouseover"));
+				if (!theUrl) continue;
 				var item={"url": theUrl,
 					"where":"guildreport", "index":(i+1), "worn":false,
 					"onmouseover":guildreportItems[i].getAttribute("onmouseover")};
-				if (i==0) output.innerHTML+="<br/>Found guild report item "
+				if (i==0) output.innerHTML+="<br/>Found faction report item "
 				output.innerHTML+=(i+1) + " ";
 				Helper.guildinventory.items.push(item);
 			}
 		}
-		output.innerHTML+="<br/>Parsing guild inventory item "
+		output.innerHTML+="<br/>Parsing faction inventory item "
 		Helper.retrieveInventoryItem(0, "guild");
 	},
 
@@ -7142,12 +7011,12 @@ var Helper = {
 			Helper.helpTDwithHTML('Friendly Factions','','',Helper.injectSettingsGuildData("Frnd"))+
 			Helper.helpTDwithHTML('Old Factions','','',Helper.injectSettingsGuildData("Past"))+
 			Helper.helpTDwithHTML('Enemy Factions','','',Helper.injectSettingsGuildData("Enmy"))+
-			Helper.helpTDwithCB('Show rank controls','Show ranking controls for guild managemenet in member profile page - ' +
-				'this works for guild founders only','showAdmin')+
+			Helper.helpTDwithCB('Show rank controls','Show ranking controls for faction managemenet in member profile page - ' +
+				'this works for faction founders only','showAdmin')+
 			'</table>';
 		var logCfg='<table width="100%" cellspacing="0" cellpadding="2" border="0">' +
 			Helper.helpTDwithCB('Cleanup faction log','Any log messages not related to the ' +
-				'current player will be dimmed (e.g. recall messages from guild store)','hideNonPlayerGuildLogMessages')+
+				'current player will be dimmed (e.g. recall messages from faction store)','hideNonPlayerGuildLogMessages')+
 			Helper.helpTDwithCB('Disable Item Coloring','Disable the code that colors the item text based on the rarity of the item.',
 				'disableItemColoring')+
 			Helper.helpTDwithCB('Enable Log Coloring','Three logs will be colored if this is enabled, Faction Chat, Faction Log and Player Log. ' +
@@ -7162,12 +7031,7 @@ var Helper = {
 				' Allies:'+Helper.makeCBButton('enableAllyOnlineList')+
 				' Enemies:'+Helper.makeCBButton('enableEnemyOnlineList')+
 				' <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh')+
-			Helper.helpTDwithCB('Chat top to bottom','When selected, chat messages run from top (older) to bottom (newer), as in most chat programs. ' +
-				'When not, messages run as they are in HCS\\\'s chat','chatTopToBottom')+
-			Helper.helpTDwithCB('Show chat lines','Display the last {n} lines from faction chat (set to 0 to disable).' +
-				((System.browserVersion<3)?'<br/>Does not work in Firefox 2 - suggest setting to 0 or upgrading to Firefox 3.':''),
-				'enableChat',Layout.networkIcon(),'<input name="chatLines" size="3" value="' + GM_getValue("chatLines") + '">')+
-			Helper.helpTDwithCB('Enable Guild Info Widgets','Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)',
+			Helper.helpTDwithCB('Enable Faction Info Widgets','Enabling this option will enable the Faction Info Widgets (coloring on the Faction Info panel)',
 				'enableGuildInfoWidgets')+
 			Helper.helpTDwithCB('Navigate After Message Sent','If enabled, will try to navigate to the referring page after a successful message is sent.',
 				'navigateToLogAfterMsg')+
@@ -7291,16 +7155,6 @@ var Helper = {
 
 	saveConfig: function(evt) {
 		var oForm=evt.target.form;
-		var chatLines = System.findNode("//input[@name='chatLines']", oForm);
-		var enableChat = System.findNode("//input[@name='enableChat']", oForm);
-		var chatLinesValue = parseInt(chatLines.value);
-
-		if (enableChat.checked && (isNaN(chatLinesValue) || chatLinesValue<=0)) {
-			chatLines.value="10";
-		}
-		if (!enableChat.checked) {
-			chatLines.value="0";
-		}
 
 		System.saveValueForm(oForm, "guildSelf");
 		System.saveValueForm(oForm, "guildFrnd");
@@ -7310,8 +7164,6 @@ var Helper = {
 		System.saveValueForm(oForm, "guildFrndMessage");
 		System.saveValueForm(oForm, "guildPastMessage");
 		System.saveValueForm(oForm, "guildEnmyMessage");
-		System.saveValueForm(oForm, "chatLines");
-		System.saveValueForm(oForm, "chatTopToBottom");
 		System.saveValueForm(oForm, "showAdmin");
 		System.saveValueForm(oForm, "disableItemColoring");
 		System.saveValueForm(oForm, "enableLogColoring");
@@ -9394,8 +9246,8 @@ var Helper = {
 				["FB", "Find Buffs", "injectFindBuffs"],
 				["OP", "Online Players", "injectOnlinePlayers"], ["QS", "AH Quick Search", "injectAuctionSearch"],
 			],
-			"Guild" : [
-				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log Summary", "injectGuildLogSummary"],
+			"Faction" : [
+				["GI", "Faction Inventory", "injectGuildInventoryManager"], ["GL", "Faction Log Summary", "injectGuildLogSummary"],
 			],
 			"Extra" : [
 				["QE", "Quick Extract", "insertQuickExtract"], ["ML", "Creature Log", "injectMonsterLog"],
