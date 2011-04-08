@@ -12965,7 +12965,7 @@ var Helper = {
 		var loadingMessageInjectHere = callback.loadingMessageInjectHere;
 		var doc=System.createDocument(responseText);
 
-		var logTable = $(doc).find('table.width_full');
+		var logTable = $(doc).find('table.width_full:first');
 
 		//if the whole first page is new, then likely that the stored log needs to be refreshed, so go ahead and do so
 		if (pageNumber == 1) {
@@ -12986,7 +12986,7 @@ var Helper = {
 			var localDateMilli = (new Date()).getTime();
 		}
 		
-		logTable.find('td:not(.divider)').parent('tr:gt(2)').each(function(index){
+		logTable.find('tr:gt(2):has(td:not(.divider))').each(function(index){
 			var cellContents = $(this).children('td:eq(1)').text();
 			if (!cellContents || cellContents == 'Date' || cellContents.split(' ').length == 1) return;
 			postDateAsDate = System.parseDate(cellContents);
