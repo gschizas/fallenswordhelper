@@ -621,14 +621,31 @@ var Helper = {
 		var nodes = System.findNodes("//a[contains(@href, 'javascript:openQuickBuffDialog(')]");
 		if (!nodes) return;
 		for (var i=0; i<nodes.length; i++) {
+			nodes[i].setAttribute("url",nodes[i].getAttribute("href"));
+			nodes[i].setAttribute("href","javascript:void(0);");
 			nodes[i].addEventListener("click", Helper.addBuffedPlayerInfoJQ, true);
 		}
 	},
 
 	addBuffedPlayerInfoJQ: function(evt) {
-		var playerName = evt.target.getAttribute("href").match(/'(.*)'/)[1];
+		var playerName = evt.target.getAttribute("url").match(/'(.*)'/)[1];
+		$(".validateTips").text("Loading... Please Wait");
 		$.get("index.php", { cmd: "quickbuff", subcmd: "fetchdialog", t: playerName }, function(data)
 			{$("#quickBuffDialogContent").html(data);
+
+			$("#quickBuffDialog_targetPlayers").parent().append("&nbsp;<button id=groPlayer>Get random online players</button>");
+			$("table[width=450]","#quickBuffDialog").parent()
+				.append("<button id=saCore>Toggle Core buffs</button>&nbsp;"+
+				"<button id=saClass>Toggle Class buffs</button><br/>");
+			$("#saCore, #saClass, #groPlayer").button();
+			$("#saCore, #saClass").click(function() {
+				var column = this.id == 'saCore' ? 1 : 2;
+				$("#quickBuffDialogContent tr>td[width=50%]:nth-child("+column+") table input:checkbox")
+					.each(function(){this.checked = !this.checked;});
+			});
+			$("#groPlayer").click(Helper.addRandomOnlinePlayer);
+
+			$("#quickBuffDialog").dialog("open");
 
 			$.get("index.php?cmd=findplayer&subcmd=dofindplayer&target_username=" + playerName, [], function(responseText) {
 				var doc=$(responseText);
@@ -655,7 +672,23 @@ var Helper = {
 				});
 				resultText += "</table>";
 				$("table[width=450]","#quickBuffDialog").parent().append(resultText);
+				$(".validateTips").text("");
 			});
+		});
+	},
+
+	addRandomOnlinePlayer: function() {
+		$.get("index.php?cmd=onlineplayers", [], function(responseText) {
+			var doc=$(responseText);
+			var maxpage = doc.find("input[name=page]:first").parent().text().match(/of\s(\d+)\s/)[1] - 1;
+			maxpage = maxpage < 1 ? 1 : maxpage;
+			$.get("index.php?cmd=onlineplayers&page="+maxpage, [], function(responseText) {
+				var doc=$(responseText), names = "";
+				doc.find("td[colspan=2] > a[href^=index.php?cmd=profile&player_id=]").each(function(){
+					names += $(this).text()+",";
+				});
+				$("#quickBuffDialog_targetPlayers").val(names.substr(0,names.length-1));
+			})
 		});
 	},
 
@@ -3114,7 +3147,7 @@ var Helper = {
 		var localLastCheckMilli=GM_getValue(lastCheckScreen);
 		if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 
-		var chatTable = System.findNode("//table[@border='0' and @cellpadding='5' and @width='100%']");
+		var chatTable = System.findNode("//table[@border='0' and (@cellpadding='2' or @cellpadding='5')and @width='100%']");
 
 		var localDateMilli = (new Date()).getTime();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
