@@ -559,7 +559,6 @@ var System = {
 
 	parseDate: function(textDate) {
 		textDateSplitSpace = textDate.split(" ");
-		if (textDateSplitSpace.length == 1) GM_log(textDate)
 		timeText = textDateSplitSpace[0];
 		dateText = textDateSplitSpace[1];
 		dayText = dateText.split("/")[0];
@@ -13518,76 +13517,52 @@ var Helper = {
 	},
 
 	injectFindPlayer: function() {
-		var findPlayerButton = System.findNode("//input[@value='Find Player']");
+		var findPlayerButton = $('input[value="Find Player"]');
 		var levelToTest = Helper.characterLevel;
 		var characterVirtualLevel = GM_getValue('characterVirtualLevel');
 		if (characterVirtualLevel) levelToTest = characterVirtualLevel;
 		var pvpLowerLevelModifier = (levelToTest > 205)? 10:5;
 		var pvpUpperLevelModifier = (levelToTest >= 200)? 10:5;
-		findPlayerButton.parentNode.innerHTML += "&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
+		findPlayerButton.parent().append("&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
 			(levelToTest - pvpLowerLevelModifier) + "&search_level_max=" + (levelToTest + pvpUpperLevelModifier) +
 			"&search_in_guild=0'><span style='color:blue;'>Get PvP targets</span></a>" +
 			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
 			(levelToTest - 25) + "&search_level_max=" + (levelToTest + 25) +
-			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>";
+			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>");
 		if (!GM_getValue("showGoldOnFindPlayer")) return;
-		var findPlayerTable = System.findNode("//table[tbody/tr/td[.='Guild']]");
-		for (var i=0; i<findPlayerTable.rows.length; i++) {
-			var aRow = findPlayerTable.rows[i];
-			if (i == 0) {
-				var newCell = aRow.insertCell(4);
-				newCell.style.backgroundColor = '#CD9E4B';
-				newCell.style.fontSize = '12px';
-				newCell.align = 'right';
-				newCell.innerHTML = 'PvP';
-				var newCell = aRow.insertCell(5);
-				newCell.style.backgroundColor = '#CD9E4B';
-				newCell.innerHTML = '&nbsp;';
-				var newCell = aRow.insertCell(6);
-				newCell.style.backgroundColor = '#CD9E4B';
-				newCell.style.fontSize = '12px';
-				newCell.align = 'right';
-				newCell.innerHTML = 'Gold';
-			}
-			if (i != 0 && aRow.cells[1]) {
-				var playerHREF = aRow.cells[0].firstChild.nextSibling.getAttribute("href");
-				var newCell = aRow.insertCell(4);
-				newCell.style.fontSize = '12px';
-				newCell.align = 'right';
-				newCell.innerHTML = '<span style="color:green;" id="PvP' + playerHREF + '">?</span>';
-				var newCell = aRow.insertCell(5);
-				newCell.innerHTML = '&nbsp;';
-				var newCell = aRow.insertCell(6);
-				newCell.style.fontSize = '12px';
-				newCell.align = 'right';
-				newCell.innerHTML = '<span style="color:blue;" id="Gold' + playerHREF + '">?</span>';
-				System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
-			} else if (!aRow.cells[1]) {
-				aRow.cells[0].colSpan = 8;
-			}
-		}
+		var findPlayerTable = $('table.width_full');
+		//add header
+		findPlayerTable.find('tr:first td:eq(3)')
+			.after('<td class="header">Gold</td>');
+		//fix divider lengths for table
+		findPlayerTable.find('td.divider').each(function(){
+			$(this).attr("colSpan",7);
+		});
+		//add gold column and then go fetch data
+		findPlayerTable.find('tr:not(:first):has(td:not(.divider))').each(function(){
+			var playerHREF = $(this).find('td:first a').attr("href");
+			$(this).find('td:eq(3)')			
+				.after('<td class="row"><span style="color:blue;" id="Gold' + playerHREF + '">?</span></td>');
+			System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
+		});
 	},
 
 	findPlayerParseProfile: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var pvpElement = System.findNode("//tbody/tr/td[b/a[contains(.,'Rating')] or a/b[contains(.,'Rating')]]", doc);
-		var pvpValue = pvpElement.nextSibling;
-		var findPlayerPvPElement = document.getElementById("PvP" + callback.href);
-		findPlayerPvPElement.innerHTML = pvpValue.textContent;
-		var goldElement = System.findNode("//tbody/tr/td[b[contains(.,'Gold:')]]", doc);
-		var goldValue = goldElement.nextSibling;
-		document.getElementById("Gold" + callback.href).innerHTML = goldValue.textContent;
+		var goldValue = $(doc).find('b:contains("Gold:")').parents('td:first').next();
+		var goldSpan = $('span[id="Gold' + callback.href + '"]');
+		goldSpan.html(goldValue.text());
 		//add VL if not equal to current level
-		var levelElement = System.findNode("//tbody/tr/td[b[contains(.,'Level:')]]", doc);
-		var levelValue = parseInt(levelElement.nextSibling.textContent.replace(/,/,""),10);
-		var virtualLevelElement = System.findNode("//tbody/tr/td[a/b[.='VL'] or b/a[.='VL']]", doc);
-		var virtualLevelValue = virtualLevelElement.nextSibling;
-		if (levelValue != parseInt(virtualLevelValue.textContent,10)) {
-			findPlayerPvPElement.parentNode.parentNode.cells[1].innerHTML += '&nbsp;<span style="color:blue;">(' + parseInt(virtualLevelValue.textContent,10) + ')</span>';
+		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
+		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
+		var virtualLevelElement = $(doc).find('a:contains("VL")').parents('td:first').next();;
+		var virtualLevelValue = parseInt(virtualLevelElement.text(),10);
+		if (levelValue != virtualLevelValue) {
+			goldSpan.parents('tr:first').children('td:eq(1)').append('&nbsp;<span style="color:blue;">(' + virtualLevelValue + ')</span>');
 		}
-		var pvpProtection = System.findNode("//b[contains(.,'PvP') and contains(.,'Protection')]", doc);
-		if (pvpProtection.nextSibling.textContent != '[not activated]') {
-			findPlayerPvPElement.parentNode.parentNode.cells[0].innerHTML += '&nbsp;<img width="10" height="10" title="Protected" src="' + Data.redDot() + '">'
+		var pvpProtection = $(doc).find('td:contains("[not activated]"):last');
+		if (pvpProtection.length == 0) {
+			goldSpan.parents('tr:first').children('td:eq(0)').append('&nbsp;<img width="10" height="10" title="Protected" src="' + Data.redDot() + '">')
 		}
 	},
 
