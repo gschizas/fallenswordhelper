@@ -2451,7 +2451,7 @@ var Helper = {
 			var onmouseover=$(item).data("tipped").replace("Click to Buy","Click to Select");
 			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
-				"' class='tipped' data-tipped=\""+onmouseover+"\">"+text+"</td>";
+				"' class='tipped' data-tipped-options='skin: \"fsItem\", ajax: true' data-tipped=\""+onmouseover+"\">"+text+"</td>";
 				"'>"+text+"</td>";
 			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
