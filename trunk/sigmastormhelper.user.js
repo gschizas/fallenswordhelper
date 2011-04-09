@@ -628,7 +628,9 @@ var Helper = {
 	},
 
 	addBuffedPlayerInfoJQ: function(evt) {
-		var playerName = evt.target.getAttribute("url").match(/'(.*)'/)[1];
+		var url = evt.target.getAttribute("url");
+		if (url == null) url = evt.target.parentNode.getAttribute("url");
+		var playerName = url.match(/'(.*)'/)[1];
 		$(".validateTips").text("Loading... Please Wait");
 		$.get("index.php", { cmd: "quickbuff", subcmd: "fetchdialog", t: playerName }, function(data)
 			{$("#quickBuffDialogContent").html(data);
@@ -8236,8 +8238,9 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			if (!Helper.rightSideBar) return;
-			var info = Helper.rightSideBar.insertRow(0);
+			rightSideBar = System.findNode("//table[@width='120' and contains(tbody/tr/td/table/@style, '/sigma2/skin/infobox_sigmabox.gif')]");
+			if (!rightSideBar) return;
+			var info = rightSideBar.insertRow(0);
 			var cell = info.insertCell(0);
 			cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
 			Helper.retrieveAllyEnemyData(false);
