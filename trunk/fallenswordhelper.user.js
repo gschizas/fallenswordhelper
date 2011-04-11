@@ -13700,7 +13700,7 @@ var Helper = {
 	},
 
 	findBuffsStart: function(evt) {
-		var selectedBuff = System.findNode("//select[@id='selectedBuff']").value;
+		var selectedBuff = $('#selectedBuff').val();
 		//create array of buff nicknames ...
 		var buffList = Data.buffList();
 		for (var j = 0; j < buffList.length; j++) {
@@ -13769,7 +13769,7 @@ var Helper = {
 	},
 
 	findOtherStart: function(evt) {
-		var textToSearchFor = System.findNode("//input[@id='textToSearchFor']").value;
+		var textToSearchFor = $('#textToSearchFor').val();
 		//use existing array structure to save search text ...
 		var textArray=textToSearchFor.split(",");
 		var tempArray = new Array();
@@ -13796,29 +13796,26 @@ var Helper = {
 
 	findBuffsParseGuildManagePage: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var memberTable = System.findNode("//table[tbody/tr/td[.='Rank']]", doc);
+		var memberTableRows = $(doc).find('table:has(td:contains("Rank")[bgcolor="#C18B35"]):last').find('tr:gt(1):not(:has(td[colspan="5"]))');
 		if (document.getElementById("guildMembers").checked) {
-			for (var i=2;i<memberTable.rows.length ;i++ ) {
-				var aRow = memberTable.rows[i];
-				if (aRow.cells[1]) {
-					var contactLink = aRow.cells[1].firstChild.nextSibling;
-					var onMouseOver = $(contactLink).data('tipped');
-					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
-					var lastActivityDays = parseInt(lastActivity[1],10);
-					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
-					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
-					//check if they are high enough level to cast the buff
-					var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-					var virtualLevel = parseInt(virtualLevel[1].replace(/,/g,""),10);
-					var minPlayerVirtualLevel = 1;
-					if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
-					if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
-						//add online player to search list (all but self)
-						var onlinePlayer = contactLink.getAttribute('href');
-						if (Helper.characterName != aRow.cells[1].textContent.trim()) Helper.onlinePlayers.push(onlinePlayer);
-					}
+			memberTableRows.each(function(){
+				var contactLink = $(this).find('a');
+				var onMouseOver = $(contactLink).data('tipped');
+				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
+				var lastActivityDays = parseInt(lastActivity[1],10);
+				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+				//check if they are high enough level to cast the buff
+				var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
+				var virtualLevel = parseInt(virtualLevel[1].replace(/,/g,""),10);
+				var minPlayerVirtualLevel = 1;
+				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
+				if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
+					//add online player to search list (all but self)
+					var onlinePlayer = contactLink.attr('href');
+					if (Helper.characterName != $(this).find('td:eq(1)').text().trim()) Helper.onlinePlayers.push(onlinePlayer);
 				}
-			}
+			});
 		}
 		//continue with profile pages
 		Helper.findBuffsParseProfilePageStart();
@@ -13844,28 +13841,24 @@ var Helper = {
 
 	findBuffsParseProfilePage: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var profileAlliesEnemies = System.findNodes("//div[@id='profileLeftColumn']//table/tbody/tr/td/a[contains(@onmouseover,'Last Activity')]", doc);
-		if (profileAlliesEnemies) {
-			for (var i=0;i<profileAlliesEnemies.length ;i++ ) {
-				var testProfile = profileAlliesEnemies[i];
-				var contactLink   = testProfile;
-				var onMouseOver = $(contactLink).data('tipped');
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
-				var lastActivityDays = parseInt(lastActivity[1],10);
-				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
-				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
-				//check if they are high enough level to cast the buff
-				var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-				var virtualLevel = parseInt(virtualLevel[1].replace(/,/g,""),10);
-				var minPlayerVirtualLevel = 1;
-				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
-				if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
-					//add online player to search list (all but self)
-					var onlinePlayer = contactLink.getAttribute('href');
-					if (Helper.characterName != contactLink.textContent.trim()) Helper.onlinePlayers.push(onlinePlayer);
-				}
+		var profileAlliesEnemies = $(doc).find('#profileLeftColumn').find('a[data-tipped*="Last Activity"]');
+		profileAlliesEnemies.each(function(){
+			var onMouseOver = $(this).data('tipped');
+			var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
+			var lastActivityDays = parseInt(lastActivity[1],10);
+			var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+			var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+			//check if they are high enough level to cast the buff
+			var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
+			var virtualLevel = parseInt(virtualLevel[1].replace(/,/g,""),10);
+			var minPlayerVirtualLevel = 1;
+			if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
+			if (lastActivityMinutes < 5 && virtualLevel >= Helper.findBuffMinCastLevel && virtualLevel >= minPlayerVirtualLevel) {
+				//add online player to search list (all but self)
+				var onlinePlayer = $(this).attr('href');
+				if (Helper.characterName != $(this).text().trim()) Helper.onlinePlayers.push(onlinePlayer);
 			}
-		}
+		});
 		//continue with online players
 		Helper.profilePagesToSearchProcessed ++;
 		if (Helper.profilePagesToSearchProcessed == Helper.profilePagesToSearch.length) {
@@ -13885,22 +13878,22 @@ var Helper = {
 
 	findBuffsParseOnlinePlayers: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var playerRows = System.findNodes("//table/tbody/tr[count(td)=4 and td[2]/a]", doc);
-		var maxPage = parseInt(System.findNode("//table//td[input[@name='page']]", doc).textContent.replace(/\D/g, ""),10);
-		if (playerRows && callback.page != 1){
-			for (var i=0; i<playerRows.length; i++) {
-				var onlinePlayer = playerRows[i].cells[1].firstChild.getAttribute("href");
-				var onlinePlayerLevel = parseInt(playerRows[i].cells[2].textContent.replace(/,/g,""),10);
-				var onlinePlayerName = playerRows[i].cells[1].textContent;
+		var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has(td>a[href*="cmd=profile&player_id="])');
+		var maxPage = parseInt($(doc).find('td:has(input[name="page"]):last').text().replace(/\D/g, ""),10);
+		if (callback.page != 1){
+			playerRows.each(function(){
+				var onlinePlayer = $(this).find('td:eq(1) a').attr("href");
+				var onlinePlayerLevel = parseInt($(this).find('td:eq(2)').text().replace(/,/g,""),10);
+				var onlinePlayerName = $(this).find('td:eq(1) a').text();
 				var minPlayerVirtualLevel = 1;
 				if (Helper.findBuffsLevel175Only) minPlayerVirtualLevel = 500;
 				if (onlinePlayerLevel >= Helper.findBuffMinCastLevel && onlinePlayerLevel >= minPlayerVirtualLevel) {
 					//add online player to search list (all but self)
 					if (Helper.characterName != onlinePlayerName.trim()) Helper.onlinePlayers.push(onlinePlayer);
 				}
-			}
+			});
 		}
-		if (callback.page<maxPage/*-maxPage+15*/) {
+		if (callback.page<=maxPage/*-maxPage+15*/) {
 			var newPage = (callback.page == 1) ? Math.round(Helper.onlinePlayersSetting * maxPage / 50) : (callback.page+1);
 			var bufferProgress = document.getElementById("bufferProgress");
 			bufferProgress.innerHTML = 'Parsing online page ' + callback.page + ' ...';
@@ -13934,27 +13927,27 @@ var Helper = {
 	findBuffsParseProfileAndDisplay: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
 		//name and level
-		var playerName = System.findNode("//h1", doc).textContent;
-		var levelElement = System.findNode("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
-		var levelValue = parseInt(levelElement.textContent.replace(/,/g,""),10);
-		var virtualLevelElement = System.findNode("//td[a/b[.='VL'] or b/a[.='VL']]/following-sibling::td[1]", doc);
-		var virtualLevelValue = parseInt(virtualLevelElement.textContent.replace(/,/g,""),10);
+		var playerName = $(doc).find('h1:first').text();
+		var levelElement = $(doc).find('td:contains("Level:"):last').next();
+		var levelValue = parseInt(levelElement.text().replace(/,/g,""),10);
+		var virtualLevelElement = $(doc).find('td:contains("VL:"):last').next();
+		var virtualLevelValue = parseInt(virtualLevelElement.text().replace(/,/g,""),10);
 		//last activity
-		var lastActivityElement = System.findNode("//h2[@class='centered tiny']", doc);
-		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.textContent);
+		var lastActivityElement = $(doc).find('h2[class="centered tiny"]');
+		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.text());
 		var lastActivityMinutes = parseInt(lastActivity[1],10);
 		var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
 		if (lastActivityMinutes < 2) {
 			lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
 		}
 		//buffs
-		var bioDiv = System.findNode("//div[strong[.='Biography']]", doc);
-		var bioCell = bioDiv.nextSibling.nextSibling;
+		var bioDiv = $(doc).find('div.innerColumnHeader:contains("Biography"):last');
+		var bioCell = bioDiv.next();
 		var buffNickArray = Helper.findBuffNicks.split(",");
 		var buffTable = document.getElementById("buffTable")
 		var textLineArray = new Array();
 		var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
-		var bioTextToSearch = " "+bioCell.innerHTML+" ";
+		var bioTextToSearch = " "+bioCell.html()+" ";
 		var buffRE = new RegExp("[^a-zA-Z](("+Helper.findBuffNicks.replace(/,/g,")|(")+"))[^a-zA-Z]", 'i');
 		while (buffPosition != -1) {
 			bioTextToSearch = bioTextToSearch.substr(startingPosition, bioTextToSearch.length);
@@ -13962,27 +13955,26 @@ var Helper = {
 			if (buffPosition != -1) {
 				startingPosition = buffPosition + 1;
 				runningTotalPosition += buffPosition;
-				var prevBR = bioCell.innerHTML.lastIndexOf("<br>",runningTotalPosition-1);
+				var prevBR = bioCell.html().lastIndexOf("<br>",runningTotalPosition-1);
 				if (prevBR==-1) prevBR=0;
-				var nextBR = bioCell.innerHTML.indexOf("<br>",runningTotalPosition);
-				if (nextBR==-1) nextBr=bioCell.innerHTML.length-5;
-				var textLine = bioCell.innerHTML.substr(prevBR + 4, (nextBR - prevBR));
+				var nextBR = bioCell.html().indexOf("<br>",runningTotalPosition);
+				if (nextBR==-1 && bioCell.html().indexOf("<br>") != -1) nextBr=bioCell.html().length-5;
+				var textLine = bioCell.html().substr(prevBR + 4, (nextBR - prevBR));
 				textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
 				textLineArray.push(textLine);
 			}
 		}
 		textLineArray = textLineArray.removeDuplicates();
 		//sustain
-		var sustainText = System.findNode("//a[contains(@data-tipped,'<b>Sustain</b>')]", doc);
-		if (sustainText) {
-			var sustainMouseover = $(sustainText.parentNode.parentNode.parentNode.nextSibling.nextSibling.firstChild).data("tipped");
+		var sustainText = $(doc).find('td:has(a:contains("Sustain")):last').next().find('table.tipped').data("tipped");
+		if (sustainText !== undefined) {
 			var sustainLevelRE = /Level<br>(\d+)%/;
-			var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
+			var sustainLevel = sustainLevelRE.exec(sustainText)[1];
 		} else {
 			sustainLevel = -1;
 		}
 		//extend
-		var hasExtendBuff = System.findNode("//img[contains(@data-tipped,'Extend')]", doc);
+		var hasExtendBuff = $(doc).find('img.tipped[data-tipped*="Extend"]');
 
 		//add row to table
 		if (textLineArray.length > 0) {
@@ -13995,7 +13987,7 @@ var Helper = {
 				lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond() + '">';
 			}
 			playerHREF = callback.href;
-			var bioTip = bioCell.innerHTML.replace(/'|"|\n/g,"");
+			var bioTip = bioCell.html().replace(/'|"|\n/g,"");
 			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
 				//fix me - It kind works now, but not guaranteed?
 				'class="tipped" data-tipped="'+bioTip+'">' + playerName + '</a>' +
@@ -14009,7 +14001,7 @@ var Helper = {
 			var newCell = newRow.insertCell(1);
 			var playerInfo = '<table><tbody><tr><td colspan="2" style="color:gray;" align="right" width="50%">Last Activity:</td><td colspan="2"><nobr>' + lastActivity[0] + '</nobr></td></tr>';
 			playerInfo += '<tr><td style="color:gray;" align="right" width="25%">Sustain:</td><td width="25%" style="color:' + (sustainLevel>=100?'green':'red') + ';">' + sustainLevel + '%</td>' +
-				'<td width="25%" style="color:gray;" align="right">Extend:</td><td width="25%">' + (hasExtendBuff?'<span style="color:green;">Yes</span>':'<span style="color:red;">No</span>') + '</td></tr>';
+				'<td width="25%" style="color:gray;" align="right">Extend:</td><td width="25%">' + (hasExtendBuff.length > 0?'<span style="color:green;">Yes</span>':'<span style="color:red;">No</span>') + '</td></tr>';
 			newCell.innerHTML = playerInfo;
 			newCell.style.verticalAlign = 'top';
 			//buff cell
