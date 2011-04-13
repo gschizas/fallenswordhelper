@@ -8627,15 +8627,19 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
+		//temp fix until HCS sorts the html out
+		$('a:contains("Target Player(s)")').css('color','orange');
 		GM_addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
-		var playerInput = System.findNode("//input[@name='targetPlayers']");
-		if (!playerInput) return;
+		//var playerInput = System.findNode("//input[@name='targetPlayers']");
+		var playerInput = $('input[name="targetPlayers"]');
+		if (playerInput.length == 0) return;
 		var buffMe = document.createElement("SPAN");
 		buffMe.innerHTML="[self]";
 		buffMe.className='HelperTextLink';
 		buffMe.addEventListener("click", Helper.quickBuffMe, true);
-		playerInput.parentNode.appendChild(buffMe);
+		//playerInput.parentNode.appendChild(buffMe);
+		playerInput.parent().append(buffMe);
 
 		Helper.injectBuffPackArea();
 
@@ -8663,8 +8667,8 @@ var Helper = {
 		}
 		var buffPacksToUse = new Array();
 		if (skillNodes) {
-			var targetPlayers = System.findNode("//input[@name='targetPlayers']");
-			var targetPlayersCount = targetPlayers.value.split(",").length*1;
+			var targetPlayers = playerInput;
+			var targetPlayersCount = targetPlayers.val().split(",").length*1;
 			var newStaminaTotal = 0;
 			var theBuffPack = System.getValueJSON("buffpack"); // cache it now in case we have a buff pack to find.
 			for (var i = 0; i < skillNodes.length; i++ ) {
@@ -8709,10 +8713,11 @@ var Helper = {
 				skillNodes[i].addEventListener("click", Helper.toggleBuffStatus, true);
 			}
 		}
-		var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
-		activateButton.parentNode.innerHTML += "<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
+		//var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
+		var activateButton = $('input[value="Activate Selected Skills"]');
+		activateButton.parent().append("<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
 			"<span id='staminaTotal' style='display:none; color:orange;'>" + newStaminaTotal +
-			"</span>&nbsp;<span id='staminaTotalAll' style='color:orange;'>" + newStaminaTotal * targetPlayersCount + "</span>";
+			"</span>&nbsp;<span id='staminaTotalAll' style='color:orange;'>" + newStaminaTotal * targetPlayersCount + "</span>");
 		if (buffPacksToUse.length > 0) {
 			for (i = 0; i < buffPacksToUse.length; i++ ) {
 				Helper.useBuffPack(buffPacksToUse[i]);
@@ -8966,8 +8971,8 @@ var Helper = {
 	},
 
 	getPlayerBuffs: function(responseText, keepPlayerInput) {
-		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
-		var resultText = "<table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
+		var injectHere = $('form:contains("Activate Selected Skills"):last');
+		var resultText = "<center><table align='center'><tr><td colspan='4' style='color:lime;font-weight:bold'>Buffs already on player:</td></tr>";
 
 		if (keepPlayerInput) {
 			var playerInput = System.findNode("//input[@name='targetPlayers']");
@@ -9007,12 +9012,12 @@ var Helper = {
 
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
 		var doc=System.createDocument(responseText);
-		buffs = System.findNodes("//img[contains(@src,'/skills/')]", doc);
-		if (buffs) {
-			var buffRE, buff, buffName;
-			for (i=0;i<buffs.length;i++) {
-				var aBuff=buffs[i];
-				var onmouseover = aBuff.getAttribute("data-tipped");
+		buffs = $(doc).find('img[src*="/skills/"]');
+		var buffRE, buff, buffName;
+		if (buffs.length == 0) resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
+		else {
+			buffs.each(function(index){
+				var onmouseover = $(this).attr("data-tipped");
 				if (onmouseover.search("Summon Shield Imp") != -1) {
 					//<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
 					//<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
@@ -9035,55 +9040,44 @@ var Helper = {
 				resultText += ((i % 4 === 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
 				resultText += ((i % 4 == 3)? "</tr>":"");
-				var hasThisBuff = System.findNode("//font[contains(.,'" + buffName + "') and not(contains(.,' " + buffName + "'))]");
-				if (hasThisBuff) {
+				var hasThisBuff = $('font:contains("' + buffName + '"):not(:contains(" ' + buffName + '"))');
+				if (hasThisBuff.length > 0) {
 					buffLevelRE = /\[(\d+)\]/;
-					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.innerHTML)[1],10);
+					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.html())[1],10);
 					if (myBuffLevel > 11 ||
 						buffName == 'Quest Finder') {
-						hasThisBuff.style.color='lime';
-						hasThisBuff.innerHTML += " (<font color='#FFFF00'>" + buffLevel + "</font>)";
+						hasThisBuff.css('color','lime');
+						hasThisBuff.append(" (<font color='#FFFF00'>" + buffLevel + "</font>)");
 					}
-				}
-			}
+				}			
+			});
 			resultText += ((i % 4 == 3)? "<td></td></tr>":"");
-		} else {
-			resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		}
+		resultText += "</table></center>";
 
-		//var playerLevel=Helper.findNodeText("//td[contains(b,'Level:')]/following-sibling::td[1]", doc);
-		//var playerXP=Helper.findNodeText("//td[contains(b,'XP:')]/following-sibling::td[1]", doc);
-		resultText += "</table>";
-
-		var statistics = System.findNode("//div[strong[contains(.,'Statistics')]]/following-sibling::div[1]/table", doc);
-		if (!statistics) statistics = System.findNode("//div[strong[contains(.,'Character Stats')]]/following-sibling::div[1]/table", doc);
-		statistics.style.backgroundImage = 'url(' + System.imageServer + '/skin/realm_top_b2.jpg)'; //Color='white';
-		var staminaCell = statistics.rows[6].cells[1].firstChild.rows[0].cells[0];
-		var curStamina = System.intValue(staminaCell.textContent.split("/")[0]);
-		var maxStamina = System.intValue(staminaCell.textContent.split("/")[1]);
+		var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
+		var staminaCell = $(doc).find('td:contains("Stamina:"):last').next().find('td:first');
+		var curStamina = System.intValue(staminaCell.text().split("/")[0]);
+		var maxStamina = System.intValue(staminaCell.text().split("/")[1]);
 		var percentageStaminaLeft = Math.round((100.0*curStamina)/(1.0*maxStamina));
-		staminaCell.textContent += "(" + percentageStaminaLeft + "%)";
+		staminaCell.append("(" + percentageStaminaLeft + "%)");
 		if (percentageStaminaLeft < 10) {
-			var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
 			activateButton.parentNode.style.backgroundColor = 'red';
 		}
 
-		var lastActivity = System.findNode("//h2[contains(.,'Last Activity:')]", doc);
-		if (lastActivity) {
-			var newRow = statistics.insertRow(0);
-			var newCell = newRow.insertCell(0);
-			newCell.setAttribute('colspan', '4');
-			newCell.style.textAlign='center';
-			newCell.innerHTML=lastActivity.innerHTML + '<br/>';
+		var lastActivity = $(doc).find('h2:contains("Last Activity"):last');
+		if (lastActivity.length > 0) {
+			var newNode = document.createElement("SPAN");
+			newNode.innerHTML = '<br/><center><span style="color:white;" align="center">' + lastActivity.html() + '</span></center><br/>';
+			activateButton.parentNode.parentNode.appendChild(newNode);
 		}
 
-		resultText += statistics.parentNode.innerHTML;
+		var statistics = $(doc).find('td:contains("Stamina:"):last').parents('table:first');
+		resultText += '<center><table class="innerContentMiddle">' + statistics.html() + '</table></center>';
 
-		// injectHere.innerHTML += "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
-		// injectHere.innerHTML += resultText; // "<br/><span style='color:lime;font-weight:bold'>Buffs already on player:</span><br/>"
 		var newNode = document.createElement("SPAN");
 		newNode.innerHTML = resultText;
-		injectHere.appendChild(newNode);
+		activateButton.parentNode.parentNode.appendChild(newNode);
 
 		if (keepPlayerInput) {
 			playerInput = System.findNode("//input[@name='targetPlayers']");
@@ -9094,11 +9088,15 @@ var Helper = {
 	getSustain: function(responseText) {
 		var doc=System.createDocument(responseText);
 		Helper.tmpSelfProfile=responseText;
-		var sustainTipped = System.findNode("//a[contains(@data-tipped,'<b>Sustain</b>')]/ancestor::td[1]/following-sibling::td[1]/table", doc);
-		if (!sustainTipped) {return;}
-		var sustainMouseover = sustainTipped.getAttribute("data-tipped");
-		var sustainLevelRE = /Level<br>(\d+)%/;
-		var sustainLevel = sustainLevelRE.exec(sustainMouseover)[1];
+		//sustain
+		var sustainText = $(doc).find('td:has(a:contains("Sustain")):last').next().find('table.tipped').data("tipped");
+		if (sustainText !== undefined) {
+			var sustainLevelRE = /Level<br>(\d+)%/;
+			var sustainLevel = sustainLevelRE.exec(sustainText)[1];
+		} else {
+			sustainLevel = -1;
+		}
+		//extend
 		var sustainColor = "lime";
 		if (sustainLevel < 100) sustainColor = "red";
 		var activateInput = System.findNode("//input[@value='activate']");
@@ -9106,28 +9104,27 @@ var Helper = {
 		var injectHere = inputTable.rows[3].cells[0];
 		injectHere.align = "center";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
-		//var furyCasterText = System.findNode("//a[contains(@data-tipped,'<b>Fury Caster</b>')]", doc);
-		var furyCasterTipped = System.findNode("//a[contains(@data-tipped,'<b>Fury Caster</b>')]/ancestor::td[1]/following-sibling::td[1]/table", doc);
-		if (!furyCasterTipped) {return;}
-		var furyCasterMouseover = furyCasterTipped.getAttribute("data-tipped");
+		var furyCasterTipped = $(doc).find('td:contains("Fury Caster"):last').next().find('table.tipped');
+		if (furyCasterTipped.length == 0) {return;}
+		var furyCasterMouseover = furyCasterTipped.attr("data-tipped");
 		var furyCasterLevelRE = /Level<br>(\d+)%/;
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		var furyCasterColor = "lime";
 		if (furyCasterLevel < 100) furyCasterColor = "red";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span>";
-		var hasBuffMasterBuff = System.findNode("//img[contains(@data-tipped,'Buff Master')]", doc);
-		if (hasBuffMasterBuff) {
+		var hasBuffMasterBuff = $(doc).find('img.tipped[data-tipped*="Buff Master"]');
+		if (hasBuffMasterBuff.length > 0) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
-			var buffMasterTimeToExpire = hasBuffMasterBuff.parentNode.nextSibling.nextSibling.innerHTML;
+			var buffMasterTimeToExpire = hasBuffMasterBuff.parents('td:first').find('nobr').html();
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + buffMasterTimeToExpire +")</span>";
 		}
 		else {
 			injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> <span style='color:red;'>Off</span>";
 		}
-		var hasExtendBuff = System.findNode("//img[contains(@data-tipped,'Extend')]", doc);
-		if (hasExtendBuff) {
+		var hasExtendBuff = $(doc).find('img.tipped[data-tipped*="Extend"]');
+		if (hasExtendBuff.length > 0) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Extend:</span>	<span style='color:lime;'>On</span>";
-			var ExtendTimeToExpire = hasExtendBuff.parentNode.nextSibling.nextSibling.innerHTML;
+			var ExtendTimeToExpire = hasExtendBuff.parents('td:first').find('nobr').html();
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + ExtendTimeToExpire +")</span>";
 		}
 		else {
@@ -9135,16 +9132,13 @@ var Helper = {
 		}
 		var canCastCounterAttack = System.findNode("//td/font[contains(.,'Counter Attack')]");
 		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
-
-		//refresh ally/enemy list while you are here.
-		//Helper.parseProfileForWorld(doc.innerHTML, true);
 	},
 
 	getCounterAttackSetting: function(responseText) {
 		var doc=System.createDocument(responseText);
-		var counterAttackTextElement = System.findNode("//input[@name='ca_default']", doc);
-		if (!counterAttackTextElement) {return;}
-		var counterAttackValue = counterAttackTextElement.getAttribute("value");
+		var counterAttackTextElement = $(doc).find('input[name="ca_default"]');
+		if (counterAttackTextElement.length == 0) {return;}
+		var counterAttackValue = counterAttackTextElement.val();
 		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
 		var injectHere = inputTable.rows[3].cells[0];
@@ -9154,10 +9148,9 @@ var Helper = {
 	getKillStreak: function(responseText) {
 		var doc=System.createDocument(responseText);
 		//Kill&nbsp;Streak:&nbsp;
-		var killStreakText = System.findNode("//b[contains(.,'Kill')]", doc);
-		if (killStreakText) {
-			var killStreakLocation = killStreakText.parentNode.nextSibling;
-			var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
+		var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
+		if (killStreakLocation.length > 0) {
+			var playerKillStreakValue = System.intValue(killStreakLocation.text());
 		}
 		var killStreakElement = System.findNode("//span[@findme='killstreak']");
 		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
