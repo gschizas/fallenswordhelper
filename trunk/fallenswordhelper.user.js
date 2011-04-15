@@ -2568,7 +2568,7 @@ var Helper = {
 		targetEmpowerLevel = callback.targetEmpowerLevel;
 		var info = Layout.infoBox(responseText);
 		var doc = System.createDocument(responseText);
-		var currentLevel = parseInt(System.findNode("//table[@width=400]/tbody/tr/td[contains(.,'Empower') and contains(.,'Level')]/following-sibling::td", doc).textContent,10);
+		var currentLevel = parseInt($(doc).find('td:contains("Empower"):contains("Level:"):last').next().text(),10);
 		target.innerHTML += currentLevel + " -> ";
 		var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries
 		var empowerRelicMaxTries = Helper.empowerRelicMaxTries
@@ -8614,8 +8614,6 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
-		//temp fix until HCS sorts the html out
-		$('a:contains("Target Player(s)")').css('color','orange');
 		GM_addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		//var playerInput = System.findNode("//input[@name='targetPlayers']");
@@ -9024,9 +9022,9 @@ var Helper = {
 					buffLevel = buff[2];
 				}
 				if (!buffLevel) buffLevel = 0; //For when a shield imp runs out but the buff is still there (0HP)
-				resultText += ((i % 4 === 0)? "<tr>":"");
+				resultText += ((index % 4 === 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
-				resultText += ((i % 4 == 3)? "</tr>":"");
+				resultText += ((index % 4 == 3)? "</tr>":"");
 				var hasThisBuff = $('font:contains("' + buffName + '"):not(:contains(" ' + buffName + '"))');
 				if (hasThisBuff.length > 0) {
 					buffLevelRE = /\[(\d+)\]/;
@@ -12965,7 +12963,7 @@ var Helper = {
 			var localDateMilli = (new Date()).getTime();
 		}
 		
-		logTable.find('tr:gt(2):has(td:not(.divider))').each(function(index){
+		logTable.find('tr:gt(0):has(td:not(.divider))').each(function(index){
 			var cellContents = $(this).children('td:eq(1)').text();
 			if (!cellContents || cellContents == 'Date' || cellContents.split(' ').length == 1) return;
 			postDateAsDate = System.parseDate(cellContents);
