@@ -2789,11 +2789,13 @@ var Helper = {
 				playerHPValue = hpLocation.textContent;
 			}
 		}
-		if (playerAttackValue && playerAttackValue.indexOf("Hidden")>0) playerAttackValue = 5000;
-		if (playerDefenseValue && playerDefenseValue.indexOf("Hidden")>0) playerDefenseValue = 5000;
-		if (playerArmorValue && playerArmorValue.indexOf("Hidden")>0) playerArmorValue = 5000;
-		if (playerDamageValue && playerDamageValue.indexOf("Hidden")>0) playerDamageValue = 5000;
-		if (playerHPValue && playerHPValue.indexOf("Hidden")>0) playerHPValue = 200;
+		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
+		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
+		if (playerAttackValue && playerAttackValue.indexOf("Hidden")>0) playerAttackValue = levelValue*10;
+		if (playerDefenseValue && playerDefenseValue.indexOf("Hidden")>0) playerDefenseValue = levelValue*10;
+		if (playerArmorValue && playerArmorValue.indexOf("Hidden")>0) playerArmorValue = levelValue*10;
+		if (playerDamageValue && playerDamageValue.indexOf("Hidden")>0) playerDamageValue = levelValue*10;
+		if (playerHPValue && playerHPValue.indexOf("Hidden")>0) playerHPValue = Math.ceil(levelValue*0.4);
 
 		if (defenderCount !== 0) {
 			var defenderMultiplier = 0.2;
