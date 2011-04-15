@@ -5247,7 +5247,7 @@ var Helper = {
 		var logTable = System.findNode("//table[tbody/tr/td/span[contains(.,'Currently showing:')]]");
 		if (!logTable) {return;}
 		var memberList = System.getValueJSON("memberlist");
-		var memberNameString = "";
+		var memberNameString = " ";
 		if (memberList) {
 			for (var i=0;i<memberList.members.length;i++) {
 				var member=memberList.members[i];
@@ -5284,14 +5284,14 @@ var Helper = {
 						}
 					}
 					if (colorPlayerName) {
-						if (memberNameString.search(playerName) !=-1) {
+						if (memberNameString.search(" "+playerName+" ") !=-1) {
 							playerElement.style.color="green";
 							isGuildMate = true;
 						}
-						if (listOfEnemies.search(playerName) !=-1) {
+						if (listOfEnemies.search(" "+playerName+" ") !=-1) {
 							playerElement.style.color="red";
 						}
-						if (listOfAllies.search(playerName) !=-1) {
+						if (listOfAllies.search(" "+playerName+" ") !=-1) {
 							playerElement.style.color="blue";
 						}
 					}
@@ -5747,13 +5747,13 @@ var Helper = {
 						var winningBidCell = winningBidTable.rows[0].cells[0];
 						var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
 						var winningBidder = winningBidderCell.innerHTML;
-						if (memberNameString.search(winningBidder) !=-1) {
+						if (memberNameString.search(" "+winningBidder+" ") !=-1) {
 							winningBidderCell.style.color="green";
 						}
-						if (listOfEnemies.search(winningBidder) !=-1) {
+						if (listOfEnemies.search(" "+winningBidder+" ") !=-1) {
 							winningBidderCell.style.color="red";
 						}
-						if (listOfAllies.search(winningBidder) !=-1) {
+						if (listOfAllies.search(" "+winningBidder+" ") !=-1) {
 							winningBidderCell.style.color="blue";
 						}
 						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
@@ -6203,6 +6203,7 @@ var Helper = {
 	},
 
 	injectGuildAddTagsWidgets: function() {
+		//<td><input type="checkbox" name="tagIndex[]" value="22302759" onclick="updateTagPrice(this, 100);"></td><td><center><img src="http://huntedcow.cachefly.net/fs/items/6317.gif" class="tipped" data-tipped-options="skin: 'fsItem'" data-tipped="fetchitem.php?item_id=6317&inv_id=22302759&t=4&p=46796&currentPlayerId=1599987" border=0 height=30></center>
 		var itemTable = System.findNode("//img[contains(@src,'/items/')]/ancestor::table[1]");
 		if (itemTable) {
 			for (var i=1;i<itemTable.rows.length;i++) {
@@ -6215,6 +6216,15 @@ var Helper = {
 				}
 			}
 		}
+		$('b:contains("100 x Item Level")').closest('tr').next().children('td:first').append('<input type="button" id="fshCheckAlTag" value="Check All">');
+		$("#fshCheckAlTag").click(function()				
+		{
+			$("input[name*=tagIndex]").each(function()
+			{
+				//this.checked = !this.checked;
+				this.click();
+			});
+		});
 	},
 
 	changeCombatSet: function(responseText, itemIndex) {
@@ -6827,7 +6837,7 @@ var Helper = {
 		}
 
 		//store a list of allies and enemies for use in coloring
-		listOfAllies = "";
+		listOfAllies = " ";
 		if (alliesTable) {
 			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling;
 			for (var i=0;i<alliesTableActual.rows.length;i++) {
@@ -6843,7 +6853,7 @@ var Helper = {
 			}
 		}
 
-		listOfEnemies = "";
+		listOfEnemies = " ";
 		if (enemiesTable) {
 			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling;
 			for (i=0;i<enemiesTableActual.rows.length;i++) {
