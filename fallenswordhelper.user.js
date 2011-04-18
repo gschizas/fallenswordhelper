@@ -998,7 +998,7 @@ var Layout = {
 				var overlayTable = $('div[class="top_banner"]');
 				if (overlayTable) {
 					var STnode = $('font:contains("Server Time:"):first').closest('tr').next().find('b');
-					
+
 					if (STnode.length) { //maximized
 						overlayTable.append("<div><font color=#FFFFFF size='3'>ST: " + STnode.html() + "</font></div>");
 					} else { //minimized
@@ -1014,7 +1014,7 @@ var Layout = {
 		}
 		$('div[class="top_banner"]').attr('style','display:none');
 	},
-	
+
 	moveRHSBoxUpOnRHS: function(title) {
 		var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
 		if (src.length == 0) return;
@@ -6217,7 +6217,7 @@ var Helper = {
 			}
 		}
 		$('b:contains("100 x Item Level")').closest('tr').next().children('td:first').append('<input type="button" id="fshCheckAlTag" value="Check All">');
-		$("#fshCheckAlTag").click(function()				
+		$("#fshCheckAlTag").click(function()
 		{
 			$("input[name*=tagIndex]").each(function()
 			{
@@ -7696,13 +7696,13 @@ var Helper = {
 
 		var backpackItems = $(doc).find('a[href*="subcmd=equipitem"] img');
 		var pages = $(doc).find('.centered').children('a[href*="index.php?cmd=profile&backpack_page="]');
-		
+
 		if (backpackItems.length > 0) output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
 		else {
 			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
 			currentPage = pages.length; // go to end automatically since the rest of the pages will be empty too.
 		}
-		
+
 		backpackItems.each(function(index){
 			var item={"url": $(this).data("tipped"),
 				"where":"backpack", "index":(index+1), "page":currentPage};
@@ -7710,7 +7710,7 @@ var Helper = {
 			output.innerHTML+=(index+1) + " ";
 			Helper.inventory.items.push(item);
 		});
-		
+
 		if (currentPage<pages.length || currentFolder<folderCount) {
 			if (currentPage==pages.length && currentFolder<folderCount) {
 				currentPage = 0;
@@ -7741,10 +7741,10 @@ var Helper = {
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		var guildstoreItems = $(doc).find('a[href*="subcmd2=takeitem"] img');
 		var currentPage = parseInt($(doc).find('a[href*="cmd=guild&subcmd=manage&guildstore_page"] font').text(),10);
-		
+
 		var guildstoreItems = $(doc).find('a[href*="subcmd2=takeitem"] img');
 		var pages = $(doc).find('td').children('a[href*="cmd=guild&subcmd=manage&guildstore_page"]');
-		
+
 		if (guildstoreItems.length > 0) output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
 		else {
 			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
@@ -7839,7 +7839,7 @@ var Helper = {
 			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
 
 			if ($(itemDetails).length == 0) itemDetails= $(doc); // to catch resources
-			
+
 			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
 			while(re.exec($(itemDetails).html())) {
 				forgeCount++;
@@ -9046,7 +9046,7 @@ var Helper = {
 						hasThisBuff.css('color','lime');
 						hasThisBuff.append(" (<font color='#FFFF00'>" + buffLevel + "</font>)");
 					}
-				}			
+				}
 			});
 			resultText += ((i % 4 == 3)? "<td></td></tr>":"");
 		}
@@ -11532,6 +11532,46 @@ var Helper = {
 			injectHere.innerHTML += '<br><input id="trackThisQuest" type="button" value="Track Quest" title="Tracks quest progress." class="custombutton">';
 			document.getElementById("trackThisQuest").addEventListener("click", Helper.trackThisQuest, true);
 		}
+
+		// insert next step
+		var questId = document.location.search.match(/quest_id=(\d+)/)[1];
+		var table = System.findNode("//table[@width=500]");
+		if (!table.textContent.match(/\d+ xp/i)) {
+			System.xmlhttp('http://guide.fallensword.com/index.php?cmd=quests&subcmd=view&quest_id='+questId, Helper.showNextMissionStep);
+		}
+	},
+
+	showNextMissionStep: function(responseText) {
+		var doc=$(responseText.replace(/[\u0080-\uFFFF]+/g, ""));
+		var item=$("table[width=500] font[color='#000099']:last"), node, html, tr;
+		if (item.length>0) {
+			tr = doc.find('td[height=10][colspan=10]:contains("'+item.text().replace(/[\u0080-\uFFFF]+/g, "")+'")').closest('table').closest('tr').next();
+			node = item.closest('table').find('tr:last').after('<tr><hr/></tr>');
+		} else {
+			tr = doc.find('td[height=10][colspan=10]:contains("Stage "):first').closest('table').closest('tr');
+			node = $("td[width=666] table tbody tr:eq(4)");
+		}
+		if (tr.length>0) {
+			html = "<hr/><table width=100% style='color:green'><tr>"+tr.html().replace('display: none','').replace(/800/g,'100%')
+				.replace(/(Stage \d+)/, 'Quest Helper: What is next (from the UltimateGuide)?<br/>$1') +
+				"</tr></table><table width=100% height><tr align=center>"+
+				"<td width=50%><input type=button class=custombutton id=whatelse value='What else?'></td>"+
+				// "<td  width=50%><a href='index.php?cmd=notepad&subcmd=huntguide'>Hunting Guide</a></td>"+
+				"</tr></table>";
+			while (tr = tr.next()) {
+				if (tr.html())
+					html += "<table width=100% style='display:none;color:gray' class=hiddenpart><tr>"+
+						tr.html().replace('display: none','').replace(/800/g,'100%')+"</tr></table>";
+				else {
+					html += "<div style='display:none' class=hiddenpart>Done</div>";
+					break;
+				}
+			}
+			node.html(html);
+			$('#whatelse').click(function() {$('.hiddenpart').show();});
+		} else {
+			node.html("Quest is not available in the Ultimate Guide!");
+		}
 	},
 
 	trackThisQuest: function(evt) {
@@ -12974,7 +13014,7 @@ var Helper = {
 			if (!localLastCheckMilli) localLastCheckMilli=(new Date()).getTime();
 			var localDateMilli = (new Date()).getTime();
 		}
-		
+
 		logTable.find('tr:gt(0):has(td:not(.divider))').each(function(index){
 			var cellContents = $(this).children('td:eq(1)').text();
 			if (!cellContents || cellContents == 'Date' || cellContents.split(' ').length == 1) return;
@@ -13100,7 +13140,7 @@ var Helper = {
 			};
 			Helper.newStoredGuildLog.logMessage.push(newLogMessage);
 		});
-		
+
 		if (Helper.stopProcessingLogPages) {
 			loadingMessageInjectHere.innerHTML = 'Processing stored logs ...';
 			for (i=0;i<Helper.storedGuildLog.logMessage.length;i++) {
@@ -13531,7 +13571,7 @@ var Helper = {
 		//add gold column and then go fetch data
 		findPlayerTable.find('tr:not(:first):has(td:not(.divider))').each(function(){
 			var playerHREF = $(this).find('td:first a').attr("href");
-			$(this).find('td:eq(3)')			
+			$(this).find('td:eq(3)')
 				.after('<td class="row"><span style="color:blue;" id="Gold' + playerHREF + '">?</span></td>');
 			System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
 		});
