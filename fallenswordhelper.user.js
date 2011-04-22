@@ -6028,7 +6028,40 @@ var Helper = {
 	},
 
 	injectReportPaint: function() {
-		var mainTable = System.findNode("//table[@width='600']");
+		//Get the list of online members
+		var memberList = System.getValueJSON("memberlist");
+
+		var injectHere, searchString;
+		if (memberList) {
+			for (i=0;i<memberList.members.length;i++) {
+				var member=memberList.members[i];
+				var lastActivityMinutes = 30;
+				var lastActivityIMG = "";
+				if (!isNaN(member.lastActivityMinutes)) var lastActivityMinutes = member.lastActivityMinutes;
+				if (GM_getValue("enhanceOnlineDots")) {
+					var lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.offlineDot() + '">';
+					if (lastActivityMinutes < 2) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
+					} else if (lastActivityMinutes < 5) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
+					} else if (lastActivityMinutes < 30) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
+					} else if (lastActivityMinutes > 10080) {
+						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
+					}
+				}
+
+				var player=$("b:contains('" + member.name + "')");
+				if (player.length > 0) {
+					player.html(lastActivityIMG + "&nbsp;<a href='" +
+						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.html() + "</a>");
+					player.append(" [ <span class=a-reply target_player=" + member.name + " style='cursor:pointer; text-decoration:underline;'>m</span> ]");
+				}
+			}
+			$(".a-reply").click(function(evt) {
+				Helper.openQuickMsgDialog(evt.target.getAttribute("target_player"));
+			});
+		}
 		var searchItemRE = /&item=(.*)$/;
 		var searchSetRE = /&set=(.*)$/;
 		var searchUserRE = /&user=(.*)$/;
@@ -6042,21 +6075,12 @@ var Helper = {
 				searchItem.replace(/^.* of /,''):(searchItem.replace(/ .*$/ig,'')+' ');
 		}
 		if (searchUser) searchUser = unescape(searchUser[1]);
-		var isUser=false, startRow=0, stopRow=mainTable.rows.length, j;
 		if (searchUser) {
-			for (var i=0;i<mainTable.rows.length;i++) {
-				var aRow = mainTable.rows[i];
-				if (!(aRow.cells[2])) {
-					if (isUser) stopRow=i;
-					isUser=(aRow.textContent.replace(/\s*/g,'')==searchUser);
-					if (isUser) startRow=i;
-				}
-			}
-			var len=mainTable.rows.length;
-			for (i=0;i<startRow;i++) mainTable.deleteRow(0);
-			for (i=0;i<len-stopRow;i++) mainTable.deleteRow(stopRow-startRow);
+			var playerID = /player_id=(\d+)/.exec($('table[width=600]').find('a:contains("' + searchUser + '")').attr("href"))[1];
+			$('table[width=600] tr:has(a:not([href*="player_id=' + playerID + '"]))').hide()
 		}
 		if (searchItem) var searchItemArr = searchItem.split('|');
+		var mainTable = System.findNode("//table[@width='600']");
 		for (i=mainTable.rows.length-1;i>=0;i--) {
 			aRow = mainTable.rows[i];
 			if (aRow.cells[2]) { // itemRow
@@ -6112,38 +6136,6 @@ var Helper = {
 						fastWearSpan = fastGSSpan.nextSibling.nextSibling;
 						fastWearSpan.addEventListener('click', Helper.equipProfileInventoryItem, true);
 					}
-				}
-			}
-		}
-
-		//Get the list of online members
-		var memberList = System.getValueJSON("memberlist");
-
-		var injectHere, searchString;
-		if (memberList) {
-			for (i=0;i<memberList.members.length;i++) {
-				var member=memberList.members[i];
-				var lastActivityMinutes = 30;
-				var lastActivityIMG = "";
-				if (!isNaN(member.lastActivityMinutes)) var lastActivityMinutes = member.lastActivityMinutes;
-				if (GM_getValue("enhanceOnlineDots")) {
-					var lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.offlineDot() + '">';
-					if (lastActivityMinutes < 2) {
-						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond() + '">';
-					} else if (lastActivityMinutes < 5) {
-						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
-					} else if (lastActivityMinutes < 30) {
-						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.orangeDiamond() + '">';
-					} else if (lastActivityMinutes > 10080) {
-						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.sevenDayDot() + '">';
-					}
-				}
-
-				var player=System.findNode("//b[contains(., '" + member.name + "')]");
-				if (player) {
-					player.innerHTML = lastActivityIMG + "&nbsp;<a href='" +
-						System.server + "index.php?cmd=profile&player_id=" + member.id + "'>" + player.innerHTML + "</a>";
-					player.innerHTML += " [ <a href='index.php?cmd=message&target_player=" + member.name + ">m</a> ]";
 				}
 			}
 		}
