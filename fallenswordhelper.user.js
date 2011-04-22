@@ -6076,8 +6076,11 @@ var Helper = {
 		}
 		if (searchUser) searchUser = unescape(searchUser[1]);
 		if (searchUser) {
-			var playerID = /player_id=(\d+)/.exec($('table[width=600]').find('a:contains("' + searchUser + '")').attr("href"))[1];
-			$('table[width=600] tr:has(a:not([href*="player_id=' + playerID + '"]))').hide()
+			playerReport = $('table[width=600]').find('a:contains("' + searchUser + '")');
+			if (playerReport.length > 0) {
+				var playerID = /player_id=(\d+)/.exec(playerReport.attr("href"))[1];
+				$('table[width=600] tr:has(a:not([href*="player_id=' + playerID + '"]))').hide()
+			}
 		}
 		if (searchItem) var searchItemArr = searchItem.split('|');
 		var mainTable = System.findNode("//table[@width='600']");
