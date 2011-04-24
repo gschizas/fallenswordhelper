@@ -5822,6 +5822,20 @@ var Helper = {
 				var bidNoRefreshItem = bidNoRefreshList[i];
 				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
 			}
+			//Add a bid no refresh on all
+			$('input[value="My Bids"]').after('&nbsp;<input type="button" value="Bid on All" id="fshBidOnAll"  class="custombutton tipped" data-tipped="<b>Bid on each auction</b><br>Triggers the \"Bid no refresh\" for each btton on screen">');
+			$("#fshBidOnAll").click(function()
+			{
+				if(confirm ("Are you sure you want to bid on all of them?")){
+					$("input[id=bidNoRefresh]").each(function()
+					{
+						//this.checked = !this.checked;
+						//alert("asdf");
+						//alert(this.attr('id'));
+						this.click();
+					});
+				}
+			});
 		}
 		//show saved prefs if not default values
 		var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
@@ -12354,7 +12368,7 @@ var Helper = {
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
 		//var itemList=[["All Resources", "Resource"], ["Amber", "Amber"], ["Amethyst Weed", "Amethyst Weed"], ["Blood Bloom", "Blood Bloom"], ["Cerulean Rose", "Cerulean Rose"], ["Dark Shade", "Dark Shade"], ["Deathbloom", "Deathbloom"], ["Deathly Mold", "Deathly Mold"], ["Greenskin\u00A0Fungus", "Greenskin Fungus"], ["Heffle", "Heffle"], ["Jademare", "Jademare"], ["Ruby Thistle", "Ruby Thistle"], ["Trinettle", "Trinettle"], ["Viridian\u00A0Vine", "Viridian Vine"]];
-		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9159"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"]];
+		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
@@ -13554,6 +13568,13 @@ var Helper = {
 			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
 			(levelToTest - 25) + "&search_level_max=" + (levelToTest + 25) +
 			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>");
+			
+		//<a href="index.php?cmd=profile&player_id=4145241">Boeffie13</a>
+		$('table[class="width_full"]').find('a[href*="player_id"]').each(function () {
+			//javascript:openWindow('index.php?cmd=quickbuff&tid=920497',%20'fsQuickBuff',%20618,%201000,%20',scrollbars')
+			var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
+			$(this).after("<a style='color:blue;font-size:10px;' "+Layout.quickBuffHref(id[1])+">[b]</a>");
+		});
 		if (!GM_getValue("showGoldOnFindPlayer")) return;
 		var findPlayerTable = $('table.width_full');
 		//add header
