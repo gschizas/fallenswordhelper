@@ -946,6 +946,7 @@ var Layout = {
 			Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19);
 		}
 		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
+		Layout.injectItemIntoMenuTable(tableElement, "Create Maps", "index.php?cmd=notepad&subcmd=createmap", 23);
 		//"menuSource_5"
 		tableElement = $('div[id="menuSource_5"]').find('tbody:first');
 		if (!tableElement) return;
@@ -1329,15 +1330,15 @@ var Helper = {
 	},
 
 	readInfo: function() {
-		var charInfo = $('img[src*="skin/icon_player.gif"]').parents('td.help');
+		var charInfo = $('img[src*="skin/icon_player.gif"]').closest('td.help');
 		if (charInfo.length == 0) { return; }
 		$(charInfo).each(function() {
 			var charInfoText = $(this).data('tipped');
 			/**
-			<center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>tnka</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%'>973</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>205th</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_up.gif'> +5</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>2401</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>5420</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>116</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>2018</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>6751</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.
+			<div><center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>teekill</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%' class='level'>959</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>271st</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_down.gif'> -1</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>7749</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>10515</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>901</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>41</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>2422</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.</div>
 			*/
 			Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
-			Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\'>(\d+)/i);
+			Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\' class='level'>(\d+)/i);
 			Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
 			Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
 			Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
@@ -1791,6 +1792,9 @@ var Helper = {
 				break;
 			case "findother":
 				Helper.injectFindOther();
+				break;
+			case "createmap":
+				Helper.injectCreateMap();
 				break;
 			default:
 				Helper.injectNotepad();
@@ -12367,7 +12371,6 @@ var Helper = {
 
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		//var itemList=[["All Resources", "Resource"], ["Amber", "Amber"], ["Amethyst Weed", "Amethyst Weed"], ["Blood Bloom", "Blood Bloom"], ["Cerulean Rose", "Cerulean Rose"], ["Dark Shade", "Dark Shade"], ["Deathbloom", "Deathbloom"], ["Deathly Mold", "Deathly Mold"], ["Greenskin\u00A0Fungus", "Greenskin Fungus"], ["Heffle", "Heffle"], ["Jademare", "Jademare"], ["Ruby Thistle", "Ruby Thistle"], ["Trinettle", "Trinettle"], ["Viridian\u00A0Vine", "Viridian Vine"]];
 		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
 		var output = ''
 		var allResRE='';
@@ -13568,7 +13571,7 @@ var Helper = {
 			"&nbsp;<a href='index.php?cmd=findplayer&search_active=1&search_username=&search_level_min=" +
 			(levelToTest - 25) + "&search_level_max=" + (levelToTest + 25) +
 			"&search_in_guild=0'><span style='color:blue;'>Get GvG targets</span></a>");
-			
+
 		//<a href="index.php?cmd=profile&player_id=4145241">Boeffie13</a>
 		$('table[class="width_full"]').find('a[href*="player_id"]').each(function () {
 			//javascript:openWindow('index.php?cmd=quickbuff&tid=920497',%20'fsQuickBuff',%20618,%201000,%20',scrollbars')
@@ -14116,7 +14119,7 @@ var Helper = {
 			"Character" : [
 				["BL", "Buff Log", "injectBuffLog"], ["CL", "Combat Log", "injectNotepadShowLogs"],
 				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
-				["QLM", "Quick Links", "injectQuickLinkManager"],
+				["QLM", "Quick Links", "injectQuickLinkManager"], ["CRM", "Create Maps", "injectCreateMap"],
 			],
 			"Actions" : [
 				["FB", "Find Buffs", "injectFindBuffs"], ["FO", "Find Other", "injectFindOther"],
@@ -14162,6 +14165,137 @@ var Helper = {
 			Helper[evt.target.getAttribute("fn")].call(Helper, document.getElementById("content"));
 			$("#content").dialog({ width: 'auto', modal: true });
 		}, 0);
+	},
+
+	injectCreateMap: function(content) {
+		if (!content) content=Layout.notebookContent();
+		System.setDefault("prevAreaMaps", "[]");
+		content=$(content).html(Helper.makePageHeader('Create Maps','','','')+
+			'<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>'+
+			'<tr><td colspan=2 align=right>Min Level: <input id=minlvl class=custominput name=minlvl></td>'+
+			'<td colspan=2 align=center>Max Level: <input id=maxlvl class=custominput name=maxlvl></td><td>'+
+			'<input type=button id=createmap value="Create Map" class=custombutton></td></tr>'+
+			'<tr><td colspan=5 id=maparea0 align=center></td><tr><td colspan=5><b>Previous Created Maps</b></td><tr id=prevmaps>'+
+			'<td id=maparea1></td><td id=maparea2></td><td id=maparea3></td><td id=maparea4></td><td id=maparea5></td></tr></tbody></table>'+
+			'<hr>Click on map to see full-size image<br/>If you do not see the image, try to lower the level difference.');
+		$('#minlvl').val(Helper.characterLevel - 2);
+		$('#maxlvl').val(Helper.characterLevel + 5);
+		Helper.prevAreaMaps = System.getValueJSON('prevAreaMaps');
+		$('#createmap').click(function() {
+			System.xmlhttp("http://guide.fallensword.com/index.php?cmd=realms&index=0&search_name=&search_level_min="+
+				$('#minlvl').val()+"&search_level_max="+$('#maxlvl').val()+"&sort_by=",
+				Helper.makeAreaMap);
+			});
+		Helper.showPreviousMaps();
+	},
+
+	makeAreaMap: function(responseText) {
+		Helper.areaMap = {};
+		Helper.mapCount = 0;
+		var doc=$(responseText);
+		var maps=$("//a[href*='index.php?cmd=realms&subcmd=view&realm_id='][text!='']", doc);
+		if (maps.length==0) {
+			$('#maparea0').html("Cannot find maps.");
+			return;
+		}
+		$('#maparea0').html("<br/>...loading area map image...<br/>");
+		maps.each(function(){
+			var el=$(this), url= "http://guide.fallensword.com/"+el.attr('href');
+			if (!Helper.areaMap[el.text()]) {
+				Helper.areaMap[el.text()] = {"url":url, "nb":[], "id":("m"+Helper.mapCount++), "lvl":el.closest('tr').children()[1].textContent};
+			}
+			});
+		Helper.mapCountMax = Helper.mapCount;
+		for (var map in Helper.areaMap) {
+			System.xmlhttp(Helper.areaMap[map].url, Helper.getConnectedMaps, map);
+		}
+	},
+
+	getConnectedMaps: function(responseText, map) {
+		var doc=$(responseText);
+		var maps = $("img[onmouseover*='Stairway to']", doc);
+		maps.each(function(){
+			var title=this.getAttribute("onmouseover").replace(/^.*Stairway to /,'').replace(/'\);/,'').replace(/\\/g,'');
+			if (title.indexOf("Master Realm")>=0) Helper.areaMap[title]={"url":null, "nb":[], "id":("m"+Helper.mapCountMax++), "lvl":0};
+			Helper.areaMap[map].nb.push(title);
+			});
+		$('#maparea0').html($('#maparea0').html()+map+", ");
+		Helper.mapCount --;
+		if (Helper.mapCount==0) {
+			Helper.drawAreaMap(Helper.areaMap, 0, $('#minlvl').val(), $('#maxlvl').val());
+
+			// store the map
+			if (Helper.prevAreaMaps.length >= 5) Helper.prevAreaMaps.shift();
+			Helper.prevAreaMaps.push({'map':Helper.areaMap,'minlvl':$('#minlvl').val(),'maxlvl':$('#maxlvl').val()});
+			System.setValueJSON('prevAreaMaps', Helper.prevAreaMaps);
+		}
+	},
+
+	drawAreaMap: function(areaMap, id, minlvl, maxlvl) {
+
+		var src="http://chart.googleapis.com/chart?cht=gv&chl=graph{node[shape=box];label=\"\\n\\nFS Area Map\\nDrawn by dkwizard\";";
+		var map, mapbg, nbbg, i;
+		for (map in areaMap) {src+=areaMap[map].id+"[label=\""+map+
+			(areaMap[map].lvl>0 ? ("\\n"+areaMap[map].lvl+"\"") : "\",fontcolor=brown")+
+			(areaMap[map].lvl==Helper.characterLevel ? ",fontcolor=blue" : "")+
+			"];";}
+		for (map in areaMap) {
+			for (i=0; i<areaMap[map].nb.length; i++) {
+				if (map < areaMap[map].nb[i] || areaMap[map].nb[i].indexOf("Master Realm")>=0) {
+					src += areaMap[map].id+"--"+(areaMap[areaMap[map].nb[i]] ? areaMap[areaMap[map].nb[i]].id : ('"'+areaMap[map].nb[i]+'"'))+";";
+				}
+			}
+		}
+		src = src.replace(/'/g,'`')+"}";
+		previewsrc = src+"&chs="+(id==0?"540x240":"100x100");
+		$('#maparea'+id).html("<div align=center><img id=imgarea"+id+" style='cursor:pointer' src='"+previewsrc+"' alt='If you still see this msg after 10 seconds, try to lower the lvl range!'><br/>"+
+			"Lvl: "+minlvl+" - "+maxlvl+"</div>")
+			.click(function(){
+				Helper.lightBox("<div align=center><img src='"+src+"'><br/>Min lvl: "+minlvl+" - Max lvl: "+maxlvl+"</div>");
+			});
+
+	},
+
+	lightBox: function(content) {
+
+		if(!content){
+			$('#ntz_modal').remove();
+			$('#ntz_overlay').fadeOut(function(){$(this).remove();});
+			return false;
+		}
+		$('body').append('<div id="ntz_overlay"><\/div>');
+		$('#ntz_overlay').css({
+			width     :   '100%',
+			height    :   $(document).height(),
+			position  :   'absolute',
+			left      :   0,
+			top       :   0,
+			backgroundColor : '#000',
+			zIndex    : 9990,
+			opacity   :   0
+		}).fadeTo(200, 0.5).click(function(){Helper.lightBox()});
+
+		$('body').append('<div id="ntz_modal"><\/div>');
+		$('#ntz_modal').css({
+			position  : 'absolute',
+			border    : '1px solid #ccc',
+			backgroundColor:'#ffffff',
+			top       : $(document).scrollTop()+20,
+			zIndex    : 9995,
+			marginLeft: 20,
+			cursor    : "pointer"
+		}).html(content).click(function(){Helper.lightBox()});;
+
+		$('#ntz_modal a:eq(0), #ntz_modal input, #ntz_modal textarea').focus();
+
+	},
+
+	showPreviousMaps: function() {
+		var i = 0, aMap;
+		for (i=0; i < Helper.prevAreaMaps.length; i++) {
+			aMap = Helper.prevAreaMaps[i];
+			Helper.drawAreaMap(aMap.map, Helper.prevAreaMaps.length-i, aMap.minlvl, aMap.maxlvl);
+		}
 	}
 };
 Helper.onPageLoad(null);
