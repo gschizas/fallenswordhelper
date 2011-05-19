@@ -7905,8 +7905,14 @@ var Helper = {
 		}
 		if (!targetInventory) {return;}
 		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
-
 		var output=document.getElementById(targetId);
+		var dropLink='';
+		
+		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
+		if (showQuickDropLinks && inventoryShell == 'inventory') {
+			dropLink='<th align="left">Drop</th>';
+		}
+
 		var result='<table id="Helper:InventoryTable"><tr>' +
 			'<th width="180" align="left" sortkey="name" colspan="2">Name</th>' +
 			'<th sortkey="minLevel">Level</th>' +
@@ -7920,11 +7926,12 @@ var Helper = {
 			'<th sortkey="forgelevel" colspan="2">Forge</th>' +
 			'<th align="left" sortkey="craftlevel">Craft</th>' +
 			'<th align="right" sortkey="durability">Dur%</th>' +
+			dropLink +
 			'<th width="10"></th>';
 		var item, color;
 
 		var allItems = targetInventory.items;
-
+//fetchitem.php?item_id=8370&inv_id=231182525&t=0&p=1599987&currentPlayerId=1599987&extra=8
 		//apply level filters
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
 		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
@@ -8007,6 +8014,12 @@ var Helper = {
 				durabilityPercent = parseInt(100*durabilityExec[1]/durabilityExec[2],10);
 				var durabilityColor = (durabilityPercent<20)?'red':'gray';
 			}
+			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(item.url);
+			var itemId = itemStats[1];
+			var itemInvId = itemStats[2];
+			var itemtype = itemStats[3];
+			var itempid = itemStats[4];
+
 			result+='</td>' +
 				'<td align="right">' + item.minLevel + '</td>' +
 				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
@@ -8019,13 +8032,25 @@ var Helper = {
 				'<td align="right">' + item.forgelevel + '</td>' +
 				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craftlevel + '</span>' + '</td>' +
-				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>' +
-				'<td></td>' +
+				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
+				if (showQuickDropLinks && inventoryShell == 'inventory') {
+					result+="<td><span  title='INSTANTLY DROP "+item.name+". NO REFUNDS OR DO-OVERS! Use at own risk.' id='FSHQuickDrop" +
+							itemInvId +
+							"' itemInvId=" + itemInvId +
+							" itemIndexId=" + item.index + " itemPageId=" + item.page +
+							" findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Drop]</span> </td>";
+				}
+				result+='<td></td>' +
 				'</tr>';
 		}
 		result+='</table>';
 		output.innerHTML=result;
-
+		if (showQuickDropLinks && inventoryShell == 'inventory') {
+			$('span[id*="FSHQuickDrop"]').each(function(){
+				this.addEventListener('click', Helper.quickDropItem, true);
+				this.addEventListener('click', Helper.removeInventoryItem, true);
+			});
+		}
 		targetInventory.lastUpdate = new Date();
 		System.setValueJSON(inventoryShell, targetInventory);
 
@@ -8036,6 +8061,20 @@ var Helper = {
 			cell.style.cursor="pointer";
 			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
+	},
+	
+	removeInventoryItem: function(evt){
+		var itemIndexId = evt.target.getAttribute("itemIndexId");
+		var itemPageId = evt.target.getAttribute("itemPageId");
+		var itemArrayId=-1;
+		for (var i=0; i<Helper.inventory.items.length;i++) { //find item
+			if(Helper.inventory.items[i].index==itemIndexId && Helper.inventory.items[i].page==itemPageId){
+				itemArrayId=i;
+				break;
+			}
+		}
+		var remItem = Helper.inventory.items.splice(itemArrayId,1); //remove from array		
+		System.setValueJSON('inventory', Helper.inventory); //update var so it does not display again
 	},
 
 	sortInventoryTable: function(evt) {
