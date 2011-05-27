@@ -8673,7 +8673,7 @@ var Helper = {
 			}
 
 			warningField.innerHTML = "<span style='color:" + warningColor + ";'>You are offering to buy <b>" + amount + "</b> FSP for >> <b>" +
-				System.addCommas(sellPrice) + warningText + " (Total: " + System.addCommas((amount * sellPrice) + Math.ceil(sellPrice * 0.005)) +  ")</span>";
+				System.addCommas(sellPrice) + warningText + " (Total: " + System.addCommas((amount * sellPrice) + Math.ceil(amount * sellPrice * 0.005)) +  ")</span>";
 		}
 	},
 
