@@ -7907,7 +7907,7 @@ var Helper = {
 		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
 		var output=document.getElementById(targetId);
 		var dropLink='';
-		
+
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		if (showQuickDropLinks && inventoryShell == 'inventory') {
 			dropLink='<th align="left">Drop</th>';
@@ -8062,7 +8062,7 @@ var Helper = {
 			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
 	},
-	
+
 	removeInventoryItem: function(evt){
 		var itemIndexId = evt.target.getAttribute("itemIndexId");
 		var itemPageId = evt.target.getAttribute("itemPageId");
@@ -8073,7 +8073,7 @@ var Helper = {
 				break;
 			}
 		}
-		var remItem = Helper.inventory.items.splice(itemArrayId,1); //remove from array		
+		var remItem = Helper.inventory.items.splice(itemArrayId,1); //remove from array
 		System.setValueJSON('inventory', Helper.inventory); //update var so it does not display again
 	},
 
@@ -13312,7 +13312,7 @@ var Helper = {
 							Helper.wearingItems[type].best=nodes[0].textContent;
 							for (var i=0; i<5; i++) {
 								Helper.wearingItems[type].suggest+=
-									"<span class=\"tipped\" data-tipped-options=\"skin: 'fsItem', ajax: true\" data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
+									"<span class=\"tipped\" data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
 										nodes[i].textContent+"</span>"+
 									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
 									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
@@ -13354,7 +13354,7 @@ var Helper = {
 						"><font color=yellow>"+Helper.wearingItems[type].wear+"</font><");
 					//GM_log(Helper.wearingItems[type].suggest);
 				}
-				newHtml+="<td><span style='color:"+color+"' onmouseover=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
+				newHtml+="<td><span style='color:"+color+"' class=tipped data-tipped-options='ajax:true' data-tipped=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
 					(Helper.wearingItems[type].fullSet?" (<span style='color:blue'>Full Set</span>)":"")+"</td></tr>"+
 					"<tr><td align=right>Suggested</td><td>"+Helper.wearingItems[type].suggest+"</td></tr>";
 			} else
