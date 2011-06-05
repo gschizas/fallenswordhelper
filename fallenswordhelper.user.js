@@ -4236,8 +4236,10 @@ var Helper = {
 	},
 
 	showQuickWear: function(callback) {
-		var output='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b> Quick Wear / Use / Extract Manager</b></td></tr></table>'+
-			'Please select the appropriate action for each item. When inappropriate action is selected, unexpected output can be displayed<br/>'+
+		var output='<div id="invTabs"><ul>'+
+			'<li><a href="#invTabs-qw">Quick Wear / Use / Extract <br/>Manager</a></li>'+
+			'<li><a href="#invTabs-ah">Inventory Manager Counter<br/>filtered by AH Quick Search</a></li></ul>'+
+			'<div id="invTabs-qw"><table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Wear / Use / Extract Manager</b></td></tr></table>'+
 			'<table width=100%><tr><th width=20%>Actions</th><th colspan=4>Items</th></tr>';
 		for (var key in Helper.itemList) {
 			var itemID=Helper.itemList[key].id;
@@ -4250,7 +4252,7 @@ var Helper = {
 				'itemID="' + itemID + '">Use/Ext</span>'+
 				'</td>'+Helper.itemList[key].html+'</tr>';
 		}
-		output+='</table>';
+		output+='</table></div><div id="invTabs-ah"></div></div>';
 		callback.inject.innerHTML=output;
 		for (key in Helper.itemList) {
 			itemID=Helper.itemList[key].id;
@@ -4259,6 +4261,62 @@ var Helper = {
 			document.getElementById('Helper:useProfileInventoryItem' + itemID).
 				addEventListener('click', Helper.useProfileInventoryItem, true);
 		}
+		$("#invTabs").tabs();
+		$("#invTabs").tabs('select', 0);
+		Helper.showAHInvManager("#invTabs-ah");
+	},
+
+	showAHInvManager: function(injectId) {
+		var output = 'Note that clicking on Show AH Price might reset your AH Search Preference (min/max Lvl, min/max Forge)<br/>'+
+			'<table width=100% cellspacing=2 cellpadding=2>'+
+			'<tr><th colspan=5 align=right>[<span id=showAhPrice style="cursor:pointer; color:yellow">Show AH Price</span>]</td>'+
+			'<tr><th colspan=5 align=center>Items from <a href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>'+
+			'<tr><th>Name</th><th>Nick Name<th>Inv Count</th><th>AH Min Price</th><th>AH BuyNow Price</th></tr>';
+		var invCount = {}, name;
+		var quickSL = System.getValueJSON("quickSearchList");
+		// fill up the Inv Counter
+		for (var key in Helper.itemList) {
+			name = Helper.itemList[key].html.match(/<td width="90%">&nbsp;(.*)<\/td>/)[1];
+			if (invCount[name])
+				invCount[name].count++;
+			else
+				invCount[name]={'count':1,'nicknameList':''};
+			for (var i = 0; i<quickSL.length; i++) {
+				if (name.indexOf(quickSL[i].searchname)>=0 && invCount[name].nicknameList.indexOf(quickSL[i].nickname) < 0) {
+					invCount[name].nicknameList += '<a href=\"index.php?cmd=auctionhouse&type=-1&search_text='+quickSL[i].searchname+'\">'+quickSL[i].nickname+'</a> ';
+					quickSL[i].found = true;
+				}
+			}
+		}
+		// show inv & counter for item with nickname found
+		for (var key in invCount) {
+			if (invCount[key].nicknameList != '')
+				output += '<tr><td>'+key+'</td><td>'+invCount[key].nicknameList+'</td><td>'+invCount[key].count+'</td><td></td><td></td><td></td></tr>';
+		}
+		// show item from quick AH search that are not in our inv
+		output += '</td></tr><tr><td colspan=5><hr></td></tr>';
+		output += '<tr><td>Did not find:</td><td colspan=4>';
+		for (var i=0; i<quickSL.length; i++) {
+			if (quickSL[i].displayOnAH && !quickSL[i].found)
+				output += '<a href=\"index.php?cmd=auctionhouse&type=-1&search_text='+quickSL[i].searchname+'\">'+quickSL[i].nickname+'</a>, ';
+		}
+		output += '</td></tr><tr><td colspan=5><hr></td></tr>'+
+			'<tr><th colspan=5 align=center>Items NOT from <a href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>';
+		// show inv & counter for item with nickname NOT found
+		for (var key in invCount) {
+			if (invCount[key].nicknameList == '')
+				output += '<tr><td>'+key+'</td><td>'+invCount[key].nicknameList+'</td><td>'+invCount[key].count+'</td><td></td><td></td><td></td></tr>';
+		}
+		output += '</table>';
+		$(injectId).html(output);
+		$('#showAhPrice').click(Helper.showAHPrice);
+	},
+
+	showAHPrice: function() {
+		//index.php?cmd=auctionhouse&order_by=1&search_text=Potion of Black Death&pref_save=1&pref_hidegold=1
+		// inter-exchange pref_hidegold and pref_hidefsp to get the price
+		// feel free to implement this :)
+		alert('dkwizard is a bit busy, but completing this new feature is definitely high in his TODO list, stay tuned :)');
 	},
 
 	insertQuickExtract: function(content) {
@@ -7307,7 +7365,7 @@ var Helper = {
 		// global parameters for the meta function generateManageTable
 		Helper.param={};
 		Helper.param={'id':'Helper:Auction Search Output',
-			'headers':["Category","Nickname","Quick Search Text","Display on TH?"],
+			'headers':["Category","Nickname","Quick Search Text","Display in AH?"],
 			'fields':["category","nickname","searchname","displayOnAH"],
 			'tags':["textbox","textbox","textbox","checkbox"],
 			'url':["","","index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@",""],
