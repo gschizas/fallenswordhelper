@@ -2916,7 +2916,7 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
-		if (System.browserVersion==4) {
+		if (System.browserVersion>=4) {
 			unsafeWindow.onkeypress = null;
 			unsafeWindow.combatKeyHandler = null;
 			unsafeWindow.realmKeyHandler = null;
