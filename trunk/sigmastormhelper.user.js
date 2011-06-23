@@ -4568,11 +4568,11 @@ var Helper = {
 					if (profileInventoryBox[i]) profileInventoryBoxItem[i] = profileInventoryBox[i].firstChild;
 					if (profileInventoryBoxItem[i] && profileInventoryBoxItem[i].firstChild) {
 						var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
-						if (itemHREF && profileInventoryIDRE(itemHREF)) {
-							if (wearableIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
-							if (usableIDRE(itemHREF)) {
-								profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
-								profileInventoryResID[i] = itemImgRE(profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("src"))[1];
+						if (itemHREF && profileInventoryIDRE.exec(itemHREF)) {
+							if (wearableIDRE.exec(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE.exec(itemHREF)[1];
+							if (usableIDRE.exec(itemHREF)) {
+								profileInventoryBoxID[i] = profileInventoryIDRE.exec(itemHREF)[1];
+								profileInventoryResID[i] = itemImgRE.exec(profileInventoryBoxItem[i].firstChild.firstChild.getAttribute("src"))[1];
 							}
 						}
 						if (itemHREF) var itemsCount = i;

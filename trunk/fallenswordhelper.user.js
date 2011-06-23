@@ -6798,7 +6798,7 @@ var Helper = {
 				if (profileInventoryBoxItem[i]) {
 					var itemHREF = profileInventoryBoxItem[i].firstChild.getAttribute("href");
 					if (itemHREF == '#') itemHREF = /window.location = \'(.*)\'/.exec(profileInventoryBoxItem[i].firstChild.getAttribute("onclick"))[1];
-					if (itemHREF && profileInventoryIDRE(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE(itemHREF)[1];
+					if (itemHREF && profileInventoryIDRE.exec(itemHREF)) profileInventoryBoxID[i] = profileInventoryIDRE.exec(itemHREF)[1];
 				}
 			}
 
