@@ -917,7 +917,7 @@ var Helper = {
 			if (guildStore.rows[i >> 2]) guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];
 			if (guildStoreBox[i]) guildStoreBoxItem[i] = guildStoreBox[i].firstChild;
 			if (guildStoreBoxItem[i] && guildStoreBoxItem[i].firstChild)
-				guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
+				guildStoreBoxID[i] = guildStoreIDRE.exec(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];
 		}
 
 		var newRow;
