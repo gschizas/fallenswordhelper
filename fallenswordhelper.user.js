@@ -249,7 +249,8 @@ var System = {
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
-		System.imageServerHTTP  = "http://72.29.91.222";
+		System.imageServerHTTPOld  = "http://72.29.91.222"; // keep the old one around for some old images
+		System.imageServerHTTP  = "http://huntedcow.cachefly.net/fs";
 
 		Array.prototype.removeDuplicates = System.removeDuplicates;
 	},
@@ -1242,7 +1243,6 @@ var Helper = {
 
 		System.setDefault("enterForSendMessage", false);
 		System.setDefault("trackKillStreak", true);
-		System.setDefault("showFSGIcon", false);
 		System.setDefault("storeLastQuestPage", true);
 		System.setDefault("addAttackLinkToLog", false);
 		System.setDefault("showStatBonusTotal", true);
@@ -2205,7 +2205,7 @@ var Helper = {
 		for (var i=0;i<12;i++) {
 			if (guildStore.rows[i >> 2]) {guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];}
 			if (guildStoreBox[i]) {guildStoreBoxItem[i] = guildStoreBox[i].firstChild;}
-			if (guildStoreBoxItem[i]) {guildStoreBoxID[i] = guildStoreIDRE(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];}
+			if (guildStoreBoxItem[i]) {guildStoreBoxID[i] = guildStoreIDRE.exec(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];}
 		}
 
 		var newRow;
@@ -3675,16 +3675,16 @@ var Helper = {
 		}
 		if (GM_getValue("storeLastQuestPage")) {
 			if (GM_getValue("lastActiveQuestPage").length > 0) {
-				var activeLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=0")]');
-				activeLink.setAttribute("href", GM_getValue("lastActiveQuestPage"));
+				var activeLink = $('a[href*="index.php?cmd=questbook&mode=0"]');
+				activeLink.attr("href", GM_getValue("lastActiveQuestPage"));
 			}
 			if (GM_getValue("lastCompletedQuestPage").length > 0) {
-				var completedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=1")]');
-				completedLink.setAttribute("href", GM_getValue("lastCompletedQuestPage"));
+				var completedLink = $('a[href*="index.php?cmd=questbook&mode=1"]');
+				completedLink.attr("href", GM_getValue("lastCompletedQuestPage"));
 			}
 			if (GM_getValue("lastNotStartedQuestPage").length > 0) {
-				var notStartedLink = System.findNode('//a[contains(@HREF,"index.php?cmd=questbook&mode=2")]');
-				notStartedLink.setAttribute("href", GM_getValue("lastNotStartedQuestPage"));
+				var notStartedLink = $('a[href*="index.php?cmd=questbook&mode=2"]');
+				notStartedLink.attr("href", GM_getValue("lastNotStartedQuestPage"));
 			}
 		}
 
@@ -3706,10 +3706,8 @@ var Helper = {
 					var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
 					aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + '" target="_blank">' +
 						'<img src="http://72.29.91.222//skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
-					aRow.cells[4].innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') +
-						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
-						'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
+						'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 				}
 			}
 		}
@@ -3858,7 +3856,7 @@ var Helper = {
 
 		if (buttonRow && !GM_getValue("hideKrulPortal")) {
 			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTP +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTPOld +
 				'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
 		}
 
@@ -3934,11 +3932,7 @@ var Helper = {
 		if (mapName) {
 
 			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&search_name=' + mapName.textContent + '&search_level_min=&search_level_max=" target="_blank">' +
-				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
-			if (GM_getValue("showFSGIcon")) {
-				mapName.innerHTML += ' <a href="http://www.fallenswordguide.com/realms/?search=' + mapName.textContent + '" target="_blank">' +
-					'<img border=0 title="Search map in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>';
-			}
+				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 
@@ -7015,7 +7009,7 @@ var Helper = {
 			System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
 			"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
 			playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
-			System.imageServerHTTP + "/temple/2.gif></a>&nbsp;&nbsp;" +
+			System.imageServerHTTPOld + "/temple/2.gif></a>&nbsp;&nbsp;" +
 			"<a href=" + System.server + "?cmd=guild&subcmd=inventory&subcmd2=report&user=" +
 			playername + '>[SR]</a>&nbsp;&nbsp;';
 		if (Helper.currentGuildRelationship == "self" && GM_getValue("showAdmin")) {
@@ -8088,7 +8082,7 @@ var Helper = {
 				'<td align="right">' + item.damage + '</td>' +
 				'<td align="right">' + item.hp + '</td>' +
 				'<td align="right">' + item.forgelevel + '</td>' +
-				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTP + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTPOld + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craftlevel + '</span>' + '</td>' +
 				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
 				if (showQuickDropLinks && inventoryShell == 'inventory') {
@@ -9287,9 +9281,7 @@ var Helper = {
 		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
 			creatureName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=creatures&search_name=' + creatureName.textContent + '&search_level_min=&search_level_max=&search_class=-1" target="_blank">' +
-				'<img border=0 title="Search creature in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>' +
-				' <a href="http://www.fallenswordguide.com/creatures/?search=' + creatureName.textContent + '" target="_blank">' +
-				'<img border=0 title="Search creature in FSG" width=10 height=10 src="http://www.fallenswordguide.com/favicon.ico"/></a>' +
+				'<img border=0 title="Search creature in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>' +
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 			var extraText = 'Add to the do not kill list';
@@ -10567,8 +10559,6 @@ var Helper = {
 				':</td><td><input name="keepBuffLog" type="checkbox" value="on"' + (GM_getValue("keepBuffLog")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual features to speed up the Helper.') +
 				':</td><td><input name="huntingMode" type="checkbox" value="on"' + (GM_getValue("huntingMode")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show FSG icon' + Helper.helpLink('Show FSG icon', 'This will show the FSG icon on the world page that links to the map for the page.') +
-				':</td><td><input name="showFSGIcon" type="checkbox" value="on"' + (GM_getValue("showFSGIcon")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Fast Walk' + Helper.helpLink('Enable Fast Walk', 'This functionality will allow the user to send multiple move commands, each subsequent one assuming that the previous one succeeded. ' +
 				'It does not check for blocked squares, not does it check to make sure that the move commands arrived at the server in the right order. Depending on the lag you experience, the user may have to pause slightly ' +
 				'between each move to make sure they reach the server in the right order.') +
@@ -10591,7 +10581,7 @@ var Helper = {
 				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +
 			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
 				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
-				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallenswordguide and Fallensword wiki icons and will only display on Firefox 3.5+)') +
+				' Show speaker on world' + Helper.helpLink('Show speaker on world', 'Should the toggle play sound speaker show on the world map? (This icon is next to the Fallensword wiki icon and will only display on Firefox 3.5+)') +
 				':<input name="showSpeakerOnWorld" type="checkbox" value="on"' + (GM_getValue("showSpeakerOnWorld")?" checked":"") + '></tr></td>' +
 			'<tr><td align="right">Enable Chat Parsing' + Helper.helpLink('Enable Chat Parsing', 'If this is checked, your character log will be parsed for chat messages and show the chat message on the screen if you reply to that message.') +
 				':</td><td><input name="enableChatParsing" type="checkbox" value="on"' + (GM_getValue("enableChatParsing")?" checked":"") + '></td></td></tr>' +
@@ -10886,7 +10876,6 @@ var Helper = {
 		System.saveValueForm(oForm, "hideRelicOffline");
 		System.saveValueForm(oForm, "enterForSendMessage");
 		System.saveValueForm(oForm, "showBPSlotsOnProfile");
-		System.saveValueForm(oForm, "showFSGIcon");
 		System.saveValueForm(oForm, "storeLastQuestPage");
 		System.saveValueForm(oForm, "addAttackLinkToLog");
 		System.saveValueForm(oForm, "showStatBonusTotal");
@@ -11022,7 +11011,8 @@ var Helper = {
 		var size = 20;
 		var miniMap = document.getElementById("miniMap");
 		var docu = System.createDocument(responseText);
-		var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + System.findNode("//table", docu).innerHTML + '</table>';
+		//var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + System.findNode("//table", docu).innerHTML + '</table>';
+		var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + $(docu).find('table:first').html() + '</table>';
 		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		//doc = doc.replace("<center></center>", "");
@@ -11622,11 +11612,7 @@ var Helper = {
 			if (questName && questName.length > 1) {
 				questName = questName[1];
 				injectHere.innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&search_name=' + questName.replace(/ /g,'+') + '&search_level_min=&search_level_max=" target="_blank">' +
-					'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTP + '/temple/1.gif"/></a>';
-				if (GM_getValue("showFSGIcon")) {
-					injectHere.innerHTML += '&nbsp;<a href="http://www.fallenswordguide.com/quests/index.php?realm=0&search=' + questName.replace(/ /g,'+') +
-						'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Guide" src="http://www.fallenswordguide.com/favicon.ico"/></a>';
-				}
+					'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 				injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') +
 					'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Wiki" src=' + System.imageServer + '/skin/fs_wiki.gif /></a>';
 			}
