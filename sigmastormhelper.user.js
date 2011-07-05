@@ -1935,12 +1935,17 @@ var Helper = {
 				var monster = document.getElementById("attackLink" + i);
 				if (monster) {
 					var monsterName = monster.parentNode.parentNode.previousSibling.textContent;
-					for (var j=0; j<doNotKillListAry.length; j++) {
-						var doNotKillName = doNotKillListAry[j];
-						if (monsterName == doNotKillName){
+					if (monsterName.match(/\(HK\)/i)) {
 							var monsterNameCell = monster.parentNode.parentNode.previousSibling
 							monsterNameCell.innerHTML = '<span style="color:cyan;">' + monsterNameCell.innerHTML + '</span>';
-							break;
+ 					} else {
+						for (var j=0; j<doNotKillListAry.length; j++) {
+							var doNotKillName = doNotKillListAry[j];
+							if (monsterName == doNotKillName){
+								var monsterNameCell = monster.parentNode.parentNode.previousSibling
+								monsterNameCell.innerHTML = '<span style="color:cyan;">' + monsterNameCell.innerHTML + '</span>';
+								break;
+							}
 						}
 					}
 				} else
@@ -2394,6 +2399,10 @@ var Helper = {
 					monsterFound = true;
 					break;
 				}
+			}
+			if (monsterName.match(/\(HK\)/i) ) {
+				injectHere.innerHTML = '<nobr><span style="color:cyan; font-size:x-small;">A HK&nbsp;</span></nobr>';
+				monsterFound = true;
 			}
 			if (!monsterFound) {
 				kills+=1;
