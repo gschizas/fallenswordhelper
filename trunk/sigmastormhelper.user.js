@@ -3219,8 +3219,8 @@ var Helper = {
 					var colorPlayerName = false;
 					var isGuildMate = false;
 					if (messageType == "Chat") {
-						var playerElement = aRow.cells[2].firstChild.nextSibling.firstChild;
-						var playerName = playerElement.innerHTML;
+						var playerElement = aRow.cells[2].firstChild;
+						var playerName = playerElement.textContent;
 						colorPlayerName = true;
 					}
 					if (messageType == "General") {
@@ -6085,7 +6085,7 @@ var Helper = {
 			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
 
-		allItems = System.findNodes("//tr[td/a/img/@title='View Squad Stats']");
+		allItems = System.findNodes("//tr[td/nobr/a/img/@title='View Squad Stats']");
 		var memberList=System.getValueJSON("memberlist");
 		var onlineIMG = '<img src="' + System.imageServer + '/skin/online.gif" width=10 height="10" title="Online">';
 		var offlineIMG = '<img src="' + System.imageServer + '/skin/offline.gif" width=10 height="10" title="Offline">';
@@ -6163,9 +6163,9 @@ var Helper = {
 	fetchGroupData: function(evt) {
 		var calcButton = System.findNode("//input[@id='fetchgroupstats']");
 		calcButton.style.display = "none";
-		var allItems = System.findNodes("//img[@title='View Squad Stats']");
+		var allItems = System.findNodes("//a/img[@title='View Squad Stats']/..");
 		for (var i=0; i<allItems.length; i++) {
-			System.xmlhttp(allItems[i].parentNode.getAttribute("href"), Helper.parseGroupData, allItems[i].parentNode);
+			System.xmlhttp(allItems[i].getAttribute("href"), Helper.parseGroupData, allItems[i].parentNode.parentNode.previousSibling.previousSibling);
 		}
 	},
 
@@ -6208,8 +6208,7 @@ var Helper = {
 		extraText += "<td style='color:brown;'>HP</td><td align='right'>" + hpValue + "</td>";
 		extraText += "<td colspan='2'></td></tr>";
 		extraText += "</table>";
-		expiresLocation = linkElement.parentNode.previousSibling.previousSibling;
-		expiresLocation.innerHTML += extraText;
+		linkElement.innerHTML += extraText;
 	},
 
 	addMarketplaceWidgets: function() {
