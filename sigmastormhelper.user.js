@@ -3224,9 +3224,9 @@ var Helper = {
 						colorPlayerName = true;
 					}
 					if (messageType == "General") {
-						if (aRow.cells[2].firstChild.nextSibling.innerHTML.search("player_id")!=-1) {
-							playerElement = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling;
-							playerName = playerElement.innerHTML
+						if (aRow.cells[2].firstChild.nextSibling.getAttribute('href').search("player_id")!=-1) {
+							playerElement = aRow.cells[2].firstChild.nextSibling;
+							playerName = playerElement.textContent
 							colorPlayerName = true;
 						}
 					}
@@ -3264,11 +3264,11 @@ var Helper = {
 						aRow.cells[2].innerHTML += ". Go to <a href='/index.php?cmd=auctionhouse&type=-50'>My Bids</a>.";
 					}
 					if (messageType == "General" &&
-							aRow.cells[2].firstChild.nextSibling.innerHTML.search("player_id")!=-1){
+							aRow.cells[2].firstChild.nextSibling.getAttribute('href').search("player_id")!=-1){
 
 						var buffingPlayerIDRE = /player_id=(\d+)/;
 						var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
-						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.firstChild.nextSibling.innerHTML;
+						var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.textContent;
 						var extraText = " <span style='font-size:x-small;'><nobr>[ <a href='index.php?cmd=message&target_player=" + buffingPlayerName +
 							"'>Reply</a> | <a href='index.php?cmd=trade&target_player=" + buffingPlayerName +
 							"'>Trade</a> | <a title='Secure Trade' href='index.php?cmd=trade&subcmd=createsecure&target_username=" + buffingPlayerName +
