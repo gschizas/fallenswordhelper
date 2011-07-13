@@ -7928,7 +7928,7 @@ var Helper = {
 				document.getElementById('Helper:recallMailboxItem' + i)
 					.addEventListener('click', Helper.recallMailboxItem, true);
 			}
-			var titleTable = System.findNode("//table[contains(@background,'/large_content_bg.jpg')]/tbody/tr/td/table/tbody/tr/td[contains(.,'Item Mailbox')]");
+			var titleTable = System.findNode("//table[contains(@background,'/large_content_bg.jpg')]/tbody/tr/td/div[contains(.,'Item Mailbox')]");
 			titleTable.innerHTML += '<br><table width=100%><tr><td align=center><span id="Helper:recallAllMailbox" '+
 				'style="cursor:pointer; text-decoration:underline; color:#D4FAFF; font-size:x-small;">Take All</span>'+
 				'</td></tr></table>';
