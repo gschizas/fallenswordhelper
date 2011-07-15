@@ -1492,9 +1492,7 @@ var Helper = {
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
-
 		}
-
 
 		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId;
@@ -9118,7 +9116,10 @@ var Helper = {
 		if (buffs.length == 0) resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
 		else {
 			buffs.each(function(index){
+				//<center><b>Reckoning</b> (Level: 175)</b></center>
+				//<center><b>Doubler<br><br>(Cannot be affected by Spell Breaker or Spell Leech.)<br><br></b> (Level: 1200)</b></center>
 				var onmouseover = $(this).attr("data-tipped");
+				onmouseover = onmouseover.replace("<br><br>(Cannot be affected by Spell Breaker or Spell Leech.)<br><br>","");
 				if (onmouseover.search("Summon Shield Imp") != -1) {
 					//<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>');
 					//<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>');
