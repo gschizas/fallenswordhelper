@@ -6275,7 +6275,6 @@ var Helper = {
 	injectDropItems: function() {
 		var subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
 		subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
-
 		var mainTable = System.findNode("//table[@width='600']");
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
@@ -6298,7 +6297,7 @@ var Helper = {
 
 		//function to add links to all the items in the drop items list
 		var itemName, itemInvId, theTextNode, newLink;
-		var allItems=System.findNodes("//input[@type='checkbox']");
+		var allItems=System.findNodes("//input[@type='checkbox'][@name='removeIndex[]' or @name='storeIndex[]']");
 		if (allItems) {
 			for (var i=0; i<allItems.length; i++) {
 				anItem = allItems[i];
@@ -6325,7 +6324,10 @@ var Helper = {
 						"&item_id=" + itemId +
 						"&type=" + type +
 						"&pid=" + pid + "'>" +
-						"Sell</a>]</span> ";
+						"Sell</a>]</span>" +
+						"[<a href='http://guide.fallensword.com/index.php?cmd=items&subcmd=view" +
+						"&item_id=" + itemId +
+						"' target='_blank'>UFSG</a>] ";
 				}
 				postText1 = ((findItems.length>1)?' [<span findme="checkall" linkto="' +
 					itemName +
@@ -6368,7 +6370,7 @@ var Helper = {
 			}
 		}
 
-		allItems = System.findNodes("//input[@type='checkbox']");
+		allItems = System.findNodes("//input[@type='checkbox'][@name='removeIndex[]' or @name='storeIndex[]']");
 		if (allItems) {
 			for (i=0; i<allItems.length; i++) {
 				anItem = allItems[i];
@@ -6505,7 +6507,7 @@ var Helper = {
 		var allGuildLockedItems = System.findNodes("//span[@id='guildLocked']");
 		if (allGuildLockedItems) {
 		for (var i = 0; i < allGuildLockedItems.length; i++) {
-			var cbNode = System.findNode("../../td/input[@type='checkbox']", allGuildLockedItems[i]);
+			var cbNode = System.findNode("../../td/input[@type='checkbox'][@name='removeIndex[]' or @name='storeIndex[]']", allGuildLockedItems[i]);
 			cbNode.checked = true;
 		}
 		}
@@ -6534,12 +6536,10 @@ var Helper = {
 		var guildLockedRE = /<center>Guild Locked: <font color="#00FF00">/i;
 
 		if (guildLockedRE.exec(responseText)) {
-
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
 			if (quickDropLink) quickDropLink.style.visibility='hidden';
 			textNode.innerHTML += '<span id="guildLocked" visibility="hidden"/>';
-
 		}
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
@@ -7246,7 +7246,7 @@ var Helper = {
 	},
 
 	profileSelectAll: function(evt) {
-		var checkboxItems = System.findNodes("//input[@type='checkbox']");
+		var checkboxItems = System.findNodes("//input[@type='checkbox'][@name='folderItem[]']");
 		checkboxItems.forEach(function(e) {e.checked = e.checked? false:true;});
 	},
 
@@ -12837,7 +12837,7 @@ var Helper = {
 
 	parseRankData: function(responseText, linkElement) {
 		var doc=System.createDocument(responseText);
-		var checkBoxes = System.findNodes("//input[@type='checkbox']",doc);
+		var checkBoxes = System.findNodes("//input[@type='checkbox'][contains(@name,'permission')]",doc);
 		var count = 0;
 		for (var i=0;i<checkBoxes.length;i++) {
 			var checkbox=checkBoxes[i];
