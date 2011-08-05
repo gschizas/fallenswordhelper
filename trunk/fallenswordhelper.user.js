@@ -1252,7 +1252,6 @@ var Helper = {
 		System.setDefault("enhanceChatTextEntry", true);
 
 		System.setDefault("ajaxifyRankControls", true);
-		System.setDefault("disablePageShiftToGuildStore", false);
 
 		System.setDefault("enableMaxGroupSizeToJoin", true);
 		System.setDefault("maxGroupSizeToJoin", 11);
@@ -2179,52 +2178,9 @@ var Helper = {
 		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
 
-		//Add functionality to remove the skip to guildstoresection
-		if (GM_getValue("disablePageShiftToGuildStore")) {
-			var guildStoreLinks = $('a[href*="#guildStoreSection"]');
-			for (var i=0;i<guildStoreLinks.length ;i++ ) {
-				var guildStoreLink = guildStoreLinks[i];
-				var linkHREF = guildStoreLink.getAttribute("href");
-				guildStoreLink.setAttribute("href", linkHREF.replace(/#guildStoreSection/,""));
-			}
-		}
-
 		//Update the guild online list, since we are already on the page.
 		doc = document.firstChild.nextSibling;
 		Helper.parseGuildForWorld(doc.innerHTML, true);
-
-		// Fast Take
-
-		var guildStore = leftHandSideColumnTable.rows[23].cells[0].firstChild.nextSibling;
-		var guildStoreIDRE = /guildstore_id=(\d+)/i;
-
-		var guildStoreBox = [];
-		var guildStoreBoxItem = [];
-		var guildStoreBoxID = [];
-		for (var i=0;i<12;i++) {
-			if (guildStore.rows[i >> 2]) {guildStoreBox[i]=guildStore.rows[i >> 2].cells[i % 4];}
-			if (guildStoreBox[i]) {guildStoreBoxItem[i] = guildStoreBox[i].firstChild;}
-			if (guildStoreBoxItem[i]) {guildStoreBoxID[i] = guildStoreIDRE.exec(guildStoreBoxItem[i].firstChild.getAttribute("href"))[1];}
-		}
-
-		var newRow;
-
-		for (i=0;i<12;i++) {
-			if ((i % 4===0) && guildStoreBoxItem[i]) {newRow = guildStore.insertRow(2*(i >> 2)+1);}
-			if (guildStoreBoxItem[i]) {
-				var newCell = newRow.insertCell(i % 4);
-				newCell.innerHTML = '<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
-					'id="Helper:recallGuildStoreItem' + guildStoreBoxID[i] + '" ' +
-					'itemID="' + guildStoreBoxID[i] + '">Take</span> | '+
-					'<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
-					'id="Helper:wearGuildStoreItem' + guildStoreBoxID[i] + '" ' +
-					'href="index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' + guildStoreBoxID[i] + '">Wear</span>';
-				document.getElementById('Helper:recallGuildStoreItem' + guildStoreBoxID[i]).
-					addEventListener('click', Helper.recallGuildStoreItem, true);
-				document.getElementById('Helper:wearGuildStoreItem' + guildStoreBoxID[i]).
-					addEventListener('click', Helper.recallItemNWear, true);
-			}
-		}
 
 		// self recall
 		var selfRecall = leftHandSideColumnTable.rows[22].cells[0];
@@ -3927,10 +3883,9 @@ var Helper = {
 			}
 		}
 
-
 		if (mapName) {
-
-			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&search_name=' + mapName.textContent + '&search_level_min=&search_level_max=" target="_blank">' +
+			var realmId = $('td[data-realm]').attr('data-realm');
+			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
 				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
@@ -10672,8 +10627,6 @@ var Helper = {
 			'<tr><td align="right">Navigate After Message Sent' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
 				' if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen.') +
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Disable GS page shift' + Helper.helpLink('Disable GS page shift', 'This will disable the page shift on the manage page to shift to the guild store.') +
-				':</td><td><input name="disablePageShiftToGuildStore" type="checkbox" value="on"' + (GM_getValue("disablePageShiftToGuildStore")?" checked":"") + '></td></tr>' +
 			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
 				'Max Size: <input name="maxGroupSizeToJoin" size="1" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
@@ -10886,7 +10839,6 @@ var Helper = {
 		System.saveValueForm(oForm, "newGuildLogHistoryPages");
 		System.saveValueForm(oForm, "useNewGuildLog");
 		System.saveValueForm(oForm, "enhanceChatTextEntry");
-		System.saveValueForm(oForm, "disablePageShiftToGuildStore");
 
 		System.saveValueForm(oForm, "enableMaxGroupSizeToJoin");
 		System.saveValueForm(oForm, "maxGroupSizeToJoin");
@@ -11646,7 +11598,7 @@ var Helper = {
 		var doc=$(responseText.replace(/[\u0080-\uFFFF]+/g, ""));
 		//find the last row and so find out what stage they are currently on
 		var lastRow = $('td[bgcolor="#634A29"]:last').parent('tr');
-		var currentStage = lastRow.parents('table:first').attr('rows').length/2;
+		var currentStage = lastRow.index()/2;
 		var parentTable = lastRow.parents('table:first')
 		var ufsgStageArray = $(doc).find('div[id*="stage_"]');
 		if (currentStage < ufsgStageArray.length || $('td:contains("You have not yet started this quest.")').length > 0) {
