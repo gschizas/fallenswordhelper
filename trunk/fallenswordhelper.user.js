@@ -806,7 +806,7 @@ var Data = {
 				{name: "Overkill",           stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 0, skillId: 109,buff: "When you inflict 2 times or more of the starting hit points in the first round of combat, you have a 0.25% per point chance to gain 0.025% per point extra XP. (PvE Only)", nicks: "overkill,ok"},
 				{name: "Smashing Hammer",    stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 0, skillId: 111,buff: "+0.05% per point added to your damage for each complete set equipped.", nicks: "smashing hammer,sh"},
 				{name: "Mighty Vigor",       stamina: 35, "duration": 60,   minCastLevel: 1200,treeId: 0, skillId: 113,buff: "For every 50 points of the skill, can equip items 1 level higher than your level.", nicks: "mighty vigor,mv"},
-				{name: "Fist Fight",         stamina: 35, "duration": 90,   minCastLevel: 1200,treeId: 0, skillId: 115,buff: "+0.1% per point chance that both players will lose the benefit of ALL skills at the start of combat. This skill takes effect before Sealed. (PvP Only)", nicks: "fist fight,ff"},
+				{name: "Fist Fight",         stamina: 30, "duration": 90,   minCastLevel: 1200,treeId: 0, skillId: 115,buff: "+0.1% per point chance that both players will lose the benefit of ALL skills at the start of combat. This skill takes effect before Sealed. (PvP Only)", nicks: "fist fight,ff"},
 				{name: "Cursed Ring",        stamina: 30, "duration": 120,  minCastLevel: 1400,treeId: 0, skillId: 88, buff: "0.2% per point stat bonus to your equipped ring. Excludes \\'Gain\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.", nicks: "cursed ring,cring"},
 				{name: "Sharpen",            stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 0, skillId: 106,buff: "Increases the maximum percentage (above 100%) of the Piercing Strike enhancement by +0.1% per point.", nicks: "sharpen,sharp"},
 				{name: "Balanced Attack",    stamina: 30, "duration": 90,   minCastLevel: 1400,treeId: 0, skillId: 116,buff: "+0.05% per point added to Attack and Damage if every piece of equipped gear is the same level.", nicks: "balanced attack,ba"},
@@ -4887,6 +4887,11 @@ var Helper = {
 	},
 
 	retrieveGuildData: function() {
+		//don't need to run the retrieve guild data function when looking at these pages (causes issues or already done elsewhere
+		if (location.search.search("quickbuff") != -1
+			|| location.search.search("index.php?cmd=guild&subcmd=manage") != -1
+			|| location.search.search("index.php?cmd=guild&subcmd=ranks") != -1) return;
+		//only update every x minutes
 		var memberList = System.getValueJSON("memberlist");
 		var guildOnlineRefreshTime = GM_getValue("guildOnlineRefreshTime");
 		if (guildOnlineRefreshTime != 300) GM_setValue("guildOnlineRefreshTime", 300); //set refresh to 300 if not equal to 300
@@ -4894,96 +4899,80 @@ var Helper = {
 		if (memberList) {
 			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > guildOnlineRefreshTime) memberList = null; // invalidate cache
 		}
-		if (!memberList && location.search.search("quickbuff") == -1) {
+		if (!memberList) {
 			System.xmlhttp("index.php?cmd=guild&subcmd=manage", Helper.parseGuildForWorld, true);
 		}
 	},
 
 	parseGuildForWorld: function(details) {
 		var doc=System.createDocument(details);
-		var allTables = doc.getElementsByTagName("TABLE");
-		var membersTable;
-		for (var i=0;i<allTables.length;i++) {
-			var oneTable=allTables[i];
-			if (oneTable.rows.length>=1 && oneTable.rows[0].cells.length>=1 && (/<b>Members<\/b>/i).test(oneTable.rows[0].cells[0].innerHTML)) {
-				membersTable=oneTable;
-			}
+		if (location.search.search("index.php?cmd=guild&subcmd=manage") != -1) {
+			//manage page so we don't need to parse the response we can just look at the current page.
+			var memberRows = $('td:contains("Username"):last').parents('table:first').find('a[href]').parent('td').parent('tr');
+		} else {
+			var memberRows = $(doc).find('td:contains("Username"):last').parents('table:first').find('a[href]').parent('td').parent('tr');
 		}
+		//members found so reset the list
+		var memberList = System.getValueJSON("memberlist");
+		if (!memberList) {
+			memberList = {};
+			memberList.members = [];
+		}
+		//go through each member and store the data
+		memberRows.each(function(index){
+			var playerLink   = $(this).find('a');
+			var memberId     = System.intValue((/[0-9]+$/).exec(playerLink.attr("href"))[0]);
+			var memberName   = playerLink.text();
+			var memberLevel  = System.intValue($(this).find('td:eq(2)').text());
+			var memberRank   = $(this).find('td:eq(3)').text();
+			var memberXP     = System.intValue($(this).find('td:eq(4)').text());
+			var memberStatus = $(this).find('td:eq(0) img').attr('title');
+			var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(playerLink).data('tipped'));
+			var lastActivityDays = parseInt(lastActivity[1],10);
+			var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
+			var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
+			var aMember;
 
-		if (membersTable) {
-			var membersDetails=membersTable.getElementsByTagName("TABLE")[0];
-			var memberList = System.getValueJSON("memberlist");
-			if (!memberList) {
-				memberList = {};
-				memberList.members = [];
+			// find member in member list, to modify data instead of replacing it
+			var findMembers = memberList.members.filter(function (e) {return e.id==memberId;});
+			if (findMembers.length>0) {
+				aMember = findMembers[0];
+			}
+			else { // member was not found, must be a new player
+				aMember = {};
+				// You can still modify an object, even if you have added it to something else
+				memberList.members.push(aMember);
+				aMember.firstSeen = new Date();
+				aMember.status = "Offline"; // new players are supposed to be offline
+			}
+			Helper.getFullPlayerData(aMember);
+
+			if (aMember.status == "Offline" && memberStatus=="Online") {
+				aMember.loggedInAt = new Date();
 			}
 
-			memberList.members.forEach(function(e) {e.status="Deleted";});
-
-			for (i=0;i<membersDetails.rows.length;i++) {
-				var aRow = membersDetails.rows[i];
-				if (aRow.cells.length==5 && aRow.cells[0].firstChild.title) {
-					var playerLink   = aRow.cells[1].firstChild.nextSibling;
-					var memberId     = System.intValue((/[0-9]+$/).exec(playerLink.getAttribute("href"))[0]);
-					var memberName   = playerLink.textContent;
-					var memberLevel  = System.intValue(aRow.cells[2].textContent);
-					var memberRank   = aRow.cells[3].textContent;
-					var memberXP     = System.intValue(aRow.cells[4].textContent);
-					var memberStatus = aRow.cells[0].firstChild.title;
-
-					var contactLink   = aRow.cells[1].firstChild.nextSibling;
-					contactLink   = $(contactLink).data('tipped');
-					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink);
-					var lastActivityDays = parseInt(lastActivity[1],10);
-					var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
-					var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
-
-					var aMember;
-
-					// find member in member list, to modify data instead of replacing it
-
-					var findMembers = memberList.members.filter(function (e) {return e.id==memberId;});
-					if (findMembers.length>0) {
-						aMember = findMembers[0];
-					}
-					else { // member was not found, must be a new player
-						aMember = {};
-						// You can still modify an object, even if you have added it to something else
-						memberList.members.push(aMember);
-						aMember.firstSeen = new Date();
-						aMember.status = "Offline"; // new players are supposed to be offline
-					}
-					Helper.getFullPlayerData(aMember);
-
-					if (aMember.status == "Offline" && memberStatus=="Online") {
-						aMember.loggedInAt = new Date();
-					}
-
-					if (!aMember.loggedInAt) {
-						aMember.loggedInAt = new Date();
-					}
-
-					aMember.status = memberStatus;
-					aMember.id     = memberId;
-					aMember.name   = memberName;
-					aMember.level  = memberLevel;
-					aMember.rank   = memberRank;
-					aMember.xp     = memberXP;
-					aMember.lastActivityMinutes = lastActivityMinutes;
-				}
+			if (!aMember.loggedInAt) {
+				aMember.loggedInAt = new Date();
 			}
 
-			// remove not existing players
-			memberList.members = memberList.members.filter(function(e) {return e.status!="Deleted";});
-			// damn, I love javascript array functions :)
+			aMember.status = memberStatus;
+			aMember.id     = memberId;
+			aMember.name   = memberName;
+			aMember.level  = memberLevel;
+			aMember.rank   = memberRank;
+			aMember.xp     = memberXP;
+			aMember.lastActivityMinutes = lastActivityMinutes;
+		});
+		// remove not existing players
+		memberList.members = memberList.members.filter(function(e) {return e.status!="Deleted";});
+		// damn, I love javascript array functions :)
 
-			memberList.lastUpdate = new Date();
-			memberList.isRefreshed = true;
-			System.setValueJSON("memberlist", memberList);
+		memberList.lastUpdate = new Date();
+		memberList.isRefreshed = true;
+		System.setValueJSON("memberlist", memberList);
 
-			if (location.search == "?cmd=guild&subcmd=ranks") {
-				Helper.injectGuildRanksMembers(memberList);
-			}
+		if (location.search == "?cmd=guild&subcmd=ranks") {
+			Helper.injectGuildRanksMembers(memberList);
 		}
 	},
 
