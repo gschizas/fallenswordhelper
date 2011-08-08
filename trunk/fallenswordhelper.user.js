@@ -7406,7 +7406,7 @@ var Helper = {
 		var lastCheck=GM_getValue("lastGuildInventoryCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 15*60*1000);
+		var haveToCheck=((now - lastCheck) > 5*60*1000);
 		var refreshButton;
 		if (haveToCheck) {
 			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
@@ -7741,37 +7741,27 @@ var Helper = {
 		Helper.guildinventory.items = new Array();
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
 		output.innerHTML = '<br/>Parsing guild store ...';
-		System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page=0', Helper.parseGuildStorePage);
-	},
-
-	parseGuildStorePage: function(responseText) {
-		var doc=System.createDocument(responseText);
-		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		var guildstoreItems = $(doc).find('a[href*="subcmd2=takeitem"] img');
-		var currentPage = parseInt($(doc).find('a[href*="cmd=guild&subcmd=manage&guildstore_page"] font').text(),10);
-
-		var guildstoreItems = $(doc).find('a[href*="subcmd2=takeitem"] img');
-		var pages = $(doc).find('td').children('a[href*="cmd=guild&subcmd=manage&guildstore_page"]');
-
-		if (guildstoreItems.length > 0) output.innerHTML+='<br/>Parsing guild store page '+currentPage+'...';
-		else {
-			output.innerHTML+='<br/>Parsing guild store page '+currentPage+'... Empty';
-			currentPage = pages.length; // go to end automatically since the rest of the pages will be empty too.
-		}
-		guildstoreItems.each(function(index){
-			var item={"url": $(this).data("tipped"),
-				"where":"guildstore", "index":(index+1), "page":currentPage, "worn":false};
-			if (index===0) output.innerHTML+="<br/>Found guild store item ";
-			output.innerHTML+=(index+1) + " ";
-			Helper.guildinventory.items.push(item);
+		
+		var guildId = GM_getValue('guildID');
+		$.ajax({
+			url: '?cmd=guild&subcmd=fetchinv',
+			success: function( data ) {
+				for (var i=0; i<data.length;i++) {
+					//{"a":"23040636","b":"10781","n":"Sword of Lorsin","t":"4","tg":true,"c":118300,"l":"1183","eq":true,"s":true}
+					//fetchitem.php?item_id=10781&inv_id=292437196&t=1&p=1346893&currentPlayerId=1346893
+					//t = 1 then player_id, p = 4 then guild_id
+					var itemHref = 'fetchitem.php?item_id=' + data[i].b + '&inv_id=' + data[i].a + '&t=4&p=' + guildId
+					var item={"url": itemHref,
+						"where":"guildstore", "index":(i+1), "worn":false};
+					if (i===0) output.innerHTML+="<br/>Found guild store item ";
+					output.innerHTML+=(i+1) + " ";
+					Helper.guildinventory.items.push(item);
+				}
+				output.innerHTML+='<br/>Parsing guild report page ...';
+				System.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', Helper.parseGuildReportPage);
+			},
+			dataType: 'json'
 		});
-		if (currentPage<pages.length && guildstoreItems.length == 12) { //if there are not 12 items on the page then end of store is reached
-			System.xmlhttp('index.php?cmd=guild&subcmd=manage&guildstore_page='+(currentPage), Helper.parseGuildStorePage);
-		}
-		else {
-			output.innerHTML+='<br/>Parsing guild report page ...';
-			System.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', Helper.parseGuildReportPage);
-		}
 	},
 
 	parseGuildReportPage: function(responseText) {
