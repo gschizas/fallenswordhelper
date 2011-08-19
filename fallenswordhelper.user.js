@@ -308,12 +308,22 @@ var System = {
 		return System.intValue(node.textContent);
 	},
 
-	createDocument: function(details) {
+	createDocumentWithImages: function(details) {
 		var doc=document.createElement("HTML");
 		doc.innerHTML=details;
 		return doc;
 	},
 
+	createDocument: function(details) {
+		var doc=document.createElement("HTML");
+		// new -- strip images
+		var reg=/(<img\s[^>]*?src=\\?["']http:)\/\/([a-zA-Z0-9\-.])*?\//g;
+		var stripped=details.replace(reg,"$1//0.0.0.0/");
+		doc.innerHTML=stripped;
+		// doc.innerHTML=details;  // old
+		return doc;
+	},
+	
 	//~ createDocument: function(str) { // chrome extension must use this createDocument (which not work under Firefox :( )
 		//~ if (document.documentElement.nodeName != 'HTML') {
 		    //~ return new DOMParser().parseFromString(str, 'application/xhtml+xml');
@@ -2095,14 +2105,15 @@ var Helper = {
 
 	injectFSBoxLog: function() {
 		if (GM_getValue("fsboxlog")) {
-			var node=System.findNode("//input[@value='Send Msg']/../font[1]");
-			if (node) {
-				var fsbox=node.innerHTML.replace('<br><br>',' ');
+			var node=$('a[href="javascript:reportFSBox();"]').parents('font:first');
+			if (node.length > 0) {
+				var fsbox=node.html().replace('<br><br>',' ').replace(/<div(.*)report(.*)div>/ig,'');
 				var boxList=GM_getValue("fsboxcontent");
-				if (boxList.indexOf(fsbox)<0) {boxList=fsbox+boxList;}
+				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
 				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
 				GM_setValue("fsboxcontent",boxList);
-				node.innerHTML+="<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[Log]</a>";
+				var nodediv = node.find('div');
+				nodediv.html(nodediv.html() + "&nbsp;<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:blue'>[Log]</a>");
 			}
 		}
 	},
@@ -3659,7 +3670,7 @@ var Helper = {
 					}
 					//<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=17&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank"><img src="http://72.29.91.222//skin/fs_wiki.gif" title="Search for this quest on the Ultimate Fallen Sword Guide" border="0"></a>
 					var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-					aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') + '" target="_blank">' +
+					aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
 						'<img src="http://72.29.91.222//skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
 						'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
@@ -4470,7 +4481,7 @@ var Helper = {
 	},
 
 	checkedMonster: function(responseText, callback) {
-		var creatureInfo=System.createDocument(responseText);
+		var creatureInfo=System.createDocumentWithImages(responseText);
 		var statsNode = System.findNode("//table[@width='400']", creatureInfo);
 		if (!statsNode) {return;} // FF2 error fix
 		var showMonsterLog = GM_getValue("showMonsterLog");
@@ -6695,7 +6706,7 @@ var Helper = {
 	},
 
 	injectEmptySlots: function(responseText) {
-		var doc = System.createDocument(responseText);
+		var doc = System.createDocumentWithImages(responseText);
 		var bpImage = System.findNode("//img[contains(@title,'Manage Backpack')]",doc);
 		if (bpImage) {
 			var bpslots = bpImage.parentNode.nextSibling.nextSibling
@@ -7031,7 +7042,7 @@ var Helper = {
 	retriveComponent: function(responseText, currentPage) {
 		var nextPage=currentPage+1;
 		document.getElementById('compSum').innerHTML+=nextPage+', ';
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var compList = System.findNodes("//a[contains(@href,'cmd=profile&subcmd=destroycomponent&component_id=')]/img",doc);
 		if (compList) {
 			for (var i=0;i<compList.length;i++) {
@@ -7666,7 +7677,7 @@ var Helper = {
 	},
 
 	parseProfileDone: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
 		$(doc).find('a[href*="subcmd=unequipitem"] img').each(function(index){
 			var item={"url": $(this).data("tipped"),
@@ -7687,7 +7698,7 @@ var Helper = {
 	},
 
 	parseInventoryPage: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var output=document.getElementById('Helper:InventoryManagerOutput');
 		var pageElement = $(doc).find('a[href*="backpack_page="] font');
 		var currentPage = 1;
@@ -7765,9 +7776,9 @@ var Helper = {
 	},
 
 	parseGuildReportPage: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		var guildreportItems = $(doc).find('img[src*="/items/"]');
+		var guildreportItems = $(doc).find('td#centerColumn img[src*="/items/"]');
 		guildreportItems.each(function(index){
 			var item={"url": $(this).data("tipped"),
 				"where":"guildreport", "index":(index+1), "worn":false};
@@ -8129,7 +8140,7 @@ var Helper = {
 	},
 
 	parseInventingPage: function(responseText, callback) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 
 		var	folderIDs = new Array();
 		Helper.folderIDs = folderIDs; //clear out the array before starting.
@@ -8219,7 +8230,7 @@ var Helper = {
 	},
 
 	parseRecipePage: function(responseText, callback) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentRecipeIndex = callback.recipeIndex;
 		var recipe = Helper.recipebook.recipe[currentRecipeIndex];
@@ -8367,7 +8378,7 @@ var Helper = {
 	},
 
 	parseMercStats: function(responseText) {
-		var mercPage=System.createDocument(responseText);
+		var mercPage=System.createDocumentWithImages(responseText);
 		var mercElements = mercPage.getElementsByTagName("IMG");
 		var totalMercAttack = 0;
 		var totalMercDefense = 0;
@@ -9045,7 +9056,7 @@ var Helper = {
 		}
 
 		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		buffs = $(doc).find('img[src*="/skills/"]');
 		var buffRE, buff, buffName;
 		if (buffs.length == 0) resultText += "<tr><td colspan='4' style='text-align:center;color:white; font-size:x-small'>[no buffs]</td></tr>";
@@ -9123,7 +9134,7 @@ var Helper = {
 	},
 
 	getSustain: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		Helper.tmpSelfProfile=responseText;
 		//sustain
 		var sustainText = $(doc).find('td:has(a:contains("Sustain")):last').next().find('table.tipped').data("tipped");
@@ -9183,7 +9194,7 @@ var Helper = {
 	},
 
 	getKillStreak: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		//Kill&nbsp;Streak:&nbsp;
 		var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
 		if (killStreakLocation.length > 0) {
@@ -9246,7 +9257,7 @@ var Helper = {
 	},
 
 	checkIfGroupExists: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var groupExistsIMG = System.findNode("//img[@title='Disband Group (Cancel Attack)']",doc);
 		if (groupExistsIMG) {
 			var groupHref = groupExistsIMG.parentNode.parentNode.firstChild.getAttribute("href");
@@ -9268,7 +9279,7 @@ var Helper = {
 
 	getCreaturePlayerData: function(responseText, callback) {
 		//playerdata
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var allItems = doc.getElementsByTagName("B");
 		for (var i=0;i<allItems.length;i++) {
 			var anItem=allItems[i];
@@ -10949,7 +10960,7 @@ var Helper = {
 		var docu = System.createDocument(responseText);
 		//var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + System.findNode("//table", docu).innerHTML + '</table>';
 		var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + $(docu).find('table:first').html() + '</table>';
-		doc = doc.replace(/ background=/g, '><img width=' + size + ' height=' + size + ' src=');
+		doc = doc.replace(/<td[^>]* background=/g, '<td align="center"><img width=' + size + ' height=' + size + ' src=');
 		// doc = doc.replace(/<[^>]*>(<center><[^>]*title="You are here")>/g, '$1 width=11 height=11>');
 		//doc = doc.replace("<center></center>", "");
 		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
@@ -11081,6 +11092,7 @@ var Helper = {
 		position.innerHTML = '<center><img width=16 height=16 src="' + System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
 		position.style.backgroundImage = 'url("' + background + '")';
 		position.style.backgroundPosition = "center";
+		position.style.backgroundSize = "20px";
 	},
 
 	injectQuickLinkManager: function(content) {
@@ -11472,7 +11484,7 @@ var Helper = {
 	},
 
 	getScoutTowerDetails: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/scouttower_header.jpg')]]", doc);
 		if (scoutTowerTable) {
 			var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/titankilllog_banner.jpg')]]");
@@ -11551,7 +11563,7 @@ var Helper = {
 			questName = questName.match(/"(.*)"/);
 			if (questName && questName.length > 1) {
 				questName = questName[1];
-				injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php/' + questName.replace(/ /g,'_') +
+				injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') +
 					'" target="_blank"><img border=0 title="Search for this quest on the Fallensword Wiki" src=' + System.imageServer + '/skin/fs_wiki.gif /></a>';
 			}
 		}
@@ -12206,7 +12218,7 @@ var Helper = {
 
 		var bulkSellTable = $('table[id="Helper:CreateAuctionBulkSellTable"]');
 
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var bulkAuctionItemIMGs = $(doc).find('img[src*="items/'+originalItemID+'.gif"]');
 		if (bulkAuctionItemIMGs.length == 0) {return;}
 		var maxAuctions = GM_getValue("maxAuctions");
@@ -12408,7 +12420,7 @@ var Helper = {
 	},
 
 	getFolderName2Trade: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var otherFolders = System.findNodes("//td/center/a/img[contains(@src,'/folder.gif')]",doc);
 		var newHtml='<span id="Folder-2" fid=-2 style="cursor:pointer; text-decoration:underline;">All</span> '+
 			'<span id="Folder-1" fid=-1 style="cursor:pointer; text-decoration:underline;">Main</span> ';
@@ -12471,7 +12483,7 @@ var Helper = {
 	},
 
 	markExistingSecureTrades: function(responseText) {
-		var doc = System.createDocument(responseText);
+		var doc = System.createDocumentWithImages(responseText);
 		$(doc).find('img[src*="/items/"]').each(function(){
 			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(this).data("tipped"));
 			var itemId = itemStats[1];
@@ -12611,7 +12623,7 @@ var Helper = {
 
 	getBpCountFromWorld: function(responseText) {
 		// backpack counter
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		var bp=System.findNode("//td[a/img[contains(@src,'_manageitems.gif')]]",doc);
 		var injectHere=document.getElementById("reportDiv");
 		if (!injectHere) injectHere=System.findNode("//b[contains(.,'Multiple Scavenging Results')]/..");
@@ -13243,7 +13255,7 @@ var Helper = {
 	},
 
 	getWearingItems: function(responseText) {
-		var doc=System.createDocument(responseText);
+		var doc=System.createDocumentWithImages(responseText);
 		//fix me
 		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]",doc);
 		for (var i=0; i<items.length; i++) {
@@ -13989,7 +14001,7 @@ var Helper = {
 	},
 
 	findBuffsParseProfileAndDisplay: function(responseText, callback) {
-		var doc = System.createDocument(responseText);
+		var doc = System.createDocumentWithImages(responseText);
 		//name and level
 		var playerName = $(doc).find('h1:first').text();
 		var levelElement = $(doc).find('td:contains("Level:"):last').next();
@@ -14093,7 +14105,7 @@ var Helper = {
 	},
 
 	parseProfileAndPostWarnings: function(responseText, callback) {//jquery ready, minus xmlhttp
-		var doc = System.createDocument(responseText);
+		var doc = System.createDocumentWithImages(responseText);
 		$(doc).find('img[src*="/skills/"]').each(function(){
 				var onmouseover = $(this).data("tipped");
 				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: (\d+)\)/.exec(onmouseover);
