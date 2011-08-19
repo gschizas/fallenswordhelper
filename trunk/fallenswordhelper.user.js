@@ -316,12 +316,16 @@ var System = {
 
 	createDocument: function(details) {
 		var doc=document.createElement("HTML");
+		doc.innerHTML=details;
+		return doc;
+/*		commenting out until we can do some more testing on which screens to use this on.
+		var doc=document.createElement("HTML");
 		// new -- strip images
 		var reg=/(<img\s[^>]*?src=\\?["']http:)\/\/([a-zA-Z0-9\-.])*?\//g;
 		var stripped=details.replace(reg,"$1//0.0.0.0/");
 		doc.innerHTML=stripped;
 		// doc.innerHTML=details;  // old
-		return doc;
+		return doc;*/
 	},
 	
 	//~ createDocument: function(str) { // chrome extension must use this createDocument (which not work under Firefox :( )
