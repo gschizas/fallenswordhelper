@@ -4993,10 +4993,10 @@ var Helper = {
 
 	replaceKeyHandler: function() {
 		if (System.browserVersion>=4) {
-			unsafeWindow.onkeypress = null;
-			unsafeWindow.combatKeyHandler = null;
-			unsafeWindow.realmKeyHandler = null;
-			unsafeWindow.onkeypress = Helper.keyPress;
+			window.document.wrappedJSObject.onkeypress = null;
+			window.document.wrappedJSObject.combatKeyHandler = null;
+			window.document.wrappedJSObject.realmKeyHandler = null;
+			window.document.wrappedJSObject.onkeypress = Helper.keyPress;
 		} else {
 			unsafeWindow.document.onkeypress = null;
 			unsafeWindow.document.combatKeyHandler = null;
