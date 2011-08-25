@@ -1043,7 +1043,10 @@ var Layout = {
 	},
 
 	moveRHSBoxToLHS: function(title) {
-		var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
+		//var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
+		var src=$('font b').filter(function() {
+			return $(this).text() === title;
+		}).closest('table');
 		if (src.length == 0) return;
 		src.next('br').remove(); //remove next BR
 		var tmp = document.createElement('div');
