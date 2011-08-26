@@ -4995,7 +4995,7 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
-		if (System.browserVersion>=4) {
+		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
 			window.document.wrappedJSObject.onkeypress = null;
 			window.document.wrappedJSObject.combatKeyHandler = null;
 			window.document.wrappedJSObject.realmKeyHandler = null;
