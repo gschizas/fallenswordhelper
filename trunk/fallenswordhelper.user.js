@@ -761,23 +761,44 @@ var Data = {
 				{Name:"Statue of Falzwort",Realm:"Falzwort Labyrinth (Halls) (2, 14) Lvl 803",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
 				{Name:"Abroia Fissure",Realm:"Forest of Abroia (Plateau) (9, 11) Lvl 818",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
 				{Name:"Enchanted Willow",Realm:"Nualgiath Forest (Thicket) (11, 9) Lvl 827",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Mystical Cluster",Realm:"Gritloar Burrows (Central Chamber) Lvl 846",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Piercing Strike<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Doujin Haunt",Realm:"Doujin Swamps (Murk) Lvl 853",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Outlores Pillar",Realm:"Outlore Flats (Valley) Lvl 866",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Ever Ice Stones",Realm:"Farmane Shore (Slopes) Lvl 878",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Goitha Vault",Realm:"Town of Goitha (Courtyard) Lvl 834",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Nullify<br>+25 Disarm"},
-				{Name:"Ancient Ruins of Zorx",Realm:"Nualgiath Forest (Ridge) Lvl 828",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Enchanted Circle of Pelgarir",Realm:"Pelgarir Valley (Verge) Lvl 874",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Sapher Fissure",Realm:"Sapher Flow (Upper) Lvl 885",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"},
-
-				{Name:"Menhir of Gore",Realm:"Krudar Crags (West) Lvl 904",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+30 Critical Hit<br>+25 Breaker<br>+25 Protection"},
-				{Name:"Riangi Cluster",Realm:"Mount Riangi (Flats) Lvl 913",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+45 Reinforced Armor<br>+10 Piercing Strike<br>+45 Breaker"},
-				{Name:"Yozahn Growth",Realm:"Isle of Yozahn (Shores) Lvl 925",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+15 Breaker<br>+45 Dodge"},
-				{Name:"Barnacle Buckler",Realm:"Dead Dogs Island (Port) Lvl 934",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+40 Piercing Strike<br>+25 Critical Strike<br>+15 Dodge<br>+10 Disarm"},
-				{Name:"Sacred Rocks of Zxl",Realm:"Xanlin Plain (Rise) Lvl 948",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+35 Piercing Strike<br>+30 Reinforced Armor<br>+15 Critical Hit<br>+15 Dodge"},
-				{Name:"The Blazing Statue",Realm:"Karthak (Mausoleum) Lvl 962",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Reinforced Armor<br>+20 Critical Hit<br>+30 Dodge<br>+30 Disarm"},
-				{Name:"Volmar Dark Crystal",Realm:"Unknown (Unknown) Lvl xyz",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Piercing Strike<br>+40 Reinforced Armor<br>+40 Critical Hit"}
+				{Name:"Mystical Cluster",Realm:"Gritloar Burrows (Central Chamber) (14,9) Lvl 846",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Piercing Strike<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Doujin Haunt",Realm:"Doujin Swamps (Murk) (9,6) Lvl 853",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Outlores Pillar",Realm:"Outlore Flats (Valley)(13,13) Lvl 866",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Ever Ice Stones",Realm:"Farmane Shore (Slopes)(13,10) Lvl 878",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Goitha Vault",Realm:"Town of Goitha (Courtyard)(6,10) Lvl 834",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Nullify<br>+25 Disarm"},
+				{Name:"Ancient Ruins of Zorx",Realm:"Nualgiath Forest (Ridge)(5,6) Lvl 828",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Enchanted Circle of Pelgarir",Realm:"Pelgarir Valley (Verge)(5,13) Lvl 874",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
+				{Name:"Sapher Fissure",Realm:"Sapher Flow (Upper)(12,4) Lvl 885",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires)(5,9) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"},
+				{Name:"Menhir of Gore",Realm:"Krudar Crags (West)(10,8) Lvl 904",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+30 Critical Hit<br>+25 Breaker<br>+25 Protection"},
+				{Name:"Riangi Cluster",Realm:"Mount Riangi (Flats)(2,13) Lvl 913",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+45 Reinforced Armor<br>+10 Piercing Strike<br>+45 Breaker"},
+				{Name:"Yozahn Growth",Realm:"Isle of Yozahn (Shores)(12,2) Lvl 925",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+15 Breaker<br>+45 Dodge"},
+				{Name:"Barnacle Buckler",Realm:"Dead Dogs Island (Port)(9,7) Lvl 934",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+40 Piercing Strike<br>+25 Critical Strike<br>+15 Dodge<br>+10 Disarm"},
+				{Name:"Sacred Rocks of Zxl",Realm:"Xanlin Plain (Rise)(9,8) Lvl 948",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+35 Piercing Strike<br>+30 Reinforced Armor<br>+15 Critical Hit<br>+15 Dodge"},
+				{Name:"The Blazing Statue",Realm:"Karthak (Mausoleum)(6,8) Lvl 962",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Reinforced Armor<br>+20 Critical Hit<br>+30 Dodge<br>+30 Disarm"},
+				{Name:"Volmar Dark Crystal",Realm:"Volmar Wastes (Rolling Hills)(9,12) Lvl 974",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Piercing Strike<br>+40 Reinforced Armor<br>+40 Critical Hit"},
+				{Name:"Emblazoned Statue",Realm:"Mount Volmar (Roost)(2,13) Lvl 984",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+10 Critical Hit<br>+15 Breaker<br>+30 Dodge<br>+30 Disarm"},
+				{Name:"Charnel Pit",Realm:"Mount Volmar (Chambers)(10,10) Lvl 993",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+10 Dodge<br>+10 Disarm"},  
+				{Name:"Mushroom Circle",Realm:"Galduir Grove (West)(11,3) Lvl 1008",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+50 Critical Hit<br>+5 Dodge"},  
+				{Name:"Enchanted Thistle Patch",Realm:"Heilan Lowlands (9,8) Lvl 1012",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+20 Sustain<br>+20 Fury Caster<br>+10 First Strike<br>+5 Master Inventor"},  
+				{Name:"Tartan Stone",Realm:"Stoatin Forest (Meadow) (16,11) Lvl 1023",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Critical Hit<br>+40 Dodge<br>+40 Disarm"},  
+				{Name:"Frost Dragon Bones",Realm:"Mehteh Snow Fields (Edge) (8,4) Lvl 1034",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Piercing Strike<br>+50 Reinforced Armor<br>+30 Critical Hit"},  
+				{Name:"Yellow Snow",Realm:"Ymirheim Mountains (Ascent) (3,5) Lvl 1043",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Reinforced Armor<br>+30 Critical Hit<br>+20 Dodge<br>+30 Disarm"},  
+				{Name:"Elven Wreck",Realm:"Vinder Berg (Shore) (14,7) Lvl 1054",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+10 Breaker"},  
+				{Name:"Oathstone",Realm:"Ranulfr Woods (Depths) (12,13) Lvl 1064",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+5 Piercing Strike<br>+5 Reinforced Armor<br>+30 Critical Hit<br>+10 Breaker"},  
+				{Name:"Trun Cluster",Realm:"Trun Mine (Depths) (1,17) Lvl 1078",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+10 Reinforced Armor<br>+20 Critical Hit<br>+10 Breaker<br>+5 Dodge<br>+5 Disarm"},  
+				{Name:"Haunted Tree",Realm:"Athelstan Woods (Thicket) (15,3) Lvl 1083",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+30 Piercing Strike<br>+30 Reinforced Armor<br>+5 Critical Hit<br>+5 Breaker"},  
+				{Name:"Fountain of Light",Realm:"Cymru Woods (Thicket) (4,15) Lvl 1093",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+15 Reinforced Armor<br>+15 Critical Hit<br>+10 Dodge<br>+10 Disarm"},
+				{Name:"Zargon Dragon Spire",Realm:"Zargon Bonevale (Hungry Gloom) (21,2) Lvl 1108",Comment:"+2% Armor<br>+20 Piercing Strike<br>+20 Breaker<br>+10 Dodge"},
+				{Name:"Pit of Suffering",Realm:"Lorsil Fortress (Lower Cellar) (8,2) Lvl 1119",Comment:"+2% HP<br>+10 Reinforced Armor<br>+30 Holy"},
+				{Name:"The Green Queen",Realm:"Tainted Isle (Coast) (7,11) Lvl 1137",Comment:"+2% Defense<br>+15 Critical Hit<br>+20 Dodge<br>+15 Disarm"},
+				{Name:"Altar of Orggok",Realm:"Nangoo Island (Depths) (12,8) Lvl 1149",Comment:"+2% HP<br>+15 Piercing Strike<br>+20 Reinforced Armor<br>+15 Critical Hit"},
+				{Name:"Shadow Well",Realm:"Umbrae Caverns (Mouth) (3,7) Lvl 1157",Comment:"+2% Attack<br>+20 Piercing Strike<br>+10 Reinforced Armor<br>+15 Critical Hit"},
+				{Name:"Dark Pulpit",Realm:"Labsarx Fortress (Sermon Hall) (2,3) Lvl 1168",Comment:"+2% Armor<br>+20 Holy<br>+10 Protection<br>+15 Sustain"},
+				{Name:"Ancestor Statue",Realm:"Valgotic Halls (Golem Yard) (3,20) Lvl 1179",Comment:"+2% Damage<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+20 Protect Gold"},
+				{Name:"Atrum Gallows",Realm:"Atrum Town (Center) (6,7) Lvl 1188",Comment:"+2% Defense<br>+20 Critical Hit<br>+20 Disarm<br>+120 First Strike"},
+				{Name:"Zendell Weapon Cache",Realm:"Zendell Keep (Barracks) (13,16) Lvl 1198",Comment:"+2% HP<br>+20 Piercing Strike<br>+20 Critical Hit<br>+20 First Strike"},
+				{Name:"Atrum Cow Inna Bun",Realm:"Atrum Farmland (Milking Barns) (12,6) Lvl 1206",Comment:"+2% HP<br>+20 Reinforced Armor<br>+20 Protection<br>+20 Disarm"}
 			];
 		}
 		return Data.relicArray;
@@ -1484,6 +1505,7 @@ var Helper = {
 		if (GM_getValue("huntingMode")) {
 			Helper.readInfo();
 			Helper.replaceKeyHandler();
+			Helper.fixOnlineGuildBuffLinks();
 		} else {
 			Helper.init();
 			Layout.hideBanner();
@@ -2120,7 +2142,12 @@ var Helper = {
 				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
 				GM_setValue("fsboxcontent",boxList);
 				var nodediv = node.find('div');
-				nodediv.html(nodediv.html() + "&nbsp;<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:blue'>[Log]</a>");
+				var playerName = node.find('a:first').text();
+				nodediv.html(nodediv.html() + "&nbsp;" +
+					"<a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+					"' style='color:PaleVioletRed'>[ Ignore ]</a>" +
+					"<br>" +
+					"<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[ Log ]</a>");
 			}
 		}
 	},
@@ -2630,12 +2657,14 @@ var Helper = {
 			"<tr style='display:none; visibility:hidden;'><td align='right'>LDFortitudeLevel:</td><td align='right' title='LDFortitudeLevel'>0</td></tr>" +
 			"<tr style='display:none; visibility:hidden;'><td align='right'>LDChiStrikeLevel:</td><td align='right' title='LDChiStrikeLevel'>0</td></tr>" +
 			"<tr style='display:none; visibility:hidden;'><td align='right'>LDTerrorizeLevel:</td><td align='right' title='LDTerrorizeLevel'>0</td></tr>" +
+			"<tr style='display:none; visibility:hidden;'><td align='right'>LDSanctuaryLevel:</td><td align='right' title='LDSanctuaryLevel'>0</td></tr>" +
 			"<tr><td colspan='2' style='border-top:2px black solid;'>Other Defender Stats</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Attack:</td><td style='font-size:x-small; color:gray;' align='right' title='attackValue'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Attack w/ buffs:</td><td style='font-size:x-small;' align='right' title='attackValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Defense:</td><td style='font-size:x-small; color:gray;' align='right' title='defenseValue'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Defense w/buffs:</td><td style='font-size:x-small;' align='right' title='defenseValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Armor:</td><td style='font-size:x-small;' align='right' title='armorValue'>0</td></tr>" +
+			"<tr><td style='font-size:x-small; color:brown;' align='right'>Armor w/ buffs:</td><td style='font-size:x-small;' align='right' title='armorValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Damage:</td><td style='font-size:x-small; color:gray;' align='right' title='damageValue'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Damage w/ buffs:</td><td style='font-size:x-small;' align='right' title='damageValueBuffed'>0</td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw HP:</td><td style='font-size:x-small; color:gray;' align='right' title='hpValue'>0</td></tr>" +
@@ -2650,6 +2679,7 @@ var Helper = {
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Defense:</td><td style='font-size:x-small; color:gray;' align='right' title='GroupDefense'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Group Defense w/ buffs:</td><td style='font-size:x-small;' align='right' title='GroupDefenseBuffed'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Armor:</td><td style='font-size:x-small;' align='right' title='GroupArmor'></td></tr>" +
+			"<tr><td style='font-size:x-small; color:brown;' align='right'>Group Armor w/ buffs:</td><td style='font-size:x-small;' align='right' title='GroupArmorBuffed'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group Damage:</td><td style='font-size:x-small; color:gray;' align='right' title='GroupDamage'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Group Damage w/ buffs:</td><td style='font-size:x-small;' align='right' title='GroupDamageBuffed'></td></tr>" +
 			"<tr><td style='font-size:x-small; color:brown;' align='right'>Raw Group HP:</td><td style='font-size:x-small; color:gray;' align='right' title='GroupHP'></td></tr>" +
@@ -2797,10 +2827,10 @@ var Helper = {
 			defendersProcessed.html(System.addCommas(defendersProcessedNumber + 1));
 		}
 		else {
-			//get relavent buffs here later ... just Constitution atm
+			//get lead defender (LD) buffs here for use later ... 
 			allItems = doc.getElementsByTagName("IMG");
 			var constitutionLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, fortitudeLevel = 0;
-			var chiStrikeLevel = 0, terrorizeLevel = 0;
+			var chiStrikeLevel = 0, terrorizeLevel = 0, sanctuaryLevel = 0;
 			for (i=0;i<allItems.length;i++) {
 				anItem=allItems[i];
 				if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -2841,6 +2871,12 @@ var Helper = {
 						terrorizeLevel = terrorize[1];
 						continue;
 					}
+					var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/;
+					var sanctuary = sanctuaryRE.exec(onmouseover);
+					if (sanctuary) {
+						sanctuaryLevel = sanctuary[1];
+						continue;
+					}
 				}
 			}
 
@@ -2868,14 +2904,20 @@ var Helper = {
 			LDProcessed = $("td[title='LDProcessed']");
 			LDProcessedNumber=System.intValue(LDProcessed.html());
 			LDProcessed.html(1);
-			storedFlinchLevel = $("td[title='LDFlinchLevel']");
-			storedFlinchLevel.html(System.intValue(flinchLevel));
 			storedConstitutionLevel = $("td[title='LDConstitutionLevel']");
 			storedConstitutionLevel.html(System.intValue(constitutionLevel));
+			storedFlinchLevel = $("td[title='LDFlinchLevel']");
+			storedFlinchLevel.html(System.intValue(flinchLevel));
 			storedNightmareVisageLevel = $("td[title='LDNightmareVisageLevel']");
 			storedNightmareVisageLevel.html(System.intValue(nightmareVisageLevel));
 			storedFortitudeLevel = $("td[title='LDFortitudeLevel']");
 			storedFortitudeLevel.html(System.intValue(fortitudeLevel));
+			storedChiStrikeLevel = $("td[title='LDChiStrikeLevel']");
+			storedChiStrikeLevel.html(System.intValue(chiStrikeLevel));
+			storedTerrorizeLevel = $("td[title='LDTerrorizeLevel']");
+			storedTerrorizeLevel.html(System.intValue(terrorizeLevel));
+			storedSanctuaryLevel = $("td[title='LDSanctuaryLevel']");
+			storedSanctuaryLevel.html(System.intValue(sanctuaryLevel));
 		}
 		var relicProcessedValue = $("td[title='relicProcessed']");
 		if (Helper.relicDefenderCount == defendersProcessedNumber + 1 && relicProcessedValue.html() == "1") {
@@ -2900,6 +2942,7 @@ var Helper = {
 		var LDNightmareVisageLevel = System.intValue($("td[title='LDNightmareVisageLevel']").text());
 		var LDFortitudeLevel = System.intValue($("td[title='LDFortitudeLevel']").text());
 		var LDChiStrikeLevel = System.intValue($("td[title='LDChiStrikeLevel']").text());
+		var LDSanctuaryLevel = System.intValue($("td[title='LDSanctuaryLevel']").text());
 		var attackValue = $("td[title='attackValue']");
 		var attackValueBuffed = $("td[title='attackValueBuffed']");
 		var LDattackValue = $("td[title='LDattackValue']");
@@ -2924,10 +2967,13 @@ var Helper = {
 		dc225.html(System.addCommas(Math.ceil(totalDefense * (1 - (225 * 0.002)))));
 		dc175.html(System.addCommas(Math.ceil(totalDefense * (1 - (175 * 0.002)))));
 		var armorValue = $("td[title='armorValue']");
+		var armorValueBuffed = $("td[title='armorValueBuffed']");
 		var LDarmorValue = $("td[title='LDarmorValue']");
 		armorNumber = System.intValue(armorValue.html());
 		LDarmorNumber = System.intValue(LDarmorValue.html());
-		armorValue.html(System.addCommas(armorNumber + Math.round(LDarmorNumber*relicMultiplier)));
+		var totalArmor = armorNumber + Math.round(LDarmorNumber*relicMultiplier);
+		armorValue.html(System.addCommas(totalArmor));
+		armorValueBuffed.html(System.addCommas(totalArmor + Math.floor(totalArmor * LDSanctuaryLevel * 0.001)));
 		var damageValue = $("td[title='damageValue']");
 		var damageValueBuffed = $("td[title='damageValueBuffed']");
 		var LDdamageValue = $("td[title='LDdamageValue']");
@@ -2968,17 +3014,18 @@ var Helper = {
 		processingStatus.html('Parsing attacking group stats ... ');
 
 		var doc=System.createDocument(responseText);
-		Helper.relicGroupAttackValue = $(doc).find('td:contains("Attack"):last').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupDefenseValue = $(doc).find('td:contains("Defense"):last').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupArmorValue = $(doc).find('td:contains("Armor"):last').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupDamageValue = $(doc).find('td:contains("Damage"):last').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupHPValue = $(doc).find('td:contains("HP"):last').next().text().replace(/,/g,"")*1;
+		Helper.relicGroupAttackValue = $(doc).find('td#centerColumn').find('td:contains("Attack:"):not(:contains(" Attack:"))').next().text().replace(/,/g,"")*1;
+		Helper.relicGroupDefenseValue = $(doc).find('td#centerColumn').find('td:contains("Defense:"):not(:contains(" Defense:"))').next().text().replace(/,/g,"")*1;
+		Helper.relicGroupArmorValue = $(doc).find('td#centerColumn').find('td:contains("Armor:"):not(:contains(" Armor:"))').next().text().replace(/,/g,"")*1;
+		Helper.relicGroupDamageValue = $(doc).find('td#centerColumn').find('td:contains("Damage:"):not(:contains(" Damage:"))').next().text().replace(/,/g,"")*1;
+		Helper.relicGroupHPValue = $(doc).find('td#centerColumn').find('td:contains("HP:"):not(:contains(" HP:"))').next().text().replace(/,/g,"")*1;
 		System.xmlhttp("index.php?cmd=guild&subcmd=mercs", Helper.parseRelicMercStats);
 	},
 
 	parseRelicMercStats: function(responseText) {
+		//merc stats do not count for group stats so subtract them here ...
 		var processingStatus = $('td[title="ProcessingStatus"]');
-		processingStatus.html('Parsing group merc stats ... ');
+		processingStatus.html('Subtracting group merc stats ... ');
 
 		var mercPage=System.createDocument(responseText);
 		var mercElements = mercPage.getElementsByTagName("IMG");
@@ -3026,7 +3073,7 @@ var Helper = {
 		var doc=System.createDocument(responseText);
 		allItems = doc.getElementsByTagName("IMG");
 		var constitutionLevel = 0, flinchLevel = 0, nightmareVisageLevel = 0, fortitudeLevel = 0;
-		var chiStrikeLevel = 0, terrorizeLevel = 0;
+		var chiStrikeLevel = 0, terrorizeLevel = 0, sanctuaryLevel = 0;
 		for (i=0;i<allItems.length;i++) {
 			anItem=allItems[i];
 			if (anItem.getAttribute("src").search("/skills/") != -1) {
@@ -3067,6 +3114,12 @@ var Helper = {
 					terrorizeLevel = terrorize[1];
 					continue;
 				}
+				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/;
+				var sanctuary = sanctuaryRE.exec(onmouseover);
+				if (sanctuary) {
+					sanctuaryLevel = sanctuary[1];
+					continue;
+				}
 			}
 		}
 		var groupAttackElement = $("td[title='GroupAttack']");
@@ -3084,7 +3137,9 @@ var Helper = {
 		groupDefenseElement.html(System.addCommas(Helper.relicGroupDefenseValue));
 		groupDefenseBuffedElement.html(System.addCommas(totalDefense));
 		var groupArmorElement = $("td[title='GroupArmor']");
+		var groupArmorBuffedElement = $("td[title='GroupArmorBuffed']");
 		groupArmorElement.html(System.addCommas(Helper.relicGroupArmorValue));
+		groupArmorBuffedElement.html(System.addCommas(Helper.relicGroupArmorValue + Math.floor(Helper.relicGroupArmorValue * sanctuaryLevel * 0.001)));
 		var groupDamageElement = $("td[title='GroupDamage']");
 		var groupDamageBuffedElement = $("td[title='GroupDamageBuffed']");
 		var groupHPElement = $("td[title='GroupHP']");
@@ -6937,9 +6992,9 @@ var Helper = {
 				bioContents=bioContents.replace(buffs[i], cbString);
 			}
 
-			if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
+			if (bioContents.indexOf("[cmd]") < 0) bioContents+="[cmd]";
 
-			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" target_player="' +
+			bioContents = bioContents.replace("[cmd]",'<input id="Helper:sendBuffMsg" subject="buffMe" target_player="' +
 				playername +'" class="custombutton" type="submit" value="Ask For Buffs"/>'+
 				'<span id=buffCost style="color:red"></span>');
 		}
@@ -9587,7 +9642,7 @@ var Helper = {
 		advancedEditing.appendChild(advancedEditingDiv);
 		advancedEditingDiv.style.align = 'left';
 		advancedEditingDiv.innerHTML += "`~This will allow FSH Script users to select buffs from your bio~`<br/>" +
-			"You can use the {cmd} tag as well to determine where to put the 'Ask For Buffs' button<br/><br/>" +
+			"You can use the [cmd] tag as well to determine where to put the 'Ask For Buffs' button<br/><br/>" +
 			"&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br/>" +
 			"&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special characters (non-alphanumeric).<br/>" +
 			"&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff pack names in them to make buffing even easier!";
@@ -9662,9 +9717,9 @@ var Helper = {
 				bioContents=bioContents.replace(buffs[i], cbString);
 			}
 
-			if (bioContents.indexOf("{cmd}") < 0) bioContents+="{cmd}";
+			if (bioContents.indexOf("[cmd]") < 0) bioContents+="[cmd]";
 
-			bioContents = bioContents.replace("{cmd}",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=" class="custombutton" type="submit" value="Ask For Buffs"/>' +
+			bioContents = bioContents.replace("[cmd]",'<input id="Helper:sendBuffMsg" subject="buffMe" href="index.php?cmd=message&target_player=" class="custombutton" type="submit" value="Ask For Buffs"/>' +
 			'<span id=buffCost style="color:red"></span>');
 			previewArea.innerHTML = bioContents;
 
@@ -9999,7 +10054,7 @@ var Helper = {
 				'HellForgeHTML': theRow.cells[5].innerHTML,
 				'Epic[?]': (theRow.cells[6].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
 				'EpicHTML': theRow.cells[6].innerHTML,
-				'MaxEquipLvL': theRow.cells[7].textContent*1,
+				'MaxEquipLvL': theRow.cells[7].textContent.replace(/,/g,"")*1,
 				'MaxEquipLvLHTML': theRow.cells[7].innerHTML,
 				'Reward': theRow.cells[8].innerHTML,
 				'Action': theRow.cells[9].innerHTML,
@@ -13965,7 +14020,8 @@ var Helper = {
 		var doc = System.createDocument(responseText);
 		var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has(td>a[href*="cmd=profile&player_id="])');
 		var maxPage = parseInt($(doc).find('td:has(input[name="page"]):last').text().replace(/\D/g, ""),10);
-		if (callback.page != 1){
+		var curPage = parseInt($(doc).find('input[name="page"]:last').val().replace(/\D/g, ""),10);
+		if (curPage != 1){
 			playerRows.each(function(){
 				var onlinePlayer = $(this).find('td:eq(1) a').attr("href");
 				var onlinePlayerLevel = parseInt($(this).find('td:eq(2)').text().replace(/,/g,""),10);
@@ -13978,10 +14034,10 @@ var Helper = {
 				}
 			});
 		}
-		if (callback.page<=maxPage/*-maxPage+15*/) {
-			var newPage = (callback.page == 1) ? Math.round(Helper.onlinePlayersSetting * maxPage / 50) : (callback.page+1);
+		if (curPage < maxPage/*-maxPage+15*/) {
+			var newPage = (curPage == 1) ? Math.round(Helper.onlinePlayersSetting * maxPage / 50) : (curPage+1);
 			var bufferProgress = document.getElementById("bufferProgress");
-			bufferProgress.innerHTML = 'Parsing online page ' + callback.page + ' ...';
+			bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.findBuffsParseOnlinePlayers, {"page":newPage});
 		}
 		else {
@@ -14075,7 +14131,8 @@ var Helper = {
 			var bioTip = bioCell.html().replace(/'|"|\n/g,"");
 			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
 				//fix me - It kind works now, but not guaranteed?
-				'class="tipped" data-tipped="'+bioTip+'">' + playerName + '</a>' +
+				'class="tipped" data-tipped-options="hook: \'leftmiddle\'" ' + 
+				'data-tipped="'+bioTip+'">' + playerName + '</a>' +
 				'&nbsp;<span style="color:blue;">[<span class="a-reply" target_player="' + playerName +'" style="cursor:pointer; text-decoration:underline;">m</span>]</span>' + '</nobr><br>' +
 				'<span style="color:gray;">Level:&nbsp;</span>' + levelValue + '&nbsp;(' + virtualLevelValue + ')';
 			$(".a-reply").click(function(evt) {
