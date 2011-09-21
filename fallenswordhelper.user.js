@@ -6735,35 +6735,29 @@ var Helper = {
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
 			$.subscribe('afterUpdate.Tipped', function(e, data){
-					var $e = $(data.element);
+				var $e = $(data.element);
 
-					//alert("asdf");
-					// already modified || not an item
-					if(!data.skin == 'fsItem' || $e.is('.fsh'))
-						return;
-					//creating a fake DOM object
-					var tmp = document.createElement('div');
-					tmp.innerHTML = $(data.content).html();
-//alert($(data.content).html());
-					var bonusTable = System.findNode("//table[tbody/tr/td/center/font[.='Bonuses']]",tmp); //var bonusTable = $(someelement).find(':contains( Bonuses )'); //jquery equilivant
-					//var bonusTable = $(data.content).find('font:contains("Bonuses")').closest('tbody');
-					var extraText = "";
-					if (bonusTable) {
-						var subTotal = 0;
-						for (var i=2;i<bonusTable.rows.length;i++) {
-							aRow = bonusTable.rows[i];
-							if(aRow.cells.length < 2) {break; } //single column, so break after stat bonuses kick in
-							bonusValue = parseInt(/(^[-+]?\d+)/.exec(aRow.cells[1].textContent)[1],10);
-							subTotal += bonusValue;
-						}
-						extraText = "<br><font color=#999999>Individual item stats subtotal:</font> " + subTotal;
-					}
-
-					var addMe = '<br><center>'+extraText+'</center>';
-		$(data.content).append(addMe);
-		unsafeWindow.Tipped.refresh(data.element);
-
+				// already modified || not an item
+				if(!data.skin == 'fsItem' || $e.is('.fsh'))
+					return;
+//GM_log($(data.content).html());
+				$(data.content).find('font:contains("Bonuses")').closest('tr').each(function(index){
+					var itemTable = $(this).closest('table');
+					var attackStatElement = $(itemTable).find('td:contains("Attack:"):not(:contains(" Attack:"))');
+					var attackStat = (attackStatElement.length > 0)? attackStatElement.next().text().replace(/\+/g,"")*1:0;
+					var defenseStatElement = $(itemTable).find('td:contains("Defense:"):not(:contains(" Defense:"))');
+					var defenseStat = (defenseStatElement.length > 0)? defenseStatElement.next().text().replace(/\+/g,"")*1:0;
+					var armorStatElement = $(itemTable).find('td:contains("Armor:"):not(:contains(" Armor:"))');
+					var armorStat = (armorStatElement.length > 0)? armorStatElement.next().text().replace(/\+/g,"")*1:0;
+					var damageStatElement = $(itemTable).find('td:contains("Damage:"):not(:contains(" Damage:"))');
+					var damageStat = (damageStatElement.length > 0)? damageStatElement.next().text().replace(/\+/g,"")*1:0;
+					var hpStatElement = $(itemTable).find('td:contains("HP:"):not(:contains(" HP:"))');
+					var hpStat = (hpStatElement.length > 0)? hpStatElement.next().text().replace(/\+/g,"")*1:0;
+					var totalStats = attackStat + defenseStat + armorStat + damageStat + hpStat;
+					$(this).nextAll('tr:contains("Enhance"):first').before("<tr style='color:DodgerBlue;'><td align='right'>Stat Total:</td><td align='right'>" + totalStats + "&nbsp;</td></tr>");
 				});
+			unsafeWindow.Tipped.refresh(data.element);
+			});
 		}
 	},
 
