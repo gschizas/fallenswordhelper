@@ -8,7 +8,6 @@
 // @include        http://*.fallensword.com/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @exclude        http://alpha.fallensword.com/*
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
@@ -8201,54 +8200,46 @@ var Helper = {
 		var	folderIDs = new Array();
 		Helper.folderIDs = folderIDs; //clear out the array before starting.
 		var currentFolder = GM_getValue("currentFolder");
-		var folderLinks = System.findNodes("//a[contains(@href,'index.php?cmd=inventing&folder_id=')]", doc);
-		//if folders are enabled then save the ID's in an array
-		if (folderLinks) {
-			for (i=0; i<folderLinks.length;i++) {
-				folderLink = folderLinks[i];
-				href = folderLink.getAttribute("href");
-				var folderID = /folder_id=([-0-9]+)/.exec(href)[1]*1;
-				folderIDs.push(folderID);
-				Helper.folderIDs = folderIDs;
-			}
-		}
+		$(doc).find('a[href*="index.php?cmd=inventing&folder_id="]').each(function(index){
+			var folderID = /folder_id=([-0-9]+)/.exec($(this).attr("href"))[1]*1;
+			folderIDs.push(folderID);
+			Helper.folderIDs = folderIDs;
+		});
+		
 		folderCount = Helper.folderIDs.length;
 		folderID = Helper.folderIDs[currentFolder-1];
-		var folderTextElement = System.findNode("//a[@href='index.php?cmd=inventing&folder_id=" + folderID + "']/ancestor::td[1]", doc);
+		var folderTextElement = $(doc).find('a[href*="index.php?cmd=inventing&folder_id=' + folderID + '"]').closest('td').text();
+		
 		var folderText = "";
-		if (folderTextElement) {
-			folderText = folderTextElement.textContent;
+		if (folderTextElement.length > 0) {
+			folderText = folderTextElement;
 		}
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		var currentPage = callback.page;
-		var pages=System.findNode("//select[@name='page']", doc);
+		var pages = $(doc).find('select[name="page"]:first');
 		if (folderText.search(/quest/i) == -1) {
-			if (!pages) {return;}
-			var recipeRows = System.findNodes("//table[tbody/tr/td[.='Recipe Name']]//tr[td/img]",doc);
-
+			if (pages.length == 0) {return;}
+			$(doc).find('a[href*="index.php?cmd=inventing&subcmd=viewrecipe&recipe_id="]').each(function(index){
+				var recipeLink = $(this).attr("href");
+				var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
+				var recipe={
+					"img": $(this).closest('tr').find('img').attr("src"),
+					"link": recipeLink,
+					"name": $(this).text(),
+					"id": recipeId};
+				output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
+				Helper.recipebook.recipe.push(recipe);
+			});
+			
 			var nextPage=currentPage+1;
 			output.innerHTML += 'Parsing folder '+ currentFolder + ' ... Page ' + nextPage + '... <br/>';
 
-			if (recipeRows) {
-				for (var i=0; i<recipeRows.length;i++) {
-					aRow = recipeRows[i];
-					var recipeLink = aRow.cells[1].firstChild.getAttribute("href");
-					var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
-					var recipe={
-						"img": aRow.cells[0].firstChild.src,
-						"link": recipeLink,
-						"name": aRow.cells[1].firstChild.textContent,
-						"id": recipeId};
-					output.innerHTML+="Found blueprint: "+ recipe.name + "<br/>";
-					Helper.recipebook.recipe.push(recipe);
-				}
-			}
 		} else {
 			output.innerHTML += 'Skipping folder '+ currentFolder + ' as it has the word "quest" in folder name.<br/>';
-			nextPage = pages.options.length;
+			nextPage = pages.find('option:last').text()*1;
 		}
-		if ((nextPage<=pages.options.length && currentFolder!=folderCount) || currentFolder<folderCount) {
-			if (nextPage==pages.options.length && currentFolder<folderCount) {
+		if ((nextPage<=pages.find('option:last').text()*1 && currentFolder!=folderCount) || currentFolder<folderCount) {
+			if (nextPage==pages.find('option:last').text()*1 && currentFolder<folderCount) {
 				nextPage = 0;
 				folderID = Helper.folderIDs[currentFolder];
 				GM_setValue("currentFolder", currentFolder+1);
@@ -8262,29 +8253,6 @@ var Helper = {
 		}
 	},
 
-	parseRecipeItemOrComponent: function(xpath, doc) {
-		var resultNodes = System.findNodes(xpath, doc);
-		var results = [];
-		if (resultNodes) {
-			for (var i=0; i<resultNodes.length; i++) {
-				var resultNode = resultNodes[i];
-				var mouseOver = $(resultNode.firstChild.firstChild).data("tipped");
-				var resultAmounts = resultNode.parentNode.nextSibling.textContent;
-				//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
-				var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)\&inv_id=-1\&t=2\&p=(\d+)\&vcode=([a-z0-9]+)/i);
-				var result = {
-					img: resultNode.firstChild.firstChild.src,
-					id: mouseOverRX[1],
-					verify: mouseOverRX[3],
-					amountPresent: parseInt(resultAmounts.split("/")[0],10),
-					amountNeeded: parseInt(resultAmounts.split("/")[1],10)
-				};
-				results.push(result);
-			}
-		}
-		return results;
-	},
-
 	parseRecipePage: function(responseText, callback) {
 		var doc=System.createDocumentWithImages(responseText);
 		var output=document.getElementById('Helper:RecipeManagerOutput');
@@ -8293,10 +8261,10 @@ var Helper = {
 
 		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
 
-		recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
-		recipe.items = Helper.parseRecipeItemOrComponent("//td[contains(@background,'/inventory/2x3.gif')]", doc);
-		recipe.components  = Helper.parseRecipeItemOrComponent("//td[contains(@background,'/inventory/1x1mini.gif')]", doc);
-		recipe.target = Helper.parseRecipeItemOrComponent("//td[contains(@background,'/hellforge/2x3.gif')]", doc)[0];
+		//recipe.credits = System.findNodeInt("//tr[td/img/@title='Credits']/td[1]", doc);
+		recipe.items = Helper.parseRecipeItemOrComponent('td[background*="/inventory/2x3.gif"]', doc);
+		recipe.components  = Helper.parseRecipeItemOrComponent('td[background*="/inventory/1x1mini.gif"]', doc);
+		recipe.target = Helper.parseRecipeItemOrComponent('td[background*="/hellforge/2x3.gif"]', doc)[0];
 
 		var nextRecipeIndex = currentRecipeIndex+1;
 		if (nextRecipeIndex<Helper.recipebook.recipe.length) {
@@ -8309,6 +8277,26 @@ var Helper = {
 			System.setValueJSON("recipebook", Helper.recipebook);
 			Helper.generateRecipeTable();
 		}
+	},
+
+	parseRecipeItemOrComponent: function(jqueryxpath, doc) {
+		var results = [];
+		$(doc).find(jqueryxpath).each(function(index){
+			var mouseOver = $(this).find('img').data("tipped");
+			var resultAmounts = $(this).parent().next().text();
+			//fetchitem.php?item_id=10113&inv_id=-1&t=2&p=1346893&vcode=9d5dd9b780dbca8f4940642a11ee8d1a
+			var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)\&inv_id=-1\&t=2\&p=(\d+)\&vcode=([a-z0-9]+)/i);
+			var result = {
+				img: $(this).find('img').attr("src"),
+				id: mouseOverRX[1],
+				verify: mouseOverRX[3],
+				amountPresent: parseInt(resultAmounts.split("/")[0],10),
+				amountNeeded: parseInt(resultAmounts.split("/")[1],10)
+			};
+			results.push(result);
+		});
+
+		return results;
 	},
 
 	generateRecipeTable: function() {
