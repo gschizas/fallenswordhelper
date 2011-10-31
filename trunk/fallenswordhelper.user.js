@@ -6,6 +6,7 @@
 // @include        http://guide.fallensword.com/*
 // @include        http://fallensword.com/*
 // @include        http://*.fallensword.com/*
+// @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
 // ==/UserScript==
@@ -16,6 +17,7 @@
 var main = function() {
 
 var isBeta ="0";
+var isNewUI = "0";
 
 // jquery GM_get/set wrapper
 function GM_JQ_wrapper() {
@@ -1077,7 +1079,12 @@ var Layout = {
 	},
 
 	notebookContent: function() {
-		return System.findNode("//div[@class='innerContentMiddle']");
+		if (isNewUI == 0)
+		{
+			return System.findNode("//div[@class='innerContentMiddle']");
+		} else {
+			return System.findNode("//div[@id='pCC']"); //new interface logic
+		}
 	},
 
 	playerId: function() {
@@ -1472,7 +1479,9 @@ var Helper = {
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
-		isBeta = $('html[data-hcs="beta: true"]:first').length;
+		hcsData = $('html').data('hcs');
+		if (hcsData['beta']) isBeta = 1;
+		if (hcsData['new-ui']) isNewUI = 1;
 		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
 		if (System.imageServer != System.imageServerHTTP) {
 			var changeCount = 0;
@@ -3174,7 +3183,11 @@ var Helper = {
 			result.type="worldmap";
 		}
 		else {
-			var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]//center/nobr");
+			if (isNewUI == 1) { // new UI
+				var posit = System.findNode("//h3[@id='world-realm-name']");
+			} else { // old UI
+				var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]//center/nobr");
+			}
 			if (!posit) {return;}
 			var thePosition=posit.innerHTML;
 			var positionRE=/\((\d+),\s*(\d+)\)/;
@@ -3551,7 +3564,7 @@ var Helper = {
 
 		//extra world screen text
 		var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
-		replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
+		replacementText += "<table align='right' cellpadding='1' style='width:270px;margin-left:38px;margin-right:38px;" +
 			"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
 		replacementText += "<tr><td colspan='2' height='10'></td></tr><tr>";
 		var hasShieldImp = System.findNode("//img[contains(@src,'/55_sm.gif')]");
@@ -3655,7 +3668,7 @@ var Helper = {
 		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
 		if (!injectHere) {return;}
 		//insert after kill all monsters image and text
-		var newSpan = document.createElement("SPAN");
+		var newSpan = document.createElement("DIV");
 		newSpan.innerHTML=replacementText;
 		injectHere.appendChild(newSpan);
 
@@ -3910,17 +3923,27 @@ var Helper = {
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
 		Helper.prepareCombatLog();
-		var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+		if (isNewUI == 1) {
+			var mapName = System.findNode('//h3[@id="world-realm-name"]');
+		} else {
+			var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+		}
 		//Checking if there are quests on current map
 		if (GM_getValue("checkForQuestsInWorld") === true) {
-			if (mapName.textContent !== null &&
-				(GM_getValue("lastWorld") != mapName.textContent.trim() ||
+			if (mapName.textContent !== null) {
+				if (isNewUI == 1) {
+					var mapNameText = mapName.textContent.substr(0,mapName.textContent.lastIndexOf("(")).trim();
+				} else {
+					var mapNameText = mapName.textContent.trim();
+				}
+				if (GM_getValue("lastWorld") != mapNameText ||
 					GM_getValue("questsNotStarted") === true ||
-					GM_getValue("questsNotComplete") === true)) {
-				GM_setValue("lastWorld", mapName.textContent.trim());
-				var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
-				System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
-				System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
+					GM_getValue("questsNotComplete") === true) {
+					GM_setValue("lastWorld", mapNameText);
+					var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
+					System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
+					System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
+				}
 			}
 		}
 		//quest tracker
@@ -3955,11 +3978,11 @@ var Helper = {
 			}
 		}
 
-		if (mapName) {
+		if (mapName && mapNameText) {
 			var realmId = $('td[data-realm]').attr('data-realm');
 			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
 				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
-			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapName.textContent + '&go=Go" target="_blank">' +
+			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 
 			var uaStr = navigator.userAgent;
@@ -3995,6 +4018,7 @@ var Helper = {
 				},true);
 
 		}
+		
 		if (GM_getValue("quickKill")) {
 			var doNotKillList = GM_getValue("doNotKillList");
 			var doNotKillListAry = doNotKillList.split(",");
@@ -12764,14 +12788,22 @@ var Helper = {
 				guildLogNode.setAttribute("href", "index.php?cmd=notepad&subcmd=newguildlog");
 			}
 			//hide the lhs box
-			if (location.search == "?cmd=notepad&subcmd=newguildlog" && guildLogNode.firstChild.getAttribute("alt") == "You have unread guild log messages.") {
-				messageBox = guildLogNode.parentNode.parentNode;
-				if (messageBox) {
-					messageBox.style.display = "none";
-					messageBox.style.visibility = "hidden";
-					//hide the empty row before it too (can't do after in case there is no after row)
-					messageBox.previousSibling.style.display = "none";
-					messageBox.previousSibling.style.visibility = "hidden";
+			if (location.search == "?cmd=notepad&subcmd=newguildlog") {
+				if(guildLogNode.firstChild.getAttribute("alt") == "You have unread guild log messages.") { //old UI
+					messageBox = guildLogNode.parentNode.parentNode;
+					if (messageBox) {
+						messageBox.style.display = "none";
+						messageBox.style.visibility = "hidden";
+						//hide the empty row before it too (can't do after in case there is no after row)
+						messageBox.previousSibling.style.display = "none";
+						messageBox.previousSibling.style.visibility = "hidden";
+					}
+				} else if (guildLogNode.innerHTML.search("Guild Log updated!") != -1) { // new UI
+					messageBox = guildLogNode.parentNode;
+					if (messageBox) {
+						messageBox.style.display = "none";
+						messageBox.style.visibility = "hidden";
+					}
 				}
 			}
 		}
@@ -13574,7 +13606,7 @@ var Helper = {
 
 	injectNotepad: function() {
 		var textAreaNode = System.findNode("//textarea[@name='notes']");
-		textAreaNode.cols = 115;
+		textAreaNode.cols = 90;
 		textAreaNode.rows = 30;
 	},
 
@@ -14178,11 +14210,17 @@ var Helper = {
 	injectHelperMenu: function() { //jquery ready
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		if (GM_getValue("hideHelperMenu")) return;
-		var node=$('img[src*="knight_corner.gif"]').parent();
-		if (node.length==0) return;
-		node.attr('background','http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif');
-		node.attr('align', 'center');
-		node.html("<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>");
+		if (isNewUI == 1) {
+			var node=$('#statbar-container');
+			if (node.length==0) return;
+			node.before("<div align='center' style='position:absolute; top:0; left:0; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</div>");
+		} else {
+			var node=$('img[src*="knight_corner.gif"]').parent();
+			if (node.length==0) return;
+			node.attr('background','http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif');
+			node.attr('align', 'center');
+			node.html("<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>");
+		}
 		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
 
 	},
