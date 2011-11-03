@@ -1155,13 +1155,13 @@ var Layout = {
 				changes[revNo] += "<li>" + chgTxt + "</li>";
 			}
 		}
-		var result='<ol>';
-		for (i=newVersion; i>=oldVersion; i--) {
+		var result='<ul>';
+		for (i=newVersion; i>oldVersion; i--) {
 			if (changes[i]) {
-				result += '<li value='+i+'><ul type=square>' + changes[i] + '</ul></li>';
+				result += '<li><ul type=square>Version '+ i + '. ' + changes[i] + '</ul></li>';
 			}
 		}
-		result += "</ol>";
+		result += "</ul>";
 		return result;
 	}
 
@@ -2138,9 +2138,11 @@ var Helper = {
 
 	injectFSBoxLog: function() {
 		if (GM_getValue("fsboxlog")) {
-			var node=$('a[href="javascript:reportFSBox();"]').parents('font:first');
+			if (isNewUI != 1) var node=$('a[href="javascript:reportFSBox();"]').parents('font:first');
+			else var node=$('div#minibox-fsbox');
 			if (node.length > 0) {
-				var fsbox=node.html().replace('<br><br>',' ').replace(/<div(.*)report(.*)div>/ig,'');
+				if (isNewUI != 1) var fsbox=node.html().replace('<br><br>',' ').replace(/<div(.*)report(.*)div>/ig,'');
+				else var fsbox=node.find('p.message').html().replace('<br><br>',' ');
 				var boxList=GM_getValue("fsboxcontent");
 				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
 				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
@@ -2148,10 +2150,10 @@ var Helper = {
 				var nodediv = node.find('div');
 				var playerName = node.find('a:first').text();
 				nodediv.html(nodediv.html() + "&nbsp;" +
-					"<a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
+					"<nobr><a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 					"' style='color:PaleVioletRed'>[ Ignore ]</a>" +
 					"<br>" +
-					"<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[ Log ]</a>");
+					"<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[ Log ]</a></nobr>");
 			}
 		}
 	},
@@ -5714,7 +5716,8 @@ var Helper = {
 			}
 
 			//insert another page change block at the top of the screen.
-			var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+			if (isNewUI == 1) var insertPageChangeBlockHere = auctionTable.rows[3].cells[0]; // crude fix for new UI
+			else var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
 			var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
 			var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
 			newPageChangeBlock += "</form>";
@@ -8498,7 +8501,8 @@ var Helper = {
 			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
 
-		allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
+		if (isNewUI != 1) allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
+		else allItems = System.findNodes("//tr[td/div/a[contains(@href,'index.php?cmd=guild&subcmd=groups&subcmd2=viewstats&group_id=')]]");
 		if (!allItems) return;
 		var memberList=System.getValueJSON("memberlist");
 		var onlineIMG = '<img src="' + System.imageServer + '/skin/online.gif" width=10 height="10" title="Online">';
@@ -8627,12 +8631,12 @@ var Helper = {
 		var joinButtons = System.findNodes("//img[contains(@src,'skin/icon_action_join.gif')]");
 		for (var i=0; i<joinButtons.length; i++) {
 			var joinButton = joinButtons[i];
-			 var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
-			 var memberListArrayWithMercs = memberList.innerHTML.split(",");
-			 var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
-			 if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin"))
-				{
-			var groupID = /javascript:confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
+			if (isNewUI != 1) var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
+			else var memberList = joinButton.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
+			var memberListArrayWithMercs = memberList.innerHTML.split(",");
+			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
+			if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin")){
+				var groupID = /javascript:confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
 				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
 				GM_xmlhttpRequest({
 					method: 'GET',
@@ -8700,7 +8704,8 @@ var Helper = {
 		extraText += "<td style='color:brown;'>HP</td><td align='right'>" + hpValue + "</td>";
 		extraText += "<td colspan='2'></td></tr>";
 		extraText += "</table>";
-		expiresLocation = linkElement.parentNode.previousSibling.previousSibling;
+		if (isNewUI != 1) expiresLocation = linkElement.parentNode.previousSibling.previousSibling;
+		else expiresLocation = linkElement.parentNode.parentNode.previousSibling.previousSibling;
 		expiresLocation.innerHTML += extraText;
 	},
 
@@ -12749,29 +12754,42 @@ var Helper = {
 	},
 
 	injectJoinAllLink: function() {
-		var attackGroupLink = System.findNode("//tr[td/a/img[@alt='A new guild attack group has been formed.']]");
-		if (attackGroupLink) {
+		if (isNewUI != 1) {
+			var attackGroupLink = System.findNode("//tr[td/a/img[@alt='A new guild attack group has been formed.']]");
+			if (attackGroupLink) {
+				var groupJoinHTML = '';
+				if (!GM_getValue("enableMaxGroupSizeToJoin")) {
+					groupJoinHTML = "<a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
+						"<span style='color:white; font-size:x-small;'>Join all attack groups.</span></a></nobr>";
+				} else {
+					var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
+					groupJoinHTML = " <a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize'>"+
+						"<span style='color:white; font-size:x-small;'>Join all attack groups less than size " + maxGroupSizeToJoin + ".</span></a></nobr>";
+				}
+				var LHSSidebarTable = attackGroupLink.parentNode.parentNode;
+				var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
+				var newCell=newRow.insertCell(0);
+				newCell.height = 10;
+				newCell.align = 'center';
+				newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
+					'<tr><td align="center">' + groupJoinHTML + '</td></tr>' +
+					'</tbody></table>';
+				var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
+				var newCell=newRow.insertCell(0);
+				newCell.height = 10;
+
+			}
+		} else {
 			var groupJoinHTML = '';
 			if (!GM_getValue("enableMaxGroupSizeToJoin")) {
-				groupJoinHTML = "<a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
-					"<span style='color:white; font-size:x-small;'>Join all attack groups.</span></a></nobr>";
+				groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall"><span class="notification-icon"></span>'+
+					'<p class="notification-content">Join all attack groups.</p></a>';
 			} else {
 				var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
-				groupJoinHTML = " <a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize'>"+
-					"<span style='color:white; font-size:x-small;'>Join all attack groups less than size " + maxGroupSizeToJoin + ".</span></a></nobr>";
+				groupJoinHTML = ' <a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize"><span class="notification-icon"></span>'+
+					'<p class="notification-content">Join all attack groups less than size ' + maxGroupSizeToJoin + '.</p></a>';
 			}
-			var LHSSidebarTable = attackGroupLink.parentNode.parentNode;
-			var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
-			var newCell=newRow.insertCell(0);
-			newCell.height = 10;
-			newCell.align = 'center';
-			newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
-				'<tr><td align="center">' + groupJoinHTML + '</td></tr>' +
-				'</tbody></table>';
-			var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
-			var newCell=newRow.insertCell(0);
-			newCell.height = 10;
-
+			$('li:contains("New attack group created.")').after('<li class="notification">' + groupJoinHTML + '</li>');
 		}
 	},
 
@@ -13644,19 +13662,27 @@ var Helper = {
 	},
 
 	displayDisconnectedFromGodsMessage: function() {
-		var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
-		if (!logoutRow) return;
-		var LHSSidebarTable = logoutRow.parentNode.parentNode;
-		var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
-		var newCell=newRow.insertCell(0);
-		newCell.height = 10;
-		newCell.align = 'center';
-		newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
-			'<tr><td align="center"><a href="index.php?cmd=temple"><font size="x-small" color="#ffffff">You feel disconnected from the gods.</font></a></td></tr>' +
-			'</tbody></table>';
-		var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
-		var newCell=newRow.insertCell(0);
-		newCell.height = 10;
+		if (isNewUI != 1) { // old UI
+			var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
+			if (!logoutRow) return;
+			var LHSSidebarTable = logoutRow.parentNode.parentNode;
+			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
+			var newCell=newRow.insertCell(0);
+			newCell.height = 10;
+			newCell.align = 'center';
+			newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
+				'<tr><td align="center"><a href="index.php?cmd=temple"><font size="x-small" color="#ffffff">You feel disconnected from the gods.</font></a></td></tr>' +
+				'</tbody></table>';
+			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
+			var newCell=newRow.insertCell(0);
+			newCell.height = 10;
+		} else {
+			var notificationUl = $('ul#notifications');
+			notificationUl.append('<li class="notification"><a href="index.php?cmd=temple">' +
+				'<span class="notification-icon"></span>' +
+				'<p class="notification-content">Bow down the gods.</p>' +
+				'</a></li>');
+		}
 	},
 
 	injectFindPlayer: function() {
