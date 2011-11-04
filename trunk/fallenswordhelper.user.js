@@ -1476,8 +1476,10 @@ var Helper = {
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		hcsData = $('html').data('hcs');
-		if (hcsData['beta']) isBeta = 1;
-		if (hcsData['new-ui']) isNewUI = 1;
+		if (hcsData) {
+			if (hcsData['beta']) isBeta = 1;
+			if (hcsData['new-ui']) isNewUI = 1;
+		}
 		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
 		if (System.imageServer != System.imageServerHTTP) {
 			var changeCount = 0;
@@ -13764,22 +13766,22 @@ var Helper = {
 		//title row
 		var newCell = creatureTable.rows[1].insertCell(1);
 		newCell.innerHTML = 'Class';
-		newCell.style.backgroundColor = '#ebd2ab';
+		newCell.setAttribute('class','tHeader');
 		var newCell = creatureTable.rows[1].insertCell(-1);
 		newCell.innerHTML = 'Attack';
-		newCell.style.backgroundColor = '#ebd2ab';
+		newCell.setAttribute('class','tHeader');
 		var newCell = creatureTable.rows[1].insertCell(-1);
 		newCell.innerHTML = 'Defense';
-		newCell.style.backgroundColor = '#ebd2ab';
+		newCell.setAttribute('class','tHeader');
 		var newCell = creatureTable.rows[1].insertCell(-1);
 		newCell.innerHTML = 'Armor';
-		newCell.style.backgroundColor = '#ebd2ab';
+		newCell.setAttribute('class','tHeader');
 		var newCell = creatureTable.rows[1].insertCell(-1);
 		newCell.innerHTML = 'Damage';
-		newCell.style.backgroundColor = '#ebd2ab';
+		newCell.setAttribute('class','tHeader');
 		var newCell = creatureTable.rows[1].insertCell(-1);
 		newCell.innerHTML = 'HP';
-		newCell.style.backgroundColor = '#ebd2ab';
+		newCell.setAttribute('class','tHeader');
 		for (var i=2; i<creatureTable.rows.length-1; i++) {
 			var aRow = creatureTable.rows[i];
 			if (aRow.cells[1]) {
