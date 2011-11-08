@@ -967,42 +967,85 @@ var Layout = {
 		if (GM_getValue("lastActiveQuestPage").length > 0) { //JQuery ready
 			$('a[href="index.php?cmd=questbook"]').attr('href', GM_getValue("lastActiveQuestPage"));
 		}
-		//"menuSource_0"
-		var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
-		if (!tableElement) return;
-		if (GM_getValue("keepBuffLog")) {
-			Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
+		if (isNewUI == 1) {
+			var pCL = $('div#pCL:first');
+			if (pCL.length == 0) return;
+			//character
+			$(pCL).find('a#nav-character-log').parent('li')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&subcmd=recipemanager">Recipe Manager</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&subcmd=invmanager">Inventory Manager</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>')
+			if (GM_getValue("keepBuffLog")) {
+				$(pCL).find('a#nav-character-log').parent('li')
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&subcmd=bufflogcontent">Buff Log</a></li>')
+			}
+			if (GM_getValue("keepLogs")) {
+				$(pCL).find('a#nav-character-notepad').parent('li')
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&subcmd=showlogs">Combat Logs</a></li>')
+			}
+			if (GM_getValue("showMonsterLog")) {
+				$(pCL).find('a#nav-character-notepad').parent('li')
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&subcmd=monsterlog">Creature Logs</a></li>')
+			}
+			$(pCL).find('a#nav-character-notepad').parent('li')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&subcmd=quicklinkmanager">Quick Links</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&subcmd=createmap">Create Maps</a></li>')
+			//guild
+			$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&subcmd=guildinvmanager">Guild Inventory</a></li>')
+			if (!GM_getValue("useNewGuildLog")) {
+				//if not using the new guild log, show it as a separate menu entry
+				$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
+					.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&subcmd=newguildlog">New Guild Log</a></li>')
+			}
+			//top rated
+			$(pCL).find('a#nav-toprated-players-level').parent('li')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>')
+			//actions
+			$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a></li>')
+			$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&subcmd=onlineplayers">Online Players</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&subcmd=findother">Find Other</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&subcmd=findbuffs">Find Buffs</a></li>')
+		} else {
+			//"menuSource_0"
+			var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
+			if (!tableElement) return;
+			if (GM_getValue("keepBuffLog")) {
+				Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
+			}
+			Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
+			Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13);
+			Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 15);
+			if (GM_getValue("keepLogs")) {
+				Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17);
+			}
+			if (GM_getValue("showMonsterLog")) {
+				Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19);
+			}
+			Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
+			Layout.injectItemIntoMenuTable(tableElement, "Create Maps", "index.php?cmd=notepad&subcmd=createmap", 23);
+			//"menuSource_5"
+			tableElement = $('div[id="menuSource_5"]').find('tbody:first');
+			if (!tableElement) return;
+			Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
+			if (!GM_getValue("useNewGuildLog")) {
+				//if not using the new guild log, show it as a separate menu entry
+				Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
+			}
+			//"menuSource_3"
+			tableElement = $('div[id="menuSource_3"]').find('tbody:first');
+			if (!tableElement) return;
+			Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
+			//"menuSource_2"
+			tableElement = $('div[id="menuSource_2"]').find('tbody:first');
+			if (!tableElement) return;
+			Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 37);
+			Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 8);
+			Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 10);
+			Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 12);
 		}
-		Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
-		Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13);
-		Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 15);
-		if (GM_getValue("keepLogs")) {
-			Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17);
-		}
-		if (GM_getValue("showMonsterLog")) {
-			Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19);
-		}
-		Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
-		Layout.injectItemIntoMenuTable(tableElement, "Create Maps", "index.php?cmd=notepad&subcmd=createmap", 23);
-		//"menuSource_5"
-		tableElement = $('div[id="menuSource_5"]').find('tbody:first');
-		if (!tableElement) return;
-		Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
-		if (!GM_getValue("useNewGuildLog")) {
-			//if not using the new guild log, show it as a separate menu entry
-			Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
-		}
-		//"menuSource_3"
-		tableElement = $('div[id="menuSource_3"]').find('tbody:first');
-		if (!tableElement) return;
-		Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
-		//"menuSource_2"
-		tableElement = $('div[id="menuSource_2"]').find('tbody:first');
-		if (!tableElement) return;
-		Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 37);
-		Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 8);
-		Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 10);
-		Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 12);
 	},
 
 	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
@@ -1016,7 +1059,8 @@ var Layout = {
 		if (!quickLinks) quickLinks=[];
 		if (quickLinks.length<=0) return;
 		//var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg') or contains(@src,'realm_top_a.jpg')]");
-		var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
+		if (isNewUI == 1) var insertBeforeHere = $('div#pCC').children(':first');
+		else var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
 		if (!insertBeforeHere) return;
 		result="&nbsp;&nbsp;";
 		for (var i=0; i<quickLinks.length; i++) {
@@ -1374,24 +1418,37 @@ var Helper = {
 	},
 
 	readInfo: function() {
-		var charInfo = $('img[src*="skin/icon_player.gif"]').closest('td.help');
-		if (charInfo.length == 0) { return; }
-		$(charInfo).each(function() {
-			var charInfoText = $(this).data('tipped');
-			/**
-			<div><center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>teekill</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%' class='level'>959</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>271st</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_down.gif'> -1</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>7749</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>10515</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>901</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>41</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>2422</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.</div>
-			*/
-			Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
-			Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\' class='level'>(\d+)/i);
-			Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
-			Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
-			Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
-			Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
-			Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
+		if (isNewUI == 1) {
+			Helper.characterName = $('dt.stat-name:first').next().text().replace(/,/g,'');
+			Helper.characterLevel = $('dt.stat-level:first').next().text().replace(/,/g,'')*1;
+			Helper.characterAttack = $('dt.stat-attack:first').next().text().replace(/,/g,'')*1;
+			Helper.characterDefense = $('dt.stat-defense:first').next().text().replace(/,/g,'')*1;
+			Helper.characterHP = $('dt.stat-hp:first').next().text().replace(/,/g,'')*1;
+			Helper.characterArmor = $('dt.stat-armor:first').next().text().replace(/,/g,'')*1;
+			Helper.characterDamage = $('dt.stat-damage:first').next().text().replace(/,/g,'')*1;
 			GM_setValue("CharacterName", Helper.characterName);
 
 			Helper.savedItemData = [];
-		});
+		} else {
+			var charInfo = $('img[src*="skin/icon_player.gif"]').closest('td.help');
+			if (charInfo.length == 0) { return; }
+			$(charInfo).each(function() {
+				var charInfoText = $(this).data('tipped');
+				/**
+				<div><center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>teekill</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%' class='level'>959</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>271st</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_down.gif'> -1</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>7749</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>10515</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>901</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>41</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>2422</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.</div>
+				*/
+				Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
+				Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\' class='level'>(\d+)/i);
+				Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
+				Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
+				Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
+				Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
+				Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
+				GM_setValue("CharacterName", Helper.characterName);
+
+				Helper.savedItemData = [];
+			});
+		}
 	},
 
 	// Autoupdate
@@ -2153,8 +2210,7 @@ var Helper = {
 				var playerName = node.find('a:first').text();
 				nodediv.html(nodediv.html() + "&nbsp;" +
 					"<nobr><a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
-					"' style='color:PaleVioletRed'>[ Ignore ]</a>" +
-					"<br>" +
+					"' style='color:PaleVioletRed'>[ Ignore ]</a>&nbsp;" +
 					"<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[ Log ]</a></nobr>");
 			}
 		}
@@ -2338,25 +2394,88 @@ var Helper = {
 	},
 
 	injectStaminaCalculator: function() {
-		//Check for beta as beta is different
+		if (isNewUI == 1) {
+			var staminaMouseover = $('dl#statbar-stamina-tooltip-stamina:first');
+			
+			var stamina = $(staminaMouseover).find('dt.stat-name:first').next().text().replace(/,/g,'');
+			var staminaRE = /([,0-9]+)\s\/\s([,0-9]+)/;
+			var curStamina = System.intValue(staminaRE.exec(stamina)[1]);
+			var maxStamina = System.intValue(staminaRE.exec(stamina)[2]);
+			
+			var gainPerHour = $(staminaMouseover).find('dt.stat-stamina-gainPerHour:first').next().text().replace(/,/g,'');
+			var gainPerHourRE = /\+([,0-9]+)/;
+			var gainPerHour = System.intValue(gainPerHourRE.exec(gainPerHour)[1]);
+				
+			
+			var nextGain = $(staminaMouseover).find('dt.stat-stamina-nextGain:first').next().text().replace(/,/g,'');
+			var nextGainRE = /([,0-9]+)m ([,0-9]+)s/;
+			var nextGainMinutes = System.intValue(nextGainRE.exec(nextGain)[1]);
+			var nextGainSeconds = System.intValue(nextGainRE.exec(nextGain)[2]);
+			nextGainHours = nextGainMinutes/60;
 
-		if(isBeta){  //New Map Style
-			var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-			if (!staminaImageElement) {return;}
+			//get the max hours to still be inside stamina maximum
+			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+			var now = (new Date()).getTime();
+			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+
+			var d = new Date(nextHuntMilliseconds);
+			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+			$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
+			
+			return;								
+		} else {
+			//Check for beta as beta is different
+
+			if(isBeta){  //New Map Style
+				var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
+				if (!staminaImageElement) {return;}
+
+				var mouseoverText = $(staminaImageElement).data('tipped');
+
+				var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
+				var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
+				var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
+
+				var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
+				var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
+				var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
+				var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
+				var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
+				nextGainHours = nextGainMinutes/60;
+
+				//get the max hours to still be inside stamina maximum
+				var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+				var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+				var now = (new Date()).getTime();
+				var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+
+				var d = new Date(nextHuntMilliseconds);
+				var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+				var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
+					nextHuntTimeText + "</nobr></font></td></tr><tr>";
+				var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
+				//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
+				staminaImageElement.setAttribute("data-tipped", newMouseoverText);
+				return;
+			}
+
+			//Old Map Style
+			//var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
+			var staminaImageElement = $('td[id="topBar-Stamina"]');
+			if (staminaImageElement.length < 1) {return;}
 
 			var mouseoverText = $(staminaImageElement).data('tipped');
-
 			var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-			var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
-			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
-
 			var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
 			var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
+			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
 			var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
+
+			var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
 			var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
 			var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
 			nextGainHours = nextGainMinutes/60;
-
 			//get the max hours to still be inside stamina maximum
 			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
 			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
@@ -2369,39 +2488,8 @@ var Helper = {
 				nextHuntTimeText + "</nobr></font></td></tr><tr>";
 			var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
 			//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-			staminaImageElement.setAttribute("data-tipped", newMouseoverText);
-			return;
+			$(staminaImageElement).attr("data-tipped", newMouseoverText);
 		}
-
-		//Old Map Style
-		//var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-		var staminaImageElement = $('td[id="topBar-Stamina"]');
-		if (staminaImageElement.length < 1) {return;}
-
-		var mouseoverText = $(staminaImageElement).data('tipped');
-		var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-		var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-		var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-		var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
-		var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-
-		var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
-		var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
-		var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
-		nextGainHours = nextGainMinutes/60;
-		//get the max hours to still be inside stamina maximum
-		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-		var now = (new Date()).getTime();
-		var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-
-		var d = new Date(nextHuntMilliseconds);
-		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-		var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
-			nextHuntTimeText + "</nobr></font></td></tr><tr>";
-		var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
-		//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-		$(staminaImageElement).attr("data-tipped", newMouseoverText);
 	},
 
 	injectLevelupCalculator: function() {
@@ -12805,7 +12893,7 @@ var Helper = {
 			}
 			//hide the lhs box
 			if (location.search == "?cmd=notepad&subcmd=newguildlog") {
-				if(guildLogNode.firstChild.getAttribute("alt") == "You have unread guild log messages.") { //old UI
+				if(guildLogNode.firstChild.nodeName == 'IMG' && guildLogNode.firstChild.getAttribute("alt") == "You have unread guild log messages.") { //old UI
 					messageBox = guildLogNode.parentNode.parentNode;
 					if (messageBox) {
 						messageBox.style.display = "none";
@@ -14254,7 +14342,7 @@ var Helper = {
 
 		var actionMenu = {
 			"Character" : [
-				["BL", "Buff Log", "injectBuffLog"], ["CL", "Combat Log", "injectNotepadShowLogs"],
+				["BL", "Buff Log", "injectBuffLog"], ["COL", "Combat Log", "injectNotepadShowLogs"],
 				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
 				["QLM", "Quick Links", "injectQuickLinkManager"], ["CRM", "Create Maps", "injectCreateMap"],
 			],
@@ -14268,19 +14356,23 @@ var Helper = {
 			"Extra" : [
 				["BD", "Best Damage Items", "injectCheckWearingItem"], ["QE", "Quick Extract", "insertQuickExtract"],
 				["QW", "Quick Wear", "insertQuickWear"], ["BoxL", "FS Box Log", "injectFsBoxContent"],
+				["CRL", "Creature Log", "injectMonsterLog"], //still needs work
 			],
 			};
-		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; width:740px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
-		for (var key in actionMenu) {
-			html += "<div class=column><h3>"+key+"</h3><ul>";
-			for (var i=0; i< actionMenu[key].length; i++) {
-				html += "<li><span style='cursor:pointer; text-decoration:underline;' id=hm"+actionMenu[key][i][0]+" fn="+actionMenu[key][i][2]+">"+actionMenu[key][i][1]+"</span></li>";
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		html += "<div class=column>";
+			for (var key in actionMenu) {
+				html += "<h3>"+key+"</h3><ul>";
+				for (var i=0; i< actionMenu[key].length; i++) {
+					html += "<li><span style='cursor:pointer; text-decoration:underline;' id=hm"+actionMenu[key][i][0]+" fn="+actionMenu[key][i][2]+">"+actionMenu[key][i][1]+"</span></li>";
+				}
+				html += "</ul>";
 			}
-			html += "</ul></div>";
-		}
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a>";
-		html += " - <span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a>";
-		html += " - <span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a>";
+		html += "<h3>FSH developer quick links</h3>";
+		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a></br>";
+		html += "<span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a></br>";
+		html += "<span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a></br>";
+		html += "</div>";
 		html += "</div>";
 		$("#helperMenu").append(html);
 		$("#helperMenu").click(function() {$("#helperMenuDiv").toggle("fast");});
