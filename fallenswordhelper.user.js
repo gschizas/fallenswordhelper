@@ -4013,17 +4013,17 @@ var Helper = {
 		Helper.prepareCombatLog();
 		if (isNewUI == 1) {
 			var mapName = System.findNode('//h3[@id="world-realm-name"]');
+			if ($('h3#world-realm-name').data('realm')) {
+				var realmId = $('h3#world-realm-name').data('realm').id.trim();
+				var mapNameText = $('h3#world-realm-name').data('realm').name.trim();
+			}
 		} else {
 			var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
 		}
 		//Checking if there are quests on current map
 		if (GM_getValue("checkForQuestsInWorld") === true) {
-			if (mapName.textContent !== null) {
-				if (isNewUI == 1) {
-					var mapNameText = mapName.textContent.substr(0,mapName.textContent.lastIndexOf("(")).trim();
-				} else {
-					var mapNameText = mapName.textContent.trim();
-				}
+			if (mapName && mapName.textContent !== null) {
+				if (!mapNameText) mapNameText = mapName.textContent.trim();
 				if (GM_getValue("lastWorld") != mapNameText ||
 					GM_getValue("questsNotStarted") === true ||
 					GM_getValue("questsNotComplete") === true) {
@@ -4067,7 +4067,6 @@ var Helper = {
 		}
 
 		if (mapName && mapNameText) {
-			var realmId = $('td[data-realm]').attr('data-realm');
 			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
 				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
@@ -4229,6 +4228,7 @@ var Helper = {
 					buffSelectedTable.style.display = 'none';
 				}
 			}
+			// old UI
 			var chatText = System.findNode("//b[contains(.,'Last 5')]");
 			if (chatText) chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
 		}
