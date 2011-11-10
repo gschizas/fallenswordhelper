@@ -2025,7 +2025,10 @@ var Helper = {
 		}
 		if (GM_getValue("playNewMessageSound")) {
 			var soundLocation = GM_getValue("defaultMessageSound");
+			 //old UI
 			 $('img[alt="You have unread log messages."]:first').each(function(){$(this).after("<audio src='" + soundLocation + "' autoplay=true />");});
+			 //new UI
+			 $('a:contains("New log messages"):first').each(function(){$(this).after("<audio src='" + soundLocation + "' autoplay=true />");});
 		}
 
 		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
@@ -4149,88 +4152,120 @@ var Helper = {
 
 	addGuildInfoWidgets: function() {
 		if (!GM_getValue("enableGuildInfoWidgets")) {return;}
-		var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/i/b[.='Online Members']]//table");
+		var hideGuildInfoTrade = GM_getValue("hideGuildInfoTrade");
+		var hideGuildInfoSecureTrade = GM_getValue("hideGuildInfoSecureTrade")
+		var hideGuildInfoBuff = GM_getValue("hideGuildInfoBuff")
+		var hideGuildInfoMessage = GM_getValue("hideGuildInfoMessage")
 		var hideBuffSelected = GM_getValue("hideBuffSelected");
-		if (onlineMembersTable) {
-			for (var i=0; i<onlineMembersTable.rows.length; i++){
-				var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
-				var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
-				if (onlineMemberSecondCell) {
-					var playerTable = onlineMemberFirstCell.getElementsByTagName('TABLE')[0];
-					var checkboxColumn = playerTable.rows[0].cells[0];
-					if (hideBuffSelected) checkboxColumn.innerHTML = '';
-					var playernameColumn = playerTable.rows[0].cells[1];
-					var playerNameLinkElement = playernameColumn.firstChild;
-					//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
-					var onMouseOver = $(playerNameLinkElement).data('tipped');
+		if (isNewUI == 1) {
+			var guildMemberList = $('ul#minibox-guild-members-list');
+			if (guildMemberList.length > 0) { // list exists
+				//hide guild info links
+				if (hideGuildInfoTrade) $('a#guild-minibox-action-trade').hide();
+				if (hideGuildInfoSecureTrade) $('a#guild-minibox-action-secure-trade').hide();
+				if (hideGuildInfoBuff) $('a#guild-minibox-action-quickbuff').hide();
+				if (hideGuildInfoMessage) $('a#guild-minibox-action-send-message').hide();
+				//add coloring for offline time
+				$(guildMemberList).find('li.player').each(function() {
+					var playerA = $(this).find('div.player-row a');
+					var playerName = playerA.text();
+					var onMouseOver = playerA.data('tipped');
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-			//Hide the Guild info Links
-					if (GM_getValue("hideGuildInfoTrade")) {
-						var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						var buffLink = messageLink.nextSibling.nextSibling;
-						var secureTradeLink = buffLink.nextSibling.nextSibling;
-						var tradeLink = secureTradeLink.nextSibling.nextSibling;
-						tradeLink.style.display = 'none';
-						tradeLink.style.visibility = 'hidden';
-					}
-					if (GM_getValue("hideGuildInfoSecureTrade")) {
-						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						buffLink = messageLink.nextSibling.nextSibling;
-						secureTradeLink = buffLink.nextSibling.nextSibling;
-						secureTradeLink.style.display = 'none';
-						secureTradeLink.style.visibility = 'hidden';
-					}
-					if (GM_getValue("hideGuildInfoBuff")) {
-						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						buffLink = messageLink.nextSibling.nextSibling;
-						buffLink.style.display = 'none';
-						buffLink.style.visibility = 'hidden';
-					}
-
-					if (GM_getValue("hideGuildInfoMessage")) {
-						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						if (messageLink.style) {
-							messageLink.style.display = 'none';
-							messageLink.style.visibility = 'hidden';
+						if (lastActivityMinutes < 2) playerA.css('color','green');
+						else if (lastActivityMinutes < 5) playerA.css('color','white');
+						else playerA.css('color','gray');
+						//only need buff link for the current player
+						if (playerName.trim() == Helper.characterName.trim()) {
+							$(this).find('div.guild-minibox-actions a#guild-minibox-action-trade').hide();
+							$(this).find('div.guild-minibox-actions a#guild-minibox-action-secure-trade').hide();
+							$(this).find('div.guild-minibox-actions a#guild-minibox-action-send-message').hide();
 						}
-					}
+				});
+				var chatH4 = $('h4:contains("Chat")');
+				chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatH4.html() + '</span></a>');
+			}
+		} else {
+			var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/i/b[.='Online Members']]//table");
+			if (onlineMembersTable) {
+				for (var i=0; i<onlineMembersTable.rows.length; i++){
+					var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
+					var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
+					if (onlineMemberSecondCell) {
+						var playerTable = onlineMemberFirstCell.getElementsByTagName('TABLE')[0];
+						var checkboxColumn = playerTable.rows[0].cells[0];
+						if (hideBuffSelected) checkboxColumn.innerHTML = '';
+						var playernameColumn = playerTable.rows[0].cells[1];
+						var playerNameLinkElement = playernameColumn.firstChild;
+						//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+						var onMouseOver = $(playerNameLinkElement).data('tipped');
+						var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+						//Hide the Guild info Links
+						if (hideGuildInfoTrade) {
+							var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+							var buffLink = messageLink.nextSibling.nextSibling;
+							var secureTradeLink = buffLink.nextSibling.nextSibling;
+							var tradeLink = secureTradeLink.nextSibling.nextSibling;
+							tradeLink.style.display = 'none';
+							tradeLink.style.visibility = 'hidden';
+						}
+						if (hideGuildInfoSecureTrade) {
+							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+							buffLink = messageLink.nextSibling.nextSibling;
+							secureTradeLink = buffLink.nextSibling.nextSibling;
+							secureTradeLink.style.display = 'none';
+							secureTradeLink.style.visibility = 'hidden';
+						}
+						if (hideGuildInfoBuff) {
+							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+							buffLink = messageLink.nextSibling.nextSibling;
+							buffLink.style.display = 'none';
+							buffLink.style.visibility = 'hidden';
+						}
+						if (hideGuildInfoMessage) {
+							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+							if (messageLink.style) {
+								messageLink.style.display = 'none';
+								messageLink.style.visibility = 'hidden';
+							}
+						}
 
-				// Set Color for Activity
-					if (lastActivityMinutes < 2) {
-						playerNameLinkElement.style.color = 'green';
-						playerNameLinkElement.firstChild.style.color = 'green';
-					} else if (lastActivityMinutes < 5) {
-						playerNameLinkElement.style.color = 'white';
-						playerNameLinkElement.firstChild.style.color = 'white';
-					} else {
-						playerNameLinkElement.style.color = 'gray';
-						playerNameLinkElement.firstChild.style.color = 'gray';
+						// Set Color for Activity
+						if (lastActivityMinutes < 2) {
+							playerNameLinkElement.style.color = 'green';
+							playerNameLinkElement.firstChild.style.color = 'green';
+						} else if (lastActivityMinutes < 5) {
+							playerNameLinkElement.style.color = 'white';
+							playerNameLinkElement.firstChild.style.color = 'white';
+						} else {
+							playerNameLinkElement.style.color = 'gray';
+							playerNameLinkElement.firstChild.style.color = 'gray';
+						}
+						if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
+							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
+							if (messageLink.style) messageLink.style.visibility = 'hidden';
+							buffLink = messageLink.nextSibling.nextSibling;
+							secureTradeLink = buffLink.nextSibling.nextSibling;
+							secureTradeLink.style.visibility = 'hidden';
+							tradeLink = secureTradeLink.nextSibling.nextSibling;
+							tradeLink.style.visibility = 'hidden';
+						}
+						onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
 					}
-					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
-						messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-						if (messageLink.style) messageLink.style.visibility = 'hidden';
-						buffLink = messageLink.nextSibling.nextSibling;
-						secureTradeLink = buffLink.nextSibling.nextSibling;
-						secureTradeLink.style.visibility = 'hidden';
-						tradeLink = secureTradeLink.nextSibling.nextSibling;
-						tradeLink.style.visibility = 'hidden';
+				}
+				if (hideBuffSelected) {
+					var lineBreak = onlineMembersTable.nextSibling.nextSibling;
+					if (lineBreak) {
+						lineBreak.style.display = 'none';
+						var actionsFontItalic = lineBreak.nextSibling.nextSibling.firstChild;
+						actionsFontItalic.style.display = 'none';
+						var buffSelectedTable = actionsFontItalic.nextSibling.nextSibling;
+						buffSelectedTable.style.display = 'none';
 					}
-					onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
 				}
+				// old UI
+				var chatText = System.findNode("//b[contains(.,'Last 5')]");
+				if (chatText) chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
 			}
-			if (hideBuffSelected) {
-				var lineBreak = onlineMembersTable.nextSibling.nextSibling;
-				if (lineBreak) {
-					lineBreak.style.display = 'none';
-					var actionsFontItalic = lineBreak.nextSibling.nextSibling.firstChild;
-					actionsFontItalic.style.display = 'none';
-					var buffSelectedTable = actionsFontItalic.nextSibling.nextSibling;
-					buffSelectedTable.style.display = 'none';
-				}
-			}
-			// old UI
-			var chatText = System.findNode("//b[contains(.,'Last 5')]");
-			if (chatText) chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
 		}
 	},
 
