@@ -3948,11 +3948,14 @@ var Helper = {
 	},
 
 	injectWorld: function() {
-			if (isBeta)
-			{
-			// put all new functions in here. this way we can remove all old once it goes final.
-				// alert("BETA");
-			}
+		if (isBeta)
+		{
+		// put all new functions in here. this way we can remove all old once it goes final.
+		// JT also said that $('#worldPage') will work to detect new map until something better
+		//   is available
+			// alert("BETA");
+			
+		}
 
 		try {
 			var curTile = System.findNode("//img[contains(@title, 'You are here')]/ancestor::td[@width='40' and @height='40']").getAttribute("background");
@@ -3962,21 +3965,16 @@ var Helper = {
 		} catch (err) {
 			//just eat it and move on
 		}
-		var currentLocation = System.findNode("//td[contains(@background,'/realm_top_b4.jpg')]");
-		if (currentLocation) {
-			var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.textContent)
+		if (isNewUI == 1) var currentLocation = $('h3#world-realm-name');
+		else var currentLocation = $('td[background*="/realm_top_b4.jpg"]');
+		if (currentLocation.length > 0) {
+			var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text())
 			Helper.xLocation = parseInt(locationRE[1],10);
 			Helper.yLocation = parseInt(locationRE[2],10);
 		}
 
 		Helper.mapThis();
 		Helper.showMap(false);
-
-		/*var injectHere = System.findNode("//tr[contains(td/img/@src, 'realm_right_bottom.jpg')]/../..");
-		if (!injectHere) {return;}
-		var newRow=injectHere.insertRow(1);
-		var newCell=newRow.insertCell(0);
-		newCell.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");*/
 
 		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
@@ -5005,32 +5003,32 @@ var Helper = {
 		var monster = callback.node;
 		var showCombatLog = false;
 		if (monster) {
-			var result=document.createElement("div");
-			var resultHtml = "<small><small>"+callback.index+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small></small>";
+			var result=document.createElement("DIV");
+			var resultHtml = "<small style='color:green;'>"+callback.index+". XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")</small>";
 			var resultText = "XP:" + xpGain + " Gold:" + goldGain + " (" + guildTaxGain + ")\n";
 			if (info!=="") {
-				resultHtml += "<br/><div style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</div>";
+				resultHtml += "<br/><span style='font-size:x-small;width:120px;overflow:hidden;' title='" + info + "'>" + info + "</span>";
 				resultText += info + "\n";
 			}
 			if (lootedItem!=="") {
 				Helper.backpackUpdater(1);
 				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-				resultHtml += "<br/><small>Looted item:<span class=\"tipped\" data-tipped-options=\"skin: 'fsItem', ajax: true\" data-tipped=\""+lootedItemURL+"\">" +
+				resultHtml += "<br/><small style='color:green;'>Looted item:<span class=\"tipped\" data-tipped-options=\"skin: 'fsItem', ajax: true\" data-tipped=\""+lootedItemURL+"\">" +
 					lootedItem + "</span></small>";
 				resultText += "Looted item:" + lootedItem + "\n";
 			}
 			if (shieldImpDeath) {
-				resultHtml += "<br/><small><small><span style='color:red;'>Shield Imp Death</span></small></small>";
+				resultHtml += "<br/><small><span style='color:red;'>Shield Imp Death</span></small>";
 				resultText += "Shield Imp Death\n";
 				showCombatLog = true;
 			}
 			if (levelUp=="1") {
-				resultHtml += '<br/><br/><div style="color:#999900;font-weight:bold;>Your level has increased!</div>';
+				resultHtml += '<br/><br/><span style="color:#999900;font-weight:bold;>Your level has increased!</span>';
 				resultText += "Your level has increased!\n";
 				showCombatLog = true;
 			}
 			if (levelUp=="-1") {
-				resultHtml += '<br/><br/><div style="color:#991100;font-weight:bold;">Your level has decreased!</div>';
+				resultHtml += '<br/><br/><span style="color:#991100;font-weight:bold;">Your level has decreased!</span>';
 				resultText += "Your level has decreased!\n";
 				showCombatLog = true;
 			}
@@ -5043,12 +5041,12 @@ var Helper = {
 				var reportHtml="";
 				var reportText="";
 				if (specials) {
-					reportHtml += "<div style='color:red'>";
+					reportHtml += "<span style='color:red'>";
 					for (var i=0; i<specials.length; i++) {
 						reportHtml += specials[i].textContent + "<br/>";
 						reportText += specials[i].textContent + "\n";
 					}
-					reportHtml += "</div>";
+					reportHtml += "</span>";
 				}
 				for (i=0; i<reportLines.length; i++) {
 					var reportMatch = reportLines[i].match(/\"(.*)\"/);
@@ -5057,7 +5055,7 @@ var Helper = {
 						reportText += reportMatch[1].replace(/<br>/g, "\n") + "\n";
 					}
 				}
-				mouseOverText = "<div><div style='color:#FFF380;text-align:center;'>Combat Results</div>" + reportHtml + "</div>";
+				mouseOverText = "<span><span style='color:#FFF380;text-align:center;'>Combat Results</span>" + reportHtml + "</span>";
 				Helper.appendCombatLog(reportHtml, showCombatLog);
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
@@ -5065,8 +5063,15 @@ var Helper = {
 					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%M:%S") + "\n" + resultText + "\n" + reportText);
 				}
 			}
+
 			monsterParent.innerHTML = "";
-			monsterParent.insertBefore(result, monsterParent.nextSibling);
+			if (isNewUI == 1) {
+				monsterParent.parentNode.appendChild(result);
+				result.setAttribute("style", "float:right; text-align:right;");
+				monsterParent.parentNode.setAttribute("style", ""); // removes the line height on the td
+			} else { //old UI
+				monsterParent.insertBefore(result, monsterParent.nextSibling);
+			}
 			if (report) {
 				document.getElementById("result" + callback.index).addEventListener("mouseover", Helper.clientTip, true);
 			}
@@ -5210,6 +5215,12 @@ var Helper = {
 
 	replaceKeyHandler: function() {
 		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
+			if (isNewUI == 1 && $('#worldPage').length == 0) { //new UI and not new map
+				//clear out the HCS keybinds so only helper ones fire
+				$.each($(document).controls('option').keys, function(index, value) { 
+					$(document).controls('option').keys[index] = [];
+				});
+			}
 			window.document.wrappedJSObject.onkeypress = null;
 			window.document.wrappedJSObject.combatKeyHandler = null;
 			window.document.wrappedJSObject.realmKeyHandler = null;
@@ -13849,7 +13860,7 @@ var Helper = {
 			var notificationUl = $('ul#notifications');
 			notificationUl.append('<li class="notification"><a href="index.php?cmd=temple">' +
 				'<span class="notification-icon"></span>' +
-				'<p class="notification-content">Bow down the gods.</p>' +
+				'<p class="notification-content">Bow down to the gods.</p>' +
 				'</a></li>');
 		}
 	},
