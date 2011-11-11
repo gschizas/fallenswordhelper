@@ -1559,7 +1559,8 @@ var Helper = {
 			}*/
 		}
 		if (GM_getValue("gameHelpLink")) {
-			var gameHelpNode = $('b:contains("Game Help")');
+			if (isNewUI == 1) var gameHelpNode = $('div.minibox h3:contains("Game Help")');
+			else var gameHelpNode = $('td font b:contains("Game Help")');
 			$(gameHelpNode).each(function() {
 				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
 			});
@@ -1589,7 +1590,7 @@ var Helper = {
 			Helper.addOnlineAlliesWidgets();
 			Helper.injectJoinAllLink();
 			Helper.changeGuildLogHREF();
-			Helper.injectTHsearch();
+			Helper.injectAHsearch();
 			Helper.updateTitanLogs();
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
@@ -3348,12 +3349,12 @@ var Helper = {
 		}
 	},
 
-	injectTHsearch: function() {
+	injectAHsearch: function() {
 		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]");
 		if (items)
 			for (var i=0; i<items.length; i++) {
 				if (items[i].parentNode.tagName!='A') {
-					items[i].addEventListener('click', Helper.searchTHforItem, true);
+					items[i].addEventListener('click', Helper.searchAHforItem, true);
 					items[i].style.cursor='pointer';
 					items[i].setAttribute("data-tipped-options",
 						items[i].getAttribute("data-tipped-options")+
@@ -3362,12 +3363,15 @@ var Helper = {
 			}
 	},
 
-	searchTHforItem: function(evt) {
+	searchAHforItem: function(evt) {
 		var responseText = evt.target.getAttribute('data-tipped-html');
 		var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-		if (responseText.indexOf('Bound (Non-Tradable)') > 0)
-			if (!confirm(name + " is Bound (Non-Tradable), cannot be found in TH!\n"+
-				"Do you still want to try?")) return;
+		//if (responseText.indexOf('Bound (Non-Tradable)') > 0)
+			//if (!confirm(name + " is Bound (Non-Tradable), cannot be found in AH!\n"+
+				//"Do you still want to try?")) return;
+		if (responseText.indexOf('Container') > 0)
+			if (!confirm(name + " is type Container.\n"+
+				"Do you still want to search AH for this item (OK) or not (Cancel)?")) return;
 		window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
 	},
 
@@ -8972,6 +8976,8 @@ var Helper = {
 				Helper.useBuffPack(buffPacksToUse[i]);
 			}
 		}
+		//code to pre-size cell for data later. crude but it works.
+		$('input[value="activate"]').next().find('tr:last td').html('&nbsp;</br>&nbsp;</br>&nbsp;');
 	},
 
 	toggleBuffStatus: function(evt) {
@@ -9351,11 +9357,11 @@ var Helper = {
 		//extend
 		var sustainColor = "lime";
 		if (sustainLevel < 100) sustainColor = "red";
-		var activateInput = System.findNode("//input[@value='activate' or @value='Activate Selected Skills']");
+		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
 		var injectHere = inputTable.rows[inputTable.rows.length-1].cells[0];
 		injectHere.align = "center";
-		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
+		injectHere.innerHTML = "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
 		var furyCasterTipped = $(doc).find('td:contains("Fury Caster"):last').next().find('table.tipped');
 		if (furyCasterTipped.length == 0) {return;}
 		var furyCasterMouseover = furyCasterTipped.attr("data-tipped");
@@ -9391,6 +9397,7 @@ var Helper = {
 		else {
 			injectHere.innerHTML += " <span style='color:orange;'>Reinforce:</span> <span style='color:red;'>Off</span>";
 		}
+		injectHere.innerHTML += "</br>&nbsp;";
 		var canCastCounterAttack = System.findNode("//td/font[contains(.,'Counter Attack')]");
 		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
 	},
@@ -9409,7 +9416,6 @@ var Helper = {
 		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
 		var injectHere = inputTable.rows[inputTable.rows.length-1].cells[0];
-		injectHere.innerHTML += "</br>";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default CA level:</span> <span style='color:white;'>" + counterAttackValue + "</span>";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default SC level:</span> <span style='color:white;'>" + severeConditionValue + "</span>";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default NMV level:</span> <span style='color:white;'>" + nightmareVisageValue + "</span>";
