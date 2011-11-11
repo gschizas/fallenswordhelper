@@ -1167,7 +1167,7 @@ var Layout = {
 
 	quickBuffHref: function(playerId, buffList) {
 		if (buffList) {
-		return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
+			return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
 				"&blist=" + buffList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
 		} else {
 			return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
@@ -4138,16 +4138,22 @@ var Helper = {
 	},
 
 	fixOnlineGuildBuffLinks: function() {
-		var guildInfoOnlineMembersTable = System.findNodes("//tr[td/a[contains(@href,'index.php?cmd=quickbuff&t=')]/font[.='B']]");
-		if (guildInfoOnlineMembersTable) {
-			for (var i=0; i<guildInfoOnlineMembersTable.length; i++){
-				var guildInfoOnlineMember = guildInfoOnlineMembersTable[i];
-				var playerLink = System.findNode("./td/table/tbody/tr/td/a[contains(@href,'index.php?cmd=profile&player_id=')]", guildInfoOnlineMember);
-				var playerID = /player_id=(\d+)/.exec(playerLink)[1];
-				var buffLink = System.findNode("./td/a[contains(@href,'index.php?cmd=quickbuff&t=')]", guildInfoOnlineMember);
-				var oldHref = buffLink.getAttribute('href');
-				var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
-				buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+		if (isNewUI == 1) {
+			$('a[href*="index.php?cmd=quickbuff&t="]').each(function() {
+				$(this).attr('href',$(this).attr('href').replace(/500/g,'1000'));
+			});
+		} else {
+			var guildInfoOnlineMembersTable = System.findNodes("//tr[td/a[contains(@href,'index.php?cmd=quickbuff&t=')]/font[.='B']]");
+			if (guildInfoOnlineMembersTable) {
+				for (var i=0; i<guildInfoOnlineMembersTable.length; i++){
+					var guildInfoOnlineMember = guildInfoOnlineMembersTable[i];
+					var playerLink = System.findNode("./td/table/tbody/tr/td/a[contains(@href,'index.php?cmd=profile&player_id=')]", guildInfoOnlineMember);
+					var playerID = /player_id=(\d+)/.exec(playerLink)[1];
+					var buffLink = System.findNode("./td/a[contains(@href,'index.php?cmd=quickbuff&t=')]", guildInfoOnlineMember);
+					var oldHref = buffLink.getAttribute('href');
+					var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
+					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+				}
 			}
 		}
 	},
@@ -7622,7 +7628,8 @@ var Helper = {
 		var lastCheck=GM_getValue("lastGuildInventoryCheck");
 		var now=(new Date()).getTime();
 		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 5*60*1000);
+		//var haveToCheck=((now - lastCheck) > 5*60*1000);
+		var haveToCheck=((now - lastCheck) > 1000);
 		var refreshButton;
 		if (haveToCheck) {
 			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
@@ -7983,7 +7990,8 @@ var Helper = {
 	parseGuildReportPage: function(responseText) {
 		var doc=System.createDocumentWithImages(responseText);
 		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		var guildreportItems = $(doc).find('td#centerColumn img[src*="/items/"]');
+		if (isNewUI == 1) var guildreportItems = $(doc).find('div#pCC td img[src*="/items/"]');
+		else var guildreportItems = $(doc).find('td#centerColumn img[src*="/items/"]');
 		guildreportItems.each(function(index){
 			var item={"url": $(this).data("tipped"),
 				"where":"guildreport", "index":(index+1), "worn":false};
@@ -9343,9 +9351,9 @@ var Helper = {
 		//extend
 		var sustainColor = "lime";
 		if (sustainLevel < 100) sustainColor = "red";
-		var activateInput = System.findNode("//input[@value='activate']");
+		var activateInput = System.findNode("//input[@value='activate' or @value='Activate Selected Skills']");
 		var inputTable = activateInput.nextSibling.nextSibling;
-		var injectHere = inputTable.rows[3].cells[0];
+		var injectHere = inputTable.rows[inputTable.rows.length-1].cells[0];
 		injectHere.align = "center";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
 		var furyCasterTipped = $(doc).find('td:contains("Fury Caster"):last').next().find('table.tipped');
@@ -9355,7 +9363,7 @@ var Helper = {
 		var furyCasterLevel = furyCasterLevelRE.exec(furyCasterMouseover)[1];
 		var furyCasterColor = "lime";
 		if (furyCasterLevel < 100) furyCasterColor = "red";
-		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span></br>";
 		var hasBuffMasterBuff = $(doc).find('img.tipped[data-tipped*="Buff Master"]');
 		if (hasBuffMasterBuff.length > 0) {
 			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
@@ -9374,6 +9382,15 @@ var Helper = {
 		else {
 			injectHere.innerHTML += " <span style='color:orange;'>Extend:</span> <span style='color:red;'>Off</span>";
 		}
+		var hasReinforceBuff = $(doc).find('img.tipped[data-tipped*="Reinforce"]');
+		if (hasReinforceBuff.length > 0) {
+			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Reinforce:</span>	<span style='color:lime;'>On</span>";
+			var ReinforceTimeToExpire = hasReinforceBuff.parents('td:first').find('nobr').html();
+			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + ReinforceTimeToExpire +")</span>";
+		}
+		else {
+			injectHere.innerHTML += " <span style='color:orange;'>Reinforce:</span> <span style='color:red;'>Off</span>";
+		}
 		var canCastCounterAttack = System.findNode("//td/font[contains(.,'Counter Attack')]");
 		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
 	},
@@ -9383,10 +9400,19 @@ var Helper = {
 		var counterAttackTextElement = $(doc).find('input[name="ca_default"]');
 		if (counterAttackTextElement.length == 0) {return;}
 		var counterAttackValue = counterAttackTextElement.val();
+		var severeConditionTextElement = $(doc).find('input[name="sc_default"]');
+		if (severeConditionTextElement.length == 0) {return;}
+		var severeConditionValue = severeConditionTextElement.val();
+		var nightmareVisageTextElement = $(doc).find('input[name="nv_default"]');
+		if (nightmareVisageTextElement.length == 0) {return;}
+		var nightmareVisageValue = nightmareVisageTextElement.val();
 		var activateInput = System.findNode("//input[@value='activate']");
 		var inputTable = activateInput.nextSibling.nextSibling;
-		var injectHere = inputTable.rows[3].cells[0];
+		var injectHere = inputTable.rows[inputTable.rows.length-1].cells[0];
+		injectHere.innerHTML += "</br>";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default CA level:</span> <span style='color:white;'>" + counterAttackValue + "</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default SC level:</span> <span style='color:white;'>" + severeConditionValue + "</span>";
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Default NMV level:</span> <span style='color:white;'>" + nightmareVisageValue + "</span>";
 	},
 
 	getKillStreak: function(responseText) {
