@@ -5307,7 +5307,8 @@ var Helper = {
 			Helper.moveMe(1,1);
 			break;
 		case 114: // repair
-			window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
+			//do not use repair link for new map
+			if ($('#worldPage').length == 0) window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			break;
 		case 71: // create group [G]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
@@ -5352,7 +5353,8 @@ var Helper = {
 			GM_openInTab(System.server + "index.php?cmd=quickbuff");
 			break;
 		case 48: // return to world
-			window.location = 'index.php?cmd=world';
+			//do not use if using new map
+			if ($('#worldPage').length == 0) window.location = 'index.php?cmd=world';
 			break;
 		case 109: // map
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
@@ -9525,8 +9527,8 @@ var Helper = {
 			var playerArmorValue = parseInt($(doc).find('td:contains("Armor:"):first').next().clone().children().remove().end().text().trim(),10);
 			var playerDamageValue = parseInt($(doc).find('td:contains("Damage:"):first').next().clone().children().remove().end().text().trim(),10);
 			var playerHPValue = parseInt($(doc).find('td:contains("HP:"):first').next().clone().children().remove().end().text().trim(),10);
-		} else {
 			var playerKillStreakValue = parseInt($(doc).find('td:contains("Kill"):contains("Streak:"):first').next().clone().children().remove().end().text().trim().replace(/,/g,''),10);
+		} else {
 			var allItems = doc.getElementsByTagName("B");
 			for (var i=0;i<allItems.length;i++) {
 				var anItem=allItems[i];
@@ -14284,13 +14286,15 @@ var Helper = {
 	findBuffsParseProfileAndDisplay: function(responseText, callback) {
 		var doc = System.createDocumentWithImages(responseText);
 		//name and level
-		var playerName = $(doc).find('h1:first').text();
+		if (isNewUI == 1) var playerName = $(doc).find('div#pCC h1:first').text();
+		else var playerName = $(doc).find('h1:first').text();
 		var levelElement = $(doc).find('td:contains("Level:"):last').next();
 		var levelValue = parseInt(levelElement.text().replace(/,/g,""),10);
 		var virtualLevelElement = $(doc).find('td:contains("VL:"):last').next();
 		var virtualLevelValue = parseInt(virtualLevelElement.text().replace(/,/g,""),10);
 		//last activity
-		var lastActivityElement = $(doc).find('h2[class="centered tiny"]');
+		if (isNewUI == 1) var lastActivityElement = $(doc).find('div#pCC p:first');
+		else var lastActivityElement = $(doc).find('h2[class="centered tiny"]');
 		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.text());
 		var lastActivityMinutes = parseInt(lastActivity[1],10);
 		var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
