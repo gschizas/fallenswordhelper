@@ -974,40 +974,40 @@ var Layout = {
 			$(pCL).find('a#nav-character-log').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&subcmd=recipemanager">Recipe Manager</a></li>')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&subcmd=invmanager">Inventory Manager</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
 			if (GM_getValue("keepBuffLog")) {
 				$(pCL).find('a#nav-character-log').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&subcmd=bufflogcontent">Buff Log</a></li>')
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&subcmd=bufflogcontent">Buff Log</a></li>');
 			}
 			if (GM_getValue("keepLogs")) {
 				$(pCL).find('a#nav-character-notepad').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&subcmd=showlogs">Combat Logs</a></li>')
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&subcmd=showlogs">Combat Logs</a></li>');
 			}
 			if (GM_getValue("showMonsterLog")) {
 				$(pCL).find('a#nav-character-notepad').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&subcmd=monsterlog">Creature Logs</a></li>')
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&subcmd=monsterlog">Creature Logs</a></li>');
 			}
 			$(pCL).find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&subcmd=quicklinkmanager">Quick Links</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&subcmd=createmap">Create Maps</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&subcmd=createmap">Create Maps</a></li>');
 			//guild
 			$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&subcmd=guildinvmanager">Guild Inventory</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&subcmd=guildinvmanager">Guild Inventory</a></li>');
 			if (!GM_getValue("useNewGuildLog")) {
 				//if not using the new guild log, show it as a separate menu entry
 				$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
-					.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&subcmd=newguildlog">New Guild Log</a></li>')
+					.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&subcmd=newguildlog">New Guild Log</a></li>');
 			}
 			//top rated
 			$(pCL).find('a#nav-toprated-players-level').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
 			//actions
 			$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a></li>');
 			$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
 				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&subcmd=onlineplayers">Online Players</a></li>')
 				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&subcmd=findother">Find Other</a></li>')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&subcmd=findbuffs">Find Buffs</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&subcmd=findbuffs">Find Buffs</a></li>');
 		} else {
 			//"menuSource_0"
 			var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
@@ -4116,11 +4116,13 @@ var Helper = {
 				for (i=1; i<9; i++) {
 					var monster = System.findNode("//a[@id='aLink" + i + "']");
 					if (monster) {
-						var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
+						if (isNewUI == 1) var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
+						else var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
 						for (var j=0; j<doNotKillListAry.length; j++) {
 							var doNotKillName = doNotKillListAry[j].trim();
 							if (monsterName == doNotKillName){
-								var monsterNameCell = monster.parentNode.parentNode.previousSibling;
+								if (isNewUI) var monsterNameCell = monster.parentNode.parentNode;
+								else var monsterNameCell = monster.parentNode.parentNode.previousSibling;
 								monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
 								break;
 							}
@@ -4621,7 +4623,8 @@ var Helper = {
 		var doNotKillListAry = doNotKillList.split(",");
 
 		if (monster) {
-			var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
+			if (isNewUI == 1) var monsterName = monster.parentNode.parentNode.textContent.trim();
+			else var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
 			var injectHere = monster.parentNode.parentNode;
 			var monsterFound = false;
 			for (var j=0; j<doNotKillListAry.length; j++) {
@@ -6887,7 +6890,6 @@ var Helper = {
 				// already modified || not an item
 				if(!data.skin == 'fsItem' || $e.is('.fsh'))
 					return;
-//GM_log($(data.content).html());
 				$(data.content).find('font:contains("Bonuses")').closest('tr').each(function(index){
 					var itemTable = $(this).closest('table');
 					var attackStatElement = $(itemTable).find('td:contains("Attack:"):not(:contains(" Attack:"))');
@@ -9452,9 +9454,9 @@ var Helper = {
 
 	checkIfGroupExists: function(responseText) {
 		var doc=System.createDocumentWithImages(responseText);
-		var groupExistsIMG = System.findNode("//img[@title='Disband Group (Cancel Attack)']",doc);
-		if (groupExistsIMG) {
-			var groupHref = groupExistsIMG.parentNode.parentNode.firstChild.getAttribute("href");
+		var groupExistsIMG = $(doc).find('img[title="Disband Group (Cancel Attack)"]');
+		if (groupExistsIMG.length > 0) {
+			var groupHref = groupExistsIMG.parents('td:first').find('a:first').attr("href");
 			System.xmlhttp(groupHref, Helper.getCreatureGroupData);
 		}
 	},
@@ -9474,30 +9476,39 @@ var Helper = {
 	getCreaturePlayerData: function(responseText, callback) {
 		//playerdata
 		var doc=System.createDocumentWithImages(responseText);
-		var allItems = doc.getElementsByTagName("B");
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.innerHTML == "Attack:&nbsp;"){
-				var attackText = anItem;
-				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerAttackValue = parseInt(attackLocation.textContent,10);
-				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDefenseValue = parseInt(defenseLocation.textContent,10);
-				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerArmorValue = parseInt(armorLocation.textContent,10);
-				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerDamageValue = parseInt(damageLocation.textContent,10);
-				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				var playerHPValue = parseInt(hpLocation.textContent,10);
-			}
-			if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
-				var killStreakText = anItem;
-				var killStreakLocation = killStreakText.parentNode.nextSibling;
-				var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
+		if (isNewUI == 1) {
+			var playerAttackValue = parseInt($(doc).find('td:contains("Attack:"):first').next().clone().children().remove().end().text().trim(),10);
+			var playerDefenseValue = parseInt($(doc).find('td:contains("Defense:"):first').next().clone().children().remove().end().text().trim(),10);
+			var playerArmorValue = parseInt($(doc).find('td:contains("Armor:"):first').next().clone().children().remove().end().text().trim(),10);
+			var playerDamageValue = parseInt($(doc).find('td:contains("Damage:"):first').next().clone().children().remove().end().text().trim(),10);
+			var playerHPValue = parseInt($(doc).find('td:contains("HP:"):first').next().clone().children().remove().end().text().trim(),10);
+		} else {
+			var playerKillStreakValue = parseInt($(doc).find('td:contains("Kill"):contains("Streak:"):first').next().clone().children().remove().end().text().trim().replace(/,/g,''),10);
+			var allItems = doc.getElementsByTagName("B");
+			for (var i=0;i<allItems.length;i++) {
+				var anItem=allItems[i];
+				if (anItem.innerHTML == "Attack:&nbsp;"){
+					var attackText = anItem;
+					var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+					var playerAttackValue = parseInt(attackLocation.textContent,10);
+					var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+					var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+					var playerDefenseValue = parseInt(defenseLocation.textContent,10);
+					var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+					var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+					var playerArmorValue = parseInt(armorLocation.textContent,10);
+					var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+					var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+					var playerDamageValue = parseInt(damageLocation.textContent,10);
+					var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+					var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+					var playerHPValue = parseInt(hpLocation.textContent,10);
+				}
+				if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
+					var killStreakText = anItem;
+					var killStreakLocation = killStreakText.parentNode.nextSibling;
+					var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
+				}
 			}
 		}
 		//get buffs here later ... DD, CA, DC, Constitution, etc
@@ -12742,6 +12753,7 @@ var Helper = {
 			output += "</tbody></table><center>";
 
 			attackPlayerTable.rows[4].cells[0].innerHTML = output;
+			
 			//System.xmlhttp("index.php?cmd=profile", Helper.getSelfProfileStatsAndBuffs);
 			System.xmlhttp("index.php?cmd=profile", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerSelfStatData","anchor2":"attackPlayerSelfBuffData"});
 			System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username="+targetPlayer[1]+"&search_show_first=1", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerDefenderStatData","anchor2":"attackPlayerDefenderBuffData"});
