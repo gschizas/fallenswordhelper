@@ -8918,7 +8918,8 @@ var Helper = {
 		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
 		if (playerName) {
 			playerName = playerName[1];
-			System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
+			if (playerName == GM_getValue("CharacterName")) System.xmlhttp("index.php?cmd=profile", Helper.getPlayerBuffs, false);
+			else System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
 
@@ -10048,7 +10049,8 @@ var Helper = {
 	},
 
 	injectArena: function() {
-		arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
+		if (isNewUI == 1) arenaTable = System.findNode("//table/tbody/tr/td[contains(.,'Reward')]/table"); // not sure why it doesn't work with width in there for new UI.
+		else arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves");
 		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
