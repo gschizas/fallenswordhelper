@@ -1008,6 +1008,15 @@ var Layout = {
 				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&subcmd=onlineplayers">Online Players</a></li>')
 				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&subcmd=findother">Find Other</a></li>')
 				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&subcmd=findbuffs">Find Buffs</a></li>');
+			//adjust the menu length in chrome for the newly added items
+			//first the open ones
+			$('ul.nav-animated').each(function() {
+				if ($(this).css('height') != '0px') {
+					$(this).css('height',$(this).find('li').length*22);
+				}
+			});
+			//and now the closed saved variables
+			$('#nav').nav('calcHeights');
 		} else {
 			//"menuSource_0"
 			var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
@@ -1098,28 +1107,36 @@ var Layout = {
 	},
 
 	moveRHSBoxUpOnRHS: function(title) {
-		var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
-		if (src.length == 0) return;
-		src.next('br').remove(); //remove next BR
-		var tmp = document.createElement('div');
-		tmp.appendChild(src[0]);
-		var dest=$('#rightColumn').find('table:eq(1)').find('tr:first');
-		dest.before('<tr><td align="center">'+tmp.innerHTML+'</td></tr><tr><td>&nbsp;</td></tr>');
-		src.remove();
+		if (isNewUI == 1) {
+			$('div#pCR').prepend($('div#' + title));
+		} else {
+			var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
+			if (src.length == 0) return;
+			src.next('br').remove(); //remove next BR
+			var tmp = document.createElement('div');
+			tmp.appendChild(src[0]);
+			var dest=$('#rightColumn').find('table:eq(1)').find('tr:first');
+			dest.before('<tr><td align="center">'+tmp.innerHTML+'</td></tr><tr><td>&nbsp;</td></tr>');
+			src.remove();
+		}
 	},
 
 	moveRHSBoxToLHS: function(title) {
-		//var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
-		var src=$('font b').filter(function() {
-			return $(this).text() === title;
-		}).closest('table');
-		if (src.length == 0) return;
-		src.next('br').remove(); //remove next BR
-		var tmp = document.createElement('div');
-		tmp.appendChild(src[0]);
-		var dest=$('img[src*="menu_logout.gif"]').closest('tr');
-		dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+tmp.innerHTML+'</td></tr>');
-		src.remove();
+		if (isNewUI == 1) {
+			$('div#pCL').append($('div#' + title));
+		} else {
+			//var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
+			var src=$('font b').filter(function() {
+				return $(this).text() === title;
+			}).closest('table');
+			if (src.length == 0) return;
+			src.next('br').remove(); //remove next BR
+			var tmp = document.createElement('div');
+			tmp.appendChild(src[0]);
+			var dest=$('img[src*="menu_logout.gif"]').closest('tr');
+			dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+tmp.innerHTML+'</td></tr>');
+			src.remove();
+		}
 	},
 
 	notebookContent: function() {
@@ -1574,9 +1591,18 @@ var Helper = {
 			Helper.init();
 			Layout.hideBanner();
 			//move boxes in opposite order that you want them to appear.
-			if (GM_getValue("moveGuildList")) Layout.moveRHSBoxUpOnRHS('Guild Info');
-			if (GM_getValue("moveOnlineAlliesList")) Layout.moveRHSBoxUpOnRHS('Online Allies');
-			if (GM_getValue("moveFSBox")) Layout.moveRHSBoxToLHS('FSBox');
+			if (GM_getValue("moveGuildList")) {
+				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-guild');
+				else Layout.moveRHSBoxUpOnRHS('Guild Info');
+			}
+			if (GM_getValue("moveOnlineAlliesList")) {
+				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-allies');
+				else Layout.moveRHSBoxUpOnRHS('Online Allies');
+			}
+			if (GM_getValue("moveFSBox")) {
+				if (isNewUI == 1) Layout.moveRHSBoxToLHS('minibox-fsbox');
+				else Layout.moveRHSBoxToLHS('FSBox');
+			}
 			Helper.prepareAllyEnemyList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
@@ -4281,52 +4307,74 @@ var Helper = {
 
 	addOnlineAlliesWidgets: function() {
 		if (!GM_getValue("enableOnlineAlliesWidgets")) {return;}
-		var onlineAlliesTable = System.findNode("//table/tbody[tr/td/font/b[.='Online Allies']]//table");
-		var hideBuffSelected = GM_getValue("hideBuffSelected");
-		if (onlineAlliesTable) {
-			for (var i=0; i<onlineAlliesTable.rows.length; i++){
-				var onlineAlliesFirstCell = onlineAlliesTable.rows[i].cells[0];
-				var onlineAlliesSecondCell = onlineAlliesTable.rows[i].cells[1];
-				if (onlineAlliesSecondCell) {
-					var playerTable = onlineAlliesFirstCell.getElementsByTagName('TABLE')[0];
-					var checkboxColumn = playerTable.rows[0].cells[0];
-					if (hideBuffSelected) checkboxColumn.innerHTML = '';
-					var playernameColumn = playerTable.rows[0].cells[1];
-					var playerNameLinkElement = playernameColumn.firstChild;
-					//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
-					var onMouseOver = $(playerNameLinkElement).data('tipped');
+		if (isNewUI == 1) {
+			var onlineAlliesList = $('ul#minibox-allies-list');
+			if (onlineAlliesList.length > 0) { // list exists
+				//add coloring for offline time
+				$(onlineAlliesList).find('li.player').each(function() {
+					var playerA = $(this).find('a[class*="player-name"]');
+					var playerName = playerA.text();
+					var onMouseOver = playerA.data('tipped');
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-					// Set Color for Activity
-					if (lastActivityMinutes < 2) {
-						playerNameLinkElement.style.color = 'DodgerBlue';
-						playerNameLinkElement.firstChild.style.color = 'DodgerBlue';
-					} else if (lastActivityMinutes < 5) {
-						playerNameLinkElement.style.color = 'LightSkyBlue';
-						playerNameLinkElement.firstChild.style.color = 'LightSkyBlue';
-					} else {
-						playerNameLinkElement.style.color = 'PowderBlue';
-						playerNameLinkElement.firstChild.style.color = 'PowderBlue';
-					}
-					if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
-						messageLink = onlineAlliesSecondCell.firstChild.nextSibling;
-						if (messageLink.style) messageLink.style.visibility = 'hidden';
-						buffLink = messageLink.nextSibling.nextSibling;
-						secureTradeLink = buffLink.nextSibling.nextSibling;
-						secureTradeLink.style.visibility = 'hidden';
-						tradeLink = secureTradeLink.nextSibling.nextSibling;
-						tradeLink.style.visibility = 'hidden';
-					}
-					onlineAlliesSecondCell.innerHTML = '<nobr>' + onlineAlliesSecondCell.innerHTML + '</nobr>';
-				}
+						if (lastActivityMinutes < 2) playerA.css('color','DodgerBlue');
+						else if (lastActivityMinutes < 5) playerA.css('color','LightSkyBlue');
+						else playerA.css('color','PowderBlue');
+						//only need buff link for the current player
+						if (playerName.trim() == Helper.characterName.trim()) {
+							$(this).find('div.online-allies-actions a#online-allies-action-trade').hide();
+							$(this).find('div.online-allies-actions a#online-allies-action-secure-trade').hide();
+							$(this).find('div.online-allies-actions a#online-allies-action-send-message').hide();
+						}
+				});
 			}
-			if (hideBuffSelected) {
-				var lineBreak = onlineAlliesTable.nextSibling.nextSibling;
-				if (lineBreak) {
-					lineBreak.style.display = 'none';
-					var actionsFont = lineBreak.nextSibling.nextSibling;
-					actionsFont.style.display = 'none';
-					var buffSelectedTable = actionsFont.nextSibling.nextSibling;
-					buffSelectedTable.style.display = 'none';
+		} else {
+			var onlineAlliesTable = System.findNode("//table/tbody[tr/td/font/b[.='Online Allies']]//table");
+			var hideBuffSelected = GM_getValue("hideBuffSelected");
+			if (onlineAlliesTable) {
+				for (var i=0; i<onlineAlliesTable.rows.length; i++){
+					var onlineAlliesFirstCell = onlineAlliesTable.rows[i].cells[0];
+					var onlineAlliesSecondCell = onlineAlliesTable.rows[i].cells[1];
+					if (onlineAlliesSecondCell) {
+						var playerTable = onlineAlliesFirstCell.getElementsByTagName('TABLE')[0];
+						var checkboxColumn = playerTable.rows[0].cells[0];
+						if (hideBuffSelected) checkboxColumn.innerHTML = '';
+						var playernameColumn = playerTable.rows[0].cells[1];
+						var playerNameLinkElement = playernameColumn.firstChild;
+						//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
+						var onMouseOver = $(playerNameLinkElement).data('tipped');
+						var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+						// Set Color for Activity
+						if (lastActivityMinutes < 2) {
+							playerNameLinkElement.style.color = 'DodgerBlue';
+							playerNameLinkElement.firstChild.style.color = 'DodgerBlue';
+						} else if (lastActivityMinutes < 5) {
+							playerNameLinkElement.style.color = 'LightSkyBlue';
+							playerNameLinkElement.firstChild.style.color = 'LightSkyBlue';
+						} else {
+							playerNameLinkElement.style.color = 'PowderBlue';
+							playerNameLinkElement.firstChild.style.color = 'PowderBlue';
+						}
+						if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
+							messageLink = onlineAlliesSecondCell.firstChild.nextSibling;
+							if (messageLink.style) messageLink.style.visibility = 'hidden';
+							buffLink = messageLink.nextSibling.nextSibling;
+							secureTradeLink = buffLink.nextSibling.nextSibling;
+							secureTradeLink.style.visibility = 'hidden';
+							tradeLink = secureTradeLink.nextSibling.nextSibling;
+							tradeLink.style.visibility = 'hidden';
+						}
+						onlineAlliesSecondCell.innerHTML = '<nobr>' + onlineAlliesSecondCell.innerHTML + '</nobr>';
+					}
+				}
+				if (hideBuffSelected) {
+					var lineBreak = onlineAlliesTable.nextSibling.nextSibling;
+					if (lineBreak) {
+						lineBreak.style.display = 'none';
+						var actionsFont = lineBreak.nextSibling.nextSibling;
+						actionsFont.style.display = 'none';
+						var buffSelectedTable = actionsFont.nextSibling.nextSibling;
+						buffSelectedTable.style.display = 'none';
+					}
 				}
 			}
 		}
@@ -4565,15 +4613,13 @@ var Helper = {
 	},
 
 	retrieveItemInfor: function(doc) {
-		var table=System.findNode("//td[@colspan=3]/table[@width='100%']",doc);
-		for (var i=0; i<table.rows.length/2; i++){
-			var row=table.rows[i*2];
+		$(doc).find('div#pCC').find('input[name="removeIndex[]"]').each(function(index){
 			var item={
-				"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
-				"html":row.innerHTML.replace(/<input[^>]*>/g, '')
+				"id": $(this).attr('value'),
+				"html": $(this).closest('tr').html().replace(/<input[^>]*>/g, '')
 				};
 			Helper.itemList["id"+item.id]=item;
-		}
+		});
 	},
 
 	toggleFootprints: function() {
