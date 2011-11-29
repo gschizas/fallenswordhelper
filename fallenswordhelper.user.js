@@ -5260,13 +5260,13 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
+		if (isNewUI == 1 && $('#worldPage').length == 0) { //new UI and not new map
+			//clear out the HCS keybinds so only helper ones fire
+			$.each($(document).controls('option').keys, function(index, value) { 
+				$(document).controls('option').keys[index] = [];
+			});
+		}
 		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-			if (isNewUI == 1 && $('#worldPage').length == 0) { //new UI and not new map
-				//clear out the HCS keybinds so only helper ones fire
-				$.each($(document).controls('option').keys, function(index, value) { 
-					$(document).controls('option').keys[index] = [];
-				});
-			}
 			window.document.wrappedJSObject.onkeypress = null;
 			window.document.wrappedJSObject.combatKeyHandler = null;
 			window.document.wrappedJSObject.realmKeyHandler = null;
