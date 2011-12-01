@@ -934,25 +934,6 @@ var Layout = {
 		$(tableElement).find('tr:eq('+position+')').before('<tr><td><font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font></td></tr><tr><td height="5"></td></tr>')
 	},
 
-	injectQuickLinks: function() {//JQuery ready
-		var quickLinks = System.getValueJSON("quickLinks");
-		if (!quickLinks) quickLinks=[];
-		if (quickLinks.length<=0) return;
-		//var insertBeforeHere = System.findNode("//img[contains(@src,'inner_top.jpg') or contains(@src,'realm_top_a.jpg')]");
-		if (isNewUI == 1) var insertBeforeHere = $('div#pCC').children(':first');
-		else var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
-		if (!insertBeforeHere) return;
-		result="&nbsp;&nbsp;";
-		for (var i=0; i<quickLinks.length; i++) {
-			result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
-				(quickLinks[i].newWindow?' target=new':"") +
-				'>' + quickLinks[i].name + '</a> ;';
-		}
-		result += '<br/>'
-
-		$(insertBeforeHere).before('<div style="background:black;text-align:left;background-image:none;z-index:100;position:absolute;filter:alpha(opacity=40);" id="fshQuickLinks">'+result+'</div>');
-	},
-
 	hideBanner: function() {//JQuery ready
 
 		if (!GM_getValue("hideBanner")) {
@@ -1928,7 +1909,7 @@ var Helper = {
 
 		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
 		if (GM_getValue("huntingMode") === false) {
-			Layout.injectQuickLinks();
+			Helper.injectQuickLinks();
 		}
 	},
 
@@ -11802,27 +11783,37 @@ var Helper = {
 		enableActiveBountyList = GM_getValue("enableActiveBountyList");
 		enableWantedList = GM_getValue("enableWantedList");
 		if (enableWantedList || enableActiveBountyList) {
-			var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
-			if (rightColumnTable) {
+			if (isNewUI == 1) {
 				if (enableWantedList) {
-					if (!rightColumnTable)
-						return;
-					var info = rightColumnTable.insertRow(1);
-					var cell = info.insertCell(0);
-					cell.width = 120;
-					cell.align = 'center';
-					cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
+					$('div#pCR').prepend("<div class='minibox'><span id='Helper:WantedListPlaceholder'></span></div>");
 				}
 				if (enableActiveBountyList) {
-					if (rightColumnTable) {
-						info = rightColumnTable.insertRow(1);
-						cell = info.insertCell(0);
-						cell.width = 120;
-						cell.align = 'center';
-						cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
-					}
+					$('div#pCR').prepend("<div class='minibox'><span id='Helper:BountyListPlaceholder'></span></div>");
 				}
 				Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
+			} else {
+				var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+				if (rightColumnTable) {
+					if (enableWantedList) {
+						if (!rightColumnTable)
+							return;
+						var info = rightColumnTable.insertRow(1);
+						var cell = info.insertCell(0);
+						cell.width = 120;
+						cell.align = 'center';
+						cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
+					}
+					if (enableActiveBountyList) {
+						if (rightColumnTable) {
+							info = rightColumnTable.insertRow(1);
+							cell = info.insertCell(0);
+							cell.width = 120;
+							cell.align = 'center';
+							cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
+						}
+					}
+					Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
+				}
 			}
 		}
 	},
@@ -11875,7 +11866,7 @@ var Helper = {
 		GM_setValue("bwNeedsRefresh", false);
 
 		if (enableWantedList) {
-			var activeTable = System.findNode("//table[@width = '630' and @cellpadding = '3']", doc);
+			var activeTable = System.findNode("//table[@width = '630' and contains(.,'Posted')]", doc);
 			var wantedNames = GM_getValue("wantedNames");
 			var wantedArray = wantedNames.split(",");
 			var wantedList = callback.wantedList;
@@ -12065,12 +12056,17 @@ var Helper = {
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
-			if (rightColumnTable) {
-				var info = rightColumnTable.insertRow(2);
-				var cell = info.insertCell(0);
-				cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
+			if (isNewUI == 1) {
+				$('div#pCR').prepend("<div class='minibox'><span id='Helper:AllyEnemyListPlaceholder'></span></div>");
 				Helper.retrieveAllyEnemyData(false);
+			} else { //old UI
+				var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
+				if (rightColumnTable) {
+					var info = rightColumnTable.insertRow(2);
+					var cell = info.insertCell(0);
+					cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
+					Helper.retrieveAllyEnemyData(false);
+				}
 			}
 		}
 	},
@@ -14298,7 +14294,7 @@ var Helper = {
 		if (isNewUI == 1) {
 			var node=$('#statbar-container');
 			if (node.length==0) return;
-			node.before("<div align='center' style='position:absolute; top:0; left:0; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</div>");
+			node.before("<div align='center' style='position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</div>");
 		} else {
 			var node=$('img[src*="knight_corner.gif"]').parent();
 			if (node.length==0) return;
@@ -14310,7 +14306,7 @@ var Helper = {
 		$(document).ready(function(){  
 			menuYloc = parseInt($('#helperMenu').css("top").substring(0,$('#helperMenu').css("top").indexOf("px")))  
 			$(window).scroll(function () {  
-				var offset = menuYloc+$(document).scrollTop()+"px";  
+				var offset = menuYloc+$(document).scrollTop() - 22 + "px";  
 				$('#helperMenu').animate({top:offset},{duration:0,queue:false});  
 			});  
 		}); 
@@ -14373,6 +14369,56 @@ var Helper = {
 			Helper[evt.target.getAttribute("fn")].call(Helper, document.getElementById("content"));
 			$("#content").dialog({ width: 'auto', modal: true });
 		}, 0);
+	},
+
+	injectQuickLinks: function() { //jquery ready
+	// don't put all the menu code here (but call if clicked) to minimize lag
+		var quickLinks = System.getValueJSON("quickLinks");
+		if (!quickLinks) quickLinks=[];
+		Helper.quickLinks = quickLinks;
+		if (quickLinks.length<=0) return;
+		if (GM_getValue("hideHelperMenu")) return;
+		if (isNewUI == 1) {
+			var node=$('#statbar-container');
+			if (node.length==0) return;
+			node.before("<div align='center' style='position:absolute; top:22px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=fshQuickLinks nowrap>Quick Links</div>");
+		} else { // old UI logic
+			var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
+			if (!insertBeforeHere) return;
+			result="&nbsp;&nbsp;";
+			for (var i=0; i<quickLinks.length; i++) {
+				result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
+					(quickLinks[i].newWindow?' target=new':"") +
+					'>' + quickLinks[i].name + '</a> ;';
+			}
+			result += '<br/>'
+			$(insertBeforeHere).before('<div style="background:black;text-align:left;background-image:none;z-index:100;position:absolute;filter:alpha(opacity=40);" id="fshQuickLinks">'+result+'</div>');
+		}
+		$('#fshQuickLinks').bind("mouseover", Helper.showQuickLinks);
+		$(document).ready(function(){  
+			menuYloc = parseInt($('#fshQuickLinks').css("top").substring(0,$('#fshQuickLinks').css("top").indexOf("px")))  
+			$(window).scroll(function () {  
+				var offset = menuYloc+$(document).scrollTop()+ "px";  
+				$('#fshQuickLinks').animate({top:offset},{duration:0,queue:false});  
+			});  
+		}); 
+	},
+
+	showQuickLinks: function(evt) { //jqeury ready
+		var quickLinks = Helper.quickLinks;
+		$('#fshQuickLinks').unbind("mouseover", Helper.showQuickLinks);
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=fshQuickLinksDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		html += "<div class=column>";
+		html += "<ul>";
+		for (var i=0; i<quickLinks.length; i++) {
+				html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
+					(quickLinks[i].newWindow?' target=new':"") +
+					'>' + quickLinks[i].name + '</a></span></li>';
+			
+		}
+		html += "</ul>";
+		$("#fshQuickLinks").append(html);
+		$("#fshQuickLinks").click(function() {$("#fshQuickLinksDiv").toggle("fast");});
 	},
 
 	injectCreateMap: function(content) {
