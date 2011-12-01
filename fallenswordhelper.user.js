@@ -676,135 +676,6 @@ var Data = {
 		return "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAABy6+R8AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAAd0SU1FB9gDBhMtH+MwW90AAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAAAyUlEQVQoz52SLQ4CMRCFv00Qi+tKZCWSI3AE1hEUIWBwhKugCEEBDotEIjlC5dZ13FZRRMOGFQ0/k4yZvC/vZWayEAK/VgfAbHdBruePYjUs0fNZ1gGQy5HBdPkRuu83MJ9FJwA8yOmQdhlP2vGQGiOOwqddjDiQ+g1q3Pz3i3A19I3BO5cU9oxBWvEAxMdOlXhc/QYVAqg8dnITedS9IG8tldYUeTfJVFrjrW3FC1oVsErfSgEWsgZSo/JxW6xT+qwBR2Uc/PN7T+yzRewsE50wAAAAAElFTkSuQmCC";
 	},
 
-	relicList: function() {
-		if (!Data.relicArray) {
-			Data.relicArray=[
-				{Name:"Blue Chasm",Realm:"Mountain Path (7,9) Lvl 1",Comment:"+1% Defense<br>+1% HP<br>+1 Stamina Gain<br>+5 Reinforced Armor"},
-				{Name:"Krul Pyramid",Realm:"Krul Small Cave (4,16) Lvl 14",Comment:"+1% Attack<br>+1% Damage<br>+200 XP Gain<br>+5 Critical Hit"},
-				{Name:"Unholy Shrine",Realm:"Paladir Forest East (2,2) Lvl 20",Comment:"+1% Damage<br>+75 Stamina<br>+50 Gold Gain<br>+200 XP Gain"},
-				{Name:"Udan Sun Orb",Realm:"Udan Forest (17,10) Lvl 28",Comment:"+1% Attack<br>+1 Stamina Gain<br>+50 Gold Gain<br>+5 Critical Hit"},
-				{Name:"Chaotic Symbol",Realm:"Burning Abyss (Level 3) (2,36) Lvl 34",Comment:"+50 Stamina<br>+1 Stamina Gain<br>+25 Thievery<br>+5 Disarm"},
-				{Name:"Moot Crypt",Realm:"Moot Forest East (10,11) Lvl 40",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+10 Master Blacksmith"},
-				{Name:"Klar Worldstone",Realm:"Klar Labyrinth (Level 1) (5,8) Lvl 48",Comment:"+5 Holy<br>+5 Nullify<br>+5 Banishment<br>+5 Protection<br>+5 Oceanic<br>+20 Disarm"},
-				{Name:"Pyramid of Protection",Realm:"Ellan Port Outskirts (2,4) Lvl 55",Comment:"+25 Reinforced Armor<br>+50 Protection<br>+25 Protect Gold<br>+50 Dodge"},
-				{Name:"Despair Crystal",Realm:"Depths of Despair (Level 2) (13,12) Lvl 85",Comment:"+1% Armor<br>+100 Stamina<br>+1 Stamina Gain<br>+20 Gold Gain<br>+200 XP Gain"},
-				{Name:"Endlore Giants Reach",Realm:"Endlore Valley North (9,7) Lvl 70",Comment:"+1% Attack<br>+1% HP<br>+1% Damage<br>+100 Gold Gain<br>+25 Breaker"},
-				{Name:"Utapo Death Skull",Realm:"Utapo Flats West (10,7) Lvl 48",Comment:"+1% Attack<br>+1% Damage<br>+10 Piercing strike<br>+20 Critical Hit<br>+25 Breaker<br>+20 Disarm"},
-				{Name:"Temple of the Gods",Realm:"Eldora Plains (East) (7,9) Lvl 98",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% Hp<br>+1% Damage<br>+50 Stamina<br>+1 Stamina Gain<br>+5 Nullify<br>+20 Protect Gold<br>+25 Dodge<br>+15 Master Blacksmith"},
-				{Name:"Elven Forge",Realm:"Elven Hideout (11,12) Lvl 30",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+10 Protect Gold"},
-				{Name:"Feidal Power Obelisk",Realm:"Feidal Swamps North (12,3) Lvl 65",Comment:"+1% Damage<br>+30 Critical Hit"},
-				{Name:"Ruined Crypt",Realm:"Enkmar Scrubland (North) (8,4) Lvl 107",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+10 Piercing Strike<br>+10 Reinforced Armor<br>+10 Thievery<br>+10 Critical Hit<br>+10 Breaker<br>+5 Nullify<br>+15 Dodge<br>+5 Disarm<br>+15 Sustain"},
-				{Name:"Ethereal Pillars",Realm:"Ethereal Gateway (7,7) Lvl 1",Comment:"+1% Defense<br>+1% Armor<br>+200 XP Gain<br>+25 Reinforced Armor<br>+25 Protection<br>+25 Protect Gold<br>+25 Sustain"},
-				{Name:"Kentlor Mine",Realm:"Kentlor Caves (North) (11,4) Lvl 113",Comment:"+1% Defense<br>+1% HP<br>+1% Damage<br>+100 Gold Gain<br>+25 Master Blacksmith<br>+25 Master Crafter"},
-				{Name:"Spirit Bog",Realm:"Jahd Swamps (North) (10,7) Lvl 125",Comment:"+1% Armor<br>+1% Hp<br>+1% Damage<br>+5 Breaker<br>+35 Nullify<br>+35 Banishment"},
-				{Name:"Sacrificial Altar",Realm:"Dekma Jungle (North (4,12) Lvl 130",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+15 Piercing Strike<br>+15 Thievery<br>+15 Critical Hit"},
-				{Name:"Lookout Menhir",Realm:"Metlair (North) (6,3) Lvl 140",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+20 Holy<br>+20 Breaker<br>+25 Dodge<br>+15 Disarm"},
-				{Name:"Ruined Temple",Realm:"Ekloren (South) (8,4) Lvl 152",Comment:"+1% Attack<br>+1% Defense<br>+1% Damage<br>+25 Critical Hit<br>+25 Holy<br>+50 Dodge<br>+25 Disarm<br>+25 Sustain"},
-				{Name:"Serpent Tree",Realm:"Emerye (North) (3,12) Lvl 160",Comment:"+1% Armor<br>+1% HP<br>+1% Damage<br>+15 Thievery<br>+15 Holy<br>+15 Nullify<br>+15 Oceanic<br>+15 Master Crafter"},
-				{Name:"Demonic Idol",Realm:"Brale (South) (8,9) Lvl 181",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+35 Reinforced Armour<br>+35 Critical Hit"},
-				{Name:"Sun Dial",Realm:"Pelrei (South) (4,8) Lvl 172",Comment:"+1% Attack<br>+1% HP<br>+25 Holy<br>+25 Protection<br>+25 Protect Gold<br>+25 Sustain"},
-				{Name:"Temple of Lightning",Realm:"Ephal Swamp (South) (12,4) Lvl 286",Comment:"+1% Attack<br>+1% Damage<br>+1 Stamina Gain<br>+15 Thievery<br>+45 Dodge<br>+15 Master Crafter"},
-				{Name:"The Fallen Star",Realm:"Krysa (West) (11,4) Lvl 298",Comment:"+1% Defense<br>+1% HP<br>+35 Breaker<br>+35 Banishment<br>+35 Oceanic"},
-				{Name:"Pyramid of Annot",Realm:"Selari (East) (11,5) Lvl 303",Comment:"+1% Attack<br>+1% Damage<br>+25 Breaker<br>+25 Protect Gold<br>+25 Disarm<br>+25 Sustain"},
-				{Name:"Leora Becon",Realm:"Cereas (West) (1,3) Lvl 314",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+20 Stamina<br>+15 Piercing Strike<br>+10 Reinforced Armor<br>+5 Holy<br>+15 Breaker"},
-				{Name:"Tree of Eternal Fire",Realm:"Inual (West) (12.10) Lvl 318",Comment:"+1% Damage<br>+75 Critical Hit<br>+15 Protection"},
-				{Name:"Mists of Concelment",Realm:"Peitha (West) (12,7) Lvl 324",Comment:"+100 Stamina<br>+50 Sustain"},
-				{Name:"Temple of Mar",Realm:"Aeresi (South) (8,3) Lvl 332",Comment:"+1% Attack<br>+1% Defense<br>+5 Holy<br>+25 Nullify"},
-				{Name:"Ice Claws",Realm:"Erodum (South) (12,14) Lvl 336",Comment:"+1% Armor<br>+1% HP<br>+55 Holy"},
-				{Name:"Ruzdum Keep",Realm:"Korundor (West) (9,10) Lvl 344",Comment:"+1% Defense<br>+1% Armor<br>+1% HP<br>+50 Reinforced Armor<br>+15 Fury Caster"},
-				{Name:"Ward of Dagoresh",Realm:"Maw of Dagoresh (12,10) Lvl 349",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+25 Piercing Strike<br>+25 Reinforced Armor<br>+25 Critical Hit<br>+25 Protection"},
-				{Name:"Enchanted Cottage",Realm:"Mountain Heights (2,2) Lvl 351",Comment:"+1% Attack<br>+1% Defense<br>+45 Sustain"},
-				{Name:"Elithra Crystal Cluster",Realm:"Hidden Valley (East) (14,8) Lvl 367",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+15 Nullify<br>+35 Banishment<br>+35 Disarm"},
-				{Name:"Glowing Lava Crystal",Realm:"Broken Lands (South) (10,3) Lvl 375",Comment:"+1% Defense<br>+1% Armor<br>+35 Sustain<br>+35 Fury Caster"},
-				{Name:"Searing Orb",Realm:"Wasteland (South) (13,3) Lvl 381",Comment:"+80 Defense<br>+100 XP Gain<br>+10 Awareness"},
-				{Name:"Aspiring Formation",Realm:"Fractured Foundations (4,2) Lvl 393",Comment:"+45 Dodge<br>+45 Disarm<br>+45 Duelist"},
-				{Name:"Wretched Abyss",Realm:"Seething Caverns (10,5) Lvl 399",Comment:"+1% Defense<br>+1% Armor<br>+1% HP<br>+45 Greenskin Slayer<br>+45 Beast Slayer"},
-				{Name:"Crossroads",Realm:"City of Xinderoth (26,35) Lvl 400",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+25 Protect Gold"},
-				{Name:"Tower Orb",Realm:"Citadel of Xinderoth (Floor 13) (15,17) Lvl 413",Comment:"+1% Attack<br>+25 Critical Hit<br>+25 Glory Seeker<br>+25 First Strike"},
-				{Name:"The Jolly Rodger",Realm:"Craggy Coastline (Upper) (12,3) Lvl 425",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+15 Sustain<br>+30 Master Crafter<br>+15 First Strike"},
-				{Name:"Emblazoned Warrior",Realm:"Stheno Lake (Edge) (10,2) Lvl 438",Comment:"+1% Damage<br>+10 Piercing Strike<br>+10 Critical Hit<br>+35 First Strike"},
-				{Name:"Kreth Crystals",Realm:"Caves of Kreth (Level 8) (15,10) Lvl 448",Comment:"+1% HP<br>+1% Damage"},
-				{Name:"Ritualistic Statue",Realm:"Troll Hold (8,1) Lvl 459",Comment:"+1% Attack <br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage"},
-				{Name:"Resolute Crystal",Realm:"Thundersnow Valley (East) (13,3) Lvl 462",Comment:"+1% Attack<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Disarm"},
-				{Name:"Statue of Degrot",Realm:"Wastes of Kruz (Plain) (15,2) Lvl 472",Comment:"+1% Defense<br>+1% Damage<br>+10 Reinforced Armor"},
-				{Name:"Ral Worldstone",Realm:"Forest of Ral (Depths) (8,8) Lvl 497",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+12 Piercing Strike<br>+13 Reinforced Armor<br>+15 Critical Hit<br>+10 Fury Caster"},
-				{Name:"Holy Crystals",Realm:"Castle Morbidstein (Fortress Upper) (15,9) Lvl 488",Comment:"+1% Attack<br>+1% Damage<br>+30 Holy"},
-				{Name:"Castle of the Sorceress",Realm:"Ralthien (District of Magic) (6,2) Lvl 508",Comment:"+1% Attack<br>+1% HP<br>+20 Reinforced Armor<br>+10 Critical Hit<br>+10 Master Blacksmith"},
-				{Name:"Circle of Virtue",Realm:"Teotal (Clearing) (16,10) Lvl 513",Comment:"+1% Defence<br>+1% Armor<br>+20 Reinforced Armor<br>+30 Nullify"},
-				{Name:"Oak of Ages",Realm:"The Secret Kingdom (Thicket) (16,8) Lvl 523",Comment:"+1% Attack<br>+1% Defense<br>+20 Critical Hit<br>+20 Nullify<br>+10 Disarm"},
-				{Name:"Holy Atholhu Pillar",Realm:"Dark Atholhu (Edge) (2,2) Lvl 538",Comment:"+1% Damage<br>+20 Nullify<br>+25 Dodge<br>+20 Master Crafter<br>+15 Master Inventor"},
-				{Name:"Temple of Inner Light",Realm:"Yanyi Woods (Inner) (8,9) Lvl 546",Comment:"+1% Attack<br>+1% Damage<br>+30 Critical Hit<br>+10 Master Inventor"},
-				{Name:"Greater Statue",Realm:"Gao Tain Lake (View) (15,2) Lvl 554",Comment:"+1% Armor<br>+1% Damage<br>+20 Critical Hit<br>+10 Sustain<br>+20 Glory Seeker"},
-				{Name:"Kyoko Relic",Realm:"Kyoko Island (South) Location (7,3) Lvl 564",Comment:"+1% Defense<br>+1% HP<br>+1% Damage<br>+25 Reinforced Armor<br>+15 Protection"},
-				{Name:"Spearing Light",Realm:"Floating Islands of Wu Kong (West Island) (15,5) Lvl 578",Comment:"+1% Attack<br>+1% Armor<br>+1% HP<br>+1% Damage"},
-				{Name:"Wise Willow",Realm:"Truncal Jungle (South) (9,12) Lvl 583",Comment:"+1% Defense<br>+1% Damage<br>+40 Reinforced Armor"},
-				{Name:"Aura Rock",Realm:"Encrow Bay (Inner) (3,4) Lvl 592",Comment:"+1% Defense<br>+1% Damage<br>+20 Piercing Strike<br>+20 Critical Hit<br>+10 Dodge"},
-				{Name:"Shrieking Spire",Realm:"Desert of Brigands (North) (13,3) Lvl 608",Comment:"+1% Armor<br>+1% Damage<br>+20 Piercing Strike<br>+20 Critical Hit"},
-				{Name:"Giant Necral Skull",Realm:"Necral Fields (South) (3,13) Lvl 619",Comment:"+1% Defense<br>+1% Damage<br>+20 Piercing Strike<br>+10 Dodge<br>+10 Disarm"},
-				{Name:"Glacier Relic",Realm:"Zrozon Glacier (Edge) (5,7) Lvl 624",Comment:"+1% Defense"},
-				{Name:"Hobba Fort",Realm:"Hobba Marsh (Hobgoblin Ruins) (14,14) Lvl 634",Comment:"+1% Attack<br>+1% Defense"},
-				{Name:"Eohlar Relic",Realm:"Eohlar (South) (11,16) Lvl 643",Comment:"+1% Attack<br>+1% Damage"},
-				{Name:"Old Ruins",Realm:"The Fire Forest (Valley) (13,16) Lvl 654",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+10 Piercing Strike<br>+20 Critical Hit<br>+20 Sustain"},
-				{Name:"Barbmore Pillars",Realm:"Barbmore (Highland) (3,3) Lvl 663",Comment:"+1% Attack<br>+1% Armor<br>+1% Damage<br>+20 Reinforced Armor<br>+20 Critical Hit<br>+10 Sustain"},
-				{Name:"Ravaged Cluster",Realm:"Ravaged Forest (Clearing) (10,2) Lvl 673",Comment:"+1% Attack<br>+1% Damage<br>+40 Piercing Strike<br>+10 Dodge"},
-				{Name:"Mittamurk Spires",Realm:"Forsaken Desert (Wastes) (12,10) Lvl 683",Comment:"+1% Attack<br>+1% Armor<br>+20 Breaker<br>+30 Dodge"},
-				{Name:"Hyrmit Pillar",Realm:"Hyrmit Swamps (Verge) (7,2) Lvl 694",Comment:"+1% Defense<br>+1% Damage<br>+20 Piercing Strike<br>+30 Critical Strike"},
-				{Name:"Ossrilan Circle",Realm:"Ossrilan Labyrinth (Cistern) (8,10) Lvl 707",Comment:"+1% Attack<br>+1% Armor<br>+30 Piercing Strike<br>+30 Nullify"},
-				{Name:"Ancient Fort",Realm:"Black Glades (Valley)  (10,8) Lvl 714",Comment:"+1% Defense<br>+1% Damage<br>+25 Reinforced Armor<br>+25 Nullify"},
-				{Name:"Crevasse of Souls",Realm:"Gohar Barrens (Ridge) (2,14) Lvl 728",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Sustain<br>+25 Fury Caster<br>+25 Master Inventor"},
-				{Name:"Huirvast Ruins",Realm:"Huirvast Jungle (Grove) (15,9) Lvl 733",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Critical Hit<br>+25 Nullify<br>+25 Sustain"},
-				{Name:"Guardian Statue",Realm:"Avithral Caves (Entrance) (12,2) Lvl 745",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Sustain"},
-				{Name:"Azlatha Artifact",Realm:"Azlatha Kingdom (Thicket) (15,12) Lvl 752",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge"},
-				{Name:"Pillars of Lindorik",Realm:"Lindorik Kingdom (Edge) (2,2) Lvl 763",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge"},
-				{Name:"Statue of Elidoia",Realm:"Muisru Kingdom (North) (12, 2) Lvl 775",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Disarm"},
-				{Name:"Darghei Statue",Realm:"Darghei Desert (South) (12, 2) Lvl 783",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Shimmering Circle",Realm:"The Lost Ascent (Entrance) (13, 2) Lvl 791",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Statue of Falzwort",Realm:"Falzwort Labyrinth (Halls) (2, 14) Lvl 803",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Abroia Fissure",Realm:"Forest of Abroia (Plateau) (9, 11) Lvl 818",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Enchanted Willow",Realm:"Nualgiath Forest (Thicket) (11, 9) Lvl 827",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Mystical Cluster",Realm:"Gritloar Burrows (Central Chamber) (14,9) Lvl 846",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Piercing Strike<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Doujin Haunt",Realm:"Doujin Swamps (Murk) (9,6) Lvl 853",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Outlores Pillar",Realm:"Outlore Flats (Valley)(13,13) Lvl 866",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Ever Ice Stones",Realm:"Farmane Shore (Slopes)(13,10) Lvl 878",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Goitha Vault",Realm:"Town of Goitha (Courtyard)(6,10) Lvl 834",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Reinforced Armor<br>+25 Breaker<br>+25 Nullify<br>+25 Disarm"},
-				{Name:"Ancient Ruins of Zorx",Realm:"Nualgiath Forest (Ridge)(5,6) Lvl 828",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Enchanted Circle of Pelgarir",Realm:"Pelgarir Valley (Verge)(5,13) Lvl 874",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+25 Critical Hit<br>+25 Breaker<br>+25 Nullify"},
-				{Name:"Sapher Fissure",Realm:"Sapher Flow (Upper)(12,4) Lvl 885",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+25 Nullify<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Artifact of Dryidu",Realm:"Pits of Dryidu (Spires)(5,9) Lvl 897",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+25 Piercing Strike<br>+30 Breaker<br>+25 Dodge<br>+25 Disarm"},
-				{Name:"Menhir of Gore",Realm:"Krudar Crags (West)(10,8) Lvl 904",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+30 Reinforced Armor<br>+30 Critical Hit<br>+25 Breaker<br>+25 Protection"},
-				{Name:"Riangi Cluster",Realm:"Mount Riangi (Flats)(2,13) Lvl 913",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+45 Reinforced Armor<br>+10 Piercing Strike<br>+45 Breaker"},
-				{Name:"Yozahn Growth",Realm:"Isle of Yozahn (Shores)(12,2) Lvl 925",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+15 Breaker<br>+45 Dodge"},
-				{Name:"Barnacle Buckler",Realm:"Dead Dogs Island (Port)(9,7) Lvl 934",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+40 Piercing Strike<br>+25 Critical Strike<br>+15 Dodge<br>+10 Disarm"},
-				{Name:"Sacred Rocks of Zxl",Realm:"Xanlin Plain (Rise)(9,8) Lvl 948",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+35 Piercing Strike<br>+30 Reinforced Armor<br>+15 Critical Hit<br>+15 Dodge"},
-				{Name:"The Blazing Statue",Realm:"Karthak (Mausoleum)(6,8) Lvl 962",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Reinforced Armor<br>+20 Critical Hit<br>+30 Dodge<br>+30 Disarm"},
-				{Name:"Volmar Dark Crystal",Realm:"Volmar Wastes (Rolling Hills)(9,12) Lvl 974",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+15 Piercing Strike<br>+40 Reinforced Armor<br>+40 Critical Hit"},
-				{Name:"Emblazoned Statue",Realm:"Mount Volmar (Roost)(2,13) Lvl 984",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+10 Piercing Strike<br>+10 Critical Hit<br>+15 Breaker<br>+30 Dodge<br>+30 Disarm"},
-				{Name:"Charnel Pit",Realm:"Mount Volmar (Chambers)(10,10) Lvl 993",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+50 Reinforced Armor<br>+25 Breaker<br>+10 Dodge<br>+10 Disarm"},  
-				{Name:"Mushroom Circle",Realm:"Galduir Grove (West)(11,3) Lvl 1008",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+5 XP Gain<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+50 Critical Hit<br>+5 Dodge"},  
-				{Name:"Enchanted Thistle Patch",Realm:"Heilan Lowlands (9,8) Lvl 1012",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+20 Sustain<br>+20 Fury Caster<br>+10 First Strike<br>+5 Master Inventor"},  
-				{Name:"Tartan Stone",Realm:"Stoatin Forest (Meadow) (16,11) Lvl 1023",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Critical Hit<br>+40 Dodge<br>+40 Disarm"},  
-				{Name:"Frost Dragon Bones",Realm:"Mehteh Snow Fields (Edge) (8,4) Lvl 1034",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Piercing Strike<br>+50 Reinforced Armor<br>+30 Critical Hit"},  
-				{Name:"Yellow Snow",Realm:"Ymirheim Mountains (Ascent) (3,5) Lvl 1043",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Reinforced Armor<br>+30 Critical Hit<br>+20 Dodge<br>+30 Disarm"},  
-				{Name:"Elven Wreck",Realm:"Vinder Berg (Shore) (14,7) Lvl 1054",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+10 Breaker"},  
-				{Name:"Oathstone",Realm:"Ranulfr Woods (Depths) (12,13) Lvl 1064",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+5 Piercing Strike<br>+5 Reinforced Armor<br>+30 Critical Hit<br>+10 Breaker"},  
-				{Name:"Trun Cluster",Realm:"Trun Mine (Depths) (1,17) Lvl 1078",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+10 Reinforced Armor<br>+20 Critical Hit<br>+10 Breaker<br>+5 Dodge<br>+5 Disarm"},  
-				{Name:"Haunted Tree",Realm:"Athelstan Woods (Thicket) (15,3) Lvl 1083",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+30 Piercing Strike<br>+30 Reinforced Armor<br>+5 Critical Hit<br>+5 Breaker"},  
-				{Name:"Fountain of Light",Realm:"Cymru Woods (Thicket) (4,15) Lvl 1093",Comment:"+1% Attack<br>+1% Defense<br>+1% Armor<br>+1% HP<br>+1% Damage<br>+1 Stamina<br>+1 XP Gain<br>+15 Reinforced Armor<br>+15 Critical Hit<br>+10 Dodge<br>+10 Disarm"},
-				{Name:"Zargon Dragon Spire",Realm:"Zargon Bonevale (Hungry Gloom) (21,2) Lvl 1108",Comment:"+2% Armor<br>+20 Piercing Strike<br>+20 Breaker<br>+10 Dodge"},
-				{Name:"Pit of Suffering",Realm:"Lorsil Fortress (Lower Cellar) (8,2) Lvl 1119",Comment:"+2% HP<br>+10 Reinforced Armor<br>+30 Holy"},
-				{Name:"The Green Queen",Realm:"Tainted Isle (Coast) (7,11) Lvl 1137",Comment:"+2% Defense<br>+15 Critical Hit<br>+20 Dodge<br>+15 Disarm"},
-				{Name:"Altar of Orggok",Realm:"Nangoo Island (Depths) (12,8) Lvl 1149",Comment:"+2% HP<br>+15 Piercing Strike<br>+20 Reinforced Armor<br>+15 Critical Hit"},
-				{Name:"Shadow Well",Realm:"Umbrae Caverns (Mouth) (3,7) Lvl 1157",Comment:"+2% Attack<br>+20 Piercing Strike<br>+10 Reinforced Armor<br>+15 Critical Hit"},
-				{Name:"Dark Pulpit",Realm:"Labsarx Fortress (Sermon Hall) (2,3) Lvl 1168",Comment:"+2% Armor<br>+20 Holy<br>+10 Protection<br>+15 Sustain"},
-				{Name:"Ancestor Statue",Realm:"Valgotic Halls (Golem Yard) (3,20) Lvl 1179",Comment:"+2% Damage<br>+20 Piercing Strike<br>+20 Reinforced Armor<br>+20 Protect Gold"},
-				{Name:"Atrum Gallows",Realm:"Atrum Town (Center) (6,7) Lvl 1188",Comment:"+2% Defense<br>+20 Critical Hit<br>+20 Disarm<br>+120 First Strike"},
-				{Name:"Zendell Weapon Cache",Realm:"Zendell Keep (Barracks) (13,16) Lvl 1198",Comment:"+2% HP<br>+20 Piercing Strike<br>+20 Critical Hit<br>+20 First Strike"},
-				{Name:"Atrum Cow Inna Bun",Realm:"Atrum Farmland (Milking Barns) (12,6) Lvl 1206",Comment:"+2% HP<br>+20 Reinforced Armor<br>+20 Protection<br>+20 Disarm"}
-			];
-		}
-		return Data.relicArray;
-	},
-
 	buffList: function() {
 		if (!Data.buffArray) {
 			Data.buffArray = [
@@ -1786,9 +1657,6 @@ var Helper = {
 			case "chat":
 				Helper.addChatTextArea();
 				Helper.addLogColoring("Chat", 0);
-				break;
-			case "reliclist":
-				Helper.injectRelicList();
 				break;
 			case "log":
 				Helper.addLogColoring("GuildLog", 1);
@@ -3320,11 +3188,18 @@ var Helper = {
 
 	mapThis: function() {
 		if (!GM_getValue("footprints")) {return;}
-		var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+		if (isNewUI == 1) {
+			var realm = System.findNode('//h3[@id="world-realm-name"]');
+			if ($('h3#world-realm-name').data('realm')) {
+				var realmId = $('h3#world-realm-name').data('realm').id.trim();
+				var levelName = $('h3#world-realm-name').data('realm').name.trim();
+			}
+		} else {
+			var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+		}
 		var posit = Helper.position();
-
 		if ((realm) && (posit)) {
-			var levelName=realm.innerHTML;
+			if (!levelName) var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
 			var theMap = System.getValueJSON("map");
 			if (!theMap) {
@@ -4210,12 +4085,6 @@ var Helper = {
 						if (lastActivityMinutes < 2) playerA.css('color','green');
 						else if (lastActivityMinutes < 5) playerA.css('color','white');
 						else playerA.css('color','gray');
-						//only need buff link for the current player
-						if (playerName.trim() == Helper.characterName.trim()) {
-							$(this).find('div.guild-minibox-actions a#guild-minibox-action-trade').hide();
-							$(this).find('div.guild-minibox-actions a#guild-minibox-action-secure-trade').hide();
-							$(this).find('div.guild-minibox-actions a#guild-minibox-action-send-message').hide();
-						}
 				});
 				var chatH4 = $('h4:contains("Chat")');
 				chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatH4.html() + '</span></a>');
@@ -4276,15 +4145,6 @@ var Helper = {
 							playerNameLinkElement.style.color = 'gray';
 							playerNameLinkElement.firstChild.style.color = 'gray';
 						}
-						if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
-							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-							if (messageLink.style) messageLink.style.visibility = 'hidden';
-							buffLink = messageLink.nextSibling.nextSibling;
-							secureTradeLink = buffLink.nextSibling.nextSibling;
-							secureTradeLink.style.visibility = 'hidden';
-							tradeLink = secureTradeLink.nextSibling.nextSibling;
-							tradeLink.style.visibility = 'hidden';
-						}
 						onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
 					}
 				}
@@ -4319,12 +4179,6 @@ var Helper = {
 						if (lastActivityMinutes < 2) playerA.css('color','DodgerBlue');
 						else if (lastActivityMinutes < 5) playerA.css('color','LightSkyBlue');
 						else playerA.css('color','PowderBlue');
-						//only need buff link for the current player
-						if (playerName.trim() == Helper.characterName.trim()) {
-							$(this).find('div.online-allies-actions a#online-allies-action-trade').hide();
-							$(this).find('div.online-allies-actions a#online-allies-action-secure-trade').hide();
-							$(this).find('div.online-allies-actions a#online-allies-action-send-message').hide();
-						}
 				});
 			}
 		} else {
@@ -4353,15 +4207,6 @@ var Helper = {
 						} else {
 							playerNameLinkElement.style.color = 'PowderBlue';
 							playerNameLinkElement.firstChild.style.color = 'PowderBlue';
-						}
-						if (playernameColumn.textContent.trim() == Helper.characterName.trim()) {
-							messageLink = onlineAlliesSecondCell.firstChild.nextSibling;
-							if (messageLink.style) messageLink.style.visibility = 'hidden';
-							buffLink = messageLink.nextSibling.nextSibling;
-							secureTradeLink = buffLink.nextSibling.nextSibling;
-							secureTradeLink.style.visibility = 'hidden';
-							tradeLink = secureTradeLink.nextSibling.nextSibling;
-							tradeLink.style.visibility = 'hidden';
 						}
 						onlineAlliesSecondCell.innerHTML = '<nobr>' + onlineAlliesSecondCell.innerHTML + '</nobr>';
 					}
@@ -4630,8 +4475,16 @@ var Helper = {
 
 		if (!footprints) { // clear footprints
 			var theMap = System.getValueJSON("map");
-			var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
-			var levelName=realm.innerHTML;
+			if (isNewUI == 1) {
+				var realm = System.findNode('//h3[@id="world-realm-name"]');
+				if ($('h3#world-realm-name').data('realm')) {
+					var realmId = $('h3#world-realm-name').data('realm').id.trim();
+					var levelName = $('h3#world-realm-name').data('realm').name.trim();
+				}
+			} else {
+				var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+			}
+			if (!levelName) var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
 			theMap["levels"][Helper.levelName]={};
 			System.setValueJSON("map", theMap);
@@ -5260,12 +5113,14 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
-		if (isNewUI == 1 && $('#worldPage').length == 0) { //new UI and not new map
-			//clear out the HCS keybinds so only helper ones fire
-			$.each($(document).controls('option').keys, function(index, value) { 
-				$(document).controls('option').keys[index] = [];
-			});
-		}
+		setTimeout(function() { // FF3.6 was not working without the timeout in place
+			if (isNewUI == 1 && $('#worldPage').length == 0) { //new UI and not new map
+				//clear out the HCS keybinds so only helper ones fire
+				$.each($(document).controls('option').keys, function(index, value) { 
+					$(document).controls('option').keys[index] = [];
+				});
+			}
+		}, 0);
 		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
 			window.document.wrappedJSObject.onkeypress = null;
 			window.document.wrappedJSObject.combatKeyHandler = null;
@@ -10561,30 +10416,6 @@ var Helper = {
 			}, 500);
 	},
 
-	injectRelicList: function(){
-		var relics = Data.relicList();
-		var relicImages = System.findNodes("//img[contains(@src,'/relics/')]");
-		var relicFound = false;
-		for (var i=0; i<relicImages.length; i++){
-			var relicImage = relicImages[i];
-			var relicName = relicImage.parentNode.nextSibling.nextSibling.textContent.trim();
-			relicFound = false;
-			for (var j=0; j<relics.length; j++){
-				var relic = relics[j];
-				if (relicName == relic.Name.trim()){
-					var onmouseoverText='<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + relic.Name + '</span><br /><br />' +
-						relic.Realm + '<br><br>' +
-						relic.Comment + '</span>';
-					$(relicImage).attr("data-tipped", onmouseoverText);
-					$(relicImage).addClass("tipped");
-					relicFound = true;
-					break;
-				}
-			}
-			if (!relicFound) GM_log("Relic:'" + relicName + "' not found in data set");
-		}
-	},
-
 	injectSettingsGuildData: function(guildType) {
 		var result='';
 		result += '<input name="guild' + guildType + '" size="60" value="' + GM_getValue("guild" + guildType) + '">';
@@ -14476,7 +14307,13 @@ var Helper = {
 			node.html("<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>");
 		}
 		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
-
+		$(document).ready(function(){  
+			menuYloc = parseInt($('#helperMenu').css("top").substring(0,$('#helperMenu').css("top").indexOf("px")))  
+			$(window).scroll(function () {  
+				var offset = menuYloc+$(document).scrollTop()+"px";  
+				$('#helperMenu').animate({top:offset},{duration:0,queue:false});  
+			});  
+		}); 
 	},
 
 	showHelperMenu: function(evt) { //jqeury ready
