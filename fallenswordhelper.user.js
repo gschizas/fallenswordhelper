@@ -1227,6 +1227,9 @@ var Helper = {
 		System.setDefault("hideBuffSelected", true);
 		System.setDefault("enableFastWalk", true);
 		System.setDefault("hideHelperMenu", false);
+		System.setDefault("keepHelperMenuOnScreen", true);
+		System.setDefault("quickLinksTopPx", 22);
+		System.setDefault("quickLinksLeftPx", 0);
 		System.setDefault("showNextQuestSteps", true);
 
 		Helper.setItemFilterDefault();
@@ -10535,6 +10538,10 @@ var Helper = {
 				':</td><td><input name="hideBuffSelected" type="checkbox" value="on"' + (GM_getValue("hideBuffSelected")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Helper Menu' + Helper.helpLink('Hide Helper Menu', 'Hides the helper menu from top left.') +
 				':</td><td><input name="hideHelperMenu" type="checkbox" value="on"' + (GM_getValue("hideHelperMenu")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Keep Helper Menu On Screen' + Helper.helpLink('Keep Helper Menu On Screen', 'Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links.') +
+				':</td><td><input name="keepHelperMenuOnScreen" type="checkbox" value="on"' + (GM_getValue("keepHelperMenuOnScreen")?" checked":"") + '></td></tr>' +
+			'<tr><td align="right">Quick Links Screen Location' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
+				':</td><td>Top: <input name="quickLinksTopPx" size="1" value="'+ GM_getValue("quickLinksTopPx") + '" /> Left: <input name="quickLinksLeftPx" size="1" value="'+ GM_getValue("quickLinksLeftPx") + '" /></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -10921,6 +10928,8 @@ var Helper = {
 		System.saveValueForm(oForm, "enableAllyOnlineList");
 		System.saveValueForm(oForm, "enableEnemyOnlineList");
 		System.saveValueForm(oForm, "allyEnemyOnlineRefreshTime");
+		System.saveValueForm(oForm, "quickLinksTopPx");
+		System.saveValueForm(oForm, "quickLinksLeftPx");
 
 		System.saveValueForm(oForm, "enableActiveBountyList");
 		System.saveValueForm(oForm, "bountyListRefreshTime");
@@ -10957,6 +10966,7 @@ var Helper = {
 		System.saveValueForm(oForm, "enableFastWalk");
 		System.saveValueForm(oForm, "showFastWalkIconOnWorld");
 		System.saveValueForm(oForm, "hideHelperMenu");
+		System.saveValueForm(oForm, "keepHelperMenuOnScreen");
 		System.saveValueForm(oForm, "showNextQuestSteps");
 
 		window.alert("FS Helper Settings Saved");
@@ -14303,13 +14313,15 @@ var Helper = {
 			node.html("<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>");
 		}
 		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
-		$(document).ready(function(){  
-			menuYloc = parseInt($('#helperMenu').css("top").substring(0,$('#helperMenu').css("top").indexOf("px")))  
-			$(window).scroll(function () {  
-				var offset = menuYloc+$(document).scrollTop() - 22 + "px";  
-				$('#helperMenu').animate({top:offset},{duration:0,queue:false});  
-			});  
-		}); 
+		$('#helperMenu').draggable();
+		if (GM_getValue("keepHelperMenuOnScreen")) {
+			$(document).ready(function(){  
+				$(window).scroll(function () {  
+					var offset = $(document).scrollTop() + "px";  
+					$('#helperMenu').animate({top:offset},{duration:0,queue:false});  
+				});  
+			}); 
+		}
 	},
 
 	showHelperMenu: function(evt) { //jqeury ready
@@ -14381,7 +14393,19 @@ var Helper = {
 		if (isNewUI == 1) {
 			var node=$('#statbar-container');
 			if (node.length==0) return;
-			node.before("<div align='center' style='position:absolute; top:22px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=fshQuickLinks nowrap>Quick Links</div>");
+			var html = "<div style='cursor:pointer; text-decoration:underline; text-align:left; position:absolute; color:black; top:" + GM_getValue("quickLinksTopPx") + "px; left:" + GM_getValue("quickLinksLeftPx") + "px; " +
+				"background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; " +
+				"-moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1; width: 100px;' id=fshQuickLinks nowrap>";
+			html += "<ul>";
+			for (var i=0; i<quickLinks.length; i++) {
+					html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
+						(quickLinks[i].newWindow?' target=new':"") +
+						'>' + quickLinks[i].name + '</a></span></li>';
+				
+			}
+			html += "</ul></div>";
+			node.before(html);
+			$('#fshQuickLinks').draggable();
 		} else { // old UI logic
 			var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
 			if (!insertBeforeHere) return;
@@ -14394,31 +14418,15 @@ var Helper = {
 			result += '<br/>'
 			$(insertBeforeHere).before('<div style="background:black;text-align:left;background-image:none;z-index:100;position:absolute;filter:alpha(opacity=40);" id="fshQuickLinks">'+result+'</div>');
 		}
-		$('#fshQuickLinks').bind("mouseover", Helper.showQuickLinks);
-		$(document).ready(function(){  
-			menuYloc = parseInt($('#fshQuickLinks').css("top").substring(0,$('#fshQuickLinks').css("top").indexOf("px")))  
-			$(window).scroll(function () {  
-				var offset = menuYloc+$(document).scrollTop()+ "px";  
-				$('#fshQuickLinks').animate({top:offset},{duration:0,queue:false});  
-			});  
-		}); 
-	},
-
-	showQuickLinks: function(evt) { //jqeury ready
-		var quickLinks = Helper.quickLinks;
-		$('#fshQuickLinks').unbind("mouseover", Helper.showQuickLinks);
-		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=fshQuickLinksDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
-		html += "<div class=column>";
-		html += "<ul>";
-		for (var i=0; i<quickLinks.length; i++) {
-				html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
-					(quickLinks[i].newWindow?' target=new':"") +
-					'>' + quickLinks[i].name + '</a></span></li>';
-			
+		if (GM_getValue("keepHelperMenuOnScreen")) {
+			var quickLinksTopPx = parseInt(GM_getValue("quickLinksTopPx"));
+			$(document).ready(function(){  
+				$(window).scroll(function () {  
+					var offset = quickLinksTopPx + $(document).scrollTop() + "px";  
+					$('#fshQuickLinks').animate({top:offset},{duration:0,queue:false});  
+				});  
+			}); 
 		}
-		html += "</ul>";
-		$("#fshQuickLinks").append(html);
-		$("#fshQuickLinks").click(function() {$("#fshQuickLinksDiv").toggle("fast");});
 	},
 
 	injectCreateMap: function(content) {
