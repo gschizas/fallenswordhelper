@@ -3842,6 +3842,18 @@ var Helper = {
 			
 		}
 
+		// subscribe to view creature events on the new map.
+		if ($('#worldPage').length > 0) { // new map
+			$.subscribe('ready.view-creature', function(e, data) { 
+				$('div#creatureEvaluator').html("");
+				$('div#creatureEvaluatorGroup').html("");
+				System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData,
+					{"groupExists": false, "groupAttackValue": 0, "groupDefenseValue": 0,
+					"groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0});
+				System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
+			});
+		}
+
 		try {
 			var curTile = System.findNode("//img[contains(@title, 'You are here')]/ancestor::td[@width='40' and @height='40']").getAttribute("background");
 			if (GM_getValue("currentTile") != curTile) {
@@ -9348,7 +9360,7 @@ var Helper = {
 	injectCreature: function() {
 		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData,
 			{"groupExists": false, "groupAttackValue": 0, "groupDefenseValue": 0,
-				"groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0});
+				"groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0, "groupEvaluation": false});
 		System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
 
 		var creatureName = System.findNode('//td[@align="center"]/font[@size=3]/b');
@@ -9401,7 +9413,7 @@ var Helper = {
 		var groupHPValue = System.findNode("//table[@width='400']/tbody/tr/td[contains(.,'HP:')]",doc).nextSibling.textContent.replace(/,/,"")*1;
 		System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData,
 			{"groupExists": true, "groupAttackValue": groupAttackValue, "groupDefenseValue": groupDefenseValue,
-				"groupArmorValue": groupArmorValue, "groupDamageValue": groupDamageValue, "groupHPValue": groupHPValue});
+				"groupArmorValue": groupArmorValue, "groupDamageValue": groupDamageValue, "groupHPValue": groupHPValue, "groupEvaluation": true});
 	},
 
 	getCreaturePlayerData: function(responseText, callback) {
@@ -9534,6 +9546,7 @@ var Helper = {
 		//group data (if appropriate)
 		var groupAttackValue = 0, groupDefenseValue = 0,  groupArmorValue = 0, groupDamageValue = 0, groupHPValue = 0;
 		groupExists = callback.groupExists;
+		groupEvaluation = callback.groupEvaluation;
 		if (groupExists) {
 			groupAttackValue = callback.groupAttackValue;
 			groupDefenseValue = callback.groupDefenseValue;
@@ -9541,9 +9554,6 @@ var Helper = {
 			groupDamageValue = callback.groupDamageValue;
 			groupHPValue = callback.groupHPValue;
 		}
-		//creaturedata
-		var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
-		if (!creatureStatTable) {return;}
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var attackVariable = 1.1053, generalVariable = 1.1053, hpVariable = 1.1;
 		if (combatEvaluatorBias == 1) {
@@ -9553,20 +9563,34 @@ var Helper = {
 			generalVariable = 1.053;
 			hpVariable = 1;
 		}
-		var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
-		var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
-		var creatureAttack  = System.intValue(creatureStatTable.rows[2].cells[1].textContent);
-		var creatureDefense = System.intValue(creatureStatTable.rows[2].cells[3].textContent);
-		var creatureArmor   = System.intValue(creatureStatTable.rows[3].cells[1].textContent);
-		var creatureDamage  = System.intValue(creatureStatTable.rows[3].cells[3].textContent);
-		var creatureHP      = System.intValue(creatureStatTable.rows[4].cells[1].textContent);
+		//creaturedata
+		if ($('#worldPage').length > 0) { // new map
+			var creatureName    = $('#dialog-viewcreature').find('h2.name').text();
+			var creatureClass   = $('#dialog-viewcreature').find('span.classification').text();
+			var creatureLevel   = $('#dialog-viewcreature').find('span.level').text();
+			var creatureAttack  = System.intValue($('#dialog-viewcreature').find('dd.attribute-atk').text());
+			var creatureDefense = System.intValue($('#dialog-viewcreature').find('dd.attribute-def').text());
+			var creatureArmor   = System.intValue($('#dialog-viewcreature').find('dd.attribute-arm').text());
+			var creatureDamage  = System.intValue($('#dialog-viewcreature').find('dd.attribute-dmg').text());
+			var creatureHP      = System.intValue($('#dialog-viewcreature').find('p.health-max').text());
+		} else { //old UI
+			var creatureStatTable = System.findNode("//table[tbody/tr/td[.='Statistics']]");
+			if (!creatureStatTable) {return;}
+			var creatureName    = System.findNode("//td/font[@size='3'][b]").textContent.trim();
+			var creatureClass   = creatureStatTable.rows[1].cells[1].textContent;
+			var creatureLevel   = creatureStatTable.rows[1].cells[3].textContent;
+			var creatureAttack  = System.intValue(creatureStatTable.rows[2].cells[1].textContent);
+			var creatureDefense = System.intValue(creatureStatTable.rows[2].cells[3].textContent);
+			var creatureArmor   = System.intValue(creatureStatTable.rows[3].cells[1].textContent);
+			var creatureDamage  = System.intValue(creatureStatTable.rows[3].cells[3].textContent);
+			var creatureHP      = System.intValue(creatureStatTable.rows[4].cells[1].textContent);
+		}
 		var extraNotes = "", holyFlameBonusDamage = 0;
 		//reduce stats if critter is a SE and player has SES cast on them.
 		var superEliteSlayerMultiplier = 0;
 		if (superEliteSlayerLevel > 0) {
 			superEliteSlayerMultiplier = Math.round(0.002 * superEliteSlayerLevel*100)/100;
 		}
-		var creatureName = System.findNode("//td/font[@size='3'][b]").textContent.trim();
 		if (creatureName.search("Super Elite") != -1) {
 			creatureAttack -= Math.ceil(creatureAttack * superEliteSlayerMultiplier);
 			creatureDefense -= Math.ceil(creatureDefense * superEliteSlayerMultiplier);
@@ -9666,12 +9690,8 @@ var Helper = {
 				extraNotes += "You need a minimum of CA" + lowestCALevelToStillKill + " to 1-hit kill this creature<br>";
 			}
 		}
-
 		//display data
-		var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
-		var newCell = newRow.insertCell(0);
-		newCell.colSpan = '4';
-		newCell.innerHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>" + (groupExists? "Group ":"") + "Combat Evaluation</td></tr>" +
+		var evaluatorHTML = "<table width='100%'><tbody><tr><td bgcolor='#CD9E4B' colspan='4' align='center'>" + (groupExists? "Group ":"") + "Combat Evaluation</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'>Will I hit it? </td><td align='left'>" + (hitByHowMuch > 0? "Yes":"No") + "</td>" +
 				"<td align='right'><span style='color:#333333'>Extra Attack: </td><td align='left'>( " + hitByHowMuch + " )</td></tr>" +
 			"<tr><td align='right'><span style='color:#333333'># Hits to kill it? </td><td align='left'>" + numberOfHitsRequired + "</td>" +
@@ -9689,6 +9709,22 @@ var Helper = {
 				"*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, Sanctuary, Constitution, Fortitude, Chi Strike and Terrorize (if active) and allow for randomness (1.1053). " +
 				"Constitution, NMV, Fortitude and Chi Strike apply to group stats.</span></td></tr>" +
 			"</tbody></table>";
+		if ($('#worldPage').length > 0) { // new map
+			if (groupEvaluation) {
+				if ($('div#creatureEvaluatorGroup').length == 0) $('#dialog-viewcreature').append('<div id="creatureEvaluatorGroup" style="clear:both;"></div>');
+				var tempdata = evaluatorHTML.replace(/'/g,"\\'");
+				$('div#creatureEvaluatorGroup').html(tempdata)
+			} else {
+				if ($('div#creatureEvaluator').length == 0) $('#dialog-viewcreature').append('<div id="creatureEvaluator" style="clear:both;"></div>');
+				var tempdata = evaluatorHTML.replace(/'/g,"\\'");
+				$('div#creatureEvaluator').html(tempdata)
+			}
+		} else {
+			var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
+			var newCell = newRow.insertCell(0);
+			newCell.colSpan = '4';
+			newCell.innerHTML = evaluatorHTML;
+		}
 	},
 
 	injectBioWidgets: function() {
@@ -11607,9 +11643,11 @@ var Helper = {
 
 	getScoutTowerDetails: function(responseText) {
 		var doc=System.createDocumentWithImages(responseText);
-		var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/scouttower_header.jpg')]]", doc);
+		if (isNewUI == 1) var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/banners/scouttower.png')]]", doc);
+		else var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/scouttower_header.jpg')]]", doc);
 		if (scoutTowerTable) {
-			var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/titankilllog_banner.jpg')]]");
+			if (isNewUI == 1) var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/banners/titankilllog.png')]]");
+			else var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/titankilllog_banner.jpg')]]");
 			var newRow = titanTable.insertRow(0);
 			var newCell = newRow.insertCell(0);
 			newCell.align = "center";
