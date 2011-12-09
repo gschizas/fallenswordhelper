@@ -3839,11 +3839,11 @@ var Helper = {
 		// JT also said that $('#worldPage') will work to detect new map until something better
 		//   is available
 			// alert("BETA");
-			
 		}
 
-		// subscribe to view creature events on the new map.
 		if ($('#worldPage').length > 0) { // new map
+			// subscribe to view creature events on the new map.
+			Helper.doNotKillList = GM_getValue("doNotKillList");
 			$.subscribe('ready.view-creature', function(e, data) { 
 				$('div#creatureEvaluator').html("");
 				$('div#creatureEvaluatorGroup').html("");
@@ -3851,6 +3851,52 @@ var Helper = {
 					{"groupExists": false, "groupAttackValue": 0, "groupDefenseValue": 0,
 					"groupArmorValue": 0, "groupDamageValue": 0, "groupHPValue": 0});
 				System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
+				
+				$('div#addRemoveCreatureToDoNotKillList').html("");
+				GM_log($('#dialog-viewcreature').find('h2.name').text());
+				if ($('div#addRemoveCreatureToDoNotKillList').length == 0) {
+					var doNotKillElement = '<div id="addRemoveCreatureToDoNotKillList"' +
+					'" class="description" style="cursor:pointer;text-decoration:underline;color:blue;"></div>';
+					$(doNotKillElement).insertAfter($('#dialog-viewcreature').find('p.description'));
+				}
+				var creatureName = $('#dialog-viewcreature').find('h2.name').text();
+				$('div#addRemoveCreatureToDoNotKillList').attr("creatureName",creatureName);
+				var extraText = 'Add to the do not kill list';
+				if (Helper.doNotKillList.indexOf(creatureName) != -1) extraText = 'Remove from do not kill list';
+				$('div#addRemoveCreatureToDoNotKillList').html(extraText)
+				document.getElementById('addRemoveCreatureToDoNotKillList').addEventListener('click', Helper.addRemoveCreatureToDoNotKillList, true);
+			});
+			// add do-not-kill list functionality
+			$.subscribe('after-update.actionlist', function(e, data) {
+				// color the critters in the do no kill list blue
+				$('ul#actionList div.header').each(function() {
+					if (Helper.doNotKillList.indexOf($(this).find('a.icon').data('name')) != -1) {
+						$(this).css('color','blue')
+					}
+				});
+				// then intercept the action call 
+				if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
+					var gameData = window.wrappedJSObject.GameData;
+					var hcs = window.wrappedJSObject.HCS;
+				} else {
+					var gameData = unsafeWindow.GameData;
+					var hcs = unsafeWindow.HCS;
+				}
+				var oldDoAction = gameData.doAction;
+				gameData.doAction = function(actionCode, fetchFlags, data){
+					if(actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT){
+						// Do custom stuff e.g. do not kill list
+						var attackNumber = parseInt(data.passback) + 1;
+						var creatureIcon = $('ul#actionList a.attack-'+ attackNumber).parents('div.header').find('a.icon');
+						if (Helper.doNotKillList.indexOf(creatureIcon.data('name')) != -1) {
+							creatureIcon.removeClass('loading');
+							return;
+						}
+					}
+				   
+					// Call standard action
+					oldDoAction(actionCode, fetchFlags, data);
+				}; 
 			});
 		}
 
@@ -9393,6 +9439,13 @@ var Helper = {
 			evt.target.innerHTML = 'Remove from do not kill list';
 		}
 		GM_setValue("doNotKillList",newDoNotKillList);
+		Helper.doNotKillList = newDoNotKillList;
+		//refresh the action list
+		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
+			window.wrappedJSObject.GameData.doAction(-1);
+		} else {
+			var gameData = unsafeWindow.GameData.doAction(-1);
+		}
 	},
 
 	checkIfGroupExists: function(responseText) {
@@ -9713,11 +9766,11 @@ var Helper = {
 			if (groupEvaluation) {
 				if ($('div#creatureEvaluatorGroup').length == 0) $('#dialog-viewcreature').append('<div id="creatureEvaluatorGroup" style="clear:both;"></div>');
 				var tempdata = evaluatorHTML.replace(/'/g,"\\'");
-				$('div#creatureEvaluatorGroup').html(tempdata)
+				$('div#creatureEvaluatorGroup').html(tempdata);
 			} else {
 				if ($('div#creatureEvaluator').length == 0) $('#dialog-viewcreature').append('<div id="creatureEvaluator" style="clear:both;"></div>');
 				var tempdata = evaluatorHTML.replace(/'/g,"\\'");
-				$('div#creatureEvaluator').html(tempdata)
+				$('div#creatureEvaluator').html(tempdata);
 			}
 		} else {
 			var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
@@ -14341,15 +14394,11 @@ var Helper = {
 		if (GM_getValue("hideHelperMenu")) return;
 		if (isNewUI == 1) {
 			var node=$('#statbar-container');
-			if (node.length==0) return;
-			node.before("<div align='center' style='position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</div>");
 		} else {
-			var node=$('img[src*="knight_corner.gif"]').parent();
-			if (node.length==0) return;
-			node.attr('background','http://huntedcow.cachefly.net/fs/skin/welcome/knight_corner.gif');
-			node.attr('align', 'center');
-			node.html("<span style='color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</span>");
+			var node=$('div.top_banner');
 		}
+		if (node.length==0) return;
+		node.before("<div align='center' style='position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</div>");
 		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
 		$('#helperMenu').draggable();
 		if (GM_getValue("keepHelperMenuOnScreen")) {
@@ -14430,32 +14479,22 @@ var Helper = {
 		if (GM_getValue("hideHelperMenu")) return;
 		if (isNewUI == 1) {
 			var node=$('#statbar-container');
-			if (node.length==0) return;
-			var html = "<div style='cursor:pointer; text-decoration:underline; text-align:left; position:absolute; color:black; top:" + GM_getValue("quickLinksTopPx") + "px; left:" + GM_getValue("quickLinksLeftPx") + "px; " +
-				"background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; " +
-				"-moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1; width: 100px;' id=fshQuickLinks nowrap>";
-			html += "<ul>";
-			for (var i=0; i<quickLinks.length; i++) {
-					html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
-						(quickLinks[i].newWindow?' target=new':"") +
-						'>' + quickLinks[i].name + '</a></span></li>';
-				
-			}
-			html += "</ul></div>";
-			node.before(html);
-			$('#fshQuickLinks').draggable();
-		} else { // old UI logic
-			var insertBeforeHere = $('img[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//$('img option:[src*="inner_top.jpg"],[src*="realm_top_a.jpg"]');//<div class="innerContent">
-			if (!insertBeforeHere) return;
-			result="&nbsp;&nbsp;";
-			for (var i=0; i<quickLinks.length; i++) {
-				result+='<a style="font-size:x-small;color:white;" href="' + quickLinks[i].url + '"' +
-					(quickLinks[i].newWindow?' target=new':"") +
-					'>' + quickLinks[i].name + '</a> ;';
-			}
-			result += '<br/>'
-			$(insertBeforeHere).before('<div style="background:black;text-align:left;background-image:none;z-index:100;position:absolute;filter:alpha(opacity=40);" id="fshQuickLinks">'+result+'</div>');
+		} else {
+			var node=$('div.top_banner');
 		}
+		if (node.length==0) return;
+		var html = "<div style='cursor:pointer; text-decoration:underline; text-align:left; position:absolute; color:black; top:" + GM_getValue("quickLinksTopPx") + "px; left:" + GM_getValue("quickLinksLeftPx") + "px; " +
+			"background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; " +
+			"-moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1; width: 100px;' id=fshQuickLinks nowrap>";
+		for (var i=0; i<quickLinks.length; i++) {
+				html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
+					(quickLinks[i].newWindow?' target=new':"") +
+					'>' + quickLinks[i].name + '</a></span></li>';
+			
+		}
+		html += "</div>";
+		node.before(html);
+		$('#fshQuickLinks').draggable();
 		if (GM_getValue("keepHelperMenuOnScreen")) {
 			var quickLinksTopPx = parseInt(GM_getValue("quickLinksTopPx"));
 			$(document).ready(function(){  
