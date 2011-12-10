@@ -6453,7 +6453,7 @@ var Helper = {
 	injectDropItems: function() {
 		var subPage2Id=System.findNode("//input[@type='hidden' and @name='subcmd2']");
 		subPage2Id=subPage2Id?subPage2Id.getAttribute("value"):"-";
-		var mainTable = System.findNode("//table[@width='600']");
+		var mainTable = System.findNode("//table[tbody/tr/td/table/tbody/tr/td/input[@name='storeIndex[]']]");
 		var showExtraLinks = GM_getValue("showExtraLinks");
 		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
 		var showQuickSendLinks = GM_getValue("showQuickSendLinks");
@@ -14471,12 +14471,11 @@ var Helper = {
 	},
 
 	injectQuickLinks: function() { //jquery ready
-	// don't put all the menu code here (but call if clicked) to minimize lag
+		// don't put all the menu code here (but call if clicked) to minimize lag
 		var quickLinks = System.getValueJSON("quickLinks");
 		if (!quickLinks) quickLinks=[];
 		Helper.quickLinks = quickLinks;
 		if (quickLinks.length<=0) return;
-		if (GM_getValue("hideHelperMenu")) return;
 		if (isNewUI == 1) {
 			var node=$('#statbar-container');
 		} else {
