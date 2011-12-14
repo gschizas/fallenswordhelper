@@ -1008,14 +1008,15 @@ var Layout = {
 	},
 
 	infoBox: function(documentText) {
-		var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
-		infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)</i;
+		//var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
+		//infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\"\#000000\"><center>([^<]+)</i;
 		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully recalled the item.</center>
 		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully took the item into your backpack.</center>
-		var infoMatch = documentText.match(infoRE);
+		var infoMatch = $(documentText).find('center[id="info-msg"]').html();
+		var infoMatch = infoMatch.replace(/<br.*/,"");
 		var result="";
 		if (infoMatch) {
-			result=infoMatch[1];
+			result=infoMatch;
 		}
 		return result;
 	},
