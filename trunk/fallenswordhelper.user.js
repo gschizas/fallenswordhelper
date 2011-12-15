@@ -13,20 +13,6 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
-
-/*
-
-fixed FSH settigns page display issue
-updated guild inventory manager
-updated player inventory manager
-updated ah bulk posting
-updated quick extract
-fixed arena sort issue
-added yuuzhan's fsh log parser to the combat log page
-
-*/
-
-
 // EVERYTHING MUST BE IN main()
 var main = function() {
 
