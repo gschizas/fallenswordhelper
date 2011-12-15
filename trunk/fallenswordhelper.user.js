@@ -13,6 +13,20 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
+
+/*
+
+fixed FSH settigns page display issue
+updated guild inventory manager
+updated player inventory manager
+updated ah bulk posting
+updated quick extract
+fixed arena sort issue
+added yuuzhan's fsh log parser to the combat log page
+
+*/
+
+
 // EVERYTHING MUST BE IN main()
 var main = function() {
 
@@ -1013,9 +1027,9 @@ var Layout = {
 		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully recalled the item.</center>
 		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color="#000000"><center>You successfully took the item into your backpack.</center>
 		var infoMatch = $(documentText).find('center[id="info-msg"]').html();
-		var infoMatch = infoMatch.replace(/<br.*/,"");
 		var result="";
 		if (infoMatch) {
+			infoMatch = infoMatch.replace(/<br.*/,"");
 			result=infoMatch;
 		}
 		return result;
@@ -1273,7 +1287,7 @@ var Helper = {
 	},
 
 	setItemFilterDefault: function() {
-		Helper.itemFilters = [
+/*		Helper.itemFilters = [
 		{"id":"showGloveTypeItems", "type":"Gloves"},
 			{"id":"showHelmetTypeItems", "type":"Helmet"},
 		{"id":"showAmuletTypeItems", "type":"Amulet"},
@@ -1284,11 +1298,24 @@ var Helper = {
 		{"id":"showBootTypeItems", "type":"Boots"},
 		{"id":"showRuneTypeItems", "type":"Rune"}
 		];
-
+*/
+		//re-arranged array to so that arrayid = type number for HCS: item.item_type = i
+		Helper.itemFilters = [
+			{"id":"showHelmetTypeItems", "type":"Helmet"},
+			{"id":"showAmorTypeItems", "type":"Armor"},
+			{"id":"showGloveTypeItems", "type":"Gloves"},
+			{"id":"showBootTypeItems", "type":"Boots"},
+			{"id":"showWeaponTypeItems", "type":"Weapon"},
+			{"id":"showShieldTypeItems", "type":"Shield"},
+			{"id":"showRingTypeItems", "type":"Ring"},
+			{"id":"showAmuletTypeItems", "type":"Amulet"},
+			{"id":"showRuneTypeItems", "type":"Rune"},
+		];
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			System.setDefault(Helper.itemFilters[i].id, true);
 		}
 	},
+
 
 	readInfo: function() {
 		if (isNewUI == 1) {
@@ -1612,7 +1639,7 @@ var Helper = {
 			case "create":
 				Helper.injectCreateAuctionTemplate();
 				Helper.injectCreateAuctionBulkSell();
-				Helper.injectAuctionSTCheck();
+				//Helper.injectAuctionSTCheck();
 				break;
 			case "preferences":
 				break;
@@ -1729,7 +1756,7 @@ var Helper = {
 				Helper.injectInventoryManager();
 				break;
 			case "guildinvmanager":
-				Helper.injectGuildInventoryManager();
+				Helper.injectInventoryManager();
 				break;
 			case "recipemanager":
 				Helper.injectRecipeManager();
@@ -1799,10 +1826,10 @@ var Helper = {
 			Helper.retrieveTradeConfirm();
 			switch (subPageId) {
 			case "createsecure":
-				Helper.injectSecureTrade();
+				Helper.injectTrade();
 				break;
 			case "-":
-				Helper.injectStandardTrade();
+				Helper.injectTrade();
 				break;
 			default:
 				break;
@@ -2377,26 +2404,22 @@ var Helper = {
 
 	injectLevelupCalculator: function() {
 		//check for beta as beta has class= additions in the mouse over
-		if(isBeta){ //New Map Style
-			var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
-			if (!levelupImageElement) {return;}
-			var mouseoverText = $(levelupImageElement).data('tipped');
-			var remainingXPRE = /Remaining:\s<\/td><td[^>]*>([0-9,]+)/i;
-			var gainRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([0-9,]+)/i;
-			var nextGainRE = /Next\sGain\s*:\s*<\/td><td[^>]*>([0-9]*)m\s*([0-9]*)s/i;
-			var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-			var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-			var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
-			var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[2],10);
+		if(isBeta==1){ //New Map Style
+			var remainingXP =  parseInt($('dt[class="stat-xp-remaining"]').next('dd').html().replace(/,/g,""));
+			var nextGainTime =  $('dt[class="stat-xp-nextGain"]').next('dd').html();
+			var gain =  parseInt($('dt[class="stat-xp-gainPerHour"]').next('dd').html().replace(/,/g,""));
+
+			var nextGainRE = /([0-9]*)m\s*([0-9]*)s/i;
+			var nextGain = nextGainRE.exec(nextGainTime);
+			var nextGainMin = parseInt(nextGain[1],10);
+			var nextGainSec = parseInt(nextGain[2],10);
 			var hoursToNextLevel = Math.ceil(remainingXP/gain);
 			var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 			var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-			var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
-				nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
-			newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-			levelupImageElement.setAttribute("data-tipped", newMouseoverText);
+			$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
 			return;
 		}
+		
 		//Old Map Style
 		var levelupImageElement = $('td[id="topBar-XP"]');
 		if (levelupImageElement.length < 1) {return;}
@@ -3477,16 +3500,23 @@ var Helper = {
 
 	stringSort: function(a,b) {
 		var result=0;
-		if (a[Helper.sortBy].toLowerCase()<b[Helper.sortBy].toLowerCase()) result=-1;
-		if (a[Helper.sortBy].toLowerCase()>b[Helper.sortBy].toLowerCase()) result=+1;
+		a = eval("a."+Helper.sortBy);
+		b = eval("b."+Helper.sortBy);
+
+		if (a.toLowerCase()<b.toLowerCase()) result=-1;
+		if (a.toLowerCase()>b.toLowerCase()) result=+1;
 		if (!Helper.sortAsc) result=-result;
 		return result;
 	},
 
 	numberSort: function(a,b) {
 		var result=0;
-		var valueA=a[Helper.sortBy];
-		var valueB=b[Helper.sortBy];
+		if(typeof a.type !== undefined){
+			if(a.type > 8) return 1; //non equipment items
+			if(b.type > 8) return -1;
+		}
+		var valueA=eval("a."+Helper.sortBy);
+		var valueB=eval("b."+Helper.sortBy);
 		if (typeof valueA=="string") valueA=parseInt(valueA.replace(/,/g,"").replace(/#/g,""),10);
 		if (typeof valueB=="string") valueB=parseInt(valueB.replace(/,/g,"").replace(/#/g,""),10);
 		result = valueA-valueB;
@@ -4435,47 +4465,58 @@ var Helper = {
 	insertQuickExtract: function(content) {
 		Helper.itemList = {};
 		if (!content) var content=Layout.notebookContent();
-		content.innerHTML="Getting item list from: ";
-		Helper.resourceList={};
-		System.xmlhttp("/index.php?cmd=profile&subcmd=dropitems&folder_id=-1", Helper.getPlantsFromBackpack, {"inject":content,"id":0});
+		$.ajax({
+			url: '?cmd=export&subcmd=inventory',
+			success: function( data ) {
+				Helper.inventory = data;
+			},
+			async: false, //wait for responce
+			dataType: 'json'
+		});
+		Helper.inventory.items = Helper.inventory.items.filter(function(e) {return e.type==12;});//type=plants
+		content.innerHTML='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>'+
+		'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
+		'<label id="Helper:useItemsInStCont"><input type="checkbox" id="Helper:useItemsInSt" checked /> Select items in ST</label>' +
+		'<label id="Helper:useItemsInMainCont"><input type="checkbox" id="Helper:useItemsInMain" checked /> Only extract items in Main Folder</label>' +
+		'<table width=100% id="Helper:ExtTable"></table>';
+
+		$('label,input[id*="Helper:useItemsIn"]').click(Helper.showQuickExtract);
+		Helper.showQuickExtract();
 	},
 
-	getPlantsFromBackpack: function(responseText, callback) {
-		var layout=callback.inject;
-		layout.innerHTML+="Parsing main pack for plants.";
-		var doc=System.createDocument(responseText);
-		if (responseText.indexOf('Back to Profile') > 0){
-			Helper.retrieveItemInfor(doc);
-		}
-		Helper.showQuickExtract(callback);
-	},
+	showQuickExtract: function() {
 
-	showQuickExtract: function(callback) {
-		var output='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>'+
-			'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
-			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=buy_result colspan=12></td></tr>';
-		for (var key in Helper.itemList) {
-			var itemID=Helper.itemList[key].id;
-			var	itemStats = /fetchitem.php\?item_id=(\d+)\&amp;inv_id=(\d+)\&amp;t=(\d+)\&amp;p=(\d+)/.exec(Helper.itemList[key].html); //add this line
-			var plantType = itemStats[1];
-			if (Helper.resourceList[plantType]){
-				Helper.resourceList[plantType].invIDs+=","+itemID;
-				Helper.resourceList[plantType].count++;
+		var table = $('table[id="Helper:ExtTable"]');
+		table.children().remove();//empty table for re-population.
+		Helper.resourceList={}; //reset resourceList
+		var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
+		var selectMain= $('input[id="Helper:useItemsInMain"]').is(':checked');
+
+		table.append('<tr><th width=20%>Actions</th><th>Items</th></tr><tr><td id="buy_result" colspan=2></td></tr>');
+		//for (var key in Helper.inventory.items) {
+		for (var i=0; i<Helper.inventory.items.length;i++) {
+			var item = Helper.inventory.items[i];
+			if(selectMain && item.folder_id!=-1){ continue;}
+			if(!selectST && item.is_in_st){ continue;}
+			if (Helper.resourceList[item.item_id]){
+				Helper.resourceList[item.item_id].invIDs+=","+item.inv_id;
+				Helper.resourceList[item.item_id].count++;
 			}
 			else {
-				Helper.resourceList[plantType]={'count':1,'invIDs':itemID,'src':Helper.itemList[key].html};
+				Helper.resourceList[item.item_id]={'count':1,'invIDs':item.inv_id,'first_item':item};
 			}
 		}
 
 		for (var id in Helper.resourceList) {
 			var res=Helper.resourceList[id];
-			output+='<tr><td align=center>'+
+			var item=res.first_item;
+			table.append('<tr><td align=center>'+
 				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
-				'id="Helper:extractAllSimilar' + id + '" invIDs="'+res.invIDs+'">Extract all '+res.count +'</span></td>'+res.src+'</tr>';
+				'id="Helper:extractAllSimilar' + id + '" invIDs="'+res.invIDs+'">Extract all '+res.count +'</span></td> ' +
+				'<td><img src="'+System.imageServerHTTP+'/items/'+item.item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'"' + 
+				'data-tipped="fetchitem.php?item_id='+item.item_id+'&inv_id='+item.inv_id+'&t=1&p='+Helper.inventory.player_id+'" border=0>' + '</td><td>'+item.item_name+'</td></tr>');;
 		}
-		output+='</table>';
 
-		callback.inject.innerHTML=output;
 		for (id in Helper.resourceList) {
 			document.getElementById('Helper:extractAllSimilar' + id).
 				addEventListener('click', Helper.extractAllSimilar, true);
@@ -7532,135 +7573,445 @@ var Helper = {
 	injectInventoryManager: function(content) {
 		if (!content) content=Layout.notebookContent();
 		Helper.setItemFilterDefault();
-
-		var lastCheck=GM_getValue("lastInventoryCheck");
-		var now=(new Date()).getTime();
-		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 2*60*1000);
-		var refreshButton;
-		if (haveToCheck) {
-			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:InventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
-		} else {
-			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(300 - ((now - lastCheck)/1000)) +'s ]</td>';
+		if(document.location.search.indexOf("subcmd=invmanager") != -1){
+			$.ajax({
+				url: '?cmd=export&subcmd=inventory',
+				success: function( data ) {
+					Helper.inventory = data;
+					targetInventory=data;
+					targetInventory.folders['-1']='Main';
+					targetID='Helper:InventoryManagerOutput';
+					reportType='self';
+				},
+				async: false, //wait for responce
+				dataType: 'json'
+		});
+		}else if(document.location.search.indexOf("subcmd=guildinvmanager") != -1){
+			$.ajax({
+				url: '?cmd=export&subcmd=guild_store&inc_tagged=1',
+				success: function( data ) {
+					Helper.guildinventory = data;
+					targetInventory=data;
+					targetID='Helper:GuildInventoryManagerOutput';
+					reportType='guild';
+				},
+				async: false, //wait for responce
+				dataType: 'json'
+			});
+		}else{
+			return;
 		}
 
-		Helper.inventory=System.getValueJSON("inventory");
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
 		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
-
+		if(reportType=='self'){
+			reportTitle='<td width="90%" nobr><b>&nbsp;Inventory Manager</b> ' + targetInventory.items.length + ' items (green = worn, blue = backpack)</td>';
+		}else{
+			reportTitle='<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> ' + targetInventory.items.length + ' items (maroon = in BP, blue=guild store)</td>';
+		}
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td width="90%" nobr><b>&nbsp;Inventory Manager</b> green = worn, blue = backpack</td>'+
-			refreshButton+
-			'<tr><td colspan=2>' +
+			reportTitle + '<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
 				'<td><table><tr><td>' +
 				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
-				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/>' +
+				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/><input id="reportType" type="hidden" value="'+reportType+'" />' +
 				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ ':<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
 					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
 		}
-		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
+		newhtml+=' Sets Only: <input id="Helper:SetFilter" type="checkbox" />';
+		newhtml+='</td></tr><tr><td>&nbsp;<span id=SelectAllFilters>[Select All]</span>&nbsp;<span id=SelectNoFilters>[Select None]</span>' +
 				'</td></tr></table></td></tr></table>' +
-				'<div style="font-size:small;" id="Helper:InventoryManagerOutput">' +
+				'<div style="font-size:small;" id="'+targetID+'">' +
 				'</div>';
 		content.innerHTML=newhtml;
-		if (haveToCheck)
-			document.getElementById("Helper:InventoryManagerRefresh").addEventListener('click', Helper.parseProfileStart, true);
-		Helper.generateInventoryTable("self");
-		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
-		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
+
+		document.getElementById("Helper:SetFilter").addEventListener('click', Helper.generateInventoryTable, true);
+
+		Helper.generateInventoryTable();
+		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', function(){
+				GM_setValue("inventoryMinLvl",1);
+				GM_setValue("inventoryMaxLvl",2000);
+				$('input[id="Helper.inventoryMinLvl"]').attr('value','1');
+				$('input[id="Helper.inventoryMaxLvl"]').attr('value','2000')
+				Helper.generateInventoryTable();
+			}, true);
+		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', function(){
+				GM_setValue("inventoryMinLvl", $('input[id="Helper.inventoryMinLvl"]').attr('value'));
+				GM_setValue("inventoryMaxLvl", $('input[id="Helper.inventoryMaxLvl"]').attr('value'));
+				Helper.generateInventoryTable();
+			}, true);
 
 		for (i=0; i<Helper.itemFilters.length; i++) {
 			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
 		}
-		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
-		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("SelectAllFilters").addEventListener('click', Helper.InventorySelectFilters, true);
+		document.getElementById("SelectNoFilters").addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
-	injectGuildInventoryManager: function(content) {
-		if (!content) content=Layout.notebookContent();
-		Helper.setItemFilterDefault();
 
-		var lastCheck=GM_getValue("lastGuildInventoryCheck");
-		var now=(new Date()).getTime();
-		if (!lastCheck) lastCheck=0;
-		//var haveToCheck=((now - lastCheck) > 5*60*1000);
-		var haveToCheck=((now - lastCheck) > 1000);
-		var refreshButton;
-		if (haveToCheck) {
-			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ <span id="Helper:GuildInventoryManagerRefresh" style="text-decoration:underline;cursor:pointer">Refresh</span> ]</td>';
+	generateInventoryTable: function() {
+		reportType=$('input[id="reportType"]').attr('value');
+		if (reportType == "guild") {
+			targetId = 'Helper:GuildInventoryManagerOutput';
+			targetInventory = Helper.guildinventory;
+			inventoryShell = 'guildinventory';
 		} else {
-			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+ Math.round(900 - ((now - lastCheck)/1000)) +'s ]</td>';
+			targetId = 'Helper:InventoryManagerOutput';
+			targetInventory = Helper.inventory;
+			inventoryShell = 'inventory';
+		}
+		if (!targetInventory) {return;}
+		//targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
+		var output=document.getElementById(targetId);
+		/*var dropLink='';
+
+		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
+		if (showQuickDropLinks && inventoryShell == 'inventory') {
+			dropLink='<th align="left">Drop</th>';
+		}
+*/
+		var result='<table id="Helper:InventoryTable"><tr>' +
+			'<th width="180" align="left" sortkey="item_name" sortType="string" colspan="2">Name</th>' +
+			'<th sortkey="stats.min_level" sortType="number">Level</th>' +
+			'<th align="left" sortkey="folder_id" sortType="number">Where</th>' +
+			'<th align="left" sortkey="type" sortType="number">Type</th>' +
+			'<th sortkey="stats.attack" sortType="number">Att</th>' +
+			'<th sortkey="stats.defense" sortType="number">Def</th>' +
+			'<th sortkey="stats.armor" sortType="number">Arm</th>' +
+			'<th sortkey="stats.damage" sortType="number">Dam</th>' +
+			'<th sortkey="stats.hp" sortType="number">HP</th>' +
+			'<th colspan="2" >Forge</th>' +
+			'<th align="left" >Craft</th>' +
+			'<th align="right" sortkey="durabilityPer" sortType="number">Dur%</th>' +
+			//dropLink +
+			'<th width="10"></th>';
+		var item, color;
+
+		var allItems = targetInventory.items;
+
+		var minLvl = parseInt($('input[id="Helper.inventoryMinLvl"]').attr('value'));
+		var maxLvl = parseInt($('input[id="Helper.inventoryMaxLvl"]').attr('value'));
+		var setsOnly = $('input[id="Helper:SetFilter"]').is(':checked');
+		for (var i=0; i<allItems.length;i++) {
+			item=allItems[i];
+			if(item.equipped) {item.folder_id=99999999; } //for sorting purposes.
+			//continue; if item is filtered.
+			if(item.type > 8){continue;}//not a wearable item
+			if(!$('input[id="'+Helper.itemFilters[item.type].id+'"]').is(':checked')){continue;}
+			if(minLvl >= item.stats.min_level || maxLvl <= item.stats.min_level){continue;}
+			if(setsOnly && !item.stats.set_name) {continue;}
+
+			var whereTitle='';
+			var whereText='';
+			var p=0;
+			if (reportType == "guild") {
+				if(item.player_id==-1){ //guild store
+					color = "navy";   whereText = "GS";   whereTitle="Guild Store"
+				}else{
+					color = "maroon"; whereText = "Rep";  whereTitle="Guild Report"
+				}
+				if(item.player_id=='-1'){
+					p=targetInventory.guild_id;
+					t=4;
+				}else{
+					p=item.player_id;
+					t=1;
+				}
+				p=p+'&currentPlayerId='+targetInventory.current_player_id;
+			}else{
+				if(item.equipped){
+					color = "green";  whereText = "Worn"; whereTitle="Wearing it";
+				}else{
+					color = "blue";   whereText = Helper.inventory.folders[item.folder_id];   whereTitle="In Backpack";
+				}
+				p=targetInventory.player_id;
+				t=1;
+
+			}
+
+			result+='<tr style="color:'+ color +'">' +
+				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
+				'</td><td><a style="cursor:help" id="Helper:item'+i+'" arrayID="'+i+'" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+item.item_id+'&inv_id='+item.inv_id+'&t='+t+'&p='+p+'">' + item.item_name + '</a>';
+
+			if (item.stats.set_name && reportType == "guild") {
+				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
+					item.item_name.replace(/(amulet)|(armor)|(armored)|(axe)|(boots)|(fist)|(gauntlets)|(gloves)|(hammer)|(helm)|(helmet)|(mace)|(necklace)|(of)|(plate)|(ring)|(rune)|(shield)|(sword)|(the)|(weapon)|/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
+			}
+			var craftColor = "";
+			switch(item.craft) {
+				case 'Perfect': craftColor = '#00b600'; break;
+				case 'Excellent': craftColor = '#f6ed00'; break;
+				case 'Very Good': craftColor = '#f67a00'; break;
+				case 'Good': craftColor = '#f65d00'; break;
+				case 'Average': craftColor = '#f64500'; break;
+				case 'Poor': craftColor = '#f61d00'; break;
+				case 'Very Poor': craftColor = '#b21500'; break;
+				case 'Uncrafted': craftColor = '#666666'; break;
+			}
+
+			var durabilityPercent = "";
+			if (item.durability) {
+				var durabilityExec = /(.*)\/(.*)/.exec(item.durability);
+				durabilityPercent = parseInt(100*item.durability/item.max_durability,10);
+				item.durabilityPer=durabilityPercent;
+				var durabilityColor = (durabilityPercent<20)?'red':'gray';
+			}
+
+			var itemTypes=new Array("Helmet","Armor","Gloves","Boots","Weapon","Shield","Ring","Amulet","Rune");
+
+			result+='</td>' +
+				'<td align="right">' + item.stats.min_level + '</td>' +
+				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
+				'<td align="left">' + itemTypes[item.type] + '</td>' +
+				'<td align="right">' + item.stats.attack + '</td>' +
+				'<td align="right">' + item.stats.defense + '</td>' +
+				'<td align="right">' + item.stats.armor + '</td>' +
+				'<td align="right">' + item.stats.damage + '</td>' +
+				'<td align="right">' + item.stats.hp + '</td>' +
+				'<td align="right">' + item.forge + '</td>' +
+				'<td>' + ((item.forge>0)? "<img src='" + System.imageServerHTTPOld + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craft + '</span>' + '</td>' +
+				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
+/*				if (showQuickDropLinks && inventoryShell == 'inventory') {
+					result+="<td><span  title='INSTANTLY DROP "+item.item_name+". NO REFUNDS OR DO-OVERS! Use at own risk.' id='FSHQuickDrop" +
+							item.item_id +
+							"' itemInvId=" + item.inv_id +
+							" itemIndexId=" + item.index + " itemPageId=" + item.page +
+							" findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Drop]</span> </td>";
+				}
+*/				result+='<td></td>' +
+				'</tr>';
+		}
+		result+='</table>';
+		result+='<input type="hidden" id="xcnum" value="'+GM_getValue("goldConfirm")+'" />';
+		output.innerHTML=result;
+		/*if (showQuickDropLinks && inventoryShell == 'inventory') {
+			$('span[id*="FSHQuickDrop"]').each(function(){
+				this.addEventListener('click', Helper.quickDropItem, true);
+				this.addEventListener('click', Helper.removeInventoryItem, true);
+			});
+		}*/
+		targetInventory.lastUpdate = new Date();
+		System.setValueJSON(inventoryShell, targetInventory);
+
+		var inventoryTable=document.getElementById('Helper:InventoryTable');
+		for (i=0; i<inventoryTable.rows[0].cells.length; i++) {
+			var cell=inventoryTable.rows[0].cells[i];
+			cell.style.textDecoration="underline";
+			cell.style.cursor="pointer";
+			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
 
-		var guildItemCount = "unknown";
-		Helper.guildinventory = System.getValueJSON("guildinventory");
-		if (Helper.guildinventory) {
-			Helper.guildinventory.items = Helper.guildinventory.items.filter(function (e) {return (e.name);});
-			guildItemCount = Helper.guildinventory.items.length;
-		}
-		var minLvl = GM_getValue("inventoryMinLvl", 1);
-		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
 
-		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> (takes a while to refresh so only do it if you really need to)</td>'+
-			refreshButton+
-			'</tr>' +
-			'<tr><td colspan=2>' +
-				'<table><tr><td><b>Show Items:</b></td>' +
-				'<td><table><tr><td>' +
-				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" onSubmit="javascript:return false;">' +
-				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
-				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
-				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="submit" value="Filter"/>' +
-				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=guildinvmanager" class="custombutton" type="button" value="Reset"/></form></div>';
-		for (var i=0; i<Helper.itemFilters.length; i++) {
-			newhtml += (i % 5 === 0) ? '</td></tr><tr><td>' : '';
-			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ ':<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
-					(GM_getValue(Helper.itemFilters[i].id)?' checked':'') + '/>';
-		}
-		newhtml+='</td></tr><tr><td>&nbsp;<span id=GuildInventorySelectAll>[Select All]</span>&nbsp;<span id=GuildInventorySelectNone>[Select None]</span>' +
-				'</td></tr></table></td></tr>'+
-			'<tr><td colspan=2>&nbsp;Guild Item Count:&nbsp;' + guildItemCount + '</td></tr></table>' +
-			'<div style="font-size:small;" id="Helper:GuildInventoryManagerOutput">' +
-			'</div>';
-		content.innerHTML=newhtml;
-		if (haveToCheck)
-			document.getElementById("Helper:GuildInventoryManagerRefresh").addEventListener('click', Helper.parseGuildStart, true);
-		Helper.generateInventoryTable("guild");
-		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', Helper.resetLevelFilter, true);
-		document.getElementById("Helper:inventoryFilterForm").addEventListener('submit', Helper.setLevelFilter, true);
 
-		for (i=0; i<Helper.itemFilters.length; i++) {
-			document.getElementById(Helper.itemFilters[i].id).addEventListener('click', Helper.toggleCheckboxAndRefresh, true);
-		}
-		document.getElementById("GuildInventorySelectAll").addEventListener('click', Helper.InventorySelectFilters, true);
-		document.getElementById("GuildInventorySelectNone").addEventListener('click', Helper.InventorySelectFilters, true);
+		$('a[id*="Helper:item"]').click(function(){
+			i=$(this).attr('arrayID');
+			var html = '';
+			var t=1;
+			var p=0;
+			if (reportType == "guild") {
+				html+='<span id="Helper:Recall">'+
+					'&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+targetInventory.items[i].player_id+'&mode=0">Fast BP</span> |'+
+					'&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+targetInventory.items[i].player_id+'&mode=1">Fast GS</span> |'+
+					'</span><br />';
+				if(item.player_id=='-1'){
+					p=targetInventory.guild_id;
+					t=4;
+				}else{
+					p=targetInventory.items[i].player_id;
+					t=1;
+				}
+				p=p+'&currentPlayerId='+targetInventory.current_player_id;
+					
+			}else{
+				//'INSTANTLY DROP '+targetInventory.items[i].item_name+'. NO REFUNDS OR DO-OVERS! Use at own risk.'
+				html+='<span id="Helper:FolderMove"><select id="Helper:ToFolder"><option value="0">Move to folder</option>';
+				for(var key in targetInventory.folders){
+					html+= '<option value="'+key+'">'+targetInventory.folders[key]+'</option>';
+				}
+				
+				html+='</select><input id="Helper:InitiateMove" type="submit" class="custombutton" value="Move!" invid="'+targetInventory.items[i].inv_id+'" ></span><br />';
+
+				html+='<span id="Helper:Drop"><input id="Helper:DropItem" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'"  itemName="'+targetInventory.items[i].item_name+'" value="Drop Item!" /></span><br />' + 
+				'<span id="Helper:Send" >send to <input type="text" id="Helper:sendTo" size=5 /><input id="Helper:SendSubmit" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'" value="Send!"/></span><br />' + 
+				'<span id="Helper:Sell"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&subcmd=create2&inv_id='+targetInventory.items[i].inv_id+'">Post to AH</a></span><br />';
+				t=1;
+				p=targetInventory.player_id;
+			}
+				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Bahmou%20Mask
+			html+='<span id="Helper:SearchAH"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text='+escape(targetInventory.items[i].item_name)+'">Search AH</a></span><br /><br />';
+			if(targetInventory.items[i].stats.set_name)
+				html+='Set Name: ' + targetInventory.items[i].stats.set_name + '<br />';
+			html+='<img src="'+System.imageServerHTTP+'/items/'+targetInventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+targetInventory.items[i].item_id+'&inv_id='+targetInventory.items[i].inv_id+'&t='+t+'&p='+p+'" border=0>';
+
+			var $dialog = $('<div></div>')
+				.html(html)
+				.dialog({
+					title: targetInventory.items[i].item_name,
+					resizable: false,
+					height:350,
+					width:300,
+					modal: true,
+					buttons: {
+						"Close" : function() {
+							$dialog.dialog( "close" );
+						}
+					}
+				});
+			$('input[id="Helper:DropItem"]').click(function(){
+				var answer = confirm("Are you sure you want to drop "+$(this).attr('itemName')+"?");
+				if(answer){
+					var itemInvId = $(this).attr('invid');
+					var dropHref = System.server + "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
+					$.ajax({
+						url: dropHref,
+						success: function( data ) {
+							var info = Layout.infoBox(data);
+							var drop=$('span[id="Helper:Drop"]');
+							if (info==="Items dropped and destroyed.") {
+								drop.html("Item Dropped!");
+								drop.css('color','green');
+								drop.css('fontWeight','bold');
+								drop.css('fontSize','small');
+							} else if (info!=="") {
+								drop.css('color','red');
+								drop.css('fontWeight','bold');
+								drop.css('fontSize','small');
+								drop.html("Error: " + info);
+							} else {
+								drop.css('color','red');
+								drop.css('fontSize','small');
+								drop.html("Weird Error: check the Tools>Error Console");
+								GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+								GM_log(callback.url);
+							}
+						},
+						async: false, //wait for responce
+					});
+				}
+			});
+			$('input[id="Helper:SendSubmit"]').click(function(){
+				var itemInvId = $(this).attr('invid');
+				var xcNum = $('input[id="xcnum"]').attr('value');
+				var itemRecipient = $('input[id="Helper:sendTo"]').val();
+				var sendItemHref = System.server + "index.php?cmd=trade&subcmd=senditems&xc=" + xcNum + "&target_username=" + itemRecipient + "&sendItemList[]=" + itemInvId;
+				$.ajax({
+					url: sendItemHref,
+					success: function( data ) {
+						var info = Layout.infoBox(data);
+						var send=$('span[id="Helper:Send"]');
+						if (info==="Items sent successfully!") {
+							send.html("Item sent to " + itemRecipient + "!");
+							send.css('color','green');
+							send.css('fontWeight','bold');
+							send.css('fontSize','small');
+						} else if (info!=="") {
+							send.css('color','red');
+							send.css('fontWeight','bold');
+							send.css('fontSize','small');
+							send.html("Error: " + info);
+						} else {
+							send.css('color','red');
+							send.css('fontSize','small');
+							send.html("Weird Error: check the Tools>Error Console");
+							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log(callback.url);
+						}
+					},
+					async: false, //wait for responce
+				});
+
+			});
+			$('span[id*="Helper:RecallTo"]').click(function(){
+				var href = $(this).attr('href');
+				var id = $(this).attr('id');
+				$.ajax({
+					url: href,
+					success: function( data ) {
+						var info = Layout.infoBox(data);
+						var recall=$('span[id="'+id+'"]');
+						if (info == "You successfully recalled the item.") {
+							recall.html("Recalled!");
+							recall.css('color','green');
+							recall.css('fontWeight','bold');
+							recall.css('fontSize','small');
+						} else if (info!=="") {
+							recall.css('color','red');
+							recall.css('fontWeight','bold');
+							recall.css('fontSize','small');
+							recall.html("Error: " + info);
+						} else {
+							recall.css('color','red');
+							recall.css('fontSize','small');
+							recall.html("Weird Error: check the Tools>Error Console");
+							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log(callback.url);
+						}
+					},
+					async: false, //wait for responce
+				});
+
+			});
+			$('input[id="Helper:InitiateMove"]').click(function(){
+				var itemInvId = $(this).attr('invid');
+				var folderID = $('select[id="Helper:ToFolder"]').val();
+				var moveHref = System.server + "index.php?cmd=profile&subcmd=sendtofolder&folderItem[]="+itemInvId+"&folder_id=" + folderID;
+				$.ajax({
+					url: moveHref,
+					success: function( data ) {
+						var info = Layout.infoBox(data);
+						var move=$('span[id="Helper:FolderMove"]');
+						if (info==="Items moved to folder successfully!") {
+							move.html("Item Moved!");
+							move.css('color','green');
+							move.css('fontWeight','bold');
+							move.css('fontSize','small');
+						} else if (info!=="") {
+							move.css('color','red');
+							move.css('fontWeight','bold');
+							move.css('fontSize','small');
+							move.html("Error: " + info);
+						} else {
+							move.css('color','red');
+							move.css('fontSize','small');
+							move.html("Weird Error: check the Tools>Error Console");
+							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log(callback.url);
+						}
+					},
+					async: false, //wait for responce
+				});
+			});
+		});
+
+
 	},
 
 	InventorySelectFilters: function(evt) {
 		Helper.setItemFilterDefault();
-		var checkedValue = (evt.target.id=="GuildInventorySelectAll");
+		var checkedValue = (evt.target.id=="SelectAllFilters");
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			GM_setValue(Helper.itemFilters[i].id, checkedValue);
 		}
-		if (checkedValue)
-			window.location=window.location;
-		else {
-			for (i=0; i<Helper.itemFilters.length; i++) {
-				document.getElementById(Helper.itemFilters[i].id).checked = checkedValue;
-			}
+		for (i=0; i<Helper.itemFilters.length; i++) {
+			document.getElementById(Helper.itemFilters[i].id).checked = checkedValue;
 		}
+		setTimeout(function() {
+			Helper.generateInventoryTable();
+		});
 	},
 
 	toggleCheckboxAndRefresh: function(evt) {
 		GM_setValue(evt.target.id, evt.target.checked);
-		window.location=window.location;
+		setTimeout(function() {
+			Helper.generateInventoryTable();
+		});
+		//window.location=window.location;
 	},
 
 	injectOnlinePlayers: function(content) {
@@ -7812,14 +8163,13 @@ var Helper = {
 			// GM_log(Helper.sortBy);
 			GM_log(sortType);
 			// numberSort
+			Helper.sortBy=headerClicked;
 			if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 			if (Helper.sortBy && Helper.sortBy==headerClicked) {
 				Helper.sortAsc=!Helper.sortAsc;
 			}
-			Helper.sortBy=headerClicked;
 		}
 		System.setValueJSON("onlinePlayerSortBy", {"sortBy": Helper.sortBy, "sortType": sortType, "sortAsc": Helper.sortAsc});
-
 		switch(sortType) {
 			case "string":
 				Helper.onlinePlayers.players.sort(Helper.stringSort);
@@ -7833,406 +8183,9 @@ var Helper = {
 		Helper.generateOnlinePlayersTable();
 	},
 
-	toggleCheckboxAndRefresh: function(evt) {
-		GM_setValue(evt.target.id, evt.target.checked);
-		window.location=window.location;
-	},
-
-	parseProfileStart: function(){
-		var now=(new Date()).getTime();
-		GM_setValue("lastInventoryCheck", now.toString());
-
-		Helper.inventory = new Object;
-		Helper.inventory.items = new Array();
-		var output=document.getElementById('Helper:InventoryManagerOutput');
-		output.innerHTML='<br/>Parsing profile...';
-		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileDone);
-	},
-
-	parseProfileDone: function(responseText) {
-		var doc=System.createDocumentWithImages(responseText);
-		var output=document.getElementById('Helper:InventoryManagerOutput');
-		$(doc).find('a[href*="subcmd=unequipitem"] img').each(function(index){
-			var item={"url": $(this).data("tipped"),
-				"where":"worn", "index":(index+1)};
-			if (index===0) output.innerHTML+="<br/>Found worn item ";
-			output.innerHTML+=(index+1) + " ";
-			Helper.inventory.items.push(item);
-		});
-		var	folderIDs = new Array();
-		Helper.folderIDs = folderIDs; //clear out the array before starting.
-		Helper.currentFolder=1;
-		$(doc).find('a[href*="profile&folder_id="]').each(function(index){
-			var folderID = /folder_id=([-0-9]+)/.exec($(this).attr("href"))[1]*1;
-			folderIDs.push(folderID);
-			Helper.folderIDs = folderIDs;
-		});
-		Helper.parseInventoryPage(responseText);
-	},
-
-	parseInventoryPage: function(responseText) {
-		var doc=System.createDocumentWithImages(responseText);
-		var output=document.getElementById('Helper:InventoryManagerOutput');
-		var pageElement = $(doc).find('a[href*="backpack_page="] font');
-		var currentPage = 1;
-		if (pageElement.length > 0) currentPage = parseInt(pageElement.text(),10);
-		var currentFolder = Helper.currentFolder;
-		var folderCount = 0, folderID = -1;
-		if (Helper.folderIDs.length<=1) {
-			folderCount = 1;
-			folderID = -1;
-		} else {
-			folderCount = Helper.folderIDs.length;
-			folderID = Helper.folderIDs[currentFolder-1];
-		}
-
-		var backpackItems = $(doc).find('a[href*="subcmd=equipitem"] img');
-		var pages = $(doc).find('.centered').children('a[href*="index.php?cmd=profile&backpack_page="]');
-
-		if (backpackItems.length > 0) output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'...';
-		else {
-			output.innerHTML+='<br/>Parsing folder '+currentFolder+', backpack page '+currentPage+'... Empty';
-			currentPage = pages.length; // go to end automatically since the rest of the pages will be empty too.
-		}
-
-		backpackItems.each(function(index){
-			var item={"url": $(this).data("tipped"),
-				"where":"backpack", "index":(index+1), "page":currentPage};
-			if (index===0) output.innerHTML+="<br/>Found wearable item ";
-			output.innerHTML+=(index+1) + " ";
-			Helper.inventory.items.push(item);
-		});
-
-		if (currentPage<pages.length || currentFolder<folderCount) {
-			if (currentPage==pages.length && currentFolder<folderCount) {
-				currentPage = 0;
-				folderID = Helper.folderIDs[currentFolder];
-				Helper.currentFolder=currentFolder+1;
-			}
-			System.xmlhttp('index.php?cmd=profile&backpack_page='+(currentPage)+'&folder_id='+(folderID), Helper.parseInventoryPage);
-		}
-		else {
-			output.innerHTML+="<br/>Parsing inventory item ";
-			Helper.retrieveInventoryItem(0, "self");
-		}
-	},
-
-	parseGuildStart: function(){
-		var now=(new Date()).getTime();
-		GM_setValue("lastGuildInventoryCheck", now.toString());
-
-		Helper.guildinventory = new Object;
-		Helper.guildinventory.items = new Array();
-		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		output.innerHTML = '<br/>Parsing guild store ...';
-		
-		var guildId = GM_getValue('guildID');
-		$.ajax({
-			url: '?cmd=guild&subcmd=fetchinv',
-			success: function( data ) {
-				for (var i=0; i<data.length;i++) {
-					//{"a":"23040636","b":"10781","n":"Sword of Lorsin","t":"4","tg":true,"c":118300,"l":"1183","eq":true,"s":true}
-					//fetchitem.php?item_id=10781&inv_id=292437196&t=1&p=1346893&currentPlayerId=1346893
-					//t = 1 then player_id, p = 4 then guild_id
-					var itemHref = 'fetchitem.php?item_id=' + data[i].b + '&inv_id=' + data[i].a + '&t=4&p=' + guildId
-					var item={"url": itemHref,
-						"where":"guildstore", "index":(i+1), "worn":false};
-					if (i===0) output.innerHTML+="<br/>Found guild store item ";
-					output.innerHTML+=(i+1) + " ";
-					Helper.guildinventory.items.push(item);
-				}
-				output.innerHTML+='<br/>Parsing guild report page ...';
-				System.xmlhttp('index.php?cmd=guild&subcmd=inventory&subcmd2=report', Helper.parseGuildReportPage);
-			},
-			dataType: 'json'
-		});
-	},
-
-	parseGuildReportPage: function(responseText) {
-		var doc=System.createDocumentWithImages(responseText);
-		var output=document.getElementById('Helper:GuildInventoryManagerOutput');
-		if (isNewUI == 1) var guildreportItems = $(doc).find('div#pCC td img[src*="/items/"]');
-		else var guildreportItems = $(doc).find('td#centerColumn img[src*="/items/"]');
-		guildreportItems.each(function(index){
-			var item={"url": $(this).data("tipped"),
-				"where":"guildreport", "index":(index+1), "worn":false};
-			if (index===0) output.innerHTML+="<br/>Found guild report item ";
-			output.innerHTML+=(index+1) + " ";
-			Helper.guildinventory.items.push(item);
-		});
-		output.innerHTML+="<br/>Parsing guild inventory item ";
-		Helper.retrieveInventoryItem(0, "guild");
-	},
-
-	retrieveInventoryItem: function(invIndex, reportType) {
-		if (reportType == "guild") {
-			targetInventory = Helper.guildinventory;
-		} else {
-			targetInventory = Helper.inventory;
-		}
-		if (targetInventory.items[invIndex].url === null) {
-			invIndex++;
-		}
-		System.xmlhttp(targetInventory.items[invIndex].url, Helper.parseInventoryItem, {"invIndex": invIndex, "reportType": reportType});
-	},
-
-	parseInventoryItem: function(responseText, callback) {
-		if (callback.reportType == "guild") {
-			targetId = 'Helper:GuildInventoryManagerOutput';
-			targetInventory = Helper.guildinventory;
-		} else {
-			targetId = 'Helper:InventoryManagerOutput';
-			targetInventory = Helper.inventory;
-		}
-		var output=document.getElementById(targetId);
-		var doc=System.createDocument(responseText);
-		output.innerHTML+=(callback.invIndex+1) + " ";
-
-		var item=targetInventory.items[callback.invIndex];
-
-		var nameNode=$(doc).find('b:first');
-		if (nameNode.length == 0) GM_log(responseText);
-		else {
-			item.name=nameNode.text().replace(/\\/g,"");
-
-			var itemDetails=$(doc).find('table:not(:contains("Equipped Details")):first'); //to avoid item compare item
-
-			var attackNode=$(itemDetails).find('font:contains("Attack:"):not(:contains(" Attack:")):first').parents('td:first').next();;
-			item.attack=(attackNode.length>0)?parseInt(attackNode.text(),10):0;
-
-			var defenseNode=$(itemDetails).find('font:contains("Defense:"):not(:contains(" Defense:")):first').parents('td:first').next();
-			item.defense=(defenseNode.length>0)?parseInt(defenseNode.text(),10):0;
-
-			var armorNode=$(itemDetails).find('font:contains("Armor:"):not(:contains(" Armor:")):first').parents('td:first').next();
-			item.armor=(armorNode.length>0)?parseInt(armorNode.text(),10):0;
-
-			var damageNode=$(itemDetails).find('font:contains("Damage:"):not(:contains(" Damage:")):first').parents('td:first').next();
-			item.damage=(damageNode.length>0)?parseInt(damageNode.text(),10):0;
-
-			var hpNode=$(itemDetails).find('font:contains("HP:"):not(:contains(" HP:")):first').parents('td:first').next();
-			item.hp=(hpNode.length>0)?parseInt(hpNode.text(),10):0;
-
-			var levelNode=$(itemDetails).find('font:contains("Min Level:"):first').parents('td:first').next();
-			item.minLevel=(levelNode.length>0)?parseInt(levelNode.text(),10):0;
-
-			var itemPartOfSetNode=$(itemDetails).find('font:contains("Set Details")');
-			item.partOfSet=(itemPartOfSetNode.length > 0)?true:false;
-
-			var durabilityNode=$(itemDetails).find('font:contains("Durability:"):first').parents('td:first').next();
-			item.durability=(durabilityNode.length>0)?durabilityNode.text():'0/100';
-
-			if ($(itemDetails).length == 0) itemDetails= $(doc); // to catch resources
-
-			var forgeCount=0, re=/hellforge\/forgelevel.gif/ig;
-			while(re.exec($(itemDetails).html())) {
-				forgeCount++;
-			}
-			item.forgelevel=forgeCount;
-			if ($(itemDetails).text().search(/Gloves -/) != -1) item.type = "Gloves";
-			else if ($(itemDetails).text().search(/Helmet -/) != -1) item.type = "Helmet";
-			else if ($(itemDetails).text().search(/Amulet -/) != -1) item.type = "Amulet";
-			else if ($(itemDetails).text().search(/Weapon -/) != -1) item.type = "Weapon";
-			else if ($(itemDetails).text().search(/Armor -/) != -1) item.type = "Armor";
-			else if ($(itemDetails).text().search(/Shield -/) != -1) item.type = "Shield";
-			else if ($(itemDetails).text().search(/Ring -/) != -1) item.type = "Ring";
-			else if ($(itemDetails).text().search(/Boots -/) != -1) item.type = "Boots";
-			else if ($(itemDetails).text().search(/Rune -/) != -1) item.type = "Rune";
-			else if ($(itemDetails).text().search(/Potions -/) != -1) item.type = "Potions";
-			else if ($(itemDetails).text().search(/Resource -/) != -1) item.type = "Resource";
-			else if ($(itemDetails).text().search(/Recipe -/) != -1) item.type = "Recipe";
-			else if ($(itemDetails).text().search(/Quest Item/) != -1) item.type = "Quest Item";
-
-			var craft="";
-			if ($(itemDetails).html().search(/>Uncrafted</) != -1) craft = "Uncrafted";
-			else if ($(itemDetails).html().search(/>Very Poor</) != -1) craft = "Very Poor";
-			else if ($(itemDetails).html().search(/>Poor</) != -1) craft = "Poor";
-			else if ($(itemDetails).html().search(/>Average</) != -1) craft = "Average";
-			else if ($(itemDetails).html().search(/>Good</) != -1) craft = "Good";
-			else if ($(itemDetails).html().search(/>Very Good</) != -1) craft = "Very Good";
-			else if ($(itemDetails).html().search(/>Excellent</) != -1) craft = "Excellent";
-			else if ($(itemDetails).html().search(/>Perfect</) != -1) craft = "Perfect";
-			item.craftlevel=craft;
-		}
-
-		if (callback.invIndex<targetInventory.items.length-1) {
-			Helper.retrieveInventoryItem(callback.invIndex+1, callback.reportType);
-		}
-		else {
-			output.innerHTML+="Parsing done!";
-			Helper.generateInventoryTable(callback.reportType);
-		}
-	},
-
-	generateInventoryTable: function(reportType) {
-		if (reportType == "guild") {
-			targetId = 'Helper:GuildInventoryManagerOutput';
-			targetInventory = Helper.guildinventory;
-			inventoryShell = 'guildinventory';
-		} else {
-			targetId = 'Helper:InventoryManagerOutput';
-			targetInventory = Helper.inventory;
-			inventoryShell = 'inventory';
-		}
-		if (!targetInventory) {return;}
-		targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
-		var output=document.getElementById(targetId);
-		var dropLink='';
-
-		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
-		if (showQuickDropLinks && inventoryShell == 'inventory') {
-			dropLink='<th align="left">Drop</th>';
-		}
-
-		var result='<table id="Helper:InventoryTable"><tr>' +
-			'<th width="180" align="left" sortkey="name" colspan="2">Name</th>' +
-			'<th sortkey="minLevel">Level</th>' +
-			'<th align="left" sortkey="where">Where</th>' +
-			'<th align="left" sortkey="type">Type</th>' +
-			'<th sortkey="attack">Att</th>' +
-			'<th sortkey="defense">Def</th>' +
-			'<th sortkey="armor">Arm</th>' +
-			'<th sortkey="damage">Dam</th>' +
-			'<th sortkey="hp">HP</th>' +
-			'<th sortkey="forgelevel" colspan="2">Forge</th>' +
-			'<th align="left" sortkey="craftlevel">Craft</th>' +
-			'<th align="right" sortkey="durability">Dur%</th>' +
-			dropLink +
-			'<th width="10"></th>';
-		var item, color;
-
-		var allItems = targetInventory.items;
-//fetchitem.php?item_id=8370&inv_id=231182525&t=0&p=1599987&currentPlayerId=1599987&extra=8
-		//apply level filters
-		var minLvl = GM_getValue("inventoryMinLvl", 1);
-		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
-		allItems=allItems.filter(function(e,i,a) {return (e.minLevel >= minLvl && e.minLevel <= maxLvl);});
-
-		var showGloveTypeItems = GM_getValue("showGloveTypeItems");
-		if (!showGloveTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Gloves';});
-		}
-		var showHelmetTypeItems = GM_getValue("showHelmetTypeItems");
-		if (!showHelmetTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Helmet';});
-		}
-		var showAmuletTypeItems = GM_getValue("showAmuletTypeItems");
-		if (!showAmuletTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Amulet';});
-		}
-		var showWeaponTypeItems = GM_getValue("showWeaponTypeItems");
-		if (!showWeaponTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Weapon';});
-		}
-		var showAmorTypeItems = GM_getValue("showAmorTypeItems");
-		if (!showAmorTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Armor';});
-		}
-		var showShieldTypeItems = GM_getValue("showShieldTypeItems");
-		if (!showShieldTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Shield';});
-		}
-		var showRingTypeItems = GM_getValue("showRingTypeItems");
-		if (!showRingTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Ring';});
-		}
-		var showBootTypeItems = GM_getValue("showBootTypeItems");
-		if (!showBootTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Boots';});
-		}
-		var showRuneTypeItems = GM_getValue("showRuneTypeItems");
-		if (!showRuneTypeItems) {
-			allItems=allItems.filter(function(e,i,a) {return e.type != 'Rune';});
-		}
-
-		for (var i=0; i<allItems.length;i++) {
-			item=allItems[i];
-
-			switch (item.where+"") {
-				case "worn":        color = "green";  whereText = "Worn"; whereTitle="Wearing it";     break;
-				case "backpack":    color = "blue";   whereText = "BP";   whereTitle="In Backpack";    break;
-				case "guildstore":  color = "navy";   whereText = "GS";   whereTitle="Guild Store";  break;
-				case "guildreport": color = "maroon"; whereText = "Rep";  whereTitle="Guild Report"; break;
-				default: color = "black"; break;
-			}
-
-			result+='<tr style="color:'+ color +'">' +
-				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item=' + item.name + '">' + item.name + '</a>';
-			if (item.partOfSet) {
-				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
-					item.name.replace(/gloves/gi,'').replace(/gauntlets/gi,'').replace(/helmet/gi,'').replace(/helm/gi,'').replace(/amulet/gi,'').replace(/necklace/gi,'').
-						replace(/weapon/gi,'').replace(/axe/gi,'').replace(/sword/gi,'').replace(/fist/gi,'').replace(/hammer/gi,'').replace(/mace/gi,'').
-						replace(/armored/gi,'').replace(/armor/gi,'').replace(/plate/gi,'').replace(/shield/gi,'').
-						replace(/ring/gi,'').replace(/boots/gi,'').replace(/rune/gi,'').
-						replace(/the/gi,'').replace(/of/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
-			}
-			var craftColor = "";
-			switch(item.craftlevel) {
-				case 'Perfect': craftColor = '#00b600'; break;
-				case 'Excellent': craftColor = '#f6ed00'; break;
-				case 'Very Good': craftColor = '#f67a00'; break;
-				case 'Good': craftColor = '#f65d00'; break;
-				case 'Average': craftColor = '#f64500'; break;
-				case 'Poor': craftColor = '#f61d00'; break;
-				case 'Very Poor': craftColor = '#b21500'; break;
-				case 'Uncrafted': craftColor = '#666666'; break;
-			}
-
-			var durabilityPercent = "";
-			if (item.durability) {
-				var durabilityExec = /(.*)\/(.*)/.exec(item.durability);
-				durabilityPercent = parseInt(100*durabilityExec[1]/durabilityExec[2],10);
-				var durabilityColor = (durabilityPercent<20)?'red':'gray';
-			}
-			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(item.url);
-			var itemId = itemStats[1];
-			var itemInvId = itemStats[2];
-			var itemtype = itemStats[3];
-			var itempid = itemStats[4];
-
-			result+='</td>' +
-				'<td align="right">' + item.minLevel + '</td>' +
-				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
-				'<td align="left">' + item.type + '</td>' +
-				'<td align="right">' + item.attack + '</td>' +
-				'<td align="right">' + item.defense + '</td>' +
-				'<td align="right">' + item.armor + '</td>' +
-				'<td align="right">' + item.damage + '</td>' +
-				'<td align="right">' + item.hp + '</td>' +
-				'<td align="right">' + item.forgelevel + '</td>' +
-				'<td>' + ((item.forgelevel>0)? "<img src='" + System.imageServerHTTPOld + "/hellforge/forgelevel.gif'>":"") + '</td>' +
-				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craftlevel + '</span>' + '</td>' +
-				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
-				if (showQuickDropLinks && inventoryShell == 'inventory') {
-					result+="<td><span  title='INSTANTLY DROP "+item.name+". NO REFUNDS OR DO-OVERS! Use at own risk.' id='FSHQuickDrop" +
-							itemInvId +
-							"' itemInvId=" + itemInvId +
-							" itemIndexId=" + item.index + " itemPageId=" + item.page +
-							" findme='QuickDrop' style='color:red; cursor:pointer; text-decoration:underline;'>[Drop]</span> </td>";
-				}
-				result+='<td></td>' +
-				'</tr>';
-		}
-		result+='</table>';
-		output.innerHTML=result;
-		if (showQuickDropLinks && inventoryShell == 'inventory') {
-			$('span[id*="FSHQuickDrop"]').each(function(){
-				this.addEventListener('click', Helper.quickDropItem, true);
-				this.addEventListener('click', Helper.removeInventoryItem, true);
-			});
-		}
-		targetInventory.lastUpdate = new Date();
-		System.setValueJSON(inventoryShell, targetInventory);
-
-		var inventoryTable=document.getElementById('Helper:InventoryTable');
-		for (i=0; i<inventoryTable.rows[0].cells.length; i++) {
-			var cell=inventoryTable.rows[0].cells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.addEventListener('click', Helper.sortInventoryTable, true);
-		}
-	},
-
+//*************************** Note *********************
+/* The following fuction is only used in the quick drop method in the inventory manager currently commented out, if that is deleted
+	this function can be removed as well */
 	removeInventoryItem: function(evt){
 		var itemIndexId = evt.target.getAttribute("itemIndexId");
 		var itemPageId = evt.target.getAttribute("itemPageId");
@@ -8246,43 +8199,32 @@ var Helper = {
 		var remItem = Helper.inventory.items.splice(itemArrayId,1); //remove from array
 		System.setValueJSON('inventory', Helper.inventory); //update var so it does not display again
 	},
-
+// ************************* /end note
 	sortInventoryTable: function(evt) {
-		re=/subcmd=([a-z]+)/;
-		var subPageIdRE = re.exec(document.location.search);
-		var subPageId="-";
-		if (subPageIdRE)
-			subPageId=subPageIdRE[1];
-		if (subPageId == "guildinvmanager") {
-			Helper.guildinventory=System.getValueJSON("guildinventory");
+		var reportType=$('input[id="reportType"]').attr('value');
+		if (reportType == "guild") {
 			targetInventory = Helper.guildinventory;
 		} else {
-			Helper.inventory=System.getValueJSON("inventory");
 			targetInventory = Helper.inventory;
 		}
 		var headerClicked=evt.target.getAttribute("sortKey");
+		var sortType=evt.target.getAttribute("sortType");
 		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
 		if (Helper.sortBy && Helper.sortBy==headerClicked) {
 			Helper.sortAsc=!Helper.sortAsc;
 		}
-		Helper.sortBy="name";
+		Helper.sortBy="item_name";
 		targetInventory.items.sort(Helper.stringSort);
 
 		Helper.sortBy=headerClicked;
 		//GM_log(headerClicked)
-		if (headerClicked=="minLevel" || headerClicked=="attack" || headerClicked=="defense" ||
-			headerClicked=="armor" || headerClicked=="damage" || headerClicked=="forgelevel" ||
-			headerClicked=="hp") {
+		if (sortType == "number") {
 			targetInventory.items.sort(Helper.numberSort);
 		}
 		else {
 			targetInventory.items.sort(Helper.stringSort);
 		}
-		if (subPageId == "guildinvmanager") {
-			Helper.generateInventoryTable("guild");
-		} else {
-			Helper.generateInventoryTable("self");
-		}
+		Helper.generateInventoryTable();
 	},
 
 	injectRecipeManager: function(content) {
@@ -10177,6 +10119,7 @@ var Helper = {
 		for (var i=0; i<titleCells.length; i++) {
 			var cell=titleCells[i];
 			cell.innerHTML = cell.innerHTML.replace(/ \[/,"<br>[");
+			cell.innerHTML = cell.innerHTML.replace(/&nbsp;/," ");
 			if (cell.innerHTML.search("LvL") != -1 ||
 				cell.innerHTML.search("Join Cost") != -1 ||
 				cell.innerHTML.search("State") != -1 ||
@@ -10213,11 +10156,11 @@ var Helper = {
 				'JoinCost': theRow.cells[2].textContent.replace(/,/g,"")*1,
 				'JoinCostHTML': theRow.cells[2].innerHTML,
 				'State': theRow.cells[3].textContent,
-				'Specials[?]': (theRow.cells[4].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'Specials': (theRow.cells[4].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
 				'SpecialsHTML': theRow.cells[4].innerHTML,
-				'HellForge[?]': (theRow.cells[5].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'HellForge': (theRow.cells[5].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
 				'HellForgeHTML': theRow.cells[5].innerHTML,
-				'Epic[?]': (theRow.cells[6].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
+				'Epic': (theRow.cells[6].firstChild.getAttribute("src").search("/specials_1.gif") == -1? 1:0),
 				'EpicHTML': theRow.cells[6].innerHTML,
 				'MaxEquipLvL': theRow.cells[7].textContent.replace(/,/g,"")*1,
 				'MaxEquipLvLHTML': theRow.cells[7].innerHTML,
@@ -10581,7 +10524,7 @@ var Helper = {
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
 		var configData=
-			'<div id="settingsTabs-6"><form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
+			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
 //			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
@@ -10850,15 +10793,17 @@ var Helper = {
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
-			'</table></form></div>';
+			'</table></form>';
 		//var insertHere = System.findNode("//table[@width='100%' and @cellspacing='0' and @cellpadding='5' and @border='0']");
 		//var newRow=insertHere.insertRow(insertHere.rows.length);
 		//var newCell=newRow.insertCell(0);
 		//newCell.colSpan=3;
 		//newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
-		$('#settingsTabs-5').after(configData);
-		$('a[href*="settingsTabs-5"]').parent().after('<li><a href="#settingsTabs-6">FSH Settings</a></li>');
+		maxID=parseInt($('div[id*="settingsTabs-"]:last').attr('id').split('-')[1]);
+
+		$('div[id*="settingsTabs-"]:last').after('<div id="settingsTabs-'+(maxID+1)+'">'+configData+'</div>');
+		$('a[href*="settingsTabs-"]:last').parent().after('<li><a href="#settingsTabs-'+(maxID+1)+'">FSH Settings</a></li>');
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
@@ -11075,14 +11020,25 @@ var Helper = {
 	injectNotepadShowLogs: function(content) {
 		if (!content) var content = Layout.notebookContent();
 		var combatLog = GM_getValue("CombatLog");
-		content.innerHTML = '<div align="center"><textarea align="center" cols="80" rows="25" ' +
-			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog">' + combatLog + '</textarea></div>' +
+		var playerName = $('dt[id="statbar-character"]').html();
+		var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b></td></tr>'+
+			'<tr><td colspan="4" align="center">WARNING: this links to an external site not related to HCS.<br />' +
+			'If you wish to visit site directly URL is: http://evolutions.yvong.com/fshlogparser.php</td></tr>'+
+			'<tr><td colspan=1>Nick (This is used for parsing, it is not case sensitive):</td><td colspan=3><input type="text" name="nick" value="'+playerName+'"></td></tr>'+
+			'<tr><td colspan=1>Doubler Level: </td><td colspan=3><input type="text" name="dob" value=""></td></tr>'+
+			'<tr><td colspan=1>Counter Attack Level: </td><td colspan=3 align="left"><input type="text" name="ca" value=""></td></tr>'+
+			'<tr><td colspan=4 align="center"><input type="hidden" value="true" name="submit"><input type="submit" value="Analyze!"></td></tr>';
+		content.innerHTML = '<form action="http://evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
+			'<div align="center"><textarea align="center" cols="80" rows="25" ' +
+			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog" name="logs">' + combatLog + '</textarea></div>' +
 			'<br /><br /><table width="100%"><tr>'+
 			'<td colspan="2" align=center>' +
 			'<input type="button" class="custombutton" value="Select All" id="Helper:CopyLog"></td>' +
 			'<td colspan="2" align=center>' +
 			'<input type="button" class="custombutton" value="Clear" id="Helper:ClearLog"></td>' +
-			'</tr></table>';
+			'</tr>'+yuuzParser+'</table></div>'+
+			'</form>';
+
 		document.getElementById("Helper:CopyLog").addEventListener("click", Helper.notepadCopyLog, true);
 		document.getElementById("Helper:ClearLog").addEventListener("click", Helper.notepadClearLog, true);
 	},
@@ -11333,64 +11289,15 @@ var Helper = {
 		window.location = url;
 	},
 
-	toggleSellFromAllBags: function(evt) {
-		var newValue = !GM_getValue("bulkSellAllBags");
-		GM_setValue("bulkSellAllBags", newValue);
-		var theSpan = document.getElementById("Helper:bulkCheck");
-		theSpan.innerHTML = (newValue === true ? "Selling from all bags" : "Selling only from main folder");
-	},
+
 
 	injectCreateAuctionTemplate: function() {
-		if (window.location.search.search("inv_id") != -1) {
-			if (GM_getValue("enableBulkSell")) {
-				var row = System.findNode("//tr[td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-				if (row) {
-					var sellFromAll = GM_getValue("bulkSellAllBags");
-					var toggleSellAllHTML = "<span id='Helper:bulkCheck' style='cursor: pointer; text-decoration: underline; color: blue;'>" +
-					(sellFromAll === true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
-					row.innerHTML = row.innerHTML.replace("]", " | " + toggleSellAllHTML + " ]");
-					var bulkCheck = document.getElementById("Helper:bulkCheck")
-					if (bulkCheck) bulkCheck.addEventListener("click", Helper.toggleSellFromAllBags, true);
-				}
+		if (window.location.search.search("inv_id") == -1) { return; }
 
-			}
-		}
-		if (window.location.search.search("inv_id") == -1) {
-			var items = System.findNodes("//a[contains(@href,'index.php?cmd=auctionhouse&subcmd=create2')]");
-			if (items) {
-				for (var i = 0; i < items.length; i++) {
-					var item = items[i];
-					//var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec(item.getAttribute("onmouseover"));
-					var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(item.parentNode.parentNode).data("tipped"));
-					if (itemStats) {
-						itemId = itemStats[1];
-						invId = itemStats[2];
-						type = itemStats[3];
-						pid = itemStats[4];
-						var itemHref = item.getAttribute("href");
-						var newHref = itemHref + '&item_id=' + itemId + '&type=' + type + '&pid=' + pid;
-						item.setAttribute("href",newHref);
-					}
-				}
-			}
-			return;
-		}
 		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
 		if (!auctionTable) {return;}
-		var bidEntryTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]/tbody/tr[10]/td[1]/table");
-		itemStats = /inv_id=(\d+)&item_id=(\d+)&type=(\d+)&pid=(\d+)/.exec(window.location.search);
-		if (itemStats) {
-			var invId = itemStats[1];
-			var itemId = itemStats[2];
-			var type = itemStats[3];
-			var pid = itemStats[4];
-			//GM_log();
-			var newCell = bidEntryTable.rows[0].insertCell(2);
-			newCell.rowSpan = 5;
-			newCell.innerHTML = '<img src="' + System.imageServerHTTP + '/items/' + itemId +
-				//fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)
-				'.gif" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t=' + type + '&p=' + pid + '" border=0>';
-		}
+
+
 
 		var newRow = auctionTable.insertRow(10);
 		newCell = newRow.insertCell(0);
@@ -11405,7 +11312,7 @@ var Helper = {
 		}
 
 		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
-				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
+				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;' id='Helper:AuctionTemplateTable'>" +
 				"<tr><td bgcolor='#cd9e4b'><center>Auction Templates</center></td></tr>" +
 				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>" +
 				"<tr><th bgcolor='#cd9e4b'>Length</th><th bgcolor='#cd9e4b'>Currency</th>"+
@@ -11450,7 +11357,165 @@ var Helper = {
 			document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
 		}
 	},
+	
+	injectCreateAuctionBulkSell: function(){
+////////////////////////////////// Post bulk sell //////////////////////////////////
+		var enableBulkSell = GM_getValue("enableBulkSell");
+		var sellFromAll = GM_getValue("bulkSellAllBags");
+		if (!enableBulkSell) {return;}
 
+		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+		if (!auctionTable) {return;}
+
+		var newRow = auctionTable.insertRow(11);
+		var newCell = newRow.insertCell(0);
+		newCell.innerHTML = "&nbsp;";
+		newRow = auctionTable.insertRow(12);
+		newCell = newRow.insertCell(0);
+		newCell.colSpan = 2;
+		newCell.align = "center";
+
+		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
+				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
+				"<tr><td bgcolor='#cd9e4b'><center>Bulk Auction List</center></td></tr>" +
+				"<tr><td align='center'><table cellspacing='10' cellpadding='0' border='0' width='100%' style='border-style: solid; border-width: 1px;'>" +
+				"<tr><th bgcolor='#cd9e4b'>Length</th><th bgcolor='#cd9e4b'>Currency</th>"+
+				"<th bgcolor='#cd9e4b'>Min Bid</th><th bgcolor='#cd9e4b'>Buy Now</th>"+
+				"<th></th></tr>";
+
+			textResult += "<tr align='right'>"+
+				"<td><select id='Helper:bulkSellAuctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
+					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
+					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
+				"<td><select id='Helper:bulkSellAuctionCurrency'><option value='0' >Gold</option><option value='1' selected>FSP</option></select></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellMinBid'/></td>"+
+				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellBuyNow'/></td>"+
+				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
+					"id='Helper:bulkListAll'>bulk list all</span>]</td></tr>";
+
+		textResult += "</table></td></tr>";
+
+
+/// had to move up here for call back purposes:
+
+		$.ajax({
+			url: '?cmd=export&subcmd=inventory',
+			success: function( data ) {
+				Helper.inventory = data;
+			},
+			async: false, //wait for responce
+			dataType: 'json'
+		});
+		var inv_id = /inv_id=(\d+)$/.exec(window.location.search);
+		inv_id = inv_id[1];
+		var inv_id_index=-1;
+		var item_id = -1;
+		for(i=0;i<Helper.inventory.items.length;i++){
+			if(Helper.inventory.items[i].inv_id == inv_id){
+				inv_id_index=i;
+				item_id=Helper.inventory.items[i].item_id;
+			}
+		}
+
+		textResult += "<tr><td align='center'><label id='Helper:useItemsInStCont'><input type='checkbox' id='Helper:useItemsInSt' checked /> Select items in ST</label> - <label id='Helper:listDifferentItemsCont'><input type='checkbox' id='Helper:listDifferentItems' /> Post different types of items</label><input type='hidden' value='"+item_id+"' id='Helper:postingItemID' /></td><tr>";
+
+		textResult += "<tr><td align='center'><table id='Helper:CreateAuctionBulkSellTable' cellspacing='10' cellpadding='0' border='0' width='100%'>";
+
+		textResult += "</table></td></tr>";
+
+		textResult += "</table>";
+
+		newCell.innerHTML = textResult;
+
+		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);
+
+
+		var bidEntryTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]/tbody/tr[10]/td[1]/table");
+		if (inv_id_index > 0) {
+			var newCell = bidEntryTable.rows[0].insertCell(2);
+			newCell.rowSpan = 5;
+			var style='';
+			if (Helper.inventory.items[inv_id_index].is_in_st){
+				style='style="border: 3px solid red"';
+			}
+			//.css('border','3px solid red')
+			newCell.innerHTML = '<img src="' + System.imageServerHTTP + '/items/' + Helper.inventory.items[inv_id_index].item_id +
+				//fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)
+				'.gif" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + Helper.inventory.items[inv_id_index].item_id + '&inv_id=' + Helper.inventory.items[inv_id_index].inv_id  + '&t=1&p=' + Helper.inventory.player_id + '" border=0 '+style+'>';
+		}
+
+		var row = System.findNode("//tr[td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
+		if (row) {
+			var toggleSellAllHTML = "<span id='Helper:bulkCheck' item_id='"+item_id+"' style='cursor: pointer; text-decoration: underline; color: blue;'>" +
+			(sellFromAll === true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
+			row.innerHTML = row.innerHTML.replace("]", " | " + toggleSellAllHTML + " ]");
+			var bulkCheck = document.getElementById("Helper:bulkCheck")
+			if (bulkCheck) bulkCheck.addEventListener("click", Helper.toggleSellFromAllBags, true);
+		}
+
+		document.getElementById('Helper:useItemsInStCont').addEventListener('click', Helper.bulkSellInsertItems, true);
+		document.getElementById('Helper:useItemsInSt').addEventListener('click', Helper.bulkSellInsertItems, true);
+		document.getElementById('Helper:listDifferentItemsCont').addEventListener('click', Helper.bulkSellInsertItems, true);
+		document.getElementById('Helper:listDifferentItems').addEventListener('click', Helper.bulkSellInsertItems, true);
+		Helper.bulkSellInsertItems();
+	},
+
+	toggleSellFromAllBags: function(evt) {
+		var newValue = !GM_getValue("bulkSellAllBags");
+		GM_setValue('bulkSellAllBags', newValue);
+		var theSpan = document.getElementById("Helper:bulkCheck");
+		theSpan.innerHTML = (newValue === true ? "Selling from all bags" : "Selling only from main folder");
+		setTimeout(function() { //need to do this to give time for the gm_getvalue to send
+			Helper.bulkSellInsertItems();
+		},0);
+		
+	},
+
+	bulkSellInsertItems: function(){
+		var item_id=$('input[id="Helper:postingItemID"]').attr('value');
+		if(!item_id){return;}
+		var bulkSellTable = $('table[id="Helper:CreateAuctionBulkSellTable"]');
+		var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
+		var selectAll= $('input[id="Helper:listDifferentItems"]').is(':checked');
+		bulkSellTable.children().remove();
+		var maxAuctions = GM_getValue("maxAuctions");
+		if (!maxAuctions) maxAuctions = 2;
+
+		var sellFromAll = GM_getValue("bulkSellAllBags");
+//alert("in post: " + sellFromAll);
+var items=0;
+		for(i=0;i<Helper.inventory.items.length;i++){
+			shouldPost=true;
+			if(!sellFromAll && Helper.inventory.items[i].folder_id > 0){ shouldPost=false;} //all bp or not?
+			if(!selectST && Helper.inventory.items[i].is_in_st){ shouldPost=false;} //items in ST or not
+			if(!selectAll && Helper.inventory.items[i].item_id!=item_id) { shouldPost=false;}
+
+			if(Helper.inventory.items[i].guild_tag==-1 && shouldPost){
+				if (items % 3 === 0) bulkSellTable.append('<tr><td><td><td><td><td><td></td></td></td></td></td></td></tr>');
+				bulkSellTable.find('tr:last').css("vAlign","middle");
+				bulkSellTable.find('tr:last').find('td:eq('+(items%3)*2+')')
+					.html('<img src="'+System.imageServerHTTP+'/items/'+Helper.inventory.items[i].item_id+'.gif" border=0 ' +
+						'class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + Helper.inventory.items[i].item_id + '&inv_id=' + Helper.inventory.items[i].inv_id + '&t=1&p=' + Helper.inventory.player_id + '">')
+					.next()
+					.html('<span id="Helper:bulkListSingle'+Helper.inventory.items[i].inv_id+'" itemInvId="'+Helper.inventory.items[i].inv_id+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>');
+				if(Helper.inventory.items[i].is_in_st){
+					bulkSellTable.find('tr:last').find('td:eq('+(items%3)*2+')').css('border','3px solid red');
+				}
+				document.getElementById('Helper:bulkListSingle'+Helper.inventory.items[i].inv_id).addEventListener('click', Helper.bulkListSingle, true);
+				if (items > maxAuctions && (i+1) != Helper.inventory.items.length) {
+					bulkSellTable.append('<tr><td></td></tr>');
+					var newText = "You only have " + maxAuctions + " auction slots.";
+					if (maxAuctions == 2) {
+						newText += " Check the updates page to add more (or to fix this number if you think it is wrong)";
+					}
+					bulkSellTable.find('tr:last').find('td:first').html(newText).attr("colspan",6);
+					return false;
+				}
+				items++;
+
+			}
+		}
+	},
 	getAuctionLength: function(auctionLength) {
 		if (auctionLength == 1) return '2 Hours';
 		else if (auctionLength == 2) return '4 Hours';
@@ -11507,7 +11572,10 @@ var Helper = {
 		};
 		table.push(theTemplate);
 		System.setValueJSON("auctionTemplate", table);
-		window.location = window.location;
+		$("table[id='Helper:AuctionTemplateTable']").remove();
+		setTimeout(function(){
+			Helper.injectCreateAuctionTemplate();
+		},0);
 	},
 
 	delAuctionTemplate: function(evt) {
@@ -11515,7 +11583,11 @@ var Helper = {
 		var table = System.getValueJSON("auctionTemplate");
 		table.splice(auctionTemplateId,1);
 		System.setValueJSON("auctionTemplate", table);
-		window.location = window.location;
+		$("table[id='Helper:AuctionTemplateTable']").remove();
+		setTimeout(function(){
+			Helper.injectCreateAuctionTemplate();
+		},0);
+		//window.location = window.location;
 	},
 
 	injectMailbox: function() {
@@ -12373,62 +12445,6 @@ var Helper = {
 		window.location = window.location;
 	},
 
-	injectCreateAuctionBulkSell: function() {
-		if (window.location.search.search("inv_id") == -1) {return;}
-		var enableBulkSell = GM_getValue("enableBulkSell");
-		if (!enableBulkSell) {return;}
-
-		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (!auctionTable) {return;}
-
-		var newRow = auctionTable.insertRow(11);
-		var newCell = newRow.insertCell(0);
-		newCell.innerHTML = "&nbsp;";
-		newRow = auctionTable.insertRow(12);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = 2;
-		newCell.align = "center";
-
-		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
-				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
-				"<tr><td bgcolor='#cd9e4b'><center>Bulk Auction List</center></td></tr>" +
-				"<tr><td align='center'><table cellspacing='10' cellpadding='0' border='0' width='100%' style='border-style: solid; border-width: 1px;'>" +
-				"<tr><th bgcolor='#cd9e4b'>Length</th><th bgcolor='#cd9e4b'>Currency</th>"+
-				"<th bgcolor='#cd9e4b'>Min Bid</th><th bgcolor='#cd9e4b'>Buy Now</th>"+
-				"<th></th></tr>";
-
-			textResult += "<tr align='right'>"+
-				"<td><select id='Helper:bulkSellAuctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
-					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
-					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
-				"<td><select id='Helper:bulkSellAuctionCurrency'><option value='0' >Gold</option><option value='1' selected>FSP</option></select></td>"+
-				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellMinBid'/></td>"+
-				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellBuyNow'/></td>"+
-				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
-					"id='Helper:bulkListAll'>bulk list all</span>]</td></tr>";
-
-		textResult += "</table></td></tr>";
-
-		textResult += "<tr><td align='center'><table id='Helper:CreateAuctionBulkSellTable' cellspacing='10' cellpadding='0' border='0' width='100%'";
-
-		textResult += "</table></td></tr>";
-
-		textResult += "</table>";
-
-		newCell.innerHTML = textResult;
-		var itemStats = /inv_id=(\d+)&item_id=(\d+)/.exec(window.location.search);
-		var invID = itemStats[1];
-		var itemID = itemStats[2];
-		var xmlhttpAddress;
-
-		if (GM_getValue("bulkSellAllBags")) {
-			xmlhttpAddress = "index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems";
-		} else {
-			xmlhttpAddress = "index.php?cmd=auctionhouse&subcmd=create";
-		}
-		System.xmlhttp(xmlhttpAddress, Helper.processAuctionBulkSellItems, {"itemID":itemID,"invID":invID});
-		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);
-	},
 
 	injectAuctionSTCheck: function() {
 		var injectCell = System.findNode("//table[@width='650']/tbody/tr/td[contains(.,'Use the form below')]");
@@ -12441,49 +12457,6 @@ var Helper = {
 		}
 	},
 
-	processAuctionBulkSellItems: function(responseText, callback) {
-		var originalItemID = callback.itemID;
-		var originalInvID = callback.invID;
-
-		var bulkSellTable = $('table[id="Helper:CreateAuctionBulkSellTable"]');
-
-		var doc=System.createDocumentWithImages(responseText);
-		var bulkAuctionItemIMGs = $(doc).find('img[src*="items/'+originalItemID+'.gif"]');
-		if (bulkAuctionItemIMGs.length == 0) {return;}
-		var maxAuctions = GM_getValue("maxAuctions");
-		if (!maxAuctions) maxAuctions = 2;
-		var bulkSellAllBags = GM_getValue("bulkSellAllBags");
-
-		bulkAuctionItemIMGs.each(function(index){
-			if (!bulkSellAllBags) {
-				var bulkItemMouseover = $(this).parents('td:first').data("tipped");
-			} else {
-				var bulkItemMouseover = $(this).data("tipped");
-			}
-			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(bulkItemMouseover);
-			var itemId = itemStats[1];
-			var invId = itemStats[2];
-			var type = itemStats[3];
-			var pid = itemStats[4];
-			if ((index % 3 === 0)) bulkSellTable.append('<tr><td><td><td><td><td><td></td></td></td></td></td></td></tr>');
-			bulkSellTable.find('tr:last').css("vAlign","middle");
-			bulkSellTable.find('tr:last').find('td:eq('+(index%3)*2+')')
-				.html('<img src="'+System.imageServerHTTP+'/items/'+itemId+'.gif" border=0 ' +
-					'class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t=' + type + '&p=' + pid + '">')
-				.next()
-				.html('<span id="Helper:bulkListSingle'+invId+'" itemInvId="'+invId+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>');
-			document.getElementById('Helper:bulkListSingle'+invId).addEventListener('click', Helper.bulkListSingle, true);
-			if ((index+2) > maxAuctions && (index+1) != bulkAuctionItemIMGs.length) {
-				bulkSellTable.append('<tr><td></td></tr>');
-				var newText = "You only have " + maxAuctions + " auction slots.";
-				if (maxAuctions == 2) {
-					newText += " Check the updates page to add more (or to fix this number if you think it is wrong)";
-				}
-				bulkSellTable.find('tr:last').find('td:first').html(newText).attr("colspan",6);
-				return false;
-			}
-		});
-	},
 
 	bulkListAll: function() {
 		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
@@ -12541,29 +12514,12 @@ var Helper = {
 		}
 	},
 
-	toggleCheckAllItems: function(evt) {
-		var allItems=System.findNodes("//input[@type='checkbox' and @name='sendItemList[]']");
-		if (allItems) {
-			for (var i=0; i<allItems.length; i++) {
-				var checkboxForItem = allItems[i];
-				if (checkboxForItem.style.visibility == "hidden")
-					checkboxForItem.checked = false;
-				else {
-					if (checkboxForItem.checked) {
-						checkboxForItem.checked = false;
-					} else {
-						checkboxForItem.checked = true;
-					}
-				}
-			}
-		}
-	},
-
 	toggleCheckAllPlants: function(evt) {
 		var plantRE = new RegExp(evt.target.getAttribute("plantRE"));
 		var tradeType = evt.target.getAttribute("tradetype");
 		var allItems = System.findNodes("//input[@type='checkbox' and @name='sendItemList[]']");
-		var ignoreST = document.getElementById("Helper:ignoreSTitems").checked;
+		//var ignoreST = document.getElementById("Helper:ignoreSTitems").checked;
+		var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
 
 		if (allItems) {
 			var itemsLen = allItems.length;
@@ -12572,7 +12528,7 @@ var Helper = {
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
 				if(plantRE.exec(theImgNode.getAttribute("src"))) {
-					if((/3px solid red/.exec(theImgNode.parentNode.parentNode.style.border))&&!ignoreST) //item in an ST, skip it
+					if((/3px solid red/.exec(theImgNode.parentNode.parentNode.style.border))&&!selectST) //item in an ST, skip it
 						continue;//alert("asdf");
 					if (allItems[i].checked)
 						allItems[i].checked = false;
@@ -12585,49 +12541,81 @@ var Helper = {
 		}
 	},
 
-	injectStandardTrade: function() {
-		var mainTable = System.findNodes("//table[@width='300']");
-		if (mainTable[2]) {
-			var td=mainTable[2].parentNode;
-			td.innerHTML = '<form method="post" action="index.php" name="sendItemForm">'+
-				td.innerHTML.replace('<form method="post" action="index.php" name="sendItemForm"></form>','')+
-				'</form>'; // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
-			mainTable = System.findNodes("//table[@width='300']");
-			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
-			var newCellAll = newRow.insertCell(0);
-			newCellAll.colSpan = 3;
-			Helper.makeSelectAllInTrade(newCellAll,'send');
-			var newRow = mainTable[2].insertRow(mainTable[2].rows.length - 1);
-			var newCell = newRow.insertCell(0);
-			newCell.colSpan = 3;
-			newCell.innerHTML = "<span id='SecureTradeCheckMessage' style='color:blue;'>Existing ST check in progress ...</span>";
-			System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
-		}
-	},
+	insertItemsToTrade: function(){
+		//remove the HCS table... building it myself
+		var itemTable=$('<table></table>');
+		var items=0;
+		var fromFolder=$('input[id="Helper:CurrentFolder"]').val();
+		for(i=0;i<Helper.inventory.items.length;i++){
+			shouldDisplay=true;
+			if(!(fromFolder==0) && Helper.inventory.items[i].folder_id != fromFolder) { shouldDisplay=false;}
+			if(Helper.inventory.items[i].equipped) { shouldDisplay=false;}
+			//if(!selectST && Helper.inventory.items[i].is_in_st){ shouldDisplay=false;}
+			if(shouldDisplay){
+				if (items % 6 === 0) {
+					insertAt = $('<tr></tr>');
+					itemTable.append(insertAt);
+					for(x=0;x<6;x++){
+						insertAt.append('<td align="center" id="Helper:itemTD'+(items+x)+'"></td>');
+					}
+				}
+				style='';
+				if(Helper.inventory.items[i].is_in_st){
+					style=' style="border: 3px solid red"';
+				}
 
-	injectSecureTrade: function() {
-		var mainTable = System.findNode("//table[@width='300']");
-		if (mainTable) {
-			var td=mainTable.parentNode;
-			td.innerHTML = '<form method="post" action="index.php" name="createOffer" onsubmit="if(confirm(\'Are you sure you wish send this offer?\')) return true; else return false;">'+
-				td.innerHTML.replace('<form method="post" action="index.php" name="createOffer" onsubmit="if(confirm(\'Are you sure you wish send this offer?\')) return true; else return false;"></form>','')+
-				'</form>'; // fixing HCS coding style (<table><form><tr>  --> <form><table><tr>)
-			mainTable = System.findNode("//table[@width='300']");
-			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
-			var newCellAll = newRow.insertCell(0);
-			newCellAll.colSpan = 3;
-			Helper.makeSelectAllInTrade(newCellAll,'secure');
-			var newRow = mainTable.insertRow(mainTable.rows.length - 5);
-			var newCell = newRow.insertCell(0);
-			newCell.colSpan = 3;
-			newCell.innerHTML = "<span id='SecureTradeCheckMessage' style='color:blue;'>Existing ST check in progress ...</span>";
-			System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
+				itemTable.find("td[id='Helper:itemTD"+items+"']").append('<table border=0 cellpadding="0" cellspacing="0"><tr><td background="http://fileserver.huntedcow.com/inventory/2x3.gif" width="60" height="90" '+style+'><center><img src="'+System.imageServerHTTP+'/items/'+Helper.inventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+Helper.inventory.items[i].item_id+'&inv_id='+Helper.inventory.items[i].inv_id+'&t=1&p='+Helper.inventory.player_id+'&currentPlayerId='+Helper.inventory.player_id+'" border=0></center></td></tr><tr><td align="center"><input type="checkbox" value="'+Helper.inventory.items[i].inv_id+'" name="sendItemList[]" ></td></tr></table>');
+				items++;
+			}
 		}
+		$("table[id='item-list']").children().remove();
+		$("table[id='item-list']").append(itemTable.html());
+
+	},
+	injectTrade: function() {
+		
+		$("table[id='item-list']").closest('tr').before('<tr id="Helper:selectMultiple"></tr>').before('<tr id="Helper:folderSelect"></tr>').before('<tr id="Helper:showSTs"></tr>');
+		//$("tr[id='Helper:selectMultiple']").append('<td colspan=6>Multiple Select</td>');
+		Helper.makeSelectAllInTrade();
+
+		$.ajax({
+			url: '?cmd=export&subcmd=inventory',
+			success: function( data ) {
+				Helper.inventory = data;
+			},
+			async: false, //wait for responce
+			dataType: 'json'
+		});
+		for(i=0;i<Helper.inventory.items.length;i++){
+				if(Helper.inventory.items[i].is_in_st){
+					$('input[value="'+Helper.inventory.items[i].inv_id+'"]').closest('tr').prev().find('td[background="http://fileserver.huntedcow.com/inventory/2x3.gif"]').css('border','3px solid red');
+				}
+		}
+
+//append main folder
+		var folders='<input type="hidden" id="Helper:CurrentFolder" value=0 /><span id="FolderID0" fid=0 style="cursor:pointer; text-decoration:underline;">All</span> <span id="FolderID-1" fid="-1" style="cursor:pointer; text-decoration:underline;">Main</span> ';
+		for (var key in Helper.inventory.folders){//Helper.inventory.folders[key]
+			folders+='<span id="FolderID'+key+'" fid='+key+' style="cursor:pointer; text-decoration:underline;">'+Helper.inventory.folders[key]+'</span> ';
+			//folders+='<label><input type="radio" name="all" value='+key+' /> '+Helper.inventory.folders[key]+'</label>, ';
+		}
+		$("tr[id='Helper:folderSelect']").append('<td colspan=6>'+folders+'</td>');//retrieving folder names...
+
+		$('span[id*="FolderID"]').click(function(){
+			//alert($(this).attr('fid'));
+			$('input[id="Helper:CurrentFolder"]').attr('value',$(this).attr('fid'));
+			//alert($('input[id="Helper:CurrentFolder"]').val());
+			Helper.insertItemsToTrade();
+
+		});
+
+
+		$("tr[id='Helper:showSTs']").append("<td align='center' colspan=6><label id='Helper:useItemsInStCont'><input type='checkbox' id='Helper:useItemsInSt' checked /> Select items in ST</label></td>");
+		//Helper.insertItemsToTrade(); //rebuilds item list - not required - takes a second to load and mostly not needed.
 	},
 
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
+		var itemList=[["bbdsj", "5563|5564|5566"], ["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
@@ -12635,98 +12623,14 @@ var Helper = {
 				'id="Helper:checkAll'+i+'" tradetype="'+type+'">'+itemList[i][0]+'</span> &ensp;';
 			allResRE+=itemList[i][1]+'|';
 		}
-		output='Select: &ensp;<span style="cursor:pointer; text-decoration:underline;" id="Helper:checkAllItems" tradetype="'+type+'">' +
+		output='Select: &ensp;<span style="cursor:pointer; text-decoration:underline;" plantRE=".*" id="Helper:checkAll'+(i++)+'" tradetype="'+type+'">' +
 			'All Items</span> &ensp; ' +
 			'<span plantRE="'+allResRE.substr(0,allResRE.length-1)+'" style="cursor:pointer; text-decoration:underline;"' +
 				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp;' + output;
-		output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
-		injectHere.innerHTML += output;
+		//output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
+		$("tr[id='Helper:selectMultiple']").append('<td colspan=6>'+output+'</td>');
 		for (var i=0;i<itemList.length+1;i++) {
 			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
-		}
-		document.getElementById("Helper:checkAllItems").addEventListener('click', Helper.toggleCheckAllItems, true);
-		System.xmlhttp("index.php?cmd=profile&subcmd=dropitems&fromworld=1", Helper.getFolderName2Trade, true);
-	},
-
-	getFolderName2Trade: function(responseText) {
-		var doc=System.createDocumentWithImages(responseText);
-		var otherFolders = System.findNodes("//td/center/a/img[contains(@src,'/folder.gif')]",doc);
-		var newHtml='<span id="Folder-2" fid=-2 style="cursor:pointer; text-decoration:underline;">All</span> '+
-			'<span id="Folder-1" fid=-1 style="cursor:pointer; text-decoration:underline;">Main</span> ';
-		for (var i=0; i<otherFolders.length; i++) {
-			//GM_log(otherFolders[i].parentNode.getAttribute("href").match(/cmd=profile&subcmd=dropitems&folder_id=(\d+)/i)[1]);
-			newHtml+='<span id="Folder'+i+'" fid='+
-				otherFolders[i].parentNode.getAttribute("href").match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+
-				' style="cursor:pointer; text-decoration:underline;">'+
-				otherFolders[i].parentNode.parentNode.textContent+'</span> ';
-		}
-		document.getElementById("Helper:getFolder").innerHTML=newHtml;
-		for (var i=-2; i<otherFolders.length; i++) {
-			document.getElementById("Folder"+i).addEventListener('click', Helper.getFolderContent2Trade, true);
-		}
-	},
-
-	getFolderContent2Trade: function(evt) {
-		var fid=evt.target.getAttribute('fid');
-		if (fid==-2)
-			window.location.reload();
-		else
-			System.xmlhttp('index.php?cmd=profile&subcmd=dropitems&folder_id='+fid, function(responseText) {
-				var table=System.findNode('//td[@colspan=3 or @colspan=2]/table[@cellspacing=8]');
-				var newHtml = '<table cellspacing="8" cellpadding="0" border="0" align="center"><tbody><tr>';
-				var doc=System.createDocument(responseText);
-				Helper.itemList = {};
-				Helper.retrieveItemInfor(doc);
-				var counter = 0;
-				for (var key in Helper.itemList) {
-					newHtml+='<td align="center"><table cellspacing="0" cellpadding="0" border="0"><tbody><tr>'+
-						'<td background="http://72.29.91.222/inventory/2x3.gif" width="60" height="90">'+
-						Helper.itemList[key].html.match(/(<center><img [^>]*><\/center>)/)[1]+
-						'</td></tr><tr><td align="center"><input type="checkbox" name="sendItemList[]" value="'+Helper.itemList[key].id+'"></td></tr></tbody></table></td>';
-					counter++;
-					if (counter % 6 == 0) newHtml+='</tr><tr>';
-				}
-				newHtml+='</tr></tbody></table>';
-				table.innerHTML = newHtml;
-			});
-		var stmsg = document.getElementById("SecureTradeCheckMessage");
-		stmsg.innerHTML='Existing ST check in progress ...';
-		stmsg.style.color = 'blue';
-
-		System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
-	},
-
-	checkExistingSecureTrades: function(responseText) {
-		var doc = System.createDocument(responseText);
-		Helper.secureTradesToCheckCount = 0;
-		Helper.secureTradesProcessed = 0;
-		$(doc).find('table:contains("Outgoing"):last').find('tr:gt(1)').find('td:eq(2) a').each(function(){
-			Helper.secureTradesToCheckCount++;
-			System.xmlhttp($(this).attr('href'), Helper.markExistingSecureTrades, true);
-		});
-		if (Helper.secureTradesToCheckCount == 0) {
-			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
-			secureTradeCheckMessage.innerHTML = 'No existing ST\'s to check.<input type="checkbox" id="Helper:ignoreSTitems" style="display:none;" checked>';
-			secureTradeCheckMessage.style.color = 'Green';
-		}
-	},
-
-	markExistingSecureTrades: function(responseText) {
-		var doc = System.createDocumentWithImages(responseText);
-		$(doc).find('img[src*="/items/"]').each(function(){
-			var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(this).data("tipped"));
-			var itemId = itemStats[1];
-			var invId = itemStats[2];
-			var testString = 'a[href*="'+itemId+'"][href*="'+invId+'"],img[data-tipped*="'+itemId+'"][data-tipped*="'+invId+'"]';
-			$('html').find(testString)
-				.parents('td:first').css('border','3px solid red');
-		});
-
-		Helper.secureTradesProcessed++;
-		if (Helper.secureTradesProcessed == Helper.secureTradesToCheckCount) {
-			var secureTradeCheckMessage = document.getElementById("SecureTradeCheckMessage");
-			secureTradeCheckMessage.innerHTML = 'Existing ST check complete. Select items in ST <input type="checkbox" id="Helper:ignoreSTitems" checked>';
-			secureTradeCheckMessage.style.color = 'Green';
 		}
 	},
 
