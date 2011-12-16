@@ -7719,10 +7719,11 @@ var Helper = {
 				t=1;
 
 			}
-
+			var nm = item.item_name;
+			if(item.equipped) { nm='<b>'+nm+'</b>';}
 			result+='<tr style="color:'+ color +'">' +
 				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a style="cursor:help" id="Helper:item'+i+'" arrayID="'+i+'" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+item.item_id+'&inv_id='+item.inv_id+'&t='+t+'&p='+p+'">' + item.item_name + '</a>';
+				'</td><td><a style="cursor:help" id="Helper:item'+i+'" arrayID="'+i+'" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+item.item_id+'&inv_id='+item.inv_id+'&t='+t+'&p='+p+'">' + nm + '</a>';
 
 			if (item.stats.set_name && reportType == "guild") {
 				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
@@ -7805,10 +7806,15 @@ var Helper = {
 					'&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+targetInventory.items[i].player_id+'&mode=0">Fast BP</span> |'+
 					'&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+targetInventory.items[i].player_id+'&mode=1">Fast GS</span> |'+
 					'</span><br />';
-				if(item.player_id=='-1'){
+				if(targetInventory.items[i].equipped){
+					//
+					html+='<span id="Helper:isEquiped">This item is being worn!</span><br />';
+				}
+				if(targetInventory.items[i].player_id=='-1'){
 					p=targetInventory.guild_id;
 					t=4;
 				}else{
+					html+='<span id="Helper:IsWornBy"><input id="Helper:GetWornBy" type="submit" class="custombutton" value="Who is Holding it?" pid="'+targetInventory.items[i].player_id+'" ></span><br />';
 					p=targetInventory.items[i].player_id;
 					t=1;
 				}
@@ -7939,6 +7945,19 @@ var Helper = {
 							GM_log(callback.url);
 						}
 					},
+					async: false, //wait for responce
+				});
+
+			});
+			$('input[id="Helper:GetWornBy"]').click(function(){
+				var pid = $(this).attr('pid');
+				var whoisHref = '?cmd=export&subcmd=profile&player_id='+pid;
+				$.ajax({
+					url: whoisHref,
+					success: function( data ) {
+						$('span[id="Helper:IsWornBy"]').html(data.username);
+					},
+					dataType: 'json',
 					async: false, //wait for responce
 				});
 
@@ -12510,7 +12529,7 @@ var items=0;
 		if (allItems) {
 			var itemsLen = allItems.length;
 			if(tradeType=='secure') {itemsLen=Math.min(100,itemsLen);}
-
+itemsLen=Math.min(80,itemsLen);
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
 				if(plantRE.exec(theImgNode.getAttribute("src"))) {
@@ -12601,7 +12620,7 @@ var items=0;
 
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		var itemList=[["bbdsj", "5563|5564|5566"], ["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
+		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
