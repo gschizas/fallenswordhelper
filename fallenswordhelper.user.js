@@ -12529,7 +12529,7 @@ var items=0;
 		if (allItems) {
 			var itemsLen = allItems.length;
 			if(tradeType=='secure') {itemsLen=Math.min(100,itemsLen);}
-itemsLen=Math.min(80,itemsLen);
+
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
 				if(plantRE.exec(theImgNode.getAttribute("src"))) {
