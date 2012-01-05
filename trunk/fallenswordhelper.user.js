@@ -4137,7 +4137,7 @@ var Helper = {
 				if (hideGuildInfoMessage) $('a#guild-minibox-action-send-message').hide();
 				//add coloring for offline time
 				$(guildMemberList).find('li.player').each(function() {
-					var playerA = $(this).find('div.player-row a');
+					var playerA = $(this).find('div.player-row a.player-name');
 					var playerName = playerA.text();
 					var onMouseOver = playerA.data('tipped');
 					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
