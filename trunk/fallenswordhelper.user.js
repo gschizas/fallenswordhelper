@@ -7577,17 +7577,30 @@ var Helper = {
 				url: '?cmd=export&subcmd=guild_store&inc_tagged=1',
 				success: function( data ) {
 					Helper.guildinventory = data;
-					targetInventory=data;
 					targetID='Helper:GuildInventoryManagerOutput';
 					reportType='guild';
 				},
 				async: false, //wait for responce
 				dataType: 'json'
 			});
+			$.ajax({
+				url: '?cmd=export&subcmd=guild_members&guild_id='+Helper.guildinventory.guild_id,
+				success: function( data ) {
+					var buildJSON='{';
+					for(x in data){
+						//Helper.guildinventory.members[data[x].id]=data[x].username;
+						buildJSON+='"'+data[x].id+'":"'+data[x].username+'",';
+					}
+					buildJSON=buildJSON.substring(0, buildJSON.length-1)+'}';
+					Helper.guildinventory.members = JSON.parse(buildJSON);
+				},
+				async: false, //wait for responce
+				dataType: 'json'
+			});
+			targetInventory=Helper.guildinventory;
 		}else{
 			return;
 		}
-
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
 		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
 		if(reportType=='self'){
@@ -7664,7 +7677,7 @@ var Helper = {
 		var result='<table id="Helper:InventoryTable"><tr>' +
 			'<th width="180" align="left" sortkey="item_name" sortType="string" colspan="2">Name</th>' +
 			'<th sortkey="stats.min_level" sortType="number">Level</th>' +
-			'<th align="left" sortkey="folder_id" sortType="number">Where</th>' +
+			'<th align="left" sortkey="player_name" sortType="string">Where</th>' +
 			'<th align="left" sortkey="type" sortType="number">Type</th>' +
 			'<th sortkey="stats.attack" sortType="number">Att</th>' +
 			'<th sortkey="stats.defense" sortType="number">Def</th>' +
@@ -7687,6 +7700,7 @@ var Helper = {
 			item=allItems[i];
 			if(item.equipped) {item.folder_id=99999999; } //for sorting purposes.
 			//continue; if item is filtered.
+			item.player_name='';
 			if(item.type > 8){continue;}//not a wearable item
 			if(!$('input[id="'+Helper.itemFilters[item.type].id+'"]').is(':checked')){continue;}
 			if(minLvl >= item.stats.min_level || maxLvl <= item.stats.min_level){continue;}
@@ -7697,9 +7711,11 @@ var Helper = {
 			var p=0;
 			if (reportType == "guild") {
 				if(item.player_id==-1){ //guild store
+					item.player_name='GS';
 					color = "navy";   whereText = "GS";   whereTitle="Guild Store"
 				}else{
-					color = "maroon"; whereText = "Rep";  whereTitle="Guild Report"
+					item.player_name=targetInventory.members[item.player_id];
+					color = "maroon"; whereText = item.player_name;  whereTitle="Guild Report"
 				}
 				if(item.player_id=='-1'){
 					p=targetInventory.guild_id;
@@ -7717,8 +7733,9 @@ var Helper = {
 				}
 				p=targetInventory.player_id;
 				t=1;
-
 			}
+
+
 			var nm = item.item_name;
 			if(item.equipped) { nm='<b>'+nm+'</b>';}
 			result+='<tr style="color:'+ color +'">' +
@@ -7814,7 +7831,7 @@ var Helper = {
 					p=targetInventory.guild_id;
 					t=4;
 				}else{
-					html+='<span id="Helper:IsWornBy"><input id="Helper:GetWornBy" type="submit" class="custombutton" value="Who is Holding it?" pid="'+targetInventory.items[i].player_id+'" ></span><br />';
+					html+='<span id="Helper:IsWornBy">Is being held by: '+targetInventory.items[i].player_name+'</span><br />';
 					p=targetInventory.items[i].player_id;
 					t=1;
 				}
@@ -7830,7 +7847,9 @@ var Helper = {
 				html+='</select><input id="Helper:InitiateMove" type="submit" class="custombutton" value="Move!" invid="'+targetInventory.items[i].inv_id+'" ></span><br />';
 
 				html+='<span id="Helper:Drop"><input id="Helper:DropItem" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'"  itemName="'+targetInventory.items[i].item_name+'" value="Drop Item!" /></span><br />' + 
-				'<span id="Helper:Send" >send to <input type="text" id="Helper:sendTo" size=5 /><input id="Helper:SendSubmit" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'" value="Send!"/></span><br />' + 
+				'<span id="Helper:Send" >send to <input type="text" id="Helper:sendTo" size=5 /><input id="Helper:SendSubmit" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'" value="Send!"/></span><br />' +
+				'<span id="Helper:Wear"><input class="custombutton" type="submit" id="Helper:equipProfileInventoryItem" ' +
+								'itemID="' + targetInventory.items[i].inv_id + '" value="Put it on!"></span> <br />' +
 				'<span id="Helper:Sell"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&subcmd=create2&inv_id='+targetInventory.items[i].inv_id+'">Post to AH</a></span><br />';
 				t=1;
 				p=targetInventory.player_id;
@@ -7840,7 +7859,6 @@ var Helper = {
 			if(targetInventory.items[i].stats.set_name)
 				html+='Set Name: ' + targetInventory.items[i].stats.set_name + '<br />';
 			html+='<img src="'+System.imageServerHTTP+'/items/'+targetInventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+targetInventory.items[i].item_id+'&inv_id='+targetInventory.items[i].inv_id+'&t='+t+'&p='+p+'" border=0>';
-
 			var $dialog = $('<div></div>')
 				.html(html)
 				.dialog({
@@ -7855,6 +7873,7 @@ var Helper = {
 						}
 					}
 				});
+			document.getElementById('Helper:equipProfileInventoryItem').addEventListener('click', Helper.equipProfileInventoryItem, true);
 			$('input[id="Helper:DropItem"]').click(function(){
 				var answer = confirm("Are you sure you want to drop "+$(this).attr('itemName')+"?");
 				if(answer){
@@ -7945,19 +7964,6 @@ var Helper = {
 							GM_log(callback.url);
 						}
 					},
-					async: false, //wait for responce
-				});
-
-			});
-			$('input[id="Helper:GetWornBy"]').click(function(){
-				var pid = $(this).attr('pid');
-				var whoisHref = '?cmd=export&subcmd=profile&player_id='+pid;
-				$.ajax({
-					url: whoisHref,
-					success: function( data ) {
-						$('span[id="Helper:IsWornBy"]').html(data.username);
-					},
-					dataType: 'json',
 					async: false, //wait for responce
 				});
 
