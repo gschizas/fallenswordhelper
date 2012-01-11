@@ -110,10 +110,10 @@ function GM_ApiBrowserCheck(){
     if (needApiUpgrade){
         var ws = null;
         try{
-            ws = typeof(unsafeWindow.localStorage);
-            unsafeWindow.localStorage.length;
+			ws = typeof(unsafeWindow.localStorage);
+			unsafeWindow.localStorage.length;
         } catch(e){
-            ws = null;
+			ws = null;
         }
         // Catch Security error
         if (ws == 'object'){
@@ -934,30 +934,6 @@ var Layout = {
 		$(tableElement).find('tr:eq('+position+')').before('<tr><td><font color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font color="black">' + text + '</font></A></font></td></tr><tr><td height="5"></td></tr>')
 	},
 
-	hideBanner: function() {//JQuery ready
-
-		if (!GM_getValue("hideBanner")) {
-			if (GM_getValue("showSTUpTop")) {
-				var overlayTable = $('div[class="top_banner"]');
-				if (overlayTable) {
-					var STnode = $('font:contains("Server Time:"):first').closest('tr').next().find('b');
-
-					if (STnode.length) { //maximized
-						overlayTable.append("<div><font color=#FFFFFF size='3'>ST: " + STnode.html() + "</font></div>");
-					} else { //minimized
-						var STnode1 = $('font:contains("Time:"):first').closest('td').next().find('font');
-						var STnode2 = $('font:contains("Date:"):first').closest('td').next().find('font');
-						if (STnode1 && STnode2) {
-							overlayTable.append("<div><font color=#FFFFFF size='3'>ST: " + STnode1.html() + "<br>" + STnode2.html() + "</font></div>");
-						}
-					}
-				}
-			}
-			return;
-		}
-		$('div[class="top_banner"]').attr('style','display:none');
-	},
-
 	moveRHSBoxUpOnRHS: function(title) {
 		if (isNewUI == 1) {
 			$('div#pCR').prepend($('div#' + title));
@@ -1080,7 +1056,151 @@ var Layout = {
 	}
 
 };
+function getVar(p,m)
+{	m=m.substr(33,m.length);
+	n=m.split("&");
+	for (i=0;i<n.length;i++)
+	{
+		o = n[i].split("=");
+		if (o[0]==p)
+		{
+			return o[1];
+		}
+	}
+}
+var inventor = {
+		insertQuickTake: function() { //get items from temp inventory.
+		inventor.itemList = {};
+		var layout=Layout.notebookContent();
+		layout.innerHTML="Getting item list from Mailbox";
+		inventor.mailboxList={};
+		System.xmlhttp("/index.php?cmd=tempinv", inventor.getItemsFromMailbox, {"inject":layout,"id":0});
+	},
 
+	retrieveItemInforMailbox: function(doc) {
+		//var mailItems=System.findNodes("//td[@height=90]",doc);
+		//
+		var mailItems=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]", doc);
+		//alert (mailItems[0].getAttribute('data-tipped'));
+		//alert(System.getIntFromRegExp(mailItems[0].getAttribute('data-tipped'),/fetchitem.php\?item_id=\(d+)\&/));
+		for (var i=0; i<mailItems.length; i++){//mailItems.length
+			var mailItem=mailItems[i];
+			if (mailItem.parentNode.innerHTML.indexOf('offer') > 0){ continue;}
+			var	itemIDs = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(mailItem.getAttribute('data-tipped')); 
+			//add this line
+			var item={
+				//"id":System.getIntFromRegExp(mailItem.innerHTML,/ajaxLoadItem\(\d+, (\d+), \d+, \d+/),
+				//"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
+				"id":itemIDs[2],
+				"html":mailItem.parentNode.innerHTML//mailItem.getAttribute('data-tipped')//mailItem.innerHTML.replace(/<a[^>]*>/g, '')
+				};
+			inventor.itemList["id"+item.id]=item;
+		}
+		//alert (mailItem.innerHTML);
+	},
+
+	getItemsFromMailbox: function(responseText, callback) {
+		var layout=callback.inject;
+		layout.innerHTML+="Parsing Mailbox Items";
+		var doc=System.createDocument(responseText);
+		if (responseText.indexOf('Item Mailbox') > 0){
+			inventor.retrieveItemInforMailbox(doc);
+		}
+		inventor.showQuickTake(callback);
+	},
+
+	showQuickTake: function(callback) {
+		var output='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Take</b></td></tr></table>'+
+			'Select which item to take all similar items from your Mailbox.<br/>'+
+			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=take_result colspan=12></td></tr>';
+		for (var key in inventor.itemList) {
+			var itemID=inventor.itemList[key].id;
+			//alert(inventor.itemList[key].html);
+			//alert(itemID);
+			var	itemStats = /fetchitem.php\?item_id=(\d+)\&amp;inv_id=(\d+)\&amp;t=(\d+)\&amp;p=(\d+)/.exec(inventor.itemList[key].html); //add this line
+			var itemType = itemStats[1];
+			//var	itemType=inventor.itemList[key].itemid; //add this line
+			if (inventor.mailboxList[itemType]){
+				inventor.mailboxList[itemType].invIDs+=","+itemID;
+				inventor.mailboxList[itemType].count++;
+			}
+			else {
+				inventor.mailboxList[itemType]={'count':1,'invIDs':itemID,'src':inventor.itemList[key].html};
+			}
+		}
+
+		for (var id in inventor.mailboxList) {
+			var titem=inventor.mailboxList[id];
+			output+='<tr><td align=center>'+
+				'<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+				'id="Helper:takeAllSimilar' + id + '" invIDs="'+titem.invIDs+'">Take All '+titem.count +'</span></td>'+titem.src+'</tr>';
+		}
+		output+='</table>';
+
+		callback.inject.innerHTML=output;
+		for (id in inventor.mailboxList) {
+			document.getElementById('Helper:takeAllSimilar' + id).
+				addEventListener('click', inventor.takeAllSimilar, true);
+			}
+	},
+
+	takeAllSimilar: function(evt) {
+		//if (!window.confirm("Are you sure you want to take all similar items?")) {return;}
+		var InventoryIDs=evt.target.getAttribute("invIDs").split(",");
+		//evt.target.parentNode.innerHTML = InventoryIDs;
+		var output= '';
+		evt.target.parentNode.innerHTML = 'taking all ' + Math.min(InventoryIDs.length,100) + ' items';
+		for (var i=0; i<Math.min(InventoryIDs.length,100); i++){
+			//index.php?cmd=tempinv&subcmd=takeitem&&temp_id=
+			System.xmlhttp('index.php?cmd=tempinv&subcmd=takeitem&&temp_id='+InventoryIDs[i], inventor.quickDoneTaken);
+		}
+		//evt.target.parentNode.innerHTML = output;
+	},
+	quickDoneTaken: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		//unsafeWindow.tt_setWidth(200);
+		//unsafeWindow.Tip(infoMessage);
+		document.getElementById('take_result').innerHTML+="<br />"+infoMessage;
+	},
+
+	injectInvent: function(){
+		var injectHere=System.findNode("//tr/td/input[contains(@value,'Invent')]");
+		var	recipeID = /name=\"recipe_id\" value=\"(\d+)\"/.exec(injectHere.parentNode.parentNode.parentNode.innerHTML)[1]; //add this line
+		//var	recipeID = /name=\"recipe_id\" value=\"(\d+)\"/.exec(injectHere.parentNode.parentNode.parentNode.innerHTML); //add this line
+
+		var selector="</td></tr><tr><td><span>Select how many to quick invent<input value=1 id='invent_amount' name='invent_amount' size=1 class='custominput'></td></tr>"+
+			"<tr><td><input id='quickInvent' value='Quick invent items' class='custombutton' type='submit'></td></tr>"+ //button to invennt
+			"<input type='hidden' id='recipe_id' value='"+ recipeID +"'>"+
+			"<tr><td colspan=6 align='center'><ol id='invent_Result'></ol></td></tr>"+
+			"<tr><td id='warningMsg' colspan=6 align='center'></td></tr>";
+		injectHere.parentNode.innerHTML+=selector;
+		quickInventButton = System.findNode("//input[@id='quickInvent']");
+		quickInventButton.addEventListener('click', inventor.quickInvent, true);
+
+	},
+	quickInvent: function() {
+		//alert ();
+		var amountToInvent = document.getElementById('invent_amount').value;
+		var recipeID = document.getElementById('recipe_id').value;
+		document.getElementById('invent_Result').innerHTML="Inventing "+amountToInvent+" Items";
+		for (var i=0;i<amountToInvent;i++) {
+			System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+recipeID, inventor.quickInventDone);
+
+		}
+	},
+	quickInventDone: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		if(!infoMessage){
+			infoMessage=$(responseText).find('b:contains("invent"):first').html();
+		}
+		document.getElementById('invent_Result').innerHTML+="<li>"+infoMessage+"</li>";
+	}
+}
+if(getVar("subcmd",window.location.href)=="viewrecipe"){
+	inventor.injectInvent();
+}else if(getVar("subcmd",window.location.href)=="quicktake"){
+	inventor.insertQuickTake();
+}
 var Helper = {
 	// System functions
 	init: function (e) {
@@ -1135,8 +1255,6 @@ var Helper = {
 		System.setDefault("hideQuestNames", "");
 		System.setDefault("hideRecipes", false);
 		System.setDefault("hideRecipeNames", "");
-		System.setDefault("hideBanner", false);
-		System.setDefault("showSTUpTop", true);
 		System.setDefault("footprintsColor", "silver");
 		System.setDefault("enableGuildInfoWidgets", true);
 		System.setDefault("enableOnlineAlliesWidgets", true);
@@ -1148,7 +1266,6 @@ var Helper = {
 
 		System.setDefault("buyBuffsGreeting", "Hello {playername}, can I buy {buffs} for {cost} please?");
 		System.setDefault("renderSelfBio", true);
-		System.setDefault("showBPSlotsOnProfile", false);
 		System.setDefault("bioEditLines", 10);
 		System.setDefault("renderOtherBios", true);
 		System.setDefault("playNewMessageSound", false);
@@ -1295,7 +1412,7 @@ var Helper = {
 			{"id":"showShieldTypeItems", "type":"Shield"},
 			{"id":"showRingTypeItems", "type":"Ring"},
 			{"id":"showAmuletTypeItems", "type":"Amulet"},
-			{"id":"showRuneTypeItems", "type":"Rune"},
+			{"id":"showRuneTypeItems", "type":"Rune"}
 		];
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			System.setDefault(Helper.itemFilters[i].id, true);
@@ -1458,7 +1575,6 @@ var Helper = {
 			Helper.fixOnlineGuildBuffLinks();
 		} else {
 			Helper.init();
-			Layout.hideBanner();
 			//move boxes in opposite order that you want them to appear.
 			if (GM_getValue("moveGuildList")) {
 				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-guild');
@@ -1720,6 +1836,9 @@ var Helper = {
 			default:
 				break;
 			}
+			break;
+		case "potionbazaar":
+			Helper.injectBazaar();
 			break;
 		case "marketplace":
 			switch (subPageId) {
@@ -2390,7 +2509,8 @@ var Helper = {
 
 	injectLevelupCalculator: function() {
 		//check for beta as beta has class= additions in the mouse over
-		if(isBeta==1){ //New Map Style
+		if(isNewUI==1){ //New Map Style
+			
 			var remainingXP =  parseInt($('dt[class="stat-xp-remaining"]').next('dd').html().replace(/,/g,""));
 			var nextGainTime =  $('dt[class="stat-xp-nextGain"]').next('dd').html();
 			var gain =  parseInt($('dt[class="stat-xp-gainPerHour"]').next('dd').html().replace(/,/g,""));
@@ -2444,7 +2564,6 @@ var Helper = {
 			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
 				"' class='tipped' data-tipped-options='skin: \"fsItem\", ajax: true' data-tipped=\""+onmouseover+"\">"+text+"</td>";
-				"'>"+text+"</td>";
 			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
 		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
@@ -2467,7 +2586,17 @@ var Helper = {
 
 	quickBuyItem: function() {
 		//
-		if (!Helper.shopItemId || !Helper.shopId) {return;}
+		if($('img[alt="Potion Bazaar"]')){//bazaar
+			if(!Helper.bazaarItemId){return;}
+			document.getElementById('buy_result').innerHTML="Buying "+document.getElementById('buy_amount').value+" Items";
+			for (var i=0;i<document.getElementById('buy_amount').value;i++) {
+				//http://www.fallensword.com/index.php?cmd=potionbazaar&subcmd=buyitem&item_id=3683
+				System.xmlhttp("index.php?cmd=potionbazaar&subcmd=buyitem&item_id="+Helper.bazaarItemId,
+					Helper.quickDone);
+			}
+		}
+
+		if (!Helper.shopId || !Helper.shopItemId) {return;}
 		document.getElementById('buy_result').innerHTML="Buying "+document.getElementById('buy_amount').value+" Items";
 		for (var i=0;i<document.getElementById('buy_amount').value;i++) {
 			System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
@@ -2480,7 +2609,40 @@ var Helper = {
 		var infoMessage = Layout.infoBox(responseText);
 		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
+/*******************************************************************************************************************/
+injectBazaar: function() {
+		var injectHere=$('img[alt="Potion Bazaar"]').parents("center:first");
+		var itemNodes=$('td center a img[src*="/items/"]');
 
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=1 class='custominput'><table cellpadding=2><tr>";
+		var itemId;
+		for (var i=0;i<itemNodes.length;i++) {
+			var item=itemNodes[i];
+			var src=item.getAttribute("src");
+			var text=item.parentNode.parentNode.textContent;
+			var onmouseover=$(item).data("tipped").replace("Click to Buy","Click to Select");
+			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)/)[1];
+			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
+				"' class='tipped' data-tipped-options='skin: \"fsItem\", ajax: true' data-tipped=\""+onmouseover+"\">"+text+"</td>";
+			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
+		}
+		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
+			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
+			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>";
+		injectHere.html("<table><tr><td>"+injectHere.html()+"</td><td>"+selector+"</td></tr></table>");
+		for (i=0;i<itemNodes.length;i++) {
+			itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)$/)[1];
+			document.getElementById("select"+itemId).addEventListener("click",Helper.selectBazaarItem,true);
+		}
+	},
+
+	selectBazaarItem: function(evt) {
+		Helper.bazaarItemId=evt.target.getAttribute("itemId");
+		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the '+document.getElementById('buy_amount').value+' item(s) WITHOUT confirmation!</span>';
+		document.getElementById('selectedItem').innerHTML=
+			document.getElementById("select"+Helper.bazaarItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
+	},
+/************************************************************************************************************************************************/
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = $('td:contains("Below is the current status for the relic"):last');
 		relicNameElement.css('font-size', 'x-small');
@@ -3850,14 +4012,6 @@ var Helper = {
 	},
 
 	injectWorld: function() {
-		if (isBeta)
-		{
-		// put all new functions in here. this way we can remove all old once it goes final.
-		// JT also said that $('#worldPage') will work to detect new map until something better
-		//   is available
-			// alert("BETA");
-		}
-
 		if ($('#worldPage').length > 0) { // new map
 			// subscribe to view creature events on the new map.
 			Helper.doNotKillList = GM_getValue("doNotKillList");
@@ -5176,7 +5330,6 @@ var Helper = {
 		memberList.lastUpdate = new Date();
 		memberList.isRefreshed = true;
 		System.setValueJSON("memberlist", memberList);
-
 		if (location.search == "?cmd=guild&subcmd=ranks") {
 			Helper.injectGuildRanksMembers(memberList);
 		}
@@ -5283,6 +5436,9 @@ var Helper = {
 			break;
 		case 71: // create group [G]
 			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+			break;
+		case 76: // Log Page [L]
+			window.location = 'index.php?cmd=log';
 			break;
 		case 103: // go to guild [g]
 			window.location = 'index.php?cmd=guild&subcmd=manage';
@@ -6830,9 +6986,6 @@ var Helper = {
 				node.parentNode.innerHTML+="&nbsp;<span id='Helper:profileSelectAll' style='cursor:pointer; text-decoration:underline; font-size:x-small; color:blue;'>[All]</span>";
 				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 			}
-			if (GM_getValue("showBPSlotsOnProfile") === true) {
-				System.xmlhttp("index.php?cmd=world", Helper.injectEmptySlots, 0);
-			}
 
 			//Update the ally/enemy online list, since we are already on the page.
 			doc = System.findNode("//html");
@@ -6902,26 +7055,6 @@ var Helper = {
 			unsafeWindow.Tipped.refresh(data.element);
 			});
 		}
-	},
-
-	injectEmptySlots: function(responseText) {
-		var doc = System.createDocumentWithImages(responseText);
-		var bpImage = System.findNode("//img[contains(@title,'Manage Backpack')]",doc);
-		if (bpImage) {
-			var bpslots = bpImage.parentNode.nextSibling.nextSibling
-			var node=System.findNode("//span/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
-			if (bpslots) {
-				try {
-					var theText = bpslots.innerHTML.replace("&nbsp;","").replace("&nbsp;","");
-					var slots = theText.split("/");
-					var color = (slots[0] == slots[1]) ? "#FF0000" : "blue";
-					node.innerHTML += "&nbsp;<font color='" + color + "' size='1'>[" + theText + "]</font>&nbsp;";
-				} catch (err) {
-					GM_log(err);
-				}
-			}
-		}
-
 	},
 
 	profileInjectFastWear: function() {
@@ -7818,23 +7951,28 @@ var Helper = {
 			var html = '';
 			var t=1;
 			var p=0;
+			//http://www.fallensword.com/index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=24096093&ajax=1
 			if (reportType == "guild") {
-				html+='<span id="Helper:Recall">'+
-					'&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+targetInventory.items[i].player_id+'&mode=0">Fast BP</span> |'+
-					'&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+targetInventory.items[i].player_id+'&mode=1">Fast GS</span> |'+
-					'</span><br />';
-				if(targetInventory.items[i].equipped){
-					//
-					html+='<span id="Helper:isEquiped">This item is being worn!</span><br />';
-				}
+				html+='<span id="Helper:Recall">';
 				if(targetInventory.items[i].player_id=='-1'){
 					p=targetInventory.guild_id;
 					t=4;
+					html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id='+targetInventory.items[i].inv_id+'">Fast BP</span><br />';
+
 				}else{
-					html+='<span id="Helper:IsWornBy">Is being held by: '+targetInventory.items[i].player_name+'</span><br />';
 					p=targetInventory.items[i].player_id;
 					t=1;
+					html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+p+'&mode=0">Fast BP</span> |'+
+					'&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+p+'&mode=1">Fast GS</span><br />';
+
+					if(targetInventory.items[i].equipped){
+						//
+						html+='<span id="Helper:isEquiped">This item is being worn!</span><br />';
+					}
+
+					html+='<span id="Helper:IsWornBy">Is being held by: '+targetInventory.items[i].player_name+'</span><br />';
 				}
+				html+='</span><br />';
 				p=p+'&currentPlayerId='+targetInventory.current_player_id;
 					
 			}else{
@@ -7873,7 +8011,9 @@ var Helper = {
 						}
 					}
 				});
-			document.getElementById('Helper:equipProfileInventoryItem').addEventListener('click', Helper.equipProfileInventoryItem, true);
+			if (reportType == "self") {
+				document.getElementById('Helper:equipProfileInventoryItem').addEventListener('click', Helper.equipProfileInventoryItem, true);
+			}
 			$('input[id="Helper:DropItem"]').click(function(){
 				var answer = confirm("Are you sure you want to drop "+$(this).attr('itemName')+"?");
 				if(answer){
@@ -7902,7 +8042,7 @@ var Helper = {
 								GM_log(callback.url);
 							}
 						},
-						async: false, //wait for responce
+						async: false //wait for responce
 					});
 				}
 			});
@@ -7934,7 +8074,7 @@ var Helper = {
 							GM_log(callback.url);
 						}
 					},
-					async: false, //wait for responce
+					async: false //wait for responce
 				});
 
 			});
@@ -7946,7 +8086,7 @@ var Helper = {
 					success: function( data ) {
 						var info = Layout.infoBox(data);
 						var recall=$('span[id="'+id+'"]');
-						if (info == "You successfully recalled the item.") {
+						if ((info == "You successfully recalled the item.") || (info == "You successfully took the item into your backpack.")) {
 							recall.html("Recalled!");
 							recall.css('color','green');
 							recall.css('fontWeight','bold');
@@ -7964,9 +8104,8 @@ var Helper = {
 							GM_log(callback.url);
 						}
 					},
-					async: false, //wait for responce
+					async: false //wait for responce
 				});
-
 			});
 			$('input[id="Helper:InitiateMove"]').click(function(){
 				var itemInvId = $(this).attr('invid');
@@ -7995,7 +8134,7 @@ var Helper = {
 							GM_log(callback.url);
 						}
 					},
-					async: false, //wait for responce
+					async: false //wait for responce
 				});
 			});
 		});
@@ -10565,11 +10704,6 @@ var Helper = {
 				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (GM_getValue("enableOnlineAlliesWidgets")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Hide Top Banner' + Helper.helpLink('Hide Top Banner', 'Pretty simple ... it just hides the top banner') +
-				':</td><td><input name="hideBanner" type="checkbox" value="on"' + (GM_getValue("hideBanner")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show ST/Date At Top' + Helper.helpLink('Show ST/Date At Top', 'Adds the current server time on the top banner over the dragon\\\'s head. Does nothing if you hide the top banner. ' +
-				'Also, if you have the HCS option to hide the Game Stats box, this will not work either.') +
-				':</td><td><input name="showSTUpTop" type="checkbox" value="on"' + (GM_getValue("showSTUpTop")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
@@ -10704,7 +10838,9 @@ var Helper = {
 			'<tr><td align="right">Show Quick Send Item' + Helper.helpLink('Show Quick Send on Manage Backpack', 'This will show a link beside each item which gives the option to quick send the item to this person') +
 				':</td><td><input name="showQuickSendLinks" type="checkbox" value="on"' + (GM_getValue("showQuickSendLinks")?" checked":"") + '>'+
 				'Send Items To <input name="itemRecipient" size="10" value="'+ GM_getValue("itemRecipient") + '" />' +
-			//Quest prefs
+			
+			'<tr><td align="right">Show Quick Drop Item' + Helper.helpLink('Show Quick Drop on Manage Backpack', 'This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR') +
+				':</td><td><input name="showQuickDropLinks" type="checkbox" value="on"' + (GM_getValue("showQuickDropLinks")?" checked":"") + '>'+			//Quest prefs
 			'<tr><th colspan="2" align="left">Quest preferences</th></tr>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
@@ -10721,8 +10857,6 @@ var Helper = {
 				':</td><td><input name="showNextQuestSteps" type="checkbox" value="on"' + (GM_getValue("showNextQuestSteps")?" checked":"") + '></td></tr>' +
 			//profile prefs
 			'<tr><th colspan="2" align="left">Profile preferences</th></tr>' +
-			'<tr><td align="right">Show BP Slots In Profile' + Helper.helpLink('Show BP Slots In Profile', 'This determines if the backpack counter will be displayed on your profile page') +
-				':</td><td><input name="showBPSlotsOnProfile" type="checkbox" value="on"' + (GM_getValue("showBPSlotsOnProfile")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
@@ -10919,8 +11053,6 @@ var Helper = {
 		System.saveValueForm(oForm, "enableChatParsing");
 		System.saveValueForm(oForm, "enableCreatureColoring");
 		System.saveValueForm(oForm, "hideNonPlayerGuildLogMessages");
-		System.saveValueForm(oForm, "hideBanner");
-		System.saveValueForm(oForm, "showSTUpTop");
 		System.saveValueForm(oForm, "buyBuffsGreeting");
 		System.saveValueForm(oForm, "renderSelfBio");
 		System.saveValueForm(oForm, "renderOtherBios");
@@ -10966,6 +11098,7 @@ var Helper = {
 		System.saveValueForm(oForm, "goldAmount");
 		System.saveValueForm(oForm, "keepBuffLog");
 		System.saveValueForm(oForm, "showQuickSendLinks");
+		System.saveValueForm(oForm, "showQuickDropLinks");
 		System.saveValueForm(oForm, "itemRecipient");
 		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "hideArenaPrizes");
@@ -10987,7 +11120,6 @@ var Helper = {
 		System.saveValueForm(oForm, "enableAttackHelper");
 		System.saveValueForm(oForm, "hideRelicOffline");
 		System.saveValueForm(oForm, "enterForSendMessage");
-		System.saveValueForm(oForm, "showBPSlotsOnProfile");
 		System.saveValueForm(oForm, "storeLastQuestPage");
 		System.saveValueForm(oForm, "addAttackLinkToLog");
 		System.saveValueForm(oForm, "showStatBonusTotal");
@@ -12340,7 +12472,7 @@ var items=0;
 				var lastActivityHours = parseInt(lastActivity[2],10) + (lastActivityDays*24);
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + (lastActivityHours*60);
 
-				aContact;
+				var aContact;
 
 				// find contact in contact list, to modify data instead of replacing it
 
@@ -12531,11 +12663,12 @@ var items=0;
 		var allItems = System.findNodes("//input[@type='checkbox' and @name='sendItemList[]']");
 		//var ignoreST = document.getElementById("Helper:ignoreSTitems").checked;
 		var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
-
+		var limit = parseInt($('input[id="Helper:SendHowMany"]').attr('value').replace(/[^0-9]/g,''));
+		
 		if (allItems) {
 			var itemsLen = allItems.length;
 			if(tradeType=='secure') {itemsLen=Math.min(100,itemsLen);}
-
+			if(limit>0){itemsLen=Math.min(limit,itemsLen);}
 			for (var i = 0; i < allItems.length; i++){
 				var theImgNode = allItems[i].parentNode.parentNode.previousSibling.firstChild.firstChild.firstChild;
 				if(plantRE.exec(theImgNode.getAttribute("src"))) {
@@ -12638,7 +12771,7 @@ var items=0;
 			'All Items</span> &ensp; ' +
 			'<span plantRE="'+allResRE.substr(0,allResRE.length-1)+'" style="cursor:pointer; text-decoration:underline;"' +
 				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp;' + output;
-		//output += '<br/>From folders: <span id="Helper:getFolder">retrieving ...</span>';
+		output += 'Select <input id="Helper:SendHowMany" type="text" class="custominput" value="all" size=1 />';
 		$("tr[id='Helper:selectMultiple']").append('<td colspan=6>'+output+'</td>');
 		for (var i=0;i<itemList.length+1;i++) {
 			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
@@ -13379,7 +13512,7 @@ var items=0;
 				var newLogMessage = {
 					postDateAsLocalMilli: logMessageArrayItem.postDateAsLocalMilli,
 					rowTypeID: logMessageArrayItem.rowTypeID,
-					logMessage: logMessageArrayItem.logMessage,
+					logMessage: logMessageArrayItem.logMessage
 				};
 				Helper.newStoredGuildLog.logMessage.push(newLogMessage);
 			}
@@ -14334,20 +14467,20 @@ var items=0;
 			"Character" : [
 				["BL", "Buff Log", "injectBuffLog"], ["COL", "Combat Log", "injectNotepadShowLogs"],
 				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
-				["QLM", "Quick Links", "injectQuickLinkManager"], ["CRM", "Create Maps", "injectCreateMap"],
+				["QLM", "Quick Links", "injectQuickLinkManager"], ["CRM", "Create Maps", "injectCreateMap"]
 			],
 			"Actions" : [
 				["FB", "Find Buffs", "injectFindBuffs"], ["FO", "Find Other", "injectFindOther"],
-				["OP", "Online Players", "injectOnlinePlayers"], ["QS", "AH Quick Search", "injectAuctionSearch"],
+				["OP", "Online Players", "injectOnlinePlayers"], ["QS", "AH Quick Search", "injectAuctionSearch"]
 			],
 			"Guild" : [
-				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"],
+				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"]
 			],
 			"Extra" : [
 				["BD", "Best Damage Items", "injectCheckWearingItem"], ["QE", "Quick Extract", "insertQuickExtract"],
 				["QW", "Quick Wear", "insertQuickWear"], ["BoxL", "FS Box Log", "injectFsBoxContent"],
-				["CRL", "Creature Log", "injectMonsterLog"], //still needs work
-			],
+				["CRL", "Creature Log", "injectMonsterLog"] //still needs work
+			]
 			};
 		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
 		html += "<div class=column>";
