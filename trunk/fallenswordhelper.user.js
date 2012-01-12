@@ -1056,151 +1056,7 @@ var Layout = {
 	}
 
 };
-function getVar(p,m)
-{	m=m.substr(33,m.length);
-	n=m.split("&");
-	for (i=0;i<n.length;i++)
-	{
-		o = n[i].split("=");
-		if (o[0]==p)
-		{
-			return o[1];
-		}
-	}
-}
-var inventor = {
-		insertQuickTake: function() { //get items from temp inventory.
-		inventor.itemList = {};
-		var layout=Layout.notebookContent();
-		layout.innerHTML="Getting item list from Mailbox";
-		inventor.mailboxList={};
-		System.xmlhttp("/index.php?cmd=tempinv", inventor.getItemsFromMailbox, {"inject":layout,"id":0});
-	},
 
-	retrieveItemInforMailbox: function(doc) {
-		//var mailItems=System.findNodes("//td[@height=90]",doc);
-		//
-		var mailItems=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]", doc);
-		//alert (mailItems[0].getAttribute('data-tipped'));
-		//alert(System.getIntFromRegExp(mailItems[0].getAttribute('data-tipped'),/fetchitem.php\?item_id=\(d+)\&/));
-		for (var i=0; i<mailItems.length; i++){//mailItems.length
-			var mailItem=mailItems[i];
-			if (mailItem.parentNode.innerHTML.indexOf('offer') > 0){ continue;}
-			var	itemIDs = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec(mailItem.getAttribute('data-tipped')); 
-			//add this line
-			var item={
-				//"id":System.getIntFromRegExp(mailItem.innerHTML,/ajaxLoadItem\(\d+, (\d+), \d+, \d+/),
-				//"id":System.getIntFromRegExp(row.innerHTML,/value="(\d+)"/),
-				"id":itemIDs[2],
-				"html":mailItem.parentNode.innerHTML//mailItem.getAttribute('data-tipped')//mailItem.innerHTML.replace(/<a[^>]*>/g, '')
-				};
-			inventor.itemList["id"+item.id]=item;
-		}
-		//alert (mailItem.innerHTML);
-	},
-
-	getItemsFromMailbox: function(responseText, callback) {
-		var layout=callback.inject;
-		layout.innerHTML+="Parsing Mailbox Items";
-		var doc=System.createDocument(responseText);
-		if (responseText.indexOf('Item Mailbox') > 0){
-			inventor.retrieveItemInforMailbox(doc);
-		}
-		inventor.showQuickTake(callback);
-	},
-
-	showQuickTake: function(callback) {
-		var output='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Take</b></td></tr></table>'+
-			'Select which item to take all similar items from your Mailbox.<br/>'+
-			'<table width=100%><tr><th width=20%>Actions</th><th colspan=6>Items</th></tr><tr><td id=take_result colspan=12></td></tr>';
-		for (var key in inventor.itemList) {
-			var itemID=inventor.itemList[key].id;
-			//alert(inventor.itemList[key].html);
-			//alert(itemID);
-			var	itemStats = /fetchitem.php\?item_id=(\d+)\&amp;inv_id=(\d+)\&amp;t=(\d+)\&amp;p=(\d+)/.exec(inventor.itemList[key].html); //add this line
-			var itemType = itemStats[1];
-			//var	itemType=inventor.itemList[key].itemid; //add this line
-			if (inventor.mailboxList[itemType]){
-				inventor.mailboxList[itemType].invIDs+=","+itemID;
-				inventor.mailboxList[itemType].count++;
-			}
-			else {
-				inventor.mailboxList[itemType]={'count':1,'invIDs':itemID,'src':inventor.itemList[key].html};
-			}
-		}
-
-		for (var id in inventor.mailboxList) {
-			var titem=inventor.mailboxList[id];
-			output+='<tr><td align=center>'+
-				'<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
-				'id="Helper:takeAllSimilar' + id + '" invIDs="'+titem.invIDs+'">Take All '+titem.count +'</span></td>'+titem.src+'</tr>';
-		}
-		output+='</table>';
-
-		callback.inject.innerHTML=output;
-		for (id in inventor.mailboxList) {
-			document.getElementById('Helper:takeAllSimilar' + id).
-				addEventListener('click', inventor.takeAllSimilar, true);
-			}
-	},
-
-	takeAllSimilar: function(evt) {
-		//if (!window.confirm("Are you sure you want to take all similar items?")) {return;}
-		var InventoryIDs=evt.target.getAttribute("invIDs").split(",");
-		//evt.target.parentNode.innerHTML = InventoryIDs;
-		var output= '';
-		evt.target.parentNode.innerHTML = 'taking all ' + Math.min(InventoryIDs.length,100) + ' items';
-		for (var i=0; i<Math.min(InventoryIDs.length,100); i++){
-			//index.php?cmd=tempinv&subcmd=takeitem&&temp_id=
-			System.xmlhttp('index.php?cmd=tempinv&subcmd=takeitem&&temp_id='+InventoryIDs[i], inventor.quickDoneTaken);
-		}
-		//evt.target.parentNode.innerHTML = output;
-	},
-	quickDoneTaken: function(responseText) {
-		var infoMessage = Layout.infoBox(responseText);
-		//unsafeWindow.tt_setWidth(200);
-		//unsafeWindow.Tip(infoMessage);
-		document.getElementById('take_result').innerHTML+="<br />"+infoMessage;
-	},
-
-	injectInvent: function(){
-		var injectHere=System.findNode("//tr/td/input[contains(@value,'Invent')]");
-		var	recipeID = /name=\"recipe_id\" value=\"(\d+)\"/.exec(injectHere.parentNode.parentNode.parentNode.innerHTML)[1]; //add this line
-		//var	recipeID = /name=\"recipe_id\" value=\"(\d+)\"/.exec(injectHere.parentNode.parentNode.parentNode.innerHTML); //add this line
-
-		var selector="</td></tr><tr><td><span>Select how many to quick invent<input value=1 id='invent_amount' name='invent_amount' size=1 class='custominput'></td></tr>"+
-			"<tr><td><input id='quickInvent' value='Quick invent items' class='custombutton' type='submit'></td></tr>"+ //button to invennt
-			"<input type='hidden' id='recipe_id' value='"+ recipeID +"'>"+
-			"<tr><td colspan=6 align='center'><ol id='invent_Result'></ol></td></tr>"+
-			"<tr><td id='warningMsg' colspan=6 align='center'></td></tr>";
-		injectHere.parentNode.innerHTML+=selector;
-		quickInventButton = System.findNode("//input[@id='quickInvent']");
-		quickInventButton.addEventListener('click', inventor.quickInvent, true);
-
-	},
-	quickInvent: function() {
-		//alert ();
-		var amountToInvent = document.getElementById('invent_amount').value;
-		var recipeID = document.getElementById('recipe_id').value;
-		document.getElementById('invent_Result').innerHTML="Inventing "+amountToInvent+" Items";
-		for (var i=0;i<amountToInvent;i++) {
-			System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+recipeID, inventor.quickInventDone);
-
-		}
-	},
-	quickInventDone: function(responseText) {
-		var infoMessage = Layout.infoBox(responseText);
-		if(!infoMessage){
-			infoMessage=$(responseText).find('b:contains("invent"):first').html();
-		}
-		document.getElementById('invent_Result').innerHTML+="<li>"+infoMessage+"</li>";
-	}
-}
-if(getVar("subcmd",window.location.href)=="viewrecipe"){
-	inventor.injectInvent();
-}else if(getVar("subcmd",window.location.href)=="quicktake"){
-	inventor.insertQuickTake();
-}
 var Helper = {
 	// System functions
 	init: function (e) {
@@ -2037,10 +1893,9 @@ var Helper = {
 		}
 		if (GM_getValue("playNewMessageSound")) {
 			var soundLocation = GM_getValue("defaultMessageSound");
-			 //old UI
-			 $('img[alt="You have unread log messages."]:first').each(function(){$(this).after("<audio src='" + soundLocation + "' autoplay=true />");});
 			 //new UI
 			 $('a:contains("New log messages"):first').each(function(){$(this).after("<audio src='" + soundLocation + "' autoplay=true />");});
+			 $('a:contains("New Guild chat message"):first').each(function(){$(this).after("<audio src='" + soundLocation + "' autoplay=true />");});
 		}
 
 		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
@@ -6682,10 +6537,10 @@ injectBazaar: function() {
 						"'>AH</a>]</span> " +
 						"<span findme='Sell'>[<a href='" + System.server + "index.php?cmd=auctionhouse&subcmd=create2" +
 						"&inv_id=" + itemInvId  +
-						"&item_id=" + itemId +
-						"&type=" + type +
-						"&pid=" + pid + "'>" +
-						"Sell</a>]</span>" +
+						//"&item_id=" + itemId +
+						//"&type=" + type +
+						//"&pid=" + pid + 
+						"'>Sell</a>]</span>" +
 						"[<a href='http://guide.fallensword.com/index.php?cmd=items&subcmd=view" +
 						"&item_id=" + itemId +
 						"' target='_blank'>UFSG</a>] ";
