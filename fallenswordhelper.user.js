@@ -431,11 +431,11 @@ var System = {
 			method: 'GET',
 			url: theUrl,
 			callback: theCallback,
-			headers: {
-				"User-Agent" : navigator.userAgent,
-				"Referer": document.location,
-				"Cookie" : document.cookie
-			},
+			//headers: {
+			//	"User-Agent" : navigator.userAgent,
+			//	"Referer": document.location,
+			//	"Cookie" : document.cookie
+			//},
 			onload: function(responseDetails) {
 				if (func) {
 					func.call(this, responseDetails.responseText, this.callback);
@@ -1328,10 +1328,10 @@ var Helper = {
 		GM_xmlhttpRequest({
 			method: 'GET',
 			url: "http://code.google.com/p/fallenswordhelper/source/browse/trunk",
-			headers: {
+			/*headers: {
 				"User-Agent": navigator.userAgent,
 				"Referer": document.location
-			},
+			},*/
 			onload: function(responseDetails) {
 				Helper.autoUpdate(responseDetails);
 			}
@@ -1354,10 +1354,10 @@ var Helper = {
 			GM_xmlhttpRequest({
 				method: 'GET',
 				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
-				headers: {
+				/*headers: {
 					"User-Agent": navigator.userAgent,
 					"Referer": document.location
-				},
+				},*/
 				onload: function(responseDetails) {
 					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
 				}
@@ -6228,12 +6228,12 @@ injectBazaar: function() {
 		GM_xmlhttpRequest({
 			method: 'POST',
 			url: System.server + "index.php",
-			headers: {
+			/*headers: {
 				"User-Agent" : navigator.userAgent,
 				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
 				"Cookie" : document.cookie,
 				"Content-Type": "application/x-www-form-urlencoded"
-			},
+			},*/
 			data: postData,
 			onload: function(responseDetails) {
 				var info = Layout.infoBox(responseDetails.responseText);
@@ -6475,12 +6475,12 @@ injectBazaar: function() {
 		GM_xmlhttpRequest({
 			method: 'POST',
 			url: System.server + "index.php",
-			headers: {
+			/*headers: {
 				"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
 				"Referer": System.server + "index.php?cmd=profile",
 				"Cookie" : document.cookie
-			},
+			},*/
 			data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
 			onload: function() {
 				window.location="index.php?cmd=profile";
@@ -6635,12 +6635,12 @@ injectBazaar: function() {
 				GM_xmlhttpRequest({
 					method: 'POST',
 					url: System.server + "index.php",
-					headers: {
+					/*headers: {
 						"User-Agent" : navigator.userAgent,
 						"Content-Type": "application/x-www-form-urlencoded",
 						"Referer": document.location,
 						"Cookie" : document.cookie
-					},
+					},*/
 					data: postData+postItems
 				});
 				countItems = 0;
@@ -8686,10 +8686,10 @@ injectBazaar: function() {
 				GM_xmlhttpRequest({
 					method: 'GET',
 					url: System.server + groupJoinURL,
-					headers: {
+					/*headers: {
 						"User-Agent": navigator.userAgent,
 						"Referer": document.location
-					},
+					},*/
 					onload: function(responseDetails) {
 						joinButton.style.display = "none";
 						joinButton.style.visibility = "hidden";
@@ -10531,7 +10531,7 @@ injectBazaar: function() {
 		var combatEvaluatorBias = GM_getValue("combatEvaluatorBias");
 		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
 		var configData=
-			'<form><table width="100%" cellspacing="0" cellpadding="5" border="0">' +
+			'<form><table style="border-spacing: 10px;">' +
 //			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
@@ -10803,17 +10803,21 @@ injectBazaar: function() {
 		//newCell.innerHTML=configData;
 		// insertHere.insertBefore(configData, insertHere);
 		maxID=parseInt($('div[id*="settingsTabs-"]:last').attr('id').split('-')[1]);
-
 		$('div[id*="settingsTabs-"]:last').after('<div id="settingsTabs-'+(maxID+1)+'">'+configData+'</div>');
-		$('a[href*="settingsTabs-"]:last').parent().after('<li><a href="#settingsTabs-'+(maxID+1)+'">FSH Settings</a></li>');
+		if($("#settingsTabs").tabs('length')>0){
+			//chrome, have to add it this way (due to loading order
+			$("#settingsTabs").tabs('add','#settingsTabs-'+(maxID+1),'FSH Settings');
+		}else{
+			//firefox loads it later, so just print to page
+			$('a[href*="settingsTabs-"]:last').parent().after('<li><a href="#settingsTabs-'+(maxID+1)+'">FSH Settings</a></li>');
+		}
+
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
 		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
 		if (GM_getValue("map")) {document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);}
 		document.getElementById('Helper:updateFpColor').addEventListener('click', Helper.updateFpColor, true);
-
-
 
 		document.getElementById('toggleShowGuildSelfMessage').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleShowGuildFrndMessage').addEventListener('click', System.toggleVisibilty, true);
@@ -13445,10 +13449,10 @@ var items=0;
 					GM_xmlhttpRequest({
 						method: 'GET',
 						url: url,
-						headers: {
+						/*headers: {
 							"User-Agent": navigator.userAgent,
 							"Referer": document.location
-						},
+						},*/
 						onload: function(responseDetails) {
 							var doc=System.createDocument(responseDetails.responseText);
 							var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=items&subcmd=view')]",doc);
