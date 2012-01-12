@@ -2585,8 +2585,7 @@ var Helper = {
 	},
 
 	quickBuyItem: function() {
-		//
-		if($('img[alt="Potion Bazaar"]')){//bazaar
+		if($('img[alt="Potion Bazaar"]').length > 0){//bazaar
 			if(!Helper.bazaarItemId){return;}
 			document.getElementById('buy_result').innerHTML="Buying "+document.getElementById('buy_amount').value+" Items";
 			for (var i=0;i<document.getElementById('buy_amount').value;i++) {
@@ -7817,8 +7816,8 @@ injectBazaar: function() {
 			'<th sortkey="stats.armor" sortType="number">Arm</th>' +
 			'<th sortkey="stats.damage" sortType="number">Dam</th>' +
 			'<th sortkey="stats.hp" sortType="number">HP</th>' +
-			'<th colspan="2" >Forge</th>' +
-			'<th align="left" >Craft</th>' +
+			'<th colspan="2" sortkey="forge" sortType="number">Forge</th>' +
+			'<th align="left" sortkey="craft" sortType="string">Craft</th>' +
 			'<th align="right" sortkey="durabilityPer" sortType="number">Dur%</th>' +
 			//dropLink +
 			'<th width="10"></th>';
@@ -7842,6 +7841,7 @@ injectBazaar: function() {
 			var whereTitle='';
 			var whereText='';
 			var p=0;
+			var xcNum = GM_getValue("goldConfirm");
 			if (reportType == "guild") {
 				if(item.player_id==-1){ //guild store
 					item.player_name='GS';
@@ -7859,6 +7859,8 @@ injectBazaar: function() {
 				}
 				p=p+'&currentPlayerId='+targetInventory.current_player_id;
 			}else{
+				xcNum=Helper.inventory.xc;
+				GM_setValue("goldConfirm", xcNum);
 				if(item.equipped){
 					color = "green";  whereText = "Worn"; whereTitle="Wearing it";
 				}else{
@@ -7925,7 +7927,7 @@ injectBazaar: function() {
 				'</tr>';
 		}
 		result+='</table>';
-		result+='<input type="hidden" id="xcnum" value="'+GM_getValue("goldConfirm")+'" />';
+		result+='<input type="hidden" id="xcnum" value="'+xcNum+'" />';
 		output.innerHTML=result;
 		/*if (showQuickDropLinks && inventoryShell == 'inventory') {
 			$('span[id*="FSHQuickDrop"]').each(function(){
