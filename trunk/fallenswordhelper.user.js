@@ -951,7 +951,13 @@ var Layout = {
 
 	moveRHSBoxToLHS: function(title) {
 		if (isNewUI == 1) {
-			$('div#pCL').append($('div#' + title));
+			var myDiv=$('div#' + title).wrap('<div class="pCR"></div>');
+
+			myDiv=myDiv.parent();
+			$('div#pCL').append(myDiv);
+			$('div#pCL').append('<style>.pCR a { color: #F7EAC9; }</style>');
+			//myDiv.before('<style>#Helper'+title+' { #pCR; }</style>');
+
 		} else {
 			//var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
 			var src=$('font b').filter(function() {
@@ -1444,6 +1450,7 @@ var Helper = {
 				if (isNewUI == 1) Layout.moveRHSBoxToLHS('minibox-fsbox');
 				else Layout.moveRHSBoxToLHS('FSBox');
 			}
+
 			Helper.prepareAllyEnemyList();
 			Helper.prepareGuildList();
 			Helper.prepareBountyData();
@@ -6228,12 +6235,12 @@ injectBazaar: function() {
 		GM_xmlhttpRequest({
 			method: 'POST',
 			url: System.server + "index.php",
-			/*headers: {
-				"User-Agent" : navigator.userAgent,
-				"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
-				"Cookie" : document.cookie,
+			headers: {
+			//	"User-Agent" : navigator.userAgent,
+			//	"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
+			//	"Cookie" : document.cookie,
 				"Content-Type": "application/x-www-form-urlencoded"
-			},*/
+			},
 			data: postData,
 			onload: function(responseDetails) {
 				var info = Layout.infoBox(responseDetails.responseText);
@@ -6475,12 +6482,12 @@ injectBazaar: function() {
 		GM_xmlhttpRequest({
 			method: 'POST',
 			url: System.server + "index.php",
-			/*headers: {
-				"User-Agent" : navigator.userAgent,
+			headers: {
+			//	"User-Agent" : navigator.userAgent,
 				"Content-Type": "application/x-www-form-urlencoded",
-				"Referer": System.server + "index.php?cmd=profile",
-				"Cookie" : document.cookie
-			},*/
+			//	"Referer": System.server + "index.php?cmd=profile",
+			//	"Cookie" : document.cookie
+			},
 			data: "cmd=profile&subcmd=managecombatset&combatSetId="+cbsIndex+"&submit=Use",
 			onload: function() {
 				window.location="index.php?cmd=profile";
@@ -6635,12 +6642,12 @@ injectBazaar: function() {
 				GM_xmlhttpRequest({
 					method: 'POST',
 					url: System.server + "index.php",
-					/*headers: {
-						"User-Agent" : navigator.userAgent,
+					headers: {
+					//	"User-Agent" : navigator.userAgent,
 						"Content-Type": "application/x-www-form-urlencoded",
-						"Referer": document.location,
-						"Cookie" : document.cookie
-					},*/
+					//	"Referer": document.location,
+					//	"Cookie" : document.cookie
+					},
 					data: postData+postItems
 				});
 				countItems = 0;
