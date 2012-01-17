@@ -3873,6 +3873,23 @@ injectBazaar: function() {
 	},
 
 	injectWorld: function() {
+		//-1 = world page
+		//0 = quest responce
+		//1 = view creature
+		//2 = attack creature
+		//3 = attack player
+		//4 = move
+		//5 = use stair
+		//6 = use chest
+		//7 = take portal
+		//10 = problaby view relic
+		//11 = take relic
+		//12 = create group
+		//13 = view shop
+		//14 = purchase item
+		//15 = repair
+		//17 = login
+		//18 = username not found
 		if ($('#worldPage').length > 0) { // new map
 			// subscribe to view creature events on the new map.
 			Helper.doNotKillList = GM_getValue("doNotKillList");
@@ -3930,6 +3947,30 @@ injectBazaar: function() {
 					oldDoAction(actionCode, fetchFlags, data);
 				}; 
 			});
+
+			//on world
+			//$.subscribe('-1-success.action-response 5-success.action-response', function(e, data){
+			//});
+
+			Helper.keepLogs = GM_getValue("keepLogs");
+
+			$.subscribe('2-success.action-response', function(e, data){
+				if (Helper.keepLogs) {
+					if(data.response.response !== 0) // If bad response do nothing.
+					{
+						return;
+					}
+					var combatData = {};
+					combatData.combat = data.response.data;
+					combatData.player={};
+					combatData.player.enhancements = data.player.enhancements;
+					combatData.player.buffs = data.player.buffs;
+					var now=new Date();
+					combatData.time=now.toLocaleFormat("%Y-%m-%d %H:%M:%S");
+					Helper.appendSavedLog("," + JSON.stringify(combatData));
+				}
+			});
+
 		}
 
 		try {
@@ -11616,23 +11657,11 @@ var items=0;
 			var titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Item Mailbox']]");
 			if (!titleTable) titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Mailbox']]");
 			titleTable.rows[4].cells[0].align = 'center';
-			titleTable.rows[4].cells[0].innerHTML = '<span id="Helper:recallAllMailbox" '+
-				'style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;">Take All</span>';
+			titleTable.rows[4].cells[0].innerHTML = '<a href="index.php?cmd=tempinv&subcmd=takeall">Take All Items</a>';
 			document.getElementById('Helper:recallAllMailbox').addEventListener('click', Helper.recallAllMailbox, true);
 		}
 	},
-
-	recallAllMailbox: function(evt) {
-		var mailItems = System.findNodes("//span[contains(@id,'Helper:recallMailboxItem')]");
-		for (var i = 0; i < mailItems.length; i++) {
-			var mailItem = mailItems[i];
-			var mailboxItemHref = mailItem.getAttribute("itemHref");
-			System.xmlhttp(mailboxItemHref,
-				Helper.recallMailboxReturnMessage,
-				{"target": mailItem});
-		}
-	},
-
+	
 	recallMailboxItem: function(evt) {
 		var mailboxItemHref = evt.target.getAttribute("itemHref");
 		System.xmlhttp(mailboxItemHref,Helper.recallMailboxReturnMessage,{"target": evt.target, "url": mailboxItemHref});
@@ -12639,7 +12668,7 @@ var items=0;
 			'All Items</span> &ensp; ' +
 			'<span plantRE="'+allResRE.substr(0,allResRE.length-1)+'" style="cursor:pointer; text-decoration:underline;"' +
 				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp;' + output;
-		output += 'Select <input id="Helper:SendHowMany" type="text" class="custominput" value="all" size=1 />';
+		output += 'Select <input id="Helper:SendHowMany" type="text" class="custominput" value="all" size=3 />';
 		$("tr[id='Helper:selectMultiple']").append('<td colspan=6>'+output+'</td>');
 		for (var i=0;i<itemList.length+1;i++) {
 			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
