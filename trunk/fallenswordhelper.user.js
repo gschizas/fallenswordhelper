@@ -345,13 +345,22 @@ var System = {
 	//~ },
 
 	formatDateTime: function(aDate) {
-		var result=aDate.toDateString();
-		result += " ";
+		//var result=aDate.toDateString();
+		var yyyy = aDate.getFullYear();
+		var mon = aDate.getMonth()+1;
+		if (mon<10) mon = "0" + mon;
+		var dd = aDate.getDate();
+		if (dd<10) dd = "0" + dd;
+
 		var hh=aDate.getHours();
 		if (hh<10) hh = "0" + hh;
 		var mm=aDate.getMinutes();
 		if (mm<10) mm = "0" + mm;
-		result += hh + ":" + mm;
+		var ss=aDate.getSeconds();
+		if (ss<10) ss = "0" + ss;
+
+		result = yyyy + "-" + mon + "-" + dd + " " + hh + ":" + mm + ":" + ss;
+
 		return result;
 	},
 
@@ -2027,8 +2036,7 @@ var Helper = {
 	updateBuffLog: function() {
 		if (GM_getValue("keepBuffLog")) {
 			var now=new Date();
-			var timeStamp = now.toLocaleFormat("%Y-%m-%d %H:%M:%S") + " - ";
-			//Skill Inventor level 175 was activated on 'yuuzhan'.
+			var timeStamp = System.formatDateTime(now);//now.toLocaleFormat("%Y-%m-%d %H:%M:%S") + " - ";
 			var buffLog=GM_getValue("buffLog");
 			var buffsAttempted = document.body.innerHTML.split('<li>');
 			document.body.innerHTML+= "<span id='buff_Log' style='color:yellow'></span>";
@@ -3948,6 +3956,39 @@ injectBazaar: function() {
 				}; 
 			});
 
+			$.subscribe(DATA_EVENTS.PLAYER_BUFFS.ANY, function(e, data)
+			{
+				// check shield imp is still active
+				var shieldImpVal = 0;
+				var ddVal=0;
+				var l = data.b.length;
+				for(var i=0; i<l; i++)
+				{
+					var buff = data.b[i];
+					if(buff['id']==55)
+					{
+						shieldImpVal = buff['stack'];
+					}else if(buff['id']==50)
+					{
+						ddVal = buff['level'];
+					}
+					if(ddVal > 0 && shieldImpVal > 0){
+						break;
+					}
+
+				}
+				if(ddVal>0){
+					var imp = $('#actionlist-shield-imp');
+					if(shieldImpVal==0){
+						imp.css('background-color','red');
+					}else if(shieldImpVal<3){
+						imp.css('background-color','yellow');
+					}
+				}
+				
+
+			});
+
 			//on world
 			//$.subscribe('-1-success.action-response 5-success.action-response', function(e, data){
 			//});
@@ -3966,7 +4007,7 @@ injectBazaar: function() {
 					combatData.player.enhancements = data.player.enhancements;
 					combatData.player.buffs = data.player.buffs;
 					var now=new Date();
-					combatData.time=now.toLocaleFormat("%Y-%m-%d %H:%M:%S");
+					combatData.time=System.formatDateTime(now);
 					Helper.appendSavedLog("," + JSON.stringify(combatData));
 				}
 			});
@@ -5085,7 +5126,7 @@ injectBazaar: function() {
 				result.setAttribute("mouseOverText", mouseOverText);
 				if (GM_getValue("keepLogs")) {
 					var now=new Date();
-					Helper.appendSavedLog("\n================================\n" + now.toLocaleFormat("%Y-%m-%d %H:%M:%S") + "\n" + resultText + "\n" + reportText);
+					Helper.appendSavedLog("\n================================\n" + System.formatDateTime(now) + "\n" + resultText + "\n" + reportText);
 				}
 			}
 
@@ -7738,7 +7779,7 @@ injectBazaar: function() {
 			item.player_name='';
 			if(item.type > 8){continue;}//not a wearable item
 			if(!$('input[id="'+Helper.itemFilters[item.type].id+'"]').is(':checked')){continue;}
-			if(minLvl >= item.stats.min_level || maxLvl <= item.stats.min_level){continue;}
+			if(minLvl > item.stats.min_level || maxLvl < item.stats.min_level){continue;}
 			if(setsOnly && !item.stats.set_name) {continue;}
 
 			var whereTitle='';
@@ -11072,17 +11113,26 @@ injectBazaar: function() {
 	injectNotepadShowLogs: function(content) {
 		if (!content) var content = Layout.notebookContent();
 		var combatLog = GM_getValue("CombatLog");
+		//combatLog = JSON.stringify(combatLog);
+		if (combatLog.indexOf(',')==0)
+		{
+			//combat logs start with a ,
+			combatLog=combatLog.substr(1);
+			GM_setValue("CombatLog", combatLog)
+		}
+
 		var playerName = $('dt[id="statbar-character"]').html();
 		var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b></td></tr>'+
 			'<tr><td colspan="4" align="center">WARNING: this links to an external site not related to HCS.<br />' +
-			'If you wish to visit site directly URL is: http://evolutions.yvong.com/fshlogparser.php</td></tr>'+
+			'If you wish to visit site directly URL is: http://evolutions.yvong.com/fshlogparser.php'+
+			'NOTE: Combat Log Parser will be updated soon to work with the new combat logs, if your combat loogs look different, the parser may not work.</td></tr>'+
 			'<tr><td colspan=1>Nick (This is used for parsing, it is not case sensitive):</td><td colspan=3><input type="text" name="nick" value="'+playerName+'"></td></tr>'+
 			'<tr><td colspan=1>Doubler Level: </td><td colspan=3><input type="text" name="dob" value=""></td></tr>'+
 			'<tr><td colspan=1>Counter Attack Level: </td><td colspan=3 align="left"><input type="text" name="ca" value=""></td></tr>'+
 			'<tr><td colspan=4 align="center"><input type="hidden" value="true" name="submit"><input type="submit" value="Analyze!"></td></tr>';
 		content.innerHTML = '<form action="http://evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
 			'<div align="center"><textarea align="center" cols="80" rows="25" ' +
-			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog" name="logs">' + combatLog + '</textarea></div>' +
+			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog" name="logs">[' + combatLog + ']</textarea></div>' +
 			'<br /><br /><table width="100%"><tr>'+
 			'<td colspan="2" align=center>' +
 			'<input type="button" class="custombutton" value="Select All" id="Helper:CopyLog"></td>' +
