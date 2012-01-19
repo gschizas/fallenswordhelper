@@ -172,6 +172,18 @@ function GM_ApiBrowserCheck(){
                 delete gvar.temporarilyStorage[GMSTORAGE_PATH + name];
             };
         }
+
+		GM_listValues = function(){
+			var list = [];
+			var reKey = new RegExp("^" + GMSTORAGE_PATH);
+			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i++) {
+				var key = unsafeWindow.localStorage.key(i);
+				if (key.match(reKey)) {
+					list.push(key.replace(GMSTORAGE_PATH, ''));
+				}
+			}
+			return list;
+		}
         if (typeof(GM_openInTab) == 'undefined'){
             GM_openInTab = function(url){
                 unsafeWindow.open(url, "");
@@ -1779,6 +1791,9 @@ var Helper = {
 				break;
 			case "createmap":
 				Helper.injectCreateMap();
+				break;
+			case "savesettings":
+				Helper.injectSaveSettings();
 				break;
 			default:
 				Helper.injectNotepad();
@@ -3880,6 +3895,60 @@ injectBazaar: function() {
 		}
 	},
 
+	injectWorldNewMap: function(data){
+
+			if(data.player){
+				Helper.xLocation = data.player.location.x;
+				Helper.yLocation = data.player.location.y;
+			}
+
+			if (data.realm) {
+				//alert(JSON.stringify(data.realm));
+				$('h1#worldName').append(' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + data.realm.id + '" target="_blank">' +
+					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>');
+				$('h1#worldName').append(' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + data.realm.name + '&go=Go" target="_blank">' +
+					'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>');
+
+				if (GM_getValue("showSpeakerOnWorld")) {
+					var simgOn='<img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/>';
+					var simgOff='<img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/>';
+					var img = GM_getValue("playNewMessageSound") === true ? simgOn : simgOff;
+					$('h1#worldName').append('<a href="#" id="toggleSoundLink">'+img+'</a>');
+					document.getElementById('toggleSoundLink').addEventListener('click',
+					function() {
+					//alert($('a#HelperToggleHuntingMode').html());
+						if(GM_getValue("playNewMessageSound") === false){
+							$('a#toggleSoundLink').html(simgOn);
+						}else{
+							$('a#toggleSoundLink').html(simgOff);
+						}
+						GM_setValue("playNewMessageSound",!GM_getValue("playNewMessageSound")); //window.location.reload();
+
+					},true);
+				}
+				var huntingMode = GM_getValue("huntingMode");
+
+				var himgOn="<img title='Hunting mode is ON' src='" + Data.huntingOnImage() + "' border=0 width=10 height=10/>";
+				var himgOff="<img title='Hunting mode is OFF' src='" + Data.huntingOffImage() + "' border=0 width=10 height=10/>";
+				var img = huntingMode === true ? himgOn : himgOff;
+				$('h1#worldName').append(" <a href=# id='HelperToggleHuntingMode'>" + img + "</a>");
+				
+				document.getElementById('HelperToggleHuntingMode').addEventListener('click',
+					function() {
+					//alert($('a#HelperToggleHuntingMode').html());
+						if(GM_getValue("huntingMode") === false){
+							$('a#HelperToggleHuntingMode').html(himgOn);
+						}else{
+							$('a#HelperToggleHuntingMode').html(himgOff);
+						}
+						GM_setValue("huntingMode",!GM_getValue("huntingMode")); //window.location.reload();
+
+					},true);
+
+			}
+
+	},
+
 	injectWorld: function() {
 		//-1 = world page
 		//0 = quest responce
@@ -3956,7 +4025,7 @@ injectBazaar: function() {
 				}; 
 			});
 
-			$.subscribe(DATA_EVENTS.PLAYER_BUFFS.ANY, function(e, data)
+			$.subscribe(unsafeWindow.DATA_EVENTS.PLAYER_BUFFS.ANY, function(e, data)
 			{
 				// check shield imp is still active
 				var shieldImpVal = 0;
@@ -3983,15 +4052,13 @@ injectBazaar: function() {
 						imp.css('background-color','red');
 					}else if(shieldImpVal<3){
 						imp.css('background-color','yellow');
+					}else{
+						imp.css('background-color','inherit');
 					}
 				}
 				
 
 			});
-
-			//on world
-			//$.subscribe('-1-success.action-response 5-success.action-response', function(e, data){
-			//});
 
 			Helper.keepLogs = GM_getValue("keepLogs");
 
@@ -4011,184 +4078,196 @@ injectBazaar: function() {
 					Helper.appendSavedLog("," + JSON.stringify(combatData));
 				}
 			});
+			//on world
 
-		}
-
-		try {
-			var curTile = System.findNode("//img[contains(@title, 'You are here')]/ancestor::td[@width='40' and @height='40']").getAttribute("background");
-			if (GM_getValue("currentTile") != curTile) {
-				GM_setValue("currentTile", curTile);
+			if(unsafeWindow.initialGameData){//HCS initial data
+				setTimeout(function(){Helper.injectWorldNewMap(unsafeWindow.initialGameData);},400);
 			}
-		} catch (err) {
-			//just eat it and move on
-		}
-		if (isNewUI == 1) var currentLocation = $('h3#world-realm-name');
-		else var currentLocation = $('td[background*="/realm_top_b4.jpg"]');
-		if (currentLocation.length > 0) {
-			var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text())
-			Helper.xLocation = parseInt(locationRE[1],10);
-			Helper.yLocation = parseInt(locationRE[2],10);
-		}
+			$.subscribe('-1-success.action-response 5-success.action-response', function(e, data){ //change of information
+				setTimeout(function(){Helper.injectWorldNewMap(data);},400);
+			});
 
-		Helper.mapThis();
-		Helper.showMap(false);
 
-		var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
 
-		if (buttonRow && GM_getValue("sendGoldonWorld")){
-			currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
-			var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") +
-				". Current gold sent total is " + currentGoldSentTotal;
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
-				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
-		}
+			//document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
 
-		if (buttonRow && !GM_getValue("hideKrulPortal")) {
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTPOld +
-				'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
-		}
+		}else{
+			//not new map.
 
-		var footprints = GM_getValue("footprints");
-
-		if (buttonRow) {
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
-				'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
-			document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
-		}
-		if (buttonRow && GM_getValue("sendGoldonWorld")){
-			//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
-			document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
-		}
-		if (buttonRow && !GM_getValue("hideKrulPortal")) {
-			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
-		}
-
-		// One may ask why the separation of creating the button and the event handling code.
-		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
-		// a region, all attached events are destroyed (because the original elements are also destroyed)
-
-		Helper.checkBuffs();
-		Helper.prepareCheckMonster();
-		Helper.prepareCombatLog();
-		if (isNewUI == 1) {
-			var mapName = System.findNode('//h3[@id="world-realm-name"]');
-			if ($('h3#world-realm-name').data('realm')) {
-				var realmId = $('h3#world-realm-name').data('realm').id.trim();
-				var mapNameText = $('h3#world-realm-name').data('realm').name.trim();
+			try {
+				var curTile = System.findNode("//img[contains(@title, 'You are here')]/ancestor::td[@width='40' and @height='40']").getAttribute("background");
+				if (GM_getValue("currentTile") != curTile) {
+					GM_setValue("currentTile", curTile);
+				}
+			} catch (err) {
+				//just eat it and move on
 			}
-		} else {
-			var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
-		}
-		//Checking if there are quests on current map
-		if (GM_getValue("checkForQuestsInWorld") === true) {
-			if (mapName && mapName.textContent !== null) {
-				if (!mapNameText) mapNameText = mapName.textContent.trim();
-				if (GM_getValue("lastWorld") != mapNameText ||
-					GM_getValue("questsNotStarted") === true ||
-					GM_getValue("questsNotComplete") === true) {
-					GM_setValue("lastWorld", mapNameText);
-					var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
-					System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
-					System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
+			if (isNewUI == 1) var currentLocation = $('h3#world-realm-name');
+			else var currentLocation = $('td[background*="/realm_top_b4.jpg"]');
+			if (currentLocation.length > 0) {
+				var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text());
+				Helper.xLocation = parseInt(locationRE[1],10);
+				Helper.yLocation = parseInt(locationRE[2],10);
+			}
+
+			Helper.mapThis();
+			Helper.showMap(false);
+
+			var buttonRow = System.findNode("//tr[td/a/img[@title='Open Realm Map']]");
+
+			if (buttonRow && GM_getValue("sendGoldonWorld")){
+				currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
+				var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") +
+					". Current gold sent total is " + currentGoldSentTotal;
+				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+					'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
+					'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
+			}
+
+			if (buttonRow && !GM_getValue("hideKrulPortal")) {
+				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+					'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTPOld +
+					'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
+			}
+
+			var footprints = GM_getValue("footprints");
+
+			if (buttonRow) {
+				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+					'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
+					'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+				document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
+			}
+			if (buttonRow && GM_getValue("sendGoldonWorld")){
+				//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+				document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
+			}
+			if (buttonRow && !GM_getValue("hideKrulPortal")) {
+				document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+			}
+
+			// One may ask why the separation of creating the button and the event handling code.
+			// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
+			// a region, all attached events are destroyed (because the original elements are also destroyed)
+
+			Helper.checkBuffs();
+			Helper.prepareCheckMonster();
+			Helper.prepareCombatLog();
+			if (isNewUI == 1) {
+				var mapName = System.findNode('//h3[@id="world-realm-name"]');
+				if ($('h3#world-realm-name').data('realm')) {
+					var realmId = $('h3#world-realm-name').data('realm').id.trim();
+					var mapNameText = $('h3#world-realm-name').data('realm').name.trim();
+				}
+			} else {
+				var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+			}
+			//Checking if there are quests on current map - Already done by HCS in new map
+			if (GM_getValue("checkForQuestsInWorld") === true) {
+				if (mapName && mapName.textContent !== null) {
+					if (!mapNameText) mapNameText = mapName.textContent.trim();
+					if (GM_getValue("lastWorld") != mapNameText ||
+						GM_getValue("questsNotStarted") === true ||
+						GM_getValue("questsNotComplete") === true) {
+						GM_setValue("lastWorld", mapNameText);
+						var insertToHere = System.findNode("//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td");
+						System.xmlhttp("index.php?cmd=questbook&mode=2&letter=*", Helper.checkForNotStartedQuests, {"insertHere" : insertToHere});
+						System.xmlhttp("index.php?cmd=questbook&mode=0&letter=*", Helper.checkForNotCompletedQuests,{"insertHere" : insertToHere});
+					}
 				}
 			}
-		}
-		//quest tracker
-		var questBeingTracked = GM_getValue("questBeingTracked").split(";");
-		if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
-			var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
-			if (!injectHere) {return;}
-			var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
-			replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
-				"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
-			replacementText += "<tr><td colspan='2' height='10'></td>";
-			for (var i = 0; i < questBeingTracked.length; i++) {
+			//quest tracker - will be added by HCS in new Map
+			var questBeingTracked = GM_getValue("questBeingTracked").split(";");
+			if (questBeingTracked.length > 0 & questBeingTracked[0].trim().length > 0) {
+				var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
+				if (!injectHere) {return;}
+				var replacementText = "<td background='" + System.imageServer + "/skin/realm_right_bg.jpg'>";
+				replacementText += "<table width='280' cellpadding='1' style='margin-left:28px; margin-right:28px; " +
+					"font-size:medium; border-spacing: 1px; border-collapse: collapse;'>";
+				replacementText += "<tr><td colspan='2' height='10'></td>";
+				for (var i = 0; i < questBeingTracked.length; i++) {
 
-				replacementText += "<tr><td style='font-size:small; color:black'><a id='qiLink" + i + "' href=" + questBeingTracked[i] + "></a>&nbsp;";
-				replacementText += "<input id='dontTrackThisQuest" + i + "' data='" + questBeingTracked[i] + "' type='button' value='Stop Tracking' title='Stops tracking quest progress.' class='custombutton'><br>";
-				replacementText += "<span findme='questinfo" + i + "'></span></td></tr>";
-				if (i != questBeingTracked.length - 1) {
-					replacementText += '<tr><td height="10" colspan="2"/></tr>' +
-					'<tr><td height="10" colspan="2"/></tr>';
+					replacementText += "<tr><td style='font-size:small; color:black'><a id='qiLink" + i + "' href=" + questBeingTracked[i] + "></a>&nbsp;";
+					replacementText += "<input id='dontTrackThisQuest" + i + "' data='" + questBeingTracked[i] + "' type='button' value='Stop Tracking' title='Stops tracking quest progress.' class='custombutton'><br>";
+					replacementText += "<span findme='questinfo" + i + "'></span></td></tr>";
+					if (i != questBeingTracked.length - 1) {
+						replacementText += '<tr><td height="10" colspan="2"/></tr>' +
+						'<tr><td height="10" colspan="2"/></tr>';
+					}
+				}
+
+				replacementText += "</table>";
+				replacementText += "</td>";
+
+				var newSpan = document.createElement("SPAN");
+				newSpan.innerHTML=replacementText;
+				injectHere.appendChild(newSpan);
+
+				for (i = 0; i < questBeingTracked.length; i++) {
+					System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {"data" : i});
 				}
 			}
 
-			replacementText += "</table>";
-			replacementText += "</td>";
+			if (mapName && mapNameText) {
+				mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
+					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
+				mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
+					'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 
-			var newSpan = document.createElement("SPAN");
-			newSpan.innerHTML=replacementText;
-			injectHere.appendChild(newSpan);
+				var huntingMode = GM_getValue("huntingMode");
+				var imgSource = huntingMode === true ? Data.huntingOnImage() : Data.huntingOffImage();
+				var altText = huntingMode === true ? "Hunting mode is ON" : "Hunting mode is OFF";
+				mapName.innerHTML += " <a href=# id='Helper:ToggleHuntingMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
 
-			for (i = 0; i < questBeingTracked.length; i++) {
-				System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {"data" : i});
-			}
-		}
+				if (GM_getValue("showSpeakerOnWorld")) {
+					if (GM_getValue("playNewMessageSound"))
+					{
+						mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/></a>';
+					} else {
+						mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/></a>';
+					}
+					document.getElementById("toggleSoundLink").addEventListener("click", Helper.toggleSound, true);
 
-		if (mapName && mapNameText) {
-			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
-				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
-			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
-				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
-
-			var uaStr = navigator.userAgent;
-			var FFindex = uaStr.indexOf("Firefox");
-			var huntingMode = GM_getValue("huntingMode");
-			var imgSource = huntingMode === true ? Data.huntingOnImage() : Data.huntingOffImage();
-			var altText = huntingMode === true ? "Hunting mode is ON" : "Hunting mode is OFF";
-			mapName.innerHTML += " <a href=# id='Helper:ToggleHuntingMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
-
-			if (FFindex && uaStr.substring(FFindex+8,uaStr.indexOf(" ", FFindex)) >= "3.5" && GM_getValue("showSpeakerOnWorld")) {
-				if (GM_getValue("playNewMessageSound"))
-				{
-					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/></a>';
-				} else {
-					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/></a>';
 				}
-				document.getElementById("toggleSoundLink").addEventListener("click", Helper.toggleSound, true);
-
-			}
-			if (GM_getValue("showFastWalkIconOnWorld")) {
-				var enableFastWalk = GM_getValue("enableFastWalk");
-				var imgSource = enableFastWalk === true ? Data.runIcon() : Data.stopIcon();
-				var altText = enableFastWalk === true ? "FastWalk mode is ON" : "FastWalk mode is OFF";
-				mapName.innerHTML += " <a href=# id='Helper:ToggleFastWalkMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
-				document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
+				if (GM_getValue("showFastWalkIconOnWorld")) {
+					var enableFastWalk = GM_getValue("enableFastWalk");
+					var imgSource = enableFastWalk === true ? Data.runIcon() : Data.stopIcon();
+					var altText = enableFastWalk === true ? "FastWalk mode is ON" : "FastWalk mode is OFF";
+					mapName.innerHTML += " <a href=# id='Helper:ToggleFastWalkMode'><img title='" + altText + "' src='" + imgSource + "' border=0 width=10 height=10/></a>";
+					document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
+						function() {
+							GM_setValue("enableFastWalk",!GM_getValue("enableFastWalk")); window.location.reload();
+						},true);
+				}
+				document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
 					function() {
-						GM_setValue("enableFastWalk",!GM_getValue("enableFastWalk")); window.location.reload();
+						GM_setValue("huntingMode",!GM_getValue("huntingMode")); window.location.reload();
 					},true);
-			}
-			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
-				function() {
-					GM_setValue("huntingMode",!GM_getValue("huntingMode")); window.location.reload();
-				},true);
 
-		}
-		
-		if (GM_getValue("quickKill")) {
-			var doNotKillList = GM_getValue("doNotKillList");
-			var doNotKillListAry = doNotKillList.split(",");
-			if (doNotKillListAry.length > 0) {
-				for (i=1; i<9; i++) {
-					var monster = System.findNode("//a[@id='aLink" + i + "']");
-					if (monster) {
-						if (isNewUI == 1) var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
-						else var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
-						for (var j=0; j<doNotKillListAry.length; j++) {
-							var doNotKillName = doNotKillListAry[j].trim();
-							if (monsterName == doNotKillName){
-								if (isNewUI) var monsterNameCell = monster.parentNode.parentNode;
-								else var monsterNameCell = monster.parentNode.parentNode.previousSibling;
-								monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
-								break;
+			}
+			
+			if (GM_getValue("quickKill")) {
+				var doNotKillList = GM_getValue("doNotKillList");
+				var doNotKillListAry = doNotKillList.split(",");
+				if (doNotKillListAry.length > 0) {
+					for (i=1; i<9; i++) {
+						var monster = System.findNode("//a[@id='aLink" + i + "']");
+						if (monster) {
+							if (isNewUI == 1) var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
+							else var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
+							for (var j=0; j<doNotKillListAry.length; j++) {
+								var doNotKillName = doNotKillListAry[j].trim();
+								if (monsterName == doNotKillName){
+									if (isNewUI) var monsterNameCell = monster.parentNode.parentNode;
+									else var monsterNameCell = monster.parentNode.parentNode.previousSibling;
+									monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
+									break;
+								}
 							}
 						}
+						else
+							break;
 					}
-					else
-						break;
 				}
 			}
 		}
@@ -6877,7 +6956,9 @@ injectBazaar: function() {
 		var playeridRE = document.URL.match(/player_id=(\d+)/);
 		if (playeridRE) var playerid=playeridRE[1];
 		var idindex;
-
+//************** yuuzhan having fun
+			$('img[title="yuuzhan\'s Avatar"]').click(function(){alert("Winner!");});
+//**************
 		Helper.profileInjectGuildRel();
 		if (GM_getValue("enableBioCompressor")) Helper.compressBio();
 		var isSelfRE=/player_id=/.exec(document.location.search);
@@ -7731,29 +7812,26 @@ injectBazaar: function() {
 
 	generateInventoryTable: function() {
 		reportType=$('input[id="reportType"]').attr('value');
+		var wh = '<th align="left" sortkey="player_name" sortType="string">Where</th>';
 		if (reportType == "guild") {
 			targetId = 'Helper:GuildInventoryManagerOutput';
 			targetInventory = Helper.guildinventory;
 			inventoryShell = 'guildinventory';
+
 		} else {
 			targetId = 'Helper:InventoryManagerOutput';
 			targetInventory = Helper.inventory;
 			inventoryShell = 'inventory';
+			wh='<th align="left" sortkey="folder_id" sortType="number">Where</th>';
 		}
 		if (!targetInventory) {return;}
 		//targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
 		var output=document.getElementById(targetId);
-		/*var dropLink='';
 
-		var showQuickDropLinks = GM_getValue("showQuickDropLinks");
-		if (showQuickDropLinks && inventoryShell == 'inventory') {
-			dropLink='<th align="left">Drop</th>';
-		}
-*/
 		var result='<table id="Helper:InventoryTable"><tr>' +
 			'<th width="180" align="left" sortkey="item_name" sortType="string" colspan="2">Name</th>' +
 			'<th sortkey="stats.min_level" sortType="number">Level</th>' +
-			'<th align="left" sortkey="player_name" sortType="string">Where</th>' +
+			wh +
 			'<th align="left" sortkey="type" sortType="number">Type</th>' +
 			'<th sortkey="stats.attack" sortType="number">Att</th>' +
 			'<th sortkey="stats.defense" sortType="number">Def</th>' +
@@ -10873,15 +10951,17 @@ injectBazaar: function() {
 			'<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
 				':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
 			//save button
+			//http://www.fallensword.com/index.php?cmd=notepad&subcmd=savesettings
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
+			'<tr><td colspan="2" align=center><a href="http://www.fallensword.com/index.php?cmd=notepad&subcmd=savesettings">Export or Load Settings!</a></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>,  ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2156859">ByteBoy</a>, and ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2169401">McBush</a>, ' +
 			'with valuable contributions by <a href="' + System.server + 'index.php?cmd=profile&player_id=524660">Nabalac</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=37905">Ananasii</a></td></tr>' +
 			'</table></form>';
@@ -11110,8 +11190,8 @@ injectBazaar: function() {
 		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog";
 	},
 
-	injectNotepadShowLogs: function(content) {
-		if (!content) var content = Layout.notebookContent();
+	injectNotepadShowLogs: function() {
+		var content = Layout.notebookContent();
 		var combatLog = GM_getValue("CombatLog");
 		//combatLog = JSON.stringify(combatLog);
 		if (combatLog.indexOf(',')==0)
@@ -11124,13 +11204,13 @@ injectBazaar: function() {
 		var playerName = $('dt[id="statbar-character"]').html();
 		var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b></td></tr>'+
 			'<tr><td colspan="4" align="center">WARNING: this links to an external site not related to HCS.<br />' +
-			'If you wish to visit site directly URL is: http://evolutions.yvong.com/fshlogparser.php'+
+			'If you wish to visit site directly URL is: http://evolutions.yvong.com/fshlogparser.php<br />'+
 			'NOTE: Combat Log Parser will be updated soon to work with the new combat logs, if your combat loogs look different, the parser may not work.</td></tr>'+
 			'<tr><td colspan=1>Nick (This is used for parsing, it is not case sensitive):</td><td colspan=3><input type="text" name="nick" value="'+playerName+'"></td></tr>'+
 			'<tr><td colspan=1>Doubler Level: </td><td colspan=3><input type="text" name="dob" value=""></td></tr>'+
 			'<tr><td colspan=1>Counter Attack Level: </td><td colspan=3 align="left"><input type="text" name="ca" value=""></td></tr>'+
 			'<tr><td colspan=4 align="center"><input type="hidden" value="true" name="submit"><input type="submit" value="Analyze!"></td></tr>';
-		content.innerHTML = '<form action="http://evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
+		content.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
 			'<div align="center"><textarea align="center" cols="80" rows="25" ' +
 			'readonly style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="Helper:CombatLog" name="logs">[' + combatLog + ']</textarea></div>' +
 			'<br /><br /><table width="100%"><tr>'+
@@ -11143,6 +11223,29 @@ injectBazaar: function() {
 
 		document.getElementById("Helper:CopyLog").addEventListener("click", Helper.notepadCopyLog, true);
 		document.getElementById("Helper:ClearLog").addEventListener("click", Helper.notepadClearLog, true);
+	},
+
+	injectSaveSettings: function(){
+		var content = Layout.notebookContent();
+		var fshSettings = {};
+		var list = GM_listValues();
+		//alert(JSON.stringify(list));
+		for(var i=0;i<list.length;i++) {
+		  fshSettings[list[i]]=GM_getValue(list[i]);
+		}
+		content.innerHTML = '<h1>FSH Settings</h1><br /><center>The box below is your current settings. Copy it to save your current settings<br />' +
+			'To load saved settings, simply replace the contents of the box with your saved copy and press the button below.'+
+			'<textarea align="center" cols="80" rows="25" style="background-color:white;font-family:Consolas,\"Lucida Console\",\"Courier New\",monospace;" id="HelperfshSettings" name="fshSettings">' + JSON.stringify(fshSettings) + '</textarea>' +
+			'<br /><input id="HelperLoadSettings" class="custombutton" type="submit" value="Load Settings!" /></center>';
+		$('input#HelperLoadSettings').click(function(){
+			var settings = JSON.parse($('textarea#HelperfshSettings').val());
+			//alert(JSON.stringify(settings));
+			for(var id in settings){
+				GM_setValue(id,settings[id]);
+			}
+			alert('Settings loaded successfully!');
+		});
+
 	},
 
 	notepadCopyLog: function() {
@@ -11587,12 +11690,13 @@ injectBazaar: function() {
 //alert("in post: " + sellFromAll);
 var items=0;
 		for(i=0;i<Helper.inventory.items.length;i++){
-			shouldPost=true;
-			if(!sellFromAll && Helper.inventory.items[i].folder_id > 0){ shouldPost=false;} //all bp or not?
-			if(!selectST && Helper.inventory.items[i].is_in_st){ shouldPost=false;} //items in ST or not
-			if(!selectAll && Helper.inventory.items[i].item_id!=item_id) { shouldPost=false;}
+			//shouldPost=true;
+			if(!sellFromAll && Helper.inventory.items[i].folder_id > 0){ continue;} //all bp or not?
+			if(!selectST && Helper.inventory.items[i].is_in_st){ continue;} //items in ST or not
+			if(!selectAll && Helper.inventory.items[i].item_id!=item_id) { continue;}
+			if(Helper.inventory.items[i].equipped) { continue;}
 
-			if(Helper.inventory.items[i].guild_tag==-1 && shouldPost){
+			if(Helper.inventory.items[i].guild_tag==-1){
 				if (items % 3 === 0) bulkSellTable.append('<tr><td><td><td><td><td><td></td></td></td></td></td></td></tr>');
 				bulkSellTable.find('tr:last').css("vAlign","middle");
 				bulkSellTable.find('tr:last').find('td:eq('+(items%3)*2+')')
