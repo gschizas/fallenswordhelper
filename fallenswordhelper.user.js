@@ -713,7 +713,7 @@ var Data = {
 				{name: "Super Elite Slayer", stamina: 25, "duration": 15,   minCastLevel: 250, treeId: 0, skillId: 31, buff: "+0.2% per point reduction of damage, attack, defence and armor to super elite creatures.", nicks: "super elite slayer,ses,se slayer"},
 				{name: "Wither",             stamina: 15, "duration": 60,   minCastLevel: 250, treeId: 0, skillId: 32, buff: "+0.2% per point chance of a 50% reduction of your opponents HP at the start of combat.", nicks: "wither,with"},
 				{name: "Shatter Armor",      stamina: 20, "duration": 60,   minCastLevel: 300, treeId: 0, skillId: 33, buff: "+0.05% per point chance to reduce opponents armor by 75%.", nicks: "shatter armor,sa"},
-				{name: "Deathwish",          stamina: 20, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 34, buff: "+0.03% per point chance to instantly kill vs. creatures. (Excludes Super Elites)", nicks: "deathwish,dw,deathw,death wish"},
+				{name: "Death Wish",          stamina: 20, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 34, buff: "+0.03% per point chance to instantly kill vs. creatures. (Excludes Super Elites)", nicks: "deathwish,dw,deathw,death wish"},
 				{name: "Spell Breaker",      stamina: 35, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 35, buff: "+0.1% per point chance to remove a random buff from PvP target upon a successful attack.", nicks:"spell breaker,sb"},
 				{name: "Keen Edge",          stamina: 10, "duration": 60,   minCastLevel: 400, treeId: 0, skillId: 47, buff: "+0.1% per point to your attack for each complete set equipped.", nicks: "keen edge,ke"},
 				{name: "Spectral Knight",    stamina: 15, "duration": 45,   minCastLevel: 400, treeId: 0, skillId: 48, buff: "+0.1% per point chance to reduce targets armor by 100%. (vs Creature only)", nicks: "spectral knight,sk,spec knight"},
@@ -1847,6 +1847,7 @@ var Helper = {
 			default:
 				break;
 			}
+			Helper.injectInvent();
 			break;
 		case "tempinv":
 			Helper.injectMailbox();
@@ -1914,6 +1915,9 @@ var Helper = {
 			}
 			if (System.findNode("//a[.='Back to Scavenging']")) {
 				Helper.injectScavenging();
+			}
+			if($('img[title="Inventing"]').length > 0){
+				Helper.injectInvent();
 			}
 			break;
 		case "skills":
@@ -2190,6 +2194,9 @@ var Helper = {
 		//Update the guild online list, since we are already on the page.
 		doc = document.firstChild.nextSibling;
 		Helper.parseGuildForWorld(doc.innerHTML, true);
+		$('td:contains("Username"):last').parents('table:first').find('a[href]').each(function(){
+			$(this).after(" <a style='color:blue;font-size:10px;' href=\"javascript:window.openWindow('index.php?cmd=quickbuff&t="+$(this).text()+"', 'fsQuickBuff', 618, 1000, ',scrollbars')\">[b]</a>");
+		});
 
 		// self recall
 		var selfRecall = leftHandSideColumnTable.rows[22].cells[0];
@@ -2202,6 +2209,8 @@ var Helper = {
 				Helper.getConflictInfo,	{"node": confNode});
 		}
 		Helper.changeGuildListOfflineBallColor();
+
+
 	},
 
 	changeGuildListOfflineBallColor: function() {
@@ -3900,10 +3909,30 @@ injectBazaar: function() {
 			if(data.player){
 				Helper.xLocation = data.player.location.x;
 				Helper.yLocation = data.player.location.y;
+				//<dd id="HelperSendTotal">' + GM_getValue("currentGoldSentTotal").toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '</dd>
+				if(GM_getValue("sendGoldonWorld")){
+					$('#HelperSendTotal').html(GM_getValue("currentGoldSentTotal").toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,"));
+					if(parseInt(data.player.gold) > GM_getValue("goldAmount")){
+						$('#statbar-gold').css('background-color','red');
+					}else{
+						$('#statbar-gold').css('background-color','inherit');
+					}
+				}
+				/*if (buttonRow && GM_getValue("sendGoldonWorld")){
+					currentGoldSentTotal = System.addCommas(GM_getValue("currentGoldSentTotal"));
+					var recipient_text = "Send " + GM_getValue("goldAmount") + " gold to " + GM_getValue("goldRecipient") +
+						". Current gold sent total is " + currentGoldSentTotal;
+					buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+						'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
+						'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
+				}
+				if (buttonRow && GM_getValue("sendGoldonWorld")){
+					//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+					document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
+				}*/
 			}
 
-			if (data.realm) {
-				//alert(JSON.stringify(data.realm));
+			if (data.realm && data.realm.name) {
 				$('h1#worldName').append(' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + data.realm.id + '" target="_blank">' +
 					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>');
 				$('h1#worldName').append(' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + data.realm.name + '&go=Go" target="_blank">' +
@@ -3969,6 +3998,40 @@ injectBazaar: function() {
 		//18 = username not found
 		if ($('#worldPage').length > 0) { // new map
 			// subscribe to view creature events on the new map.
+			//current send total
+			//send to
+			//send amount
+			//deposit?
+			if(GM_getValue("sendGoldonWorld")){
+				$('#statbar-gold-tooltip-general').append(
+						'<dt class="stat-gold-sendTo">Send To:</dt><dd id="HelperSendTo">' + GM_getValue("goldRecipient") + '</dd>' + 
+						'<dt class="stat-gold-sendAmt">Amount:</dt><dd id="HelperSendAmt">' + GM_getValue("goldAmount").replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '</dd>' +
+						'<dt class="stat-gold-sendTo">Send?</dt><dd><input id="HelperSendGold" value="Send!" class="custombutton" type="submit"><input type="hidden" id="xc" value="' + GM_getValue("goldConfirm") + '"</dd>' + 
+						'<dt class="stat-gold-sendTotal">Total Sent:</dt><dd id="HelperSendTotal">' + GM_getValue("currentGoldSentTotal").toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '</dd>');
+				$('input#HelperSendGold').click(function(){
+					var sendTo = $('#HelperSendTo').html();
+					var sendAmt = $('#HelperSendAmt').html().replace(/[^\d]/g,'');
+					var xcNum = $('#xc').val();
+					var sendHref = System.server + 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + sendTo +'&gold_amount='+ sendAmt;
+					$.ajax({
+						url: sendHref,
+						success: function( data ) {
+							//alert($(data).find();
+							var info = Layout.infoBox(data);
+							if(info == 'You successfully sent gold!' || info === ''){
+								//currentGoldSentTotal += System.intValue(callback.amount);
+								//info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
+								GM_setValue("currentGoldSentTotal", parseInt(GM_getValue('currentGoldSentTotal'))+parseInt(GM_getValue("goldAmount")));
+								unsafeWindow.GameData.fetch(387);
+							}
+						},
+						async: false, //wait for responce
+					});
+					
+				});
+			}
+
+			//Subscribes:
 			Helper.doNotKillList = GM_getValue("doNotKillList");
 			$.subscribe('ready.view-creature', function(e, data) { 
 				$('div#creatureEvaluator').html("");
@@ -4069,10 +4132,43 @@ injectBazaar: function() {
 						return;
 					}
 					var combatData = {};
-					combatData.combat = data.response.data;
+					combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
+					//delete some values that are not needed to trim down size of log.
+					delete combatData.combat.attacker.img_url;
+					delete combatData.combat.defender.img_url;
+					delete combatData.combat.is_conflict;
+					delete combatData.combat.is_bounty;
+					delete combatData.combat.pvp_rating_change;
+					delete combatData.combat.pvp_prestige_gain;
+					if(combatData.combat.inventory_id){
+						combatData.combat['drop']=combatData.combat.item.id;
+					}
+					delete combatData.combat.inventory_id;
+					delete combatData.combat.item;
+
 					combatData.player={};
-					combatData.player.enhancements = data.player.enhancements;
-					combatData.player.buffs = data.player.buffs;
+					combatData.player.buffs={};
+					combatData.player.enhancements={};
+					var l = data.player.buffs.length;
+					for(var i=0; i<l; i++) //loop through buffs, only need to keep CA and Doubler
+					{//54 = ca, 26 = doubler
+						var buff = data.player.buffs[i];
+						if(buff['id']==54 || buff['id']==26)
+						{
+							combatData.player.buffs[buff['id']]= parseInt(buff['level']);
+						}
+					}
+					var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
+					var l = data.player.enhancements.length;
+					for(var i=0; i<l; i++) //loop through enhancements
+					{//54 = ca, 26 = doubler
+						var enh = data.player.enhancements[i];
+						if (notSave.indexOf('|'+enh.name+'|')==-1){
+							combatData.player.enhancements[enh.name]=enh.value;
+						}
+					}
+					//combatData.player.enhancements = data.player.enhancements;
+					//combatData.player.buffs = data.player.buffs;
 					var now=new Date();
 					combatData.time=System.formatDateTime(now);
 					Helper.appendSavedLog("," + JSON.stringify(combatData));
@@ -4477,11 +4573,11 @@ injectBazaar: function() {
 	},
 
 	sendGoldToPlayer: function(){
-		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
-		if (!injectHere) {return;}
+//		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
+//		if (!injectHere) {return;}
 		var recipient = GM_getValue("goldRecipient");
 		var amount = GM_getValue("goldAmount");
-		System.xmlhttp('index.php?cmd=trade');
+		//System.xmlhttp('index.php?cmd=trade');
 		var xcNum = GM_getValue("goldConfirm");
 		if (xcNum === "") {
 			window.alert("You have to visit the trade page once to use the send gold functionality");
@@ -4492,11 +4588,6 @@ injectBazaar: function() {
 	},
 
 	goldToPlayerSent: function(responseText, callback) {
-		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
-		if (!injectHere) {return;}
-		var newSpan = document.createElement("SPAN");
-		injectHere.appendChild(newSpan);
-		newSpan.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		var info = Layout.infoBox(responseText);
 		if (info==="" || info==="You successfully sent gold!") {
 			var currentGoldSentTotal = GM_getValue("currentGoldSentTotal")*1;
@@ -4504,6 +4595,11 @@ injectBazaar: function() {
 			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
 			GM_setValue("currentGoldSentTotal", currentGoldSentTotal);
 		}
+		var injectHere = System.findNode("//div[table[@class='centered' and @style='width: 270px;']]");
+		if (!injectHere) {return;}
+		var newSpan = document.createElement("SPAN");
+		injectHere.appendChild(newSpan);
+		newSpan.setAttribute("background", System.imageServer + "/skin/realm_right_bg.jpg");
 		newSpan.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
 	},
 
@@ -5224,10 +5320,12 @@ injectBazaar: function() {
 	},
 
 	appendSavedLog: function(text) {
-		var theLog=GM_getValue("CombatLog");
-		if (!theLog) theLog="";
-		theLog+=text;
-		GM_setValue("CombatLog", theLog);
+		setTimeout(function(){
+			var theLog=GM_getValue("CombatLog");
+			if (!theLog) theLog="";
+			theLog+=text;
+			GM_setValue("CombatLog", theLog);
+		}, 0);
 	},
 
 	appendCombatLog: function(text, showCombatLog) {
@@ -9091,7 +9189,8 @@ injectBazaar: function() {
 
 		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
 		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
-
+		document.getElementById("selectAllButton").addEventListener("click", function() {Helper.sumStamCostOfSelectedBuffs();}, false);	
+		
 		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) {return;}
 
@@ -9444,35 +9543,76 @@ injectBazaar: function() {
 		var furyCasterColor = "lime";
 		if (furyCasterLevel < 100) furyCasterColor = "red";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span></br>";
+
 		var hasBuffMasterBuff = $(doc).find('img.tipped[data-tipped*="Buff Master"]');
+		injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> ";
 		if (hasBuffMasterBuff.length > 0) {
-			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Buff Master:</span>	<span style='color:lime;'>On</span>";
+			injectHere.innerHTML += "<span style='color:lime;'>On</span>";
 			var buffMasterTimeToExpire = hasBuffMasterBuff.parents('td:first').find('nobr').html();
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + buffMasterTimeToExpire +")</span>";
 		}
 		else {
-			injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> <span style='color:red;'>Off</span>";
+			var elem=$('input[skillname="Buff Master"]');
+			if(elem.length>0){
+				injectHere.innerHTML += "<span style='color:red;cursor:pointer;' buffID='"+elem.val()+"' id='HelperActivate"+elem.val()+"'>Activate</span>";
+			}else{
+				injectHere.innerHTML += "<span style='color:red;'>Off</span>";
+			}
 		}
+
 		var hasExtendBuff = $(doc).find('img.tipped[data-tipped*="Extend"]');
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Extend:</span>";
 		if (hasExtendBuff.length > 0) {
-			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Extend:</span>	<span style='color:lime;'>On</span>";
+			injectHere.innerHTML += "<span style='color:lime;'>On</span>";
 			var ExtendTimeToExpire = hasExtendBuff.parents('td:first').find('nobr').html();
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + ExtendTimeToExpire +")</span>";
 		}
 		else {
-			injectHere.innerHTML += " <span style='color:orange;'>Extend:</span> <span style='color:red;'>Off</span>";
+			var elem=$('input[skillname="Extend"]');
+			if(elem.length>0){
+				injectHere.innerHTML += "<span style='color:red;cursor:pointer;' buffID='"+elem.val()+"' id='HelperActivate"+elem.val()+"'>Activate</span>";
+			}else{
+				injectHere.innerHTML += "<span style='color:red;'>Off</span>";
+			}
 		}
+
 		var hasReinforceBuff = $(doc).find('img.tipped[data-tipped*="Reinforce"]');
+		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Reinforce:</span> ";
 		if (hasReinforceBuff.length > 0) {
-			injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Reinforce:</span>	<span style='color:lime;'>On</span>";
+			injectHere.innerHTML += "<span style='color:lime;'>On</span>";
 			var ReinforceTimeToExpire = hasReinforceBuff.parents('td:first').find('nobr').html();
 			injectHere.innerHTML += "&nbsp;<span style='color:white; font-size:x-small;'>(" + ReinforceTimeToExpire +")</span>";
 		}
 		else {
-			injectHere.innerHTML += " <span style='color:orange;'>Reinforce:</span> <span style='color:red;'>Off</span>";
+			var elem=$('input[skillname="Reinforce"]');
+			if(elem.length>0){
+				injectHere.innerHTML += "<span style='color:red;cursor:pointer;' buffID='"+elem.val()+"' id='HelperActivate"+elem.val()+"'>Activate</span>";
+			}else{
+				injectHere.innerHTML += "<span style='color:red;'>Off</span>";
+			}
 		}
 		injectHere.innerHTML += "</br>&nbsp;";
 		var canCastCounterAttack = System.findNode("//td/font[contains(.,'Counter Attack')]");
+
+		$('span[id*="HelperActivate"]').click(function(){
+			var user=$(doc).find('#statbar-character').html();
+			var buffHref='?cmd=quickbuff&subcmd=activate&targetPlayers='+user+'&skills[]='+$(this).attr('buffID');
+			var trigger = $(this);
+			$.ajax({
+				url: buffHref,
+				success: function( data ) {
+					//The skill Keen Edge of current or higher level is currently active on 'apedde'.
+					if(	$(data).find('font:contains("current or higher level is currently active on")').length>0 ||
+						$(data).find('font:contains("was activated on")')
+						){
+							trigger.css('color','lime');
+							trigger.html('On');
+					}
+					
+				}
+			});
+		});
+
 		if (canCastCounterAttack) System.xmlhttp("index.php?cmd=settings", Helper.getCounterAttackSetting);
 	},
 
@@ -11796,6 +11936,63 @@ var items=0;
 		//window.location = window.location;
 	},
 
+	injectInvent: function(){
+		var selector="<tr><td align='center'>Select how many to quick invent<input value=1 id='invent_amount' name='invent_amount' size=3 class='custominput'></td></tr>"+
+			"<tr><td align='center'><input id='quickInvent' value='Quick invent items' class='custombutton' type='submit'></td></tr>"+ //button to invennt
+			//"<input type='hidden' id='recipe_id' value='"+ recipeID +"'>"+
+			"<tr><td colspan=6 align='center'><span id='invet_Result_label'></span><ol id='invent_Result'></ol></td></tr>";
+		//injectHere.parentNode.innerHTML+=selector;
+		$('input[name="recipe_id"]').closest('tbody').append(selector);
+		document.getElementById('quickInvent').addEventListener('click', Helper.quickInvent, true);
+
+	},
+	quickInvent: function() {
+		var amountToInvent = $('#invent_amount').attr('value');
+		var recipeID = $('input[name="recipe_id"]').attr('value');
+		$('#invet_Result_label').html("Inventing "+amountToInvent+" Items");
+		for (var i=0;i<amountToInvent;i++) {
+			System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+recipeID, Helper.quickInventDone);
+
+		}
+	},
+	quickInventDone: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		$('#invent_Result').append("<li style='list-style:decimal'>"+infoMessage+"</li>");
+	},
+
+	toggleQuickTake: function(){
+		if($('#currentMBDisplay').attr('value')=='mailbox'){
+			$('#mailboxSwitcher').html('Toggle Mailbox');
+			$('#quickTake').css('display','block');
+			$('#regularMailbox').css('display','none');
+			$('#currentMBDisplay').attr('value','quicktake');
+		}else{
+			$('#mailboxSwitcher').html('Toggle Quick Take');
+			$('#quickTake').css('display','none');
+			$('#regularMailbox').css('display','block');
+			$('#currentMBDisplay').attr('value','mailbox');
+		}
+	},
+
+	takeAllSimilar: function(evt) {
+		//if (!window.confirm("Are you sure you want to take all similar items?")) {return;}
+		var InventoryIDs=evt.target.getAttribute("invIDs").split(",");
+		//evt.target.parentNode.innerHTML = InventoryIDs;
+		var output= '';
+		evt.target.parentNode.innerHTML = 'taking all ' + Math.min(InventoryIDs.length,100) + ' items';
+		for (var i=0; i<Math.min(InventoryIDs.length,100); i++){
+			//index.php?cmd=tempinv&subcmd=takeitem&&temp_id=
+			System.xmlhttp('index.php?cmd=tempinv&subcmd=takeitem&&temp_id='+InventoryIDs[i], Helper.quickDoneTaken);
+		}
+		//evt.target.parentNode.innerHTML = output;
+	},
+	quickDoneTaken: function(responseText) {
+		var infoMessage = Layout.infoBox(responseText);
+		//unsafeWindow.tt_setWidth(200);
+		//unsafeWindow.Tip(infoMessage);
+		$('#take_result').append("<br />"+infoMessage);
+	},
+
 	injectMailbox: function() {
 		var items = System.findNodes("//a[contains(@href,'temp_id')]");
 		if (items) {
@@ -11812,8 +12009,68 @@ var items=0;
 			if (!titleTable) titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Mailbox']]");
 			titleTable.rows[4].cells[0].align = 'center';
 			titleTable.rows[4].cells[0].innerHTML = '<a href="index.php?cmd=tempinv&subcmd=takeall">Take All Items</a>';
-			document.getElementById('Helper:recallAllMailbox').addEventListener('click', Helper.recallAllMailbox, true);
 		}
+
+		//*************** Quick take ****************
+		//$('#pCC').html('Getting information from mailbox');
+		$('#pCC').wrapInner('<div id="regularMailbox" />');
+		var quickTakeDiv='<div id="quickTake" style="display:none"><br /><br /><center><font size="3"><b>Quick Take</b></font>'+
+			'<br />Select which item to take all similar items from your Mailbox.<br /></center>'+
+			'<table id="quickTakeTable" align="left"><tr><th width=20%>Actions</th><th>Items</th></tr><tr><td id="take_result" colspan=2></td></tr></table>'+
+			'</div>';
+
+		$('#pCC').prepend('<span id="mailboxSwitcher" style="cursor:pointer; text-decoration:underline; color:blue;">Toggle Quick Take</span><input type="hidden" id="currentMBDisplay" value="mailbox" />'+quickTakeDiv);
+
+		//fetchitem.php?item_id=9208&inv_id=91591259&t=5&p=1599987&currentPlayerId=1599987&extra=3
+		Helper.itemList = {};
+		$('img[data-tipped*="t=5"]').each(function () {
+			//quickTakeDiv+='<br /><img src="'+$(this).attr('src')+'">';
+			var	itemIDs = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(this).attr('data-tipped'));
+			if(itemIDs){
+				var item={
+					"item_id":itemIDs[1],
+					"inv_id":itemIDs[2],
+					"tipped":$(this).attr('data-tipped'),
+					"src":$(this).attr('src')
+					};
+				Helper.itemList["id"+item.inv_id]=item;
+			}
+		});
+
+//confirm(JSON.stringify(Helper.itemList));
+		//<img src="http://huntedcow.cachefly.net/fs/items/9208.gif" class="t_hideOnClickOutside" border="0">
+		Helper.mailboxList={};
+		for (var key in Helper.itemList) {
+			var item_id=Helper.itemList[key].item_id;
+			var inv_id=Helper.itemList[key].inv_id;
+			//var	itemType=Helper.itemList[key].itemid; //add this line
+			if (Helper.mailboxList[item_id]){
+				Helper.mailboxList[item_id].invIDs+=","+inv_id;
+				Helper.mailboxList[item_id].count++;
+			}
+			else {
+				Helper.mailboxList[item_id]={'count':1,'invIDs':inv_id,'src':Helper.itemList[key].src,'tipped':Helper.itemList[key].tipped};
+			}
+		}
+//confirm(JSON.stringify(Helper.mailboxList));
+		var quickTakeTable = $('#quickTakeTable');
+		for (var id in Helper.mailboxList) {
+			var titem=Helper.mailboxList[id];
+			quickTakeTable.append('<tr><td align=center>'+
+				'<span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
+				'id="Helper:takeAllSimilar' + id + '" invIDs="'+titem.invIDs+'">Take All '+titem.count +'</span></td>'+
+				'<td><img src="'+titem.src+'" class="t_hideOnClickOutside" border="0" data-tipped="'+titem.tipped+'"></td></tr>');
+		}
+
+		for (id in Helper.mailboxList) {
+			document.getElementById('Helper:takeAllSimilar' + id).
+				addEventListener('click', Helper.takeAllSimilar, true);
+		}
+
+
+		//Helper.mailboxList={};
+		//System.xmlhttp("/index.php?cmd=tempinv", Helper.getItemsFromMailbox, {"inject":layout,"id":0});
+		document.getElementById('mailboxSwitcher').addEventListener('click', Helper.toggleQuickTake, true);
 	},
 	
 	recallMailboxItem: function(evt) {
@@ -13783,7 +14040,7 @@ var items=0;
 		var titanLog = System.getValueJSON("titanLog");
 		if (!titanLog) titanLog = {}, titanLog.titans = [];
 		if (titanTable) {
-			var titanName = "", titanRealm = "", titanHP = "";
+			titanHP = "";
 			for (var i=1; i<titanTable.rows.length; i++) { //ignore title row
 				var titan = {};
 				var aRow = titanTable.rows[i];
@@ -13806,13 +14063,13 @@ var items=0;
 							break;
 						}
 					}
-
 					//if not already in the array, then add the titan to the array
-					if (!titanFoundInLog) {
+					if (!titanFoundInLog && titan.realm != 'Land of the Elements') {
 						titanLog.titans.push(titan);
 					}
 				}
 			}
+
 			//if there are more than x titans in the log, then purge the oldest ones
 			var titanLogLength = GM_getValue("titanLogLength")
 			if (titanLog.titans.length > titanLogLength) {
@@ -14498,7 +14755,7 @@ var items=0;
 			var node=$('div.top_banner');
 		}
 		if (node.length==0) return;
-		node.before("<div align='center' style='position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline;' id=helperMenu nowrap>Helper Menu</div>");
+		node.before("<div align='center' style='position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline; z-index:100' id=helperMenu nowrap>Helper Menu</div>");
 		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
 		$('#helperMenu').draggable();
 		if (GM_getValue("keepHelperMenuOnScreen")) {
