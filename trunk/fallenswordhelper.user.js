@@ -4025,7 +4025,6 @@ injectBazaar: function() {
 								unsafeWindow.GameData.fetch(387);
 							}
 						},
-						async: false, //wait for responce
 					});
 					
 				});
@@ -11345,10 +11344,10 @@ injectBazaar: function() {
 		var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b></td></tr>'+
 			'<tr><td colspan="4" align="center">WARNING: this links to an external site not related to HCS.<br />' +
 			'If you wish to visit site directly URL is: http://evolutions.yvong.com/fshlogparser.php<br />'+
-			'NOTE: Combat Log Parser will be updated soon to work with the new combat logs, if your combat loogs look different, the parser may not work.</td></tr>'+
-			'<tr><td colspan=1>Nick (This is used for parsing, it is not case sensitive):</td><td colspan=3><input type="text" name="nick" value="'+playerName+'"></td></tr>'+
-			'<tr><td colspan=1>Doubler Level: </td><td colspan=3><input type="text" name="dob" value=""></td></tr>'+
-			'<tr><td colspan=1>Counter Attack Level: </td><td colspan=3 align="left"><input type="text" name="ca" value=""></td></tr>'+
+			//'NOTE: Combat Log Parser will be updated soon to work with the new combat logs, if your combat loogs look different, the parser may not work.</td></tr>'+
+			//'<tr><td colspan=1>Nick (This is used for parsing, it is not case sensitive):</td><td colspan=3><input type="text" name="nick" value="'+playerName+'"></td></tr>'+
+			//'<tr><td colspan=1>Doubler Level: </td><td colspan=3><input type="text" name="dob" value=""></td></tr>'+
+			//'<tr><td colspan=1>Counter Attack Level: </td><td colspan=3 align="left"><input type="text" name="ca" value=""></td></tr>'+
 			'<tr><td colspan=4 align="center"><input type="hidden" value="true" name="submit"><input type="submit" value="Analyze!"></td></tr>';
 		content.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
 			'<div align="center"><textarea align="center" cols="80" rows="25" ' +
