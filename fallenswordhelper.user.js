@@ -713,7 +713,7 @@ var Data = {
 				{name: "Super Elite Slayer", stamina: 25, "duration": 15,   minCastLevel: 250, treeId: 0, skillId: 31, buff: "+0.2% per point reduction of damage, attack, defence and armor to super elite creatures.", nicks: "super elite slayer,ses,se slayer"},
 				{name: "Wither",             stamina: 15, "duration": 60,   minCastLevel: 250, treeId: 0, skillId: 32, buff: "+0.2% per point chance of a 50% reduction of your opponents HP at the start of combat.", nicks: "wither,with"},
 				{name: "Shatter Armor",      stamina: 20, "duration": 60,   minCastLevel: 300, treeId: 0, skillId: 33, buff: "+0.05% per point chance to reduce opponents armor by 75%.", nicks: "shatter armor,sa"},
-				{name: "Death Wish",          stamina: 20, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 34, buff: "+0.03% per point chance to instantly kill vs. creatures. (Excludes Super Elites)", nicks: "deathwish,dw,deathw,death wish"},
+				{name: "Death Wish",         stamina: 20, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 34, buff: "+0.03% per point chance to instantly kill vs. creatures. (Excludes Super Elites)", nicks: "deathwish,dw,deathw,death wish"},
 				{name: "Spell Breaker",      stamina: 35, "duration": 45,   minCastLevel: 300, treeId: 0, skillId: 35, buff: "+0.1% per point chance to remove a random buff from PvP target upon a successful attack.", nicks:"spell breaker,sb"},
 				{name: "Keen Edge",          stamina: 10, "duration": 60,   minCastLevel: 400, treeId: 0, skillId: 47, buff: "+0.1% per point to your attack for each complete set equipped.", nicks: "keen edge,ke"},
 				{name: "Spectral Knight",    stamina: 15, "duration": 45,   minCastLevel: 400, treeId: 0, skillId: 48, buff: "+0.1% per point chance to reduce targets armor by 100%. (vs Creature only)", nicks: "spectral knight,sk,spec knight"},
@@ -816,7 +816,17 @@ var Data = {
 		}
 		return Data.buffArray;
 	},
+	guildRelationshipMessages: function(){
+		if(!Data.guildMessages){
+			Data.guildMessages= {};
+				Data.guildMessages['guildSelfMessage']={'color':'green','message':'Member of your own guild!'};
+				Data.guildMessages['guildFrndMessage']={'color':'OliveDrab','message':'Do not attack - Guild is friendly!'};
+				Data.guildMessages['guildPastMessage']={'color':'DarkCyan','message':'Do not attack - You\'ve been in that guild once!'};
+				Data.guildMessages['guildEnmyMessage']={'color':'red','message':'Enemy guild. Attack at will!'};
+		}
+		return Data.guildMessages;
 
+	},
 	quickSearchList: function() {
 		if (!Data.quickSearchArray) {
 			Data.quickSearchArray = [
@@ -1128,10 +1138,6 @@ var Helper = {
 		System.setDefault("goldAmount", "");
 		System.setDefault("sendGoldonWorld", false);
 		System.setDefault("goldConfirm", "");
-		System.setDefault("guildSelfMessage", "green|Member of your own guild");
-		System.setDefault("guildFrndMessage", "yellow|Do not attack - Guild is friendly!");
-		System.setDefault("guildPastMessage", "gray|Do not attack - You've been in that guild once!");
-		System.setDefault("guildEnmyMessage", "red|Enemy guild. Attack at will!");
 
 		System.setDefault("hideKrulPortal", false);
 		System.setDefault("hideQuests", false);
@@ -3933,16 +3939,18 @@ injectBazaar: function() {
 			}
 
 			if (data.realm && data.realm.name) {
-				$('h1#worldName').append(' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + data.realm.id + '" target="_blank">' +
+				var worldName = $('h1#worldName');
+				worldName.html(data.realm.name); //HACK - incase of switchign between master realm and realm they dont replace teh realm name
+				worldName.append(' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + data.realm.id + '" target="_blank">' +
 					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>');
-				$('h1#worldName').append(' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + data.realm.name + '&go=Go" target="_blank">' +
+				worldName.append(' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + data.realm.name + '&go=Go" target="_blank">' +
 					'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>');
 
 				if (GM_getValue("showSpeakerOnWorld")) {
 					var simgOn='<img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/>';
 					var simgOff='<img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/>';
 					var img = GM_getValue("playNewMessageSound") === true ? simgOn : simgOff;
-					$('h1#worldName').append('<a href="#" id="toggleSoundLink">'+img+'</a>');
+					worldName.append('<a href="#" id="toggleSoundLink">'+img+'</a>');
 					document.getElementById('toggleSoundLink').addEventListener('click',
 					function() {
 					//alert($('a#HelperToggleHuntingMode').html());
@@ -3960,7 +3968,7 @@ injectBazaar: function() {
 				var himgOn="<img title='Hunting mode is ON' src='" + Data.huntingOnImage() + "' border=0 width=10 height=10/>";
 				var himgOff="<img title='Hunting mode is OFF' src='" + Data.huntingOffImage() + "' border=0 width=10 height=10/>";
 				var img = huntingMode === true ? himgOn : himgOff;
-				$('h1#worldName').append(" <a href=# id='HelperToggleHuntingMode'>" + img + "</a>");
+				worldName.append(" <a href=# id='HelperToggleHuntingMode'>" + img + "</a>");
 				
 				document.getElementById('HelperToggleHuntingMode').addEventListener('click',
 					function() {
@@ -4029,10 +4037,9 @@ injectBazaar: function() {
 					
 				});
 			}
-
 			//Subscribes:
 			Helper.doNotKillList = GM_getValue("doNotKillList");
-			$.subscribe('ready.view-creature', function(e, data) { 
+			$.subscribe('ready.view-creature', function(e, data) {
 				$('div#creatureEvaluator').html("");
 				$('div#creatureEvaluatorGroup').html("");
 				System.xmlhttp("index.php?cmd=profile", Helper.getCreaturePlayerData,
@@ -4112,8 +4119,10 @@ injectBazaar: function() {
 					var imp = $('#actionlist-shield-imp');
 					if(shieldImpVal==0){
 						imp.css('background-color','red');
-					}else if(shieldImpVal<3){
+					}else if(shieldImpVal==2){
 						imp.css('background-color','yellow');
+					}else if(shieldImpVal==1){
+						imp.css('background-color','orange');
 					}else{
 						imp.css('background-color','inherit');
 					}
@@ -4121,9 +4130,13 @@ injectBazaar: function() {
 				
 
 			});
-
+			$.subscribe('keydown.controls', function(e, key){
+				switch(key)
+				{
+					case 'ACT_REPAIR': unsafeWindow.GameData.fetch(387); break;
+				}
+			});
 			Helper.keepLogs = GM_getValue("keepLogs");
-
 			$.subscribe('2-success.action-response', function(e, data){
 				if (Helper.keepLogs) {
 					if(data.response.response !== 0) // If bad response do nothing.
@@ -4182,7 +4195,11 @@ injectBazaar: function() {
 				setTimeout(function(){Helper.injectWorldNewMap(data);},400);
 			});
 
-
+			//somewhere near here will be multi buy on shop
+			//$.subscribe('prompt.worldDialogShop', function(e, data){
+				//self._createShop(self.shop.items);
+			//	$('span[class="price"]').after('<span class="numTake">test</span>');
+			//});
 
 			//document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
 
@@ -7058,7 +7075,7 @@ injectBazaar: function() {
 //**************
 		Helper.profileInjectGuildRel();
 		if (GM_getValue("enableBioCompressor")) Helper.compressBio();
-		var isSelfRE=/player_id=/.exec(document.location.search);
+		var isSelfRE=$('form[name="folderManagement"]').length > 0;// /player_id=/.exec(document.location.search);//
 		if (player) {
 			if (!playerid) {
 				playerid = player.innerHTML;
@@ -7079,18 +7096,19 @@ injectBazaar: function() {
 
 			Helper.bioAddEventListener();
 
-			if (isSelfRE) {
+/*			if (isSelfRE) {
+				alert(playerid);
 				var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
 				if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 			}
-		}
+*/		}
 
 		var invSectionToggle = System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
 		if (invSectionToggle) {
 			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
 
-		if (!isSelfRE) { // self inventory
+		if (isSelfRE) { // self inventory
 
 			Helper.profileParseAllyEnemy();
 			Helper.profileInjectFastWear();
@@ -7456,9 +7474,9 @@ injectBazaar: function() {
 					break;
 			}
 			if (changeAppearance) {
-				var settingsAry=GM_getValue(settings).split("|");
-				warning.innerHTML="<br/>" + settingsAry[1];
-				color = settingsAry[0];
+				var settingsAry=Data.guildRelationshipMessages();
+				warning.innerHTML="<br/>" + settingsAry[settings].message;
+				color = settingsAry[settings].color;
 				aLink.parentNode.style.color=color;
 				aLink.style.color=color;
 				aLink.parentNode.insertBefore(warning, aLink.nextSibling);
@@ -9188,7 +9206,7 @@ injectBazaar: function() {
 
 		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
 		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
-		document.getElementById("selectAllButton").addEventListener("click", function() {Helper.sumStamCostOfSelectedBuffs();}, false);	
+		document.getElementById("selectAllButton").addEventListener("click", function() {setTimeout(function(){Helper.sumStamCostOfSelectedBuffs();},0);}, false);	
 		
 		var theBuffPack = System.getValueJSON("buffpack");
 		if (!theBuffPack) {return;}
@@ -11208,10 +11226,6 @@ injectBazaar: function() {
 		System.saveValueForm(oForm, "guildFrnd");
 		System.saveValueForm(oForm, "guildPast");
 		System.saveValueForm(oForm, "guildEnmy");
-		System.saveValueForm(oForm, "guildSelfMessage");
-		System.saveValueForm(oForm, "guildFrndMessage");
-		System.saveValueForm(oForm, "guildPastMessage");
-		System.saveValueForm(oForm, "guildEnmyMessage");
 
 		System.saveValueForm(oForm, "showAdmin");
 		System.saveValueForm(oForm, "ajaxifyRankControls");
@@ -11834,6 +11848,8 @@ var items=0;
 			if(!selectST && Helper.inventory.items[i].is_in_st){ continue;} //items in ST or not
 			if(!selectAll && Helper.inventory.items[i].item_id!=item_id) { continue;}
 			if(Helper.inventory.items[i].equipped) { continue;}
+			if(Helper.inventory.items[i].guild_tag != '-1') { continue;}
+			if(Helper.inventory.items[i].bound) { continue;}
 
 			if(Helper.inventory.items[i].guild_tag==-1){
 				if (items % 3 === 0) bulkSellTable.append('<tr><td><td><td><td><td><td></td></td></td></td></td></td></tr>');
@@ -13066,7 +13082,7 @@ var items=0;
 
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
+		var itemList=[["bbdsj", "5563|5564|5566"], ["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
@@ -14331,6 +14347,9 @@ var items=0;
 	injectFindBuffs: function(content) {
 		if (!content) var content=Layout.notebookContent();
 		var buffList = Data.buffList();
+		Helper.sortBy='name';
+		Helper.sortAsc=true;
+		buffList.sort(Helper.stringSort);//.sort(function(a,b) { return a.name.toLowerCase() > b.name.toLowerCase() } );
 		var injectionText = '';
 		var extraProfile = GM_getValue("extraProfile");
 		injectionText += '<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>';
