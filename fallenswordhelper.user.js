@@ -9618,7 +9618,6 @@ injectBazaar: function() {
 			$.ajax({
 				url: buffHref,
 				success: function( data ) {
-					//The skill Keen Edge of current or higher level is currently active on 'apedde'.
 					if(	$(data).find('font:contains("current or higher level is currently active on")').length>0 ||
 						$(data).find('font:contains("was activated on")')
 						){
