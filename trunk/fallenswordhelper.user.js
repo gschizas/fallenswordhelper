@@ -1901,7 +1901,7 @@ var Helper = {
 			if (isAuctionPage) {
 				Helper.injectAuctionHouse();
 			}
-			var isShopPage = System.findNode("//td[contains(.,'then click to purchase for the price listed below the item.')]");
+			var isShopPage =  $('#shop-info').length > 0;//System.findNode("//td[contains(.,'then click to purchase for the price listed below the item.')]");
 			if (isShopPage) {
 				Helper.injectShop();
 			}
@@ -2451,10 +2451,10 @@ var Helper = {
 	},
 
 	injectShop: function() {
-		var injectHere=$('img[src*="_banner.jpg"]').parents("center:first");
+		var injectHere=$('#shop-info');
 		var itemNodes=$('td center a img[src*="/items/"]');
 
-		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=1 class='custominput'><table cellpadding=2><tr>";
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=3 class='custominput'><table cellpadding=2><tr>";
 		var itemId;
 		for (var i=0;i<itemNodes.length;i++) {
 			var item=itemNodes[i];
@@ -2464,12 +2464,11 @@ var Helper = {
 			itemId=item.parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			selector+="<td width=20 height=20 ><img width=20 height=20 id=select"+itemId+" itemId="+itemId+" src='"+src+
 				"' class='tipped' data-tipped-options='skin: \"fsItem\", ajax: true' data-tipped=\""+onmouseover+"\">"+text+"</td>";
-			if (i%6==5 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
+			if (i%25==24 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
-		selector+="</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>"+
-			"<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>"+
-			"<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>";
-		injectHere.html("<table><tr><td>"+injectHere.html()+"</td><td>"+selector+"</td></tr></table>");
+		selector+="</table><table width='600px'></tr><tr><td align='right' width='50%'>Selected item:</td><td height=45 width='50%' id=selectedItem align='left'>&nbsp;</td></tr>"+
+			"<tr><td id=warningMsg colspan='2' align='center'></td></tr><tr><td id=buy_result colspan='2' align='center'></td></tr>";
+		injectHere.after("<table><tr><td>"+selector+"</td></tr></table>");
 		for (i=0;i<itemNodes.length;i++) {
 			itemId=itemNodes[i].parentNode.getAttribute("href").match(/&item_id=(\d+)&/)[1];
 			document.getElementById("select"+itemId).addEventListener("click",Helper.selectShopItem,true);
@@ -6142,8 +6141,8 @@ injectBazaar: function() {
 
 			var quickSearchList = System.getValueJSON("quickSearchList");
 
-			var finalHTML = "<span style='font-size:x-small; color:blue;'><table><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
-				"<td colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
+			var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
+				"<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
 							System.server +
 							"index.php?cmd=notepad&subcmd=auctionsearch'>" +
 							"Configure Quick Search</a></td></tr>";
@@ -6157,7 +6156,7 @@ injectBazaar: function() {
 						finalHTML += "<tr>";
 						rowCount++;
 					}
-					finalHTML += "<td nowrap";
+					finalHTML += "<td nowrap style='overflow: hidden;'";
 					finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
 						quickSearch.searchname + "&page=1&order_by=1'>" +
 						quickSearch.nickname + "</a></td>";
@@ -13081,7 +13080,7 @@ var items=0;
 
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		var itemList=[["bbdsj", "5563|5564|5566"], ["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
+		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ['Toad Corpse','9288'], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
