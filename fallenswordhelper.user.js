@@ -7071,6 +7071,7 @@ injectBazaar: function() {
 		var idindex;
 //************** yuuzhan having fun
 			$('img[title="yuuzhan\'s Avatar"]').click(function(){alert("Winner!");});
+			$('img[title="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
 //**************
 		Helper.profileInjectGuildRel();
 		if (GM_getValue("enableBioCompressor")) Helper.compressBio();
@@ -7599,7 +7600,7 @@ injectBazaar: function() {
 				text+=newtext;
 			}
 
-			var price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)/);
+			var price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)|([+\-]{0,1}[\.\d]+ *stam)/);
 			if (!price) { // some players have prices BEFORE the buff names
 				node=buffNameNode;
 				while (node && node.nodeName.toLowerCase()!='br') {
@@ -7607,11 +7608,11 @@ injectBazaar: function() {
 					node=node.previousSibling;
 					text=newtext+text;
 				}
-				price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)/);
+				price=text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase().match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)|([+\-]{0,1}[\.\d]+ *stam)/);
 			}
 			var type, cost;
 			if (price) {
-				type=price[0].indexOf('k')>0 ? 'k' : 'fsp';
+				type=price[0].indexOf('k')>0 ? 'k' : price[0].indexOf('f')>0 ? 'fsp' : 'stam';
 				cost=price[0].match(/([+\-]{0,1}[\.\d]+)/)[0];
 			} else {
 				type='unknown'; cost='1';
@@ -7627,7 +7628,7 @@ injectBazaar: function() {
 
 	updateBuffCost: function() {
 		if (Helper.buffCost.count>0) {
-			var total={'k':0,'fsp':0,'unknown':0};
+			var total={'k':0,'fsp':0,'stam':0,'unknown':0};
 			var html='This is an estimated cost based on how the script finds the cost associated with buffs from viewing bio.'+
 				'It can be incorrect, please use with discretion.<br/><hr/>'+
 				'<table border=0>';
@@ -7638,6 +7639,8 @@ injectBazaar: function() {
 			var totalText=(total.fsp>0)?(Math.round(total.fsp*100)/100) +' FSP':'';
 			if (total.fsp > 0 && total.k > 0) totalText+=' and ';
 			totalText+=(total.k>0)?total.k+' k':'';
+			if (total.fsp > 0 || total.k > 0) totalText+=' and ';
+			totalText+=(total.stam>0)?total.stam+' Stam('+Math.round(total.stam/25*10)/10+'fsp)':'';
 			if (total.unknown>0) totalText+=' ('+total.unknown+' buff(s) with unknown cost)';
 			html+='</table><b>Total: '+totalText+'</b>';
 			document.getElementById('buffCost').innerHTML='<br/><span class="tipped" data-tipped="'+html+'">Estimated Cost: <b>'+totalText+'</b></span>';
