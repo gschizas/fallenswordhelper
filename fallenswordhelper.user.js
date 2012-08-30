@@ -452,11 +452,14 @@ var System = {
 			method: 'GET',
 			url: theUrl,
 			callback: theCallback,
-			//headers: {
+			headers: {
 			//	"User-Agent" : navigator.userAgent,
 			//	"Referer": document.location,
 			//	"Cookie" : document.cookie
-			//},
+				"Cache-Control" : "no-cache, no-store, max-age=0, must-revalidate",
+				"Pragma" : "no-cache",
+				"Expires" : "Fri, 01 Jan 1990 00:00:00 GMT"
+			},
 			onload: function(responseDetails) {
 				if (func) {
 					func.call(this, responseDetails.responseText, this.callback);
@@ -874,42 +877,42 @@ var Layout = {
 			if (pCL.length == 0) return;
 			//character
 			$(pCL).find('a#nav-character-log').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&subcmd=recipemanager">Recipe Manager</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&subcmd=invmanager">Inventory Manager</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&blank=1&subcmd=recipemanager">Recipe Manager</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanager">Inventory Manager</a></li>')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
 			if (GM_getValue("keepBuffLog")) {
 				$(pCL).find('a#nav-character-log').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&subcmd=bufflogcontent">Buff Log</a></li>');
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&blank=1&subcmd=bufflogcontent">Buff Log</a></li>');
 			}
 			if (GM_getValue("keepLogs")) {
 				$(pCL).find('a#nav-character-notepad').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&subcmd=showlogs">Combat Logs</a></li>');
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&blank=1&subcmd=showlogs">Combat Logs</a></li>');
 			}
 			if (GM_getValue("showMonsterLog")) {
 				$(pCL).find('a#nav-character-notepad').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&subcmd=monsterlog">Creature Logs</a></li>');
+					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&blank=1&subcmd=monsterlog">Creature Logs</a></li>');
 			}
 			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&subcmd=quicklinkmanager">Quick Links</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&subcmd=createmap">Create Maps</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&blank=1&subcmd=createmap">Create Maps</a></li>');
 			//guild
 			$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&subcmd=guildinvmanager">Guild Inventory</a></li>');
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmanager">Guild Inventory</a></li>');
 			if (!GM_getValue("useNewGuildLog")) {
 				//if not using the new guild log, show it as a separate menu entry
 				$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
-					.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&subcmd=newguildlog">New Guild Log</a></li>');
+					.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&blank=1&subcmd=newguildlog">New Guild Log</a></li>');
 			}
 			//top rated
 			$(pCL).find('a#nav-toprated-players-level').parent('li')
 				.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
 			//actions
 			$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a></li>');
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a></li>');
 			$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&subcmd=onlineplayers">Online Players</a></li>')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&subcmd=findother">Find Other</a></li>')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&subcmd=findbuffs">Find Buffs</a></li>');
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers">Online Players</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&blank=1&subcmd=findother">Find Other</a></li>')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&blank=1&subcmd=findbuffs">Find Buffs</a></li>');
 			//adjust the menu length in chrome for the newly added items
 			//first the open ones
 			$('ul.nav-animated').each(function() {
@@ -924,26 +927,26 @@ var Layout = {
 			var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
 			if (!tableElement) return;
 			if (GM_getValue("keepBuffLog")) {
-				Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&subcmd=bufflogcontent", 9);
+				Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&blank=1&subcmd=bufflogcontent", 9);
 			}
 			Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
-			Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&subcmd=invmanager", 13);
-			Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&subcmd=recipemanager", 15);
+			Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&blank=1&subcmd=invmanager", 13);
+			Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&blank=1&subcmd=recipemanager", 15);
 			if (GM_getValue("keepLogs")) {
-				Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&subcmd=showlogs", 17);
+				Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&blank=1&subcmd=showlogs", 17);
 			}
 			if (GM_getValue("showMonsterLog")) {
-				Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&subcmd=monsterlog", 19);
+				Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&blank=1&subcmd=monsterlog", 19);
 			}
-			Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&subcmd=quicklinkmanager", 21, "menuSource_0");
-			Layout.injectItemIntoMenuTable(tableElement, "Create Maps", "index.php?cmd=notepad&subcmd=createmap", 23);
+			Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager", 21, "menuSource_0");
+			Layout.injectItemIntoMenuTable(tableElement, "Create Maps", "index.php?cmd=notepad&blank=1&subcmd=createmap", 23);
 			//"menuSource_5"
 			tableElement = $('div[id="menuSource_5"]').find('tbody:first');
 			if (!tableElement) return;
-			Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&subcmd=guildinvmanager", 3);
+			Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&blank=1&subcmd=guildinvmanager", 3);
 			if (!GM_getValue("useNewGuildLog")) {
 				//if not using the new guild log, show it as a separate menu entry
-				Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&subcmd=newguildlog", 13);
+				Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&blank=1&subcmd=newguildlog", 13);
 			}
 			//"menuSource_3"
 			tableElement = $('div[id="menuSource_3"]').find('tbody:first');
@@ -952,10 +955,10 @@ var Layout = {
 			//"menuSource_2"
 			tableElement = $('div[id="menuSource_2"]').find('tbody:first');
 			if (!tableElement) return;
-			Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&subcmd=auctionsearch", 37);
-			Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&subcmd=findbuffs", 8);
-			Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&subcmd=findother", 10);
-			Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&subcmd=onlineplayers", 12);
+			Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&blank=1&subcmd=auctionsearch", 37);
+			Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&blank=1&subcmd=findbuffs", 8);
+			Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&blank=1&subcmd=findother", 10);
+			Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&blank=1&subcmd=onlineplayers", 12);
 		}
 	},
 
@@ -1257,6 +1260,7 @@ var Helper = {
 		}
 
 		System.setDefault("showQuickDropLinks", false);
+		System.setDefault("sendClasses","['Amber', '5611'], ['Amethyst Weed', '9145'], ['Blood Bloom', '5563'], ['Cerulean Rose', '9156'], ['Coleoptera Body', '9287'], ['Dark Shade', '5564'], ['Deathbloom', '9140'], ['Deathly Mold', '9153'], ['Greenskin\u00A0Fungus', '9148'], ['Heffle', '5565'], ['Jademare', '5566'], ['Ruby Thistle', '9143'], ['Toad Corpse','9288'], ['Trinettle', '5567'], ['Viridian\u00A0Vine', '9151'], ['Mortar & Pestle', '9157'], ['Beetle Juice', '9158']");
 
 		try {
 			var quickSearchList = System.getValueJSON("quickSearchList");
@@ -2048,9 +2052,9 @@ var Helper = {
 					var level = memberList.rows[i].cells[2].innerHTML;
 					var aRow = memberList.rows[i];
 					if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
-						aRow.style.backgroundColor = "#4671C8";
-					} else if (highlightGvGPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= 25) {
-						aRow.style.backgroundColor = "#FF9900";
+						aRow.style.backgroundColor = "#4671C8"; //blue
+					} else if (highlightGvGPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= ((levelToTest <= 300)?25:(levelToTest <= 700)?50:100)) {
+						aRow.style.backgroundColor = "#FF9900"; //red
 					}
 				}
 			}
@@ -2121,7 +2125,7 @@ var Helper = {
 				nodediv.html(nodediv.html() + "&nbsp;" +
 					"<nobr><a title='Add to Ignore List' href='index.php?cmd=log&subcmd=doaddignore&ignore_username=" + playerName +
 					"' style='color:PaleVioletRed'>[ Ignore ]</a>&nbsp;" +
-					"<a href='index.php?cmd=notepad&subcmd=fsboxcontent' style='color:yellow'>[ Log ]</a></nobr>");
+					"<a href='index.php?cmd=notepad&blank=1&subcmd=fsboxcontent' style='color:yellow'>[ Log ]</a></nobr>");
 			}
 		}
 	},
@@ -4686,7 +4690,7 @@ injectBazaar: function() {
 		var output = 'Note that clicking on Show AH Price might reset your AH Search Preference (min/max Lvl, min/max Forge)<br/>'+
 			'<table width=100% cellspacing=2 cellpadding=2>'+
 			'<tr><th colspan=5 align=right>[<span id=showAhPrice style="cursor:pointer; color:yellow">Show AH Price</span>]</td>'+
-			'<tr><th colspan=5 align=center>Items from <a href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>'+
+			'<tr><th colspan=5 align=center>Items from <a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>'+
 			'<tr><th>Name</th><th>Nick Name<th>Inv Count</th><th>AH Min Price</th><th>AH BuyNow Price</th></tr>';
 		var invCount = {}, name;
 		var quickSL = System.getValueJSON("quickSearchList");
@@ -4717,7 +4721,7 @@ injectBazaar: function() {
 				output += '<a href=\"index.php?cmd=auctionhouse&type=-1&search_text='+quickSL[i].searchname+'\">'+quickSL[i].nickname+'</a>, ';
 		}
 		output += '</td></tr><tr><td colspan=5><hr></td></tr>'+
-			'<tr><th colspan=5 align=center>Items NOT from <a href="index.php?cmd=notepad&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>';
+			'<tr><th colspan=5 align=center>Items NOT from <a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>';
 		// show inv & counter for item with nickname NOT found
 		for (var key in invCount) {
 			if (invCount[key].nicknameList == '')
@@ -5190,7 +5194,7 @@ injectBazaar: function() {
 
 	clearEntityLog: function() {
 		GM_setValue("monsterLog", "");
-		window.location="index.php?cmd=notepad&subcmd=monsterlog";
+		window.location="index.php?cmd=notepad&blank=1&subcmd=monsterlog";
 	},
 
 	sortEntityLogTable: function(evt) {
@@ -5605,7 +5609,7 @@ injectBazaar: function() {
 			Helper.quickBuyItem();
 			break;
 		case 118: // fast wear manager [v]
-			window.location = 'index.php?cmd=notepad&subcmd=quickwear';
+			window.location = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
 			break;
 		case 121: // fast send gold [y]
 			Helper.sendGoldToPlayer();
@@ -5956,7 +5960,7 @@ injectBazaar: function() {
 
 	addGuildLogWidgets: function() {
 		var node=System.findNode("//font[@size=3]/b[contains(.,'s Log')]/..");
-		if (node) node.innerHTML+=' [ <a href="index.php?cmd=notepad&subcmd=guildlog">Guild Log Summary</a> ]';
+		if (node) node.innerHTML+=' [ <a href="index.php?cmd=notepad&blank=1&subcmd=guildlog">Guild Log Summary</a> ]';
 		if (!GM_getValue("hideNonPlayerGuildLogMessages")) {return;}
 		var playerId=Layout.playerId();
 		var logTable = System.findNode("//table[tbody/tr/td[.='Message']]");
@@ -6144,7 +6148,7 @@ injectBazaar: function() {
 			var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
 				"<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
 							System.server +
-							"index.php?cmd=notepad&subcmd=auctionsearch'>" +
+							"index.php?cmd=notepad&blank=1&subcmd=auctionsearch'>" +
 							"Configure Quick Search</a></td></tr>";
 			var lp=0;
 			var rowCount = 0;
@@ -6490,7 +6494,7 @@ injectBazaar: function() {
 	},
 
 	resetRawEditor: function(evt) {
-		if (location.search == '?cmd=notepad&subcmd=auctionsearch') {
+		if (location.search == '?cmd=notepad&blank=1&subcmd=auctionsearch') {
 			Helper.param.currentItems = Data.quickSearchList();
 		}
 		else Helper.param.currentItems=[];
@@ -6930,7 +6934,7 @@ injectBazaar: function() {
 			}
 		}
 		if (haveItems)
-			setTimeout(function() {window.location=window.location;}, 1000);
+			setTimeout(function() {window.location=window.location;}, 10000);
 	},
 
 	quickDropItem: function(evt){
@@ -7105,7 +7109,7 @@ injectBazaar: function() {
 
 		var invSectionToggle = System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
 		if (invSectionToggle) {
-			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
+			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&blank=1&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
 
 		if (isSelfRE) { // self inventory
@@ -7117,7 +7121,7 @@ injectBazaar: function() {
 			// quick wear manager link
 			var node=System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
 			if (node) {
-				node.parentNode.innerHTML+="&nbsp;[<a href='/index.php?cmd=notepad&subcmd=quickwear'><span style='color:blue;'>Quick&nbsp;Wear</span></a>]";
+				node.parentNode.innerHTML+="&nbsp;[<a href='/index.php?cmd=notepad&blank=1&subcmd=quickwear'><span style='color:blue;'>Quick&nbsp;Wear</span></a>]";
 			}
 			//select all link
 			var node=System.findNode("//span/a[contains(@href,'cmd=profile&subcmd=dropitems')]");
@@ -7491,7 +7495,7 @@ injectBazaar: function() {
 			injectHere.appendChild(componentExtrasDiv);
 			componentExtrasDiv.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
 				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>'+
-				'<div align=center><a href="index.php?cmd=notepad&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a></div>';
+				'<div align=center><a href="index.php?cmd=notepad&blank=1&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a></div>';
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
 		} else {
@@ -7515,18 +7519,19 @@ injectBazaar: function() {
 		document.getElementById('compSum').innerHTML+=nextPage+', ';
 		var doc=System.createDocumentWithImages(responseText);
 		var compList = System.findNodes("//a[contains(@href,'cmd=profile&subcmd=destroycomponent&component_id=')]/img",doc);
-		if (compList) {
-			for (var i=0;i<compList.length;i++) {
-				var mouseover=$(compList[i]).data('tipped');
-				var id=mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
-				if (Helper.componentList[id])
-					Helper.componentList[id].count++;
-				else {
-					Helper.componentList[id]={'count':1,'src':compList[i].getAttribute('src'),
-						'onmouseover':mouseover.replace("<br><center><b>[Click to Destroy]</b></center>","")};
-				}
-			}
-		}
+		$(responseText).find('a[href*="cmd\=profile\&subcmd\=destroycomponent\&component_id\="]').each(function(i) { 
+
+					var img=$(this).children(':first');
+					var mouseover=$(img).data('tipped');
+					var id=mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
+					if (Helper.componentList[id])
+						Helper.componentList[id].count++;
+					else {
+						Helper.componentList[id]={'count':1,'src':$(img).attr('src'),
+													'onmouseover':mouseover};
+					}
+			});
+
 		if (currentPage < Helper.compPage - 1) {
 			System.xmlhttp("index.php?cmd=profile&component_page="+nextPage, Helper.retriveComponent, nextPage);
 		} else {
@@ -7777,8 +7782,8 @@ injectBazaar: function() {
 		content.innerHTML=Helper.makePageHeader('Trade Hub Quick Search','','','')+
 			'<div class=content>This screen allows you to set up some quick search templates for the Auction House. '+
 				'The Display on AH column indicates if the quick search will show on the short list on the '+
-				'Auction House main screen. A maximum of 18 items can show on this list '+
-				'(It will not show more than 18 even if you have more than 18 flagged). '+
+				'Auction House main screen. A maximum of 36 items can show on this list '+
+				'(It will not show more than 36 even if you have more than 36 flagged). '+
 				'To edit items, either use the large text area below, '+
 				'or add a new entry and delete the old one. You can always reset the list to the default values.</div>'+
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
@@ -7886,11 +7891,11 @@ injectBazaar: function() {
 			reportTitle + '<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
 				'<td><table><tr><td>' +
-				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" onSubmit="javascript:return false;">' +
+				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
-				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/><input id="reportType" type="hidden" value="'+reportType+'" />' +
-				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>';
+				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/><input id="reportType" type="hidden" value="'+reportType+'" />' +
+				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ ':<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
@@ -8395,11 +8400,11 @@ injectBazaar: function() {
 		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 2000);
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
 		var result=
-			'<div align=right><form id=Helper:onlinePlayerFilterForm subject="onlinePlayer" href="index.php?cmd=notepad&subcmd=onlineplayers" onSubmit="javascript:return false;">' +
+			'<div align=right><form id=Helper:onlinePlayerFilterForm subject="onlinePlayer" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers" onSubmit="javascript:return false;">' +
 			'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.onlinePlayerMinLvl" id="Helper.onlinePlayerMinLvl" style=custominput/> ' +
 			'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.onlinePlayerMaxLvl" id="Helper.onlinePlayerMaxLvl" style=custominput/> ' +
-			'<input id="Helper:onlinePlayerFilter" subject="onlinePlayer" href="/index.php?cmd=notepad&subcmd=onlineplayers" class="custombutton" type="submit" value="Filter"/>' +
-			'<input id="Helper:onlinePlayerFilterReset" subject="onlinePlayer" href="index.php?cmd=notepad&subcmd=onlineplayers" class="custombutton" type="button" value="Reset"/></form></div>' +
+			'<input id="Helper:onlinePlayerFilter" subject="onlinePlayer" href="/index.php?cmd=notepad&blank=1&subcmd=onlineplayers" class="custombutton" type="submit" value="Filter"/>' +
+			'<input id="Helper:onlinePlayerFilterReset" subject="onlinePlayer" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers" class="custombutton" type="button" value="Reset"/></form></div>' +
 			'<table id="Helper:OnlinePlayersTable"><tr>' +
 			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
 			'<th sortkey="name">Name</th>' +
@@ -10297,14 +10302,13 @@ injectBazaar: function() {
 		}
 	},
 
-	injectArena: function() {
-		if (isNewUI == 1) arenaTable = System.findNode("//table/tbody/tr/td[contains(.,'Reward')]/table"); // not sure why it doesn't work with width in there for new UI.
-		else arenaTable = System.findNode("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/table");
+injectArena: function() {
+		var arenaTables = System.findNodes("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/../../..");
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves");
 		injectHere.innerHTML = '<input id="Helper:hideMatchesForCompletedMoves" type="checkbox"' +
 				(hideMatchesForCompletedMoves?' checked':'') + '/>'+
-				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves | Number of active arenas: ' + (arenaTable.rows.length-1) +
+				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves ' +
 				'<div align=center><form id=Helper:arenaFilterForm subject="arena" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + GM_getValue("arenaMinLvl", 1) + '" size=5 name="Helper.arenaMinLvl" id="Helper.arenaMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 2000) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
@@ -10333,78 +10337,82 @@ injectBazaar: function() {
 		var matchFound = false;
 		var minLvl=GM_getValue('arenaMinLvl',1);
 		var maxLvl=GM_getValue('arenaMaxLvl',2000);
-		for (var i=1; i<arenaTable.rows.length; i++){
-			var row = arenaTable.rows[i];
+		for( var ar = 0; ar < arenaTables.length;ar++)
+		{
+			var arenaTable = arenaTables[ar];
+			for (var i=1; i<arenaTable.rows.length; i++){
+				var row = arenaTable.rows[i];
 
-			matchFound = false;
-			aMatch = new Object();
-			var arenaIDRE = /#\s(\d+)/;
-			var arenaID = arenaIDRE.exec(row.cells[0].textContent)[1]*1;
-			if (oldArenaMatches){
-				for (var k=0; k<oldArenaMatches.length; k++){
-					if (oldArenaMatches[k].arenaID == arenaID) {
-						matchFound = true;
-						break;
+				matchFound = false;
+				aMatch = new Object();
+				var arenaIDRE = /#\s(\d+)/;
+				var arenaID = arenaIDRE.exec(row.cells[0].textContent)[1]*1;
+				if (oldArenaMatches){
+					for (var k=0; k<oldArenaMatches.length; k++){
+						if (oldArenaMatches[k].arenaID == arenaID) {
+							matchFound = true;
+							break;
+						}
 					}
 				}
-			}
-			if (!matchFound) {
-				aMatch.arenaID = arenaID;
-				aMatch.arenaJoinCostHTML = row.cells[2].innerHTML;
-				aMatch.arenaSpecialsHTML = row.cells[4].innerHTML;
-				if (row.cells[4].innerHTML.search("/pvp/specials_1.gif") != -1) {
-					aMatch.arenaSpecials = true;
-				} else {
-					aMatch.arenaSpecials = false;
-				}
-				aMatch.arenaHellForgeHTML = row.cells[5].innerHTML;
-				aMatch.arenaEpicHTML = row.cells[6].innerHTML;
-				aMatch.arenaMaxEquipHTML = row.cells[7].innerHTML;
-				aMatch.arenaRewardHTML = row.cells[8].innerHTML;
-				arenaMatches.push(aMatch);
-			}
-
-			var prizeSRC = row.cells[8].firstChild.getAttribute("src");
-			var maxEquipLvL = row.cells[7].textContent*1;
-			if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
-				for (var j=0; j<arenaMoves.length; j++){
-					var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/pvp/"),prizeSRC.length);
-					var searchText = "/pvp/" + arenaMoves[j].moveID+ ".gif";
-					if (prizeSRCShort == searchText && arenaMoves[j].moveCount == 3){
-						row.style.visibility = "hidden";
-						row.style.display = "none";
-						break;
+				if (!matchFound) {
+					aMatch.arenaID = arenaID;
+					aMatch.arenaJoinCostHTML = row.cells[2].innerHTML;
+					aMatch.arenaSpecialsHTML = row.cells[4].innerHTML;
+					if (row.cells[4].innerHTML.search("/pvp/specials_1.gif") != -1) {
+						aMatch.arenaSpecials = true;
+					} else {
+						aMatch.arenaSpecials = false;
 					}
+					aMatch.arenaHellForgeHTML = row.cells[5].innerHTML;
+					aMatch.arenaEpicHTML = row.cells[6].innerHTML;
+					aMatch.arenaMaxEquipHTML = row.cells[7].innerHTML;
+					aMatch.arenaRewardHTML = row.cells[8].innerHTML;
+					arenaMatches.push(aMatch);
 				}
-			}
-			if (prizeSRC && prizeSRC.search("/items/") != -1) {
-				var prizeImgElement = row.cells[8].firstChild;
-				var prizeOnmouseover = $(prizeImgElement).data("tipped");
-				//var itemIdRE = /ajaxLoadCustom\((\d+)/;
-				var itemIdRE = /fetchitem.php\?item_id=(\d+)/;
-				var itemId = itemIdRE.exec(prizeOnmouseover)[1];
-				prizeOnmouseover = prizeOnmouseover.replace(/""/,'"ItemId = '+itemId+'"');
-				prizeImgElement.setAttribute("data-tipped", prizeOnmouseover);
-				if (hideArenaPrizes) {
-					for (k=0; k<hideArenaPrizesArray.length; k++){
-						var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/items/"),prizeSRC.length);
-						var compareStr = "/items/" + hideArenaPrizesArray[k] + ".gif";
-						if (prizeSRCShort == compareStr) {
+
+				var prizeSRC = row.cells[8].firstChild.getAttribute("src");
+				var maxEquipLvL = row.cells[7].textContent*1;
+				if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
+					for (var j=0; j<arenaMoves.length; j++){
+						var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/pvp/"),prizeSRC.length);
+						var searchText = "/pvp/" + arenaMoves[j].moveID+ ".gif";
+						if (prizeSRCShort == searchText && arenaMoves[j].moveCount == 3){
 							row.style.visibility = "hidden";
 							row.style.display = "none";
 							break;
 						}
 					}
 				}
-			}
-			if (!(maxEquipLvL >= minLvl && maxEquipLvL <= maxLvl)) {
-				row.style.visibility = "hidden";
-				row.style.display = "none";
-			}
+				if (prizeSRC && prizeSRC.search("/items/") != -1) {
+					var prizeImgElement = row.cells[8].firstChild;
+					var prizeOnmouseover = $(prizeImgElement).data("tipped");
+					//var itemIdRE = /ajaxLoadCustom\((\d+)/;
+					var itemIdRE = /fetchitem.php\?item_id=(\d+)/;
+					var itemId = itemIdRE.exec(prizeOnmouseover)[1];
+					prizeOnmouseover = prizeOnmouseover.replace(/""/,'"ItemId = '+itemId+'"');
+					prizeImgElement.setAttribute("data-tipped", prizeOnmouseover);
+					if (hideArenaPrizes) {
+						for (k=0; k<hideArenaPrizesArray.length; k++){
+							var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/items/"),prizeSRC.length);
+							var compareStr = "/items/" + hideArenaPrizesArray[k] + ".gif";
+							if (prizeSRCShort == compareStr) {
+								row.style.visibility = "hidden";
+								row.style.display = "none";
+								break;
+							}
+						}
+					}
+				}
+				if (!((maxEquipLvL >= minLvl) && (maxEquipLvL <= maxLvl))) {
+					row.style.visibility = "hidden";
+					row.style.display = "none";
+				}
 
-			if (!matchFound) {
-				//color new matches since last visit
-				row.style.backgroundColor = '#F5F298';
+				if (!matchFound) {
+					//color new matches since last visit
+					row.style.backgroundColor = '#F5F298';
+				}
 			}
 		}
 		System.setValueJSON("arenaMatches", arenaMatches);
@@ -10903,7 +10911,7 @@ injectBazaar: function() {
 			'<tr><td align="right">Quick Links Screen Location' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
 				':</td><td>Top: <input name="quickLinksTopPx" size="1" value="'+ GM_getValue("quickLinksTopPx") + '" /> Left: <input name="quickLinksLeftPx" size="1" value="'+ GM_getValue("quickLinksLeftPx") + '" /></td></tr>' +
 			//Guild Manage
-			'<tr><th colspan="2" align="left">Guild>Manage preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Guild>Manage preferences</b></th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
 			'<tr><td>Own Guild</td><td>'+ Helper.injectSettingsGuildData("Self") + '</td></tr>' +
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
@@ -10920,7 +10928,7 @@ injectBazaar: function() {
 			'<tr><td align="right">Show Conflict Details' + Helper.helpLink('Show Conflict Details', 'Inserts detailed conflict information onto your guild\\\'s manage page. Currently displays the target guild as well as the current score.') +
 				':</td><td><input name="detailedConflictInfo" type="checkbox" value="on"' + (GM_getValue("detailedConflictInfo")?" checked":"") + '></td></tr>' +
 			//World Screen
-			'<tr><th colspan="2" align="left">World screen/Hunting preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>World screen/Hunting preferences</b></th></tr>' +
 			'<tr><td align="right">Quick Kill ' + Helper.helpLink('Quick Kill', 'This will kill monsters without opening a new page') +
 				':</td><td><input name="quickKill" type="checkbox" value="on"' + (GM_getValue("quickKill")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -10990,7 +10998,7 @@ injectBazaar: function() {
 				' Show FastWalk icon on world' + Helper.helpLink('Show FastWalk icon on world', 'Should the FastWalk toggle icon show on the world map') +
 				':<input name="showFastWalkIconOnWorld" type="checkbox" value="on"' + (GM_getValue("showFastWalkIconOnWorld")?" checked":"") + '></td></tr>' +
 			//Log screen prefs
-			'<tr><th colspan="2" align="left">Log screen preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Log screen preferences</b></th></tr>' +
 			'<tr><td align="right">Cleanup Guild Log' + Helper.helpLink('Dim Non Player Guild Log Messages', 'Any log messages not related to the ' +
 				'current player will be dimmed (e.g. recall messages from guild store)') +
 				':</td><td><input name="hideNonPlayerGuildLogMessages" type="checkbox" value="on"' + (GM_getValue("hideNonPlayerGuildLogMessages")?" checked":"") + '></td></td></tr>' +
@@ -11014,16 +11022,20 @@ injectBazaar: function() {
 			'<tr><td align="right">Enhance Chat Text Entry' + Helper.helpLink('Enhance Chat Text Entry', 'If checked, this will enhance the entry field for entering chat text on the guild chat page.') +
 				':</td><td><input name="enhanceChatTextEntry" type="checkbox" value="on"' + (GM_getValue("enhanceChatTextEntry")?" checked":"") + '></td></td></tr>' +
 			//Equipment screen prefs
-			'<tr><th colspan="2" align="left">Equipment screen preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Equipment screen preferences</b></th></tr>' +
 			'<tr><td align="right">Disable Item Coloring' + Helper.helpLink('Disable Item Coloring', 'Disable the code that colors the item text based on the rarity of the item.') +
 				':</td><td><input name="disableItemColoring" type="checkbox" value="on"' + (GM_getValue("disableItemColoring")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Show Quick Send Item' + Helper.helpLink('Show Quick Send on Manage Backpack', 'This will show a link beside each item which gives the option to quick send the item to this person') +
 				':</td><td><input name="showQuickSendLinks" type="checkbox" value="on"' + (GM_getValue("showQuickSendLinks")?" checked":"") + '>'+
 				'Send Items To <input name="itemRecipient" size="10" value="'+ GM_getValue("itemRecipient") + '" />' +
-			
 			'<tr><td align="right">Show Quick Drop Item' + Helper.helpLink('Show Quick Drop on Manage Backpack', 'This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR') +
 				':</td><td><input name="showQuickDropLinks" type="checkbox" value="on"' + (GM_getValue("showQuickDropLinks")?" checked":"") + '>'+			//Quest prefs
-			'<tr><th colspan="2" align="left">Quest preferences</th></tr>' +
+			
+			'<tr><td align="right">Quick Select all of type<br> in Send Screen' + Helper.helpLink('Quick Select all of type in Send Screen', 'This allows you to customize what quick links you would like displayed in your send item screen.<br>Use the format [\'name\',\'itemid\'],[\'othername\',\'itemid2\'].<br>WARNING: NO REFUNDS ON ERROR') +
+				':</td><td><input name="sendClasses" size="60" value="' + (GM_getValue("sendClasses")) + '">'+
+			
+			//Quest Preferences
+			'<tr><th colspan="2" align="left"><b>Quest preferences</b></th></tr>' +
 			'<tr><td align="right">Hide Specific Quests' + Helper.helpLink('Hide Specific Quests', 'If enabled, this hides quests whose name matches the list (separated by commas). ' +
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
@@ -11038,7 +11050,7 @@ injectBazaar: function() {
 			'<tr><td align="right">Show Next Quest Steps' + Helper.helpLink('Show Next Quest Steps', 'Shows the next quest steps from the UFSG.') +
 				':</td><td><input name="showNextQuestSteps" type="checkbox" value="on"' + (GM_getValue("showNextQuestSteps")?" checked":"") + '></td></tr>' +
 			//profile prefs
-			'<tr><th colspan="2" align="left">Profile preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Profile preferences</b></th></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
@@ -11055,14 +11067,14 @@ injectBazaar: function() {
 			'<tr><td align="right">Enable Quick Drink' + Helper.helpLink('Enable Quick Drink On Profile', 'This enables the quick drink functionality on the profile page.') +
 				':</td><td><input name="enableQuickDrink" type="checkbox" value="on"' + (GM_getValue("enableQuickDrink")?" checked":"") + '></td></tr>' +
 			//Arena prefs
-			'<tr><th colspan="2" align="left">Arena preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Arena preferences</b></th></tr>' +
 			'<tr><td align="right">Auto Sort Arena List' + Helper.helpLink('Auto Sort Arena List', 'This will automatically sort the arena list based on your last preference for sort.') +
 				':</td><td><input name="autoSortArenaList" type="checkbox" value="on"' + (GM_getValue("autoSortArenaList")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Hide Arena Prizes' + Helper.helpLink('Hide Arena Prizes', 'List of the itemIds of arena prizes that should not display on the arena screen ' +
 				'separated by commas. To find the itemId you will have to view the source of the page or mouseover the item on the arena page.') +
 				':</td><td colspan="3"><input name="hideArenaPrizes" size="60" value="'+ hideArenaPrizes + '" /></td></tr>' +
 			//Bounty hunting prefs
-			'<tr><th colspan="2" align="left">Bounty hunting preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Bounty hunting preferences</b></th></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Active Bounties' + Helper.helpLink('Show Active Bounties', 'This will show your active bounties ' +
 				'on the right hand side') + ':</td><td colspan="3"><input name="enableActiveBountyList" type = "checkbox" value = "on"' + (enableActiveBountyList? " checked":"") + '/>' +
 				'<input name="bountyListRefreshTime" size="1" value="'+ bountyListRefreshTime + '" /> seconds refresh</td></tr>' +
@@ -11075,13 +11087,13 @@ injectBazaar: function() {
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' +
 				'<input name="showPvPSummaryInLog" type = "checkbox" value = "on"' + (GM_getValue("showPvPSummaryInLog")? " checked":"") + '/>' +
 			//Auction house prefs
-			'<tr><th colspan="2" align="left">Auction house preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Auction house preferences</b></th></tr>' +
 			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
 				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Auto Fill Min Bid Price' + Helper.helpLink('Auto Fill Min Bid Price', 'This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed.') +
 				':</td><td><input name="autoFillMinBidPrice" type="checkbox" value="on"' + (GM_getValue("autoFillMinBidPrice")?" checked":"") + '></td></tr>' +
 			//Other prefs
-			'<tr><th colspan="2" align="left">Other preferences</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>Other preferences</b></th></tr>' +
 			'<tr><td align="right">Hide Specific Recipes' + Helper.helpLink('Hide Specific Recipes', 'If enabled, this hides recipes whose name matches the list (separated by commas). ' +
 				'This works on Recipe Manager') +
 				':</td><td colspan="3"><input name="hideRecipes" type="checkbox" value="on"' + (GM_getValue("hideRecipes")?" checked":"") + '>' +
@@ -11109,9 +11121,9 @@ injectBazaar: function() {
 			'<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
 				':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
 			//save button
-			//http://www.fallensword.com/index.php?cmd=notepad&subcmd=savesettings
+			//http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
-			'<tr><td colspan="2" align=center><a href="http://www.fallensword.com/index.php?cmd=notepad&subcmd=savesettings">Export or Load Settings!</a></td></tr>' +
+			'<tr><td colspan="2" align=center><a href="http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings">Export or Load Settings!</a></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
@@ -11283,6 +11295,7 @@ injectBazaar: function() {
 		System.saveValueForm(oForm, "keepBuffLog");
 		System.saveValueForm(oForm, "showQuickSendLinks");
 		System.saveValueForm(oForm, "showQuickDropLinks");
+		System.saveValueForm(oForm, "sendClasses");
 		System.saveValueForm(oForm, "itemRecipient");
 		System.saveValueForm(oForm, "currentGoldSentTotal");
 		System.saveValueForm(oForm, "hideArenaPrizes");
@@ -11337,11 +11350,11 @@ injectBazaar: function() {
 	},
 
 	showLogs: function(evt) {
-		document.location=System.server + "index.php?cmd=notepad&subcmd=showlogs";
+		document.location=System.server + "index.php?cmd=notepad&blank=1&subcmd=showlogs";
 	},
 
 	showMonsterLogs: function(evt) {
-		document.location=System.server + "index.php?cmd=notepad&subcmd=monsterlog";
+		document.location=System.server + "index.php?cmd=notepad&blank=1&subcmd=monsterlog";
 	},
 
 	injectNotepadShowLogs: function() {
@@ -11967,8 +11980,8 @@ var items=0;
 		var recipeID = $('input[name="recipe_id"]').attr('value');
 		$('#invet_Result_label').html("Inventing "+amountToInvent+" Items");
 		for (var i=0;i<amountToInvent;i++) {
-			System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+recipeID, Helper.quickInventDone);
-
+			//Had to add &fsh=i to ensure that the call is sent out multiple times.
+			System.xmlhttp("index.php?cmd=inventing&subcmd=doinvent&recipe_id="+recipeID+"&fsh="+i, Helper.quickInventDone);
 		}
 	},
 	quickInventDone: function(responseText) {
@@ -12022,20 +12035,23 @@ var items=0;
 				document.getElementById('Helper:recallMailboxItem' + i).addEventListener('click', Helper.recallMailboxItem, true);
 			}
 			var titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Item Mailbox']]");
-			if (!titleTable) titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Mailbox']]");
-			titleTable.rows[4].cells[0].align = 'center';
-			titleTable.rows[4].cells[0].innerHTML = '<a href="index.php?cmd=tempinv&subcmd=takeall">Take All Items</a>';
+			if (!titleTable){
+				titleTable = System.findNode("//table[tbody/tr/td/font/b[.='Guild Mailbox']]");
+			}else{
+				titleTable.rows[4].cells[0].align = 'center';
+				titleTable.rows[4].cells[0].innerHTML = '<a href="index.php?cmd=tempinv&subcmd=takeall">Take All Items</a>';
+				
+				//*************** Quick take ****************
+				//$('#pCC').html('Getting information from mailbox');
+				$('#pCC').wrapInner('<div id="regularMailbox" />');
+				var quickTakeDiv='<div id="quickTake" style="display:none"><br /><br /><center><font size="3"><b>Quick Take</b></font>'+
+					'<br />Select which item to take all similar items from your Mailbox.<br /></center>'+
+					'<table id="quickTakeTable" align="left"><tr><th width=20%>Actions</th><th>Items</th></tr><tr><td id="take_result" colspan=2></td></tr></table>'+
+					'</div>';
+
+				$('#pCC').prepend('<span id="mailboxSwitcher" style="cursor:pointer; text-decoration:underline; color:blue;">Toggle Quick Take</span><input type="hidden" id="currentMBDisplay" value="mailbox" />'+quickTakeDiv);
+			}
 		}
-
-		//*************** Quick take ****************
-		//$('#pCC').html('Getting information from mailbox');
-		$('#pCC').wrapInner('<div id="regularMailbox" />');
-		var quickTakeDiv='<div id="quickTake" style="display:none"><br /><br /><center><font size="3"><b>Quick Take</b></font>'+
-			'<br />Select which item to take all similar items from your Mailbox.<br /></center>'+
-			'<table id="quickTakeTable" align="left"><tr><th width=20%>Actions</th><th>Items</th></tr><tr><td id="take_result" colspan=2></td></tr></table>'+
-			'</div>';
-
-		$('#pCC').prepend('<span id="mailboxSwitcher" style="cursor:pointer; text-decoration:underline; color:blue;">Toggle Quick Take</span><input type="hidden" id="currentMBDisplay" value="mailbox" />'+quickTakeDiv);
 
 		//fetchitem.php?item_id=9208&inv_id=91591259&t=5&p=1599987&currentPlayerId=1599987&extra=3
 		Helper.itemList = {};
@@ -13083,7 +13099,9 @@ var items=0;
 
 	makeSelectAllInTrade: function(injectHere, type) {
 		var space = new String(' &nbsp ');
-		var itemList=[["Amber", "5611"], ["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ["Dark Shade", "5564"], ["Deathbloom", "9140"], ["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ["Heffle", "5565"], ["Jademare", "5566"], ["Ruby Thistle", "9143"], ['Toad Corpse','9288'], ["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]];
+		var sendClasses = GM_getValue("sendClasses");
+
+		eval('var itemList=['+sendClasses+'];');
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
@@ -13330,10 +13348,10 @@ var items=0;
 		if (guildLogNodes) {
 			for (i=0;i<guildLogNodes.length;i++) {
 				guildLogNode = guildLogNodes[i];
-				guildLogNode.setAttribute("href", "index.php?cmd=notepad&subcmd=newguildlog");
+				guildLogNode.setAttribute("href", "index.php?cmd=notepad&blank=1&subcmd=newguildlog");
 			}
 			//hide the lhs box
-			if (location.search == "?cmd=notepad&subcmd=newguildlog") {
+			if (location.search == "?cmd=notepad&blank=1&subcmd=newguildlog") {
 				if(guildLogNode.firstChild.nodeName == 'IMG' && guildLogNode.firstChild.getAttribute("alt") == "You have unread guild log messages.") { //old UI
 					messageBox = guildLogNode.parentNode.parentNode;
 					if (messageBox) {
@@ -13864,7 +13882,7 @@ var items=0;
 
 	injectCheckWearingItem: function(content) {
 		if (!content) var content = Layout.notebookContent();
-		content.innerHTML=Helper.makePageTemplate("Check Wearing Items for Best Damage", "", "", "", "checkwear");
+		content.innerHTML=Helper.makePageTemplate("Check Worn Items for Best Damage", "", "", "", "checkwear");
 
 		document.getElementById("checkwear").innerHTML+="Getting profile ...<br/>";
 		var playerid=/&playerid=(\d+)/.exec(window.location);
