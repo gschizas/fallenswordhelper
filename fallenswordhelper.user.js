@@ -295,13 +295,13 @@ var System = {
 		if (!nodes) return null;
 		return (nodes[0]);
 	},
-
+	
 	findNodes: function(xpath, doc) {
 			if (!doc) {
 				doc=document;
 			}
 			var nodes=[];
-			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			var findQ = document.evaluate('.'+xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 			if (findQ.snapshotLength===0) return null;
 			for (var i=0; i<findQ.snapshotLength; i++) {
 				nodes.push(findQ.snapshotItem(i));
@@ -1590,10 +1590,10 @@ var Helper = {
 				Helper.storeArenaMoves();
 				break;
 			case "results":
-				Helper.injectTournament();
+				//Helper.injectTournament();
 				break;
 			case "dojoin":
-				Helper.injectTournament();
+				//Helper.injectTournament();
 				break;
 			case "setup":
 				Helper.injectArenaSetupMove();
@@ -1921,7 +1921,7 @@ var Helper = {
 			}
 			var isArenaTournamentPage = System.findNode("//b[contains(.,'Tournament #')]");
 			if (isArenaTournamentPage) {
-				Helper.injectTournament();
+				//Helper.injectTournament();
 			}
 			if (System.findNode("//a[.='Back to Scavenging']")) {
 				Helper.injectScavenging();
@@ -2045,10 +2045,13 @@ var Helper = {
 			var levelToTest = Helper.characterLevel;
 			var characterVirtualLevel = GM_getValue('characterVirtualLevel');
 			if (characterVirtualLevel) levelToTest = characterVirtualLevel;
+
+
 			for (var i=2;i<memberList.rows.length;i++) {
 				var iplus1 = i+1;
 				if (memberList.rows[i].cells[1]) {
-					var vlevel = /VL:\&lt;\/td\&gt;\&lt;td\&gt;(\d+)/.exec(memberList.rows[i].cells[1].innerHTML)[1];
+					//Firefox reads it as </td> and chrome reads it as \&lt;\/td\&gt;
+					var vlevel = /VL:.+?(\d+)/.exec(memberList.rows[i].cells[1].innerHTML)[1];
 					var level = memberList.rows[i].cells[2].innerHTML;
 					var aRow = memberList.rows[i];
 					if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= ((levelToTest <= 205)?5:10)) {
@@ -2167,7 +2170,6 @@ var Helper = {
 			}
 		}
 
-
 		var leftHandSideColumnTable = System.findNode("//table[tbody/tr/td/font/a[contains(.,'Change Logo')]]");
 		var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
 		changeLogoCell.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
@@ -2187,10 +2189,10 @@ var Helper = {
 			statisticsControlElement.style.display = "none";
 			statisticsControlElement.style.visibility = "hidden";
 		}
-		var buildCell = leftHandSideColumnTable.rows[11].cells[1].firstChild;
+		var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
 		buildCell.innerHTML += "[ <span style='cursor:pointer; text-decoration:underline;' " +
 			"id='toggleGuildStructureControl' linkto='guildStructureControl' title='Toggle Section'>X</span> ]";
-		guildStructureControlElement = leftHandSideColumnTable.rows[13].cells[0].firstChild.nextSibling;
+		guildStructureControlElement = leftHandSideColumnTable.rows[17].cells[0].firstChild.nextSibling;
 		guildStructureControlElement.id = "guildStructureControl";
 		if (GM_getValue("guildStructureControl")) {
 			guildStructureControlElement.style.display = "none";
@@ -10372,7 +10374,7 @@ injectArena: function() {
 				}
 
 				var prizeSRC = row.cells[8].firstChild.getAttribute("src");
-				var maxEquipLvL = row.cells[7].textContent*1;
+				var maxEquipLvL = row.cells[7].textContent.replace(',','');
 				if (hideMatchesForCompletedMoves && arenaMoves && prizeSRC && prizeSRC.search("/pvp/") != -1) {
 					for (var j=0; j<arenaMoves.length; j++){
 						var prizeSRCShort = prizeSRC.substr(prizeSRC.indexOf("/pvp/"),prizeSRC.length);
@@ -10590,6 +10592,7 @@ injectArena: function() {
 		System.setValueJSON("arenaMoves", moves);
 	},
 
+	/* CAN DELETE
 	injectTournament: function() {
 		var mainTable = System.findNode("//table[tbody/tr/td/a[.='Back to PvP Arena']]");
 		var joinPage = System.findNode("//b[.='Your Tournament Stats']");
@@ -10617,7 +10620,7 @@ injectArena: function() {
 				break;
 			}
 		}
-	},
+	},*/
 
 	getCombatMoves: function(responseText, callback) {
 		var doc=System.createDocument(responseText);
@@ -12498,7 +12501,8 @@ var items=0;
 			wantedList.lastUpdate = new Date();
 			wantedList.wantedBounties = false;
 			Helper.activeBountyListPosted = false;
-			System.xmlhttp("index.php?cmd=bounty", Helper.parseBountyPageForWorld, {wantedList:wantedList});
+
+			System.xmlhttp("index.php?cmd=bounty&page=1", Helper.parseBountyPageForWorld, {wantedList:wantedList});
 		} else {
 			if (enableWantedList) {
 				wantedList.isRefreshed = false;
@@ -12515,15 +12519,16 @@ var items=0;
 
 	parseBountyPageForWorld: function(details, callback) {
 		var doc = System.createDocument(details);
-		var page = System.findNode("//input[@name='page']", doc);
+		var page = System.findNode("//input[@name='page']", doc, $('body'));
 		var curPage = parseInt(page.value,10);
 		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+
 		var enableActiveBountyList = GM_getValue("enableActiveBountyList");
 		var enableWantedList = GM_getValue("enableWantedList");
 		GM_setValue("bwNeedsRefresh", false);
-
 		if (enableWantedList) {
-			var activeTable = System.findNode("//table[@width = '630' and contains(.,'Posted')]", doc);
+
+			var activeTable = System.findNode("//table[@width = '630' and contains(.,'Target')]", doc);
 			var wantedNames = GM_getValue("wantedNames");
 			var wantedArray = wantedNames.split(",");
 			var wantedList = callback.wantedList;
@@ -12531,6 +12536,7 @@ var items=0;
 				for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
 					for (var j = 0; j < wantedArray.length; j++) {
 						var target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
+
 						if (target == wantedArray[j].trim()) {
 							wantedList.wantedBounties = true;
 							bounty = {};
@@ -12607,15 +12613,15 @@ var items=0;
 		System.setValueJSON("bountylist", bountyList);
 		var injectHere = document.getElementById("Helper:BountyListPlaceholder");
 		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = (bountyList.isRefreshed)?"#6a5938":"#4a3918";
+		//displayList.style.border = "1px solid #c5ad73";
+		//displayList.style.backgroundColor = (bountyList.isRefreshed)?"#6a5938":"#4a3918";
 		displayList.cellPadding = 1;
 		displayList.width = 125;
 
 		var aRow=displayList.insertRow(0); //bountyList.rows.length
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
-			"<nobr>Active Bounties <span id='Helper:resetBountyList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span><nobr><br>";
+		var output = "<h3>Active Bounties</h3><ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;'>"+
+			"<nobr><span id='Helper:resetBountyList' style=' font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span><nobr><br>";
 
 		if (bountyList.activeBounties === false) {
 			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:10px;'>" +
@@ -12658,15 +12664,15 @@ var items=0;
 		System.setValueJSON("wantedList", wantedList);
 		var injectHere = document.getElementById("Helper:WantedListPlaceholder");
 		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = (wantedList.isRefreshed)?"#6a5938":"#4a3918";
+		//displayList.style.border = "1px solid #c5ad73";
+		//displayList.style.backgroundColor = (wantedList.isRefreshed)?"#6a5938":"#4a3918";
 		displayList.cellPadding = 3;
 		displayList.width = 125;
 
 		var aRow=displayList.insertRow(0);
 		var aCell=aRow.insertCell(0);
-		var output = "<ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;'>"+
-			"<nobr>Wanted Bounties <span id='Helper:resetWantedList' style='color:blue; font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span></nobr><br>";
+		var output = "<h3>Wanted Bounties</h3><ol style='color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;'>"+
+			"<nobr> <span id='Helper:resetWantedList' font-size:8px; cursor:pointer; text-decoration:underline;'>Reset</span></nobr><br>";
 
 		if (wantedList.wantedBounties === false) {
 			output += "</ol> \f <ol style='color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:7px;'>" +
@@ -12864,14 +12870,14 @@ var items=0;
 		var playerId = Layout.playerId();
 		var injectHere = document.getElementById("Helper:AllyEnemyListPlaceholder");
 		var displayList = document.createElement("TABLE");
-		displayList.style.border = "1px solid #c5ad73";
-		displayList.style.backgroundColor = (contactList.isRefreshed)?"#6a5938":"#4a3918";
+		//displayList.style.border = "1px solid #c5ad73";
+		//displayList.style.backgroundColor = (contactList.isRefreshed)?"#6a5938":"#4a3918";
 		displayList.cellPadding = 3;
 		displayList.width = 125;
 
 		var aRow=displayList.insertRow(displayList.rows.length);
 		var aCell=aRow.insertCell(0);
-		output = '<center><font color="white"><b>Allies/Enemies</b></font><br/><font color="white" size=1><i><b>Online Contacts</b> <span id="Helper:resetAllyEnemyList" style="color:blue; font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span></i></font></center>'+
+		output = '<h3>Allies/Enemies</h3><center><font color="white" size=1><i><b>Online Contacts</b> <span id="Helper:resetAllyEnemyList" style="font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span></i></font></center>'+
 		'<table width="110" cellpadding="0" cellspacing="0"><tbody>'+
 			'<tr><td colspan="2" height="5"></td></tr>';
 
