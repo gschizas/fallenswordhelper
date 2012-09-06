@@ -301,7 +301,10 @@ var System = {
 				doc=document;
 			}
 			var nodes=[];
-			var findQ = document.evaluate('.'+xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+			if(xpath.indexOf('/') == 0)
+				xpath = '.'+xpath; //this is a chrome fix - needs a .// for xpath where as firefox can fucntion without it.  firefox sitll works with .//
+
+			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
 			if (findQ.snapshotLength===0) return null;
 			for (var i=0; i<findQ.snapshotLength; i++) {
 				nodes.push(findQ.snapshotItem(i));
@@ -6936,7 +6939,7 @@ injectBazaar: function() {
 			}
 		}
 		if (haveItems)
-			setTimeout(function() {window.location=window.location;}, 10000);
+			setTimeout(function() {window.location=window.location;}, 100);
 	},
 
 	quickDropItem: function(evt){
