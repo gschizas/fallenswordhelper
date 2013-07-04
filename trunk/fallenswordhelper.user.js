@@ -744,6 +744,8 @@ var Data = {
 				{name: "Cursed Ring",        stamina: 30, "duration": 120,  minCastLevel: 1400,treeId: 0, skillId: 88, buff: "0.2% per point stat bonus to your equipped ring. Excludes \\'Gain\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.", nicks: "cursed ring,cring"},
 				{name: "Sharpen",            stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 0, skillId: 106,buff: "Increases the maximum percentage (above 100%) of the Piercing Strike enhancement by +0.1% per point.", nicks: "sharpen,sharp"},
 				{name: "Balanced Attack",    stamina: 30, "duration": 90,   minCastLevel: 1400,treeId: 0, skillId: 116,buff: "+0.05% per point added to Attack and Damage if every piece of equipped gear is the same level.", nicks: "balanced attack,ba"},
+				{name: "Heavy Weight",       stamina: 20, "duration": 120,  minCastLevel: 1600,treeId: 0, skillId: 146,buff: "Increases damage in combat by +0.025% per point providing you have at least 2,500 gold multiplied by your level in hand.", nicks: "heavy weight, hw"},
+				{name: "Armored Strike",     stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 0, skillId: 130,buff: "+0.05% per point chance that your Armor stat is reduced to zero and your Damage is doubled. (PvE Only)", nicks: "armored strike, armstr"},
 				{name: "Fortify",            stamina: 10, "duration": 120,  minCastLevel: 25,  treeId: 1, skillId: 8,  buff: "+0.1% base Armor per point.", nicks: "fortify"},
 				{name: "Enchanted Armor",    stamina: 10, "duration": 90,   minCastLevel: 75,  treeId: 1, skillId: 9,  buff: "+0.1% per point stat bonus increase to your equipped armor. (Excludes \\'Gain\\' bonuses).", nicks: "enchanted armor,enchant armor,ea,ench arm,ench armor"},
 				{name: "Evade",              stamina: 10, "duration": 90,   minCastLevel: 25,  treeId: 1, skillId: 10, buff: "+0.1% base Defence per point.", nicks: "evade"},
@@ -780,6 +782,10 @@ var Data = {
 				{name: "Retaliate",          stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 123,buff: "Increases the maximum percentage (above 100%) of the Disarm enhancement by +0.2% per point.", nicks: "retaliate,ret"},
 				{name: "Shame",              stamina: 35, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 110,buff: "If successfully defending an attack, remove a percentage of additional +0.25% per point xp from the attacker. (PvP Only)", nicks: "shame"},
 				{name: "Dispel Curse",       stamina: 35, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 114,buff: "0.2% chance per point that Dark Curse will not work against you. (PvP Only)", nicks: "dispel curse,dispel"},
+				{name: "Anchored",           stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 154,buff: "0.05% per point Damage is added to your health during combat.", nicks: "anchored, anch, anchor"},
+				{name: "Hardened",           stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 153,buff: "0.05% per point chance to prevent your opponent activating Shatter Armor.", nicks: "hardened, hard, harden"},
+				{name: "Armored Boost",      stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 136,buff: "+0.05% per point to your Armor for each complete set equipped.", nicks: "armor boost, armbst, arm bst, armb"},
+				{name: "Shield Wall",        stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 135,buff: "+0.05% per point to your Defense for each complete set equipped.", nicks: "shield wall, shldwll, sw"},
 				{name: "Find Item",          stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 2, skillId: 16, buff: "+0.1% per point increase of creatures current drop rate.", nicks: "find item,fi"},
 				{name: "Treasure Hunter",    stamina: 15, "duration": 120,  minCastLevel: 1,   treeId: 2, skillId: 17, buff: "+0.2% per point additional gold from creatures.", nicks: "treasure hunter,th,treas hunter"},
 				{name: "Defiance",           stamina: 15, "duration": 120,  minCastLevel: 25,  treeId: 2, skillId: 18, buff: "+0.25% per point reduction in xp lost when defeated in combat vs creatures.", nicks: "defiance"},
@@ -801,6 +807,7 @@ var Data = {
 				{name: "Inventor II",        stamina: 20, "duration": 60,   minCastLevel: 500, treeId: 2, skillId: 64, buff: "Chance not to consume (or consume less) components when inventing items.", nicks: "inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2"},
 				{name: "Buff Master",        stamina: 10, "duration": 60,   minCastLevel: 500, treeId: 2, skillId: 65, buff: "0.2% per point chance to half the stamina cost (rounding up) when casting skills on other players. (Does not work on self!)", nicks: "buff master,buffm,bum"},
 				{name: "Reflection",         stamina: 10, "duration": 90,   minCastLevel: 600, treeId: 2, skillId: 66, buff: "0.1% per point of enemies damage inflicted is added to your next combat strike.", nicks: "reflection,ref,refl,reflect"},
+				{name: "Guild Buffer",       stamina: 10, "duration": 90,   minCastLevel: 600, treeId: 2, skillId: 160,buff: "+0.25% per point chance to reduce stamina cost of casting buffs on guild members by 50% (rounding up).", nicks: "guild buffer, gldbfr, gb"},
 				{name: "Light Foot",         stamina: 15, "duration": 120,  minCastLevel: 700, treeId: 2, skillId: 67, buff: "0.05% chance to use no stamina while moving on the world map.", nicks: "light foot,lf"},
 				{name: "Mesmerize",          stamina: 20, "duration": 60,   minCastLevel: 700, treeId: 2, skillId: 68, buff: "0.1% per point chance to reduce a creatures armor and defense by 50% (vs. creature only).", nicks: "mesmerize,mesmer,mes,mez"},
 				{name: "Resource Finder",    stamina: 25, "duration": 90,   minCastLevel: 800, treeId: 2, skillId: 76, buff: "Increases the chance a resource item will drop. (If you fail to obtain an item, an extra roll is given for Resource Finder at a fixed percentage based on the points allocated to the skill. If this second roll is successful, you will obtain one of the available resource items drops (if any)). Note if you have Quest Finder active as well, this roll takes place after Quest Finder and only if Quest Finder fails to obtain an item.", nicks: "resource finder,rf"},
@@ -817,7 +824,9 @@ var Data = {
 				{name: "Golden Shield",      stamina: 30, "duration": 60,   minCastLevel: 1200,treeId: 2, skillId: 103,buff: "+0.05% per point chance to double your armor and defense at the start of combat.", nicks: "golden shield,gs"},
 				{name: "Stalker",            stamina: 35, "duration": 90,   minCastLevel: 1400,treeId: 2, skillId: 125,buff: "Increases the maximum percentage (above 100%) of the Elite Hunter enhancement by +0.1% per point.", nicks: "stalker,stalk"},
 				{name: "Ageless",            stamina: 30, "duration": 90,   minCastLevel: 1400,treeId: 2, skillId: 100,buff: "+0.2% per point chance of doubling your HP at the start of combat.", nicks: "ageless,age"},
-				{name: "Extractor II",       stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 2, skillId: 104,buff: "+0.05% per point chance to not destroy a resource when extracting components.", nicks: "extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2"}
+				{name: "Extractor II",       stamina: 30, "duration": 60,   minCastLevel: 1400,treeId: 2, skillId: 104,buff: "+0.05% per point chance to not destroy a resource when extracting components.", nicks: "extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2"},
+				{name: "Epic Craft",         stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 2, skillId: 159,buff: "+0.5% per point increase to crafted stat bonuses.", nicks: "epic craft, epc crft, epccrft, ec"},
+				{name: "Gold Foot",          stamina: 20, "duration": 60,   minCastLevel: 1600,treeId: 2, skillId: 137,buff: "0.05% per point chance to consume 2,500 gold from your hand instead of 1 stamina while moving.", nicks: "gold foot, goldfoot, gldft, gf"}
 			];
 		}
 		return Data.buffArray;
@@ -9500,7 +9509,7 @@ injectBazaar: function() {
 				resultText += ((index % 4 === 0)? "<tr>":"");
 				resultText += "<td style='color:white; font-size:x-small'>" + buffName + "</td><td style='color:silver; font-size:x-small'>[" + buffLevel + "]</td>";
 				resultText += ((index % 4 == 3)? "</tr>":"");
-				var hasThisBuff = $('font:contains("' + buffName + '"):not(:contains(" ' + buffName + '"))');
+				var hasThisBuff = $('font:contains("' + buffName + ' ["):not(:contains(" ' + buffName + '"))');
 				if (hasThisBuff.length > 0) {
 					buffLevelRE = /\[(\d+)\]/;
 					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.html())[1],10);
