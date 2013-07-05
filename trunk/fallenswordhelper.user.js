@@ -784,7 +784,7 @@ var Data = {
 				{name: "Dispel Curse",       stamina: 35, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 114,buff: "0.2% chance per point that Dark Curse will not work against you. (PvP Only)", nicks: "dispel curse,dispel"},
 				{name: "Anchored",           stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 154,buff: "0.05% per point Damage is added to your health during combat.", nicks: "anchored, anch, anchor"},
 				{name: "Hardened",           stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 153,buff: "0.05% per point chance to prevent your opponent activating Shatter Armor.", nicks: "hardened, hard, harden"},
-				{name: "Armored Boost",      stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 136,buff: "+0.05% per point to your Armor for each complete set equipped.", nicks: "armor boost, armbst, arm bst, armb"},
+				{name: "Armor Boost",      stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 136,buff: "+0.05% per point to your Armor for each complete set equipped.", nicks: "armor boost, armbst, arm bst, armb"},
 				{name: "Shield Wall",        stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 135,buff: "+0.05% per point to your Defense for each complete set equipped.", nicks: "shield wall, shldwll, sw"},
 				{name: "Find Item",          stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 2, skillId: 16, buff: "+0.1% per point increase of creatures current drop rate.", nicks: "find item,fi"},
 				{name: "Treasure Hunter",    stamina: 15, "duration": 120,  minCastLevel: 1,   treeId: 2, skillId: 17, buff: "+0.2% per point additional gold from creatures.", nicks: "treasure hunter,th,treas hunter"},
