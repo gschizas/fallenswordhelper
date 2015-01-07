@@ -9,6 +9,8 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
+// @version        1487
+// @grant          none
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
@@ -1113,7 +1115,7 @@ var Helper = {
 	// System functions
 	init: function (e) {
 		Helper.initSettings();
-		Helper.beginAutoUpdate();
+		//Helper.beginAutoUpdate();
 		Helper.readInfo();
 		this.initialized = true;
 	},
@@ -1593,7 +1595,7 @@ var Helper = {
 		case "arena":
 			switch (subPageId) {
 			case "-":
-				Helper.injectArena();
+				//Helper.injectArena();
 				break;
 			case "completed":
 				Helper.storeCompletedArenas();
@@ -1645,14 +1647,14 @@ var Helper = {
 		case "auctionhouse":
 			switch (subPageId) {
 			case "create":
-				Helper.injectCreateAuctionTemplate();
-				Helper.injectCreateAuctionBulkSell();
+				//Helper.injectCreateAuctionTemplate();
+				//Helper.injectCreateAuctionBulkSell();
 				//Helper.injectAuctionSTCheck();
 				break;
 			case "preferences":
 				break;
 			default:
-				Helper.injectAuctionHouse();
+				//Helper.injectAuctionHouse();
 				break;
 			}
 			break;
@@ -1756,7 +1758,7 @@ var Helper = {
 			}
 			break;
 		case "quickbuff":
-			Helper.injectQuickBuff();
+			//Helper.injectQuickBuff();
 			break;
 		case "notepad":
 			switch (subPageId) {
@@ -1825,8 +1827,9 @@ var Helper = {
 		case "points":
 			switch (subPageId) {
 			case "shop":
-				Helper.storePlayerUpgrades();
-				Helper.injectPoints();
+			
+				//Helper.storePlayerUpgrades();
+				//Helper.injectPoints();
 				break;
 			case "-":
 				Helper.storePlayerUpgrades();
@@ -3819,10 +3822,14 @@ injectBazaar: function() {
 					}
 					//<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=17&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank"><img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Ultimate Fallen Sword Guide" border="0"></a>
 					var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-					aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
-						'<img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
-					aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
-						'<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
+					//~ aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
+						//~ '<img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
+					//~ aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
+						//~ '<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
+					aRow.cells[4].innerHTML = '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
+						'<img border=0 style="float:left;" title="Search quest in Ultimate FSG" src="' + System.imageServer + '/temple/1.gif"/></a>';
+					aRow.cells[4].innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
+						'<img border=0 style="float:left;" title="Search for this quest on the Wiki" src="' + System.imageServer + '/skin/fs_wiki.gif"/></a>';
 				}
 			}
 		}
@@ -4087,13 +4094,13 @@ injectBazaar: function() {
 					}
 				});
 				// then intercept the action call 
-				if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-					var gameData = window.wrappedJSObject.GameData;
-					var hcs = window.wrappedJSObject.HCS;
-				} else {
+				//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
+					//~ var gameData = window.wrappedJSObject.GameData;
+					//~ var hcs = window.wrappedJSObject.HCS;
+				//~ } else {
 					var gameData = unsafeWindow.GameData;
 					var hcs = unsafeWindow.HCS;
-				}
+				//~ }
 				var oldDoAction = gameData.doAction;
 				gameData.doAction = function(actionCode, fetchFlags, data){
 					if(actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT){
@@ -5497,17 +5504,17 @@ injectBazaar: function() {
 				});
 			}
 		}, 0);
-		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-			window.document.wrappedJSObject.onkeypress = null;
-			window.document.wrappedJSObject.combatKeyHandler = null;
-			window.document.wrappedJSObject.realmKeyHandler = null;
-			window.document.wrappedJSObject.onkeypress = Helper.keyPress;
-		} else {
+		//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
+			//~ window.document.wrappedJSObject.onkeypress = null;
+			//~ window.document.wrappedJSObject.combatKeyHandler = null;
+			//~ window.document.wrappedJSObject.realmKeyHandler = null;
+			//~ window.document.wrappedJSObject.onkeypress = Helper.keyPress;
+		//~ } else {
 			unsafeWindow.document.onkeypress = null;
 			unsafeWindow.document.combatKeyHandler = null;
 			unsafeWindow.document.realmKeyHandler = null;
 			unsafeWindow.document.onkeypress = Helper.keyPress;
-		}
+		//~ }
 	},
 
 	moveMe: function(dx, dy) {
@@ -7093,7 +7100,7 @@ injectBazaar: function() {
 //**************
 		Helper.profileInjectGuildRel();
 		if (GM_getValue("enableBioCompressor")) Helper.compressBio();
-		var isSelfRE=$('form[name="folderManagement"]').length > 0;// /player_id=/.exec(document.location.search);//
+		var isSelfRE=$('#backpack_tabs').length > 0;// /player_id=/.exec(document.location.search);//
 		if (player) {
 			if (!playerid) {
 				playerid = player.innerHTML;
@@ -7452,7 +7459,7 @@ injectBazaar: function() {
 			System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
 			"<a href=" + System.server + "index.php?cmd=trade&subcmd=createsecure&target_username=" +
 			playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
-			System.imageServerHTTPOld + "/temple/2.gif></a>&nbsp;&nbsp;" +
+			"http://cdn.fallensword.com" + "/temple/2.gif></a>&nbsp;&nbsp;" +
 			"<a href=" + System.server + "?cmd=guild&subcmd=inventory&subcmd2=report&user=" +
 			playername + '>[SR]</a>&nbsp;&nbsp;';
 		if (Helper.currentGuildRelationship == "self" && GM_getValue("showAdmin")) {
@@ -9735,11 +9742,11 @@ injectBazaar: function() {
 		GM_setValue("doNotKillList",newDoNotKillList);
 		Helper.doNotKillList = newDoNotKillList;
 		//refresh the action list
-		if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-			window.wrappedJSObject.GameData.doAction(-1);
-		} else {
+		//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
+			//~ window.wrappedJSObject.GameData.doAction(-1);
+		//~ } else {
 			var gameData = unsafeWindow.GameData.doAction(-1);
-		}
+		//~ }
 	},
 
 	checkIfGroupExists: function(responseText) {
