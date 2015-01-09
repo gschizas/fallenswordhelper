@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1490
+// @version        1491
 // @grant          none
 // ==/UserScript==
 
@@ -1834,8 +1834,8 @@ var Helper = {
 				//Helper.injectPoints();
 				break;
 			case "-":
-				Helper.storePlayerUpgrades();
-				Helper.injectPoints();
+				//Helper.storePlayerUpgrades();
+				//Helper.injectPoints();
 				break;
 			default:
 				break;
@@ -1874,7 +1874,7 @@ var Helper = {
 			default:
 				break;
 			}
-			Helper.injectInvent();
+			//Helper.injectInvent();
 			break;
 		case "tempinv":
 			Helper.injectMailbox();
@@ -7579,8 +7579,14 @@ injectBazaar: function() {
 	},
 
 	compressBio: function() {
-		var bioDiv = System.findNode("//div[strong[.='Biography']]");
-		var bioCell = bioDiv.nextSibling.nextSibling;
+		var bioCell;
+		if (isNewUI == 0)
+		{
+			var bioDiv = System.findNode("//div[strong[.='Biography']]");
+			bioCell = bioDiv.nextSibling.nextSibling;
+		} else {
+			bioCell = System.findNode("//div[@id='profile-bio']"); //new interface logic
+		}
 		if (bioCell) { //non-self profile
 			var bioContents = bioCell.innerHTML;
 			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
@@ -8085,7 +8091,7 @@ injectBazaar: function() {
 				'<td align="right">' + item.stats.damage + '</td>' +
 				'<td align="right">' + item.stats.hp + '</td>' +
 				'<td align="right">' + item.forge + '</td>' +
-				'<td>' + ((item.forge>0)? "<img src='" + System.imageServerHTTPOld + "/hellforge/forgelevel.gif'>":"") + '</td>' +
+				'<td>' + ((item.forge>0)? "<img src='" + System.imageServer + "/hellforge/forgelevel.gif'>":"") + '</td>' +
 				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craft + '</span>' + '</td>' +
 				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
 /*				if (showQuickDropLinks && inventoryShell == 'inventory') {
@@ -10090,7 +10096,7 @@ injectBazaar: function() {
 
 	injectBioWidgets: function() {
 		var textArea = System.findNode("//textarea[@id='textInputBox']");
-		textArea.cols=100;
+		//textArea.cols=100;
 		var textAreaDev = textArea.parentNode;
 		var bioPreviewHTML = System.convertTextToHtml(textArea.value);
 
@@ -10896,14 +10902,14 @@ injectArena: function() {
 			'<form><table style="border-spacing: 10px;">' +
 //			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
-			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
-			'<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
-			')</span></td></tr>' +
+			//~ '<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
+			//~ '<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
+			//~ ')</span></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
 			'for any suggestions, requests or bug reports</span></td></tr>' +
 			//General Prefs
-			'<tr><th colspan="2" align="left">General preferences (apply to most screens)</th></tr>' +
+			'<tr><th colspan="2" align="left"><b>General preferences (apply to most screens)</b></th></tr>' +
 			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'>  Hide Message&gt;<input name="hideGuildInfoMessage" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoMessage")?" checked":"") +
@@ -10920,7 +10926,7 @@ injectArena: function() {
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") +
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
-				'> <input name="allyEnemyOnlineRefreshTime" size="1" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
+				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (GM_getValue("enableOnlineAlliesWidgets")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
@@ -10938,7 +10944,7 @@ injectArena: function() {
 			'<tr><td align="right">Keep Helper Menu On Screen' + Helper.helpLink('Keep Helper Menu On Screen', 'Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links.') +
 				':</td><td><input name="keepHelperMenuOnScreen" type="checkbox" value="on"' + (GM_getValue("keepHelperMenuOnScreen")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Quick Links Screen Location' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
-				':</td><td>Top: <input name="quickLinksTopPx" size="1" value="'+ GM_getValue("quickLinksTopPx") + '" /> Left: <input name="quickLinksLeftPx" size="1" value="'+ GM_getValue("quickLinksLeftPx") + '" /></td></tr>' +
+				':</td><td>Top: <input name="quickLinksTopPx" size="3" value="'+ GM_getValue("quickLinksTopPx") + '" /> Left: <input name="quickLinksLeftPx" size="3" value="'+ GM_getValue("quickLinksLeftPx") + '" /></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left"><b>Guild>Manage preferences</b></th></tr>' +
 			'<tr><td colspan="2" align="left">Enter guild names, seperated by commas</td></tr>' +
@@ -11086,8 +11092,8 @@ injectArena: function() {
 				':</td><td><input name="renderOtherBios" type="checkbox" value="on"' + (GM_getValue("renderOtherBios")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
-				'> Max Compressed Characters:<input name="maxCompressedCharacters" size="1" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
-				' Max Compressed Lines:<input name="maxCompressedLines" size="1" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
+				'> Max Characters:<input name="maxCompressedCharacters" size="4" value="'+ GM_getValue("maxCompressedCharacters") + '" />'+
+				' Max Lines:<input name="maxCompressedLines" size="3" value="'+ GM_getValue("maxCompressedLines") + '" /></td></tr>' +
 			'<tr><td align="right">Buy Buffs Greeting' + Helper.helpLink('Buy Buffs Greeting', 'This is the default text to open a message with when asking to buy buffs. You can use {playername} to insert the target players name. You can also use' +
 				' {buffs} to insert the list of buffs. You can use {cost} to insert the total cost of the buffs.') +
 				':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" value="'+ GM_getValue("buyBuffsGreeting") + '" /></td></tr>' +
@@ -11106,7 +11112,7 @@ injectArena: function() {
 			'<tr><th colspan="2" align="left"><b>Bounty hunting preferences</b></th></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Active Bounties' + Helper.helpLink('Show Active Bounties', 'This will show your active bounties ' +
 				'on the right hand side') + ':</td><td colspan="3"><input name="enableActiveBountyList" type = "checkbox" value = "on"' + (enableActiveBountyList? " checked":"") + '/>' +
-				'<input name="bountyListRefreshTime" size="1" value="'+ bountyListRefreshTime + '" /> seconds refresh</td></tr>' +
+				'<input name="bountyListRefreshTime" size="3" value="'+ bountyListRefreshTime + '" /> seconds refresh</td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Wanted Bounties' + Helper.helpLink('Show Wanted Bounties', 'This will show when someone you want is on the bounty board, the list is ' +
 				'displayed on the right hand side') + ':</td><td colspan="3"><input name="enableWantedList" type = "checkbox" value = "on"' + (enableWantedList? " checked":"") + '/> Refresh time is same as Active Bounties' +
 			'<tr><td align= "right">Wanted Names' + Helper.helpLink('Wanted Names', 'The names of the people you want to see on the bounty board separated by commas') + ':</td><td colspan="3">' +
@@ -11137,16 +11143,16 @@ injectArena: function() {
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
 			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
-				'Max Size: <input name="maxGroupSizeToJoin" size="1" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
+				'Max Size: <input name="maxGroupSizeToJoin" size="3" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
 				'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' +
 				'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
 				':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
-				'<input name="titanLogRefreshTime" size="1" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
+				'<input name="titanLogRefreshTime" size="2" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
 			'<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.') +
 				':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + (GM_getValue("showGoldOnFindPlayer")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
-				':</td><td><input name="titanLogLength" size="1" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
+				':</td><td><input name="titanLogLength" size="3" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
 			'<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
 				':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
 			//save button
@@ -11181,7 +11187,7 @@ injectArena: function() {
 		}
 
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
-		document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
+		//~ document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
 		if (GM_getValue("map")) {document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);}
@@ -11226,7 +11232,7 @@ injectArena: function() {
 
 	helpLink: function(title, text) {
 		return ' [ ' +
-			'<span style="text-decoration:underline;cursor:pointer;" class="tipped" data-tipped="' +
+			'<span style="text-decoration:underline;cursor:pointer;" class="tip-static" data-tipped="' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '\');">?</span>' +
 			' ]';
