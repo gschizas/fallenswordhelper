@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1491
+// @version        1492
 // @grant          none
 // ==/UserScript==
 
@@ -2158,7 +2158,11 @@ var Helper = {
 	},
 
 	injectGuild: function() {
-		var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+		if (navigator.userAgent.indexOf("Firefox")>0)
+			var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+		else //chrome
+			var avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
+		if (!avyImg) {return;}
 		avyImg.style.borderStyle="none";
 
 		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
@@ -2786,7 +2790,9 @@ injectBazaar: function() {
 
 	checkPlayerActivity: function(responseText, callback) {
 		var doc = System.createDocument(responseText);
-		var lastActivity = $(doc).find("h2:contains('Last Activity:')");
+		//fix offline member check
+		//$(doc).find("h2:contains('Last Activity:')"); TO $(doc).find("p:contains('Last Activity:')"); 
+		var lastActivity = $(doc).find("p:contains('Last Activity:')");
 		var playerName = callback.playerName;
 		var playerId = callback.playerId;
 		var offlinePlayerList = $("td[title='offlinePlayerList']");
@@ -2845,28 +2851,46 @@ injectBazaar: function() {
 		var defenderCount = callback.defenderCount;
 		var extraTextInsertPoint = callback.extraTextInsertPoint;
 		var doc = System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName("B");
 		var playerAttackValue = 0, playerDefenseValue = 0, playerArmorValue = 0, playerDamageValue = 0, playerHPValue = 0;
-		for (var i=0;i<allItems.length;i++) {
-			var anItem=allItems[i];
-			if (anItem.innerHTML == "Attack:&nbsp;"){
-				var attackText = anItem;
-				var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				playerAttackValue = attackLocation.textContent;
-				var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				playerDefenseValue = defenseLocation.textContent;
-				var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				playerArmorValue = armorLocation.textContent;
-				var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				playerDamageValue = damageLocation.textContent;
-				var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				playerHPValue = hpLocation.textContent;
-			}
-		}
+
+		//~ var playerName = $(doc).find('h1').text();
+		$(doc).find('div').remove(".profile-stat-bonus");
+		playerAttackValue = $(doc).find('#stat-attack').text();
+		playerDefenseValue = $(doc).find('#stat-defense').text();
+		playerArmorValue = $(doc).find('#stat-armor').text();
+		playerDamageValue = $(doc).find('#stat-damage').text();
+		playerHPValue = $(doc).find('#stat-hp').text();
+		//~ console.log('Player : ' + playerName + '   ' + 
+					//~ 'playerAttackValue = ' + playerAttackValue + '   ' + 
+					//~ 'playerDefenseValue = ' + playerDefenseValue + '   ' + 
+					//~ 'playerArmorValue = ' + playerArmorValue + '   ' + 
+					//~ 'playerDamageValue = ' + playerDamageValue + '   ' + 
+					//~ 'playerHPValue = ' + playerHPValue
+					//~ );
+
+		//~ var allItems = doc.getElementsByTagName("B");
+		//~ for (var i=0;i<allItems.length;i++) {
+			//~ var anItem=allItems[i];
+			//~ if (anItem.innerHTML == "Attack:&nbsp;"){
+				//~ var attackText = anItem;
+				//~ var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				//~ playerAttackValue = attackLocation.textContent;
+				//~ console.log('Player : ' + playerName + '   attack = ' + playerAttackValue);
+				//~ var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+				//~ var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				//~ playerDefenseValue = defenseLocation.textContent;
+				//~ var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+				//~ var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				//~ playerArmorValue = armorLocation.textContent;
+				//~ var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
+				//~ var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				//~ playerDamageValue = damageLocation.textContent;
+				//~ var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
+				//~ var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
+				//~ playerHPValue = hpLocation.textContent;
+			//~ }
+		//~ }
+
 		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
 		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
 		if (playerAttackValue && playerAttackValue.indexOf("Hidden")>0) playerAttackValue = levelValue*10;
@@ -3083,13 +3107,17 @@ injectBazaar: function() {
 	getRelicGroupData: function(responseText) {
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Parsing attacking group stats ... ');
-
 		var doc=System.createDocument(responseText);
-		Helper.relicGroupAttackValue = $(doc).find('td#centerColumn').find('td:contains("Attack:"):not(:contains(" Attack:"))').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupDefenseValue = $(doc).find('td#centerColumn').find('td:contains("Defense:"):not(:contains(" Defense:"))').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupArmorValue = $(doc).find('td#centerColumn').find('td:contains("Armor:"):not(:contains(" Armor:"))').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupDamageValue = $(doc).find('td#centerColumn').find('td:contains("Damage:"):not(:contains(" Damage:"))').next().text().replace(/,/g,"")*1;
-		Helper.relicGroupHPValue = $(doc).find('td#centerColumn').find('td:contains("HP:"):not(:contains(" HP:"))').next().text().replace(/,/g,"")*1;
+		//~ Helper.relicGroupAttackValue = $(doc).find('td#centerColumn').find('td:contains("Attack:"):not(:contains(" Attack:"))').next().text().replace(/,/g,"")*1;
+		//~ Helper.relicGroupDefenseValue = $(doc).find('td#centerColumn').find('td:contains("Defense:"):not(:contains(" Defense:"))').next().text().replace(/,/g,"")*1;
+		//~ Helper.relicGroupArmorValue = $(doc).find('td#centerColumn').find('td:contains("Armor:"):not(:contains(" Armor:"))').next().text().replace(/,/g,"")*1;
+		//~ Helper.relicGroupDamageValue = $(doc).find('td#centerColumn').find('td:contains("Damage:"):not(:contains(" Damage:"))').next().text().replace(/,/g,"")*1;
+		//~ Helper.relicGroupHPValue = $(doc).find('td#centerColumn').find('td:contains("HP:"):not(:contains(" HP:"))').next().text().replace(/,/g,"")*1;
+		Helper.relicGroupAttackValue = $(doc).find('#stat-attack').text().replace(/,/g,"")*1;
+		Helper.relicGroupDefenseValue = $(doc).find('#stat-defense').text().replace(/,/g,"")*1;
+		Helper.relicGroupArmorValue = $(doc).find('#stat-armor').text().replace(/,/g,"")*1;
+		Helper.relicGroupDamageValue = $(doc).find('#stat-damage').text().replace(/,/g,"")*1;
+		Helper.relicGroupHPValue = $(doc).find('#stat-hp').text().replace(/,/g,"")*1;
 		System.xmlhttp("index.php?cmd=guild&subcmd=mercs", Helper.parseRelicMercStats);
 	},
 
@@ -3968,7 +3996,7 @@ injectBazaar: function() {
 				var worldName = $('h1#worldName');
 				worldName.html(data.realm.name); //HACK - incase of switchign between master realm and realm they dont replace teh realm name
 				worldName.append(' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + data.realm.id + '" target="_blank">' +
-					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>');
+					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServer + '/temple/1.gif"/></a>');
 				worldName.append(' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + data.realm.name + '&go=Go" target="_blank">' +
 					'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>');
 
@@ -4264,7 +4292,7 @@ injectBazaar: function() {
 
 			if (buttonRow && !GM_getValue("hideKrulPortal")) {
 				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-					'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServerHTTPOld +
+					'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
 					'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
 			}
 
@@ -4276,6 +4304,7 @@ injectBazaar: function() {
 					'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
 				document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
 			}
+
 			if (buttonRow && GM_getValue("sendGoldonWorld")){
 				//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
 				document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
@@ -4287,6 +4316,9 @@ injectBazaar: function() {
 			// One may ask why the separation of creating the button and the event handling code.
 			// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
 			// a region, all attached events are destroyed (because the original elements are also destroyed)
+			
+			// PH 20150110 Only in Chrome. FF is apparently different!
+			// It's important because we lose the mouseover events of the built-in buttons.
 
 			Helper.checkBuffs();
 			Helper.prepareCheckMonster();
@@ -4348,7 +4380,7 @@ injectBazaar: function() {
 
 			if (mapName && mapNameText) {
 				mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
-					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
+					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServer + '/temple/1.gif"/></a>';
 				mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
 					'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 
@@ -5005,6 +5037,9 @@ injectBazaar: function() {
 			hpVariable = 1.053;
 		} else if (combatEvaluatorBias == 2) {
 			generalVariable = 1.053;
+			hpVariable = 1;
+		} else if (combatEvaluatorBias == 3) {
+			generalVariable = 1.1053;
 			hpVariable = 1;
 		}
 		var oneHitNumber = Math.ceil((hitpoints*hpVariable)+(armorNumber*generalVariable));
@@ -6024,7 +6059,7 @@ injectBazaar: function() {
 						secondQuote = message.indexOf('\'',firstQuote+1);
 						targetPlayerName = message.substring(firstQuote+1,secondQuote);
 						aRow.cells[2].innerHTML = firstPart + '\'' +
-							'<a href="index.php?cmd=findplayer&search_active=1&search_username=' + targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>' +
+							'<a href="index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=' + targetPlayerName + '&search_show_first=1">' + targetPlayerName + '</a>' +
 							message.substring(secondQuote, message.length);
 					}
 				}
@@ -7091,10 +7126,15 @@ injectBazaar: function() {
 
 	injectProfile: function() {
 		var player = System.findNode("//textarea[@id='holdtext']");
-		if (navigator.userAgent.indexOf("Firefox")>0)
-			var avyImg = System.findNode("//img[contains(@title, 's Avatar')]");
-		else //chrome
-			var avyImg = System.findNode("//img[contains(@oldtitle, 's Avatar')]");
+		var avyImg;
+		var playername;
+		if (navigator.userAgent.indexOf("Firefox")>0) {
+			avyImg = System.findNode("//img[contains(@title, 's Avatar')]");
+			playername = avyImg.getAttribute("title");
+		} else { //chrome
+			avyImg = System.findNode("//img[contains(@oldtitle, 's Avatar')]");
+			playername = avyImg.getAttribute("oldtitle");
+		}
 		if (!avyImg) {return;}
 		if(document.URL.indexOf("player_id") != -1){
 			var playeridRE = document.URL.match(/player_id=(\d+)/);
@@ -7115,7 +7155,6 @@ injectBazaar: function() {
 				playerid = playerid.substr(idindex);
 			}
 
-			var playername = avyImg.getAttribute("title");
 			avyImg.style.borderStyle="none";
 			playername = playername.substr(0, playername.indexOf("'s Avatar"));
 
@@ -7301,7 +7340,9 @@ injectBazaar: function() {
 				document.getElementById('compDelBtn'+i).addEventListener('click',Helper.delComponent,true);
 			}
 		}
-		document.getElementById('compDel').innerHTML='';
+		//~ document.getElementById('compDel').innerHTML='';
+		$("#compDel").hide();
+		$("#compDelAll").show();
 	},
 
 	delComponent: function(evt) {
@@ -7523,12 +7564,19 @@ injectBazaar: function() {
 			injectHere.appendChild(componentExtrasDiv);
 			componentExtrasDiv.innerHTML+='<div id=compDel align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Enable Quick Del</span>]</div>'+
 				'<div id=compSum align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Count Components</span>]</div>'+
-				'<div align=center><a href="index.php?cmd=notepad&blank=1&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a></div>';
+				'<div align=center><a href="index.php?cmd=notepad&blank=1&subcmd=quickextract">[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Quick Extract Components</span>]</a></div>' +
+				'<div id=compDelAll align=center>[<span style="text-decoration:underline;cursor:pointer;color:#0000FF">Delete All Visible</span>]</div>';
 			document.getElementById('compDel').addEventListener('click', Helper.enableDelComponent, true);
 			document.getElementById('compSum').addEventListener('click', Helper.countComponent, true);
+			document.getElementById('compDelAll').addEventListener('click', Helper.delAllComponent, true);
+			$("#compDelAll").hide();
 		} else {
-			GM_log("Components div not found! Please let Tangtop know.");
+			GM_log("Components div not found! Please let Yuuzhan know.");
 		}
+	},
+
+	delAllComponent: function() {
+		$("span[id^=compDelBtn]").each(function(index) {$(this).click();});
 	},
 
 	countComponent: function() {
@@ -7600,9 +7648,16 @@ injectBazaar: function() {
 				}
 				maxCharactersToShow = startIndex;
 			}
+
 			if (bioContents.length>maxCharactersToShow) {
 				//find the end of next HTML tag after the max characters to show.
 				var breakPoint = bioContents.indexOf("<br>",maxCharactersToShow) + 4;
+				var lineBreak = ""
+				if (breakPoint == 3) {
+						breakPoint = bioContents.indexOf(" ",maxCharactersToShow) + 1;
+						if (breakPoint == 0) {return;}
+						lineBreak = "<br>"
+					}
 				var bioStart = bioContents.substring(0,breakPoint);
 				var bioEnd = bioContents.substring(breakPoint,bioContents.length);
 				var extraOpenHTML = "", extraCloseHTML = "";
@@ -7616,8 +7671,12 @@ injectBazaar: function() {
 					}
 				}
 
-				bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
-					"<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
+				//~ bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
+					//~ "<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
+				bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span><br>" +
+					"<span id='Helper:bioHidden'>" + extraOpenHTML + bioEnd + "</span>";
+				$("#Helper\\:bioHidden").hide();
+
 			}
 		}
 	},
@@ -7749,12 +7808,9 @@ injectBazaar: function() {
 	},
 
 	expandBio: function(evt) {
-		var bioExpander = document.getElementById('Helper:bioExpander');
-		bioExpander.style.display = 'none';
-		bioExpander.style.visibility = 'hidden';
-		var bioHidden = document.getElementById('Helper:bioHidden');
-		bioHidden.style.display = 'block';
-		bioHidden.style.visibility = 'visible';
+		var bioExpander = $("#Helper\\:bioExpander");
+		$(bioExpander).text($(bioExpander).text() == "More ..." ? "Less ..." : "More ...");
+		$("#Helper\\:bioHidden").toggle();
 	},
 
 	profileSelectAll: function(evt) {
@@ -8913,17 +8969,19 @@ injectBazaar: function() {
 							theItem.innerHTML + "</a></span> [" + aMember.level + "]";
 						var shortList = new Array();
 						var modifierWord;
+						//fix buff 16 in group page
 						for (var k = 0; k < listOfDefenders.length; k++) {
 							shortList.push(listOfDefenders[k]);
-							if (((k + 1) % 16 === 0 && k !== 0) || (k == listOfDefenders.length - 1)) {
-								modifierWord = Helper.getGroupBuffModifierWord(k);
-								theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + k + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
-									"Buff " + modifierWord + " 16</span></a></nobr>";
-								var buffAllLink = System.findNode("//a[@id='buffAll" + k + modifierWord + "']");
+							if (((k + 1) % 16 === 0 && k !== 0) || (k == listOfDefenders.length - 1)) { 
+									modifierWord = Helper.getGroupBuffModifierWord(k);
+								theItem.innerHTML += "<br><nobr><a href='#' id='buffAll" + aMember.id + modifierWord + "'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
+								"Buff " + modifierWord + " 16</span></a></nobr>";
+								var buffAllLink = System.findNode("//a[@id='buffAll" + aMember.id + modifierWord + "']");
 								buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 								shortList = new Array();
 							}
 						}
+						//
 
 						break;
 					}
@@ -9135,7 +9193,7 @@ injectBazaar: function() {
 		if (playerName) {
 			playerName = playerName[1];
 			if (playerName == GM_getValue("CharacterName")) System.xmlhttp("index.php?cmd=profile", Helper.getPlayerBuffs, false);
-			else System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
+			else System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
 
@@ -9727,7 +9785,7 @@ injectBazaar: function() {
 		var doNotKillList=GM_getValue("doNotKillList");
 		if (creatureName) {
 			creatureName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=creatures&search_name=' + creatureName.textContent + '&search_level_min=&search_level_max=&search_class=-1" target="_blank">' +
-				'<img border=0 title="Search creature in Ultimate FSG" width=10 height=10 src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>' +
+				'<img border=0 title="Search creature in Ultimate FSG" width=10 height=10 src="'+ System.imageServer + '/temple/1.gif"/></a>' +
 				' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search creature in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 			var extraText = 'Add to the do not kill list';
@@ -9791,7 +9849,7 @@ injectBazaar: function() {
 			var playerDefenseValue = parseInt($(doc).find('td:contains("Defense:"):first').next().clone().children().remove().end().text().trim(),10);
 			var playerArmorValue = parseInt($(doc).find('td:contains("Armor:"):first').next().clone().children().remove().end().text().trim(),10);
 			var playerDamageValue = parseInt($(doc).find('td:contains("Damage:"):first').next().clone().children().remove().end().text().trim(),10);
-			var playerHPValue = parseInt($(doc).find('td:contains("HP:"):first').next().clone().children().remove().end().text().trim(),10);
+			var playerHPValue = parseInt($(doc).find('td:contains("Health:"):first').next().clone().children().remove().end().text().trim(),10);
 			var playerKillStreakValue = parseInt($(doc).find('td:contains("Kill"):contains("Streak:"):first').next().clone().children().remove().end().text().trim().replace(/,/g,''),10);
 		} else {
 			var allItems = doc.getElementsByTagName("B");
@@ -9929,6 +9987,9 @@ injectBazaar: function() {
 		} else if (combatEvaluatorBias == 2) {
 			generalVariable = 1.053;
 			hpVariable = 1;
+		} else if (combatEvaluatorBias == 3) {
+			generalVariable = 1.1053;
+			hpVariable = 1;
 		}
 		//creaturedata
 		if ($('#worldPage').length > 0) { // new map
@@ -9990,6 +10051,8 @@ injectBazaar: function() {
 		extraNotes += (nightmareVisageLevel > 0? "NMV Attack moved to Defense = " + nightmareVisageAttackMovedToDefense + "<br>":"");
 		var overallAttackValue = (groupExists?groupAttackValue:playerAttackValue) + counterAttackBonusAttack - nightmareVisageAttackMovedToDefense;
 		var hitByHowMuch = (overallAttackValue - Math.ceil(attackVariable*(creatureDefense - (creatureDefense * darkCurseLevel * 0.002))));
+		if (combatEvaluatorBias == 3)
+			hitByHowMuch = (overallAttackValue - Math.ceil(creatureDefense - (creatureDefense * darkCurseLevel * 0.002)) - 50);
 		//Damage:
 		var fortitudeExtraHPs = Math.floor((groupExists?groupHPValue:playerHPValue) * fortitudeLevel * 0.001);
 		extraNotes += (fortitudeLevel > 0? "Fortitude Bonus HP = " + fortitudeExtraHPs + "<br>":"");
@@ -10004,6 +10067,8 @@ injectBazaar: function() {
 		extraNotes += (constitutionLevel > 0? "Constitution Bonus Defense = " + Math.floor((groupExists?groupDefenseValue:playerDefenseValue) * constitutionLevel * 0.001) + "<br>":"");
 		extraNotes += (flinchLevel > 0? "Flinch Bonus Attack Reduction = " + Math.floor(creatureAttack * flinchLevel * 0.001) + "<br>":"");
 		var creatureHitByHowMuch = Math.floor((attackVariable*creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue);
+		if (combatEvaluatorBias == 3)
+			creatureHitByHowMuch = Math.floor((creatureAttack - (creatureAttack * flinchLevel * 0.001)) - overallDefenseValue - 50);
 		//Armor and HP:
 		var overallArmorValue = (groupExists?groupArmorValue:playerArmorValue) + Math.floor(playerArmorValue * sanctuaryLevel * 0.001);
 		extraNotes += (sanctuaryLevel > 0? "Sanc Bonus Armor = " + Math.floor(playerArmorValue * sanctuaryLevel * 0.001) + "<br>":"");
@@ -10982,11 +11047,13 @@ injectArena: function() {
 			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator for the damage and HP evaluation. It will not change the attack bias (1.1053).'+
 					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
 					'<br>Semi-Conservative = 1.1 and 1.053'+
-					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)') +
+					'<br>Adventurous = 1.053 and 1 (Bleeding Edge)'+
+					'<br>Conservative+ = 1.1053 and 1 with the attack calculation changed to +-48 per RJEM') +
 				':</td><td><select name="combatEvaluatorBias"><option value="0"' + (combatEvaluatorBias==0?" SELECTED":"") +
 					'>Conservative</option><option value="1"' + (combatEvaluatorBias==1?" SELECTED":"") +
 					'>Semi-Conservative</option><option value="2"' + (combatEvaluatorBias==2?" SELECTED":"") +
-					'>Adventurous</option></select></td></tr>' +
+					'>Adventurous</option><option value="3"' + (combatEvaluatorBias==3?" SELECTED":"") +
+					'>Conservative+</option></select></td></tr>' +
 			'<tr><td align="right">Keep Creature Log' + Helper.helpLink('Keep Creature Log', 'This will show the creature log for each creature you see when you travel. This requires Show Creature Info enabled!') +
 				':</td><td><input name="showMonsterLog" type="checkbox" value="on"' + (GM_getValue("showMonsterLog")?" checked":"") + '>'+
 				'&nbsp;&nbsp;<input type="button" class="custombutton" value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
@@ -11161,8 +11228,9 @@ injectArena: function() {
 			'<tr><td colspan="2" align=center><a href="http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings">Export or Load Settings!</a></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1963510">PointyHair</a> ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>,  ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2156859">ByteBoy</a>, and ' +
@@ -11234,7 +11302,7 @@ injectArena: function() {
 		return ' [ ' +
 			'<span style="text-decoration:underline;cursor:pointer;" class="tip-static" data-tipped="' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
-			text + '\');">?</span>' +
+			text + '">?</span>' +
 			' ]';
 	},
 
@@ -12307,7 +12375,7 @@ var items=0;
 		Helper.injectScouttowerBuffLinks();
 		Helper.parseScoutTower();
 		var titanTable = System.findNode("//table[@width='500']");
-		for (var i = 1; i < titanTable.rows.length; i+=5) {
+		for (var i = 1; i < titanTable.rows.length; i++) {
 			var aRow = titanTable.rows[i];
 			if (aRow.cells[2]) {
 				var titanHP = aRow.cells[2].textContent;
@@ -12320,11 +12388,13 @@ var items=0;
 					var currentNumberOfKills = totalHP - currentHP;
 					var numberOfKillsToSecure = Math.ceil(totalHP/2 + 1);
 
-					var titanString = "<span style='color:red;'>" + (numberOfKillsToSecure - guildKills) + "</span> more kills until secured";
+					var titanString = "<span style='color:red;'>" + (numberOfKillsToSecure - guildKills) + "</span> to secure";
 					if (guildKills >= numberOfKillsToSecure) titanString = "Secured";
 					else if ((numberOfKillsToSecure - guildKills) > currentHP) titanString = "<span style='color:red;'>Cannot Secure</span>";
 					var killsPercent = (guildKills * 100/currentNumberOfKills).toFixed(2);
-					aRow.cells[3].innerHTML += "<br><span style='color:blue;'> (" + killsPercent + "% " + titanString + ")";
+					var killsTotPct = (guildKills * 100/totalHP).toFixed(2);
+					aRow.cells[3].innerHTML += "<br><span style='color:blue;'> (" + killsPercent + "% Current <br>" +
+					killsTotPct + "% Total<br>" + titanString + ")";
 				}
 			}
 		}
@@ -12359,7 +12429,7 @@ var items=0;
 		tracking = Helper.isQuestBeingTracked(location.search);
 		var questId = document.location.search.match(/quest_id=(\d+)/)[1];
 		injectHere.innerHTML += '&nbsp;<a target="_blank" href="http://guide.fallensword.com/index.php?cmd=quests&subcmd=view&quest_id=' + questId +
-			'"><img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
+			'"><img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServer + '/temple/1.gif"/></a>';
 		
 		var questName = System.findNode("//font[@size='2' and contains(.,'\"')]", injectHere);
 		if (questName) {
@@ -13194,8 +13264,8 @@ var items=0;
 		if (!attackPlayerTable) {return;}
 		var targetPlayer = /target_username=([a-zA-Z0-9]+)/.exec(location.search);
 		if (targetPlayer) {
-			var output = "<center><table width='550' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>";
-			output += "<tr style='text-align:center;' bgcolor='#cd9e4b'><td width='275' style='border-style: solid; border-width: 1px;'>Attacker</td><td width='275' style='border-style: solid; border-width: 1px;'>Defender</td></tr>";
+			var output = "<center><table width='625' cellspacing='0' cellpadding='0' bordercolor='#000000' border='0' style='border-style: solid; border-width: 1px;'><tbody>";
+			output += "<tr style='text-align:center;' bgcolor='#cd9e4b'><td width='350' style='border-style: solid; border-width: 1px;'>Attacker</td><td width='275' style='border-style: solid; border-width: 1px;'>Defender</td></tr>";
 			output += "<tr style='text-align:center;'><td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerSelfStatData'><font color='green'>Gathering your stats ...</font></span></td>"+
 				"<td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerDefenderStatData'><font color='green'>Gathering defender stats ...</font></span></td></tr>";
 			output += "<tr style='text-align:center;'><td style='border-style: solid; border-width: 1px;'><span id='Helper:attackPlayerSelfBuffData'><font color='green'>Gathering your buffs ...</font></span></td>" +
@@ -13206,7 +13276,7 @@ var items=0;
 			
 			//System.xmlhttp("index.php?cmd=profile", Helper.getSelfProfileStatsAndBuffs);
 			System.xmlhttp("index.php?cmd=profile", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerSelfStatData","anchor2":"attackPlayerSelfBuffData"});
-			System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_username="+targetPlayer[1]+"&search_show_first=1", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerDefenderStatData","anchor2":"attackPlayerDefenderBuffData"});
+			System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username="+targetPlayer[1]+"&search_show_first=1", Helper.getProfileStatsAndBuffs, {"anchor1":"attackPlayerDefenderStatData","anchor2":"attackPlayerDefenderBuffData"});
 			//insert blank row
 			var newRow = attackPlayerTable.insertRow(5);
 			var newCell = newRow.insertCell(0);
@@ -13229,19 +13299,23 @@ var items=0;
 		var armorValueElement = armorTextElement.nextSibling;
 		var damageTextElement = System.findNode("//td[b[contains(.,'Damage:')]]", doc);
 		var damageValueElement = damageTextElement.nextSibling;
-		var hpTextElement = System.findNode("//td[b[contains(.,'HP:')]]", doc);
+		var hpTextElement = System.findNode("//td[b[contains(.,'Health:')]]", doc);
 		var hpValueElement = hpTextElement.nextSibling;
 		var goldTextElement = System.findNode("//td[b[contains(.,'Gold:')]]", doc);
 		var goldValueElement = goldTextElement.nextSibling;
+		var pvpProtElement = System.findNode("//td[contains(.,'PvP') and contains(.,'Protection')]", doc);
+		var lastActivityElement = System.findNode("//p[contains(.,'Last Activity:')]", doc);
 		var output = "<table width='100%'><tbody>";
-		output += "<tr><td width='25%' style='text-align:right;'>" + vlTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + vlValueElement.innerHTML + "</td>" +
-			"<td width='25%' style='text-align:right;'>" + pvpTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + pvpValueElement.innerHTML + "</td></tr>";
-		output += "<tr><td width='25%' style='text-align:right;'>" + attackTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + attackValueElement.innerHTML + "</td>" +
-			"<td width='25%' style='text-align:right;'>" + defenseTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + defenseValueElement.innerHTML + "</td></tr>";
-		output += "<tr><td width='25%' style='text-align:right;'>" + armorTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + armorValueElement.innerHTML + "</td>" +
-			"<td width='25%' style='text-align:right;'>" + damageTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + damageValueElement.innerHTML + "</td></tr>";
-		output += "<tr><td width='25%' style='text-align:right;'>" + hpTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + hpValueElement.innerHTML + "</td>" +
-			"<td width='25%' style='text-align:right;'>" + goldTextElement.innerHTML + "</td><td width='25%' style='text-align:left;'>" + goldValueElement.innerHTML + "</td></tr>";
+		if (lastActivityElement) output += "<tr><td colspan=4 style='text-align:center;'>" + lastActivityElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='15%' style='text-align:right;'>" + vlTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + vlValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + pvpTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + pvpValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='15%' style='text-align:right;'>" + attackTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + attackValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + defenseTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + defenseValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='15%' style='text-align:right;'>" + armorTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + armorValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + damageTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + damageValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td width='15%' style='text-align:right;'>" + hpTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + hpValueElement.innerHTML + "</td>" +
+			"<td width='25%' style='text-align:right;'>" + goldTextElement.innerHTML + "</td><td width='30%' style='text-align:left;'>" + goldValueElement.innerHTML + "</td></tr>";
+		output += "<tr><td colspan=4 style='text-align:center;'>" + pvpProtElement.innerHTML + "</td></tr>";
 		output += "</tbody></table>";
 		var anchor1 = callback.anchor1;
 		var injectHere = System.findNode("//span[@id='Helper:"+anchor1+"']");
@@ -14593,7 +14667,7 @@ var items=0;
 		Helper.profilePagesToSearch.push("index.php?cmd=profile");
 		var extraProfileArray = Helper.extraProfile.split(",");
 		for (var i=0;i<extraProfileArray.length ;i++ ) {
-			Helper.profilePagesToSearch.push("index.php?cmd=findplayer&search_active=1&search_username="+extraProfileArray[i]+"&search_show_first=1");
+			Helper.profilePagesToSearch.push("index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username="+extraProfileArray[i]+"&search_show_first=1");
 		}
 		Helper.profilePagesToSearchProcessed = 0;
 		if (document.getElementById("alliesEnemies").checked) {
