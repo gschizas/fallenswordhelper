@@ -9,7 +9,8 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1492
+// @version        1493
+// @downloadURL    https://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -1517,7 +1518,8 @@ var Helper = {
 		}
 
 		Helper.injectHelperMenu();
-		var pageId, subPageId, subPage2Id, subsequentPageId;
+		var pageId, subPageId, subPage2Id, subsequentPageId, typePageId;
+
 		if (document.location.search !== "") {
 			var re=/cmd=([a-z]+)/;
 			var pageIdRE = re.exec(document.location.search);
@@ -1537,6 +1539,11 @@ var Helper = {
 			var subsequentPageIdRE = re.exec(document.location.search);
 			subsequentPageId="-";
 			if (subsequentPageIdRE) {subsequentPageId=subsequentPageIdRE[1];}
+
+			re=/type=([0-9]+)/;
+			var typePageIdRE = re.exec(document.location.search);
+			typePageId="-";
+			if (typePageIdRE) {typePageId=typePageIdRE[1];}
 		} else {
 			pageId=System.findNode("//input[@type='hidden' and @name='cmd']");
 			pageId = pageId?pageId.getAttribute("value"):"-";
@@ -1829,12 +1836,12 @@ var Helper = {
 			break;
 		case "points":
 			switch (subPageId) {
-			case "shop":
+			//case "shop":
 				//Helper.storePlayerUpgrades();
 				//Helper.injectPoints();
-				break;
+				//break;
 			case "-":
-				//Helper.storePlayerUpgrades();
+				if (typePageId == 0) Helper.storePlayerUpgrades();
 				//Helper.injectPoints();
 				break;
 			default:
@@ -1870,6 +1877,7 @@ var Helper = {
 			switch (subPageId) {
 			case "viewrecipe":
 				Helper.injectViewRecipe();
+				Helper.injectInvent();
 				break;
 			default:
 				break;
@@ -2052,7 +2060,12 @@ var Helper = {
 	},
 
 	injectViewGuild: function() {
-		var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+		var avyImg;
+		if (navigator.userAgent.indexOf("Firefox")>0)
+			avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+		else //chrome
+			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
+		if (!avyImg) {return;}
 		avyImg.style.borderStyle="none";
 
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
@@ -2158,10 +2171,11 @@ var Helper = {
 	},
 
 	injectGuild: function() {
+		var avyImg;
 		if (navigator.userAgent.indexOf("Firefox")>0)
-			var avyImg = System.findNode("//img[contains(@title, 's Logo')]");
+			avyImg = System.findNode("//img[contains(@title, 's Logo')]");
 		else //chrome
-			var avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
+			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
 		if (!avyImg) {return;}
 		avyImg.style.borderStyle="none";
 
@@ -5828,13 +5842,19 @@ injectBazaar: function() {
 		if (!listOfAllies) listOfAllies = "";
 		var buffList = Data.buffList();
 		var showPvPSummaryInLog = GM_getValue("showPvPSummaryInLog");
+		var messageType;
 		for (i=0;i<logTable.rows.length;i++) {
 			var aRow = logTable.rows[i];
 			if (i !== 0) {
 				if (aRow.cells[0].innerHTML) {
 					firstCell = aRow.cells[0];
 					//Valid Types: General, Chat, Guild
-					messageType = firstCell.firstChild.getAttribute("title");
+					if (navigator.userAgent.indexOf("Firefox")>0)
+						messageType = firstCell.firstChild.getAttribute("title");
+					else //chrome
+						messageType = firstCell.firstChild.getAttribute("oldtitle");
+					if (!messageType) {return;}
+					//~ messageType = firstCell.firstChild.getAttribute("title");
 					var colorPlayerName = false;
 					var isGuildMate = false;
 					if (messageType == "Chat") {
@@ -7105,7 +7125,7 @@ injectBazaar: function() {
 		if (boundItemRE.exec(responseText)) {
 			if (auctionHouseLink) auctionHouseLink.style.visibility='hidden';
 			if (sellLink) sellLink.style.visibility='hidden';
-			if (quickDropLink) quickDropLink.style.visibility='hidden';
+			//~ if (quickDropLink) quickDropLink.style.visibility='hidden';
 		}
 		if (GM_getValue("disableItemColoring")) {return;}
 		var fontLineRE=/<nobr><font color='(#[0-9A-F]{6})' size=2>/i;
@@ -7130,10 +7150,10 @@ injectBazaar: function() {
 		var playername;
 		if (navigator.userAgent.indexOf("Firefox")>0) {
 			avyImg = System.findNode("//img[contains(@title, 's Avatar')]");
-			playername = avyImg.getAttribute("title");
+			if (avyImg) playername = avyImg.getAttribute("title");
 		} else { //chrome
 			avyImg = System.findNode("//img[contains(@oldtitle, 's Avatar')]");
-			playername = avyImg.getAttribute("oldtitle");
+			if (avyImg) playername = avyImg.getAttribute("oldtitle");
 		}
 		if (!avyImg) {return;}
 		if(document.URL.indexOf("player_id") != -1){
@@ -7198,8 +7218,9 @@ injectBazaar: function() {
 			}
 
 			//Update the ally/enemy online list, since we are already on the page.
-			doc = System.findNode("//html");
-			Helper.parseProfileForWorld(doc.innerHTML, true);
+			//doc = System.findNode("//html");
+			//Helper.parseProfileForWorld(doc.innerHTML, true);
+			// No point doing this twice!
 
 			// store the VL of the player
 			var virtualLevel = parseInt(System.findNode("//td[a/b[.='VL'] or b/a[.='VL']]/following-sibling::td[1]").textContent,10);
@@ -8232,7 +8253,7 @@ injectBazaar: function() {
 			html+='<span id="Helper:SearchAH"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text='+escape(targetInventory.items[i].item_name)+'">Search AH</a></span><br /><br />';
 			if(targetInventory.items[i].stats.set_name)
 				html+='Set Name: ' + targetInventory.items[i].stats.set_name + '<br />';
-			html+='<img src="'+System.imageServerHTTP+'/items/'+targetInventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+targetInventory.items[i].item_id+'&inv_id='+targetInventory.items[i].inv_id+'&t='+t+'&p='+p+'" border=0>';
+			html+='<img src="'+System.imageServer+'/items/'+targetInventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+targetInventory.items[i].item_id+'&inv_id='+targetInventory.items[i].inv_id+'&t='+t+'&p='+p+'" border=0>';
 			var $dialog = $('<div></div>')
 				.html(html)
 				.dialog({
@@ -8512,7 +8533,7 @@ injectBazaar: function() {
 			if (player.level >= minLvl && player.level <= maxLvl)
 				result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
 					'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
-						'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
+						'<img width="16" border="0" height="16" src="' + System.imageServer + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
 					'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
 					'<td align="right"' + (highlightPlayersNearMyLvl?(Math.abs(player.level - levelToTest) <= lvlDiffToHighlight?' style="background-color:#4671C8"':''):'') +
 						'>' + player.level + '</td>' +
@@ -9772,7 +9793,7 @@ injectBazaar: function() {
 		GM_setValue("lastDeathDealerPercentage", deathDealerPercentage);
 
 		//refresh ally/enemy list while you are here.
-		Helper.parseProfileForWorld(doc.innerHTML, true);
+		//Helper.parseProfileForWorld(doc.innerHTML, true); // Why are we doing it twice?
 	},
 
 	injectCreature: function() {
@@ -11107,7 +11128,7 @@ injectArena: function() {
 			'<tr><td align="right">Use New Guild Log' + Helper.helpLink('Use New Guild Log', 'This will replace the standard guild log with the helper version of the guild log.') +
 				':</td><td><input name="useNewGuildLog" type="checkbox" value="on"' + (GM_getValue("useNewGuildLog")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">New Guild Log History' + Helper.helpLink('New Guild Log History (pages)', 'This is the number of pages that the new guild log screen will go back in history.') +
-				':</td><td><input name="newGuildLogHistoryPages" size="1" value="'+ GM_getValue("newGuildLogHistoryPages") + '" /></td></td></tr>' +
+				':</td><td><input name="newGuildLogHistoryPages" size="3" value="'+ GM_getValue("newGuildLogHistoryPages") + '" /></td></td></tr>' +
 			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
@@ -11228,8 +11249,8 @@ injectArena: function() {
 			'<tr><td colspan="2" align=center><a href="http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings">Export or Load Settings!</a></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-size:xx-small">Fallen Sword Helper was coded by <a href="' + System.server + 'index.php?cmd=profile&player_id=1393340">Coccinella</a>, ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a> ' +
-			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1963510">PointyHair</a> ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1599987">yuuzhan</a>, ' +
+			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1963510">PointyHair</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1346893">Tangtop</a>, '+
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=2536682">dkwizard</a>, ' +
 			'<a href="' + System.server + 'index.php?cmd=profile&player_id=1570854">jesiegel</a>,  ' +
@@ -12823,16 +12844,15 @@ var items=0;
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
 			if (isNewUI == 1) {
 				$('div#pCR').prepend("<div class='minibox'><span id='Helper:AllyEnemyListPlaceholder'></span></div>");
-				Helper.retrieveAllyEnemyData(false);
 			} else { //old UI
 				var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
 				if (rightColumnTable) {
 					var info = rightColumnTable.insertRow(2);
 					var cell = info.insertCell(0);
 					cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
-					Helper.retrieveAllyEnemyData(false);
 				}
 			}
+			Helper.retrieveAllyEnemyData(false);
 		}
 	},
 
@@ -13156,7 +13176,12 @@ var items=0;
 					style=' style="border: 3px solid red"';
 				}
 
-				itemTable.find("td[id='Helper:itemTD"+items+"']").append('<table border=0 cellpadding="0" cellspacing="0"><tr><td background="http://fileserver.huntedcow.com/inventory/2x3.gif" width="60" height="90" '+style+'><center><img src="'+System.imageServerHTTP+'/items/'+Helper.inventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+Helper.inventory.items[i].item_id+'&inv_id='+Helper.inventory.items[i].inv_id+'&t=1&p='+Helper.inventory.player_id+'&currentPlayerId='+Helper.inventory.player_id+'" border=0></center></td></tr><tr><td align="center"><input type="checkbox" value="'+Helper.inventory.items[i].inv_id+'" name="sendItemList[]" ></td></tr></table>');
+				itemTable.find("td[id='Helper:itemTD"+items+"']").append('<table border=0 cellpadding="0" cellspacing="0"><tr><td background="'+System.imageServer
+				+'/inventory/2x3.gif" width="60" height="90" '+style+'><center><img src="'+System.imageServer+'/items/'+Helper.inventory.items[i].item_id
+				+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+Helper.inventory.items[i].item_id+'&inv_id='
+				+Helper.inventory.items[i].inv_id+'&t=1&p='+Helper.inventory.player_id+'&currentPlayerId='+Helper.inventory.player_id
+				+'" border=0></center></td></tr><tr><td align="center"><input type="checkbox" value="'+Helper.inventory.items[i].inv_id
+				+'" name="sendItemList[]" ></td></tr></table>');
 				items++;
 			}
 		}
@@ -13180,7 +13205,7 @@ var items=0;
 		});
 		for(i=0;i<Helper.inventory.items.length;i++){
 				if(Helper.inventory.items[i].is_in_st){
-					$('input[value="'+Helper.inventory.items[i].inv_id+'"]').closest('tr').prev().find('td[background="http://fileserver.huntedcow.com/inventory/2x3.gif"]').css('border','3px solid red');
+					$('input[value="'+Helper.inventory.items[i].inv_id+'"]').closest('tr').prev().find('td[background="' + System.imageServer + '/inventory/2x3.gif"]').css('border','3px solid red');
 				}
 		}
 
@@ -14939,7 +14964,7 @@ var items=0;
 				["CRL", "Creature Log", "injectMonsterLog"] //still needs work
 			]
 			};
-		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"" + System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
 		html += "<div class=column>";
 			for (var key in actionMenu) {
 				html += "<h3>"+key+"</h3><ul>";
@@ -14989,7 +15014,7 @@ var items=0;
 		}
 		if (node.length==0) return;
 		var html = "<div style='cursor:pointer; text-decoration:underline; text-align:left; position:absolute; color:black; top:" + GM_getValue("quickLinksTopPx") + "px; left:" + GM_getValue("quickLinksLeftPx") + "px; " +
-			"background-image:url(\"http://huntedcow.cachefly.net/fs/skin/inner_bg.jpg\"); font-size:12px; " +
+			"background-image:url(\"" + System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; " +
 			"-moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1; width: 100px;' id=fshQuickLinks nowrap>";
 		for (var i=0; i<quickLinks.length; i++) {
 				html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
