@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1493
+// @version        1494
 // @downloadURL    https://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -787,7 +787,7 @@ var Data = {
 				{name: "Dispel Curse",       stamina: 35, "duration": 60,   minCastLevel: 1400,treeId: 1, skillId: 114,buff: "0.2% chance per point that Dark Curse will not work against you. (PvP Only)", nicks: "dispel curse,dispel"},
 				{name: "Anchored",           stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 154,buff: "0.05% per point Damage is added to your health during combat.", nicks: "anchored, anch, anchor"},
 				{name: "Hardened",           stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 153,buff: "0.05% per point chance to prevent your opponent activating Shatter Armor.", nicks: "hardened, hard, harden"},
-				{name: "Armor Boost",      stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 136,buff: "+0.05% per point to your Armor for each complete set equipped.", nicks: "armor boost, armbst, arm bst, armb"},
+				{name: "Armor Boost",        stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 136,buff: "+0.05% per point to your Armor for each complete set equipped.", nicks: "armor boost, armbst, arm bst, armb"},
 				{name: "Shield Wall",        stamina: 30, "duration": 60,   minCastLevel: 1600,treeId: 1, skillId: 135,buff: "+0.05% per point to your Defense for each complete set equipped.", nicks: "shield wall, shldwll, sw"},
 				{name: "Find Item",          stamina: 10, "duration": 60,   minCastLevel: 1,   treeId: 2, skillId: 16, buff: "+0.1% per point increase of creatures current drop rate.", nicks: "find item,fi"},
 				{name: "Treasure Hunter",    stamina: 15, "duration": 120,  minCastLevel: 1,   treeId: 2, skillId: 17, buff: "+0.2% per point additional gold from creatures.", nicks: "treasure hunter,th,treas hunter"},
@@ -1363,83 +1363,83 @@ var Helper = {
 	},
 
 	// Autoupdate
-	beginAutoUpdate: function() {
-		var lastCheck = GM_getValue("lastVersionCheck");
-		var now = (new Date()).getTime();
-		if (!lastCheck) {lastCheck = 0;}
-		var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000);
-		if (haveToCheck) {
-			Helper.checkForUpdate();
-		}
-	},
+	//beginAutoUpdate: function() {
+	//	var lastCheck = GM_getValue("lastVersionCheck");
+	//	var now = (new Date()).getTime();
+	//	if (!lastCheck) {lastCheck = 0;}
+	//	var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000);
+	//	if (haveToCheck) {
+	//		Helper.checkForUpdate();
+	//	}
+	//},
 
-	checkForUpdate: function() {
-		GM_log("Checking for new version...");
-		var now = (new Date()).getTime();
-		GM_setValue("lastVersionCheck", now.toString());
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: "http://code.google.com/p/fallenswordhelper/source/browse/trunk",
-			/*headers: {
-				"User-Agent": navigator.userAgent,
-				"Referer": document.location
-			},*/
-			onload: function(responseDetails) {
-				Helper.autoUpdate(responseDetails);
-			}
-		});
-	},
+	//checkForUpdate: function() {
+	//	GM_log("Checking for new version...");
+	//	var now = (new Date()).getTime();
+	//	GM_setValue("lastVersionCheck", now.toString());
+	//	GM_xmlhttpRequest({
+	//		method: 'GET',
+	//		url: "http://code.google.com/p/fallenswordhelper/source/browse/trunk",
+	//		/*headers: {
+	//			"User-Agent": navigator.userAgent,
+	//			"Referer": document.location
+	//		},*/
+	//		onload: function(responseDetails) {
+	//			Helper.autoUpdate(responseDetails);
+	//		}
+	//	});
+	//},
 
-	autoUpdate: function(responseDetails) {
-		var now = (new Date()).getTime();
-		GM_setValue("lastVersionCheck", now.toString());
-		var currentVersion = GM_getValue("currentVersion");
-		if (!currentVersion) {currentVersion = 0;}
+	//autoUpdate: function(responseDetails) {
+	//	var now = (new Date()).getTime();
+	//	GM_setValue("lastVersionCheck", now.toString());
+	//	var currentVersion = GM_getValue("currentVersion");
+	//	if (!currentVersion) {currentVersion = 0;}
+    //
+	//	var doc = System.createDocument(responseDetails.responseText);
+	//	var latestVersion = $(doc).find('td:contains("fallenswordhelper.user.js")').next().next().text();
+    //
+	//	GM_log("Current version: " + currentVersion);
+	//	GM_log("Found version: " + latestVersion);
+    //
+	//	if (currentVersion != latestVersion) {
+	//		GM_xmlhttpRequest({
+	//			method: 'GET',
+	//			url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
+	//			/*headers: {
+	//				"User-Agent": navigator.userAgent,
+	//				"Referer": document.location
+	//			},*/
+	//			onload: function(responseDetails) {
+	//				Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
+	//			}
+	//		});
+	//	}
+	//},
 
-		var doc = System.createDocument(responseDetails.responseText);
-		var latestVersion = $(doc).find('td:contains("fallenswordhelper.user.js")').next().next().text();
-
-		GM_log("Current version: " + currentVersion);
-		GM_log("Found version: " + latestVersion);
-
-		if (currentVersion != latestVersion) {
-			GM_xmlhttpRequest({
-				method: 'GET',
-				url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
-				/*headers: {
-					"User-Agent": navigator.userAgent,
-					"Referer": document.location
-				},*/
-				onload: function(responseDetails) {
-					Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
-				}
-			});
-		}
-	},
-
-	autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-		var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-
-		var $dialog = $('<div></div>')
-			.html(theChanges)
-			.dialog({
-				title: 'Fallen Sword Helper new version (' + newVersion + ') found. Update from version ' + oldVersion + '?',
-				resizable: false,
-				height:500,
-				width:500,
-				modal: true,
-				buttons: {
-					"OK": function() {
-						$dialog.dialog( "close" );
-						GM_setValue("currentVersion", newVersion);
-						GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
-					},
-					Cancel: function() {
-						$dialog.dialog( "close" );
-					}
-				}
-		});
-	},
+	//autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
+	//	var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
+    //
+	//	var $dialog = $('<div></div>')
+	//		.html(theChanges)
+	//		.dialog({
+	//			title: 'Fallen Sword Helper new version (' + newVersion + ') found. Update from version ' + oldVersion + '?',
+	//			resizable: false,
+	//			height:500,
+	//			width:500,
+	//			modal: true,
+	//			buttons: {
+	//				"OK": function() {
+	//					$dialog.dialog( "close" );
+	//					GM_setValue("currentVersion", newVersion);
+	//					GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
+	//				},
+	//				Cancel: function() {
+	//					$dialog.dialog( "close" );
+	//				}
+	//			}
+	//	});
+	//},
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
@@ -1471,7 +1471,7 @@ var Helper = {
 		}
 		if (GM_getValue("gameHelpLink")) {
 			if (isNewUI == 1) var gameHelpNode = $('div.minibox h3:contains("Game Help")');
-			else var gameHelpNode = $('td font b:contains("Game Help")');
+			//else var gameHelpNode = $('td font b:contains("Game Help")');
 			$(gameHelpNode).each(function() {
 				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
 			});
@@ -1486,15 +1486,15 @@ var Helper = {
 			//move boxes in opposite order that you want them to appear.
 			if (GM_getValue("moveGuildList")) {
 				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-guild');
-				else Layout.moveRHSBoxUpOnRHS('Guild Info');
+				//else Layout.moveRHSBoxUpOnRHS('Guild Info');
 			}
 			if (GM_getValue("moveOnlineAlliesList")) {
 				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-allies');
-				else Layout.moveRHSBoxUpOnRHS('Online Allies');
+				//else Layout.moveRHSBoxUpOnRHS('Online Allies');
 			}
 			if (GM_getValue("moveFSBox")) {
 				if (isNewUI == 1) Layout.moveRHSBoxToLHS('minibox-fsbox');
-				else Layout.moveRHSBoxToLHS('FSBox');
+				//else Layout.moveRHSBoxToLHS('FSBox');
 			}
 
 			Helper.prepareAllyEnemyList();
@@ -1841,7 +1841,7 @@ var Helper = {
 				//Helper.injectPoints();
 				//break;
 			case "-":
-				if (typePageId == 0) Helper.storePlayerUpgrades();
+				if (typePageId == "-" || typePageId == 0) Helper.storePlayerUpgrades();
 				//Helper.injectPoints();
 				break;
 			default:
@@ -4116,7 +4116,7 @@ injectBazaar: function() {
 				System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.checkIfGroupExists);
 				
 				$('div#addRemoveCreatureToDoNotKillList').html("");
-				GM_log($('#dialog-viewcreature').find('h2.name').text());
+//GM_log($('#dialog-viewcreature').find('h2.name').text());
 				if ($('div#addRemoveCreatureToDoNotKillList').length == 0) {
 					var doNotKillElement = '<div id="addRemoveCreatureToDoNotKillList"' +
 					'" class="description" style="cursor:pointer;text-decoration:underline;color:blue;"></div>';
@@ -4129,6 +4129,7 @@ injectBazaar: function() {
 				$('div#addRemoveCreatureToDoNotKillList').html(extraText)
 				document.getElementById('addRemoveCreatureToDoNotKillList').addEventListener('click', Helper.addRemoveCreatureToDoNotKillList, true);
 			});
+
 			// add do-not-kill list functionality
 			$.subscribe('after-update.actionlist', function(e, data) {
 				// color the critters in the do no kill list blue
@@ -4138,19 +4139,13 @@ injectBazaar: function() {
 					}
 				});
 				// then intercept the action call 
-				//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-					//~ var gameData = window.wrappedJSObject.GameData;
-					//~ var hcs = window.wrappedJSObject.HCS;
-				//~ } else {
-					var gameData = unsafeWindow.GameData;
-					var hcs = unsafeWindow.HCS;
-				//~ }
+				var gameData = unsafeWindow.GameData;
+				var hcs = unsafeWindow.HCS;
 				var oldDoAction = gameData.doAction;
 				gameData.doAction = function(actionCode, fetchFlags, data){
 					if(actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT){
 						// Do custom stuff e.g. do not kill list
-						var attackNumber = parseInt(data.passback) + 1;
-						var creatureIcon = $('ul#actionList a.attack-'+ attackNumber).parents('div.header').find('a.icon');
+						var creatureIcon = $('ul#actionList div.header').eq(data.passback).find('a.icon');
 						if (Helper.doNotKillList.indexOf(creatureIcon.data('name')) != -1) {
 							creatureIcon.removeClass('loading');
 							return;
@@ -4283,7 +4278,7 @@ injectBazaar: function() {
 				//just eat it and move on
 			}
 			if (isNewUI == 1) var currentLocation = $('h3#world-realm-name');
-			else var currentLocation = $('td[background*="/realm_top_b4.jpg"]');
+			//else var currentLocation = $('td[background*="/realm_top_b4.jpg"]');
 			if (currentLocation.length > 0) {
 				var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text());
 				Helper.xLocation = parseInt(locationRE[1],10);
@@ -5279,7 +5274,7 @@ injectBazaar: function() {
 		}
 
 		Helper.sortBy=headerClicked;
-		GM_log(Helper.sortAsc + " " + Helper.sortBy + " " + sortType);
+//GM_log(Helper.sortAsc + " " + Helper.sortBy + " " + sortType);
 
 		switch(sortType) {
 			case "string":
@@ -6154,7 +6149,7 @@ injectBazaar: function() {
 		var statistics = System.findNode("//table[contains(tbody/tr/td/b,'Level:')]",0,doc);
 		var levelNode = System.findNode("//td[contains(b,'Level:')]",0,statistics);
 		var levelValue = levelNode.nextSibling.innerHTML;
-		GM_log(levelValue);
+//GM_log(levelValue);
 		// GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
 	},
 
@@ -7992,7 +7987,7 @@ injectBazaar: function() {
 			return;
 		}
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
-		var maxLvl = GM_getValue("inventoryMaxLvl", 2000);
+		var maxLvl = GM_getValue("inventoryMaxLvl", 9999);
 		if(reportType=='self'){
 			reportTitle='<td width="90%" nobr><b>&nbsp;Inventory Manager</b> ' + targetInventory.items.length + ' items (green = worn, blue = backpack)</td>';
 		}else{
@@ -8024,7 +8019,7 @@ injectBazaar: function() {
 		Helper.generateInventoryTable();
 		document.getElementById("Helper:inventoryFilterReset").addEventListener('click', function(){
 				GM_setValue("inventoryMinLvl",1);
-				GM_setValue("inventoryMaxLvl",2000);
+				GM_setValue("inventoryMaxLvl",9999);
 				$('input[id="Helper.inventoryMinLvl"]').attr('value','1');
 				$('input[id="Helper.inventoryMaxLvl"]').attr('value','2000')
 				Helper.generateInventoryTable();
@@ -8508,7 +8503,7 @@ injectBazaar: function() {
 		if (!Helper.onlinePlayers) {return;}
 		Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
 		var minLvl = GM_getValue("onlinePlayerMinLvl", 1);
-		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 2000);
+		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 9999);
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
 		var result=
 			'<div align=right><form id=Helper:onlinePlayerFilterForm subject="onlinePlayer" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers" onSubmit="javascript:return false;">' +
@@ -9657,7 +9652,7 @@ injectBazaar: function() {
 		var doc=System.createDocumentWithImages(responseText);
 		Helper.tmpSelfProfile=responseText;
 		//sustain
-		var sustainText = $(doc).find('td:has(a:contains("Sustain")):last').next().find('table.tipped').data("tipped");
+		var sustainText = $(doc).find('td:has(a:contains("Sustain")):last').next().find('table.tip-static').data("tipped");
 		if (sustainText !== undefined) {
 			var sustainLevelRE = /Level<br>(\d+)%/;
 			var sustainLevel = sustainLevelRE.exec(sustainText)[1];
@@ -9672,7 +9667,7 @@ injectBazaar: function() {
 		var injectHere = inputTable.rows[inputTable.rows.length-1].cells[0];
 		injectHere.align = "center";
 		injectHere.innerHTML = "&nbsp;<span style='color:orange;'>Sustain:</span> <span style='color:" + sustainColor + ";'>" + sustainLevel + "%</span>";
-		var furyCasterTipped = $(doc).find('td:contains("Fury Caster"):last').next().find('table.tipped');
+		var furyCasterTipped = $(doc).find('td:contains("Fury Caster"):last').next().find('table.tip-static');
 		if (furyCasterTipped.length == 0) {return;}
 		var furyCasterMouseover = furyCasterTipped.attr("data-tipped");
 		var furyCasterLevelRE = /Level<br>(\d+)%/;
@@ -9681,7 +9676,7 @@ injectBazaar: function() {
 		if (furyCasterLevel < 100) furyCasterColor = "red";
 		injectHere.innerHTML += "&nbsp;<span style='color:orange;'>Fury Caster:</span> <span style='color:" + furyCasterColor + ";'>" + furyCasterLevel + "%</span></br>";
 
-		var hasBuffMasterBuff = $(doc).find('img.tipped[data-tipped*="Buff Master"]');
+		var hasBuffMasterBuff = $(doc).find('img.tip-static[data-tipped*="Buff Master"]');
 		injectHere.innerHTML += " <span style='color:orange;'>Buff Master:</span> ";
 		if (hasBuffMasterBuff.length > 0) {
 			injectHere.innerHTML += "<span style='color:lime;'>On</span>";
@@ -10431,7 +10426,7 @@ injectArena: function() {
 				'<span style="color:blue;">&nbsp;Hide Matches for Completed Moves ' +
 				'<div align=center><form id=Helper:arenaFilterForm subject="arena" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + GM_getValue("arenaMinLvl", 1) + '" size=5 name="Helper.arenaMinLvl" id="Helper.arenaMinLvl" style=custominput/> ' +
-				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 2000) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
+				'Max lvl:<input value="' + GM_getValue("arenaMaxLvl", 9999) + '" size=5 name="Helper.arenaMaxLvl" id="Helper.arenaMaxLvl" style=custominput/> ' +
 				'<input id="Helper:arenaFilter" subject="arena" class="custombutton" type="submit" value="Filter"/>' +
 				'<input id="Helper:arenaFilterReset" subject="arena" class="custombutton" type="button" value="Reset"/></form></div>'+
 				'</span>';
@@ -10456,7 +10451,7 @@ injectArena: function() {
 		}
 		var matchFound = false;
 		var minLvl=GM_getValue('arenaMinLvl',1);
-		var maxLvl=GM_getValue('arenaMaxLvl',2000);
+		var maxLvl=GM_getValue('arenaMaxLvl',9999);
 		for( var ar = 0; ar < arenaTables.length;ar++)
 		{
 			var arenaTable = arenaTables[ar];
@@ -10552,7 +10547,7 @@ injectArena: function() {
 		var playerMinLvl = document.getElementById("Helper." + minLvlSearchText);
 		var playerMaxLvl = document.getElementById("Helper." + maxLvlSearchText);
 		if (playerMinLvl.value === '') playerMinLvl.value = '0';
-		if (playerMaxLvl.value === '') playerMaxLvl.value = '2000';
+		if (playerMaxLvl.value === '') playerMaxLvl.value = '9999';
 		if (!isNaN(playerMinLvl.value))
 			GM_setValue(minLvlSearchText, parseInt(playerMinLvl.value,10));
 		if (!isNaN(playerMaxLvl.value))
@@ -10568,8 +10563,8 @@ injectArena: function() {
 		var maxLvlSearchText = filterSubject + "MaxLvl";
 		GM_setValue(minLvlSearchText, 1);
 		document.getElementById("Helper." + minLvlSearchText).value=1;
-		GM_setValue(maxLvlSearchText, 2000);
-		document.getElementById("Helper." + maxLvlSearchText).value=2000;
+		GM_setValue(maxLvlSearchText, 9999);
+		document.getElementById("Helper." + maxLvlSearchText).value=9999;
 		if (href) window.location = System.server + href;
 		else window.location = window.location;
 	},
@@ -10663,7 +10658,7 @@ injectArena: function() {
 		var result='<tr>' + list.rows[0].innerHTML + '</tr>';
 
 		var minLvl=GM_getValue('arenaMinLvl',1);
-		var maxLvl=GM_getValue('arenaMaxLvl',2000);
+		var maxLvl=GM_getValue('arenaMaxLvl',9999);
 		for (var i=0; i<Helper.arenaRows.length; i++){
 			var r = Helper.arenaRows[i];
 			//var bgColor=((i % 2)==0)?'bgcolor="#e7c473"':'bgcolor="#e2b960"'
@@ -12412,7 +12407,7 @@ var items=0;
 					var titanString = "<span style='color:red;'>" + (numberOfKillsToSecure - guildKills) + "</span> to secure";
 					if (guildKills >= numberOfKillsToSecure) titanString = "Secured";
 					else if ((numberOfKillsToSecure - guildKills) > currentHP) titanString = "<span style='color:red;'>Cannot Secure</span>";
-					var killsPercent = (guildKills * 100/currentNumberOfKills).toFixed(2);
+					var killsPercent = (currentNumberOfKills == 0 ? 0 : guildKills * 100/currentNumberOfKills).toFixed(2);
 					var killsTotPct = (guildKills * 100/totalHP).toFixed(2);
 					aRow.cells[3].innerHTML += "<br><span style='color:blue;'> (" + killsPercent + "% Current <br>" +
 					killsTotPct + "% Total<br>" + titanString + ")";
