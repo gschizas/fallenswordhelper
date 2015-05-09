@@ -9,8 +9,8 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1494
-// @downloadURL    https://fallenswordhelper.googlecode.com/svn/trunk/fallenswordhelper.user.js
+// @version        1496
+// @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -15161,45 +15161,46 @@ var items=0;
 			Helper.drawAreaMap(aMap.map, Helper.prevAreaMaps.length-i, aMap.minlvl, aMap.maxlvl);
 		}
 	}
-};
-Helper.onPageLoad(null);
+}; // end of var helper
 
-};
+// Anonymous "self-invoking" function
+(function() {
+	if (typeof unsafeWindow.jQuery == 'undefined') {
+			// Load the script
+			var script = document.createElement("script");
+			script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js';
+			script.type = 'text/javascript';
+			document.getElementsByTagName("head")[0].appendChild(script);
+
+			// Poll for jQuery to come into existance
+			var checkReady = function(callback) {
+				if (window.jQuery) {
+					callback(jQuery);
+				}
+				else {
+					window.setTimeout(function() { checkReady(callback); }, 20);
+				}
+			};
+
+			// Start polling...
+			checkReady(function($) {
+				$(function() {
+					Helper.onPageLoad(null);
+				});
+			});
+	} else {
+		Helper.onPageLoad(null);
+	}
+})();
+
+}; // end of var main
 
 if (navigator.userAgent.indexOf("Firefox")>0) {
-	var $ ;
-	var jqcounter = 0;
-	// Check if jQuery's loaded
-	function GM_wait() {
-		if (typeof unsafeWindow.jQuery == 'undefined' && jqcounter < 10) {
-			jqcounter++;
-			if (jqcounter == 5) { // 1/2 second, must be some error, try to load our own jquery
-				var GM_Head = document.getElementsByTagName('head')[0] || document.documentElement,
-					GM_JQ = document.createElement('script');
-
-				GM_JQ.src = 'http://ajax.googleapis.com/ajax/libs/jquery/1/jquery.min.js';
-				GM_JQ.type = 'text/javascript';
-				GM_JQ.async = true;
-
-				GM_Head.insertBefore(GM_JQ, GM_Head.firstChild);
-			}
-			window.setTimeout(GM_wait, 100);
-		} else {
-			$ = unsafeWindow.jQuery;
-			$T = unsafeWindow.Tipped;
-			if (jqcounter>=0) {
-				jqcounter = -1000; // prevent running main twice due to setTimeout effect
-				main();
-			}
-		}
+	main();
+} else {
+	if (navigator.userAgent.indexOf("Chrome")>0) {
+		var script = document.createElement("script");
+		script.textContent = "(" + main.toString() + ")();";
+		document.body.appendChild(script);
 	}
-	GM_wait();
 }
-
-function insertJS(callback) {
-	var script = document.createElement("script");
-	script.textContent = "(" + callback.toString() + ")();";
-	document.body.appendChild(script);
-}
-// load jQuery and execute the main function
-if (navigator.userAgent.indexOf("Chrome")>0) insertJS(main);
