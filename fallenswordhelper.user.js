@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1496
+// @version        1497
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -5775,6 +5775,11 @@ injectBazaar: function() {
 	},
 
 	addLogColoring: function(logScreen, dateColumn) {
+
+		// fix for Chrome table width problem
+        if (logScreen == 'Chat' && navigator.userAgent.indexOf("Chrome")>0)
+			$("#pCC").find("table").find("table").find("table").find("table").css({"table-layout": "fixed", "word-wrap": "break-word"});
+
 		if (!GM_getValue("enableLogColoring")) {return;}
 		var lastCheckScreen = "last" + logScreen + "Check";
 		var localLastCheckMilli=GM_getValue(lastCheckScreen);
@@ -12170,6 +12175,8 @@ var items=0;
 
 				$('#pCC').prepend('<span id="mailboxSwitcher" style="cursor:pointer; text-decoration:underline; color:blue;">Toggle Quick Take</span><input type="hidden" id="currentMBDisplay" value="mailbox" />'+quickTakeDiv);
 			}
+		} else { // Empty mailbox
+			return
 		}
 
 		//fetchitem.php?item_id=9208&inv_id=91591259&t=5&p=1599987&currentPlayerId=1599987&extra=3
@@ -14145,7 +14152,7 @@ var items=0;
 		result += '<input type="hidden" value="dochat" name="subcmd"/>';
 		result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
 		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		result += '<textarea align="center" cols="80" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
 		result += '</td><td>';
 		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
 		result += '</td><tr><td>';
@@ -14170,7 +14177,7 @@ var items=0;
 		result += '<input type="hidden" value="dochat" name="subcmd"/>';
 		result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
 		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		result += '<textarea align="center" cols="80" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
 		result += '</td><td>';
 		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
 		result += '</td><tr><td>';
