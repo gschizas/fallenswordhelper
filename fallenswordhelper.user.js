@@ -4234,12 +4234,15 @@ injectBazaar: function() {
 						}
 					}
 					var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-					var l = data.player.enhancements.length;
-					for(var i=0; i<l; i++) //loop through enhancements
-					{//54 = ca, 26 = doubler
-						var enh = data.player.enhancements[i];
-						if (notSave.indexOf('|'+enh.name+'|')==-1){
-							combatData.player.enhancements[enh.name]=enh.value;
+					if (data.player.enhancements)
+					{
+						var l = data.player.enhancements.length;
+						for(var i=0; i<l; i++) //loop through enhancements
+						{//54 = ca, 26 = doubler
+							var enh = data.player.enhancements[i];
+							if (notSave.indexOf('|'+enh.name+'|')==-1){
+								combatData.player.enhancements[enh.name]=enh.value;
+							}
 						}
 					}
 					//combatData.player.enhancements = data.player.enhancements;
