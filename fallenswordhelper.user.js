@@ -1362,85 +1362,6 @@ var Helper = {
 		}
 	},
 
-	// Autoupdate
-	//beginAutoUpdate: function() {
-	//	var lastCheck = GM_getValue("lastVersionCheck");
-	//	var now = (new Date()).getTime();
-	//	if (!lastCheck) {lastCheck = 0;}
-	//	var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000);
-	//	if (haveToCheck) {
-	//		Helper.checkForUpdate();
-	//	}
-	//},
-
-	//checkForUpdate: function() {
-	//	GM_log("Checking for new version...");
-	//	var now = (new Date()).getTime();
-	//	GM_setValue("lastVersionCheck", now.toString());
-	//	GM_xmlhttpRequest({
-	//		method: 'GET',
-	//		url: "http://code.google.com/p/fallenswordhelper/source/browse/trunk",
-	//		/*headers: {
-	//			"User-Agent": navigator.userAgent,
-	//			"Referer": document.location
-	//		},*/
-	//		onload: function(responseDetails) {
-	//			Helper.autoUpdate(responseDetails);
-	//		}
-	//	});
-	//},
-
-	//autoUpdate: function(responseDetails) {
-	//	var now = (new Date()).getTime();
-	//	GM_setValue("lastVersionCheck", now.toString());
-	//	var currentVersion = GM_getValue("currentVersion");
-	//	if (!currentVersion) {currentVersion = 0;}
-    //
-	//	var doc = System.createDocument(responseDetails.responseText);
-	//	var latestVersion = $(doc).find('td:contains("fallenswordhelper.user.js")').next().next().text();
-    //
-	//	GM_log("Current version: " + currentVersion);
-	//	GM_log("Found version: " + latestVersion);
-    //
-	//	if (currentVersion != latestVersion) {
-	//		GM_xmlhttpRequest({
-	//			method: 'GET',
-	//			url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
-	//			/*headers: {
-	//				"User-Agent": navigator.userAgent,
-	//				"Referer": document.location
-	//			},*/
-	//			onload: function(responseDetails) {
-	//				Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
-	//			}
-	//		});
-	//	}
-	//},
-
-	//autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-	//	var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-    //
-	//	var $dialog = $('<div></div>')
-	//		.html(theChanges)
-	//		.dialog({
-	//			title: 'Fallen Sword Helper new version (' + newVersion + ') found. Update from version ' + oldVersion + '?',
-	//			resizable: false,
-	//			height:500,
-	//			width:500,
-	//			modal: true,
-	//			buttons: {
-	//				"OK": function() {
-	//					$dialog.dialog( "close" );
-	//					GM_setValue("currentVersion", newVersion);
-	//					GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
-	//				},
-	//				Cancel: function() {
-	//					$dialog.dialog( "close" );
-	//				}
-	//			}
-	//	});
-	//},
-
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
 		hcsData = $('html').data('hcs');
@@ -2069,13 +1990,7 @@ var Helper = {
 	},
 
 	injectViewGuild: function() {
-		var avyImg;
-		if (navigator.userAgent.indexOf("Firefox")>0)
-			avyImg = System.findNode("//img[contains(@title, 's Logo')]");
-		else //chrome
-			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
-		if (!avyImg) {return;}
-		avyImg.style.borderStyle="none";
+		Helper.removeGuildAvyImgBorder();
 
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
 		var highlightGvGPlayersNearMyLvl = GM_getValue("highlightGvGPlayersNearMyLvl");
@@ -2134,14 +2049,11 @@ var Helper = {
 				if (buffsNotCast) {
 
 					buffLog=timeStamp+'<span style="color: red;">' + buffsNotCast[0] + '</span><br>' + buffLog;
-
 				}
-
 			}
 			GM_setValue("buffLog",buffLog);
 			//document.getElementById('buff_Log').innerHTML+='<br><br><br>'+buffLog;
 		}
-
 	},
 
 	injectBuffLog: function(content) {
@@ -2179,14 +2091,18 @@ var Helper = {
 		document.getElementById('fsboxdetail').innerHTML=GM_getValue("fsboxcontent");
 	},
 
-	injectGuild: function() {
+	removeGuildAvyImgBorder: function() {
 		var avyImg;
 		if (navigator.userAgent.indexOf("Firefox")>0)
 			avyImg = System.findNode("//img[contains(@title, 's Logo')]");
 		else //chrome
-			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
-		if (!avyImg) {return;}
-		avyImg.style.borderStyle="none";
+			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");0
+		if (avyImg) avyImg.style.borderStyle="none";
+		return;
+	},
+
+	injectGuild: function() {
+		Helper.removeGuildAvyImgBorder();
 
 		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
@@ -2265,7 +2181,6 @@ var Helper = {
 				Helper.getConflictInfo,	{"node": confNode});
 		}
 		Helper.changeGuildListOfflineBallColor();
-
 
 	},
 
@@ -2549,7 +2464,6 @@ var Helper = {
 		for (var i=0;i<document.getElementById('buy_amount').value;i++) {
 			System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
 				Helper.quickDone);
-
 		}
 	},
 
@@ -2617,11 +2531,8 @@ injectBazaar: function() {
 							buffAllLink.attr("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 							shortList = new Array();
 						}
-
 					}
-
 				}
-
 			}
 			injectHere.html(injectHere.html() + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
 				'class="custombutton">');
@@ -2876,43 +2787,12 @@ injectBazaar: function() {
 		var doc = System.createDocument(responseText);
 		var playerAttackValue = 0, playerDefenseValue = 0, playerArmorValue = 0, playerDamageValue = 0, playerHPValue = 0;
 
-		//~ var playerName = $(doc).find('h1').text();
 		$(doc).find('div').remove(".profile-stat-bonus");
 		playerAttackValue = $(doc).find('#stat-attack').text();
 		playerDefenseValue = $(doc).find('#stat-defense').text();
 		playerArmorValue = $(doc).find('#stat-armor').text();
 		playerDamageValue = $(doc).find('#stat-damage').text();
 		playerHPValue = $(doc).find('#stat-hp').text();
-		//~ console.log('Player : ' + playerName + '   ' + 
-					//~ 'playerAttackValue = ' + playerAttackValue + '   ' + 
-					//~ 'playerDefenseValue = ' + playerDefenseValue + '   ' + 
-					//~ 'playerArmorValue = ' + playerArmorValue + '   ' + 
-					//~ 'playerDamageValue = ' + playerDamageValue + '   ' + 
-					//~ 'playerHPValue = ' + playerHPValue
-					//~ );
-
-		//~ var allItems = doc.getElementsByTagName("B");
-		//~ for (var i=0;i<allItems.length;i++) {
-			//~ var anItem=allItems[i];
-			//~ if (anItem.innerHTML == "Attack:&nbsp;"){
-				//~ var attackText = anItem;
-				//~ var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerAttackValue = attackLocation.textContent;
-				//~ console.log('Player : ' + playerName + '   attack = ' + playerAttackValue);
-				//~ var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				//~ var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerDefenseValue = defenseLocation.textContent;
-				//~ var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				//~ var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerArmorValue = armorLocation.textContent;
-				//~ var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				//~ var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerDamageValue = damageLocation.textContent;
-				//~ var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				//~ var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerHPValue = hpLocation.textContent;
-			//~ }
-		//~ }
 
 		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
 		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
@@ -3131,11 +3011,6 @@ injectBazaar: function() {
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Parsing attacking group stats ... ');
 		var doc=System.createDocument(responseText);
-		//~ Helper.relicGroupAttackValue = $(doc).find('td#centerColumn').find('td:contains("Attack:"):not(:contains(" Attack:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupDefenseValue = $(doc).find('td#centerColumn').find('td:contains("Defense:"):not(:contains(" Defense:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupArmorValue = $(doc).find('td#centerColumn').find('td:contains("Armor:"):not(:contains(" Armor:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupDamageValue = $(doc).find('td#centerColumn').find('td:contains("Damage:"):not(:contains(" Damage:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupHPValue = $(doc).find('td#centerColumn').find('td:contains("HP:"):not(:contains(" HP:"))').next().text().replace(/,/g,"")*1;
 		Helper.relicGroupAttackValue = $(doc).find('#stat-attack').text().replace(/,/g,"")*1;
 		Helper.relicGroupDefenseValue = $(doc).find('#stat-defense').text().replace(/,/g,"")*1;
 		Helper.relicGroupArmorValue = $(doc).find('#stat-armor').text().replace(/,/g,"")*1;
@@ -3873,12 +3748,7 @@ injectBazaar: function() {
 						aRow.parentNode.removeChild(aRow.nextSibling);
 						aRow.parentNode.removeChild(aRow);
 					}
-					//<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=17&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank"><img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Ultimate Fallen Sword Guide" border="0"></a>
 					var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-					//~ aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
-						//~ '<img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
-					//~ aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
-						//~ '<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 					aRow.cells[4].innerHTML = '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
 						'<img border=0 style="float:left;" title="Search quest in Ultimate FSG" src="' + System.imageServer + '/temple/1.gif"/></a>';
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
@@ -4462,8 +4332,6 @@ injectBazaar: function() {
 				}
 			}
 		}
-
-
 	},
 
 	fixOnlineGuildBuffLinks: function() {
@@ -7704,12 +7572,9 @@ injectBazaar: function() {
 					}
 				}
 
-				//~ bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
-					//~ "<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
 				bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span><br>" +
 					"<span id='Helper:bioHidden'>" + extraOpenHTML + bioEnd + "</span>";
 				$("#Helper\\:bioHidden").hide();
-
 			}
 		}
 	},
@@ -11323,7 +11188,6 @@ injectArena: function() {
 			}
 			window.location.reload();
 		}
-
 	},
 
 	updateFpColor: function(evt) {
@@ -11548,7 +11412,6 @@ injectArena: function() {
 			}
 			alert('Settings loaded successfully!');
 		});
-
 	},
 
 	notepadCopyLog: function() {
@@ -13872,6 +13735,7 @@ var items=0;
 			//if recall message, check to see if showRecallMessages is checked.
 			if (messageText.search("recalled the item") != -1 ||
 				messageText.search("took the item") != -1 ||
+				messageText.search("auto-returned the") != -1 ||
 				messageText.search("stored the item") != -1) {
 				if (!Helper.showRecallMessages) {
 					displayRow = false;
@@ -13888,7 +13752,9 @@ var items=0;
 			}
 			//Relic messages (showRelicMessages)
 			else if (messageText.search("relic. This relic now has an empower level of") != -1 ||
+				messageText.search(/ empowered the .+ relic/) != -1 ||
 				messageText.search("relic. The relic empower level has been reset to zero.") != -1 ||
+				messageText.search("failed to capture the relic") != -1 ||
 				messageText.search("captured the relic") != -1 ||
 				messageText.search("captured your relic") != -1 ||
 				messageText.search("has captured the undefended relic") != -1 ||
@@ -13907,7 +13773,8 @@ var items=0;
 				rowTypeID = "GuildLogFilter:showMercenaryMessages";
 			}
 			//Group Combat messages (showGroupCombatMessages)
-			else if (messageText.search(/A group from your guild was (.*) in combat./) != -1) {
+			else if (messageText.search("has disbanded one of their groups") != -1 ||
+				messageText.search(/A group from your guild was (.*) in combat./) != -1) {
 				if (!Helper.showGroupCombatMessages) {
 					displayRow = false;
 				}
@@ -13923,6 +13790,12 @@ var items=0;
 			}
 			//Ranking messages (showRankingMessages)
 			else if (messageText.search("has added a new rank entitled") != -1 ||
+				messageText.search("has deleted the rank") != -1 ||
+				messageText.search("has requested to join the guild") != -1 ||
+				messageText.search("has invited the player") != -1 ||
+				messageText.search("has officially joined the guild") != -1 ||
+				messageText.search("has been kicked from the guild by") != -1 ||
+				messageText.search("has left the guild") != -1 ||
 				messageText.search("has been assigned the rank") != -1) {
 				if (!Helper.showRankingMessages) {
 					displayRow = false;
@@ -15210,7 +15083,7 @@ var items=0;
 
 			// Start polling...
 			checkReady(function($) {
-				$(function() {
+				$(function() { //DOMReady shorthand
 					Helper.onPageLoad(null);
 				});
 			});
