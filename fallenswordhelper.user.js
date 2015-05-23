@@ -2268,7 +2268,7 @@ var Helper = {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -6642,7 +6642,7 @@ injectBazaar: function() {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -6922,7 +6922,7 @@ injectBazaar: function() {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -6957,7 +6957,7 @@ injectBazaar: function() {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -8172,7 +8172,7 @@ injectBazaar: function() {
 								drop.css('color','red');
 								drop.css('fontSize','small');
 								drop.html("Weird Error: check the Tools>Error Console");
-								GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+								GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 								GM_log(callback.url);
 							}
 						},
@@ -8204,7 +8204,7 @@ injectBazaar: function() {
 							send.css('color','red');
 							send.css('fontSize','small');
 							send.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
@@ -8234,7 +8234,7 @@ injectBazaar: function() {
 							recall.css('color','red');
 							recall.css('fontSize','small');
 							recall.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
@@ -8264,7 +8264,7 @@ injectBazaar: function() {
 							move.css('color','red');
 							move.css('fontSize','small');
 							move.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
@@ -10869,7 +10869,7 @@ injectArena: function() {
 			//~ '<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
 			//~ ')</span></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
-			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
+			'<span style="font-weight:bold;">Visit the <a href="https://github.com/fallenswordhelper/fallenswordhelper">Fallen Sword Helper web site</a> ' +
 			'for any suggestions, requests or bug reports</span></td></tr>' +
 			//General Prefs
 			'<tr><th colspan="2" align="left"><b>General preferences (apply to most screens)</b></th></tr>' +
@@ -12135,7 +12135,7 @@ var items=0;
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -12206,7 +12206,7 @@ var items=0;
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -13004,7 +13004,7 @@ var items=0;
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
