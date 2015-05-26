@@ -4419,9 +4419,7 @@ var Helper = {
 	},
 
 	showAHInvManager: function(injectId) {
-		var output = 'Note that clicking on Show AH Price might reset your AH Search Preference (min/max Lvl, min/max Forge)<br/>'+
-			'<table width=100% cellspacing=2 cellpadding=2>'+
-			'<tr><th colspan=5 align=right>[<span id=showAhPrice style="cursor:pointer; color:yellow">Show AH Price</span>]</td>'+
+		var output = '<table width=100% cellspacing=2 cellpadding=2>'+
 			'<tr><th colspan=5 align=center>Items from <a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>'+
 			'<tr><th>Name</th><th>Nick Name<th>Inv Count</th><th>AH Min Price</th><th>AH BuyNow Price</th></tr>';
 		var invCount = {}, name;
@@ -4462,13 +4460,6 @@ var Helper = {
 		output += '</table>';
 		$(injectId).html(output);
 		$('#showAhPrice').click(Helper.showAHPrice);
-	},
-
-	showAHPrice: function() {
-		//index.php?cmd=auctionhouse&order_by=1&search_text=Potion of Black Death&pref_save=1&pref_hidegold=1
-		// inter-exchange pref_hidegold and pref_hidefsp to get the price
-		// feel free to implement this :)
-		alert('dkwizard is a bit busy, but completing this new feature is definitely high in his TODO list, stay tuned :)');
 	},
 
 	insertQuickExtract: function(content) {
