@@ -1150,7 +1150,7 @@ var Helper = {
 		//~ System.setDefault("titanLogRefreshTime", 5);
 
 		System.setDefault("enableTempleAlert", true);
-		System.setDefault("showGoldOnFindPlayer", true);
+		//~ System.setDefault("showGoldOnFindPlayer", false);
 		//~ System.setDefault("titanLogLength", 15);
 		System.setDefault("autoFillMinBidPrice", false);
 		System.setDefault("showPvPSummaryInLog", true);
@@ -11002,8 +11002,8 @@ var Helper = {
 				//~ 'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
 				//~ ':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
 				//~ '<input name="titanLogRefreshTime" size="2" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
-			'<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.<br>Disabled at HCS request.') +
-				':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + /*(GM_getValue("showGoldOnFindPlayer")?" checked":"") +*/ ' disabled></td></tr>' +
+			//~ '<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.<br>Disabled at HCS request.') +
+				//~ ':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + /*(GM_getValue("showGoldOnFindPlayer")?" checked":"") +*/ ' disabled></td></tr>' +
 			//~ '<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
 				//~ ':</td><td><input name="titanLogLength" size="3" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
 			'<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
@@ -11218,7 +11218,7 @@ var Helper = {
 		//~ System.saveValueForm(oForm, "enableTitanLog");
 		//~ System.saveValueForm(oForm, "titanLogRefreshTime");
 		System.saveValueForm(oForm, "enableTempleAlert");
-		System.saveValueForm(oForm, "showGoldOnFindPlayer");
+		//~ System.saveValueForm(oForm, "showGoldOnFindPlayer");
 		//~ System.saveValueForm(oForm, "titanLogLength");
 		System.saveValueForm(oForm, "autoFillMinBidPrice");
 		System.saveValueForm(oForm, "showPvPSummaryInLog");
@@ -14022,41 +14022,6 @@ var items=0;
 			var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
 			$(this).after("<a style='color:blue;font-size:10px;' "+Layout.quickBuffHref(id[1])+">[b]</a>");
 		});
-		if (!GM_getValue("showGoldOnFindPlayer")) return;
-		var findPlayerTable = $('table.width_full');
-		//add header
-		findPlayerTable.find('tr:first td:eq(3)')
-			.after('<td class="header">Gold</td>');
-		//fix divider lengths for table
-		findPlayerTable.find('td.divider').each(function(){
-			$(this).attr("colSpan",7);
-		});
-		//add gold column and then go fetch data
-		findPlayerTable.find('tr:not(:first):has(td:not(.divider))').each(function(){
-			var playerHREF = $(this).find('td:first a').attr("href");
-			$(this).find('td:eq(3)')
-				.after('<td class="row"><span style="color:blue;" id="Gold' + playerHREF + '">?</span></td>');
-			System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
-		});
-	},
-
-	findPlayerParseProfile: function(responseText, callback) {
-		var doc = System.createDocument(responseText);
-		var goldValue = $(doc).find('b:contains("Gold:")').parents('td:first').next();
-		var goldSpan = $('span[id="Gold' + callback.href + '"]');
-		goldSpan.html(goldValue.text());
-		//add VL if not equal to current level
-		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
-		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
-		var virtualLevelElement = $(doc).find('a:contains("VL")').parents('td:first').next();;
-		var virtualLevelValue = parseInt(virtualLevelElement.text(),10);
-		if (levelValue != virtualLevelValue) {
-			goldSpan.parents('tr:first').children('td:eq(1)').append('&nbsp;<span style="color:blue;">(' + virtualLevelValue + ')</span>');
-		}
-		var pvpProtection = $(doc).find('td:contains("[not activated]"):last');
-		if (pvpProtection.length == 0) {
-			goldSpan.parents('tr:first').children('td:eq(0)').append('&nbsp;<img width="10" height="10" title="Protected" src="' + Data.redDot() + '">')
-		}
 	},
 
 	injectCreatures: function() {
