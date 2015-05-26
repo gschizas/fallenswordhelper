@@ -1631,7 +1631,7 @@ var Helper = {
 				Helper.injectNewGuildLog();
 				break;
 			case "checkwear":
-				Helper.injectCheckWearingItem();
+				//~ Helper.injectCheckWearingItem();
 				break;
 			case "findbuffs":
 				Helper.injectFindBuffs();
@@ -6907,17 +6907,6 @@ var Helper = {
 			Helper.buffCost={'count':0,'buffs':{}};
 
 			Helper.bioAddEventListener();
-
-/*			if (isSelfRE) {
-				alert(playerid);
-				var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
-				if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
-			}
-*/		}
-
-		var invSectionToggle = System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
-		if (invSectionToggle) {
-			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&blank=1&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
 
 		if (isSelfRE) { // self inventory
@@ -13707,118 +13696,6 @@ var items=0;
 		}
 	},
 
-	injectCheckWearingItem: function(content) {
-		if (!content) var content = Layout.notebookContent();
-		content.innerHTML=Helper.makePageTemplate("Check Worn Items for Best Damage", "", "", "", "checkwear");
-
-		document.getElementById("checkwear").innerHTML+="Getting profile ...<br/>";
-		var playerid=/&playerid=(\d+)/.exec(window.location);
-		if (playerid)
-			playerid = playerid[1];
-		else
-			playerid = "";
-		Helper.wearingItems={};
-		Helper.wearingItems.playerid=playerid;
-		System.xmlhttp("index.php?cmd=profile&player_id="+playerid, Helper.getWearingItems);
-	},
-
-	getWearingItems: function(responseText) {
-		var doc=System.createDocumentWithImages(responseText);
-		//fix me
-		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]",doc);
-		for (var i=0; i<items.length; i++) {
-			if (!(items[i].parentNode.getAttribute("href")) || items[i].parentNode.getAttribute("href").indexOf("subcmd=unequipitem&")>0) {
-				var item=items[i], type, onmo=item.getAttribute("data-tipped");
-				if (item.parentNode.getAttribute("href")) item=item.parentNode;
-				if (item.parentNode.width != 60) item=item.parentNode.parentNode.parentNode.parentNode;
-				type = item.parentNode.cellIndex + item.parentNode.parentNode.rowIndex*3;
-				Helper.wearingItems[type]=onmo;
-			}
-		}
-		Helper.wearingItems.name=System.findNode("//div[@class='innerContentMiddle']/div/h1",doc).textContent;
-		Helper.wearingItems.lvl=System.findNode("//b[contains(.,'Level:')]",doc).parentNode.nextSibling.textContent;
-		document.getElementById("checkwear").innerHTML+="Getting items from "+Helper.wearingItems.name+"'s profile ... <br/>";
-		Helper.getEachWearingItem(0);
-	},
-
-	getEachWearingItem: function(type) {
-		if (Helper.wearingItems[type]) {
-			System.xmlhttp(Helper.linkFromMouseover(Helper.wearingItems[type]), function(responseText) {
-					var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-					var mo=Helper.wearingItems[type].replace("'<br><center><b>[Click to Unequip]</b></center>'","''");
-					Helper.wearingItems[type]={"mo":mo};
-					Helper.wearingItems[type].wear=name;
-					Helper.wearingItems[type].fullSet=responseText.match(/>Set Details \((\d)\/\1\)</)!=null;
-					document.getElementById("checkwear").innerHTML+=" comparing "+name+" ...<br/>";
-					var stype=[2,0,7,4,1,5,6,3,8][type];
-					var url="http://guide.fallensword.com/index.php?cmd=items&index=0&search_name=&search_level_min=&"+
-						"search_level_max="+parseInt(Helper.wearingItems.lvl.replace(/,/g,""),10)+
-						"&search_type="+stype+"&search_rarity=-1&sort_by=1&sort_by=5";
-					GM_xmlhttpRequest({
-						method: 'GET',
-						url: url,
-						/*headers: {
-							"User-Agent": navigator.userAgent,
-							"Referer": document.location
-						},*/
-						onload: function(responseDetails) {
-							var doc=System.createDocument(responseDetails.responseText);
-							var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=items&subcmd=view')]",doc);
-							Helper.wearingItems[type].suggest="";
-							Helper.wearingItems[type].best=nodes[0].textContent;
-							for (var i=0; i<5; i++) {
-								Helper.wearingItems[type].suggest+=
-									"<span class=\"tipped\" data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
-										nodes[i].textContent+"</span>"+
-									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
-									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
-									"[<a href='http://guide.fallensword.com/index.php?cmd=items&index=0&search_name="+nodes[i].textContent+"'>UFG</a>]</span>, ";
-							}
-							Helper.getEachWearingItem(type+1);
-						}
-					});
-				});
-		} else {
-			if (type < 8)
-				Helper.getEachWearingItem(type+1);
-			else
-				Helper.showCheckWearingResult();
-		}
-	},
-
-	showCheckWearingResult: function() {
-		var content=document.getElementById("checkwear");
-		var pos2type=["Glove", "Helm", "Amulet", "Weapon", "Armor", "Shield", "Ring", "Boot", "Rune"];
-		var newHtml, color;
-		newHtml='<h3><a href="/index.php?cmd=profile&player_id='+Helper.wearingItems.playerid+'">'+Helper.wearingItems.name+'</a>\'s Setup Analysis</h3>'+
-			"Please note that:<br/>"+
-			"<ul><li>Analysis based on availability of items in the Ultimate Fallensword Guide</li>"+
-			"<li>Item sorted by damage stat in no-forge, no-craft condition</li>"+
-			"<li>Set bonus, other stats are not considered</li></ul>"+
-			"Please use at your own risk ^_^<p/>"+
-			"Tooltip format: Name  	Level  	Type 	Rarity 	Attack  	Defense  	Armor  	Damage  	HP<p/>"+
-			"<table width=100% cellspacing=2>";
-		for (var type=0; type<9; type++) {
-			newHtml+="<tr><th align=left>"+pos2type[type]+"</th>";
-			if (Helper.wearingItems[type]) {
-				if (Helper.wearingItems[type].wear == Helper.wearingItems[type].best ||  Helper.wearingItems[type].fullSet) {
-					color="green";
-				} else {
-					color="yellow";
-					//GM_log(Helper.wearingItems[type].suggest);
-					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(">"+Helper.wearingItems[type].wear+"<",
-						"><font color=yellow>"+Helper.wearingItems[type].wear+"</font><");
-					//GM_log(Helper.wearingItems[type].suggest);
-				}
-				newHtml+="<td><span style='color:"+color+"' class=tipped data-tipped-options='ajax:true' data-tipped=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
-					(Helper.wearingItems[type].fullSet?" (<span style='color:blue'>Full Set</span>)":"")+"</td></tr>"+
-					"<tr><td align=right>Suggested</td><td>"+Helper.wearingItems[type].suggest+"</td></tr>";
-			} else
-				newHtml+="<td><span style='color:red'>NOTHING</span></td></tr>";
-		}
-		content.innerHTML=newHtml+"</table>";
-	},
-
 	addChatTextArea: function() {
 		if (!GM_getValue("enhanceChatTextEntry")) return;
 		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
@@ -14433,7 +14310,8 @@ var items=0;
 				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"]
 			],
 			"Extra" : [
-				["BD", "Best Damage Items", "injectCheckWearingItem"], ["QE", "Quick Extract", "insertQuickExtract"],
+				//~ ["BD", "Best Damage Items", "injectCheckWearingItem"], 
+				["QE", "Quick Extract", "insertQuickExtract"],
 				["QW", "Quick Wear", "insertQuickWear"], ["BoxL", "FS Box Log", "injectFsBoxContent"],
 				["CRL", "Creature Log", "injectMonsterLog"] //still needs work
 			]
