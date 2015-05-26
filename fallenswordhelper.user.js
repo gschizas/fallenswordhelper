@@ -1625,7 +1625,7 @@ var Helper = {
 				Helper.injectBuffLog();
 				break;
 			case "guildlog":
-				Helper.injectGuildLogSummary();
+				//~ Helper.injectGuildLogSummary();
 				break;
 			case "newguildlog":
 				Helper.injectNewGuildLog();
@@ -5861,56 +5861,6 @@ var Helper = {
 			}
 
 		}
-	},
-
-	injectGuildLogSummary: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
-
-		var lastCheck=GM_getValue("lastGuildLogSumCheck");
-		var now=(new Date()).getTime();
-		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 60*60*1000);
-		if (haveToCheck)
-			document.getElementById('guillogrefresh').addEventListener('click',Helper.guildLogSummaryRefresh,true);
-		else
-			document.getElementById('guillogrefresh').innerHTML='[ Wait '+ Math.round(60 - ((now - lastCheck)/60000)) +'m ]';
-		var logDetail=GM_getValue("guildlogdetail");
-		if (logDetail)
-			Helper.guildLogDisplay(logDetail);
-		else
-			Helper.guildLogSummaryRefresh();
-	},
-
-	guildLogSummaryRefresh: function() {
-		var now=(new Date()).getTime();
-		GM_setValue("lastGuildLogSumCheck", now.toString());
-		GM_setValue("guildlogdetail",'');
-		document.getElementById('guillogrefresh').innerHTML='';
-		document.getElementById('guildlogdetail').innerHTML='Parsing page 1';
-		System.xmlhttp('index.php?cmd=guild&subcmd=log&page=0',Helper.guidLogRetrieve,1);
-	},
-
-	guidLogRetrieve: function(responseText, callback) {
-		var doc=System.createDocument(responseText);
-		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
-		logTable.deleteRow(0);
-		log=logTable.innerHTML.replace('<tbody>','').replace('</tbody>','');
-		var logDetail=GM_getValue("guildlogdetail");
-		if (!logDetail) logDetail='';
-		logDetail+=log;
-		GM_setValue("guildlogdetail", logDetail);
-		var page=System.findNode("//select",doc);
-		if (callback==15 || callback==page.length)
-			Helper.guildLogDisplay(logDetail);
-		else {
-			document.getElementById('guildlogdetail').innerHTML+=', '+(callback+1);
-			System.xmlhttp('index.php?cmd=guild&subcmd=log&page='+callback,Helper.guidLogRetrieve,callback+1);
-		}
-	},
-
-	guildLogDisplay: function(logDetail) {
-		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'+
-			logDetail+'</table>';
 	},
 
 	getFullPlayerData: function(member) {
