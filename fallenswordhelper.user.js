@@ -1779,7 +1779,7 @@ var Helper = {
 			}
 			break;
 		case "skills":
-			Helper.injectSkillsPage();
+			//Helper.injectSkillsPage();
 			break;
 		default:
 			break;
@@ -1861,25 +1861,6 @@ var Helper = {
 			},
 			"Cancel":function() {$("#msgTemplateDialog").dialog("close");$("#msgTemplateDialog").remove();}
 		}});
-	},
-
-	injectSkillsPage: function() {
-		var buffs = $('a[href*="index.php?cmd=skills&tree_id="][href*="&skill_id="] img[border*="0"]');
-		for (var i = 0; i < buffs.length; i++) {
-			var parNode = buffs[i].parentNode;
-			//var mouseoverText = buffs[i].firstChild.getAttribute("onmouseover");
-			var mouseoverText = $(buffs[i]).data('tipped');
-			var buffIndex = parNode.getAttribute("href").match(/skill_id=(\d*)/)[1];
-			var buffList = Data.buffList();
-			for (var j = 0; j < buffList.length; j++) {
-				if (buffList[j].skillId == buffIndex) {
-					mouseoverText = mouseoverText.replace("Click for Details", buffList[j].buff);
-					break;
-				}
-			}
-			buffs[i].setAttribute("data-tipped", mouseoverText);
-
-		}
 	},
 
 	injectViewGuild: function() {
