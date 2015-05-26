@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1498
+// @version        1499
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -6851,6 +6851,10 @@ var Helper = {
 		}
 	},
 
+	profileSelectAll: function(evt) {
+		$('input.backpackCheckbox:enabled').not(':checked').each(function(){$(this).click();});
+	},
+
 	addStatTotalToMouseover: function() {
 		if (GM_getValue("showStatBonusTotal")) {
 			$.subscribe('afterUpdate.Tipped', function(e, data){
@@ -7420,11 +7424,6 @@ var Helper = {
 		var bioExpander = $("#Helper\\:bioExpander");
 		$(bioExpander).text($(bioExpander).text() == "More ..." ? "Less ..." : "More ...");
 		$("#Helper\\:bioHidden").toggle();
-	},
-
-	profileSelectAll: function(evt) {
-		var checkboxItems = System.findNodes("//input[@type='checkbox'][@name='folderItem[]']");
-		checkboxItems.forEach(function(e) {e.checked = e.checked? false:true;});
 	},
 
 	equipProfileInventoryItem: function(evt) {
