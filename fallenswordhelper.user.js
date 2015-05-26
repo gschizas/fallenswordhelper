@@ -2176,73 +2176,6 @@ var Helper = {
 			var d = new Date(nextHuntMilliseconds);
 			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
 			$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
-			
-			return;								
-		} else {
-			//Check for beta as beta is different
-
-			if(isBeta){  //New Map Style
-				var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-				if (!staminaImageElement) {return;}
-
-				var mouseoverText = $(staminaImageElement).data('tipped');
-
-				var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-				var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
-				var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
-
-				var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-				var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-				var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-				var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
-				var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
-				nextGainHours = nextGainMinutes/60;
-
-				//get the max hours to still be inside stamina maximum
-				var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-				var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-				var now = (new Date()).getTime();
-				var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-
-				var d = new Date(nextHuntMilliseconds);
-				var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-				var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
-					nextHuntTimeText + "</nobr></font></td></tr><tr>";
-				var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
-				//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-				staminaImageElement.setAttribute("data-tipped", newMouseoverText);
-				return;
-			}
-
-			//Old Map Style
-			//var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-			var staminaImageElement = $('td[id="topBar-Stamina"]');
-			if (staminaImageElement.length < 1) {return;}
-
-			var mouseoverText = $(staminaImageElement).data('tipped');
-			var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-			var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-			var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
-			var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-
-			var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
-			var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
-			var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
-			nextGainHours = nextGainMinutes/60;
-			//get the max hours to still be inside stamina maximum
-			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-			var now = (new Date()).getTime();
-			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-
-			var d = new Date(nextHuntMilliseconds);
-			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-			var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
-				nextHuntTimeText + "</nobr></font></td></tr><tr>";
-			var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
-			//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-			$(staminaImageElement).attr("data-tipped", newMouseoverText);
 		}
 	},
 
@@ -2262,31 +2195,7 @@ var Helper = {
 			var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 			var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
 			$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
-			return;
 		}
-		
-		//Old Map Style
-		var levelupImageElement = $('td[id="topBar-XP"]');
-		if (levelupImageElement.length < 1) {return;}
-//		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
-//		if (!levelupImageElement) {return;}
-		var mouseoverText = $(levelupImageElement).data('tipped');
-		var remainingXPRE = /Remaining:\s<\/td><td[^>]*>([0-9,]+)/i;
-		var gainRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([0-9,]+)/i;
-		var nextGainRE = /Next\sGain\s*:\s*<\/td><td[^>]*>([0-9]*)m\s*([0-9]*)s/i;
-		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
-		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[1],10);
-		var hoursToNextLevel = Math.ceil(remainingXP/gain);
-		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
-
-		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-		var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
-			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
-		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-		$(levelupImageElement).attr("data-tipped", newMouseoverText);
-		return;
 	},
 
 	injectShop: function() {
