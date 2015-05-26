@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1497
+// @version        1498
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -546,63 +546,6 @@ var System = {
 			replace(/\[([a-z])\]/g,"<\$1>");
 	},
 
-	generateLiveTable: function(dataArray, outputElement, itemProperty) {
-		throw new Exception("Not ready yet!");
-		/*if (!dataArray) return;
-		var result='<table id="Helper:LiveTableOutput"><tr>' +
-			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
-			'<th sortkey="name">Name</th>' +
-			'<th sortkey="level" sortType="number">Level</th></tr>';
-		var item, color;
-		for (var i=0; i<dataArray[itemProperty].length;i++) {
-			item=dataArray[itemProperty][i];
-
-			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
-				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
-					'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
-				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
-				'<td align="right">' + player.level + '</td>' +
-				'</tr>';
-		}
-		result+='</table>';
-		outputElement.innerHTML=result;
-
-		var theTable=document.getElementById('Helper:OnlinePlayersTable');
-		for (var i=0; i<theTable.rows[0].cells.length; i++) {
-			var cell=theTable.rows[0].cells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
-		}*/
-	},
-
-	sortLiveTable: function(evt) {
-		throw new Exception("Not ready yet!");
-		/*Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
-		var headerClicked = evt.target.getAttribute("sortKey");
-		var sortType = evt.target.getAttribute("sortType");
-		if (!sortType) sortType="string";
-		GM_log(headerClicked);
-		// GM_log(Helper.sortBy);
-		GM_log(sortType);
-		// numberSort
-		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
-		}
-		Helper.sortBy=headerClicked;
-
-		switch(sortType) {
-			case "string":
-				Helper.onlinePlayers.players.sort(Helper.stringSort);
-				break;
-			case "number":
-				Helper.onlinePlayers.players.sort(Helper.numberSort);
-				break;
-		}
-		System.generateOnlinePlayersTable();*/
-	},
-
 	parseDate: function(textDate) {
 		textDateSplitSpace = textDate.split(" ");
 		timeText = textDateSplitSpace[0];
@@ -1074,42 +1017,7 @@ var Layout = {
 			return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
 			"', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
 		}
-	},
-
-
-	formatWiki: function(aText, oldVersion, newVersion) {
-		var lines=aText.replace("\r","").split("\n");
-		var changes=[];
-		var revRX = /^==Revision\s*(\d+)/i;
-		var chgRX = /^\s*\#\s+(.*)$/i;
-		var rev = null;
-		var chg = null;
-		var revNo = 0;
-		var chgTxt = "";
-
-		for (var i=0; i<lines.length; i++){
-			var line = lines[i];
-			rev=revRX.exec(line);
-			chg=chgRX.exec(line);
-
-			if (rev) revNo = parseInt(rev[1],10);
-			chgTxt = "";
-			if (chg) chgTxt = chg[1];
-			if (chgTxt!=="") {
-				if (!changes[revNo]) changes[revNo] = "";
-				changes[revNo] += "<li>" + chgTxt + "</li>";
-			}
-		}
-		var result='<ul>';
-		for (i=newVersion; i>oldVersion; i--) {
-			if (changes[i]) {
-				result += '<li><ul type=square>Version '+ i + '. ' + changes[i] + '</ul></li>';
-			}
-		}
-		result += "</ul>";
-		return result;
 	}
-
 };
 
 var Helper = {
@@ -1238,15 +1146,15 @@ var Helper = {
 		System.setDefault("enableMaxGroupSizeToJoin", true);
 		System.setDefault("maxGroupSizeToJoin", 11);
 
-		System.setDefault("enableTitanLog", false);
-		System.setDefault("titanLogRefreshTime", 5);
+		//~ System.setDefault("enableTitanLog", false);
+		//~ System.setDefault("titanLogRefreshTime", 5);
 
 		System.setDefault("enableTempleAlert", true);
-		System.setDefault("showGoldOnFindPlayer", true);
-		System.setDefault("titanLogLength", 15);
+		//~ System.setDefault("showGoldOnFindPlayer", false);
+		//~ System.setDefault("titanLogLength", 15);
 		System.setDefault("autoFillMinBidPrice", false);
 		System.setDefault("showPvPSummaryInLog", true);
-		System.setDefault("addUFSGWidgets", true);
+		//~ System.setDefault("addUFSGWidgets", true);
 		System.setDefault("enableQuickDrink", true);
 		System.setDefault("enhanceOnlineDots", true);
 		System.setDefault("hideBuffSelected", true);
@@ -1298,19 +1206,6 @@ var Helper = {
 	},
 
 	setItemFilterDefault: function() {
-/*		Helper.itemFilters = [
-		{"id":"showGloveTypeItems", "type":"Gloves"},
-			{"id":"showHelmetTypeItems", "type":"Helmet"},
-		{"id":"showAmuletTypeItems", "type":"Amulet"},
-		{"id":"showWeaponTypeItems", "type":"Weapon"},
-		{"id":"showAmorTypeItems", "type":"Armor"},
-		{"id":"showShieldTypeItems", "type":"Shield"},
-		{"id":"showRingTypeItems", "type":"Ring"},
-		{"id":"showBootTypeItems", "type":"Boots"},
-		{"id":"showRuneTypeItems", "type":"Rune"}
-		];
-*/
-		//re-arranged array to so that arrayid = type number for HCS: item.item_type = i
 		Helper.itemFilters = [
 			{"id":"showHelmetTypeItems", "type":"Helmet"},
 			{"id":"showAmorTypeItems", "type":"Armor"},
@@ -1361,85 +1256,6 @@ var Helper = {
 			});
 		}
 	},
-
-	// Autoupdate
-	//beginAutoUpdate: function() {
-	//	var lastCheck = GM_getValue("lastVersionCheck");
-	//	var now = (new Date()).getTime();
-	//	if (!lastCheck) {lastCheck = 0;}
-	//	var haveToCheck = ((now - lastCheck) > 6 * 60 * 60 * 1000);
-	//	if (haveToCheck) {
-	//		Helper.checkForUpdate();
-	//	}
-	//},
-
-	//checkForUpdate: function() {
-	//	GM_log("Checking for new version...");
-	//	var now = (new Date()).getTime();
-	//	GM_setValue("lastVersionCheck", now.toString());
-	//	GM_xmlhttpRequest({
-	//		method: 'GET',
-	//		url: "http://code.google.com/p/fallenswordhelper/source/browse/trunk",
-	//		/*headers: {
-	//			"User-Agent": navigator.userAgent,
-	//			"Referer": document.location
-	//		},*/
-	//		onload: function(responseDetails) {
-	//			Helper.autoUpdate(responseDetails);
-	//		}
-	//	});
-	//},
-
-	//autoUpdate: function(responseDetails) {
-	//	var now = (new Date()).getTime();
-	//	GM_setValue("lastVersionCheck", now.toString());
-	//	var currentVersion = GM_getValue("currentVersion");
-	//	if (!currentVersion) {currentVersion = 0;}
-    //
-	//	var doc = System.createDocument(responseDetails.responseText);
-	//	var latestVersion = $(doc).find('td:contains("fallenswordhelper.user.js")').next().next().text();
-    //
-	//	GM_log("Current version: " + currentVersion);
-	//	GM_log("Found version: " + latestVersion);
-    //
-	//	if (currentVersion != latestVersion) {
-	//		GM_xmlhttpRequest({
-	//			method: 'GET',
-	//			url: "http://fallenswordhelper.googlecode.com/svn/wiki/ChangeLog.wiki?nonce=" + now,
-	//			/*headers: {
-	//				"User-Agent": navigator.userAgent,
-	//				"Referer": document.location
-	//			},*/
-	//			onload: function(responseDetails) {
-	//				Helper.autoUpdateConfirm(responseDetails, currentVersion, latestVersion);
-	//			}
-	//		});
-	//	}
-	//},
-
-	//autoUpdateConfirm: function(responseDetails, oldVersion, newVersion) {
-	//	var theChanges = Layout.formatWiki(responseDetails.responseText, oldVersion, newVersion);
-    //
-	//	var $dialog = $('<div></div>')
-	//		.html(theChanges)
-	//		.dialog({
-	//			title: 'Fallen Sword Helper new version (' + newVersion + ') found. Update from version ' + oldVersion + '?',
-	//			resizable: false,
-	//			height:500,
-	//			width:500,
-	//			modal: true,
-	//			buttons: {
-	//				"OK": function() {
-	//					$dialog.dialog( "close" );
-	//					GM_setValue("currentVersion", newVersion);
-	//					GM_openInTab("http://fallenswordhelper.googlecode.com/svn-history/r" + newVersion + "/trunk/fallenswordhelper.user.js");
-	//				},
-	//				Cancel: function() {
-	//					$dialog.dialog( "close" );
-	//				}
-	//			}
-	//	});
-	//},
 
 	// main event dispatcher
 	onPageLoad: function(anEvent) {
@@ -1511,7 +1327,7 @@ var Helper = {
 			Helper.injectJoinAllLink();
 			Helper.changeGuildLogHREF();
 			Helper.injectAHsearch();
-			Helper.updateTitanLogs();
+			//~ Helper.updateTitanLogs();
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
@@ -1809,13 +1625,13 @@ var Helper = {
 				Helper.injectBuffLog();
 				break;
 			case "guildlog":
-				Helper.injectGuildLogSummary();
+				//~ Helper.injectGuildLogSummary();
 				break;
 			case "newguildlog":
 				Helper.injectNewGuildLog();
 				break;
 			case "checkwear":
-				Helper.injectCheckWearingItem();
+				//~ Helper.injectCheckWearingItem();
 				break;
 			case "findbuffs":
 				Helper.injectFindBuffs();
@@ -1824,7 +1640,6 @@ var Helper = {
 				Helper.injectFindOther();
 				break;
 			case "createmap":
-				Helper.injectCreateMap();
 				break;
 			case "savesettings":
 				Helper.injectSaveSettings();
@@ -1901,7 +1716,15 @@ var Helper = {
 			case "view":
 				break;
 			default:
-				Helper.injectCreatures();
+				break;
+			}
+			break;
+		case "quests":
+			switch (subPageId) {
+			case "view":
+				Helper.showAllQuestSteps();
+				break;
+			default:
 				break;
 			}
 			break;
@@ -1926,10 +1749,10 @@ var Helper = {
 			if (isBuffResult) {
 				Helper.updateBuffLog();
 			}
-			var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
-			if (isAuctionPage) {
-				Helper.injectAuctionHouse();
-			}
+			//~ var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
+			//~ if (isAuctionPage) {
+				//~ Helper.injectAuctionHouse();
+			//~ }
 			var isShopPage =  $('#shop-info').length > 0;//System.findNode("//td[contains(.,'then click to purchase for the price listed below the item.')]");
 			if (isShopPage) {
 				Helper.injectShop();
@@ -1956,7 +1779,7 @@ var Helper = {
 			}
 			break;
 		case "skills":
-			Helper.injectSkillsPage();
+			//Helper.injectSkillsPage();
 			break;
 		default:
 			break;
@@ -2040,33 +1863,8 @@ var Helper = {
 		}});
 	},
 
-	injectSkillsPage: function() {
-		var buffs = $('a[href*="index.php?cmd=skills&tree_id="][href*="&skill_id="] img[border*="0"]');
-		for (var i = 0; i < buffs.length; i++) {
-			var parNode = buffs[i].parentNode;
-			//var mouseoverText = buffs[i].firstChild.getAttribute("onmouseover");
-			var mouseoverText = $(buffs[i]).data('tipped');
-			var buffIndex = parNode.getAttribute("href").match(/skill_id=(\d*)/)[1];
-			var buffList = Data.buffList();
-			for (var j = 0; j < buffList.length; j++) {
-				if (buffList[j].skillId == buffIndex) {
-					mouseoverText = mouseoverText.replace("Click for Details", buffList[j].buff);
-					break;
-				}
-			}
-			buffs[i].setAttribute("data-tipped", mouseoverText);
-
-		}
-	},
-
 	injectViewGuild: function() {
-		var avyImg;
-		if (navigator.userAgent.indexOf("Firefox")>0)
-			avyImg = System.findNode("//img[contains(@title, 's Logo')]");
-		else //chrome
-			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
-		if (!avyImg) {return;}
-		avyImg.style.borderStyle="none";
+		Helper.removeGuildAvyImgBorder();
 
 		var highlightPlayersNearMyLvl = GM_getValue("highlightPlayersNearMyLvl");
 		var highlightGvGPlayersNearMyLvl = GM_getValue("highlightGvGPlayersNearMyLvl");
@@ -2125,14 +1923,11 @@ var Helper = {
 				if (buffsNotCast) {
 
 					buffLog=timeStamp+'<span style="color: red;">' + buffsNotCast[0] + '</span><br>' + buffLog;
-
 				}
-
 			}
 			GM_setValue("buffLog",buffLog);
 			//document.getElementById('buff_Log').innerHTML+='<br><br><br>'+buffLog;
 		}
-
 	},
 
 	injectBuffLog: function(content) {
@@ -2170,14 +1965,18 @@ var Helper = {
 		document.getElementById('fsboxdetail').innerHTML=GM_getValue("fsboxcontent");
 	},
 
-	injectGuild: function() {
+	removeGuildAvyImgBorder: function() {
 		var avyImg;
 		if (navigator.userAgent.indexOf("Firefox")>0)
 			avyImg = System.findNode("//img[contains(@title, 's Logo')]");
 		else //chrome
-			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");
-		if (!avyImg) {return;}
-		avyImg.style.borderStyle="none";
+			avyImg = System.findNode("//img[contains(@oldtitle, 's Logo')]");0
+		if (avyImg) avyImg.style.borderStyle="none";
+		return;
+	},
+
+	injectGuild: function() {
+		Helper.removeGuildAvyImgBorder();
 
 		var guildMiniSRC = System.findNode("//img[contains(@src,'_mini.jpg')]").getAttribute("src");
 		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
@@ -2256,7 +2055,6 @@ var Helper = {
 				Helper.getConflictInfo,	{"node": confNode});
 		}
 		Helper.changeGuildListOfflineBallColor();
-
 
 	},
 
@@ -2344,7 +2142,7 @@ var Helper = {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -2378,73 +2176,6 @@ var Helper = {
 			var d = new Date(nextHuntMilliseconds);
 			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
 			$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
-			
-			return;								
-		} else {
-			//Check for beta as beta is different
-
-			if(isBeta){  //New Map Style
-				var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-				if (!staminaImageElement) {return;}
-
-				var mouseoverText = $(staminaImageElement).data('tipped');
-
-				var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-				var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
-				var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
-
-				var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-				var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-				var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-				var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
-				var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
-				nextGainHours = nextGainMinutes/60;
-
-				//get the max hours to still be inside stamina maximum
-				var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-				var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-				var now = (new Date()).getTime();
-				var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-
-				var d = new Date(nextHuntMilliseconds);
-				var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-				var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
-					nextHuntTimeText + "</nobr></font></td></tr><tr>";
-				var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
-				//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-				staminaImageElement.setAttribute("data-tipped", newMouseoverText);
-				return;
-			}
-
-			//Old Map Style
-			//var staminaImageElement = System.findNode("//img[contains(@src,'/skin/icon_stamina.gif')]/ancestor::td[2]");
-			var staminaImageElement = $('td[id="topBar-Stamina"]');
-			if (staminaImageElement.length < 1) {return;}
-
-			var mouseoverText = $(staminaImageElement).data('tipped');
-			var staminaRE = /Stamina:\s<\/td><td[^>]*>([,0-9]+)\s\/\s([,0-9]+)<\/td>/;
-			var curStamina = System.intValue(staminaRE.exec(mouseoverText)[1]);
-			var maxStamina = System.intValue(staminaRE.exec(mouseoverText)[2]);
-			var gainPerHourRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([,0-9]+)<\/td>/;
-			var gainPerHour = System.intValue(gainPerHourRE.exec(mouseoverText)[1]);
-
-			var nextGainRE = /Next\sGain\s:\s<\/td><td[^>]*>([,0-9]+)m ([,0-9]+)s/;
-			var nextGainMinutes = System.intValue(nextGainRE.exec(mouseoverText)[1]);
-			var nextGainSeconds = System.intValue(nextGainRE.exec(mouseoverText)[2]);
-			nextGainHours = nextGainMinutes/60;
-			//get the max hours to still be inside stamina maximum
-			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-			var now = (new Date()).getTime();
-			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-
-			var d = new Date(nextHuntMilliseconds);
-			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-			var newPart = "<tr><td><font color=#999999>Max Stam At: </td><td width=90%><nobr>" +
-				nextHuntTimeText + "</nobr></font></td></tr><tr>";
-			var newMouseoverText = mouseoverText.replace("</table>", newPart + "</table>");
-			//newMouseoverText = newMouseoverText.replace(/\s:/,":"); //this breaks the fallen sword addon, so removing this line.
-			$(staminaImageElement).attr("data-tipped", newMouseoverText);
 		}
 	},
 
@@ -2464,38 +2195,16 @@ var Helper = {
 			var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 			var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
 			$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
-			return;
 		}
-		
-		//Old Map Style
-		var levelupImageElement = $('td[id="topBar-XP"]');
-		if (levelupImageElement.length < 1) {return;}
-//		var levelupImageElement = System.findNode("//img[contains(@src,'/skin/icon_xp.gif')]/ancestor::td[2]");
-//		if (!levelupImageElement) {return;}
-		var mouseoverText = $(levelupImageElement).data('tipped');
-		var remainingXPRE = /Remaining:\s<\/td><td[^>]*>([0-9,]+)/i;
-		var gainRE = /Gain\sPer\sHour:\s<\/td><td[^>]*>\+([0-9,]+)/i;
-		var nextGainRE = /Next\sGain\s*:\s*<\/td><td[^>]*>([0-9]*)m\s*([0-9]*)s/i;
-		var remainingXP = parseInt(remainingXPRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-		var gain = parseInt(gainRE.exec(mouseoverText)[1].replace(/,/g,""),10);
-		var nextGainMin = parseInt(nextGainRE.exec(mouseoverText)[1],10);
-		var nextGainSec = parseInt(nextGainRE.exec(mouseoverText)[1],10);
-		var hoursToNextLevel = Math.ceil(remainingXP/gain);
-		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
-
-		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-		var mouseoverTextAddition = "<tr><td><font color=#999999>Next Level At: </td><td width=90%><nobr>" +
-			nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy") + "</nobr></font></td></tr><tr>";
-		newMouseoverText = mouseoverText.replace("</table>", mouseoverTextAddition + "</table>");
-		$(levelupImageElement).attr("data-tipped", newMouseoverText);
-		return;
 	},
 
 	injectShop: function() {
 		var injectHere=$('#shop-info');
 		var itemNodes=$('td center a img[src*="/items/"]');
 
-		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=3 class='custominput'><table cellpadding=2><tr>";
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy "
+					 + "<input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=3 "
+					 + "class='custominput'><table cellpadding=2><tr>";
 		var itemId;
 		for (var i=0;i<itemNodes.length;i++) {
 			var item=itemNodes[i];
@@ -2507,7 +2216,8 @@ var Helper = {
 				"' class='tipped' data-tipped-options='skin: \"fsItem\", ajax: true' data-tipped=\""+onmouseover+"\">"+text+"</td>";
 			if (i%25==24 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
-		selector+="</table><table width='600px'></tr><tr><td align='right' width='50%'>Selected item:</td><td height=45 width='50%' id=selectedItem align='left'>&nbsp;</td></tr>"+
+		selector+="</table><table width='600px'></tr><tr><td align='right' width='50%'>Selected item:</td><td height=45 width='50%' "
+				  + "id=selectedItem align='left'>&nbsp;</td></tr>"+
 			"<tr><td id=warningMsg colspan='2' align='center'></td></tr><tr><td id=buy_result colspan='2' align='center'></td></tr>";
 		injectHere.after("<table><tr><td>"+selector+"</td></tr></table>");
 		for (i=0;i<itemNodes.length;i++) {
@@ -2540,7 +2250,6 @@ var Helper = {
 		for (var i=0;i<document.getElementById('buy_amount').value;i++) {
 			System.xmlhttp("index.php?cmd=shop&subcmd=buyitem&item_id="+Helper.shopItemId+"&shop_id="+Helper.shopId,
 				Helper.quickDone);
-
 		}
 	},
 
@@ -2548,8 +2257,9 @@ var Helper = {
 		var infoMessage = Layout.infoBox(responseText);
 		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
-/*******************************************************************************************************************/
-injectBazaar: function() {
+
+	/*******************************************************************************************************************/
+	injectBazaar: function() {
 		var injectHere=$('img[alt="Potion Bazaar"]').parents("center:first");
 		var itemNodes=$('td center a img[src*="/items/"]');
 
@@ -2581,7 +2291,8 @@ injectBazaar: function() {
 		document.getElementById('selectedItem').innerHTML=
 			document.getElementById("select"+Helper.bazaarItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
 	},
-/************************************************************************************************************************************************/
+	/************************************************************************************************************************************************/
+
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = $('td:contains("Below is the current status for the relic"):last');
 		relicNameElement.css('font-size', 'x-small');
@@ -2608,11 +2319,8 @@ injectBazaar: function() {
 							buffAllLink.attr("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
 							shortList = new Array();
 						}
-
 					}
-
 				}
-
 			}
 			injectHere.html(injectHere.html() + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
 				'class="custombutton">');
@@ -2867,43 +2575,12 @@ injectBazaar: function() {
 		var doc = System.createDocument(responseText);
 		var playerAttackValue = 0, playerDefenseValue = 0, playerArmorValue = 0, playerDamageValue = 0, playerHPValue = 0;
 
-		//~ var playerName = $(doc).find('h1').text();
 		$(doc).find('div').remove(".profile-stat-bonus");
 		playerAttackValue = $(doc).find('#stat-attack').text();
 		playerDefenseValue = $(doc).find('#stat-defense').text();
 		playerArmorValue = $(doc).find('#stat-armor').text();
 		playerDamageValue = $(doc).find('#stat-damage').text();
 		playerHPValue = $(doc).find('#stat-hp').text();
-		//~ console.log('Player : ' + playerName + '   ' + 
-					//~ 'playerAttackValue = ' + playerAttackValue + '   ' + 
-					//~ 'playerDefenseValue = ' + playerDefenseValue + '   ' + 
-					//~ 'playerArmorValue = ' + playerArmorValue + '   ' + 
-					//~ 'playerDamageValue = ' + playerDamageValue + '   ' + 
-					//~ 'playerHPValue = ' + playerHPValue
-					//~ );
-
-		//~ var allItems = doc.getElementsByTagName("B");
-		//~ for (var i=0;i<allItems.length;i++) {
-			//~ var anItem=allItems[i];
-			//~ if (anItem.innerHTML == "Attack:&nbsp;"){
-				//~ var attackText = anItem;
-				//~ var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerAttackValue = attackLocation.textContent;
-				//~ console.log('Player : ' + playerName + '   attack = ' + playerAttackValue);
-				//~ var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				//~ var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerDefenseValue = defenseLocation.textContent;
-				//~ var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				//~ var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerArmorValue = armorLocation.textContent;
-				//~ var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-				//~ var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerDamageValue = damageLocation.textContent;
-				//~ var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-				//~ var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-				//~ playerHPValue = hpLocation.textContent;
-			//~ }
-		//~ }
 
 		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
 		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
@@ -3122,11 +2799,6 @@ injectBazaar: function() {
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Parsing attacking group stats ... ');
 		var doc=System.createDocument(responseText);
-		//~ Helper.relicGroupAttackValue = $(doc).find('td#centerColumn').find('td:contains("Attack:"):not(:contains(" Attack:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupDefenseValue = $(doc).find('td#centerColumn').find('td:contains("Defense:"):not(:contains(" Defense:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupArmorValue = $(doc).find('td#centerColumn').find('td:contains("Armor:"):not(:contains(" Armor:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupDamageValue = $(doc).find('td#centerColumn').find('td:contains("Damage:"):not(:contains(" Damage:"))').next().text().replace(/,/g,"")*1;
-		//~ Helper.relicGroupHPValue = $(doc).find('td#centerColumn').find('td:contains("HP:"):not(:contains(" HP:"))').next().text().replace(/,/g,"")*1;
 		Helper.relicGroupAttackValue = $(doc).find('#stat-attack').text().replace(/,/g,"")*1;
 		Helper.relicGroupDefenseValue = $(doc).find('#stat-defense').text().replace(/,/g,"")*1;
 		Helper.relicGroupArmorValue = $(doc).find('#stat-armor').text().replace(/,/g,"")*1;
@@ -3864,12 +3536,7 @@ injectBazaar: function() {
 						aRow.parentNode.removeChild(aRow.nextSibling);
 						aRow.parentNode.removeChild(aRow);
 					}
-					//<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=17&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank"><img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Ultimate Fallen Sword Guide" border="0"></a>
 					var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-					//~ aRow.cells[4].innerHTML = '<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
-						//~ '<img src="http://fileserver.huntedcow.com/skin/fs_wiki.gif" title="Search for this quest on the Wiki" border="0"></a>';
-					//~ aRow.cells[4].innerHTML += '&nbsp;<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
-						//~ '<img border=0 title="Search quest in Ultimate FSG" src="'+ System.imageServerHTTPOld + '/temple/1.gif"/></a>';
 					aRow.cells[4].innerHTML = '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID + '&amp;search_name=&amp;search_level_min=&amp;search_level_max=&amp;sort_by=" target="_blank">' +
 						'<img border=0 style="float:left;" title="Search quest in Ultimate FSG" src="' + System.imageServer + '/temple/1.gif"/></a>';
 					aRow.cells[4].innerHTML += '&nbsp;<a href="http://wiki.fallensword.com/index.php?title=' + questName.replace(/ /g,'_') + '" target="_blank">' +
@@ -4234,12 +3901,15 @@ injectBazaar: function() {
 						}
 					}
 					var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-					var l = data.player.enhancements.length;
-					for(var i=0; i<l; i++) //loop through enhancements
-					{//54 = ca, 26 = doubler
-						var enh = data.player.enhancements[i];
-						if (notSave.indexOf('|'+enh.name+'|')==-1){
-							combatData.player.enhancements[enh.name]=enh.value;
+					if (data.player.enhancements)
+					{
+						var l = data.player.enhancements.length;
+						for(var i=0; i<l; i++) //loop through enhancements
+						{//54 = ca, 26 = doubler
+							var enh = data.player.enhancements[i];
+							if (notSave.indexOf('|'+enh.name+'|')==-1){
+								combatData.player.enhancements[enh.name]=enh.value;
+							}
 						}
 					}
 					//combatData.player.enhancements = data.player.enhancements;
@@ -4450,8 +4120,6 @@ injectBazaar: function() {
 				}
 			}
 		}
-
-
 	},
 
 	fixOnlineGuildBuffLinks: function() {
@@ -4751,9 +4419,7 @@ injectBazaar: function() {
 	},
 
 	showAHInvManager: function(injectId) {
-		var output = 'Note that clicking on Show AH Price might reset your AH Search Preference (min/max Lvl, min/max Forge)<br/>'+
-			'<table width=100% cellspacing=2 cellpadding=2>'+
-			'<tr><th colspan=5 align=right>[<span id=showAhPrice style="cursor:pointer; color:yellow">Show AH Price</span>]</td>'+
+		var output = '<table width=100% cellspacing=2 cellpadding=2>'+
 			'<tr><th colspan=5 align=center>Items from <a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a> found in your inventory</td>'+
 			'<tr><th>Name</th><th>Nick Name<th>Inv Count</th><th>AH Min Price</th><th>AH BuyNow Price</th></tr>';
 		var invCount = {}, name;
@@ -4794,13 +4460,6 @@ injectBazaar: function() {
 		output += '</table>';
 		$(injectId).html(output);
 		$('#showAhPrice').click(Helper.showAHPrice);
-	},
-
-	showAHPrice: function() {
-		//index.php?cmd=auctionhouse&order_by=1&search_text=Potion of Black Death&pref_save=1&pref_hidegold=1
-		// inter-exchange pref_hidegold and pref_hidefsp to get the price
-		// feel free to implement this :)
-		alert('dkwizard is a bit busy, but completing this new feature is definitely high in his TODO list, stay tuned :)');
 	},
 
 	insertQuickExtract: function(content) {
@@ -5550,17 +5209,10 @@ injectBazaar: function() {
 				});
 			}
 		}, 0);
-		//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-			//~ window.document.wrappedJSObject.onkeypress = null;
-			//~ window.document.wrappedJSObject.combatKeyHandler = null;
-			//~ window.document.wrappedJSObject.realmKeyHandler = null;
-			//~ window.document.wrappedJSObject.onkeypress = Helper.keyPress;
-		//~ } else {
-			unsafeWindow.document.onkeypress = null;
-			unsafeWindow.document.combatKeyHandler = null;
-			unsafeWindow.document.realmKeyHandler = null;
-			unsafeWindow.document.onkeypress = Helper.keyPress;
-		//~ }
+		unsafeWindow.document.onkeypress = null;
+		unsafeWindow.document.combatKeyHandler = null;
+		unsafeWindow.document.realmKeyHandler = null;
+		unsafeWindow.document.onkeypress = Helper.keyPress;
 	},
 
 	moveMe: function(dx, dy) {
@@ -6092,56 +5744,6 @@ injectBazaar: function() {
 		}
 	},
 
-	injectGuildLogSummary: function() {
-		Layout.notebookContent().innerHTML=Helper.makePageTemplate('Guild Log Summary','','guillogrefresh','Refresh','guildlogdetail');
-
-		var lastCheck=GM_getValue("lastGuildLogSumCheck");
-		var now=(new Date()).getTime();
-		if (!lastCheck) lastCheck=0;
-		var haveToCheck=((now - lastCheck) > 60*60*1000);
-		if (haveToCheck)
-			document.getElementById('guillogrefresh').addEventListener('click',Helper.guildLogSummaryRefresh,true);
-		else
-			document.getElementById('guillogrefresh').innerHTML='[ Wait '+ Math.round(60 - ((now - lastCheck)/60000)) +'m ]';
-		var logDetail=GM_getValue("guildlogdetail");
-		if (logDetail)
-			Helper.guildLogDisplay(logDetail);
-		else
-			Helper.guildLogSummaryRefresh();
-	},
-
-	guildLogSummaryRefresh: function() {
-		var now=(new Date()).getTime();
-		GM_setValue("lastGuildLogSumCheck", now.toString());
-		GM_setValue("guildlogdetail",'');
-		document.getElementById('guillogrefresh').innerHTML='';
-		document.getElementById('guildlogdetail').innerHTML='Parsing page 1';
-		System.xmlhttp('index.php?cmd=guild&subcmd=log&page=0',Helper.guidLogRetrieve,1);
-	},
-
-	guidLogRetrieve: function(responseText, callback) {
-		var doc=System.createDocument(responseText);
-		var logTable = System.findNode("//table[@border='0' and @cellpadding='2' and @width='100%']",doc);
-		logTable.deleteRow(0);
-		log=logTable.innerHTML.replace('<tbody>','').replace('</tbody>','');
-		var logDetail=GM_getValue("guildlogdetail");
-		if (!logDetail) logDetail='';
-		logDetail+=log;
-		GM_setValue("guildlogdetail", logDetail);
-		var page=System.findNode("//select",doc);
-		if (callback==15 || callback==page.length)
-			Helper.guildLogDisplay(logDetail);
-		else {
-			document.getElementById('guildlogdetail').innerHTML+=', '+(callback+1);
-			System.xmlhttp('index.php?cmd=guild&subcmd=log&page='+callback,Helper.guidLogRetrieve,callback+1);
-		}
-	},
-
-	guildLogDisplay: function(logDetail) {
-		document.getElementById('guildlogdetail').innerHTML='<table width=100% cellpadding=2 border=0 style="font-size:x-small">'+
-			logDetail+'</table>';
-	},
-
 	getFullPlayerData: function(member) {
 		return;
 		//System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
@@ -6166,295 +5768,295 @@ injectBazaar: function() {
 		}
 	},
 
-	injectAuctionHouse: function() {
-		var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
-		if (isAuctionPage) {
-			var imageCell = isAuctionPage.parentNode;
-			var imageHTML = imageCell.innerHTML; //hold on to this for later.
-
-			var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
-
-			//Add functionality to hide the text block at the top.
-			var textRow = auctionTable.rows[2];
-			textRow.id = 'auctionTextControl';
-			var myBidsButton = System.findNode("//input[@value='My Bids']/..");
-			myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
-				"id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
-			if (GM_getValue("auctionTextControl")) {
-				textRow.style.display = "none";
-				textRow.style.visibility = "hidden";
-			}
-			document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
-
-			//fix button class and add go to first and last
-			var prevButton = System.findNode("//input[@value='<']");
-			var nextButton = System.findNode("//input[@value='>']");
-			if (prevButton) {
-				prevButton.setAttribute("class", "custombutton");
-				var startButton = document.createElement("input");
-				startButton.setAttribute("type", "button");
-				startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
-				startButton.setAttribute("class", "custombutton");
-				startButton.setAttribute("value", "<<");
-				prevButton.parentNode.insertBefore(startButton,prevButton);
-			}
-			if (nextButton) {
-				nextButton.setAttribute("class", "custombutton");
-				var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
-				lastPage = lastPageNode.textContent.replace(/\D/g,"");
-				var finishButton = document.createElement("input");
-				finishButton.setAttribute("type", "button");
-				finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
-				finishButton.setAttribute("class", "custombutton");
-				finishButton.setAttribute("value", ">>");
-				nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
-			}
-
-			//insert another page change block at the top of the screen.
-			if (isNewUI == 1) var insertPageChangeBlockHere = auctionTable.rows[3].cells[0]; // crude fix for new UI
-			else var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
-			var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
-			var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
-			newPageChangeBlock += "</form>";
-			var insertPageChangeBlock=document.createElement("SPAN");
-			insertPageChangeBlock.innerHTML = newPageChangeBlock;
-			insertPageChangeBlockHere.align = "right";
-			insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
-
-			var quickSearchList = System.getValueJSON("quickSearchList");
-
-			var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
-				"<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
-							System.server +
-							"index.php?cmd=notepad&blank=1&subcmd=auctionsearch'>" +
-							"Configure Quick Search</a></td></tr>";
-			var lp=0;
-			var rowCount = 0;
-			for (var p=0;p<quickSearchList.length;p++) {
-				if (lp % 6==0 && rowCount == 6) break; //36 searches on the screen so don't display any more
-				var quickSearch=quickSearchList[p];
-				if (quickSearch.displayOnAH) {
-					if (lp % 6==0) {
-						finalHTML += "<tr>";
-						rowCount++;
-					}
-					finalHTML += "<td nowrap style='overflow: hidden;'";
-					finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
-						quickSearch.searchname + "&page=1&order_by=1'>" +
-						quickSearch.nickname + "</a></td>";
-					if (lp % 6==5) finalHTML += "</tr>";
-					lp++;
-				}
-			}
-			imageCell.innerHTML = finalHTML;
-		}
-
-		//add coloring for item craft and durability
-		var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
-		if (auctionCellCraftElements) {
-			for (i=0; i<auctionCellCraftElements.length; i++) {
-				var auctionCellCraftElement = auctionCellCraftElements[i];
-				if (auctionCellCraftElement.textContent.length > 0){
-					switch(auctionCellCraftElement.textContent) {
-						case 'Perfect': craftColor = '#00b600'; break;
-						case 'Excellent': craftColor = '#f6ed00'; break;
-						case 'Very Good': craftColor = '#f67a00'; break;
-						case 'Good': craftColor = '#f65d00'; break;
-						case 'Average': craftColor = '#f64500'; break;
-						case 'Poor': craftColor = '#f61d00'; break;
-						case 'Very Poor': craftColor = '#b21500'; break;
-						case 'Uncrafted': craftColor = '#666666'; break;
-					}
-					auctionCellCraftElement.style.color = craftColor;
-				}
-				var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
-				if (auctionCellDurabilityElement.nodeName == 'SPAN') {
-					auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
-					auctionCellDurabilityElement.style.color = 'gray';
-				}
-			}
-		}
-
-		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
-		auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
-
-		var playerId = Layout.playerId();
-
-		var memberList = System.getValueJSON("memberlist");
-		var memberNameString = "";
-		if (memberList) {
-			for (i=0;i<memberList.members.length;i++) {
-				var member=memberList.members[i];
-				memberNameString += member.name + " ";
-			}
-		}
-		var listOfEnemies = GM_getValue("listOfEnemies");
-		if (!listOfEnemies) listOfEnemies = "";
-		var listOfAllies = GM_getValue("listOfAllies");
-		if (!listOfAllies) listOfAllies = "";
-
-		var newRow, newCell, winningBidBuyoutCell;
-		var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
-		for (i=0;i<auctionTable.rows.length;i++) {
-			var aRow = auctionTable.rows[i];
-			if (i>0 && // the title row - ignore this
-				aRow.cells[1]) { // a separator row - ignore this
-				if (aRow.cells[5].innerHTML == '<font size="1">[ended]</font>') { //time left column
-					aRow.cells[6].innerHTML = ""; // text field and button column
-				} else {
-					var timeLeft = aRow.cells[5].firstChild.innerHTML;
-					var secondsLeft = timeLeft.substring(timeLeft.indexOf('m')+1).trim();
-					timeLeft = timeLeft.substring(0, timeLeft.indexOf('m'));
-					if (timeLeft >= 60) {
-						var hoursLeft = Math.floor(timeLeft / 60);
-						if (hoursLeft < 24) {
-							var minutesLeft = timeLeft - (hoursLeft * 60);
-							aRow.cells[5].firstChild.innerHTML = hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
-						} else {
-							var daysLeft = Math.floor(hoursLeft / 24);
-							hoursLeft = hoursLeft - (daysLeft * 24);
-							minutesLeft = timeLeft - (hoursLeft * 60) - (daysLeft * 1440);
-							aRow.cells[5].firstChild.innerHTML = daysLeft + "d " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
-						}
-
-					}
-
-					winningBidValue = "-";
-					var bidExistsOnItem = false;
-					var playerListedItem = false;
-					if (aRow.cells[1].innerHTML != '<font size="1">Auction House</font>') {
-						var sellerElement = aRow.cells[1].firstChild.firstChild;
-						sellerHref = sellerElement.getAttribute("href");
-						var sellerIDRE = /player_id=(\d+)/;
-						var sellerID = sellerIDRE.exec(sellerHref)[1];
-						if (playerId == sellerID) {
-							playerListedItem = true;
-						}
-					}
-					if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
-						var winningBidTable = aRow.cells[3].firstChild.firstChild;
-						var winningBidCell = winningBidTable.rows[0].cells[0];
-						var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
-						var winningBidder = winningBidderCell.innerHTML;
-						if (memberNameString.search(" "+winningBidder+" ") !=-1) {
-							winningBidderCell.style.color="green";
-						}
-						if (listOfEnemies.search(" "+winningBidder+" ") !=-1) {
-							winningBidderCell.style.color="red";
-						}
-						if (listOfAllies.search(" "+winningBidder+" ") !=-1) {
-							winningBidderCell.style.color="blue";
-						}
-						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
-						var winningBidValue = System.intValue(winningBidCell.textContent);
-						newRow = winningBidTable.insertRow(2);
-						winningBidBuyoutCell = newRow.insertCell(0);
-						winningBidBuyoutCell.colSpan = "2";
-						winningBidBuyoutCell.align = "center";
-						var winningBidderHTML = winningBidTable.rows[1].cells[0].innerHTML;
-						var winningBidderIDRE = /player_id=(\d+)/;
-						var winningBidderID = winningBidderIDRE.exec(winningBidderHTML)[1];
-						if (playerId == winningBidderID) {
-							playerListedItem = true;
-						}
-					}
-					if (!bidExistsOnItem && !playerListedItem) {
-						var bidValueButton = aRow.cells[6].getElementsByTagName("input");
-						if (winningBidValue != "-") {
-							var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-							var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
-							if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
-							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
-								System.addCommas(overBid) + '</span>&nbsp';
-							if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
-							bidValueButton[0].size = 6;
-						} else {
-							var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
-							if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
-							bidValueButton[0].size = 6;
-						}
-					}
-					var inputTableCell;
-					if (!playerListedItem) {
-						var inputTable = aRow.cells[6].firstChild.firstChild;
-						var inputCell = inputTable.rows[0].cells[0];
-						var textInput = inputCell.firstChild;
-						textInput.id = 'auction' + i + 'text';
-						var bidCell = inputTable.rows[0].cells[1];
-						bidCell.align = "right";
-						//spacer row
-						newRow = inputTable.insertRow(1);
-						inputTableCell = newRow.insertCell(0);
-						inputTableCell.colSpan = "2";
-						inputTableCell.height = "2";
-						//get itemID for bid no refresh
-						var itemIMG = aRow.cells[0].firstChild;
-						//var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
-						var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(itemIMG).data("tipped"));
-						invID = itemStats[2];
-						//new bid no refresh button
-						newRow = inputTable.insertRow(2);
-						inputTableCell = newRow.insertCell(0);
-						inputTableCell.colSpan = "2";
-						inputTableCell.align = "center";
-						inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
-							'<input id="bidNoRefresh" invID="'+ invID +
-								'" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
-					}
-					var inputText = aRow.cells[6];
-				}
-			}
-		}
-		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");
-		if (bidNoRefreshList) {
-			for (i=0; i<bidNoRefreshList.length; i++) {
-				var bidNoRefreshItem = bidNoRefreshList[i];
-				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
-			}
-			//Add a bid no refresh on all
-			$('input[value="My Bids"]').after('&nbsp;<input type="button" value="Bid on All" id="fshBidOnAll"  class="custombutton tipped" data-tipped="<b>Bid on each auction</b><br>Triggers the \"Bid no refresh\" for each btton on screen">');
-			$("#fshBidOnAll").click(function()
-			{
-				if(confirm ("Are you sure you want to bid on all of them?")){
-					$("input[id=bidNoRefresh]").each(function()
-					{
-						//this.checked = !this.checked;
-						//alert("asdf");
-						//alert(this.attr('id'));
-						this.click();
-					});
-				}
-			});
-		}
-		//show saved prefs if not default values
-		var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
-		var pref_minlevel = System.findNode("//input[@name='pref_minlevel']").value;
-		var pref_maxlevel = System.findNode("//input[@name='pref_maxlevel']").value
-		var pref_hidegold = System.findNode("//input[@name='pref_hidegold']").checked;
-		var pref_hidefsp = System.findNode("//input[@name='pref_hidefsp']").checked;
-		var pref_minforge = System.findNode("//select[@name='pref_minforge']").selectedIndex;
-		var pref_mincraft = System.findNode("//select[@name='pref_mincraft']").selectedIndex;
-		var output = '';
-		if (pref_minlevel > 1 || (pref_maxlevel > 0 && pref_maxlevel != 1000) || pref_hidegold || pref_hidefsp || pref_minforge != 0 || pref_mincraft != 0) {
-			output = '<nobr><span style="color:blue; font-size:x-small;">Enabled filters (' +
-				'<span id="Helper.resetAHprefs" style="cursor:pointer; text-decoration:underline; color:blue;">Reset</span>' +
-				'):</span> <span style="color:orangered; font-size:x-small;">';
-			if (pref_minlevel > 1) output += 'MinLevel('+pref_minlevel+') ';
-			if (pref_maxlevel > 0 && pref_maxlevel != 1000) output += 'MaxLevel('+pref_maxlevel+') ';
-			if (pref_hidegold) output += pref_hidefsp?'<span style="color:magenta; font-weight:900;">Gold</span> ':'Gold ';
-			if (pref_hidefsp) output += pref_hidegold?'<span style="color:magenta; font-weight:900;">FSP</span> ':'FSP ';
-			if (pref_minforge != 0) output += 'Forge('+pref_minforge+') ';
-			if (pref_mincraft != 0) output += 'Craft('+pref_mincraft+') ';
-			output += '</span></nobr>';
-			searchPrefsFirstCell.innerHTML = output;
-			document.getElementById("Helper.resetAHprefs").addEventListener('click', Helper.resetAHquickPrefsAndReload, true);
-		}
-		//litte something to default to sorting by min bid
-		var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
-		hiddenOrderByInput.value = 1;
-
-		Helper.injectAuctionQuickCancel();
-	},
+	//~ injectAuctionHouse: function() {
+		//~ var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
+		//~ if (isAuctionPage) {
+			//~ var imageCell = isAuctionPage.parentNode;
+			//~ var imageHTML = imageCell.innerHTML; //hold on to this for later.
+//~ 
+			//~ var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
+//~ 
+			//~ //Add functionality to hide the text block at the top.
+			//~ var textRow = auctionTable.rows[2];
+			//~ textRow.id = 'auctionTextControl';
+			//~ var myBidsButton = System.findNode("//input[@value='My Bids']/..");
+			//~ myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
+				//~ "id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
+			//~ if (GM_getValue("auctionTextControl")) {
+				//~ textRow.style.display = "none";
+				//~ textRow.style.visibility = "hidden";
+			//~ }
+			//~ document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
+//~ 
+			//~ //fix button class and add go to first and last
+			//~ var prevButton = System.findNode("//input[@value='<']");
+			//~ var nextButton = System.findNode("//input[@value='>']");
+			//~ if (prevButton) {
+				//~ prevButton.setAttribute("class", "custombutton");
+				//~ var startButton = document.createElement("input");
+				//~ startButton.setAttribute("type", "button");
+				//~ startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
+				//~ startButton.setAttribute("class", "custombutton");
+				//~ startButton.setAttribute("value", "<<");
+				//~ prevButton.parentNode.insertBefore(startButton,prevButton);
+			//~ }
+			//~ if (nextButton) {
+				//~ nextButton.setAttribute("class", "custombutton");
+				//~ var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
+				//~ lastPage = lastPageNode.textContent.replace(/\D/g,"");
+				//~ var finishButton = document.createElement("input");
+				//~ finishButton.setAttribute("type", "button");
+				//~ finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
+				//~ finishButton.setAttribute("class", "custombutton");
+				//~ finishButton.setAttribute("value", ">>");
+				//~ nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
+			//~ }
+//~ 
+			//~ //insert another page change block at the top of the screen.
+			//~ if (isNewUI == 1) var insertPageChangeBlockHere = auctionTable.rows[3].cells[0]; // crude fix for new UI
+			//~ else var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+			//~ var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
+			//~ var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
+			//~ newPageChangeBlock += "</form>";
+			//~ var insertPageChangeBlock=document.createElement("SPAN");
+			//~ insertPageChangeBlock.innerHTML = newPageChangeBlock;
+			//~ insertPageChangeBlockHere.align = "right";
+			//~ insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
+//~ 
+			//~ var quickSearchList = System.getValueJSON("quickSearchList");
+//~ 
+			//~ var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
+				//~ "<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
+							//~ System.server +
+							//~ "index.php?cmd=notepad&blank=1&subcmd=auctionsearch'>" +
+							//~ "Configure Quick Search</a></td></tr>";
+			//~ var lp=0;
+			//~ var rowCount = 0;
+			//~ for (var p=0;p<quickSearchList.length;p++) {
+				//~ if (lp % 6==0 && rowCount == 6) break; //36 searches on the screen so don't display any more
+				//~ var quickSearch=quickSearchList[p];
+				//~ if (quickSearch.displayOnAH) {
+					//~ if (lp % 6==0) {
+						//~ finalHTML += "<tr>";
+						//~ rowCount++;
+					//~ }
+					//~ finalHTML += "<td nowrap style='overflow: hidden;'";
+					//~ finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
+						//~ quickSearch.searchname + "&page=1&order_by=1'>" +
+						//~ quickSearch.nickname + "</a></td>";
+					//~ if (lp % 6==5) finalHTML += "</tr>";
+					//~ lp++;
+				//~ }
+			//~ }
+			//~ imageCell.innerHTML = finalHTML;
+		//~ }
+//~ 
+		//~ //add coloring for item craft and durability
+		//~ var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
+		//~ if (auctionCellCraftElements) {
+			//~ for (i=0; i<auctionCellCraftElements.length; i++) {
+				//~ var auctionCellCraftElement = auctionCellCraftElements[i];
+				//~ if (auctionCellCraftElement.textContent.length > 0){
+					//~ switch(auctionCellCraftElement.textContent) {
+						//~ case 'Perfect': craftColor = '#00b600'; break;
+						//~ case 'Excellent': craftColor = '#f6ed00'; break;
+						//~ case 'Very Good': craftColor = '#f67a00'; break;
+						//~ case 'Good': craftColor = '#f65d00'; break;
+						//~ case 'Average': craftColor = '#f64500'; break;
+						//~ case 'Poor': craftColor = '#f61d00'; break;
+						//~ case 'Very Poor': craftColor = '#b21500'; break;
+						//~ case 'Uncrafted': craftColor = '#666666'; break;
+					//~ }
+					//~ auctionCellCraftElement.style.color = craftColor;
+				//~ }
+				//~ var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
+				//~ if (auctionCellDurabilityElement.nodeName == 'SPAN') {
+					//~ auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
+					//~ auctionCellDurabilityElement.style.color = 'gray';
+				//~ }
+			//~ }
+		//~ }
+//~ 
+		//~ var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
+		//~ auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
+//~ 
+		//~ var playerId = Layout.playerId();
+//~ 
+		//~ var memberList = System.getValueJSON("memberlist");
+		//~ var memberNameString = "";
+		//~ if (memberList) {
+			//~ for (i=0;i<memberList.members.length;i++) {
+				//~ var member=memberList.members[i];
+				//~ memberNameString += member.name + " ";
+			//~ }
+		//~ }
+		//~ var listOfEnemies = GM_getValue("listOfEnemies");
+		//~ if (!listOfEnemies) listOfEnemies = "";
+		//~ var listOfAllies = GM_getValue("listOfAllies");
+		//~ if (!listOfAllies) listOfAllies = "";
+//~ 
+		//~ var newRow, newCell, winningBidBuyoutCell;
+		//~ var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
+		//~ for (i=0;i<auctionTable.rows.length;i++) {
+			//~ var aRow = auctionTable.rows[i];
+			//~ if (i>0 && // the title row - ignore this
+				//~ aRow.cells[1]) { // a separator row - ignore this
+				//~ if (aRow.cells[5].innerHTML == '<font size="1">[ended]</font>') { //time left column
+					//~ aRow.cells[6].innerHTML = ""; // text field and button column
+				//~ } else {
+					//~ var timeLeft = aRow.cells[5].firstChild.innerHTML;
+					//~ var secondsLeft = timeLeft.substring(timeLeft.indexOf('m')+1).trim();
+					//~ timeLeft = timeLeft.substring(0, timeLeft.indexOf('m'));
+					//~ if (timeLeft >= 60) {
+						//~ var hoursLeft = Math.floor(timeLeft / 60);
+						//~ if (hoursLeft < 24) {
+							//~ var minutesLeft = timeLeft - (hoursLeft * 60);
+							//~ aRow.cells[5].firstChild.innerHTML = hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
+						//~ } else {
+							//~ var daysLeft = Math.floor(hoursLeft / 24);
+							//~ hoursLeft = hoursLeft - (daysLeft * 24);
+							//~ minutesLeft = timeLeft - (hoursLeft * 60) - (daysLeft * 1440);
+							//~ aRow.cells[5].firstChild.innerHTML = daysLeft + "d " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
+						//~ }
+//~ 
+					//~ }
+//~ 
+					//~ winningBidValue = "-";
+					//~ var bidExistsOnItem = false;
+					//~ var playerListedItem = false;
+					//~ if (aRow.cells[1].innerHTML != '<font size="1">Auction House</font>') {
+						//~ var sellerElement = aRow.cells[1].firstChild.firstChild;
+						//~ sellerHref = sellerElement.getAttribute("href");
+						//~ var sellerIDRE = /player_id=(\d+)/;
+						//~ var sellerID = sellerIDRE.exec(sellerHref)[1];
+						//~ if (playerId == sellerID) {
+							//~ playerListedItem = true;
+						//~ }
+					//~ }
+					//~ if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
+						//~ var winningBidTable = aRow.cells[3].firstChild.firstChild;
+						//~ var winningBidCell = winningBidTable.rows[0].cells[0];
+						//~ var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
+						//~ var winningBidder = winningBidderCell.innerHTML;
+						//~ if (memberNameString.search(" "+winningBidder+" ") !=-1) {
+							//~ winningBidderCell.style.color="green";
+						//~ }
+						//~ if (listOfEnemies.search(" "+winningBidder+" ") !=-1) {
+							//~ winningBidderCell.style.color="red";
+						//~ }
+						//~ if (listOfAllies.search(" "+winningBidder+" ") !=-1) {
+							//~ winningBidderCell.style.color="blue";
+						//~ }
+						//~ var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
+						//~ var winningBidValue = System.intValue(winningBidCell.textContent);
+						//~ newRow = winningBidTable.insertRow(2);
+						//~ winningBidBuyoutCell = newRow.insertCell(0);
+						//~ winningBidBuyoutCell.colSpan = "2";
+						//~ winningBidBuyoutCell.align = "center";
+						//~ var winningBidderHTML = winningBidTable.rows[1].cells[0].innerHTML;
+						//~ var winningBidderIDRE = /player_id=(\d+)/;
+						//~ var winningBidderID = winningBidderIDRE.exec(winningBidderHTML)[1];
+						//~ if (playerId == winningBidderID) {
+							//~ playerListedItem = true;
+						//~ }
+					//~ }
+					//~ if (!bidExistsOnItem && !playerListedItem) {
+						//~ var bidValueButton = aRow.cells[6].getElementsByTagName("input");
+						//~ if (winningBidValue != "-") {
+							//~ var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
+							//~ var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
+							//~ if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
+							//~ winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
+								//~ System.addCommas(overBid) + '</span>&nbsp';
+							//~ if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
+							//~ bidValueButton[0].size = 6;
+						//~ } else {
+							//~ var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
+							//~ if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
+							//~ bidValueButton[0].size = 6;
+						//~ }
+					//~ }
+					//~ var inputTableCell;
+					//~ if (!playerListedItem) {
+						//~ var inputTable = aRow.cells[6].firstChild.firstChild;
+						//~ var inputCell = inputTable.rows[0].cells[0];
+						//~ var textInput = inputCell.firstChild;
+						//~ textInput.id = 'auction' + i + 'text';
+						//~ var bidCell = inputTable.rows[0].cells[1];
+						//~ bidCell.align = "right";
+						//~ //spacer row
+						//~ newRow = inputTable.insertRow(1);
+						//~ inputTableCell = newRow.insertCell(0);
+						//~ inputTableCell.colSpan = "2";
+						//~ inputTableCell.height = "2";
+						//~ //get itemID for bid no refresh
+						//~ var itemIMG = aRow.cells[0].firstChild;
+						//~ //var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
+						//~ var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(itemIMG).data("tipped"));
+						//~ invID = itemStats[2];
+						//~ //new bid no refresh button
+						//~ newRow = inputTable.insertRow(2);
+						//~ inputTableCell = newRow.insertCell(0);
+						//~ inputTableCell.colSpan = "2";
+						//~ inputTableCell.align = "center";
+						//~ inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
+							//~ '<input id="bidNoRefresh" invID="'+ invID +
+								//~ '" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
+					//~ }
+					//~ var inputText = aRow.cells[6];
+				//~ }
+			//~ }
+		//~ }
+		//~ bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");
+		//~ if (bidNoRefreshList) {
+			//~ for (i=0; i<bidNoRefreshList.length; i++) {
+				//~ var bidNoRefreshItem = bidNoRefreshList[i];
+				//~ bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
+			//~ }
+			//~ //Add a bid no refresh on all
+			//~ $('input[value="My Bids"]').after('&nbsp;<input type="button" value="Bid on All" id="fshBidOnAll"  class="custombutton tipped" data-tipped="<b>Bid on each auction</b><br>Triggers the \"Bid no refresh\" for each btton on screen">');
+			//~ $("#fshBidOnAll").click(function()
+			//~ {
+				//~ if(confirm ("Are you sure you want to bid on all of them?")){
+					//~ $("input[id=bidNoRefresh]").each(function()
+					//~ {
+						//~ //this.checked = !this.checked;
+						//~ //alert("asdf");
+						//~ //alert(this.attr('id'));
+						//~ this.click();
+					//~ });
+				//~ }
+			//~ });
+		//~ }
+		//~ //show saved prefs if not default values
+		//~ var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
+		//~ var pref_minlevel = System.findNode("//input[@name='pref_minlevel']").value;
+		//~ var pref_maxlevel = System.findNode("//input[@name='pref_maxlevel']").value
+		//~ var pref_hidegold = System.findNode("//input[@name='pref_hidegold']").checked;
+		//~ var pref_hidefsp = System.findNode("//input[@name='pref_hidefsp']").checked;
+		//~ var pref_minforge = System.findNode("//select[@name='pref_minforge']").selectedIndex;
+		//~ var pref_mincraft = System.findNode("//select[@name='pref_mincraft']").selectedIndex;
+		//~ var output = '';
+		//~ if (pref_minlevel > 1 || (pref_maxlevel > 0 && pref_maxlevel != 1000) || pref_hidegold || pref_hidefsp || pref_minforge != 0 || pref_mincraft != 0) {
+			//~ output = '<nobr><span style="color:blue; font-size:x-small;">Enabled filters (' +
+				//~ '<span id="Helper.resetAHprefs" style="cursor:pointer; text-decoration:underline; color:blue;">Reset</span>' +
+				//~ '):</span> <span style="color:orangered; font-size:x-small;">';
+			//~ if (pref_minlevel > 1) output += 'MinLevel('+pref_minlevel+') ';
+			//~ if (pref_maxlevel > 0 && pref_maxlevel != 1000) output += 'MaxLevel('+pref_maxlevel+') ';
+			//~ if (pref_hidegold) output += pref_hidefsp?'<span style="color:magenta; font-weight:900;">Gold</span> ':'Gold ';
+			//~ if (pref_hidefsp) output += pref_hidegold?'<span style="color:magenta; font-weight:900;">FSP</span> ':'FSP ';
+			//~ if (pref_minforge != 0) output += 'Forge('+pref_minforge+') ';
+			//~ if (pref_mincraft != 0) output += 'Craft('+pref_mincraft+') ';
+			//~ output += '</span></nobr>';
+			//~ searchPrefsFirstCell.innerHTML = output;
+			//~ document.getElementById("Helper.resetAHprefs").addEventListener('click', Helper.resetAHquickPrefsAndReload, true);
+		//~ }
+		//~ //litte something to default to sorting by min bid
+		//~ var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
+		//~ hiddenOrderByInput.value = 1;
+//~ 
+		//~ Helper.injectAuctionQuickCancel();
+	//~ },
 
 	resetAHquickPrefsAndReload: function(evt) {
 		//POSTDATA=cmd=auctionhouse&order_by=1&search_text=hunter&pref_save=1&pref_minlevel=&pref_maxlevel=&pref_minforge=0&pref_mincraft=-1
@@ -6579,36 +6181,36 @@ injectBazaar: function() {
 		Helper.generateManageTable();
 	},
 
-	bidNoRefresh: function(evt) {
-		var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
-		var invID = evt.target.getAttribute("invID");
-		var postData = "cmd=auctionhouse&subcmd=placebid" +
-				"&auction_id=" + invID +
-				"&page=" +
-				"&type=-1" +
-				"&bid=" + inputValue.value;
-
-		GM_xmlhttpRequest({
-			method: 'POST',
-			url: System.server + "index.php",
-			headers: {
-			//	"User-Agent" : navigator.userAgent,
-			//	"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
-			//	"Cookie" : document.cookie,
-				"Content-Type": "application/x-www-form-urlencoded"
-			},
-			data: postData,
-			onload: function(responseDetails) {
-				var info = Layout.infoBox(responseDetails.responseText);
-				var infoElement = evt.target.parentNode;
-				if (info.search("Bid placed successfully!") != -1) {
-					infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
-				} else {
-					infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
-				}
-			}
-		});
-	},
+	//~ bidNoRefresh: function(evt) {
+		//~ var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
+		//~ var invID = evt.target.getAttribute("invID");
+		//~ var postData = "cmd=auctionhouse&subcmd=placebid" +
+				//~ "&auction_id=" + invID +
+				//~ "&page=" +
+				//~ "&type=-1" +
+				//~ "&bid=" + inputValue.value;
+//~ 
+		//~ GM_xmlhttpRequest({
+			//~ method: 'POST',
+			//~ url: System.server + "index.php",
+			//~ headers: {
+			//~ //	"User-Agent" : navigator.userAgent,
+			//~ //	"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
+			//~ //	"Cookie" : document.cookie,
+				//~ "Content-Type": "application/x-www-form-urlencoded"
+			//~ },
+			//~ data: postData,
+			//~ onload: function(responseDetails) {
+				//~ var info = Layout.infoBox(responseDetails.responseText);
+				//~ var infoElement = evt.target.parentNode;
+				//~ if (info.search("Bid placed successfully!") != -1) {
+					//~ infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+				//~ } else {
+					//~ infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+				//~ }
+			//~ }
+		//~ });
+	//~ },
 
 	toggleShowExtraLinks: function(evt) {
 		var showExtraLinksElement = System.findNode("//span[@id='Helper:showExtraLinks']");
@@ -6762,7 +6364,7 @@ injectBazaar: function() {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Weird Error: check the Tools>Error Console</span>";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -7042,7 +6644,7 @@ injectBazaar: function() {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -7077,7 +6679,7 @@ injectBazaar: function() {
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -7186,17 +6788,6 @@ injectBazaar: function() {
 			Helper.buffCost={'count':0,'buffs':{}};
 
 			Helper.bioAddEventListener();
-
-/*			if (isSelfRE) {
-				alert(playerid);
-				var quickBuffLink = System.findNode("//a[contains(@href,'index.php?cmd=quickbuff&t=')]");
-				if (quickBuffLink) quickBuffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerid + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
-			}
-*/		}
-
-		var invSectionToggle = System.findNode("//span/a[@href='index.php?cmd=profile&subcmd=togglesection&section_id=2']");
-		if (invSectionToggle) {
-			invSectionToggle.parentNode.innerHTML += "&nbsp;[<a href='index.php?cmd=notepad&blank=1&subcmd=checkwear&playerid="+playerid+"'><span style='color:blue;'>Check&nbsp;Items</span></a>]";
 		}
 
 		if (isSelfRE) { // self inventory
@@ -7692,12 +7283,9 @@ injectBazaar: function() {
 					}
 				}
 
-				//~ bioCell.innerHTML = bioStart + extraCloseHTML + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span>" +
-					//~ "<span id='Helper:bioHidden' style='display:none; visibility:hidden;'>" + extraOpenHTML + bioEnd + "</span>";
 				bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak + "<span id='Helper:bioExpander' style='cursor:pointer; text-decoration:underline; color:blue;'>More ...</span><br>" +
 					"<span id='Helper:bioHidden'>" + extraOpenHTML + bioEnd + "</span>";
 				$("#Helper\\:bioHidden").hide();
-
 			}
 		}
 	},
@@ -8295,7 +7883,7 @@ injectBazaar: function() {
 								drop.css('color','red');
 								drop.css('fontSize','small');
 								drop.html("Weird Error: check the Tools>Error Console");
-								GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+								GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 								GM_log(callback.url);
 							}
 						},
@@ -8327,7 +7915,7 @@ injectBazaar: function() {
 							send.css('color','red');
 							send.css('fontSize','small');
 							send.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
@@ -8357,7 +7945,7 @@ injectBazaar: function() {
 							recall.css('color','red');
 							recall.css('fontSize','small');
 							recall.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
@@ -8387,7 +7975,7 @@ injectBazaar: function() {
 							move.css('color','red');
 							move.css('fontSize','small');
 							move.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
@@ -10422,7 +10010,7 @@ injectBazaar: function() {
 		}
 	},
 
-injectArena: function() {
+	injectArena: function() {
 		var arenaTables = System.findNodes("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/../../..");
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves");
@@ -10986,13 +10574,9 @@ injectArena: function() {
 		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
 		var configData=
 			'<form><table style="border-spacing: 10px;">' +
-//			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
-			//~ '<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
-			//~ '<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
-			//~ ')</span></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
-			'<span style="font-weight:bold;">Visit the <a href="http://code.google.com/p/fallenswordhelper/">Fallen Sword Helper web site</a> ' +
+			'<span style="font-weight:bold;">Visit the <a href="https://github.com/fallenswordhelper/fallenswordhelper">Fallen Sword Helper web site</a> ' +
 			'for any suggestions, requests or bug reports</span></td></tr>' +
 			//General Prefs
 			'<tr><th colspan="2" align="left"><b>General preferences (apply to most screens)</b></th></tr>' +
@@ -11170,7 +10754,7 @@ injectArena: function() {
 			'<tr><td align="right">Store Last Quest Page' + Helper.helpLink('Store Last Quest Page', 'This will store the page and sort order of each of the three quest selection pages for next time you visit. If you need to reset the links, turn this option off, '+
 				'click on the link you wish to reset and then turn this option back on again.') +
 				':</td><td><input name="storeLastQuestPage" type="checkbox" value="on"' + (GM_getValue("storeLastQuestPage")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Show Next Quest Steps' + Helper.helpLink('Show Next Quest Steps', 'Shows the next quest steps from the UFSG.') +
+			'<tr><td align="right">Show All Quest Steps' + Helper.helpLink('Show All Quest Steps', 'Shows all quest steps in the UFSG.') +
 				':</td><td><input name="showNextQuestSteps" type="checkbox" value="on"' + (GM_getValue("showNextQuestSteps")?" checked":"") + '></td></tr>' +
 			//profile prefs
 			'<tr><th colspan="2" align="left"><b>Profile preferences</b></th></tr>' +
@@ -11232,17 +10816,17 @@ injectArena: function() {
 			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
 				'Max Size: <input name="maxGroupSizeToJoin" size="3" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
-			'<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
-				'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' +
-				'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
-				':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
-				'<input name="titanLogRefreshTime" size="2" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
-			'<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.') +
-				':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + (GM_getValue("showGoldOnFindPlayer")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
-				':</td><td><input name="titanLogLength" size="3" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
-			'<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
-				':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
+			//~ '<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
+				//~ 'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' +
+				//~ 'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
+				//~ ':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
+				//~ '<input name="titanLogRefreshTime" size="2" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
+			//~ '<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.<br>Disabled at HCS request.') +
+				//~ ':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + /*(GM_getValue("showGoldOnFindPlayer")?" checked":"") +*/ ' disabled></td></tr>' +
+			//~ '<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
+				//~ ':</td><td><input name="titanLogLength" size="3" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
+			//~ '<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
+				//~ ':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
 			//save button
 			//http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
@@ -11311,7 +10895,6 @@ injectArena: function() {
 			}
 			window.location.reload();
 		}
-
 	},
 
 	updateFpColor: function(evt) {
@@ -11451,14 +11034,14 @@ injectArena: function() {
 		System.saveValueForm(oForm, "enableMaxGroupSizeToJoin");
 		System.saveValueForm(oForm, "maxGroupSizeToJoin");
 
-		System.saveValueForm(oForm, "enableTitanLog");
-		System.saveValueForm(oForm, "titanLogRefreshTime");
+		//~ System.saveValueForm(oForm, "enableTitanLog");
+		//~ System.saveValueForm(oForm, "titanLogRefreshTime");
 		System.saveValueForm(oForm, "enableTempleAlert");
-		System.saveValueForm(oForm, "showGoldOnFindPlayer");
-		System.saveValueForm(oForm, "titanLogLength");
+		//~ System.saveValueForm(oForm, "showGoldOnFindPlayer");
+		//~ System.saveValueForm(oForm, "titanLogLength");
 		System.saveValueForm(oForm, "autoFillMinBidPrice");
 		System.saveValueForm(oForm, "showPvPSummaryInLog");
-		System.saveValueForm(oForm, "addUFSGWidgets");
+		//~ System.saveValueForm(oForm, "addUFSGWidgets");
 		System.saveValueForm(oForm, "enableQuickDrink");
 		System.saveValueForm(oForm, "enhanceOnlineDots");
 		System.saveValueForm(oForm, "hideBuffSelected");
@@ -11536,7 +11119,6 @@ injectArena: function() {
 			}
 			alert('Settings loaded successfully!');
 		});
-
 	},
 
 	notepadCopyLog: function() {
@@ -11784,8 +11366,6 @@ injectArena: function() {
 		url = url.replace(/^[^']*'/m, "").replace(/\';$/m, "");
 		window.location = url;
 	},
-
-
 
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) { return; }
@@ -12260,7 +11840,7 @@ var items=0;
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -12331,7 +11911,7 @@ var items=0;
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -12396,7 +11976,6 @@ var items=0;
 
 	injectScouttower: function() {
 		Helper.injectScouttowerBuffLinks();
-		Helper.parseScoutTower();
 		var titanTable = System.findNode("//table[@width='500']");
 		for (var i = 1; i < titanTable.rows.length; i++) {
 			var aRow = titanTable.rows[i];
@@ -12472,43 +12051,12 @@ var items=0;
 			injectHere.innerHTML += '<br><input id="trackThisQuest" type="button" value="Track Quest" title="Tracks quest progress." class="custombutton">';
 			document.getElementById("trackThisQuest").addEventListener("click", Helper.trackThisQuest, true);
 		}
-
-		// insert next step
-		if (GM_getValue('showNextQuestSteps')) {
-			var table = System.findNode("//table[@width=500]");
-			if (!table.textContent.match(/\d+ xp/i)) {
-				System.xmlhttp('http://guide.fallensword.com/index.php?cmd=quests&subcmd=view&quest_id='+questId, Helper.showNextMissionStep);
-			}
-		}
 	},
 
-	showNextMissionStep: function(responseText) {
-		var doc=$(responseText.replace(/[\u0080-\uFFFF]+/g, ""));
-		//find the last row and so find out what stage they are currently on
-		var lastRow = $('td[bgcolor="#634A29"]:last').parent('tr');
-		var currentStage = lastRow.index()/2;
-		var parentTable = lastRow.parents('table:first')
-		var ufsgStageArray = $(doc).find('div[id*="stage_"]');
-		if (currentStage < ufsgStageArray.length || $('td:contains("You have not yet started this quest.")').length > 0) {
-			//parentTable.append("<tr><td height='1' bgcolor='#634A29'></td></tr>");
-			ufsgStageArray.each(function(index){
-				//for all the stages on the usfg for this quest, consider all the ones greater than the current stage
-				if ((currentStage-1) < index || $('td:contains("You have not yet started this quest.")').length > 0) {
-					parentTable.append($(this));
-				}
-			});
-			//fix the column widths of the hidden fields
-			$('div[id*="stage"]').find('table[width=600],table[width=800],td[width=600]').attr('width','');
-			//fix the links to ufsg
-			$('div[id*="stage"]').find('a').each(function(){
-				var ufsgHref = $(this).attr('href');
-				$(this).attr('href','http://guide.fallensword.com/' + ufsgHref);
-				$(this).attr('target','_blank');
-			});
-			//show hidden div's
+	showAllQuestSteps: function() {
+		if (GM_getValue('showNextQuestSteps')) {
 			$('div[id*="stage"]').show();
-		} else {
-			parentTable.append("<tr><td style='color:blue;'>No more steps</td></tr>");
+			document.getElementById("next_stage_button").style.display = "none";
 		}
 	},
 
@@ -13122,7 +12670,7 @@ var items=0;
 			target.style.color = 'red';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the code.google.com site or to the forum to help us debug this error");
+			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 			GM_log(callback.url);
 		}
 	},
@@ -13853,6 +13401,7 @@ var items=0;
 			//if recall message, check to see if showRecallMessages is checked.
 			if (messageText.search("recalled the item") != -1 ||
 				messageText.search("took the item") != -1 ||
+				messageText.search("auto-returned the") != -1 ||
 				messageText.search("stored the item") != -1) {
 				if (!Helper.showRecallMessages) {
 					displayRow = false;
@@ -13869,7 +13418,9 @@ var items=0;
 			}
 			//Relic messages (showRelicMessages)
 			else if (messageText.search("relic. This relic now has an empower level of") != -1 ||
+				messageText.search(/ empowered the .+ relic/) != -1 ||
 				messageText.search("relic. The relic empower level has been reset to zero.") != -1 ||
+				messageText.search("failed to capture the relic") != -1 ||
 				messageText.search("captured the relic") != -1 ||
 				messageText.search("captured your relic") != -1 ||
 				messageText.search("has captured the undefended relic") != -1 ||
@@ -13888,7 +13439,8 @@ var items=0;
 				rowTypeID = "GuildLogFilter:showMercenaryMessages";
 			}
 			//Group Combat messages (showGroupCombatMessages)
-			else if (messageText.search(/A group from your guild was (.*) in combat./) != -1) {
+			else if (messageText.search("has disbanded one of their groups") != -1 ||
+				messageText.search(/A group from your guild was (.*) in combat./) != -1) {
 				if (!Helper.showGroupCombatMessages) {
 					displayRow = false;
 				}
@@ -13904,6 +13456,12 @@ var items=0;
 			}
 			//Ranking messages (showRankingMessages)
 			else if (messageText.search("has added a new rank entitled") != -1 ||
+				messageText.search("has deleted the rank") != -1 ||
+				messageText.search("has requested to join the guild") != -1 ||
+				messageText.search("has invited the player") != -1 ||
+				messageText.search("has officially joined the guild") != -1 ||
+				messageText.search("has been kicked from the guild by") != -1 ||
+				messageText.search("has left the guild") != -1 ||
 				messageText.search("has been assigned the rank") != -1) {
 				if (!Helper.showRankingMessages) {
 					displayRow = false;
@@ -14019,118 +13577,6 @@ var items=0;
 		}
 	},
 
-	injectCheckWearingItem: function(content) {
-		if (!content) var content = Layout.notebookContent();
-		content.innerHTML=Helper.makePageTemplate("Check Worn Items for Best Damage", "", "", "", "checkwear");
-
-		document.getElementById("checkwear").innerHTML+="Getting profile ...<br/>";
-		var playerid=/&playerid=(\d+)/.exec(window.location);
-		if (playerid)
-			playerid = playerid[1];
-		else
-			playerid = "";
-		Helper.wearingItems={};
-		Helper.wearingItems.playerid=playerid;
-		System.xmlhttp("index.php?cmd=profile&player_id="+playerid, Helper.getWearingItems);
-	},
-
-	getWearingItems: function(responseText) {
-		var doc=System.createDocumentWithImages(responseText);
-		//fix me
-		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]",doc);
-		for (var i=0; i<items.length; i++) {
-			if (!(items[i].parentNode.getAttribute("href")) || items[i].parentNode.getAttribute("href").indexOf("subcmd=unequipitem&")>0) {
-				var item=items[i], type, onmo=item.getAttribute("data-tipped");
-				if (item.parentNode.getAttribute("href")) item=item.parentNode;
-				if (item.parentNode.width != 60) item=item.parentNode.parentNode.parentNode.parentNode;
-				type = item.parentNode.cellIndex + item.parentNode.parentNode.rowIndex*3;
-				Helper.wearingItems[type]=onmo;
-			}
-		}
-		Helper.wearingItems.name=System.findNode("//div[@class='innerContentMiddle']/div/h1",doc).textContent;
-		Helper.wearingItems.lvl=System.findNode("//b[contains(.,'Level:')]",doc).parentNode.nextSibling.textContent;
-		document.getElementById("checkwear").innerHTML+="Getting items from "+Helper.wearingItems.name+"'s profile ... <br/>";
-		Helper.getEachWearingItem(0);
-	},
-
-	getEachWearingItem: function(type) {
-		if (Helper.wearingItems[type]) {
-			System.xmlhttp(Helper.linkFromMouseover(Helper.wearingItems[type]), function(responseText) {
-					var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-					var mo=Helper.wearingItems[type].replace("'<br><center><b>[Click to Unequip]</b></center>'","''");
-					Helper.wearingItems[type]={"mo":mo};
-					Helper.wearingItems[type].wear=name;
-					Helper.wearingItems[type].fullSet=responseText.match(/>Set Details \((\d)\/\1\)</)!=null;
-					document.getElementById("checkwear").innerHTML+=" comparing "+name+" ...<br/>";
-					var stype=[2,0,7,4,1,5,6,3,8][type];
-					var url="http://guide.fallensword.com/index.php?cmd=items&index=0&search_name=&search_level_min=&"+
-						"search_level_max="+parseInt(Helper.wearingItems.lvl.replace(/,/g,""),10)+
-						"&search_type="+stype+"&search_rarity=-1&sort_by=1&sort_by=5";
-					GM_xmlhttpRequest({
-						method: 'GET',
-						url: url,
-						/*headers: {
-							"User-Agent": navigator.userAgent,
-							"Referer": document.location
-						},*/
-						onload: function(responseDetails) {
-							var doc=System.createDocument(responseDetails.responseText);
-							var nodes = System.findNodes("//a[contains(@href,'index.php?cmd=items&subcmd=view')]",doc);
-							Helper.wearingItems[type].suggest="";
-							Helper.wearingItems[type].best=nodes[0].textContent;
-							for (var i=0; i<5; i++) {
-								Helper.wearingItems[type].suggest+=
-									"<span class=\"tipped\" data-tipped='"+nodes[i].parentNode.parentNode.textContent+"'>"+
-										nodes[i].textContent+"</span>"+
-									" <span style='font-size:xx-small'>[<a href='/index.php?cmd=guild&subcmd=inventory&subcmd2=report&item="+nodes[i].textContent+"'>GS</a>] "+
-									"[<a href='/index.php?cmd=auctionhouse&type=-1&search_text="+nodes[i].textContent+"'>AH</a>] "+
-									"[<a href='http://guide.fallensword.com/index.php?cmd=items&index=0&search_name="+nodes[i].textContent+"'>UFG</a>]</span>, ";
-							}
-							Helper.getEachWearingItem(type+1);
-						}
-					});
-				});
-		} else {
-			if (type < 8)
-				Helper.getEachWearingItem(type+1);
-			else
-				Helper.showCheckWearingResult();
-		}
-	},
-
-	showCheckWearingResult: function() {
-		var content=document.getElementById("checkwear");
-		var pos2type=["Glove", "Helm", "Amulet", "Weapon", "Armor", "Shield", "Ring", "Boot", "Rune"];
-		var newHtml, color;
-		newHtml='<h3><a href="/index.php?cmd=profile&player_id='+Helper.wearingItems.playerid+'">'+Helper.wearingItems.name+'</a>\'s Setup Analysis</h3>'+
-			"Please note that:<br/>"+
-			"<ul><li>Analysis based on availability of items in the Ultimate Fallensword Guide</li>"+
-			"<li>Item sorted by damage stat in no-forge, no-craft condition</li>"+
-			"<li>Set bonus, other stats are not considered</li></ul>"+
-			"Please use at your own risk ^_^<p/>"+
-			"Tooltip format: Name  	Level  	Type 	Rarity 	Attack  	Defense  	Armor  	Damage  	HP<p/>"+
-			"<table width=100% cellspacing=2>";
-		for (var type=0; type<9; type++) {
-			newHtml+="<tr><th align=left>"+pos2type[type]+"</th>";
-			if (Helper.wearingItems[type]) {
-				if (Helper.wearingItems[type].wear == Helper.wearingItems[type].best ||  Helper.wearingItems[type].fullSet) {
-					color="green";
-				} else {
-					color="yellow";
-					//GM_log(Helper.wearingItems[type].suggest);
-					Helper.wearingItems[type].suggest=Helper.wearingItems[type].suggest.replace(">"+Helper.wearingItems[type].wear+"<",
-						"><font color=yellow>"+Helper.wearingItems[type].wear+"</font><");
-					//GM_log(Helper.wearingItems[type].suggest);
-				}
-				newHtml+="<td><span style='color:"+color+"' class=tipped data-tipped-options='ajax:true' data-tipped=\""+Helper.wearingItems[type].mo+"\">"+Helper.wearingItems[type].wear+"</span>"+
-					(Helper.wearingItems[type].fullSet?" (<span style='color:blue'>Full Set</span>)":"")+"</td></tr>"+
-					"<tr><td align=right>Suggested</td><td>"+Helper.wearingItems[type].suggest+"</td></tr>";
-			} else
-				newHtml+="<td><span style='color:red'>NOTHING</span></td></tr>";
-		}
-		content.innerHTML=newHtml+"</table>";
-	},
-
 	addChatTextArea: function() {
 		if (!GM_getValue("enhanceChatTextEntry")) return;
 		var messageCell = System.findNode("//td[table/tbody/tr/td/input[@value='Send As Mass']]");
@@ -14187,116 +13633,6 @@ var items=0;
 
 		document.getElementById('Helper:ChatTextArea').addEventListener('keyup', function(evt) {if (evt.keyCode == 13) evt.target.form.submit()}, true);
 		;
-},
-
-	updateTitanLogs: function() {
-		if (!GM_getValue("enableTitanLog")) return;
-		//need timer function
-		var titanLogRefreshTime = GM_getValue("titanLogRefreshTime");
-		var titanLog = System.getValueJSON("titanLog");
-		if (titanLog && titanLog.lastUpdate) {
-			if ((new Date()).getTime() - titanLog.lastUpdate.getTime() > (titanLogRefreshTime * 60 * 1000)) {
-				//bring up the scout tower page and parse it
-				//index.php?cmd=guild&subcmd=scouttower
-				System.xmlhttp("index.php?cmd=guild&subcmd=scouttower", Helper.parseScoutTower);
-			}
-		}
-	},
-
-	parseScoutTower: function(responseText) {
-		if (responseText) {
-			var doc = System.createDocument(responseText);
-			var titanTable = System.findNode("//table[tbody/tr/td/font[.='Titan']]", doc);
-		} else {
-			var titanTable = System.findNode("//table[tbody/tr/td/font[.='Titan']]");
-		}
-		var titanLog = System.getValueJSON("titanLog");
-		if (!titanLog) titanLog = {}, titanLog.titans = [];
-		if (titanTable) {
-			titanHP = "";
-			for (var i=1; i<titanTable.rows.length; i++) { //ignore title row
-				var titan = {};
-				var aRow = titanTable.rows[i];
-				if (aRow.cells[3]) { // titan row
-					titan.name = aRow.cells[0].firstChild.getAttribute('title');
-					titan.realm = aRow.cells[1].textContent;
-					titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
-					if (!titanHP) break;
-					titan.currentHP = titanHP[1]*1;
-					titan.maxHP = titanHP[2]*1;
-					titan.firstRow = aRow.innerHTML;
-					titan.nextRow = titanTable.rows[i+1].innerHTML;
-
-					//if the titan is already in the array, then update the record
-					var titanFoundInLog = false;
-					for (var j=0; j<titanLog.titans.length; j++) {
-						if (titan.name == titanLog.titans[j].name && titan.realm == titanLog.titans[j].realm && titan.maxHP == titanLog.titans[j].maxHP) {
-							if (titan.currentHP < titanLog.titans[j].currentHP) titanLog.titans.splice(j,1,titan);
-							titanFoundInLog = true;
-							break;
-						}
-					}
-					//if not already in the array, then add the titan to the array
-					if (!titanFoundInLog && titan.realm != 'Land of the Elements') {
-						titanLog.titans.push(titan);
-					}
-				}
-			}
-
-			//if there are more than x titans in the log, then purge the oldest ones
-			var titanLogLength = GM_getValue("titanLogLength")
-			if (titanLog.titans.length > titanLogLength) {
-				titanLog.titans.splice(0, titanLog.titans.length - titanLogLength);
-			}
-
-			//save the titanLog
-			titanLog.lastUpdate = new Date();
-			System.setValueJSON("titanLog", titanLog);
-
-			//if on the scout tower screen, show the log
-			if (location.search == "?cmd=guild&subcmd=scouttower") {
-				var newRow = titanTable.insertRow(-1);
-				newRow.innerHTML = '<td bgcolor="#cd9e4b" style="height: 1px;" colspan="4">Killed Titan History</td>';
-				for (var j=titanLog.titans.length-1; j>=0; j--) {
-					var titanLogTitan = {};
-					titanLogTitan.name = titanLog.titans[j].name;
-					titanLogTitan.realm = titanLog.titans[j].realm;
-					titanLogTitan.maxHP = titanLog.titans[j].maxHP;
-					//if the titan is already on the screen, then don't display it again
-					var displayTitan = true;
-					for (var i=1; i<titanTable.rows.length; i++) {
-						var aRow = titanTable.rows[i];
-						if (aRow.cells[3]) { // titan row
-							var scoutTowerTitan = {};
-							scoutTowerTitan.name = aRow.cells[0].firstChild.getAttribute('title');
-							scoutTowerTitan.realm = aRow.cells[1].textContent;
-							titanHP = /(\d+)\/(\d+)/.exec(aRow.cells[2].textContent);
-							if (!titanHP) break;
-							scoutTowerTitan.maxHP = titanHP[2]*1;
-							if (titanLogTitan.name == scoutTowerTitan.name && titanLogTitan.realm == scoutTowerTitan.realm
-								&& titanLogTitan.maxHP == scoutTowerTitan.maxHP) {
-								displayTitan = false;
-								break;
-							}
-						}
-					}
-					if (displayTitan) {
-						var newRow = titanTable.insertRow(-1);
-						newRow.innerHTML = titanLog.titans[j].firstRow;
-						newRow = titanTable.insertRow(-1);
-						newRow.innerHTML = titanLog.titans[j].nextRow;
-						newRow = titanTable.insertRow(-1);
-						newRow.innerHTML = '<td height="2" colspan="3"></td>';
-						newRow = titanTable.insertRow(-1);
-						newRow.innerHTML = '<td bgcolor="#cd9e4b" style="height: 1px;" colspan="4"></td>';
-						newRow = titanTable.insertRow(-1);
-						newRow.innerHTML = '<td height="2" colspan="3"></td>';
-					}
-				}
-			}
-		}
-
-
 	},
 
 	injectHomePageTwoLink: function() {
@@ -14393,113 +13729,6 @@ var items=0;
 			var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
 			$(this).after("<a style='color:blue;font-size:10px;' "+Layout.quickBuffHref(id[1])+">[b]</a>");
 		});
-		if (!GM_getValue("showGoldOnFindPlayer")) return;
-		var findPlayerTable = $('table.width_full');
-		//add header
-		findPlayerTable.find('tr:first td:eq(3)')
-			.after('<td class="header">Gold</td>');
-		//fix divider lengths for table
-		findPlayerTable.find('td.divider').each(function(){
-			$(this).attr("colSpan",7);
-		});
-		//add gold column and then go fetch data
-		findPlayerTable.find('tr:not(:first):has(td:not(.divider))').each(function(){
-			var playerHREF = $(this).find('td:first a').attr("href");
-			$(this).find('td:eq(3)')
-				.after('<td class="row"><span style="color:blue;" id="Gold' + playerHREF + '">?</span></td>');
-			System.xmlhttp(playerHREF, Helper.findPlayerParseProfile, {"href": playerHREF});
-		});
-	},
-
-	findPlayerParseProfile: function(responseText, callback) {
-		var doc = System.createDocument(responseText);
-		var goldValue = $(doc).find('b:contains("Gold:")').parents('td:first').next();
-		var goldSpan = $('span[id="Gold' + callback.href + '"]');
-		goldSpan.html(goldValue.text());
-		//add VL if not equal to current level
-		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
-		var levelValue = parseInt(levelElement.text().replace(/,/,""),10);
-		var virtualLevelElement = $(doc).find('a:contains("VL")').parents('td:first').next();;
-		var virtualLevelValue = parseInt(virtualLevelElement.text(),10);
-		if (levelValue != virtualLevelValue) {
-			goldSpan.parents('tr:first').children('td:eq(1)').append('&nbsp;<span style="color:blue;">(' + virtualLevelValue + ')</span>');
-		}
-		var pvpProtection = $(doc).find('td:contains("[not activated]"):last');
-		if (pvpProtection.length == 0) {
-			goldSpan.parents('tr:first').children('td:eq(0)').append('&nbsp;<img width="10" height="10" title="Protected" src="' + Data.redDot() + '">')
-		}
-	},
-
-	injectCreatures: function() {
-		var addUFSGWidgets = GM_getValue("addUFSGWidgets");
-		if (!addUFSGWidgets) return;
-		var creatureForm = System.findNode("//form");
-		var fetchCreatureDataDiv = document.createElement("DIV");
-		fetchCreatureDataDiv.innerHTML = "Fetch All Creature Data";
-		fetchCreatureDataDiv.style.cursor = "pointer";
-		fetchCreatureDataDiv.style.textDecoration = "underline";
-		fetchCreatureDataDiv.style.color = "blue";
-		fetchCreatureDataDiv.style.fontSize = "x-small";
-		fetchCreatureDataDiv.align = "center";
-		creatureForm.appendChild(fetchCreatureDataDiv);
-		fetchCreatureDataDiv.addEventListener('click', Helper.fetchCreatureData, true);
-	},
-
-	fetchCreatureData: function() {
-		var creatureTable = System.findNode("//table[@width='800']");
-		creatureTable.rows[0].cells[0].colSpan = '8';
-		creatureTable.rows[creatureTable.rows.length-1].cells[0].colSpan = '8';
-		//title row
-		var newCell = creatureTable.rows[1].insertCell(1);
-		newCell.innerHTML = 'Class';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Attack';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Defense';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Armor';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Damage';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'HP';
-		newCell.setAttribute('class','tHeader');
-		for (var i=2; i<creatureTable.rows.length-1; i++) {
-			var aRow = creatureTable.rows[i];
-			if (aRow.cells[1]) {
-				var newCell = aRow.insertCell(1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var href = aRow.cells[0].firstChild.getAttribute("href");
-				System.xmlhttp(href, Helper.parseCreatureData, {"row": aRow});
-			} else {
-				aRow.cells[0].colSpan = '8';
-			}
-		}
-	},
-
-	parseCreatureData: function(responseText, callback) {
-		var target = callback.row;
-		var doc = System.createDocument(responseText);
-		var classText = System.findNode("//td[b[.='Class:']]/following-sibling::td[1]", doc).textContent;
-		var attackText = System.findNode("//td[b[.='Attack:']]/following-sibling::td[3]", doc).textContent;
-		var defenseText = System.findNode("//td[b[.='Defense:']]/following-sibling::td[3]", doc).textContent;
-		var armorText = System.findNode("//td[b[.='Armor:']]/following-sibling::td[3]", doc).textContent;
-		var damageText = System.findNode("//td[b[.='Damage:']]/following-sibling::td[3]", doc).textContent;
-		var hpText = System.findNode("//td[b[.='HP:']]/following-sibling::td[3]", doc).textContent;
-		target.cells[1].innerHTML = classText;
-		target.cells[3].innerHTML = attackText;
-		target.cells[4].innerHTML = defenseText;
-		target.cells[5].innerHTML = armorText;
-		target.cells[6].innerHTML = damageText;
-		target.cells[7].innerHTML = hpText;
 	},
 
 	injectFindBuffs: function(content) {
@@ -14951,7 +14180,8 @@ var items=0;
 			"Character" : [
 				["BL", "Buff Log", "injectBuffLog"], ["COL", "Combat Log", "injectNotepadShowLogs"],
 				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
-				["QLM", "Quick Links", "injectQuickLinkManager"], ["CRM", "Create Maps", "injectCreateMap"]
+				["QLM", "Quick Links", "injectQuickLinkManager"]
+				//, ["CRM", "Create Maps", "injectCreateMap"]
 			],
 			"Actions" : [
 				["FB", "Find Buffs", "injectFindBuffs"], ["FO", "Find Other", "injectFindOther"],
@@ -14961,12 +14191,16 @@ var items=0;
 				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"]
 			],
 			"Extra" : [
-				["BD", "Best Damage Items", "injectCheckWearingItem"], ["QE", "Quick Extract", "insertQuickExtract"],
+				//~ ["BD", "Best Damage Items", "injectCheckWearingItem"], 
+				["QE", "Quick Extract", "insertQuickExtract"],
 				["QW", "Quick Wear", "insertQuickWear"], ["BoxL", "FS Box Log", "injectFsBoxContent"],
 				["CRL", "Creature Log", "injectMonsterLog"] //still needs work
 			]
 			};
-		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"" + System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\""
+					+ System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; "
+					+ "z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold "
+					+ "13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
 		html += "<div class=column>";
 			for (var key in actionMenu) {
 				html += "<h3>"+key+"</h3><ul>";
@@ -14976,8 +14210,7 @@ var items=0;
 				html += "</ul>";
 			}
 		html += "<h3>FSH developer quick links</h3>";
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a></br>";
-		html += "<span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a></br>";
+		html += "<span class=a-reply target_player=PointyHair style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1963510>PointyHair</a></br>";
 		html += "<span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a></br>";
 		html += "</div>";
 		html += "</div>";
@@ -15036,137 +14269,6 @@ var items=0;
 				});  
 			}); 
 		}
-	},
-
-	injectCreateMap: function(content) {
-		if (!content) content=Layout.notebookContent();
-		System.setDefault("prevAreaMaps", "[]");
-		content=$(content).html(Helper.makePageHeader('Create Maps','','','')+
-			'<table width="620" cellspacing="0" cellpadding="2" border="0" align="center"><tbody>'+
-			'<tr><td colspan=2 align=right>Min Level: <input id=minlvl class=custominput name=minlvl></td>'+
-			'<td colspan=2 align=center>Max Level: <input id=maxlvl class=custominput name=maxlvl></td><td>'+
-			'<input type=button id=createmap value="Create Map" class=custombutton></td></tr>'+
-			'<tr><td colspan=5 id=maparea0 align=center></td><tr><td colspan=5><b>Previous Created Maps</b></td><tr id=prevmaps>'+
-			'<td id=maparea1></td><td id=maparea2></td><td id=maparea3></td><td id=maparea4></td><td id=maparea5></td></tr></tbody></table>'+
-			'<hr>Click on map to see full-size image<br/>If you do not see the image, try to lower the level difference.');
-		$('#minlvl').val(Helper.characterLevel - 2);
-		$('#maxlvl').val(Helper.characterLevel + 5);
-		Helper.prevAreaMaps = System.getValueJSON('prevAreaMaps');
-		$('#createmap').click(function() {
-			System.xmlhttp("http://guide.fallensword.com/index.php?cmd=realms&index=0&search_name=&search_level_min="+
-				$('#minlvl').val()+"&search_level_max="+$('#maxlvl').val()+"&sort_by=",
-				Helper.makeAreaMap);
-			});
-		Helper.showPreviousMaps();
-	},
-
-	makeAreaMap: function(responseText) {
-		Helper.areaMap = {};
-		Helper.mapCount = 0;
-		var doc=$(responseText);
-		var maps=$("//a[href*='index.php?cmd=realms&subcmd=view&realm_id='][text!='']", doc);
-		if (maps.length==0) {
-			$('#maparea0').html("Cannot find maps.");
-			return;
-		}
-		$('#maparea0').html("<br/>...loading area map image...<br/>");
-		maps.each(function(){
-			var el=$(this), url= "http://guide.fallensword.com/"+el.attr('href');
-			if (!Helper.areaMap[el.text()]) {
-				Helper.areaMap[el.text()] = {"url":url, "nb":[], "id":("m"+Helper.mapCount++), "lvl":el.closest('tr').children()[1].textContent};
-			}
-			});
-		Helper.mapCountMax = Helper.mapCount;
-		for (var map in Helper.areaMap) {
-			System.xmlhttp(Helper.areaMap[map].url, Helper.getConnectedMaps, map);
-		}
-	},
-
-	getConnectedMaps: function(responseText, map) {
-		var doc=$(responseText);
-		var maps = $("img[onmouseover*='Stairway to']", doc);
-		maps.each(function(){
-			var title=this.getAttribute("onmouseover").replace(/^.*Stairway to /,'').replace(/'\);/,'').replace(/\\/g,'');
-			if (title.indexOf("Master Realm")>=0) Helper.areaMap[title]={"url":null, "nb":[], "id":("m"+Helper.mapCountMax++), "lvl":0};
-			Helper.areaMap[map].nb.push(title);
-			});
-		$('#maparea0').html($('#maparea0').html()+map+", ");
-		Helper.mapCount --;
-		if (Helper.mapCount==0) {
-			Helper.drawAreaMap(Helper.areaMap, 0, $('#minlvl').val(), $('#maxlvl').val());
-
-			// store the map
-			if (Helper.prevAreaMaps.length >= 5) Helper.prevAreaMaps.shift();
-			Helper.prevAreaMaps.push({'map':Helper.areaMap,'minlvl':$('#minlvl').val(),'maxlvl':$('#maxlvl').val()});
-			System.setValueJSON('prevAreaMaps', Helper.prevAreaMaps);
-		}
-	},
-
-	drawAreaMap: function(areaMap, id, minlvl, maxlvl) {
-
-		var src="http://chart.googleapis.com/chart?cht=gv&chl=graph{node[shape=box];label=\"\\n\\nFS Area Map\\nDrawn by dkwizard\";";
-		var map, mapbg, nbbg, i;
-		for (map in areaMap) {src+=areaMap[map].id+"[label=\""+map+
-			(areaMap[map].lvl>0 ? ("\\n"+areaMap[map].lvl+"\"") : "\",fontcolor=brown")+
-			(areaMap[map].lvl==Helper.characterLevel ? ",fontcolor=blue" : "")+
-			"];";}
-		for (map in areaMap) {
-			for (i=0; i<areaMap[map].nb.length; i++) {
-				if (map < areaMap[map].nb[i] || areaMap[map].nb[i].indexOf("Master Realm")>=0) {
-					src += areaMap[map].id+"--"+(areaMap[areaMap[map].nb[i]] ? areaMap[areaMap[map].nb[i]].id : ('"'+areaMap[map].nb[i]+'"'))+";";
-				}
-			}
-		}
-		src = src.replace(/'/g,'`')+"}";
-		previewsrc = src+"&chs="+(id==0?"540x240":"100x100");
-		$('#maparea'+id).html("<div align=center><img id=imgarea"+id+" style='cursor:pointer' src='"+previewsrc+"' alt='If you still see this msg after 10 seconds, try to lower the lvl range!'><br/>"+
-			"Lvl: "+minlvl+" - "+maxlvl+"</div>")
-			.click(function(){
-				Helper.lightBox("<div align=center><img src='"+src+"'><br/>Min lvl: "+minlvl+" - Max lvl: "+maxlvl+"</div>");
-			});
-
-	},
-
-	lightBox: function(content) {
-
-		if(!content){
-			$('#ntz_modal').remove();
-			$('#ntz_overlay').fadeOut(function(){$(this).remove();});
-			return false;
-		}
-		$('body').append('<div id="ntz_overlay"><\/div>');
-		$('#ntz_overlay').css({
-			width     :   '100%',
-			height    :   $(document).height(),
-			position  :   'absolute',
-			left      :   0,
-			top       :   0,
-			backgroundColor : '#000',
-			zIndex    : 9990,
-			opacity   :   0
-		}).fadeTo(200, 0.5).click(function(){Helper.lightBox()});
-
-		$('body').append('<div id="ntz_modal"><\/div>');
-		$('#ntz_modal').css({
-			position  : 'absolute',
-			border    : '1px solid #ccc',
-			backgroundColor:'#ffffff',
-			top       : $(document).scrollTop()+20,
-			zIndex    : 9995,
-			marginLeft: 20,
-			cursor    : "pointer"
-		}).html(content).click(function(){Helper.lightBox()});;
-
-		$('#ntz_modal a:eq(0), #ntz_modal input, #ntz_modal textarea').focus();
-
-	},
-
-	showPreviousMaps: function() {
-		var i = 0, aMap;
-		for (i=0; i < Helper.prevAreaMaps.length; i++) {
-			aMap = Helper.prevAreaMaps[i];
-			Helper.drawAreaMap(aMap.map, Helper.prevAreaMaps.length-i, aMap.minlvl, aMap.maxlvl);
-		}
 	}
 }; // end of var helper
 
@@ -15191,7 +14293,7 @@ var items=0;
 
 			// Start polling...
 			checkReady(function($) {
-				$(function() {
+				$(function() { //DOMReady shorthand
 					Helper.onPageLoad(null);
 				});
 			});
