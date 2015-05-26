@@ -1749,10 +1749,10 @@ var Helper = {
 			if (isBuffResult) {
 				Helper.updateBuffLog();
 			}
-			var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
-			if (isAuctionPage) {
-				Helper.injectAuctionHouse();
-			}
+			//~ var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
+			//~ if (isAuctionPage) {
+				//~ Helper.injectAuctionHouse();
+			//~ }
 			var isShopPage =  $('#shop-info').length > 0;//System.findNode("//td[contains(.,'then click to purchase for the price listed below the item.')]");
 			if (isShopPage) {
 				Helper.injectShop();
@@ -5768,295 +5768,295 @@ var Helper = {
 		}
 	},
 
-	injectAuctionHouse: function() {
-		var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
-		if (isAuctionPage) {
-			var imageCell = isAuctionPage.parentNode;
-			var imageHTML = imageCell.innerHTML; //hold on to this for later.
-
-			var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
-
-			//Add functionality to hide the text block at the top.
-			var textRow = auctionTable.rows[2];
-			textRow.id = 'auctionTextControl';
-			var myBidsButton = System.findNode("//input[@value='My Bids']/..");
-			myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
-				"id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
-			if (GM_getValue("auctionTextControl")) {
-				textRow.style.display = "none";
-				textRow.style.visibility = "hidden";
-			}
-			document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
-
-			//fix button class and add go to first and last
-			var prevButton = System.findNode("//input[@value='<']");
-			var nextButton = System.findNode("//input[@value='>']");
-			if (prevButton) {
-				prevButton.setAttribute("class", "custombutton");
-				var startButton = document.createElement("input");
-				startButton.setAttribute("type", "button");
-				startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
-				startButton.setAttribute("class", "custombutton");
-				startButton.setAttribute("value", "<<");
-				prevButton.parentNode.insertBefore(startButton,prevButton);
-			}
-			if (nextButton) {
-				nextButton.setAttribute("class", "custombutton");
-				var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
-				lastPage = lastPageNode.textContent.replace(/\D/g,"");
-				var finishButton = document.createElement("input");
-				finishButton.setAttribute("type", "button");
-				finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
-				finishButton.setAttribute("class", "custombutton");
-				finishButton.setAttribute("value", ">>");
-				nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
-			}
-
-			//insert another page change block at the top of the screen.
-			if (isNewUI == 1) var insertPageChangeBlockHere = auctionTable.rows[3].cells[0]; // crude fix for new UI
-			else var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
-			var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
-			var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
-			newPageChangeBlock += "</form>";
-			var insertPageChangeBlock=document.createElement("SPAN");
-			insertPageChangeBlock.innerHTML = newPageChangeBlock;
-			insertPageChangeBlockHere.align = "right";
-			insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
-
-			var quickSearchList = System.getValueJSON("quickSearchList");
-
-			var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
-				"<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
-							System.server +
-							"index.php?cmd=notepad&blank=1&subcmd=auctionsearch'>" +
-							"Configure Quick Search</a></td></tr>";
-			var lp=0;
-			var rowCount = 0;
-			for (var p=0;p<quickSearchList.length;p++) {
-				if (lp % 6==0 && rowCount == 6) break; //36 searches on the screen so don't display any more
-				var quickSearch=quickSearchList[p];
-				if (quickSearch.displayOnAH) {
-					if (lp % 6==0) {
-						finalHTML += "<tr>";
-						rowCount++;
-					}
-					finalHTML += "<td nowrap style='overflow: hidden;'";
-					finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
-						quickSearch.searchname + "&page=1&order_by=1'>" +
-						quickSearch.nickname + "</a></td>";
-					if (lp % 6==5) finalHTML += "</tr>";
-					lp++;
-				}
-			}
-			imageCell.innerHTML = finalHTML;
-		}
-
-		//add coloring for item craft and durability
-		var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
-		if (auctionCellCraftElements) {
-			for (i=0; i<auctionCellCraftElements.length; i++) {
-				var auctionCellCraftElement = auctionCellCraftElements[i];
-				if (auctionCellCraftElement.textContent.length > 0){
-					switch(auctionCellCraftElement.textContent) {
-						case 'Perfect': craftColor = '#00b600'; break;
-						case 'Excellent': craftColor = '#f6ed00'; break;
-						case 'Very Good': craftColor = '#f67a00'; break;
-						case 'Good': craftColor = '#f65d00'; break;
-						case 'Average': craftColor = '#f64500'; break;
-						case 'Poor': craftColor = '#f61d00'; break;
-						case 'Very Poor': craftColor = '#b21500'; break;
-						case 'Uncrafted': craftColor = '#666666'; break;
-					}
-					auctionCellCraftElement.style.color = craftColor;
-				}
-				var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
-				if (auctionCellDurabilityElement.nodeName == 'SPAN') {
-					auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
-					auctionCellDurabilityElement.style.color = 'gray';
-				}
-			}
-		}
-
-		var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
-		auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
-
-		var playerId = Layout.playerId();
-
-		var memberList = System.getValueJSON("memberlist");
-		var memberNameString = "";
-		if (memberList) {
-			for (i=0;i<memberList.members.length;i++) {
-				var member=memberList.members[i];
-				memberNameString += member.name + " ";
-			}
-		}
-		var listOfEnemies = GM_getValue("listOfEnemies");
-		if (!listOfEnemies) listOfEnemies = "";
-		var listOfAllies = GM_getValue("listOfAllies");
-		if (!listOfAllies) listOfAllies = "";
-
-		var newRow, newCell, winningBidBuyoutCell;
-		var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
-		for (i=0;i<auctionTable.rows.length;i++) {
-			var aRow = auctionTable.rows[i];
-			if (i>0 && // the title row - ignore this
-				aRow.cells[1]) { // a separator row - ignore this
-				if (aRow.cells[5].innerHTML == '<font size="1">[ended]</font>') { //time left column
-					aRow.cells[6].innerHTML = ""; // text field and button column
-				} else {
-					var timeLeft = aRow.cells[5].firstChild.innerHTML;
-					var secondsLeft = timeLeft.substring(timeLeft.indexOf('m')+1).trim();
-					timeLeft = timeLeft.substring(0, timeLeft.indexOf('m'));
-					if (timeLeft >= 60) {
-						var hoursLeft = Math.floor(timeLeft / 60);
-						if (hoursLeft < 24) {
-							var minutesLeft = timeLeft - (hoursLeft * 60);
-							aRow.cells[5].firstChild.innerHTML = hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
-						} else {
-							var daysLeft = Math.floor(hoursLeft / 24);
-							hoursLeft = hoursLeft - (daysLeft * 24);
-							minutesLeft = timeLeft - (hoursLeft * 60) - (daysLeft * 1440);
-							aRow.cells[5].firstChild.innerHTML = daysLeft + "d " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
-						}
-
-					}
-
-					winningBidValue = "-";
-					var bidExistsOnItem = false;
-					var playerListedItem = false;
-					if (aRow.cells[1].innerHTML != '<font size="1">Auction House</font>') {
-						var sellerElement = aRow.cells[1].firstChild.firstChild;
-						sellerHref = sellerElement.getAttribute("href");
-						var sellerIDRE = /player_id=(\d+)/;
-						var sellerID = sellerIDRE.exec(sellerHref)[1];
-						if (playerId == sellerID) {
-							playerListedItem = true;
-						}
-					}
-					if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
-						var winningBidTable = aRow.cells[3].firstChild.firstChild;
-						var winningBidCell = winningBidTable.rows[0].cells[0];
-						var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
-						var winningBidder = winningBidderCell.innerHTML;
-						if (memberNameString.search(" "+winningBidder+" ") !=-1) {
-							winningBidderCell.style.color="green";
-						}
-						if (listOfEnemies.search(" "+winningBidder+" ") !=-1) {
-							winningBidderCell.style.color="red";
-						}
-						if (listOfAllies.search(" "+winningBidder+" ") !=-1) {
-							winningBidderCell.style.color="blue";
-						}
-						var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
-						var winningBidValue = System.intValue(winningBidCell.textContent);
-						newRow = winningBidTable.insertRow(2);
-						winningBidBuyoutCell = newRow.insertCell(0);
-						winningBidBuyoutCell.colSpan = "2";
-						winningBidBuyoutCell.align = "center";
-						var winningBidderHTML = winningBidTable.rows[1].cells[0].innerHTML;
-						var winningBidderIDRE = /player_id=(\d+)/;
-						var winningBidderID = winningBidderIDRE.exec(winningBidderHTML)[1];
-						if (playerId == winningBidderID) {
-							playerListedItem = true;
-						}
-					}
-					if (!bidExistsOnItem && !playerListedItem) {
-						var bidValueButton = aRow.cells[6].getElementsByTagName("input");
-						if (winningBidValue != "-") {
-							var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-							var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
-							if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
-							winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
-								System.addCommas(overBid) + '</span>&nbsp';
-							if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
-							bidValueButton[0].size = 6;
-						} else {
-							var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
-							if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
-							bidValueButton[0].size = 6;
-						}
-					}
-					var inputTableCell;
-					if (!playerListedItem) {
-						var inputTable = aRow.cells[6].firstChild.firstChild;
-						var inputCell = inputTable.rows[0].cells[0];
-						var textInput = inputCell.firstChild;
-						textInput.id = 'auction' + i + 'text';
-						var bidCell = inputTable.rows[0].cells[1];
-						bidCell.align = "right";
-						//spacer row
-						newRow = inputTable.insertRow(1);
-						inputTableCell = newRow.insertCell(0);
-						inputTableCell.colSpan = "2";
-						inputTableCell.height = "2";
-						//get itemID for bid no refresh
-						var itemIMG = aRow.cells[0].firstChild;
-						//var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
-						var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(itemIMG).data("tipped"));
-						invID = itemStats[2];
-						//new bid no refresh button
-						newRow = inputTable.insertRow(2);
-						inputTableCell = newRow.insertCell(0);
-						inputTableCell.colSpan = "2";
-						inputTableCell.align = "center";
-						inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
-							'<input id="bidNoRefresh" invID="'+ invID +
-								'" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
-					}
-					var inputText = aRow.cells[6];
-				}
-			}
-		}
-		bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");
-		if (bidNoRefreshList) {
-			for (i=0; i<bidNoRefreshList.length; i++) {
-				var bidNoRefreshItem = bidNoRefreshList[i];
-				bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
-			}
-			//Add a bid no refresh on all
-			$('input[value="My Bids"]').after('&nbsp;<input type="button" value="Bid on All" id="fshBidOnAll"  class="custombutton tipped" data-tipped="<b>Bid on each auction</b><br>Triggers the \"Bid no refresh\" for each btton on screen">');
-			$("#fshBidOnAll").click(function()
-			{
-				if(confirm ("Are you sure you want to bid on all of them?")){
-					$("input[id=bidNoRefresh]").each(function()
-					{
-						//this.checked = !this.checked;
-						//alert("asdf");
-						//alert(this.attr('id'));
-						this.click();
-					});
-				}
-			});
-		}
-		//show saved prefs if not default values
-		var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
-		var pref_minlevel = System.findNode("//input[@name='pref_minlevel']").value;
-		var pref_maxlevel = System.findNode("//input[@name='pref_maxlevel']").value
-		var pref_hidegold = System.findNode("//input[@name='pref_hidegold']").checked;
-		var pref_hidefsp = System.findNode("//input[@name='pref_hidefsp']").checked;
-		var pref_minforge = System.findNode("//select[@name='pref_minforge']").selectedIndex;
-		var pref_mincraft = System.findNode("//select[@name='pref_mincraft']").selectedIndex;
-		var output = '';
-		if (pref_minlevel > 1 || (pref_maxlevel > 0 && pref_maxlevel != 1000) || pref_hidegold || pref_hidefsp || pref_minforge != 0 || pref_mincraft != 0) {
-			output = '<nobr><span style="color:blue; font-size:x-small;">Enabled filters (' +
-				'<span id="Helper.resetAHprefs" style="cursor:pointer; text-decoration:underline; color:blue;">Reset</span>' +
-				'):</span> <span style="color:orangered; font-size:x-small;">';
-			if (pref_minlevel > 1) output += 'MinLevel('+pref_minlevel+') ';
-			if (pref_maxlevel > 0 && pref_maxlevel != 1000) output += 'MaxLevel('+pref_maxlevel+') ';
-			if (pref_hidegold) output += pref_hidefsp?'<span style="color:magenta; font-weight:900;">Gold</span> ':'Gold ';
-			if (pref_hidefsp) output += pref_hidegold?'<span style="color:magenta; font-weight:900;">FSP</span> ':'FSP ';
-			if (pref_minforge != 0) output += 'Forge('+pref_minforge+') ';
-			if (pref_mincraft != 0) output += 'Craft('+pref_mincraft+') ';
-			output += '</span></nobr>';
-			searchPrefsFirstCell.innerHTML = output;
-			document.getElementById("Helper.resetAHprefs").addEventListener('click', Helper.resetAHquickPrefsAndReload, true);
-		}
-		//litte something to default to sorting by min bid
-		var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
-		hiddenOrderByInput.value = 1;
-
-		Helper.injectAuctionQuickCancel();
-	},
+	//~ injectAuctionHouse: function() {
+		//~ var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
+		//~ if (isAuctionPage) {
+			//~ var imageCell = isAuctionPage.parentNode;
+			//~ var imageHTML = imageCell.innerHTML; //hold on to this for later.
+//~ 
+			//~ var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
+//~ 
+			//~ //Add functionality to hide the text block at the top.
+			//~ var textRow = auctionTable.rows[2];
+			//~ textRow.id = 'auctionTextControl';
+			//~ var myBidsButton = System.findNode("//input[@value='My Bids']/..");
+			//~ myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
+				//~ "id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
+			//~ if (GM_getValue("auctionTextControl")) {
+				//~ textRow.style.display = "none";
+				//~ textRow.style.visibility = "hidden";
+			//~ }
+			//~ document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
+//~ 
+			//~ //fix button class and add go to first and last
+			//~ var prevButton = System.findNode("//input[@value='<']");
+			//~ var nextButton = System.findNode("//input[@value='>']");
+			//~ if (prevButton) {
+				//~ prevButton.setAttribute("class", "custombutton");
+				//~ var startButton = document.createElement("input");
+				//~ startButton.setAttribute("type", "button");
+				//~ startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
+				//~ startButton.setAttribute("class", "custombutton");
+				//~ startButton.setAttribute("value", "<<");
+				//~ prevButton.parentNode.insertBefore(startButton,prevButton);
+			//~ }
+			//~ if (nextButton) {
+				//~ nextButton.setAttribute("class", "custombutton");
+				//~ var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
+				//~ lastPage = lastPageNode.textContent.replace(/\D/g,"");
+				//~ var finishButton = document.createElement("input");
+				//~ finishButton.setAttribute("type", "button");
+				//~ finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
+				//~ finishButton.setAttribute("class", "custombutton");
+				//~ finishButton.setAttribute("value", ">>");
+				//~ nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
+			//~ }
+//~ 
+			//~ //insert another page change block at the top of the screen.
+			//~ if (isNewUI == 1) var insertPageChangeBlockHere = auctionTable.rows[3].cells[0]; // crude fix for new UI
+			//~ else var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
+			//~ var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
+			//~ var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
+			//~ newPageChangeBlock += "</form>";
+			//~ var insertPageChangeBlock=document.createElement("SPAN");
+			//~ insertPageChangeBlock.innerHTML = newPageChangeBlock;
+			//~ insertPageChangeBlockHere.align = "right";
+			//~ insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
+//~ 
+			//~ var quickSearchList = System.getValueJSON("quickSearchList");
+//~ 
+			//~ var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
+				//~ "<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
+							//~ System.server +
+							//~ "index.php?cmd=notepad&blank=1&subcmd=auctionsearch'>" +
+							//~ "Configure Quick Search</a></td></tr>";
+			//~ var lp=0;
+			//~ var rowCount = 0;
+			//~ for (var p=0;p<quickSearchList.length;p++) {
+				//~ if (lp % 6==0 && rowCount == 6) break; //36 searches on the screen so don't display any more
+				//~ var quickSearch=quickSearchList[p];
+				//~ if (quickSearch.displayOnAH) {
+					//~ if (lp % 6==0) {
+						//~ finalHTML += "<tr>";
+						//~ rowCount++;
+					//~ }
+					//~ finalHTML += "<td nowrap style='overflow: hidden;'";
+					//~ finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
+						//~ quickSearch.searchname + "&page=1&order_by=1'>" +
+						//~ quickSearch.nickname + "</a></td>";
+					//~ if (lp % 6==5) finalHTML += "</tr>";
+					//~ lp++;
+				//~ }
+			//~ }
+			//~ imageCell.innerHTML = finalHTML;
+		//~ }
+//~ 
+		//~ //add coloring for item craft and durability
+		//~ var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
+		//~ if (auctionCellCraftElements) {
+			//~ for (i=0; i<auctionCellCraftElements.length; i++) {
+				//~ var auctionCellCraftElement = auctionCellCraftElements[i];
+				//~ if (auctionCellCraftElement.textContent.length > 0){
+					//~ switch(auctionCellCraftElement.textContent) {
+						//~ case 'Perfect': craftColor = '#00b600'; break;
+						//~ case 'Excellent': craftColor = '#f6ed00'; break;
+						//~ case 'Very Good': craftColor = '#f67a00'; break;
+						//~ case 'Good': craftColor = '#f65d00'; break;
+						//~ case 'Average': craftColor = '#f64500'; break;
+						//~ case 'Poor': craftColor = '#f61d00'; break;
+						//~ case 'Very Poor': craftColor = '#b21500'; break;
+						//~ case 'Uncrafted': craftColor = '#666666'; break;
+					//~ }
+					//~ auctionCellCraftElement.style.color = craftColor;
+				//~ }
+				//~ var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
+				//~ if (auctionCellDurabilityElement.nodeName == 'SPAN') {
+					//~ auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
+					//~ auctionCellDurabilityElement.style.color = 'gray';
+				//~ }
+			//~ }
+		//~ }
+//~ 
+		//~ var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
+		//~ auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
+//~ 
+		//~ var playerId = Layout.playerId();
+//~ 
+		//~ var memberList = System.getValueJSON("memberlist");
+		//~ var memberNameString = "";
+		//~ if (memberList) {
+			//~ for (i=0;i<memberList.members.length;i++) {
+				//~ var member=memberList.members[i];
+				//~ memberNameString += member.name + " ";
+			//~ }
+		//~ }
+		//~ var listOfEnemies = GM_getValue("listOfEnemies");
+		//~ if (!listOfEnemies) listOfEnemies = "";
+		//~ var listOfAllies = GM_getValue("listOfAllies");
+		//~ if (!listOfAllies) listOfAllies = "";
+//~ 
+		//~ var newRow, newCell, winningBidBuyoutCell;
+		//~ var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
+		//~ for (i=0;i<auctionTable.rows.length;i++) {
+			//~ var aRow = auctionTable.rows[i];
+			//~ if (i>0 && // the title row - ignore this
+				//~ aRow.cells[1]) { // a separator row - ignore this
+				//~ if (aRow.cells[5].innerHTML == '<font size="1">[ended]</font>') { //time left column
+					//~ aRow.cells[6].innerHTML = ""; // text field and button column
+				//~ } else {
+					//~ var timeLeft = aRow.cells[5].firstChild.innerHTML;
+					//~ var secondsLeft = timeLeft.substring(timeLeft.indexOf('m')+1).trim();
+					//~ timeLeft = timeLeft.substring(0, timeLeft.indexOf('m'));
+					//~ if (timeLeft >= 60) {
+						//~ var hoursLeft = Math.floor(timeLeft / 60);
+						//~ if (hoursLeft < 24) {
+							//~ var minutesLeft = timeLeft - (hoursLeft * 60);
+							//~ aRow.cells[5].firstChild.innerHTML = hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
+						//~ } else {
+							//~ var daysLeft = Math.floor(hoursLeft / 24);
+							//~ hoursLeft = hoursLeft - (daysLeft * 24);
+							//~ minutesLeft = timeLeft - (hoursLeft * 60) - (daysLeft * 1440);
+							//~ aRow.cells[5].firstChild.innerHTML = daysLeft + "d " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
+						//~ }
+//~ 
+					//~ }
+//~ 
+					//~ winningBidValue = "-";
+					//~ var bidExistsOnItem = false;
+					//~ var playerListedItem = false;
+					//~ if (aRow.cells[1].innerHTML != '<font size="1">Auction House</font>') {
+						//~ var sellerElement = aRow.cells[1].firstChild.firstChild;
+						//~ sellerHref = sellerElement.getAttribute("href");
+						//~ var sellerIDRE = /player_id=(\d+)/;
+						//~ var sellerID = sellerIDRE.exec(sellerHref)[1];
+						//~ if (playerId == sellerID) {
+							//~ playerListedItem = true;
+						//~ }
+					//~ }
+					//~ if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
+						//~ var winningBidTable = aRow.cells[3].firstChild.firstChild;
+						//~ var winningBidCell = winningBidTable.rows[0].cells[0];
+						//~ var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
+						//~ var winningBidder = winningBidderCell.innerHTML;
+						//~ if (memberNameString.search(" "+winningBidder+" ") !=-1) {
+							//~ winningBidderCell.style.color="green";
+						//~ }
+						//~ if (listOfEnemies.search(" "+winningBidder+" ") !=-1) {
+							//~ winningBidderCell.style.color="red";
+						//~ }
+						//~ if (listOfAllies.search(" "+winningBidder+" ") !=-1) {
+							//~ winningBidderCell.style.color="blue";
+						//~ }
+						//~ var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
+						//~ var winningBidValue = System.intValue(winningBidCell.textContent);
+						//~ newRow = winningBidTable.insertRow(2);
+						//~ winningBidBuyoutCell = newRow.insertCell(0);
+						//~ winningBidBuyoutCell.colSpan = "2";
+						//~ winningBidBuyoutCell.align = "center";
+						//~ var winningBidderHTML = winningBidTable.rows[1].cells[0].innerHTML;
+						//~ var winningBidderIDRE = /player_id=(\d+)/;
+						//~ var winningBidderID = winningBidderIDRE.exec(winningBidderHTML)[1];
+						//~ if (playerId == winningBidderID) {
+							//~ playerListedItem = true;
+						//~ }
+					//~ }
+					//~ if (!bidExistsOnItem && !playerListedItem) {
+						//~ var bidValueButton = aRow.cells[6].getElementsByTagName("input");
+						//~ if (winningBidValue != "-") {
+							//~ var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
+							//~ var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
+							//~ if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
+							//~ winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
+								//~ System.addCommas(overBid) + '</span>&nbsp';
+							//~ if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
+							//~ bidValueButton[0].size = 6;
+						//~ } else {
+							//~ var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
+							//~ if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
+							//~ bidValueButton[0].size = 6;
+						//~ }
+					//~ }
+					//~ var inputTableCell;
+					//~ if (!playerListedItem) {
+						//~ var inputTable = aRow.cells[6].firstChild.firstChild;
+						//~ var inputCell = inputTable.rows[0].cells[0];
+						//~ var textInput = inputCell.firstChild;
+						//~ textInput.id = 'auction' + i + 'text';
+						//~ var bidCell = inputTable.rows[0].cells[1];
+						//~ bidCell.align = "right";
+						//~ //spacer row
+						//~ newRow = inputTable.insertRow(1);
+						//~ inputTableCell = newRow.insertCell(0);
+						//~ inputTableCell.colSpan = "2";
+						//~ inputTableCell.height = "2";
+						//~ //get itemID for bid no refresh
+						//~ var itemIMG = aRow.cells[0].firstChild;
+						//~ //var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
+						//~ var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(itemIMG).data("tipped"));
+						//~ invID = itemStats[2];
+						//~ //new bid no refresh button
+						//~ newRow = inputTable.insertRow(2);
+						//~ inputTableCell = newRow.insertCell(0);
+						//~ inputTableCell.colSpan = "2";
+						//~ inputTableCell.align = "center";
+						//~ inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
+							//~ '<input id="bidNoRefresh" invID="'+ invID +
+								//~ '" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
+					//~ }
+					//~ var inputText = aRow.cells[6];
+				//~ }
+			//~ }
+		//~ }
+		//~ bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");
+		//~ if (bidNoRefreshList) {
+			//~ for (i=0; i<bidNoRefreshList.length; i++) {
+				//~ var bidNoRefreshItem = bidNoRefreshList[i];
+				//~ bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
+			//~ }
+			//~ //Add a bid no refresh on all
+			//~ $('input[value="My Bids"]').after('&nbsp;<input type="button" value="Bid on All" id="fshBidOnAll"  class="custombutton tipped" data-tipped="<b>Bid on each auction</b><br>Triggers the \"Bid no refresh\" for each btton on screen">');
+			//~ $("#fshBidOnAll").click(function()
+			//~ {
+				//~ if(confirm ("Are you sure you want to bid on all of them?")){
+					//~ $("input[id=bidNoRefresh]").each(function()
+					//~ {
+						//~ //this.checked = !this.checked;
+						//~ //alert("asdf");
+						//~ //alert(this.attr('id'));
+						//~ this.click();
+					//~ });
+				//~ }
+			//~ });
+		//~ }
+		//~ //show saved prefs if not default values
+		//~ var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
+		//~ var pref_minlevel = System.findNode("//input[@name='pref_minlevel']").value;
+		//~ var pref_maxlevel = System.findNode("//input[@name='pref_maxlevel']").value
+		//~ var pref_hidegold = System.findNode("//input[@name='pref_hidegold']").checked;
+		//~ var pref_hidefsp = System.findNode("//input[@name='pref_hidefsp']").checked;
+		//~ var pref_minforge = System.findNode("//select[@name='pref_minforge']").selectedIndex;
+		//~ var pref_mincraft = System.findNode("//select[@name='pref_mincraft']").selectedIndex;
+		//~ var output = '';
+		//~ if (pref_minlevel > 1 || (pref_maxlevel > 0 && pref_maxlevel != 1000) || pref_hidegold || pref_hidefsp || pref_minforge != 0 || pref_mincraft != 0) {
+			//~ output = '<nobr><span style="color:blue; font-size:x-small;">Enabled filters (' +
+				//~ '<span id="Helper.resetAHprefs" style="cursor:pointer; text-decoration:underline; color:blue;">Reset</span>' +
+				//~ '):</span> <span style="color:orangered; font-size:x-small;">';
+			//~ if (pref_minlevel > 1) output += 'MinLevel('+pref_minlevel+') ';
+			//~ if (pref_maxlevel > 0 && pref_maxlevel != 1000) output += 'MaxLevel('+pref_maxlevel+') ';
+			//~ if (pref_hidegold) output += pref_hidefsp?'<span style="color:magenta; font-weight:900;">Gold</span> ':'Gold ';
+			//~ if (pref_hidefsp) output += pref_hidegold?'<span style="color:magenta; font-weight:900;">FSP</span> ':'FSP ';
+			//~ if (pref_minforge != 0) output += 'Forge('+pref_minforge+') ';
+			//~ if (pref_mincraft != 0) output += 'Craft('+pref_mincraft+') ';
+			//~ output += '</span></nobr>';
+			//~ searchPrefsFirstCell.innerHTML = output;
+			//~ document.getElementById("Helper.resetAHprefs").addEventListener('click', Helper.resetAHquickPrefsAndReload, true);
+		//~ }
+		//~ //litte something to default to sorting by min bid
+		//~ var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
+		//~ hiddenOrderByInput.value = 1;
+//~ 
+		//~ Helper.injectAuctionQuickCancel();
+	//~ },
 
 	resetAHquickPrefsAndReload: function(evt) {
 		//POSTDATA=cmd=auctionhouse&order_by=1&search_text=hunter&pref_save=1&pref_minlevel=&pref_maxlevel=&pref_minforge=0&pref_mincraft=-1
@@ -6181,36 +6181,36 @@ var Helper = {
 		Helper.generateManageTable();
 	},
 
-	bidNoRefresh: function(evt) {
-		var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
-		var invID = evt.target.getAttribute("invID");
-		var postData = "cmd=auctionhouse&subcmd=placebid" +
-				"&auction_id=" + invID +
-				"&page=" +
-				"&type=-1" +
-				"&bid=" + inputValue.value;
-
-		GM_xmlhttpRequest({
-			method: 'POST',
-			url: System.server + "index.php",
-			headers: {
-			//	"User-Agent" : navigator.userAgent,
-			//	"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
-			//	"Cookie" : document.cookie,
-				"Content-Type": "application/x-www-form-urlencoded"
-			},
-			data: postData,
-			onload: function(responseDetails) {
-				var info = Layout.infoBox(responseDetails.responseText);
-				var infoElement = evt.target.parentNode;
-				if (info.search("Bid placed successfully!") != -1) {
-					infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
-				} else {
-					infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
-				}
-			}
-		});
-	},
+	//~ bidNoRefresh: function(evt) {
+		//~ var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
+		//~ var invID = evt.target.getAttribute("invID");
+		//~ var postData = "cmd=auctionhouse&subcmd=placebid" +
+				//~ "&auction_id=" + invID +
+				//~ "&page=" +
+				//~ "&type=-1" +
+				//~ "&bid=" + inputValue.value;
+//~ 
+		//~ GM_xmlhttpRequest({
+			//~ method: 'POST',
+			//~ url: System.server + "index.php",
+			//~ headers: {
+			//~ //	"User-Agent" : navigator.userAgent,
+			//~ //	"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
+			//~ //	"Cookie" : document.cookie,
+				//~ "Content-Type": "application/x-www-form-urlencoded"
+			//~ },
+			//~ data: postData,
+			//~ onload: function(responseDetails) {
+				//~ var info = Layout.infoBox(responseDetails.responseText);
+				//~ var infoElement = evt.target.parentNode;
+				//~ if (info.search("Bid placed successfully!") != -1) {
+					//~ infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
+				//~ } else {
+					//~ infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
+				//~ }
+			//~ }
+		//~ });
+	//~ },
 
 	toggleShowExtraLinks: function(evt) {
 		var showExtraLinksElement = System.findNode("//span[@id='Helper:showExtraLinks']");
