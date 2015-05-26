@@ -1154,7 +1154,7 @@ var Helper = {
 		//~ System.setDefault("titanLogLength", 15);
 		System.setDefault("autoFillMinBidPrice", false);
 		System.setDefault("showPvPSummaryInLog", true);
-		System.setDefault("addUFSGWidgets", true);
+		//~ System.setDefault("addUFSGWidgets", true);
 		System.setDefault("enableQuickDrink", true);
 		System.setDefault("enhanceOnlineDots", true);
 		System.setDefault("hideBuffSelected", true);
@@ -1716,7 +1716,6 @@ var Helper = {
 			case "view":
 				break;
 			default:
-				Helper.injectCreatures();
 				break;
 			}
 			break;
@@ -11006,8 +11005,8 @@ var Helper = {
 				//~ ':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + /*(GM_getValue("showGoldOnFindPlayer")?" checked":"") +*/ ' disabled></td></tr>' +
 			//~ '<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
 				//~ ':</td><td><input name="titanLogLength" size="3" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
-			'<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
-				':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
+			//~ '<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
+				//~ ':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
 			//save button
 			//http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
@@ -11222,7 +11221,7 @@ var Helper = {
 		//~ System.saveValueForm(oForm, "titanLogLength");
 		System.saveValueForm(oForm, "autoFillMinBidPrice");
 		System.saveValueForm(oForm, "showPvPSummaryInLog");
-		System.saveValueForm(oForm, "addUFSGWidgets");
+		//~ System.saveValueForm(oForm, "addUFSGWidgets");
 		System.saveValueForm(oForm, "enableQuickDrink");
 		System.saveValueForm(oForm, "enhanceOnlineDots");
 		System.saveValueForm(oForm, "hideBuffSelected");
@@ -14022,78 +14021,6 @@ var items=0;
 			var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
 			$(this).after("<a style='color:blue;font-size:10px;' "+Layout.quickBuffHref(id[1])+">[b]</a>");
 		});
-	},
-
-	injectCreatures: function() {
-		var addUFSGWidgets = GM_getValue("addUFSGWidgets");
-		if (!addUFSGWidgets) return;
-		var creatureForm = System.findNode("//form");
-		var fetchCreatureDataDiv = document.createElement("DIV");
-		fetchCreatureDataDiv.innerHTML = "Fetch All Creature Data";
-		fetchCreatureDataDiv.style.cursor = "pointer";
-		fetchCreatureDataDiv.style.textDecoration = "underline";
-		fetchCreatureDataDiv.style.color = "blue";
-		fetchCreatureDataDiv.style.fontSize = "x-small";
-		fetchCreatureDataDiv.align = "center";
-		creatureForm.appendChild(fetchCreatureDataDiv);
-		fetchCreatureDataDiv.addEventListener('click', Helper.fetchCreatureData, true);
-	},
-
-	fetchCreatureData: function() {
-		var creatureTable = System.findNode("//table[@width='800']");
-		creatureTable.rows[0].cells[0].colSpan = '8';
-		creatureTable.rows[creatureTable.rows.length-1].cells[0].colSpan = '8';
-		//title row
-		var newCell = creatureTable.rows[1].insertCell(1);
-		newCell.innerHTML = 'Class';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Attack';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Defense';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Armor';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'Damage';
-		newCell.setAttribute('class','tHeader');
-		var newCell = creatureTable.rows[1].insertCell(-1);
-		newCell.innerHTML = 'HP';
-		newCell.setAttribute('class','tHeader');
-		for (var i=2; i<creatureTable.rows.length-1; i++) {
-			var aRow = creatureTable.rows[i];
-			if (aRow.cells[1]) {
-				var newCell = aRow.insertCell(1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var newCell = aRow.insertCell(-1);
-				var href = aRow.cells[0].firstChild.getAttribute("href");
-				System.xmlhttp(href, Helper.parseCreatureData, {"row": aRow});
-			} else {
-				aRow.cells[0].colSpan = '8';
-			}
-		}
-	},
-
-	parseCreatureData: function(responseText, callback) {
-		var target = callback.row;
-		var doc = System.createDocument(responseText);
-		var classText = System.findNode("//td[b[.='Class:']]/following-sibling::td[1]", doc).textContent;
-		var attackText = System.findNode("//td[b[.='Attack:']]/following-sibling::td[3]", doc).textContent;
-		var defenseText = System.findNode("//td[b[.='Defense:']]/following-sibling::td[3]", doc).textContent;
-		var armorText = System.findNode("//td[b[.='Armor:']]/following-sibling::td[3]", doc).textContent;
-		var damageText = System.findNode("//td[b[.='Damage:']]/following-sibling::td[3]", doc).textContent;
-		var hpText = System.findNode("//td[b[.='HP:']]/following-sibling::td[3]", doc).textContent;
-		target.cells[1].innerHTML = classText;
-		target.cells[3].innerHTML = attackText;
-		target.cells[4].innerHTML = defenseText;
-		target.cells[5].innerHTML = armorText;
-		target.cells[6].innerHTML = damageText;
-		target.cells[7].innerHTML = hpText;
 	},
 
 	injectFindBuffs: function(content) {
