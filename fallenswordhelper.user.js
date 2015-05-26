@@ -546,63 +546,6 @@ var System = {
 			replace(/\[([a-z])\]/g,"<\$1>");
 	},
 
-	generateLiveTable: function(dataArray, outputElement, itemProperty) {
-		throw new Exception("Not ready yet!");
-		/*if (!dataArray) return;
-		var result='<table id="Helper:LiveTableOutput"><tr>' +
-			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
-			'<th sortkey="name">Name</th>' +
-			'<th sortkey="level" sortType="number">Level</th></tr>';
-		var item, color;
-		for (var i=0; i<dataArray[itemProperty].length;i++) {
-			item=dataArray[itemProperty][i];
-
-			result+='<tr class="HelperTableRow' + (1 + i % 2) +'">' +
-				'<td><a href="index.php?cmd=guild&amp;subcmd=view&amp;guild_id=' + player.guildId + '">'+
-					'<img width="16" border="0" height="16" src="' + System.imageServerHTTP + '/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
-				'<td><a href="index.php?cmd=profile&player_id='+player.id+'">'+ player.name+'</a></td>' +
-				'<td align="right">' + player.level + '</td>' +
-				'</tr>';
-		}
-		result+='</table>';
-		outputElement.innerHTML=result;
-
-		var theTable=document.getElementById('Helper:OnlinePlayersTable');
-		for (var i=0; i<theTable.rows[0].cells.length; i++) {
-			var cell=theTable.rows[0].cells[i];
-			cell.style.textDecoration="underline";
-			cell.style.cursor="pointer";
-			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
-		}*/
-	},
-
-	sortLiveTable: function(evt) {
-		throw new Exception("Not ready yet!");
-		/*Helper.onlinePlayers=System.getValueJSON("onlinePlayers");
-		var headerClicked = evt.target.getAttribute("sortKey");
-		var sortType = evt.target.getAttribute("sortType");
-		if (!sortType) sortType="string";
-		GM_log(headerClicked);
-		// GM_log(Helper.sortBy);
-		GM_log(sortType);
-		// numberSort
-		if (Helper.sortAsc==undefined) Helper.sortAsc=true;
-		if (Helper.sortBy && Helper.sortBy==headerClicked) {
-			Helper.sortAsc=!Helper.sortAsc;
-		}
-		Helper.sortBy=headerClicked;
-
-		switch(sortType) {
-			case "string":
-				Helper.onlinePlayers.players.sort(Helper.stringSort);
-				break;
-			case "number":
-				Helper.onlinePlayers.players.sort(Helper.numberSort);
-				break;
-		}
-		System.generateOnlinePlayersTable();*/
-	},
-
 	parseDate: function(textDate) {
 		textDateSplitSpace = textDate.split(" ");
 		timeText = textDateSplitSpace[0];
@@ -1074,42 +1017,7 @@ var Layout = {
 			return "href=\"javascript:window.openWindow('index.php?cmd=quickbuff&tid=" + playerId +
 			"', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
 		}
-	},
-
-
-	formatWiki: function(aText, oldVersion, newVersion) {
-		var lines=aText.replace("\r","").split("\n");
-		var changes=[];
-		var revRX = /^==Revision\s*(\d+)/i;
-		var chgRX = /^\s*\#\s+(.*)$/i;
-		var rev = null;
-		var chg = null;
-		var revNo = 0;
-		var chgTxt = "";
-
-		for (var i=0; i<lines.length; i++){
-			var line = lines[i];
-			rev=revRX.exec(line);
-			chg=chgRX.exec(line);
-
-			if (rev) revNo = parseInt(rev[1],10);
-			chgTxt = "";
-			if (chg) chgTxt = chg[1];
-			if (chgTxt!=="") {
-				if (!changes[revNo]) changes[revNo] = "";
-				changes[revNo] += "<li>" + chgTxt + "</li>";
-			}
-		}
-		var result='<ul>';
-		for (i=newVersion; i>oldVersion; i--) {
-			if (changes[i]) {
-				result += '<li><ul type=square>Version '+ i + '. ' + changes[i] + '</ul></li>';
-			}
-		}
-		result += "</ul>";
-		return result;
 	}
-
 };
 
 var Helper = {
@@ -1298,19 +1206,6 @@ var Helper = {
 	},
 
 	setItemFilterDefault: function() {
-/*		Helper.itemFilters = [
-		{"id":"showGloveTypeItems", "type":"Gloves"},
-			{"id":"showHelmetTypeItems", "type":"Helmet"},
-		{"id":"showAmuletTypeItems", "type":"Amulet"},
-		{"id":"showWeaponTypeItems", "type":"Weapon"},
-		{"id":"showAmorTypeItems", "type":"Armor"},
-		{"id":"showShieldTypeItems", "type":"Shield"},
-		{"id":"showRingTypeItems", "type":"Ring"},
-		{"id":"showBootTypeItems", "type":"Boots"},
-		{"id":"showRuneTypeItems", "type":"Rune"}
-		];
-*/
-		//re-arranged array to so that arrayid = type number for HCS: item.item_type = i
 		Helper.itemFilters = [
 			{"id":"showHelmetTypeItems", "type":"Helmet"},
 			{"id":"showAmorTypeItems", "type":"Armor"},
@@ -2419,7 +2314,9 @@ var Helper = {
 		var injectHere=$('#shop-info');
 		var itemNodes=$('td center a img[src*="/items/"]');
 
-		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy <input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=3 class='custominput'><table cellpadding=2><tr>";
+		var selector="<span style='font-size:xx-small'>Select an item to quick-buy:<br>Select how many to quick-buy "
+					 + "<input style='font-size:xx-small' value=1 id='buy_amount' name='buy_amount' size=3 "
+					 + "class='custominput'><table cellpadding=2><tr>";
 		var itemId;
 		for (var i=0;i<itemNodes.length;i++) {
 			var item=itemNodes[i];
@@ -2431,7 +2328,8 @@ var Helper = {
 				"' class='tipped' data-tipped-options='skin: \"fsItem\", ajax: true' data-tipped=\""+onmouseover+"\">"+text+"</td>";
 			if (i%25==24 && i!=itemNodes.length-1) {selector+="</tr><tr>";}
 		}
-		selector+="</table><table width='600px'></tr><tr><td align='right' width='50%'>Selected item:</td><td height=45 width='50%' id=selectedItem align='left'>&nbsp;</td></tr>"+
+		selector+="</table><table width='600px'></tr><tr><td align='right' width='50%'>Selected item:</td><td height=45 width='50%' "
+				  + "id=selectedItem align='left'>&nbsp;</td></tr>"+
 			"<tr><td id=warningMsg colspan='2' align='center'></td></tr><tr><td id=buy_result colspan='2' align='center'></td></tr>";
 		injectHere.after("<table><tr><td>"+selector+"</td></tr></table>");
 		for (i=0;i<itemNodes.length;i++) {
@@ -2471,8 +2369,9 @@ var Helper = {
 		var infoMessage = Layout.infoBox(responseText);
 		document.getElementById('buy_result').innerHTML+="<br />"+infoMessage;
 	},
-/*******************************************************************************************************************/
-injectBazaar: function() {
+
+	/*******************************************************************************************************************/
+	injectBazaar: function() {
 		var injectHere=$('img[alt="Potion Bazaar"]').parents("center:first");
 		var itemNodes=$('td center a img[src*="/items/"]');
 
@@ -2504,7 +2403,8 @@ injectBazaar: function() {
 		document.getElementById('selectedItem').innerHTML=
 			document.getElementById("select"+Helper.bazaarItemId).parentNode.innerHTML.replace(/="20"/g,'=45');
 	},
-/************************************************************************************************************************************************/
+	/************************************************************************************************************************************************/
+
 	injectRelic: function(isRelicPage) {
 		var relicNameElement = $('td:contains("Below is the current status for the relic"):last');
 		relicNameElement.css('font-size', 'x-small');
@@ -5430,17 +5330,10 @@ injectBazaar: function() {
 				});
 			}
 		}, 0);
-		//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
-			//~ window.document.wrappedJSObject.onkeypress = null;
-			//~ window.document.wrappedJSObject.combatKeyHandler = null;
-			//~ window.document.wrappedJSObject.realmKeyHandler = null;
-			//~ window.document.wrappedJSObject.onkeypress = Helper.keyPress;
-		//~ } else {
-			unsafeWindow.document.onkeypress = null;
-			unsafeWindow.document.combatKeyHandler = null;
-			unsafeWindow.document.realmKeyHandler = null;
-			unsafeWindow.document.onkeypress = Helper.keyPress;
-		//~ }
+		unsafeWindow.document.onkeypress = null;
+		unsafeWindow.document.combatKeyHandler = null;
+		unsafeWindow.document.realmKeyHandler = null;
+		unsafeWindow.document.onkeypress = Helper.keyPress;
 	},
 
 	moveMe: function(dx, dy) {
@@ -10299,7 +10192,7 @@ injectBazaar: function() {
 		}
 	},
 
-injectArena: function() {
+	injectArena: function() {
 		var arenaTables = System.findNodes("//table[@width=620]/tbody/tr/td[contains(.,'Reward')]/../../..");
 		var injectHere = System.findNode("//tr[td/input[@value='Setup Combat Moves...']]").previousSibling.previousSibling.firstChild;
 		var hideMatchesForCompletedMoves = GM_getValue("hideMatchesForCompletedMoves");
@@ -10863,11 +10756,7 @@ injectArena: function() {
 		var enabledHuntingMode = GM_getValue("enabledHuntingMode");
 		var configData=
 			'<form><table style="border-spacing: 10px;">' +
-//			'<tr><td colspan="2" height="1" bgcolor="#333333"></td></tr>' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
-			//~ '<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Check for updates" id="Helper:CheckUpdate"></td></tr>'+
-			//~ '<tr><td colspan="2" align=center><span style="font-size:xx-small">(Current version: ' + GM_getValue("currentVersion") + ', Last check: ' + lastCheck.toFormatString("dd/MMM/yyyy HH:mm:ss") +
-			//~ ')</span></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-weight:bold;">Visit the <a href="https://github.com/fallenswordhelper/fallenswordhelper">Fallen Sword Helper web site</a> ' +
 			'for any suggestions, requests or bug reports</span></td></tr>' +
@@ -11660,8 +11549,6 @@ injectArena: function() {
 		window.location = url;
 	},
 
-
-
 	injectCreateAuctionTemplate: function() {
 		if (window.location.search.search("inv_id") == -1) { return; }
 
@@ -12347,14 +12234,6 @@ var items=0;
 			injectHere.innerHTML += '<br><input id="trackThisQuest" type="button" value="Track Quest" title="Tracks quest progress." class="custombutton">';
 			document.getElementById("trackThisQuest").addEventListener("click", Helper.trackThisQuest, true);
 		}
-
-		// insert next step
-		//~ if (GM_getValue('showNextQuestSteps')) {
-			//~ var table = System.findNode("//table[@width=500]");
-			//~ if (!table.textContent.match(/\d+ xp/i)) {
-				//~ System.xmlhttp('http://guide.fallensword.com/index.php?cmd=quests&subcmd=view&quest_id='+questId, Helper.showNextMissionStep);
-			//~ }
-		//~ }
 	},
 
 	showAllQuestSteps: function() {
@@ -12363,36 +12242,6 @@ var items=0;
 			document.getElementById("next_stage_button").style.display = "none";
 		}
 	},
-
-	//~ showNextMissionStep: function(responseText) {
-		//~ var doc=$(responseText.replace(/[\u0080-\uFFFF]+/g, ""));
-		//~ //find the last row and so find out what stage they are currently on
-		//~ var lastRow = $('td[bgcolor="#634A29"]:last').parent('tr');
-		//~ var currentStage = lastRow.index()/2;
-		//~ var parentTable = lastRow.parents('table:first')
-		//~ var ufsgStageArray = $(doc).find('div[id*="stage_"]');
-		//~ if (currentStage < ufsgStageArray.length || $('td:contains("You have not yet started this quest.")').length > 0) {
-			//~ //parentTable.append("<tr><td height='1' bgcolor='#634A29'></td></tr>");
-			//~ ufsgStageArray.each(function(index){
-				//~ //for all the stages on the usfg for this quest, consider all the ones greater than the current stage
-				//~ if ((currentStage-1) < index || $('td:contains("You have not yet started this quest.")').length > 0) {
-					//~ parentTable.append($(this));
-				//~ }
-			//~ });
-			//~ //fix the column widths of the hidden fields
-			//~ $('div[id*="stage"]').find('table[width=600],table[width=800],td[width=600]').attr('width','');
-			//~ //fix the links to ufsg
-			//~ $('div[id*="stage"]').find('a').each(function(){
-				//~ var ufsgHref = $(this).attr('href');
-				//~ $(this).attr('href','http://guide.fallensword.com/' + ufsgHref);
-				//~ $(this).attr('target','_blank');
-			//~ });
-			//~ //show hidden div's
-			//~ $('div[id*="stage"]').show();
-		//~ } else {
-			//~ parentTable.append("<tr><td style='color:blue;'>No more steps</td></tr>");
-		//~ }
-	//~ },
 
 	trackThisQuest: function(evt) {
 		var currentTrackedQuest = GM_getValue("questBeingTracked").split(";");
@@ -14858,7 +14707,10 @@ var items=0;
 				["CRL", "Creature Log", "injectMonsterLog"] //still needs work
 			]
 			};
-		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\"" + System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold 13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
+		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\""
+					+ System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; "
+					+ "z-index: 1' id=helperMenuDiv><style>.column{float: left;width: 180px;margin-right: 5px;} .column h3{background: #e0e0e0;font: bold "
+					+ "13px Arial;margin: 0 0 5px 0;}.column ul{margin: 0;padding: 0;list-style-type: none;}</style>";
 		html += "<div class=column>";
 			for (var key in actionMenu) {
 				html += "<h3>"+key+"</h3><ul>";
@@ -14868,8 +14720,7 @@ var items=0;
 				html += "</ul>";
 			}
 		html += "<h3>FSH developer quick links</h3>";
-		html += "<span class=a-reply target_player=TangTop style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1346893>TangTop</a></br>";
-		html += "<span class=a-reply target_player=jesiegel style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1570854>Jesiegel</a></br>";
+		html += "<span class=a-reply target_player=PointyHair style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1963510>PointyHair</a></br>";
 		html += "<span class=a-reply target_player=yuuzhan style='cursor:pointer; text-decoration:underline;'>PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a></br>";
 		html += "</div>";
 		html += "</div>";
