@@ -22,27 +22,6 @@ var main = function() {
 var isBeta ="0";
 var isNewUI = "0";
 
-// jquery GM_get/set wrapper
-function GM_JQ_wrapper() {
-	if (typeof(GM_setValue) != 'undefined') {
-		var oldGM_setValue = GM_setValue;
-		GM_setValue = function(name, value){
-			setTimeout(function() {oldGM_setValue(name, value);}, 0);
-		};
-		var oldGM_openInTab = GM_openInTab;
-		GM_openInTab = function(url) {
-			setTimeout(function() {oldGM_openInTab(url);}, 0);
-		};
-		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
-		GM_xmlhttpRequest = function(details) {
-			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
-		};
-		// don't know how to modify GM_getValue yet (how to return value from setTimeout) - TODO
-		// other GM_functions are not needed.
-	}
-}
-GM_JQ_wrapper();
-
 // GM_ApiBrowserCheck
 // @author        GIJoe
 // @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
@@ -66,30 +45,30 @@ function GM_ApiBrowserCheck(){
             } catch(e){}
         };
     }
-    GM_clog = function(msg){
-        if (arguments.callee.counter){
-            arguments.callee.counter++;
-        } else{
-            arguments.callee.counter = 1;
-        }
-        GM_log('(' + arguments.callee.counter + ') ' + msg);
-    }
-    GM_addGlobalStyle = function(css){
-        // Redefine GM_addGlobalStyle with a better routine
-        var sel = document.createElement('style');
-        sel.setAttribute('type', 'text/css');
-        sel.appendChild(document.createTextNode(css));
-        var hel = document.documentElement.firstChild;
-        while (hel && hel.nodeName != 'HEAD'){
-            hel = hel.nextSibling;
-        }
-        if (hel && hel.nodeName == 'HEAD'){
-            hel.appendChild(sel);
-        } else{
-            document.body.insertBefore(sel, document.body.firstChild);
-        }
-        return sel;
-    }
+    //~ GM_clog = function(msg){
+        //~ if (arguments.callee.counter){
+            //~ arguments.callee.counter++;
+        //~ } else{
+            //~ arguments.callee.counter = 1;
+        //~ }
+        //~ GM_log('(' + arguments.callee.counter + ') ' + msg);
+    //~ }
+    //~ GM_addGlobalStyle = function(css){
+        //~ // Redefine GM_addGlobalStyle with a better routine
+        //~ var sel = document.createElement('style');
+        //~ sel.setAttribute('type', 'text/css');
+        //~ sel.appendChild(document.createTextNode(css));
+        //~ var hel = document.documentElement.firstChild;
+        //~ while (hel && hel.nodeName != 'HEAD'){
+            //~ hel = hel.nextSibling;
+        //~ }
+        //~ if (hel && hel.nodeName == 'HEAD'){
+            //~ hel.appendChild(sel);
+        //~ } else{
+            //~ document.body.insertBefore(sel, document.body.firstChild);
+        //~ }
+        //~ return sel;
+    //~ }
     var needApiUpgrade = false;
     if (window.navigator.appName.match(/^opera/i) && typeof(window.opera) != 'undefined'){
         needApiUpgrade = true;
@@ -192,11 +171,11 @@ function GM_ApiBrowserCheck(){
                 unsafeWindow.open(url, "");
             }
         }
-        if (typeof(GM_registerMenuCommand) == 'undefined'){
-            GM_registerMenuCommand = function(name, cmd){
-                GM_log("Notice: GM_registerMenuCommand is not supported.");
-            }
-        }
+        //~ if (typeof(GM_registerMenuCommand) == 'undefined'){
+            //~ GM_registerMenuCommand = function(name, cmd){
+                //~ GM_log("Notice: GM_registerMenuCommand is not supported.");
+            //~ }
+        //~ }
         // Dummy
         if (!gvar.isOpera || typeof(GM_xmlhttpRequest) == 'undefined'){
             GM_xmlhttpRequest = function(obj){
@@ -241,6 +220,28 @@ function GM_ApiBrowserCheck(){
     }
 }
 GM_ApiBrowserCheck();
+
+// jquery GM_get/set wrapper
+function GM_JQ_wrapper() {
+	if (typeof(GM_setValue) != 'undefined') {
+console.log('We need this because it makes the calls asynchronous');
+		var oldGM_setValue = GM_setValue;
+		GM_setValue = function(name, value){
+			setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		};
+		var oldGM_openInTab = GM_openInTab;
+		GM_openInTab = function(url) {
+			setTimeout(function() {oldGM_openInTab(url);}, 0);
+		};
+		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
+		GM_xmlhttpRequest = function(details) {
+			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
+		};
+		// don't know how to modify GM_getValue yet (how to return value from setTimeout) - TODO
+		// other GM_functions are not needed.
+	}
+}
+GM_JQ_wrapper();
 
 // System functions
 var System = {
