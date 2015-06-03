@@ -13320,27 +13320,11 @@ var items=0;
 	},
 
 	displayDisconnectedFromGodsMessage: function() {
-		if (isNewUI != 1) { // old UI
-			var logoutRow = System.findNode("//tr[td/a[@href='javascript:confirmLogout();']]");
-			if (!logoutRow) return;
-			var LHSSidebarTable = logoutRow.parentNode.parentNode;
-			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
-			var newCell=newRow.insertCell(0);
-			newCell.height = 10;
-			newCell.align = 'center';
-			newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
-				'<tr><td align="center"><a href="index.php?cmd=temple"><font size="x-small" color="#ffffff">You feel disconnected from the gods.</font></a></td></tr>' +
-				'</tbody></table>';
-			var newRow=LHSSidebarTable.insertRow(logoutRow.rowIndex+1);
-			var newCell=newRow.insertCell(0);
-			newCell.height = 10;
-		} else {
-			var notificationUl = $('ul#notifications');
-			notificationUl.append('<li class="notification"><a href="index.php?cmd=temple">' +
-				'<span class="notification-icon"></span>' +
-				'<p class="notification-content">Bow down to the gods.</p>' +
-				'</a></li>');
-		}
+		var notificationUl = $('ul#notifications');
+		notificationUl.append('<li class="notification"><a href="index.php?cmd=temple">' +
+			'<span class="notification-icon"></span>' +
+			'<p class="notification-content">Bow down to the gods.</p>' +
+			'</a></li>');
 	},
 
 	injectFindPlayer: function() {
