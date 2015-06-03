@@ -224,7 +224,6 @@ GM_ApiBrowserCheck();
 // jquery GM_get/set wrapper
 function GM_JQ_wrapper() {
 	if (typeof(GM_setValue) != 'undefined') {
-console.log('We need this because it makes the calls asynchronous');
 		var oldGM_setValue = GM_setValue;
 		GM_setValue = function(name, value){
 			setTimeout(function() {oldGM_setValue(name, value);}, 0);
