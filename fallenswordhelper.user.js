@@ -1241,7 +1241,6 @@ var Helper = {
 			Helper.injectJoinAllLink();
 			Helper.changeGuildLogHREF();
 			Helper.injectAHsearch();
-			//~ Helper.updateTitanLogs();
 			Helper.injectHomePageTwoLink();
 			Helper.injectTempleAlert();
 			Helper.injectQuickMsgDialogJQ();
@@ -1856,11 +1855,9 @@ var Helper = {
 
 	injectFSBoxLog: function() {
 		if (GM_getValue("fsboxlog")) {
-			if (isNewUI != 1) var node=$('a[href="javascript:reportFSBox();"]').parents('font:first');
-			else var node=$('div#minibox-fsbox');
+			var node=$('div#minibox-fsbox');
 			if (node.length > 0) {
-				if (isNewUI != 1) var fsbox=node.html().replace('<br><br>',' ').replace(/<div(.*)report(.*)div>/ig,'');
-				else var fsbox=node.find('p.message').html().replace('<br><br>',' ');
+				var fsbox=node.find('p.message').html().replace('<br><br>',' ');
 				var boxList=GM_getValue("fsboxcontent");
 				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
 				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
@@ -2065,54 +2062,41 @@ var Helper = {
 	},
 
 	injectStaminaCalculator: function() {
-		if (isNewUI == 1) {
-			var staminaMouseover = $('dl#statbar-stamina-tooltip-stamina:first');
-			
-			var stamina = $(staminaMouseover).find('dt.stat-name:first').next().text().replace(/,/g,'');
-			var staminaRE = /([,0-9]+)\s\/\s([,0-9]+)/;
-			var curStamina = System.intValue(staminaRE.exec(stamina)[1]);
-			var maxStamina = System.intValue(staminaRE.exec(stamina)[2]);
-			
-			var gainPerHour = $(staminaMouseover).find('dt.stat-stamina-gainPerHour:first').next().text().replace(/,/g,'');
-			var gainPerHourRE = /\+([,0-9]+)/;
-			var gainPerHour = System.intValue(gainPerHourRE.exec(gainPerHour)[1]);
-				
-			
-			var nextGain = $(staminaMouseover).find('dt.stat-stamina-nextGain:first').next().text().replace(/,/g,'');
-			var nextGainRE = /([,0-9]+)m ([,0-9]+)s/;
-			var nextGainMinutes = System.intValue(nextGainRE.exec(nextGain)[1]);
-			var nextGainSeconds = System.intValue(nextGainRE.exec(nextGain)[2]);
-			nextGainHours = nextGainMinutes/60;
-
-			//get the max hours to still be inside stamina maximum
-			var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-			var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-			var now = (new Date()).getTime();
-			var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
-
-			var d = new Date(nextHuntMilliseconds);
-			var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
-			$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
-		}
+		var staminaMouseover = $('dl#statbar-stamina-tooltip-stamina:first');
+		var stamina = $(staminaMouseover).find('dt.stat-name:first').next().text().replace(/,/g,'');
+		var staminaRE = /([,0-9]+)\s\/\s([,0-9]+)/;
+		var curStamina = System.intValue(staminaRE.exec(stamina)[1]);
+		var maxStamina = System.intValue(staminaRE.exec(stamina)[2]);
+		var gainPerHour = $(staminaMouseover).find('dt.stat-stamina-gainPerHour:first').next().text().replace(/,/g,'');
+		var gainPerHourRE = /\+([,0-9]+)/;
+		var gainPerHour = System.intValue(gainPerHourRE.exec(gainPerHour)[1]);
+		var nextGain = $(staminaMouseover).find('dt.stat-stamina-nextGain:first').next().text().replace(/,/g,'');
+		var nextGainRE = /([,0-9]+)m ([,0-9]+)s/;
+		var nextGainMinutes = System.intValue(nextGainRE.exec(nextGain)[1]);
+		var nextGainSeconds = System.intValue(nextGainRE.exec(nextGain)[2]);
+		nextGainHours = nextGainMinutes/60;
+		//get the max hours to still be inside stamina maximum
+		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
+		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
+		var now = (new Date()).getTime();
+		var nextHuntMilliseconds = (now + millisecondsToMaxStamina);
+		var d = new Date(nextHuntMilliseconds);
+		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+		$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
 	},
 
 	injectLevelupCalculator: function() {
-		//check for beta as beta has class= additions in the mouse over
-		if(isNewUI==1){ //New Map Style
-			
-			var remainingXP =  parseInt($('dt[class="stat-xp-remaining"]').next('dd').html().replace(/,/g,""));
-			var nextGainTime =  $('dt[class="stat-xp-nextGain"]').next('dd').html();
-			var gain =  parseInt($('dt[class="stat-xp-gainPerHour"]').next('dd').html().replace(/,/g,""));
-
-			var nextGainRE = /([0-9]*)m\s*([0-9]*)s/i;
-			var nextGain = nextGainRE.exec(nextGainTime);
-			var nextGainMin = parseInt(nextGain[1],10);
-			var nextGainSec = parseInt(nextGain[2],10);
-			var hoursToNextLevel = Math.ceil(remainingXP/gain);
-			var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
-			var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-			$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
-		}
+		var remainingXP =  parseInt($('dt[class="stat-xp-remaining"]').next('dd').html().replace(/,/g,""));
+		var nextGainTime =  $('dt[class="stat-xp-nextGain"]').next('dd').html();
+		var gain =  parseInt($('dt[class="stat-xp-gainPerHour"]').next('dd').html().replace(/,/g,""));
+		var nextGainRE = /([0-9]*)m\s*([0-9]*)s/i;
+		var nextGain = nextGainRE.exec(nextGainTime);
+		var nextGainMin = parseInt(nextGain[1],10);
+		var nextGainSec = parseInt(nextGain[2],10);
+		var hoursToNextLevel = Math.ceil(remainingXP/gain);
+		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
+		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
+		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
 	},
 
 	injectShop: function() {
@@ -2877,11 +2861,7 @@ var Helper = {
 			result.type="worldmap";
 		}
 		else {
-			if (isNewUI == 1) { // new UI
-				var posit = System.findNode("//h3[@id='world-realm-name']");
-			} else { // old UI
-				var posit = System.findNode("//td[contains(@background,'/skin/realm_top_b4.jpg')]//center/nobr");
-			}
+			var posit = System.findNode("//h3[@id='world-realm-name']");
 			if (!posit) {return;}
 			var thePosition=posit.innerHTML;
 			var positionRE=/\((\d+),\s*(\d+)\)/;
@@ -2896,14 +2876,10 @@ var Helper = {
 
 	mapThis: function() {
 		if (!GM_getValue("footprints")) {return;}
-		if (isNewUI == 1) {
-			var realm = System.findNode('//h3[@id="world-realm-name"]');
-			if ($('h3#world-realm-name').data('realm')) {
-				var realmId = $('h3#world-realm-name').data('realm').id.trim();
-				var levelName = $('h3#world-realm-name').data('realm').name.trim();
-			}
-		} else {
-			var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+		var realm = System.findNode('//h3[@id="world-realm-name"]');
+		if ($('h3#world-realm-name').data('realm')) {
+			var realmId = $('h3#world-realm-name').data('realm').id.trim();
+			var levelName = $('h3#world-realm-name').data('realm').name.trim();
 		}
 		var posit = Helper.position();
 		if ((realm) && (posit)) {
@@ -3864,8 +3840,7 @@ var Helper = {
 			} catch (err) {
 				//just eat it and move on
 			}
-			if (isNewUI == 1) var currentLocation = $('h3#world-realm-name');
-			//else var currentLocation = $('td[background*="/realm_top_b4.jpg"]');
+			var currentLocation = $('h3#world-realm-name');
 			if (currentLocation.length > 0) {
 				var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text());
 				Helper.xLocation = parseInt(locationRE[1],10);
@@ -3919,14 +3894,10 @@ var Helper = {
 			Helper.checkBuffs();
 			Helper.prepareCheckMonster();
 			Helper.prepareCombatLog();
-			if (isNewUI == 1) {
-				var mapName = System.findNode('//h3[@id="world-realm-name"]');
-				if ($('h3#world-realm-name').data('realm')) {
-					var realmId = $('h3#world-realm-name').data('realm').id.trim();
-					var mapNameText = $('h3#world-realm-name').data('realm').name.trim();
-				}
-			} else {
-				var mapName = System.findNode('//td[contains(@background,"/skin/realm_top_b2.jpg")]/center/nobr');
+			var mapName = System.findNode('//h3[@id="world-realm-name"]');
+			if ($('h3#world-realm-name').data('realm')) {
+				var realmId = $('h3#world-realm-name').data('realm').id.trim();
+				var mapNameText = $('h3#world-realm-name').data('realm').name.trim();
 			}
 			//Checking if there are quests on current map - Already done by HCS in new map
 			if (GM_getValue("checkForQuestsInWorld") === true) {
@@ -4019,13 +3990,11 @@ var Helper = {
 					for (i=1; i<9; i++) {
 						var monster = System.findNode("//a[@id='aLink" + i + "']");
 						if (monster) {
-							if (isNewUI == 1) var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
-							else var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
+							var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
 							for (var j=0; j<doNotKillListAry.length; j++) {
 								var doNotKillName = doNotKillListAry[j].trim();
 								if (monsterName == doNotKillName){
-									if (isNewUI) var monsterNameCell = monster.parentNode.parentNode;
-									else var monsterNameCell = monster.parentNode.parentNode.previousSibling;
+									var monsterNameCell = monster.parentNode.parentNode;
 									monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
 									break;
 								}
@@ -4040,24 +4009,9 @@ var Helper = {
 	},
 
 	fixOnlineGuildBuffLinks: function() {
-		if (isNewUI == 1) {
-			$('a[href*="index.php?cmd=quickbuff&t="]').each(function() {
-				$(this).attr('href',$(this).attr('href').replace(/500/g,'1000'));
-			});
-		} else {
-			var guildInfoOnlineMembersTable = System.findNodes("//tr[td/a[contains(@href,'index.php?cmd=quickbuff&t=')]/font[.='B']]");
-			if (guildInfoOnlineMembersTable) {
-				for (var i=0; i<guildInfoOnlineMembersTable.length; i++){
-					var guildInfoOnlineMember = guildInfoOnlineMembersTable[i];
-					var playerLink = System.findNode("./td/table/tbody/tr/td/a[contains(@href,'index.php?cmd=profile&player_id=')]", guildInfoOnlineMember);
-					var playerID = /player_id=(\d+)/.exec(playerLink)[1];
-					var buffLink = System.findNode("./td/a[contains(@href,'index.php?cmd=quickbuff&t=')]", guildInfoOnlineMember);
-					var oldHref = buffLink.getAttribute('href');
-					var playerName = /cmd=quickbuff\&t=([,a-zA-Z0-9]+)'/.exec(oldHref);
-					buffLink.setAttribute('href', "javascript:openWindow('index.php?cmd=quickbuff&tid=" + playerID + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
-				}
-			}
-		}
+		$('a[href*="index.php?cmd=quickbuff&t"]').each(function() {
+			$(this).attr('href',$(this).attr('href').replace(/500/g,'1000'));
+		});
 	},
 
 	addGuildInfoWidgets: function() {
@@ -4067,160 +4021,42 @@ var Helper = {
 		var hideGuildInfoBuff = GM_getValue("hideGuildInfoBuff")
 		var hideGuildInfoMessage = GM_getValue("hideGuildInfoMessage")
 		var hideBuffSelected = GM_getValue("hideBuffSelected");
-		if (isNewUI == 1) {
-			var guildMemberList = $('ul#minibox-guild-members-list');
-			if (guildMemberList.length > 0) { // list exists
-				//hide guild info links
-				if (hideGuildInfoTrade) $('a#guild-minibox-action-trade').hide();
-				if (hideGuildInfoSecureTrade) $('a#guild-minibox-action-secure-trade').hide();
-				if (hideGuildInfoBuff) $('a#guild-minibox-action-quickbuff').hide();
-				if (hideGuildInfoMessage) $('a#guild-minibox-action-send-message').hide();
-				//add coloring for offline time
-				$(guildMemberList).find('li.player').each(function() {
-					var playerA = $(this).find('div.player-row a.player-name');
-					var playerName = playerA.text();
-					var onMouseOver = playerA.data('tipped');
-					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-						if (lastActivityMinutes < 2) playerA.css('color','green');
-						else if (lastActivityMinutes < 5) playerA.css('color','white');
-						else playerA.css('color','gray');
-				});
-				var chatH4 = $('h4:contains("Chat")');
-				chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatH4.html() + '</span></a>');
-			}
-		} else {
-			var onlineMembersTable = System.findNode("//table/tbody/tr/td[font/i/b[.='Online Members']]//table");
-			if (onlineMembersTable) {
-				for (var i=0; i<onlineMembersTable.rows.length; i++){
-					var onlineMemberFirstCell = onlineMembersTable.rows[i].cells[0];
-					var onlineMemberSecondCell = onlineMembersTable.rows[i].cells[1];
-					if (onlineMemberSecondCell) {
-						var playerTable = onlineMemberFirstCell.getElementsByTagName('TABLE')[0];
-						var checkboxColumn = playerTable.rows[0].cells[0];
-						if (hideBuffSelected) checkboxColumn.innerHTML = '';
-						var playernameColumn = playerTable.rows[0].cells[1];
-						var playerNameLinkElement = playernameColumn.firstChild;
-						//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
-						var onMouseOver = $(playerNameLinkElement).data('tipped');
-						var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-						//Hide the Guild info Links
-						if (hideGuildInfoTrade) {
-							var messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-							var buffLink = messageLink.nextSibling.nextSibling;
-							var secureTradeLink = buffLink.nextSibling.nextSibling;
-							var tradeLink = secureTradeLink.nextSibling.nextSibling;
-							tradeLink.style.display = 'none';
-							tradeLink.style.visibility = 'hidden';
-						}
-						if (hideGuildInfoSecureTrade) {
-							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-							buffLink = messageLink.nextSibling.nextSibling;
-							secureTradeLink = buffLink.nextSibling.nextSibling;
-							secureTradeLink.style.display = 'none';
-							secureTradeLink.style.visibility = 'hidden';
-						}
-						if (hideGuildInfoBuff) {
-							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-							buffLink = messageLink.nextSibling.nextSibling;
-							buffLink.style.display = 'none';
-							buffLink.style.visibility = 'hidden';
-						}
-						if (hideGuildInfoMessage) {
-							messageLink = onlineMemberSecondCell.firstChild.nextSibling;
-							if (messageLink.style) {
-								messageLink.style.display = 'none';
-								messageLink.style.visibility = 'hidden';
-							}
-						}
-
-						// Set Color for Activity
-						if (lastActivityMinutes < 2) {
-							playerNameLinkElement.style.color = 'green';
-							playerNameLinkElement.firstChild.style.color = 'green';
-						} else if (lastActivityMinutes < 5) {
-							playerNameLinkElement.style.color = 'white';
-							playerNameLinkElement.firstChild.style.color = 'white';
-						} else {
-							playerNameLinkElement.style.color = 'gray';
-							playerNameLinkElement.firstChild.style.color = 'gray';
-						}
-						onlineMemberSecondCell.innerHTML = '<nobr>' + onlineMemberSecondCell.innerHTML + '</nobr>';
-					}
-				}
-				if (hideBuffSelected) {
-					var lineBreak = onlineMembersTable.nextSibling.nextSibling;
-					if (lineBreak) {
-						lineBreak.style.display = 'none';
-						var actionsFontItalic = lineBreak.nextSibling.nextSibling.firstChild;
-						actionsFontItalic.style.display = 'none';
-						var buffSelectedTable = actionsFontItalic.nextSibling.nextSibling;
-						buffSelectedTable.style.display = 'none';
-					}
-				}
-				// old UI
-				var chatText = System.findNode("//b[contains(.,'Last 5')]");
-				if (chatText) chatText.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatText.innerHTML + '</span></a>';
-			}
+		var guildMemberList = $('ul#minibox-guild-members-list');
+		if (guildMemberList.length > 0) { // list exists
+			//hide guild info links
+			if (hideGuildInfoTrade) $('a#guild-minibox-action-trade').hide();
+			if (hideGuildInfoSecureTrade) $('a#guild-minibox-action-secure-trade').hide();
+			if (hideGuildInfoBuff) $('a#guild-minibox-action-quickbuff').hide();
+			if (hideGuildInfoMessage) $('a#guild-minibox-action-send-message').hide();
+			//add coloring for offline time
+			$(guildMemberList).find('li.player').each(function() {
+				var playerA = $(this).find('div.player-row a.player-name');
+				var playerName = playerA.text();
+				var onMouseOver = playerA.data('tipped');
+				var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+					if (lastActivityMinutes < 2) playerA.css('color','green');
+					else if (lastActivityMinutes < 5) playerA.css('color','white');
+					else playerA.css('color','gray');
+			});
+			var chatH4 = $('h4:contains("Chat")');
+			chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatH4.html() + '</span></a>');
 		}
 	},
 
 	addOnlineAlliesWidgets: function() {
 		if (!GM_getValue("enableOnlineAlliesWidgets")) {return;}
-		if (isNewUI == 1) {
-			var onlineAlliesList = $('ul#minibox-allies-list');
-			if (onlineAlliesList.length > 0) { // list exists
-				//add coloring for offline time
-				$(onlineAlliesList).find('li.player').each(function() {
-					var playerA = $(this).find('a[class*="player-name"]');
-					var playerName = playerA.text();
-					var onMouseOver = playerA.data('tipped');
-					var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-						if (lastActivityMinutes < 2) playerA.css('color','DodgerBlue');
-						else if (lastActivityMinutes < 5) playerA.css('color','LightSkyBlue');
-						else playerA.css('color','PowderBlue');
-				});
-			}
-		} else {
-			var onlineAlliesTable = System.findNode("//table/tbody[tr/td/font/b[.='Online Allies']]//table");
-			var hideBuffSelected = GM_getValue("hideBuffSelected");
-			if (onlineAlliesTable) {
-				for (var i=0; i<onlineAlliesTable.rows.length; i++){
-					var onlineAlliesFirstCell = onlineAlliesTable.rows[i].cells[0];
-					var onlineAlliesSecondCell = onlineAlliesTable.rows[i].cells[1];
-					if (onlineAlliesSecondCell) {
-						var playerTable = onlineAlliesFirstCell.getElementsByTagName('TABLE')[0];
-						var checkboxColumn = playerTable.rows[0].cells[0];
-						if (hideBuffSelected) checkboxColumn.innerHTML = '';
-						var playernameColumn = playerTable.rows[0].cells[1];
-						var playerNameLinkElement = playernameColumn.firstChild;
-						//var onMouseOver = playerNameLinkElement.getAttribute("onmouseover");
-						var onMouseOver = $(playerNameLinkElement).data('tipped');
-						var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-						// Set Color for Activity
-						if (lastActivityMinutes < 2) {
-							playerNameLinkElement.style.color = 'DodgerBlue';
-							playerNameLinkElement.firstChild.style.color = 'DodgerBlue';
-						} else if (lastActivityMinutes < 5) {
-							playerNameLinkElement.style.color = 'LightSkyBlue';
-							playerNameLinkElement.firstChild.style.color = 'LightSkyBlue';
-						} else {
-							playerNameLinkElement.style.color = 'PowderBlue';
-							playerNameLinkElement.firstChild.style.color = 'PowderBlue';
-						}
-						onlineAlliesSecondCell.innerHTML = '<nobr>' + onlineAlliesSecondCell.innerHTML + '</nobr>';
-					}
-				}
-				if (hideBuffSelected) {
-					var lineBreak = onlineAlliesTable.nextSibling.nextSibling;
-					if (lineBreak) {
-						lineBreak.style.display = 'none';
-						var actionsFont = lineBreak.nextSibling.nextSibling;
-						actionsFont.style.display = 'none';
-						var buffSelectedTable = actionsFont.nextSibling.nextSibling;
-						buffSelectedTable.style.display = 'none';
-					}
-				}
-			}
+		var onlineAlliesList = $('ul#minibox-allies-list');
+		if (onlineAlliesList.length > 0) { // list exists
+			//add coloring for offline time
+			$(onlineAlliesList).find('li.player').each(function() {
+				var playerA = $(this).find('a[class*="player-name"]');
+				var playerName = playerA.text();
+				var onMouseOver = playerA.data('tipped');
+				var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+					if (lastActivityMinutes < 2) playerA.css('color','DodgerBlue');
+					else if (lastActivityMinutes < 5) playerA.css('color','LightSkyBlue');
+					else playerA.css('color','PowderBlue');
+			});
 		}
 	},
 
@@ -4476,14 +4312,10 @@ var Helper = {
 
 		if (!footprints) { // clear footprints
 			var theMap = System.getValueJSON("map");
-			if (isNewUI == 1) {
-				var realm = System.findNode('//h3[@id="world-realm-name"]');
-				if ($('h3#world-realm-name').data('realm')) {
-					var realmId = $('h3#world-realm-name').data('realm').id.trim();
-					var levelName = $('h3#world-realm-name').data('realm').name.trim();
-				}
-			} else {
-				var realm = System.findNode("//td[contains(@background,'/skin/realm_top_b2.jpg')]/center/nobr/b");
+			var realm = System.findNode('//h3[@id="world-realm-name"]');
+			if ($('h3#world-realm-name').data('realm')) {
+				var realmId = $('h3#world-realm-name').data('realm').id.trim();
+				var levelName = $('h3#world-realm-name').data('realm').name.trim();
 			}
 			if (!levelName) var levelName=realm.innerHTML;
 			Helper.levelName = levelName;
@@ -4531,8 +4363,7 @@ var Helper = {
 		var doNotKillListAry = doNotKillList.split(",");
 
 		if (monster) {
-			if (isNewUI == 1) var monsterName = monster.parentNode.parentNode.textContent.trim();
-			else var monsterName = monster.parentNode.parentNode.previousSibling.textContent.trim();
+			var monsterName = monster.parentNode.parentNode.textContent.trim();
 			var injectHere = monster.parentNode.parentNode;
 			var monsterFound = false;
 			for (var j=0; j<doNotKillListAry.length; j++) {
@@ -4968,13 +4799,9 @@ var Helper = {
 			}
 
 			monsterParent.innerHTML = "";
-			if (isNewUI == 1) {
-				monsterParent.parentNode.appendChild(result);
-				result.setAttribute("style", "float:right; text-align:right;");
-				monsterParent.parentNode.setAttribute("style", ""); // removes the line height on the td
-			} else { //old UI
-				monsterParent.insertBefore(result, monsterParent.nextSibling);
-			}
+			monsterParent.parentNode.appendChild(result);
+			result.setAttribute("style", "float:right; text-align:right;");
+			monsterParent.parentNode.setAttribute("style", ""); // removes the line height on the td
 			if (report) {
 				document.getElementById("result" + callback.index).addEventListener("mouseover", Helper.clientTip, true);
 			}
@@ -5119,7 +4946,7 @@ var Helper = {
 
 	replaceKeyHandler: function() {
 		setTimeout(function() { // FF3.6 was not working without the timeout in place
-			if (isNewUI == 1 && $('#worldPage').length == 0) { //new UI and not new map
+			if ($('#worldPage').length == 0) { // not new map
 				//clear out the HCS keybinds so only helper ones fire
 				$.each($(document).controls('option').keys, function(index, value) { 
 					$(document).controls('option').keys[index] = [];
@@ -7155,14 +6982,7 @@ var Helper = {
 	},
 
 	compressBio: function() {
-		var bioCell;
-		if (isNewUI == 0)
-		{
-			var bioDiv = System.findNode("//div[strong[.='Biography']]");
-			bioCell = bioDiv.nextSibling.nextSibling;
-		} else {
-			bioCell = System.findNode("//div[@id='profile-bio']"); //new interface logic
-		}
+		var bioCell = System.findNode("//div[@id='profile-bio']"); //new interface logic
 		if (bioCell) { //non-self profile
 			var bioContents = bioCell.innerHTML;
 			var maxCharactersToShow = GM_getValue("maxCompressedCharacters");
@@ -8440,8 +8260,7 @@ var Helper = {
 			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
 		}
 
-		if (isNewUI != 1) allItems = System.findNodes("//tr[td/a/img/@title='View Group Stats']");
-		else allItems = System.findNodes("//tr[td/div/a[contains(@href,'index.php?cmd=guild&subcmd=groups&subcmd2=viewstats&group_id=')]]");
+		allItems = System.findNodes("//tr[td/div/a[contains(@href,'index.php?cmd=guild&subcmd=groups&subcmd2=viewstats&group_id=')]]");
 		if (!allItems) return;
 		var memberList=System.getValueJSON("memberlist");
 		var onlineIMG = '<img src="' + System.imageServer + '/skin/online.gif" width=10 height="10" title="Online">';
@@ -8572,8 +8391,7 @@ var Helper = {
 		var joinButtons = System.findNodes("//img[contains(@src,'skin/icon_action_join.gif')]");
 		for (var i=0; i<joinButtons.length; i++) {
 			var joinButton = joinButtons[i];
-			if (isNewUI != 1) var memberList = joinButton.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
-			else var memberList = joinButton.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
+			var memberList = joinButton.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
 			var memberListArrayWithMercs = memberList.innerHTML.split(",");
 			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
 			if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin")){
@@ -8645,8 +8463,7 @@ var Helper = {
 		extraText += "<td style='color:brown;'>HP</td><td align='right'>" + hpValue + "</td>";
 		extraText += "<td colspan='2'></td></tr>";
 		extraText += "</table>";
-		if (isNewUI != 1) expiresLocation = linkElement.parentNode.previousSibling.previousSibling;
-		else expiresLocation = linkElement.parentNode.parentNode.previousSibling.previousSibling;
+		expiresLocation = linkElement.parentNode.parentNode.previousSibling.previousSibling;
 		expiresLocation.innerHTML += extraText;
 	},
 
@@ -9359,41 +9176,12 @@ var Helper = {
 	getCreaturePlayerData: function(responseText, callback) {
 		//playerdata
 		var doc=System.createDocumentWithImages(responseText);
-		if (isNewUI == 1) {
-			var playerAttackValue = parseInt($(doc).find('td:contains("Attack:"):first').next().clone().children().remove().end().text().trim(),10);
-			var playerDefenseValue = parseInt($(doc).find('td:contains("Defense:"):first').next().clone().children().remove().end().text().trim(),10);
-			var playerArmorValue = parseInt($(doc).find('td:contains("Armor:"):first').next().clone().children().remove().end().text().trim(),10);
-			var playerDamageValue = parseInt($(doc).find('td:contains("Damage:"):first').next().clone().children().remove().end().text().trim(),10);
-			var playerHPValue = parseInt($(doc).find('td:contains("Health:"):first').next().clone().children().remove().end().text().trim(),10);
-			var playerKillStreakValue = parseInt($(doc).find('td:contains("Kill"):contains("Streak:"):first').next().clone().children().remove().end().text().trim().replace(/,/g,''),10);
-		} else {
-			var allItems = doc.getElementsByTagName("B");
-			for (var i=0;i<allItems.length;i++) {
-				var anItem=allItems[i];
-				if (anItem.innerHTML == "Attack:&nbsp;"){
-					var attackText = anItem;
-					var attackLocation = attackText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-					var playerAttackValue = parseInt(attackLocation.textContent,10);
-					var defenseText = attackText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-					var defenseLocation = defenseText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-					var playerDefenseValue = parseInt(defenseLocation.textContent,10);
-					var armorText = defenseText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-					var armorLocation = armorText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-					var playerArmorValue = parseInt(armorLocation.textContent,10);
-					var damageText = armorText.parentNode.nextSibling.nextSibling.nextSibling.firstChild;
-					var damageLocation = damageText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-					var playerDamageValue = parseInt(damageLocation.textContent,10);
-					var hpText = damageText.parentNode.parentNode.nextSibling.nextSibling.firstChild.nextSibling.firstChild;
-					var hpLocation = hpText.parentNode.nextSibling.firstChild.firstChild.firstChild.firstChild;
-					var playerHPValue = parseInt(hpLocation.textContent,10);
-				}
-				if (anItem.innerHTML == "Kill&nbsp;Streak:&nbsp;"){
-					var killStreakText = anItem;
-					var killStreakLocation = killStreakText.parentNode.nextSibling;
-					var playerKillStreakValue = System.intValue(killStreakLocation.textContent);
-				}
-			}
-		}
+		var playerAttackValue = parseInt($(doc).find('td:contains("Attack:"):first').next().clone().children().remove().end().text().trim(),10);
+		var playerDefenseValue = parseInt($(doc).find('td:contains("Defense:"):first').next().clone().children().remove().end().text().trim(),10);
+		var playerArmorValue = parseInt($(doc).find('td:contains("Armor:"):first').next().clone().children().remove().end().text().trim(),10);
+		var playerDamageValue = parseInt($(doc).find('td:contains("Damage:"):first').next().clone().children().remove().end().text().trim(),10);
+		var playerHPValue = parseInt($(doc).find('td:contains("Health:"):first').next().clone().children().remove().end().text().trim(),10);
+		var playerKillStreakValue = parseInt($(doc).find('td:contains("Kill"):contains("Streak:"):first').next().clone().children().remove().end().text().trim().replace(/,/g,''),10);
 		//get buffs here later ... DD, CA, DC, Constitution, etc
 		allItems = doc.getElementsByTagName("IMG");
 		var counterAttackLevel = 0, doublerLevel = 0, deathDealerLevel = 0, darkCurseLevel = 0, holyFlameLevel = 0;
@@ -11867,11 +11655,9 @@ var items=0;
 
 	getScoutTowerDetails: function(responseText) {
 		var doc=System.createDocumentWithImages(responseText);
-		if (isNewUI == 1) var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/banners/scouttower.png')]]", doc);
-		else var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/scouttower_header.jpg')]]", doc);
+		var scoutTowerTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/banners/scouttower.png')]]", doc);
 		if (scoutTowerTable) {
-			if (isNewUI == 1) var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/banners/titankilllog.png')]]");
-			else var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/skin/titankilllog_banner.jpg')]]");
+			var titanTable = System.findNode("//table[tbody/tr/td/img[contains(@src,'/banners/titankilllog.png')]]");
 			var newRow = titanTable.insertRow(0);
 			var newCell = newRow.insertCell(0);
 			newCell.align = "center";
@@ -12025,38 +11811,13 @@ var items=0;
 		enableActiveBountyList = GM_getValue("enableActiveBountyList");
 		enableWantedList = GM_getValue("enableWantedList");
 		if (enableWantedList || enableActiveBountyList) {
-			if (isNewUI == 1) {
-				if (enableWantedList) {
-					$('div#pCR').prepend("<div class='minibox'><span id='Helper:WantedListPlaceholder'></span></div>");
-				}
-				if (enableActiveBountyList) {
-					$('div#pCR').prepend("<div class='minibox'><span id='Helper:BountyListPlaceholder'></span></div>");
-				}
-				Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
-			} else {
-				var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
-				if (rightColumnTable) {
-					if (enableWantedList) {
-						if (!rightColumnTable)
-							return;
-						var info = rightColumnTable.insertRow(1);
-						var cell = info.insertCell(0);
-						cell.width = 120;
-						cell.align = 'center';
-						cell.innerHTML="<span id='Helper:WantedListPlaceholder'></span>";
-					}
-					if (enableActiveBountyList) {
-						if (rightColumnTable) {
-							info = rightColumnTable.insertRow(1);
-							cell = info.insertCell(0);
-							cell.width = 120;
-							cell.align = 'center';
-							cell.innerHTML="<span id='Helper:BountyListPlaceholder'></span>";
-						}
-					}
-					Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
-				}
+			if (enableWantedList) {
+				$('div#pCR').prepend("<div class='minibox'><span id='Helper:WantedListPlaceholder'></span></div>");
 			}
+			if (enableActiveBountyList) {
+				$('div#pCR').prepend("<div class='minibox'><span id='Helper:BountyListPlaceholder'></span></div>");
+			}
+			Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
 		}
 	},
 
@@ -12301,16 +12062,7 @@ var items=0;
 
 	prepareAllyEnemyList: function() {
 		if (GM_getValue("enableAllyOnlineList") || GM_getValue("enableEnemyOnlineList")) {
-			if (isNewUI == 1) {
-				$('div#pCR').prepend("<div class='minibox'><span id='Helper:AllyEnemyListPlaceholder'></span></div>");
-			} else { //old UI
-				var rightColumnTable = System.findNode("//td[@id='rightColumn']/table");
-				if (rightColumnTable) {
-					var info = rightColumnTable.insertRow(2);
-					var cell = info.insertCell(0);
-					cell.innerHTML="<span id='Helper:AllyEnemyListPlaceholder'></span>";
-				}
-			}
+			$('div#pCR').prepend("<div class='minibox'><span id='Helper:AllyEnemyListPlaceholder'></span></div>");
 			Helper.retrieveAllyEnemyData(false);
 		}
 	},
@@ -13907,15 +13659,13 @@ var items=0;
 	findBuffsParseProfileAndDisplay: function(responseText, callback) {
 		var doc = System.createDocumentWithImages(responseText);
 		//name and level
-		if (isNewUI == 1) var playerName = $(doc).find('div#pCC h1:first').text();
-		else var playerName = $(doc).find('h1:first').text();
+		var playerName = $(doc).find('div#pCC h1:first').text();
 		var levelElement = $(doc).find('td:contains("Level:"):last').next();
 		var levelValue = parseInt(levelElement.text().replace(/,/g,""),10);
 		var virtualLevelElement = $(doc).find('td:contains("VL:"):last').next();
 		var virtualLevelValue = parseInt(virtualLevelElement.text().replace(/,/g,""),10);
 		//last activity
-		if (isNewUI == 1) var lastActivityElement = $(doc).find('div#pCC p:first');
-		else var lastActivityElement = $(doc).find('h2[class="centered tiny"]');
+		var lastActivityElement = $(doc).find('div#pCC p:first');
 		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.text());
 		var lastActivityMinutes = parseInt(lastActivity[1],10);
 		var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond() + '">';
@@ -14037,11 +13787,7 @@ var items=0;
 	injectHelperMenu: function() { //jquery ready
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		if (GM_getValue("hideHelperMenu")) return;
-		if (isNewUI == 1) {
-			var node=$('#statbar-container');
-		} else {
-			var node=$('div.top_banner');
-		}
+		var node=$('#statbar-container');
 		if (node.length==0) return;
 		node.before("<div align='center' style='position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline; z-index:100' id=helperMenu nowrap>Helper Menu</div>");
 		$('#helperMenu').bind("mouseover", Helper.showHelperMenu);
@@ -14125,11 +13871,7 @@ var items=0;
 		if (!quickLinks) quickLinks=[];
 		Helper.quickLinks = quickLinks;
 		if (quickLinks.length<=0) return;
-		if (isNewUI == 1) {
-			var node=$('#statbar-container');
-		} else {
-			var node=$('div.top_banner');
-		}
+		var node=$('#statbar-container');
 		if (node.length==0) return;
 		var html = "<div style='cursor:pointer; text-decoration:underline; text-align:left; position:absolute; color:black; top:" + GM_getValue("quickLinksTopPx") + "px; left:" + GM_getValue("quickLinksLeftPx") + "px; " +
 			"background-image:url(\"" + System.imageServer + "/skin/inner_bg.jpg\"); font-size:12px; " +
