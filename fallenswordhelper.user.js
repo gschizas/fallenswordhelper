@@ -842,94 +842,55 @@ var Layout = {
 		if (GM_getValue("lastActiveQuestPage").length > 0) { //JQuery ready
 			$('a[href="index.php?cmd=questbook"]').attr('href', GM_getValue("lastActiveQuestPage"));
 		}
-		if (isNewUI == 1) {
-			var pCL = $('div#pCL:first');
-			if (pCL.length == 0) return;
-			//character
+		var pCL = $('div#pCL:first');
+		if (pCL.length == 0) return;
+		//character
+		$(pCL).find('a#nav-character-log').parent('li')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&blank=1&subcmd=recipemanager">Recipe Manager</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanager">Inventory Manager</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
+		if (GM_getValue("keepBuffLog")) {
 			$(pCL).find('a#nav-character-log').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&blank=1&subcmd=recipemanager">Recipe Manager</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanager">Inventory Manager</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
-			if (GM_getValue("keepBuffLog")) {
-				$(pCL).find('a#nav-character-log').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&blank=1&subcmd=bufflogcontent">Buff Log</a></li>');
-			}
-			if (GM_getValue("keepLogs")) {
-				$(pCL).find('a#nav-character-notepad').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&blank=1&subcmd=showlogs">Combat Logs</a></li>');
-			}
-			if (GM_getValue("showMonsterLog")) {
-				$(pCL).find('a#nav-character-notepad').parent('li')
-					.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&blank=1&subcmd=monsterlog">Creature Logs</a></li>');
-			}
-			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&blank=1&subcmd=createmap">Create Maps</a></li>');
-			//guild
-			$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmanager">Guild Inventory</a></li>');
-			if (!GM_getValue("useNewGuildLog")) {
-				//if not using the new guild log, show it as a separate menu entry
-				$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
-					.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&blank=1&subcmd=newguildlog">New Guild Log</a></li>');
-			}
-			//top rated
-			$(pCL).find('a#nav-toprated-players-level').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
-			//actions
-			$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a></li>');
-			$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers">Online Players</a></li>')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&blank=1&subcmd=findother">Find Other</a></li>')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&blank=1&subcmd=findbuffs">Find Buffs</a></li>');
-			//adjust the menu length in chrome for the newly added items
-			//first the open ones
-			$('ul.nav-animated').each(function() {
-				if ($(this).css('height') != '0px') {
-					$(this).css('height',$(this).find('li').length*22);
-				}
-			});
-			//and now the closed saved variables
-			$('#nav').nav('calcHeights');
-		} else {
-			//"menuSource_0"
-			var tableElement = $('div[id="menuSource_0"]').find('tbody:first');
-			if (!tableElement) return;
-			if (GM_getValue("keepBuffLog")) {
-				Layout.injectItemIntoMenuTable(tableElement, "Buff Log", "index.php?cmd=notepad&blank=1&subcmd=bufflogcontent", 9);
-			}
-			Layout.injectItemIntoMenuTable(tableElement, "Medal Guide", "index.php?cmd=profile&subcmd=medalguide", 11);
-			Layout.injectItemIntoMenuTable(tableElement, "Inventory Manager", "index.php?cmd=notepad&blank=1&subcmd=invmanager", 13);
-			Layout.injectItemIntoMenuTable(tableElement, "Recipe Manager", "index.php?cmd=notepad&blank=1&subcmd=recipemanager", 15);
-			if (GM_getValue("keepLogs")) {
-				Layout.injectItemIntoMenuTable(tableElement, "Combat Logs", "index.php?cmd=notepad&blank=1&subcmd=showlogs", 17);
-			}
-			if (GM_getValue("showMonsterLog")) {
-				Layout.injectItemIntoMenuTable(tableElement, "Creature Logs", "index.php?cmd=notepad&blank=1&subcmd=monsterlog", 19);
-			}
-			Layout.injectItemIntoMenuTable(tableElement, "Quick Links", "index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager", 21, "menuSource_0");
-			Layout.injectItemIntoMenuTable(tableElement, "Create Maps", "index.php?cmd=notepad&blank=1&subcmd=createmap", 23);
-			//"menuSource_5"
-			tableElement = $('div[id="menuSource_5"]').find('tbody:first');
-			if (!tableElement) return;
-			Layout.injectItemIntoMenuTable(tableElement, "Guild Inventory", "index.php?cmd=notepad&blank=1&subcmd=guildinvmanager", 3);
-			if (!GM_getValue("useNewGuildLog")) {
-				//if not using the new guild log, show it as a separate menu entry
-				Layout.injectItemIntoMenuTable(tableElement, "New Guild Log", "index.php?cmd=notepad&blank=1&subcmd=newguildlog", 13);
-			}
-			//"menuSource_3"
-			tableElement = $('div[id="menuSource_3"]').find('tbody:first');
-			if (!tableElement) return;
-			Layout.injectItemIntoMenuTable(tableElement, "Top 250 Players", "index.php?cmd=toprated&subcmd=xp", 3);
-			//"menuSource_2"
-			tableElement = $('div[id="menuSource_2"]').find('tbody:first');
-			if (!tableElement) return;
-			Layout.injectItemIntoMenuTable(tableElement, "AH Quick Search", "index.php?cmd=notepad&blank=1&subcmd=auctionsearch", 37);
-			Layout.injectItemIntoMenuTable(tableElement, "Find Buffs", "index.php?cmd=notepad&blank=1&subcmd=findbuffs", 8);
-			Layout.injectItemIntoMenuTable(tableElement, "Find Other", "index.php?cmd=notepad&blank=1&subcmd=findother", 10);
-			Layout.injectItemIntoMenuTable(tableElement, "Online Players", "index.php?cmd=notepad&blank=1&subcmd=onlineplayers", 12);
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&blank=1&subcmd=bufflogcontent">Buff Log</a></li>');
 		}
+		if (GM_getValue("keepLogs")) {
+			$(pCL).find('a#nav-character-notepad').parent('li')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&blank=1&subcmd=showlogs">Combat Logs</a></li>');
+		}
+		if (GM_getValue("showMonsterLog")) {
+			$(pCL).find('a#nav-character-notepad').parent('li')
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&blank=1&subcmd=monsterlog">Creature Logs</a></li>');
+		}
+		$(pCL).find('a#nav-character-notepad').parent('li')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&blank=1&subcmd=createmap">Create Maps</a></li>');
+		//guild
+		$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmanager">Guild Inventory</a></li>');
+		if (!GM_getValue("useNewGuildLog")) {
+			//if not using the new guild log, show it as a separate menu entry
+			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
+				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&blank=1&subcmd=newguildlog">New Guild Log</a></li>');
+		}
+		//top rated
+		$(pCL).find('a#nav-toprated-players-level').parent('li')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
+		//actions
+		$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a></li>');
+		$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers">Online Players</a></li>')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&blank=1&subcmd=findother">Find Other</a></li>')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&blank=1&subcmd=findbuffs">Find Buffs</a></li>');
+		//adjust the menu length in chrome for the newly added items
+		//first the open ones
+		$('ul.nav-animated').each(function() {
+			if ($(this).css('height') != '0px') {
+				$(this).css('height',$(this).find('li').length*22);
+			}
+		});
+		//and now the closed saved variables
+		$('#nav').nav('calcHeights');
 	},
 
 	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
@@ -939,51 +900,18 @@ var Layout = {
 	},
 
 	moveRHSBoxUpOnRHS: function(title) {
-		if (isNewUI == 1) {
-			$('div#pCR').prepend($('div#' + title));
-		} else {
-			var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
-			if (src.length == 0) return;
-			src.next('br').remove(); //remove next BR
-			var tmp = document.createElement('div');
-			tmp.appendChild(src[0]);
-			var dest=$('#rightColumn').find('table:eq(1)').find('tr:first');
-			dest.before('<tr><td align="center">'+tmp.innerHTML+'</td></tr><tr><td>&nbsp;</td></tr>');
-			src.remove();
-		}
+		$('div#pCR').prepend($('div#' + title));
 	},
 
 	moveRHSBoxToLHS: function(title) {
-		if (isNewUI == 1) {
-			var myDiv=$('div#' + title).wrap('<div class="pCR"></div>');
-
-			myDiv=myDiv.parent();
-			$('div#pCL').append(myDiv);
-			$('div#pCL').append('<style>.pCR a { color: #F7EAC9; }</style>');
-			//myDiv.before('<style>#Helper'+title+' { #pCR; }</style>');
-
-		} else {
-			//var src=$('b:contains("'+title+'"):first').closest('table');//System.findNode("//b[.='FSBox']/../../../../..");
-			var src=$('font b').filter(function() {
-				return $(this).text() === title;
-			}).closest('table');
-			if (src.length == 0) return;
-			src.next('br').remove(); //remove next BR
-			var tmp = document.createElement('div');
-			tmp.appendChild(src[0]);
-			var dest=$('img[src*="menu_logout.gif"]').closest('tr');
-			dest.after('<tr><td>&nbsp;</td></tr><tr><td align="center">'+tmp.innerHTML+'</td></tr>');
-			src.remove();
-		}
+		var myDiv=$('div#' + title).wrap('<div class="pCR"></div>');
+		myDiv=myDiv.parent();
+		$('div#pCL').append(myDiv);
+		$('div#pCL').append('<style>.pCR a { color: #F7EAC9; }</style>');
 	},
 
 	notebookContent: function() {
-		if (isNewUI == 0)
-		{
-			return System.findNode("//div[@class='innerContentMiddle']");
-		} else {
-			return System.findNode("//div[@id='pCC']"); //new interface logic
-		}
+		return System.findNode("//div[@id='pCC']"); //new interface logic
 	},
 
 	playerId: function() {
@@ -1036,7 +964,6 @@ var Helper = {
 	// System functions
 	init: function (e) {
 		Helper.initSettings();
-		//Helper.beginAutoUpdate();
 		Helper.readInfo();
 		this.initialized = true;
 	},
@@ -1236,37 +1163,15 @@ var Helper = {
 
 
 	readInfo: function() {
-		if (isNewUI == 1) {
-			Helper.characterName = $('dt.stat-name:first').next().text().replace(/,/g,'');
-			Helper.characterLevel = $('dt.stat-level:first').next().text().replace(/,/g,'')*1;
-			Helper.characterAttack = $('dt.stat-attack:first').next().text().replace(/,/g,'')*1;
-			Helper.characterDefense = $('dt.stat-defense:first').next().text().replace(/,/g,'')*1;
-			Helper.characterHP = $('dt.stat-hp:first').next().text().replace(/,/g,'')*1;
-			Helper.characterArmor = $('dt.stat-armor:first').next().text().replace(/,/g,'')*1;
-			Helper.characterDamage = $('dt.stat-damage:first').next().text().replace(/,/g,'')*1;
-			GM_setValue("CharacterName", Helper.characterName);
-
-			Helper.savedItemData = [];
-		} else {
-			var charInfo = $('img[src*="skin/icon_player.gif"]').closest('td.help');
-			if (charInfo.length == 0) { return; }
-			$(charInfo).each(function() {
-				var charInfoText = $(this).data('tipped');
-				/**
-				<div><center><b>Character Summary</b></center><br><table border=0 cellpadding=3 cellspacing=0 width='100%'><tr><td><font color='#999999'>Name: </td><td width='90%'>teekill</td></tr><tr><td><font color='#999999'>Level: </td><td width='90%' class='level'>959</td></tr><tr><td class='line'><font color='#999999'>Rank: </td><td width='90%' class='line'><table border=0 cellpadding='0' cellspacing='0'><tr><td>271st</td><td>  <font size=1><img src='http://fileserver.huntedcow.com/skin/arrow_down.gif'> -1</font></td></tr></table></td></tr><tr><td><font color='#999999'>Attack: </td><td width='90%'>7749</td></tr><tr><td><font color='#999999'>Defense: </td><td width='90%'>10515</td></tr><tr><td><font color='#999999'>HP: </td><td width='90%'>901</td></tr><tr><td><font color='#999999'>Armor: </td><td width='90%'>41</td></tr><tr><td class='line'><font color='#999999'>Damage: </td><td width='90%' class='line'>2422</td></tr></table><br>Complete character details (including your inventory can be viewed by clicking 'Character' followed by 'Profile'.</div>
-				*/
-				Helper.characterName = charInfoText.match(/Name:\s*<\/td><td width=\'90%\'>([0-9a-z]+)/i)[1];
-				Helper.characterLevel = System.getIntFromRegExp(charInfoText, /Level:\s*<\/td><td width=\'90%\' class='level'>(\d+)/i);
-				Helper.characterAttack = System.getIntFromRegExp(charInfoText, /Attack:\s*<\/td><td width=\'90%\'>(\d+)/i);
-				Helper.characterDefense = System.getIntFromRegExp(charInfoText, /Defense:\s*<\/td><td width=\'90%\'>(\d+)/i);
-				Helper.characterHP = charInfoText.match(/HP:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
-				Helper.characterArmor = charInfoText.match(/Armor:\s*<\/td><td width=\'90%\'>(\d+)/i)[1];
-				Helper.characterDamage = charInfoText.match(/Damage:\s*<\/td><td width=\'90%\' class=\'line\'>(\d+)/i)[1];
-				GM_setValue("CharacterName", Helper.characterName);
-
-				Helper.savedItemData = [];
-			});
-		}
+		Helper.characterName = $('dt.stat-name:first').next().text().replace(/,/g,'');
+		Helper.characterLevel = $('dt.stat-level:first').next().text().replace(/,/g,'')*1;
+		Helper.characterAttack = $('dt.stat-attack:first').next().text().replace(/,/g,'')*1;
+		Helper.characterDefense = $('dt.stat-defense:first').next().text().replace(/,/g,'')*1;
+		Helper.characterHP = $('dt.stat-hp:first').next().text().replace(/,/g,'')*1;
+		Helper.characterArmor = $('dt.stat-armor:first').next().text().replace(/,/g,'')*1;
+		Helper.characterDamage = $('dt.stat-damage:first').next().text().replace(/,/g,'')*1;
+		GM_setValue("CharacterName", Helper.characterName);
+		Helper.savedItemData = [];
 	},
 
 	// main event dispatcher
@@ -1298,8 +1203,7 @@ var Helper = {
 			}*/
 		}
 		if (GM_getValue("gameHelpLink")) {
-			if (isNewUI == 1) var gameHelpNode = $('div.minibox h3:contains("Game Help")');
-			//else var gameHelpNode = $('td font b:contains("Game Help")');
+			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
 			$(gameHelpNode).each(function() {
 				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
 			});
@@ -1313,16 +1217,13 @@ var Helper = {
 			Helper.init();
 			//move boxes in opposite order that you want them to appear.
 			if (GM_getValue("moveGuildList")) {
-				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-guild');
-				//else Layout.moveRHSBoxUpOnRHS('Guild Info');
+				Layout.moveRHSBoxUpOnRHS('minibox-guild');
 			}
 			if (GM_getValue("moveOnlineAlliesList")) {
-				if (isNewUI == 1) Layout.moveRHSBoxUpOnRHS('minibox-allies');
-				//else Layout.moveRHSBoxUpOnRHS('Online Allies');
+				Layout.moveRHSBoxUpOnRHS('minibox-allies');
 			}
 			if (GM_getValue("moveFSBox")) {
-				if (isNewUI == 1) Layout.moveRHSBoxToLHS('minibox-fsbox');
-				//else Layout.moveRHSBoxToLHS('FSBox');
+				Layout.moveRHSBoxToLHS('minibox-fsbox');
 			}
 
 			Helper.prepareAllyEnemyList();
@@ -5615,8 +5516,8 @@ var Helper = {
 									for (var idx = 0; idx < theBuffPack["size"]; idx++) {
 										var nickname = (theBuffPack["nickname"][idx]? theBuffPack["nickname"][idx]:"");
 										if (nickname.toLowerCase().trim() == buffsSent[j].toLowerCase().trim()) {
-											//126 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
-											quickBuff += (126+idx) + ";";
+											//131 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsData.buffList variable!
+											quickBuff += (131+idx) + ";";
 											break;
 										}
 									}
@@ -6820,11 +6721,6 @@ var Helper = {
 				document.getElementById('Helper:profileSelectAll').addEventListener('click', Helper.profileSelectAll, true);
 			}
 
-			//Update the ally/enemy online list, since we are already on the page.
-			//doc = System.findNode("//html");
-			//Helper.parseProfileForWorld(doc.innerHTML, true);
-			// No point doing this twice!
-
 			// store the VL of the player
 			var virtualLevel = parseInt(System.findNode("//td[a/b[.='VL'] or b/a[.='VL']]/following-sibling::td[1]").textContent,10);
 			if (Helper.characterLevel == virtualLevel) {
@@ -7641,7 +7537,6 @@ var Helper = {
 		document.getElementById("SelectNoFilters").addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
-
 	generateInventoryTable: function() {
 		reportType=$('input[id="reportType"]').attr('value');
 		var wh = '<th align="left" sortkey="player_name" sortType="string">Where</th>';
@@ -7799,8 +7694,6 @@ var Helper = {
 			cell.style.cursor="pointer";
 			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
-
-
 
 		$('a[id*="Helper:item"]').click(function(){
 			i=$(this).attr('arrayID');
@@ -7994,8 +7887,6 @@ var Helper = {
 				});
 			});
 		});
-
-
 	},
 
 	InventorySelectFilters: function(evt) {
@@ -12750,6 +12641,7 @@ var items=0;
 		$("table[id='item-list']").append(itemTable.html());
 
 	},
+
 	injectTrade: function() {
 		
 		$("table[id='item-list']").closest('tr').before('<tr id="Helper:selectMultiple"></tr>').before('<tr id="Helper:folderSelect"></tr>').before('<tr id="Helper:showSTs"></tr>');
@@ -13001,43 +12893,16 @@ var items=0;
 	},
 
 	injectJoinAllLink: function() {
-		if (isNewUI != 1) {
-			var attackGroupLink = System.findNode("//tr[td/a/img[@alt='A new guild attack group has been formed.']]");
-			if (attackGroupLink) {
-				var groupJoinHTML = '';
-				if (!GM_getValue("enableMaxGroupSizeToJoin")) {
-					groupJoinHTML = "<a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinall'>"+
-						"<span style='color:white; font-size:x-small;'>Join all attack groups.</span></a></nobr>";
-				} else {
-					var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
-					groupJoinHTML = " <a href='index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize'>"+
-						"<span style='color:white; font-size:x-small;'>Join all attack groups less than size " + maxGroupSizeToJoin + ".</span></a></nobr>";
-				}
-				var LHSSidebarTable = attackGroupLink.parentNode.parentNode;
-				var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
-				var newCell=newRow.insertCell(0);
-				newCell.height = 10;
-				newCell.align = 'center';
-				newCell.innerHTML = '<table width="125" cellpadding="3" border="0" bgcolor="#4a3918" style="border: 1px solid rgb(198, 173, 115);"><tbody>' +
-					'<tr><td align="center">' + groupJoinHTML + '</td></tr>' +
-					'</tbody></table>';
-				var newRow=LHSSidebarTable.insertRow(attackGroupLink.rowIndex+1);
-				var newCell=newRow.insertCell(0);
-				newCell.height = 10;
-
-			}
+		var groupJoinHTML = '';
+		if (!GM_getValue("enableMaxGroupSizeToJoin")) {
+			groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall"><span class="notification-icon"></span>'+
+				'<p class="notification-content">Join all attack groups.</p></a>';
 		} else {
-			var groupJoinHTML = '';
-			if (!GM_getValue("enableMaxGroupSizeToJoin")) {
-				groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall"><span class="notification-icon"></span>'+
-					'<p class="notification-content">Join all attack groups.</p></a>';
-			} else {
-				var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
-				groupJoinHTML = ' <a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize"><span class="notification-icon"></span>'+
-					'<p class="notification-content">Join all attack groups less than size ' + maxGroupSizeToJoin + '.</p></a>';
-			}
-			$('li:contains("New attack group created.")').after('<li class="notification">' + groupJoinHTML + '</li>');
+			var maxGroupSizeToJoin = GM_getValue("maxGroupSizeToJoin");
+			groupJoinHTML = ' <a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize"><span class="notification-icon"></span>'+
+				'<p class="notification-content">Join all attack groups less than size ' + maxGroupSizeToJoin + '.</p></a>';
 		}
+		$('li:contains("New attack group created.")').after('<li class="notification">' + groupJoinHTML + '</li>');
 	},
 
 	changeGuildLogHREF: function() {
