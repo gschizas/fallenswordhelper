@@ -1103,6 +1103,7 @@ var Helper = {
 		System.setDefault("quickLinksTopPx", 22);
 		System.setDefault("quickLinksLeftPx", 0);
 		System.setDefault("showNextQuestSteps", true);
+		System.setDefault("disableComposingPrompts", false);
 
 		Helper.setItemFilterDefault();
 
@@ -1693,6 +1694,9 @@ var Helper = {
 			break;
 		case "skills":
 			//Helper.injectSkillsPage();
+			break;
+		case "composing":
+			Helper.injectComposing();
 			break;
 		default:
 			break;
@@ -10482,7 +10486,7 @@ var Helper = {
 			'for any suggestions, requests or bug reports</span></td></tr>' +
 			//General Prefs
 			'<tr><th colspan="2" align="left"><b>General preferences (apply to most screens)</b></th></tr>' +
-			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+			'<tr><td align="right">Enable Guild Info Widgets<br>' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'>  Hide Message&gt;<input name="hideGuildInfoMessage" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoMessage")?" checked":"") +
 				'>  Hide Buff&gt;<input name="hideGuildInfoBuff" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoBuff")?" checked":"") +
@@ -10495,15 +10499,15 @@ var Helper = {
 			'<tr><td align="right">Move Online Allies List' + Helper.helpLink('Move Guild Info List', 'This will Move the Online Allies List higher on the bar on the right') +
 				':</td><td><input name="moveOnlineAlliesList" type="checkbox" value="on"' + (GM_getValue("moveOnlineAlliesList")?" checked":"") + '>' +
 				'</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies<br>' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") +
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
 				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
-			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+			'<tr><td align="right">Enable Online Allies Widgets<br>' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (GM_getValue("enableOnlineAlliesWidgets")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
+			'<tr><td align="right">"Game Help" Settings Link<br>' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
 				':</td><td><input name="enableTempleAlert" type="checkbox" value="on"' + (GM_getValue("enableTempleAlert")?" checked":"") + '></td></tr>' +
@@ -10515,7 +10519,7 @@ var Helper = {
 				':</td><td><input name="hideHelperMenu" type="checkbox" value="on"' + (GM_getValue("hideHelperMenu")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Keep Helper Menu On Screen' + Helper.helpLink('Keep Helper Menu On Screen', 'Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links.') +
 				':</td><td><input name="keepHelperMenuOnScreen" type="checkbox" value="on"' + (GM_getValue("keepHelperMenuOnScreen")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Quick Links Screen Location' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
+			'<tr><td align="right">Quick Links Screen Location<br>' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
 				':</td><td>Top: <input name="quickLinksTopPx" size="3" value="'+ GM_getValue("quickLinksTopPx") + '" /> Left: <input name="quickLinksLeftPx" size="3" value="'+ GM_getValue("quickLinksLeftPx") + '" /></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left"><b>Guild>Manage preferences</b></th></tr>' +
@@ -10524,7 +10528,7 @@ var Helper = {
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP or GvG.') +
+			'<tr><td align="right">Highlight Valid PvP Targets<br>' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP or GvG.') +
 				':</td><td>PvP: <input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +
 				'> GvG: <input name="highlightGvGPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightGvGPlayersNearMyLvl")?" checked":"") + '/></td></tr>'  +
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
@@ -10618,7 +10622,7 @@ var Helper = {
 			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
+			'<tr><td align="right">New Log Message Sound<br>' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
 				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +
 			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
 				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
@@ -10662,7 +10666,7 @@ var Helper = {
 			'<tr><th colspan="2" align="left"><b>Profile preferences</b></th></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
+			'<tr><td align="right">Render other players\' bios<br>' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
 				':</td><td><input name="renderOtherBios" type="checkbox" value="on"' + (GM_getValue("renderOtherBios")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
@@ -10693,7 +10697,7 @@ var Helper = {
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen ' +
 				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
-			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log<br>' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' +
 				'<input name="showPvPSummaryInLog" type = "checkbox" value = "on"' + (GM_getValue("showPvPSummaryInLog")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left"><b>Auction house preferences</b></th></tr>' +
@@ -10712,12 +10716,14 @@ var Helper = {
 			'<tr><td align="right">Enter Sends Message' + Helper.helpLink('Enter Sends Message', 'If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift' +
 			' when you press enter.') +
 				':</td><td><input name="enterForSendMessage" type="checkbox" value="on"' + (GM_getValue("enterForSendMessage")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Navigate After Message Sent' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
+			'<tr><td align="right">Navigate After Message Sent<br>' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
 				' if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen.') +
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
 			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
 				'Max Size: <input name="maxGroupSizeToJoin" size="3" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
+			'<tr><td align="right">Disable Composing Prompts<br>' + Helper.helpLink('Disable Composing Prompts', 'Disables confirmation prompts in composing screen.  WARNING: NO REFUNDS ON ERROR') +
+				':</td><td><input name="disableComposingPrompts" type="checkbox" value="on"' + (GM_getValue("disableComposingPrompts")?" checked":"") + '></td></tr>' +
 			//~ '<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
 				//~ 'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' +
 				//~ 'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
@@ -10952,6 +10958,7 @@ var Helper = {
 		System.saveValueForm(oForm, "hideHelperMenu");
 		System.saveValueForm(oForm, "keepHelperMenuOnScreen");
 		System.saveValueForm(oForm, "showNextQuestSteps");
+		System.saveValueForm(oForm, "disableComposingPrompts");
 
 		window.alert("FS Helper Settings Saved");
 		window.location.reload();
@@ -14145,6 +14152,53 @@ var items=0;
 				});  
 			}); 
 		}
+	},
+
+	injectComposing: function() {
+		if (GM_getValue("disableComposingPrompts")) {
+			$('input[class^="large awesome"][onclick]').each(function(i, e) {
+				$(e).attr('onclick', $(e).attr('onclick').replace(/if\(confirm\(.+\)\) /, ""));
+			});
+			$('input[value^="Instant Finish All"]').after('<br><br><b>Warning:</b> Confirmation prompts are disabled. Use at your own risk.');
+		}
+
+		$('input[value="Discard All"]').before('<input type="button" id="helperCreateAll" class="large awesome red" value="Create All" '
+				 + 'disabled="true" style="height: 25px; line-height: 9px;">&nbsp;');
+		if ($('select[id^="composing-template-"][value!="none"]'.length)) {
+			$('#helperCreateAll').prop("disabled", false);
+			$('#helperCreateAll').click(function() {
+				if (GM_getValue("disableComposingPrompts") || confirm('Are you sure you want to create all potions?'
+																	+ ' Do you have the correct templates selected?')) {
+					$('select[id^="composing-template-"][value!="none"]').each(function () {Helper.composingCreatePotion($(this));});
+				}
+			});
+		};
+
+		$('input[id^=create-]').each(function(i,e){
+			$(e).after('<span id="helperQC-' + $(e).attr('id').slice(-1) + '" class="helperQC" ' +
+				'style="cursor: pointer"">&nbsp;[Quick Create]</span>');
+		});
+
+		$('span[id^="helperQC-"]').on('click', function(){
+			var temp = $('select#composing-template-' + $(this).attr('id').slice(-1));
+			if (temp.length == 1 && temp.val() != 'none') Helper.composingCreatePotion(temp);
+		});
+	},
+
+	composingCreatePotion: function ($template) {
+		$.getJSON('index.php', {
+					'cmd': 'composing',
+					'subcmd': 'createajax',
+					'template_id': $template.val()
+				},
+				function (data, textStatus) {
+					if (data.error != "") $template.parent().html('<div id="helperQCError" style="height: 26px;">' + data.error + '</div>');
+					else $template.parent().html('<div id="helperQCSuccess" style="height: 26px;">' + textStatus + '</div>');
+					if ($('select[id^="composing-template-"]').length == 0 && $('div#helperQCError').length == 0) {
+						window.location = 'index.php?cmd=composing&m=0';
+					}
+				}
+		);
 	}
 }; // end of var helper
 
