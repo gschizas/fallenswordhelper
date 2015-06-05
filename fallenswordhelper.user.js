@@ -4200,41 +4200,31 @@ var Helper = {
 	},
 
 	insertQuickExtract: function(content) {
-		Helper.itemList = {};
 		if (!content) var content=Layout.notebookContent();
-		$.ajax({
-			url: '?cmd=export&subcmd=inventory',
-			success: function( data ) {
-				Helper.inventory = data;
-			},
-			async: false, //wait for responce
-			dataType: 'json'
-		});
-		//Helper.inventory.items = Helper.inventory.items.filter(function(e) {return e.type==12;});//type=plants
 		content.innerHTML='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>'+
 		'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
 		'<label id="Helper:useItemsInStCont"><input type="checkbox" id="Helper:useItemsInSt" checked /> Select items in ST</label>' +
 		'<label id="Helper:useItemsInMainCont"><input type="checkbox" id="Helper:useItemsInMain" checked /> Only extract items in Main Folder</label>' +
 		'<table width=100% id="Helper:ExtTable"></table>';
-
 		$('label,input[id*="Helper:useItemsIn"]').click(Helper.showQuickExtract);
-		Helper.showQuickExtract();
+		$.getJSON('?cmd=export&subcmd=inventory', Helper.showQuickExtract);
 	},
 
-	showQuickExtract: function() {
-
+	showQuickExtract: function(data, textStatus, jqXHR) {
+		Helper.inventory = data;
+		Helper.itemList = {};
 		var table = $('table[id="Helper:ExtTable"]');
 		table.children().remove();//empty table for re-population.
 		Helper.resourceList={}; //reset resourceList
 		var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
 		var selectMain= $('input[id="Helper:useItemsInMain"]').is(':checked');
-
 		table.append('<tr><th width=20%>Actions</th><th>Items</th></tr><tr><td id="buy_result" colspan=2></td></tr>');
 		//for (var key in Helper.inventory.items) {
 		for (var i=0; i<Helper.inventory.items.length;i++) {
 			var item = Helper.inventory.items[i];
 			if(selectMain && item.folder_id!=-1){ continue;}
 			if(!selectST && item.is_in_st){ continue;}
+			if (item.type != '12') continue;
 			if (Helper.resourceList[item.item_id]){
 				Helper.resourceList[item.item_id].invIDs+=","+item.inv_id;
 				Helper.resourceList[item.item_id].count++;
@@ -4250,7 +4240,7 @@ var Helper = {
 			table.append('<tr><td align=center>'+
 				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
 				'id="Helper:extractAllSimilar' + id + '" invIDs="'+res.invIDs+'">Extract all '+res.count +'</span></td> ' +
-				'<td><img src="'+System.imageServerHTTP+'/items/'+item.item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'"' + 
+				'<td><img src="'+System.imageServer+'/items/'+item.item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'"' + 
 				'data-tipped="fetchitem.php?item_id='+item.item_id+'&inv_id='+item.inv_id+'&t=1&p='+Helper.inventory.player_id+'" border=0>' + '</td><td>'+item.item_name+'</td></tr>');;
 		}
 
