@@ -7,6 +7,7 @@
 // @include        http://fallensword.com/*
 // @include        http://*.fallensword.com/*
 // @include        http://local.huntedcow.com/fallensword/*
+// @exclude        http://www.fallensword.com/
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
 // @version        1499
@@ -265,8 +266,9 @@ var System = {
 		if (!imgurls) return; //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf("/skin/");
 		System.imageServer      = imgurls.src.substr(0,idindex);
-		System.imageServerHTTPOld  = "http://72.29.91.222"; // keep the old one around for some old images
-		System.imageServerHTTP  = "http://huntedcow.cachefly.net/fs";
+		//~ System.imageServerHTTPOld  = "http://72.29.91.222"; // keep the old one around for some old images
+		//~ System.imageServerHTTP  = "http://huntedcow.cachefly.net/fs";
+		System.imageServerHTTP  = "http://cdn.fallensword.com";
 
 		Array.prototype.removeDuplicates = System.removeDuplicates;
 	},
@@ -1055,8 +1057,8 @@ var Helper = {
 		System.setDefault("wantedNames", "");
 		System.setDefault("bwNeedsRefresh", true);
 
-		System.setDefault("enableBulkSell", false);
-		System.setDefault("bulkSellAllBags", false);
+		//~ System.setDefault("enableBulkSell", false);
+		//~ System.setDefault("bulkSellAllBags", false);
 
 		System.setDefault("fsboxlog", true);
 		System.setDefault("fsboxcontent", "");
@@ -1084,15 +1086,9 @@ var Helper = {
 		System.setDefault("enableMaxGroupSizeToJoin", true);
 		System.setDefault("maxGroupSizeToJoin", 11);
 
-		//~ System.setDefault("enableTitanLog", false);
-		//~ System.setDefault("titanLogRefreshTime", 5);
-
 		System.setDefault("enableTempleAlert", true);
-		//~ System.setDefault("showGoldOnFindPlayer", false);
-		//~ System.setDefault("titanLogLength", 15);
 		System.setDefault("autoFillMinBidPrice", false);
 		System.setDefault("showPvPSummaryInLog", true);
-		//~ System.setDefault("addUFSGWidgets", true);
 		System.setDefault("enableQuickDrink", true);
 		System.setDefault("enhanceOnlineDots", true);
 		System.setDefault("hideBuffSelected", true);
@@ -1383,18 +1379,7 @@ var Helper = {
 			}
 			break;
 		case "auctionhouse":
-			switch (subPageId) {
-			case "create":
-				//Helper.injectCreateAuctionTemplate();
-				//Helper.injectCreateAuctionBulkSell();
-				//Helper.injectAuctionSTCheck();
-				break;
-			case "preferences":
-				break;
-			default:
-				//Helper.injectAuctionHouse();
-				break;
-			}
+			Helper.injectAuctionHouse();
 			break;
 		case "guild":
 			switch (subPageId) {
@@ -4336,7 +4321,7 @@ var Helper = {
 		var injLog=reportsTable.appendChild(tempLog);
 		var is=injLog.style;
 		is.color = 'black';
-		is.backgroundImage='url(' + System.imageServerHTTP + '/skin/realm_right_bg.jpg)';
+		is.backgroundImage='url(' + System.imageServer + '/skin/realm_right_bg.jpg)';
 		is.maxHeight = '240px';
 		is.width = '277px';
 		is.maxWidth = is.width;
@@ -5511,302 +5496,16 @@ var Helper = {
 		}
 	},
 
-	//~ injectAuctionHouse: function() {
-		//~ var isAuctionPage = System.findNode("//img[contains(@title,'Auction House')]");
-		//~ if (isAuctionPage) {
-			//~ var imageCell = isAuctionPage.parentNode;
-			//~ var imageHTML = imageCell.innerHTML; //hold on to this for later.
-//~ 
-			//~ var auctionTable = System.findNode("//img[contains(@title,'Auction House')]/../../../..");
-//~ 
-			//~ //Add functionality to hide the text block at the top.
-			//~ var textRow = auctionTable.rows[2];
-			//~ textRow.id = 'auctionTextControl';
-			//~ var myBidsButton = System.findNode("//input[@value='My Bids']/..");
-			//~ myBidsButton.innerHTML += " [ <span style='cursor:pointer; text-decoration:underline;' " +
-				//~ "id='toggleAuctionTextControl' linkto='auctionTextControl' title='Click on this to Show/Hide the AH text.'>X</span> ]";
-			//~ if (GM_getValue("auctionTextControl")) {
-				//~ textRow.style.display = "none";
-				//~ textRow.style.visibility = "hidden";
-			//~ }
-			//~ document.getElementById('toggleAuctionTextControl').addEventListener('click', System.toggleVisibilty, true);
-//~ 
-			//~ //fix button class and add go to first and last
-			//~ var prevButton = System.findNode("//input[@value='<']");
-			//~ var nextButton = System.findNode("//input[@value='>']");
-			//~ if (prevButton) {
-				//~ prevButton.setAttribute("class", "custombutton");
-				//~ var startButton = document.createElement("input");
-				//~ startButton.setAttribute("type", "button");
-				//~ startButton.setAttribute("onclick", prevButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=1"));
-				//~ startButton.setAttribute("class", "custombutton");
-				//~ startButton.setAttribute("value", "<<");
-				//~ prevButton.parentNode.insertBefore(startButton,prevButton);
-			//~ }
-			//~ if (nextButton) {
-				//~ nextButton.setAttribute("class", "custombutton");
-				//~ var lastPageNode=System.findNode("//input[@value='Go']/../preceding-sibling::td");
-				//~ lastPage = lastPageNode.textContent.replace(/\D/g,"");
-				//~ var finishButton = document.createElement("input");
-				//~ finishButton.setAttribute("type", "button");
-				//~ finishButton.setAttribute("onclick", nextButton.getAttribute("onclick").replace(/\&page=[0-9]*/, "&page=" + lastPage));
-				//~ finishButton.setAttribute("class", "custombutton");
-				//~ finishButton.setAttribute("value", ">>");
-				//~ nextButton.parentNode.insertBefore(finishButton, nextButton.nextSibling);
-			//~ }
-//~ 
-			//~ //insert another page change block at the top of the screen.
-			//~ if (isNewUI == 1) var insertPageChangeBlockHere = auctionTable.rows[3].cells[0]; // crude fix for new UI
-			//~ else var insertPageChangeBlockHere = auctionTable.rows[5].cells[0];
-			//~ var pageChangeBlock = System.findNode("//input[@name='page' and @class='custominput']/../../../../../..");
-			//~ var newPageChangeBlock = pageChangeBlock.innerHTML.replace('</form>','');
-			//~ newPageChangeBlock += "</form>";
-			//~ var insertPageChangeBlock=document.createElement("SPAN");
-			//~ insertPageChangeBlock.innerHTML = newPageChangeBlock;
-			//~ insertPageChangeBlockHere.align = "right";
-			//~ insertPageChangeBlockHere.appendChild(insertPageChangeBlock);
-//~ 
-			//~ var quickSearchList = System.getValueJSON("quickSearchList");
-//~ 
-			//~ var finalHTML = "<span style='font-size:x-small; color:blue;'><table style='table-layout:fixed; width:650px;'><tbody><tr><td rowspan='7'>" + imageHTML.replace("<img ","<img width=400 ") + "</td>" +
-				//~ "<td width='230' colspan='6' style='text-align:center;color:#7D2252;background-color:#CD9E4B'><a style='color:#7D2252' href='" +
-							//~ System.server +
-							//~ "index.php?cmd=notepad&blank=1&subcmd=auctionsearch'>" +
-							//~ "Configure Quick Search</a></td></tr>";
-			//~ var lp=0;
-			//~ var rowCount = 0;
-			//~ for (var p=0;p<quickSearchList.length;p++) {
-				//~ if (lp % 6==0 && rowCount == 6) break; //36 searches on the screen so don't display any more
-				//~ var quickSearch=quickSearchList[p];
-				//~ if (quickSearch.displayOnAH) {
-					//~ if (lp % 6==0) {
-						//~ finalHTML += "<tr>";
-						//~ rowCount++;
-					//~ }
-					//~ finalHTML += "<td nowrap style='overflow: hidden;'";
-					//~ finalHTML += "><a href='index.php?cmd=auctionhouse&type=-1&search_text=" +
-						//~ quickSearch.searchname + "&page=1&order_by=1'>" +
-						//~ quickSearch.nickname + "</a></td>";
-					//~ if (lp % 6==5) finalHTML += "</tr>";
-					//~ lp++;
-				//~ }
-			//~ }
-			//~ imageCell.innerHTML = finalHTML;
-		//~ }
-//~ 
-		//~ //add coloring for item craft and durability
-		//~ var auctionCellCraftElements = System.findNodes("//table/tbody/tr/td/span[2]");
-		//~ if (auctionCellCraftElements) {
-			//~ for (i=0; i<auctionCellCraftElements.length; i++) {
-				//~ var auctionCellCraftElement = auctionCellCraftElements[i];
-				//~ if (auctionCellCraftElement.textContent.length > 0){
-					//~ switch(auctionCellCraftElement.textContent) {
-						//~ case 'Perfect': craftColor = '#00b600'; break;
-						//~ case 'Excellent': craftColor = '#f6ed00'; break;
-						//~ case 'Very Good': craftColor = '#f67a00'; break;
-						//~ case 'Good': craftColor = '#f65d00'; break;
-						//~ case 'Average': craftColor = '#f64500'; break;
-						//~ case 'Poor': craftColor = '#f61d00'; break;
-						//~ case 'Very Poor': craftColor = '#b21500'; break;
-						//~ case 'Uncrafted': craftColor = '#666666'; break;
-					//~ }
-					//~ auctionCellCraftElement.style.color = craftColor;
-				//~ }
-				//~ var auctionCellDurabilityElement = auctionCellCraftElement.previousSibling;
-				//~ if (auctionCellDurabilityElement.nodeName == 'SPAN') {
-					//~ auctionCellDurabilityElement.innerHTML = '<nobr>' + auctionCellDurabilityElement.innerHTML + '</nobr>';
-					//~ auctionCellDurabilityElement.style.color = 'gray';
-				//~ }
-			//~ }
-		//~ }
-//~ 
-		//~ var minBidLink = System.findNode("//a[contains(@href,'&order_by=1&tid=')]");
-		//~ auctionTable = minBidLink.parentNode.parentNode.parentNode.parentNode;
-//~ 
-		//~ var playerId = Layout.playerId();
-//~ 
-		//~ var memberList = System.getValueJSON("memberlist");
-		//~ var memberNameString = "";
-		//~ if (memberList) {
-			//~ for (i=0;i<memberList.members.length;i++) {
-				//~ var member=memberList.members[i];
-				//~ memberNameString += member.name + " ";
-			//~ }
-		//~ }
-		//~ var listOfEnemies = GM_getValue("listOfEnemies");
-		//~ if (!listOfEnemies) listOfEnemies = "";
-		//~ var listOfAllies = GM_getValue("listOfAllies");
-		//~ if (!listOfAllies) listOfAllies = "";
-//~ 
-		//~ var newRow, newCell, winningBidBuyoutCell;
-		//~ var autoFillMinBidPrice = GM_getValue("autoFillMinBidPrice");
-		//~ for (i=0;i<auctionTable.rows.length;i++) {
-			//~ var aRow = auctionTable.rows[i];
-			//~ if (i>0 && // the title row - ignore this
-				//~ aRow.cells[1]) { // a separator row - ignore this
-				//~ if (aRow.cells[5].innerHTML == '<font size="1">[ended]</font>') { //time left column
-					//~ aRow.cells[6].innerHTML = ""; // text field and button column
-				//~ } else {
-					//~ var timeLeft = aRow.cells[5].firstChild.innerHTML;
-					//~ var secondsLeft = timeLeft.substring(timeLeft.indexOf('m')+1).trim();
-					//~ timeLeft = timeLeft.substring(0, timeLeft.indexOf('m'));
-					//~ if (timeLeft >= 60) {
-						//~ var hoursLeft = Math.floor(timeLeft / 60);
-						//~ if (hoursLeft < 24) {
-							//~ var minutesLeft = timeLeft - (hoursLeft * 60);
-							//~ aRow.cells[5].firstChild.innerHTML = hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
-						//~ } else {
-							//~ var daysLeft = Math.floor(hoursLeft / 24);
-							//~ hoursLeft = hoursLeft - (daysLeft * 24);
-							//~ minutesLeft = timeLeft - (hoursLeft * 60) - (daysLeft * 1440);
-							//~ aRow.cells[5].firstChild.innerHTML = daysLeft + "d " + hoursLeft + "h " + minutesLeft + "m " + secondsLeft;
-						//~ }
-//~ 
-					//~ }
-//~ 
-					//~ winningBidValue = "-";
-					//~ var bidExistsOnItem = false;
-					//~ var playerListedItem = false;
-					//~ if (aRow.cells[1].innerHTML != '<font size="1">Auction House</font>') {
-						//~ var sellerElement = aRow.cells[1].firstChild.firstChild;
-						//~ sellerHref = sellerElement.getAttribute("href");
-						//~ var sellerIDRE = /player_id=(\d+)/;
-						//~ var sellerID = sellerIDRE.exec(sellerHref)[1];
-						//~ if (playerId == sellerID) {
-							//~ playerListedItem = true;
-						//~ }
-					//~ }
-					//~ if (aRow.cells[3].innerHTML != '<font size="1">-</font>') {
-						//~ var winningBidTable = aRow.cells[3].firstChild.firstChild;
-						//~ var winningBidCell = winningBidTable.rows[0].cells[0];
-						//~ var winningBidderCell = winningBidTable.rows[1].cells[0].firstChild.nextSibling;
-						//~ var winningBidder = winningBidderCell.innerHTML;
-						//~ if (memberNameString.search(" "+winningBidder+" ") !=-1) {
-							//~ winningBidderCell.style.color="green";
-						//~ }
-						//~ if (listOfEnemies.search(" "+winningBidder+" ") !=-1) {
-							//~ winningBidderCell.style.color="red";
-						//~ }
-						//~ if (listOfAllies.search(" "+winningBidder+" ") !=-1) {
-							//~ winningBidderCell.style.color="blue";
-						//~ }
-						//~ var isGold = winningBidTable.rows[0].cells[1].firstChild.getAttribute("title")=="Gold";
-						//~ var winningBidValue = System.intValue(winningBidCell.textContent);
-						//~ newRow = winningBidTable.insertRow(2);
-						//~ winningBidBuyoutCell = newRow.insertCell(0);
-						//~ winningBidBuyoutCell.colSpan = "2";
-						//~ winningBidBuyoutCell.align = "center";
-						//~ var winningBidderHTML = winningBidTable.rows[1].cells[0].innerHTML;
-						//~ var winningBidderIDRE = /player_id=(\d+)/;
-						//~ var winningBidderID = winningBidderIDRE.exec(winningBidderHTML)[1];
-						//~ if (playerId == winningBidderID) {
-							//~ playerListedItem = true;
-						//~ }
-					//~ }
-					//~ if (!bidExistsOnItem && !playerListedItem) {
-						//~ var bidValueButton = aRow.cells[6].getElementsByTagName("input");
-						//~ if (winningBidValue != "-") {
-							//~ var overBid = isGold?Math.ceil(winningBidValue * 1.05):(winningBidValue+1);
-							//~ var buyNow = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.nextSibling.nextSibling.nextSibling.textContent);
-							//~ if (!isNaN(buyNow)) overBid = Math.min(overBid,buyNow);
-							//~ winningBidBuyoutCell.innerHTML = '<span style="color:blue;" title="Overbid value">Overbid ' +
-								//~ System.addCommas(overBid) + '</span>&nbsp';
-							//~ if (autoFillMinBidPrice) bidValueButton[0].value = overBid;
-							//~ bidValueButton[0].size = 6;
-						//~ } else {
-							//~ var minBid = System.intValue(aRow.cells[4].firstChild.firstChild.firstChild.firstChild.firstChild.textContent);
-							//~ if (autoFillMinBidPrice) bidValueButton[0].value = minBid;
-							//~ bidValueButton[0].size = 6;
-						//~ }
-					//~ }
-					//~ var inputTableCell;
-					//~ if (!playerListedItem) {
-						//~ var inputTable = aRow.cells[6].firstChild.firstChild;
-						//~ var inputCell = inputTable.rows[0].cells[0];
-						//~ var textInput = inputCell.firstChild;
-						//~ textInput.id = 'auction' + i + 'text';
-						//~ var bidCell = inputTable.rows[0].cells[1];
-						//~ bidCell.align = "right";
-						//~ //spacer row
-						//~ newRow = inputTable.insertRow(1);
-						//~ inputTableCell = newRow.insertCell(0);
-						//~ inputTableCell.colSpan = "2";
-						//~ inputTableCell.height = "2";
-						//~ //get itemID for bid no refresh
-						//~ var itemIMG = aRow.cells[0].firstChild;
-						//~ //var itemStats = /ajaxLoadItem\((\d+), (\d+), (\d+), (\d+)/.exec($(itemIMG).data("tipped"));
-						//~ var itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(itemIMG).data("tipped"));
-						//~ invID = itemStats[2];
-						//~ //new bid no refresh button
-						//~ newRow = inputTable.insertRow(2);
-						//~ inputTableCell = newRow.insertCell(0);
-						//~ inputTableCell.colSpan = "2";
-						//~ inputTableCell.align = "center";
-						//~ inputTableCell.innerHTML = '<span id="auction' + i + 'text">'+
-							//~ '<input id="bidNoRefresh" invID="'+ invID +
-								//~ '" linkto="auction' + i + 'text" value="Bid no Refresh" class="custombutton" type="submit"></span>';
-					//~ }
-					//~ var inputText = aRow.cells[6];
-				//~ }
-			//~ }
-		//~ }
-		//~ bidNoRefreshList = System.findNodes("//input[@id='bidNoRefresh']");
-		//~ if (bidNoRefreshList) {
-			//~ for (i=0; i<bidNoRefreshList.length; i++) {
-				//~ var bidNoRefreshItem = bidNoRefreshList[i];
-				//~ bidNoRefreshItem.addEventListener('click', Helper.bidNoRefresh, true);
-			//~ }
-			//~ //Add a bid no refresh on all
-			//~ $('input[value="My Bids"]').after('&nbsp;<input type="button" value="Bid on All" id="fshBidOnAll"  class="custombutton tipped" data-tipped="<b>Bid on each auction</b><br>Triggers the \"Bid no refresh\" for each btton on screen">');
-			//~ $("#fshBidOnAll").click(function()
-			//~ {
-				//~ if(confirm ("Are you sure you want to bid on all of them?")){
-					//~ $("input[id=bidNoRefresh]").each(function()
-					//~ {
-						//~ //this.checked = !this.checked;
-						//~ //alert("asdf");
-						//~ //alert(this.attr('id'));
-						//~ this.click();
-					//~ });
-				//~ }
-			//~ });
-		//~ }
-		//~ //show saved prefs if not default values
-		//~ var searchPrefsFirstCell = System.findNode("//tr[td/font/a[@id='showAdvSearchLink']]/td[1]");
-		//~ var pref_minlevel = System.findNode("//input[@name='pref_minlevel']").value;
-		//~ var pref_maxlevel = System.findNode("//input[@name='pref_maxlevel']").value
-		//~ var pref_hidegold = System.findNode("//input[@name='pref_hidegold']").checked;
-		//~ var pref_hidefsp = System.findNode("//input[@name='pref_hidefsp']").checked;
-		//~ var pref_minforge = System.findNode("//select[@name='pref_minforge']").selectedIndex;
-		//~ var pref_mincraft = System.findNode("//select[@name='pref_mincraft']").selectedIndex;
-		//~ var output = '';
-		//~ if (pref_minlevel > 1 || (pref_maxlevel > 0 && pref_maxlevel != 1000) || pref_hidegold || pref_hidefsp || pref_minforge != 0 || pref_mincraft != 0) {
-			//~ output = '<nobr><span style="color:blue; font-size:x-small;">Enabled filters (' +
-				//~ '<span id="Helper.resetAHprefs" style="cursor:pointer; text-decoration:underline; color:blue;">Reset</span>' +
-				//~ '):</span> <span style="color:orangered; font-size:x-small;">';
-			//~ if (pref_minlevel > 1) output += 'MinLevel('+pref_minlevel+') ';
-			//~ if (pref_maxlevel > 0 && pref_maxlevel != 1000) output += 'MaxLevel('+pref_maxlevel+') ';
-			//~ if (pref_hidegold) output += pref_hidefsp?'<span style="color:magenta; font-weight:900;">Gold</span> ':'Gold ';
-			//~ if (pref_hidefsp) output += pref_hidegold?'<span style="color:magenta; font-weight:900;">FSP</span> ':'FSP ';
-			//~ if (pref_minforge != 0) output += 'Forge('+pref_minforge+') ';
-			//~ if (pref_mincraft != 0) output += 'Craft('+pref_mincraft+') ';
-			//~ output += '</span></nobr>';
-			//~ searchPrefsFirstCell.innerHTML = output;
-			//~ document.getElementById("Helper.resetAHprefs").addEventListener('click', Helper.resetAHquickPrefsAndReload, true);
-		//~ }
-		//~ //litte something to default to sorting by min bid
-		//~ var hiddenOrderByInput = System.findNode("//input[@name='order_by']");
-		//~ hiddenOrderByInput.value = 1;
-//~ 
-		//~ Helper.injectAuctionQuickCancel();
-	//~ },
-
-	resetAHquickPrefsAndReload: function(evt) {
-		//POSTDATA=cmd=auctionhouse&order_by=1&search_text=hunter&pref_save=1&pref_minlevel=&pref_maxlevel=&pref_minforge=0&pref_mincraft=-1
-		var searchText = System.findNode("//input[@name='search_text']").value;
-		var destURL = 'index.php?cmd=auctionhouse&order_by=1&search_text=' + searchText +
-			'&pref_save=1&pref_minlevel=&pref_maxlevel=&pref_minforge=0&pref_mincraft=-1';
-		window.location = destURL;
+	injectAuctionHouse: function() {
+		if (GM_getValue("autoFillMinBidPrice")) {
+			$('input#auto-fill').not(':checked').click();
+		}
+		$('input[value="My Auctions"]').before('<input id="helperAHCancelAll" type="button" value="Cancel All" ' +
+			'class="custombutton auctionbutton" style="float: right;">');
+		$('input#helperAHCancelAll').click(function() {
+			$("a.auctionCancel").each(function() {$(this).click();});
+		});
+		$('div#sort0').click();
 	},
 
 	generateManageTable: function() {
@@ -5923,37 +5622,6 @@ var Helper = {
 		else Helper.param.currentItems=[];
 		Helper.generateManageTable();
 	},
-
-	//~ bidNoRefresh: function(evt) {
-		//~ var inputValue = System.findNode("//input[@id='" + evt.target.getAttribute("linkto") + "']");
-		//~ var invID = evt.target.getAttribute("invID");
-		//~ var postData = "cmd=auctionhouse&subcmd=placebid" +
-				//~ "&auction_id=" + invID +
-				//~ "&page=" +
-				//~ "&type=-1" +
-				//~ "&bid=" + inputValue.value;
-//~ 
-		//~ GM_xmlhttpRequest({
-			//~ method: 'POST',
-			//~ url: System.server + "index.php",
-			//~ headers: {
-			//~ //	"User-Agent" : navigator.userAgent,
-			//~ //	"Referer": System.server + "index.php?cmd=auctionhouse&subcmd=type=-1",
-			//~ //	"Cookie" : document.cookie,
-				//~ "Content-Type": "application/x-www-form-urlencoded"
-			//~ },
-			//~ data: postData,
-			//~ onload: function(responseDetails) {
-				//~ var info = Layout.infoBox(responseDetails.responseText);
-				//~ var infoElement = evt.target.parentNode;
-				//~ if (info.search("Bid placed successfully!") != -1) {
-					//~ infoElement.innerHTML = " <span style='color:green; font-weight:bold;'>" + info + "</span>";
-				//~ } else {
-					//~ infoElement.innerHTML = " <span style='color:red; font-weight:bold;'>" + info + "</span>";
-				//~ }
-			//~ }
-		//~ });
-	//~ },
 
 	toggleShowExtraLinks: function(evt) {
 		var showExtraLinksElement = System.findNode("//span[@id='Helper:showExtraLinks']");
@@ -6868,7 +6536,7 @@ var Helper = {
 			newhtml +=
 				"<a href='" + System.server + "index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=" +
 				playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
-				System.imageServerHTTP + "/guilds/" + Helper.guildId + "_mini.jpg></a>";
+				System.imageServer + "/guilds/" + Helper.guildId + "_mini.jpg></a>";
 		}
 		avyrow.innerHTML = newhtml ;
 	},
@@ -10273,7 +9941,7 @@ var Helper = {
 			'for any suggestions, requests or bug reports</span></td></tr>' +
 			//General Prefs
 			'<tr><th colspan="2" align="left"><b>General preferences (apply to most screens)</b></th></tr>' +
-			'<tr><td align="right">Enable Guild Info Widgets<br>' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+			'<tr><td align="right">Enable Guild Info Widgets' + Helper.helpLink('Enable Guild Info Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableGuildInfoWidgets" type="checkbox" value="on"' + (GM_getValue("enableGuildInfoWidgets")?" checked":"") +
 				'>  Hide Message&gt;<input name="hideGuildInfoMessage" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoMessage")?" checked":"") +
 				'>  Hide Buff&gt;<input name="hideGuildInfoBuff" type="checkbox" value="on"' + (GM_getValue("hideGuildInfoBuff")?" checked":"") +
@@ -10286,15 +9954,15 @@ var Helper = {
 			'<tr><td align="right">Move Online Allies List' + Helper.helpLink('Move Guild Info List', 'This will Move the Online Allies List higher on the bar on the right') +
 				':</td><td><input name="moveOnlineAlliesList" type="checkbox" value="on"' + (GM_getValue("moveOnlineAlliesList")?" checked":"") + '>' +
 				'</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies<br>' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
+			'<tr><td align="right">'+Layout.networkIcon()+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableAllyOnlineList")?" checked":"") +
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (GM_getValue("enableEnemyOnlineList")?" checked":"") +
 				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ GM_getValue("allyEnemyOnlineRefreshTime") + '" /> seconds refresh</td></tr>' +
-			'<tr><td align="right">Enable Online Allies Widgets<br>' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (GM_getValue("enableOnlineAlliesWidgets")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (GM_getValue("moveFSBox")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">"Game Help" Settings Link<br>' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
+			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (GM_getValue("gameHelpLink")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
 				':</td><td><input name="enableTempleAlert" type="checkbox" value="on"' + (GM_getValue("enableTempleAlert")?" checked":"") + '></td></tr>' +
@@ -10306,7 +9974,7 @@ var Helper = {
 				':</td><td><input name="hideHelperMenu" type="checkbox" value="on"' + (GM_getValue("hideHelperMenu")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Keep Helper Menu On Screen' + Helper.helpLink('Keep Helper Menu On Screen', 'Keeps helper menu on screen as you scroll (helper menu must be enabled to work). Also works with quick links.') +
 				':</td><td><input name="keepHelperMenuOnScreen" type="checkbox" value="on"' + (GM_getValue("keepHelperMenuOnScreen")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Quick Links Screen Location<br>' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
+			'<tr><td align="right">Quick Links Screen Location' + Helper.helpLink('Quick Links Screen Location', 'Determines where the quick links dialog shows on the screen. Default is top 22, left 0.') +
 				':</td><td>Top: <input name="quickLinksTopPx" size="3" value="'+ GM_getValue("quickLinksTopPx") + '" /> Left: <input name="quickLinksLeftPx" size="3" value="'+ GM_getValue("quickLinksLeftPx") + '" /></td></tr>' +
 			//Guild Manage
 			'<tr><th colspan="2" align="left"><b>Guild>Manage preferences</b></th></tr>' +
@@ -10315,7 +9983,7 @@ var Helper = {
 			'<tr><td>Friendly Guilds</td><td>'+ Helper.injectSettingsGuildData("Frnd") + '</td></tr>' +
 			'<tr><td>Old Guilds</td><td>'+ Helper.injectSettingsGuildData("Past") + '</td></tr>' +
 			'<tr><td>Enemy Guilds</td><td>'+ Helper.injectSettingsGuildData("Enmy") + '</td></tr>' +
-			'<tr><td align="right">Highlight Valid PvP Targets<br>' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP or GvG.') +
+			'<tr><td align="right">Highlight Valid PvP Targets' + Helper.helpLink('Highlight Valid PvP Targets', 'Enabling this option will highlight targets in OTHER guilds that are within your level range to attack for PvP or GvG.') +
 				':</td><td>PvP: <input name="highlightPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightPlayersNearMyLvl")?" checked":"") +
 				'> GvG: <input name="highlightGvGPlayersNearMyLvl" type="checkbox" value="on"' + (GM_getValue("highlightGvGPlayersNearMyLvl")?" checked":"") + '/></td></tr>'  +
 			'<tr><td align="right">Show rank controls' + Helper.helpLink('Show rank controls', 'Show ranking controls for guild managemenet in member profile page - ' +
@@ -10340,7 +10008,7 @@ var Helper = {
 				'Champions will be colored green, Elites yellow and Super Elites red.') +
 				':</td><td><input name="enableCreatureColoring" type="checkbox" value="on"' + (GM_getValue("enableCreatureColoring")?" checked":"") + '></td></td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon()+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
-				((System.browserVersion<3)?'<br>Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+				((System.browserVersion<3)?'Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (GM_getValue("showCreatureInfo")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator for the damage and HP evaluation. It will not change the attack bias (1.1053).'+
 					'<br>Conservative = 1.1053 and 1.1 (Safest)'+
@@ -10409,7 +10077,7 @@ var Helper = {
 			'<tr><td align="right">Enable Log Coloring' + Helper.helpLink('Enable Log Coloring', 'Three logs will be colored if this is enabled, Guild Chat, Guild Log and Player Log. ' +
 				'It will show any new messages in yellow and anything 20 minutes old ones in brown.') +
 				':</td><td><input name="enableLogColoring" type="checkbox" value="on"' + (GM_getValue("enableLogColoring")?" checked":"") + '></td></td></tr>' +
-			'<tr><td align="right">New Log Message Sound<br>' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
+			'<tr><td align="right">New Log Message Sound' + Helper.helpLink('New Log Message Sound', 'The .wav or .ogg file to play when you have unread log messages. This must be a .wav or .ogg file. This option can be turned on/off on the world page. Only works in Firefox 3.5+') +
 				':</td><td colspan="3"><input name="defaultMessageSound" size="60" value="'+ GM_getValue("defaultMessageSound") + '" /></td></tr>' +
 			'<tr><td align="right">Play sound on unread log' + Helper.helpLink('Play sound on unread log', 'Should the above sound play when you have unread log messages? (will work on Firefox 3.5+ only)') +
 				':</td><td><input name="playNewMessageSound" type="checkbox" value="on"' + (GM_getValue("playNewMessageSound")?" checked":"") + '>' +
@@ -10431,7 +10099,7 @@ var Helper = {
 			'<tr><td align="right">Show Quick Drop Item' + Helper.helpLink('Show Quick Drop on Manage Backpack', 'This will show a link beside each item which gives the option to drop the item.  WARNING: NO REFUNDS ON ERROR') +
 				':</td><td><input name="showQuickDropLinks" type="checkbox" value="on"' + (GM_getValue("showQuickDropLinks")?" checked":"") + '>'+			//Quest prefs
 			
-			'<tr><td align="right">Quick Select all of type<br> in Send Screen' + Helper.helpLink('Quick Select all of type in Send Screen', 'This allows you to customize what quick links you would like displayed in your send item screen.<br>Use the format [\'name\',\'itemid\'],[\'othername\',\'itemid2\'].<br>WARNING: NO REFUNDS ON ERROR') +
+			'<tr><td align="right">Quick Select all of type in Send Screen' + Helper.helpLink('Quick Select all of type in Send Screen', 'This allows you to customize what quick links you would like displayed in your send item screen.<br>Use the format [\'name\',\'itemid\'],[\'othername\',\'itemid2\'].<br>WARNING: NO REFUNDS ON ERROR') +
 				':</td><td><input name="sendClasses" size="60" value="' + (GM_getValue("sendClasses")) + '">'+
 			
 			//Quest Preferences
@@ -10440,7 +10108,7 @@ var Helper = {
 				'This works on Quest Manager and Quest Book.') +
 				':</td><td colspan="3"><input name="hideQuests" type="checkbox" value="on"' + (GM_getValue("hideQuests")?" checked":"") + '>' +
 				'<input name="hideQuestNames" size="60" value="'+ GM_getValue("hideQuestNames") + '" /></td></tr>' +
-			'<tr><td align="right">Show Incomplete/Not <br>Started Quests' + Helper.helpLink('Show Incomplete/Not Started Quests', 'If checked, the helper will check to see if you have quests that are not started, or are started, not complete and not being tracked.' +
+			'<tr><td align="right">Show Incomplete/Not Started Quests' + Helper.helpLink('Show Incomplete/Not Started Quests', 'If checked, the helper will check to see if you have quests that are not started, or are started, not complete and not being tracked.' +
 				'<br>The helper will only check this when you change worlds, or if when it last checked, there were quests it detected for the current world.') +
 				':</td><td colspan="3"><input name="checkForQuestsInWorld" type="checkbox" value="on"' + (GM_getValue("checkForQuestsInWorld")?" checked":"") + '>' +
 				'</td></tr>' +
@@ -10453,7 +10121,7 @@ var Helper = {
 			'<tr><th colspan="2" align="left"><b>Profile preferences</b></th></tr>' +
 			'<tr><td align="right">Render self bio' + Helper.helpLink('Render self bio', 'This determines if your own bio will render the FSH special bio tags.') +
 				':</td><td><input name="renderSelfBio" type="checkbox" value="on"' + (GM_getValue("renderSelfBio")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Render other players\' bios<br>' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
+			'<tr><td align="right">Render other players\' bios' + Helper.helpLink('Render other players bios', 'This determines if other players bios will render the FSH special bio tags.') +
 				':</td><td><input name="renderOtherBios" type="checkbox" value="on"' + (GM_getValue("renderOtherBios")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Enable Bio Compressor' + Helper.helpLink('Enable Bio Compressor', 'This will compress long bios according to settings and provide a link to expand the compressed section.') +
 				':</td><td><input name="enableBioCompressor" type="checkbox" value="on"' + (GM_getValue("enableBioCompressor")?" checked":"") +
@@ -10484,12 +10152,10 @@ var Helper = {
 				'<input name ="wantedNames" size ="60" value="' + wantedNames + '"/></td></tr>' +
 			'<tr><td align= "right">' + Layout.networkIcon() + 'Show Attack Helper' + Helper.helpLink('Show Attack Helper', 'This will show extra information on the attack player screen ' +
 				'about stats and buffs on you and your target') + ':</td><td colspan="3"><input name="enableAttackHelper" type = "checkbox" value = "on"' + (GM_getValue("enableAttackHelper")? " checked":"") + '/>' +
-			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log<br>' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' +
+			'<tr><td align= "right">' + Layout.networkIcon() + 'Show PvP Summary in Log' + Helper.helpLink('Show PvP Summary in Log', 'This will show a summary of the PvP results in the log.') + ':</td><td colspan="3">' +
 				'<input name="showPvPSummaryInLog" type = "checkbox" value = "on"' + (GM_getValue("showPvPSummaryInLog")? " checked":"") + '/>' +
 			//Auction house prefs
 			'<tr><th colspan="2" align="left"><b>Auction house preferences</b></th></tr>' +
-			'<tr><td align="right">Enable Bulk Sell' + Helper.helpLink('Enable Bulk Sell', 'This enables the functionality for the user to bulk sell items.') +
-				':</td><td><input name="enableBulkSell" type="checkbox" value="on"' + (GM_getValue("enableBulkSell")?" checked":"") + '></td></tr>' +
 			'<tr><td align="right">Auto Fill Min Bid Price' + Helper.helpLink('Auto Fill Min Bid Price', 'This enables the functionality to automatically fill in the min bid price so you just have to hit bid and your bid will be placed.') +
 				':</td><td><input name="autoFillMinBidPrice" type="checkbox" value="on"' + (GM_getValue("autoFillMinBidPrice")?" checked":"") + '></td></tr>' +
 			//Other prefs
@@ -10503,25 +10169,14 @@ var Helper = {
 			'<tr><td align="right">Enter Sends Message' + Helper.helpLink('Enter Sends Message', 'If enabled, will send a message from the Send Message screen if you press enter. You can still insert a new line by holding down shift' +
 			' when you press enter.') +
 				':</td><td><input name="enterForSendMessage" type="checkbox" value="on"' + (GM_getValue("enterForSendMessage")?" checked":"") + '></td></tr>' +
-			'<tr><td align="right">Navigate After Message Sent<br>' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
+			'<tr><td align="right">Navigate After Message Sent' + Helper.helpLink('Navigate After Message Sent', 'If enabled, will navigate to the referring page after a successful message is sent. Example: ' +
 				' if you are on the world screen and hit message on the guild info panel after you send the message, it will return you to the world screen.') +
 				':</td><td><input name="navigateToLogAfterMsg" type="checkbox" value="on"' + (GM_getValue("navigateToLogAfterMsg")?" checked":"") + '></td></tr>' +
 			'<tr><td align= "right">Max Group Size to Join' + Helper.helpLink('Max Group Size to Join', 'This will disable HCSs Join All functionality and will only join groups less than a set size. ') +
 				':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" type = "checkbox" value = "on"' + (GM_getValue("enableMaxGroupSizeToJoin")? " checked":"") + '/>' +
 				'Max Size: <input name="maxGroupSizeToJoin" size="3" value="' + GM_getValue("maxGroupSizeToJoin") + '" /></td></tr>' +
-			'<tr><td align="right">Disable Composing Prompts<br>' + Helper.helpLink('Disable Composing Prompts', 'Disables confirmation prompts in composing screen.  WARNING: NO REFUNDS ON ERROR') +
+			'<tr><td align="right">Disable Composing Prompts' + Helper.helpLink('Disable Composing Prompts', 'Disables confirmation prompts in composing screen.  WARNING: NO REFUNDS ON ERROR') +
 				':</td><td><input name="disableComposingPrompts" type="checkbox" value="on"' + (GM_getValue("disableComposingPrompts")?" checked":"") + '></td></tr>' +
-			//~ '<tr><td align= "right">' + Layout.networkIcon() + 'Enable Titan Log' + Helper.helpLink('Enable Titan Log', 'This will keep a record of guild titan kills while you play. ' +
-				//~ 'You can set the number of minutes to delay before checking again. Setting this to 0 will check every page load, setting it to any other number ' +
-				//~ 'will mean that it will not refresh until the next page load after that many minutes have elapsed.') +
-				//~ ':</td><td colspan="3"><input name="enableTitanLog" type = "checkbox" value = "on"' + (GM_getValue("enableTitanLog")? " checked":"") + '/>' +
-				//~ '<input name="titanLogRefreshTime" size="2" value="'+ GM_getValue("titanLogRefreshTime") + '" /> minutes refresh</td></tr>' +
-			//~ '<tr><td align="right">Show Gold On Find Player' + Helper.helpLink('Show Gold On Find Player', 'Shows gold on hand on the find player screen.<br>Disabled at HCS request.') +
-				//~ ':</td><td><input name="showGoldOnFindPlayer" type="checkbox" value="on"' + /*(GM_getValue("showGoldOnFindPlayer")?" checked":"") +*/ ' disabled></td></tr>' +
-			//~ '<tr><td align="right">Titan Log Length' + Helper.helpLink('Titan Log Length', 'This is the number of titan logs that are stored on the scout tower page (including currently active titans).') +
-				//~ ':</td><td><input name="titanLogLength" size="3" value="'+ GM_getValue("titanLogLength") + '" /></td></td></tr>' +
-			//~ '<tr><td align="right">Add UFSG Widgets' + Helper.helpLink('Add Ultimate Fallen Sword Guide Widgets', 'Shows extra links on the guide.fallensword.com page. First step is a link to pull back max critter data.') +
-				//~ ':</td><td><input name="addUFSGWidgets" type="checkbox" value="on"' + (GM_getValue("addUFSGWidgets")?" checked":"") + '></td></tr>' +
 			//save button
 			//http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
 			'<tr><td colspan="2" align=center><input type="button" class="custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
@@ -10555,7 +10210,6 @@ var Helper = {
 		}
 
 		document.getElementById('Helper:SaveOptions').addEventListener('click', Helper.saveConfig, true);
-		//~ document.getElementById('Helper:CheckUpdate').addEventListener('click', Helper.checkForUpdate, true);
 		document.getElementById('Helper:ShowLogs').addEventListener('click', Helper.showLogs, true);
 		document.getElementById('Helper:ShowMonsterLogs').addEventListener('click', Helper.showMonsterLogs, true);
 		if (GM_getValue("map")) {document.getElementById('Helper:ResetFootprints').addEventListener('click', Helper.resetFootprints, true);}
@@ -10598,11 +10252,11 @@ var Helper = {
 	},
 
 	helpLink: function(title, text) {
-		return ' [ ' +
+		return ' [&nbsp;' +
 			'<span style="text-decoration:underline;cursor:pointer;" class="tip-static" data-tipped="' +
 			'<span style=\\\'font-weight:bold; color:#FFF380;\\\'>' + title + '</span><br /><br />' +
 			text + '">?</span>' +
-			' ]';
+			'&nbsp;]';
 	},
 
 	saveConfig: function(evt) {
@@ -10713,7 +10367,6 @@ var Helper = {
 		System.saveValueForm(oForm, "bountyListRefreshTime");
 		System.saveValueForm(oForm, "enableWantedList");
 		System.saveValueForm(oForm, "wantedNames");
-		System.saveValueForm(oForm, "enableBulkSell");
 		System.saveValueForm(oForm, "fsboxlog");
 		System.saveValueForm(oForm, "huntingMode");
 		System.saveValueForm(oForm, "enableAttackHelper");
@@ -10729,14 +10382,9 @@ var Helper = {
 		System.saveValueForm(oForm, "enableMaxGroupSizeToJoin");
 		System.saveValueForm(oForm, "maxGroupSizeToJoin");
 
-		//~ System.saveValueForm(oForm, "enableTitanLog");
-		//~ System.saveValueForm(oForm, "titanLogRefreshTime");
 		System.saveValueForm(oForm, "enableTempleAlert");
-		//~ System.saveValueForm(oForm, "showGoldOnFindPlayer");
-		//~ System.saveValueForm(oForm, "titanLogLength");
 		System.saveValueForm(oForm, "autoFillMinBidPrice");
 		System.saveValueForm(oForm, "showPvPSummaryInLog");
-		//~ System.saveValueForm(oForm, "addUFSGWidgets");
 		System.saveValueForm(oForm, "enableQuickDrink");
 		System.saveValueForm(oForm, "enhanceOnlineDots");
 		System.saveValueForm(oForm, "hideBuffSelected");
@@ -11063,308 +10711,6 @@ var Helper = {
 		window.location = url;
 	},
 
-	injectCreateAuctionTemplate: function() {
-		if (window.location.search.search("inv_id") == -1) { return; }
-
-		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (!auctionTable) {return;}
-
-
-
-		var newRow = auctionTable.insertRow(10);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = 2;
-		newCell.align = "center";
-		var table = System.getValueJSON("auctionTemplate");
-		if (!table) {
-			table = [
-				{auctionLength:6,auctionCurrency:1,auctionMinBid:1,		auctionBuyNow:1,	isDefault:true}
-			];
-			System.setValueJSON("auctionTemplate", table);
-		}
-
-		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
-				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;' id='Helper:AuctionTemplateTable'>" +
-				"<tr><td bgcolor='#cd9e4b'><center>Auction Templates</center></td></tr>" +
-				"<tr><td><table cellspacing='10' cellpadding='0' border='0' width='100%'>" +
-				"<tr><th bgcolor='#cd9e4b'>Length</th><th bgcolor='#cd9e4b'>Currency</th>"+
-				"<th bgcolor='#cd9e4b'>Min Bid</th><th bgcolor='#cd9e4b'>Buy Now</th>"+
-				"<th></th></tr>";
-
-		for (i = 0; i < table.length; i++) {
-			textResult += "<tr align='right'><td>"+Helper.getAuctionLength(table[i].auctionLength)+"</td>"+
-				"<td>"+(table[i].auctionCurrency==0?"Gold":"FSP")+"</td>"+
-				"<td>"+System.addCommas(table[i].auctionMinBid)+"</td>"+
-				"<td>"+System.addCommas(table[i].auctionBuyNow)+"</td>"+
-				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
-					"id='Helper:useAuctionTemplate" + i + "' auctionTemplateId=" + i +
-					" auctionLength=" + table[i].auctionLength +
-					" auctionCurrency=" + table[i].auctionCurrency +
-					" auctionMinBid=" + table[i].auctionMinBid +
-					" auctionBuyNow=" + table[i].auctionBuyNow +
-					">apply</span>]";
-				textResult += " [<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
-					"id='Helper:delAuctionTemplate" + i + "' auctionTemplateId=" + i +">del</span>]";
-			textResult += "</td></tr>";
-		}
-		if (table.length<=10) {
-			textResult += "<tr align='right'>"+
-				"<td><select id='Helper:auctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
-					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
-					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
-				"<td><select id='Helper:auctionCurrency'><option value='0' >Gold</option><option value='1' selected>FSP</option></select></td>"+
-				"<td><input type='text' class='custominput' size='6' id='Helper:minBid'/></td>"+
-				"<td><input type='text' class='custominput' size='6' id='Helper:buyNow'/></td>"+
-				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
-					"id='Helper:saveAuctionTemplate'>save new template</span>]</td></tr>";
-
-		}
-		textResult += "</table></td></tr></table>";
-
-		newCell.innerHTML = textResult;
-
-		if (table.length<=10) document.getElementById("Helper:saveAuctionTemplate").addEventListener("click", Helper.saveAuctionTemplate, true);
-		for (i = 0; i < table.length; i++) {
-			document.getElementById("Helper:useAuctionTemplate" + i).addEventListener("click", Helper.useAuctionTemplate, true);
-			document.getElementById("Helper:delAuctionTemplate" + i).addEventListener("click", Helper.delAuctionTemplate, true);
-		}
-	},
-	
-	injectCreateAuctionBulkSell: function(){
-////////////////////////////////// Post bulk sell //////////////////////////////////
-		var enableBulkSell = GM_getValue("enableBulkSell");
-		var sellFromAll = GM_getValue("bulkSellAllBags");
-		if (!enableBulkSell) {return;}
-
-		var auctionTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (!auctionTable) {return;}
-
-		var newRow = auctionTable.insertRow(11);
-		var newCell = newRow.insertCell(0);
-		newCell.innerHTML = "&nbsp;";
-		newRow = auctionTable.insertRow(12);
-		newCell = newRow.insertCell(0);
-		newCell.colSpan = 2;
-		newCell.align = "center";
-
-		var textResult = "<table cellspacing='0' cellpadding='0' bordercolor='#000000'" +
-				" border='0' align='center' width='550' style='border-style: solid; border-width: 1px;'>" +
-				"<tr><td bgcolor='#cd9e4b'><center>Bulk Auction List</center></td></tr>" +
-				"<tr><td align='center'><table cellspacing='10' cellpadding='0' border='0' width='100%' style='border-style: solid; border-width: 1px;'>" +
-				"<tr><th bgcolor='#cd9e4b'>Length</th><th bgcolor='#cd9e4b'>Currency</th>"+
-				"<th bgcolor='#cd9e4b'>Min Bid</th><th bgcolor='#cd9e4b'>Buy Now</th>"+
-				"<th></th></tr>";
-
-			textResult += "<tr align='right'>"+
-				"<td><select id='Helper:bulkSellAuctionLength'><option value='0' selected>1 Hour</option><option value='1' >2 Hours</option>"+
-					"<option value='2' >4 Hours</option><option value='3' >8 Hours</option><option value='4' >12 Hours</option>"+
-					"<option value='5' >24 Hours</option><option value='6' >48 Hours</option></select></td>"+
-				"<td><select id='Helper:bulkSellAuctionCurrency'><option value='0' >Gold</option><option value='1' selected>FSP</option></select></td>"+
-				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellMinBid'/></td>"+
-				"<td><input type='text' class='custominput' size='6' id='Helper:bulkSellBuyNow'/></td>"+
-				"<td>[<span style='cursor:pointer; text-decoration:underline; color:blue;' "+
-					"id='Helper:bulkListAll'>bulk list all</span>]</td></tr>";
-
-		textResult += "</table></td></tr>";
-
-
-/// had to move up here for call back purposes:
-
-		$.ajax({
-			url: '?cmd=export&subcmd=inventory',
-			success: function( data ) {
-				Helper.inventory = data;
-			},
-			async: false, //wait for responce
-			dataType: 'json'
-		});
-		var inv_id = /inv_id=(\d+)$/.exec(window.location.search);
-		inv_id = inv_id[1];
-		var inv_id_index=-1;
-		var item_id = -1;
-		for(i=0;i<Helper.inventory.items.length;i++){
-			if(Helper.inventory.items[i].inv_id == inv_id){
-				inv_id_index=i;
-				item_id=Helper.inventory.items[i].item_id;
-			}
-		}
-
-		textResult += "<tr><td align='center'><label id='Helper:useItemsInStCont'><input type='checkbox' id='Helper:useItemsInSt' checked /> Select items in ST</label> - <label id='Helper:listDifferentItemsCont'><input type='checkbox' id='Helper:listDifferentItems' /> Post different types of items</label><input type='hidden' value='"+item_id+"' id='Helper:postingItemID' /></td><tr>";
-
-		textResult += "<tr><td align='center'><table id='Helper:CreateAuctionBulkSellTable' cellspacing='10' cellpadding='0' border='0' width='100%'>";
-
-		textResult += "</table></td></tr>";
-
-		textResult += "</table>";
-
-		newCell.innerHTML = textResult;
-
-		document.getElementById('Helper:bulkListAll').addEventListener('click', Helper.bulkListAll, true);
-
-
-		var bidEntryTable = System.findNode("//table[tbody/tr/td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]/tbody/tr[10]/td[1]/table");
-		if (inv_id_index > 0) {
-			var newCell = bidEntryTable.rows[0].insertCell(2);
-			newCell.rowSpan = 5;
-			var style='';
-			if (Helper.inventory.items[inv_id_index].is_in_st){
-				style='style="border: 3px solid red"';
-			}
-			//.css('border','3px solid red')
-			newCell.innerHTML = '<img src="' + System.imageServerHTTP + '/items/' + Helper.inventory.items[inv_id_index].item_id +
-				//fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)
-				'.gif" class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + Helper.inventory.items[inv_id_index].item_id + '&inv_id=' + Helper.inventory.items[inv_id_index].inv_id  + '&t=1&p=' + Helper.inventory.player_id + '" border=0 '+style+'>';
-		}
-
-		var row = System.findNode("//tr[td/a[@href='index.php?cmd=auctionhouse&subcmd=create']]");
-		if (row) {
-			var toggleSellAllHTML = "<span id='Helper:bulkCheck' item_id='"+item_id+"' style='cursor: pointer; text-decoration: underline; color: blue;'>" +
-			(sellFromAll === true ? "Selling from all bags" : "Selling only from main folder") + " </span>";
-			row.innerHTML = row.innerHTML.replace("]", " | " + toggleSellAllHTML + " ]");
-			var bulkCheck = document.getElementById("Helper:bulkCheck")
-			if (bulkCheck) bulkCheck.addEventListener("click", Helper.toggleSellFromAllBags, true);
-		}
-
-		document.getElementById('Helper:useItemsInStCont').addEventListener('click', Helper.bulkSellInsertItems, true);
-		document.getElementById('Helper:useItemsInSt').addEventListener('click', Helper.bulkSellInsertItems, true);
-		document.getElementById('Helper:listDifferentItemsCont').addEventListener('click', Helper.bulkSellInsertItems, true);
-		document.getElementById('Helper:listDifferentItems').addEventListener('click', Helper.bulkSellInsertItems, true);
-		Helper.bulkSellInsertItems();
-	},
-
-	toggleSellFromAllBags: function(evt) {
-		var newValue = !GM_getValue("bulkSellAllBags");
-		GM_setValue('bulkSellAllBags', newValue);
-		var theSpan = document.getElementById("Helper:bulkCheck");
-		theSpan.innerHTML = (newValue === true ? "Selling from all bags" : "Selling only from main folder");
-		setTimeout(function() { //need to do this to give time for the gm_getvalue to send
-			Helper.bulkSellInsertItems();
-		},0);
-		
-	},
-
-	bulkSellInsertItems: function(){
-		var item_id=$('input[id="Helper:postingItemID"]').attr('value');
-		if(!item_id){return;}
-		var bulkSellTable = $('table[id="Helper:CreateAuctionBulkSellTable"]');
-		var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
-		var selectAll= $('input[id="Helper:listDifferentItems"]').is(':checked');
-		bulkSellTable.children().remove();
-		var maxAuctions = GM_getValue("maxAuctions");
-		if (!maxAuctions) maxAuctions = 2;
-
-		var sellFromAll = GM_getValue("bulkSellAllBags");
-//alert("in post: " + sellFromAll);
-var items=0;
-		for(i=0;i<Helper.inventory.items.length;i++){
-			//shouldPost=true;
-			if(!sellFromAll && Helper.inventory.items[i].folder_id > 0){ continue;} //all bp or not?
-			if(!selectST && Helper.inventory.items[i].is_in_st){ continue;} //items in ST or not
-			if(!selectAll && Helper.inventory.items[i].item_id!=item_id) { continue;}
-			if(Helper.inventory.items[i].equipped) { continue;}
-			if(Helper.inventory.items[i].guild_tag != '-1') { continue;}
-			if(Helper.inventory.items[i].bound) { continue;}
-
-			if(Helper.inventory.items[i].guild_tag==-1){
-				if (items % 3 === 0) bulkSellTable.append('<tr><td><td><td><td><td><td></td></td></td></td></td></td></tr>');
-				bulkSellTable.find('tr:last').css("vAlign","middle");
-				bulkSellTable.find('tr:last').find('td:eq('+(items%3)*2+')')
-					.html('<img src="'+System.imageServerHTTP+'/items/'+Helper.inventory.items[i].item_id+'.gif" border=0 ' +
-						'class="tipped" data-tipped-options="skin:\'fsItem\', ajax:true" data-tipped="fetchitem.php?item_id=' + Helper.inventory.items[i].item_id + '&inv_id=' + Helper.inventory.items[i].inv_id + '&t=1&p=' + Helper.inventory.player_id + '">')
-					.next()
-					.html('<span id="Helper:bulkListSingle'+Helper.inventory.items[i].inv_id+'" itemInvId="'+Helper.inventory.items[i].inv_id+'" style="cursor:pointer; text-decoration:underline; color:blue;">auction single</span>');
-				if(Helper.inventory.items[i].is_in_st){
-					bulkSellTable.find('tr:last').find('td:eq('+(items%3)*2+')').css('border','3px solid red');
-				}
-				document.getElementById('Helper:bulkListSingle'+Helper.inventory.items[i].inv_id).addEventListener('click', Helper.bulkListSingle, true);
-				if (items > maxAuctions && (i+1) != Helper.inventory.items.length) {
-					bulkSellTable.append('<tr><td></td></tr>');
-					var newText = "You only have " + maxAuctions + " auction slots.";
-					if (maxAuctions == 2) {
-						newText += " Check the updates page to add more (or to fix this number if you think it is wrong)";
-					}
-					bulkSellTable.find('tr:last').find('td:first').html(newText).attr("colspan",6);
-					return false;
-				}
-				items++;
-
-			}
-		}
-	},
-	getAuctionLength: function(auctionLength) {
-		if (auctionLength == 1) return '2 Hours';
-		else if (auctionLength == 2) return '4 Hours';
-		else if (auctionLength == 3) return '8 Hours';
-		else if (auctionLength == 4) return '12 Hours';
-		else if (auctionLength == 5) return '24 Hours';
-		else if (auctionLength == 6) return '48 Hours';
-		else return '1 Hour';
-	},
-
-	useAuctionTemplate: function(evt) {
-		var newAuctionLength = evt.target.getAttribute("auctionLength");
-		var newAuctionCurrency = evt.target.getAttribute("auctionCurrency");
-		var newAuctionMinBid = evt.target.getAttribute("auctionMinBid");
-		var newAuctionBuyNow = evt.target.getAttribute("auctionBuyNow");
-
-		var auctionLength = System.findNode("//select[@name='auction_length']");
-		var auctionCurrency = System.findNode("//select[@name='currency']");
-		var auctionMinBid = System.findNode("//input[@name='minbid']");
-		var auctionBuyNow = System.findNode("//input[@name='buynow']");
-
-		auctionLength.selectedIndex = newAuctionLength;
-		auctionCurrency.selectedIndex = newAuctionCurrency;
-		auctionMinBid.value = newAuctionMinBid;
-		auctionBuyNow.value = newAuctionBuyNow;
-
-		var enableBulkSell = GM_getValue("enableBulkSell");
-		if (enableBulkSell) {
-			var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
-			var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
-			var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
-			var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
-
-			bulkSellAuctionLength.selectedIndex = newAuctionLength;
-			bulkSellAuctionCurrency.selectedIndex = newAuctionCurrency;
-			bulkSellAuctionMinBid.value = newAuctionMinBid;
-			bulkSellAuctionBuyNow.value = newAuctionBuyNow;
-		}
-	},
-
-	saveAuctionTemplate: function(evt) {
-		var auctionLength = document.getElementById("Helper:auctionLength").value;
-		var auctionCurrency = document.getElementById("Helper:auctionCurrency").value;
-		var auctionMinBid = document.getElementById("Helper:minBid").value;
-		var auctionBuyNow = document.getElementById("Helper:buyNow").value;
-		if (!auctionMinBid) {return;}
-		var table = System.getValueJSON("auctionTemplate");
-		var theTemplate = {
-			auctionLength: auctionLength,
-			auctionCurrency: auctionCurrency,
-			auctionMinBid: auctionMinBid,
-			auctionBuyNow: auctionBuyNow,
-			isDefault: false
-		};
-		table.push(theTemplate);
-		System.setValueJSON("auctionTemplate", table);
-		$("table[id='Helper:AuctionTemplateTable']").remove();
-		setTimeout(function(){
-			Helper.injectCreateAuctionTemplate();
-		},0);
-	},
-
-	delAuctionTemplate: function(evt) {
-		var auctionTemplateId = evt.target.getAttribute("auctionTemplateId");
-		var table = System.getValueJSON("auctionTemplate");
-		table.splice(auctionTemplateId,1);
-		System.setValueJSON("auctionTemplate", table);
-		$("table[id='Helper:AuctionTemplateTable']").remove();
-		setTimeout(function(){
-			Helper.injectCreateAuctionTemplate();
-		},0);
-		//window.location = window.location;
-	},
-
 	injectInvent: function(){
 		var selector="<tr><td align='center'>Select how many to quick invent<input value=1 id='invent_amount' name='invent_amount' size=3 class='custominput'></td></tr>"+
 			"<tr><td align='center'><input id='quickInvent' value='Quick invent items' class='custombutton' type='submit'></td></tr>"+ //button to invennt
@@ -11527,77 +10873,6 @@ var items=0;
 			target.style.fontWeight = 'bold';
 			target.style.fontSize = 'small';
 			target.innerHTML = "Taken";
-		} else if (info!=="") {
-			target.style.color = 'red';
-			target.style.fontWeight = 'bold';
-			target.style.fontSize = 'small';
-			target.innerHTML = "Error: " + info;
-		} else {
-			target.style.color = 'red';
-			target.style.fontSize = 'small';
-			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
-			GM_log(callback.url);
-		}
-	},
-
-	injectAuctionQuickCancel: function() {
-		if (location.search == '?cmd=auctionhouse' != -1 && location.search == '&type=-2' != -1) {
-			var cancelButtons = System.findNodes("//img[@title='Cancel Auction']");
-			if (cancelButtons) {
-				for (var i = 0; i < cancelButtons.length; i++) {
-					var cancelButton = cancelButtons[i];
-					var cancelButtonHref = cancelButton.parentNode.getAttribute('href');
-					var cancelButtonCellElement = cancelButton.parentNode.parentNode.parentNode;
-					cancelButtonCellElement.style.textAlign = 'center';
-					cancelButtonCellElement.innerHTML += '<br><br><span style="cursor:pointer; text-decoration:underline; color:blue; font-size:x-small;" '+
-						'id="Helper:cancelAuctionItem' + i + '" ' +
-						'cancelButtonHref="' + cancelButtonHref + '">Fast Cancel</span>';
-					document.getElementById('Helper:cancelAuctionItem' + i).addEventListener('click', Helper.cancelAuctionItem, true);
-				}
-				var buttonCell = System.findNode("//input[contains(@value,'My Auctions')]/..");
-				var insertCancelAllHere = buttonCell;
-				var insertCancelAllBlock = document.createElement("SPAN");
-				insertCancelAllBlock.innerHTML = "Cancel All";
-				insertCancelAllBlock.style.cursor = "pointer";
-				insertCancelAllBlock.style.textDecoration = "underline";
-				insertCancelAllBlock.style.color = "blue";
-				insertCancelAllBlock.style.fontSize = "x-small";
-				insertCancelAllHere.innerHTML += "&nbsp;";
-				insertCancelAllHere.appendChild(insertCancelAllBlock);
-				insertCancelAllBlock.addEventListener('click', Helper.cancelAllAuction, true);
-			}
-		}
-	},
-
-	cancelAllAuction: function(evt) {
-		var auctionItems = System.findNodes("//span[contains(@id,'Helper:cancelAuctionItem')]");
-		for (var i = 0; i < auctionItems.length; i++) {
-			var auctionItem = auctionItems[i];
-			var cancelButtonHref = auctionItem.getAttribute("cancelButtonHref");
-			System.xmlhttp(cancelButtonHref,
-				Helper.cancelAuctionReturnMessage,
-				{"target": auctionItem, "url": cancelButtonHref});
-		}
-	},
-
-	cancelAuctionItem: function(evt) {
-		var cancelButtonHref = evt.target.getAttribute("cancelButtonHref");
-		System.xmlhttp(cancelButtonHref,
-			Helper.cancelAuctionReturnMessage,
-			{"target": evt.target, "url": cancelButtonHref});
-	},
-
-	cancelAuctionReturnMessage: function(responseText, callback) {
-		var target = callback.target;
-		var info = Layout.infoBox(responseText);
-		target.style.cursor = 'default';
-		target.style.textDecoration = 'none';
-		if (info.search("You cancelled your auction") != -1) {
-			target.style.color = 'green';
-			target.style.fontWeight = 'bold';
-			target.style.fontSize = 'small';
-			target.innerHTML = "Cancelled";
 		} else if (info!=="") {
 			target.style.color = 'red';
 			target.style.fontWeight = 'bold';
@@ -12266,75 +11541,6 @@ var items=0;
 		window.location = window.location;
 	},
 
-
-	injectAuctionSTCheck: function() {
-		var injectCell = System.findNode("//table[@width='650']/tbody/tr/td[contains(.,'Use the form below')]");
-		if (!injectCell) {
-			var injectCell = System.findNode("//table[@width='650']/tbody/tr/td[contains(.,'Now select the minimum')]");
-		}
-		if (injectCell) {
-			injectCell.innerHTML = "<span id='SecureTradeCheckMessage' style='color:blue;'>Existing ST check in progress ...</span>";
-			System.xmlhttp("index.php?cmd=trade&subcmd=secure", Helper.checkExistingSecureTrades, true);
-		}
-	},
-
-
-	bulkListAll: function() {
-		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
-		var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
-		var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
-		var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
-
-		var potentialAuctions = System.findNodes("//span[contains(@id,'Helper:bulkListSingle')]");
-		for (var i=0;i<potentialAuctions.length;i++) {
-			var potentialAuction = potentialAuctions[i];
-			var invID = /Helper:bulkListSingle(\d+)/.exec(potentialAuction.getAttribute("id"))[1];
-			var bulkSellHref = System.server + "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + invID +
-				"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
-				"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
-			System.xmlhttp(bulkSellHref,
-				Helper.bulkListSingleReturnMessage,
-				{"target": potentialAuction});
-		}
-	},
-
-	bulkListSingle: function(evt) {
-		var itemInvId = evt.target.getAttribute("itemInvId");
-		var bulkSellAuctionLength = System.findNode("//select[@id='Helper:bulkSellAuctionLength']");
-		var bulkSellAuctionCurrency = System.findNode("//select[@id='Helper:bulkSellAuctionCurrency']");
-		var bulkSellAuctionMinBid = System.findNode("//input[@id='Helper:bulkSellMinBid']");
-		var bulkSellAuctionBuyNow = System.findNode("//input[@id='Helper:bulkSellBuyNow']");
-
-		var bulkSellHref = System.server + "index.php?cmd=auctionhouse&subcmd=docreate&inv_id=" + itemInvId +
-			"&auction_length=" + bulkSellAuctionLength.value + "&currency=" + bulkSellAuctionCurrency.value +
-			"&minbid=" + bulkSellAuctionMinBid.value + "&buynow=" + bulkSellAuctionBuyNow.value;
-		System.xmlhttp(bulkSellHref,
-			Helper.bulkListSingleReturnMessage,
-			{"target": evt.target, "url": bulkSellHref});
-	},
-
-	bulkListSingleReturnMessage: function(responseText, callback) {
-		var target = callback.target;
-		var info = Layout.infoBox(responseText);
-		if (info.search("Auction placed successfully!") != -1) {
-			target.style.color = 'green';
-			target.style.fontWeight = 'bold';
-			target.style.fontSize = 'small';
-			target.innerHTML = "Auction Listed";
-		} else if (info!=="") {
-			target.style.color = 'red';
-			target.style.fontWeight = 'bold';
-			target.style.fontSize = 'small';
-			target.innerHTML = "Error: " + info;
-		} else {
-			target.style.color = 'red';
-			target.style.fontSize = 'small';
-			target.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
-			GM_log(callback.url);
-		}
-	},
-
 	toggleCheckAllPlants: function(evt) {
 		var plantRE = new RegExp(evt.target.getAttribute("plantRE"));
 		var tradeType = evt.target.getAttribute("tradetype");
@@ -12397,7 +11603,6 @@ var items=0;
 		}
 		$("table[id='item-list']").children().remove();
 		$("table[id='item-list']").append(itemTable.html());
-
 	},
 
 	injectTrade: function() {
