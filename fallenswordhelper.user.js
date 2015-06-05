@@ -11596,67 +11596,57 @@ var Helper = {
 	},
 
 	injectTrade: function() {
-		
-		$("table[id='item-list']").closest('tr').before('<tr id="Helper:selectMultiple"></tr>').before('<tr id="Helper:folderSelect"></tr>').before('<tr id="Helper:showSTs"></tr>');
+		$("table[id='item-list']").closest('tr').before('<tr id="Helper:selectMultiple"></tr>')
+												.before('<tr id="Helper:folderSelect"></tr>')
+												.before('<tr id="Helper:showSTs"></tr>');
 		//$("tr[id='Helper:selectMultiple']").append('<td colspan=6>Multiple Select</td>');
-		Helper.makeSelectAllInTrade();
-
-		$.ajax({
-			url: '?cmd=export&subcmd=inventory',
-			success: function( data ) {
-				Helper.inventory = data;
-			},
-			async: false, //wait for responce
-			dataType: 'json'
-		});
-		for(i=0;i<Helper.inventory.items.length;i++){
-				if(Helper.inventory.items[i].is_in_st){
-					$('input[value="'+Helper.inventory.items[i].inv_id+'"]').closest('tr').prev().find('td[background="' + System.imageServer + '/inventory/2x3.gif"]').css('border','3px solid red');
-				}
-		}
-
-//append main folder
-		var folders='<input type="hidden" id="Helper:CurrentFolder" value=0 /><span id="FolderID0" fid=0 style="cursor:pointer; text-decoration:underline;">All</span> <span id="FolderID-1" fid="-1" style="cursor:pointer; text-decoration:underline;">Main</span> ';
-		for (var key in Helper.inventory.folders){//Helper.inventory.folders[key]
-			folders+='<span id="FolderID'+key+'" fid='+key+' style="cursor:pointer; text-decoration:underline;">'+Helper.inventory.folders[key]+'</span> ';
-			//folders+='<label><input type="radio" name="all" value='+key+' /> '+Helper.inventory.folders[key]+'</label>, ';
-		}
-		$("tr[id='Helper:folderSelect']").append('<td colspan=6>'+folders+'</td>');//retrieving folder names...
-
-		$('span[id*="FolderID"]').click(function(){
-			//alert($(this).attr('fid'));
-			$('input[id="Helper:CurrentFolder"]').attr('value',$(this).attr('fid'));
-			//alert($('input[id="Helper:CurrentFolder"]').val());
-			Helper.insertItemsToTrade();
-
-		});
-
-
-		$("tr[id='Helper:showSTs']").append("<td align='center' colspan=6><label id='Helper:useItemsInStCont'><input type='checkbox' id='Helper:useItemsInSt' checked /> Select items in ST</label></td>");
-		//Helper.insertItemsToTrade(); //rebuilds item list - not required - takes a second to load and mostly not needed.
-	},
-
-	makeSelectAllInTrade: function(injectHere, type) {
-		var space = new String(' &nbsp ');
+		//~ var space = new String(' &nbsp ');
 		var sendClasses = GM_getValue("sendClasses");
-
 		eval('var itemList=['+sendClasses+'];');
 		var output = ''
 		var allResRE='';
 		for (var i=0;i<itemList.length;i++) {
 			output += '<span plantRE="'+itemList[i][1]+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'" tradetype="'+type+'">'+itemList[i][0]+'</span> &ensp;';
+				'id="Helper:checkAll'+i+'">'+itemList[i][0]+'</span> &ensp;';
 			allResRE+=itemList[i][1]+'|';
 		}
-		output='Select: &ensp;<span style="cursor:pointer; text-decoration:underline;" plantRE=".*" id="Helper:checkAll'+(i++)+'" tradetype="'+type+'">' +
-			'All Items</span> &ensp; ' +
-			'<span plantRE="'+allResRE.substr(0,allResRE.length-1)+'" style="cursor:pointer; text-decoration:underline;"' +
-				'id="Helper:checkAll'+i+'" tradetype="'+type+'">All Resources</span> &ensp;' + output;
+		output='Select: &ensp;<span style="cursor:pointer; text-decoration:underline;" plantRE=".*" id="Helper:checkAll' + (i++) +
+				'">' + 'All Items</span> &ensp; ' + '<span plantRE="' + allResRE.substr(0,allResRE.length-1) +
+				'" style="cursor:pointer; text-decoration:underline;"' + 'id="Helper:checkAll' + i + '">All Resources</span> &ensp;' + output;
 		output += 'Select <input id="Helper:SendHowMany" type="text" class="custominput" value="all" size=3 />';
 		$("tr[id='Helper:selectMultiple']").append('<td colspan=6>'+output+'</td>');
 		for (var i=0;i<itemList.length+1;i++) {
 			document.getElementById("Helper:checkAll"+i).addEventListener('click', Helper.toggleCheckAllPlants, true);
 		}
+		$.getJSON('?cmd=export&subcmd=inventory', Helper.processTrade);
+	},
+
+	processTrade: function (data, textStatus, jqXHR) {
+		Helper.inventory = data;
+		for(i=0;i<Helper.inventory.items.length;i++){
+			if(Helper.inventory.items[i].is_in_st){
+				$('input[value="'+Helper.inventory.items[i].inv_id+'"]').closest('tr').prev().find('td[background="' +
+						System.imageServer + '/inventory/2x3.gif"]').css('border','3px solid red');
+			}
+		}
+		//append main folder
+		var folders='<input type="hidden" id="Helper:CurrentFolder" value=0 /><span id="FolderID0" fid=0 style="cursor:pointer; ' +
+					'text-decoration:underline;">All</span> <span id="FolderID-1" fid="-1" style="cursor:pointer; ' +
+					'text-decoration:underline;">Main</span> ';
+		for (var key in Helper.inventory.folders){//Helper.inventory.folders[key]
+			folders+='<span id="FolderID'+key+'" fid='+key+' style="cursor:pointer; text-decoration:underline;">'+
+						Helper.inventory.folders[key]+'</span> ';
+			//folders+='<label><input type="radio" name="all" value='+key+' /> '+Helper.inventory.folders[key]+'</label>, ';
+		}
+		$("tr[id='Helper:folderSelect']").append('<td colspan=6>'+folders+'</td>');//retrieving folder names...
+		$('span[id*="FolderID"]').click(function(){
+			//alert($(this).attr('fid'));
+			$('input[id="Helper:CurrentFolder"]').attr('value',$(this).attr('fid'));
+			//alert($('input[id="Helper:CurrentFolder"]').val());
+			Helper.insertItemsToTrade();
+		});
+		$("tr[id='Helper:showSTs']").append("<td align='center' colspan=6><label id='Helper:useItemsInStCont'><input type='checkbox' id='Helper:useItemsInSt' checked /> Select items in ST</label></td>");
+		//Helper.insertItemsToTrade(); //rebuilds item list - not required - takes a second to load and mostly not needed.
 	},
 
 	makePageHeader: function(title, comment, spanId, button) {
