@@ -1177,71 +1177,76 @@ var Helper = {
 			if (hcsData['beta']) isBeta = 1;
 			if (hcsData['new-ui']) isNewUI = 1;
 		}
-		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
-		if (System.imageServer != System.imageServerHTTP) {
-			var changeCount = 0;
-			var td = System.findNodes("//td[contains(@background, 'file://') and contains(@background, 'tiles')]");
-			if (td) {
-				for (var i = 0; i < td.length; i++) {
-					var src = td[i].getAttribute("background");
-					if (src) {
-						if (src.indexOf("file://") != -1 && src.indexOf("\\") != -1) {
-							td[i].setAttribute("background", src.replace(/\\/g, "/"));
-							changeCount++;
+
+		if (isNewUI == 1) { // UFSG
+
+			//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
+			if (System.imageServer != System.imageServerHTTP) {
+				var changeCount = 0;
+				var td = System.findNodes("//td[contains(@background, 'file://') and contains(@background, 'tiles')]");
+				if (td) {
+					for (var i = 0; i < td.length; i++) {
+						var src = td[i].getAttribute("background");
+						if (src) {
+							if (src.indexOf("file://") != -1 && src.indexOf("\\") != -1) {
+								td[i].setAttribute("background", src.replace(/\\/g, "/"));
+								changeCount++;
+							}
 						}
 					}
 				}
+				if (changeCount === 0 && td !== null) {
+					GM_log("Time to remove the temporary HCS tile image slash fix.");
+				} /*else {
+					GM_log("Changed " + changeCount + " references.");
+				}*/
 			}
-			if (changeCount === 0 && td !== null) {
-				GM_log("Time to remove the temporary HCS tile image slash fix.");
-			} /*else {
-				GM_log("Changed " + changeCount + " references.");
-			}*/
-		}
-		if (GM_getValue("gameHelpLink")) {
-			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
-			$(gameHelpNode).each(function() {
-				$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
-			});
-		}
-
-		if (GM_getValue("huntingMode")) {
-			Helper.readInfo();
-			Helper.replaceKeyHandler();
-			Helper.fixOnlineGuildBuffLinks();
-		} else {
-			Helper.init();
-			//move boxes in opposite order that you want them to appear.
-			if (GM_getValue("moveGuildList")) {
-				Layout.moveRHSBoxUpOnRHS('minibox-guild');
-			}
-			if (GM_getValue("moveOnlineAlliesList")) {
-				Layout.moveRHSBoxUpOnRHS('minibox-allies');
-			}
-			if (GM_getValue("moveFSBox")) {
-				Layout.moveRHSBoxToLHS('minibox-fsbox');
+			if (GM_getValue("gameHelpLink")) {
+				var gameHelpNode = $('div.minibox h3:contains("Game Help")');
+				$(gameHelpNode).each(function() {
+					$(this).html("<a href='index.php?cmd=settings' style='color: #FFFFFF; text-decoration: underline'>" + $(this).text() + "</a>");
+				});
 			}
 
-			Helper.prepareAllyEnemyList();
-			Helper.prepareGuildList();
-			Helper.prepareBountyData();
-			Helper.injectStaminaCalculator();
-			Helper.injectLevelupCalculator();
-			Layout.injectMenu();
-			Helper.replaceKeyHandler();
-			Helper.injectFSBoxLog();
-			Helper.fixOnlineGuildBuffLinks();
-			Helper.addGuildInfoWidgets();
-			Helper.addOnlineAlliesWidgets();
-			Helper.injectJoinAllLink();
-			Helper.changeGuildLogHREF();
-			Helper.injectAHsearch();
-			Helper.injectHomePageTwoLink();
-			Helper.injectTempleAlert();
-			Helper.injectQuickMsgDialogJQ();
+			if (GM_getValue("huntingMode")) {
+				Helper.readInfo();
+				Helper.replaceKeyHandler();
+				Helper.fixOnlineGuildBuffLinks();
+			} else {
+				Helper.init();
+				//move boxes in opposite order that you want them to appear.
+				if (GM_getValue("moveGuildList")) {
+					Layout.moveRHSBoxUpOnRHS('minibox-guild');
+				}
+				if (GM_getValue("moveOnlineAlliesList")) {
+					Layout.moveRHSBoxUpOnRHS('minibox-allies');
+				}
+				if (GM_getValue("moveFSBox")) {
+					Layout.moveRHSBoxToLHS('minibox-fsbox');
+				}
+
+				Helper.prepareAllyEnemyList();
+				Helper.prepareGuildList();
+				Helper.prepareBountyData();
+				Helper.injectStaminaCalculator();
+				Helper.injectLevelupCalculator();
+				Layout.injectMenu();
+				Helper.replaceKeyHandler();
+				Helper.injectFSBoxLog();
+				Helper.fixOnlineGuildBuffLinks();
+				Helper.addGuildInfoWidgets();
+				Helper.addOnlineAlliesWidgets();
+				Helper.injectJoinAllLink();
+				Helper.changeGuildLogHREF();
+				Helper.injectAHsearch();
+				Helper.injectHomePageTwoLink();
+				Helper.injectTempleAlert();
+				Helper.injectQuickMsgDialogJQ();
+			}
+			Helper.injectHelperMenu();
+
 		}
 
-		Helper.injectHelperMenu();
 		var pageId, subPageId, subPage2Id, subsequentPageId, typePageId;
 
 		if (document.location.search !== "") {
@@ -2080,7 +2085,8 @@ var Helper = {
 		var hoursToNextLevel = Math.ceil(remainingXP/gain);
 		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 		var nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
-		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
+		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+
+				nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
 	},
 
 	injectShop: function() {
@@ -4888,7 +4894,7 @@ var Helper = {
 				aMember.firstSeen = new Date();
 				aMember.status = "Offline"; // new players are supposed to be offline
 			}
-			Helper.getFullPlayerData(aMember);
+			//~ Helper.getFullPlayerData(aMember);
 
 			if (aMember.status == "Offline" && memberStatus=="Online") {
 				aMember.loggedInAt = new Date();
@@ -4982,31 +4988,31 @@ var Helper = {
 		s = evt.keyCode;
 
 		switch (r) {
-		case 113: // nw
+		case 113: // nw [q]
 			Helper.moveMe(-1,-1);
 			break;
-		case 119: // n
+		case 119: // n [w]
 			Helper.moveMe(0,-1);
 			break;
-		case 101: // ne
+		case 101: // ne [e]
 			Helper.moveMe(1,-1);
 			break;
-		case 97: // w
+		case 97: // w [a]
 			Helper.moveMe(-1,0);
 			break;
-		case 100: // e
+		case 100: // e [d]
 			Helper.moveMe(1,0);
 			break;
-		case 122: // sw
+		case 122: // sw [z]
 			Helper.moveMe(-1,1);
 			break;
-		case 120: // s
+		case 120: // s [x]
 			Helper.moveMe(0,1);
 			break;
-		case 99: // se
+		case 99: // se [c]
 			Helper.moveMe(1,1);
 			break;
-		case 114: // repair
+		case 114: // repair [r]
 			//do not use repair link for new map
 			if ($('#worldPage').length == 0) window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			break;
@@ -5026,14 +5032,14 @@ var Helper = {
 				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
 			}
 			break;
-		case 49:
-		case 50:
-		case 51:
-		case 52:
-		case 53:
-		case 54:
-		case 55:
-		case 56: // keyed combat
+		case 49: // [1]
+		case 50: // [2]
+		case 51: // [3]
+		case 52: // [4]
+		case 53: // [5]
+		case 54: // [6]
+		case 55: // [7]
+		case 56: // keyed combat [8]
 			Helper.killMonsterAt(r-48);
 			break;
 		case 98: // backpack [b]
@@ -5055,16 +5061,16 @@ var Helper = {
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
 			GM_openInTab(System.server + "index.php?cmd=quickbuff");
 			break;
-		case 48: // return to world
+		case 48: // return to world [0]
 			//do not use if using new map
 			if ($('#worldPage').length == 0) window.location = 'index.php?cmd=world';
 			break;
-		case 109: // map
+		case 109: // map [m]
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
 			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
-		case 112: // profile
+		case 112: // profile [p]
 			window.location = 'index.php?cmd=profile';
 			break;
 		case 110: // mini map [n]
@@ -5462,21 +5468,21 @@ var Helper = {
 		}
 	},
 
-	getFullPlayerData: function(member) {
-		return;
-		//System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
-	},
-
-	parsePlayerData: function(responseText, memberId) {
-		// return;
-		var doc=System.createDocument(responseText);
-		// var statistics = System.findNode("//table[contains(tr/td/b,'Level:')]",0,doc);
-		var statistics = System.findNode("//table[contains(tbody/tr/td/b,'Level:')]",0,doc);
-		var levelNode = System.findNode("//td[contains(b,'Level:')]",0,statistics);
-		var levelValue = levelNode.nextSibling.innerHTML;
-//GM_log(levelValue);
-		// GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
-	},
+	//~ getFullPlayerData: function(member) {
+		//~ return;
+		//~ //System.xmlhttp("index.php?cmd=profile&player_id=" + member.id, Helper.parsePlayerData, member.id);
+	//~ },
+//~ 
+	//~ parsePlayerData: function(responseText, memberId) {
+		//~ // return;
+		//~ var doc=System.createDocument(responseText);
+		//~ // var statistics = System.findNode("//table[contains(tr/td/b,'Level:')]",0,doc);
+		//~ var statistics = System.findNode("//table[contains(tbody/tr/td/b,'Level:')]",0,doc);
+		//~ var levelNode = System.findNode("//td[contains(b,'Level:')]",0,statistics);
+		//~ var levelValue = levelNode.nextSibling.innerHTML;
+//~ //GM_log(levelValue);
+		//~ // GM_log(statistics.innerHTML); //parentNode.parentNode.nextSibling.nextSibling.nextSibling.innerHTML);
+	//~ },
 
 	injectBank: function() {
 		var injectHere;
@@ -6922,67 +6928,61 @@ var Helper = {
 		return theUrl;
 	},
 
-	injectInventoryManager: function(content) {
-		if (!content) content=Layout.notebookContent();
-		Helper.setItemFilterDefault();
-		if(document.location.search.indexOf("subcmd=invmanager") != -1){
-			$.ajax({
-				url: '?cmd=export&subcmd=inventory',
-				success: function( data ) {
-					Helper.inventory = data;
-					targetInventory=data;
-					targetInventory.folders['-1']='Main';
-					targetID='Helper:InventoryManagerOutput';
-					reportType='self';
-				},
-				async: false, //wait for responce
-				dataType: 'json'
-		});
-		}else if(document.location.search.indexOf("subcmd=guildinvmanager") != -1){
-			$.ajax({
-				url: '?cmd=export&subcmd=guild_store&inc_tagged=1',
-				success: function( data ) {
-					Helper.guildinventory = data;
-					targetID='Helper:GuildInventoryManagerOutput';
-					reportType='guild';
-				},
-				async: false, //wait for responce
-				dataType: 'json'
-			});
-			$.ajax({
-				url: '?cmd=export&subcmd=guild_members&guild_id='+Helper.guildinventory.guild_id,
-				success: function( data ) {
-					var buildJSON='{';
-					for(x in data){
-						//Helper.guildinventory.members[data[x].id]=data[x].username;
-						buildJSON+='"'+data[x].id+'":"'+data[x].username+'",';
-					}
-					buildJSON=buildJSON.substring(0, buildJSON.length-1)+'}';
-					Helper.guildinventory.members = JSON.parse(buildJSON);
-				},
-				async: false, //wait for responce
-				dataType: 'json'
-			});
-			targetInventory=Helper.guildinventory;
-		}else{
-			return;
+	injectInventoryManager: function() {
+		var content = Layout.notebookContent();
+		content.innerHTML = '<img src = "' + System.imageServer + '/world/actionLoadingSpinner.gif">&nbsp;Getting inventory data...'
+		if (document.location.search.indexOf("subcmd=invmanager") != -1){
+			$.getJSON('?cmd=export&subcmd=inventory', Helper.gotInvMan);
+		}else if (document.location.search.indexOf("subcmd=guildinvmanager") != -1){
+			$.getJSON('?cmd=export&subcmd=guild_store&inc_tagged=1', Helper.gotGuildInvMan);
 		}
+	},
+
+	gotInvMan: function (data, textStatus, jqXHR) {
+		Helper.inventory = data;
+		Helper.inventory.folders['-1']='Main';
+		Helper.inventoryManagerHeaders('self', Helper.inventory, 'Helper:InventoryManagerOutput');
+	},
+
+	gotGuildInvMan: function (data, textStatus, jqXHR) {
+		Helper.guildinventory = data;
+		$.getJSON('?cmd=export&subcmd=guild_members&guild_id='+Helper.guildinventory.guild_id, Helper.gotGuildMembers);
+	},
+
+	gotGuildMembers: function (data, textStatus, jqXHR) {
+		var buildJSON='{';
+		for(x in data){
+			buildJSON+='"'+data[x].id+'":"'+data[x].username+'",';
+		}
+		buildJSON=buildJSON.substring(0, buildJSON.length-1)+'}';
+		Helper.guildinventory.members = JSON.parse(buildJSON);
+		Helper.inventoryManagerHeaders('guild', Helper.guildinventory, 'Helper:GuildInventoryManagerOutput');
+	},
+
+	inventoryManagerHeaders: function(reportType, targetInventory, targetID) {
+		var content=Layout.notebookContent();
+		Helper.setItemFilterDefault();
 		var minLvl = GM_getValue("inventoryMinLvl", 1);
 		var maxLvl = GM_getValue("inventoryMaxLvl", 9999);
 		if(reportType=='self'){
-			reportTitle='<td width="90%" nobr><b>&nbsp;Inventory Manager</b> ' + targetInventory.items.length + ' items (green = worn, blue = backpack)</td>';
+			reportTitle='<td width="90%" nobr><b>&nbsp;Inventory Manager</b> ' + targetInventory.items.length +
+						' items (green = worn, blue = backpack)</td>';
 		}else{
-			reportTitle='<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> ' + targetInventory.items.length + ' items (maroon = in BP, blue=guild store)</td>';
+			reportTitle='<td width="90%" nobr><b>&nbsp;Guild Inventory Manager</b> ' + targetInventory.items.length +
+						' items (maroon = in BP, blue=guild store)</td>';
 		}
 		var newhtml='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
 			reportTitle + '<tr><td colspan=2>' +
 			'<table><tr><td><b>Show Items:</b></td>' +
 				'<td><table><tr><td>' +
-				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" onSubmit="javascript:return false;">' +
+				'<div align=right><form id=Helper:inventoryFilterForm subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager' +
+				'" onSubmit="javascript:return false;">' +
 				'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.inventoryMinLvl" id="Helper.inventoryMinLvl" style=custominput/> ' +
 				'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.inventoryMaxLvl" id="Helper.inventoryMaxLvl" style=custominput/> ' +
-				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" class="custombutton" type="submit" value="Filter"/><input id="reportType" type="hidden" value="'+reportType+'" />' +
-				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" class="custombutton" type="button" value="Reset"/></form></div>';
+				'<input id="Helper:inventoryFilter" subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" ' +
+				'class="custombutton" type="submit" value="Filter"/><input id="reportType" type="hidden" value="'+reportType+'" />' +
+				'<input id="Helper:inventoryFilterReset" subject="inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager" ' +
+				'class="custombutton" type="button" value="Reset"/></form></div>';
 		for (var i=0; i<Helper.itemFilters.length; i++) {
 			newhtml += (i % 5 ===0) ? '</td></tr><tr><td>' : '';
 			newhtml+='&nbsp;' +Helper.itemFilters[i].type+ ':<input id="'+Helper.itemFilters[i].id+'" type="checkbox" linkto="'+Helper.itemFilters[i].id+'"' +
@@ -7019,17 +7019,16 @@ var Helper = {
 	},
 
 	generateInventoryTable: function() {
-		reportType=$('input[id="reportType"]').attr('value');
+		var reportType=$('input[id="reportType"]').attr('value');
 		var wh = '<th align="left" sortkey="player_name" sortType="string">Where</th>';
 		if (reportType == "guild") {
-			targetId = 'Helper:GuildInventoryManagerOutput';
-			targetInventory = Helper.guildinventory;
-			inventoryShell = 'guildinventory';
-
+			var targetId = 'Helper:GuildInventoryManagerOutput';
+			var targetInventory = Helper.guildinventory;
+			var inventoryShell = 'guildinventory';
 		} else {
-			targetId = 'Helper:InventoryManagerOutput';
-			targetInventory = Helper.inventory;
-			inventoryShell = 'inventory';
+			var targetId = 'Helper:InventoryManagerOutput';
+			var targetInventory = Helper.inventory;
+			var inventoryShell = 'inventory';
 			wh='<th align="left" sortkey="folder_id" sortType="number">Where</th>';
 		}
 		if (!targetInventory) {return;}
@@ -7176,137 +7175,173 @@ var Helper = {
 			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
 
-		$('a[id*="Helper:item"]').click(function(){
-			i=$(this).attr('arrayID');
-			var html = '';
-			var t=1;
-			var p=0;
-			//http://www.fallensword.com/index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=24096093&ajax=1
-			if (reportType == "guild") {
-				html+='<span id="Helper:Recall">';
-				if(targetInventory.items[i].player_id=='-1'){
-					p=targetInventory.guild_id;
-					t=4;
-					html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id='+targetInventory.items[i].inv_id+'">Fast BP</span><br />';
+		$('a[id*="Helper:item"]').click(Helper.inspectInventoryItem);
+	},
 
-				}else{
-					p=targetInventory.items[i].player_id;
-					t=1;
-					html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+p+'&mode=0">Fast BP</span> |'+
-					'&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; text-decoration:underline; color:blue;" href="'+System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id='+targetInventory.items[i].inv_id+'&player_id='+p+'&mode=1">Fast GS</span><br />';
-
-					if(targetInventory.items[i].equipped){
-						//
-						html+='<span id="Helper:isEquiped">This item is being worn!</span><br />';
-					}
-
-					html+='<span id="Helper:IsWornBy">Is being held by: '+targetInventory.items[i].player_name+'</span><br />';
-				}
-				html+='</span><br />';
-				p=p+'&currentPlayerId='+targetInventory.current_player_id;
-					
+	inspectInventoryItem: function() {
+		var reportType=$('input[id="reportType"]').attr('value');
+		i=$(this).attr('arrayID');
+		var html = '';
+		var t=1;
+		var p=0;
+		//http://www.fallensword.com/index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=24096093&ajax=1
+		if (reportType == "guild") {
+			var targetInventory = Helper.guildinventory;
+			html+='<span id="Helper:Recall">';
+			if(targetInventory.items[i].player_id=='-1'){
+				p=targetInventory.guild_id;
+				t=4;
+				html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="' +
+						System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
+						targetInventory.items[i].inv_id + '">Fast BP</span><br />';
 			}else{
-				//'INSTANTLY DROP '+targetInventory.items[i].item_name+'. NO REFUNDS OR DO-OVERS! Use at own risk.'
-				html+='<span id="Helper:FolderMove"><select id="Helper:ToFolder"><option value="0">Move to folder</option>';
-				for(var key in targetInventory.folders){
-					html+= '<option value="'+key+'">'+targetInventory.folders[key]+'</option>';
-				}
-				
-				html+='</select><input id="Helper:InitiateMove" type="submit" class="custombutton" value="Move!" invid="'+targetInventory.items[i].inv_id+'" ></span><br />';
-
-				html+='<span id="Helper:Drop"><input id="Helper:DropItem" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'"  itemName="'+targetInventory.items[i].item_name+'" value="Drop Item!" /></span><br />' + 
-				'<span id="Helper:Send" >send to <input type="text" id="Helper:sendTo" size=5 /><input id="Helper:SendSubmit" class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'" value="Send!"/></span><br />' +
-				'<span id="Helper:Wear"><input class="custombutton" type="submit" id="Helper:equipProfileInventoryItem" ' +
-								'itemID="' + targetInventory.items[i].inv_id + '" value="Put it on!"></span> <br />' +
-				'<span id="Helper:Sell"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&subcmd=create2&inv_id='+targetInventory.items[i].inv_id+'">Post to AH</a></span><br />';
+				p=targetInventory.items[i].player_id;
 				t=1;
-				p=targetInventory.player_id;
+				html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="' +
+						System.server + 'index.php?cmd=guild&subcmd=inventory&subcmd2=recall&id=' + targetInventory.items[i].inv_id +
+						'&player_id='+ p +'&mode=0">Fast BP</span> |' + '&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; ' +
+						'text-decoration:underline; color:blue;" href="' + System.server + 'index.php?cmd=guild&subcmd=inventory&' +
+						'subcmd2=recall&id=' + targetInventory.items[i].inv_id + '&player_id=' + p + '&mode=1">Fast GS</span><br />';
+				if(targetInventory.items[i].equipped){
+					html+='<span id="Helper:isEquiped">This item is being worn!</span><br />';
+				}
+				html+='<span id="Helper:IsWornBy">Is being held by: '+targetInventory.items[i].player_name+'</span><br />';
 			}
-				//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Bahmou%20Mask
-			html+='<span id="Helper:SearchAH"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text='+escape(targetInventory.items[i].item_name)+'">Search AH</a></span><br /><br />';
-			if(targetInventory.items[i].stats.set_name)
-				html+='Set Name: ' + targetInventory.items[i].stats.set_name + '<br />';
-			html+='<img src="'+System.imageServer+'/items/'+targetInventory.items[i].item_id+'.gif" class="tipped" data-tipped-options="skin: \'fsItem\'" data-tipped="fetchitem.php?item_id='+targetInventory.items[i].item_id+'&inv_id='+targetInventory.items[i].inv_id+'&t='+t+'&p='+p+'" border=0>';
-			var $dialog = $('<div></div>')
-				.html(html)
-				.dialog({
-					title: targetInventory.items[i].item_name,
-					resizable: false,
-					height:350,
-					width:300,
-					modal: true,
-					buttons: {
-						"Close" : function() {
-							$dialog.dialog( "close" );
-						}
+			html+='</span><br />';
+			p=p+'&currentPlayerId='+targetInventory.current_player_id;
+		}else{
+			var targetInventory = Helper.inventory;
+			//'INSTANTLY DROP '+targetInventory.items[i].item_name+'. NO REFUNDS OR DO-OVERS! Use at own risk.'
+			html+='<span id="Helper:FolderMove"><select id="Helper:ToFolder"><option value="0">Move to folder</option>';
+			for(var key in targetInventory.folders){
+				html+= '<option value="'+key+'">'+targetInventory.folders[key]+'</option>';
+			}
+			html+='</select><input id="Helper:InitiateMove" type="submit" class="custombutton" value="Move!" invid="'+
+					targetInventory.items[i].inv_id+'" ></span><br />';
+			html+='<span id="Helper:Drop"><input id="Helper:DropItem" class="custombutton" type="submit" invid="'+
+					targetInventory.items[i].inv_id+'"  itemName="'+targetInventory.items[i].item_name+'" value="Drop Item!" /></span><br />' + 
+					'<span id="Helper:Send" >send to <input type="text" id="Helper:sendTo" size=5 /><input id="Helper:SendSubmit" ' +
+					'class="custombutton" type="submit" invid="'+targetInventory.items[i].inv_id+'" value="Send!"/></span><br />' +
+					'<span id="Helper:Wear"><input class="custombutton" type="submit" id="Helper:equipProfileInventoryItem" ' +
+					'itemID="' + targetInventory.items[i].inv_id + '" value="Put it on!"></span> <br />' +
+					'<span id="Helper:Sell"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&subcmd=create2&inv_id='+
+					targetInventory.items[i].inv_id+'">Post to AH</a></span><br />';
+			t=1;
+			p=targetInventory.player_id;
+		}
+		//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Bahmou%20Mask
+		html+='<span id="Helper:SearchAH"><a href="http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text='+
+				escape(targetInventory.items[i].item_name)+'">Search AH</a></span><br /><br />';
+		if(targetInventory.items[i].stats.set_name)
+			html+='Set Name: ' + targetInventory.items[i].stats.set_name + '<br />';
+		html+='<img src="'+System.imageServer+'/items/'+targetInventory.items[i].item_id+'.gif" class="tip-dynamic" ' +
+				'data-tipped="fetchitem.php?item_id='+targetInventory.items[i].item_id+'&inv_id='+
+				targetInventory.items[i].inv_id+'&t='+t+'&p='+p+'" border=0>';
+		var $dialog = $('<div></div>')
+			.html(html)
+			.dialog({
+				title: targetInventory.items[i].item_name,
+				resizable: false,
+				height:350,
+				width:300,
+				modal: true,
+				buttons: {
+					"Close" : function() {
+						$dialog.dialog( "close" );
 					}
-				});
-			if (reportType == "self") {
-				document.getElementById('Helper:equipProfileInventoryItem').addEventListener('click', Helper.equipProfileInventoryItem, true);
-			}
-			$('input[id="Helper:DropItem"]').click(function(){
-				var answer = confirm("Are you sure you want to drop "+$(this).attr('itemName')+"?");
-				if(answer){
-					var itemInvId = $(this).attr('invid');
-					var dropHref = System.server + "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
-					$.ajax({
-						url: dropHref,
-						success: function( data ) {
-							var info = Layout.infoBox(data);
-							var drop=$('span[id="Helper:Drop"]');
-							if (info==="Items dropped and destroyed.") {
-								drop.html("Item Dropped!");
-								drop.css('color','green');
-								drop.css('fontWeight','bold');
-								drop.css('fontSize','small');
-							} else if (info!=="") {
-								drop.css('color','red');
-								drop.css('fontWeight','bold');
-								drop.css('fontSize','small');
-								drop.html("Error: " + info);
-							} else {
-								drop.css('color','red');
-								drop.css('fontSize','small');
-								drop.html("Weird Error: check the Tools>Error Console");
-								GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
-								GM_log(callback.url);
-							}
-						},
-						async: false //wait for responce
-					});
 				}
 			});
-			$('input[id="Helper:SendSubmit"]').click(function(){
+		if (reportType == "self") {
+			document.getElementById('Helper:equipProfileInventoryItem').addEventListener('click', Helper.equipProfileInventoryItem, true);
+		}
+		$('input[id="Helper:DropItem"]').click(function(){
+			var answer = confirm("Are you sure you want to drop "+$(this).attr('itemName')+"?");
+			if(answer){
 				var itemInvId = $(this).attr('invid');
-				var xcNum = $('input[id="xcnum"]').attr('value');
-				var itemRecipient = $('input[id="Helper:sendTo"]').val();
-				var sendItemHref = System.server + "index.php?cmd=trade&subcmd=senditems&xc=" + xcNum + "&target_username=" + itemRecipient + "&sendItemList[]=" + itemInvId;
+				var dropHref = System.server + "index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=" + itemInvId;
 				$.ajax({
-					url: sendItemHref,
+					url: dropHref,
 					success: function( data ) {
 						var info = Layout.infoBox(data);
-						var send=$('span[id="Helper:Send"]');
-						if (info==="Items sent successfully!") {
-							send.html("Item sent to " + itemRecipient + "!");
-							send.css('color','green');
-							send.css('fontWeight','bold');
-							send.css('fontSize','small');
+						var drop=$('span[id="Helper:Drop"]');
+						if (info==="Items dropped and destroyed.") {
+							drop.html("Item Dropped!");
+							drop.css('color','green');
+							drop.css('fontWeight','bold');
+							drop.css('fontSize','small');
 						} else if (info!=="") {
-							send.css('color','red');
-							send.css('fontWeight','bold');
-							send.css('fontSize','small');
-							send.html("Error: " + info);
+							drop.css('color','red');
+							drop.css('fontWeight','bold');
+							drop.css('fontSize','small');
+							drop.html("Error: " + info);
 						} else {
-							send.css('color','red');
-							send.css('fontSize','small');
-							send.html("Weird Error: check the Tools>Error Console");
+							drop.css('color','red');
+							drop.css('fontSize','small');
+							drop.html("Weird Error: check the Tools>Error Console");
 							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
 							GM_log(callback.url);
 						}
 					},
-					async: false //wait for responce
 				});
+			}
+		});
+		$('input[id="Helper:SendSubmit"]').click(function(){
+			var itemInvId = $(this).attr('invid');
+			var xcNum = $('input[id="xcnum"]').attr('value');
+			var itemRecipient = $('input[id="Helper:sendTo"]').val();
+			var sendItemHref = System.server + "index.php?cmd=trade&subcmd=senditems&xc=" + xcNum + "&target_username=" + itemRecipient + "&sendItemList[]=" + itemInvId;
+			$.ajax({
+				url: sendItemHref,
+				success: function( data ) {
+					var info = Layout.infoBox(data);
+					var send=$('span[id="Helper:Send"]');
+					if (info==="Items sent successfully!") {
+						send.html("Item sent to " + itemRecipient + "!");
+						send.css('color','green');
+						send.css('fontWeight','bold');
+						send.css('fontSize','small');
+					} else if (info!=="") {
+						send.css('color','red');
+						send.css('fontWeight','bold');
+						send.css('fontSize','small');
+						send.html("Error: " + info);
+					} else {
+						send.css('color','red');
+						send.css('fontSize','small');
+						send.html("Weird Error: check the Tools>Error Console");
+						GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
+						GM_log(callback.url);
+					}
+				},
+			});
 
+		});
+		$('span[id*="Helper:RecallTo"]').click(function(){
+			var href = $(this).attr('href');
+			var id = $(this).attr('id');
+			$.ajax({
+				url: href,
+				success: function( data ) {
+					var info = Layout.infoBox(data);
+					var recall=$('span[id="'+id+'"]');
+					if ((info == "You successfully recalled the item.") || (info == "You successfully took the item into your backpack.")) {
+						recall.html("Recalled!");
+						recall.css('color','green');
+						recall.css('fontWeight','bold');
+						recall.css('fontSize','small');
+					} else if (info!=="") {
+						recall.css('color','red');
+						recall.css('fontWeight','bold');
+						recall.css('fontSize','small');
+						recall.html("Error: " + info);
+					} else {
+						recall.css('color','red');
+						recall.css('fontSize','small');
+						recall.html("Weird Error: check the Tools>Error Console");
+						GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
+						GM_log(callback.url);
+					}
+				},
 			});
 			$('span[id*="Helper:RecallTo"]').click(function(){
 				var href = $(this).attr('href');
@@ -8064,7 +8099,7 @@ var Helper = {
 					onload: function(responseDetails) {
 						joinButton.style.display = "none";
 						joinButton.style.visibility = "hidden";
-										}
+					}
 				});
 			}
 		}
@@ -10398,8 +10433,8 @@ var Helper = {
 		document.location=System.server + "index.php?cmd=notepad&blank=1&subcmd=monsterlog";
 	},
 
-	injectNotepadShowLogs: function() {
-		var content = Layout.notebookContent();
+	injectNotepadShowLogs: function(content) {
+		if (!content) var content = Layout.notebookContent();
 		var combatLog = GM_getValue("CombatLog");
 		//combatLog = JSON.stringify(combatLog);
 		if (combatLog.indexOf(',')==0)
@@ -12975,23 +13010,29 @@ var Helper = {
 
 		var actionMenu = {
 			"Character" : [
-				["BL", "Buff Log", "injectBuffLog"], ["COL", "Combat Log", "injectNotepadShowLogs"],
-				["IM", "Inventory Manager", "injectInventoryManager"], ["RM", "Recipe Manager", "injectRecipeManager"],
+				["BL", "Buff Log", "injectBuffLog"],
+				["COL", "Combat Log", "injectNotepadShowLogs"],
+				//~ ["IM", "Inventory Manager", "injectInventoryManager"],
+				["RM", "Recipe Manager", "injectRecipeManager"],
 				["QLM", "Quick Links", "injectQuickLinkManager"]
 				//, ["CRM", "Create Maps", "injectCreateMap"]
 			],
 			"Actions" : [
-				["FB", "Find Buffs", "injectFindBuffs"], ["FO", "Find Other", "injectFindOther"],
-				["OP", "Online Players", "injectOnlinePlayers"], ["QS", "AH Quick Search", "injectAuctionSearch"]
+				["FB", "Find Buffs", "injectFindBuffs"],
+				["FO", "Find Other", "injectFindOther"],
+				["OP", "Online Players", "injectOnlinePlayers"],
+				["QS", "AH Quick Search", "injectAuctionSearch"]
 			],
-			"Guild" : [
-				["GI", "Guild Inventory", "injectGuildInventoryManager"], ["GL", "Guild Log", "injectNewGuildLog"]
-			],
+			//~ "Guild" : [
+				//~ ["GI", "Guild Inventory", "injectGuildInventoryManager"],
+				//~ ["GL", "Guild Log", "injectNewGuildLog"]
+			//~ ],
 			"Extra" : [
-				//~ ["BD", "Best Damage Items", "injectCheckWearingItem"], 
+				//~ ["BD", "Best Damage Items", "injectCheckWearingItem"],
 				["QE", "Quick Extract", "insertQuickExtract"],
-				["QW", "Quick Wear", "insertQuickWear"], ["BoxL", "FS Box Log", "injectFsBoxContent"],
-				["CRL", "Creature Log", "injectMonsterLog"] //still needs work
+				["QW", "Quick Wear", "insertQuickWear"],
+				["BoxL", "FS Box Log", "injectFsBoxContent"],
+				//~ ["CRL", "Creature Log", "injectMonsterLog"] // TODO
 			]
 			};
 		var html = "<div style='cursor:default; text-decoration:none; display:none; text-align:center; position:absolute; color:black; background-image:url(\""
