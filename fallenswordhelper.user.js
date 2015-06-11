@@ -300,7 +300,7 @@ var System = {
 		if (!nodes) return null;
 		return (nodes[0]);
 	},
-	
+
 	findNodes: function(xpath, doc) {
 			if (!doc) {
 				doc=document;
@@ -348,7 +348,7 @@ var System = {
 		// doc.innerHTML=details;  // old
 		return doc;*/
 	},
-	
+
 	//~ createDocument: function(str) { // chrome extension must use this createDocument (which not work under Firefox :( )
 		//~ if (document.documentElement.nodeName != 'HTML') {
 		    //~ return new DOMParser().parseFromString(str, 'application/xhtml+xml');
@@ -7343,64 +7343,34 @@ var Helper = {
 					}
 				},
 			});
-			$('span[id*="Helper:RecallTo"]').click(function(){
-				var href = $(this).attr('href');
-				var id = $(this).attr('id');
-				$.ajax({
-					url: href,
-					success: function( data ) {
-						var info = Layout.infoBox(data);
-						var recall=$('span[id="'+id+'"]');
-						if ((info == "You successfully recalled the item.") || (info == "You successfully took the item into your backpack.")) {
-							recall.html("Recalled!");
-							recall.css('color','green');
-							recall.css('fontWeight','bold');
-							recall.css('fontSize','small');
-						} else if (info!=="") {
-							recall.css('color','red');
-							recall.css('fontWeight','bold');
-							recall.css('fontSize','small');
-							recall.html("Error: " + info);
-						} else {
-							recall.css('color','red');
-							recall.css('fontSize','small');
-							recall.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
-							GM_log(callback.url);
-						}
-					},
-					async: false //wait for responce
-				});
-			});
-			$('input[id="Helper:InitiateMove"]').click(function(){
-				var itemInvId = $(this).attr('invid');
-				var folderID = $('select[id="Helper:ToFolder"]').val();
-				var moveHref = System.server + "index.php?cmd=profile&subcmd=sendtofolder&folderItem[]="+itemInvId+"&folder_id=" + folderID;
-				$.ajax({
-					url: moveHref,
-					success: function( data ) {
-						var info = Layout.infoBox(data);
-						var move=$('span[id="Helper:FolderMove"]');
-						if (info==="Items moved to folder successfully!") {
-							move.html("Item Moved!");
-							move.css('color','green');
-							move.css('fontWeight','bold');
-							move.css('fontSize','small');
-						} else if (info!=="") {
-							move.css('color','red');
-							move.css('fontWeight','bold');
-							move.css('fontSize','small');
-							move.html("Error: " + info);
-						} else {
-							move.css('color','red');
-							move.css('fontSize','small');
-							move.html("Weird Error: check the Tools>Error Console");
-							GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
-							GM_log(callback.url);
-						}
-					},
-					async: false //wait for responce
-				});
+		});
+		$('input[id="Helper:InitiateMove"]').click(function () {
+			var itemInvId = $(this).attr('invid');
+			var folderID = $('select[id="Helper:ToFolder"]').val();
+			var moveHref = System.server + "index.php?cmd=profile&subcmd=sendtofolder&folderItem[]="+itemInvId+"&folder_id=" + folderID;
+			$.ajax({
+				url: moveHref,
+				success: function( data ) {
+					var info = Layout.infoBox(data);
+					var move=$('span[id="Helper:FolderMove"]');
+					if (info==="Items moved to folder successfully!") {
+						move.html("Item Moved!");
+						move.css('color','green');
+						move.css('fontWeight','bold');
+						move.css('fontSize','small');
+					} else if (info!=="") {
+						move.css('color','red');
+						move.css('fontWeight','bold');
+						move.css('fontSize','small');
+						move.html("Error: " + info);
+					} else {
+						move.css('color','red');
+						move.css('fontSize','small');
+						move.html("Weird Error: check the Tools>Error Console");
+						GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
+						GM_log(callback.url);
+					}
+				},
 			});
 		});
 	},
