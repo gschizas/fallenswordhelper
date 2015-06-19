@@ -19,6 +19,8 @@
 // EVERYTHING MUST BE IN main()
 var main = function() {
 
+"use strict";
+
 var isBeta ="0";
 var isNewUI = "0";
 
@@ -30,21 +32,21 @@ var gvar = function(){};
 function GM_ApiBrowserCheck(){
 	var GMSTORAGE_PATH = 'GM_';
 	// You can change it to avoid conflict with others scripts
-	GM_addStyle = function(css){
-		var style = document.createElement('style');
-		style.textContent = css;
-		document.getElementsByTagName('head')[0].appendChild(style);
-	}
 	if (typeof unsafeWindow === 'undefined'){
 		window.unsafeWindow = window;
 	}
-	if (typeof GM_log === 'undefined'){
-		GM_log = function(msg){
-			try{
-				unsafeWindow.console.log('GM_log: ' + msg);
-			} catch(e){}
-		};
-	}
+	//~ unsafeWindow.GM_addStyle = function(css){
+		//~ var style = document.createElement('style');
+		//~ style.textContent = css;
+		//~ document.getElementsByTagName('head')[0].appendChild(style);
+	//~ };
+	//~ if (typeof GM_log === 'undefined'){
+		//~ unsafeWindow.GM_log = function(msg){
+			//~ try{
+				//~ unsafeWindow.console.log('GM_log: ' + msg);
+			//~ } catch(e){}
+		//~ };
+	//~ }
 	//~ GM_clog = function(msg){
 		//~ if (arguments.callee.counter){
 			//~ arguments.callee.counter++;
@@ -97,15 +99,25 @@ function GM_ApiBrowserCheck(){
 
 	if (needApiUpgrade){
 		var ws = null;
+		var uid = new Date().toString();
+		var result;
 		try{
-			ws = typeof(unsafeWindow.localStorage);
-			unsafeWindow.localStorage.length;
+			unsafeWindow.localStorage.setItem(uid, uid);
+			result = unsafeWindow.localStorage.getItem(uid) === uid;
+			unsafeWindow.localStorage.removeItem(uid);
+			if (result) {
+				ws = typeof unsafeWindow.localStorage;
+			} else {
+				console.log("There is a problem with your local storage. " +
+					"FSH cannot persist your settings.");
+				ws = null;
+			}
 		} catch(e){
 			ws = null;
 		}
 		// Catch Security error
 		if (ws === 'object'){
-			GM_getValue = function(name, defValue){
+			unsafeWindow.GM_getValue = function(name, defValue){
 				var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH +
 					name);
 				if (value === null || value === undefined){
@@ -122,7 +134,7 @@ function GM_ApiBrowserCheck(){
 				}
 				return value;
 			};
-			GM_setValue = function(name, value){
+			unsafeWindow.GM_setValue = function(name, value){
 				switch (typeof value){
 				case 'string':
 					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
@@ -140,7 +152,7 @@ function GM_ApiBrowserCheck(){
 					break;
 				}
 			};
-			GM_deleteValue = function(name){
+			unsafeWindow.GM_deleteValue = function(name){
 				unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH + name);
 			};
 		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
@@ -166,7 +178,7 @@ function GM_ApiBrowserCheck(){
 			};
 		}
 
-		GM_listValues = function(){
+		unsafeWindow.GM_listValues = function(){
 			var list = [];
 			var reKey = new RegExp("^" + GMSTORAGE_PATH);
 			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i += 1) {
@@ -177,11 +189,11 @@ function GM_ApiBrowserCheck(){
 			}
 			return list;
 		};
-		if (typeof GM_openInTab === 'undefined'){
-			GM_openInTab = function(url){
-				unsafeWindow.open(url, "");
-			};
-		}
+		//~ if (typeof GM_openInTab === 'undefined'){
+			//~ unsafeWindow.GM_openInTab = function(url){
+				//~ unsafeWindow.open(url, "");
+			//~ };
+		//~ }
 		//~ if (typeof(GM_registerMenuCommand) == 'undefined'){
 			//~ GM_registerMenuCommand = function(name, cmd){
 				//~ GM_log("Notice: GM_registerMenuCommand is not supported.");
@@ -189,7 +201,7 @@ function GM_ApiBrowserCheck(){
 		//~ }
 		// Dummy
 		if (!gvar.isOpera || typeof GM_xmlhttpRequest === 'undefined'){
-			GM_xmlhttpRequest = function(obj){
+			unsafeWindow.GM_xmlhttpRequest = function(obj){
 				var request = new XMLHttpRequest();
 				request.onreadystatechange = function(){
 					if (obj.onreadystatechange){
@@ -241,10 +253,10 @@ function GM_JQ_wrapper() {
 		GM_setValue = function(name, value){
 			setTimeout(function() {oldGM_setValue(name, value);}, 0);
 		};
-		var oldGM_openInTab = GM_openInTab;
-		GM_openInTab = function(url) {
-			setTimeout(function() {oldGM_openInTab(url);}, 0);
-		};
+		//~ var oldGM_openInTab = GM_openInTab;
+		//~ GM_openInTab = function(url) {
+			//~ setTimeout(function() {oldGM_openInTab(url);}, 0);
+		//~ };
 		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
 		GM_xmlhttpRequest = function(details) {
 			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
@@ -648,6 +660,16 @@ var System = {
 		} else {
 			GM_setValue(anItemId, "ON");
 		}
+	},
+
+	addStyle: function(css) {
+		var style = document.createElement('style');
+		style.textContent = css;
+		document.getElementsByTagName('head')[0].appendChild(style);
+	},
+
+	openInTab: function(url){
+		setTimeout(function() {unsafeWindow.open(url, "");}, 0);
 	}
 };
 System.init();
@@ -3171,7 +3193,7 @@ var Helper = {
 			elem.innerHTML=" <a href='index.php?cmd=guild&subcmd=advisor&subcmd2=weekly'>7-Day Summary</a>";
 			injectHere.appendChild(elem);
 		}
-		GM_addStyle(
+		System.addStyle(
 			'.HelperAdvisorRow1 {background-color:#e7c473;font-size:x-small}\n' +
 			'.HelperAdvisorRow1:hover {background-color:white}\n' +
 			'.HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}\n' +
@@ -3421,7 +3443,7 @@ var Helper = {
 		}
 
 		result = valueA-valueB;
-		if (!Helper.sortAsc) result=-result;
+		if (!Helper.sortAsc) {result=-result;}
 		return result;
 	},
 
@@ -4385,6 +4407,7 @@ var Helper = {
 	},
 
 	showQuickWear: function(callback) {
+		var itemID;
 		var output='<div id="invTabs"><ul>'+
 			'<li><a href="#invTabs-qw">Quick Wear / Use / Extract <br/>Manager</a></li>'+
 			'<li><a href="#invTabs-ah">Inventory Manager Counter<br/>filtered by AH Quick Search</a></li></ul>'+
@@ -4392,7 +4415,7 @@ var Helper = {
 			'<table width=100%><tr><th width=20%>Actions</th><th colspan=4>Items</th></tr>';
 		for (var key in Helper.itemList) {
 			if (!Helper.itemList.hasOwnProperty(key)) {continue;}
-			var itemID=Helper.itemList[key].id;
+			itemID=Helper.itemList[key].id;
 			output+='<tr><td align=center>'+
 				'<span style="cursor:pointer; text-decoration:underline; color:#blue; font-size:x-small;" '+
 				'id="Helper:equipProfileInventoryItem' + itemID + '" ' +
@@ -4405,6 +4428,7 @@ var Helper = {
 		output+='</table></div><div id="invTabs-ah"></div></div>';
 		callback.inject.innerHTML=output;
 		for (key in Helper.itemList) {
+			if (!Helper.itemList.hasOwnProperty(key)) {continue;}
 			itemID=Helper.itemList[key].id;
 			document.getElementById('Helper:equipProfileInventoryItem' + itemID).
 				addEventListener('click', Helper.equipProfileInventoryItem, true);
@@ -4893,7 +4917,7 @@ var Helper = {
 		var content = document.getElementById("Helper.entityTableOutput");
 		var i;
 		if (!Helper.entityLogTable || !content) {return;}
-		GM_addStyle(
+		System.addStyle(
 			'.HelperMonsterLogRow1 {background-color:#e7c473;font-size:small}\n' +
 			'.HelperMonsterLogRow1:hover {background-color:white}\n' +
 			'.HelperMonsterLogRow2 {background-color:#e2b960;font-size:small}\n' +
@@ -5383,7 +5407,7 @@ var Helper = {
 			break;
 		case 19: // quick buffs
 			// openWindow("", "fsQuickBuff", 618, 800, ",scrollbars");
-			GM_openInTab(System.server + "index.php?cmd=quickbuff");
+			System.openInTab(System.server + "index.php?cmd=quickbuff");
 			break;
 		case 48: // return to world [0]
 			//do not use if using new map
@@ -5394,7 +5418,7 @@ var Helper = {
 		case 109: // map [m]
 			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
 			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
-			GM_openInTab(System.server + "index.php?cmd=world&subcmd=map");
+			System.openInTab(System.server + "index.php?cmd=world&subcmd=map");
 			break;
 		case 112: // profile [p]
 			window.location = 'index.php?cmd=profile';
@@ -5870,7 +5894,7 @@ var Helper = {
 	},
 
 	generateManageTable: function() {
-		GM_addStyle('.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}\n' +
+		System.addStyle('.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr bgcolor=#CD9E4B>';
 		var isArrayOnly= Helper.param.fields.length === 0;
@@ -7892,7 +7916,7 @@ var Helper = {
 		if (refreshButton) {
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
 		}
-		GM_addStyle(
+		System.addStyle(
 			'.HelperTableRow1 {background-color:#e7c473;font-size:small}\n' +
 			'.HelperTableRow1:hover {background-color:white}\n' +
 			'.HelperTableRow2 {background-color:#e2b960;font-size:small}\n' +
@@ -8687,7 +8711,7 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
-		GM_addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
+		System.addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		//var playerInput = System.findNode("//input[@name='targetPlayers']");
 		var playerInput = $('input[name="targetPlayers"]');
@@ -9768,24 +9792,34 @@ var Helper = {
 		var bioEditLinesDiv = document.createElement("DIV");
 		advancedEditing.appendChild(bioEditLinesDiv);
 		textArea.rows = GM_getValue("bioEditLines");
-		bioEditLinesDiv.innerHTML += " Display <input size=2 maxlength=2 id='Helper:linesToShow' type='text' value='" + GM_getValue("bioEditLines") + "'/> Lines"  +
-		" <input type='button' style='display:none' id='Helper:saveLines' value='Update Rows To Show' class='custombutton'/>";
+		textArea.style.resize='none';
+		bioEditLinesDiv.innerHTML += " Display <input id='Helper:linesToShow'" +
+			" type='number' min='0' max='99' value='" + GM_getValue("bioEditLines") +
+			"'/> Lines" +
+		//~ " <input type='button' style='display:none' id='Helper:saveLines' value='Update Rows To Show' class='custombutton'/>";
+		" <input type='button' id='Helper:saveLines' value='Update Rows To Show' class='custombutton'/>";
 		document.getElementById("Helper:saveLines").addEventListener('click',
 			function () {
 				var theBox = document.getElementById("Helper:linesToShow");
-				if (theBox.value.trim().length === 0) {
-					return;
-				}
-				GM_setValue("bioEditLines", theBox.value);
+				if (isNaN(parseInt(theBox.value, 10)) ||
+					parseInt(theBox.value, 10) < '0' ||
+					parseInt(theBox.value, 10) > '99') {return;}
+				GM_setValue("bioEditLines", parseInt(theBox.value, 10));
 				window.location.reload();
 			}, true);
 
-		unsafeWindow.document.getElementById("Helper:linesToShow").realmKeyHandler = function (event) {
-			event = event ? event : window.event;
-			var charkey = String.fromCharCode(event.which ? event.which : event.keyCode);
-			document.getElementById("Helper:saveLines").style.display = "";
-			return "0123456789".indexOf(charkey) > -1;
-		};
+		//~ unsafeWindow.document.getElementById("Helper:linesToShow").realmKeyHandler = function (event) {
+			//~ event = event ? event : window.event;
+			//~ var charkey = String.fromCharCode(event.which ? event.which :
+				//~ event.keyCode);
+			//~ document.getElementById("Helper:saveLines").style.display = "";
+			/* jshint -W100 */ //This character may get silently deleted by one or more browsers. (W100)
+			/* jshint -W113 */ //Control character in string: <non-printable>. (W113)
+			//~ return "0123456789".indexOf(charkey) > -1;
+			/* jshint +W100 */
+			/* jshint +W113 */
+		//~ };
+
 		document.getElementById('textInputBox').addEventListener('keyup', Helper.updateBioCharacters, true);
 		//Force the preview area to render
 		Helper.updateBioCharacters(null);
@@ -11331,7 +11365,7 @@ var Helper = {
 	},
 
 	injectQuickLinkManager: function(content) {
-		GM_addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
+		System.addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 
 		if (!content) {content = Layout.notebookContent();}
