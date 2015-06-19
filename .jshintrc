@@ -30,17 +30,17 @@
                                 //   "single" : require single quotes
                                 //   "double" : require double quotes
     "singleGroups"  : true,     // true: Prohibits the use of the grouping operator when it is not strictly required
-    "strict"        : true ,    // true: Requires all functions run in ES5 Strict Mode
+    "strict"        : false,    // true: Requires all functions run in ES5 Strict Mode
     "undef"         : true,     // true: Require all non-global variables to be declared (prevents global leaks)
     "unused"        : true,     // Unused variables:
                                 //   true     : all variables, last function parameter
                                 //   "vars"   : all variables only
                                 //   "strict" : all variables, all function parameters
     "varstmt"       : false,    // true: the use of VariableStatements are forbidden
-    "maxparams"     : 5,        // {int} Max number of formal params allowed per function
-    "maxdepth"      : 10,       // {int} Max depth of nested blocks (within functions)
-    "maxstatements" : 150,      // {int} Max number statements per function
-    "maxcomplexity" : 40,       // {int} Max cyclomatic complexity per function
+    "maxparams"     : false,    // {int} Max number of formal params allowed per function
+    "maxdepth"      : false,    // {int} Max depth of nested blocks (within functions)
+    "maxstatements" : false,    // {int} Max number statements per function
+    "maxcomplexity" : false,    // {int} Max cyclomatic complexity per function
     "maxlen"        : false,    // {int} Max number of characters per line
 
     // Relaxing

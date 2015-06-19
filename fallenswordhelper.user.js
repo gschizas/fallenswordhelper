@@ -258,16 +258,16 @@ GM_JQ_wrapper();
 // System functions
 var System = {
 	init: function() {
-		Date.prototype.toFormatString = System.formatDate;
+		//~ Date.prototype.toFormatString = System.formatDate;
 
-		Number.prototype.padZero = System.padZero;
-		String.prototype.repeat = System.repeatString;
-		if (!String.trim) {
-			String.prototype.trimLeft  = System.trimLeft;
-			String.prototype.trimRight = System.trimRight;
-			String.prototype.trim      = System.trim;
-		}
-		Array.prototype.filterBy = System.filterBy;
+		//~ Number.prototype.padZero = System.padZero;
+		//~ String.prototype.repeat = System.repeatString;
+		//~ if (!String.trim) {
+			//~ String.prototype.trimLeft  = System.trimLeft;
+			//~ String.prototype.trimRight = System.trimRight;
+			//~ String.prototype.trim      = System.trim;
+		//~ }
+		//~ Array.prototype.filterBy = System.filterBy;
 
 		System.server = document.location.protocol + "//" + document.location.host + "/";
 		var uAgent = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i);
@@ -282,7 +282,7 @@ var System = {
 		//~ System.imageServerHTTP  = "http://huntedcow.cachefly.net/fs";
 		System.imageServerHTTP  = "http://cdn.fallensword.com";
 
-		Array.prototype.removeDuplicates = System.removeDuplicates;
+		//~ Array.prototype.removeDuplicates = System.removeDuplicates;
 	},
 
 	getValueJSON: function(name) {
@@ -396,52 +396,72 @@ var System = {
 		return result;
 	},
 
-	formatDate: function(dateFormat) {
-		if (!this.valueOf()) {return;}
+	formatShortDate: function(aDate) {
+		var result;
 		var months = ['January', 'February', 'March', 'April', 'May', 'June',
 			'July', 'August', 'September', 'October', 'November', 'December'];
-		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-
-		var theDate=this;
-		var h;
-
-		return dateFormat.replace(/(yyyy|MMMM|MMM|MM|dddd|ddd|dd|hh|HH|mm|ss|a)/g,
-			function($1) {
-				switch ($1) {
-					case 'yyyy': return theDate.getFullYear();
-					case 'MMMM': return months[theDate.getMonth()];
-					case 'MMM':  return months[theDate.getMonth()].substr(0, 3);
-					case 'MM':   return (theDate.getMonth() + 1).padZero(2);
-					case 'dddd': return days[theDate.getDay()];
-					case 'ddd':  return days[theDate.getDay()].substr(0, 3);
-					case 'dd':   return theDate.getDate().padZero(2);
-					case 'HH':   return theDate.getHours().padZero(2);
-					case 'hh':   return ((h = theDate.getHours() % 12) ? h : 12).padZero(2);
-					case 'mm':   return theDate.getMinutes().padZero(2);
-					case 'ss':   return theDate.getSeconds().padZero(2);
-					case 'a':  return theDate.getHours() < 12 ? 'am' : 'pm';
-				}
-			}
-		);
-	},
-
-	padZero: function(zeroes) {
-		var s=this.toString();
-		var result="0".repeat(zeroes-s.length) + s;
+		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+			'Friday', 'Saturday'];
+		var yyyy = aDate.getFullYear();
+		var dd = aDate.getDate();
+		if (dd<10) {dd = "0" + dd;}
+		var ddd = days[aDate.getDay()].substr(0, 3);
+		var month = months[aDate.getMonth()].substr(0, 3);
+		var hh=aDate.getHours();
+		if (hh<10) {hh = "0" + hh;}
+		var mm=aDate.getMinutes();
+		if (mm<10) {mm = "0" + mm;}
+		result = hh + ":" + mm + " " + ddd + " " + dd + "/" + month + "/" +
+			yyyy;
 		return result;
 	},
 
-	filterBy: function(property, value) {
-		return this.filter(function(element, index, array) {return element[property]==value;});
-	},
+	//~ formatDate: function(dateFormat) {
+		//~ if (!this.valueOf()) {return;}
+		//~ var months = ['January', 'February', 'March', 'April', 'May', 'June',
+			//~ 'July', 'August', 'September', 'October', 'November', 'December'];
+		//~ var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+//~ 
+		//~ var theDate=this;
+		//~ var h;
+//~ 
+		//~ return dateFormat.replace(/(yyyy|MMMM|MMM|MM|dddd|ddd|dd|hh|HH|mm|ss|a)/g,
+			//~ function($1) {
+				//~ switch ($1) {
+					//~ case 'yyyy': return theDate.getFullYear();
+					//~ case 'MMMM': return months[theDate.getMonth()];
+					//~ case 'MMM':  return months[theDate.getMonth()].substr(0, 3);
+					//~ case 'MM':   return (theDate.getMonth() + 1).padZero(2);
+					//~ case 'dddd': return days[theDate.getDay()];
+					//~ case 'ddd':  return days[theDate.getDay()].substr(0, 3);
+					//~ case 'dd':   return theDate.getDate().padZero(2);
+					//~ case 'HH':   return theDate.getHours().padZero(2);
+					//~ case 'hh':   return ((h = theDate.getHours() % 12) ? h : 12).padZero(2);
+					//~ case 'mm':   return theDate.getMinutes().padZero(2);
+					//~ case 'ss':   return theDate.getSeconds().padZero(2);
+					//~ case 'a':    return theDate.getHours() < 12 ? 'am' : 'pm';
+				//~ }
+			//~ }
+		//~ );
+	//~ },
 
-	repeatString: function(times) {
-		var s = '';
-		for (var i=0; i<times; i++) {
-			s += this;
-		}
-		return s;
-	},
+	//~ padZero: function(zeroes) {
+		//~ var s=this.toString();
+		//~ var result="0".repeat(zeroes-s.length) + s;
+		//~ return result;
+	//~ },
+
+	//~ filterBy: function(property, value) {
+		//~ return this.filter(function(element) {return element[property] === value;});
+	//~ },
+
+	//~ repeatString: function(times) {
+		//~ var s = '';
+		//~ for (var i=0; i<times; i += 1) {
+			//~ s += this;
+		//~ }
+		//~ return s;
+	//~ },
 
 	saveValueForm: function(oForm, name) {
 		var formElement = System.findNode("//input[@name='" + name + "']", oForm);
@@ -518,42 +538,69 @@ var System = {
 		return x1 + x2;
 	},
 
-	trim: function() {
-	    return this.trimLeft().trimRight();
-	},
+	//~ trim: function() {
+		//~ return this.trimLeft().trimRight();
+	//~ },
 
-	trimLeft: function() {
-		return this.replace(/^\s+/,"");
-	},
+	//~ trimLeft: function() {
+		//~ return this.replace(/^\s+/,"");
+	//~ },
 
-	trimRight: function() {
-		return this.replace(/\s+$/,"");
-	},
+	//~ trimRight: function() {
+		//~ return this.replace(/\s+$/,"");
+	//~ },
 
-	removeDuplicates: function (removeBy){
-		var temp = [];
-		var first;
-		var second;
+	//~ removeDuplicates: function (removeBy){
+		//~ var temp = [];
+		//~ var first;
+		//~ var second;
+		//~ var i;
+		//~ if (removeBy) {
+			//~ Helper.sortBy = removeBy;
+			//~ this.sort();
+			//~ for(i=0;i<this.length;i += 1) {
+				//~ first = this[i];
+				//~ second = this[i+1]?this[i+1]:"abc";
+				//~ if(i !== this.length && first[removeBy]===second[removeBy]) {continue;}
+				//~ temp[temp.length]=this[i];
+			//~ }
+		//~ } else {
+			//~ this.sort();
+			//~ for(i=0;i<this.length;i += 1) {
+				//~ first = this[i];
+				//~ second = this[i+1]?this[i+1]:"abc";
+				//~ if(i !== this.length && first===second) {continue;}
+				//~ temp[temp.length]=this[i];
+			//~ }
+		//~ }
+		//~ return temp;
+	//~ },
+
+	uniq: function (arr, removeBy){
+		var seen = {};
+		var out = [];
+		var len = arr.length;
+		var j = 0;
 		var i;
+		var item;
 		if (removeBy) {
-			Helper.sortBy = removeBy;
-			this.sort();
-			for(i=0;i<this.length;i++) {
-				var first = this[i];
-				var second = (this[i+1]?this[i+1]:"abc");
-				if(i != this.length && first[removeBy]==second[removeBy]) {continue;}
-				temp[temp.length]=this[i];
+			for(i=0;i<len;i += 1) {
+				item = arr[i];
+				if(seen[item[removeBy]] === 1) {continue;}
+				seen[item[removeBy]] = 1;
+				out[j] = item;
+				j += 1;
 			}
 		} else {
-			this.sort();
-			for(i=0;i<this.length;i++) {
-				var first = this[i];
-				var second = (this[i+1]?this[i+1]:"abc");
-				if(i != this.length && first==second) {continue;}
-				temp[temp.length]=this[i];
+			for(i=0;i<len;i += 1) {
+				item = arr[i];
+				if(seen[item] === 1) {continue;}
+				seen[item] = 1;
+				out[j] = item;
+				j += 1;
 			}
 		}
-		return temp;
+		return out;
 	},
 
 	convertTextToHtml: function(inputText) {
@@ -571,18 +618,20 @@ var System = {
 		var dateText = textDateSplitSpace[1];
 		var dayText = dateText.split("/")[0];
 		var monthText = dateText.split("/")[1];
-		if (monthText == "Jan") fullMonthText = "January";
-		if (monthText == "Feb") fullMonthText = "February";
-		if (monthText == "Mar") fullMonthText = "March";
-		if (monthText == "Apr") fullMonthText = "April";
-		if (monthText == "May") fullMonthText = "May";
-		if (monthText == "Jun") fullMonthText = "June";
-		if (monthText == "Jul") fullMonthText = "July";
-		if (monthText == "Aug") fullMonthText = "August";
-		if (monthText == "Sep") fullMonthText = "September";
-		if (monthText == "Oct") fullMonthText = "October";
-		if (monthText == "Nov") fullMonthText = "November";
-		if (monthText == "Dec") fullMonthText = "December";
+		var months = {"Jan": "January",
+			"Feb": "February",
+			"Mar": "March",
+			"Apr": "April",
+			"May": "May",
+			"Jun": "June",
+			"Jul": "July",
+			"Aug": "August",
+			"Sep": "September",
+			"Oct": "October",
+			"Nov": "November",
+			"Dec": "December"
+			};
+		var fullMonthText = months[monthText];
 		var yearText = dateText.split("/")[2];
 		var dateAsDate = new Date(fullMonthText + " " + dayText + ", " + yearText + " " + timeText + ":00");
 		return dateAsDate;
@@ -985,6 +1034,12 @@ var Layout = {
 				"quickbuff&tid=" + playerId +
 				"', 'fsQuickBuff', 618, 1000, ',scrollbars')\"";
 		}
+	},
+
+	buffAllHref: function(shortList) {
+		var j = "java";
+		return j + "script:openWindow('index.php?cmd=quickbuff&t=" + shortList +
+			"', 'fsQuickBuff', 618, 1000, ',scrollbars')";
 	}
 };
 
@@ -1160,7 +1215,7 @@ var Helper = {
 			quickSearchList = System.getValueJSON("quickSearchList");
 		}
 		catch (err) {
-			GM_log(err);
+			console.log(err);
 			quickSearchList = null;
 		}
 
@@ -1234,9 +1289,9 @@ var Helper = {
 					}
 				}
 				if (changeCount === 0 && td !== null) {
-					GM_log("Time to remove the temporary HCS tile image slash fix.");
+					console.log("Time to remove the temporary HCS tile image slash fix.");
 				} /*else {
-					GM_log("Changed " + changeCount + " references.");
+					console.log("Changed " + changeCount + " references.");
 				}*/
 			}
 			if (GM_getValue("gameHelpLink")) {
@@ -1276,7 +1331,7 @@ var Helper = {
 				Helper.addOnlineAlliesWidgets();
 				Helper.injectJoinAllLink();
 				Helper.changeGuildLogHREF();
-				Helper.injectAHsearch();
+				//~ Helper.injectAHsearch();
 				Helper.injectHomePageTwoLink();
 				Helper.injectTempleAlert();
 				Helper.injectQuickMsgDialogJQ();
@@ -1948,7 +2003,7 @@ var Helper = {
 						var xpNode = xpLock.parentNode.parentNode;
 							xpNode.cells[1].innerHTML += ' (<b>' + System.addCommas(xpLockXP - actualXP) + '</b>)';
 						} catch (err) {
-							GM_log(err);
+							console.log(err);
 						}
 					}
 				}
@@ -2072,7 +2127,7 @@ var Helper = {
 					{"node": callback.node});
 			}
 		} catch (err) {
-			GM_log(err);
+			console.log(err);
 		}
 	},
 
@@ -2095,8 +2150,8 @@ var Helper = {
 			itemCellElement.innerHTML = "<span style='color:red; font-weight:bold;'>Error:" + info + "</span>";
 		} else {
 			itemCellElement.innerHTML = "Weird Error: check the Tools>Error Console";
-			GM_log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
-			GM_log(callback.url);
+			console.log("Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error");
+			console.log(callback.url);
 		}
 	},
 
@@ -2120,7 +2175,8 @@ var Helper = {
 		var now = (new Date()).getTime();
 		var nextHuntMilliseconds = now + millisecondsToMaxStamina;
 		var d = new Date(nextHuntMilliseconds);
-		var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+		//~ var nextHuntTimeText = d.toFormatString("HH:mm ddd dd/MMM/yyyy");
+		var nextHuntTimeText = System.formatShortDate(d);
 		$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
 	},
 
@@ -2136,7 +2192,8 @@ var Helper = {
 		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 		nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
 		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+
-				nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
+				//~ nextGainTime.toFormatString("HH:mm ddd dd/MMM/yyyy")+'</dd>');
+				System.formatShortDate(nextGainTime)+'</dd>');
 	},
 
 	injectShop: function() {
@@ -2265,7 +2322,7 @@ var Helper = {
 							modifierWord + " 16</span></a></nobr>";
 							injectHere.append(htmlToAppend);
 							var buffAllLink = $('#buffAll'+modifierWord);
-							buffAllLink.attr("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+							buffAllLink.attr("href",Layout.buffAllHref(shortList));
 							shortList = [];
 						}
 					}
@@ -2767,7 +2824,7 @@ var Helper = {
 		hpValue.html(System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier)));
 		hpValueBuffed.html(System.addCommas(hpNumber + Math.round(LDhpNumber*relicMultiplier) + fortitudeBonusHP));
 		var LDpercentageValue = $("td[title='LDPercentage']");
-		LDpercentageValue.html((relicMultiplier*100) + "%");
+		LDpercentageValue.html(relicMultiplier*100 + "%");
 
 		System.xmlhttp("index.php?cmd=guild&subcmd=groups", Helper.relicCheckIfGroupExists);
 	},
@@ -3043,31 +3100,35 @@ var Helper = {
 		}
 	},
 
-	injectAHsearch: function() {
-		var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]");
-		if (items)
-			for (var i=0; i<items.length; i++) {
-				if (items[i].parentNode.tagName!='A') {
-					items[i].addEventListener('click', Helper.searchAHforItem, true);
-					items[i].style.cursor='pointer';
-					items[i].setAttribute("data-tipped-options",
-						items[i].getAttribute("data-tipped-options")+
-						", afterUpdate: function(content, element){element.setAttribute('data-tipped-html', content.innerHTML);}");
-				}
-			}
-	},
+	//~ injectAHsearch: function() {
+		//~ // TODO This is completely different now
+		//~ // We need to look at qtip after update
+		//~ var items=System.findNodes("//img[contains(@data-tipped,'fetchitem') and contains(@src,'/items/')]");
+		//~ if (items) {
+			//~ for (var i=0; i<items.length; i += 1) {
+				//~ if (items[i].parentNode.tagName!=='A') {
+					//~ items[i].addEventListener('click', Helper.searchAHforItem, true);
+					//~ items[i].style.cursor='pointer';
+					//~ items[i].setAttribute("data-tipped-options",
+						//~ items[i].getAttribute("data-tipped-options")+
+						//~ ", afterUpdate: function(content, element){element.setAttribute('data-tipped-html', content.innerHTML);}");
+				//~ }
+			//~ }
+		//~ }
+	//~ },
 
-	searchAHforItem: function(evt) {
-		var responseText = evt.target.getAttribute('data-tipped-html');
-		var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-		//if (responseText.indexOf('Bound (Non-Tradable)') > 0)
-			//if (!confirm(name + " is Bound (Non-Tradable), cannot be found in AH!\n"+
-				//"Do you still want to try?")) return;
-		if (responseText.indexOf('Container') > 0)
-			if (!confirm(name + " is type Container.\n"+
-				"Do you still want to search AH for this item (OK) or not (Cancel)?")) return;
-		window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
-	},
+	//~ searchAHforItem: function(evt) {
+		//~ console.log("evt=", evt);
+		//~ var responseText = evt.target.getAttribute('data-tipped-html');
+		//~ var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
+		//~ //if (responseText.indexOf('Bound (Non-Tradable)') > 0)
+			//~ //if (!confirm(name + " is Bound (Non-Tradable), cannot be found in AH!\n"+
+				//~ //"Do you still want to try?")) return;
+		//~ if (responseText.indexOf('Container') > 0 &&
+			//~ !confirm(name + " is type Container.\nDo you still want to " +
+				//~ "search AH for this item (OK) or not (Cancel)?")) {return;}
+		//~ window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
+	//~ },
 
 	injectViewRecipe: function() {
 		var components = System.findNodes("//b[.='Components Required']/../../following-sibling::tr[2]//img");
@@ -3304,8 +3365,8 @@ var Helper = {
 
 	stringSort: function(a,b) {
 		var result=0;
-		a = eval("a."+Helper.sortBy);
-		b = eval("b."+Helper.sortBy);
+		a = Helper.path(a, Helper.sortBy, 'a');
+		b = Helper.path(b, Helper.sortBy, 'a');
 		if (a.toLowerCase()<b.toLowerCase()) {result=-1;}
 		if (a.toLowerCase()>b.toLowerCase()) {result=+1;}
 		if (!Helper.sortAsc) {result=-result;}
@@ -3318,8 +3379,8 @@ var Helper = {
 			if(a.type > 8) {return 1;} //non equipment items
 			if(b.type > 8) {return -1;}
 		}
-		var valueA=eval("a."+Helper.sortBy);
-		var valueB=eval("b."+Helper.sortBy);
+		var valueA = Helper.path(a, Helper.sortBy, 1);
+		var valueB = Helper.path(b, Helper.sortBy, 1);
 		if (typeof valueA==="string") {
 			valueA=parseInt(valueA.replace(/,/g,"").replace(/#/g,""),10);
 		}
@@ -3329,6 +3390,17 @@ var Helper = {
 		result = valueA-valueB;
 		if (!Helper.sortAsc) {result=-result;}
 		return result;
+	},
+
+	path: function(obj, path, def){
+		path = path.split('.');
+		var len = path.length;
+		for (var i = 0; i < len; i+=1) {
+			if (!obj || typeof obj !== 'object') {return def;}
+			obj = obj[path[i]];
+		}
+		if (obj === undefined) {return def;}
+		return obj;
 	},
 
 	questStatusSort: function(a,b) {
@@ -7819,7 +7891,7 @@ var Helper = {
 		refreshButton = document.getElementById("Helper:OnlinePlayersRefresh");
 		if (refreshButton) {
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
-
+		}
 		GM_addStyle(
 			'.HelperTableRow1 {background-color:#e7c473;font-size:small}\n' +
 			'.HelperTableRow1:hover {background-color:white}\n' +
@@ -7878,16 +7950,17 @@ var Helper = {
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {"page":newPage});
 		}
 		else {
-			Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
+			//~ Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
+			Helper.onlinePlayers.players = System.uniq(Helper.onlinePlayers.players, 'name');
 			System.setValueJSON("onlinePlayers", Helper.onlinePlayers);
 			Helper.sortOnlinePlayersTable();
-			Helper.generateOnlinePlayersTable();
+			//~ Helper.generateOnlinePlayersTable();
 		}
 	},
 
 	generateOnlinePlayersTable: function() {
 		if (!Helper.onlinePlayers) {return;}
-		Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
+		//~ Helper.onlinePlayers.players = Helper.onlinePlayers.players.removeDuplicates('name'); //remove duplicate entries.
 		var minLvl = GM_getValue("onlinePlayerMinLvl", 1);
 		var maxLvl = GM_getValue("onlinePlayerMaxLvl", 9999);
 		var output=document.getElementById("Helper:OnlinePlayersOutput");
@@ -8409,7 +8482,7 @@ var Helper = {
 								"'><span style='color:blue; font-size:x-small;' title='Quick buff functionality from HCS only does 16'>"+
 								"Buff " + modifierWord + " 16</span></a></nobr>";
 								var buffAllLink = System.findNode("//a[@id='buffAll" + aMember.id + modifierWord + "']");
-								buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+								buffAllLink.setAttribute("href",Layout.buffAllHref(shortList));
 								shortList = [];
 							}
 						}
@@ -8485,28 +8558,34 @@ var Helper = {
 		}
 	},
 
+	filterMercs: function(e) {return e.search('#000099') === -1;},
+
+	joinGroup: function(groupJoinURL, joinButton) {
+		GM_xmlhttpRequest({
+			method: 'GET',
+			url: System.server + groupJoinURL,
+			/*headers: {
+				"User-Agent": navigator.userAgent,
+				"Referer": document.location
+			},*/
+			onload: function() {
+				joinButton.style.display = "none";
+				joinButton.style.visibility = "hidden";
+			}
+		});
+	},
+
 	joinAllGroupsUnderSize: function() {
 		var joinButtons = System.findNodes("//img[contains(@src,'skin/icon_action_join.gif')]");
 		for (var i=0; i<joinButtons.length; i += 1) {
 			var joinButton = joinButtons[i];
 			var memberList = joinButton.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
 			var memberListArrayWithMercs = memberList.innerHTML.split(",");
-			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(function(e,i,a) {return e.search('#000099') == -1;});
+			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(Helper.filterMercs);
 			if (memberListArrayWithoutMercs.length < GM_getValue("maxGroupSizeToJoin")){
 				var groupID = /javascript:confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute("href"))[1];
 				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
-				GM_xmlhttpRequest({
-					method: 'GET',
-					url: System.server + groupJoinURL,
-					/*headers: {
-						"User-Agent": navigator.userAgent,
-						"Referer": document.location
-					},*/
-					onload: function(responseDetails) {
-						joinButton.style.display = "none";
-						joinButton.style.visibility = "hidden";
-					}
-				});
+				Helper.joinGroup(groupJoinURL, joinButton);
 			}
 		}
 		//refresh after a slight delay
@@ -9284,7 +9363,7 @@ var Helper = {
 		//~ if (System.browserVersion>=4 && navigator.userAgent.indexOf("Firefox")>0) {
 			//~ window.wrappedJSObject.GameData.doAction(-1);
 		//~ } else {
-			var gameData = unsafeWindow.GameData.doAction(-1);
+			unsafeWindow.GameData.doAction(-1);
 		//~ }
 	},
 
@@ -11562,7 +11641,7 @@ var Helper = {
 				}
 				titanTable.rows[0].cells[0].innerHTML += " <a style='color:blue;font-size:10px;'>all</a>";
 				var buffAllLink = titanTable.rows[0].cells[0].firstChild.nextSibling.nextSibling;
-				buffAllLink.setAttribute("href","javascript:openWindow('index.php?cmd=quickbuff&t=" + shortList + "', 'fsQuickBuff', 618, 1000, ',scrollbars')");
+				buffAllLink.setAttribute("href",Layout.buffAllHref(shortList));
 			}
 		}
 	},
@@ -13498,8 +13577,8 @@ var Helper = {
 	},
 
 	findBuffsParsePlayersForBuffs: function() {
-		//remove duplicates
-		Helper.onlinePlayers = Helper.onlinePlayers.removeDuplicates();
+		//remove duplicates TODO
+		//~ Helper.onlinePlayers = Helper.onlinePlayers.removeDuplicates();
 		var bufferProgress = document.getElementById("bufferProgress");
 		//now need to parse player pages for buff ...
 		document.getElementById("potentialBuffers").innerHTML = Helper.onlinePlayers.length;
@@ -13556,7 +13635,8 @@ var Helper = {
 				textLineArray.push(textLine);
 			}
 		}
-		textLineArray = textLineArray.removeDuplicates();
+		//~ textLineArray = textLineArray.removeDuplicates();
+		textLineArray = System.uniq(textLineArray);
 		//sustain
 		var sustainText = $(doc).find('td:has(a:contains("Sustain")):last').next().find('table.tipped').data("tipped");
 		var sustainLevel;
