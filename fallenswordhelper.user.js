@@ -486,16 +486,18 @@ var System = {
 		//~ return s;
 	//~ },
 
-	saveValueForm: function(oForm, name) {
-		var formElement = System.findNode('//input[@name="' + name + '"]', oForm);
+	saveValueForm: function(name) {
+		var formElement = System.findNode('//input[@name="' + name + '"]',
+			this);
 		if (formElement.getAttribute('type') === 'checkbox') {
 			GM_setValue(name, formElement.checked);
 		} else if (formElement.getAttribute('type') === 'radio') {
-			var radioElements = System.findNodes('//input[@name="' + name + '"]', 0, oForm);
+			var radioElements = System.findNodes('//input[@name="' + name +
+				'"]', 0, this);
 			for (var i=0; i<radioElements.length; i += 1) {
-				var radioElement = radioElements[i];
-				if (radioElement.checked) {
-					GM_setValue(name, radioElement.value);
+				//~ var radioElement = radioElements[i];
+				if (radioElements[i].checked) {
+					GM_setValue(name, radioElements[i].value);
 				}
 			}
 		} else {
@@ -1169,7 +1171,109 @@ var Data = {
 				"nickname":"FI 1k","displayOnAH":true}],
 
 		memberlist: ''
-	}
+	},
+
+	saveBoxes: [
+		'navigateToLogAfterMsg',
+		'gameHelpLink',
+		'guildSelf',
+		'guildFrnd',
+		'guildPast',
+		'guildEnmy',
+		'showAdmin',
+		'ajaxifyRankControls',
+		'detailedConflictInfo',
+		'disableItemColoring',
+		'enableLogColoring',
+		'enableChatParsing',
+		'enableCreatureColoring',
+		'hideNonPlayerGuildLogMessages',
+		'buyBuffsGreeting',
+		'renderSelfBio',
+		'renderOtherBios',
+		'defaultMessageSound',
+		'showSpeakerOnWorld',
+		'playNewMessageSound',
+		'highlightPlayersNearMyLvl',
+		'highlightGvGPlayersNearMyLvl',
+		'showCombatLog',
+		'showMonsterLog',
+		'showCreatureInfo',
+		'keepLogs',
+		'enableGuildInfoWidgets',
+		'enableOnlineAlliesWidgets',
+		'hideGuildInfoMessage',
+		'hideGuildInfoBuff',
+		'hideGuildInfoSecureTrade',
+		'hideGuildInfoTrade',
+		'quickKill',
+		'huntingBuffs',
+		'huntingBuffsName',
+		'huntingBuffs2',
+		'huntingBuffs2Name',
+		'huntingBuffs3',
+		'huntingBuffs3Name',
+		'showHuntingBuffs',
+		'moveGuildList',
+		'moveOnlineAlliesList',
+		'moveFSBox',
+		'hideKrulPortal',
+		'hideQuests',
+		'hideQuestNames',
+		'checkForQuestsInWorld',
+		'hideRecipes',
+		'hideRecipeNames',
+		'footprintsColor',
+		'doNotKillList',
+		'enableBioCompressor',
+		'maxCompressedCharacters',
+		'maxCompressedLines',
+		'sendGoldonWorld',
+		'goldRecipient',
+		'goldAmount',
+		'keepBuffLog',
+		'showQuickSendLinks',
+		'showQuickDropLinks',
+		'sendClasses',
+		'itemRecipient',
+		'currentGoldSentTotal',
+		'hideArenaPrizes',
+		'autoSortArenaList',
+		'enableAllyOnlineList',
+		'enableEnemyOnlineList',
+		'allyEnemyOnlineRefreshTime',
+		'quickLinksTopPx',
+		'quickLinksLeftPx',
+		'enableActiveBountyList',
+		'bountyListRefreshTime',
+		'enableWantedList',
+		'wantedNames',
+		'fsboxlog',
+		'huntingMode',
+		'enableAttackHelper',
+		'hideRelicOffline',
+		'enterForSendMessage',
+		'storeLastQuestPage',
+		'addAttackLinkToLog',
+		'showStatBonusTotal',
+		'newGuildLogHistoryPages',
+		'useNewGuildLog',
+		'enhanceChatTextEntry',
+		'enableMaxGroupSizeToJoin',
+		'maxGroupSizeToJoin',
+		'enableTempleAlert',
+		'autoFillMinBidPrice',
+		'showPvPSummaryInLog',
+		'enableQuickDrink',
+		'enhanceOnlineDots',
+		'hideBuffSelected',
+		'enableFastWalk',
+		'showFastWalkIconOnWorld',
+		'hideHelperMenu',
+		'keepHelperMenuOnScreen',
+		'showNextQuestSteps',
+		'disableComposingPrompts'
+	]
 };
 
 var Layout = {
@@ -2863,7 +2967,7 @@ var Helper = {
 		var armorNumber;
 		var damageNumber;
 		var hpNumber;
-		var allItems;
+		//~ var allItems;
 		var LDProcessed;
 		var LDProcessedNumber;
 		var storedConstitutionLevel;
@@ -2923,7 +3027,7 @@ var Helper = {
 		}
 		else {
 			//get lead defender (LD) buffs here for use later ... 
-			allItems = doc.getElementsByTagName('IMG');
+			//~ allItems = doc.getElementsByTagName('IMG');
 			var constitutionLevel = Helper.getBuffLevel(doc, 'Constitution');
 			var flinchLevel = Helper.getBuffLevel(doc, 'Flinch');
 			var nightmareVisageLevel = Helper.getBuffLevel(doc, 'Nightmare Visage');
@@ -3644,48 +3748,87 @@ var Helper = {
 		return result;
 	},
 
-	checkBuffs: function() {
+	oldRemoveBuffs: function () {
 		var buffName;
+		//code to remove buffs but stay on the same screen
+		var currentBuffs = System.findNodes('//a[contains(@href,"index.php?' +
+			'cmd=profile&subcmd=removeskill&skill_id=")]');
+		var buffHash={};
+		if (!currentBuffs) {return;}
+		for (var i=0;i<currentBuffs.length;i += 1) {
+			var currentBuff = currentBuffs[i];
+			var buffHref = currentBuff.getAttribute('href');
+			var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
+				.exec(currentBuff.getAttribute('onclick'));
+			if (buffTest) {
+				buffName = buffTest[1];
+			} else {
+				buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/
+					.exec(currentBuff.getAttribute('onclick'));
+				if (buffTest) { buffName = buffTest[1];
+				} else {console.log('Error getting buff');}
+			}
+			buffHash[buffName]=true;
+			var imageHTML = currentBuff.innerHTML;
+			var buffCell = currentBuff.parentNode;
+			var buffHTML = buffCell.innerHTML;
+			var lastPart = buffHTML
+				.substring(buffHTML.indexOf('</a>')+4, buffHTML.length);
+			var newCellContents = '<span id="Helper:removeSkill' + i + 
+				'" style="cursor:pointer;" buffName="' + buffName + 
+				'" buffHref="' + buffHref + '">' + imageHTML +
+				'</span>' + lastPart;
+			buffCell.innerHTML = newCellContents;
+			buffCell.firstChild
+				.addEventListener('click', Helper.removeSkill, true);
+		}
+		return buffHash;
+	},
+
+	checkBuffs: function() {
+		//~ var buffName;
 		var onmouseover;
-		var i;
+		//~ var i;
 		var impsRemaining;
 		var textToTest;
 		var impsRemainingRE;
 		var counterAttackLevel;
 		var doublerLevel;
-		//code to remove buffs but stay on the same screen
-		var currentBuffs = System.findNodes('//a[contains(@href,"index.php?' +
-			'cmd=profile&subcmd=removeskill&skill_id=")]');
-		var buffHash={};
-		if (currentBuffs) {
-			for (i=0;i<currentBuffs.length;i += 1) {
-				var currentBuff = currentBuffs[i];
-				var buffHref = currentBuff.getAttribute('href');
-				var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
-					.exec(currentBuff.getAttribute('onclick'));
-				if (buffTest) {
-					buffName = buffTest[1];
-				} else {
-					buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/
-						.exec(currentBuff.getAttribute('onclick'));
-					if (buffTest) { buffName = buffTest[1];
-					} else {console.log('Error getting buff');}
-				}
-				buffHash[buffName]=true;
-				var imageHTML = currentBuff.innerHTML;
-				var buffCell = currentBuff.parentNode;
-				var buffHTML = buffCell.innerHTML;
-				var lastPart = buffHTML
-					.substring(buffHTML.indexOf('</a>')+4, buffHTML.length);
-				var newCellContents = '<span id="Helper:removeSkill' + i + 
-					'" style="cursor:pointer;" buffName="' + buffName + 
-					'" buffHref="' + buffHref + '">' + imageHTML +
-					'</span>' + lastPart;
-				buffCell.innerHTML = newCellContents;
-				buffCell.firstChild
-					.addEventListener('click', Helper.removeSkill, true);
-			}
-		}
+		//~ //code to remove buffs but stay on the same screen
+		//~ var currentBuffs = System.findNodes('//a[contains(@href,"index.php?' +
+			//~ 'cmd=profile&subcmd=removeskill&skill_id=")]');
+		//~ var buffHash={};
+		//~ if (currentBuffs) {
+			//~ for (i=0;i<currentBuffs.length;i += 1) {
+				//~ var currentBuff = currentBuffs[i];
+				//~ var buffHref = currentBuff.getAttribute('href');
+				//~ var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
+					//~ .exec(currentBuff.getAttribute('onclick'));
+				//~ if (buffTest) {
+					//~ buffName = buffTest[1];
+				//~ } else {
+					//~ buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/
+						//~ .exec(currentBuff.getAttribute('onclick'));
+					//~ if (buffTest) { buffName = buffTest[1];
+					//~ } else {console.log('Error getting buff');}
+				//~ }
+				//~ buffHash[buffName]=true;
+				//~ var imageHTML = currentBuff.innerHTML;
+				//~ var buffCell = currentBuff.parentNode;
+				//~ var buffHTML = buffCell.innerHTML;
+				//~ var lastPart = buffHTML
+					//~ .substring(buffHTML.indexOf('</a>')+4, buffHTML.length);
+				//~ var newCellContents = '<span id="Helper:removeSkill' + i + 
+					//~ '" style="cursor:pointer;" buffName="' + buffName + 
+					//~ '" buffHref="' + buffHref + '">' + imageHTML +
+					//~ '</span>' + lastPart;
+				//~ buffCell.innerHTML = newCellContents;
+				//~ buffCell.firstChild
+					//~ .addEventListener('click', Helper.removeSkill, true);
+			//~ }
+		//~ }
+
+		var buffHash = Helper.oldRemoveBuffs;
 
 		//extra world screen text
 		var replacementText = '<td background="' + System.imageServer +
@@ -3817,7 +3960,7 @@ var Helper = {
 			}
 			var buffAry=buffs.split(',');
 			var missingBuffs = [];
-			for (i=0;i<buffAry.length;i += 1) {
+			for (var i=0;i<buffAry.length;i += 1) {
 				if (!buffHash[buffAry[i].trim()]) {
 					missingBuffs.push(buffAry[i]);
 				}
@@ -4127,24 +4270,43 @@ var Helper = {
 			//deposit?
 			if(System.getValue('sendGoldonWorld')){
 				$('#statbar-gold-tooltip-general').append(
-						'<dt class="stat-gold-sendTo">Send To:</dt><dd id="HelperSendTo">' + System.getValue('goldRecipient') + '</dd>' + 
-						'<dt class="stat-gold-sendAmt">Amount:</dt><dd id="HelperSendAmt">' + System.getValue('goldAmount').replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
-						'<dt class="stat-gold-sendTo">Send?</dt><dd><input id="HelperSendGold" value="Send!" class="custombutton" type="submit"><input type="hidden" id="xc" value="' + System.getValue('goldConfirm') + '"</dd>' + 
-						'<dt class="stat-gold-sendTotal">Total Sent:</dt><dd id="HelperSendTotal">' + System.getValue('currentGoldSentTotal').toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>');
+					'<dt class="stat-gold-sendTo">Send To:</dt><dd id="' +
+					'HelperSendTo">' + System.getValue('goldRecipient') +
+					'</dd>' + 
+					'<dt class="stat-gold-sendAmt">Amount:</dt><dd id="' +
+					'HelperSendAmt">' + System.getValue('goldAmount')
+						.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
+					'<dt class="stat-gold-sendTo">Send?</dt><dd><input id="' +
+					'HelperSendGold" value="Send!" class="custombutton" ' +
+					'type="submit"><input type="hidden" id="xc" value="' +
+					System.getValue('goldConfirm') + '"</dd>' + 
+					'<dt class="stat-gold-sendTotal">Total Sent:</dt><dd ' +
+					'id="HelperSendTotal">' +
+					System.getValue('currentGoldSentTotal').toString()
+						.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>');
 				$('input#HelperSendGold').click(function(){
 					var sendTo = $('#HelperSendTo').html();
-					var sendAmt = $('#HelperSendAmt').html().replace(/[^\d]/g,'');
+					var sendAmt = $('#HelperSendAmt').html()
+						.replace(/[^\d]/g,'');
 					var xcNum = $('#xc').val();
-					var sendHref = System.server + 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + sendTo +'&gold_amount='+ sendAmt;
+					var sendHref = System.server + 'index.php?cmd=trade&' +
+						'subcmd=sendgold&xc=' + xcNum + '&target_username=' +
+						sendTo +'&gold_amount='+ sendAmt;
 					$.ajax({
 						url: sendHref,
 						success: function( data ) {
 							//alert($(data).find();
 							var info = Layout.infoBox(data);
-							if(info === 'You successfully sent gold!' || info === ''){
+							if (info === 'You successfully sent gold!' ||
+								info === '') {
 								//currentGoldSentTotal += System.intValue(callback.amount);
 								//info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
-								GM_setValue('currentGoldSentTotal', parseInt(System.getValue('currentGoldSentTotal'), 10)+parseInt(System.getValue('goldAmount'), 10));
+								GM_setValue('currentGoldSentTotal',
+									parseInt(
+										System.getValue('currentGoldSentTotal'),
+										10) +
+									parseInt(
+										System.getValue('goldAmount'), 10));
 								unsafeWindow.GameData.fetch(387);
 							}
 						}
@@ -4157,32 +4319,47 @@ var Helper = {
 			$.subscribe('ready.view-creature', function() {
 				$('div#creatureEvaluator').html('');
 				$('div#creatureEvaluatorGroup').html('');
-				System.xmlhttp('index.php?cmd=profile', Helper.getCreaturePlayerData,
-					{'groupExists': false, 'groupAttackValue': 0, 'groupDefenseValue': 0,
-					'groupArmorValue': 0, 'groupDamageValue': 0, 'groupHPValue': 0});
-				System.xmlhttp('index.php?cmd=guild&subcmd=groups', Helper.checkIfGroupExists);
+				System.xmlhttp('index.php?cmd=profile',
+					Helper.getCreaturePlayerData,
+					{	'groupExists': false,
+						'groupAttackValue': 0,
+						'groupDefenseValue': 0,
+						'groupArmorValue': 0,
+						'groupDamageValue': 0,
+						'groupHPValue': 0
+					}
+				);
+				System.xmlhttp('index.php?cmd=guild&subcmd=groups',
+					Helper.checkIfGroupExists);
 				
 				$('div#addRemoveCreatureToDoNotKillList').html('');
 //console.log($('#dialog-viewcreature').find('h2.name').text());
 				if ($('div#addRemoveCreatureToDoNotKillList').length === 0) {
-					var doNotKillElement = '<div id="addRemoveCreatureToDoNotKillList"' +
-					'" class="description" style="cursor:pointer;text-decoration:underline;color:blue;"></div>';
-					$(doNotKillElement).insertAfter($('#dialog-viewcreature').find('p.description'));
+					var doNotKillElement = '<div id="addRemoveCreatureToDo' +
+						'NotKillList"" class="description" style="cursor:' +
+						'pointer;text-decoration:underline;color:blue;"></div>';
+					$(doNotKillElement).insertAfter($('#dialog-viewcreature')
+						.find('p.description'));
 				}
-				var creatureName = $('#dialog-viewcreature').find('h2.name').text();
-				$('div#addRemoveCreatureToDoNotKillList').attr('creatureName',creatureName);
+				var creatureName = $('#dialog-viewcreature').find('h2.name')
+					.text();
+				$('div#addRemoveCreatureToDoNotKillList')
+					.attr('creatureName',creatureName);
 				var extraText = 'Add to the do not kill list';
 				if (Helper.doNotKillList.indexOf(creatureName) !== -1) {
 					extraText = 'Remove from do not kill list';}
 				$('div#addRemoveCreatureToDoNotKillList').html(extraText);
-				document.getElementById('addRemoveCreatureToDoNotKillList').addEventListener('click', Helper.addRemoveCreatureToDoNotKillList, true);
+				document.getElementById('addRemoveCreatureToDoNotKillList')
+					.addEventListener('click',
+						Helper.addRemoveCreatureToDoNotKillList, true);
 			});
 
 			// add do-not-kill list functionality
 			$.subscribe('after-update.actionlist', function() {
 				// color the critters in the do no kill list blue
 				$('ul#actionList div.header').each(function() {
-					if (Helper.doNotKillList.indexOf($(this).find('a.icon').data('name')) !== -1) {
+					if (Helper.doNotKillList.indexOf($(this).find('a.icon')
+						.data('name')) !== -1) {
 						$(this).css('color','blue');
 					}
 				});
@@ -4190,23 +4367,24 @@ var Helper = {
 				var gameData = unsafeWindow.GameData;
 				var hcs = unsafeWindow.HCS;
 				var oldDoAction = gameData.doAction;
-				gameData.doAction = function(actionCode, fetchFlags, data){
-					if(actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT){
+				gameData.doAction = function(actionCode, fetchFlags, data) {
+					if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
 						// Do custom stuff e.g. do not kill list
-						var creatureIcon = $('ul#actionList div.header').eq(data.passback).find('a.icon');
-						if (Helper.doNotKillList.indexOf(creatureIcon.data('name')) !== -1) {
+						var creatureIcon = $('ul#actionList div.header')
+							.eq(data.passback).find('a.icon');
+						if (Helper.doNotKillList.indexOf(
+								creatureIcon.data('name')) !== -1) {
 							creatureIcon.removeClass('loading');
 							return;
 						}
 					}
-				   
 					// Call standard action
 					oldDoAction(actionCode, fetchFlags, data);
 				}; 
 			});
 
-			$.subscribe(unsafeWindow.DATA_EVENTS.PLAYER_BUFFS.ANY, function(e, data)
-			{
+			$.subscribe(unsafeWindow.DATA_EVENTS.PLAYER_BUFFS.ANY,
+				function(e, data) {
 				// check shield imp is still active
 				var shieldImpVal = 0;
 				var ddVal=0;
@@ -4214,14 +4392,14 @@ var Helper = {
 				for(var i=0; i<l; i += 1)
 				{
 					var buff = data.b[i];
-					if(buff.id === 55)
+					if (buff.id === 55)
 					{
 						shieldImpVal = buff.stack;
-					}else if(buff.id === 50)
+					} else if(buff.id === 50)
 					{
 						ddVal = buff.level;
 					}
-					if(ddVal > 0 && shieldImpVal > 0){
+					if (ddVal > 0 && shieldImpVal > 0) {
 						break;
 					}
 
@@ -4251,56 +4429,52 @@ var Helper = {
 			$.subscribe('2-success.action-response', function(e, data){
 				var l;
 				var i;
-				if (Helper.keepLogs) {
-					if(data.response.response !== 0) // If bad response do nothing.
-					{
-						return;
-					}
-					var combatData = {};
-					combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
-					//delete some values that are not needed to trim down size of log.
-					delete combatData.combat.attacker.img_url;
-					delete combatData.combat.defender.img_url;
-					delete combatData.combat.is_conflict;
-					delete combatData.combat.is_bounty;
-					delete combatData.combat.pvp_rating_change;
-					delete combatData.combat.pvp_prestige_gain;
-					if(combatData.combat.inventory_id){
-						combatData.combat.drop = combatData.combat.item.id;
-					}
-					delete combatData.combat.inventory_id;
-					delete combatData.combat.item;
-
-					combatData.player={};
-					combatData.player.buffs={};
-					combatData.player.enhancements={};
-					l = data.player.buffs.length;
-					for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
-					{//54 = ca, 26 = doubler
-						var buff = data.player.buffs[i];
-						if(buff.id === 54 || buff.id === 26)
-						{
-							combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
-						}
-					}
-					var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-					if (data.player.enhancements)
-					{
-						l = data.player.enhancements.length;
-						for(i=0; i<l; i += 1) //loop through enhancements
-						{//54 = ca, 26 = doubler
-							var enh = data.player.enhancements[i];
-							if (notSave.indexOf('|'+enh.name+'|')===-1){
-								combatData.player.enhancements[enh.name]=enh.value;
-							}
-						}
-					}
-					//combatData.player.enhancements = data.player.enhancements;
-					//combatData.player.buffs = data.player.buffs;
-					var now=new Date();
-					combatData.time=System.formatDateTime(now);
-					Helper.appendSavedLog(',' + JSON.stringify(combatData));
+				// If bad response do nothing.
+				if (!Helper.keepLogs || data.response.response !== 0) {return;}
+				var combatData = {};
+				combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
+				//delete some values that are not needed to trim down size of log.
+				delete combatData.combat.attacker.img_url;
+				delete combatData.combat.defender.img_url;
+				delete combatData.combat.is_conflict;
+				delete combatData.combat.is_bounty;
+				delete combatData.combat.pvp_rating_change;
+				delete combatData.combat.pvp_prestige_gain;
+				if (combatData.combat.inventory_id) {
+					combatData.combat.drop = combatData.combat.item.id;
 				}
+				delete combatData.combat.inventory_id;
+				delete combatData.combat.item;
+
+				combatData.player={};
+				combatData.player.buffs={};
+				combatData.player.enhancements={};
+				l = data.player.buffs.length;
+				for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
+				{//54 = ca, 26 = doubler
+					var buff = data.player.buffs[i];
+					if(buff.id === 54 || buff.id === 26)
+					{
+						combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
+					}
+				}
+				var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
+				if (data.player.enhancements)
+				{
+					l = data.player.enhancements.length;
+					for(i=0; i<l; i += 1) //loop through enhancements
+					{//54 = ca, 26 = doubler
+						var enh = data.player.enhancements[i];
+						if (notSave.indexOf('|'+enh.name+'|')===-1){
+							combatData.player.enhancements[enh.name]=enh.value;
+						}
+					}
+				}
+				//combatData.player.enhancements = data.player.enhancements;
+				//combatData.player.buffs = data.player.buffs;
+				var now = new Date();
+				combatData.time=System.formatDateTime(now);
+				Helper.appendSavedLog(',' + JSON.stringify(combatData));
 			});
 			//on world
 
@@ -4321,182 +4495,185 @@ var Helper = {
 
 		}else{
 			//not new map.
+			Helper.injectOldMap();
+		}
+	},
 
-			try {
-				var curTile = System.findNode('//img[contains(@title, "You are here")]/ancestor::td[@width="40" and @height="40"]').getAttribute('background');
-				if (System.getValue('currentTile') !== curTile) {
-					GM_setValue('currentTile', curTile);
+	injectOldMap: function() {
+		try {
+			var curTile = System.findNode('//img[contains(@title, "You are here")]/ancestor::td[@width="40" and @height="40"]').getAttribute('background');
+			if (System.getValue('currentTile') !== curTile) {
+				GM_setValue('currentTile', curTile);
+			}
+		} catch (err) {
+			//just eat it and move on
+		}
+		var currentLocation = $('h3#world-realm-name');
+		if (currentLocation.length > 0) {
+			var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text());
+			Helper.xLocation = parseInt(locationRE[1],10);
+			Helper.yLocation = parseInt(locationRE[2],10);
+		}
+
+		Helper.mapThis();
+		Helper.showMap(false);
+
+		var buttonRow = System.findNode('//tr[td/a/img[@title="Open Realm Map"]]');
+
+		if (buttonRow && System.getValue('sendGoldonWorld')){
+			var currentGoldSentTotal = System.addCommas(System.getValue('currentGoldSentTotal'));
+			var recipient_text = 'Send ' + System.getValue('goldAmount') + ' gold to ' + System.getValue('goldRecipient') +
+				'. Current gold sent total is ' + currentGoldSentTotal;
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
+				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
+		}
+
+		if (buttonRow && !System.getValue('hideKrulPortal')) {
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
+				'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
+		}
+
+		var footprints = System.getValue('footprints');
+
+		if (buttonRow) {
+			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
+				'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
+				'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
+			document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
+		}
+
+		if (buttonRow && System.getValue('sendGoldonWorld')){
+			//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+			document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
+		}
+		if (buttonRow && !System.getValue('hideKrulPortal')) {
+			document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
+		}
+
+		// One may ask why the separation of creating the button and the event handling code.
+		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
+		// a region, all attached events are destroyed (because the original elements are also destroyed)
+		
+		// PH 20150110 Only in Chrome. FF is apparently different!
+		// It's important because we lose the mouseover events of the built-in buttons.
+
+		Helper.checkBuffs();
+		Helper.prepareCheckMonster();
+		Helper.prepareCombatLog();
+		var realmId;
+		var mapNameText;
+		var i;
+		var mapName = System.findNode('//h3[@id="world-realm-name"]');
+		if ($('h3#world-realm-name').data('realm')) {
+			realmId = $('h3#world-realm-name').data('realm').id.trim();
+			mapNameText = $('h3#world-realm-name').data('realm').name.trim();
+		}
+		//Checking if there are quests on current map - Already done by HCS in new map
+		if (System.getValue('checkForQuestsInWorld') === true) {
+			if (mapName && mapName.textContent !== null) {
+				if (!mapNameText) {
+					mapNameText = mapName.textContent.trim();}
+				if (System.getValue('lastWorld') !== mapNameText ||
+					System.getValue('questsNotStarted') === true ||
+					System.getValue('questsNotComplete') === true) {
+					GM_setValue('lastWorld', mapNameText);
+					var insertToHere = System.findNode('//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td');
+					System.xmlhttp('index.php?cmd=questbook&mode=2&letter=*', Helper.checkForNotStartedQuests, {'insertHere' : insertToHere});
+					System.xmlhttp('index.php?cmd=questbook&mode=0&letter=*', Helper.checkForNotCompletedQuests,{'insertHere' : insertToHere});
 				}
-			} catch (err) {
-				//just eat it and move on
 			}
-			var currentLocation = $('h3#world-realm-name');
-			if (currentLocation.length > 0) {
-				var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text());
-				Helper.xLocation = parseInt(locationRE[1],10);
-				Helper.yLocation = parseInt(locationRE[2],10);
-			}
+		}
+		//quest tracker - will be added by HCS in new Map
+		var questBeingTracked = System.getValue('questBeingTracked').split(';');
+		if (questBeingTracked.length > 0 &&
+			questBeingTracked[0].trim().length > 0) {
+			var injectHere = System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
+			if (!injectHere) {return;}
+			var replacementText = '<td background="' + System.imageServer + '/skin/realm_right_bg.jpg">';
+			replacementText += '<table width="280" cellpadding="1" style="margin-left:28px; margin-right:28px; ' +
+				'font-size:medium; border-spacing: 1px; border-collapse: collapse;">';
+			replacementText += '<tr><td colspan="2" height="10"></td>';
+			for (i = 0; i < questBeingTracked.length; i += 1) {
 
-			Helper.mapThis();
-			Helper.showMap(false);
-
-			var buttonRow = System.findNode('//tr[td/a/img[@title="Open Realm Map"]]');
-
-			if (buttonRow && System.getValue('sendGoldonWorld')){
-				var currentGoldSentTotal = System.addCommas(System.getValue('currentGoldSentTotal'));
-				var recipient_text = 'Send ' + System.getValue('goldAmount') + ' gold to ' + System.getValue('goldRecipient') +
-					'. Current gold sent total is ' + currentGoldSentTotal;
-				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-					'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + System.imageServer +
-					'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
-			}
-
-			if (buttonRow && !System.getValue('hideKrulPortal')) {
-				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-					'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + System.imageServer +
-					'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
-			}
-
-			var footprints = System.getValue('footprints');
-
-			if (buttonRow) {
-				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-					'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + System.imageServer +
-					'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
-				document.getElementById('Helper:ToggleFootprints').addEventListener('click', Helper.toggleFootprints, true);
-			}
-
-			if (buttonRow && System.getValue('sendGoldonWorld')){
-				//document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
-				document.getElementById('Helper:SendGold').addEventListener('click', Helper.sendGoldToPlayer, true);
-			}
-			if (buttonRow && !System.getValue('hideKrulPortal')) {
-				document.getElementById('Helper:PortalToStart').addEventListener('click', Helper.portalToStartArea, true);
-			}
-
-			// One may ask why the separation of creating the button and the event handling code.
-			// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
-			// a region, all attached events are destroyed (because the original elements are also destroyed)
-			
-			// PH 20150110 Only in Chrome. FF is apparently different!
-			// It's important because we lose the mouseover events of the built-in buttons.
-
-			Helper.checkBuffs();
-			Helper.prepareCheckMonster();
-			Helper.prepareCombatLog();
-			var realmId;
-			var mapNameText;
-			var i;
-			var mapName = System.findNode('//h3[@id="world-realm-name"]');
-			if ($('h3#world-realm-name').data('realm')) {
-				realmId = $('h3#world-realm-name').data('realm').id.trim();
-				mapNameText = $('h3#world-realm-name').data('realm').name.trim();
-			}
-			//Checking if there are quests on current map - Already done by HCS in new map
-			if (System.getValue('checkForQuestsInWorld') === true) {
-				if (mapName && mapName.textContent !== null) {
-					if (!mapNameText) {
-						mapNameText = mapName.textContent.trim();}
-					if (System.getValue('lastWorld') !== mapNameText ||
-						System.getValue('questsNotStarted') === true ||
-						System.getValue('questsNotComplete') === true) {
-						GM_setValue('lastWorld', mapNameText);
-						var insertToHere = System.findNode('//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td');
-						System.xmlhttp('index.php?cmd=questbook&mode=2&letter=*', Helper.checkForNotStartedQuests, {'insertHere' : insertToHere});
-						System.xmlhttp('index.php?cmd=questbook&mode=0&letter=*', Helper.checkForNotCompletedQuests,{'insertHere' : insertToHere});
-					}
-				}
-			}
-			//quest tracker - will be added by HCS in new Map
-			var questBeingTracked = System.getValue('questBeingTracked').split(';');
-			if (questBeingTracked.length > 0 &&
-				questBeingTracked[0].trim().length > 0) {
-				var injectHere = System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
-				if (!injectHere) {return;}
-				var replacementText = '<td background="' + System.imageServer + '/skin/realm_right_bg.jpg">';
-				replacementText += '<table width="280" cellpadding="1" style="margin-left:28px; margin-right:28px; ' +
-					'font-size:medium; border-spacing: 1px; border-collapse: collapse;">';
-				replacementText += '<tr><td colspan="2" height="10"></td>';
-				for (i = 0; i < questBeingTracked.length; i += 1) {
-
-					replacementText += '<tr><td style="font-size:small; color:black"><a id="qiLink' + i + '" href=' + questBeingTracked[i] + '></a>&nbsp;';
-					replacementText += '<input id="dontTrackThisQuest' + i + '" data="' + questBeingTracked[i] + '" type="button" value="Stop Tracking" title="Stops tracking quest progress." class="custombutton"><br>';
-					replacementText += '<span findme="questinfo' + i + '"></span></td></tr>';
-					if (i !== questBeingTracked.length - 1) {
-						replacementText += '<tr><td height="10" colspan="2"/></tr>' +
-						'<tr><td height="10" colspan="2"/></tr>';
-					}
-				}
-
-				replacementText += '</table>';
-				replacementText += '</td>';
-
-				var newSpan = document.createElement('SPAN');
-				newSpan.innerHTML=replacementText;
-				injectHere.appendChild(newSpan);
-
-				for (i = 0; i < questBeingTracked.length; i += 1) {
-					System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {'data' : i});
+				replacementText += '<tr><td style="font-size:small; color:black"><a id="qiLink' + i + '" href=' + questBeingTracked[i] + '></a>&nbsp;';
+				replacementText += '<input id="dontTrackThisQuest' + i + '" data="' + questBeingTracked[i] + '" type="button" value="Stop Tracking" title="Stops tracking quest progress." class="custombutton"><br>';
+				replacementText += '<span findme="questinfo' + i + '"></span></td></tr>';
+				if (i !== questBeingTracked.length - 1) {
+					replacementText += '<tr><td height="10" colspan="2"/></tr>' +
+					'<tr><td height="10" colspan="2"/></tr>';
 				}
 			}
 
-			var imgSource;
-			var altText;
-			if (mapName && mapNameText) {
-				mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
-					'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServer + '/temple/1.gif"/></a>';
-				mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
-					'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
+			replacementText += '</table>';
+			replacementText += '</td>';
 
-				var huntingMode = System.getValue('huntingMode');
-				imgSource = huntingMode === true ? Data.huntingOnImage() : Data.huntingOffImage();
-				altText = huntingMode === true ? 'Hunting mode is ON' : 'Hunting mode is OFF';
-				mapName.innerHTML += ' <a href=# id="Helper:ToggleHuntingMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
+			var newSpan = document.createElement('SPAN');
+			newSpan.innerHTML=replacementText;
+			injectHere.appendChild(newSpan);
 
-				if (System.getValue('showSpeakerOnWorld')) {
-					if (System.getValue('playNewMessageSound'))
-					{
-						mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/></a>';
-					} else {
-						mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/></a>';
-					}
-					document.getElementById('toggleSoundLink').addEventListener('click', Helper.toggleSound, true);
+			for (i = 0; i < questBeingTracked.length; i += 1) {
+				System.xmlhttp(questBeingTracked[i], Helper.getQuestInfo, {'data' : i});
+			}
+		}
 
+		var imgSource;
+		var altText;
+		if (mapName && mapNameText) {
+			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
+				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ System.imageServer + '/temple/1.gif"/></a>';
+			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
+				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
+
+			var huntingMode = System.getValue('huntingMode');
+			imgSource = huntingMode === true ? Data.huntingOnImage() : Data.huntingOffImage();
+			altText = huntingMode === true ? 'Hunting mode is ON' : 'Hunting mode is OFF';
+			mapName.innerHTML += ' <a href=# id="Helper:ToggleHuntingMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
+
+			if (System.getValue('showSpeakerOnWorld')) {
+				if (System.getValue('playNewMessageSound'))
+				{
+					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn Off Sound when you have a new log message" width=10 height=10 src="' + Data.soundMuteImage() + '"/></a>';
+				} else {
+					mapName.innerHTML += '<a href="#" id="toggleSoundLink"><img border=0 title="Turn On Sound when you have a new log message" width=10 height=10 src="' + Data.soundImage() + '"/></a>';
 				}
-				if (System.getValue('showFastWalkIconOnWorld')) {
-					var enableFastWalk = System.getValue('enableFastWalk');
-					imgSource = enableFastWalk === true ? Data.runIcon() : Data.stopIcon();
-					altText = enableFastWalk === true ? 'FastWalk mode is ON' : 'FastWalk mode is OFF';
-					mapName.innerHTML += ' <a href=# id="Helper:ToggleFastWalkMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
-					document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
-						function() {
-							GM_setValue('enableFastWalk',!System.getValue('enableFastWalk')); window.location.reload();
-						},true);
-				}
-				document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
+				document.getElementById('toggleSoundLink').addEventListener('click', Helper.toggleSound, true);
+
+			}
+			if (System.getValue('showFastWalkIconOnWorld')) {
+				var enableFastWalk = System.getValue('enableFastWalk');
+				imgSource = enableFastWalk === true ? Data.runIcon() : Data.stopIcon();
+				altText = enableFastWalk === true ? 'FastWalk mode is ON' : 'FastWalk mode is OFF';
+				mapName.innerHTML += ' <a href=# id="Helper:ToggleFastWalkMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
+				document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
 					function() {
-						GM_setValue('huntingMode',!System.getValue('huntingMode')); window.location.reload();
+						GM_setValue('enableFastWalk',!System.getValue('enableFastWalk')); window.location.reload();
 					},true);
-
 			}
-			if (System.getValue('quickKill')) {
-				var doNotKillList = System.getValue('doNotKillList');
-				var doNotKillListAry = doNotKillList.split(',');
-				if (doNotKillListAry.length > 0) {
-					for (i=1; i<9; i += 1) {
-						var monster = System.findNode('//a[@id="aLink' + i + '"]');
-						if (monster) {
-							var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
-							for (var j=0; j<doNotKillListAry.length; j += 1) {
-								var doNotKillName = doNotKillListAry[j].trim();
-								if (monsterName === doNotKillName){
-									var monsterNameCell = monster.parentNode.parentNode;
-									monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
-									break;
-								}
+			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
+				function() {
+					GM_setValue('huntingMode',!System.getValue('huntingMode')); window.location.reload();
+				},true);
+
+		}
+		if (System.getValue('quickKill')) {
+			var doNotKillList = System.getValue('doNotKillList');
+			var doNotKillListAry = doNotKillList.split(',');
+			if (doNotKillListAry.length > 0) {
+				for (i=1; i<9; i += 1) {
+					var monster = System.findNode('//a[@id="aLink' + i + '"]');
+					if (monster) {
+						var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
+						for (var j=0; j<doNotKillListAry.length; j += 1) {
+							var doNotKillName = doNotKillListAry[j].trim();
+							if (monsterName === doNotKillName){
+								var monsterNameCell = monster.parentNode.parentNode;
+								monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
+								break;
 							}
-						} else { break; }
-					}
+						}
+					} else { break; }
 				}
 			}
 		}
@@ -11138,111 +11315,114 @@ console.log('creature=', creature);
 		var enabledHuntingModeElement = System.findNode('//select[@name="enabledHuntingMode"]', oForm);
 		var enabledHuntingMode = enabledHuntingModeElement.value;
 		GM_setValue('enabledHuntingMode', enabledHuntingMode);
-		System.saveValueForm(oForm, 'navigateToLogAfterMsg');
-		System.saveValueForm(oForm, 'gameHelpLink');
-		System.saveValueForm(oForm, 'guildSelf');
-		System.saveValueForm(oForm, 'guildFrnd');
-		System.saveValueForm(oForm, 'guildPast');
-		System.saveValueForm(oForm, 'guildEnmy');
 
-		System.saveValueForm(oForm, 'showAdmin');
-		System.saveValueForm(oForm, 'ajaxifyRankControls');
+		Data.saveBoxes.forEach(System.saveValueForm, oForm);
 
-		System.saveValueForm(oForm, 'detailedConflictInfo');
-		System.saveValueForm(oForm, 'disableItemColoring');
-		System.saveValueForm(oForm, 'enableLogColoring');
-		System.saveValueForm(oForm, 'enableChatParsing');
-		System.saveValueForm(oForm, 'enableCreatureColoring');
-		System.saveValueForm(oForm, 'hideNonPlayerGuildLogMessages');
-		System.saveValueForm(oForm, 'buyBuffsGreeting');
-		System.saveValueForm(oForm, 'renderSelfBio');
-		System.saveValueForm(oForm, 'renderOtherBios');
-		System.saveValueForm(oForm, 'defaultMessageSound');
-		System.saveValueForm(oForm, 'showSpeakerOnWorld');
-		System.saveValueForm(oForm, 'playNewMessageSound');
-		System.saveValueForm(oForm, 'highlightPlayersNearMyLvl');
-		System.saveValueForm(oForm, 'highlightGvGPlayersNearMyLvl');
-		System.saveValueForm(oForm, 'showCombatLog');
-		System.saveValueForm(oForm, 'showMonsterLog');
-		System.saveValueForm(oForm, 'showCreatureInfo');
-		System.saveValueForm(oForm, 'keepLogs');
-		System.saveValueForm(oForm, 'enableGuildInfoWidgets');
-		System.saveValueForm(oForm, 'enableOnlineAlliesWidgets');
-		System.saveValueForm(oForm, 'hideGuildInfoMessage');
-		System.saveValueForm(oForm, 'hideGuildInfoBuff');
-		System.saveValueForm(oForm, 'hideGuildInfoSecureTrade');
-		System.saveValueForm(oForm, 'hideGuildInfoTrade');
-		System.saveValueForm(oForm, 'quickKill');
-		System.saveValueForm(oForm, 'huntingBuffs');
-		System.saveValueForm(oForm, 'huntingBuffsName');
-		System.saveValueForm(oForm, 'huntingBuffs2');
-		System.saveValueForm(oForm, 'huntingBuffs2Name');
-		System.saveValueForm(oForm, 'huntingBuffs3');
-		System.saveValueForm(oForm, 'huntingBuffs3Name');
-		System.saveValueForm(oForm, 'showHuntingBuffs');
-		System.saveValueForm(oForm, 'moveGuildList');
-		System.saveValueForm(oForm, 'moveOnlineAlliesList');
-		System.saveValueForm(oForm, 'moveFSBox');
-		System.saveValueForm(oForm, 'hideKrulPortal');
-		System.saveValueForm(oForm, 'hideQuests');
-		System.saveValueForm(oForm, 'hideQuestNames');
-		System.saveValueForm(oForm, 'checkForQuestsInWorld');
-		System.saveValueForm(oForm, 'hideRecipes');
-		System.saveValueForm(oForm, 'hideRecipeNames');
-		System.saveValueForm(oForm, 'footprintsColor');
-		System.saveValueForm(oForm, 'doNotKillList');
-		System.saveValueForm(oForm, 'enableBioCompressor');
-		System.saveValueForm(oForm, 'maxCompressedCharacters');
-		System.saveValueForm(oForm, 'maxCompressedLines');
-		System.saveValueForm(oForm, 'sendGoldonWorld');
-		System.saveValueForm(oForm, 'goldRecipient');
-		System.saveValueForm(oForm, 'goldAmount');
-		System.saveValueForm(oForm, 'keepBuffLog');
-		System.saveValueForm(oForm, 'showQuickSendLinks');
-		System.saveValueForm(oForm, 'showQuickDropLinks');
-		System.saveValueForm(oForm, 'sendClasses');
-		System.saveValueForm(oForm, 'itemRecipient');
-		System.saveValueForm(oForm, 'currentGoldSentTotal');
-		System.saveValueForm(oForm, 'hideArenaPrizes');
-		System.saveValueForm(oForm, 'autoSortArenaList');
+		//~ System.saveValueForm(oForm, 'navigateToLogAfterMsg');
+		//~ System.saveValueForm(oForm, 'gameHelpLink');
+		//~ System.saveValueForm(oForm, 'guildSelf');
+		//~ System.saveValueForm(oForm, 'guildFrnd');
+		//~ System.saveValueForm(oForm, 'guildPast');
+		//~ System.saveValueForm(oForm, 'guildEnmy');
 
-		System.saveValueForm(oForm, 'enableAllyOnlineList');
-		System.saveValueForm(oForm, 'enableEnemyOnlineList');
-		System.saveValueForm(oForm, 'allyEnemyOnlineRefreshTime');
-		System.saveValueForm(oForm, 'quickLinksTopPx');
-		System.saveValueForm(oForm, 'quickLinksLeftPx');
+		//~ System.saveValueForm(oForm, 'showAdmin');
+		//~ System.saveValueForm(oForm, 'ajaxifyRankControls');
 
-		System.saveValueForm(oForm, 'enableActiveBountyList');
-		System.saveValueForm(oForm, 'bountyListRefreshTime');
-		System.saveValueForm(oForm, 'enableWantedList');
-		System.saveValueForm(oForm, 'wantedNames');
-		System.saveValueForm(oForm, 'fsboxlog');
-		System.saveValueForm(oForm, 'huntingMode');
-		System.saveValueForm(oForm, 'enableAttackHelper');
-		System.saveValueForm(oForm, 'hideRelicOffline');
-		System.saveValueForm(oForm, 'enterForSendMessage');
-		System.saveValueForm(oForm, 'storeLastQuestPage');
-		System.saveValueForm(oForm, 'addAttackLinkToLog');
-		System.saveValueForm(oForm, 'showStatBonusTotal');
-		System.saveValueForm(oForm, 'newGuildLogHistoryPages');
-		System.saveValueForm(oForm, 'useNewGuildLog');
-		System.saveValueForm(oForm, 'enhanceChatTextEntry');
+		//~ System.saveValueForm(oForm, 'detailedConflictInfo');
+		//~ System.saveValueForm(oForm, 'disableItemColoring');
+		//~ System.saveValueForm(oForm, 'enableLogColoring');
+		//~ System.saveValueForm(oForm, 'enableChatParsing');
+		//~ System.saveValueForm(oForm, 'enableCreatureColoring');
+		//~ System.saveValueForm(oForm, 'hideNonPlayerGuildLogMessages');
+		//~ System.saveValueForm(oForm, 'buyBuffsGreeting');
+		//~ System.saveValueForm(oForm, 'renderSelfBio');
+		//~ System.saveValueForm(oForm, 'renderOtherBios');
+		//~ System.saveValueForm(oForm, 'defaultMessageSound');
+		//~ System.saveValueForm(oForm, 'showSpeakerOnWorld');
+		//~ System.saveValueForm(oForm, 'playNewMessageSound');
+		//~ System.saveValueForm(oForm, 'highlightPlayersNearMyLvl');
+		//~ System.saveValueForm(oForm, 'highlightGvGPlayersNearMyLvl');
+		//~ System.saveValueForm(oForm, 'showCombatLog');
+		//~ System.saveValueForm(oForm, 'showMonsterLog');
+		//~ System.saveValueForm(oForm, 'showCreatureInfo');
+		//~ System.saveValueForm(oForm, 'keepLogs');
+		//~ System.saveValueForm(oForm, 'enableGuildInfoWidgets');
+		//~ System.saveValueForm(oForm, 'enableOnlineAlliesWidgets');
+		//~ System.saveValueForm(oForm, 'hideGuildInfoMessage');
+		//~ System.saveValueForm(oForm, 'hideGuildInfoBuff');
+		//~ System.saveValueForm(oForm, 'hideGuildInfoSecureTrade');
+		//~ System.saveValueForm(oForm, 'hideGuildInfoTrade');
+		//~ System.saveValueForm(oForm, 'quickKill');
+		//~ System.saveValueForm(oForm, 'huntingBuffs');
+		//~ System.saveValueForm(oForm, 'huntingBuffsName');
+		//~ System.saveValueForm(oForm, 'huntingBuffs2');
+		//~ System.saveValueForm(oForm, 'huntingBuffs2Name');
+		//~ System.saveValueForm(oForm, 'huntingBuffs3');
+		//~ System.saveValueForm(oForm, 'huntingBuffs3Name');
+		//~ System.saveValueForm(oForm, 'showHuntingBuffs');
+		//~ System.saveValueForm(oForm, 'moveGuildList');
+		//~ System.saveValueForm(oForm, 'moveOnlineAlliesList');
+		//~ System.saveValueForm(oForm, 'moveFSBox');
+		//~ System.saveValueForm(oForm, 'hideKrulPortal');
+		//~ System.saveValueForm(oForm, 'hideQuests');
+		//~ System.saveValueForm(oForm, 'hideQuestNames');
+		//~ System.saveValueForm(oForm, 'checkForQuestsInWorld');
+		//~ System.saveValueForm(oForm, 'hideRecipes');
+		//~ System.saveValueForm(oForm, 'hideRecipeNames');
+		//~ System.saveValueForm(oForm, 'footprintsColor');
+		//~ System.saveValueForm(oForm, 'doNotKillList');
+		//~ System.saveValueForm(oForm, 'enableBioCompressor');
+		//~ System.saveValueForm(oForm, 'maxCompressedCharacters');
+		//~ System.saveValueForm(oForm, 'maxCompressedLines');
+		//~ System.saveValueForm(oForm, 'sendGoldonWorld');
+		//~ System.saveValueForm(oForm, 'goldRecipient');
+		//~ System.saveValueForm(oForm, 'goldAmount');
+		//~ System.saveValueForm(oForm, 'keepBuffLog');
+		//~ System.saveValueForm(oForm, 'showQuickSendLinks');
+		//~ System.saveValueForm(oForm, 'showQuickDropLinks');
+		//~ System.saveValueForm(oForm, 'sendClasses');
+		//~ System.saveValueForm(oForm, 'itemRecipient');
+		//~ System.saveValueForm(oForm, 'currentGoldSentTotal');
+		//~ System.saveValueForm(oForm, 'hideArenaPrizes');
+		//~ System.saveValueForm(oForm, 'autoSortArenaList');
 
-		System.saveValueForm(oForm, 'enableMaxGroupSizeToJoin');
-		System.saveValueForm(oForm, 'maxGroupSizeToJoin');
+		//~ System.saveValueForm(oForm, 'enableAllyOnlineList');
+		//~ System.saveValueForm(oForm, 'enableEnemyOnlineList');
+		//~ System.saveValueForm(oForm, 'allyEnemyOnlineRefreshTime');
+		//~ System.saveValueForm(oForm, 'quickLinksTopPx');
+		//~ System.saveValueForm(oForm, 'quickLinksLeftPx');
 
-		System.saveValueForm(oForm, 'enableTempleAlert');
-		System.saveValueForm(oForm, 'autoFillMinBidPrice');
-		System.saveValueForm(oForm, 'showPvPSummaryInLog');
-		System.saveValueForm(oForm, 'enableQuickDrink');
-		System.saveValueForm(oForm, 'enhanceOnlineDots');
-		System.saveValueForm(oForm, 'hideBuffSelected');
-		System.saveValueForm(oForm, 'enableFastWalk');
-		System.saveValueForm(oForm, 'showFastWalkIconOnWorld');
-		System.saveValueForm(oForm, 'hideHelperMenu');
-		System.saveValueForm(oForm, 'keepHelperMenuOnScreen');
-		System.saveValueForm(oForm, 'showNextQuestSteps');
-		System.saveValueForm(oForm, 'disableComposingPrompts');
+		//~ System.saveValueForm(oForm, 'enableActiveBountyList');
+		//~ System.saveValueForm(oForm, 'bountyListRefreshTime');
+		//~ System.saveValueForm(oForm, 'enableWantedList');
+		//~ System.saveValueForm(oForm, 'wantedNames');
+		//~ System.saveValueForm(oForm, 'fsboxlog');
+		//~ System.saveValueForm(oForm, 'huntingMode');
+		//~ System.saveValueForm(oForm, 'enableAttackHelper');
+		//~ System.saveValueForm(oForm, 'hideRelicOffline');
+		//~ System.saveValueForm(oForm, 'enterForSendMessage');
+		//~ System.saveValueForm(oForm, 'storeLastQuestPage');
+		//~ System.saveValueForm(oForm, 'addAttackLinkToLog');
+		//~ System.saveValueForm(oForm, 'showStatBonusTotal');
+		//~ System.saveValueForm(oForm, 'newGuildLogHistoryPages');
+		//~ System.saveValueForm(oForm, 'useNewGuildLog');
+		//~ System.saveValueForm(oForm, 'enhanceChatTextEntry');
+
+		//~ System.saveValueForm(oForm, 'enableMaxGroupSizeToJoin');
+		//~ System.saveValueForm(oForm, 'maxGroupSizeToJoin');
+
+		//~ System.saveValueForm(oForm, 'enableTempleAlert');
+		//~ System.saveValueForm(oForm, 'autoFillMinBidPrice');
+		//~ System.saveValueForm(oForm, 'showPvPSummaryInLog');
+		//~ System.saveValueForm(oForm, 'enableQuickDrink');
+		//~ System.saveValueForm(oForm, 'enhanceOnlineDots');
+		//~ System.saveValueForm(oForm, 'hideBuffSelected');
+		//~ System.saveValueForm(oForm, 'enableFastWalk');
+		//~ System.saveValueForm(oForm, 'showFastWalkIconOnWorld');
+		//~ System.saveValueForm(oForm, 'hideHelperMenu');
+		//~ System.saveValueForm(oForm, 'keepHelperMenuOnScreen');
+		//~ System.saveValueForm(oForm, 'showNextQuestSteps');
+		//~ System.saveValueForm(oForm, 'disableComposingPrompts');
 
 		window.alert('FS Helper Settings Saved');
 		window.location.reload();
