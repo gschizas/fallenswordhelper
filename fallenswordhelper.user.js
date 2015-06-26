@@ -2968,117 +2968,128 @@ var Helper = {
 		var damageNumber;
 		var hpNumber;
 		//~ var allItems;
-		var LDProcessed;
-		var LDProcessedNumber;
-		var storedConstitutionLevel;
-		var storedFlinchLevel;
-		var storedNightmareVisageLevel;
-		var storedFortitudeLevel;
-		var storedChiStrikeLevel;
-		var storedTerrorizeLevel;
-		var storedSanctuaryLevel;
-		var defenderCount = callback.defenderCount;
-		var doc = System.createDocument(responseText);
-		var playerAttackValue = Helper.getStat('#stat-attack', doc);
-		var playerDefenseValue = Helper.getStat('#stat-defense', doc);
-		var playerArmorValue = Helper.getStat('#stat-armor', doc);
-		var playerDamageValue = Helper.getStat('#stat-damage', doc);
-		var playerHPValue = Helper.getStat('#stat-hp', doc);
+		//~ var LDProcessed;
+		//~ var LDProcessedNumber;
+		//~ var storedConstitutionLevel;
+		//~ var storedFlinchLevel;
+		//~ var storedNightmareVisageLevel;
+		//~ var storedFortitudeLevel;
+		//~ var storedChiStrikeLevel;
+		//~ var storedTerrorizeLevel;
+		//~ var storedSanctuaryLevel;
 
-		var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
-		var levelValue = parseInt(levelElement.text().replace(/,/,''),10);
-		if (playerAttackValue && playerAttackValue.indexOf('Hidden')>0) {
-			playerAttackValue = levelValue*10;
+		var defenderCount = callback.defenderCount;
+		//~ var doc = System.createDocument(responseText);
+
+		var player = Helper.playerData(responseText);
+		//~ var playerAttackValue = Helper.getStat('#stat-attack', doc);
+		//~ var playerDefenseValue = Helper.getStat('#stat-defense', doc);
+		//~ var playerArmorValue = Helper.getStat('#stat-armor', doc);
+		//~ var playerDamageValue = Helper.getStat('#stat-damage', doc);
+		//~ var playerHPValue = Helper.getStat('#stat-hp', doc);
+		//~ var levelElement = $(doc).find('b:contains("Level:")').parents('td:first').next();
+		//~ var levelValue = parseInt(levelElement.text().replace(/,/,''),10);
+		//~ if (playerAttackValue && playerAttackValue.indexOf('Hidden')>0) {
+		if (player.attackValue && isNaN(player.attackValue)) {
+			player.attackValue = player.levelValue*10;
 		}
-		if (playerDefenseValue && playerDefenseValue.indexOf('Hidden')>0) {
-			playerDefenseValue = levelValue*10;
+		//~ if (playerDefenseValue && playerDefenseValue.indexOf('Hidden')>0) {
+		if (player.defenseValue && isNaN(player.defenseValue)) {
+			player.defenseValue = player.levelValue*10;
 		}
-		if (playerArmorValue && playerArmorValue.indexOf('Hidden')>0) {
-			playerArmorValue = levelValue*10;
+		//~ if (playerArmorValue && playerArmorValue.indexOf('Hidden')>0) {
+		if (player.armorValue && isNaN(player.armorValue)) {
+			player.armorValue = player.levelValue*10;
 		}
-		if (playerDamageValue && playerDamageValue.indexOf('Hidden')>0) {
-			playerDamageValue = levelValue*10;
+		//~ if (playerDamageValue && playerDamageValue.indexOf('Hidden')>0) {
+		if (player.damageValue && isNaN(player.damageValue)) {
+			player.damageValue = player.levelValue*10;
 		}
-		if (playerHPValue && playerHPValue.indexOf('Hidden')>0) {
-			playerHPValue = Math.ceil(levelValue*0.4);
+		//~ if (playerHPValue && playerHPValue.indexOf('Hidden')>0) {
+		if (player.hpValue && isNaN(player.hpValue)) {
+			player.hpValue = Math.ceil(player.levelValue*0.4);
 		}
 
 		if (defenderCount !== 0) {
 			defenderMultiplier = 0.2;
 			attackValue = $('td[title="attackValue"]');
 			attackNumber = System.intValue(attackValue.html());
-			attackValue.html(System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier)));
+			attackValue.html(System.addCommas(attackNumber + Math.round(player.attackValue*defenderMultiplier)));
 			defenseValue = $('td[title="defenseValue"]');
 			defenseNumber = System.intValue(defenseValue.html());
-			overallDefense = defenseNumber + Math.round(playerDefenseValue*defenderMultiplier);
+			overallDefense = defenseNumber + Math.round(player.defenseValue*defenderMultiplier);
 			defenseValue.html(System.addCommas(overallDefense));
 			armorValue = $('td[title="armorValue"]');
 			armorNumber = System.intValue(armorValue.html());
-			armorValue.html(System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier)));
+			armorValue.html(System.addCommas(armorNumber + Math.round(player.armorValue*defenderMultiplier)));
 			damageValue = $('td[title="damageValue"]');
 			damageNumber = System.intValue(damageValue.html());
-			damageValue.html(System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier)));
+			damageValue.html(System.addCommas(damageNumber + Math.round(player.damageValue*defenderMultiplier)));
 			hpValue = $('td[title="hpValue"]');
 			hpNumber = System.intValue(hpValue.html());
-			hpValue.html(System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier)));
+			hpValue.html(System.addCommas(hpNumber + Math.round(player.hpValue*defenderMultiplier)));
 			defendersProcessed = $('td[title="defendersProcessed"]');
 			defendersProcessedNumber = System.intValue(defendersProcessed.html());
 			defendersProcessed.html(System.addCommas(defendersProcessedNumber + 1));
 		}
 		else {
-			//get lead defender (LD) buffs here for use later ... 
-			//~ allItems = doc.getElementsByTagName('IMG');
-			var constitutionLevel = Helper.getBuffLevel(doc, 'Constitution');
-			var flinchLevel = Helper.getBuffLevel(doc, 'Flinch');
-			var nightmareVisageLevel = Helper.getBuffLevel(doc, 'Nightmare Visage');
-			var fortitudeLevel = Helper.getBuffLevel(doc, 'Fortitude');
-			var chiStrikeLevel = Helper.getBuffLevel(doc, 'Chi Strike');
-			var terrorizeLevel = Helper.getBuffLevel(doc, 'Terrorize');
-			var sanctuaryLevel = Helper.getBuffLevel(doc, 'Sanctuary');
-
-			defenderMultiplier = 1;
-			attackValue = $('td[title="LDattackValue"]');
-			attackNumber = System.intValue(attackValue.html());
-			//~ var playerAttackValue2 = playerAttackValue;
-			//~ var playerDefenseValue2 = playerDefenseValue;
-			attackValue.html(System.addCommas(attackNumber + Math.round(playerAttackValue*defenderMultiplier)));
-			defenseValue = $('td[title="LDdefenseValue"]');
-			defenseNumber = System.intValue(defenseValue.html());
-			defenseValue.html(System.addCommas(defenseNumber + Math.round(playerDefenseValue*defenderMultiplier)));
-			armorValue = $('td[title="LDarmorValue"]');
-			armorNumber=System.intValue(armorValue.html());
-			armorValue.html(System.addCommas(armorNumber + Math.round(playerArmorValue*defenderMultiplier)));
-			damageValue = $('td[title="LDdamageValue"]');
-			damageNumber=System.intValue(damageValue.html());
-			damageValue.html(System.addCommas(damageNumber + Math.round(playerDamageValue*defenderMultiplier)));
-			hpValue = $('td[title="LDhpValue"]');
-			hpNumber=System.intValue(hpValue.html());
-			hpValue.html(System.addCommas(hpNumber + Math.round(playerHPValue*defenderMultiplier)));
-			defendersProcessed = $('td[title="defendersProcessed"]');
-			defendersProcessedNumber = System.intValue(defendersProcessed.html());
-			defendersProcessed.html(System.addCommas(defendersProcessedNumber + 1));
-			LDProcessed = $('td[title="LDProcessed"]');
-			LDProcessedNumber=System.intValue(LDProcessed.html());
-			LDProcessed.html(1);
-			storedConstitutionLevel = $('td[title="LDConstitutionLevel"]');
-			storedConstitutionLevel.html(System.intValue(constitutionLevel));
-			storedFlinchLevel = $('td[title="LDFlinchLevel"]');
-			storedFlinchLevel.html(System.intValue(flinchLevel));
-			storedNightmareVisageLevel = $('td[title="LDNightmareVisageLevel"]');
-			storedNightmareVisageLevel.html(System.intValue(nightmareVisageLevel));
-			storedFortitudeLevel = $('td[title="LDFortitudeLevel"]');
-			storedFortitudeLevel.html(System.intValue(fortitudeLevel));
-			storedChiStrikeLevel = $('td[title="LDChiStrikeLevel"]');
-			storedChiStrikeLevel.html(System.intValue(chiStrikeLevel));
-			storedTerrorizeLevel = $('td[title="LDTerrorizeLevel"]');
-			storedTerrorizeLevel.html(System.intValue(terrorizeLevel));
-			storedSanctuaryLevel = $('td[title="LDSanctuaryLevel"]');
-			storedSanctuaryLevel.html(System.intValue(sanctuaryLevel));
+			Helper.leadDefender(player);
 		}
 		var relicProcessedValue = $('td[title="relicProcessed"]');
 		if (Helper.relicDefenderCount === defendersProcessedNumber + 1 && relicProcessedValue.html() === '1') {
 			Helper.processRelicStats();
 		}
+	},
+
+	leadDefender: function(player) {
+		//get lead defender (LD) buffs here for use later ... 
+		//~ allItems = doc.getElementsByTagName('IMG');
+		//~ var constitutionLevel = Helper.getBuffLevel(doc, 'Constitution');
+		//~ var flinchLevel = Helper.getBuffLevel(doc, 'Flinch');
+		//~ var nightmareVisageLevel = Helper.getBuffLevel(doc, 'Nightmare Visage');
+		//~ var fortitudeLevel = Helper.getBuffLevel(doc, 'Fortitude');
+		//~ var chiStrikeLevel = Helper.getBuffLevel(doc, 'Chi Strike');
+		//~ var terrorizeLevel = Helper.getBuffLevel(doc, 'Terrorize');
+		//~ var sanctuaryLevel = Helper.getBuffLevel(doc, 'Sanctuary');
+
+		var defenderMultiplier = 1;
+		var attackValue = $('td[title="LDattackValue"]');
+		var attackNumber = System.intValue(attackValue.html());
+		//~ var playerAttackValue2 = playerAttackValue;
+		//~ var playerDefenseValue2 = playerDefenseValue;
+		attackValue.html(System.addCommas(attackNumber + Math.round(player.attackValue*defenderMultiplier)));
+		var defenseValue = $('td[title="LDdefenseValue"]');
+		var defenseNumber = System.intValue(defenseValue.html());
+		defenseValue.html(System.addCommas(defenseNumber + Math.round(player.defenseValue*defenderMultiplier)));
+		var armorValue = $('td[title="LDarmorValue"]');
+		var armorNumber=System.intValue(armorValue.html());
+		armorValue.html(System.addCommas(armorNumber + Math.round(player.armorValue*defenderMultiplier)));
+		var damageValue = $('td[title="LDdamageValue"]');
+		var damageNumber=System.intValue(damageValue.html());
+		damageValue.html(System.addCommas(damageNumber + Math.round(player.damageValue*defenderMultiplier)));
+		var hpValue = $('td[title="LDhpValue"]');
+		var hpNumber=System.intValue(hpValue.html());
+		hpValue.html(System.addCommas(hpNumber + Math.round(player.hpValue*defenderMultiplier)));
+		var defendersProcessed = $('td[title="defendersProcessed"]');
+		var defendersProcessedNumber = System.intValue(defendersProcessed.html());
+		defendersProcessed.html(System.addCommas(defendersProcessedNumber + 1));
+		var LDProcessed = $('td[title="LDProcessed"]');
+		//~ var LDProcessedNumber=System.intValue(LDProcessed.html());
+		LDProcessed.html(1);
+		var storedConstitutionLevel = $('td[title="LDConstitutionLevel"]');
+		storedConstitutionLevel.html(System.intValue(player.constitutionLevel));
+		var storedFlinchLevel = $('td[title="LDFlinchLevel"]');
+		storedFlinchLevel.html(System.intValue(player.flinchLevel));
+		var storedNightmareVisageLevel = $('td[title="LDNightmareVisageLevel"]');
+		storedNightmareVisageLevel.html(System.intValue(player.nightmareVisageLevel));
+		var storedFortitudeLevel = $('td[title="LDFortitudeLevel"]');
+		storedFortitudeLevel.html(System.intValue(player.fortitudeLevel));
+		var storedChiStrikeLevel = $('td[title="LDChiStrikeLevel"]');
+		storedChiStrikeLevel.html(System.intValue(player.chiStrikeLevel));
+		var storedTerrorizeLevel = $('td[title="LDTerrorizeLevel"]');
+		storedTerrorizeLevel.html(System.intValue(player.terrorizeLevel));
+		var storedSanctuaryLevel = $('td[title="LDSanctuaryLevel"]');
+		storedSanctuaryLevel.html(System.intValue(player.sanctuaryLevel));
 	},
 
 	processRelicStats: function() {
