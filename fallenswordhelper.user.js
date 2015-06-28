@@ -298,9 +298,6 @@ var System = {
 	},
 
 	getValue: function(name) {
-		if (Data.defaults[name] === undefined) {
-			console.log('Data.defaults[' + name + ']=', Data.defaults[name]);
-		}
 		return GM_getValue(name, Data.defaults[name]);
 	},
 
@@ -8505,9 +8502,9 @@ var Helper = {
 			var headerClicked = evt.target.getAttribute('sortKey');
 			sortType = evt.target.getAttribute('sortType');
 			if (!sortType) {sortType='string';}
-			console.log(headerClicked);
+			// console.log(headerClicked);
 			// console.log(Helper.sortBy);
-			console.log(sortType);
+			// console.log(sortType);
 			// numberSort
 			Helper.sortBy=headerClicked;
 			if (Helper.sortAsc === undefined) {Helper.sortAsc = true;}
@@ -9815,6 +9812,7 @@ var Helper = {
 	},
 
 	getStat: function(stat, doc) {
+		// 'Hidden' returns NaN
 		return System.intValue($(stat, doc)
 			.contents()
 			.filter(function(){
@@ -9825,9 +9823,9 @@ var Helper = {
 	getBuffLevel: function(doc, buff) {
 		var hasBuff = $('img.tip-static[data-tipped*="' + buff + '"]', doc);
 		hasBuff = hasBuff.data('tipped');
-		var re = new RegExp('<b>' + buff + '</b> \\(Level: (\\d+)\\)');
+		var re = new RegExp('</b> \\(Level: (\\d+)\\)');
 		var test = re.exec(hasBuff);
-		return test === null ? 0 : test[1];
+		return test === null ? 0 : System.intValue(test[1]);
 	},
 
 	playerData: function (responseText) {
@@ -9938,7 +9936,7 @@ var Helper = {
 		}
 
 		var creature = Helper.creatureData(player.superEliteSlayerMultiplier);
-console.log('creature=', creature);
+//~ console.log('creature=', creature);
 
 		var extraNotes = '';
 		extraNotes += player.superEliteSlayerLevel > 0 ?
@@ -9992,10 +9990,11 @@ console.log('creature=', creature);
 			generalVariable * creature.armor +
 			hpVariable * creature.hp);
 		var numberOfHitsRequired = hitByHowMuch > 0 ?
-			Math.ceil(hpVariable * creature.hp / overallDamageValue <
-				generalVariable * creature.armor ? 1:
-				overallDamageValue - generalVariable * creature.armor):
-			'-';
+			Math.ceil(hpVariable * creature.hp /
+				(overallDamageValue < generalVariable * creature.armor ? 1 :
+				overallDamageValue - generalVariable * creature.armor))
+		:'-';
+
 		//Defense:
 		var overallDefenseValue = (groupExists ? groupDefenseValue :
 			player.defenseValue) + Math.floor((groupExists ? groupDefenseValue :
@@ -10023,9 +10022,10 @@ console.log('creature=', creature);
 		var creatureDamageDone = Math.ceil(generalVariable*creature.damage -
 			overallArmorValue + overallHPValue);
 		var numberOfCreatureHitsTillDead = creatureHitByHowMuch >= 0 ?
-			Math.ceil(overallHPValue / generalVariable * creature.damage <
+			Math.ceil(overallHPValue / (generalVariable * creature.damage <
 			overallArmorValue ? 1 : generalVariable * creature.damage -
-			overallArmorValue):'-';
+			overallArmorValue)):'-';
+
 		//Analysis:
 		var playerHits = numberOfCreatureHitsTillDead === '-' ?
 			numberOfHitsRequired : numberOfHitsRequired === '-' ? '-' :
