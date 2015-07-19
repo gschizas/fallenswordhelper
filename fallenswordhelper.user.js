@@ -4574,7 +4574,7 @@ var Helper = {
 		// fill up the Inv Counter
 		for (key in Helper.itemList) {
 			if (!Helper.itemList.hasOwnProperty(key)) {continue;}
-			name = Helper.itemList[key].html.match(/<td width='90%'>&nbsp;(.*)<\/td>/)[1];
+			name = Helper.itemList[key].html.match(/<td width="90%">&nbsp;(.*)<\/td>/)[1];
 			if (invCount[name]) {
 				invCount[name].count+= 1;
 			} else {
@@ -4624,7 +4624,7 @@ var Helper = {
 		}
 		output += '</table>';
 		$(injectId).html(output);
-		$('#showAhPrice').click(Helper.showAHPrice);
+		//~ $('#showAhPrice').click(Helper.showAHPrice);
 	},
 
 	insertQuickExtract: function(content) {
