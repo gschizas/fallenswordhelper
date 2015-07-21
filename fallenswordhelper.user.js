@@ -1104,7 +1104,7 @@ var Data = {
 		arenaMinLvl: 1,
 		arenaMaxLvl: 9999,
 		showMonsterLog: false,
-		templeAlertLastUpdate: '2000-01-01T00:00:00.000Z',
+		templeAlertLastUpdate: '"2000-01-01T00:00:00.000Z"',
 		needToPray: false,
 		lastChatCheck: '0',
 		lastGuildLogCheck: '0',
