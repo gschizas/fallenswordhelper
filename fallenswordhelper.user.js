@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1500
+// @version        1502
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -1104,7 +1104,7 @@ var Data = {
 		arenaMinLvl: 1,
 		arenaMaxLvl: 9999,
 		showMonsterLog: false,
-		templeAlertLastUpdate: '2000-01-01T00:00:00.000Z',
+		templeAlertLastUpdate: '"2000-01-01T00:00:00.000Z"',
 		needToPray: false,
 		lastChatCheck: '0',
 		lastGuildLogCheck: '0',
@@ -4574,7 +4574,7 @@ var Helper = {
 		// fill up the Inv Counter
 		for (key in Helper.itemList) {
 			if (!Helper.itemList.hasOwnProperty(key)) {continue;}
-			name = Helper.itemList[key].html.match(/<td width='90%'>&nbsp;(.*)<\/td>/)[1];
+			name = Helper.itemList[key].html.match(/<td width="90%">&nbsp;(.*)<\/td>/)[1];
 			if (invCount[name]) {
 				invCount[name].count+= 1;
 			} else {
@@ -4624,7 +4624,7 @@ var Helper = {
 		}
 		output += '</table>';
 		$(injectId).html(output);
-		$('#showAhPrice').click(Helper.showAHPrice);
+		//~ $('#showAhPrice').click(Helper.showAHPrice);
 	},
 
 	insertQuickExtract: function(content) {
