@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1502
+// @version        1503
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -5785,7 +5785,7 @@ var Helper = {
 			}
 
 			//add PvP combat log summary
-			if (messageType === 'Notification' && aRow.cells[2] && showPvPSummaryInLog && aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+			if (messageType === 'Combat' && aRow.cells[2] && showPvPSummaryInLog && aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
 				var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
 				var combatSummarySpan = document.createElement('SPAN');
 				combatSummarySpan.style.color = 'gray';
