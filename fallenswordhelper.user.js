@@ -5785,8 +5785,10 @@ var Helper = {
 			}
 
 			//add PvP combat log summary
-			if (messageType === 'Combat' && aRow.cells[2] && showPvPSummaryInLog
-				&& aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+			if (messageType === 'Combat' &&
+				aRow.cells[2] &&
+				showPvPSummaryInLog &&
+				aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
 				var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
 				var combatSummarySpan = document.createElement('SPAN');
 				combatSummarySpan.style.color = 'gray';
@@ -10714,7 +10716,7 @@ var Helper = {
 				':</td><td><input name="enableCreatureColoring" type="checkbox" value="on"' + (System.getValue('enableCreatureColoring')?' checked':'') + '></td></td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
 				//~ (System.browserVersion<3?'Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
-				) +
+				'') +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (System.getValue('showCreatureInfo')?' checked':'') + '></td></tr>' +
 
 			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator for the damage and HP evaluation. It will not change the attack bias (1.1053).'+
