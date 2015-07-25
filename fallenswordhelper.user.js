@@ -271,9 +271,9 @@ GM_JQ_wrapper();
 var System = {
 	init: function() {
 		System.server = document.location.protocol + '//' + document.location.host + '/';
-		var uAgent = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i);
-		System.browserName = uAgent[1];
-		System.browserVersion = parseInt(uAgent[2],10);
+		//~ var uAgent = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i);
+		//~ System.browserName = uAgent[1];
+		//~ System.browserVersion = parseInt(uAgent[2],10);
 		var imgurls = System.findNode('//img[contains(@src, "/skin/")]');
 		if (!imgurls) {return;} //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf('/skin/');
@@ -5785,12 +5785,15 @@ var Helper = {
 			}
 
 			//add PvP combat log summary
-			if (messageType === 'Combat' && aRow.cells[2] && showPvPSummaryInLog && aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+			if (messageType === 'Combat' && aRow.cells[2] && showPvPSummaryInLog
+				&& aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
 				var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
 				var combatSummarySpan = document.createElement('SPAN');
 				combatSummarySpan.style.color = 'gray';
 				aRow.cells[2].appendChild(combatSummarySpan);
-				System.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id='+combatID, Helper.retrievePvPCombatSummary, {'target': combatSummarySpan});
+				System.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
+					combatID, Helper.retrievePvPCombatSummary,
+					{'target': combatSummarySpan});
 			}
 		}
 		//GM_wait(function() { // just want to be on the safe side
@@ -10710,7 +10713,8 @@ var Helper = {
 				'Champions will be colored green, Elites yellow and Super Elites red.') +
 				':</td><td><input name="enableCreatureColoring" type="checkbox" value="on"' + (System.getValue('enableCreatureColoring')?' checked':'') + '></td></td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
-				(System.browserVersion<3?'Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+				//~ (System.browserVersion<3?'Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+				) +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (System.getValue('showCreatureInfo')?' checked':'') + '></td></tr>' +
 
 			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator for the damage and HP evaluation. It will not change the attack bias (1.1053).'+
