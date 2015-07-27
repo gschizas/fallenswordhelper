@@ -35,42 +35,6 @@ function GM_ApiBrowserCheck(){
 	if (typeof unsafeWindow === 'undefined'){
 		window.unsafeWindow = window;
 	}
-	//~ unsafeWindow.GM_addStyle = function(css){
-		//~ var style = document.createElement('style');
-		//~ style.textContent = css;
-		//~ document.getElementsByTagName('head')[0].appendChild(style);
-	//~ };
-	//~ if (typeof GM_log === 'undefined'){
-		//~ unsafeWindow.GM_log = function(msg){
-			//~ try{
-				//~ unsafeWindow.console.log('GM_log: ' + msg);
-			//~ } catch(e){}
-		//~ };
-	//~ }
-	//~ GM_clog = function(msg){
-		//~ if (arguments.callee.counter){
-			//~ arguments.callee.counter++;
-		//~ } else{
-			//~ arguments.callee.counter = 1;
-		//~ }
-		//~ GM_log('(' + arguments.callee.counter + ') ' + msg);
-	//~ }
-	//~ GM_addGlobalStyle = function(css){
-		//~ // Redefine GM_addGlobalStyle with a better routine
-		//~ var sel = document.createElement('style');
-		//~ sel.setAttribute('type', 'text/css');
-		//~ sel.appendChild(document.createTextNode(css));
-		//~ var hel = document.documentElement.firstChild;
-		//~ while (hel && hel.nodeName != 'HEAD'){
-			//~ hel = hel.nextSibling;
-		//~ }
-		//~ if (hel && hel.nodeName == 'HEAD'){
-			//~ hel.appendChild(sel);
-		//~ } else{
-			//~ document.body.insertBefore(sel, document.body.firstChild);
-		//~ }
-		//~ return sel;
-	//~ }
 	var needApiUpgrade = false;
 	if (window.navigator.appName.match(/^opera/i) && 
 			typeof window.opera !== 'undefined'){
@@ -81,7 +45,7 @@ function GM_ApiBrowserCheck(){
 	if (typeof GM_setValue !== 'undefined'){
 		var gsv;
 		try {
-			gsv=GM_setValue.toString();
+			gsv=unsafeWindow.GM_setValue.toString();
 		} catch(e) {
 			gsv='staticArgs';
 		}
@@ -152,9 +116,6 @@ function GM_ApiBrowserCheck(){
 					break;
 				}
 			};
-			//~ unsafeWindow.GM_deleteValue = function(name){
-				//~ unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH + name);
-			//~ };
 		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
 			gvar.temporarilyStorage = [];
 			unsafeWindow.GM_getValue = function(name, defValue){
@@ -173,9 +134,6 @@ function GM_ApiBrowserCheck(){
 					gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
 				}
 			};
-			//~ unsafeWindow.GM_deleteValue = function(name){
-				//~ delete gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-			//~ };
 		}
 
 		unsafeWindow.GM_listValues = function(){
@@ -189,16 +147,6 @@ function GM_ApiBrowserCheck(){
 			}
 			return list;
 		};
-		//~ if (typeof GM_openInTab === 'undefined'){
-			//~ unsafeWindow.GM_openInTab = function(url){
-				//~ unsafeWindow.open(url, '');
-			//~ };
-		//~ }
-		//~ if (typeof(GM_registerMenuCommand) == 'undefined'){
-			//~ GM_registerMenuCommand = function(name, cmd){
-				//~ GM_log('Notice: GM_registerMenuCommand is not supported.');
-			//~ }
-		//~ }
 		// Dummy
 		if (!gvar.isOpera || typeof GM_xmlhttpRequest === 'undefined'){
 			unsafeWindow.GM_xmlhttpRequest = function(obj){
@@ -253,16 +201,10 @@ function GM_JQ_wrapper() {
 		GM_setValue = function(name, value){
 			setTimeout(function() {oldGM_setValue(name, value);}, 0);
 		};
-		//~ var oldGM_openInTab = GM_openInTab;
-		//~ GM_openInTab = function(url) {
-			//~ setTimeout(function() {oldGM_openInTab(url);}, 0);
-		//~ };
 		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
 		GM_xmlhttpRequest = function(details) {
 			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
 		};
-		// don't know how to modify GM_getValue yet (how to return value from setTimeout) - TODO
-		// other GM_functions are not needed.
 	}
 }
 GM_JQ_wrapper();
@@ -899,8 +841,8 @@ var Data = {
 		enableLogColoring: true,
 		enableChatParsing: true,
 		enableCreatureColoring: true,
-		showCombatLog: true,
-		showCreatureInfo: true,
+		showCombatLog: false,
+		showCreatureInfo: false,
 		keepLogs: false,
 
 		showExtraLinks: true,
@@ -931,7 +873,7 @@ var Data = {
 		enableGuildInfoWidgets: true,
 		enableOnlineAlliesWidgets: true,
 		guildOnlineRefreshTime: 300,
-		hideGuildInfoSecureTrade: false,
+		hideGuildInfoSecureTrade: true,
 		hideGuildInfoTrade: false,
 		hideGuildInfoMessage: false,
 		hideGuildInfoBuff: false,
@@ -941,7 +883,7 @@ var Data = {
 		bioEditLines: 10,
 		renderOtherBios: true,
 		playNewMessageSound: false,
-		showSpeakerOnWorld: true,
+		showSpeakerOnWorld: false,
 		defaultMessageSound: 'http://dl.getdropbox.com/u/2144065/chimes.wav',
 		highlightPlayersNearMyLvl: true,
 		highlightGvGPlayersNearMyLvl: true,
@@ -951,30 +893,30 @@ var Data = {
 
 		enableAllyOnlineList: false,
 		enableEnemyOnlineList: false,
-		allyEnemyOnlineRefreshTime: 60,
+		allyEnemyOnlineRefreshTime: 300,
 		moveGuildList: false,
 		moveOnlineAlliesList: false,
 
 		hideMatchesForCompletedMoves: false,
-		quickKill: true,
+		quickKill: false,
 		doNotKillList: '',
-		enableBioCompressor: false,
-		maxCompressedCharacters: 1500,
-		maxCompressedLines: 25,
+		enableBioCompressor: true,
+		maxCompressedCharacters: 250,
+		maxCompressedLines: 10,
 		hideArenaPrizes: '',
 		autoSortArenaList: false,
 
 		currentGoldSentTotal: 0,
-		keepBuffLog: true,
+		keepBuffLog: false,
 		buffLog: '',
 
 		enableActiveBountyList: false,
-		bountyListRefreshTime: 30,
+		bountyListRefreshTime: 300,
 		enableWantedList: false,
 		wantedNames: '',
 		bwNeedsRefresh: true,
 
-		fsboxlog: true,
+		fsboxlog: false,
 		fsboxcontent: '',
 		itemRecipient: '',
 		quickMsg: ["Thank you very much ^_^","Happy hunting, {playername}"],
@@ -988,27 +930,27 @@ var Data = {
 
 		enterForSendMessage: false,
 		trackKillStreak: true,
-		storeLastQuestPage: true,
-		addAttackLinkToLog: false,
-		showStatBonusTotal: true,
+		storeLastQuestPage: false,
+		addAttackLinkToLog: true,
+		showStatBonusTotal: false,
 
 		newGuildLogHistoryPages: 3,
-		useNewGuildLog: true,
+		useNewGuildLog: false,
 		enhanceChatTextEntry: true,
 
-		ajaxifyRankControls: true,
+		ajaxifyRankControls: false,
 
-		enableMaxGroupSizeToJoin: true,
+		enableMaxGroupSizeToJoin: false,
 		maxGroupSizeToJoin: 11,
 
 		enableTempleAlert: true,
 		enableUpgradeAlert: true,
-		autoFillMinBidPrice: false,
-		showPvPSummaryInLog: true,
-		enableQuickDrink: true,
+		autoFillMinBidPrice: true,
+		showPvPSummaryInLog: false,
+		enableQuickDrink: false,
 		enhanceOnlineDots: true,
-		hideBuffSelected: true,
-		enableFastWalk: true,
+		hideBuffSelected: false,
+		enableFastWalk: false,
 		hideHelperMenu: false,
 		keepHelperMenuOnScreen: true,
 		quickLinksTopPx: 22,
@@ -1036,6 +978,7 @@ var Data = {
 		showTaggingMessages: true,
 
 		showQuickDropLinks: false,
+
 		sendClasses: '["Amber", "5611"], ' +
 			'["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
 			'["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ' +
@@ -1117,7 +1060,8 @@ var Data = {
 		showFastWalkIconOnWorld: false,
 		hideNonPlayerGuildLogMessages: true,
 		listOfAllies: '',
-		listOfEnemies: ''
+		listOfEnemies: '',
+		contactList: ''
 	},
 
 	saveBoxes: [
@@ -9699,6 +9643,7 @@ var Helper = {
 			player.damageValue) + deathDealerBonusDamage +
 			counterAttackBonusDamage + player.holyFlameBonusDamage +
 			chiStrikeExtraDamage;
+
 		var damageDone = Math.floor(overallDamageValue -
 			generalVariable * creature.armor +
 			hpVariable * creature.hp);
@@ -9739,6 +9684,7 @@ var Helper = {
 		creature.damage -= terrrorizeEffect;
 		var creatureDamageDone = Math.ceil(generalVariable*creature.damage -
 			overallArmorValue + overallHPValue);
+
 		var numberOfCreatureHitsTillDead = creatureHitByHowMuch >= 0 ?
 			Math.ceil(overallHPValue / (generalVariable * creature.damage <
 			overallArmorValue ? 1 : generalVariable * creature.damage -
@@ -9826,6 +9772,7 @@ var Helper = {
 				'Constitution, NMV, Fortitude and Chi Strike apply to group stats.</span></td></tr>' +
 			'</tbody></table>';
 		var tempdata;
+
 		if ($('#worldPage').length > 0) { // new map
 			if (callback.groupEvaluation) {
 				if ($('div#creatureEvaluatorGroup').length === 0) {
@@ -9850,6 +9797,7 @@ var Helper = {
 			newCell.colSpan = '4';
 			newCell.innerHTML = evaluatorHTML;
 		}
+
 	},
 
 	injectBioWidgets: function() {
@@ -13948,16 +13896,6 @@ var Helper = {
 })();
 
 }; // end of var main
-
-//if (navigator.userAgent.indexOf('Firefox')>0) {
-//	main();
-//} else {
-//	if (navigator.userAgent.indexOf('Chrome')>0) {
-//		var script = document.createElement('script');
-//		script.textContent = '(' + main.toString() + ')();';
-//		document.body.appendChild(script);
-//	}
-//}
 
 if (typeof GM_info === "undefined") {
 	var script = document.createElement('script');
