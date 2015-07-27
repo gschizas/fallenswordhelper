@@ -76,7 +76,7 @@ function GM_ApiBrowserCheck(){
 			typeof window.opera !== 'undefined'){
 		needApiUpgrade = true;
 		gvar.isOpera = true;
-		GM_log = window.opera.postError;
+		unsafeWindow.GM_log = window.opera.postError;
 	}
 	if (typeof GM_setValue !== 'undefined'){
 		var gsv;
@@ -8100,7 +8100,7 @@ var Helper = {
 			}
 		}
 		if (callback.page<maxPage/*-maxPage+15*/) {
-			var newPage = (callback.page == 1) ? Math.round(4 * maxPage / 5) : (callback.page+1);
+			var newPage = callback.page === 1 ? Math.round(4 * maxPage / 5) : callback.page + 1;
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {'page':newPage});
 		}
 		else {
@@ -8841,7 +8841,7 @@ var Helper = {
 			'.HelperTextLink:hover {text-decoration:underline;}\n');
 		//var playerInput = System.findNode("//input[@name='targetPlayers']");
 		var playerInput = $('input[name="targetPlayers"]');
-		if (playerInput.length == 0) return;
+		if (playerInput.length === 0) {return;}
 		var buffMe = document.createElement("SPAN");
 		buffMe.innerHTML="[self]";
 		buffMe.className='HelperTextLink';
@@ -8860,8 +8860,17 @@ var Helper = {
 		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
 		if (playerName) {
 			playerName = playerName[1];
-			if (playerName == System.getValue("CharacterName")) System.xmlhttp("index.php?cmd=profile", Helper.getPlayerBuffs, false);
-			else System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
+			if (playerName === System.getValue("CharacterName")) {
+				System.xmlhttp("index.php?cmd=profile",
+					Helper.getPlayerBuffs,
+					false);
+			}
+			else {
+				System.xmlhttp("index.php?cmd=findplayer&search_active=1&" +
+					"search_level_max=&search_level_min=&search_username=" +
+					playerName + "&search_show_first=1",
+					Helper.getPlayerBuffs, false);
+			}
 		}
 		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
 
