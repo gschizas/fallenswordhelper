@@ -13851,13 +13851,13 @@ var Helper = {
 			.before('<input type="button" id="helperCreateAll" class="large ' +
 			'awesome red" value="Create All" disabled="true" style="height: ' +
 			'25px; line-height: 9px;">&nbsp;');
-		if ($('select[id^="composing-template-"][value!=="none"]'.length)) {
+		if ($('select[id^="composing-template-"][value!="none"]').length) {
 			$('#helperCreateAll').prop('disabled', false);
 			$('#helperCreateAll').click(function() {
 				if (System.getValue('disableComposingPrompts') ||
 					confirm('Are you sure you want to create all potions? ' +
 						'Do you have the correct templates selected?')) {
-					$('select[id^="composing-template-"][value!=="none"]')
+					$('select[id^="composing-template-"][value!="none"]')
 						.each(function () {
 							Helper.composingCreatePotion($(this));
 						});
@@ -13880,12 +13880,16 @@ var Helper = {
 	},
 
 	composingCreatePotion: function ($template) {
-		$.getJSON('index.php', {
+		$.ajax({
+			cache: false,
+			dataType: 'json',
+			url:'index.php',
+			data: {
 				'cmd': 'composing',
 				'subcmd': 'createajax',
 				'template_id': $template.val()
 			},
-			function (data, textStatus) {
+			success: function (data, textStatus) {
 				if (data.error !== '') {
 					$template.parent()
 						.html('<div id="helperQCError" style="height: ' +
@@ -13900,7 +13904,7 @@ var Helper = {
 					window.location = 'index.php?cmd=composing&m=0';
 				}
 			}
-		);
+		});
 	}
 }; // end of var helper
 
