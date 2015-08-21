@@ -54,23 +54,22 @@ window.System = {
 	},
 
 	findNodes: function(xpath, doc) {
-			if (!doc) {
-				doc=document;
-			}
-			var nodes=[];
-			if(xpath.indexOf('/') === 0) {
-				xpath = '.'+xpath;
-				// this is a chrome fix - needs a .// for xpath
-				// where as firefox can fucntion without it.
-				// firefox sitll works with .//
-			}
-
-			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-			if (findQ.snapshotLength===0) {return null;}
-			for (var i=0; i<findQ.snapshotLength; i += 1) {
-				nodes.push(findQ.snapshotItem(i));
-			}
-			return nodes;
+		if (!doc) {
+			doc=document;
+		}
+		var nodes=[];
+		if(xpath.indexOf('/') === 0) {
+			xpath = '.'+xpath;
+			// this is a chrome fix - needs a .// for xpath
+			// where as firefox can fucntion without it.
+			// firefox sitll works with .//
+		}
+		var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		if (findQ.snapshotLength===0) {return null;}
+		for (var i=0; i<findQ.snapshotLength; i += 1) {
+			nodes.push(findQ.snapshotItem(i));
+		}
+		return nodes;
 	},
 
 	findNodeText: function(xpath, doc) {
@@ -88,13 +87,14 @@ window.System = {
 	createDocument: function(details) {
 		//~ var doctype = document.implementation.createDocumentType( 'html', '', '');
 		//~ var dom = document.implementation.createDocument('', 'html', doctype);
-		//~ var doc = document.createElement('HTML');
-		//~ doc.innerHTML = details;
+		var doc = document.createElement('HTML');
+		doc.innerHTML = details;
 		// Use DOMParser to prevent img src tags downloading
 		// The alternative is regexing all the img tags
 		// or src attributes out
-		var parser = new DOMParser();
-		var doc = parser.parseFromString(details, 'text/html');
+		//~ var parser = new DOMParser();
+		//~ var doc = parser.parseFromString(details, 'text/html');
+		// This causes trouble in Firefox - document.evaluate may not return?
 		return doc;
 	},
 
