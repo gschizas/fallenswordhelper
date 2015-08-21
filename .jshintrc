@@ -105,6 +105,10 @@
         "GM_listValues": true,
         //"GM_openInTab": true,
         "GM_xmlhttpRequest": true,
-        "Helper": true
+        "Helper": true,
+        "System": true,
+        "Data": true,
+        "Layout": true,
+        "localforage": true
     }
 }
