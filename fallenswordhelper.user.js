@@ -886,11 +886,11 @@ var Helper = {
 
 	removeGuildAvyImgBorder: function() {
 		var avyImg;
-		if (navigator.userAgent.indexOf('Firefox')>0) {
-			avyImg = System.findNode('//img[contains(@title, "s Logo")]');
-		} else { //chrome
-			avyImg = System.findNode('//img[contains(@oldtitle, "s Logo")]');
-		}
+		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+			//~ avyImg = System.findNode('//img[contains(@title, "s Logo")]');
+		//~ } else { //chrome
+		avyImg = System.findNode('//img[contains(@oldtitle, "s Logo")]');
+		//~ }
 		if (avyImg) {avyImg.style.borderStyle='none';}
 		return;
 	},
@@ -2973,6 +2973,7 @@ var Helper = {
 		
 		// PH 20150110 Only in Chrome. FF is apparently different!
 		// It's important because we lose the mouseover events of the built-in buttons.
+		// It's because you used innerHTML instead of append
 
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
@@ -4373,10 +4374,10 @@ var Helper = {
 		if (!chatTable) {return;}
 
 		// fix for Chrome table width problem
-		if (logScreen === 'Chat' && navigator.userAgent.indexOf('Firefox') === -1) {
-			chatTable.style.tableLayout = 'fixed';
-			chatTable.style.wordWrap = 'break-word';
-		}
+		//~ if (logScreen === 'Chat' && navigator.userAgent.indexOf('Firefox') === -1) {
+		chatTable.style.tableLayout = 'fixed';
+		chatTable.style.wordWrap = 'break-word';
+		//~ }
 
 		var localDateMilli = (new Date()).getTime();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
@@ -4450,11 +4451,11 @@ var Helper = {
 			if (!aRow.cells[0].innerHTML) {continue;}
 			var firstCell = aRow.cells[0];
 			//Valid Types: General, Chat, Guild
-			if (navigator.userAgent.indexOf('Firefox')>0) {
-				messageType = firstCell.firstChild.getAttribute('title');
-			} else { //chrome
-				messageType = firstCell.firstChild.getAttribute('oldtitle');
-			}
+			//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+				//~ messageType = firstCell.firstChild.getAttribute('title');
+			//~ } else { //chrome
+			messageType = firstCell.firstChild.getAttribute('oldtitle');
+			//~ }
 			if (!messageType) {return;}
 			var colorPlayerName = false;
 			var isGuildMate = false;
@@ -5450,13 +5451,13 @@ var Helper = {
 		var player = System.findNode('//textarea[@id="holdtext"]');
 		var avyImg;
 		var playername;
-		if (navigator.userAgent.indexOf('Firefox')>0) {
-			avyImg = System.findNode('//img[contains(@title, "s Avatar")]');
-			if (avyImg) {playername = avyImg.getAttribute('title');}
-		} else { //chrome
-			avyImg = System.findNode('//img[contains(@oldtitle, "s Avatar")]');
-			if (avyImg) {playername = avyImg.getAttribute('oldtitle');}
-		}
+		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+			//~ avyImg = System.findNode('//img[contains(@title, "s Avatar")]');
+			//~ if (avyImg) {playername = avyImg.getAttribute('title');}
+		//~ } else { //chrome
+		avyImg = System.findNode('//img[contains(@oldtitle, "s Avatar")]');
+		if (avyImg) {playername = avyImg.getAttribute('oldtitle');}
+		//~ }
 		if (!avyImg) {return;}
 
 		if(document.URL.indexOf('player_id') !== -1){
@@ -5465,13 +5466,13 @@ var Helper = {
 		}
 		var idindex;
 //************** yuuzhan having fun
-		if (navigator.userAgent.indexOf('Firefox')>0) {
-			$('img[title="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
-			$('img[title="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		} else { //chrome
-			$('img[oldtitle="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
-			$('img[oldtitle="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		}
+		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+			//~ $('img[title="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
+			//~ $('img[title="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
+		//~ } else { //chrome
+		$('img[oldtitle="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
+		$('img[oldtitle="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
+		//~ }
 //**************
 		Helper.profileInjectGuildRel();
 		if (System.getValue('enableBioCompressor')) {Helper.compressBio();}
@@ -12667,7 +12668,7 @@ var Helper = {
 				//~ ['BD', 'Best Damage Items', 'injectCheckWearingItem'],
 				['QE', 'Quick Extract', 'insertQuickExtract'],
 				['QW', 'Quick Wear', 'insertQuickWear'],
-				['BoxL', 'FS Box Log', 'injectFsBoxContent']
+				//~ ['BoxL', 'FS Box Log', 'injectFsBoxContent']
 				//~ ['CRL', 'Creature Log', 'injectMonsterLog'] // TODO
 			]
 			};
