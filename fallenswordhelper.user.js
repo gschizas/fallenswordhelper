@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1502
+// @version        1503
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -17,7 +17,7 @@
 // No warranty expressed or implied. Use at your own risk.
 
 // EVERYTHING MUST BE IN main()
-var main = function() {
+var fshMain = function() {
 
 'use strict';
 
@@ -35,53 +35,17 @@ function GM_ApiBrowserCheck(){
 	if (typeof unsafeWindow === 'undefined'){
 		window.unsafeWindow = window;
 	}
-	//~ unsafeWindow.GM_addStyle = function(css){
-		//~ var style = document.createElement('style');
-		//~ style.textContent = css;
-		//~ document.getElementsByTagName('head')[0].appendChild(style);
-	//~ };
-	//~ if (typeof GM_log === 'undefined'){
-		//~ unsafeWindow.GM_log = function(msg){
-			//~ try{
-				//~ unsafeWindow.console.log('GM_log: ' + msg);
-			//~ } catch(e){}
-		//~ };
-	//~ }
-	//~ GM_clog = function(msg){
-		//~ if (arguments.callee.counter){
-			//~ arguments.callee.counter++;
-		//~ } else{
-			//~ arguments.callee.counter = 1;
-		//~ }
-		//~ GM_log('(' + arguments.callee.counter + ') ' + msg);
-	//~ }
-	//~ GM_addGlobalStyle = function(css){
-		//~ // Redefine GM_addGlobalStyle with a better routine
-		//~ var sel = document.createElement('style');
-		//~ sel.setAttribute('type', 'text/css');
-		//~ sel.appendChild(document.createTextNode(css));
-		//~ var hel = document.documentElement.firstChild;
-		//~ while (hel && hel.nodeName != 'HEAD'){
-			//~ hel = hel.nextSibling;
-		//~ }
-		//~ if (hel && hel.nodeName == 'HEAD'){
-			//~ hel.appendChild(sel);
-		//~ } else{
-			//~ document.body.insertBefore(sel, document.body.firstChild);
-		//~ }
-		//~ return sel;
-	//~ }
 	var needApiUpgrade = false;
 	if (window.navigator.appName.match(/^opera/i) && 
 			typeof window.opera !== 'undefined'){
 		needApiUpgrade = true;
 		gvar.isOpera = true;
-		GM_log = window.opera.postError;
+		unsafeWindow.GM_log = window.opera.postError;
 	}
 	if (typeof GM_setValue !== 'undefined'){
 		var gsv;
 		try {
-			gsv=GM_setValue.toString();
+			gsv=unsafeWindow.GM_setValue.toString();
 		} catch(e) {
 			gsv='staticArgs';
 		}
@@ -152,9 +116,6 @@ function GM_ApiBrowserCheck(){
 					break;
 				}
 			};
-			//~ unsafeWindow.GM_deleteValue = function(name){
-				//~ unsafeWindow.localStorage.removeItem(GMSTORAGE_PATH + name);
-			//~ };
 		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
 			gvar.temporarilyStorage = [];
 			unsafeWindow.GM_getValue = function(name, defValue){
@@ -173,9 +134,6 @@ function GM_ApiBrowserCheck(){
 					gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
 				}
 			};
-			//~ unsafeWindow.GM_deleteValue = function(name){
-				//~ delete gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-			//~ };
 		}
 
 		unsafeWindow.GM_listValues = function(){
@@ -189,16 +147,6 @@ function GM_ApiBrowserCheck(){
 			}
 			return list;
 		};
-		//~ if (typeof GM_openInTab === 'undefined'){
-			//~ unsafeWindow.GM_openInTab = function(url){
-				//~ unsafeWindow.open(url, '');
-			//~ };
-		//~ }
-		//~ if (typeof(GM_registerMenuCommand) == 'undefined'){
-			//~ GM_registerMenuCommand = function(name, cmd){
-				//~ GM_log('Notice: GM_registerMenuCommand is not supported.');
-			//~ }
-		//~ }
 		// Dummy
 		if (!gvar.isOpera || typeof GM_xmlhttpRequest === 'undefined'){
 			unsafeWindow.GM_xmlhttpRequest = function(obj){
@@ -253,1152 +201,64 @@ function GM_JQ_wrapper() {
 		GM_setValue = function(name, value){
 			setTimeout(function() {oldGM_setValue(name, value);}, 0);
 		};
-		//~ var oldGM_openInTab = GM_openInTab;
-		//~ GM_openInTab = function(url) {
-			//~ setTimeout(function() {oldGM_openInTab(url);}, 0);
-		//~ };
 		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
 		GM_xmlhttpRequest = function(details) {
 			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
 		};
-		// don't know how to modify GM_getValue yet (how to return value from setTimeout) - TODO
-		// other GM_functions are not needed.
 	}
 }
 GM_JQ_wrapper();
 
-// System functions
-var System = {
-	init: function() {
-		System.server = document.location.protocol + '//' + document.location.host + '/';
-		var uAgent = navigator.userAgent.match(/(Firefox|Minefield|IceWeasel|Chrome)\/(\d+)/i);
-		System.browserName = uAgent[1];
-		System.browserVersion = parseInt(uAgent[2],10);
-		var imgurls = System.findNode('//img[contains(@src, "/skin/")]');
-		if (!imgurls) {return;} //login screen or error loading etc.
-		var idindex             = imgurls.src.indexOf('/skin/');
-		System.imageServer      = imgurls.src.substr(0,idindex);
-		//~ System.imageServerHTTPOld  = 'http://72.29.91.222'; // keep the old one around for some old images
-		//~ System.imageServerHTTP  = 'http://huntedcow.cachefly.net/fs';
-		System.imageServerHTTP  = 'http://cdn.fallensword.com';
-	},
-
-	getValue: function(name) {
-		return GM_getValue(name, Data.defaults[name]);
-	},
-
-	getValueJSON: function(name) {
-		var resultJSON = System.getValue(name);
-		var result;
-		if (resultJSON) {
-			var reviver = function (key, value) {
-				if (typeof value === 'string') {
-					var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
-					if (a) {
-						return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
-					}
-				}
-				return value;
-			};
-			result = JSON.parse(resultJSON, reviver);
-		}
-		return result;
-	},
-
-	setValueJSON: function(name, value) {
-		GM_setValue(name, JSON.stringify(value));
-	},
-
-	findNode: function(xpath, doc) {
-		var nodes=System.findNodes(xpath, doc);
-		if (!nodes) {return null;}
-		return nodes[0];
-	},
-
-	findNodes: function(xpath, doc) {
-			if (!doc) {
-				doc=document;
-			}
-			var nodes=[];
-			if(xpath.indexOf('/') === 0) {
-				xpath = '.'+xpath;
-				// this is a chrome fix - needs a .// for xpath
-				// where as firefox can fucntion without it.
-				// firefox sitll works with .//
-			}
-
-			var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-			if (findQ.snapshotLength===0) {return null;}
-			for (var i=0; i<findQ.snapshotLength; i += 1) {
-				nodes.push(findQ.snapshotItem(i));
-			}
-			return nodes;
-	},
-
-	findNodeText: function(xpath, doc) {
-		var node=System.findNode(xpath, doc);
-		if (!node) {return null;}
-		return node.textContent;
-	},
-
-	findNodeInt: function(xpath, doc) {
-		var node=System.findNode(xpath, doc);
-		if (!node) {return null;}
-		return System.intValue(node.textContent);
-	},
-
-	createDocument: function(details) {
-		var doc=document.createElement('HTML');
-		doc.innerHTML=details;
-		return doc;
-	},
-
-	formatDateTime: function(aDate) {
-		//var result=aDate.toDateString();
-		var yyyy = aDate.getFullYear();
-		var mon = aDate.getMonth()+1;
-		if (mon<10) {mon = '0' + mon;}
-		var dd = aDate.getDate();
-		if (dd<10) {dd = '0' + dd;}
-
-		var hh=aDate.getHours();
-		if (hh<10) {hh = '0' + hh;}
-		var mm=aDate.getMinutes();
-		if (mm<10) {mm = '0' + mm;}
-		var ss=aDate.getSeconds();
-		if (ss<10) {ss = '0' + ss;}
-
-		var result = yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
-
-		return result;
-	},
-
-	formatShortDate: function(aDate) {
-		var result;
-		var months = ['January', 'February', 'March', 'April', 'May', 'June',
-			'July', 'August', 'September', 'October', 'November', 'December'];
-		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-			'Friday', 'Saturday'];
-		var yyyy = aDate.getFullYear();
-		var dd = aDate.getDate();
-		if (dd<10) {dd = '0' + dd;}
-		var ddd = days[aDate.getDay()].substr(0, 3);
-		var month = months[aDate.getMonth()].substr(0, 3);
-		var hh=aDate.getHours();
-		if (hh<10) {hh = '0' + hh;}
-		var mm=aDate.getMinutes();
-		if (mm<10) {mm = '0' + mm;}
-		result = hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' +
-			yyyy;
-		return result;
-	},
-
-	saveValueForm: function(name) {
-		var formElement = System.findNode('//input[@name="' + name + '"]',
-			this);
-		if (formElement.getAttribute('type') === 'checkbox') {
-			GM_setValue(name, formElement.checked);
-		} else if (formElement.getAttribute('type') === 'radio') {
-			var radioElements = System.findNodes('//input[@name="' + name +
-				'"]', 0, this);
-			for (var i=0; i<radioElements.length; i += 1) {
-				//~ var radioElement = radioElements[i];
-				if (radioElements[i].checked) {
-					GM_setValue(name, radioElements[i].value);
-				}
-			}
-		} else {
-			GM_setValue(name, formElement.value);
-		}
-	},
-
-	xmlhttp: function(theUrl, func, theCallback) {
-		theUrl=theUrl.replace(System.server, '');
-		if (theUrl.indexOf('http://')<0) {
-			theUrl = System.server + theUrl;
-		}
-		GM_xmlhttpRequest({
-			method: 'GET',
-			url: theUrl,
-			callback: theCallback,
-			headers: {
-			//	'User-Agent' : navigator.userAgent,
-			//	'Referer': document.location,
-			//	'Cookie' : document.cookie
-				'Cache-Control' : 'no-cache, no-store, max-age=0, must-revalidate',
-				'Pragma' : 'no-cache',
-				'Expires' : 'Fri, 01 Jan 1990 00:00:00 GMT'
-			},
-			onload: function(responseDetails) {
-				if (func) {
-					func.call(this, responseDetails.responseText, this.callback);
-				}
-			}
-		});
-	},
-
-	intValue: function(theText) {
-		if (!theText) {return 0;}
-		return parseInt(theText.replace(/,/g,''),10);
-	},
-
-	getIntFromRegExp: function(theText, rxSearch) {
-		var result;
-		var matches = theText.replace(/,/g,'').match(rxSearch);
-		if (matches) {
-			result = parseInt(matches[1],10);
-		} else {
-			result = 0;
-		}
-		return result;
-	},
-
-	addCommas: function(nStr) {
-		var x, x1, x2;
-		nStr += '';
-		x = nStr.split('.');
-		x1 = x[0];
-		x2 = x.length > 1 ? '.' + x[1] : '';
-		var rgx = /(\d+)(\d{3})/;
-		while (rgx.test(x1)) {
-			x1 = x1.replace(rgx, '$1' + ',' + '$2');
-		}
-		return x1 + x2;
-	},
-
-	uniq: function (arr, removeBy){
-		var seen = {};
-		var out = [];
-		var len = arr.length;
-		var j = 0;
-		var i;
-		var item;
-		if (removeBy) {
-			for(i=0;i<len;i += 1) {
-				item = arr[i];
-				if(seen[item[removeBy]] === 1) {continue;}
-				seen[item[removeBy]] = 1;
-				out[j] = item;
-				j += 1;
-			}
-		} else {
-			for(i=0;i<len;i += 1) {
-				item = arr[i];
-				if(seen[item] === 1) {continue;}
-				seen[item] = 1;
-				out[j] = item;
-				j += 1;
-			}
-		}
-		return out;
-	},
-
-	convertTextToHtml: function(inputText) {
-		return inputText.
-			replace(/</g,'&lt').
-			replace(/>/g,'&gt').
-			replace(/\n/g,'<br>').
-			replace(/\[\/([a-z])\]/g,'<\/\$1>').
-			replace(/\[([a-z])\]/g,'<\$1>');
-	},
-
-	parseDate: function(textDate) {
-		var textDateSplitSpace = textDate.split(' ');
-		var timeText = textDateSplitSpace[0];
-		var dateText = textDateSplitSpace[1];
-		var dayText = dateText.split('/')[0];
-		var monthText = dateText.split('/')[1];
-		var months = {'Jan': 'January',
-			'Feb': 'February',
-			'Mar': 'March',
-			'Apr': 'April',
-			'May': 'May',
-			'Jun': 'June',
-			'Jul': 'July',
-			'Aug': 'August',
-			'Sep': 'September',
-			'Oct': 'October',
-			'Nov': 'November',
-			'Dec': 'December'
-			};
-		var fullMonthText = months[monthText];
-		var yearText = dateText.split('/')[2];
-		var dateAsDate = new Date(fullMonthText + ' ' + dayText + ', ' + yearText + ' ' + timeText + ':00');
-		return dateAsDate;
-	},
-
-	toggleVisibilty: function(evt) {
-		var anItemId=evt.target.getAttribute('linkto');
-		var anItem=document.getElementById(anItemId);
-		var currentVisibility=anItem.style.visibility;
-		anItem.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
-		anItem.style.display= currentVisibility === 'hidden' ? 'block' : 'none';
-		if (System.getValue(anItemId)) {
-			GM_setValue(anItemId, '');
-		} else {
-			GM_setValue(anItemId, 'ON');
-		}
-	},
-
-	addStyle: function(css) {
-		var style = document.createElement('style');
-		style.textContent = css;
-		document.getElementsByTagName('head')[0].appendChild(style);
-	},
-
-	openInTab: function(url){
-		setTimeout(function() {unsafeWindow.open(url, '');}, 0);
-	},
-
-	escapeHtml: function(unsafe) {
-		return unsafe
-			 .replace(/&/g, '&amp;')
-			 .replace(/</g, '&lt;')
-			 .replace(/>/g, '&gt;')
-			 .replace(/"/g, '&quot;')
-			 .replace(/'/g, '&#039;');
-	}
-};
-System.init();
-
-var Data = {
-
-	plantFromComponent: function(aComponent) {
-		switch(aComponent) {
-			case 'Amber Essense':      return 'Amber Plant';
-			case 'Blood Bloom Flower': return 'Blood Bloom Plant';
-			case 'Dark Shade ':        return 'Dark Shade Plant';
-			case 'Snake Eye':          return 'Elya Snake Head';
-			case 'Snake Venom Fang':   return 'Elya Snake Head';
-			case 'Heffle Wart':        return 'Heffle Wart Plant';
-			case 'Jademare Blossom':   return 'Jademare Plant';
-			case 'Trinettle Leaf':     return 'Trinettle Plant';
-			case 'Purplet Flower':     return 'Purplet Plant';
-			default:                   return aComponent;
-		}
-	},
-
-	huntingOnImage:
-		'<img title="Hunting mode is ON" src="' +
-		'data:image/gif;base64,R0lGODlhKAAoALMAAD+yQH3Kf7zjvxCfEMvpzur17qzcr' +
-		'y+rMDCsMGLAY9vv3k64T5fUmh+lIPr7/gCZACH5BAAAAAAALAAAAAAoACgAAASsEL1J' +
-		'q704T6m7/2AojmRpnmiqrtQSBA2rDYJjO4mMBfd9YICXcAEoFn+eQs8WAAoDDIFiSRV' +
-		'YGROqwxAaELTVyXSZCx0ESrBNMFlYpY7CwOQFF67PAABZqqvBBHN9X39aXHSEhUsofo' +
-		'o3KY2OgieRhQAqAy8JAAZ/lzo1amUyoWBNoH+nMmlghzKFbDqwOgOKOgC2MriFkyq7n' +
-		'jIDRsPEvTrHyMnKy8zHHM0bEQA7' + '" border=0 width=10 height=10>',
-
-	huntingOffImage:
-		'<img title="Hunting mode is OFF" src="' +
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtA' +
-		'AAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAA' +
-		'gOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHY' +
-		'zLjM2qefiJQAAAVhJREFUWEftl08OQTEQxrkq5xDHkDiDxAUkrEms7IiNFQtWNiTKJx' +
-		'mppm2mpp33IhXNC9qZX7/50+qaTuf1bvELgG0ekK8CSkSoCkrUexew1EDp9Y0ADpZDg' +
-		'8HZnCrg7DA3t/vja/QW/SioGiAUc+Hoc0zJDyDJbj85IeDOOV3PQcBYuIOAo83YICTb' +
-		'yz5o2KcI1tCADdpASD18P9lNg2FmhXh1XCdBEgxACTC20VgesgDhBM5iYQqpaaeArS4' +
-		'BwyYrB7m5RPM4qsK5He5f8pytoG8DHMhY7tm/wZbPhwgQBnNC+opFDJgb0lUxC2BOyG' +
-		'KAuSCLAuaALA4IB9ROqAEj+bnVrALoOvHdYkLA7qmSrUhijT4F0L04VEAom3KGu81aR' +
-		'UFugWCefQNS+9P0V4DYjF1wrQtxBfT1w5QcbETB1Nu6eg5WQIkC0rUqbUYCWQEl6qmd' +
-		'xRLIJyPitjwjlrDgAAAAAElFTkSuQmCC' + '" border=0 width=10 height=10>',
-
-	soundMuteImage:
-		'<img border=0 title="Turn Off Sound when you have a new log message' +
-		'" width=10 height=10 src="' +
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hA' +
-		'AAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJ' +
-		'ZTwAAAHNSURBVHjaYvz//z8DJQAggJgYKAQAAUS0Ad3dnZFtbS1P0cUBAoiFkMaenm7' +
-		'm////Nfz9+7f4379/nO/9/XOAwpsEN258BJIHCCAMA/r7+6wYGCDh8u/ffwag5oXCws' +
-		'IqQkJCDOw7doCE04B4GUw9QABhGADUcJSVlQ1EMzABPSgsLMbAxsbBIHnyNIPMqzcgJ' +
-		'VeAtr+DqQcIIAwD/v37y2BoaMjw8+cvIPsfw5MnTxhEjx1gkHv9muEdCwsD19+/acjq' +
-		'AQIIw4A/f/4yPH78mOHhw0dgAwwePmTQAWr+xMHBMF+Yn6Fn8vQvyOoBAgiLAX8Yvn7' +
-		'9wnDv3j0Gx0+fGHS+f2d4AUwri/l5GX79/YcRyAABhBGNP358ZwClLV+g7Xa/fjG8YW' +
-		'RgqP78meED0CCQ99ABQABhuODnz58MYsePMRh9+MjwnpmFYamUOAMXMDSZgBjkJXQAE' +
-		'EAYLkh68HiO9bsPH5j//b++ho/L5fOvH3dlZCQZxMSEGbAle4AAQjEAmEgMJH798gem' +
-		'nNvs//+bNcxduJeBgVH9+7fvbW/fvPuOLaEBBBDYVGT8zs/PHYh50MVTUxOjgfgZujh' +
-		'AADFSmhsBAoji3AgQYAAwuNxkuZyGCwAAAABJRU5ErkJggg==' + '">',
-
-	soundImage:
-		'<img border=0 title="Turn On Sound when you have a new log message' +
-		'" width=10 height=10 src="' +
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hA' +
-		'AAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJ' +
-		'ZTwAAAI9SURBVHjaYvz//z8DJQAggJgYKAQAAYTTgO7uzsi2tpanhAwACCAWdIGenm7' +
-		'm////Nfz9+7f4379/nNg0PcoqTmH48XOb3LwpzwACiKW/v8+KgQESDv/+/WcAal4oLC' +
-		'ysIiQkxHDhwnlMzRmF1dxMf1u+fvtxBsg1BQggFqCGo6ysbCCNDExADwkLizGwsXEwf' +
-		'P78heHnj5+omtMLUoE2b/z153cLD8s/k0duIdkAAcTy799fBkNDQ4afP38BXfCP4cmT' +
-		'JwwPHtxi4OPjY/j1C2HAo9T8FG7Gv7OANlf+/vEzn52dcSLDtx+5AAHE8ufPX4bHjx8' +
-		'zPHz4CGzAjx8/GL5+/Qp0DSPD7z+/wZpfBUbfYeDiTv/7/w8Dw7fv7XJbVzA+svaeCH' +
-		'SNOkAAAQ34A9TwheHevXtAG38xfPnyheHbt28MCgpyDLCwAQJBhu8/gNy/QAN+QERA9' +
-		'M+fDAABxPTjx3cGUFoSFhZiEBDgZwB5CWQACIPYICC2fqkwUIMay9/fII2Vjwwc83i4' +
-		'mRkYvv+8CRBALD+Bpty8eY0B5BKQF6SlJSEJBBiiID4MyO1YNf2RmTsj0NmHWBn/XWb' +
-		'4BbT1x8/JAAHE9PfPb+sf339aAw2C4u93ZWQkGcTEhBnQk7ncqZ3TgLaGsgNTz5dHb8' +
-		'/IPb80FSCAGNEVpaUlMf//978JyCxkYGTgnD17PiNGWhDTyWD49XuT3IebzwACCGwLN' +
-		'pyamhgNxM9wycMwQAAxUpobAQKI4twIEGAA+Mk8nL2QZm8AAAAASUVORK5CYII=' +
-		'">',
-
-	greenDiamond: 'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH' +
-		'5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D',
-
-	yellowDiamond: 'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAAC' +
-		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D',
-
-	orangeDiamond:
-		'<img width="10" height="10" title="Offline" src="' + 
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAAC' +
-		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'">',
-
-	offlineDot: 'data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SEhK2tr' +
-		'bW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpj' +
-		'YxghISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAW' +
-		'GICAChCINxihm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3' +
-		'E0GD8rzSK6XDicDNqMdIoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PE' +
-		'BIKFYEeAAoJGRUTdJc1FgIiAx1mZhtHHQMqIgQCHAGtKiEAOw%3D%3D',
-
-	sevenDayDot:
-		'<img width="10" height="10" title="Offline" src="' +
-		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNr' +
-		'azEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1' +
-		'zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQA' +
-		'V8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl' +
-		'0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8U' +
-		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7' +
-		'">',
-
-	//~ redDot: return 'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9znDEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudSa85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiLKpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTHSICFGSeSQcCKiIBDA0MoiohADs%3D',
-
-	runIcon:
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf' +
-		'8/9hAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAAd0SU1FB9gDBhM' +
-		'MFhZz9poAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAABv0lEQV' +
-		'Q4y6WTMWsbQRCFPwUVa5BhBS684MZwzRkVukJFBGkE+QEhpUuVTid1SulSKt3lmvwAl' +
-		'04nF4a4UJCb4GsOXSNYQQS7IIGnU4qzT5JlJ5DMMsXO7ns7O/Om5H5Z/sfKzwNW3Gow' +
-		'irlPE2YiABwqxUkQ0mm0Mapa2rxf2syge9NfjdOEj++THLg8Yw+wCyHxGfdTy0kQ0n/' +
-		'XLUjebILtNOO0FgLQq0+YVS5wiwyFJdKa01qInWZ0b/qrLQIrbjVOE5pHBhDelr8UJN' +
-		'5cIYA8rlZgGKcJVtyqIBiMYoxWWHFk3m3VpFefIOaKzLvCm0eawSheZzBOEzTgloJby' +
-		'k6le/UJJrwtzpXKs9iqgZ/J2sW/SPLpQ4if5Q/4xw6Vi83i4Y/9Hv4c0v06BEDPZVcH' +
-		'si+vgi9/XPL52znsg1EGqbhtglYtIpsmqFfA8W3MsTbkFxR+LrRq0boGnUYbKwJKIcg' +
-		'WuH99gRMp4qqisOLpNNprAqOqpWYQ4UTQB4cF+Py6DzywpxX6QKMqGjv3NIOokPSOlL' +
-		'+ndxxrjaooqqoKgBOHLIXM5+BNKZeeT+PTMA3TO4rfKGgF0d+H6V/sN7ur7I3UK1cpA' +
-		'AAAAElFTkSuQmCC',
-
-	stopIcon:
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAAB' +
-		'y6+R8AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAPYQAAD2' +
-		'EBqD+naQAAAAd0SU1FB9gDBhMtH+MwW90AAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3a' +
-		'XRoIEdJTVBXgQ4XAAAAyUlEQVQoz52SLQ4CMRCFv00Qi+tKZCWSI3AE1hEUIWBwhKug' +
-		'CEEBDotEIjlC5dZ13FZRRMOGFQ0/k4yZvC/vZWayEAK/VgfAbHdBruePYjUs0fNZ1gG' +
-		'Qy5HBdPkRuu83MJ9FJwA8yOmQdhlP2vGQGiOOwqddjDiQ+g1q3Pz3i3A19I3BO5cU9o' +
-		'xBWvEAxMdOlXhc/QYVAqg8dnITedS9IG8tldYUeTfJVFrjrW3FC1oVsErfSgEWsgZSo' +
-		'/JxW6xT+qwBR2Uc/PN7T+yzRewsE50wAAAAAElFTkSuQmCC',
-
-	buffList: [
-		{name: 'Rage',                stamina: 10, 'duration': 90,   minCastLevel: 1,    treeId: 0, skillId: 0,   buff: '+0.2% base attack per point.', nicks: 'rage'},
-		{name: 'Stun',                stamina: 15, 'duration': 90,   minCastLevel: 1,    treeId: 0, skillId: 1,   buff: '+0.1% chance per point to half opponents chance to hit.', nicks: 'stun,st'},
-		{name: 'Fury',                stamina: 10, 'duration': 90,   minCastLevel: 25,   treeId: 0, skillId: 2,   buff: '+0.1% base Attack and +0.1% base Damage per point.', nicks: 'fury'},
-		{name: 'Blood Thirst',        stamina: 10, 'duration': 45,   minCastLevel: 25,   treeId: 0, skillId: 4,   buff: '+0.2% chance per point to drain 5% of your opponents current HP per combat turn from your opponent.', nicks: 'blood thirst,bloodthirst,bt'},
-		{name: 'Enchant Weapon',      stamina: 10, 'duration': 90,   minCastLevel: 25,   treeId: 0, skillId: 5,   buff: '+0.1% per point stat bonus increase to your equipped weapon. (Excludes \\\'Gain\\\' bonuses).', nicks: 'enchant weapon,ew'},
-		{name: 'Berserk',             stamina: 15, 'duration': 90,   minCastLevel: 75,   treeId: 0, skillId: 3,   buff: '+0.2% base Damage per point.', nicks: 'berserk'},
-		{name: 'Holy Flame',          stamina: 15, 'duration': 90,   minCastLevel: 75,   treeId: 0, skillId: 6,   buff: '+0.2% extra damage vs. undead per point.', nicks: 'holy flame,hf'},
-		{name: 'Dark Curse',          stamina: 20, 'duration': 60,   minCastLevel: 150,  treeId: 0, skillId: 7,   buff: '+0.2% reduction of opponents defence per point.', nicks: 'dark curse,dc'},
-		{name: 'Shockwave',           stamina: 20, 'duration': 90,   minCastLevel: 200,  treeId: 0, skillId: 29,  buff: '+0.1% per point chance per point that your opponent will forfeit their next combat turn.', nicks: 'shockwave,sw,shock'},
-		{name: 'Ignite',              stamina: 10, 'duration': 60,   minCastLevel: 200,  treeId: 0, skillId: 30,  buff: '+0.1% per point chance per point that your opponent will be set on fire. Each successful hit thereafter will inflict between 5% and 10% extra damage.', nicks: 'ignite,ign'},
-		{name: 'Super Elite Slayer',  stamina: 25, 'duration': 15,   minCastLevel: 250,  treeId: 0, skillId: 31,  buff: '+0.2% per point reduction of damage, attack, defence and armor to super elite creatures.', nicks: 'super elite slayer,ses,se slayer'},
-		{name: 'Wither',              stamina: 15, 'duration': 60,   minCastLevel: 250,  treeId: 0, skillId: 32,  buff: '+0.2% per point chance of a 50% reduction of your opponents HP at the start of combat.', nicks: 'wither,with'},
-		{name: 'Shatter Armor',       stamina: 20, 'duration': 60,   minCastLevel: 300,  treeId: 0, skillId: 33,  buff: '+0.05% per point chance to reduce opponents armor by 75%.', nicks: 'shatter armor,sa'},
-		{name: 'Death Wish',          stamina: 20, 'duration': 45,   minCastLevel: 300,  treeId: 0, skillId: 34,  buff: '+0.03% per point chance to instantly kill vs. creatures. (Excludes Super Elites)', nicks: 'deathwish,dw,deathw,death wish'},
-		{name: 'Spell Breaker',       stamina: 35, 'duration': 45,   minCastLevel: 300,  treeId: 0, skillId: 35,  buff: '+0.1% per point chance to remove a random buff from PvP target upon a successful attack.', nicks:'spell breaker,sb'},
-		{name: 'Spectral Knight',     stamina: 15, 'duration': 45,   minCastLevel: 400,  treeId: 0, skillId: 48,  buff: '+0.1% per point chance to reduce targets armor by 100%. (vs Creature only)', nicks: 'spectral knight,sk,spec knight'},
-		{name: 'Keen Edge',           stamina: 10, 'duration': 60,   minCastLevel: 400,  treeId: 0, skillId: 47,  buff: '+0.1% per point to your attack for each complete set equipped.', nicks: 'keen edge,ke'},
-		{name: 'Arterial Strike',     stamina: 20, 'duration': 60,   minCastLevel: 500,  treeId: 0, skillId: 49,  buff: 'Gain additional 0.1% xp per point for every additional round of combat. (Note that this does not activate if conserve activated)', nicks: 'arterial strike,as,art strike,art str'},
-		{name: 'Death Dealer',        stamina: 20, 'duration': 60,   minCastLevel: 500,  treeId: 0, skillId: 50,  buff: 'For every 5 kills in a row, without dying, you gain +0.01% extra damage per point (Max 20% and vs. creatures only).', nicks: 'death dealer,dd'},
-		{name: 'Savagery',            stamina: 15, 'duration': 45,   minCastLevel: 600,  treeId: 0, skillId: 51,  buff: '0.05% chance per point that your defense stat is added to your attack and your armor stat is added to your damage.', nicks: 'savagery,savage'},
-		{name: 'Chi Strike',          stamina: 20, 'duration': 90,   minCastLevel: 700,  treeId: 0, skillId: 52,  buff: '0.1% per point of your Health total is added to your damage', nicks:'chi strike,chi,chis,chi str'},
-		{name: 'Shield Strike',       stamina: 20, 'duration': 45,   minCastLevel: 700,  treeId: 0, skillId: 53,  buff: '0.1% per point chance that your defense stat is reduced to zero and your damage is doubled.', nicks: 'shield strike,ss,sh str'},
-		{name: 'Demoralize',          stamina: 25, 'duration': 30,   minCastLevel: 800,  treeId: 0, skillId: 73,  buff: '+0.25% per point chance to half the opponents enchancement levels for the battle. Note this skill only takes effect if you initiated the combat.', nicks: 'demoralize,dem'},
-		{name: 'Poison',              stamina: 25, 'duration': 60,   minCastLevel: 800,  treeId: 0, skillId: 70,  buff: '+0.1% per point chance that your opponent will be poisoned. Each successful hit thereafter will inflict between 10% and 20% extra damage.', nicks: 'poison,poi'},
-		{name: 'Iron Fist',           stamina: 25, 'duration': 60,   minCastLevel: 900,  treeId: 0, skillId: 74,  buff: '+0.1% per point stat bonus increase to your equipped gloves. (Excludes \\\'Gain\\\' bonuses).', nicks: 'iron fist,if'},
-		{name: 'Spell Leech',         stamina: 50, 'duration': 60,   minCastLevel: 900,  treeId: 0, skillId: 79,  buff: '+0.1% per point chance when you defeat an opponent in PvP that you initiated, you will steal a random buff. Note the remaining duration of the buff is reduced by 50% and will not take effect until the next combat. Note also if you already have the buff active, it will replace the existing buff you have active.', nicks: 'spell leech,sl'},
-		{name: 'Distraction',         stamina: 25, 'duration': 60,   minCastLevel: 900,  treeId: 0, skillId: 78,  buff: '+0.2% per point chance to obtain no gold from a successful combat. +0.05% per point chance to inflict double damage in each round of combat. Note this skill has no effect in PvP.', nicks: 'distraction,dis'},
-		{name: 'Coordinated Attack',  stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 0, skillId: 118, buff: '+0.05% per point added to Attack and Damage if every piece of equipped gear is part of a set.', nicks: 'coordinated attack,coorda'},
-		{name: 'Undermine',           stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 0, skillId: 108, buff: 'Increases the maximum percentage (above 100%) of the Breaker enhancement by +0.2% per point.', nicks: 'undermine,um'},
-		{name: 'Cursed Rune',         stamina: 30, 'duration': 120,  minCastLevel: 1000, treeId: 0, skillId: 89,  buff: '0.2% per point stat bonus to your equipped rune. Excludes \\\'Gain\\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.', nicks: 'cursed rune,crune'},
-		{name: 'Anti Deflect',        stamina: 30, 'duration': 60,   minCastLevel: 1000, treeId: 0, skillId: 105, buff: '+0.2% per point chance to prevent your opponent activating Deflect.', nicks: 'anti deflect,ad'},
-		{name: 'Overkill',            stamina: 30, 'duration': 60,   minCastLevel: 1200, treeId: 0, skillId: 109, buff: 'When you inflict 2 times or more of the starting hit points in the first round of combat, you have a 0.25% per point chance to gain 0.025% per point extra XP. (PvE Only)', nicks: 'overkill,ok'},
-		{name: 'Smashing Hammer',     stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 0, skillId: 111, buff: '+0.05% per point added to your damage for each complete set equipped.', nicks: 'smashing hammer,sh'},
-		{name: 'Mighty Vigor',        stamina: 35, 'duration': 60,   minCastLevel: 1200, treeId: 0, skillId: 113, buff: 'For every 50 points of the skill, can equip items 1 level higher than your level.', nicks: 'mighty vigor,mv'},
-		{name: 'Fist Fight',          stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 0, skillId: 115, buff: '+0.1% per point chance that both players will lose the benefit of ALL skills at the start of combat. This skill takes effect before Sealed. (PvP Only)', nicks: 'fist fight,ff'},
-		{name: 'Cursed Ring',         stamina: 30, 'duration': 120,  minCastLevel: 1400, treeId: 0, skillId: 88,  buff: '0.2% per point stat bonus to your equipped ring. Excludes \\\'Gain\\\' bonuses. Double chance of durability loss. Prevents Unbreakable from working while active.', nicks: 'cursed ring,cring'},
-		{name: 'Sharpen',             stamina: 30, 'duration': 60,   minCastLevel: 1400, treeId: 0, skillId: 106, buff: 'Increases the maximum percentage (above 100%) of the Piercing Strike enhancement by +0.1% per point.', nicks: 'sharpen,sharp'},
-		{name: 'Balanced Attack',     stamina: 30, 'duration': 90,   minCastLevel: 1400, treeId: 0, skillId: 116, buff: '+0.05% per point added to Attack and Damage if every piece of equipped gear is the same level.', nicks: 'balanced attack,ba'},
-		{name: 'Heavy Weight',        stamina: 20, 'duration': 120,  minCastLevel: 1600, treeId: 0, skillId: 146, buff: 'Increases damage in combat by +0.025% per point providing you have at least 2,500 gold multiplied by your level in hand.', nicks: 'heavy weight, hw'},
-		{name: 'Armored Strike',      stamina: 30, 'duration': 60,   minCastLevel: 1600, treeId: 0, skillId: 130, buff: '+0.05% per point chance that your Armor stat is reduced to zero and your Damage is doubled. (PvE Only)', nicks: 'armored strike, armstr'},
-		{name: 'Invert',              stamina: 40, 'duration': 180,  minCastLevel: 2000, treeId: 0, skillId: 173, buff: '+0.2% per skill level chance that enemies armor and defense stats are switched in a PvP attack.', nicks: 'invert'},
-		{name: 'Reign of Terror',     stamina: 40, 'duration': 60,   minCastLevel: 2500, treeId: 0, skillId: 174, buff: '+0.1% per skill level reduction to relic defenders armor/defense. (Only counts for capturing groups leader)', nicks: 'reign of terror'},
-		{name: 'Critical Strike',     stamina: 40, 'duration': 90,   minCastLevel: 3000, treeId: 0, skillId: 175, buff: 'Increases the maximum percentage (above 100%) of the Critical Hit enhancement by +0.25% per point.', nicks: 'critical strike'},
-		{name: 'Great Vigor',         stamina: 10, 'duration': 90,   minCastLevel: 1,    treeId: 1, skillId: 12,  buff: '+0.2% base HP per point.', nicks: 'great vigor,vigor,gv'},
-		{name: 'Fortify',             stamina: 10, 'duration': 120,  minCastLevel: 25,   treeId: 1, skillId: 8,   buff: '+0.1% base Armor per point.', nicks: 'fortify'},
-		{name: 'Evade',               stamina: 10, 'duration': 90,   minCastLevel: 25,   treeId: 1, skillId: 10,  buff: '+0.1% base Defence per point.', nicks: 'evade'},
-		{name: 'Absorb',              stamina: 20, 'duration': 120,  minCastLevel: 25,   treeId: 1, skillId: 13,  buff: '+0.1% chance per point that you will absorb 25% of the damage inflicted on you.', nicks: 'absorb,abs'},
-		{name: 'Rock Skin',           stamina: 15, 'duration': 90,   minCastLevel: 75,   treeId: 1, skillId: 11,  buff: '+0.1% base Defence and +0.1 base Armor per point.', nicks: 'rock skin,rs'},
-		{name: 'Enchanted Armor',     stamina: 10, 'duration': 90,   minCastLevel: 75,   treeId: 1, skillId: 9,   buff: '+0.1% per point stat bonus increase to your equipped armor. (Excludes \\\'Gain\\\' bonuses).', nicks: 'enchanted armor,enchant armor,ea,ench arm,ench armor'},
-		{name: 'Aura of Protection',  stamina: 20, 'duration': 90,   minCastLevel: 150,  treeId: 1, skillId: 15,  buff: '+0.1% base Defence, +0.1% base Armor and +0.1% base HP per point.', nicks: 'aura of protection,aop,aofp'},
-		{name: 'Deflect',             stamina: 25, 'duration': 300,  minCastLevel: 150,  treeId: 1, skillId: 14,  buff: '+0.25% chance per point that a player attacking you will automatically fail before combat starts.', nicks: 'deflect,defl'},
-		{name: 'Force Shield',        stamina: 10, 'duration': 60,   minCastLevel: 200,  treeId: 1, skillId: 27,  buff: '+0.1% per point chance to reduce damage done to you to 1.', nicks: 'force shield,fs'},
-		{name: 'Unbreakable',         stamina: 20, 'duration': 90,   minCastLevel: 200,  treeId: 1, skillId: 28,  buff: '+0.5% per point chance per point of equipment not taking durability loss during combat.', nicks: 'unbreakable,ub,unb,unbr'},
-		{name: 'Honor',               stamina: 10, 'duration': 180,  minCastLevel: 800,  treeId: 1, skillId: 82,  buff: '+0.2% per point decrease to the PvP Rating points transferred upon defeat.', nicks: 'honor'},
-		{name: 'Assist',              stamina: 30, 'duration': 120,  minCastLevel: 250,  treeId: 1, skillId: 36,  buff: '+0.05% per point chance of one of your allies assisting in combat vs. creatures. (Ally is randomly selected and adds 50% of their attack, defense, damage, armor and hp - note this also excludes allies whom are more than 25 levels above you.).', nicks: 'assist,ass'},
-		{name: 'Constitution',        stamina: 25, 'duration': 30,   minCastLevel: 300,  treeId: 1, skillId: 37,  buff: '+0.1% per point increase to your defense.', nicks: 'constitution,const'},
-		{name: 'Counter Attack',      stamina: 20, 'duration': 60,   minCastLevel: 400,  treeId: 1, skillId: 54,  buff: 'Uses 0.25% extra stamina (per point) to add 0.25% to both attack and damage. (Both values are rounded up, vs. creature only)', nicks: 'counter attack,ca'},
-		{name: 'Summon Shield Imp',   stamina: 50, 'duration': 60,   minCastLevel: 400,  treeId: 1, skillId: 55,  buff: 'Creates an Imp which can absorb 100% of damage. Each full absorb uses one of the Shield Imp\\\'s hit points. The Shield Imp starts with 3 hit points and gains one for each 50 points placed in this skill. The Shield Imp auto-debuffs when it reaches zero hit points. (Note Super-Elites can crush the imp in a single turn regardless of hit points remaining and it only works in PvE.', nicks: 'summon shield imp,ssi,imp'},
-		{name: 'Vision',              stamina: 20, 'duration': 90,   minCastLevel: 500,  treeId: 1, skillId: 56,  buff: 'Lights up dark realms. More skill points allow more vision on the \\\'Map\\\' screen. (Vision radius increases every 50 levels).', nicks: 'vision,vis'},
-		{name: 'Fortitude',           stamina: 15, 'duration': 90,   minCastLevel: 500,  treeId: 1, skillId: 57,  buff: 'Defense stat is added to HP. (0.1% per point).', nicks: 'fortitude,fort'},
-		{name: 'Flinch',              stamina: 20, 'duration': 60,   minCastLevel: 600,  treeId: 1, skillId: 58,  buff: '0.1% per point decrease in enemies Attack stat', nicks: 'flinch'},
-		{name: 'Terrorize',           stamina: 20, 'duration': 60,   minCastLevel: 700,  treeId: 1, skillId: 59,  buff: '0.1% per point decrease in enemies Damage stat.', nicks: 'terrorize,terror'},
-		{name: 'Nightmare Visage',    stamina: 40, 'duration': 1000, minCastLevel: 700,  treeId: 1, skillId: 60,  buff: '0.25% per point of your Attack will be transferred into Defense. (Great for offline protection!)', nicks: 'nightmare visage,nv,visage'},
-		{name: 'Sanctuary',           stamina: 25, 'duration': 30,   minCastLevel: 800,  treeId: 1, skillId: 44,  buff: '+0.1% per point increase to your armor', nicks: 'sanctuary,sanc'},
-		{name: 'Dull Edge',           stamina: 10, 'duration': 60,   minCastLevel: 800,  treeId: 1, skillId: 46,  buff: '+0.4% per point reduction to creatures \\\'Piercing Strike\\\' enhancement.', nicks: 'dull edge,de'},
-		{name: 'Erosion',             stamina: 25, 'duration': 180,  minCastLevel: 900,  treeId: 1, skillId: 80,  buff: '+0.1% per point chance to reduce an attackers item durability to 1 if durability damage is inflicted. Note this skill only works in PvP and if you are defending.', nicks: 'erosion,ero'},
-		{name: 'Avert Gaze',          stamina: 10, 'duration': 60,   minCastLevel: 900,  treeId: 1, skillId: 71,  buff: '+0.5% per point chance of not being affected by Hypnotize.', nicks: 'avert gaze,ag'},
-		{name: 'Enchant Shield',      stamina: 25, 'duration': 60,   minCastLevel: 900,  treeId: 1, skillId: 77,  buff: '+0.1% per point stat bonus increase to your equipped shield. (Excludes \\\'Gain\\\' bonuses).', nicks: 'enchant shield,es'},
-		{name: 'Smite',               stamina: 30, 'duration': 60,   minCastLevel: 1000, treeId: 1, skillId: 97,  buff: '0.1% per point reduction to attackers armor when defending a PvP attack. (PvP Only).', nicks: 'smite,sm'},
-		{name: 'Balanced Defense',    stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 1, skillId: 117, buff: '+0.05% per point added to Defense and Armor if every piece of equipped gear is the same level.', nicks: 'balanced defense,bd'},
-		{name: 'Bastion',             stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 1, skillId: 122, buff: 'Increases the maximum percentage (above 100%) of the Protection enhancement by +0.2% per point.', nicks: 'bastion,bast'},
-		{name: 'Side Step',           stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 1, skillId: 86,  buff: 'Increases the maximum percentage (above 100%) of the Dodge enhancement by +0.2% per point.', nicks: 'side step,sstep'},
-		{name: 'High Guard',          stamina: 30, 'duration': 60,   minCastLevel: 1200, treeId: 1, skillId: 96,  buff: '0.05% chance per point that your attack stat is added to your defense and your damage stat is added to your armor.', nicks: 'high guard,hg'},
-		{name: 'Barricade',           stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 1, skillId: 98,  buff: '0.1% per point of Damage is transferred to Defense.', nicks: 'barricade,bar'},
-		{name: 'Coordinated Defense', stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 1, skillId: 119, buff: '+0.05% per point added to Defense and Armor if every piece of equipped gear is part of a set.', nicks: 'coordinated defense,cd'},
-		{name: 'Degrade',             stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 1, skillId: 121, buff: 'Increases the maximum percentage (above 100%) of the Nullify enhancement by +0.2% per point.', nicks: 'degrade,deg,dg'},
-		{name: 'Retaliate',           stamina: 30, 'duration': 60,   minCastLevel: 1400, treeId: 1, skillId: 123, buff: 'Increases the maximum percentage (above 100%) of the Disarm enhancement by +0.2% per point.', nicks: 'retaliate,ret'},
-		{name: 'Shame',               stamina: 35, 'duration': 60,   minCastLevel: 1400, treeId: 1, skillId: 110, buff: 'If successfully defending an attack, remove a percentage of additional +0.25% per point xp from the attacker. (PvP Only)', nicks: 'shame'},
-		{name: 'Dispel Curse',        stamina: 35, 'duration': 60,   minCastLevel: 1400, treeId: 1, skillId: 114, buff: '0.2% chance per point that Dark Curse will not work against you. (PvP Only)', nicks: 'dispel curse,dispel'},
-		{name: 'Anchored',            stamina: 30, 'duration': 60,   minCastLevel: 1600, treeId: 1, skillId: 154, buff: '0.05% per point Damage is added to your health during combat.', nicks: 'anchored, anch, anchor'},
-		{name: 'Hardened',            stamina: 30, 'duration': 60,   minCastLevel: 1600, treeId: 1, skillId: 153, buff: '0.05% per point chance to prevent your opponent activating Shatter Armor.', nicks: 'hardened, hard, harden'},
-		{name: 'Armor Boost',         stamina: 30, 'duration': 60,   minCastLevel: 1600, treeId: 1, skillId: 136, buff: '+0.05% per point to your Armor for each complete set equipped.', nicks: 'armor boost, armbst, arm bst, armb'},
-		{name: 'Shield Wall',         stamina: 30, 'duration': 60,   minCastLevel: 1600, treeId: 1, skillId: 135, buff: '+0.05% per point to your Defense for each complete set equipped.', nicks: 'shield wall, shldwll, sw'},
-		{name: 'Layered Armor',       stamina: 40, 'duration': 60,   minCastLevel: 2000, treeId: 1, skillId: 170, buff: '+0.05% of every items damage stat is added to your armor per skill level.', nicks: 'layered armor'},
-		{name: 'Defensive Aura',      stamina: 40, 'duration': 60,   minCastLevel: 2500, treeId: 1, skillId: 171, buff: '+0.05% of every items attack stat is added to your defense per skill level.', nicks: 'defensive aura'},
-		{name: 'Fumble',              stamina: 40, 'duration': 180,  minCastLevel: 3000, treeId: 1, skillId: 172, buff: '+0.1% per skill level reduction to attackers attack when defending a PvP attack.', nicks: 'fumble'},
-		{name: 'Find Item',           stamina: 10, 'duration': 60,   minCastLevel: 1,    treeId: 2, skillId: 16,  buff: '+0.1% per point increase of creatures current drop rate.', nicks: 'find item,fi'},
-		{name: 'Treasure Hunter',     stamina: 15, 'duration': 120,  minCastLevel: 1,    treeId: 2, skillId: 17,  buff: '+0.2% per point additional gold from creatures.', nicks: 'treasure hunter,th,treas hunter'},
-		{name: 'Deep Pockets',        stamina: 10, 'duration': 90,   minCastLevel: 1,    treeId: 2, skillId: 22,  buff: '+0.25% per point reduction in gold lost on failed combat vs creatures.', nicks: 'deep pockets,dp'},
-		{name: 'Quest Finder',        stamina: 5,  'duration': 90,   minCastLevel: 1,    treeId: 2, skillId: 61,  buff: 'Increases the chance a quest item will drop. (If you fail to obtain an item, an extra roll is given for Quest Finder at a fixed percentage based on the points allocated to the skill. If this second roll is successful, you will obtain one of the available quest items drops (if any)).', nicks: 'quest finder,qf'},
-		{name: 'Adept Learner',       stamina: 10, 'duration': 90,   minCastLevel: 25,   treeId: 2, skillId: 19,  buff: '+0.2% per point increase in xp from creature kills.', nicks: 'adept learner,al'},
-		{name: 'Defiance',            stamina: 15, 'duration': 120,  minCastLevel: 25,   treeId: 2, skillId: 18,  buff: '+0.25% per point reduction in xp lost when defeated in combat vs creatures.', nicks: 'defiance'},
-		{name: 'Librarian',           stamina: 10, 'duration': 60,   minCastLevel: 75,   treeId: 2, skillId: 20,  buff: '+0.1% per point chance to gain double xp from creatures.', nicks: 'librarian,lib,libr'},
-		{name: 'Merchant',            stamina: 10, 'duration': 60,   minCastLevel: 75,   treeId: 2, skillId: 21,  buff: '+0.05% per point chance to gain double gold from creatures.', nicks: 'merchant,merch,merc'},
-		{name: 'Last Ditch',          stamina: 15, 'duration': 120,  minCastLevel: 150,  treeId: 2, skillId: 23,  buff: '+0.2% per point chance to survive death in combat (once per combat).', nicks: 'last ditch,ld'},
-		{name: 'Animal Magnetism',    stamina: 10, 'duration': 60,   minCastLevel: 200,  treeId: 2, skillId: 24,  buff: '+0.2% per point chance to make certain creatures respawn at your location.', nicks: 'animal magnetism,animag,ani mag,am'},
-		{name: 'Empower',             stamina: 20, 'duration': 60,   minCastLevel: 200,  treeId: 2, skillId: 25,  buff: '+0.1% per point increase to all currently active enhancements.', nicks: 'empower,emp'},
-		{name: 'Doubler',             stamina: 5,  'duration': 120,  minCastLevel: 200,  treeId: 2, skillId: 26,  buff: 'At skill level 50+, 2x Stamina usage in combat in return for 2x gold/xp. At level 100+ 3x, and at level 150+ 4x. Note that stamina and xp loss are normal (not multiplied) if you lose a battle.', nicks: 'doubler,doub,db'},
-		{name: 'Conserve',            stamina: 10, 'duration': 45,   minCastLevel: 250,  treeId: 2, skillId: 39,  buff: '+0.05% per point chance that combat (vs. players and vs. creatures) will use no stamina. (Excludes group/relic combat)', nicks: 'conserve,cons,consv,con'},
-		{name: 'Brewing Master',      stamina: 10, 'duration': 30,   minCastLevel: 250,  treeId: 2, skillId: 40,  buff: '+0.5% per point to the duration of potions when consumed while active.', nicks: 'brewing master,bm,brm,brewm'},
-		{name: 'Four Leaf',           stamina: 20, 'duration': 60,   minCastLevel: 250,  treeId: 2, skillId: 41,  buff: '+0.1% per point chance that craftable items are discovered already \\\'Perfect\\\'.', nicks: 'four leaf,4l,fl'},
-		{name: 'Extend',              stamina: 30, 'duration': 30,   minCastLevel: 300,  treeId: 2, skillId: 42,  buff: '+0.25% per point increase to skills durations that are cast while this skill is active.', nicks: 'extend,ext'},
-		{name: 'Inventor',            stamina: 15, 'duration': 60,   minCastLevel: 400,  treeId: 2, skillId: 62,  buff: 'Increases chance of success when attempting to Invent items/potions. (A fixed +0.05% chance per point extra chance of success)', nicks: 'inventor,inv,invI,inv1,inventor1,inventor 1,inventor i,inv i,inv 1'},
-		{name: 'Extractor',           stamina: 15, 'duration': 60,   minCastLevel: 400,  treeId: 2, skillId: 63,  buff: 'Increases chance of success when attempting to extract Components from Resources. (A fixed +0.05% chance per point extra chance of success).', nicks: 'extractor,extr'},
-		{name: 'Inventor II',         stamina: 20, 'duration': 60,   minCastLevel: 500,  treeId: 2, skillId: 64,  buff: 'Chance not to consume (or consume less) components when inventing items.', nicks: 'inventor ii,inventorii,invii,inv2,inventor 2,inv ii,inv 2'},
-		{name: 'Buff Master',         stamina: 10, 'duration': 60,   minCastLevel: 500,  treeId: 2, skillId: 65,  buff: '0.2% per point chance to half the stamina cost (rounding up) when casting skills on other players. (Does not work on self!)', nicks: 'buff master,buffm,bum'},
-		{name: 'Reflection',          stamina: 10, 'duration': 90,   minCastLevel: 600,  treeId: 2, skillId: 66,  buff: '0.1% per point of enemies damage inflicted is added to your next combat strike.', nicks: 'reflection,ref,refl,reflect'},
-		{name: 'Guild Buffer',        stamina: 10, 'duration': 90,   minCastLevel: 600,  treeId: 2, skillId: 160, buff: '+0.25% per point chance to reduce stamina cost of casting buffs on guild members by 50% (rounding up).', nicks: 'guild buffer, gldbfr, gb'},
-		{name: 'Light Foot',          stamina: 15, 'duration': 120,  minCastLevel: 700,  treeId: 2, skillId: 67,  buff: '0.05% chance to use no stamina while moving on the world map.', nicks: 'light foot,lf'},
-		{name: 'Mesmerize',           stamina: 20, 'duration': 60,   minCastLevel: 700,  treeId: 2, skillId: 68,  buff: '0.1% per point chance to reduce a creatures armor and defense by 50% (vs. creature only).', nicks: 'mesmerize,mesmer,mes,mez'},
-		{name: 'Resource Finder',     stamina: 25, 'duration': 90,   minCastLevel: 800,  treeId: 2, skillId: 76,  buff: 'Increases the chance a resource item will drop. (If you fail to obtain an item, an extra roll is given for Resource Finder at a fixed percentage based on the points allocated to the skill. If this second roll is successful, you will obtain one of the available resource items drops (if any)). Note if you have Quest Finder active as well, this roll takes place after Quest Finder and only if Quest Finder fails to obtain an item.', nicks: 'resource finder,rf'},
-		{name: 'Quest Hunter',        stamina: 25, 'duration': 120,  minCastLevel: 800,  treeId: 2, skillId: 166, buff: 'At skill level 50+ grants 2x the kills towards quest requirements.. At level 100+ 3x, and at level 150+ 4x.', nicks: 'quest hunter'},
-		{name: 'Gloat',               stamina: 10, 'duration': 30,   minCastLevel: 900,  treeId: 2, skillId: 81,  buff: '+0.5% per point increase to the PvP Rating points transferred upon victory. Note if you lose to a player who has the Honor skill active, you will lose and additional 50% PvP Rating.', nicks: 'gloat'},
-		{name: 'Sacrifice',           stamina: 25, 'duration': 90,   minCastLevel: 900,  treeId: 2, skillId: 75,  buff: '+0.04% per point additional xp and -0.25% per point less gold for defeating creatures in combat.', nicks: 'sacrifice,sac'},
-		{name: 'Reckoning',           stamina: 25, 'duration': 60,   minCastLevel: 900,  treeId: 2, skillId: 72,  buff: '+0.2% per point chance of doubling a random skill level for the battle if you initiate the combat (Note that this skill does not work with Doubler, Summon Shield Imp or Counter Attack.).', nicks: 'reckoning,rec,rek'},
-		{name: 'Reinforce',           stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 2, skillId: 126, buff: 'Increases the maximum percentage (above 100%) of the Sustain enhancement by +0.2% per point.', nicks: 'reinforce,rein'},
-		{name: 'Bodyguard',           stamina: 30, 'duration': 120,  minCastLevel: 1000, treeId: 2, skillId: 120, buff: '0.4% per point of XP lost that would be lost to a non-bounty board PvP attack is lost as gold instead, as long as there is enough unbanked gold. Gold lost because of Bodyguard is sunk: it does not go to attacker. Gold taken by attacker (and gold sunk as a result) is unaffected.', nicks: 'bodyguard,bg'},
-		{name: 'Riposte',             stamina: 30, 'duration': 60,   minCastLevel: 1000, treeId: 2, skillId: 124, buff: 'Increases the maximum percentage (above 100%) of the Duelist enhancement by +0.2% per point.', nicks: 'riposte,rip'},
-		{name: 'Severe Condition',    stamina: 30, 'duration': 90,   minCastLevel: 1000, treeId: 2, skillId: 101, buff: '+0.25% per point of your attack, defense, damage and armor stats are transferred to your health at the start of combat.', nicks: 'severe condition,sc'},
-		{name: 'Sealed',              stamina: 35, 'duration': 60,   minCastLevel: 1200, treeId: 2, skillId: 112, buff: '+0.1% per point chance at the start of combat that your opponents skills won\'t take effect in combat. (PvP Only)', nicks: 'sealed,seal'},
-		{name: 'Righteous',           stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 2, skillId: 107, buff: 'Increases the maximum percentage (above 100%) of the Holy enhancement by +0.2% per point.', nicks: 'righteous,right'},
-		{name: 'Epic Forge',          stamina: 30, 'duration': 90,   minCastLevel: 1200, treeId: 2, skillId: 102, buff: '+0.5% per point increase to Hell Forge stat bonuses. Excludes bonuses to enhancements.', nicks: 'epic forge,ef'},
-		{name: 'Golden Shield',       stamina: 30, 'duration': 60,   minCastLevel: 1200, treeId: 2, skillId: 103, buff: '+0.05% per point chance to double your armor and defense at the start of combat.', nicks: 'golden shield,gs'},
-		{name: 'Stalker',             stamina: 35, 'duration': 90,   minCastLevel: 1400, treeId: 2, skillId: 125, buff: 'Increases the maximum percentage (above 100%) of the Elite Hunter enhancement by +0.1% per point.', nicks: 'stalker,stalk'},
-		{name: 'Ageless',             stamina: 30, 'duration': 90,   minCastLevel: 1400, treeId: 2, skillId: 100, buff: '+0.2% per point chance of doubling your HP at the start of combat.', nicks: 'ageless,age'},
-		{name: 'Extractor II',        stamina: 30, 'duration': 60,   minCastLevel: 1400, treeId: 2, skillId: 104, buff: '+0.05% per point chance to not destroy a resource when extracting components.', nicks: 'extractor ii,extractorii,extii,ext2,extractor 2,ext ii,ext 2'},
-		{name: 'Epic Craft',          stamina: 30, 'duration': 60,   minCastLevel: 1600, treeId: 2, skillId: 159, buff: '+0.5% per point increase to crafted stat bonuses.', nicks: 'epic craft, epc crft, epccrft, ec'},
-		{name: 'Gold Foot',           stamina: 20, 'duration': 120,  minCastLevel: 1600, treeId: 2, skillId: 137, buff: '0.05% per point chance to consume 2,500 gold from your hand instead of 1 stamina while moving.', nicks: 'gold foot, goldfoot, gldft, gf'},
-		{name: 'Titan Doubler',       stamina: 40, 'duration': 120,  minCastLevel: 2000, treeId: 2, skillId: 167, buff: 'At skill level 50+, 2x Stamina usage in combat against a Titan would kill it twice. At level 100+ 3x, and at level 150+ 4x.', nicks: 'titan doubler'},
-		{name: 'Teleport',            stamina: 40, 'duration': 60,   minCastLevel: 2500, treeId: 2, skillId: 168, buff: 'Allows the player to teleport within their current realm. Ability has a 225 second cooldown, reduced by 1 second for each skill level.', nicks: 'teleport'},
-		{name: 'Invigorate',          stamina: 40, 'duration': 90,   minCastLevel: 3000, treeId: 2, skillId: 169, buff: '+0.01% per skill level added to your attack, defence, armor, HP and damage for each piece of equipped gear that is epic.', nicks: 'invigorate'}
-	],
-
-	guildRelationshipMessages: function(){
-		if(!Data.guildMessages){
-			Data.guildMessages= {};
-				Data.guildMessages.guildSelfMessage = {'color':'green',
-					'message':'Member of your own guild!'};
-				Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
-					'message':'Do not attack - Guild is friendly!'};
-				Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
-					'message':'Do not attack - You\'ve been in that guild once!'};
-				Data.guildMessages.guildEnmyMessage = {'color':'red',
-					'message':'Enemy guild. Attack at will!'};
-		}
-		return Data.guildMessages;
-	},
-
-	quickSearchList: function() {
-		if (!Data.quickSearchArray) {
-			Data.quickSearchArray = [
-				{'category':'Potions','searchname':'Potion of the Wise',             'nickname':'Lib 200', 'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of the Bookworm',         'nickname':'Lib 225', 'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Shattering',           'nickname':'SA',      'displayOnAH':true},
-				{'category':'Potions','searchname':'Dragons Blood Potion',           'nickname':'ZK 200',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Berserkers Potion',              'nickname':'ZK 300',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Fury',                 'nickname':'ZK 350',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Sludge Brew',                    'nickname':'DC 200',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Black Death',          'nickname':'DC 225',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Aid',                  'nickname':'Assist',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Supreme Doubling',     'nickname':'DB 450',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Acceleration',         'nickname':'DB 500',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Lesser Death Dealer',  'nickname':'DD',      'displayOnAH':true},
-				{'category':'Potions','searchname':'Runic Potion',                   'nickname':'FI 250',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Supreme Luck',         'nickname':'FI 1k',   'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Truth',                'nickname':'EW 1k',   'displayOnAH':true},
-				{'category':'Potions','searchname':'Dull Edge',                      'nickname':'DE 25',   'displayOnAH':true},
-				{'category':'Potions','searchname':'Notched Blade',                  'nickname':'DE 80',   'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Death',                'nickname':'DW 125',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Decay',                'nickname':'WI 150',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Fatality',             'nickname':'WI 350',  'displayOnAH':true},
-				{'category':'Potions','searchname':'Potion of Annihilation',         'nickname':'DW 150',  'displayOnAH':true},
-				{'category':'Plants', 'searchname':'Blood Bloom',                    'nickname':''},
-				{'category':'Plants', 'searchname':'Jademare',                       'nickname':''},
-				{'category':'Plants', 'searchname':'Dark Shade',                     'nickname':''},
-				{'category':'Plants', 'searchname':'Trinettle',                      'nickname':''},
-				{'category':'Plants', 'searchname':'Heffle Wart',                    'nickname':''},
-				{'category':'Plants', 'searchname':'Amber',                          'nickname':''}
-			];
-		}
-		return Data.quickSearchArray;
-	},
-
-	bias: {0: {generalVariable: 1.1053,
-				hpVariable: 1.1},
-			1: {generalVariable: 1.1,
-				hpVariable: 1.053},
-			2: {generalVariable: 1.053,
-				hpVariable: 1},
-			3: {generalVariable: 1.1053,
-				hpVariable: 1}
-		},
-
-	defaults: {
-		currentTile: '',
-		lastActiveQuestPage: '',
-		lastCompletedQuestPage: '',
-		lastNotStartedQuestPage: '',
-		questBeingTracked: '',
-		lastWorld: '',
-		questsNotStarted: false,
-		questsNotComplete: false,
-		checkForQuestsInWorld: false,
-		enableLogColoring: true,
-		enableChatParsing: true,
-		enableCreatureColoring: true,
-		showCombatLog: true,
-		showCreatureInfo: true,
-		keepLogs: false,
-
-		showExtraLinks: true,
-		huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve',
-		huntingBuffsName: 'default',
-		huntingBuffs2: 'Deflect',
-		huntingBuffs2Name: 'PvP',
-		huntingBuffs3: 'SE hunting',
-		huntingBuffs3Name: 'Super Elite Slayer',
-		showHuntingBuffs: true,
-		moveFSBox: false,
-
-		guildSelf: '',
-		guildFrnd: '',
-		guildPast: '',
-		guildEnmy: '',
-		goldRecipient: '',
-		goldAmount: '',
-		sendGoldonWorld: false,
-		goldConfirm: '',
-
-		hideKrulPortal: false,
-		hideQuests: false,
-		hideQuestNames: '',
-		hideRecipes: false,
-		hideRecipeNames: '',
-		footprintsColor: 'silver',
-		enableGuildInfoWidgets: true,
-		enableOnlineAlliesWidgets: true,
-		guildOnlineRefreshTime: 300,
-		hideGuildInfoSecureTrade: false,
-		hideGuildInfoTrade: false,
-		hideGuildInfoMessage: false,
-		hideGuildInfoBuff: false,
-
-		buyBuffsGreeting: 'Hello {playername}, can I buy {buffs} for {cost} please?',
-		renderSelfBio: true,
-		bioEditLines: 10,
-		renderOtherBios: true,
-		playNewMessageSound: false,
-		showSpeakerOnWorld: true,
-		defaultMessageSound: 'http://dl.getdropbox.com/u/2144065/chimes.wav',
-		highlightPlayersNearMyLvl: true,
-		highlightGvGPlayersNearMyLvl: true,
-		detailedConflictInfo: false,
-		gameHelpLink: true,
-		navigateToLogAfterMsg: true,
-
-		enableAllyOnlineList: false,
-		enableEnemyOnlineList: false,
-		allyEnemyOnlineRefreshTime: 60,
-		moveGuildList: false,
-		moveOnlineAlliesList: false,
-
-		hideMatchesForCompletedMoves: false,
-		quickKill: true,
-		doNotKillList: '',
-		enableBioCompressor: false,
-		maxCompressedCharacters: 1500,
-		maxCompressedLines: 25,
-		hideArenaPrizes: '',
-		autoSortArenaList: false,
-
-		currentGoldSentTotal: 0,
-		keepBuffLog: true,
-		buffLog: '',
-
-		enableActiveBountyList: false,
-		bountyListRefreshTime: 30,
-		enableWantedList: false,
-		wantedNames: '',
-		bwNeedsRefresh: true,
-
-		fsboxlog: true,
-		fsboxcontent: '',
-		itemRecipient: '',
-		quickMsg: ["Thank you very much ^_^","Happy hunting, {playername}"],
-		quickLinks:'[]',
-		enableAttackHelper: false,
-		minGroupLevel: 1,
-		combatEvaluatorBias: 0,
-		huntingMode: false,
-		enabledHuntingMode: 1,
-		hideRelicOffline: false,
-
-		enterForSendMessage: false,
-		trackKillStreak: true,
-		storeLastQuestPage: true,
-		addAttackLinkToLog: false,
-		showStatBonusTotal: true,
-
-		newGuildLogHistoryPages: 3,
-		useNewGuildLog: true,
-		enhanceChatTextEntry: true,
-
-		ajaxifyRankControls: true,
-
-		enableMaxGroupSizeToJoin: true,
-		maxGroupSizeToJoin: 11,
-
-		enableTempleAlert: true,
-		enableUpgradeAlert: true,
-		autoFillMinBidPrice: false,
-		showPvPSummaryInLog: true,
-		enableQuickDrink: true,
-		enhanceOnlineDots: true,
-		hideBuffSelected: true,
-		enableFastWalk: true,
-		hideHelperMenu: false,
-		keepHelperMenuOnScreen: true,
-		quickLinksTopPx: 22,
-		quickLinksLeftPx: 0,
-		showNextQuestSteps: true,
-		disableComposingPrompts: false,
-
-		showHelmetTypeItems: true,
-		showAmorTypeItems: true,
-		showGloveTypeItems: true,
-		showBootTypeItems: true,
-		showWeaponTypeItems: true,
-		showShieldTypeItems: true,
-		showRingTypeItems: true,
-		showAmuletTypeItems: true,
-		showRuneTypeItems: true,
-
-		showRecallMessages: true,
-		showRelicMessages: true,
-		showMercenaryMessages: true,
-		showGroupCombatMessages: true,
-		showDonationMessages: true,
-		showRankingMessages: true,
-		showGvGMessages: true,
-		showTaggingMessages: true,
-
-		showQuickDropLinks: false,
-		sendClasses: '["Amber", "5611"], ' +
-			'["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
-			'["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ' +
-			'["Dark Shade", "5564"], ["Deathbloom", "9140"], ' +
-			'["Deathly Mold", "9153"], ["Greenskin\u00A0Fungus", "9148"], ' +
-			'["Heffle", "5565"], ["Jademare", "5566"], ' +
-			'["Ruby Thistle", "9143"], ["Toad Corpse","9288"], ' +
-			'["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
-			'["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
-
-		quickSearchList: 
-			[{"category":"Plants","searchname":"Amber","nickname":""},
-			{"category":"Plants","searchname":"Blood Bloom","nickname":""},
-			{"category":"Plants","searchname":"Jademare","nickname":""},
-			{"category":"Plants","searchname":"Dark Shade","nickname":""},
-			{"category":"Plants","searchname":"Trinettle","nickname":""},
-			{"category":"Plants","searchname":"Heffle Wart","nickname":""},
-			{"category":"Potions","searchname":"Sludge Brew",
-				"nickname":"DC 200","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Black Death",
-				"nickname":"DC 225","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Aid",
-				"nickname":"Assist","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Supreme Doubling",
-				"nickname":"DB 450","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Acceleration",
-				"nickname":"DB 500","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Lesser Death Dealer",
-				"nickname":"DD","displayOnAH":true},
-			{"category":"Potions","searchname":"Runic Potion",
-				"nickname":"FI 250","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of the Bookworm",
-				"nickname":"Lib 225","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Truth",
-				"nickname":"EW 1k","displayOnAH":true},
-			{"category":"Potions","searchname":"Dull Edge",
-				"nickname":"DE 25","displayOnAH":true},
-			{"category":"Potions","searchname":"Notched Blade",
-				"nickname":"DE 80","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Death",
-				"nickname":"DW 125","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Decay",
-				"nickname":"WI 150","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Fatality",
-				"nickname":"WI 350","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Annihilation",
-				"nickname":"DW 150","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of the Wise",
-				"nickname":"Lib 200","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Shattering",
-				"nickname":"SA","displayOnAH":true},
-			{"category":"Potions","searchname":"Dragons Blood Potion",
-				"nickname":"ZK 200","displayOnAH":true},
-			{"category":"Potions","searchname":"Berserkers Potion",
-				"nickname":"ZK 300","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Fury",
-				"nickname":"ZK 350","displayOnAH":true},
-			{"category":"Potions","searchname":"Potion of Supreme Luck",
-				"nickname":"FI 1k","displayOnAH":true}],
-
-		memberlist: '',
-		inventoryMinLvl: 1,
-		inventoryMaxLvl: 9999,
-		onlinePlayerMinLvl: 1,
-		onlinePlayerMaxLvl: 9999,
-		arenaMinLvl: 1,
-		arenaMaxLvl: 9999,
-		showMonsterLog: false,
-		templeAlertLastUpdate: '"2000-01-01T00:00:00.000Z"',
-		needToPray: false,
-		lastChatCheck: '0',
-		lastGuildLogCheck: '0',
-		lastOutBoxCheck: '0',
-		lastPlayerLogCheck: '0',
-		showAdmin: false,
-		alliestotal: 0,
-		enemiestotal: 0,
-		footprints: false,
-		showFastWalkIconOnWorld: false,
-		hideNonPlayerGuildLogMessages: true,
-		listOfAllies: '',
-		listOfEnemies: ''
-	},
-
-	saveBoxes: [
-		'navigateToLogAfterMsg',
-		'gameHelpLink',
-		'guildSelf',
-		'guildFrnd',
-		'guildPast',
-		'guildEnmy',
-		'showAdmin',
-		'ajaxifyRankControls',
-		'detailedConflictInfo',
-		'disableItemColoring',
-		'enableLogColoring',
-		'enableChatParsing',
-		'enableCreatureColoring',
-		'hideNonPlayerGuildLogMessages',
-		'buyBuffsGreeting',
-		'renderSelfBio',
-		'renderOtherBios',
-		'defaultMessageSound',
-		'showSpeakerOnWorld',
-		'playNewMessageSound',
-		'highlightPlayersNearMyLvl',
-		'highlightGvGPlayersNearMyLvl',
-		'showCombatLog',
-		'showMonsterLog',
-		'showCreatureInfo',
-		'keepLogs',
-		'enableGuildInfoWidgets',
-		'enableOnlineAlliesWidgets',
-		'hideGuildInfoMessage',
-		'hideGuildInfoBuff',
-		'hideGuildInfoSecureTrade',
-		'hideGuildInfoTrade',
-		'quickKill',
-		'huntingBuffs',
-		'huntingBuffsName',
-		'huntingBuffs2',
-		'huntingBuffs2Name',
-		'huntingBuffs3',
-		'huntingBuffs3Name',
-		'showHuntingBuffs',
-		'moveGuildList',
-		'moveOnlineAlliesList',
-		'moveFSBox',
-		'hideKrulPortal',
-		'hideQuests',
-		'hideQuestNames',
-		'checkForQuestsInWorld',
-		'hideRecipes',
-		'hideRecipeNames',
-		'footprintsColor',
-		'doNotKillList',
-		'enableBioCompressor',
-		'maxCompressedCharacters',
-		'maxCompressedLines',
-		'sendGoldonWorld',
-		'goldRecipient',
-		'goldAmount',
-		'keepBuffLog',
-		'showQuickSendLinks',
-		'showQuickDropLinks',
-		'sendClasses',
-		'itemRecipient',
-		'currentGoldSentTotal',
-		'hideArenaPrizes',
-		'autoSortArenaList',
-		'enableAllyOnlineList',
-		'enableEnemyOnlineList',
-		'allyEnemyOnlineRefreshTime',
-		'quickLinksTopPx',
-		'quickLinksLeftPx',
-		'enableActiveBountyList',
-		'bountyListRefreshTime',
-		'enableWantedList',
-		'wantedNames',
-		'fsboxlog',
-		'huntingMode',
-		'enableAttackHelper',
-		'hideRelicOffline',
-		'enterForSendMessage',
-		'storeLastQuestPage',
-		'addAttackLinkToLog',
-		'showStatBonusTotal',
-		'newGuildLogHistoryPages',
-		'useNewGuildLog',
-		'enhanceChatTextEntry',
-		'enableMaxGroupSizeToJoin',
-		'maxGroupSizeToJoin',
-		'enableTempleAlert',
-		'autoFillMinBidPrice',
-		'showPvPSummaryInLog',
-		'enableQuickDrink',
-		'enhanceOnlineDots',
-		'hideBuffSelected',
-		'enableFastWalk',
-		'showFastWalkIconOnWorld',
-		'hideHelperMenu',
-		'keepHelperMenuOnScreen',
-		'showNextQuestSteps',
-		'disableComposingPrompts'
-	]
-};
-
-var Layout = {
-
-	injectMenu: function() {
-		if (System.getValue('lastActiveQuestPage').length > 0) { //JQuery ready
-			$('a[href="index.php?cmd=questbook"]').attr('href', System.getValue('lastActiveQuestPage'));
-		}
-		var pCL = $('div#pCL:first');
-		if (pCL.length === 0) {return;}
-		//character
-		$(pCL).find('a#nav-character-log').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&blank=1&subcmd=recipemanager">Recipe Manager</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanager">Inventory Manager</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
-		if (System.getValue('keepBuffLog')) {
-			$(pCL).find('a#nav-character-log').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&blank=1&subcmd=bufflogcontent">Buff Log</a></li>');
-		}
-		if (System.getValue('keepLogs')) {
-			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&blank=1&subcmd=showlogs">Combat Logs</a></li>');
-		}
-		if (System.getValue('showMonsterLog')) {
-			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&blank=1&subcmd=monsterlog">Creature Logs</a></li>');
-		}
-		$(pCL).find('a#nav-character-notepad').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&blank=1&subcmd=createmap">Create Maps</a></li>');
-		//guild
-		$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmanager">Guild Inventory</a></li>');
-		if (!System.getValue('useNewGuildLog')) {
-			//if not using the new guild log, show it as a separate menu entry
-			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
-				.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&blank=1&subcmd=newguildlog">New Guild Log</a></li>');
-		}
-		//top rated
-		$(pCL).find('a#nav-toprated-players-level').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
-		//actions
-		$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a></li>');
-		$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers">Online Players</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&blank=1&subcmd=findother">Find Other</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&blank=1&subcmd=findbuffs">Find Buffs</a></li>');
-		//adjust the menu length in chrome for the newly added items
-		//first the open ones
-		$('ul.nav-animated').each(function() {
-			if ($(this).css('height') !== '0px') {
-				$(this).css('height',$(this).find('li').length*22);
-			}
-		});
-		//and now the closed saved variables
-		$('#nav').nav('calcHeights');
-	},
-
-	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
-		if (position > tableElement.children().length) {
-			position = tableElement.children().length;
-		}
-		$(tableElement).find('tr:eq('+position+')').before('<tr><td><font ' +
-			'color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font ' +
-			'color="black">' + text + '</font></A></font></td></tr><tr><td ' +
-			'height="5"></td></tr>');
-	},
-
-	moveRHSBoxUpOnRHS: function(title) {
-		$('div#pCR').prepend($('div#' + title));
-	},
-
-	moveRHSBoxToLHS: function(title) {
-		var myDiv=$('div#' + title).wrap('<div class="pCR"></div>');
-		myDiv=myDiv.parent();
-		$('div#pCL').append(myDiv);
-		$('div#pCL').append('<style>.pCR a { color: #F7EAC9; }</style>');
-	},
-
-	notebookContent: function() {
-		return System.findNode('//div[@id="pCC"]'); //new interface logic
-	},
-
-	playerId: function() {
-		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
-		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
-		GM_setValue('playerID',thePlayerId);
-		return thePlayerId;
-	},
-
-	infoBox: function(documentText) {
-		//var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
-		//infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\'\#000000\'><center>([^<]+)</i;
-		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color='#000000'><center>You successfully recalled the item.</center>
-		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color='#000000'><center>You successfully took the item into your backpack.</center>
-		var infoMatch = $(documentText).find('center[id="info-msg"]').html();
-		var result='';
-		if (infoMatch) {
-			infoMatch = infoMatch.replace(/<br.*/,'');
-			result=infoMatch;
-		}
-		return result;
-	},
-
-	networkIcon:
-		'<img title="This function retrieves data from the network. ' +
-		'Disable this to increase speed" src="data:image/png;base64,' +
-		'iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hAAAA' +
-		'B3RJTUUH1QgGDTMWk1twEwAAAAlwSFlzAAALEgAACxIB0t1+' +
-		'/AAAAARnQU1BAACxjwv8YQUAAAC8SURBVHjahVPBEcQgCEQn' +
-		'HdmTqUlr0qe16I8cufOiCGZnGCcIy4LEICJwmGgWJ3o0IOCQ' +
-		'EqVg9Y4U3CoCHQhvxuPUZEiA3XYkxyI1/6S6R6rke8AlJbkV' +
-		'7u95lleXq3yrdyUjLGxwnifmnHEXY3fJIQSIMcKOZCLgMltr' +
-		'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
-		'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
-		'egAAAABJRU5ErkJggg==" width="16" height="16" />',
-
-	quickBuffHref: function(playerId, buffList) {
-		if (buffList) {
-			return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-				'quickbuff&tid=' + playerId + '&blist=' + buffList +
-				'", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-		} else {
-			return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-				'quickbuff&tid=' + playerId +
-				'", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-		}
-	},
-
-	buffAllHref: function(shortList) {
-		shortList = shortList.join(',').replace(/\s/g, '');
-		var j = 'java';
-		return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + shortList +
-			'", "fsQuickBuff", 618, 1000, ",scrollbars")';
-	}
-};
-
 var Helper = {
-	setItemFilterDefault: function() {
-		Helper.itemFilters = [
-			{'id':'showHelmetTypeItems', 'type':'Helmet'},
-			{'id':'showAmorTypeItems', 'type':'Armor'},
-			{'id':'showGloveTypeItems', 'type':'Gloves'},
-			{'id':'showBootTypeItems', 'type':'Boots'},
-			{'id':'showWeaponTypeItems', 'type':'Weapon'},
-			{'id':'showShieldTypeItems', 'type':'Shield'},
-			{'id':'showRingTypeItems', 'type':'Ring'},
-			{'id':'showAmuletTypeItems', 'type':'Amulet'},
-			{'id':'showRuneTypeItems', 'type':'Rune'}
-		];
-		//~ for (var i=0; i<Helper.itemFilters.length; i += 1) {
-			//~ System.setDefault(Helper.itemFilters[i].id, true);
-		//~ }
-	},
-
-	fixForNix: function() {
-		//TODO: These are only meant to be a temporary fix for people using *nix based systems, remove when HCS fixes the slash issue
-		if (System.imageServer !== System.imageServerHTTP) {
-			var changeCount = 0;
-			var td = System.findNodes('//td[contains(@background, "file://") and contains(@background, "tiles")]');
-			if (td) {
-				for (var i = 0; i < td.length; i += 1) {
-					var src = td[i].getAttribute('background');
-					if (src) {
-						if (src.indexOf('file://') !== -1 && src.indexOf('\\') !== -1) {
-							td[i].setAttribute('background', src.replace(/\\/g, '/'));
-							changeCount+= 1;
-						}
-					}
-				}
-			}
-			if (changeCount === 0 && td !== null) {
-				console.log('Time to remove the temporary HCS tile image slash fix.');
-			} /*else {
-				console.log('Changed ' + changeCount + ' references.');
-			}*/
+	prepareEnv: function () {
+		// TODO This can be moved I think
+		// It was back when some people used an image pack
+		if (System.getValue('gameHelpLink')) {
+			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
+			$(gameHelpNode).each(function() {
+				$(this).html('<a href="index.php?cmd=settings" style="color:' +
+					' #FFFFFF; text-decoration: underline">' +
+					$(this).text() + '</a>');
+			});
 		}
+
+		if (System.getValue('huntingMode')) {
+			Helper.replaceKeyHandler();
+			Helper.fixOnlineGuildBuffLinks(); // Do we really need to do this in hunt mode?
+		} else {
+			//move boxes in opposite order that you want them to appear.
+			if (System.getValue('moveGuildList')) {
+				Layout.moveRHSBoxUpOnRHS('minibox-guild');
+			}
+			if (System.getValue('moveOnlineAlliesList')) {
+				Layout.moveRHSBoxUpOnRHS('minibox-allies');
+			}
+			//~ if (System.getValue('moveFSBox')) {
+				//~ Layout.moveRHSBoxToLHS('minibox-fsbox');
+			//~ }
+
+			Helper.prepareAllyEnemyList(); // TODO need to do something cleverer
+			//~ Helper.prepareGuildList();
+			Helper.retrieveGuildData(); // TODO need to do something cleverer
+			Helper.prepareBountyData();
+			Helper.injectStaminaCalculator();
+			Helper.injectLevelupCalculator();
+			Layout.injectMenu();
+			Helper.replaceKeyHandler();
+			//~ Helper.injectFSBoxLog();
+			Helper.fixOnlineGuildBuffLinks();
+			Helper.addGuildInfoWidgets();
+			Helper.addOnlineAlliesWidgets();
+			Helper.injectJoinAllLink();
+			Helper.changeGuildLogHREF();
+			//~ Helper.injectAHsearch();
+			Helper.injectHomePageTwoLink();
+			Helper.injectTempleAlert();
+			//~ Helper.injectUpgradeAlert();
+			Helper.injectQuickMsgDialogJQ();
+		}
+
+		Helper.injectHelperMenu();
 	},
 
 	// main event dispatcher
@@ -1410,52 +270,7 @@ var Helper = {
 		}
 
 		if (isNewUI === 1) { // UFSG
-
-			Helper.fixForNix();
-
-			if (System.getValue('gameHelpLink')) {
-				var gameHelpNode = $('div.minibox h3:contains("Game Help")');
-				$(gameHelpNode).each(function() {
-					$(this).html('<a href="index.php?cmd=settings" style="color: #FFFFFF; text-decoration: underline">' + $(this).text() + '</a>');
-				});
-			}
-
-			if (System.getValue('huntingMode')) {
-				Helper.replaceKeyHandler();
-				Helper.fixOnlineGuildBuffLinks();
-			} else {
-				//move boxes in opposite order that you want them to appear.
-				if (System.getValue('moveGuildList')) {
-					Layout.moveRHSBoxUpOnRHS('minibox-guild');
-				}
-				if (System.getValue('moveOnlineAlliesList')) {
-					Layout.moveRHSBoxUpOnRHS('minibox-allies');
-				}
-				if (System.getValue('moveFSBox')) {
-					Layout.moveRHSBoxToLHS('minibox-fsbox');
-				}
-
-				Helper.prepareAllyEnemyList();
-				//~ Helper.prepareGuildList();
-				Helper.retrieveGuildData();
-				Helper.prepareBountyData();
-				Helper.injectStaminaCalculator();
-				Helper.injectLevelupCalculator();
-				Layout.injectMenu();
-				Helper.replaceKeyHandler();
-				Helper.injectFSBoxLog();
-				Helper.fixOnlineGuildBuffLinks();
-				Helper.addGuildInfoWidgets();
-				Helper.addOnlineAlliesWidgets();
-				Helper.injectJoinAllLink();
-				Helper.changeGuildLogHREF();
-				//~ Helper.injectAHsearch();
-				Helper.injectHomePageTwoLink();
-				Helper.injectTempleAlert();
-				Helper.injectQuickMsgDialogJQ();
-			}
-			Helper.injectHelperMenu();
-
+			Helper.prepareEnv();
 		}
 
 		var pageId, subPageId, subPage2Id, subsequentPageId, typePageId;
@@ -1520,9 +335,9 @@ var Helper = {
 			break;
 		case 'news':
 			switch (subPageId) {
-			case 'fsbox':
-				Helper.injectShoutboxWidgets('fsbox_input', 100);
-				break;
+			//~ case 'fsbox':
+				//~ Helper.injectShoutboxWidgets('fsbox_input', 100);
+				//~ break;
 			case 'shoutbox':
 				Helper.injectShoutboxWidgets('shoutbox_input', 150);
 				break;
@@ -1634,11 +449,11 @@ var Helper = {
 				}
 				break;
 			case 'manage':
-				Helper.parseGuildForWorld();
+				//~ Helper.parseGuildForWorld();
 				Helper.injectGuild();
 				break;
 			case 'advisor':
-				Helper.injectAdvisor(subPage2Id);
+				Helper.injectAdvisor();
 				break;
 			case 'history':
 				Helper.addHistoryWidgets();
@@ -1731,9 +546,9 @@ var Helper = {
 			case 'quickwear':
 				Helper.insertQuickWear();
 				break;
-			case 'fsboxcontent':
-				Helper.injectFsBoxContent();
-				break;
+			//~ case 'fsboxcontent':
+				//~ Helper.injectFsBoxContent();
+				//~ break;
 			case 'bufflogcontent':
 				Helper.injectBuffLog();
 				break;
@@ -1902,9 +717,15 @@ var Helper = {
 		}
 		if (System.getValue('playNewMessageSound')) {
 			var soundLocation = System.getValue('defaultMessageSound');
-			 //new UI
-			 $('a:contains("New log messages"):first').each(function(){$(this).after('<audio src="' + soundLocation + '" autoplay=true />');});
-			 $('a:contains("New Guild chat message"):first').each(function(){$(this).after('<audio src="' + soundLocation + '" autoplay=true />');});
+			//new UI
+			$('a:contains("New log messages"):first').each(function(){
+				$(this).after('<audio src="' + soundLocation +
+				'" autoplay=true />');
+			});
+			$('a:contains("New Guild chat message"):first').each(function(){
+				$(this).after('<audio src="' + soundLocation +
+				'" autoplay=true />');
+			});
 		}
 
 		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
@@ -2063,39 +884,13 @@ var Helper = {
 		document.getElementById('bufflog').innerHTML=System.getValue('buffLog');
 	},
 
-	injectFSBoxLog: function() {
-		if (System.getValue('fsboxlog')) {
-			var node=$('div#minibox-fsbox');
-			if (node.length > 0) {
-				var fsbox=node.find('p.message').html().replace('<br><br>',' ');
-				var boxList=System.getValue('fsboxcontent');
-				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
-				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
-				GM_setValue('fsboxcontent',boxList);
-				var nodediv = node.find('div');
-				var playerName = node.find('a:first').text();
-				nodediv.html(nodediv.html() + '&nbsp;' +
-					'<nobr><a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
-					'" style="color:PaleVioletRed">[ Ignore ]</a>&nbsp;' +
-					'<a href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent" style="color:yellow">[ Log ]</a></nobr>');
-			}
-		}
-	},
-
-	injectFsBoxContent: function(content) {
-		if (!content) {content = Layout.notebookContent();}
-		content.innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
-		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue('fsboxcontent','');window.location=window.location;},true);
-		document.getElementById('fsboxdetail').innerHTML=System.getValue('fsboxcontent');
-	},
-
 	removeGuildAvyImgBorder: function() {
 		var avyImg;
-		if (navigator.userAgent.indexOf('Firefox')>0) {
-			avyImg = System.findNode('//img[contains(@title, "s Logo")]');
-		} else { //chrome
-			avyImg = System.findNode('//img[contains(@oldtitle, "s Logo")]');
-		}
+		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+			//~ avyImg = System.findNode('//img[contains(@title, "s Logo")]');
+		//~ } else { //chrome
+		avyImg = System.findNode('//img[contains(@oldtitle, "s Logo")]');
+		//~ }
 		if (avyImg) {avyImg.style.borderStyle='none';}
 		return;
 	},
@@ -2119,9 +914,9 @@ var Helper = {
 	injectGuild: function() {
 		Helper.removeGuildAvyImgBorder();
 
-		var guildMiniSRC = System.findNode('//img[contains(@src,"_mini.jpg")]').getAttribute('src');
-		var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
-		GM_setValue('guildID',guildID);
+		//~ var guildMiniSRC = System.findNode('//img[contains(@src,"_mini.jpg")]').getAttribute('src');
+		//~ var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
+		//~ GM_setValue('guildID',guildID);
 
 		Helper.guildXPLock();
 
@@ -2197,17 +992,8 @@ var Helper = {
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + lastActivityDays * 24;
 				var lastActivityMinutes = parseInt(lastActivity[3],10) + lastActivityHours * 60;
-				if (lastActivityMinutes < 2) {
-					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond + '">';
-				} else if (lastActivityMinutes < 5) {
-					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond + '">';
-				} else if (lastActivityMinutes < 30) {
-					aRow.cells[0].innerHTML = Data.orangeDiamond;
-				} else if (lastActivityMinutes > 10080) {
-					aRow.cells[0].innerHTML = Data.sevenDayDot;
-				} else {
-					aRow.cells[0].innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot + '">';
-				}
+				var lastActivityIMG = Helper.onlineDot(lastActivityMinutes);
+				aRow.cells[0].innerHTML = lastActivityIMG;
 			}
 		}
 	},
@@ -2421,8 +1207,8 @@ var Helper = {
 		if (injectHere.length > 0) {
 			var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
 			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
-			var myGuildID = System.getValue('guildID');
-			if (defendingGuildID === myGuildID) {
+			//~ var myGuildID = System.getValue('guildID');
+			if (defendingGuildID === Layout.guildId().toString()) {
 				var listOfDefenders = injectHere.next().text().split(','); // quick buff only supports 16
 				//actually I think it might be text length on the address bar or something like that.
 				var shortList = [];
@@ -2532,7 +1318,7 @@ var Helper = {
 
 		var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
 		var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
-		var myGuildID = System.getValue('guildID');
+		var myGuildID = Layout.guildId().toString();
 
 		var hideRelicOffline = System.getValue('hideRelicOffline');
 		if (defendingGuildID === myGuildID && !hideRelicOffline) {
@@ -2718,19 +1504,23 @@ var Helper = {
 		var defenderCount = callback.defenderCount;
 
 		var player = Helper.playerData(responseText);
-		if (player.attackValue && isNaN(player.attackValue)) {
+		if (typeof player.attackValue === 'number' &&
+			isNaN(player.attackValue)) {
 			player.attackValue = player.levelValue*10;
 		}
-		if (player.defenseValue && isNaN(player.defenseValue)) {
+		if (typeof player.defenseValue === 'number' &&
+			isNaN(player.defenseValue)) {
 			player.defenseValue = player.levelValue*10;
 		}
-		if (player.armorValue && isNaN(player.armorValue)) {
+		if (typeof player.armorValue === 'number' &&
+			isNaN(player.armorValue)) {
 			player.armorValue = player.levelValue*10;
 		}
-		if (player.damageValue && isNaN(player.damageValue)) {
+		if (typeof player.damageValue === 'number' &&
+			isNaN(player.damageValue)) {
 			player.damageValue = player.levelValue*10;
 		}
-		if (player.hpValue && isNaN(player.hpValue)) {
+		if (typeof player.hpValue === 'number' && isNaN(player.hpValue)) {
 			player.hpValue = Math.ceil(player.levelValue*0.4);
 		}
 
@@ -2767,7 +1557,6 @@ var Helper = {
 
 	leadDefender: function(player) {
 		//get lead defender (LD) buffs here for use later ... 
-
 		var defenderMultiplier = 1;
 		var attackValue = $('td[title="LDattackValue"]');
 		var attackNumber = System.intValue(attackValue.html());
@@ -2790,19 +1579,19 @@ var Helper = {
 		var LDProcessed = $('td[title="LDProcessed"]');
 		LDProcessed.html(1);
 		var storedConstitutionLevel = $('td[title="LDConstitutionLevel"]');
-		storedConstitutionLevel.html(System.intValue(player.constitutionLevel));
+		storedConstitutionLevel.html(player.constitutionLevel);
 		var storedFlinchLevel = $('td[title="LDFlinchLevel"]');
-		storedFlinchLevel.html(System.intValue(player.flinchLevel));
+		storedFlinchLevel.html(player.flinchLevel);
 		var storedNightmareVisageLevel = $('td[title="LDNightmareVisageLevel"]');
-		storedNightmareVisageLevel.html(System.intValue(player.nightmareVisageLevel));
+		storedNightmareVisageLevel.html(player.nightmareVisageLevel);
 		var storedFortitudeLevel = $('td[title="LDFortitudeLevel"]');
-		storedFortitudeLevel.html(System.intValue(player.fortitudeLevel));
+		storedFortitudeLevel.html(player.fortitudeLevel);
 		var storedChiStrikeLevel = $('td[title="LDChiStrikeLevel"]');
-		storedChiStrikeLevel.html(System.intValue(player.chiStrikeLevel));
+		storedChiStrikeLevel.html(player.chiStrikeLevel);
 		var storedTerrorizeLevel = $('td[title="LDTerrorizeLevel"]');
-		storedTerrorizeLevel.html(System.intValue(player.terrorizeLevel));
+		storedTerrorizeLevel.html(player.terrorizeLevel);
 		var storedSanctuaryLevel = $('td[title="LDSanctuaryLevel"]');
-		storedSanctuaryLevel.html(System.intValue(player.sanctuaryLevel));
+		storedSanctuaryLevel.html(player.sanctuaryLevel);
 	},
 
 	processRelicStats: function() {
@@ -3147,37 +1936,14 @@ var Helper = {
 		}
 	},
 
-	//~ injectAHsearch: function() {
-		//~ // TODO This is completely different now
-		//~ // We need to look at qtip after update
-		//~ var items=System.findNodes('//img[contains(@data-tipped,"fetchitem") and contains(@src,"/items/")]');
-		//~ if (items) {
-			//~ for (var i=0; i<items.length; i += 1) {
-				//~ if (items[i].parentNode.tagName!=='A') {
-					//~ items[i].addEventListener('click', Helper.searchAHforItem, true);
-					//~ items[i].style.cursor='pointer';
-					//~ items[i].setAttribute('data-tipped-options',
-						//~ items[i].getAttribute('data-tipped-options')+
-						//~ ', afterUpdate: function(content, element){element.setAttribute("data-tipped-html", content.innerHTML);}');
-				//~ }
-			//~ }
-		//~ }
-	//~ },
-
-	//~ searchAHforItem: function(evt) {
-		//~ console.log('evt=', evt);
-		//~ var responseText = evt.target.getAttribute('data-tipped-html');
-		//~ var name=responseText.match(/<b>([^<]*)<\/b>/)[1];
-		//~ //if (responseText.indexOf('Bound (Non-Tradable)') > 0)
-			//~ //if (!confirm(name + ' is Bound (Non-Tradable), cannot be found in AH!\n'+
-				//~ //'Do you still want to try?')) return;
-		//~ if (responseText.indexOf('Container') > 0 &&
-			//~ !confirm(name + ' is type Container.\nDo you still want to ' +
-				//~ 'search AH for this item (OK) or not (Cancel)?')) {return;}
-		//~ window.location='index.php?cmd=auctionhouse&type=-1&search_text='+name;
-	//~ },
-
 	injectViewRecipe: function() {
+		var recipe = $('div#pCC table table b').first();
+		var name = recipe.html();
+		var searchName = recipe.html().replace(/ /g, '%20');
+		recipe.html('<a href="http://guide.fallensword.com/index.php?cmd=' +
+			'items&subcmd=view&search_name=' + searchName + '">' + name +
+			'</a>');
+
 		var components = System.findNodes('//b[.="Components Required"]/../../following-sibling::tr[2]//img');
 		if (components) {
 			for (var i = 0; i < components.length; i += 1) {
@@ -3205,209 +1971,168 @@ var Helper = {
 		}
 	},
 
-	injectAdvisor: function(subPage2Id) {
-		var i;
-		var titleCells;
-		var list=System.findNode('//tr[td/b="Member"]/../..');
+	injectAdvisorNew: function(m) {
+		var list = System.findNode('//tr[td/b="Member"]/../..');
 		if (!list) {return;}
 
 		// insert weekly summary link
-		var injectHere=System.findNode('//td/select/..');
+		var injectHere = System.findNode('//td/select/..');
 		if (injectHere) {
-			var elem=document.createElement('span');
-			elem.innerHTML=' <a href="index.php?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a>';
+			var elem = document.createElement('span');
+			elem.innerHTML=' <a href="index.php?cmd=guild&subcmd=advisor&' +
+				'subcmd2=weekly">7-Day Summary</a>';
 			injectHere.appendChild(elem);
 		}
-		System.addStyle(
-			'.HelperAdvisorRow1 {background-color:#e7c473;font-size:x-small}\n' +
-			'.HelperAdvisorRow1:hover {background-color:white}\n' +
-			'.HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}\n' +
-			'.HelperAdvisorRow2:hover {background-color:white}');
 
-		var memberList = System.getValueJSON('memberlist');
-		if (memberList) {Helper.generateAdvisorRows(list);}
-
-		if (!Helper.advisorHeader) {
-			Helper.advisorHeader = '<tr>';
-			titleCells = ['Member', 'Lvl', 'Rank', 'Gold From Deposits',
-				'Gold From Tax', 'Gold Total', 'FSPs', 'Skills Cast',
-				'Groups Created', 'Groups Joined', 'Relics Captured',
-				'XP Contrib'];
-			for (i=0; i<titleCells.length; i += 1) {
-				Helper.advisorHeader += '<th bgcolor=#cd9e4b align=center ' +
-					'width=8% style="text-decoration: underline; cursor: ' +
-					'pointer; font-size:x-small;">' + titleCells[i] + '</td>';
-			}
-			Helper.advisorHeader += '</tr>';
-		}
-
-		if (! Helper.advisorFooter) {
-			Helper.advisorFooter = '<tr><td colspan=3 align=right>Total: </td>';
-			for (i=1; i<list.rows[list.rows.length-1].cells.length; i += 1) {
-				Helper.advisorFooter += '<td align=center>' +
-				list.rows[list.rows.length-1].cells[i].innerHTML + '</td>';
-			}
-			Helper.advisorFooter +='</tr>';
-		}
-		if (subPage2Id!=='-') {
-			Helper.advisorFooter='';
-		}
-
-		Helper.sortAsc = true;
-		if (subPage2Id === '-' && memberList) {
-			Helper.generateAdvisorRows(list);
-			Helper.sortAdvisor(list, 'Member');
-		} else if (memberList){
-			list.innerHTML='Retrieving daily data ...';
-			Helper.generateWeeklyAdvisorRows('',{'day':0,'inject':list});
-		}
+		$(list).attr('id', 'advisorTable');
+		$(list).addClass('stripe hover');
+		$(list).append('<tfoot id="advTFoot"></tfoot>');
+		$('tfoot', list).append($('tr', list).last());
+		$('tr', list).first().remove();
+		$('#advTFoot td').first().removeAttr('class').attr('colspan', 3)
+			.attr('style', 'text-align: right;');
+		$('#advisorTable td').removeAttr('bgcolor');
+		$('#advisorTable font').contents().unwrap();
+		$('#advTFoot b').contents().unwrap();
+		$('#advisorTable tbody tr').each(function (i, e) {
+			var td1 = $('td', e).first();
+			td1.html(td1.html().replace('&nbsp;', ''));
+			td1.html('<a href="index.php?cmd=profile&player_id=' +
+				m[td1.text()].id + '">' +
+				td1.text() + '</a>');
+			td1.after('<td>' + m[td1.text()].level + '</td><td>' +
+				m[td1.text()].rank_name.substr(0,9) +
+				(m[td1.text()].rank_name.length > 9 ? '...' : '') + '</td>');
+		});
+		$(list).dataTable({pageLength: 25,
+			lengthMenu: [[25, 50, -1], [25, 50, 'All']],
+			columns: Layout.advisorColumns
+		});
 	},
 
-	generateWeeklyAdvisorRows: function(responseText, callback) {
-		var i;
-		var id;
-		var columnName;
-		var day=callback.day;
-		if (day <= 7) {
-			if (day > 0) {
-				callback.inject.innerHTML+=' day '+day+',';
-				var doc=System.createDocument(responseText);
-				var list=System.findNode('//tr[td/b="Member"]/../..',doc);
-				Helper.generateAdvisorRows(list);
-				if (day === 1) {
-					Helper.weeklyAdvisorRows = Helper.advisorRows;
-					Helper.advisorColumns = ['GoldFromDeposits','GoldFromTax',
-						'GoldTotal','FSPs','SkillsCast','GroupsCreated',
-						'GroupsJoined','RelicsCaptured','XPContrib'];
-				}
-				for (i=1; i<list.rows.length-1; i += 1){
-					for (id=0; id<Helper.advisorColumns.length; id += 1){
-						columnName=Helper.advisorColumns[id];
-						if (day===1) {
-							Helper.weeklyAdvisorRows[i-1][columnName]=
-								System.intValue(Helper.weeklyAdvisorRows[i-1][columnName]);
-						} else {
-							Helper.weeklyAdvisorRows[i-1][columnName]+=
-								System.intValue(Helper.advisorRows[i-1][columnName]);
+	injectAdvisor: function() {
+		Helper.appendHead({
+			js: ['https://cdn.jsdelivr.net/jquery.datatables/1.10.4/js/jquery.dataTables.min.js'],
+			callback: Helper.getMemberList,
+			param1: System.getUrlParameter('subcmd2') === 'weekly' ?
+				Helper.injectAdvisorWeekly :
+				Helper.injectAdvisorNew,
+			param2: false
+			//~ callback: Helper.injectAdvisorOld(System.getUrlParameter('subcmd2'))
+		});
+	},
+
+	injectAdvisorWeekly: function(m) {
+		var list = System.findNode('//tr[td/b="Member"]/../..');
+		if (!list) {return;}
+		list.innerHTML='<img src = "' + System.imageServer +
+			'/world/actionLoadingSpinner.gif" style = "float: left;">&nbsp;Retrieving daily data ...';
+		Helper.getAdvisorPages(list, m);
+	},
+
+	getAdvisorPages: function (list, m) {
+		var count = 0;
+		var pages = [1, 2, 3, 4, 5, 6, 7];
+		var advisorPages = [];
+		pages.forEach(function(e) {
+			$.ajax({
+				url: 'index.php',
+				data: {
+					cmd: 'guild',
+					subcmd: 'advisor',
+					period: e
+				},
+				success: function (data) {
+					list.innerHTML += ' day ' + e + ',';
+					var ob = {};
+					var tr = $('tr',
+						System.findNode('//tr[td/b="Member"]/../..',
+						System.createDocument(data)));
+					tr.each(function(i, el) {
+						var tds = $('td', el);
+						var member = $(tds.eq(0).html().replace(/&nbsp;/g, ''))
+							.text();
+						if (member !== 'Member') {
+							ob[member] = {
+								deposit: System.intValue(tds.eq(1).text()),
+								tax:     System.intValue(tds.eq(2).text()),
+								total:   System.intValue(tds.eq(3).text()),
+								fsp:     System.intValue(tds.eq(4).text()),
+								skills:  System.intValue(tds.eq(5).text()),
+								grpCrt:  System.intValue(tds.eq(6).text()),
+								grpJoin: System.intValue(tds.eq(7).text()),
+								relics:  System.intValue(tds.eq(8).text()),
+								contrib: System.intValue(tds.eq(9).text())
+							};
 						}
+					});
+					advisorPages[e-1] = ob;
+					count += 1;
+					if (count === 7) {
+						Helper.addAdvisorPages(list, advisorPages, m);
 					}
 				}
-			}
-			System.xmlhttp(
-				'index.php?cmd=guild&subcmd=advisor&period='+(day+1),
-				Helper.generateWeeklyAdvisorRows,
-				{'day': day+1,
-				'inject': callback.inject}
-			);
-		} else {
-			Helper.advisorRows = Helper.weeklyAdvisorRows;
-			for (i=1; i<=Helper.advisorRows.length; i += 1){
-				for (id=0; id<Helper.advisorColumns.length; id += 1){
-					columnName=Helper.advisorColumns[id];
-					Helper.advisorRows[i-1][columnName]=
-						System.addCommas(Helper.advisorRows[i-1][columnName]);
-				}
-			}
-			Helper.sortAdvisor(callback.inject, 'Member');
-		}
+			});
+		});
 	},
 
-	generateAdvisorRows: function(list) {
-		var member;
-		Helper.advisorRows = [];
-		var memberList = System.getValueJSON('memberlist');
-		for (var i=1; i<list.rows.length-1; i += 1){
-			var theRow=list.rows[i];
-			var name = theRow.cells[0].textContent.replace(/\s/, '');
-			for (var j=0; j<memberList.members.length; j += 1) {
-				if (memberList.members[j].name === name) {
-					member = memberList.members[j];
-					break;
-				}
+	addAdvisorPages: function(list, pages, m) {
+		var o = {};
+		var data = [];
+		pages.forEach(function(e) {
+			Object.getOwnPropertyNames(e).forEach(function(f) {
+				o[f] = o[f] || {};
+				o[f].deposit = (o[f].deposit || 0) + e[f].deposit;
+				o[f].tax = (o[f].tax || 0) + e[f].tax;
+				o[f].total = (o[f].total || 0) + e[f].total;
+				o[f].fsp = (o[f].fsp || 0) + e[f].fsp;
+				o[f].skills = (o[f].skills || 0) + e[f].skills;
+				o[f].grpCrt = (o[f].grpCrt || 0) + e[f].grpCrt;
+				o[f].grpJoin = (o[f].grpJoin || 0) + e[f].grpJoin;
+				o[f].relics = (o[f].relics || 0) + e[f].relics;
+				o[f].contrib = (o[f].contrib || 0) + e[f].contrib;
+			});
+		});
+		Object.getOwnPropertyNames(o).forEach(function(f) {
+			if (f !== 'Total:') {
+				data.push([
+					!m[f] ? f : '<a href="index.php?cmd=profile&player_id=' + m[f].id + '">' + f + '</a>',
+					!m[f] ? '' : m[f].level,
+					!m[f] ? '' : m[f].rank_name.substr(0,9) + (m[f].rank_name.length > 9 ? '...' : ''),
+					System.addCommas(o[f].deposit),
+					System.addCommas(o[f].tax),
+					System.addCommas(o[f].total),
+					System.addCommas(o[f].fsp),
+					System.addCommas(o[f].skills),
+					System.addCommas(o[f].grpCrt),
+					System.addCommas(o[f].grpJoin),
+					System.addCommas(o[f].relics),
+					System.addCommas(o[f].contrib),
+				]);
 			}
-			Helper.advisorRows[i-1] = {
-				'Id': member !== undefined ? member.id : -1,
-				'Member': theRow.cells[0].textContent,
-				'Lvl': member !== undefined ? member.level : -1,
-				'Rank': member !== undefined ? member.rank : '',
-				'GoldFromDeposits': theRow.cells[1].textContent,
-				'GoldFromTax': theRow.cells[2].textContent,
-				'GoldTotal': theRow.cells[3].textContent,
-				'FSPs': theRow.cells[4].textContent,
-				'SkillsCast': theRow.cells[5].textContent,
-				'GroupsCreated': theRow.cells[6].textContent,
-				'GroupsJoined': theRow.cells[7].textContent,
-				'RelicsCaptured': theRow.cells[8].textContent,
-				'XPContrib': theRow.cells[9].textContent
-			};
-		}
+		});
+		Helper.displayAdvisor(list, o, data);
 	},
 
-	advisorHeaderClicked: function(evt) {
-		var headerClicked=evt.target.textContent;
-		var list=evt.target.parentNode.parentNode;
-		Helper.sortAdvisor(list, headerClicked.replace(/ /g, ''));
-	},
-
-	sortAdvisor: function(list, sortBy) {
-		if (Helper.sortAsc===undefined) {Helper.sortAsc=true;}
-		if (Helper.sortBy && Helper.sortBy===sortBy) {
-			Helper.sortAsc=!Helper.sortAsc;
-		}
-		Helper.sortBy=sortBy;
-
-		if (sortBy==='Member' || sortBy==='Rank') {
-			Helper.advisorRows.sort(Helper.stringSort);
-		}
-		else {
-			Helper.advisorRows.sort(Helper.numberSort);
-		}
-
-		var result = Helper.advisorHeader;
-
-		for (var i=0; i<Helper.advisorRows.length; i += 1){
-			var r = Helper.advisorRows[i];
-			result += '<tr class="HelperAdvisorRow'+(1+i % 2)+'">'+
-			'<td><a href="index.php?cmd=profile&player_id=' + r.Id +'">' +
-			r.Member + '</a></td>' +
-			'<td align="center"> ' + r.Lvl+'</td>' +
-			'<td align="center"> ' + r.Rank.substr(0,9) +
-			(r.Rank.length > 9 ? '...' : '') + '</td>' +
-			'<td align="center">' + r.GoldFromDeposits + '</td>' +
-			'<td align="center">' + r.GoldFromTax + '</td>' +
-			'<td align="center">' + r.GoldTotal + '</td>' +
-			'<td align="center">' + r.FSPs + '</td>' +
-			'<td align="center">' + r.SkillsCast + '</td>' +
-			'<td align="center">' + r.GroupsCreated + '</td>' +
-			'<td align="center">' + r.GroupsJoined + '</td>' +
-			'<td align="center">' + r.RelicsCaptured + '</td>' +
-			'<td align="center">' + r.XPContrib + '</td></tr>';
-		}
-		if (Helper.advisorFooter!=='') {
-			result+=Helper.advisorFooter;
-		} else {
-			Helper.advisorFooter='<tr><td align="right" colspan="3">Total: </td>';
-			for (var id=0; id<Helper.advisorColumns.length; id += 1){
-				var sum=0;
-				var columnName=Helper.advisorColumns[id];
-				for (i=0; i<Helper.advisorRows.length; i += 1) {
-					sum+=System.intValue(Helper.advisorRows[i][columnName]);
-				}
-				Helper.advisorFooter+='<td align="center" style="text-decoration:underline;font-weight:bold;font-size:x-small">'+System.addCommas(sum)+'</td>';
-			}
-			Helper.advisorFooter+='</tr>';
-			result+=Helper.advisorFooter;
-		}
-
-		list.innerHTML=result;
-
-		for (i=0; i<list.rows[0].cells.length; i += 1) {
-			var cell=list.rows[0].cells[i];
-			cell.style.textDecoration='underline';
-			cell.style.cursor='pointer';
-			cell.addEventListener('click', Helper.advisorHeaderClicked, true);
-		}
-
+	displayAdvisor: function(list, o, data) {
+		$(list).addClass('stripe hover');
+		$(list).html('<tfoot id="advTFoot"><tr><td style="text-align: ' +
+			'right;" colspan="3">Total: </td><td><u>' +
+			System.addCommas(o['Total:'].deposit) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].tax) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].total) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].fsp) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].skills) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].grpCrt) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].grpJoin) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].relics) + '</u></td><td><u>' +
+			System.addCommas(o['Total:'].contrib) + '</u></td></tr></tfoot>');
+		$(list).dataTable({
+			data: data,
+			pageLength: 25,
+			lengthMenu: [[25, 50, -1], [25, 50, 'All']],
+			columns: Layout.advisorColumns
+		});
 	},
 
 	stringSort: function(a,b) {
@@ -4248,6 +2973,7 @@ var Helper = {
 		
 		// PH 20150110 Only in Chrome. FF is apparently different!
 		// It's important because we lose the mouseover events of the built-in buttons.
+		// It's because you used innerHTML instead of append
 
 		Helper.checkBuffs();
 		Helper.prepareCheckMonster();
@@ -4629,19 +3355,24 @@ var Helper = {
 
 	insertQuickExtract: function(content) {
 		if (!content) {content=Layout.notebookContent();}
-		content.innerHTML='<table width=100%><tr style="background-color:#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>'+
-		'Select which type of plants you wish to extract all of.  Only select extractable resources.<br/>'+
-		'<label id="Helper:useItemsInStCont"><input type="checkbox" id="Helper:useItemsInSt" checked /> Select items in ST</label>' +
-		'<label id="Helper:useItemsInMainCont"><input type="checkbox" id="Helper:useItemsInMain" checked /> Only extract items in Main Folder</label>' +
-		'<table width=100% id="Helper:ExtTable"></table>';
-		$('label,input[id*="Helper:useItemsIn"]').click(Helper.showQuickExtract);
+		content.innerHTML='<table width=100%><tr style="background-color:' +
+			'#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>' +
+			'Select which type of plants you wish to extract all of. Only ' +
+			'select extractable resources.<br/><label><input type="checkbox"' +
+			' id="Helper:useItemsInSt" checked /> Select items in ST</label>' +
+			'<label><input type="checkbox" id="Helper:useItemsInMain" ' +
+			'checked /> Only extract items in Main Folder</label><table ' +
+			'width=100% id="Helper:ExtTable"></table>';
+		$('[id^="Helper\\:useItemsIn"]').click(Helper.showQuickExtract);
 		$.getJSON('?cmd=export&subcmd=inventory', Helper.showQuickExtract);
 	},
 
 	showQuickExtract: function(data) {
 		var item;
-		Helper.inventory = data;
-		Helper.itemList = {};
+		if (data.items) {
+			Helper.inventory = data;
+		}
+		//Helper.itemList = {};
 		var table = $('table[id="Helper:ExtTable"]');
 		table.children().remove();//empty table for re-population.
 		Helper.resourceList={}; //reset resourceList
@@ -5050,11 +3781,11 @@ var Helper = {
 		var content = document.getElementById('Helper.entityTableOutput');
 		var i;
 		if (!Helper.entityLogTable || !content) {return;}
-		System.addStyle(
-			'.HelperMonsterLogRow1 {background-color:#e7c473;font-size:small}\n' +
-			'.HelperMonsterLogRow1:hover {background-color:white}\n' +
-			'.HelperMonsterLogRow2 {background-color:#e2b960;font-size:small}\n' +
-			'.HelperMonsterLogRow2:hover {background-color:white}');
+		//~ System.addStyle(
+			//~ '.HelperMonsterLogRow1 {background-color:#e7c473;font-size:small}\n' +
+			//~ '.HelperMonsterLogRow1:hover {background-color:white}\n' +
+			//~ '.HelperMonsterLogRow2 {background-color:#e2b960;font-size:small}\n' +
+			//~ '.HelperMonsterLogRow2:hover {background-color:white}');
 
 		var result = '<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#110011; color:white;">'+
 			'<td width="90%" nobr align=center><b>&nbsp;Entity Information</b></td>'+
@@ -5338,6 +4069,9 @@ var Helper = {
 			memberList = {};
 			memberList.members = [];
 		}
+
+		memberList.members.forEach(function(e) {e.status='Deleted';});
+
 		//go through each member and store the data
 		memberRows.each(function(){
 			var playerLink   = $(this).find('a');
@@ -5396,14 +4130,14 @@ var Helper = {
 	},
 
 	replaceKeyHandler: function() {
-		setTimeout(function() { // FF3.6 was not working without the timeout in place
+		//~ setTimeout(function() { // FF3.6 was not working without the timeout in place
 			if ($('#worldPage').length === 0) { // not new map
 				//clear out the HCS keybinds so only helper ones fire
 				$.each($(document).controls('option').keys, function(index) { 
 					$(document).controls('option').keys[index] = [];
 				});
 			}
-		}, 0);
+		//~ }, 0);
 		unsafeWindow.document.onkeypress = null;
 		unsafeWindow.document.combatKeyHandler = null;
 		unsafeWindow.document.realmKeyHandler = null;
@@ -5640,10 +4374,10 @@ var Helper = {
 		if (!chatTable) {return;}
 
 		// fix for Chrome table width problem
-		if (logScreen === 'Chat' && navigator.userAgent.indexOf('Chrome') > 0) {
-			chatTable.style.tableLayout = 'fixed';
-			chatTable.style.wordWrap = 'break-word';
-		}
+		//~ if (logScreen === 'Chat' && navigator.userAgent.indexOf('Firefox') === -1) {
+		chatTable.style.tableLayout = 'fixed';
+		chatTable.style.wordWrap = 'break-word';
+		//~ }
 
 		var localDateMilli = (new Date()).getTime();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
@@ -5677,8 +4411,9 @@ var Helper = {
 				}
 			}
 		}
-		var now=(new Date()).getTime();
-		GM_setValue(lastCheckScreen, now.toString());
+		//~ var now=(new Date()).getTime();
+		//~ GM_setValue(lastCheckScreen, now.toString());
+		System.setValue(lastCheckScreen, (new Date()).getTime());
 	},
 
 	addLogWidgets: function() {
@@ -5716,11 +4451,11 @@ var Helper = {
 			if (!aRow.cells[0].innerHTML) {continue;}
 			var firstCell = aRow.cells[0];
 			//Valid Types: General, Chat, Guild
-			if (navigator.userAgent.indexOf('Firefox')>0) {
-				messageType = firstCell.firstChild.getAttribute('title');
-			} else { //chrome
-				messageType = firstCell.firstChild.getAttribute('oldtitle');
-			}
+			//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+				//~ messageType = firstCell.firstChild.getAttribute('title');
+			//~ } else { //chrome
+			messageType = firstCell.firstChild.getAttribute('oldtitle');
+			//~ }
 			if (!messageType) {return;}
 			var colorPlayerName = false;
 			var isGuildMate = false;
@@ -5785,12 +4520,17 @@ var Helper = {
 			}
 
 			//add PvP combat log summary
-			if (messageType === 'Notification' && aRow.cells[2] && showPvPSummaryInLog && aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+			if (messageType === 'Combat' &&
+				aRow.cells[2] &&
+				showPvPSummaryInLog &&
+				aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
 				var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
 				var combatSummarySpan = document.createElement('SPAN');
 				combatSummarySpan.style.color = 'gray';
 				aRow.cells[2].appendChild(combatSummarySpan);
-				System.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id='+combatID, Helper.retrievePvPCombatSummary, {'target': combatSummarySpan});
+				System.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
+					combatID, Helper.retrievePvPCombatSummary,
+					{'target': combatSummarySpan});
 			}
 		}
 		//GM_wait(function() { // just want to be on the safe side
@@ -5940,7 +4680,7 @@ var Helper = {
 			'subcmd=guildlog">Guild Log Summary</a> ]';
 		}
 		if (!System.getValue('hideNonPlayerGuildLogMessages')) {return;}
-		var playerId=Layout.playerId();
+		var playerId = Layout.playerId();
 		var logTable = System.findNode('//table[tbody/tr/td[.="Message"]]');
 		var hideNextRows = 0;
 		for (var i=0;i<logTable.rows.length;i += 1) {
@@ -6016,9 +4756,10 @@ var Helper = {
 	},
 
 	generateManageTable: function() {
-		System.addStyle('.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}\n' +
-			'.HelperTextLink:hover {text-decoration:underline;}\n');
-		var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr bgcolor=#CD9E4B>';
+		//~ System.addStyle('.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}\n' +
+			//~ '.HelperTextLink:hover {text-decoration:underline;}\n');
+		//~ var i, j, result='<table cellspacing=2 cellpadding=2 width=100%><tr bgcolor=#CD9E4B>';
+		var i, j, result='<table cellspacing=2 cellpadding=2 style="table-layout: fixed; word-wrap: break-word;" width=100%><tr bgcolor=#CD9E4B>';
 		var isArrayOnly= Helper.param.fields.length === 0;
 		for (i=0;i<Helper.param.headers.length;i += 1) {
 			result+='<th>'+Helper.param.headers[i]+'</th>';
@@ -6161,132 +4902,119 @@ var Helper = {
 	},
 
 	injectReportPaint: function() {
-		//Get the list of online members
-		var memberList = System.getValueJSON('memberlist');
-		var i;
-		if (memberList) {
-			for (i=0;i<memberList.members.length;i += 1) {
-				var member=memberList.members[i];
-				var lastActivityMinutes = 30;
-				var lastActivityIMG = '';
-				if (!isNaN(member.lastActivityMinutes)) {
-					lastActivityMinutes = member.lastActivityMinutes;
-				}
-				if (System.getValue('enhanceOnlineDots')) {
-					lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.offlineDot + '">';
-					if (lastActivityMinutes < 2) {
-						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond + '">';
-					} else if (lastActivityMinutes < 5) {
-						lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond + '">';
-					} else if (lastActivityMinutes < 30) {
-						lastActivityIMG = Data.orangeDiamond;
-					} else if (lastActivityMinutes > 10080) {
-						lastActivityIMG = Data.sevenDayDot;
-					}
-				}
+		Helper.getMemberList(Helper.doReportPaint, false);
+	},
 
-				var player=$('b:contains("' + member.name + '")');
-				if (player.length > 0) {
-					player.html(lastActivityIMG + '&nbsp;<a href="' +
-						System.server + 'index.php?cmd=profile&player_id=' + member.id + '">' + player.html() + '</a>');
-					player.append(' [ <span class=a-reply target_player=' + member.name + ' style="cursor:pointer; text-decoration:underline;">m</span> ]');
-				}
+	getMemberList: function(fn, force) {
+		force = force;//TODO
+		$.ajax({
+			cache: false,
+			dataType: 'json',
+			url:'index.php',
+			data: {
+				cmd: 'export',
+				subcmd: 'guild_members',
+				guild_id: Layout.guildId(),
+				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+			},
+			success: function(data) {
+				var fn = this;
+				var m = {};
+				System.setValue('lastMemberListCheck', Date.now());
+				m.lastUpdate = Date.now();
+				data.forEach(function(e) {m[e.username] = e;});
+				localforage.setItem('memberList', m, function (e, m) {fn(m);});
+			},
+			context: fn
+		});
+	},
+
+	reportHeader: function (memberList, tr) {
+		var b = $('b', tr);
+		b.html(Helper.onlineDot(Math.floor((Math.floor(Date.now() /
+			1000) - memberList[b.text()].last_login) / 60)) +
+			'<a href="' + System.server +
+			'index.php?cmd=profile&player_id=' +
+			memberList[b.text()].id + '">' + b.html() + '</a>' +
+			' [ <span class=a-reply target_player=' + b.text() +
+			' style="cursor:pointer; text-decoration:underline;">m' +
+			'</span> ]'
+		);
+	},
+
+	onlineDot: function (min) {
+		var img = '';
+		if (System.getValue('enhanceOnlineDots')) {
+			img = Data.offlineDot;
+			if (min < 2) {
+				img = Data.greenDiamond;
+			} else if (min < 5) {
+				img = Data.yellowDiamond;
+			} else if (min < 30) {
+				img = Data.orangeDiamond;
+			} else if (min > 10080) {
+				img = Data.sevenDayDot;
 			}
-			$('.a-reply').click(function(evt) {
-				Helper.openQuickMsgDialog(evt.target.getAttribute('target_player'));
-			});
 		}
-		var searchItemRE = /&item=(.*)$/;
-		var searchSetRE = /&set=(.*)$/;
-		var searchUserRE = /&user=(.*)$/;
-		var searchItem = searchItemRE.exec(location);
-		var searchSet = searchSetRE.exec(location);
-		var searchUser = searchUserRE.exec(location);
-		if (searchItem) {searchItem = decodeURI(searchItem[1]);}
+		return img;
+	},
+
+	doReportPaint: function(memberList) {
+		var rows = $('#pCC table table tr');
+
+		var searchUser = System.getUrlParameter('user');
+		if (searchUser && $('b:contains("' + searchUser + '")', rows)
+			.length > 0) {
+			rows
+			.not(rows.has('b:contains("' + searchUser + '")'))
+			.not(rows.has('[href*="_id=' + memberList[searchUser].id + '&"]'))
+			.remove();
+		}
+
+		var searchSet = System.getUrlParameter('set');
 		if (searchSet) {
-			searchItem = decodeURI(searchSet[1]);
-			searchItem = searchItem.indexOf(' of ') > 0 ?
-				searchItem.replace(/^.* of /,'') : searchItem.replace(/ .*$/ig,'')+' ';
+			var re = new RegExp(searchSet);
+			rows.filter(function (i, e) {
+				return !re.test($('td', e)[1].innerText) &&
+					$('td', e).length !== 2;
+			}).remove();
 		}
-		if (searchUser) {searchUser = decodeURI(searchUser[1]);}
-		if (searchUser) {
-			var playerReport = $('table[width=600]').find('a:contains("' + searchUser + '")');
-			if (playerReport.length > 0) {
-				var playerID = /player_id=(\d+)/.exec(playerReport.attr('href'))[1];
-				$('table[width=600] tr:has(a:not([href*="player_id=' + playerID + '"]))').hide();
+
+		rows.each(function (i,tr) {
+			if ($(tr).children().length === 2) {
+				Helper.reportHeader(memberList, tr);
+			} else {
+				Helper.reportChild(tr);
 			}
-		}
-		var searchItemArr;
-		var recallToBackpackHREF;
-		var recallToGuildStore;
-		var recallToGuildStoreHREF;
-		var inventoryItemID;
-		if (searchItem) {searchItemArr = searchItem.split('|');}
-		var mainTable = System.findNode('//table[@width="600"]');
-		for (i=mainTable.rows.length-1;i>=0;i-=1) {
-			var aRow = mainTable.rows[i];
-			if (aRow.cells[2]) { // itemRow
-				var itemCell = aRow.cells[1];
-				if (searchItem) {
-					for (var j=0; j<searchItemArr.length; j += 1) {
-						if (itemCell
-							.textContent
-							.indexOf(searchItemArr[j].trim()) >= 0) {
-							break;
-						}
-					}
-					if (j===searchItemArr.length) {
-						mainTable.deleteRow(i);
-						continue;
-					}
-				}
-				var recallCell = aRow.cells[2];
-				var recallToBackpack = '';
-				if (recallCell.firstChild.nextSibling.innerHTML === 'Backpack') {
-					recallToBackpack = recallCell.firstChild.nextSibling;
-					recallToBackpackHREF = recallToBackpack.getAttribute('href');
-					recallToGuildStore = recallToBackpack.nextSibling.nextSibling;
-					recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
-				} else {
-					recallToGuildStore = recallCell.firstChild.nextSibling;
-					recallToGuildStoreHREF = recallToGuildStore.getAttribute('href');
-					inventoryItemID = /&id=(\d+)/.exec(recallToGuildStoreHREF)[1];
-				}
-				var itemWorn = false;
-				if (aRow.cells[1].firstChild.nodeName === 'B') {
-					itemWorn = true;
-				}
-				var fastGSSpan;
-				var fastWearSpan;
-				if (recallToBackpack) {
-					recallCell.innerHTML = '<nobr>' + recallCell.innerHTML + '|' +
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast BP</span> |'+
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span> |'+
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToBackpackHREF + '">Fast Wear</span></nobr>';
-					var fastBPSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling.nextSibling.nextSibling;
-					fastBPSpan.addEventListener('click', Helper.recallItem, true);
-					fastGSSpan = fastBPSpan.nextSibling.nextSibling;
-					fastGSSpan.addEventListener('click', Helper.recallItem, true);
-					fastWearSpan = fastGSSpan.nextSibling.nextSibling;
-					fastWearSpan.addEventListener('click', Helper.recallItemNWear, true);
-				} else {
-					var output = '<nobr>' + recallCell.innerHTML + '|' +
-						'&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" href="' + recallToGuildStoreHREF + '">Fast GS</span>';
-					if (!itemWorn) {
-						output += ' |&nbsp;<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:equipProfileInventoryItem' + inventoryItemID +
-							'" itemID="' + inventoryItemID + '">Fast Wear</span>';
-					}
-					output += '</nobr>';
-					recallCell.innerHTML = output;
-					fastGSSpan = recallCell.firstChild.firstChild.nextSibling.nextSibling.nextSibling;
-					fastGSSpan.addEventListener('click', Helper.recallItem, true);
-					if (!itemWorn) {
-						fastWearSpan = fastGSSpan.nextSibling.nextSibling;
-						fastWearSpan.addEventListener('click', Helper.equipProfileInventoryItem, true);
-					}
-				}
-			}
-		}
+		});
+		$('.a-reply').click(function(evt) {
+			Helper.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+		});
+		$('.recall').click(Helper.recallItem);
+		$('.wear').click(Helper.recallItemNWear);
+		$('.equip').click(Helper.equipProfileInventoryItem);
+	},
+
+	reportChild: function (tr) {
+		$(':nth-child(3)' ,tr).wrapInner('<span class="fshNoWrap" ></span>');
+		var atr = $('a', tr);
+		atr.each(function (i,a) {
+			var $a = $(a);
+			$a.parent().append(
+				' | <span class="reportLink recall" href="' +
+				$a.attr('href') + '">' +
+				($a.text() === 'Backpack' ? 'Fast BP' : 'Fast GS') +
+				'</span>');
+		});
+		if ($('b', tr).length !== 0 ||
+			$(':contains("Potion")', tr).length !== 0 ||
+			$(':contains("Brew")', tr).length !== 0) {return;}
+		var href = atr.first().attr('href');
+		$('span.fshNoWrap', tr).append(' | <span class="reportLink ' +
+			(atr.length === 2 ?
+			'wear" href="' + href + '"' :
+			'equip" itemid="' + /&id=(\d+)/.exec(href)[1] + '"') +
+			'>Fast Wear</span>');
 	},
 
 	recallItem: function(evt) {
@@ -6708,35 +5436,47 @@ var Helper = {
 	},
 
 	injectProfile: function() {
+
+		var charStats = $('#profileLeftColumn table').first().attr('id', 'characterStats');
+		var tblCells = $('td', charStats).has('table').has('font');
+		tblCells.each(function (i, e) {
+			var tde = $('td', e);
+			$(e).attr('id', tde.first().attr('id'));
+			$(e).html(tde.first().html().replace(/&nbsp;/g, ' ') +
+				'<div class="profile-stat-bonus">' +
+				tde.last().text() + '</div>');
+		});
+
 		var playerid;
 		var player = System.findNode('//textarea[@id="holdtext"]');
 		var avyImg;
 		var playername;
-		if (navigator.userAgent.indexOf('Firefox')>0) {
-			avyImg = System.findNode('//img[contains(@title, "s Avatar")]');
-			if (avyImg) {playername = avyImg.getAttribute('title');}
-		} else { //chrome
-			avyImg = System.findNode('//img[contains(@oldtitle, "s Avatar")]');
-			if (avyImg) {playername = avyImg.getAttribute('oldtitle');}
-		}
+		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+			//~ avyImg = System.findNode('//img[contains(@title, "s Avatar")]');
+			//~ if (avyImg) {playername = avyImg.getAttribute('title');}
+		//~ } else { //chrome
+		avyImg = System.findNode('//img[contains(@oldtitle, "s Avatar")]');
+		if (avyImg) {playername = avyImg.getAttribute('oldtitle');}
+		//~ }
 		if (!avyImg) {return;}
+
 		if(document.URL.indexOf('player_id') !== -1){
 			var playeridRE = document.URL.match(/player_id=(\d+)/);
 			if (playeridRE) {playerid = playeridRE[1];}
 		}
 		var idindex;
 //************** yuuzhan having fun
-		if (navigator.userAgent.indexOf('Firefox')>0) {
-			$('img[title="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
-			$('img[title="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		} else { //chrome
-			$('img[oldtitle="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
-			$('img[oldtitle="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		}
+		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
+			//~ $('img[title="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
+			//~ $('img[title="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
+		//~ } else { //chrome
+		$('img[oldtitle="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
+		$('img[oldtitle="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
+		//~ }
 //**************
 		Helper.profileInjectGuildRel();
 		if (System.getValue('enableBioCompressor')) {Helper.compressBio();}
-		var isSelfRE=$('#backpack_tabs').length > 0;// /player_id=/.exec(document.location.search);//
+		var isSelfRE = $('#backpack_tabs').length > 0;// /player_id=/.exec(document.location.search);//
 		if (player) {
 			if (!playerid) {
 				playerid = player.innerHTML;
@@ -6788,29 +5528,21 @@ var Helper = {
 
 		//enhance colored dots
 		var enhanceOnlineDots = System.getValue('enhanceOnlineDots');
-		if (enhanceOnlineDots) {
-			var profileAlliesEnemies = System.findNodes('//div[@id="profileLeftColumn"]//table/tbody/tr/td/a[contains(@data-tipped,"Last Activity")]');
-			if (profileAlliesEnemies) {
-				for (var i=0;i<profileAlliesEnemies.length ;i+= 1 ) {
-					var testProfile = profileAlliesEnemies[i];
-					var contactLink = testProfile;
-					var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
-					var lastActivityDays = parseInt(lastActivity[1],10);
-					var lastActivityHours = parseInt(lastActivity[2],10) + lastActivityDays*24;
-					var lastActivityMinutes = parseInt(lastActivity[3],10) + lastActivityHours*60;
-					if (lastActivityMinutes < 2) {
-						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond + '">';
-					} else if (lastActivityMinutes < 5) {
-						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond + '">';
-					} else if (lastActivityMinutes < 30) {
-						contactLink.parentNode.previousSibling.innerHTML = Data.orangeDiamond;
-					} else if (lastActivityMinutes > 10080) {
-						contactLink.parentNode.previousSibling.innerHTML = Data.sevenDayDot;
-					} else {
-						contactLink.parentNode.previousSibling.innerHTML = '<img width="10" height="10" title="Offline" src="' + Data.offlineDot + '">';
-					}
-				}
-			}
+		if (!enhanceOnlineDots) {return;}
+		var profileAlliesEnemies = System.findNodes(
+			'//div[@id="profileLeftColumn"]//table/tbody/tr/td/a[' +
+			'contains(@data-tipped,"Last Activity")]');
+		if (!profileAlliesEnemies) {return;}
+		var re = new RegExp('<td>Last Activity:</td><td>(\\d+)d (\\d+)h (\\d+)m (\\d+)s</td>');
+		for (var i=0;i<profileAlliesEnemies.length ;i+= 1 ) {
+			var contactLink = profileAlliesEnemies[i];
+			var lastActivity = re.exec($(contactLink).data('tipped'));
+			var lastActivityIMG = Helper.onlineDot(
+				parseInt(lastActivity[3], 10) +
+				(parseInt(lastActivity[2], 10) +
+				parseInt(lastActivity[1], 10) * 24) * 60);
+			contactLink.parentNode.previousSibling
+				.innerHTML = lastActivityIMG;
 		}
 	},
 
@@ -7240,47 +5972,47 @@ var Helper = {
 
 	compressBio: function() {
 		var bioCell = System.findNode('//div[@id="profile-bio"]'); //new interface logic
-		if (bioCell) { //non-self profile
-			var bioContents = bioCell.innerHTML;
-			var maxCharactersToShow = System.getValue('maxCompressedCharacters');
-			var maxRowsToShow = System.getValue('maxCompressedLines');
-			var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
-			if (numberOfLines >= maxRowsToShow) {
-				var startIndex = 0;
-				while (maxRowsToShow >= 0) {
-					maxRowsToShow -=1;
-					startIndex = bioContents.indexOf('<br>\n',startIndex+1);
-				}
-				maxCharactersToShow = startIndex;
+		if (!bioCell) {return;} //non-self profile
+		var bioContents = bioCell.innerHTML;
+		var maxCharactersToShow = System.getValue('maxCompressedCharacters');
+		var maxRowsToShow = System.getValue('maxCompressedLines');
+		var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
+		if (numberOfLines >= maxRowsToShow) {
+			var startIndex = 0;
+			while (maxRowsToShow >= 0) {
+				maxRowsToShow -=1;
+				startIndex = bioContents.indexOf('<br>\n',startIndex+1);
 			}
+			maxCharactersToShow = startIndex;
+		}
 
-			if (bioContents.length>maxCharactersToShow) {
-				//find the end of next HTML tag after the max characters to show.
-				var breakPoint = bioContents.indexOf('<br>',maxCharactersToShow) + 4;
-				var lineBreak = '';
-				if (breakPoint === 3) {
-						breakPoint = bioContents.indexOf(' ',maxCharactersToShow) + 1;
-						if (breakPoint === 0) {return;}
-						lineBreak = '<br>';
-					}
-				var bioStart = bioContents.substring(0,breakPoint);
-				var bioEnd = bioContents.substring(breakPoint,bioContents.length);
-				var extraOpenHTML = '', extraCloseHTML = '';
-				var tagList=['b','i','u','span'];
-				for (var i=0;i<tagList.length;i += 1){
-					var closeTagIndex = bioEnd.indexOf('</'+tagList[i]+'>');
-					var openTagIndex = bioEnd.indexOf('<'+tagList[i]+'>');
-					if (closeTagIndex !== -1 && openTagIndex > closeTagIndex) {
-						extraOpenHTML += '<'+tagList[i]+'>';
-						extraCloseHTML += '</'+tagList[i]+'>';
-					}
-				}
-
-				bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak + '<span id="Helper:bioExpander" style="cursor:pointer; text-decoration:underline; color:blue;">More ...</span><br>' +
-					'<span id="Helper:bioHidden">' + extraOpenHTML + bioEnd + '</span>';
-				$('#Helper\\:bioHidden').hide();
+		if (bioContents.length <= maxCharactersToShow) {return;}
+		//find the end of next HTML tag after the max characters to show.
+		var breakPoint = bioContents.indexOf('<br>',maxCharactersToShow) + 4;
+		var lineBreak = '';
+		if (breakPoint === 3) {
+				breakPoint = bioContents.indexOf(' ',maxCharactersToShow) + 1;
+				if (breakPoint === 0) {return;}
+				lineBreak = '<br>';
+			}
+		var bioStart = bioContents.substring(0,breakPoint);
+		var bioEnd = bioContents.substring(breakPoint,bioContents.length);
+		var extraOpenHTML = '', extraCloseHTML = '';
+		var tagList=['b','i','u','span'];
+		for (var i=0;i<tagList.length;i += 1){
+			var closeTagIndex = bioEnd.indexOf('</'+tagList[i]+'>');
+			var openTagIndex = bioEnd.indexOf('<'+tagList[i]+'>');
+			if (closeTagIndex !== -1 && (openTagIndex > closeTagIndex ||
+				openTagIndex === -1)) {
+				extraOpenHTML += '<'+tagList[i]+'>';
+				extraCloseHTML += '</'+tagList[i]+'>';
 			}
 		}
+		bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak +
+			'<span id="Helper:bioExpander" style="cursor:pointer; ' +
+			'text-decoration:underline; color:blue;">More ...</span><br>' +
+			'<span id="Helper:bioHidden">' + extraOpenHTML + bioEnd + '</span>';
+		$('#Helper\\:bioHidden').hide();
 	},
 
 	toggleBuffsToBuy: function(evt) {
@@ -7558,6 +6290,23 @@ var Helper = {
 		Helper.inventoryManagerHeaders('guild', Helper.guildinventory, 'Helper:GuildInventoryManagerOutput');
 	},
 
+	setItemFilterDefault: function() { // FIXME
+		Helper.itemFilters = [
+			{'id':'showHelmetTypeItems', 'type':'Helmet'},
+			{'id':'showAmorTypeItems', 'type':'Armor'},
+			{'id':'showGloveTypeItems', 'type':'Gloves'},
+			{'id':'showBootTypeItems', 'type':'Boots'},
+			{'id':'showWeaponTypeItems', 'type':'Weapon'},
+			{'id':'showShieldTypeItems', 'type':'Shield'},
+			{'id':'showRingTypeItems', 'type':'Ring'},
+			{'id':'showAmuletTypeItems', 'type':'Amulet'},
+			{'id':'showRuneTypeItems', 'type':'Rune'}
+		];
+		//~ for (var i=0; i<Helper.itemFilters.length; i += 1) {
+			//~ System.setDefault(Helper.itemFilters[i].id, true);
+		//~ }
+	},
+
 	inventoryManagerHeaders: function(reportType, targetInventory, targetID) {
 		var content=Layout.notebookContent();
 		Helper.setItemFilterDefault();
@@ -7600,10 +6349,10 @@ var Helper = {
 		Helper.generateInventoryTable();
 
 		document.getElementById('Helper:inventoryFilterReset').addEventListener('click', function(){
-				GM_setValue('inventoryMinLvl',1);
-				GM_setValue('inventoryMaxLvl',9999);
-				$('input[id="Helper.inventoryMinLvl"]').attr('value','1');
-				$('input[id="Helper.inventoryMaxLvl"]').attr('value','2000');
+				GM_setValue('inventoryMinLvl', Data.defaults.inventoryMinLvl);
+				GM_setValue('inventoryMaxLvl', Data.defaults.inventoryMaxLvl);
+				$('input[id="Helper.inventoryMinLvl"]').attr('value', Data.defaults.inventoryMinLvl);
+				$('input[id="Helper.inventoryMaxLvl"]').attr('value', Data.defaults.inventoryMaxLvl);
 				Helper.generateInventoryTable();
 			}, true);
 		document.getElementById('Helper:inventoryFilterForm').addEventListener('submit', function(){
@@ -7687,7 +6436,7 @@ var Helper = {
 					item.player_name=targetInventory.members[item.player_id];
 					color = 'maroon'; whereText = item.player_name;  whereTitle='Guild Report';
 				}
-				if(item.player_id==='-1'){
+				if(item.player_id===-1){
 					p=targetInventory.guild_id;
 					t=4;
 				}else{
@@ -7706,7 +6455,6 @@ var Helper = {
 				p=targetInventory.player_id;
 				t=1;
 			}
-
 
 			var nm = item.item_name;
 			if(item.equipped) { nm='<b>'+nm+'</b>';}
@@ -7776,7 +6524,8 @@ var Helper = {
 			});
 		}*/
 		targetInventory.lastUpdate = new Date();
-		System.setValueJSON(inventoryShell, targetInventory);
+		// Sets but never gets inventory!
+		//~ System.setValueJSON(inventoryShell, targetInventory);
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
 		for (i=0; i<inventoryTable.rows[0].cells.length; i += 1) {
@@ -7800,7 +6549,7 @@ var Helper = {
 		if (reportType === 'guild') {
 			targetInventory = Helper.guildinventory;
 			html+='<span id="Helper:Recall">';
-			if(targetInventory.items[i].player_id==='-1'){
+			if(targetInventory.items[i].player_id===-1){
 				p=targetInventory.guild_id;
 				t=4;
 				html+='&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; text-decoration:underline; color:blue;" href="' +
@@ -8095,7 +6844,7 @@ var Helper = {
 			}
 		}
 		if (callback.page<maxPage/*-maxPage+15*/) {
-			var newPage = (callback.page == 1) ? Math.round(4 * maxPage / 5) : (callback.page+1);
+			var newPage = callback.page === 1 ? Math.round(4 * maxPage / 5) : callback.page + 1;
 			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {'page':newPage});
 		}
 		else {
@@ -8563,138 +7312,108 @@ var Helper = {
 		hpValue.innerHTML      = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
 
-	injectGroups: function() {
-		var subTable = System.findNode('//table[@width="650"]/tbody/tr/td/table');
-		if (!subTable) {return;}
+	displayMinGroupLevel: function () {
 		var minGroupLevel = System.getValue('minGroupLevel');
 		if (minGroupLevel) {
-			var textArea = subTable.rows[0].cells[0];
-			textArea.innerHTML += ' <span style="color:blue">Current Min Level Setting: '+ minGroupLevel +'</span>';
+			$('#pCC > table > tbody > tr > td > table td').first()
+				.append('<span style="color:blue"> ' +
+				'Current Min Level Setting: ' + minGroupLevel + '</span>');
 		}
-		var j;
-		var k;
-		var aMember;
-		var allItems = System.findNodes('//tr[td/div/a[contains(@href,"index.php?cmd=guild&subcmd=groups&subcmd2=viewstats&group_id=")]]');
-		if (!allItems) {return;}
-		var memberList=System.getValueJSON('memberlist');
-		for (var i=0; i<allItems.length; i += 1) {
-			var theItem=allItems[i].cells[0];
-			var foundName=theItem.textContent;
-			if (memberList) {
-				var listOfDefenders = '';
-				var listOfDefendersHTML = '';
-				for (j=0; j<memberList.members.length; j += 1) {
-					aMember = memberList.members[j];
-					// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
-					if (aMember.name===foundName) {
-						listOfDefendersHTML = allItems[i].cells[1].innerHTML;
-						if (listOfDefenders.indexOf('<font') !== -1) {
-						listOfDefenders = listOfDefendersHTML.substring(0, listOfDefendersHTML.indexOf('<font') - 2); //strip off mercs as they don"t need buffs
-						} else {
-							listOfDefenders = listOfDefendersHTML;
-						}
-						listOfDefenders = listOfDefenders.split(', '); // quick buff only supports 16
-						if (listOfDefenders[0] === '[none]') {break;}
-						var lastActivityMinutes = 30;
-						var lastActivityIMG = '';
-						if (!isNaN(aMember.lastActivityMinutes)) {
-							lastActivityMinutes = aMember.lastActivityMinutes;
-						}
-						if (System.getValue('enhanceOnlineDots')) {
-							lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.offlineDot + '">';
-							if (lastActivityMinutes < 2) {
-								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond + '">';
-							} else if (lastActivityMinutes < 5) {
-								lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond + '">';
-							} else if (lastActivityMinutes < 30) {
-								lastActivityIMG = Data.orangeDiamond;
-							} else if (lastActivityMinutes > 10080) {
-								lastActivityIMG = Data.sevenDayDot;
-							}
-						}
-						theItem.innerHTML = lastActivityIMG +
-							//direct call to player_id is faster link - server doesn"t have to do a search.
-							'&nbsp;<span style="font-size:small;"><a href="index.php?cmd=profile&player_id=' + aMember.id + '">' +
-							theItem.innerHTML + '</a></span> [' + aMember.level + ']';
-						var shortList = [];
-						var modifierWord;
-						//fix buff 16 in group page
-						for (k = 0; k < listOfDefenders.length; k += 1) {
-							shortList.push(listOfDefenders[k]);
-							if (k + 1 % 16 === 0 && k !== 0 || k === listOfDefenders.length - 1) {
-									modifierWord = Helper.getGroupBuffModifierWord(k);
-								theItem.innerHTML += '<br><nobr><a href="#" id="buffAll' + aMember.id + modifierWord + 
-								'"><span style="color:blue; font-size:x-small;" title="Quick buff functionality from HCS only does 16">'+
-								'Buff ' + modifierWord + ' 16</span></a></nobr>';
-								var buffAllLink = System.findNode('//a[@id="buffAll' + aMember.id + modifierWord + '"]');
-								buffAllLink.setAttribute('href',Layout.buffAllHref(shortList));
-								shortList = [];
-							}
-						}
-						//
+	},
 
-						break;
-					}
-				}
-			}
+	doGroupPaint: function(m) {
+		$('#pCC table table table tr').has('.group-action-container')
+			.each(function(i, e) {
+				Helper.doGroupRow(e, m);
+			});
+	},
 
-			var theMembersCell=allItems[i].cells[1];
-			if (theMembersCell.textContent !== '[none]') {
-				var theMembersArray=theMembersCell.innerHTML.split(',');
-				var linkMembersArray = [];
-				for (k=0; k<theMembersArray.length; k += 1) {
-					var theMember = theMembersArray[k].trim();
-					var linkMember;
-					if (theMember.search('<font') === -1) {
-						if (memberList) {
-							for (j=0; j<memberList.members.length; j += 1) {
-								aMember=memberList.members[j];
-								// I hate doing two loops, but using a hashtable implementation I found crashed my browser...
-								if (aMember.name===theMember) {
-									//direct call to player_id is faster link - server doesn"t have to do a search.
-									linkMember = (k===0?'':' ') + '<a href="index.php?cmd=profile&player_id=' + aMember.id + '">' + theMember + '</a>';
-									break;
-								}
-							}
-						}
-					} else {
-						linkMember = ' ' + theMember;
-					}
-					linkMembersArray.push(linkMember);
-				}
-				theMembersCell.innerHTML = linkMembersArray;
-			}
-
-			var theDateCell=allItems[i].cells[2];
-			var theDate=theDateCell.firstChild;
-			var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-			var xRE=/([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
-			var x=xRE.exec(theDate.innerHTML);
-			var month = months.indexOf(x[3]);
-			var curYear = new Date().getFullYear();
-			var groupDate = new Date();
-			groupDate.setUTCDate(x[2]);
-			groupDate.setUTCMonth(month);
-			groupDate.setUTCFullYear(curYear);
-			groupDate.setUTCHours(x[4]);
-			groupDate.setUTCMinutes(x[5]);
-			theDateCell.innerHTML += '<br><nobr><span style="color:blue; font-size:x-small">Local: '+
-				groupDate.toString().substr(0,21)+'</span></nobr>';
+	doGroupRow: function(e, m) {
+		var creator = $('b', e).text();
+		var td = $('td', e).first();
+		if (m[creator]) {
+			td.html(Helper.onlineDot(Math.floor((Math.floor(Date.now() /
+				1000) - m[creator].last_login) / 60)) + '&nbsp;<a href="' +
+				System.server + 'index.php?cmd=profile&player_id=' +
+				m[creator].id + '">' + td.html() + '</a>' + ' [' +
+				m[creator].level + ']');
 		}
-		var buttonElement = System.findNode('//td[input[@value="Join All Available Groups"]]');
-		var enableMaxGroupSizeToJoin = System.getValue('enableMaxGroupSizeToJoin');
+
+		var td2 = $('td', e).eq(1);
+		var theList = td2.html();
+		var listArr = theList.split(', ');
+		var buffList = [];
+		listArr.forEach(function(v, i, a) {
+			if (v.indexOf('<font') !== -1) {return;}
+			buffList[Math.floor(i / 16)] = buffList[Math.floor(i / 16)] || [];
+			buffList[Math.floor(i / 16)].push(v);
+			if (!m[v]) {return;}
+			a[i] = ' <a href="index.php?cmd=profile&player_id=' +
+				m[v].id + '">' + v + '</a>';
+		});
+
+		buffList.forEach(function(v, i) {
+			td.append('<br><a href=\'' + Layout.buffAllHref(v) +
+				'\'><span style="color:blue; font-size:x-small;" title="Quick ' +
+				'buff functionality from HCS only does 16">Buff ' +
+				Layout.places[i] + ' 16</span></a>'
+			);
+		});
+
+		var formList = listArr.join(', ');
+		td2.html('<span>' + formList + '</span>');
+
+		Helper.groupLocalTime($('td', e).eq(2));
+	},
+
+	groupLocalTime: function (theDateCell) {
+		var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
+			'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+		var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
+		var x = xRE.exec(theDateCell.text());
+		var month = months.indexOf(x[3]);
+		var curYear = new Date().getFullYear(); // Boundary condition
+		var groupDate = new Date();
+		groupDate.setUTCDate(x[2]);
+		groupDate.setUTCMonth(month);
+		groupDate.setUTCFullYear(curYear);
+		groupDate.setUTCHours(x[4]);
+		groupDate.setUTCMinutes(x[5]);
+		theDateCell.append('<br><span style="color:blue; font-size:x-small">' +
+			'Local: ' + groupDate.toString().substr(0,21)+'</span>');
+	},
+
+	injectGroups: function() {
+
+		Helper.getMemberList(Helper.doGroupPaint, false);
+
+		Helper.displayMinGroupLevel();
+		Helper.groupButtons();
+	},
+
+	groupButtons: function() {
+		var buttonElement = System.findNode('//td[input[@value="Join All ' +
+			'Available Groups"]]');
+		var enableMaxGroupSizeToJoin =
+			System.getValue('enableMaxGroupSizeToJoin');
 		if (enableMaxGroupSizeToJoin) {
 			var maxGroupSizeToJoin = System.getValue('maxGroupSizeToJoin');
 			var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
 			joinAllInput.style.display = 'none';
 			joinAllInput.style.visibility = 'hidden';
-			buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsundersize" type="button" value="Join All Groups < ' + maxGroupSizeToJoin +
-				' Members" class="custombutton">&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
-			document.getElementById('joinallgroupsundersize').addEventListener('click', Helper.joinAllGroupsUnderSize, true);
+			buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
+				'size" type="button" value="Join All Groups < ' +
+				maxGroupSizeToJoin + ' Members" class="custombutton">&nbsp;' +
+				'<input id="fetchgroupstats" type="button" value="Fetch ' +
+				'Group Stats" class="custombutton">';
+			document.getElementById('joinallgroupsundersize')
+				.addEventListener('click', Helper.joinAllGroupsUnderSize, true);
 		} else {
-			buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" type="button" value="Fetch Group Stats" class="custombutton">';
+			buttonElement.innerHTML += '&nbsp;<input id="fetchgroupstats" ' +
+				'type="button" value="Fetch Group Stats" class="custombutton">';
 		}
-		document.getElementById('fetchgroupstats').addEventListener('click', Helper.fetchGroupData, true);
+		document.getElementById('fetchgroupstats')
+			.addEventListener('click', Helper.fetchGroupData, true);
 
 		var re=/subcmd2=([a-z]+)/;
 		var subPage2IdRE = re.exec(document.location.search);
@@ -8832,106 +7551,104 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
-		System.addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
-			'.HelperTextLink:hover {text-decoration:underline;}\n');
-		//var playerInput = System.findNode("//input[@name='targetPlayers']");
-		var playerInput = $('input[name="targetPlayers"]');
-		if (playerInput.length == 0) return;
-		var buffMe = document.createElement("SPAN");
-		buffMe.innerHTML="[self]";
-		buffMe.className='HelperTextLink';
-		buffMe.addEventListener("click", Helper.quickBuffMe, true);
+		//~ System.addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
+			//~ '.HelperTextLink:hover {text-decoration:underline;}\n');
+		//var playerInput = System.findNode('//input[@name="targetPlayers"]');
+		var playerInput = $('input#targetPlayers');
+		if (playerInput.length === 0) {return;}
+		//~ var buffMe = document.createElement('SPAN');
+		//~ buffMe.innerHTML='[self]';
+		//~ buffMe.className='HelperTextLink';
+		//~ buffMe.addEventListener('click', Helper.quickBuffMe, true);
 		//playerInput.parentNode.appendChild(buffMe);
-		playerInput.parent().append(buffMe);
+		//~ playerInput.parent().append(buffMe);
 
-		Helper.injectBuffPackArea();
+		//~ Helper.injectBuffPackArea();
 
-		var playerIDRE = /tid=(\d+)/;
-		var playerID = playerIDRE.exec(location);
-		if (playerID) {
-			playerID = playerID[1];
-			System.xmlhttp("index.php?cmd=profile&player_id=" + playerID, Helper.getPlayerBuffs, false);
-		}
-		var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
-		if (playerName) {
-			playerName = playerName[1];
-			if (playerName == System.getValue("CharacterName")) System.xmlhttp("index.php?cmd=profile", Helper.getPlayerBuffs, false);
-			else System.xmlhttp("index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=" + playerName + "&search_show_first=1", Helper.getPlayerBuffs, false);
-		}
-		System.xmlhttp("index.php?cmd=profile", Helper.getSustain);
+		//~ var playerIDRE = /tid=(\d+)/;
+		//~ var playerID = playerIDRE.exec(location);
+		//~ if (playerID) {
+			//~ playerID = playerID[1];
+			//~ System.xmlhttp('index.php?cmd=profile&player_id=' + playerID, Helper.getPlayerBuffs, false);
+		//~ }
+		//~ var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
+		//~ if (playerName) {
+			//~ playerName = playerName[1];
+			//~ if (playerName === System.getValue('CharacterName')) System.xmlhttp('index.php?cmd=profile', Helper.getPlayerBuffs, false);
+			//~ else System.xmlhttp('index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=' + playerName + '&search_show_first=1', Helper.getPlayerBuffs, false);
+		//~ }
+		System.xmlhttp('index.php?cmd=profile', Helper.getSustain);
 
-		var buffList = Data.buffList();
-		var skillNodes = System.findNodes("//input[@name='skills[]']");
-		var buffIndex = window.location.toString().indexOf("&blist=");
-		var addr;
-		var newStaminaTotal;
-		var targetPlayersCount;
-		var i;
-
-		if (buffIndex !== -1) {
-			addr = window.location.toString().substring(buffIndex + 7);
-			addr = addr.substring(0, addr.length - 1).split(";");
-		}
-		var buffPacksToUse = [];
-		if (skillNodes) {
-			var targetPlayers = playerInput;
-			targetPlayersCount = targetPlayers.val().split(",").length*1;
-			newStaminaTotal = 0;
-			var theBuffPack = System.getValueJSON("buffpack"); // cache it now in case we have a buff pack to find.
-			for (i = 0; i < skillNodes.length; i+= 1 ) {
-				var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
-				skillNodes[i].setAttribute("skillName", skillName);
-				for (var k = 0; k < buffList.length; k += 1) {
-					if (buffList[k].name === skillName) {
-						if (addr) {
-							for (var p = 0; p < addr.length; p += 1) {
-
-								if (addr[p] === k) {
-
-									newStaminaTotal += buffList[k].stamina*1;
-									skillNodes[i].checked = true;
-								} else if (addr[p] >= 126) {
-									if (theBuffPack) {
-
-										var bpIndex = addr[p] - 126;
-										var bpButton = document.getElementById("bpSelect" + bpIndex);
-
-										if (bpButton) {
-											var foundMe = false;
-											for (var indx = 0; indx < buffPacksToUse.length; indx += 1) {
-												if (buffPacksToUse[indx] === bpIndex) {
-													foundMe = true;
-													break;
-												}
-											}
-											if (!foundMe) {
-												buffPacksToUse.push(bpIndex);
-											}
-											continue;
-										}
-									}
-								}
-							}
-						}
-						skillNodes[i].setAttribute("staminaCost",buffList[k].stamina);
-						break;
-					}
-				}
-				skillNodes[i].addEventListener("click", Helper.toggleBuffStatus, true);
-			}
-		}
-		//var activateButton = System.findNode("//input[@value='Activate Selected Skills']");
-		var activateButton = $('input[value="Activate Selected Skills"]');
-		activateButton.parent().append("<br><span style='color:white;'>Stamina to cast selected skills: <span>" +
-			"<span id='staminaTotal' style='display:none; color:orange;'>" + newStaminaTotal +
-			"</span>&nbsp;<span id='staminaTotalAll' style='color:orange;'>" + newStaminaTotal * targetPlayersCount + "</span>");
-		if (buffPacksToUse.length > 0) {
-			for (i = 0; i < buffPacksToUse.length; i+= 1 ) {
-				Helper.useBuffPack(buffPacksToUse[i]);
-			}
-		}
-		//code to pre-size cell for data later. crude but it works.
-		$('input[value="activate"]').next().find('tr:last td').html('&nbsp;</br>&nbsp;</br>&nbsp;');
+		//~ var buffList = Data.buffList;
+		//~ var skillNodes = System.findNodes('//input[@name="skills[]"]');
+		//~ var buffIndex = window.location.toString().indexOf('&blist=');
+//~ 
+		//~ var addr;
+		//~ var newStaminaTotal;
+		//~ var targetPlayersCount;
+		//~ var i;
+//~ 
+		//~ if (buffIndex !== -1) {
+			//~ addr = window.location.toString().substring(buffIndex + 7);
+			//~ addr = addr.substring(0, addr.length - 1).split(';');
+		//~ }
+		//~ var buffPacksToUse = [];
+		//~ if (skillNodes) {
+			//~ var targetPlayers = playerInput;
+			//~ targetPlayersCount = targetPlayers.val().split(',').length*1;
+			//~ newStaminaTotal = 0;
+			//~ var theBuffPack = System.getValueJSON('buffpack'); // cache it now in case we have a buff pack to find.
+			//~ for (i = 0; i < skillNodes.length; i+= 1 ) {
+				//var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
+				//~ var skillName = skillNodes[i].getAttribute('data-name');
+				//skillNodes[i].setAttribute('skillName', skillName); // Use data-name instead
+				//~ for (var k = 0; k < buffList.length; k += 1) {
+					//~ if (buffList[k].name !== skillName) {continue;}
+					//~ if (!addr) {break;}
+					//~ for (var p = 0; p < addr.length; p += 1) {
+//~ 
+						//~ if (addr[p] === k) {
+//~ 
+							//~ newStaminaTotal += buffList[k].stamina*1;
+							//~ skillNodes[i].checked = true;
+						//~ } else if (addr[p] >= 126) {
+							//~ if (!theBuffPack) {continue;}
+//~ 
+							//~ var bpIndex = addr[p] - 126;
+							//~ var bpButton = document.getElementById('bpSelect' + bpIndex);
+//~ 
+							//~ if (!bpButton) {continue;}
+							//~ var foundMe = false;
+							//~ for (var indx = 0; indx < buffPacksToUse.length; indx += 1) {
+								//~ if (buffPacksToUse[indx] === bpIndex) {
+									//~ foundMe = true;
+									//~ break;
+								//~ }
+							//~ }
+							//~ if (!foundMe) {
+								//~ buffPacksToUse.push(bpIndex);
+							//~ }
+								//continue;
+						//~ }
+					//~ }
+					//skillNodes[i].setAttribute('staminaCost',buffList[k].stamina); // Use data-cost instead
+				//~ }
+				//~ skillNodes[i].addEventListener('click', Helper.toggleBuffStatus, true);
+			//~ }
+		//~ }
+		//~ //var activateButton = System.findNode('//input[@value="Activate Selected Skills"]');
+		//var activateButton = $('input[value="Activate Selected Skills"]');
+		//~ var activateButton = $('table#bpTable');
+		//~ activateButton.parent().append('<br><span style="color:white;">Stamina to cast selected skills: <span>' +
+			//~ '<span id="staminaTotal" style="display:none; color:orange;">' + newStaminaTotal +
+			//~ '</span>&nbsp;<span id="staminaTotalAll" style="color:orange;">' + newStaminaTotal * targetPlayersCount + '</span>');
+		//~ if (buffPacksToUse.length > 0) {
+			//~ for (i = 0; i < buffPacksToUse.length; i+= 1 ) {
+				//~ Helper.useBuffPack(buffPacksToUse[i]);
+			//~ }
+		//~ }
+		//~ //code to pre-size cell for data later. crude but it works.
+		//~ $('input[value="activate"]').next().find('tr:last td').html('&nbsp;</br>&nbsp;</br>&nbsp;');
 	},
 
 	toggleBuffStatus: function(evt) {
@@ -9378,7 +8095,7 @@ var Helper = {
 			inject.innerHTML += '&nbsp;<span style="color:white; ' +
 				'font-size:x-small;">(' + buffTimeToExpire +')</span>';
 		} else {
-			var elem=$('input[data-name="Buff Master"]');
+			var elem=$('input[data-name="' + buff + '"]');
 			if (elem.length > 0) {
 				inject.innerHTML += '<span style="color:red;cursor:pointer;" ' +
 					'buffID="' + elem.val() + '" id="HelperActivate' +
@@ -9518,6 +8235,7 @@ var Helper = {
 	playerData: function (responseText) {
 		var doc = System.createDocument(responseText);
 		var obj = {
+			levelValue: Helper.getStat('#stat-vl', doc),
 			attackValue: Helper.getStat('#stat-attack', doc),
 			defenseValue: Helper.getStat('#stat-defense', doc),
 			armorValue: Helper.getStat('#stat-armor', doc),
@@ -9538,7 +8256,6 @@ var Helper = {
 			fortitudeLevel: Helper.getBuffLevel(doc, 'Fortitude'),
 			chiStrikeLevel: Helper.getBuffLevel(doc, 'Chi Strike'),
 			terrorizeLevel: Helper.getBuffLevel(doc, 'Terrorize'),
-			holyFlameBonusDamage: 0
 		};
 		obj.superEliteSlayerMultiplier = Math.round(0.002 *
 			obj.superEliteSlayerLevel * 100) / 100;
@@ -9595,16 +8312,381 @@ var Helper = {
 		return obj;
 	},
 
-	getCreaturePlayerData: function(responseText, callback) {
-		//playerdata
-		var player = Helper.playerData(responseText);
+	evalExtraBuffs: function(combat) {
+		combat.extraNotes = '';
+		combat.extraNotes += combat.player.superEliteSlayerLevel > 0 ?
+			'SES Stat Reduction Multiplier = ' +
+			combat.player.superEliteSlayerMultiplier + '<br>':'';
 
-		var combatEvaluatorBias = System.getValue('combatEvaluatorBias');
-		var attackVariable = 1.1053;
-		var generalVariable = Data.bias[combatEvaluatorBias] ?
-			Data.bias[combatEvaluatorBias].generalVariable : 1.1053;
-		var hpVariable = Data.bias[combatEvaluatorBias] ?
-			Data.bias[combatEvaluatorBias].hpVariable : 1.1;
+		//math section ... analysis
+		//Holy Flame adds its bonus after the armor of the creature has been taken off.
+		combat.holyFlameBonusDamage = 0;
+		if (combat.creature.class === 'Undead') {
+			combat.holyFlameBonusDamage = Math.max(Math.floor(
+				(combat.player.damageValue - combat.creature.armor) *
+				combat.player.holyFlameLevel * 0.002),0);
+			combat.extraNotes += combat.player.holyFlameLevel > 0 ?
+				'HF Bonus Damage = ' + combat.holyFlameBonusDamage +
+				'<br>':'';
+		}
+
+		//Death Dealer and Counter Attack both applied at the same time
+		combat.deathDealerBonusDamage =
+			Math.floor(combat.player.damageValue * (Math.min(Math.floor(
+				combat.player.killStreakValue / 5) * 0.01 *
+				combat.player.deathDealerLevel, 20) / 100));
+
+		combat.counterAttackBonusAttack =
+			Math.floor(combat.player.attackValue * 0.0025 *
+			combat.player.counterAttackLevel);
+
+		combat.counterAttackBonusDamage =
+			Math.floor(combat.player.damageValue * 0.0025 *
+			combat.player.counterAttackLevel);
+
+		combat.extraStaminaPerHit =
+			combat.player.counterAttackLevel > 0 ?
+			Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
+			combat.player.counterAttackLevel) : 0;
+
+		//playerAttackValue += counterAttackBonusAttack;
+		//playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
+
+		combat.extraNotes += combat.player.deathDealerLevel > 0 ?
+			'DD Bonus Damage = ' + combat.deathDealerBonusDamage + '<br>':'';
+
+		if (combat.player.counterAttackLevel > 0) {
+			combat.extraNotes += 'CA Bonus Attack/Damage = ' +
+				combat.counterAttackBonusAttack + ' / ' +
+				combat.counterAttackBonusDamage + '<br>' +
+				'CA Extra Stam Used = ' + combat.extraStaminaPerHit + '<br>';
+		}
+
+		return combat;
+
+	},
+
+	evalAttack: function(combat) {
+		//Attack:
+		combat.extraNotes += combat.player.darkCurseLevel > 0 ?
+			'DC Bonus Attack = ' + Math.floor(combat.creature.defense *
+			combat.player.darkCurseLevel * 0.002) + '<br>':'';
+
+		combat.nightmareVisageAttackMovedToDefense =
+			Math.floor(((combat.callback.groupExists ?
+			combat.callback.groupAttackValue : combat.player.attackValue) +
+			combat.counterAttackBonusAttack) *
+			combat.player.nightmareVisageLevel * 0.0025);
+
+		combat.extraNotes += combat.player.nightmareVisageLevel > 0 ?
+			'NMV Attack moved to Defense = ' +
+			combat.nightmareVisageAttackMovedToDefense + '<br>':'';
+
+		combat.overallAttackValue = (combat.callback.groupExists ?
+			combat.callback.groupAttackValue : combat.player.attackValue) +
+			combat.counterAttackBonusAttack -
+			combat.nightmareVisageAttackMovedToDefense;
+
+		combat.hitByHowMuch = combat.overallAttackValue -
+			Math.ceil(combat.attackVariable * (combat.creature.defense -
+			combat.creature.defense * combat.player.darkCurseLevel * 0.002));
+
+		if (combat.combatEvaluatorBias === 3) {
+			combat.hitByHowMuch = combat.overallAttackValue - Math.ceil(
+				combat.creature.defense - combat.creature.defense *
+				combat.player.darkCurseLevel * 0.002
+			) - 50;
+		}
+
+		return combat;
+
+	},
+
+	evalDamage: function(combat) {
+		//Damage:
+		combat.fortitudeExtraHPs = Math.floor((combat.callback.groupExists ?
+			combat.callback.groupHPValue : combat.player.hpValue) *
+			combat.player.fortitudeLevel * 0.001);
+
+		combat.extraNotes += combat.player.fortitudeLevel > 0 ?
+			'Fortitude Bonus HP = ' + combat.fortitudeExtraHPs + '<br>' : '';
+
+		combat.overallHPValue = (combat.callback.groupExists ?
+			combat.callback.groupHPValue : combat.player.hpValue) +
+			combat.fortitudeExtraHPs;
+
+		combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
+			combat.player.chiStrikeLevel * 0.001);
+
+		combat.extraNotes += combat.player.chiStrikeLevel > 0 ?
+			'Chi Strike Bonus Damage = ' + combat.chiStrikeExtraDamage +
+			'<br>':'';
+
+		combat.overallDamageValue = (combat.callback.groupExists ?
+			combat.callback.groupDamageValue : combat.player.damageValue) +
+			combat.deathDealerBonusDamage + combat.counterAttackBonusDamage +
+			combat.holyFlameBonusDamage + combat.chiStrikeExtraDamage;
+
+		combat.damageDone = Math.floor(combat.overallDamageValue - (
+			combat.generalVariable * combat.creature.armor +
+			combat.hpVariable * combat.creature.hp));
+
+		combat.numberOfHitsRequired = combat.hitByHowMuch > 0 ?
+			Math.ceil(combat.hpVariable * combat.creature.hp / (
+			combat.overallDamageValue < combat.generalVariable *
+			combat.creature.armor ? 1 : combat.overallDamageValue -
+			combat.generalVariable * combat.creature.armor)) :'-';
+
+		return combat;
+
+	},
+
+	evalDefence: function(combat) {
+
+//~ var overallDefenseValue = (groupExists?groupDefenseValue:playerDefenseValue) +
+//~ 
+//~ Math.floor((groupExists?groupDefenseValue:playerDefenseValue) * constitutionLevel * 0.001) + nightmareVisageAttackMovedToDefense;
+
+		combat.overallDefenseValue = (combat.callback.groupExists ?
+			combat.callback.groupDefenseValue : combat.player.defenseValue) +
+			Math.floor((combat.callback.groupExists ?
+			combat.callback.groupDefenseValue : combat.player.defenseValue) *
+			combat.player.constitutionLevel * 0.001 ) +
+			combat.nightmareVisageAttackMovedToDefense;
+
+		combat.extraNotes += combat.player.constitutionLevel > 0 ?
+			'Constitution Bonus Defense = ' +
+			Math.floor((combat.callback.groupExists ?
+			combat.callback.groupDefenseValue : combat.player.defenseValue) *
+			combat.player.constitutionLevel * 0.001) + '<br>':'';
+
+		combat.extraNotes += combat.player.flinchLevel > 0 ?
+			'Flinch Bonus Attack Reduction = ' +
+			Math.floor(combat.creature.attack * combat.player.flinchLevel *
+			0.001) + '<br>':'';
+
+		combat.creatureHitByHowMuch = Math.floor(combat.attackVariable *
+			combat.creature.attack - combat.creature.attack *
+			combat.player.flinchLevel * 0.001 - combat.overallDefenseValue);
+
+		if (combat.combatEvaluatorBias === 3) {
+			combat.creatureHitByHowMuch = Math.floor(combat.creature.attack -
+				combat.creature.attack * combat.player.flinchLevel * 0.001 -
+				combat.overallDefenseValue - 50);
+		}
+
+		return combat;
+
+	},
+
+	evalArmour: function(combat) {
+		combat.overallArmorValue = (combat.callback.groupExists ?
+			combat.callback.groupArmorValue : combat.player.armorValue) +
+			Math.floor(combat.player.armorValue *
+			combat.player.sanctuaryLevel * 0.001);
+
+		combat.extraNotes += combat.player.sanctuaryLevel > 0 ?
+			'Sanc Bonus Armor = ' + Math.floor(combat.player.armorValue *
+			combat.player.sanctuaryLevel * 0.001) + '<br>':'';
+
+		combat.terrrorizeEffect = Math.floor(combat.creature.damage *
+			combat.player.terrorizeLevel * 0.001);
+
+		combat.extraNotes += combat.player.terrorizeLevel > 0 ?
+			'Terrorize Creature Damage Effect = ' +
+			combat.player.terrrorizeEffect * -1 + '<br>':'';
+
+		combat.creature.damage -= combat.terrrorizeEffect;
+
+		combat.creatureDamageDone = Math.ceil(combat.generalVariable *
+			combat.creature.damage - combat.overallArmorValue +
+			combat.overallHPValue);
+
+		combat.numberOfCreatureHitsTillDead =
+			combat.creatureHitByHowMuch >= 0 ?
+			Math.ceil(combat.overallHPValue / (combat.generalVariable *
+			combat.creature.damage < combat.overallArmorValue ? 1 :
+			combat.generalVariable * combat.creature.damage -
+			combat.overallArmorValue)):'-';
+
+		return combat;
+
+	},
+
+	evalAnalysis: function(combat) {
+		//Analysis:
+		combat.playerHits = combat.numberOfCreatureHitsTillDead === '-' ?
+			combat.numberOfHitsRequired : combat.numberOfHitsRequired === '-' ?
+			'-' : combat.numberOfHitsRequired >
+			combat.numberOfCreatureHitsTillDead ? '-' :
+			combat.numberOfHitsRequired;
+
+		combat.creatureHits = combat.numberOfHitsRequired === '-' ?
+			combat.numberOfCreatureHitsTillDead :
+			combat.numberOfCreatureHitsTillDead === '-' ? '-' :
+			combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired ?
+			'-' : combat.numberOfCreatureHitsTillDead;
+
+		combat.fightStatus = 'Unknown';
+		if (combat.playerHits === '-' && combat.creatureHits === '-') {
+			combat.fightStatus = 'Unresolved';
+		} else if (combat.playerHits === '-') {
+			combat.fightStatus = 'Player dies';
+		} else if (combat.playerHits === 1) {
+			combat.fightStatus = 'Player 1 hits' + (
+				combat.numberOfCreatureHitsTillDead -
+				combat.numberOfHitsRequired <= 1 ? ', dies on miss' :
+				', survives a miss');
+		} else if (combat.playerHits > 1) {
+			combat.fightStatus = 'Player > 1 hits' + (
+				combat.numberOfCreatureHitsTillDead -
+				combat.numberOfHitsRequired <= 1 ? ', dies on miss' :
+				', survives a miss');
+		}
+
+		return combat;
+
+	},
+
+	evalCA: function(combat) {
+		if (combat.player.counterAttackLevel > 0 &&
+			combat.numberOfHitsRequired === 1) {
+			combat.lowestCALevelToStillHit = Math.max(Math.ceil((
+				combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
+				combat.player.attackValue / 0.0025), 0);
+			combat.lowestCALevelToStillKill = Math.max(Math.ceil((
+				combat.counterAttackBonusDamage - combat.damageDone + 1) /
+				combat.player.damageValue / 0.0025), 0);
+			combat.lowestFeasibleCALevel =
+				Math.max(combat.lowestCALevelToStillHit,
+				combat.lowestCALevelToStillKill);
+			combat.extraNotes += 'Lowest CA to still 1-hit this creature = ' +
+				combat.lowestFeasibleCALevel + '<br>';
+			if (combat.lowestFeasibleCALevel !== 0) {
+				combat.extraAttackAtLowestFeasibleCALevel =
+					Math.floor(combat.player.attackValue * 0.0025 *
+					combat.lowestFeasibleCALevel);
+				combat.extraDamageAtLowestFeasibleCALevel =
+					Math.floor(combat.player.damageValue * 0.0025 *
+					combat.lowestFeasibleCALevel);
+				combat.extraNotes +=
+					'Extra CA Att/Dam at this lowered CA level = ' +
+					combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
+					combat.extraDamageAtLowestFeasibleCALevel + '<br>';
+			}
+			combat.extraStaminaPerHitAtLowestFeasibleCALevel =
+				combat.player.counterAttackLevel > 0 ? Math.ceil((1 +
+				combat.player.doublerLevel / 50) * 0.0025 *
+				combat.lowestFeasibleCALevel) :0;
+			if (combat.extraStaminaPerHitAtLowestFeasibleCALevel <
+				combat.extraStaminaPerHit) {
+				combat.extraNotes +=
+					'Extra Stam Used at this lowered CA level = ' +
+					combat.extraStaminaPerHitAtLowestFeasibleCALevel + '<br>';
+			}
+			else {
+				combat.extraNotes += 'No reduction of stam used at the lower CA level<br>';
+			}
+		}
+
+		if (combat.numberOfHitsRequired === '-' ||
+			combat.numberOfHitsRequired !== 1) {
+			combat.lowestCALevelToStillHit = Math.max(Math.ceil((
+				combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
+				combat.player.attackValue / 0.0025), 0);
+			combat.lowestCALevelToStillKill = Math.max(Math.ceil((
+				combat.counterAttackBonusDamage - combat.damageDone + 1) /
+				combat.player.damageValue / 0.0025), 0);
+			if (combat.lowestCALevelToStillHit > 175) {
+				combat.extraNotes +=
+					'Even with CA175 you cannot hit this creature<br>';
+			} else if (combat.lowestCALevelToStillHit !== 0) {
+				combat.extraNotes += 'You need a minimum of CA' +
+					combat.lowestCALevelToStillHit +
+					' to hit this creature<br>';
+			}
+			if (combat.lowestCALevelToStillKill > 175) {
+				combat.extraNotes +=
+					'Even with CA175 you cannot 1-hit kill this creature<br>';
+			} else if (combat.lowestCALevelToStillKill !== 0) {
+				combat.extraNotes += 'You need a minimum of CA' +
+					combat.lowestCALevelToStillKill +
+					' to 1-hit kill this creature<br>';
+			}
+		}
+
+		return combat;
+
+	},
+
+	evalHTML: function(combat) {
+
+		return '<table width="100%"><tbody>' +
+			'<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
+			(combat.callback.groupExists ? 'Group ':'') +
+			'Combat Evaluation</td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'Will I hit it? </td><td align="left">' +
+			(combat.hitByHowMuch > 0 ? 'Yes':'No') +
+			'</td><td align="right"><span style="color:#333333">' +
+			'Extra Attack: </td><td align="left">( ' +
+			combat.hitByHowMuch + ' )</td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'# Hits to kill it? </td><td align="left">' +
+			combat.numberOfHitsRequired +
+			'</td><td align="right"><span style="color:#333333">' +
+			'Extra Damage: </td><td align="left">( ' + combat.damageDone +
+			' )</td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'Will I be hit? </td><td align="left">' +
+			(combat.creatureHitByHowMuch >= 0 ? 'Yes':'No') +
+			'</td><td align="right"><span style="color:#333333">' +
+			'Extra Defense: </td><td align="left">( ' + -1 *
+			combat.creatureHitByHowMuch + ' )</td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'# Hits to kill me? </td><td align="left">' +
+			combat.numberOfCreatureHitsTillDead +
+			'</td><td align="right"><span style="color:#333333">' +
+			'Extra Armor + HP: </td><td align="left">( ' + -1 *
+			combat.creatureDamageDone + ' )</td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'# Player Hits? </td><td align="left">' + combat.playerHits +
+			'</td><td align="right"><span style="color:#333333">' +
+			'# Creature Hits? </td><td align="left">' + combat.creatureHits +
+			'</td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'Fight Status: </span></td><td align="left" colspan="3"><span>' +
+			combat.fightStatus + '</span></td></tr>' +
+			'<tr><td align="right"><span style="color:#333333">' +
+			'Notes: </span></td><td align="left" colspan="3">' +
+			'<span style="font-size:x-small;">' + combat.extraNotes +
+			'</span></td></tr>' +
+			'<tr><td colspan="4"><span style="font-size:x-small; ' +
+			'color:gray">*Does include CA, DD, HF, DC, Flinch, Super Elite ' +
+			'Slayer, NMV, Sanctuary, Constitution, Fortitude, Chi Strike ' +
+			'and Terrorize (if active) and allow for randomness (1.1053). ' +
+			'Constitution, NMV, Fortitude and Chi Strike apply to group ' +
+			'stats.</span></td></tr>' +
+			'</tbody></table>';
+
+	},
+
+	getCreaturePlayerData: function(responseText, callback) {
+
+		var combat = {};
+		combat.callback = callback;
+		//playerdata
+		combat.player = Helper.playerData(responseText);
+
+		combat.combatEvaluatorBias = System.getValue('combatEvaluatorBias');
+		combat.attackVariable = 1.1053;
+		combat.generalVariable =
+			Data.bias[combat.combatEvaluatorBias] ?
+			Data.bias[combat.combatEvaluatorBias].generalVariable :
+			1.1053;
+		combat.hpVariable =
+			Data.bias[combat.combatEvaluatorBias] ?
+			Data.bias[combat.combatEvaluatorBias].hpVariable : 1.1;
 
 		//creaturedata
 		var creatureStatTable;
@@ -9614,204 +8696,19 @@ var Helper = {
 			if (!creatureStatTable) {return;}
 		}
 
-		var creature = Helper.creatureData(player.superEliteSlayerMultiplier);
-//~ console.log('creature=', creature);
+		combat.creature =
+			Helper.creatureData(combat.player.superEliteSlayerMultiplier);
+		combat = Helper.evalExtraBuffs(combat);
+		combat = Helper.evalAttack(combat);
+		combat = Helper.evalDamage(combat);
+		combat = Helper.evalDefence(combat);
+		combat = Helper.evalArmour(combat);
+		combat = Helper.evalAnalysis(combat);
+		combat = Helper.evalCA(combat);
+		combat.evaluatorHTML = Helper.evalHTML(combat);
 
-		var extraNotes = '';
-		extraNotes += player.superEliteSlayerLevel > 0 ?
-			'SES Stat Reduction Multiplier = ' +
-			player.superEliteSlayerMultiplier + '<br>':'';
-		//math section ... analysis
-		//Holy Flame adds its bonus after the armor of the creature has been taken off.
-		if (creature.class === 'Undead') {
-			player.holyFlameBonusDamage = Math.max(Math.floor(
-				(player.damageValue - creature.armor) *
-				player.holyFlameLevel * 0.002),0);
-			extraNotes += player.holyFlameLevel > 0 ?
-				'HF Bonus Damage = ' + player.holyFlameBonusDamage + '<br>':'';
-		}
-		//Death Dealer and Counter Attack both applied at the same time
-		var deathDealerBonusDamage = Math.floor(player.damageValue * (
-			Math.min(Math.floor(player.killStreakValue / 5) * 0.01 *
-			player.deathDealerLevel, 20) / 100));
-		var counterAttackBonusAttack = Math.floor(player.attackValue *
-			0.0025 * player.counterAttackLevel);
-		var counterAttackBonusDamage = Math.floor(player.damageValue *
-			0.0025 * player.counterAttackLevel);
-		var extraStaminaPerHit = player.counterAttackLevel > 0 ?
-			Math.ceil((1 + player.doublerLevel / 50) * 0.0025 *
-			player.counterAttackLevel) : 0;
-		//playerAttackValue += counterAttackBonusAttack;
-		//playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
-		extraNotes += player.deathDealerLevel > 0 ?
-			'DD Bonus Damage = ' + deathDealerBonusDamage + '<br>':'';
-		if (player.counterAttackLevel > 0) {
-			extraNotes += 'CA Bonus Attack/Damage = ' +
-				counterAttackBonusAttack + ' / ' +
-				counterAttackBonusDamage + '<br>' +
-				'CA Extra Stam Used = ' + extraStaminaPerHit + '<br>';
-		}
-		//Attack:
-		extraNotes += player.darkCurseLevel > 0? 'DC Bonus Attack = ' + Math.floor(creature.defense * player.darkCurseLevel * 0.002) + '<br>':'';
-
-		var nightmareVisageAttackMovedToDefense = Math.floor(((callback.groupExists ?
-			callback.groupAttackValue:player.attackValue) +
-			counterAttackBonusAttack) * player.nightmareVisageLevel * 0.0025);
-
-		extraNotes += player.nightmareVisageLevel > 0? 'NMV Attack moved to Defense = ' + nightmareVisageAttackMovedToDefense + '<br>':'';
-
-		var overallAttackValue = (callback.groupExists ? callback.groupAttackValue :
-			player.attackValue) + counterAttackBonusAttack -
-			nightmareVisageAttackMovedToDefense;
-
-		var hitByHowMuch = overallAttackValue - Math.ceil(attackVariable*(creature.defense - creature.defense * player.darkCurseLevel * 0.002));
-		if (combatEvaluatorBias === 3) {
-			hitByHowMuch = overallAttackValue - Math.ceil(
-				creature.defense - creature.defense * player.darkCurseLevel * 0.002
-			) - 50;
-		}
-		//Damage:
-		var fortitudeExtraHPs = Math.floor((callback.groupExists ? callback.groupHPValue :
-			player.hpValue) * player.fortitudeLevel * 0.001);
-		extraNotes += player.fortitudeLevel > 0 ? 'Fortitude Bonus HP = ' +
-			fortitudeExtraHPs + '<br>':'';
-		var overallHPValue = (callback.groupExists ? callback.groupHPValue : player.hpValue) +
-			fortitudeExtraHPs;
-		var chiStrikeExtraDamage = Math.floor(overallHPValue *
-			player.chiStrikeLevel * 0.001);
-		extraNotes += player.chiStrikeLevel > 0 ? 'Chi Strike Bonus Damage = ' +
-			chiStrikeExtraDamage + '<br>':'';
-		var overallDamageValue = (callback.groupExists ? callback.groupDamageValue :
-			player.damageValue) + deathDealerBonusDamage +
-			counterAttackBonusDamage + player.holyFlameBonusDamage +
-			chiStrikeExtraDamage;
-		var damageDone = Math.floor(overallDamageValue -
-			generalVariable * creature.armor +
-			hpVariable * creature.hp);
-		var numberOfHitsRequired = hitByHowMuch > 0 ?
-			Math.ceil(hpVariable * creature.hp /
-				(overallDamageValue < generalVariable * creature.armor ? 1 :
-				overallDamageValue - generalVariable * creature.armor))
-		:'-';
-
-		//Defense:
-		var overallDefenseValue = (callback.groupExists ? callback.groupDefenseValue :
-			player.defenseValue) +
-			Math.floor((callback.groupExists ?
-				callback.groupDefenseValue : player.defenseValue) *
-				player.constitutionLevel * 0.001
-			) + nightmareVisageAttackMovedToDefense;
-
-		extraNotes += player.constitutionLevel > 0 ? 'Constitution Bonus Defense = ' +
-			Math.floor((callback.groupExists ? callback.groupDefenseValue : player.defenseValue) *
-			player.constitutionLevel * 0.001) + '<br>':'';
-		extraNotes += player.flinchLevel > 0 ? 'Flinch Bonus Attack Reduction = ' +
-			Math.floor(creature.attack * player.flinchLevel * 0.001) + '<br>':'';
-		var creatureHitByHowMuch = Math.floor(attackVariable*creature.attack -
-			creature.attack * player.flinchLevel * 0.001 - overallDefenseValue);
-		if (combatEvaluatorBias === 3) {
-			creatureHitByHowMuch = Math.floor(creature.attack - creature.attack * player.flinchLevel * 0.001 - overallDefenseValue - 50);
-		}
-		//Armor and HP:
-		var overallArmorValue = (callback.groupExists ? callback.groupArmorValue :
-			player.armorValue) + Math.floor(player.armorValue *
-				player.sanctuaryLevel * 0.001);
-		extraNotes += player.sanctuaryLevel > 0 ? 'Sanc Bonus Armor = ' +
-			Math.floor(player.armorValue * player.sanctuaryLevel * 0.001) + '<br>':'';
-		var terrrorizeEffect = Math.floor(creature.damage * player.terrorizeLevel * 0.001);
-			extraNotes += player.terrorizeLevel > 0 ?
-			'Terrorize Creature Damage Effect = ' + terrrorizeEffect * -1 +
-			'<br>':'';
-		creature.damage -= terrrorizeEffect;
-		var creatureDamageDone = Math.ceil(generalVariable*creature.damage -
-			overallArmorValue + overallHPValue);
-		var numberOfCreatureHitsTillDead = creatureHitByHowMuch >= 0 ?
-			Math.ceil(overallHPValue / (generalVariable * creature.damage <
-			overallArmorValue ? 1 : generalVariable * creature.damage -
-			overallArmorValue)):'-';
-
-		//Analysis:
-		var playerHits = numberOfCreatureHitsTillDead === '-' ?
-			numberOfHitsRequired : numberOfHitsRequired === '-' ? '-' :
-			numberOfHitsRequired > numberOfCreatureHitsTillDead ? '-' :
-			numberOfHitsRequired;
-		var creatureHits = numberOfHitsRequired === '-' ?
-			numberOfCreatureHitsTillDead : numberOfCreatureHitsTillDead ===
-			'-' ? '-' : numberOfCreatureHitsTillDead > numberOfHitsRequired ?
-			'-' : numberOfCreatureHitsTillDead;
-		var fightStatus = 'Unknown';
-		if (playerHits === '-' && creatureHits === '-') {
-			fightStatus = 'Unresolved';
-		} else if (playerHits === '-') {
-			fightStatus = 'Player dies';
-		} else if (playerHits === 1) {
-			fightStatus = 'Player 1 hits' + (numberOfCreatureHitsTillDead-numberOfHitsRequired<=1? ', dies on miss':', survives a miss');
-		} else if (playerHits > 1) {
-			fightStatus = 'Player > 1 hits' + (numberOfCreatureHitsTillDead-numberOfHitsRequired<=1? ', dies on miss':', survives a miss');
-		}
-		var lowestCALevelToStillHit;
-		var lowestCALevelToStillKill;
-		if (player.counterAttackLevel > 0 && numberOfHitsRequired === '1') {
-			lowestCALevelToStillHit = Math.max(Math.ceil((counterAttackBonusAttack-hitByHowMuch + 1)/player.attackValue/0.0025), 0);
-			lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/player.damageValue/0.0025), 0);
-			var lowestFeasibleCALevel = Math.max(lowestCALevelToStillHit,lowestCALevelToStillKill);
-			extraNotes += 'Lowest CA to still 1-hit this creature = ' + lowestFeasibleCALevel + '<br>';
-			if (lowestFeasibleCALevel !== 0) {
-				var extraAttackAtLowestFeasibleCALevel = Math.floor(player.attackValue * 0.0025 * lowestFeasibleCALevel);
-				var extraDamageAtLowestFeasibleCALevel = Math.floor(player.damageValue * 0.0025 * lowestFeasibleCALevel);
-				extraNotes += 'Extra CA Att/Dam at this lowered CA level = ' + extraAttackAtLowestFeasibleCALevel + ' / ' + extraDamageAtLowestFeasibleCALevel + '<br>';
-			}
-			var extraStaminaPerHitAtLowestFeasibleCALevel = 
-				player.counterAttackLevel > 0 ? Math.ceil((1 + player.doublerLevel / 50) *
-				0.0025 * lowestFeasibleCALevel) :0;
-			if (extraStaminaPerHitAtLowestFeasibleCALevel < extraStaminaPerHit) {
-				extraNotes += 'Extra Stam Used at this lowered CA level = ' + extraStaminaPerHitAtLowestFeasibleCALevel + '<br>';
-			}
-			else {
-				extraNotes += 'No reduction of stam used at the lower CA level<br>';
-			}
-		}
-		if (numberOfHitsRequired === '-' || numberOfHitsRequired !== '1') {
-			lowestCALevelToStillHit = Math.max(Math.ceil((counterAttackBonusAttack-hitByHowMuch + 1)/player.attackValue/0.0025), 0);
-			lowestCALevelToStillKill = Math.max(Math.ceil((counterAttackBonusDamage-damageDone + 1)/player.damageValue/0.0025), 0);
-			if (lowestCALevelToStillHit >175) {
-				extraNotes += 'Even with CA175 you cannot hit this creature<br>';
-			} else if (lowestCALevelToStillHit !== 0) {
-				extraNotes += 'You need a minimum of CA' + lowestCALevelToStillHit + ' to hit this creature<br>';
-			}
-			if (lowestCALevelToStillKill >175) {
-				extraNotes += 'Even with CA175 you cannot 1-hit kill this creature<br>';
-			} else if (lowestCALevelToStillKill !== 0) {
-				extraNotes += 'You need a minimum of CA' + lowestCALevelToStillKill + ' to 1-hit kill this creature<br>';
-			}
-		}
-		//display data
-		var evaluatorHTML = '<table width="100%"><tbody>' +
-			'<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
-				(callback.groupExists ? 'Group ':'') +
-				'Combat Evaluation</td></tr>' +
-			'<tr><td align="right"><span style="color:#333333">' +
-					'Will I hit it? </td><td align="left">' +
-					(hitByHowMuch > 0 ? 'Yes':'No') + '</td>' +
-				'<td align="right"><span style="color:#333333">' +
-					'Extra Attack: </td><td align="left">( ' +
-					hitByHowMuch + ' )</td></tr>' +
-			'<tr><td align="right"><span style="color:#333333"># Hits to kill it? </td><td align="left">' + numberOfHitsRequired + '</td>' +
-				'<td align="right"><span style="color:#333333">Extra Damage: </td><td align="left">( ' + damageDone + ' )</td></tr>' +
-			'<tr><td align="right"><span style="color:#333333">Will I be hit? </td><td align="left">' + (creatureHitByHowMuch >= 0 ? 'Yes':'No') + '</td>' +
-				'<td align="right"><span style="color:#333333">Extra Defense: </td><td align="left">( ' + -1 * creatureHitByHowMuch + ' )</td></tr>' +
-			'<tr><td align="right"><span style="color:#333333"># Hits to kill me? </td><td align="left">' + numberOfCreatureHitsTillDead + '</td>' +
-				'<td align="right"><span style="color:#333333">Extra Armor + HP: </td><td align="left">( ' + -1 * creatureDamageDone + ' )</td></tr>' +
-			'<tr><td align="right"><span style="color:#333333"># Player Hits? </td><td align="left">' + playerHits + '</td>' +
-				'<td align="right"><span style="color:#333333"># Creature Hits? </td><td align="left">' + creatureHits + '</td></tr>' +
-			'<tr><td align="right"><span style="color:#333333">Fight Status: </span></td><td align="left" colspan="3"><span>' + fightStatus + '</span></td></tr>' +
-			'<tr><td align="right"><span style="color:#333333">Notes: </span></td><td align="left" colspan="3"><span style="font-size:x-small;">' +
-				extraNotes + '</span></td></tr>' +
-			'<tr><td colspan="4"><span style="font-size:x-small; color:gray">' +
-				'*Does include CA, DD, HF, DC, Flinch, Super Elite Slayer, NMV, Sanctuary, Constitution, Fortitude, Chi Strike and Terrorize (if active) and allow for randomness (1.1053). ' +
-				'Constitution, NMV, Fortitude and Chi Strike apply to group stats.</span></td></tr>' +
-			'</tbody></table>';
 		var tempdata;
+
 		if ($('#worldPage').length > 0) { // new map
 			if (callback.groupEvaluation) {
 				if ($('div#creatureEvaluatorGroup').length === 0) {
@@ -9819,7 +8716,7 @@ var Helper = {
 						.append('<div id="creatureEvaluatorGroup" ' +
 							'style="clear:both;"></div>');
 				}
-				tempdata = evaluatorHTML.replace(/'/g,"\\'");
+				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
 				$('div#creatureEvaluatorGroup').html(tempdata);
 			} else {
 				if ($('div#creatureEvaluator').length === 0) {
@@ -9827,15 +8724,16 @@ var Helper = {
 						.append('<div id="creatureEvaluator" ' +
 							'style="clear:both;"></div>');
 				}
-				tempdata = evaluatorHTML.replace(/'/g,"\\'");
+				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
 				$('div#creatureEvaluator').html(tempdata);
 			}
 		} else {
 			var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
 			var newCell = newRow.insertCell(0);
 			newCell.colSpan = '4';
-			newCell.innerHTML = evaluatorHTML;
+			newCell.innerHTML = combat.evaluatorHTML;
 		}
+
 	},
 
 	injectBioWidgets: function() {
@@ -10577,6 +9475,7 @@ var Helper = {
 			console.log(err);
 		}
 	},
+
 	toggleTickAllBuffs: function(){
 		var allItems=System.findNodes('//input[@type="checkbox" and @name="blockedSkillList\[\]"]');
 		var tckTxt =document.getElementById('Helper:tickAllBuffs');
@@ -10600,6 +9499,7 @@ var Helper = {
 			}
 		}
 	},
+
 	injectSettings: function() {
 		try {
 			var exNode = System.findNode('//font[contains(.,"Example:")]');
@@ -10662,8 +9562,8 @@ var Helper = {
 				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ System.getValue('allyEnemyOnlineRefreshTime') + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (System.getValue('enableOnlineAlliesWidgets')?' checked':'') + '></td></tr>' +
-			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
-				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (System.getValue('moveFSBox')?' checked':'') + '></td></tr>' +
+			//~ '<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
+				//~ ':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (System.getValue('moveFSBox')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (System.getValue('gameHelpLink')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
@@ -10710,7 +9610,8 @@ var Helper = {
 				'Champions will be colored green, Elites yellow and Super Elites red.') +
 				':</td><td><input name="enableCreatureColoring" type="checkbox" value="on"' + (System.getValue('enableCreatureColoring')?' checked':'') + '></td></td></tr>' +
 			'<tr><td align="right">'+Layout.networkIcon+'Show Creature Info' + Helper.helpLink('Show Creature Info', 'This will show the information from the view creature link when you mouseover the link.' +
-				(System.browserVersion<3?'Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+				//~ (System.browserVersion<3?'Does not work in Firefox 2 - suggest disabling or upgrading to Firefox 3.':'')) +
+				'') +
 				':</td><td><input name="showCreatureInfo" type="checkbox" value="on"' + (System.getValue('showCreatureInfo')?' checked':'') + '></td></tr>' +
 
 			'<tr><td align="right">Combat Evaluator Bias' + Helper.helpLink('Combat Evaluator Bias', 'This changes the bias of the combat evaluator for the damage and HP evaluation. It will not change the attack bias (1.1053).'+
@@ -10757,8 +9658,8 @@ var Helper = {
 				':</td><td colspan="3"><input name="huntingBuffs2Name" title="Hunting mode name" size="7" value="'+ buffs2Name + '" /><input name="huntingBuffs2" size="49" value="'+ buffs2 + '" /></td></tr>' +
 			'<tr><td align="right">' + buffs3Name + ' Hunting Buff List' + Helper.helpLink(buffs3Name + ' Hunting Buff List', 'List of ' + buffs3Name + ' hunting buffs.') +
 				':</td><td colspan="3"><input name="huntingBuffs3Name" title="Hunting mode name" size="7" value="'+ buffs3Name + '" /><input name="huntingBuffs3" size="49" value="'+ buffs3 + '" /></td></tr>' +
-			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
-				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (System.getValue('fsboxlog')?' checked':'') + '></td></tr>' +
+			//~ '<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
+				//~ ':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (System.getValue('fsboxlog')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Enable Buff Log' + Helper.helpLink('Enable Buff Log', 'This enables the functionality to keep a log of recently casted buffs') +
 				':</td><td><input name="keepBuffLog" type="checkbox" value="on"' + (System.getValue('keepBuffLog')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual features to speed up the Helper.') +
@@ -11298,8 +10199,8 @@ var Helper = {
 	},
 
 	injectQuickLinkManager: function(content) {
-		System.addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
-			'.HelperTextLink:hover {text-decoration:underline;}\n');
+		//~ System.addStyle('.HelperTextLink {color:black;font-size:x-small;cursor:pointer;}\n' +
+			//~ '.HelperTextLink:hover {text-decoration:underline;}\n');
 
 		if (!content) {content = Layout.notebookContent();}
 		content.innerHTML=Helper.makePageTemplate('Quick Links','','','','quickLinkAreaId');
@@ -11334,6 +10235,7 @@ var Helper = {
 		document.getElementById('quickInvent').addEventListener('click', Helper.quickInvent, true);
 
 	},
+
 	quickInvent: function() {
 		var amountToInvent = $('#invent_amount').attr('value');
 		var recipeID = $('input[name="recipe_id"]').attr('value');
@@ -11343,6 +10245,7 @@ var Helper = {
 			System.xmlhttp('index.php?cmd=inventing&subcmd=doinvent&recipe_id='+recipeID+'&fsh='+i, Helper.quickInventDone);
 		}
 	},
+
 	quickInventDone: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
 		$('#invent_Result').append('<li style="list-style:decimal">'+infoMessage+'</li>');
@@ -11373,6 +10276,7 @@ var Helper = {
 		}
 		//evt.target.parentNode.innerHTML = output;
 	},
+
 	quickDoneTaken: function(responseText) {
 		var infoMessage = Layout.infoBox(responseText);
 		//unsafeWindow.tt_setWidth(200);
@@ -11977,8 +10881,10 @@ var Helper = {
 	},
 
 	prepareAllyEnemyList: function() {
-		if (System.getValue('enableAllyOnlineList') || System.getValue('enableEnemyOnlineList')) {
-			$('div#pCR').prepend('<div class="minibox"><span id="Helper:AllyEnemyListPlaceholder"></span></div>');
+		if (System.getValue('enableAllyOnlineList') ||
+			System.getValue('enableEnemyOnlineList')) {
+			$('div#pCR').prepend('<div class="minibox"><span id="Helper:' +
+				'AllyEnemyListPlaceholder"></span></div>');
 			Helper.retrieveAllyEnemyData(false);
 		}
 	},
@@ -11987,16 +10893,15 @@ var Helper = {
 		var contactList = System.getValueJSON('contactList');
 		var allyEnemyOnlineRefreshTime = System.getValue('allyEnemyOnlineRefreshTime');
 		allyEnemyOnlineRefreshTime *= 1000;
-		if (contactList) {
-			if ((new Date()).getTime() -
-				contactList.lastUpdate.getTime() >
-				allyEnemyOnlineRefreshTime) {
-				contactList = null; // invalidate cache
-			}
+		if (contactList && Date.now() -
+			contactList.lastUpdate.getTime() >
+			allyEnemyOnlineRefreshTime) {
+			contactList = null; // invalidate cache
 		}
 
 		if (!contactList || refreshAllyEnemyDataOnly) {
-			System.xmlhttp('index.php?cmd=profile', Helper.parseProfileForWorld, refreshAllyEnemyDataOnly);
+			System.xmlhttp('index.php?cmd=profile',
+				Helper.parseProfileForWorld, refreshAllyEnemyDataOnly);
 		} else {
 			//~ contactList = System.getValueJSON('contactList');
 			contactList.isRefreshed = false;
@@ -13192,11 +12097,19 @@ var Helper = {
 	},
 
 	injectHomePageTwoLink: function() {
-		var viewNewsArchiveLink = System.findNode('//a[@href="index.php?cmd=&subcmd=viewarchive"]');
-		if (viewNewsArchiveLink) {
-			viewNewsArchiveLink.parentNode.innerHTML += '&nbsp;<a href="' +
+		var archiveLink = System.findNode('//a[@href="index.php?cmd=&subcmd=' +
+			'viewarchive"]');
+		if (archiveLink) {
+			archiveLink.parentNode.innerHTML += '&nbsp;<a href="' +
 				'index.php?cmd=&subcmd=viewarchive&subcmd2=&page=2&' +
 				'search_text=">View Archive Page 2</a>';
+		}
+		archiveLink = System.findNode('//a[@href="index.php?cmd=&subcmd=' +
+			'viewupdatearchive"]');
+		if (archiveLink) {
+			archiveLink.parentNode.innerHTML += '&nbsp;<a href="' +
+				'index.php?cmd=&subcmd=viewupdatearchive&subcmd2=&page=2&' +
+				'search_text=">View Updates Page 2</a>';
 		}
 	},
 
@@ -13210,10 +12123,12 @@ var Helper = {
 		//Checks to see if the temple is open for business.
 		if (!System.getValue('enableTempleAlert')) {return;}
 		//need timer function
-		var templeAlertLastUpdate = System.getValueJSON('templeAlertLastUpdate');
+		//~ var templeAlertLastUpdate = System.getValueJSON('templeAlertLastUpdate');
+		var templeAlertLastUpdate = System.getValue('lastTempleCheck');
 		var needToPray = System.getValue('needToPray');
 		if (templeAlertLastUpdate) {
-			if (new Date().getTime() - templeAlertLastUpdate.getTime() > 60 * 60 * 1000) {
+			//~ if (new Date().getTime() - templeAlertLastUpdate.getTime() > 60 * 60 * 1000) {
+			if (new Date().getTime() - templeAlertLastUpdate > 60 * 60 * 1000) {
 				//bring up the temple page and parse it
 				System.xmlhttp('index.php?cmd=temple', Helper.parseTemplePage);
 			} else if (needToPray && window.location.search.search('cmd=temple') === -1) {
@@ -13241,7 +12156,9 @@ var Helper = {
 			needToPray = true;
 		}
 		GM_setValue('needToPray',needToPray);
-		System.setValueJSON('templeAlertLastUpdate', new Date());
+		//~ System.setValueJSON('templeAlertLastUpdate', new Date());
+		System.setValue('lastTempleCheck', (new Date()).getTime());
+
 	},
 
 	displayDisconnectedFromGodsMessage: function() {
@@ -13587,10 +12504,11 @@ var Helper = {
 		var lastActivityElement = $(doc).find('div#pCC p:first');
 		var lastActivity = /(\d+) mins, (\d+) secs/.exec(lastActivityElement.text());
 		var lastActivityMinutes = parseInt(lastActivity[1],10);
-		var lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.yellowDiamond + '">';
-		if (lastActivityMinutes < 2) {
-			lastActivityIMG = '<img width="10" height="10" title="Offline" src="' + Data.greenDiamond + '">';
-		}
+		var lastActivityIMG = Helper.onlineDot(lastActivityMinutes);
+		//~ var lastActivityIMG = Data.yellowDiamond;
+		//~ if (lastActivityMinutes < 2) {
+			//~ lastActivityIMG = Data.greenDiamond;
+		//~ }
 		//buffs
 		var bioDiv = $(doc).find('div.innerColumnHeader:contains("Biography"):last');
 		var bioCell = bioDiv.next();
@@ -13635,10 +12553,10 @@ var Helper = {
 			//name cell
 			var newCell = newRow.insertCell(0);
 			newCell.style.verticalAlign = 'top';
-			lastActivityIMG = '<img width="10" height="10" title="Recently Online" src="' + Data.yellowDiamond + '">';
-			if (lastActivityMinutes < 2) {
-				lastActivityIMG = '<img width="10" height="10" title="Online" src="' + Data.greenDiamond + '">';
-			}
+			//~ lastActivityIMG = Data.yellowDiamond;
+			//~ if (lastActivityMinutes < 2) {
+				//~ lastActivityIMG = Data.greenDiamond;
+			//~ }
 			var playerHREF = callback.href;
 			var bioTip = bioCell.html().replace(/'|"|\n/g,'');
 			newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' + playerHREF + '" target="new" ' +
@@ -13750,7 +12668,7 @@ var Helper = {
 				//~ ['BD', 'Best Damage Items', 'injectCheckWearingItem'],
 				['QE', 'Quick Extract', 'insertQuickExtract'],
 				['QW', 'Quick Wear', 'insertQuickWear'],
-				['BoxL', 'FS Box Log', 'injectFsBoxContent']
+				//~ ['BoxL', 'FS Box Log', 'injectFsBoxContent']
 				//~ ['CRL', 'Creature Log', 'injectMonsterLog'] // TODO
 			]
 			};
@@ -13834,24 +12752,28 @@ var Helper = {
 	injectComposing: function() {
 		if (System.getValue('disableComposingPrompts')) {
 			$('input[class^="large awesome"][onclick]').each(function(i, e) {
-				$(e).attr('onclick', $(e).attr('onclick').replace(/if\(confirm\(.+\)\) /, ''));
+				$(e).attr('onclick', $(e).attr('onclick')
+				.replace(/if\(confirm\(.+\)\) /, ''));
 			});
-			$('input[value^="Instant Finish All"]')
-				.after('<br><br><b>Warning:</b> Confirmation prompts are ' +
-				'disabled. Use at your own risk.');
+			//~ $('input[value^="Instant Finish All"]')
+			$('div#composing-error-dialog')
+				//~ .after('<br><br><b>Warning:</b> Confirmation prompts are ' +
+				//~ 'disabled. Use at your own risk.');
+				.before('<div id="fshCompConf"><b>Warning:</b> Confirmation ' +
+				'prompts are disabled. Use at your own risk.<div>');
 		}
 
 		$('input[value="Discard All"]')
 			.before('<input type="button" id="helperCreateAll" class="large ' +
 			'awesome red" value="Create All" disabled="true" style="height: ' +
 			'25px; line-height: 9px;">&nbsp;');
-		if ($('select[id^="composing-template-"][value!=="none"]'.length)) {
+		if ($('select[id^="composing-template-"][value!="none"]').length) {
 			$('#helperCreateAll').prop('disabled', false);
 			$('#helperCreateAll').click(function() {
 				if (System.getValue('disableComposingPrompts') ||
 					confirm('Are you sure you want to create all potions? ' +
 						'Do you have the correct templates selected?')) {
-					$('select[id^="composing-template-"][value!=="none"]')
+					$('select[id^="composing-template-"][value!="none"]')
 						.each(function () {
 							Helper.composingCreatePotion($(this));
 						});
@@ -13861,12 +12783,12 @@ var Helper = {
 
 		$('input[id^=create-]').each(function(i,e){
 			$(e).after('<span id="helperQC-' + $(e).attr('id').slice(-1) +
-				'" class="helperQC" style="cursor: pointer">&nbsp;[Quick ' +
-				'Create]</span>');
+				'" class="helperQC">&nbsp;[Quick Create]</span>');
 		});
 
 		$('span[id^="helperQC-"]').on('click', function(){
-			var temp = $('select#composing-template-' + $(this).attr('id').slice(-1));
+			var temp = $('select#composing-template-' +
+				$(this).attr('id').slice(-1));
 			if (temp.length === 1 && temp.val() !== 'none') {
 				Helper.composingCreatePotion(temp);
 			}
@@ -13874,12 +12796,17 @@ var Helper = {
 	},
 
 	composingCreatePotion: function ($template) {
-		$.getJSON('index.php', {
-				'cmd': 'composing',
-				'subcmd': 'createajax',
-				'template_id': $template.val()
+		$.ajax({
+			cache: false,
+			dataType: 'json',
+			url:'index.php',
+			data: {
+				cmd: 'composing',
+				subcmd: 'createajax',
+				template_id: $template.val(),
+				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
 			},
-			function (data, textStatus) {
+			success: function (data, textStatus) {
 				if (data.error !== '') {
 					$template.parent()
 						.html('<div id="helperQCError" style="height: ' +
@@ -13894,57 +12821,68 @@ var Helper = {
 					window.location = 'index.php?cmd=composing&m=0';
 				}
 			}
-		);
+		});
+	},
+
+	appendHead: function(o) {
+		var count = 0;
+		var scriptTag, linkTag;
+		var scriptFiles = o.js || [];
+		var cssFiles = o.css || [];
+		var head = document.getElementsByTagName('head')[0];
+
+		cssFiles.forEach(function(c) {
+			linkTag = document.createElement('link');
+			linkTag.type = 'text/css';
+			linkTag.rel = 'stylesheet';
+			linkTag.href = c;
+			head.appendChild(linkTag);
+		});
+
+		scriptFiles.forEach(function(s) {
+			scriptTag = document.createElement('script');
+			scriptTag.type = 'text/javascript';
+			if (typeof o.callback === 'function') {
+				scriptTag.onload = function() {
+					count += 1;
+					if (count === o.js.length) {
+						o.callback(o.param1, o.param2);
+					}
+				};
+			}
+			scriptTag.src = s;
+			head.appendChild(scriptTag);
+		});
 	}
+
 }; // end of var helper
 
-// Anonymous 'self-invoking' function
-(function() {
+(function loadScripts () {
+	var o = {
+		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/calfSystem.css'],
+		js:  ['https://cdn.jsdelivr.net/localforage/1.2.7/localforage.min.js',
+			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/calfSystem.js'],
+		callback: Helper.onPageLoad
+	};
 	if (typeof unsafeWindow.jQuery === 'undefined') {
-			// Load the script
-			var script = document.createElement('script');
-			script.src = 'https://ajax.googleapis.com/ajax/libs/jquery/1.7.1/jquery.min.js';
-			script.type = 'text/javascript';
-			document.getElementsByTagName('head')[0].appendChild(script);
-
-			// Poll for jQuery to come into existance
-			var checkReady = function(callback) {
-				if (window.jQuery) {
-					callback(jQuery);
-				}
-				else {
-					window.setTimeout(function() { checkReady(callback); }, 20);
-				}
-			};
-
-			// Start polling...
-			checkReady(function($) {
-				$(function() { //DOMReady shorthand
-					Helper.onPageLoad();
-				});
-			});
-	} else {
-		Helper.onPageLoad();
+		o.js.unshift('https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
 	}
+	Helper.appendHead(o);
 })();
 
 }; // end of var main
 
-//if (navigator.userAgent.indexOf('Firefox')>0) {
-//	main();
-//} else {
-//	if (navigator.userAgent.indexOf('Chrome')>0) {
-//		var script = document.createElement('script');
-//		script.textContent = '(' + main.toString() + ')();';
-//		document.body.appendChild(script);
-//	}
-//}
+(function fshInstallAndRun() {
 
-if (typeof GM_info === "undefined") {
-	var script = document.createElement('script');
-	script.textContent = '(' + main.toString() + ')();';
-	document.body.appendChild(script);
-}
-else {
-	main();
-}
+'use strict';
+
+	if (typeof GM_info === 'undefined') {
+		var script = document.createElement('script');
+		script.textContent = '(' + fshMain.toString() + ')();';
+		document.body.appendChild(script);
+	}
+	else {
+		fshMain();
+	}
+
+})();

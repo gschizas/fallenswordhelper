@@ -10,7 +10,7 @@
     "curly"         : true,     // true: Require {} for every new block or scope
     "eqeqeq"        : true,     // true: Require triple equals (===) for comparison
     "es3"           : false,    // true: needs to adhere to ECMAScript 3 specification
-    "es5"           : true,     // true: Allow ES5 syntax (ex: getters and setters)
+//    "es5"           : true,     // true: Allow ES5 syntax (ex: getters and setters)
     "forin"         : true,     // true: Require filtering for..in loops with obj.hasOwnProperty()
     "freeze"        : true,     // true: prohibits overwriting prototypes of native objects such as Array, Date etc.
     "futurehostile" : true,     // true: warnings about the use of identifiers which are defined in future versions of JavaScript
@@ -30,14 +30,14 @@
                                 //   "single" : require single quotes
                                 //   "double" : require double quotes
     "singleGroups"  : true,     // true: Prohibits the use of the grouping operator when it is not strictly required
-    "strict"        : false,    // true: Requires all functions run in ES5 Strict Mode
+    "strict"        : true,     // true: Requires all functions run in ES5 Strict Mode
     "undef"         : true,     // true: Require all non-global variables to be declared (prevents global leaks)
     "unused"        : true,     // Unused variables:
                                 //   true     : all variables, last function parameter
                                 //   "vars"   : all variables only
                                 //   "strict" : all variables, all function parameters
     "varstmt"       : false,    // true: the use of VariableStatements are forbidden
-    "maxparams"     : false,    // {int} Max number of formal params allowed per function
+    "maxparams"     : 5,        // {int} Max number of formal params allowed per function
     "maxdepth"      : false,    // {int} Max depth of nested blocks (within functions)
     "maxstatements" : false,    // {int} Max number statements per function
     "maxcomplexity" : false,    // {int} Max cyclomatic complexity per function
@@ -97,14 +97,20 @@
     // Custom Globals
     "globals"       : {         // additional predefined global variables
         "unsafeWindow": true,
-        "GM_addStyle": true,
-        "GM_log": true,
+        // "GM_addStyle": true,
+        // "GM_log": true,
         "GM_setValue": true,
         "GM_getValue": true,
-        "GM_deleteValue": true,
+        // "GM_deleteValue": true,
         "GM_listValues": true,
-        "GM_openInTab": true,
+        // "GM_openInTab": true,
         "GM_xmlhttpRequest": true,
-        "Helper": true
+        "Helper": true,
+        "System": true,
+        "Data": true,
+        "Layout": true,
+        //"target": true, // This is HCS Seasons attack target
+        "HTMLDocument": true,
+        "localforage": true
     }
 }
