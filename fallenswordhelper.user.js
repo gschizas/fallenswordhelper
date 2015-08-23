@@ -5476,7 +5476,7 @@ var Helper = {
 //**************
 		Helper.profileInjectGuildRel();
 		if (System.getValue('enableBioCompressor')) {Helper.compressBio();}
-		var isSelfRE=$('#backpack_tabs').length > 0;// /player_id=/.exec(document.location.search);//
+		var isSelfRE = $('#backpack_tabs').length > 0;// /player_id=/.exec(document.location.search);//
 		if (player) {
 			if (!playerid) {
 				playerid = player.innerHTML;

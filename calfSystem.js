@@ -54,47 +54,52 @@ window.System = {
 	},
 
 	findNodes: function(xpath, doc) {
-		if (!doc) {
-			doc=document;
-		}
-		var nodes=[];
-		if(xpath.indexOf('/') === 0) {
+		var nodes = [];
+		if (xpath.indexOf('/') === 0) {
 			xpath = '.'+xpath;
+			// TODO this is likely to be bad
 			// this is a chrome fix - needs a .// for xpath
-			// where as firefox can fucntion without it.
+			// where as firefox can function without it.
 			// firefox sitll works with .//
 		}
-		var findQ = document.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
-		if (findQ.snapshotLength===0) {return null;}
-		for (var i=0; i<findQ.snapshotLength; i += 1) {
+
+		var target;
+		// We may have passed in a HTMLDocument object as the context
+		// See createDocument with DOMParser below
+		// This only matters in Firefox. evaluate will fail silently if 
+		// the context is not part of the calling object.
+		doc = doc || document;
+		if (doc instanceof HTMLDocument) {
+			target = doc;
+		} else {
+			target = document;
+		}
+		var findQ = target.evaluate(xpath, doc, null, XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
+		if (findQ.snapshotLength === 0) {return null;}
+		for (var i = 0; i < findQ.snapshotLength; i += 1) {
 			nodes.push(findQ.snapshotItem(i));
 		}
 		return nodes;
 	},
 
 	findNodeText: function(xpath, doc) {
-		var node=System.findNode(xpath, doc);
+		var node = System.findNode(xpath, doc);
 		if (!node) {return null;}
 		return node.textContent;
 	},
 
 	findNodeInt: function(xpath, doc) {
-		var node=System.findNode(xpath, doc);
+		var node = System.findNode(xpath, doc);
 		if (!node) {return null;}
 		return System.intValue(node.textContent);
 	},
 
 	createDocument: function(details) {
-		//~ var doctype = document.implementation.createDocumentType( 'html', '', '');
-		//~ var dom = document.implementation.createDocument('', 'html', doctype);
-		var doc = document.createElement('HTML');
-		doc.innerHTML = details;
+		//~ var doc = document.createElement('HTML');
+		//~ doc.innerHTML = details;
 		// Use DOMParser to prevent img src tags downloading
-		// The alternative is regexing all the img tags
-		// or src attributes out
-		//~ var parser = new DOMParser();
-		//~ var doc = parser.parseFromString(details, 'text/html');
-		// This causes trouble in Firefox - document.evaluate may not return?
+		var parser = new DOMParser();
+		var doc = parser.parseFromString(details, 'text/html');
 		return doc;
 	},
 
