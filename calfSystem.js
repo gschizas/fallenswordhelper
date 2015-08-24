@@ -15,9 +15,9 @@ window.System = {
 	},
 
 	getValue: function(name) {
-		if (Data.defaults[name] === undefined) {
-			console.log('Data.defaults[' + name + ']=', Data.defaults[name]);
-		}
+		//~ if (Data.defaults[name] === undefined) {
+			//~ console.log('Data.defaults[' + name + ']=', Data.defaults[name]);
+		//~ }
 		return GM_getValue(name, Data.defaults[name]);
 	},
 
@@ -186,13 +186,13 @@ window.System = {
 	},
 
 	intValue: function(theText) {
-		if (typeof theText === 'number') {
-			console.log('theText', theText);
-			return theText;
-		} else {
+		//~ if (typeof theText === 'number') {
+			//~ console.log('theText', theText);
+			//~ return theText;
+		//~ } else {
 			if (!theText) {return 0;}
 			return parseInt(theText.replace(/,/g,''),10);
-		}
+		//~ }
 	},
 
 	getIntFromRegExp: function(theText, rxSearch) {
@@ -948,7 +948,7 @@ window.Data = {
 		'showHuntingBuffs',
 		'moveGuildList',
 		'moveOnlineAlliesList',
-		//~ 'moveFSBox',
+		'moveFSBox',
 		'hideKrulPortal',
 		'hideQuests',
 		'hideQuestNames',
@@ -980,7 +980,7 @@ window.Data = {
 		'bountyListRefreshTime',
 		'enableWantedList',
 		'wantedNames',
-		//~ 'fsboxlog',
+		'fsboxlog',
 		'huntingMode',
 		'enableAttackHelper',
 		'hideRelicOffline',

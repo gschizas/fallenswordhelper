@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1503
+// @version        1504
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -233,9 +233,9 @@ var Helper = {
 			if (System.getValue('moveOnlineAlliesList')) {
 				Layout.moveRHSBoxUpOnRHS('minibox-allies');
 			}
-			//~ if (System.getValue('moveFSBox')) {
-				//~ Layout.moveRHSBoxToLHS('minibox-fsbox');
-			//~ }
+			if (System.getValue('moveFSBox')) {
+				Layout.moveRHSBoxToLHS('minibox-fsbox');
+			}
 
 			Helper.prepareAllyEnemyList(); // TODO need to do something cleverer
 			//~ Helper.prepareGuildList();
@@ -245,7 +245,7 @@ var Helper = {
 			Helper.injectLevelupCalculator();
 			Layout.injectMenu();
 			Helper.replaceKeyHandler();
-			//~ Helper.injectFSBoxLog();
+			Helper.injectFSBoxLog();
 			Helper.fixOnlineGuildBuffLinks();
 			Helper.addGuildInfoWidgets();
 			Helper.addOnlineAlliesWidgets();
@@ -335,9 +335,9 @@ var Helper = {
 			break;
 		case 'news':
 			switch (subPageId) {
-			//~ case 'fsbox':
-				//~ Helper.injectShoutboxWidgets('fsbox_input', 100);
-				//~ break;
+			case 'fsbox':
+				Helper.injectShoutboxWidgets('fsbox_input', 100);
+				break;
 			case 'shoutbox':
 				Helper.injectShoutboxWidgets('shoutbox_input', 150);
 				break;
@@ -546,9 +546,9 @@ var Helper = {
 			case 'quickwear':
 				Helper.insertQuickWear();
 				break;
-			//~ case 'fsboxcontent':
-				//~ Helper.injectFsBoxContent();
-				//~ break;
+			case 'fsboxcontent':
+				Helper.injectFsBoxContent();
+				break;
 			case 'bufflogcontent':
 				Helper.injectBuffLog();
 				break;
@@ -882,6 +882,32 @@ var Helper = {
 		content.innerHTML=Helper.makePageTemplate('Buff Log','','clearBuffs','Clear','bufflog');
 		document.getElementById('clearBuffs').addEventListener('click',function() {GM_setValue('buffLog','');window.location=window.location;},true);
 		document.getElementById('bufflog').innerHTML=System.getValue('buffLog');
+	},
+
+	injectFSBoxLog: function() {
+		if (System.getValue('fsboxlog')) {
+			var node=$('div#minibox-fsbox');
+			if (node.length > 0) {
+				var fsbox=node.find('p.message').html().replace('<br><br>',' ');
+				var boxList=System.getValue('fsboxcontent');
+				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
+				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
+				GM_setValue('fsboxcontent',boxList);
+				var nodediv = node.find('div');
+				var playerName = node.find('a:first').text();
+				nodediv.html(nodediv.html() + '&nbsp;' +
+					'<nobr><a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
+					'" style="color:PaleVioletRed">[ Ignore ]</a>&nbsp;' +
+					'<a href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent" style="color:yellow">[ Log ]</a></nobr>');
+			}
+		}
+	},
+
+	injectFsBoxContent: function(content) {
+		if (!content) {content = Layout.notebookContent();}
+		content.innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
+		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue('fsboxcontent','');window.location=window.location;},true);
+		document.getElementById('fsboxdetail').innerHTML=System.getValue('fsboxcontent');
 	},
 
 	removeGuildAvyImgBorder: function() {
@@ -9562,8 +9588,8 @@ var Helper = {
 				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ System.getValue('allyEnemyOnlineRefreshTime') + '" /> seconds refresh</td></tr>' +
 			'<tr><td align="right">Enable Online Allies Widgets' + Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (System.getValue('enableOnlineAlliesWidgets')?' checked':'') + '></td></tr>' +
-			//~ '<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
-				//~ ':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (System.getValue('moveFSBox')?' checked':'') + '></td></tr>' +
+			'<tr><td align="right">Move FS box' + Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
+				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (System.getValue('moveFSBox')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (System.getValue('gameHelpLink')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
@@ -9658,8 +9684,8 @@ var Helper = {
 				':</td><td colspan="3"><input name="huntingBuffs2Name" title="Hunting mode name" size="7" value="'+ buffs2Name + '" /><input name="huntingBuffs2" size="49" value="'+ buffs2 + '" /></td></tr>' +
 			'<tr><td align="right">' + buffs3Name + ' Hunting Buff List' + Helper.helpLink(buffs3Name + ' Hunting Buff List', 'List of ' + buffs3Name + ' hunting buffs.') +
 				':</td><td colspan="3"><input name="huntingBuffs3Name" title="Hunting mode name" size="7" value="'+ buffs3Name + '" /><input name="huntingBuffs3" size="49" value="'+ buffs3 + '" /></td></tr>' +
-			//~ '<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
-				//~ ':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (System.getValue('fsboxlog')?' checked':'') + '></td></tr>' +
+			'<tr><td align="right">Enable FS Box Log' + Helper.helpLink('Enable FS Box Log', 'This enables the functionality to keep a log of recent seen FS Box message.') +
+				':</td><td><input name="fsboxlog" type="checkbox" value="on"' + (System.getValue('fsboxlog')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Enable Buff Log' + Helper.helpLink('Enable Buff Log', 'This enables the functionality to keep a log of recently casted buffs') +
 				':</td><td><input name="keepBuffLog" type="checkbox" value="on"' + (System.getValue('keepBuffLog')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Enable Hunting Mode' + Helper.helpLink('Enable Hunting Mode', 'This disable menu and some visual features to speed up the Helper.') +
@@ -12668,7 +12694,7 @@ var Helper = {
 				//~ ['BD', 'Best Damage Items', 'injectCheckWearingItem'],
 				['QE', 'Quick Extract', 'insertQuickExtract'],
 				['QW', 'Quick Wear', 'insertQuickWear'],
-				//~ ['BoxL', 'FS Box Log', 'injectFsBoxContent']
+				['BoxL', 'FS Box Log', 'injectFsBoxContent']
 				//~ ['CRL', 'Creature Log', 'injectMonsterLog'] // TODO
 			]
 			};
