@@ -20,6 +20,20 @@
 .fshNoWrap {white-space: nowrap;}
 .helperQC {cursor: pointer;}
 
+.qbT {margin: 0px auto;}
+.qbTH {text-align: center; padding:0px 4px; color:orange;}
+.qbTD {text-align: center; padding:0px 4px;}
+
+table.relicT {font-size:small;}
+table.relicT tr.hidden {display:none; visibility:hidden;}
+table.relicT td {font-size:x-small; text-align: right;}
+table.relicT td.brn {color:brown;}
+table.relicT td.grey {color:grey;}
+table.relicT td.headr {font-size:small;border-top:2px black solid;}
+
+
+
+
 div#fshCompConf {
   position: relative;
   top: -16px;

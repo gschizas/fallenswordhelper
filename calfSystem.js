@@ -2,8 +2,192 @@
 
 'use strict';
 
-// System functions
+// GM_ApiBrowserCheck
+// @author        GIJoe
+// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
+var gvar = function(){};
+// Global variables
+function GM_ApiBrowserCheck(){
+	var GMSTORAGE_PATH = 'GM_';
+	// You can change it to avoid conflict with others scripts
+	if (typeof unsafeWindow === 'undefined'){
+		window.unsafeWindow = window;
+	}
+	var needApiUpgrade = false;
+	if (window.navigator.appName.match(/^opera/i) && 
+			typeof window.opera !== 'undefined'){
+		needApiUpgrade = true;
+		gvar.isOpera = true;
+		unsafeWindow.GM_log = window.opera.postError;
+	}
+	if (typeof GM_setValue !== 'undefined'){
+		var gsv;
+		try {
+			gsv=unsafeWindow.GM_setValue.toString();
+		} catch(e) {
+			gsv='staticArgs';
+		}
+		if (gsv.indexOf('staticArgs') > 0){
+			gvar.isGreaseMonkey = true;
+		}
+		// test GM_hitch
+		else if (gsv.match(/not\s+supported/)){
+			needApiUpgrade = true;
+			gvar.isBuggedChrome = true;
+		}
+	} else{
+		needApiUpgrade = true;
+	}
 
+	if (needApiUpgrade){
+		var ws = null;
+		var uid = new Date().toString();
+		var result;
+		try{
+			unsafeWindow.localStorage.setItem(uid, uid);
+			result = unsafeWindow.localStorage.getItem(uid) === uid;
+			unsafeWindow.localStorage.removeItem(uid);
+			if (result) {
+				ws = typeof unsafeWindow.localStorage;
+			} else {
+				console.log('There is a problem with your local storage. ' +
+					'FSH cannot persist your settings.');
+				ws = null;
+			}
+		} catch(e){
+			ws = null;
+		}
+		// Catch Security error
+		if (ws === 'object'){
+			unsafeWindow.GM_getValue = function(name, defValue){
+				var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH +
+					name);
+				if (value === null || value === undefined){
+					return defValue;
+				} else{
+					switch (value.substr(0, 2)){
+					case 'S]':
+						return value.substr(2);
+					case 'N]':
+						return parseInt(value.substr(2), 10);
+					case 'B]':
+						return value.substr(2) === 'true';
+					}
+				}
+				return value;
+			};
+			unsafeWindow.GM_setValue = function(name, value){
+				switch (typeof value){
+				case 'string':
+					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+						name, 'S]' + value);
+					break;
+				case 'number':
+					if (value.toString().indexOf('.') < 0){
+						unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+							name, 'N]' + value);
+					}
+					break;
+				case 'boolean':
+					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+						name, 'B]' + value);
+					break;
+				}
+			};
+		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
+			gvar.temporarilyStorage = [];
+			unsafeWindow.GM_getValue = function(name, defValue){
+				if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
+					'undefined'){
+					return defValue;
+				} else{
+					return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+				}
+			};
+			unsafeWindow.GM_setValue = function(name, value){
+				switch (typeof value){
+				case 'string':
+				case 'boolean':
+				case 'number':
+					gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
+				}
+			};
+		}
+
+		unsafeWindow.GM_listValues = function(){
+			var list = [];
+			var reKey = new RegExp('^' + GMSTORAGE_PATH);
+			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i += 1) {
+				var key = unsafeWindow.localStorage.key(i);
+				if (key.match(reKey)) {
+					list.push(key.replace(GMSTORAGE_PATH, ''));
+				}
+			}
+			return list;
+		};
+		// Dummy
+		if (!gvar.isOpera || typeof GM_xmlhttpRequest === 'undefined'){
+			unsafeWindow.GM_xmlhttpRequest = function(obj){
+				var request = new XMLHttpRequest();
+				request.onreadystatechange = function(){
+					if (obj.onreadystatechange){
+						obj.onreadystatechange(request);
+					}
+					if (request.readyState === 4 && obj.onload){
+						obj.onload(request);
+					}
+				};
+				request.onerror = function(){
+					if (obj.onerror){
+						obj.onerror(request);
+					}
+				};
+				try{
+					request.open(obj.method, obj.url, true);
+				} catch(e){
+					if (obj.onerror){
+						obj.onerror({
+							readyState: 4,
+							responseHeaders: '',
+							responseText: '',
+							responseXML: '',
+							status: 403,
+							statusText: 'Forbidden'
+						});
+					}
+					return;
+				}
+				var name;
+				if (obj.headers){
+					for (name in obj.headers){
+						if (!obj.headers.hasOwnProperty(name)) { continue; }
+						request.setRequestHeader(name, obj.headers[name]);
+					}
+				}
+				request.send(obj.data);
+				return request;
+			};
+		}
+	}
+}
+GM_ApiBrowserCheck();
+
+// jquery GM_get/set wrapper
+function GM_JQ_wrapper() {
+	if (typeof GM_setValue !== 'undefined') {
+		var oldGM_setValue = GM_setValue;
+		GM_setValue = function(name, value){
+			setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		};
+		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
+		GM_xmlhttpRequest = function(details) {
+			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
+		};
+	}
+}
+GM_JQ_wrapper();
+
+// System functions
 window.System = {
 	init: function() {
 		System.server = document.location.protocol + '//' + document.location.host + '/';
@@ -15,9 +199,6 @@ window.System = {
 	},
 
 	getValue: function(name) {
-		//~ if (Data.defaults[name] === undefined) {
-			//~ console.log('Data.defaults[' + name + ']=', Data.defaults[name]);
-		//~ }
 		return GM_getValue(name, Data.defaults[name]);
 	},
 
@@ -48,7 +229,7 @@ window.System = {
 	},
 
 	findNode: function(xpath, doc) {
-		var nodes=System.findNodes(xpath, doc);
+		var nodes = System.findNodes(xpath, doc);
 		if (!nodes) {return null;}
 		return nodes[0];
 	},
@@ -186,13 +367,8 @@ window.System = {
 	},
 
 	intValue: function(theText) {
-		//~ if (typeof theText === 'number') {
-			//~ console.log('theText', theText);
-			//~ return theText;
-		//~ } else {
-			if (!theText) {return 0;}
-			return parseInt(theText.replace(/,/g,''),10);
-		//~ }
+		if (!theText) {return 0;}
+		return parseInt(theText.replace(/,/g,''),10);
 	},
 
 	getIntFromRegExp: function(theText, rxSearch) {
@@ -218,17 +394,17 @@ window.System = {
 		var i;
 		var item;
 		if (removeBy) {
-			for(i=0;i<len;i += 1) {
+			for (i = 0; i < len; i += 1) {
 				item = arr[i];
-				if(seen[item[removeBy]] === 1) {continue;}
+				if (seen[item[removeBy]] === 1) {continue;}
 				seen[item[removeBy]] = 1;
 				out[j] = item;
 				j += 1;
 			}
 		} else {
-			for(i=0;i<len;i += 1) {
+			for (i = 0; i < len; i += 1) {
 				item = arr[i];
-				if(seen[item] === 1) {continue;}
+				if (seen[item] === 1) {continue;}
 				seen[item] = 1;
 				out[j] = item;
 				j += 1;
@@ -319,12 +495,6 @@ window.System = {
 	}
 };
 System.init();
-})();
-
-
-(function() {
-
-'use strict';
 
 window.Data = {
 
@@ -902,7 +1072,10 @@ window.Data = {
 		hideNonPlayerGuildLogMessages: true,
 		listOfAllies: '',
 		listOfEnemies: '',
-		contactList: ''
+		contactList: '',
+		lastUpgradeCheck: 0,
+		needToDoUpgrade: false,
+		characterVirtualLevel: 0
 	},
 
 	saveBoxes: [
@@ -1038,61 +1211,84 @@ window.Data = {
 	}
 
 };
-})();
-
-
-(function() {
-
-'use strict';
 
 window.Layout = {
 
-	injectMenu: function() {
-		if (System.getValue('lastActiveQuestPage').length > 0) { //JQuery ready
-			$('a[href="index.php?cmd=questbook"]').attr('href', System.getValue('lastActiveQuestPage'));
+	injectMenu: function() { //jquery
+		if (System.getValue('lastActiveQuestPage').length > 0) {
+			$('a[href="index.php?cmd=questbook"]').attr('href',
+				System.getValue('lastActiveQuestPage'));
 		}
 		var pCL = $('div#pCL:first');
 		if (pCL.length === 0) {return;}
 		//character
 		$(pCL).find('a#nav-character-log').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&blank=1&subcmd=recipemanager">Recipe Manager</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanager">Inventory Manager</a></li>')
-			//~ .after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanagernew">New Inventory</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-recipemanager" href="index.php?cmd=notepad&blank' +
+				'=1&subcmd=recipemanager">Recipe Manager</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=invmanager">Inventory Manager</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
+				'medalguide">Medal Guide</a></li>');
 		if (System.getValue('keepBuffLog')) {
 			$(pCL).find('a#nav-character-log').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&blank=1&subcmd=bufflogcontent">Buff Log</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
+					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
 		if (System.getValue('keepLogs')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&blank=1&subcmd=showlogs">Combat Logs</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
+					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
 		if (System.getValue('showMonsterLog')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&blank=1&subcmd=monsterlog">Creature Logs</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+					'character-monsterlog" href="index.php?cmd=notepad&blank' +
+					'=1&subcmd=monsterlog">Creature Logs</a></li>');
 		}
 		$(pCL).find('a#nav-character-notepad').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&blank=1&subcmd=createmap">Create Maps</a></li>');
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-quicklinkmanager" href="index.php?cmd=notepad&' +
+				'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-createmap" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=createmap">Create Maps</a></li>');
 		//guild
 		$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmanager">Guild Inventory</a></li>');
-			//~ .after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmgr">New Inventory</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=guildinvmanager">Guild Inventory</a></li>');
 		if (!System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
 			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
-				.before('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&blank=1&subcmd=newguildlog">New Guild Log</a></li>');
+				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
+					'-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
+					'&subcmd=newguildlog">New Guild Log</a></li>');
 		}
 		//top rated
 		$(pCL).find('a#nav-toprated-players-level').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
+				'Top 250 Players</a></li>');
 		//actions
 		$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=auctionsearch">AH Quick Search</a></li>');
 		$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers">Online Players</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&blank=1&subcmd=findother">Find Other</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&blank=1&subcmd=findbuffs">Find Buffs</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=onlineplayers">Online Players</a></li>')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-findother" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=findother">Find Other</a></li>')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=findbuffs">Find Buffs</a></li>');
 		//adjust the menu length in chrome for the newly added items
 		//first the open ones
 		$('ul.nav-animated').each(function() {
@@ -1205,6 +1401,31 @@ window.Layout = {
 		{title: 'XP Contrib', class: 'dt-center'}
 	],
 
-	places:['first', 'second', 'third', 'fourth']
+	places:['first', 'second', 'third', 'fourth'],
+
+	quickBuffHeader:
+		'<div id="helperQBheader">' +
+		'<table class="qbT"><thead><tr>' +
+		'<th class="qbTH">Sustain</th>' +
+		'<th class="qbTH">Fury Caster</th>' +
+		'<th class="qbTH">Guild Buffer</th>' +
+		'<th class="qbTH">Buff Master</span></th>' +
+		'<th class="qbTH">Extend</span></th>' +
+		'<th class="qbTH">Reinforce</span></th>' +
+		'</tr></thead><tbody><tr>' +
+		'<td id="fshSus" class="qbTD"></td>' +
+		'<td id="fshFur" class="qbTD"></td>' +
+		'<td id="fshGB"  class="qbTD"></td>' +
+		'<td id="fshBM"  class="qbTD"></td>' +
+		'<td id="fshExt" class="qbTD"></td>' +
+		'<td id="fshRI"  class="qbTD"></td>' +
+		'</tr></tbody></table>' +
+		'</div>',
+
+	goldUpgradeMsg:
+		'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
+		' class="notification-icon"></span><p class="notification-content">Up' +
+		'grade stamina with gold.</p></a></li>'
+
 };
 })();

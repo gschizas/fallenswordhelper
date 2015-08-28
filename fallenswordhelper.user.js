@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1504
+// @version        1505
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -24,193 +24,8 @@ var fshMain = function() {
 var isBeta ='0';
 var isNewUI = '0';
 
-// GM_ApiBrowserCheck
-// @author        GIJoe
-// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
-var gvar = function(){};
-// Global variables
-function GM_ApiBrowserCheck(){
-	var GMSTORAGE_PATH = 'GM_';
-	// You can change it to avoid conflict with others scripts
-	if (typeof unsafeWindow === 'undefined'){
-		window.unsafeWindow = window;
-	}
-	var needApiUpgrade = false;
-	if (window.navigator.appName.match(/^opera/i) && 
-			typeof window.opera !== 'undefined'){
-		needApiUpgrade = true;
-		gvar.isOpera = true;
-		unsafeWindow.GM_log = window.opera.postError;
-	}
-	if (typeof GM_setValue !== 'undefined'){
-		var gsv;
-		try {
-			gsv=unsafeWindow.GM_setValue.toString();
-		} catch(e) {
-			gsv='staticArgs';
-		}
-		if (gsv.indexOf('staticArgs') > 0){
-			gvar.isGreaseMonkey = true;
-		}
-		// test GM_hitch
-		else if (gsv.match(/not\s+supported/)){
-			needApiUpgrade = true;
-			gvar.isBuggedChrome = true;
-		}
-	} else{
-		needApiUpgrade = true;
-	}
-
-	if (needApiUpgrade){
-		var ws = null;
-		var uid = new Date().toString();
-		var result;
-		try{
-			unsafeWindow.localStorage.setItem(uid, uid);
-			result = unsafeWindow.localStorage.getItem(uid) === uid;
-			unsafeWindow.localStorage.removeItem(uid);
-			if (result) {
-				ws = typeof unsafeWindow.localStorage;
-			} else {
-				console.log('There is a problem with your local storage. ' +
-					'FSH cannot persist your settings.');
-				ws = null;
-			}
-		} catch(e){
-			ws = null;
-		}
-		// Catch Security error
-		if (ws === 'object'){
-			unsafeWindow.GM_getValue = function(name, defValue){
-				var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH +
-					name);
-				if (value === null || value === undefined){
-					return defValue;
-				} else{
-					switch (value.substr(0, 2)){
-					case 'S]':
-						return value.substr(2);
-					case 'N]':
-						return parseInt(value.substr(2), 10);
-					case 'B]':
-						return value.substr(2) === 'true';
-					}
-				}
-				return value;
-			};
-			unsafeWindow.GM_setValue = function(name, value){
-				switch (typeof value){
-				case 'string':
-					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
-						name, 'S]' + value);
-					break;
-				case 'number':
-					if (value.toString().indexOf('.') < 0){
-						unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
-							name, 'N]' + value);
-					}
-					break;
-				case 'boolean':
-					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
-						name, 'B]' + value);
-					break;
-				}
-			};
-		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
-			gvar.temporarilyStorage = [];
-			unsafeWindow.GM_getValue = function(name, defValue){
-				if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
-					'undefined'){
-					return defValue;
-				} else{
-					return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-				}
-			};
-			unsafeWindow.GM_setValue = function(name, value){
-				switch (typeof value){
-				case 'string':
-				case 'boolean':
-				case 'number':
-					gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
-				}
-			};
-		}
-
-		unsafeWindow.GM_listValues = function(){
-			var list = [];
-			var reKey = new RegExp('^' + GMSTORAGE_PATH);
-			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i += 1) {
-				var key = unsafeWindow.localStorage.key(i);
-				if (key.match(reKey)) {
-					list.push(key.replace(GMSTORAGE_PATH, ''));
-				}
-			}
-			return list;
-		};
-		// Dummy
-		if (!gvar.isOpera || typeof GM_xmlhttpRequest === 'undefined'){
-			unsafeWindow.GM_xmlhttpRequest = function(obj){
-				var request = new XMLHttpRequest();
-				request.onreadystatechange = function(){
-					if (obj.onreadystatechange){
-						obj.onreadystatechange(request);
-					}
-					if (request.readyState === 4 && obj.onload){
-						obj.onload(request);
-					}
-				};
-				request.onerror = function(){
-					if (obj.onerror){
-						obj.onerror(request);
-					}
-				};
-				try{
-					request.open(obj.method, obj.url, true);
-				} catch(e){
-					if (obj.onerror){
-						obj.onerror({
-							readyState: 4,
-							responseHeaders: '',
-							responseText: '',
-							responseXML: '',
-							status: 403,
-							statusText: 'Forbidden'
-						});
-					}
-					return;
-				}
-				var name;
-				if (obj.headers){
-					for (name in obj.headers){
-						if (!obj.headers.hasOwnProperty(name)) { continue; }
-						request.setRequestHeader(name, obj.headers[name]);
-					}
-				}
-				request.send(obj.data);
-				return request;
-			};
-		}
-	}
-}
-GM_ApiBrowserCheck();
-
-// jquery GM_get/set wrapper
-function GM_JQ_wrapper() {
-	if (typeof GM_setValue !== 'undefined') {
-		var oldGM_setValue = GM_setValue;
-		GM_setValue = function(name, value){
-			setTimeout(function() {oldGM_setValue(name, value);}, 0);
-		};
-		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
-		GM_xmlhttpRequest = function(details) {
-			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
-		};
-	}
-}
-GM_JQ_wrapper();
-
 var Helper = {
-	prepareEnv: function () {
+	prepareEnv: function() {
 		// TODO This can be moved I think
 		// It was back when some people used an image pack
 		if (System.getValue('gameHelpLink')) {
@@ -239,7 +54,7 @@ var Helper = {
 
 			Helper.prepareAllyEnemyList(); // TODO need to do something cleverer
 			//~ Helper.prepareGuildList();
-			Helper.retrieveGuildData(); // TODO need to do something cleverer
+			//~ Helper.retrieveGuildData(); // TODO need to do something cleverer
 			Helper.prepareBountyData();
 			Helper.injectStaminaCalculator();
 			Helper.injectLevelupCalculator();
@@ -252,9 +67,9 @@ var Helper = {
 			Helper.injectJoinAllLink();
 			Helper.changeGuildLogHREF();
 			//~ Helper.injectAHsearch();
-			Helper.injectHomePageTwoLink();
+			Helper.injectHomePageTwoLink(); // TODO need to do something cleverer
 			Helper.injectTempleAlert();
-			//~ Helper.injectUpgradeAlert();
+			Helper.injectUpgradeAlert();
 			Helper.injectQuickMsgDialogJQ();
 		}
 
@@ -578,13 +393,18 @@ var Helper = {
 			}
 			break;
 		case 'points':
-			switch (subPageId) {
-			//case 'shop':
-				//Helper.storePlayerUpgrades();
-				//Helper.injectPoints();
-				//break;
+			switch (typePageId) {
 			case '-':
-				if (typePageId === '-' || typePageId === 0) {Helper.storePlayerUpgrades();}
+				Helper.storePlayerUpgrades();
+				//Helper.injectPoints();
+				break;
+			case '0':
+				Helper.storePlayerUpgrades();
+				//Helper.injectPoints();
+				break;
+			case '1':
+				Helper.parseGoldUpgrades();
+				//Helper.storePlayerUpgrades();
 				//Helper.injectPoints();
 				break;
 			default:
@@ -816,17 +636,18 @@ var Helper = {
 		var highlightPlayersNearMyLvl = System.getValue('highlightPlayersNearMyLvl');
 		var highlightGvGPlayersNearMyLvl = System.getValue('highlightGvGPlayersNearMyLvl');
 		if (highlightPlayersNearMyLvl || highlightGvGPlayersNearMyLvl) {
-			var memberList = System.findNode('//tr[td/b[.="Members"]]/following-sibling::tr/td/table');
+			var memList = System.findNode('//tr[td/b[.="Members"]]/following-sibling::tr/td/table');
 			var levelToTest = System.intValue($('dt.stat-level:first').next().text());
 			var characterVirtualLevel = System.getValue('characterVirtualLevel');
 			if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-			for (var i=2;i<memberList.rows.length;i += 1) {
+			for (var i=2;i<memList.rows.length;i += 1) {
 				//~ var iplus1 = i+1;
-				if (memberList.rows[i].cells[1]) {
+				if (memList.rows[i].cells[1]) {
 					//Firefox reads it as </td> and chrome reads it as \&lt;\/td\&gt;
-					var vlevel = /VL:.+?(\d+)/.exec(memberList.rows[i].cells[1].innerHTML)[1];
-					//~ var level = memberList.rows[i].cells[2].innerHTML;
-					var aRow = memberList.rows[i];
+					// TODO Test
+					var vlevel = /VL:.+?(\d+)/.exec(memList.rows[i].cells[1].innerHTML)[1];
+					//~ var level = memList.rows[i].cells[2].innerHTML;
+					var aRow = memList.rows[i];
 					if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= (levelToTest <= 205 ? 5 : 10)) {
 						aRow.style.backgroundColor = '#4671C8'; //blue
 					} else if (highlightGvGPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= (levelToTest <= 300 ? 25 : levelToTest <= 700 ? 50 : 100)) {
@@ -872,7 +693,7 @@ var Helper = {
 					buffLog=timeStamp+'<span style="color: red;">' + buffsNotCast[0] + '</span><br>' + buffLog;
 				}
 			}
-			GM_setValue('buffLog',buffLog);
+			System.setValue('buffLog',buffLog);
 			//document.getElementById('buff_Log').innerHTML+='<br><br><br>'+buffLog;
 		}
 	},
@@ -880,7 +701,12 @@ var Helper = {
 	injectBuffLog: function(content) {
 		if (!content) {content = Layout.notebookContent();}
 		content.innerHTML=Helper.makePageTemplate('Buff Log','','clearBuffs','Clear','bufflog');
-		document.getElementById('clearBuffs').addEventListener('click',function() {GM_setValue('buffLog','');window.location=window.location;},true);
+		document.getElementById('clearBuffs').addEventListener('click',
+			function() {
+				System.setValue('buffLog','');
+				window.location = window.location;
+			}, true
+		);
 		document.getElementById('bufflog').innerHTML=System.getValue('buffLog');
 	},
 
@@ -892,7 +718,7 @@ var Helper = {
 				var boxList=System.getValue('fsboxcontent');
 				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
 				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
-				GM_setValue('fsboxcontent',boxList);
+				System.setValue('fsboxcontent',boxList);
 				var nodediv = node.find('div');
 				var playerName = node.find('a:first').text();
 				nodediv.html(nodediv.html() + '&nbsp;' +
@@ -906,7 +732,7 @@ var Helper = {
 	injectFsBoxContent: function(content) {
 		if (!content) {content = Layout.notebookContent();}
 		content.innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
-		document.getElementById('fsboxclear').addEventListener('click',function() {GM_setValue('fsboxcontent','');window.location=window.location;},true);
+		document.getElementById('fsboxclear').addEventListener('click',function() {System.setValue('fsboxcontent','');window.location=window.location;},true);
 		document.getElementById('fsboxdetail').innerHTML=System.getValue('fsboxcontent');
 	},
 
@@ -942,7 +768,7 @@ var Helper = {
 
 		//~ var guildMiniSRC = System.findNode('//img[contains(@src,"_mini.jpg")]').getAttribute('src');
 		//~ var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
-		//~ GM_setValue('guildID',guildID);
+		//~ System.setValue('guildID',guildID);
 
 		Helper.guildXPLock();
 
@@ -980,8 +806,9 @@ var Helper = {
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
 
 		//Update the guild online list, since we are already on the page.
-		var doc = document.firstChild.nextSibling;
-		Helper.parseGuildForWorld(doc.innerHTML, true);
+		//var doc = document.firstChild.nextSibling;
+		//Helper.parseGuildForWorld(doc.innerHTML, true);
+
 		$('td:contains("Username"):last').parents('table:first').find('a[href]').each(function(){
 			$(this).after(' <a style="color:blue;font-size:10px;" ' +
 			'href=\'javascript:window.openWindow("index.php?cmd=quickbuff&t='+$(this).text()+'", "fsQuickBuff", 618, 1000, ",scrollbars")\'' +
@@ -1260,7 +1087,13 @@ var Helper = {
 			}
 			injectHere.html(injectHere.html() + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
 				'class="custombutton">');
-			document.getElementById('calculatedefenderstats').addEventListener('click', Helper.calculateRelicDefenderStats, true);
+			document.getElementById('calculatedefenderstats')
+				.addEventListener('click',
+					function() {
+						Helper.getMembrList(Helper.calculateRelicDefenderStats,
+							false);
+					},
+					true);
 		}
 		var empowerButton = $('input[value*="Attempt Empower"]');
 		if (empowerButton.length > 0) {
@@ -1320,14 +1153,15 @@ var Helper = {
 
 	calculateRelicDefenderStats: function() {
 		var validMemberString;
-		var memberList;
-		var memberId;
+		var membrList = Helper.membrList;
+		//~ var memberId;
 		var i;
-		var href;
+		//~ var href;
 		//hide the calc button
 		$('input[id="calculatedefenderstats"]').css('visibility','hidden');
 		//make the text smaller
-		$('td:contains("Below is the current status for the relic"):last').css('fontSize','x-small');
+		$('td:contains("Below is the current status for the relic"):last')
+			.css('fontSize','x-small');
 		//set the colspan of all other rows to 3
 		$('table[width="600"]>tbody>tr:not(:eq(9))>td').attr('colspan',3);
 
@@ -1336,29 +1170,49 @@ var Helper = {
 			.attr('align','left')
 			.attr('colSpan',2);
 		var tableInsertPoint = tableWithBorderElement.parents('tr:first');
-		tableInsertPoint.append('<td colspan="1"><table width="200" style="border:1px solid #A07720;">' +
-			'<tbody><tr><td id="InsertSpot"></td></tr></tbody></table></td>');
+		tableInsertPoint.append('<td colspan="1"><table width="200" style="' +
+			'border:1px solid #A07720;"><tbody><tr><td id="InsertSpot"></td>' +
+			'</tr></tbody></table></td>');
 		var extraTextInsertPoint = System.findNode('//td[@id="InsertSpot"]');
-		var defendingGuildHref = $('a[href*="index.php?cmd=guild&subcmd=view&guild_id="]:first').attr('href');
+		var defendingGuildHref = $('a[href*="index.php?cmd=guild&subcmd=view' +
+			'&guild_id="]:first').attr('href');
 		Helper.getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
 
 		var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
-		var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
+		var defendingGuildID = /guilds\/(\d+)_mini.jpg/
+			.exec(defendingGuildMiniSRC)[1];
 		var myGuildID = Layout.guildId().toString();
 
 		var hideRelicOffline = System.getValue('hideRelicOffline');
 		if (defendingGuildID === myGuildID && !hideRelicOffline) {
 			validMemberString = '';
-			memberList = System.getValueJSON('memberlist');
-			if (memberList) {
-				for (i=0;i<memberList.members.length;i += 1) {
-					var member=memberList.members[i];
-					if (member.status === 'Offline' &&
-						(member.level < 400 || member.level > 421 && member.level < 441 || member.level > 450)) {
-						validMemberString += member.name + ' ';
-					}
+			// memberList = System.getValueJSON('memberlist');
+			Object.keys(membrList).forEach(function(val) {
+				var member = membrList[val];
+				var lastLogin = 0;
+				if (member.last_login) {
+					lastLogin = Math.floor(Date.now() / 1000 -
+						member.last_login);
 				}
-			}
+				if (lastLogin >= 120 && // two minutes is offline
+					lastLogin <= 604800 && // 7 days max
+					(member.level < 400 || member.level > 421 &&
+					member.level < 441 || member.level > 450)) {
+					validMemberString += member.username + ' ';
+				}
+			});
+			validMemberString = validMemberString.slice(0, -1);
+
+			//~ if (membrList) {
+				//~ for (i = 0; i < membrList.members.length; i += 1) {
+					//~ var member = membrList.members[i];
+					//~ if (member.status === 'Offline' &&
+						//~ (member.level < 400 || member.level > 421 &&
+						//~ member.level < 441 || member.level > 450)) {
+						//~ validMemberString += member.name + ' ';
+					//~ }
+				//~ }
+			//~ }
 		}
 
 		var listOfDefenders = System.findNodes('//b/a[contains(@href,"index.php?cmd=profile&player_id=")]');
@@ -1375,107 +1229,159 @@ var Helper = {
 		}
 		Helper.relicDefenderCount = defenderCount;
 		//extraTextInsertPoint.innerHTML += '<tr><td style="font-size:x-small;">' + testList + '<td><tr>';
-		var textToInsert = '<tr><td><table style="font-size:small;">' +
-			'<tr><td colspan="2" style="border-top:2px black solid;">Defending Guild Stats</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Number of Defenders:</td><td style="font-size:x-small;" align="right">' + Helper.relicDefenderCount + '</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Relic Count:</td><td style="font-size:x-small;" align="right" title="relicCount">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Lead Defender Bonus:</td><td style="font-size:x-small;" align="right" title="LDPercentage">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td>Relic Count Processed:</td><td title="relicProcessed">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td colspan="2" style="border-top:2px black solid;">Lead Defender Full Stats</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">Attack:</td><td align="right" title="LDattackValue">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">Defense:</td><td align="right" title="LDdefenseValue">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">Armor:</td><td align="right" title="LDarmorValue">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">Damage:</td><td align="right" title="LDdamageValue">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">HP:</td><td align="right" title="LDhpValue">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDProcessed:</td><td align="right" title="LDProcessed">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDFlinchLevel:</td><td align="right" title="LDFlinchLevel">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDConstitutionLevel:</td><td align="right" title="LDConstitutionLevel">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDNightmareVisageLevel:</td><td align="right" title="LDNightmareVisageLevel">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDFortitudeLevel:</td><td align="right" title="LDFortitudeLevel">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDChiStrikeLevel:</td><td align="right" title="LDChiStrikeLevel">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDTerrorizeLevel:</td><td align="right" title="LDTerrorizeLevel">0</td></tr>' +
-			'<tr style="display:none; visibility:hidden;"><td align="right">LDSanctuaryLevel:</td><td align="right" title="LDSanctuaryLevel">0</td></tr>' +
-			'<tr><td colspan="2" style="border-top:2px black solid;">Other Defender Stats</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Attack:</td><td style="font-size:x-small; color:gray;" align="right" title="attackValue">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Attack w/ buffs:</td><td style="font-size:x-small;" align="right" title="attackValueBuffed">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Defense:</td><td style="font-size:x-small; color:gray;" align="right" title="defenseValue">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Defense w/buffs:</td><td style="font-size:x-small;" align="right" title="defenseValueBuffed">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Armor:</td><td style="font-size:x-small;" align="right" title="armorValue">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Armor w/ buffs:</td><td style="font-size:x-small;" align="right" title="armorValueBuffed">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Damage:</td><td style="font-size:x-small; color:gray;" align="right" title="damageValue">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Damage w/ buffs:</td><td style="font-size:x-small;" align="right" title="damageValueBuffed">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw HP:</td><td style="font-size:x-small; color:gray;" align="right" title="hpValue">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">HP w/ buffs:</td><td style="font-size:x-small;" align="right" title="hpValueBuffed">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Processed:</td><td style="font-size:x-small;" align="right" title="defendersProcessed">0</td></tr>' +
-			'<tr><td style="border-top:2px black solid;" colspan=2>Adjusted defense values:</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">DC225:</td><td style="font-size:x-small;" align="right" title="DC225">0</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">DC175:</td><td style="font-size:x-small;" align="right" title="DC175">0</td></tr>' +
-			'<tr><td style="border-top:2px black solid;" colspan=2>Attacking Group Stats:</td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Group Attack:</td><td style="font-size:x-small; color:gray;" align="right" title="GroupAttack"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Group Attack w/ buffs:</td><td style="font-size:x-small;" align="right" title="GroupAttackBuffed"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Group Defense:</td><td style="font-size:x-small; color:gray;" align="right" title="GroupDefense"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Group Defense w/ buffs:</td><td style="font-size:x-small;" align="right" title="GroupDefenseBuffed"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Group Armor:</td><td style="font-size:x-small;" align="right" title="GroupArmor"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Group Armor w/ buffs:</td><td style="font-size:x-small;" align="right" title="GroupArmorBuffed"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Group Damage:</td><td style="font-size:x-small; color:gray;" align="right" title="GroupDamage"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Group Damage w/ buffs:</td><td style="font-size:x-small;" align="right" title="GroupDamageBuffed"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Raw Group HP:</td><td style="font-size:x-small; color:gray;" align="right" title="GroupHP"></td></tr>' +
-			'<tr><td style="font-size:x-small; color:brown;" align="right">Group HP w/ buffs:</td><td style="font-size:x-small;" align="right" title="GroupHPBuffed"></td></tr>' +
-			'<tr><td style="border-top:2px black solid;" colspan=2>Processing:</td></tr>' +
-			'<tr><td style="font-size:x-small; color:green;" colspan="2" title="ProcessingStatus">Parsing defending guild stats ...</td></tr>' +
-			'<tr><td style="border-top:2px black solid;" colspan=2>Assumptions:</td></tr>' +
-			'<tr><td colspan="2" style="font-size:x-small; color:gray;">Above calculations include Constitution, Fortitude, Nightmare Visage, Chi Strike, Terrorize and Flinch bonus calculations' +
-				' (in that order) on both the defending group and attacking group.</td></tr>';
+		var textToInsert = '<tr><td><table class="relicT">' +
+			'<tr><td colspan="2" class="headr">Defending Guild Stats</td></tr>' +
+			'<tr><td class="brn">Number of Defenders:</td>' +
+				'<td>' + Helper.relicDefenderCount + '</td></tr>' +
+			'<tr><td class="brn">Relic Count:</td>' +
+				'<td title="relicCount">0</td></tr>' +
+			'<tr><td class="brn">Lead Defender Bonus:</td>' +
+				'<td title="LDPercentage">0</td></tr>' +
+			'<tr class="hidden"><td>Relic Count Processed:</td>' +
+				'<td title="relicProcessed">0</td></tr>' +
+			'<tr class="hidden"><td colspan="2" class="headr">Lead Defender Full Stats</td></tr>' +
+			'<tr class="hidden"><td>Attack:</td>' +
+				'<td title="LDattackValue">0</td></tr>' +
+			'<tr class="hidden"><td>Defense:</td>' +
+				'<td title="LDdefenseValue">0</td></tr>' +
+			'<tr class="hidden"><td>Armor:</td>' +
+				'<td title="LDarmorValue">0</td></tr>' +
+			'<tr class="hidden"><td>Damage:</td>' +
+				'<td title="LDdamageValue">0</td></tr>' +
+			'<tr class="hidden"><td>HP:</td>' +
+				'<td title="LDhpValue">0</td></tr>' +
+			'<tr class="hidden"><td>LDProcessed:</td>' +
+				'<td title="LDProcessed">0</td></tr>' +
+			'<tr class="hidden"><td>LDFlinchLevel:</td>' +
+				'<td title="LDFlinchLevel">0</td></tr>' +
+			'<tr class="hidden"><td>LDConstitutionLevel:</td>' +
+				'<td title="LDConstitutionLevel">0</td></tr>' +
+			'<tr class="hidden"><td>LDNightmareVisageLevel:</td>' +
+				'<td title="LDNightmareVisageLevel">0</td></tr>' +
+			'<tr class="hidden"><td>LDFortitudeLevel:</td>' +
+				'<td title="LDFortitudeLevel">0</td></tr>' +
+			'<tr class="hidden"><td>LDChiStrikeLevel:</td>' +
+				'<td title="LDChiStrikeLevel">0</td></tr>' +
+			'<tr class="hidden"><td>LDTerrorizeLevel:</td>' +
+				'<td title="LDTerrorizeLevel">0</td></tr>' +
+			'<tr class="hidden"><td>LDSanctuaryLevel:</td>' +
+				'<td title="LDSanctuaryLevel">0</td></tr>' +
+			'<tr><td colspan="2" class="headr">Other Defender Stats</td></tr>' +
+			'<tr><td class="brn">Raw Attack:</td>' +
+				'<td class="grey" title="attackValue">0</td></tr>' +
+			'<tr><td class="brn">Attack w/ buffs:</td>' +
+				'<td title="attackValueBuffed">0</td></tr>' +
+			'<tr><td class="brn">Raw Defense:</td>' +
+				'<td class="grey" title="defenseValue">0</td></tr>' +
+			'<tr><td class="brn">Defense w/buffs:</td>' +
+				'<td title="defenseValueBuffed">0</td></tr>' +
+			'<tr><td class="brn">Raw Armor:</td>' +
+				'<td title="armorValue">0</td></tr>' +
+			'<tr><td class="brn">Armor w/ buffs:</td>' +
+				'<td title="armorValueBuffed">0</td></tr>' +
+			'<tr><td class="brn">Raw Damage:</td>' +
+				'<td class="grey" title="damageValue">0</td></tr>' +
+			'<tr><td class="brn">Damage w/ buffs:</td>' +
+				'<td title="damageValueBuffed">0</td></tr>' +
+			'<tr><td class="brn">Raw HP:</td>' +
+				'<td class="grey" title="hpValue">0</td></tr>' +
+			'<tr><td class="brn">HP w/ buffs:</td>' +
+				'<td title="hpValueBuffed">0</td></tr>' +
+			'<tr><td class="brn">Processed:</td>' +
+				'<td title="defendersProcessed">0</td></tr>' +
+			'<tr><td class="headr" colspan=2>Adjusted defense values:</td></tr>' +
+			'<tr><td class="brn">DC225:</td>' +
+				'<td title="DC225">0</td></tr>' +
+			'<tr><td class="brn">DC175:</td>' +
+				'<td title="DC175">0</td></tr>' +
+			'<tr><td class="headr" colspan=2>Attacking Group Stats:</td></tr>' +
+			'<tr><td class="brn">Raw Group Attack:</td>' +
+				'<td class="grey" title="GroupAttack"></td></tr>' +
+			'<tr><td class="brn">Group Attack w/ buffs:</td>' +
+				'<td title="GroupAttackBuffed"></td></tr>' +
+			'<tr><td class="brn">Raw Group Defense:</td>' +
+				'<td class="grey" title="GroupDefense"></td></tr>' +
+			'<tr><td class="brn">Group Defense w/ buffs:</td>' +
+				'<td title="GroupDefenseBuffed"></td></tr>' +
+			'<tr><td class="brn">Raw Group Armor:</td>' +
+				'<td title="GroupArmor"></td></tr>' +
+			'<tr><td class="brn">Group Armor w/ buffs:</td>' +
+				'<td title="GroupArmorBuffed"></td></tr>' +
+			'<tr><td class="brn">Raw Group Damage:</td>' +
+				'<td class="grey" title="GroupDamage"></td></tr>' +
+			'<tr><td class="brn">Group Damage w/ buffs:</td>' +
+				'<td title="GroupDamageBuffed"></td></tr>' +
+			'<tr><td class="brn">Raw Group HP:</td>' +
+				'<td class="grey" title="GroupHP"></td></tr>' +
+			'<tr><td class="brn">Group HP w/ buffs:</td>' +
+				'<td title="GroupHPBuffed"></td></tr>' +
+			'<tr><td class="headr" colspan=2>Processing:</td></tr>' +
+			'<tr><td style="color:green;" colspan="2" title="ProcessingStatus">Parsing defending guild stats ...</td></tr>' +
+			'<tr><td class="headr" colspan=2>Assumptions:</td></tr>' +
+			'<tr><td colspan="2" class="grey">Above calculations include Constitution, Fortitude, Nightmare Visage, Chi Strike, Terrorize and Flinch bonus calculations (in that order) on both the defending group and attacking group.</td></tr>';
+
 		if (defendingGuildID === myGuildID && !hideRelicOffline) {
 			var validMemberArray = validMemberString.split(' ');
-			memberList = System.getValueJSON('memberlist');
-			for (i=0;i<validMemberArray.length-1;i += 1) {
-				var guildMemberName = validMemberArray[i];
-				for (var j=0; j<memberList.members.length; j += 1) {
-					if (memberList.members[j].name === guildMemberName) {
-						memberId = memberList.members[j].id;
-						break;
-					}
+			validMemberArray.forEach(function(val, ind, arr) {
+				if (membrList[val]) {
+					arr[ind] = '<a style="color:red;" href="index.php?cmd=' +
+						'profile&player_id=' + membrList[val].id + '">' +
+						val + '</a>';
 				}
-				href = System.server + '?cmd=profile&player_id=' + memberId;
-				System.xmlhttp(href, Helper.checkPlayerActivity, {'playerName':guildMemberName,'playerId':memberId});
-			}
-			textToInsert += '<tr><td style="border-top:2px black solid;" colspan=2>Offline guild members not at relic:</td></tr>' +
-				'<tr title="offlinePlayerListControl"><td colspan=2 style="font-size:x-small; color:red;" title="offlinePlayerList">' + validMemberString + '</td></tr>' +
-				'<tr style="display:none; visibility:hidden;"><td align="right" style="color:brown;">OfflinePlayerCount:</td><td align="right" title="offlinePlayerCount">' + validMemberArray.length + '</td></tr>' +
-				'<tr style="display:none; visibility:hidden;"><td align="right" style="color:brown;">OfflinePlayersProcessed:</td><td align="right" title="offlinePlayersProcessed">0</td></tr>' +
-				'<tr title="offlinePlayerListControlTemp" style="display:block;"><td style="font-size:x-small; color:green;" colspan=2>Checking offline status ...</td></tr>';
+			});
+			validMemberString = validMemberArray.join(' ');
+
+			// memberList = System.getValueJSON('memberlist');
+			//~ for (i = 0; i < validMemberArray.length - 1; i += 1) {
+				//~ var guildMemberName = validMemberArray[i];
+				//~ for (var j = 0; j < membrList.members.length; j += 1) {
+					//~ if (membrList.members[j].name === guildMemberName) {
+						//~ memberId = membrList.members[j].id;
+						//~ break;
+					//~ }
+				//~ }
+				//~ href = System.server + '?cmd=profile&player_id=' + memberId;
+				//~ System.xmlhttp(href, Helper.checkPlayerActivity, {'playerName':guildMemberName,'playerId':memberId});
+			//~ }
+			textToInsert += '<tr><td class="headr" colspan=2>Offline guild members not at relic:</td></tr>' +
+				'<tr title="offlinePlayerListControl"><td colspan=2 style="color:red;" title="offlinePlayerList">' + validMemberString + '</td></tr>' +
+				'<tr class="hidden"><td class="brn">OfflinePlayerCount:</td><td title="offlinePlayerCount">' + validMemberArray.length + '</td></tr>' +
+				'<tr class="hidden"><td class="brn">OfflinePlayersProcessed:</td><td title="offlinePlayersProcessed">0</td></tr>' +
+				'<tr class="hidden" title="offlinePlayerListControlTemp" style="display:block;"><td style="color:green;" colspan=2>Checking offline status ...</td></tr>';
 		}
 		textToInsert += '</table><td><tr>';
 		extraTextInsertPoint.innerHTML += textToInsert;
 	},
 
-	checkPlayerActivity: function(responseText, callback) {
-		var doc = System.createDocument(responseText);
-		//fix offline member check
-		//$(doc).find('h2:contains("Last Activity:")'); TO $(doc).find('p:contains("Last Activity:")'); 
-		var lastActivity = $(doc).find('p:contains("Last Activity:")');
-		var playerName = callback.playerName;
-		var playerId = callback.playerId;
-		var offlinePlayerList = $('td[title="offlinePlayerList"]');
-		var offlinePlayerCount = System.intValue($('td[title="offlinePlayerCount"]').html());
-		var offlinePlayersProcessed = $('td[title="offlinePlayersProcessed"]');
-		offlinePlayersProcessed.html(System.intValue(offlinePlayersProcessed.html()) + 1);
-		if (System.intValue(offlinePlayersProcessed.html()) === offlinePlayerCount - 1) {
-			var offlinePlayerListControlTemp = $('tr[title="offlinePlayerListControlTemp"]');
-			offlinePlayerListControlTemp
-				.css('display','none')
-				.css('visibility','hidden');
-		}
-		if (lastActivity.length === 0 || lastActivity.html() === 'Last Activity: Inactive Account') {
-			offlinePlayerList.html(offlinePlayerList.html().replace(playerName + ' ',''));
-		} else if (lastActivity.html().search('days') !== -1 && /(\d+) days/.exec(lastActivity.html())[1] >= 7) {
-			offlinePlayerList.html(offlinePlayerList.html().replace(playerName + ' ',''));
-		} else {
-			offlinePlayerList.html(
-				offlinePlayerList.html().replace(playerName + ' ', '<a style="color:red;" href="index.php?cmd=profile&player_id=' + playerId + '"><span style="color:red;">' + playerName + '</span></a> '));
-		}
-	},
+	//~ checkPlayerActivity: function(responseText, callback) {
+		//~ var doc = System.createDocument(responseText);
+		//~ //fix offline member check
+		//~ //$(doc).find('h2:contains("Last Activity:")'); TO $(doc).find('p:contains("Last Activity:")'); 
+		//~ var lastActivity = $(doc).find('p:contains("Last Activity:")');
+		//~ var playerName = callback.playerName;
+		//~ var playerId = callback.playerId;
+		//~ var offlinePlayerList = $('td[title="offlinePlayerList"]');
+		//~ var offlinePlayerCount = System.intValue($('td[title="offlinePlayerCount"]').html());
+		//~ var offlinePlayersProcessed = $('td[title="offlinePlayersProcessed"]');
+		//~ offlinePlayersProcessed.html(System.intValue(offlinePlayersProcessed.html()) + 1);
+		//~ if (System.intValue(offlinePlayersProcessed.html()) === offlinePlayerCount - 1) {
+			//~ var offlinePlayerListControlTemp = $('tr[title="offlinePlayerListControlTemp"]');
+			//~ offlinePlayerListControlTemp
+				//~ .css('display','none')
+				//~ .css('visibility','hidden');
+		//~ }
+		//~ if (lastActivity.length === 0 || lastActivity.html() === 'Last Activity: Inactive Account') {
+			//~ offlinePlayerList.html(offlinePlayerList.html().replace(playerName + ' ',''));
+		//~ } else if (lastActivity.html().search('days') !== -1 && /(\d+) days/.exec(lastActivity.html())[1] >= 7) {
+			//~ offlinePlayerList.html(offlinePlayerList.html().replace(playerName + ' ',''));
+		//~ } else {
+			//~ offlinePlayerList.html(
+				//~ offlinePlayerList.html().replace(playerName + ' ', 
+				//~ '<a style="color:red;" href="index.php?cmd=profile&player_id=' +
+				//~ playerId + '"><span style="color:red;">' + playerName +
+				//~ '</span></a> '));
+		//~ }
+	//~ },
 
 	getRelicGuildData: function(extraTextInsertPoint,hrefpointer) {
 		//~ System.xmlhttp(hrefpointer, Helper.parseRelicGuildData, {'extraTextInsertPoint':extraTextInsertPoint});
@@ -2020,7 +1926,7 @@ var Helper = {
 		$('#advisorTable td').removeAttr('bgcolor');
 		$('#advisorTable font').contents().unwrap();
 		$('#advTFoot b').contents().unwrap();
-		$('#advisorTable tbody tr').each(function (i, e) {
+		$('#advisorTable tbody tr').each(function(i, e) {
 			var td1 = $('td', e).first();
 			td1.html(td1.html().replace('&nbsp;', ''));
 			td1.html('<a href="index.php?cmd=profile&player_id=' +
@@ -2039,7 +1945,7 @@ var Helper = {
 	injectAdvisor: function() {
 		Helper.appendHead({
 			js: ['https://cdn.jsdelivr.net/jquery.datatables/1.10.4/js/jquery.dataTables.min.js'],
-			callback: Helper.getMemberList,
+			callback: Helper.getMembrList,
 			param1: System.getUrlParameter('subcmd2') === 'weekly' ?
 				Helper.injectAdvisorWeekly :
 				Helper.injectAdvisorNew,
@@ -2056,7 +1962,7 @@ var Helper = {
 		Helper.getAdvisorPages(list, m);
 	},
 
-	getAdvisorPages: function (list, m) {
+	getAdvisorPages: function(list, m) {
 		var count = 0;
 		var pages = [1, 2, 3, 4, 5, 6, 7];
 		var advisorPages = [];
@@ -2068,7 +1974,7 @@ var Helper = {
 					subcmd: 'advisor',
 					period: e
 				},
-				success: function (data) {
+				success: function(data) {
 					list.innerHTML += ' day ' + e + ',';
 					var ob = {};
 					var tr = $('tr',
@@ -2223,7 +2129,7 @@ var Helper = {
 		return result;
 	},
 
-	oldRemoveBuffs: function () {
+	oldRemoveBuffs: function() {
 		var buffName;
 		//code to remove buffs but stay on the same screen
 		var currentBuffs = System.findNodes('//a[contains(@href,"index.php?' +
@@ -2311,9 +2217,9 @@ var Helper = {
 				'xx-small;">Recast</span>':'') + '</td></tr>';
 			if (hasDeathDealer) {
 				if (System.getValue('lastDeathDealerPercentage') === undefined) {
-					GM_setValue('lastDeathDealerPercentage', 0);}
+					System.setValue('lastDeathDealerPercentage', 0);}
 				if (System.getValue('lastKillStreak') === undefined) {
-					GM_setValue('lastKillStreak', 0);}
+					System.setValue('lastKillStreak', 0);}
 				var lastDeathDealerPercentage =
 					System.getValue('lastDeathDealerPercentage');
 				var lastKillStreak = System.getValue('lastKillStreak');
@@ -2444,7 +2350,7 @@ var Helper = {
 		var trackKS=document.getElementById('Helper:toggleKStracker');
 		if (trackKS) {
 			trackKS.addEventListener('click', function() {
-				GM_setValue('trackKillStreak',
+				System.setValue('trackKillStreak',
 				System.getValue('trackKillStreak') ? false : true);
 				window.location=window.location;
 			},true);
@@ -2472,11 +2378,11 @@ var Helper = {
 		//TODO: Make this configurable on/off
 		//TODO: upgrade normal & seasonal
 		if (lastQBPage.indexOf('&mode=0') !== -1) {
-			GM_setValue('lastActiveQuestPage', lastQBPage);
+			System.setValue('lastActiveQuestPage', lastQBPage);
 		} else if (lastQBPage.indexOf('&mode=1') !== -1) {
-			GM_setValue('lastCompletedQuestPage', lastQBPage);
+			System.setValue('lastCompletedQuestPage', lastQBPage);
 		} else if (lastQBPage.indexOf('&mode=2') !== -1) {
-			GM_setValue('lastNotStartedQuestPage', lastQBPage);
+			System.setValue('lastNotStartedQuestPage', lastQBPage);
 		}
 		if (System.getValue('storeLastQuestPage')) {
 			if (System.getValue('lastActiveQuestPage').length > 0) {
@@ -2521,14 +2427,14 @@ var Helper = {
 	toggleSound: function() {
 		if (System.getValue('playNewMessageSound'))
 		{
-			GM_setValue('playNewMessageSound', false);
+			System.setValue('playNewMessageSound', false);
 		} else {
-			GM_setValue('playNewMessageSound', true);
+			System.setValue('playNewMessageSound', true);
 		}
 		window.location.reload();
 	},
 
-	isQuestBeingTracked: function (questHREF) {
+	isQuestBeingTracked: function(questHREF) {
 		//quests are stored as their address after index.php: ?cmd=questbook....
 		var questsBeingTracked = System.getValue('questBeingTracked').split(';');
 		for (var i = 0; i < questsBeingTracked.length; i += 1) {
@@ -2547,7 +2453,7 @@ var Helper = {
 
 
 		if (maxPage && maxPage.length >= 2) {
-			GM_setValue('questsNotComplete', false);
+			System.setValue('questsNotComplete', false);
 			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ''); i += 1) {
 				System.xmlhttp('index.php?cmd=questbook&subcmd=&subcmd2=&page=' + i + '&search_text=&mode=0&letter=*&sortby=min_level&sortbydir=0',
 				Helper.checkForNotCompletedQuestRecurse,
@@ -2570,7 +2476,7 @@ var Helper = {
 					if (table.rows[i].cells[2].innerHTML === System.getValue('lastWorld') && !Helper.isQuestBeingTracked(questHREF)) {
 						if (System.getValue('questsNotComplete') === false) {
 							insertHere.innerHTML += '<br><span style="color:red;font-size:12px;">Quest(s) in zone not completed:</span><br>';
-							GM_setValue('questsNotComplete', true);
+							System.setValue('questsNotComplete', true);
 						}
 						insertHere.innerHTML += '<span style="font-size:12px;">' +table.rows[i].cells[0].innerHTML + '</span><br>';
 					}
@@ -2586,7 +2492,7 @@ var Helper = {
 		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/g);
 
 		if (maxPage && maxPage.length >= 2) {
-			GM_setValue('questsNotStarted', false);
+			System.setValue('questsNotStarted', false);
 			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ''); i += 1) {
 				System.xmlhttp('index.php?cmd=questbook&subcmd=&subcmd2=&page=' + i + '&search_text=&mode=2&letter=*&sortby=min_level&sortbydir=0',
 				Helper.checkForQuestRecurse,
@@ -2608,7 +2514,7 @@ var Helper = {
 					if (table.rows[i].cells[2].innerHTML === System.getValue('lastWorld')) {
 						if (System.getValue('questsNotStarted') === false) {
 							insertHere.innerHTML += '<br><span style="color:red;font-size:12px;">Quest(s) in zone not started:</span><br>';
-							GM_setValue('questsNotStarted', true);
+							System.setValue('questsNotStarted', true);
 						}
 						insertHere.innerHTML += '<span style="font-size:12px;">' + Helper.removeHTML(table.rows[i].cells[0].innerHTML) + '</span><br>';
 					}
@@ -2664,7 +2570,7 @@ var Helper = {
 					}else{
 						$('a#toggleSoundLink').html(Data.soundImage);
 					}
-					GM_setValue('playNewMessageSound',!System.getValue('playNewMessageSound')); //window.location.reload();
+					System.setValue('playNewMessageSound',!System.getValue('playNewMessageSound')); //window.location.reload();
 				},true);
 			}
 			var huntingMode = System.getValue('huntingMode');
@@ -2679,7 +2585,7 @@ var Helper = {
 					}else{
 						$('a#HelperToggleHuntingMode').html(Data.huntingOffImage);
 					}
-					GM_setValue('huntingMode',!System.getValue('huntingMode')); //window.location.reload();
+					System.setValue('huntingMode',!System.getValue('huntingMode')); //window.location.reload();
 				},true);
 		}
 	},
@@ -2741,7 +2647,7 @@ var Helper = {
 								info === '') {
 								//currentGoldSentTotal += System.intValue(callback.amount);
 								//info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
-								GM_setValue('currentGoldSentTotal',
+								System.setValue('currentGoldSentTotal',
 									parseInt(
 										System.getValue('currentGoldSentTotal'),
 										10) +
@@ -2944,7 +2850,7 @@ var Helper = {
 		try {
 			var curTile = System.findNode('//img[contains(@title, "You are here")]/ancestor::td[@width="40" and @height="40"]').getAttribute('background');
 			if (System.getValue('currentTile') !== curTile) {
-				GM_setValue('currentTile', curTile);
+				System.setValue('currentTile', curTile);
 			}
 		} catch (err) {
 			//just eat it and move on
@@ -3020,7 +2926,7 @@ var Helper = {
 				if (System.getValue('lastWorld') !== mapNameText ||
 					System.getValue('questsNotStarted') === true ||
 					System.getValue('questsNotComplete') === true) {
-					GM_setValue('lastWorld', mapNameText);
+					System.setValue('lastWorld', mapNameText);
 					var insertToHere = System.findNode('//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td');
 					System.xmlhttp('index.php?cmd=questbook&mode=2&letter=*', Helper.checkForNotStartedQuests, {'insertHere' : insertToHere});
 					System.xmlhttp('index.php?cmd=questbook&mode=0&letter=*', Helper.checkForNotCompletedQuests,{'insertHere' : insertToHere});
@@ -3093,12 +2999,12 @@ var Helper = {
 				mapName.innerHTML += ' <a href=# id="Helper:ToggleFastWalkMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
 				document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
 					function() {
-						GM_setValue('enableFastWalk',!System.getValue('enableFastWalk')); window.location.reload();
+						System.setValue('enableFastWalk',!System.getValue('enableFastWalk')); window.location.reload();
 					},true);
 			}
 			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
 				function() {
-					GM_setValue('huntingMode',!System.getValue('huntingMode')); window.location.reload();
+					System.setValue('huntingMode',!System.getValue('huntingMode')); window.location.reload();
 				},true);
 
 		}
@@ -3134,39 +3040,39 @@ var Helper = {
 		});
 	},
 
-	addGuildInfoWidgets: function() {
+	addGuildInfoWidgets: function() { //jquery
 		if (!System.getValue('enableGuildInfoWidgets')) {return;}
+		var guildMembrList = $('ul#minibox-guild-members-list');
+		if (guildMembrList.length === 0) {return;} // list exists
 		var hideGuildInfoTrade = System.getValue('hideGuildInfoTrade');
-		var hideGuildInfoSecureTrade = System.getValue('hideGuildInfoSecureTrade');
+		var hideGuildInfoSecureTrade =
+			System.getValue('hideGuildInfoSecureTrade');
 		var hideGuildInfoBuff = System.getValue('hideGuildInfoBuff');
 		var hideGuildInfoMessage = System.getValue('hideGuildInfoMessage');
-		var guildMemberList = $('ul#minibox-guild-members-list');
-		if (guildMemberList.length > 0) { // list exists
-			//hide guild info links
-			if (hideGuildInfoTrade) {$('a#guild-minibox-action-trade').hide();}
-			if (hideGuildInfoSecureTrade) {
-				$('a#guild-minibox-action-secure-trade').hide();}
-			if (hideGuildInfoBuff) {
-				$('a#guild-minibox-action-quickbuff').hide();}
-			if (hideGuildInfoMessage) {
-				$('a#guild-minibox-action-send-message').hide();}
-			//add coloring for offline time
-			$(guildMemberList).find('li.player').each(function() {
-				var playerA = $(this).find('div.player-row a.player-name');
-				//~ var playerName = playerA.text();
-				var onMouseOver = playerA.data('tipped');
-				var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-					if (lastActivityMinutes < 2) {
-						playerA.css('color','green');
-					} else if (lastActivityMinutes < 5) {
-						playerA.css('color','white');
-					} else {
-						playerA.css('color','gray');
-					}
-			});
-			var chatH4 = $('h4:contains("Chat")');
-			chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="color:white;">' + chatH4.html() + '</span></a>');
-		}
+		//hide guild info links
+		if (hideGuildInfoTrade) {$('a#guild-minibox-action-trade').hide();}
+		if (hideGuildInfoSecureTrade) {
+			$('a#guild-minibox-action-secure-trade').hide();}
+		if (hideGuildInfoBuff) {
+			$('a#guild-minibox-action-quickbuff').hide();}
+		if (hideGuildInfoMessage) {
+			$('a#guild-minibox-action-send-message').hide();}
+		//add coloring for offline time
+		$('a.player-name', guildMembrList).each(function() {
+			var playerA = $(this);
+			var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/
+				.exec(playerA.data('tipped'))[1];
+			if (lastActivityMinutes < 2) {
+				playerA.css('color','green');
+			} else if (lastActivityMinutes < 5) {
+				playerA.css('color','white');
+			} else {
+				playerA.css('color','gray');
+			}
+		});
+		var chatH4 = $('h4:contains("Chat")');
+		chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="' +
+			'color:white;">' + chatH4.html() + '</span></a>');
 	},
 
 	addOnlineAlliesWidgets: function() {
@@ -3202,7 +3108,7 @@ var Helper = {
 		var xcNumber;
 		xcNumber=System.findNode('//input[@type="hidden" and @name="xc"]');
 		xcNumber=xcNumber?xcNumber.getAttribute('value'):'-';
-		GM_setValue('goldConfirm', xcNumber);
+		System.setValue('goldConfirm', xcNumber);
 	},
 
 	sendGoldToPlayer: function(){
@@ -3226,7 +3132,7 @@ var Helper = {
 			var currentGoldSentTotal = System.getValue('currentGoldSentTotal')*1;
 			currentGoldSentTotal += System.intValue(callback.amount);
 			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
-			GM_setValue('currentGoldSentTotal', currentGoldSentTotal);
+			System.setValue('currentGoldSentTotal', currentGoldSentTotal);
 		}
 		var injectHere = System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
 		if (!injectHere) {return;}
@@ -3468,7 +3374,7 @@ var Helper = {
 		var footprints = System.getValue('footprints');
 		if (footprints === undefined) {footprints=false;}
 		footprints = !footprints;
-		GM_setValue('footprints', footprints);
+		System.setValue('footprints', footprints);
 
 		if (!footprints) { // clear footprints
 			var theMap = System.getValueJSON('map');
@@ -3869,7 +3775,7 @@ var Helper = {
 	},
 
 	clearEntityLog: function() {
-		GM_setValue('monsterLog', '');
+		System.setValue('monsterLog', '');
 		window.location='index.php?cmd=notepad&blank=1&subcmd=monsterlog';
 	},
 
@@ -4014,7 +3920,7 @@ var Helper = {
 			var theLog=System.getValue('CombatLog');
 			if (!theLog) {theLog='';}
 			theLog+=text;
-			GM_setValue('CombatLog', theLog);
+			System.setValue('CombatLog', theLog);
 		}, 0);
 	},
 
@@ -4055,105 +3961,110 @@ var Helper = {
 		}
 	},
 
-	retrieveGuildData: function() {
-		//don't need to run the retrieve guild data function when looking at these pages (causes issues or already done elsewhere
-		if (location.search.search('quickbuff') !== -1 ||
-			location.search.search('index.php?cmd=guild&subcmd=manage') !== -1 ||
-			location.search.search('index.php?cmd=guild&subcmd=ranks') !== -1) {
-			return;
-		}
-		//only update every x minutes
-		var memberList = System.getValueJSON('memberlist');
-		var guildOnlineRefreshTime = System.getValue('guildOnlineRefreshTime');
-		if (guildOnlineRefreshTime !== 300) {
-			GM_setValue('guildOnlineRefreshTime', 300); //set refresh to 300 if not equal to 300
-		}
-		guildOnlineRefreshTime *= 1000;
-		if (memberList) {
-			if ((new Date()).getTime() - memberList.lastUpdate.getTime() > 
-				guildOnlineRefreshTime) {
-				memberList = null; // invalidate cache
-			}
-		}
-		if (!memberList) {
-			System.xmlhttp('index.php?cmd=guild&subcmd=manage', Helper.parseGuildForWorld, true);
-		}
-	},
+	//~ retrieveGuildData: function() {
+		//~ // don't need to run the retrieve guild data function when looking at these pages (causes issues or already done elsewhere
+		//~ if (location.search.search('cmd=quickbuff') !== -1 ||
+			//~ location.search.search('cmd=guild&subcmd=manage') !== -1 ||
+			//~ location.search.search('cmd=guild&subcmd=ranks') !== -1) {
+			//~ return;
+		//~ }
+		//~ // only update every x minutes
+		//~ var memberList = System.getValueJSON('memberlist');
+		//~ if (!memberList || (new Date()).getTime() -
+			//~ memberList.lastUpdate.getTime() > 300000) {
+			//~ $.get('index.php?cmd=guild&subcmd=manage',
+				//~ Helper.parseGuildForWorld);
+		//~ }
+	//~ },
 
-	parseGuildForWorld: function(details) {
-		var memberRows;
-		var doc=System.createDocument(details);
-		if (location.search.search('index.php?cmd=guild&subcmd=manage') !== -1) {
-			//manage page so we don't need to parse the response we can just look at the current page.
-			memberRows = $('td:contains("Username"):last').parents('table:first').find('a[href]').parent('td').parent('tr');
-		} else {
-			memberRows = $(doc).find('td:contains("Username"):last').parents('table:first').find('a[href]').parent('td').parent('tr');
-		}
-		//members found so reset the list
-		var memberList = System.getValueJSON('memberlist');
-		if (!memberList) {
-			memberList = {};
-			memberList.members = [];
-		}
-
-		memberList.members.forEach(function(e) {e.status='Deleted';});
-
-		//go through each member and store the data
-		memberRows.each(function(){
-			var playerLink   = $(this).find('a');
-			var memberId     = System.intValue(/[0-9]+$/.exec(playerLink.attr('href'))[0]);
-			var memberName   = playerLink.text();
-			var memberLevel  = System.intValue($(this).find('td:eq(2)').text());
-			var memberRank   = $(this).find('td:eq(3)').text();
-			var memberXP     = System.intValue($(this).find('td:eq(4)').text());
-			var memberStatus = $(this).find('td:eq(0) img').attr('title');
-			var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(playerLink).data('tipped'));
-			var lastActivityDays = parseInt(lastActivity[1],10);
-			var lastActivityHours = parseInt(lastActivity[2],10) + lastActivityDays*24;
-			var lastActivityMinutes = parseInt(lastActivity[3],10) + lastActivityHours*60;
-			var aMember;
-
-			// find member in member list, to modify data instead of replacing it
-			var findMembers = memberList.members.filter(function (e) {return e.id===memberId;});
-			if (findMembers.length>0) {
-				aMember = findMembers[0];
-			}
-			else { // member was not found, must be a new player
-				aMember = {};
-				// You can still modify an object, even if you have added it to something else
-				memberList.members.push(aMember);
-				aMember.firstSeen = new Date();
-				aMember.status = 'Offline'; // new players are supposed to be offline
-			}
-			//~ Helper.getFullPlayerData(aMember);
-
-			if (aMember.status === 'Offline' && memberStatus==='Online') {
-				aMember.loggedInAt = new Date();
-			}
-
-			if (!aMember.loggedInAt) {
-				aMember.loggedInAt = new Date();
-			}
-
-			aMember.status = memberStatus;
-			aMember.id     = memberId;
-			aMember.name   = memberName;
-			aMember.level  = memberLevel;
-			aMember.rank   = memberRank;
-			aMember.xp     = memberXP;
-			aMember.lastActivityMinutes = lastActivityMinutes;
-		});
-		// remove not existing players
-		memberList.members = memberList.members.filter(function(e) {return e.status!=='Deleted';});
-		// damn, I love javascript array functions :)
-
-		memberList.lastUpdate = new Date();
-		memberList.isRefreshed = true;
-		System.setValueJSON('memberlist', memberList);
-		if (location.search === '?cmd=guild&subcmd=ranks') {
-			Helper.injectGuildRanksMembers(memberList);
-		}
-	},
+	//~ parseGuildForWorld: function(details) {
+		//~ var memberRows;
+		//~ var doc=System.createDocument(details);
+		//~ if (location.search.search('cmd=guild&subcmd=manage') !== -1) {
+			//~ //manage page so we don't need to parse the response we can just look at the current page.
+			//~ memberRows = $('td:contains("Username"):last')
+				//~ .parents('table:first')
+				//~ .find('a[href]')
+				//~ .parent('td')
+				//~ .parent('tr');
+		//~ } else {
+			//~ memberRows = $(doc)
+				//~ .find('td:contains("Username"):last')
+				//~ .parents('table:first')
+				//~ .find('a[href]')
+				//~ .parent('td')
+				//~ .parent('tr');
+		//~ }
+		//~ //members found so reset the list
+		//~ var memberList = System.getValueJSON('memberlist');
+		//~ if (!memberList) {
+			//~ memberList = {};
+			//~ memberList.members = [];
+		//~ }
+//~ 
+		//~ memberList.members.forEach(function(e) {e.status='Deleted';});
+//~ 
+		//~ //go through each member and store the data
+		//~ memberRows.each(function(){
+			//~ var playerLink   = $(this).find('a');
+			//~ var memberId     = System.intValue(/[0-9]+$/
+				//~ .exec(playerLink.attr('href'))[0]);
+			//~ var memberName   = playerLink.text();
+			//~ var memberLevel  = System.intValue($(this).find('td:eq(2)').text());
+			//~ var memberRank   = $(this).find('td:eq(3)').text();
+			//~ var memberXP     = System.intValue($(this).find('td:eq(4)').text());
+			//~ var memberStatus = $(this).find('td:eq(0) img').attr('title');
+			//~ var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(playerLink).data('tipped'));
+			//~ var lastActivityDays = parseInt(lastActivity[1],10);
+			//~ var lastActivityHours = parseInt(lastActivity[2],10) +
+				//~ lastActivityDays*24;
+			//~ var lastActivityMinutes = parseInt(lastActivity[3],10) +
+				//~ lastActivityHours*60;
+			//~ var aMember;
+//~ 
+			//~ // find member in member list, to modify data instead of replacing it
+			//~ var findMembers = memberList.members.filter(function(e) {
+				//~ return e.id===memberId;});
+			//~ if (findMembers.length>0) {
+				//~ aMember = findMembers[0];
+			//~ }
+			//~ else { // member was not found, must be a new player
+				//~ aMember = {};
+				//~ // You can still modify an object, even if you have added it to something else
+				//~ memberList.members.push(aMember);
+				//~ aMember.firstSeen = new Date();
+				//~ aMember.status = 'Offline'; // new players are supposed to be offline
+			//~ }
+			//~ // Helper.getFullPlayerData(aMember);
+//~ 
+			//~ if (aMember.status === 'Offline' && memberStatus==='Online') {
+				//~ aMember.loggedInAt = new Date();
+			//~ }
+//~ 
+			//~ if (!aMember.loggedInAt) {
+				//~ aMember.loggedInAt = new Date();
+			//~ }
+//~ 
+			//~ aMember.status = memberStatus;
+			//~ aMember.id     = memberId;
+			//~ aMember.name   = memberName;
+			//~ aMember.level  = memberLevel;
+			//~ aMember.rank   = memberRank;
+			//~ aMember.xp     = memberXP;
+			//~ aMember.lastActivityMinutes = lastActivityMinutes;
+		//~ });
+		//~ // remove not existing players
+		//~ memberList.members = memberList.members.filter(function(e) {
+			//~ return e.status!=='Deleted';});
+		//~ // damn, I love javascript array functions :)
+//~ 
+		//~ memberList.lastUpdate = new Date();
+		//~ memberList.isRefreshed = true;
+		//~ System.setValueJSON('memberlist', memberList);
+		//~ // if (location.search === '?cmd=guild&subcmd=ranks') {
+			//~ // Helper.injectGuildRanksMembers(memberList);
+		//~ // }
+	//~ },
 
 	replaceKeyHandler: function() {
 		//~ setTimeout(function() { // FF3.6 was not working without the timeout in place
@@ -4208,7 +4119,7 @@ var Helper = {
 		}
 	},
 
-	keyPress: function (evt) {
+	keyPress: function(evt) {
 		var r, s;
 		if (evt.target.tagName!=='HTML' && evt.target.tagName!=='BODY') {return;}
 
@@ -4438,11 +4349,15 @@ var Helper = {
 			}
 		}
 		//~ var now=(new Date()).getTime();
-		//~ GM_setValue(lastCheckScreen, now.toString());
+		//~ System.setValue(lastCheckScreen, now.toString());
 		System.setValue(lastCheckScreen, (new Date()).getTime());
 	},
 
 	addLogWidgets: function() {
+		Helper.getMembrList(Helper.addLogWidgetsOld, false);
+	},
+
+	addLogWidgetsOld: function() {
 		var i;
 		var playerElement;
 		var playerName;
@@ -4451,12 +4366,12 @@ var Helper = {
 		var logTable = System.findNode('//table[tbody/tr/td/span[contains' +
 			'(.,"Currently showing:")]]');
 		if (!logTable) {return;}
-		var memberList = System.getValueJSON('memberlist');
-		var memberNameString = ' ';
-		if (memberList) {
-			memberNameString += memberList.members
-				.map(function(o) {return o.name;}).join(' ') + ' ';
-		}
+		//~ var memberList = System.getValueJSON('memberlist');
+		var memberNameString = ' ' + Object.keys(Helper.membrList).join(' ') + ' ';
+		//~ if (memberList) {
+			//~ memberNameString += memberList.members
+				//~ .map(function(o) {return o.name;}).join(' ') + ' ';
+		//~ }
 		var listOfEnemies = System.getValue('listOfEnemies');
 		if (!listOfEnemies) {listOfEnemies = '';}
 		var listOfAllies = System.getValue('listOfAllies');
@@ -4477,11 +4392,11 @@ var Helper = {
 			if (!aRow.cells[0].innerHTML) {continue;}
 			var firstCell = aRow.cells[0];
 			//Valid Types: General, Chat, Guild
-			//~ if (navigator.userAgent.indexOf('Firefox')>0) {
-				//~ messageType = firstCell.firstChild.getAttribute('title');
-			//~ } else { //chrome
+			// if (navigator.userAgent.indexOf('Firefox')>0) {
+				// messageType = firstCell.firstChild.getAttribute('title');
+			// } else { //chrome
 			messageType = firstCell.firstChild.getAttribute('oldtitle');
-			//~ }
+			// }
 			if (!messageType) {return;}
 			var colorPlayerName = false;
 			var isGuildMate = false;
@@ -4515,9 +4430,9 @@ var Helper = {
 			if (messageType === 'Chat') {
 				Helper.doChat(aRow, isGuildMate, playerName, addAttackLinkToLog);
 			}
-			if (aRow.cells[2].innerHTML.search('You have just been outbid at the auction house') !== -1) {
-				aRow.cells[2].innerHTML += '. Go to <a href="/index.php?cmd=auctionhouse&type=-50">My Bids</a>.';
-			}
+			//~ if (aRow.cells[2].innerHTML.search('You have just been outbid at the auction house') !== -1) {
+				//~ aRow.cells[2].innerHTML += '. Go to <a href="/index.php?cmd=auctionhouse&type=-50">My Bids</a>.';
+			//~ }
 			if (messageType === 'Notification') {
 				if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName === 'A') {
 					if (aRow.cells[2].firstChild.nextSibling.getAttribute('href').search('player_id') !== -1) {
@@ -4561,12 +4476,13 @@ var Helper = {
 		}
 		//GM_wait(function() { // just want to be on the safe side
 		$('.a-reply').click(function(evt) {
-			Helper.openQuickMsgDialog(evt.target.getAttribute('target_player'),'', evt.target.getAttribute('replyTo'));
+			Helper.openQuickMsgDialog(evt.target.getAttribute('target_player'),
+				'', evt.target.getAttribute('replyTo'));
 		});
 		//});
 	},
 
-	doChat: function (aRow, isGuildMate, playerName, addAttackLinkToLog) {
+	doChat: function(aRow, isGuildMate, playerName, addAttackLinkToLog) {
 		var buffList = Data.buffList;
 		var dateHTML = aRow.cells[1].innerHTML;
 		var dateFirstPart = dateHTML
@@ -4908,9 +4824,9 @@ var Helper = {
 	toggleShowExtraLinks: function() {
 		var showExtraLinksElement = System.findNode('//span[@id="Helper:showExtraLinks"]');
 		if (showExtraLinksElement.textContent === 'Show AH and Sell links') {
-			GM_setValue('showExtraLinks', true);
+			System.setValue('showExtraLinks', true);
 		} else {
-			GM_setValue('showExtraLinks', false);
+			System.setValue('showExtraLinks', false);
 		}
 		window.location = window.location;
 	},
@@ -4920,18 +4836,18 @@ var Helper = {
 		if (showQuickDropLinksElement.textContent === 'Show Quick Drop links' &&
 			window.confirm('Are you sure you want to show the quick drop ' +
 			'links?')) {
-			GM_setValue('showQuickDropLinks', true);
+			System.setValue('showQuickDropLinks', true);
 		} else {
-			GM_setValue('showQuickDropLinks', false);
+			System.setValue('showQuickDropLinks', false);
 		}
 		window.location = window.location;
 	},
 
 	injectReportPaint: function() {
-		Helper.getMemberList(Helper.doReportPaint, false);
+		Helper.getMembrList(Helper.doReportPaint, false);
 	},
 
-	getMemberList: function(fn, force) {
+	getMembrList: function(fn, force) {
 		force = force;//TODO
 		$.ajax({
 			cache: false,
@@ -4945,30 +4861,36 @@ var Helper = {
 			},
 			success: function(data) {
 				var fn = this;
-				var m = {};
-				System.setValue('lastMemberListCheck', Date.now());
-				m.lastUpdate = Date.now();
-				data.forEach(function(e) {m[e.username] = e;});
-				localforage.setItem('memberList', m, function (e, m) {fn(m);});
+				var membrList = {};
+				System.setValue('lastMembrListCheck', Date.now());
+				membrList.lastUpdate = Date.now();
+				data.forEach(function(ele) {membrList[ele.username] = ele;});
+				localforage.setItem('membrList', membrList,
+					function(err, membrList) {
+						// Assign as global because in future we may have
+						// multiple concurrent ajax calls before the callback
+						Helper.membrList = membrList;
+						fn(membrList);
+					});
 			},
 			context: fn
 		});
 	},
 
-	reportHeader: function (memberList, tr) {
+	reportHeader: function(membrList, tr) {
 		var b = $('b', tr);
 		b.html(Helper.onlineDot(Math.floor((Math.floor(Date.now() /
-			1000) - memberList[b.text()].last_login) / 60)) +
+			1000) - membrList[b.text()].last_login) / 60)) +
 			'<a href="' + System.server +
 			'index.php?cmd=profile&player_id=' +
-			memberList[b.text()].id + '">' + b.html() + '</a>' +
+			membrList[b.text()].id + '">' + b.html() + '</a>' +
 			' [ <span class=a-reply target_player=' + b.text() +
 			' style="cursor:pointer; text-decoration:underline;">m' +
 			'</span> ]'
 		);
 	},
 
-	onlineDot: function (min) {
+	onlineDot: function(min) {
 		var img = '';
 		if (System.getValue('enhanceOnlineDots')) {
 			img = Data.offlineDot;
@@ -4985,7 +4907,7 @@ var Helper = {
 		return img;
 	},
 
-	doReportPaint: function(memberList) {
+	doReportPaint: function(membrList) {
 		var rows = $('#pCC table table tr');
 
 		var searchUser = System.getUrlParameter('user');
@@ -4993,22 +4915,22 @@ var Helper = {
 			.length > 0) {
 			rows
 			.not(rows.has('b:contains("' + searchUser + '")'))
-			.not(rows.has('[href*="_id=' + memberList[searchUser].id + '&"]'))
+			.not(rows.has('[href*="_id=' + membrList[searchUser].id + '&"]'))
 			.remove();
 		}
 
 		var searchSet = System.getUrlParameter('set');
 		if (searchSet) {
 			var re = new RegExp(searchSet);
-			rows.filter(function (i, e) {
+			rows.filter(function(i, e) {
 				return !re.test($('td', e)[1].innerText) &&
 					$('td', e).length !== 2;
 			}).remove();
 		}
 
-		rows.each(function (i,tr) {
+		rows.each(function(i,tr) {
 			if ($(tr).children().length === 2) {
-				Helper.reportHeader(memberList, tr);
+				Helper.reportHeader(membrList, tr);
 			} else {
 				Helper.reportChild(tr);
 			}
@@ -5021,10 +4943,10 @@ var Helper = {
 		$('.equip').click(Helper.equipProfileInventoryItem);
 	},
 
-	reportChild: function (tr) {
+	reportChild: function(tr) {
 		$(':nth-child(3)' ,tr).wrapInner('<span class="fshNoWrap" ></span>');
 		var atr = $('a', tr);
-		atr.each(function (i,a) {
+		atr.each(function(i,a) {
 			var $a = $(a);
 			$a.parent().append(
 				' | <span class="reportLink recall" href="' +
@@ -5465,7 +5387,7 @@ var Helper = {
 
 		var charStats = $('#profileLeftColumn table').first().attr('id', 'characterStats');
 		var tblCells = $('td', charStats).has('table').has('font');
-		tblCells.each(function (i, e) {
+		tblCells.each(function(i, e) {
 			var tde = $('td', e);
 			$(e).attr('id', tde.first().attr('id'));
 			$(e).html(tde.first().html().replace(/&nbsp;/g, ' ') +
@@ -5545,9 +5467,9 @@ var Helper = {
 			// store the VL of the player
 			var virtualLevel = parseInt(System.findNode('//td[a/b[.="VL"] or b/a[.="VL"]]/following-sibling::td[1]').textContent,10);
 			if (System.intValue($('dt.stat-level:first').next().text()) === virtualLevel) {
-				GM_setValue('characterVirtualLevel','');
+				System.setValue('characterVirtualLevel','');
 			} else {
-				GM_setValue('characterVirtualLevel',virtualLevel);
+				System.setValue('characterVirtualLevel',virtualLevel);
 			}
 		}
 		Helper.addStatTotalToMouseover();
@@ -5793,8 +5715,8 @@ var Helper = {
 				}
 			}
 		}
-		GM_setValue('listOfAllies', listOfAllies);
-		GM_setValue('listOfEnemies', listOfEnemies);
+		System.setValue('listOfAllies', listOfAllies);
+		System.setValue('listOfEnemies', listOfEnemies);
 	},
 
 	addClickListener: function(id, listener) {
@@ -5819,7 +5741,7 @@ var Helper = {
 		var bioDiv = System.findNode('//div[strong[.="Biography"]]');
 		var bioCell = bioDiv.nextSibling.nextSibling;
 		var renderBio = bioCell && System.getValue('renderSelfBio') || !bioCell && System.getValue('renderOtherBios');
-		GM_setValue('buffsToBuy', '');
+		System.setValue('buffsToBuy', '');
 		if (!renderBio || !bioCell) {return;}
 
 		var bioContents = bioCell.innerHTML;
@@ -6108,10 +6030,10 @@ var Helper = {
 			}
 			html+='</table><b>Total: '+totalText+'</b>';
 			document.getElementById('buffCost').innerHTML='<br/><span class="tipped" data-tipped="'+html+'">Estimated Cost: <b>'+totalText+'</b></span>';
-			GM_setValue('buffCostTotalText', totalText);
+			System.setValue('buffCostTotalText', totalText);
 		} else {
 			document.getElementById('buffCost').innerHTML='';
-			GM_setValue('buffCostTotalText', '');
+			System.setValue('buffCostTotalText', '');
 		}
 	},
 
@@ -6294,18 +6216,18 @@ var Helper = {
 		}
 	},
 
-	gotInvMan: function (data) {
+	gotInvMan: function(data) {
 		Helper.inventory = data;
 		Helper.inventory.folders['-1']='Main';
 		Helper.inventoryManagerHeaders('self', Helper.inventory, 'Helper:InventoryManagerOutput');
 	},
 
-	gotGuildInvMan: function (data) {
+	gotGuildInvMan: function(data) {
 		Helper.guildinventory = data;
 		$.getJSON('?cmd=export&subcmd=guild_members&guild_id='+Helper.guildinventory.guild_id, Helper.gotGuildMembers);
 	},
 
-	gotGuildMembers: function (data) {
+	gotGuildMembers: function(data) {
 		var buildJSON='{';
 		for(var x in data){
 			if (!data.hasOwnProperty(x)) { continue; }
@@ -6375,15 +6297,15 @@ var Helper = {
 		Helper.generateInventoryTable();
 
 		document.getElementById('Helper:inventoryFilterReset').addEventListener('click', function(){
-				GM_setValue('inventoryMinLvl', Data.defaults.inventoryMinLvl);
-				GM_setValue('inventoryMaxLvl', Data.defaults.inventoryMaxLvl);
+				System.setValue('inventoryMinLvl', Data.defaults.inventoryMinLvl);
+				System.setValue('inventoryMaxLvl', Data.defaults.inventoryMaxLvl);
 				$('input[id="Helper.inventoryMinLvl"]').attr('value', Data.defaults.inventoryMinLvl);
 				$('input[id="Helper.inventoryMaxLvl"]').attr('value', Data.defaults.inventoryMaxLvl);
 				Helper.generateInventoryTable();
 			}, true);
 		document.getElementById('Helper:inventoryFilterForm').addEventListener('submit', function(){
-				GM_setValue('inventoryMinLvl', $('input[id="Helper.inventoryMinLvl"]').attr('value'));
-				GM_setValue('inventoryMaxLvl', $('input[id="Helper.inventoryMaxLvl"]').attr('value'));
+				System.setValue('inventoryMinLvl', $('input[id="Helper.inventoryMinLvl"]').attr('value'));
+				System.setValue('inventoryMaxLvl', $('input[id="Helper.inventoryMaxLvl"]').attr('value'));
 
 				Helper.generateInventoryTable();
 
@@ -6413,7 +6335,7 @@ var Helper = {
 			wh='<th align="left" sortkey="folder_id" sortType="number">Where</th>';
 		}
 		if (!targetInventory) {return;}
-		//targetInventory.items = targetInventory.items.filter(function (e) {return (e.name);});
+		//targetInventory.items = targetInventory.items.filter(function(e) {return (e.name);});
 		var output=document.getElementById(targetId);
 
 		var result='<table id="Helper:InventoryTable"><tr>' +
@@ -6472,7 +6394,7 @@ var Helper = {
 				p=p+'&currentPlayerId='+targetInventory.current_player_id;
 			}else{
 				xcNum=Helper.inventory.xc;
-				GM_setValue('goldConfirm', xcNum);
+				System.setValue('goldConfirm', xcNum);
 				if(item.equipped){
 					color = 'green';  whereText = 'Worn'; whereTitle='Wearing it';
 				}else{
@@ -6644,7 +6566,7 @@ var Helper = {
 		if (reportType === 'self') {
 			document.getElementById('Helper:equipProfileInventoryItem').addEventListener('click', Helper.equipProfileInventoryItem, true);
 		}
-		$('input[id="Helper:DropItem"]').click(function(){
+		$('input[id="Helper:DropItem"]').click(function() {
 			var answer = confirm('Are you sure you want to drop '+$(this).attr('itemName')+'?');
 			if(answer){
 				var itemInvId = $(this).attr('invid');
@@ -6675,7 +6597,7 @@ var Helper = {
 				});
 			}
 		});
-		$('input[id="Helper:SendSubmit"]').click(function(){
+		$('input[id="Helper:SendSubmit"]').click(function() {
 			var itemInvId = $(this).attr('invid');
 			var xcNum = $('input[id="xcnum"]').attr('value');
 			var itemRecipient = $('input[id="Helper:sendTo"]').val();
@@ -6706,7 +6628,7 @@ var Helper = {
 			});
 
 		});
-		$('span[id*="Helper:RecallTo"]').click(function(){
+		$('span[id*="Helper:RecallTo"]').click(function() {
 			var href = $(this).attr('href');
 			var id = $(this).attr('id');
 			$.ajax({
@@ -6735,7 +6657,7 @@ var Helper = {
 				}
 			});
 		});
-		$('input[id="Helper:InitiateMove"]').click(function () {
+		$('input[id="Helper:InitiateMove"]').click(function() {
 			var itemInvId = $(this).attr('invid');
 			var folderID = $('select[id="Helper:ToFolder"]').val();
 			var moveHref = System.server + 'index.php?cmd=profile&subcmd=sendtofolder&folderItem[]='+itemInvId+'&folder_id=' + folderID;
@@ -6770,7 +6692,7 @@ var Helper = {
 		Helper.setItemFilterDefault();
 		var checkedValue = evt.target.id==='SelectAllFilters';
 		for (var i=0; i<Helper.itemFilters.length; i += 1) {
-			GM_setValue(Helper.itemFilters[i].id, checkedValue);
+			System.setValue(Helper.itemFilters[i].id, checkedValue);
 		}
 		for (i=0; i<Helper.itemFilters.length; i += 1) {
 			document.getElementById(Helper.itemFilters[i].id).checked = checkedValue;
@@ -6781,7 +6703,7 @@ var Helper = {
 	},
 
 	toggleCheckboxAndRefresh: function(evt) {
-		GM_setValue(evt.target.id, evt.target.checked);
+		System.setValue(evt.target.id, evt.target.checked);
 		setTimeout(function() {
 			Helper.generateInventoryTable();
 		});
@@ -7043,7 +6965,7 @@ var Helper = {
 		var output=document.getElementById('Helper:RecipeManagerOutput');
 		output.innerHTML='<br/>Parsing inventing screen ...<br/>';
 		var currentFolder = 1;
-		GM_setValue('currentFolder', currentFolder);
+		System.setValue('currentFolder', currentFolder);
 
 		System.xmlhttp('index.php?cmd=inventing&page=0', Helper.parseInventingPage, {'page': 0});
 
@@ -7098,7 +7020,7 @@ var Helper = {
 			if (nextPage===pages.find('option:last').text()*1 && currentFolder<folderCount) {
 				nextPage = 0;
 				folderID = Helper.folderIDs[currentFolder];
-				GM_setValue('currentFolder', currentFolder+1);
+				System.setValue('currentFolder', currentFolder+1);
 			}
 			System.xmlhttp(
 				'index.php?cmd=inventing&page=' + nextPage + '&folder_id=' +
@@ -7338,7 +7260,7 @@ var Helper = {
 		hpValue.innerHTML      = System.addCommas(hpNumber - Math.round(totalMercHP*0.2));
 	},
 
-	displayMinGroupLevel: function () {
+	displayMinGroupLevel: function() {
 		var minGroupLevel = System.getValue('minGroupLevel');
 		if (minGroupLevel) {
 			$('#pCC > table > tbody > tr > td > table td').first()
@@ -7392,7 +7314,7 @@ var Helper = {
 		Helper.groupLocalTime($('td', e).eq(2));
 	},
 
-	groupLocalTime: function (theDateCell) {
+	groupLocalTime: function(theDateCell) {
 		var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
 			'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 		var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
@@ -7410,9 +7332,7 @@ var Helper = {
 	},
 
 	injectGroups: function() {
-
-		Helper.getMemberList(Helper.doGroupPaint, false);
-
+		Helper.getMembrList(Helper.doGroupPaint, false);
 		Helper.displayMinGroupLevel();
 		Helper.groupButtons();
 	},
@@ -7469,10 +7389,10 @@ var Helper = {
 		var joinButtons = System.findNodes('//img[contains(@src,"skin/icon_action_join.gif")]');
 		for (var i=0; i<joinButtons.length; i += 1) {
 			var joinButton = joinButtons[i];
-			var memberList = joinButton.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
-			var memberListArrayWithMercs = memberList.innerHTML.split(',');
-			var memberListArrayWithoutMercs = memberListArrayWithMercs.filter(Helper.filterMercs);
-			if (memberListArrayWithoutMercs.length < System.getValue('maxGroupSizeToJoin')){
+			var memList = joinButton.parentNode.parentNode.parentNode.previousSibling.previousSibling.previousSibling.previousSibling;
+			var memListArrayWithMercs = memList.innerHTML.split(',');
+			var memListArrayWithoutMercs = memListArrayWithMercs.filter(Helper.filterMercs);
+			if (memListArrayWithoutMercs.length < System.getValue('maxGroupSizeToJoin')){
 				var groupID = /javascript:confirmJoin\((\d+)\)/.exec(joinButton.parentNode.getAttribute('href'))[1];
 				var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join&group_id=' + groupID;
 				Helper.joinGroup(groupJoinURL, joinButton);
@@ -8057,17 +7977,16 @@ var Helper = {
 	},
 
 	getSustain: function(responseText) {
-		var doc=System.createDocument(responseText);
-		Helper.tmpSelfProfile=responseText;
-		$('h1:contains("Quick Buff")').after('<div id="helperQBheader"></div>');
-		var injectHere = document.getElementById('helperQBheader');
-		Helper.getEnhancement(doc, 'Sustain', injectHere);
-		Helper.getEnhancement(doc, 'Fury Caster', injectHere);
-		Helper.getBuff(doc, 'Buff Master', injectHere);
-		Helper.getBuff(doc, 'Extend', injectHere);
-		Helper.getBuff(doc, 'Reinforce', injectHere);
-
-		$('span[id*="HelperActivate"]').click(function(){
+		var doc = System.createDocument(responseText);
+		Helper.tmpSelfProfile = responseText;
+		$('h1:contains("Quick Buff")').after(Layout.quickBuffHeader);
+		Helper.getEnhancement(doc, 'Sustain', $('td#fshSus'));
+		Helper.getEnhancement(doc, 'Fury Caster', $('td#fshFur'));
+		Helper.getBuff(doc, 'Guild Buffer', $('td#fshGB'));
+		Helper.getBuff(doc, 'Buff Master', $('td#fshBM'));
+		Helper.getBuff(doc, 'Extend', $('td#fshExt'));
+		Helper.getBuff(doc, 'Reinforce', $('td#fshRI'));
+		$('span[id*="HelperActivate"]').click(function() {
 			var user = $(doc).find('#statbar-character').html();
 			var buffHref='?cmd=quickbuff&subcmd=activate&targetPlayers=' +
 				user + '&skills[]=' + $(this).attr('buffID');
@@ -8076,7 +7995,7 @@ var Helper = {
 				url: buffHref,
 				success: function( data ) {
 					if ($(data).find('font:contains("current or higher ' +
-						'level is currently active on")').length>0 ||
+						'level is currently active on")').length > 0 ||
 						$(data).find('font:contains("was activated on")')
 						) {
 							trigger.css('color','lime');
@@ -8103,31 +8022,29 @@ var Helper = {
 		}
 		var enhColor = 'lime';
 		if (enhLevel < 100) {enhColor = 'red';}
-		inject.innerHTML += '<span style="color:orange;">&nbsp;' + enh +
-			':</span>' + '<span style="color:' + enhColor + ';">' +
-			enhLevel + '%</span>';
+		inject.append('<span style="color: ' + enhColor + ';">' +
+			enhLevel + '%</span>');
 	},
 
 	getBuff: function(doc, buff, inject) {
 		var hasBuff = $(doc)
 			.find('img.tip-static[data-tipped*="' + buff + '"]');
-		inject.innerHTML += '<span style="color:orange;">&nbsp;' + buff + ':</span>';
 		if (hasBuff.length > 0) {
-			inject.innerHTML += '<span style="color:lime;">On</span>';
 			var buffTimeToExpire = hasBuff
 				.parents('td:first')
 				.find('nobr')
 				.html();
-			inject.innerHTML += '&nbsp;<span style="color:white; ' +
-				'font-size:x-small;">(' + buffTimeToExpire +')</span>';
+			inject.append('<span style="color:lime;">On</span>&nbsp;<span ' +
+				'style="color: white; font-size: x-small;">(' +
+				buffTimeToExpire +')</span>');
 		} else {
-			var elem=$('input[data-name="' + buff + '"]');
+			var elem = $('input[data-name="' + buff + '"]');
 			if (elem.length > 0) {
-				inject.innerHTML += '<span style="color:red;cursor:pointer;" ' +
+				inject.append('<span style="color:red;cursor:pointer;" ' +
 					'buffID="' + elem.val() + '" id="HelperActivate' +
-					elem.val() + '">Activate</span>';
+					elem.val() + '">Activate</span>');
 			} else {
-				inject.innerHTML += '<span style="color:red;">Off</span>';
+				inject.append('<span style="color:red;">Off</span>');
 			}
 		}
 	},
@@ -8142,7 +8059,7 @@ var Helper = {
 		}
 		var killStreakElement = System.findNode('//span[@findme="killstreak"]');
 		killStreakElement.innerHTML = System.addCommas(playerKillStreakValue);
-		GM_setValue('lastKillStreak', playerKillStreakValue);
+		System.setValue('lastKillStreak', playerKillStreakValue);
 		var deathDealerBuff = System.findNode('//img[contains(@data-tipped,"Death Dealer")]');
 		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
 		var deathDealer = deathDealerRE.exec($(deathDealerBuff).data('tipped'));
@@ -8153,7 +8070,7 @@ var Helper = {
 		}
 		var deathDealerPercentageElement = System.findNode('//span[@findme="damagebonus"]');
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
-		GM_setValue('lastDeathDealerPercentage', deathDealerPercentage);
+		System.setValue('lastDeathDealerPercentage', deathDealerPercentage);
 
 		//refresh ally/enemy list while you are here.
 		//Helper.parseProfileForWorld(doc.innerHTML, true); // Why are we doing it twice?
@@ -8206,7 +8123,7 @@ var Helper = {
 			newDoNotKillList = newDoNotKillList.replace(',,', ',');
 			evt.target.innerHTML = 'Remove from do not kill list';
 		}
-		GM_setValue('doNotKillList',newDoNotKillList);
+		System.setValue('doNotKillList',newDoNotKillList);
 		Helper.doNotKillList = newDoNotKillList;
 		//refresh the action list
 		unsafeWindow.GameData.doAction(-1);
@@ -8258,7 +8175,7 @@ var Helper = {
 		return test === null ? 0 : System.intValue(test[1]);
 	},
 
-	playerData: function (responseText) {
+	playerData: function(responseText) {
 		var doc = System.createDocument(responseText);
 		var obj = {
 			levelValue: Helper.getStat('#stat-vl', doc),
@@ -8288,7 +8205,7 @@ var Helper = {
 		return obj;
 	},
 
-	creatureData: function (ses) {
+	creatureData: function(ses) {
 		var obj = {};
 		if ($('#worldPage').length > 0) { // new map
 			obj.name    = $('#dialog-viewcreature').find('h2.name').text();
@@ -8801,12 +8718,12 @@ var Helper = {
 		//~ ' <input type="button" style="display:none" id="Helper:saveLines" value="Update Rows To Show" class="custombutton"/>';
 		' <input type="button" id="Helper:saveLines" value="Update Rows To Show" class="custombutton"/>';
 		document.getElementById('Helper:saveLines').addEventListener('click',
-			function () {
+			function() {
 				var theBox = document.getElementById('Helper:linesToShow');
 				if (isNaN(parseInt(theBox.value, 10)) ||
 					parseInt(theBox.value, 10) < '0' ||
 					parseInt(theBox.value, 10) > '99') {return;}
-				GM_setValue('bioEditLines', parseInt(theBox.value, 10));
+				System.setValue('bioEditLines', parseInt(theBox.value, 10));
 				window.location.reload();
 			}, true);
 
@@ -8929,21 +8846,21 @@ var Helper = {
 		if (alliesRatio) {
 			var alliesValueRE = /(\d+) \/ 115/;
 			var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
-			GM_setValue('alliestotal',alliesValue+5);
+			System.setValue('alliestotal',alliesValue+5);
 		}
 		var enemiesText = System.findNode('//td[.="+1 Max Enemies"]');
 		var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling.nextSibling;
 		if (enemiesRatio) {
 			var enemiesValueRE = /(\d+) \/ 115/;
 			var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
-			GM_setValue('enemiestotal',enemiesValue+5);
+			System.setValue('enemiestotal',enemiesValue+5);
 		}
 		var maxAuctionsText = System.findNode('//td[.="+1 Max Auctions"]');
 		var maxAuctionsRatio = maxAuctionsText.nextSibling.nextSibling.nextSibling.nextSibling;
 		if (maxAuctionsRatio) {
 			var maxAuctionsValueRE = /(\d+) \/ 100/;
 			var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
-			GM_setValue('maxAuctions',maxAuctionsValue+2);
+			System.setValue('maxAuctions',maxAuctionsValue+2);
 		}
 	},
 
@@ -8962,7 +8879,7 @@ var Helper = {
 		findPlayersButton.style.display = 'none';
 		var topPlayerTable = System.findNode('//table[@width="500"]');
 		var lowestLevel = topPlayerTable.rows[topPlayerTable.rows.length-4].cells[3].textContent*1;
-		GM_setValue('lowestLevelInTop250',lowestLevel);
+		System.setValue('lowestLevelInTop250',lowestLevel);
 		var guildsChecked = '';
 		for (var i=0; i<topPlayerTable.rows.length; i += 1) {
 			var aRow = topPlayerTable.rows[i];
@@ -9148,10 +9065,10 @@ var Helper = {
 		if (playerMinLvl.value === '') {playerMinLvl.value = '0';}
 		if (playerMaxLvl.value === '') {playerMaxLvl.value = '9999';}
 		if (!isNaN(playerMinLvl.value)) {
-			GM_setValue(minLvlSearchText, parseInt(playerMinLvl.value,10));
+			System.setValue(minLvlSearchText, parseInt(playerMinLvl.value,10));
 		}
 		if (!isNaN(playerMaxLvl.value)) {
-			GM_setValue(maxLvlSearchText, parseInt(playerMaxLvl.value,10));
+			System.setValue(maxLvlSearchText, parseInt(playerMaxLvl.value,10));
 		}
 		if (href) {window.location = System.server + href;
 		} else {window.location = window.location;}
@@ -9162,9 +9079,9 @@ var Helper = {
 		var href = evt.target.getAttribute('href');
 		var minLvlSearchText = filterSubject + 'MinLvl';
 		var maxLvlSearchText = filterSubject + 'MaxLvl';
-		GM_setValue(minLvlSearchText, 1);
+		System.setValue(minLvlSearchText, 1);
 		document.getElementById('Helper.' + minLvlSearchText).value=1;
-		GM_setValue(maxLvlSearchText, 9999);
+		System.setValue(maxLvlSearchText, 9999);
 		document.getElementById('Helper.' + maxLvlSearchText).value=9999;
 		if (href) {window.location = System.server + href;
 		} else {window.location = window.location;}
@@ -9192,7 +9109,7 @@ var Helper = {
 	},
 
 	hideMatchesForCompletedMoves: function(evt) {
-		GM_setValue('hideMatchesForCompletedMoves', evt.target.checked);
+		System.setValue('hideMatchesForCompletedMoves', evt.target.checked);
 		window.location=window.location;
 	},
 
@@ -9233,7 +9150,7 @@ var Helper = {
 			headerClicked = System.getValue('arenaSortBy');
 			if (headerClicked === undefined) {headerClicked='State';}
 		} else {
-			GM_setValue('arenaSortBy', headerClicked);
+			System.setValue('arenaSortBy', headerClicked);
 		}
 		if (headerClicked==='Id') {headerClicked='ArenaID';}
 
@@ -9245,7 +9162,7 @@ var Helper = {
 				Helper.sortAsc=!Helper.sortAsc;
 			}
 		}
-		GM_setValue('arenaSortAsc',Helper.sortAsc);
+		System.setValue('arenaSortAsc',Helper.sortAsc);
 		Helper.sortBy=headerClicked;
 
 		if (headerClicked==='Member' || headerClicked==='State') {
@@ -9480,18 +9397,18 @@ var Helper = {
 		return result;
 	},
 
-	saveImgLoc: function () {
+	saveImgLoc: function() {
 		try {
 			var imgLocText = System.findNode('//input[@name="local_dir"]');
 			if (imgLocText && imgLocText.value.trim().length > 0) {
-				GM_setValue('lastImgLoc', imgLocText.value.trim());
+				System.setValue('lastImgLoc', imgLocText.value.trim());
 			}
 		} catch (err) {
 			console.log(err);
 		}
 	},
 
-	setImgLoc: function () {
+	setImgLoc: function() {
 		try {
 			var imgLocText = System.findNode('//input[@name="local_dir"]');
 			if (imgLocText) {
@@ -9856,12 +9773,12 @@ var Helper = {
 		//window.location='index.php?cmd=settings&subcmd=fix&xcv=3264968baaf287c67b0fab314280b163';
 		var krulXCVRE = /xcv=([a-z0-9]+)'/;
 		var krulXCV = krulXCVRE.exec(onClick);
-		if (krulXCV) {GM_setValue('krulXCV',krulXCV[1]);}
+		if (krulXCV) {System.setValue('krulXCV',krulXCV[1]);}
 
 		var minGroupLevelTextField = System.findNode('//input[@name="min_group_level"]');
 		if (minGroupLevelTextField) {
 			var minGroupLevel = minGroupLevelTextField.value;
-			GM_setValue('minGroupLevel',minGroupLevel);
+			System.setValue('minGroupLevel',minGroupLevel);
 		}
 	},
 
@@ -9878,7 +9795,7 @@ var Helper = {
 	},
 
 	updateFpColor: function() {
-		GM_setValue('footprintsColor', System.findNode('//input[@name="footprintsColor"]').value);
+		System.setValue('footprintsColor', System.findNode('//input[@name="footprintsColor"]').value);
 		window.location.reload();
 	},
 
@@ -9916,10 +9833,10 @@ var Helper = {
 		}
 		var combatEvaluatorBiasElement = System.findNode('//select[@name="combatEvaluatorBias"]', oForm);
 		var combatEvaluatorBias = combatEvaluatorBiasElement.value*1;
-		GM_setValue('combatEvaluatorBias', combatEvaluatorBias);
+		System.setValue('combatEvaluatorBias', combatEvaluatorBias);
 		var enabledHuntingModeElement = System.findNode('//select[@name="enabledHuntingMode"]', oForm);
 		var enabledHuntingMode = enabledHuntingModeElement.value;
-		GM_setValue('enabledHuntingMode', enabledHuntingMode);
+		System.setValue('enabledHuntingMode', enabledHuntingMode);
 
 		Data.saveBoxes.forEach(System.saveValueForm, oForm);
 
@@ -9944,7 +9861,7 @@ var Helper = {
 		{
 			//combat logs start with a ,
 			combatLog=combatLog.substr(1);
-			GM_setValue('CombatLog', combatLog);
+			System.setValue('CombatLog', combatLog);
 		}
 
 		//~ var playerName = $('dt[id="statbar-character"]').html();
@@ -9988,7 +9905,7 @@ var Helper = {
 			//alert(JSON.stringify(settings));
 			for(var id in settings){
 				if (!settings.hasOwnProperty(id)) { continue; }
-				GM_setValue(id,settings[id]);
+				System.setValue(id,settings[id]);
 			}
 			alert('Settings loaded successfully!');
 		});
@@ -10003,7 +9920,7 @@ var Helper = {
 	notepadClearLog: function() {
 		if (window.confirm('Are you sure you want to clear your log?')) {
 			//~ var combatLog=document.getElementById('Helper:CombatLog');
-			GM_setValue('CombatLog', '');
+			System.setValue('CombatLog', '');
 			window.location = window.location;
 		}
 	},
@@ -10015,19 +9932,19 @@ var Helper = {
 		var guildEnmy = System.getValue('guildEnmy');
 		if (!guildSelf) {
 			guildSelf = '';
-			GM_setValue('guildSelf', guildSelf);
+			System.setValue('guildSelf', guildSelf);
 		}
 		if (!guildFrnd) {
 			guildFrnd = '';
-			GM_setValue('guildFrnd', guildFrnd);
+			System.setValue('guildFrnd', guildFrnd);
 		}
 		if (!guildPast) {
 			guildPast = '';
-			GM_setValue('guildPast', guildPast);
+			System.setValue('guildPast', guildPast);
 		}
 		if (!guildEnmy) {
 			guildEnmy = '';
-			GM_setValue('guildEnmy', guildEnmy);
+			System.setValue('guildEnmy', guildEnmy);
 		}
 		guildSelf = guildSelf.toLowerCase().replace(/\s*,\s*/, ',').replace(/\s\s*/g, ' ').split(',');
 		guildFrnd = guildFrnd.toLowerCase().replace(/\s*,\s*/, ',').replace(/\s\s*/g, ' ').split(',');
@@ -10088,8 +10005,8 @@ var Helper = {
 		miniMap.innerHTML = doc;
 		Helper.addMiniMapExtras(miniMap);
 
-		if (Helper.levelName) {GM_setValue('miniMapName', Helper.levelName);}
-		GM_setValue('miniMapSource', doc);
+		if (Helper.levelName) {System.setValue('miniMapName', Helper.levelName);}
+		System.setValue('miniMapSource', doc);
 	},
 
 	addMiniMapExtras: function(miniMap) {
@@ -10120,9 +10037,11 @@ var Helper = {
 		}
 	},
 
-	miniMapMouseOver: function(){if (Helper.mouse === 1) {Helper.markPos(this);}},
+	miniMapMouseOver: function(){
+		if (Helper.mouse === 1) {Helper.markPos(this);}
+	},
 
-	mousedown: function (evt){
+	mousedown: function(evt){
 		// needed for FF to disable dragging
 		evt.preventDefault();
 		// set pressed mouse button
@@ -10345,7 +10264,7 @@ var Helper = {
 
 		//fetchitem.php?item_id=9208&inv_id=91591259&t=5&p=1599987&currentPlayerId=1599987&extra=3
 		Helper.itemList = {};
-		$('img[data-tipped*="t=5"]').each(function () {
+		$('img[data-tipped*="t=5"]').each(function() {
 			//quickTakeDiv+='<br /><img src="'+$(this).attr('src')+'">';
 			var itemIDs = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(this).attr('data-tipped'));
 			if(itemIDs){
@@ -10581,9 +10500,9 @@ var Helper = {
 	trackThisQuest: function() {
 		var currentTrackedQuest = System.getValue('questBeingTracked').split(';');
 		if (currentTrackedQuest.length > 0 && currentTrackedQuest[0].trim().length > 0) {
-			GM_setValue('questBeingTracked', System.getValue('questBeingTracked') + ';' + location.search);
+			System.setValue('questBeingTracked', System.getValue('questBeingTracked') + ';' + location.search);
 		} else {
-		GM_setValue('questBeingTracked', location.search);
+		System.setValue('questBeingTracked', location.search);
 		}
 		window.location = window.location;
 	},
@@ -10602,9 +10521,9 @@ var Helper = {
 
 				}
 			}
-			GM_setValue('questBeingTracked', newTracked);
+			System.setValue('questBeingTracked', newTracked);
 		} else {
-		GM_setValue('questBeingTracked', '');
+		System.setValue('questBeingTracked', '');
 		}
 
 		window.location = window.location;
@@ -10707,7 +10626,7 @@ var Helper = {
 		var activeTable;
 		var i;
 		var bounty;
-		GM_setValue('bwNeedsRefresh', false);
+		System.setValue('bwNeedsRefresh', false);
 		if (enableWantedList) {
 
 			activeTable = System.findNode('//table[@width = "630" and contains(.,"Target")]', doc);
@@ -10935,7 +10854,7 @@ var Helper = {
 		}
 	},
 
-	profileContactsFilter: function (e) {return e.id === this;},
+	profileContactsFilter: function(e) {return e.id === this;},
 
 	parseProfileForWorld: function(details, refreshAllyEnemyDataOnly) {
 		var doc=System.createDocument(details);
@@ -11059,12 +10978,12 @@ var Helper = {
 		var enableAllyOnlineList = System.getValue('enableAllyOnlineList');
 		var enableEnemyOnlineList = System.getValue('enableEnemyOnlineList');
 		if (!enableAllyOnlineList && !enableEnemyOnlineList) {return;}
-		var onlineAlliesEnemies = contactList.contacts.filter(function (e) {return e.status==='Online';});
+		var onlineAlliesEnemies = contactList.contacts.filter(function(e) {return e.status==='Online';});
 		if (!enableAllyOnlineList) {
-			onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return e.type!=='Ally';});
+			onlineAlliesEnemies = onlineAlliesEnemies.filter(function(e) {return e.type!=='Ally';});
 		}
 		if (!enableEnemyOnlineList) {
-			onlineAlliesEnemies = onlineAlliesEnemies.filter(function (e) {return e.type!=='Enemy';});
+			onlineAlliesEnemies = onlineAlliesEnemies.filter(function(e) {return e.type!=='Enemy';});
 		}
 		if (onlineAlliesEnemies.length === 0) {return;}
 		//~ var playerId = Layout.playerId();
@@ -11140,7 +11059,7 @@ var Helper = {
 	},
 
 	resetAllyEnemyList: function() {
-		GM_setValue('contactList','');
+		System.setValue('contactList','');
 		window.location = window.location;
 	},
 
@@ -11261,7 +11180,7 @@ var Helper = {
 		$.getJSON('?cmd=export&subcmd=inventory', Helper.processTrade);
 	},
 
-	processTrade: function (data) {
+	processTrade: function(data) {
 		Helper.inventory = data;
 		for(var i=0;i<Helper.inventory.items.length;i += 1){
 			if(Helper.inventory.items[i].is_in_st){
@@ -11522,63 +11441,115 @@ var Helper = {
 	},
 
 	injectGuildRanks: function() {
-		//update the guild member list and insert a list of members next to each rank
-		System.xmlhttp('index.php?cmd=guild&subcmd=manage', Helper.parseGuildForWorld, true);
-		var characterName = $('dt.stat-name:first').next().text().replace(/,/g,'');
-		var rankNameTable = System.findNode('//table[tbody/tr/td[.="Rank Name"]]');
-		if (!rankNameTable) {return;}
-		var memberList = System.getValueJSON('memberlist');
-		var i;
-		if (memberList) {
-			for (i=0;i<memberList.members.length;i += 1) {
-				var member=memberList.members[i];
-				if (member.name.trim() === characterName.trim()) {
-					Helper.characterRank = member.rank;
-					break;
+		Helper.getMembrList(Helper.doRankPaint, true);
+		// gather rank info button
+		$('td', '#pCC').has('a#show-guild-founder-rank-name')
+			.append('&nbsp;<input id="getrankweightings" type="button" ' +
+				'value="Get Rank Weightings" class="custombutton">');
+		$('input#getrankweightings', '#pCC').click(Helper.fetchRankData);
+	},
+
+	doRankPaint: function() {
+		var theTable = $('#pCC table table').has('td.line[width="80%"]')[0];
+		var myRank = Helper.membrList[$('dt#statbar-character')
+			.text()].rank_name;
+		var ranks = {};
+		Object.keys(Helper.membrList).forEach(function(val) {
+			if (val === 'lastUpdate') {return;}
+			var rankName = Helper.membrList[val].rank_name;
+			ranks[rankName] = ranks[rankName] || [];
+			ranks[rankName].push(val);
+		});
+		$('tr', theTable).each(function(ind) {
+			var rankCell = $('td.line[width="80%"]', $(this));
+			if (rankCell.length === 0) {return;} // header
+			var rankName = rankCell.text();
+			if (ranks[rankName]) { // has members
+				if (rankName === myRank) {
+					Helper.characterRow = ind; // limit for ajaxify later
 				}
+				rankCell.append(' <span style="color:blue;">- ' +
+					ranks[rankName].join(', ') + '</span>');
 			}
-			for (i=0;i<rankNameTable.rows.length;i += 1) {
-				var aRow = rankNameTable.rows[i];
-				if (aRow.cells[1]) {
-					var rankName = aRow.cells[0].textContent;
-					if (rankName.trim() === Helper.characterRank.trim()) {
-						Helper.characterRow = i;
-						break;
-					}
-				}
-			}
+		});
+
+		if (System.getValue('ajaxifyRankControls')) {
+			Helper.ajaxifyRankControls();
 		}
 
-		//gather rank info
-		var newRankElement = System.findNode('//td[a[@href="index.php?cmd=guild&subcmd=ranks&subcmd2=add"]]');
-		newRankElement.innerHTML += '&nbsp;<input id="getrankweightings" type="button" value="Get Rank Weightings" class="custombutton">';
+	},
 
-		document.getElementById('getrankweightings').addEventListener('click', Helper.fetchRankData, true);
+	//~ injectGuildRanksOld: function() {
+		//~ //update the guild member list and insert a list of members next to each rank
+		//~ System.xmlhttp('index.php?cmd=guild&subcmd=manage', Helper.parseGuildForWorld, true);
+//~ 
+		//~ // Assign our rank to globals because we can't modify a rank higher
+		//~ // than our own
+		//~ // You cannot move a rank which is above your current rank.
+		//~ // Currently using cached version of memberlist possibly under the
+		//~ // assumption that if we have rank control we are not a new member
+		//~ // Bit of a problem if I just cleared my cache though
+		//~ // these values are undefined for guild founders, is that an issue?
+		//~ var characterName = $('dt.stat-name:first').next().text().replace(/,/g,'');
+		//~ var rankNameTable = System.findNode('//table[tbody/tr/td[.="Rank Name"]]');
+		//~ if (!rankNameTable) {return;}
+		//~ var memberList = System.getValueJSON('memberlist');
+		//~ var i;
+		//~ if (memberList) {
+			//~ for (i=0;i<memberList.members.length;i += 1) {
+				//~ var member=memberList.members[i];
+				//~ if (member.name.trim() === characterName.trim()) {
+					//~ Helper.characterRank = member.rank;
+					//~ break;
+				//~ }
+			//~ }
+			//~ for (i=0;i<rankNameTable.rows.length;i += 1) {
+				//~ var aRow = rankNameTable.rows[i];
+				//~ if (aRow.cells[1]) {
+					//~ var rankName = aRow.cells[0].textContent;
+					//~ if (rankName.trim() === Helper.characterRank.trim()) {
+						//~ Helper.characterRow = i;
+						//~ break;
+					//~ }
+				//~ }
+			//~ }
+		//~ }
+//~ 
+		//~ // gather rank info button
+		//~ var newRankElement = System.findNode('//td[a[@href="index.php?cmd=guild&subcmd=ranks&subcmd2=add"]]');
+		//~ newRankElement.innerHTML += '&nbsp;<input id="getrankweightings" type="button" value="Get Rank Weightings" class="custombutton">';
+		//~ document.getElementById('getrankweightings').addEventListener('click', Helper.fetchRankData, true);
+//~ 
+		//~ if (System.getValue('ajaxifyRankControls')) {
+			//~ Helper.ajaxifyRankControls();
+		//~ }
+	//~ },
+
+	ajaxifyRankControls: function() {
+		var i;
 		var upButton;
 		var onclickText;
 		var onclickHREF;
 		var downButton;
-		if (System.getValue('ajaxifyRankControls')) {
-			//up buttons
-			var upButtons = System.findNodes('//input[@value="Up"]');
-			for (i=0;i<upButtons.length;i += 1) {
-				upButton = upButtons[i];
-				onclickText = upButton.getAttribute('onclick');
-				onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
-				upButton.setAttribute('onclickhref', onclickHREF);
-				upButton.setAttribute('onclick', '');
-				upButton.addEventListener('click', Helper.moveRankUpOneSlotOnScreen, true);
-			}
-			//down buttons
-			var downButtons = System.findNodes('//input[@value="Down"]');
-			for (i=0;i<downButtons.length;i += 1) {
-				downButton = downButtons[i];
-				onclickText = downButton.getAttribute('onclick');
-				onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
-				downButton.setAttribute('onclickhref', onclickHREF);
-				downButton.setAttribute('onclick', '');
-				downButton.addEventListener('click', Helper.moveRankDownOneSlotOnScreen, true);
-			}
+		//up buttons
+		var upButtons = System.findNodes('//input[@value="Up"]');
+		for (i=0;i<upButtons.length;i += 1) {
+			upButton = upButtons[i];
+			onclickText = upButton.getAttribute('onclick');
+			onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
+			upButton.setAttribute('onclickhref', onclickHREF);
+			upButton.setAttribute('onclick', '');
+			upButton.addEventListener('click', Helper.moveRankUpOneSlotOnScreen, true);
+		}
+		//down buttons
+		var downButtons = System.findNodes('//input[@value="Down"]');
+		for (i=0;i<downButtons.length;i += 1) {
+			downButton = downButtons[i];
+			onclickText = downButton.getAttribute('onclick');
+			onclickHREF = /window.location=\'(.*)\';/.exec(onclickText)[1];
+			downButton.setAttribute('onclickhref', onclickHREF);
+			downButton.setAttribute('onclick', '');
+			downButton.addEventListener('click', Helper.moveRankDownOneSlotOnScreen, true);
 		}
 	},
 
@@ -11621,6 +11592,8 @@ var Helper = {
 	},
 
 	parseRankData: function(responseText, linkElement) {
+		// Makes a weighted calculation of available permissions
+		// and gets tax rate
 		var doc=System.createDocument(responseText);
 		var checkBoxes = System.findNodes('//input[@type="checkbox"][contains(@name,"permission")]',doc);
 		var count = 0;
@@ -11633,12 +11606,13 @@ var Helper = {
 					privName === 'Build/Upgrade/Demolish Structures' ||
 					privName === 'Can Un-Tag Items') {
 					count += 5;
+				} else if (privName === 'Build/Upgrade Structures' ||
+					privName === 'Can Kick Members') {
+					count += 4;
 				} else if (privName === 'Can Mass Messages') {
 					count += 0.5;
 				} else if (privName === 'Take Items' ||
-					privName === 'Can Tag Items' ||
-					privName === 'Can Recall Tagged Items' ||
-					privName === 'Can Tag Items') {
+					privName === 'Can Recall Tagged Items') {
 					count += 0.2;
 				} else if (privName === 'Store Items' ||
 					privName === 'Can View Advisor') {
@@ -11650,66 +11624,71 @@ var Helper = {
 		}
 		var taxRate = System.findNode('//input[@name="rank_tax"]',doc);
 
-		linkElement.innerHTML = '<span style="color:blue;">(' + Math.round(10*count)/10 + ') Tax:(' + taxRate.value + '%)</span> ' + linkElement.innerHTML;
+		linkElement.innerHTML = '<span style="color:blue;">(' +
+			Math.round(10*count)/10 + ') Tax:(' + taxRate.value +
+			'%)</span> ' + linkElement.innerHTML;
 	},
 
-	injectGuildRanksMembers: function(memberList) {
-		//first build up a relationship from rank to names
-		Helper.sortAsc = true;
-		Helper.sortBy = 'rank'.trim();
-		memberList.members.sort(Helper.stringSort);
-		var rankList = {};
-		rankList.rank = [];
-		var tempList = [];
-		var prevRank = memberList.members[0].rank.replace(/Profile Unavailable/ig,'');
-		var curRank = '';
-		var i;
-		var aRank;
-		for (i=0;i<memberList.members.length;i += 1) {
-			var member=memberList.members[i];
-			curRank = member.rank.replace(/Profile Unavailable/ig,'');
-			if (curRank !== prevRank) {
-				aRank = {};
-				aRank.rank = prevRank;
-				aRank.names = tempList;
-				rankList.rank.push(aRank);
-				tempList = [];
-				//last name on the list, so add it to the list of names
-				if (i === memberList.members.length-1) {
-					aRank = {};
-					aRank.rank = curRank;
-					tempList.push(' ' + member.name);
-					aRank.names = tempList;
-					rankList.rank.push(aRank);
-					tempList = [];
-				}
-			} else if (curRank === prevRank && i === memberList.members.length-1) {
-				aRank = {};
-				aRank.rank = prevRank;
-				tempList.push(' ' + member.name);
-				aRank.names = tempList;
-				rankList.rank.push(aRank);
-				tempList = [];
-			}
-			tempList.push(' ' + member.name);
-			prevRank = member.rank.replace(/Profile Unavailable/ig,'');
-		}
-		//then for each of the ranks, find the rank on screen and append the names next to it.
-		var rankNameTable = System.findNode('//table[tbody/tr/td[.="Rank Name"]]');
-		for (i=0;i<rankNameTable.rows.length;i += 1) {
-			var aRow = rankNameTable.rows[i];
-			if (aRow.cells[1]) {
-				var rankName = aRow.cells[0].textContent;
-				for (var j=0;j<rankList.rank.length;j += 1) {
-					var rankListName = rankList.rank[j].rank;
-					if (rankName === rankListName) {
-						aRow.cells[0].innerHTML += ' <span style="color:blue;">- ' + rankList.rank[j].names + '</span>';
-						break;
-					}
-				}
-			}
-		}
-	},
+	//~ injectGuildRanksMembers: function(memberList) {
+//~ 
+		//~ // Is all this really just to put peoples names next to their ranks?
+//~ 
+		//~ //first build up a relationship from rank to names
+		//~ Helper.sortAsc = true;
+		//~ Helper.sortBy = 'rank'.trim();
+		//~ memberList.members.sort(Helper.stringSort);
+		//~ var rankList = {};
+		//~ rankList.rank = [];
+		//~ var tempList = [];
+		//~ var prevRank = memberList.members[0].rank.replace(/Profile Unavailable/ig,'');
+		//~ var curRank = '';
+		//~ var i;
+		//~ var aRank;
+		//~ for (i=0;i<memberList.members.length;i += 1) {
+			//~ var member=memberList.members[i];
+			//~ curRank = member.rank.replace(/Profile Unavailable/ig,'');
+			//~ if (curRank !== prevRank) {
+				//~ aRank = {};
+				//~ aRank.rank = prevRank;
+				//~ aRank.names = tempList;
+				//~ rankList.rank.push(aRank);
+				//~ tempList = [];
+				//~ //last name on the list, so add it to the list of names
+				//~ if (i === memberList.members.length-1) {
+					//~ aRank = {};
+					//~ aRank.rank = curRank;
+					//~ tempList.push(' ' + member.name);
+					//~ aRank.names = tempList;
+					//~ rankList.rank.push(aRank);
+					//~ tempList = [];
+				//~ }
+			//~ } else if (curRank === prevRank && i === memberList.members.length-1) {
+				//~ aRank = {};
+				//~ aRank.rank = prevRank;
+				//~ tempList.push(' ' + member.name);
+				//~ aRank.names = tempList;
+				//~ rankList.rank.push(aRank);
+				//~ tempList = [];
+			//~ }
+			//~ tempList.push(' ' + member.name);
+			//~ prevRank = member.rank.replace(/Profile Unavailable/ig,'');
+		//~ }
+		//~ //then for each of the ranks, find the rank on screen and append the names next to it.
+		//~ var rankNameTable = System.findNode('//table[tbody/tr/td[.="Rank Name"]]');
+		//~ for (i=0;i<rankNameTable.rows.length;i += 1) {
+			//~ var aRow = rankNameTable.rows[i];
+			//~ if (aRow.cells[1]) {
+				//~ var rankName = aRow.cells[0].textContent;
+				//~ for (var j=0;j<rankList.rank.length;j += 1) {
+					//~ var rankListName = rankList.rank[j].rank;
+					//~ if (rankName === rankListName) {
+						//~ aRow.cells[0].innerHTML += ' <span style="color:blue;">- ' + rankList.rank[j].names + '</span>';
+						//~ break;
+					//~ }
+				//~ }
+			//~ }
+		//~ }
+	//~ },
 
 	setupGuildLogFilters: function() {
 		Helper.guildLogFilters = [
@@ -11781,7 +11760,7 @@ var Helper = {
 		var oldMaxPagesToFetch = System.getValue('oldNewGuildLogHistoryPages');
 		oldMaxPagesToFetch = oldMaxPagesToFetch ? parseInt(oldMaxPagesToFetch,10) : 100;
 		var maxPagesToFetch = parseInt(System.getValue('newGuildLogHistoryPages') - 1,10);
-		GM_setValue('oldNewGuildLogHistoryPages', maxPagesToFetch);
+		System.setValue('oldNewGuildLogHistoryPages', maxPagesToFetch);
 		var completeReload = false;
 		if (maxPagesToFetch > oldMaxPagesToFetch) {completeReload = true;}
 		//fetch guild log page and apply filters
@@ -11810,14 +11789,14 @@ var Helper = {
 				}
 			}
 		}
-		GM_setValue(filterID,filterChecked);
+		System.setValue(filterID,filterChecked);
 		Helper[filterID] = filterChecked;
 	},
 
 	guildLogSelectFilters: function(evt) {
 		var checkedValue = evt.target.id==='GuildLogSelectAll';
 		for (var i=0; i<Helper.guildLogFilters.length; i += 1) {
-			GM_setValue(Helper.guildLogFilters[i].id, checkedValue);
+			System.setValue(Helper.guildLogFilters[i].id, checkedValue);
 			document.getElementById(Helper.guildLogFilters[i].id).checked = checkedValue;
 		}
 		var logRows = System.findNodes('//tr[contains(@id,"GuildLogFilter:")]');
@@ -12057,133 +12036,153 @@ var Helper = {
 			Helper.addGuildLogWidgets();
 			System.setValueJSON('storedGuildLog', Helper.newStoredGuildLog);
 			var now=(new Date()).getTime();
-			GM_setValue('lastGuildLogCheck', now.toString());
+			System.setValue('lastGuildLogCheck', now.toString());
 		}
 	},
 
-	addChatTextArea: function() {
+	addChatTextArea: function() { //jquery
 		if (!System.getValue('enhanceChatTextEntry')) {return;}
-		var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send As Mass"]]');
-		if (!messageCell) {
-			Helper.addChatTextAreaLeader();
-			return;
-				}
-		Helper.addChatTextAreaNormal();
-		},
-
-	addChatTextAreaNormal: function () {
-		if (!System.getValue('enhanceChatTextEntry')) {return;}
-		var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send As Mass"]]');
-		var chatConfirm=System.findNode('//input[@name="xc"]');
-		var chatType=System.findNode('//input[@name="chat_type"]');
-		var result = '<form name="dochat" action="index.php" method="post">';
-		result += '<table border="0"><tbody><tr><td rowspan="2">';
-		result += '<input type="hidden" value="guild" name="cmd"/>';
-		result += '<input type="hidden" value="dochat" name="subcmd"/>';
-		result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
-		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
-		result += '</td><td>';
-		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
-		result += '</td><tr><td>';
-		//if(!confirm('Are you sure you wish to send this a mass message to all guild members?')) return false;
-		result += '<input class="custominput" type="submit" value="Send As Mass" name="submit" ' +
-			'onClick="if(!confirm(\'Are you sure you wish to send this a mass message to all guild members?\')) return false;"/>';
-		result += '</td></tr></tbody></table>';
-		result += '</form>';
-		messageCell.innerHTML = result;
-
-		document
-			.getElementById('Helper:ChatTextArea')
-			.addEventListener('keyup', function(evt) {if (evt.keyCode === 13) {evt.target.form.submit();}}, true);
-	},
-
-	addChatTextAreaLeader: function() {
-		if (!System.getValue('enhanceChatTextEntry')) {return;}
-		var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send"]]');
-		var chatConfirm=System.findNode('//input[@name="xc"]');
-		var chatType=System.findNode('//input[@name="chat_type"]');
-		var result = '<form name="dochat" action="index.php" method="post">';
-		result += '<table border="0"><tbody><tr><td rowspan="2">';
-		result += '<input type="hidden" value="guild" name="cmd"/>';
-		result += '<input type="hidden" value="dochat" name="subcmd"/>';
-		result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
-		result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
-		result += '</td><td>';
-		result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
-		result += '</td><tr><td>';
-		result += '</td></tr></tbody></table>';
-		result += '</form>';
-		messageCell.innerHTML = result;
-
-		document
-			.getElementById('Helper:ChatTextArea')
-			.addEventListener('keyup', function(evt) {if (evt.keyCode === 13) {evt.target.form.submit();}}, true);
-	},
-
-	injectHomePageTwoLink: function() {
-		var archiveLink = System.findNode('//a[@href="index.php?cmd=&subcmd=' +
-			'viewarchive"]');
-		if (archiveLink) {
-			archiveLink.parentNode.innerHTML += '&nbsp;<a href="' +
-				'index.php?cmd=&subcmd=viewarchive&subcmd2=&page=2&' +
-				'search_text=">View Archive Page 2</a>';
+		$('div#pCC form').first().attr('id', 'dochat');
+		var theTable = $('div#pCC table table').first();
+		theTable.append('<tr id="fshMass"></tr>');
+		$('td', theTable).eq(0).remove();
+		var btnMass = $('input[value="Send As Mass"]', theTable);
+		if (btnMass.length === 1 ) {
+			btnMass.appendTo('tr#fshMass', theTable);
 		}
-		archiveLink = System.findNode('//a[@href="index.php?cmd=&subcmd=' +
-			'viewupdatearchive"]');
-		if (archiveLink) {
-			archiveLink.parentNode.innerHTML += '&nbsp;<a href="' +
-				'index.php?cmd=&subcmd=viewupdatearchive&subcmd2=&page=2&' +
-				'search_text=">View Updates Page 2</a>';
-		}
+		var ourTd = $('td', theTable).eq(0);
+		ourTd.attr('rowspan', '2');
+		$('input', ourTd).replaceWith('<textarea id="fshTxt" name="msg" cols' +
+			'="72" rows="2" form="dochat" style="resize: none"></textarea>');
+		var fshTxt = $('#fshTxt', ourTd);
+		fshTxt.keydown(function(e) {
+			if (e.keyCode === 13 && fshTxt.val() !== '') {
+				$('input[value=Send]', theTable).click();
+				return false;
+			}
+		});
 	},
 
-	injectNotepad: function() {
-		var textAreaNode = System.findNode('//textarea[@name="notes"]');
-		textAreaNode.cols = 90;
-		textAreaNode.rows = 30;
+		//~ var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send As Mass"]]');
+		//~ if (!messageCell) {
+			//~ Helper.addChatTextAreaLeader();
+			//~ return;
+		//~ }
+		//~ Helper.addChatTextAreaNormal();
+	//~ },
+
+	//~ addChatTextAreaNormal: function() {
+		//~ if (!System.getValue('enhanceChatTextEntry')) {return;}
+		//~ var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send As Mass"]]');
+		//~ var chatConfirm=System.findNode('//input[@name="xc"]');
+		//~ var chatType=System.findNode('//input[@name="chat_type"]');
+		//~ var result = '<form name="dochat" action="index.php" method="post">';
+		//~ result += '<table border="0"><tbody><tr><td rowspan="2">';
+		//~ result += '<input type="hidden" value="guild" name="cmd"/>';
+		//~ result += '<input type="hidden" value="dochat" name="subcmd"/>';
+		//~ result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
+		//~ result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
+		//~ result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		//~ result += '</td><td>';
+		//~ result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
+		//~ result += '</td><tr><td>';
+		//~ //if(!confirm('Are you sure you wish to send this a mass message to all guild members?')) return false;
+		//~ result += '<input class="custominput" type="submit" value="Send As Mass" name="submit" ' +
+			//~ 'onClick="if(!confirm(\'Are you sure you wish to send this a mass message to all guild members?\')) return false;"/>';
+		//~ result += '</td></tr></tbody></table>';
+		//~ result += '</form>';
+		//~ messageCell.innerHTML = result;
+
+		//~ document
+			//~ .getElementById('Helper:ChatTextArea')
+			//~ .addEventListener('keyup', function(evt) {if (evt.keyCode === 13) {evt.target.form.submit();}}, true);
+	//~ },
+
+	//~ addChatTextAreaLeader: function() {
+		//~ if (!System.getValue('enhanceChatTextEntry')) {return;}
+		//~ var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send"]]');
+		//~ var chatConfirm=System.findNode('//input[@name="xc"]');
+		//~ var chatType=System.findNode('//input[@name="chat_type"]');
+		//~ var result = '<form name="dochat" action="index.php" method="post">';
+		//~ result += '<table border="0"><tbody><tr><td rowspan="2">';
+		//~ result += '<input type="hidden" value="guild" name="cmd"/>';
+		//~ result += '<input type="hidden" value="dochat" name="subcmd"/>';
+		//~ result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
+		//~ result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
+		//~ result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
+		//~ result += '</td><td>';
+		//~ result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
+		//~ result += '</td><tr><td>';
+		//~ result += '</td></tr></tbody></table>';
+		//~ result += '</form>';
+		//~ messageCell.innerHTML = result;
+
+		//~ document
+			//~ .getElementById('Helper:ChatTextArea')
+			//~ .addEventListener('keyup', function(evt) {if (evt.keyCode === 13) {evt.target.form.submit();}}, true);
+	//~ },
+
+	injectHomePageTwoLink: function() { //jquery
+		var archiveLink =
+			$('a[href="index.php?cmd=&subcmd=viewupdatearchive"]',
+			$('div#pCC'));
+		if (archiveLink.length !== 1) {return;}
+		archiveLink.after('&nbsp;<a href="index.php?cmd=&subcmd=viewupdatear' +
+			'chive&subcmd2=&page=2&search_text=">View Updates Page 2</a>');
+		archiveLink = $('a[href="index.php?cmd=&subcmd=viewarchive"]',
+			$('div#pCC'));
+		archiveLink.after('&nbsp;<a href="index.php?cmd=&subcmd=viewarchive&' +
+			'subcmd2=&page=2&search_text=">View News Page 2</a>');
+		$('.news_body:first').hide().data('open', false);
+		$('.news_body_tavern:first').hide().data('open', false);
 	},
 
-	injectTempleAlert: function() {
+	injectNotepad: function() { //jquery
+		$('textarea#notepad_notes')
+		.attr('cols', '90')
+		.attr('rows', '30')
+		.css('resize', 'none');
+	},
+
+	injectTempleAlert: function() { //jquery
 		//Checks to see if the temple is open for business.
 		if (!System.getValue('enableTempleAlert')) {return;}
-		//need timer function
-		//~ var templeAlertLastUpdate = System.getValueJSON('templeAlertLastUpdate');
+		if (System.getUrlParameter('cmd') === 'temple') {return;}
 		var templeAlertLastUpdate = System.getValue('lastTempleCheck');
 		var needToPray = System.getValue('needToPray');
+		var needToParse = false;
 		if (templeAlertLastUpdate) {
-			//~ if (new Date().getTime() - templeAlertLastUpdate.getTime() > 60 * 60 * 1000) {
+			// TODO midnight
 			if (new Date().getTime() - templeAlertLastUpdate > 60 * 60 * 1000) {
-				//bring up the temple page and parse it
-				System.xmlhttp('index.php?cmd=temple', Helper.parseTemplePage);
-			} else if (needToPray && window.location.search.search('cmd=temple') === -1) {
+				needToParse = true;
+			} else if (needToPray) {
 				Helper.displayDisconnectedFromGodsMessage();
 			}
 		} else {
-			System.xmlhttp('index.php?cmd=temple', Helper.parseTemplePage);
+			needToParse = true;
+		}
+		if (needToParse) {
+			$.get('index.php?cmd=temple', Helper.parseTemplePage);
 		}
 	},
 
-	parseTemplePage: function(responseText) {
-		var checkNeedToPray;
-		//Checks to see if the temple is open for business.
+	parseTemplePage: function(responseText) { //native
+		var checkNeedToPray, doc;
 		if (!System.getValue('enableTempleAlert')) {return;}
-		if (window.location.search.search('cmd=temple') === -1) {
-			var doc = System.createDocument(responseText);
-			checkNeedToPray = System.findNode('//input[@value="Pray to Osverin"]', doc);
+		if (System.getUrlParameter('cmd') !== 'temple') {
+			doc = System.createDocument(responseText);
 		} else {
-			checkNeedToPray = System.findNode('//input[@value="Pray to Osverin"]');
+			doc = document;
 		}
-		//if need to pray is set then put an alert in the LHS sidebar
+		checkNeedToPray = doc.querySelector('input[value="Pray to Osverin"]');
 		var needToPray = false;
 		if (checkNeedToPray) {
 			Helper.displayDisconnectedFromGodsMessage();
 			needToPray = true;
 		}
-		GM_setValue('needToPray',needToPray);
-		//~ System.setValueJSON('templeAlertLastUpdate', new Date());
-		System.setValue('lastTempleCheck', (new Date()).getTime());
+		System.setValue('needToPray', needToPray);
+		System.setValue('lastTempleCheck', (new Date()).getTime()); // TODO midnight
+	},
 
 	},
 
@@ -12193,6 +12192,45 @@ var Helper = {
 			'<span class="notification-icon"></span>' +
 			'<p class="notification-content">Bow down to the gods.</p>' +
 			'</a></li>');
+	},
+
+	injectUpgradeAlert: function() { //jquery
+		if (!System.getValue('enableUpgradeAlert')) {return;}
+		if (window.location.search.search('cmd=points&type=1') !== -1) {return;}
+		var needToDoUpgrade = System.getValue('needToDoUpgrade');
+		if (needToDoUpgrade) {
+			Helper.displayUpgradeMsg();
+			return;
+		}
+		var lastUpgradeCheck = System.getValue('lastUpgradeCheck');
+		if (lastUpgradeCheck && new Date().getTime() < lastUpgradeCheck) {
+			return;
+		}
+		$.get('index.php?cmd=points&type=1', Helper.parseGoldUpgrades);
+	},
+
+	parseGoldUpgrades: function(data) { //jquery
+		if (!System.getValue('enableUpgradeAlert')) {return;}
+		var doc;
+		if (window.location.search.search('cmd=points&type=1') === -1) {
+			doc = data;
+		} else {
+			doc = document;
+		}
+		var limit = $('tr:contains("+1 Maximum Stamina") > td:eq(2)', doc);
+		var checkDoneUpgrade = limit.text().split(' / ');
+		if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
+			Helper.displayUpgradeMsg();
+			System.setValue('needToDoUpgrade', true);
+		} else {
+			System.setValue('needToDoUpgrade', false);
+			System.setValue('lastUpgradeCheck',
+				Date.parse(limit.next().text() + ' GMT'));
+		}
+	},
+
+	displayUpgradeMsg: function() { //jquery
+		$('ul#notifications').append(Layout.goldUpgradeMsg);
 	},
 
 	injectFindPlayer: function() {
@@ -12210,7 +12248,7 @@ var Helper = {
 			'&search_in_guild=0"><span style="color:blue;">Get GvG targets</span></a>');
 
 		//<a href='index.php?cmd=profile&player_id=4145241'>Boeffie13</a>
-		$('table[class="width_full"]').find('a[href*="player_id"]').each(function () {
+		$('table[class="width_full"]').find('a[href*="player_id"]').each(function() {
 			//javascript:openWindow('index.php?cmd=quickbuff&tid=920497',%20'fsQuickBuff',%20618,%201000,%20',scrollbars')
 			var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
 			$(this).after('<a style="color:blue;font-size:10px;" '+Layout.quickBuffHref(id[1])+'>[b]</a>');
@@ -12300,7 +12338,7 @@ var Helper = {
 		document.getElementById('buffersProcessed').innerHTML = 0;
 		Helper.onlinePlayers = [];
 		Helper.extraProfile = document.getElementById('extraProfile').value;
-		GM_setValue('extraProfile', Helper.extraProfile);
+		System.setValue('extraProfile', Helper.extraProfile);
 		//get list of players to search, starting with guild>manage page
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage', Helper.findBuffsParseGuildManagePage);
 	},
@@ -12369,9 +12407,9 @@ var Helper = {
 		Helper.findBuffsLevel175Only = document.getElementById('level175').checked;
 		document.getElementById('buffersProcessed').innerHTML = 0;
 		Helper.onlinePlayers = [];
-		GM_setValue('textToSearchFor', textToSearchFor);
+		System.setValue('textToSearchFor', textToSearchFor);
 		Helper.extraProfile = document.getElementById('extraProfile').value;
-		GM_setValue('extraProfile', Helper.extraProfile);
+		System.setValue('extraProfile', Helper.extraProfile);
 		//get list of players to search, starting with guild>manage page
 		System.xmlhttp('index.php?cmd=guild&subcmd=manage', Helper.findBuffsParseGuildManagePage);
 	},
@@ -12619,24 +12657,31 @@ var Helper = {
 		}
 	},
 
-	injectRPUpgrades: function() {  //jquery ready, minus xmlhttp
-		var injectHere = $('b:contains("Guild Reputation")').closest('table').find('tr:eq(10) > td:first');
+	injectRPUpgrades: function() {  //jquery
+		var injectHere = $('b:contains("Guild Reputation")').closest('table')
+			.find('tr:eq(10) > td:first');
 		injectHere.attr('align','center');
-		injectHere.html('<span id="warningMessage" style="color:green;">Gathering active buffs ... please wait ... </span>');
-		System.xmlhttp('index.php?cmd=profile', Helper.parseProfileAndPostWarnings);
+		injectHere.html('<span id="warningMessage" style="color:green;">' +
+			'Gathering active buffs ... please wait ... </span>');
+		$.get('index.php?cmd=profile', Helper.parseProfileAndPostWarnings);
 	},
 
-	parseProfileAndPostWarnings: function(responseText) {//jquery ready, minus xmlhttp
+	parseProfileAndPostWarnings: function(responseText) {//jquery
 		var doc = System.createDocument(responseText);
 		$(doc).find('img[src*="/skills/"]').each(function(){
 				var onmouseover = $(this).data('tipped');
-				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: (\d+)\)/.exec(onmouseover);
+				var buffRE = /<center><b>([ a-zA-Z]+)<\/b>\s\(Level: (\d+)\)/
+					.exec(onmouseover);
 
 				if (!buffRE) { return true; } // same as continue in a for loop
 				var buffName = buffRE[1];
 				var buffLevel = buffRE[2];
-				$('a[data-tipped*="'+buffName+' Level '+buffLevel+'"]').each(function(){
-						$(this).parent().append('<br><nobr><span style="color:red;">' + buffName + ' ' + buffLevel + ' active</span></nobr>');
+				$('a[data-tipped*="' + buffName + ' Level ' + buffLevel + '"]')
+					.each(function(){
+						$(this).parent()
+							.append('<br><nobr><span style="color:red;">' +
+							buffName + ' ' + buffLevel +
+							' active</span></nobr>');
 					});
 			});
 		var warningMessage = $('#warningMessage');
@@ -12644,30 +12689,37 @@ var Helper = {
 		warningMessage.attr('style','color:blue');
 	},
 
-	useStairs: function() { //jquery ready
+	useStairs: function() { //jquery
 		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
-		$('input[name="stairway_id"]:first').each(function(){window.location='index.php?cmd=world&subcmd=usestairs&stairway_id='+$(this).val();});
+		$('input[name="stairway_id"]:first').each(function(){
+			window.location='index.php?cmd=world&subcmd=usestairs&' +
+				'stairway_id=' + $(this).val();
+		});
 	},
 
-	injectHelperMenu: function() { //jquery ready
+	injectHelperMenu: function() { //jquery
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		if (System.getValue('hideHelperMenu')) {return;}
 		var node = $('#statbar-container');
 		if (node.length === 0) {return;}
-		node.before('<div align="center" style="position:absolute; top:0px; left:0px; color:yellow;font-weight:bold;cursor:pointer; text-decoration:underline; z-index:100" id=helperMenu nowrap>Helper Menu</div>');
+		node.before('<div align="center" style="position:absolute; top:0px; ' +
+			'left:0px; color:yellow;font-weight:bold;cursor:pointer; text-' +
+			'decoration:underline; z-index:100" id=helperMenu nowrap>Helper ' +
+			'Menu</div>');
 		$('#helperMenu').bind('mouseover', Helper.showHelperMenu);
 		$('#helperMenu').draggable();
 		if (System.getValue('keepHelperMenuOnScreen')) {
 			$(document).ready(function(){  
-				$(window).scroll(function () {  
+				$(window).scroll(function() {  
 					var offset = $(document).scrollTop() + 'px';  
-					$('#helperMenu').animate({top:offset},{duration:0,queue:false});  
+					$('#helperMenu').animate({top:offset},
+						{duration:0,queue:false});  
 				});  
 			}); 
 		}
 	},
 
-	showHelperMenu: function() { //jqeury ready
+	showHelperMenu: function() { //jqeury
 		$('#helperMenu').unbind('mouseover', Helper.showHelperMenu);
 		var key;
 		var i;
@@ -12709,25 +12761,35 @@ var Helper = {
 			'list-style-type: none;}</style>';
 		html += '<div class=column>';
 			for (key in actionMenu) {
-				if (!actionMenu.hasOwnProperty(key)) { continue; }
-				html += '<h3>'+key+'</h3><ul>';
-				for (i=0; i< actionMenu[key].length; i += 1) {
-					html += '<li><span style="cursor:pointer; text-decoration:underline;" id=hm'+actionMenu[key][i][0]+' fn='+actionMenu[key][i][2]+'>'+actionMenu[key][i][1]+'</span></li>';
+				if (!actionMenu.hasOwnProperty(key)) {continue;}
+				html += '<h3>' + key + '</h3><ul>';
+				for (i = 0; i < actionMenu[key].length; i += 1) {
+					html += '<li><span style="cursor:pointer; text-' +
+					'decoration:underline;" id=hm' + actionMenu[key][i][0] +
+					' fn=' + actionMenu[key][i][2] + '>' +
+					actionMenu[key][i][1] + '</span></li>';
 				}
 				html += '</ul>';
 			}
 		html += '<h3>FSH developer quick links</h3>';
-		html += '<span class=a-reply target_player=PointyHair style="cursor:pointer; text-decoration:underline;">PM</span> <a href=index.php?cmd=profile&player_id=1963510>PointyHair</a></br>';
-		html += '<span class=a-reply target_player=yuuzhan style="cursor:pointer; text-decoration:underline;">PM</span> <a href=index.php?cmd=profile&player_id=1599987>yuuzhan</a></br>';
+		html += '<span class=a-reply target_player=PointyHair style="cursor' +
+			':pointer; text-decoration:underline;">PM</span> <a href=index.' +
+			'php?cmd=profile&player_id=1963510>PointyHair</a></br>';
+		html += '<span class=a-reply target_player=yuuzhan style="cursor' +
+			':pointer; text-decoration:underline;">PM</span> <a href=index' +
+			'.php?cmd=profile&player_id=1599987>yuuzhan</a></br>';
 		html += '</div>';
 		html += '</div>';
 		$('#helperMenu').append(html);
-		$('#helperMenu').click(function() {$('#helperMenuDiv').toggle('fast');});
+		$('#helperMenu').click(function() {
+			$('#helperMenuDiv').toggle('fast');
+		});
 
 		for (key in actionMenu) {
-			if (!actionMenu.hasOwnProperty(key)) { continue; }
-			for (i=0; i< actionMenu[key].length; i += 1) {
-				document.getElementById('hm'+actionMenu[key][i][0]).addEventListener('click', Helper.callHelperFunction, true);
+			if (!actionMenu.hasOwnProperty(key)) {continue;}
+			for (i=0; i < actionMenu[key].length; i += 1) {
+				document.getElementById('hm' + actionMenu[key][i][0])
+					.addEventListener('click', Helper.callHelperFunction, true);
 			}
 		}
 		$('.a-reply').click(function(evt) {
@@ -12735,7 +12797,7 @@ var Helper = {
 		});
 	},
 
-	callHelperFunction: function(evt) { //jquery ready
+	callHelperFunction: function(evt) { //jquery
 		setTimeout(function() {
 			$('#content').remove();
 			$('body').append($('<style>.content {max-width:600px}</style><div id=content/>').hide());
@@ -12744,20 +12806,26 @@ var Helper = {
 		}, 0);
 	},
 
-	injectQuickLinks: function() { //jquery ready
+	injectQuickLinks: function() { //jquery
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var quickLinks = System.getValueJSON('quickLinks');
 		if (!quickLinks) {quickLinks=[];}
-		Helper.quickLinks = quickLinks;
-		if (quickLinks.length<=0) {return;}
+		//Helper.quickLinks = quickLinks;
+		if (quickLinks.length <= 0) {return;}
 		var node=$('#statbar-container');
 		if (node.length === 0) {return;}
-		var html = '<div style="cursor:pointer; text-decoration:underline; text-align:left; position:absolute; color:black; top:' + System.getValue('quickLinksTopPx') + 'px; left:' + System.getValue('quickLinksLeftPx') + 'px; ' +
-			'background-image:url(\'' + System.imageServer + '/skin/inner_bg.jpg\'); font-size:12px; ' +
-			'-moz-border-radius:5px; -webkit-border-radius:5px; border:3px solid #cb7; z-index: 1; width: 100px;" id=fshQuickLinks nowrap>';
+		var html = '<div style="cursor:pointer; text-decoration:underline; ' +
+			'text-align:left; position:absolute; color:black; top:' +
+			System.getValue('quickLinksTopPx') + 'px; left:' +
+			System.getValue('quickLinksLeftPx') + 'px; background-image:' +
+			'url(\'' + System.imageServer + '/skin/inner_bg.jpg\'); font-' +
+			'size:12px; -moz-border-radius:5px; -webkit-border-radius:5px; ' +
+			'border:3px solid #cb7; z-index: 1; width: 100px;" ' +
+			'id=fshQuickLinks nowrap>';
 		for (var i=0; i<quickLinks.length; i += 1) {
-				html += '<li><span style="cursor:pointer; text-decoration:underline;"><a href="' + quickLinks[i].url + '"' +
-					(quickLinks[i].newWindow?' target=new':'') +
+				html += '<li><span style="cursor:pointer; text-decoration:' +
+					'underline;"><a href="' + quickLinks[i].url + '"' +
+					(quickLinks[i].newWindow ? ' target=new' : '') +
 					'>' + quickLinks[i].name + '</a></span></li>';
 			
 		}
@@ -12765,17 +12833,20 @@ var Helper = {
 		node.before(html);
 		$('#fshQuickLinks').draggable();
 		if (System.getValue('keepHelperMenuOnScreen')) {
-			var quickLinksTopPx = parseInt(System.getValue('quickLinksTopPx'), 10);
+			var quickLinksTopPx = parseInt(
+				System.getValue('quickLinksTopPx'), 10);
 			$(document).ready(function(){  
-				$(window).scroll(function () {  
-					var offset = quickLinksTopPx + $(document).scrollTop() + 'px';  
-					$('#fshQuickLinks').animate({top:offset},{duration:0,queue:false});  
+				$(window).scroll(function() {  
+					var offset = quickLinksTopPx + $(document).scrollTop() +
+						'px';  
+					$('#fshQuickLinks').animate({top:offset},
+						{duration:0,queue:false});  
 				});  
 			}); 
 		}
 	},
 
-	injectComposing: function() {
+	injectComposing: function() { //jquery
 		if (System.getValue('disableComposingPrompts')) {
 			$('input[class^="large awesome"][onclick]').each(function(i, e) {
 				$(e).attr('onclick', $(e).attr('onclick')
@@ -12800,7 +12871,7 @@ var Helper = {
 					confirm('Are you sure you want to create all potions? ' +
 						'Do you have the correct templates selected?')) {
 					$('select[id^="composing-template-"][value!="none"]')
-						.each(function () {
+						.each(function() {
 							Helper.composingCreatePotion($(this));
 						});
 				}
@@ -12821,7 +12892,7 @@ var Helper = {
 		});
 	},
 
-	composingCreatePotion: function ($template) {
+	composingCreatePotion: function($template) { //jquery
 		$.ajax({
 			cache: false,
 			dataType: 'json',
@@ -12832,7 +12903,7 @@ var Helper = {
 				template_id: $template.val(),
 				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
 			},
-			success: function (data, textStatus) {
+			success: function(data, textStatus) {
 				if (data.error !== '') {
 					$template.parent()
 						.html('<div id="helperQCError" style="height: ' +
@@ -12850,7 +12921,7 @@ var Helper = {
 		});
 	},
 
-	appendHead: function(o) {
+	appendHead: function(o) { // native
 		var count = 0;
 		var scriptTag, linkTag;
 		var scriptFiles = o.js || [];
@@ -12885,9 +12956,9 @@ var Helper = {
 
 (function loadScripts () {
 	var o = {
-		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/calfSystem.css'],
+		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/dev/calfSystem.css'],
 		js:  ['https://cdn.jsdelivr.net/localforage/1.2.7/localforage.min.js',
-			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/calfSystem.js'],
+			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/dev/calfSystem.js'],
 		callback: Helper.onPageLoad
 	};
 	if (typeof unsafeWindow.jQuery === 'undefined') {
