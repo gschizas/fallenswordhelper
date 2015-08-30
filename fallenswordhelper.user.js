@@ -393,19 +393,25 @@ var Helper = {
 			}
 			break;
 		case 'points':
-			switch (typePageId) {
-			case '-':
-				Helper.storePlayerUpgrades();
-				//Helper.injectPoints();
-				break;
-			case '0':
-				Helper.storePlayerUpgrades();
-				//Helper.injectPoints();
-				break;
-			case '1':
-				Helper.parseGoldUpgrades();
-				//Helper.storePlayerUpgrades();
-				//Helper.injectPoints();
+			switch (subPageId) {
+			case '-': // Ignore guild upgrades
+				switch (typePageId) {
+				case '-':
+					Helper.storePlayerUpgrades();
+					//Helper.injectPoints();
+					break;
+				case '0':
+					Helper.storePlayerUpgrades();
+					//Helper.injectPoints();
+					break;
+				case '1':
+					Helper.parseGoldUpgrades();
+					//Helper.storePlayerUpgrades();
+					//Helper.injectPoints();
+					break;
+				default:
+					break;
+				}
 				break;
 			default:
 				break;
@@ -661,7 +667,7 @@ var Helper = {
 
 	updateBuffLog: function() {
 		if (System.getValue('keepBuffLog')) {
-			var now=new Date();
+			var now = new Date();
 			var timeStamp = System.formatDateTime(now);//now.toLocaleFormat('%Y-%m-%d %H:%M:%S') + ' - ';
 			var buffLog=System.getValue('buffLog');
 			var buffsAttempted = document.body.innerHTML.split('<li>');
@@ -736,15 +742,8 @@ var Helper = {
 		document.getElementById('fsboxdetail').innerHTML=System.getValue('fsboxcontent');
 	},
 
-	removeGuildAvyImgBorder: function() {
-		var avyImg;
-		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
-			//~ avyImg = System.findNode('//img[contains(@title, "s Logo")]');
-		//~ } else { //chrome
-		avyImg = System.findNode('//img[contains(@oldtitle, "s Logo")]');
-		//~ }
-		if (avyImg) {avyImg.style.borderStyle='none';}
-		return;
+	removeGuildAvyImgBorder: function() { //jquery
+		$('img[oldtitle$="\'s Logo"]').css('border-style', 'none');
 	},
 
 	guildXPLock: function() {
@@ -765,11 +764,6 @@ var Helper = {
 
 	injectGuild: function() {
 		Helper.removeGuildAvyImgBorder();
-
-		//~ var guildMiniSRC = System.findNode('//img[contains(@src,"_mini.jpg")]').getAttribute('src');
-		//~ var guildID = /guilds\/(\d+)_mini.jpg/.exec(guildMiniSRC)[1];
-		//~ System.setValue('guildID',guildID);
-
 		Helper.guildXPLock();
 
 		var leftHandSideColumnTable = System.findNode('//table[tbody/tr/td/font/a[contains(.,"Change Logo")]]');
@@ -804,10 +798,6 @@ var Helper = {
 		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
 		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
-
-		//Update the guild online list, since we are already on the page.
-		//var doc = document.firstChild.nextSibling;
-		//Helper.parseGuildForWorld(doc.innerHTML, true);
 
 		$('td:contains("Username"):last').parents('table:first').find('a[href]').each(function(){
 			$(this).after(' <a style="color:blue;font-size:10px;" ' +
@@ -890,7 +880,7 @@ var Helper = {
 
 	recallGuildStoreItem: function(evt) {
 		var guildStoreID=evt.target.getAttribute('itemID');
-		var recallHref = 'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' + guildStoreID;
+		var recallHref = 'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' + guildStoreID + '&ajax=1';
 		System.xmlhttp(recallHref,
 			Helper.recallGuildStoreItemReturnMessage,
 			{'item': guildStoreID, 'target': evt.target, 'url': recallHref});
@@ -929,7 +919,7 @@ var Helper = {
 		//get the max hours to still be inside stamina maximum
 		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
 		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-		var now = (new Date()).getTime();
+		var now = Date.now();
 		var nextHuntMilliseconds = now + millisecondsToMaxStamina;
 		var d = new Date(nextHuntMilliseconds);
 		//~ var nextHuntTimeText = d.toFormatString('HH:mm ddd dd/MMM/yyyy');
@@ -947,7 +937,7 @@ var Helper = {
 		var nextGainSec = parseInt(nextGain[2],10);
 		var hoursToNextLevel = Math.ceil(remainingXP/gain);
 		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
-		nextGainTime  = new Date((new Date()).getTime() + millisecsToNextGain);
+		nextGainTime  = new Date(Date.now() + millisecsToNextGain);
 		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+
 				//~ nextGainTime.toFormatString('HH:mm ddd dd/MMM/yyyy')+'</dd>');
 				System.formatShortDate(nextGainTime)+'</dd>');
@@ -1053,110 +1043,115 @@ var Helper = {
 	/**************************************************************************/
 
 	injectRelic: function() {
-		var relicNameElement = $('td:contains("Below is the current status for the relic"):last');
+		var relicNameElement = $('td:contains("Below is the current status ' +
+			'for the relic"):last');
 		relicNameElement.css('font-size', 'x-small');
 
 		var injectHere = $('td:contains("Defended"):last');
-		if (injectHere.length > 0) {
-			var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
-			var defendingGuildID = /guilds\/(\d+)_mini.jpg/.exec(defendingGuildMiniSRC)[1];
-			//~ var myGuildID = System.getValue('guildID');
-			if (defendingGuildID === Layout.guildId().toString()) {
-				var listOfDefenders = injectHere.next().text().split(','); // quick buff only supports 16
-				//actually I think it might be text length on the address bar or something like that.
-				var shortList = [];
-				if (listOfDefenders) {
-					var modifierWord;
-					for (var i = 0; i < listOfDefenders.length; i += 1) {
-						shortList.push(listOfDefenders[i]);
-						if ((i + 1) % 16 === 0 && i !== 0 ||
-							i === listOfDefenders.length - 1) {
-							modifierWord = Helper.getGroupBuffModifierWord(i);
-							var htmlToAppend = '<br><nobr><a href="#" id="' +
-							'buffAll' + modifierWord + '"><span style="color' +
-							':blue; font-size:x-small;" title="Quick buff ' +
-							'functionality from HCS only does 16">Buff ' +
-							modifierWord + ' 16</span></a></nobr>';
-							injectHere.append(htmlToAppend);
-							var buffAllLink = $('#buffAll'+modifierWord);
-							buffAllLink.attr('href',Layout.buffAllHref(shortList));
-							shortList = [];
-						}
+		if (injectHere.length === 0) {return;}
+		//~ if (injectHere.length > 0) {
+		var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
+		var defendingGuildID = /guilds\/(\d+)_mini.jpg/
+			.exec(defendingGuildMiniSRC)[1];
+		//~ var myGuildID = System.getValue('guildID');
+		if (defendingGuildID === Layout.guildId().toString()) {
+			var listOfDefenders = injectHere.next().text().split(',');
+			// quick buff only supports 16
+			var shortList = [];
+			if (listOfDefenders) {
+				var modifierWord;
+				for (var i = 0; i < listOfDefenders.length; i += 1) {
+					shortList.push(listOfDefenders[i]);
+					if ((i + 1) % 16 === 0 && i !== 0 ||
+						i === listOfDefenders.length - 1) {
+						//~ modifierWord = Helper.getGroupBuffModifierWord(i);
+						modifierWord = Layout.places[Math.floor(i / 16)];
+						var htmlToAppend = '<br><nobr><a href="#" id="buffAll' +
+							modifierWord + '"><span style="color:blue; font-' +
+							'size:x-small;" title="Quick buff functionality ' +
+							'from HCS only does 16">Buff ' + modifierWord +
+							' 16</span></a></nobr>';
+						injectHere.append(htmlToAppend);
+						var buffAllLink = $('#buffAll' + modifierWord);
+						buffAllLink.attr('href', Layout.buffAllHref(shortList));
+						shortList = [];
 					}
 				}
 			}
-			injectHere.html(injectHere.html() + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." ' +
-				'class="custombutton">');
-			document.getElementById('calculatedefenderstats')
-				.addEventListener('click',
-					function() {
-						Helper.getMembrList(Helper.calculateRelicDefenderStats,
-							false);
-					},
-					true);
 		}
-		var empowerButton = $('input[value*="Attempt Empower"]');
-		if (empowerButton.length > 0) {
-			//window.location='index.php?cmd=relic&subcmd=empower&relic_id=12'
-			var relicID = /relic_id=(\d+)/.exec(empowerButton.attr('onclick'))[1];
-			var insertEmpowerRelicTenTimesSpan = $('<span></span>').attr({
-					'style': 'cursor:pointer;text-decoration:underline;color:blue;font-size:x-small',
-					'relicID': relicID
-				}).appendTo(empowerButton.parent());
-			insertEmpowerRelicTenTimesSpan.text('Empower to level: ')
-				.click(Helper.empowerRelic);
-
-			var targetEmpowerLevelInput = $('<input></input>');
-			targetEmpowerLevelInput.val(10)
-				.attr('size',1)
-				.attr('name','targetEmpowerLevel')
-				.appendTo(empowerButton.parent());
-		}
+		//~ injectHere.html(injectHere.html() + '<input id="calculatedefenderstats" type="button" value="Fetch Stats" title="Calculate the stats of the players defending the relic." class="custombutton">');
+		injectHere.append('<input id="calculatedefenderstats" type="button" ' +
+			'value="Fetch Stats" title="Calculate the stats of the players ' +
+			'defending the relic." class="custombutton">');
+		document.getElementById('calculatedefenderstats')
+			.addEventListener('click',
+				function() {
+					Helper.getMembrList(Helper.calculateRelicDefenderStats,
+						false);
+				},
+				true);
 	},
 
-	empowerRelic: function(evt) {
-		var relicID = evt.target.getAttribute('relicID');
-		var targetEmpowerLevel = $('input[name="targetEmpowerLevel"]').val();
-		var currentLevel = parseInt($('td:contains("Empower"):contains("Level"):last').next('td').text(),10);
-		if (targetEmpowerLevel <= currentLevel) {return;}
-		evt.target.innerHTML = 'Processing ... ';
-		evt.target.removeEventListener('click', Helper.empowerRelic, true);
-		evt.target.style.cursor = 'default';
-		evt.target.style.textDecoration = 'none';
-		Helper.empowerRelicMaxTries = 20;
-		Helper.empowerRelicCurrentTries = 1;
-		//index.php?cmd=relic&subcmd=empower&relic_id=12
-		System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {'target':evt.target,'relicID':relicID,'targetEmpowerLevel':targetEmpowerLevel});
-	},
+		//~ }
+		//~ var empowerButton = $('input[value*="Attempt Empower"]');
+		//~ if (empowerButton.length > 0) {
+			//~ //window.location='index.php?cmd=relic&subcmd=empower&relic_id=12'
+			//~ var relicID = /relic_id=(\d+)/.exec(empowerButton.attr('onclick'))[1];
+			//~ var insertEmpowerRelicTenTimesSpan = $('<span></span>').attr({
+					//~ 'style': 'cursor:pointer;text-decoration:underline;color:blue;font-size:x-small',
+					//~ 'relicID': relicID
+				//~ }).appendTo(empowerButton.parent());
+			//~ insertEmpowerRelicTenTimesSpan.text('Empower to level: ')
+				//~ .click(Helper.empowerRelic);
 
-	empowerRelicToTarget: function(responseText, callback) {
-		//http://www.fallensword.com/index.php?cmd=relic&relic_id=87
-		//<center>You failed to increase the empower level of the relic! The empower level has been reset back to zero.</center>
-		//<center>You successfully increased the empower level of the relic!</center>
-		var target = callback.target;
-		var relicID = callback.relicID;
-		var targetEmpowerLevel = callback.targetEmpowerLevel;
-		//~ var info = Layout.infoBox(responseText);
-		var doc = System.createDocument(responseText);
-		var currentLevel = parseInt($(doc).find('td:contains("Empower"):contains("Level:"):last').next().text(),10);
-		target.innerHTML += currentLevel + ' -> ';
-		var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries;
-		var empowerRelicMaxTries = Helper.empowerRelicMaxTries;
-		if (currentLevel < targetEmpowerLevel && empowerRelicCurrentTries < empowerRelicMaxTries) {
-			empowerRelicCurrentTries += 1;
-			System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {'target':target,'relicID':relicID,'targetEmpowerLevel':targetEmpowerLevel});
-		} else {
-			//http://www.fallensword.com/index.php?cmd=relic&relic_id=87
-			window.location = 'index.php?cmd=relic&relic_id=' + relicID;
-		}
-	},
+			//~ var targetEmpowerLevelInput = $('<input></input>');
+			//~ targetEmpowerLevelInput.val(10)
+				//~ .attr('size',1)
+				//~ .attr('name','targetEmpowerLevel')
+				//~ .appendTo(empowerButton.parent());
+		//~ }
+
+	//~ empowerRelic: function(evt) {
+		//~ var relicID = evt.target.getAttribute('relicID');
+		//~ var targetEmpowerLevel = $('input[name="targetEmpowerLevel"]').val();
+		//~ var currentLevel = parseInt($('td:contains("Empower"):contains("Level"):last').next('td').text(),10);
+		//~ if (targetEmpowerLevel <= currentLevel) {return;}
+		//~ evt.target.innerHTML = 'Processing ... ';
+		//~ evt.target.removeEventListener('click', Helper.empowerRelic, true);
+		//~ evt.target.style.cursor = 'default';
+		//~ evt.target.style.textDecoration = 'none';
+		//~ Helper.empowerRelicMaxTries = 20;
+		//~ Helper.empowerRelicCurrentTries = 1;
+		//~ //index.php?cmd=relic&subcmd=empower&relic_id=12
+		//~ System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {'target':evt.target,'relicID':relicID,'targetEmpowerLevel':targetEmpowerLevel});
+	//~ },
+
+	//~ empowerRelicToTarget: function(responseText, callback) {
+		//~ //http://www.fallensword.com/index.php?cmd=relic&relic_id=87
+		//~ //<center>You failed to increase the empower level of the relic! The empower level has been reset back to zero.</center>
+		//~ //<center>You successfully increased the empower level of the relic!</center>
+		//~ var target = callback.target;
+		//~ var relicID = callback.relicID;
+		//~ var targetEmpowerLevel = callback.targetEmpowerLevel;
+		//var info = Layout.infoBox(responseText);
+		//~ var doc = System.createDocument(responseText);
+		//~ var currentLevel = parseInt($(doc).find('td:contains("Empower"):contains("Level:"):last').next().text(),10);
+		//~ target.innerHTML += currentLevel + ' -> ';
+		//~ var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries;
+		//~ var empowerRelicMaxTries = Helper.empowerRelicMaxTries;
+		//~ if (currentLevel < targetEmpowerLevel && empowerRelicCurrentTries < empowerRelicMaxTries) {
+			//~ empowerRelicCurrentTries += 1;
+			//~ System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {'target':target,'relicID':relicID,'targetEmpowerLevel':targetEmpowerLevel});
+		//~ } else {
+			//~ //http://www.fallensword.com/index.php?cmd=relic&relic_id=87
+			//~ window.location = 'index.php?cmd=relic&relic_id=' + relicID;
+		//~ }
+	//~ },
 
 	calculateRelicDefenderStats: function() {
 		var validMemberString;
 		var membrList = Helper.membrList;
-		//~ var memberId;
-		var i;
-		//~ var href;
+		//~ var i;
 		//hide the calc button
 		$('input[id="calculatedefenderstats"]').css('visibility','hidden');
 		//make the text smaller
@@ -1186,7 +1181,6 @@ var Helper = {
 		var hideRelicOffline = System.getValue('hideRelicOffline');
 		if (defendingGuildID === myGuildID && !hideRelicOffline) {
 			validMemberString = '';
-			// memberList = System.getValueJSON('memberlist');
 			Object.keys(membrList).forEach(function(val) {
 				var member = membrList[val];
 				var lastLogin = 0;
@@ -1201,33 +1195,34 @@ var Helper = {
 					validMemberString += member.username + ' ';
 				}
 			});
-			validMemberString = validMemberString.slice(0, -1);
-
-			//~ if (membrList) {
-				//~ for (i = 0; i < membrList.members.length; i += 1) {
-					//~ var member = membrList.members[i];
-					//~ if (member.status === 'Offline' &&
-						//~ (member.level < 400 || member.level > 421 &&
-						//~ member.level < 441 || member.level > 450)) {
-						//~ validMemberString += member.name + ' ';
-					//~ }
-				//~ }
-			//~ }
 		}
 
-		var listOfDefenders = System.findNodes('//b/a[contains(@href,"index.php?cmd=profile&player_id=")]');
-		var defenderCount = 0;
-		var testList = '';
-		for (i=0; i<listOfDefenders.length; i += 1) {
-			var hrefpointer = listOfDefenders[i].getAttribute('href');
-			Helper.getRelicPlayerData(defenderCount,extraTextInsertPoint,hrefpointer);
-			testList += listOfDefenders[i].innerHTML + ' ';
+		var defenders = $('a[href*="cmd=profile&player_id="]',
+			'div#pCC table table');
+		defenders.each(function(ind) {
+			var $this = $(this);
+			Helper.getRelicPlayerData(ind, $this.attr('href'), $this.text());
 			if (defendingGuildID === myGuildID && !hideRelicOffline) {
-				validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + ' ','');
+				validMemberString = validMemberString.replace(
+					$this.text() + ' ','');
 			}
-			defenderCount+= 1;
-		}
-		Helper.relicDefenderCount = defenderCount;
+		});
+		Helper.relicDefenderCount = defenders.length;
+
+		//~ var listOfDefenders = System.findNodes('//b/a[contains(@href,"index.php?cmd=profile&player_id=")]');
+		//~ var defenderCount = 0;
+		//~ var testList = '';
+		//~ for (i = 0; i < listOfDefenders.length; i += 1) {
+			//~ var hrefpointer = listOfDefenders[i].getAttribute('href');
+			//~ Helper.getRelicPlayerData(defenderCount, extraTextInsertPoint, hrefpointer);
+			//~ testList += listOfDefenders[i].innerHTML + ' ';
+			//~ if (defendingGuildID === myGuildID && !hideRelicOffline) {
+				//~ validMemberString = validMemberString.replace(listOfDefenders[i].innerHTML + ' ','');
+			//~ }
+			//~ defenderCount+= 1;
+		//~ }
+		//~ Helper.relicDefenderCount = defenderCount;
+
 		//extraTextInsertPoint.innerHTML += '<tr><td style="font-size:x-small;">' + testList + '<td><tr>';
 		var textToInsert = '<tr><td><table class="relicT">' +
 			'<tr><td colspan="2" class="headr">Defending Guild Stats</td></tr>' +
@@ -1321,6 +1316,7 @@ var Helper = {
 			'<tr><td colspan="2" class="grey">Above calculations include Constitution, Fortitude, Nightmare Visage, Chi Strike, Terrorize and Flinch bonus calculations (in that order) on both the defending group and attacking group.</td></tr>';
 
 		if (defendingGuildID === myGuildID && !hideRelicOffline) {
+			validMemberString = validMemberString.slice(0, -1);
 			var validMemberArray = validMemberString.split(' ');
 			validMemberArray.forEach(function(val, ind, arr) {
 				if (membrList[val]) {
@@ -1331,18 +1327,6 @@ var Helper = {
 			});
 			validMemberString = validMemberArray.join(' ');
 
-			// memberList = System.getValueJSON('memberlist');
-			//~ for (i = 0; i < validMemberArray.length - 1; i += 1) {
-				//~ var guildMemberName = validMemberArray[i];
-				//~ for (var j = 0; j < membrList.members.length; j += 1) {
-					//~ if (membrList.members[j].name === guildMemberName) {
-						//~ memberId = membrList.members[j].id;
-						//~ break;
-					//~ }
-				//~ }
-				//~ href = System.server + '?cmd=profile&player_id=' + memberId;
-				//~ System.xmlhttp(href, Helper.checkPlayerActivity, {'playerName':guildMemberName,'playerId':memberId});
-			//~ }
 			textToInsert += '<tr><td class="headr" colspan=2>Offline guild members not at relic:</td></tr>' +
 				'<tr title="offlinePlayerListControl"><td colspan=2 style="color:red;" title="offlinePlayerList">' + validMemberString + '</td></tr>' +
 				'<tr class="hidden"><td class="brn">OfflinePlayerCount:</td><td title="offlinePlayerCount">' + validMemberArray.length + '</td></tr>' +
@@ -1353,36 +1337,6 @@ var Helper = {
 		extraTextInsertPoint.innerHTML += textToInsert;
 	},
 
-	//~ checkPlayerActivity: function(responseText, callback) {
-		//~ var doc = System.createDocument(responseText);
-		//~ //fix offline member check
-		//~ //$(doc).find('h2:contains("Last Activity:")'); TO $(doc).find('p:contains("Last Activity:")'); 
-		//~ var lastActivity = $(doc).find('p:contains("Last Activity:")');
-		//~ var playerName = callback.playerName;
-		//~ var playerId = callback.playerId;
-		//~ var offlinePlayerList = $('td[title="offlinePlayerList"]');
-		//~ var offlinePlayerCount = System.intValue($('td[title="offlinePlayerCount"]').html());
-		//~ var offlinePlayersProcessed = $('td[title="offlinePlayersProcessed"]');
-		//~ offlinePlayersProcessed.html(System.intValue(offlinePlayersProcessed.html()) + 1);
-		//~ if (System.intValue(offlinePlayersProcessed.html()) === offlinePlayerCount - 1) {
-			//~ var offlinePlayerListControlTemp = $('tr[title="offlinePlayerListControlTemp"]');
-			//~ offlinePlayerListControlTemp
-				//~ .css('display','none')
-				//~ .css('visibility','hidden');
-		//~ }
-		//~ if (lastActivity.length === 0 || lastActivity.html() === 'Last Activity: Inactive Account') {
-			//~ offlinePlayerList.html(offlinePlayerList.html().replace(playerName + ' ',''));
-		//~ } else if (lastActivity.html().search('days') !== -1 && /(\d+) days/.exec(lastActivity.html())[1] >= 7) {
-			//~ offlinePlayerList.html(offlinePlayerList.html().replace(playerName + ' ',''));
-		//~ } else {
-			//~ offlinePlayerList.html(
-				//~ offlinePlayerList.html().replace(playerName + ' ', 
-				//~ '<a style="color:red;" href="index.php?cmd=profile&player_id=' +
-				//~ playerId + '"><span style="color:red;">' + playerName +
-				//~ '</span></a> '));
-		//~ }
-	//~ },
-
 	getRelicGuildData: function(extraTextInsertPoint,hrefpointer) {
 		//~ System.xmlhttp(hrefpointer, Helper.parseRelicGuildData, {'extraTextInsertPoint':extraTextInsertPoint});
 		System.xmlhttp(hrefpointer, Helper.parseRelicGuildData);
@@ -1390,31 +1344,63 @@ var Helper = {
 
 	parseRelicGuildData: function(responseText) {
 		//~ var extraTextInsertPoint = callback.extraTextInsertPoint;
-		var doc=System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName('IMG');
-		var relicCount = 0;
-		for (var i=0;i<allItems.length-1;i += 1) {
-			var anItem=allItems[i];
-			var mouseoverText = $(anItem).data('tipped');
-			if (mouseoverText && mouseoverText.search('Relic Bonuses') !== -1){
-				relicCount+= 1;
-			}
-		}
+		var doc = System.createDocument(responseText);
+
+		var relicCount = $('div#pCC table table table img[data-tipped*="' +
+			'Relic Bonuses"]', doc).length;
+//console.log('relicCount', relicCount);
+		//~ var allItems = doc.getElementsByTagName('IMG');
+		//~ var relicCount = 0;
+		//~ for (var i=0;i<allItems.length-1;i += 1) {
+			//~ var anItem=allItems[i];
+			//~ var mouseoverText = $(anItem).data('tipped');
+			//~ if (mouseoverText && mouseoverText.search('Relic Bonuses') !== -1){
+				//~ relicCount+= 1;
+			//~ }
+		//~ }
 		var relicCountElement = $('td[title="relicCount"]');
 		relicCountElement.html(relicCount);
 		var relicProcessedElement = $('td[title="relicProcessed"]');
 		relicProcessedElement.html(1);
 		//if all defenders processed and relic processed, then finalize totals
-		var defendersProcessed = $('td[title="defendersProcessed"]');
-		var defendersProcessedNumber = System.intValue(defendersProcessed.html());
-		if (Helper.relicDefenderCount === defendersProcessedNumber + 1) {
-			Helper.processRelicStats();
-		}
+		//~ var defendersProcessed = $('td[title="defendersProcessed"]');
+		//~ var defendersProcessedNumber = System.intValue(defendersProcessed.html());
+
+		//~ if (Helper.relicDefenderCount === defendersProcessedNumber + 1) {
+			//~ Helper.processRelicStats();
+		//~ }
+		Helper.syncRelicData();
 	},
 
-	getRelicPlayerData: function(defenderCount,extraTextInsertPoint,hrefpointer) {
-		//~ System.xmlhttp(hrefpointer, Helper.parseRelicPlayerData, {'defenderCount': defenderCount, 'extraTextInsertPoint': extraTextInsertPoint});
-		System.xmlhttp(hrefpointer, Helper.parseRelicPlayerData, {'defenderCount': defenderCount});
+	getRelicPlayerData: function(defenderCount, hrefpointer, pl) {
+
+		if (defenderCount === 0) {
+
+			System.xmlhttp(
+				hrefpointer,
+				Helper.parseRelicPlayerData,
+				{'defenderCount': defenderCount}
+			);
+
+		} else {
+
+			$.ajax({
+				cache: false,
+				dataType: 'json',
+				url:'index.php',
+				data: {
+					'cmd': 'export',
+					'subcmd': 'profile',
+					'player_username': pl
+				},
+				success: function(data) {
+					//~ console.log('13106 textStatus1', textStatus);
+					//~ console.log('13107 data', data);
+					Helper.parseRelicPlayerData(data, {'defenderCount': defenderCount});
+				}
+			});
+
+		}
 	},
 
 	parseRelicPlayerData: function(responseText, callback) {
@@ -1436,25 +1422,6 @@ var Helper = {
 		var defenderCount = callback.defenderCount;
 
 		var player = Helper.playerData(responseText);
-		if (typeof player.attackValue === 'number' &&
-			isNaN(player.attackValue)) {
-			player.attackValue = player.levelValue*10;
-		}
-		if (typeof player.defenseValue === 'number' &&
-			isNaN(player.defenseValue)) {
-			player.defenseValue = player.levelValue*10;
-		}
-		if (typeof player.armorValue === 'number' &&
-			isNaN(player.armorValue)) {
-			player.armorValue = player.levelValue*10;
-		}
-		if (typeof player.damageValue === 'number' &&
-			isNaN(player.damageValue)) {
-			player.damageValue = player.levelValue*10;
-		}
-		if (typeof player.hpValue === 'number' && isNaN(player.hpValue)) {
-			player.hpValue = Math.ceil(player.levelValue*0.4);
-		}
 
 		if (defenderCount !== 0) {
 			defenderMultiplier = 0.2;
@@ -1481,30 +1448,38 @@ var Helper = {
 		else {
 			Helper.leadDefender(player);
 		}
+		Helper.syncRelicData();
+	},
+
+	syncRelicData: function() {
+		var defendersProcessed = $('td[title="defendersProcessed"]');
+		var defendersProcessedNumber = System.intValue(defendersProcessed
+			.html());
 		var relicProcessedValue = $('td[title="relicProcessed"]');
-		if (Helper.relicDefenderCount === defendersProcessedNumber + 1 && relicProcessedValue.html() === '1') {
+		if (Helper.relicDefenderCount === defendersProcessedNumber &&
+			relicProcessedValue.html() === '1') {
 			Helper.processRelicStats();
 		}
 	},
 
 	leadDefender: function(player) {
 		//get lead defender (LD) buffs here for use later ... 
-		var defenderMultiplier = 1;
+		//~ var defenderMultiplier = 1;
 		var attackValue = $('td[title="LDattackValue"]');
 		var attackNumber = System.intValue(attackValue.html());
-		attackValue.html(System.addCommas(attackNumber + Math.round(player.attackValue*defenderMultiplier)));
+		attackValue.html(System.addCommas(attackNumber + Math.round(player.attackValue)));
 		var defenseValue = $('td[title="LDdefenseValue"]');
 		var defenseNumber = System.intValue(defenseValue.html());
-		defenseValue.html(System.addCommas(defenseNumber + Math.round(player.defenseValue*defenderMultiplier)));
+		defenseValue.html(System.addCommas(defenseNumber + Math.round(player.defenseValue)));
 		var armorValue = $('td[title="LDarmorValue"]');
 		var armorNumber=System.intValue(armorValue.html());
-		armorValue.html(System.addCommas(armorNumber + Math.round(player.armorValue*defenderMultiplier)));
+		armorValue.html(System.addCommas(armorNumber + Math.round(player.armorValue)));
 		var damageValue = $('td[title="LDdamageValue"]');
 		var damageNumber=System.intValue(damageValue.html());
-		damageValue.html(System.addCommas(damageNumber + Math.round(player.damageValue*defenderMultiplier)));
+		damageValue.html(System.addCommas(damageNumber + Math.round(player.damageValue)));
 		var hpValue = $('td[title="LDhpValue"]');
 		var hpNumber=System.intValue(hpValue.html());
-		hpValue.html(System.addCommas(hpNumber + Math.round(player.hpValue*defenderMultiplier)));
+		hpValue.html(System.addCommas(hpNumber + Math.round(player.hpValue)));
 		var defendersProcessed = $('td[title="defendersProcessed"]');
 		var defendersProcessedNumber = System.intValue(defendersProcessed.html());
 		defendersProcessed.html(System.addCommas(defendersProcessedNumber + 1));
@@ -1613,12 +1588,23 @@ var Helper = {
 	getRelicGroupData: function(responseText) {
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Parsing attacking group stats ... ');
-		var doc=System.createDocument(responseText);
-		Helper.relicGroupAttackValue = $(doc).find('#stat-attack').text().replace(/,/g,'')*1;
-		Helper.relicGroupDefenseValue = $(doc).find('#stat-defense').text().replace(/,/g,'')*1;
-		Helper.relicGroupArmorValue = $(doc).find('#stat-armor').text().replace(/,/g,'')*1;
-		Helper.relicGroupDamageValue = $(doc).find('#stat-damage').text().replace(/,/g,'')*1;
-		Helper.relicGroupHPValue = $(doc).find('#stat-hp').text().replace(/,/g,'')*1;
+		var doc = System.createDocument(responseText);
+		var theTable = $('div#pCC table table table', doc);
+		//~ Helper.relicGroupAttackValue = $(doc).find('#stat-attack').text().replace(/,/g,'')*1;
+		Helper.relicGroupAttackValue = System.intValue($('td#stat-attack',
+			theTable).text());
+		//~ Helper.relicGroupDefenseValue = $(doc).find('#stat-defense').text().replace(/,/g,'')*1;
+		Helper.relicGroupDefenseValue = System.intValue($('td#stat-defense',
+			theTable).text());
+		//~ Helper.relicGroupArmorValue = $(doc).find('#stat-armor').text().replace(/,/g,'')*1;
+		Helper.relicGroupArmorValue = System.intValue($('td#stat-armor',
+			theTable).text());
+		//~ Helper.relicGroupDamageValue = $(doc).find('#stat-damage').text().replace(/,/g,'')*1;
+		Helper.relicGroupDamageValue = System.intValue($('td#stat-damage',
+			theTable).text());
+		//~ Helper.relicGroupHPValue = $(doc).find('#stat-hp').text().replace(/,/g,'')*1;
+		Helper.relicGroupHPValue = System.intValue($('td#stat-hp',
+			theTable).text());
 		System.xmlhttp('index.php?cmd=guild&subcmd=mercs', Helper.parseRelicMercStats);
 	},
 
@@ -1627,7 +1613,7 @@ var Helper = {
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Subtracting group merc stats ... ');
 
-		var mercPage=System.createDocument(responseText);
+		var mercPage = System.createDocument(responseText);
 		var mercElements = mercPage.getElementsByTagName('IMG');
 		var totalMercAttack = 0;
 		var totalMercDefense = 0;
@@ -1671,104 +1657,128 @@ var Helper = {
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Processing attacking group stats ... ');
 
-		var doc=System.createDocument(responseText);
-		var allItems = doc.getElementsByTagName('IMG');
-		var constitutionLevel = 0;
-		var flinchLevel = 0;
-		var nightmareVisageLevel = 0;
-		var fortitudeLevel = 0;
-		var chiStrikeLevel = 0;
-		var terrorizeLevel = 0;
-		var sanctuaryLevel = 0;
-		var anItem;
-		for (var i=0;i<allItems.length;i += 1) {
-			anItem=allItems[i];
-			if (anItem.getAttribute('src').search('/skills/') !== -1) {
-				var onmouseover = $(anItem).data('tipped');
-				var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
-				var constitution =  constitutionRE.exec(onmouseover);
-				if (constitution) {
-					constitutionLevel = constitution[1];
-					continue;
-				}
-				var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/;
-				var flinch = flinchRE.exec(onmouseover);
-				if (flinch) {
-					flinchLevel = flinch[1];
-					continue;
-				}
-				var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/;
-				var nightmareVisage = nightmareVisageRE.exec(onmouseover);
-				if (nightmareVisage) {
-					nightmareVisageLevel = nightmareVisage[1];
-					continue;
-				}
-				var fortitudeRE = /<b>Fortitude<\/b> \(Level: (\d+)\)/;
-				var fortitude = fortitudeRE.exec(onmouseover);
-				if (fortitude) {
-					fortitudeLevel = fortitude[1];
-					continue;
-				}
-				var chiStrikeRE = /<b>Chi Strike<\/b> \(Level: (\d+)\)/;
-				var chiStrike = chiStrikeRE.exec(onmouseover);
-				if (chiStrike) {
-					chiStrikeLevel = chiStrike[1];
-					continue;
-				}
-				var terrorizeRE = /<b>Terrorize<\/b> \(Level: (\d+)\)/;
-				var terrorize = terrorizeRE.exec(onmouseover);
-				if (terrorize) {
-					terrorizeLevel = terrorize[1];
-					continue;
-				}
-				var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/;
-				var sanctuary = sanctuaryRE.exec(onmouseover);
-				if (sanctuary) {
-					sanctuaryLevel = sanctuary[1];
-					continue;
-				}
-			}
-		}
+		var player = Helper.playerData(responseText);
+		//~ var doc = System.createDocument(responseText);
+		//~ var allItems = doc.getElementsByTagName('IMG');
+		//~ var constitutionLevel = 0;
+		//~ var flinchLevel = 0;
+		//~ var nightmareVisageLevel = 0;
+		//~ var fortitudeLevel = 0;
+		//~ var chiStrikeLevel = 0;
+		//~ var terrorizeLevel = 0;
+		//~ var sanctuaryLevel = 0;
+		//~ var anItem;
+		//~ for (var i=0;i<allItems.length;i += 1) {
+			//~ anItem=allItems[i];
+			//~ if (anItem.getAttribute('src').search('/skills/') !== -1) {
+				//~ var onmouseover = $(anItem).data('tipped');
+				//~ var constitutionRE = /<b>Constitution<\/b> \(Level: (\d+)\)/;
+				//~ var constitution =  constitutionRE.exec(onmouseover);
+				//~ if (constitution) {
+					//~ constitutionLevel = constitution[1];
+					//~ continue;
+				//~ }
+				//~ var flinchRE = /<b>Flinch<\/b> \(Level: (\d+)\)/;
+				//~ var flinch = flinchRE.exec(onmouseover);
+				//~ if (flinch) {
+					//~ flinchLevel = flinch[1];
+					//~ continue;
+				//~ }
+				//~ var nightmareVisageRE = /<b>Nightmare Visage<\/b> \(Level: (\d+)\)/;
+				//~ var nightmareVisage = nightmareVisageRE.exec(onmouseover);
+				//~ if (nightmareVisage) {
+					//~ nightmareVisageLevel = nightmareVisage[1];
+					//~ continue;
+				//~ }
+				//~ var fortitudeRE = /<b>Fortitude<\/b> \(Level: (\d+)\)/;
+				//~ var fortitude = fortitudeRE.exec(onmouseover);
+				//~ if (fortitude) {
+					//~ fortitudeLevel = fortitude[1];
+					//~ continue;
+				//~ }
+				//~ var chiStrikeRE = /<b>Chi Strike<\/b> \(Level: (\d+)\)/;
+				//~ var chiStrike = chiStrikeRE.exec(onmouseover);
+				//~ if (chiStrike) {
+					//~ chiStrikeLevel = chiStrike[1];
+					//~ continue;
+				//~ }
+				//~ var terrorizeRE = /<b>Terrorize<\/b> \(Level: (\d+)\)/;
+				//~ var terrorize = terrorizeRE.exec(onmouseover);
+				//~ if (terrorize) {
+					//~ terrorizeLevel = terrorize[1];
+					//~ continue;
+				//~ }
+				//~ var sanctuaryRE = /<b>Sanctuary<\/b> \(Level: (\d+)\)/;
+				//~ var sanctuary = sanctuaryRE.exec(onmouseover);
+				//~ if (sanctuary) {
+					//~ sanctuaryLevel = sanctuary[1];
+					//~ continue;
+				//~ }
+			//~ }
+		//~ }
 		var groupAttackElement = $('td[title="GroupAttack"]');
 		var groupAttackBuffedElement = $('td[title="GroupAttackBuffed"]');
 		groupAttackElement.html(System.addCommas(Helper.relicGroupAttackValue));
-		var nightmareVisageEffect = Math.ceil(Helper.relicGroupAttackValue*(nightmareVisageLevel * 0.0025));
-		Helper.relicGroupAttackValue = Helper.relicGroupAttackValue - nightmareVisageEffect;
-		var storedFlinchLevel = System.intValue($('td[title="LDFlinchLevel"]').text());
-		var storedFlinchEffectValue = Math.ceil(Helper.relicGroupAttackValue * storedFlinchLevel * 0.001);
-		groupAttackBuffedElement.html(System.addCommas(Helper.relicGroupAttackValue - storedFlinchEffectValue));
-		var defenseWithConstitution = Math.ceil(Helper.relicGroupDefenseValue * (1 + constitutionLevel * 0.001));
+		var nightmareVisageEffect = Math.ceil(Helper.relicGroupAttackValue *
+			(player.nightmareVisageLevel * 0.0025));
+		Helper.relicGroupAttackValue = Helper.relicGroupAttackValue -
+			nightmareVisageEffect;
+		var storedFlinchLevel = System.intValue($('td[title="LDFlinchLevel"]')
+			.text());
+		var storedFlinchEffectValue = Math.ceil(Helper.relicGroupAttackValue *
+			storedFlinchLevel * 0.001);
+		groupAttackBuffedElement.html(System.addCommas(
+			Helper.relicGroupAttackValue - storedFlinchEffectValue));
+		var defenseWithConstitution = Math.ceil(Helper.relicGroupDefenseValue *
+			(1 + player.constitutionLevel * 0.001));
 		var totalDefense = defenseWithConstitution + nightmareVisageEffect;
 		var groupDefenseElement = $('td[title="GroupDefense"]');
 		var groupDefenseBuffedElement = $('td[title="GroupDefenseBuffed"]');
-		groupDefenseElement.html(System.addCommas(Helper.relicGroupDefenseValue));
+		groupDefenseElement.html(System.addCommas(
+			Helper.relicGroupDefenseValue));
 		groupDefenseBuffedElement.html(System.addCommas(totalDefense));
 		var groupArmorElement = $('td[title="GroupArmor"]');
 		var groupArmorBuffedElement = $('td[title="GroupArmorBuffed"]');
 		groupArmorElement.html(System.addCommas(Helper.relicGroupArmorValue));
-		groupArmorBuffedElement.html(System.addCommas(Helper.relicGroupArmorValue + Math.floor(Helper.relicGroupArmorValue * sanctuaryLevel * 0.001)));
+		groupArmorBuffedElement.html(System.addCommas(
+			Helper.relicGroupArmorValue +
+			Math.floor(Helper.relicGroupArmorValue * player.sanctuaryLevel *
+			0.001)));
 		var groupDamageElement = $('td[title="GroupDamage"]');
 		var groupDamageBuffedElement = $('td[title="GroupDamageBuffed"]');
 		var groupHPElement = $('td[title="GroupHP"]');
 		var groupHPBuffedElement = $('td[title="GroupHPBuffed"]');
-		var fortitudeBonusHP = Math.ceil(defenseWithConstitution * fortitudeLevel * 0.001);
-		var chiStrikeBonusDamage = Math.ceil((Helper.relicGroupHPValue + fortitudeBonusHP) * chiStrikeLevel * 0.001);
-		var storedTerrorizeLevel = System.intValue($('td[title="LDTerrorizeLevel"]').text());
-		var storedTerrorizeEffectValue = Math.ceil(Helper.relicGroupDamageValue * storedTerrorizeLevel * 0.001);
+		var fortitudeBonusHP = Math.ceil(defenseWithConstitution *
+			player.fortitudeLevel * 0.001);
+		var chiStrikeBonusDamage = Math.ceil((Helper.relicGroupHPValue +
+			fortitudeBonusHP) * player.chiStrikeLevel * 0.001);
+		var storedTerrorizeLevel = System.intValue(
+			$('td[title="LDTerrorizeLevel"]').text());
+		var storedTerrorizeEffectValue = Math.ceil(
+			Helper.relicGroupDamageValue * storedTerrorizeLevel * 0.001);
 		groupDamageElement.html(System.addCommas(Helper.relicGroupDamageValue));
-		groupDamageBuffedElement.html(System.addCommas(Helper.relicGroupDamageValue + chiStrikeBonusDamage - storedTerrorizeEffectValue));
+		groupDamageBuffedElement.html(System.addCommas(
+			Helper.relicGroupDamageValue + chiStrikeBonusDamage -
+			storedTerrorizeEffectValue));
 		groupHPElement.html(System.addCommas(Helper.relicGroupHPValue));
-		groupHPBuffedElement.html(System.addCommas(Helper.relicGroupHPValue + fortitudeBonusHP));
+		groupHPBuffedElement.html(System.addCommas(Helper.relicGroupHPValue +
+			fortitudeBonusHP));
 
 		//Effect on defending group from Flinch on attacking group.
 		var defGuildBuffedAttackElement = $('td[title="attackValueBuffed"]');
-		var defGuildBuffedAttackValue = System.intValue(defGuildBuffedAttackElement.text());
-		var flinchEffectValue = Math.ceil(defGuildBuffedAttackValue * flinchLevel * 0.001);
-		defGuildBuffedAttackElement.html(System.addCommas(defGuildBuffedAttackValue - flinchEffectValue));
+		var defGuildBuffedAttackValue = System.intValue(
+			defGuildBuffedAttackElement.text());
+		var flinchEffectValue = Math.ceil(defGuildBuffedAttackValue *
+			player.flinchLevel * 0.001);
+		defGuildBuffedAttackElement.html(System.addCommas(
+			defGuildBuffedAttackValue - flinchEffectValue));
 		var defGuildBuffedDamageElement = $('td[title="damageValueBuffed"]');
-		var defGuildBuffedDamageValue = System.intValue(defGuildBuffedDamageElement.text());
-		var terrorizeEffectValue = Math.ceil(defGuildBuffedDamageValue * terrorizeLevel * 0.001);
-		defGuildBuffedDamageElement.html(System.addCommas(defGuildBuffedDamageValue - terrorizeEffectValue));
+		var defGuildBuffedDamageValue = System.intValue(
+			defGuildBuffedDamageElement.text());
+		var terrorizeEffectValue = Math.ceil(defGuildBuffedDamageValue *
+			player.terrorizeLevel * 0.001);
+		defGuildBuffedDamageElement.html(System.addCommas(
+			defGuildBuffedDamageValue - terrorizeEffectValue));
 
 		processingStatus.html('Done.');
 	},
@@ -2820,7 +2830,7 @@ var Helper = {
 				//combatData.player.enhancements = data.player.enhancements;
 				//combatData.player.buffs = data.player.buffs;
 				var now = new Date();
-				combatData.time=System.formatDateTime(now);
+				combatData.time = System.formatDateTime(now);
 				Helper.appendSavedLog(',' + JSON.stringify(combatData));
 			});
 			//on world
@@ -3900,7 +3910,7 @@ var Helper = {
 				Helper.appendCombatLog(reportHtml, showCombatLog);
 				result.setAttribute('mouseOverText', mouseOverText);
 				if (System.getValue('keepLogs')) {
-					var now=new Date();
+					var now = new Date();
 					Helper.appendSavedLog('\n================================\n' + System.formatDateTime(now) + '\n' + resultText + '\n' + reportText);
 				}
 			}
@@ -3960,111 +3970,6 @@ var Helper = {
 			//~ $T.show($(target));
 		}
 	},
-
-	//~ retrieveGuildData: function() {
-		//~ // don't need to run the retrieve guild data function when looking at these pages (causes issues or already done elsewhere
-		//~ if (location.search.search('cmd=quickbuff') !== -1 ||
-			//~ location.search.search('cmd=guild&subcmd=manage') !== -1 ||
-			//~ location.search.search('cmd=guild&subcmd=ranks') !== -1) {
-			//~ return;
-		//~ }
-		//~ // only update every x minutes
-		//~ var memberList = System.getValueJSON('memberlist');
-		//~ if (!memberList || (new Date()).getTime() -
-			//~ memberList.lastUpdate.getTime() > 300000) {
-			//~ $.get('index.php?cmd=guild&subcmd=manage',
-				//~ Helper.parseGuildForWorld);
-		//~ }
-	//~ },
-
-	//~ parseGuildForWorld: function(details) {
-		//~ var memberRows;
-		//~ var doc=System.createDocument(details);
-		//~ if (location.search.search('cmd=guild&subcmd=manage') !== -1) {
-			//~ //manage page so we don't need to parse the response we can just look at the current page.
-			//~ memberRows = $('td:contains("Username"):last')
-				//~ .parents('table:first')
-				//~ .find('a[href]')
-				//~ .parent('td')
-				//~ .parent('tr');
-		//~ } else {
-			//~ memberRows = $(doc)
-				//~ .find('td:contains("Username"):last')
-				//~ .parents('table:first')
-				//~ .find('a[href]')
-				//~ .parent('td')
-				//~ .parent('tr');
-		//~ }
-		//~ //members found so reset the list
-		//~ var memberList = System.getValueJSON('memberlist');
-		//~ if (!memberList) {
-			//~ memberList = {};
-			//~ memberList.members = [];
-		//~ }
-//~ 
-		//~ memberList.members.forEach(function(e) {e.status='Deleted';});
-//~ 
-		//~ //go through each member and store the data
-		//~ memberRows.each(function(){
-			//~ var playerLink   = $(this).find('a');
-			//~ var memberId     = System.intValue(/[0-9]+$/
-				//~ .exec(playerLink.attr('href'))[0]);
-			//~ var memberName   = playerLink.text();
-			//~ var memberLevel  = System.intValue($(this).find('td:eq(2)').text());
-			//~ var memberRank   = $(this).find('td:eq(3)').text();
-			//~ var memberXP     = System.intValue($(this).find('td:eq(4)').text());
-			//~ var memberStatus = $(this).find('td:eq(0) img').attr('title');
-			//~ var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(playerLink).data('tipped'));
-			//~ var lastActivityDays = parseInt(lastActivity[1],10);
-			//~ var lastActivityHours = parseInt(lastActivity[2],10) +
-				//~ lastActivityDays*24;
-			//~ var lastActivityMinutes = parseInt(lastActivity[3],10) +
-				//~ lastActivityHours*60;
-			//~ var aMember;
-//~ 
-			//~ // find member in member list, to modify data instead of replacing it
-			//~ var findMembers = memberList.members.filter(function(e) {
-				//~ return e.id===memberId;});
-			//~ if (findMembers.length>0) {
-				//~ aMember = findMembers[0];
-			//~ }
-			//~ else { // member was not found, must be a new player
-				//~ aMember = {};
-				//~ // You can still modify an object, even if you have added it to something else
-				//~ memberList.members.push(aMember);
-				//~ aMember.firstSeen = new Date();
-				//~ aMember.status = 'Offline'; // new players are supposed to be offline
-			//~ }
-			//~ // Helper.getFullPlayerData(aMember);
-//~ 
-			//~ if (aMember.status === 'Offline' && memberStatus==='Online') {
-				//~ aMember.loggedInAt = new Date();
-			//~ }
-//~ 
-			//~ if (!aMember.loggedInAt) {
-				//~ aMember.loggedInAt = new Date();
-			//~ }
-//~ 
-			//~ aMember.status = memberStatus;
-			//~ aMember.id     = memberId;
-			//~ aMember.name   = memberName;
-			//~ aMember.level  = memberLevel;
-			//~ aMember.rank   = memberRank;
-			//~ aMember.xp     = memberXP;
-			//~ aMember.lastActivityMinutes = lastActivityMinutes;
-		//~ });
-		//~ // remove not existing players
-		//~ memberList.members = memberList.members.filter(function(e) {
-			//~ return e.status!=='Deleted';});
-		//~ // damn, I love javascript array functions :)
-//~ 
-		//~ memberList.lastUpdate = new Date();
-		//~ memberList.isRefreshed = true;
-		//~ System.setValueJSON('memberlist', memberList);
-		//~ // if (location.search === '?cmd=guild&subcmd=ranks') {
-			//~ // Helper.injectGuildRanksMembers(memberList);
-		//~ // }
-	//~ },
 
 	replaceKeyHandler: function() {
 		//~ setTimeout(function() { // FF3.6 was not working without the timeout in place
@@ -4303,7 +4208,7 @@ var Helper = {
 		var lastCheckScreen = 'last' + logScreen + 'Check';
 		var localLastCheckMilli = System.getValue(lastCheckScreen);
 		if (!localLastCheckMilli) {
-			localLastCheckMilli = (new Date()).getTime();
+			localLastCheckMilli = Date.now();
 		}
 		var chatTable = System.findNode('//table[@class="width_full"]');
 		if (!chatTable) {chatTable = System.findNode('//table[tbody/tr/td[.="Message"]]');}
@@ -4316,12 +4221,12 @@ var Helper = {
 		chatTable.style.wordWrap = 'break-word';
 		//~ }
 
-		var localDateMilli = (new Date()).getTime();
+		var localDateMilli = Date.now();
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
-		var gmtOffsetMilli = gmtOffsetMinutes*60*1000;
+		var gmtOffsetMilli = gmtOffsetMinutes * 60 * 1000;
 		var newRow = chatTable.insertRow(1);
 		newRow.insertCell(0);
-		for (var i=2;i<chatTable.rows.length;i+=2) {
+		for (var i = 2; i < chatTable.rows.length; i += 2) {
 			var aRow = chatTable.rows[i];
 			var addBuffTag = true;
 			if (aRow.cells[0].innerHTML) {
@@ -4350,7 +4255,7 @@ var Helper = {
 		}
 		//~ var now=(new Date()).getTime();
 		//~ System.setValue(lastCheckScreen, now.toString());
-		System.setValue(lastCheckScreen, (new Date()).getTime());
+		System.setValue(lastCheckScreen, Date.now());
 	},
 
 	addLogWidgets: function() {
@@ -5832,7 +5737,8 @@ var Helper = {
 					break;
 			}
 			if (changeAppearance) {
-				var settingsAry=Data.guildRelationshipMessages();
+				//~ var settingsAry = Data.guildRelationshipMessages();
+				var settingsAry = Data.guildMessages;
 				warning.innerHTML='<br/>' + settingsAry[settings].message;
 				color = settingsAry[settings].color;
 				aLink.parentNode.style.color=color;
@@ -7290,6 +7196,13 @@ var Helper = {
 		var td2 = $('td', e).eq(1);
 		var theList = td2.html();
 		var listArr = theList.split(', ');
+
+		if (listArr.length > 1) {
+			listArr.sort(function(a, b) {
+				return (m[b] ? m[b].level : 0) - (m[a] ? m[a].level : 0);
+			});
+		}
+
 		var buffList = [];
 		listArr.forEach(function(v, i, a) {
 			if (v.indexOf('<font') !== -1) {return;}
@@ -8167,6 +8080,15 @@ var Helper = {
 			})[0].nodeValue);
 	},
 
+	getBonus: function(stat, doc) {
+		var target = $(stat, doc);
+		var children = target.children();
+		if (children.length === 0) {
+			children = target.next();
+		}
+		return children.text().slice(2, -1);
+	},
+
 	getBuffLevel: function(doc, buff) {
 		var hasBuff = $('img.tip-static[data-tipped*="' + buff + '"]', doc);
 		hasBuff = hasBuff.data('tipped');
@@ -8176,6 +8098,30 @@ var Helper = {
 	},
 
 	playerData: function(responseText) {
+		var obj = {};
+		if (typeof responseText === 'string') {
+			obj = Helper.playerDataString(responseText);
+		}
+		if (typeof responseText === 'object') {
+			obj = Helper.playerDataObject(responseText);
+		}
+		return obj;
+	},
+
+	playerDataObject: function(responseText) {
+		var obj = {
+			levelValue: responseText.level,
+			attackValue: responseText.attack,
+			defenseValue: responseText.defense,
+			armorValue: responseText.armor,
+			damageValue: responseText.damage,
+			hpValue: responseText.hp,
+			killStreakValue: System.intValue(responseText.killstreak)
+		};
+		return obj;
+	},
+
+	playerDataString: function(responseText) {
 		var doc = System.createDocument(responseText);
 		var obj = {
 			levelValue: Helper.getStat('#stat-vl', doc),
@@ -8187,21 +8133,52 @@ var Helper = {
 			killStreakValue: Helper.getStat('#stat-kill-streak', doc),
 			//get buffs here later ... DD, CA, DC, Constitution, etc
 			counterAttackLevel: Helper.getBuffLevel(doc, 'Counter Attack'),
-			doublerLevel: Helper.getBuffLevel(doc, 'Doubler'),
-			deathDealerLevel: Helper.getBuffLevel(doc, 'Death Dealer'),
-			darkCurseLevel: Helper.getBuffLevel(doc, 'Dark Curse'),
-			holyFlameLevel: Helper.getBuffLevel(doc, 'Holy Flame'),
-			constitutionLevel: Helper.getBuffLevel(doc, 'Constitution'),
-			sanctuaryLevel: Helper.getBuffLevel(doc, 'Sanctuary'),
-			flinchLevel: Helper.getBuffLevel(doc, 'Flinch'),
-			nightmareVisageLevel: Helper.getBuffLevel(doc, 'Nightmare Visage'),
-			superEliteSlayerLevel: Helper.getBuffLevel(doc, 'Super Elite Slayer'),
-			fortitudeLevel: Helper.getBuffLevel(doc, 'Fortitude'),
-			chiStrikeLevel: Helper.getBuffLevel(doc, 'Chi Strike'),
-			terrorizeLevel: Helper.getBuffLevel(doc, 'Terrorize'),
+			doublerLevel:		Helper.getBuffLevel(doc, 'Doubler'),
+			deathDealerLevel:	Helper.getBuffLevel(doc, 'Death Dealer'),
+			darkCurseLevel: 	Helper.getBuffLevel(doc, 'Dark Curse'),
+			holyFlameLevel: 	Helper.getBuffLevel(doc, 'Holy Flame'),
+			constitutionLevel:	Helper.getBuffLevel(doc, 'Constitution'),
+			sanctuaryLevel: 	Helper.getBuffLevel(doc, 'Sanctuary'),
+			flinchLevel:		Helper.getBuffLevel(doc, 'Flinch'),
+			nightmareVisageLevel:
+								Helper.getBuffLevel(doc, 'Nightmare Visage'),
+			superEliteSlayerLevel:
+								Helper.getBuffLevel(doc, 'Super Elite Slayer'),
+			fortitudeLevel: 	Helper.getBuffLevel(doc, 'Fortitude'),
+			chiStrikeLevel: 	Helper.getBuffLevel(doc, 'Chi Strike'),
+			terrorizeLevel: 	Helper.getBuffLevel(doc, 'Terrorize'),
+			barricadeLevel: 	Helper.getBuffLevel(doc, 'Barricade'),
+			reignOfTerrorLevel: Helper.getBuffLevel(doc, 'Reign Of Terror'),
+			anchoredLevel:		Helper.getBuffLevel(doc, 'Anchored'),
+			severeConditionLevel:
+								Helper.getBuffLevel(doc, 'Severe Condition'),
+			entrenchLevel:		Helper.getBuffLevel(doc, 'Entrench'),
+			cloakLevel: 		Helper.getBuffLevel(doc, 'Cloak')
 		};
 		obj.superEliteSlayerMultiplier = Math.round(0.002 *
 			obj.superEliteSlayerLevel * 100) / 100;
+
+		if (obj.cloakLevel === 0) {return obj;}
+
+		obj.attackBonus = Helper.getBonus('#stat-attack', doc);
+		obj.defenseBonus = Helper.getBonus('#stat-defense', doc);
+		obj.armorBonus = Helper.getBonus('#stat-armor', doc);
+		obj.damageBonus = Helper.getBonus('#stat-damage', doc);
+		obj.hpBonus = Helper.getBonus('#stat-hp', doc);
+
+		obj.attackValue = obj.attackBonus > obj.levelValue * 10 ||
+			obj.attackBonus < obj.levelValue ?
+			obj.attackBonus : obj.levelValue * 10;
+		obj.defenseValue = obj.defenseBonus > obj.levelValue * 10 ||
+			obj.defenseBonus < obj.levelValue ?
+			obj.defenseBonus : obj.levelValue * 10;
+		obj.armorValue = obj.armorBonus > obj.levelValue * 10 ||
+			obj.armorBonus < obj.levelValue ?
+			obj.armorBonus : obj.levelValue * 10;
+		obj.damageValue = obj.damageBonus > obj.levelValue * 10 ||
+			obj.damageBonus < obj.levelValue ?
+			obj.damageBonus : obj.levelValue * 10;
+		obj.hpValue = obj.hpBonus;
 		return obj;
 	},
 
@@ -9480,7 +9457,12 @@ var Helper = {
 		var enabledHuntingMode = System.getValue('enabledHuntingMode');
 		var configData=
 			'<form><table style="border-spacing: 10px;">' +
-			'<tr><th colspan="2"><b>Fallen Sword Helper configuration Settings</b></th></tr>' +
+			'<tr><th colspan="2"><b>Fallen Sword Helper configuration ' +
+				'Settings</b></th></tr>' +
+			'<tr><td colspan="2" align=center>' +
+				'<span style="font-size:xx-small">(Current version: ' +
+				(GM_info ? GM_info.script.version : 'unknown') + ')</span>' +
+			'</td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-weight:bold;">Visit the <a href="https://github.com/fallenswordhelper/fallenswordhelper">Fallen Sword Helper web site</a> ' +
 			'for any suggestions, requests or bug reports</span></td></tr>' +
@@ -9536,7 +9518,7 @@ var Helper = {
 				':</td><td><input name="showAdmin" type="checkbox" value="on"' + (System.getValue('showAdmin')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">AJAXify rank controls' + Helper.helpLink('AJAXify rank controls', 'Enables guild founders with ranking rights to change rank positions without a screen refresh.') +
 				':</td><td><input name="ajaxifyRankControls" type="checkbox" value="on"' + (System.getValue('ajaxifyRankControls')?' checked':'') + '></td></tr>' +
-			'<tr><td align="right">Show Conflict Details' + Helper.helpLink('Show Conflict Details', 'Inserts detailed conflict information onto your guild\\\'s manage page. Currently displays the target guild as well as the current score.') +
+			'<tr><td align="right">'+Layout.networkIcon+'Show Conflict Details' + Helper.helpLink('Show Conflict Details', 'Inserts detailed conflict information onto your guild\\\'s manage page. Currently displays the target guild as well as the current score.') +
 				':</td><td><input name="detailedConflictInfo" type="checkbox" value="on"' + (System.getValue('detailedConflictInfo')?' checked':'') + '></td></tr>' +
 			//World Screen
 			'<tr><th colspan="2" align="left"><b>World screen/Hunting preferences</b></th></tr>' +
@@ -10572,14 +10554,14 @@ var Helper = {
 		bountyListRefreshTime *= 1000;
 		if (!bwNeedsRefresh) {
 			if (bountyList) {
-				if ((new Date()).getTime() -
+				if (Date.now() -
 					bountyList.lastUpdate.getTime() >
 					bountyListRefreshTime) {
 					bwNeedsRefresh = true; // invalidate cache
 				}
 			}
 			if (wantedList && !bwNeedsRefresh) {
-				if ((new Date()).getTime() -
+				if (Date.now() -
 					wantedList.lastUpdate.getTime() >
 					bountyListRefreshTime) {
 					bwNeedsRefresh = true; // invalidate cache
@@ -11343,57 +11325,57 @@ var Helper = {
 		injectHere.appendChild(bp);
 	},
 
-	getGroupBuffModifierWord: function(defenderIdx) {
-		var modifierWord = '';
-		switch (Math.ceil(( defenderIdx+1) / 16)) {
-			case 1:
-				modifierWord = 'first';
-				break;
-			case 2:
-				modifierWord = 'second';
-				break;
-			case 3:
-				modifierWord = 'third';
-				break;
-			case 4:
-				modifierWord = 'fourth';
-				break;
-			case 5:
-				modifierWord = 'fifth';
-				break;
-			case 6:
-				modifierWord = 'sixth';
-				break;
-			case 7:
-				modifierWord = 'seventh';
-				break;
-			case 8:
-				modifierWord = 'eighth';
-				break;
-			case 9:
-				modifierWord = 'ninth';
-				break;
-			case 10:
-				modifierWord = 'tenth';
-				break;
-			case 11:
-				modifierWord = 'eleventh';
-				break;
-			case 12:
-				modifierWord = 'twelfth';
-				break;
-			case 13:
-				modifierWord = 'thirteenth';
-				break;
-			case 14:
-				modifierWord = 'fourteenth';
-				break;
-			default:
-				modifierWord = '';
-				break;
-		}
-		return modifierWord;
-	},
+	//~ getGroupBuffModifierWord: function(defenderIdx) {
+		//~ var modifierWord = '';
+		//~ switch (Math.ceil(( defenderIdx+1) / 16)) {
+			//~ case 1:
+				//~ modifierWord = 'first';
+				//~ break;
+			//~ case 2:
+				//~ modifierWord = 'second';
+				//~ break;
+			//~ case 3:
+				//~ modifierWord = 'third';
+				//~ break;
+			//~ case 4:
+				//~ modifierWord = 'fourth';
+				//~ break;
+			//~ case 5:
+				//~ modifierWord = 'fifth';
+				//~ break;
+			//~ case 6:
+				//~ modifierWord = 'sixth';
+				//~ break;
+			//~ case 7:
+				//~ modifierWord = 'seventh';
+				//~ break;
+			//~ case 8:
+				//~ modifierWord = 'eighth';
+				//~ break;
+			//~ case 9:
+				//~ modifierWord = 'ninth';
+				//~ break;
+			//~ case 10:
+				//~ modifierWord = 'tenth';
+				//~ break;
+			//~ case 11:
+				//~ modifierWord = 'eleventh';
+				//~ break;
+			//~ case 12:
+				//~ modifierWord = 'twelfth';
+				//~ break;
+			//~ case 13:
+				//~ modifierWord = 'thirteenth';
+				//~ break;
+			//~ case 14:
+				//~ modifierWord = 'fourteenth';
+				//~ break;
+			//~ default:
+				//~ modifierWord = '';
+				//~ break;
+		//~ }
+		//~ return modifierWord;
+	//~ },
 
 	injectJoinAllLink: function() {
 		var groupJoinHTML = '';
@@ -11478,52 +11460,6 @@ var Helper = {
 		}
 
 	},
-
-	//~ injectGuildRanksOld: function() {
-		//~ //update the guild member list and insert a list of members next to each rank
-		//~ System.xmlhttp('index.php?cmd=guild&subcmd=manage', Helper.parseGuildForWorld, true);
-//~ 
-		//~ // Assign our rank to globals because we can't modify a rank higher
-		//~ // than our own
-		//~ // You cannot move a rank which is above your current rank.
-		//~ // Currently using cached version of memberlist possibly under the
-		//~ // assumption that if we have rank control we are not a new member
-		//~ // Bit of a problem if I just cleared my cache though
-		//~ // these values are undefined for guild founders, is that an issue?
-		//~ var characterName = $('dt.stat-name:first').next().text().replace(/,/g,'');
-		//~ var rankNameTable = System.findNode('//table[tbody/tr/td[.="Rank Name"]]');
-		//~ if (!rankNameTable) {return;}
-		//~ var memberList = System.getValueJSON('memberlist');
-		//~ var i;
-		//~ if (memberList) {
-			//~ for (i=0;i<memberList.members.length;i += 1) {
-				//~ var member=memberList.members[i];
-				//~ if (member.name.trim() === characterName.trim()) {
-					//~ Helper.characterRank = member.rank;
-					//~ break;
-				//~ }
-			//~ }
-			//~ for (i=0;i<rankNameTable.rows.length;i += 1) {
-				//~ var aRow = rankNameTable.rows[i];
-				//~ if (aRow.cells[1]) {
-					//~ var rankName = aRow.cells[0].textContent;
-					//~ if (rankName.trim() === Helper.characterRank.trim()) {
-						//~ Helper.characterRow = i;
-						//~ break;
-					//~ }
-				//~ }
-			//~ }
-		//~ }
-//~ 
-		//~ // gather rank info button
-		//~ var newRankElement = System.findNode('//td[a[@href="index.php?cmd=guild&subcmd=ranks&subcmd2=add"]]');
-		//~ newRankElement.innerHTML += '&nbsp;<input id="getrankweightings" type="button" value="Get Rank Weightings" class="custombutton">';
-		//~ document.getElementById('getrankweightings').addEventListener('click', Helper.fetchRankData, true);
-//~ 
-		//~ if (System.getValue('ajaxifyRankControls')) {
-			//~ Helper.ajaxifyRankControls();
-		//~ }
-	//~ },
 
 	ajaxifyRankControls: function() {
 		var i;
@@ -11629,67 +11565,6 @@ var Helper = {
 			'%)</span> ' + linkElement.innerHTML;
 	},
 
-	//~ injectGuildRanksMembers: function(memberList) {
-//~ 
-		//~ // Is all this really just to put peoples names next to their ranks?
-//~ 
-		//~ //first build up a relationship from rank to names
-		//~ Helper.sortAsc = true;
-		//~ Helper.sortBy = 'rank'.trim();
-		//~ memberList.members.sort(Helper.stringSort);
-		//~ var rankList = {};
-		//~ rankList.rank = [];
-		//~ var tempList = [];
-		//~ var prevRank = memberList.members[0].rank.replace(/Profile Unavailable/ig,'');
-		//~ var curRank = '';
-		//~ var i;
-		//~ var aRank;
-		//~ for (i=0;i<memberList.members.length;i += 1) {
-			//~ var member=memberList.members[i];
-			//~ curRank = member.rank.replace(/Profile Unavailable/ig,'');
-			//~ if (curRank !== prevRank) {
-				//~ aRank = {};
-				//~ aRank.rank = prevRank;
-				//~ aRank.names = tempList;
-				//~ rankList.rank.push(aRank);
-				//~ tempList = [];
-				//~ //last name on the list, so add it to the list of names
-				//~ if (i === memberList.members.length-1) {
-					//~ aRank = {};
-					//~ aRank.rank = curRank;
-					//~ tempList.push(' ' + member.name);
-					//~ aRank.names = tempList;
-					//~ rankList.rank.push(aRank);
-					//~ tempList = [];
-				//~ }
-			//~ } else if (curRank === prevRank && i === memberList.members.length-1) {
-				//~ aRank = {};
-				//~ aRank.rank = prevRank;
-				//~ tempList.push(' ' + member.name);
-				//~ aRank.names = tempList;
-				//~ rankList.rank.push(aRank);
-				//~ tempList = [];
-			//~ }
-			//~ tempList.push(' ' + member.name);
-			//~ prevRank = member.rank.replace(/Profile Unavailable/ig,'');
-		//~ }
-		//~ //then for each of the ranks, find the rank on screen and append the names next to it.
-		//~ var rankNameTable = System.findNode('//table[tbody/tr/td[.="Rank Name"]]');
-		//~ for (i=0;i<rankNameTable.rows.length;i += 1) {
-			//~ var aRow = rankNameTable.rows[i];
-			//~ if (aRow.cells[1]) {
-				//~ var rankName = aRow.cells[0].textContent;
-				//~ for (var j=0;j<rankList.rank.length;j += 1) {
-					//~ var rankListName = rankList.rank[j].rank;
-					//~ if (rankName === rankListName) {
-						//~ aRow.cells[0].innerHTML += ' <span style="color:blue;">- ' + rankList.rank[j].names + '</span>';
-						//~ break;
-					//~ }
-				//~ }
-			//~ }
-		//~ }
-	//~ },
-
 	setupGuildLogFilters: function() {
 		Helper.guildLogFilters = [
 			{'id':'showRecallMessages', 'type':'Store/Recall'},
@@ -11710,7 +11585,7 @@ var Helper = {
 
 		//store the time zone for use in processing date/times
 		var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
-		Helper.gmtOffsetMilli = gmtOffsetMinutes*60*1000;
+		Helper.gmtOffsetMilli = gmtOffsetMinutes * 60 * 1000;
 
 		//find the time the guild log was stored last
 		Helper.storedGuildLog = System.getValueJSON('storedGuildLog');
@@ -11842,8 +11717,10 @@ var Helper = {
 		if (enableLogColoring) {
 			var lastCheckScreen = 'lastGuildLogCheck';
 			localLastCheckMilli=System.getValue(lastCheckScreen);
-			if (!localLastCheckMilli) {localLastCheckMilli=(new Date()).getTime();}
-			localDateMilli = (new Date()).getTime();
+			if (!localLastCheckMilli) {
+				localLastCheckMilli = Date.now();
+			}
+			localDateMilli = Date.now();
 		}
 
 		logTable.find('tr:gt(0):has(td:not(.divider))').each(function(){
@@ -12035,7 +11912,7 @@ var Helper = {
 			//Helper.addLogColoring('GuildLog', 1);
 			Helper.addGuildLogWidgets();
 			System.setValueJSON('storedGuildLog', Helper.newStoredGuildLog);
-			var now=(new Date()).getTime();
+			var now = Date.now();
 			System.setValue('lastGuildLogCheck', now.toString());
 		}
 	},
@@ -12062,65 +11939,6 @@ var Helper = {
 			}
 		});
 	},
-
-		//~ var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send As Mass"]]');
-		//~ if (!messageCell) {
-			//~ Helper.addChatTextAreaLeader();
-			//~ return;
-		//~ }
-		//~ Helper.addChatTextAreaNormal();
-	//~ },
-
-	//~ addChatTextAreaNormal: function() {
-		//~ if (!System.getValue('enhanceChatTextEntry')) {return;}
-		//~ var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send As Mass"]]');
-		//~ var chatConfirm=System.findNode('//input[@name="xc"]');
-		//~ var chatType=System.findNode('//input[@name="chat_type"]');
-		//~ var result = '<form name="dochat" action="index.php" method="post">';
-		//~ result += '<table border="0"><tbody><tr><td rowspan="2">';
-		//~ result += '<input type="hidden" value="guild" name="cmd"/>';
-		//~ result += '<input type="hidden" value="dochat" name="subcmd"/>';
-		//~ result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
-		//~ result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		//~ result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
-		//~ result += '</td><td>';
-		//~ result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
-		//~ result += '</td><tr><td>';
-		//~ //if(!confirm('Are you sure you wish to send this a mass message to all guild members?')) return false;
-		//~ result += '<input class="custominput" type="submit" value="Send As Mass" name="submit" ' +
-			//~ 'onClick="if(!confirm(\'Are you sure you wish to send this a mass message to all guild members?\')) return false;"/>';
-		//~ result += '</td></tr></tbody></table>';
-		//~ result += '</form>';
-		//~ messageCell.innerHTML = result;
-
-		//~ document
-			//~ .getElementById('Helper:ChatTextArea')
-			//~ .addEventListener('keyup', function(evt) {if (evt.keyCode === 13) {evt.target.form.submit();}}, true);
-	//~ },
-
-	//~ addChatTextAreaLeader: function() {
-		//~ if (!System.getValue('enhanceChatTextEntry')) {return;}
-		//~ var messageCell = System.findNode('//td[table/tbody/tr/td/input[@value="Send"]]');
-		//~ var chatConfirm=System.findNode('//input[@name="xc"]');
-		//~ var chatType=System.findNode('//input[@name="chat_type"]');
-		//~ var result = '<form name="dochat" action="index.php" method="post">';
-		//~ result += '<table border="0"><tbody><tr><td rowspan="2">';
-		//~ result += '<input type="hidden" value="guild" name="cmd"/>';
-		//~ result += '<input type="hidden" value="dochat" name="subcmd"/>';
-		//~ result += '<input type="hidden" value="' + chatType.value + '" name="chat_type">';
-		//~ result += '<input type="hidden" value="' + chatConfirm.value + '" name="xc"/>';
-		//~ result += '<textarea align="center" cols="72" rows="2" name="msg" id="Helper:ChatTextArea"></textarea>';
-		//~ result += '</td><td>';
-		//~ result += '<input class="custominput" type="submit" value="Send" name="submit"/>';
-		//~ result += '</td><tr><td>';
-		//~ result += '</td></tr></tbody></table>';
-		//~ result += '</form>';
-		//~ messageCell.innerHTML = result;
-
-		//~ document
-			//~ .getElementById('Helper:ChatTextArea')
-			//~ .addEventListener('keyup', function(evt) {if (evt.keyCode === 13) {evt.target.form.submit();}}, true);
-	//~ },
 
 	injectHomePageTwoLink: function() { //jquery
 		var archiveLink =
@@ -12152,8 +11970,8 @@ var Helper = {
 		var needToPray = System.getValue('needToPray');
 		var needToParse = false;
 		if (templeAlertLastUpdate) {
-			// TODO midnight
-			if (new Date().getTime() - templeAlertLastUpdate > 60 * 60 * 1000) {
+			//~ if (Date.now() - templeAlertLastUpdate > 60 * 60 * 1000) { // TODO midnight
+			if (Date.now() > templeAlertLastUpdate) { // midnight
 				needToParse = true;
 			} else if (needToPray) {
 				Helper.displayDisconnectedFromGodsMessage();
@@ -12181,14 +11999,15 @@ var Helper = {
 			needToPray = true;
 		}
 		System.setValue('needToPray', needToPray);
-		System.setValue('lastTempleCheck', (new Date()).getTime()); // TODO midnight
+		System.setValue('lastTempleCheck', new Date()
+			.setUTCHours(23, 59, 59, 999) + 1); // midnight
 	},
 
 	},
 
 	displayDisconnectedFromGodsMessage: function() {
 		var notificationUl = $('ul#notifications');
-		notificationUl.append('<li class="notification"><a href="index.php?cmd=temple">' +
+		notificationUl.prepend('<li class="notification"><a href="index.php?cmd=temple">' +
 			'<span class="notification-icon"></span>' +
 			'<p class="notification-content">Bow down to the gods.</p>' +
 			'</a></li>');
@@ -12203,7 +12022,7 @@ var Helper = {
 			return;
 		}
 		var lastUpgradeCheck = System.getValue('lastUpgradeCheck');
-		if (lastUpgradeCheck && new Date().getTime() < lastUpgradeCheck) {
+		if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {
 			return;
 		}
 		$.get('index.php?cmd=points&type=1', Helper.parseGoldUpgrades);
@@ -12230,7 +12049,7 @@ var Helper = {
 	},
 
 	displayUpgradeMsg: function() { //jquery
-		$('ul#notifications').append(Layout.goldUpgradeMsg);
+		$('ul#notifications').prepend(Layout.goldUpgradeMsg);
 	},
 
 	injectFindPlayer: function() {
@@ -12961,7 +12780,7 @@ var Helper = {
 			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/dev/calfSystem.js'],
 		callback: Helper.onPageLoad
 	};
-	if (typeof unsafeWindow.jQuery === 'undefined') {
+	if (typeof window.jQuery === 'undefined') {
 		o.js.unshift('https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
 	}
 	Helper.appendHead(o);
@@ -12973,7 +12792,7 @@ var Helper = {
 
 'use strict';
 
-	if (typeof GM_info === 'undefined') {
+	if (typeof GM_info === 'undefined') { // Chromium Native
 		var script = document.createElement('script');
 		script.textContent = '(' + fshMain.toString() + ')();';
 		document.body.appendChild(script);

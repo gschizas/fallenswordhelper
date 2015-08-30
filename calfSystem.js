@@ -774,19 +774,30 @@ window.Data = {
 
 /* jshint +W101 */ // Line is too long. (W101)
 
-	guildRelationshipMessages: function(){
-		if(!Data.guildMessages){
-			Data.guildMessages= {};
-				Data.guildMessages.guildSelfMessage = {'color':'green',
-					'message':'Member of your own guild!'};
-				Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
-					'message':'Do not attack - Guild is friendly!'};
-				Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
-					'message':'Do not attack - You\'ve been in that guild once!'};
-				Data.guildMessages.guildEnmyMessage = {'color':'red',
-					'message':'Enemy guild. Attack at will!'};
-		}
-		return Data.guildMessages;
+	//~ guildRelationshipMessages: function(){
+		//~ if(!Data.guildMessages){
+			//~ Data.guildMessages= {};
+				//~ Data.guildMessages.guildSelfMessage = {'color':'green',
+					//~ 'message':'Member of your own guild!'};
+				//~ Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
+					//~ 'message':'Do not attack - Guild is friendly!'};
+				//~ Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
+					//~ 'message':'Do not attack - You\'ve been in that guild once!'};
+				//~ Data.guildMessages.guildEnmyMessage = {'color':'red',
+					//~ 'message':'Enemy guild. Attack at will!'};
+		//~ }
+		//~ return Data.guildMessages;
+	//~ },
+
+	guildMessages: {
+		guildSelfMessage: {'color':'green',
+			'message':'Member of your own guild!'},
+		guildFrndMessage: {'color':'OliveDrab',
+			'message':'Do not attack - Guild is friendly!'},
+		guildPastMessage: {'color':'DarkCyan',
+			'message':'Do not attack - You\'ve been in that guild once!'},
+		guildEnmyMessage: {'color':'red',
+			'message':'Enemy guild. Attack at will!'}
 	},
 
 	quickSearchList: function() {
@@ -1075,7 +1086,10 @@ window.Data = {
 		contactList: '',
 		lastUpgradeCheck: 0,
 		needToDoUpgrade: false,
-		characterVirtualLevel: 0
+		characterVirtualLevel: 0,
+		guildLogoControl: false,
+		statisticsControl: false,
+		guildStructureControl: false
 	},
 
 	saveBoxes: [
@@ -1401,7 +1415,9 @@ window.Layout = {
 		{title: 'XP Contrib', class: 'dt-center'}
 	],
 
-	places:['first', 'second', 'third', 'fourth'],
+	places:['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
+			'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
+			'fourteenth'],
 
 	quickBuffHeader:
 		'<div id="helperQBheader">' +
