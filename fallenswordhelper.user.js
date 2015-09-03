@@ -21,8 +21,8 @@ var fshMain = function() {
 
 'use strict';
 
-var isBeta ='0';
-var isNewUI = '0';
+//~ var isBeta ='0';
+//~ var isNewUI = '0';
 
 var Helper = {
 	prepareEnv: function() {
@@ -79,12 +79,7 @@ var Helper = {
 	// main event dispatcher
 	onPageLoad: function() {
 		var hcsData = $('html').data('hcs');
-		if (hcsData) {
-			if (hcsData.beta) {isBeta = 1;}
-			if (hcsData['new-ui']) {isNewUI = 1;}
-		}
-
-		if (isNewUI === 1) { // UFSG
+		if (hcsData && hcsData['new-ui']) { // UFSG or QuickBuff
 			Helper.prepareEnv();
 		}
 
@@ -240,8 +235,10 @@ var Helper = {
 					case 'removetags':
 						Helper.injectGuildAddTagsWidgets();
 						break;
-					default:
+					case 'storeitems':
 						Helper.injectDropItems();
+						break;
+					default:
 						break;
 				}
 				break;
@@ -1091,62 +1088,6 @@ var Helper = {
 				},
 				true);
 	},
-
-		//~ }
-		//~ var empowerButton = $('input[value*="Attempt Empower"]');
-		//~ if (empowerButton.length > 0) {
-			//~ //window.location='index.php?cmd=relic&subcmd=empower&relic_id=12'
-			//~ var relicID = /relic_id=(\d+)/.exec(empowerButton.attr('onclick'))[1];
-			//~ var insertEmpowerRelicTenTimesSpan = $('<span></span>').attr({
-					//~ 'style': 'cursor:pointer;text-decoration:underline;color:blue;font-size:x-small',
-					//~ 'relicID': relicID
-				//~ }).appendTo(empowerButton.parent());
-			//~ insertEmpowerRelicTenTimesSpan.text('Empower to level: ')
-				//~ .click(Helper.empowerRelic);
-
-			//~ var targetEmpowerLevelInput = $('<input></input>');
-			//~ targetEmpowerLevelInput.val(10)
-				//~ .attr('size',1)
-				//~ .attr('name','targetEmpowerLevel')
-				//~ .appendTo(empowerButton.parent());
-		//~ }
-
-	//~ empowerRelic: function(evt) {
-		//~ var relicID = evt.target.getAttribute('relicID');
-		//~ var targetEmpowerLevel = $('input[name="targetEmpowerLevel"]').val();
-		//~ var currentLevel = parseInt($('td:contains("Empower"):contains("Level"):last').next('td').text(),10);
-		//~ if (targetEmpowerLevel <= currentLevel) {return;}
-		//~ evt.target.innerHTML = 'Processing ... ';
-		//~ evt.target.removeEventListener('click', Helper.empowerRelic, true);
-		//~ evt.target.style.cursor = 'default';
-		//~ evt.target.style.textDecoration = 'none';
-		//~ Helper.empowerRelicMaxTries = 20;
-		//~ Helper.empowerRelicCurrentTries = 1;
-		//~ //index.php?cmd=relic&subcmd=empower&relic_id=12
-		//~ System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {'target':evt.target,'relicID':relicID,'targetEmpowerLevel':targetEmpowerLevel});
-	//~ },
-
-	//~ empowerRelicToTarget: function(responseText, callback) {
-		//~ //http://www.fallensword.com/index.php?cmd=relic&relic_id=87
-		//~ //<center>You failed to increase the empower level of the relic! The empower level has been reset back to zero.</center>
-		//~ //<center>You successfully increased the empower level of the relic!</center>
-		//~ var target = callback.target;
-		//~ var relicID = callback.relicID;
-		//~ var targetEmpowerLevel = callback.targetEmpowerLevel;
-		//var info = Layout.infoBox(responseText);
-		//~ var doc = System.createDocument(responseText);
-		//~ var currentLevel = parseInt($(doc).find('td:contains("Empower"):contains("Level:"):last').next().text(),10);
-		//~ target.innerHTML += currentLevel + ' -> ';
-		//~ var empowerRelicCurrentTries = Helper.empowerRelicCurrentTries;
-		//~ var empowerRelicMaxTries = Helper.empowerRelicMaxTries;
-		//~ if (currentLevel < targetEmpowerLevel && empowerRelicCurrentTries < empowerRelicMaxTries) {
-			//~ empowerRelicCurrentTries += 1;
-			//~ System.xmlhttp('index.php?cmd=relic&subcmd=empower&relic_id=' + relicID, Helper.empowerRelicToTarget, {'target':target,'relicID':relicID,'targetEmpowerLevel':targetEmpowerLevel});
-		//~ } else {
-			//~ //http://www.fallensword.com/index.php?cmd=relic&relic_id=87
-			//~ window.location = 'index.php?cmd=relic&relic_id=' + relicID;
-		//~ }
-	//~ },
 
 	calculateRelicDefenderStats: function() {
 		var validMemberString;
@@ -4753,32 +4694,46 @@ var Helper = {
 	},
 
 	getMembrList: function(fn, force) {
-		force = force;//TODO
-		$.ajax({
-			cache: false,
-			dataType: 'json',
-			url:'index.php',
-			data: {
-				cmd: 'export',
-				subcmd: 'guild_members',
-				guild_id: Layout.guildId(),
-				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
-			},
-			success: function(data) {
-				var fn = this;
-				var membrList = {};
-				System.setValue('lastMembrListCheck', Date.now());
-				membrList.lastUpdate = Date.now();
-				data.forEach(function(ele) {membrList[ele.username] = ele;});
-				localforage.setItem('membrList', membrList,
-					function(err, membrList) {
-						// Assign as global because in future we may have
-						// multiple concurrent ajax calls before the callback
-						Helper.membrList = membrList;
-						fn(membrList);
+		if (force) {
+			$.ajax({
+				cache: false,
+				dataType: 'json',
+				url:'index.php',
+				data: {
+					cmd: 'export',
+					subcmd: 'guild_members',
+					guild_id: Layout.guildId(),
+					_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+				},
+				success: function(data) {
+					var fn = this;
+					var membrList = {};
+					membrList.lastUpdate = Date.now();
+					data.forEach(function(ele) {
+						membrList[ele.username] = ele;
 					});
-			},
-			context: fn
+					localforage.setItem('membrList', membrList,
+						function(err, membrList) {
+							if (err) {console.log('localforage error', err);}
+							// Assign as global because in future we may have
+							// multiple concurrent ajax calls before the callback
+							Helper.membrList = membrList;
+							fn(membrList);
+						}
+					);
+				},
+				context: fn
+			});
+			return;
+		}
+		localforage.getItem('membrList', function(err, membrList) {
+			if (err) {console.log('localforage error', err);}
+			if (!membrList || membrList.lastUpdate < Date.now() - 300000) {
+				Helper.getMembrList(fn, true);
+				return;
+			}
+			Helper.membrList = membrList;
+			fn(membrList);
 		});
 	},
 
@@ -4964,18 +4919,17 @@ var Helper = {
 		if (itemIndex >= allItems.length) {return;}
 		var cbsIndex = allItems[itemIndex].value;
 
-		GM_xmlhttpRequest({
-			method: 'POST',
+		$.ajax({
+			type: 'POST',
 			url: System.server + 'index.php',
-			headers: {
-			//	'User-Agent' : navigator.userAgent,
-				'Content-Type': 'application/x-www-form-urlencoded'
-			//	'Referer': System.server + 'index.php?cmd=profile',
-			//	'Cookie' : document.cookie
+			data: {
+				cmd: 'profile',
+				subcmd: 'managecombatset',
+				combatSetId: cbsIndex,
+				submit: 'Use'
 			},
-			data: 'cmd=profile&subcmd=managecombatset&combatSetId='+cbsIndex+'&submit=Use',
-			onload: function() {
-				window.location='index.php?cmd=profile';
+			success: function() {
+				window.location = 'index.php?cmd=profile';
 			}
 		});
 	},
@@ -5138,16 +5092,10 @@ var Helper = {
 			}
 			if (countItems === 12 || countItems > 0 && i === itemsList.length - 1) {
 				// multiple posts since HCS only move the first 12 items to other folder
-				GM_xmlhttpRequest({
-					method: 'POST',
+				$.ajax({
+					type: 'POST',
 					url: System.server + 'index.php',
-					headers: {
-					//	'User-Agent' : navigator.userAgent,
-						'Content-Type': 'application/x-www-form-urlencoded'
-					//	'Referer': document.location,
-					//	'Cookie' : document.cookie
-					},
-					data: postData+postItems
+					data: postData + postItems
 				});
 				countItems = 0;
 				postItems = '';
@@ -5304,13 +5252,8 @@ var Helper = {
 		var player = System.findNode('//textarea[@id="holdtext"]');
 		var avyImg;
 		var playername;
-		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
-			//~ avyImg = System.findNode('//img[contains(@title, "s Avatar")]');
-			//~ if (avyImg) {playername = avyImg.getAttribute('title');}
-		//~ } else { //chrome
 		avyImg = System.findNode('//img[contains(@oldtitle, "s Avatar")]');
 		if (avyImg) {playername = avyImg.getAttribute('oldtitle');}
-		//~ }
 		if (!avyImg) {return;}
 
 		if(document.URL.indexOf('player_id') !== -1){
@@ -5319,13 +5262,8 @@ var Helper = {
 		}
 		var idindex;
 //************** yuuzhan having fun
-		//~ if (navigator.userAgent.indexOf('Firefox')>0) {
-			//~ $('img[title="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
-			//~ $('img[title="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		//~ } else { //chrome
 		$('img[oldtitle="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
 		$('img[oldtitle="yuuzhan\'s Avatar"]').attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		//~ }
 //**************
 		Helper.profileInjectGuildRel();
 		if (System.getValue('enableBioCompressor')) {Helper.compressBio();}
@@ -5377,6 +5315,7 @@ var Helper = {
 				System.setValue('characterVirtualLevel',virtualLevel);
 			}
 		}
+
 		Helper.addStatTotalToMouseover();
 
 		//enhance colored dots
@@ -5404,30 +5343,37 @@ var Helper = {
 	},
 
 	addStatTotalToMouseover: function() {
-		if (System.getValue('showStatBonusTotal')) {
-			$.subscribe('afterUpdate.Tipped', function(e, data){
-				var $e = $(data.element);
-
-				// already modified || not an item
-				if(data.skin !== 'fsItem' || $e.is('.fsh')) {return;}
-				$(data.content).find('font:contains("Bonuses")').closest('tr').each(function(){
-					var itemTable = $(this).closest('table');
-					var attackStatElement = $(itemTable).find('td:contains("Attack:"):not(:contains(" Attack:"))');
-					var attackStat = attackStatElement.length > 0 ? attackStatElement.next().text().replace(/\+/g,'')*1:0;
-					var defenseStatElement = $(itemTable).find('td:contains("Defense:"):not(:contains(" Defense:"))');
-					var defenseStat = defenseStatElement.length > 0 ? defenseStatElement.next().text().replace(/\+/g,'')*1:0;
-					var armorStatElement = $(itemTable).find('td:contains("Armor:"):not(:contains(" Armor:"))');
-					var armorStat = armorStatElement.length > 0 ? armorStatElement.next().text().replace(/\+/g,'')*1:0;
-					var damageStatElement = $(itemTable).find('td:contains("Damage:"):not(:contains(" Damage:"))');
-					var damageStat = damageStatElement.length > 0 ? damageStatElement.next().text().replace(/\+/g,'')*1:0;
-					var hpStatElement = $(itemTable).find('td:contains("HP:"):not(:contains(" HP:"))');
-					var hpStat = hpStatElement.length > 0 ? hpStatElement.next().text().replace(/\+/g,'')*1:0;
-					var totalStats = attackStat + defenseStat + armorStat + damageStat + hpStat;
-					$(this).nextAll('tr:contains("Enhance"):first').before('<tr style="color:DodgerBlue;"><td align="right">Stat Total:</td><td align="right">' + totalStats + '&nbsp;</td></tr>');
-				});
-			unsafeWindow.Tipped.refresh(data.element);
-			});
-		}
+		if (!System.getValue('showStatBonusTotal')) {return;}
+		$(document).ajaxSuccess(function(evt, xhr, ajax, data) {
+			if (ajax.url.indexOf('fetchitem') !== 0) {return;}
+			var img = $('[data-tipped="' + ajax.url + '"]');
+			if (img.length === 0) {return;}
+			var repl = $(data);
+			var bonus = $('font:contains("Bonuses")', repl);
+			if (bonus.length === 0) {return;}
+			var statTable = bonus.closest('tr')
+				.nextUntil('tr:contains("Enhance")');
+			var attackStatElement = $('td:contains("Attack:")', statTable);
+			var defenseStatElement = $('td:contains("Defense:")', statTable);
+			var armorStatElement = $('td:contains("Armor:")', statTable);
+			var damageStatElement = $('td:contains("Damage:")', statTable);
+			var hpStatElement = $('td:contains("HP:")', statTable);
+			var totalStats = (attackStatElement.length > 0 ? attackStatElement
+				.next().text().replace(/\+/g,'') * 1 : 0) +
+				(defenseStatElement.length > 0 ? defenseStatElement.next()
+				.text().replace(/\+/g,'') * 1 : 0) +
+				(armorStatElement.length > 0 ? armorStatElement.next().text()
+				.replace(/\+/g,'') * 1 : 0) +
+				(damageStatElement.length > 0 ? damageStatElement.next().text()
+				.replace(/\+/g,'') * 1 : 0) +
+				(hpStatElement.length > 0 ? hpStatElement.next().text()
+				.replace(/\+/g,'') * 1 : 0);
+			statTable.last().before('<tr style="color:DodgerBlue;"><td>' +
+				'Stat Total:</td><td align="right">' + totalStats +
+				'&nbsp;</td></tr>'
+			);
+			img.qtip('option', 'content.text', $('<div/>').append(repl).html());
+		});
 	},
 
 	profileInjectFastWear: function() {
@@ -7284,14 +7230,9 @@ var Helper = {
 	filterMercs: function(e) {return e.search('#000099') === -1;},
 
 	joinGroup: function(groupJoinURL, joinButton) {
-		GM_xmlhttpRequest({
-			method: 'GET',
+		$.ajax({
 			url: System.server + groupJoinURL,
-			/*headers: {
-				'User-Agent': navigator.userAgent,
-				'Referer': document.location
-			},*/
-			onload: function() {
+			success: function() {
 				joinButton.style.display = 'none';
 				joinButton.style.visibility = 'hidden';
 			}
@@ -9481,7 +9422,7 @@ var Helper = {
 			'<tr><td align="right">Move Online Allies List' + Helper.helpLink('Move Guild Info List', 'This will Move the Online Allies List higher on the bar on the right') +
 				':</td><td><input name="moveOnlineAlliesList" type="checkbox" value="on"' + (System.getValue('moveOnlineAlliesList')?' checked':'') + '>' +
 				'</td></tr>' +
-			'<tr><td align="right">'+Layout.networkIcon+'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
+			'<tr><td align="right">' + Layout.networkIcon + 'Show Online Allies/Enemies' + Helper.helpLink('Show Online Allies/Enemies', 'This will show the allies/enemies online list on the right.') +
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (System.getValue('enableAllyOnlineList')?' checked':'') +
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (System.getValue('enableEnemyOnlineList')?' checked':'') +
 				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ System.getValue('allyEnemyOnlineRefreshTime') + '" /> seconds refresh</td></tr>' +
@@ -9491,8 +9432,18 @@ var Helper = {
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (System.getValue('moveFSBox')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">"Game Help" Settings Link' + Helper.helpLink('Game Help Settings Link', 'This turns the Game Help text in the lower right box into a link to this settings page. This can be helpful if you use the FS Image Pack.') +
 				':</td><td><input name="gameHelpLink" type="checkbox" value="on"' + (System.getValue('gameHelpLink')?' checked':'') + '></td></tr>' +
-			'<tr><td align="right">Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you  have not prayed at the temple today. Checks once every 60 mins.') +
+
+			'<tr><td align="right">' + Layout.networkIcon + 'Enable Temple Alert' + Helper.helpLink('Enable Temple Alert', 'Puts an alert on the LHS if you have not prayed at the temple today.') +
 				':</td><td><input name="enableTempleAlert" type="checkbox" value="on"' + (System.getValue('enableTempleAlert')?' checked':'') + '></td></tr>' +
+
+			'<tr><td align="right">' + Layout.networkIcon +'Enable Gold ' +
+				'Upgrade Alert' + Helper.helpLink('Enable Gold Upgrade Alert',
+				'Puts an alert on the LHS if you have not upgraded your ' +
+				'stamina with gold today.') +
+				':</td><td><input name="enableUpgradeAlert" type="checkbox" ' +
+				'value="on"' + (System.getValue('enableUpgradeAlert') ?
+				' checked' : '') + '></td></tr>' +
+
 			'<tr><td align="right">Enhance Online Dots' + Helper.helpLink('Enhance Online Dots', 'Enhances the green/grey dots by player names to show online/offline status.') +
 				':</td><td><input name="enhanceOnlineDots" type="checkbox" value="on"' + (System.getValue('enhanceOnlineDots')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Hide Buff Selected' + Helper.helpLink('Hide Buff Selected', 'Hides the buff selected functionality in the online allies and guild info section.') +
@@ -11325,58 +11276,6 @@ var Helper = {
 		injectHere.appendChild(bp);
 	},
 
-	//~ getGroupBuffModifierWord: function(defenderIdx) {
-		//~ var modifierWord = '';
-		//~ switch (Math.ceil(( defenderIdx+1) / 16)) {
-			//~ case 1:
-				//~ modifierWord = 'first';
-				//~ break;
-			//~ case 2:
-				//~ modifierWord = 'second';
-				//~ break;
-			//~ case 3:
-				//~ modifierWord = 'third';
-				//~ break;
-			//~ case 4:
-				//~ modifierWord = 'fourth';
-				//~ break;
-			//~ case 5:
-				//~ modifierWord = 'fifth';
-				//~ break;
-			//~ case 6:
-				//~ modifierWord = 'sixth';
-				//~ break;
-			//~ case 7:
-				//~ modifierWord = 'seventh';
-				//~ break;
-			//~ case 8:
-				//~ modifierWord = 'eighth';
-				//~ break;
-			//~ case 9:
-				//~ modifierWord = 'ninth';
-				//~ break;
-			//~ case 10:
-				//~ modifierWord = 'tenth';
-				//~ break;
-			//~ case 11:
-				//~ modifierWord = 'eleventh';
-				//~ break;
-			//~ case 12:
-				//~ modifierWord = 'twelfth';
-				//~ break;
-			//~ case 13:
-				//~ modifierWord = 'thirteenth';
-				//~ break;
-			//~ case 14:
-				//~ modifierWord = 'fourteenth';
-				//~ break;
-			//~ default:
-				//~ modifierWord = '';
-				//~ break;
-		//~ }
-		//~ return modifierWord;
-	//~ },
-
 	injectJoinAllLink: function() {
 		var groupJoinHTML = '';
 		if (!System.getValue('enableMaxGroupSizeToJoin')) {
@@ -12003,9 +11902,7 @@ var Helper = {
 			.setUTCHours(23, 59, 59, 999) + 1); // midnight
 	},
 
-	},
-
-	displayDisconnectedFromGodsMessage: function() {
+displayDisconnectedFromGodsMessage: function() {
 		var notificationUl = $('ul#notifications');
 		notificationUl.prepend('<li class="notification"><a href="index.php?cmd=temple">' +
 			'<span class="notification-icon"></span>' +

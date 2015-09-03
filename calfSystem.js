@@ -125,49 +125,6 @@ function GM_ApiBrowserCheck(){
 			}
 			return list;
 		};
-		// Dummy
-		if (!gvar.isOpera || typeof GM_xmlhttpRequest === 'undefined'){
-			unsafeWindow.GM_xmlhttpRequest = function(obj){
-				var request = new XMLHttpRequest();
-				request.onreadystatechange = function(){
-					if (obj.onreadystatechange){
-						obj.onreadystatechange(request);
-					}
-					if (request.readyState === 4 && obj.onload){
-						obj.onload(request);
-					}
-				};
-				request.onerror = function(){
-					if (obj.onerror){
-						obj.onerror(request);
-					}
-				};
-				try{
-					request.open(obj.method, obj.url, true);
-				} catch(e){
-					if (obj.onerror){
-						obj.onerror({
-							readyState: 4,
-							responseHeaders: '',
-							responseText: '',
-							responseXML: '',
-							status: 403,
-							statusText: 'Forbidden'
-						});
-					}
-					return;
-				}
-				var name;
-				if (obj.headers){
-					for (name in obj.headers){
-						if (!obj.headers.hasOwnProperty(name)) { continue; }
-						request.setRequestHeader(name, obj.headers[name]);
-					}
-				}
-				request.send(obj.data);
-				return request;
-			};
-		}
 	}
 }
 GM_ApiBrowserCheck();
@@ -178,10 +135,6 @@ function GM_JQ_wrapper() {
 		var oldGM_setValue = GM_setValue;
 		GM_setValue = function(name, value){
 			setTimeout(function() {oldGM_setValue(name, value);}, 0);
-		};
-		var oldGM_xmlhttpRequest = GM_xmlhttpRequest;
-		GM_xmlhttpRequest = function(details) {
-			setTimeout(function() {oldGM_xmlhttpRequest(details);}, 0);
 		};
 	}
 }
@@ -342,25 +295,12 @@ window.System = {
 	},
 
 	xmlhttp: function(theUrl, func, theCallback) {
-		theUrl=theUrl.replace(System.server, '');
-		if (theUrl.indexOf('http://')<0) {
-			theUrl = System.server + theUrl;
-		}
-		GM_xmlhttpRequest({
-			method: 'GET',
+		$.ajax({
 			url: theUrl,
 			callback: theCallback,
-			headers: {
-			//	'User-Agent' : navigator.userAgent,
-			//	'Referer': document.location,
-			//	'Cookie' : document.cookie
-				'Cache-Control' : 'no-cache, no-store, max-age=0, must-revalidate',
-				'Pragma' : 'no-cache',
-				'Expires' : 'Fri, 01 Jan 1990 00:00:00 GMT'
-			},
-			onload: function(responseDetails) {
+			success: function(responseDetails) {
 				if (func) {
-					func.call(this, responseDetails.responseText, this.callback);
+					func.call(this, responseDetails, this.callback);
 				}
 			}
 		});
@@ -933,12 +873,9 @@ window.Data = {
 		wantedNames: '',
 		bwNeedsRefresh: true,
 
-/* jshint -W110 */ // Mixed double and single quotes. (W110)
-
 		fsboxlog: false,
 		fsboxcontent: '',
 		itemRecipient: '',
-		quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 		quickLinks:'[]',
 		enableAttackHelper: false,
 		minGroupLevel: 1,
@@ -962,8 +899,8 @@ window.Data = {
 		enableMaxGroupSizeToJoin: false,
 		maxGroupSizeToJoin: 11,
 
-		enableTempleAlert: true,
-		enableUpgradeAlert: true,
+		enableTempleAlert: false,
+		enableUpgradeAlert: false,
 		autoFillMinBidPrice: true,
 		showPvPSummaryInLog: false,
 		enableQuickDrink: false,
@@ -997,6 +934,44 @@ window.Data = {
 		showTaggingMessages: true,
 
 		showQuickDropLinks: false,
+
+
+		memberlist: '',
+		inventoryMinLvl: 1,
+		inventoryMaxLvl: 9999,
+		onlinePlayerMinLvl: 1,
+		onlinePlayerMaxLvl: 9999,
+		arenaMinLvl: 1,
+		arenaMaxLvl: 9999,
+		showMonsterLog: false,
+		lastTempleCheck: 0,
+		needToPray: false,
+		lastChatCheck: '0',
+		lastGuildLogCheck: '0',
+		lastOutBoxCheck: '0',
+		lastPlayerLogCheck: '0',
+		showAdmin: false,
+		alliestotal: 0,
+		enemiestotal: 0,
+		footprints: false,
+		showFastWalkIconOnWorld: false,
+		hideNonPlayerGuildLogMessages: true,
+		listOfAllies: '',
+		listOfEnemies: '',
+		contactList: '',
+		lastUpgradeCheck: 0,
+		needToDoUpgrade: false,
+		characterVirtualLevel: 0,
+		guildLogoControl: false,
+		statisticsControl: false,
+		guildStructureControl: false,
+		lastMembrListCheck: 0,
+		disableItemColoring: false,
+		showQuickSendLinks: false,
+
+/* jshint -W110 */ // Mixed double and single quotes. (W110)
+
+		quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 
 		sendClasses: '["Amber", "5611"], ' +
 			'["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
@@ -1056,40 +1031,10 @@ window.Data = {
 			'{"category":"Potions","searchname":"Potion of Fury",' +
 				'"nickname":"ZK 350","displayOnAH":true},' +
 			'{"category":"Potions","searchname":"Potion of Supreme Luck",' +
-				'"nickname":"FI 1k","displayOnAH":true}]',
+				'"nickname":"FI 1k","displayOnAH":true}]'
 
 /* jshint +W110 */ // Mixed double and single quotes. (W110)
 
-		memberlist: '',
-		inventoryMinLvl: 1,
-		inventoryMaxLvl: 9999,
-		onlinePlayerMinLvl: 1,
-		onlinePlayerMaxLvl: 9999,
-		arenaMinLvl: 1,
-		arenaMaxLvl: 9999,
-		showMonsterLog: false,
-		//~ templeAlertLastUpdate: '"2000-01-01T00:00:00.000Z"',
-		lastTempleCheck: 0,
-		needToPray: false,
-		lastChatCheck: '0',
-		lastGuildLogCheck: '0',
-		lastOutBoxCheck: '0',
-		lastPlayerLogCheck: '0',
-		showAdmin: false,
-		alliestotal: 0,
-		enemiestotal: 0,
-		footprints: false,
-		showFastWalkIconOnWorld: false,
-		hideNonPlayerGuildLogMessages: true,
-		listOfAllies: '',
-		listOfEnemies: '',
-		contactList: '',
-		lastUpgradeCheck: 0,
-		needToDoUpgrade: false,
-		characterVirtualLevel: 0,
-		guildLogoControl: false,
-		statisticsControl: false,
-		guildStructureControl: false
 	},
 
 	saveBoxes: [
@@ -1181,6 +1126,7 @@ window.Data = {
 		'enableMaxGroupSizeToJoin',
 		'maxGroupSizeToJoin',
 		'enableTempleAlert',
+		'enableUpgradeAlert',
 		'autoFillMinBidPrice',
 		'showPvPSummaryInLog',
 		'enableQuickDrink',
