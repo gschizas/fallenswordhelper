@@ -5204,7 +5204,8 @@ var Helper = {
 		var auctionHouseLink=System.findNode('span[@findme="AH"]', textNode);
 		var sellLink=System.findNode('span[@findme="Sell"]', textNode);
 		var quickDropLink=System.findNode('span[@findme="QuickDrop"]', textNode);
-		var guildLockedRE = /<center>Guild Locked: <font color='#00FF00'>/i;
+		//~ var guildLockedRE = /<center>Guild Locked: <font color='#00FF00'>/i;
+		var guildLockedRE = /<center>\s*Guild Locked:\s*<font color="#00FF00">/;
 
 		if (guildLockedRE.exec(responseText)) {
 			if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
@@ -11852,8 +11853,6 @@ var Helper = {
 			$('div#pCC'));
 		archiveLink.after('&nbsp;<a href="index.php?cmd=&subcmd=viewarchive&' +
 			'subcmd2=&page=2&search_text=">View News Page 2</a>');
-		$('.news_body:first').hide().data('open', false);
-		$('.news_body_tavern:first').hide().data('open', false);
 	},
 
 	injectNotepad: function() { //jquery
