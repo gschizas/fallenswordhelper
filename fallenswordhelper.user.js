@@ -5351,27 +5351,29 @@ var Helper = {
 			var repl = $(data);
 			var bonus = $('font:contains("Bonuses")', repl);
 			if (bonus.length === 0) {return;}
-			var statTable = bonus.closest('tr')
-				.nextUntil('tr:contains("Enhance")');
-			var attackStatElement = $('td:contains("Attack:")', statTable);
-			var defenseStatElement = $('td:contains("Defense:")', statTable);
-			var armorStatElement = $('td:contains("Armor:")', statTable);
-			var damageStatElement = $('td:contains("Damage:")', statTable);
-			var hpStatElement = $('td:contains("HP:")', statTable);
-			var totalStats = (attackStatElement.length > 0 ? attackStatElement
-				.next().text().replace(/\+/g,'') * 1 : 0) +
-				(defenseStatElement.length > 0 ? defenseStatElement.next()
-				.text().replace(/\+/g,'') * 1 : 0) +
-				(armorStatElement.length > 0 ? armorStatElement.next().text()
-				.replace(/\+/g,'') * 1 : 0) +
-				(damageStatElement.length > 0 ? damageStatElement.next().text()
-				.replace(/\+/g,'') * 1 : 0) +
-				(hpStatElement.length > 0 ? hpStatElement.next().text()
-				.replace(/\+/g,'') * 1 : 0);
-			statTable.last().before('<tr style="color:DodgerBlue;"><td>' +
-				'Stat Total:</td><td align="right">' + totalStats +
-				'&nbsp;</td></tr>'
-			);
+			bonus.each(function() {
+				var statTable = $(this).closest('tr')
+					.nextUntil('tr:contains("Enhance")');
+				var attackStatElement = $('td:contains("Attack:")', statTable);
+				var defenseStatElement = $('td:contains("Defense:")', statTable);
+				var armorStatElement = $('td:contains("Armor:")', statTable);
+				var damageStatElement = $('td:contains("Damage:")', statTable);
+				var hpStatElement = $('td:contains("HP:")', statTable);
+				var totalStats = (attackStatElement.length > 0 ? attackStatElement
+					.next().text().replace(/\+/g,'') * 1 : 0) +
+					(defenseStatElement.length > 0 ? defenseStatElement.next()
+					.text().replace(/\+/g,'') * 1 : 0) +
+					(armorStatElement.length > 0 ? armorStatElement.next().text()
+					.replace(/\+/g,'') * 1 : 0) +
+					(damageStatElement.length > 0 ? damageStatElement.next().text()
+					.replace(/\+/g,'') * 1 : 0) +
+					(hpStatElement.length > 0 ? hpStatElement.next().text()
+					.replace(/\+/g,'') * 1 : 0);
+				statTable.last().before('<tr style="color:DodgerBlue;"><td>' +
+					'Stat Total:</td><td align="right">' + totalStats +
+					'&nbsp;</td></tr>'
+				);
+			});
 			img.qtip('option', 'content.text', $('<div/>').append(repl).html());
 		});
 	},
