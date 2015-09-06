@@ -2,8 +2,145 @@
 
 'use strict';
 
-// System functions
+// GM_ApiBrowserCheck
+// @author        GIJoe
+// @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
+var gvar = function(){};
+// Global variables
+function GM_ApiBrowserCheck(){
+	var GMSTORAGE_PATH = 'GM_';
+	// You can change it to avoid conflict with others scripts
+	if (typeof unsafeWindow === 'undefined'){
+		window.unsafeWindow = window;
+	}
+	var needApiUpgrade = false;
+	if (window.navigator.appName.match(/^opera/i) && 
+			typeof window.opera !== 'undefined'){
+		needApiUpgrade = true;
+		gvar.isOpera = true;
+		unsafeWindow.GM_log = window.opera.postError;
+	}
+	if (typeof GM_setValue !== 'undefined'){
+		var gsv;
+		try {
+			gsv=unsafeWindow.GM_setValue.toString();
+		} catch(e) {
+			gsv='staticArgs';
+		}
+		if (gsv.indexOf('staticArgs') > 0){
+			gvar.isGreaseMonkey = true;
+		}
+		// test GM_hitch
+		else if (gsv.match(/not\s+supported/)){
+			needApiUpgrade = true;
+			gvar.isBuggedChrome = true;
+		}
+	} else{
+		needApiUpgrade = true;
+	}
 
+	if (needApiUpgrade){
+		var ws = null;
+		var uid = new Date().toString();
+		var result;
+		try{
+			unsafeWindow.localStorage.setItem(uid, uid);
+			result = unsafeWindow.localStorage.getItem(uid) === uid;
+			unsafeWindow.localStorage.removeItem(uid);
+			if (result) {
+				ws = typeof unsafeWindow.localStorage;
+			} else {
+				console.log('There is a problem with your local storage. ' +
+					'FSH cannot persist your settings.');
+				ws = null;
+			}
+		} catch(e){
+			ws = null;
+		}
+		// Catch Security error
+		if (ws === 'object'){
+			unsafeWindow.GM_getValue = function(name, defValue){
+				var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH +
+					name);
+				if (value === null || value === undefined){
+					return defValue;
+				} else{
+					switch (value.substr(0, 2)){
+					case 'S]':
+						return value.substr(2);
+					case 'N]':
+						return parseInt(value.substr(2), 10);
+					case 'B]':
+						return value.substr(2) === 'true';
+					}
+				}
+				return value;
+			};
+			unsafeWindow.GM_setValue = function(name, value){
+				switch (typeof value){
+				case 'string':
+					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+						name, 'S]' + value);
+					break;
+				case 'number':
+					if (value.toString().indexOf('.') < 0){
+						unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+							name, 'N]' + value);
+					}
+					break;
+				case 'boolean':
+					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+						name, 'B]' + value);
+					break;
+				}
+			};
+		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
+			gvar.temporarilyStorage = [];
+			unsafeWindow.GM_getValue = function(name, defValue){
+				if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
+					'undefined'){
+					return defValue;
+				} else{
+					return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
+				}
+			};
+			unsafeWindow.GM_setValue = function(name, value){
+				switch (typeof value){
+				case 'string':
+				case 'boolean':
+				case 'number':
+					gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
+				}
+			};
+		}
+
+		unsafeWindow.GM_listValues = function(){
+			var list = [];
+			var reKey = new RegExp('^' + GMSTORAGE_PATH);
+			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i += 1) {
+				var key = unsafeWindow.localStorage.key(i);
+				if (key.match(reKey)) {
+					list.push(key.replace(GMSTORAGE_PATH, ''));
+				}
+			}
+			return list;
+		};
+	}
+}
+GM_ApiBrowserCheck();
+
+// jquery GM_get/set wrapper
+function GM_JQ_wrapper() {
+	if (typeof GM_setValue !== 'undefined') {
+		var oldGM_setValue = GM_setValue;
+		GM_setValue = function(name, value){
+			setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		};
+	}
+}
+GM_JQ_wrapper();
+
+// System functions
 window.System = {
 	init: function() {
 		System.server = document.location.protocol + '//' + document.location.host + '/';
@@ -15,9 +152,6 @@ window.System = {
 	},
 
 	getValue: function(name) {
-		//~ if (Data.defaults[name] === undefined) {
-			//~ console.log('Data.defaults[' + name + ']=', Data.defaults[name]);
-		//~ }
 		return GM_getValue(name, Data.defaults[name]);
 	},
 
@@ -48,7 +182,7 @@ window.System = {
 	},
 
 	findNode: function(xpath, doc) {
-		var nodes=System.findNodes(xpath, doc);
+		var nodes = System.findNodes(xpath, doc);
 		if (!nodes) {return null;}
 		return nodes[0];
 	},
@@ -161,38 +295,20 @@ window.System = {
 	},
 
 	xmlhttp: function(theUrl, func, theCallback) {
-		theUrl=theUrl.replace(System.server, '');
-		if (theUrl.indexOf('http://')<0) {
-			theUrl = System.server + theUrl;
-		}
-		GM_xmlhttpRequest({
-			method: 'GET',
+		$.ajax({
 			url: theUrl,
 			callback: theCallback,
-			headers: {
-			//	'User-Agent' : navigator.userAgent,
-			//	'Referer': document.location,
-			//	'Cookie' : document.cookie
-				'Cache-Control' : 'no-cache, no-store, max-age=0, must-revalidate',
-				'Pragma' : 'no-cache',
-				'Expires' : 'Fri, 01 Jan 1990 00:00:00 GMT'
-			},
-			onload: function(responseDetails) {
+			success: function(responseDetails) {
 				if (func) {
-					func.call(this, responseDetails.responseText, this.callback);
+					func.call(this, responseDetails, this.callback);
 				}
 			}
 		});
 	},
 
 	intValue: function(theText) {
-		//~ if (typeof theText === 'number') {
-			//~ console.log('theText', theText);
-			//~ return theText;
-		//~ } else {
-			if (!theText) {return 0;}
-			return parseInt(theText.replace(/,/g,''),10);
-		//~ }
+		if (!theText) {return 0;}
+		return parseInt(theText.replace(/,/g,''),10);
 	},
 
 	getIntFromRegExp: function(theText, rxSearch) {
@@ -218,17 +334,17 @@ window.System = {
 		var i;
 		var item;
 		if (removeBy) {
-			for(i=0;i<len;i += 1) {
+			for (i = 0; i < len; i += 1) {
 				item = arr[i];
-				if(seen[item[removeBy]] === 1) {continue;}
+				if (seen[item[removeBy]] === 1) {continue;}
 				seen[item[removeBy]] = 1;
 				out[j] = item;
 				j += 1;
 			}
 		} else {
-			for(i=0;i<len;i += 1) {
+			for (i = 0; i < len; i += 1) {
 				item = arr[i];
-				if(seen[item] === 1) {continue;}
+				if (seen[item] === 1) {continue;}
 				seen[item] = 1;
 				out[j] = item;
 				j += 1;
@@ -319,12 +435,6 @@ window.System = {
 	}
 };
 System.init();
-})();
-
-
-(function() {
-
-'use strict';
 
 window.Data = {
 
@@ -604,19 +714,30 @@ window.Data = {
 
 /* jshint +W101 */ // Line is too long. (W101)
 
-	guildRelationshipMessages: function(){
-		if(!Data.guildMessages){
-			Data.guildMessages= {};
-				Data.guildMessages.guildSelfMessage = {'color':'green',
-					'message':'Member of your own guild!'};
-				Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
-					'message':'Do not attack - Guild is friendly!'};
-				Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
-					'message':'Do not attack - You\'ve been in that guild once!'};
-				Data.guildMessages.guildEnmyMessage = {'color':'red',
-					'message':'Enemy guild. Attack at will!'};
-		}
-		return Data.guildMessages;
+	//~ guildRelationshipMessages: function(){
+		//~ if(!Data.guildMessages){
+			//~ Data.guildMessages= {};
+				//~ Data.guildMessages.guildSelfMessage = {'color':'green',
+					//~ 'message':'Member of your own guild!'};
+				//~ Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
+					//~ 'message':'Do not attack - Guild is friendly!'};
+				//~ Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
+					//~ 'message':'Do not attack - You\'ve been in that guild once!'};
+				//~ Data.guildMessages.guildEnmyMessage = {'color':'red',
+					//~ 'message':'Enemy guild. Attack at will!'};
+		//~ }
+		//~ return Data.guildMessages;
+	//~ },
+
+	guildMessages: {
+		guildSelfMessage: {'color':'green',
+			'message':'Member of your own guild!'},
+		guildFrndMessage: {'color':'OliveDrab',
+			'message':'Do not attack - Guild is friendly!'},
+		guildPastMessage: {'color':'DarkCyan',
+			'message':'Do not attack - You\'ve been in that guild once!'},
+		guildEnmyMessage: {'color':'red',
+			'message':'Enemy guild. Attack at will!'}
 	},
 
 	quickSearchList: function() {
@@ -752,12 +873,9 @@ window.Data = {
 		wantedNames: '',
 		bwNeedsRefresh: true,
 
-/* jshint -W110 */ // Mixed double and single quotes. (W110)
-
 		fsboxlog: false,
 		fsboxcontent: '',
 		itemRecipient: '',
-		quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 		quickLinks:'[]',
 		enableAttackHelper: false,
 		minGroupLevel: 1,
@@ -781,8 +899,8 @@ window.Data = {
 		enableMaxGroupSizeToJoin: false,
 		maxGroupSizeToJoin: 11,
 
-		enableTempleAlert: true,
-		enableUpgradeAlert: true,
+		enableTempleAlert: false,
+		enableUpgradeAlert: false,
 		autoFillMinBidPrice: true,
 		showPvPSummaryInLog: false,
 		enableQuickDrink: false,
@@ -816,6 +934,44 @@ window.Data = {
 		showTaggingMessages: true,
 
 		showQuickDropLinks: false,
+
+
+		memberlist: '',
+		inventoryMinLvl: 1,
+		inventoryMaxLvl: 9999,
+		onlinePlayerMinLvl: 1,
+		onlinePlayerMaxLvl: 9999,
+		arenaMinLvl: 1,
+		arenaMaxLvl: 9999,
+		showMonsterLog: false,
+		lastTempleCheck: 0,
+		needToPray: false,
+		lastChatCheck: '0',
+		lastGuildLogCheck: '0',
+		lastOutBoxCheck: '0',
+		lastPlayerLogCheck: '0',
+		showAdmin: false,
+		alliestotal: 0,
+		enemiestotal: 0,
+		footprints: false,
+		showFastWalkIconOnWorld: false,
+		hideNonPlayerGuildLogMessages: true,
+		listOfAllies: '',
+		listOfEnemies: '',
+		contactList: '',
+		lastUpgradeCheck: 0,
+		needToDoUpgrade: false,
+		characterVirtualLevel: 0,
+		guildLogoControl: false,
+		statisticsControl: false,
+		guildStructureControl: false,
+		lastMembrListCheck: 0,
+		disableItemColoring: false,
+		showQuickSendLinks: false,
+
+/* jshint -W110 */ // Mixed double and single quotes. (W110)
+
+		quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 
 		sendClasses: '["Amber", "5611"], ' +
 			'["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
@@ -875,34 +1031,10 @@ window.Data = {
 			'{"category":"Potions","searchname":"Potion of Fury",' +
 				'"nickname":"ZK 350","displayOnAH":true},' +
 			'{"category":"Potions","searchname":"Potion of Supreme Luck",' +
-				'"nickname":"FI 1k","displayOnAH":true}]',
+				'"nickname":"FI 1k","displayOnAH":true}]'
 
 /* jshint +W110 */ // Mixed double and single quotes. (W110)
 
-		memberlist: '',
-		inventoryMinLvl: 1,
-		inventoryMaxLvl: 9999,
-		onlinePlayerMinLvl: 1,
-		onlinePlayerMaxLvl: 9999,
-		arenaMinLvl: 1,
-		arenaMaxLvl: 9999,
-		showMonsterLog: false,
-		//~ templeAlertLastUpdate: '"2000-01-01T00:00:00.000Z"',
-		lastTempleCheck: 0,
-		needToPray: false,
-		lastChatCheck: '0',
-		lastGuildLogCheck: '0',
-		lastOutBoxCheck: '0',
-		lastPlayerLogCheck: '0',
-		showAdmin: false,
-		alliestotal: 0,
-		enemiestotal: 0,
-		footprints: false,
-		showFastWalkIconOnWorld: false,
-		hideNonPlayerGuildLogMessages: true,
-		listOfAllies: '',
-		listOfEnemies: '',
-		contactList: ''
 	},
 
 	saveBoxes: [
@@ -994,6 +1126,7 @@ window.Data = {
 		'enableMaxGroupSizeToJoin',
 		'maxGroupSizeToJoin',
 		'enableTempleAlert',
+		'enableUpgradeAlert',
 		'autoFillMinBidPrice',
 		'showPvPSummaryInLog',
 		'enableQuickDrink',
@@ -1038,61 +1171,84 @@ window.Data = {
 	}
 
 };
-})();
-
-
-(function() {
-
-'use strict';
 
 window.Layout = {
 
-	injectMenu: function() {
-		if (System.getValue('lastActiveQuestPage').length > 0) { //JQuery ready
-			$('a[href="index.php?cmd=questbook"]').attr('href', System.getValue('lastActiveQuestPage'));
+	injectMenu: function() { //jquery
+		if (System.getValue('lastActiveQuestPage').length > 0) {
+			$('a[href="index.php?cmd=questbook"]').attr('href',
+				System.getValue('lastActiveQuestPage'));
 		}
 		var pCL = $('div#pCL:first');
 		if (pCL.length === 0) {return;}
 		//character
 		$(pCL).find('a#nav-character-log').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-recipemanager" href="index.php?cmd=notepad&blank=1&subcmd=recipemanager">Recipe Manager</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanager">Inventory Manager</a></li>')
-			//~ .after('<li class="nav-level-1"><a class="nav-link" id="nav-character-invmanager" href="index.php?cmd=notepad&blank=1&subcmd=invmanagernew">New Inventory</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-medalguide" href="index.php?cmd=profile&subcmd=medalguide">Medal Guide</a></li>');
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-recipemanager" href="index.php?cmd=notepad&blank' +
+				'=1&subcmd=recipemanager">Recipe Manager</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=invmanager">Inventory Manager</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
+				'medalguide">Medal Guide</a></li>');
 		if (System.getValue('keepBuffLog')) {
 			$(pCL).find('a#nav-character-log').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-bufflog" href="index.php?cmd=notepad&blank=1&subcmd=bufflogcontent">Buff Log</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
+					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
 		if (System.getValue('keepLogs')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-showlogs" href="index.php?cmd=notepad&blank=1&subcmd=showlogs">Combat Logs</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
+					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
 		if (System.getValue('showMonsterLog')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-monsterlog" href="index.php?cmd=notepad&blank=1&subcmd=monsterlog">Creature Logs</a></li>');
+				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+					'character-monsterlog" href="index.php?cmd=notepad&blank' +
+					'=1&subcmd=monsterlog">Creature Logs</a></li>');
 		}
 		$(pCL).find('a#nav-character-notepad').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-quicklinkmanager" href="index.php?cmd=notepad&blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-character-createmap" href="index.php?cmd=notepad&blank=1&subcmd=createmap">Create Maps</a></li>');
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-quicklinkmanager" href="index.php?cmd=notepad&' +
+				'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>')
+			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-createmap" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=createmap">Create Maps</a></li>');
 		//guild
 		$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmanager">Guild Inventory</a></li>');
-			//~ .after('<li class="nav-level-2"><a class="nav-link" id="nav-guild-guildinvmanager" href="index.php?cmd=notepad&blank=1&subcmd=guildinvmgr">New Inventory</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=guildinvmanager">Guild Inventory</a></li>');
 		if (!System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
 			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
-				.before('<li class="nav-level-2"><a class="nav-link" id="nav-guild-newguildlog" href="index.php?cmd=notepad&blank=1&subcmd=newguildlog">New Guild Log</a></li>');
+				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
+					'-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
+					'&subcmd=newguildlog">New Guild Log</a></li>');
 		}
 		//top rated
 		$(pCL).find('a#nav-toprated-players-level').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-toprated-top250" href="index.php?cmd=toprated&subcmd=xp">Top 250 Players</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
+				'Top 250 Players</a></li>');
 		//actions
 		$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-ahquicksearch" href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">AH Quick Search</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=auctionsearch">AH Quick Search</a></li>');
 		$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-onlineplayers" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers">Online Players</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findother" href="index.php?cmd=notepad&blank=1&subcmd=findother">Find Other</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-actions-findbuffs" href="index.php?cmd=notepad&blank=1&subcmd=findbuffs">Find Buffs</a></li>');
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=onlineplayers">Online Players</a></li>')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-findother" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=findother">Find Other</a></li>')
+			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=findbuffs">Find Buffs</a></li>');
 		//adjust the menu length in chrome for the newly added items
 		//first the open ones
 		$('ul.nav-animated').each(function() {
@@ -1205,6 +1361,33 @@ window.Layout = {
 		{title: 'XP Contrib', class: 'dt-center'}
 	],
 
-	places:['first', 'second', 'third', 'fourth']
+	places:['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
+			'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
+			'fourteenth'],
+
+	quickBuffHeader:
+		'<div id="helperQBheader">' +
+		'<table class="qbT"><thead><tr>' +
+		'<th class="qbTH">Sustain</th>' +
+		'<th class="qbTH">Fury Caster</th>' +
+		'<th class="qbTH">Guild Buffer</th>' +
+		'<th class="qbTH">Buff Master</span></th>' +
+		'<th class="qbTH">Extend</span></th>' +
+		'<th class="qbTH">Reinforce</span></th>' +
+		'</tr></thead><tbody><tr>' +
+		'<td id="fshSus" class="qbTD"></td>' +
+		'<td id="fshFur" class="qbTD"></td>' +
+		'<td id="fshGB"  class="qbTD"></td>' +
+		'<td id="fshBM"  class="qbTD"></td>' +
+		'<td id="fshExt" class="qbTD"></td>' +
+		'<td id="fshRI"  class="qbTD"></td>' +
+		'</tr></tbody></table>' +
+		'</div>',
+
+	goldUpgradeMsg:
+		'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
+		' class="notification-icon"></span><p class="notification-content">Up' +
+		'grade stamina with gold.</p></a></li>'
+
 };
 })();
