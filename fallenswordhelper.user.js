@@ -11652,7 +11652,7 @@ var Helper = {
 				rowTypeID = 'GuildLogFilter:showRecallMessages';
 			}
 			//Tag/Untag (showTaggingMessages)
-			else if (messageText.search('has added flags to some of guild"s stored items costing a total of') !== -1 ||
+			else if (messageText.search('has added flags to some of guild\'s stored items costing a total of') !== -1 ||
 				messageText.search('has removed flags to the guild"s stored items.') !== -1) {
 				if (!Helper.showTaggingMessages) {
 					displayRow = false;
