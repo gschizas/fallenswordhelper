@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1505
+// @version        1506
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -11822,6 +11822,9 @@ var Helper = {
 	addChatTextArea: function() { //jquery
 		if (!System.getValue('enhanceChatTextEntry')) {return;}
 		$('div#pCC form').first().attr('id', 'dochat');
+		$('div#pCC input').slice(0, 7).each(function() {
+			$(this).attr('form', 'dochat');
+		});
 		var theTable = $('div#pCC table table').first();
 		theTable.append('<tr id="fshMass"></tr>');
 		$('td', theTable).eq(0).remove();
