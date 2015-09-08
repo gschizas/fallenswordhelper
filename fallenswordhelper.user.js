@@ -8662,6 +8662,7 @@ var Helper = {
 			var maxAuctionsValue = maxAuctionsValueRE.exec(maxAuctionsRatio.innerHTML)[1]*1;
 			System.setValue('maxAuctions',maxAuctionsValue+2);
 		}
+		Helper.injectPoints();
 	},
 
 	injectTopRated: function() {
@@ -10173,7 +10174,7 @@ var Helper = {
 	},
 
 	injectPoints: function() {
-		Helper.currentFSP = System.findNode('//tr[td/a/img[contains(@src,"/skin/icon_points.gif")]]/td[4]').textContent.replace(/,/g,'')*1;
+		Helper.currentFSP = System.intValue($('dt#statbar-fsp').text().replace(/,/g, ''));
 
 		var stamForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+25 Current Stamina")]/../td[4]');
 		var stamForFSPInjectHere = System.findNode('//td[@width="60%" and contains(.,"+25 Current Stamina")]');
