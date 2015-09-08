@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1506
+// @version        1507
 // @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -685,7 +685,7 @@ var Helper = {
 		document.getElementById('clearBuffs').addEventListener('click',
 			function() {
 				System.setValue('buffLog','');
-				window.location = window.location;
+				location.reload();
 			}, true
 		);
 		document.getElementById('bufflog').innerHTML=System.getValue('buffLog');
@@ -710,11 +710,16 @@ var Helper = {
 		}
 	},
 
-	injectFsBoxContent: function(content) {
+	injectFsBoxContent: function(content) { //native
 		if (!content) {content = Layout.notebookContent();}
-		content.innerHTML=Helper.makePageTemplate('FS Box Log','','fsboxclear','Clear','fsboxdetail');
-		document.getElementById('fsboxclear').addEventListener('click',function() {System.setValue('fsboxcontent','');window.location=window.location;},true);
-		document.getElementById('fsboxdetail').innerHTML=System.getValue('fsboxcontent');
+		content.innerHTML = Helper.makePageTemplate('FS Box Log', '',
+			'fsboxclear', 'Clear', 'fsboxdetail');
+		document.getElementById('fsboxclear')
+			.addEventListener('click', function() {
+				System.setValue('fsboxcontent','');
+				location.reload();}, true);
+		document.getElementById('fsboxdetail').innerHTML =
+			System.getValue('fsboxcontent');
 	},
 
 	removeGuildAvyImgBorder: function() { //jquery
@@ -752,8 +757,8 @@ var Helper = {
 			guildLogoElement.style.visibility = 'hidden';
 		}
 		var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
-		leaveGuildCell.innerHTML += '[ <span style="cursor:pointer; text-decoration:underline;" ' +
-			'id="toggleStatisticsControl" linkto="statisticsControl" title="Toggle Section">X</span> ]';
+		leaveGuildCell.innerHTML += '<span class="fshNoWrap">[ <span style="cursor:pointer; text-decoration:underline;" ' +
+			'id="toggleStatisticsControl" linkto="statisticsControl" title="Toggle Section">X</span> ]</span>';
 		var statisticsControlElement = leftHandSideColumnTable.rows[6].cells[0].firstChild.nextSibling;
 		statisticsControlElement.id = 'statisticsControl';
 		if (System.getValue('statisticsControl')) {
@@ -770,22 +775,27 @@ var Helper = {
 			guildStructureControlElement.style.visibility = 'hidden';
 		}
 
-		document.getElementById('toggleGuildLogoControl').addEventListener('click', System.toggleVisibilty, true);
-		document.getElementById('toggleStatisticsControl').addEventListener('click', System.toggleVisibilty, true);
-		document.getElementById('toggleGuildStructureControl').addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleGuildLogoControl')
+			.addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleStatisticsControl')
+			.addEventListener('click', System.toggleVisibilty, true);
+		document.getElementById('toggleGuildStructureControl')
+			.addEventListener('click', System.toggleVisibilty, true);
 
-		$('td:contains("Username"):last').parents('table:first').find('a[href]').each(function(){
+		$('td:contains("Username"):last').parents('table:first')
+			.find('a[href]').each(function(){
 			$(this).after(' <a style="color:blue;font-size:10px;" ' +
-			'href=\'javascript:window.openWindow("index.php?cmd=quickbuff&t='+$(this).text()+'", "fsQuickBuff", 618, 1000, ",scrollbars")\'' +
-			'>[b]</a>');
+			'href=\'javascript:window.openWindow("index.php?cmd=quickbuff&t=' +
+			$(this).text() + '", "fsQuickBuff", 618, 1000, ",scrollbars")\'' +
+			'>[b]</a>'); // FIXME
 		});
 
 		// self recall
 		var selfRecall = leftHandSideColumnTable.rows[22].cells[0];
 		selfRecall.innerHTML+=' [<a href="index.php?cmd=guild&subcmd=' +
-		'inventory&subcmd2=report&user=' +
-		$('dt.stat-name:first').next().text().replace(/,/g,'') +
-		'" title="Self Recall">SR</a>]';
+			'inventory&subcmd2=report&user=' +
+			$('dt.stat-name:first').next().text().replace(/,/g,'') +
+			'" title="Self Recall">SR</a>]';
 
 		//Detailed conflict information
 		if (System.getValue('detailedConflictInfo') === true) {
@@ -2169,7 +2179,7 @@ var Helper = {
 			trackKS.addEventListener('click', function() {
 				System.setValue('trackKillStreak',
 				System.getValue('trackKillStreak') ? false : true);
-				window.location=window.location;
+				location.reload();
 			},true);
 		}
 	},
@@ -2177,15 +2187,17 @@ var Helper = {
 	recastImpAndRefresh: function(responseText) {
 		var doc = System.createDocument(responseText);
 		if (doc) {
-			window.location=window.location;
+			location.reload();
 		}
 	},
 
 	removeSkill: function(evt) {
 		var buffName = evt.target.parentNode.getAttribute('buffName');
 		var buffHref = evt.target.parentNode.getAttribute('buffHref');
-		if (confirm('Are you sure you wish to remove the ' + buffName + ' skill?')) {
-			System.xmlhttp(buffHref, function() {window.location='index.php?cmd=world';});
+		if (confirm('Are you sure you wish to remove the ' + buffName +
+			' skill?')) {
+			System.xmlhttp(buffHref,
+				function() {location.href = 'index.php?cmd=world';});
 		}
 	},
 
@@ -2246,7 +2258,7 @@ var Helper = {
 		} else {
 			System.setValue('playNewMessageSound', true);
 		}
-		window.location.reload();
+		location.reload();
 	},
 
 	isQuestBeingTracked: function(questHREF) {
@@ -2385,7 +2397,7 @@ var Helper = {
 					}else{
 						$('a#toggleSoundLink').html(Data.soundImage);
 					}
-					System.setValue('playNewMessageSound',!System.getValue('playNewMessageSound')); //window.location.reload();
+					System.setValue('playNewMessageSound',!System.getValue('playNewMessageSound'));
 				},true);
 			}
 			var huntingMode = System.getValue('huntingMode');
@@ -2400,7 +2412,7 @@ var Helper = {
 					}else{
 						$('a#HelperToggleHuntingMode').html(Data.huntingOffImage);
 					}
-					System.setValue('huntingMode',!System.getValue('huntingMode')); //window.location.reload();
+					System.setValue('huntingMode',!System.getValue('huntingMode'));
 				},true);
 		}
 	},
@@ -2810,12 +2822,16 @@ var Helper = {
 				mapName.innerHTML += ' <a href=# id="Helper:ToggleFastWalkMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
 				document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
 					function() {
-						System.setValue('enableFastWalk',!System.getValue('enableFastWalk')); window.location.reload();
+						System.setValue('enableFastWalk',
+							!System.getValue('enableFastWalk'));
+						location.reload();
 					},true);
 			}
 			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
 				function() {
-					System.setValue('huntingMode',!System.getValue('huntingMode')); window.location.reload();
+					System.setValue('huntingMode',
+						!System.getValue('huntingMode'));
+					location.reload();
 				},true);
 
 		}
@@ -2846,8 +2862,9 @@ var Helper = {
 	},
 
 	fixOnlineGuildBuffLinks: function() {
-		$('a[href*="index.php?cmd=quickbuff&t"]').each(function() {
-			$(this).attr('href',$(this).attr('href').replace(/500/g,'1000'));
+		$('a#guild-minibox-action-quickbuff').each(function() {
+			var self = $(this);
+			self.attr('href', self.attr('href').replace(/500/g,'1000'));
 		});
 	},
 
@@ -2930,11 +2947,13 @@ var Helper = {
 		//System.xmlhttp('index.php?cmd=trade');
 		var xcNum = System.getValue('goldConfirm');
 		if (xcNum === '') {
-			window.alert('You have to visit the trade page once to use the send gold functionality');
+			alert('You have to visit the trade page once to use the send gold functionality');
 			return;
 		}
-		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum + '&target_username=' + recipient +'&gold_amount='+ amount;
-		System.xmlhttp(url, Helper.goldToPlayerSent, {'amount': amount, 'recipient': recipient} );
+		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum +
+			'&target_username=' + recipient +'&gold_amount='+ amount;
+		System.xmlhttp(url, Helper.goldToPlayerSent,
+			{'amount': amount, 'recipient': recipient} );
 	},
 
 	goldToPlayerSent: function(responseText, callback) {
@@ -3162,7 +3181,7 @@ var Helper = {
 	},
 
 	extractAllSimilar: function(evt) {
-		if (!window.confirm('Are you sure you want to extract all similar items?')) {return;}
+		if (!confirm('Are you sure you want to extract all similar items?')) {return;}
 		var InventoryIDs=evt.target.getAttribute('invIDs').split(',');
 		//evt.target.parentNode.innerHTML = InventoryIDs;
 		// var output= '';
@@ -3581,7 +3600,7 @@ var Helper = {
 
 	clearEntityLog: function() {
 		System.setValue('monsterLog', '');
-		window.location='index.php?cmd=notepad&blank=1&subcmd=monsterlog';
+		location.href = 'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
 	},
 
 	sortEntityLogTable: function(evt) {
@@ -3789,7 +3808,7 @@ var Helper = {
 				//if fast walk is enabled then use the stored location, otherwise look it up
 				xCoord = enableFastWalk?Helper.xLocation:pos.X;
 				yCoord = enableFastWalk?Helper.yLocation:pos.Y;
-				window.location = 'index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy);
+				location.href = 'index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy);
 				Helper.xLocation+=dx;
 				Helper.yLocation+=dy;
 			}
@@ -3797,7 +3816,10 @@ var Helper = {
 				//if fast walk is enabled then use the stored location, otherwise look it up
 				xCoord = enableFastWalk?Helper.xLocation:pos.X;
 				yCoord = enableFastWalk?Helper.yLocation:pos.Y;
-				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy), function() {window.location = System.server + 'index.php?cmd=world&subcmd=map';});
+				System.xmlhttp('index.php?cmd=world&subcmd=move&x=' +
+					(xCoord+dx) + '&y=' + (yCoord+dy), function() {
+						location.href = System.server +
+							'index.php?cmd=world&subcmd=map';});
 				Helper.xLocation+=dx;
 				Helper.yLocation+=dy;
 
@@ -3812,7 +3834,7 @@ var Helper = {
 				Helper.killSingleMonster(index);
 			}
 			else {
-				window.location = linkObj.getAttribute('href');
+				location.href = linkObj.getAttribute('href');
 			}
 		}
 	},
@@ -3857,23 +3879,23 @@ var Helper = {
 		case 114: // repair [r]
 			//do not use repair link for new map
 			if ($('#worldPage').length === 0) {
-				window.location = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
+				location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
 			}
 			break;
 		case 71: // create group [G]
-			window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
+			location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
 			break;
 		case 76: // Log Page [L]
-			window.location = 'index.php?cmd=log';
+			location.href = 'index.php?cmd=log';
 			break;
 		case 103: // go to guild [g]
-			window.location = 'index.php?cmd=guild&subcmd=manage';
+			location.href = 'index.php?cmd=guild&subcmd=manage';
 			break;
 		case 106: // join all group [j]
 			if (!System.getValue('enableMaxGroupSizeToJoin')) {
-				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
+				location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
 			} else {
-				window.location = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
+				location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
 			}
 			break;
 		case 49: // [1]
@@ -3887,7 +3909,7 @@ var Helper = {
 			Helper.killMonsterAt(r-48);
 			break;
 		case 98: // backpack [b]
-			window.location = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+			location.href = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			break;
 		case 115: // use stairs [s]
 			Helper.useStairs(); // this is suspect, is it old map only?
@@ -3896,7 +3918,7 @@ var Helper = {
 			Helper.quickBuyItem();
 			break;
 		case 118: // fast wear manager [v]
-			window.location = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
+			location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
 			break;
 		case 121: // fast send gold [y]
 			Helper.sendGoldToPlayer();
@@ -3908,7 +3930,7 @@ var Helper = {
 		case 48: // return to world [0]
 			//do not use if using new map
 			if ($('#worldPage').length === 0) {
-				window.location = 'index.php?cmd=world';
+				location.href = 'index.php?cmd=world';
 			}
 			break;
 		case 109: // map [m]
@@ -3917,7 +3939,7 @@ var Helper = {
 			System.openInTab(System.server + 'index.php?cmd=world&subcmd=map');
 			break;
 		case 112: // profile [p]
-			window.location = 'index.php?cmd=profile';
+			location.href = 'index.php?cmd=profile';
 			break;
 		case 110: // mini map [n]
 			Helper.displayMiniMap();
@@ -4504,7 +4526,7 @@ var Helper = {
 		} else {
 			System.setValue('showExtraLinks', false);
 		}
-		window.location = window.location;
+		location.reload();
 	},
 
 	toggleShowQuickDropLinks: function() {
@@ -4516,7 +4538,7 @@ var Helper = {
 		} else {
 			System.setValue('showQuickDropLinks', false);
 		}
-		window.location = window.location;
+		location.reload();
 	},
 
 	injectReportPaint: function() {
@@ -4757,7 +4779,7 @@ var Helper = {
 				submit: 'Use'
 			},
 			success: function() {
-				window.location = 'index.php?cmd=profile';
+				location.href = 'index.php?cmd=profile';
 			}
 		});
 	},
@@ -4931,7 +4953,7 @@ var Helper = {
 			}
 		}
 		if (haveItems) {
-			setTimeout(function() {window.location=window.location;}, 100);
+			setTimeout(function() {location.reload();}, 100);
 		}
 	},
 
@@ -5168,7 +5190,8 @@ var Helper = {
 	},
 
 	profileSelectAll: function() {
-		$('input.backpackCheckbox:enabled').not(':checked').each(function(){$(this).click();});
+		$('input.backpackCheckbox:enabled').not(':checked')
+			.each(function(){$(this).click();});
 	},
 
 	addStatTotalToMouseover: function() {
@@ -5889,37 +5912,42 @@ var Helper = {
 
 	injectInventoryManager: function() {
 		var content = Layout.notebookContent();
-		content.innerHTML = '<img src = "' + System.imageServer + '/world/actionLoadingSpinner.gif">&nbsp;Getting inventory data...';
-		if (document.location.search.indexOf('subcmd=invmanager') !== -1){
+		content.innerHTML = '<img src = "' + System.imageServer +
+			'/world/actionLoadingSpinner.gif">&nbsp;Getting inventory data...';
+		if (System.getUrlParameter('subcmd') === 'invmanager') {
 			$.getJSON('?cmd=export&subcmd=inventory', Helper.gotInvMan);
-		}else if (document.location.search.indexOf('subcmd=guildinvmanager') !== -1){
-			$.getJSON('?cmd=export&subcmd=guild_store&inc_tagged=1', Helper.gotGuildInvMan);
+		} else if (System.getUrlParameter('subcmd') === 'guildinvmanager') {
+			$.getJSON('?cmd=export&subcmd=guild_store&inc_tagged=1',
+				Helper.gotGuildInvMan);
 		}
 	},
 
 	gotInvMan: function(data) {
 		Helper.inventory = data;
 		Helper.inventory.folders['-1']='Main';
-		Helper.inventoryManagerHeaders('self', Helper.inventory, 'Helper:InventoryManagerOutput');
+		Helper.inventoryManagerHeaders('self', Helper.inventory,
+			'Helper:InventoryManagerOutput');
 	},
 
 	gotGuildInvMan: function(data) {
 		Helper.guildinventory = data;
-		$.getJSON('?cmd=export&subcmd=guild_members&guild_id='+Helper.guildinventory.guild_id, Helper.gotGuildMembers);
+		$.getJSON('?cmd=export&subcmd=guild_members&guild_id=' +
+			Helper.guildinventory.guild_id, Helper.gotGuildMembers);
 	},
 
 	gotGuildMembers: function(data) {
 		var buildJSON='{';
-		for(var x in data){
+		for (var x in data) {
 			if (!data.hasOwnProperty(x)) { continue; }
-			buildJSON+='"'+data[x].id+'":"'+data[x].username+'",';
+			buildJSON += '"' + data[x].id + '":"' + data[x].username + '",';
 		}
-		buildJSON=buildJSON.substring(0, buildJSON.length-1)+'}';
+		buildJSON = buildJSON.substring(0, buildJSON.length - 1) + '}';
 		Helper.guildinventory.members = JSON.parse(buildJSON);
-		Helper.inventoryManagerHeaders('guild', Helper.guildinventory, 'Helper:GuildInventoryManagerOutput');
+		Helper.inventoryManagerHeaders('guild', Helper.guildinventory,
+			'Helper:GuildInventoryManagerOutput');
 	},
 
-	setItemFilterDefault: function() { // FIXME
+	setItemFilterDefault: function() {
 		Helper.itemFilters = [
 			{'id':'showHelmetTypeItems', 'type':'Helmet'},
 			{'id':'showAmorTypeItems', 'type':'Armor'},
@@ -6385,7 +6413,6 @@ var Helper = {
 		setTimeout(function() {
 			Helper.generateInventoryTable();
 		});
-		//window.location=window.location;
 	},
 
 	injectOnlinePlayers: function(content) {
@@ -6416,11 +6443,6 @@ var Helper = {
 		if (refreshButton) {
 			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
 		}
-		System.addStyle(
-			'.HelperTableRow1 {background-color:#e7c473;font-size:small}\n' +
-			'.HelperTableRow1:hover {background-color:white}\n' +
-			'.HelperTableRow2 {background-color:#e2b960;font-size:small}\n' +
-			'.HelperTableRow2:hover {background-color:white}');
 		Helper.onlinePlayers = System.getValueJSON('onlinePlayers');
 		Helper.sortOnlinePlayersTable();
 		Helper.generateOnlinePlayersTable();
@@ -6429,7 +6451,7 @@ var Helper = {
 	parseOnlinePlayersStart: function() {
 		// set timer to redisplay the [refresh] button
 		var now=(new Date()).getTime();
-		GM_setValue('lastOnlineCheck', now.toString());
+		System.setValue('lastOnlineCheck', now.toString());
 
 		var refreshButton = document.getElementById('Helper:OnlinePlayersRefresh');
 		refreshButton.style.visibility = 'hidden';
@@ -8466,7 +8488,7 @@ var Helper = {
 					parseInt(theBox.value, 10) < '0' ||
 					parseInt(theBox.value, 10) > '99') {return;}
 				System.setValue('bioEditLines', parseInt(theBox.value, 10));
-				window.location.reload();
+				location.reload();
 			}, true);
 
 		document.getElementById('textInputBox').addEventListener('keyup', Helper.updateBioCharacters, true);
@@ -8575,7 +8597,9 @@ var Helper = {
 		if (window.confirm('Are you sure you with to use a special portal back to Krul Island?')) {
 			var krulXCV = System.getValue('krulXCV');
 			if (krulXCV) {
-				System.xmlhttp('index.php?cmd=settings&subcmd=fix&xcv=' + krulXCV, function() {window.location='index.php?cmd=world';});
+				System.xmlhttp('index.php?cmd=settings&subcmd=fix&xcv=' +
+					krulXCV, function() {location.href = 
+						'index.php?cmd=world';});
 			} else {
 				window.alert('Please visit the preferences page to cache your Krul Portal link');
 			}
@@ -8807,13 +8831,13 @@ var Helper = {
 		if (playerMinLvl.value === '') {playerMinLvl.value = '0';}
 		if (playerMaxLvl.value === '') {playerMaxLvl.value = '9999';}
 		if (!isNaN(playerMinLvl.value)) {
-			System.setValue(minLvlSearchText, parseInt(playerMinLvl.value,10));
+			System.setValue(minLvlSearchText, parseInt(playerMinLvl.value, 10));
 		}
 		if (!isNaN(playerMaxLvl.value)) {
-			System.setValue(maxLvlSearchText, parseInt(playerMaxLvl.value,10));
+			System.setValue(maxLvlSearchText, parseInt(playerMaxLvl.value, 10));
 		}
-		if (href) {window.location = System.server + href;
-		} else {window.location = window.location;}
+		if (href) {location.href = System.server + href;
+		} else {location.reload();}
 	},
 
 	resetLevelFilter: function(evt) {
@@ -8825,8 +8849,8 @@ var Helper = {
 		document.getElementById('Helper.' + minLvlSearchText).value=1;
 		System.setValue(maxLvlSearchText, 9999);
 		document.getElementById('Helper.' + maxLvlSearchText).value=9999;
-		if (href) {window.location = System.server + href;
-		} else {window.location = window.location;}
+		if (href) {location.href = System.server + href;
+		} else {location.reload();}
 	},
 
 	addEventSortArena: function() {
@@ -8852,7 +8876,7 @@ var Helper = {
 
 	hideMatchesForCompletedMoves: function(evt) {
 		System.setValue('hideMatchesForCompletedMoves', evt.target.checked);
-		window.location=window.location;
+		location.reload();
 	},
 
 	sortArena: function(evt) {
@@ -9124,7 +9148,7 @@ var Helper = {
 					System.xmlhttp('index.php?cmd=arena&subcmd=dopickmove&move_id='+mv[i]+'&slot_id='+i);
 				}
 			}
-			setTimeout(function() {window.location = window.location;}, 500);
+			setTimeout(function() {location.reload();}, 500);
 		}, 500);
 	},
 
@@ -9547,13 +9571,13 @@ var Helper = {
 				theMap.levels = {};
 				System.setValueJSON('map', theMap);
 			}
-			window.location.reload();
+			location.reload();
 		}
 	},
 
 	updateFpColor: function() {
 		System.setValue('footprintsColor', System.findNode('//input[@name="footprintsColor"]').value);
-		window.location.reload();
+		location.reload();
 	},
 
 	helpLink: function(title, text) {
@@ -9598,7 +9622,7 @@ var Helper = {
 		Data.saveBoxes.forEach(System.saveValueForm, oForm);
 
 		window.alert('FS Helper Settings Saved');
-		window.location.reload();
+		location.reload();
 		return false;
 	},
 
@@ -9678,7 +9702,7 @@ var Helper = {
 		if (window.confirm('Are you sure you want to clear your log?')) {
 			// var combatLog=document.getElementById('Helper:CombatLog');
 			System.setValue('CombatLog', '');
-			window.location = window.location;
+			location.reload();
 		}
 	},
 
@@ -9834,7 +9858,7 @@ var Helper = {
 		var currentPos = '('+Helper.moveList[id].X+', '+Helper.moveList[id].Y+')';
 		if (responseText.indexOf(currentPos)<0) {
 			alert('Cannot move via ' + currentPos);
-			window.location = window.location;
+			location.reload();
 		} else {
 			// update current pos
 			Helper.markPosOnMiniMap(Helper.moveList[id]);
@@ -9847,7 +9871,7 @@ var Helper = {
 						Helper.moveList[nextId].Y,
 					Helper.autoMoveNext,
 					nextId);
-			} else { window.location = window.location;}
+			} else {location.reload();}
 		}
 	},
 
@@ -9922,7 +9946,7 @@ var Helper = {
 		if (!dirButton) {return;}
 		var url = dirButton.getAttribute('onClick');
 		url = url.replace(/^[^']*'/m, '').replace(/\';$/m, '');
-		window.location = url;
+		location.href = url;
 	},
 
 	injectInvent: function(){
@@ -10267,7 +10291,7 @@ var Helper = {
 		} else {
 		System.setValue('questBeingTracked', location.search);
 		}
-		window.location = window.location;
+		location.reload();
 	},
 
 	dontTrackThisQuest: function(evt) {
@@ -10289,7 +10313,7 @@ var Helper = {
 		System.setValue('questBeingTracked', '');
 		}
 
-		window.location = window.location;
+		location.reload();
 	},
 
 	getQuestInfo: function(responseText, callback) {
@@ -10521,7 +10545,7 @@ var Helper = {
 
 	resetBountyList: function() {
 		System.setValueJSON('bountylist', null);
-		window.location = window.location;
+		location.reload();
 	},
 
 	injectWantedList: function(wantedList) {
@@ -10584,7 +10608,7 @@ var Helper = {
 
 	resetWantedList: function() {
 		System.setValueJSON('wantedList', null);
-		window.location = window.location;
+		location.reload();
 	},
 
 	prepareAllyEnemyList: function() {
@@ -10822,7 +10846,7 @@ var Helper = {
 
 	resetAllyEnemyList: function() {
 		System.setValue('contactList','');
-		window.location = window.location;
+		location.reload();
 	},
 
 	toggleCheckAllPlants: function(evt) {
@@ -11373,7 +11397,7 @@ var Helper = {
 
 	resetNewGuildLog: function() {
 		System.setValueJSON('storedGuildLog', '');
-		window.location = window.location;
+		location.reload();
 	},
 
 	toggleGuildLogFilterVisibility: function(evt) {
@@ -11741,7 +11765,7 @@ displayDisconnectedFromGodsMessage: function() {
 
 	injectUpgradeAlert: function() { //jquery
 		//if (!System.getValue('enableUpgradeAlert')) {return;}
-		if (window.location.search.search('cmd=points&type=1') !== -1) {return;}
+		if (location.search.search('cmd=points&type=1') !== -1) {return;}
 		var needToDoUpgrade = System.getValue('needToDoUpgrade');
 		if (needToDoUpgrade) {
 			Helper.displayUpgradeMsg();
@@ -11755,7 +11779,7 @@ displayDisconnectedFromGodsMessage: function() {
 	parseGoldUpgrades: function(data) { //jquery
 		if (!System.getValue('enableUpgradeAlert')) {return;}
 		var doc;
-		if (window.location.search.search('cmd=points&type=1') === -1) {
+		if (location.search.search('cmd=points&type=1') === -1) {
 			doc = data;
 		} else {
 			doc = document;
@@ -12224,7 +12248,7 @@ displayDisconnectedFromGodsMessage: function() {
 	useStairs: function() { //jquery
 		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
 		$('input[name="stairway_id"]:first').each(function(){
-			window.location='index.php?cmd=world&subcmd=usestairs&' +
+			location.href = 'index.php?cmd=world&subcmd=usestairs&' +
 				'stairway_id=' + $(this).val();
 		});
 	},
@@ -12444,7 +12468,7 @@ displayDisconnectedFromGodsMessage: function() {
 				}
 				if ($('select[id^="composing-template-"]').length === 0 &&
 					$('div#helperQCError').length === 0) {
-					window.location = 'index.php?cmd=composing&m=0';
+					location.href = 'index.php?cmd=composing&m=0';
 				}
 			}
 		});
