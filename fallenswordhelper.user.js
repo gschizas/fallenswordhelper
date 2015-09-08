@@ -8030,11 +8030,12 @@ var Helper = {
 		if (children.length === 0) {
 			children = target.next();
 		}
-		return children.text().slice(2, -1);
+		return System.intValue(children.text().slice(2, -1));
 	},
 
 	getBuffLevel: function(doc, buff) {
-		var hasBuff = $('img.tip-static[data-tipped*="' + buff + '"]', doc);
+		var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]',
+			doc);
 		hasBuff = hasBuff.data('tipped');
 		var re = new RegExp('</b> \\(Level: (\\d+)\\)');
 		var test = re.exec(hasBuff);
@@ -8102,7 +8103,8 @@ var Helper = {
 		obj.superEliteSlayerMultiplier = Math.round(0.002 *
 			obj.superEliteSlayerLevel * 100) / 100;
 
-		if (obj.cloakLevel === 0) {return obj;}
+		if (obj.cloakLevel === 0 || typeof obj.attackValue === 'number' &&
+			!isNaN(obj.attackValue)) {return obj;}
 
 		obj.attackBonus = Helper.getBonus('#stat-attack', doc);
 		obj.defenseBonus = Helper.getBonus('#stat-defense', doc);
@@ -8353,14 +8355,14 @@ var Helper = {
 			'Sanc Bonus Armor = ' + Math.floor(combat.player.armorValue *
 			combat.player.sanctuaryLevel * 0.001) + '<br>':'';
 
-		combat.terrrorizeEffect = Math.floor(combat.creature.damage *
+		combat.terrorizeEffect = Math.floor(combat.creature.damage *
 			combat.player.terrorizeLevel * 0.001);
 
 		combat.extraNotes += combat.player.terrorizeLevel > 0 ?
 			'Terrorize Creature Damage Effect = ' +
-			combat.player.terrrorizeEffect * -1 + '<br>':'';
+			combat.terrorizeEffect * -1 + '<br>':'';
 
-		combat.creature.damage -= combat.terrrorizeEffect;
+		combat.creature.damage -= combat.terrorizeEffect;
 
 		combat.creatureDamageDone = Math.ceil(combat.generalVariable *
 			combat.creature.damage - combat.overallArmorValue +
