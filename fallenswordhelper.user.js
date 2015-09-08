@@ -4785,8 +4785,12 @@ var Helper = {
 	},
 
 	injectDropItems: function() {
-		var subPage2Id=System.findNode('//input[@type="hidden" and @name="subcmd2"]');
-		subPage2Id=subPage2Id?subPage2Id.getAttribute('value'):'-';
+		Helper.addStatTotalToMouseover();
+		// prevent multiple calls to local storage
+		Helper.disableItemColoring = System.getValue('disableItemColoring');
+
+		var subPage2Id = System.findNode('//input[@type="hidden" and @name="subcmd2"]');
+		subPage2Id = subPage2Id ? subPage2Id.getAttribute('value') : '-';
 		var mainTable = System.findNode('//table[tbody/tr/td/table/tbody/tr/td/input[@name="storeIndex[]"]]');
 		var showExtraLinks = System.getValue('showExtraLinks');
 		var showQuickDropLinks = System.getValue('showQuickDropLinks');
@@ -4797,7 +4801,6 @@ var Helper = {
 				(showExtraLinks?'Hide':'Show') + ' AH and Sell links</span>]&nbsp;';
 			insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:showQuickDropLinks">' +
 				(showQuickDropLinks?'Hide':'Show') + ' Quick Drop links</span>]&nbsp;';
-
 			if (subPage2Id && subPage2Id === 'dostoreitems') {
 				insertHere.innerHTML += '[<span style="cursor:pointer; text-decoration:underline; color:blue;" id="Helper:selectAllGuildLocked">' +
 					' Select All Guild Locked</span>]&nbsp;';
@@ -4812,9 +4815,9 @@ var Helper = {
 		var theImgElement;
 		var itemStats;
 		var itemId;
-		var invId;
-		var type;
-		var pid;
+		//~ var invId;
+		//~ var type;
+		//~ var pid;
 		//function to add links to all the items in the drop items list
 		var itemName;
 		var itemInvId;
@@ -4829,9 +4832,9 @@ var Helper = {
 				itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(theImgElement).data('tipped'));
 				if (itemStats) {
 					itemId = itemStats[1];
-					invId = itemStats[2];
-					type = itemStats[3];
-					pid = itemStats[4];
+					//~ invId = itemStats[2];
+					//~ type = itemStats[3];
+					//~ pid = itemStats[4];
 				}
 				itemName = theTextNode.textContent.trim().replace('\\','');
 				theTextNode.textContent = itemName;
@@ -4845,9 +4848,9 @@ var Helper = {
 					preText = '<span findme="AH">[<a href="' + System.server +
 						'?cmd=auctionhouse&type=-1&order_by=1&search_text=' +
 						encodeURI(itemName) + '">AH</a>]</span> ' +
-						'<span findme="Sell">[<a href="' + System.server +
-						'index.php?cmd=auctionhouse&subcmd=create2' +
-						'&inv_id=' + itemInvId  + '">Sell</a>]</span>' +
+						//~ '<span findme="Sell">[<a href="' + System.server +
+						//~ 'index.php?cmd=auctionhouse&subcmd=create2' +
+						//~ '&inv_id=' + itemInvId  + '">Sell</a>]</span>' +
 						'[<a href="http://guide.fallensword.com/index.php?' +
 						'cmd=items&subcmd=view' + '&item_id=' + itemId +
 						'" target="_blank">UFSG</a>] ';
@@ -4856,14 +4859,14 @@ var Helper = {
 					itemName +
 					'" style="text-decoration:underline;cursor:pointer">Check all</span>]':'';
 				if (showQuickDropLinks) {
-					postText2 = '&nbsp;<span  title="INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk." id="Helper:QuickDrop' +
+					postText2 = '&nbsp;<span title="INSTANTLY DROP THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk." id="Helper:QuickDrop' +
 						itemInvId +
 						'" itemInvId=' +
 						itemInvId +
 						' findme="QuickDrop" style="color:red; cursor:pointer; text-decoration:underline;">[Quick Drop]</span> ';
 				}
 				if (showQuickSendLinks) {
-					postText3 = '&nbsp;<span  title="INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk." id="Helper:QuickSend' +
+					postText3 = '&nbsp;<span title="INSTANTLY SENDS THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk." id="Helper:QuickSend' +
 						itemInvId +
 						'" itemInvId=' +
 						itemInvId +
@@ -4894,19 +4897,46 @@ var Helper = {
 			}
 		}
 
-		allItems = System.findNodes('//input[@type="checkbox"][@name="removeIndex[]" or @name="storeIndex[]"]');
-		var theLocation;
-		var theImage;
-		if (allItems) {
-			for (i=0; i<allItems.length; i += 1) {
-				anItem = allItems[i];
-				theLocation=anItem.parentNode.nextSibling.nextSibling;
-				theImage=anItem.parentNode.nextSibling.firstChild.firstChild;
-				System.xmlhttp(Helper.linkFromMouseover($(theImage).data('tipped')), Helper.injectDropItemsPaint, theImage);
-			}
-		}
+		Helper.getQTip($('div#pCC table table img.tip-dynamic'),
+			Helper.injectDropItemsPaint);
 
-		Helper.addStatTotalToMouseover();
+	},
+
+	getQTip: function(images, fn) {
+		images.qtip({
+			overwrite: false,
+			show: {
+				event: 'mouseenter',
+				ready: false
+			},
+			style: {classes: 'qtip-tipsy qtip-custom'},
+			position: {
+				my: 'center right',
+				at: 'center left',
+				effect: false,
+				viewport: $(window)
+			},
+			content: {
+				text: function(event, api) {
+					$.ajax({
+						url: $(this).data('tipped') // Use data-url attribute for the URL
+					})
+						.then(function(content) {
+							// Set the tooltip content upon successful retrieval
+							api.set('content.text', content);
+							//~ Helper.managePaint(api, content);
+							fn(content, api.target[0]);
+						}, function(xhr, status, error) {
+							// Upon failure... set the tooltip content to the status and error value
+							api.set('content.text', status + ': ' + error);
+						});
+					return 'Loading...'; // Set some initial text
+				}
+			},
+			hide: {effect: false}
+		});
+		images.qtip('show');
+		images.qtip('hide');
 	},
 
 	injectMoveItems: function() {
@@ -5051,26 +5081,30 @@ var Helper = {
 
 	injectDropItemsPaint: function(responseText, callback) {
 		var textNode = System.findNode('../../../td[3]', callback);
-		var auctionHouseLink=System.findNode('span[@findme="AH"]', textNode);
-		var sellLink=System.findNode('span[@findme="Sell"]', textNode);
-		var quickDropLink=System.findNode('span[@findme="QuickDrop"]', textNode);
+		// var auctionHouseLink = System.findNode('span[@findme="AH"]', textNode);
+		// var sellLink=System.findNode('span[@findme="Sell"]', textNode);
+		var quickDropLink = System.findNode('span[@findme="QuickDrop"]',
+			textNode);
+		var quickSendLink = System.findNode('span[@findme="QuickSend"]',
+			textNode);
 		//~ var guildLockedRE = /<center>Guild Locked: <font color='#00FF00'>/i;
 		var guildLockedRE = /<center>\s*Guild Locked:\s*<font color="#00FF00">/;
 
 		if (guildLockedRE.exec(responseText)) {
-			if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
-			if (sellLink) {sellLink.style.visibility='hidden';}
+			// if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
+			// if (sellLink) {sellLink.style.visibility='hidden';}
 			if (quickDropLink) {quickDropLink.style.visibility='hidden';}
 			textNode.innerHTML += '<span id="guildLocked" visibility="hidden"/>';
 		}
 		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
 		if (boundItemRE.exec(responseText)) {
-			if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
-			if (sellLink) {sellLink.style.visibility='hidden';}
-			//~ if (quickDropLink) quickDropLink.style.visibility='hidden';
+			// if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
+			// if (sellLink) {sellLink.style.visibility='hidden';}
+			// if (quickDropLink) quickDropLink.style.visibility='hidden';
+			if (quickSendLink) {quickSendLink.style.visibility='hidden';}
 		}
-		if (System.getValue('disableItemColoring')) {return;}
+		if (Helper.disableItemColoring) {return;}
 		var fontLineRE=/<nobr><font color='(#[0-9A-F]{6})' size=2>/i;
 		var fontLineRX=fontLineRE.exec(responseText);
 		var color=fontLineRX[1];
@@ -7101,7 +7135,8 @@ var Helper = {
 			}
 		}
 		//refresh after a slight delay
-		setTimeout('window.location = "' + System.server + 'index.php?cmd=guild&subcmd=groups";',1250);
+		setTimeout('location.href = "' + System.server +
+			'index.php?cmd=guild&subcmd=groups";',1250);
 	},
 
 	fetchGroupData: function() {
