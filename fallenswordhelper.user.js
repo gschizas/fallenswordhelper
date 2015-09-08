@@ -530,7 +530,7 @@ var Helper = {
 			});
 		}
 
-		//This must be at the end in order not to screw up other System.findNode calls (Issue 351)
+		// This must be at the end in order not to screw up other System.findNode calls (Issue 351)
 		if (System.getValue('huntingMode') === false) {
 			Helper.injectQuickLinks();
 		}
@@ -625,7 +625,7 @@ var Helper = {
 			for (var i=2;i<memList.rows.length;i += 1) {
 				// var iplus1 = i+1;
 				if (memList.rows[i].cells[1]) {
-					//Firefox reads it as </td> and chrome reads it as \&lt;\/td\&gt;
+					// Firefox reads it as </td> and chrome reads it as \&lt;\/td\&gt;
 					var vlevel = /VL:.+?(\d+)/.exec(memList.rows[i].cells[1].innerHTML)[1];
 					// var level = memList.rows[i].cells[2].innerHTML;
 					var aRow = memList.rows[i];
@@ -7012,45 +7012,42 @@ var Helper = {
 	doGroupRow: function(e, m) {
 		var creator = $('b', e).text();
 		var td = $('td', e).first();
+		var inject = '';
 		if (m[creator]) {
-			td.html(Helper.onlineDot(Math.floor((Math.floor(Date.now() /
+			inject += Helper.onlineDot(Math.floor((Math.floor(Date.now() /
 				1000) - m[creator].last_login) / 60)) + '&nbsp;<a href="' +
 				System.server + 'index.php?cmd=profile&player_id=' +
 				m[creator].id + '">' + td.html() + '</a>' + ' [' +
-				m[creator].level + ']');
+				m[creator].level + ']';
 		}
-
 		var td2 = $('td', e).eq(1);
 		var theList = td2.html();
 		var listArr = theList.split(', ');
-
 		if (listArr.length > 1) {
 			listArr.sort(function(a, b) {
 				return (m[b] ? m[b].level : 0) - (m[a] ? m[a].level : 0);
 			});
 		}
-
+		var countMembers = 0;
 		var buffList = [];
 		listArr.forEach(function(v, i, a) {
 			if (v.indexOf('<font') !== -1) {return;}
+			countMembers += 1;
 			buffList[Math.floor(i / 16)] = buffList[Math.floor(i / 16)] || [];
 			buffList[Math.floor(i / 16)].push(v);
 			if (!m[v]) {return;}
 			a[i] = ' <a href="index.php?cmd=profile&player_id=' +
 				m[v].id + '">' + v + '</a>';
 		});
-
 		buffList.forEach(function(v, i) {
-			td.append('<br><a href=\'' + Layout.buffAllHref(v) +
+			inject += '<br><a href=\'' + Layout.buffAllHref(v) +
 				'\'><span style="color:blue; font-size:x-small;" title="Quick ' +
 				'buff functionality from HCS only does 16">Buff ' +
-				Layout.places[i] + ' 16</span></a>'
-			);
+				Layout.places[i] + ' 16</span></a>';
 		});
-
-		var formList = listArr.join(', ');
-		td2.html('<span>' + formList + '</span>');
-
+		td.html(inject + '<br><span style="font-size:x-small;">Members: ' +
+			countMembers + '</span>');
+		td2.html('<span>' + listArr.join(', ') + '</span>');
 		Helper.groupLocalTime($('td', e).eq(2));
 	},
 
