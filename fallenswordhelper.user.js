@@ -8858,10 +8858,14 @@ var Helper = {
 		var href = evt.target.getAttribute('href');
 		var minLvlSearchText = filterSubject + 'MinLvl';
 		var maxLvlSearchText = filterSubject + 'MaxLvl';
-		var playerMinLvl = document.getElementById('Helper.' + minLvlSearchText);
-		var playerMaxLvl = document.getElementById('Helper.' + maxLvlSearchText);
-		if (playerMinLvl.value === '') {playerMinLvl.value = '0';}
-		if (playerMaxLvl.value === '') {playerMaxLvl.value = '9999';}
+		var playerMinLvl = document.getElementById('Helper.' +
+			minLvlSearchText);
+		var playerMaxLvl = document.getElementById('Helper.' +
+			maxLvlSearchText);
+		if (playerMinLvl.value === '') {
+				playerMinLvl.value = Data.defaults[minLvlSearchText];}
+		if (playerMaxLvl.value === '') {
+				playerMaxLvl.value = Data.defaults[maxLvlSearchText];}
 		if (!isNaN(playerMinLvl.value)) {
 			System.setValue(minLvlSearchText, parseInt(playerMinLvl.value, 10));
 		}
@@ -8877,10 +8881,12 @@ var Helper = {
 		var href = evt.target.getAttribute('href');
 		var minLvlSearchText = filterSubject + 'MinLvl';
 		var maxLvlSearchText = filterSubject + 'MaxLvl';
-		System.setValue(minLvlSearchText, 1);
-		document.getElementById('Helper.' + minLvlSearchText).value=1;
+		System.setValue(minLvlSearchText, Data.defaults[minLvlSearchText]);
+		document.getElementById('Helper.' + minLvlSearchText).value =
+			Data.defaults[minLvlSearchText];
 		System.setValue(maxLvlSearchText, 9999);
-		document.getElementById('Helper.' + maxLvlSearchText).value=9999;
+		document.getElementById('Helper.' + maxLvlSearchText).value =
+			Data.defaults[maxLvlSearchText];
 		if (href) {location.href = System.server + href;
 		} else {location.reload();}
 	},
