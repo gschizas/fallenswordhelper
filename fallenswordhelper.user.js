@@ -6097,6 +6097,12 @@ var Helper = {
 
 		var allItems = targetInventory.items;
 		var xcNum;
+		if (reportType === 'guild') {
+			xcNum = System.getValue('goldConfirm');
+		} else {
+			xcNum = Helper.inventory.xc;
+			System.setValue('goldConfirm', xcNum);
+		}
 
 		var minLvl = parseInt($('input[id="Helper.inventoryMinLvl"]').attr('value'), 10);
 		var maxLvl = parseInt($('input[id="Helper.inventoryMaxLvl"]').attr('value'), 10);
@@ -6115,74 +6121,67 @@ var Helper = {
 			var whereTitle='';
 			var whereText='';
 			var p=0;
-			xcNum = System.getValue('goldConfirm');
 			if (reportType === 'guild') {
-				if(item.player_id===-1){ //guild store
-					item.player_name='GS';
-					color = 'navy';   whereText = 'GS';   whereTitle='Guild Store';
-				}else{
-					item.player_name=targetInventory.members[item.player_id];
+				if (item.player_id === -1) { //guild store
+					item.player_name = 'GS';
+					color = 'navy';   whereText = 'GS';   whereTitle = 'Guild Store';
+				} else {
+					item.player_name = targetInventory.members[item.player_id];
 					color = 'maroon'; whereText = item.player_name;  whereTitle='Guild Report';
 				}
-				if(item.player_id===-1){
-					p=targetInventory.guild_id;
-					t=4;
-				}else{
-					p=item.player_id;
-					t=1;
+				if (item.player_id===-1) {
+					p = targetInventory.guild_id;
+					t = 4;
+				} else {
+					p = item.player_id;
+					t = 1;
 				}
-				p=p+'&currentPlayerId='+targetInventory.current_player_id;
+				p = p + '&currentPlayerId=' + targetInventory.current_player_id;
 			}else{
-				xcNum=Helper.inventory.xc;
-				System.setValue('goldConfirm', xcNum);
 				if(item.equipped){
-					color = 'green';  whereText = 'Worn'; whereTitle='Wearing it';
+					color = 'green';  whereText = 'Worn'; whereTitle = 'Wearing it';
 				}else{
-					color = 'blue';   whereText = Helper.inventory.folders[item.folder_id];   whereTitle='In Backpack';
+					color = 'blue';   whereText = Helper.inventory.folders[item.folder_id];   whereTitle = 'In Backpack';
 				}
-				p=targetInventory.player_id;
-				t=1;
+				p = targetInventory.player_id;
+				t = 1;
 			}
 
+			var rarity = Data.rarityColour[item.rarity];
+
 			var nm = item.item_name;
-			if(item.equipped) { nm='<b>'+nm+'</b>';}
-			result+='<tr style="color:'+ color +'">' +
+			if (item.equipped) { nm = '<b>' + nm + '</b>';}
+			result += '<tr style="color:' + color + '">' +
 				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a style="cursor:help" id="Helper:item'+i+'" arrayID="'+i+'" class="tip-dynamic" ' +
-				'data-tipped="fetchitem.php?item_id='+item.item_id+'&inv_id='+item.inv_id+'&t='+t+'&p='+p+'">' + nm + '</a>';
+				'</td><td><a style="cursor:help; color:' + rarity +
+				'" id="Helper:item' + i +
+				'" arrayID="' + i + '" class="tip-dynamic" ' +
+				'data-tipped="fetchitem.php?item_id=' + item.item_id +
+				'&inv_id=' + item.inv_id + '&t=' + t + '&p=' + p + '">' + nm +
+				'</a>';
 
 			if (item.stats.set_name && reportType === 'guild') {
 				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
 					item.item_name.replace(/(amulet)|(armor)|(armored)|(axe)|(boots)|(fist)|(gauntlets)|(gloves)|(hammer)|(helm)|(helmet)|(mace)|(necklace)|(of)|(plate)|(ring)|(rune)|(shield)|(sword)|(the)|(weapon)|/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
 			}
-			var craftColor = '';
-			switch(item.craft) {
-				case 'Perfect': craftColor = '#00b600'; break;
-				case 'Excellent': craftColor = '#f6ed00'; break;
-				case 'Very Good': craftColor = '#f67a00'; break;
-				case 'Good': craftColor = '#f65d00'; break;
-				case 'Average': craftColor = '#f64500'; break;
-				case 'Poor': craftColor = '#f61d00'; break;
-				case 'Very Poor': craftColor = '#b21500'; break;
-				case 'Uncrafted': craftColor = '#666666'; break;
-			}
+
+			var craftColor = Data.craft[item.craft] ?
+				Data.craft[item.craft].colour : '';
 
 			var durabilityPercent = '';
 			var durabilityColor;
 			if (item.durability) {
-				//~ var durabilityExec = /(.*)\/(.*)/.exec(item.durability);
 				durabilityPercent = parseInt(100*item.durability/item.max_durability,10);
 				item.durabilityPer=durabilityPercent;
 				durabilityColor = durabilityPercent < 20 ?'red':'gray';
 			}
 
 // TODO
-			var itemTypes=new Array('Helmet','Armor','Gloves','Boots','Weapon','Shield','Ring','Amulet','Rune');
 
 			result+='</td>' +
 				'<td align="right">' + item.stats.min_level + '</td>' +
 				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
-				'<td align="left">' + itemTypes[item.type] + '</td>' +
+				'<td align="left">' + Data.itemType[item.type] + '</td>' +
 				'<td align="right">' + item.stats.attack + '</td>' +
 				'<td align="right">' + item.stats.defense + '</td>' +
 				'<td align="right">' + item.stats.armor + '</td>' +
@@ -12544,9 +12543,9 @@ displayDisconnectedFromGodsMessage: function() {
 
 (function loadScripts () {
 	var o = {
-		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1505/calfSystem.css'],
+		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.css'],
 		js:  ['https://cdn.jsdelivr.net/localforage/1.2.7/localforage.min.js',
-			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1505/calfSystem.js'],
+			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.js'],
 		callback: Helper.onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {

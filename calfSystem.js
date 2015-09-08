@@ -1140,14 +1140,15 @@ window.Data = {
 		'disableComposingPrompts'
 	],
 
-	craftAbbr: {
-		Perfect    : 'Perf',
-		Excellent  : 'Exc',
-		'Very Good': 'VG',
-		Good       : 'Good',
-		Average    : 'Ave',
-		Poor       : 'Poor',
-		'Very Poor': 'VPr'
+	craft: {
+		Perfect    : {abbr: 'Perf', colour: '#00b600'},
+		Excellent  : {abbr: 'Exc',  colour: '#f6ed00'},
+		'Very Good': {abbr: 'VG',   colour: '#f67a00'},
+		Good       : {abbr: 'Good', colour: '#f65d00'},
+		Average    : {abbr: 'Ave',  colour: '#f64500'},
+		Poor       : {abbr: 'Poor', colour: '#f61d00'},
+		'Very Poor': {abbr: 'VPr',  colour: '#b21500'},
+		Uncrafted  : {abbr: 'Unc',  colour: '#666666'}
 	},
 
 	itemType: {
@@ -1168,7 +1169,17 @@ window.Data = {
 		14: 'Container',
 		15: 'Composed Potion',
 		16: 'Frag Stash'
-	}
+	},
+
+	rarityColour: [
+		'#FFFFFF', // Common
+		'#00A0A0', // Rare '#40FFFF'
+		'#FF40FF', // Unique
+		'#FFFF40', // Legendary '#F6ED00'
+		'#FF0000', // Super Elite
+		'#b677f5', // Crystalline
+		'#008000'  // Epic '#00FF00'
+	]
 
 };
 
