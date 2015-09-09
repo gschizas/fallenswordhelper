@@ -6449,186 +6449,175 @@ var Helper = {
 	},
 
 	injectOnlinePlayers: function(content) {
-		if (!content) {content=Layout.notebookContent();}
+		Helper.context = content ? $(content) : $('div#pCC');
+		Helper.appendHead({
+			js: ['https://cdn.jsdelivr.net/jquery.datatables/1.10.4/js/' +
+				'jquery.dataTables.min.js'],
+			callback: Helper.injectOnlinePlayersNew
+		});
+	},
 
-		var lastCheck=System.getValue('lastOnlineCheck');
-		var now=(new Date()).getTime();
-		if (!lastCheck) {lastCheck=0;}
-		var haveToCheck= now - lastCheck > 5*60*1000;
+	injectOnlinePlayersNew: function () {
+		var lastCheck = System.getValue('lastOnlineCheck');
+		var now = Date.now();
 		var refreshButton;
-		if (haveToCheck) {
-			refreshButton = '<td> (takes a while to refresh so only do it if you really need to) </td>'+
-			'<td width="10%" nobr style="font-size:x-small;text-align:right"><span id="Helper:OnlinePlayersRefresh" style="text-decoration:underline;cursor:pointer">[Refresh]</span></td>';
+		if (now - lastCheck > 300000) {
+			refreshButton = '<span> (takes a while to refresh so only do it ' +
+				'if you really need to) </span><span id="fshRefresh"' +
+				'>[Refresh]</span>';
 		} else {
-			refreshButton = '<td width="10%" nobr style="font-size:x-small;text-align:right">[ Wait '+
-				Math.round(300 - (now - lastCheck)/1000) +'s ]</td>';
+			refreshButton = '<span>[ Wait ' + Math.round(300 - (now -
+				lastCheck) / 1000) +'s ]</span>';
 		}
-
-		content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" width="100%"><tr style="background-color:#cd9e4b">'+
-			'<td nobr><b>&nbsp;Online Players</b></td>' +
-			refreshButton +
-			'</tr>' +
-			'</table>' +
-			'<div style="font-size:small;" id="Helper:OnlinePlayersOutput">' +
-			'' +
-			'</div>';
-		refreshButton = document.getElementById('Helper:OnlinePlayersRefresh');
-		if (refreshButton) {
-			refreshButton.addEventListener('click', Helper.parseOnlinePlayersStart, true);
-		}
-		Helper.onlinePlayers = System.getValueJSON('onlinePlayers');
-		Helper.sortOnlinePlayersTable();
-		Helper.generateOnlinePlayersTable();
+		Helper.context.html(
+			'<span><b>Online Players</b></span>' + refreshButton +
+			'<div id="fshOutput"></div>');
+		localforage.getItem('fsh_OnlinePlayers', function(err, value) {
+			Helper.onlinePlayers = value || {};
+			Helper.gotOnlinePlayers();
+		});
 	},
 
-	parseOnlinePlayersStart: function() {
-		// set timer to redisplay the [refresh] button
-		var now=(new Date()).getTime();
-		System.setValue('lastOnlineCheck', now.toString());
-
-		var refreshButton = document.getElementById('Helper:OnlinePlayersRefresh');
-		refreshButton.style.visibility = 'hidden';
-
-		Helper.onlinePlayers = {players:[]};
-		var output=document.getElementById('Helper:OnlinePlayersOutput');
-		output.innerHTML='<br/>Parsing online players ...';
-		System.xmlhttp('index.php?cmd=onlineplayers&page=1', Helper.parseOnlinePlayersStorePage, {'page':1});
-	},
-
-	parseOnlinePlayersStorePage: function(responseText, callback) {
-		var doc = System.createDocument(responseText);
-		var output=document.getElementById('Helper:OnlinePlayersOutput');
-		var playerRows = System.findNodes('//table/tbody/tr[count(td)=4 and td[2]/a]', doc);
-		var maxPage = parseInt(System.findNode('//table//td[input[@name="page"]]', doc).textContent.replace(/\D/g, ''),10);
-		output.innerHTML+=callback.page + ' ';
-		if (playerRows){
-			for (var i=0; i<playerRows.length; i += 1) {
-				var guildId;
-				if (playerRows[i].cells[0].innerHTML.search('href') === -1) {
-					guildId = -1;
-				} else {
-					guildId = parseInt(
-						playerRows[i]
-							.cells[0]
-							.firstChild
-							.getAttribute('href')
-							.replace(/\D/g,''),10
-					);
-				}
-				var newPlayer = {
-					guildId: guildId,
-					id: parseInt(playerRows[i].cells[1].firstChild.getAttribute('href').replace(/\D/g,''),10),
-					name: playerRows[i].cells[1].textContent,
-					level: parseInt(playerRows[i].cells[2].textContent.replace(/,/g,''),10)
-				};
-				Helper.onlinePlayers.players.push(newPlayer);
+	getOnlinePlayers: function(data) {
+		var doc = System.createDocument(data);
+		var input = $('div#pCC input.custominput', doc).first();
+		var thePage = input.attr('value');
+		var theRows = $('div#pCC img[src$="/skin/icon_action_view.gif',
+			doc).parent().parent().parent();
+		theRows.each(function(index) {
+			var tds = $('td', $(this));
+			var player = tds.eq(1).text();
+			if (Helper.onlinePlayers[player] &&
+				Helper.onlinePlayers[player][3] < thePage) {return;}
+			Helper.onlinePlayers[player] = [
+				tds.eq(0).html(),
+				tds.eq(1).html(),
+				tds.eq(2).text(),
+				thePage,
+				index
+			];
+		});
+		input = input.parent().text();
+		var pages = parseInt(input.match(/(\d+)/g)[0], 10);
+		Helper.onlinePages += 1;
+		$('div#fshOutput', Helper.context).append(' ' + Helper.onlinePages); // context
+		if (Helper.onlinePages === pages) {
+			localforage.setItem('fsh_OnlinePlayers', Helper.onlinePlayers);
+			Helper.gotOnlinePlayers();
+		} else if (Helper.onlinePages === 1) {
+			for (var i = 2; i <= pages; i += 1) {
+				$.get('index.php?cmd=onlineplayers&page=' + i,
+					Helper.getOnlinePlayers);
 			}
 		}
-		if (callback.page<maxPage/*-maxPage+15*/) {
-			var newPage = callback.page === 1 ? Math.round(4 * maxPage / 5) : callback.page + 1;
-			System.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage, Helper.parseOnlinePlayersStorePage, {'page':newPage});
-		}
-		else {
-			Helper.onlinePlayers.players = System.uniq(Helper.onlinePlayers.players, 'name');
-			System.setValueJSON('onlinePlayers', Helper.onlinePlayers);
-			Helper.sortOnlinePlayersTable();
-		}
 	},
 
-	generateOnlinePlayersTable: function() {
-		if (!Helper.onlinePlayers) {return;}
-		var minLvl = System.getValue('onlinePlayerMinLvl');
-		var maxLvl = System.getValue('onlinePlayerMaxLvl');
-		var output=document.getElementById('Helper:OnlinePlayersOutput');
-		var result=
-			'<div align=right><form id=Helper:onlinePlayerFilterForm subject="onlinePlayer" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers" onSubmit="javascript:return false;">' +
-			'Min lvl:<input value="' + minLvl + '" size=5 name="Helper.onlinePlayerMinLvl" id="Helper.onlinePlayerMinLvl" style=custominput/> ' +
-			'Max lvl:<input value="' + maxLvl + '" size=5 name="Helper.onlinePlayerMaxLvl" id="Helper.onlinePlayerMaxLvl" style=custominput/> ' +
-			'<input id="Helper:onlinePlayerFilter" subject="onlinePlayer" href="/index.php?cmd=notepad&blank=1&subcmd=onlineplayers" class="custombutton" type="submit" value="Filter"/>' +
-			'<input id="Helper:onlinePlayerFilterReset" subject="onlinePlayer" href="index.php?cmd=notepad&blank=1&subcmd=onlineplayers" class="custombutton" type="button" value="Reset"/></form></div>' +
-			'<table id="Helper:OnlinePlayersTable"><tr>' +
-			'<th align="left" sortkey="guildId" sortType="number">Guild</th>' +
-			'<th sortkey="name">Name</th>' +
-			'<th sortkey="level" sortType="number">Level</th></tr>';
-		var highlightPlayersNearMyLvl = System.getValue('highlightPlayersNearMyLvl');
-		var lvlDiffToHighlight = 10;
-		var levelToTest = System.intValue($('dt.stat-level:first').next().text());
+	buildOnlinePlayerData: function() {
+		Helper.onlineData = [];
+		Object.keys(Helper.onlinePlayers).forEach(function(player) {
+			var guildImage = $('<div/>')
+				.append(Helper.onlinePlayers[player][0]);
+			$('img', guildImage).addClass('center');
+			Helper.onlineData.push([
+				guildImage.html(),
+				Helper.onlinePlayers[player][1],
+				Helper.onlinePlayers[player][2],
+				Helper.onlinePlayers[player][3] * 100 +
+				Helper.onlinePlayers[player][4] + 1,
+			]);
+		});
+	},
+
+	filterHeaderOnlinePlayers: function() {
+		Helper.highlightPlayersNearMyLvl =
+			System.getValue('highlightPlayersNearMyLvl');
+		Helper.lvlDiffToHighlight = 10;
+		Helper.levelToTest = System.intValue($('dt.stat-level:first')
+			.next().text());
 		var characterVirtualLevel = System.getValue('characterVirtualLevel');
-		if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-		if (levelToTest <= 205) {lvlDiffToHighlight = 5;}
-
-		var player;
-		for (var i=0; i<Helper.onlinePlayers.players.length;i += 1) {
-			player=Helper.onlinePlayers.players[i];
-			if (player.level >= minLvl && player.level <= maxLvl) {
-				result += '<tr class="HelperTableRow' + (1 + i % 2) +'"><td>' +
-					'<a href="index.php?cmd=guild&amp;subcmd=view&amp;' +
-					'guild_id=' + player.guildId + '"><img width="16" ' +
-					'border="0" height="16" src="' + System.imageServer +
-					'/guilds/' + player.guildId + '_mini.jpg"></a></td>'+
-					'<td><a href="index.php?cmd=profile&player_id=' +
-					player.id + '">' + player.name + '</a></td>' +
-					'<td align="right"' + (
-						highlightPlayersNearMyLvl ? (
-							Math.abs(
-								player.level - levelToTest
-							) <= lvlDiffToHighlight ?
-							' style="background-color:#4671C8"' : ''
-						) : ''
-					) +
-					'>' + player.level + '</td></tr>';
-			}
-		}
-		result+='</table>';
-		output.innerHTML=result;
-
-		document.getElementById('Helper:onlinePlayerFilterReset').addEventListener('click', Helper.resetLevelFilter, true);
-		document.getElementById('Helper:onlinePlayerFilterForm').addEventListener('submit', Helper.setLevelFilter, true);
-
-		var theTable=document.getElementById('Helper:OnlinePlayersTable');
-		for (i=0; i<theTable.rows[0].cells.length; i += 1) {
-			var cell=theTable.rows[0].cells[i];
-			cell.style.textDecoration='underline';
-			cell.style.cursor='pointer';
-			cell.addEventListener('click', Helper.sortOnlinePlayersTable, true);
-		}
+		if (characterVirtualLevel) {Helper.levelToTest = characterVirtualLevel;}
+		if (Helper.levelToTest <= 205) {Helper.lvlDiffToHighlight = 5;}
+		$('div#fshOutput', Helper.context).html( // context
+			'<div align=right>' +
+			'Min lvl:<input value="' + System.getValue('onlinePlayerMinLvl') +
+				'" size=5 id="fshMinLvl" /> ' +
+			'Max lvl:<input value="' + System.getValue('onlinePlayerMaxLvl') +
+				'" size=5 id="fshMaxLvl" /> ' +
+			'<input id="fshReset" type="button" value="Reset"/>' +
+			'</div><table id="fshInv" class="stripe hover"></table>');
 	},
 
-	sortOnlinePlayersTable: function(evt) {
-		var sortType;
-		Helper.onlinePlayers=System.getValueJSON('onlinePlayers');
-		if (!evt) {
-			var sortCriteria = System.getValueJSON('onlinePlayerSortBy');
-			if (!sortCriteria) {return;}
-			sortType = sortCriteria.sortType;
-			Helper.sortBy = sortCriteria.sortBy;
-			Helper.sortAsc = sortCriteria.sortAsc;
-		} else {
-			var headerClicked = evt.target.getAttribute('sortKey');
-			sortType = evt.target.getAttribute('sortType');
-			if (!sortType) {sortType='string';}
-			// console.log(headerClicked);
-			// console.log(Helper.sortBy);
-			// console.log(sortType);
-			// numberSort
-			Helper.sortBy=headerClicked;
-			if (Helper.sortAsc === undefined) {Helper.sortAsc = true;}
-			if (Helper.sortBy && Helper.sortBy===headerClicked) {
-				Helper.sortAsc=!Helper.sortAsc;
+	gotOnlinePlayers: function() {
+		Helper.buildOnlinePlayerData();
+		Helper.dataTableSearch();
+		Helper.filterHeaderOnlinePlayers();
+
+		var table = $('#fshInv', Helper.context).dataTable({ // context
+			data: Helper.onlineData,
+			pageLength: 30,
+			lengthMenu: [[30, 60, -1], [30, 60, 'All']],
+			columns: [
+				{title: 'Guild', class: 'dt-center', orderable: false},
+				{title: 'Name', class: 'dt-center'},
+				{title: 'Level', class: 'dt-center'},
+				{title: 'Page/Index', class: 'dt-center'}
+			],
+			createdRow: function(row, data) {
+				if (Helper.highlightPlayersNearMyLvl &&
+					Math.abs(System.intValue(data[2]) - Helper.levelToTest) <=
+					Helper.lvlDiffToHighlight) {
+					$('td', row).eq(2).addClass('lvlHighlight');
+				}
+			},
+			order: [3, 'asc']
+		}).api();
+
+		Helper.doOnlinePlayerEventHandlers(table);
+	},
+
+	doOnlinePlayerEventHandlers: function(table) {
+		$('span#fshRefresh', Helper.context).click(function() {
+			$('span#fshRefresh', Helper.context).hide();
+			Helper.onlinePages = 0;
+			Helper.onlinePlayers = {};
+			$.get('index.php?cmd=onlineplayers&page=1',
+			Helper.getOnlinePlayers);
+			System.setValue('lastOnlineCheck', Date.now());
+			$('div#fshOutput', Helper.context)
+				.append('Parsing online players...'); // context
+		});
+		$('#fshMinLvl, #fshMaxLvl', Helper.context).keyup(function() {
+				table.draw();}); // context
+		$('#fshReset', Helper.context).click(function() { // context
+			System.setValue('onlinePlayerMinLvl',
+				Data.defaults.onlinePlayerMinLvl);
+			System.setValue('onlinePlayerMaxLvl',
+				Data.defaults.onlinePlayerMaxLvl);
+			$('#fshMinLvl', Helper.context).val(
+				Data.defaults.onlinePlayerMinLvl); // context
+			$('#fshMaxLvl', Helper.context).val(
+				Data.defaults.onlinePlayerMaxLvl); // context
+			table.draw();
+		});
+	},
+
+	dataTableSearch: function() {
+		/* Custom filtering function which will search data in column three between two values */
+		$.fn.dataTable.ext.search.push(
+			function(settings, data) {
+				var min = parseInt($('#fshMinLvl', Helper.context).val(), 10); // context
+				var max = parseInt($('#fshMaxLvl', Helper.context).val(), 10); // context
+				if (!isNaN(min)) {System.setValue('onlinePlayerMinLvl', min);}
+				if (!isNaN(max)) {System.setValue('onlinePlayerMaxLvl', max);}
+				var level = System.intValue(data[2]) || 0; // use data for the level column
+				if (isNaN(min)   && isNaN(max)   ||
+					isNaN(min)   && level <= max ||
+					min <= level && isNaN(max)   ||
+					min <= level && level <= max )
+				{return true;}
+				return false;
 			}
-		}
-		System.setValueJSON('onlinePlayerSortBy', {'sortBy': Helper.sortBy, 'sortType': sortType, 'sortAsc': Helper.sortAsc});
-		switch(sortType) {
-			case 'string':
-				Helper.onlinePlayers.players.sort(Helper.stringSort);
-				break;
-			case 'number':
-				Helper.onlinePlayers.players.sort(Helper.numberSort);
-				break;
-			default:
-				break;
-		}
-		Helper.generateOnlinePlayersTable();
+		);
 	},
 
 //*************************** Note *********************
@@ -8884,7 +8873,7 @@ var Helper = {
 		System.setValue(minLvlSearchText, Data.defaults[minLvlSearchText]);
 		document.getElementById('Helper.' + minLvlSearchText).value =
 			Data.defaults[minLvlSearchText];
-		System.setValue(maxLvlSearchText, 9999);
+		System.setValue(maxLvlSearchText, Data.defaults[maxLvlSearchText]);
 		document.getElementById('Helper.' + maxLvlSearchText).value =
 			Data.defaults[maxLvlSearchText];
 		if (href) {location.href = System.server + href;
