@@ -26,6 +26,14 @@
 .qbT {margin: 0px auto;}
 .qbTH {text-align: center; padding:0px 4px; color:orange;}
 .qbTD {text-align: center; padding:0px 4px;}
+div#quickbuff div#players h1 {float: left;}
+div#quickbuff div#players p {clear: both;}
+.fshLastActivity {color: #ccc; font-size: x-small;}
+
+div#quickbuff div.buff-block p label.fshDim span {
+  color: #999;
+}
+
 
 table.relicT {font-size:small;}
 table.relicT tr.hidden {display:none; visibility:hidden;}
@@ -55,10 +63,6 @@ div#fshCompConf {
   text-align: right;
   padding-right: 38px;
 }
-
-div#quickbuff div#players h1 {float: left;}
-div#quickbuff div#players p {clear: both;}
-.fshLastActivity {color: #ccc; font-size: x-small;}
 
 /*
  * Table styles

@@ -7188,6 +7188,22 @@ var Helper = {
 		System.xmlhttp('index.php?cmd=profile', Helper.getSustain);
 		$('div#packs').on('click', 'h1', window.updateCost);
 		$('div#players').on('click', 'h1', Helper.addBuffLevels);
+		var excludeBuff = {
+			'skill-50': 'Death Dealer',
+			'skill-54': 'Counter Attack',
+			'skill-55': 'Summon Shield Imp',
+			'skill-56': 'Vision',
+			'skill-60': 'Nightmare Visage',
+			'skill-61': 'Quest Finder',
+			'skill-98': 'Barricade',
+			'skill-101': 'Severe Condition'};
+		$('div#buff-outer label').each(function() {
+			var lbl = $(this);
+			var myLvl = parseInt($('span > span', lbl)
+				.text().replace(/\[|\]/g, ''), 10);
+			if (!excludeBuff[lbl.attr('for')] && myLvl < 125) {
+				lbl.addClass('fshDim');}
+		});
 	},
 
 	addBuffLevels: function() {
