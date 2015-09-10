@@ -64,6 +64,8 @@ var Helper = {
 				Helper.injectTempleAlert();}
 			if (System.getValue('enableUpgradeAlert')) {
 				Helper.injectUpgradeAlert();}
+			if (System.getValue('enableComposingAlert')) {
+				Helper.injectComposeAlert();}
 			Helper.injectQuickMsgDialogJQ();
 		}
 
@@ -1932,28 +1934,6 @@ var Helper = {
 		}
 		if (obj === undefined) {return def;}
 		return obj;
-	},
-
-	questStatusSort: function(a,b) {
-		var result=0;
-		var valueA,valueB;
-		var statuses = ['Incomplete', 'Complete', ''];
-		if (!a[Helper.sortBy]) {
-			valueA=Helper.sortAsc?50:-50;
-		}
-		else {
-			valueA=statuses.indexOf(a[Helper.sortBy]);
-		}
-		if (!b[Helper.sortBy]) {
-			valueB=Helper.sortAsc?50:-50;
-		}
-		else {
-			valueB=statuses.indexOf(b[Helper.sortBy]);
-		}
-
-		result = valueA-valueB;
-		if (!Helper.sortAsc) {result=-result;}
-		return result;
 	},
 
 	oldRemoveBuffs: function() {
@@ -4548,14 +4528,14 @@ var Helper = {
 	getMembrList: function(fn, force) {
 		if (force) {
 			$.ajax({
-				cache: false,
+				//cache: false,
 				dataType: 'json',
 				url:'index.php',
 				data: {
 					cmd: 'export',
 					subcmd: 'guild_members',
-					guild_id: Layout.guildId(),
-					_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+					guild_id: Layout.guildId()//,
+					// _rnd: Math.floor(Math.random() * 8999999998) + 1000000000
 				},
 				success: function(data) {
 					var fn = this;
@@ -5829,7 +5809,6 @@ var Helper = {
 	},
 
 	removeHTML: function(buffName) {
-
 		return buffName.replace(/<\/?[^>]+(>|$)/g, '').replace(/[^a-zA-Z 0-9]+/g,'');
 	},
 
@@ -5910,22 +5889,6 @@ var Helper = {
 			'categoryField':'category',
 			'showRawEditor':true};
 		Helper.generateManageTable();
-	},
-
-	linkFromMouseover: function(mouseOver) {
-		//fetchitem.php?item_id=9206&inv_id=256710069&t=1&p=1346893&currentPlayerId=1346893&extra=5
-		var reParams=/item_id=(\d+)\&inv_id=([-0-9]*)\&t=(\d+)\&p=(\d+)/;
-		var reResult=reParams.exec(mouseOver);
-		if (reResult === null) {
-			return null;
-		}
-		var itemId=reResult[1];
-		var invId=reResult[2];
-		var type=reResult[3];
-		var pid=reResult[4];
-		var theUrl = 'fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t='+type + '&p='+pid;
-		theUrl = System.server + theUrl;
-		return theUrl;
 	},
 
 	linkFromMouseoverCustom: function(mouseOver) {
@@ -7219,489 +7182,61 @@ var Helper = {
 	},
 
 	injectQuickBuff: function() {
-		//~ System.addStyle('.HelperTextLink {color:white;font-size:x-small;cursor:pointer;}\n' +
-			//~ '.HelperTextLink:hover {text-decoration:underline;}\n');
-		//var playerInput = System.findNode('//input[@name="targetPlayers"]');
 		var playerInput = $('input#targetPlayers');
 		if (playerInput.length === 0) {return;}
-		//~ var buffMe = document.createElement('SPAN');
-		//~ buffMe.innerHTML='[self]';
-		//~ buffMe.className='HelperTextLink';
-		//~ buffMe.addEventListener('click', Helper.quickBuffMe, true);
-		//playerInput.parentNode.appendChild(buffMe);
-		//~ playerInput.parent().append(buffMe);
-
-		//~ Helper.injectBuffPackArea();
-
-		//~ var playerIDRE = /tid=(\d+)/;
-		//~ var playerID = playerIDRE.exec(location);
-		//~ if (playerID) {
-			//~ playerID = playerID[1];
-			//~ System.xmlhttp('index.php?cmd=profile&player_id=' + playerID, Helper.getPlayerBuffs, false);
-		//~ }
-		//~ var playerName = /quickbuff&t=([a-zA-Z0-9]+)/.exec(location);
-		//~ if (playerName) {
-			//~ playerName = playerName[1];
-			//~ if (playerName === System.getValue('CharacterName')) System.xmlhttp('index.php?cmd=profile', Helper.getPlayerBuffs, false);
-			//~ else System.xmlhttp('index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=' + playerName + '&search_show_first=1', Helper.getPlayerBuffs, false);
-		//~ }
+		$('h1:contains("Quick Buff")').after(Layout.quickBuffHeader);
 		System.xmlhttp('index.php?cmd=profile', Helper.getSustain);
-
-		//~ var buffList = Data.buffList;
-		//~ var skillNodes = System.findNodes('//input[@name="skills[]"]');
-		//~ var buffIndex = window.location.toString().indexOf('&blist=');
-//~ 
-		//~ var addr;
-		//~ var newStaminaTotal;
-		//~ var targetPlayersCount;
-		//~ var i;
-//~ 
-		//~ if (buffIndex !== -1) {
-			//~ addr = window.location.toString().substring(buffIndex + 7);
-			//~ addr = addr.substring(0, addr.length - 1).split(';');
-		//~ }
-		//~ var buffPacksToUse = [];
-		//~ if (skillNodes) {
-			//~ var targetPlayers = playerInput;
-			//~ targetPlayersCount = targetPlayers.val().split(',').length*1;
-			//~ newStaminaTotal = 0;
-			//~ var theBuffPack = System.getValueJSON('buffpack'); // cache it now in case we have a buff pack to find.
-			//~ for (i = 0; i < skillNodes.length; i+= 1 ) {
-				//var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
-				//~ var skillName = skillNodes[i].getAttribute('data-name');
-				//skillNodes[i].setAttribute('skillName', skillName); // Use data-name instead
-				//~ for (var k = 0; k < buffList.length; k += 1) {
-					//~ if (buffList[k].name !== skillName) {continue;}
-					//~ if (!addr) {break;}
-					//~ for (var p = 0; p < addr.length; p += 1) {
-//~ 
-						//~ if (addr[p] === k) {
-//~ 
-							//~ newStaminaTotal += buffList[k].stamina*1;
-							//~ skillNodes[i].checked = true;
-						//~ } else if (addr[p] >= 126) {
-							//~ if (!theBuffPack) {continue;}
-//~ 
-							//~ var bpIndex = addr[p] - 126;
-							//~ var bpButton = document.getElementById('bpSelect' + bpIndex);
-//~ 
-							//~ if (!bpButton) {continue;}
-							//~ var foundMe = false;
-							//~ for (var indx = 0; indx < buffPacksToUse.length; indx += 1) {
-								//~ if (buffPacksToUse[indx] === bpIndex) {
-									//~ foundMe = true;
-									//~ break;
-								//~ }
-							//~ }
-							//~ if (!foundMe) {
-								//~ buffPacksToUse.push(bpIndex);
-							//~ }
-								//continue;
-						//~ }
-					//~ }
-					//skillNodes[i].setAttribute('staminaCost',buffList[k].stamina); // Use data-cost instead
-				//~ }
-				//~ skillNodes[i].addEventListener('click', Helper.toggleBuffStatus, true);
-			//~ }
-		//~ }
-		//~ //var activateButton = System.findNode('//input[@value="Activate Selected Skills"]');
-		//var activateButton = $('input[value="Activate Selected Skills"]');
-		//~ var activateButton = $('table#bpTable');
-		//~ activateButton.parent().append('<br><span style="color:white;">Stamina to cast selected skills: <span>' +
-			//~ '<span id="staminaTotal" style="display:none; color:orange;">' + newStaminaTotal +
-			//~ '</span>&nbsp;<span id="staminaTotalAll" style="color:orange;">' + newStaminaTotal * targetPlayersCount + '</span>');
-		//~ if (buffPacksToUse.length > 0) {
-			//~ for (i = 0; i < buffPacksToUse.length; i+= 1 ) {
-				//~ Helper.useBuffPack(buffPacksToUse[i]);
-			//~ }
-		//~ }
-		//~ //code to pre-size cell for data later. crude but it works.
-		//~ $('input[value="activate"]').next().find('tr:last td').html('&nbsp;</br>&nbsp;</br>&nbsp;');
+		$('div#packs').on('click', 'h1', window.updateCost);
+		$('div#players').on('click', 'h1', Helper.addBuffLevels);
 	},
 
-	toggleBuffStatus: function(evt) {
-		var staminaTotal = System.findNode('//span[@id="staminaTotal"]');
-		var staminaTotalAll = System.findNode('//span[@id="staminaTotalAll"]');
-		var targetPlayers = System.findNode('//input[@name="targetPlayers"]');
-		var targetPlayersCount = targetPlayers.value.split(',').length*1;
-		var newStaminaTotal = 0;
-		if (evt.target.checked === false) {
-			evt.target.checked = false;
-			newStaminaTotal = staminaTotal.textContent*1 - evt.target.getAttribute('data-cost')*1;
-			staminaTotal.innerHTML = newStaminaTotal;
-			staminaTotalAll.innerHTML = newStaminaTotal * targetPlayersCount;
-		}
-		else if (evt.target.checked === true) {
-			evt.target.checked = true;
-			newStaminaTotal = staminaTotal.textContent*1 + evt.target.getAttribute('data-cost')*1;
-			staminaTotal.innerHTML = newStaminaTotal;
-			staminaTotalAll.innerHTML = newStaminaTotal * targetPlayersCount;
-		}
+	addBuffLevels: function() {
+		$('span.fshSelf').remove();
+		var self = $(this);
+		Helper.addStatsQuickBuff(self);
+		var buffs = self.data('buffs').split(',');
+		var hash = {};
+		self.next().find('span').each(function(i, e) {
+			hash[buffs[i]] = $(e).text().replace(/\[|\]/g, '');
+		});
+		Object.keys(hash).forEach(function(value) {
+			var buffLvl = parseInt(hash[value], 10);
+			var label = $('label[for="skill-' + value + '"]');
+			if (label.length === 0) {return;}
+			var span = $('span > span', label);
+			var myLvl = parseInt(span.text().replace(/\[|\]/g, ''), 10);
+			span.after('<span class="fshSelf"' + (myLvl > buffLvl ?
+				' style="color:red;"' : ' style="color:green;"') + '> [' +
+				buffLvl + ']</span>');
+		});
 	},
 
-	injectBuffPackArea: function() {
-		Helper.injectBuffPackList();
-		Helper.injectBuffPackAddButton();
-	},
-
-	injectBuffPackList: function() {
-		var injectHere = System.findNode("//input[@value='Activate Selected Skills']/parent::*/parent::*");
-		var bpArea = document.createElement("SPAN");
-		bpArea.innerHTML="<br><div align='center'><span style='color:lime; font-size:large;'>Buff Packs</span><table id='bpTable' width='600' style='border:1px solid #A07720;' rules=rows><tbody>" +
-			"<tr><td style='color:gold; font-weight:bold;'>Nickname</td><td style='color:gold; font-weight:bold;'>Buffs included in the pack</td>" +
-			"<td><span id=bpSelectAll class='HelperTextLink'>[All]</span>&nbsp;<span id=bpClear class='HelperTextLink'>[Clear]</span></td></tr>" +
-			"</tbody></table></div>";
-		bpArea.style.color='white';
-		injectHere.appendChild(bpArea);
-
-		document.getElementById("bpSelectAll").addEventListener("click", function() {Helper.setAllSkills(true);}, false);
-		document.getElementById("bpClear").addEventListener("click", function() {Helper.setAllSkills(false);}, false);
-		document.getElementById("selectAllButton").addEventListener("click", function() {setTimeout(function(){Helper.sumStamCostOfSelectedBuffs();},0);}, false);	
-		
-		var theBuffPack = System.getValueJSON("buffpack");
-		if (!theBuffPack) {return;}
-
-		if (!theBuffPack.nickname) { //avoid bugs if the new array is not populated yet
-			theBuffPack.nickname = {};
-		}
-		if (!theBuffPack.staminaTotal) { //avoid bugs if the new array is not populated yet
-			theBuffPack.staminaTotal = {};
-		}
-
-		var bpTable = document.getElementById('bpTable');
-		for (var i = 0; i < theBuffPack.size; i += 1) {
-			var myRow = bpTable.insertRow(-1);
-			var nickname = theBuffPack.nickname[i]? theBuffPack.nickname[i]:'';
-			var listOfBuffs = theBuffPack.bp[i];
-			var staminaTotal = theBuffPack.staminaTotal[i]? theBuffPack.staminaTotal[i]:'';
-			myRow.innerHTML = '<td>' + nickname + '</td><td style="font-size:x-small;">' + listOfBuffs + '&nbsp;' + staminaTotal + '&nbsp;' +
-				'</td><td><span id=bpSelect' + i + ' class="HelperTextLink" buffId=' + i + '>[Select]</span> ' +
-				'<span id=bpDelete' + i + ' buffId=' + i + ' class="HelperTextLink">[X]</span></td>';
-			document.getElementById('bpSelect' + i).addEventListener('click', Helper.useBuffPackHandler, true);
-			document.getElementById('bpDelete' + i).addEventListener('click', Helper.deleteBuffPack, true);
-		}
-	},
-
-	setAllSkills: function(value) {
-		var skillNodes = System.findNodes('//input[@name="skills[]"]');
-		if (!skillNodes) {return;}
-
-		for (var i = 0; i < skillNodes.length; i+= 1 ) {
-			skillNodes[i].checked = value;
-		}
-		Helper.sumStamCostOfSelectedBuffs();
-	},
-
-	sumStamCostOfSelectedBuffs: function() {
-		var skillNodes = System.findNodes('//input[@name="skills[]"]');
-		if (!skillNodes) {return;}
-
-		var staminaRunningTotal = 0;
-		for (var i = 0; i < skillNodes.length; i+= 1 ) {
-			if (skillNodes[i].checked) {
-				staminaRunningTotal += skillNodes[i].getAttribute('data-cost')*1;
+	addStatsQuickBuff: function(self) {
+		self.parent().find('span.fshLastActivity').remove();
+		$.ajax({
+			cache: false,
+			dataType: 'json',
+			url: 'index.php',
+			data: {
+				cmd:             'export',
+				subcmd:          'profile',
+				player_username: self.text()
+			},
+			success: function(data) {
+				//console.log('7344 data', data);
+				self.after('<span class="fshLastActivity">' +
+					System.formatLastActivity(data.last_login) +
+					'<br>Stamina: ' + data.current_stamina + ' / ' +
+					data.stamina + ' ( ' + Math.floor(data.current_stamina /
+					data.stamina * 100) + '% )' +
+					'</span>');
 			}
-		}
-
-		var staminaTotal = System.findNode('//span[@id="staminaTotal"]');
-		staminaTotal.innerHTML = staminaRunningTotal;
-		var staminaTotalAll = System.findNode('//span[@id="staminaTotalAll"]');
-		var targetPlayers = System.findNode('//input[@name="targetPlayers"]');
-		var targetPlayersCount = targetPlayers.value.split(',').length*1;
-		staminaTotalAll.innerHTML = staminaRunningTotal * targetPlayersCount;
-	},
-
-	useBuffPackHandler: function(evt) {
-		var bpIndex=evt.target.getAttribute('buffId');
-		Helper.useBuffPack(bpIndex);
-	},
-
-	useBuffPack: function(bpIndex) {
-
-		var theBuffPack = System.getValueJSON('buffpack');
-		if (!theBuffPack) {return;}
-		if (bpIndex >= theBuffPack.size) {return;}
-
-		var buffList = theBuffPack.bp[bpIndex];
-		if (!buffList) {return;}
-
-		var skillNodes = System.findNodes('//input[@name="skills[]"]');
-		if (!skillNodes) {return;}
-
-		for (var i = 0; i < skillNodes.length; i+= 1 ) {
-			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
-			if (buffList.indexOf(skillName) >= 0) {
-				skillNodes[i].checked = true;
-			}
-		}
-		Helper.sumStamCostOfSelectedBuffs();
-	},
-
-	deleteBuffPack: function(evt) {
-
-		if (!window.confirm('Are you sure you want to delete the buff pack?')) {return;}
-
-		var bpIndex=parseInt(evt.target.getAttribute('buffId'),10);
-		var theBuffPack = System.getValueJSON('buffpack');
-		if (!theBuffPack) {return;}
-		if (!theBuffPack.size) {return;}
-
-		theBuffPack.size -=1;
-		if (theBuffPack.size === 0) { // avoid bugs :)
-			delete theBuffPack.bp;
-			delete theBuffPack.nickname;
-			delete theBuffPack.staminaTotal;
-			theBuffPack.bp = {};
-			theBuffPack.nickname = {};
-			theBuffPack.staminaTotal = {};
-		}
-		if (!theBuffPack.nickname) { //avoid bugs
-			theBuffPack.nickname = {};
-		}
-		if (!theBuffPack.staminaTotal) { //avoid bugs
-			theBuffPack.staminaTotal = {};
-		}
-		for (var i = bpIndex; i < theBuffPack.size; i += 1) {
-			theBuffPack.bp[i] = theBuffPack.bp[i + 1];
-			//old buff packs won't have the next two values.
-			theBuffPack.nickname[i] = theBuffPack.nickname[i + 1]? theBuffPack.nickname[i + 1]:'';
-			theBuffPack.staminaTotal[i] = theBuffPack.staminaTotal[i + 1]? theBuffPack.staminaTotal[i + 1]:'';
-		}
-
-		delete theBuffPack.bp[theBuffPack.size];
-		if (theBuffPack.nickname[theBuffPack.size]) {
-			delete theBuffPack.nickname[theBuffPack.size];
-		}
-		if (theBuffPack.staminaTotal[theBuffPack.size]) {
-			delete theBuffPack.staminaTotal[theBuffPack.size];
-		}
-
-		System.setValueJSON('buffpack', theBuffPack);
-		location.reload(true);
-	},
-
-	injectBuffPackAddButton: function() {
-		var bpTable = document.getElementById('bpTable');
-		var myRow = bpTable.insertRow(-1);
-		myRow.innerHTML = '<td><input size=10 id="newBuffPackNickname" name="newBuffPackNickname" value="nickname"></td>'+
-			'<td><input size=60 id="newBuffPack" name="newBuffPack" value="full buff names, separated by comma"></td>' +
-			'<td><span id=bpSave class="HelperTextLink">[Save]</span><span id=bpAdd class="HelperTextLink">[add]</span></td>';
-
-		// button handlers
-		document.getElementById('bpAdd').addEventListener('click', Helper.displayAddBuffPack, true);
-		document.getElementById('bpSave').addEventListener('click', Helper.saveBuffPack, true);
-
-		// display [add] only
-		document.getElementById('newBuffPack').style.visibility = 'hidden';
-		document.getElementById('newBuffPackNickname').style.visibility = 'hidden';
-		document.getElementById('bpAdd').style.visibility = '';
-		document.getElementById('bpSave').style.visibility = 'hidden';
-	},
-
-	displayAddBuffPack: function() {
-		var skillNodes = System.findNodes('//input[@name="skills[]"]');
-		if (!skillNodes) {return;}
-		var buffListBox = document.getElementById('newBuffPack');
-		var buffListText = '';
-		for (var i = 0; i < skillNodes.length; i+= 1 ) {
-			var skillName = skillNodes[i].parentNode.parentNode.textContent.match(/\t([A-Z].*) \[/)[1];
-			if (skillNodes[i].checked === true) {
-				buffListText += skillName + ',';
-			}
-		}
-		if (buffListText.length > 0) {
-			buffListText = buffListText.substring(0,buffListText.lastIndexOf(','));
-			buffListBox.value = buffListText;
-		}
-		document.getElementById('newBuffPack').style.visibility = '';
-		document.getElementById('newBuffPackNickname').style.visibility = '';
-		document.getElementById('bpAdd').style.visibility = 'hidden';
-		document.getElementById('bpSave').style.visibility = '';
-	},
-
-	saveBuffPack: function() {
-		if (!document.getElementById('newBuffPack').value) {return;}
-		if (!document.getElementById('newBuffPackNickname').value) {return;}
-
-		var theBuffPack = System.getValueJSON('buffpack');
-		if (!theBuffPack) {
-			theBuffPack = {};
-			theBuffPack.size = 0;
-			theBuffPack.bp = {};
-			theBuffPack.nickname = {};
-			theBuffPack.staminaTotal = {};
-		}
-		if (!theBuffPack.nickname) { //avoid bugs
-			theBuffPack.nickname = {};
-		}
-		if (!theBuffPack.staminaTotal) { //avoid bugs
-			theBuffPack.staminaTotal = {};
-		}
-		theBuffPack.bp[theBuffPack.size] = document.getElementById('newBuffPack').value;
-		theBuffPack.nickname[theBuffPack.size] = document.getElementById('newBuffPackNickname').value;
-		var listOfBuffs = theBuffPack.bp[theBuffPack.size];
-		var buffArray = listOfBuffs.split(',');
-		var buffList = Data.buffList;
-		var staminaTotal = 0;
-		for (var j = 0; j < buffArray.length; j += 1) {
-			for (var k = 0; k < buffList.length; k += 1) {
-				if (buffArray[j].trim() === buffList[k].name) {
-					staminaTotal += buffList[k].stamina;
-					break;
-				}
-			}
-		}
-		theBuffPack.staminaTotal[theBuffPack.size] = '<span style="color:orange;">(' + staminaTotal + ')</span>';
-
-		//increase the size of the array
-		theBuffPack.size += 1;
-
-		// save and reload
-		System.setValueJSON('buffpack', theBuffPack);
-		location.reload(true);
-	},
-
-	quickBuffMe: function() {
-		var playerInput = System.findNode('//input[@name="targetPlayers"]');
-		playerInput.value = $('dt.stat-name:first').next().text()
-			.replace(/,/g,'');
-
-		if (Helper.tmpSelfProfile) {
-			Helper.getPlayerBuffs(Helper.tmpSelfProfile, true);
-		}
-	},
-
-	getPlayerBuffs: function(responseText, keepPlayerInput) {
-		var playerInput;
-		var playerName;
-		var buffRE;
-		var buff;
-		var buffName;
-		//~ var injectHere = $('form:contains("Activate Selected Skills"):last');
-		var resultText = '<center><table align="center"><tr><td colspan="4" style="color:lime;font-weight:bold">Buffs already on player:</td></tr>';
-
-		if (keepPlayerInput) {
-			playerInput = System.findNode('//input[@name="targetPlayers"]');
-			playerName = playerInput.value;
-		}
-
-		//low level buffs used to get the buff above are not really worth casting.
-		var buffs = Data.buffList;
-		var myBuffs = System.findNodes('//font[@size="1"]');
-		for (var i=0;i<myBuffs.length;i += 1) {
-			var myBuff=myBuffs[i];
-			var myBuffName = /([ a-zA-Z]+)\s\[/.exec(myBuff.innerHTML)[1];
-			var buffFound = false;
-			for (var j=0;j<buffs.length;j += 1) {
-				buffName = buffs[j].name;
-				if (myBuffName === buffName) {
-					//fix me - test again once mouseovers are tested in quick buff screen.
-					var onmouseoverText = '<span style="font-weight:bold; color:#FFF380;">' + buffName + '</span><br /><br />Stamina: ' +
-						buffs[j].stamina + '<br>Duration: ' +
-						buffs[j].duration + '<br>Effect: ' +
-						buffs[j].buff;
-					myBuff.setAttribute('class', 'tipped');
-					myBuff.setAttribute('data-tipped', onmouseoverText);
-					buffFound = true;
-					break;
-				}
-			}
-			if (!buffFound) {
-				console.log('Buff typo in data file: "' + myBuffName + '"');
-			}
-			var buffLevelRE = /\[(\d+)\]/;
-			var buffLevel = buffLevelRE.exec(myBuff.innerHTML)[1]*1;
-			if (buffLevel < 75 &&
-				myBuff.innerHTML.search('Counter Attack') === -1 && myBuff.innerHTML.search('Quest Finder') === -1 &&
-				myBuff.innerHTML.search('Death Dealer') === -1 && myBuff.innerHTML.search('Vision') === -1) {
-				myBuff.style.color = 'gray';
-			}
-		}
-
-		//this could be formatted better ... it looks ugly but my quick attempts at putting it in a table didn't work.
-		var doc=System.createDocument(responseText);
-		buffs = $(doc).find('img[src*="/skills/"]');
-		if (buffs.length === 0) {
-			resultText += '<tr><td colspan="4" style="text-align:center;' +
-				'color:white; font-size:x-small">[no buffs]</td></tr>';
-		} else {
-			buffs.each(function(index){
-				//<center><b>Reckoning</b> (Level: 175)</b></center>
-				//<center><b>Doubler<br><br>(Cannot be affected by Spell Breaker or Spell Leech.)<br><br></b> (Level: 1200)</b></center>
-				var onmouseover = $(this).attr('data-tipped');
-				onmouseover = onmouseover.replace('<br><br>(Cannot be affected by Spell Breaker or Spell Leech.)<br><br>','');
-				if (onmouseover.search('Summon Shield Imp') !== -1) {
-					//<center><b>Summon Shield Imp<br>6 HP remaining<br></b> (Level: 150)</b></center>");
-					//<center><b>Summon Shield Imp<br> HP remaining<br></b> (Level: 165)</b></center>");
-					buffRE = /<b>([ a-zA-Z]+)<br>([0-9]+) HP remaining<br><\/b> \(Level: (\d+)\)/;
-					buff = buffRE.exec(onmouseover);
-					if (!buff) {
-						buffRE = /<b>([ a-zA-Z]+)<br> HP remaining<br><\/b> \(Level: (\d+)\)/;
-						buff = buffRE.exec(onmouseover);
-					}
-					if (!buff) {console.log(onmouseover);}
-					buffName = buff[1];
-					buffLevel = buff[3];
-				} else {
-					buffRE = /<b>([ a-zA-Z]+)<\/b> \(Level: (\d+)\)/;
-					buff = buffRE.exec(onmouseover);
-					buffName = buff[1];
-					buffLevel = buff[2];
-				}
-				if (!buffLevel) {buffLevel = 0;} //For when a shield imp runs out but the buff is still there (0HP)
-				resultText += index % 4 === 0? '<tr>':'';
-				resultText += '<td style="color:white; font-size:x-small">' + buffName + '</td><td style="color:silver; font-size:x-small">[' + buffLevel + ']</td>';
-				resultText += index % 4 === 3? '</tr>':'';
-				var hasThisBuff = $('font:contains("' + buffName + ' ["):not(:contains(" ' + buffName + '"))');
-				if (hasThisBuff.length > 0) {
-					buffLevelRE = /\[(\d+)\]/;
-					var myBuffLevel = parseInt(buffLevelRE.exec(hasThisBuff.html())[1],10);
-					if (myBuffLevel > 11 ||
-						buffName === 'Quest Finder') {
-						hasThisBuff.css('color','lime');
-						hasThisBuff.append(' (<font color="#FFFF00">' + buffLevel + '</font>)');
-					}
-				}
-			});
-			resultText += i % 4 === 3? '<td></td></tr>':'';
-		}
-		resultText += '</table></center>';
-
-		var activateButton = System.findNode('//input[@value="Activate Selected Skills"]');
-		var staminaCell = $(doc).find('td:contains("Stamina:"):last').next().find('td:first');
-		var curStamina = System.intValue(staminaCell.text().split('/')[0]);
-		var maxStamina = System.intValue(staminaCell.text().split('/')[1]);
-		var percentageStaminaLeft = Math.round(100.0*curStamina/1.0*maxStamina);
-		staminaCell.append('(' + percentageStaminaLeft + '%)');
-		if (percentageStaminaLeft < 10) {
-			activateButton.parentNode.style.backgroundColor = 'red';
-		}
-
-		var newNode;
-		var lastActivity = $(doc).find('h2:contains("Last Activity"):last');
-		if (lastActivity.length > 0) {
-			newNode = document.createElement('SPAN');
-			newNode.innerHTML = '<br/><center><span style="color:white;" align="center">' + lastActivity.html() + '</span></center><br/>';
-			activateButton.parentNode.parentNode.appendChild(newNode);
-		}
-
-		var statistics = $(doc).find('td:contains("Stamina:"):last').parents('table:first');
-		resultText += '<center><table class="innerContentMiddle">' + statistics.html() + '</table></center>';
-
-		newNode = document.createElement('SPAN');
-		newNode.innerHTML = resultText;
-		activateButton.parentNode.parentNode.appendChild(newNode);
-
-		if (keepPlayerInput) {
-			playerInput = System.findNode('//input[@name="targetPlayers"]');
-			playerInput.value = playerName;
-		}
+		});
 	},
 
 	getSustain: function(responseText) {
 		var doc = System.createDocument(responseText);
-		Helper.tmpSelfProfile = responseText;
-		$('h1:contains("Quick Buff")').after(Layout.quickBuffHeader);
+		var user = $('#statbar-character').html();
 		Helper.getEnhancement(doc, 'Sustain', $('td#fshSus'));
 		Helper.getEnhancement(doc, 'Fury Caster', $('td#fshFur'));
 		Helper.getBuff(doc, 'Guild Buffer', $('td#fshGB'));
@@ -7709,21 +7244,18 @@ var Helper = {
 		Helper.getBuff(doc, 'Extend', $('td#fshExt'));
 		Helper.getBuff(doc, 'Reinforce', $('td#fshRI'));
 		$('span[id*="HelperActivate"]').click(function() {
-			var user = $(doc).find('#statbar-character').html();
-			var buffHref='?cmd=quickbuff&subcmd=activate&targetPlayers=' +
-				user + '&skills[]=' + $(this).attr('buffID');
 			var trigger = $(this);
+			var buffHref='?cmd=quickbuff&subcmd=activate&targetPlayers=' +
+				user + '&skills[]=' + trigger.attr('buffID');
 			$.ajax({
 				url: buffHref,
 				success: function( data ) {
-					if ($(data).find('font:contains("current or higher ' +
-						'level is currently active on")').length > 0 ||
-						$(data).find('font:contains("was activated on")')
-						) {
+					if ($('font:contains("current or higher level is ' +
+						'currently active on")', data).length > 0 ||
+						$('font:contains("was activated on")', data)) {
 							trigger.css('color','lime');
 							trigger.html('On');
 					}
-					
 				}
 			});
 		});
@@ -7744,29 +7276,28 @@ var Helper = {
 		}
 		var enhColor = 'lime';
 		if (enhLevel < 100) {enhColor = 'red';}
-		inject.append('<span style="color: ' + enhColor + ';">' +
+		inject.html('<span style="color: ' + enhColor + ';">' +
 			enhLevel + '%</span>');
 	},
 
 	getBuff: function(doc, buff, inject) {
-		var hasBuff = $(doc)
-			.find('img.tip-static[data-tipped*="' + buff + '"]');
+		var hasBuff = $('img.tip-static[data-tipped*=">' + buff + '<"]', doc);
 		if (hasBuff.length > 0) {
 			var buffTimeToExpire = hasBuff
 				.parents('td:first')
 				.find('nobr')
 				.html();
-			inject.append('<span style="color:lime;">On</span>&nbsp;<span ' +
+			inject.html('<span style="color:lime;">On</span>&nbsp;<span ' +
 				'style="color: white; font-size: x-small;">(' +
 				buffTimeToExpire +')</span>');
 		} else {
 			var elem = $('input[data-name="' + buff + '"]');
 			if (elem.length > 0) {
-				inject.append('<span style="color:red;cursor:pointer;" ' +
+				inject.html('<span style="color:red;cursor:pointer;" ' +
 					'buffID="' + elem.val() + '" id="HelperActivate' +
 					elem.val() + '">Activate</span>');
 			} else {
-				inject.append('<span style="color:red;">Off</span>');
+				inject.html('<span style="color:red;">Off</span>');
 			}
 		}
 	},
@@ -9271,13 +8802,17 @@ var Helper = {
 		var wantedNames = System.getValue('wantedNames');
 		var combatEvaluatorBias = System.getValue('combatEvaluatorBias');
 		var enabledHuntingMode = System.getValue('enabledHuntingMode');
+		var storage = (JSON.stringify(localStorage).length /
+			(5 * 1024 * 1024) * 100).toFixed(2);
 		var configData=
 			'<form><table style="border-spacing: 10px;">' +
 			'<tr><th colspan="2"><b>Fallen Sword Helper configuration ' +
 				'Settings</b></th></tr>' +
 			'<tr><td colspan="2" align=center>' +
 				'<span style="font-size:xx-small">(Current version: ' +
-				(GM_info ? GM_info.script.version : 'unknown') + ')</span>' +
+				(GM_info ? GM_info.script.version : 'unknown') + ')&nbsp;' +
+				'(Storage Used: ' + storage + '% Remaining: ' +
+				(100 - storage) + '%)</span>' +
 			'</td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 			'<span style="font-weight:bold;">Visit the <a href="https://github.com/fallenswordhelper/fallenswordhelper">Fallen Sword Helper web site</a> ' +
@@ -9317,6 +8852,14 @@ var Helper = {
 				'stamina with gold today.') +
 				':</td><td><input name="enableUpgradeAlert" type="checkbox" ' +
 				'value="on"' + (System.getValue('enableUpgradeAlert') ?
+				' checked' : '') + '></td></tr>' +
+
+			'<tr><td align="right">' + Layout.networkIcon + 'Enable ' +
+				'Composing Alert' + Helper.helpLink('Enable Composing Alert',
+				'Puts an alert on the LHS if you have composing slots ' +
+				'available.') +
+				':</td><td><input name="enableComposingAlert" type="checkbox" ' +
+				'value="on"' + (System.getValue('enableComposingAlert') ?
 				' checked' : '') + '></td></tr>' +
 
 			'<tr><td align="right">Enhance Online Dots' + Helper.helpLink('Enhance Online Dots', 'Enhances the green/grey dots by player names to show online/offline status.') +
@@ -11786,7 +11329,7 @@ displayDisconnectedFromGodsMessage: function() {
 		var notificationUl = $('ul#notifications');
 		notificationUl.prepend('<li class="notification"><a href="index.php?cmd=temple">' +
 			'<span class="notification-icon"></span>' +
-			'<p class="notification-content">Bow down to the gods.</p>' +
+			'<p class="notification-content">Bow down to the gods</p>' +
 			'</a></li>');
 	},
 
@@ -11825,6 +11368,50 @@ displayDisconnectedFromGodsMessage: function() {
 
 	displayUpgradeMsg: function() { //jquery
 		$('ul#notifications').prepend(Layout.goldUpgradeMsg);
+	},
+
+	injectComposeAlert: function() { //jquery
+		if (System.getUrlParameter('cmd') === 'composing') {return;}
+		var needToCompose = System.getValue('needToCompose');
+		if (needToCompose) {
+			Helper.displayComposeMsg();
+			return;
+		}
+		var lastComposeCheck = System.getValue('lastComposeCheck');
+		if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
+		$.get('index.php?cmd=composing', Helper.parseComposing);
+	},
+
+	parseComposing: function(data) { //jquery
+		var doc;
+		if (System.getUrlParameter('cmd') !== 'composing') {
+			doc = data;
+		} else {
+			doc = document;
+		}
+		var openSlots = $('div.composing-potion-time:contains("ETA: Ready to ' +
+			'Collect!"), div.composing-potion-time:contains("ETA: n/a")', doc);
+		if (openSlots.length !== 0) {
+			Helper.displayComposeMsg();
+			System.setValue('needToCompose', true);
+		} else {
+			var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
+			var etas = $('div.composing-potion-time', doc);
+			var eta = Infinity;
+			etas.each(function() { // might be better just to look at [0]
+				var timeArr = timeRE.exec($(this).text());
+				if (!timeArr) {return;}
+				var milli = timeArr[1] * 3600000 + timeArr[2] * 60000 +
+					timeArr[3] * 1000 + Date.now();
+				eta = milli < eta ? milli : eta;
+			});
+			System.setValue('needToCompose', false);
+			System.setValue('lastComposeCheck', eta);
+		}
+	},
+
+	displayComposeMsg: function() { //jquery
+		$('ul#notifications').prepend(Layout.composeMsg);
 	},
 
 	injectFindPlayer: function() {
@@ -12428,6 +12015,10 @@ displayDisconnectedFromGodsMessage: function() {
 	},
 
 	injectComposing: function() { //jquery
+
+		if (System.getValue('enableComposingAlert')) {
+			Helper.parseComposing();}
+
 		var disableComposingPrompts =
 			System.getValue('disableComposingPrompts');
 		if (disableComposingPrompts) {
@@ -12537,7 +12128,7 @@ displayDisconnectedFromGodsMessage: function() {
 (function loadScripts () {
 	var o = {
 		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.css'],
-		js:  ['https://cdn.jsdelivr.net/localforage/1.2.7/localforage.min.js',
+		js:  ['https://cdn.jsdelivr.net/localforage/1.2.10/localforage.min.js',
 			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.js'],
 		callback: Helper.onPageLoad
 	};

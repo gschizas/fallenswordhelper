@@ -432,7 +432,22 @@ window.System = {
 				return sParameterName[1] === undefined ? true : sParameterName[1];
 			}
 		}
-	}
+	},
+
+	formatLastActivity: function(last_login) {
+		var d, h, m, s;
+		//~ s = Math.floor(ms / 1000);
+		s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
+		m = Math.floor(s / 60);
+		s = s % 60;
+		h = Math.floor(m / 60);
+		m = m % 60;
+		d = Math.floor(h / 24);
+		h = h % 24;
+		//~ return { d: d, h: h, m: m, s: s };
+		return 'Last Activity: ' + d + ' days, ' + h + ' hours, ' + m +
+			' minutes, ' + s + ' secs';
+	},
 };
 System.init();
 
@@ -901,6 +916,7 @@ window.Data = {
 
 		enableTempleAlert: false,
 		enableUpgradeAlert: false,
+		enableComposingAlert: false,
 		autoFillMinBidPrice: true,
 		showPvPSummaryInLog: false,
 		enableQuickDrink: false,
@@ -968,6 +984,9 @@ window.Data = {
 		lastMembrListCheck: 0,
 		disableItemColoring: false,
 		showQuickSendLinks: false,
+		needToCompose: false,
+		lastComposeCheck: 0,
+		lastOnlineCheck: 0,
 
 /* jshint -W110 */ // Mixed double and single quotes. (W110)
 
@@ -1127,6 +1146,7 @@ window.Data = {
 		'maxGroupSizeToJoin',
 		'enableTempleAlert',
 		'enableUpgradeAlert',
+		'enableComposingAlert',
 		'autoFillMinBidPrice',
 		'showPvPSummaryInLog',
 		'enableQuickDrink',
@@ -1386,19 +1406,24 @@ window.Layout = {
 		'<th class="qbTH">Extend</span></th>' +
 		'<th class="qbTH">Reinforce</span></th>' +
 		'</tr></thead><tbody><tr>' +
-		'<td id="fshSus" class="qbTD"></td>' +
-		'<td id="fshFur" class="qbTD"></td>' +
-		'<td id="fshGB"  class="qbTD"></td>' +
-		'<td id="fshBM"  class="qbTD"></td>' +
-		'<td id="fshExt" class="qbTD"></td>' +
-		'<td id="fshRI"  class="qbTD"></td>' +
+		'<td id="fshSus" class="qbTD">&nbsp;</td>' +
+		'<td id="fshFur" class="qbTD">&nbsp;</td>' +
+		'<td id="fshGB"  class="qbTD">&nbsp;</td>' +
+		'<td id="fshBM"  class="qbTD">&nbsp;</td>' +
+		'<td id="fshExt" class="qbTD">&nbsp;</td>' +
+		'<td id="fshRI"  class="qbTD">&nbsp;</td>' +
 		'</tr></tbody></table>' +
 		'</div>',
 
 	goldUpgradeMsg:
 		'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
 		' class="notification-icon"></span><p class="notification-content">Up' +
-		'grade stamina with gold.</p></a></li>'
+		'grade stamina with gold</p></a></li>',
+
+	composeMsg:
+		'<li class="notification"><a href="index.php?cmd=composing"><span' +
+		' class="notification-icon"></span><p class="notification-content">Co' +
+		'mposing to do</p></a></li>'
 
 };
 })();
