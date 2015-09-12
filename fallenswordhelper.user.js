@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1507b2
+// @version        1507b3
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -6485,7 +6485,7 @@ var Helper = {
 			var tds = $('td', $(this));
 			var player = tds.eq(1).text();
 			if (Helper.onlinePlayers[player] &&
-				Helper.onlinePlayers[player][3] < thePage) {return;}
+				Helper.onlinePlayers[player][3] > thePage) {return;}
 			Helper.onlinePlayers[player] = [
 				tds.eq(0).html(),
 				tds.eq(1).html(),
@@ -6566,7 +6566,7 @@ var Helper = {
 					$('td', row).eq(2).addClass('lvlHighlight');
 				}
 			},
-			order: [3, 'asc']
+			order: [3, 'desc']
 		}).api();
 
 		Helper.doOnlinePlayerEventHandlers(table);
