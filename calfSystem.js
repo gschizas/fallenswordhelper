@@ -1171,35 +1171,29 @@ window.Data = {
 		Uncrafted  : {abbr: 'Unc',  colour: '#666666'}
 	},
 
-	itemType: {
-		0 : 'Helmet',
-		1 : 'Armour',
-		2 : 'Gloves',
-		3 : 'Boots',
-		4 : 'Weapon',
-		5 : 'Shield',
-		6 : 'Ring',
-		7 : 'Amulet',
-		8 : 'Rune',
-		9 : 'Quest Item',
-		10: 'Potion',
-		11: 'Component',
-		12: 'Resource',
-		13: 'Recipe',
-		14: 'Container',
-		15: 'Composed Potion',
-		16: 'Frag Stash'
-	},
+	itemType: ['Helmet', 'Armour', 'Gloves', 'Boots', 'Weapon', 'Shield',
+		'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
+		'Resource', 'Recipe', 'Container', 'Composed Potion', 'Frag Stash'],
 
 	rarityColour: [
-		'#FFFFFF', // Common
-		'#00A0A0', // Rare '#40FFFF'
-		'#FF40FF', // Unique
-		'#FFFF40', // Legendary '#F6ED00'
-		'#FF0000', // Super Elite
-		'#b677f5', // Crystalline
-		'#008000'  // Epic '#00FF00'
-	]
+		'#ffffff', // Common
+		'#0099ff', // Rare '#40FFFF'
+		'#ff33ff', // Unique
+		'#ffff66', // Legendary '#F6ED00'
+		'#ff3333', // Super Elite
+		'#6633ff', // Crystalline
+		'#009900'  // Epic '#00FF00'
+	],
+
+	rarity: {
+		'0': {colour: '#ffffff', class: 'fshCommon'},
+		'1': {colour: '#0099ff', class: 'fshRare'},
+		'2': {colour: '#cc00ff', class: 'fshUnique'},
+		'3': {colour: '#ffff33', class: 'fshLegendary'},
+		'4': {colour: '#cc0033', class: 'fshSuper'},
+		'5': {colour: '#6633ff', class: 'fshCrystal'},
+		'6': {colour: '#009900', class: 'fshEpic'}
+	}
 
 };
 
@@ -1379,17 +1373,17 @@ window.Layout = {
 
 	advisorColumns: [
 		{title: 'Member'},
-		{title: 'Lvl', class: 'dt-center'},
-		{title: 'Rank', class: 'dt-center dt-nowrap'},
+		{title: 'Lvl',                class: 'dt-center'},
+		{title: 'Rank',               class: 'dt-center dt-nowrap'},
 		{title: 'Gold From Deposits', class: 'dt-center'},
-		{title: 'Gold From Tax', class: 'dt-center'},
-		{title: 'Gold Total', class: 'dt-center'},
-		{title: 'FSP', class: 'dt-center'},
-		{title: 'Skill Cast', class: 'dt-center'},
-		{title: 'Group Create', class: 'dt-center'},
-		{title: 'Group Join', class: 'dt-center'},
-		{title: 'Relic', class: 'dt-center'},
-		{title: 'XP Contrib', class: 'dt-center'}
+		{title: 'Gold From Tax',      class: 'dt-center'},
+		{title: 'Gold Total',         class: 'dt-center'},
+		{title: 'FSP',                class: 'dt-center'},
+		{title: 'Skill Cast',         class: 'dt-center'},
+		{title: 'Group Create',       class: 'dt-center'},
+		{title: 'Group Join',         class: 'dt-center'},
+		{title: 'Relic',              class: 'dt-center'},
+		{title: 'XP Contrib',         class: 'dt-center'}
 	],
 
 	places:['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',

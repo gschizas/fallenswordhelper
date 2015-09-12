@@ -9,8 +9,8 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1507
-// @downloadURL    https://github.com/fallenswordhelper/fallenswordhelper/raw/master/fallenswordhelper.user.js
+// @version        1507b2
+// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -4528,35 +4528,31 @@ var Helper = {
 	getMembrList: function(fn, force) {
 		if (force) {
 			$.ajax({
-				//cache: false,
 				dataType: 'json',
 				url:'index.php',
 				data: {
 					cmd: 'export',
 					subcmd: 'guild_members',
 					guild_id: Layout.guildId()//,
-					// _rnd: Math.floor(Math.random() * 8999999998) + 1000000000
 				},
 				success: function(data) {
-					var fn = this;
 					var membrList = {};
 					membrList.lastUpdate = Date.now();
 					data.forEach(function(ele) {
 						membrList[ele.username] = ele;
 					});
-					localforage.setItem('membrList', membrList,
+					localforage.setItem('fsh_membrList', membrList,
 						function(err, membrList) {
 							if (err) {console.log('localforage error', err);}
 							Helper.membrList = membrList;
 							fn(membrList);
 						}
 					);
-				},
-				context: fn
+				}
 			});
 			return;
 		}
-		localforage.getItem('membrList', function(err, membrList) {
+		localforage.getItem('fsh_membrList', function(err, membrList) {
 			if (err) {console.log('localforage error', err);}
 			if (!membrList || membrList.lastUpdate < Date.now() - 300000) {
 				Helper.getMembrList(fn, true);
@@ -4564,6 +4560,41 @@ var Helper = {
 			}
 			Helper.membrList = membrList;
 			fn(membrList);
+		});
+	},
+
+	getInv: function(fn, force) {
+		var ajax = 'inventory';
+		var forage = 'fsh_selfInv';
+		if (System.getUrlParameter('subcmd') === 'guildinvmgr') {
+			ajax = 'guild_store&inc_tagged=1';
+			forage = 'fsh_guildInv';
+		}
+		if (force) {
+			$.ajax({
+				dataType: 'json',
+				url:'index.php?cmd=export&subcmd=' + ajax,
+				success: function(data) {
+					data.lastUpdate = Date.now();
+					localforage.setItem(forage, data,
+						function(err, inv) {
+							if (err) {console.log('localforage error', err);}
+							Helper.inventory = inv;
+							fn();
+						}
+					);
+				}
+			});
+			return;
+		}
+		localforage.getItem(forage, function(err, inv) {
+			if (err) {console.log('localforage error', err);}
+			if (!inv || inv.lastUpdate < Date.now() - 300000) {
+				Helper.getInv(fn, true);
+				return;
+			}
+			Helper.inventory = inv;
+			fn();
 		});
 	},
 
@@ -4645,8 +4676,11 @@ var Helper = {
 				'</span>');
 		});
 		if ($('b', tr).length !== 0 ||
-			$(':contains("Potion")', tr).length !== 0 ||
-			$(':contains("Brew")', tr).length !== 0) {return;}
+			$(':contains("Bottle")', tr).length !== 0 ||
+			$(':contains("Brew")', tr).length !== 0 ||
+			$(':contains("Draft")', tr).length !== 0 ||
+			$(':contains("Elixir")', tr).length !== 0 ||
+			$(':contains("Potion")', tr).length !== 0) {return;}
 		var href = atr.first().attr('href');
 		$('span.fshNoWrap', tr).append(' | <span class="reportLink ' +
 			(atr.length === 2 ?
@@ -6110,7 +6144,7 @@ var Helper = {
 				t = 1;
 			}
 
-			var rarity = Data.rarityColour[item.rarity];
+			var rarity = Data.rarity[item.rarity].colour;
 
 			var nm = item.item_name;
 			if (item.equipped) { nm = '<b>' + nm + '</b>';}
