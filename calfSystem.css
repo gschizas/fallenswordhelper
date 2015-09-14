@@ -17,12 +17,38 @@
 .HelperTableRow2:hover {background-color:white}
 
 .reportLink {cursor:pointer; text-decoration:underline; color:blue;}
+.fshLink {cursor:pointer; text-decoration:underline;}
+
+.fshRed       {color: red;}
+.fshBlue      {color: blue;}
+.fshGreen     {color: green;}
+.fshNavy      {color: navy;}
+.fshMaroon    {color: maroon;}
+.fshWhite     {color: white;}
+
+.fshCommon    {color: white;}
+.fshRare      {color: #0099ff;}
+.fshUnique    {color: #cc33ff;}
+.fshLegendary {color: #ffff00;}
+.fshSuper     {color: #ff0000;}
+.fshCrystal   {color: #6633ff;}
+.fshEpic      {color: #00cc00;}
+
+
 .fshNoWrap {white-space: nowrap;}
-.helperQC {cursor: pointer;}
+.helperQC  {cursor: pointer;}
 
 .qbT {margin: 0px auto;}
 .qbTH {text-align: center; padding:0px 4px; color:orange;}
 .qbTD {text-align: center; padding:0px 4px;}
+div#quickbuff div#players h1 {float: left;}
+div#quickbuff div#players p {clear: both;}
+.fshLastActivity {color: #ccc; font-size: x-small;}
+
+div#quickbuff div.buff-block p label.fshDim span {
+  color: #999;
+}
+
 
 table.relicT {font-size:small;}
 table.relicT tr.hidden {display:none; visibility:hidden;}
@@ -31,8 +57,18 @@ table.relicT td.brn {color:brown;}
 table.relicT td.grey {color:grey;}
 table.relicT td.headr {font-size:small;border-top:2px black solid;}
 
+img.center {
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
 
+td.lvlHighlight {background-color:#4671C8;}
 
+span#fshRefresh {
+  text-decoration: underline;
+  cursor: pointer;
+}
 
 div#fshCompConf {
   position: relative;

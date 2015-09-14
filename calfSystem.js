@@ -432,7 +432,22 @@ window.System = {
 				return sParameterName[1] === undefined ? true : sParameterName[1];
 			}
 		}
-	}
+	},
+
+	formatLastActivity: function(last_login) {
+		var d, h, m, s;
+		//~ s = Math.floor(ms / 1000);
+		s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
+		m = Math.floor(s / 60);
+		s = s % 60;
+		h = Math.floor(m / 60);
+		m = m % 60;
+		d = Math.floor(h / 24);
+		h = h % 24;
+		//~ return { d: d, h: h, m: m, s: s };
+		return 'Last Activity: ' + d + ' days, ' + h + ' hours, ' + m +
+			' minutes, ' + s + ' secs';
+	},
 };
 System.init();
 
@@ -901,6 +916,7 @@ window.Data = {
 
 		enableTempleAlert: false,
 		enableUpgradeAlert: false,
+		enableComposingAlert: false,
 		autoFillMinBidPrice: true,
 		showPvPSummaryInLog: false,
 		enableQuickDrink: false,
@@ -968,6 +984,9 @@ window.Data = {
 		lastMembrListCheck: 0,
 		disableItemColoring: false,
 		showQuickSendLinks: false,
+		needToCompose: false,
+		lastComposeCheck: 0,
+		lastOnlineCheck: 0,
 
 /* jshint -W110 */ // Mixed double and single quotes. (W110)
 
@@ -1127,6 +1146,7 @@ window.Data = {
 		'maxGroupSizeToJoin',
 		'enableTempleAlert',
 		'enableUpgradeAlert',
+		'enableComposingAlert',
 		'autoFillMinBidPrice',
 		'showPvPSummaryInLog',
 		'enableQuickDrink',
@@ -1140,35 +1160,40 @@ window.Data = {
 		'disableComposingPrompts'
 	],
 
-	craftAbbr: {
-		Perfect    : 'Perf',
-		Excellent  : 'Exc',
-		'Very Good': 'VG',
-		Good       : 'Good',
-		Average    : 'Ave',
-		Poor       : 'Poor',
-		'Very Poor': 'VPr'
+	craft: {
+		Perfect    : {abbr: 'Perf', colour: '#00b600'},
+		Excellent  : {abbr: 'Exc',  colour: '#f6ed00'},
+		'Very Good': {abbr: 'VG',   colour: '#f67a00'},
+		Good       : {abbr: 'Good', colour: '#f65d00'},
+		Average    : {abbr: 'Ave',  colour: '#f64500'},
+		Poor       : {abbr: 'Poor', colour: '#f61d00'},
+		'Very Poor': {abbr: 'VPr',  colour: '#b21500'},
+		Uncrafted  : {abbr: 'Unc',  colour: '#666666'}
 	},
 
-	itemType: {
-		0 : 'Helmet',
-		1 : 'Armour',
-		2 : 'Gloves',
-		3 : 'Boots',
-		4 : 'Weapon',
-		5 : 'Shield',
-		6 : 'Ring',
-		7 : 'Amulet',
-		8 : 'Rune',
-		9 : 'Quest Item',
-		10: 'Potion',
-		11: 'Component',
-		12: 'Resource',
-		13: 'Recipe',
-		14: 'Container',
-		15: 'Composed Potion',
-		16: 'Frag Stash'
-	}
+	itemType: ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon', 'Shield',
+		'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
+		'Resource', 'Recipe', 'Container', 'Composed Potion', 'Frag Stash'],
+
+	rarityColour: [
+		'#ffffff', // Common
+		'#0099ff', // Rare '#40FFFF'
+		'#ff33ff', // Unique
+		'#ffff66', // Legendary '#F6ED00'
+		'#ff3333', // Super Elite
+		'#6633ff', // Crystalline
+		'#009900'  // Epic '#00FF00'
+	],
+
+	rarity: [
+		{colour: '#ffffff', class: 'fshCommon'},
+		{colour: '#0099ff', class: 'fshRare'},
+		{colour: '#cc00ff', class: 'fshUnique'},
+		{colour: '#ffff33', class: 'fshLegendary'},
+		{colour: '#cc0033', class: 'fshSuper'},
+		{colour: '#6633ff', class: 'fshCrystal'},
+		{colour: '#009900', class: 'fshEpic'}
+	]
 
 };
 
@@ -1288,7 +1313,7 @@ window.Layout = {
 	playerId: function() {
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
 		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
-		GM_setValue('playerID',thePlayerId);
+		System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
 
@@ -1348,17 +1373,17 @@ window.Layout = {
 
 	advisorColumns: [
 		{title: 'Member'},
-		{title: 'Lvl', class: 'dt-center'},
-		{title: 'Rank', class: 'dt-center dt-nowrap'},
+		{title: 'Lvl',                class: 'dt-center'},
+		{title: 'Rank',               class: 'dt-center dt-nowrap'},
 		{title: 'Gold From Deposits', class: 'dt-center'},
-		{title: 'Gold From Tax', class: 'dt-center'},
-		{title: 'Gold Total', class: 'dt-center'},
-		{title: 'FSP', class: 'dt-center'},
-		{title: 'Skill Cast', class: 'dt-center'},
-		{title: 'Group Create', class: 'dt-center'},
-		{title: 'Group Join', class: 'dt-center'},
-		{title: 'Relic', class: 'dt-center'},
-		{title: 'XP Contrib', class: 'dt-center'}
+		{title: 'Gold From Tax',      class: 'dt-center'},
+		{title: 'Gold Total',         class: 'dt-center'},
+		{title: 'FSP',                class: 'dt-center'},
+		{title: 'Skill Cast',         class: 'dt-center'},
+		{title: 'Group Create',       class: 'dt-center'},
+		{title: 'Group Join',         class: 'dt-center'},
+		{title: 'Relic',              class: 'dt-center'},
+		{title: 'XP Contrib',         class: 'dt-center'}
 	],
 
 	places:['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
@@ -1375,19 +1400,24 @@ window.Layout = {
 		'<th class="qbTH">Extend</span></th>' +
 		'<th class="qbTH">Reinforce</span></th>' +
 		'</tr></thead><tbody><tr>' +
-		'<td id="fshSus" class="qbTD"></td>' +
-		'<td id="fshFur" class="qbTD"></td>' +
-		'<td id="fshGB"  class="qbTD"></td>' +
-		'<td id="fshBM"  class="qbTD"></td>' +
-		'<td id="fshExt" class="qbTD"></td>' +
-		'<td id="fshRI"  class="qbTD"></td>' +
+		'<td id="fshSus" class="qbTD">&nbsp;</td>' +
+		'<td id="fshFur" class="qbTD">&nbsp;</td>' +
+		'<td id="fshGB"  class="qbTD">&nbsp;</td>' +
+		'<td id="fshBM"  class="qbTD">&nbsp;</td>' +
+		'<td id="fshExt" class="qbTD">&nbsp;</td>' +
+		'<td id="fshRI"  class="qbTD">&nbsp;</td>' +
 		'</tr></tbody></table>' +
 		'</div>',
 
 	goldUpgradeMsg:
 		'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
 		' class="notification-icon"></span><p class="notification-content">Up' +
-		'grade stamina with gold.</p></a></li>'
+		'grade stamina with gold</p></a></li>',
+
+	composeMsg:
+		'<li class="notification"><a href="index.php?cmd=composing"><span' +
+		' class="notification-icon"></span><p class="notification-content">Co' +
+		'mposing to do</p></a></li>'
 
 };
 })();
