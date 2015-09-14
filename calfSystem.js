@@ -1171,7 +1171,7 @@ window.Data = {
 		Uncrafted  : {abbr: 'Unc',  colour: '#666666'}
 	},
 
-	itemType: ['Helmet', 'Armour', 'Gloves', 'Boots', 'Weapon', 'Shield',
+	itemType: ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon', 'Shield',
 		'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
 		'Resource', 'Recipe', 'Container', 'Composed Potion', 'Frag Stash'],
 
@@ -1185,15 +1185,15 @@ window.Data = {
 		'#009900'  // Epic '#00FF00'
 	],
 
-	rarity: {
-		'0': {colour: '#ffffff', class: 'fshCommon'},
-		'1': {colour: '#0099ff', class: 'fshRare'},
-		'2': {colour: '#cc00ff', class: 'fshUnique'},
-		'3': {colour: '#ffff33', class: 'fshLegendary'},
-		'4': {colour: '#cc0033', class: 'fshSuper'},
-		'5': {colour: '#6633ff', class: 'fshCrystal'},
-		'6': {colour: '#009900', class: 'fshEpic'}
-	}
+	rarity: [
+		{colour: '#ffffff', class: 'fshCommon'},
+		{colour: '#0099ff', class: 'fshRare'},
+		{colour: '#cc00ff', class: 'fshUnique'},
+		{colour: '#ffff33', class: 'fshLegendary'},
+		{colour: '#cc0033', class: 'fshSuper'},
+		{colour: '#6633ff', class: 'fshCrystal'},
+		{colour: '#009900', class: 'fshEpic'}
+	]
 
 };
 
@@ -1313,7 +1313,7 @@ window.Layout = {
 	playerId: function() {
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
 		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
-		GM_setValue('playerID',thePlayerId);
+		System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
 
