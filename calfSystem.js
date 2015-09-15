@@ -279,18 +279,18 @@ window.System = {
 		var formElement = System.findNode('//input[@name="' + name + '"]',
 			this);
 		if (formElement.getAttribute('type') === 'checkbox') {
-			GM_setValue(name, formElement.checked);
+			System.setValue(name, formElement.checked);
 		} else if (formElement.getAttribute('type') === 'radio') {
 			var radioElements = System.findNodes('//input[@name="' + name +
 				'"]', 0, this);
 			for (var i=0; i<radioElements.length; i += 1) {
 				//~ var radioElement = radioElements[i];
 				if (radioElements[i].checked) {
-					GM_setValue(name, radioElements[i].value);
+					System.setValue(name, radioElements[i].value);
 				}
 			}
 		} else {
-			GM_setValue(name, formElement.value);
+			System.setValue(name, formElement.value);
 		}
 	},
 
@@ -394,9 +394,9 @@ window.System = {
 		anItem.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
 		anItem.style.display = currentVisibility === 'hidden' ? 'block' : 'none';
 		if (System.getValue(anItemId)) {
-			GM_setValue(anItemId, '');
+			System.setValue(anItemId, '');
 		} else {
-			GM_setValue(anItemId, 'ON');
+			System.setValue(anItemId, 'ON');
 		}
 	},
 
