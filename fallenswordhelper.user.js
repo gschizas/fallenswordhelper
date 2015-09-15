@@ -8771,28 +8771,6 @@ var Helper = {
 		return result;
 	},
 
-	saveImgLoc: function() {
-		try {
-			var imgLocText = System.findNode('//input[@name="local_dir"]');
-			if (imgLocText && imgLocText.value.trim().length > 0) {
-				System.setValue('lastImgLoc', imgLocText.value.trim());
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	},
-
-	setImgLoc: function() {
-		try {
-			var imgLocText = System.findNode('//input[@name="local_dir"]');
-			if (imgLocText) {
-				imgLocText.value = System.getValue('lastImgLoc');
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	},
-
 	toggleTickAllBuffs: function(){
 		var allItems=System.findNodes('//input[@type="checkbox" and @name="blockedSkillList\[\]"]');
 		var tckTxt =document.getElementById('Helper:tickAllBuffs');
@@ -8818,25 +8796,11 @@ var Helper = {
 	},
 
 	injectSettings: function() {
-		try {
-			var exNode = System.findNode('//font[contains(.,"Example:")]');
-			var saveButton = System.findNode('//input[contains(@value, "Save Settings")]');
-			saveButton.addEventListener('click', Helper.saveImgLoc, true);
-			if (System.getValue('lastImgLoc')) {
-				exNode.innerHTML = 'Last Location Set:<br><a href="#" id="Helper.lastImgLocLink">' + System.getValue('lastImgLoc') + '</a>';
-				document.getElementById('Helper.lastImgLocLink').addEventListener('click', Helper.setImgLoc, true);
-			}
+		var tickNode = System.findNode('//td[@height="10" and contains(.,"Tick which skills you do not want cast on you")]');
+		tickNode.innerHTML+='<br><span style="cursor:pointer; text-decoration:underline;" id="Helper:tickAllBuffs">' +
+		'Tick all buffs</span>';
+		document.getElementById('Helper:tickAllBuffs').addEventListener('click', Helper.toggleTickAllBuffs, true);
 
-			var tickNode = System.findNode('//td[@height="10" and contains(.,"Tick which skills you do not want cast on you")]');
-			//alert(tickNode.innerHTML);
-			tickNode.innerHTML+='<br><span style="cursor:pointer; text-decoration:underline;" id="Helper:tickAllBuffs">' +
-			'Tick all buffs</span>';
-			document.getElementById('Helper:tickAllBuffs').addEventListener('click', Helper.toggleTickAllBuffs, true);
-
-		} catch (err) {
-			console.log(err);
-		}
-		// var lastCheck=new Date(parseInt(System.getValue('lastVersionCheck'),10));
 		var buffs=System.getValue('huntingBuffs');
 		var buffsName=System.getValue('huntingBuffsName');
 		var buffs2=System.getValue('huntingBuffs2');
