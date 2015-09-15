@@ -8852,6 +8852,9 @@ var Helper = {
 		var wantedNames = System.getValue('wantedNames');
 		var combatEvaluatorBias = System.getValue('combatEvaluatorBias');
 		var enabledHuntingMode = System.getValue('enabledHuntingMode');
+		var curVer;
+		if (typeof GM_info === 'undefined') {curVer = 'unknown';
+		} else {curVer = GM_info.script.version;}
 		var storage = (JSON.stringify(localStorage).length /
 			(5 * 1024 * 1024) * 100).toFixed(2);
 		var configData=
@@ -8860,7 +8863,7 @@ var Helper = {
 				'Settings</b></th></tr>' +
 			'<tr><td colspan="2" align=center>' +
 				'<span style="font-size:xx-small">(Current version: ' +
-				(GM_info ? GM_info.script.version : 'unknown') + ')&nbsp;' +
+				curVer + ')&nbsp;' +
 				'(Storage Used: ' + storage + '% Remaining: ' +
 				(100 - storage) + '%)</span>' +
 			'</td></tr>' +
