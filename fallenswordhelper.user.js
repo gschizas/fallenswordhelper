@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1508b1
+// @version        1508b2
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -7286,7 +7286,6 @@ var Helper = {
 
 	getSustain: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var user = $('#statbar-character').html();
 		Helper.getEnhancement(doc, 'Sustain', $('td#fshSus'));
 		Helper.getEnhancement(doc, 'Fury Caster', $('td#fshFur'));
 		Helper.getBuff(doc, 'Guild Buffer', $('td#fshGB'));
@@ -7296,7 +7295,7 @@ var Helper = {
 		$('span[id*="HelperActivate"]').click(function() {
 			var trigger = $(this);
 			var buffHref='?cmd=quickbuff&subcmd=activate&targetPlayers=' +
-				user + '&skills[]=' + trigger.attr('buffID');
+				window.self + '&skills[]=' + trigger.attr('buffID');
 			$.ajax({
 				url: buffHref,
 				success: function( data ) {
@@ -12144,9 +12143,9 @@ displayDisconnectedFromGodsMessage: function() {
 
 (function loadScripts () {
 	var o = {
-		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1508/calfSystem.css'],
+		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.css'],
 		js:  ['https://cdn.jsdelivr.net/localforage/1.2.10/localforage.min.js',
-			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1508/calfSystem.js'],
+			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.js'],
 		callback: Helper.onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {
