@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1508b2
+// @version        1508b3
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -6476,6 +6476,8 @@ var Helper = {
 	},
 
 	getOnlinePlayers: function(data) {
+		$('div#fshOutput', Helper.context).append(' ' +
+			(Helper.onlinePages + 1)); // context
 		var doc = System.createDocument(data);
 		var input = $('div#pCC input.custominput', doc).first();
 		var thePage = input.attr('value');
@@ -6494,18 +6496,17 @@ var Helper = {
 				index
 			];
 		});
-		input = input.parent().text();
-		var pages = parseInt(input.match(/(\d+)/g)[0], 10);
 		Helper.onlinePages += 1;
-		$('div#fshOutput', Helper.context).append(' ' + Helper.onlinePages); // context
-		if (Helper.onlinePages === pages) {
-			localforage.setItem('fsh_OnlinePlayers', Helper.onlinePlayers);
-			Helper.gotOnlinePlayers();
-		} else if (Helper.onlinePages === 1) {
-			for (var i = 2; i <= pages; i += 1) {
+		if (Helper.onlinePages === 1) {
+			input = input.parent().text();
+			Helper.lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
+			for (var i = 2; i <= Helper.lastPage; i += 1) {
 				$.get('index.php?cmd=onlineplayers&page=' + i,
 					Helper.getOnlinePlayers);
 			}
+		} else if (Helper.onlinePages === Helper.lastPage) {
+			localforage.setItem('fsh_OnlinePlayers', Helper.onlinePlayers);
+			Helper.gotOnlinePlayers();
 		}
 	},
 
