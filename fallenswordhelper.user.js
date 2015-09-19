@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1507
+// @version        1508
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -6476,6 +6476,8 @@ var Helper = {
 	},
 
 	getOnlinePlayers: function(data) {
+		$('div#fshOutput', Helper.context).append(' ' +
+			(Helper.onlinePages + 1)); // context
 		var doc = System.createDocument(data);
 		var input = $('div#pCC input.custominput', doc).first();
 		var thePage = input.attr('value');
@@ -6494,18 +6496,17 @@ var Helper = {
 				index
 			];
 		});
-		input = input.parent().text();
-		var pages = parseInt(input.match(/(\d+)/g)[0], 10);
 		Helper.onlinePages += 1;
-		$('div#fshOutput', Helper.context).append(' ' + Helper.onlinePages); // context
-		if (Helper.onlinePages === pages) {
-			localforage.setItem('fsh_OnlinePlayers', Helper.onlinePlayers);
-			Helper.gotOnlinePlayers();
-		} else if (Helper.onlinePages === 1) {
-			for (var i = 2; i <= pages; i += 1) {
+		if (Helper.onlinePages === 1) {
+			input = input.parent().text();
+			Helper.lastPage = parseInt(input.match(/(\d+)/g)[0], 10);
+			for (var i = 2; i <= Helper.lastPage; i += 1) {
 				$.get('index.php?cmd=onlineplayers&page=' + i,
 					Helper.getOnlinePlayers);
 			}
+		} else if (Helper.onlinePages === Helper.lastPage) {
+			localforage.setItem('fsh_OnlinePlayers', Helper.onlinePlayers);
+			Helper.gotOnlinePlayers();
 		}
 	},
 
@@ -7241,28 +7242,25 @@ var Helper = {
 	},
 
 	addBuffLevels: function() {
-		$('span.fshSelf').remove();
-		var self = $(this);
-		Helper.addStatsQuickBuff(self);
-		var buffs = self.data('buffs').split(',');
-		var hash = {};
-		self.next().find('span').each(function(i, e) {
-			hash[buffs[i]] = $(e).text().replace(/\[|\]/g, '');
-		});
-		Object.keys(hash).forEach(function(value) {
-			var buffLvl = parseInt(hash[value], 10);
-			var label = $('label[for="skill-' + value + '"]');
+		$('span.fshPlayer').remove();
+		var player = $(this);
+		Helper.addStatsQuickBuff(player);
+		var data = player.data('buffs');
+		var buffs = typeof data === 'string' ? data.split(',') : [data];
+		player.next().find('span').each(function(i, e) {
+			var buffLvl = parseInt($(e).text().replace(/\[|\]/g, ''), 10);
+			var label = $('label[for="skill-' + buffs[i] + '"]');
 			if (label.length === 0) {return;}
 			var span = $('span > span', label);
 			var myLvl = parseInt(span.text().replace(/\[|\]/g, ''), 10);
-			span.after('<span class="fshSelf"' + (myLvl > buffLvl ?
+			span.after('<span class="fshPlayer"' + (myLvl > buffLvl ?
 				' style="color:red;"' : ' style="color:green;"') + '> [' +
 				buffLvl + ']</span>');
 		});
 	},
 
-	addStatsQuickBuff: function(self) {
-		self.parent().find('span.fshLastActivity').remove();
+	addStatsQuickBuff: function(player) {
+		player.parent().find('span.fshLastActivity').remove();
 		$.ajax({
 			cache: false,
 			dataType: 'json',
@@ -7270,11 +7268,11 @@ var Helper = {
 			data: {
 				cmd:             'export',
 				subcmd:          'profile',
-				player_username: self.text()
+				player_username: player.text()
 			},
 			success: function(data) {
 				//console.log('7344 data', data);
-				self.after('<span class="fshLastActivity">' +
+				player.after('<span class="fshLastActivity">' +
 					System.formatLastActivity(data.last_login) +
 					'<br>Stamina: ' + data.current_stamina + ' / ' +
 					data.stamina + ' ( ' + Math.floor(data.current_stamina /
@@ -7286,7 +7284,6 @@ var Helper = {
 
 	getSustain: function(responseText) {
 		var doc = System.createDocument(responseText);
-		var user = $('#statbar-character').html();
 		Helper.getEnhancement(doc, 'Sustain', $('td#fshSus'));
 		Helper.getEnhancement(doc, 'Fury Caster', $('td#fshFur'));
 		Helper.getBuff(doc, 'Guild Buffer', $('td#fshGB'));
@@ -7296,7 +7293,7 @@ var Helper = {
 		$('span[id*="HelperActivate"]').click(function() {
 			var trigger = $(this);
 			var buffHref='?cmd=quickbuff&subcmd=activate&targetPlayers=' +
-				user + '&skills[]=' + trigger.attr('buffID');
+				window.self + '&skills[]=' + trigger.attr('buffID');
 			$.ajax({
 				url: buffHref,
 				success: function( data ) {
@@ -8771,28 +8768,6 @@ var Helper = {
 		return result;
 	},
 
-	saveImgLoc: function() {
-		try {
-			var imgLocText = System.findNode('//input[@name="local_dir"]');
-			if (imgLocText && imgLocText.value.trim().length > 0) {
-				System.setValue('lastImgLoc', imgLocText.value.trim());
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	},
-
-	setImgLoc: function() {
-		try {
-			var imgLocText = System.findNode('//input[@name="local_dir"]');
-			if (imgLocText) {
-				imgLocText.value = System.getValue('lastImgLoc');
-			}
-		} catch (err) {
-			console.log(err);
-		}
-	},
-
 	toggleTickAllBuffs: function(){
 		var allItems=System.findNodes('//input[@type="checkbox" and @name="blockedSkillList\[\]"]');
 		var tckTxt =document.getElementById('Helper:tickAllBuffs');
@@ -8818,25 +8793,11 @@ var Helper = {
 	},
 
 	injectSettings: function() {
-		try {
-			var exNode = System.findNode('//font[contains(.,"Example:")]');
-			var saveButton = System.findNode('//input[contains(@value, "Save Settings")]');
-			saveButton.addEventListener('click', Helper.saveImgLoc, true);
-			if (System.getValue('lastImgLoc')) {
-				exNode.innerHTML = 'Last Location Set:<br><a href="#" id="Helper.lastImgLocLink">' + System.getValue('lastImgLoc') + '</a>';
-				document.getElementById('Helper.lastImgLocLink').addEventListener('click', Helper.setImgLoc, true);
-			}
+		var tickNode = System.findNode('//td[@height="10" and contains(.,"Tick which skills you do not want cast on you")]');
+		tickNode.innerHTML+='<br><span style="cursor:pointer; text-decoration:underline;" id="Helper:tickAllBuffs">' +
+		'Tick all buffs</span>';
+		document.getElementById('Helper:tickAllBuffs').addEventListener('click', Helper.toggleTickAllBuffs, true);
 
-			var tickNode = System.findNode('//td[@height="10" and contains(.,"Tick which skills you do not want cast on you")]');
-			//alert(tickNode.innerHTML);
-			tickNode.innerHTML+='<br><span style="cursor:pointer; text-decoration:underline;" id="Helper:tickAllBuffs">' +
-			'Tick all buffs</span>';
-			document.getElementById('Helper:tickAllBuffs').addEventListener('click', Helper.toggleTickAllBuffs, true);
-
-		} catch (err) {
-			console.log(err);
-		}
-		// var lastCheck=new Date(parseInt(System.getValue('lastVersionCheck'),10));
 		var buffs=System.getValue('huntingBuffs');
 		var buffsName=System.getValue('huntingBuffsName');
 		var buffs2=System.getValue('huntingBuffs2');
@@ -8852,6 +8813,9 @@ var Helper = {
 		var wantedNames = System.getValue('wantedNames');
 		var combatEvaluatorBias = System.getValue('combatEvaluatorBias');
 		var enabledHuntingMode = System.getValue('enabledHuntingMode');
+		var curVer;
+		if (typeof GM_info === 'undefined') {curVer = 'unknown';
+		} else {curVer = GM_info.script.version;}
 		var storage = (JSON.stringify(localStorage).length /
 			(5 * 1024 * 1024) * 100).toFixed(2);
 		var configData=
@@ -8860,7 +8824,7 @@ var Helper = {
 				'Settings</b></th></tr>' +
 			'<tr><td colspan="2" align=center>' +
 				'<span style="font-size:xx-small">(Current version: ' +
-				(GM_info ? GM_info.script.version : 'unknown') + ')&nbsp;' +
+				curVer + ')&nbsp;' +
 				'(Storage Used: ' + storage + '% Remaining: ' +
 				(100 - storage) + '%)</span>' +
 			'</td></tr>' +
