@@ -34,6 +34,7 @@
 .fshCrystal   {color: #6633ff;}
 .fshEpic      {color: #00cc00;}
 
+.fshCenter    {text-align: center;}
 
 .fshNoWrap {white-space: nowrap;}
 .helperQC  {cursor: pointer;}
@@ -76,6 +77,10 @@ div#fshCompConf {
   text-align: right;
   padding-right: 38px;
 }
+
+table.fshInvFilter {width: 100%;}
+
+table.fshInvFilter th {background-color: #cd9e4b;}
 
 /*
  * Table styles
@@ -158,12 +163,12 @@ table.dataTable tbody tr {
 table.dataTable tbody tr.selected {
   background-color: #B0BED9;
 }
+/*
 table.dataTable tbody th,
 table.dataTable tbody td {
-/*
   padding: 8px 10px;
-*/
 }
+*/
 table.dataTable.row-border tbody th, table.dataTable.row-border tbody td, table.dataTable.display tbody th, table.dataTable.display tbody td {
   border-top: 1px solid #ddd;
 }

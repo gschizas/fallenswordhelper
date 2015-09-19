@@ -9,8 +9,8 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1508
-// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
+// @version        1509b1
+// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -4953,52 +4953,44 @@ var Helper = {
 		images.qtip('hide');
 	},
 
-	injectMoveItems: function() {
-		var foldersEnabled = System.findNode('//img[contains(@src,"/folder_on.gif")]');
-		if (! foldersEnabled) {return;}
-		var otherFolders = System.findNodes('//td/center/a/img[contains(@src,"/folder.gif")]');
-		if (! otherFolders) {return;}
-		var cell=foldersEnabled.parentNode.parentNode.parentNode.parentNode.parentNode.insertRow(-1).insertCell(-1);
-		cell.colSpan = otherFolders.length + 1;
-		cell.align='center';
-		cell.noWrap = true;
-		var newHtml='Move selected items to: <select name=folder id=selectFolderId class=customselect>';
-		for (var i=0; i<otherFolders.length; i += 1) {
-			newHtml+='<option value='+otherFolders[i].parentNode.getAttribute('href').match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
-				otherFolders[i].parentNode.parentNode.textContent+'</option>';
-		}
-		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>';
-		cell.innerHTML=newHtml;
-		document.getElementById('Helper::moveItems').addEventListener('click', Helper.moveItemsToFolder, true);
+	injectMoveItems: function() { // jquery
+		var foldersEnabled = $('img[src$="/folder_on.gif"]');
+		if (foldersEnabled.length !== 1) {return;}
+		var otherFolders = $('div#pCC a').has('img[src$="/folder.gif"]');
+		if (otherFolders.length === 0) {return;}
+		var select = $('<select name=folder id=selectFolderId class=' +
+			'customselect></select>');
+		otherFolders.each(function() {
+			var self = $(this);
+			select.append('<option value=' + self.attr('href')
+			.match(/&folder_id=(-*\d+)/i)[1] + '>' +
+			self.parent().text() + '</option>');
+		});
+		$('div#pCC tr').has(otherFolders[0]).first().after($('<tr/>')
+			.append($('<td class="fshCenter">Move selected items to: </td>')
+				.append(select)
+				.append('&nbsp;<input type="button" class="custombutton"' +
+					' id="fshMove" value="Move">')));
+		$('input#fshMove').click(Helper.moveItemsToFolder);
 	},
 
-	moveItemsToFolder: function() {
-		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
-		var selectElem = document.getElementById('selectFolderId');
-		var postData = 'cmd=profile&subcmd=sendtofolder&folder_id='+selectElem.options[selectElem.selectedIndex].value;
-		var haveItems = false;
-		var postItems = '';
-		var countItems = 0;
-		for (var i=0; i<itemsList.length; i += 1) {
-			if (itemsList[i].checked) {
-				countItems+= 1;
-				postItems+='&folderItem[]='+itemsList[i].value;
-			}
-			if (countItems === 12 || countItems > 0 && i === itemsList.length - 1) {
-				// multiple posts since HCS only move the first 12 items to other folder
-				$.ajax({
-					type: 'POST',
-					url: System.server + 'index.php',
-					data: postData + postItems
-				});
-				countItems = 0;
-				postItems = '';
-				haveItems = true;
-			}
-		}
-		if (haveItems) {
-			setTimeout(function() {location.reload();}, 100);
-		}
+	moveItemsToFolder: function() { // jquery
+		var invList = [];
+		$('input[name="removeIndex[]"]:checked').each(function() {
+			invList.push($(this).val());
+		});
+		$.ajax({
+			dataType: 'json',
+			url: 'index.php',
+			data: {
+				'cmd': 'profile',
+				'subcmd': 'sendtofolder',
+				'inv_list': JSON.stringify(invList),
+				'folder_id': $('#selectFolderId option:selected').val(),
+				'ajax': 1
+			},
+			success: function(data) {location.reload();}
+		});
 	},
 
 	quickDropItem: function(evt){
