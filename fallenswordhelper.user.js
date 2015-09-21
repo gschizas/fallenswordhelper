@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1509b2
+// @version        1509b3
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -4975,10 +4975,9 @@ var Helper = {
 	},
 
 	moveItemsToFolder: function() { // jquery
-		var batchSize = 50;
 		var invList = [];
 		$('input[name="removeIndex[]"]:checked').each(function(i) {
-			batchNo = Math.floor(i / batchSize);
+			var batchNo = Math.floor(i / 50);
 			invList[batchNo] = invList[batchNo] || [];
 			invList[batchNo].push($(this).val());
 		});
@@ -4994,7 +4993,7 @@ var Helper = {
 					'folder_id': $('#selectFolderId option:selected').val(),
 					'ajax': 1
 				},
-				success: function(data) {
+				success: function() {
 					Helper.moveItemsCallback -= 1;
 					if (Helper.moveItemsCallback === 0) {location.reload();}
 				}
@@ -7240,6 +7239,7 @@ var Helper = {
 			if (!excludeBuff[lbl.attr('for')] && myLvl < 125) {
 				lbl.addClass('fshDim');}
 		});
+		$('div#players h1').first().click();
 	},
 
 	addBuffLevels: function() {
