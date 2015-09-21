@@ -4975,7 +4975,7 @@ var Helper = {
 	},
 
 	moveItemsToFolder: function() { // jquery
-		var batchSize = 200;
+		var batchSize = 50;
 		var invList = [];
 		$('input[name="removeIndex[]"]:checked').each(function(i) {
 			batchNo = Math.floor(i / batchSize);
