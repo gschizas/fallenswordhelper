@@ -1215,7 +1215,10 @@ window.Data = {
 			//'dojoin': {'-': {'-': 'injectTournament'}},
 			'setup': {'-': {'-': 'injectArenaSetupMove'}}},
 		questbook: {
-			'-': {'-': {'-': 'injectQuestBookFull'}},
+			'-': {'-': {
+				'-': 'injectQuestBookFull',
+				'0': 'injectQuestBookFull', // Normal
+				'1': 'injectQuestBookFull'}}, // Seasonal
 			'atoz': {'-': {'-': 'injectQuestBookFull'}},
 			'viewquest': {'-': {'-':'injectQuestTracker'}}},
 		profile: {
@@ -1290,7 +1293,7 @@ window.Data = {
 		//attackplayer: {'-': {'-': {'-': 'injectAttackPlayer'}}},
 		findplayer: {'-': {'-': {'-': 'injectFindPlayer'}}},
 		//relic: {'-': {'-': {'-': 'injectRelic'}}},
-		quests: {'view': {'-': {'-': 'showAllQuestSteps'}}},
+		quests: {'view': {'-': {'-': 'showAllQuestSteps'}}}, //UFSG
 		scavenging: {'process': {'-': {'-': 'injectScavenging'}}},
 		temple: {'-': {'-': {'-': 'parseTemplePage'}}},
 		skills: {'-': {'-': {'-': 'injectSkills'}}},
