@@ -1206,7 +1206,7 @@ window.Data = {
 		news: {
 			'fsbox': {'-': {'-': 'newsFsbox'}},
 			'shoutbox': {'-': {'-': 'newsShoutbox'}}},
-		//blacksmith: {'repairall': {'-': {'-': 'injectWorld'}}},
+		blacksmith: {'repairall': {'-': {'-': 'injectWorld'}}},
 		arena: {
 			//'-': {'-': {'-': 'injectArena'}},
 			'completed': {'-': {'-': 'storeCompletedArenas'}},
