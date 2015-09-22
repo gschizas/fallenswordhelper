@@ -6917,8 +6917,7 @@ var Helper = {
 		$('span.fshPlayer').remove();
 		var player = $(this);
 		Helper.addStatsQuickBuff(player);
-		var data = player.data('buffs');
-		var buffs = typeof data === 'string' ? data.split(',') : [data];
+		var buffs = String.prototype.split.call(player.data('buffs'), ',');
 		player.next().find('span').each(function(i, e) {
 			var buffLvl = parseInt($(e).text().replace(/\[|\]/g, ''), 10);
 			var label = $('label[for="skill-' + buffs[i] + '"]');
@@ -9607,7 +9606,7 @@ var Helper = {
 	},
 
 	retrieveBountyInfo: function(enableActiveBountyList, enableWantedList) {
-		var bountyList = System.getValueJSON('bountylist');
+		var bountyList = System.getValueJSON('bountyList');
 		var wantedList = System.getValueJSON('wantedList');
 		var bountyListRefreshTime = System.getValue('bountyListRefreshTime');
 		var bwNeedsRefresh = System.getValue('bwNeedsRefresh');
@@ -9660,135 +9659,167 @@ var Helper = {
 
 	parseBountyPageForWorld: function(details, callback) {
 		var doc = System.createDocument(details);
-		var page = System.findNode('//input[@name="page"]', doc, $('body'));
-		var curPage = parseInt(page.value,10);
-		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
-
 		var enableActiveBountyList = System.getValue('enableActiveBountyList');
 		var enableWantedList = System.getValue('enableWantedList');
-		var activeTable;
-		var i;
-		var bounty;
 		System.setValue('bwNeedsRefresh', false);
 		if (enableWantedList) {
-
-			activeTable = System.findNode('//table[@width = "630" and contains(.,"Target")]', doc);
-			var wantedNames = System.getValue('wantedNames');
-			var wantedArray = wantedNames.split(',');
-			var wantedList = callback.wantedList;
-			if (activeTable) {
-				for (i = 1; i < activeTable.rows.length - 2; i+=2) {
-					for (var j = 0; j < wantedArray.length; j += 1) {
-						var target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
-
-						if (target === wantedArray[j].trim()) {
-							wantedList.wantedBounties = true;
-							bounty = {};
-							bounty.target = target;
-							bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.getAttribute('href');
-							bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, '').replace(/\]/, '');
-
-							bounty.offerer = activeTable.rows[i].cells[1].firstChild.firstChild.firstChild.textContent;
-
-							bounty.reward = activeTable.rows[i].cells[2].textContent;
-							bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
-
-							//bounty.rKills = activeTable.rows[i].cells[3].textContent;
-
-							bounty.xpLoss = activeTable.rows[i].cells[3].textContent;
-
-							bounty.posted = activeTable.rows[i].cells[4].textContent;
-
-							bounty.tickets = activeTable.rows[i].cells[5].textContent;
-
-							if (activeTable.rows[i].cells[6].textContent.trim() === '[active]') {
-								bounty.active = true;
-								bounty.accept = '';
-							}
-							else {
-								bounty.active = false;
-								bounty.accept = activeTable.rows[i].cells[6].firstChild.firstChild.getAttribute('onclick');
-							}
-							wantedList.bounty.push(bounty);
-						}
-					}
-				}
-			}
-			if (curPage < maxPage) {
-				System.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1), Helper.parseBountyPageForWorld, {wantedList:wantedList});
-			} else {
-				Helper.injectWantedList(wantedList);
-			}
+			Helper.getWantedBountyList(doc, callback);
 		}
 		if (enableActiveBountyList && !Helper.activeBountyListPosted) {
-			activeTable = System.findNode('//table[@width = 620]', doc);
-			var bountyList = {};
-			bountyList.bounty = [];
-			bountyList.isRefreshed = true;
-			bountyList.lastUpdate = new Date();
-
-			if (activeTable) {
-				if (!/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML)) {
-					bountyList.activeBounties = true;
-					for (i = 1; i < activeTable.rows.length - 2; i+=2) {
-						bounty = {};
-						bounty.target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
-						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.getAttribute('href');
-						bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, '').replace(/\]/, '');
-						bounty.reward = activeTable.rows[i].cells[2].textContent;
-						bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
-						bounty.posted = activeTable.rows[i].cells[3].textContent;
-						bounty.xpLoss = activeTable.rows[i].cells[4].textContent;
-						bounty.progress = activeTable.rows[i].cells[5].textContent;
-
-						bountyList.bounty.push(bounty);
-					}
-				}
-				else {
-					bountyList.activeBounties = false;
-				}
-			}
-			Helper.injectBountyList(bountyList);
-			Helper.activeBountyListPosted = true;
+			Helper.getActiveBountyList(doc);
 		}
 	},
 
+	getWantedBountyList: function(doc, callback) {
+		var page = System.findNode('//input[@name="page"]', doc, $('body'));
+		var curPage = parseInt(page.value,10);
+		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+		var activeTable = System.findNode('//table[@width = "630" and ' +
+			'contains(.,"Target")]', doc);
+		var wantedNames = System.getValue('wantedNames');
+		var wantedArray = wantedNames.split(',');
+		var wantedList = callback.wantedList;
+		if (activeTable) {
+			for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+				var target = activeTable.rows[i].cells[0].firstChild
+					.firstChild.firstChild.textContent;
+if (target === '[ No bounties available. ]') {break;}
+				for (var j = 0; j < wantedArray.length; j += 1) {
+					if (target === wantedArray[j].trim()) {
+						wantedList.wantedBounties = true;
+						var bounty = {};
+						bounty.target = target;
+						bounty.link = activeTable.rows[i].cells[0]
+							.firstChild.firstChild.getAttribute('href');
+						bounty.lvl = activeTable.rows[i].cells[0]
+							.firstChild.firstChild.nextSibling.textContent
+								.replace(/\[/, '').replace(/\]/, '');
+						bounty.offerer = activeTable.rows[i].cells[1]
+							.firstChild.firstChild.firstChild.textContent;
+						bounty.reward = activeTable.rows[i].cells[2]
+							.textContent;
+						bounty.rewardType = activeTable.rows[i].cells[2]
+							.firstChild.firstChild.firstChild.firstChild
+							.nextSibling.firstChild.title;
+						//bounty.rKills = activeTable.rows[i].cells[3].textContent;
+						bounty.xpLoss = activeTable.rows[i].cells[3]
+							.textContent;
+						bounty.posted = activeTable.rows[i].cells[4]
+							.textContent;
+						bounty.tickets = activeTable.rows[i].cells[5]
+							.textContent;
+						if (activeTable.rows[i].cells[6].textContent
+							.trim() === '[active]') {
+							bounty.active = true;
+							bounty.accept = '';
+						}
+						else if (activeTable.rows[i].cells[6].textContent
+							.trim() !== '[n/a]') { // TODO
+							bounty.active = false;
+							bounty.accept = activeTable.rows[i].cells[6]
+								.firstChild.firstChild
+								.getAttribute('onclick');
+						}
+						wantedList.bounty.push(bounty);
+					}
+				}
+			}
+		}
+		if (curPage < maxPage) {
+			System.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
+				Helper.parseBountyPageForWorld, {wantedList:wantedList});
+		} else {
+			Helper.injectWantedList(wantedList);
+		}
+	},
+
+	getActiveBountyList: function(doc) {
+		var activeTable = System.findNode('//table[@width = 620]', doc);
+		var bountyList = {};
+		bountyList.bounty = [];
+		bountyList.isRefreshed = true;
+		bountyList.lastUpdate = new Date();
+
+		if (activeTable) {
+			if (!/No bounties active/.test(activeTable.rows[1].cells[0]
+				.innerHTML)) {
+				bountyList.activeBounties = true;
+				for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+					var bounty = {};
+					bounty.target = activeTable.rows[i].cells[0].firstChild
+						.firstChild.firstChild.textContent;
+					bounty.link = activeTable.rows[i].cells[0].firstChild
+						.firstChild.getAttribute('href');
+					bounty.lvl = activeTable.rows[i].cells[0].firstChild
+						.firstChild.nextSibling.textContent
+						.replace(/\[/, '').replace(/\]/, '');
+					bounty.reward = activeTable.rows[i].cells[2]
+						.textContent;
+					bounty.rewardType = activeTable.rows[i].cells[2]
+						.firstChild.firstChild.firstChild.firstChild
+						.nextSibling.firstChild.title;
+					bounty.posted = activeTable.rows[i].cells[3]
+						.textContent;
+					bounty.xpLoss = activeTable.rows[i].cells[4]
+						.textContent;
+					bounty.progress = activeTable.rows[i].cells[5]
+						.textContent;
+
+					bountyList.bounty.push(bounty);
+				}
+			}
+			else {
+				bountyList.activeBounties = false;
+			}
+		}
+		Helper.injectBountyList(bountyList);
+		Helper.activeBountyListPosted = true;
+	},
+
 	injectBountyList: function(bountyList) {
-		System.setValueJSON('bountylist', bountyList);
-		var injectHere = document.getElementById('Helper:BountyListPlaceholder');
+		System.setValueJSON('bountyList', bountyList);
+		var injectHere = document
+			.getElementById('Helper:BountyListPlaceholder');
 		var displayList = document.createElement('TABLE');
 		//displayList.style.border = '1px solid #c5ad73';
 		//displayList.style.backgroundColor = (bountyList.isRefreshed)?'#6a5938':'#4a3918';
 		displayList.cellPadding = 1;
 		displayList.width = 125;
 
-		var aRow=displayList.insertRow(0); //bountyList.rows.length
-		var aCell=aRow.insertCell(0);
-		var output = '<h3>Active Bounties</h3><ol style="color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;">'+
-			'<nobr><span id="Helper:resetBountyList" style=" font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span><nobr><br>';
+		var aRow = displayList.insertRow(0); //bountyList.rows.length
+		var aCell = aRow.insertCell(0);
+		var output = '<h3>Active Bounties</h3><ol style="color:#FFF380;font-' +
+			'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
+			'1px;margin-bottom:1px;padding-left:20px;"><nobr><span id="' +
+			'Helper:resetBountyList" style=" font-size:8px; cursor:pointer; ' +
+			'text-decoration:underline;">Reset</span><nobr><br>';
 
 		if (bountyList.activeBounties === false) {
-			output += '</ol> \f <ol style="color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:10px;">' +
-				'[No Active bounties]</ol>';
+			output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
+				'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
+				'bottom:1px;padding-left:10px;">[No Active bounties]</ol>';
 		}
 		else {
 			for (var i = 0; i < bountyList.bounty.length; i += 1) {
-				var mouseOverText = '';
-				mouseOverText += '<div>Level:  ' + bountyList.bounty[i].lvl +
-				'<br/>Reward: ' + bountyList.bounty[i].reward + ' ' +bountyList.bounty[i].rewardType +
-				'<br/>XP Loss Remaining: ' + bountyList.bounty[i].xpLoss +
-				'<br/>Progress:  ' + bountyList.bounty[i].progress;
-				mouseOverText += '</div>';
+				var mouseOverText = '<div>Level:  ' + bountyList.bounty[i].lvl +
+					'<br/>Reward: ' + bountyList.bounty[i].reward + ' ' +
+					bountyList.bounty[i].rewardType +
+					'<br/>XP Loss Remaining: ' + bountyList.bounty[i].xpLoss +
+					'<br/>Progress:  ' + bountyList.bounty[i].progress +
+					'</div>';
 
 //				output += ' href="' + bountyList.bounty[i].link + '">' + bountyList.bounty[i].target +'</a></li>';
-				output += '<li style="padding-bottom:0px;">';
-				output += '<a style="color:red;font-size:10px;"';
-				output += 'href="' + System.server + 'index.php?cmd=attackplayer&target_username=' + bountyList.bounty[i].target + '">[a]</a>&nbsp;';
-
-				output += '<a style="color:#A0CFEC;font-size:10px;"';
-				output += 'href="' + System.server + 'index.php?cmd=message&target_player=' + bountyList.bounty[i].target + '">[m]';
-				output += '</a> &nbsp;';
-				output += '<a href="'+bountyList.bounty[i].link+'" class="tipped" data-tipped="'+mouseOverText+'" style="color:#FFF380;font-size:10px;">' + bountyList.bounty[i].target +'</a></li>';
+				output += '<li style="padding-bottom:0px;"><a style="color:' +
+					'red;font-size:10px;"href="' + System.server +
+					'index.php?cmd=attackplayer&target_username=' +
+					bountyList.bounty[i].target + '">[a]</a>&nbsp;<a style="' +
+					'color:#A0CFEC;font-size:10px;"href="' + System.server +
+					'index.php?cmd=message&target_player=' +
+					bountyList.bounty[i].target + '">[m]</a> &nbsp;<a href="' +
+					bountyList.bounty[i].link + '" class="tip-static" ' +
+					'data-tipped="' + mouseOverText + '" style="color:' +
+					'#FFF380;font-size:10px;">' + bountyList.bounty[i].target +
+					'</a></li>';
 			}
 		}
 
@@ -9796,62 +9827,74 @@ var Helper = {
 		var breaker=document.createElement('BR');
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetBountyList').addEventListener('click', Helper.resetBountyList, true);
+		document.getElementById('Helper:resetBountyList')
+			.addEventListener('click', Helper.resetBountyList, true);
 	},
 
 	resetBountyList: function() {
-		System.setValueJSON('bountylist', null);
+		System.setValueJSON('bountyList', null);
 		location.reload();
 	},
 
 	injectWantedList: function(wantedList) {
 		System.setValueJSON('wantedList', wantedList);
-		var injectHere = document.getElementById('Helper:WantedListPlaceholder');
+		var injectHere = document
+			.getElementById('Helper:WantedListPlaceholder');
 		var displayList = document.createElement('TABLE');
 		//displayList.style.border = '1px solid #c5ad73';
 		//displayList.style.backgroundColor = (wantedList.isRefreshed)?'#6a5938':'#4a3918';
 		displayList.cellPadding = 3;
 		displayList.width = 125;
 
-		var aRow=displayList.insertRow(0);
-		var aCell=aRow.insertCell(0);
-		var output = '<h3>Wanted Bounties</h3><ol style="color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;">'+
-			'<nobr> <span id="Helper:resetWantedList" font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span></nobr><br>';
+		var aRow = displayList.insertRow(0);
+		var aCell = aRow.insertCell(0);
+		var output = '<h3>Wanted Bounties</h3><ol style="color:#FFF380;font-' +
+			'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
+			'1px;margin-bottom:1px;padding-left:12px;"><nobr> <span id="' +
+			'Helper:resetWantedList" font-size:8px; cursor:pointer; text-' +
+			'decoration:underline;">Reset</span></nobr><br>';
 
 		if (wantedList.wantedBounties === false) {
-			output += '</ol> \f <ol style="color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:7px;">' +
-				'[No wanted bounties]</ol>';
+			output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
+				'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
+				'bottom:1px;padding-left:7px;">[No wanted bounties]</ol>';
 		}
 		else {
 			for (var i = 0; i < wantedList.bounty.length; i += 1) {
-				var mouseOverText = '\'<div style=\\\'text-align:center;width:205px;\\\'>Target Level:  ' + wantedList.bounty[i].lvl +
-					'<br/>Offerer: '+ wantedList.bounty[i].offerer +
-					'<br/>Reward: ' + wantedList.bounty[i].reward + ' ' +wantedList.bounty[i].rewardType +
-					'<br/>Req. Kills: ' + wantedList.bounty[i].rKills +
+				var mouseOverText = '"<div style=\'text-align:center;width:' +
+					'205px;\'>Target Level:  ' + wantedList.bounty[i].lvl +
+					'<br/>Offerer: ' + wantedList.bounty[i].offerer +
+					'<br/>Reward: ' + wantedList.bounty[i].reward + ' ' +
+					wantedList.bounty[i].rewardType +
+					//'<br/>Req. Kills: ' + wantedList.bounty[i].rKills +
 					'<br/>XP Loss Remaining: ' + wantedList.bounty[i].xpLoss +
 					'<br/>Posted: ' + wantedList.bounty[i].posted +
 					'<br/>Tickets Req.:  ' + wantedList.bounty[i].tickets;
-				mouseOverText += '</div>\' ';
+				mouseOverText += '</div>" ';
 
 				output += '<li style="padding-bottom:0px;margin-left:5px;">';
 				output += '<a style= "font-size:10px;';
 				if (wantedList.bounty[i].accept) {
 					output += 'color:rgb(0,255,0); cursor:pointer; ' +
 						'text-decoration:underline blink;" title = "Accept ' +
-						'Bounty" "onclick=\'' + wantedList.bounty[i].accept +
-						'\'">[a]</a>&nbsp;';
+						'Bounty" onclick="' + wantedList.bounty[i].accept +
+						'">[a]</a>&nbsp;';
 				} else {
 					output += 'color:red;" href="' + System.server +
 						'index.php?cmd=attackplayer&target_username=' +
 						wantedList.bounty[i].target + '">[a]</a>&nbsp;';
 				}
-				output += '<a style="color:#A0CFEC;font-size:10px;"';
-				output += 'href="' + System.server + 'index.php?cmd=message&target_player=' + wantedList.bounty[i].target + '">[m]';
-				output += '</a> &nbsp;<a class=tipped data-tipped=' + mouseOverText;
-				output += 'style="color:';
-				output += '#FFF380';
-				output += ';font-size:10px;"';
-				output += ' href="' + wantedList.bounty[i].link + '">' + wantedList.bounty[i].target +'</a></li>';
+				output += '<a style="color:#A0CFEC;font-size:10px;"href="j' +
+
+'avascript:openQuickMsgDialog(\'' + wantedList.bounty[i].target + '\');' +
+
+					//System.server + 'index.php?cmd=message&target_player=' +
+					//wantedList.bounty[i].target +
+					'">[m]</a> &nbsp;<a class="tip-static" data-tipped=' +
+					mouseOverText +
+					'style="color:#FFF380;font-size:10px;" href="' +
+					wantedList.bounty[i].link + '">' +
+					wantedList.bounty[i].target +'</a></li>';
 			}
 		}
 
@@ -9859,7 +9902,8 @@ var Helper = {
 		var breaker=document.createElement('BR');
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetWantedList').addEventListener('click', Helper.resetWantedList, true);
+		document.getElementById('Helper:resetWantedList')
+			.addEventListener('click', Helper.resetWantedList, true);
 	},
 
 	resetWantedList: function() {
