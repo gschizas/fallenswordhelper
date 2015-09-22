@@ -987,6 +987,8 @@ window.Data = {
 		needToCompose: false,
 		lastComposeCheck: 0,
 		lastOnlineCheck: 0,
+		bountyList: '',
+		wantedList: '',
 
 /* jshint -W110 */ // Mixed double and single quotes. (W110)
 
@@ -1193,7 +1195,108 @@ window.Data = {
 		{colour: '#cc0033', class: 'fshSuper'},
 		{colour: '#6633ff', class: 'fshCrystal'},
 		{colour: '#009900', class: 'fshEpic'}
-	]
+	],
+
+	pageSwitcher: {
+		settings: {'-': {'-': {'-': 'injectSettings'}}},
+		world: {
+			'-': {'-': {'-': 'injectWorld'}},
+			'viewcreature': {'-': {'-': 'injectCreature'}},
+			'map': {'-': {'-': 'injectWorldMap'}}},
+		news: {
+			'fsbox': {'-': {'-': 'newsFsbox'}},
+			'shoutbox': {'-': {'-': 'newsShoutbox'}}},
+		//blacksmith: {'repairall': {'-': {'-': 'injectWorld'}}},
+		arena: {
+			//'-': {'-': {'-': 'injectArena'}},
+			'completed': {'-': {'-': 'storeCompletedArenas'}},
+			'pickmove': {'-': {'-': 'storeArenaMoves'}},
+			//'results': {'-': {'-': 'injectTournament'}},
+			//'dojoin': {'-': {'-': 'injectTournament'}},
+			'setup': {'-': {'-': 'injectArenaSetupMove'}}},
+		questbook: {
+			'-': {'-': {'-': 'injectQuestBookFull'}},
+			'atoz': {'-': {'-': 'injectQuestBookFull'}},
+			'viewquest': {'-': {'-':'injectQuestTracker'}}},
+		profile: {
+			'-': {'-': {'-': 'injectProfile'}},
+			'changebio': {'-': {'-': 'injectBioWidgets'}},
+			'dropitems': {'-': {'-': 'injectProfileDropItems'}}},
+		auctionhouse: {'-': {'-': {'-': 'injectAuctionHouse'}}},
+		guild: {
+			'inventory': {
+				'report': {'-': 'injectReportPaint'},
+				'addtags': {'-': 'injectGuildAddTagsWidgets'},
+				'removetags': {'-': 'injectGuildAddTagsWidgets'},
+				'storeitems': {'-': 'injectDropItems'}},
+			'chat': {'-': {'-': 'guildChat'}},
+			'log': {'-': {'-': 'guildLog'}},
+			'groups': {
+				'viewstats': {'-': 'injectGroupStats'},
+				'-': {'-': 'injectGroups'}},
+			'manage': {'-': {'-': 'injectGuild'}},
+			'advisor': {'-': {'-': 'injectAdvisor'}},
+			'history': {'-': {'-': 'addHistoryWidgets'}},
+			'view': {'-': {'-': 'injectViewGuild'}},
+			'scouttower': {'-': {'-': 'injectScouttower'}},
+			'mailbox': {'-': {'-': 'injectMailbox'}},
+			'ranks': {'-': {'-': 'injectGuildRanks'}},
+			'conflicts': {'rpupgrades': {'-': 'injectRPUpgrades'}}},
+		bank: {'-': {'-': {'-': 'injectBank'}}},
+		log: {
+			'-': {'-': {
+				'-': 'playerLog',
+				'-1': 'playerLog',
+				'0': 'playerLog',
+				'1': 'playerLog',
+				'2': 'playerLog',
+				'3': 'playerLog'}},
+			'outbox': {'-': {'-': 'outbox'}}},
+		potionbazaar: {'-': {'-': {'-': 'injectBazaar'}}},
+		marketplace: {
+			'createreq': {'-': {'-': 'addMarketplaceWidgets'}}},
+		quickbuff: {'-': {'-': {'-': 'injectQuickBuff'}}},
+		notepad: {
+			'showlogs': {'-': {'-': 'injectNotepadShowLogs'}},
+			'invmanagernew': {'-': {'-': 'injectInventoryManagerNew'}},
+			'invmanager': {'-': {'-': 'injectInventoryManager'}},
+			'guildinvmgr': {'-': {'-': 'injectInventoryManagerNew'}},
+			'guildinvmanager': {'-': {'-': 'injectInventoryManager'}},
+			'recipemanager': {'-': {'-': 'injectRecipeManager'}},
+			'auctionsearch': {'-': {'-': 'injectAuctionSearch'}},
+			'onlineplayers': {'-': {'-': 'injectOnlinePlayers'}},
+			'quicklinkmanager': {'-': {'-': 'injectQuickLinkManager'}},
+			'monsterlog': {'-': {'-': 'injectMonsterLog'}},
+			'quickextract': {'-': {'-': 'insertQuickExtract'}},
+			'quickwear': {'-': {'-': 'insertQuickWear'}},
+			'fsboxcontent': {'-': {'-': 'injectFsBoxContent'}},
+			'bufflogcontent': {'-': {'-': 'injectBuffLog'}},
+			'newguildlog': {'-': {'-': 'injectNewGuildLog'}},
+			'findbuffs': {'-': {'-': 'injectFindBuffs'}},
+			'findother': {'-': {'-': 'injectFindOther'}},
+			'savesettings': {'-': {'-': 'injectSaveSettings'}},
+			'-': {'-': {'-': 'injectNotepad'}}},
+		points: {'-': {'-': {
+			'-': 'storePlayerUpgrades',
+			'0': 'storePlayerUpgrades',
+			'1': 'parseGoldUpgrades'}}},
+		trade: {
+			'-': {'-': {'-': 'injectTrade'}},
+			'createsecure': {'-': {'-': 'injectTrade'}}},
+		titan: {'-': {'-': {'-': 'injectTitan'}}},
+		toprated: {'xp': {'-': {'-': 'injectTopRated'}}},
+		inventing: {'viewrecipe': {'-': {'-': 'inventing'}}},
+		tempinv: {'-': {'-': {'-': 'injectMailbox'}}},
+		//attackplayer: {'-': {'-': {'-': 'injectAttackPlayer'}}},
+		findplayer: {'-': {'-': {'-': 'injectFindPlayer'}}},
+		//relic: {'-': {'-': {'-': 'injectRelic'}}},
+		quests: {'view': {'-': {'-': 'showAllQuestSteps'}}},
+		scavenging: {'process': {'-': {'-': 'injectScavenging'}}},
+		temple: {'-': {'-': {'-': 'parseTemplePage'}}},
+		skills: {'-': {'-': {'-': 'injectSkills'}}},
+		composing: {'-': {'-': {'-': 'injectComposing'}}},
+		'-': {'-': {'-': {'-': 'unknownPage'}}}
+	}
 
 };
 

@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1509b3
+// @version        1509b4
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -79,446 +79,41 @@ var Helper = {
 			Helper.prepareEnv();
 		}
 
-		var pageId, subPageId, subPage2Id, subsequentPageId, typePageId;
+		var pageId;
+		var subPageId;
+		var subPage2Id;
+		var typePageId;
+		var funcName;
+		var fn;
 
 		if (document.location.search !== '') {
-			var re=/cmd=([a-z]+)/;
-			var pageIdRE = re.exec(document.location.search);
-			pageId='-';
-			if (pageIdRE) {pageId=pageIdRE[1];}
-
-			re=/subcmd=([a-z]+)/;
-			var subPageIdRE = re.exec(document.location.search);
-			subPageId='-';
-			if (subPageIdRE){subPageId=subPageIdRE[1];}
-			re=/subcmd2=([a-z]+)/;
-			var subPage2IdRE = re.exec(document.location.search);
-			subPage2Id='-';
-			if (subPage2IdRE) {subPage2Id=subPage2IdRE[1];}
-
-			re=/page=([0-9]+)/;
-			var subsequentPageIdRE = re.exec(document.location.search);
-			subsequentPageId='-';
-			if (subsequentPageIdRE) {subsequentPageId=subsequentPageIdRE[1];}
-
-			re=/type=([0-9]+)/;
-			var typePageIdRE = re.exec(document.location.search);
-			typePageId='-';
-			if (typePageIdRE) {typePageId=typePageIdRE[1];}
+			pageId = System.getUrlParameter('cmd') || '-';
+			subPageId = System.getUrlParameter('subcmd') || '-';
+			subPage2Id = System.getUrlParameter('subcmd2') || '-';
+			typePageId = System.getUrlParameter('type') || '-';
 		} else {
-			pageId=System.findNode('//input[@type="hidden" and @name="cmd"]');
-			pageId = pageId?pageId.getAttribute('value'):'-';
-
-			subPageId=System.findNode('//input[@type="hidden" and @name="subcmd"]');
-			subPageId=subPageId?subPageId.getAttribute('value'):'-';
-			if (subPageId==='dochat') {pageId='-'; subPageId='-';}
-
-			subPage2Id=System.findNode('//input[@type="hidden" and @name="subcmd2"]');
-			subPage2Id=subPage2Id?subPage2Id.getAttribute('value'):'-';
-
-			subsequentPageId=System.findNode('//input[@type="hidden" and @name="page"]');
-			subsequentPageId=subsequentPageId?subsequentPageId.getAttribute('value'):'-';
+			pageId = $('input[name="cmd"]').val() || '-';
+			subPageId = $('input[name="subcmd"]').val() || '-';
+			if (subPageId==='dochat') {
+				pageId='-';
+				subPageId='-';
+			}
+			subPage2Id = $('input[name="subcmd2"]').val() || '-';
+			typePageId = '-';
 		}
 
-		Helper.page = pageId + '/' + subPageId + '/' + subPage2Id + '(' + subsequentPageId + ')';
+		Helper.page = pageId + '/' + subPageId + '/' + subPage2Id + '(' + typePageId + ')';
 
-		switch (pageId) {
-		case 'settings':
-			Helper.injectSettings();
-			break;
-		case 'world':
-			switch (subPageId) {
-			case 'viewcreature':
-				Helper.injectCreature();
-				break;
-			case 'map':
-				Helper.injectWorldMap();
-				break;
-			default:
-				Helper.injectWorld();
-				break;
-			}
-			break;
-		case 'news':
-			switch (subPageId) {
-			case 'fsbox':
-				Helper.injectShoutboxWidgets('fsbox_input', 100);
-				break;
-			case 'shoutbox':
-				Helper.injectShoutboxWidgets('shoutbox_input', 150);
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'blacksmith':
-			switch (subPageId) {
-			case 'repairall':
-				Helper.injectWorld();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'arena':
-			switch (subPageId) {
-			case '-':
-				// Helper.injectArena();
-				break;
-			case 'completed':
-				Helper.storeCompletedArenas();
-				break;
-			case 'pickmove':
-				Helper.storeArenaMoves();
-				break;
-			case 'results':
-				// Helper.injectTournament();
-				break;
-			case 'dojoin':
-				// Helper.injectTournament();
-				break;
-			case 'setup':
-				Helper.injectArenaSetupMove();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'questbook':
-			switch (subPageId) {
-			case 'viewquest':
-				Helper.injectQuestTracker();
-				break;
-			case 'atoz':
-				Helper.injectQuestBookFull();
-				break;
-			case '-':
-				Helper.injectQuestBookFull();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'profile':
-			switch (subPageId) {
-			case 'dropitems':
-				Helper.injectDropItems();
-				Helper.injectMoveItems();
-				break;
-			case 'changebio':
-				Helper.injectBioWidgets();
-				break;
-			case '-':
-				Helper.injectProfile();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'auctionhouse':
-			Helper.injectAuctionHouse();
-			break;
-		case 'guild':
-			switch (subPageId) {
-			case 'inventory':
-				switch (subPage2Id) {
-					case 'report':
-						Helper.injectReportPaint();
-						break;
-					case 'addtags':
-						Helper.injectGuildAddTagsWidgets();
-						break;
-					case 'removetags':
-						Helper.injectGuildAddTagsWidgets();
-						break;
-					case 'storeitems':
-						Helper.injectDropItems();
-						break;
-					default:
-						break;
-				}
-				break;
-			case 'chat':
-				Helper.addChatTextArea();
-				Helper.addLogColoring('Chat', 0);
-				break;
-			case 'log':
-				Helper.addLogColoring('GuildLog', 1);
-				Helper.addGuildLogWidgets();
-				break;
-			case 'groups':
-				switch (subPage2Id) {
-					case 'viewstats':
-						Helper.injectGroupStats();
-						break;
-					default:
-						Helper.injectGroups();
-						break;
-				}
-				break;
-			case 'manage':
-				Helper.injectGuild();
-				break;
-			case 'advisor':
-				Helper.injectAdvisor();
-				break;
-			case 'history':
-				Helper.addHistoryWidgets();
-				break;
-			case 'view':
-				Helper.injectViewGuild();
-				break;
-			case 'scouttower':
-				Helper.injectScouttower();
-				break;
-			case 'mailbox':
-				Helper.injectMailbox();
-				break;
-			case 'ranks':
-				Helper.injectGuildRanks();
-				break;
-			case 'conflicts':
-				switch (subPage2Id) {
-					case 'rpupgrades':
-						Helper.injectRPUpgrades();
-						break;
-					default:
-						break;
-				}
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'bank':
-			Helper.injectBank();
-			break;
-		case 'log':
-			switch (subPageId) {
-			case 'outbox':
-				Helper.addLogColoring('OutBox', 1);
-				break;
-			case '-':
-				Helper.addLogColoring('PlayerLog', 1);
-				Helper.addLogWidgets();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'potionbazaar':
-			Helper.injectBazaar();
-			break;
-		case 'marketplace':
-			switch (subPageId) {
-			case 'createreq':
-				Helper.addMarketplaceWidgets();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'quickbuff':
-			Helper.injectQuickBuff();
-			break;
-		case 'notepad':
-			switch (subPageId) {
-			case 'showlogs':
-				Helper.injectNotepadShowLogs();
-				break;
-			case 'invmanager':
-				Helper.injectInventoryManager();
-				break;
-			case 'guildinvmanager':
-				Helper.injectInventoryManager();
-				break;
-			case 'recipemanager':
-				Helper.injectRecipeManager();
-				break;
-			case 'auctionsearch':
-				Helper.injectAuctionSearch();
-				break;
-			case 'onlineplayers':
-				Helper.injectOnlinePlayers();
-				break;
-			case 'quicklinkmanager':
-				Helper.injectQuickLinkManager();
-				break;
-			case 'monsterlog':
-				Helper.injectMonsterLog();
-				break;
-			case 'quickextract':
-				Helper.insertQuickExtract();
-				break;
-			case 'quickwear':
-				Helper.insertQuickWear();
-				break;
-			case 'fsboxcontent':
-				Helper.injectFsBoxContent();
-				break;
-			case 'bufflogcontent':
-				Helper.injectBuffLog();
-				break;
-			case 'newguildlog':
-				Helper.injectNewGuildLog();
-				break;
-			case 'findbuffs':
-				Helper.injectFindBuffs();
-				break;
-			case 'findother':
-				Helper.injectFindOther();
-				break;
-			case 'createmap':
-				break;
-			case 'savesettings':
-				Helper.injectSaveSettings();
-				break;
-			default:
-				Helper.injectNotepad();
-				break;
-			}
-			break;
-		case 'points':
-			switch (subPageId) {
-			case '-': // Ignore guild upgrades
-				switch (typePageId) {
-				case '-':
-					Helper.storePlayerUpgrades();
-					break;
-				case '0':
-					Helper.storePlayerUpgrades();
-					break;
-				case '1':
-					Helper.parseGoldUpgrades();
-					break;
-				default:
-					break;
-				}
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'trade':
-			Helper.retrieveTradeConfirm();
-			switch (subPageId) {
-			case 'createsecure':
-				Helper.injectTrade();
-				break;
-			case '-':
-				Helper.injectTrade();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'titan':
-			Helper.injectTitan();
-			break;
-		case 'toprated':
-			switch (subPageId) {
-			case 'xp':
-				Helper.injectTopRated();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'inventing':
-			switch (subPageId) {
-			case 'viewrecipe':
-				Helper.injectViewRecipe();
-				Helper.injectInvent();
-				break;
-			default:
-				break;
-			}
-			// Helper.injectInvent();
-			break;
-		case 'tempinv':
-			Helper.injectMailbox();
-			break;
-		case 'attackplayer':
-			Helper.injectAttackPlayer();
-			break;
-		case 'findplayer':
-			Helper.injectFindPlayer();
-			break;
-		case 'relic':
-			Helper.injectRelic();
-			break;
-		case 'creatures':
-			switch (subPageId) {
-			case 'view':
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'quests':
-			switch (subPageId) {
-			case 'view':
-				Helper.showAllQuestSteps();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'scavenging':
-			switch (subPageId) {
-			case 'process':
-				Helper.injectScavenging();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'temple':
-			Helper.parseTemplePage();
-			break;
-		case '-':
-			var isRelicPage = System.findNode('//td[contains(.,"Below is the current status for the relic")]/b');
-			if (isRelicPage) {
-				Helper.injectRelic();
-			}
-			var isBuffResult = System.findNode('//td[contains(.,"Back to Quick Buff Menu")]');
-			if (isBuffResult) {
-				Helper.updateBuffLog();
-			}
-			var isShopPage =  $('#shop-info').length > 0;//System.findNode('//td[contains(.,"then click to purchase for the price listed below the item.")]');
-			if (isShopPage) {
-				Helper.injectShop();
-			}
-			var isQuestBookPage = System.findNode('//td[.="Quest Name"]');
-			if (isQuestBookPage) {
-				Helper.injectQuestBookFull();
-			}
-			var isAdvisorPageClue1 = System.findNode('//font[@size=2 and .="Advisor"]');
-			var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" and .="Back to Guild Management"]';
-			var isAdvisorPageClue2 = System.findNode(clue2);
-			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
-				Helper.injectAdvisor(subPage2Id);
-			}
-			// var isArenaTournamentPage = System.findNode('//b[contains(.,"Tournament #")]');
-			// if (isArenaTournamentPage) {
-				// Helper.injectTournament();
-			// }
-			if (System.findNode('//a[.="Back to Scavenging"]')) {
-				Helper.injectScavenging();
-			}
-			if ($('img[title="Inventing"]').length > 0) {
-				Helper.injectInvent();
-			}
-			break;
-		case 'skills':
-			//Helper.injectSkillsPage();
-			break;
-		case 'composing':
-			Helper.injectComposing();
-			break;
-		default:
-			break;
+		if (Data.pageSwitcher[pageId] &&
+			Data.pageSwitcher[pageId][subPageId] &&
+			Data.pageSwitcher[pageId][subPageId][subPage2Id] &&
+			Data.pageSwitcher[pageId][subPageId][subPage2Id][typePageId]) {
+			funcName = Data.pageSwitcher[pageId][subPageId][subPage2Id]
+				[typePageId];
+			fn = Helper[funcName];
+			fn();
 		}
+
 		if (System.getValue('playNewMessageSound')) {
 			var soundLocation = System.getValue('defaultMessageSound');
 			//new UI
@@ -535,6 +130,82 @@ var Helper = {
 		// This must be at the end in order not to screw up other System.findNode calls (Issue 351)
 		if (System.getValue('huntingMode') === false) {
 			Helper.injectQuickLinks();
+		}
+	},
+
+	newsFsbox: function() {
+		Helper.injectShoutboxWidgets('fsbox_input', 100);
+	},
+
+	newsShoutbox: function() {
+		Helper.injectShoutboxWidgets('shoutbox_input', 150);
+	},
+
+	injectProfileDropItems: function() {
+		Helper.injectDropItems();
+		Helper.injectMoveItems();
+	},
+
+	guildChat: function() {
+		Helper.addChatTextArea();
+		Helper.addLogColoring('Chat', 0);
+	},
+
+	guildLog: function() {
+		Helper.addLogColoring('GuildLog', 1);
+		Helper.addGuildLogWidgets();
+	},
+
+	outbox: function() {
+		Helper.addLogColoring('OutBox', 1);
+	},
+
+	playerLog: function() {
+		Helper.addLogColoring('PlayerLog', 1);
+		Helper.addLogWidgets();
+	},
+
+	inventing: function() {
+		Helper.injectViewRecipe();
+		Helper.injectInvent();
+	},
+
+	unknownPage: function() {
+		console.log('*** unknownPage ***');
+		//var isRelicPage = $('div#pCC td:contains("Below is the current status for the relic")');
+		//var isRelicPage = System.findNode('//td[contains(.,"Below is the current status for the relic")]/b');
+		if ($('div#pCC td:contains("Below is the current status for ' +
+			'the relic")').length > 0) {
+			Helper.injectRelic();
+		}
+		var isBuffResult = System.findNode('//td[contains(.,"Back to Quick Buff Menu")]');
+		if (isBuffResult) {
+			Helper.updateBuffLog();
+		}
+		//System.findNode('//td[contains(.,"then click to purchase for the price listed below the item.")]');
+		//var isShopPage =  $('#shop-info').length > 0;
+		if ($('#shop-info').length > 0) {
+			Helper.injectShop();
+		}
+		var isQuestBookPage = System.findNode('//td[.="Quest Name"]');
+		if (isQuestBookPage) {
+			Helper.injectQuestBookFull();
+		}
+		var isAdvisorPageClue1 = System.findNode('//font[@size=2 and .="Advisor"]');
+		var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" and .="Back to Guild Management"]';
+		var isAdvisorPageClue2 = System.findNode(clue2);
+		if (isAdvisorPageClue1 && isAdvisorPageClue2) {
+			Helper.injectAdvisor();
+		}
+		// var isArenaTournamentPage = System.findNode('//b[contains(.,"Tournament #")]');
+		// if (isArenaTournamentPage) {
+			// Helper.injectTournament();
+		// }
+		if (System.findNode('//a[.="Back to Scavenging"]')) {
+			Helper.injectScavenging();
+		}
+		if ($('div#pCC img[title="Inventing"]').length > 0) {
+			Helper.injectInvent();
 		}
 	},
 
@@ -2912,12 +2583,12 @@ var Helper = {
 		Helper.showMap(true);
 	},
 
-	retrieveTradeConfirm: function() {
-		var xcNumber;
-		xcNumber=System.findNode('//input[@type="hidden" and @name="xc"]');
-		xcNumber=xcNumber?xcNumber.getAttribute('value'):'-';
-		System.setValue('goldConfirm', xcNumber);
-	},
+	//retrieveTradeConfirm: function() {
+		//var xcNumber = $('input[name="xc"]').val() || '-';
+		//xcNumber=System.findNode('//input[@type="hidden" and @name="xc"]');
+		//xcNumber=xcNumber?xcNumber.getAttribute('value'):'-';
+		//System.setValue('goldConfirm', xcNumber);
+	//},
 
 	sendGoldToPlayer: function(){
 //		var injectHere = System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
