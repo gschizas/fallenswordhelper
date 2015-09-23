@@ -4810,7 +4810,9 @@ var Helper = {
 
 	injectProfile: function() {
 		var qb = $('div#profileRightColumn a:contains("Quick Buff")');
-		qb.attr('href', qb.attr('href').replace(/500/g,'1000'));
+		if (qb.length !== 0) {
+			qb.attr('href', qb.attr('href').replace(/500/g,'1000'));
+		}
 
 		var charStats = $('#profileLeftColumn table').first()
 			.attr('id', 'characterStats');
