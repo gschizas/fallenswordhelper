@@ -5735,30 +5735,16 @@ var Helper = {
 		document.getElementById('SelectNoFilters').addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
-	generateInventoryTable: function() {
-		var targetId;
-		var targetInventory;
-		var inventoryShell;
-		var reportType=$('input[id="reportType"]').attr('value');
-		var wh = '<th align="left" sortkey="player_name" sortType="string">Where</th>';
-		if (reportType === 'guild') {
-			targetId = 'Helper:GuildInventoryManagerOutput';
-			targetInventory = Helper.guildinventory;
-			inventoryShell = 'guildinventory';
-		} else {
-			targetId = 'Helper:InventoryManagerOutput';
-			targetInventory = Helper.inventory;
-			inventoryShell = 'inventory';
-			wh='<th align="left" sortkey="folder_id" sortType="number">Where</th>';
-		}
-		if (!targetInventory) {return;}
-		//targetInventory.items = targetInventory.items.filter(function(e) {return (e.name);});
-		var output=document.getElementById(targetId);
-
-		var result='<table id="Helper:InventoryTable"><tr>' +
-			'<th width="180" align="left" sortkey="item_name" sortType="string" colspan="2">Name</th>' +
+	inventoryTableHeader: function(reportType) {
+		return '<table id="Helper:InventoryTable"><tr>' +
+			'<th width="180" align="left" sortkey="item_name" sortType=' +
+				'"string" colspan="2">Name</th>' +
 			'<th sortkey="stats.min_level" sortType="number">Level</th>' +
-			wh +
+			'<th align="left" sortkey="' +
+			(reportType === 'guild' ?
+			'player_name" sortType="string' :
+			'folder_id" sortType="number') +
+			'">Where</th>' +
 			'<th align="left" sortkey="type" sortType="number">Type</th>' +
 			'<th sortkey="stats.attack" sortType="number">Att</th>' +
 			'<th sortkey="stats.defense" sortType="number">Def</th>' +
@@ -5767,100 +5753,126 @@ var Helper = {
 			'<th sortkey="stats.hp" sortType="number">HP</th>' +
 			'<th colspan="2" sortkey="forge" sortType="number">Forge</th>' +
 			'<th align="left" sortkey="craft" sortType="string">Craft</th>' +
-			'<th align="right" sortkey="durabilityPer" sortType="number">Dur%</th>' +
+			'<th align="right" sortkey="durabilityPer" sortType="number">' +
+				'Dur%</th>' +
 			//dropLink +
 			'<th width="10"></th>';
-		var item, color;
+	},
+
+	generateInventoryTable: function() {
+		var targetId;
+		var targetInventory;
+		var inventoryShell;
+
+		var reportType = $('input[id="reportType"]').attr('value');
+		if (reportType === 'guild') {
+			targetId = 'Helper:GuildInventoryManagerOutput';
+			targetInventory = Helper.guildinventory;
+			inventoryShell = 'guildinventory';
+		} else {
+			targetId = 'Helper:InventoryManagerOutput';
+			targetInventory = Helper.inventory;
+			inventoryShell = 'inventory';
+		}
+		if (!targetInventory) {return;}
+
+		var result = Helper.inventoryTableHeader(reportType);
 
 		Helper.disableItemColoring = System.getValue('disableItemColoring');
 
 		var allItems = targetInventory.items;
-		var xcNum;
-		if (reportType === 'guild') {
-			xcNum = System.getValue('goldConfirm');
-		} else {
-			xcNum = Helper.inventory.xc;
-			System.setValue('goldConfirm', xcNum);
-		}
-
-		var minLvl = parseInt($('input[id="Helper.inventoryMinLvl"]').attr('value'), 10);
-		var maxLvl = parseInt($('input[id="Helper.inventoryMaxLvl"]').attr('value'), 10);
+		var minLvl = parseInt($('input[id="Helper.inventoryMinLvl"]')
+			.attr('value'), 10);
+		var maxLvl = parseInt($('input[id="Helper.inventoryMaxLvl"]')
+			.attr('value'), 10);
 		var setsOnly = $('input[id="Helper:SetFilter"]').is(':checked');
-		var t;
-		for (var i=0; i<allItems.length;i += 1) {
-			item=allItems[i];
-			if(item.equipped) {item.folder_id=99999999; } //for sorting purposes.
-			//continue; if item is filtered.
-			item.player_name='';
-			if(item.type > 8){continue;}//not a wearable item
-			if(!$('input[id="'+Helper.itemFilters[item.type].id+'"]').is(':checked')){continue;}
-			if(minLvl > item.stats.min_level || maxLvl < item.stats.min_level){continue;}
-			if(setsOnly && !item.stats.set_name) {continue;}
+		for (var i = 0; i < allItems.length;i += 1) {
+			var item = allItems[i];
 
-			var whereTitle='';
-			var whereText='';
-			var p=0;
+			//continue; if item is filtered.
+			if (item.type > 8 ||
+				!$('input[id="' + Helper.itemFilters[item.type].id + '"]')
+					.is(':checked') ||
+				minLvl > item.stats.min_level ||
+				maxLvl < item.stats.min_level || 
+				setsOnly && !item.stats.set_name) {continue;}
+
+			if (item.equipped) {item.folder_id = 99999999; } //for sorting purposes.
+			item.player_name = '';
+			var color;
+			var whereTitle = '';
+			var whereText = '';
+			var p = 0;
+			var t = 0;
 			if (reportType === 'guild') {
 				if (item.player_id === -1) { //guild store
 					item.player_name = 'GS';
-					color = 'navy';   whereText = 'GS';   whereTitle = 'Guild Store';
-				} else {
-					item.player_name = targetInventory.members[item.player_id];
-					color = 'maroon'; whereText = item.player_name;  whereTitle='Guild Report';
-				}
-				if (item.player_id===-1) {
+					color = 'navy';
+					whereText = 'GS';
+					whereTitle = 'Guild Store';
 					p = targetInventory.guild_id;
 					t = 4;
 				} else {
+					item.player_name = targetInventory.members[item.player_id];
+					color = 'maroon';
+					whereText = item.player_name;
+					whereTitle='Guild Report';
 					p = item.player_id;
 					t = 1;
 				}
 				p = p + '&currentPlayerId=' + targetInventory.current_player_id;
-			}else{
-				if(item.equipped){
-					color = 'green';  whereText = 'Worn'; whereTitle = 'Wearing it';
-				}else{
-					color = 'blue';   whereText = Helper.inventory.folders[item.folder_id];   whereTitle = 'In Backpack';
+			} else {
+				if (item.equipped) {
+					color = 'green';
+					whereText = 'Worn';
+					whereTitle = 'Wearing it';
+				} else {
+					color = 'blue';
+					whereText = Helper.inventory.folders[item.folder_id];
+					whereTitle = 'In Backpack';
 				}
 				p = targetInventory.player_id;
 				t = 1;
 			}
 
-			var rarity = Helper.disableItemColoring ? '' : ' color:' +
+			item.rarityColor = Helper.disableItemColoring ? '' : ' color:' +
 				Data.rarity[item.rarity].colour;
 
-			var nm = item.item_name;
-			if (item.equipped) { nm = '<b>' + nm + '</b>';}
-			result += '<tr style="color:' + color + '">' +
-				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a style="cursor:help;' + rarity +
-				'" id="Helper:item' + i +
-				'" arrayID="' + i + '" class="tip-dynamic" ' +
-				'data-tipped="fetchitem.php?item_id=' + item.item_id +
-				'&inv_id=' + item.inv_id + '&t=' + t + '&p=' + p + '">' + nm +
+			item.displayName = item.item_name;
+			if (item.equipped) {
+				item.displayName = '<b>' + item.displayName + '</b>';
+			}
+			result += '<tr style="color:' + color + '"><td></td><td><a ' +
+				'style="cursor:help;' + item.rarityColor + '" id="Helper:item' +
+				i + '" arrayID="' + i + '" class="tip-dynamic" data-tipped="' +
+				'fetchitem.php?item_id=' + item.item_id + '&inv_id=' +
+				item.inv_id + '&t=' + t + '&p=' + p + '">' + item.displayName +
 				'</a>';
 
+			var itemRE = new RegExp('amulet|armor|armored|axe|boots|fist|' +
+				'gauntlets|gloves|hammer|helm|helmet|mace|necklace|of|plate|' +
+				'ring|rune|shield|sword|the|weapon', 'gi');
+
 			if (item.stats.set_name && reportType === 'guild') {
-				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
-					item.item_name.replace(/(amulet)|(armor)|(armored)|(axe)|(boots)|(fist)|(gauntlets)|(gloves)|(hammer)|(helm)|(helmet)|(mace)|(necklace)|(of)|(plate)|(ring)|(rune)|(shield)|(sword)|(the)|(weapon)|/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
+				result += ' (<a href="/index.php?cmd=guild&subcmd=inventory&' +
+					'subcmd2=report&set=' +
+					item.item_name.replace(itemRE,'').trim().replace(/  /g,' ')
+						.replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
 			}
 
-			var craftColor = Data.craft[item.craft] ?
+			item.craftColor = Data.craft[item.craft] ?
 				Data.craft[item.craft].colour : '';
 
-			var durabilityPercent = '';
-			var durabilityColor;
 			if (item.durability) {
-				durabilityPercent = parseInt(100*item.durability/item.max_durability,10);
-				item.durabilityPer=durabilityPercent;
-				durabilityColor = durabilityPercent < 20 ?'red':'gray';
+				item.durabilityPer = Math.floor(100 * item.durability /
+					item.max_durability);
+				item.durabilityColor = item.durabilityPer < 20 ? 'red' : 'gray';
 			}
 
-// TODO
-
-			result+='</td>' +
+			result += '</td>' +
 				'<td align="right">' + item.stats.min_level + '</td>' +
-				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
+				'<td align="left" title="' + whereTitle + '">' + whereText +
+					'</td>' +
 				'<td align="left">' + Data.itemType[item.type] + '</td>' +
 				'<td align="right">' + item.stats.attack + '</td>' +
 				'<td align="right">' + item.stats.defense + '</td>' +
@@ -5868,37 +5880,27 @@ var Helper = {
 				'<td align="right">' + item.stats.damage + '</td>' +
 				'<td align="right">' + item.stats.hp + '</td>' +
 				'<td align="right">' + item.forge + '</td>' +
-				'<td>' + (item.forge > 0 ? '<img src="' + System.imageServer + '/hellforge/forgelevel.gif">':'') + '</td>' +
-				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craft + '</span>' + '</td>' +
-				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
-/*				if (showQuickDropLinks && inventoryShell === 'inventory') {
-					result+='<td><span  title="INSTANTLY DROP '+item.item_name+'. NO REFUNDS OR DO-OVERS! Use at own risk." id="FSHQuickDrop' +
-							item.item_id +
-							'" itemInvId=' + item.inv_id +
-							' itemIndexId=' + item.index + ' itemPageId=' + item.page +
-							' findme="QuickDrop" style="color:red; cursor:pointer; text-decoration:underline;">[Drop]</span> </td>';
-				}
-*/				result+='<td></td>' +
-				'</tr>';
+				'<td>' + (item.forge > 0 ? '<img src="' + System.imageServer +
+					'/hellforge/forgelevel.gif">':'') + '</td>' +
+				'<td align="left">' + '<span style="color:' + item.craftColor +
+					';">' + item.craft + '</span>' + '</td>' +
+				'<td align="right">' + '<span style="color:' +
+					item.durabilityColor + ';">' + item.durabilityPer +
+					'</span></td>' +
+				'<td></td></tr>';
 		}
-		result+='</table>';
-		result+='<input type="hidden" id="xcnum" value="' + xcNum + '" />';
-		output.innerHTML=result;
-		/*if (showQuickDropLinks && inventoryShell === 'inventory') {
-			$('span[id*="FSHQuickDrop"]').each(function(){
-				this.addEventListener('click', Helper.quickDropItem, true);
-				this.addEventListener('click', Helper.removeInventoryItem, true);
-			});
-		}*/
-		targetInventory.lastUpdate = new Date();
-		// Sets but never gets inventory!
-		// System.setValueJSON(inventoryShell, targetInventory);
+
+		result += '</table><input type="hidden" id="xcnum" value="' +
+			window.ajaxXC + '" />';
+
+		var output = document.getElementById(targetId);
+		output.innerHTML = result;
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
-		for (i=0; i<inventoryTable.rows[0].cells.length; i += 1) {
-			var cell=inventoryTable.rows[0].cells[i];
-			cell.style.textDecoration='underline';
-			cell.style.cursor='pointer';
+		for (i = 0; i < inventoryTable.rows[0].cells.length; i += 1) {
+			var cell = inventoryTable.rows[0].cells[i];
+			cell.style.textDecoration = 'underline';
+			cell.style.cursor = 'pointer';
 			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
 
@@ -6301,23 +6303,6 @@ var Helper = {
 		);
 	},
 
-//*************************** Note *********************
-/* The following fuction is only used in the quick drop method in the inventory manager currently commented out, if that is deleted
-	this function can be removed as well */
-	removeInventoryItem: function(evt){
-		var itemIndexId = evt.target.getAttribute('itemIndexId');
-		var itemPageId = evt.target.getAttribute('itemPageId');
-		var itemArrayId=-1;
-		for (var i=0; i<Helper.inventory.items.length;i += 1) { //find item
-			if(Helper.inventory.items[i].index===itemIndexId && Helper.inventory.items[i].page===itemPageId){
-				itemArrayId=i;
-				break;
-			}
-		}
-		//~ var remItem = Helper.inventory.items.splice(itemArrayId,1); //remove from array
-		System.setValueJSON('inventory', Helper.inventory); //update var so it does not display again
-	},
-// ************************* /end note
 	sortInventoryTable: function(evt) {
 		var targetInventory;
 		var reportType=$('input[id="reportType"]').attr('value');
