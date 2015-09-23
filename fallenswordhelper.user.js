@@ -2592,13 +2592,6 @@ var Helper = {
 		Helper.showMap(true);
 	},
 
-	//retrieveTradeConfirm: function() {
-		//var xcNumber = $('input[name="xc"]').val() || '-';
-		//xcNumber=System.findNode('//input[@type="hidden" and @name="xc"]');
-		//xcNumber=xcNumber?xcNumber.getAttribute('value'):'-';
-		//System.setValue('goldConfirm', xcNumber);
-	//},
-
 	sendGoldToPlayer: function(){
 //		var injectHere = System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
 //		if (!injectHere) {return;}
@@ -4816,8 +4809,11 @@ var Helper = {
 	},
 
 	injectProfile: function() {
+		var qb = $('div#profileRightColumn a:contains("Quick Buff")');
+		qb.attr('href', qb.attr('href').replace(/500/g,'1000'));
 
-		var charStats = $('#profileLeftColumn table').first().attr('id', 'characterStats');
+		var charStats = $('#profileLeftColumn table').first()
+			.attr('id', 'characterStats');
 		var tblCells = $('td', charStats).has('table').has('font');
 		tblCells.each(function(i, e) {
 			var tde = $('td', e);
