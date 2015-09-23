@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1509b4
+// @version        1509b5
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -5763,6 +5763,8 @@ var Helper = {
 			'<th width="10"></th>';
 		var item, color;
 
+		Helper.disableItemColoring = System.getValue('disableItemColoring');
+
 		var allItems = targetInventory.items;
 		var xcNum;
 		if (reportType === 'guild') {
@@ -5815,13 +5817,14 @@ var Helper = {
 				t = 1;
 			}
 
-			var rarity = Data.rarity[item.rarity].colour;
+			var rarity = Helper.disableItemColoring ? '' : ' color:' +
+				Data.rarity[item.rarity].colour;
 
 			var nm = item.item_name;
 			if (item.equipped) { nm = '<b>' + nm + '</b>';}
 			result += '<tr style="color:' + color + '">' +
 				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a style="cursor:help; color:' + rarity +
+				'</td><td><a style="cursor:help;' + rarity +
 				'" id="Helper:item' + i +
 				'" arrayID="' + i + '" class="tip-dynamic" ' +
 				'data-tipped="fetchitem.php?item_id=' + item.item_id +
