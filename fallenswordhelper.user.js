@@ -1613,7 +1613,7 @@ var Helper = {
 		var currentBuffs = System.findNodes('//a[contains(@href,"index.php?' +
 			'cmd=profile&subcmd=removeskill&skill_id=")]');
 		var buffHash={};
-		if (!currentBuffs) {return;}
+		if (!currentBuffs) {return buffHash;}
 		for (var i=0;i<currentBuffs.length;i += 1) {
 			var currentBuff = currentBuffs[i];
 			var buffHref = currentBuff.getAttribute('href');
@@ -9388,40 +9388,47 @@ var Helper = {
 		}
 	},
 
-	injectPoints: function() {
-		Helper.currentFSP = System.intValue($('dt#statbar-fsp').text().replace(/,/g, ''));
-
-		var stamForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+25 Current Stamina")]/../td[4]');
-		var stamForFSPInjectHere = System.findNode('//td[@width="60%" and contains(.,"+25 Current Stamina")]');
-		var stamFSPTextField = System.findNode('table/tbody/tr/td/input[@name="quantity"]', stamForFSPElement);
-		stamFSPTextField.type='current';
-		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
-		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="current"><span>';
-
-		stamForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+10 Maximum Stamina")]/../td[4]');
-		stamForFSPInjectHere = System.findNode('//td[@width="60%" and contains(.,"+10 Maximum Stamina")]');
-		stamFSPTextField = System.findNode('table/tbody/tr/td/input[@name="quantity"]', stamForFSPElement);
-		stamFSPTextField.type='maximum';
-		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
-		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="maximum"><span>';
-
-		var goldForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+50,000")]/../td[4]');
-		goldForFSPElement.innerHTML = '<a href="' + System.server + '?cmd=marketplace">Sell at Marketplace</a>';
+	injectPoints: function() { // jquery
+		Helper.currentFSP = System.intValue($('dt#statbar-fsp').text());
+		Helper.injectUpgradeHelper(0, 'Current');
+		Helper.injectUpgradeHelper(1, 'Maximum');
+		$('#pCC td')
+			.has('input[name="upgrade_id"][value="3"]')
+			.html('<a href="' + System.server +
+				'?cmd=marketplace">Sell at Marketplace</a>');
 	},
 
-	updateStamCount: function(evt) {
-		var FSPvalue = evt.target.value*1;
-		var type = evt.target.getAttribute('type');
-		var injectHere = System.findNode('//span[@id="totalStam" and @type="'+type+'"]');
+	injectUpgradeHelper: function(value, type) {
+		var theCells = $('#pCC tr')
+			.has('input[name="upgrade_id"][value="' + value + '"]')
+			.find('td');
+		var cell = theCells.first();
+		cell.append(' <span style="color:blue" ' +
+			'id="totalStam" type="' + type + '"></span>');
+		var amountRE = new RegExp('\\+(\\d+) ' + type + ' Stamina');
+		var amount = cell.text().match(amountRE)[1];
+		$('input[name="quantity"]', theCells)
+			.attr('stamtype', type)
+			.attr('amount', amount)
+			.attr('cost', theCells.eq(1).text())
+			.keyup(Helper.updateStamCount);
+	},
+
+	updateStamCount: function(evt) { // jquery
+		var target = $(evt.target);
+		var amount = target.attr('amount');
+		var cost = target.attr('cost');
+		var quantity = target.val();
 		//cap the value if the user goes over his current FSP
 		var color = 'red';
-		var extraStam = Helper.currentFSP*(type==='current'?25:10);
-		if (FSPvalue <= Helper.currentFSP) {
-			extraStam = FSPvalue*(type==='current'?25:10);
+		var extraStam = Math.floor(Helper.currentFSP / cost) * amount;
+		if (quantity * cost <= Helper.currentFSP) {
+			extraStam = quantity * amount;
 			color = 'blue';
 		}
-		injectHere.style.color = color;
-		injectHere.innerHTML = '(+' + extraStam + ' stamina)';
+		$('#pCC span[id="totalStam"][type="' + target.attr('stamtype') + '"]')
+			.css('color', color)
+			.html('(+' + extraStam + ' stamina)');
 	},
 
 	injectTitan: function() {
