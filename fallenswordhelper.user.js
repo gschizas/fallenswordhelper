@@ -9,8 +9,8 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1508
-// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
+// @version        1509b5
+// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -79,446 +79,41 @@ var Helper = {
 			Helper.prepareEnv();
 		}
 
-		var pageId, subPageId, subPage2Id, subsequentPageId, typePageId;
+		var pageId;
+		var subPageId;
+		var subPage2Id;
+		var typePageId;
+		var funcName;
+		var fn;
 
 		if (document.location.search !== '') {
-			var re=/cmd=([a-z]+)/;
-			var pageIdRE = re.exec(document.location.search);
-			pageId='-';
-			if (pageIdRE) {pageId=pageIdRE[1];}
-
-			re=/subcmd=([a-z]+)/;
-			var subPageIdRE = re.exec(document.location.search);
-			subPageId='-';
-			if (subPageIdRE){subPageId=subPageIdRE[1];}
-			re=/subcmd2=([a-z]+)/;
-			var subPage2IdRE = re.exec(document.location.search);
-			subPage2Id='-';
-			if (subPage2IdRE) {subPage2Id=subPage2IdRE[1];}
-
-			re=/page=([0-9]+)/;
-			var subsequentPageIdRE = re.exec(document.location.search);
-			subsequentPageId='-';
-			if (subsequentPageIdRE) {subsequentPageId=subsequentPageIdRE[1];}
-
-			re=/type=([0-9]+)/;
-			var typePageIdRE = re.exec(document.location.search);
-			typePageId='-';
-			if (typePageIdRE) {typePageId=typePageIdRE[1];}
+			pageId = System.getUrlParameter('cmd') || '-';
+			subPageId = System.getUrlParameter('subcmd') || '-';
+			subPage2Id = System.getUrlParameter('subcmd2') || '-';
+			typePageId = System.getUrlParameter('type') || '-';
 		} else {
-			pageId=System.findNode('//input[@type="hidden" and @name="cmd"]');
-			pageId = pageId?pageId.getAttribute('value'):'-';
-
-			subPageId=System.findNode('//input[@type="hidden" and @name="subcmd"]');
-			subPageId=subPageId?subPageId.getAttribute('value'):'-';
-			if (subPageId==='dochat') {pageId='-'; subPageId='-';}
-
-			subPage2Id=System.findNode('//input[@type="hidden" and @name="subcmd2"]');
-			subPage2Id=subPage2Id?subPage2Id.getAttribute('value'):'-';
-
-			subsequentPageId=System.findNode('//input[@type="hidden" and @name="page"]');
-			subsequentPageId=subsequentPageId?subsequentPageId.getAttribute('value'):'-';
+			pageId = $('input[name="cmd"]').val() || '-';
+			subPageId = $('input[name="subcmd"]').val() || '-';
+			if (subPageId==='dochat') {
+				pageId='-';
+				subPageId='-';
+			}
+			subPage2Id = $('input[name="subcmd2"]').val() || '-';
+			typePageId = '-';
 		}
 
-		Helper.page = pageId + '/' + subPageId + '/' + subPage2Id + '(' + subsequentPageId + ')';
+		Helper.page = pageId + '/' + subPageId + '/' + subPage2Id + '(' + typePageId + ')';
 
-		switch (pageId) {
-		case 'settings':
-			Helper.injectSettings();
-			break;
-		case 'world':
-			switch (subPageId) {
-			case 'viewcreature':
-				Helper.injectCreature();
-				break;
-			case 'map':
-				Helper.injectWorldMap();
-				break;
-			default:
-				Helper.injectWorld();
-				break;
-			}
-			break;
-		case 'news':
-			switch (subPageId) {
-			case 'fsbox':
-				Helper.injectShoutboxWidgets('fsbox_input', 100);
-				break;
-			case 'shoutbox':
-				Helper.injectShoutboxWidgets('shoutbox_input', 150);
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'blacksmith':
-			switch (subPageId) {
-			case 'repairall':
-				Helper.injectWorld();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'arena':
-			switch (subPageId) {
-			case '-':
-				// Helper.injectArena();
-				break;
-			case 'completed':
-				Helper.storeCompletedArenas();
-				break;
-			case 'pickmove':
-				Helper.storeArenaMoves();
-				break;
-			case 'results':
-				// Helper.injectTournament();
-				break;
-			case 'dojoin':
-				// Helper.injectTournament();
-				break;
-			case 'setup':
-				Helper.injectArenaSetupMove();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'questbook':
-			switch (subPageId) {
-			case 'viewquest':
-				Helper.injectQuestTracker();
-				break;
-			case 'atoz':
-				Helper.injectQuestBookFull();
-				break;
-			case '-':
-				Helper.injectQuestBookFull();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'profile':
-			switch (subPageId) {
-			case 'dropitems':
-				Helper.injectDropItems();
-				Helper.injectMoveItems();
-				break;
-			case 'changebio':
-				Helper.injectBioWidgets();
-				break;
-			case '-':
-				Helper.injectProfile();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'auctionhouse':
-			Helper.injectAuctionHouse();
-			break;
-		case 'guild':
-			switch (subPageId) {
-			case 'inventory':
-				switch (subPage2Id) {
-					case 'report':
-						Helper.injectReportPaint();
-						break;
-					case 'addtags':
-						Helper.injectGuildAddTagsWidgets();
-						break;
-					case 'removetags':
-						Helper.injectGuildAddTagsWidgets();
-						break;
-					case 'storeitems':
-						Helper.injectDropItems();
-						break;
-					default:
-						break;
-				}
-				break;
-			case 'chat':
-				Helper.addChatTextArea();
-				Helper.addLogColoring('Chat', 0);
-				break;
-			case 'log':
-				Helper.addLogColoring('GuildLog', 1);
-				Helper.addGuildLogWidgets();
-				break;
-			case 'groups':
-				switch (subPage2Id) {
-					case 'viewstats':
-						Helper.injectGroupStats();
-						break;
-					default:
-						Helper.injectGroups();
-						break;
-				}
-				break;
-			case 'manage':
-				Helper.injectGuild();
-				break;
-			case 'advisor':
-				Helper.injectAdvisor();
-				break;
-			case 'history':
-				Helper.addHistoryWidgets();
-				break;
-			case 'view':
-				Helper.injectViewGuild();
-				break;
-			case 'scouttower':
-				Helper.injectScouttower();
-				break;
-			case 'mailbox':
-				Helper.injectMailbox();
-				break;
-			case 'ranks':
-				Helper.injectGuildRanks();
-				break;
-			case 'conflicts':
-				switch (subPage2Id) {
-					case 'rpupgrades':
-						Helper.injectRPUpgrades();
-						break;
-					default:
-						break;
-				}
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'bank':
-			Helper.injectBank();
-			break;
-		case 'log':
-			switch (subPageId) {
-			case 'outbox':
-				Helper.addLogColoring('OutBox', 1);
-				break;
-			case '-':
-				Helper.addLogColoring('PlayerLog', 1);
-				Helper.addLogWidgets();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'potionbazaar':
-			Helper.injectBazaar();
-			break;
-		case 'marketplace':
-			switch (subPageId) {
-			case 'createreq':
-				Helper.addMarketplaceWidgets();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'quickbuff':
-			Helper.injectQuickBuff();
-			break;
-		case 'notepad':
-			switch (subPageId) {
-			case 'showlogs':
-				Helper.injectNotepadShowLogs();
-				break;
-			case 'invmanager':
-				Helper.injectInventoryManager();
-				break;
-			case 'guildinvmanager':
-				Helper.injectInventoryManager();
-				break;
-			case 'recipemanager':
-				Helper.injectRecipeManager();
-				break;
-			case 'auctionsearch':
-				Helper.injectAuctionSearch();
-				break;
-			case 'onlineplayers':
-				Helper.injectOnlinePlayers();
-				break;
-			case 'quicklinkmanager':
-				Helper.injectQuickLinkManager();
-				break;
-			case 'monsterlog':
-				Helper.injectMonsterLog();
-				break;
-			case 'quickextract':
-				Helper.insertQuickExtract();
-				break;
-			case 'quickwear':
-				Helper.insertQuickWear();
-				break;
-			case 'fsboxcontent':
-				Helper.injectFsBoxContent();
-				break;
-			case 'bufflogcontent':
-				Helper.injectBuffLog();
-				break;
-			case 'newguildlog':
-				Helper.injectNewGuildLog();
-				break;
-			case 'findbuffs':
-				Helper.injectFindBuffs();
-				break;
-			case 'findother':
-				Helper.injectFindOther();
-				break;
-			case 'createmap':
-				break;
-			case 'savesettings':
-				Helper.injectSaveSettings();
-				break;
-			default:
-				Helper.injectNotepad();
-				break;
-			}
-			break;
-		case 'points':
-			switch (subPageId) {
-			case '-': // Ignore guild upgrades
-				switch (typePageId) {
-				case '-':
-					Helper.storePlayerUpgrades();
-					break;
-				case '0':
-					Helper.storePlayerUpgrades();
-					break;
-				case '1':
-					Helper.parseGoldUpgrades();
-					break;
-				default:
-					break;
-				}
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'trade':
-			Helper.retrieveTradeConfirm();
-			switch (subPageId) {
-			case 'createsecure':
-				Helper.injectTrade();
-				break;
-			case '-':
-				Helper.injectTrade();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'titan':
-			Helper.injectTitan();
-			break;
-		case 'toprated':
-			switch (subPageId) {
-			case 'xp':
-				Helper.injectTopRated();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'inventing':
-			switch (subPageId) {
-			case 'viewrecipe':
-				Helper.injectViewRecipe();
-				Helper.injectInvent();
-				break;
-			default:
-				break;
-			}
-			// Helper.injectInvent();
-			break;
-		case 'tempinv':
-			Helper.injectMailbox();
-			break;
-		case 'attackplayer':
-			Helper.injectAttackPlayer();
-			break;
-		case 'findplayer':
-			Helper.injectFindPlayer();
-			break;
-		case 'relic':
-			Helper.injectRelic();
-			break;
-		case 'creatures':
-			switch (subPageId) {
-			case 'view':
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'quests':
-			switch (subPageId) {
-			case 'view':
-				Helper.showAllQuestSteps();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'scavenging':
-			switch (subPageId) {
-			case 'process':
-				Helper.injectScavenging();
-				break;
-			default:
-				break;
-			}
-			break;
-		case 'temple':
-			Helper.parseTemplePage();
-			break;
-		case '-':
-			var isRelicPage = System.findNode('//td[contains(.,"Below is the current status for the relic")]/b');
-			if (isRelicPage) {
-				Helper.injectRelic();
-			}
-			var isBuffResult = System.findNode('//td[contains(.,"Back to Quick Buff Menu")]');
-			if (isBuffResult) {
-				Helper.updateBuffLog();
-			}
-			var isShopPage =  $('#shop-info').length > 0;//System.findNode('//td[contains(.,"then click to purchase for the price listed below the item.")]');
-			if (isShopPage) {
-				Helper.injectShop();
-			}
-			var isQuestBookPage = System.findNode('//td[.="Quest Name"]');
-			if (isQuestBookPage) {
-				Helper.injectQuestBookFull();
-			}
-			var isAdvisorPageClue1 = System.findNode('//font[@size=2 and .="Advisor"]');
-			var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" and .="Back to Guild Management"]';
-			var isAdvisorPageClue2 = System.findNode(clue2);
-			if (isAdvisorPageClue1 && isAdvisorPageClue2) {
-				Helper.injectAdvisor(subPage2Id);
-			}
-			// var isArenaTournamentPage = System.findNode('//b[contains(.,"Tournament #")]');
-			// if (isArenaTournamentPage) {
-				// Helper.injectTournament();
-			// }
-			if (System.findNode('//a[.="Back to Scavenging"]')) {
-				Helper.injectScavenging();
-			}
-			if ($('img[title="Inventing"]').length > 0) {
-				Helper.injectInvent();
-			}
-			break;
-		case 'skills':
-			//Helper.injectSkillsPage();
-			break;
-		case 'composing':
-			Helper.injectComposing();
-			break;
-		default:
-			break;
+		if (Data.pageSwitcher[pageId] &&
+			Data.pageSwitcher[pageId][subPageId] &&
+			Data.pageSwitcher[pageId][subPageId][subPage2Id] &&
+			Data.pageSwitcher[pageId][subPageId][subPage2Id][typePageId]) {
+			funcName = Data.pageSwitcher[pageId][subPageId][subPage2Id]
+				[typePageId];
+			fn = Helper[funcName];
+			fn();
 		}
+
 		if (System.getValue('playNewMessageSound')) {
 			var soundLocation = System.getValue('defaultMessageSound');
 			//new UI
@@ -535,6 +130,82 @@ var Helper = {
 		// This must be at the end in order not to screw up other System.findNode calls (Issue 351)
 		if (System.getValue('huntingMode') === false) {
 			Helper.injectQuickLinks();
+		}
+	},
+
+	newsFsbox: function() {
+		Helper.injectShoutboxWidgets('fsbox_input', 100);
+	},
+
+	newsShoutbox: function() {
+		Helper.injectShoutboxWidgets('shoutbox_input', 150);
+	},
+
+	injectProfileDropItems: function() {
+		Helper.injectDropItems();
+		Helper.injectMoveItems();
+	},
+
+	guildChat: function() {
+		Helper.addChatTextArea();
+		Helper.addLogColoring('Chat', 0);
+	},
+
+	guildLog: function() {
+		Helper.addLogColoring('GuildLog', 1);
+		Helper.addGuildLogWidgets();
+	},
+
+	outbox: function() {
+		Helper.addLogColoring('OutBox', 1);
+	},
+
+	playerLog: function() {
+		Helper.addLogColoring('PlayerLog', 1);
+		Helper.addLogWidgets();
+	},
+
+	inventing: function() {
+		Helper.injectViewRecipe();
+		Helper.injectInvent();
+	},
+
+	unknownPage: function() {
+		console.log('*** unknownPage ***');
+		//var isRelicPage = $('div#pCC td:contains("Below is the current status for the relic")');
+		//var isRelicPage = System.findNode('//td[contains(.,"Below is the current status for the relic")]/b');
+		if ($('div#pCC td:contains("Below is the current status for ' +
+			'the relic")').length > 0) {
+			Helper.injectRelic();
+		}
+		var isBuffResult = System.findNode('//td[contains(.,"Back to Quick Buff Menu")]');
+		if (isBuffResult) {
+			Helper.updateBuffLog();
+		}
+		//System.findNode('//td[contains(.,"then click to purchase for the price listed below the item.")]');
+		//var isShopPage =  $('#shop-info').length > 0;
+		if ($('#shop-info').length > 0) {
+			Helper.injectShop();
+		}
+		var isQuestBookPage = System.findNode('//td[.="Quest Name"]');
+		if (isQuestBookPage) {
+			Helper.injectQuestBookFull();
+		}
+		var isAdvisorPageClue1 = System.findNode('//font[@size=2 and .="Advisor"]');
+		var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" and .="Back to Guild Management"]';
+		var isAdvisorPageClue2 = System.findNode(clue2);
+		if (isAdvisorPageClue1 && isAdvisorPageClue2) {
+			Helper.injectAdvisor();
+		}
+		// var isArenaTournamentPage = System.findNode('//b[contains(.,"Tournament #")]');
+		// if (isArenaTournamentPage) {
+			// Helper.injectTournament();
+		// }
+		if (System.findNode('//a[.="Back to Scavenging"]')) {
+			Helper.injectScavenging();
+		}
+		if ($('div#pCC img[title="Inventing"]').length > 0) {
+			Helper.injectInvent();
 		}
 	},
 
@@ -1942,7 +1613,7 @@ var Helper = {
 		var currentBuffs = System.findNodes('//a[contains(@href,"index.php?' +
 			'cmd=profile&subcmd=removeskill&skill_id=")]');
 		var buffHash={};
-		if (!currentBuffs) {return;}
+		if (!currentBuffs) {return buffHash;}
 		for (var i=0;i<currentBuffs.length;i += 1) {
 			var currentBuff = currentBuffs[i];
 			var buffHref = currentBuff.getAttribute('href');
@@ -1981,15 +1652,14 @@ var Helper = {
 		var counterAttackLevel;
 		var doublerLevel;
 
-		var buffHash = Helper.oldRemoveBuffs;
+		var buffHash = Helper.oldRemoveBuffs();
 
 		//extra world screen text
 		var replacementText = '<td background="' + System.imageServer +
-			'/skin/realm_right_bg.jpg">';
-		replacementText += '<table align="right" cellpadding="1" style="' +
-			'width:270px;margin-left:38px;margin-right:38px;font-size:medium' +
-			'; border-spacing: 1px; border-collapse: collapse;">';
-		replacementText += '<tr><td colspan="2" height="10"></td></tr><tr>';
+			'/skin/realm_right_bg.jpg"><table align="right" cellpadding="1" ' +
+			'style="width:270px;margin-left:38px;margin-right:38px;font-size' +
+			':medium; border-spacing: 1px; border-collapse: collapse;"><tr><' +
+			'td colspan="2" height="10"></td></tr><tr>';
 		var hasShieldImp = System
 			.findNode('//img[contains(@src,"/55_sm.gif")]');
 		var hasDeathDealer = System
@@ -2023,46 +1693,7 @@ var Helper = {
 				'blue;cursor:pointer;text-decoration:underline;font-size:' +
 				'xx-small;">Recast</span>':'') + '</td></tr>';
 			if (hasDeathDealer) {
-				if (System.getValue('lastDeathDealerPercentage') === undefined) {
-					System.setValue('lastDeathDealerPercentage', 0);}
-				if (System.getValue('lastKillStreak') === undefined) {
-					System.setValue('lastKillStreak', 0);}
-				var lastDeathDealerPercentage =
-					System.getValue('lastDeathDealerPercentage');
-				var lastKillStreak = System.getValue('lastKillStreak');
-				if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
-					replacementText += '<tr><td style="font-size:small; ' +
-						'color:black">Kill Streak: <span findme="killstreak">' +
-						'&gt;' + System.addCommas(lastKillStreak) + '</span> ' +
-						'Damage bonus: <span findme="damagebonus">20</span>%' +
-						'</td></tr>';
-				} else {
-					if (!System.getValue('trackKillStreak')) {
-						replacementText += '<tr><td style="font-size:small; ' +
-							'color:navy" nowrap>KillStreak tracker disabled. ' +
-							'<span style="font-size:xx-small">Track: <span ' +
-							'id=Helper:toggleKStracker style="color:navy;' +
-							'cursor:pointer;text-decoration:underline;" ' +
-							'title="Click to toggle">' +
-							(System.getValue('trackKillStreak') ? 'ON' : 'off') +
-							'</span></span></td></tr>';
-					} else {
-						replacementText += '<tr><td style="font-size:small;' +
-							' color:navy" nowrap>KillStreak: <span findme="' +
-							'killstreak">' + System.addCommas(lastKillStreak) +
-							'</span> Damage bonus: <span findme="damagebonus' +
-							'">' + Math.round(lastDeathDealerPercentage *
-							100) / 100 + '</span>%&nbsp;' + '<span style="' +
-							'font-size:xx-small">Track: <span id=Helper:' +
-							'toggleKStracker style="color:navy;cursor:' +
-							'pointer;text-decoration:underline;" title="' +
-							'Click to toggle">'+
-							(System.getValue('trackKillStreak') ? 'ON' : 'off') +
-							'</span></span></td></tr>';
-						System.xmlhttp('index.php?cmd=profile',
-							Helper.getKillStreak);
-					}
-				}
+				replacementText += Helper.doDeathDealer(impsRemaining);
 			}
 		}
 		var hasCounterAttack = System
@@ -2151,6 +1782,55 @@ var Helper = {
 		}
 
 		Helper.toggleKsTracker();
+	},
+
+	doDeathDealer: function(impsRemaining) {
+		var replacementText = '';
+
+		var lastDeathDealerPercentage =
+			System.getValue('lastDeathDealerPercentage');
+		if (lastDeathDealerPercentage === undefined) {
+			System.setValue('lastDeathDealerPercentage', 0);
+			lastDeathDealerPercentage = 0;
+		}
+
+		var lastKillStreak = System.getValue('lastKillStreak');
+		if (lastKillStreak === undefined) {
+			System.setValue('lastKillStreak', 0);
+			lastKillStreak = 0;
+		}
+
+		var trackKillStreak = System.getValue('trackKillStreak');
+
+		if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
+			replacementText += '<tr><td style="font-size:small; color:black"' +
+				'>Kill Streak: <span findme="killstreak">&gt;' +
+				System.addCommas(lastKillStreak) + '</span> Damage bonus: <' +
+				'span findme="damagebonus">20</span>%</td></tr>';
+		} else {
+			if (!trackKillStreak) {
+				replacementText += '<tr><td style="font-size:small; color:' +
+					'navy" nowrap>KillStreak tracker disabled. <span style="' +
+					'font-size:xx-small">Track: <span id=Helper:toggleKS' +
+					'tracker style="color:navy;cursor:pointer;text-' +
+					'decoration:underline;" title="Click to toggle">' +
+					(trackKillStreak ? 'ON' : 'off') +
+					'</span></span></td></tr>';
+			} else {
+				replacementText += '<tr><td style="font-size:small; color:' +
+					'navy" nowrap>KillStreak: <span findme="killstreak">' +
+					System.addCommas(lastKillStreak) + '</span> Damage bonus' +
+					': <span findme="damagebonus">' +
+					Math.round(lastDeathDealerPercentage * 100) / 100 +
+					'</span>%&nbsp;<span style="font-size:xx-small">Track: ' +
+					'<span id=Helper:toggleKStracker style="color:navy;' +
+					'cursor:pointer;text-decoration:underline;" title="Click' +
+					' to toggle">' + (trackKillStreak ? 'ON' : 'off') +
+					'</span></span></td></tr>';
+				System.xmlhttp('index.php?cmd=profile', Helper.getKillStreak);
+			}
+		}
+		return replacementText;
 	},
 
 	toggleKsTracker: function() {
@@ -2910,13 +2590,6 @@ var Helper = {
 			Helper.yLocation = playerTile.parentNode.rowIndex;
 		}
 		Helper.showMap(true);
-	},
-
-	retrieveTradeConfirm: function() {
-		var xcNumber;
-		xcNumber=System.findNode('//input[@type="hidden" and @name="xc"]');
-		xcNumber=xcNumber?xcNumber.getAttribute('value'):'-';
-		System.setValue('goldConfirm', xcNumber);
 	},
 
 	sendGoldToPlayer: function(){
@@ -4953,52 +4626,52 @@ var Helper = {
 		images.qtip('hide');
 	},
 
-	injectMoveItems: function() {
-		var foldersEnabled = System.findNode('//img[contains(@src,"/folder_on.gif")]');
-		if (! foldersEnabled) {return;}
-		var otherFolders = System.findNodes('//td/center/a/img[contains(@src,"/folder.gif")]');
-		if (! otherFolders) {return;}
-		var cell=foldersEnabled.parentNode.parentNode.parentNode.parentNode.parentNode.insertRow(-1).insertCell(-1);
-		cell.colSpan = otherFolders.length + 1;
-		cell.align='center';
-		cell.noWrap = true;
-		var newHtml='Move selected items to: <select name=folder id=selectFolderId class=customselect>';
-		for (var i=0; i<otherFolders.length; i += 1) {
-			newHtml+='<option value='+otherFolders[i].parentNode.getAttribute('href').match(/cmd=profile&subcmd=dropitems&folder_id=(-*\d+)/i)[1]+'>'+
-				otherFolders[i].parentNode.parentNode.textContent+'</option>';
-		}
-		newHtml+='</select> <input type=button class=custombutton id="Helper::moveItems" value=Move>';
-		cell.innerHTML=newHtml;
-		document.getElementById('Helper::moveItems').addEventListener('click', Helper.moveItemsToFolder, true);
+	injectMoveItems: function() { // jquery
+		var foldersEnabled = $('img[src$="/folder_on.gif"]');
+		if (foldersEnabled.length !== 1) {return;}
+		var otherFolders = $('div#pCC a').has('img[src$="/folder.gif"]');
+		if (otherFolders.length === 0) {return;}
+		var select = $('<select name=folder id=selectFolderId class=' +
+			'customselect></select>');
+		otherFolders.each(function() {
+			var self = $(this);
+			select.append('<option value=' + self.attr('href')
+			.match(/&folder_id=(-*\d+)/i)[1] + '>' +
+			self.parent().text() + '</option>');
+		});
+		$('div#pCC tr').has(otherFolders[0]).first().after($('<tr/>')
+			.append($('<td class="fshCenter">Move selected items to: </td>')
+				.append(select)
+				.append('&nbsp;<input type="button" class="custombutton"' +
+					' id="fshMove" value="Move">')));
+		$('input#fshMove').click(Helper.moveItemsToFolder);
 	},
 
-	moveItemsToFolder: function() {
-		var itemsList = System.findNodes('//input[@name="removeIndex[]"]');
-		var selectElem = document.getElementById('selectFolderId');
-		var postData = 'cmd=profile&subcmd=sendtofolder&folder_id='+selectElem.options[selectElem.selectedIndex].value;
-		var haveItems = false;
-		var postItems = '';
-		var countItems = 0;
-		for (var i=0; i<itemsList.length; i += 1) {
-			if (itemsList[i].checked) {
-				countItems+= 1;
-				postItems+='&folderItem[]='+itemsList[i].value;
-			}
-			if (countItems === 12 || countItems > 0 && i === itemsList.length - 1) {
-				// multiple posts since HCS only move the first 12 items to other folder
-				$.ajax({
-					type: 'POST',
-					url: System.server + 'index.php',
-					data: postData + postItems
-				});
-				countItems = 0;
-				postItems = '';
-				haveItems = true;
-			}
-		}
-		if (haveItems) {
-			setTimeout(function() {location.reload();}, 100);
-		}
+	moveItemsToFolder: function() { // jquery
+		var invList = [];
+		$('input[name="removeIndex[]"]:checked').each(function(i) {
+			var batchNo = Math.floor(i / 50);
+			invList[batchNo] = invList[batchNo] || [];
+			invList[batchNo].push($(this).val());
+		});
+		Helper.moveItemsCallback = invList.length;
+		invList.forEach(function(val) {
+			$.ajax({
+				dataType: 'json',
+				url: 'index.php',
+				data: {
+					'cmd': 'profile',
+					'subcmd': 'sendtofolder',
+					'inv_list': JSON.stringify(val),
+					'folder_id': $('#selectFolderId option:selected').val(),
+					'ajax': 1
+				},
+				success: function() {
+					Helper.moveItemsCallback -= 1;
+					if (Helper.moveItemsCallback === 0) {location.reload();}
+				}
+			});
+		});
 	},
 
 	quickDropItem: function(evt){
@@ -5136,8 +4809,13 @@ var Helper = {
 	},
 
 	injectProfile: function() {
+		var qb = $('div#profileRightColumn a:contains("Quick Buff")');
+		if (qb.length !== 0) {
+			qb.attr('href', qb.attr('href').replace(/500/g,'1000'));
+		}
 
-		var charStats = $('#profileLeftColumn table').first().attr('id', 'characterStats');
+		var charStats = $('#profileLeftColumn table').first()
+			.attr('id', 'characterStats');
 		var tblCells = $('td', charStats).has('table').has('font');
 		tblCells.each(function(i, e) {
 			var tde = $('td', e);
@@ -6055,30 +5733,16 @@ var Helper = {
 		document.getElementById('SelectNoFilters').addEventListener('click', Helper.InventorySelectFilters, true);
 	},
 
-	generateInventoryTable: function() {
-		var targetId;
-		var targetInventory;
-		var inventoryShell;
-		var reportType=$('input[id="reportType"]').attr('value');
-		var wh = '<th align="left" sortkey="player_name" sortType="string">Where</th>';
-		if (reportType === 'guild') {
-			targetId = 'Helper:GuildInventoryManagerOutput';
-			targetInventory = Helper.guildinventory;
-			inventoryShell = 'guildinventory';
-		} else {
-			targetId = 'Helper:InventoryManagerOutput';
-			targetInventory = Helper.inventory;
-			inventoryShell = 'inventory';
-			wh='<th align="left" sortkey="folder_id" sortType="number">Where</th>';
-		}
-		if (!targetInventory) {return;}
-		//targetInventory.items = targetInventory.items.filter(function(e) {return (e.name);});
-		var output=document.getElementById(targetId);
-
-		var result='<table id="Helper:InventoryTable"><tr>' +
-			'<th width="180" align="left" sortkey="item_name" sortType="string" colspan="2">Name</th>' +
+	inventoryTableHeader: function(reportType) {
+		return '<table id="Helper:InventoryTable"><tr>' +
+			'<th width="180" align="left" sortkey="item_name" sortType=' +
+				'"string" colspan="2">Name</th>' +
 			'<th sortkey="stats.min_level" sortType="number">Level</th>' +
-			wh +
+			'<th align="left" sortkey="' +
+			(reportType === 'guild' ?
+			'player_name" sortType="string' :
+			'folder_id" sortType="number') +
+			'">Where</th>' +
 			'<th align="left" sortkey="type" sortType="number">Type</th>' +
 			'<th sortkey="stats.attack" sortType="number">Att</th>' +
 			'<th sortkey="stats.defense" sortType="number">Def</th>' +
@@ -6087,97 +5751,126 @@ var Helper = {
 			'<th sortkey="stats.hp" sortType="number">HP</th>' +
 			'<th colspan="2" sortkey="forge" sortType="number">Forge</th>' +
 			'<th align="left" sortkey="craft" sortType="string">Craft</th>' +
-			'<th align="right" sortkey="durabilityPer" sortType="number">Dur%</th>' +
+			'<th align="right" sortkey="durabilityPer" sortType="number">' +
+				'Dur%</th>' +
 			//dropLink +
 			'<th width="10"></th>';
-		var item, color;
+	},
+
+	generateInventoryTable: function() {
+		var targetId;
+		var targetInventory;
+		var inventoryShell;
+
+		var reportType = $('input[id="reportType"]').attr('value');
+		if (reportType === 'guild') {
+			targetId = 'Helper:GuildInventoryManagerOutput';
+			targetInventory = Helper.guildinventory;
+			inventoryShell = 'guildinventory';
+		} else {
+			targetId = 'Helper:InventoryManagerOutput';
+			targetInventory = Helper.inventory;
+			inventoryShell = 'inventory';
+		}
+		if (!targetInventory) {return;}
+
+		var result = Helper.inventoryTableHeader(reportType);
+
+		Helper.disableItemColoring = System.getValue('disableItemColoring');
 
 		var allItems = targetInventory.items;
-		var xcNum;
-		if (reportType === 'guild') {
-			xcNum = System.getValue('goldConfirm');
-		} else {
-			xcNum = Helper.inventory.xc;
-			System.setValue('goldConfirm', xcNum);
-		}
-
-		var minLvl = parseInt($('input[id="Helper.inventoryMinLvl"]').attr('value'), 10);
-		var maxLvl = parseInt($('input[id="Helper.inventoryMaxLvl"]').attr('value'), 10);
+		var minLvl = parseInt($('input[id="Helper.inventoryMinLvl"]')
+			.attr('value'), 10);
+		var maxLvl = parseInt($('input[id="Helper.inventoryMaxLvl"]')
+			.attr('value'), 10);
 		var setsOnly = $('input[id="Helper:SetFilter"]').is(':checked');
-		var t;
-		for (var i=0; i<allItems.length;i += 1) {
-			item=allItems[i];
-			if(item.equipped) {item.folder_id=99999999; } //for sorting purposes.
-			//continue; if item is filtered.
-			item.player_name='';
-			if(item.type > 8){continue;}//not a wearable item
-			if(!$('input[id="'+Helper.itemFilters[item.type].id+'"]').is(':checked')){continue;}
-			if(minLvl > item.stats.min_level || maxLvl < item.stats.min_level){continue;}
-			if(setsOnly && !item.stats.set_name) {continue;}
+		for (var i = 0; i < allItems.length;i += 1) {
+			var item = allItems[i];
 
-			var whereTitle='';
-			var whereText='';
-			var p=0;
+			//continue; if item is filtered.
+			if (item.type > 8 ||
+				!$('input[id="' + Helper.itemFilters[item.type].id + '"]')
+					.is(':checked') ||
+				minLvl > item.stats.min_level ||
+				maxLvl < item.stats.min_level || 
+				setsOnly && !item.stats.set_name) {continue;}
+
+			if (item.equipped) {item.folder_id = 99999999; } //for sorting purposes.
+			item.player_name = '';
+			var color;
+			var whereTitle = '';
+			var whereText = '';
+			var p = 0;
+			var t = 0;
 			if (reportType === 'guild') {
 				if (item.player_id === -1) { //guild store
 					item.player_name = 'GS';
-					color = 'navy';   whereText = 'GS';   whereTitle = 'Guild Store';
-				} else {
-					item.player_name = targetInventory.members[item.player_id];
-					color = 'maroon'; whereText = item.player_name;  whereTitle='Guild Report';
-				}
-				if (item.player_id===-1) {
+					color = 'navy';
+					whereText = 'GS';
+					whereTitle = 'Guild Store';
 					p = targetInventory.guild_id;
 					t = 4;
 				} else {
+					item.player_name = targetInventory.members[item.player_id];
+					color = 'maroon';
+					whereText = item.player_name;
+					whereTitle='Guild Report';
 					p = item.player_id;
 					t = 1;
 				}
 				p = p + '&currentPlayerId=' + targetInventory.current_player_id;
-			}else{
-				if(item.equipped){
-					color = 'green';  whereText = 'Worn'; whereTitle = 'Wearing it';
-				}else{
-					color = 'blue';   whereText = Helper.inventory.folders[item.folder_id];   whereTitle = 'In Backpack';
+			} else {
+				if (item.equipped) {
+					color = 'green';
+					whereText = 'Worn';
+					whereTitle = 'Wearing it';
+				} else {
+					color = 'blue';
+					whereText = Helper.inventory.folders[item.folder_id];
+					whereTitle = 'In Backpack';
 				}
 				p = targetInventory.player_id;
 				t = 1;
 			}
 
-			var rarity = Data.rarity[item.rarity].colour;
+			item.rarityColor = Helper.disableItemColoring ? '' : ' color:' +
+				Data.rarity[item.rarity].colour;
 
-			var nm = item.item_name;
-			if (item.equipped) { nm = '<b>' + nm + '</b>';}
-			result += '<tr style="color:' + color + '">' +
-				'<td>' + //'<img src="' + System.imageServerHTTP + '/temple/1.gif" onmouseover="' + item.onmouseover + '">' +
-				'</td><td><a style="cursor:help; color:' + rarity +
-				'" id="Helper:item' + i +
-				'" arrayID="' + i + '" class="tip-dynamic" ' +
-				'data-tipped="fetchitem.php?item_id=' + item.item_id +
-				'&inv_id=' + item.inv_id + '&t=' + t + '&p=' + p + '">' + nm +
+			item.displayName = item.item_name;
+			if (item.equipped) {
+				item.displayName = '<b>' + item.displayName + '</b>';
+			}
+			result += '<tr style="color:' + color + '"><td></td><td><a ' +
+				'style="cursor:help;' + item.rarityColor + '" id="Helper:item' +
+				i + '" arrayID="' + i + '" class="tip-dynamic" data-tipped="' +
+				'fetchitem.php?item_id=' + item.item_id + '&inv_id=' +
+				item.inv_id + '&t=' + t + '&p=' + p + '">' + item.displayName +
 				'</a>';
 
+			var itemRE = new RegExp('amulet|armor|armored|axe|boots|fist|' +
+				'gauntlets|gloves|hammer|helm|helmet|mace|necklace|of|plate|' +
+				'ring|rune|shield|sword|the|weapon', 'gi');
+
 			if (item.stats.set_name && reportType === 'guild') {
-				result+=' (<a href="/index.php?cmd=guild&subcmd=inventory&subcmd2=report&set=' +
-					item.item_name.replace(/(amulet)|(armor)|(armored)|(axe)|(boots)|(fist)|(gauntlets)|(gloves)|(hammer)|(helm)|(helmet)|(mace)|(necklace)|(of)|(plate)|(ring)|(rune)|(shield)|(sword)|(the)|(weapon)|/gi,'').trim().replace(/  /g,' ').replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
+				result += ' (<a href="/index.php?cmd=guild&subcmd=inventory&' +
+					'subcmd2=report&set=' +
+					item.item_name.replace(itemRE,'').trim().replace(/  /g,' ')
+						.replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
 			}
 
-			var craftColor = Data.craft[item.craft] ?
+			item.craftColor = Data.craft[item.craft] ?
 				Data.craft[item.craft].colour : '';
 
-			var durabilityPercent = '';
-			var durabilityColor;
 			if (item.durability) {
-				durabilityPercent = parseInt(100*item.durability/item.max_durability,10);
-				item.durabilityPer=durabilityPercent;
-				durabilityColor = durabilityPercent < 20 ?'red':'gray';
+				item.durabilityPer = Math.floor(100 * item.durability /
+					item.max_durability);
+				item.durabilityColor = item.durabilityPer < 20 ? 'red' : 'gray';
 			}
 
-// TODO
-
-			result+='</td>' +
+			result += '</td>' +
 				'<td align="right">' + item.stats.min_level + '</td>' +
-				'<td align="left" title="' + whereTitle + '">' + whereText + '</td>' +
+				'<td align="left" title="' + whereTitle + '">' + whereText +
+					'</td>' +
 				'<td align="left">' + Data.itemType[item.type] + '</td>' +
 				'<td align="right">' + item.stats.attack + '</td>' +
 				'<td align="right">' + item.stats.defense + '</td>' +
@@ -6185,37 +5878,27 @@ var Helper = {
 				'<td align="right">' + item.stats.damage + '</td>' +
 				'<td align="right">' + item.stats.hp + '</td>' +
 				'<td align="right">' + item.forge + '</td>' +
-				'<td>' + (item.forge > 0 ? '<img src="' + System.imageServer + '/hellforge/forgelevel.gif">':'') + '</td>' +
-				'<td align="left">' + '<span style="color:' + craftColor + ';">' + item.craft + '</span>' + '</td>' +
-				'<td align="right">' + '<span style="color:' + durabilityColor + ';">' + durabilityPercent + '</span>' + '</td>';
-/*				if (showQuickDropLinks && inventoryShell === 'inventory') {
-					result+='<td><span  title="INSTANTLY DROP '+item.item_name+'. NO REFUNDS OR DO-OVERS! Use at own risk." id="FSHQuickDrop' +
-							item.item_id +
-							'" itemInvId=' + item.inv_id +
-							' itemIndexId=' + item.index + ' itemPageId=' + item.page +
-							' findme="QuickDrop" style="color:red; cursor:pointer; text-decoration:underline;">[Drop]</span> </td>';
-				}
-*/				result+='<td></td>' +
-				'</tr>';
+				'<td>' + (item.forge > 0 ? '<img src="' + System.imageServer +
+					'/hellforge/forgelevel.gif">':'') + '</td>' +
+				'<td align="left">' + '<span style="color:' + item.craftColor +
+					';">' + item.craft + '</span>' + '</td>' +
+				'<td align="right">' + '<span style="color:' +
+					item.durabilityColor + ';">' + item.durabilityPer +
+					'</span></td>' +
+				'<td></td></tr>';
 		}
-		result+='</table>';
-		result+='<input type="hidden" id="xcnum" value="' + xcNum + '" />';
-		output.innerHTML=result;
-		/*if (showQuickDropLinks && inventoryShell === 'inventory') {
-			$('span[id*="FSHQuickDrop"]').each(function(){
-				this.addEventListener('click', Helper.quickDropItem, true);
-				this.addEventListener('click', Helper.removeInventoryItem, true);
-			});
-		}*/
-		targetInventory.lastUpdate = new Date();
-		// Sets but never gets inventory!
-		// System.setValueJSON(inventoryShell, targetInventory);
+
+		result += '</table><input type="hidden" id="xcnum" value="' +
+			window.ajaxXC + '" />';
+
+		var output = document.getElementById(targetId);
+		output.innerHTML = result;
 
 		var inventoryTable=document.getElementById('Helper:InventoryTable');
-		for (i=0; i<inventoryTable.rows[0].cells.length; i += 1) {
-			var cell=inventoryTable.rows[0].cells[i];
-			cell.style.textDecoration='underline';
-			cell.style.cursor='pointer';
+		for (i = 0; i < inventoryTable.rows[0].cells.length; i += 1) {
+			var cell = inventoryTable.rows[0].cells[i];
+			cell.style.textDecoration = 'underline';
+			cell.style.cursor = 'pointer';
 			cell.addEventListener('click', Helper.sortInventoryTable, true);
 		}
 
@@ -6618,23 +6301,6 @@ var Helper = {
 		);
 	},
 
-//*************************** Note *********************
-/* The following fuction is only used in the quick drop method in the inventory manager currently commented out, if that is deleted
-	this function can be removed as well */
-	removeInventoryItem: function(evt){
-		var itemIndexId = evt.target.getAttribute('itemIndexId');
-		var itemPageId = evt.target.getAttribute('itemPageId');
-		var itemArrayId=-1;
-		for (var i=0; i<Helper.inventory.items.length;i += 1) { //find item
-			if(Helper.inventory.items[i].index===itemIndexId && Helper.inventory.items[i].page===itemPageId){
-				itemArrayId=i;
-				break;
-			}
-		}
-		//~ var remItem = Helper.inventory.items.splice(itemArrayId,1); //remove from array
-		System.setValueJSON('inventory', Helper.inventory); //update var so it does not display again
-	},
-// ************************* /end note
 	sortInventoryTable: function(evt) {
 		var targetInventory;
 		var reportType=$('input[id="reportType"]').attr('value');
@@ -7239,14 +6905,14 @@ var Helper = {
 			if (!excludeBuff[lbl.attr('for')] && myLvl < 125) {
 				lbl.addClass('fshDim');}
 		});
+		$('div#players h1').first().click();
 	},
 
 	addBuffLevels: function() {
 		$('span.fshPlayer').remove();
 		var player = $(this);
 		Helper.addStatsQuickBuff(player);
-		var data = player.data('buffs');
-		var buffs = typeof data === 'string' ? data.split(',') : [data];
+		var buffs = String.prototype.split.call(player.data('buffs'), ',');
 		player.next().find('span').each(function(i, e) {
 			var buffLvl = parseInt($(e).text().replace(/\[|\]/g, ''), 10);
 			var label = $('label[for="skill-' + buffs[i] + '"]');
@@ -9722,40 +9388,47 @@ var Helper = {
 		}
 	},
 
-	injectPoints: function() {
-		Helper.currentFSP = System.intValue($('dt#statbar-fsp').text().replace(/,/g, ''));
-
-		var stamForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+25 Current Stamina")]/../td[4]');
-		var stamForFSPInjectHere = System.findNode('//td[@width="60%" and contains(.,"+25 Current Stamina")]');
-		var stamFSPTextField = System.findNode('table/tbody/tr/td/input[@name="quantity"]', stamForFSPElement);
-		stamFSPTextField.type='current';
-		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
-		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="current"><span>';
-
-		stamForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+10 Maximum Stamina")]/../td[4]');
-		stamForFSPInjectHere = System.findNode('//td[@width="60%" and contains(.,"+10 Maximum Stamina")]');
-		stamFSPTextField = System.findNode('table/tbody/tr/td/input[@name="quantity"]', stamForFSPElement);
-		stamFSPTextField.type='maximum';
-		stamFSPTextField.addEventListener('keyup', Helper.updateStamCount, true);
-		stamForFSPInjectHere.innerHTML += ' <span style="color:blue" id="totalStam" type="maximum"><span>';
-
-		var goldForFSPElement = System.findNode('//td[@width="60%" and contains(.,"+50,000")]/../td[4]');
-		goldForFSPElement.innerHTML = '<a href="' + System.server + '?cmd=marketplace">Sell at Marketplace</a>';
+	injectPoints: function() { // jquery
+		Helper.currentFSP = System.intValue($('dt#statbar-fsp').text());
+		Helper.injectUpgradeHelper(0, 'Current');
+		Helper.injectUpgradeHelper(1, 'Maximum');
+		$('#pCC td')
+			.has('input[name="upgrade_id"][value="3"]')
+			.html('<a href="' + System.server +
+				'?cmd=marketplace">Sell at Marketplace</a>');
 	},
 
-	updateStamCount: function(evt) {
-		var FSPvalue = evt.target.value*1;
-		var type = evt.target.getAttribute('type');
-		var injectHere = System.findNode('//span[@id="totalStam" and @type="'+type+'"]');
+	injectUpgradeHelper: function(value, type) {
+		var theCells = $('#pCC tr')
+			.has('input[name="upgrade_id"][value="' + value + '"]')
+			.find('td');
+		var cell = theCells.first();
+		cell.append(' <span style="color:blue" ' +
+			'id="totalStam" type="' + type + '"></span>');
+		var amountRE = new RegExp('\\+(\\d+) ' + type + ' Stamina');
+		var amount = cell.text().match(amountRE)[1];
+		$('input[name="quantity"]', theCells)
+			.attr('stamtype', type)
+			.attr('amount', amount)
+			.attr('cost', theCells.eq(1).text())
+			.keyup(Helper.updateStamCount);
+	},
+
+	updateStamCount: function(evt) { // jquery
+		var target = $(evt.target);
+		var amount = target.attr('amount');
+		var cost = target.attr('cost');
+		var quantity = target.val();
 		//cap the value if the user goes over his current FSP
 		var color = 'red';
-		var extraStam = Helper.currentFSP*(type==='current'?25:10);
-		if (FSPvalue <= Helper.currentFSP) {
-			extraStam = FSPvalue*(type==='current'?25:10);
+		var extraStam = Math.floor(Helper.currentFSP / cost) * amount;
+		if (quantity * cost <= Helper.currentFSP) {
+			extraStam = quantity * amount;
 			color = 'blue';
 		}
-		injectHere.style.color = color;
-		injectHere.innerHTML = '(+' + extraStam + ' stamina)';
+		$('#pCC span[id="totalStam"][type="' + target.attr('stamtype') + '"]')
+			.css('color', color)
+			.html('(+' + extraStam + ' stamina)');
 	},
 
 	injectTitan: function() {
@@ -9935,7 +9608,7 @@ var Helper = {
 	},
 
 	retrieveBountyInfo: function(enableActiveBountyList, enableWantedList) {
-		var bountyList = System.getValueJSON('bountylist');
+		var bountyList = System.getValueJSON('bountyList');
 		var wantedList = System.getValueJSON('wantedList');
 		var bountyListRefreshTime = System.getValue('bountyListRefreshTime');
 		var bwNeedsRefresh = System.getValue('bwNeedsRefresh');
@@ -9988,135 +9661,167 @@ var Helper = {
 
 	parseBountyPageForWorld: function(details, callback) {
 		var doc = System.createDocument(details);
-		var page = System.findNode('//input[@name="page"]', doc, $('body'));
-		var curPage = parseInt(page.value,10);
-		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
-
 		var enableActiveBountyList = System.getValue('enableActiveBountyList');
 		var enableWantedList = System.getValue('enableWantedList');
-		var activeTable;
-		var i;
-		var bounty;
 		System.setValue('bwNeedsRefresh', false);
 		if (enableWantedList) {
-
-			activeTable = System.findNode('//table[@width = "630" and contains(.,"Target")]', doc);
-			var wantedNames = System.getValue('wantedNames');
-			var wantedArray = wantedNames.split(',');
-			var wantedList = callback.wantedList;
-			if (activeTable) {
-				for (i = 1; i < activeTable.rows.length - 2; i+=2) {
-					for (var j = 0; j < wantedArray.length; j += 1) {
-						var target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
-
-						if (target === wantedArray[j].trim()) {
-							wantedList.wantedBounties = true;
-							bounty = {};
-							bounty.target = target;
-							bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.getAttribute('href');
-							bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, '').replace(/\]/, '');
-
-							bounty.offerer = activeTable.rows[i].cells[1].firstChild.firstChild.firstChild.textContent;
-
-							bounty.reward = activeTable.rows[i].cells[2].textContent;
-							bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
-
-							//bounty.rKills = activeTable.rows[i].cells[3].textContent;
-
-							bounty.xpLoss = activeTable.rows[i].cells[3].textContent;
-
-							bounty.posted = activeTable.rows[i].cells[4].textContent;
-
-							bounty.tickets = activeTable.rows[i].cells[5].textContent;
-
-							if (activeTable.rows[i].cells[6].textContent.trim() === '[active]') {
-								bounty.active = true;
-								bounty.accept = '';
-							}
-							else {
-								bounty.active = false;
-								bounty.accept = activeTable.rows[i].cells[6].firstChild.firstChild.getAttribute('onclick');
-							}
-							wantedList.bounty.push(bounty);
-						}
-					}
-				}
-			}
-			if (curPage < maxPage) {
-				System.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1), Helper.parseBountyPageForWorld, {wantedList:wantedList});
-			} else {
-				Helper.injectWantedList(wantedList);
-			}
+			Helper.getWantedBountyList(doc, callback);
 		}
 		if (enableActiveBountyList && !Helper.activeBountyListPosted) {
-			activeTable = System.findNode('//table[@width = 620]', doc);
-			var bountyList = {};
-			bountyList.bounty = [];
-			bountyList.isRefreshed = true;
-			bountyList.lastUpdate = new Date();
-
-			if (activeTable) {
-				if (!/No bounties active/.test(activeTable.rows[1].cells[0].innerHTML)) {
-					bountyList.activeBounties = true;
-					for (i = 1; i < activeTable.rows.length - 2; i+=2) {
-						bounty = {};
-						bounty.target = activeTable.rows[i].cells[0].firstChild.firstChild.firstChild.textContent;
-						bounty.link = activeTable.rows[i].cells[0].firstChild.firstChild.getAttribute('href');
-						bounty.lvl = activeTable.rows[i].cells[0].firstChild.firstChild.nextSibling.textContent.replace(/\[/, '').replace(/\]/, '');
-						bounty.reward = activeTable.rows[i].cells[2].textContent;
-						bounty.rewardType = activeTable.rows[i].cells[2].firstChild.firstChild.firstChild.firstChild.nextSibling.firstChild.title;
-						bounty.posted = activeTable.rows[i].cells[3].textContent;
-						bounty.xpLoss = activeTable.rows[i].cells[4].textContent;
-						bounty.progress = activeTable.rows[i].cells[5].textContent;
-
-						bountyList.bounty.push(bounty);
-					}
-				}
-				else {
-					bountyList.activeBounties = false;
-				}
-			}
-			Helper.injectBountyList(bountyList);
-			Helper.activeBountyListPosted = true;
+			Helper.getActiveBountyList(doc);
 		}
 	},
 
+	getWantedBountyList: function(doc, callback) {
+		var page = System.findNode('//input[@name="page"]', doc, $('body'));
+		var curPage = parseInt(page.value,10);
+		var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+		var activeTable = System.findNode('//table[@width = "630" and ' +
+			'contains(.,"Target")]', doc);
+		var wantedNames = System.getValue('wantedNames');
+		var wantedArray = wantedNames.split(',');
+		var wantedList = callback.wantedList;
+		if (activeTable) {
+			for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+				var target = activeTable.rows[i].cells[0].firstChild
+					.firstChild.firstChild.textContent;
+if (target === '[ No bounties available. ]') {break;}
+				for (var j = 0; j < wantedArray.length; j += 1) {
+					if (target === wantedArray[j].trim()) {
+						wantedList.wantedBounties = true;
+						var bounty = {};
+						bounty.target = target;
+						bounty.link = activeTable.rows[i].cells[0]
+							.firstChild.firstChild.getAttribute('href');
+						bounty.lvl = activeTable.rows[i].cells[0]
+							.firstChild.firstChild.nextSibling.textContent
+								.replace(/\[/, '').replace(/\]/, '');
+						bounty.offerer = activeTable.rows[i].cells[1]
+							.firstChild.firstChild.firstChild.textContent;
+						bounty.reward = activeTable.rows[i].cells[2]
+							.textContent;
+						bounty.rewardType = activeTable.rows[i].cells[2]
+							.firstChild.firstChild.firstChild.firstChild
+							.nextSibling.firstChild.title;
+						//bounty.rKills = activeTable.rows[i].cells[3].textContent;
+						bounty.xpLoss = activeTable.rows[i].cells[3]
+							.textContent;
+						bounty.posted = activeTable.rows[i].cells[4]
+							.textContent;
+						bounty.tickets = activeTable.rows[i].cells[5]
+							.textContent;
+						if (activeTable.rows[i].cells[6].textContent
+							.trim() === '[active]') {
+							bounty.active = true;
+							bounty.accept = '';
+						}
+						else if (activeTable.rows[i].cells[6].textContent
+							.trim() !== '[n/a]') { // TODO
+							bounty.active = false;
+							bounty.accept = activeTable.rows[i].cells[6]
+								.firstChild.firstChild
+								.getAttribute('onclick');
+						}
+						wantedList.bounty.push(bounty);
+					}
+				}
+			}
+		}
+		if (curPage < maxPage) {
+			System.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
+				Helper.parseBountyPageForWorld, {wantedList:wantedList});
+		} else {
+			Helper.injectWantedList(wantedList);
+		}
+	},
+
+	getActiveBountyList: function(doc) {
+		var activeTable = System.findNode('//table[@width = 620]', doc);
+		var bountyList = {};
+		bountyList.bounty = [];
+		bountyList.isRefreshed = true;
+		bountyList.lastUpdate = new Date();
+
+		if (activeTable) {
+			if (!/No bounties active/.test(activeTable.rows[1].cells[0]
+				.innerHTML)) {
+				bountyList.activeBounties = true;
+				for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+					var bounty = {};
+					bounty.target = activeTable.rows[i].cells[0].firstChild
+						.firstChild.firstChild.textContent;
+					bounty.link = activeTable.rows[i].cells[0].firstChild
+						.firstChild.getAttribute('href');
+					bounty.lvl = activeTable.rows[i].cells[0].firstChild
+						.firstChild.nextSibling.textContent
+						.replace(/\[/, '').replace(/\]/, '');
+					bounty.reward = activeTable.rows[i].cells[2]
+						.textContent;
+					bounty.rewardType = activeTable.rows[i].cells[2]
+						.firstChild.firstChild.firstChild.firstChild
+						.nextSibling.firstChild.title;
+					bounty.posted = activeTable.rows[i].cells[3]
+						.textContent;
+					bounty.xpLoss = activeTable.rows[i].cells[4]
+						.textContent;
+					bounty.progress = activeTable.rows[i].cells[5]
+						.textContent;
+
+					bountyList.bounty.push(bounty);
+				}
+			}
+			else {
+				bountyList.activeBounties = false;
+			}
+		}
+		Helper.injectBountyList(bountyList);
+		Helper.activeBountyListPosted = true;
+	},
+
 	injectBountyList: function(bountyList) {
-		System.setValueJSON('bountylist', bountyList);
-		var injectHere = document.getElementById('Helper:BountyListPlaceholder');
+		System.setValueJSON('bountyList', bountyList);
+		var injectHere = document
+			.getElementById('Helper:BountyListPlaceholder');
 		var displayList = document.createElement('TABLE');
 		//displayList.style.border = '1px solid #c5ad73';
 		//displayList.style.backgroundColor = (bountyList.isRefreshed)?'#6a5938':'#4a3918';
 		displayList.cellPadding = 1;
 		displayList.width = 125;
 
-		var aRow=displayList.insertRow(0); //bountyList.rows.length
-		var aCell=aRow.insertCell(0);
-		var output = '<h3>Active Bounties</h3><ol style="color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:20px;">'+
-			'<nobr><span id="Helper:resetBountyList" style=" font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span><nobr><br>';
+		var aRow = displayList.insertRow(0); //bountyList.rows.length
+		var aCell = aRow.insertCell(0);
+		var output = '<h3>Active Bounties</h3><ol style="color:#FFF380;font-' +
+			'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
+			'1px;margin-bottom:1px;padding-left:20px;"><nobr><span id="' +
+			'Helper:resetBountyList" style=" font-size:8px; cursor:pointer; ' +
+			'text-decoration:underline;">Reset</span><nobr><br>';
 
 		if (bountyList.activeBounties === false) {
-			output += '</ol> \f <ol style="color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:10px;">' +
-				'[No Active bounties]</ol>';
+			output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
+				'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
+				'bottom:1px;padding-left:10px;">[No Active bounties]</ol>';
 		}
 		else {
 			for (var i = 0; i < bountyList.bounty.length; i += 1) {
-				var mouseOverText = '';
-				mouseOverText += '<div>Level:  ' + bountyList.bounty[i].lvl +
-				'<br/>Reward: ' + bountyList.bounty[i].reward + ' ' +bountyList.bounty[i].rewardType +
-				'<br/>XP Loss Remaining: ' + bountyList.bounty[i].xpLoss +
-				'<br/>Progress:  ' + bountyList.bounty[i].progress;
-				mouseOverText += '</div>';
+				var mouseOverText = '<div>Level:  ' + bountyList.bounty[i].lvl +
+					'<br/>Reward: ' + bountyList.bounty[i].reward + ' ' +
+					bountyList.bounty[i].rewardType +
+					'<br/>XP Loss Remaining: ' + bountyList.bounty[i].xpLoss +
+					'<br/>Progress:  ' + bountyList.bounty[i].progress +
+					'</div>';
 
 //				output += ' href="' + bountyList.bounty[i].link + '">' + bountyList.bounty[i].target +'</a></li>';
-				output += '<li style="padding-bottom:0px;">';
-				output += '<a style="color:red;font-size:10px;"';
-				output += 'href="' + System.server + 'index.php?cmd=attackplayer&target_username=' + bountyList.bounty[i].target + '">[a]</a>&nbsp;';
-
-				output += '<a style="color:#A0CFEC;font-size:10px;"';
-				output += 'href="' + System.server + 'index.php?cmd=message&target_player=' + bountyList.bounty[i].target + '">[m]';
-				output += '</a> &nbsp;';
-				output += '<a href="'+bountyList.bounty[i].link+'" class="tipped" data-tipped="'+mouseOverText+'" style="color:#FFF380;font-size:10px;">' + bountyList.bounty[i].target +'</a></li>';
+				output += '<li style="padding-bottom:0px;"><a style="color:' +
+					'red;font-size:10px;"href="' + System.server +
+					'index.php?cmd=attackplayer&target_username=' +
+					bountyList.bounty[i].target + '">[a]</a>&nbsp;<a style="' +
+					'color:#A0CFEC;font-size:10px;"href="' + System.server +
+					'index.php?cmd=message&target_player=' +
+					bountyList.bounty[i].target + '">[m]</a> &nbsp;<a href="' +
+					bountyList.bounty[i].link + '" class="tip-static" ' +
+					'data-tipped="' + mouseOverText + '" style="color:' +
+					'#FFF380;font-size:10px;">' + bountyList.bounty[i].target +
+					'</a></li>';
 			}
 		}
 
@@ -10124,62 +9829,74 @@ var Helper = {
 		var breaker=document.createElement('BR');
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetBountyList').addEventListener('click', Helper.resetBountyList, true);
+		document.getElementById('Helper:resetBountyList')
+			.addEventListener('click', Helper.resetBountyList, true);
 	},
 
 	resetBountyList: function() {
-		System.setValueJSON('bountylist', null);
+		System.setValueJSON('bountyList', null);
 		location.reload();
 	},
 
 	injectWantedList: function(wantedList) {
 		System.setValueJSON('wantedList', wantedList);
-		var injectHere = document.getElementById('Helper:WantedListPlaceholder');
+		var injectHere = document
+			.getElementById('Helper:WantedListPlaceholder');
 		var displayList = document.createElement('TABLE');
 		//displayList.style.border = '1px solid #c5ad73';
 		//displayList.style.backgroundColor = (wantedList.isRefreshed)?'#6a5938':'#4a3918';
 		displayList.cellPadding = 3;
 		displayList.width = 125;
 
-		var aRow=displayList.insertRow(0);
-		var aCell=aRow.insertCell(0);
-		var output = '<h3>Wanted Bounties</h3><ol style="color:#FFF380;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:12px;">'+
-			'<nobr> <span id="Helper:resetWantedList" font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span></nobr><br>';
+		var aRow = displayList.insertRow(0);
+		var aCell = aRow.insertCell(0);
+		var output = '<h3>Wanted Bounties</h3><ol style="color:#FFF380;font-' +
+			'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
+			'1px;margin-bottom:1px;padding-left:12px;"><nobr> <span id="' +
+			'Helper:resetWantedList" font-size:8px; cursor:pointer; text-' +
+			'decoration:underline;">Reset</span></nobr><br>';
 
 		if (wantedList.wantedBounties === false) {
-			output += '</ol> \f <ol style="color:orange;font-size:10px;list-style-type:decimal;margin-left:1px;margin-top:1px;margin-bottom:1px;padding-left:7px;">' +
-				'[No wanted bounties]</ol>';
+			output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
+				'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
+				'bottom:1px;padding-left:7px;">[No wanted bounties]</ol>';
 		}
 		else {
 			for (var i = 0; i < wantedList.bounty.length; i += 1) {
-				var mouseOverText = '\'<div style=\\\'text-align:center;width:205px;\\\'>Target Level:  ' + wantedList.bounty[i].lvl +
-					'<br/>Offerer: '+ wantedList.bounty[i].offerer +
-					'<br/>Reward: ' + wantedList.bounty[i].reward + ' ' +wantedList.bounty[i].rewardType +
-					'<br/>Req. Kills: ' + wantedList.bounty[i].rKills +
+				var mouseOverText = '"<div style=\'text-align:center;width:' +
+					'205px;\'>Target Level:  ' + wantedList.bounty[i].lvl +
+					'<br/>Offerer: ' + wantedList.bounty[i].offerer +
+					'<br/>Reward: ' + wantedList.bounty[i].reward + ' ' +
+					wantedList.bounty[i].rewardType +
+					//'<br/>Req. Kills: ' + wantedList.bounty[i].rKills +
 					'<br/>XP Loss Remaining: ' + wantedList.bounty[i].xpLoss +
 					'<br/>Posted: ' + wantedList.bounty[i].posted +
 					'<br/>Tickets Req.:  ' + wantedList.bounty[i].tickets;
-				mouseOverText += '</div>\' ';
+				mouseOverText += '</div>" ';
 
 				output += '<li style="padding-bottom:0px;margin-left:5px;">';
 				output += '<a style= "font-size:10px;';
 				if (wantedList.bounty[i].accept) {
 					output += 'color:rgb(0,255,0); cursor:pointer; ' +
 						'text-decoration:underline blink;" title = "Accept ' +
-						'Bounty" "onclick=\'' + wantedList.bounty[i].accept +
-						'\'">[a]</a>&nbsp;';
+						'Bounty" onclick="' + wantedList.bounty[i].accept +
+						'">[a]</a>&nbsp;';
 				} else {
 					output += 'color:red;" href="' + System.server +
 						'index.php?cmd=attackplayer&target_username=' +
 						wantedList.bounty[i].target + '">[a]</a>&nbsp;';
 				}
-				output += '<a style="color:#A0CFEC;font-size:10px;"';
-				output += 'href="' + System.server + 'index.php?cmd=message&target_player=' + wantedList.bounty[i].target + '">[m]';
-				output += '</a> &nbsp;<a class=tipped data-tipped=' + mouseOverText;
-				output += 'style="color:';
-				output += '#FFF380';
-				output += ';font-size:10px;"';
-				output += ' href="' + wantedList.bounty[i].link + '">' + wantedList.bounty[i].target +'</a></li>';
+				output += '<a style="color:#A0CFEC;font-size:10px;"href="j' +
+
+'avascript:openQuickMsgDialog(\'' + wantedList.bounty[i].target + '\');' +
+
+					//System.server + 'index.php?cmd=message&target_player=' +
+					//wantedList.bounty[i].target +
+					'">[m]</a> &nbsp;<a class="tip-static" data-tipped=' +
+					mouseOverText +
+					'style="color:#FFF380;font-size:10px;" href="' +
+					wantedList.bounty[i].link + '">' +
+					wantedList.bounty[i].target +'</a></li>';
 			}
 		}
 
@@ -10187,7 +9904,8 @@ var Helper = {
 		var breaker=document.createElement('BR');
 		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
 		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetWantedList').addEventListener('click', Helper.resetWantedList, true);
+		document.getElementById('Helper:resetWantedList')
+			.addEventListener('click', Helper.resetWantedList, true);
 	},
 
 	resetWantedList: function() {
@@ -12141,9 +11859,9 @@ displayDisconnectedFromGodsMessage: function() {
 
 (function loadScripts () {
 	var o = {
-		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.css'],
+		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1509/calfSystem.css'],
 		js:  ['https://cdn.jsdelivr.net/localforage/1.2.10/localforage.min.js',
-			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1507/calfSystem.js'],
+			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1509/calfSystem.js'],
 		callback: Helper.onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {
