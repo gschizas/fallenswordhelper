@@ -2,12 +2,14 @@
 
 'use strict';
 
+window.FSH = window.FSH || {};
+
 // GM_ApiBrowserCheck
 // @author        GIJoe
 // @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
-var gvar = function(){};
 // Global variables
-function GM_ApiBrowserCheck(){
+(function GM_ApiBrowserCheck() {
+	var gvar = {};
 	var GMSTORAGE_PATH = 'GM_';
 	// You can change it to avoid conflict with others scripts
 	if (typeof unsafeWindow === 'undefined'){
@@ -126,37 +128,37 @@ function GM_ApiBrowserCheck(){
 			return list;
 		};
 	}
-}
-GM_ApiBrowserCheck();
+})();
+//window.FSH.GM_ApiBrowserCheck();
 
 // jquery GM_get/set wrapper
-function GM_JQ_wrapper() {
+(function GM_JQ_wrapper() {
 	if (typeof GM_setValue !== 'undefined') {
 		var oldGM_setValue = GM_setValue;
 		GM_setValue = function(name, value){
 			setTimeout(function() {oldGM_setValue(name, value);}, 0);
 		};
 	}
-}
-GM_JQ_wrapper();
+})();
+//window.FSH.GM_JQ_wrapper();
 
-// System functions
-window.System = {
+// FSH.System.functions
+window.FSH.System = {
 	init: function() {
-		System.server = document.location.protocol + '//' + document.location.host + '/';
-		var imgurls = System.findNode('//img[contains(@src, "/skin/")]');
+		FSH.System.server = document.location.protocol + '//' + document.location.host + '/';
+		var imgurls = FSH.System.findNode('//img[contains(@src, "/skin/")]');
 		if (!imgurls) {return;} //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf('/skin/');
-		System.imageServer      = imgurls.src.substr(0,idindex);
-		System.imageServerHTTP  = 'http://cdn.fallensword.com';
+		FSH.System.imageServer      = imgurls.src.substr(0,idindex);
+		FSH.System.imageServerHTTP  = 'http://cdn.fallensword.com';
 	},
 
 	getValue: function(name) {
-		return GM_getValue(name, Data.defaults[name]);
+		return GM_getValue(name, FSH.Data.defaults[name]);
 	},
 
 	getValueJSON: function(name) {
-		var resultJSON = System.getValue(name);
+		var resultJSON = FSH.System.getValue(name);
 		var result;
 		if (resultJSON) {
 			var reviver = function (key, value) {
@@ -182,7 +184,7 @@ window.System = {
 	},
 
 	findNode: function(xpath, doc) {
-		var nodes = System.findNodes(xpath, doc);
+		var nodes = FSH.System.findNodes(xpath, doc);
 		if (!nodes) {return null;}
 		return nodes[0];
 	},
@@ -217,15 +219,15 @@ window.System = {
 	},
 
 	findNodeText: function(xpath, doc) {
-		var node = System.findNode(xpath, doc);
+		var node = FSH.System.findNode(xpath, doc);
 		if (!node) {return null;}
 		return node.textContent;
 	},
 
 	findNodeInt: function(xpath, doc) {
-		var node = System.findNode(xpath, doc);
+		var node = FSH.System.findNode(xpath, doc);
 		if (!node) {return null;}
-		return System.intValue(node.textContent);
+		return FSH.System.intValue(node.textContent);
 	},
 
 	createDocument: function(details) {
@@ -276,21 +278,21 @@ window.System = {
 	},
 
 	saveValueForm: function(name) {
-		var formElement = System.findNode('//input[@name="' + name + '"]',
+		var formElement = FSH.System.findNode('//input[@name="' + name + '"]',
 			this);
 		if (formElement.getAttribute('type') === 'checkbox') {
-			System.setValue(name, formElement.checked);
+			FSH.System.setValue(name, formElement.checked);
 		} else if (formElement.getAttribute('type') === 'radio') {
-			var radioElements = System.findNodes('//input[@name="' + name +
+			var radioElements = FSH.System.findNodes('//input[@name="' + name +
 				'"]', 0, this);
 			for (var i=0; i<radioElements.length; i += 1) {
 				//~ var radioElement = radioElements[i];
 				if (radioElements[i].checked) {
-					System.setValue(name, radioElements[i].value);
+					FSH.System.setValue(name, radioElements[i].value);
 				}
 			}
 		} else {
-			System.setValue(name, formElement.value);
+			FSH.System.setValue(name, formElement.value);
 		}
 	},
 
@@ -393,10 +395,10 @@ window.System = {
 		var currentVisibility = anItem.style.visibility;
 		anItem.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
 		anItem.style.display = currentVisibility === 'hidden' ? 'block' : 'none';
-		if (System.getValue(anItemId)) {
-			System.setValue(anItemId, '');
+		if (FSH.System.getValue(anItemId)) {
+			FSH.System.setValue(anItemId, '');
 		} else {
-			System.setValue(anItemId, 'ON');
+			FSH.System.setValue(anItemId, 'ON');
 		}
 	},
 
@@ -449,9 +451,9 @@ window.System = {
 			' minutes, ' + s + ' secs';
 	},
 };
-System.init();
+FSH.System.init();
 
-window.Data = {
+window.FSH.Data = {
 
 	plantFromComponent: function(aComponent) {
 		switch(aComponent) {
@@ -756,8 +758,8 @@ window.Data = {
 	},
 
 	quickSearchList: function() {
-		if (!Data.quickSearchArray) {
-			Data.quickSearchArray = [
+		if (!FSH.Data.quickSearchArray) {
+			FSH.Data.quickSearchArray = [
 				{'category':'Potions','searchname':'Potion of the Wise',             'nickname':'Lib 200', 'displayOnAH':true},
 				{'category':'Potions','searchname':'Potion of the Bookworm',         'nickname':'Lib 225', 'displayOnAH':true},
 				{'category':'Potions','searchname':'Potion of Shattering',           'nickname':'SA',      'displayOnAH':true},
@@ -787,7 +789,7 @@ window.Data = {
 				{'category':'Plants', 'searchname':'Amber',                          'nickname':''}
 			];
 		}
-		return Data.quickSearchArray;
+		return FSH.Data.quickSearchArray;
 	},
 
 	bias: {0: {generalVariable: 1.1053,
@@ -1303,12 +1305,12 @@ window.Data = {
 
 };
 
-window.Layout = {
+window.FSH.Layout = {
 
 	injectMenu: function() { //jquery
-		if (System.getValue('lastActiveQuestPage').length > 0) {
+		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
 			$('a[href="index.php?cmd=questbook"]').attr('href',
-				System.getValue('lastActiveQuestPage'));
+				FSH.System.getValue('lastActiveQuestPage'));
 		}
 		var pCL = $('div#pCL:first');
 		if (pCL.length === 0) {return;}
@@ -1323,19 +1325,19 @@ window.Layout = {
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
 				'medalguide">Medal Guide</a></li>');
-		if (System.getValue('keepBuffLog')) {
+		if (FSH.System.getValue('keepBuffLog')) {
 			$(pCL).find('a#nav-character-log').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
 					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
-		if (System.getValue('keepLogs')) {
+		if (FSH.System.getValue('keepLogs')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
-		if (System.getValue('showMonsterLog')) {
+		if (FSH.System.getValue('showMonsterLog')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-monsterlog" href="index.php?cmd=notepad&blank' +
@@ -1413,13 +1415,13 @@ window.Layout = {
 	},
 
 	notebookContent: function() {
-		return System.findNode('//div[@id="pCC"]'); //new interface logic
+		return FSH.System.findNode('//div[@id="pCC"]'); //new interface logic
 	},
 
 	playerId: function() {
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
 		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
-		System.setValue('playerID',thePlayerId);
+		FSH.System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
 
@@ -1427,7 +1429,7 @@ window.Layout = {
 		var guildId = $('script:contains("guildId: ")').first().text()
 			.match(/\s+guildId: ([0-9]+),/);
 		if (guildId) {guildId = parseInt(guildId[1], 10);}
-		System.setValue('guildId', guildId);
+		FSH.System.setValue('guildId', guildId);
 		return guildId;
 	},
 
