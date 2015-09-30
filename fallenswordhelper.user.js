@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1510b1
+// @version        1510b2
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -2142,7 +2142,7 @@ window.FSH.Helper = {
 										10) +
 									parseInt(
 										FSH.System.getValue('goldAmount'), 10));
-								unsafeWindow.GameFSH.Data.fetch(387);
+								unsafeWindow.GameData.fetch(387);
 							}
 						}
 					});
@@ -2258,7 +2258,7 @@ window.FSH.Helper = {
 			$.subscribe('keydown.controls', function(e, key){
 				switch(key)
 				{
-					case 'ACT_REPAIR': unsafeWindow.GameFSH.Data.fetch(387); break;
+					case 'ACT_REPAIR': unsafeWindow.GameData.fetch(387); break;
 				}
 			});
 			FSH.Helper.keepLogs = FSH.System.getValue('keepLogs');
@@ -6201,7 +6201,7 @@ window.FSH.Helper = {
 			var guildImage = $('<div/>')
 				.append(FSH.Helper.onlinePlayers[player][0]);
 			$('img', guildImage).addClass('center');
-			FSH.Helper.onlineFSH.Data.push([
+			FSH.Helper.onlineData.push([
 				guildImage.html(),
 				FSH.Helper.onlinePlayers[player][1],
 				FSH.Helper.onlinePlayers[player][2],
@@ -7094,7 +7094,7 @@ window.FSH.Helper = {
 		FSH.System.setValue('doNotKillList',newDoNotKillList);
 		FSH.Helper.doNotKillList = newDoNotKillList;
 		//refresh the action list
-		unsafeWindow.GameFSH.Data.doAction(-1);
+		unsafeWindow.GameData.doAction(-1);
 	},
 
 	checkIfGroupExists: function(responseText) {
