@@ -1355,7 +1355,7 @@ window.FSH.Layout = {
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=guildinvmanager">Guild Inventory</a></li>');
-		if (!System.getValue('useNewGuildLog')) {
+		if (!FSH.System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
 			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
 				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
