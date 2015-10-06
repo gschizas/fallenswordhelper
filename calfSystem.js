@@ -438,7 +438,6 @@ FSH.System = {
 
 	formatLastActivity: function(last_login) {
 		var d, h, m, s;
-		//~ s = Math.floor(ms / 1000);
 		s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
 		m = Math.floor(s / 60);
 		s = s % 60;
@@ -446,10 +445,22 @@ FSH.System = {
 		m = m % 60;
 		d = Math.floor(h / 24);
 		h = h % 24;
-		//~ return { d: d, h: h, m: m, s: s };
-		return 'Last Activity: ' + d + ' days, ' + h + ' hours, ' + m +
-			' minutes, ' + s + ' secs';
+		return (d === 0 ? '' : d + ' days, ') +
+			(h === 0 ? '' : h + ' hours, ') +
+			(m === 0 ? '' : m + ' mins, ') +
+			s + ' secs';
 	},
+
+	contactColor: function(last_login, type) {
+		var out = 'white';
+		var now = Math.floor(Date.now() / 1000);
+		if (now - last_login < 120) { // 2 mins
+			out = type ? 'DodgerBlue' : 'red';
+		} else if (now - last_login < 300) { // 5 mins
+			out = type ? 'LightSkyBlue' : 'PaleVioletRed';
+		} else {out = type ? 'PowderBlue' : 'Pink';}
+		return out;
+	}
 };
 FSH.System.init();
 
@@ -1547,7 +1558,81 @@ FSH.Layout = {
 	composeMsg:
 		'<li class="notification"><a href="index.php?cmd=composing"><span' +
 		' class="notification-icon"></span><p class="notification-content">Co' +
-		'mposing to do</p></a></li>'
+		'mposing to do</p></a></li>',
+
+	allyEnemyList:
+		'<h3>Allies/Enemies</h3><div class="minibox-content"><h4>Online ' +
+		'Contacts <span id="fshResetEnemy">Reset</span></h4><div id="' +
+		'minibox-enemy"><ul id="fshContactList"></ul><ul id="' +
+		'enemy-quick-buff">Quick Buff Selected</ul></div></div>',
+
+	allyEnemyContact:
+		'<li class="player"><div class="player-row"><a class="' +
+		'enemy-buff-check-on" data-name="@@username@@" href="#"></a>' +
+		'<a class="player-name tip-static" style="color: @@contactColor@@" ' +
+		'data-tipped="<b>@@username@@</b><br><table><tbody><tr><td>Level:' +
+		'</td><td>@@level@@</td></tr><tr><td>Last Activity:</td><td>' +
+		'@@last_login@@</td></tr></tbody></table>" ' +
+		'href="index.php?cmd=profile&player_id=@@id@@">@@username@@</a></div>' +
+		'<div class="guild-minibox-actions"><a id="enemy-send-message" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="javascript:openQuickMsgDialog(\'@@username@@\');" ' +
+		'data-tipped="Send Message""></a><a id="enemy-quickbuff" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="javascript:openWindow(\'index.php?cmd=quickbuff&t=@@username@@' +
+		'\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" ' +
+		'data-tipped="Quick Buff"></a><a id="enemy-secure-trade" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+		'@@username@@" data-tipped="Secure Trade"></a><a id="enemy-trade" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="index.php?cmd=trade&target_player=@@username@@" ' +
+		'data-tipped="Send Gold/Items/FSP"></a></div></li>'
 
 };
+
+FSH.ajax = {
+	myStats: function(fn, force) {
+		FSH.Helper.myUsername = $('dt#statbar-character').text();
+		var forage = 'fsh_selfProfile';
+		if (force) {
+			$.ajax({
+				dataType: 'json',
+				url: 'index.php',
+				data: {
+					cmd:             'export',
+					subcmd:          'profile',
+					player_username: FSH.Helper.myUsername
+				},
+				success: function(data) {
+					data.lastUpdate = Date.now();
+					localforage.setItem(forage, data,
+						function(err, data) {
+							if (err) {console.log('localforage error', err);}
+							FSH.Helper.profile = FSH.Helper.profile || {};
+							FSH.Helper.profile[FSH.Helper.myUsername] = data;
+console.log('myStats forage set success');
+							if (typeof fn === 'function') {fn();}
+						}
+					);
+				}
+			});
+			return;
+		}
+		localforage.getItem(forage, function(err, data) {
+			if (err) {console.log('localforage error', err);}
+			if (!data || data.lastUpdate < Date.now() -
+				FSH.Helper.allyEnemyOnlineRefreshTime) {
+				FSH.ajax.myStats(fn, true);
+				return;
+			}
+			FSH.Helper.profile = FSH.Helper.profile || {};
+			FSH.Helper.profile[FSH.Helper.myUsername] = data;
+console.log('getInv forage get success');
+			if (typeof fn === 'function') {fn();}
+		});
+	}
+
+};
+
 })();

@@ -7047,7 +7047,7 @@ FSH.Helper = {
 			},
 			success: function(data) {
 				//console.log('7344 data', data);
-				player.after('<span class="fshLastActivity">' +
+				player.after('<span class="fshLastActivity">Last Activity: ' +
 					FSH.System.formatLastActivity(data.last_login) +
 					'<br>Stamina: ' + data.current_stamina + ' / ' +
 					data.stamina + ' ( ' + Math.floor(data.current_stamina /
@@ -7146,9 +7146,6 @@ FSH.Helper = {
 		var deathDealerPercentageElement = FSH.System.findNode('//span[@findme="damagebonus"]');
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
 		FSH.System.setValue('lastDeathDealerPercentage', deathDealerPercentage);
-
-		//refresh ally/enemy list while you are here.
-		//FSH.Helper.parseProfileForWorld(doc.innerHTML, true); // Why are we doing it twice?
 	},
 
 	injectCreature: function() {
@@ -10023,241 +10020,108 @@ if (target === '[ No bounties available. ]') {break;}
 	},
 
 	prepareAllyEnemyList: function() {
-		if (FSH.System.getValue('enableAllyOnlineList') ||
-			FSH.System.getValue('enableEnemyOnlineList')) {
-			$('div#pCR').prepend('<div class="minibox"><span id="Helper:' +
-				'AllyEnemyListPlaceholder"></span></div>');
-			FSH.Helper.retrieveAllyEnemyData(false);
-		}
+		$('div#pCR').prepend('<div id="fshAllyEnemy" class="minibox"></div>');
+		FSH.Helper.retrieveAllyEnemyData();
 	},
 
-	retrieveAllyEnemyData: function(refreshAllyEnemyDataOnly) {
-		var contactList = FSH.System.getValueJSON('contactList');
-		var allyEnemyOnlineRefreshTime = FSH.System.getValue('allyEnemyOnlineRefreshTime');
-		allyEnemyOnlineRefreshTime *= 1000;
-		if (contactList && Date.now() -
-			contactList.lastUpdate.getTime() >
-			allyEnemyOnlineRefreshTime) {
-			contactList = null; // invalidate cache
+	retrieveAllyEnemyData: function() {
+		FSH.Helper.allyEnemyOnlineRefreshTime =
+			FSH.System.getValue('allyEnemyOnlineRefreshTime');
+		FSH.Helper.allyEnemyOnlineRefreshTime *= 1000;
+		FSH.ajax.myStats(FSH.Helper.injectAllyEnemyList, false);
+	},
+
+	injectAllyEnemyList: function() {
+
+		console.log(
+			FSH.Helper.profile[FSH.Helper.myUsername]
+		);
+
+		var allies = FSH.Helper.profile[FSH.Helper.myUsername]._allies || [];
+		var enemies = FSH.Helper.profile[FSH.Helper.myUsername]._enemies || [];
+		if (allies.length + enemies.length === 0 ||
+			!FSH.Helper.enableAllyOnlineList && enemies.length === 0 ||
+			!FSH.Helper.enableEnemyOnlineList && allies.length === 0) {
+			return;
+		}
+		var output = $(FSH.Layout.allyEnemyList);
+
+		if (FSH.Helper.enableAllyOnlineList) {
+			$('ul#fshContactList', output)
+				.append(FSH.Helper.addContact(allies, true));
+		}
+		if (FSH.Helper.enableEnemyOnlineList) {
+			$('ul#fshContactList', output)
+				.append(FSH.Helper.addContact(enemies, false));
+		}
+		if (FSH.Helper.hideGuildInfoTrade) {
+			$('a#enemy-trade', output).hide();
+		}
+		if (FSH.Helper.hideGuildInfoSecureTrade) {
+			$('a#enemy-secure-trade', output).hide();
+		}
+		if (FSH.Helper.hideGuildInfoBuff) {
+			$('a#enemy-quickbuff', output).hide();
+		}
+		if (FSH.Helper.hideGuildInfoMessage) {
+			$('a#enemy-send-message', output).hide();
+		}
+		if (FSH.Helper.hideBuffSelected) {
+			$('a.enemy-buff-check-on', output).hide();
+			$('ul#enemy-quick-buff', output).hide();
 		}
 
-		if (!contactList || refreshAllyEnemyDataOnly) {
-			FSH.System.xmlhttp('index.php?cmd=profile',
-				FSH.Helper.parseProfileForWorld, refreshAllyEnemyDataOnly);
+		$('div#pCR div#fshAllyEnemy').empty();
+		$('div#pCR div#fshAllyEnemy').append(output);
+
+		$('div#pCR ul#fshContactList').on('click',
+			'a[class^="enemy-buff-check-o"]', FSH.Helper.quickBuffToggle);
+
+		$('div#pCR ul#enemy-quick-buff').click(function(){
+			var sendstring = [];
+			$('ul#fshContactList a.enemy-buff-check-on').each(function(){
+				sendstring.push($(this).data('name'));
+			});
+			window.openWindow('index.php?cmd=quickbuff&t=' + sendstring.join(),
+				'fsQuickBuff', 618, 1000, ',scrollbars');
+		});
+
+		$('div#pCR span#fshResetEnemy').click(FSH.Helper.resetAllyEnemyList);
+
+	},
+
+	quickBuffToggle: function() {
+		var ball = $(this);
+		if (ball.hasClass('enemy-buff-check-on')) {
+			ball.addClass('enemy-buff-check-off');
+			ball.removeClass('enemy-buff-check-on');
 		} else {
-			// contactList = FSH.System.getValueJSON('contactList');
-			contactList.isRefreshed = false;
-			FSH.Helper.injectAllyEnemyList(contactList);
+			ball.addClass('enemy-buff-check-on');
+			ball.removeClass('enemy-buff-check-off');
 		}
 	},
 
-	profileContactsFilter: function(e) {return e.id === this;},
+	addContact: function(contactList, type) {
+		var now = Math.floor(Date.now() / 1000);
+		var contactColor;
+		var output = '';
+		contactList.forEach(function(val) {
+			if (now - val.last_login > 1800) {return;} // 30 mins
+			contactColor = FSH.System.contactColor(val.last_login, type);
 
-	parseProfileForWorld: function(details, refreshAllyEnemyDataOnly) {
-		var doc=FSH.System.createDocument(details);
-		var alliesTable = FSH.System.findNode('//div[strong[.="Allies"]]/following-sibling::div[1]/table[1]',doc);
-		var enemiesTable = FSH.System.findNode('//div[strong[.="Enemies"]]/following-sibling::div[1]/table[1]',doc);
-		var contactList = FSH.System.getValueJSON('contactList');
-		if (!contactList) {
-			contactList = {};
-			contactList.contacts = [];
-		}
-		contactList.contacts.forEach(function(e) {e.status='Deleted';});
-		var aTable;
-		var contactLink;
-		var contactId;
-		var contactName;
-		var contactStatus;
-		var lastActivity;
-		var lastActivityDays;
-		var lastActivityHours;
-		var lastActivityMinutes;
-		var aContact;
-		var findContacts;
-		var i;
-		if (alliesTable && enemiesTable) {
-			var alliesDetails=alliesTable.getElementsByTagName('TABLE');
-
-			for (i=0;i<alliesDetails.length;i += 1) {
-				aTable = alliesDetails[i];
-				contactLink   = aTable.rows[0].cells[1].firstChild;
-				contactId     = FSH.System.intValue(/[0-9]+$/.exec(contactLink.getAttribute('href'))[0]);
-				contactName   = contactLink.textContent;
-				contactStatus = aTable.rows[0].cells[0].firstChild.title;
-				lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
-				lastActivityDays = parseInt(lastActivity[1],10);
-				lastActivityHours = parseInt(lastActivity[2],10) + lastActivityDays*24;
-				lastActivityMinutes = parseInt(lastActivity[3],10) + lastActivityHours*60;
-
-				// find contact in contact list, to modify data instead of replacing it
-
-				findContacts = contactList.contacts.filter(FSH.Helper.profileContactsFilter, contactId);
-				if (findContacts.length>0) {
-					aContact = findContacts[0];
-				}
-				else { // contact was not found, must be new
-					aContact = {};
-					// You can still modify an object, even if you have added it to something else
-					contactList.contacts.push(aContact);
-					aContact.firstSeen = new Date();
-					aContact.status = 'Offline'; // new players are supposed to be offline
-				}
-
-				if (aContact.status === 'Offline' && contactStatus==='Online') {
-					aContact.loggedInAt = new Date();
-				}
-
-				if (!aContact.loggedInAt) {
-					aContact.loggedInAt = new Date();
-				}
-
-				aContact.status = contactStatus;
-				aContact.id     = contactId;
-				aContact.name   = contactName;
-				aContact.type   = 'Ally';
-				aContact.lastActivityMinutes = lastActivityMinutes;
-			}
-			var enemiesDetails=enemiesTable.getElementsByTagName('TABLE');
-
-			for (i=0;i<enemiesDetails.length;i += 1) {
-				aTable = enemiesDetails[i];
-				contactLink   = aTable.rows[0].cells[1].firstChild;
-				contactId     = FSH.System.intValue(/[0-9]+$/.exec(contactLink.getAttribute('href'))[0]);
-				contactName   = contactLink.textContent;
-				contactStatus = aTable.rows[0].cells[0].firstChild.title;
-				lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
-				lastActivityDays = parseInt(lastActivity[1],10);
-				lastActivityHours = parseInt(lastActivity[2],10) + lastActivityDays*24;
-				lastActivityMinutes = parseInt(lastActivity[3],10) + lastActivityHours*60;
-
-				// find contact in contact list, to modify data instead of replacing it
-
-				findContacts = contactList.contacts.filter(FSH.Helper.profileContactsFilter, contactId);
-				if (findContacts.length>0) {
-					aContact = findContacts[0];
-				}
-				else { // contact was not found, must be new
-					aContact = {};
-					// You can still modify an object, even if you have added it to something else
-					contactList.contacts.push(aContact);
-					aContact.firstSeen = new Date();
-					aContact.status = 'Offline'; // new players are supposed to be offline
-				}
-
-				if (aContact.status === 'Offline' && contactStatus==='Online') {
-					aContact.loggedInAt = new Date();
-				}
-
-				if (!aContact.loggedInAt) {
-					aContact.loggedInAt = new Date();
-				}
-
-				aContact.status = contactStatus;
-				aContact.id     = contactId;
-				aContact.name   = contactName;
-				aContact.type   = 'Enemy';
-				aContact.lastActivityMinutes = lastActivityMinutes;
-			}
-			// remove not existing players
-			contactList.contacts = contactList.contacts.filter(function(e) {return e.status!=='Deleted';});
-			// damn, I love javascript array functions :)
-
-			contactList.lastUpdate = new Date();
-			contactList.isRefreshed = true;
-			FSH.System.setValueJSON('contactList', contactList);
-			if (!refreshAllyEnemyDataOnly) {
-				FSH.Helper.injectAllyEnemyList(contactList);
-			}
-		}
-	},
-
-	injectAllyEnemyList: function(contactList) {
-		var enableAllyOnlineList = FSH.System.getValue('enableAllyOnlineList');
-		var enableEnemyOnlineList = FSH.System.getValue('enableEnemyOnlineList');
-		if (!enableAllyOnlineList && !enableEnemyOnlineList) {return;}
-		var onlineAlliesEnemies = contactList.contacts.filter(function(e) {return e.status==='Online';});
-		if (!enableAllyOnlineList) {
-			onlineAlliesEnemies = onlineAlliesEnemies.filter(function(e) {return e.type!=='Ally';});
-		}
-		if (!enableEnemyOnlineList) {
-			onlineAlliesEnemies = onlineAlliesEnemies.filter(function(e) {return e.type!=='Enemy';});
-		}
-		if (onlineAlliesEnemies.length === 0) {return;}
-		// var playerId = FSH.Layout.playerId();
-		var injectHere = document.getElementById('Helper:AllyEnemyListPlaceholder');
-		var displayList = document.createElement('TABLE');
-		//displayList.style.border = '1px solid #c5ad73';
-		//displayList.style.backgroundColor = (contactList.isRefreshed)?'#6a5938':'#4a3918';
-		displayList.cellPadding = 3;
-		displayList.width = 125;
-
-		var aRow=displayList.insertRow(displayList.rows.length);
-		var aCell=aRow.insertCell(0);
-		var output = '<h3>Allies/Enemies</h3><center><font color="white" size=1><i><b>Online Contacts</b> <span id="Helper:resetAllyEnemyList" style="font-size:8px; cursor:pointer; text-decoration:underline;">Reset</span></i></font></center>'+
-		'<table width="110" cellpadding="0" cellspacing="0"><tbody>'+
-			'<tr><td colspan="2" height="5"></td></tr>';
-
-		var hideBuffSelected = FSH.System.getValue('hideBuffSelected');
-		for (var i=0;i<onlineAlliesEnemies.length;i += 1) {
-			var contact=onlineAlliesEnemies[i];
-			var contactColor = '';
-			if (new Date() - contact.loggedInAt < 30000) { // just logged in
-				contactColor = 'orange';
-			}
-			else if (contact.type === 'Ally') {
-				if (contact.lastActivityMinutes < 2) {
-					contactColor = 'DodgerBlue';
-				} else if (contact.lastActivityMinutes < 5) {
-					contactColor = 'LightSkyBlue';
-				} else {contactColor = 'PowderBlue';}
-			}
-			else if (contact.type === 'Enemy') {
-				contactColor = 'red';
-				if (contact.lastActivityMinutes < 2) {
-					contactColor = 'red';
-				} else if (contact.lastActivityMinutes < 5) {
-					contactColor = 'PaleVioletRed';
-				} else {contactColor = 'Pink';}
-			}
-			else {
-				contactColor = 'white';
-			}
-			output +=
-				'<tr>'+
-					'<td align="left">'+
-						'<span style="color:' + contactColor + '; font-size:x-small; visibility:hidden;">' + (hideBuffSelected?'':'+') + '</span>'+
-						'<a style="color:' + contactColor + '; font-size:x-small;" href="index.php?cmd=profile&player_id=' + contact.id + '">' + contact.name + '</a>'+
-					'</td>'+
-					'<td align="right"><span style="color:#FFFF00; font-size:x-small;">'+
-						'<a href="index.php?cmd=message&target_player=' + contact.name + '" class="tip-static" data-tipped="Send Message">' +
-						'<font color="#FFFF00">M</font></a>'+
-						'&nbsp;<a href="javascript:openWindow(\'index.php?cmd=quickbuff&t=' + contact.name + 
-						'\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" class="tip-static" data-tipped="Quick Buff">' +
-						'<font color="#FFFF00">B</font></a>'+
-						'&nbsp;<a href="index.php?cmd=trade&subcmd=createsecure&target_username=' + contact.name + 
-						'" class="tip-static" data-tipped="Secure Trade"><font color="#FFFF00">S</font></a>'+
-						'&nbsp;<a href="index.php?cmd=trade&target_player=' + contact.name + 
-						'" class="tip-static" data-tipped="Send to Player">' +
-						'<font color="#FFFF00">T</font></a>'+
-					'</span></td>'+
-				'</tr>';
-		}
-		output += '</tbody></table>';
-
-
-		aCell.innerHTML = output;
-		injectHere.parentNode.align = 'center';
-		injectHere.parentNode.width = '120';
-
-		var breaker=document.createElement('BR');
-		injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
-		injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
-		document.getElementById('Helper:resetAllyEnemyList').addEventListener('click', FSH.Helper.resetAllyEnemyList, true);
+			output += FSH.Layout.allyEnemyContact;
+			output = output.replace(/@@username@@/g, val.username);
+			output = output.replace(/@@contactColor@@/g, contactColor);
+			output = output.replace(/@@level@@/g, val.level);
+			output = output.replace(/@@last_login@@/g,
+				FSH.System.formatLastActivity(val.last_login));
+			output = output.replace(/@@id@@/g, val.id);
+		});
+		return output;
 	},
 
 	resetAllyEnemyList: function() {
-		FSH.System.setValue('contactList','');
-		location.reload();
+		FSH.ajax.myStats(FSH.Helper.injectAllyEnemyList, true);
 	},
 
 	toggleCheckAllPlants: function(evt) {
