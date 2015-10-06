@@ -81,37 +81,51 @@ FSH.Helper = {
 			FSH.Helper.prepareEnv();
 		}
 
-		var pageId;
-		var subPageId;
-		var subPage2Id;
-		var typePageId;
+		var cmd;
+		var subcmd;
+		var subcmd2;
+		var type;
+		var fromWorld;
 		var funcName;
 		var fn;
 
 		if (document.location.search !== '') {
-			pageId = FSH.System.getUrlParameter('cmd') || '-';
-			subPageId = FSH.System.getUrlParameter('subcmd') || '-';
-			subPage2Id = FSH.System.getUrlParameter('subcmd2') || '-';
-			typePageId = FSH.System.getUrlParameter('type') || '-';
+			cmd = FSH.System.getUrlParameter('cmd') || '-';
+			subcmd = FSH.System.getUrlParameter('subcmd') || '-';
+			subcmd2 = FSH.System.getUrlParameter('subcmd2') || '-';
+			type = FSH.System.getUrlParameter('type') || '-';
+			fromWorld = FSH.System.getUrlParameter('fromworld') || '-';
 		} else {
-			pageId = $('input[name="cmd"]').val() || '-';
-			subPageId = $('input[name="subcmd"]').val() || '-';
-			if (subPageId==='dochat') {
-				pageId='-';
-				subPageId='-';
+			cmd = $('input[name="cmd"]').val() || '-';
+			subcmd = $('input[name="subcmd"]').val() || '-';
+			if (subcmd==='dochat') {
+				console.log('Investigate this...');
+				cmd='-';
+				subcmd='-';
 			}
-			subPage2Id = $('input[name="subcmd2"]').val() || '-';
-			typePageId = '-';
+			subcmd2 = $('input[name="subcmd2"]').val() || '-';
+			type = '-';
+			fromWorld = '-';
 		}
 
-		FSH.Helper.page = pageId + '/' + subPageId + '/' + subPage2Id + '(' + typePageId + ')';
+		FSH.cmd = cmd;
+		FSH.subcmd = subcmd;
+		FSH.subcmd2 = subcmd2;
+		FSH.type = type;
+		FSH.fromWorld = fromWorld;
 
-		if (FSH.Data.pageSwitcher[pageId] &&
-			FSH.Data.pageSwitcher[pageId][subPageId] &&
-			FSH.Data.pageSwitcher[pageId][subPageId][subPage2Id] &&
-			FSH.Data.pageSwitcher[pageId][subPageId][subPage2Id][typePageId]) {
-			funcName = FSH.Data.pageSwitcher[pageId][subPageId][subPage2Id]
-				[typePageId];
+		FSH.Helper.page = cmd + '/' + subcmd + '/' + subcmd2 + '(' + type + ')';
+		console.log('FSH.Helper.page', FSH.Helper.page);
+
+		var pageSwitcher = FSH.Data.pageSwitcher;
+
+		if (pageSwitcher[cmd] &&
+			pageSwitcher[cmd][subcmd] &&
+			pageSwitcher[cmd][subcmd][subcmd2] &&
+			pageSwitcher[cmd][subcmd][subcmd2][type] &&
+			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+			funcName = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
+			console.log('pageSwitcher2 funcName', funcName);
 			fn = FSH.Helper[funcName];
 			fn();
 		}
