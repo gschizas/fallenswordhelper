@@ -1611,7 +1611,7 @@ FSH.ajax = {
 							if (err) {console.log('localforage error', err);}
 							FSH.Helper.profile = FSH.Helper.profile || {};
 							FSH.Helper.profile[FSH.Helper.myUsername] = data;
-console.log('myStats forage set success');
+// console.log('myStats forage set success');
 							if (typeof fn === 'function') {fn();}
 						}
 					);
@@ -1628,7 +1628,7 @@ console.log('myStats forage set success');
 			}
 			FSH.Helper.profile = FSH.Helper.profile || {};
 			FSH.Helper.profile[FSH.Helper.myUsername] = data;
-console.log('getInv forage get success');
+// console.log('getInv forage get success');
 			if (typeof fn === 'function') {fn();}
 		});
 	}

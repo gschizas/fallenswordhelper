@@ -154,7 +154,7 @@ FSH.Helper = {
 		FSH.fromWorld = fromWorld;
 
 		FSH.Helper.page = cmd + '/' + subcmd + '/' + subcmd2 + '(' + type + ')';
-		console.log('FSH.Helper.page', FSH.Helper.page);
+		// console.log('FSH.Helper.page', FSH.Helper.page);
 
 		var pageSwitcher = FSH.Data.pageSwitcher;
 
@@ -164,7 +164,7 @@ FSH.Helper = {
 			pageSwitcher[cmd][subcmd][subcmd2][type] &&
 			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
 			funcName = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
-			console.log('pageSwitcher2 funcName', funcName);
+			// console.log('pageSwitcher2 funcName', funcName);
 			fn = FSH.Helper[funcName];
 			fn();
 		}
@@ -229,7 +229,7 @@ FSH.Helper = {
 	},
 
 	unknownPage: function() {
-		console.log('*** unknownPage ***');
+		// console.log('*** unknownPage ***');
 		//var isRelicPage = $('div#pCC td:contains("Below is the current status for the relic")');
 		//var isRelicPage = FSH.System.findNode('//td[contains(.,"Below is the current status for the relic")]/b');
 		if ($('div#pCC td:contains("Below is the current status for ' +
@@ -10033,9 +10033,9 @@ if (target === '[ No bounties available. ]') {break;}
 
 	injectAllyEnemyList: function() {
 
-		console.log(
-			FSH.Helper.profile[FSH.Helper.myUsername]
-		);
+		// console.log(
+		// 	FSH.Helper.profile[FSH.Helper.myUsername]
+		// );
 
 		var allies = FSH.Helper.profile[FSH.Helper.myUsername]._allies || [];
 		var enemies = FSH.Helper.profile[FSH.Helper.myUsername]._enemies || [];
