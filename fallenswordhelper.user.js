@@ -2607,6 +2607,10 @@ FSH.Helper = {
 			var self = $(this);
 			self.attr('href', self.attr('href').replace(/500/g,'1000'));
 		});
+		$('a#online-allies-action-quickbuff').each(function() {
+			var self = $(this);
+			self.attr('href', self.attr('href').replace(/, 500/g,', 1000'));
+		});
 	},
 
 	addGuildInfoWidgets: function() { //jquery
@@ -2649,21 +2653,36 @@ FSH.Helper = {
 
 	addOnlineAlliesWidgets: function() {
 		var onlineAlliesList = $('ul#minibox-allies-list');
-		if (onlineAlliesList.length > 0) { // list exists
-			//add coloring for offline time
-			$(onlineAlliesList).find('li.player').each(function() {
-				var playerA = $(this).find('a[class*="player-name"]');
-				var onMouseOver = playerA.data('tipped');
-				var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-				if (lastActivityMinutes < 2) {
-					playerA.css('color','DodgerBlue');
-				} else if (lastActivityMinutes < 5) {
-					playerA.css('color','LightSkyBlue');
-				} else {
-					playerA.css('color','PowderBlue');
-				}
-			});
+		if (onlineAlliesList.length === 0) {return;}
+		if (FSH.Helper.hideGuildInfoTrade) {
+			$('a#online-allies-action-trade').hide();
 		}
+		if (FSH.Helper.hideGuildInfoSecureTrade) {
+			$('a#online-allies-action-secure-trade').hide();
+		}
+		if (FSH.Helper.hideGuildInfoBuff) {
+			$('a#online-allies-action-quickbuff').hide();
+		}
+		if (FSH.Helper.hideGuildInfoMessage) {
+			$('a#online-allies-action-send-message').hide();
+		}
+		if (FSH.Helper.hideBuffSelected) {
+			$('a.ally-buff-check-on').hide();
+			$('ul#ally-quick-buff').hide();
+		}
+		//add coloring for offline time
+		$(onlineAlliesList).find('li.player').each(function() {
+			var playerA = $(this).find('a[class*="player-name"]');
+			var onMouseOver = playerA.data('tipped');
+			var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+			if (lastActivityMinutes < 2) {
+				playerA.css('color','DodgerBlue');
+			} else if (lastActivityMinutes < 5) {
+				playerA.css('color','LightSkyBlue');
+			} else {
+				playerA.css('color','PowderBlue');
+			}
+		});
 	},
 
 	injectWorldMap: function() {
@@ -8600,7 +8619,7 @@ FSH.Helper = {
 				':</td><td>Allies<input name="enableAllyOnlineList" type="checkbox" value="on"' + (FSH.System.getValue('enableAllyOnlineList')?' checked':'') +
 				'> Enemies<input name="enableEnemyOnlineList" type="checkbox" value="on"' + (FSH.System.getValue('enableEnemyOnlineList')?' checked':'') +
 				'> <input name="allyEnemyOnlineRefreshTime" size="3" value="'+ FSH.System.getValue('allyEnemyOnlineRefreshTime') + '" /> seconds refresh</td></tr>' +
-			'<tr><td align="right">Enable Online Allies Widgets' + FSH.Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Guild Info Widgets (coloring on the Guild Info panel)') +
+			'<tr><td align="right">Enable Online Allies Widgets' + FSH.Helper.helpLink('Enable Online Allies Widgets', 'Enabling this option will enable the Allies List Widgets (coloring on the Allies List panel)') +
 				':</td><td><input name="enableOnlineAlliesWidgets" type="checkbox" value="on"' + (FSH.System.getValue('enableOnlineAlliesWidgets')?' checked':'') + '></td></tr>' +
 			'<tr><td align="right">Move FS box' + FSH.Helper.helpLink('Move FallenSword Box', 'This will move the FS box to the left, under the menu, for better visibility (unless it is already hidden.)') +
 				':</td><td><input name="moveFSBox" type="checkbox" value="on"' + (FSH.System.getValue('moveFSBox')?' checked':'') + '></td></tr>' +
