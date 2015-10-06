@@ -4911,12 +4911,14 @@ FSH.Helper = {
 		textNode.style.color=color;
 	},
 
-	injectProfile: function() {
+	updateQuickBuff: function() {
 		var qb = $('div#profileRightColumn a:contains("Quick Buff")');
 		if (qb.length !== 0) {
-			qb.attr('href', qb.attr('href').replace(/500/g,'1000'));
+			qb.attr('href', qb.attr('href').replace(/, 500/g,', 1000'));
 		}
+	},
 
+	updateStatistics: function() {
 		var charStats = $('#profileLeftColumn table').first()
 			.attr('id', 'characterStats');
 		var tblCells = $('td', charStats).has('table').has('font');
@@ -4927,7 +4929,11 @@ FSH.Helper = {
 				'<div class="profile-stat-bonus">' +
 				tde.last().text() + '</div>');
 		});
+	},
 
+	injectProfile: function() {
+		FSH.Helper.updateQuickBuff();
+		FSH.Helper.updateStatistics();
 		var playerid;
 		var player = FSH.System.findNode('//textarea[@id="holdtext"]');
 		var avyImg;
