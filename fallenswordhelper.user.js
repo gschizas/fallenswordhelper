@@ -24,6 +24,32 @@ var fshMain = function() {
 window.FSH = window.FSH || {};
 
 FSH.Helper = {
+	getEnvVars: function() {
+		FSH.Helper.enableAllyOnlineList =
+			FSH.System.getValue('enableAllyOnlineList');
+		FSH.Helper.enableEnemyOnlineList =
+			FSH.System.getValue('enableEnemyOnlineList');
+		FSH.Helper.enableGuildInfoWidgets =
+			FSH.System.getValue('enableGuildInfoWidgets');
+		FSH.Helper.enableOnlineAlliesWidgets =
+			FSH.System.getValue('enableOnlineAlliesWidgets');
+		FSH.Helper.hideGuildInfoTrade =
+			FSH.System.getValue('hideGuildInfoTrade');
+		FSH.Helper.hideGuildInfoSecureTrade =
+			FSH.System.getValue('hideGuildInfoSecureTrade');
+		FSH.Helper.hideGuildInfoBuff =
+			FSH.System.getValue('hideGuildInfoBuff');
+		FSH.Helper.hideGuildInfoMessage =
+			FSH.System.getValue('hideGuildInfoMessage');
+		FSH.Helper.hideBuffSelected = FSH.System.getValue('hideBuffSelected');
+		FSH.Helper.enableTempleAlert =
+			FSH.System.getValue('enableTempleAlert');
+		FSH.Helper.enableUpgradeAlert =
+			FSH.System.getValue('enableUpgradeAlert');
+		FSH.Helper.enableComposingAlert =
+			FSH.System.getValue('enableComposingAlert');
+	},
+
 	prepareEnv: function() {
 		if (FSH.System.getValue('gameHelpLink')) {
 			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
@@ -34,7 +60,9 @@ FSH.Helper = {
 			});
 		}
 
-		if (FSH.System.getValue('huntingMode')) {
+		FSH.Helper.huntingMode = FSH.System.getValue('huntingMode');
+
+		if (FSH.Helper.huntingMode) {
 			FSH.Helper.replaceKeyHandler();
 			// FSH.Helper.fixOnlineGuildBuffLinks();
 		} else {
@@ -49,7 +77,12 @@ FSH.Helper = {
 				FSH.Layout.moveRHSBoxToLHS('minibox-fsbox');
 			}
 
-			FSH.Helper.prepareAllyEnemyList();
+			FSH.Helper.getEnvVars();
+
+			if (FSH.Helper.enableAllyOnlineList ||
+				FSH.Helper.enableEnemyOnlineList) {
+				FSH.Helper.prepareAllyEnemyList();
+			}
 			FSH.Helper.prepareBountyData();
 			FSH.Helper.injectStaminaCalculator();
 			FSH.Helper.injectLevelupCalculator();
@@ -57,21 +90,27 @@ FSH.Helper = {
 			FSH.Helper.replaceKeyHandler();
 			FSH.Helper.injectFSBoxLog();
 			FSH.Helper.fixOnlineGuildBuffLinks();
-			FSH.Helper.addGuildInfoWidgets();
-			FSH.Helper.addOnlineAlliesWidgets();
+			if (FSH.Helper.enableGuildInfoWidgets) {
+				FSH.Helper.addGuildInfoWidgets();
+			}
+			if (FSH.Helper.enableOnlineAlliesWidgets) {
+				FSH.Helper.addOnlineAlliesWidgets();
+			}
 			FSH.Helper.injectJoinAllLink();
 			FSH.Helper.changeGuildLogHREF();
 			FSH.Helper.injectHomePageTwoLink();
-			if (FSH.System.getValue('enableTempleAlert')) {
+			if (FSH.Helper.enableTempleAlert) {
 				FSH.Helper.injectTempleAlert();}
-			if (FSH.System.getValue('enableUpgradeAlert')) {
+			if (FSH.Helper.enableUpgradeAlert) {
 				FSH.Helper.injectUpgradeAlert();}
-			if (FSH.System.getValue('enableComposingAlert')) {
+			if (FSH.Helper.enableComposingAlert) {
 				FSH.Helper.injectComposeAlert();}
 			FSH.Helper.injectQuickMsgDialogJQ();
 		}
 
-		FSH.Helper.injectHelperMenu();
+		if (!FSH.System.getValue('hideHelperMenu')) {
+			FSH.Helper.injectHelperMenu();
+		}
 	},
 
 	// main event dispatcher
@@ -131,22 +170,25 @@ FSH.Helper = {
 		}
 
 		if (FSH.System.getValue('playNewMessageSound')) {
-			var soundLocation = FSH.System.getValue('defaultMessageSound');
-			//new UI
-			$('a:contains("New log messages"):first').each(function(){
-				$(this).after('<audio src="' + soundLocation +
-				'" autoplay=true />');
-			});
-			$('a:contains("New Guild chat message"):first').each(function(){
-				$(this).after('<audio src="' + soundLocation +
-				'" autoplay=true />');
-			});
+			FSH.Helper.doMsgSound();
 		}
 
 		// This must be at the end in order not to screw up other FSH.System.findNode calls (Issue 351)
-		if (FSH.System.getValue('huntingMode') === false) {
+		if (!FSH.Helper.huntingMode) {
 			FSH.Helper.injectQuickLinks();
 		}
+	},
+
+	doMsgSound: function() {
+		var soundLocation = FSH.System.getValue('defaultMessageSound');
+		$('a:contains("New log messages"):first').each(function(){
+			$(this).after('<audio src="' + soundLocation +
+			'" autoplay=true />');
+		});
+		$('a:contains("New Guild chat message"):first').each(function(){
+			$(this).after('<audio src="' + soundLocation +
+			'" autoplay=true />');
+		});
 	},
 
 	newsFsbox: function() {
@@ -1742,7 +1784,7 @@ FSH.Helper = {
 					'red">Doubler ' + doublerLevel + ' active</td></tr>';
 			}
 		}
-		var huntingMode = FSH.System.getValue('huntingMode');
+		var huntingMode = FSH.Helper.huntingMode;
 		replacementText += huntingMode === true ? '<tr><td style="font-size:' +
 			'small; color:red">Hunting mode enabled</td></tr>':'';
 		replacementText += '<tr><td colspan="2" height="10"></td></tr>';
@@ -2076,19 +2118,20 @@ FSH.Helper = {
 					FSH.System.setValue('playNewMessageSound',!FSH.System.getValue('playNewMessageSound'));
 				},true);
 			}
-			var huntingMode = FSH.System.getValue('huntingMode');
+			var huntingMode = FSH.Helper.huntingMode;
 			img = huntingMode === true ? FSH.Data.huntingOnImage : FSH.Data.huntingOffImage;
 			worldName.append(' <a href=# id="HelperToggleHuntingMode">' + img + '</a>');
 			
 			document.getElementById('HelperToggleHuntingMode').addEventListener('click',
 				function() {
 				//alert($('a#HelperToggleHuntingMode').html());
-					if(FSH.System.getValue('huntingMode') === false){
+					if (!FSH.Helper.huntingMode) {
 						$('a#HelperToggleHuntingMode').html(FSH.Data.huntingOnImage);
-					}else{
+					} else {
 						$('a#HelperToggleHuntingMode').html(FSH.Data.huntingOffImage);
 					}
-					FSH.System.setValue('huntingMode',!FSH.System.getValue('huntingMode'));
+					FSH.Helper.huntingMode = !FSH.Helper.huntingMode;
+					FSH.System.setValue('huntingMode', FSH.Helper.huntingMode);
 				},true);
 		}
 	},
@@ -2499,7 +2542,7 @@ FSH.Helper = {
 			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
 				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
 
-			var huntingMode = FSH.System.getValue('huntingMode');
+			var huntingMode = FSH.Helper.huntingMode;
 			imgSource = huntingMode === true ? FSH.Data.huntingOnImage : FSH.Data.huntingOffImage;
 			mapName.innerHTML += ' <a href=# id="Helper:ToggleHuntingMode">' + imgSource + '</a>';
 
@@ -2528,7 +2571,7 @@ FSH.Helper = {
 			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
 				function() {
 					FSH.System.setValue('huntingMode',
-						!FSH.System.getValue('huntingMode'));
+						!FSH.Helper.huntingMode);
 					location.reload();
 				},true);
 
@@ -2567,22 +2610,25 @@ FSH.Helper = {
 	},
 
 	addGuildInfoWidgets: function() { //jquery
-		if (!FSH.System.getValue('enableGuildInfoWidgets')) {return;}
 		var guildMembrList = $('ul#minibox-guild-members-list');
 		if (guildMembrList.length === 0) {return;} // list exists
-		var hideGuildInfoTrade = FSH.System.getValue('hideGuildInfoTrade');
-		var hideGuildInfoSecureTrade =
-			FSH.System.getValue('hideGuildInfoSecureTrade');
-		var hideGuildInfoBuff = FSH.System.getValue('hideGuildInfoBuff');
-		var hideGuildInfoMessage = FSH.System.getValue('hideGuildInfoMessage');
 		//hide guild info links
-		if (hideGuildInfoTrade) {$('a#guild-minibox-action-trade').hide();}
-		if (hideGuildInfoSecureTrade) {
-			$('a#guild-minibox-action-secure-trade').hide();}
-		if (hideGuildInfoBuff) {
-			$('a#guild-minibox-action-quickbuff').hide();}
-		if (hideGuildInfoMessage) {
-			$('a#guild-minibox-action-send-message').hide();}
+		if (FSH.Helper.hideGuildInfoTrade) {
+			$('a#guild-minibox-action-trade').hide();
+		}
+		if (FSH.Helper.hideGuildInfoSecureTrade) {
+			$('a#guild-minibox-action-secure-trade').hide();
+		}
+		if (FSH.Helper.hideGuildInfoBuff) {
+			$('a#guild-minibox-action-quickbuff').hide();
+		}
+		if (FSH.Helper.hideGuildInfoMessage) {
+			$('a#guild-minibox-action-send-message').hide();
+		}
+		if (FSH.Helper.hideBuffSelected) {
+			$('a.guild-buff-check-on').hide();
+			$('ul#guild-quick-buff').hide();
+		}
 		//add coloring for offline time
 		$('a.player-name', guildMembrList).each(function() {
 			var playerA = $(this);
@@ -2602,7 +2648,6 @@ FSH.Helper = {
 	},
 
 	addOnlineAlliesWidgets: function() {
-		if (!FSH.System.getValue('enableOnlineAlliesWidgets')) {return;}
 		var onlineAlliesList = $('ul#minibox-allies-list');
 		if (onlineAlliesList.length > 0) { // list exists
 			//add coloring for offline time
@@ -3600,7 +3645,8 @@ FSH.Helper = {
 			FSH.Helper.killMonsterAt(r-48);
 			break;
 		case 98: // backpack [b]
-			location.href = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+			//~ location.href = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
+			location.href = 'index.php?cmd=profile&subcmd=dropitems';
 			break;
 		case 115: // use stairs [s]
 			FSH.Helper.useStairs(); // this is suspect, is it old map only?
@@ -11078,7 +11124,7 @@ if (target === '[ No bounties available. ]') {break;}
 
 	parseTemplePage: function(responseText) { //native
 		var checkNeedToPray, doc;
-		if (!FSH.System.getValue('enableTempleAlert')) {return;}
+		if (!FSH.Helper.enableTempleAlert) {return;}
 		if (FSH.System.getUrlParameter('cmd') !== 'temple') {
 			doc = FSH.System.createDocument(responseText);
 		} else {
@@ -11117,7 +11163,7 @@ displayDisconnectedFromGodsMessage: function() {
 	},
 
 	parseGoldUpgrades: function(data) { //jquery
-		if (!FSH.System.getValue('enableUpgradeAlert')) {return;}
+		if (!FSH.Helper.enableUpgradeAlert) {return;}
 		var doc;
 		if (location.search.search('cmd=points&type=1') === -1) {
 			doc = data;
@@ -11786,7 +11832,7 @@ displayDisconnectedFromGodsMessage: function() {
 
 	injectComposing: function() { //jquery
 
-		if (FSH.System.getValue('enableComposingAlert')) {
+		if (FSH.Helper.enableComposingAlert) {
 			FSH.Helper.parseComposing();}
 
 		var disableComposingPrompts =
@@ -11856,7 +11902,7 @@ displayDisconnectedFromGodsMessage: function() {
 				}
 				if ($('select[id^="composing-template-"]').length === 0 &&
 					$('div#helperQCError').length === 0) {
-					location.href = 'index.php?cmd=composing&m=0';
+					location.href = 'index.php?cmd=composing';
 				}
 			}
 		});
