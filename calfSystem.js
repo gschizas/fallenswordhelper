@@ -1426,15 +1426,15 @@ FSH.Layout = {
 		window.$('#nav').nav('calcHeights');
 	},
 
-	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
-		if (position > tableElement.children().length) {
-			position = tableElement.children().length;
-		}
-		$(tableElement).find('tr:eq('+position+')').before('<tr><td><font ' +
-			'color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font ' +
-			'color="black">' + text + '</font></A></font></td></tr><tr><td ' +
-			'height="5"></td></tr>');
-	},
+	//~ injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
+		//~ if (position > tableElement.children().length) {
+			//~ position = tableElement.children().length;
+		//~ }
+		//~ $(tableElement).find('tr:eq('+position+')').before('<tr><td><font ' +
+			//~ 'color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font ' +
+			//~ 'color="black">' + text + '</font></A></font></td></tr><tr><td ' +
+			//~ 'height="5"></td></tr>');
+	//~ },
 
 	moveRHSBoxUpOnRHS: function(title) {
 		$('div#pCR').prepend($('div#' + title));
@@ -1448,7 +1448,7 @@ FSH.Layout = {
 	},
 
 	notebookContent: function() {
-		return FSH.System.findNode('//div[@id="pCC"]'); //new interface logic
+		return $('div#pCC')[0]; //new interface logic
 	},
 
 	playerId: function() {
