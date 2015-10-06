@@ -1312,6 +1312,23 @@ FSH.Data = {
 
 FSH.Layout = {
 
+	onlineDot: function(min) {
+		var img = '';
+		if (FSH.System.getValue('enhanceOnlineDots')) {
+			img = FSH.Data.offlineDot;
+			if (min < 2) {
+				img = FSH.Data.greenDiamond;
+			} else if (min < 5) {
+				img = FSH.Data.yellowDiamond;
+			} else if (min < 30) {
+				img = FSH.Data.orangeDiamond;
+			} else if (min > 10080) {
+				img = FSH.Data.sevenDayDot;
+			}
+		}
+		return img;
+	},
+
 	injectMenu: function() { //jquery
 		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
 			$('a[href="index.php?cmd=questbook"]').attr('href',
