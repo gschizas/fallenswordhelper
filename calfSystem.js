@@ -1220,9 +1220,7 @@ FSH.Data = {
 			'fsbox': {'-': {'-': {'-': 'newsFsbox'}}},
 			'shoutbox': {'-': {'-': {'-': 'newsShoutbox'}}}},
 		blacksmith: {
-			'-': {'-': {'-': {'-': 'injectBlacksmith'}}},
-			'repairall': {'-': {'-': {'-': 'injectBlacksmith',
-				'1': 'injectWorld'}}}},
+			'repairall': {'-': {'-': {'1': 'injectWorld'}}}},
 		arena: {
 			//'-': {'-': {'-': {'-': 'injectArena'}}},
 			'completed': {'-': {'-': {'-': 'storeCompletedArenas'}}},
