@@ -42,12 +42,16 @@ FSH.Helper = {
 		FSH.Helper.hideGuildInfoMessage =
 			FSH.System.getValue('hideGuildInfoMessage');
 		FSH.Helper.hideBuffSelected = FSH.System.getValue('hideBuffSelected');
-		FSH.Helper.enableTempleAlert =
-			FSH.System.getValue('enableTempleAlert');
+		FSH.Helper.enableTempleAlert = FSH.System.getValue('enableTempleAlert');
 		FSH.Helper.enableUpgradeAlert =
 			FSH.System.getValue('enableUpgradeAlert');
 		FSH.Helper.enableComposingAlert =
 			FSH.System.getValue('enableComposingAlert');
+
+		FSH.Helper.enableActiveBountyList =
+			FSH.System.getValue('enableActiveBountyList');
+		FSH.Helper.enableWantedList = FSH.System.getValue('enableWantedList');
+
 	},
 
 	prepareEnv: function() {
@@ -76,14 +80,15 @@ FSH.Helper = {
 			if (FSH.System.getValue('moveFSBox')) {
 				FSH.Layout.moveRHSBoxToLHS('minibox-fsbox');
 			}
-
 			FSH.Helper.getEnvVars();
-
 			if (FSH.Helper.enableAllyOnlineList ||
 				FSH.Helper.enableEnemyOnlineList) {
 				FSH.Helper.prepareAllyEnemyList();
 			}
-			FSH.Helper.prepareBountyData();
+			if (FSH.Helper.enableWantedList ||
+				FSH.Helper.enableActiveBountyList) {
+				FSH.Helper.prepareBountyData();
+			}
 			FSH.Helper.injectStaminaCalculator();
 			FSH.Helper.injectLevelupCalculator();
 			FSH.Layout.injectMenu();
@@ -107,7 +112,6 @@ FSH.Helper = {
 				FSH.Helper.injectComposeAlert();}
 			FSH.Helper.injectQuickMsgDialogJQ();
 		}
-
 		if (!FSH.System.getValue('hideHelperMenu')) {
 			FSH.Helper.injectHelperMenu();
 		}
@@ -423,21 +427,20 @@ FSH.Helper = {
 	},
 
 	injectFSBoxLog: function() {
-		if (FSH.System.getValue('fsboxlog')) {
-			var node=$('div#minibox-fsbox');
-			if (node.length > 0) {
-				var fsbox=node.find('p.message').html().replace('<br><br>',' ');
-				var boxList=FSH.System.getValue('fsboxcontent');
-				if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
-				if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
-				FSH.System.setValue('fsboxcontent',boxList);
-				var nodediv = node.find('div');
-				var playerName = node.find('a:first').text();
-				nodediv.html(nodediv.html() + '&nbsp;' +
-					'<nobr><a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
-					'" style="color:PaleVioletRed">[ Ignore ]</a>&nbsp;' +
-					'<a href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent" style="color:yellow">[ Log ]</a></nobr>');
-			}
+		if (!FSH.System.getValue('fsboxlog')) {return;}
+		var node=$('div#minibox-fsbox');
+		if (node.length > 0) {
+			var fsbox=node.find('p.message').html().replace('<br><br>',' ');
+			var boxList=FSH.System.getValue('fsboxcontent');
+			if (boxList.indexOf(fsbox)<0) {boxList='<br>'+fsbox+boxList;}
+			if (boxList.length>10000) {boxList=boxList.substring(0,10000);}
+			FSH.System.setValue('fsboxcontent',boxList);
+			var nodediv = node.find('div');
+			var playerName = node.find('a:first').text();
+			nodediv.html(nodediv.html() + '&nbsp;' +
+				'<nobr><a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
+				'" style="color:PaleVioletRed">[ Ignore ]</a>&nbsp;' +
+				'<a href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent" style="color:yellow">[ Log ]</a></nobr>');
 		}
 	},
 
@@ -9700,17 +9703,16 @@ FSH.Helper = {
 	},
 
 	prepareBountyData: function() {
-		var enableActiveBountyList = FSH.System.getValue('enableActiveBountyList');
-		var enableWantedList = FSH.System.getValue('enableWantedList');
-		if (enableWantedList || enableActiveBountyList) {
-			if (enableWantedList) {
-				$('div#pCR').prepend('<div class="minibox"><span id="Helper:WantedListPlaceholder"></span></div>');
-			}
-			if (enableActiveBountyList) {
-				$('div#pCR').prepend('<div class="minibox"><span id="Helper:BountyListPlaceholder"></span></div>');
-			}
-			FSH.Helper.retrieveBountyInfo(enableActiveBountyList, enableWantedList);
+		if (FSH.Helper.enableWantedList) {
+			$('div#pCR').prepend('<div class="minibox"><span id="Helper:' +
+				'WantedListPlaceholder"></span></div>');
 		}
+		if (FSH.Helper.enableActiveBountyList) {
+			$('div#pCR').prepend('<div class="minibox"><span id="Helper:' +
+				'BountyListPlaceholder"></span></div>');
+		}
+		FSH.Helper.retrieveBountyInfo(FSH.Helper.enableActiveBountyList,
+			FSH.Helper.enableWantedList);
 	},
 
 	retrieveBountyInfo: function(enableActiveBountyList, enableWantedList) {
@@ -9767,8 +9769,8 @@ FSH.Helper = {
 
 	parseBountyPageForWorld: function(details, callback) {
 		var doc = FSH.System.createDocument(details);
-		var enableActiveBountyList = FSH.System.getValue('enableActiveBountyList');
-		var enableWantedList = FSH.System.getValue('enableWantedList');
+		var enableActiveBountyList = FSH.Helper.enableActiveBountyList;
+		var enableWantedList = FSH.Helper.enableWantedList;
 		FSH.System.setValue('bwNeedsRefresh', false);
 		if (enableWantedList) {
 			FSH.Helper.getWantedBountyList(doc, callback);
