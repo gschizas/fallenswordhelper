@@ -2098,241 +2098,263 @@ FSH.Helper = {
 		//17 = login
 		//18 = username not found
 		if ($('#worldPage').length > 0) { // new map
-			// subscribe to view creature events on the new map.
-			//current send total
-			//send to
-			//send amount
-			//deposit?
-			if(FSH.System.getValue('sendGoldonWorld')){
-				$('#statbar-gold-tooltip-general').append(
-					'<dt class="stat-gold-sendTo">Send To:</dt><dd id="' +
-					'HelperSendTo">' + FSH.System.getValue('goldRecipient') +
-					'</dd>' + 
-					'<dt class="stat-gold-sendAmt">Amount:</dt><dd id="' +
-					'HelperSendAmt">' + FSH.System.getValue('goldAmount')
-						.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
-					'<dt class="stat-gold-sendTo">Send?</dt><dd><input id="' +
-					'HelperSendGold" value="Send!" class="custombutton" ' +
-					'type="submit"><input type="hidden" id="xc" value="' +
-					FSH.System.getValue('goldConfirm') + '"</dd>' + 
-					'<dt class="stat-gold-sendTotal">Total Sent:</dt><dd ' +
-					'id="HelperSendTotal">' +
-					FSH.System.getValue('currentGoldSentTotal').toString()
-						.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>');
-				$('input#HelperSendGold').click(function(){
-					var sendTo = $('#HelperSendTo').html();
-					var sendAmt = $('#HelperSendAmt').html()
-						.replace(/[^\d]/g,'');
-					var xcNum = $('#xc').val();
-					var sendHref = FSH.System.server + 'index.php?cmd=trade&' +
-						'subcmd=sendgold&xc=' + xcNum + '&target_username=' +
-						sendTo +'&gold_amount='+ sendAmt;
-					$.ajax({
-						url: sendHref,
-						success: function( data ) {
-							//alert($(data).find();
-							var info = FSH.Layout.infoBox(data);
-							if (info === 'You successfully sent gold!' ||
-								info === '') {
-								//currentGoldSentTotal += FSH.System.intValue(callback.amount);
-								//info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
-								FSH.System.setValue('currentGoldSentTotal',
-									parseInt(
-										FSH.System.getValue('currentGoldSentTotal'),
-										10) +
-									parseInt(
-										FSH.System.getValue('goldAmount'), 10));
-								window.GameData.fetch(387);
-							}
-						}
-					});
-					
-				});
-			}
-			//Subscribes:
-			FSH.Helper.doNotKillList = FSH.System.getValue('doNotKillList');
-			$.subscribe('ready.view-creature', function() {
-				$('div#creatureEvaluator').html('');
-				$('div#creatureEvaluatorGroup').html('');
-				FSH.System.xmlhttp('index.php?cmd=profile',
-					FSH.Helper.getCreaturePlayerData,
-					{	'groupExists': false,
-						'groupAttackValue': 0,
-						'groupDefenseValue': 0,
-						'groupArmorValue': 0,
-						'groupDamageValue': 0,
-						'groupHPValue': 0,
-						'groupEvaluation': false
-					}
-				);
-				FSH.System.xmlhttp('index.php?cmd=guild&subcmd=groups',
-					FSH.Helper.checkIfGroupExists);
-				
-				$('div#addRemoveCreatureToDoNotKillList').html('');
-//console.log($('#dialog-viewcreature').find('h2.name').text());
-				if ($('div#addRemoveCreatureToDoNotKillList').length === 0) {
-					var doNotKillElement = '<div id="addRemoveCreatureToDo' +
-						'NotKillList"" class="description" style="cursor:' +
-						'pointer;text-decoration:underline;color:blue;"></div>';
-					$(doNotKillElement).insertAfter($('#dialog-viewcreature')
-						.find('p.description'));
-				}
-				var creatureName = $('#dialog-viewcreature').find('h2.name')
-					.text();
-				$('div#addRemoveCreatureToDoNotKillList')
-					.attr('creatureName',creatureName);
-				var extraText = 'Add to the do not kill list';
-				if (FSH.Helper.doNotKillList.indexOf(creatureName) !== -1) {
-					extraText = 'Remove from do not kill list';}
-				$('div#addRemoveCreatureToDoNotKillList').html(extraText);
-				document.getElementById('addRemoveCreatureToDoNotKillList')
-					.addEventListener('click',
-						FSH.Helper.addRemoveCreatureToDoNotKillList, true);
-			});
-
-			// add do-not-kill list functionality
-			$.subscribe('after-update.actionlist', function() {
-				// color the critters in the do no kill list blue
-				$('ul#actionList div.header').each(function() {
-					if (FSH.Helper.doNotKillList.indexOf($(this).find('a.icon')
-						.data('name')) !== -1) {
-						$(this).css('color','blue');
-					}
-				});
-				// then intercept the action call 
-				var gameData = window.GameData;
-				var hcs = window.HCS;
-				var oldDoAction = gameData.doAction;
-				gameData.doAction = function(actionCode, fetchFlags, data) {
-					if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
-						// Do custom stuff e.g. do not kill list
-						var creatureIcon = $('ul#actionList div.header')
-							.eq(data.passback).find('a.icon');
-						if (FSH.Helper.doNotKillList.indexOf(
-								creatureIcon.data('name')) !== -1) {
-							creatureIcon.removeClass('loading');
-							return;
-						}
-					}
-					// Call standard action
-					oldDoAction(actionCode, fetchFlags, data);
-				}; 
-			});
-
-			$.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-				function(e, data) {
-				// check shield imp is still active
-				var shieldImpVal = 0;
-				var ddVal=0;
-				var l = data.b.length;
-				for(var i=0; i<l; i += 1)
-				{
-					var buff = data.b[i];
-					if (buff.id === 55)
-					{
-						shieldImpVal = buff.stack;
-					} else if(buff.id === 50)
-					{
-						ddVal = buff.level;
-					}
-					if (ddVal > 0 && shieldImpVal > 0) {
-						break;
-					}
-
-				}
-				//~ if(ddVal>0){
-					var imp = $('#actionlist-shield-imp');
-					if(shieldImpVal === 0){
-						imp.css('background-color','red');
-					}else if(shieldImpVal===2){
-						imp.css('background-color','yellow');
-					}else if(shieldImpVal===1){
-						imp.css('background-color','orange');
-					}else{
-						imp.css('background-color','inherit');
-					}
-				//~ }
-				
-
-			});
-			$.subscribe('keydown.controls', function(e, key){
-				switch(key)
-				{
-					case 'ACT_REPAIR': window.GameData.fetch(387); break;
-				}
-			});
-			FSH.Helper.keepLogs = FSH.System.getValue('keepLogs');
-			$.subscribe('2-success.action-response', function(e, data){
-				var l;
-				var i;
-				// If bad response do nothing.
-				if (!FSH.Helper.keepLogs || data.response.response !== 0) {return;}
-				var combatData = {};
-				combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
-				//delete some values that are not needed to trim down size of log.
-				delete combatData.combat.attacker.img_url;
-				delete combatData.combat.defender.img_url;
-				delete combatData.combat.is_conflict;
-				delete combatData.combat.is_bounty;
-				delete combatData.combat.pvp_rating_change;
-				delete combatData.combat.pvp_prestige_gain;
-				if (combatData.combat.inventory_id) {
-					combatData.combat.drop = combatData.combat.item.id;
-				}
-				delete combatData.combat.inventory_id;
-				delete combatData.combat.item;
-
-				combatData.player={};
-				combatData.player.buffs={};
-				combatData.player.enhancements={};
-				l = data.player.buffs.length;
-				for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
-				{//54 = ca, 26 = doubler
-					var buff = data.player.buffs[i];
-					if(buff.id === 54 || buff.id === 26)
-					{
-						combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
-					}
-				}
-				var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-				if (data.player.enhancements)
-				{
-					l = data.player.enhancements.length;
-					for(i=0; i<l; i += 1) //loop through enhancements
-					{//54 = ca, 26 = doubler
-						var enh = data.player.enhancements[i];
-						if (notSave.indexOf('|'+enh.name+'|')===-1){
-							combatData.player.enhancements[enh.name]=enh.value;
-						}
-					}
-				}
-				//combatData.player.enhancements = data.player.enhancements;
-				//combatData.player.buffs = data.player.buffs;
-				var now = new Date();
-				combatData.time = FSH.System.formatDateTime(now);
-				FSH.Helper.appendSavedLog(',' + JSON.stringify(combatData));
-			});
-			//on world
-
-			if(window.initialGameData){//HCS initial data
-				setTimeout(function(){FSH.Helper.injectWorldNewMap(window.initialGameData);},400);
-			}
-			$.subscribe('-1-success.action-response 5-success.action-response', function(e, data){ //change of information
-				setTimeout(function(){FSH.Helper.injectWorldNewMap(data);},400);
-			});
-
-			//somewhere near here will be multi buy on shop
-			//$.subscribe('prompt.worldDialogShop', function(e, data){
-				//self._createShop(self.shop.items);
-			//	$('span[class="price"]').after('<span class="numTake">test</span>');
-			//});
-
-			//document.getElementById('Helper:SendGold').addEventListener('click', FSH.Helper.sendGoldToPlayer, true);
-
-		}else{
+			FSH.Helper.newMapSubscribes();
+		} else {
 			//not new map.
 			FSH.Helper.injectOldMap();
 		}
+	},
+
+	injectSendGoldOnWorld: function() {
+		$('#statbar-gold-tooltip-general').append(
+			'<dt class="stat-gold-sendTo">Send To:</dt><dd id="' +
+			'HelperSendTo">' + FSH.System.getValue('goldRecipient') +
+			'</dd>' + 
+			'<dt class="stat-gold-sendAmt">Amount:</dt><dd id="' +
+			'HelperSendAmt">' + FSH.System.getValue('goldAmount')
+				.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
+			'<dt class="stat-gold-sendTo">Send?</dt><dd><input id="' +
+			'HelperSendGold" value="Send!" class="custombutton" ' +
+			'type="submit"><input type="hidden" id="xc" value="' +
+			FSH.System.getValue('goldConfirm') + '"</dd>' + 
+			'<dt class="stat-gold-sendTotal">Total Sent:</dt><dd ' +
+			'id="HelperSendTotal">' +
+			FSH.System.getValue('currentGoldSentTotal').toString()
+				.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>');
+		$('input#HelperSendGold').click(FSH.Helper.doSendGold);
+	},
+
+	doSendGold: function() {
+		var sendTo = $('#HelperSendTo').html();
+		var sendAmt = $('#HelperSendAmt').html()
+			.replace(/[^\d]/g,'');
+		var xcNum = $('#xc').val();
+		var sendHref = FSH.System.server + 'index.php?cmd=trade&' +
+			'subcmd=sendgold&xc=' + xcNum + '&target_username=' +
+			sendTo +'&gold_amount='+ sendAmt;
+		$.ajax({
+			url: sendHref,
+			success: function( data ) {
+				//alert($(data).find();
+				var info = FSH.Layout.infoBox(data);
+				if (info === 'You successfully sent gold!' ||
+					info === '') {
+					//currentGoldSentTotal += FSH.System.intValue(callback.amount);
+					//info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
+					FSH.System.setValue('currentGoldSentTotal',
+						parseInt(
+							FSH.System.getValue('currentGoldSentTotal'), 10) +
+						parseInt(FSH.System.getValue('goldAmount'), 10));
+					window.GameData.fetch(387);
+				}
+			}
+		});
+	},
+
+	readyViewCreature: function() {
+		$('div#creatureEvaluator').html('');
+		$('div#creatureEvaluatorGroup').html('');
+
+		FSH.System.xmlhttp('index.php?cmd=profile',
+			FSH.Helper.getCreaturePlayerData,
+			{	'groupExists': false,
+				'groupAttackValue': 0,
+				'groupDefenseValue': 0,
+				'groupArmorValue': 0,
+				'groupDamageValue': 0,
+				'groupHPValue': 0,
+				'groupEvaluation': false
+			}
+		);
+		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=groups',
+			FSH.Helper.checkIfGroupExists);
+
+		$('div#addRemoveCreatureToDoNotKillList').html('');
+//console.log($('#dialog-viewcreature').find('h2.name').text());
+		if ($('div#addRemoveCreatureToDoNotKillList').length === 0) {
+			var doNotKillElement = '<div id="addRemoveCreatureToDo' +
+				'NotKillList"" class="description" style="cursor:' +
+				'pointer;text-decoration:underline;color:blue;"></div>';
+			$(doNotKillElement).insertAfter($('#dialog-viewcreature')
+				.find('p.description'));
+		}
+		var creatureName = $('#dialog-viewcreature').find('h2.name')
+			.text();
+		$('div#addRemoveCreatureToDoNotKillList')
+			.attr('creatureName',creatureName);
+		var extraText = 'Add to the do not kill list';
+		if (FSH.Helper.doNotKillList.indexOf(creatureName) !== -1) {
+			extraText = 'Remove from do not kill list';}
+		$('div#addRemoveCreatureToDoNotKillList').html(extraText);
+		document.getElementById('addRemoveCreatureToDoNotKillList')
+			.addEventListener('click',
+				FSH.Helper.addRemoveCreatureToDoNotKillList, true);
+	},
+
+	afterUpdateActionList: function() {
+		// color the critters in the do no kill list blue
+		$('ul#actionList div.header').each(function() {
+			if (FSH.Helper.doNotKillList.indexOf($(this).find('a.icon')
+				.data('name')) !== -1) {
+				$(this).css('color','blue');
+			}
+		});
+		// then intercept the action call 
+		var gameData = window.GameData;
+		var hcs = window.HCS;
+		var oldDoAction = gameData.doAction;
+		gameData.doAction = function(actionCode, fetchFlags, data) {
+			if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
+				// Do custom stuff e.g. do not kill list
+				var creatureIcon = $('ul#actionList div.header')
+					.eq(data.passback).find('a.icon');
+				if (FSH.Helper.doNotKillList.indexOf(
+						creatureIcon.data('name')) !== -1) {
+					creatureIcon.removeClass('loading');
+					return;
+				}
+			}
+			// Call standard action
+			oldDoAction(actionCode, fetchFlags, data);
+		}; 
+	},
+
+	dataEventsPlayerBuffs: function(e, data) {
+		// check shield imp is still active
+		// TODO So Bad!
+		var shieldImpVal = 0;
+		var ddVal=0;
+		var l = data.b.length;
+		for(var i = 0; i < l; i += 1) {
+			var buff = data.b[i];
+			if (buff.id === 55) {
+				shieldImpVal = buff.stack;
+			} else if (buff.id === 50) {
+				ddVal = buff.level;
+			}
+			if (ddVal > 0 && shieldImpVal > 0) {break;}
+		}
+
+		//~ if(ddVal>0){
+			var imp = $('#actionlist-shield-imp');
+			if(shieldImpVal === 0){
+				imp.css('background-color','red');
+			}else if(shieldImpVal===2){
+				imp.css('background-color','yellow');
+			}else if(shieldImpVal===1){
+				imp.css('background-color','orange');
+			}else{
+				imp.css('background-color','inherit');
+			}
+		//~ }
+	},
+
+	combatResponse: function(e, data) {
+		// TODO this is too slow
+		// send the response to localforage
+		// and deal with it later
+		var l;
+		var i;
+		// If bad response do nothing.
+		if (!FSH.Helper.keepLogs || data.response.response !== 0) {return;}
+		var combatData = {};
+		combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
+		//delete some values that are not needed to trim down size of log.
+		delete combatData.combat.attacker.img_url;
+		delete combatData.combat.defender.img_url;
+		delete combatData.combat.is_conflict;
+		delete combatData.combat.is_bounty;
+		delete combatData.combat.pvp_rating_change;
+		delete combatData.combat.pvp_prestige_gain;
+		if (combatData.combat.inventory_id) {
+			combatData.combat.drop = combatData.combat.item.id;
+		}
+		delete combatData.combat.inventory_id;
+		delete combatData.combat.item;
+
+		combatData.player={};
+		combatData.player.buffs={};
+		combatData.player.enhancements={};
+		l = data.player.buffs.length;
+		for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
+		{//54 = ca, 26 = doubler
+			var buff = data.player.buffs[i];
+			if(buff.id === 54 || buff.id === 26)
+			{
+				combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
+			}
+		}
+		var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
+		if (data.player.enhancements)
+		{
+			l = data.player.enhancements.length;
+			for(i=0; i<l; i += 1) //loop through enhancements
+			{//54 = ca, 26 = doubler
+				var enh = data.player.enhancements[i];
+				if (notSave.indexOf('|'+enh.name+'|')===-1){
+					combatData.player.enhancements[enh.name]=enh.value;
+				}
+			}
+		}
+		//combatData.player.enhancements = data.player.enhancements;
+		//combatData.player.buffs = data.player.buffs;
+		var now = new Date();
+		combatData.time = FSH.System.formatDateTime(now);
+		FSH.Helper.appendSavedLog(',' + JSON.stringify(combatData));
+	},
+
+	newMapSubscribes: function() {
+		// subscribe to view creature events on the new map.
+		//current send total
+		//send to
+		//send amount
+		//deposit?
+		if (FSH.System.getValue('sendGoldonWorld')) {
+			FSH.Helper.injectSendGoldOnWorld();
+		}
+		//Subscribes:
+		FSH.Helper.doNotKillList = FSH.System.getValue('doNotKillList');
+		$.subscribe('ready.view-creature', FSH.Helper.readyViewCreature);
+
+		// add do-not-kill list functionality
+		$.subscribe('after-update.actionlist',
+			FSH.Helper.afterUpdateActionList);
+
+		$.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
+			FSH.Helper.dataEventsPlayerBuffs);
+
+		$.subscribe('keydown.controls', function(e, key){
+			switch(key)
+			{
+				case 'ACT_REPAIR': window.GameData.fetch(387);
+				break;
+			}
+		});
+
+		FSH.Helper.keepLogs = FSH.System.getValue('keepLogs');
+		$.subscribe('2-success.action-response', FSH.Helper.combatResponse);
+		//on world
+
+		if (window.initialGameData) {//HCS initial data
+			setTimeout(function(){
+				FSH.Helper.injectWorldNewMap(window.initialGameData);
+			}, 400);
+		}
+		$.subscribe('-1-success.action-response 5-success.action-response',
+			function(e, data) { //change of information
+				setTimeout(function() {
+					FSH.Helper.injectWorldNewMap(data);
+				}, 400);
+			}
+		);
+
+		//somewhere near here will be multi buy on shop
+		//$.subscribe('prompt.worldDialogShop', function(e, data){
+			//self._createShop(self.shop.items);
+		//	$('span[class="price"]').after('<span class="numTake">test</span>');
+		//});
+
+		//document.getElementById('Helper:SendGold').addEventListener('click', FSH.Helper.sendGoldToPlayer, true);
 	},
 
 	injectOldMap: function() {
