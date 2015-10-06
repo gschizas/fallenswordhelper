@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1510b2
+// @version        1510b3
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -23,7 +23,7 @@ var fshMain = function() {
 
 window.FSH = window.FSH || {};
 
-window.FSH.Helper = {
+FSH.Helper = {
 	prepareEnv: function() {
 		if (FSH.System.getValue('gameHelpLink')) {
 			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
@@ -2142,7 +2142,7 @@ window.FSH.Helper = {
 										10) +
 									parseInt(
 										FSH.System.getValue('goldAmount'), 10));
-								unsafeWindow.GameData.fetch(387);
+								window.GameData.fetch(387);
 							}
 						}
 					});
@@ -2200,8 +2200,8 @@ window.FSH.Helper = {
 					}
 				});
 				// then intercept the action call 
-				var gameData = unsafeWindow.GameData;
-				var hcs = unsafeWindow.HCS;
+				var gameData = window.GameData;
+				var hcs = window.HCS;
 				var oldDoAction = gameData.doAction;
 				gameData.doAction = function(actionCode, fetchFlags, data) {
 					if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
@@ -2219,7 +2219,7 @@ window.FSH.Helper = {
 				}; 
 			});
 
-			$.subscribe(unsafeWindow.DATA_EVENTS.PLAYER_BUFFS.ANY,
+			$.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
 				function(e, data) {
 				// check shield imp is still active
 				var shieldImpVal = 0;
@@ -2258,7 +2258,7 @@ window.FSH.Helper = {
 			$.subscribe('keydown.controls', function(e, key){
 				switch(key)
 				{
-					case 'ACT_REPAIR': unsafeWindow.GameData.fetch(387); break;
+					case 'ACT_REPAIR': window.GameData.fetch(387); break;
 				}
 			});
 			FSH.Helper.keepLogs = FSH.System.getValue('keepLogs');
@@ -2314,8 +2314,8 @@ window.FSH.Helper = {
 			});
 			//on world
 
-			if(unsafeWindow.initialGameData){//HCS initial data
-				setTimeout(function(){FSH.Helper.injectWorldNewMap(unsafeWindow.initialGameData);},400);
+			if(window.initialGameData){//HCS initial data
+				setTimeout(function(){FSH.Helper.injectWorldNewMap(window.initialGameData);},400);
 			}
 			$.subscribe('-1-success.action-response 5-success.action-response', function(e, data){ //change of information
 				setTimeout(function(){FSH.Helper.injectWorldNewMap(data);},400);
@@ -3447,10 +3447,10 @@ window.FSH.Helper = {
 				$(document).controls('option').keys[index] = [];
 			});
 		}
-		unsafeWindow.document.onkeypress = null;
-		unsafeWindow.document.combatKeyHandler = null;
-		unsafeWindow.document.realmKeyHandler = null;
-		unsafeWindow.document.onkeypress = FSH.Helper.keyPress;
+		window.document.onkeypress = null;
+		window.document.combatKeyHandler = null;
+		window.document.realmKeyHandler = null;
+		window.document.onkeypress = FSH.Helper.keyPress;
 	},
 
 	moveMe: function(dx, dy) {
@@ -7094,7 +7094,7 @@ window.FSH.Helper = {
 		FSH.System.setValue('doNotKillList',newDoNotKillList);
 		FSH.Helper.doNotKillList = newDoNotKillList;
 		//refresh the action list
-		unsafeWindow.GameData.doAction(-1);
+		window.GameData.doAction(-1);
 	},
 
 	checkIfGroupExists: function(responseText) {

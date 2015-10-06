@@ -12,20 +12,20 @@ window.FSH = window.FSH || {};
 	var gvar = {};
 	var GMSTORAGE_PATH = 'GM_';
 	// You can change it to avoid conflict with others scripts
-	if (typeof unsafeWindow === 'undefined'){
-		window.unsafeWindow = window;
-	}
+	//~ if (typeof unsafeWindow === 'undefined'){
+		//~ window.unsafeWindow = window;
+	//~ }
 	var needApiUpgrade = false;
 	if (window.navigator.appName.match(/^opera/i) && 
 			typeof window.opera !== 'undefined'){
 		needApiUpgrade = true;
 		gvar.isOpera = true;
-		unsafeWindow.GM_log = window.opera.postError;
+		window.GM_log = window.opera.postError;
 	}
 	if (typeof GM_setValue !== 'undefined'){
 		var gsv;
 		try {
-			gsv=unsafeWindow.GM_setValue.toString();
+			gsv=window.GM_setValue.toString();
 		} catch(e) {
 			gsv='staticArgs';
 		}
@@ -46,11 +46,11 @@ window.FSH = window.FSH || {};
 		var uid = new Date().toString();
 		var result;
 		try{
-			unsafeWindow.localStorage.setItem(uid, uid);
-			result = unsafeWindow.localStorage.getItem(uid) === uid;
-			unsafeWindow.localStorage.removeItem(uid);
+			window.localStorage.setItem(uid, uid);
+			result = window.localStorage.getItem(uid) === uid;
+			window.localStorage.removeItem(uid);
 			if (result) {
-				ws = typeof unsafeWindow.localStorage;
+				ws = typeof window.localStorage;
 			} else {
 				console.log('There is a problem with your local storage. ' +
 					'FSH cannot persist your settings.');
@@ -61,8 +61,8 @@ window.FSH = window.FSH || {};
 		}
 		// Catch Security error
 		if (ws === 'object'){
-			unsafeWindow.GM_getValue = function(name, defValue){
-				var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH +
+			window.GM_getValue = function(name, defValue){
+				var value = window.localStorage.getItem(GMSTORAGE_PATH +
 					name);
 				if (value === null || value === undefined){
 					return defValue;
@@ -78,27 +78,27 @@ window.FSH = window.FSH || {};
 				}
 				return value;
 			};
-			unsafeWindow.GM_setValue = function(name, value){
+			window.GM_setValue = function(name, value){
 				switch (typeof value){
 				case 'string':
-					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+					window.localStorage.setItem(GMSTORAGE_PATH +
 						name, 'S]' + value);
 					break;
 				case 'number':
 					if (value.toString().indexOf('.') < 0){
-						unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+						window.localStorage.setItem(GMSTORAGE_PATH +
 							name, 'N]' + value);
 					}
 					break;
 				case 'boolean':
-					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+					window.localStorage.setItem(GMSTORAGE_PATH +
 						name, 'B]' + value);
 					break;
 				}
 			};
 		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
 			gvar.temporarilyStorage = [];
-			unsafeWindow.GM_getValue = function(name, defValue){
+			window.GM_getValue = function(name, defValue){
 				if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
 					'undefined'){
 					return defValue;
@@ -106,7 +106,7 @@ window.FSH = window.FSH || {};
 					return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
 				}
 			};
-			unsafeWindow.GM_setValue = function(name, value){
+			window.GM_setValue = function(name, value){
 				switch (typeof value){
 				case 'string':
 				case 'boolean':
@@ -116,11 +116,11 @@ window.FSH = window.FSH || {};
 			};
 		}
 
-		unsafeWindow.GM_listValues = function(){
+		window.GM_listValues = function(){
 			var list = [];
 			var reKey = new RegExp('^' + GMSTORAGE_PATH);
-			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i += 1) {
-				var key = unsafeWindow.localStorage.key(i);
+			for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
+				var key = window.localStorage.key(i);
 				if (key.match(reKey)) {
 					list.push(key.replace(GMSTORAGE_PATH, ''));
 				}
@@ -132,18 +132,18 @@ window.FSH = window.FSH || {};
 //window.FSH.GM_ApiBrowserCheck();
 
 // jquery GM_get/set wrapper
-(function GM_JQ_wrapper() {
-	if (typeof GM_setValue !== 'undefined') {
-		var oldGM_setValue = GM_setValue;
-		GM_setValue = function(name, value){
-			setTimeout(function() {oldGM_setValue(name, value);}, 0);
-		};
-	}
-})();
+//~ (function GM_JQ_wrapper() {
+	//~ if (typeof GM_setValue !== 'undefined') {
+		//~ var oldGM_setValue = GM_setValue;
+		//~ GM_setValue = function(name, value){
+			//~ setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		//~ };
+	//~ }
+//~ })();
 //window.FSH.GM_JQ_wrapper();
 
 // FSH.System.functions
-window.FSH.System = {
+FSH.System = {
 	init: function() {
 		FSH.System.server = document.location.protocol + '//' + document.location.host + '/';
 		var imgurls = FSH.System.findNode('//img[contains(@src, "/skin/")]');
@@ -409,7 +409,7 @@ window.FSH.System = {
 	},
 
 	openInTab: function(url){
-		setTimeout(function() {unsafeWindow.open(url, '');}, 0);
+		setTimeout(function() {window.open(url, '');}, 0);
 	},
 
 	escapeHtml: function(unsafe) {
@@ -453,7 +453,7 @@ window.FSH.System = {
 };
 FSH.System.init();
 
-window.FSH.Data = {
+FSH.Data = {
 
 	plantFromComponent: function(aComponent) {
 		switch(aComponent) {
@@ -1305,7 +1305,7 @@ window.FSH.Data = {
 
 };
 
-window.FSH.Layout = {
+FSH.Layout = {
 
 	injectMenu: function() { //jquery
 		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
