@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1510b3
+// @version        1510b4
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -105,11 +105,11 @@ FSH.Helper = {
 			FSH.Helper.changeGuildLogHREF();
 			FSH.Helper.injectHomePageTwoLink();
 			if (FSH.Helper.enableTempleAlert) {
-				FSH.Helper.injectTempleAlert();}
+				FSH.notification.injectTempleAlert();}
 			if (FSH.Helper.enableUpgradeAlert) {
-				FSH.Helper.injectUpgradeAlert();}
+				FSH.notification.injectUpgradeAlert();}
 			if (FSH.Helper.enableComposingAlert) {
-				FSH.Helper.injectComposeAlert();}
+				FSH.composing.injectComposeAlert();}
 			FSH.Helper.injectQuickMsgDialogJQ();
 		}
 		if (!FSH.System.getValue('hideHelperMenu')) {
@@ -119,10 +119,6 @@ FSH.Helper = {
 
 	// main event dispatcher
 	onPageLoad: function() {
-		var hcsData = $('html').data('hcs');
-		if (hcsData && hcsData['new-ui']) { // UFSG or QuickBuff
-			FSH.Helper.prepareEnv();
-		}
 
 		var cmd;
 		var subcmd;
@@ -160,6 +156,11 @@ FSH.Helper = {
 		FSH.Helper.page = cmd + '/' + subcmd + '/' + subcmd2 + '(' + type + ')';
 		// console.log('FSH.Helper.page', FSH.Helper.page);
 
+		var hcsData = $('html').data('hcs');
+		if (hcsData && hcsData['new-ui']) { // UFSG or QuickBuff
+			FSH.Helper.prepareEnv();
+		}
+
 		var pageSwitcher = FSH.Data.pageSwitcher;
 
 		if (pageSwitcher[cmd] &&
@@ -169,7 +170,12 @@ FSH.Helper = {
 			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
 			funcName = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
 			// console.log('pageSwitcher2 funcName', funcName);
-			fn = FSH.Helper[funcName];
+			funcName = funcName.split('.');
+			if (funcName.length === 1) {
+				fn = FSH.Helper[funcName[0]];
+			} else if (funcName.length === 2) {
+				fn = FSH[funcName[0]][funcName[1]];
+			}
 			fn();
 		}
 
@@ -801,7 +807,7 @@ FSH.Helper = {
 		document.getElementById('calculatedefenderstats')
 			.addEventListener('click',
 				function() {
-					FSH.Helper.getMembrList(FSH.Helper.calculateRelicDefenderStats,
+					FSH.ajax.getMembrList(FSH.Helper.calculateRelicDefenderStats,
 						false);
 				},
 				true);
@@ -1507,8 +1513,8 @@ FSH.Helper = {
 	injectAdvisor: function() {
 		FSH.Helper.appendHead({
 			js: ['https://cdn.jsdelivr.net/jquery.datatables/1.10.4/js/jquery.dataTables.min.js'],
-			callback: FSH.Helper.getMembrList,
-			param1: FSH.System.getUrlParameter('subcmd2') === 'weekly' ?
+			callback: FSH.ajax.getMembrList,
+			param1: FSH.subcmd2 === 'weekly' ?
 				FSH.Helper.injectAdvisorWeekly :
 				FSH.Helper.injectAdvisorNew,
 			param2: false
@@ -3828,7 +3834,7 @@ FSH.Helper = {
 	},
 
 	addLogWidgets: function() {
-		FSH.Helper.getMembrList(FSH.Helper.addLogWidgetsOld, false);
+		FSH.ajax.getMembrList(FSH.Helper.addLogWidgetsOld, false);
 	},
 
 	addLogWidgetsOld: function() {
@@ -3978,8 +3984,7 @@ FSH.Helper = {
 		var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
 		var quickBuff = '';
 		if (buffsSent) {
-
-			buffsSent = buffsSent.replace('`~','').replace('~`', '').split(',');
+			buffsSent = buffsSent[0].replace('`~','').replace('~`', '').split(',');
 			var theBuffPack = FSH.System.getValueJSON('buffpack');
 			for (var j = 0; j < buffsSent.length; j += 1) {
 				var bBuffFound = false;
@@ -4301,80 +4306,7 @@ FSH.Helper = {
 	},
 
 	injectReportPaint: function() {
-		FSH.Helper.getMembrList(FSH.Helper.doReportPaint, false);
-	},
-
-	getMembrList: function(fn, force) {
-		if (force) {
-			$.ajax({
-				dataType: 'json',
-				url:'index.php',
-				data: {
-					cmd: 'export',
-					subcmd: 'guild_members',
-					guild_id: FSH.Layout.guildId()//,
-				},
-				success: function(data) {
-					var membrList = {};
-					membrList.lastUpdate = Date.now();
-					data.forEach(function(ele) {
-						membrList[ele.username] = ele;
-					});
-					localforage.setItem('fsh_membrList', membrList,
-						function(err, membrList) {
-							if (err) {console.log('localforage error', err);}
-							FSH.Helper.membrList = membrList;
-							fn(membrList);
-						}
-					);
-				}
-			});
-			return;
-		}
-		localforage.getItem('fsh_membrList', function(err, membrList) {
-			if (err) {console.log('localforage error', err);}
-			if (!membrList || membrList.lastUpdate < Date.now() - 300000) {
-				FSH.Helper.getMembrList(fn, true);
-				return;
-			}
-			FSH.Helper.membrList = membrList;
-			fn(membrList);
-		});
-	},
-
-	getInv: function(fn, force) {
-		var ajax = 'inventory';
-		var forage = 'fsh_selfInv';
-		if (FSH.System.getUrlParameter('subcmd') === 'guildinvmgr') {
-			ajax = 'guild_store&inc_tagged=1';
-			forage = 'fsh_guildInv';
-		}
-		if (force) {
-			$.ajax({
-				dataType: 'json',
-				url:'index.php?cmd=export&subcmd=' + ajax,
-				success: function(data) {
-					data.lastUpdate = Date.now();
-					localforage.setItem(forage, data,
-						function(err, inv) {
-							if (err) {console.log('localforage error', err);}
-							FSH.Helper.inventory = inv;
-							fn();
-						}
-					);
-				}
-			});
-			return;
-		}
-		localforage.getItem(forage, function(err, inv) {
-			if (err) {console.log('localforage error', err);}
-			if (!inv || inv.lastUpdate < Date.now() - 300000) {
-				FSH.Helper.getInv(fn, true);
-				return;
-			}
-			FSH.Helper.inventory = inv;
-			fn();
-		});
+		FSH.ajax.getMembrList(FSH.Helper.doReportPaint, false);
 	},
 
 	reportHeader: function(membrList, tr) {
@@ -4389,23 +4321,6 @@ FSH.Helper = {
 			'</span> ]'
 		);
 	},
-
-	//~ onlineDot: function(min) {
-		//~ var img = '';
-		//~ if (FSH.System.getValue('enhanceOnlineDots')) {
-			//~ img = FSH.Data.offlineDot;
-			//~ if (min < 2) {
-				//~ img = FSH.Data.greenDiamond;
-			//~ } else if (min < 5) {
-				//~ img = FSH.Data.yellowDiamond;
-			//~ } else if (min < 30) {
-				//~ img = FSH.Data.orangeDiamond;
-			//~ } else if (min > 10080) {
-				//~ img = FSH.Data.sevenDayDot;
-			//~ }
-		//~ }
-		//~ return img;
-	//~ },
 
 	doReportPaint: function(membrList) {
 		var rows = $('#pCC table table tr');
@@ -5735,9 +5650,9 @@ FSH.Helper = {
 		var content = FSH.Layout.notebookContent();
 		content.innerHTML = '<img src = "' + FSH.System.imageServer +
 			'/world/actionLoadingSpinner.gif">&nbsp;Getting inventory data...';
-		if (FSH.System.getUrlParameter('subcmd') === 'invmanager') {
+		if (FSH.subcmd === 'invmanager') {
 			$.getJSON('?cmd=export&subcmd=inventory', FSH.Helper.gotInvMan);
-		} else if (FSH.System.getUrlParameter('subcmd') === 'guildinvmanager') {
+		} else if (FSH.subcmd === 'guildinvmanager') {
 			$.getJSON('?cmd=export&subcmd=guild_store&inc_tagged=1',
 				FSH.Helper.gotGuildInvMan);
 		}
@@ -6834,7 +6749,7 @@ FSH.Helper = {
 	},
 
 	injectGroups: function() {
-		FSH.Helper.getMembrList(FSH.Helper.doGroupPaint, false);
+		FSH.ajax.getMembrList(FSH.Helper.doGroupPaint, false);
 		FSH.Helper.displayMinGroupLevel();
 		FSH.Helper.groupButtons();
 	},
@@ -6999,7 +6914,7 @@ FSH.Helper = {
 		if (playerInput.length === 0) {return;}
 		$('h1:contains("Quick Buff")').after(FSH.Layout.quickBuffHeader);
 		FSH.System.xmlhttp('index.php?cmd=profile', FSH.Helper.getSustain);
-		$('div#packs').on('click', 'h1', window.updateCost);
+		//$('div#packs').on('click', 'h1', window.updateCost);
 		$('div#players').on('click', 'h1', FSH.Helper.addBuffLevels);
 		var excludeBuff = {
 			'skill-50': 'Death Dealer',
@@ -10452,7 +10367,7 @@ if (target === '[ No bounties available. ]') {break;}
 	},
 
 	injectGuildRanks: function() {
-		FSH.Helper.getMembrList(FSH.Helper.doRankPaint, true);
+		FSH.ajax.getMembrList(FSH.Helper.doRankPaint, true);
 		// gather rank info button
 		$('td', '#pCC').has('a#show-guild-founder-rank-name')
 			.append('&nbsp;<input id="getrankweightings" type="button" ' +
@@ -10990,135 +10905,6 @@ if (target === '[ No bounties available. ]') {break;}
 		.attr('cols', '90')
 		.attr('rows', '30')
 		.css('resize', 'none');
-	},
-
-	injectTempleAlert: function() { //jquery
-		//Checks to see if the temple is open for business.
-		//if (!FSH.System.getValue('enableTempleAlert')) {return;}
-		if (FSH.System.getUrlParameter('cmd') === 'temple') {return;}
-		var templeAlertLastUpdate = FSH.System.getValue('lastTempleCheck');
-		var needToPray = FSH.System.getValue('needToPray');
-		var needToParse = false;
-		if (templeAlertLastUpdate) {
-			if (Date.now() > templeAlertLastUpdate) { // midnight
-				needToParse = true;
-			} else if (needToPray) {
-				FSH.Helper.displayDisconnectedFromGodsMessage();
-			}
-		} else {
-			needToParse = true;
-		}
-		if (needToParse) {
-			$.get('index.php?cmd=temple', FSH.Helper.parseTemplePage);
-		}
-	},
-
-	parseTemplePage: function(responseText) { //native
-		var checkNeedToPray, doc;
-		if (!FSH.Helper.enableTempleAlert) {return;}
-		if (FSH.System.getUrlParameter('cmd') !== 'temple') {
-			doc = FSH.System.createDocument(responseText);
-		} else {
-			doc = document;
-		}
-		checkNeedToPray = doc.querySelector('input[value="Pray to Osverin"]');
-		var needToPray = false;
-		if (checkNeedToPray) {
-			FSH.Helper.displayDisconnectedFromGodsMessage();
-			needToPray = true;
-		}
-		FSH.System.setValue('needToPray', needToPray);
-		FSH.System.setValue('lastTempleCheck', new Date()
-			.setUTCHours(23, 59, 59, 999) + 1); // midnight
-	},
-
-displayDisconnectedFromGodsMessage: function() {
-		var notificationUl = $('ul#notifications');
-		notificationUl.prepend('<li class="notification"><a href="index.php?cmd=temple">' +
-			'<span class="notification-icon"></span>' +
-			'<p class="notification-content">Bow down to the gods</p>' +
-			'</a></li>');
-	},
-
-	injectUpgradeAlert: function() { //jquery
-		//if (!FSH.System.getValue('enableUpgradeAlert')) {return;}
-		if (location.search.search('cmd=points&type=1') !== -1) {return;}
-		var needToDoUpgrade = FSH.System.getValue('needToDoUpgrade');
-		if (needToDoUpgrade) {
-			FSH.Helper.displayUpgradeMsg();
-			return;
-		}
-		var lastUpgradeCheck = FSH.System.getValue('lastUpgradeCheck');
-		if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
-		$.get('index.php?cmd=points&type=1', FSH.Helper.parseGoldUpgrades);
-	},
-
-	parseGoldUpgrades: function(data) { //jquery
-		if (!FSH.Helper.enableUpgradeAlert) {return;}
-		var doc;
-		if (location.search.search('cmd=points&type=1') === -1) {
-			doc = data;
-		} else {
-			doc = document;
-		}
-		var limit = $('tr:contains("+1 Maximum Stamina") > td:eq(2)', doc);
-		var checkDoneUpgrade = limit.text().split(' / ');
-		if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
-			FSH.Helper.displayUpgradeMsg();
-			FSH.System.setValue('needToDoUpgrade', true);
-		} else {
-			FSH.System.setValue('needToDoUpgrade', false);
-			FSH.System.setValue('lastUpgradeCheck',
-				Date.parse(limit.next().text() + ' GMT'));
-		}
-	},
-
-	displayUpgradeMsg: function() { //jquery
-		$('ul#notifications').prepend(FSH.Layout.goldUpgradeMsg);
-	},
-
-	injectComposeAlert: function() { //jquery
-		if (FSH.System.getUrlParameter('cmd') === 'composing') {return;}
-		var needToCompose = FSH.System.getValue('needToCompose');
-		if (needToCompose) {
-			FSH.Helper.displayComposeMsg();
-			return;
-		}
-		var lastComposeCheck = FSH.System.getValue('lastComposeCheck');
-		if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
-		$.get('index.php?cmd=composing', FSH.Helper.parseComposing);
-	},
-
-	parseComposing: function(data) { //jquery
-		var doc;
-		if (FSH.System.getUrlParameter('cmd') !== 'composing') {
-			doc = data;
-		} else {
-			doc = document;
-		}
-		var openSlots = $('div.composing-potion-time:contains("ETA: Ready to ' +
-			'Collect!"), div.composing-potion-time:contains("ETA: n/a")', doc);
-		if (openSlots.length !== 0) {
-			FSH.Helper.displayComposeMsg();
-			FSH.System.setValue('needToCompose', true);
-		} else {
-			var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
-			var etas = $('div.composing-potion-time', doc);
-			var eta = Infinity;
-			etas.each(function() { // might be better just to look at [0]
-				var timeArr = timeRE.exec($(this).text());
-				if (!timeArr) {return;}
-				var milli = timeArr[1] * 3600000 + timeArr[2] * 60000 +
-					timeArr[3] * 1000 + Date.now();
-				eta = milli < eta ? milli : eta;
-			});
-			FSH.System.setValue('needToCompose', false);
-			FSH.System.setValue('lastComposeCheck', eta);
-		}
-	},
-
-	displayComposeMsg: function() { //jquery
-		$('ul#notifications').prepend(FSH.Layout.composeMsg);
 	},
 
 	injectFindPlayer: function() {
@@ -11718,84 +11504,6 @@ displayDisconnectedFromGodsMessage: function() {
 				});  
 			}); 
 		}
-	},
-
-	injectComposing: function() { //jquery
-
-		if (FSH.Helper.enableComposingAlert) {
-			FSH.Helper.parseComposing();}
-
-		var disableComposingPrompts =
-			FSH.System.getValue('disableComposingPrompts');
-		if (disableComposingPrompts) {
-			$('input[class^="large awesome"][onclick]').each(function(i, e) {
-				$(e).attr('onclick', $(e).attr('onclick')
-				.replace(/if\(confirm\(.+\)\) /, ''));
-			});
-			$('div#composing-error-dialog')
-				.before('<div id="fshCompConf"><b>Warning:</b> Confirmation ' +
-				'prompts are disabled. Use at your own risk.<div>');
-		}
-
-		$('input[value="Discard All"]')
-			.before('<input type="button" id="helperCreateAll" class="large ' +
-			'awesome red" value="Create All" disabled="true" style="height: ' +
-			'25px; line-height: 9px;">&nbsp;');
-		if ($('select[id^="composing-template-"][value!="none"]').length) {
-			$('#helperCreateAll').prop('disabled', false);
-			$('#helperCreateAll').click(function() {
-				if (disableComposingPrompts ||
-					confirm('Are you sure you want to create all potions? ' +
-						'Do you have the correct templates selected?')) {
-					$('select[id^="composing-template-"][value!="none"]')
-						.each(function() {
-							FSH.Helper.composingCreatePotion($(this));
-						});
-				}
-			});
-		}
-
-		$('input[id^=create-]').each(function(i,e){
-			$(e).after('<span id="helperQC-' + $(e).attr('id').slice(-1) +
-				'" class="helperQC">&nbsp;[Quick Create]</span>');
-		});
-
-		$('span[id^="helperQC-"]').on('click', function(){
-			var temp = $('select#composing-template-' +
-				$(this).attr('id').slice(-1));
-			if (temp.length === 1 && temp.val() !== 'none') {
-				FSH.Helper.composingCreatePotion(temp);
-			}
-		});
-	},
-
-	composingCreatePotion: function($template) { //jquery
-		$.ajax({
-			cache: false,
-			dataType: 'json',
-			url:'index.php',
-			data: {
-				cmd: 'composing',
-				subcmd: 'createajax',
-				template_id: $template.val(),
-				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
-			},
-			success: function(data, textStatus) {
-				if (data.error !== '') {
-					$template.parent()
-						.html('<div id="helperQCError" style="height: ' +
-						'26px;">' + data.error + '</div>');
-				} else {
-					$template.parent()
-						.html('<div id="helperQCSuccess" style="height: ' +
-						'26px;">' + textStatus + '</div>');
-				}
-				if ($('select[id^="composing-template-"]').length === 0 &&
-					$('div#helperQCError').length === 0) {
-					location.href = 'index.php?cmd=composing';
-				}
-			}
-		});
 	},
 
 	appendHead: function(o) { // native
