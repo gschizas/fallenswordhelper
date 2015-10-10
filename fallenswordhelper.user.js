@@ -176,7 +176,7 @@ FSH.Helper = {
 			} else if (funcName.length === 2) {
 				fn = FSH[funcName[0]][funcName[1]];
 			}
-			fn();
+			if (typeof fn === 'function') {fn();}
 		}
 
 		if (FSH.System.getValue('playNewMessageSound')) {
@@ -4316,14 +4316,17 @@ FSH.Helper = {
 			'<a href="' + FSH.System.server +
 			'index.php?cmd=profile&player_id=' +
 			membrList[b.text()].id + '">' + b.html() + '</a>' +
-			' [ <span class=a-reply target_player=' + b.text() +
-			' style="cursor:pointer; text-decoration:underline;">m' +
-			'</span> ]'
+			' [ <span class="a-reply fshLink" target_player=' + b.text() +
+			'>m</span> ]'
 		);
 	},
 
 	doReportPaint: function(membrList) {
-		var rows = $('#pCC table table tr');
+		var pCC = $('div#pCC');
+
+		var internalPCC = pCC.clone();
+
+		var rows = $('table table tr', internalPCC);
 
 		var searchUser = FSH.System.getUrlParameter('user');
 		if (searchUser && $('b:contains("' + searchUser + '")', rows)
@@ -4350,12 +4353,18 @@ FSH.Helper = {
 				FSH.Helper.reportChild(tr);
 			}
 		});
-		$('.a-reply').click(function(evt) {
-			FSH.Helper.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+
+		pCC.replaceWith(internalPCC);
+
+		$('div#pCC').on('click', 'span.a-reply', function(evt) {
+			FSH.Helper.openQuickMsgDialog(
+				evt.target.getAttribute('target_player'));
 		});
-		$('.recall').click(FSH.Helper.recallItem);
-		$('.wear').click(FSH.Helper.recallItemNWear);
-		$('.equip').click(FSH.Helper.equipProfileInventoryItem);
+		$('div#pCC').on('click', '.recall', FSH.Helper.recallItem);
+		$('div#pCC').on('click', '.wear', FSH.Helper.recallItemNWear);
+		$('div#pCC').on('click', '.equip',
+			FSH.Helper.equipProfileInventoryItem);
+
 	},
 
 	reportChild: function(tr) {
@@ -4363,9 +4372,12 @@ FSH.Helper = {
 		var atr = $('a', tr);
 		atr.each(function(i,a) {
 			var $a = $(a);
+			$a.attr('data-tipped', $a.attr('oldtitle'));
+			$a.addClass('tip-static');
 			$a.parent().append(
-				' | <span class="reportLink recall" href="' +
-				$a.attr('href') + '">' +
+				' | <span class="reportLink recall tip-static" href="' +
+				$a.attr('href') + '" data-tipped="' + $a.attr('oldtitle') +
+				'">' +
 				($a.text() === 'Backpack' ? 'Fast BP' : 'Fast GS') +
 				'</span>');
 		});
@@ -4374,7 +4386,8 @@ FSH.Helper = {
 			$(':contains("Brew")', tr).length !== 0 ||
 			$(':contains("Draft")', tr).length !== 0 ||
 			$(':contains("Elixir")', tr).length !== 0 ||
-			$(':contains("Potion")', tr).length !== 0) {return;}
+			$(':contains("Potion")', tr).length !== 0 ||
+			$(':contains("Jagua Egg")', tr).length !== 0) {return;}
 		var href = atr.first().attr('href');
 		$('span.fshNoWrap', tr).append(' | <span class="reportLink ' +
 			(atr.length === 2 ?
@@ -9836,7 +9849,7 @@ if (target === '[ No bounties available. ]') {break;}
 //				output += ' href="' + bountyList.bounty[i].link + '">' + bountyList.bounty[i].target +'</a></li>';
 				output += '<li style="padding-bottom:0px;"><a style="color:' +
 					'red;font-size:10px;"href="' + FSH.System.server +
-					'index.php?cmd=attackplayer&target_username=' +
+					'index.php?cmd=attackplayer&mode=bounty&target_username=' +
 					bountyList.bounty[i].target + '">[a]</a>&nbsp;<a style="' +
 					'color:#A0CFEC;font-size:10px;"href="' + FSH.System.server +
 					'index.php?cmd=message&target_player=' +
