@@ -36,7 +36,9 @@
 
 .fshCenter    {text-align: center;}
 .fshRight     {text-align: right;}
-
+.fshHide      {display: none;}
+.fshWearHide  {display: none;}
+.fshInline    {display: inline;}
 .fshNoWrap    {white-space: nowrap;}
 .helperQC     {cursor: pointer;}
 

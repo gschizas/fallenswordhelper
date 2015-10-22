@@ -1244,7 +1244,7 @@ FSH.Data = {
 		auctionhouse: {'-': {'-': {'-': {'-': 'injectAuctionHouse'}}}},
 		guild: {
 			'inventory': {
-				'report': {'-': {'-': 'injectReportPaint'}},
+				'report': {'-': {'-': 'guildReport.injectReportPaint'}},
 				'addtags': {'-': {'-': 'injectGuildAddTagsWidgets'}},
 				'removetags': {'-': {'-': 'injectGuildAddTagsWidgets'}},
 				'storeitems': {'-': {'-': 'injectDropItems'}}},
@@ -1593,7 +1593,20 @@ FSH.Layout = {
 		'@@username@@" data-tipped="Secure Trade"></a><a id="enemy-trade" ' +
 		'class="guild-icon left guild-minibox-action tip-static" ' +
 		'href="index.php?cmd=trade&target_player=@@username@@" ' +
-		'data-tipped="Send Gold/Items/FSP"></a></div></li>'
+		'data-tipped="Send Gold/Items/FSP"></a></div></li>',
+
+	reportLinks:
+		'<span class="fshNoWrap">Recall to: <a class="tip-static" ' +
+		'href="@@firstHref@@" data-tipped="@@firstOldTitle@@">@@firstText@@' +
+		'</a><span class="fshHide"> | <a class="tip-static" ' +
+		'href="@@secondHref@@" data-tipped="Click to recall to guild store">' +
+		'Guild Store</a></span> | <span class="reportLink recall tip-static" ' +
+		'href="@@firstHref@@" data-tipped="@@firstOldTitle@@">Fast ' +
+		'@@fasttext@@</span><span class="fshHide"> | <span class="reportLink ' +
+		'recall tip-static" href="@@secondHref@@" data-tipped="Click to ' +
+		'recall to guild store">Fast GS</span></span><span ' +
+		'class="fshWearHide"> | <span class="reportLink @@linktype@@">Fast ' +
+		'Wear</span></span></span>'
 
 };
 
@@ -1941,6 +1954,158 @@ FSH.notification = {
 	displayUpgradeMsg: function() { //jquery
 		$('ul#notifications').prepend(FSH.Layout.goldUpgradeMsg);
 	},
+};
+
+FSH.guildReport = {
+
+	injectReportPaint: function() {
+		FSH.ajax.getMembrList(FSH.guildReport.doReportPaint, false);
+	},
+
+	reportHeader: function(innerTable) {
+		$('td[bgcolor="#DAA534"][colspan="2"] b', innerTable).each(function() {
+			var self = $(this);
+			self.html(
+				FSH.Layout.onlineDot(Math.floor((Math.floor(Date.now() /
+				1000) - FSH.Helper.membrList[self.text()].last_login) / 60)) +
+				'<a href="index.php?cmd=profile&player_id=' +
+				FSH.Helper.membrList[self.text()].id + '">' + self.html() +
+				'</a> [ <span class="a-reply fshLink" target_player=' +
+				self.text() + '>m</span> ]'
+			);
+		});
+	},
+
+	doReportPaint: function() {
+		var container = $('div#pCC > table > tbody > tr > td').last();
+		var innerTable = $('table', container).detach();
+		var rows = $('tr', innerTable);
+
+		var searchUser = FSH.System.getUrlParameter('user');
+		if (searchUser && $('b:contains("' + searchUser + '")', innerTable)
+			.length > 0) {
+			$('b:contains("' + searchUser + '")', innerTable)
+				.closest('tr').prevAll().remove();
+			$('a[href*="_id=' + FSH.Helper.membrList[searchUser].id + '&"]',
+				innerTable).last().closest('tr').nextAll().remove();
+		}
+
+		var searchSet = FSH.System.getUrlParameter('set');
+		if (searchSet) {
+			var setRE = new RegExp(searchSet);
+			rows.filter(function() {
+				var tds = $('td', this);
+				return tds.length !== 2 && !setRE.test(tds.eq(1).text());
+			}).remove();
+		}
+
+		FSH.guildReport.reportHeader(innerTable);
+		FSH.guildReport.reportChild(innerTable);
+
+		innerTable.on('click', 'span.a-reply', function(evt) {
+			FSH.Helper.openQuickMsgDialog(
+				evt.target.getAttribute('target_player'));
+		});
+		innerTable.on('click', '.recall', FSH.guildReport.recallItem);
+		innerTable.on('click', '.wear', FSH.guildReport.recallItemNWear);
+		innerTable.on('click', '.equip',
+			FSH.guildReport.equipProfileInventoryItem);
+
+		container.append(innerTable);
+	},
+
+	reportChild: function(innerTable) {
+		var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion' +
+			'|Jagua Egg');
+		$('td:contains("Recall to:")', innerTable).each(function() {
+			var self = $(this);
+			var atd = $('a', self);
+			var firstA = atd.first();
+			var firstHref = firstA.attr('href');
+			var firstOldTitle = firstA.attr('oldtitle');
+			var firstText = firstA.text();
+			var secondHref = atd.length === 2 ? atd.eq(1).attr('href') : null;
+			var output = FSH.Layout.reportLinks;
+			output = output.replace(/@@firstHref@@/g, firstHref);
+			output = output.replace(/@@firstOldTitle@@/g, firstOldTitle);
+			output = output.replace(/@@firstText@@/g, firstText);
+			output = output.replace(/@@fasttext@@/g, firstText === 'Backpack' ?
+				'BP' : 'GS');
+			if (secondHref) {
+				output = output.replace(/fshHide/g, 'fshInline');
+				output = output.replace(/@@secondHref@@/g, secondHref);
+			}
+
+			var itemName = self.prev().html();
+			if (!wearRE.test(itemName)) {
+				output = output.replace(/fshWearHide/g, 'fshInline');
+				output = output.replace(/@@linktype@@/g, secondHref ?
+					'wear" href="' + firstHref :
+					'equip" itemid="' + /&id=(\d+)/.exec(firstHref)[1]);
+			}
+			self.html(output);
+		});
+	},
+
+	recallItem: function(evt) {
+		var href=evt.target.getAttribute('href');
+		FSH.System.xmlhttp(href, FSH.guildReport.recallItemReturnMessage, {'target': evt.target, 'url': href});
+	},
+
+	recallItemReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = FSH.Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode;
+		if (info.search('You successfully recalled the item') !== -1) {
+			itemCellElement.innerHTML = '<span style="color:green; font-weight:bold;">' + info + '</span>';
+		} else if (info!=='') {
+			itemCellElement.innerHTML = '<span style="color:red; font-weight:bold;">' + info + '</span>';
+		} else {
+			itemCellElement.innerHTML = '<span style="color:red; font-weight:bold;">Weird Error: check the Tools>Error Console</span>';
+			console.log('Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error');
+			console.log(callback.url);
+		}
+	},
+
+	recallItemNWear: function(evt) {
+		var href=evt.target.getAttribute('href');
+		FSH.System.xmlhttp(href, FSH.guildReport.recallItemNWearReturnMessage, {'target': evt.target, 'url': href});
+	},
+
+	recallItemNWearReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = FSH.Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode;
+		if (info.search('You successfully') !== -1) {
+			itemCellElement.innerHTML = '<span style="color:green; font-weight:bold;">Taken</span>';
+			FSH.System.xmlhttp(FSH.System.server+'?cmd=trade', FSH.guildReport.wearRecall, itemCellElement);
+		} else if (info!=='') {
+			itemCellElement.innerHTML = '<span style="color:red; font-weight:bold;">Error</span>';
+		}
+	},
+
+	wearRecall: function(responseText, callback) {
+		var doc=FSH.System.createDocument(responseText);
+		var items=FSH.System.findNodes('//input[@name="sendItemList[]"]',doc);
+		if (items) {
+			var itemId=items[items.length-1].getAttribute('value');
+			FSH.System.xmlhttp(FSH.System.server +
+				'?cmd=profile&subcmd=equipitem&inventory_id=' + itemId +
+				'&folder_id=0&backpack_page=0',
+				function(responseText) {
+					var info = FSH.Layout.infoBox(responseText);
+					if (info==='') {
+						callback.innerHTML += '<br><span style="color:green; ' +
+							'font-weight:bold;">Worn</span>';
+					} else {
+						callback.innerHTML += '<br><span style="color:red; ' +
+							'font-weight:bold;">' + info + '</span>';
+					}
+				}
+			);
+		}
+	},
+
 };
 
 })();
