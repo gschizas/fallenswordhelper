@@ -3788,7 +3788,10 @@ FSH.Helper = {
 	},
 
 	addLogWidgets: function() {
-		FSH.ajax.getMembrList(false, FSH.Helper.addLogWidgetsOld);
+		$.when(
+			FSH.ajax.getMembrList(false),
+			FSH.ajax.myStats(false)
+		).done(FSH.Helper.addLogWidgetsOld);
 	},
 
 	addLogWidgetsOld: function() {
@@ -3800,11 +3803,12 @@ FSH.Helper = {
 		var logTable = FSH.System.findNode('//table[tbody/tr/td/span[contains' +
 			'(.,"Currently showing:")]]');
 		if (!logTable) {return;}
-		var memberNameString = ' ' + Object.keys(FSH.Helper.membrList).join(' ') + ' ';
-		var listOfEnemies = FSH.System.getValue('listOfEnemies');
-		if (!listOfEnemies) {listOfEnemies = '';}
-		var listOfAllies = FSH.System.getValue('listOfAllies');
-		if (!listOfAllies) {listOfAllies = '';}
+		var memberNameString = Object.keys(FSH.Helper.membrList);
+		var profile = FSH.Helper.profile[FSH.Helper.myUsername];
+		var listOfAllies = profile._allies.map(function(obj) {
+			return obj.username;});
+		var listOfEnemies = profile._enemies.map(function(obj) {
+			return obj.username;});
 		var showPvPSummaryInLog = FSH.System.getValue('showPvPSummaryInLog');
 		var messageType;
 		for (i=0;i<logTable.rows.length;i += 1) {
@@ -3841,14 +3845,14 @@ FSH.Helper = {
 				colorPlayerName = true;
 			}
 			if (colorPlayerName) {
-				if (memberNameString.search(' '+playerName+' ') !==-1) {
+				if (memberNameString.indexOf(playerName) !== -1) {
 					playerElement.style.color='green';
 					isGuildMate = true;
 				}
-				if (listOfEnemies.search(' '+playerName+' ') !==-1) {
+				if (listOfEnemies.indexOf(playerName) !== -1) {
 					playerElement.style.color='red';
 				}
-				if (listOfAllies.search(' '+playerName+' ') !==-1) {
+				if (listOfAllies.indexOf(playerName) !== -1) {
 					playerElement.style.color='blue';
 				}
 			}

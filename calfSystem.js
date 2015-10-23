@@ -2029,7 +2029,7 @@ FSH.notification = {
 FSH.guildReport = {
 
 	injectReportPaint: function() {
-		FSH.ajax.getMembrList(FSH.guildReport.doReportPaint, false);
+		FSH.ajax.getMembrList(false, FSH.guildReport.doReportPaint);
 	},
 
 	reportHeader: function(innerTable) {
