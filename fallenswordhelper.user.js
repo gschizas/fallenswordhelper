@@ -4914,88 +4914,27 @@ FSH.Helper = {
 			});
 	},
 
-	profileParseAllyEnemy: function() {
-		var startIndex;
+	profileParseAllyEnemy: function() { // jquery
 		// Allies/Enemies count/total function
 		var alliesTotal = FSH.System.getValue('alliestotal');
-		var alliesTitle = FSH.System.findNode('//div[strong[.="Allies"]]');
-		var alliesTable = alliesTitle.nextSibling.nextSibling;
-		if (alliesTable) {
-			var numberOfAllies = 0;
-			startIndex = 0;
-			while (alliesTable.innerHTML.indexOf('/avatars/', startIndex+1) !== -1) {
-				numberOfAllies += 1;
-				startIndex = alliesTable.innerHTML.indexOf('/avatars/',startIndex+1);
-			}
-			startIndex = 0;
-			while (alliesTable.innerHTML.indexOf('/skin/player_default.jpg', startIndex+1) !== -1) {
-				numberOfAllies += 1;
-				startIndex = alliesTable.innerHTML.indexOf('/skin/player_default.jpg',startIndex+1);
-			}
-			alliesTitle.innerHTML += '&nbsp<span style="color:blue">' + numberOfAllies + '</span>';
-			if (alliesTotal && alliesTotal >= numberOfAllies) {
-				alliesTitle.innerHTML += '/<span style="color:blue" findme="alliestotal">' + alliesTotal + '</span>';
-			}
-		}
+		var alliesTitle = $('div#profileLeftColumn strong:contains("Allies")')
+			.parent();
+		var numberOfAllies = alliesTitle.next().find('img')
+			.filter('[src*="/avatars/"],[src$="/skin/player_default.jpg"]')
+			.length;
+		alliesTitle.append('<span class="fshBlue">&nbsp;' + numberOfAllies +
+			(alliesTotal && alliesTotal >= numberOfAllies ? '/' +
+			alliesTotal : '') + '</span>');
+
 		var enemiesTotal = FSH.System.getValue('enemiestotal');
-		var enemiesTitle = FSH.System.findNode('//div[strong[.="Enemies"]]');
-		var enemiesTable = enemiesTitle.nextSibling.nextSibling;
-		if (enemiesTable) {
-			var numberOfEnemies = 0;
-			startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf('/avatars/', startIndex+1) !== -1) {
-				numberOfEnemies += 1;
-				startIndex = enemiesTable.innerHTML.indexOf('/avatars/',startIndex+1);
-			}
-			startIndex = 0;
-			while (enemiesTable.innerHTML.indexOf('/skin/player_default.jpg', startIndex+1) !== -1) {
-				numberOfEnemies += 1;
-				startIndex = enemiesTable.innerHTML.indexOf('/skin/player_default.jpg',startIndex+1);
-			}
-			enemiesTitle.innerHTML += '&nbsp;<span style="color:blue">' + numberOfEnemies + '</span>';
-			if (enemiesTotal && enemiesTotal >= numberOfEnemies) {
-				enemiesTitle.innerHTML += '/<span style="color:blue" findme="enemiestotal">' + enemiesTotal + '</span>';
-			}
-		}
-
-		var i;
-		var aRow;
-		var j;
-		var aCell;
-		//store a list of allies and enemies for use in coloring
-		var listOfAllies = ' ';
-		if (alliesTable) {
-			var alliesTableActual = alliesTable.firstChild.nextSibling.firstChild.nextSibling;
-			for (i=0;i<alliesTableActual.rows.length;i += 1) {
-				aRow = alliesTableActual.rows[i];
-				for (j=0;j<alliesTableActual.rows[i].cells.length;j += 1) {
-					aCell = aRow.cells[j];
-					if (aCell.firstChild.firstChild.nextSibling) {
-						var allyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-						var allyName = allyNameTable.rows[0].cells[1].firstChild.textContent;
-						listOfAllies += allyName + ' ';
-					}
-				}
-			}
-		}
-
-		var listOfEnemies = ' ';
-		if (enemiesTable) {
-			var enemiesTableActual = enemiesTable.firstChild.nextSibling.firstChild.nextSibling;
-			for (i=0;i<enemiesTableActual.rows.length;i += 1) {
-				aRow = enemiesTableActual.rows[i];
-				for (j=0;j<enemiesTableActual.rows[i].cells.length;j += 1) {
-					aCell = aRow.cells[j];
-					if (aCell.firstChild.firstChild.nextSibling) {
-						var enemyNameTable = aCell.firstChild.firstChild.nextSibling.nextSibling;
-						var enemyName = enemyNameTable.rows[0].cells[1].firstChild.textContent;
-						listOfEnemies += enemyName + ' ';
-					}
-				}
-			}
-		}
-		FSH.System.setValue('listOfAllies', listOfAllies);
-		FSH.System.setValue('listOfEnemies', listOfEnemies);
+		var enemiesTitle = $('div#profileLeftColumn strong:contains("Enemies")')
+			.parent();
+		var numberOfEnemies = enemiesTitle.next().find('img')
+			.filter('[src*="/avatars/"],[src$="/skin/player_default.jpg"]')
+			.length;
+		enemiesTitle.append('<span class="fshBlue">&nbsp;' + numberOfEnemies +
+			(enemiesTotal && enemiesTotal >= numberOfEnemies ? '/' +
+			enemiesTotal : '') + '</span>');
 	},
 
 	addClickListener: function(id, listener) {
