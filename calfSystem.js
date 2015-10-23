@@ -1315,6 +1315,17 @@ FSH.Data = {
 		skills: {'-': {'-': {'-': {'-': 'injectSkills'}}}},
 		composing: {'-': {'-': {'-': {'-': 'composing.injectComposing'}}}},
 		'-': {'-': {'-': {'-': {'-': 'unknownPage'}}}}
+	},
+
+	excludeBuff: {
+		'skill-50' : 'Death Dealer',
+		'skill-54' : 'Counter Attack',
+		'skill-55' : 'Summon Shield Imp',
+		'skill-56' : 'Vision',
+		'skill-60' : 'Nightmare Visage',
+		'skill-61' : 'Quest Finder',
+		'skill-98' : 'Barricade',
+		'skill-101': 'Severe Condition'
 	}
 
 };
