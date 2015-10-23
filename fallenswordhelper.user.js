@@ -761,8 +761,8 @@ FSH.Helper = {
 		document.getElementById('calculatedefenderstats')
 			.addEventListener('click',
 				function() {
-					FSH.ajax.getMembrList(FSH.Helper.calculateRelicDefenderStats,
-						false);
+					FSH.ajax.getMembrList(false,
+						FSH.Helper.calculateRelicDefenderStats);
 				},
 				true);
 	},
@@ -1468,10 +1468,10 @@ FSH.Helper = {
 		FSH.Helper.appendHead({
 			js: ['https://cdn.jsdelivr.net/jquery.datatables/1.10.4/js/jquery.dataTables.min.js'],
 			callback: FSH.ajax.getMembrList,
-			param1: FSH.subcmd2 === 'weekly' ?
+			param1: false,
+			param2: FSH.subcmd2 === 'weekly' ?
 				FSH.Helper.injectAdvisorWeekly :
-				FSH.Helper.injectAdvisorNew,
-			param2: false
+				FSH.Helper.injectAdvisorNew
 		});
 	},
 
@@ -3788,7 +3788,7 @@ FSH.Helper = {
 	},
 
 	addLogWidgets: function() {
-		FSH.ajax.getMembrList(FSH.Helper.addLogWidgetsOld, false);
+		FSH.ajax.getMembrList(false, FSH.Helper.addLogWidgetsOld);
 	},
 
 	addLogWidgetsOld: function() {
@@ -6566,7 +6566,7 @@ FSH.Helper = {
 	},
 
 	injectGroups: function() {
-		FSH.ajax.getMembrList(FSH.Helper.doGroupPaint, false);
+		FSH.ajax.getMembrList(false, FSH.Helper.doGroupPaint);
 		FSH.Helper.displayMinGroupLevel();
 		FSH.Helper.groupButtons();
 	},
@@ -10178,7 +10178,7 @@ FSH.Helper = {
 	},
 
 	injectGuildRanks: function() {
-		FSH.ajax.getMembrList(FSH.Helper.doRankPaint, true);
+		FSH.ajax.getMembrList(true, FSH.Helper.doRankPaint);
 		// gather rank info button
 		$('td', '#pCC').has('a#show-guild-founder-rank-name')
 			.append('&nbsp;<input id="getrankweightings" type="button" ' +

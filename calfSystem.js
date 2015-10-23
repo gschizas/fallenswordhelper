@@ -1640,46 +1640,50 @@ FSH.Layout = {
 };
 
 FSH.ajax = {
-	getMembrList: function(fn, force) {
-		if (force) {
-			$.ajax({
-				dataType: 'json',
-				url:'index.php',
-				data: {
-					cmd: 'export',
-					subcmd: 'guild_members',
-					guild_id: FSH.Layout.guildId()//,
-				},
-				success: function(data) {
-					var membrList = {};
-					membrList.lastUpdate = Date.now();
-					data.forEach(function(ele) {
-						membrList[ele.username] = ele;
-					});
-					localforage.setItem('fsh_membrList', membrList,
-						function(err, membrList) {
-							if (err) {console.log('localforage error', err);}
-							FSH.Helper.membrList = membrList;
-// console.log('getMembrList forage set success');
-							fn(membrList);
-						}
-					);
-				}
-			});
-			return;
-		}
-		localforage.getItem('fsh_membrList', function(err, membrList) {
-			if (err) {console.log('localforage error', err);}
-			if (!membrList || membrList.lastUpdate < Date.now() - 300000) {
-				FSH.ajax.getMembrList(fn, true);
-				return;
-			}
+	getMembrList: function(force, fn) {
+		var dfr = FSH.ajax.guildMembers(force);
+		dfr.done(function(membrList) {
 			FSH.Helper.membrList = membrList;
-// console.log('getMembrList forage get success');
-			fn(membrList);
+			if (typeof fn === 'function') {fn(membrList);}
+		});
+		return dfr;
+	},
+
+	guildMembers: function(force) {
+		if (force) {
+			return FSH.ajax.getGuildMembers();
+		}
+		var prm = FSH.ajax.getForage('fsh_membrList');
+		return prm.pipe(function(membrList) {
+			if (!membrList || membrList.lastUpdate < Date.now() - 300000) {
+				return FSH.ajax.getGuildMembers();
+			}
+			return membrList;
 		});
 	},
 
+	getGuildMembers: function() {
+		var prm = $.ajax({
+			dataType: 'json',
+			url:'index.php',
+			data: {
+				cmd: 'export',
+				subcmd: 'guild_members',
+				guild_id: FSH.Layout.guildId()
+			}
+		});
+		return prm.pipe(function(data) {
+			var membrList = {};
+			membrList.lastUpdate = Date.now();
+			data.forEach(function(ele) {
+				membrList[ele.username] = ele;
+			});
+			FSH.ajax.setForage('fsh_membrList', membrList);
+			return membrList;
+		});
+	},
+
+	// this is a shit name, change it
 	getInv: function(fn, force) {
 		var ajax = 'inventory';
 		var forage = 'fsh_selfInv';
