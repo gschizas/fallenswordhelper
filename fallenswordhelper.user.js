@@ -6129,7 +6129,7 @@ FSH.Helper = {
 	dataTableSearch: function() {
 		/* Custom filtering function which will search data in column three between two values */
 		$.fn.dataTable.ext.search.push(
-			function(settings, data) {
+			function(_settings, data) {
 				var min = parseInt($('#fshMinLvl', FSH.Helper.context).val(), 10); // context
 				var max = parseInt($('#fshMaxLvl', FSH.Helper.context).val(), 10); // context
 				if (!isNaN(min)) {FSH.System.setValue('onlinePlayerMinLvl', min);}
@@ -9264,7 +9264,8 @@ FSH.Helper = {
 	},
 
 	injectTitan: function() {
-		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=scouttower', FSH.Helper.getScoutTowerDetails);
+		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=scouttower',
+			FSH.Helper.getScoutTowerDetails);
 	},
 
 	getScoutTowerDetails: function(responseText) {

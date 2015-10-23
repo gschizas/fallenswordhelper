@@ -743,18 +743,18 @@ FSH.Data = {
 /* jshint +W101 */ // Line is too long. (W101)
 
 	//~ guildRelationshipMessages: function(){
-		//~ if(!Data.guildMessages){
-			//~ Data.guildMessages= {};
-				//~ Data.guildMessages.guildSelfMessage = {'color':'green',
+		//~ if(!FSH.Data.guildMessages){
+			//~ FSH.Data.guildMessages= {};
+				//~ FSH.Data.guildMessages.guildSelfMessage = {'color':'green',
 					//~ 'message':'Member of your own guild!'};
-				//~ Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
+				//~ FSH.Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
 					//~ 'message':'Do not attack - Guild is friendly!'};
-				//~ Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
+				//~ FSH.Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
 					//~ 'message':'Do not attack - You\'ve been in that guild once!'};
-				//~ Data.guildMessages.guildEnmyMessage = {'color':'red',
+				//~ FSH.Data.guildMessages.guildEnmyMessage = {'color':'red',
 					//~ 'message':'Enemy guild. Attack at will!'};
 		//~ }
-		//~ return Data.guildMessages;
+		//~ return FSH.Data.guildMessages;
 	//~ },
 
 	guildMessages: {
