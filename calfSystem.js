@@ -1717,46 +1717,83 @@ FSH.ajax = {
 		});
 	},
 
-	myStats: function(fn, force) {
+	myStats: function(force) {
 		FSH.Helper.myUsername = $('dt#statbar-character').text();
-		var forage = 'fsh_selfProfile';
-		if (force) {
-			$.ajax({
-				dataType: 'json',
-				url: 'index.php',
-				data: {
-					cmd:             'export',
-					subcmd:          'profile',
-					player_username: FSH.Helper.myUsername
-				},
-				success: function(data) {
-					data.lastUpdate = Date.now();
-					localforage.setItem(forage, data,
-						function(err, data) {
-							if (err) {console.log('localforage error', err);}
-							FSH.Helper.profile = FSH.Helper.profile || {};
-							FSH.Helper.profile[FSH.Helper.myUsername] = data;
-// console.log('myStats forage set success');
-							if (typeof fn === 'function') {fn();}
-						}
-					);
-				}
-			});
-			return;
-		}
-		localforage.getItem(forage, function(err, data) {
-			if (err) {console.log('localforage error', err);}
-			if (!data || data.lastUpdate < Date.now() -
-				FSH.Helper.allyEnemyOnlineRefreshTime) {
-				FSH.ajax.myStats(fn, true);
-				return;
-			}
+		var dfr = FSH.ajax.getMyStats(force);
+		dfr.done(function(data) {
 			FSH.Helper.profile = FSH.Helper.profile || {};
 			FSH.Helper.profile[FSH.Helper.myUsername] = data;
-// console.log('getInv forage get success');
-			if (typeof fn === 'function') {fn();}
 		});
+		return dfr;
+	},
+
+	getMyStats: function(force) {
+		if (force) {
+			return FSH.ajax.getMyProfile();
+		} else {
+			var prm = FSH.ajax.getForage('fsh_selfProfile');
+			// jQuery 1.7 uses pipe instead of then
+			return prm.pipe(function(data) {
+				if (!data || data.lastUpdate < Date.now() -
+					FSH.Helper.allyEnemyOnlineRefreshTime) {
+					//console.log('myStats doing refresh');
+					return FSH.ajax.getMyProfile();
+				} else {
+					return data;
+				}
+			});
+		}
+	},
+
+	getMyProfile: function() {
+		var prm = FSH.ajax.getProfile(FSH.Helper.myUsername);
+		return prm.done(function(data) {
+			data.lastUpdate = Date.now();
+			FSH.ajax.setForage('fsh_selfProfile', data);
+		});
+	},
+
+	getProfile: function(username) {
+		return $.getJSON('index.php', {
+			cmd:             'export',
+			subcmd:          'profile',
+			player_username: username
+		});
+	},
+
+	setForage: function(forage, data) {
+		// Wrap in jQuery Deferred because we're using 1.7
+		// rather than using ES6 promise
+		var dfr = $.Deferred();
+		localforage.setItem(forage, data, function(err, data) {
+			if (err) {
+				console.log(forage + ' forage error', err);
+				dfr.reject(err);
+			} else {
+				//console.log(forage + ' forage set success');
+				dfr.resolve(data);
+			}
+		});
+		return dfr.promise();
+	},
+
+	getForage: function(forage) {
+		// Wrap in jQuery Deferred because we're using 1.7
+		// rather than using ES6 promise
+		var dfr = $.Deferred();
+		localforage.getItem(forage, function(err, data) {
+			if (err) {
+				console.log(forage + ' forage error', err);
+				dfr.reject(err);
+			} else {
+				// returns null if key does not exist
+				//console.log(forage + ' forage get success');
+				dfr.resolve(data);
+			}
+		});
+		return dfr.promise();
 	}
+
 };
 
 FSH.composing = {

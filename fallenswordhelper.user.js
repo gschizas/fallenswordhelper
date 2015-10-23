@@ -9754,7 +9754,8 @@ FSH.Helper = {
 		FSH.Helper.allyEnemyOnlineRefreshTime =
 			FSH.System.getValue('allyEnemyOnlineRefreshTime');
 		FSH.Helper.allyEnemyOnlineRefreshTime *= 1000;
-		FSH.ajax.myStats(FSH.Helper.injectAllyEnemyList, false);
+		FSH.ajax.myStats(false)
+			.done(FSH.Helper.injectAllyEnemyList);
 	},
 
 	injectAllyEnemyList: function() {
@@ -9847,7 +9848,8 @@ FSH.Helper = {
 	},
 
 	resetAllyEnemyList: function() {
-		FSH.ajax.myStats(FSH.Helper.injectAllyEnemyList, true);
+		FSH.ajax.myStats(true)
+			.done(FSH.Helper.injectAllyEnemyList);
 	},
 
 	toggleCheckAllPlants: function(evt) {
