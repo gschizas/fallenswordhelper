@@ -708,20 +708,9 @@ FSH.Helper = {
 	},
 
 	quickBuyItem: function() {
-		var i;
-		if($('img[alt="Potion Bazaar"]').length > 0){//bazaar
-			if(!FSH.Helper.bazaarItemId){return;}
-			document.getElementById('buy_result').innerHTML='Buying '+document.getElementById('buy_amount').value+' Items';
-			for (i=0;i<document.getElementById('buy_amount').value;i += 1) {
-				//http://www.fallensword.com/index.php?cmd=potionbazaar&subcmd=buyitem&item_id=3683
-				FSH.System.xmlhttp('index.php?cmd=potionbazaar&subcmd=buyitem&item_id='+FSH.Helper.bazaarItemId,
-					FSH.Helper.quickDone);
-			}
-		}
-
 		if (!FSH.Helper.shopId || !FSH.Helper.shopItemId) {return;}
 		document.getElementById('buy_result').innerHTML='Buying '+document.getElementById('buy_amount').value+' Items';
-		for (i=0;i<document.getElementById('buy_amount').value;i += 1) {
+		for (var i=0;i<document.getElementById('buy_amount').value;i += 1) {
 			FSH.System.xmlhttp('index.php?cmd=shop&subcmd=buyitem&item_id='+FSH.Helper.shopItemId+'&shop_id='+FSH.Helper.shopId,
 				FSH.Helper.quickDone);
 		}
@@ -731,41 +720,6 @@ FSH.Helper = {
 		var infoMessage = FSH.Layout.infoBox(responseText);
 		document.getElementById('buy_result').innerHTML+='<br />'+infoMessage;
 	},
-
-	/**************************************************************************/
-	injectBazaar: function() {
-		var injectHere=$('img[alt="Potion Bazaar"]').parents('center:first');
-		var itemNodes=$('td center a img[src*="/items/"]');
-
-		var selector='<span style="font-size:xx-small">Select an item to quick-buy:<br>Select how many to quick-buy <input style="font-size:xx-small" value=1 id="buy_amount" name="buy_amount" size=1 class="custominput"><table cellpadding=2><tr>';
-		var itemId;
-		for (var i=0;i<itemNodes.length;i += 1) {
-			var item=itemNodes[i];
-			var src=item.getAttribute('src');
-			var text=item.parentNode.parentNode.textContent;
-			var onmouseover=$(item).data('tipped').replace('Click to Buy','Click to Select');
-			itemId=item.parentNode.getAttribute('href').match(/&item_id=(\d+)/)[1];
-			selector+='<td width=20 height=20 ><img width=20 height=20 id=select'+itemId+' itemId='+itemId+' src="'+src+
-				'" class="tipped" data-tipped-options="skin: \'fsItem\', ajax: true" data-tipped=\''+onmouseover+'\'>'+text+'</td>';
-			if (i%6===5 && i!==itemNodes.length-1) {selector+='</tr><tr>';}
-		}
-		selector+='</tr><tr><td colspan=3>Selected item:</td><td colspan=3 align=center>'+
-			'<table><tr><td width=45 height=45 id=selectedItem align=center></td></tr></table>'+
-			'<td></tr><tr><td id=warningMsg colspan=6 align=center></td></tr><tr><td id=buy_result colspan=6 align=center></td></tr></table>';
-		injectHere.html('<table><tr><td>'+injectHere.html()+'</td><td>'+selector+'</td></tr></table>');
-		for (i=0;i<itemNodes.length;i += 1) {
-			itemId=itemNodes[i].parentNode.getAttribute('href').match(/&item_id=(\d+)$/)[1];
-			document.getElementById('select'+itemId).addEventListener('click',FSH.Helper.selectBazaarItem,true);
-		}
-	},
-
-	selectBazaarItem: function(evt) {
-		FSH.Helper.bazaarItemId=evt.target.getAttribute('itemId');
-		document.getElementById('warningMsg').innerHTML='<span style="color:red;font-size:small">Warning:<br> pressing "t" now will buy the '+document.getElementById('buy_amount').value+' item(s) WITHOUT confirmation!</span>';
-		document.getElementById('selectedItem').innerHTML=
-			document.getElementById('select'+FSH.Helper.bazaarItemId).parentNode.innerHTML.replace(/='20'/g,'=45');
-	},
-	/**************************************************************************/
 
 	injectRelic: function() {
 		var relicNameElement = $('td:contains("Below is the current status ' +

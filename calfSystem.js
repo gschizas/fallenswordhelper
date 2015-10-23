@@ -1271,7 +1271,7 @@ FSH.Data = {
 				'2': {'-': 'playerLog'},
 				'3': {'-': 'playerLog'}}},
 			'outbox': {'-': {'-': {'-': 'outbox'}}}},
-		potionbazaar: {'-': {'-': {'-': {'-': 'injectBazaar'}}}},
+		potionbazaar: {'-': {'-': {'-': {'-': 'bazaar.inject'}}}},
 		marketplace: {
 			'createreq': {'-': {'-': {'-': 'addMarketplaceWidgets'}}}},
 		quickbuff: {'-': {'-': {'-': {'-': 'injectQuickBuff'}}}},
@@ -1606,7 +1606,25 @@ FSH.Layout = {
 		'recall tip-static" href="@@secondHref@@" data-tipped="Click to ' +
 		'recall to guild store">Fast GS</span></span><span ' +
 		'class="fshWearHide"> | <span class="reportLink @@linktype@@">Fast ' +
-		'Wear</span></span></span>'
+		'Wear</span></span></span>',
+
+	bazaarTable:
+		'<table id="fshBazaar"><tr><td colspan="5">Select an item to ' +
+		'quick-buy:</td></tr><tr><td colspan="5">Select how many to ' +
+		'quick-buy</td></tr><tr><td colspan="5"><input id="buy_amount" ' +
+		'class="fshNumberInput" type="number" min="0" max="99" value="1">' +
+		'</td></tr><tr><td>@0@</td><td>@1@</td><td>@2@</td><td>@3@</td><td>' +
+		'@4@</td></tr><tr><td>@5@</td><td>@6@</td><td>@7@</td><td>@8@</td>' +
+		'<td>@9@</td></tr><tr><td colspan="3">Selected item:</td><td id="' +
+		'selectedItem" colspan="2"></td></tr><tr><td colspan="5"><span id="' +
+		'warning">Warning:<br>pressing [<span id="fshBuy" class="fshLink">' +
+		'This button</span>] now will buy the <span id="quantity">1</span> ' +
+		'item(s) WITHOUT confirmation!</span></td></tr><tr>' +
+		'<td id="buy_result" colspan="5"></td></tr></table>',
+
+	bazaarItem:
+		'<img class="tip-dynamic" width="20" height="20" src="@src@" ' +
+		'itemid="@itemid@" data-tipped="@tipped@">'
 
 };
 
@@ -2105,6 +2123,64 @@ FSH.guildReport = {
 			);
 		}
 	},
+
+};
+
+FSH.bazaar = {
+
+	inject: function() { // jQuery
+		var pbImg = $('div#pCC img[alt="Potion Bazaar"]');
+		pbImg.css('float', 'left');
+		var myTable = FSH.Layout.bazaarTable;
+		$('div#pCC table table table img[src*="/items/"]').each(function(i) {
+			var item = $(this);
+			var tipped = item.data('tipped');
+			myTable = myTable
+				.replace('@' + i + '@', FSH.Layout.bazaarItem)
+				.replace('@src@', item.attr('src'))
+				.replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
+				.replace('@tipped@', tipped);
+		});
+		myTable = $(myTable.replace(/@\d@/g, ''));
+		$('span#warning', myTable).hide();
+		myTable.on('click', 'img[width="20"]', FSH.bazaar.select);
+		myTable.on('input', 'input#buy_amount', FSH.bazaar.quantity);
+		myTable.on('click', 'span#fshBuy', FSH.bazaar.buy);
+		pbImg.parent().append(myTable);
+	},
+
+	select: function(evt) { // jQuery
+		var target = $(evt.target);
+		FSH.bazaar.ItemId = target.attr('itemid');
+		$('table#fshBazaar span#quantity').text(
+			$('table#fshBazaar input#buy_amount').val());
+		$('table#fshBazaar span#warning').show();
+		$('table#fshBazaar td#selectedItem').empty().append(
+			target.clone().attr('width', '45').attr('height', '45'));
+	},
+
+	quantity: function(evt) { // mixed
+		var theValue = parseInt(evt.target.value, 10);
+		if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+			$('table#fshBazaar span#quantity:visible').text(theValue);
+		}
+	},
+
+	buy: function() {
+		if (!FSH.bazaar.ItemId) {return;}
+		var buyAmount = $('table#fshBazaar input#buy_amount').val();
+		$('table#fshBazaar td#buy_result')
+			.html('Buying ' + buyAmount + ' items');
+		for (var i = 0; i < buyAmount; i += 1) {
+			$.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
+				FSH.bazaar.ItemId, FSH.bazaar.done);
+		}
+	},
+
+	done: function(responseText) {
+		$('table#fshBazaar td#buy_result')
+			.append('<br>' + FSH.Layout.infoBox(responseText));
+	}
 
 };
 

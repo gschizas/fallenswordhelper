@@ -129,8 +129,10 @@ div#fshCompConf {
 }
 
 table.fshInvFilter {width: 100%;}
-
 table.fshInvFilter th {background-color: #cd9e4b;}
+
+.fshNumberInput {width: 3em;}
+
 
 /*
  * Table styles
