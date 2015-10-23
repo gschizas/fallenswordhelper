@@ -9516,9 +9516,9 @@ FSH.Helper = {
 			for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
 				var target = activeTable.rows[i].cells[0].firstChild
 					.firstChild.firstChild.textContent;
-if (target === '[ No bounties available. ]') {break;}
+				if (target === '[ No bounties available. ]') {break;}
 				for (var j = 0; j < wantedArray.length; j += 1) {
-					if (target === wantedArray[j].trim()) {
+					if (target === wantedArray[j].trim() || wantedArray.indexOf('*') !== -1) {
 						wantedList.wantedBounties = true;
 						var bounty = {};
 						bounty.target = target;
