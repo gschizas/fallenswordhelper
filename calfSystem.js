@@ -1252,9 +1252,13 @@ FSH.Data = {
 			'log': {'-': {'-': {'-': 'guildLog'}}},
 			'groups': {
 				'viewstats': {'-': {'-': 'injectGroupStats'}},
+				'joinall': {'-': {'-': 'injectGroups'}},
+				'joinallgroupsundersize': {'-': {'-': 'injectGroups'}},
 				'-': {'-': {'-': 'injectGroups'}}},
 			'manage': {'-': {'-': {'-': 'injectGuild'}}},
-			'advisor': {'-': {'-': {'-': 'injectAdvisor'}}},
+			'advisor': {
+				'-': {'-': {'-': 'injectAdvisor'}},
+				'weekly': {'-': {'-': 'injectAdvisor'}}},
 			'history': {'-': {'-': {'-': 'addHistoryWidgets'}}},
 			'view': {'-': {'-': {'-': 'injectViewGuild'}}},
 			'scouttower': {'-': {'-': {'-': 'injectScouttower'}}},
