@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1510b5
+// @version        1510b6
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -6538,9 +6538,10 @@ FSH.Helper = {
 		document.getElementById('fetchgroupstats')
 			.addEventListener('click', FSH.Helper.fetchGroupData, true);
 
-		var re=/subcmd2=([a-z]+)/;
-		var subPage2IdRE = re.exec(document.location.search);
-		if (subPage2IdRE && subPage2IdRE[1] === 'joinallgroupsundersize') {
+		//~ var re=/subcmd2=([a-z]+)/;
+		//~ var subPage2IdRE = re.exec(document.location.search);
+		//~ if (subPage2IdRE && subPage2IdRE[1] === 'joinallgroupsundersize') {
+		if (FSH.subcmd2 === 'joinallgroupsundersize') {
 			FSH.Helper.joinAllGroupsUnderSize();
 		}
 	},
@@ -10152,11 +10153,9 @@ FSH.Helper = {
 					ranks[rankName].join(', ') + '</span>');
 			}
 		});
-
 		if (FSH.System.getValue('ajaxifyRankControls')) {
 			FSH.Helper.ajaxifyRankControls();
 		}
-
 	},
 
 	ajaxifyRankControls: function() {
