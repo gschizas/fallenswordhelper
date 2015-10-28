@@ -35,13 +35,19 @@
 .fshEpic      {color: #00cc00;}
 
 .fshCenter    {text-align: center;}
+.fshRight     {text-align: right;}
+.fshHide      {display: none;}
+.fshWearHide  {display: none;}
+.fshInline    {display: inline;}
+.fshNoWrap    {white-space: nowrap;}
+.helperQC     {cursor: pointer;}
 
-.fshNoWrap {white-space: nowrap;}
-.helperQC  {cursor: pointer;}
+.bsT          {margin: 0px auto;}
+.bsT td       {text-align: right; padding:0px 4px;}
 
-.qbT {margin: 0px auto;}
-.qbTH {text-align: center; padding:0px 4px; color:orange;}
-.qbTD {text-align: center; padding:0px 4px;}
+.qbT          {margin: 0px auto;}
+.qbTH         {text-align: center; padding:0px 4px; color:orange;}
+.qbTD         {text-align: center; padding:0px 4px;}
 div#quickbuff div#players h1 {float: left;}
 div#quickbuff div#players p {clear: both;}
 .fshLastActivity {color: #ccc; font-size: x-small;}
@@ -50,6 +56,50 @@ div#quickbuff div.buff-block p label.fshDim span {
   color: #999;
 }
 
+.profile-stat-bonus {font-size: x-small;}
+
+#minibox-enemy {
+    margin: 0 0 10px;
+    overflow: hidden
+}
+#fshResetEnemy {
+    font-size: xx-small;
+    cursor: pointer;
+    text-decoration: underline;
+}
+#enemy-send-message {background-position: -198px -80px;}
+#enemy-quickbuff {background-position: -210px -80px;}
+#enemy-secure-trade {background-position: -222px -80px;}
+#enemy-trade {background-position: -234px -80px;}
+.player-row {white-space: nowrap}
+#enemy-quick-buff {
+    clear: both;
+    text-align: center;
+    font-size: 11px;
+    margin: 0;
+    padding-top: 5px;
+    color: #F7EAC9;
+    text-decoration: underline;
+    cursor: pointer;
+}
+.enemy-buff-check-on,
+.enemy-buff-check-off {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    margin: 0 1px 2px 0;
+    vertical-align: bottom;
+    background: transparent url('http://cdn.fallensword.com/media/dist/img/ui/ui.png');
+}
+.enemy-buff-check-off {
+    background-position: -246px -80px;
+}
+.enemy-buff-check-on {
+    background-position: -270px -80px;
+}
+
+table#fshBazaar {font-size: x-small;}
+table#fshBazaar span#warning {color: red; font-size: small}
 
 table.relicT {font-size:small;}
 table.relicT tr.hidden {display:none; visibility:hidden;}
@@ -79,8 +129,10 @@ div#fshCompConf {
 }
 
 table.fshInvFilter {width: 100%;}
-
 table.fshInvFilter th {background-color: #cd9e4b;}
+
+.fshNumberInput {width: 3em;}
+
 
 /*
  * Table styles

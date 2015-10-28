@@ -2,28 +2,30 @@
 
 'use strict';
 
+window.FSH = window.FSH || {};
+
 // GM_ApiBrowserCheck
 // @author        GIJoe
 // @license       http://creativecommons.org/licenses/by-nc-sa/3.0/
-var gvar = function(){};
 // Global variables
-function GM_ApiBrowserCheck(){
+(function GM_ApiBrowserCheck() {
+	var gvar = {};
 	var GMSTORAGE_PATH = 'GM_';
 	// You can change it to avoid conflict with others scripts
-	if (typeof unsafeWindow === 'undefined'){
-		window.unsafeWindow = window;
-	}
+	//~ if (typeof unsafeWindow === 'undefined'){
+		//~ window.unsafeWindow = window;
+	//~ }
 	var needApiUpgrade = false;
 	if (window.navigator.appName.match(/^opera/i) && 
 			typeof window.opera !== 'undefined'){
 		needApiUpgrade = true;
 		gvar.isOpera = true;
-		unsafeWindow.GM_log = window.opera.postError;
+		window.GM_log = window.opera.postError;
 	}
 	if (typeof GM_setValue !== 'undefined'){
 		var gsv;
 		try {
-			gsv=unsafeWindow.GM_setValue.toString();
+			gsv=window.GM_setValue.toString();
 		} catch(e) {
 			gsv='staticArgs';
 		}
@@ -44,11 +46,11 @@ function GM_ApiBrowserCheck(){
 		var uid = new Date().toString();
 		var result;
 		try{
-			unsafeWindow.localStorage.setItem(uid, uid);
-			result = unsafeWindow.localStorage.getItem(uid) === uid;
-			unsafeWindow.localStorage.removeItem(uid);
+			window.localStorage.setItem(uid, uid);
+			result = window.localStorage.getItem(uid) === uid;
+			window.localStorage.removeItem(uid);
 			if (result) {
-				ws = typeof unsafeWindow.localStorage;
+				ws = typeof window.localStorage;
 			} else {
 				console.log('There is a problem with your local storage. ' +
 					'FSH cannot persist your settings.');
@@ -59,8 +61,8 @@ function GM_ApiBrowserCheck(){
 		}
 		// Catch Security error
 		if (ws === 'object'){
-			unsafeWindow.GM_getValue = function(name, defValue){
-				var value = unsafeWindow.localStorage.getItem(GMSTORAGE_PATH +
+			window.GM_getValue = function(name, defValue){
+				var value = window.localStorage.getItem(GMSTORAGE_PATH +
 					name);
 				if (value === null || value === undefined){
 					return defValue;
@@ -76,27 +78,27 @@ function GM_ApiBrowserCheck(){
 				}
 				return value;
 			};
-			unsafeWindow.GM_setValue = function(name, value){
+			window.GM_setValue = function(name, value){
 				switch (typeof value){
 				case 'string':
-					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+					window.localStorage.setItem(GMSTORAGE_PATH +
 						name, 'S]' + value);
 					break;
 				case 'number':
 					if (value.toString().indexOf('.') < 0){
-						unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+						window.localStorage.setItem(GMSTORAGE_PATH +
 							name, 'N]' + value);
 					}
 					break;
 				case 'boolean':
-					unsafeWindow.localStorage.setItem(GMSTORAGE_PATH +
+					window.localStorage.setItem(GMSTORAGE_PATH +
 						name, 'B]' + value);
 					break;
 				}
 			};
 		} else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
 			gvar.temporarilyStorage = [];
-			unsafeWindow.GM_getValue = function(name, defValue){
+			window.GM_getValue = function(name, defValue){
 				if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
 					'undefined'){
 					return defValue;
@@ -104,7 +106,7 @@ function GM_ApiBrowserCheck(){
 					return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
 				}
 			};
-			unsafeWindow.GM_setValue = function(name, value){
+			window.GM_setValue = function(name, value){
 				switch (typeof value){
 				case 'string':
 				case 'boolean':
@@ -114,11 +116,11 @@ function GM_ApiBrowserCheck(){
 			};
 		}
 
-		unsafeWindow.GM_listValues = function(){
+		window.GM_listValues = function(){
 			var list = [];
 			var reKey = new RegExp('^' + GMSTORAGE_PATH);
-			for (var i = 0, il = unsafeWindow.localStorage.length; i < il; i += 1) {
-				var key = unsafeWindow.localStorage.key(i);
+			for (var i = 0, il = window.localStorage.length; i < il; i += 1) {
+				var key = window.localStorage.key(i);
 				if (key.match(reKey)) {
 					list.push(key.replace(GMSTORAGE_PATH, ''));
 				}
@@ -126,37 +128,37 @@ function GM_ApiBrowserCheck(){
 			return list;
 		};
 	}
-}
-GM_ApiBrowserCheck();
+})();
+//window.FSH.GM_ApiBrowserCheck();
 
 // jquery GM_get/set wrapper
-function GM_JQ_wrapper() {
-	if (typeof GM_setValue !== 'undefined') {
-		var oldGM_setValue = GM_setValue;
-		GM_setValue = function(name, value){
-			setTimeout(function() {oldGM_setValue(name, value);}, 0);
-		};
-	}
-}
-GM_JQ_wrapper();
+//~ (function GM_JQ_wrapper() {
+	//~ if (typeof GM_setValue !== 'undefined') {
+		//~ var oldGM_setValue = GM_setValue;
+		//~ GM_setValue = function(name, value){
+			//~ setTimeout(function() {oldGM_setValue(name, value);}, 0);
+		//~ };
+	//~ }
+//~ })();
+//window.FSH.GM_JQ_wrapper();
 
-// System functions
-window.System = {
+// FSH.System.functions
+FSH.System = {
 	init: function() {
-		System.server = document.location.protocol + '//' + document.location.host + '/';
-		var imgurls = System.findNode('//img[contains(@src, "/skin/")]');
+		FSH.System.server = document.location.protocol + '//' + document.location.host + '/';
+		var imgurls = FSH.System.findNode('//img[contains(@src, "/skin/")]');
 		if (!imgurls) {return;} //login screen or error loading etc.
 		var idindex             = imgurls.src.indexOf('/skin/');
-		System.imageServer      = imgurls.src.substr(0,idindex);
-		System.imageServerHTTP  = 'http://cdn.fallensword.com';
+		FSH.System.imageServer      = imgurls.src.substr(0,idindex);
+		FSH.System.imageServerHTTP  = 'http://cdn.fallensword.com';
 	},
 
 	getValue: function(name) {
-		return GM_getValue(name, Data.defaults[name]);
+		return GM_getValue(name, FSH.Data.defaults[name]);
 	},
 
 	getValueJSON: function(name) {
-		var resultJSON = System.getValue(name);
+		var resultJSON = FSH.System.getValue(name);
 		var result;
 		if (resultJSON) {
 			var reviver = function (key, value) {
@@ -182,7 +184,7 @@ window.System = {
 	},
 
 	findNode: function(xpath, doc) {
-		var nodes = System.findNodes(xpath, doc);
+		var nodes = FSH.System.findNodes(xpath, doc);
 		if (!nodes) {return null;}
 		return nodes[0];
 	},
@@ -217,15 +219,15 @@ window.System = {
 	},
 
 	findNodeText: function(xpath, doc) {
-		var node = System.findNode(xpath, doc);
+		var node = FSH.System.findNode(xpath, doc);
 		if (!node) {return null;}
 		return node.textContent;
 	},
 
 	findNodeInt: function(xpath, doc) {
-		var node = System.findNode(xpath, doc);
+		var node = FSH.System.findNode(xpath, doc);
 		if (!node) {return null;}
-		return System.intValue(node.textContent);
+		return FSH.System.intValue(node.textContent);
 	},
 
 	createDocument: function(details) {
@@ -276,21 +278,21 @@ window.System = {
 	},
 
 	saveValueForm: function(name) {
-		var formElement = System.findNode('//input[@name="' + name + '"]',
+		var formElement = FSH.System.findNode('//input[@name="' + name + '"]',
 			this);
 		if (formElement.getAttribute('type') === 'checkbox') {
-			System.setValue(name, formElement.checked);
+			FSH.System.setValue(name, formElement.checked);
 		} else if (formElement.getAttribute('type') === 'radio') {
-			var radioElements = System.findNodes('//input[@name="' + name +
+			var radioElements = FSH.System.findNodes('//input[@name="' + name +
 				'"]', 0, this);
 			for (var i=0; i<radioElements.length; i += 1) {
 				//~ var radioElement = radioElements[i];
 				if (radioElements[i].checked) {
-					System.setValue(name, radioElements[i].value);
+					FSH.System.setValue(name, radioElements[i].value);
 				}
 			}
 		} else {
-			System.setValue(name, formElement.value);
+			FSH.System.setValue(name, formElement.value);
 		}
 	},
 
@@ -393,10 +395,10 @@ window.System = {
 		var currentVisibility = anItem.style.visibility;
 		anItem.style.visibility = currentVisibility === 'hidden' ? 'visible' : 'hidden';
 		anItem.style.display = currentVisibility === 'hidden' ? 'block' : 'none';
-		if (System.getValue(anItemId)) {
-			System.setValue(anItemId, '');
+		if (FSH.System.getValue(anItemId)) {
+			FSH.System.setValue(anItemId, '');
 		} else {
-			System.setValue(anItemId, 'ON');
+			FSH.System.setValue(anItemId, 'ON');
 		}
 	},
 
@@ -407,7 +409,7 @@ window.System = {
 	},
 
 	openInTab: function(url){
-		setTimeout(function() {unsafeWindow.open(url, '');}, 0);
+		setTimeout(function() {window.open(url, '');}, 0);
 	},
 
 	escapeHtml: function(unsafe) {
@@ -436,7 +438,6 @@ window.System = {
 
 	formatLastActivity: function(last_login) {
 		var d, h, m, s;
-		//~ s = Math.floor(ms / 1000);
 		s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
 		m = Math.floor(s / 60);
 		s = s % 60;
@@ -444,14 +445,26 @@ window.System = {
 		m = m % 60;
 		d = Math.floor(h / 24);
 		h = h % 24;
-		//~ return { d: d, h: h, m: m, s: s };
-		return 'Last Activity: ' + d + ' days, ' + h + ' hours, ' + m +
-			' minutes, ' + s + ' secs';
+		return (d === 0 ? '' : d + ' days, ') +
+			(h === 0 ? '' : h + ' hours, ') +
+			(m === 0 ? '' : m + ' mins, ') +
+			s + ' secs';
 	},
-};
-System.init();
 
-window.Data = {
+	contactColor: function(last_login, type) {
+		var out = 'white';
+		var now = Math.floor(Date.now() / 1000);
+		if (now - last_login < 120) { // 2 mins
+			out = type ? 'DodgerBlue' : 'red';
+		} else if (now - last_login < 300) { // 5 mins
+			out = type ? 'LightSkyBlue' : 'PaleVioletRed';
+		} else {out = type ? 'PowderBlue' : 'Pink';}
+		return out;
+	}
+};
+FSH.System.init();
+
+FSH.Data = {
 
 	plantFromComponent: function(aComponent) {
 		switch(aComponent) {
@@ -527,42 +540,42 @@ window.Data = {
 		'">',
 
 	greenDiamond:
-		'<img width="10" height="10" title="Online" style="float:left" src="' +
+		'<img width="10" height="10" style="float:left" src="' +
 		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH' +
 		'5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'">',
+		'" class="tip-static" data-tipped="Online">',
 
 	yellowDiamond:
-		'<img width="10" height="10" title="Offline" style="float:left" src="' +
+		'<img width="10" height="10" style="float:left" src="' +
 		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAAC' +
 		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'">',
+		'" class="tip-static" data-tipped="Offline">',
 
 	orangeDiamond:
-		'<img width="10" height="10" title="Offline" style="float:left" src="' + 
+		'<img width="10" height="10" style="float:left" src="' + 
 		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAAC' +
 		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'">',
+		'" class="tip-static" data-tipped="Offline">',
 
 	offlineDot:
-		'<img width="10" height="10" title="Offline" style="float:left" src="' +
+		'<img width="10" height="10" style="float:left" src="' +
 		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SEhK2tr' +
 		'bW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpj' +
 		'YxghISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAW' +
 		'GICAChCINxihm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3' +
 		'E0GD8rzSK6XDicDNqMdIoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PE' +
 		'BIKFYEeAAoJGRUTdJc1FgIiAx1mZhtHHQMqIgQCHAGtKiEAOw%3D%3D' +
-		'">',
+		'" class="tip-static" data-tipped="Offline">',
 
 	sevenDayDot:
-		'<img width="10" height="10" title="Offline" style="float:left" src="' +
+		'<img width="10" height="10" style="float:left" src="' +
 		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNr' +
 		'azEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1' +
 		'zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQA' +
 		'V8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl' +
 		'0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8U' +
 		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7' +
-		'">',
+		'" class="tip-static" data-tipped="Offline">',
 
 	//~ redDot: return 'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9znDEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudSa85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiLKpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTHSICFGSeSQcCKiIBDA0MoiohADs%3D',
 
@@ -730,18 +743,18 @@ window.Data = {
 /* jshint +W101 */ // Line is too long. (W101)
 
 	//~ guildRelationshipMessages: function(){
-		//~ if(!Data.guildMessages){
-			//~ Data.guildMessages= {};
-				//~ Data.guildMessages.guildSelfMessage = {'color':'green',
+		//~ if(!FSH.Data.guildMessages){
+			//~ FSH.Data.guildMessages= {};
+				//~ FSH.Data.guildMessages.guildSelfMessage = {'color':'green',
 					//~ 'message':'Member of your own guild!'};
-				//~ Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
+				//~ FSH.Data.guildMessages.guildFrndMessage = {'color':'OliveDrab',
 					//~ 'message':'Do not attack - Guild is friendly!'};
-				//~ Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
+				//~ FSH.Data.guildMessages.guildPastMessage = {'color':'DarkCyan',
 					//~ 'message':'Do not attack - You\'ve been in that guild once!'};
-				//~ Data.guildMessages.guildEnmyMessage = {'color':'red',
+				//~ FSH.Data.guildMessages.guildEnmyMessage = {'color':'red',
 					//~ 'message':'Enemy guild. Attack at will!'};
 		//~ }
-		//~ return Data.guildMessages;
+		//~ return FSH.Data.guildMessages;
 	//~ },
 
 	guildMessages: {
@@ -756,8 +769,8 @@ window.Data = {
 	},
 
 	quickSearchList: function() {
-		if (!Data.quickSearchArray) {
-			Data.quickSearchArray = [
+		if (!FSH.Data.quickSearchArray) {
+			FSH.Data.quickSearchArray = [
 				{'category':'Potions','searchname':'Potion of the Wise',             'nickname':'Lib 200', 'displayOnAH':true},
 				{'category':'Potions','searchname':'Potion of the Bookworm',         'nickname':'Lib 225', 'displayOnAH':true},
 				{'category':'Potions','searchname':'Potion of Shattering',           'nickname':'SA',      'displayOnAH':true},
@@ -787,7 +800,7 @@ window.Data = {
 				{'category':'Plants', 'searchname':'Amber',                          'nickname':''}
 			];
 		}
-		return Data.quickSearchArray;
+		return FSH.Data.quickSearchArray;
 	},
 
 	bias: {0: {generalVariable: 1.1053,
@@ -1198,117 +1211,152 @@ window.Data = {
 	],
 
 	pageSwitcher: {
-		settings: {'-': {'-': {'-': 'injectSettings'}}},
+		settings: {'-': {'-': {'-': {'-': 'injectSettings'}}}},
 		world: {
-			'-': {'-': {'-': 'injectWorld'}},
-			'viewcreature': {'-': {'-': 'injectCreature'}},
-			'map': {'-': {'-': 'injectWorldMap'}}},
+			'-': {'-': {'-': {'-': 'injectWorld'}}},
+			'viewcreature': {'-': {'-': {'-': 'injectCreature'}}},
+			'map': {'-': {'-': {'-': 'injectWorldMap'}}}},
 		news: {
-			'fsbox': {'-': {'-': 'newsFsbox'}},
-			'shoutbox': {'-': {'-': 'newsShoutbox'}}},
-		blacksmith: {'repairall': {'-': {'-': 'injectWorld'}}},
+			'fsbox': {'-': {'-': {'-': 'newsFsbox'}}},
+			'shoutbox': {'-': {'-': {'-': 'newsShoutbox'}}}},
+		blacksmith: {
+			'repairall': {'-': {'-': {'1': 'injectWorld'}}}},
 		arena: {
-			//'-': {'-': {'-': 'injectArena'}},
-			'completed': {'-': {'-': 'storeCompletedArenas'}},
-			'pickmove': {'-': {'-': 'storeArenaMoves'}},
-			//'results': {'-': {'-': 'injectTournament'}},
-			//'dojoin': {'-': {'-': 'injectTournament'}},
-			'setup': {'-': {'-': 'injectArenaSetupMove'}}},
+			//'-': {'-': {'-': {'-': 'injectArena'}}},
+			'completed': {'-': {'-': {'-': 'storeCompletedArenas'}}},
+			'pickmove': {'-': {'-': {'-': 'storeArenaMoves'}}},
+			//'results': {'-': {'-': {'-': 'injectTournament'}}},
+			//'dojoin': {'-': {'-': {'-': 'injectTournament'}}},
+			'setup': {'-': {'-': {'-': 'injectArenaSetupMove'}}}},
 		questbook: {
 			'-': {'-': {
-				'-': 'injectQuestBookFull',
-				'0': 'injectQuestBookFull', // Normal
-				'1': 'injectQuestBookFull'}}, // Seasonal
-			'atoz': {'-': {'-': 'injectQuestBookFull'}},
-			'viewquest': {'-': {'-':'injectQuestTracker'}}},
+				'-': {'-': 'injectQuestBookFull'},
+				'0': {'-': 'injectQuestBookFull'}, // Normal
+				'1': {'-': 'injectQuestBookFull'}}}, // Seasonal
+			'atoz': {'-': {'-': {'-': 'injectQuestBookFull'}}},
+			'viewquest': {'-': {'-': {'-': 'injectQuestTracker'}}}},
 		profile: {
-			'-': {'-': {'-': 'injectProfile'}},
-			'changebio': {'-': {'-': 'injectBioWidgets'}},
-			'dropitems': {'-': {'-': 'injectProfileDropItems'}}},
-		auctionhouse: {'-': {'-': {'-': 'injectAuctionHouse'}}},
+			'-': {'-': {'-': {'-': 'injectProfile'}}},
+			'report': {'-': {'-': {'-': 'injectProfile'}}},
+			'changebio': {'-': {'-': {'-': 'injectBioWidgets'}}},
+			'dropitems': {'-': {'-': {'-': 'injectProfileDropItems',
+				'1': 'injectProfileDropItems'}}}},
+		auctionhouse: {'-': {'-': {'-': {'-': 'injectAuctionHouse'}}}},
 		guild: {
 			'inventory': {
-				'report': {'-': 'injectReportPaint'},
-				'addtags': {'-': 'injectGuildAddTagsWidgets'},
-				'removetags': {'-': 'injectGuildAddTagsWidgets'},
-				'storeitems': {'-': 'injectDropItems'}},
-			'chat': {'-': {'-': 'guildChat'}},
-			'log': {'-': {'-': 'guildLog'}},
+				'report': {'-': {'-': 'guildReport.injectReportPaint'}},
+				'addtags': {'-': {'-': 'injectGuildAddTagsWidgets'}},
+				'removetags': {'-': {'-': 'injectGuildAddTagsWidgets'}},
+				'storeitems': {'-': {'-': 'injectDropItems'}}},
+			'chat': {'-': {'-': {'-': 'guildChat'}}},
+			'log': {'-': {'-': {'-': 'guildLog'}}},
 			'groups': {
-				'viewstats': {'-': 'injectGroupStats'},
-				'-': {'-': 'injectGroups'}},
-			'manage': {'-': {'-': 'injectGuild'}},
-			'advisor': {'-': {'-': 'injectAdvisor'}},
-			'history': {'-': {'-': 'addHistoryWidgets'}},
-			'view': {'-': {'-': 'injectViewGuild'}},
-			'scouttower': {'-': {'-': 'injectScouttower'}},
-			'mailbox': {'-': {'-': 'injectMailbox'}},
-			'ranks': {'-': {'-': 'injectGuildRanks'}},
-			'conflicts': {'rpupgrades': {'-': 'injectRPUpgrades'}}},
-		bank: {'-': {'-': {'-': 'injectBank'}}},
+				'viewstats': {'-': {'-': 'injectGroupStats'}},
+				'joinall': {'-': {'-': 'injectGroups'}},
+				'joinallgroupsundersize': {'-': {'-': 'injectGroups'}},
+				'-': {'-': {'-': 'injectGroups'}}},
+			'manage': {'-': {'-': {'-': 'injectGuild'}}},
+			'advisor': {
+				'-': {'-': {'-': 'injectAdvisor'}},
+				'weekly': {'-': {'-': 'injectAdvisor'}}},
+			'history': {'-': {'-': {'-': 'addHistoryWidgets'}}},
+			'view': {'-': {'-': {'-': 'injectViewGuild'}}},
+			'scouttower': {'-': {'-': {'-': 'injectScouttower'}}},
+			'mailbox': {'-': {'-': {'-': 'injectMailbox'}}},
+			'ranks': {'-': {'-': {'-': 'injectGuildRanks'}}},
+			'conflicts': {'rpupgrades': {'-': {'-': 'injectRPUpgrades'}}}},
+		bank: {'-': {'-': {'-': {'-': 'injectBank'}}}},
 		log: {
 			'-': {'-': {
-				'-': 'playerLog',
-				'-1': 'playerLog',
-				'0': 'playerLog',
-				'1': 'playerLog',
-				'2': 'playerLog',
-				'3': 'playerLog'}},
-			'outbox': {'-': {'-': 'outbox'}}},
-		potionbazaar: {'-': {'-': {'-': 'injectBazaar'}}},
+				'-': {'-': 'playerLog'},
+				'-1': {'-': 'playerLog'},
+				'0': {'-': 'playerLog'},
+				'1': {'-': 'playerLog'},
+				'2': {'-': 'playerLog'},
+				'3': {'-': 'playerLog'}}},
+			'outbox': {'-': {'-': {'-': 'outbox'}}}},
+		potionbazaar: {'-': {'-': {'-': {'-': 'bazaar.inject'}}}},
 		marketplace: {
-			'createreq': {'-': {'-': 'addMarketplaceWidgets'}}},
-		quickbuff: {'-': {'-': {'-': 'injectQuickBuff'}}},
+			'createreq': {'-': {'-': {'-': 'addMarketplaceWidgets'}}}},
+		quickbuff: {'-': {'-': {'-': {'-': 'injectQuickBuff'}}}},
 		notepad: {
-			'showlogs': {'-': {'-': 'injectNotepadShowLogs'}},
-			'invmanagernew': {'-': {'-': 'injectInventoryManagerNew'}},
-			'invmanager': {'-': {'-': 'injectInventoryManager'}},
-			'guildinvmgr': {'-': {'-': 'injectInventoryManagerNew'}},
-			'guildinvmanager': {'-': {'-': 'injectInventoryManager'}},
-			'recipemanager': {'-': {'-': 'injectRecipeManager'}},
-			'auctionsearch': {'-': {'-': 'injectAuctionSearch'}},
-			'onlineplayers': {'-': {'-': 'injectOnlinePlayers'}},
-			'quicklinkmanager': {'-': {'-': 'injectQuickLinkManager'}},
-			'monsterlog': {'-': {'-': 'injectMonsterLog'}},
-			'quickextract': {'-': {'-': 'insertQuickExtract'}},
-			'quickwear': {'-': {'-': 'insertQuickWear'}},
-			'fsboxcontent': {'-': {'-': 'injectFsBoxContent'}},
-			'bufflogcontent': {'-': {'-': 'injectBuffLog'}},
-			'newguildlog': {'-': {'-': 'injectNewGuildLog'}},
-			'findbuffs': {'-': {'-': 'injectFindBuffs'}},
-			'findother': {'-': {'-': 'injectFindOther'}},
-			'savesettings': {'-': {'-': 'injectSaveSettings'}},
-			'-': {'-': {'-': 'injectNotepad'}}},
+			'showlogs': {'-': {'-': {'-': 'injectNotepadShowLogs'}}},
+			'invmanagernew': {'-': {'-': {'-': 'injectInventoryManagerNew'}}},
+			'invmanager': {'-': {'-': {'-': 'injectInventoryManager'}}},
+			'guildinvmgr': {'-': {'-': {'-': 'injectInventoryManagerNew'}}},
+			'guildinvmanager': {'-': {'-': {'-': 'injectInventoryManager'}}},
+			'recipemanager': {'-': {'-': {'-': 'injectRecipeManager'}}},
+			'auctionsearch': {'-': {'-': {'-': 'injectAuctionSearch'}}},
+			'onlineplayers': {'-': {'-': {'-': 'injectOnlinePlayers'}}},
+			'quicklinkmanager': {'-': {'-': {'-': 'injectQuickLinkManager'}}},
+			'monsterlog': {'-': {'-': {'-': 'injectMonsterLog'}}},
+			'quickextract': {'-': {'-': {'-': 'insertQuickExtract'}}},
+			'quickwear': {'-': {'-': {'-': 'insertQuickWear'}}},
+			'fsboxcontent': {'-': {'-': {'-': 'injectFsBoxContent'}}},
+			'bufflogcontent': {'-': {'-': {'-': 'injectBuffLog'}}},
+			'newguildlog': {'-': {'-': {'-': 'injectNewGuildLog'}}},
+			'findbuffs': {'-': {'-': {'-': 'injectFindBuffs'}}},
+			'findother': {'-': {'-': {'-': 'injectFindOther'}}},
+			'savesettings': {'-': {'-': {'-': 'injectSaveSettings'}}},
+			'-': {'-': {'-': {'-': 'injectNotepad'}}}},
 		points: {'-': {'-': {
-			'-': 'storePlayerUpgrades',
-			'0': 'storePlayerUpgrades',
-			'1': 'parseGoldUpgrades'}}},
+			'-': {'-': 'storePlayerUpgrades'},
+			'0': {'-': 'storePlayerUpgrades'},
+			'1': {'-': 'notification.parseGoldUpgrades'}}}},
 		trade: {
-			'-': {'-': {'-': 'injectTrade'}},
-			'createsecure': {'-': {'-': 'injectTrade'}}},
-		titan: {'-': {'-': {'-': 'injectTitan'}}},
-		toprated: {'xp': {'-': {'-': 'injectTopRated'}}},
-		inventing: {'viewrecipe': {'-': {'-': 'inventing'}}},
-		tempinv: {'-': {'-': {'-': 'injectMailbox'}}},
-		//attackplayer: {'-': {'-': {'-': 'injectAttackPlayer'}}},
-		findplayer: {'-': {'-': {'-': 'injectFindPlayer'}}},
-		//relic: {'-': {'-': {'-': 'injectRelic'}}},
-		quests: {'view': {'-': {'-': 'showAllQuestSteps'}}}, //UFSG
-		scavenging: {'process': {'-': {'-': 'injectScavenging'}}},
-		temple: {'-': {'-': {'-': 'parseTemplePage'}}},
-		skills: {'-': {'-': {'-': 'injectSkills'}}},
-		composing: {'-': {'-': {'-': 'injectComposing'}}},
-		'-': {'-': {'-': {'-': 'unknownPage'}}}
+			'-': {'-': {'-': {'-': 'injectTrade'}}},
+			'createsecure': {'-': {'-': {'-': 'injectTrade'}}}},
+		titan: {'-': {'-': {'-': {'-': 'injectTitan'}}}},
+		toprated: {'xp': {'-': {'-': {'-': 'injectTopRated'}}}},
+		inventing: {'viewrecipe': {'-': {'-': {'-': 'inventing'}}}},
+		tempinv: {'-': {'-': {'-': {'-': 'injectMailbox'}}}},
+		//attackplayer: {'-': {'-': {'-': {'-': 'injectAttackPlayer'}}}},
+		findplayer: {'-': {'-': {'-': {'-': 'injectFindPlayer'}}}},
+		//relic: {'-': {'-': {'-': {'-': 'injectRelic'}}}},
+		quests: {'view': {'-': {'-': {'-': 'showAllQuestSteps'}}}}, //UFSG
+		scavenging: {'process': {'-': {'-': {'-': 'injectScavenging'}}}},
+		temple: {'-': {'-': {'-': {'-': 'notification.parseTemplePage'}}}},
+		skills: {'-': {'-': {'-': {'-': 'injectSkills'}}}},
+		composing: {'-': {'-': {'-': {'-': 'composing.injectComposing'}}}},
+		'-': {'-': {'-': {'-': {'-': 'unknownPage'}}}}
+	},
+
+	excludeBuff: {
+		'skill-50' : 'Death Dealer',
+		'skill-54' : 'Counter Attack',
+		'skill-55' : 'Summon Shield Imp',
+		'skill-56' : 'Vision',
+		'skill-60' : 'Nightmare Visage',
+		'skill-61' : 'Quest Finder',
+		'skill-98' : 'Barricade',
+		'skill-101': 'Severe Condition'
 	}
 
 };
 
-window.Layout = {
+FSH.Layout = {
+
+	onlineDot: function(min) {
+		var img = '';
+		if (FSH.System.getValue('enhanceOnlineDots')) {
+			img = FSH.Data.offlineDot;
+			if (min < 2) {
+				img = FSH.Data.greenDiamond;
+			} else if (min < 5) {
+				img = FSH.Data.yellowDiamond;
+			} else if (min < 30) {
+				img = FSH.Data.orangeDiamond;
+			} else if (min > 10080) {
+				img = FSH.Data.sevenDayDot;
+			}
+		}
+		return img;
+	},
 
 	injectMenu: function() { //jquery
-		if (System.getValue('lastActiveQuestPage').length > 0) {
+		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
 			$('a[href="index.php?cmd=questbook"]').attr('href',
-				System.getValue('lastActiveQuestPage'));
+				FSH.System.getValue('lastActiveQuestPage'));
 		}
 		var pCL = $('div#pCL:first');
 		if (pCL.length === 0) {return;}
@@ -1323,19 +1371,19 @@ window.Layout = {
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
 				'medalguide">Medal Guide</a></li>');
-		if (System.getValue('keepBuffLog')) {
+		if (FSH.System.getValue('keepBuffLog')) {
 			$(pCL).find('a#nav-character-log').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
 					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
-		if (System.getValue('keepLogs')) {
+		if (FSH.System.getValue('keepLogs')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
-		if (System.getValue('showMonsterLog')) {
+		if (FSH.System.getValue('showMonsterLog')) {
 			$(pCL).find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-monsterlog" href="index.php?cmd=notepad&blank' +
@@ -1353,7 +1401,7 @@ window.Layout = {
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=guildinvmanager">Guild Inventory</a></li>');
-		if (!System.getValue('useNewGuildLog')) {
+		if (!FSH.System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
 			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
 				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
@@ -1391,16 +1439,6 @@ window.Layout = {
 		window.$('#nav').nav('calcHeights');
 	},
 
-	injectItemIntoMenuTable: function(tableElement, text, href, position) { //JQuery ready
-		if (position > tableElement.children().length) {
-			position = tableElement.children().length;
-		}
-		$(tableElement).find('tr:eq('+position+')').before('<tr><td><font ' +
-			'color="black">&nbsp;&nbsp;-&nbsp;<A href="' + href + '"><font ' +
-			'color="black">' + text + '</font></A></font></td></tr><tr><td ' +
-			'height="5"></td></tr>');
-	},
-
 	moveRHSBoxUpOnRHS: function(title) {
 		$('div#pCR').prepend($('div#' + title));
 	},
@@ -1413,13 +1451,13 @@ window.Layout = {
 	},
 
 	notebookContent: function() {
-		return System.findNode('//div[@id="pCC"]'); //new interface logic
+		return $('div#pCC')[0]; //new interface logic
 	},
 
 	playerId: function() {
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
 		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
-		System.setValue('playerID',thePlayerId);
+		FSH.System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
 
@@ -1427,7 +1465,7 @@ window.Layout = {
 		var guildId = $('script:contains("guildId: ")').first().text()
 			.match(/\s+guildId: ([0-9]+),/);
 		if (guildId) {guildId = parseInt(guildId[1], 10);}
-		System.setValue('guildId', guildId);
+		FSH.System.setValue('guildId', guildId);
 		return guildId;
 	},
 
@@ -1515,6 +1553,24 @@ window.Layout = {
 		'</tr></tbody></table>' +
 		'</div>',
 
+	godsNotification:
+		'<li class="notification">' +
+		'<span id="helperPrayToGods" style="text-align:center"><table><tbody>' +
+		'<tr><td style="padding: 1px"><img src="' + FSH.System.imageServer +
+		'/temple/0.gif" class="tip-static" data-tipped="Pray to Sahria" ' +
+		'style="cursor: pointer"></td>' +
+		'<td style="padding: 1px"><img src="' + FSH.System.imageServer +
+		'/temple/1.gif" class="tip-static" data-tipped="Pray to Osverin" ' +
+		'style="cursor: pointer"></td>' +
+		'<td rowspan="2"><a href="index.php?cmd=temple" ' +
+		'class="notification-content">Bow down to the gods</a></td></tr>' +
+		'<tr><td style="padding: 1px"><img src="' + FSH.System.imageServer +
+		'/temple/2.gif" class="tip-static" data-tipped="Pray to Gurgriss" ' +
+		'style="cursor: pointer"></td>' +
+		'<td style="padding: 1px"><img src="' + FSH.System.imageServer +
+		'/temple/3.gif" class="tip-static" data-tipped="Pray to Lindarsil" ' +
+		'style="cursor: pointer"></td></tr></tbody></table></span></li>',
+
 	goldUpgradeMsg:
 		'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
 		' class="notification-icon"></span><p class="notification-content">Up' +
@@ -1523,7 +1579,665 @@ window.Layout = {
 	composeMsg:
 		'<li class="notification"><a href="index.php?cmd=composing"><span' +
 		' class="notification-icon"></span><p class="notification-content">Co' +
-		'mposing to do</p></a></li>'
+		'mposing to do</p></a></li>',
+
+	allyEnemyList:
+		'<h3>Allies/Enemies</h3><div class="minibox-content"><h4>Online ' +
+		'Contacts <span id="fshResetEnemy">Reset</span></h4><div id="' +
+		'minibox-enemy"><ul id="fshContactList"></ul><ul id="' +
+		'enemy-quick-buff">Quick Buff Selected</ul></div></div>',
+
+	allyEnemyContact:
+		'<li class="player"><div class="player-row"><a class="' +
+		'enemy-buff-check-on" data-name="@@username@@" href="#"></a>' +
+		'<a class="player-name tip-static" style="color: @@contactColor@@" ' +
+		'data-tipped="<b>@@username@@</b><br><table><tbody><tr><td>Level:' +
+		'</td><td>@@level@@</td></tr><tr><td>Last Activity:</td><td>' +
+		'@@last_login@@</td></tr></tbody></table>" ' +
+		'href="index.php?cmd=profile&player_id=@@id@@">@@username@@</a></div>' +
+		'<div class="guild-minibox-actions"><a id="enemy-send-message" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="javascript:openQuickMsgDialog(\'@@username@@\');" ' +
+		'data-tipped="Send Message""></a><a id="enemy-quickbuff" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="javascript:openWindow(\'index.php?cmd=quickbuff&t=@@username@@' +
+		'\', \'fsQuickBuff\', 618, 1000, \',scrollbars\');" ' +
+		'data-tipped="Quick Buff"></a><a id="enemy-secure-trade" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+		'@@username@@" data-tipped="Secure Trade"></a><a id="enemy-trade" ' +
+		'class="guild-icon left guild-minibox-action tip-static" ' +
+		'href="index.php?cmd=trade&target_player=@@username@@" ' +
+		'data-tipped="Send Gold/Items/FSP"></a></div></li>',
+
+	reportLinks:
+		'<span class="fshNoWrap">Recall to: <a class="tip-static" ' +
+		'href="@@firstHref@@" data-tipped="@@firstOldTitle@@">@@firstText@@' +
+		'</a><span class="fshHide"> | <a class="tip-static" ' +
+		'href="@@secondHref@@" data-tipped="Click to recall to guild store">' +
+		'Guild Store</a></span> | <span class="reportLink recall tip-static" ' +
+		'href="@@firstHref@@" data-tipped="@@firstOldTitle@@">Fast ' +
+		'@@fasttext@@</span><span class="fshHide"> | <span class="reportLink ' +
+		'recall tip-static" href="@@secondHref@@" data-tipped="Click to ' +
+		'recall to guild store">Fast GS</span></span><span ' +
+		'class="fshWearHide"> | <span class="reportLink @@linktype@@">Fast ' +
+		'Wear</span></span></span>',
+
+	bazaarTable:
+		'<table id="fshBazaar"><tr><td colspan="5">Select an item to ' +
+		'quick-buy:</td></tr><tr><td colspan="5">Select how many to ' +
+		'quick-buy</td></tr><tr><td colspan="5"><input id="buy_amount" ' +
+		'class="fshNumberInput" type="number" min="0" max="99" value="1">' +
+		'</td></tr><tr><td>@0@</td><td>@1@</td><td>@2@</td><td>@3@</td><td>' +
+		'@4@</td></tr><tr><td>@5@</td><td>@6@</td><td>@7@</td><td>@8@</td>' +
+		'<td>@9@</td></tr><tr><td colspan="3">Selected item:</td><td id="' +
+		'selectedItem" colspan="2"></td></tr><tr><td colspan="5"><span id="' +
+		'warning">Warning:<br>pressing [<span id="fshBuy" class="fshLink">' +
+		'This button</span>] now will buy the <span id="quantity">1</span> ' +
+		'item(s) WITHOUT confirmation!</span></td></tr><tr>' +
+		'<td id="buy_result" colspan="5"></td></tr></table>',
+
+	bazaarItem:
+		'<img class="tip-dynamic" width="20" height="20" src="@src@" ' +
+		'itemid="@itemid@" data-tipped="@tipped@">'
 
 };
+
+FSH.ajax = {
+	getMembrList: function(force, fn) {
+		var dfr = FSH.ajax.guildMembers(force);
+		dfr.done(function(membrList) {
+			FSH.Helper.membrList = membrList;
+			if (typeof fn === 'function') {fn(membrList);}
+		});
+		return dfr;
+	},
+
+	guildMembers: function(force) {
+		if (force) {
+			return FSH.ajax.getGuildMembers();
+		}
+		var prm = FSH.ajax.getForage('fsh_membrList');
+		return prm.pipe(function(membrList) {
+			if (!membrList || membrList.lastUpdate < Date.now() - 300000) {
+				return FSH.ajax.getGuildMembers();
+			}
+			return membrList;
+		});
+	},
+
+	getGuildMembers: function() {
+		var prm = $.ajax({
+			dataType: 'json',
+			url:'index.php',
+			data: {
+				cmd: 'export',
+				subcmd: 'guild_members',
+				guild_id: FSH.Layout.guildId()
+			}
+		});
+		return prm.pipe(function(data) {
+			var membrList = {};
+			membrList.lastUpdate = Date.now();
+			data.forEach(function(ele) {
+				membrList[ele.username] = ele;
+			});
+			FSH.ajax.setForage('fsh_membrList', membrList);
+			return membrList;
+		});
+	},
+
+	// this is a shit name, change it
+	getInv: function(fn, force) {
+		var ajax = 'inventory';
+		var forage = 'fsh_selfInv';
+		if (FSH.subcmd === 'guildinvmgr') {
+			ajax = 'guild_store&inc_tagged=1';
+			forage = 'fsh_guildInv';
+		}
+		if (force) {
+			$.ajax({
+				dataType: 'json',
+				url:'index.php?cmd=export&subcmd=' + ajax,
+				success: function(data) {
+					data.lastUpdate = Date.now();
+					localforage.setItem(forage, data,
+						function(err, inv) {
+							if (err) {console.log('localforage error', err);}
+							FSH.Helper.inventory = inv;
+// console.log('getInv forage set success');
+							fn();
+						}
+					);
+				}
+			});
+			return;
+		}
+		localforage.getItem(forage, function(err, inv) {
+			if (err) {console.log('localforage error', err);}
+			if (!inv || inv.lastUpdate < Date.now() - 300000) {
+				FSH.ajax.getInv(fn, true);
+				return;
+			}
+			FSH.Helper.inventory = inv;
+// console.log('getInv forage get success');
+			fn();
+		});
+	},
+
+	myStats: function(force) {
+		FSH.Helper.myUsername = $('dt#statbar-character').text();
+		var dfr = FSH.ajax.getMyStats(force);
+		dfr.done(function(data) {
+			FSH.Helper.profile = FSH.Helper.profile || {};
+			FSH.Helper.profile[FSH.Helper.myUsername] = data;
+		});
+		return dfr;
+	},
+
+	getMyStats: function(force) {
+		if (force) {
+			return FSH.ajax.getMyProfile();
+		} else {
+			var prm = FSH.ajax.getForage('fsh_selfProfile');
+			// jQuery 1.7 uses pipe instead of then
+			return prm.pipe(function(data) {
+				if (!data || data.lastUpdate < Date.now() -
+					FSH.Helper.allyEnemyOnlineRefreshTime) {
+					//console.log('myStats doing refresh');
+					return FSH.ajax.getMyProfile();
+				} else {
+					return data;
+				}
+			});
+		}
+	},
+
+	getMyProfile: function() {
+		var prm = FSH.ajax.getProfile(FSH.Helper.myUsername);
+		return prm.done(function(data) {
+			data.lastUpdate = Date.now();
+			FSH.ajax.setForage('fsh_selfProfile', data);
+		});
+	},
+
+	getProfile: function(username) {
+		return $.getJSON('index.php', {
+			cmd:             'export',
+			subcmd:          'profile',
+			player_username: username
+		});
+	},
+
+	setForage: function(forage, data) {
+		// Wrap in jQuery Deferred because we're using 1.7
+		// rather than using ES6 promise
+		var dfr = $.Deferred();
+		localforage.setItem(forage, data, function(err, data) {
+			if (err) {
+				console.log(forage + ' forage error', err);
+				dfr.reject(err);
+			} else {
+				//console.log(forage + ' forage set success');
+				dfr.resolve(data);
+			}
+		});
+		return dfr.promise();
+	},
+
+	getForage: function(forage) {
+		// Wrap in jQuery Deferred because we're using 1.7
+		// rather than using ES6 promise
+		var dfr = $.Deferred();
+		localforage.getItem(forage, function(err, data) {
+			if (err) {
+				console.log(forage + ' forage error', err);
+				dfr.reject(err);
+			} else {
+				// returns null if key does not exist
+				//console.log(forage + ' forage get success');
+				dfr.resolve(data);
+			}
+		});
+		return dfr.promise();
+	}
+
+};
+
+FSH.composing = {
+	injectComposeAlert: function() { //jquery
+		if (FSH.cmd === 'composing') {return;}
+		var needToCompose = FSH.System.getValue('needToCompose');
+		if (needToCompose) {
+			FSH.composing.displayComposeMsg();
+			return;
+		}
+		var lastComposeCheck = FSH.System.getValue('lastComposeCheck');
+		if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
+		$.get('index.php?cmd=composing', FSH.composing.parseComposing);
+	},
+
+	parseComposing: function(data) { //jquery
+		var doc;
+		if (FSH.cmd !== 'composing') {
+			doc = data;
+		} else {
+			doc = document;
+		}
+		var openSlots = $('div.composing-potion-time:contains("ETA: Ready to ' +
+			'Collect!"), div.composing-potion-time:contains("ETA: n/a")', doc);
+		if (openSlots.length !== 0) {
+			FSH.composing.displayComposeMsg();
+			FSH.System.setValue('needToCompose', true);
+		} else {
+			var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
+			var etas = $('div.composing-potion-time', doc);
+			var eta = Infinity;
+			etas.each(function() { // might be better just to look at [0]
+				var timeArr = timeRE.exec($(this).text());
+				if (!timeArr) {return;}
+				var milli = timeArr[1] * 3600000 + timeArr[2] * 60000 +
+					timeArr[3] * 1000 + Date.now();
+				eta = milli < eta ? milli : eta;
+			});
+			FSH.System.setValue('needToCompose', false);
+			FSH.System.setValue('lastComposeCheck', eta);
+		}
+	},
+
+	displayComposeMsg: function() { //jquery
+		$('ul#notifications').prepend(FSH.Layout.composeMsg);
+	},
+
+	injectComposing: function() { //jquery
+		if (FSH.Helper.enableComposingAlert) {
+			FSH.composing.parseComposing();}
+
+		var disableComposingPrompts =
+			FSH.System.getValue('disableComposingPrompts');
+		if (disableComposingPrompts) {
+			$('input[class^="large awesome"][onclick]').each(function(i, e) {
+				$(e).attr('onclick', $(e).attr('onclick')
+				.replace(/if\(confirm\(.+\)\) /, ''));
+			});
+			$('div#composing-error-dialog')
+				.before('<div id="fshCompConf"><b>Warning:</b> Confirmation ' +
+				'prompts are disabled. Use at your own risk.<div>');
+		}
+
+		$('input[value="Discard All"]')
+			.before('<input type="button" id="helperCreateAll" class="large ' +
+			'awesome red" value="Create All" disabled="true" style="height: ' +
+			'25px; line-height: 9px;">&nbsp;');
+		if ($('select[id^="composing-template-"][value!="none"]').length) {
+			$('#helperCreateAll').prop('disabled', false);
+			$('#helperCreateAll').click(function() {
+				if (disableComposingPrompts ||
+					confirm('Are you sure you want to create all potions? ' +
+						'Do you have the correct templates selected?')) {
+					$('select[id^="composing-template-"][value!="none"]')
+						.each(function() {
+							FSH.composing.createPotion($(this));
+						});
+				}
+			});
+		}
+
+		$('input[id^=create-]').each(function(i,e){
+			$(e).after('<span id="helperQC-' + $(e).attr('id').slice(-1) +
+				'" class="helperQC">&nbsp;[Quick Create]</span>');
+		});
+
+		$('span[id^="helperQC-"]').on('click', function(){
+			var temp = $('select#composing-template-' +
+				$(this).attr('id').slice(-1));
+			if (temp.length === 1 && temp.val() !== 'none') {
+				FSH.composing.createPotion(temp);
+			}
+		});
+	},
+
+	createPotion: function($template) { //jquery
+		$.ajax({
+			cache: false,
+			dataType: 'json',
+			url:'index.php',
+			data: {
+				cmd: 'composing',
+				subcmd: 'createajax',
+				template_id: $template.val(),
+				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+			},
+			success: function(data, textStatus) {
+				if (data.error !== '') {
+					$template.parent()
+						.html('<div id="helperQCError" style="height: ' +
+						'26px;">' + data.error + '</div>');
+				} else {
+					$template.parent()
+						.html('<div id="helperQCSuccess" style="height: ' +
+						'26px;">' + textStatus + '</div>');
+				}
+				if ($('select[id^="composing-template-"]').length === 0 &&
+					$('div#helperQCError').length === 0) {
+					location.href = 'index.php?cmd=composing';
+				}
+			}
+		});
+	}
+};
+
+FSH.notification = {
+	injectTempleAlert: function() { //jquery
+		//Checks to see if the temple is open for business.
+		//if (!FSH.System.getValue('enableTempleAlert')) {return;}
+		if (FSH.cmd === 'temple') {return;}
+		var templeAlertLastUpdate = FSH.System.getValue('lastTempleCheck');
+		var needToPray = FSH.System.getValue('needToPray');
+		var needToParse = false;
+		if (templeAlertLastUpdate) {
+			if (Date.now() > templeAlertLastUpdate) { // midnight
+				needToParse = true;
+			} else if (needToPray) {
+				FSH.notification.displayDisconnectedFromGodsMessage();
+			}
+		} else {
+			needToParse = true;
+		}
+		if (needToParse) {
+			$.get('index.php?cmd=temple', FSH.notification.parseTemplePage);
+		}
+	},
+
+	parseTemplePage: function(responseText) { //native
+		var checkNeedToPray, doc;
+		if (!FSH.Helper.enableTempleAlert) {return;}
+		if (FSH.cmd !== 'temple') {
+			doc = FSH.System.createDocument(responseText);
+		} else {
+			doc = document;
+		}
+		checkNeedToPray = doc.querySelector('input[value="Pray to Osverin"]');
+		var needToPray = false;
+		if (checkNeedToPray) {
+			FSH.notification.displayDisconnectedFromGodsMessage();
+			needToPray = true;
+		}
+		FSH.System.setValue('needToPray', needToPray);
+		FSH.System.setValue('lastTempleCheck', new Date()
+			.setUTCHours(23, 59, 59, 999) + 1); // midnight
+	},
+
+	displayDisconnectedFromGodsMessage: function() { //jquery
+		$('ul#notifications').prepend(FSH.Layout.godsNotification);
+		$('#helperPrayToGods').on('click', 'img', function() {
+			var index = $(this).attr('src').replace(/\D/g, '');
+			$('#helperPrayToGods').off('click', 'img');
+			$.post(
+				FSH.System.server + 'index.php',
+				'cmd=temple&subcmd=pray&type=' + index,
+				function() {
+					$('#helperPrayToGods').html('<span class="notification-' +
+						'icon"></span><p class="notification-content">You ' +
+						'are currently praying at the temple.</p>');
+					FSH.System.setValue('needToPray',false);
+					FSH.System.setValue('lastTempleCheck', new Date()
+						.setUTCHours(23, 59, 59, 999) + 1); // Midnight
+					// location.href = 'index.php?cmd=temple'
+				}
+			);
+		});
+	},
+
+	injectUpgradeAlert: function() { //jquery
+		//if (!FSH.System.getValue('enableUpgradeAlert')) {return;}
+		if (location.search.search('cmd=points&type=1') !== -1) {return;}
+		var needToDoUpgrade = FSH.System.getValue('needToDoUpgrade');
+		if (needToDoUpgrade) {
+			FSH.notification.displayUpgradeMsg();
+			return;
+		}
+		var lastUpgradeCheck = FSH.System.getValue('lastUpgradeCheck');
+		if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
+		$.get('index.php?cmd=points&type=1',
+			FSH.notification.parseGoldUpgrades);
+	},
+
+	parseGoldUpgrades: function(data) { //jquery
+		if (!FSH.Helper.enableUpgradeAlert) {return;}
+		var doc;
+		if (location.search.search('cmd=points&type=1') === -1) {
+			doc = data;
+		} else {
+			doc = document;
+			$('div#pCC input[name="upgrade_id"][value="1"]', doc).parent()
+				.find('input[name="quantity"]').val('10');
+		}
+		var limit = $('tr:contains("+1 Maximum Stamina") > td:eq(2)', doc);
+		var checkDoneUpgrade = limit.text().split(' / ');
+		if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
+			FSH.notification.displayUpgradeMsg();
+			FSH.System.setValue('needToDoUpgrade', true);
+		} else {
+			FSH.System.setValue('needToDoUpgrade', false);
+			FSH.System.setValue('lastUpgradeCheck',
+				Date.parse(limit.next().text() + ' GMT'));
+		}
+	},
+
+	displayUpgradeMsg: function() { //jquery
+		$('ul#notifications').prepend(FSH.Layout.goldUpgradeMsg);
+	},
+};
+
+FSH.guildReport = {
+
+	injectReportPaint: function() {
+		FSH.ajax.getMembrList(false, FSH.guildReport.doReportPaint);
+	},
+
+	reportHeader: function(innerTable) {
+		$('td[bgcolor="#DAA534"][colspan="2"] b', innerTable).each(function() {
+			var self = $(this);
+			self.html(
+				FSH.Layout.onlineDot(Math.floor((Math.floor(Date.now() /
+				1000) - FSH.Helper.membrList[self.text()].last_login) / 60)) +
+				'<a href="index.php?cmd=profile&player_id=' +
+				FSH.Helper.membrList[self.text()].id + '">' + self.html() +
+				'</a> [ <span class="a-reply fshLink" target_player=' +
+				self.text() + '>m</span> ]'
+			);
+		});
+	},
+
+	doReportPaint: function() {
+		var container = $('div#pCC > table > tbody > tr > td').last();
+		var innerTable = $('table', container).detach();
+		var rows = $('tr', innerTable);
+
+		var searchUser = FSH.System.getUrlParameter('user');
+		if (searchUser && $('b:contains("' + searchUser + '")', innerTable)
+			.length > 0) {
+			$('b:contains("' + searchUser + '")', innerTable)
+				.closest('tr').prevAll().remove();
+			$('a[href*="_id=' + FSH.Helper.membrList[searchUser].id + '&"]',
+				innerTable).last().closest('tr').nextAll().remove();
+		}
+
+		var searchSet = FSH.System.getUrlParameter('set');
+		if (searchSet) {
+			var setRE = new RegExp(searchSet);
+			rows.filter(function() {
+				var tds = $('td', this);
+				return tds.length !== 2 && !setRE.test(tds.eq(1).text());
+			}).remove();
+		}
+
+		FSH.guildReport.reportHeader(innerTable);
+		FSH.guildReport.reportChild(innerTable);
+
+		innerTable.on('click', 'span.a-reply', function(evt) {
+			FSH.Helper.openQuickMsgDialog(
+				evt.target.getAttribute('target_player'));
+		});
+		innerTable.on('click', '.recall', FSH.guildReport.recallItem);
+		innerTable.on('click', '.wear', FSH.guildReport.recallItemNWear);
+		innerTable.on('click', '.equip',
+			FSH.guildReport.equipProfileInventoryItem);
+
+		container.append(innerTable);
+	},
+
+	reportChild: function(innerTable) {
+		var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion' +
+			'|Jagua Egg');
+		$('td:contains("Recall to:")', innerTable).each(function() {
+			var self = $(this);
+			var atd = $('a', self);
+			var firstA = atd.first();
+			var firstHref = firstA.attr('href');
+			var firstOldTitle = firstA.attr('oldtitle');
+			var firstText = firstA.text();
+			var secondHref = atd.length === 2 ? atd.eq(1).attr('href') : null;
+			var output = FSH.Layout.reportLinks;
+			output = output.replace(/@@firstHref@@/g, firstHref);
+			output = output.replace(/@@firstOldTitle@@/g, firstOldTitle);
+			output = output.replace(/@@firstText@@/g, firstText);
+			output = output.replace(/@@fasttext@@/g, firstText === 'Backpack' ?
+				'BP' : 'GS');
+			if (secondHref) {
+				output = output.replace(/fshHide/g, 'fshInline');
+				output = output.replace(/@@secondHref@@/g, secondHref);
+			}
+
+			var itemName = self.prev().html();
+			if (!wearRE.test(itemName)) {
+				output = output.replace(/fshWearHide/g, 'fshInline');
+				output = output.replace(/@@linktype@@/g, secondHref ?
+					'wear" href="' + firstHref :
+					'equip" itemid="' + /&id=(\d+)/.exec(firstHref)[1]);
+			}
+			self.html(output);
+		});
+	},
+
+	recallItem: function(evt) {
+		var href=evt.target.getAttribute('href');
+		FSH.System.xmlhttp(href, FSH.guildReport.recallItemReturnMessage, {'target': evt.target, 'url': href});
+	},
+
+	recallItemReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = FSH.Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode;
+		if (info.search('You successfully recalled the item') !== -1) {
+			itemCellElement.innerHTML = '<span style="color:green; font-weight:bold;">' + info + '</span>';
+		} else if (info!=='') {
+			itemCellElement.innerHTML = '<span style="color:red; font-weight:bold;">' + info + '</span>';
+		} else {
+			itemCellElement.innerHTML = '<span style="color:red; font-weight:bold;">Weird Error: check the Tools>Error Console</span>';
+			console.log('Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error');
+			console.log(callback.url);
+		}
+	},
+
+	recallItemNWear: function(evt) {
+		var href=evt.target.getAttribute('href');
+		FSH.System.xmlhttp(href, FSH.guildReport.recallItemNWearReturnMessage, {'target': evt.target, 'url': href});
+	},
+
+	recallItemNWearReturnMessage: function(responseText, callback) {
+		var target = callback.target;
+		var info = FSH.Layout.infoBox(responseText);
+		var itemCellElement = target.parentNode;
+		if (info.search('You successfully') !== -1) {
+			itemCellElement.innerHTML = '<span style="color:green; font-weight:bold;">Taken</span>';
+			FSH.System.xmlhttp(FSH.System.server+'?cmd=trade', FSH.guildReport.wearRecall, itemCellElement);
+		} else if (info!=='') {
+			itemCellElement.innerHTML = '<span style="color:red; font-weight:bold;">Error</span>';
+		}
+	},
+
+	wearRecall: function(responseText, callback) {
+		var doc=FSH.System.createDocument(responseText);
+		var items=FSH.System.findNodes('//input[@name="sendItemList[]"]',doc);
+		if (items) {
+			var itemId=items[items.length-1].getAttribute('value');
+			FSH.System.xmlhttp(FSH.System.server +
+				'?cmd=profile&subcmd=equipitem&inventory_id=' + itemId +
+				'&folder_id=0&backpack_page=0',
+				function(responseText) {
+					var info = FSH.Layout.infoBox(responseText);
+					if (info==='') {
+						callback.innerHTML += '<br><span style="color:green; ' +
+							'font-weight:bold;">Worn</span>';
+					} else {
+						callback.innerHTML += '<br><span style="color:red; ' +
+							'font-weight:bold;">' + info + '</span>';
+					}
+				}
+			);
+		}
+	},
+
+};
+
+FSH.bazaar = {
+
+	inject: function() { // jQuery
+		var pbImg = $('div#pCC img[alt="Potion Bazaar"]');
+		pbImg.css('float', 'left');
+		var myTable = FSH.Layout.bazaarTable;
+		$('div#pCC table table table img[src*="/items/"]').each(function(i) {
+			var item = $(this);
+			var tipped = item.data('tipped');
+			myTable = myTable
+				.replace('@' + i + '@', FSH.Layout.bazaarItem)
+				.replace('@src@', item.attr('src'))
+				.replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
+				.replace('@tipped@', tipped);
+		});
+		myTable = $(myTable.replace(/@\d@/g, ''));
+		$('span#warning', myTable).hide();
+		myTable.on('click', 'img[width="20"]', FSH.bazaar.select);
+		myTable.on('input', 'input#buy_amount', FSH.bazaar.quantity);
+		myTable.on('click', 'span#fshBuy', FSH.bazaar.buy);
+		pbImg.parent().append(myTable);
+	},
+
+	select: function(evt) { // jQuery
+		var target = $(evt.target);
+		FSH.bazaar.ItemId = target.attr('itemid');
+		$('table#fshBazaar span#quantity').text(
+			$('table#fshBazaar input#buy_amount').val());
+		$('table#fshBazaar span#warning').show();
+		$('table#fshBazaar td#selectedItem').empty().append(
+			target.clone().attr('width', '45').attr('height', '45'));
+	},
+
+	quantity: function(evt) { // mixed
+		var theValue = parseInt(evt.target.value, 10);
+		if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+			$('table#fshBazaar span#quantity:visible').text(theValue);
+		}
+	},
+
+	buy: function() {
+		if (!FSH.bazaar.ItemId) {return;}
+		var buyAmount = $('table#fshBazaar input#buy_amount').val();
+		$('table#fshBazaar td#buy_result')
+			.html('Buying ' + buyAmount + ' items');
+		for (var i = 0; i < buyAmount; i += 1) {
+			$.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
+				FSH.bazaar.ItemId, FSH.bazaar.done);
+		}
+	},
+
+	done: function(responseText) {
+		$('table#fshBazaar td#buy_result')
+			.append('<br>' + FSH.Layout.infoBox(responseText));
+	}
+
+};
+
 })();
