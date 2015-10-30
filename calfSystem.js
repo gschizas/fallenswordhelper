@@ -577,7 +577,15 @@ FSH.Data = {
 		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7' +
 		'" class="tip-static" data-tipped="Offline">',
 
-	//~ redDot: return 'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9znDEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudSa85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiLKpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTHSICFGSeSQcCKiIBDA0MoiohADs%3D',
+	redDot:
+		'<img width="10" height="10" style="float:left" src="' +
+		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9zn' +
+		'DEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudS' +
+		'a85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV' +
+		'1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiL' +
+		'KpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTH' +
+		'SICFGSeSQcCKiIBDA0MoiohADs%3D' +
+		'" class="tip-static" data-tipped="Offline">',
 
 	runIcon:
 		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf' +
@@ -1346,8 +1354,12 @@ FSH.Layout = {
 				img = FSH.Data.yellowDiamond;
 			} else if (min < 30) {
 				img = FSH.Data.orangeDiamond;
-			} else if (min > 10080) {
+			} else if (min < 10080) {
+				img = FSH.Data.offlineDot;
+			} else if (min < 44640) {
 				img = FSH.Data.sevenDayDot;
+			} else if (min >= 44640) {
+				img = FSH.Data.redDot;
 			}
 		}
 		return img;
