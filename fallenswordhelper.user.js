@@ -2838,7 +2838,9 @@ FSH.Helper = {
 			item = FSH.Helper.inventory.items[i];
 			if (selectMain && item.folder_id !== '-1') { continue;}
 			if (!selectST && item.is_in_st) { continue;}
-			if (item.type !== '12' && item.type !== '16') {continue;}
+			if(item.item_name != 'Zombie Coffin'){
+        			if (item.type !== '12' && item.type !== '16') {continue;}
+            		}
 			if (FSH.Helper.resourceList[item.item_id]){
 				FSH.Helper.resourceList[item.item_id].invIDs += ',' +
 					item.inv_id;
