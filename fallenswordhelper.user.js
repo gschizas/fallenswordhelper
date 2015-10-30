@@ -68,7 +68,6 @@ FSH.Helper = {
 
 		if (FSH.Helper.huntingMode) {
 			FSH.Helper.replaceKeyHandler();
-			// FSH.Helper.fixOnlineGuildBuffLinks();
 		} else {
 			//move boxes in opposite order that you want them to appear.
 			if (FSH.System.getValue('moveGuildList')) {
@@ -154,7 +153,6 @@ FSH.Helper = {
 		FSH.fromWorld = fromWorld;
 
 		FSH.Helper.page = cmd + '/' + subcmd + '/' + subcmd2 + '(' + type + ')';
-		// console.log('FSH.Helper.page', FSH.Helper.page);
 
 		var hcsData = $('html').data('hcs');
 		if (hcsData && hcsData['new-ui']) { // UFSG or QuickBuff
@@ -169,7 +167,6 @@ FSH.Helper = {
 			pageSwitcher[cmd][subcmd][subcmd2][type] &&
 			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
 			funcName = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
-			// console.log('pageSwitcher2 funcName', funcName);
 			funcName = funcName.split('.');
 			if (funcName.length === 1) {
 				fn = FSH.Helper[funcName[0]];
@@ -239,9 +236,6 @@ FSH.Helper = {
 	},
 
 	unknownPage: function() {
-		// console.log('*** unknownPage ***');
-		//var isRelicPage = $('div#pCC td:contains("Below is the current status for the relic")');
-		//var isRelicPage = FSH.System.findNode('//td[contains(.,"Below is the current status for the relic")]/b');
 		if ($('div#pCC td:contains("Below is the current status for ' +
 			'the relic")').length > 0) {
 			FSH.Helper.injectRelic();
@@ -250,8 +244,6 @@ FSH.Helper = {
 		if (isBuffResult) {
 			FSH.Helper.updateBuffLog();
 		}
-		//FSH.System.findNode('//td[contains(.,"then click to purchase for the price listed below the item.")]');
-		//var isShopPage =  $('#shop-info').length > 0;
 		if ($('#shop-info').length > 0) {
 			FSH.Helper.injectShop();
 		}
@@ -393,7 +385,6 @@ FSH.Helper = {
 			var buffsCastRE = new RegExp('Skill ([\w ]*) level (\d*) was ' +
 				'activated on "(\w*)"');
 			var buffList = FSH.Data.buffList;
-			//var buffsNotCast = buffsCastRE.exec(document.body.innerHTML);
 			for (var i=0;i<buffsAttempted.length ;i+= 1 )
 			{
 				var buffsCast = buffsCastRE.exec(buffsAttempted[i]);
@@ -416,7 +407,6 @@ FSH.Helper = {
 				}
 			}
 			FSH.System.setValue('buffLog',buffLog);
-			//document.getElementById('buff_Log').innerHTML+='<br><br><br>'+buffLog;
 		}
 	},
 
@@ -555,7 +545,6 @@ FSH.Helper = {
 			var aRow = memberTable.rows[i];
 			if (aRow.cells[1]) {
 				var contactLink   = aRow.cells[1].firstChild.nextSibling;
-				//var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(contactLink.getAttribute('onmouseover'));
 				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
 				var lastActivityDays = parseInt(lastActivity[1],10);
 				var lastActivityHours = parseInt(lastActivity[2],10) + lastActivityDays * 24;
@@ -593,7 +582,6 @@ FSH.Helper = {
 				}
 			}
 			if (maxPage && parseInt(maxPage[1],10) > curPage) {
-				//http://www.fallensword.com/index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=2&search_text=
 				FSH.System.xmlhttp('index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' + (curPage + 1) + '&search_text=',
 					FSH.Helper.getConflictInfo,
 					{'node': callback.node});
@@ -612,10 +600,9 @@ FSH.Helper = {
 	},
 
 	recallGuildStoreItemReturnMessage: function(responseText, callback) {
-		// var itemID = callback.item;
 		var target = callback.target;
 		var info = FSH.Layout.infoBox(responseText);
-		var itemCellElement = target.parentNode; //FSH.System.findNode('//td[@title="' + itemID + '"]');
+		var itemCellElement = target.parentNode;
 		if (info.search('You successfully took the item into your backpack') !== -1) {
 			itemCellElement.innerHTML = '<span style="color:green; font-weight:bold;">Taken</span>';
 		} else if (info!=='') {
@@ -639,7 +626,6 @@ FSH.Helper = {
 		var nextGain = $(staminaMouseover).find('dt.stat-stamina-nextGain:first').next().text().replace(/,/g,'');
 		var nextGainRE = /([,0-9]+)m ([,0-9]+)s/;
 		var nextGainMinutes = FSH.System.intValue(nextGainRE.exec(nextGain)[1]);
-		// var nextGainSeconds = FSH.System.intValue(nextGainRE.exec(nextGain)[2]);
 		var nextGainHours = nextGainMinutes/60;
 		//get the max hours to still be inside stamina maximum
 		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
@@ -647,7 +633,6 @@ FSH.Helper = {
 		var now = Date.now();
 		var nextHuntMilliseconds = now + millisecondsToMaxStamina;
 		var d = new Date(nextHuntMilliseconds);
-		// var nextHuntTimeText = d.toFormatString('HH:mm ddd dd/MMM/yyyy');
 		var nextHuntTimeText = FSH.System.formatShortDate(d);
 		$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
 	},
@@ -664,8 +649,7 @@ FSH.Helper = {
 		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
 		nextGainTime  = new Date(Date.now() + millisecsToNextGain);
 		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+
-				// nextGainTime.toFormatString('HH:mm ddd dd/MMM/yyyy')+'</dd>');
-				FSH.System.formatShortDate(nextGainTime)+'</dd>');
+			FSH.System.formatShortDate(nextGainTime)+'</dd>');
 	},
 
 	injectShop: function() {
@@ -1196,7 +1180,6 @@ FSH.Helper = {
 			var mouseoverText = $(merc).data('tipped');
 			var src = merc.getAttribute('src');
 			if (mouseoverText && src.search('/merc/') !== -1){
-				//<td>Attack:</td><td>1919</td>
 				var attackRE=/<td>Attack:<\/td><td>(\d+)<\/td>/;
 				var mercAttackValue = attackRE.exec(mouseoverText)[1]*1;
 				totalMercAttack += mercAttackValue;
@@ -1350,7 +1333,6 @@ FSH.Helper = {
 			var realm = FSH.System.findNode('//b');
 			FSH.Helper.levelName = realm.textContent.replace(' Map Overview', '');
 		}
-		// console.log(FSH.Helper.levelName);
 		var theMap = FSH.System.getValueJSON('map');
 		var displayedMap = FSH.System.findNode(isLarge ? '//table[@width]' : '//table[@width="200"]');
 		if (!displayedMap) {return;}
@@ -1363,12 +1345,10 @@ FSH.Helper = {
 				var aCell = aRow.cells[x];
 				var dx = isLarge ? x : posit.X + (x - 2);
 				var dy = isLarge ? y : posit.Y + (y - 2);
-				// console.log(dx + ':' + dy)
 				if (theMap.levels[FSH.Helper.levelName] &&
 					theMap.levels[FSH.Helper.levelName][dx] &&
 					theMap.levels[FSH.Helper.levelName][dx][dy] &&
 					theMap.levels[FSH.Helper.levelName][dx][dy] === '!') {
-					// aCell.setAttribute('background', 'http://66.7.192.165/tiles/9_50.gif');
 
 					if (x !== (isLarge ? posit.X : 2) || y !== (isLarge ? posit.Y : 2)) {
 						aCell.style.color = footprintsColor;
@@ -1385,7 +1365,6 @@ FSH.Helper = {
 						}
 					}
 				}
-				// console.log(x + ':' + y + ' >> ' + aCell.getAttribute('background'));
 			}
 		}
 	},
@@ -2241,7 +2220,6 @@ FSH.Helper = {
 
 	dataEventsPlayerBuffs: function(e, data) {
 		// check shield imp is still active
-		// TODO So Bad!
 		var shieldImpVal = 0;
 		var ddVal=0;
 		var l = data.b.length;
@@ -2270,9 +2248,6 @@ FSH.Helper = {
 	},
 
 	combatResponse: function(e, data) {
-		// TODO this is too slow
-		// send the response to localforage
-		// and deal with it later
 		var l;
 		var i;
 		// If bad response do nothing.
@@ -2942,7 +2917,6 @@ FSH.Helper = {
 	},
 
 	prepareCombatLog: function() {
-		//if (!FSH.System.getValue('showCombatLog')) {return;}
 		var reportsTable=FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
 		if (!reportsTable) {return;}
 		var tempLog=document.createElement('div');
@@ -3169,7 +3143,6 @@ FSH.Helper = {
 	},
 
 	pushMonsterInfo: function(monster) {
-		// name, img, cls, lvl, atk, def, arm, dmg, hp, gold
 		var i;
 		var name = monster.key0;
 		var monsterLog = FSH.System.getValueJSON('monsterLog');
@@ -3761,7 +3734,6 @@ FSH.Helper = {
 			var aRow = chatTable.rows[i];
 			var addBuffTag = true;
 			if (aRow.cells[0].innerHTML) {
-				//console.log(aRow.cells[dateColumn].innerHTML);
 				var cellContents = aRow.cells[dateColumn].innerHTML;
 				if (logScreen !== 'Chat') {
 					cellContents = cellContents.substring(6,23); // fix for player log screen.
@@ -6106,7 +6078,6 @@ FSH.Helper = {
 		targetInventory.items.sort(FSH.Helper.stringSort);
 
 		FSH.Helper.sortBy=headerClicked;
-		//console.log(headerClicked)
 		if (sortType === 'number') {
 			targetInventory.items.sort(FSH.Helper.numberSort);
 		}
@@ -6343,7 +6314,6 @@ FSH.Helper = {
 			FSH.Helper.sortAsc=!FSH.Helper.sortAsc;
 		}
 		FSH.Helper.sortBy=headerClicked;
-		//console.log(headerClicked)
 		switch (sortType) {
 			case 'number':
 				FSH.Helper.recipebook.recipe.sort(FSH.Helper.numberSort);
@@ -6675,7 +6645,6 @@ FSH.Helper = {
 		if (playerInput.length === 0) {return;}
 		$('h1:contains("Quick Buff")').after(FSH.Layout.quickBuffHeader);
 		FSH.System.xmlhttp('index.php?cmd=profile', FSH.Helper.getSustain);
-		//$('div#packs').on('click', 'h1', window.updateCost);
 		$('div#players').on('click', 'h1', FSH.Helper.addBuffLevels);
 		$('div#buff-outer label').each(function() {
 			var lbl = $(this);
@@ -9703,11 +9672,6 @@ FSH.Helper = {
 	},
 
 	injectAllyEnemyList: function() {
-
-		// console.log(
-		// 	FSH.Helper.profile[FSH.Helper.myUsername]
-		// );
-
 		var allies = FSH.Helper.profile[FSH.Helper.myUsername]._allies || [];
 		var enemies = FSH.Helper.profile[FSH.Helper.myUsername]._enemies || [];
 		if (allies.length + enemies.length === 0 ||

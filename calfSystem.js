@@ -1687,7 +1687,6 @@ FSH.ajax = {
 		});
 	},
 
-	// this is a shit name, change it
 	getInv: function(fn, force) {
 		var ajax = 'inventory';
 		var forage = 'fsh_selfInv';
@@ -1705,7 +1704,6 @@ FSH.ajax = {
 						function(err, inv) {
 							if (err) {console.log('localforage error', err);}
 							FSH.Helper.inventory = inv;
-// console.log('getInv forage set success');
 							fn();
 						}
 					);
@@ -1720,7 +1718,6 @@ FSH.ajax = {
 				return;
 			}
 			FSH.Helper.inventory = inv;
-// console.log('getInv forage get success');
 			fn();
 		});
 	},
@@ -1744,7 +1741,6 @@ FSH.ajax = {
 			return prm.pipe(function(data) {
 				if (!data || data.lastUpdate < Date.now() -
 					FSH.Helper.allyEnemyOnlineRefreshTime) {
-					//console.log('myStats doing refresh');
 					return FSH.ajax.getMyProfile();
 				} else {
 					return data;
@@ -1778,7 +1774,6 @@ FSH.ajax = {
 				console.log(forage + ' forage error', err);
 				dfr.reject(err);
 			} else {
-				//console.log(forage + ' forage set success');
 				dfr.resolve(data);
 			}
 		});
@@ -1795,7 +1790,6 @@ FSH.ajax = {
 				dfr.reject(err);
 			} else {
 				// returns null if key does not exist
-				//console.log(forage + ' forage get success');
 				dfr.resolve(data);
 			}
 		});
@@ -1833,7 +1827,7 @@ FSH.composing = {
 			var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
 			var etas = $('div.composing-potion-time', doc);
 			var eta = Infinity;
-			etas.each(function() { // might be better just to look at [0]
+			etas.each(function() {
 				var timeArr = timeRE.exec($(this).text());
 				if (!timeArr) {return;}
 				var milli = timeArr[1] * 3600000 + timeArr[2] * 60000 +
@@ -1930,7 +1924,6 @@ FSH.composing = {
 FSH.notification = {
 	injectTempleAlert: function() { //jquery
 		//Checks to see if the temple is open for business.
-		//if (!FSH.System.getValue('enableTempleAlert')) {return;}
 		if (FSH.cmd === 'temple') {return;}
 		var templeAlertLastUpdate = FSH.System.getValue('lastTempleCheck');
 		var needToPray = FSH.System.getValue('needToPray');
@@ -1990,7 +1983,6 @@ FSH.notification = {
 	},
 
 	injectUpgradeAlert: function() { //jquery
-		//if (!FSH.System.getValue('enableUpgradeAlert')) {return;}
 		if (location.search.search('cmd=points&type=1') !== -1) {return;}
 		var needToDoUpgrade = FSH.System.getValue('needToDoUpgrade');
 		if (needToDoUpgrade) {
