@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1511b1
+// @version        1511
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -2836,17 +2836,16 @@ FSH.Helper = {
 		//for (var key in FSH.Helper.inventory.items) {
 		for (var i=0; i<FSH.Helper.inventory.items.length;i += 1) {
 			item = FSH.Helper.inventory.items[i];
-			if (selectMain && item.folder_id !== '-1') { continue;}
-			if (!selectST && item.is_in_st) { continue;}
-			if(item.item_name != 'Zombie Coffin'){
-        			if (item.type !== '12' && item.type !== '16') {continue;}
-            		}
+			if (selectMain && item.folder_id !== '-1') {continue;}
+			if (!selectST && item.is_in_st) {continue;}
+			if (item.item_name !== 'Zombie Coffin' &&
+				item.type !== '12' &&
+				item.type !== '16') {continue;}
 			if (FSH.Helper.resourceList[item.item_id]){
 				FSH.Helper.resourceList[item.item_id].invIDs += ',' +
 					item.inv_id;
 				FSH.Helper.resourceList[item.item_id].count += 1;
-			}
-			else {
+			} else {
 				FSH.Helper.resourceList[item.item_id] = {'count':1,
 					'invIDs':item.inv_id,
 					'first_item':item};
