@@ -10,7 +10,7 @@
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
 // @version        1511
-// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Beta/fallenswordhelper.user.js
+// @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
