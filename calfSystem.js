@@ -465,7 +465,9 @@ FSH.System = {
 
 	getFunction: function(funcName) {
 
-		ga('fsh.send', 'screenview', {screenName: funcName});
+		if (typeof ga !== 'undefined') {
+			ga('fsh.send', 'screenview', {screenName: funcName});
+		}
 
 		funcName = funcName.split('.');
 		if (funcName.length === 1) {
@@ -6593,9 +6595,11 @@ FSH.environment = { // Legacy
 	// main event dispatcher
 	dispatch: function() { // jQuery
 
-		ga('create', 'UA-76488113-1', 'auto', 'fsh');
-		ga('fsh.set', 'appName', 'fsh');
-		ga('fsh.set', 'appVersion', '1512b3');
+		if (typeof ga !== 'undefined') {
+			ga('create', 'UA-76488113-1', 'auto', 'fsh');
+			ga('fsh.set', 'appName', 'fsh');
+			ga('fsh.set', 'appVersion', '1512b3');
+		}
 
 		var cmd;
 		var subcmd;
