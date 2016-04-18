@@ -1,3 +1,71 @@
+#fshSpinner {
+  float: right;
+  margin: 0 160px 0 0;
+}
+
+#fshFindOnlinePlayers {
+  width: 120px;
+  float: right;
+  margin: 0 100px 0 0;
+  padding: 0;
+}
+
+#content {max-width:600px}
+
+.column {
+  float: left;
+  width: 180px;
+  margin-right: 5px;
+}
+
+.column h3 {
+  background: #e0e0e0;
+  font: bold 13px Arial;
+  margin: 0 0 5px 0;
+}
+
+.column ul {
+  margin: 0;
+  padding: 0;
+  list-style-type: none;
+}
+
+div#helperMenuDiv {
+  cursor: default;
+  text-decoration: none;
+  display: none;
+  text-align: center;
+  position: absolute;
+  color: black;
+  font-size: 12px;
+  -moz-border-radius: 5px;
+  -webkit-border-radius: 5px;
+  border:3px solid #cb7;
+  z-index: 1
+}
+
+div#helperMenuDiv .a-reply {
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+div#helperMenu {
+  position: absolute;
+  top: 0px;
+  left: 0px;
+  color: yellow;
+  font-weight: bold;
+  cursor: pointer;
+  text-decoration: underline;
+  z-index: 100;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.no-close .ui-dialog-titlebar-close {
+  display: none;
+}
+
 .HelperAdvisorRow1 {background-color:#e7c473;font-size:x-small}
 .HelperAdvisorRow1:hover {background-color:white}
 .HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}
@@ -15,6 +83,27 @@
 .HelperTableRow1:hover {background-color:white}
 .HelperTableRow2 {background-color:#e2b960;font-size:small}
 .HelperTableRow2:hover {background-color:white}
+
+.fastWear {
+  cursor:pointer;
+  text-decoration:underline;
+  color:blue;
+  position: relative;
+  top: -20%;
+}
+
+.fastWorn {
+  color:green;
+  font-weight:bold;
+}
+
+.fastUse {
+  cursor:pointer;
+  text-decoration:underline;
+  color:blue;
+  position: relative;
+  top: -20%;
+}
 
 .reportLink {cursor:pointer; text-decoration:underline; color:blue;}
 .fshLink {cursor:pointer; text-decoration:underline;}
@@ -59,13 +148,13 @@ div#quickbuff div.buff-block p label.fshDim span {
 .profile-stat-bonus {font-size: x-small;}
 
 #minibox-enemy {
-    margin: 0 0 10px;
-    overflow: hidden
+  margin: 0 0 10px;
+  overflow: hidden
 }
 #fshResetEnemy {
-    font-size: xx-small;
-    cursor: pointer;
-    text-decoration: underline;
+  font-size: xx-small;
+  cursor: pointer;
+  text-decoration: underline;
 }
 #enemy-send-message {background-position: -198px -80px;}
 #enemy-quickbuff {background-position: -210px -80px;}
@@ -73,29 +162,29 @@ div#quickbuff div.buff-block p label.fshDim span {
 #enemy-trade {background-position: -234px -80px;}
 .player-row {white-space: nowrap}
 #enemy-quick-buff {
-    clear: both;
-    text-align: center;
-    font-size: 11px;
-    margin: 0;
-    padding-top: 5px;
-    color: #F7EAC9;
-    text-decoration: underline;
-    cursor: pointer;
+  clear: both;
+  text-align: center;
+  font-size: 11px;
+  margin: 0;
+  padding-top: 5px;
+  color: #F7EAC9;
+  text-decoration: underline;
+  cursor: pointer;
 }
 .enemy-buff-check-on,
 .enemy-buff-check-off {
-    display: inline-block;
-    width: 12px;
-    height: 12px;
-    margin: 0 1px 2px 0;
-    vertical-align: bottom;
-    background: transparent url('http://cdn.fallensword.com/media/dist/img/ui/ui.png');
+  display: inline-block;
+  width: 12px;
+  height: 12px;
+  margin: 0 1px 2px 0;
+  vertical-align: bottom;
+  background: transparent url('http://cdn.fallensword.com/media/dist/img/ui/ui.png');
 }
 .enemy-buff-check-off {
-    background-position: -246px -80px;
+  background-position: -246px -80px;
 }
 .enemy-buff-check-on {
-    background-position: -270px -80px;
+  background-position: -270px -80px;
 }
 
 table#fshBazaar {font-size: x-small;}
