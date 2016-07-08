@@ -7716,12 +7716,28 @@ FSH.environment = { // Legacy
 		};
 	},
 
+	statbar: function() {
+		$('#statbar-character').off('click')
+			.wrap('<a href="index.php?cmd=profile"></a>');
+		$('#statbar-stamina').off('click')
+			.wrap('<a href="index.php?cmd=points&subcmd=reserve"></a>');
+		$('#statbar-equipment').off('click')
+			.wrap('<a href="index.php?cmd=blacksmith"></a>');
+		$('#statbar-inventory').off('click')
+			.wrap('<a href="index.php?cmd=profile&subcmd=dropitems"></a>');
+		$('#statbar-fsp').off('click')
+			.wrap('<a href="index.php?cmd=points"></a>');
+		$('#statbar-gold').off('click')
+			.wrap('<a href="index.php?cmd=bank"></a>');
+	},
+
 	// main event dispatcher
 	dispatch: function() { // jQuery
 
 		FSH.ga.setup();
 
 		FSH.environment.navMenu();
+		FSH.environment.statbar();
 
 		var cmd;
 		var subcmd;
@@ -9260,7 +9276,8 @@ FSH.newGuildLog = { // Legacy
 			}
 			// Titan messages (showTitanMessages)
 			else if (messageText.search('from your guild\'s contribution to the defeat of the titan') !== -1 ||
-				messageText.search('a 7 day cooldown has been activated on your guild for this titan') !== -1) {
+				messageText.search('a 7 day cooldown has been activated on your guild for this titan') !== -1 ||
+				messageText.search('bought the Titan Reward item') !== -1) {
 				if (!FSH.Helper.showTitanMessages) {displayRow = false;}
 				rowTypeID = 'GuildLogFilter:showTitanMessages';
 			}
@@ -13025,7 +13042,6 @@ FSH.newMap = { // Hybrid
 	},
 
 	injectWorldNewMap: function(data){ // jQuery - Ugly
-
 		if (data.player && FSH.System.getValue('sendGoldonWorld')) {
 			FSH.newMap.updateSendGoldOnWorld(data);
 		}
@@ -13041,7 +13057,7 @@ FSH.newMap = { // Hybrid
 		var oldButtonContainer = $('#fshWorldButtonContainer');
 		if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
 		var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});
-		FSH.newMap.showQuickLinks(buttonContainer);
+		FSH.newMap.showQuickLinks(buttonContainer, data);
 		FSH.newMap.showSearchButtons(buttonContainer, data);
 		if (FSH.System.getValue('showSpeakerOnWorld')) {
 			FSH.newMap.showSpeakerOnWorld(buttonContainer);
@@ -13050,11 +13066,8 @@ FSH.newMap = { // Hybrid
 		worldName.after(buttonContainer);
 	},
 
-	showQuickLinks: function(worldName) { // jQuery
-		worldName.append(FSH.Layout.worldBackpack);
-		var repair = $(FSH.Layout.worldRepair);
-		worldName.append('&nbsp;').append(repair);
-		repair.click(FSH.newMap.repair);
+	showQuickLinks: function(worldName, data) { // jQuery
+		worldName.append('&nbsp;').append('Min Lvl: ' + data.realm.minlevel);
 		var formgroup = $(FSH.Layout.worldFormgroup);
 		worldName.append('&nbsp;').append(formgroup);
 		formgroup.click(FSH.newMap.formgroup);
@@ -13078,15 +13091,14 @@ FSH.newMap = { // Hybrid
 
 	openQuickBuff: function(e) { // Native
 		e.preventDefault();
-		window.openWindow('index.php?cmd=quickbuff',
-			'fsQuickBuff', 618, 1000, ',scrollbars');
+		window.openWindow('index.php?cmd=quickbuff&t=' +
+			$('dt#statbar-character').text(), 'fsQuickBuff', 618, 1000,
+			',scrollbars');
 	},
 
 	showSearchButtons: function(worldName, data) { // jQuery
 		worldName.append('&nbsp;')
-		.append(FSH.Layout.searchMapUFSG.replace('@@realmId@@', data.realm.id))
-		.append('&nbsp;')
-		.append(FSH.Layout.searchMapWiki.replace('@@realmName@@', data.realm.name));
+			.append(FSH.Layout.searchMapUFSG.replace('@@realmId@@', data.realm.id));
 	},
 
 	showSpeakerOnWorld: function(worldName) { // jQuery
