@@ -525,67 +525,23 @@ FSH.Data = {
 
 	huntingOnImage:
 		'<a href="#" id="HelperToggleHuntingMode" ' +
-		'class="quicklink tip-static" data-tipped="Hunting mode is ON" ' +
-		'style="background-image: url(\'' +
-		'data:image/gif;base64,R0lGODlhKAAoALMAAD+yQH3Kf7zjvxCfEMvpzur17qzcr' +
-		'y+rMDCsMGLAY9vv3k64T5fUmh+lIPr7/gCZACH5BAAAAAAALAAAAAAoACgAAASsEL1J' +
-		'q704T6m7/2AojmRpnmiqrtQSBA2rDYJjO4mMBfd9YICXcAEoFn+eQs8WAAoDDIFiSRV' +
-		'YGROqwxAaELTVyXSZCx0ESrBNMFlYpY7CwOQFF67PAABZqqvBBHN9X39aXHSEhUsofo' +
-		'o3KY2OgieRhQAqAy8JAAZ/lzo1amUyoWBNoH+nMmlghzKFbDqwOgOKOgC2MriFkyq7n' +
-		'jIDRsPEvTrHyMnKy8zHHM0bEQA7' +
-		'\'); background-size: contain;"></a>',
+		'class="huntOn quicklink tip-static" ' +
+		'data-tipped="Hunting mode is ON"></a>',
 
 	huntingOffImage:
 		'<a href="#" id="HelperToggleHuntingMode" ' +
-		'class="quicklink tip-static" data-tipped="Hunting mode is OFF" ' +
-		'style="background-image: url(\'' +
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtA' +
-		'AAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAA' +
-		'gOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHY' +
-		'zLjM2qefiJQAAAVhJREFUWEftl08OQTEQxrkq5xDHkDiDxAUkrEms7IiNFQtWNiTKJx' +
-		'mppm2mpp33IhXNC9qZX7/50+qaTuf1bvELgG0ekK8CSkSoCkrUexew1EDp9Y0ADpZDg' +
-		'8HZnCrg7DA3t/vja/QW/SioGiAUc+Hoc0zJDyDJbj85IeDOOV3PQcBYuIOAo83YICTb' +
-		'yz5o2KcI1tCADdpASD18P9lNg2FmhXh1XCdBEgxACTC20VgesgDhBM5iYQqpaaeArS4' +
-		'BwyYrB7m5RPM4qsK5He5f8pytoG8DHMhY7tm/wZbPhwgQBnNC+opFDJgb0lUxC2BOyG' +
-		'KAuSCLAuaALA4IB9ROqAEj+bnVrALoOvHdYkLA7qmSrUhijT4F0L04VEAom3KGu81aR' +
-		'UFugWCefQNS+9P0V4DYjF1wrQtxBfT1w5QcbETB1Nu6eg5WQIkC0rUqbUYCWQEl6qmd' +
-		'xRLIJyPitjwjlrDgAAAAAElFTkSuQmCC' +
-		'\'); background-size: contain;"></a>',
+		'class="huntOff quicklink tip-static" ' +
+		'data-tipped="Hunting mode is OFF"></a>',
 
 	soundMuteImage:
-		'<img class="tip-static" data-tipped="Turn Off Sound when you have a' +
-		' new log message" width=15 height=15 src="' +
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hA' +
-		'AAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJ' +
-		'ZTwAAAHNSURBVHjaYvz//z8DJQAggJgYKAQAAUS0Ad3dnZFtbS1P0cUBAoiFkMaenm7' +
-		'm////Nfz9+7f4379/nO/9/XOAwpsEN258BJIHCCAMA/r7+6wYGCDh8u/ffwag5oXCws' +
-		'IqQkJCDOw7doCE04B4GUw9QABhGADUcJSVlQ1EMzABPSgsLMbAxsbBIHnyNIPMqzcgJ' +
-		'VeAtr+DqQcIIAwD/v37y2BoaMjw8+cvIPsfw5MnTxhEjx1gkHv9muEdCwsD19+/acjq' +
-		'AQIIw4A/f/4yPH78mOHhw0dgAwwePmTQAWr+xMHBMF+Yn6Fn8vQvyOoBAgiLAX8Yvn7' +
-		'9wnDv3j0Gx0+fGHS+f2d4AUwri/l5GX79/YcRyAABhBGNP358ZwClLV+g7Xa/fjG8YW' +
-		'RgqP78meED0CCQ99ABQABhuODnz58MYsePMRh9+MjwnpmFYamUOAMXMDSZgBjkJXQAE' +
-		'EAYLkh68HiO9bsPH5j//b++ho/L5fOvH3dlZCQZxMSEGbAle4AAQjEAmEgMJH798gem' +
-		'nNvs//+bNcxduJeBgVH9+7fvbW/fvPuOLaEBBBDYVGT8zs/PHYh50MVTUxOjgfgZujh' +
-		'AADFSmhsBAoji3AgQYAAwuNxkuZyGCwAAAABJRU5ErkJggg==' + '">',
+		'<a href="#" id="toggleSoundLink" ' +
+		'class="soundOn quicklink tip-static" ' +
+		'data-tipped="Turn Off Sound when you have a new log message"></a>',
 
 	soundImage:
-		'<img class="tip-static" data-tipped="Turn On Sound when you have a ' +
-		'new log message" width=15 height=15 src="' +
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf8/9hA' +
-		'AAABGdBTUEAAK/INwWK6QAAABl0RVh0U29mdHdhcmUAQWRvYmUgSW1hZ2VSZWFkeXHJ' +
-		'ZTwAAAI9SURBVHjaYvz//z8DJQAggJgYKAQAAYTTgO7uzsi2tpanhAwACCAWdIGenm7' +
-		'm////Nfz9+7f4379/nNg0PcoqTmH48XOb3LwpzwACiKW/v8+KgQESDv/+/WcAal4oLC' +
-		'ysIiQkxHDhwnlMzRmF1dxMf1u+fvtxBsg1BQggFqCGo6ysbCCNDExADwkLizGwsXEwf' +
-		'P78heHnj5+omtMLUoE2b/z153cLD8s/k0duIdkAAcTy799fBkNDQ4afP38BXfCP4cmT' +
-		'JwwPHtxi4OPjY/j1C2HAo9T8FG7Gv7OANlf+/vEzn52dcSLDtx+5AAHE8ufPX4bHjx8' +
-		'zPHz4CGzAjx8/GL5+/Qp0DSPD7z+/wZpfBUbfYeDiTv/7/w8Dw7fv7XJbVzA+svaeCH' +
-		'SNOkAAAQ34A9TwheHevXtAG38xfPnyheHbt28MCgpyDLCwAQJBhu8/gNy/QAN+QERA9' +
-		'M+fDAABxPTjx3cGUFoSFhZiEBDgZwB5CWQACIPYICC2fqkwUIMay9/fII2Vjwwc83i4' +
-		'mRkYvv+8CRBALD+Bpty8eY0B5BKQF6SlJSEJBBiiID4MyO1YNf2RmTsj0NmHWBn/XWb' +
-		'4BbT1x8/JAAHE9PfPb+sf339aAw2C4u93ZWQkGcTEhBnQk7ncqZ3TgLaGsgNTz5dHb8' +
-		'/IPb80FSCAGNEVpaUlMf//978JyCxkYGTgnD17PiNGWhDTyWD49XuT3IebzwACCGwLN' +
-		'pyamhgNxM9wycMwQAAxUpobAQKI4twIEGAA+Mk8nL2QZm8AAAAASUVORK5CYII=' +
-		'">',
+		'<a href="#" id="toggleSoundLink" ' +
+		'class="soundOff quicklink tip-static" ' +
+		'data-tipped="Turn On Sound when you have a new log message"></a>',
 
 	greenDiamond:
 		'<img width="10" height="10" style="float:left" src="' +
@@ -1145,8 +1101,6 @@ FSH.Data = {
 		'sendClasses',
 		'itemRecipient',
 		'currentGoldSentTotal',
-		// 'hideArenaPrizes',
-		// 'autoSortArenaList',
 		'enableAllyOnlineList',
 		'enableEnemyOnlineList',
 		'allyEnemyOnlineRefreshTime',
@@ -1177,8 +1131,6 @@ FSH.Data = {
 		'enableQuickDrink',
 		'enhanceOnlineDots',
 		'hideBuffSelected',
-		// 'enableFastWalk',
-		// 'showFastWalkIconOnWorld',
 		'hideHelperMenu',
 		'keepHelperMenuOnScreen',
 		'showNextQuestSteps',
@@ -1454,9 +1406,6 @@ FSH.Layout = {
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-quicklinkmanager" href="index.php?cmd=notepad&' +
 				'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
-			// .after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
-				// 'character-createmap" href="index.php?cmd=notepad&blank=1&' +
-				// 'subcmd=createmap">Create Maps</a></li>');
 		//guild
 		$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
@@ -13107,9 +13056,8 @@ FSH.newMap = { // Hybrid
 		var img = FSH.System.getValue('playNewMessageSound') === true ?
 			FSH.Data.soundMuteImage :
 			FSH.Data.soundImage;
-		var toggleSound = $('<a href="#" id="toggleSoundLink">' + img + '</a>');
-		worldName.append('&nbsp;').append(toggleSound);
-		toggleSound.click(FSH.newMap.toggleSound);
+		worldName.append('&nbsp;').append(img);
+		worldName.on('click', 'a#toggleSoundLink', FSH.newMap.toggleSound);
 	},
 
 	showHuntMode: function(worldName) { // jQuery
@@ -13123,9 +13071,11 @@ FSH.newMap = { // Hybrid
 	toggleSound: function(e) { // jQuery
 		e.preventDefault();
 		if (FSH.System.getValue('playNewMessageSound') === false) {
-			$('a#toggleSoundLink').html(FSH.Data.soundMuteImage);
+			$('a#toggleSoundLink').qtip('hide')
+				.replaceWith(FSH.Data.soundMuteImage);
 		} else {
-			$('a#toggleSoundLink').html(FSH.Data.soundImage);
+			$('a#toggleSoundLink').qtip('hide')
+				.replaceWith(FSH.Data.soundImage);
 		}
 		FSH.System.setValue('playNewMessageSound',
 			!FSH.System.getValue('playNewMessageSound'));
