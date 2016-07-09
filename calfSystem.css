@@ -19,8 +19,13 @@ table#fshSettingsTable {
   align-items: center;
 }
 
-#fshWorldButtonContainer img {
-  padding-top: 1ex;
+#fshWorldButtonContainer .quicklink {
+  height: 15px;
+  width: 15px;
+  border: solid 1px #4f3717;
+  border-radius: 2px;
+  background-position: center center;
+  box-shadow: 0 0 4px #4f3717;
 }
 
 #fshSpinner {

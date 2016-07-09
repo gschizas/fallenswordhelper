@@ -524,16 +524,21 @@ FSH.Data = {
 	},
 
 	huntingOnImage:
-		'<img class="tip-static" data-tipped="Hunting mode is ON" src="' +
+		'<a href="#" id="HelperToggleHuntingMode" ' +
+		'class="quicklink tip-static" data-tipped="Hunting mode is ON" ' +
+		'style="background-image: url(\'' +
 		'data:image/gif;base64,R0lGODlhKAAoALMAAD+yQH3Kf7zjvxCfEMvpzur17qzcr' +
 		'y+rMDCsMGLAY9vv3k64T5fUmh+lIPr7/gCZACH5BAAAAAAALAAAAAAoACgAAASsEL1J' +
 		'q704T6m7/2AojmRpnmiqrtQSBA2rDYJjO4mMBfd9YICXcAEoFn+eQs8WAAoDDIFiSRV' +
 		'YGROqwxAaELTVyXSZCx0ESrBNMFlYpY7CwOQFF67PAABZqqvBBHN9X39aXHSEhUsofo' +
 		'o3KY2OgieRhQAqAy8JAAZ/lzo1amUyoWBNoH+nMmlghzKFbDqwOgOKOgC2MriFkyq7n' +
-		'jIDRsPEvTrHyMnKy8zHHM0bEQA7' + '" border=0 width=15 height=15>',
+		'jIDRsPEvTrHyMnKy8zHHM0bEQA7' +
+		'\'); background-size: contain;"></a>',
 
 	huntingOffImage:
-		'<img class="tip-static" data-tipped="Hunting mode is OFF" src="' +
+		'<a href="#" id="HelperToggleHuntingMode" ' +
+		'class="quicklink tip-static" data-tipped="Hunting mode is OFF" ' +
+		'style="background-image: url(\'' +
 		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACgAAAAoCAYAAACM/rhtA' +
 		'AAAAXNSR0IArs4c6QAAAARnQU1BAACxjwv8YQUAAAAgY0hSTQAAeiYAAICEAAD6AAAA' +
 		'gOgAAHUwAADqYAAAOpgAABdwnLpRPAAAABh0RVh0U29mdHdhcmUAUGFpbnQuTkVUIHY' +
@@ -544,7 +549,8 @@ FSH.Data = {
 		'BwyYrB7m5RPM4qsK5He5f8pytoG8DHMhY7tm/wZbPhwgQBnNC+opFDJgb0lUxC2BOyG' +
 		'KAuSCLAuaALA4IB9ROqAEj+bnVrALoOvHdYkLA7qmSrUhijT4F0L04VEAom3KGu81aR' +
 		'UFugWCefQNS+9P0V4DYjF1wrQtxBfT1w5QcbETB1Nu6eg5WQIkC0rUqbUYCWQEl6qmd' +
-		'xRLIJyPitjwjlrDgAAAAAElFTkSuQmCC' + '" border=0 width=15 height=15>',
+		'xRLIJyPitjwjlrDgAAAAAElFTkSuQmCC' +
+		'\'); background-size: contain;"></a>',
 
 	soundMuteImage:
 		'<img class="tip-static" data-tipped="Turn Off Sound when you have a' +
@@ -1832,9 +1838,10 @@ FSH.Layout = {
 
 	searchMapUFSG:
 		'<a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view' +
-		'&realm_id=@@realmId@@" target="mapUFSG">' +
-			'<img class="tip-static" data-tipped="Search map in Ultimate FSG" ' +
-			'width=15 height=15 src="' + FSH.System.imageServer + '/temple/1.gif">' +
+		'&realm_id=@@realmId@@" target="mapUFSG" ' +
+			'class="quicklink tip-static" data-tipped="Search map in Ultimate FSG" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/temple/1.gif\');">' +
 		'</a>',
 
 	searchMapWiki:
@@ -1861,24 +1868,24 @@ FSH.Layout = {
 		'</a>',
 
 	worldFormgroup:
-		'<a href="#">' +
-			'<img class="tip-static" data-tipped="Quick Create Attack Group" src="' +
-			FSH.System.imageServer +
-			'/skin/realm/icon_action_formgroup.gif" height=15 width=15>' +
+		'<a href="#" class="quicklink tip-static" ' +
+			'data-tipped="Quick Create Attack Group" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/skin/realm/icon_action_formgroup.gif\');">' +
 		'</a>',
 
 	worldQuickBuff:
-		'<a href="#">' +
-			'<img class="tip-static" data-tipped="Open Quick Buff Popup" src="' +
-			FSH.System.imageServer +
-			'/skin/realm/icon_action_quickbuff.gif" height=15 width=15>' +
+		'<a href="#" class="quicklink tip-static" ' +
+			'data-tipped="Open Quick Buff Popup" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/skin/realm/icon_action_quickbuff.gif\');">' +
 		'</a>',
 
 	worldMap:
-		'<a href="index.php?cmd=world&subcmd=map" target="fsWorldMap">' +
-			'<img class="tip-static" data-tipped="Open Realm Map" src="' +
-			FSH.System.imageServer +
-			'/skin/realm/icon_action_map.gif" height=15 width=15>' +
+		'<a href="index.php?cmd=world&subcmd=map" target="fsWorldMap" ' +
+			'class="quicklink tip-static" data-tipped="Open Realm Map" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/skin/realm/icon_action_map.gif\');">' +
 		'</a>',
 
 };
@@ -6264,6 +6271,10 @@ FSH.dropItems = { // Legacy
 		// prevent multiple calls to local storage
 		FSH.Helper.disableItemColoring = FSH.System.getValue('disableItemColoring');
 
+		FSH.dropItems.getQTip($('div#pCC table table img.tip-dynamic'),
+			FSH.dropItems.injectDropItemsPaint);
+			// function() {console.log('QTip!');});
+
 		var subPage2Id = FSH.System.findNode('//input[@type="hidden" and @name="subcmd2"]');
 		subPage2Id = subPage2Id ? subPage2Id.getAttribute('value') : '-';
 		var mainTable = FSH.System.findNode('//table[tbody/tr/td/table/tbody/tr/td/input[@name="storeIndex[]"]]');
@@ -6368,9 +6379,6 @@ FSH.dropItems = { // Legacy
 				checkAllElement.addEventListener('click', FSH.dropItems.checkAll, true);
 			}
 		}
-
-		FSH.dropItems.getQTip($('div#pCC table table img.tip-dynamic'),
-			FSH.dropItems.injectDropItemsPaint);
 
 	},
 
@@ -13067,9 +13075,9 @@ FSH.newMap = { // Hybrid
 	},
 
 	showQuickLinks: function(worldName, data) { // jQuery
-		worldName.append('&nbsp;').append('Min Lvl: ' + data.realm.minlevel);
+		worldName.append('Min Lvl: ' + data.realm.minlevel);
 		var formgroup = $(FSH.Layout.worldFormgroup);
-		worldName.append('&nbsp;').append(formgroup);
+		worldName.append('&nbsp;&nbsp;').append(formgroup);
 		formgroup.click(FSH.newMap.formgroup);
 		var quickbuff = $(FSH.Layout.worldQuickBuff);
 		worldName.append('&nbsp;').append(quickbuff);
@@ -13077,15 +13085,9 @@ FSH.newMap = { // Hybrid
 		worldName.append('&nbsp;').append(FSH.Layout.worldMap);
 	},
 
-	repair: function(e) { // jQuery
-		e.preventDefault();
-		$('img', this).qtip('hide');
-		GameData.doAction(15, 513, {}, 0);
-	},
-
 	formgroup: function(e) { // jQuery
 		e.preventDefault();
-		$('img', this).qtip('hide');
+		$(this).qtip('hide');
 		GameData.doAction(12, 385, {}, 0);
 	},
 
@@ -13113,10 +13115,9 @@ FSH.newMap = { // Hybrid
 	showHuntMode: function(worldName) { // jQuery
 		var img = FSH.Helper.huntingMode === true ? FSH.Data.huntingOnImage :
 			FSH.Data.huntingOffImage;
-		var toggleHuntMode = $('<a href=# id="HelperToggleHuntingMode">' + img +
-			'</a>');
-		worldName.append('&nbsp;').append(toggleHuntMode);
-		toggleHuntMode.click(FSH.newMap.toggleHuntMode);
+		worldName.append('&nbsp;').append(img);
+		worldName.on('click', 'a#HelperToggleHuntingMode',
+			FSH.newMap.toggleHuntMode);
 	},
 
 	toggleSound: function(e) { // jQuery
@@ -13133,9 +13134,11 @@ FSH.newMap = { // Hybrid
 	toggleHuntMode: function(e) { // jQuery
 		e.preventDefault();
 		if (!FSH.Helper.huntingMode) {
-			$('a#HelperToggleHuntingMode').html(FSH.Data.huntingOnImage);
+			$('a#HelperToggleHuntingMode').qtip('hide')
+				.replaceWith(FSH.Data.huntingOnImage);
 		} else {
-			$('a#HelperToggleHuntingMode').html(FSH.Data.huntingOffImage);
+			$('a#HelperToggleHuntingMode').qtip('hide')
+				.replaceWith(FSH.Data.huntingOffImage);
 		}
 		FSH.Helper.huntingMode = !FSH.Helper.huntingMode;
 		FSH.System.setValue('huntingMode', FSH.Helper.huntingMode);
