@@ -12,9 +12,6 @@ window.FSH = window.FSH || {};
 	var gvar = {};
 	var GMSTORAGE_PATH = 'GM_';
 	// You can change it to avoid conflict with others scripts
-	//~ if (typeof unsafeWindow === 'undefined'){
-		//~ window.unsafeWindow = window;
-	//~ }
 	var needApiUpgrade = false;
 	if (window.navigator.appName.match(/^opera/i) && 
 			typeof window.opera !== 'undefined'){
@@ -139,7 +136,6 @@ FSH.System = {
 		if (!imgurls) {return;} //login screen or error loading etc.
 		var idindex = imgurls.src.indexOf('/skin/');
 		FSH.System.imageServer = imgurls.src.substr(0,idindex);
-		//FSH.System.imageServerHTTP = 'http://cdn.fallensword.com';
 	},
 
 	getValue: function(name) {
@@ -220,8 +216,6 @@ FSH.System = {
 	},
 
 	createDocument: function(details) {
-		//~ var doc = document.createElement('HTML');
-		//~ doc.innerHTML = details;
 		// Use DOMParser to prevent img src tags downloading
 		var parser = new DOMParser();
 		var doc = parser.parseFromString(details, 'text/html');
@@ -229,7 +223,6 @@ FSH.System = {
 	},
 
 	formatDateTime: function(aDate) {
-		//var result=aDate.toDateString();
 		var yyyy = aDate.getFullYear();
 		var mon = aDate.getMonth()+1;
 		if (mon<10) {mon = '0' + mon;}
@@ -397,7 +390,6 @@ FSH.System = {
 	},
 
 	openInTab: function(url){
-		// setTimeout(function() {window.open(url, '');}, 0);
 		window.open(url, '_blank');
 	},
 
@@ -510,6 +502,7 @@ FSH.System = {
 FSH.System.init();
 
 FSH.Data = {
+	// To be moved back into main script in future as it does not compress well
 
 	plantFromComponent : {
 		'Amber Essense':      'Amber Plant',
@@ -1173,8 +1166,6 @@ FSH.Data = {
 		settings: {'-': {'-': {'-': {'-': 'settingsPage.injectSettings'}}}},
 		world: {
 		'-': {'-': {'-': {'-': 'injectWorld'}}},
-			// 'viewcreature': {'-': {'-': {'-': 'injectCreature'}}}, // Old Map
-			// 'map': {'-': {'-': {'-': 'injectWorldMap'}}} // Old Map
 		},
 		news: {
 			'fsbox': {'-': {'-': {'-': 'news.newsFsbox'}}},
@@ -1259,10 +1250,8 @@ FSH.Data = {
 			'showlogs': {'-': {'-': {'-': 'combatLog.injectNotepadShowLogs'}}},
 			'invmanagernew': {'-': {'-': {
 				'-': 'inventory.injectInventoryManagerNew'}}},
-			'invmanager': {'-': {'-': {'-': 'oldInvMan.injectInventoryManager'}}},
 			'guildinvmgr': {'-': {'-': {
 				'-': 'inventory.injectInventoryManagerNew'}}},
-			'guildinvmanager': {'-': {'-': {'-': 'oldInvMan.injectInventoryManager'}}},
 			'recipemanager': {'-': {'-': {'-': 'recipeMgr.injectRecipeManager'}}},
 			'auctionsearch': {'-': {'-': {'-': 'lists.injectAuctionSearch'}}},
 			'onlineplayers': {'-': {'-': {'-': 'onlinePlayers.injectOnlinePlayers'}}},
@@ -1338,6 +1327,7 @@ FSH.Data = {
 };
 
 FSH.Layout = {
+	// To be moved back into main script in future as it does not compress well
 
 	onlineDot: function(obj) {
 		var img;
@@ -1460,6 +1450,7 @@ FSH.Layout = {
 		$('div#pCL').append('<style>.pCR a { color: #F7EAC9; }</style>');
 	},
 
+	//TODO replace this
 	notebookContent: function() {
 		return $('div#pCC')[0]; //new interface logic
 	},
@@ -1494,10 +1485,6 @@ FSH.Layout = {
 	},
 
 	infoBox: function(documentText) {
-		//var infoRE = /<center><b>INFORMATION.*><center>([^<]+)<\/center>/i;
-		//infoRE = /<center>INFORMATION<\/center><\/font><\/td><\/tr>\t*<tr><td><font size=2 color=\'\#000000\'><center>([^<]+)</i;
-		//Fast Recall = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color='#000000'><center>You successfully recalled the item.</center>
-		//Guild Take = <center>INFORMATION</center></font></td></tr>	<tr><td><font size=2 color='#000000'><center>You successfully took the item into your backpack.</center>
 		var infoMatch = $(documentText).find('center[id="info-msg"]').html();
 		var result='';
 		if (infoMatch) {
@@ -2108,8 +2095,6 @@ FSH.ajax = { // jQuery
 
 	htmlResult: function(data) {
 		var info = FSH.Layout.infoBox(data);
-		// console.log('info:', info);
-		// console.log('info.search:', info.match(/You (successfully|gained)/));
 		return info.search(/(successfully|gained)/) !== -1 ?
 			{r: 0, m: ''} : {r: 1, m: info};
 	},
@@ -2324,10 +2309,6 @@ FSH.composing = { // jQuery
 						.html('<div id="helperQCSuccess" style="height: ' +
 						'26px;">' + textStatus + '</div>');
 				}
-				//~ if ($('select[id^="composing-template-"]').length === 0 &&
-					//~ $('div#helperQCError').length === 0) {
-					//~ location.href = 'index.php?cmd=composing';
-				//~ }
 			});
 	},
 
@@ -2522,7 +2503,6 @@ FSH.guildReport = { // Legacy
 		innerTable.on('click', '.equip',
 			FSH.common.equipProfileInventoryItem);
 
-		// container.append(innerTable);
 	},
 
 	reportChild: function(innerTable) { // jQuery
@@ -3495,7 +3475,6 @@ FSH.inventory = { // jQuery
 			colour = data.player_id === -1 ? 'fshNavy' : 'fshMaroon';
 		}
 		$(row).addClass(colour);
-		// $('td', row).first().addClass(FSH.Data.rarity[data.rarity].class);
 	},
 
 	nameRender: function(data, type, row) { // Native
@@ -3935,7 +3914,7 @@ FSH.quickBuff = { // jQuery
 		var playerInput = $('input#targetPlayers');
 		if (playerInput.length === 0) {return;}
 		$('h1:contains("Quick Buff")').after(FSH.Layout.quickBuffHeader);
-		$.getJSON('index.php', {
+		$.getJSON('index.php', { // TODO This should be moved to ajax
 			cmd:             'export',
 			subcmd:          'profile',
 			player_username: window.self
@@ -3961,7 +3940,7 @@ FSH.quickBuff = { // jQuery
 
 	addStatsQuickBuff: function(player) { // jQuery
 		player.parent().find('span.fshLastActivity').remove();
-		$.ajax({
+		$.ajax({ // TODO This should be moved to ajax
 			cache: false,
 			dataType: 'json',
 			url: 'index.php',
@@ -4138,6 +4117,7 @@ FSH.toprated = { // jQuery
 
 			guildALink = $('a', $('td', topPlayerRows.eq(i)).eq(2));
 			if (guildALink.length === 0) {continue;} // Player does not belong to a guild
+			// TODO player array for exceptions or just get profiles for everyone?
 
 			guildId = guildALink.attr('href').match(/guild_id=([0-9]+)/)[1];
 			if (guildArray.indexOf(guildId) === -1) {guildArray.push(guildId);}
@@ -4183,13 +4163,6 @@ FSH.helperMenu = { // jQuery
 		helperMenu.draggable();
 		if (!FSH.System.getValue('keepHelperMenuOnScreen')) {return;}
 		helperMenu.css('position', 'fixed');
-		// $(document).ready(function() {
-			// $(window).scroll(function() {
-				// var offset = $(document).scrollTop() + 'px';
-				// helperMenu.animate({top:offset},
-					// {duration:0,queue:false});
-			// });
-		// });
 	},
 
 	showHelperMenu: function() { // jquery
@@ -5262,15 +5235,6 @@ FSH.logs = { // Legacy
 
 		for (i=1;i<logTable.rows.length;i += 2) {
 			var aRow = logTable.rows[i];
-			// if (i === 0 ) {
-				// var messageNameCell = aRow.cells[2];
-				// if (messageNameCell) {
-					// messageNameCell.innerHTML += '&nbsp;&nbsp;<span style="' +
-						// 'color:white;">(Guild mates show up in <span style="' +
-						// 'color:green;">green</span>)</span>';
-				// }
-				// continue;
-			// }
 			if (!aRow.cells[0].innerHTML) {continue;}
 			var firstCell = aRow.cells[0];
 			//Valid Types: General, Chat, Guild
@@ -5377,7 +5341,6 @@ FSH.logs = { // Legacy
 
 		var messageHTML = aRow.cells[2].innerHTML;
 		var firstPart = messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
-		// var secondPart = messageHTML.substring(messageHTML.indexOf('<small>') + 7, messageHTML.indexOf('>Reply</a>') + 10);
 		var thirdPart = messageHTML.substring(messageHTML.indexOf('>Reply</a>') + 10, messageHTML.indexOf('>Buff</a>') + 9);
 		var targetPlayerID = /quickBuff\((\d+)\)/.exec(thirdPart)[1];
 		thirdPart = ' | <a ' + FSH.Layout.quickBuffHref(targetPlayerID) + '>Buff</a></span>';
@@ -5441,8 +5404,6 @@ FSH.logs = { // Legacy
 			thirdPart = ' | <a ' + FSH.Layout.quickBuffHref(targetPlayerID, quickBuff) + '>Buff</a></span>';
 		}
 
-		//var msgReplyTo = (FSH.System.getValue('enableChatParsing') === true) ? secondPart.replace(/'([^']*?)'/, secondPart.match(/'([^']*?)'/)[1] + '&replyTo="' +
-		// FSH.Helper.removeHTML(firstPart.replace(/&nbsp;/g, '')).replace(/[\s*]/g, '_') + '"') : secondPart;
 		var msgReplyTo = '[ <span style="cursor:pointer;text-' +
 			'decoration:underline"class="a-reply" target_player="' +
 			playerName + '" replyTo="' +
@@ -5455,8 +5416,6 @@ FSH.logs = { // Legacy
 	},
 
 	retrievePvPCombatSummary: function(responseText, callback) { // Native
-		// var doc = FSH.System.createDocument(responseText);
-		//~ var winner = FSH.System.getIntFromRegExp(responseText, /var\s+winner=(-?[0-9]+);/i);
 		var winner = callback.winner;
 		var xpGain = FSH.System.getIntFromRegExp(responseText, /var\s+xpGain=(-?[0-9]+);/i);
 		var goldGain = FSH.System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
@@ -5782,10 +5741,8 @@ FSH.recipes = { // Legacy
 			'size=3 class="custominput"></td></tr>' +
 			'<tr><td align="center"><input id="quickInvent" value="Quick ' +
 			'invent items" class="custombutton" type="submit"></td></tr>' + //button to invent
-			//'<input type="hidden" id="recipe_id" value="'+ recipeID +'">'+
 			'<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
 			'</span><ol id="invent_Result"></ol></td></tr>';
-		//injectHere.parentNode.innerHTML+=selector;
 		$('input[name="recipe_id"]').closest('tbody').append(selector);
 		document.getElementById('quickInvent').addEventListener('click',
 			FSH.recipes.quickInvent, true);
@@ -5828,8 +5785,6 @@ FSH.quickWear = { // Legacy
 		if (responseText.indexOf('Back to Profile') > 0){
 			FSH.quickWear.retrieveItemInfor(doc);
 		}
-
-		//~ FSH.quickWear.showQuickWear(callback);
 
 		var folderNodes=FSH.System.findNodes('//a[contains(@href,"cmd=profile&subcmd=dropitems&folder_id=")]',doc);
 		if (folderNodes && folderNodes.length > 0 && callback.id < folderNodes.length - 1) {
@@ -6222,7 +6177,6 @@ FSH.dropItems = { // Legacy
 
 		FSH.dropItems.getQTip($('div#pCC table table img.tip-dynamic'),
 			FSH.dropItems.injectDropItemsPaint);
-			// function() {console.log('QTip!');});
 
 		var subPage2Id = FSH.System.findNode('//input[@type="hidden" and @name="subcmd2"]');
 		subPage2Id = subPage2Id ? subPage2Id.getAttribute('value') : '-';
@@ -6264,9 +6218,6 @@ FSH.dropItems = { // Legacy
 				itemStats = /fetchitem.php\?item_id=(\d+)\&inv_id=(\d+)\&t=(\d+)\&p=(\d+)/.exec($(theImgElement).data('tipped'));
 				if (itemStats) {
 					itemId = itemStats[1];
-					//~ invId = itemStats[2];
-					//~ type = itemStats[3];
-					//~ pid = itemStats[4];
 				}
 				itemName = theTextNode.textContent.trim().replace('\\','');
 				theTextNode.textContent = itemName;
@@ -6280,9 +6231,6 @@ FSH.dropItems = { // Legacy
 					preText = '<span findme="AH">[<a href="' + FSH.System.server +
 						'?cmd=auctionhouse&type=-1&order_by=1&search_text=' +
 						encodeURI(itemName) + '">AH</a>]</span> ' +
-						//~ '<span findme="Sell">[<a href="' + FSH.System.server +
-						//~ 'index.php?cmd=auctionhouse&subcmd=create2' +
-						//~ '&inv_id=' + itemInvId  + '">Sell</a>]</span>' +
 						'[<a href="http://guide.fallensword.com/index.php?' +
 						'cmd=items&subcmd=view' + '&item_id=' + itemId +
 						'" target="_blank">UFSG</a>] ';
@@ -6397,7 +6345,6 @@ FSH.dropItems = { // Legacy
 
 	quickSendItem: function(evt){ // Legacy
 		var itemInvId = evt.target.getAttribute('itemInvId');
-		// var xcNum = FSH.System.getValue('goldConfirm');
 		var itemRecipient = FSH.System.getValue('itemRecipient');
 		var sendItemHref = FSH.System.server +
 			'index.php?cmd=trade&subcmd=senditems&xc=' + window.ajaxXC +
@@ -6485,27 +6432,18 @@ FSH.dropItems = { // Legacy
 
 	injectDropItemsPaint: function(responseText, callback) { // Legacy
 		var textNode = FSH.System.findNode('../../../td[3]', callback);
-		// var auctionHouseLink = FSH.System.findNode('span[@findme="AH"]', textNode);
-		// var sellLink=FSH.System.findNode('span[@findme="Sell"]', textNode);
 		var quickDropLink = FSH.System.findNode('span[@findme="QuickDrop"]',
 			textNode);
 		var quickSendLink = FSH.System.findNode('span[@findme="QuickSend"]',
 			textNode);
-		//~ var guildLockedRE = /<center>Guild Locked: <font color='#00FF00'>/i;
 		var guildLockedRE = /<center>\s*Guild Locked:\s*<font color="#00FF00">/;
 
 		if (guildLockedRE.exec(responseText)) {
-			// if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
-			// if (sellLink) {sellLink.style.visibility='hidden';}
 			if (quickDropLink) {quickDropLink.style.visibility='hidden';}
 			$(textNode).append('<span id="guildLocked" visibility="hidden"/>');
 		}
-		//<font color='cyan'>Bound (Non-Tradable)</font></b> <font color='orange'>Quest Item </font></center>
 		var boundItemRE = /Bound \(Non-Tradable\)/i;
 		if (boundItemRE.exec(responseText)) {
-			// if (auctionHouseLink) {auctionHouseLink.style.visibility='hidden';}
-			// if (sellLink) {sellLink.style.visibility='hidden';}
-			// if (quickDropLink) quickDropLink.style.visibility='hidden';
 			if (quickSendLink) {quickSendLink.style.visibility='hidden';}
 		}
 		if (FSH.Helper.disableItemColoring) {return;}
@@ -7770,7 +7708,6 @@ FSH.environment = { // Legacy
 
 		if (FSH.Helper.huntingMode) {
 			FSH.environment.replaceKeyHandler();
-			// FSH.Helper.fixOnlineGuildBuffLinks();
 		} else {
 			//move boxes in opposite order that you want them to appear.
 			if (FSH.System.getValue('moveGuildList')) {
@@ -7902,14 +7839,11 @@ FSH.environment = { // Legacy
 		case 54: // [6]
 		case 55: // [7]
 		case 56: // keyed combat [8]
-			// FSH.Helper.killMonsterAt(r-48);
 			break;
 		case 98: // backpack [b]
-			//~ location.href = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
 			location.href = 'index.php?cmd=profile&subcmd=dropitems';
 			break;
 		case 115: // use stairs [s]
-			// FSH.Helper.useStairs(); // Old Map
 			break;
 		case 116: // quick buy [t]
 			FSH.Helper.quickBuyItem();
@@ -7918,7 +7852,6 @@ FSH.environment = { // Legacy
 			location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
 			break;
 		case 121: // fast send gold [y]
-			// FSH.Helper.sendGoldToPlayer();
 			FSH.newMap.doSendGold();
 			break;
 		case 48: // return to world [0]
@@ -7938,10 +7871,8 @@ FSH.environment = { // Legacy
 			location.href = 'index.php?cmd=profile';
 			break;
 		case 110: // mini map [n]
-			// FSH.Helper.displayMiniMap();
 			break;
 		case 78: // auto move in mini map [N]
-			// FSH.Helper.autoMoveMiniMap();
 			break;
 		case 62: // move to next page [>]
 		case 60: // move to prev page [<]
@@ -7976,24 +7907,12 @@ FSH.environment = { // Legacy
 				// FSH.System.openInTab(FSH.System.server + 'index.php?cmd=quickbuff');
 				break;
 			case 37: // w
-				// FSH.Helper.moveMe(-1,0);
-				// evt.preventDefault();
-				// evt.stopPropagation();
 				break;
 			case 38: // n
-				// FSH.Helper.moveMe(0,-1);
-				// evt.preventDefault();
-				// evt.stopPropagation();
 				break;
 			case 39: // e
-				// FSH.Helper.moveMe(1,0);
-				// evt.preventDefault();
-				// evt.stopPropagation();
 				break;
 			case 40: // s
-				// FSH.Helper.moveMe(0,1);
-				// evt.preventDefault();
-				// evt.stopPropagation();
 				break;
 			case 33:
 				if (FSH.System.findNode('//div[@id="reportsLog"]')) {
@@ -8010,15 +7929,12 @@ FSH.environment = { // Legacy
 				}
 				break;
 			default:
-				// console.log('special key: ' +s);
 				break;
 			}
 			break;
 		default:
-			// console.log('standard key: ' +r);
 			break;
 		}
-		//return true;
 	},
 
 	movePage: function(dir) {
@@ -8074,7 +7990,6 @@ FSH.environment = { // Legacy
 		var nextGain = $(staminaMouseover).find('dt.stat-stamina-nextGain:first').next().text().replace(/,/g,'');
 		var nextGainRE = /([,0-9]+)m ([,0-9]+)s/;
 		var nextGainMinutes = FSH.System.intValue(nextGainRE.exec(nextGain)[1]);
-		// var nextGainSeconds = FSH.System.intValue(nextGainRE.exec(nextGain)[2]);
 		var nextGainHours = nextGainMinutes/60;
 		//get the max hours to still be inside stamina maximum
 		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
@@ -8261,8 +8176,6 @@ FSH.environment = { // Legacy
 	injectQuickLinks: function() { // Bad jquery
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var quickLinks = FSH.System.getValueJSON('quickLinks') || [];
-		// if (!quickLinks) {quickLinks=[];}
-		//FSH.Helper.quickLinks = quickLinks;
 		if (quickLinks.length <= 0) {return;}
 		var node = $('#statbar-container');
 		if (node.length === 0) {return;}
@@ -8279,22 +8192,11 @@ FSH.environment = { // Legacy
 		}
 		html += '</div>';
 		var divQuickLink = $(html);
-		// node.before(divQuickLink);
 		divQuickLink.draggable();
 		if (FSH.System.getValue('keepHelperMenuOnScreen')) {
 			divQuickLink.css('position', 'fixed');
 		}
 		$('body').append(divQuickLink);
-		// var quickLinksTopPx = parseInt(
-			// FSH.System.getValue('quickLinksTopPx'), 10);
-		// $(document).ready(function(){  
-			// $(window).scroll(function() {  
-				// var offset = quickLinksTopPx + $(document).scrollTop() +
-					// 'px';  
-				// $('#fshQuickLinks').animate({top:offset},
-					// {duration:0,queue:false});  
-			// });  
-		// }); 
 	},
 
 	unknownPage: function() { // Legacy
@@ -8309,8 +8211,6 @@ FSH.environment = { // Legacy
 			FSH.ga.screenview('unknown.quickBuff.updateBuffLog');
 			FSH.quickBuff.updateBuffLog();
 		}
-		//FSH.System.findNode('//td[contains(.,"then click to purchase for the price listed below the item.")]');
-		//var isShopPage =  $('#shop-info').length > 0;
 		if ($('#shop-info').length > 0) {
 			FSH.ga.screenview('unknown.Helper.injectShop');
 			FSH.Helper.injectShop();
@@ -8440,7 +8340,6 @@ FSH.mailbox = { // Hybrid
 			'style="cursor:pointer; text-decoration:underline; ' +
 			'color:blue;">Toggle Quick Take</span><input type="hidden" ' +
 			'id="currentMBDisplay" value="mailbox" />'+quickTakeDiv);
-			//~ }
 		var itemList = {};
 		$('#regularMailbox img[data-tipped*="t=5"]').each(function() {
 			var itemIDs = /item_id=(\d+)\&inv_id=(\d+)/
@@ -8500,8 +8399,6 @@ FSH.mailbox = { // Hybrid
 	},
 
 	quickDoneTaken: function(data) { // jQuery
-		// www.fallensword.com/index.php?cmd=tempinv&subcmd=takeitem&temp_id=141980821&ajax=1
-		// {"r":0,"m":"","temp_id":141980821}
 		if (data.r !== 0) {
 			var $tempError = $('#temp_error');
 			$tempError.html('<span style="color: red">Error:</span> ' + data.m);
@@ -8658,11 +8555,9 @@ FSH.guild = { // Legacy
 			var characterVirtualLevel = FSH.System.getValue('characterVirtualLevel');
 			if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
 			for (var i=2;i<memList.rows.length;i += 1) {
-				// var iplus1 = i+1;
 				if (memList.rows[i].cells[1]) {
 					// Firefox reads it as </td> and chrome reads it as \&lt;\/td\&gt;
 					var vlevel = /VL:.+?(\d+)/.exec(memList.rows[i].cells[1].innerHTML)[1];
-					// var level = memList.rows[i].cells[2].innerHTML;
 					var aRow = memList.rows[i];
 					if (highlightPlayersNearMyLvl && Math.abs(vlevel - levelToTest) <= (levelToTest <= 205 ? 5 : 10)) {
 						aRow.style.backgroundColor = '#4671C8'; //blue
@@ -8997,7 +8892,6 @@ FSH.newGuildLog = { // Legacy
 		//find the time the guild log was stored last
 		FSH.newGuildLog.storedGuildLog = FSH.System.getValueJSON('storedGuildLog');
 		if (FSH.newGuildLog.storedGuildLog) {
-			// var lastMessageIndex = FSH.Helper.storedGuildLog.logMessage.length;
 			FSH.Helper.lastStoredGuildLogMessage = FSH.newGuildLog.storedGuildLog.logMessage[0].logMessage;
 			FSH.Helper.lastStoredGuildLogMessagePostTime = FSH.newGuildLog.storedGuildLog.logMessage[0].postDateAsLocalMilli;
 		}
@@ -9338,7 +9232,6 @@ FSH.newGuildLog = { // Legacy
 					'completeReload': completeReload});
 		} else {
 			loadingMessageInjectHere.innerHTML = 'Loading Complete.';
-			//FSH.Helper.addLogColoring('GuildLog', 1);
 			FSH.logs.addGuildLogWidgets();
 			FSH.System.setValueJSON('storedGuildLog', FSH.Helper.newStoredGuildLog);
 			var now = Date.now();
@@ -9905,7 +9798,6 @@ FSH.attackPlayer = { // Legacy - currently disabled
 
 			attackPlayerTable.rows[4].cells[0].innerHTML = output;
 
-			//FSH.System.xmlhttp('index.php?cmd=profile', FSH.Helper.getSelfProfileStatsAndBuffs);
 			FSH.System.xmlhttp('index.php?cmd=profile',
 				FSH.attackPlayer.getProfileStatsAndBuffs,
 				{'anchor1':'attackPlayerSelfStatData',
@@ -10084,7 +9976,6 @@ FSH.recipeMgr = { // Legacy
 		}
 		else {
 			output.innerHTML+='Finished parsing ... Retrieving individual blueprints...<br/>';
-			// FSH.Helper.generateRecipeTable();
 			FSH.System.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
 				FSH.recipeMgr.recipebook.recipe[0].id,
 				FSH.recipeMgr.parseRecipePage, {'recipeIndex': 0});
@@ -10674,7 +10565,6 @@ FSH.findBuffs = { // Legacy
 		var bioDiv = $(doc)
 			.find('div.innerColumnHeader:contains("Biography"):last');
 		var bioCell = bioDiv.next();
-		//~ var buffNickArray = FSH.Helper.findBuffNicks.split(',');
 		var buffTable = document.getElementById('buffTable');
 		var textLineArray = [];
 		var buffPosition = 0, startingPosition = 0, runningTotalPosition = 0;
@@ -10942,7 +10832,6 @@ FSH.monstorLog = { // Native - Bad
 			'<th align="center">Armor</th>' +
 			'<th align="center">Damage</th>' +
 			'<th align="center">HP</th>' +
-			//'<th align="center">Gold</th>' +
 			'<th align="center">Enhancements</th>' +
 			'</tr>';
 		for (var k=0;k<FSH.Helper.entityLogTable.entity.length;k += 1) {
@@ -11029,8 +10918,6 @@ FSH.monstorLog = { // Native - Bad
 				monsterLog[name].min['key' + i] = 1e+100;
 				monsterLog[name].max['key' + i] = 0;
 			}
-			//monsterLog[name]['min'] = {'cls':1e+100, 'lvl':1e+100, 'atk':1e+100, 'def':1e+100, 'arm':1e+100, 'dmg':1e+100, 'hp':1e+100, 'gold':1e+100};
-			//monsterLog[name]['max'] = {'cls':0, 'lvl':0, 'atk':0, 'def':0, 'arm':0, 'dmg':0, 'hp':0, 'gold':0};
 			for (i = 10; i < 11; i += 1) {// enchantments
 				if (monster['key' + i]) { //does this critter have enchantments, if so, then see min and max with the initial list
 					monsterLog[name].min['key' + i] = monster['key' + i];
@@ -11058,7 +10945,6 @@ FSH.monstorLog = { // Native - Bad
 					monsterLog[name].max['key' + i] = monster['key' + i];
 				}
 				for (var j = 0; j < monster['key' + i].length; j += 1) {
-					//~ var enchantName = monster['key' + i][j].name;
 					var enchantValue = monster['key' + i][j].value * 1;
 					monsterLog[name].min['key' + i][j].value =
 						monsterLog[name].min['key' + i][j].value * 1 < enchantValue ?
@@ -11070,611 +10956,6 @@ FSH.monstorLog = { // Native - Bad
 			}
 		}
 		FSH.System.setValueJSON('monsterLog', monsterLog);
-	},
-
-};
-
-FSH.oldInvMan = { // Hybrid - Bad
-
-	injectInventoryManager: function() { // Hybrid
-		var content = FSH.Layout.notebookContent();
-		content.innerHTML = '<img src = "' + FSH.System.imageServer +
-			'/world/actionLoadingSpinner.gif">&nbsp;Getting inventory data...';
-		if (FSH.subcmd === 'invmanager') {
-			$.getJSON('?cmd=export&subcmd=inventory', FSH.oldInvMan.gotInvMan);
-		} else if (FSH.subcmd === 'guildinvmanager') {
-			$.getJSON('?cmd=export&subcmd=guild_store&inc_tagged=1',
-				FSH.oldInvMan.gotGuildInvMan);
-		}
-	},
-
-	gotInvMan: function(data) { // Native
-		FSH.Helper.inventory = data;
-		FSH.Helper.inventory.folders['-1']='Main';
-		FSH.oldInvMan.inventoryManagerHeaders('self', FSH.Helper.inventory,
-			'Helper:InventoryManagerOutput');
-	},
-
-	gotGuildInvMan: function(data) { // jQuery
-		FSH.Helper.guildinventory = data;
-		$.getJSON('?cmd=export&subcmd=guild_members&guild_id=' +
-			FSH.Helper.guildinventory.guild_id, FSH.oldInvMan.gotGuildMembers);
-	},
-
-	gotGuildMembers: function(data) { // Native - Bad
-		var buildJSON = '{';
-		for (var x in data) {
-			if (!data.hasOwnProperty(x)) { continue; }
-			buildJSON += '"' + data[x].id + '":"' + data[x].username + '",';
-		}
-		buildJSON = buildJSON.substring(0, buildJSON.length - 1) + '}';
-		FSH.Helper.guildinventory.members = JSON.parse(buildJSON);
-		FSH.oldInvMan.inventoryManagerHeaders('guild', FSH.Helper.guildinventory,
-			'Helper:GuildInventoryManagerOutput');
-	},
-
-	inventoryManagerHeaders: function(reportType, targetInventory, targetID) { // Hybrid - Bad
-		var content = FSH.Layout.notebookContent();
-		FSH.oldInvMan.setItemFilterDefault();
-		var minLvl = FSH.System.getValue('inventoryMinLvl');
-		var maxLvl = FSH.System.getValue('inventoryMaxLvl');
-		var reportTitle;
-		if (reportType === 'self') {
-			reportTitle='<td width="90%" nobr><b>&nbsp;Inventory Manager</b> ' +
-				targetInventory.items.length +
-				' items (green = worn, blue = backpack)</td>';
-		} else {
-			reportTitle = '<td width="90%" nobr><b>&nbsp;Guild Inventory Manager' +
-				'</b> ' + targetInventory.items.length +
-				' items (maroon = in BP, blue=guild store)</td>';
-		}
-		var newhtml = '<table cellspacing="0" cellpadding="0" border="0" ' +
-			'width="100%"><tr style="background-color:#cd9e4b">' +
-			reportTitle + '<tr><td colspan=2>' +
-			'<table><tr><td><b>Show Items:</b></td>' +
-			'<td><table><tr><td>' +
-			'<div align=right><form id=Helper:inventoryFilterForm subject=' +
-			'"inventory" href="index.php?cmd=notepad&blank=1&subcmd=invmanager' +
-			'" onSubmit="javascript:return false;">' +
-			'Min lvl:<input value="' + minLvl +
-			'" size=5 name="FSH.Helper.inventoryMinLvl" ' +
-			'id="FSH.Helper.inventoryMinLvl" style=custominput/> ' +
-			'Max lvl:<input value="' + maxLvl +
-			'" size=5 name="FSH.Helper.inventoryMaxLvl" ' +
-			'id="FSH.Helper.inventoryMaxLvl" style=custominput/> ' +
-			'<input id="Helper:inventoryFilter" subject="inventory" ' +
-			'href="index.php?cmd=notepad&blank=1&subcmd=invmanager" ' +
-			'class="custombutton" type="submit" value="Filter"/><input ' +
-			'id="reportType" type="hidden" value="' + reportType + '" />' +
-			'<input id="Helper:inventoryFilterReset" subject="inventory" ' +
-			'href="index.php?cmd=notepad&blank=1&subcmd=invmanager" ' +
-			'class="custombutton" type="button" value="Reset"/></form></div>';
-		for (var i = 0; i < FSH.Helper.itemFilters.length; i += 1) {
-			newhtml += (i % 5 === 0 ? '</td></tr><tr><td>' : '') +
-				'&nbsp;' + FSH.Helper.itemFilters[i].type +
-				':<input id="' + FSH.Helper.itemFilters[i].id +
-				'" type="checkbox" linkto="' + FSH.Helper.itemFilters[i].id + '"' +
-				(FSH.System.getValue(FSH.Helper.itemFilters[i].id) ? ' checked' : '') +
-				'/>';
-		}
-		newhtml+=' Sets Only: <input id="Helper:SetFilter" type="checkbox" />' +
-			'</td></tr><tr><td>&nbsp;<span id=SelectAllFilters>[Select All]</span>' +
-			'&nbsp;<span id=SelectNoFilters>[Select None]</span>' +
-			'</td></tr></table></td></tr></table>' +
-			'<div style="font-size:small;" id="' + targetID + '">' +
-			'</div>';
-		content.innerHTML=newhtml;
-
-		document.getElementById('Helper:SetFilter')
-			.addEventListener('click', FSH.oldInvMan.generateInventoryTable, true);
-
-		FSH.oldInvMan.generateInventoryTable();
-
-		document.getElementById('Helper:inventoryFilterReset')
-			.addEventListener('click', function() {
-				FSH.System.setValue('inventoryMinLvl',
-					FSH.Data.defaults.inventoryMinLvl);
-				FSH.System.setValue('inventoryMaxLvl',
-					FSH.Data.defaults.inventoryMaxLvl);
-				$('input[id="FSH.Helper.inventoryMinLvl"]')
-					.attr('value', FSH.Data.defaults.inventoryMinLvl);
-				$('input[id="FSH.Helper.inventoryMaxLvl"]')
-					.attr('value', FSH.Data.defaults.inventoryMaxLvl);
-				FSH.oldInvMan.generateInventoryTable();
-			}, true);
-		document.getElementById('Helper:inventoryFilterForm')
-			.addEventListener('submit', function() {
-				FSH.System.setValue('inventoryMinLvl',
-					$('input[id="FSH.Helper.inventoryMinLvl"]').attr('value'));
-				FSH.System.setValue('inventoryMaxLvl',
-					$('input[id="FSH.Helper.inventoryMaxLvl"]').attr('value'));
-
-				FSH.oldInvMan.generateInventoryTable();
-
-			}, true);
-
-		for (i=0; i<FSH.Helper.itemFilters.length; i += 1) {
-			document.getElementById(FSH.Helper.itemFilters[i].id)
-				.addEventListener('click',
-					FSH.oldInvMan.toggleCheckboxAndRefresh, true);
-		}
-		document.getElementById('SelectAllFilters')
-			.addEventListener('click', FSH.oldInvMan.InventorySelectFilters, true);
-		document.getElementById('SelectNoFilters')
-			.addEventListener('click', FSH.oldInvMan.InventorySelectFilters, true);
-	},
-
-	setItemFilterDefault: function() { // Native - Bad
-		// TODO Move this
-		FSH.Helper.itemFilters = [
-			{'id':'showHelmetTypeItems', 'type':'Helmet'},
-			{'id':'showAmorTypeItems', 'type':'Armor'},
-			{'id':'showGloveTypeItems', 'type':'Gloves'},
-			{'id':'showBootTypeItems', 'type':'Boots'},
-			{'id':'showWeaponTypeItems', 'type':'Weapon'},
-			{'id':'showShieldTypeItems', 'type':'Shield'},
-			{'id':'showRingTypeItems', 'type':'Ring'},
-			{'id':'showAmuletTypeItems', 'type':'Amulet'},
-			{'id':'showRuneTypeItems', 'type':'Rune'}
-		];
-	},
-
-	generateInventoryTable: function() { // Hybrid - Bad
-		var targetId;
-		var targetInventory;
-		var inventoryShell;
-
-		var reportType = $('input[id="reportType"]').attr('value');
-		if (reportType === 'guild') {
-			targetId = 'Helper:GuildInventoryManagerOutput';
-			targetInventory = FSH.Helper.guildinventory;
-			inventoryShell = 'guildinventory';
-		} else {
-			targetId = 'Helper:InventoryManagerOutput';
-			targetInventory = FSH.Helper.inventory;
-			inventoryShell = 'inventory';
-		}
-		if (!targetInventory) {return;}
-
-		var result = FSH.oldInvMan.inventoryTableHeader(reportType);
-
-		FSH.Helper.disableItemColoring = FSH.System.getValue('disableItemColoring');
-
-		var allItems = targetInventory.items;
-		var minLvl = parseInt($('input[id="FSH.Helper.inventoryMinLvl"]')
-			.attr('value'), 10);
-		var maxLvl = parseInt($('input[id="FSH.Helper.inventoryMaxLvl"]')
-			.attr('value'), 10);
-		var setsOnly = $('input[id="Helper:SetFilter"]').is(':checked');
-		for (var i = 0; i < allItems.length;i += 1) {
-			var item = allItems[i];
-
-			//continue; if item is filtered.
-			if (item.type > 8 ||
-				!$('input[id="' + FSH.Helper.itemFilters[item.type].id + '"]')
-					.is(':checked') ||
-				minLvl > item.stats.min_level ||
-				maxLvl < item.stats.min_level || 
-				setsOnly && !item.stats.set_name) {continue;}
-
-			if (item.equipped) {item.folder_id = 99999999; } //for sorting purposes.
-			item.player_name = '';
-			var color;
-			var whereTitle = '';
-			var whereText = '';
-			var p = 0;
-			var t = 0;
-			if (reportType === 'guild') {
-				if (item.player_id === -1) { //guild store
-					item.player_name = 'GS';
-					color = 'navy';
-					whereText = 'GS';
-					whereTitle = 'Guild Store';
-					p = targetInventory.guild_id;
-					t = 4;
-				} else {
-					item.player_name = targetInventory.members[item.player_id];
-					color = 'maroon';
-					whereText = item.player_name;
-					whereTitle='Guild Report';
-					p = item.player_id;
-					t = 1;
-				}
-				p = p + '&currentPlayerId=' + targetInventory.current_player_id;
-			} else {
-				if (item.equipped) {
-					color = 'green';
-					whereText = 'Worn';
-					whereTitle = 'Wearing it';
-				} else {
-					color = 'blue';
-					whereText = FSH.Helper.inventory.folders[item.folder_id];
-					whereTitle = 'In Backpack';
-				}
-				p = targetInventory.player_id;
-				t = 1;
-			}
-
-			item.rarityColor = FSH.Helper.disableItemColoring ? '' : ' color:' +
-				FSH.Data.rarity[item.rarity].colour;
-
-			item.displayName = item.item_name;
-			if (item.equipped) {
-				item.displayName = '<b>' + item.displayName + '</b>';
-			}
-			result += '<tr style="color:' + color + '"><td></td><td><a ' +
-				'style="cursor:help;' + item.rarityColor + '" id="Helper:item' +
-				i + '" arrayID="' + i + '" class="tip-dynamic" data-tipped="' +
-				'fetchitem.php?item_id=' + item.item_id + '&inv_id=' +
-				item.inv_id + '&t=' + t + '&p=' + p + '">' + item.displayName +
-				'</a>';
-
-			var itemRE = new RegExp('amulet|armor|armored|axe|boots|fist|' +
-				'gauntlets|gloves|hammer|helm|helmet|mace|necklace|of|plate|' +
-				'ring|rune|shield|sword|the|weapon', 'gi');
-
-			if (item.stats.set_name && reportType === 'guild') {
-				result += ' (<a href="/index.php?cmd=guild&subcmd=inventory&' +
-					'subcmd2=report&set=' +
-					item.item_name.replace(itemRE,'').trim().replace(/  /g,' ')
-						.replace(/  /g,' ').replace(/ /g,'|') + '">set</a>)';
-			}
-
-			item.craftColor = FSH.Data.craft[item.craft] ?
-				FSH.Data.craft[item.craft].colour : '';
-
-			if (item.durability) {
-				item.durabilityPer = Math.floor(100 * item.durability /
-					item.max_durability);
-				item.durabilityColor = item.durabilityPer < 20 ? 'red' : 'gray';
-			}
-
-			result += '</td>' +
-				'<td align="right">' + item.stats.min_level + '</td>' +
-				'<td align="left" title="' + whereTitle + '">' + whereText +
-					'</td>' +
-				'<td align="left">' + FSH.Data.itemType[item.type] + '</td>' +
-				'<td align="right">' + item.stats.attack + '</td>' +
-				'<td align="right">' + item.stats.defense + '</td>' +
-				'<td align="right">' + item.stats.armor + '</td>' +
-				'<td align="right">' + item.stats.damage + '</td>' +
-				'<td align="right">' + item.stats.hp + '</td>' +
-				'<td align="right">' + item.forge + '</td>' +
-				'<td>' + (item.forge > 0 ? '<img src="' + FSH.System.imageServer +
-					'/hellforge/forgelevel.gif">':'') + '</td>' +
-				'<td align="left">' + '<span style="color:' + item.craftColor +
-					';">' + item.craft + '</span>' + '</td>' +
-				'<td align="right">' + '<span style="color:' +
-					item.durabilityColor + ';">' + item.durabilityPer +
-					'</span></td>' +
-				'<td></td></tr>';
-		}
-
-		result += '</table><input type="hidden" id="xcnum" value="' +
-			window.ajaxXC + '" />';
-
-		var output = document.getElementById(targetId);
-		output.innerHTML = result;
-
-		var inventoryTable = document.getElementById('Helper:InventoryTable');
-		for (i = 0; i < inventoryTable.rows[0].cells.length; i += 1) {
-			var cell = inventoryTable.rows[0].cells[i];
-			cell.style.textDecoration = 'underline';
-			cell.style.cursor = 'pointer';
-			cell.addEventListener('click', FSH.oldInvMan.sortInventoryTable, true);
-		}
-
-		$('a[id*="Helper:item"]').click(FSH.oldInvMan.inspectInventoryItem);
-	},
-
-	toggleCheckboxAndRefresh: function(evt) { // Native
-		FSH.System.setValue(evt.target.id, evt.target.checked);
-		//~ setTimeout(function() {
-			FSH.oldInvMan.generateInventoryTable();
-		//~ });
-	},
-
-	InventorySelectFilters: function(evt) { // Native
-		FSH.oldInvMan.setItemFilterDefault();
-		var checkedValue = evt.target.id === 'SelectAllFilters';
-		for (var i = 0; i < FSH.Helper.itemFilters.length; i += 1) {
-			FSH.System.setValue(FSH.Helper.itemFilters[i].id, checkedValue);
-		}
-		for (i = 0; i < FSH.Helper.itemFilters.length; i += 1) {
-			document.getElementById(FSH.Helper.itemFilters[i].id).checked =
-				checkedValue;
-		}
-		//~ setTimeout(function() {
-			FSH.oldInvMan.generateInventoryTable();
-		//~ });
-	},
-
-	inventoryTableHeader: function(reportType) { // Native - Bad
-		return '<table id="Helper:InventoryTable"><tr>' +
-			'<th width="180" align="left" sortkey="item_name" sortType=' +
-				'"string" colspan="2">Name</th>' +
-			'<th sortkey="stats.min_level" sortType="number">Level</th>' +
-			'<th align="left" sortkey="' +
-			(reportType === 'guild' ?
-			'player_name" sortType="string' :
-			'folder_id" sortType="number') +
-			'">Where</th>' +
-			'<th align="left" sortkey="type" sortType="number">Type</th>' +
-			'<th sortkey="stats.attack" sortType="number">Att</th>' +
-			'<th sortkey="stats.defense" sortType="number">Def</th>' +
-			'<th sortkey="stats.armor" sortType="number">Arm</th>' +
-			'<th sortkey="stats.damage" sortType="number">Dam</th>' +
-			'<th sortkey="stats.hp" sortType="number">HP</th>' +
-			'<th colspan="2" sortkey="forge" sortType="number">Forge</th>' +
-			'<th align="left" sortkey="craft" sortType="string">Craft</th>' +
-			'<th align="right" sortkey="durabilityPer" sortType="number">' +
-				'Dur%</th>' +
-			//dropLink +
-			'<th width="10"></th>';
-	},
-
-	sortInventoryTable: function(evt) { // Hybrid
-		var targetInventory;
-		var reportType = $('input[id="reportType"]').attr('value');
-		if (reportType === 'guild') {
-			targetInventory = FSH.Helper.guildinventory;
-		} else {
-			targetInventory = FSH.Helper.inventory;
-		}
-		var headerClicked = evt.target.getAttribute('sortKey');
-		var sortType = evt.target.getAttribute('sortType');
-		if (FSH.Helper.sortAsc === undefined) {FSH.Helper.sortAsc = true;}
-		if (FSH.Helper.sortBy && FSH.Helper.sortBy === headerClicked) {
-			FSH.Helper.sortAsc = !FSH.Helper.sortAsc;
-		}
-		FSH.Helper.sortBy = 'item_name';
-		targetInventory.items.sort(FSH.System.stringSort);
-
-		FSH.Helper.sortBy = headerClicked;
-
-		if (sortType === 'number') {
-			targetInventory.items.sort(FSH.System.numberSort);
-		} else {
-			targetInventory.items.sort(FSH.System.stringSort);
-		}
-		FSH.oldInvMan.generateInventoryTable();
-	},
-
-	inspectInventoryItem: function() { // Hybrid - Bad
-		var reportType = $('input[id="reportType"]').attr('value');
-		var i = $(this).attr('arrayID');
-		var html = '';
-		var t = 1;
-		var p = 0;
-		var targetInventory;
-		//http://www.fallensword.com/index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=24096093&ajax=1
-		if (reportType === 'guild') {
-			targetInventory = FSH.Helper.guildinventory;
-			html += '<span id="Helper:Recall">';
-			if (targetInventory.items[i].player_id === -1) {
-				p = targetInventory.guild_id;
-				t = 4;
-				html += '&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; ' +
-					'text-decoration:underline; color:blue;" href="' +
-					FSH.System.server + 'index.php?cmd=guild&subcmd=inventory' +
-					'&subcmd2=takeitem&guildstore_id=' +
-					// targetInventory.items[i].inv_id + '&ajax=1">Fast BP</span><br />'; // FIXME
-					targetInventory.items[i].inv_id + '">Fast BP</span><br />'; // FIXME
-			} else {
-				p = targetInventory.items[i].player_id;
-				t = 1;
-				html += '&nbsp;<span id="Helper:RecallToBP" style="cursor:pointer; ' +
-					'text-decoration:underline; color:blue;" href="' +
-					FSH.System.server + 'index.php?cmd=guild&subcmd=inventory' +
-					'&subcmd2=recall&id=' + targetInventory.items[i].inv_id +
-					'&player_id=' + p + '&mode=0">Fast BP</span> |' +
-					'&nbsp;<span id="Helper:RecallToStore" style="cursor:pointer; ' +
-					'text-decoration:underline; color:blue;" href="' +
-					FSH.System.server + 'index.php?cmd=guild&subcmd=inventory&' +
-					'subcmd2=recall&id=' + targetInventory.items[i].inv_id +
-					'&player_id=' + p + '&mode=1">Fast GS</span><br />';
-				if (targetInventory.items[i].equipped){
-					html += '<span id="Helper:isEquiped">This item is being worn!' +
-						'</span><br />';
-				}
-				html += '<span id="Helper:IsWornBy">Is being held by: ' +
-					targetInventory.items[i].player_name + '</span><br />';
-			}
-			html += '</span><br />';
-			p = p + '&currentPlayerId=' + targetInventory.current_player_id;
-		} else {
-			targetInventory = FSH.Helper.inventory;
-			//'INSTANTLY DROP '+targetInventory.items[i].item_name+'. NO REFUNDS OR DO-OVERS! Use at own risk.'
-			html += '<span id="Helper:FolderMove"><select id="Helper:ToFolder">' +
-				'<option value="0">Move to folder</option>';
-			for (var key in targetInventory.folders) {
-				if (!targetInventory.folders.hasOwnProperty(key)) {continue;}
-				html += '<option value="' + key + '">' +
-					targetInventory.folders[key] + '</option>';
-			}
-			html += '</select><input id="Helper:InitiateMove" type="submit" ' +
-				'class="custombutton" value="Move!" invid="' +
-				targetInventory.items[i].inv_id + '" ></span><br />' +
-				'<span id="Helper:Drop"><input id="Helper:DropItem" ' +
-				'class="custombutton" type="submit" invid="' +
-				targetInventory.items[i].inv_id + '"  itemName="' +
-				targetInventory.items[i].item_name +
-				'" value="Drop Item!" /></span><br />' +
-				'<span id="Helper:Send" >send to <input type="text" ' +
-				'id="Helper:sendTo" size=5 /><input id="Helper:SendSubmit" ' +
-				'class="custombutton" type="submit" invid="' +
-				targetInventory.items[i].inv_id + '" value="Send!"/></span><br />' +
-				'<span id="Helper:Wear"><input class="custombutton" type="submit" ' +
-				'id="Helper:equipProfileInventoryItem" ' +
-				'itemID="' + targetInventory.items[i].inv_id +
-				'" value="Put it on!"></span> <br />' +
-				'<span id="Helper:Sell"><a href="http://www.fallensword.com/' +
-				'index.php?cmd=auctionhouse&subcmd=create2&inv_id=' +
-				targetInventory.items[i].inv_id + '">Post to AH</a></span><br />';
-			t = 1;
-			p = targetInventory.player_id;
-		}
-		//http://www.fallensword.com/index.php?cmd=auctionhouse&type=-1&search_text=Bahmou%20Mask
-		html += '<span id="Helper:SearchAH"><a href="http://www.fallensword.com' +
-			'/index.php?cmd=auctionhouse&type=-1&search_text=' +
-			encodeURI(targetInventory.items[i].item_name) +
-			'">Search AH</a></span><br /><br />';
-		if (targetInventory.items[i].stats.set_name) {
-			html += 'Set Name: ' + targetInventory.items[i].stats.set_name +
-				'<br />';
-		}
-		html += '<img src="' + FSH.System.imageServer + '/items/' +
-			targetInventory.items[i].item_id + '.gif" class="tip-dynamic" ' +
-			'data-tipped="fetchitem.php?item_id=' +
-			targetInventory.items[i].item_id + '&inv_id=' +
-			targetInventory.items[i].inv_id + '&t=' + t + '&p=' + p + '" border=0>';
-		var $dialog = $('<div></div>')
-			.html(html)
-			.dialog({
-				title: targetInventory.items[i].item_name,
-				resizable: false,
-				height:350,
-				width:300,
-				modal: true,
-				buttons: {'Close' : function() {$dialog.dialog( 'close' );}}
-			});
-		if (reportType === 'self') {
-			document.getElementById('Helper:equipProfileInventoryItem')
-				.addEventListener('click', FSH.common.equipProfileInventoryItem, true);
-		}
-		$('input[id="Helper:DropItem"]').click(function() {
-			var answer = confirm('Are you sure you want to drop ' +
-				$(this).attr('itemName') + '?');
-			if (answer) {
-				var itemInvId = $(this).attr('invid');
-				var dropHref = FSH.System.server +
-					'index.php?cmd=profile&subcmd=dodropitems&removeIndex[]=' + itemInvId;
-				$.ajax({
-					url: dropHref,
-					success: function(data) {
-						var info = FSH.Layout.infoBox(data);
-						var drop = $('span[id="Helper:Drop"]');
-						if (info === 'Items dropped and destroyed.') {
-							drop.html('Item Dropped!');
-							drop.css('color','green');
-							drop.css('fontWeight','bold');
-							drop.css('fontSize','small');
-						} else if (info !== '') {
-							drop.css('color','red');
-							drop.css('fontWeight','bold');
-							drop.css('fontSize','small');
-							drop.html('Error: ' + info);
-						} else {
-							drop.css('color','red');
-							drop.css('fontSize','small');
-							drop.html('Weird Error: check the Tools>Error Console');
-							console.log('Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error');
-							console.log(data);
-						}
-					}
-				});
-			}
-		});
-		$('input[id="Helper:SendSubmit"]').click(function() {
-			var itemInvId = $(this).attr('invid');
-			// var xcNum = $('input[id="xcnum"]').attr('value');
-			var itemRecipient = $('input[id="Helper:sendTo"]').val();
-			var sendItemHref = FSH.System.server +
-				'index.php?cmd=trade&subcmd=senditems&xc=' + window.ajaxXC +
-				'&target_username=' + itemRecipient + '&sendItemList[]=' + itemInvId;
-			$.ajax({
-				url: sendItemHref,
-				success: function(data) {
-					var info = FSH.Layout.infoBox(data);
-					var send=$('span[id="Helper:Send"]');
-					if (info === 'Items sent successfully!') {
-						send.html('Item sent to ' + itemRecipient + '!');
-						send.css('color','green');
-						send.css('fontWeight','bold');
-						send.css('fontSize','small');
-					} else if (info !== '') {
-						send.css('color','red');
-						send.css('fontWeight','bold');
-						send.css('fontSize','small');
-						send.html('Error: ' + info);
-					} else {
-						send.css('color','red');
-						send.css('fontSize','small');
-						send.html('Weird Error: check the Tools>Error Console');
-						console.log('Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error');
-						console.log(data);
-					}
-				}
-			});
-
-		});
-		$('span[id*="Helper:RecallTo"]').click(function() {
-			var href = $(this).attr('href');
-			var id = $(this).attr('id');
-			$.ajax({
-				url: href,
-				success: function(data) {
-					var info = FSH.Layout.infoBox(data);
-					var recall = $('span[id="' + id + '"]');
-					//~ if (data.slice(0, 1) === '{') {
-						//~ recall.html('Recalled!');
-						//~ recall.css('color','green');
-						//~ recall.css('fontWeight','bold');
-						//~ recall.css('fontSize','small');
-						//~ return;
-					//~ } // FIXME needs feedback
-					if (info === 'You successfully recalled the item.' ||
-						info === 'You successfully took the item into your backpack.') {
-						recall.html('Recalled!');
-						recall.css('color','green');
-						recall.css('fontWeight','bold');
-						recall.css('fontSize','small');
-					} else if (info!=='') {
-						recall.css('color','red');
-						recall.css('fontWeight','bold');
-						recall.css('fontSize','small');
-						recall.html('Error: ' + info);
-					} else {
-						recall.css('color','red');
-						recall.css('fontSize','small');
-						recall.html('Weird Error: check the Tools>Error Console');
-						console.log('Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error');
-						console.log(data);
-					}
-				}
-			});
-		});
-		$('input[id="Helper:InitiateMove"]').click(function() {
-			var itemInvId = $(this).attr('invid');
-			var folderID = $('select[id="Helper:ToFolder"]').val();
-			var moveHref = FSH.System.server +
-				'index.php?cmd=profile&subcmd=sendtofolder&folderItem[]=' + itemInvId +
-				'&folder_id=' + folderID;
-			$.ajax({
-				url: moveHref,
-				success: function( data ) {
-					var info = FSH.Layout.infoBox(data);
-					var move = $('span[id="Helper:FolderMove"]');
-					if (info === 'Items moved to folder successfully!') {
-						move.html('Item Moved!');
-						move.css('color','green');
-						move.css('fontWeight','bold');
-						move.css('fontSize','small');
-					} else if (info !== '') {
-						move.css('color','red');
-						move.css('fontWeight','bold');
-						move.css('fontSize','small');
-						move.html('Error: ' + info);
-					} else {
-						move.css('color','red');
-						move.css('fontSize','small');
-						move.html('Weird Error: check the Tools>Error Console');
-						console.log('Post the previous HTML and the following message to the GitHub or to the forum to help us debug this error');
-						console.log(data);
-					}
-				}
-			});
-		});
 	},
 
 };
@@ -12199,7 +11480,6 @@ FSH.oldRelic = { // Legacy - Old map
 			var mouseoverText = $(merc).data('tipped');
 			var src = merc.getAttribute('src');
 			if (mouseoverText && src.search('/merc/') !== -1){
-				//<td>Attack:</td><td>1919</td>
 				var attackRE = /<td>Attack:<\/td><td>(\d+)<\/td>/;
 				var mercAttackValue = attackRE.exec(mouseoverText)[1] * 1;
 				totalMercAttack += mercAttackValue;
@@ -12376,7 +11656,6 @@ FSH.arena = { // jQuery
 
 	tableOpts: { // Native
 		paging: false,
-		//searching: false,
 		info: false,
 		order: [[3, 'desc'],[0, 'asc']],
 		columnDefs: [
@@ -12617,7 +11896,6 @@ FSH.arena = { // jQuery
 			});
 			$.when.apply($, prm).done(function() {
 				window.location = 'index.php?cmd=arena&subcmd=setup';
-				// console.log('Finished!');
 			});
 		});
 	},
@@ -12651,24 +11929,18 @@ FSH.combatLog = { // Native
 	injectNotepadShowLogs: function(content) { // Native
 		if (!content) {content = FSH.Layout.notebookContent();}
 		var combatLog = FSH.System.getValue('CombatLog');
-		//combatLog = JSON.stringify(combatLog);
 		if (combatLog.indexOf(',') === 0) {
 			//combat logs start with a ,
 			combatLog = combatLog.substr(1);
 			FSH.System.setValue('CombatLog', combatLog);
 		}
 
-		// var playerName = $('dt[id="statbar-character"]').html();
 		var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
 			'</td></tr>'+
 			'<tr><td colspan="4" align="center">WARNING: this links to an ' +
 			'external site not related to HCS.<br />' +
 			'If you wish to visit site directly URL is: http://evolutions.' +
 			'yvong.com/fshlogparser.php<br />' +
-			//'NOTE: Combat Log Parser will be updated soon to work with the new combat logs, if your combat loogs look different, the parser may not work.</td></tr>'+
-			//'<tr><td colspan=1>Nick (This is used for parsing, it is not case sensitive):</td><td colspan=3><input type="text" name="nick" value="'+playerName+'"></td></tr>'+
-			//'<tr><td colspan=1>Doubler Level: </td><td colspan=3><input type="text" name="dob" value=''></td></tr>'+
-			//'<tr><td colspan=1>Counter Attack Level: </td><td colspan=3 align="left"><input type="text" name="ca" value=''></td></tr>'+
 			'<tr><td colspan=4 align="center"><input type="hidden" value="true" ' +
 			'name="submit"><input type="submit" value="Analyze!"></td></tr>';
 		content.innerHTML = '<h1>Combat Logs</h1><br /><form action="http://' +
@@ -12701,7 +11973,6 @@ FSH.combatLog = { // Native
 
 	notepadClearLog: function() { // Native
 		if (window.confirm('Are you sure you want to clear your log?')) {
-			// var combatLog=document.getElementById('Helper:CombatLog');
 			FSH.System.setValue('CombatLog', '');
 			location.reload();
 		}
@@ -12747,7 +12018,6 @@ FSH.newMap = { // Hybrid
 			}
 		});
 
-		//FSH.Helper.keepLogs = FSH.System.getValue('keepLogs');
 		if (FSH.System.getValue('keepLogs')) {
 			$.subscribe('2-success.action-response', FSH.newMap.combatResponse);
 		}
@@ -12798,11 +12068,6 @@ FSH.newMap = { // Hybrid
 	},
 
 	doSendGold: function() { // jQuery
-		// var sendTo = $('#HelperSendTo').html();
-		// var sendAmt = $('#HelperSendAmt').html().replace(/[^\d]/g,'');
-		// var sendHref = FSH.System.server + 'index.php?cmd=trade&' +
-			// 'subcmd=sendgold&xc=' + window.ajaxXC + '&target_username=' +
-			// sendTo +'&gold_amount='+ sendAmt;
 		$.ajax({
 			url: 'index.php',
 			data: {
@@ -12855,7 +12120,6 @@ FSH.newMap = { // Hybrid
 			FSH.Helper.checkIfGroupExists);
 
 		$('div#addRemoveCreatureToDoNotKillList').html('');
-		//console.log($('#dialog-viewcreature').find('h2.name').text());
 		if ($('div#addRemoveCreatureToDoNotKillList').length === 0) {
 			var doNotKillElement = '<div id="addRemoveCreatureToDo' +
 				'NotKillList"" class="description" style="cursor:' +
@@ -12868,6 +12132,7 @@ FSH.newMap = { // Hybrid
 		$('div#addRemoveCreatureToDoNotKillList')
 			.attr('creatureName',creatureName);
 		var extraText = 'Add to the do not kill list';
+		// TODO substring bug
 		if (FSH.Helper.doNotKillList.indexOf(creatureName) !== -1) {
 			extraText = 'Remove from do not kill list';}
 		$('div#addRemoveCreatureToDoNotKillList').html(extraText);
@@ -12901,6 +12166,7 @@ FSH.newMap = { // Hybrid
 
 	afterUpdateActionList: function() { // jQuery
 		// color the critters in the do no kill list blue
+		// TODO substring bug
 		$('ul#actionList div.header').each(function() {
 			if (FSH.Helper.doNotKillList.indexOf($(this).find('a.icon')
 				.data('name')) !== -1) {
@@ -12918,6 +12184,7 @@ FSH.newMap = { // Hybrid
 				// Do custom stuff e.g. do not kill list
 				var creatureIcon = $('ul#actionList div.header')
 					.eq(data.passback).find('a.icon');
+				// TODO substring bug
 				if (FSH.Helper.doNotKillList.indexOf(
 						creatureIcon.data('name')) !== -1) {
 					creatureIcon.removeClass('loading');
@@ -12948,7 +12215,6 @@ FSH.newMap = { // Hybrid
 		// send the response to localforage
 		// and deal with it later
 		// If bad response do nothing.
-		// if (!FSH.Helper.keepLogs || data.response.response !== 0) {return;}
 		if (data.response.response !== 0) {return;}
 		var l;
 		var i;
@@ -12991,8 +12257,6 @@ FSH.newMap = { // Hybrid
 				}
 			}
 		}
-		//combatData.player.enhancements = data.player.enhancements;
-		//combatData.player.buffs = data.player.buffs;
 		var now = new Date();
 		combatData.time = FSH.System.formatDateTime(now);
 		FSH.Helper.appendSavedLog(',' + JSON.stringify(combatData));

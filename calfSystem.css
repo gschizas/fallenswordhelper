@@ -113,23 +113,8 @@ div#fshQuickLinks {
   display: none;
 }
 
-.HelperAdvisorRow1 {background-color:#e7c473;font-size:x-small}
-.HelperAdvisorRow1:hover {background-color:white}
-.HelperAdvisorRow2 {background-color:#e2b960;font-size:x-small}
-.HelperAdvisorRow2:hover {background-color:white}
-
-.HelperMonsterLogRow1 {background-color:#e7c473;font-size:small}
-.HelperMonsterLogRow1:hover {background-color:white}
-.HelperMonsterLogRow2 {background-color:#e2b960;font-size:small}
-.HelperMonsterLogRow2:hover {background-color:white}
-
 .HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}
 .HelperTextLink:hover {text-decoration:underline;}
-
-.HelperTableRow1 {background-color:#e7c473;font-size:small}
-.HelperTableRow1:hover {background-color:white}
-.HelperTableRow2 {background-color:#e2b960;font-size:small}
-.HelperTableRow2:hover {background-color:white}
 
 .fastWear {
   cursor:pointer;
@@ -304,42 +289,20 @@ table.dataTable {
   clear: both;
   border-collapse: separate;
   border-spacing: 0;
-  /*
-   * Header and footer styles
-   */
-  /*
-   * Body styles
-   */
 }
-/*
-table.dataTable thead th,
-table.dataTable tfoot th {
-  font-weight: bold;
-}
-*/
+
 table.dataTable thead th,
 table.dataTable thead td {
-/*  padding: 10px 18px;
-  border-bottom: 1px solid #111;*/
   background-color:#cd9e4b;
   padding:0px;
   border: 0;
-/*
-  font-weight: normal;
-*/
   text-decoration: underline;
 }
 table.dataTable thead th:active,
 table.dataTable thead td:active {
   outline: none;
 }
-/*
-table.dataTable tfoot th,
-table.dataTable tfoot td {
-  padding: 10px 18px 6px 18px;
-  border-top: 1px solid #111;
-}
-*/
+
 table.dataTable thead .sorting,
 table.dataTable thead .sorting_asc,
 table.dataTable thead .sorting_desc {
@@ -377,12 +340,7 @@ table.dataTable.allow tbody tr {
 table.dataTable tbody tr.selected {
   background-color: #B0BED9;
 }
-/*
-table.dataTable tbody th,
-table.dataTable tbody td {
-  padding: 8px 10px;
-}
-*/
+
 table.dataTable.row-border tbody th, table.dataTable.row-border tbody td, table.dataTable.display tbody th, table.dataTable.display tbody td {
   border-top: 1px solid #ddd;
 }
@@ -403,14 +361,6 @@ table.dataTable.cell-border tbody tr:first-child th,
 table.dataTable.cell-border tbody tr:first-child td {
   border-top: none;
 }
-
-/*
-
-table.dataTable.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
-  background-color: #e7c473;
-}
-
-*/
 
 table.dataTable.allow.stripe tbody tr.odd, table.dataTable.display tbody tr.odd {
   background-color: #e7c473;
