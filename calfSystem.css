@@ -164,9 +164,6 @@ div#fshQuickLinks {
 .fshNoWrap    {white-space: nowrap;}
 .helperQC     {cursor: pointer;}
 
-.bsT          {margin: 0px auto;}
-.bsT td       {text-align: right; padding:0px 4px;}
-
 .qbT          {margin: 0px auto;}
 .qbTH         {text-align: center; padding:0px 4px; color:orange;}
 .qbTD         {text-align: center; padding:0px 4px;}

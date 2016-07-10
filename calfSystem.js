@@ -1486,10 +1486,10 @@ FSH.Layout = {
 
 	infoBox: function(documentText) {
 		var infoMatch = $(documentText).find('center[id="info-msg"]').html();
-		var result='';
+		var result = '';
 		if (infoMatch) {
 			infoMatch = infoMatch.replace(/<br.*/,'');
-			result=infoMatch;
+			result = infoMatch;
 		}
 		return result;
 	},
@@ -1657,7 +1657,7 @@ FSH.Layout = {
 	invManFilter:
 		'<table class="fshInvFilter">' +
 		'<tr><th colspan="14">@@reportTitle@@</th>' +
-		'<th><span id="fshRefresh">[Refresh]<span></th></tr>' +
+		'<th><span id="fshRefresh">[Refresh]</span></th></tr>' +
 		'<tr><td colspan="2" rowspan="3"><b>&nbsp;Show Items:</b></td>' +
 		'<td class="fshRight">&nbsp;Helmet:</td>' +
 		'<td><input id="fshHelmet" type="checkbox" item="0"/></td>' +
@@ -1778,29 +1778,6 @@ FSH.Layout = {
 			'class="quicklink tip-static" data-tipped="Search map in Ultimate FSG" ' +
 			'style="background-image: url(\'' + FSH.System.imageServer +
 			'/temple/1.gif\');">' +
-		'</a>',
-
-	searchMapWiki:
-		'<a href="http://wiki.fallensword.com/index.php/Special:Search?search=' +
-		'@@realmName@@&go=Go" target="mapWiki">' +
-			'<img class="tip-static" data-tipped="Search map in Wiki" width=15 ' +
-			'height=15 src="/favicon.ico">' +
-		'</a>',
-
-	worldBackpack:
-		'<a href="index.php?cmd=profile&amp;subcmd=dropitems" ' +
-		'target="fsBackpack">' +
-			'<img class="tip-static" data-tipped="Manage Backpack" src="' +
-			FSH.System.imageServer +
-			'/skin/realm/icon_action_manageitems.gif" height=15 width=15>' +
-		'</a>',
-
-	worldRepair:
-		'<a href="#">' +
-			'<img class="tip-static" ' +
-			'data-tipped="Quick Repair All Items [Shortcut Key: r]" src="' +
-			FSH.System.imageServer +
-			'/skin/realm/icon_action_repair.gif" height=15 width=15>' +
 		'</a>',
 
 	worldFormgroup:
