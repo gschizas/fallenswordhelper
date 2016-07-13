@@ -1436,7 +1436,8 @@ FSH.Helper = {
 		callback: FSH.Helper.onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {
-		o.js.unshift(FSH.resources.jQuery);
+		// o.js.unshift(FSH.resources.jQuery);
+		o.js.pop();
 	}
 	FSH.Helper.appendHead(o);
 })();

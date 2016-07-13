@@ -129,13 +129,13 @@ window.FSH = window.FSH || {};
 FSH.System = {
 	// FSH.System.functions
 
-	init: function() {
+	init: function() { // Native
 		FSH.System.server = document.location.protocol + '//' +
 			document.location.host + '/';
-		var imgurls = FSH.System.findNode('//img[contains(@src, "/skin/")]');
-		if (!imgurls) {return;} //login screen or error loading etc.
-		var idindex = imgurls.src.indexOf('/skin/');
-		FSH.System.imageServer = imgurls.src.substr(0,idindex);
+		if ('HCS' in window && 'defines' in window.HCS &&
+			'fileserver' in window.HCS.defines) {
+			FSH.System.imageServer = window.HCS.defines.fileserver.slice(0, -1);
+		}
 	},
 
 	getValue: function(name) {
@@ -1164,9 +1164,7 @@ FSH.Data = {
 
 	pageSwitcher: {
 		settings: {'-': {'-': {'-': {'-': 'settingsPage.injectSettings'}}}},
-		world: {
-		'-': {'-': {'-': {'-': 'injectWorld'}}},
-		},
+		world: {'-': {'-': {'-': {'-': 'injectWorld'}}}},
 		news: {
 			'fsbox': {'-': {'-': {'-': 'news.newsFsbox'}}},
 			'shoutbox': {'-': {'-': {'-': 'news.newsShoutbox'}}}},
@@ -1471,7 +1469,8 @@ FSH.Layout = {
 
 	playerId: function() {
 		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
-		var thePlayerId=parseInt(document.body.innerHTML.match(playerIdRE)[1],10);
+		var thePlayerId = parseInt(document.getElementById('holdtext')
+			.textContent.match(playerIdRE)[1], 10);
 		FSH.System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
@@ -1508,7 +1507,7 @@ FSH.Layout = {
 		'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
 		'egAAAABJRU5ErkJggg==" width="16" height="16" />',
 
-	quickBuffHref: function(playerId, buffList) {
+	quickBuffHref: function(playerId, buffList) { // Evil
 		if (buffList) {
 			return 'href=\'javascript:window.openWindow("index.php?cmd=' +
 				'quickbuff&tid=' + playerId + '&blist=' + buffList +
@@ -6573,11 +6572,11 @@ FSH.questBook = { // Legacy
 
 	},
 
-	showAllQuestSteps: function() { // Hybrid
-		if (FSH.System.getValue('showNextQuestSteps')) {
-			$('div[id*="stage"]').show();
-			document.getElementById('next_stage_button').style.display = 'none';
-		}
+	showAllQuestSteps: function() { // Native
+		if (!FSH.System.getValue('showNextQuestSteps')) {return;}
+		Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
+			function(e) {e.style.display = 'block';});
+		document.getElementById('next_stage_button').style.display = 'none';
 	},
 
 };
@@ -7554,8 +7553,17 @@ FSH.news = { // Legacy
 
 FSH.ga = { // jQuery
 
+	refAry: ['www.lazywebtools.co.uk', 'refreshthing.com'],
+
+	isAuto: function() {
+		var docRef = document.referrer
+			.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+		docRef = docRef ? docRef[1] : docRef;
+		return FSH.ga.refAry.indexOf(docRef) !== -1;
+	},
+
 	setup: function() { // jQuery
-		if (typeof ga === 'undefined') {return;}
+		if (FSH.ga.isAuto || typeof ga === 'undefined') {return;}
 
 		ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
 			userId: $('dt#statbar-character').text()
@@ -7569,13 +7577,78 @@ FSH.ga = { // jQuery
 	},
 
 	screenview: function(funcName) { // Native
-		if (typeof ga === 'undefined') {return;}
+		if (FSH.ga.isAuto || typeof ga === 'undefined') {return;}
 		ga('fshApp.send', 'screenview', {screenName: funcName});
 	},
 
 };
 
 FSH.environment = { // Legacy
+
+	// main event dispatcher
+	dispatch: function() { // jQuery
+
+		FSH.ga.setup();
+
+		var cmd, subcmd, subcmd2, type, fromWorld, test_cmd, fn;
+
+		if (document.location.search !== '') {
+			cmd = FSH.System.getUrlParameter('cmd') || '-';
+			subcmd = FSH.System.getUrlParameter('subcmd') || '-';
+			subcmd2 = FSH.System.getUrlParameter('subcmd2') || '-';
+			type = FSH.System.getUrlParameter('type') || '-';
+			fromWorld = FSH.System.getUrlParameter('fromworld') || '-';
+		} else {
+			test_cmd = document.querySelector('input[name="cmd"]');
+			cmd = test_cmd ? test_cmd.getAttribute('value') : '-';
+			test_cmd = document.querySelector('input[name="subcmd"]');
+			subcmd = test_cmd ? test_cmd.getAttribute('value') : '-';
+			if (subcmd === 'dochat') {
+				cmd = '-';
+				subcmd = '-';
+			}
+			test_cmd = document.querySelector('input[name="subcmd2"]');
+			subcmd2 = test_cmd ? test_cmd.getAttribute('value') : '-';
+			type = '-';
+			fromWorld = '-';
+		}
+
+		FSH.cmd = cmd;
+		FSH.subcmd = subcmd;
+		FSH.subcmd2 = subcmd2;
+		FSH.type = type;
+		FSH.fromWorld = fromWorld;
+
+		FSH.Helper.page = cmd + '/' + subcmd + '/' + subcmd2 + '(' + type + ')';
+
+		var hcsData = document.getElementById('html');
+		if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
+			FSH.environment.prepareEnv();
+		}
+
+		var pageSwitcher = FSH.Data.pageSwitcher;
+
+		if (pageSwitcher[cmd] &&
+			pageSwitcher[cmd][subcmd] &&
+			pageSwitcher[cmd][subcmd][subcmd2] &&
+			pageSwitcher[cmd][subcmd][subcmd2][type] &&
+			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+			fn = FSH.System.getFunction(
+				pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]);
+			if (typeof fn === 'function') {fn();}
+		}
+
+		if (typeof window.jQuery === 'undefined') {return;}
+
+		if (FSH.System.getValue('playNewMessageSound')) {
+			FSH.environment.doMsgSound();
+		}
+
+		// This must be at the end in order not to screw up other FSH.System.findNode calls (Issue 351)
+		if (!FSH.Helper.huntingMode) {
+			FSH.environment.injectQuickLinks();
+		}
+	},
 
 	navMenu: function() {
 		var myNav = $('#nav').data('nav');
@@ -7603,75 +7676,11 @@ FSH.environment = { // Legacy
 			.wrap('<a href="index.php?cmd=bank"></a>');
 	},
 
-	// main event dispatcher
-	dispatch: function() { // jQuery
-
-		FSH.ga.setup();
+	prepareEnv: function() { // jQuery
 
 		FSH.environment.navMenu();
 		FSH.environment.statbar();
 
-		var cmd;
-		var subcmd;
-		var subcmd2;
-		var type;
-		var fromWorld;
-		var fn;
-
-		if (document.location.search !== '') {
-			cmd = FSH.System.getUrlParameter('cmd') || '-';
-			subcmd = FSH.System.getUrlParameter('subcmd') || '-';
-			subcmd2 = FSH.System.getUrlParameter('subcmd2') || '-';
-			type = FSH.System.getUrlParameter('type') || '-';
-			fromWorld = FSH.System.getUrlParameter('fromworld') || '-';
-		} else {
-			cmd = $('input[name="cmd"]').val() || '-';
-			subcmd = $('input[name="subcmd"]').val() || '-';
-			if (subcmd==='dochat') {
-				cmd='-';
-				subcmd='-';
-			}
-			subcmd2 = $('input[name="subcmd2"]').val() || '-';
-			type = '-';
-			fromWorld = '-';
-		}
-
-		FSH.cmd = cmd;
-		FSH.subcmd = subcmd;
-		FSH.subcmd2 = subcmd2;
-		FSH.type = type;
-		FSH.fromWorld = fromWorld;
-
-		FSH.Helper.page = cmd + '/' + subcmd + '/' + subcmd2 + '(' + type + ')';
-
-		var hcsData = $('html').data('hcs');
-		if (hcsData && hcsData['new-ui']) { // UFSG or QuickBuff
-			FSH.environment.prepareEnv();
-		}
-
-		var pageSwitcher = FSH.Data.pageSwitcher;
-
-		if (pageSwitcher[cmd] &&
-			pageSwitcher[cmd][subcmd] &&
-			pageSwitcher[cmd][subcmd][subcmd2] &&
-			pageSwitcher[cmd][subcmd][subcmd2][type] &&
-			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
-			fn = FSH.System.getFunction(
-				pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]);
-			if (typeof fn === 'function') {fn();}
-		}
-
-		if (FSH.System.getValue('playNewMessageSound')) {
-			FSH.environment.doMsgSound();
-		}
-
-		// This must be at the end in order not to screw up other FSH.System.findNode calls (Issue 351)
-		if (!FSH.Helper.huntingMode) {
-			FSH.environment.injectQuickLinks();
-		}
-	},
-
-	prepareEnv: function() { // jQuery
 		if (FSH.System.getValue('gameHelpLink')) {
 			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
 			$(gameHelpNode).each(function() {
@@ -8178,7 +8187,9 @@ FSH.environment = { // Legacy
 
 	unknownPage: function() { // Legacy
 
-		if ($('div#pCC td:contains("Below is the current status for ' +
+		if (typeof window.jQuery === 'undefined') {return;}
+
+		if ($('#pCC td:contains("Below is the current status for ' +
 			'the relic")').length > 0) {
 			FSH.ga.screenview('unknown.oldRelic.injectRelic');
 			FSH.oldRelic.injectRelic();
@@ -12343,18 +12354,18 @@ FSH.newMap = { // Hybrid
 
 };
 
-FSH.guide = { // jQuery
+FSH.guide = { // Native
 
-	allowBack: function () { // jQuery
-		$('body').on('click', 'input[type="submit"]', function(e) {
-			e.preventDefault();
-			var url = 'index.php?';
-			$('input[type!="submit"], select').each(function() {
-				var self = $(this);
-				url += '&' + self.attr('name') + '=' + self.val();
+	allowBack: function () { // Native
+		document.querySelector('input[type="submit"]')
+			.addEventListener('click', function(e) {
+				e.preventDefault();
+				var url = 'index.php?';
+				Array.prototype.forEach.call(
+					document.querySelectorAll('input:not([type="submit"]), select'),
+					function(e) {url += '&' + e.name + '=' + e.value;});
+				window.location = url;
 			});
-			window.location = url;
-		});
 	},
 
 };
