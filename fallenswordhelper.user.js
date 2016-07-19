@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1513
+// @version        1514
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -22,10 +22,17 @@ var fshMain = function() {
 'use strict';
 
 window.FSH = window.FSH || {};
-FSH.dataTablesLoc = 'https://cdn.datatables.net/1.10.10/js/jquery.dataTables.min.js';
+
+FSH.resources = {
+	calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1514/calfSystem.js',
+	calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1514/calfSystem.css',
+	localForage: 'https://cdn.jsdelivr.net/localforage/1.4.2/localforage.min.js',
+	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
+	jQuery: 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+};
 
 if (typeof GM_info === 'undefined') {
-	FSH.version = 'undefined';
+	FSH.version = '1514_native';
 } else {
 	FSH.version = GM_info.script.version;
 }
@@ -99,108 +106,14 @@ FSH.Helper = {
 		document.getElementById('buy_result').innerHTML += '<br />' + infoMessage;
 	},
 
-
-	position: function() {
-		var result = {};
-		if (FSH.Helper.page==='world/map/-(-)') {
-			var playerTile=FSH.System.findNode('//img/ancestor::td[@background]');
-			result.X=playerTile.cellIndex;
-			result.Y=playerTile.parentNode.rowIndex;
-			result.type='worldmap';
-		}
-		else {
-			var posit = FSH.System.findNode('//h3[@id="world-realm-name"]');
-			if (!posit) {return;}
-			var thePosition=posit.innerHTML;
-			var positionRE=/\((\d+),\s*(\d+)\)/;
-			var positionX = parseInt(thePosition.match(positionRE)[1],10);
-			var positionY = parseInt(thePosition.match(positionRE)[2],10);
-			result.X=positionX;
-			result.Y=positionY;
-			result.type='normal';
-		}
-		return result;
-	},
-
-	mapThis: function() { // Legacy - Old map
-		if (!FSH.System.getValue('footprints')) {return;}
-		var realmId;
-		var levelName;
-		var realm = FSH.System.findNode('//h3[@id="world-realm-name"]');
-		if ($('h3#world-realm-name').data('realm')) {
-			realmId = $('h3#world-realm-name').data('realm').id.trim();
-			levelName = $('h3#world-realm-name').data('realm').name.trim();
-		}
-		var posit = FSH.Helper.position();
-		if (realm && posit) {
-			if (!levelName) {levelName=realm.innerHTML;}
-			FSH.Helper.levelName = levelName;
-			var theMap = FSH.System.getValueJSON('map');
-			if (!theMap) {
-				theMap = {};
-				theMap.levels = {};
-			}
-			if (!theMap.levels[levelName]) {theMap.levels[levelName] = {};}
-			if (!theMap.levels[levelName][posit.X]) {
-				theMap.levels[levelName][posit.X]={};
-			}
-			theMap.levels[levelName][posit.X][posit.Y]='!';
-			FSH.System.setValueJSON('map', theMap);
-		}
-	},
-
-	showMap: function(isLarge) {
-		if (!FSH.System.getValue('footprints')) {return;}
-		if (isLarge) {
-			var realm = FSH.System.findNode('//b');
-			FSH.Helper.levelName = realm.textContent.replace(' Map Overview', '');
-		}
-		var theMap = FSH.System.getValueJSON('map');
-		var displayedMap = FSH.System.findNode(isLarge ? '//table[@width]' : '//table[@width="200"]');
-		if (!displayedMap) {return;}
-		var footprintsColor = FSH.System.getValue('footprintsColor');
-		var posit = FSH.Helper.position();
-
-		for (var y = 0; y < displayedMap.rows.length; y += 1) {
-			var aRow = displayedMap.rows[y];
-			for (var x = 0; x < aRow.cells.length; x += 1) {
-				var aCell = aRow.cells[x];
-				var dx = isLarge ? x : posit.X + (x - 2);
-				var dy = isLarge ? y : posit.Y + (y - 2);
-				if (theMap.levels[FSH.Helper.levelName] &&
-					theMap.levels[FSH.Helper.levelName][dx] &&
-					theMap.levels[FSH.Helper.levelName][dx][dy] &&
-					theMap.levels[FSH.Helper.levelName][dx][dy] === '!') {
-
-					if (x !== (isLarge ? posit.X : 2) || y !== (isLarge ? posit.Y : 2)) {
-						aCell.style.color = footprintsColor;
-						if (aCell.innerHTML.indexOf('table') > 0) {
-							aCell
-								.firstChild
-								.firstChild
-								.firstChild
-								.firstChild
-								.firstChild
-								.innerHTML +='**';
-						} else {
-							aCell.innerHTML+='**';
-						}
-					}
-				}
-			}
-		}
-	},
-
-	oldRemoveBuffs: function() {
+	oldRemoveBuffs: function() { // Legacy - Old Map
 		var buffName;
-		//code to remove buffs but stay on the same screen
 		var currentBuffs = FSH.System.findNodes('//a[contains(@href,"index.php?' +
 			'cmd=profile&subcmd=removeskill&skill_id=")]');
 		var buffHash={};
 		if (!currentBuffs) {return buffHash;}
 		for (var i=0;i<currentBuffs.length;i += 1) {
 			var currentBuff = currentBuffs[i];
-			var buffHref = currentBuff.getAttribute('href');
 			var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
 				.exec(currentBuff.getAttribute('onclick'));
 			if (buffTest) {
@@ -212,18 +125,6 @@ FSH.Helper = {
 				} else {console.log('Error getting buff');}
 			}
 			buffHash[buffName]=true;
-			var imageHTML = currentBuff.innerHTML;
-			var buffCell = currentBuff.parentNode;
-			var buffHTML = buffCell.innerHTML;
-			var lastPart = buffHTML
-				.substring(buffHTML.indexOf('</a>')+4, buffHTML.length);
-			var newCellContents = '<span id="Helper:removeSkill' + i + 
-				'" style="cursor:pointer;" buffName="' + buffName + 
-				'" buffHref="' + buffHref + '">' + imageHTML +
-				'</span>' + lastPart;
-			buffCell.innerHTML = newCellContents;
-			buffCell.firstChild
-				.addEventListener('click', FSH.Helper.removeSkill, true);
 		}
 		return buffHash;
 	},
@@ -231,12 +132,8 @@ FSH.Helper = {
 	checkBuffs: function() { // Legacy - Old Map
 		var onmouseover;
 		var impsRemaining;
-		var textToTest;
-		var impsRemainingRE;
 		var counterAttackLevel;
 		var doublerLevel;
-
-		var buffHash = FSH.Helper.oldRemoveBuffs();
 
 		//extra world screen text
 		var replacementText = '<td background="' + FSH.System.imageServer +
@@ -252,23 +149,23 @@ FSH.Helper = {
 			var re=/(\d+) HP remaining/;
 			impsRemaining = 0;
 			if (hasShieldImp) {
-				textToTest = $(hasShieldImp).data('tipped');
-				impsRemainingRE = re.exec(textToTest);
+				var textToTest = $(hasShieldImp).data('tipped');
+				var impsRemainingRE = re.exec(textToTest);
 				impsRemaining = impsRemainingRE[1];
 			}
 			var applyImpWarningColor = ' style="color:green; ' +
 				'font-size:medium;"';
 			if (impsRemaining===2){
-				applyImpWarningColor = ' style="color:Orangered; font-size:' +
-					'medium; font-weight:bold;"';
+				applyImpWarningColor = ' style="color:Orangered; ' +
+					'font-size:medium; font-weight:bold;"';
 			}
 			if (impsRemaining===1){
-				applyImpWarningColor = ' style="color:Orangered; font-size:' +
-					'large; font-weight:bold"';
+				applyImpWarningColor = ' style="color:Orangered; ' +
+					'font-size:large; font-weight:bold"';
 			}
 			if (impsRemaining===0){
-				applyImpWarningColor = ' style="color:red; font-size:large;' +
-					' font-weight:bold"';
+				applyImpWarningColor = ' style="color:red; ' +
+					'font-size:large; font-weight:bold"';
 			}
 			replacementText += '<tr><td' + applyImpWarningColor +
 				'>Shield Imps Remaining: ' +  impsRemaining +
@@ -328,6 +225,9 @@ FSH.Helper = {
 			}
 			var buffAry=buffs.split(',');
 			var missingBuffs = [];
+
+			var buffHash = FSH.Helper.oldRemoveBuffs();
+
 			for (var i=0;i<buffAry.length;i += 1) {
 				if (!buffHash[buffAry[i].trim()]) {
 					missingBuffs.push(buffAry[i]);
@@ -435,183 +335,6 @@ FSH.Helper = {
 		}
 	},
 
-	removeSkill: function(evt) {
-		var buffName = evt.target.parentNode.getAttribute('buffName');
-		var buffHref = evt.target.parentNode.getAttribute('buffHref');
-		if (confirm('Are you sure you wish to remove the ' + buffName +
-			' skill?')) {
-			FSH.System.xmlhttp(buffHref,
-				function() {location.href = 'index.php?cmd=world';});
-		}
-	},
-
-	toggleSound: function() {
-		if (FSH.System.getValue('playNewMessageSound'))
-		{
-			FSH.System.setValue('playNewMessageSound', false);
-		} else {
-			FSH.System.setValue('playNewMessageSound', true);
-		}
-		location.reload();
-	},
-
-	isQuestBeingTracked: function(questHREF) {
-		//quests are stored as their address after index.php: ?cmd=questbook....
-		var questsBeingTracked = FSH.System.getValue('questBeingTracked').split(';');
-		for (var i = 0; i < questsBeingTracked.length; i += 1) {
-			if (questsBeingTracked[i] === questHREF) {
-				return true;
-			}
-		}
-		return false;
-	},
-
-	checkForNotCompletedQuests: function(responseText, callback) {
-		//gets the maximum page number and goes through the pages.
-		var doc=FSH.System.createDocument(responseText);
-		var page = FSH.System.findNode('//td[contains(.,"Page:")]', doc);
-		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
-
-
-		if (maxPage && maxPage.length >= 2) {
-			FSH.System.setValue('questsNotComplete', false);
-			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ''); i += 1) {
-				FSH.System.xmlhttp('index.php?cmd=questbook&subcmd=&subcmd2=&page=' + i + '&search_text=&mode=0&letter=*&sortby=min_level&sortbydir=0',
-				FSH.Helper.checkForNotCompletedQuestRecurse,
-				{'insertHere' : callback.insertHere});
-			}
-		}
-	},
-
-	checkForNotCompletedQuestRecurse: function(responseText, callback) {
-		var doc=FSH.System.createDocument(responseText);
-		var insertHere = callback.insertHere;
-
-		var table = FSH.System.findNode('//table[@width="100%" and @cellspacing=0 and @cellpadding=0 and @border=0]', doc);
-		if (table) {
-			table = table.lastChild.getElementsByTagName('TABLE')[2];
-
-			for (var i = 2; i < table.rows.length; i+=2) {
-				if (table.rows[i].cells.length > 1) {
-					var questHREF = table.rows[i].cells[0].getElementsByTagName('a')[0].getAttribute('href').match(/(\?.*)/)[1];
-					if (table.rows[i].cells[2].innerHTML === FSH.System.getValue('lastWorld') && !FSH.Helper.isQuestBeingTracked(questHREF)) {
-						if (FSH.System.getValue('questsNotComplete') === false) {
-							insertHere.innerHTML += '<br><span style="color:red;font-size:12px;">Quest(s) in zone not completed:</span><br>';
-							FSH.System.setValue('questsNotComplete', true);
-						}
-						insertHere.innerHTML += '<span style="font-size:12px;">' +table.rows[i].cells[0].innerHTML + '</span><br>';
-					}
-				}
-			}
-		}
-	},
-
-	checkForNotStartedQuests: function(responseText, callback) {
-
-		var doc=FSH.System.createDocument(responseText);
-		var page = FSH.System.findNode('//td[contains(.,"Page:")]', doc);
-		var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/g);
-
-		if (maxPage && maxPage.length >= 2) {
-			FSH.System.setValue('questsNotStarted', false);
-			for (var i = 0; i < maxPage[1].replace(/of&nbsp;/g, ''); i += 1) {
-				FSH.System.xmlhttp('index.php?cmd=questbook&subcmd=&subcmd2=&page=' + i + '&search_text=&mode=2&letter=*&sortby=min_level&sortbydir=0',
-				FSH.Helper.checkForQuestRecurse,
-				{'insertHere' : callback.insertHere});
-			}
-		}
-	},
-
-	checkForQuestRecurse: function(responseText, callback) {
-		var doc=FSH.System.createDocument(responseText);
-		var insertHere = callback.insertHere;
-
-		var table = FSH.System.findNode('//table[@width="100%" and @cellspacing=0 and @cellpadding=0 and @border=0]', doc);
-		if (table) {
-			table = table.lastChild.getElementsByTagName('TABLE')[2];
-
-			for (var i = 2; i < table.rows.length; i+=2) {
-				if (table.rows[i].cells.length > 1) {
-					if (table.rows[i].cells[2].innerHTML === FSH.System.getValue('lastWorld')) {
-						if (FSH.System.getValue('questsNotStarted') === false) {
-							insertHere.innerHTML += '<br><span style="color:red;font-size:12px;">Quest(s) in zone not started:</span><br>';
-							FSH.System.setValue('questsNotStarted', true);
-						}
-						insertHere.innerHTML += '<span style="font-size:12px;">' + FSH.System.removeHTML(table.rows[i].cells[0].innerHTML) + '</span><br>';
-					}
-				}
-			}
-		}
-	},
-
-	injectWorldNewMap: function(data){
-		var img;
-		if(data.player){
-			FSH.Helper.xLocation = data.player.location.x;
-			FSH.Helper.yLocation = data.player.location.y;
-			//<dd id='HelperSendTotal'>' + FSH.System.getValue("currentGoldSentTotal").toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, "$1,") + '</dd>
-			if(FSH.System.getValue('sendGoldonWorld')){
-				$('#HelperSendTotal').html(FSH.System.getValue('currentGoldSentTotal').toString().replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-				if(parseInt(data.player.gold, 10) > FSH.System.getValue('goldAmount')){
-					$('#statbar-gold').css('background-color','red');
-				}else{
-					$('#statbar-gold').css('background-color','inherit');
-				}
-			}
-			/*if (buttonRow && FSH.System.getValue('sendGoldonWorld')){
-				currentGoldSentTotal = FSH.System.addCommas(FSH.System.getValue('currentGoldSentTotal'));
-				var recipient_text = 'Send ' + FSH.System.getValue('goldAmount') + ' gold to ' + FSH.System.getValue('goldRecipient') +
-					'. Current gold sent total is ' + currentGoldSentTotal;
-				buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-					'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + FSH.System.imageServer +
-					'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
-			}
-			if (buttonRow && FSH.System.getValue('sendGoldonWorld')){
-				//document.getElementById('Helper:PortalToStart').addEventListener('click', FSH.Helper.portalToStartArea, true);
-				document.getElementById('Helper:SendGold').addEventListener('click', FSH.Helper.sendGoldToPlayer, true);
-			}*/
-		}
-		if (data.realm && data.realm.name) {
-			var worldName = $('h1#worldName');
-			worldName.html(data.realm.name); //HACK - incase of switchign between master realm and realm they dont replace teh realm name
-			worldName.append(' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + data.realm.id + '" target="_blank">' +
-				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ FSH.System.imageServer + '/temple/1.gif"/></a>');
-			worldName.append(' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + data.realm.name + '&go=Go" target="_blank">' +
-				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>');
-			if (FSH.System.getValue('showSpeakerOnWorld')) {
-				img = FSH.System.getValue('playNewMessageSound') === true ?
-					FSH.Data.soundMuteImage :
-					FSH.Data.soundImage;
-				worldName.append('<a href="#" id="toggleSoundLink">'+img+'</a>');
-				document.getElementById('toggleSoundLink').addEventListener('click',
-				function() {
-				//alert($('a#HelperToggleHuntingMode').html());
-					if(FSH.System.getValue('playNewMessageSound') === false){
-						$('a#toggleSoundLink').html(FSH.Data.soundMuteImage);
-					}else{
-						$('a#toggleSoundLink').html(FSH.Data.soundImage);
-					}
-					FSH.System.setValue('playNewMessageSound',!FSH.System.getValue('playNewMessageSound'));
-				},true);
-			}
-			var huntingMode = FSH.Helper.huntingMode;
-			img = huntingMode === true ? FSH.Data.huntingOnImage : FSH.Data.huntingOffImage;
-			worldName.append(' <a href=# id="HelperToggleHuntingMode">' + img + '</a>');
-			
-			document.getElementById('HelperToggleHuntingMode').addEventListener('click',
-				function() {
-				//alert($('a#HelperToggleHuntingMode').html());
-					if (!FSH.Helper.huntingMode) {
-						$('a#HelperToggleHuntingMode').html(FSH.Data.huntingOnImage);
-					} else {
-						$('a#HelperToggleHuntingMode').html(FSH.Data.huntingOffImage);
-					}
-					FSH.Helper.huntingMode = !FSH.Helper.huntingMode;
-					FSH.System.setValue('huntingMode', FSH.Helper.huntingMode);
-				},true);
-		}
-	},
-
 	injectWorld: function() {
 		//-1 = world page
 		//0 = quest responce
@@ -631,514 +354,17 @@ FSH.Helper = {
 		//17 = login
 		//18 = username not found
 		if ($('#worldPage').length > 0) { // new map
-			FSH.Helper.newMapSubscribes();
+			FSH.newMap.subscribes();
 		} else {
 			//not new map.
 			FSH.Helper.injectOldMap();
 		}
 	},
 
-	injectSendGoldOnWorld: function() {
-		$('#statbar-gold-tooltip-general').append(
-			'<dt class="stat-gold-sendTo">Send To:</dt><dd id="' +
-			'HelperSendTo">' + FSH.System.getValue('goldRecipient') +
-			'</dd>' + 
-			'<dt class="stat-gold-sendAmt">Amount:</dt><dd id="' +
-			'HelperSendAmt">' + FSH.System.getValue('goldAmount')
-				.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>' +
-			'<dt class="stat-gold-sendTo">Send?</dt><dd><input id="' +
-			'HelperSendGold" value="Send!" class="custombutton" ' +
-			'type="submit"><input type="hidden" id="xc" value="' +
-			FSH.System.getValue('goldConfirm') + '"</dd>' + 
-			'<dt class="stat-gold-sendTotal">Total Sent:</dt><dd ' +
-			'id="HelperSendTotal">' +
-			FSH.System.getValue('currentGoldSentTotal').toString()
-				.replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,') + '</dd>');
-		$('input#HelperSendGold').click(FSH.Helper.doSendGold);
-	},
-
-	doSendGold: function() {
-		var sendTo = $('#HelperSendTo').html();
-		var sendAmt = $('#HelperSendAmt').html()
-			.replace(/[^\d]/g,'');
-		var xcNum = $('#xc').val();
-		var sendHref = FSH.System.server + 'index.php?cmd=trade&' +
-			'subcmd=sendgold&xc=' + xcNum + '&target_username=' +
-			sendTo +'&gold_amount='+ sendAmt;
-		$.ajax({
-			url: sendHref,
-			success: function( data ) {
-				//alert($(data).find();
-				var info = FSH.Layout.infoBox(data);
-				if (info === 'You successfully sent gold!' ||
-					info === '') {
-					//currentGoldSentTotal += FSH.System.intValue(callback.amount);
-					//info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
-					FSH.System.setValue('currentGoldSentTotal',
-						parseInt(
-							FSH.System.getValue('currentGoldSentTotal'), 10) +
-						parseInt(FSH.System.getValue('goldAmount'), 10));
-					window.GameData.fetch(387);
-				}
-			}
-		});
-	},
-
-	readyViewCreature: function() { // Hybrid - New Map
-		$('div#creatureEvaluator').html('');
-		$('div#creatureEvaluatorGroup').html('');
-
-		FSH.System.xmlhttp('index.php?cmd=profile',
-			FSH.Helper.getCreaturePlayerData,
-			{	'groupExists': false,
-				'groupAttackValue': 0,
-				'groupDefenseValue': 0,
-				'groupArmorValue': 0,
-				'groupDamageValue': 0,
-				'groupHPValue': 0,
-				'groupEvaluation': false
-			}
-		);
-		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=groups',
-			FSH.Helper.checkIfGroupExists);
-
-		$('div#addRemoveCreatureToDoNotKillList').html('');
-//console.log($('#dialog-viewcreature').find('h2.name').text());
-		if ($('div#addRemoveCreatureToDoNotKillList').length === 0) {
-			var doNotKillElement = '<div id="addRemoveCreatureToDo' +
-				'NotKillList"" class="description" style="cursor:' +
-				'pointer;text-decoration:underline;color:blue;"></div>';
-			$(doNotKillElement).insertAfter($('#dialog-viewcreature')
-				.find('p.description'));
-		}
-		var creatureName = $('#dialog-viewcreature').find('h2.name')
-			.text();
-		$('div#addRemoveCreatureToDoNotKillList')
-			.attr('creatureName',creatureName);
-		var extraText = 'Add to the do not kill list';
-		if (FSH.Helper.doNotKillList.indexOf(creatureName) !== -1) {
-			extraText = 'Remove from do not kill list';}
-		$('div#addRemoveCreatureToDoNotKillList').html(extraText);
-		document.getElementById('addRemoveCreatureToDoNotKillList')
-			.addEventListener('click',
-				FSH.Helper.addRemoveCreatureToDoNotKillList, true);
-	},
-
-	afterUpdateActionList: function() {
-		// color the critters in the do no kill list blue
-		$('ul#actionList div.header').each(function() {
-			if (FSH.Helper.doNotKillList.indexOf($(this).find('a.icon')
-				.data('name')) !== -1) {
-				$(this).css('color','blue');
-			}
-		});
-		// then intercept the action call 
-		var gameData = window.GameData;
-		var hcs = window.HCS;
-		var oldDoAction = gameData.doAction;
-		gameData.doAction = function(actionCode, fetchFlags, data) {
-			if (actionCode === hcs.DEFINES.ACTION.CREATURE_COMBAT) {
-				// Do custom stuff e.g. do not kill list
-				var creatureIcon = $('ul#actionList div.header')
-					.eq(data.passback).find('a.icon');
-				if (FSH.Helper.doNotKillList.indexOf(
-						creatureIcon.data('name')) !== -1) {
-					creatureIcon.removeClass('loading');
-					return;
-				}
-			}
-			// Call standard action
-			oldDoAction(actionCode, fetchFlags, data);
-		}; 
-	},
-
-	dataEventsPlayerBuffs: function(e, data) {
-		// check shield imp is still active
-		var shieldImpVal = 0;
-		var ddVal=0;
-		var l = data.b.length;
-		for(var i = 0; i < l; i += 1) {
-			var buff = data.b[i];
-			if (buff.id === 55) {
-				shieldImpVal = buff.stack;
-			} else if (buff.id === 50) {
-				ddVal = buff.level;
-			}
-			if (ddVal > 0 && shieldImpVal > 0) {break;}
-		}
-
-		//~ if(ddVal>0){
-			var imp = $('#actionlist-shield-imp');
-			if(shieldImpVal === 0){
-				imp.css('background-color','red');
-			}else if(shieldImpVal===2){
-				imp.css('background-color','yellow');
-			}else if(shieldImpVal===1){
-				imp.css('background-color','orange');
-			}else{
-				imp.css('background-color','inherit');
-			}
-		//~ }
-	},
-
-	combatResponse: function(e, data) {
-		var l;
-		var i;
-		// If bad response do nothing.
-		if (!FSH.Helper.keepLogs || data.response.response !== 0) {return;}
-		var combatData = {};
-		combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
-		//delete some values that are not needed to trim down size of log.
-		delete combatData.combat.attacker.img_url;
-		delete combatData.combat.defender.img_url;
-		delete combatData.combat.is_conflict;
-		delete combatData.combat.is_bounty;
-		delete combatData.combat.pvp_rating_change;
-		delete combatData.combat.pvp_prestige_gain;
-		if (combatData.combat.inventory_id) {
-			combatData.combat.drop = combatData.combat.item.id;
-		}
-		delete combatData.combat.inventory_id;
-		delete combatData.combat.item;
-
-		combatData.player={};
-		combatData.player.buffs={};
-		combatData.player.enhancements={};
-		l = data.player.buffs.length;
-		for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
-		{//54 = ca, 26 = doubler
-			var buff = data.player.buffs[i];
-			if(buff.id === 54 || buff.id === 26)
-			{
-				combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
-			}
-		}
-		var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-		if (data.player.enhancements)
-		{
-			l = data.player.enhancements.length;
-			for(i=0; i<l; i += 1) //loop through enhancements
-			{//54 = ca, 26 = doubler
-				var enh = data.player.enhancements[i];
-				if (notSave.indexOf('|'+enh.name+'|')===-1){
-					combatData.player.enhancements[enh.name]=enh.value;
-				}
-			}
-		}
-		//combatData.player.enhancements = data.player.enhancements;
-		//combatData.player.buffs = data.player.buffs;
-		var now = new Date();
-		combatData.time = FSH.System.formatDateTime(now);
-		FSH.Helper.appendSavedLog(',' + JSON.stringify(combatData));
-	},
-
-	newMapSubscribes: function() {
-		// subscribe to view creature events on the new map.
-		//current send total
-		//send to
-		//send amount
-		//deposit?
-		if (FSH.System.getValue('sendGoldonWorld')) {
-			FSH.Helper.injectSendGoldOnWorld();
-		}
-		//Subscribes:
-		FSH.Helper.doNotKillList = FSH.System.getValue('doNotKillList');
-		$.subscribe('ready.view-creature', FSH.Helper.readyViewCreature);
-
-		// add do-not-kill list functionality
-		$.subscribe('after-update.actionlist',
-			FSH.Helper.afterUpdateActionList);
-
-		$.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-			FSH.Helper.dataEventsPlayerBuffs);
-
-		$.subscribe('keydown.controls', function(e, key){
-			switch(key)
-			{
-				case 'ACT_REPAIR': window.GameData.fetch(387);
-				break;
-			}
-		});
-
-		FSH.Helper.keepLogs = FSH.System.getValue('keepLogs');
-		$.subscribe('2-success.action-response', FSH.Helper.combatResponse);
-		//on world
-
-		if (window.initialGameData) {//HCS initial data
-			setTimeout(function(){
-				FSH.Helper.injectWorldNewMap(window.initialGameData);
-			}, 400);
-		}
-		$.subscribe('-1-success.action-response 5-success.action-response',
-			function(e, data) { //change of information
-				setTimeout(function() {
-					FSH.Helper.injectWorldNewMap(data);
-				}, 400);
-			}
-		);
-
-		//somewhere near here will be multi buy on shop
-		//$.subscribe('prompt.worldDialogShop', function(e, data){
-			//self._createShop(self.shop.items);
-		//	$('span[class="price"]').after('<span class="numTake">test</span>');
-		//});
-
-		//document.getElementById('Helper:SendGold').addEventListener('click', FSH.Helper.sendGoldToPlayer, true);
-	},
-
 	injectOldMap: function() {
-		try {
-			var curTile = FSH.System.findNode('//img[contains(@title, "You are here")]/ancestor::td[@width="40" and @height="40"]').getAttribute('background');
-			if (FSH.System.getValue('currentTile') !== curTile) {
-				FSH.System.setValue('currentTile', curTile);
-			}
-		} catch (err) {
-			//just eat it and move on
-		}
-		var currentLocation = $('h3#world-realm-name');
-		if (currentLocation.length > 0) {
-			var locationRE = /\((\d+), (\d+)\)/.exec(currentLocation.text());
-			FSH.Helper.xLocation = parseInt(locationRE[1],10);
-			FSH.Helper.yLocation = parseInt(locationRE[2],10);
-		}
-
-		FSH.Helper.mapThis();
-		FSH.Helper.showMap(false);
-
-		var buttonRow = FSH.System.findNode('//tr[td/a/img[@title="Open Realm Map"]]');
-
-		if (buttonRow && FSH.System.getValue('sendGoldonWorld')){
-			var currentGoldSentTotal = FSH.System.addCommas(FSH.System.getValue('currentGoldSentTotal'));
-			var recipient_text = 'Send ' + FSH.System.getValue('goldAmount') + ' gold to ' + FSH.System.getValue('goldRecipient') +
-				'. Current gold sent total is ' + currentGoldSentTotal;
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:SendGold" src="' + FSH.System.imageServer +
-				'/skin/gold_button.gif" title= "' + recipient_text + '" border="1" />';
-		}
-
-		if (buttonRow && !FSH.System.getValue('hideKrulPortal')) {
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:PortalToStart" src="' + FSH.System.imageServer +
-				'/temple/3.gif" title="Instant port to Krul Island" border="1" /></span></td>';
-		}
-
-		var footprints = FSH.System.getValue('footprints');
-
-		if (buttonRow) {
-			buttonRow.innerHTML += '<td valign="top" width="5"></td>' +
-				'<td valign="top"><img style="cursor:pointer" id="Helper:ToggleFootprints" src="' + FSH.System.imageServer +
-				'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif" title="Toggle Footprints" border="0"></td>';
-			document.getElementById('Helper:ToggleFootprints').addEventListener('click', FSH.Helper.toggleFootprints, true);
-		}
-
-		if (buttonRow && FSH.System.getValue('sendGoldonWorld')){
-			//document.getElementById('Helper:PortalToStart').addEventListener('click', FSH.Helper.portalToStartArea, true);
-			document.getElementById('Helper:SendGold').addEventListener('click', FSH.Helper.sendGoldToPlayer, true);
-		}
-		if (buttonRow && !FSH.System.getValue('hideKrulPortal')) {
-			document.getElementById('Helper:PortalToStart').addEventListener('click', FSH.Helper.portalToStartArea, true);
-		}
-
-		// One may ask why the separation of creating the button and the event handling code.
-		// Well, obviously (so obvious it took me 3 hours to figure out), when you change the HTML of
-		// a region, all attached events are destroyed (because the original elements are also destroyed)
-		
-		// PH 20150110 Only in Chrome. FF is apparently different!
-		// It's important because we lose the mouseover events of the built-in buttons.
-		// It's because you used innerHTML instead of append
-
 		FSH.Helper.checkBuffs();
 		FSH.Helper.prepareCheckMonster();
 		FSH.Helper.prepareCombatLog();
-		var realmId;
-		var mapNameText;
-		var i;
-		var mapName = FSH.System.findNode('//h3[@id="world-realm-name"]');
-		if ($('h3#world-realm-name').data('realm')) {
-			realmId = $('h3#world-realm-name').data('realm').id.trim();
-			mapNameText = $('h3#world-realm-name').data('realm').name.trim();
-		}
-		//Checking if there are quests on current map - Already done by HCS in new map
-		if (FSH.System.getValue('checkForQuestsInWorld') === true) {
-			if (mapName && mapName.textContent !== null) {
-				if (!mapNameText) {
-					mapNameText = mapName.textContent.trim();}
-				if (FSH.System.getValue('lastWorld') !== mapNameText ||
-					FSH.System.getValue('questsNotStarted') === true ||
-					FSH.System.getValue('questsNotComplete') === true) {
-					FSH.System.setValue('lastWorld', mapNameText);
-					var insertToHere = FSH.System.findNode('//html/body/table/tbody/tr[3]/td[2]/table/tbody/tr[5]/td[2]/table/tbody/tr[3]/td/table/tbody/tr[4]/td');
-					FSH.System.xmlhttp('index.php?cmd=questbook&mode=2&letter=*', FSH.Helper.checkForNotStartedQuests, {'insertHere' : insertToHere});
-					FSH.System.xmlhttp('index.php?cmd=questbook&mode=0&letter=*', FSH.Helper.checkForNotCompletedQuests,{'insertHere' : insertToHere});
-				}
-			}
-		}
-		//quest tracker - will be added by HCS in new Map
-		var questBeingTracked = FSH.System.getValue('questBeingTracked').split(';');
-		if (questBeingTracked.length > 0 &&
-			questBeingTracked[0].trim().length > 0) {
-			var injectHere = FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
-			if (!injectHere) {return;}
-			var replacementText = '<td background="' + FSH.System.imageServer + '/skin/realm_right_bg.jpg">';
-			replacementText += '<table width="280" cellpadding="1" style="margin-left:28px; margin-right:28px; ' +
-				'font-size:medium; border-spacing: 1px; border-collapse: collapse;">';
-			replacementText += '<tr><td colspan="2" height="10"></td>';
-			for (i = 0; i < questBeingTracked.length; i += 1) {
-
-				replacementText += '<tr><td style="font-size:small; color:black"><a id="qiLink' + i + '" href=' + questBeingTracked[i] + '></a>&nbsp;';
-				replacementText += '<input id="dontTrackThisQuest' + i + '" data="' + questBeingTracked[i] + '" type="button" value="Stop Tracking" title="Stops tracking quest progress." class="custombutton"><br>';
-				replacementText += '<span findme="questinfo' + i + '"></span></td></tr>';
-				if (i !== questBeingTracked.length - 1) {
-					replacementText += '<tr><td height="10" colspan="2"/></tr>' +
-					'<tr><td height="10" colspan="2"/></tr>';
-				}
-			}
-
-			replacementText += '</table>';
-			replacementText += '</td>';
-
-			var newSpan = document.createElement('SPAN');
-			newSpan.innerHTML=replacementText;
-			injectHere.appendChild(newSpan);
-
-			for (i = 0; i < questBeingTracked.length; i += 1) {
-				FSH.System.xmlhttp(questBeingTracked[i], FSH.Helper.getQuestInfo, {'data' : i});
-			}
-		}
-
-		var imgSource;
-		var altText;
-		if (mapName && mapNameText) {
-			mapName.innerHTML += ' <a href="http://guide.fallensword.com/index.php?cmd=realms&subcmd=view&realm_id=' + realmId + '" target="_blank">' +
-				'<img border=0 title="Search map in Ultimate FSG" width=10 height=10 src="'+ FSH.System.imageServer + '/temple/1.gif"/></a>';
-			mapName.innerHTML += ' <a href="http://wiki.fallensword.com/index.php/Special:Search?search=' + mapNameText + '&go=Go" target="_blank">' +
-				'<img border=0 title="Search map in Wiki" width=10 height=10 src="/favicon.ico"/></a>';
-
-			var huntingMode = FSH.Helper.huntingMode;
-			imgSource = huntingMode === true ? FSH.Data.huntingOnImage : FSH.Data.huntingOffImage;
-			mapName.innerHTML += ' <a href=# id="Helper:ToggleHuntingMode">' + imgSource + '</a>';
-
-			if (FSH.System.getValue('showSpeakerOnWorld')) {
-				if (FSH.System.getValue('playNewMessageSound'))
-				{
-					mapName.innerHTML += '<a href="#" id="toggleSoundLink">' + FSH.Data.soundMuteImage + '</a>';
-				} else {
-					mapName.innerHTML += '<a href="#" id="toggleSoundLink">' + FSH.Data.soundImage + '</a>';
-				}
-				document.getElementById('toggleSoundLink').addEventListener('click', FSH.Helper.toggleSound, true);
-
-			}
-			if (FSH.System.getValue('showFastWalkIconOnWorld')) {
-				var enableFastWalk = FSH.System.getValue('enableFastWalk');
-				imgSource = enableFastWalk === true ? FSH.Data.runIcon : FSH.Data.stopIcon;
-				altText = enableFastWalk === true ? 'FastWalk mode is ON' : 'FastWalk mode is OFF';
-				mapName.innerHTML += ' <a href=# id="Helper:ToggleFastWalkMode"><img title="' + altText + '" src="' + imgSource + '" border=0 width=10 height=10/></a>';
-				document.getElementById('Helper:ToggleFastWalkMode').addEventListener('click',
-					function() {
-						FSH.System.setValue('enableFastWalk',
-							!FSH.System.getValue('enableFastWalk'));
-						location.reload();
-					},true);
-			}
-			document.getElementById('Helper:ToggleHuntingMode').addEventListener('click',
-				function() {
-					FSH.System.setValue('huntingMode',
-						!FSH.Helper.huntingMode);
-					location.reload();
-				},true);
-
-		}
-		if (FSH.System.getValue('quickKill')) {
-			FSH.Helper.oldMapDoNotKill();
-		}
-	},
-
-	oldMapDoNotKill: function() {
-		var doNotKillList = FSH.System.getValue('doNotKillList');
-		var doNotKillListAry = doNotKillList.split(',');
-		if (doNotKillListAry.length > 0) {
-			for (var i=1; i<9; i += 1) {
-				var monster = FSH.System.findNode('//a[@id="aLink' + i + '"]');
-				if (monster) {
-					var monsterName = monster.parentNode.parentNode.firstChild.textContent.trim();
-					for (var j=0; j<doNotKillListAry.length; j += 1) {
-						var doNotKillName = doNotKillListAry[j].trim();
-						if (monsterName === doNotKillName){
-							var monsterNameCell = monster.parentNode.parentNode;
-							monsterNameCell.innerHTML = '<span style="color:blue;">' + monsterNameCell.innerHTML + '</span>';
-							break;
-						}
-					}
-				} else { break; }
-			}
-		}
-	},
-
-	injectWorldMap: function() {
-		var playerTile=FSH.System.findNode('//img/ancestor::td[@background]');
-		if (playerTile) {
-			FSH.Helper.xLocation = playerTile.cellIndex;
-			FSH.Helper.yLocation = playerTile.parentNode.rowIndex;
-		}
-		FSH.Helper.showMap(true);
-	},
-
-	sendGoldToPlayer: function(){
-//		var injectHere = FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
-//		if (!injectHere) {return;}
-		var recipient = FSH.System.getValue('goldRecipient');
-		var amount = FSH.System.getValue('goldAmount');
-		//FSH.System.xmlhttp('index.php?cmd=trade');
-		var xcNum = FSH.System.getValue('goldConfirm');
-		if (xcNum === '') {
-			alert('You have to visit the trade page once to use the send gold functionality');
-			return;
-		}
-		var url = 'index.php?cmd=trade&subcmd=sendgold&xc=' + xcNum +
-			'&target_username=' + recipient +'&gold_amount='+ amount;
-		FSH.System.xmlhttp(url, FSH.Helper.goldToPlayerSent,
-			{'amount': amount, 'recipient': recipient} );
-	},
-
-	goldToPlayerSent: function(responseText, callback) {
-		var info = FSH.Layout.infoBox(responseText);
-		if (info==='' || info==='You successfully sent gold!') {
-			var currentGoldSentTotal = FSH.System.getValue('currentGoldSentTotal')*1;
-			currentGoldSentTotal += FSH.System.intValue(callback.amount);
-			info = 'You successfully sent ' + callback.amount + ' gold to ' + callback.recipient + '! Current total sent is '+currentGoldSentTotal+' gold.';
-			FSH.System.setValue('currentGoldSentTotal', currentGoldSentTotal);
-		}
-		var injectHere = FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
-		if (!injectHere) {return;}
-		var newSpan = document.createElement('SPAN');
-		injectHere.appendChild(newSpan);
-		newSpan.setAttribute('background', FSH.System.imageServer + '/skin/realm_right_bg.jpg');
-		newSpan.innerHTML='<div style="margin-left:28px; margin-right:28px; color:navy; font-size:xx-small;">' + info + '</div>';
-	},
-
-	toggleFootprints: function() {
-		var levelName;
-		var footprints = FSH.System.getValue('footprints');
-		if (footprints === undefined) {footprints=false;}
-		footprints = !footprints;
-		FSH.System.setValue('footprints', footprints);
-
-		if (!footprints) { // clear footprints
-			var theMap = FSH.System.getValueJSON('map');
-			var realm = FSH.System.findNode('//h3[@id="world-realm-name"]');
-			if ($('h3#world-realm-name').data('realm')) {
-				// var realmId = $('h3#world-realm-name').data('realm').id.trim();
-				levelName = $('h3#world-realm-name').data('realm').name.trim();
-			}
-			if (!levelName) {levelName=realm.innerHTML;}
-			FSH.Helper.levelName = levelName;
-			theMap.levels[FSH.Helper.levelName] = {};
-			FSH.System.setValueJSON('map', theMap);
-		}
-
-		document.getElementById('Helper:ToggleFootprints').src =
-			FSH.System.imageServer +
-			'/skin/' + (footprints?'quest_complete':'quest_incomplete') + '.gif';
 	},
 
 	prepareCombatLog: function() {
@@ -1162,62 +388,8 @@ FSH.Helper = {
 		is.textAlign = 'justify';
 	},
 
-	getMonster: function(index) {
-		return FSH.System.findNode('//a[@id="aLink' + index + '"]');
-	},
-
-	killSingleMonster: function(monsterNumber) {
-		if (!FSH.System.getValue('quickKill')) {return;}
-		var kills=0;
-		var monster = FSH.Helper.getMonster(monsterNumber);
-
-		var doNotKillList = FSH.System.getValue('doNotKillList');
-		var doNotKillListAry = doNotKillList.split(',');
-
-		if (monster) {
-			var monsterName = monster.parentNode.parentNode.textContent.trim();
-			var injectHere = monster.parentNode.parentNode;
-			var monsterFound = false;
-			for (var j=0; j<doNotKillListAry.length; j += 1) {
-				var doNotKillName = doNotKillListAry[j].trim();
-				if (monsterName === doNotKillName){
-					injectHere.innerHTML = '<nobr><span style="color:blue; font-size:x-small;">On do not kill list&nbsp;</span></nobr>';
-					monsterFound = true;
-					break;
-				}
-			}
-			if (!monsterFound) {
-				kills+=1;
-				FSH.System.xmlhttp(monster.getAttribute('href'), FSH.Helper.killedMonster, {'node': monster, 'index': monsterNumber});
-			}
-		}
-	},
-
 	prepareCheckMonster: function() {
-		FSH.Helper.colorMonsters();
 		FSH.Helper.getMonsterInfo();
-	},
-
-	colorMonsters: function() {
-		if (!FSH.System.getValue('enableCreatureColoring')) {return;}
-		var monsters = FSH.System.findNodes('//a[contains(@href,"cmd=combat") and not(contains(@href,"max_turns="))]');
-		if (!monsters) {return;}
-		for (var i=0; i<monsters.length; i += 1) {
-			var monster = monsters[i];
-			if (monster) {
-				// add monster color based on elite types
-				var monsterText = monster.parentNode.parentNode.parentNode.cells[1];
-				if (monsterText.textContent.match(/\(Champion\)/i)) {
-					monsterText.style.color = 'green';
-				}
-				if (monsterText.textContent.match(/\(Elite\)/i)) {
-					monsterText.style.color = 'yellow';
-				}
-				if (monsterText.textContent.match(/\(Super Elite\)/i)) {
-					monsterText.style.color = 'red';
-				}
-			}
-		}
 	},
 
 	getMonsterInfo: function() {
@@ -1225,7 +397,7 @@ FSH.Helper = {
 		var monsters = FSH.System.findNodes('//a[contains(@href,"cmd=world&' +
 			'subcmd=viewcreature&creature_id=")]');
 		if (!monsters) {return;}
-		for (var i=0; i<monsters.length; i += 1) {
+		for (var i = 0; i < monsters.length; i += 1) {
 			var monster = monsters[i];
 			if (monster) {
 				if (FSH.System.getValue('showMonsterLog')) {
@@ -1241,30 +413,28 @@ FSH.Helper = {
 	},
 
 	showTipCreatureInfo: function(evt) {
-		var monster=evt.target.parentNode;
-		if (monster.getAttribute('mouseovertext') !== undefined) {
-			evt.target.removeEventListener('mouseover', FSH.Helper.showTipCreatureInfo, true);
-			return;
-		}
-		FSH.System.xmlhttp(monster.getAttribute('href'), FSH.Helper.checkedMonster, {'monster':monster,'showTip':true});
+		var monster = evt.target.parentNode;
+			monster.removeEventListener('mouseover', FSH.Helper.showTipCreatureInfo, true);
+		FSH.System.xmlhttp(monster.getAttribute('href'),
+			FSH.Helper.checkedMonster, {'monster':monster,'showTip':true});
 	},
 
 	checkedMonster: function(responseText, callback) {
-		var creatureInfo=FSH.System.createDocument(responseText);
+		var creatureInfo = FSH.System.createDocument(responseText);
 		var statsNode = FSH.System.findNode('//table[@width="400"]', creatureInfo);
 		if (!statsNode) {return;} // FF2 error fix
 		var showMonsterLog = FSH.System.getValue('showMonsterLog');
 		//store the stats
-		var classNode = statsNode.rows[1].cells[1];
-		var levelNode = statsNode.rows[1].cells[3];
-		var attackNode = statsNode.rows[2].cells[1];
-		var defenseNode = statsNode.rows[2].cells[3];
-		var armorNode = statsNode.rows[3].cells[1];
-		var damageNode = statsNode.rows[3].cells[3];
+		var classNode     = statsNode.rows[1].cells[1];
+		var levelNode     = statsNode.rows[1].cells[3];
+		var attackNode    = statsNode.rows[2].cells[1];
+		var defenseNode   = statsNode.rows[2].cells[3];
+		var armorNode     = statsNode.rows[3].cells[1];
+		var damageNode    = statsNode.rows[3].cells[3];
 		var hitpointsNode = statsNode.rows[4].cells[1];
-		var goldNode = statsNode.rows[4].cells[3];
-		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,''),10);
-		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,''),10);
+		var goldNode      = statsNode.rows[4].cells[3];
+		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,''), 10);
+		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,''), 10);
 		var combatEvaluatorBias = FSH.System.getValue('combatEvaluatorBias');
 		// var attackVariable = 1.1053
 		var generalVariable = 1.1053;
@@ -1279,12 +449,13 @@ FSH.Helper = {
 			generalVariable = 1.1053;
 			hpVariable = 1;
 		}
-		var oneHitNumber = Math.ceil(hitpoints*hpVariable+armorNumber*generalVariable);
+		var oneHitNumber = Math.ceil(hitpoints * hpVariable + armorNumber *
+			generalVariable);
 
 		var hideRestOfRows = false;
 		var collectEnchantments = true;
 		var enchantmentsList = [];
-		for (var i=0; i<statsNode.rows.length; i += 1) {
+		for (var i = 0; i < statsNode.rows.length; i += 1) {
 			var enchantment = {};
 			var firstCell = statsNode.rows[i].cells[0];
 			var thirdCell = statsNode.rows[i].cells[2];
@@ -1313,12 +484,12 @@ FSH.Helper = {
 			if (showMonsterLog && i >= 7 && collectEnchantments) { //first enchantment row
 				var ThisRowFirstCell = statsNode.rows[i].cells[0];
 				if (ThisRowFirstCell.textContent !== '[no enhancements]') {
-					var SecondNextRowFirstCell = statsNode.rows[i+2].cells[0];
+					var SecondNextRowFirstCell = statsNode.rows[i + 2].cells[0];
 					if (SecondNextRowFirstCell.textContent === 'Description') {
 						collectEnchantments = false;
 					}
 					enchantment.name = statsNode.rows[i].cells[0].textContent;
-					enchantment.value = statsNode.rows[i].cells[1].textContent*1;
+					enchantment.value = statsNode.rows[i].cells[1].textContent * 1;
 					enchantmentsList.push(enchantment);
 				} else {
 					collectEnchantments = false;
@@ -1326,15 +497,19 @@ FSH.Helper = {
 			}
 		}
 
-		var imageTable = FSH.System.findNode('//table[tbody/tr/td/img[contains(@src, "/creatures/")]]', creatureInfo);
+		var imageTable = FSH.System.findNode(
+			'//table[tbody/tr/td/img[contains(@src, "/creatures/")]]', creatureInfo);
 		var imageNode = imageTable.rows[0].cells[0].firstChild;
-		var nameNode = imageTable.rows[1].cells[0].firstChild;
+		var nameNode  = imageTable.rows[1].cells[0].firstChild;
 		var imageNodeSRC = imageNode.src.replace(/.jpg(.*)/,'.jpg');
 
 		if (showMonsterLog) {
-			FSH.monstorLog.pushMonsterInfo({'key0':nameNode.textContent, 'key1':imageNodeSRC, 'key2':classNode.textContent, 'key3':levelNode.textContent,
-				'key4':attackNode.textContent, 'key5':defenseNode.textContent, 'key6':armorNode.textContent, 'key7':damageNode.textContent,
-				'key8':hitpointsNode.textContent, 'key9':goldNode.textContent, 'key10':enchantmentsList});
+			FSH.monstorLog.pushMonsterInfo({'key0':nameNode.textContent,
+				'key1':imageNodeSRC, 'key2':classNode.textContent,
+				'key3':levelNode.textContent, 'key4':attackNode.textContent,
+				'key5':defenseNode.textContent, 'key6':armorNode.textContent,
+				'key7':damageNode.textContent, 'key8':hitpointsNode.textContent,
+				'key9':goldNode.textContent, 'key10':enchantmentsList});
 		}
 
 		levelNode.innerHTML += ' (your level:<span style="color:yellow">' +
@@ -1357,14 +532,10 @@ FSH.Helper = {
 			'</span>)' +
 			'(1H: <span style="color:red">' + oneHitNumber + '</span>)';
 
-		callback.monster.setAttribute('mouseOverText', '<table>' +
+		$('img', callback.monster).qtip('api').set('content.text', '<table>' +
 			'<tr><td valign=top>' + imageNode.parentNode.innerHTML + '</td>' +
 			'<td rowspan=2>' + statsNode.parentNode.innerHTML + '</td></tr>' +
 			'<tr><td align=center valign=top>' + nameNode.innerHTML + '</td></tr></table>');
-		//fix me
-		callback.monster.setAttribute('mouseOverWidth', '600');
-		callback.monster.addEventListener('mouseover', FSH.Helper.clientTip, true);
-		if (callback.showTip) {FSH.Helper.clientTip({'target':callback.monster});}
 	},
 
 	backpackUpdater: function(count){
@@ -1524,227 +695,6 @@ FSH.Helper = {
 		}
 	},
 
-	moveMe: function(dx, dy) {
-		var xCoord;
-		var yCoord;
-		var pos=FSH.Helper.position();
-		var enableFastWalk = FSH.System.getValue('enableFastWalk');
-		if (pos) {
-			if (pos.type === 'normal') {
-				//if fast walk is enabled then use the stored location, otherwise look it up
-				xCoord = enableFastWalk?FSH.Helper.xLocation:pos.X;
-				yCoord = enableFastWalk?FSH.Helper.yLocation:pos.Y;
-				location.href = 'index.php?cmd=world&subcmd=move&x=' + (xCoord+dx) + '&y=' + (yCoord+dy);
-				FSH.Helper.xLocation+=dx;
-				FSH.Helper.yLocation+=dy;
-			}
-			if (pos.type === 'worldmap') {
-				//if fast walk is enabled then use the stored location, otherwise look it up
-				xCoord = enableFastWalk?FSH.Helper.xLocation:pos.X;
-				yCoord = enableFastWalk?FSH.Helper.yLocation:pos.Y;
-				FSH.System.xmlhttp('index.php?cmd=world&subcmd=move&x=' +
-					(xCoord+dx) + '&y=' + (yCoord+dy), function() {
-						location.href = FSH.System.server +
-							'index.php?cmd=world&subcmd=map';});
-				FSH.Helper.xLocation+=dx;
-				FSH.Helper.yLocation+=dy;
-
-			}
-		}
-	},
-
-	killMonsterAt: function(index) {
-		var linkObj = FSH.Helper.getMonster(index);
-		if (linkObj!==null) {
-			if (FSH.System.getValue('quickKill')) {
-				FSH.Helper.killSingleMonster(index);
-			}
-			else {
-				location.href = linkObj.getAttribute('href');
-			}
-		}
-	},
-
-	keyPress: function(evt) {
-		var r, s;
-		if (evt.target.tagName!=='HTML' && evt.target.tagName!=='BODY') {return;}
-
-		// ignore control, alt and meta keys (I think meta is the command key in Macintoshes)
-		if (evt.ctrlKey) {return;}
-		if (evt.metaKey) {return;}
-		if (evt.altKey) {return;}
-
-		r = evt.charCode;
-		s = evt.keyCode;
-
-		switch (r) {
-		case 113: // nw [q]
-			FSH.Helper.moveMe(-1,-1);
-			break;
-		case 119: // n [w]
-			FSH.Helper.moveMe(0,-1);
-			break;
-		case 101: // ne [e]
-			FSH.Helper.moveMe(1,-1);
-			break;
-		case 97: // w [a]
-			FSH.Helper.moveMe(-1,0);
-			break;
-		case 100: // e [d]
-			FSH.Helper.moveMe(1,0);
-			break;
-		case 122: // sw [z]
-			FSH.Helper.moveMe(-1,1);
-			break;
-		case 120: // s [x]
-			FSH.Helper.moveMe(0,1);
-			break;
-		case 99: // se [c]
-			FSH.Helper.moveMe(1,1);
-			break;
-		case 114: // repair [r]
-			//do not use repair link for new map
-			if ($('#worldPage').length === 0) {
-				location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
-			}
-			break;
-		case 71: // create group [G]
-			location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
-			break;
-		case 76: // Log Page [L]
-			location.href = 'index.php?cmd=log';
-			break;
-		case 103: // go to guild [g]
-			location.href = 'index.php?cmd=guild&subcmd=manage';
-			break;
-		case 106: // join all group [j]
-			if (!FSH.System.getValue('enableMaxGroupSizeToJoin')) {
-				location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
-			} else {
-				location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
-			}
-			break;
-		case 49: // [1]
-		case 50: // [2]
-		case 51: // [3]
-		case 52: // [4]
-		case 53: // [5]
-		case 54: // [6]
-		case 55: // [7]
-		case 56: // keyed combat [8]
-			FSH.Helper.killMonsterAt(r-48);
-			break;
-		case 98: // backpack [b]
-			//~ location.href = 'index.php?cmd=profile&subcmd=dropitems&fromworld=1';
-			location.href = 'index.php?cmd=profile&subcmd=dropitems';
-			break;
-		case 115: // use stairs [s]
-			FSH.Helper.useStairs(); // this is suspect, is it old map only?
-			break;
-		case 116: // quick buy [t]
-			FSH.Helper.quickBuyItem();
-			break;
-		case 118: // fast wear manager [v]
-			location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
-			break;
-		case 121: // fast send gold [y]
-			FSH.Helper.sendGoldToPlayer();
-			break;
-		case 19: // quick buffs []
-			// openWindow('', 'fsQuickBuff', 618, 800, ',scrollbars');
-			FSH.System.openInTab(FSH.System.server + 'index.php?cmd=quickbuff');
-			break;
-		case 48: // return to world [0]
-			//do not use if using new map
-			if ($('#worldPage').length === 0) {
-				location.href = 'index.php?cmd=world';
-			}
-			break;
-		case 109: // map [m]
-			// window.open('index.php?cmd=world&subcmd=map', 'fsMap');
-			// openWindow('index.php?cmd=world&subcmd=map', 'fsMap', 650, 650, ',scrollbars,resizable');
-			FSH.System.openInTab(FSH.System.server + 'index.php?cmd=world&subcmd=map');
-			break;
-		case 112: // profile [p]
-			location.href = 'index.php?cmd=profile';
-			break;
-		case 110: // mini map [n]
-			FSH.Helper.displayMiniMap();
-			break;
-		case 78: // auto move in mini map [N]
-			FSH.Helper.autoMoveMiniMap();
-			break;
-		case 62: // move to next page [>]
-		case 60: // move to prev page [<]
-			FSH.Helper.movePage({62:'>', 60:'<'}[r]);
-			break;
-		case 33: // Shift+1
-		case 64: // Shift+2
-		case 34: // Shift+2 -- for UK keyboards, I think
-		case 35: // Shift+3
-		case 36: // Shift+4
-		case 37: // Shift+5
-		case 94: // Shift+6
-		case 38: // Shift+7
-		case 42: // Shift+8
-		case 40: // Shift+9
-			var keyMap = {'key33':1, 'key64':2, 'key34':2, 'key35':3, 'key36':4, 'key37':5,
-				'key94':6, 'key38':7, 'key42':8, 'key40':9};
-			// I'm using "key??" because I don't feel comfortable of naming properties with integers
-			var itemIndex = keyMap['key' + r];
-			FSH.System.xmlhttp('index.php?cmd=profile', FSH.Helper.changeCombatSet, itemIndex);
-			break;
-		case 41: // Shift+0
-			// TODO: ask for a number, check isnumeric, then call changeCombatSet with that index.
-			break;
-		case 0: // special key
-			switch (s) {
-			case 37: // w
-				FSH.Helper.moveMe(-1,0);
-				evt.preventDefault();
-				evt.stopPropagation();
-				break;
-			case 38: // n
-				FSH.Helper.moveMe(0,-1);
-				evt.preventDefault();
-				evt.stopPropagation();
-				break;
-			case 39: // e
-				FSH.Helper.moveMe(1,0);
-				evt.preventDefault();
-				evt.stopPropagation();
-				break;
-			case 40: // s
-				FSH.Helper.moveMe(0,1);
-				evt.preventDefault();
-				evt.stopPropagation();
-				break;
-			case 33:
-				if (FSH.System.findNode('//div[@id="reportsLog"]')) {
-					FSH.Helper.scrollUpCombatLog();
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
-				break;
-			case 34:
-				if (FSH.System.findNode('//div[@id="reportsLog"]')) {
-					FSH.Helper.scrollDownCombatLog();
-					evt.preventDefault();
-					evt.stopPropagation();
-				}
-				break;
-			default:
-				// console.log('special key: ' +s);
-				break;
-			}
-			break;
-		default:
-			// console.log('standard key: ' +r);
-			break;
-		}
-		//return true;
-	},
-
 	changeCombatSet: function(responseText, itemIndex) {
 		var doc = FSH.System.createDocument(responseText);
 
@@ -1772,7 +722,6 @@ FSH.Helper = {
 
 	getKillStreak: function(responseText) {
 		var doc=FSH.System.createDocument(responseText);
-		//Kill&nbsp;Streak:&nbsp;
 		var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
 		var playerKillStreakValue;
 		if (killStreakLocation.length > 0) {
@@ -1792,49 +741,6 @@ FSH.Helper = {
 		var deathDealerPercentageElement = FSH.System.findNode('//span[@findme="damagebonus"]');
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
 		FSH.System.setValue('lastDeathDealerPercentage', deathDealerPercentage);
-	},
-
-	injectCreature: function() { // Legacy - Old Map
-		FSH.System.xmlhttp('index.php?cmd=profile',
-			FSH.Helper.getCreaturePlayerData,
-			{	'groupExists': false,
-				'groupAttackValue': 0,
-				'groupDefenseValue': 0,
-				'groupArmorValue': 0,
-				'groupDamageValue': 0,
-				'groupHPValue': 0,
-				'groupEvaluation': false
-			}
-		);
-		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=groups',
-			FSH.Helper.checkIfGroupExists);
-
-		var creatureName =
-			FSH.System.findNode('//td[@align="center"]/font[@size=3]/b');
-		var doNotKillList = FSH.System.getValue('doNotKillList');
-		if (creatureName) {
-			creatureName.innerHTML += ' <a href="http://guide.fallensword.com/' +
-				'index.php?cmd=creatures&search_name=' + creatureName.textContent +
-				'&search_level_min=&search_level_max=&search_class=-1" ' +
-				'target="_blank">' +
-				'<img border=0 title="Search creature in Ultimate FSG" width=10 ' +
-				'height=10 src="' + FSH.System.imageServer + '/temple/1.gif"/></a>' +
-				' <a href="http://wiki.fallensword.com/index.php/Special:Search' +
-				'?search=' + creatureName.textContent + '&go=Go" target="_blank">' +
-				'<img border=0 title="Search creature in Wiki" width=10 ' +
-				'height=10 src="/favicon.ico"/></a>';
-			var extraText = 'Add to the do not kill list';
-			if (doNotKillList.indexOf(creatureName.textContent.trim()) !== -1) {
-				extraText = 'Remove from do not kill list';
-			}
-			creatureName.innerHTML += '&nbsp;<span style="cursor:pointer;' +
-				'text-decoration:underline;color:blue;font-size:x-small;" ' +
-				'id="addRemoveCreatureToDoNotKillList" creatureName="' +
-				creatureName.textContent.trim() + '">' + extraText + '</span>';
-			document.getElementById('addRemoveCreatureToDoNotKillList')
-				.addEventListener('click',
-					FSH.Helper.addRemoveCreatureToDoNotKillList, true);
-		}
 	},
 
 	addRemoveCreatureToDoNotKillList: function(evt) { // Native - Both Maps
@@ -2485,249 +1391,14 @@ FSH.Helper = {
 
 	},
 
-	portalToStartArea: function() {
-		if (window.confirm('Are you sure you with to use a special portal back to Krul Island?')) {
-			var krulXCV = FSH.System.getValue('krulXCV');
-			if (krulXCV) {
-				FSH.System.xmlhttp('index.php?cmd=settings&subcmd=fix&xcv=' +
-					krulXCV, function() {location.href = 
-						'index.php?cmd=world';});
-			} else {
-				window.alert('Please visit the preferences page to cache your Krul Portal link');
-			}
-		}
-	},
-
-	displayMiniMap: function() {
-		var miniMap = document.getElementById('miniMap');
-		if (!miniMap) {
-			miniMap = document.createElement('div');
-			miniMap.style.position = 'absolute';
-			miniMap.style.left = 0;
-			miniMap.style.top = 0;
-			miniMap.style.display = 'none';
-			miniMap.id = 'miniMap';
-			miniMap.style.zIndex = '90';
-			miniMap.style.filter = 'alpha';
-			miniMap.style.opacity = '0.9';
-
-			var objBody = document.getElementsByTagName('body').item(0);
-			objBody.insertBefore(miniMap, objBody.firstChild);
-		}
-		var miniMapName = FSH.System.getValue('miniMapName');
-		var miniMapSource = FSH.System.getValue('miniMapSource');
-		if (miniMap.style.display !== '') {
-			if (miniMapName && FSH.Helper.levelName === miniMapName) {
-				miniMap.innerHTML = miniMapSource;
-				FSH.Helper.addMiniMapExtras(miniMap);
-			}
-			else {
-				FSH.System.xmlhttp('index.php?cmd=world&subcmd=map', FSH.Helper.loadMiniMap, true);
-			}
-		}
-		else {miniMap.style.display = 'none';}
-	},
-
-	loadMiniMap: function(responseText) {
-		var size = 20;
-		var miniMap = document.getElementById('miniMap');
-		var docu = FSH.System.createDocument(responseText);
-		//shrink the background down from 40 to 20 and prep it for the mini map POI logic.
-		$(docu).find('td[background]').each(function(){
-			var background = $(this).attr('background');
-			$(this).append('<img width=' + size + ' height=' + size + ' src="' + background + '">')
-				.attr('background', '');
-		});
-		var doc = '<table cellspacing="0" cellpadding="0" align="center" id=miniMapTable>' + $(docu).find('table:first').html() + '</table>';
-		doc = doc.replace(/<[^>]*title="You are here"[^>]*>/g, '');
-		doc = doc.replace(/<center><table [^>]*><tbody><tr><td[^>]*><\/td><\/tr><\/tbody><\/table><\/center>/g,'');
-		doc = doc.replace(/width="40"/g, 'width="' + size + '"').replace(/height="40"/g, 'height="' + size + '"');
-		miniMap.innerHTML = doc;
-		FSH.Helper.addMiniMapExtras(miniMap);
-
-		if (FSH.Helper.levelName) {FSH.System.setValue('miniMapName', FSH.Helper.levelName);}
-		FSH.System.setValue('miniMapSource', doc);
-	},
-
-	addMiniMapExtras: function(miniMap) {
-		FSH.Helper.markPlayerOnMiniMap();
-		FSH.Helper.toogleMiniMapPOI();
-		var last=document.getElementById('miniMapTable').insertRow(-1).insertCell(0);
-		last.colSpan=document.getElementById('miniMapTable').rows[0].cells.length;
-		last.innerHTML = '<span style="color:green;font-size:x-small;font-weight:bolder">'+
-			'<br/><h1 class=tipped data-tipped="Click on the player icon and left click drag the path you want to walk. If you walk into a wall or make an error, ' +
-				'close and reopen the mini map and start again. Push N (capital n) to activate the auto-walk and watch the mini map as you walk to your ' +
-				'new location. The screen will refresh when you get there.">Auto-Walk</h1></span>';
-		FSH.Helper.miniMapTableEvents();
-		miniMap.style.display = '';
-	},
-
-	miniMapTableEvents: function(){
-		FSH.Helper.mouse = 0;
-		FSH.Helper.moveList=[FSH.Helper.position()];
-		document.getElementById('miniMap').addEventListener('mouseup', function(){FSH.Helper.mouse = 0;}, false);
-		// collect table cells from the drawing_table div element
-		var td = document.getElementById('miniMap').getElementsByTagName('td');
-		// attach onMouseDown and onMouseOver event for collected table cells
-		for (var i=0; i<td.length; i += 1){
-			td[i].addEventListener('mousedown', FSH.Helper.mousedown, true);
-			// colorize table cell if left mouse button is pressed
-			//fix me?
-			td[i].addEventListener('mouseover', FSH.Helper.miniMapMouseOver, true);
-		}
-	},
-
-	miniMapMouseOver: function(){
-		if (FSH.Helper.mouse === 1) {FSH.Helper.markPos(this);}
-	},
-
-	mousedown: function(evt){
-		// needed for FF to disable dragging
-		evt.preventDefault();
-		// set pressed mouse button
-		FSH.Helper.mouse = evt.which;
-		// colorize pixel on mousedown event for TD element
-		if (this.tagName === 'TD' && FSH.Helper.mouse === 1) {FSH.Helper.markPos(this);}
-	},
-
-	markPos: function(td) {
-		var pos={'X':td.cellIndex,'Y':td.parentNode.rowIndex};
-		if (!FSH.Helper.moveList[0]) {return;}
-		var lastPos=FSH.Helper.moveList[FSH.Helper.moveList.length - 1];
-		var dx=pos.X-lastPos.X, dy=pos.Y-lastPos.Y;
-		if (dx>=-1 && dx <=1 && dy>=-1 && dy<=1 && (dx!==0 || dy!==0)) {
-			FSH.Helper.moveList.push(pos);
-			td.innerHTML='';
-			td.style.backgroundColor = 'red';
-		}
-	},
-
-	autoMoveMiniMap: function() {
-		if (FSH.Helper.moveList && FSH.Helper.moveList.length > 1) {
-			FSH.System.xmlhttp(
-				'index.php?cmd=world&subcmd=move&x=' + FSH.Helper.moveList[1].X + 
-					'&y=' + FSH.Helper.moveList[1].Y,
-				FSH.Helper.autoMoveNext,
-				1
-			);
-		}
-	},
-
-	autoMoveNext: function(responseText, id) {
-		var currentPos = '('+FSH.Helper.moveList[id].X+', '+FSH.Helper.moveList[id].Y+')';
-		if (responseText.indexOf(currentPos)<0) {
-			alert('Cannot move via ' + currentPos);
-			location.reload();
-		} else {
-			// update current pos
-			FSH.Helper.markPosOnMiniMap(FSH.Helper.moveList[id]);
-			// move next
-			var nextId = id+1;
-			if (nextId < FSH.Helper.moveList.length) {
-				FSH.System.xmlhttp(
-					'index.php?cmd=world&subcmd=move&x=' +
-						FSH.Helper.moveList[nextId].X + '&y=' + 
-						FSH.Helper.moveList[nextId].Y,
-					FSH.Helper.autoMoveNext,
-					nextId);
-			} else {location.reload();}
-		}
-	},
-
-	toogleMiniMapPOI: function() {
-		var miniMap = document.getElementById('miniMap');
-		var miniMapTable = document.getElementById('miniMapTable');
-		var miniMapCover = document.getElementById('miniMapCover');
-		if (!miniMapCover) {
-			miniMapCover = document.createElement('div');
-			miniMapCover.style.position = 'absolute';
-			miniMapCover.style.left = 0;
-			miniMapCover.style.top = 0;
-			miniMapCover.id = 'miniMapCover';
-			miniMapCover.style.zIndex = '100';
-			miniMapCover.style.filter = 'alpha';
-			miniMapCover.style.opacity = '0.4';
-			miniMapCover.innerHTML = '<table cellspacing="0" cellpadding="0" align="center">'+
-				miniMapTable.innerHTML+'</table>';
-			miniMap.insertBefore(miniMapCover, miniMap.firstChild);
-		} else {
-			miniMap.removeChild(miniMapCover);
-			return;
-		}
-
-		var nodes = FSH.System.findNodes('//div[@id="miniMapCover"]//td[contains(@class,"tipped")]');
-		if (!nodes) {return;}
-		for (var i=0; i<nodes.length; i += 1) {
-			var tip=$(nodes[i]).data('tipped');
-			var color=tip.indexOf(': ') >= 0 ? 'red' :
-				tip.indexOf('Stairway to ') >= 0 ? 'green' : 'blue';
-			nodes[i].innerHTML = '';
-			nodes[i].style.backgroundColor = color;
-		}
-	},
-
-	markPlayerOnMiniMap: function() {
-		var posit = FSH.Helper.position();
-		if (!posit) {return;}
-		FSH.Helper.markPosOnMiniMap(posit);
-	},
-
-	markPosOnMiniMap: function(posit) {
-		var miniMapTable = document.getElementById('miniMapTable');
-		if (!miniMapTable) {return;}
-		var position = miniMapTable.rows[posit.Y].cells[posit.X];
-		var background = position.firstChild.src;
-		position.innerHTML = '<center><img width=16 height=16 src="' + FSH.System.imageServer + '/skin/player_tile.gif" title="You are here"></center>';
-		position.style.backgroundImage = 'url("' + background + '")';
-		position.style.backgroundPosition = 'center';
-		position.style.backgroundSize = '20px';
-	},
-
-	movePage: function(dir) {
-		var dirButton = FSH.System.findNode('//input[@value="'+dir+'"]');
-		if (!dirButton) {return;}
-		var url = dirButton.getAttribute('onClick');
-		url = url.replace(/^[^']*'/m, '').replace(/\';$/m, '');
-		location.href = url;
-	},
-
-	getQuestInfo: function(responseText, callback) { // Legacy (Old Map)
-		var idx = callback.data;
-		var doc=FSH.System.createDocument(responseText);
-		var questInfoLink = FSH.System.findNode('//a[@id="qiLink' + idx + '"]');
-		var questNameNode = FSH.System.findNode('//font[b[.="Quest Details"]]/following-sibling::font[1]', doc);
-		if (questNameNode) {
-			questInfoLink.innerHTML = questNameNode.innerHTML.replace (/"/g, '');
-		} else {
-			questInfoLink.innerHTML = 'Unnamed Quest';
-		}
-		var questInfoElement = FSH.System.findNode('//span[@findme="questinfo' + idx + '"]');
-		var trackingHTMLElement = FSH.System.findNode('//font[@color="#003300"]', doc);
-		if (trackingHTMLElement) {
-			questInfoElement.innerHTML = trackingHTMLElement.innerHTML;
-		} else {
-			questInfoElement.innerHTML = 'None';
-		}
-		document.getElementById('dontTrackThisQuest' + idx).addEventListener('click', FSH.questBook.dontTrackThisQuest, true);
-	},
-
-	useStairs: function() { //jquery
-		//cmd=world&subcmd=usestairs&stairway_id=1645&x=6&y=11
-		$('input[name="stairway_id"]:first').each(function(){
-			location.href = 'index.php?cmd=world&subcmd=usestairs&' +
-				'stairway_id=' + $(this).val();
-		});
-	},
-
 	appendHead: function(o) { // native
 		var count = 0;
-		var scriptTag, linkTag;
 		var scriptFiles = o.js || [];
 		var cssFiles = o.css || [];
 		var head = document.getElementsByTagName('head')[0];
 
 		cssFiles.forEach(function(c) {
-			linkTag = document.createElement('link');
+			var linkTag = document.createElement('link');
 			linkTag.type = 'text/css';
 			linkTag.rel = 'stylesheet';
 			linkTag.href = c;
@@ -2735,7 +1406,7 @@ FSH.Helper = {
 		});
 
 		scriptFiles.forEach(function(s) {
-			scriptTag = document.createElement('script');
+			var scriptTag = document.createElement('script');
 			scriptTag.type = 'text/javascript';
 			if (typeof o.callback === 'function') {
 				scriptTag.onload = function() {
@@ -2758,13 +1429,15 @@ FSH.Helper = {
 
 (function loadScripts () {
 	var o = {
-		css: ['https://fallenswordhelper.github.io/fallenswordhelper/resources/1513/calfSystem.css'],
-		js:  ['https://cdn.jsdelivr.net/localforage/1.2.10/localforage.min.js',
-			  'https://fallenswordhelper.github.io/fallenswordhelper/resources/1513/calfSystem.js'],
+		css: [FSH.resources.calfSystemCss],
+		js:  [FSH.resources.localForage,
+					FSH.resources.calfSystemJs,
+					FSH.resources.dataTablesLoc],
 		callback: FSH.Helper.onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {
-		o.js.unshift('https://ajax.googleapis.com/ajax/libs/jquery/2.1.4/jquery.min.js');
+		// o.js.unshift(FSH.resources.jQuery);
+		o.js.pop();
 	}
 	FSH.Helper.appendHead(o);
 })();
