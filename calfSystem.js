@@ -7563,7 +7563,7 @@ FSH.ga = { // jQuery
 	},
 
 	setup: function() { // jQuery
-		if (FSH.ga.isAuto || typeof ga === 'undefined') {return;}
+		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 
 		ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
 			userId: $('dt#statbar-character').text()
@@ -7577,7 +7577,7 @@ FSH.ga = { // jQuery
 	},
 
 	screenview: function(funcName) { // Native
-		if (FSH.ga.isAuto || typeof ga === 'undefined') {return;}
+		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 		ga('fshApp.send', 'screenview', {screenName: funcName});
 	},
 
@@ -9653,7 +9653,7 @@ FSH.trade = { // jQuery
 			.closest('tr')
 			.before(multiple);
 
-		FSH.ajax.inventory(true).done(FSH.trade.processTrade);
+		FSH.ajax.inventory(false).done(FSH.trade.processTrade);
 	},
 
 	processTrade: function(data) { // jQuery
