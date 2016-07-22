@@ -9691,15 +9691,33 @@ FSH.trade = { // jQuery
 		}
 	},
 
+	batch: function(taskStartTime){
+		var taskFinishTime;
+		var item;
+		do {
+			item = FSH.Helper.inventory.items.pop();
+			FSH.trade.decorate(item);
+			taskFinishTime = window.performance.now();
+		} while (taskFinishTime - taskStartTime < 100 &&
+			FSH.Helper.inventory.items.length > 0);
+		if (FSH.Helper.inventory.items.length > 0) {
+			requestAnimationFrame(FSH.trade.batch);
+		} else {
+			$('tr#fshShowSTs').after(FSH.trade.itemsRow);
+			FSH.ga.end('JS Perf', 'processTrade');
+		}
+	},
+
 	processTrade: function(data) { // jQuery
 
 		FSH.ga.start('JS Perf', 'processTrade');
 
-		var itemsRow = $('#item-list').closest('tr').detach();
+		FSH.trade.itemsRow = $('#item-list').closest('tr').detach();
 
-		FSH.trade.itemTables = $('#item-list table', itemsRow);
+		FSH.trade.itemTables = $('#item-list table', FSH.trade.itemsRow);
 		// Highlight items in ST
-		data.items.forEach(FSH.trade.decorate);
+		// data.items.forEach(FSH.trade.decorate);
+		requestAnimationFrame(FSH.trade.batch);
 
 		var folders = $('<tr id="fshFolderSelect"></tr>');
 		var folderTr = $('<td colspan=6></td>');
@@ -9719,9 +9737,7 @@ FSH.trade = { // jQuery
 				'<label><input type="checkbox" id="itemsInSt" checked> ' +
 				'Select items in ST</label></td>');
 
-		$('tr#fshSelectMultiple').after(itemsRow).after(showST).after(folders);
-
-		FSH.ga.end('JS Perf', 'processTrade');
+		$('tr#fshSelectMultiple').after(showST).after(folders);
 
 		},
 
