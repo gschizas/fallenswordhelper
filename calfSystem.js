@@ -7553,6 +7553,22 @@ FSH.news = { // Legacy
 
 FSH.ga = { // jQuery
 
+	times: {},
+
+	start: function(category, variable, label) {
+		FSH.ga.times[category + ':' + variable + ':' + label] =
+			Math.round(performance.now());
+	},
+
+	end: function(category, variable, label) {
+		ga('send', 'timing', category, variable,
+			Math.round(performance.now()) -
+			FSH.ga.times[category + ':' + variable + ':' + label], label);
+		$('#pF').addClass('fshCenter').text('FSH processing time: ' +
+			(Math.round(performance.now()) -
+			FSH.ga.times[category + ':' + variable + ':' + label]) + 'ms');
+	},
+
 	refAry: ['www.lazywebtools.co.uk', 'refreshthing.com'],
 
 	isAuto: function() {
@@ -7566,12 +7582,14 @@ FSH.ga = { // jQuery
 		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 
 		ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
-			userId: $('dt#statbar-character').text()
+			userId: $('dt#statbar-character').text(),
+			siteSpeedSampleRate: 10
 		});
 		ga('fshApp.set', 'appName', 'fshApp');
 		ga('fshApp.set', 'appVersion', FSH.version);
 		ga('create', 'UA-76488113-2', 'auto', 'fsh', {
-			userId: $('dt#statbar-character').text()
+			userId: $('dt#statbar-character').text(),
+			siteSpeedSampleRate: 10
 		});
 		ga('fsh.send', 'pageview');
 	},
@@ -9656,22 +9674,32 @@ FSH.trade = { // jQuery
 		FSH.ajax.inventory(false).done(FSH.trade.processTrade);
 	},
 
+	decorate: function(item){
+		// var thisCheck = itemTables.find('input[value="' + item.inv_id + '"]');
+		var thisCheck = $('input[value="' + item.inv_id + '"]',
+			FSH.trade.itemTables);
+		// var thisItem = itemTables.has(thisCheck);
+		var thisItem = thisCheck.closest('table');
+		thisCheck.addClass('itemid' + item.item_id + ' itemtype' + item.type);
+		thisItem.addClass('folderid' + item.folder_id);
+		if (item.is_in_st) {
+			/*thisItem.find('td').eq(0).css('border','3px solid red');*/
+			$('td', thisItem).eq(0).css('border','3px solid red');
+			thisCheck.addClass('isInST');
+		} else {
+			thisItem.css('margin','2.4px');
+		}
+	},
+
 	processTrade: function(data) { // jQuery
 
-		var itemTables = $('#item-list table');
+		FSH.ga.start('JS Perf', 'processTrade');
+
+		var itemsRow = $('#item-list').closest('tr').detach();
+
+		FSH.trade.itemTables = $('#item-list table', itemsRow);
 		// Highlight items in ST
-		data.items.forEach(function(item){
-			var thisCheck = itemTables.find('input[value="' + item.inv_id + '"]');
-			var thisItem = itemTables.has(thisCheck);
-			thisCheck.addClass('itemid' + item.item_id + ' itemtype' + item.type);
-			thisItem.addClass('folderid' + item.folder_id);
-			if (item.is_in_st) {
-				thisItem.find('td').eq(0).css('border','3px solid red');
-				thisCheck.addClass('isInST');
-			} else {
-				thisItem.css('margin','2.4px');
-			}
-		});
+		data.items.forEach(FSH.trade.decorate);
 
 		var folders = $('<tr id="fshFolderSelect"></tr>');
 		var folderTr = $('<td colspan=6></td>');
@@ -9691,7 +9719,9 @@ FSH.trade = { // jQuery
 				'<label><input type="checkbox" id="itemsInSt" checked> ' +
 				'Select items in ST</label></td>');
 
-		$('tr#fshSelectMultiple').after(showST).after(folders);
+		$('tr#fshSelectMultiple').after(itemsRow).after(showST).after(folders);
+
+		FSH.ga.end('JS Perf', 'processTrade');
 
 		},
 
