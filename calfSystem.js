@@ -7561,7 +7561,7 @@ FSH.ga = { // jQuery
 	},
 
 	end: function(category, variable, label) {
-		ga('send', 'timing', category, variable,
+		ga('fshApp.send', 'timing', category, variable,
 			Math.round(performance.now()) -
 			FSH.ga.times[category + ':' + variable + ':' + label], label);
 		$('#pF').addClass('fshCenter').text('FSH processing time: ' +
