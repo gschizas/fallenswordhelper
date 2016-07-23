@@ -1421,7 +1421,7 @@ FSH.Helper = {
 	},
 
 	onPageLoad: function() {
-		FSH.environment.dispatch();
+		setTimeout(FSH.environment.dispatch, 0);
 	},
 
 }; // end of var helper
