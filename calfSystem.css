@@ -1,4 +1,12 @@
 
+.isInSTBorder {
+  border: 3px solid red;
+}
+
+.tradeItemMargin {
+  margin: 2.4px;
+}
+
 table#fshSettingsTable {
   border-spacing: 10px;
 }

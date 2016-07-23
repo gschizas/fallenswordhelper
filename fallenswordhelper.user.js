@@ -27,8 +27,7 @@ FSH.resources = {
 	calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1515/calfSystem.js',
 	calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1515/calfSystem.css',
 	localForage: 'https://cdn.jsdelivr.net/localforage/1.4.2/localforage.min.js',
-	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
-	jQuery: 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js'
 };
 
 if (typeof GM_info === 'undefined') {

@@ -9674,50 +9674,26 @@ FSH.trade = { // jQuery
 		FSH.ajax.inventory(false).done(FSH.trade.processTrade);
 	},
 
-	decorate: function(item){
-		// var thisCheck = itemTables.find('input[value="' + item.inv_id + '"]');
-		var thisCheck = $('input[value="' + item.inv_id + '"]',
-			FSH.trade.itemTables);
-		// var thisItem = itemTables.has(thisCheck);
-		var thisItem = thisCheck.closest('table');
-		thisCheck.addClass('itemid' + item.item_id + ' itemtype' + item.type);
-		thisItem.addClass('folderid' + item.folder_id);
-		if (item.is_in_st) {
-			/*thisItem.find('td').eq(0).css('border','3px solid red');*/
-			$('td', thisItem).eq(0).css('border','3px solid red');
-			thisCheck.addClass('isInST');
-		} else {
-			thisItem.css('margin','2.4px');
-		}
-	},
-
-	batch: function(taskStartTime){
-		var taskFinishTime;
-		var item;
-		do {
-			item = FSH.Helper.inventory.items.pop();
-			FSH.trade.decorate(item);
-			taskFinishTime = window.performance.now();
-		} while (taskFinishTime - taskStartTime < 100 &&
-			FSH.Helper.inventory.items.length > 0);
-		if (FSH.Helper.inventory.items.length > 0) {
-			requestAnimationFrame(FSH.trade.batch);
-		} else {
-			$('tr#fshShowSTs').after(FSH.trade.itemsRow);
-			FSH.ga.end('JS Perf', 'processTrade');
-		}
-	},
-
 	processTrade: function(data) { // jQuery
 
 		FSH.ga.start('JS Perf', 'processTrade');
 
-		FSH.trade.itemsRow = $('#item-list').closest('tr').detach();
+		var invItems = data.items.reduce(function(prev, curr) {
+			prev[curr.inv_id] = curr;
+			return prev;
+		}, {});
 
-		FSH.trade.itemTables = $('#item-list table', FSH.trade.itemsRow);
-		// Highlight items in ST
-		// data.items.forEach(FSH.trade.decorate);
-		requestAnimationFrame(FSH.trade.batch);
+		/* Highlight items in ST */
+		$('#item-list table').addClass(function() {
+			var item = invItems[$(this).find('input').val()];
+			return 'folderid' + item.folder_id +
+				(item.is_in_st ? ' isInSTBorder' : ' tradeItemMargin');
+		});
+		$('#item-list input').addClass(function() {
+			var item = invItems[$(this).val()];
+			return 'itemid' + item.item_id + ' itemtype' + item.type +
+				(item.is_in_st ? ' isInST' : '');
+		});
 
 		var folders = $('<tr id="fshFolderSelect"></tr>');
 		var folderTr = $('<td colspan=6></td>');
@@ -9738,6 +9714,8 @@ FSH.trade = { // jQuery
 				'Select items in ST</label></td>');
 
 		$('tr#fshSelectMultiple').after(showST).after(folders);
+
+		FSH.ga.end('JS Perf', 'processTrade');
 
 		},
 
