@@ -1211,7 +1211,7 @@ FSH.Data = {
 					'15': {'-': 'guild.injectGuildAddTagsWidgets'},
 					'16': {'-': 'guild.injectGuildAddTagsWidgets'}},
 				'removetags': {'-': {'-': 'guild.injectGuildAddTagsWidgets'}},
-				'storeitems': {'-': {'-': 'dropItems.injectDropItems'}}},
+				'storeitems': {'-': {'-': 'dropItems.injectStoreItems'}}},
 			'chat': {'-': {'-': {'-': 'logs.guildChat'}}},
 			'log': {'-': {'-': {'-': 'logs.guildLog'}}},
 			'groups': {
@@ -2226,6 +2226,8 @@ FSH.composing = { // jQuery
 
 	injectComposing: function() { //jquery
 
+		FSH.ga.start('JS Perf', 'injectComposing');
+
 		if ($('div#pCC').length !== 1) {return;}
 		if (FSH.Helper.enableComposingAlert) {
 			FSH.composing.parseComposing();}
@@ -2248,6 +2250,8 @@ FSH.composing = { // jQuery
 				.before($('#pCC b:contains("Instant Finish Price Reset:")')
 					.parent().attr('style', 'text-align: right; padding: 0 38px 0 0'));
 		}
+
+		FSH.ga.end('JS Perf', 'injectComposing');
 
 	},
 
@@ -2406,7 +2410,7 @@ FSH.notification = { // jQuery
 
 };
 
-FSH.guildReport = { // Legacy
+FSH.guildReport = { // bad jQuery
 
 	injectReportPaint: function() { // jQuery
 		var container = $('div#pCC > table > tbody > tr > td').last();
@@ -2550,6 +2554,9 @@ FSH.guildAdvisor = { // jQuery
 	},
 
 	injectAdvisorNew: function(m) { // jQuery
+
+		FSH.ga.start('JS Perf', 'injectAdvisorNew');
+
 		var list = $('#pCC table[cellpadding="1"]');
 		if (list.length !== 1) {return;}
 		var tfoot = $('<tfoot/>').append($('tr', list).last());
@@ -2579,9 +2586,15 @@ FSH.guildAdvisor = { // jQuery
 			stateDuration: 0
 		});
 		FSH.guildAdvisor.summaryLink();
+
+		FSH.ga.end('JS Perf', 'injectAdvisorNew');
+
 	},
 
 	injectAdvisorWeekly: function(m) { // jQuery
+
+		FSH.ga.start('JS Perf', 'injectAdvisorWeekly');
+
 		var list = $('#pCC table[cellpadding="1"]');
 		if (list.length !== 1) {return;}
 		list.html('<img src = "' + FSH.System.imageServer +
@@ -2701,6 +2714,9 @@ FSH.guildAdvisor = { // jQuery
 			stateSave: true,
 			stateDuration: 0
 		});
+
+		FSH.ga.end('JS Perf', 'injectAdvisorWeekly');
+
 	}
 
 };
@@ -2708,6 +2724,9 @@ FSH.guildAdvisor = { // jQuery
 FSH.bazaar = { // jQuery
 
 	inject: function() { // jQuery
+
+		FSH.ga.start('JS Perf', 'bazaar.inject');
+
 		var pbImg = $('div#pCC img[alt="Potion Bazaar"]');
 		pbImg.css('float', 'left');
 		var myTable = FSH.Layout.bazaarTable;
@@ -2726,6 +2745,9 @@ FSH.bazaar = { // jQuery
 		myTable.on('input', 'input#buy_amount', FSH.bazaar.quantity);
 		myTable.on('click', 'span#fshBuy', FSH.bazaar.buy);
 		pbImg.parent().append(myTable);
+
+		FSH.ga.end('JS Perf', 'bazaar.inject');
+
 	},
 
 	select: function(evt) { // jQuery
@@ -2858,10 +2880,16 @@ FSH.groups = { // Legacy
 	},
 
 	doGroupPaint: function(m) { // jQuery
+
+		FSH.ga.start('JS Perf', 'doGroupPaint');
+
 		$('#pCC table table table tr').has('.group-action-container')
 			.each(function(i, e) {
 				FSH.groups.doGroupRow(e, m);
 			});
+
+		FSH.ga.end('JS Perf', 'doGroupPaint');
+
 	},
 
 	doGroupRow: function(e, m) { // jQuery
@@ -3069,6 +3097,9 @@ FSH.rank = { // Legacy
 	},
 
 	doRankPaint: function() { // jQuery
+
+		FSH.ga.start('JS Perf', 'doRankPaint');
+
 		var theTable = $('div#pCC table table').has('td.line[width="80%"]')[0];
 		var myRank = FSH.Helper.membrList[$('dt#statbar-character')
 			.text()].rank_name;
@@ -3094,6 +3125,9 @@ FSH.rank = { // Legacy
 		if (FSH.System.getValue('ajaxifyRankControls')) {
 			FSH.rank.ajaxifyRankControls();
 		}
+
+		FSH.ga.end('JS Perf', 'doRankPaint');
+
 	},
 
 	ajaxifyRankControls: function() { // Legacy
@@ -3238,6 +3272,8 @@ FSH.inventory = { // jQuery
 
 	getInvMan: function() { // Native
 
+		FSH.ga.start('JS Perf', 'getInvMan');
+
 		FSH.inventory.showQuickDropLinks =
 			FSH.System.getValue('showQuickDropLinks');
 		FSH.inventory.showQuickSendLinks =
@@ -3258,6 +3294,8 @@ FSH.inventory = { // jQuery
 		FSH.inventory.doTable();
 		FSH.inventory.eventHandlers();
 		FSH.inventory.clearButton();
+
+		FSH.ga.end('JS Perf', 'getInvMan');
 
 	},
 
@@ -4215,6 +4253,9 @@ FSH.allyEnemy = { // jQuery
 FSH.profile = { // Legacy
 
 	injectProfile: function() { // Legacy
+
+		FSH.ga.start('JS Perf', 'injectProfile');
+
 		FSH.profile.updateQuickBuff();
 		FSH.profile.updateStatistics();
 		var playerid;
@@ -4322,6 +4363,9 @@ FSH.profile = { // Legacy
 			contactLink.parentNode.previousSibling
 				.innerHTML = lastActivityIMG;
 		}
+
+		FSH.ga.end('JS Perf', 'injectProfile');
+
 	},
 
 	updateQuickBuff: function() { // jQuery
@@ -6084,17 +6128,23 @@ FSH.onlinePlayers = { // Bad jQuery
 FSH.dropItems = { // Legacy
 
 	injectProfileDropItems: function() { // Native
+		FSH.ga.start('JS Perf', 'injectProfileDropItems');
 		FSH.dropItems.injectDropItems();
 		FSH.dropItems.injectMoveItems();
 	},
 
+	injectStoreItems: function() { // Native
+		FSH.ga.start('JS Perf', 'injectStoreItems');
+		FSH.dropItems.injectDropItems();
+	},
+
 	injectDropItems: function() { // Legacy
+
+		FSH.ajax.getInventory().done(FSH.dropItems.inventory);
+
 		FSH.common.addStatTotalToMouseover();
 		// prevent multiple calls to local storage
 		FSH.Helper.disableItemColoring = FSH.System.getValue('disableItemColoring');
-
-		FSH.dropItems.getQTip($('div#pCC table table img.tip-dynamic'),
-			FSH.dropItems.injectDropItemsPaint);
 
 		var subPage2Id = FSH.System.findNode('//input[@type="hidden" and @name="subcmd2"]');
 		subPage2Id = subPage2Id ? subPage2Id.getAttribute('value') : '-';
@@ -6312,73 +6362,42 @@ FSH.dropItems = { // Legacy
 		}
 	},
 
-	getQTip: function(images, fn) { // jQuery
-		images.qtip({
-			overwrite: false,
-			show: {
-				event: 'mouseenter',
-				ready: false
-			},
-			style: {classes: 'qtip-tipsy qtip-custom'},
-			position: {
-				my: 'center right',
-				at: 'center left',
-				effect: false,
-				viewport: $(window)
-			},
-			content: {
-				text: function(event, api) {
-					$.ajax({
-						url: $(this).data('tipped') // Use data-url attribute for the URL
-					})
-						.then(function(content) {
-							// Set the tooltip content upon successful retrieval
-							api.set('content.text', content);
-							fn(content, api.target[0]);
-						}, function(xhr, status, error) {
-							// Upon failure... set the tooltip content to the status and error value
-							api.set('content.text', status + ': ' + error);
-						});
-					return 'Loading...'; // Set some initial text
-				}
-			},
-			hide: {effect: false}
+	inventory: function(data) { // jQuery
+		var quickDrops = $('#pCC span[findme="QuickDrop"]');
+		var quickSends = $('#pCC span[findme="QuickSend"]');
+		var textTd = $('#pCC input[type="checkbox"]')
+			.filter('[name="removeIndex[]"],[name="storeIndex[]"]')
+			.parent().next().next();
+		var invItems = data.items.reduce(function(prev, curr) {
+			prev[curr.inv_id] = curr;
+			return prev;
+		}, {});
+		quickDrops.addClass(function() {
+			var item = invItems[$(this).attr('iteminvid')];
+			if (item.guild_tag !== '-1') {return 'fshHide';}
 		});
-		images.qtip('show');
-		images.qtip('hide');
-	},
-
-	injectDropItemsPaint: function(responseText, callback) { // Legacy
-		var textNode = FSH.System.findNode('../../../td[3]', callback);
-		var quickDropLink = FSH.System.findNode('span[@findme="QuickDrop"]',
-			textNode);
-		var quickSendLink = FSH.System.findNode('span[@findme="QuickSend"]',
-			textNode);
-		var guildLockedRE = /<center>\s*Guild Locked:\s*<font color="#00FF00">/;
-
-		if (guildLockedRE.exec(responseText)) {
-			if (quickDropLink) {quickDropLink.style.visibility='hidden';}
-			$(textNode).append('<span id="guildLocked" visibility="hidden"/>');
-		}
-		var boundItemRE = /Bound \(Non-Tradable\)/i;
-		if (boundItemRE.exec(responseText)) {
-			if (quickSendLink) {quickSendLink.style.visibility='hidden';}
-		}
-		if (FSH.Helper.disableItemColoring) {return;}
-		var fontLineRE=/<nobr><font color='(#[0-9A-F]{6})' size=2>/i;
-		var fontLineRX=fontLineRE.exec(responseText);
-		var color=fontLineRX[1];
-		if (color==='#FFFFFF') {
-			var fontLineRE2=/<br>\s*<font color='([a-z]+)'>/i;
-			var fontLineRX2=fontLineRE2.exec(responseText);
-			if (fontLineRX2) {
-				color=fontLineRX2[1];
+		textTd.append(function() {
+			var item = invItems[$(this).prev().prev().find('input').val()];
+			if (item.guild_tag !== '-1') {
+				return '<span id="guildLocked" class="fshHide"/>';
 			}
+		});
+		quickSends.addClass(function() {
+			var item = invItems[$(this).attr('iteminvid')];
+			if (item.bound) {return 'fshHide';}
+		});
+		if (FSH.Helper.disableItemColoring) {return;}
+		textTd.addClass(function() {
+			var item = invItems[$(this).prev().prev().find('input').val()];
+			return FSH.Data.rarity[item.rarity].class;
+		});
+
+		if (FSH.cmd === 'profile') {
+			FSH.ga.end('JS Perf', 'injectProfileDropItems');
+		} else {
+			FSH.ga.end('JS Perf', 'injectStoreItems');
 		}
-		if (color==='#40FFFF') {color='#00A0A0';}
-		if (color==='orange') {color='#FF6000';}
-		if (color==='#00FF00') {color='#00B000';}
-		textNode.style.color=color;
+
 	},
 
 	injectMoveItems: function() { // Bad jQuery
@@ -8499,6 +8518,9 @@ FSH.misc = { // Legacy
 FSH.guild = { // Legacy
 
 	injectViewGuild: function() { // Legacy
+
+		FSH.ga.start('JS Perf', 'injectViewGuild');
+
 		FSH.guild.removeGuildAvyImgBorder();
 		FSH.guild.guildXPLock();
 
@@ -8523,9 +8545,15 @@ FSH.guild = { // Legacy
 			}
 		}
 		FSH.guild.changeGuildListOfflineBallColor();
+
+		FSH.ga.end('JS Perf', 'injectViewGuild');
+
 	},
 
 	injectGuild: function() { // Legacy
+
+		FSH.ga.start('JS Perf', 'injectGuild');
+
 		FSH.guild.removeGuildAvyImgBorder();
 		FSH.guild.guildXPLock();
 
@@ -8587,6 +8615,8 @@ FSH.guild = { // Legacy
 				FSH.guild.getConflictInfo, {'node': confNode});
 		}
 		FSH.guild.changeGuildListOfflineBallColor();
+
+		FSH.ga.end('JS Perf', 'injectGuild');
 
 	},
 
