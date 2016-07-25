@@ -958,7 +958,7 @@ FSH.Data = {
 
 		quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 
-		sendClasses: '["Amber", "5611"], ' +
+		sendClasses: '["Composed Pots", "13699"], ["Amber", "5611"], ' +
 			'["Amethyst Weed", "9145"], ["Blood Bloom", "5563"], ' +
 			'["Cerulean Rose", "9156"], ["Coleoptera Body", "9287"], ' +
 			'["Dark Shade", "5564"], ["Deathbloom", "9140"], ' +
@@ -6862,14 +6862,18 @@ FSH.settingsPage = { // Legacy
 
 		var configData =
 			'<form><table id="fshSettingsTable">' +
-			'<tr><th colspan="2"><b>Fallen Sword Helper configuration ' +
-				'Settings</b></th></tr>' +
-			'<tr><td colspan="2" align=center>' +
-				'<span style="font-size:xx-small">(Current version: ' +
-				FSH.version + ')&nbsp;' +
-				'(Storage Used: ' + storage + '% Remaining: ' +
-				(100 - storage) + '%)</span>' +
-			'</td></tr>' +
+			'<thead><th colspan="2"><b>Fallen Sword Helper configuration ' +
+				'Settings</b></th></thead>' +
+			'<tr><td align=center><input id="fshClearStorage" type="button" ' +
+				'class="awesome magenta tip-static" value="Clear Storage" ' +
+				'data-tipped="<span class=\'fshHelpTitle\'>Clear Storage' +
+				'</span><br><br>This will clear all localStorage related to ' +
+				'fallensword.com<br>It will reset all your Helper settings to ' +
+				'defaults<br>Use it if your storage has overflowed or become ' +
+				'corrupt"></td><td align=center>' +
+				'<span style="font-size:x-small">(Current version: ' +
+				FSH.version + ') (Storage Used: ' + storage + '% Remaining: ' +
+				(100 - storage) + '%)</span></td></tr>' +
 			'<tr><td colspan="2" align=center>' +
 				'<span style="font-weight:bold;">Visit the ' +
 				'<a href="https://github.com/fallenswordhelper/fallenswordhelper">' +
@@ -7344,6 +7348,9 @@ FSH.settingsPage = { // Legacy
 				'">FSH Settings</a></li>');
 		}
 
+		document.getElementById('fshClearStorage')
+			.addEventListener('click', FSH.settingsPage.clearStorage, true);
+
 		document.getElementById('Helper:SaveOptions')
 			.addEventListener('click', FSH.settingsPage.saveConfig, true);
 		document.getElementById('Helper:ShowLogs')
@@ -7365,6 +7372,12 @@ FSH.settingsPage = { // Legacy
 		if (minGroupLevelTextField) {
 			var minGroupLevel = minGroupLevelTextField.value;
 			FSH.System.setValue('minGroupLevel',minGroupLevel);
+		}
+	},
+
+	clearStorage: function() {
+		if (confirm('Are you sure you want to clear you localStorage?')) {
+			localStorage.clear();
 		}
 	},
 
@@ -7742,8 +7755,6 @@ FSH.environment = { // Legacy
 	},
 
 	keyPress: function(evt) {
-
-		console.log('charCode', evt.charCode, 'keyCode', evt.keyCode, 'key', evt.key);
 
 		var r, s;
 		if (evt.target.tagName!=='HTML' && evt.target.tagName!=='BODY') {return;}
@@ -11601,7 +11612,6 @@ FSH.arena = { // jQuery
 
 	inject: function() { // jQuery
 		FSH.arena.tabs = $('div#arenaTypeTabs');
-		console.log('FSH.arena.tabs', FSH.arena.tabs);
 		if (FSH.arena.tabs.length !== 1) {return;} // Join error screen
 		FSH.arena.theTables = $('table[width="635"]', FSH.arena.tabs);
 		FSH.ajax.getForage('fsh_arena').done(FSH.arena.process);
