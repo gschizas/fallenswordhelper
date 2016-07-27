@@ -8441,11 +8441,53 @@ FSH.mailbox = { // Hybrid
 
 FSH.misc = { // Legacy
 
-	injectBank: function() { // Legacy
-		var bank = FSH.System.findNode('//b[contains(.,"Bank")]');
-		if (bank) {
-			bank.innerHTML+='<br><a href="/index.php?cmd=guild&subcmd=bank">Guild Bank</a>';
+	injectBank: function() { //jquery
+		var bank = $('#pCC b');
+		if (bank.length === 0 || bank.eq(0).text() !== 'Bank') {return;}
+		bank.eq(0).append('<br><a href="/index.php?cmd=guild&subcmd=bank">' +
+			'Guild Bank</a>');
+		var depo = $('#pCC input[value="Deposit"]');
+		if (depo.length !== 1) {return;}
+		if ($('#pCC b').eq(2).text() === '0') {
+			depo.prop('disabled', true);
+		} else {
+			depo.click(FSH.misc.bankDeposit);
 		}
+	},
+
+	bankDeposit: function(e) { //jquery
+		e.preventDefault();
+		if ($('#pCC b').eq(2).text() === '0' ||
+			$('#pCC #deposit_amount').val() === '0') {return;}
+		$.get('index.php',{
+			cmd: 'bank',
+			subcmd: 'transaction',
+			mode: 'deposit',
+			deposit_amount: $('#pCC #deposit_amount').val()
+		}).done(FSH.misc.depositResponse);
+	},
+
+	depositResponse: function(response) { //jquery
+		var doc = FSH.System.createDocument(response);
+		var infoBox = $('#pCC #info-msg', doc);
+		if (infoBox.length === 0) {return;}
+		var target = $('#pCC #info-msg');
+		if (target.length === 0) {
+			$('#pCC').prepend(infoBox.closest('table'));
+		} else {
+			target.closest('table').replaceWith(infoBox.closest('table'));
+		}
+		$('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
+		$('#pH #statbar-gold-tooltip-general dd').text(function(index) {
+			return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
+		});
+		$('#pCC b').slice(1).text(function(index) {
+			return $('#pCC b', doc).slice(1).eq(index).text();
+		});
+		if ($('#pCC b').eq(2).text() === '0') {
+			$('#pCC input[value="Deposit"]').prop('disabled', true);
+		}
+		$('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
 	},
 
 	injectAuctionHouse: function() { // Bad jQuery

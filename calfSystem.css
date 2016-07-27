@@ -1,4 +1,9 @@
 
+.custombutton[disabled] {
+  background: #B8B8B8;
+  pointer-events:none;
+}
+
 .isInSTBorder {
   border: 3px solid red;
 }
