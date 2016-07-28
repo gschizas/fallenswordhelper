@@ -1229,8 +1229,9 @@ FSH.Data = {
 			'scouttower': {'-': {'-': {'-': 'scoutTower.injectScouttower'}}},
 			'mailbox': {'-': {'-': {'-': 'mailbox.guildMailbox'}}},
 			'ranks': {'-': {'-': {'-': 'rank.injectGuildRanks'}}},
-			'conflicts': {'rpupgrades': {'-': {'-': 'guild.injectRPUpgrades'}}}},
-		bank: {'-': {'-': {'-': {'-': 'misc.injectBank'}}}},
+			'conflicts': {'rpupgrades': {'-': {'-': 'guild.injectRPUpgrades'}}},
+			'bank': {'-': {'-': {'-': 'bank.injectGuildBank'}}}},
+		bank: {'-': {'-': {'-': {'-': 'bank.injectBank'}}}},
 		log: {
 			'-': {'-': {
 				'-': {'-': 'logs.playerLog'},
@@ -8441,55 +8442,6 @@ FSH.mailbox = { // Hybrid
 
 FSH.misc = { // Legacy
 
-	injectBank: function() { //jquery
-		var bank = $('#pCC b');
-		if (bank.length === 0 || bank.eq(0).text() !== 'Bank') {return;}
-		bank.eq(0).append('<br><a href="/index.php?cmd=guild&subcmd=bank">' +
-			'Guild Bank</a>');
-		var depo = $('#pCC input[value="Deposit"]');
-		if (depo.length !== 1) {return;}
-		if ($('#pCC b').eq(2).text() === '0') {
-			depo.prop('disabled', true);
-		} else {
-			depo.click(FSH.misc.bankDeposit);
-		}
-	},
-
-	bankDeposit: function(e) { //jquery
-		e.preventDefault();
-		if ($('#pCC b').eq(2).text() === '0' ||
-			$('#pCC #deposit_amount').val() === '0') {return;}
-		$.get('index.php',{
-			cmd: 'bank',
-			subcmd: 'transaction',
-			mode: 'deposit',
-			deposit_amount: $('#pCC #deposit_amount').val()
-		}).done(FSH.misc.depositResponse);
-	},
-
-	depositResponse: function(response) { //jquery
-		var doc = FSH.System.createDocument(response);
-		var infoBox = $('#pCC #info-msg', doc);
-		if (infoBox.length === 0) {return;}
-		var target = $('#pCC #info-msg');
-		if (target.length === 0) {
-			$('#pCC').prepend(infoBox.closest('table'));
-		} else {
-			target.closest('table').replaceWith(infoBox.closest('table'));
-		}
-		$('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
-		$('#pH #statbar-gold-tooltip-general dd').text(function(index) {
-			return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
-		});
-		$('#pCC b').slice(1).text(function(index) {
-			return $('#pCC b', doc).slice(1).eq(index).text();
-		});
-		if ($('#pCC b').eq(2).text() === '0') {
-			$('#pCC input[value="Deposit"]').prop('disabled', true);
-		}
-		$('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
-	},
-
 	injectAuctionHouse: function() { // Bad jQuery
 		if (FSH.System.getValue('autoFillMinBidPrice')) {
 			$('input#auto-fill').not(':checked').click();
@@ -8564,6 +8516,118 @@ FSH.misc = { // Legacy
 		.attr('cols', '90')
 		.attr('rows', '30')
 		.css('resize', 'none');
+	},
+
+};
+
+FSH.bank = { // jQuery
+
+	playerBank: { // Native
+		headText: 'Bank',
+		appLink: true,
+		depoPos: 2,
+		balPos: 1,
+		data: {
+			cmd: 'bank',
+			subcmd: 'transaction'
+		},
+		initWithdraw: ''
+	},
+
+	guildBank: { // Native
+		headText: 'Guild Bank',
+		appLink: false,
+		depoPos: 3,
+		balPos: 2,
+		data: {
+			cmd: 'guild',
+			subcmd: 'bank',
+			subcmd2: 'transaction'
+		},
+		initWithdraw: '1'
+	},
+
+	injectGuildBank: function() { // Native
+		FSH.bank.bankSettings = FSH.bank.guildBank;
+		FSH.bank.ajaxifyBank();
+	},
+
+	injectBank: function() { // jQuery
+		FSH.bank.bankSettings = FSH.bank.playerBank;
+		FSH.bank.ajaxifyBank();
+	},
+
+	ajaxifyBank: function() { // jQuery
+
+		FSH.ga.start('JS Perf', 'ajaxifyBank');
+
+		var o = FSH.bank.bankSettings;
+		var bank = $('#pCC b');
+		if (bank.length === 0 || bank.eq(0).text() !== o.headText) {return;}
+		if (o.appLink) {
+			bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
+				'<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
+				'</td></tr>');
+		}
+		var depo = $('#pCC input[value="Deposit"]');
+		if (depo.length !== 1) {return;}
+		var withdraw = $('#pCC input[value="Withdraw"]');
+		if (withdraw.length !== 1) {return;}
+		if ($('#pCC b').eq(o.depoPos).text() === '0') {
+			depo.prop('disabled', true);
+		} else {
+			depo.click(FSH.bank.bankDeposit);
+		}
+		withdraw.click(FSH.bank.bankWithdrawal);
+
+		FSH.ga.end('JS Perf', 'ajaxifyBank');
+
+	},
+
+	bankDeposit: function(e) { // jQuery
+		e.preventDefault();
+		var o = FSH.bank.bankSettings;
+		var amount = $('#pCC #deposit_amount').val();
+		if ($('#pCC b').eq(o.depoPos).text() === '0' || !$.isNumeric(amount) ||
+			amount < 1) {return;}
+		o.data.mode = 'deposit';
+		o.data.deposit_amount = amount;
+		$.get('index.php', o.data).done(FSH.bank.transResponse);
+	},
+
+	bankWithdrawal: function(e) { // jQuery
+		e.preventDefault();
+		var o = FSH.bank.bankSettings;
+		var amount = $('#pCC #withdraw_amount').val();
+		if (!$.isNumeric(amount) || amount < 1) {return;}
+		o.data.mode = 'withdraw';
+		o.data.withdraw_amount = amount;
+		$.get('index.php', o.data).done(FSH.bank.transResponse);
+	},
+
+	transResponse: function(response) { // jQuery
+		var doc = FSH.System.createDocument(response);
+		var infoBox = $('#pCC #info-msg', doc);
+		if (infoBox.length === 0) {return;}
+		var target = $('#pCC #info-msg');
+		if (target.length === 0) {
+			$('#pCC').prepend(infoBox.closest('table'));
+		} else {
+			target.closest('table').replaceWith(infoBox.closest('table'));
+		}
+		$('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
+		$('#pH #statbar-gold-tooltip-general dd').text(function(index) {
+			return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
+		});
+		var o = FSH.bank.bankSettings;
+		$('#pCC b').slice(o.balPos).text(function(index) {
+			return $('#pCC b', doc).slice(o.balPos).eq(index).text();
+		});
+		if ($('#pCC b').eq(o.depoPos).text() === '0') {
+			$('#pCC input[value="Deposit"]').prop('disabled', true);
+		}
+		$('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+		$('#pCC #withdraw_amount').val(o.initWithdraw);
 	},
 
 };
@@ -11668,9 +11732,15 @@ FSH.arena = { // jQuery
 			FSH.arena.sortHandler);
 		FSH.arena.tabs.on('click', 'input.custombutton[type="submit"]',
 			FSH.arena.dontPost);
+
+		FSH.ga.end('JS Perf', 'arena.process');
+
 	},
 
 	process: function(arena) { // jQuery
+
+		FSH.ga.start('JS Perf', 'arena.process');
+
 		FSH.arena.theTables.each(FSH.arena.redoHead);
 		FSH.arena.opts = arena || {};
 		FSH.arena.oldIds = FSH.arena.opts.id || {};
