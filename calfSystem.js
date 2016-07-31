@@ -7539,9 +7539,9 @@ FSH.ga = { // jQuery
 		ga('fshApp.send', 'timing', category, variable,
 			Math.round(performance.now()) -
 			FSH.ga.times[category + ':' + variable + ':' + label], label);
-		$('#pF').addClass('fshCenter').text('FSH processing time: ' +
-			(Math.round(performance.now()) -
-			FSH.ga.times[category + ':' + variable + ':' + label]) + 'ms');
+		// $('#pF').addClass('fshCenter').text('FSH processing time: ' +
+			// (Math.round(performance.now()) -
+			// FSH.ga.times[category + ':' + variable + ':' + label]) + 'ms');
 	},
 
 	refAry: ['www.lazywebtools.co.uk', 'refreshthing.com'],
