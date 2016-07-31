@@ -30,10 +30,14 @@ FSH.resources = {
 	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js'
 };
 
+FSH.version = '1515';
+
 if (typeof GM_info === 'undefined') {
-	FSH.version = '1515_native';
-} else {
-	FSH.version = GM_info.script.version;
+	FSH.version += '_native';
+} else if (typeof GM_info.script === 'undefined') {
+	FSH.version += '_noScript';
+} else if (typeof GM_info.script.version === 'undefined') {
+	FSH.version += '_noVersion';
 }
 
 FSH.Helper = {
