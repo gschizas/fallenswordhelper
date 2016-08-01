@@ -1356,14 +1356,17 @@ FSH.Layout = {
 	},
 
 	injectMenu: function() { //jquery
+
+		FSH.ga.start('JS Perf', 'injectMenu');
+
 		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
 			$('a[href="index.php?cmd=questbook"]').attr('href',
 				FSH.System.getValue('lastActiveQuestPage'));
 		}
-		var pCL = $('div#pCL:first');
+		var pCL = $('#pCL');
 		if (pCL.length === 0) {return;}
 		//character
-		$(pCL).find('a#nav-character-log').parent('li')
+		pCL.find('a#nav-character-log').parent('li')
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-recipemanager" href="index.php?cmd=notepad&blank' +
 				'=1&subcmd=recipemanager">Recipe Manager</a></li>')
@@ -1374,50 +1377,50 @@ FSH.Layout = {
 				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
 				'medalguide">Medal Guide</a></li>');
 		if (FSH.System.getValue('keepBuffLog')) {
-			$(pCL).find('a#nav-character-log').parent('li')
+			pCL.find('a#nav-character-log').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
 					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
 		if (FSH.System.getValue('keepLogs')) {
-			$(pCL).find('a#nav-character-notepad').parent('li')
+			pCL.find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
 		if (FSH.System.getValue('showMonsterLog')) {
-			$(pCL).find('a#nav-character-notepad').parent('li')
+			pCL.find('a#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-monsterlog" href="index.php?cmd=notepad&blank' +
 					'=1&subcmd=monsterlog">Creature Logs</a></li>');
 		}
-		$(pCL).find('a#nav-character-notepad').parent('li')
+		pCL.find('a#nav-character-notepad').parent('li')
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-quicklinkmanager" href="index.php?cmd=notepad&' +
 				'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
 		//guild
-		$(pCL).find('a#nav-guild-storehouse-inventory').parent('li')
+		pCL.find('a#nav-guild-storehouse-inventory').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=guildinvmgr">Guild Inventory</a></li>');
 		if (!FSH.System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
-			$(pCL).find('a#nav-guild-ledger-guildlog').parent('li')
+			pCL.find('a#nav-guild-ledger-guildlog').parent('li')
 				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
 					'-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=newguildlog">New Guild Log</a></li>');
 		}
 		//top rated
-		$(pCL).find('a#nav-toprated-players-level').parent('li')
+		pCL.find('a#nav-toprated-players-level').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
 				'Top 250 Players</a></li>');
 		//actions
-		$(pCL).find('a#nav-actions-trade-auctionhouse').parent('li')
+		pCL.find('a#nav-actions-trade-auctionhouse').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=auctionsearch">AH Quick Search</a></li>');
-		$(pCL).find('a#nav-actions-interaction-findplayer').parent('li')
+		pCL.find('a#nav-actions-interaction-findplayer').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=onlineplayers">Online Players</a></li>')
@@ -1429,13 +1432,17 @@ FSH.Layout = {
 				'subcmd=findbuffs">Find Buffs</a></li>');
 		//adjust the menu length in chrome for the newly added items
 		//first the open ones
-		$('ul.nav-animated').each(function() {
-			if ($(this).css('height') !== '0px') {
-				$(this).css('height',$(this).find('li').length*22);
-			}
-		});
+		$('ul.nav-animated')
+			.filter(function() {
+				return $(this).css('height') !== '0px';
+			}).css('height', function() {
+				return $(this).find('li').length * 22;
+			});
 		//and now the closed saved variables
-		window.$('#nav').nav('calcHeights');
+		$('#nav').nav('calcHeights');
+
+		FSH.ga.end('JS Perf', 'injectMenu');
+
 	},
 
 	moveRHSBoxUpOnRHS: function(title) {
