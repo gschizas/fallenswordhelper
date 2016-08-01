@@ -2522,16 +2522,11 @@ FSH.guildReport = { // bad jQuery
 FSH.guildAdvisor = { // jQuery
 
 	injectAdvisor: function() { // Native
-		FSH.guildAdvisor.dataTablesLoaded();
-	},
-
-	dataTablesLoaded: function() { // jQuery
-		FSH.ajax.getMembrList(false)
-			.done(
-				FSH.subcmd2 === 'weekly' ?
-					FSH.guildAdvisor.injectAdvisorWeekly :
-					FSH.guildAdvisor.injectAdvisorNew
-			);
+		if (FSH.subcmd2 === 'weekly') {
+			FSH.guildAdvisor.injectAdvisorWeekly();
+		} else {
+			FSH.ajax.getMembrList(false).done(FSH.guildAdvisor.injectAdvisorNew);
+		}
 	},
 
 	summaryLink: function() {
@@ -2600,7 +2595,9 @@ FSH.guildAdvisor = { // jQuery
 
 	},
 
-	injectAdvisorWeekly: function(m) { // jQuery
+	newSummary: {},
+
+	injectAdvisorWeekly: function() { // jQuery
 
 		FSH.ga.start('JS Perf', 'injectAdvisorWeekly');
 
@@ -2609,75 +2606,74 @@ FSH.guildAdvisor = { // jQuery
 		list.html('<img src = "' + FSH.System.imageServer +
 			'/world/actionLoadingSpinner.gif" style = "float: left;">' +
 			'&nbsp;Retrieving daily data ...');
-		FSH.guildAdvisor.getAdvisorPages(list, m);
+		FSH.guildAdvisor.list = list;
+
+		$.when(
+			FSH.ajax.getMembrList(false)
+				.done(function(data) {
+					FSH.guildAdvisor.membrList = data;
+				}),
+			FSH.guildAdvisor.getAdvisorPage(1),
+			FSH.guildAdvisor.getAdvisorPage(2),
+			FSH.guildAdvisor.getAdvisorPage(3),
+			FSH.guildAdvisor.getAdvisorPage(4),
+			FSH.guildAdvisor.getAdvisorPage(5),
+			FSH.guildAdvisor.getAdvisorPage(6),
+			FSH.guildAdvisor.getAdvisorPage(7)
+		).done(FSH.guildAdvisor.addAdvisorPages);
 	},
 
-	getAdvisorPages: function(list, m) { // Bad jQuery
-		FSH.guildAdvisor.count = 0;
-		var pages = [1, 2, 3, 4, 5, 6, 7];
-		FSH.guildAdvisor.advisorPages = [];
-		pages.forEach(function(e) {
-			FSH.guildAdvisor.getAdvisorPage(e, list, m);
-		});
-	},
-
-	getAdvisorPage: function(e, list, m) {
-		$.ajax({
+	getAdvisorPage: function(e) {
+		return $.ajax({
 			url: 'index.php',
 			data: {
 				cmd: 'guild',
 				subcmd: 'advisor',
 				period: e
-			}
-		}).done(function(data) {
-				list.append(' day ' + e + ',');
-				var ob = {};
-				var tr = $('tr',
-					$('#pCC table[cellpadding="1"]',
-					FSH.System.createDocument(data)));
-				tr.each(function(i, el) {
-					var tds = $('td', el);
-					var member = $(tds.eq(0).html().replace(/&nbsp;/g, ''))
-						.text();
-					if (member !== 'Member') {
-						ob[member] = {
-							deposit: FSH.System.intValue(tds.eq(1).text()),
-							tax:     FSH.System.intValue(tds.eq(2).text()),
-							total:   FSH.System.intValue(tds.eq(3).text()),
-							fsp:     FSH.System.intValue(tds.eq(4).text()),
-							skills:  FSH.System.intValue(tds.eq(5).text()),
-							grpCrt:  FSH.System.intValue(tds.eq(6).text()),
-							grpJoin: FSH.System.intValue(tds.eq(7).text()),
-							relics:  FSH.System.intValue(tds.eq(8).text()),
-							contrib: FSH.System.intValue(tds.eq(9).text())
-						};
-					}
-				});
-				FSH.guildAdvisor.advisorPages[e-1] = ob;
-				FSH.guildAdvisor.count += 1; // .when
-				if (FSH.guildAdvisor.count === 7) {
-					FSH.guildAdvisor.addAdvisorPages(list, m);
-				}
-			});
+			},
+			period: e
+		}).done(FSH.guildAdvisor.returnAdvisorPage);
 	},
 
-	addAdvisorPages: function(list, m) { // Native
-		var o = {};
-		var data = [];
-		FSH.guildAdvisor.advisorPages.forEach(function(e) {
-			Object.keys(e).forEach(function(f) {
-				o[f] = o[f] || {};
-				o[f].deposit = (o[f].deposit || 0) + e[f].deposit;
-				o[f].tax = (o[f].tax || 0) + e[f].tax;
-				o[f].total = (o[f].total || 0) + e[f].total;
-				o[f].fsp = (o[f].fsp || 0) + e[f].fsp;
-				o[f].skills = (o[f].skills || 0) + e[f].skills;
-				o[f].grpCrt = (o[f].grpCrt || 0) + e[f].grpCrt;
-				o[f].grpJoin = (o[f].grpJoin || 0) + e[f].grpJoin;
-				o[f].relics = (o[f].relics || 0) + e[f].relics;
-				o[f].contrib = (o[f].contrib || 0) + e[f].contrib;
-			});
+	returnAdvisorPage: function(data) {
+		var e = this.period;
+		var list = FSH.guildAdvisor.list;
+		list.append(' day ' + e + ',');
+		var ns = FSH.guildAdvisor.newSummary;
+		var tr = $('tr',
+			$('#pCC table[cellpadding="1"]',
+			FSH.System.createDocument(data)));
+		tr.each(function(i, el) {
+			var tds = $('td', el);
+			var member = tds.eq(0).text().trim();
+			if (member !== 'Member') {
+				ns[member] = ns[member] || {};
+				ns[member].deposit = (ns[member].deposit || 0) +
+					FSH.System.intValue(tds.eq(1).text());
+				ns[member].tax     = (ns[member].tax     || 0) +
+					FSH.System.intValue(tds.eq(2).text());
+				ns[member].total   = (ns[member].total   || 0) +
+					FSH.System.intValue(tds.eq(3).text());
+				ns[member].fsp     = (ns[member].fsp     || 0) +
+					FSH.System.intValue(tds.eq(4).text());
+				ns[member].skills  = (ns[member].skills  || 0) +
+					FSH.System.intValue(tds.eq(5).text());
+				ns[member].grpCrt  = (ns[member].grpCrt  || 0) +
+					FSH.System.intValue(tds.eq(6).text());
+				ns[member].grpJoin = (ns[member].grpJoin || 0) +
+					FSH.System.intValue(tds.eq(7).text());
+				ns[member].relics  = (ns[member].relics  || 0) +
+					FSH.System.intValue(tds.eq(8).text());
+				ns[member].contrib = (ns[member].contrib || 0) +
+					FSH.System.intValue(tds.eq(9).text());
+			}
 		});
+	},
+
+	addAdvisorPages: function() { // Native
+		var m = FSH.guildAdvisor.membrList;
+		var o = FSH.guildAdvisor.newSummary;
+		var data = [];
 		Object.keys(o).forEach(function(f) {
 			if (f !== 'Total:') {
 				data.push([
@@ -2698,10 +2694,14 @@ FSH.guildAdvisor = { // jQuery
 				]);
 			}
 		});
-		FSH.guildAdvisor.displayAdvisor(list, o, data);
+		FSH.guildAdvisor.data = data;
+		setTimeout(FSH.guildAdvisor.displayAdvisor, 0);
 	},
 
-	displayAdvisor: function(list, o, data) { // jQuery
+	displayAdvisor: function() { // jQuery
+		var o = FSH.guildAdvisor.newSummary;
+		var data = FSH.guildAdvisor.data;
+		var list = FSH.guildAdvisor.list;
 		list.css('font-size', 'x-small');
 		$(list).addClass('hover');
 		$(list).html('<tfoot id="advTFoot"><tr><td style="text-align: ' +
