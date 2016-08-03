@@ -11780,6 +11780,8 @@ FSH.arena = { // jQuery
 		columnDefs: [
 			{orderable: false, targets: [8, 9]}
 		],
+		stateSave: true,
+		stateDuration: 0,
 	},
 
 	orderData: function() { // jQuery
