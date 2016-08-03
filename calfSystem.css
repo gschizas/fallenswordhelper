@@ -175,6 +175,7 @@ div#fshQuickLinks {
 .fshWearHide  {display: none;}
 .fshInline    {display: inline;}
 .fshNoWrap    {white-space: nowrap;}
+.fshBold      {font-weight: bold;}
 .helperQC     {cursor: pointer;}
 
 .qbT          {margin: 0px auto;}
