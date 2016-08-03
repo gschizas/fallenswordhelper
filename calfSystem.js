@@ -9781,7 +9781,10 @@ FSH.trade = { // jQuery
 
 		FSH.ga.start('JS Perf', 'processTrade');
 
+		var fshHasST = false;
+
 		var invItems = data.items.reduce(function(prev, curr) {
+			if (curr.is_in_st) {fshHasST = true;}
 			prev[curr.inv_id] = curr;
 			return prev;
 		}, {});
@@ -9790,7 +9793,7 @@ FSH.trade = { // jQuery
 		$('#item-list table').addClass(function() {
 			var item = invItems[$(this).find('input').val()];
 			return 'folderid' + item.folder_id +
-				(item.is_in_st ? ' isInSTBorder' : ' tradeItemMargin');
+				(fshHasST ? (item.is_in_st ? ' isInSTBorder' : ' tradeItemMargin') : '');
 		});
 		$('#item-list input').addClass(function() {
 			var item = invItems[$(this).val()];
