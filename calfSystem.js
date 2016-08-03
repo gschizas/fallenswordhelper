@@ -1534,21 +1534,6 @@ FSH.Layout = {
 			'", "fsQuickBuff", 618, 1000, ",scrollbars")';
 	},
 
-	advisorColumns: [
-		{title: 'Member'},
-		{title: 'Lvl',                class: 'dt-center'},
-		{title: 'Rank',               class: 'dt-center dt-nowrap'},
-		{title: 'Gold From Deposits', class: 'dt-center'},
-		{title: 'Gold From Tax',      class: 'dt-center'},
-		{title: 'Gold Total',         class: 'dt-center'},
-		{title: 'FSP',                class: 'dt-center'},
-		{title: 'Skill Cast',         class: 'dt-center'},
-		{title: 'Group Create',       class: 'dt-center'},
-		{title: 'Group Join',         class: 'dt-center'},
-		{title: 'Relic',              class: 'dt-center'},
-		{title: 'XP Contrib',         class: 'dt-center'}
-	],
-
 	places:['first', 'second', 'third', 'fourth', 'fifth', 'sixth', 'seventh',
 			'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
 			'fourteenth'],
@@ -2240,14 +2225,11 @@ FSH.composing = { // jQuery
 		if (FSH.Helper.enableComposingAlert) {
 			FSH.composing.parseComposing();}
 
-		$('input[id^=create-]').not('input#create-multi').each(function(i,e){
-			$(e).after('<span id="helperQC-' + $(e).attr('id').slice(-1) +
-				'" class="helperQC">&nbsp;[Quick Create]</span>');
-		});
+		$('input[id^=create-]').not('#create-multi').after('&nbsp;[<span ' +
+			'class="helperQC">Quick Create</span>]');
 
-		$('div#pCC').on('click', 'span[id^="helperQC-"]', function() {
-			var temp = $('select#composing-template-' +
-				$(this).attr('id').slice(-1));
+		$('div#pCC').on('click', 'span.helperQC', function() {
+			var temp = $(this).prev().prev();
 			if (temp.length === 1 && temp.val() !== 'none') {
 				FSH.composing.createPotion(temp);
 			}
@@ -2429,18 +2411,16 @@ FSH.guildReport = { // bad jQuery
 	},
 
 	reportHeader: function(innerTable) { // bad jQuery
-		$('td[bgcolor="#DAA534"][colspan="2"] b', innerTable).each(function() {
-			var self = $(this);
-			self.html(
-				FSH.Layout.onlineDot({
-					last_login: FSH.Helper.membrList[self.text()].last_login
-				}) +
-				'<a href="index.php?cmd=profile&player_id=' +
-				FSH.Helper.membrList[self.text()].id + '">' + self.html() +
-				'</a> [ <span class="a-reply fshLink" target_player=' +
-				self.text() + '>m</span> ]'
-			);
-		});
+		$('td[bgcolor="#DAA534"][colspan="2"] b', innerTable)
+			.html(function(_index, oldhtml) {
+				return FSH.Layout.onlineDot({
+						last_login: FSH.Helper.membrList[oldhtml].last_login
+					}) + '<a href="index.php?cmd=profile&player_id=' +
+					FSH.Helper.membrList[oldhtml].id + '">' + oldhtml +
+					'</a> [ <span class="a-reply fshLink" target_player=' +
+					oldhtml + '>m</span> ]';
+				// );
+			});
 	},
 
 	doReportPaint: function(innerTable) { // jQuery
@@ -2561,6 +2541,22 @@ FSH.guildAdvisor = { // jQuery
 			'subcmd2=weekly">7-Day Summary</a></span>');
 	},
 
+	advisorColumns: [
+		{title: '<div class="fshBold">Member</div>'},
+		{title: '<div class="fshBold">Lvl</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">Rank</div>', class: 'dt-center dt-nowrap'},
+		{title: '<div class="fshBold">Gold From Deposits</div>',
+			class: 'dt-center'},
+		{title: '<div class="fshBold">Gold From Tax</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">Gold Total</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">FSP</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">Skill Cast</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">Group Create</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">Group Join</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">Relic</div>', class: 'dt-center'},
+		{title: '<div class="fshBold">XP Contrib</div>', class: 'dt-center'}
+	],
+
 	injectAdvisorNew: function(m) { // jQuery
 
 		FSH.ga.start('JS Perf', 'injectAdvisorNew');
@@ -2570,29 +2566,34 @@ FSH.guildAdvisor = { // jQuery
 		var tfoot = $('<tfoot/>').append($('tr', list).last());
 		$('td', tfoot).first().removeAttr('class').attr('colspan', 3)
 			.attr('style', 'text-align: right;');
-		$('b', tfoot).contents().unwrap();
 		list.css('font-size', 'x-small');
 		list.addClass('hover');
 		$('tr', list).first().remove();
 		$('td', list).removeAttr('bgcolor');
-		$('font', list).contents().unwrap();
-		$('tr', list).each(function(_i, e) {
-			var td1 = $('td', e).first();
-			td1.html(td1.html().replace('&nbsp;', ''));
-			td1.html('<a href="index.php?cmd=profile&player_id=' +
-				m[td1.text()].id + '">' +
-				td1.text() + '</a>');
-			td1.after('<td>' + m[td1.text()].level + '</td><td>' +
-				m[td1.text()].rank_name.substr(0,9) +
-				(m[td1.text()].rank_name.length > 9 ? '...' : '') + '</td>');
+		var tdOne = $('tr td:first-child', list);
+		tdOne.html(function(_index, oldhtml) {
+			var username = $(oldhtml).text().trim();
+			return '<a href="index.php?cmd=profile&player_id=' +
+				m[username].id + '">' +
+				username + '</a>';
+		});
+		tdOne.after(function() {
+			var username = $(this).text();
+			return '<td>' + m[username].level +
+				'</td><td>' + m[username].rank_name.substr(0,9) +
+				(m[username].rank_name.length > 9 ? '...' : '') + '</td>';
 		});
 		list.append(tfoot);
-		list.dataTable({pageLength: 25,
-			lengthMenu: [[25, 50, -1], [25, 50, 'All']],
-			columns: FSH.Layout.advisorColumns,
-			stateSave: true,
-			stateDuration: 0
-		});
+		setTimeout(function() {
+			list.dataTable({
+				pageLength: 25,
+				lengthMenu: [[25, 50, -1], [25, 50, 'All']],
+				autoWidth: false,
+				columns: FSH.guildAdvisor.advisorColumns,
+				stateSave: true,
+				stateDuration: 0
+			});
+		}, 0);
 		FSH.guildAdvisor.summaryLink();
 
 		FSH.ga.end('JS Perf', 'injectAdvisorNew');
@@ -2718,7 +2719,8 @@ FSH.guildAdvisor = { // jQuery
 			data: data,
 			pageLength: 25,
 			lengthMenu: [[25, 50, -1], [25, 50, 'All']],
-			columns: FSH.Layout.advisorColumns,
+			autoWidth: false,
+			columns: FSH.guildAdvisor.advisorColumns,
 			stateSave: true,
 			stateDuration: 0
 		});
