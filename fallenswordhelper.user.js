@@ -1369,21 +1369,21 @@ FSH.Helper = {
 
 		if ($('#worldPage').length > 0) { // new map
 			if (callback.groupEvaluation) {
-				if ($('div#creatureEvaluatorGroup').length === 0) {
+				if ($('#creatureEvaluatorGroup').length === 0) {
 					$('#dialog-viewcreature')
 						.append('<div id="creatureEvaluatorGroup" ' +
 							'style="clear:both;"></div>');
 				}
 				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
-				$('div#creatureEvaluatorGroup').html(tempdata);
+				$('#creatureEvaluatorGroup').html(tempdata);
 			} else {
-				if ($('div#creatureEvaluator').length === 0) {
+				if ($('#creatureEvaluator').length === 0) {
 					$('#dialog-viewcreature')
 						.append('<div id="creatureEvaluator" ' +
 							'style="clear:both;"></div>');
 				}
 				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
-				$('div#creatureEvaluator').html(tempdata);
+				$('#creatureEvaluator').html(tempdata);
 			}
 		} else {
 			var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
