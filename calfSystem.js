@@ -534,11 +534,19 @@ FSH.Data = {
 		'class="soundOff quicklink tip-static" ' +
 		'data-tipped="Turn On Sound when you have a new log message"></a>',
 
+	greenDiamondSrc:
+		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH' +
+		'5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D',
+
 	greenDiamond:
 		'<img width="10" height="10" style="float:left" src="' +
 		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH' +
 		'5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D' +
 		'" class="tip-static" data-tipped="Online">',
+
+	yellowDiamondSrc:
+		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAAC' +
+		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D',
 
 	yellowDiamond:
 		'<img width="10" height="10" style="float:left" src="' +
@@ -546,11 +554,23 @@ FSH.Data = {
 		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
 		'" class="tip-static" data-tipped="Offline">',
 
+	orangeDiamondSrc:
+		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAAC' +
+		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D',
+
 	orangeDiamond:
 		'<img width="10" height="10" style="float:left" src="' + 
 		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAAC' +
 		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
 		'" class="tip-static" data-tipped="Offline">',
+
+	// This is different to the one below
+	offlineDotSrc:
+		'data:image/gif;base64,R0lGODlhCgAKAMQAACEhIaWlpVpaWjk5OcbGxnt7e3Nzc' +
+		'0pKSikpKa2trWtra4yMjMzMzLW1tUJCQjMzM1JSUtbW1mNjY4SEhJSUlL29vf///wAA' +
+		'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEHABYALAAAAAAKAAoAAAVCoGUVDEM' +
+		'kimgFUWQmgWFJpdkEkwElRF8lOcEhQYRNFBDHgEJZBA8PBEJhUAgHCID2IEg+tFqH5T' +
+		'D4gh8qR1Y7EIUAADs=',
 
 	offlineDot:
 		'<img width="10" height="10" style="float:left" src="' +
@@ -562,6 +582,14 @@ FSH.Data = {
 		'BIKFYEeAAoJGRUTdJc1FgIiAx1mZhtHHQMqIgQCHAGtKiEAOw%3D%3D' +
 		'" class="tip-static" data-tipped="Offline">',
 
+	sevenDayDotSrc:
+		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNr' +
+		'azEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1' +
+		'zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQA' +
+		'V8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl' +
+		'0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8U' +
+		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7',
+
 	sevenDayDot:
 		'<img width="10" height="10" style="float:left" src="' +
 		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNr' +
@@ -571,6 +599,14 @@ FSH.Data = {
 		'0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8U' +
 		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7' +
 		'" class="tip-static" data-tipped="Offline">',
+
+	redDotSrc:
+		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9zn' +
+		'DEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudS' +
+		'a85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV' +
+		'1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiL' +
+		'KpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTH' +
+		'SICFGSeSQcCKiIBDA0MoiohADs%3D',
 
 	redDot:
 		'<img width="10" height="10" style="float:left" src="' +
@@ -1319,12 +1355,72 @@ FSH.Data = {
 		'14': 1, '15': 1, '16': 1, '100': 1,
 		'101': 1, '102': 1, '103': 1, '104': 1,
 		'105': 1, '106': 1
-	}
+	},
+
+	lastActivityRE:
+		/<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/,
 
 };
 
 FSH.Layout = {
 	// To be moved back into main script in future as it does not compress well
+
+	onlineSrc: function(obj) {
+		var img;
+		var min = 0;
+		if (obj.day)  {min += parseInt(obj.day,  10) * 1440;}
+		if (obj.hour) {min += parseInt(obj.hour, 10) * 60;}
+		if (obj.min)  {min += parseInt(obj.min,  10);}
+		// if (obj.last_login) {
+			// min = Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+		// }
+		// last_login is 'false' over 30 days
+		// if ('last_login' in obj && !obj.last_login) {min = 99999;}
+		if (min < 2) {
+			img = FSH.Data.greenDiamondSrc;
+		} else if (min < 5) {
+			img = FSH.Data.yellowDiamondSrc;
+		} else if (min < 30) {
+			img = FSH.Data.orangeDiamondSrc;
+		} else if (min < 60) {
+			img = FSH.Data.offlineDotSrc;
+		} else if (min < 10080) {
+			return; // img = FSH.Data.offlineDotSrc;
+		} else if (min < 44640) {
+			img = FSH.Data.sevenDayDotSrc;
+		} else {
+			img = FSH.Data.redDotSrc;
+		}
+		return img;
+	},
+
+	changeOnlineDotSrc: function(contactLink){
+		var lastActivity = FSH.Data.lastActivityRE
+			.exec(contactLink.getAttribute('data-tipped'));
+		var newSrc = FSH.Layout.onlineSrc({
+			min: lastActivity[3],
+			hour: lastActivity[2],
+			day: lastActivity[1]
+		});
+		if (newSrc) {
+			contactLink.parentNode.previousSibling.firstChild
+				.setAttribute('src', newSrc);
+		}
+	},
+
+	colouredDots: function() {
+
+		FSH.ga.start('JS Perf', 'colouredDots');
+
+		if (!FSH.System.getValue('enhanceOnlineDots')) {return;}
+		var profileAlliesEnemies = document.querySelectorAll(
+			'#pCC a[data-tipped*="Last Activity"]');
+		Array.prototype.forEach.call(profileAlliesEnemies,
+			FSH.Layout.changeOnlineDotSrc);
+
+		FSH.ga.end('JS Perf', 'colouredDots');
+
+	},
 
 	onlineDot: function(obj) {
 		var img;
@@ -1347,7 +1443,7 @@ FSH.Layout = {
 			img = FSH.Data.offlineDot;
 		} else if (min < 44640) {
 			img = FSH.Data.sevenDayDot;
-		} else if (min >= 44640) {
+		} else {
 			img = FSH.Data.redDot;
 		}
 		return img;
@@ -1475,9 +1571,8 @@ FSH.Layout = {
 	},
 
 	playerId: function() {
-		var playerIdRE = /fallensword.com\/\?ref=(\d+)/;
 		var thePlayerId = parseInt(document.getElementById('holdtext')
-			.textContent.match(playerIdRE)[1], 10);
+			.textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
 		FSH.System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
@@ -4269,136 +4364,105 @@ FSH.profile = { // Legacy
 
 		FSH.ga.start('JS Perf', 'injectProfile');
 
+		var avyImg = $('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+		if (avyImg.length !== 1) {return;}
+		var playername = $('#pCC h1').text();
+		var playerid = FSH.System.getUrlParameter('player_id');
+		if (!playerid) {
+			playerid = FSH.Layout.playerId();
+			// self inventory
+			FSH.profile.selfProfile();
+		}
+
+		var avyExtrasDiv = document.createElement('DIV');
+		avyExtrasDiv.align = 'center';
+		FSH.profile.profileInjectQuickButton(avyExtrasDiv, playerid, playername);
+		avyImg.parent().append(avyExtrasDiv);
+
+		FSH.profile.profileRenderBio(playername);
+		FSH.Helper.buffCost = {'count':0,'buffs':{}};
+		FSH.profile.bioAddEventListener();
+
+		//************** yuuzhan having fun
+		$('img[oldtitle="yuuzhan\'s Avatar"]')
+			.attr('src','http://evolutions.yvong.com/images/tumbler.gif')
+			.click(function(){alert('Winner!');});
+		//**************
+
 		FSH.profile.updateQuickBuff();
 		FSH.profile.updateStatistics();
-		var playerid;
-		var player = FSH.System.findNode('//textarea[@id="holdtext"]');
-		var avyImg;
-		var playername;
-		avyImg = FSH.System.findNode('//img[contains(@oldtitle, "s Avatar")]');
-		if (avyImg) {playername = avyImg.getAttribute('oldtitle');}
-		if (!avyImg) {return;}
-
-		if(document.URL.indexOf('player_id') !== -1){
-			var playeridRE = document.URL.match(/player_id=(\d+)/);
-			if (playeridRE) {playerid = playeridRE[1];}
-		}
-		var idindex;
-		//************** yuuzhan having fun
-		$('img[oldtitle="yuuzhan\'s Avatar"]').click(function(){alert('Winner!');});
-		$('img[oldtitle="yuuzhan\'s Avatar"]')
-			.attr('src','http://evolutions.yvong.com/images/tumbler.gif');
-		//**************
 		FSH.profile.profileInjectGuildRel();
 		if (FSH.System.getValue('enableBioCompressor')) {FSH.profile.compressBio();}
-		var isSelfRE = $('#backpack_tabs').length > 0;
-		if (player) {
-			if (!playerid) {
-				playerid = player.innerHTML;
-				idindex = playerid.indexOf('?ref=') + 5;
-				playerid = playerid.substr(idindex);
-			}
-
-			avyImg.style.borderStyle='none';
-
-			playername = playername.substr(0, playername.indexOf('\'s Avatar'));
-
-			var avyExtrasDiv = document.createElement('DIV');
-			avyImg.parentNode.appendChild(avyExtrasDiv);
-			avyExtrasDiv.align = 'center';
-			FSH.profile.profileInjectQuickButton(avyExtrasDiv, playerid, playername);
-			FSH.profile.profileRenderBio(playername);
-			FSH.Helper.buffCost={'count':0,'buffs':{}};
-
-			FSH.profile.bioAddEventListener();
-		}
-
-		if (isSelfRE) { // self inventory
-
-			FSH.profile.fastDebuff();
-
-			FSH.profile.profileParseAllyEnemy();
-			if (FSH.System.getValue('enableQuickDrink')) {
-				FSH.profile.injectFastWear();
-			}
-			FSH.profile.profileComponents();
-
-			// quick wear manager link
-			var node = FSH.System.findNode('//span/a[@href="index.php?cmd=profile' +
-				'&subcmd=togglesection&section_id=2"]');
-			if (node) {
-				node.parentNode.innerHTML += '&nbsp;[<a href="/index.php?cmd=notepad' +
-					'&blank=1&subcmd=quickwear"><span style="color:blue;">Quick&nbsp;' +
-					'Wear</span></a>]';
-			}
-			//select all link
-			node = FSH.System.findNode('//span/a[contains(@href,"cmd=profile' +
-				'&subcmd=dropitems")]');
-			if (node) {
-				node.parentNode.innerHTML += '&nbsp;<span ' +
-					'id="Helper:profileSelectAll" style="cursor:pointer; ' +
-					'text-decoration:underline; font-size:x-small; color:blue;">' +
-					'[All]</span>';
-				document.getElementById('Helper:profileSelectAll')
-					.addEventListener('click', FSH.profile.profileSelectAll, true);
-			}
-
-			// store the VL of the player
-			var virtualLevel = parseInt(FSH.System.findNode(
-				'//td[a/b[.="VL"] or b/a[.="VL"]]/following-sibling::td[1]'
-				).textContent,10);
-			if (FSH.System.intValue($('dt.stat-level:first').next().text()) ===
-				virtualLevel) {
-				FSH.System.setValue('characterVirtualLevel','');
-			} else {
-				FSH.System.setValue('characterVirtualLevel',virtualLevel);
-			}
-		}
-
 		FSH.common.addStatTotalToMouseover();
 
-		//enhance colored dots
-		var enhanceOnlineDots = FSH.System.getValue('enhanceOnlineDots');
-		if (!enhanceOnlineDots) {return;}
-		var profileAlliesEnemies = FSH.System.findNodes(
-			'//div[@id="profileLeftColumn"]//table/tbody/tr/td/a[' +
-			'contains(@data-tipped,"Last Activity")]');
-		if (!profileAlliesEnemies) {return;}
-		var re = new RegExp('<td>Last Activity:</td><td>(\\d+)d (\\d+)h (\\d+)m (\\d+)s</td>');
-		for (var i=0;i<profileAlliesEnemies.length ;i+= 1 ) {
-			var contactLink = profileAlliesEnemies[i];
-			var lastActivity = re.exec($(contactLink).data('tipped'));
-			var lastActivityIMG = FSH.Layout.onlineDot({
-					min: lastActivity[3],
-					hour: lastActivity[2],
-					day: lastActivity[1]
-				});
-			contactLink.parentNode.previousSibling
-				.innerHTML = lastActivityIMG;
-		}
+		setTimeout(FSH.Layout.colouredDots);
 
 		FSH.ga.end('JS Perf', 'injectProfile');
 
 	},
 
+	selfProfile: function() {
+		FSH.profile.fastDebuff();
+		FSH.profile.profileParseAllyEnemy();
+		FSH.profile.injectFastWear();
+		FSH.profile.profileComponents();
+		FSH.profile.quickWearLink();
+		FSH.profile.selectAllLink();
+		FSH.profile.storeVL();
+	},
+
+	quickWearLink: function() {
+		// quick wear manager link
+		var node = $('#profileRightColumn a[href="index.php?cmd=profile' +
+			'&subcmd=togglesection&section_id=2"]');
+		if (node.length !== 1) {return;}
+		node.parent().append('&nbsp;[<a href="/index.php?cmd=notepad' +
+			'&blank=1&subcmd=quickwear" class="fshBlue">Quick&nbsp;Wear</a>]');
+	},
+
+	selectAllLink: function() {
+		//select all link
+		var node = $('#profileRightColumn a[href="index.php?cmd=profile' +
+			'&subcmd=dropitems"]');
+		if (node.length !== 1) {return;}
+		var allSpan = $('<span class="smallLink">All</span>');
+		allSpan.click(FSH.profile.profileSelectAll);
+		node.parent().append(
+			$('<span/>').append('[&nbsp;').append(allSpan).append('&nbsp;]&nbsp;'));
+	},
+
+	storeVL: function() {
+		// store the VL of the player
+		var virtualLevel = parseInt($('#stat-vl').text(), 10);
+		if (FSH.System.intValue($('dt.stat-level').first().next().text()) ===
+			virtualLevel) {
+			FSH.System.setValue('characterVirtualLevel', ''); // ?
+		} else {
+			FSH.System.setValue('characterVirtualLevel', virtualLevel);
+		}
+	},
+
 	updateQuickBuff: function() { // jQuery
-		var qb = $('div#profileRightColumn a:contains("Quick Buff")');
+		var qb = $('#profileRightColumn a[href*="quickbuff"]');
 		if (qb.length !== 0) {
 			qb.attr('href', qb.attr('href').replace(/, 500/g,', 1000'));
 		}
 	},
 
 	updateStatistics: function() { // jQuery
-		var charStats = $('#profileLeftColumn table').first()
-			.attr('id', 'characterStats');
-		var tblCells = $('td', charStats).has('table').has('font');
-		tblCells.each(function(i, e) {
-			var tde = $('td', e);
-			$(e).attr('id', tde.first().attr('id'));
-			$(e).html(tde.first().html().replace(/&nbsp;/g, ' ') +
-				'<div class="profile-stat-bonus">' +
-				tde.last().text() + '</div>');
-		});
+		var charStats = $('#profileLeftColumn table').first();
+			/* .attr('id', 'characterStats'); */
+		var tblCells = $('td', charStats).removeAttr('width colspan')
+			.has('table').has('font');
+		tblCells.each(FSH.profile.removeStatTable);
+	},
+
+	removeStatTable: function(i, e) {
+		var tde = $('td', e);
+		/* $(e).attr('id', tde.first().attr('id')); */
+		$(e).html(tde.first().html().replace(/&nbsp;/g, ' ') +
+			'<div class="profile-stat-bonus">' +
+			tde.last().text() + '</div>');
 	},
 
 	profileSelectAll: function() { // jQuery
