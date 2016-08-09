@@ -1330,7 +1330,7 @@ FSH.Data = {
 		realms: {'-': {'-': {'-': {'-': 'guide.allowBack'}}}}, //UFSG
 		relics: {'-': {'-': {'-': {'-': 'guide.allowBack'}}}}, //UFSG
 		shops: {'-': {'-': {'-': {'-': 'guide.allowBack'}}}}, //UFSG
-		scavenging: {'process': {'-': {'-': {'-': 'scavenging.injectScavenging'}}}}, // No longer in use???
+		scavenging: {'-': {'-': {'-': {'-': 'scavenging.injectScavenging'}}}},
 		temple: {'-': {'-': {'-': {'-': 'notification.parseTemplePage'}}}},
 		composing: {'-': {'-': {'-': {'-': 'composing.injectComposing'}}},
 			'create': {'-': {'-': {'-': 'composing.create'}}}},
@@ -8302,10 +8302,10 @@ FSH.environment = { // Legacy
 			FSH.ga.screenview('unknown.guildAdvisor.injectAdvisor');
 			FSH.guildAdvisor.injectAdvisor();
 		}
-		if (FSH.System.findNode('//a[.="Back to Scavenging"]')) {
-			FSH.ga.screenview('unknown.scavenging.injectScavenging');
-			FSH.scavenging.injectScavenging(); // Is this used???
-		}
+		// if (FSH.System.findNode('//a[.="Back to Scavenging"]')) {
+			// FSH.ga.screenview('unknown.scavenging.injectScavenging');
+			// FSH.scavenging.injectScavenging(); // Is this used???
+		// }
 		if ($('#pCC img[title="Inventing"]').length > 0) {
 			FSH.ga.screenview('unknown.Helper.injectInvent');
 			FSH.Helper.injectInvent();
@@ -10398,7 +10398,18 @@ FSH.quickExtract = { // Legacy - No longer required?
 
 FSH.scavenging = { // Legacy - Not in use?
 
-	injectScavenging: function() { // Legacy - Not in use?
+	injectScavenging: function() {
+		$('#pCC input[value="Scavenge"]').click(FSH.scavenging.dontPost);
+	},
+
+	dontPost: function(e) { // jQuery
+		e.preventDefault();
+		window.location = 'index.php?cmd=scavenging&subcmd=process' +
+			'&cave_id=' + $('#pCC input[name="cave_id"]:checked').val() +
+			'&gold=' + $('#gold').val() + '&submit=Scavenge';
+	},
+
+	multiSummary: function() { // Legacy - Bad, could be repurposed
 		var injectHere=FSH.System.findNode('//b[contains(.,"Multiple Scavenging Results")]/..');
 		if (injectHere) { // multi scavenging
 			var victories=FSH.System.findNodes('//td[contains(.,"victorious")]');
@@ -10429,7 +10440,7 @@ FSH.scavenging = { // Legacy - Not in use?
 		FSH.System.xmlhttp('index.php?cmd=world', FSH.scavenging.getBpCountFromWorld);
 	},
 
-	getBpCountFromWorld: function(responseText) { // Legacy - Not in use?
+	getBpCountFromWorld: function(responseText) { // Legacy - Bad, could be repurposed
 		// backpack counter
 		var doc=FSH.System.createDocument(responseText);
 		var bp=FSH.System.findNode('//td[a/img[contains(@src,"_manageitems.gif")]]',doc);
