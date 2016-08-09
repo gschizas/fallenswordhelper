@@ -203,17 +203,17 @@ FSH.System = {
 		return nodes;
 	},
 
-	findNodeText: function(xpath, doc) {
-		var node = FSH.System.findNode(xpath, doc);
-		if (!node) {return null;}
-		return node.textContent;
-	},
+	// findNodeText: function(xpath, doc) {
+		// var node = FSH.System.findNode(xpath, doc);
+		// if (!node) {return null;}
+		// return node.textContent;
+	// },
 
-	findNodeInt: function(xpath, doc) {
-		var node = FSH.System.findNode(xpath, doc);
-		if (!node) {return null;}
-		return FSH.System.intValue(node.textContent);
-	},
+	// findNodeInt: function(xpath, doc) {
+		// var node = FSH.System.findNode(xpath, doc);
+		// if (!node) {return null;}
+		// return FSH.System.intValue(node.textContent);
+	// },
 
 	createDocument: function(details) {
 		// Use DOMParser to prevent img src tags downloading
@@ -301,7 +301,7 @@ FSH.System = {
 		return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 	},
 
-	uniq: function (arr, removeBy){
+	uniq: function (arr, removeBy){ // Ugly but fast
 		var seen = {};
 		var out = [];
 		var len = arr.length;
@@ -375,15 +375,15 @@ FSH.System = {
 		}
 	},
 
-	addStyle: function(css) {
-		var style = document.createElement('style');
-		style.textContent = css;
-		document.getElementsByTagName('head')[0].appendChild(style);
-	},
+	// addStyle: function(css) {
+		// var style = document.createElement('style');
+		// style.textContent = css;
+		// document.getElementsByTagName('head')[0].appendChild(style);
+	// },
 
-	openInTab: function(url){
-		window.open(url, '_blank');
-	},
+	// openInTab: function(url){
+		// window.open(url, '_blank');
+	// },
 
 	escapeHtml: function(unsafe) {
 		return unsafe
@@ -2269,6 +2269,9 @@ FSH.composing = { // jQuery
 
 	injectComposeAlert: function() { //jquery
 		if (FSH.cmd === 'composing') {return;}
+
+		FSH.ga.start('JS Perf', 'injectComposeAlert');
+
 		var needToCompose = FSH.System.getValue('needToCompose');
 		if (needToCompose) {
 			FSH.composing.displayComposeMsg();
@@ -2277,9 +2280,15 @@ FSH.composing = { // jQuery
 		var lastComposeCheck = FSH.System.getValue('lastComposeCheck');
 		if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
 		$.get('index.php?cmd=composing', FSH.composing.parseComposing);
+
+		FSH.ga.end('JS Perf', 'injectComposeAlert');
+
 	},
 
 	parseComposing: function(data) { //jquery
+
+		FSH.ga.start('JS Perf', 'parseComposing');
+
 		var doc;
 		if (FSH.cmd !== 'composing') {
 			doc = data;
@@ -2305,6 +2314,9 @@ FSH.composing = { // jQuery
 			FSH.System.setValue('needToCompose', false);
 			FSH.System.setValue('lastComposeCheck', eta);
 		}
+
+		FSH.ga.end('JS Perf', 'parseComposing');
+
 	},
 
 	displayComposeMsg: function() { //jquery
@@ -2365,6 +2377,8 @@ FSH.composing = { // jQuery
 
 	create: function() {
 
+		FSH.ga.start('JS Perf', 'composing.create');
+
 		$('#composing-add-skill').on('click', function() {
 			$('#composing-skill-level-input')
 				.val($('#composing-skill-level-max').text());
@@ -2375,6 +2389,8 @@ FSH.composing = { // jQuery
 				.val($('#composing-skill-level-max').text());
 		});
 
+		FSH.ga.end('JS Perf', 'composing.create');
+
 	},
 
 };
@@ -2384,6 +2400,9 @@ FSH.notification = { // jQuery
 	injectTempleAlert: function() { //jquery
 		//Checks to see if the temple is open for business.
 		if (FSH.cmd === 'temple') {return;}
+
+		FSH.ga.start('JS Perf', 'injectTempleAlert');
+
 		var templeAlertLastUpdate = FSH.System.getValue('lastTempleCheck');
 		var needToPray = FSH.System.getValue('needToPray');
 		var needToParse = false;
@@ -2399,11 +2418,17 @@ FSH.notification = { // jQuery
 		if (needToParse) {
 			$.get('index.php?cmd=temple', FSH.notification.parseTemplePage);
 		}
+
+		FSH.ga.end('JS Perf', 'injectTempleAlert');
+
 	},
 
 	parseTemplePage: function(responseText) { //native
 		var checkNeedToPray, doc;
 		if (!FSH.Helper.enableTempleAlert) {return;}
+
+		FSH.ga.start('JS Perf', 'parseTemplePage');
+
 		if (FSH.cmd !== 'temple') {
 			doc = FSH.System.createDocument(responseText);
 		} else {
@@ -2418,6 +2443,9 @@ FSH.notification = { // jQuery
 		FSH.System.setValue('needToPray', needToPray);
 		FSH.System.setValue('lastTempleCheck', new Date()
 			.setUTCHours(23, 59, 59, 999) + 1); // midnight
+
+		FSH.ga.end('JS Perf', 'parseTemplePage');
+
 	},
 
 	displayDisconnectedFromGodsMessage: function() { //jquery
@@ -4402,10 +4430,6 @@ FSH.profile = { // Legacy
 		FSH.profile.profileInjectQuickButton(avyExtrasDiv, playerid, playername);
 		avyImg.parent().append(avyExtrasDiv);
 
-		FSH.profile.profileRenderBio(playername);
-		FSH.Helper.buffCost = {'count':0,'buffs':{}};
-		FSH.profile.bioAddEventListener();
-
 		//************** yuuzhan having fun
 		$('img[oldtitle="yuuzhan\'s Avatar"]')
 			.attr('src','http://evolutions.yvong.com/images/tumbler.gif')
@@ -4415,7 +4439,10 @@ FSH.profile = { // Legacy
 		FSH.profile.updateQuickBuff();
 		FSH.profile.updateStatistics();
 		FSH.profile.profileInjectGuildRel();
+		FSH.profile.profileRenderBio(playername);
 		if (FSH.System.getValue('enableBioCompressor')) {FSH.profile.compressBio();}
+		FSH.Helper.buffCost = {'count':0,'buffs':{}};
+		FSH.profile.bioAddEventListener(); // Must be near end - BAD!
 		FSH.common.addStatTotalToMouseover();
 
 		setTimeout(FSH.Layout.colouredDots);
@@ -5162,22 +5189,46 @@ FSH.profile = { // Legacy
 FSH.logs = { // Legacy
 
 	guildChat: function() { // Native
+
+		FSH.ga.start('JS Perf', 'guildChat');
+
 		FSH.logs.addChatTextArea();
 		FSH.logs.addLogColoring('Chat', 0);
+
+		FSH.ga.end('JS Perf', 'guildChat');
+
 	},
 
 	guildLog: function() { // Native
+
+		FSH.ga.start('JS Perf', 'guildLog');
+
 		FSH.logs.addLogColoring('GuildLog', 1);
 		FSH.logs.addGuildLogWidgets();
+
+		FSH.ga.end('JS Perf', 'guildLog');
+
 	},
 
 	outbox: function() { // Native
+
+		FSH.ga.start('JS Perf', 'outbox');
+
 		FSH.logs.addLogColoring('OutBox', 1);
+
+		FSH.ga.end('JS Perf', 'outbox');
+
 	},
 
 	playerLog: function() { // Native
+
+		FSH.ga.start('JS Perf', 'playerLog');
+
 		FSH.logs.addLogColoring('PlayerLog', 1);
 		FSH.logs.addLogWidgets();
+
+		FSH.ga.end('JS Perf', 'playerLog');
+
 	},
 
 	addLogColoring: function(logScreen, dateColumn) { // Legacy
@@ -5584,49 +5635,72 @@ FSH.logs = { // Legacy
 FSH.lists = { // Native
 
 	injectAuctionSearch: function(content) { // Native
+
+		FSH.ga.start('JS Perf', 'injectAuctionSearch');
+
 		if (!content) {content = FSH.Layout.notebookContent();}
-		content.innerHTML=FSH.Layout.makePageHeader('Trade Hub Quick Search','','','')+
-			'<div class=content>This screen allows you to set up some quick search templates for the Auction House. '+
-				'The Display on AH column indicates if the quick search will show on the short list on the '+
-				'Auction House main screen. A maximum of 36 items can show on this list '+
-				'(It will not show more than 36 even if you have more than 36 flagged). '+
-				'To edit items, either use the large text area below, '+
-				'or add a new entry and delete the old one. You can always reset the list to the default values.</div>'+
+		content.innerHTML =
+			FSH.Layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
+			'<div class=content>This screen allows you to set up some quick ' +
+				'search templates for the Auction House. The Display on AH column ' +
+				'indicates if the quick search will show on the short list on the ' +
+				'Auction House main screen. A maximum of 36 items can show on this ' +
+				'list (It will not show more than 36 even if you have more than 36 ' +
+				'flagged). To edit items, either use the large text area below, or ' +
+				'add a new entry and delete the old one. You can always reset the ' +
+				'list to the default values.</div>'+
 			'<div style="font-size:small;" id="Helper:Auction Search Output">' +
 			'</div>';
 		// global parameters for the meta function generateManageTable
-		FSH.Helper.param={};
-		FSH.Helper.param={'id':'Helper:Auction Search Output',
-			'headers':['Category','Nickname','Quick Search Text','Display in AH?'],
-			'fields':['category','nickname','searchname','displayOnAH'],
-			'tags':['textbox','textbox','textbox','checkbox'],
-			'url':['','','index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@',''],
-			'currentItems':FSH.System.getValueJSON('quickSearchList'),
-			'gmname':'quickSearchList',
-			'sortField':'category',
-			'categoryField':'category',
-			'showRawEditor':true};
+		FSH.Helper.param = {};
+		FSH.Helper.param = {
+			'id':'Helper:Auction Search Output',
+			'headers': ['Category', 'Nickname', 'Quick Search Text',
+				'Display in AH?'],
+			'fields': ['category', 'nickname', 'searchname', 'displayOnAH'],
+			'tags': ['textbox', 'textbox', 'textbox', 'checkbox'],
+			'url': ['', '',
+				'index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@', ''],
+			'currentItems': FSH.System.getValueJSON('quickSearchList'),
+			'gmname': 'quickSearchList',
+			'sortField': 'category',
+			'categoryField': 'category',
+			'showRawEditor': true
+		};
 		FSH.lists.generateManageTable();
+
+		FSH.ga.end('JS Perf', 'injectAuctionSearch');
+
 	},
 
 	injectQuickLinkManager: function(content) { // Native
 
+		FSH.ga.start('JS Perf', 'injectQuickLinkManager');
+
 		if (!content) {content = FSH.Layout.notebookContent();}
-		content.innerHTML=FSH.Layout.makePageTemplate('Quick Links','','','','quickLinkAreaId');
+		content.innerHTML =
+			FSH.Layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
 
 		// global parameters for the meta function generateManageTable
-		FSH.Helper.param={};
-		FSH.Helper.param={'id':'quickLinkAreaId',
-			'headers':['Name','URL','New [<span style="cursor:pointer; text-decoration:underline;" title="Open page in a new window">?</span>]'],
-			'fields':['name','url','newWindow'],
-			'tags':['textbox','textbox','checkbox'],
-			'currentItems':FSH.System.getValueJSON('quickLinks'),
-			'gmname':'quickLinks',
-			'showRawEditor':true};
+		FSH.Helper.param = {};
+		FSH.Helper.param = {
+			'id': 'quickLinkAreaId',
+			'headers': ['Name', 'URL',
+				'New [<span style="cursor:pointer; text-decoration:underline;" ' +
+				'title="Open page in a new window">?</span>]'],
+			'fields': ['name', 'url', 'newWindow'],
+			'tags': ['textbox', 'textbox', 'checkbox'],
+			'currentItems': FSH.System.getValueJSON('quickLinks'),
+			'gmname': 'quickLinks',
+			'showRawEditor': true
+		};
 		FSH.lists.generateManageTable();
+
+		FSH.ga.end('JS Perf', 'injectQuickLinkManager');
+
 	},
 
-	generateManageTable: function() { // Native
+	generateManageTable: function() { // Native - Ugly but fast
 		var i, j, result='<table cellspacing=2 cellpadding=2 style="table-layout: fixed; word-wrap: break-word;" width=100%><tr bgcolor=#CD9E4B>';
 		var isArrayOnly= FSH.Helper.param.fields.length === 0;
 		for (i=0;i<FSH.Helper.param.headers.length;i += 1) {
