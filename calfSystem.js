@@ -224,39 +224,31 @@ FSH.System = {
 
 	formatDateTime: function(aDate) {
 		var yyyy = aDate.getFullYear();
-		var mon = aDate.getMonth()+1;
-		if (mon<10) {mon = '0' + mon;}
+		var mon = aDate.getMonth() + 1;
+		if (mon < 10) {mon = '0' + mon;}
 		var dd = aDate.getDate();
-		if (dd<10) {dd = '0' + dd;}
+		if (dd < 10) {dd = '0' + dd;}
 
-		var hh=aDate.getHours();
-		if (hh<10) {hh = '0' + hh;}
-		var mm=aDate.getMinutes();
-		if (mm<10) {mm = '0' + mm;}
-		var ss=aDate.getSeconds();
-		if (ss<10) {ss = '0' + ss;}
-		var result = yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
-		return result;
+		var hh = aDate.getHours();
+		if (hh < 10) {hh = '0' + hh;}
+		var mm = aDate.getMinutes();
+		if (mm < 10) {mm = '0' + mm;}
+		var ss = aDate.getSeconds();
+		if (ss < 10) {ss = '0' + ss;}
+		return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 	},
 
 	formatShortDate: function(aDate) {
-		var result;
-		var months = ['January', 'February', 'March', 'April', 'May', 'June',
-			'July', 'August', 'September', 'October', 'November', 'December'];
-		var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-			'Friday', 'Saturday'];
 		var yyyy = aDate.getFullYear();
 		var dd = aDate.getDate();
-		if (dd<10) {dd = '0' + dd;}
-		var ddd = days[aDate.getDay()].substr(0, 3);
-		var month = months[aDate.getMonth()].substr(0, 3);
-		var hh=aDate.getHours();
-		if (hh<10) {hh = '0' + hh;}
-		var mm=aDate.getMinutes();
-		if (mm<10) {mm = '0' + mm;}
-		result = hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' +
-			yyyy;
-		return result;
+		if (dd < 10) {dd = '0' + dd;}
+		var ddd = FSH.Data.days[aDate.getDay()].substr(0, 3);
+		var month = FSH.Data.months[aDate.getMonth()].substr(0, 3);
+		var hh = aDate.getHours();
+		if (hh < 10) {hh = '0' + hh;}
+		var mm = aDate.getMinutes();
+		if (mm < 10) {mm = '0' + mm;}
+		return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
 	},
 
 	saveValueForm: function(name) {
@@ -503,6 +495,12 @@ FSH.System.init();
 
 FSH.Data = {
 	// To be moved back into main script in future as it does not compress well
+
+	days: ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
+		'Friday', 'Saturday'],
+
+	months: ['January', 'February', 'March', 'April', 'May', 'June',
+		'July', 'August', 'September', 'October', 'November', 'December'],
 
 	plantFromComponent : {
 		'Amber Essense':      'Amber Plant',
@@ -2387,16 +2385,21 @@ FSH.notification = { // jQuery
 	},
 
 	injectJoinAllLink: function() { // jQuery
+		var newGroup = $('li:contains("New attack group created.")');
+		if (newGroup.length !== 1) {return;}
 		var groupJoinHTML = '';
 		if (!FSH.System.getValue('enableMaxGroupSizeToJoin')) {
-			groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall"><span class="notification-icon"></span>'+
+			groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
+				'subcmd2=joinall"><span class="notification-icon"></span>'+
 				'<p class="notification-content">Join all attack groups.</p></a>';
 		} else {
 			var maxGroupSizeToJoin = FSH.System.getValue('maxGroupSizeToJoin');
-			groupJoinHTML = ' <a href="index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize"><span class="notification-icon"></span>'+
-				'<p class="notification-content">Join all attack groups less than size ' + maxGroupSizeToJoin + '.</p></a>';
+			groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
+				'subcmd2=joinallgroupsundersize"><span class="notification-icon">' +
+				'</span><p class="notification-content">Join all attack groups ' +
+				'less than size ' + maxGroupSizeToJoin + '.</p></a>';
 		}
-		$('li:contains("New attack group created.")').after('<li class="notification">' + groupJoinHTML + '</li>');
+		newGroup.after('<li class="notification">' + groupJoinHTML + '</li>');
 	},
 
 };
@@ -2420,7 +2423,6 @@ FSH.guildReport = { // bad jQuery
 					FSH.Helper.membrList[oldhtml].id + '">' + oldhtml +
 					'</a> [ <span class="a-reply fshLink" target_player=' +
 					oldhtml + '>m</span> ]';
-				// );
 			});
 	},
 
@@ -7643,12 +7645,12 @@ FSH.environment = { // Legacy
 		if (typeof window.jQuery === 'undefined') {return;}
 
 		if (FSH.System.getValue('playNewMessageSound')) {
-			FSH.environment.doMsgSound();
+			setTimeout(FSH.environment.doMsgSound);
 		}
 
 		// This must be at the end in order not to screw up other FSH.System.findNode calls (Issue 351)
 		if (!FSH.Helper.huntingMode) {
-			setTimeout(FSH.environment.injectQuickLinks, 0);
+			setTimeout(FSH.environment.injectQuickLinks);
 		}
 	},
 
@@ -7678,15 +7680,21 @@ FSH.environment = { // Legacy
 			.wrap('<a href="index.php?cmd=bank"></a>');
 	},
 
+	gameHelpLink: function() {
+		// var gameHelpNode = $('div.minibox h3:contains("Game Help")');
+		// $(gameHelpNode).each(function() {
+			// $(this).html('<a href="index.php?cmd=settings" style="color:' +
+				// ' #FFFFFF; text-decoration: underline">' +
+				// $(this).text() + '</a>');
+		// });
+		$('div.minibox h3:contains("Game Help")')
+			.html('<a href="index.php?cmd=settings">Game Help</a>');
+	},
+
 	prepareEnv: function() { // jQuery
 
 		if (FSH.System.getValue('gameHelpLink')) {
-			var gameHelpNode = $('div.minibox h3:contains("Game Help")');
-			$(gameHelpNode).each(function() {
-				$(this).html('<a href="index.php?cmd=settings" style="color:' +
-					' #FFFFFF; text-decoration: underline">' +
-					$(this).text() + '</a>');
-			});
+			setTimeout(FSH.environment.gameHelpLink);
 		}
 
 		FSH.Helper.huntingMode = FSH.System.getValue('huntingMode');
@@ -7696,57 +7704,57 @@ FSH.environment = { // Legacy
 		} else {
 			//move boxes in opposite order that you want them to appear.
 			if (FSH.System.getValue('moveGuildList')) {
-				FSH.Layout.moveRHSBoxUpOnRHS('minibox-guild');
+				setTimeout(FSH.Layout.moveRHSBoxUpOnRHS, 0, 'minibox-guild');
 			}
 			if (FSH.System.getValue('moveOnlineAlliesList')) {
-				FSH.Layout.moveRHSBoxUpOnRHS('minibox-allies');
+				setTimeout(FSH.Layout.moveRHSBoxUpOnRHS, 0, 'minibox-allies');
 			}
 			if (FSH.System.getValue('moveFSBox')) {
-				FSH.Layout.moveRHSBoxToLHS('minibox-fsbox');
+				setTimeout(FSH.Layout.moveRHSBoxToLHS, 0, 'minibox-fsbox');
 			}
 			FSH.environment.getEnvVars();
 			if (FSH.Helper.enableAllyOnlineList ||
 				FSH.Helper.enableEnemyOnlineList) {
-				FSH.allyEnemy.prepareAllyEnemyList();
+				setTimeout(FSH.allyEnemy.prepareAllyEnemyList);
 			}
 			if (FSH.Helper.enableWantedList ||
 				FSH.Helper.enableActiveBountyList) {
-				FSH.activeWantedBounties.prepareBountyData();
+				setTimeout(FSH.activeWantedBounties.prepareBountyData);
 			}
 
 			FSH.environment.navMenu();
-			FSH.environment.statbar();
+			setTimeout(FSH.environment.statbar);
 
-			FSH.environment.injectStaminaCalculator();
-			FSH.environment.injectLevelupCalculator();
+			setTimeout(FSH.environment.injectStaminaCalculator);
+			setTimeout(FSH.environment.injectLevelupCalculator);
 
-			setTimeout(FSH.Layout.injectMenu, 0);
+			setTimeout(FSH.Layout.injectMenu);
 
 			FSH.environment.replaceKeyHandler();
-			FSH.environment.injectFSBoxLog();
-			FSH.environment.fixOnlineGuildBuffLinks();
+			setTimeout(FSH.environment.injectFSBoxLog);
+			setTimeout(FSH.environment.fixOnlineGuildBuffLinks);
 			if (FSH.Helper.enableGuildInfoWidgets) {
-				FSH.environment.addGuildInfoWidgets();
+				setTimeout(FSH.environment.addGuildInfoWidgets);
 			}
 			if (FSH.Helper.enableOnlineAlliesWidgets) {
-				FSH.environment.addOnlineAlliesWidgets();
+				setTimeout(FSH.environment.addOnlineAlliesWidgets);
 			}
-			FSH.notification.injectJoinAllLink();
-			FSH.environment.changeGuildLogHREF();
-			FSH.news.injectHomePageTwoLink();
+			setTimeout(FSH.notification.injectJoinAllLink);
+			setTimeout(FSH.environment.changeGuildLogHREF);
+			setTimeout(FSH.news.injectHomePageTwoLink);
 			if (FSH.Helper.enableTempleAlert) {
-				FSH.notification.injectTempleAlert();}
+				setTimeout(FSH.notification.injectTempleAlert);}
 			if (FSH.Helper.enableUpgradeAlert) {
-				FSH.notification.injectUpgradeAlert();}
+				setTimeout(FSH.notification.injectUpgradeAlert);}
 			if (FSH.Helper.enableComposingAlert) {
-				FSH.composing.injectComposeAlert();}
+				setTimeout(FSH.composing.injectComposeAlert);}
 
-			setTimeout(FSH.messaging.injectQuickMsgDialogJQ, 0);
+			FSH.messaging.injectQuickMsgDialogJQ();
 
 		}
 
 		if (!FSH.System.getValue('hideHelperMenu')) {
-			FSH.helperMenu.injectHelperMenu();
+			setTimeout(FSH.helperMenu.injectHelperMenu);
 		}
 
 	},
@@ -7972,41 +7980,41 @@ FSH.environment = { // Legacy
 	},
 
 	injectStaminaCalculator: function() { // jQuery
-		var staminaMouseover = $('dl#statbar-stamina-tooltip-stamina:first');
-		var stamina = $(staminaMouseover).find('dt.stat-name:first').next().text().replace(/,/g,'');
-		var staminaRE = /([,0-9]+)\s\/\s([,0-9]+)/;
-		var curStamina = FSH.System.intValue(staminaRE.exec(stamina)[1]);
-		var maxStamina = FSH.System.intValue(staminaRE.exec(stamina)[2]);
-		var gainPerHour = $(staminaMouseover).find('dt.stat-stamina-gainPerHour:first').next().text().replace(/,/g,'');
-		var gainPerHourRE = /\+([,0-9]+)/;
-		gainPerHour = FSH.System.intValue(gainPerHourRE.exec(gainPerHour)[1]);
-		var nextGain = $(staminaMouseover).find('dt.stat-stamina-nextGain:first').next().text().replace(/,/g,'');
-		var nextGainRE = /([,0-9]+)m ([,0-9]+)s/;
-		var nextGainMinutes = FSH.System.intValue(nextGainRE.exec(nextGain)[1]);
-		var nextGainHours = nextGainMinutes/60;
-		//get the max hours to still be inside stamina maximum
-		var hoursToMaxStamina = Math.floor((maxStamina - curStamina)/gainPerHour);
-		var millisecondsToMaxStamina = 1000*60*60*(hoursToMaxStamina + nextGainHours);
-		var now = Date.now();
-		var nextHuntMilliseconds = now + millisecondsToMaxStamina;
-		var d = new Date(nextHuntMilliseconds);
-		var nextHuntTimeText = FSH.System.formatShortDate(d);
-		$(staminaMouseover).append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt><dd>' + nextHuntTimeText + '</dd>');
+		var staminaMouseover = $('#statbar-stamina-tooltip-stamina');
+		var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
+			staminaMouseover.find('dt.stat-name').next().text());
+		staminaMouseover
+			.append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
+				FSH.environment.timeBox(
+					$('.stat-stamina-nextGain').next().text(),
+					// get the max hours to still be inside stamina maximum
+					Math.floor(
+						(FSH.System.intValue(stamVals[2]) -
+						FSH.System.intValue(stamVals[1])) /
+						FSH.System.intValue($('.stat-stamina-gainPerHour').next().text())
+					)
+				)
+			);
+	},
+
+	timeBox: function(nextGainTime, hrsToGo) {
+		var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
+		return '<dd>' +
+			FSH.System.formatShortDate(new Date(Date.now() +
+			(hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
+			parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 	},
 
 	injectLevelupCalculator: function() { // jQuery
-		var remainingXP =  parseInt($('dt[class="stat-xp-remaining"]').next('dd').html().replace(/,/g,''), 10);
-		var nextGainTime =  $('dt[class="stat-xp-nextGain"]').next('dd').html();
-		var gain =  parseInt($('dt[class="stat-xp-gainPerHour"]').next('dd').html().replace(/,/g,''), 10);
-		var nextGainRE = /([0-9]*)m\s*([0-9]*)s/i;
-		var nextGain = nextGainRE.exec(nextGainTime);
-		var nextGainMin = parseInt(nextGain[1],10);
-		var nextGainSec = parseInt(nextGain[2],10);
-		var hoursToNextLevel = Math.ceil(remainingXP/gain);
-		var millisecsToNextGain = (hoursToNextLevel*60*60+nextGainMin*60+nextGainSec)*1000;
-		nextGainTime  = new Date(Date.now() + millisecsToNextGain);
-		$('dl[id="statbar-level-tooltip-general"]').append('<dt class="stat-xp-nextLevel">Next Level At</dt><dd>'+
-				FSH.System.formatShortDate(nextGainTime)+'</dd>');
+		$('#statbar-level-tooltip-general')
+			.append('<dt class="stat-xp-nextLevel">Next Level At</dt>' +
+				FSH.environment.timeBox($('.stat-xp-nextGain').next().text(),
+					Math.ceil(
+						FSH.System.intValue($('.stat-xp-remaining').next().text()) /
+						FSH.System.intValue($('.stat-xp-gainPerHour').next().text())
+					)
+				)
+			);
 	},
 
 	injectFSBoxLog: function() { // Bad jQuery
@@ -8240,10 +8248,6 @@ FSH.environment = { // Legacy
 FSH.messaging = { // jQuery
 
 	injectQuickMsgDialogJQ: function() { // jQuery
-		FSH.Helper.template = FSH.System.getValueJSON('quickMsg');
-		var buttons = $('#quickMessageDialog').dialog('option','buttons');
-		buttons.Template = FSH.messaging.showMsgTemplate;
-		$('#quickMessageDialog').dialog('option','buttons',buttons);
 		window.openQuickMsgDialog = FSH.messaging.openQuickMsgDialog;
 	},
 
@@ -8308,6 +8312,12 @@ FSH.messaging = { // jQuery
 	},
 
 	openQuickMsgDialog: function(name, msg, tip) { // jQuery
+		if (!FSH.Helper.template) {
+			FSH.Helper.template = FSH.System.getValueJSON('quickMsg');
+			var buttons = $('#quickMessageDialog').dialog('option','buttons');
+			buttons.Template = FSH.messaging.showMsgTemplate;
+			$('#quickMessageDialog').dialog('option','buttons',buttons);
+		}
 		$('#quickMsgDialog_targetUsername').html(name);
 		$('#quickMsgDialog_targetPlayer').val(name);
 		if (!msg) {msg = '';}
