@@ -2719,6 +2719,9 @@ FSH.guildAdvisor = { // jQuery
 			FSH.guildAdvisor.getAdvisorPage(6),
 			FSH.guildAdvisor.getAdvisorPage(7)
 		).done(FSH.guildAdvisor.addAdvisorPages);
+
+		FSH.ga.end('JS Perf', 'injectAdvisorWeekly');
+
 	},
 
 	getAdvisorPage: function(e) {
@@ -2735,6 +2738,9 @@ FSH.guildAdvisor = { // jQuery
 
 	returnAdvisorPage: function(data) {
 		var e = this.period;
+
+		FSH.ga.start('JS Perf', 'returnAdvisorPage' + e);
+
 		var list = FSH.guildAdvisor.list;
 		list.append(' day ' + e + ',');
 		var ns = FSH.guildAdvisor.newSummary;
@@ -2766,9 +2772,15 @@ FSH.guildAdvisor = { // jQuery
 					FSH.System.intValue(tds.eq(9).text());
 			}
 		});
+
+		FSH.ga.end('JS Perf', 'returnAdvisorPage' + e);
+
 	},
 
 	addAdvisorPages: function() { // Native
+
+		FSH.ga.start('JS Perf', 'addAdvisorPages');
+
 		var m = FSH.guildAdvisor.membrList;
 		var o = FSH.guildAdvisor.newSummary;
 		var data = [];
@@ -2794,9 +2806,15 @@ FSH.guildAdvisor = { // jQuery
 		});
 		FSH.guildAdvisor.data = data;
 		setTimeout(FSH.guildAdvisor.displayAdvisor, 0);
+
+		FSH.ga.end('JS Perf', 'addAdvisorPages');
+
 	},
 
 	displayAdvisor: function() { // jQuery
+
+		FSH.ga.start('JS Perf', 'displayAdvisor');
+
 		var o = FSH.guildAdvisor.newSummary;
 		var data = FSH.guildAdvisor.data;
 		var list = FSH.guildAdvisor.list;
@@ -2823,7 +2841,7 @@ FSH.guildAdvisor = { // jQuery
 			stateDuration: 0
 		});
 
-		FSH.ga.end('JS Perf', 'injectAdvisorWeekly');
+		FSH.ga.end('JS Perf', 'displayAdvisor');
 
 	}
 
@@ -6211,17 +6229,17 @@ FSH.onlinePlayers = { // Bad jQuery
 FSH.dropItems = { // Legacy
 
 	injectProfileDropItems: function() { // Native
-		FSH.ga.start('JS Perf', 'injectProfileDropItems');
 		FSH.dropItems.injectDropItems();
 		FSH.dropItems.injectMoveItems();
 	},
 
 	injectStoreItems: function() { // Native
-		FSH.ga.start('JS Perf', 'injectStoreItems');
 		FSH.dropItems.injectDropItems();
 	},
 
 	injectDropItems: function() { // Legacy
+
+		FSH.ga.start('JS Perf', 'injectDropItems');
 
 		FSH.ajax.getInventory().done(FSH.dropItems.inventory);
 
@@ -6327,6 +6345,8 @@ FSH.dropItems = { // Legacy
 				checkAllElement.addEventListener('click', FSH.dropItems.checkAll, true);
 			}
 		}
+
+		FSH.ga.end('JS Perf', 'injectDropItems');
 
 	},
 
@@ -6446,6 +6466,9 @@ FSH.dropItems = { // Legacy
 	},
 
 	inventory: function(data) { // jQuery
+
+		FSH.ga.start('JS Perf', 'dropItems.inventory');
+
 		var quickDrops = $('#pCC span[findme="QuickDrop"]');
 		var quickSends = $('#pCC span[findme="QuickSend"]');
 		var textTd = $('#pCC input[type="checkbox"]')
@@ -6475,15 +6498,14 @@ FSH.dropItems = { // Legacy
 			return FSH.Data.rarity[item.rarity].class;
 		});
 
-		if (FSH.cmd === 'profile') {
-			FSH.ga.end('JS Perf', 'injectProfileDropItems');
-		} else {
-			FSH.ga.end('JS Perf', 'injectStoreItems');
-		}
+		FSH.ga.end('JS Perf', 'dropItems.inventory');
 
 	},
 
 	injectMoveItems: function() { // Bad jQuery
+
+		FSH.ga.start('JS Perf', 'injectMoveItems');
+
 		var foldersEnabled = $('img[src$="/folder_on.gif"]');
 		if (foldersEnabled.length !== 1) {return;}
 		var otherFolders = $('#pCC a').has('img[src$="/folder.gif"]');
@@ -6502,6 +6524,9 @@ FSH.dropItems = { // Legacy
 				.append('&nbsp;<input type="button" class="custombutton"' +
 					' id="fshMove" value="Move">')));
 		$('#fshMove').click(FSH.dropItems.moveItemsToFolder);
+
+		FSH.ga.end('JS Perf', 'injectMoveItems');
+
 	},
 
 	moveItemsToFolder: function() { // Bad jQuery
