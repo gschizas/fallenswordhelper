@@ -3276,7 +3276,7 @@ FSH.rank = { // Legacy
 		var injectRow = parentTable.rows[previousRankRowNum - 1];
 		parentTable.insertBefore(thisRankRow, injectRow);
 		FSH.System.xmlhttp(onclickHREF);
-		window.scrollBy(0,-24);
+		window.scrollBy(0,-22);
 	},
 
 	moveRankDownOneSlotOnScreen: function(evt) { // Legacy
@@ -3289,7 +3289,7 @@ FSH.rank = { // Legacy
 		var injectRow = parentTable.rows[previousRankRowNum - 1];
 		parentTable.insertBefore(thisRankRow, injectRow);
 		FSH.System.xmlhttp(onclickHREF);
-		window.scrollBy(0,24);
+		window.scrollBy(0,22);
 	},
 
 	fetchRankData: function() { // Legacy
