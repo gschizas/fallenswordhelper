@@ -1,29 +1,15 @@
 
-.custombutton[disabled] {
-  background: #B8B8B8;
-  pointer-events:none;
-}
+.custombutton[disabled] {background: #B8B8B8; pointer-events:none;}
 
-.isInSTBorder {
-  border: 3px solid red;
-}
+.isInSTBorder {border: 3px solid red;}
 
-.tradeItemMargin {
-  margin: 2.4px;
-}
+.tradeItemMargin {margin: 2.4px;}
 
-table#fshSettingsTable {
-  border-spacing: 10px;
-}
+table#fshSettingsTable {border-spacing: 10px;}
 
-.networkIcon {
-  display: inline-block;
-}
+.networkIcon {display: inline-block;}
 
-.fshHelpTitle {
-  font-weight: bold;
-  color: #FFF380;
-}
+.fshHelpTitle {font-weight: bold; color: #FFF380;}
 
 #fshWorldButtonContainer {
   float: left;
@@ -41,10 +27,7 @@ table#fshSettingsTable {
   box-shadow: 0 0 4px #4f3717;
 }
 
-#fshSpinner {
-  float: right;
-  margin: 0 160px 0 0;
-}
+#fshSpinner {float: right; margin: 0 160px 0 0;}
 
 #fshFindOnlinePlayers {
   width: 120px;
@@ -55,23 +38,11 @@ table#fshSettingsTable {
 
 #content {max-width:600px}
 
-.column {
-  float: left;
-  width: 180px;
-  margin-right: 5px;
-}
+.column {float: left; width: 180px; margin-right: 5px;}
 
-.column h3 {
-  background: #e0e0e0;
-  font: bold 13px Arial;
-  margin: 0 0 5px 0;
-}
+.column h3 {background: #e0e0e0; font: bold 13px Arial; margin: 0 0 5px 0;}
 
-.column ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-}
+.column ul {margin: 0; padding: 0; list-style-type: none;}
 
 div#helperMenuDiv {
   cursor: default;
@@ -88,10 +59,7 @@ div#helperMenuDiv {
   z-index: 1
 }
 
-div#helperMenuDiv .a-reply {
-  cursor: pointer;
-  text-decoration: underline;
-}
+div#helperMenuDiv .a-reply {cursor: pointer; text-decoration: underline;}
 
 div#helperMenu {
   position: absolute;
@@ -122,9 +90,7 @@ div#fshQuickLinks {
   width: 100px;
 }
 
-.no-close .ui-dialog-titlebar-close {
-  display: none;
-}
+.no-close .ui-dialog-titlebar-close {display: none;}
 
 .HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}
 .HelperTextLink:hover {text-decoration:underline;}
@@ -137,10 +103,7 @@ div#fshQuickLinks {
   top: -20%;
 }
 
-.fastWorn {
-  color:green;
-  font-weight:bold;
-}
+.fastWorn {color:green; font-weight:bold;}
 
 .fastUse {
   cursor:pointer;
@@ -150,9 +113,17 @@ div#fshQuickLinks {
   top: -20%;
 }
 
-.reportLink {cursor:pointer; text-decoration:underline; color:blue;}
-.dropLink {cursor:pointer; text-decoration:underline; color:red;}
-.fshLink {cursor:pointer; text-decoration:underline;}
+.reportLink {cursor: pointer; text-decoration: underline; color: blue;}
+.dropLink {cursor: pointer; text-decoration: underline; color: red;}
+.fshLink {cursor: pointer; text-decoration: underline;}
+.smallLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+  font-size: x-small;
+}
+
+.pCR a { color: #F7EAC9; }
 
 .fshRed       {color: red;}
 .fshBlue      {color: blue;}
@@ -185,16 +156,11 @@ div#quickbuff div#players h1 {float: left;}
 div#quickbuff div#players p {clear: both;}
 .fshLastActivity {color: #ccc; font-size: x-small;}
 
-div#quickbuff div.buff-block p label.fshDim span {
-  color: #999;
-}
+div#quickbuff div.buff-block p label.fshDim span {color: #999;}
 
 .profile-stat-bonus {font-size: x-small;}
 
-#minibox-enemy {
-  margin: 0 0 10px;
-  overflow: hidden
-}
+#minibox-enemy {margin: 0 0 10px; overflow: hidden}
 #fshResetEnemy {
   font-size: xx-small;
   cursor: pointer;
