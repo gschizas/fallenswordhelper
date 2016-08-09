@@ -8747,7 +8747,7 @@ FSH.guild = { // Legacy
 				}
 			}
 		}
-		FSH.guild.changeGuildListOfflineBallColor();
+		setTimeout(FSH.Layout.colouredDots);
 
 		FSH.ga.end('JS Perf', 'injectViewGuild');
 
@@ -8817,7 +8817,7 @@ FSH.guild = { // Legacy
 			FSH.System.xmlhttp('index.php?cmd=guild&subcmd=conflicts',
 				FSH.guild.getConflictInfo, {'node': confNode});
 		}
-		FSH.guild.changeGuildListOfflineBallColor();
+		setTimeout(FSH.Layout.colouredDots);
 
 		FSH.ga.end('JS Perf', 'injectGuild');
 
@@ -8839,25 +8839,6 @@ FSH.guild = { // Legacy
 				xpNode.cells[1].innerHTML += ' (<b>' + FSH.System.addCommas(xpLockXP - actualXP) + '</b>)';
 			} catch (err) {
 				console.log(err);
-			}
-		}
-	},
-
-	changeGuildListOfflineBallColor: function() { // Legacy
-		//Code to change the colored balls based on last activity
-		if (!FSH.System.getValue('enhanceOnlineDots')) {return;}
-		var memberTable = FSH.System.findNode('//table[tbody/tr/td[.="Rank"]]');
-		for (var i=2;i<memberTable.rows.length ;i+= 1 ) {
-			var aRow = memberTable.rows[i];
-			if (aRow.cells[1]) {
-				var contactLink   = aRow.cells[1].firstChild.nextSibling;
-				var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec($(contactLink).data('tipped'));
-				var lastActivityIMG = FSH.Layout.onlineDot({
-						min: lastActivity[3],
-						hour: lastActivity[2],
-						day: lastActivity[1]
-					});
-				aRow.cells[0].innerHTML = lastActivityIMG;
 			}
 		}
 	},
