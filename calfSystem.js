@@ -4159,58 +4159,63 @@ FSH.quickBuff = { // jQuery
 FSH.toprated = { // jQuery
 
 	injectTopRated: function() { // jQuery
+
+		FSH.ga.start('JS Perf', 'injectTopRated');
+
 		if ($('#pCC font:contains("Last Updated")').length === 0) {return;}
-		var lump = '<input id="fshFindOnlinePlayers" class="custombutton" ' +
-			'type="button" title="Fetch the online status of the top 250 players ' +
+		var lump = '<input id="fshFindOnlinePlayers" ' +
+			'class="custombutton tip-static" type="button" ' +
+			'data-tipped="Fetch the online status of the top 250 players ' +
 			'(warning ... takes a few seconds)." value="Find Online Players">';
 		var findBtn = $(lump);
 		var theCell = $('#pCC td').first();
 		theCell.wrapInner('<div style="width:190px;"/>');
 		theCell.prepend($('<span/>').append(findBtn));
 		findBtn.click(FSH.toprated.findOnlinePlayers);
+
+		FSH.ga.end('JS Perf', 'injectTopRated');
+
 	},
 
 	findOnlinePlayers: function(e) { // jQuery
-		$(e.target).parent().html('<img id="fshSpinner" src="' + 
+
+		FSH.ga.start('JS Perf', 'findOnlinePlayers');
+
+		$(e.target).qtip('hide').parent().html('<img id="fshSpinner" src="' + 
 			FSH.System.imageServer + '/world/actionLoadingSpinner.gif">');
-		var topPlayerRows = $('#pCC table[width="500"] > tbody > tr');
-		var guildALink;
-		var guildId;
+
 		var guildArray = [];
-		for (var i = 1; i < topPlayerRows.length; i += 4) {
+		$('#pCC table[width="500"] ' +
+			'a[href^="index.php?cmd=guild&subcmd=view&guild_id="]')
+			.each(function() {
+				var self = $(this);
+				var guildId = self.attr('href').match(/guild_id=([0-9]+)/)[1];
+				if (guildArray.indexOf(guildId) === -1) {guildArray.push(guildId);}
+				self.parent().next().children('a').attr('guildid', guildId);
+			});
 
-			guildALink = $('a', $('td', topPlayerRows.eq(i)).eq(2));
-			if (guildALink.length === 0) {continue;} // Player does not belong to a guild
-			// TODO player array for exceptions or just get profiles for everyone?
-
-			guildId = guildALink.attr('href').match(/guild_id=([0-9]+)/)[1];
-			if (guildArray.indexOf(guildId) === -1) {guildArray.push(guildId);}
-		}
 		FSH.ajax.getAllMembrList(true, guildArray)
 			.done(FSH.toprated.parseGuildOnline);
+
+		FSH.ga.end('JS Perf', 'findOnlinePlayers');
+
 	},
 
 	parseGuildOnline: function(membrList) { // jQuery
-		$('#pCC #fshSpinner').hide();
-		var topPlayerRows = $('#pCC table[width="500"] > tbody > tr');
-		var theRow;
-		var theCell;
-		var guildALink;
-		var guildId;
-		var username;
-		for (var i = 1; i < topPlayerRows.length; i += 4) {
-			theRow = topPlayerRows.eq(i);
-			theCell = $('td', theRow).eq(3);
-			guildALink = $('a', $('td', theRow).eq(2));
-			if (guildALink.length === 0) {continue;}
-			guildId = guildALink.attr('href').match(/guild_id=([0-9]+)/)[1];
-			username = $('a', theCell).text();
-			theCell.after($('<td/>').append(
-				FSH.Layout.onlineDot({
-					last_login: membrList[guildId][username].last_login
-				})
-			));
-		}
+
+		FSH.ga.start('JS Perf', 'parseGuildOnline');
+
+		$('#fshSpinner').hide();
+
+		$('#pCC table[width="500"] a[guildid]').parent().after(function() {
+			var self = $(this).children('a');
+			return '<td>' + FSH.Layout.onlineDot({
+				last_login: membrList[self.attr('guildid')][self.text()].last_login
+			}) + '</td>';
+		});
+
+		FSH.ga.end('JS Perf', 'parseGuildOnline');
+
 	}
 
 };
