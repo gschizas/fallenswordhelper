@@ -4418,9 +4418,9 @@ FSH.profile = { // Legacy
 		var avyImg = $('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
 		if (avyImg.length !== 1) {return;}
 		var playername = $('#pCC h1').text();
-		var playerid = FSH.System.getUrlParameter('player_id');
-		if (!playerid) {
-			playerid = FSH.Layout.playerId();
+		var playerid = FSH.System.getUrlParameter('player_id') ||
+			FSH.Layout.playerId();
+		if (playername === $('#statbar-character').text()) {
 			// self inventory
 			FSH.profile.selfProfile();
 		}
