@@ -1578,7 +1578,7 @@ FSH.Layout = {
 	},
 
 	guildId: function () {
-		var guildId = $('script:contains("guildId: ")').first().text()
+		var guildId = document.body.getElementsByTagName('script')[0].textContent
 			.match(/\s+guildId: ([0-9]+),/);
 		if (guildId) {guildId = parseInt(guildId[1], 10);}
 		FSH.System.setValue('guildId', guildId);
@@ -2533,20 +2533,43 @@ FSH.guildReport = { // bad jQuery
 
 		FSH.ga.start('JS Perf', 'injectReportPaint');
 
-
-		var container = $('#pCC > table > tbody > tr > td').last();
-		var innerTable = $('table', container);//.detach();
 		FSH.ajax.getMembrList(false)
-			.done(function() {FSH.guildReport.reportHeader(innerTable);});
-		FSH.guildReport.doReportPaint(innerTable);
+			.done(FSH.guildReport.reportHeader);
+		var innerTable = document.querySelector('#pCC table table');
+		FSH.guildReport.searchUser(innerTable);
+		var nodeList = innerTable
+			.querySelectorAll('tr:not(.fshHide) td:nth-of-type(3n+0)');
+		Array.prototype.forEach.call(nodeList, FSH.guildReport.reportChild);
+		FSH.guildReport.eventHandlers($(innerTable));
 
 		FSH.ga.end('JS Perf', 'injectReportPaint');
 
-
 	},
 
-	reportHeader: function(innerTable) { // bad jQuery
-		$('td[bgcolor="#DAA534"][colspan="2"] b', innerTable)
+	searchUser: function(innerTable) {
+		var searchUser = FSH.System.getUrlParameter('user');
+		if (!searchUser) {return;}
+		var userNode = $('b:contains("' + searchUser + '")', innerTable);
+		if (userNode.length > 0) {
+			userNode.closest('tr').prevAll().addClass('fshHide');
+			var otherUsers = userNode.closest('tr').nextAll().find('b');
+			if (otherUsers.length > 0) {
+				otherUsers.eq(0).closest('tr').prev().nextAll().addClass('fshHide');
+			}
+		}
+	},
+
+	eventHandlers: function(innerTable) {
+		innerTable.on('click', 'span.a-reply', function(evt) {
+			window.openQuickMsgDialog(
+				evt.target.getAttribute('target_player'));
+		});
+		innerTable.on('click', '.recall', FSH.guildReport.recallItem);
+		innerTable.on('click', '.equip', FSH.guildReport.wearItem);
+	},
+
+	reportHeader: function() { // jQuery
+		$('#pCC table table td[bgcolor="#DAA534"][colspan="2"] b')
 			.html(function(_index, oldhtml) {
 				return FSH.Layout.onlineDot({
 						last_login: FSH.Helper.membrList[oldhtml].last_login
@@ -2557,62 +2580,29 @@ FSH.guildReport = { // bad jQuery
 			});
 	},
 
-	doReportPaint: function(innerTable) { // jQuery
-		var searchUser = FSH.System.getUrlParameter('user');
-		if (searchUser) {
-			var userNode = $('b:contains("' + searchUser + '")', innerTable);
-			if (userNode.length > 0) {
-				userNode.closest('tr').prevAll().addClass('fshHide');
-				var otherUsers = userNode.closest('tr').nextAll().find('b');
-				if (otherUsers.length > 0) {
-					otherUsers.eq(0).closest('tr').prev().nextAll().addClass('fshHide');
-				}
-			}
-		}
+	wearRE: /<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|Gut Rot Head Splitter|Serum/,
 
-		FSH.guildReport.reportChild(innerTable);
-
-		innerTable.on('click', 'span.a-reply', function(evt) {
-			window.openQuickMsgDialog(
-				evt.target.getAttribute('target_player'));
-		});
-		innerTable.on('click', '.recall', FSH.guildReport.recallItem);
-		innerTable.on('click', '.equip',
-			FSH.guildReport.wearItem);
-
-	},
-
-	reportChild: function(innerTable) { // jQuery
-		var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion' +
-			'|Jagua Egg|Gut Rot Head Splitter|Serum');
-
-		$('td:contains("Recall to:")', innerTable).not('fshHide')
-			.addClass('fshNoWrap')
-			.append(function() {
-				var self = $(this);
-				var atd = $('a', self);
-				var secondHref = atd.length === 2;
-				var output = ' | <span class="reportLink recall tip-static" ' +
-					'data-tipped="' + (secondHref ? 'Click to recall to backpack':
-					'Click to recall to guild store') + '" mode="' +
-					(secondHref ? '0': '1') + '" action="recall">Fast ' +
-					(secondHref ? 'BP': 'GS') + '</span>';
-				if (secondHref) {
-					output += ' | <span class="reportLink recall tip-static" ' +
-						'data-tipped="Click to recall to guild store" mode="1" ' +
-						'action="recall">Fast GS</span>';
-				}
-
-				var itemName = self.prev().html();
-				if (!wearRE.test(itemName)) {
-					output += ' | <span class="reportLink ' +
-						(secondHref ? 'recall': 'equip') +
-						'" mode="0" action="wear">Fast Wear</span>';
-				}
-
-				return output;
-			});
-
+	reportChild: function(el) { // bad native
+		el.className = 'fshNoWrap';
+		var inject = document.createElement('span');
+		var secondHref = el.children.length === 2;
+		var firstHref = secondHref ? '': ' class="fshHide"';
+		var itemName = el.previousElementSibling.innerHTML;
+		var wearable = FSH.guildReport.wearRE.test(itemName) ?
+			' class="fshHide"' : '';
+		var equipable = secondHref ? 'recall': 'equip';
+		inject.innerHTML = '<span' + firstHref +
+			'> | <span class="reportLink recall tip-static" data-tipped="' +
+			'Click to recall to backpack" mode="0" action="recall">Fast BP' +
+			'</span></span>' +
+			' | <span class="reportLink recall tip-static" ' +
+			'data-tipped="Click to recall to guild store" mode="1" ' +
+			'action="recall">Fast GS</span>' +
+			'<span' + wearable +
+			'> | <span class="reportLink ' +
+			equipable +
+			'" mode="0" action="wear">Fast Wear</span></span>';
+		el.appendChild(inject);
 	},
 
 	recallItem: function() { // jQuery
