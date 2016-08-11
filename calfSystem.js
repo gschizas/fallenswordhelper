@@ -3048,7 +3048,7 @@ FSH.groups = { // Legacy
 				'&nbsp;<a href="' + FSH.System.server +
 				'index.php?cmd=profile&player_id=' + m[creator].id + '">' + td.html() +
 				'</a>' + ' [' + m[creator].level + ']';
-		}
+		} else {inject += td.html();}
 		var td2 = $('td', e).eq(1);
 		var theList = td2.html();
 		var listArr = theList.split(', ');
