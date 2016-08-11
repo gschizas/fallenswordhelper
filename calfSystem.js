@@ -1578,9 +1578,12 @@ FSH.Layout = {
 	},
 
 	guildId: function () {
-		var guildId = document.body.getElementsByTagName('script')[0].textContent
-			.match(/\s+guildId: ([0-9]+),/);
-		if (guildId) {guildId = parseInt(guildId[1], 10);}
+		var guildId;
+		var nodeList = document.body.getElementsByTagName('script');
+		Array.prototype.forEach.call(nodeList, function(el) {
+			var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
+			if (match) {guildId = parseInt(match[1], 10);}
+		});
 		FSH.System.setValue('guildId', guildId);
 		return guildId;
 	},
