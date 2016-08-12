@@ -9156,6 +9156,9 @@ FSH.upgrades = { // Legacy
 FSH.newGuildLog = { // Legacy
 
 	injectNewGuildLog: function(content){ // Legacy
+
+		FSH.ga.start('JS Perf', 'injectNewGuildLog');
+
 		if (!content) {content=FSH.Layout.notebookContent();}
 
 		FSH.newGuildLog.setupGuildLogFilters();
@@ -9217,6 +9220,9 @@ FSH.newGuildLog = { // Legacy
 		//fetch guild log page and apply filters
 		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=log', FSH.newGuildLog.parseGuildLogPage,
 			{'guildLogInjectTable': guildLogInjectTable, 'pageNumber': 1, 'loadingMessageInjectHere': loadingMessageInjectHere, 'maxPagesToFetch': maxPagesToFetch, 'completeReload': completeReload});
+
+		FSH.ga.end('JS Perf', 'injectNewGuildLog');
+
 	},
 
 	setupGuildLogFilters: function() { // Native - but WTF?
