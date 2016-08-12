@@ -1457,10 +1457,9 @@ FSH.Layout = {
 			$('a[href="index.php?cmd=questbook"]').attr('href',
 				FSH.System.getValue('lastActiveQuestPage'));
 		}
-		var pCL = $('#pCL');
-		if (pCL.length === 0) {return;}
+		if ($('#pCL').length === 0) {return;}
 		//character
-		pCL.find('#nav-character-log').parent('li')
+		$('#nav-character-log').parent('li')
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-recipemanager" href="index.php?cmd=notepad&blank' +
 				'=1&subcmd=recipemanager">Recipe Manager</a></li>')
@@ -1471,50 +1470,50 @@ FSH.Layout = {
 				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
 				'medalguide">Medal Guide</a></li>');
 		if (FSH.System.getValue('keepBuffLog')) {
-			pCL.find('#nav-character-log').parent('li')
+			$('#nav-character-log').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
 					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
 		if (FSH.System.getValue('keepLogs')) {
-			pCL.find('#nav-character-notepad').parent('li')
+			$('#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
 		if (FSH.System.getValue('showMonsterLog')) {
-			pCL.find('#nav-character-notepad').parent('li')
+			$('#nav-character-notepad').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-monsterlog" href="index.php?cmd=notepad&blank' +
 					'=1&subcmd=monsterlog">Creature Logs</a></li>');
 		}
-		pCL.find('#nav-character-notepad').parent('li')
+		$('#nav-character-notepad').parent('li')
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-quicklinkmanager" href="index.php?cmd=notepad&' +
 				'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
 		//guild
-		pCL.find('#nav-guild-storehouse-inventory').parent('li')
+		$('#nav-guild-storehouse-inventory').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=guildinvmgr">Guild Inventory</a></li>');
 		if (!FSH.System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
-			pCL.find('#nav-guild-ledger-guildlog').parent('li')
+			$('#nav-guild-ledger-guildlog').parent('li')
 				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
 					'-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=newguildlog">New Guild Log</a></li>');
 		}
 		//top rated
-		pCL.find('#nav-toprated-players-level').parent('li')
+		$('#nav-toprated-players-level').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
 				'Top 250 Players</a></li>');
 		//actions
-		pCL.find('#nav-actions-trade-auctionhouse').parent('li')
+		$('#nav-actions-trade-auctionhouse').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=auctionsearch">AH Quick Search</a></li>');
-		pCL.find('#nav-actions-interaction-findplayer').parent('li')
+		$('#nav-actions-interaction-findplayer').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=onlineplayers">Online Players</a></li>')
@@ -1524,16 +1523,20 @@ FSH.Layout = {
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
 				'subcmd=findbuffs">Find Buffs</a></li>');
-		//adjust the menu length in chrome for the newly added items
-		//first the open ones
-		$('ul.nav-animated')
-			.filter(function() {
-				return $(this).css('height') !== '0px';
-			}).css('height', function() {
-				return $(this).find('li').length * 22;
-			});
-		//and now the closed saved variables
-		$('#nav').nav('calcHeights');
+		// adjust the menu height for the newly added items
+		var theNav = $('#nav');
+		var myNav = theNav.data('nav');
+		// first the closed saved variables
+		myNav.heights = [ null, null, 264, 660, 484, 374, 132, 132, null ];
+		if (myNav.state !== -1) {
+			// and now the open one
+			theNav.children().eq(myNav.state).children('ul')
+				.css('height', myNav.heights[myNav.state]);
+		}
+		// Use this to get new heights if you change anything
+		// $('#nav').nav('calcHeights').data('nav').heights
+		// Do NOT run it real time
+		// Doesn't seem to work in Chrome
 
 		FSH.ga.end('JS Perf', 'injectMenu');
 
