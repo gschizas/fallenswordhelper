@@ -7839,6 +7839,9 @@ FSH.environment = { // Legacy
 	},
 
 	statbar: function() {
+
+		FSH.ga.start('JS Perf', 'statbar');
+
 		$('#statbar-character').off('click')
 			.wrap('<a href="index.php?cmd=profile"></a>');
 		$('#statbar-stamina').off('click')
@@ -7851,6 +7854,9 @@ FSH.environment = { // Legacy
 			.wrap('<a href="index.php?cmd=points"></a>');
 		$('#statbar-gold').off('click')
 			.wrap('<a href="index.php?cmd=bank"></a>');
+
+		FSH.ga.end('JS Perf', 'statbar');
+
 	},
 
 	gameHelpLink: function() {
