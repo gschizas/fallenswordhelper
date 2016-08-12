@@ -7013,6 +7013,9 @@ FSH.settingsPage = { // Legacy
 	},
 
 	injectSettings: function() { // Legacy
+
+		FSH.ga.start('JS Perf', 'injectSettings');
+
 		var tickAll = $('<span class="fshLink">Tick all buffs</span>');
 		tickAll.click(FSH.settingsPage.toggleTickAllBuffs);
 		$('#settingsTabs-4 td').eq(0).append('<br>').append(tickAll);
@@ -7551,6 +7554,9 @@ FSH.settingsPage = { // Legacy
 			var minGroupLevel = minGroupLevelTextField.value;
 			FSH.System.setValue('minGroupLevel',minGroupLevel);
 		}
+
+		FSH.ga.end('JS Perf', 'injectSettings');
+
 	},
 
 	clearStorage: function() {
