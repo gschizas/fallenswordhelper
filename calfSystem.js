@@ -8304,6 +8304,9 @@ FSH.environment = { // Legacy
 	},
 
 	changeGuildLogHREF: function() { // Legacy
+
+		FSH.ga.start('JS Perf', 'changeGuildLogHREF');
+
 		if (!FSH.System.getValue('useNewGuildLog')) {return;}
 		var guildLogNodes = FSH.System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
 		var guildLogNode;
@@ -8320,7 +8323,7 @@ FSH.environment = { // Legacy
 					if (messageBox) {
 						messageBox.style.display = 'none';
 						messageBox.style.visibility = 'hidden';
-						//hide the empty row before it too (can"t do after in case there is no after row)
+						//hide the empty row before it too (can't do after in case there is no after row)
 						messageBox.previousSibling.style.display = 'none';
 						messageBox.previousSibling.style.visibility = 'hidden';
 					}
@@ -8333,6 +8336,9 @@ FSH.environment = { // Legacy
 				}
 			}
 		}
+
+		FSH.ga.end('JS Perf', 'changeGuildLogHREF');
+
 	},
 
 	doMsgSound: function() { // jQuery
@@ -8348,6 +8354,9 @@ FSH.environment = { // Legacy
 	},
 
 	injectQuickLinks: function() { // Bad jquery
+
+		FSH.ga.start('JS Perf', 'injectQuickLinks');
+
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var quickLinks = FSH.System.getValueJSON('quickLinks') || [];
 		if (quickLinks.length <= 0) {return;}
@@ -8371,11 +8380,16 @@ FSH.environment = { // Legacy
 			divQuickLink.css('position', 'fixed');
 		}
 		$('body').append(divQuickLink);
+
+		FSH.ga.end('JS Perf', 'injectQuickLinks');
+
 	},
 
 	unknownPage: function() { // Legacy
 
 		if (typeof window.jQuery === 'undefined') {return;}
+
+		FSH.ga.start('JS Perf', 'unknownPage');
 
 		if ($('#pCC td:contains("Below is the current status for ' +
 			'the relic")').length > 0) {
@@ -8411,6 +8425,9 @@ FSH.environment = { // Legacy
 			FSH.ga.screenview('unknown.Helper.injectInvent');
 			FSH.Helper.injectInvent();
 		}
+
+		FSH.ga.end('JS Perf', 'unknownPage');
+
 	},
 
 };
