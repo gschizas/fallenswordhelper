@@ -7838,22 +7838,41 @@ FSH.environment = { // Legacy
 		};
 	},
 
+	statbarWrapper: function(href, id) {
+		var myWrapper = document.createElement('a');
+		myWrapper.setAttribute('href', href);
+		var character = document.getElementById(id);
+		$(character).off('click');
+		var statWrapper = character.parentNode;
+		myWrapper.appendChild(character);
+		statWrapper.appendChild(myWrapper);
+	},
+
 	statbar: function() {
 
 		FSH.ga.start('JS Perf', 'statbar');
 
-		$('#statbar-character').off('click')
-			.wrap('<a href="index.php?cmd=profile"></a>');
-		$('#statbar-stamina').off('click')
-			.wrap('<a href="index.php?cmd=points&subcmd=reserve"></a>');
-		$('#statbar-equipment').off('click')
-			.wrap('<a href="index.php?cmd=blacksmith"></a>');
-		$('#statbar-inventory').off('click')
-			.wrap('<a href="index.php?cmd=profile&subcmd=dropitems"></a>');
-		$('#statbar-fsp').off('click')
-			.wrap('<a href="index.php?cmd=points"></a>');
-		$('#statbar-gold').off('click')
-			.wrap('<a href="index.php?cmd=bank"></a>');
+		// $('#statbar-character').off('click');
+			// .wrap('<a href="index.php?cmd=profile"></a>');
+
+		var sw = FSH.environment.statbarWrapper;
+		sw('index.php?cmd=profile', 'statbar-character');
+		sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
+		sw('index.php?cmd=blacksmith', 'statbar-equipment');
+		sw('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
+		sw('index.php?cmd=points', 'statbar-fsp');
+		sw('index.php?cmd=bank', 'statbar-gold');
+
+			// $('#statbar-stamina').off('click')
+			// .wrap('<a href="index.php?cmd=points&subcmd=reserve"></a>');
+		// $('#statbar-equipment').off('click')
+			// .wrap('<a href="index.php?cmd=blacksmith"></a>');
+		// $('#statbar-inventory').off('click')
+			// .wrap('<a href="index.php?cmd=profile&subcmd=dropitems"></a>');
+		// $('#statbar-fsp').off('click')
+			// .wrap('<a href="index.php?cmd=points"></a>');
+		// $('#statbar-gold').off('click')
+			// .wrap('<a href="index.php?cmd=bank"></a>');
 
 		FSH.ga.end('JS Perf', 'statbar');
 
