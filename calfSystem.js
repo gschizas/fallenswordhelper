@@ -9914,6 +9914,8 @@ FSH.trade = { // jQuery
 
 	injectTrade: function() { // jQuery
 
+		FSH.ga.start('JS Perf', 'injectTrade');
+
 		var multiple = $('<tr id="fshSelectMultiple"></tr>');
 		var myTd = $('<td colspan=6></td>');
 
@@ -9942,6 +9944,9 @@ FSH.trade = { // jQuery
 			.before(multiple);
 
 		FSH.ajax.inventory(true).done(FSH.trade.processTrade);
+
+		FSH.ga.end('JS Perf', 'injectTrade');
+
 	},
 
 	processTrade: function(data) { // jQuery
