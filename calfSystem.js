@@ -8209,31 +8209,23 @@ FSH.environment = { // Legacy
 		FSH.ga.start('JS Perf', 'changeGuildLogHREF');
 
 		if (!FSH.System.getValue('useNewGuildLog')) {return;}
-		var guildLogNodes = FSH.System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
+		// var guildLogNodes = FSH.System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
+		var guildLogNodes = document.querySelectorAll(
+			'#pCL a[href="index.php?cmd=guild&subcmd=log"]');
 		var guildLogNode;
 		var messageBox;
-		if (guildLogNodes) {
-			for (var i=0;i<guildLogNodes.length;i += 1) {
-				guildLogNode = guildLogNodes[i];
-				guildLogNode.setAttribute('href', 'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
-			}
-			//hide the lhs box
-			if (location.search === '?cmd=notepad&blank=1&subcmd=newguildlog') {
-				if(guildLogNode.firstChild.nodeName === 'IMG' && guildLogNode.firstChild.getAttribute('alt') === 'You have unread guild log messages.') { //old UI
-					messageBox = guildLogNode.parentNode.parentNode;
-					if (messageBox) {
-						messageBox.style.display = 'none';
-						messageBox.style.visibility = 'hidden';
-						//hide the empty row before it too (can't do after in case there is no after row)
-						messageBox.previousSibling.style.display = 'none';
-						messageBox.previousSibling.style.visibility = 'hidden';
-					}
-				} else if (guildLogNode.innerHTML.search('Guild Log updated!') !== -1) { // new UI
-					messageBox = guildLogNode.parentNode;
-					if (messageBox) {
-						messageBox.style.display = 'none';
-						messageBox.style.visibility = 'hidden';
-					}
+		if (!guildLogNodes) {return;}
+		for (var i = 0; i < guildLogNodes.length; i += 1) {
+			guildLogNode = guildLogNodes[i];
+			guildLogNode.setAttribute('href',
+				'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
+		}
+		//hide the lhs box
+		if (location.search === '?cmd=notepad&blank=1&subcmd=newguildlog') {
+			if (guildLogNode.innerHTML.search('Guild Log updated!') !== -1) { // new UI
+				messageBox = guildLogNode.parentNode;
+				if (messageBox) {
+					messageBox.classList.add('fshHide');
 				}
 			}
 		}
