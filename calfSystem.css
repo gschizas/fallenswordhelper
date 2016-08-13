@@ -5,7 +5,7 @@
 
 .tradeItemMargin {margin: 2.4px;}
 
-table#fshSettingsTable {border-spacing: 10px;}
+#fshSettingsTable {border-spacing: 10px;}
 
 .networkIcon {display: inline-block;}
 
@@ -44,7 +44,7 @@ table#fshSettingsTable {border-spacing: 10px;}
 
 .column ul {margin: 0; padding: 0; list-style-type: none;}
 
-div#helperMenuDiv {
+.helperMenuDiv {
   cursor: default;
   text-decoration: none;
   display: none;
@@ -53,15 +53,13 @@ div#helperMenuDiv {
   color: black;
   font-size: 12px;
   border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   border:3px solid #cb7;
   z-index: 1
 }
 
-div#helperMenuDiv .a-reply {cursor: pointer; text-decoration: underline;}
+.helperMenuDiv .a-reply {cursor: pointer; text-decoration: underline;}
 
-div#helperMenu {
+.helperMenu {
   position: absolute;
   top: 0px;
   left: 0px;
@@ -74,7 +72,7 @@ div#helperMenu {
   white-space: nowrap;
 }
 
-div#fshQuickLinks {
+#fshQuickLinks {
   position: absolute;
   cursor: pointer;
   text-decoration: underline;
@@ -84,8 +82,6 @@ div#fshQuickLinks {
   color: black;
   font-size: 12px;
   border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   border: 3px solid #cb7;
   width: 100px;
 }
@@ -148,6 +144,7 @@ div#fshQuickLinks {
 .fshNoWrap    {white-space: nowrap;}
 .fshBold      {font-weight: bold;}
 .helperQC     {cursor: pointer;}
+.fshFixed     {position: fixed;}
 
 .qbT          {margin: 0px auto;}
 .qbTH         {text-align: center; padding:0px 4px; color:orange;}
