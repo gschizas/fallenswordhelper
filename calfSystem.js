@@ -4146,22 +4146,31 @@ FSH.toprated = { // jQuery
 FSH.helperMenu = { // jQuery
 
 	injectHelperMenu: function() { //jquery
+
+		FSH.ga.start('JS Perf', 'injectHelperMenu');
+
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var node = $('#statbar-container');
 		if (node.length === 0) {return;}
-		var helperMenu = $('<div id=helperMenu>Helper&nbsp;Menu</div>');
+		var helperMenu = $('<div id="helperMenu" class="helperMenu">Helper' +
+			'&nbsp;Menu</div>');
 		node.before(helperMenu);
 		helperMenu.on('mouseover', FSH.helperMenu.showHelperMenu);
 		helperMenu.draggable();
-		if (!FSH.System.getValue('keepHelperMenuOnScreen')) {return;}
-		helperMenu.css('position', 'fixed');
+		if (FSH.System.getValue('keepHelperMenuOnScreen')) {
+			helperMenu.addClass('fshFixed');
+		}
+
+		FSH.ga.end('JS Perf', 'injectHelperMenu');
+
 	},
 
 	showHelperMenu: function() { // jquery
 		var helperMenu = $('#helperMenu');
 		helperMenu.off('mouseover', FSH.helperMenu.showHelperMenu);
-		var helperMenuDiv = $('<div id=helperMenuDiv style="background-image:' +
-			'url(\'' + FSH.System.imageServer + '/skin/inner_bg.jpg\');"/>');
+		var helperMenuDiv = $('<div id=helperMenuDiv class="helperMenuDiv" ' +
+			'style="background-image:url(\'' + FSH.System.imageServer +
+			'/skin/inner_bg.jpg\');"/>');
 		helperMenuDiv.append(FSH.Layout.helperMenu);
 		helperMenu.append(helperMenuDiv);
 		helperMenu.click(function() {
