@@ -759,3 +759,78 @@ table.dataTable td {
   background-repeat: no-repeat;
   background-color: #D0B074;
 }
+
+.greenDiamond {
+  background-image: url('data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAA\
+    ACH5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.yellowDiamond {
+  background-image: url('data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAA\
+    ACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.orangeDiamond {
+  background-image: url('data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAA\
+    ACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.offlineDot {
+  background-image: url('data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SE\
+    hK2trbW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpjYxg\
+    hISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAWGICAChCINxi\
+    hm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3E0GD8rzSK6XDicDNqMd\
+    IoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PEBIKFYEeAAoJGRUTdJc1FgIiAx1m\
+    ZhtHHQMqIgQCHAGtKiEAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.sevenDayDot {
+  background-image: url('data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2t\
+    rXNrazEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1zlLV\
+    rjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQAV8ICACENZ1xi\
+    hqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl0D8FEIiR0TZPM5n2y0LG\
+    DA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8UYxFmGRkTl0STBCICSqCgEgIqdQQB\
+    EaQqIQA7');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.redDot {
+  background-image: url('data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2t\
+    rUIpKa2UnP9znDEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJx\
+    CUudSa85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV1xS\
+    guS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiLKpsFg2z+EKG\
+    CgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTHSICFGSeSQcCKiIBDA0M\
+    oiohADs%3D');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
