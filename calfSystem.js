@@ -534,114 +534,23 @@ FSH.Data = {
 		'class="soundOff quicklink tip-static" ' +
 		'data-tipped="Turn On Sound when you have a new log message"></a>',
 
-	greenDiamondSrc:
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH' +
-		'5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D',
-
 	greenDiamond:
-		'<img width="10" height="10" style="float:left" src="' +
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAAACH' +
-		'5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'" class="tip-static" data-tipped="Online">',
-
-	yellowDiamondSrc:
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAAC' +
-		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D',
+		'<span class="greenDiamond tip-static" data-tipped="Online"></span>',
 
 	yellowDiamond:
-		'<img width="10" height="10" style="float:left" src="' +
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAAAC' +
-		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'" class="tip-static" data-tipped="Offline">',
-
-	orangeDiamondSrc:
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAAC' +
-		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D',
+		'<span class="yellowDiamond tip-static" data-tipped="Offline"></span>',
 
 	orangeDiamond:
-		'<img width="10" height="10" style="float:left" src="' + 
-		'data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAAAC' +
-		'H5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D' +
-		'" class="tip-static" data-tipped="Offline">',
-
-	// This is different to the one below
-	offlineDotSrc:
-		'data:image/gif;base64,R0lGODlhCgAKAMQAACEhIaWlpVpaWjk5OcbGxnt7e3Nzc' +
-		'0pKSikpKa2trWtra4yMjMzMzLW1tUJCQjMzM1JSUtbW1mNjY4SEhJSUlL29vf///wAA' +
-		'AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH5BAEHABYALAAAAAAKAAoAAAVCoGUVDEM' +
-		'kimgFUWQmgWFJpdkEkwElRF8lOcEhQYRNFBDHgEJZBA8PBEJhUAgHCID2IEg+tFqH5T' +
-		'D4gh8qR1Y7EIUAADs=',
+		'<span class="orangeDiamond tip-static" data-tipped="Offline"></span>',
 
 	offlineDot:
-		'<img width="10" height="10" style="float:left" src="' +
-		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SEhK2tr' +
-		'bW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpj' +
-		'YxghISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAW' +
-		'GICAChCINxihm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3' +
-		'E0GD8rzSK6XDicDNqMdIoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PE' +
-		'BIKFYEeAAoJGRUTdJc1FgIiAx1mZhtHHQMqIgQCHAGtKiEAOw%3D%3D' +
-		'" class="tip-static" data-tipped="Offline">',
-
-	sevenDayDotSrc:
-		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNr' +
-		'azEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1' +
-		'zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQA' +
-		'V8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl' +
-		'0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8U' +
-		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7',
+		'<span class="offlineDot tip-static" data-tipped="Offline"></span>',
 
 	sevenDayDot:
-		'<img width="10" height="10" style="float:left" src="' +
-		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2trXNr' +
-		'azEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1' +
-		'zlLVrjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQA' +
-		'V8ICACENZ1xihqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl' +
-		'0D8FEIiR0TZPM5n2y0LGDA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8U' +
-		'YxFmGRkTl0STBCICSqCgEgIqdQQBEaQqIQA7' +
-		'" class="tip-static" data-tipped="Offline">',
-
-	redDotSrc:
-		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9zn' +
-		'DEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudS' +
-		'a85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV' +
-		'1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiL' +
-		'KpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTH' +
-		'SICFGSeSQcCKiIBDA0MoiohADs%3D',
+		'<span class="sevenDayDot tip-static" data-tipped="Offline"></span>',
 
 	redDot:
-		'<img width="10" height="10" style="float:left" src="' +
-		'data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2trUIpKa2UnP9zn' +
-		'DEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJxCUudS' +
-		'a85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV' +
-		'1xSguS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiL' +
-		'KpsFg2z+EKGCgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTH' +
-		'SICFGSeSQcCKiIBDA0MoiohADs%3D' +
-		'" class="tip-static" data-tipped="Offline">',
-
-	runIcon:
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQCAYAAAAf' +
-		'8/9hAAAAAXNSR0IArs4c6QAAAAlwSFlzAAAPYQAAD2EBqD+naQAAAAd0SU1FB9gDBhM' +
-		'MFhZz9poAAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3aXRoIEdJTVBXgQ4XAAABv0lEQV' +
-		'Q4y6WTMWsbQRCFPwUVa5BhBS684MZwzRkVukJFBGkE+QEhpUuVTid1SulSKt3lmvwAl' +
-		'04nF4a4UJCb4GsOXSNYQQS7IIGnU4qzT5JlJ5DMMsXO7ns7O/Om5H5Z/sfKzwNW3Gow' +
-		'irlPE2YiABwqxUkQ0mm0Mapa2rxf2syge9NfjdOEj++THLg8Yw+wCyHxGfdTy0kQ0n/' +
-		'XLUjebILtNOO0FgLQq0+YVS5wiwyFJdKa01qInWZ0b/qrLQIrbjVOE5pHBhDelr8UJN' +
-		'5cIYA8rlZgGKcJVtyqIBiMYoxWWHFk3m3VpFefIOaKzLvCm0eawSheZzBOEzTgloJby' +
-		'k6le/UJJrwtzpXKs9iqgZ/J2sW/SPLpQ4if5Q/4xw6Vi83i4Y/9Hv4c0v06BEDPZVcH' +
-		'si+vgi9/XPL52znsg1EGqbhtglYtIpsmqFfA8W3MsTbkFxR+LrRq0boGnUYbKwJKIcg' +
-		'WuH99gRMp4qqisOLpNNprAqOqpWYQ4UTQB4cF+Py6DzywpxX6QKMqGjv3NIOokPSOlL' +
-		'+ndxxrjaooqqoKgBOHLIXM5+BNKZeeT+PTMA3TO4rfKGgF0d+H6V/sN7ur7I3UK1cpA' +
-		'AAAAElFTkSuQmCC',
-
-	stopIcon:
-		'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAA0AAAANCAYAAAB' +
-		'y6+R8AAAAAXNSR0IArs4c6QAAAAZiS0dEAP8A/wD/oL2nkwAAAAlwSFlzAAAPYQAAD2' +
-		'EBqD+naQAAAAd0SU1FB9gDBhMtH+MwW90AAAAZdEVYdENvbW1lbnQAQ3JlYXRlZCB3a' +
-		'XRoIEdJTVBXgQ4XAAAAyUlEQVQoz52SLQ4CMRCFv00Qi+tKZCWSI3AE1hEUIWBwhKug' +
-		'CEEBDotEIjlC5dZ13FZRRMOGFQ0/k4yZvC/vZWayEAK/VgfAbHdBruePYjUs0fNZ1gG' +
-		'Qy5HBdPkRuu83MJ9FJwA8yOmQdhlP2vGQGiOOwqddjDiQ+g1q3Pz3i3A19I3BO5cU9o' +
-		'xBWvEAxMdOlXhc/QYVAqg8dnITedS9IG8tldYUeTfJVFrjrW3FC1oVsErfSgEWsgZSo' +
-		'/JxW6xT+qwBR2Uc/PN7T+yzRewsE50wAAAAAElFTkSuQmCC',
+		'<span class="redDot tip-static" data-tipped="Offline"></span>',
 
 	/* jshint -W101 */ // Line is too long. (W101)
 
@@ -1365,47 +1274,15 @@ FSH.Data = {
 FSH.Layout = {
 	// To be moved back into main script in future as it does not compress well
 
-	onlineSrc: function(obj) {
-		var img;
-		var min = 0;
-		if (obj.day)  {min += parseInt(obj.day,  10) * 1440;}
-		if (obj.hour) {min += parseInt(obj.hour, 10) * 60;}
-		if (obj.min)  {min += parseInt(obj.min,  10);}
-		// if (obj.last_login) {
-			// min = Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
-		// }
-		// last_login is 'false' over 30 days
-		// if ('last_login' in obj && !obj.last_login) {min = 99999;}
-		if (min < 2) {
-			img = FSH.Data.greenDiamondSrc;
-		} else if (min < 5) {
-			img = FSH.Data.yellowDiamondSrc;
-		} else if (min < 30) {
-			img = FSH.Data.orangeDiamondSrc;
-		} else if (min < 60) {
-			img = FSH.Data.offlineDotSrc;
-		} else if (min < 10080) {
-			return; // img = FSH.Data.offlineDotSrc;
-		} else if (min < 44640) {
-			img = FSH.Data.sevenDayDotSrc;
-		} else {
-			img = FSH.Data.redDotSrc;
-		}
-		return img;
-	},
-
-	changeOnlineDotSrc: function(contactLink){
+	changeOnlineDot: function(contactLink){
 		var lastActivity = FSH.Data.lastActivityRE
 			.exec(contactLink.getAttribute('data-tipped'));
-		var newSrc = FSH.Layout.onlineSrc({
-			min: lastActivity[3],
-			hour: lastActivity[2],
-			day: lastActivity[1]
-		});
-		if (newSrc) {
-			contactLink.parentNode.previousSibling.firstChild
-				.setAttribute('src', newSrc);
-		}
+		contactLink.parentNode.previousSibling.innerHTML =
+			FSH.Layout.onlineDot({
+				min: lastActivity[3],
+				hour: lastActivity[2],
+				day: lastActivity[1]
+			});
 	},
 
 	colouredDots: function() {
@@ -1413,10 +1290,9 @@ FSH.Layout = {
 		FSH.ga.start('JS Perf', 'colouredDots');
 
 		if (!FSH.System.getValue('enhanceOnlineDots')) {return;}
-		var profileAlliesEnemies = document.querySelectorAll(
-			'#pCC a[data-tipped*="Last Activity"]');
-		Array.prototype.forEach.call(profileAlliesEnemies,
-			FSH.Layout.changeOnlineDotSrc);
+		Array.prototype.forEach.call(document.querySelectorAll(
+			'#pCC a[data-tipped*="Last Activity"]'),
+			FSH.Layout.changeOnlineDot);
 
 		FSH.ga.end('JS Perf', 'colouredDots');
 
