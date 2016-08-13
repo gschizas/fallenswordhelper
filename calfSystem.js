@@ -1434,7 +1434,7 @@ FSH.Layout = {
 
 	//TODO replace this
 	notebookContent: function() {
-		return $('#pCC')[0]; //new interface logic
+		return document.getElementById('pCC'); // new interface logic
 	},
 
 	makePageHeader: function(title, comment, spanId, button) { // Native
