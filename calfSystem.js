@@ -1325,7 +1325,7 @@ FSH.Layout = {
 		return img;
 	},
 
-	injectMenu: function() { //jquery
+	injectMenu: function() { // jQuery
 
 		FSH.ga.start('JS Perf', 'injectMenu');
 
@@ -1337,14 +1337,14 @@ FSH.Layout = {
 		//character
 		$('#nav-character-log').parent('li')
 			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
-				'character-recipemanager" href="index.php?cmd=notepad&blank' +
-				'=1&subcmd=recipemanager">Recipe Manager</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
-				'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-				'subcmd=invmanagernew">Inventory Manager</a></li>')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
-				'medalguide">Medal Guide</a></li>');
+				'medalguide">Medal Guide</a></li>' +
+				'<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=invmanagernew">Inventory Manager</a></li>' +
+				'<li class="nav-level-1"><a class="nav-link" id="nav-' +
+				'character-recipemanager" href="index.php?cmd=notepad&blank' +
+				'=1&subcmd=recipemanager">Recipe Manager</a></li>');
 		if (FSH.System.getValue('keepBuffLog')) {
 			$('#nav-character-log').parent('li')
 				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -1391,28 +1391,30 @@ FSH.Layout = {
 				'&subcmd=auctionsearch">AH Quick Search</a></li>');
 		$('#nav-actions-interaction-findplayer').parent('li')
 			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
-				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
-				'&subcmd=onlineplayers">Online Players</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
-				'actions-findother" href="index.php?cmd=notepad&blank=1&' +
-				'subcmd=findother">Find Other</a></li>')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
-				'subcmd=findbuffs">Find Buffs</a></li>');
+				'subcmd=findbuffs">Find Buffs</a></li>' +
+				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-findother" href="index.php?cmd=notepad&blank=1&' +
+				'subcmd=findother">Find Other</a></li>' +
+				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
+				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
+				'&subcmd=onlineplayers">Online Players</a></li>');
 		// adjust the menu height for the newly added items
 		var theNav = $('#nav');
 		var myNav = theNav.data('nav');
 		// first the closed saved variables
-		myNav.heights = [ null, null, 264, 660, 484, 374, 132, 132, null ];
+		myNav.heights = [ null, null,
+			// Character
+			$('#nav-character').next().children().length * 22,
+			660,
+			// Guild
+			$('#nav-guild > ul li').length * 22,
+			374, 132, 132, null ];
 		if (myNav.state !== -1) {
 			// and now the open one
 			theNav.children().eq(myNav.state).children('ul')
 				.css('height', myNav.heights[myNav.state]);
 		}
-		// Use this to get new heights if you change anything
-		// $('#nav').nav('calcHeights').data('nav').heights
-		// Do NOT run it real time
-		// Doesn't seem to work in Chrome
 
 		FSH.ga.end('JS Perf', 'injectMenu');
 
