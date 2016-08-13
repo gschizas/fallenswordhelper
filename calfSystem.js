@@ -2392,7 +2392,10 @@ FSH.notification = { // jQuery
 	},
 
 	injectJoinAllLink: function() { // jQuery
-		var newGroup = $('li:contains("New attack group created.")');
+
+		FSH.ga.start('JS Perf', 'injectJoinAllLink');
+
+		var newGroup = $('#pCL li:contains("New attack group created.")');
 		if (newGroup.length !== 1) {return;}
 		var groupJoinHTML = '';
 		if (!FSH.System.getValue('enableMaxGroupSizeToJoin')) {
@@ -2407,6 +2410,9 @@ FSH.notification = { // jQuery
 				'less than size ' + maxGroupSizeToJoin + '.</p></a>';
 		}
 		newGroup.after('<li class="notification">' + groupJoinHTML + '</li>');
+
+		FSH.ga.end('JS Perf', 'injectJoinAllLink');
+
 	},
 
 };
