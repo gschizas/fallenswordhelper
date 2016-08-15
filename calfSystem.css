@@ -27,6 +27,14 @@
   box-shadow: 0 0 4px #4f3717;
 }
 
+.quickButton {
+  display: inline-block;
+  height: 17px;
+  width: 17px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
 #fshSpinner {float: right; margin: 0 160px 0 0;}
 
 #fshFindOnlinePlayers {
@@ -145,6 +153,7 @@
 .fshBold      {font-weight: bold;}
 .helperQC     {cursor: pointer;}
 .fshFixed     {position: fixed;}
+.fshBackpack  {height: 500px;}
 
 .qbT          {margin: 0px auto;}
 .qbTH         {text-align: center; padding:0px 4px; color:orange;}
