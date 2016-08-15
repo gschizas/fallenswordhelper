@@ -4298,23 +4298,30 @@ FSH.allyEnemy = { // jQuery
 FSH.profile = { // Legacy
 
 	injectProfile: function() { // Legacy
+		var avyImg = document
+			.querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+		if (!avyImg) {return;}
+		var playername = document.querySelector('#pCC h1').textContent;
 
-		FSH.ga.start('JS Perf', 'injectProfile');
-
-		var avyImg = $('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
-		if (avyImg.length !== 1) {return;}
-		var playername = $('#pCC h1').text();
-		var playerid = FSH.System.getUrlParameter('player_id') ||
-			FSH.Layout.playerId();
-		if (playername === $('#statbar-character').text()) {
+		if (playername === document.getElementById('statbar-character')
+				.textContent) {
 			// self inventory
-			FSH.profile.selfProfile();
+			FSH.profile.fastDebuff();
+			FSH.profile.profileParseAllyEnemy();
+			FSH.profile.injectFastWear();
+			FSH.profile.profileComponents();
+			FSH.profile.quickWearLink();
+			FSH.profile.selectAllLink();
+			FSH.profile.storeVL();
 		}
 
-		var avyExtrasDiv = document.createElement('DIV');
-		avyExtrasDiv.align = 'center';
-		FSH.profile.profileInjectQuickButton(avyExtrasDiv, playerid, playername);
-		avyImg.parent().append(avyExtrasDiv);
+		// Must be before profileInjectQuickButton
+		FSH.profile.profileInjectGuildRel();
+		// It sets up FSH.Helper.guildId and FSH.Helper.currentGuildRelationship
+
+		var playerid = FSH.System.getUrlParameter('player_id') ||
+			FSH.Layout.playerId();
+		FSH.profile.profileInjectQuickButton(avyImg, playerid, playername);
 
 		//************** yuuzhan having fun
 		$('img[oldtitle="yuuzhan\'s Avatar"]')
@@ -4324,7 +4331,6 @@ FSH.profile = { // Legacy
 
 		FSH.profile.updateQuickBuff();
 		FSH.profile.updateStatistics();
-		FSH.profile.profileInjectGuildRel();
 		FSH.profile.profileRenderBio(playername);
 		if (FSH.System.getValue('enableBioCompressor')) {FSH.profile.compressBio();}
 		FSH.Helper.buffCost = {'count':0,'buffs':{}};
@@ -4332,22 +4338,9 @@ FSH.profile = { // Legacy
 		FSH.common.addStatTotalToMouseover();
 
 		setTimeout(FSH.Layout.colouredDots);
-
-		FSH.ga.end('JS Perf', 'injectProfile');
-
 	},
 
-	selfProfile: function() {
-		FSH.profile.fastDebuff();
-		FSH.profile.profileParseAllyEnemy();
-		FSH.profile.injectFastWear();
-		FSH.profile.profileComponents();
-		FSH.profile.quickWearLink();
-		FSH.profile.selectAllLink();
-		FSH.profile.storeVL();
-	},
-
-	quickWearLink: function() {
+	quickWearLink: function() { // jQuery
 		// quick wear manager link
 		var node = $('#profileRightColumn a[href="index.php?cmd=profile' +
 			'&subcmd=togglesection&section_id=2"]');
@@ -4356,7 +4349,7 @@ FSH.profile = { // Legacy
 			'&blank=1&subcmd=quickwear" class="fshBlue">Quick&nbsp;Wear</a>]');
 	},
 
-	selectAllLink: function() {
+	selectAllLink: function() { // jQuery
 		//select all link
 		var node = $('#profileRightColumn a[href="index.php?cmd=profile' +
 			'&subcmd=dropitems"]');
@@ -4367,7 +4360,7 @@ FSH.profile = { // Legacy
 			$('<span/>').append('[&nbsp;').append(allSpan).append('&nbsp;]&nbsp;'));
 	},
 
-	storeVL: function() {
+	storeVL: function() { // jQuery
 		// store the VL of the player
 		var virtualLevel = parseInt($('#stat-vl').text(), 10);
 		if (FSH.System.intValue($('dt.stat-level').first().next().text()) ===
@@ -4385,20 +4378,17 @@ FSH.profile = { // Legacy
 		}
 	},
 
-	updateStatistics: function() { // jQuery
-		var charStats = $('#profileLeftColumn table').first();
-			/* .attr('id', 'characterStats'); */
-		var tblCells = $('td', charStats).removeAttr('width colspan')
-			.has('table').has('font');
-		tblCells.each(FSH.profile.removeStatTable);
+	updateStatistics: function() { // Native
+		var charStats = document.querySelector('#profileLeftColumn table');
+		var dodgyTables = charStats.querySelectorAll('table');
+		Array.prototype.forEach.call(dodgyTables, FSH.profile.removeStatTable);
 	},
 
-	removeStatTable: function(i, e) {
-		var tde = $('td', e);
-		/* $(e).attr('id', tde.first().attr('id')); */
-		$(e).html(tde.first().html().replace(/&nbsp;/g, ' ') +
+	removeStatTable: function(el) { // Native
+		var tde = el.getElementsByTagName('td');
+		el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
 			'<div class="profile-stat-bonus">' +
-			tde.last().text() + '</div>');
+			tde[1].textContent + '</div>';
 	},
 
 	profileSelectAll: function() { // jQuery
@@ -4420,35 +4410,36 @@ FSH.profile = { // Legacy
 	},
 
 	compressBio: function() { // Legacy
-		var bioCell = FSH.System.findNode('//div[@id="profile-bio"]'); //new interface logic
+		var bioCell = document.getElementById('profile-bio'); //new interface logic
 		if (!bioCell) {return;} //non-self profile
 		var bioContents = bioCell.innerHTML;
 		var maxCharactersToShow = FSH.System.getValue('maxCompressedCharacters');
+		if (bioContents.length <= maxCharactersToShow) {return;}
 		var maxRowsToShow = FSH.System.getValue('maxCompressedLines');
-		var numberOfLines = bioContents.substr(0,maxCharactersToShow).split(/<br>\n/).length - 1;
+		var numberOfLines = bioContents.substr(0, maxCharactersToShow)
+			.split(/<br>\n/).length - 1;
 		if (numberOfLines >= maxRowsToShow) {
 			var startIndex = 0;
 			while (maxRowsToShow >= 0) {
-				maxRowsToShow -=1;
-				startIndex = bioContents.indexOf('<br>\n',startIndex+1);
+				maxRowsToShow -= 1;
+				startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
 			}
 			maxCharactersToShow = startIndex;
 		}
 
-		if (bioContents.length <= maxCharactersToShow) {return;}
 		//find the end of next HTML tag after the max characters to show.
-		var breakPoint = bioContents.indexOf('<br>',maxCharactersToShow) + 4;
+		var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
 		var lineBreak = '';
 		if (breakPoint === 3) {
-				breakPoint = bioContents.indexOf(' ',maxCharactersToShow) + 1;
-				if (breakPoint === 0) {return;}
-				lineBreak = '<br>';
-			}
-		var bioStart = bioContents.substring(0,breakPoint);
+			breakPoint = bioContents.indexOf(' ',maxCharactersToShow) + 1;
+			if (breakPoint === 0) {return;}
+			lineBreak = '<br>';
+		}
+		var bioStart = bioContents.substring(0, breakPoint);
 		var bioEnd = bioContents.substring(breakPoint,bioContents.length);
 		var extraOpenHTML = '', extraCloseHTML = '';
 		var tagList=['b','i','u','span'];
-		for (var i=0;i<tagList.length;i += 1){
+		for (var i = 0; i < tagList.length; i += 1){
 			var closeTagIndex = bioEnd.indexOf('</'+tagList[i]+'>');
 			var openTagIndex = bioEnd.indexOf('<'+tagList[i]+'>');
 			if (closeTagIndex !== -1 && (openTagIndex > closeTagIndex ||
@@ -4458,10 +4449,10 @@ FSH.profile = { // Legacy
 			}
 		}
 		bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak +
-			'<span id="Helper:bioExpander" style="cursor:pointer; ' +
-			'text-decoration:underline; color:blue;">More ...</span><br>' +
-			'<span id="Helper:bioHidden">' + extraOpenHTML + bioEnd + '</span>';
-		$('#Helper\\:bioHidden').hide();
+			'<span id="fshBioExpander" class="reportLink">More ...</span><br>' +
+			'<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
+			'</span>';
+		FSH.profile.addClickListener('fshBioExpander', FSH.profile.expandBio);
 	},
 
 	profileInjectGuildRel: function() { // Legacy
@@ -4505,6 +4496,7 @@ FSH.profile = { // Legacy
 	},
 
 	guildRelationship: function(txt) { // Native
+		var output = '';
 		var guildSelf = FSH.System.getValue('guildSelf');
 		var guildFrnd = FSH.System.getValue('guildFrnd');
 		var guildPast = FSH.System.getValue('guildPast');
@@ -4530,47 +4522,59 @@ FSH.profile = { // Legacy
 		guildPast = guildPast.toLowerCase().replace(/\s*,\s*/, ',').replace(/\s\s*/g, ' ').split(',');
 		guildEnmy = guildEnmy.toLowerCase().replace(/\s*,\s*/, ',').replace(/\s\s*/g, ' ').split(',');
 		txt = txt.toLowerCase().replace(/\s\s*/g, ' ');
-		if (guildSelf.indexOf(txt) !== -1) {return 'self';}
-		if (guildFrnd.indexOf(txt) !== -1) {return 'friendly';}
-		if (guildPast.indexOf(txt) !== -1) {return 'old';}
-		if (guildEnmy.indexOf(txt) !== -1) {return 'enemy';}
-		return '';
+		if (guildSelf.indexOf(txt) !== -1) {output = 'self';} else
+		if (guildFrnd.indexOf(txt) !== -1) {output = 'friendly';} else
+		if (guildPast.indexOf(txt) !== -1) {output = 'old';} else
+		if (guildEnmy.indexOf(txt) !== -1) {output = 'enemy';}
+		return output;
 	},
 
-	profileInjectQuickButton: function(avyrow, playerid, playername) { // Native
-		var auctiontext = 'Go to ' + playername + '"s auctions' ;
-		var ranktext = 'Rank ' +playername + '' ;
-		var securetradetext = 'Create Secure Trade to ' + playername;
-
-		var newhtml = avyrow.innerHTML +
-			'<a ' + FSH.Layout.quickBuffHref(playerid) + '>' +
-			'<img alt="Buff ' + playername + '" title="Buff ' + playername + '" src=' +
-			FSH.System.imageServer + '/skin/realm/icon_action_quickbuff.gif></a>&nbsp;&nbsp;';
+	profileInjectQuickButton: function(avyImg, playerid, playername) { // Native
+		var newhtml = '<div align="center">';
+		newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
+			FSH.Layout.quickBuffHref(playerid) +
+			'data-tipped="Buff ' + playername + '" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
 		if (!FSH.System.getValue('enableMaxGroupSizeToJoin')) {
-			newhtml += '<a href="' + FSH.System.server + 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall' +
-				'");"><img alt="Join All Groups" title="Join All Groups" src=' +
-				FSH.System.imageServer + '/skin/icon_action_join.gif></a>&nbsp;&nbsp;';
+			newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
+				'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
+				'data-tipped="Join All Groups" ' +
+				'style="background-image: url(\'' + FSH.System.imageServer +
+				'/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
 		} else {
 			var maxGroupSizeToJoin = FSH.System.getValue('maxGroupSizeToJoin');
-			newhtml += '<a href="' + FSH.System.server + 'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize' +
-				'");"><img alt="Join All Groups" title="Join All Groups < ' + maxGroupSizeToJoin + ' Members" src=' +
-				FSH.System.imageServer + '/skin/icon_action_join.gif></a>&nbsp;&nbsp;';
+			newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
+				'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize" ' +
+				'data-tipped="Join All Groups < ' + maxGroupSizeToJoin + ' Members" ' +
+				'style="background-image: url(\'' + FSH.System.imageServer +
+				'/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
 		}
-		newhtml += '<a href=' + FSH.System.server + '?cmd=auctionhouse&type=-3&tid=' +
-			playerid + '><img alt="' + auctiontext + '" title="' + auctiontext + '" src="' +
-			FSH.System.imageServer + '/skin/gold_button.gif"></a>&nbsp;&nbsp;' +
-			'<a href=' + FSH.System.server + 'index.php?cmd=trade&subcmd=createsecure&target_username=' +
-			playername + '><img alt="' + securetradetext + '" title="' + securetradetext + '" src=' +
-			FSH.System.imageServer + '/temple/2.gif></a>&nbsp;&nbsp;' +
-			'<a href=' + FSH.System.server + '?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
-			playername + '>[SR]</a>&nbsp;&nbsp;';
-		if (FSH.Helper.currentGuildRelationship === 'self' && FSH.System.getValue('showAdmin')) {
-			newhtml +=
-				'<a href="' + FSH.System.server + 'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
-				playerid + '><img alt="' + ranktext + '" title="' + ranktext + '" src=' +
-				FSH.System.imageServer + '/guilds/' + FSH.Helper.guildId + '_mini.jpg></a>';
+		newhtml += '<a class="quickButton tip-static" ' +
+			'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid + '" ' +
+			'data-tipped="Go to ' + playername + '\'s auctions" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
+		newhtml += '<a class="quickButton tip-static" ' +
+			'href="index.php?cmd=trade&subcmd=createsecure&target_username=' + playername + '" ' +
+			'data-tipped="Create Secure Trade to ' + playername + '" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/temple/2.gif\');"></a>&nbsp;&nbsp;';
+		newhtml += '<a class="quickButton tip-static" ' +
+			'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' + playername + '" ' +
+			'data-tipped="Recall items from ' + playername + '" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/temple/3.gif\');"></a>&nbsp;&nbsp;';
+		if (FSH.Helper.currentGuildRelationship === 'self' &&
+				FSH.System.getValue('showAdmin')) {
+			newhtml += '<a class="quickButton buttonGuildRank tip-static" ' +
+			'href="index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' + playerid + '" ' +
+			'data-tipped="Rank ' + playername + '" ' +
+			'style="background-image: url(\'' + FSH.System.imageServer +
+			'/guilds/' + FSH.Helper.guildId + '_mini.jpg\');"></a>&nbsp;&nbsp;';
 		}
-		avyrow.innerHTML = newhtml ;
+		newhtml += '</div>';
+		avyImg.insertAdjacentHTML('afterend', newhtml);
 	},
 
 	profileRenderBio: function(playername) { // Legacy
@@ -4678,9 +4682,9 @@ FSH.profile = { // Legacy
 	},
 
 	expandBio: function() { // jQuery
-		var bioExpander = $('#Helper\\:bioExpander');
+		var bioExpander = $('#fshBioExpander');
 		bioExpander.text(bioExpander.text() === 'More ...' ? 'Less ...' : 'More ...');
-		$('#Helper\\:bioHidden').toggle();
+		$('#fshBioHidden').toggleClass('fshHide');
 	},
 
 	getBuffsToBuy: function(evt) { // Legacy
@@ -4740,35 +4744,42 @@ FSH.profile = { // Legacy
 				i+= 1;
 			} else {break;}
 		}
-		FSH.profile.addClickListener('Helper:bioExpander', FSH.profile.expandBio);
 	},
 
-	profileParseAllyEnemy: function() { // jquery
+	profileParseAllyEnemy: function() { // Native
 		// Allies/Enemies count/total function
-		var alliesTotal = FSH.System.getValue('alliestotal');
-		var alliesTitle = $('#profileLeftColumn strong:contains("Allies")')
-			.parent();
-		var numberOfAllies = alliesTitle.next().find('img')
-			.filter('[src*="/avatars/"],[src$="/skin/player_default.jpg"]')
-			.length;
-		alliesTitle.append('<span class="fshBlue">&nbsp;' + numberOfAllies +
-			(alliesTotal && alliesTotal >= numberOfAllies ? '/' +
-			alliesTotal : '') + '</span>');
+		Array.prototype.forEach.call(
+			document.querySelectorAll('#profileLeftColumn strong'),
+			FSH.profile.findAllyEnemy);
+	},
 
-		var enemiesTotal = FSH.System.getValue('enemiestotal');
-		var enemiesTitle = $('#profileLeftColumn strong:contains("Enemies")')
-			.parent();
-		var numberOfEnemies = enemiesTitle.next().find('img')
-			.filter('[src*="/avatars/"],[src$="/skin/player_default.jpg"]')
-			.length;
-		enemiesTitle.append('<span class="fshBlue">&nbsp;' + numberOfEnemies +
-			(enemiesTotal && enemiesTotal >= numberOfEnemies ? '/' +
-			enemiesTotal : '') + '</span>');
+	findAllyEnemy: function(el){ // Native
+		var isAllies = el.textContent === 'Allies';
+		var isEnemies = el.textContent === 'Enemies';
+		if (!isAllies && !isEnemies) {return;}
+		var target = el.parentNode;
+		var numberOfContacts = target.nextSibling.nextSibling
+			.getElementsByTagName('table').length - 1;
+		if (isAllies) {
+			FSH.profile.totalAllyEnemy(target, numberOfContacts,
+				FSH.System.getValue('alliestotal'));
+		} else {
+			FSH.profile.totalAllyEnemy(target, numberOfContacts,
+				FSH.System.getValue('enemiestotal'));
+		}
+	},
+
+	totalAllyEnemy: function(target, numberOfContacts, contactsTotal) { // Native
+		target.insertAdjacentHTML('beforeend', '<span class="fshBlue">' + '&nbsp;' +
+			numberOfContacts + (contactsTotal && contactsTotal >= numberOfContacts ?
+			'/' + contactsTotal : '') + '</span>');
 	},
 
 	injectFastWear: function() { // jQuery
 		if (!FSH.System.getValue('enableQuickDrink')) {return;}
-		$('#backpack').css('height', '500');
+		var bpBack = document.getElementById('backpack');
+		bpBack.classList.add('fshBackpack');
+		bpBack.removeAttribute('style');
 		var backpackContainer = $('#backpackContainer');
 		var theBackpack = backpackContainer.data('backpack');
 		var oldShow = theBackpack._showPage;
@@ -4777,7 +4788,7 @@ FSH.profile = { // Legacy
 			FSH.profile.fastWearLinks();
 		};
 		if ($('#backpack_current').text().length !== 0) {
-			FSH.profile.fastWearLinks();
+			setTimeout(FSH.profile.fastWearLinks);
 		}
 		backpackContainer.on('click', 'span.fastWear', FSH.profile.fastWearEquip);
 		backpackContainer.on('click', 'span.fastUse',
