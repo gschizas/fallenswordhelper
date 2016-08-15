@@ -80,10 +80,8 @@
   white-space: nowrap;
 }
 
-#fshQuickLinks {
+.fshQuickLinks {
   position: absolute;
-  cursor: pointer;
-  text-decoration: underline;
   z-index: 1;
   text-align: left;
   white-space: nowrap;
