@@ -718,21 +718,21 @@ FSH.Data = {
 		lastWorld: '',
 		questsNotStarted: false,
 		questsNotComplete: false,
-		enableLogColoring: true,
-		enableChatParsing: true,
-		enableCreatureColoring: true,
+		enableLogColoring: false,
+		enableChatParsing: false,
+		enableCreatureColoring: false,
 		showCombatLog: false,
 		showCreatureInfo: false,
 		keepLogs: false,
 
-		showExtraLinks: true,
+		showExtraLinks: false,
 		huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve',
 		huntingBuffsName: 'default',
 		huntingBuffs2: 'Deflect',
 		huntingBuffs2Name: 'PvP',
 		huntingBuffs3: 'SE hunting',
 		huntingBuffs3Name: 'Super Elite Slayer',
-		showHuntingBuffs: true,
+		showHuntingBuffs: false,
 		moveFSBox: false,
 
 		guildSelf: '',
@@ -747,26 +747,26 @@ FSH.Data = {
 		hideQuestNames: '',
 		hideRecipes: false,
 		hideRecipeNames: '',
-		enableGuildInfoWidgets: true,
-		enableOnlineAlliesWidgets: true,
+		enableGuildInfoWidgets: false,
+		enableOnlineAlliesWidgets: false,
 		guildOnlineRefreshTime: 300,
-		hideGuildInfoSecureTrade: true,
+		hideGuildInfoSecureTrade: false,
 		hideGuildInfoTrade: false,
 		hideGuildInfoMessage: false,
 		hideGuildInfoBuff: false,
 
 		buyBuffsGreeting: 'Hello {playername}, can I buy {buffs} for {cost} please?',
-		renderSelfBio: true,
+		renderSelfBio: false,
 		bioEditLines: 10,
-		renderOtherBios: true,
+		renderOtherBios: false,
 		playNewMessageSound: false,
 		showSpeakerOnWorld: false,
 		defaultMessageSound: 'http://dl.getdropbox.com/u/2144065/chimes.wav',
-		highlightPlayersNearMyLvl: true,
-		highlightGvGPlayersNearMyLvl: true,
+		highlightPlayersNearMyLvl: false,
+		highlightGvGPlayersNearMyLvl: false,
 		detailedConflictInfo: false,
 		gameHelpLink: true,
-		navigateToLogAfterMsg: true,
+		navigateToLogAfterMsg: false,
 
 		enableAllyOnlineList: false,
 		enableEnemyOnlineList: false,
@@ -776,7 +776,7 @@ FSH.Data = {
 
 		hideMatchesForCompletedMoves: false,
 		doNotKillList: '',
-		enableBioCompressor: true,
+		enableBioCompressor: false,
 		maxCompressedCharacters: 250,
 		maxCompressedLines: 10,
 
@@ -802,14 +802,14 @@ FSH.Data = {
 		hideRelicOffline: false,
 
 		enterForSendMessage: false,
-		trackKillStreak: true,
+		trackKillStreak: false,
 		storeLastQuestPage: false,
-		addAttackLinkToLog: true,
+		addAttackLinkToLog: false,
 		showStatBonusTotal: false,
 
 		newGuildLogHistoryPages: 3,
 		useNewGuildLog: false,
-		enhanceChatTextEntry: true,
+		enhanceChatTextEntry: false,
 
 		ajaxifyRankControls: false,
 
@@ -819,26 +819,18 @@ FSH.Data = {
 		enableTempleAlert: false,
 		enableUpgradeAlert: false,
 		enableComposingAlert: false,
-		autoFillMinBidPrice: true,
+		autoFillMinBidPrice: false,
 		showPvPSummaryInLog: false,
-		enableQuickDrink: true,
-		enhanceOnlineDots: true,
+		enableQuickDrink: false,
+		enhanceOnlineDots: false,
 		hideBuffSelected: false,
 		hideHelperMenu: false,
 		keepHelperMenuOnScreen: true,
+		draggableHelperMenu: false,
 		quickLinksTopPx: 22,
 		quickLinksLeftPx: 0,
+		draggableQuickLinks: false,
 		showNextQuestSteps: true,
-
-		showHelmetTypeItems: true,
-		showAmorTypeItems: true,
-		showGloveTypeItems: true,
-		showBootTypeItems: true,
-		showWeaponTypeItems: true,
-		showShieldTypeItems: true,
-		showRingTypeItems: true,
-		showAmuletTypeItems: true,
-		showRuneTypeItems: true,
 
 		showRecallMessages: true,
 		showRelicMessages: true,
@@ -852,8 +844,6 @@ FSH.Data = {
 
 		showQuickDropLinks: false,
 
-
-		memberlist: '',
 		inventoryMinLvl: 1,
 		inventoryMaxLvl: 9999,
 		onlinePlayerMinLvl: 1,
@@ -871,7 +861,7 @@ FSH.Data = {
 		alliestotal: 0,
 		enemiestotal: 0,
 		footprints: false,
-		hideNonPlayerGuildLogMessages: true,
+		hideNonPlayerGuildLogMessages: false,
 		listOfAllies: '',
 		listOfEnemies: '',
 		contactList: '',
@@ -882,7 +872,7 @@ FSH.Data = {
 		statisticsControl: false,
 		guildStructureControl: false,
 		lastMembrListCheck: 0,
-		disableItemColoring: false,
+		disableItemColoring: true,
 		showQuickSendLinks: false,
 		needToCompose: false,
 		lastComposeCheck: 0,
@@ -973,7 +963,7 @@ FSH.Data = {
 		hideLegendaryGroup: false,
 		disableDeactivatePrompts: false,
 		monsterLog: '{}',
-		moveComposingButtons: true,
+		moveComposingButtons: false,
 
 	},
 
@@ -1042,6 +1032,7 @@ FSH.Data = {
 		'allyEnemyOnlineRefreshTime',
 		'quickLinksTopPx',
 		'quickLinksLeftPx',
+		'draggableQuickLinks',
 		'enableActiveBountyList',
 		'bountyListRefreshTime',
 		'enableWantedList',
@@ -1069,6 +1060,7 @@ FSH.Data = {
 		'hideBuffSelected',
 		'hideHelperMenu',
 		'keepHelperMenuOnScreen',
+		'draggableHelperMenu',
 		'showNextQuestSteps',
 		'hideChampionsGroup',
 		'hideElitesGroup',
@@ -4083,13 +4075,13 @@ FSH.helperMenu = { // jQuery
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var node = $('#statbar-container');
 		if (node.length === 0) {return;}
-		var helperMenu = $('<div id="helperMenu" class="helperMenu">Helper' +
-			'&nbsp;Menu</div>');
+		var helperMenu = $('<div id="helperMenu" class="helperMenu' +
+			(FSH.System.getValue('keepHelperMenuOnScreen') ? ' fshFixed' : '') +
+			'">Helper&nbsp;Menu</div>');
 		node.before(helperMenu);
 		helperMenu.on('mouseover', FSH.helperMenu.showHelperMenu);
-		helperMenu.draggable();
-		if (FSH.System.getValue('keepHelperMenuOnScreen')) {
-			helperMenu.addClass('fshFixed');
+		if (FSH.System.getValue('draggableHelperMenu')) {
+			helperMenu.draggable();
 		}
 
 		FSH.ga.end('JS Perf', 'helperMenu.injectHelperMenu');
@@ -6702,7 +6694,7 @@ FSH.settingsPage = { // Legacy
 		},
 		showNextQuestSteps: {
 			id: 'showNextQuestSteps',
-			helpTitle: 'Show Quick Drop Item',
+			helpTitle: 'Show Next Quest Steps',
 			helpText: 'Shows all quest steps in the UFSG.'
 		},
 		renderSelfBio: {
@@ -6780,6 +6772,18 @@ FSH.settingsPage = { // Legacy
 			helpTitle: 'Move Composing Buttons',
 			helpText: 'If enabled, will move composing buttons to the top of ' +
 				'the composing screen.'
+		},
+		draggableHelperMenu: {
+			id: 'draggableHelperMenu',
+			helpTitle: 'Draggable Helper Menu',
+			helpText: 'If enabled, allows the helper menu to ' +
+				'be dragged around the screen.'
+		},
+		draggableQuickLinks: {
+			id: 'draggableQuickLinks',
+			helpTitle: 'Draggable Quick Links',
+			helpText: 'If enabled, allows the quick link box to ' +
+				'be dragged around the screen.'
 		},
 	},
 
@@ -6905,6 +6909,7 @@ FSH.settingsPage = { // Legacy
 			simpleCheckbox(mySimpleCheckboxes.hideBuffSelected) +
 			simpleCheckbox(mySimpleCheckboxes.hideHelperMenu) +
 			simpleCheckbox(mySimpleCheckboxes.keepHelperMenuOnScreen) +
+			simpleCheckbox(mySimpleCheckboxes.draggableHelperMenu) +
 
 			'<tr><td align="right">Quick Links Screen Location' +
 				FSH.settingsPage.helpLink('Quick Links Screen Location',
@@ -6915,6 +6920,7 @@ FSH.settingsPage = { // Legacy
 				'"> Left: <input name="quickLinksLeftPx" size="3" value="' +
 				FSH.System.getValue('quickLinksLeftPx') +
 				'"></td></tr>' +
+			simpleCheckbox(mySimpleCheckboxes.draggableQuickLinks) +
 
 			//Guild Manage
 			'<tr><th colspan="2" align="left"><b>Guild>Manage preferences' +
@@ -8131,29 +8137,27 @@ FSH.environment = { // Legacy
 
 		FSH.ga.start('JS Perf', 'environment.injectQuickLinks');
 
-		// don't put all the menu code here (but call if clicked) to minimize lag
 		var quickLinks = FSH.System.getValueJSON('quickLinks') || [];
 		if (quickLinks.length <= 0) {return;}
-		var node = $('#statbar-container');
-		if (node.length === 0) {return;}
+		var draggableQuickLinks = FSH.System.getValue('draggableQuickLinks');
 		var html = '<div style="top:' +
 			FSH.System.getValue('quickLinksTopPx') + 'px; left:' +
 			FSH.System.getValue('quickLinksLeftPx') + 'px; background-image:' +
 			'url(\'' + FSH.System.imageServer + '/skin/inner_bg.jpg\');" ' +
-			'id=fshQuickLinks>';
-		for (var i=0; i<quickLinks.length; i += 1) {
-			html += '<li><span style="cursor:pointer; text-decoration:' +
-				'underline;"><a href="' + quickLinks[i].url + '"' +
+			'id="fshQuickLinks" class="fshQuickLinks' +
+			(FSH.System.getValue('keepHelperMenuOnScreen') ? ' fshFixed' : '') +
+			(draggableQuickLinks ? ' fshLink' : '') +
+			'">';
+		for (var i = 0; i < quickLinks.length; i += 1) {
+			html += '<li><a href="' + quickLinks[i].url + '"' +
 				(quickLinks[i].newWindow ? ' target=new' : '') +
-				'>' + quickLinks[i].name + '</a></span></li>';
+				'>' + quickLinks[i].name + '</a></li>';
 		}
 		html += '</div>';
-		var divQuickLink = $(html);
-		divQuickLink.draggable();
-		if (FSH.System.getValue('keepHelperMenuOnScreen')) {
-			divQuickLink.css('position', 'fixed');
+		document.body.insertAdjacentHTML('beforeend', html);
+		if (draggableQuickLinks) {
+			$('#fshQuickLinks').draggable();
 		}
-		$('body').append(divQuickLink);
 
 		FSH.ga.end('JS Perf', 'environment.injectQuickLinks');
 
