@@ -1494,18 +1494,12 @@ FSH.Layout = {
 		'egAAAABJRU5ErkJggg==" width="16" height="16" />',
 
 	quickBuffHref: function(playerId, buffList) { // Evil
-		if (buffList) {
-			return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-				'quickbuff&tid=' + playerId + '&blist=' + buffList +
-				'", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-		} else {
-			return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-				'quickbuff&tid=' + playerId +
-				'", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
-		}
+		return 'href=\'javascript:window.openWindow("index.php?cmd=' +
+			'quickbuff&tid=' + playerId + (buffList ? '&blist=' + buffList : '') +
+			'", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
 	},
 
-	buffAllHref: function(shortList) {
+	buffAllHref: function(shortList) { // Evil
 		shortList = shortList.join(',').replace(/\s/g, '');
 		var j = 'java';
 		return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + shortList +
