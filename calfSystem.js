@@ -1274,7 +1274,7 @@ FSH.Data = {
 FSH.Layout = {
 	// To be moved back into main script in future as it does not compress well
 
-	changeOnlineDot: function(contactLink){
+	changeOnlineDot: function(contactLink){ // Native
 		var lastActivity = FSH.Data.lastActivityRE
 			.exec(contactLink.getAttribute('data-tipped'));
 		contactLink.parentNode.previousSibling.innerHTML =
@@ -1285,20 +1285,14 @@ FSH.Layout = {
 			});
 	},
 
-	colouredDots: function() {
-
-		FSH.ga.start('JS Perf', 'colouredDots');
-
+	colouredDots: function() { // Native
 		if (!FSH.System.getValue('enhanceOnlineDots')) {return;}
 		Array.prototype.forEach.call(document.querySelectorAll(
 			'#pCC a[data-tipped*="Last Activity"]'),
 			FSH.Layout.changeOnlineDot);
-
-		FSH.ga.end('JS Perf', 'colouredDots');
-
 	},
 
-	onlineDot: function(obj) {
+	onlineDot: function(obj) { // Native
 		var img;
 		var min = 0;
 		if (obj.day)  {min += parseInt(obj.day,  10) * 1440;}
@@ -1327,7 +1321,7 @@ FSH.Layout = {
 
 	injectMenu: function() { // jQuery
 
-		FSH.ga.start('JS Perf', 'injectMenu');
+		FSH.ga.start('JS Perf', 'Layout.injectMenu');
 
 		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
 			$('a[href="index.php?cmd=questbook"]').attr('href',
@@ -1416,24 +1410,19 @@ FSH.Layout = {
 				.css('height', myNav.heights[myNav.state]);
 		}
 
-		FSH.ga.end('JS Perf', 'injectMenu');
+		FSH.ga.end('JS Perf', 'Layout.injectMenu');
 
 	},
 
-	moveRHSBoxUpOnRHS: function(title) {
+	moveRHSBoxUpOnRHS: function(title) { // jQuery
 		$('#pCR').prepend($('#' + title));
 	},
 
-	moveRHSBoxToLHS: function(title) {
-		// var myDiv = $('#' + title).wrap('<div class="pCR"></div>');
-		// myDiv = myDiv.parent();
-		// $('#pCL').append(myDiv);
+	moveRHSBoxToLHS: function(title) { // jQuery
 		$('#pCL').append($('#' + title).addClass('pCR'));
-		// $('#pCL').append('<style>.pCR a { color: #F7EAC9; }</style>');
 	},
 
-	//TODO replace this
-	notebookContent: function() {
+	notebookContent: function() { // Native
 		return document.getElementById('pCC'); // new interface logic
 	},
 
@@ -1451,14 +1440,14 @@ FSH.Layout = {
 			'<div style="font-size:small;" id="'+divId+'"></div>';
 	},
 
-	playerId: function() {
+	playerId: function() { // Native
 		var thePlayerId = parseInt(document.getElementById('holdtext')
 			.textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
 		FSH.System.setValue('playerID',thePlayerId);
 		return thePlayerId;
 	},
 
-	guildId: function () {
+	guildId: function () { // Native
 		var guildId;
 		var nodeList = document.body.getElementsByTagName('script');
 		Array.prototype.forEach.call(nodeList, function(el) {
@@ -1469,7 +1458,7 @@ FSH.Layout = {
 		return guildId;
 	},
 
-	infoBox: function(documentText) {
+	infoBox: function(documentText) { // jQuery
 		var infoMatch = $(documentText).find('center[id="info-msg"]').html();
 		var result = '';
 		if (infoMatch) {
@@ -2148,7 +2137,7 @@ FSH.composing = { // jQuery
 	injectComposeAlert: function() { //jquery
 		if (FSH.cmd === 'composing') {return;}
 
-		FSH.ga.start('JS Perf', 'injectComposeAlert');
+		FSH.ga.start('JS Perf', 'composing.injectComposeAlert');
 
 		var needToCompose = FSH.System.getValue('needToCompose');
 		if (needToCompose) {
@@ -2159,14 +2148,11 @@ FSH.composing = { // jQuery
 		if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
 		$.get('index.php?cmd=composing', FSH.composing.parseComposing);
 
-		FSH.ga.end('JS Perf', 'injectComposeAlert');
+		FSH.ga.end('JS Perf', 'composing.injectComposeAlert');
 
 	},
 
 	parseComposing: function(data) { //jquery
-
-		FSH.ga.start('JS Perf', 'parseComposing');
-
 		var doc;
 		if (FSH.cmd !== 'composing') {
 			doc = data;
@@ -2192,9 +2178,6 @@ FSH.composing = { // jQuery
 			FSH.System.setValue('needToCompose', false);
 			FSH.System.setValue('lastComposeCheck', eta);
 		}
-
-		FSH.ga.end('JS Perf', 'parseComposing');
-
 	},
 
 	displayComposeMsg: function() { //jquery
@@ -2202,9 +2185,6 @@ FSH.composing = { // jQuery
 	},
 
 	injectComposing: function() { //jquery
-
-		FSH.ga.start('JS Perf', 'injectComposing');
-
 		if ($('#pCC').length !== 1) {return;}
 		if (FSH.Helper.enableComposingAlert) {
 			FSH.composing.parseComposing();}
@@ -2224,9 +2204,6 @@ FSH.composing = { // jQuery
 				.before($('#pCC b:contains("Instant Finish Price Reset:")')
 					.parent().attr('style', 'text-align: right; padding: 0 38px 0 0'));
 		}
-
-		FSH.ga.end('JS Perf', 'injectComposing');
-
 	},
 
 	createPotion: function($template) { //jquery
@@ -2279,7 +2256,7 @@ FSH.notification = { // jQuery
 		//Checks to see if the temple is open for business.
 		if (FSH.cmd === 'temple') {return;}
 
-		FSH.ga.start('JS Perf', 'injectTempleAlert');
+		FSH.ga.start('JS Perf', 'notification.injectTempleAlert');
 
 		var templeAlertLastUpdate = FSH.System.getValue('lastTempleCheck');
 		var needToPray = FSH.System.getValue('needToPray');
@@ -2297,16 +2274,13 @@ FSH.notification = { // jQuery
 			$.get('index.php?cmd=temple', FSH.notification.parseTemplePage);
 		}
 
-		FSH.ga.end('JS Perf', 'injectTempleAlert');
+		FSH.ga.end('JS Perf', 'notification.injectTempleAlert');
 
 	},
 
 	parseTemplePage: function(responseText) { //native
 		var checkNeedToPray, doc;
 		if (!FSH.Helper.enableTempleAlert) {return;}
-
-		FSH.ga.start('JS Perf', 'parseTemplePage');
-
 		if (FSH.cmd !== 'temple') {
 			doc = FSH.System.createDocument(responseText);
 		} else {
@@ -2321,9 +2295,6 @@ FSH.notification = { // jQuery
 		FSH.System.setValue('needToPray', needToPray);
 		FSH.System.setValue('lastTempleCheck', new Date()
 			.setUTCHours(23, 59, 59, 999) + 1); // midnight
-
-		FSH.ga.end('JS Perf', 'parseTemplePage');
-
 	},
 
 	displayDisconnectedFromGodsMessage: function() { //jquery
@@ -2387,7 +2358,7 @@ FSH.notification = { // jQuery
 
 	injectJoinAllLink: function() { // jQuery
 
-		FSH.ga.start('JS Perf', 'injectJoinAllLink');
+		FSH.ga.start('JS Perf', 'notification.injectJoinAllLink');
 
 		var newGroup = $('#pCL li:contains("New attack group created.")');
 		if (newGroup.length !== 1) {return;}
@@ -2405,7 +2376,7 @@ FSH.notification = { // jQuery
 		}
 		newGroup.after('<li class="notification">' + groupJoinHTML + '</li>');
 
-		FSH.ga.end('JS Perf', 'injectJoinAllLink');
+		FSH.ga.end('JS Perf', 'notification.injectJoinAllLink');
 
 	},
 
@@ -2414,9 +2385,6 @@ FSH.notification = { // jQuery
 FSH.guildReport = { // bad jQuery
 
 	injectReportPaint: function() { // jQuery
-
-		FSH.ga.start('JS Perf', 'injectReportPaint');
-
 		FSH.ajax.getMembrList(false)
 			.done(FSH.guildReport.reportHeader);
 		var innerTable = document.querySelector('#pCC table table');
@@ -2425,9 +2393,6 @@ FSH.guildReport = { // bad jQuery
 			.querySelectorAll('tr:not(.fshHide) td:nth-of-type(3n+0)');
 		Array.prototype.forEach.call(nodeList, FSH.guildReport.reportChild);
 		FSH.guildReport.eventHandlers($(innerTable));
-
-		FSH.ga.end('JS Perf', 'injectReportPaint');
-
 	},
 
 	searchUser: function(innerTable) {
@@ -2557,7 +2522,7 @@ FSH.guildAdvisor = { // jQuery
 
 	injectAdvisorNew: function(m) { // jQuery
 
-		FSH.ga.start('JS Perf', 'injectAdvisorNew');
+		FSH.ga.start('JS Perf', 'guildAdvisor.injectAdvisorNew');
 
 		var list = $('#pCC table[cellpadding="1"]');
 		if (list.length !== 1) {return;}
@@ -2594,7 +2559,7 @@ FSH.guildAdvisor = { // jQuery
 		}, 0);
 		FSH.guildAdvisor.summaryLink();
 
-		FSH.ga.end('JS Perf', 'injectAdvisorNew');
+		FSH.ga.end('JS Perf', 'guildAdvisor.injectAdvisorNew');
 
 	},
 
@@ -2602,7 +2567,7 @@ FSH.guildAdvisor = { // jQuery
 
 	injectAdvisorWeekly: function() { // jQuery
 
-		FSH.ga.start('JS Perf', 'injectAdvisorWeekly');
+		FSH.ga.start('JS Perf', 'guildAdvisor.injectAdvisorWeekly');
 
 		var list = $('#pCC table[cellpadding="1"]');
 		if (list.length !== 1) {return;}
@@ -2625,7 +2590,7 @@ FSH.guildAdvisor = { // jQuery
 			FSH.guildAdvisor.getAdvisorPage(7)
 		).done(FSH.guildAdvisor.addAdvisorPages);
 
-		FSH.ga.end('JS Perf', 'injectAdvisorWeekly');
+		FSH.ga.end('JS Perf', 'guildAdvisor.injectAdvisorWeekly');
 
 	},
 
@@ -2644,7 +2609,7 @@ FSH.guildAdvisor = { // jQuery
 	returnAdvisorPage: function(data) {
 		var e = this.period;
 
-		FSH.ga.start('JS Perf', 'returnAdvisorPage' + e);
+		FSH.ga.start('JS Perf', 'guildAdvisor.returnAdvisorPage' + e);
 
 		var list = FSH.guildAdvisor.list;
 		list.append(' day ' + e + ',');
@@ -2678,13 +2643,13 @@ FSH.guildAdvisor = { // jQuery
 			}
 		});
 
-		FSH.ga.end('JS Perf', 'returnAdvisorPage' + e);
+		FSH.ga.end('JS Perf', 'guildAdvisor.returnAdvisorPage' + e);
 
 	},
 
 	addAdvisorPages: function() { // Native
 
-		FSH.ga.start('JS Perf', 'addAdvisorPages');
+		FSH.ga.start('JS Perf', 'guildAdvisor.addAdvisorPages');
 
 		var m = FSH.guildAdvisor.membrList;
 		var o = FSH.guildAdvisor.newSummary;
@@ -2712,13 +2677,13 @@ FSH.guildAdvisor = { // jQuery
 		FSH.guildAdvisor.data = data;
 		setTimeout(FSH.guildAdvisor.displayAdvisor, 0);
 
-		FSH.ga.end('JS Perf', 'addAdvisorPages');
+		FSH.ga.end('JS Perf', 'guildAdvisor.addAdvisorPages');
 
 	},
 
 	displayAdvisor: function() { // jQuery
 
-		FSH.ga.start('JS Perf', 'displayAdvisor');
+		FSH.ga.start('JS Perf', 'guildAdvisor.displayAdvisor');
 
 		var o = FSH.guildAdvisor.newSummary;
 		var data = FSH.guildAdvisor.data;
@@ -2746,7 +2711,7 @@ FSH.guildAdvisor = { // jQuery
 			stateDuration: 0
 		});
 
-		FSH.ga.end('JS Perf', 'displayAdvisor');
+		FSH.ga.end('JS Perf', 'guildAdvisor.displayAdvisor');
 
 	}
 
@@ -2755,9 +2720,6 @@ FSH.guildAdvisor = { // jQuery
 FSH.bazaar = { // jQuery
 
 	inject: function() { // jQuery
-
-		FSH.ga.start('JS Perf', 'bazaar.inject');
-
 		var pbImg = $('#pCC img[alt="Potion Bazaar"]');
 		pbImg.css('float', 'left');
 		var myTable = FSH.Layout.bazaarTable;
@@ -2776,9 +2738,6 @@ FSH.bazaar = { // jQuery
 		myTable.on('input', '#buy_amount', FSH.bazaar.quantity);
 		myTable.on('click', '#fshBuy', FSH.bazaar.buy);
 		pbImg.parent().append(myTable);
-
-		FSH.ga.end('JS Perf', 'bazaar.inject');
-
 	},
 
 	select: function(evt) { // jQuery
@@ -2912,14 +2871,14 @@ FSH.groups = { // Legacy
 
 	doGroupPaint: function(m) { // jQuery
 
-		FSH.ga.start('JS Perf', 'doGroupPaint');
+		FSH.ga.start('JS Perf', 'groups.doGroupPaint');
 
 		$('#pCC table table table tr').has('.group-action-container')
 			.each(function(i, e) {
 				FSH.groups.doGroupRow(e, m);
 			});
 
-		FSH.ga.end('JS Perf', 'doGroupPaint');
+		FSH.ga.end('JS Perf', 'groups.doGroupPaint');
 
 	},
 
@@ -3129,7 +3088,7 @@ FSH.rank = { // Legacy
 
 	doRankPaint: function() { // jQuery
 
-		FSH.ga.start('JS Perf', 'doRankPaint');
+		FSH.ga.start('JS Perf', 'rank.doRankPaint');
 
 		var theTable = $('#pCC table table').has('td.line[width="80%"]')[0];
 		var myRank = FSH.Helper.membrList[$('#statbar-character')
@@ -3157,7 +3116,7 @@ FSH.rank = { // Legacy
 			FSH.rank.ajaxifyRankControls();
 		}
 
-		FSH.ga.end('JS Perf', 'doRankPaint');
+		FSH.ga.end('JS Perf', 'rank.doRankPaint');
 
 	},
 
@@ -3303,7 +3262,7 @@ FSH.inventory = { // jQuery
 
 	getInvMan: function() { // Native
 
-		FSH.ga.start('JS Perf', 'getInvMan');
+		FSH.ga.start('JS Perf', 'inventory.getInvMan');
 
 		FSH.inventory.showQuickDropLinks =
 			FSH.System.getValue('showQuickDropLinks');
@@ -3326,7 +3285,7 @@ FSH.inventory = { // jQuery
 		FSH.inventory.eventHandlers();
 		FSH.inventory.clearButton();
 
-		FSH.ga.end('JS Perf', 'getInvMan');
+		FSH.ga.end('JS Perf', 'inventory.getInvMan');
 
 	},
 
@@ -4082,9 +4041,6 @@ FSH.quickBuff = { // jQuery
 FSH.toprated = { // jQuery
 
 	injectTopRated: function() { // jQuery
-
-		FSH.ga.start('JS Perf', 'injectTopRated');
-
 		if ($('#pCC font:contains("Last Updated")').length === 0) {return;}
 		var lump = '<input id="fshFindOnlinePlayers" ' +
 			'class="custombutton tip-static" type="button" ' +
@@ -4095,15 +4051,9 @@ FSH.toprated = { // jQuery
 		theCell.wrapInner('<div style="width:190px;"/>');
 		theCell.prepend($('<span/>').append(findBtn));
 		findBtn.click(FSH.toprated.findOnlinePlayers);
-
-		FSH.ga.end('JS Perf', 'injectTopRated');
-
 	},
 
 	findOnlinePlayers: function(e) { // jQuery
-
-		FSH.ga.start('JS Perf', 'findOnlinePlayers');
-
 		$(e.target).qtip('hide').parent().html('<img id="fshSpinner" src="' + 
 			FSH.System.imageServer + '/world/actionLoadingSpinner.gif">');
 
@@ -4119,26 +4069,16 @@ FSH.toprated = { // jQuery
 
 		FSH.ajax.getAllMembrList(true, guildArray)
 			.done(FSH.toprated.parseGuildOnline);
-
-		FSH.ga.end('JS Perf', 'findOnlinePlayers');
-
 	},
 
 	parseGuildOnline: function(membrList) { // jQuery
-
-		FSH.ga.start('JS Perf', 'parseGuildOnline');
-
 		$('#fshSpinner').hide();
-
 		$('#pCC table[width="500"] a[guildid]').parent().after(function() {
 			var self = $(this).children('a');
 			return '<td>' + FSH.Layout.onlineDot({
 				last_login: membrList[self.attr('guildid')][self.text()].last_login
 			}) + '</td>';
 		});
-
-		FSH.ga.end('JS Perf', 'parseGuildOnline');
-
 	}
 
 };
@@ -4147,7 +4087,7 @@ FSH.helperMenu = { // jQuery
 
 	injectHelperMenu: function() { //jquery
 
-		FSH.ga.start('JS Perf', 'injectHelperMenu');
+		FSH.ga.start('JS Perf', 'helperMenu.injectHelperMenu');
 
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var node = $('#statbar-container');
@@ -4161,7 +4101,7 @@ FSH.helperMenu = { // jQuery
 			helperMenu.addClass('fshFixed');
 		}
 
-		FSH.ga.end('JS Perf', 'injectHelperMenu');
+		FSH.ga.end('JS Perf', 'helperMenu.injectHelperMenu');
 
 	},
 
@@ -5086,46 +5026,22 @@ FSH.profile = { // Legacy
 FSH.logs = { // Legacy
 
 	guildChat: function() { // Native
-
-		FSH.ga.start('JS Perf', 'guildChat');
-
 		FSH.logs.addChatTextArea();
 		FSH.logs.addLogColoring('Chat', 0);
-
-		FSH.ga.end('JS Perf', 'guildChat');
-
 	},
 
 	guildLog: function() { // Native
-
-		FSH.ga.start('JS Perf', 'guildLog');
-
 		FSH.logs.addLogColoring('GuildLog', 1);
 		FSH.logs.addGuildLogWidgets();
-
-		FSH.ga.end('JS Perf', 'guildLog');
-
 	},
 
 	outbox: function() { // Native
-
-		FSH.ga.start('JS Perf', 'outbox');
-
 		FSH.logs.addLogColoring('OutBox', 1);
-
-		FSH.ga.end('JS Perf', 'outbox');
-
 	},
 
 	playerLog: function() { // Native
-
-		FSH.ga.start('JS Perf', 'playerLog');
-
 		FSH.logs.addLogColoring('PlayerLog', 1);
 		FSH.logs.addLogWidgets();
-
-		FSH.ga.end('JS Perf', 'playerLog');
-
 	},
 
 	addLogColoring: function(logScreen, dateColumn) { // Legacy
@@ -5532,9 +5448,6 @@ FSH.logs = { // Legacy
 FSH.lists = { // Native
 
 	injectAuctionSearch: function(content) { // Native
-
-		FSH.ga.start('JS Perf', 'injectAuctionSearch');
-
 		if (!content) {content = FSH.Layout.notebookContent();}
 		content.innerHTML =
 			FSH.Layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
@@ -5565,15 +5478,9 @@ FSH.lists = { // Native
 			'showRawEditor': true
 		};
 		FSH.lists.generateManageTable();
-
-		FSH.ga.end('JS Perf', 'injectAuctionSearch');
-
 	},
 
 	injectQuickLinkManager: function(content) { // Native
-
-		FSH.ga.start('JS Perf', 'injectQuickLinkManager');
-
 		if (!content) {content = FSH.Layout.notebookContent();}
 		content.innerHTML =
 			FSH.Layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
@@ -5592,9 +5499,6 @@ FSH.lists = { // Native
 			'showRawEditor': true
 		};
 		FSH.lists.generateManageTable();
-
-		FSH.ga.end('JS Perf', 'injectQuickLinkManager');
-
 	},
 
 	generateManageTable: function() { // Native - Ugly but fast
@@ -6209,9 +6113,6 @@ FSH.dropItems = { // Legacy
 	},
 
 	injectDropItems: function() { // Legacy
-
-		FSH.ga.start('JS Perf', 'injectDropItems');
-
 		FSH.ajax.getInventory().done(FSH.dropItems.inventory);
 
 		FSH.common.addStatTotalToMouseover();
@@ -6474,9 +6375,6 @@ FSH.dropItems = { // Legacy
 	},
 
 	injectMoveItems: function() { // Bad jQuery
-
-		FSH.ga.start('JS Perf', 'injectMoveItems');
-
 		var foldersEnabled = $('img[src$="/folder_on.gif"]');
 		if (foldersEnabled.length !== 1) {return;}
 		var otherFolders = $('#pCC a').has('img[src$="/folder.gif"]');
@@ -6495,9 +6393,6 @@ FSH.dropItems = { // Legacy
 				.append('&nbsp;<input type="button" class="custombutton"' +
 					' id="fshMove" value="Move">')));
 		$('#fshMove').click(FSH.dropItems.moveItemsToFolder);
-
-		FSH.ga.end('JS Perf', 'injectMoveItems');
-
 	},
 
 	moveItemsToFolder: function() { // Bad jQuery
@@ -6914,9 +6809,6 @@ FSH.settingsPage = { // Legacy
 	},
 
 	injectSettings: function() { // Legacy
-
-		FSH.ga.start('JS Perf', 'injectSettings');
-
 		var tickAll = $('<span class="fshLink">Tick all buffs</span>');
 		tickAll.click(FSH.settingsPage.toggleTickAllBuffs);
 		$('#settingsTabs-4 td').eq(0).append('<br>').append(tickAll);
@@ -7455,9 +7347,6 @@ FSH.settingsPage = { // Legacy
 			var minGroupLevel = minGroupLevelTextField.value;
 			FSH.System.setValue('minGroupLevel',minGroupLevel);
 		}
-
-		FSH.ga.end('JS Perf', 'injectSettings');
-
 	},
 
 	clearStorage: function() {
@@ -7665,7 +7554,9 @@ FSH.environment = { // Legacy
 
 		FSH.ga.setup();
 
-		var cmd, subcmd, subcmd2, type, fromWorld, test_cmd, fn;
+		FSH.ga.start('JS Perf', 'environment.dispatch');
+
+		var cmd, subcmd, subcmd2, type, fromWorld, test_cmd, fnName, fn;
 
 		if (document.location.search !== '') {
 			cmd = FSH.System.getUrlParameter('cmd') || '-';
@@ -7704,13 +7595,17 @@ FSH.environment = { // Legacy
 		var pageSwitcher = FSH.Data.pageSwitcher;
 
 		if (pageSwitcher[cmd] &&
-			pageSwitcher[cmd][subcmd] &&
-			pageSwitcher[cmd][subcmd][subcmd2] &&
-			pageSwitcher[cmd][subcmd][subcmd2][type] &&
-			pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
-			fn = FSH.System.getFunction(
-				pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]);
-			if (typeof fn === 'function') {fn();}
+				pageSwitcher[cmd][subcmd] &&
+				pageSwitcher[cmd][subcmd][subcmd2] &&
+				pageSwitcher[cmd][subcmd][subcmd2][type] &&
+				pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+			fnName = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
+			fn = FSH.System.getFunction(fnName);
+			if (typeof fn === 'function') {
+				FSH.ga.start('JS Perf', fnName);
+				fn();
+				FSH.ga.end('JS Perf', fnName);
+			}
 		}
 
 		if (typeof window.jQuery === 'undefined') {return;}
@@ -7723,9 +7618,12 @@ FSH.environment = { // Legacy
 		if (!FSH.Helper.huntingMode) {
 			setTimeout(FSH.environment.injectQuickLinks);
 		}
+
+		FSH.ga.end('JS Perf', 'environment.dispatch');
+
 	},
 
-	navMenu: function() {
+	navMenu: function() { // jQuery
 		var myNav = $('#nav').data('nav');
 		if (!myNav) {return;}
 		var oldSave = myNav._saveState;
@@ -7736,7 +7634,7 @@ FSH.environment = { // Legacy
 		};
 	},
 
-	statbarWrapper: function(href, id) {
+	statbarWrapper: function(href, id) { // Native
 		var myWrapper = document.createElement('a');
 		myWrapper.setAttribute('href', href);
 		var character = document.getElementById(id);
@@ -7746,10 +7644,7 @@ FSH.environment = { // Legacy
 		statWrapper.appendChild(myWrapper);
 	},
 
-	statbar: function() {
-
-		FSH.ga.start('JS Perf', 'statbar');
-
+	statbar: function() { // Native
 		var sw = FSH.environment.statbarWrapper;
 		sw('index.php?cmd=profile', 'statbar-character');
 		sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
@@ -7757,24 +7652,14 @@ FSH.environment = { // Legacy
 		sw('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
 		sw('index.php?cmd=points', 'statbar-fsp');
 		sw('index.php?cmd=bank', 'statbar-gold');
-
-		FSH.ga.end('JS Perf', 'statbar');
-
 	},
 
-	gameHelpLink: function() {
-		// var gameHelpNode = $('div.minibox h3:contains("Game Help")');
-		// $(gameHelpNode).each(function() {
-			// $(this).html('<a href="index.php?cmd=settings" style="color:' +
-				// ' #FFFFFF; text-decoration: underline">' +
-				// $(this).text() + '</a>');
-		// });
+	gameHelpLink: function() { // jQuery
 		$('div.minibox h3:contains("Game Help")')
 			.html('<a href="index.php?cmd=settings">Game Help</a>');
 	},
 
 	prepareEnv: function() { // jQuery
-
 		if (FSH.System.getValue('gameHelpLink')) {
 			setTimeout(FSH.environment.gameHelpLink);
 		}
@@ -7838,7 +7723,6 @@ FSH.environment = { // Legacy
 		if (!FSH.System.getValue('hideHelperMenu')) {
 			setTimeout(FSH.helperMenu.injectHelperMenu);
 		}
-
 	},
 
 	replaceKeyHandler: function() { // jQuery
@@ -8215,10 +8099,7 @@ FSH.environment = { // Legacy
 		});
 	},
 
-	changeGuildLogHREF: function() { // Legacy
-
-		FSH.ga.start('JS Perf', 'changeGuildLogHREF');
-
+	changeGuildLogHREF: function() { // Native
 		if (!FSH.System.getValue('useNewGuildLog')) {return;}
 		// var guildLogNodes = FSH.System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
 		var guildLogNodes = document.querySelectorAll(
@@ -8240,9 +8121,6 @@ FSH.environment = { // Legacy
 				}
 			}
 		}
-
-		FSH.ga.end('JS Perf', 'changeGuildLogHREF');
-
 	},
 
 	doMsgSound: function() { // jQuery
@@ -8259,7 +8137,7 @@ FSH.environment = { // Legacy
 
 	injectQuickLinks: function() { // Bad jquery
 
-		FSH.ga.start('JS Perf', 'injectQuickLinks');
+		FSH.ga.start('JS Perf', 'environment.injectQuickLinks');
 
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var quickLinks = FSH.System.getValueJSON('quickLinks') || [];
@@ -8285,16 +8163,12 @@ FSH.environment = { // Legacy
 		}
 		$('body').append(divQuickLink);
 
-		FSH.ga.end('JS Perf', 'injectQuickLinks');
+		FSH.ga.end('JS Perf', 'environment.injectQuickLinks');
 
 	},
 
 	unknownPage: function() { // Legacy
-
 		if (typeof window.jQuery === 'undefined') {return;}
-
-		FSH.ga.start('JS Perf', 'unknownPage');
-
 		if ($('#pCC td:contains("Below is the current status for ' +
 			'the relic")').length > 0) {
 			FSH.ga.screenview('unknown.oldRelic.injectRelic');
@@ -8329,9 +8203,6 @@ FSH.environment = { // Legacy
 			FSH.ga.screenview('unknown.Helper.injectInvent');
 			FSH.Helper.injectInvent();
 		}
-
-		FSH.ga.end('JS Perf', 'unknownPage');
-
 	},
 
 };
@@ -8671,9 +8542,6 @@ FSH.bank = { // jQuery
 	},
 
 	ajaxifyBank: function() { // jQuery
-
-		FSH.ga.start('JS Perf', 'ajaxifyBank');
-
 		var o = FSH.bank.bankSettings;
 		var bank = $('#pCC b');
 		if (bank.length === 0 || bank.eq(0).text() !== o.headText) {return;}
@@ -8692,9 +8560,6 @@ FSH.bank = { // jQuery
 			depo.click(FSH.bank.bankDeposit);
 		}
 		withdraw.click(FSH.bank.bankWithdrawal);
-
-		FSH.ga.end('JS Perf', 'ajaxifyBank');
-
 	},
 
 	bankDeposit: function(e) { // jQuery
@@ -8748,9 +8613,6 @@ FSH.bank = { // jQuery
 FSH.guild = { // Legacy
 
 	injectViewGuild: function() { // Legacy
-
-		FSH.ga.start('JS Perf', 'injectViewGuild');
-
 		FSH.guild.removeGuildAvyImgBorder();
 		FSH.guild.guildXPLock();
 
@@ -8775,15 +8637,9 @@ FSH.guild = { // Legacy
 			}
 		}
 		setTimeout(FSH.Layout.colouredDots);
-
-		FSH.ga.end('JS Perf', 'injectViewGuild');
-
 	},
 
 	injectGuild: function() { // Legacy
-
-		FSH.ga.start('JS Perf', 'injectGuild');
-
 		FSH.guild.removeGuildAvyImgBorder();
 		FSH.guild.guildXPLock();
 
@@ -8845,9 +8701,6 @@ FSH.guild = { // Legacy
 				FSH.guild.getConflictInfo, {'node': confNode});
 		}
 		setTimeout(FSH.Layout.colouredDots);
-
-		FSH.ga.end('JS Perf', 'injectGuild');
-
 	},
 
 	removeGuildAvyImgBorder: function() { //jquery
@@ -9077,9 +8930,7 @@ FSH.upgrades = { // Legacy
 FSH.newGuildLog = { // Legacy
 
 	injectNewGuildLog: function(content){ // Legacy
-
-		FSH.ga.start('JS Perf', 'injectNewGuildLog');
-
+		var i;
 		if (!content) {content=FSH.Layout.notebookContent();}
 
 		FSH.newGuildLog.setupGuildLogFilters();
@@ -9104,7 +8955,7 @@ FSH.newGuildLog = { // Legacy
 			'<tr><td colspan=2>' +
 				'<table><tbody><tr><td><b>Filters:</b></td>' +
 				'<td><table><tbody><tr><td>';
-		for (var i=0; i<FSH.Helper.guildLogFilters.length; i += 1) {
+		for (i=0; i<FSH.Helper.guildLogFilters.length; i += 1) {
 			var guildLogFilterID = FSH.Helper.guildLogFilters[i].id;
 			FSH.Helper[guildLogFilterID] = FSH.System.getValue(guildLogFilterID);
 			newhtml += i % 5 === 0 ? '</td></tr><tr><td>' : '';
@@ -9141,9 +8992,6 @@ FSH.newGuildLog = { // Legacy
 		//fetch guild log page and apply filters
 		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=log', FSH.newGuildLog.parseGuildLogPage,
 			{'guildLogInjectTable': guildLogInjectTable, 'pageNumber': 1, 'loadingMessageInjectHere': loadingMessageInjectHere, 'maxPagesToFetch': maxPagesToFetch, 'completeReload': completeReload});
-
-		FSH.ga.end('JS Perf', 'injectNewGuildLog');
-
 	},
 
 	setupGuildLogFilters: function() { // Native - but WTF?
@@ -9840,9 +9688,6 @@ FSH.scoutTower = { // Legacy
 FSH.trade = { // jQuery
 
 	injectTrade: function() { // jQuery
-
-		FSH.ga.start('JS Perf', 'injectTrade');
-
 		var multiple = $('<tr id="fshSelectMultiple"></tr>');
 		var myTd = $('<td colspan=6></td>');
 
@@ -9871,14 +9716,11 @@ FSH.trade = { // jQuery
 			.before(multiple);
 
 		FSH.ajax.inventory(true).done(FSH.trade.processTrade);
-
-		FSH.ga.end('JS Perf', 'injectTrade');
-
 	},
 
 	processTrade: function(data) { // jQuery
 
-		FSH.ga.start('JS Perf', 'processTrade');
+		FSH.ga.start('JS Perf', 'trade.processTrade');
 
 		var fshHasST = false;
 
@@ -9920,9 +9762,9 @@ FSH.trade = { // jQuery
 
 		$('#fshSelectMultiple').after(showST).after(folders);
 
-		FSH.ga.end('JS Perf', 'processTrade');
+		FSH.ga.end('JS Perf', 'trade.processTrade');
 
-		},
+	},
 
 	toggleCheckAllPlants: function() { // jQuery
 		var self = $(this);
