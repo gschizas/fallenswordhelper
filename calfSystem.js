@@ -4069,23 +4069,23 @@ FSH.toprated = { // jQuery
 FSH.helperMenu = { // jQuery
 
 	injectHelperMenu: function() { //jquery
-
-		FSH.ga.start('JS Perf', 'helperMenu.injectHelperMenu');
-
 		// don't put all the menu code here (but call if clicked) to minimize lag
 		var node = $('#statbar-container');
 		if (node.length === 0) {return;}
+		var draggableHelperMenu = FSH.System.getValue('draggableHelperMenu');
 		var helperMenu = $('<div id="helperMenu" class="helperMenu' +
 			(FSH.System.getValue('keepHelperMenuOnScreen') ? ' fshFixed' : '') +
-			'">Helper&nbsp;Menu</div>');
+			'"' + (draggableHelperMenu ? ' draggable="true"' : '') +
+			'>Helper&nbsp;Menu</div>');
 		node.before(helperMenu);
 		helperMenu.on('mouseover', FSH.helperMenu.showHelperMenu);
-		if (FSH.System.getValue('draggableHelperMenu')) {
-			helperMenu.draggable();
+		if (draggableHelperMenu) {
+			// helperMenu.draggable();
+			document.getElementById('helperMenu')
+				.addEventListener('dragstart', FSH.common.drag_start, false);
+			document.body.addEventListener('dragover', FSH.common.drag_over, false);
+			document.body.addEventListener('drop', FSH.common.drag_drop, false);
 		}
-
-		FSH.ga.end('JS Perf', 'helperMenu.injectHelperMenu');
-
 	},
 
 	showHelperMenu: function() { // jquery
@@ -5909,6 +5909,29 @@ FSH.common = { // Legacy
 			'Stat Total:</td><td align="right">' + totalStats +
 			'&nbsp;</td></tr>'
 		);
+	},
+
+	drag_start: function(event) {
+		FSH.common.drag_target = event.target;
+		var style = window.getComputedStyle(event.target, null);
+		event.dataTransfer.setData('text/plain',
+			parseInt(style.getPropertyValue('left'),10) - event.clientX + ',' +
+			(parseInt(style.getPropertyValue('top'),10) - event.clientY));
+	},
+
+	drag_over: function(event) {
+		event.preventDefault();
+		return false;
+	},
+
+	drag_drop: function(event) {
+		var offset = event.dataTransfer.getData('text/plain').split(',');
+		FSH.common.drag_target.style.left =
+			event.clientX + parseInt(offset[0],10) + 'px';
+		FSH.common.drag_target.style.top =
+			event.clientY + parseInt(offset[1],10) + 'px';
+		event.preventDefault();
+		return false;
 	},
 
 };
@@ -8137,9 +8160,8 @@ FSH.environment = { // Legacy
 	},
 
 	injectQuickLinks: function() { // Bad jquery
-
-		FSH.ga.start('JS Perf', 'environment.injectQuickLinks');
-
+		var node = document.getElementById('statbar-container');
+		if (!node) {return;}
 		var quickLinks = FSH.System.getValueJSON('quickLinks') || [];
 		if (quickLinks.length <= 0) {return;}
 		var draggableQuickLinks = FSH.System.getValue('draggableQuickLinks');
@@ -8149,8 +8171,8 @@ FSH.environment = { // Legacy
 			'url(\'' + FSH.System.imageServer + '/skin/inner_bg.jpg\');" ' +
 			'id="fshQuickLinks" class="fshQuickLinks' +
 			(FSH.System.getValue('keepHelperMenuOnScreen') ? ' fshFixed' : '') +
-			(draggableQuickLinks ? ' fshLink' : '') +
-			'">';
+			(draggableQuickLinks ? ' fshLink" draggable="true"' : '"') +
+			'>';
 		for (var i = 0; i < quickLinks.length; i += 1) {
 			html += '<li><a href="' + quickLinks[i].url + '"' +
 				(quickLinks[i].newWindow ? ' target=new' : '') +
@@ -8159,11 +8181,12 @@ FSH.environment = { // Legacy
 		html += '</div>';
 		document.body.insertAdjacentHTML('beforeend', html);
 		if (draggableQuickLinks) {
-			$('#fshQuickLinks').draggable();
+			// $('#fshQuickLinks').draggable();
+			document.getElementById('fshQuickLinks')
+				.addEventListener('dragstart', FSH.common.drag_start, false);
+			document.body.addEventListener('dragover', FSH.common.drag_over, false);
+			document.body.addEventListener('drop', FSH.common.drag_drop, false);
 		}
-
-		FSH.ga.end('JS Perf', 'environment.injectQuickLinks');
-
 	},
 
 	unknownPage: function() { // Legacy
