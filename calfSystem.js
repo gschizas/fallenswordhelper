@@ -1442,7 +1442,7 @@ FSH.Layout = {
 	guildId: function () { // Native
 		var guildId;
 		var nodeList = document.body.getElementsByTagName('script');
-		Array.prototype.forEach.call(nodeList, function(el) {
+		Array.prototype.forEach.call(nodeList, function getGuildId(el) {
 			var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
 			if (match) {guildId = parseInt(match[1], 10);}
 		});
@@ -1740,48 +1740,51 @@ FSH.ajax = { // jQuery
 	getMembrList: function(force) {
 		var guildId = FSH.Layout.guildId();
 		return FSH.ajax.guildMembers(force, guildId)
-			.pipe(function(membrList) {
+			.pipe(function setHelperMembrList(membrList) {
 				FSH.Helper.membrList = membrList[guildId];
 				return FSH.Helper.membrList;
 			})
-			.done(function(membrList) {
-				FSH.ajax.getForage('fsh_membrList').done(function(oldMemList) {
-					oldMemList = oldMemList || {};
-					oldMemList[guildId] = membrList[guildId];
-					FSH.ajax.setForage('fsh_membrList', oldMemList);
-				});
+			.done(function addMembrListToForage(membrList) {
+				FSH.ajax.getForage('fsh_membrList')
+					.done(function saveMembrListInForage(oldMemList) {
+						oldMemList = oldMemList || {};
+						oldMemList[guildId] = membrList[guildId];
+						FSH.ajax.setForage('fsh_membrList', oldMemList);
+					});
 			});
 	},
 
 	getAllMembrList: function(force, guildArray) {
 		var prm = [];
-		guildArray.forEach(function(guildId) {
+		guildArray.forEach(function addGuildToArray(guildId) {
 			prm.push(FSH.ajax.guildMembers(force, guildId));
 		});
 		return $.when.apply($, prm)
-			.pipe(function() {
+			.pipe(function mergeResults() {
 				FSH.Helper.membrList = $.extend.apply(this, arguments);
 				return FSH.Helper.membrList;
 			})
-			.done(function(membrList) {
-				FSH.ajax.getForage('fsh_membrList').done(function(oldMemList) {
-					oldMemList = oldMemList || {};
-					FSH.ajax.setForage('fsh_membrList', $.extend(oldMemList, membrList));
-				});
+			.done(function addMergeToForage(membrList) {
+				FSH.ajax.getForage('fsh_membrList')
+					.done(function saveMergeInForage(oldMemList) {
+						oldMemList = oldMemList || {};
+						FSH.ajax.setForage('fsh_membrList', $.extend(oldMemList, membrList));
+					});
 			});
 	},
 
 	guildMembers: function(force, guildId) {
 		if (force) {return FSH.ajax.getGuildMembers(guildId);}
-		return FSH.ajax.getForage('fsh_membrList').pipe(function(membrList) {
-			if (!membrList ||
-				!membrList[guildId] ||
-				!membrList[guildId].lastUpdate ||
-				membrList[guildId].lastUpdate < Date.now() - 300000) {
-				return FSH.ajax.getGuildMembers(guildId);
-			}
-			return membrList;
-		});
+		return FSH.ajax.getForage('fsh_membrList')
+			.pipe(function getMembrListFromForage(membrList) {
+				if (!membrList ||
+					!membrList[guildId] ||
+					!membrList[guildId].lastUpdate ||
+					membrList[guildId].lastUpdate < Date.now() - 300000) {
+					return FSH.ajax.getGuildMembers(guildId);
+				}
+				return membrList;
+			});
 	},
 
 	getGuildMembers: function(guildId) {
@@ -1793,11 +1796,11 @@ FSH.ajax = { // jQuery
 				subcmd: 'guild_members',
 				guild_id: guildId
 			}
-		}).pipe(function(data) {
+		}).pipe(function membrListToHash(data) {
 			var membrList = {};
 			membrList[guildId] = {};
 			membrList[guildId].lastUpdate = Date.now();
-			data.forEach(function(ele) {
+			data.forEach(function memberToObject(ele) {
 				membrList[guildId][ele.username] = ele;
 			});
 			return membrList;
@@ -1806,7 +1809,7 @@ FSH.ajax = { // jQuery
 
 	inventory: function(force) {
 		var dfr = FSH.ajax.inventoryCache(force);
-		dfr.done(function(inv) {
+		dfr.done(function setHelperInventory(inv) {
 			FSH.Helper.inventory = inv;
 		});
 		return dfr;
@@ -1818,7 +1821,7 @@ FSH.ajax = { // jQuery
 		}
 		var prm = FSH.ajax.getForage(FSH.subcmd === 'guildinvmgr' ?
 			'fsh_guildInv' : 'fsh_selfInv');
-		return prm.pipe(function(data) {
+		return prm.pipe(function checkCachedInventory(data) {
 			if (!data || data.lastUpdate < Date.now() - 300000) {
 				return FSH.ajax.getInventory();
 			}
@@ -1832,7 +1835,7 @@ FSH.ajax = { // jQuery
 			url:'index.php?cmd=export&subcmd=' + (FSH.subcmd === 'guildinvmgr' ?
 				'guild_store&inc_tagged=1' : 'inventory')
 		});
-		return prm.pipe(function(data) {
+		return prm.pipe(function sendInventoryToForage(data) {
 			data.lastUpdate = Date.now();
 			FSH.ajax.setForage(FSH.subcmd === 'guildinvmgr' ? 'fsh_guildInv' :
 				'fsh_selfInv', data);
@@ -1841,9 +1844,11 @@ FSH.ajax = { // jQuery
 	},
 
 	myStats: function(force) {
-		FSH.Helper.myUsername = $('#statbar-character').text();
+		// FSH.Helper.myUsername = $('#statbar-character').text();
+		FSH.Helper.myUsername =
+			document.getElementById('statbar-character').textContent;
 		return FSH.ajax.getMyStats(force)
-			.pipe(function(data) {
+			.pipe(function setHelperProfile(data) {
 				FSH.Helper.profile = FSH.Helper.profile || {};
 				FSH.Helper.profile[FSH.Helper.myUsername] = data;
 				return data;
@@ -1854,7 +1859,7 @@ FSH.ajax = { // jQuery
 		if (force) {return FSH.ajax.getMyProfile();}
 		// jQuery 1.7 uses pipe instead of then
 		return FSH.ajax.getForage('fsh_selfProfile')
-			.pipe(function(data) {
+			.pipe(function getProfileFromForage(data) {
 				if (!data || data.lastUpdate < Date.now() -
 					FSH.Helper.allyEnemyOnlineRefreshTime) {
 					return FSH.ajax.getMyProfile();
@@ -1865,7 +1870,7 @@ FSH.ajax = { // jQuery
 
 	getMyProfile: function() {
 		return FSH.ajax.getProfile(FSH.Helper.myUsername)
-			.done(function(data) {
+			.done(function sendMyProfileToForage(data) {
 				FSH.ajax.setForage('fsh_selfProfile', data);
 			});
 	},
@@ -1875,7 +1880,7 @@ FSH.ajax = { // jQuery
 			cmd:             'export',
 			subcmd:          'profile',
 			player_username: username
-		}).pipe(function(data) {
+		}).pipe(function addLastUpdateDate(data) {
 			data.lastUpdate = Date.now();
 			return data;
 		});
@@ -1885,7 +1890,7 @@ FSH.ajax = { // jQuery
 		// Wrap in jQuery Deferred because we're using 1.7
 		// rather than using ES6 promise
 		var dfr = $.Deferred();
-		localforage.setItem(forage, data, function(err, data) {
+		localforage.setItem(forage, data, function setItemCallback(err, data) {
 			if (err) {
 				console.log(forage + ' forage error', err);
 				dfr.reject(err);
@@ -1900,7 +1905,7 @@ FSH.ajax = { // jQuery
 		// Wrap in jQuery Deferred because we're using 1.7
 		// rather than using ES6 promise
 		var dfr = $.Deferred();
-		localforage.getItem(forage, function(err, data) {
+		localforage.getItem(forage, function getItemCallback(err, data) {
 			if (err) {
 				console.log(forage + ' forage error', err);
 				dfr.reject(err);
@@ -1919,7 +1924,7 @@ FSH.ajax = { // jQuery
 
 	queueTakeItem: function(invId, action) {
 		// You have to chain them because they could be modifying the backpack
-		FSH.ajax.deferred = FSH.ajax.queue().pipe(function() {
+		FSH.ajax.deferred = FSH.ajax.queue().pipe(function pipeTakeToQueue() {
 			return FSH.ajax.takeItem(invId, action);
 		});
 		return FSH.ajax.deferred;
@@ -1927,7 +1932,7 @@ FSH.ajax = { // jQuery
 
 	queueRecallItem: function(o) {
 		// You have to chain them because they could be modifying the backpack
-		FSH.ajax.deferred = FSH.ajax.queue().pipe(function() {
+		FSH.ajax.deferred = FSH.ajax.queue().pipe(function pipeRecallToQueue() {
 			return FSH.ajax.recallItem(o);
 		});
 		return FSH.ajax.deferred;
@@ -1944,16 +1949,16 @@ FSH.ajax = { // jQuery
 				'ajax': 1
 			},
 			dataType: 'json'
-		}).done(FSH.ajax.dialog).pipe(function(data) {
+		}).done(FSH.ajax.dialog).pipe(function takeItemStatus(data) {
 			if (data.r === 0 && action !== 'take') {
 				if (action === 'wear') {
 					return FSH.ajax.equipItem(data.b)
-						.pipe(function() {return data;});
+						.pipe(function equipItemStatus() {return data;});
 						// Return takeitem status irrespective of the status of the equipitem
 				}
 				if (action === 'use') {
 					return FSH.ajax.useItem(data.b)
-						.pipe(function() {return data;});
+						.pipe(function useItemStatus() {return data;});
 						// Return takeitem status irrespective of the status of the useitem
 				}
 			}
@@ -1963,22 +1968,20 @@ FSH.ajax = { // jQuery
 
 	recallItem: function(o) {
 		return FSH.ajax.guildInvRecall(o.invId, o.playerId, o.mode)
-			.pipe(function(data) {
+			.pipe(function recallItemStatus(data) {
 				if (data.r === 0 && o.action !== 'recall') {
-					return FSH.ajax.backpack().pipe(function(bpData) {
+					return FSH.ajax.backpack().pipe(function gotBackpack(bpData) {
 						// TODO assuming backpack is successful...
 						if (o.action === 'wear') {
 							return FSH.ajax.equipItem(
-									bpData.items[bpData.items.length - 1].a
-								)
-								.pipe(function() {return data;});
+									bpData.items[bpData.items.length - 1].a)
+								.pipe(function wearItemStatus() {return data;});
 							// Return recall status irrespective of the status of the equipitem
 						}
 						if (o.action === 'use') {
 							return FSH.ajax.useItem(
-									bpData.items[bpData.items.length - 1].a
-								)
-								.pipe(function() {return data;});
+									bpData.items[bpData.items.length - 1].a)
+								.pipe(function useItemStatus() {return data;});
 							// Return recall status irrespective of the status of the useitem
 						}
 					});
@@ -2049,7 +2052,7 @@ FSH.ajax = { // jQuery
 	guildMailboxTake: function(href) {
 		return $.ajax({
 			url: href
-		}).pipe(function(data) {
+		}).pipe(function translateReturnInfo(data) {
 			var info = FSH.Layout.infoBox(data);
 			return info === 'Item was transferred to the guild store!' ?
 				{r: 0, m: ''} : {r: 1, m: info};
@@ -2160,7 +2163,7 @@ FSH.composing = { // jQuery
 			var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
 			var etas = $('div.composing-potion-time', doc);
 			var eta = Infinity;
-			etas.each(function() {
+			etas.each(function convertTime() {
 				var timeArr = timeRE.exec($(this).text());
 				if (!timeArr) {return;}
 				var milli = timeArr[1] * 3600000 + timeArr[2] * 60000 +
@@ -2184,7 +2187,7 @@ FSH.composing = { // jQuery
 		$('input[id^=create-]').not('#create-multi').after('&nbsp;[<span ' +
 			'class="helperQC">Quick Create</span>]');
 
-		$('#pCC').on('click', 'span.helperQC', function() {
+		$('#pCC').on('click', 'span.helperQC', function getTemplate() {
 			var temp = $(this).prev().prev();
 			if (temp.length === 1 && temp.val() !== 'none') {
 				FSH.composing.createPotion(temp);
@@ -2209,7 +2212,7 @@ FSH.composing = { // jQuery
 				template_id: $template.val(),
 				_rnd: Math.floor(Math.random() * 8999999998) + 1000000000
 			}
-		}).done(function(data, textStatus) {
+		}).done(function potionDone(data, textStatus) {
 			if (data.error !== '') {
 				$template.parent()
 					.html('<div id="helperQCError" style="height: ' +
@@ -2223,12 +2226,12 @@ FSH.composing = { // jQuery
 	},
 
 	create: function() {
-		$('#composing-add-skill').on('click', function() {
+		$('#composing-add-skill').on('click', function addSkill() {
 			$('#composing-skill-level-input')
 				.val($('#composing-skill-level-max').text());
 		});
 
-		$('#composing-skill-select').on('change', function() {
+		$('#composing-skill-select').on('change', function selectSkill() {
 			$('#composing-skill-level-input')
 				.val($('#composing-skill-level-max').text());
 		});
@@ -9115,7 +9118,7 @@ FSH.newGuildLog = { // Legacy
 			localDateMilli = Date.now();
 		}
 
-		logTable.find('tr:gt(0):has(td:not(.divider))').each(function(){
+		logTable.find('tr:gt(0):has(td:not(.divider))').each(function rowProfiler(){
 			var cellContents = $(this).children('td:eq(1)').text();
 			if (!cellContents || cellContents === 'Date' ||
 				cellContents.split(' ').length === 1) {return;}
