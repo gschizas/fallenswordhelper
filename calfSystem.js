@@ -7500,17 +7500,20 @@ FSH.ga = { // jQuery
 	times: {},
 
 	start: function(category, variable, label) {
+		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 		FSH.ga.times[category + ':' + variable + ':' + label] =
 			Math.round(performance.now());
 	},
 
 	end: function(category, variable, label) {
-		ga('fshApp.send', 'timing', category, variable,
-			Math.round(performance.now()) -
-			FSH.ga.times[category + ':' + variable + ':' + label], label);
-		// $('#pF').addClass('fshCenter').text('FSH processing time: ' +
-			// (Math.round(performance.now()) -
-			// FSH.ga.times[category + ':' + variable + ':' + label]) + 'ms');
+		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
+		var myTime = Math.round(performance.now()) -
+			FSH.ga.times[category + ':' + variable + ':' + label];
+		ga('fshApp.send', 'timing', category, variable, myTime, label);
+
+		// document.getElementById('foot-wrap').insertAdjacentHTML('beforeend',
+		// 	'<br>' + variable + ': ' + myTime + 'ms');
+
 	},
 
 	refAry: ['www.lazywebtools.co.uk', 'refreshthing.com'],
