@@ -7580,7 +7580,7 @@ FSH.environment = { // Legacy
 
 		FSH.ga.start('JS Perf', 'environment.dispatch');
 
-		var cmd, subcmd, subcmd2, type, fromWorld, test_cmd, fnName, fn;
+		var cmd, subcmd, subcmd2, type, fromWorld, test_cmd;
 
 		if (document.location.search !== '') {
 			cmd = FSH.System.getUrlParameter('cmd') || '-';
@@ -7623,13 +7623,8 @@ FSH.environment = { // Legacy
 				pageSwitcher[cmd][subcmd][subcmd2] &&
 				pageSwitcher[cmd][subcmd][subcmd2][type] &&
 				pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
-			fnName = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
-			fn = FSH.System.getFunction(fnName);
-			if (typeof fn === 'function') {
-				FSH.ga.start('JS Perf', fnName);
-				fn();
-				FSH.ga.end('JS Perf', fnName);
-			}
+			setTimeout(FSH.environment.asyncDispatcher, 0,
+				pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]);
 		}
 
 		if (typeof window.jQuery === 'undefined') {return;}
@@ -7645,6 +7640,15 @@ FSH.environment = { // Legacy
 
 		FSH.ga.end('JS Perf', 'environment.dispatch');
 
+	},
+
+	asyncDispatcher: function (fnName) {
+		var fn = FSH.System.getFunction(fnName);
+		if (typeof fn === 'function') {
+			FSH.ga.start('JS Perf', fnName);
+			fn();
+			FSH.ga.end('JS Perf', fnName);
+		}
 	},
 
 	navMenu: function() { // jQuery
