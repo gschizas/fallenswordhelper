@@ -16,8 +16,12 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
+/* eslint-disable no-implicit-globals */
+
 // EVERYTHING MUST BE IN main()
 var fshMain = function() {
+
+/* eslint-enable no-implicit-globals */
 
 'use strict';
 
