@@ -8058,20 +8058,22 @@ FSH.environment = { // Legacy
 		// hide guild info links
 		// illegal multiple id's - use a to prevent getElementById
 		if (FSH.Helper.hideGuildInfoTrade) {
-			$('a#guild-minibox-action-trade').hide();
+			$('a#guild-minibox-action-trade', guildMembrList).addClass('fshHide');
 		}
 		if (FSH.Helper.hideGuildInfoSecureTrade) {
-			$('a#guild-minibox-action-secure-trade').hide();
+			$('a#guild-minibox-action-secure-trade', guildMembrList)
+				.addClass('fshHide');
 		}
 		if (FSH.Helper.hideGuildInfoBuff) {
-			$('a#guild-minibox-action-quickbuff').hide();
+			$('a#guild-minibox-action-quickbuff', guildMembrList).addClass('fshHide');
 		}
 		if (FSH.Helper.hideGuildInfoMessage) {
-			$('a#guild-minibox-action-send-message').hide();
+			$('a#guild-minibox-action-send-message', guildMembrList)
+				.addClass('fshHide');
 		}
 		if (FSH.Helper.hideBuffSelected) {
-			$('a.guild-buff-check-on').hide();
-			$('#guild-quick-buff').hide();
+			$('a.guild-buff-check-on', guildMembrList).addClass('fshHide');
+			$('#guild-quick-buff').addClass('fshHide');
 		}
 		// add coloring for offline time
 		$('a.player-name', guildMembrList).each(function() {
@@ -8079,14 +8081,14 @@ FSH.environment = { // Legacy
 			var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/
 				.exec(playerA.data('tipped'))[1];
 			if (lastActivityMinutes < 2) {
-				playerA.css('color','green');
+				playerA.addClass('fshGreen');
 			} else if (lastActivityMinutes < 5) {
-				playerA.css('color','white');
+				playerA.addClass('fshWhite');
 			} else {
-				playerA.css('color','gray');
+				playerA.addClass('fshGrey');
 			}
 		});
-		var chatH4 = $('h4:contains("Chat")');
+		var chatH4 = $('#pCR h4:contains("Chat")');
 		chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="' +
 			'color:white;">' + chatH4.html() + '</span></a>');
 	},
