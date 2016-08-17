@@ -60,17 +60,14 @@ window.FSH = window.FSH || {};
 		if (ws === 'object'){
 			window.GM_getValue = function(name, defValue){
 				var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
-				if (value === null || value === undefined) {
-					return defValue;
-				} else {
-					switch (value.substr(0, 2)) {
-					case 'S]':
-						return value.substr(2);
-					case 'N]':
-						return parseInt(value.substr(2), 10);
-					case 'B]':
-						return value.substr(2) === 'true';
-					}
+				if (value === null || value === undefined) {return defValue;}
+				switch (value.substr(0, 2)) {
+				case 'S]':
+					return value.substr(2);
+				case 'N]':
+					return parseInt(value.substr(2), 10);
+				case 'B]':
+					return value.substr(2) === 'true';
 				}
 				return value;
 			};
@@ -96,11 +93,8 @@ window.FSH = window.FSH || {};
 			gvar.temporarilyStorage = [];
 			window.GM_getValue = function(name, defValue){
 				if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
-					'undefined') {
-					return defValue;
-				} else {
-					return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
-				}
+					'undefined') {return defValue;}
+				return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
 			};
 			window.GM_setValue = function(name, value){
 				switch (typeof value){
@@ -329,12 +323,12 @@ FSH.System = {
 	},
 
 	convertTextToHtml: function(inputText) {
-		return inputText.
-			replace(/</g,'&lt').
-			replace(/>/g,'&gt').
-			replace(/\n/g,'<br>').
-			replace(/\[\/([a-z])\]/g,'<\/\$1>').
-			replace(/\[([a-z])\]/g,'<\$1>');
+		return inputText
+			.replace(/</g,'&lt')
+			.replace(/>/g,'&gt')
+			.replace(/\n/g,'<br>')
+			.replace(/\[\/([a-z])\]/g,'<\/\$1>')
+			.replace(/\[([a-z])\]/g,'<\$1>');
 	},
 
 	parseDate: function(textDate) {
@@ -552,7 +546,7 @@ FSH.Data = {
 	redDot:
 		'<span class="redDot tip-static" data-tipped="Offline"></span>',
 
-	/* jshint -W101 */ // Line is too long. (W101)
+	/* eslint-disable no-multi-spaces */
 
 	buffList: [
 		{name: 'Rage',                stamina: 10, 'duration': 90,   minCastLevel: 1,    treeId: 0, skillId: 0,   buff: '+0.2% base attack per point.', nicks: 'rage'},
@@ -688,7 +682,7 @@ FSH.Data = {
 		{name: 'Invigorate',          stamina: 40, 'duration': 90,   minCastLevel: 3000, treeId: 2, skillId: 169, buff: '+0.01% per skill level added to your attack, defence, armor, HP and damage for each piece of equipped gear that is epic.', nicks: 'invigorate'}
 	],
 
-	/* jshint +W101 */ // Line is too long. (W101)
+	/* eslint-enable no-multi-spaces */
 
 	guildMessages: {
 		guildSelfMessage: {'color':'green',
@@ -1074,13 +1068,13 @@ FSH.Data = {
 
 	craft: {
 		Perfect    : {abbr: 'Perf', colour: '#00b600', index: 8},
-		Excellent  : {abbr: 'Exc',  colour: '#f6ed00', index: 7},
-		'Very Good': {abbr: 'VG',   colour: '#f67a00', index: 6},
+		Excellent  : {abbr:  'Exc', colour: '#f6ed00', index: 7},
+		'Very Good': {abbr:   'VG', colour: '#f67a00', index: 6},
 		Good       : {abbr: 'Good', colour: '#f65d00', index: 5},
-		Average    : {abbr: 'Ave',  colour: '#f64500', index: 4},
+		Average    : {abbr:  'Ave', colour: '#f64500', index: 4},
 		Poor       : {abbr: 'Poor', colour: '#f61d00', index: 3},
-		'Very Poor': {abbr: 'VPr',  colour: '#b21500', index: 2},
-		Uncrafted  : {abbr: 'Unc',  colour: '#666666', index: 1}
+		'Very Poor': {abbr:  'VPr', colour: '#b21500', index: 2},
+		Uncrafted  : {abbr:  'Unc', colour: '#666666', index: 1}
 	},
 
 	itemType: ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon', 'Shield',
@@ -1287,9 +1281,9 @@ FSH.Layout = {
 	onlineDot: function(obj) { // Native
 		var img;
 		var min = 0;
-		if (obj.day)  {min += parseInt(obj.day,  10) * 1440;}
+		if (obj.day) {min += parseInt(obj.day, 10) * 1440;}
 		if (obj.hour) {min += parseInt(obj.hour, 10) * 60;}
-		if (obj.min)  {min += parseInt(obj.min,  10);}
+		if (obj.min) {min += parseInt(obj.min, 10);}
 		if (obj.last_login) {
 			min = Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
 		}
@@ -2613,19 +2607,19 @@ FSH.guildAdvisor = { // jQuery
 				ns[member] = ns[member] || {};
 				ns[member].deposit = (ns[member].deposit || 0) +
 					FSH.System.intValue(tds.eq(1).text());
-				ns[member].tax     = (ns[member].tax     || 0) +
+				ns[member].tax = (ns[member].tax || 0) +
 					FSH.System.intValue(tds.eq(2).text());
-				ns[member].total   = (ns[member].total   || 0) +
+				ns[member].total = (ns[member].total || 0) +
 					FSH.System.intValue(tds.eq(3).text());
-				ns[member].fsp     = (ns[member].fsp     || 0) +
+				ns[member].fsp = (ns[member].fsp || 0) +
 					FSH.System.intValue(tds.eq(4).text());
-				ns[member].skills  = (ns[member].skills  || 0) +
+				ns[member].skills = (ns[member].skills || 0) +
 					FSH.System.intValue(tds.eq(5).text());
-				ns[member].grpCrt  = (ns[member].grpCrt  || 0) +
+				ns[member].grpCrt = (ns[member].grpCrt || 0) +
 					FSH.System.intValue(tds.eq(6).text());
 				ns[member].grpJoin = (ns[member].grpJoin || 0) +
 					FSH.System.intValue(tds.eq(7).text());
-				ns[member].relics  = (ns[member].relics  || 0) +
+				ns[member].relics = (ns[member].relics || 0) +
 					FSH.System.intValue(tds.eq(8).text());
 				ns[member].contrib = (ns[member].contrib || 0) +
 					FSH.System.intValue(tds.eq(9).text());
@@ -2993,7 +2987,7 @@ FSH.groups = { // Legacy
 				FSH.groups.joinGroup(groupJoinURL, joinButton);
 			}
 		}
-		//refresh after a slight delay
+		//refresh after a slight delay TODO
 		setTimeout('location.href = "' + FSH.System.server +
 			'index.php?cmd=guild&subcmd=groups";',1250);
 	},
@@ -3529,38 +3523,40 @@ FSH.inventory = { // jQuery
 		if (row.player_id && row.player_id === -1) {
 			return '<span class="fshLink takeItem" invid="' + row.inv_id +
 				'" action="wear">Wear</span>';
-		} else if (row.player_id &&
-			row.player_id !== FSH.Helper.inventory.current_player_id) {
+		}
+		if (row.player_id &&
+				row.player_id !== FSH.Helper.inventory.current_player_id) {
 			return '<span class="fshLink recallItem" invid="' + row.inv_id +
 				'" playerid="' + row.player_id +
 				'" mode="0" action="wear">Wear</span>';
-		} else if (row.folder_id && !row.equipped ||
-			row.player_id && !row.equipped &&
-			row.player_id === FSH.Helper.inventory.current_player_id) {
+		}
+		if (row.folder_id && !row.equipped ||
+				row.player_id && !row.equipped &&
+				row.player_id === FSH.Helper.inventory.current_player_id) {
 			return '<span class="fshLink wearItem" invid="' + row.inv_id +
 				'">Wear</span>';
-		} else {
-			return '';
 		}
+		return '';
 	},
 
 	useRender: function(row) { // Native
 		if (row.player_id && row.player_id === -1) {
 			return '<span class="fshLink takeItem" invid="' + row.inv_id +
 				'" action="use">Use</span>';
-		} else if (row.player_id &&
-			row.player_id !== FSH.Helper.inventory.current_player_id) {
+		}
+		if (row.player_id &&
+				row.player_id !== FSH.Helper.inventory.current_player_id) {
 			return '<span class="fshLink recallItem" invid="' + row.inv_id +
 				'" playerid="' + row.player_id +
 				'" mode="0" action="use">Use</span>';
-		} else if (row.folder_id && !row.equipped ||
-			row.player_id && !row.equipped &&
-			row.player_id === FSH.Helper.inventory.current_player_id) {
+		}
+		if (row.folder_id && !row.equipped ||
+				row.player_id && !row.equipped &&
+				row.player_id === FSH.Helper.inventory.current_player_id) {
 			return '<span class="fshLink useItem" invid="' + row.inv_id +
 				'">Use</span>';
-		} else {
-			return '';
 		}
+		return '';
 	},
 
 	dropRender: function(data, type, row) { // Native
@@ -3621,9 +3617,9 @@ FSH.inventory = { // jQuery
 				var max = FSH.inventory.options.fshMaxLvl;
 				var level = FSH.System.intValue(data[1]); // use data for the level column
 				if (level === 0 ||
-					isNaN(min)   && isNaN(max)   ||
-					isNaN(min)   && level <= max ||
-					min <= level && isNaN(max)   ||
+					isNaN(min) && isNaN(max) ||
+					isNaN(min) && level <= max ||
+					min <= level && isNaN(max) ||
 					min <= level && level <= max )
 				{return true;}
 				return false;
@@ -5240,8 +5236,8 @@ FSH.logs = { // Legacy
 		var dateHTML = aRow.cells[1].innerHTML;
 		var dateFirstPart = dateHTML
 			.substring(0, dateHTML.indexOf('>Report') + 7);
-		var dateLastPart = dateHTML.
-			substring(dateHTML.indexOf('Message</a>') + 11, dateHTML.length);
+		var dateLastPart = dateHTML
+			.substring(dateHTML.indexOf('Message</a>') + 11, dateHTML.length);
 		var extraPart = '';
 		if (!isGuildMate) {
 			extraPart = ' | <a title="Add to Ignore List" href="index.php?cmd' +
@@ -5632,12 +5628,12 @@ FSH.recipes = { // Legacy
 		if (reResult === null) {
 			return null;
 		}
-		var itemId   = reResult[1];
-		var invId    = reResult[2];
-		var type     = reResult[3];
-		var pid      = reResult[4];
-		var vcode    = reResult[5];
-		var theUrl   = 'fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t='+type + '&p=' + pid + '&vcode=' + vcode;
+		var itemId = reResult[1];
+		var invId = reResult[2];
+		var type = reResult[3];
+		var pid = reResult[4];
+		var vcode = reResult[5];
+		var theUrl = 'fetchitem.php?item_id=' + itemId + '&inv_id=' + invId + '&t='+type + '&p=' + pid + '&vcode=' + vcode;
 		theUrl = FSH.System.server + theUrl;
 		return theUrl;
 	},
@@ -5767,10 +5763,10 @@ FSH.quickWear = { // Legacy
 		for (key in FSH.Helper.itemList) {
 			if (!FSH.Helper.itemList.hasOwnProperty(key)) {continue;}
 			itemID=FSH.Helper.itemList[key].id;
-			document.getElementById('Helper:equipProfileInventoryItem' + itemID).
-				addEventListener('click', FSH.common.equipProfileInventoryItem, true);
-			document.getElementById('Helper:useProfileInventoryItem' + itemID).
-				addEventListener('click', FSH.quickWear.useProfileInventoryItem, true);
+			document.getElementById('Helper:equipProfileInventoryItem' + itemID)
+				.addEventListener('click', FSH.common.equipProfileInventoryItem, true);
+			document.getElementById('Helper:useProfileInventoryItem' + itemID)
+				.addEventListener('click', FSH.quickWear.useProfileInventoryItem, true);
 		}
 		$('#invTabs').tabs();
 		$('#invTabs').tabs('select', 0);
@@ -6022,9 +6018,9 @@ FSH.onlinePlayers = { // Bad jQuery
 				if (!isNaN(min)) {FSH.System.setValue('onlinePlayerMinLvl', min);}
 				if (!isNaN(max)) {FSH.System.setValue('onlinePlayerMaxLvl', max);}
 				var level = FSH.System.intValue(data[2]) || 0; // use data for the level column
-				if (isNaN(min)   && isNaN(max)   ||
-					isNaN(min)   && level <= max ||
-					min <= level && isNaN(max)   ||
+				if (isNaN(min) && isNaN(max) ||
+					isNaN(min) && level <= max ||
+					min <= level && isNaN(max) ||
 					min <= level && level <= max )
 				{return true;}
 				return false;
@@ -6835,21 +6831,21 @@ FSH.settingsPage = { // Legacy
 		tickAll.click(FSH.settingsPage.toggleTickAllBuffs);
 		$('#settingsTabs-4 td').eq(0).append('<br>').append(tickAll);
 
-		var buffs                  = FSH.System.getValue('huntingBuffs');
-		var buffsName              = FSH.System.getValue('huntingBuffsName');
-		var buffs2                 = FSH.System.getValue('huntingBuffs2');
-		var buffs2Name             = FSH.System.getValue('huntingBuffs2Name');
-		var buffs3                 = FSH.System.getValue('huntingBuffs3');
-		var buffs3Name             = FSH.System.getValue('huntingBuffs3Name');
-		var doNotKillList          = FSH.System.getValue('doNotKillList');
-		// var hideArenaPrizes        = FSH.System.getValue('hideArenaPrizes');
+		var buffs = FSH.System.getValue('huntingBuffs');
+		var buffsName = FSH.System.getValue('huntingBuffsName');
+		var buffs2 = FSH.System.getValue('huntingBuffs2');
+		var buffs2Name = FSH.System.getValue('huntingBuffs2Name');
+		var buffs3 = FSH.System.getValue('huntingBuffs3');
+		var buffs3Name = FSH.System.getValue('huntingBuffs3Name');
+		var doNotKillList = FSH.System.getValue('doNotKillList');
+		// var hideArenaPrizes = FSH.System.getValue('hideArenaPrizes');
 
 		var enableActiveBountyList = FSH.System.getValue('enableActiveBountyList');
-		var bountyListRefreshTime  = FSH.System.getValue('bountyListRefreshTime');
-		var enableWantedList       = FSH.System.getValue('enableWantedList');
-		var wantedNames            = FSH.System.getValue('wantedNames');
-		var combatEvaluatorBias    = FSH.System.getValue('combatEvaluatorBias');
-		var enabledHuntingMode     = FSH.System.getValue('enabledHuntingMode');
+		var bountyListRefreshTime = FSH.System.getValue('bountyListRefreshTime');
+		var enableWantedList = FSH.System.getValue('enableWantedList');
+		var wantedNames = FSH.System.getValue('wantedNames');
+		var combatEvaluatorBias = FSH.System.getValue('combatEvaluatorBias');
+		var enabledHuntingMode = FSH.System.getValue('enabledHuntingMode');
 		var storage = (JSON.stringify(localStorage).length /
 			(5 * 1024 * 1024) * 100).toFixed(2);
 
@@ -10080,7 +10076,7 @@ FSH.recipeMgr = { // Legacy
 		output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
 
 		recipe.items = FSH.recipeMgr.parseRecipeItemOrComponent('td[background*="/inventory/2x3.gif"]', doc);
-		recipe.components  = FSH.recipeMgr.parseRecipeItemOrComponent('td[background*="/inventory/1x1mini.gif"]', doc);
+		recipe.components = FSH.recipeMgr.parseRecipeItemOrComponent('td[background*="/inventory/1x1mini.gif"]', doc);
 		recipe.target = FSH.recipeMgr.parseRecipeItemOrComponent('td[background*="/hellforge/2x3.gif"]', doc)[0];
 
 		var nextRecipeIndex = currentRecipeIndex+1;
@@ -10148,7 +10144,7 @@ FSH.recipeMgr = { // Legacy
 				result += '<td style="border-bottom:1px solid #CD9E4B;">';
 				if (recipe.items) {
 					for (j=0; j<recipe.items.length; j += 1) {
-						result += recipe.items[j].amountPresent  + '/' + recipe.items[j].amountNeeded +
+						result += recipe.items[j].amountPresent + '/' + recipe.items[j].amountNeeded +
 							' <img border="0" align="middle" class="tip-dynamic" ' +
 							'data-tipped="fetchitem.php?item_id=' +
 							recipe.items[j].id + '&inv_id=-1&t=2&p=' + FSH.Layout.playerId() + '&vcode=' + recipe.items[j].verify + '" ' +
@@ -10282,8 +10278,8 @@ FSH.quickExtract = { // Legacy - No longer required?
 
 		for (id in FSH.Helper.resourceList) {
 			if (!FSH.Helper.resourceList.hasOwnProperty(id)) {continue;}
-			document.getElementById('Helper:extractAllSimilar' + id).
-				addEventListener('click', FSH.quickExtract.extractAllSimilar, true);
+			document.getElementById('Helper:extractAllSimilar' + id)
+				.addEventListener('click', FSH.quickExtract.extractAllSimilar, true);
 		}
 	},
 
@@ -11427,14 +11423,14 @@ FSH.oldRelic = { // Legacy - Old map
 		defendersProcessed.html(
 			FSH.System.addCommas(defendersProcessedNumber + 1));
 
-		$('td[title="LDProcessed"]')           .html(1);
-		$('td[title="LDConstitutionLevel"]')   .html(player.constitutionLevel);
-		$('td[title="LDFlinchLevel"]')         .html(player.flinchLevel);
+		$('td[title="LDProcessed"]') .html(1);
+		$('td[title="LDConstitutionLevel"]') .html(player.constitutionLevel);
+		$('td[title="LDFlinchLevel"]') .html(player.flinchLevel);
 		$('td[title="LDNightmareVisageLevel"]').html(player.nightmareVisageLevel);
-		$('td[title="LDFortitudeLevel"]')      .html(player.fortitudeLevel);
-		$('td[title="LDChiStrikeLevel"]')      .html(player.chiStrikeLevel);
-		$('td[title="LDTerrorizeLevel"]')      .html(player.terrorizeLevel);
-		$('td[title="LDSanctuaryLevel"]')      .html(player.sanctuaryLevel);
+		$('td[title="LDFortitudeLevel"]') .html(player.fortitudeLevel);
+		$('td[title="LDChiStrikeLevel"]') .html(player.chiStrikeLevel);
+		$('td[title="LDTerrorizeLevel"]') .html(player.terrorizeLevel);
+		$('td[title="LDSanctuaryLevel"]') .html(player.sanctuaryLevel);
 	},
 
 	processRelicStats: function() { // Legacy - Old map
@@ -11878,9 +11874,9 @@ FSH.arena = { // jQuery
 				var min = FSH.arena.opts.minLvl;
 				var max = FSH.arena.opts.maxLvl;
 				var level = FSH.System.intValue(data[7]);
-				if (isNaN(min) && isNaN(max)   ||
-					isNaN(min)   && level <= max ||
-					min <= level && isNaN(max)   ||
+				if (isNaN(min) && isNaN(max) ||
+					isNaN(min) && level <= max ||
+					min <= level && isNaN(max) ||
 					min <= level && level <= max )
 				{return true;}
 				return false;
