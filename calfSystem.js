@@ -7662,13 +7662,9 @@ FSH.environment = { // Legacy
 	},
 
 	statbarWrapper: function(href, id) { // Native
-		var myWrapper = document.createElement('a');
-		myWrapper.setAttribute('href', href);
 		var character = document.getElementById(id);
-		$(character).off('click');
-		var statWrapper = character.parentNode;
-		myWrapper.appendChild(character);
-		statWrapper.appendChild(myWrapper);
+		character.outerHTML = '<a href="' + href + '">' + character.outerHTML +
+			'</a>';
 	},
 
 	statbar: function() { // Native
