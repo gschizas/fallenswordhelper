@@ -1843,7 +1843,6 @@ FSH.ajax = { // jQuery
 	},
 
 	myStats: function(force) {
-		// FSH.Helper.myUsername = $('#statbar-character').text();
 		FSH.Helper.myUsername =
 			document.getElementById('statbar-character').textContent;
 		return FSH.ajax.getMyStats(force)
@@ -4125,7 +4124,8 @@ FSH.helperMenu = { // jQuery
 FSH.allyEnemy = { // jQuery
 
 	prepareAllyEnemyList: function() { // jQuery
-		$('#pCR').prepend('<div id="fshAllyEnemy" class="minibox"></div>');
+		document.getElementById('pCR').insertAdjacentHTML('afterbegin',
+			'<div id="fshAllyEnemy" class="minibox"></div>');
 		FSH.ajax.myStats(false)
 			.done(FSH.allyEnemy.injectAllyEnemyList);
 	},
@@ -5420,7 +5420,7 @@ FSH.logs = { // Legacy
 					targetPlayerName + '&search_show_first=1">' + targetPlayerName +
 					'</a>' + message.substring(secondQuote, message.length);
 				if (!hasInvited &&
-					targetPlayerName !== $('#statbar-character').text()) {
+					targetPlayerName !== document.getElementById('statbar-character').textContent) {
 					$(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
 					aRow.style.color = 'gray';
 				}
@@ -7522,17 +7522,17 @@ FSH.news = { // Legacy
 
 };
 
-FSH.ga = { // jQuery
+FSH.ga = { // Native
 
 	times: {},
 
-	start: function(category, variable, label) {
+	start: function(category, variable, label) { // Native
 		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 		FSH.ga.times[category + ':' + variable + ':' + label] =
 			Math.round(performance.now());
 	},
 
-	end: function(category, variable, label) {
+	end: function(category, variable, label) { // Native
 		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 		var myTime = Math.round(performance.now()) -
 			FSH.ga.times[category + ':' + variable + ':' + label];
@@ -7545,24 +7545,24 @@ FSH.ga = { // jQuery
 
 	refAry: ['www.lazywebtools.co.uk', 'refreshthing.com'],
 
-	isAuto: function() {
+	isAuto: function() { // Native
 		var docRef = document.referrer
 			.match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
 		docRef = docRef ? docRef[1] : docRef;
 		return FSH.ga.refAry.indexOf(docRef) !== -1;
 	},
 
-	setup: function() { // jQuery
+	setup: function() { // Native
 		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 
 		ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
-			userId: $('#statbar-character').text(),
+			userId: document.getElementById('statbar-character').textContent,
 			siteSpeedSampleRate: 10
 		});
 		ga('fshApp.set', 'appName', 'fshApp');
 		ga('fshApp.set', 'appVersion', FSH.version);
 		ga('create', 'UA-76488113-2', 'auto', 'fsh', {
-			userId: $('#statbar-character').text(),
+			userId: document.getElementById('statbar-character').textContent,
 			siteSpeedSampleRate: 10
 		});
 		ga('fsh.send', 'pageview');
@@ -7578,7 +7578,7 @@ FSH.ga = { // jQuery
 FSH.environment = { // Legacy
 
 	// main event dispatcher
-	dispatch: function() { // jQuery
+	dispatch: function() { // Native
 
 		FSH.ga.setup();
 
@@ -7646,7 +7646,7 @@ FSH.environment = { // Legacy
 
 	},
 
-	asyncDispatcher: function (fnName) {
+	asyncDispatcher: function (fnName) { // Native
 		var fn = FSH.System.getFunction(fnName);
 		if (typeof fn === 'function') {
 			FSH.ga.start('JS Perf', fnName);
@@ -7682,21 +7682,24 @@ FSH.environment = { // Legacy
 		sw('index.php?cmd=bank', 'statbar-gold');
 	},
 
-	gameHelpLink: function() { // jQuery
-		$('div.minibox h3:contains("Game Help")')
-			.html('<a href="index.php?cmd=settings">Game Help</a>');
+	gameHelpLink: function() { // Native
+		var nodeList = document.querySelectorAll('#pCR h3');
+		Array.prototype.forEach.call(nodeList, function(el) {
+			if (el.textContent === 'Game Help') {
+				el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
+			}
+		});
 	},
 
-	prepareEnv: function() { // jQuery
+	prepareEnv: function() { // Native
 		if (FSH.System.getValue('gameHelpLink')) {
 			setTimeout(FSH.environment.gameHelpLink);
 		}
 
 		FSH.Helper.huntingMode = FSH.System.getValue('huntingMode');
+		setTimeout(FSH.environment.replaceKeyHandler);
 
-		if (FSH.Helper.huntingMode) {
-			FSH.environment.replaceKeyHandler();
-		} else {
+		if (!FSH.Helper.huntingMode) {
 			//move boxes in opposite order that you want them to appear.
 			if (FSH.System.getValue('moveGuildList')) {
 				setTimeout(FSH.Layout.moveRHSBoxUpOnRHS, 0, 'minibox-guild');
@@ -7717,7 +7720,7 @@ FSH.environment = { // Legacy
 				setTimeout(FSH.activeWantedBounties.prepareBountyData);
 			}
 
-			FSH.environment.navMenu();
+			setTimeout(FSH.environment.navMenu);
 			setTimeout(FSH.environment.statbar);
 
 			setTimeout(FSH.environment.injectStaminaCalculator);
@@ -7725,7 +7728,6 @@ FSH.environment = { // Legacy
 
 			setTimeout(FSH.Layout.injectMenu);
 
-			FSH.environment.replaceKeyHandler();
 			setTimeout(FSH.environment.injectFSBoxLog);
 			setTimeout(FSH.environment.fixOnlineGuildBuffLinks);
 			if (FSH.Helper.enableGuildInfoWidgets) {
@@ -7766,7 +7768,7 @@ FSH.environment = { // Legacy
 		window.document.onkeypress = FSH.environment.keyPress;
 	},
 
-	keyPress: function(evt) {
+	keyPress: function(evt) { // jQuery
 
 		var r, s;
 		if (evt.target.tagName!=='HTML' && evt.target.tagName!=='BODY') {return;}
@@ -7932,7 +7934,7 @@ FSH.environment = { // Legacy
 		}
 	},
 
-	movePage: function(dir) {
+	movePage: function(dir) { // Legacy
 		var dirButton = FSH.System.findNode('//input[@value="'+dir+'"]');
 		if (!dirButton) {return;}
 		var url = dirButton.getAttribute('onClick');
@@ -7973,25 +7975,32 @@ FSH.environment = { // Legacy
 
 	},
 
-	injectStaminaCalculator: function() { // jQuery
-		var staminaMouseover = $('#statbar-stamina-tooltip-stamina');
+	injectStaminaCalculator: function() { // Native
+		var staminaMouseover =
+			document.getElementById('statbar-stamina-tooltip-stamina');
 		var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
-			staminaMouseover.find('dt.stat-name').next().text());
-		staminaMouseover
-			.append('<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
-				FSH.environment.timeBox(
-					$('.stat-stamina-nextGain').next().text(),
-					// get the max hours to still be inside stamina maximum
-					Math.floor(
-						(FSH.System.intValue(stamVals[2]) -
-						FSH.System.intValue(stamVals[1])) /
-						FSH.System.intValue($('.stat-stamina-gainPerHour').next().text())
+			staminaMouseover.getElementsByClassName('stat-name')[0]
+				.nextElementSibling.textContent
+		);
+		staminaMouseover.insertAdjacentHTML('beforeend',
+			'<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
+			FSH.environment.timeBox(
+				document.getElementsByClassName('stat-stamina-nextGain')[0]
+					.nextElementSibling.textContent,
+				// get the max hours to still be inside stamina maximum
+				Math.floor(
+					(FSH.System.intValue(stamVals[2]) -
+					FSH.System.intValue(stamVals[1])) /
+					FSH.System.intValue(
+						document.getElementsByClassName('stat-stamina-gainPerHour')[0]
+							.nextElementSibling.textContent
 					)
 				)
-			);
+			)
+		);
 	},
 
-	timeBox: function(nextGainTime, hrsToGo) {
+	timeBox: function(nextGainTime, hrsToGo) { // Native
 		var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
 		return '<dd>' +
 			FSH.System.formatShortDate(new Date(Date.now() +
@@ -7999,13 +8008,22 @@ FSH.environment = { // Legacy
 			parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 	},
 
-	injectLevelupCalculator: function() { // jQuery
-		$('#statbar-level-tooltip-general')
-			.append('<dt class="stat-xp-nextLevel">Next Level At</dt>' +
-				FSH.environment.timeBox($('.stat-xp-nextGain').next().text(),
+	injectLevelupCalculator: function() { // Native
+		document.getElementById('statbar-level-tooltip-general')
+			.insertAdjacentHTML('beforeend',
+				'<dt class="stat-xp-nextLevel">Next Level At</dt>' +
+				FSH.environment.timeBox(
+					document.getElementsByClassName('stat-xp-nextGain')[0]
+						.nextElementSibling.textContent,
 					Math.ceil(
-						FSH.System.intValue($('.stat-xp-remaining').next().text()) /
-						FSH.System.intValue($('.stat-xp-gainPerHour').next().text())
+						FSH.System.intValue(
+							document.getElementsByClassName('stat-xp-remaining')[0]
+								.nextElementSibling.textContent
+						) /
+						FSH.System.intValue(
+							document.getElementsByClassName('stat-xp-gainPerHour')[0]
+								.nextElementSibling.textContent
+						)
 					)
 				)
 			);
@@ -8131,7 +8149,6 @@ FSH.environment = { // Legacy
 
 	changeGuildLogHREF: function() { // Native
 		if (!FSH.System.getValue('useNewGuildLog')) {return;}
-		// var guildLogNodes = FSH.System.findNodes('//a[@href="index.php?cmd=guild&subcmd=log"]');
 		var guildLogNodes = document.querySelectorAll(
 			'#pCL a[href="index.php?cmd=guild&subcmd=log"]');
 		var guildLogNode;
@@ -10302,7 +10319,7 @@ FSH.quickExtract = { // Legacy - No longer required?
 
 };
 
-FSH.scavenging = { // Legacy - Not in use?
+FSH.scavenging = { // Legacy
 
 	injectScavenging: function() {
 		$('#pCC input[value="Scavenge"]').click(FSH.scavenging.dontPost);
@@ -12409,7 +12426,8 @@ FSH.newMap = { // Hybrid
 	openQuickBuff: function(e) { // Native
 		e.preventDefault();
 		window.openWindow('index.php?cmd=quickbuff&t=' +
-			$('#statbar-character').text(), 'fsQuickBuff', 618, 1000,
+			document.getElementById('statbar-character').textContent,
+			'fsQuickBuff', 618, 1000,
 			',scrollbars');
 	},
 
