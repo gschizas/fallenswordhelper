@@ -1306,17 +1306,15 @@ FSH.Layout = {
 	},
 
 	injectMenu: function() { // jQuery
-
-		FSH.ga.start('JS Perf', 'Layout.injectMenu');
-
+		if (!document.getElementById('pCL')) {return;}
 		if (FSH.System.getValue('lastActiveQuestPage').length > 0) {
-			$('a[href="index.php?cmd=questbook"]').attr('href',
-				FSH.System.getValue('lastActiveQuestPage'));
+			document.querySelector('#pCL a[href="index.php?cmd=questbook"]')
+				.setAttribute('href', FSH.System.getValue('lastActiveQuestPage'));
 		}
-		if ($('#pCL').length === 0) {return;}
 		//character
-		$('#nav-character-log').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+		document.getElementById('nav-character-log').parentNode
+			.insertAdjacentHTML('afterend',
+				'<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-medalguide" href="index.php?cmd=profile&subcmd=' +
 				'medalguide">Medal Guide</a></li>' +
 				'<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -1326,51 +1324,60 @@ FSH.Layout = {
 				'character-recipemanager" href="index.php?cmd=notepad&blank' +
 				'=1&subcmd=recipemanager">Recipe Manager</a></li>');
 		if (FSH.System.getValue('keepBuffLog')) {
-			$('#nav-character-log').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+			document.getElementById('nav-character-log').parentNode
+				.insertAdjacentHTML('afterend',
+					'<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
 					'subcmd=bufflogcontent">Buff Log</a></li>');
 		}
 		if (FSH.System.getValue('keepLogs')) {
-			$('#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+			document.getElementById('nav-character-notepad').parentNode
+				.insertAdjacentHTML('afterend',
+					'<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-showlogs" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=showlogs">Combat Logs</a></li>');
 		}
 		if (FSH.System.getValue('showMonsterLog')) {
-			$('#nav-character-notepad').parent('li')
-				.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+			document.getElementById('nav-character-notepad').parentNode
+				.insertAdjacentHTML('afterend',
+					'<li class="nav-level-1"><a class="nav-link" id="nav-' +
 					'character-monsterlog" href="index.php?cmd=notepad&blank' +
 					'=1&subcmd=monsterlog">Creature Logs</a></li>');
 		}
-		$('#nav-character-notepad').parent('li')
-			.after('<li class="nav-level-1"><a class="nav-link" id="nav-' +
+		document.getElementById('nav-character-notepad').parentNode
+			.insertAdjacentHTML('afterend',
+				'<li class="nav-level-1"><a class="nav-link" id="nav-' +
 				'character-quicklinkmanager" href="index.php?cmd=notepad&' +
 				'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
 		//guild
-		$('#nav-guild-storehouse-inventory').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+		document.getElementById('nav-guild-storehouse-inventory').parentNode
+			.insertAdjacentHTML('afterend',
+				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=guildinvmgr">Guild Inventory</a></li>');
 		if (!FSH.System.getValue('useNewGuildLog')) {
 			//if not using the new guild log, show it as a separate menu entry
-			$('#nav-guild-ledger-guildlog').parent('li')
-				.before('<li class="nav-level-2"><a class="nav-link" id="nav' +
+			document.getElementById('nav-guild-ledger-guildlog').parentNode
+				.insertAdjacentHTML('beforebegin',
+					'<li class="nav-level-2"><a class="nav-link" id="nav' +
 					'-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
 					'&subcmd=newguildlog">New Guild Log</a></li>');
 		}
 		//top rated
-		$('#nav-toprated-players-level').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+		document.getElementById('nav-toprated-players-level').parentNode
+			.insertAdjacentHTML('afterend',
+				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
 				'Top 250 Players</a></li>');
 		//actions
-		$('#nav-actions-trade-auctionhouse').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+		document.getElementById('nav-actions-trade-auctionhouse').parentNode
+			.insertAdjacentHTML('afterend',
+				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=auctionsearch">AH Quick Search</a></li>');
-		$('#nav-actions-interaction-findplayer').parent('li')
-			.after('<li class="nav-level-2"><a class="nav-link" id="nav-' +
+		document.getElementById('nav-actions-interaction-findplayer').parentNode
+			.insertAdjacentHTML('afterend',
+				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
 				'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
 				'subcmd=findbuffs">Find Buffs</a></li>' +
 				'<li class="nav-level-2"><a class="nav-link" id="nav-' +
@@ -1380,24 +1387,22 @@ FSH.Layout = {
 				'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
 				'&subcmd=onlineplayers">Online Players</a></li>');
 		// adjust the menu height for the newly added items
-		var theNav = $('#nav');
-		var myNav = theNav.data('nav');
+		var theNav = document.getElementById('nav');
+		var myNav = $(theNav).data('nav');
 		// first the closed saved variables
 		myNav.heights = [ null, null,
 			// Character
-			$('#nav-character').next().children().length * 22,
+			document.getElementById('nav-character').nextElementSibling.children
+				.length * 22,
 			660,
 			// Guild
-			$('#nav-guild > ul li').length * 22,
+			document.querySelectorAll('#nav-guild > ul li').length * 22,
 			374, 132, 132, null ];
 		if (myNav.state !== -1) {
 			// and now the open one
-			theNav.children().eq(myNav.state).children('ul')
-				.css('height', myNav.heights[myNav.state]);
+			theNav.children[myNav.state].children[1].style.height =
+				myNav.heights[myNav.state] + 'px';
 		}
-
-		FSH.ga.end('JS Perf', 'Layout.injectMenu');
-
 	},
 
 	moveRHSBoxUpOnRHS: function(title) { // jQuery
