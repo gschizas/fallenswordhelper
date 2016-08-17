@@ -133,6 +133,7 @@
 .fshNavy      {color: navy;}
 .fshMaroon    {color: maroon;}
 .fshWhite     {color: white;}
+.fshGrey      {color: grey;}
 
 .fshCommon    {color: white;}
 .fshRare      {color: #3366ff;}
@@ -152,6 +153,11 @@
 .helperQC     {cursor: pointer;}
 .fshFixed     {position: fixed;}
 .fshBackpack  {height: 500px;}
+
+#minibox-guild-members-list .fshGreen {color: green;}
+#minibox-guild-members-list .fshWhite {color: white;}
+#minibox-guild-members-list .fshGrey {color: grey;}
+#minibox-guild-members-list .fshHide {display: none;}
 
 .qbT          {margin: 0px auto;}
 .qbTH         {text-align: center; padding:0px 4px; color:orange;}
