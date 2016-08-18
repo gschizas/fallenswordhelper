@@ -1398,7 +1398,7 @@ FSH.Layout = {
 			// Guild
 			document.querySelectorAll('#nav-guild > ul li').length * 22,
 			374, 132, 132, null ];
-		if (myNav.state !== -1) {
+		if (myNav.state !== '-1') {
 			// and now the open one
 			theNav.children[myNav.state].children[1].style.height =
 				myNav.heights[myNav.state] + 'px';
