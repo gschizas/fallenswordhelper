@@ -6699,6 +6699,12 @@ FSH.settingsPage = { // Legacy
 			helpText: 'If checked, this will enhance the entry field for entering ' +
 				'chat text on the guild chat page.'
 		},
+		showExtraLinks: {
+			id: 'showExtraLinks',
+			helpTitle: 'Show Extra Links',
+			helpText: 'If checked, this will add AH and UFSG ' +
+				'links to equipment screens.'
+		},
 		disableItemColoring: {
 			id: 'disableItemColoring',
 			helpTitle: 'Disable Item Coloring',
@@ -7163,6 +7169,7 @@ FSH.settingsPage = { // Legacy
 			'<tr><th colspan="2" align="left"><b>Equipment screen preferences' +
 				'</b></th></tr>' +
 
+			simpleCheckbox(mySimpleCheckboxes.showExtraLinks) +
 			simpleCheckbox(mySimpleCheckboxes.disableItemColoring) +
 
 			'<tr><td align="right">Show Quick Send Item' +
