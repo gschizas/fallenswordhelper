@@ -1121,6 +1121,7 @@ FSH.Data = {
 			'dropitems': {'-': {'-': {'-': 'dropItems.injectProfileDropItems',
 				'1': 'dropItems.injectProfileDropItems'}}}},
 		auctionhouse: {'-': {'-': {'-': {'-': 'misc.injectAuctionHouse'},
+			'-2': {'-': 'misc.injectAuctionHouse'},
 			'-3': {'-': 'misc.injectAuctionHouse'}}}},
 		guild: {
 			'inventory': {
@@ -8527,17 +8528,19 @@ FSH.misc = { // Legacy
 		var resultRows = document.getElementById('resultRows');
 		var cancelButtons =
 			resultRows.getElementsByClassName('auctionCancel');
-		var itemImages =
-			resultRows.getElementsByClassName('item-img');
+		if (cancelButtons.length === 0) {return;}
 		var prm = [];
-		for (var i = itemImages.length - 1; i >= 0; i -= 1) {
-			cancelButtons[i].outerHTML = '<img src="' + FSH.System.imageServer +
+		for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
+			var cancelButton = cancelButtons[i];
+			var itemImage = cancelButton.parentNode.parentNode.firstElementChild
+				.firstElementChild;
+			cancelButton.outerHTML = '<img src="' + FSH.System.imageServer +
 				'/skin/loading.gif" width="14" height="14">';
 			prm.push(
 				$.post(
 					'index.php?cmd=auctionhouse&subcmd=cancel', {
 						'auction_id':
-							/inv_id=(\d+)/.exec(itemImages[i].getAttribute('data-tipped'))[1]
+							/inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
 					}
 				)
 			);
