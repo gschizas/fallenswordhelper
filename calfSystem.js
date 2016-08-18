@@ -1120,7 +1120,8 @@ FSH.Data = {
 			'changebio': {'-': {'-': {'-': 'profile.injectBioWidgets'}}},
 			'dropitems': {'-': {'-': {'-': 'dropItems.injectProfileDropItems',
 				'1': 'dropItems.injectProfileDropItems'}}}},
-		auctionhouse: {'-': {'-': {'-': {'-': 'misc.injectAuctionHouse'}}}},
+		auctionhouse: {'-': {'-': {'-': {'-': 'misc.injectAuctionHouse'},
+			'-3': {'-': 'misc.injectAuctionHouse'}}}},
 		guild: {
 			'inventory': {
 				'report': {'-': {'-': 'guildReport.injectReportPaint'}},
@@ -8480,14 +8481,43 @@ FSH.misc = { // Legacy
 
 	injectAuctionHouse: function() { // Bad jQuery
 		if (FSH.System.getValue('autoFillMinBidPrice')) {
-			$('#auto-fill').not(':checked').click();
+			document.getElementById('auto-fill').checked = true;
 		}
-		$('input[value="My Auctions"]').before('<input id="helperAHCancelAll" type="button" value="Cancel All" ' +
-			'class="custombutton auctionbutton" style="float: right;">');
-		$('#helperAHCancelAll').click(function() {
-			$('a.auctionCancel').each(function() {$(this).click();});
+		document.getElementById('sort0').click();
+		var cancelAll = document.createElement('span');
+		cancelAll.className = 'smallLink';
+		cancelAll.textContent = 'Cancel All';
+		var fill = document.getElementById('fill').parentNode.parentNode
+			.nextElementSibling.firstElementChild;
+		fill.classList.add('fshCenter');
+		fill.insertAdjacentHTML('afterbegin', ']');
+		fill.insertAdjacentElement('afterbegin', cancelAll);
+		fill.insertAdjacentHTML('afterbegin', '[');
+		cancelAll.addEventListener('click', FSH.misc.cancelAllAH);
+	},
+
+	cancelAllAH: function() {
+		var resultRows = document.getElementById('resultRows');
+		var cancelButtons =
+			resultRows.getElementsByClassName('auctionCancel');
+		var itemImages =
+			resultRows.getElementsByClassName('item-img');
+		var prm = [];
+		for (var i = itemImages.length - 1; i >= 0; i -= 1) {
+			cancelButtons[i].outerHTML = '<img src="' + FSH.System.imageServer +
+				'/skin/loading.gif" width="14" height="14">';
+			prm.push(
+				$.post(
+					'index.php?cmd=auctionhouse&subcmd=cancel', {
+						'auction_id':
+							/inv_id=(\d+)/.exec(itemImages[i].getAttribute('data-tipped'))[1]
+					}
+				)
+			);
+		}
+		$.when.apply($, prm).done(function() {
+			document.getElementById('refresh').click();
 		});
-		$('#sort0').click();
 	},
 
 	injectFindPlayer: function() { // Bad jQuery
