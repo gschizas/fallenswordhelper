@@ -4084,11 +4084,8 @@ FSH.helperMenu = { // jQuery
 		node.before(helperMenu);
 		helperMenu.on('mouseover', FSH.helperMenu.showHelperMenu);
 		if (draggableHelperMenu) {
-			// helperMenu.draggable();
 			document.getElementById('helperMenu')
 				.addEventListener('dragstart', FSH.common.drag_start, false);
-			document.body.addEventListener('dragover', FSH.common.drag_over, false);
-			document.body.addEventListener('drop', FSH.common.drag_drop, false);
 		}
 	},
 
@@ -5922,6 +5919,8 @@ FSH.common = { // Legacy
 		event.dataTransfer.setData('text/plain',
 			parseInt(style.getPropertyValue('left'),10) - event.clientX + ',' +
 			(parseInt(style.getPropertyValue('top'),10) - event.clientY));
+		document.body.addEventListener('dragover', FSH.common.drag_over, false);
+		document.body.addEventListener('drop', FSH.common.drag_drop, false);
 	},
 
 	drag_over: function(event) {
@@ -5935,6 +5934,8 @@ FSH.common = { // Legacy
 			event.clientX + parseInt(offset[0],10) + 'px';
 		FSH.common.drag_target.style.top =
 			event.clientY + parseInt(offset[1],10) + 'px';
+		document.body.removeEventListener('dragover', FSH.common.drag_over, false);
+		document.body.removeEventListener('drop', FSH.common.drag_drop, false);
 		event.preventDefault();
 		return false;
 	},
@@ -8213,7 +8214,7 @@ FSH.environment = { // Legacy
 		});
 	},
 
-	injectQuickLinks: function() { // Bad jquery
+	injectQuickLinks: function() { // Native
 		var node = document.getElementById('statbar-container');
 		if (!node) {return;}
 		var quickLinks = FSH.System.getValueJSON('quickLinks') || [];
@@ -8235,15 +8236,15 @@ FSH.environment = { // Legacy
 		html += '</div>';
 		document.body.insertAdjacentHTML('beforeend', html);
 		if (draggableQuickLinks) {
-			// $('#fshQuickLinks').draggable();
 			document.getElementById('fshQuickLinks')
 				.addEventListener('dragstart', FSH.common.drag_start, false);
-			document.body.addEventListener('dragover', FSH.common.drag_over, false);
-			document.body.addEventListener('drop', FSH.common.drag_drop, false);
 		}
 	},
 
 	unknownPage: function() { // Legacy
+
+		console.time('environment.unknownPage');
+
 		if (typeof window.jQuery === 'undefined') {return;}
 		if ($('#pCC td:contains("Below is the current status for ' +
 			'the relic")').length > 0) {
@@ -8279,6 +8280,9 @@ FSH.environment = { // Legacy
 			FSH.ga.screenview('unknown.Helper.injectInvent');
 			FSH.Helper.injectInvent();
 		}
+
+		console.timeEnd('environment.unknownPage');
+
 	},
 
 };
