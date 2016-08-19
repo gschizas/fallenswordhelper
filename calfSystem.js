@@ -12561,7 +12561,8 @@ FSH.guide = { // Native
 				e.preventDefault();
 				var url = 'index.php?';
 				Array.prototype.forEach.call(
-					document.querySelectorAll('input:not([type="submit"]), select'),
+					document.querySelectorAll('input:not([type="submit"])' +
+						':not([type="checkbox"]), select, input[type="checkbox"]:checked'),
 					function(e) {url += '&' + e.name + '=' + e.value;});
 				window.location = url;
 			});
