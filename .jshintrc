@@ -9,8 +9,9 @@
     "camelcase"     : false,    // true: Identifiers must be in camelCase
     "curly"         : true,     // true: Require {} for every new block or scope
     "eqeqeq"        : true,     // true: Require triple equals (===) for comparison
-    "es3"           : false,    // true: needs to adhere to ECMAScript 3 specification
+//  "es3"           : false,    // true: needs to adhere to ECMAScript 3 specification
 //  "es5"           : true,     // true: Allow ES5 syntax (ex: getters and setters)
+    "esversion"     : 5,
     "forin"         : true,     // true: Require filtering for..in loops with obj.hasOwnProperty()
     "freeze"        : true,     // true: prohibits overwriting prototypes of native objects such as Array, Date etc.
     "futurehostile" : true,     // true: warnings about the use of identifiers which are defined in future versions of JavaScript
@@ -49,7 +50,7 @@
     "debug"         : false,     // true: Allow debugger statements e.g. browser breakpoints.
     "elision"       : false,     // true: ES3 array elision elements, or empty elements
     "eqnull"        : false,     // true: Tolerate use of `== null`
-    "esnext"        : false,     // true: Allow ES.next (ES6) syntax (ex: `const`)
+//  "esnext"        : false,     // true: Allow ES.next (ES6) syntax (ex: `const`)
     "evil"          : false,     // true: Tolerate use of `eval` and `new Function()`
     "expr"          : false,     // true: Tolerate `ExpressionStatement` as Programs
     "funcscope"     : false,     // true: Tolerate defining variables inside control statements
@@ -96,16 +97,11 @@
 
     // Custom Globals
     "globals"       : {         // additional predefined global variables
-        //"unsafeWindow":         true,
         "GM_info":              true,
         "GM_setValue":          true,
         "GM_getValue":          true,
         "GM_listValues":        true,
         "FSH":                  true,
-        //"Helper":               true,
-        //"System":               true,
-        //"Data":                 true,
-        //"Layout":               true,
         "HTMLDocument":         true,
         "localforage":          true,
         "ga":                   true,

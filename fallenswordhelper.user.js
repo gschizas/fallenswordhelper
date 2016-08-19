@@ -9,32 +9,39 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1514
+// @version        1515
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
 // No warranty expressed or implied. Use at your own risk.
 
+/* eslint-disable no-implicit-globals */
+
 // EVERYTHING MUST BE IN main()
 var fshMain = function() {
+
+/* eslint-enable no-implicit-globals */
 
 'use strict';
 
 window.FSH = window.FSH || {};
 
 FSH.resources = {
-	calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1514/calfSystem.js',
-	calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1514/calfSystem.css',
+	calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1515/calfSystem.js',
+	calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1515/calfSystem.css',
 	localForage: 'https://cdn.jsdelivr.net/localforage/1.4.2/localforage.min.js',
-	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
-	jQuery: 'https://ajax.googleapis.com/ajax/libs/jquery/2.2.4/jquery.min.js'
+	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js'
 };
 
+FSH.version = '1515';
+
 if (typeof GM_info === 'undefined') {
-	FSH.version = '1514_native';
-} else {
-	FSH.version = GM_info.script.version;
+	FSH.version += '_native';
+} else if (typeof GM_info.script === 'undefined') {
+	FSH.version += '_noScript';
+} else if (typeof GM_info.script.version === 'undefined') {
+	FSH.version += '_noVersion';
 }
 
 FSH.Helper = {
@@ -1366,21 +1373,21 @@ FSH.Helper = {
 
 		if ($('#worldPage').length > 0) { // new map
 			if (callback.groupEvaluation) {
-				if ($('div#creatureEvaluatorGroup').length === 0) {
+				if ($('#creatureEvaluatorGroup').length === 0) {
 					$('#dialog-viewcreature')
 						.append('<div id="creatureEvaluatorGroup" ' +
 							'style="clear:both;"></div>');
 				}
 				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
-				$('div#creatureEvaluatorGroup').html(tempdata);
+				$('#creatureEvaluatorGroup').html(tempdata);
 			} else {
-				if ($('div#creatureEvaluator').length === 0) {
+				if ($('#creatureEvaluator').length === 0) {
 					$('#dialog-viewcreature')
 						.append('<div id="creatureEvaluator" ' +
 							'style="clear:both;"></div>');
 				}
 				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
-				$('div#creatureEvaluator').html(tempdata);
+				$('#creatureEvaluator').html(tempdata);
 			}
 		} else {
 			var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
@@ -1422,7 +1429,7 @@ FSH.Helper = {
 	},
 
 	onPageLoad: function() {
-		FSH.environment.dispatch();
+		setTimeout(FSH.environment.dispatch, 0);
 	},
 
 }; // end of var helper
@@ -1436,7 +1443,6 @@ FSH.Helper = {
 		callback: FSH.Helper.onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {
-		// o.js.unshift(FSH.resources.jQuery);
 		o.js.pop();
 	}
 	FSH.Helper.appendHead(o);

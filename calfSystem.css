@@ -1,16 +1,15 @@
 
-table#fshSettingsTable {
-  border-spacing: 10px;
-}
+.custombutton[disabled] {background: #B8B8B8; pointer-events:none;}
 
-.networkIcon {
-  display: inline-block;
-}
+.isInSTBorder {border: 3px solid red;}
 
-.fshHelpTitle {
-  font-weight: bold;
-  color: #FFF380;
-}
+.tradeItemMargin {margin: 2.4px;}
+
+#fshSettingsTable {border-spacing: 10px;}
+
+.networkIcon {display: inline-block;}
+
+.fshHelpTitle {font-weight: bold; color: #FFF380;}
 
 #fshWorldButtonContainer {
   float: left;
@@ -28,10 +27,15 @@ table#fshSettingsTable {
   box-shadow: 0 0 4px #4f3717;
 }
 
-#fshSpinner {
-  float: right;
-  margin: 0 160px 0 0;
+.quickButton {
+  display: inline-block;
+  height: 17px;
+  width: 17px;
+  background-repeat: no-repeat;
+  background-position: center;
 }
+
+#fshSpinner {float: right; margin: 0 160px 0 0;}
 
 #fshFindOnlinePlayers {
   width: 120px;
@@ -42,25 +46,13 @@ table#fshSettingsTable {
 
 #content {max-width:600px}
 
-.column {
-  float: left;
-  width: 180px;
-  margin-right: 5px;
-}
+.column {float: left; width: 180px; margin-right: 5px;}
 
-.column h3 {
-  background: #e0e0e0;
-  font: bold 13px Arial;
-  margin: 0 0 5px 0;
-}
+.column h3 {background: #e0e0e0; font: bold 13px Arial; margin: 0 0 5px 0;}
 
-.column ul {
-  margin: 0;
-  padding: 0;
-  list-style-type: none;
-}
+.column ul {margin: 0; padding: 0; list-style-type: none;}
 
-div#helperMenuDiv {
+.helperMenuDiv {
   cursor: default;
   text-decoration: none;
   display: none;
@@ -69,18 +61,13 @@ div#helperMenuDiv {
   color: black;
   font-size: 12px;
   border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   border:3px solid #cb7;
   z-index: 1
 }
 
-div#helperMenuDiv .a-reply {
-  cursor: pointer;
-  text-decoration: underline;
-}
+.helperMenuDiv .a-reply {cursor: pointer; text-decoration: underline;}
 
-div#helperMenu {
+.helperMenu {
   position: absolute;
   top: 0px;
   left: 0px;
@@ -93,25 +80,19 @@ div#helperMenu {
   white-space: nowrap;
 }
 
-div#fshQuickLinks {
+.fshQuickLinks {
   position: absolute;
-  cursor: pointer;
-  text-decoration: underline;
   z-index: 1;
   text-align: left;
   white-space: nowrap;
   color: black;
   font-size: 12px;
   border-radius: 5px;
-  -moz-border-radius: 5px;
-  -webkit-border-radius: 5px;
   border: 3px solid #cb7;
   width: 100px;
 }
 
-.no-close .ui-dialog-titlebar-close {
-  display: none;
-}
+.no-close .ui-dialog-titlebar-close {display: none;}
 
 .HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}
 .HelperTextLink:hover {text-decoration:underline;}
@@ -124,10 +105,7 @@ div#fshQuickLinks {
   top: -20%;
 }
 
-.fastWorn {
-  color:green;
-  font-weight:bold;
-}
+.fastWorn {color:green; font-weight:bold;}
 
 .fastUse {
   cursor:pointer;
@@ -137,9 +115,17 @@ div#fshQuickLinks {
   top: -20%;
 }
 
-.reportLink {cursor:pointer; text-decoration:underline; color:blue;}
-.dropLink {cursor:pointer; text-decoration:underline; color:red;}
-.fshLink {cursor:pointer; text-decoration:underline;}
+.reportLink {cursor: pointer; text-decoration: underline; color: blue;}
+.dropLink {cursor: pointer; text-decoration: underline; color: red;}
+.fshLink {cursor: pointer; text-decoration: underline;}
+.smallLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+  font-size: x-small;
+}
+
+.pCR a { color: #F7EAC9; }
 
 .fshRed       {color: red;}
 .fshBlue      {color: blue;}
@@ -147,6 +133,7 @@ div#fshQuickLinks {
 .fshNavy      {color: navy;}
 .fshMaroon    {color: maroon;}
 .fshWhite     {color: white;}
+.fshGrey      {color: grey;}
 
 .fshCommon    {color: white;}
 .fshRare      {color: #3366ff;}
@@ -162,7 +149,15 @@ div#fshQuickLinks {
 .fshWearHide  {display: none;}
 .fshInline    {display: inline;}
 .fshNoWrap    {white-space: nowrap;}
+.fshBold      {font-weight: bold;}
 .helperQC     {cursor: pointer;}
+.fshFixed     {position: fixed;}
+.fshBackpack  {height: 500px;}
+
+#minibox-guild-members-list .fshGreen {color: green;}
+#minibox-guild-members-list .fshWhite {color: white;}
+#minibox-guild-members-list .fshGrey {color: grey;}
+#minibox-guild-members-list .fshHide {display: none;}
 
 .qbT          {margin: 0px auto;}
 .qbTH         {text-align: center; padding:0px 4px; color:orange;}
@@ -171,16 +166,11 @@ div#quickbuff div#players h1 {float: left;}
 div#quickbuff div#players p {clear: both;}
 .fshLastActivity {color: #ccc; font-size: x-small;}
 
-div#quickbuff div.buff-block p label.fshDim span {
-  color: #999;
-}
+div#quickbuff div.buff-block p label.fshDim span {color: #999;}
 
 .profile-stat-bonus {font-size: x-small;}
 
-#minibox-enemy {
-  margin: 0 0 10px;
-  overflow: hidden
-}
+#minibox-enemy {margin: 0 0 10px; overflow: hidden}
 #fshResetEnemy {
   font-size: xx-small;
   cursor: pointer;
@@ -781,4 +771,79 @@ table.dataTable td {
   background-size: 90%;
   background-repeat: no-repeat;
   background-color: #D0B074;
+}
+
+.greenDiamond {
+  background-image: url('data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwAcADAD/RAAA\
+    ACH5BAEAAAAALAAAAAAJAAkAQAIUhBGnqCEPRUJwGvfslS1yGmmOVQAAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.yellowDiamond {
+  background-image: url('data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP3/AAcADAAA\
+    ACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.orangeDiamond {
+  background-image: url('data:image/gif;base64,R0lGODlhCQAJAJH/AMDAwP+9AAcADAAA\
+    ACH5BAEAAAAALAAAAAAJAAkAQAIUhCGnqBIPQ0JwGvfslS1yGmmOVQAAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.offlineDot {
+  background-image: url('data:image/gif;base64,R0lGODlhDgAOAMQAAP///1paWnNzc4SE\
+    hK2trbW1tZylpWNra3OEhDE5OWNzc73e3rXW1qXGxpy9vZS1tYSlpXucnHOUlFJra2OEhEpjYxg\
+    hISk5OVJzczlSUkprayExMTFKShgpKRAhIQAAACH5BAEAAAAALAAAAAAOAA4AQAWGICAChCINxi\
+    hm2WRKiKJl19YBiBY5zNI8CAztMCJsLJ2Ox7MhqAgViiQioUxoBREHQ3E0GD8rzSK6XDicDNqMd\
+    IoKGA1mMsuk3hoKxOuAUDQcGykVGBENC4gOEkJnABxREQ8PEBIKFYEeAAoJGRUTdJc1FgIiAx1m\
+    ZhtHHQMqIgQCHAGtKiEAOw%3D%3D');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.sevenDayDot {
+  background-image: url('data:image/gif;base64,R0lGODlhDgAOAMQAAP///0JCQoSEhK2t\
+    rXNrazEpKZyUnDkpMa1rjJxae5RSc3s5WlopQnMxUmMhQjkIIaWUnGNSWiEQGFIhOSEAEL1zlLV\
+    rjIxSa3M5UlIYMUoQKSkAEBgACIRrc2tSWgAAACH5BAEAAAAALAAAAAAOAA4AQAV8ICACENZ1xi\
+    hqj+YsGMZkxUZJgJc1ilUhicbksYmMBhKKksMpDFQQV2PRcLA2T8Bjl0D8FEIiR0TZPM5n2y0LG\
+    DA0cJYmJRpkXopEYmG1pTQTCwkVhHtDGwcAGy4LeQoLbw8UYxFmGRkTl0STBCICSqCgEgIqdQQB\
+    EaQqIQA7');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
+}
+
+.redDot {
+  background-image: url('data:image/gif;base64,R0lGODlhDgAOAMQAAP///62trYyEhL2t\
+    rUIpKa2UnP9znDEQGP9rjL0hQqUYOXsIIXtSWlIpMf9Sc94xUpQYMa0QMaUIKSkACFIAEHsAGJx\
+    CUudSa85CWs45UoRSWnMIGGMAEKVrczkACAAAACH5BAEAAAAALAAAAAAOAA4AQAV7ICAChdV1xS\
+    guS5RgWKZAy0YdgBY9juE7sgWHMQocPJSJkhBQFSSJhzQTETYBLYwDYUBcghyPiLKpsFg2z+EKG\
+    CgicIk5JXJHHfhHIlKhpCA7PT8YCjUNABVQWg4XhDRJORsLEBAzNDYTHSICFGSeSQcCKiIBDA0M\
+    oiohADs%3D');
+  background-repeat: no-repeat;
+  background-size: 100%;
+  background-position: center;
+  height: 10px;
+  width: 10px;
+  float: left;
 }
