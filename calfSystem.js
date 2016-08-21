@@ -1514,22 +1514,27 @@ FSH.Layout = {
 
 	godsNotification:
 		'<li class="notification">' +
-		'<span id="helperPrayToGods" style="text-align:center"><table><tbody>' +
-		'<tr><td style="padding: 1px"><img src="' + FSH.System.imageServer +
-		'/temple/0.gif" class="tip-static" data-tipped="Pray to Sahria" ' +
-		'style="cursor: pointer"></td>' +
-		'<td style="padding: 1px"><img src="' + FSH.System.imageServer +
-		'/temple/1.gif" class="tip-static" data-tipped="Pray to Osverin" ' +
-		'style="cursor: pointer"></td>' +
-		'<td rowspan="2"><a href="index.php?cmd=temple" ' +
-		'class="notification-content" style="position: static">' +
-		'Bow down to the gods</a></td></tr>' +
-		'<tr><td style="padding: 1px"><img src="' + FSH.System.imageServer +
-		'/temple/2.gif" class="tip-static" data-tipped="Pray to Gurgriss" ' +
-		'style="cursor: pointer"></td>' +
-		'<td style="padding: 1px"><img src="' + FSH.System.imageServer +
-		'/temple/3.gif" class="tip-static" data-tipped="Pray to Lindarsil" ' +
-		'style="cursor: pointer"></td></tr></tbody></table></span></li>',
+		'<span id="helperPrayToGods" class="fastPray">' +
+		'<table><tbody><tr><td>' +
+		'<span class="tip-static" data-tipped="Pray to Sahria" ' +
+		'style="background-image: url(\'' + FSH.System.imageServer +
+		'/temple/0.gif\');" praytype="0"></span></td><td>' +
+		'<span class="tip-static" data-tipped="Pray to Osverin" ' +
+		'style="background-image: url(\'' + FSH.System.imageServer +
+		'/temple/1.gif\');" praytype="1"></span></td></tr><tr><td>' +
+		'<span class="tip-static" data-tipped="Pray to Gurgriss" ' +
+		'style="background-image: url(\'' + FSH.System.imageServer +
+		'/temple/2.gif\');" praytype="2"></span></td><td>' +
+		'<span class="tip-static" data-tipped="Pray to Lindarsil" ' +
+		'style="background-image: url(\'' + FSH.System.imageServer +
+		'/temple/3.gif\');" praytype="3"></span></td></tr></tbody></table>' +
+		'<a href="index.php?cmd=temple">' +
+		'<p class="notification-content">Bow down to the gods</p>' +
+		'</a></span></li>',
+
+	havePrayed:
+		'<span class="notification-icon"></span><p class="notification-content">' +
+		'You are currently praying at the temple.</p>',
 
 	goldUpgradeMsg:
 		'<li class="notification"><a href="index.php?cmd=points&type=1"><span' +
@@ -2288,23 +2293,28 @@ FSH.notification = { // jQuery
 	},
 
 	displayDisconnectedFromGodsMessage: function() { //jquery
-		$('#notifications').prepend(FSH.Layout.godsNotification);
-		$('#helperPrayToGods').on('click', 'img', function() {
-			$('#helperPrayToGods').off('click', 'img');
-			var index = $(this).qtip('hide').attr('src').replace(/\D/g, '');
-			$.post(
-				FSH.System.server + 'index.php',
-				'cmd=temple&subcmd=pray&type=' + index,
-				function() {
-					$('#helperPrayToGods').html('<span class="notification-' +
-						'icon"></span><p class="notification-content">You ' +
-						'are currently praying at the temple.</p>');
-					FSH.System.setValue('needToPray',false);
-					FSH.System.setValue('lastTempleCheck', new Date()
-						.setUTCHours(23, 59, 59, 999) + 1); // Midnight
-				}
-			);
-		});
+		document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+			FSH.Layout.godsNotification);
+		document.getElementById('helperPrayToGods').addEventListener('click',
+			FSH.notification.prayToGods);
+	},
+
+	prayToGods: function(e) { // jQuery
+		var myGod = e.target.getAttribute('praytype');
+		if (!myGod) {return;}
+		document.getElementById('helperPrayToGods').removeEventListener('click',
+			FSH.notification.prayToGods);
+		$.get('index.php?cmd=temple&subcmd=pray&type=' + myGod)
+			.done(FSH.notification.havePrayed);
+		$(e.target).qtip('hide');
+	},
+
+	havePrayed: function() {
+		document.getElementById('helperPrayToGods').outerHTML =
+			FSH.Layout.havePrayed;
+		FSH.System.setValue('needToPray',false);
+		FSH.System.setValue('lastTempleCheck', new Date()
+			.setUTCHours(23, 59, 59, 999) + 1); // Midnight
 	},
 
 	injectUpgradeAlert: function() { //jquery
