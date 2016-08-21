@@ -6337,19 +6337,17 @@ FSH.dropItems = { // Legacy
 		}
 	},
 
-	checkAll: function(evt){ // Legacy
-		var itemName = evt.target.getAttribute('linkto');
-		var findItems = FSH.System.findNodes('//td[@width="90%" and contains(.,"] '+itemName+' [")]');
-		for (var i=0; i<findItems.length; i += 1) {
-			var item = findItems[i];
-			var checkboxForItem = item.previousSibling.previousSibling.firstChild;
-			if (checkboxForItem.checked) {
-				checkboxForItem.checked = false;
-			} else {
-				checkboxForItem.checked = true;
-			}
-
-		}
+	checkAll: function(evt){ // Native
+		var img = evt.target.parentNode.previousElementSibling.firstElementChild
+			.firstElementChild.getAttribute('data-tipped');
+		var itemId = /item_id=(\d+)/.exec(img);
+		var imgNodeList = document.querySelectorAll('#pCC ' +
+			'img[data-tipped*="item_id=' + itemId[1] + '&"]');
+		Array.prototype.forEach.call(imgNodeList, function(el) {
+			var checkboxForItem = el.parentNode.parentNode.previousElementSibling
+				.firstElementChild;
+			checkboxForItem.checked = checkboxForItem.checked ? false : true;
+		});
 	},
 
 	inventory: function(data) { // jQuery
