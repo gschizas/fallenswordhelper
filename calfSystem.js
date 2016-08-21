@@ -1062,7 +1062,8 @@ FSH.Data = {
 		'hideTitanGroup',
 		'hideLegendaryGroup',
 		'disableDeactivatePrompts',
-		'moveComposingButtons'
+		'moveComposingButtons',
+		'showExtraLinks'
 
 	],
 
