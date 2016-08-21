@@ -158,6 +158,23 @@
 #minibox-guild-members-list .fshWhite {color: white;}
 #minibox-guild-members-list .fshGrey {color: grey;}
 #minibox-guild-members-list .fshHide {display: none;}
+#minibox-allies-list .fshDodgerBlue   {color: DodgerBlue;}
+#minibox-allies-list .fshLightSkyBlue {color: LightSkyBlue;}
+#minibox-allies-list .fshPowderBlue   {color: PowderBlue;}
+#minibox-allies-list .fshHide         {display: none;}
+
+.fastPray {text-align: center;}
+.fastPray table {
+  float: left;
+}
+.fastPray td {padding: 1px;}
+.fastPray span {
+  cursor: pointer;
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+  background-repeat: no-repeat;
+}
 
 .qbT          {margin: 0px auto;}
 .qbTH         {text-align: center; padding:0px 4px; color:orange;}
