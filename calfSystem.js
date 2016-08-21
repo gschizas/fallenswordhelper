@@ -4297,10 +4297,8 @@ FSH.profile = { // Legacy
 	},
 
 	updateQuickBuff: function() { // jQuery
-		var qb = $('#profileRightColumn a[href*="quickbuff"]');
-		if (qb.length !== 0) {
-			qb.attr('href', qb.attr('href').replace(/, 500/g,', 1000'));
-		}
+		FSH.environment
+			.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
 	},
 
 	updateStatistics: function() { // Native
