@@ -2137,9 +2137,6 @@ FSH.composing = { // jQuery
 
 	injectComposeAlert: function() { //jquery
 		if (FSH.cmd === 'composing') {return;}
-
-		console.time('composing.injectComposeAlert');
-
 		var needToCompose = FSH.System.getValue('needToCompose');
 		if (needToCompose) {
 			FSH.composing.displayComposeMsg();
@@ -2148,9 +2145,6 @@ FSH.composing = { // jQuery
 		var lastComposeCheck = FSH.System.getValue('lastComposeCheck');
 		if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
 		$.get('index.php?cmd=composing', FSH.composing.parseComposing);
-
-		console.timeEnd('composing.injectComposeAlert');
-
 	},
 
 	parseComposing: function(data) { //jquery
@@ -2250,9 +2244,6 @@ FSH.notification = { // jQuery
 	injectTempleAlert: function() { //jquery
 		//Checks to see if the temple is open for business.
 		if (FSH.cmd === 'temple') {return;}
-
-		console.time('notification.injectTempleAlert');
-
 		var templeAlertLastUpdate = FSH.System.getValue('lastTempleCheck');
 		var needToPray = FSH.System.getValue('needToPray');
 		var needToParse = false;
@@ -2268,9 +2259,6 @@ FSH.notification = { // jQuery
 		if (needToParse) {
 			$.get('index.php?cmd=temple', FSH.notification.parseTemplePage);
 		}
-
-		console.timeEnd('notification.injectTempleAlert');
-
 	},
 
 	parseTemplePage: function(responseText) { //native
