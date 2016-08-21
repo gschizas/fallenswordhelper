@@ -8069,112 +8069,133 @@ FSH.environment = { // Legacy
 	},
 
 	fixOnlineGuildBuffLinks: function() { // jQuery
+		FSH.environment.updateHCSQuickBuffLinks(
+			'#minibox-guild-members-list #guild-minibox-action-quickbuff');
+		FSH.environment.updateHCSQuickBuffLinks(
+			'#minibox-allies-list #online-allies-action-quickbuff');
+	},
 
-		console.time('environment.fixOnlineGuildBuffLinks');
-
-		// illegal multiple id's - use a to prevent getElementById
-		$('a#guild-minibox-action-quickbuff').each(function() {
-			var self = $(this);
-			self.attr('href', self.attr('href').replace(/500/g,'1000'));
-		});
-		$('a#online-allies-action-quickbuff').each(function() {
-			var self = $(this);
-			self.attr('href', self.attr('href').replace(/, 500/g,', 1000'));
-		});
-
-		console.timeEnd('environment.fixOnlineGuildBuffLinks');
-
+	// Move this to common or Layout
+	updateHCSQuickBuffLinks: function(selector) {
+		Array.prototype.forEach.call(document.querySelectorAll(selector),
+			function(el) {
+				el.setAttribute('href', el.getAttribute('href')
+					.replace(/, 500/g, ', 1000'));
+			}
+		);
 	},
 
 	addGuildInfoWidgets: function() { //jquery
 
-		console.time('environment.addGuildInfoWidgets');
+		// console.time('environment.addGuildInfoWidgets');
 
-		var guildMembrList = $('#minibox-guild-members-list');
-		if (guildMembrList.length === 0) {return;} // list exists
+		var guildMembrList = document.getElementById('minibox-guild-members-list');
+		if (!guildMembrList) {return;} // list exists
 		// hide guild info links
-		// illegal multiple id's - use a to prevent getElementById
+		var hideQSA = FSH.environment.hideQuerySelectorAll;
 		if (FSH.Helper.hideGuildInfoTrade) {
-			$('a#guild-minibox-action-trade', guildMembrList).addClass('fshHide');
+			hideQSA(guildMembrList, '#guild-minibox-action-trade');
 		}
 		if (FSH.Helper.hideGuildInfoSecureTrade) {
-			$('a#guild-minibox-action-secure-trade', guildMembrList)
-				.addClass('fshHide');
+			hideQSA(guildMembrList, '#guild-minibox-action-secure-trade');
 		}
 		if (FSH.Helper.hideGuildInfoBuff) {
-			$('a#guild-minibox-action-quickbuff', guildMembrList).addClass('fshHide');
+			hideQSA(guildMembrList, '#guild-minibox-action-quickbuff');
 		}
 		if (FSH.Helper.hideGuildInfoMessage) {
-			$('a#guild-minibox-action-send-message', guildMembrList)
-				.addClass('fshHide');
+			hideQSA(guildMembrList, '#guild-minibox-action-send-message');
 		}
 		if (FSH.Helper.hideBuffSelected) {
-			$('a.guild-buff-check-on', guildMembrList).addClass('fshHide');
-			$('#guild-quick-buff').addClass('fshHide');
+			FSH.environment.hideNodeList(
+				guildMembrList.getElementsByClassName('guild-buff-check-on'));
+			document.getElementById('guild-quick-buff').classList.add('fshHide');
 		}
 		// add coloring for offline time
-		$('a.player-name', guildMembrList).each(function() {
-			var playerA = $(this);
-			var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/
-				.exec(playerA.data('tipped'))[1];
-			if (lastActivityMinutes < 2) {
-				playerA.addClass('fshGreen');
-			} else if (lastActivityMinutes < 5) {
-				playerA.addClass('fshWhite');
-			} else {
-				playerA.addClass('fshGrey');
+		Array.prototype.forEach.call(
+			guildMembrList.getElementsByClassName('player-name'),
+			FSH.environment.guildColour
+		);
+		Array.prototype.forEach.call(
+			document.querySelectorAll('#pCR h4'),
+			function(el) {
+				if (el.textContent !== 'Chat') {return;}
+				el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
+					el.textContent + '</a>';
 			}
-		});
-		var chatH4 = $('#pCR h4:contains("Chat")');
-		chatH4.html('<a href="index.php?cmd=guild&subcmd=chat"><span style="' +
-			'color:white;">' + chatH4.html() + '</span></a>');
+		);
 
-		console.timeEnd('environment.addGuildInfoWidgets');
+		// console.timeEnd('environment.addGuildInfoWidgets');
 
 	},
 
+	guildColour: function(el) {
+		FSH.environment.contactColour(el, {
+			l1: 'fshGreen',
+			l2: 'fshWhite',
+			l3: 'fshGrey'
+		});
+	},
+
+	hideNodeList: function(nodeList) {
+		Array.prototype.forEach.call(nodeList, FSH.environment.hideElement);
+	},
+
+	hideElement: function(el) {el.classList.add('fshHide');},
+
+	hideQuerySelectorAll: function(parent, selector) {
+		FSH.environment.hideNodeList(parent.querySelectorAll(selector));
+	},
+
 	addOnlineAlliesWidgets: function() { // jQuery
-
-		console.time('environment.addOnlineAlliesWidgets');
-
-		var onlineAlliesList = $('#minibox-allies-list');
-		if (onlineAlliesList.length === 0) {
+		var onlineAlliesList = document.getElementById('minibox-allies-list');
+		if (!onlineAlliesList) {
 			console.timeEnd('environment.addOnlineAlliesWidgets');
 			return;
 		}
-		// illegal multiple id's - use a to prevent getElementById
+		var hideQSA = FSH.environment.hideQuerySelectorAll;
 		if (FSH.Helper.hideGuildInfoTrade) {
-			$('a#online-allies-action-trade').hide();
+			hideQSA(onlineAlliesList, '#online-allies-action-trade');
 		}
 		if (FSH.Helper.hideGuildInfoSecureTrade) {
-			$('a#online-allies-action-secure-trade').hide();
+			hideQSA(onlineAlliesList, '#online-allies-action-secure-trade');
 		}
 		if (FSH.Helper.hideGuildInfoBuff) {
-			$('a#online-allies-action-quickbuff').hide();
+			hideQSA(onlineAlliesList, '#online-allies-action-quickbuff');
 		}
 		if (FSH.Helper.hideGuildInfoMessage) {
-			$('a#online-allies-action-send-message').hide();
+			hideQSA(onlineAlliesList, '#online-allies-action-send-message');
 		}
 		if (FSH.Helper.hideBuffSelected) {
-			$('a.ally-buff-check-on').hide();
-			$('#ally-quick-buff').hide();
+			FSH.environment.hideNodeList(
+				onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
+			document.getElementById('ally-quick-buff').classList.add('fshHide');
 		}
-		//add coloring for offline time
-		$(onlineAlliesList).find('li.player').each(function() {
-			var playerA = $(this).find('a[class*="player-name"]');
-			var onMouseOver = playerA.data('tipped');
-			var lastActivityMinutes = /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-			if (lastActivityMinutes < 2) {
-				playerA.css('color','DodgerBlue');
-			} else if (lastActivityMinutes < 5) {
-				playerA.css('color','LightSkyBlue');
-			} else {
-				playerA.css('color','PowderBlue');
-			}
+		// add coloring for offline time
+		Array.prototype.forEach.call(
+			onlineAlliesList.getElementsByClassName('player-name'),
+			FSH.environment.alliesColour
+		);
+	},
+
+	alliesColour: function(el) {
+		FSH.environment.contactColour(el, {
+			l1: 'fshDodgerBlue',
+			l2: 'fshLightSkyBlue',
+			l3: 'fshPowderBlue'
 		});
+	},
 
-		console.timeEnd('environment.addOnlineAlliesWidgets');
-
+	contactColour: function(el, obj) {
+		var onMouseOver = el.getAttribute('data-tipped');
+		var lastActivityMinutes =
+			/Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
+		if (lastActivityMinutes < 2) {
+			el.classList.add(obj.l1);
+		} else if (lastActivityMinutes < 5) {
+			el.classList.add(obj.l2);
+		} else {
+			el.classList.add(obj.l3);
+		}
 	},
 
 	changeGuildLogHREF: function() { // Native
