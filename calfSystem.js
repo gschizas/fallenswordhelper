@@ -8541,9 +8541,8 @@ FSH.misc = { // Legacy
 	},
 
 	cancelAllAH: function() {
-		var resultRows = document.getElementById('resultRows');
-		var cancelButtons =
-			resultRows.getElementsByClassName('auctionCancel');
+		var cancelButtons = document.getElementById('resultRows')
+			.getElementsByClassName('auctionCancel');
 		if (cancelButtons.length === 0) {return;}
 		var prm = [];
 		for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
