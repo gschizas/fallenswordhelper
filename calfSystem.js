@@ -12348,7 +12348,7 @@ FSH.newMap = { // Hybrid
 		$('#creatureEvaluatorGroup').html('');
 
 		FSH.System.xmlhttp('index.php?cmd=profile',
-			FSH.Helper.getCreaturePlayerData,
+			FSH.newMap.getCreaturePlayerData,
 			{	'groupExists': false,
 				'groupAttackValue': 0,
 				'groupDefenseValue': 0,
@@ -12412,7 +12412,7 @@ FSH.newMap = { // Hybrid
 			'/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
 			.replace(/,/, '') * 1;
 		FSH.System.xmlhttp('index.php?cmd=profile',
-			FSH.Helper.getCreaturePlayerData,
+			FSH.newMap.getCreaturePlayerData,
 			{	'groupExists': true,
 				'groupAttackValue': groupAttackValue,
 				'groupDefenseValue': groupDefenseValue,
@@ -12422,6 +12422,71 @@ FSH.newMap = { // Hybrid
 				'groupEvaluation': true
 			}
 		);
+	},
+
+	getCreaturePlayerData: function(responseText, callback) { // Legacy
+
+		var combat = {};
+		combat.callback = callback;
+		//playerdata
+		combat.player = FSH.Helper.playerData(responseText);
+
+		combat.combatEvaluatorBias = FSH.System.getValue('combatEvaluatorBias');
+		combat.attackVariable = 1.1053;
+		combat.generalVariable =
+			FSH.Data.bias[combat.combatEvaluatorBias] ?
+			FSH.Data.bias[combat.combatEvaluatorBias].generalVariable :
+			1.1053;
+		combat.hpVariable =
+			FSH.Data.bias[combat.combatEvaluatorBias] ?
+			FSH.Data.bias[combat.combatEvaluatorBias].hpVariable : 1.1;
+
+		//creaturedata
+		var creatureStatTable;
+		if ($('#worldPage').length === 0) { // old map
+			creatureStatTable = FSH.System
+				.findNode('//table[tbody/tr/td[.="Statistics"]]');
+			if (!creatureStatTable) {return;}
+		}
+
+		combat.creature =
+			FSH.Helper.creatureData(combat.player.superEliteSlayerMultiplier);
+		combat = FSH.Helper.evalExtraBuffs(combat);
+		combat = FSH.Helper.evalAttack(combat);
+		combat = FSH.Helper.evalDamage(combat);
+		combat = FSH.Helper.evalDefence(combat);
+		combat = FSH.Helper.evalArmour(combat);
+		combat = FSH.Helper.evalAnalysis(combat);
+		combat = FSH.Helper.evalCA(combat);
+		combat.evaluatorHTML = FSH.Helper.evalHTML(combat);
+
+		var tempdata;
+
+		if ($('#worldPage').length > 0) { // new map
+			if (callback.groupEvaluation) {
+				if ($('#creatureEvaluatorGroup').length === 0) {
+					$('#dialog-viewcreature')
+						.append('<div id="creatureEvaluatorGroup" ' +
+							'style="clear:both;"></div>');
+				}
+				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
+				$('#creatureEvaluatorGroup').html(tempdata);
+			} else {
+				if ($('#creatureEvaluator').length === 0) {
+					$('#dialog-viewcreature')
+						.append('<div id="creatureEvaluator" ' +
+							'style="clear:both;"></div>');
+				}
+				tempdata = combat.evaluatorHTML.replace(/'/g,'\\\'');
+				$('#creatureEvaluator').html(tempdata);
+			}
+		} else {
+			var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
+			var newCell = newRow.insertCell(0);
+			newCell.colSpan = '4';
+			newCell.innerHTML = combat.evaluatorHTML;
+		}
+
 	},
 
 	hideGroupButton: function() { // jQuery
