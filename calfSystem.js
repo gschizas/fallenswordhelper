@@ -7927,7 +7927,7 @@ FSH.environment = { // Legacy
 				'key94':6, 'key38':7, 'key42':8, 'key40':9};
 			// I'm using "key??" because I don't feel comfortable of naming properties with integers
 			var itemIndex = keyMap['key' + r];
-			FSH.System.xmlhttp('index.php?cmd=profile', FSH.Helper.changeCombatSet, itemIndex);
+			FSH.System.xmlhttp('index.php?cmd=profile', FSH.profile.changeCombatSet, itemIndex);
 			break;
 		case 41: // Shift+0
 			// TODO: ask for a number, check isnumeric, then call changeCombatSet with that index.
