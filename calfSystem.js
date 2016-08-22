@@ -12954,14 +12954,142 @@ FSH.legacy = {
 			if (monster) {
 				if (FSH.System.getValue('showMonsterLog')) {
 					FSH.System.xmlhttp(monster.getAttribute('href'), 
-						FSH.Helper.checkedMonster, 
+						FSH.legacy.checkedMonster, 
 						{'monster':monster,'showTip':false});
 				} else {
 					monster.addEventListener('mouseover', 
-					FSH.Helper.showTipCreatureInfo, true);
+					FSH.legacy.showTipCreatureInfo, true);
 				}
 			}
 		}
+	},
+
+	checkedMonster: function(responseText, callback) {
+		var creatureInfo = FSH.System.createDocument(responseText);
+		var statsNode = FSH.System.findNode('//table[@width="400"]', creatureInfo);
+		if (!statsNode) {return;} // FF2 error fix
+		var showMonsterLog = FSH.System.getValue('showMonsterLog');
+		//store the stats
+		var classNode     = statsNode.rows[1].cells[1];
+		var levelNode     = statsNode.rows[1].cells[3];
+		var attackNode    = statsNode.rows[2].cells[1];
+		var defenseNode   = statsNode.rows[2].cells[3];
+		var armorNode     = statsNode.rows[3].cells[1];
+		var damageNode    = statsNode.rows[3].cells[3];
+		var hitpointsNode = statsNode.rows[4].cells[1];
+		var goldNode      = statsNode.rows[4].cells[3];
+		var hitpoints = parseInt(hitpointsNode.textContent.replace(/,/g,''), 10);
+		var armorNumber = parseInt(armorNode.textContent.replace(/,/g,''), 10);
+		var combatEvaluatorBias = FSH.System.getValue('combatEvaluatorBias');
+		// var attackVariable = 1.1053
+		var generalVariable = 1.1053;
+		var hpVariable = 1.1;
+		if (combatEvaluatorBias === 1) {
+			generalVariable = 1.1;
+			hpVariable = 1.053;
+		} else if (combatEvaluatorBias === 2) {
+			generalVariable = 1.053;
+			hpVariable = 1;
+		} else if (combatEvaluatorBias === 3) {
+			generalVariable = 1.1053;
+			hpVariable = 1;
+		}
+		var oneHitNumber = Math.ceil(hitpoints * hpVariable + armorNumber *
+			generalVariable);
+
+		var hideRestOfRows = false;
+		var collectEnchantments = true;
+		var enchantmentsList = [];
+		for (var i = 0; i < statsNode.rows.length; i += 1) {
+			var enchantment = {};
+			var firstCell = statsNode.rows[i].cells[0];
+			var thirdCell = statsNode.rows[i].cells[2];
+			//color titles black
+			if (firstCell.getAttribute('bgcolor') === '#cd9e4b') {
+				firstCell.style.color='black';
+			}
+			//color text white so it can be read
+			if (firstCell.firstChild && firstCell.firstChild.tagName) {
+				firstCell.firstChild.style.color='#cccccc';
+			}
+			if (thirdCell && thirdCell.firstChild &&
+				thirdCell.firstChild.tagName) {
+				thirdCell.firstChild.style.color='#cccccc';
+			}
+			//
+			if (firstCell.textContent === 'Actions') {
+				hideRestOfRows = true;
+			}
+			if (hideRestOfRows) {
+				firstCell.style.display = 'none';
+				firstCell.style.visibility = 'hidden';
+			}
+
+			//store the enchantment min and max values in the monster log (if enabled)
+			if (showMonsterLog && i >= 7 && collectEnchantments) { //first enchantment row
+				var ThisRowFirstCell = statsNode.rows[i].cells[0];
+				if (ThisRowFirstCell.textContent !== '[no enhancements]') {
+					var SecondNextRowFirstCell = statsNode.rows[i + 2].cells[0];
+					if (SecondNextRowFirstCell.textContent === 'Description') {
+						collectEnchantments = false;
+					}
+					enchantment.name = statsNode.rows[i].cells[0].textContent;
+					enchantment.value = statsNode.rows[i].cells[1].textContent * 1;
+					enchantmentsList.push(enchantment);
+				} else {
+					collectEnchantments = false;
+				}
+			}
+		}
+
+		var imageTable = FSH.System.findNode(
+			'//table[tbody/tr/td/img[contains(@src, "/creatures/")]]', creatureInfo);
+		var imageNode = imageTable.rows[0].cells[0].firstChild;
+		var nameNode  = imageTable.rows[1].cells[0].firstChild;
+		var imageNodeSRC = imageNode.src.replace(/.jpg(.*)/,'.jpg');
+
+		if (showMonsterLog) {
+			FSH.monstorLog.pushMonsterInfo({'key0':nameNode.textContent,
+				'key1':imageNodeSRC, 'key2':classNode.textContent,
+				'key3':levelNode.textContent, 'key4':attackNode.textContent,
+				'key5':defenseNode.textContent, 'key6':armorNode.textContent,
+				'key7':damageNode.textContent, 'key8':hitpointsNode.textContent,
+				'key9':goldNode.textContent, 'key10':enchantmentsList});
+		}
+
+		levelNode.innerHTML += ' (your level:<span style="color:yellow">' +
+			FSH.System.intValue($('dt.stat-level:first').next().text()) +
+			'</span>)';
+		attackNode.innerHTML += ' (your defense:<span style="color:yellow">' +
+			FSH.System.intValue($('dt.stat-defense:first').next().text()) +
+			'</span>) ';
+		defenseNode.innerHTML += ' (your attack:<span style="color:yellow">' +
+			FSH.System.intValue($('dt.stat-attack:first').next().text()) +
+			'</span>)';
+		armorNode.innerHTML += ' (your damage:<span style="color:yellow">' +
+			FSH.System.intValue($('dt.stat-damage:first').next().text()) +
+			'</span>)';
+		damageNode.innerHTML += ' (your armor:<span style="color:yellow">' +
+			FSH.System.intValue($('dt.stat-armor:first').next().text()) +
+			'</span>)';
+		hitpointsNode.innerHTML += ' (your HP:<span style="color:yellow">' +
+			FSH.System.intValue($('dt.stat-hp:first').next().text()) +
+			'</span>)' +
+			'(1H: <span style="color:red">' + oneHitNumber + '</span>)';
+
+		$('img', callback.monster).qtip('api').set('content.text', '<table>' +
+			'<tr><td valign=top>' + imageNode.parentNode.innerHTML + '</td>' +
+			'<td rowspan=2>' + statsNode.parentNode.innerHTML + '</td></tr>' +
+			'<tr><td align=center valign=top>' + nameNode.innerHTML +
+			'</td></tr></table>');
+	},
+
+	showTipCreatureInfo: function(evt) {
+		var monster = evt.target.parentNode;
+		monster.removeEventListener('mouseover',
+			FSH.legacy.showTipCreatureInfo, true);
+		FSH.System.xmlhttp(monster.getAttribute('href'),
+			FSH.legacy.checkedMonster, {'monster':monster,'showTip':true});
 	},
 
 
