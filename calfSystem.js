@@ -5963,6 +5963,116 @@ FSH.common = { // Legacy
 		return false;
 	},
 
+	playerData: function(responseText) {
+		var obj = {};
+		if (typeof responseText === 'string') {
+			obj = FSH.common.playerDataString(responseText);
+		}
+		if (typeof responseText === 'object') {
+			obj = FSH.common.playerDataObject(responseText);
+		}
+		return obj;
+	},
+
+	playerDataObject: function(responseText) {
+		var obj = {
+			levelValue: responseText.level,
+			attackValue: responseText.attack,
+			defenseValue: responseText.defense,
+			armorValue: responseText.armor,
+			damageValue: responseText.damage,
+			hpValue: responseText.hp,
+			killStreakValue: FSH.System.intValue(responseText.killstreak)
+		};
+		return obj;
+	},
+
+	playerDataString: function(responseText) {
+		var doc = FSH.System.createDocument(responseText);
+		var obj = {
+			levelValue: FSH.common.getStat('#stat-vl', doc),
+			attackValue: FSH.common.getStat('#stat-attack', doc),
+			defenseValue: FSH.common.getStat('#stat-defense', doc),
+			armorValue: FSH.common.getStat('#stat-armor', doc),
+			damageValue: FSH.common.getStat('#stat-damage', doc),
+			hpValue: FSH.common.getStat('#stat-hp', doc),
+			killStreakValue: FSH.common.getStat('#stat-kill-streak', doc),
+			//get buffs here later ... DD, CA, DC, Constitution, etc
+			counterAttackLevel: FSH.common.getBuffLevel(doc, 'Counter Attack'),
+			doublerLevel: FSH.common.getBuffLevel(doc, 'Doubler'),
+			deathDealerLevel: FSH.common.getBuffLevel(doc, 'Death Dealer'),
+			darkCurseLevel: FSH.common.getBuffLevel(doc, 'Dark Curse'),
+			holyFlameLevel: FSH.common.getBuffLevel(doc, 'Holy Flame'),
+			constitutionLevel: FSH.common.getBuffLevel(doc, 'Constitution'),
+			sanctuaryLevel: FSH.common.getBuffLevel(doc, 'Sanctuary'),
+			flinchLevel: FSH.common.getBuffLevel(doc, 'Flinch'),
+			nightmareVisageLevel: FSH.common.getBuffLevel(doc, 'Nightmare Visage'),
+			superEliteSlayerLevel: FSH.common.getBuffLevel(doc, 'Super Elite Slayer'),
+			fortitudeLevel: FSH.common.getBuffLevel(doc, 'Fortitude'),
+			chiStrikeLevel: FSH.common.getBuffLevel(doc, 'Chi Strike'),
+			terrorizeLevel: FSH.common.getBuffLevel(doc, 'Terrorize'),
+			barricadeLevel: FSH.common.getBuffLevel(doc, 'Barricade'),
+			reignOfTerrorLevel: FSH.common.getBuffLevel(doc, 'Reign Of Terror'),
+			anchoredLevel: FSH.common.getBuffLevel(doc, 'Anchored'),
+			severeConditionLevel: FSH.common.getBuffLevel(doc, 'Severe Condition'),
+			entrenchLevel: FSH.common.getBuffLevel(doc, 'Entrench'),
+			cloakLevel: FSH.common.getBuffLevel(doc, 'Cloak')
+		};
+		obj.superEliteSlayerMultiplier = Math.round(0.002 *
+			obj.superEliteSlayerLevel * 100) / 100;
+
+		if (obj.cloakLevel === 0 || typeof obj.attackValue === 'number' &&
+			!isNaN(obj.attackValue)) {return obj;}
+
+		obj.attackBonus = FSH.common.getBonus('#stat-attack', doc);
+		obj.defenseBonus = FSH.common.getBonus('#stat-defense', doc);
+		obj.armorBonus = FSH.common.getBonus('#stat-armor', doc);
+		obj.damageBonus = FSH.common.getBonus('#stat-damage', doc);
+		obj.hpBonus = FSH.common.getBonus('#stat-hp', doc);
+
+		obj.attackValue = obj.attackBonus > obj.levelValue * 10 ||
+			obj.attackBonus < obj.levelValue ?
+			obj.attackBonus : obj.levelValue * 10;
+		obj.defenseValue = obj.defenseBonus > obj.levelValue * 10 ||
+			obj.defenseBonus < obj.levelValue ?
+			obj.defenseBonus : obj.levelValue * 10;
+		obj.armorValue = obj.armorBonus > obj.levelValue * 10 ||
+			obj.armorBonus < obj.levelValue ?
+			obj.armorBonus : obj.levelValue * 10;
+		obj.damageValue = obj.damageBonus > obj.levelValue * 10 ||
+			obj.damageBonus < obj.levelValue ?
+			obj.damageBonus : obj.levelValue * 10;
+		obj.hpValue = obj.hpBonus;
+		return obj;
+	},
+
+	getStat: function(stat, doc) {
+		// 'Hidden' returns NaN
+		return FSH.System.intValue($(stat, doc)
+			.contents()
+			.filter(function(){
+				return this.nodeType === 3;
+			})[0].nodeValue);
+	},
+
+	getBuffLevel: function(doc, buff) {
+		var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]',
+			doc);
+		hasBuff = hasBuff.data('tipped');
+		var re = new RegExp('</b> \\(Level: (\\d+)\\)');
+		var test = re.exec(hasBuff);
+		return test === null ? 0 : FSH.System.intValue(test[1]);
+	},
+
+	getBonus: function(stat, doc) {
+		var target = $(stat, doc);
+		var children = target.children();
+		if (children.length === 0) {
+			children = target.next();
+		}
+		return FSH.System.intValue(children.text().slice(2, -1));
+	},
+
 };
 
 FSH.onlinePlayers = { // Bad jQuery
