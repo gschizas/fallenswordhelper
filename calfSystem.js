@@ -12824,7 +12824,7 @@ FSH.legacy = {
 				$('dt.stat-name:first').next().text().replace(/,/g,'') +
 				'&skills%5B%5D=55';
 			recastImpAndRefresh.addEventListener('click', function() {
-				FSH.System.xmlhttp(impHref, FSH.Helper.recastImpAndRefresh, true);
+				FSH.System.xmlhttp(impHref, FSH.legacy.recastImpAndRefresh, true);
 			},true);
 		}
 
@@ -12924,6 +12924,13 @@ FSH.legacy = {
 			buffHash[buffName]=true;
 		}
 		return buffHash;
+	},
+
+	recastImpAndRefresh: function(responseText) {
+		var doc = FSH.System.createDocument(responseText);
+		if (doc) {
+			location.reload();
+		}
 	},
 
 
