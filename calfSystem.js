@@ -11591,7 +11591,7 @@ FSH.oldRelic = { // Legacy - Old map
 
 		var defenderCount = callback.defenderCount;
 
-		var player = FSH.Helper.playerData(responseText);
+		var player = FSH.common.playerData(responseText);
 
 		if (defenderCount !== 0) {
 			defenderMultiplier = 0.2;
@@ -11856,7 +11856,7 @@ FSH.oldRelic = { // Legacy - Old map
 		var processingStatus = $('td[title="ProcessingStatus"]');
 		processingStatus.html('Processing attacking group stats ... ');
 
-		var player = FSH.Helper.playerData(responseText);
+		var player = FSH.common.playerData(responseText);
 		var groupAttackElement = $('td[title="GroupAttack"]');
 		var groupAttackBuffedElement = $('td[title="GroupAttackBuffed"]');
 		groupAttackElement.html(
@@ -12539,7 +12539,7 @@ FSH.newMap = { // Hybrid
 		var combat = {};
 		combat.callback = callback;
 		//playerdata
-		combat.player = FSH.Helper.playerData(responseText);
+		combat.player = FSH.common.playerData(responseText);
 
 		combat.combatEvaluatorBias = FSH.System.getValue('combatEvaluatorBias');
 		combat.attackVariable = 1.1053;
