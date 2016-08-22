@@ -7856,7 +7856,7 @@ FSH.environment = { // Legacy
 		case 115: // use stairs [s]
 			break;
 		case 116: // quick buy [t]
-			FSH.Helper.quickBuyItem();
+			FSH.legacy.quickBuyItem();
 			break;
 		case 118: // fast wear manager [v]
 			location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
@@ -8280,8 +8280,8 @@ FSH.environment = { // Legacy
 			FSH.quickBuff.updateBuffLog();
 		}
 		if ($('#shop-info').length > 0) {
-			FSH.ga.screenview('unknown.Helper.injectShop');
-			FSH.Helper.injectShop();
+			FSH.ga.screenview('unknown.legacy.injectShop');
+			FSH.legacy.injectShop();
 		}
 		var isQuestBookPage = FSH.System.findNode('//td[.="Quest Name"]');
 		if (isQuestBookPage) {
@@ -12588,6 +12588,79 @@ FSH.guide = { // Native
 				window.location = url;
 			});
 	},
+
+};
+
+FSH.legacy = {
+
+	injectShop: function() { // Hybrid - Old map?
+		var injectHere = $('#shop-info');
+		var itemNodes = $('td center a img[src*="/items/"]');
+
+		var selector = '<span style="font-size:xx-small">Select an item to ' +
+			'quick-buy:<br>Select how many to quick-buy <input style="font-' +
+			'size:xx-small" value=1 id="buy_amount" name="buy_amount" size=3 ' +
+			'class="custominput"><table cellpadding=2><tr>';
+		var itemId;
+		for (var i = 0; i < itemNodes.length; i += 1) {
+			var item = itemNodes[i];
+			var src = item.getAttribute('src');
+			var text = item.parentNode.parentNode.textContent;
+			var onmouseover = $(item).data('tipped')
+				.replace('Click to Buy', 'Click to Select');
+			itemId = item.parentNode.getAttribute('href').match(/&item_id=(\d+)&/)[1];
+			selector += '<td width=20 height=20 ><img width=20 height=20 id=select' +
+				itemId + ' itemId=' + itemId + ' src="' + src + '" class="tipped" ' +
+				'data-tipped-options="skin: \'fsItem\', ajax: true" data-tipped=\'' +
+				onmouseover + '\'>' + text + '</td>';
+			if (i % 25 === 24 && i !== itemNodes.length - 1) {
+				selector += '</tr><tr>';
+			}
+		}
+		selector+='</table><table width="600px"></tr><tr><td align="right" ' +
+			'width="50%">Selected item:</td><td height=45 width="50%" id=' +
+			'selectedItem align="left">&nbsp;</td></tr><tr><td id=warningMsg' +
+			' colspan="2" align="center"></td></tr><tr><td id=buy_result ' +
+			'colspan="2" align="center"></td></tr>';
+		injectHere.after('<table><tr><td>' + selector + '</td></tr></table>');
+		for (i = 0; i < itemNodes.length; i += 1) {
+			itemId = itemNodes[i].parentNode.getAttribute('href')
+				.match(/&item_id=(\d+)&/)[1];
+			document.getElementById('select' + itemId)
+				.addEventListener('click', FSH.legacy.selectShopItem, true);
+		}
+		FSH.legacy.shopId = itemNodes[0].parentNode.getAttribute('href')
+			.match(/&shop_id=(\d+)/)[1];
+	},
+
+	selectShopItem: function(evt) { // Native - Old map?
+		FSH.legacy.shopItemId = evt.target.getAttribute('itemId');
+		document.getElementById('warningMsg').innerHTML = '<span style="' +
+			'color:red;font-size:small">Warning:<br> pressing "t" now will buy the ' +
+			document.getElementById('buy_amount').value +
+			' item(s) WITHOUT confirmation!</span>';
+		document.getElementById('selectedItem').innerHTML =
+			document.getElementById('select' + FSH.legacy.shopItemId).parentNode
+			.innerHTML.replace(/='20'/g,'=45');
+	},
+
+	quickBuyItem: function() { // Legacy - Old map? - from key handler
+		if (!FSH.legacy.shopId || !FSH.legacy.shopItemId) {return;}
+		document.getElementById('buy_result').innerHTML = 'Buying ' +
+			document.getElementById('buy_amount').value + ' Items';
+		for (var i = 0; i < document.getElementById('buy_amount').value; i += 1) {
+			FSH.System.xmlhttp('index.php?cmd=shop&subcmd=buyitem&item_id=' +
+				FSH.legacy.shopItemId + '&shop_id=' + FSH.legacy.shopId,
+				FSH.legacy.quickDone);
+		}
+	},
+
+	quickDone: function(responseText) { // Native - Old map?
+		var infoMessage = FSH.Layout.infoBox(responseText);
+		document.getElementById('buy_result').innerHTML += '<br />' + infoMessage;
+	},
+
+
 
 };
 
