@@ -2157,7 +2157,7 @@ FSH.composing = { // jQuery
 		var openSlots = $('div.composing-potion-time:contains("ETA: Ready to ' +
 			'Collect!"), div.composing-potion-time:contains("ETA: n/a")', doc);
 		if (openSlots.length !== 0) {
-			FSH.composing.displayComposeMsg();
+			if (FSH.cmd !== 'composing') {FSH.composing.displayComposeMsg();}
 			FSH.System.setValue('needToCompose', true);
 		} else {
 			var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
