@@ -46,29 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	oldRemoveBuffs: function() { // Legacy - Old Map
-		var buffName;
-		var currentBuffs = FSH.System.findNodes('//a[contains(@href,"index.php?' +
-			'cmd=profile&subcmd=removeskill&skill_id=")]');
-		var buffHash={};
-		if (!currentBuffs) {return buffHash;}
-		for (var i=0;i<currentBuffs.length;i += 1) {
-			var currentBuff = currentBuffs[i];
-			var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
-				.exec(currentBuff.getAttribute('onclick'));
-			if (buffTest) {
-				buffName = buffTest[1];
-			} else {
-				buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/
-					.exec(currentBuff.getAttribute('onclick'));
-				if (buffTest) { buffName = buffTest[1];
-				} else {console.log('Error getting buff');}
-			}
-			buffHash[buffName]=true;
-		}
-		return buffHash;
-	},
-
 	toggleKsTracker: function() {
 		var trackKS = document.getElementById('Helper:toggleKStracker');
 		if (trackKS) {
