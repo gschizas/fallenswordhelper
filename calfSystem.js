@@ -1094,12 +1094,12 @@ FSH.Data = {
 
 	pageSwitcher: {
 		settings: {'-': {'-': {'-': {'-': 'settingsPage.injectSettings'}}}},
-		world: {'-': {'-': {'-': {'-': 'injectWorld'}}}},
+		world: {'-': {'-': {'-': {'-': 'legacy.injectWorld'}}}},
 		news: {
 			'fsbox': {'-': {'-': {'-': 'news.newsFsbox'}}},
 			'shoutbox': {'-': {'-': {'-': 'news.newsShoutbox'}}}},
 		blacksmith: {
-			'repairall': {'-': {'-': {'1': 'injectWorld'}}}},
+			'repairall': {'-': {'-': {'1': 'legacy.injectWorld'}}}},
 		arena: {
 			'-': {'-': {'-': {'-': 'arena.inject'}}},
 			'join': {'-': {'-': {'-': 'arena.inject'}}},
