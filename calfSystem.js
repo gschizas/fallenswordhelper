@@ -12591,7 +12591,7 @@ FSH.guide = { // Native
 
 };
 
-FSH.legacy = {
+FSH.legacy = { // Legacy - Old Map
 
 	injectShop: function() { // Hybrid - Old map?
 		var injectHere = $('#shop-info');
@@ -12689,7 +12689,7 @@ FSH.legacy = {
 	injectOldMap: function() {
 		FSH.legacy.checkBuffs();
 		FSH.legacy.prepareCheckMonster();
-		FSH.Helper.prepareCombatLog();
+		FSH.legacy.prepareCombatLog();
 	},
 
 	checkBuffs: function() { // Legacy - Old Map
@@ -13090,6 +13090,27 @@ FSH.legacy = {
 			FSH.legacy.showTipCreatureInfo, true);
 		FSH.System.xmlhttp(monster.getAttribute('href'),
 			FSH.legacy.checkedMonster, {'monster':monster,'showTip':true});
+	},
+
+	prepareCombatLog: function() {
+		var reportsTable=FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
+		if (!reportsTable) {return;}
+		var tempLog=document.createElement('div');
+		tempLog.id='reportsLog';
+		var injLog=reportsTable.appendChild(tempLog);
+		var is=injLog.style;
+		is.color = 'black';
+		is.backgroundImage='url(' + FSH.System.imageServer + '/skin/realm_right_bg.jpg)';
+		is.maxHeight = '240px';
+		is.width = '277px';
+		is.maxWidth = is.width;
+		is.marginLeft = '0px';
+		is.marginRight = '0px';
+		is.paddingLeft = '26px';
+		is.paddingRight = '24px';
+		is.overflow = 'hidden';
+		is.fontSize = 'xx-small';
+		is.textAlign = 'justify';
 	},
 
 
