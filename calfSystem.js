@@ -12342,7 +12342,7 @@ FSH.newMap = { // Hybrid
 		}
 
 		//Subscribes:
-		FSH.Helper.doNotKillList = FSH.System.getValue('doNotKillList');
+		FSH.newMap.doNotKillList = FSH.System.getValue('doNotKillList');
 
 		// subscribe to view creature events on the new map.
 		$.subscribe('ready.view-creature', FSH.newMap.readyViewCreature);
@@ -12485,7 +12485,7 @@ FSH.newMap = { // Hybrid
 			.attr('creatureName',creatureName);
 		var extraText = 'Add to the do not kill list';
 		// TODO substring bug
-		if (FSH.Helper.doNotKillList.indexOf(creatureName) !== -1) {
+		if (FSH.newMap.doNotKillList.indexOf(creatureName) !== -1) {
 			extraText = 'Remove from do not kill list';}
 		$('#addRemoveCreatureToDoNotKillList').html(extraText);
 		document.getElementById('addRemoveCreatureToDoNotKillList')
@@ -12512,7 +12512,7 @@ FSH.newMap = { // Hybrid
 			evt.target.innerHTML = 'Remove from do not kill list';
 		}
 		FSH.System.setValue('doNotKillList',newDoNotKillList);
-		FSH.Helper.doNotKillList = newDoNotKillList;
+		FSH.newMap.doNotKillList = newDoNotKillList;
 		//refresh the action list
 		window.GameData.doAction(-1);
 	},
@@ -12650,7 +12650,7 @@ FSH.newMap = { // Hybrid
 		// color the critters in the do no kill list blue
 		// TODO substring bug
 		$('#actionList div.header').each(function() {
-			if (FSH.Helper.doNotKillList.indexOf($(this).find('a.icon')
+			if (FSH.newMap.doNotKillList.indexOf($(this).find('a.icon')
 				.data('name')) !== -1) {
 				$(this).css('color','blue');
 			}
@@ -12667,7 +12667,7 @@ FSH.newMap = { // Hybrid
 				var creatureIcon = $('#actionList div.header')
 					.eq(data.passback).find('a.icon');
 				// TODO substring bug
-				if (FSH.Helper.doNotKillList.indexOf(
+				if (FSH.newMap.doNotKillList.indexOf(
 						creatureIcon.data('name')) !== -1) {
 					creatureIcon.removeClass('loading');
 					return;
