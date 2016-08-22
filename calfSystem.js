@@ -12490,7 +12490,31 @@ FSH.newMap = { // Hybrid
 		$('#addRemoveCreatureToDoNotKillList').html(extraText);
 		document.getElementById('addRemoveCreatureToDoNotKillList')
 			.addEventListener('click',
-				FSH.Helper.addRemoveCreatureToDoNotKillList, true);
+				FSH.newMap.addRemoveCreatureToDoNotKillList, true);
+	},
+
+	addRemoveCreatureToDoNotKillList: function(evt) { // Native
+		var creatureName = evt.target.getAttribute('creatureName');
+		var doNotKillList = FSH.System.getValue('doNotKillList');
+		var newDoNotKillList = '';
+		if (doNotKillList.indexOf(creatureName) !== -1) {
+			newDoNotKillList = doNotKillList.replace(creatureName, '');
+			newDoNotKillList = newDoNotKillList.replace(',,', ',');
+			if (newDoNotKillList.charAt(0) === ',') {
+				newDoNotKillList = newDoNotKillList
+					.substring(1,newDoNotKillList.length);
+			}
+			evt.target.innerHTML = 'Add to the do not kill list';
+		} else {
+			newDoNotKillList = doNotKillList +
+				(doNotKillList.length !== 0 ? ',' : '') + creatureName;
+			newDoNotKillList = newDoNotKillList.replace(',,', ',');
+			evt.target.innerHTML = 'Remove from do not kill list';
+		}
+		FSH.System.setValue('doNotKillList',newDoNotKillList);
+		FSH.Helper.doNotKillList = newDoNotKillList;
+		//refresh the action list
+		window.GameData.doAction(-1);
 	},
 
 	checkIfGroupExists: function(responseText) { // Hybrid
