@@ -12343,7 +12343,7 @@ FSH.newMap = { // Hybrid
 		}
 	},
 
-	readyViewCreature: function() { // Hybrid - New Map
+	readyViewCreature: function() { // Hybrid
 		$('#creatureEvaluator').html('');
 		$('#creatureEvaluatorGroup').html('');
 
@@ -12383,15 +12383,45 @@ FSH.newMap = { // Hybrid
 				FSH.Helper.addRemoveCreatureToDoNotKillList, true);
 	},
 
-	checkIfGroupExists: function(responseText) { // Hybrid - Both Maps
+	checkIfGroupExists: function(responseText) { // Hybrid
 		var doc=FSH.System.createDocument(responseText);
 		var groupExistsIMG = $(doc)
 			.find('img[title="Disband Group (Cancel Attack)"]');
 		if (groupExistsIMG.length > 0) {
 			var groupHref = groupExistsIMG.parents('td:first').find('a:first')
 				.attr('href');
-			FSH.System.xmlhttp(groupHref, FSH.Helper.getCreatureGroupData);
+			FSH.System.xmlhttp(groupHref, FSH.newMap.getCreatureGroupData);
 		}
+	},
+
+	getCreatureGroupData: function(responseText) { // Legacy
+		var doc = FSH.System.createDocument(responseText);
+		var groupAttackValue = FSH.System.findNode('//table[@width="400"]/tbody' +
+			'/tr/td[contains(.,"Attack:")]', doc).nextSibling.textContent
+			.replace(/,/, '') * 1;
+		var groupDefenseValue = FSH.System.findNode('//table[@width="400"]/tbody' +
+			'/tr/td[contains(.,"Defense:")]', doc).nextSibling.textContent
+			.replace(/,/, '') * 1;
+		var groupArmorValue = FSH.System.findNode('//table[@width="400"]/tbody' +
+			'/tr/td[contains(.,"Armor:")]', doc).nextSibling.textContent
+			.replace(/,/, '') * 1;
+		var groupDamageValue = FSH.System.findNode('//table[@width="400"]/tbody' +
+			'/tr/td[contains(.,"Damage:")]', doc).nextSibling.textContent
+			.replace(/,/, '') * 1;
+		var groupHPValue = FSH.System.findNode('//table[@width="400"]/tbody' +
+			'/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
+			.replace(/,/, '') * 1;
+		FSH.System.xmlhttp('index.php?cmd=profile',
+			FSH.Helper.getCreaturePlayerData,
+			{	'groupExists': true,
+				'groupAttackValue': groupAttackValue,
+				'groupDefenseValue': groupDefenseValue,
+				'groupArmorValue': groupArmorValue,
+				'groupDamageValue': groupDamageValue,
+				'groupHPValue': groupHPValue,
+				'groupEvaluation': true
+			}
+		);
 	},
 
 	hideGroupButton: function() { // jQuery
