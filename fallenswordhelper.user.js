@@ -70,17 +70,6 @@ FSH.Helper = {
 		window.GameData.doAction(-1);
 	},
 
-	checkIfGroupExists: function(responseText) { // Hybrid - Both Maps
-		var doc=FSH.System.createDocument(responseText);
-		var groupExistsIMG = $(doc)
-			.find('img[title="Disband Group (Cancel Attack)"]');
-		if (groupExistsIMG.length > 0) {
-			var groupHref = groupExistsIMG.parents('td:first').find('a:first')
-				.attr('href');
-			FSH.System.xmlhttp(groupHref, FSH.Helper.getCreatureGroupData);
-		}
-	},
-
 	getCreatureGroupData: function(responseText) { // Legacy - Both Maps
 		var doc = FSH.System.createDocument(responseText);
 		var groupAttackValue = FSH.System.findNode('//table[@width="400"]/tbody' +
