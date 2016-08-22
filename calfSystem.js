@@ -7086,11 +7086,11 @@ FSH.settingsPage = { // Legacy
 				'This will determine which list of buffs gets checked ' +
 				'on the world screen.') +
 				':<select name="enabledHuntingMode">' +
-				'<option value="1"' + (enabledHuntingMode === 1 ? ' SELECTED' : '') +
+				'<option value="1"' + (enabledHuntingMode === '1' ? ' SELECTED' : '') +
 				'>' + buffsName + '</option>' +
-				'<option value="2"' + (enabledHuntingMode === 2 ? ' SELECTED' : '') +
+				'<option value="2"' + (enabledHuntingMode === '2' ? ' SELECTED' : '') +
 				'>' + buffs2Name + '</option>' +
-				'<option value="3"' + (enabledHuntingMode === 3 ? ' SELECTED' : '') +
+				'<option value="3"' + (enabledHuntingMode === '3' ? ' SELECTED' : '') +
 				'>' + buffs3Name + '</option>' +
 				'</select></td></tr>' +
 			'<tr><td align="right">' + buffsName + ' Hunting Buff List' +
@@ -12682,8 +12682,153 @@ FSH.legacy = {
 			FSH.newMap.subscribes();
 		} else {
 			//not new map.
-			FSH.Helper.injectOldMap();
+			FSH.legacy.injectOldMap();
 		}
+	},
+
+	injectOldMap: function() {
+		FSH.legacy.checkBuffs();
+		FSH.Helper.prepareCheckMonster();
+		FSH.Helper.prepareCombatLog();
+	},
+
+	checkBuffs: function() { // Legacy - Old Map
+		var onmouseover;
+		var impsRemaining;
+		var counterAttackLevel;
+		var doublerLevel;
+
+		//extra world screen text
+		var replacementText = '<td background="' + FSH.System.imageServer +
+			'/skin/realm_right_bg.jpg"><table align="right" cellpadding="1" ' +
+			'style="width:270px;margin-left:38px;margin-right:38px;font-size' +
+			':medium; border-spacing: 1px; border-collapse: collapse;"><tr><' +
+			'td colspan="2" height="10"></td></tr><tr>';
+		var hasShieldImp = FSH.System
+			.findNode('//img[contains(@src,"/55_sm.gif")]');
+		var hasDeathDealer = FSH.System
+			.findNode('//img[contains(@src,"/50_sm.gif")]');
+		if (hasDeathDealer || hasShieldImp) {
+			var re=/(\d+) HP remaining/;
+			impsRemaining = 0;
+			if (hasShieldImp) {
+				var textToTest = $(hasShieldImp).data('tipped');
+				var impsRemainingRE = re.exec(textToTest);
+				impsRemaining = impsRemainingRE[1];
+			}
+			var applyImpWarningColor = ' style="color:green; ' +
+				'font-size:medium;"';
+			if (impsRemaining===2){
+				applyImpWarningColor = ' style="color:Orangered; ' +
+					'font-size:medium; font-weight:bold;"';
+			}
+			if (impsRemaining===1){
+				applyImpWarningColor = ' style="color:Orangered; ' +
+					'font-size:large; font-weight:bold"';
+			}
+			if (impsRemaining===0){
+				applyImpWarningColor = ' style="color:red; ' +
+					'font-size:large; font-weight:bold"';
+			}
+			replacementText += '<tr><td' + applyImpWarningColor +
+				'>Shield Imps Remaining: ' +  impsRemaining +
+				(impsRemaining === 0 ?
+				'&nbsp;<span id="Helper:recastImpAndRefresh" style="color:' +
+				'blue;cursor:pointer;text-decoration:underline;font-size:' +
+				'xx-small;">Recast</span>':'') + '</td></tr>';
+			if (hasDeathDealer) {
+				replacementText += FSH.Helper.doDeathDealer(impsRemaining);
+			}
+		}
+		var hasCounterAttack = FSH.System
+			.findNode('//img[contains(@src,"/54_sm.gif")]');
+		if (hasCounterAttack) {
+			if (hasCounterAttack.getAttribute('src')
+				.search('/skills/') !== -1) {
+				onmouseover = $(hasCounterAttack).data('tipped');
+				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
+				var counterAttack = counterAttackRE.exec(onmouseover);
+				if (counterAttack) {
+					counterAttackLevel = counterAttack[1];
+				}
+			}
+			replacementText += '<tr><td style="font-size:small; color:' +
+				'blue">CA' + counterAttackLevel + ' active</td></tr>';
+		}
+		var hasDoubler = FSH.System.findNode('//img[contains(@src,"/26_sm.gif")]');
+		if (hasDoubler) {
+			if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
+				onmouseover = $(hasDoubler).data('tipped');
+				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
+				var doubler = doublerRE.exec(onmouseover);
+				if (doubler) {
+					doublerLevel = doubler[1];
+				}
+			}
+			if (doublerLevel === 200) {
+				replacementText += '<tr><td style="font-size:small; color:' +
+					'red">Doubler ' + doublerLevel + ' active</td></tr>';
+			}
+		}
+		var huntingMode = FSH.Helper.huntingMode;
+		replacementText += huntingMode === true ? '<tr><td style="font-size:' +
+			'small; color:red">Hunting mode enabled</td></tr>':'';
+		replacementText += '<tr><td colspan="2" height="10"></td></tr>';
+		if (FSH.System.getValue('showHuntingBuffs')) {
+			var enabledHuntingMode=FSH.System.getValue('enabledHuntingMode');
+			var buffs=FSH.System.getValue('huntingBuffs');
+			var buffsName=FSH.System.getValue('huntingBuffsName');
+			if (enabledHuntingMode === '2') {
+				buffs=FSH.System.getValue('huntingBuffs2');
+				buffsName=FSH.System.getValue('huntingBuffs2Name');
+			}
+			if (enabledHuntingMode === '3') {
+				buffs=FSH.System.getValue('huntingBuffs3');
+				buffsName=FSH.System.getValue('huntingBuffs3Name');
+			}
+			var buffAry=buffs.split(',');
+			var missingBuffs = [];
+
+			var buffHash = FSH.Helper.oldRemoveBuffs();
+
+			for (var i=0;i<buffAry.length;i += 1) {
+				if (!buffHash[buffAry[i].trim()]) {
+					missingBuffs.push(buffAry[i]);
+				}
+			}
+			if (missingBuffs.length>0) {
+				replacementText += '<tr><td colspan="2" align="center"><' +
+					'span style="font-size:x-small; color:navy;">You are ' +
+					'missing some ' + buffsName + ' hunting buffs<br/>(';
+				replacementText += missingBuffs.join(', ');
+				replacementText += ')</span></td></tr>';
+			}
+			replacementText += '<tr><td colspan="2" height="10"></td></tr>';
+			replacementText += '</table>';
+		}
+		replacementText += '</td>' ;
+
+		var injectHere = FSH.System.findNode('//div[table[@class="centered" ' +
+			'and @style="width: 270px;"]]');
+		if (!injectHere) {return;}
+		//insert after kill all monsters image and text
+		var newSpan = document.createElement('DIV');
+		newSpan.innerHTML=replacementText;
+		injectHere.appendChild(newSpan);
+
+		if ((hasDeathDealer || hasShieldImp) && impsRemaining ===0) {
+			var recastImpAndRefresh = document
+				.getElementById('Helper:recastImpAndRefresh');
+			var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
+				'Players=' +
+				$('dt.stat-name:first').next().text().replace(/,/g,'') +
+				'&skills%5B%5D=55';
+			recastImpAndRefresh.addEventListener('click', function() {
+				FSH.System.xmlhttp(impHref, FSH.Helper.recastImpAndRefresh, true);
+			},true);
+		}
+
+		FSH.Helper.toggleKsTracker();
 	},
 
 
