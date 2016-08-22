@@ -275,32 +275,6 @@ FSH.Helper = {
 		}
 	},
 
-	injectWorld: function() {
-		//-1 = world page
-		//0 = quest responce
-		//1 = view creature
-		//2 = attack creature
-		//3 = attack player
-		//4 = move
-		//5 = use stair
-		//6 = use chest
-		//7 = take portal
-		//10 = problaby view relic
-		//11 = take relic
-		//12 = create group
-		//13 = view shop
-		//14 = purchase item
-		//15 = repair
-		//17 = login
-		//18 = username not found
-		if ($('#worldPage').length > 0) { // new map
-			FSH.newMap.subscribes();
-		} else {
-			//not new map.
-			FSH.Helper.injectOldMap();
-		}
-	},
-
 	injectOldMap: function() {
 		FSH.Helper.checkBuffs();
 		FSH.Helper.prepareCheckMonster();
