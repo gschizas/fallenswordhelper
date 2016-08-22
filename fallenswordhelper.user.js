@@ -46,31 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	changeCombatSet: function(responseText, itemIndex) {
-		var doc = FSH.System.createDocument(responseText);
-
-		var cbsSelect = FSH.System.findNode('//select[@name="combatSetId"]', doc);
-
-		// find the combat set id value
-		var allItems = cbsSelect.getElementsByTagName('option');
-		if (itemIndex >= allItems.length) {return;}
-		var cbsIndex = allItems[itemIndex].value;
-
-		$.ajax({
-			type: 'POST',
-			url: FSH.System.server + 'index.php',
-			data: {
-				cmd: 'profile',
-				subcmd: 'managecombatset',
-				combatSetId: cbsIndex,
-				submit: 'Use'
-			},
-			success: function() {
-				location.href = 'index.php?cmd=profile';
-			}
-		});
-	},
-
 	addRemoveCreatureToDoNotKillList: function(evt) { // Native - Both Maps
 		var creatureName = evt.target.getAttribute('creatureName');
 		var doNotKillList = FSH.System.getValue('doNotKillList');
