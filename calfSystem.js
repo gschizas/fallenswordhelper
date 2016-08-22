@@ -12789,7 +12789,7 @@ FSH.legacy = {
 			var buffAry=buffs.split(',');
 			var missingBuffs = [];
 
-			var buffHash = FSH.Helper.oldRemoveBuffs();
+			var buffHash = FSH.legacy.oldRemoveBuffs();
 
 			for (var i=0;i<buffAry.length;i += 1) {
 				if (!buffHash[buffAry[i].trim()]) {
@@ -12901,6 +12901,29 @@ FSH.legacy = {
 		var deathDealerPercentageElement = FSH.System.findNode('//span[@findme="damagebonus"]');
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
 		FSH.System.setValue('lastDeathDealerPercentage', deathDealerPercentage);
+	},
+
+	oldRemoveBuffs: function() { // Legacy - Old Map
+		var buffName;
+		var currentBuffs = FSH.System.findNodes('//a[contains(@href,"index.php?' +
+			'cmd=profile&subcmd=removeskill&skill_id=")]');
+		var buffHash={};
+		if (!currentBuffs) {return buffHash;}
+		for (var i=0;i<currentBuffs.length;i += 1) {
+			var currentBuff = currentBuffs[i];
+			var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
+				.exec(currentBuff.getAttribute('onclick'));
+			if (buffTest) {
+				buffName = buffTest[1];
+			} else {
+				buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/
+					.exec(currentBuff.getAttribute('onclick'));
+				if (buffTest) { buffName = buffTest[1];
+				} else {console.log('Error getting buff');}
+			}
+			buffHash[buffName]=true;
+		}
+		return buffHash;
 	},
 
 
