@@ -46,17 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	toggleKsTracker: function() {
-		var trackKS = document.getElementById('Helper:toggleKStracker');
-		if (trackKS) {
-			trackKS.addEventListener('click', function() {
-				FSH.System.setValue('trackKillStreak',
-				FSH.System.getValue('trackKillStreak') ? false : true);
-				location.reload();
-			},true);
-		}
-	},
-
 	prepareCombatLog: function() {
 		var reportsTable=FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
 		if (!reportsTable) {return;}
