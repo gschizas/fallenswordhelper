@@ -12688,7 +12688,7 @@ FSH.legacy = {
 
 	injectOldMap: function() {
 		FSH.legacy.checkBuffs();
-		FSH.Helper.prepareCheckMonster();
+		FSH.legacy.prepareCheckMonster();
 		FSH.Helper.prepareCombatLog();
 	},
 
@@ -12941,6 +12941,26 @@ FSH.legacy = {
 				FSH.System.getValue('trackKillStreak') ? false : true);
 				location.reload();
 			},true);
+		}
+	},
+
+	prepareCheckMonster: function() {
+		if (!FSH.System.getValue('showCreatureInfo')) {return;}
+		var monsters = FSH.System.findNodes('//a[contains(@href,"cmd=world&' +
+			'subcmd=viewcreature&creature_id=")]');
+		if (!monsters) {return;}
+		for (var i = 0; i < monsters.length; i += 1) {
+			var monster = monsters[i];
+			if (monster) {
+				if (FSH.System.getValue('showMonsterLog')) {
+					FSH.System.xmlhttp(monster.getAttribute('href'), 
+						FSH.Helper.checkedMonster, 
+						{'monster':monster,'showTip':false});
+				} else {
+					monster.addEventListener('mouseover', 
+					FSH.Helper.showTipCreatureInfo, true);
+				}
+			}
 		}
 	},
 
