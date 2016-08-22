@@ -46,16 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	scrollUpCombatLog: function() {
-		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
-		reportLog.scrollTop-=10;
-	},
-
-	scrollDownCombatLog: function() {
-		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
-		reportLog.scrollTop+=10;
-	},
-
 	changeCombatSet: function(responseText, itemIndex) {
 		var doc = FSH.System.createDocument(responseText);
 
