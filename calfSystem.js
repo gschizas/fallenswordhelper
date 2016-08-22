@@ -7926,14 +7926,14 @@ FSH.environment = { // Legacy
 				break;
 			case 33:
 				if (FSH.System.findNode('//div[@id="reportsLog"]')) {
-					FSH.Helper.scrollUpCombatLog();
+					FSH.combatLog.scrollUpCombatLog();
 					evt.preventDefault();
 					evt.stopPropagation();
 				}
 				break;
 			case 34:
 				if (FSH.System.findNode('//div[@id="reportsLog"]')) {
-					FSH.Helper.scrollDownCombatLog();
+					FSH.combatLog.scrollDownCombatLog();
 					evt.preventDefault();
 					evt.stopPropagation();
 				}
@@ -12184,6 +12184,16 @@ FSH.combatLog = { // Native
 			FSH.System.setValue('CombatLog', '');
 			location.reload();
 		}
+	},
+
+	scrollUpCombatLog: function() {
+		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
+		reportLog.scrollTop-=10;
+	},
+
+	scrollDownCombatLog: function() {
+		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
+		reportLog.scrollTop+=10;
 	},
 
 };
