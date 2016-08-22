@@ -70,36 +70,6 @@ FSH.Helper = {
 		window.GameData.doAction(-1);
 	},
 
-	getCreatureGroupData: function(responseText) { // Legacy - Both Maps
-		var doc = FSH.System.createDocument(responseText);
-		var groupAttackValue = FSH.System.findNode('//table[@width="400"]/tbody' +
-			'/tr/td[contains(.,"Attack:")]', doc).nextSibling.textContent
-			.replace(/,/, '') * 1;
-		var groupDefenseValue = FSH.System.findNode('//table[@width="400"]/tbody' +
-			'/tr/td[contains(.,"Defense:")]', doc).nextSibling.textContent
-			.replace(/,/, '') * 1;
-		var groupArmorValue = FSH.System.findNode('//table[@width="400"]/tbody' +
-			'/tr/td[contains(.,"Armor:")]', doc).nextSibling.textContent
-			.replace(/,/, '') * 1;
-		var groupDamageValue = FSH.System.findNode('//table[@width="400"]/tbody' +
-			'/tr/td[contains(.,"Damage:")]', doc).nextSibling.textContent
-			.replace(/,/, '') * 1;
-		var groupHPValue = FSH.System.findNode('//table[@width="400"]/tbody' +
-			'/tr/td[contains(.,"HP:")]', doc).nextSibling.textContent
-			.replace(/,/, '') * 1;
-		FSH.System.xmlhttp('index.php?cmd=profile',
-			FSH.Helper.getCreaturePlayerData,
-			{	'groupExists': true,
-				'groupAttackValue': groupAttackValue,
-				'groupDefenseValue': groupDefenseValue,
-				'groupArmorValue': groupArmorValue,
-				'groupDamageValue': groupDamageValue,
-				'groupHPValue': groupHPValue,
-				'groupEvaluation': true
-			}
-		);
-	},
-
 	getStat: function(stat, doc) {
 		// 'Hidden' returns NaN
 		return FSH.System.intValue($(stat, doc)
