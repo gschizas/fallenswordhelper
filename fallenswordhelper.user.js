@@ -46,27 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	prepareCombatLog: function() {
-		var reportsTable=FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
-		if (!reportsTable) {return;}
-		var tempLog=document.createElement('div');
-		tempLog.id='reportsLog';
-		var injLog=reportsTable.appendChild(tempLog);
-		var is=injLog.style;
-		is.color = 'black';
-		is.backgroundImage='url(' + FSH.System.imageServer + '/skin/realm_right_bg.jpg)';
-		is.maxHeight = '240px';
-		is.width = '277px';
-		is.maxWidth = is.width;
-		is.marginLeft = '0px';
-		is.marginRight = '0px';
-		is.paddingLeft = '26px';
-		is.paddingRight = '24px';
-		is.overflow = 'hidden';
-		is.fontSize = 'xx-small';
-		is.textAlign = 'justify';
-	},
-
 	backpackUpdater: function(count){
 		var slots = FSH.System.findNode('.//font[contains(.,"/") and @size="1"]');
 		if (slots !== null){
