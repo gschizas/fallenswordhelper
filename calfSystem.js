@@ -724,8 +724,8 @@ FSH.Data = {
 		huntingBuffsName: 'default',
 		huntingBuffs2: 'Deflect',
 		huntingBuffs2Name: 'PvP',
-		huntingBuffs3: 'SE hunting',
-		huntingBuffs3Name: 'Super Elite Slayer',
+		huntingBuffs3: 'Super Elite Slayer',
+		huntingBuffs3Name: 'SE',
 		showHuntingBuffs: false,
 		moveFSBox: false,
 
@@ -12361,7 +12361,27 @@ FSH.newMap = { // Hybrid
 		FSH.newMap.interceptDoAction();
 
 		$.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-			FSH.newMap.dataEventsPlayerBuffs);
+			FSH.newMap.impIconColour);
+
+		FSH.newMap.showHuntingBuffs = FSH.System.getValue('showHuntingBuffs');
+		if (FSH.newMap.showHuntingBuffs) {
+			FSH.newMap.enabledHuntingMode = FSH.System.getValue('enabledHuntingMode');
+			if (FSH.newMap.enabledHuntingMode === '1') {
+				FSH.newMap.huntingBuffs = FSH.System.getValue('huntingBuffs');
+				FSH.newMap.huntingBuffsName = FSH.System.getValue('huntingBuffsName');
+			}
+			if (FSH.newMap.enabledHuntingMode === '2') {
+				FSH.newMap.huntingBuffs = FSH.System.getValue('huntingBuffs2');
+				FSH.newMap.huntingBuffsName = FSH.System.getValue('huntingBuffs2Name');
+			}
+			if (FSH.newMap.enabledHuntingMode === '3') {
+				FSH.newMap.huntingBuffs = FSH.System.getValue('huntingBuffs3');
+				FSH.newMap.huntingBuffsName = FSH.System.getValue('huntingBuffs3Name');
+			}
+			FSH.newMap.huntingBuffs = FSH.newMap.huntingBuffs.split(',');
+			$.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
+				FSH.newMap.dataEventsPlayerBuffs);
+		}
 
 		$.subscribe('keydown.controls', function(e, key){
 			switch(key) {
@@ -12378,8 +12398,14 @@ FSH.newMap = { // Hybrid
 		if (window.initialGameData) {//HCS initial data
 			setTimeout(function(){
 				FSH.newMap.injectWorldNewMap(window.initialGameData);
-				FSH.newMap.dataEventsPlayerBuffs(null,
+				FSH.newMap.impIconColour(null,
 					{b: window.initialGameData.player.buffs});
+
+				if (FSH.newMap.showHuntingBuffs) {
+					FSH.newMap.dataEventsPlayerBuffs(null,
+						{b: window.initialGameData.player.buffs});
+				}
+
 			}, 400);
 		}
 		$.subscribe('-1-success.action-response 5-success.action-response',
@@ -13018,12 +13044,35 @@ FSH.newMap = { // Hybrid
 		'2': 'yellow'
 	},
 
-	dataEventsPlayerBuffs: function() { // jQuery
+	impIconColour: function() { // jQuery
 		var imp = $('#actionlist-shield-imp');
 		if (imp.length === 1) {
 			imp.css('background-color',
 				FSH.newMap.colorHash[imp.text()] || '#ad8043');
 		}
+	},
+
+	dataEventsPlayerBuffs: function(evt, data) { // jQuery
+		var buffHash = data.b.reduce(function(prev, curr) {
+			prev[curr.name] = true;
+			return prev;
+		}, {});
+		var missingBuffs = FSH.newMap.huntingBuffs.reduce(function(prev, curr) {
+			if (!buffHash[curr.trim()]) {prev.push(curr);}
+			return prev;
+		}, []);
+		var missingBuffsDiv = document.getElementById('missingBuffs');
+		if (!missingBuffsDiv) {
+			missingBuffsDiv = document.createElement('div');
+			missingBuffsDiv.setAttribute('id', 'missingBuffs');
+			var worldContainer = document.getElementById('worldContainerBelow');
+			worldContainer.insertBefore(missingBuffsDiv, worldContainer.firstChild);
+		}
+		if (missingBuffs.length > 0) {
+			missingBuffsDiv.innerHTML = 'You are missing some ' +
+				FSH.newMap.huntingBuffsName + ' hunting buffs<br>(' +
+				missingBuffs.join(', ') + ')';
+		} else {missingBuffsDiv.innerHTML = '';}
 	},
 
 	combatResponse: function(e, data) { // jQuery - Bad
@@ -13087,14 +13136,19 @@ FSH.newMap = { // Hybrid
 		}, 0);
 	},
 
-	injectWorldNewMap: function(data){ // jQuery - Ugly
+	injectWorldNewMap: function(data){ // Native
 		if (data.player && FSH.System.getValue('sendGoldonWorld')) {
 			FSH.newMap.updateSendGoldOnWorld(data);
 		}
-
 		if (data.realm && data.realm.name) {
 			FSH.newMap.injectButtons(data);
+			document.getElementById('buffList')
+				.addEventListener('click', FSH.newMap.fixDebuffQTip);
 		}
+	},
+
+	fixDebuffQTip: function(e) {
+		$(e.target).qtip('hide');
 	},
 
 	injectButtons: function(data) { // jQuery
@@ -13311,10 +13365,7 @@ FSH.legacy = { // Legacy - Old Map
 	},
 
 	checkBuffs: function() { // Legacy - Old Map
-		var onmouseover;
 		var impsRemaining;
-		var counterAttackLevel;
-		var doublerLevel;
 
 		//extra world screen text
 		var replacementText = '<td background="' + FSH.System.imageServer +
@@ -13334,96 +13385,18 @@ FSH.legacy = { // Legacy - Old Map
 				var impsRemainingRE = re.exec(textToTest);
 				impsRemaining = impsRemainingRE[1];
 			}
-			var applyImpWarningColor = ' style="color:green; ' +
-				'font-size:medium;"';
-			if (impsRemaining===2){
-				applyImpWarningColor = ' style="color:Orangered; ' +
-					'font-size:medium; font-weight:bold;"';
-			}
-			if (impsRemaining===1){
-				applyImpWarningColor = ' style="color:Orangered; ' +
-					'font-size:large; font-weight:bold"';
-			}
-			if (impsRemaining===0){
-				applyImpWarningColor = ' style="color:red; ' +
-					'font-size:large; font-weight:bold"';
-			}
-			replacementText += '<tr><td' + applyImpWarningColor +
-				'>Shield Imps Remaining: ' +  impsRemaining +
-				(impsRemaining === 0 ?
-				'&nbsp;<span id="Helper:recastImpAndRefresh" style="color:' +
-				'blue;cursor:pointer;text-decoration:underline;font-size:' +
-				'xx-small;">Recast</span>':'') + '</td></tr>';
+			replacementText += FSH.legacy.impWarning(impsRemaining);
 			if (hasDeathDealer) {
 				replacementText += FSH.legacy.doDeathDealer(impsRemaining);
 			}
 		}
-		var hasCounterAttack = FSH.System
-			.findNode('//img[contains(@src,"/54_sm.gif")]');
-		if (hasCounterAttack) {
-			if (hasCounterAttack.getAttribute('src')
-				.search('/skills/') !== -1) {
-				onmouseover = $(hasCounterAttack).data('tipped');
-				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
-				var counterAttack = counterAttackRE.exec(onmouseover);
-				if (counterAttack) {
-					counterAttackLevel = counterAttack[1];
-				}
-			}
-			replacementText += '<tr><td style="font-size:small; color:' +
-				'blue">CA' + counterAttackLevel + ' active</td></tr>';
-		}
-		var hasDoubler = FSH.System.findNode('//img[contains(@src,"/26_sm.gif")]');
-		if (hasDoubler) {
-			if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
-				onmouseover = $(hasDoubler).data('tipped');
-				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
-				var doubler = doublerRE.exec(onmouseover);
-				if (doubler) {
-					doublerLevel = doubler[1];
-				}
-			}
-			if (doublerLevel === 200) {
-				replacementText += '<tr><td style="font-size:small; color:' +
-					'red">Doubler ' + doublerLevel + ' active</td></tr>';
-			}
-		}
-		var huntingMode = FSH.Helper.huntingMode;
-		replacementText += huntingMode === true ? '<tr><td style="font-size:' +
-			'small; color:red">Hunting mode enabled</td></tr>':'';
+		replacementText += FSH.legacy.hasCA();
+		replacementText += FSH.legacy.hasDblr();
+		replacementText += FSH.Helper.huntingMode === true ?
+			'<tr><td style="font-size: small; color:red">' +
+			'Hunting mode enabled</td></tr>' : '';
 		replacementText += '<tr><td colspan="2" height="10"></td></tr>';
-		if (FSH.System.getValue('showHuntingBuffs')) {
-			var enabledHuntingMode=FSH.System.getValue('enabledHuntingMode');
-			var buffs=FSH.System.getValue('huntingBuffs');
-			var buffsName=FSH.System.getValue('huntingBuffsName');
-			if (enabledHuntingMode === '2') {
-				buffs=FSH.System.getValue('huntingBuffs2');
-				buffsName=FSH.System.getValue('huntingBuffs2Name');
-			}
-			if (enabledHuntingMode === '3') {
-				buffs=FSH.System.getValue('huntingBuffs3');
-				buffsName=FSH.System.getValue('huntingBuffs3Name');
-			}
-			var buffAry=buffs.split(',');
-			var missingBuffs = [];
-
-			var buffHash = FSH.legacy.oldRemoveBuffs();
-
-			for (var i=0;i<buffAry.length;i += 1) {
-				if (!buffHash[buffAry[i].trim()]) {
-					missingBuffs.push(buffAry[i]);
-				}
-			}
-			if (missingBuffs.length>0) {
-				replacementText += '<tr><td colspan="2" align="center"><' +
-					'span style="font-size:x-small; color:navy;">You are ' +
-					'missing some ' + buffsName + ' hunting buffs<br/>(';
-				replacementText += missingBuffs.join(', ');
-				replacementText += ')</span></td></tr>';
-			}
-			replacementText += '<tr><td colspan="2" height="10"></td></tr>';
-			replacementText += '</table>';
-		}
+		// replacementText += FSH.legacy.showHuntingBuffs();
 		replacementText += '</td>' ;
 
 		var injectHere = FSH.System.findNode('//div[table[@class="centered" ' +
@@ -13447,6 +13420,70 @@ FSH.legacy = { // Legacy - Old Map
 		}
 
 		FSH.legacy.toggleKsTracker();
+	},
+
+	impWarning: function(impsRemaining) {
+		var applyImpWarningColor = ' style="color:green; ' +
+			'font-size:medium;"';
+		if (impsRemaining===2){
+			applyImpWarningColor = ' style="color:Orangered; ' +
+				'font-size:medium; font-weight:bold;"';
+		}
+		if (impsRemaining===1){
+			applyImpWarningColor = ' style="color:Orangered; ' +
+				'font-size:large; font-weight:bold"';
+		}
+		if (impsRemaining===0){
+			applyImpWarningColor = ' style="color:red; ' +
+				'font-size:large; font-weight:bold"';
+		}
+		return '<tr><td' + applyImpWarningColor +
+			'>Shield Imps Remaining: ' +  impsRemaining +
+			(impsRemaining === 0 ?
+			'&nbsp;<span id="Helper:recastImpAndRefresh" style="color:' +
+			'blue;cursor:pointer;text-decoration:underline;font-size:' +
+			'xx-small;">Recast</span>':'') + '</td></tr>';
+	},
+
+	hasCA: function() {
+		var replacementText = '';
+		var hasCounterAttack = FSH.System
+			.findNode('//img[contains(@src,"/54_sm.gif")]');
+		if (hasCounterAttack) {
+			var counterAttackLevel;
+			if (hasCounterAttack.getAttribute('src').search('/skills/') !== -1) {
+				var onmouseover = $(hasCounterAttack).data('tipped');
+				var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
+				var counterAttack = counterAttackRE.exec(onmouseover);
+				if (counterAttack) {
+					counterAttackLevel = counterAttack[1];
+				}
+			}
+			replacementText += '<tr><td style="font-size:small; color:' +
+				'blue">CA' + counterAttackLevel + ' active</td></tr>';
+		}
+		return replacementText;
+	},
+
+	hasDblr: function() {
+		var replacementText = '';
+		var hasDoubler = FSH.System.findNode('//img[contains(@src,"/26_sm.gif")]');
+		if (hasDoubler) {
+			var doublerLevel;
+			if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
+				var onmouseover = $(hasDoubler).data('tipped');
+				var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
+				var doubler = doublerRE.exec(onmouseover);
+				if (doubler) {
+					doublerLevel = doubler[1];
+				}
+			}
+			if (doublerLevel === 200) {
+				replacementText += '<tr><td style="font-size:small; color:' +
+					'red">Doubler ' + doublerLevel + ' active</td></tr>';
+			}
+		}
+		return replacementText;
 	},
 
 	doDeathDealer: function(impsRemaining) {
@@ -13501,6 +13538,7 @@ FSH.legacy = { // Legacy - Old Map
 	getKillStreak: function(responseText) {
 		var doc=FSH.System.createDocument(responseText);
 		var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
+		FSH.debug('killStreakLocation', killStreakLocation);
 		var playerKillStreakValue;
 		if (killStreakLocation.length > 0) {
 			playerKillStreakValue = FSH.System.intValue(killStreakLocation.text());
@@ -13519,29 +13557,6 @@ FSH.legacy = { // Legacy - Old Map
 		var deathDealerPercentageElement = FSH.System.findNode('//span[@findme="damagebonus"]');
 		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
 		FSH.System.setValue('lastDeathDealerPercentage', deathDealerPercentage);
-	},
-
-	oldRemoveBuffs: function() { // Legacy - Old Map
-		var buffName;
-		var currentBuffs = FSH.System.findNodes('//a[contains(@href,"index.php?' +
-			'cmd=profile&subcmd=removeskill&skill_id=")]');
-		var buffHash={};
-		if (!currentBuffs) {return buffHash;}
-		for (var i=0;i<currentBuffs.length;i += 1) {
-			var currentBuff = currentBuffs[i];
-			var buffTest = /remove\sthe\s([ a-zA-Z]+)\sskill/
-				.exec(currentBuff.getAttribute('onclick'));
-			if (buffTest) {
-				buffName = buffTest[1];
-			} else {
-				buffTest = /remove\sthe\s([ a-zA-Z]+)<br>/
-					.exec(currentBuff.getAttribute('onclick'));
-				if (buffTest) { buffName = buffTest[1];
-				} else {console.log('Error getting buff');}
-			}
-			buffHash[buffName]=true;
-		}
-		return buffHash;
 	},
 
 	recastImpAndRefresh: function(responseText) {
