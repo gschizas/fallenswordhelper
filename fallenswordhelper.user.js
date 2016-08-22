@@ -46,15 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	appendSavedLog: function(text) {
-		setTimeout(function(){
-			var theLog=FSH.System.getValue('CombatLog');
-			if (!theLog) {theLog='';}
-			theLog+=text;
-			FSH.System.setValue('CombatLog', theLog);
-		}, 0);
-	},
-
 	scrollUpCombatLog: function() {
 		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
 		reportLog.scrollTop-=10;
