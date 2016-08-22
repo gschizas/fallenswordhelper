@@ -12828,7 +12828,7 @@ FSH.legacy = {
 			},true);
 		}
 
-		FSH.Helper.toggleKsTracker();
+		FSH.legacy.toggleKsTracker();
 	},
 
 	doDeathDealer: function(impsRemaining) {
@@ -12930,6 +12930,17 @@ FSH.legacy = {
 		var doc = FSH.System.createDocument(responseText);
 		if (doc) {
 			location.reload();
+		}
+	},
+
+	toggleKsTracker: function() {
+		var trackKS = document.getElementById('Helper:toggleKStracker');
+		if (trackKS) {
+			trackKS.addEventListener('click', function() {
+				FSH.System.setValue('trackKillStreak',
+				FSH.System.getValue('trackKillStreak') ? false : true);
+				location.reload();
+			},true);
 		}
 	},
 
