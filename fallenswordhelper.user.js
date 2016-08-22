@@ -69,55 +69,6 @@ FSH.Helper = {
 		return buffHash;
 	},
 
-	doDeathDealer: function(impsRemaining) {
-		var replacementText = '';
-
-		var lastDeathDealerPercentage =
-			FSH.System.getValue('lastDeathDealerPercentage');
-		if (lastDeathDealerPercentage === undefined) {
-			FSH.System.setValue('lastDeathDealerPercentage', 0);
-			lastDeathDealerPercentage = 0;
-		}
-
-		var lastKillStreak = FSH.System.getValue('lastKillStreak');
-		if (lastKillStreak === undefined) {
-			FSH.System.setValue('lastKillStreak', 0);
-			lastKillStreak = 0;
-		}
-
-		var trackKillStreak = FSH.System.getValue('trackKillStreak');
-
-		if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
-			replacementText += '<tr><td style="font-size:small; color:black"' +
-				'>Kill Streak: <span findme="killstreak">&gt;' +
-				FSH.System.addCommas(lastKillStreak) + '</span> Damage bonus: <' +
-				'span findme="damagebonus">20</span>%</td></tr>';
-		} else {
-			if (!trackKillStreak) {
-				replacementText += '<tr><td style="font-size:small; color:' +
-					'navy" nowrap>KillStreak tracker disabled. <span style="' +
-					'font-size:xx-small">Track: <span id=Helper:toggleKS' +
-					'tracker style="color:navy;cursor:pointer;text-' +
-					'decoration:underline;" title="Click to toggle">' +
-					(trackKillStreak ? 'ON' : 'off') +
-					'</span></span></td></tr>';
-			} else {
-				replacementText += '<tr><td style="font-size:small; color:' +
-					'navy" nowrap>KillStreak: <span findme="killstreak">' +
-					FSH.System.addCommas(lastKillStreak) + '</span> Damage bonus' +
-					': <span findme="damagebonus">' +
-					Math.round(lastDeathDealerPercentage * 100) / 100 +
-					'</span>%&nbsp;<span style="font-size:xx-small">Track: ' +
-					'<span id=Helper:toggleKStracker style="color:navy;' +
-					'cursor:pointer;text-decoration:underline;" title="Click' +
-					' to toggle">' + (trackKillStreak ? 'ON' : 'off') +
-					'</span></span></td></tr>';
-				FSH.System.xmlhttp('index.php?cmd=profile', FSH.Helper.getKillStreak);
-			}
-		}
-		return replacementText;
-	},
-
 	toggleKsTracker: function() {
 		var trackKS = document.getElementById('Helper:toggleKStracker');
 		if (trackKS) {
