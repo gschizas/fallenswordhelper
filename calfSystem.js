@@ -12466,7 +12466,16 @@ FSH.newMap = { // Hybrid
 		}
 		var now = new Date();
 		combatData.time = FSH.System.formatDateTime(now);
-		FSH.Helper.appendSavedLog(',' + JSON.stringify(combatData));
+		FSH.newMap.appendSavedLog(',' + JSON.stringify(combatData));
+	},
+
+	appendSavedLog: function(text) {
+		setTimeout(function(){
+			var theLog=FSH.System.getValue('CombatLog');
+			if (!theLog) {theLog='';}
+			theLog+=text;
+			FSH.System.setValue('CombatLog', theLog);
+		}, 0);
 	},
 
 	injectWorldNewMap: function(data){ // jQuery - Ugly
