@@ -46,117 +46,6 @@ if (typeof GM_info === 'undefined') {
 
 FSH.Helper = {
 
-	backpackUpdater: function(count){
-		var slots = FSH.System.findNode('.//font[contains(.,"/") and @size="1"]');
-		if (slots !== null){
-			var bpslots = slots.childNodes[0].nodeValue.split('/');
-			//note the - 0 is to insure that math is used
-			slots.childNodes[0].nodeValue = bpslots[0] - 0 + count + ' /' + bpslots[1];
-		}
-	},
-
-	killedMonster: function(responseText, callback) {
-		var i;
-		var doc=FSH.System.createDocument(responseText);
-
-		var reportRE=/var\s+report=new\s+Array;\n(report\[[0-9]+\]="[^"]+";\n)*/;
-		var report=responseText.match(reportRE);
-		if (report) {report=report[0];}
-
-		// var specialsRE=/<div id='specialsDiv' style='position:relative; display:block;'><font color='#FF0000'><b>Azlorie Witch Doctor was withered.</b></font>/
-		var specials=FSH.System.findNodes('//div[@id="specialsDiv"]', doc);
-
-		var xpGain       = FSH.System.getIntFromRegExp(responseText, /var\s+xpGain=(-?[0-9]+);/i);
-		var goldGain     = FSH.System.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
-		var guildTaxGain = FSH.System.getIntFromRegExp(responseText, /var\s+guildTaxGain=(-?[0-9]+);/i);
-		var levelUp      = FSH.System.getIntFromRegExp(responseText, /var\s+levelUp=(-?[0-9]+);/i);
-		//You looted the item '<font color='#009900'>Amulet of Gazrif</font>'</b><br><br><img src='http://fileserver.huntedcow.com/items/4613.gif' class='tipped' data-tipped-options='skin: "fsItem", ajax: true' data-tipped='fetchitem.php?item_id=4613&t=2&p=1478403&vcode=249a530a4a8790e924af351c49bcccda'>
-		var lootRE=/You looted the item \'<font color=\'\#[0-9A-F]+\'>([^<]+)<\/font>\'.+?(fetchitem\.php\?item_id=[0-9]*\&t=[0-9]*\&p=[0-9]*\&vcode=[0-9a-zA-Z]*)/;//(fetchitem\.php\?item_id=[0-9]*\&t=[0-9]*\&p=[0-9]*\&vcode=[0-9a-zA-Z]*)
-		var info         = FSH.Layout.infoBox(responseText);
-		var lootMatch=responseText.match(lootRE);
-		var lootedItem = '';
-		var lootedItemURL = '';
-		if (lootMatch && lootMatch.length>0) {
-			lootedItem=lootMatch[1];
-			lootedItemURL=lootMatch[2];
-		}
-		var shieldImpDeathRE = /Shield Imp absorbed all damage/;
-		var shieldImpDeath = responseText.match(shieldImpDeathRE);
-
-		var monster = callback.node;
-		var showCombatLog = false;
-		if (monster) {
-			var result=document.createElement('DIV');
-			var resultHtml = '<small style="color:green;">'+callback.index+'. XP:' + xpGain + ' Gold:' + goldGain + ' (' + guildTaxGain + ')</small>';
-			var resultText = 'XP:' + xpGain + ' Gold:' + goldGain + ' (' + guildTaxGain + ')\n';
-			if (info!=='') {
-				resultHtml += '<br/><span style="font-size:x-small;width:120px;overflow:hidden;" title="' + info + '">' + info + '</span>';
-				resultText += info + '\n';
-			}
-			if (lootedItem!=='') {
-				FSH.Helper.backpackUpdater(1);
-				// I've temporarily disabled the ajax thingie, as it doesn't seem to work anyway.
-				resultHtml += '<br/><small style="color:green;">Looted item:<span class=\'tipped\' data-tipped-options=\'skin: "fsItem", ajax: true\' data-tipped=\''+lootedItemURL+'\'>' +
-					lootedItem + '</span></small>';
-				resultText += 'Looted item:' + lootedItem + '\n';
-			}
-			if (shieldImpDeath) {
-				resultHtml += '<br/><small><span style="color:red;">Shield Imp Death</span></small>';
-				resultText += 'Shield Imp Death\n';
-				showCombatLog = true;
-			}
-			if (levelUp==='1') {
-				resultHtml += '<br/><br/><span style="color:#999900;font-weight:bold;>Your level has increased!</span>';
-				resultText += 'Your level has increased!\n';
-				showCombatLog = true;
-			}
-			if (levelUp==='-1') {
-				resultHtml += '<br/><br/><span style="color:#991100;font-weight:bold;">Your level has decreased!</span>';
-				resultText += 'Your level has decreased!\n';
-				showCombatLog = true;
-			}
-			if (xpGain<0) {result.style.color='red'; showCombatLog = true;}
-			result.innerHTML=resultHtml;
-			var monsterParent = monster.parentNode;
-			result.id = 'result' + callback.index;
-			if (report) {
-				var reportLines=report.split('\n');
-				var reportHtml='';
-				var reportText='';
-				if (specials) {
-					reportHtml += '<span style="color:red">';
-					for (i=0; i<specials.length; i += 1) {
-						reportHtml += specials[i].textContent + '<br/>';
-						reportText += specials[i].textContent + '\n';
-					}
-					reportHtml += '</span>';
-				}
-				for (i=0; i<reportLines.length; i += 1) {
-					var reportMatch = reportLines[i].match(/\"(.*)\"/);
-					if (reportMatch) {
-						reportHtml += '<br/>' + reportMatch[1];
-						reportText += reportMatch[1].replace(/<br>/g, '\n') + '\n';
-					}
-				}
-				var mouseOverText = '<span><span style="color:#FFF380;text-align:center;">Combat Results</span>' + reportHtml + '</span>';
-				FSH.Helper.appendCombatLog(reportHtml, showCombatLog);
-				result.setAttribute('mouseOverText', mouseOverText);
-				if (FSH.System.getValue('keepLogs')) {
-					var now = new Date();
-					FSH.Helper.appendSavedLog('\n================================\n' + FSH.System.formatDateTime(now) + '\n' + resultText + '\n' + reportText);
-				}
-			}
-
-			monsterParent.innerHTML = '';
-			monsterParent.parentNode.appendChild(result);
-			result.setAttribute('style', 'float:right; text-align:right;');
-			monsterParent.parentNode.setAttribute('style', ''); // removes the line height on the td
-			if (report) {
-				document.getElementById('result' + callback.index).addEventListener('mouseover', FSH.Helper.clientTip, true);
-			}
-		}
-	},
-
 	appendSavedLog: function(text) {
 		setTimeout(function(){
 			var theLog=FSH.System.getValue('CombatLog');
@@ -164,14 +53,6 @@ FSH.Helper = {
 			theLog+=text;
 			FSH.System.setValue('CombatLog', theLog);
 		}, 0);
-	},
-
-	appendCombatLog: function(text, showCombatLog) {
-		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
-		if (!reportLog) {return;}
-		if (FSH.System.getValue('showCombatLog') || showCombatLog) {
-			reportLog.innerHTML += text + '<br/>';
-		}
 	},
 
 	scrollUpCombatLog: function() {
@@ -182,25 +63,6 @@ FSH.Helper = {
 	scrollDownCombatLog: function() {
 		var reportLog = FSH.System.findNode('//div[@id="reportsLog"]');
 		reportLog.scrollTop+=10;
-	},
-
-	clientTip: function(evt) {
-		var target=evt.target;
-		var value, width;
-		do {
-			if (target.getAttribute) {
-				value=target.getAttribute('mouseovertext');
-				width=target.getAttribute('mouseoverwidth');
-			}
-			target=target.parentNode;
-		} while (!value && target);
-		if (value) {
-			target.setAttribute('data-tipped', value);
-			target.setAttribute('data-tipped-options', 'maxWidth:800');
-			target.className += ' tipped';
-			// TODO creature mouseovers - when did these last work?
-			//~ $T.show($(target));
-		}
 	},
 
 	changeCombatSet: function(responseText, itemIndex) {
