@@ -12359,7 +12359,7 @@ FSH.newMap = { // Hybrid
 			}
 		);
 		FSH.System.xmlhttp('index.php?cmd=guild&subcmd=groups',
-			FSH.Helper.checkIfGroupExists);
+			FSH.newMap.checkIfGroupExists);
 
 		$('#addRemoveCreatureToDoNotKillList').html('');
 		if ($('#addRemoveCreatureToDoNotKillList').length === 0) {
@@ -12381,6 +12381,17 @@ FSH.newMap = { // Hybrid
 		document.getElementById('addRemoveCreatureToDoNotKillList')
 			.addEventListener('click',
 				FSH.Helper.addRemoveCreatureToDoNotKillList, true);
+	},
+
+	checkIfGroupExists: function(responseText) { // Hybrid - Both Maps
+		var doc=FSH.System.createDocument(responseText);
+		var groupExistsIMG = $(doc)
+			.find('img[title="Disband Group (Cancel Attack)"]');
+		if (groupExistsIMG.length > 0) {
+			var groupHref = groupExistsIMG.parents('td:first').find('a:first')
+				.attr('href');
+			FSH.System.xmlhttp(groupHref, FSH.Helper.getCreatureGroupData);
+		}
 	},
 
 	hideGroupButton: function() { // jQuery
