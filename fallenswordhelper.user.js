@@ -440,29 +440,6 @@ FSH.Helper = {
 		});
 	},
 
-	getKillStreak: function(responseText) {
-		var doc=FSH.System.createDocument(responseText);
-		var killStreakLocation = $(doc).find('td:contains("Streak:"):last').next();
-		var playerKillStreakValue;
-		if (killStreakLocation.length > 0) {
-			playerKillStreakValue = FSH.System.intValue(killStreakLocation.text());
-		}
-		var killStreakElement = FSH.System.findNode('//span[@findme="killstreak"]');
-		killStreakElement.innerHTML = FSH.System.addCommas(playerKillStreakValue);
-		FSH.System.setValue('lastKillStreak', playerKillStreakValue);
-		var deathDealerBuff = FSH.System.findNode('//img[contains(@data-tipped,"Death Dealer")]');
-		var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
-		var deathDealer = deathDealerRE.exec($(deathDealerBuff).data('tipped'));
-		var deathDealerPercentage;
-		if (deathDealer) {
-			var deathDealerLevel = deathDealer[1];
-			deathDealerPercentage = Math.min(Math.round(Math.floor(playerKillStreakValue/5) * deathDealerLevel) * 0.01, 20);
-		}
-		var deathDealerPercentageElement = FSH.System.findNode('//span[@findme="damagebonus"]');
-		deathDealerPercentageElement.innerHTML = deathDealerPercentage;
-		FSH.System.setValue('lastDeathDealerPercentage', deathDealerPercentage);
-	},
-
 	addRemoveCreatureToDoNotKillList: function(evt) { // Native - Both Maps
 		var creatureName = evt.target.getAttribute('creatureName');
 		var doNotKillList = FSH.System.getValue('doNotKillList');
