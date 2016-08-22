@@ -57,13 +57,6 @@ FSH.Helper = {
 		}
 	},
 
-	recastImpAndRefresh: function(responseText) {
-		var doc = FSH.System.createDocument(responseText);
-		if (doc) {
-			location.reload();
-		}
-	},
-
 	prepareCombatLog: function() {
 		var reportsTable=FSH.System.findNode('//div[table[@class="centered" and @style="width: 270px;"]]');
 		if (!reportsTable) {return;}
