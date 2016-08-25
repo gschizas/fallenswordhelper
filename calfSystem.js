@@ -2341,15 +2341,17 @@ FSH.notification = { // jQuery
 	},
 
 	displayUpgradeMsg: function() { //jquery
-		$('#notifications').prepend(FSH.Layout.goldUpgradeMsg);
+		document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+			FSH.Layout.goldUpgradeMsg);
 	},
 
 	injectJoinAllLink: function() { // jQuery
+		var nodeList = document.querySelectorAll('#pCL li');
+		Array.prototype.forEach.call(nodeList, FSH.notification.findNewGroup);
+	},
 
-		FSH.ga.start('JS Perf', 'notification.injectJoinAllLink');
-
-		var newGroup = $('#pCL li:contains("New attack group created.")');
-		if (newGroup.length !== 1) {return;}
+	findNewGroup: function(el) {
+		if (el.textContent.indexOf('New attack group created.') === -1) {return;}
 		var groupJoinHTML = '';
 		if (!FSH.System.getValue('enableMaxGroupSizeToJoin')) {
 			groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
@@ -2362,10 +2364,8 @@ FSH.notification = { // jQuery
 				'</span><p class="notification-content">Join all attack groups ' +
 				'less than size ' + maxGroupSizeToJoin + '.</p></a>';
 		}
-		newGroup.after('<li class="notification">' + groupJoinHTML + '</li>');
-
-		FSH.ga.end('JS Perf', 'notification.injectJoinAllLink');
-
+		el.insertAdjacentHTML('afterend',
+			'<li class="notification">' + groupJoinHTML + '</li>');
 	},
 
 };
