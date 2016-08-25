@@ -7674,9 +7674,15 @@ FSH.environment = { // Legacy
 	},
 
 	statbarWrapper: function(href, id) { // Native
+		var myWrapper = document.createElement('a');
+		myWrapper.setAttribute('href', href);
 		var character = document.getElementById(id);
-		character.outerHTML = '<a href="' + href + '">' + character.outerHTML +
-			'</a>';
+		var statWrapper = character.parentNode;
+		myWrapper.appendChild(character);
+		statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
+		myWrapper.addEventListener('click', function(evt) {
+			evt.stopPropagation();
+		}, true);
 	},
 
 	statbar: function() { // Native
