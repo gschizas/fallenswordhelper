@@ -7671,15 +7671,18 @@ FSH.ga = { // Native
 	start: function(category, variable, label) { // Native
 		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
 		FSH.ga.times[category + ':' + variable + ':' + label] =
-			Math.round(performance.now());
+			// Math.round(performance.now());
+			performance.now() * 1000;
 	},
 
 	end: function(category, variable, label) { // Native
 		if (FSH.ga.isAuto() || typeof ga === 'undefined') {return;}
-		var myTime = Math.round(performance.now()) -
-			FSH.ga.times[category + ':' + variable + ':' + label];
+		// var myTime = Math.round(performance.now()) -
+		var myTime = Math.round(performance.now() * 1000 -
+			FSH.ga.times[category + ':' + variable + ':' + label]) / 1000;
 		if (myTime > 10) {
-			ga('fshApp.send', 'timing', category, variable, myTime, label);
+			ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
+				label);
 		}
 
 		// document.getElementById('foot-wrap').insertAdjacentHTML('beforeend',
