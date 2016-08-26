@@ -2306,7 +2306,7 @@ FSH.notification = { // jQuery
 	},
 
 	injectUpgradeAlert: function() { //jquery
-		if (location.search.search('cmd=points&type=1') !== -1) {return;}
+		if (location.search.indexOf('cmd=points&type=1') !== -1) {return;}
 		var needToDoUpgrade = FSH.System.getValue('needToDoUpgrade');
 		if (needToDoUpgrade) {
 			FSH.notification.displayUpgradeMsg();
@@ -2321,7 +2321,7 @@ FSH.notification = { // jQuery
 	parseGoldUpgrades: function(data) { //jquery
 		if (!FSH.Helper.enableUpgradeAlert) {return;}
 		var doc;
-		if (location.search.search('cmd=points&type=1') === -1) {
+		if (location.search.indexOf('cmd=points&type=1') === -1) {
 			doc = data;
 		} else {
 			doc = document;
@@ -2331,7 +2331,9 @@ FSH.notification = { // jQuery
 		var limit = $('tr:contains("+1 Maximum Stamina") > td:eq(2)', doc);
 		var checkDoneUpgrade = limit.text().split(' / ');
 		if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
-			FSH.notification.displayUpgradeMsg();
+			if (location.search.indexOf('cmd=points&type=1') === -1) {
+				FSH.notification.displayUpgradeMsg();
+			}
 			FSH.System.setValue('needToDoUpgrade', true);
 		} else {
 			FSH.System.setValue('needToDoUpgrade', false);
