@@ -16,37 +16,33 @@
 
 // No warranty expressed or implied. Use at your own risk.
 
-/* eslint-disable no-implicit-globals */
+(function fallenswordhelper() {
+
+'use strict';
 
 // EVERYTHING MUST BE IN main()
 var fshMain = function() {
 
-/* eslint-enable no-implicit-globals */
+	window.FSH = window.FSH || {};
 
-'use strict';
+	FSH.version = '1516';
 
-window.FSH = window.FSH || {};
+	var resources = {
+		calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1516/calfSystem.min.js',
+		calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1516/calfSystem.css',
+		localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.4.2/localforage.min.js',
+		dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js'
+	};
 
-FSH.resources = {
-	calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1516/calfSystem.js',
-	calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1516/calfSystem.css',
-	localForage: 'https://cdn.jsdelivr.net/localforage/1.4.2/localforage.min.js',
-	dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js'
-};
+	if (typeof GM_info === 'undefined') {
+		FSH.version += '_native';
+	} else if (typeof GM_info.script === 'undefined') {
+		FSH.version += '_noScript';
+	} else if (typeof GM_info.script.version === 'undefined') {
+		FSH.version += '_noVersion';
+	}
 
-FSH.version = '1516';
-
-if (typeof GM_info === 'undefined') {
-	FSH.version += '_native';
-} else if (typeof GM_info.script === 'undefined') {
-	FSH.version += '_noScript';
-} else if (typeof GM_info.script.version === 'undefined') {
-	FSH.version += '_noVersion';
-}
-
-FSH.Helper = {
-
-	appendHead: function(o) { // native
+	function appendHead(o) { // native
 		var count = 0;
 		var scriptFiles = o.js || [];
 		var cssFiles = o.css || [];
@@ -74,41 +70,34 @@ FSH.Helper = {
 			scriptTag.src = s;
 			head.appendChild(scriptTag);
 		});
-	},
+	}
 
-	onPageLoad: function() {
-		setTimeout(FSH.environment.dispatch, 0);
-	},
+	function onPageLoad() {
+		FSH.dispatch();
+	}
 
-}; // end of var helper
-
-(function loadScripts () {
 	var o = {
-		css: [FSH.resources.calfSystemCss],
-		js:  [FSH.resources.localForage,
-					FSH.resources.calfSystemJs,
-					FSH.resources.dataTablesLoc],
-		callback: FSH.Helper.onPageLoad
+		css: [resources.calfSystemCss],
+		js:  [resources.localForage,
+					resources.calfSystemJs,
+					// resources.dableDev,
+					resources.dataTablesLoc],
+		callback: onPageLoad
 	};
 	if (typeof window.jQuery === 'undefined') {
 		o.js.pop();
 	}
-	FSH.Helper.appendHead(o);
-})();
+	appendHead(o);
 
 }; // end of var main
 
-(function fshInstallAndRun() {
-
-'use strict';
-
-	if (typeof GM_info === 'undefined') { // Chromium Native
-		var script = document.createElement('script');
-		script.textContent = '(' + fshMain.toString() + ')();';
-		document.body.appendChild(script);
-	}
-	else {
-		fshMain();
-	}
+if (typeof GM_info === 'undefined') { // Chromium Native
+	var script = document.createElement('script');
+	script.textContent = '(' + fshMain.toString() + ')();';
+	document.body.appendChild(script);
+}
+else {
+	fshMain();
+}
 
 })();

@@ -1,0 +1,33 @@
+{
+  "name": "fallenswordhelper",
+  "version": "15.16.10",
+  "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
+  "main": "index.js",
+  "scripts": {
+    "test": "jshint calfSystem.js fallenswordhelper.user.js src --verbose",
+    "prebuild": "npm run test || exit 0",
+    "build": "browserify ./calfSystem.js -o ./dist/calfSystem.js",
+    "postbuild": "uglifyjs ./dist/calfSystem.js -mc -o ./dist/calfSystem.min.js",
+    "serve": "budo calfSystem.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fallenswordhelper/fallenswordhelper.git"
+  },
+  "keywords": [
+    "fallensword",
+    "fallenswordhelper"
+  ],
+  "author": "Adrian Tompkins",
+  "license": "UNLICENSED",
+  "bugs": {
+    "url": "https://github.com/fallenswordhelper/fallenswordhelper/issues"
+  },
+  "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
+  "devDependencies": {
+    "browserify": "^13.1.0",
+    "budo": "^9.2.1",
+    "jshint": "^2.9.3",
+    "uglifyjs": "^2.4.10"
+  }
+}
