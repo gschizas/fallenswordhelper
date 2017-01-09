@@ -11,7 +11,7 @@
     "eqeqeq"        : true,     // true: Require triple equals (===) for comparison
 //  "es3"           : false,    // true: needs to adhere to ECMAScript 3 specification
 //  "es5"           : true,     // true: Allow ES5 syntax (ex: getters and setters)
-    "esversion"     : 5,
+    "esversion"     : 6,
     "forin"         : true,     // true: Require filtering for..in loops with obj.hasOwnProperty()
     "freeze"        : true,     // true: prohibits overwriting prototypes of native objects such as Array, Date etc.
     "futurehostile" : true,     // true: warnings about the use of identifiers which are defined in future versions of JavaScript
@@ -32,7 +32,7 @@
                                 //   "single" : require single quotes
                                 //   "double" : require double quotes
     "singleGroups"  : true,     // true: Prohibits the use of the grouping operator when it is not strictly required
-    "strict"        : true,     // true: Requires all functions run in ES5 Strict Mode
+    "strict"        : "implied",// true: Requires all functions run in ES5 Strict Mode
     "undef"         : true,     // true: Require all non-global variables to be declared (prevents global leaks)
     "unused"        : true,     // Unused variables:
                                 //   true     : all variables, last function parameter
@@ -41,7 +41,7 @@
     "varstmt"       : false,    // true: the use of VariableStatements are forbidden
     "maxparams"     : 5,        // {int} Max number of formal params allowed per function
     "maxdepth"      : 10,       // {int} Max depth of nested blocks (within functions)
-    "maxstatements" : 67,       // {int} Max number statements per function
+    "maxstatements" : 66,       // {int} Max number statements per function
     "maxcomplexity" : false,    // {int} Max cyclomatic complexity per function
     "maxlen"        : false,    // {int} Max number of characters per line
 
@@ -55,7 +55,7 @@
     "evil"          : false,     // true: Tolerate use of `eval` and `new Function()`
     "expr"          : false,     // true: Tolerate `ExpressionStatement` as Programs
     "funcscope"     : false,     // true: Tolerate defining variables inside control statements
-    "globalstrict"  : false,     // true: Allow global "use strict" (also enables 'strict')
+//  "globalstrict"  : false,     // true: Allow global "use strict" (also enables 'strict')
     "iterator"      : false,     // true: Tolerate using the `__iterator__` property
     "lastsemic"     : false,     // true: Tolerate omitting a semicolon for the last statement of a 1-line block
     "laxbreak"      : false,     // true: Tolerate possibly unsafe line breakings
@@ -84,7 +84,7 @@
     "jquery"        : true,     // jQuery
     "mocha"         : false,    // Mocha
     "mootools"      : false,    // MooTools
-    "node"          : false,    // Node.js
+    "node"          : true,     // Node.js
     "nonstandard"   : false,    // Widely adopted globals (escape, unescape, etc)
     "phantom"       : false,    // PhantomJS
     "prototypejs"   : false,    // Prototype and Scriptaculous
@@ -107,8 +107,6 @@
         "localforage":          false,
         "ga":                   false,
         "GameData":             false,
-        "Dable":                false,
-        "require":              false,
-        "module":               false
+        "Dable":                false
     }
 }

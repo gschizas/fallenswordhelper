@@ -1,14 +1,37 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.16.10",
+  "version": "15.16.13",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "main": "index.js",
   "scripts": {
-    "test": "jshint calfSystem.js fallenswordhelper.user.js src --verbose",
     "prebuild": "npm run test || exit 0",
-    "build": "browserify ./calfSystem.js -o ./dist/calfSystem.js",
-    "postbuild": "uglifyjs ./dist/calfSystem.js -mc -o ./dist/calfSystem.min.js",
-    "serve": "budo calfSystem.js"
+    "build": "npm run clean && npm run rollup && npm run uglify",
+    "build:beta": "npm run prebuild && npm run rollup:beta && npm run uglify:beta",
+    "build:dev": "npm run prebuild && npm run rollup:dev && npm run uglify:dev",
+    "build:prod": "npm run prebuild && npm run rollup:prod && npm run uglify:prod",
+    "clean": "npm run clean:beta && npm run clean:dev && npm run clean:prod",
+    "clean:beta": "rimraf dist/beta/*",
+    "clean:dev": "rimraf dist/dev/*",
+    "clean:prod": "rimraf dist/prod/*",
+    "jshint": "jshint src --verbose",
+    "rollup": "npm run rollup:dev && npm run rollup:beta && npm run rollup:prod",
+    "rollup:beta": "npm run rollup:betacalf && npm run rollup:betafsh",
+    "rollup:dev": "npm run rollup:devcalf && npm run rollup:devfsh",
+    "rollup:prod": "npm run rollup:prodcalf && npm run rollup:prodfsh",
+    "rollup:betacalf": "rollup -c --environment FOLDER:beta,SOURCE:calf",
+    "rollup:devcalf": "rollup -c --environment FOLDER:dev,SOURCE:calf",
+    "rollup:prodcalf": "rollup -c --environment FOLDER:prod,SOURCE:calf",
+    "rollup:betafsh": "rollup -c --environment FOLDER:beta,SOURCE:fsh",
+    "rollup:devfsh": "rollup -c --environment FOLDER:dev,SOURCE:fsh",
+    "rollup:prodfsh": "rollup -c --environment FOLDER:prod,SOURCE:fsh",
+    "serve": "run-p watch ws",
+    "test": "npm run jshint",
+    "uglify": "npm run uglify:beta && npm run uglify:dev && npm run uglify:prod",
+    "uglify:beta": "uglifyjs dist/beta/calfSystem.js -mc -o dist/beta/calfSystem.min.js",
+    "uglify:dev": "uglifyjs dist/dev/calfSystem.js -mc -o dist/dev/calfSystem.min.js",
+    "uglify:prod": "uglifyjs dist/prod/calfSystem.js -mc -o dist/prod/calfSystem.min.js",
+    "watch": "chokidar-cmd -c \"npm run rollup:devcalf\" -t src --initial",
+    "ws": "ws -c -p 9966 -d ."
   },
   "repository": {
     "type": "git",
@@ -25,9 +48,13 @@
   },
   "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
   "devDependencies": {
-    "browserify": "^13.1.0",
-    "budo": "^9.2.1",
+    "chokidar-cmd": "^1.2.1",
     "jshint": "^2.9.3",
+    "local-web-server": "^1.2.6",
+    "npm-run-all": "^3.1.2",
+    "rimraf": "^2.5.4",
+    "rollup": "^0.36.4",
+    "rollup-plugin-jscc": "^0.3.3",
     "uglifyjs": "^2.4.10"
   }
 }
