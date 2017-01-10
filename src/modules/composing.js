@@ -1,9 +1,7 @@
 import calf from './support/calf';
 import task from './support/task';
 import system from './support/system';
-//#if _DEV
 import settingsPage from './settings/settingsPage';
-//#endif
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
@@ -127,7 +125,6 @@ function composingCreate() { // Native
     });
 }
 
-//#if _DEV
 var disableBreakdownPrompts;
 var selectedList = [];
 
@@ -182,7 +179,6 @@ function breakItems() { // jQuery.min
 function breakEvt(evt) { // Native
   if (!disableBreakdownPrompts ||
       evt.target.id !== 'breakdown-selected-items') {return;}
-  // if preference is not set return
   evt.stopPropagation();
   if (selectedList.length === 0) {
     showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
@@ -220,12 +216,10 @@ function composingBreakdown() { // Native
   document.getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref);
 }
-//#endif
+
 export default {
   injectComposeAlert: injectComposeAlert,
   injectComposing: injectComposing,
   composingCreate: composingCreate,
-  //#if _DEV
   composingBreakdown: composingBreakdown,
-  //#endif
 };

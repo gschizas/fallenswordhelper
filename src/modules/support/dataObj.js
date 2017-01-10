@@ -251,12 +251,9 @@ export default {
     hideTitanGroup: false,
     hideLegendaryGroup: false,
     disableDeactivatePrompts: false,
-    // monsterLog: '{}',
     moveComposingButtons: false,
     expandMenuOnKeyPress: false,
-//#if _DEV
     disableBreakdownPrompts: false,
-//#endif
 
   },
 

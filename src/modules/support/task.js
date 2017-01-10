@@ -14,7 +14,7 @@ function taskRunner() {
 }
 
 function addTask(priority, fn, args, scope) {
-  //#if _DEV
+  //#if _DEV  //  Not sending args as Array
   if (args && !Array.isArray(args)) {
     console.log('addTask Array.isArray(args)', Array.isArray(args));
   }
@@ -32,7 +32,7 @@ function asyncTask() {
     sch.pop()();
   } catch (error) {
     debug.log('Unhandled Exception:', error);
-    //#if _DEV
+    //#if _DEV  //  Unhandled Exception
     console.log('Unhandled Exception:', error);
     //#endif
   }

@@ -351,7 +351,7 @@ function injectWorld() { // Native
 
 function unknownPage() { // Legacy
   if (typeof window.jQuery === 'undefined') {return;}
-  //#if _DEV
+  //#if _DEV  //  unknownPage
   console.log('unknownPage');
   //#endif
 
@@ -402,7 +402,7 @@ function unknownPage() { // Legacy
     recipes.inventing();
     return;
   }
-  //#if _DEV
+  //#if _DEV  //  Fell through!
   console.log('Fell through!');
   //#endif
 }

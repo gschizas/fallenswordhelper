@@ -528,7 +528,6 @@ var dataObj = {
     hideTitanGroup: false,
     hideLegendaryGroup: false,
     disableDeactivatePrompts: false,
-    // monsterLog: '{}',
     moveComposingButtons: false,
     expandMenuOnKeyPress: false,
     disableBreakdownPrompts: false,
@@ -2745,7 +2744,6 @@ function breakItems() { // jQuery.min
 function breakEvt(evt) { // Native
   if (!disableBreakdownPrompts ||
       evt.target.id !== 'breakdown-selected-items') {return;}
-  // if preference is not set return
   evt.stopPropagation();
   if (selectedList.length === 0) {
     showComposingMessage('Error: No items selected.', 'rgb(164, 28, 28)');
@@ -2783,6 +2781,7 @@ function composingBreakdown() { // Native
   document.getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref);
 }
+
 var composing = {
   injectComposeAlert: injectComposeAlert,
   injectComposing: injectComposing,
@@ -6311,46 +6310,45 @@ var profile = {
   changeCombatSet: changeCombatSet
 };
 
-function updateShoutboxPreview() { // Legacy
-  var textArea =
-    system.findNode('//textarea[@findme="Helper:InputText"]');
+// import system from './support/system';
+
+var maxcharacters;
+var textArea;
+var shoutboxPreview;
+var warehouse = [];
+
+function updateShoutboxPreview() { // Native
   var textContent = textArea.value;
   var chars = textContent.length;
-  var maxchars = parseInt(textArea.getAttribute('maxcharacters'),10);
-  if (chars>maxchars) {
-    textContent=textContent.substring(0,maxchars);
-    textArea.value=textContent;
-    chars=maxchars;
+  if (chars > maxcharacters) {
+    textContent = textContent.substring(0, maxcharacters);
+    textArea.value = textContent;
+    chars = maxcharacters;
   }
-
-  document.getElementById('Helper:ShoutboxPreview').innerHTML =
-    '<table align="center" width="325" border="0"><tbody>' +
-    '<tr><td style="text-align:center;color:#7D2252;' +
-    'background-color:#CD9E4B">Preview (' + chars + '/' + maxchars +
-    ' characters)</td></tr>' +
-    '<tr><td width="325"><span style="font-size:x-small;" ' +
-    'findme="biopreview">' + textContent +
+  if (!shoutboxPreview) {
+    shoutboxPreview = textArea.parentNode.parentNode.parentNode.parentNode
+      .insertRow().insertCell();
+  }
+  shoutboxPreview.innerHTML = '<table class="sbpTbl"><tbody><tr>' +
+    '<td class="sbpHdr">Preview (' + chars + '/' + maxcharacters +
+    ' characters)</td></tr><tr><td class="sbpMsg"><span>' + textContent +
     '</span></td></tr></tbody></table>';
-
 }
 
-function injectShoutboxWidgets(textboxname, maxcharacters) { // Legacy
-  var textArea =
-    system.findNode('//textarea[@name="' + textboxname + '"]');
-  textArea.setAttribute('findme', 'Helper:InputText');
-  textArea.setAttribute('maxcharacters', maxcharacters);
-  var textAreaTable = system.findNode('../../../..', textArea);
-  textAreaTable.insertRow(-1).insertCell(0)
-    .setAttribute('id', 'Helper:ShoutboxPreview');
-  textArea.addEventListener('keyup', updateShoutboxPreview, true);
+function injectShoutboxWidgets() { // Native
+  textArea = document.getElementById('textInputBox');
+  textArea.classList.add('fshNoResize');
+  textArea.addEventListener('keyup', updateShoutboxPreview);
 }
 
 function newsFsbox() { // Native
-  injectShoutboxWidgets('fsbox_input', 100);
+  maxcharacters = 100;
+  injectShoutboxWidgets();
 }
 
 function newsShoutbox() { // Native
-  injectShoutboxWidgets('shoutbox_input', 150);
+  maxcharacters = 150;
+  injectShoutboxWidgets();
 }
 
 function closestHead(el) { // Native
@@ -6385,6 +6383,7 @@ function fixCollapse() { // Native
   if (newsCol.length !== 1) {return;}
   newsCol[0].addEventListener('click', newsEvt, true);
 }
+
 function injectHomePageTwoLink() { // Native
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
@@ -6398,8 +6397,6 @@ function injectHomePageTwoLink() { // Native
     '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
   fixCollapse();
 }
-
-var warehouse = [];
 
 function collapseArt(article) { // Native
   article.rows.forEach(function(el) {
@@ -6459,6 +6456,7 @@ function viewArchive() { // Native
   Array.prototype.forEach.call(myTable.rows, doTagging);
   myTable.addEventListener('click', evtHdl);
 }
+
 var news = {
   newsFsbox: newsFsbox,
   newsShoutbox: newsShoutbox,
@@ -13828,8 +13826,6 @@ function getCoreFunction() { // Native
     type = '-';
     fromWorld = '-';
   }
-
-  // TODO patch for types that we don't care about
 
   calf.cmd = cmd;
   calf.subcmd = subcmd;

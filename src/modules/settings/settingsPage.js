@@ -715,7 +715,5 @@ export default {
   injectSettings: injectSettings,
   injectSaveSettings: injectSaveSettings,
   helpLink : helpLink,
-//#if _DEV
   simpleCheckbox: simpleCheckbox
-//#endif
 };

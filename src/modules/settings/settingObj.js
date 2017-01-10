@@ -412,14 +412,12 @@ var mySimpleCheckboxes = {
     helpText: 'If enabled, expands the left hand menu ' +
       'when you use hotkeys.'
   },
-//#if _DEV
   disableBreakdownPrompts: {
     id: 'disableBreakdownPrompts',
     helpTitle: 'Disable Breakdown Prompts',
     helpText: 'If enabled, will disable prompts when you breakdown items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
   },
-//#endif
 };
 
 export default {

@@ -53,9 +53,7 @@ function getCoreFunction() { // Native
     fromWorld = '-';
   }
 
-//#if _DEV
-  // TODO patch for types that we don't care about
-
+//#if _DEV  // TODO patch for types that we don't care about
 //#endif
   calf.cmd = cmd;
   calf.subcmd = subcmd;
@@ -682,7 +680,7 @@ function prepareEnv() { // Native
 }
 
 function asyncDispatcher() { // Native
-  //#if _DEV
+  //#if _DEV  //  asyncDispatcher messages
   console.log('functionPath', functionPath);
   if (!coreFunction) {
     console.log('No Core Function.');

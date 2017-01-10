@@ -192,16 +192,12 @@ var pageSwitcher = {
   scavenging: {'-': {'-': {'-': {'-': scavenging.injectScavenging}}}},
   temple: {'-': {'-': {'-': {'-': notification.parseTemplePage}}}},
   composing: {'-': {'-': {'-': {'-': composing.injectComposing}}},
-    //#if _DEV
     'breakdown': {'-': {'-': {'-': composing.composingBreakdown}}},
-    //#endif
     'create': {'-': {'-': {'-': composing.composingCreate}}}},
   pvpladder: {'-': {'-': {'-': {'-': misc.ladder}}}},
   '-': {
-    //#if _DEV
     'viewupdatearchive': {'-': {'-': {'-': news.viewArchive}}},
     'viewarchive': {'-': {'-': {'-': news.viewArchive}}},
-    //#endif
     '-': {'-': {'-': {'-': legacy.unknownPage}}}}
 };
 

@@ -277,6 +277,24 @@ input.fshFindOnlinePlayers {
   overflow: hidden;
   text-overflow: ellipsis;
 }
+/* Shoutbox Preview Table */
+.sbpTbl {
+  width: 325px;
+  margin: 0 auto;
+}
+/* Shoutbox Preview Header */
+.sbpHdr {
+  text-align: center;
+  color: #7D2252;
+  background-color: #CD9E4B;
+}
+/* Shoutbox Preview Msg */
+.sbpMsg {
+  width: 325px;
+  display: inline-block;
+  overflow-wrap: break-word;
+  font-size: 11px;
+}
 
 #fshAllyEnemy .fshHide {display: none;}
 #fshAllyEnemy .fshWhite {color: white;}
