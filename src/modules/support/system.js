@@ -131,30 +131,17 @@ function convertTextToHtml(inputText) {
     .replace(/\[([a-z])\]/g,'<\$1>');
 }
 
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+  'Oct', 'Nov', 'Dec'];
+
+function parseDateAsTimestamp(textDate) {
+  var dateAry = textDate.split(/[: \/]/);
+  return Date.UTC(dateAry[4] * 1, months.indexOf(dateAry[3]),
+    dateAry[2] * 1, dateAry[0] * 1, dateAry[1] * 1, 0);
+}
+
 function parseDate(textDate) {
-  var textDateSplitSpace = textDate.split(' ');
-  var timeText = textDateSplitSpace[0];
-  var dateText = textDateSplitSpace[1];
-  var dayText = dateText.split('/')[0];
-  var monthText = dateText.split('/')[1];
-  var months = {'Jan': 'January',
-    'Feb': 'February',
-    'Mar': 'March',
-    'Apr': 'April',
-    'May': 'May',
-    'Jun': 'June',
-    'Jul': 'July',
-    'Aug': 'August',
-    'Sep': 'September',
-    'Oct': 'October',
-    'Nov': 'November',
-    'Dec': 'December'
-    };
-  var fullMonthText = months[monthText];
-  var yearText = dateText.split('/')[2];
-  var dateAsDate = new Date(fullMonthText + ' ' + dayText + ', ' +
-    yearText + ' ' + timeText + ':00');
-  return dateAsDate;
+  return new Date(parseDateAsTimestamp(textDate));
 }
 
 function toggleVisibilty(evt) {
@@ -253,6 +240,7 @@ export default {
   getIntFromRegExp: getIntFromRegExp,
   addCommas: addCommas,
   convertTextToHtml: convertTextToHtml,
+  parseDateAsTimestamp: parseDateAsTimestamp,
   parseDate: parseDate,
   toggleVisibilty: toggleVisibilty,
   getUrlParameter: getUrlParameter,
