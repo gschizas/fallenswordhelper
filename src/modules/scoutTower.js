@@ -66,16 +66,19 @@ function injectScouttower() { // Legacy
         var currentNumberOfKills = totalHP - currentHP;
         var numberOfKillsToSecure = Math.ceil(totalHP/2 + 1);
 
-        var titanString = '<span style="color:red;">' + (numberOfKillsToSecure - guildKills) + '</span> to secure';
+        var titanString = '<span style="color:red;">' +
+          (numberOfKillsToSecure - guildKills) + '</span> to secure';
         if (guildKills >= numberOfKillsToSecure) {
           titanString = 'Secured';
         } else if (numberOfKillsToSecure - guildKills > currentHP) {
           titanString = '<span style="color:red;">Cannot Secure</span>';
         }
-        var killsPercent = (currentNumberOfKills === 0 ? 0 : guildKills * 100/currentNumberOfKills).toFixed(2);
+        var killsPercent = (currentNumberOfKills === 0 ? 0 :
+          guildKills * 100/currentNumberOfKills).toFixed(2);
         var killsTotPct = (guildKills * 100/totalHP).toFixed(2);
-        aRow.cells[3].innerHTML += '<br><span style="color:blue;"> (' + killsPercent + '% Current <br>' +
-        killsTotPct + '% Total<br>' + titanString + ')';
+        aRow.cells[3].innerHTML += '<br><span style="color:blue;"> (' +
+          killsPercent + '% Current <br>' +
+          killsTotPct + '% Total<br>' + titanString + ')';
       }
     }
   }

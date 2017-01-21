@@ -411,4 +411,6 @@ function injectNewGuildLog(content){ // Legacy
   );
 }
 
-export default {injectNewGuildLog: injectNewGuildLog};
+export default {
+  injectNewGuildLog: injectNewGuildLog,
+};

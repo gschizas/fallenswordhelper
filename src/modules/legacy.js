@@ -318,7 +318,6 @@ function prepareCombatLog() { // Legacy
 
 function injectOldMap() { // Native
   checkBuffs();
-  // prepareCheckMonster();
   prepareCombatLog();
 }
 
