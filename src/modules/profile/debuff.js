@@ -1,5 +1,5 @@
-import system from '../support/system';
-import ajax from '../support/ajax';
+import * as system from '../support/system';
+import * as ajax from '../support/ajax';
 
 function interceptDebuff(e) { // jQuery
   var aLink = e.target;
@@ -26,12 +26,8 @@ function interceptDebuff(e) { // jQuery
     });
 }
 
-function fastDebuff() { // jQuery
+export function fastDebuff() { // jQuery
   var profileRightColumn =
     document.getElementById('profileRightColumn').lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);
 }
-
-export default {
-  fastDebuff: fastDebuff
-};

@@ -1,4 +1,4 @@
-import system from '../support/system';
+import * as system from '../support/system';
 
 var buffCost = {'count': 0, 'buffs': {}};
 var bioEditLines;
@@ -10,7 +10,7 @@ function expandBio() { // Native
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
-function compressBio() { // Native
+export function compressBio() { // Native
   var bioCell = document.getElementById('profile-bio'); // new interface logic
   if (!bioCell) {return;} // non-self profile
   var bioContents = bioCell.innerHTML;
@@ -177,7 +177,6 @@ function toggleBuffsToBuy(evt) { // Legacy
 }
 
 function bioEvtHdl(e) { // Native
-  // console.log('e', e);
   if (e.target.classList.contains('buffLink')) {
     toggleBuffsToBuy(e);
     return;
@@ -191,7 +190,6 @@ function bioEvtHdl(e) { // Native
       buffNameNode.tagName.toLowerCase() !== 'span') {
     buffNameNode = buffNameNode.parentNode;
   }
-  // console.log('buffNameNode', buffNameNode);
   if (buffNameNode.classList &&
       buffNameNode.classList.contains('buffLink')) {
     toggleBuffsToBuy(e);
@@ -266,7 +264,7 @@ function renderBio(bioContents) {
   return bioContents;
 }
 
-function profileRenderBio(self) { // Native
+export function profileRenderBio(self) { // Native
   var bioCell = document.getElementById('profile-bio');
   if (bioCell && (self && system.getValue('renderSelfBio') ||
       !self && system.getValue('renderOtherBios'))) {
@@ -290,7 +288,7 @@ function updateBioCharacters() { // Native
   }
 }
 
-function injectBioWidgets() { // Native
+export function injectBioWidgets() { // Native
   bioEditLines = system.getValue('bioEditLines');
   var textArea = document.getElementById('textInputBox');
   bioPreview();
@@ -304,9 +302,3 @@ function injectBioWidgets() { // Native
   //Force the preview area to render
   updateBioCharacters();
 }
-
-export default {
-  injectBioWidgets: injectBioWidgets,
-  profileRenderBio: profileRenderBio,
-  compressBio: compressBio
-};

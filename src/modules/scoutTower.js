@@ -1,5 +1,5 @@
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 function injectScouttowerBuffLinks() { // Legacy
   var titanTables = system.findNodes('//table[tbody/tr/td/font[.="Guild Member"]]');
@@ -45,12 +45,12 @@ function getScoutTowerDetails(responseText) { // Legacy
   injectScouttowerBuffLinks();
 }
 
-function injectTitan() { // Legacy
+export function injectTitan() { // Legacy
   system.xmlhttp('index.php?cmd=guild&subcmd=scouttower',
     getScoutTowerDetails);
 }
 
-function injectScouttower() { // Legacy
+export function injectScouttower() { // Legacy
   injectScouttowerBuffLinks();
   var titanTable = system.findNode('//table[@width="500"]');
   for (var i = 1; i < titanTable.rows.length; i += 1) {
@@ -83,8 +83,3 @@ function injectScouttower() { // Legacy
     }
   }
 }
-
-export default {
-  injectTitan: injectTitan,
-  injectScouttower: injectScouttower
-};

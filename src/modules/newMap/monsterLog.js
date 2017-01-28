@@ -1,5 +1,5 @@
-import ajax from '../support/ajax';
-import system from '../support/system';
+import * as ajax from '../support/ajax';
+import * as system from '../support/system';
 
 var showCreatureInfo;
 var showMonsterLog;
@@ -158,7 +158,7 @@ function getBias() {
   }
 }
 
-function startMonsterLog() {
+export function startMonsterLog() {
   showCreatureInfo = system.getValue('showCreatureInfo');
   showMonsterLog = system.getValue('showMonsterLog');
   if (!showCreatureInfo && !showMonsterLog) {return;}
@@ -169,7 +169,3 @@ function startMonsterLog() {
   });
   initMonsterLog();
 }
-
-export default {
-  startMonsterLog: startMonsterLog
-};

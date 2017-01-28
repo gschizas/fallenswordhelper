@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import system from '../support/system';
+import * as system from '../support/system';
 import assets from './assets';
 
 function doFormGroup(e) { // jQuery
@@ -73,7 +73,7 @@ function showHuntMode(worldName) { // jQuery
     toggleHuntMode);
 }
 
-function injectButtons(data) { // jQuery
+export function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
   worldName.html(data.realm.name); //HACK - incase of switchign between master realm and realm they dont replace teh realm name
   var oldButtonContainer = $('#fshWorldButtonContainer');
@@ -87,7 +87,3 @@ function injectButtons(data) { // jQuery
   showHuntMode(buttonContainer);
   worldName.after(buttonContainer);
 }
-
-export default {
-  injectButtons: injectButtons
-};

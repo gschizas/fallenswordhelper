@@ -1,8 +1,8 @@
 import calf from './support/calf';
-import task from './support/task';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
   'Gut Rot Head Splitter|Serum');
@@ -185,7 +185,7 @@ function prepareChildRows() { // Native
   task.add(3, makeSpan);
 }
 
-function injectReportPaint() { // jQuery
+export function injectReportPaint() { // jQuery
   ajax.getMembrList(false).done(function() {
     task.add(3, reportHeader);
   });
@@ -194,7 +194,3 @@ function injectReportPaint() { // jQuery
   document.getElementById('pCC').getElementsByTagName('TABLE')[1]
     .addEventListener('click', eventHandlers);
 }
-
-export default {
-  injectReportPaint: injectReportPaint,
-};

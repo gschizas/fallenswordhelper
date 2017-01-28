@@ -1,5 +1,5 @@
-import debug from './debug';
-import sch from './sch';
+import * as debug from './debug';
+import * as sch from './sch';
 
 var paused = true;
 var message = 'fshMessage';
@@ -13,10 +13,10 @@ function taskRunner() {
   }
 }
 
-function addTask(priority, fn, args, scope) {
+export function add(priority, fn, args, scope) {
   //#if _DEV  //  Not sending args as Array
   if (args && !Array.isArray(args)) {
-    console.log('addTask Array.isArray(args)', Array.isArray(args));
+    console.log('addTask Array.isArray(args)', Array.isArray(args)); // DEV Only
   }
   //#endif
   if (typeof fn === 'function') {
@@ -33,7 +33,7 @@ function asyncTask() {
   } catch (error) {
     debug.log('Unhandled Exception:', error);
     //#if _DEV  //  Unhandled Exception
-    console.log('Unhandled Exception:', error);
+    console.log('Unhandled Exception:', error); // DEV Only
     //#endif
   }
   taskRunner();
@@ -47,7 +47,3 @@ function callback(event) {
 }
 
 window.addEventListener('message', callback);
-
-export default {
-  add: addTask
-};

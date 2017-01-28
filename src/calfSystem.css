@@ -70,6 +70,12 @@
   cursor: pointer;
 }
 
+.newGuildLog {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+}
+
 .bazaarSelected {
   display: inline-block;
   height: 45px;
@@ -420,8 +426,20 @@ div#fshCompConf {
 }
 */
 
-table.fshInvFilter {width: 100%;}
-table.fshInvFilter th {background-color: #cd9e4b;}
+table.fshInvFilter {
+  width: 100%;/*
+  border-collapse:collapse;
+  border-spacing:0;*/
+}
+table.fshInvFilter th {
+  background-color: #cd9e4b;/*
+  border-style:solid;
+  border-width:1px;*/
+}/*
+table.fshInvFilter td {
+  border-style:solid;
+  border-width:1px;
+}*/
 
 #fshInv_filter input {width: 200px}
 

@@ -1,4 +1,4 @@
-import layout from './support/layout';
+import * as layout from './support/layout';
 
 var ItemId;
 var bazaarTable =
@@ -63,7 +63,7 @@ function buy() { // jQuery
   }
 }
 
-function injectBazaar() { // Native
+export function injectBazaar() { // Native
   var pCC = document.getElementById('pCC');
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
@@ -84,7 +84,3 @@ function injectBazaar() { // Native
   document.getElementById('buy_amount').addEventListener('input', quantity);
   document.getElementById('fshBuy').addEventListener('click', buy);
 }
-
-export default {
-  injectBazaar: injectBazaar,
-};

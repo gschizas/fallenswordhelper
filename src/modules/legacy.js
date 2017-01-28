@@ -1,14 +1,14 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import fshGa from './support/fshGa';
-import system from './support/system';
-import layout from './support/layout';
-import guildAdvisor from './guildAdvisor';
-import quickBuff from './quickBuff';
-import recipes from './recipes';
-import questBook from './questBook';
-import oldRelic from './oldRelic';
-import newMap from './newMap/newMap';
+import * as debug from './support/debug';
+import * as fshGa from './support/fshGa';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as guildAdvisor from './guildAdvisor';
+import * as quickBuff from './quickBuff';
+import * as recipes from './recipes';
+import * as questBook from './questBook';
+import * as oldRelic from './oldRelic';
+import * as newMap from './newMap/newMap';
 
 var shopId;
 var shopItemId;
@@ -69,7 +69,7 @@ function quickDone(responseText) { // Legacy - Old map?
   document.getElementById('buy_result').innerHTML += '<br />' + infoMessage;
 }
 
-function quickBuyItem() { // Legacy - Old map? - from key handler
+export function quickBuyItem() { // Legacy - Old map? - from key handler
   if (!shopId || !shopItemId) {return;}
   document.getElementById('buy_result').innerHTML = 'Buying ' +
     document.getElementById('buy_amount').value + ' Items';
@@ -321,7 +321,7 @@ function injectOldMap() { // Native
   prepareCombatLog();
 }
 
-function injectWorld() { // Native
+export function injectWorld() { // Native
   //-1 = world page
   //0 = quest responce
   //1 = view creature
@@ -348,10 +348,10 @@ function injectWorld() { // Native
   }
 }
 
-function unknownPage() { // Legacy
+export function unknownPage() { // Legacy
   if (typeof window.jQuery === 'undefined') {return;}
   //#if _DEV  //  unknownPage
-  console.log('unknownPage');
+  console.log('unknownPage'); // DEV Only
   //#endif
 
   if ($('#pCC td:contains("Below is the current status for ' +
@@ -402,12 +402,6 @@ function unknownPage() { // Legacy
     return;
   }
   //#if _DEV  //  Fell through!
-  console.log('Fell through!');
+  console.log('Fell through!'); // DEV Only
   //#endif
 }
-
-export default {
-  injectWorld: injectWorld,
-  quickBuyItem: quickBuyItem,
-  unknownPage: unknownPage
-};

@@ -1,4 +1,4 @@
-import system from './support/system';
+import * as system from './support/system';
 
 var currentFSP;
 
@@ -45,7 +45,7 @@ function injectPoints() { // jQuery
       '?cmd=marketplace">Sell at Marketplace</a>');
 }
 
-function storePlayerUpgrades() { // Legacy
+export function storePlayerUpgrades() { // Legacy
   var alliesText = system.findNode('//td[.="+1 Max Allies"]');
   var alliesRatio = alliesText.nextSibling.nextSibling.nextSibling
     .nextSibling;
@@ -64,5 +64,3 @@ function storePlayerUpgrades() { // Legacy
   }
   injectPoints();
 }
-
-export default {storePlayerUpgrades: storePlayerUpgrades};

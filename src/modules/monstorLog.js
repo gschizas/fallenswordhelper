@@ -1,6 +1,6 @@
-import ajax from './support/ajax';
+import * as ajax from './support/ajax';
 import calf from './support/calf';
-import system from './support/system';
+import * as system from './support/system';
 
 var monsterAry;
 
@@ -116,10 +116,6 @@ function prepAry(data) {
   drawMobs();
 }
 
-function injectMonsterLog() {
+export function injectMonsterLog() {
   ajax.getForage('fsh_monsterLog').done(prepAry);
 }
-
-export default {
-  injectMonsterLog: injectMonsterLog
-};

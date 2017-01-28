@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 var extractInv;
 
@@ -75,7 +75,7 @@ function showQuickExtract(data) { // Legacy
   }
 }
 
-function insertQuickExtract(content) { // Hybrid
+export function insertQuickExtract(content) { // Hybrid
   if (!content) {content=layout.notebookContent();}
   content.innerHTML='<table width=100%><tr style="background-color:' +
     '#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>' +
@@ -88,5 +88,3 @@ function insertQuickExtract(content) { // Hybrid
   $('[id^="Helper\\:useItemsIn"]').click(showQuickExtract);
   $.getJSON('?cmd=export&subcmd=inventory', showQuickExtract);
 }
-
-export default {insertQuickExtract: insertQuickExtract};

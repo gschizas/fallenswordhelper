@@ -1,4 +1,4 @@
-var networkIcon =
+export var networkIcon =
   '<img class="networkIcon tip-static" ' +
   'data-tipped="This function retrieves data from the network. ' +
   'Disable this to increase speed" src="data:image/png;base64,' +
@@ -11,7 +11,7 @@ var networkIcon =
   'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
   'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
   'egAAAABJRU5ErkJggg==" width="16" height="16" />';
-var saveBoxes = [
+export var saveBoxes = [
   'navigateToLogAfterMsg',
   'gameHelpLink',
   'guildSelf',
@@ -117,7 +117,7 @@ var saveBoxes = [
   'expandMenuOnKeyPress'
 ];
 
-var mySimpleCheckboxes = {
+export var mySimpleCheckboxes = {
   moveGuildList: {
     id: 'moveGuildList',
     helpTitle: 'Move Guild Info List',
@@ -418,10 +418,4 @@ var mySimpleCheckboxes = {
     helpText: 'If enabled, will disable prompts when you breakdown items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
   },
-};
-
-export default {
-  networkIcon: networkIcon,
-  saveBoxes: saveBoxes,
-  mySimpleCheckboxes : mySimpleCheckboxes
 };

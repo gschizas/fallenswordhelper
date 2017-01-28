@@ -1,7 +1,7 @@
 import calf from './support/calf';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import layout from './support/layout';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 function generateManageTable() { // Legacy
   var i, j, result='<table cellspacing=2 cellpadding=2 style="table-layout: fixed; word-wrap: break-word;" width=100%><tr bgcolor=#CD9E4B>';
@@ -122,7 +122,7 @@ function listEvtHnl(e) { // Native
   if (e.target.id.indexOf('Helper:DeleteItem') === 0) {deleteQuickItem(e);}
 }
 
-function injectAuctionSearch(content) { // Legacy
+export function injectAuctionSearch(content) { // Legacy
   if (!content) {content = layout.notebookContent();}
   content.innerHTML =
     layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
@@ -156,7 +156,7 @@ function injectAuctionSearch(content) { // Legacy
   content.addEventListener('click', listEvtHnl);
 }
 
-function injectQuickLinkManager(content) { // Legacy
+export function injectQuickLinkManager(content) { // Legacy
   if (!content) {content = layout.notebookContent();}
   content.innerHTML =
     layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
@@ -177,8 +177,3 @@ function injectQuickLinkManager(content) { // Legacy
   generateManageTable();
   content.addEventListener('click', listEvtHnl);
 }
-
-export default {
-  injectAuctionSearch: injectAuctionSearch,
-  injectQuickLinkManager: injectQuickLinkManager
-};

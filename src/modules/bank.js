@@ -1,4 +1,4 @@
-import system from './support/system';
+import * as system from './support/system';
 
 var playerBank = {
   headText: 'Bank',
@@ -92,17 +92,12 @@ function ajaxifyBank() { // jQuery
   withdraw.click(bankWithdrawal);
 }
 
-function injectGuildBank() { // Native
+export function injectGuildBank() { // Native
   bankSettings = guildBank;
   ajaxifyBank();
 }
 
-function injectBank() { // jQuery
+export function injectBank() { // jQuery
   bankSettings = playerBank;
   ajaxifyBank();
 }
-
-export default {
-  injectGuildBank: injectGuildBank,
-  injectBank: injectBank
-};

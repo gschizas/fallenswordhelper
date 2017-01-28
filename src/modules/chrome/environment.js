@@ -1,20 +1,20 @@
 import calf from '../support/calf';
-import task from '../support/task';
-import fshGa from '../support/fshGa';
-import system from '../support/system';
-import ajax from '../support/ajax';
-import composing from '../composing';
-import notification from '../notification';
-import common from '../support/common';
-import helperMenu from './helperMenu';
-import allyEnemy from './allyEnemy';
-import profile from '../profile/profile';
-import news from '../news';
-import messaging from './messaging';
-import activeWantedBounties from './activeWantedBounties';
-import combatLog from '../combatLog';
-import sendGold from '../newMap/sendGold';
-import legacy from '../legacy';
+import * as task from '../support/task';
+import * as fshGa from '../support/fshGa';
+import * as system from '../support/system';
+import * as ajax from '../support/ajax';
+import * as composing from '../composing';
+import * as notification from '../notification';
+import * as common from '../support/common';
+import * as helperMenu from './helperMenu';
+import * as allyEnemy from './allyEnemy';
+import * as profile from '../profile/profile';
+import * as news from '../news';
+import * as messaging from './messaging';
+import * as activeWantedBounties from './activeWantedBounties';
+import * as combatLog from '../combatLog';
+import * as sendGold from '../newMap/sendGold';
+import * as legacy from '../legacy';
 import pageSwitcher from './pageSwitcher';
 
 var coreFunction;
@@ -579,9 +579,9 @@ function injectMenu() { // jQuery.min
     //if not using the new guild log, show it as a separate menu entry
     document.getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
-        '<li class="nav-level-2"><a class="nav-link" id="nav' +
-        '-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
-        '&subcmd=newguildlog">New Guild Log</a></li>');
+        '<li class="nav-level-2"><a class="nav-link" ' +
+        'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
+        '>New Guild Log</a></li>');
   }
   //top rated
   document.getElementById('nav-toprated-players-level').parentNode
@@ -681,13 +681,13 @@ function prepareEnv() { // Native
 
 function asyncDispatcher() { // Native
   //#if _DEV  //  asyncDispatcher messages
-  console.log('functionPath', functionPath);
+  console.log('functionPath', functionPath); // DEV Only
   if (!coreFunction) {
-    console.log('No Core Function.');
+    console.log('No Core Function.'); // DEV Only
     return;
   }
   if (typeof coreFunction !== 'function') {
-    console.log('Not Core Function.');
+    console.log('Not Core Function.'); // DEV Only
     return;
   }
   //#endif

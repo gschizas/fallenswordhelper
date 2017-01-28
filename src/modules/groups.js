@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var maxGroupSizeToJoin;
 
@@ -53,7 +53,7 @@ function parseMercStats(responseText) { // jQuery
     hpValue.text()) - Math.round(totalMercHP * 0.2)));
 }
 
-function injectGroupStats() { // jQuery
+export function injectGroupStats() { // jQuery
   var attackValueElement = $('#stat-attack');
   attackValueElement.html(
     '<span class="fshBlue">' + attackValueElement.text() + '</span>' +
@@ -312,15 +312,10 @@ function doGroupPaint(m) { // jQuery
 
 }
 
-function injectGroups() { // jQuery
+export function injectGroups() { // jQuery
   ajax.getMembrList(false)
     .done(doGroupPaint);
   displayMinGroupLevel();
   groupButtons();
   fixTable();
 }
-
-export default {
-  injectGroupStats: injectGroupStats,
-  injectGroups: injectGroups
-};

@@ -1,7 +1,7 @@
-import debug from './support/debug';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
 
 var moveOptions =
   '<td colspan=3 ' +
@@ -63,7 +63,7 @@ function dontPost(e) { // jQuery
     '&pvp_id=' + pvpId;
 }
 
-function completedArenas() { // jQuery
+export function completedArenas() { // jQuery
   var prevButton = $('#pCC input[value="<"]');
   var nextButton = $('#pCC input[value=">"]');
   if (prevButton.length === 1) {
@@ -143,7 +143,7 @@ function selectMoves(evt) { // jQuery
   table.append(row);
 }
 
-function setupMoves() { // jQuery
+export function setupMoves() { // jQuery
   var node = $('#pCC b:contains("Setup Combat Moves")');
   if (node.length !== 1) {return;}
   node.addClass('fshLink fshGreen');
@@ -322,7 +322,7 @@ function process(arena) { // jQuery
 
 }
 
-function storeMoves() { // jQuery
+export function storeMoves() { // jQuery
   ajax.getForage('fsh_arena').done(function(arena) {
     arena = arena || {};
     arena.moves = {};
@@ -339,16 +339,9 @@ function storeMoves() { // jQuery
   });
 }
 
-function injectArena() { // jQuery
+export function injectArena() { // jQuery
   tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);
   ajax.getForage('fsh_arena').done(process);
 }
-
-export default {
-  storeMoves: storeMoves,
-  injectArena: injectArena,
-  setupMoves: setupMoves,
-  completedArenas: completedArenas
-};

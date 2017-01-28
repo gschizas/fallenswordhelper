@@ -1,7 +1,7 @@
 import calf from './calf';
-import debug from './debug';
-import system from './system';
-import layout from './layout';
+import * as debug from './debug';
+import * as system from './system';
+import * as layout from './layout';
 
 var deferred = window.$ && $.when();
 
@@ -25,7 +25,7 @@ function getGuildMembers(guildId) {
   });
 }
 
-function getForage(forage) {
+export function getForage(forage) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
   var dfr = $.Deferred();
@@ -41,7 +41,7 @@ function getForage(forage) {
   return dfr.promise();
 }
 
-function setForage(forage, data) {
+export function setForage(forage, data) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
   // var dfr = $.Deferred();
@@ -81,7 +81,7 @@ function guildMembers(force, guildId) {
     });
 }
 
-function getMembrList(force) {
+export function getMembrList(force) {
   var guildId = layout.guildId();
   return guildMembers(force, guildId)
     .pipe(function setHelperMembrList(membrList) {
@@ -90,7 +90,7 @@ function getMembrList(force) {
     });
 }
 
-function getAllMembrList(force, guildArray) {
+export function getAllMembrList(force, guildArray) {
   var prm = [];
   guildArray.forEach(function addGuildToArray(guildId) {
     prm.push(guildMembers(force, guildId));
@@ -103,7 +103,7 @@ function getAllMembrList(force, guildArray) {
     .done(addMembrListToForage);
 }
 
-function getInventory() {
+export function getInventory() {
   var prm = $.ajax({
     dataType: 'json',
     url:'index.php?cmd=export&subcmd=' + (calf.subcmd === 'guildinvmgr' ?
@@ -117,7 +117,7 @@ function getInventory() {
   });
 }
 
-function inventory(force) {
+export function inventory(force) {
   if (force) {
     return getInventory();
   }
@@ -131,7 +131,7 @@ function inventory(force) {
   });
 }
 
-function getProfile(username) {
+export function getProfile(username) {
   return $.getJSON('index.php', {
     cmd:             'export',
     subcmd:          'profile',
@@ -149,7 +149,7 @@ function getMyProfile() {
     });
 }
 
-function myStats(force) {
+export function myStats(force) {
   if (force) {return getMyProfile();}
   // jQuery 1.7 uses pipe instead of then
   return getForage('fsh_selfProfile')
@@ -167,7 +167,7 @@ function dialog(data) {
   $('#dialog_msg').html(data.m).dialog('open');
 }
 
-function equipItem(backpackInvId) {
+export function equipItem(backpackInvId) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -186,7 +186,7 @@ function htmlResult(data) {
     {r: 0, m: ''} : {r: 1, m: info};
 }
 
-function useItem(backpackInvId) {
+export function useItem(backpackInvId) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -226,7 +226,7 @@ function takeItem(invId, action) {
   });
 }
 
-function queueTakeItem(invId, action) {
+export function queueTakeItem(invId, action) {
   // You have to chain them because they could be modifying the backpack
   deferred = deferred.pipe(function pipeTakeToQueue() {
     return takeItem(invId, action);
@@ -280,7 +280,7 @@ function recallItem(o) {
     });
 }
 
-function queueRecallItem(o) {
+export function queueRecallItem(o) {
   // You have to chain them because they could be modifying the backpack
   deferred = deferred.pipe(function pipeRecallToQueue() {
     return recallItem(o);
@@ -288,7 +288,7 @@ function queueRecallItem(o) {
   return deferred;
 }
 
-function guildMailboxTake(href) {
+export function guildMailboxTake(href) {
   return $.ajax({
     url: href
   }).pipe(function translateReturnInfo(data) {
@@ -299,7 +299,7 @@ function guildMailboxTake(href) {
   .done(dialog);
 }
 
-function moveItem(invIdList, folderId) {
+export function moveItem(invIdList, folderId) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -313,7 +313,7 @@ function moveItem(invIdList, folderId) {
   }).done(dialog);
 }
 
-function dropItem(invIdList) {
+export function dropItem(invIdList) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -326,7 +326,7 @@ function dropItem(invIdList) {
   }).done(dialog);
 }
 
-function sendItem(invIdList) {
+export function sendItem(invIdList) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -340,7 +340,7 @@ function sendItem(invIdList) {
     .done(dialog);
 }
 
-function debuff(buffId) {
+export function debuff(buffId) {
   return $.ajax({
     url: 'fetchdata.php',
     data: {
@@ -352,7 +352,7 @@ function debuff(buffId) {
   });
 }
 
-function doPickMove(moveId, slotId) {
+export function doPickMove(moveId, slotId) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -363,24 +363,3 @@ function doPickMove(moveId, slotId) {
     }
   });
 }
-
-export default {
-  getMembrList: getMembrList,
-  getAllMembrList: getAllMembrList,
-  inventory: inventory,
-  getInventory: getInventory,
-  myStats: myStats,
-  getProfile: getProfile,
-  setForage: setForage,
-  getForage: getForage,
-  queueTakeItem: queueTakeItem,
-  queueRecallItem: queueRecallItem,
-  equipItem: equipItem,
-  useItem: useItem,
-  guildMailboxTake: guildMailboxTake,
-  moveItem: moveItem,
-  dropItem: dropItem,
-  sendItem: sendItem,
-  debuff: debuff,
-  doPickMove: doPickMove
-};

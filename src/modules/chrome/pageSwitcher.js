@@ -1,43 +1,43 @@
-import composing from '../composing';
-import notification from '../notification';
-import guildReport from '../guildReport';
-import guildAdvisor from '../guildAdvisor';
-import bazaar from '../bazaar';
-import groups from '../groups';
-import rank from '../rank';
-import inventory from '../inventory';
-import quickBuff from '../quickBuff';
-import toprated from '../toprated';
-import misc from '../misc';
-import bio from '../profile/bio';
-import profile from '../profile/profile';
-import logs from '../logs';
-import lists from '../lists';
-import recipes from '../recipes';
-import quickWear from '../quickWear';
-import onlinePlayers from '../onlinePlayers';
-import dropItems from '../dropItems';
-import questBook from '../questBook';
-import settingsPage from '../settings/settingsPage';
-import news from '../news';
-import mailbox from '../mailbox';
-import bank from '../bank';
-import guild from '../guild';
-import upgrades from '../upgrades';
-import newGuildLog from '../newGuildLog';
-import scoutTower from '../scoutTower';
-import trade from '../trade';
-import recipeMgr from '../recipeMgr';
-import quickExtract from '../quickExtract';
-import scavenging from '../scavenging';
-import findBuffs from '../findBuffs';
-import monstorLog from '../monstorLog';
-import arena from '../arena';
-import combatLog from '../combatLog';
-import guide from '../guide';
-import legacy from '../legacy';
+import * as composing from '../composing';
+import * as notification from '../notification';
+import * as guildReport from '../guildReport';
+import * as guildAdvisor from '../guildAdvisor';
+import * as bazaar from '../bazaar';
+import * as groups from '../groups';
+import * as rank from '../rank';
+import * as inventory from '../inventory';
+import * as quickBuff from '../quickBuff';
+import * as toprated from '../toprated';
+import * as misc from '../misc';
+import * as bio from '../profile/bio';
+import * as profile from '../profile/profile';
+import * as logs from '../logs';
+import * as lists from '../lists';
+import * as recipes from '../recipes';
+import * as quickWear from '../quickWear';
+import * as onlinePlayers from '../onlinePlayers';
+import * as dropItems from '../dropItems';
+import * as questBook from '../questBook';
+import * as settingsPage from '../settings/settingsPage';
+import * as news from '../news';
+import * as mailbox from '../mailbox';
+import * as bank from '../bank';
+import * as guild from '../guild';
+import * as upgrades from '../upgrades';
+import * as newGuildLog from '../newGuildLog/newGuildLog';
+import * as scoutTower from '../scoutTower';
+import * as trade from '../trade';
+import * as recipeMgr from '../recipeMgr';
+import * as quickExtract from '../quickExtract';
+import * as scavenging from '../scavenging';
+import * as findBuffs from '../findBuffs';
+import * as monstorLog from '../monstorLog';
+import * as arena from '../arena';
+import * as combatLog from '../combatLog';
+import * as guide from '../guide';
+import * as legacy from '../legacy';
 
-var pageSwitcher = {
+export default {
   settings: {'-': {'-': {'-': {'-': settingsPage.injectSettings}}}},
   world: {'-': {'-': {'-': {'-': legacy.injectWorld}}}},
   news: {
@@ -113,7 +113,7 @@ var pageSwitcher = {
       'joinall': {'-': {'-': groups.injectGroups}},
       '-': {'-': {'-': groups.injectGroups}}},
     'manage': {'-': {'-': {'-': guild.injectGuild}}},
-    'structures': {'-': {'-': {'-': guild.injectGuild}}},
+    // 'structures': {'-': {'-': {'-': guild.injectGuild}}},
     'advisor': {
       '-': {'-': {'-': guildAdvisor.injectAdvisor}},
       'weekly': {'-': {'-': guildAdvisor.injectAdvisor}}},
@@ -200,5 +200,3 @@ var pageSwitcher = {
     'viewarchive': {'-': {'-': {'-': news.viewArchive}}},
     '-': {'-': {'-': {'-': legacy.unknownPage}}}}
 };
-
-export default pageSwitcher;

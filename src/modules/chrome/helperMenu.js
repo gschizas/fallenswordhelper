@@ -1,15 +1,15 @@
-import system from '../support/system';
-import common from '../support/common';
-import fshGa from '../support/fshGa';
-import quickBuff from '../quickBuff';
-import combatLog from '../combatLog';
-import recipeMgr from '../recipeMgr';
-import lists from '../lists';
-import findBuffs from '../findBuffs';
-import onlinePlayers from '../onlinePlayers';
-import quickExtract from '../quickExtract';
-import quickWear from '../quickWear';
-import misc from '../misc';
+import * as system from '../support/system';
+import * as common from '../support/common';
+import * as fshGa from '../support/fshGa';
+import * as quickBuff from '../quickBuff';
+import * as combatLog from '../combatLog';
+import * as recipeMgr from '../recipeMgr';
+import * as lists from '../lists';
+import * as findBuffs from '../findBuffs';
+import * as onlinePlayers from '../onlinePlayers';
+import * as quickExtract from '../quickExtract';
+import * as quickWear from '../quickWear';
+import * as misc from '../misc';
 
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
@@ -93,7 +93,7 @@ function showHelperMenu() { // Native
   helperMenuDiv.addEventListener('click', eventHandler);
 }
 
-function injectHelperMenu() { // Native
+export function injectHelperMenu() { // Native
   // don't put all the menu code here (but call if clicked) to minimize lag
   var node = document.getElementById('statbar-container');
   if (!node) {return;}
@@ -110,7 +110,3 @@ function injectHelperMenu() { // Native
   }
   node.parentNode.insertBefore(helperMenu, node);
 }
-
-export default {
-  injectHelperMenu: injectHelperMenu,
-};

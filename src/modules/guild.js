@@ -1,8 +1,8 @@
-import debug from './support/debug';
-import task from './support/task';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var leftHandSideColumnTable;
 var members;
@@ -28,7 +28,7 @@ function guildXPLock() { // Native
   }
 }
 
-function injectViewGuild() { // Native
+export function injectViewGuild() { // Native
   task.add(3, layout.colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
@@ -188,7 +188,7 @@ function selfRecall() { // Native
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
-function injectGuild() { // Native
+export function injectGuild() { // Native
   task.add(3, layout.colouredDots);
   task.add(3, removeGuildAvyImgBorder);
   task.add(3, guildXPLock);
@@ -236,7 +236,7 @@ function recallGuildStoreItem(evt) { // Legacy
     {'item': guildStoreID, 'target': evt.target, 'url': recallHref});
 }
 
-function injectGuildAddTagsWidgets() { // Legacy
+export function injectGuildAddTagsWidgets() { // Legacy
   var itemTable = system.findNode(
     '//img[contains(@src,"/items/")]/ancestor::table[1]');
   if (itemTable) {
@@ -269,7 +269,7 @@ function updateHistoryCharacters() { // Legacy
   previewArea.innerHTML = bioPreviewHTML;
 }
 
-function addHistoryWidgets() { // Legacy
+export function addHistoryWidgets() { // Legacy
   var textArea = system.findNode('//textarea[@name="history"]');
   if (!textArea) {return;}
   textArea.value = textArea.value.replace(/<br \/>/ig,'');
@@ -311,14 +311,6 @@ function parseProfileAndPostWarnings(data) { // Native
   });
 }
 
-function injectRPUpgrades() { // jQuery
+export function injectRPUpgrades() { // jQuery
   ajax.myStats().done(parseProfileAndPostWarnings);
 }
-
-export default {
-  injectViewGuild: injectViewGuild,
-  injectGuild: injectGuild,
-  injectGuildAddTagsWidgets: injectGuildAddTagsWidgets,
-  addHistoryWidgets: addHistoryWidgets,
-  injectRPUpgrades: injectRPUpgrades
-};

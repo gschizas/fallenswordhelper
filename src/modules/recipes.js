@@ -1,5 +1,5 @@
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 var plantFromComponentHash = {
   'Amber Essense':      'Amber Plant',
@@ -102,9 +102,7 @@ function injectViewRecipe() { // Legacy
   }
 }
 
-function inventing() { // Native
+export function inventing() { // Native
   injectViewRecipe();
   injectInvent();
 }
-
-export default {inventing: inventing};

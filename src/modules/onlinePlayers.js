@@ -1,6 +1,6 @@
-import dataObj from './support/dataObj';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
 
 var context;
 var onlinePlayers;
@@ -184,9 +184,7 @@ function injectOnlinePlayersNew() { // jQuery
   context[0].addEventListener('keyup', changeLvl);
 }
 
-function injectOnlinePlayers(content) { // jQuery
+export function injectOnlinePlayers(content) { // jQuery
   context = content ? $(content) : $('#pCC');
   injectOnlinePlayersNew();
 }
-
-export default {injectOnlinePlayers: injectOnlinePlayers};

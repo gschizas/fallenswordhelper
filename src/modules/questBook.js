@@ -1,6 +1,6 @@
-import system from './support/system';
+import * as system from './support/system';
 
-function injectQuestBookFull() { // Legacy
+export function injectQuestBookFull() { // Legacy
   var lastQBPage = location.search;
   if (lastQBPage.indexOf('&mode=0') !== -1) {
     system.setValue('lastActiveQuestPage', lastQBPage);
@@ -55,7 +55,7 @@ function injectQuestBookFull() { // Legacy
   }
 }
 
-function injectQuestTracker() { // Legacy
+export function injectQuestTracker() { // Legacy
   var injectHere = system.findNode('//td[font/b[.="Quest Details"]]');
   var questId = document.location.search.match(/quest_id=(\d+)/)[1];
   injectHere.innerHTML += '&nbsp;<a target="_blank" href="http://guide.' +
@@ -78,8 +78,3 @@ function injectQuestTracker() { // Legacy
     }
   }
 }
-
-export default {
-  injectQuestBookFull: injectQuestBookFull,
-  injectQuestTracker: injectQuestTracker
-};

@@ -1,4 +1,4 @@
-import system from '../support/system';
+import * as system from '../support/system';
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
   target.insertAdjacentHTML('beforeend', '<span class="fshBlue">' + '&nbsp;' +
@@ -22,12 +22,8 @@ function findAllyEnemy(el){ // Native
   }
 }
 
-function profileParseAllyEnemy() { // Native
+export function profileParseAllyEnemy() { // Native
   // Allies/Enemies count/total function
   Array.prototype.forEach.call(
     document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);
 }
-
-export default {
-  profileParseAllyEnemy: profileParseAllyEnemy
-};

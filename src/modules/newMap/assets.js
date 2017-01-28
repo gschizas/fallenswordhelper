@@ -1,4 +1,4 @@
-import system from '../support/system';
+import * as system from '../support/system';
 
 export default {
   colorHash: {

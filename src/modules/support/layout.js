@@ -1,5 +1,5 @@
-import task from './task';
-import system from './system';
+import * as task from './task';
+import * as system from './system';
 
 var dotList;
 var dotCount;
@@ -17,20 +17,20 @@ var offlineDot =
 var sevenDayDot =
   '<span class="sevenDayDot tip-static" data-tipped="Offline"></span>';
 
-function buffAllHref(shortList) { // Bad Pattern
+export function buffAllHref(shortList) { // Bad Pattern
   shortList = shortList.join(',').replace(/\s/g, '');
   var j = 'java';
   return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + shortList +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")';
 }
 
-function quickBuffHref(playerId, buffList) { // Bad Pattern
+export function quickBuffHref(playerId, buffList) { // Bad Pattern
   return 'href=\'javascript:window.openWindow("index.php?cmd=' +
     'quickbuff&tid=' + playerId + (buffList ? '&blist=' + buffList : '') +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
 }
 
-function infoBox(documentText) { // Native
+export function infoBox(documentText) { // Native
   var doc = system.createDocument(documentText);
   var infoMatch = doc.getElementById('info-msg').innerHTML;
   var result = '';
@@ -41,7 +41,7 @@ function infoBox(documentText) { // Native
   return result;
 }
 
-function guildId() { // Native
+export function guildId() { // Native
   var guildId;
   var nodeList = document.body.getElementsByTagName('script');
   Array.prototype.forEach.call(nodeList, function getGuildId(el) {
@@ -52,14 +52,14 @@ function guildId() { // Native
   return guildId;
 }
 
-function playerId() { // Native
+export function playerId() { // Native
   var thePlayerId = parseInt(document.getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
   system.setValue('playerID',thePlayerId);
   return thePlayerId;
 }
 
-function makePageHeader(title, comment, spanId, button) { // Native
+export function makePageHeader(title, comment, spanId, button) { // Native
   return '<table width=100%><tbody><tr class="fshHeader">' +
     '<td width="90%"><b>&nbsp;' + title + '</b>' +
     (comment === '' ? '' : '&nbsp;(' + comment + ')') +
@@ -69,16 +69,16 @@ function makePageHeader(title, comment, spanId, button) { // Native
     '</td></tr><tbody></table>';
 }
 
-function makePageTemplate(title, comment, spanId, button, divId) { // Native
+export function makePageTemplate(title, comment, spanId, button, divId) { // Native
   return makePageHeader(title, comment, spanId, button) +
     '<div class="fshSmall" id="' + divId + '"></div>';
 }
 
-function notebookContent() { // Native
+export function notebookContent() { // Native
   return document.getElementById('pCC'); // new interface logic
 }
 
-function onlineDot(obj) { // Native
+export function onlineDot(obj) { // Native
   var img;
   var min = 0;
   if (obj.day) {min += parseInt(obj.day, 10) * 1440;}
@@ -121,23 +121,10 @@ function batchDots() { // Native
   }
 }
 
-function colouredDots() { // Native
+export function colouredDots() { // Native
   if (!system.getValue('enhanceOnlineDots')) {return;}
   dotList = document.querySelectorAll(
     '#pCC a[data-tipped*="Last Activity"]');
   dotCount = 0;
   task.add(3, batchDots);
 }
-
-export default {
-  colouredDots: colouredDots,
-  onlineDot: onlineDot,
-  notebookContent: notebookContent,
-  makePageHeader: makePageHeader,
-  makePageTemplate: makePageTemplate,
-  playerId: playerId,
-  guildId: guildId,
-  infoBox: infoBox,
-  quickBuffHref: quickBuffHref,
-  buffAllHref: buffAllHref
-};

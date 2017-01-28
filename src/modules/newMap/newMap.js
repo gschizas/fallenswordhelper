@@ -1,10 +1,10 @@
 import calf from '../support/calf';
-import system from '../support/system';
+import * as system from '../support/system';
 import assets from './assets';
-import buttons from './buttons';
-import monsterLog from './monsterLog';
-import sendGold from './sendGold';
-import viewCreature from './viewCreature';
+import * as buttons from './buttons';
+import * as monsterLog from './monsterLog';
+import * as sendGold from './sendGold';
+import * as viewCreature from './viewCreature';
 
 var showHuntingBuffs;
 var huntingBuffs;
@@ -208,7 +208,7 @@ function doHuntingBuffs() {
   }
 }
 
-function subscribes() { // jQuery
+export function subscribes() { // jQuery
 
   if (system.getValue('sendGoldonWorld')) {
     sendGold.injectSendGoldOnWorld();
@@ -277,7 +277,3 @@ function subscribes() { // jQuery
   */
 
 }
-
-export default {
-  subscribes: subscribes
-};

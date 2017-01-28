@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
-import common from './support/common';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
+import * as common from './support/common';
 
 function getRelicPlayerBuffs(responseText) { // jQuery - Old map
   var processingStatus = $('td[title="ProcessingStatus"]');
@@ -584,7 +584,7 @@ function calculateRelicDefenderStats() { // Legacy - Old map
   extraTextInsertPoint.innerHTML += textToInsert;
 }
 
-function injectRelic() { // Hybrid - Old map
+export function injectRelic() { // Hybrid - Old map
   var relicNameElement = $('td:contains("Below is the current status ' +
     'for the relic"):last');
   relicNameElement.css('font-size', 'x-small');
@@ -629,5 +629,3 @@ function injectRelic() { // Hybrid - Old map
       },
       true);
 }
-
-export default {injectRelic: injectRelic};

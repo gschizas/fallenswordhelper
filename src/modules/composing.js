@@ -1,7 +1,7 @@
 import calf from './support/calf';
-import task from './support/task';
-import system from './support/system';
-import settingsPage from './settings/settingsPage';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as settingsPage from './settings/settingsPage';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
@@ -76,7 +76,7 @@ function quickCreate(evt) { // Native
   }
 }
 
-function injectComposeAlert() { // jQuery
+export function injectComposeAlert() { // jQuery
   if (calf.cmd === 'composing') {return;}
   var needToCompose = system.getValue('needToCompose');
   if (needToCompose) {
@@ -90,7 +90,7 @@ function injectComposeAlert() { // jQuery
   });
 }
 
-function injectComposing() { // Native
+export function injectComposing() { // Native
   var pCC = document.getElementById('pCC');
   if (!pCC) {return;}
   if (calf.enableComposingAlert) {
@@ -112,7 +112,7 @@ function injectComposing() { // Native
   }
 }
 
-function composingCreate() { // Native
+export function composingCreate() { // Native
   document.getElementById('composing-add-skill')
     .addEventListener('click', function() {
       document.getElementById('composing-skill-level-input').value =
@@ -203,7 +203,7 @@ function togglePref() { // Native
   system.setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
 
-function composingBreakdown() { // Native
+export function composingBreakdown() { // Native
   disableBreakdownPrompts = system.getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);
@@ -216,10 +216,3 @@ function composingBreakdown() { // Native
   document.getElementById('disableBreakdownPrompts')
     .addEventListener('click', togglePref);
 }
-
-export default {
-  injectComposeAlert: injectComposeAlert,
-  injectComposing: injectComposing,
-  composingCreate: composingCreate,
-  composingBreakdown: composingBreakdown,
-};

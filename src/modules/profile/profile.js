@@ -1,12 +1,12 @@
-import task from '../support/task';
-import system from '../support/system';
-import layout from '../support/layout';
-import common from '../support/common';
-import debuff from './debuff';
-import profileAllyEnemy from './profileAllyEnemy';
-import fastWear from './fastWear';
-import components from './components';
-import bio from './bio';
+import * as task from '../support/task';
+import * as system from '../support/system';
+import * as layout from '../support/layout';
+import * as common from '../support/common';
+import * as debuff from './debuff';
+import * as profileAllyEnemy from './profileAllyEnemy';
+import * as fastWear from './fastWear';
+import * as components from './components';
+import * as bio from './bio';
 
 var guildId;
 var currentGuildRelationship;
@@ -174,7 +174,7 @@ function updateStatistics() { // Native
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
 }
 
-function injectProfile() { // Native
+export function injectProfile() { // Native
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
@@ -216,7 +216,7 @@ function injectProfile() { // Native
   task.add(3, layout.colouredDots);
 }
 
-function changeCombatSet(responseText, itemIndex) { // Native
+export function changeCombatSet(responseText, itemIndex) { // Native
   var doc = system.createDocument(responseText);
 
   // var cbsSelect = system.findNode('//select[@name="combatSetId"]', doc);
@@ -244,8 +244,3 @@ function changeCombatSet(responseText, itemIndex) { // Native
     }
   });
 }
-
-export default {
-  injectProfile: injectProfile,
-  changeCombatSet: changeCombatSet
-};

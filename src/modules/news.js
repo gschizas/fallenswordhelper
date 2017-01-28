@@ -1,5 +1,3 @@
-// import system from './support/system';
-
 var maxcharacters;
 var textArea;
 var shoutboxPreview;
@@ -29,12 +27,12 @@ function injectShoutboxWidgets() { // Native
   textArea.addEventListener('keyup', updateShoutboxPreview);
 }
 
-function newsFsbox() { // Native
+export function newsFsbox() { // Native
   maxcharacters = 100;
   injectShoutboxWidgets();
 }
 
-function newsShoutbox() { // Native
+export function newsShoutbox() { // Native
   maxcharacters = 150;
   injectShoutboxWidgets();
 }
@@ -72,7 +70,7 @@ function fixCollapse() { // Native
   newsCol[0].addEventListener('click', newsEvt, true);
 }
 
-function injectHomePageTwoLink() { // Native
+export function injectHomePageTwoLink() { // Native
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}
@@ -139,15 +137,8 @@ function doTagging(row) { // Native
   }
 }
 
-function viewArchive() { // Native
+export function viewArchive() { // Native
   var myTable = document.getElementById('pCC').getElementsByTagName('table')[2];
   Array.prototype.forEach.call(myTable.rows, doTagging);
   myTable.addEventListener('click', evtHdl);
 }
-
-export default {
-  newsFsbox: newsFsbox,
-  newsShoutbox: newsShoutbox,
-  injectHomePageTwoLink: injectHomePageTwoLink,
-  viewArchive: viewArchive,
-};

@@ -1,6 +1,6 @@
 import calf from '../support/calf';
-import system from '../support/system';
-import common from '../support/common';
+import * as system from '../support/system';
+import * as common from '../support/common';
 import assets from './assets';
 
 function creatureData(ses) { // jQuery
@@ -468,7 +468,7 @@ function addRemoveCreatureToDoNotKillList(evt) { // Native
   window.GameData.doAction(-1);
 }
 
-function readyViewCreature() { // Hybrid
+export function readyViewCreature() { // Hybrid
 
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
@@ -508,7 +508,3 @@ function readyViewCreature() { // Hybrid
     .addEventListener('click',
       addRemoveCreatureToDoNotKillList, true);
 }
-
-export default {
-  readyViewCreature: readyViewCreature
-};
