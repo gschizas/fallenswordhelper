@@ -10,7 +10,7 @@
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
 // @version        1517a1
-// @downloadURL    http://localhost:9966/dist/dev/fallenswordhelper.user.js
+// @downloadURL    http://192.168.187.40:9966/dist/dev/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
 
@@ -24,8 +24,8 @@ var fshMain = function() {
   FSH.version = '1517a1';
 
   var resources = {
-    calfSystemJs: 'http://localhost:9966/dist/dev/calfSystem.js',
-    calfSystemCss: 'http://localhost:9966/src/calfSystem.css',
+    calfSystemJs: 'http://192.168.187.40:9966/dist/dev/calfSystem.js',
+    calfSystemCss: 'http://192.168.187.40:9966/src/calfSystem.css',
     localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.4.2/localforage.min.js',
     dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
     // dableDev: 'https://raw.githack.com/deltreey/Dable/1.2.1/Dable.js',
