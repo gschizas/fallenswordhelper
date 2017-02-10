@@ -24,7 +24,7 @@ function selectShopItem(evt) { // Legacy - Old map?
     .innerHTML.replace(/='20'/g,'=45');
 }
 
-function injectShop() { // Hybrid - Old map?
+export function injectShop() { // Hybrid - Old map?
   var injectHere = $('#shop-info');
   var itemNodes = $('td center a img[src*="/items/"]');
 

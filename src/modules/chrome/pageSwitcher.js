@@ -195,6 +195,7 @@ export default {
     'breakdown': {'-': {'-': {'-': composing.composingBreakdown}}},
     'create': {'-': {'-': {'-': composing.composingCreate}}}},
   pvpladder: {'-': {'-': {'-': {'-': misc.ladder}}}},
+  shop: {'-': {'-': {'-': {'-': legacy.injectShop}}}},
   '-': {
     'viewupdatearchive': {'-': {'-': {'-': news.viewArchive}}},
     'viewarchive': {'-': {'-': {'-': news.viewArchive}}},
