@@ -184,7 +184,7 @@ function selfRecall() { // Native
   var selfRecall = getLi[getLi.length - 1].parentNode;
   selfRecall.insertAdjacentHTML('beforeend',
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
-    'user=' + document.getElementById('statbar-character').textContent +
+    'user=' + layout.playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 

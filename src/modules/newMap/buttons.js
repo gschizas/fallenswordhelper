@@ -1,5 +1,6 @@
 import calf from '../support/calf';
 import * as system from '../support/system';
+import * as layout from '../support/layout';
 import assets from './assets';
 
 function doFormGroup(e) { // jQuery
@@ -11,7 +12,7 @@ function doFormGroup(e) { // jQuery
 function openQuickBuff(e) { // Native
   e.preventDefault();
   window.openWindow('index.php?cmd=quickbuff&t=' +
-    document.getElementById('statbar-character').textContent,
+    layout.playerName(),
     'fsQuickBuff', 618, 1000, ',scrollbars');
 }
 

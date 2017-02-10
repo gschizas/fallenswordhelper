@@ -1,6 +1,7 @@
 import * as task from './support/task';
 import * as system from './support/system';
 import * as ajax from './support/ajax';
+import * as layout from './support/layout';
 
 var ranks;
 var myRank;
@@ -122,8 +123,7 @@ function getRanks(membrList) { // Native
     }
     return prev;
   }, {});
-  myRank = membrList[document.getElementById('statbar-character')
-    .textContent].rank_name;
+  myRank = membrList[layout.playerName()].rank_name;
   theRows = document.getElementById('pCC').firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;

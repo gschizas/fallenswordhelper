@@ -143,7 +143,7 @@ export function getProfile(username) {
 }
 
 function getMyProfile() {
-  return getProfile(document.getElementById('statbar-character').textContent)
+  return getProfile(layout.playerName())
     .done(function sendMyProfileToForage(data) {
       setForage('fsh_selfProfile', data);
     });

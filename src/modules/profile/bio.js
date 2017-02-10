@@ -1,4 +1,5 @@
 import * as system from '../support/system';
+import * as layout from '../support/layout';
 
 var buffCost = {'count': 0, 'buffs': {}};
 var bioEditLines;
@@ -66,7 +67,7 @@ function getBuffsToBuy() { // Legacy
   if (targetPlayer.length !== 0) {
     targetPlayer = targetPlayer[0].textContent;
   } else {
-    targetPlayer = document.getElementById('statbar-character').textContent;
+    targetPlayer = layout.playerName();
   }
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
   var greetingText = system.getValue('buyBuffsGreeting').trim();

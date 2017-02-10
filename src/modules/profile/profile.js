@@ -180,8 +180,7 @@ export function injectProfile() { // Native
   if (!avyImg) {return;}
   var playername = document.getElementById('pCC')
     .getElementsByTagName('h1')[0].textContent;
-  var self = playername === document.getElementById('statbar-character')
-    .textContent;
+  var self = playername === layout.playerName();
   if (self) {
     // self inventory
     debuff.fastDebuff();

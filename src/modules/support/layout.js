@@ -59,6 +59,10 @@ export function playerId() { // Native
   return thePlayerId;
 }
 
+export function playerName() {
+  return document.getElementById('statbar-character').textContent;
+}
+
 export function makePageHeader(title, comment, spanId, button) { // Native
   return '<table width=100%><tbody><tr class="fshHeader">' +
     '<td width="90%"><b>&nbsp;' + title + '</b>' +

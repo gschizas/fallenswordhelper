@@ -392,7 +392,7 @@ export function addGuildLogWidgets() { // Legacy
         targetPlayerName + '&search_show_first=1">' + targetPlayerName +
         '</a>' + message.substring(secondQuote, message.length);
       if (!hasInvited &&
-        targetPlayerName !== document.getElementById('statbar-character').textContent) {
+        targetPlayerName !== layout.playerName()) {
         $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
         aRow.style.color = 'gray';
       }
