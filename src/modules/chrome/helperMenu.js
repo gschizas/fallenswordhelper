@@ -3,7 +3,7 @@ import * as common from '../support/common';
 import * as fshGa from '../support/fshGa';
 import * as quickBuff from '../quickBuff';
 import * as combatLog from '../combatLog';
-import * as recipeMgr from '../recipeMgr';
+import * as recipeMgr from '../recipeMgr/recipeMgr';
 import * as lists from '../lists';
 import * as findBuffs from '../findBuffs';
 import * as onlinePlayers from '../onlinePlayers';

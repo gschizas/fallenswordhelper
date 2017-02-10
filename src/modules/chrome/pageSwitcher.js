@@ -27,7 +27,7 @@ import * as upgrades from '../upgrades';
 import * as newGuildLog from '../newGuildLog/newGuildLog';
 import * as scoutTower from '../scoutTower';
 import * as trade from '../trade';
-import * as recipeMgr from '../recipeMgr';
+import * as recipeMgr from '../recipeMgr/recipeMgr';
 import * as quickExtract from '../quickExtract';
 import * as scavenging from '../scavenging';
 import * as findBuffs from '../findBuffs';
