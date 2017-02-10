@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1517a1
+// @version        1518a1
 // @downloadURL    http://192.168.187.40:9966/dist/dev/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -21,7 +21,7 @@ var fshMain = function() {
 
   window.FSH = window.FSH || {};
 
-  FSH.version = '1517a1';
+  FSH.version = '1518a1';
 
   var resources = {
     calfSystemJs: 'http://192.168.187.40:9966/dist/dev/calfSystem.js',

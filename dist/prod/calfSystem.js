@@ -855,6 +855,10 @@ function playerId() { // Native
   return thePlayerId;
 }
 
+function playerName() {
+  return document.getElementById('statbar-character').textContent;
+}
+
 function makePageHeader(title, comment, spanId, button) { // Native
   return '<table width=100%><tbody><tr class="fshHeader">' +
     '<td width="90%"><b>&nbsp;' + title + '</b>' +
@@ -1141,7 +1145,7 @@ function getProfile(username) {
 }
 
 function getMyProfile() {
-  return getProfile(document.getElementById('statbar-character').textContent)
+  return getProfile(playerName())
     .done(function sendMyProfileToForage(data) {
       setForage('fsh_selfProfile', data);
     });
@@ -3498,19 +3502,26 @@ function scrollDownCombatLog() { // Legacy
 }
 
 /* jshint latedef: nofunc */
+var content;
 var recipebook;
+var currentFolder;
+var hideRecipes = [];
+var output;
+
+function storeRecipeBook() {
+  setForage('fsh_recipeBook', recipebook);
+}
 
 function sortRecipeTable(evt) { // Legacy
-  recipebook = getValueJSON('recipebook');
   var headerClicked = evt.target.getAttribute('sortKey');
   var sortType = evt.target.getAttribute('sorttype');
-  if (!sortType) {sortType='string';}
+  if (!sortType) {sortType = 'string';}
   sortType = sortType.toLowerCase();
   if (calf.sortAsc === undefined) {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy===headerClicked) {
-    calf.sortAsc=!calf.sortAsc;
+  if (calf.sortBy && calf.sortBy === headerClicked) {
+    calf.sortAsc = !calf.sortAsc;
   }
-  calf.sortBy=headerClicked;
+  calf.sortBy = headerClicked;
   switch (sortType) {
   case 'number':
     recipebook.recipe.sort(numberSort);
@@ -3523,90 +3534,86 @@ function sortRecipeTable(evt) { // Legacy
 }
 
 function generateRecipeTable() { // Legacy
+  if (!recipebook) {return;}
+  var playerId$$1 = playerId();
   var i;
   var j;
-  var output=document.getElementById('Helper:RecipeManagerOutput');
-  var result='<table id="Helper:RecipeTable" width="100%"><tr>' +
-    '<th align="left" colspan="2" sortkey="name">Name</th>' +
-    '<th align="left">Items</th>' +
-    '<th align="left">Components</th>' +
-    '<th align="left">Target</th>' +
+  var result = '<table width="100%"><tr class="rmTh">' +
+    '<th>Recipe</th>' +
+    '<th><span id="sortName" class="fshLink" sortkey="name">Name</span></th>' +
+    '<th>Items</th>' +
+    '<th>Components</th>' +
+    '<th>Target</th>' +
     '</tr>';
-  if (!recipebook) {return;}
-
-  var hideRecipes=[];
-  if (getValue('hideRecipes')) {
-    hideRecipes=getValue('hideRecipeNames').split(',');
-  }
 
   var recipe;
-  var c=0;
   for (i = 0; i < recipebook.recipe.length; i += 1) {
     recipe = recipebook.recipe[i];
-    c+= 1;
-
-    if (hideRecipes.indexOf(recipe.name) === -1) {
-      result+='<tr class="HelperTableRow'+(1+c % 2)+'" valign="middle">' +
-        '<td style="border-bottom:1px solid #CD9E4B;"><a href="' +
-        recipe.link + '"><img border="0" align="middle" src="' +
-        recipe.img + '"/></a></td>' +
-        '<td style="border-bottom:1px solid #CD9E4B;"><a href="' +
-        recipe.link + '">' + recipe.name + '</a></td>';
-      result += '<td style="border-bottom:1px solid #CD9E4B;">';
-      if (recipe.items) {
-        for (j=0; j<recipe.items.length; j += 1) {
-          result += recipe.items[j].amountPresent + '/' +
-            recipe.items[j].amountNeeded +
-            ' <img border="0" align="middle" class="tip-dynamic" ' +
-            'data-tipped="fetchitem.php?item_id=' +
-            recipe.items[j].id + '&inv_id=-1&t=2&p=' +
-            playerId() + '&vcode=' + recipe.items[j].verify +
-            '" ' +
-            'src="' + recipe.items[j].img + '"/><br/>';
-        }
+    if (hideRecipes.indexOf(recipe.name) !== -1) {continue;}
+    result += '<tr class="rmTr"><td class="rmTd">' +
+      '<a href="' + recipe.link + '">' +
+      '<img src="' + recipe.img +
+      '" height="30px" width="30px">' +
+      '</a>' +
+      '</td>' +
+      '<td class="rmTd">' +
+      '<a href="' + recipe.link + '">' + recipe.name + '</a>' +
+      '</td><td class="rmTd">';
+    if (recipe.items) {
+      for (j = 0; j < recipe.items.length; j += 1) {
+        result += '<div class="rmItem"><img class="tip-dynamic" ' +
+          'data-tipped="fetchitem.php?item_id=' +
+          recipe.items[j].id + '&inv_id=-1&t=2&p=' +
+          playerId$$1 + '&vcode=' + recipe.items[j].verify +
+          '" src="' + recipe.items[j].img +
+          '" height="20px" width="20px"><p>' +
+          recipe.items[j].amountPresent + '/' +
+          recipe.items[j].amountNeeded + '</p></div>';
       }
-      result += '</td>';
-      result += '<td style="border-bottom:1px solid #CD9E4B;">';
-      if (recipe.components) {
-        for (j=0; j<recipe.components.length; j += 1) {
-          result += recipe.components[j].amountPresent + '/' +
-          recipe.components[j].amountNeeded +
-            ' <img border="0" align="middle" class="tip-dynamic" ' +
-            'data-tipped="fetchitem.php?item_id=' +
-            recipe.components[j].id + '&inv_id=-1&t=2&p=' +
-            playerId() + '&vcode=' +
-            recipe.components[j].verify + '" ' +
-            'src="' + recipe.components[j].img + '"/><br/>';
-        }
-      }
-      result += '</td>';
-      result += '<td style="border-bottom:1px solid #CD9E4B;">';
-      if (recipe.target) {
-        result +=' <img border="0" align="middle" class="tip-dynamic" ' +
-            'data-tipped="fetchitem.php?item_id=' +
-            recipe.target.id + '&inv_id=-1&t=2&p=' + playerId() +
-            '&vcode=' + recipe.target.verify + '" ' +
-            'src="' + recipe.target.img + '"/><br/>';
-      }
-      result += '</td>';
-      result += '</tr>';
     }
+    result += '</td><td class="rmTd">';
+    if (recipe.components) {
+      for (j = 0; j < recipe.components.length; j += 1) {
+        result += '<div class="rmItem"><img class="tip-dynamic" ' +
+          'data-tipped="fetchitem.php?item_id=' +
+          recipe.components[j].id + '&inv_id=-1&t=2&p=' +
+          playerId$$1 + '&vcode=' +
+          recipe.components[j].verify + '" src="' +
+          recipe.components[j].img +
+          '" height="20px" width="20px"><p>' +
+          recipe.components[j].amountPresent + '/' +
+          recipe.components[j].amountNeeded + '</p></div>';
+      }
+    }
+    result += '</td>';
+    result += '<td class="rmTd">';
+    if (recipe.target) {
+      result += ' <img class="tip-dynamic" ' +
+          'data-tipped="fetchitem.php?item_id=' +
+          recipe.target.id + '&inv_id=-1&t=2&p=' + playerId$$1 +
+          '&vcode=' + recipe.target.verify + '" ' +
+          'src="' + recipe.target.img +
+          '" height="30px" width="30px"><br/>';
+    }
+    result += '</td>';
+    result += '</tr>';
   }
-  result+='</table>';
-  output.innerHTML=result;
+  result += '</table>';
+  output.innerHTML = result;
 
   recipebook.lastUpdate = new Date();
-  setValueJSON('recipebook', recipebook);
+  storeRecipeBook(); // Why? storing the sorted data?
 
-  var recipeTable=document.getElementById('Helper:RecipeTable');
-  for (i=0; i<recipeTable.rows[0].cells.length; i += 1) {
-    var cell=recipeTable.rows[0].cells[i];
-    if (cell.getAttribute('sortkey')) {
-      cell.style.textDecoration='underline';
-      cell.style.cursor='pointer';
-      cell.addEventListener('click', sortRecipeTable, true);
-    }
-  }
+  // var recipeTable = document.getElementById('fshRcp');
+  // for (i = 0; i < recipeTable.rows[0].cells.length; i += 1) {
+    // var cell = recipeTable.rows[0].cells[i];
+    // if (cell.getAttribute('sortkey')) {
+      // cell.classList.add('fshLink');
+      // cell.addEventListener('click', sortRecipeTable);
+    // }
+  // }
+  document.getElementById('sortName')
+    .addEventListener('click', sortRecipeTable);
 }
 
 function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
@@ -3619,8 +3626,8 @@ function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
       img: $(this).find('img').attr('src'),
       id: mouseOverRX[1],
       verify: mouseOverRX[3],
-      amountPresent: parseInt(resultAmounts.split('/')[0],10),
-      amountNeeded: parseInt(resultAmounts.split('/')[1],10)
+      amountPresent: parseInt(resultAmounts.split('/')[0], 10),
+      amountNeeded: parseInt(resultAmounts.split('/')[1], 10)
     };
     results.push(result);
   });
@@ -3628,18 +3635,17 @@ function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
 }
 
 function parseRecipePage(responseText, callback) { // Legacy
-  var doc=createDocument(responseText);
-  var output=document.getElementById('Helper:RecipeManagerOutput');
+  var doc = createDocument(responseText);
   var currentRecipeIndex = callback.recipeIndex;
   var recipe = recipebook.recipe[currentRecipeIndex];
 
-  output.innerHTML+='Parsing blueprint ' + recipe.name +'...<br/>';
+  output.innerHTML += 'Parsing blueprint ' + recipe.name + '...<br/>';
 
   recipe.items = parseRecipeItemOrComponent('td[background*="/inventory/2x3.gif"]', doc);
   recipe.components = parseRecipeItemOrComponent('td[background*="/inventory/1x1mini.gif"]', doc);
   recipe.target = parseRecipeItemOrComponent('td[background*="/hellforge/2x3.gif"]', doc)[0];
 
-  var nextRecipeIndex = currentRecipeIndex+1;
+  var nextRecipeIndex = currentRecipeIndex + 1;
   if (nextRecipeIndex < recipebook.recipe.length) {
     var nextRecipe = recipebook.recipe[nextRecipeIndex];
     xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
@@ -3647,28 +3653,25 @@ function parseRecipePage(responseText, callback) { // Legacy
       {'recipeIndex': nextRecipeIndex});
   }
   else {
-    output.innerHTML+='Finished parsing ... formatting ...';
+    output.innerHTML += 'Finished parsing ... formatting ...';
     recipebook.lastUpdate = new Date();
-    setValueJSON('recipebook', recipebook);
+    storeRecipeBook();
     generateRecipeTable();
   }
 }
 
 function parseInventingPage(responseText, callback) { // Legacy
-  var doc=createDocument(responseText);
+  var doc = createDocument(responseText);
 
-  var folderIDs = [];
-  calf.folderIDs = folderIDs; //clear out the array before starting.
-  var currentFolder = getValue('currentFolder');
+  var folderIDs = []; //clear out the array before starting.
   $(doc).find('a[href*="index.php?cmd=inventing&folder_id="]')
     .each(function(){
-    var folderID = /folder_id=([-0-9]+)/.exec($(this).attr('href'))[1]*1;
-    folderIDs.push(folderID);
-    calf.folderIDs = folderIDs;
-  });
+      var folderID = /folder_id=([-0-9]+)/.exec($(this).attr('href'))[1] * 1;
+      folderIDs.push(folderID);
+    });
 
-  var folderCount = calf.folderIDs.length;
-  var folderID = calf.folderIDs[currentFolder-1];
+  var folderCount = folderIDs.length;
+  var folderID = folderIDs[currentFolder - 1];
   var folderTextElement = $(doc).find(
     'a[href*="index.php?cmd=inventing&folder_id=' + folderID + '"]')
     .closest('td').text();
@@ -3677,7 +3680,6 @@ function parseInventingPage(responseText, callback) { // Legacy
   if (folderTextElement.length > 0) {
     folderText = folderTextElement;
   }
-  var output=document.getElementById('Helper:RecipeManagerOutput');
   var currentPage = callback.page;
   var pages = $(doc).find('select[name="page"]:first');
   var nextPage;
@@ -3686,33 +3688,34 @@ function parseInventingPage(responseText, callback) { // Legacy
     $(doc).find(
       'a[href*="index.php?cmd=inventing&subcmd=viewrecipe&recipe_id="]')
       .each(function(){
-      var recipeLink = $(this).attr('href');
-      var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1],10);
-      var recipe={
-        'img': $(this).closest('tr').find('img').attr('src'),
-        'link': recipeLink,
-        'name': $(this).text(),
-        'id': recipeId};
-      output.innerHTML+='Found blueprint: '+ recipe.name + '<br/>';
-      recipebook.recipe.push(recipe);
-    });
+        var recipeLink = $(this).attr('href');
+        var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1], 10);
+        var recipe = {
+          'img': $(this).closest('tr').find('img').attr('src'),
+          'link': recipeLink,
+          'name': $(this).text(),
+          'id': recipeId};
+        output.innerHTML += 'Found blueprint: ' + recipe.name + '<br/>';
+        recipebook.recipe.push(recipe);
+      });
 
-    nextPage=currentPage+1;
+    nextPage = currentPage + 1;
     output.innerHTML += 'Parsing folder '+ currentFolder + ' ... Page ' +
       nextPage + '... <br/>';
 
   } else {
-    output.innerHTML += 'Skipping folder '+ currentFolder +
+    output.innerHTML += 'Skipping folder ' + currentFolder +
       ' as it has the word "quest" in folder name.<br/>';
-    nextPage = pages.find('option:last').text()*1;
+    nextPage = pages.find('option:last').text() * 1;
   }
-  if (nextPage<=pages.find('option:last').text()*1 &&
-      currentFolder!==folderCount || currentFolder<folderCount) {
-    if (nextPage===pages.find('option:last').text()*1 &&
-        currentFolder<folderCount) {
+  if (nextPage <= pages.find('option:last').text() * 1 &&
+      currentFolder !== folderCount ||
+      currentFolder < folderCount) {
+    if (nextPage === pages.find('option:last').text() * 1 &&
+        currentFolder < folderCount) {
       nextPage = 0;
-      folderID = calf.folderIDs[currentFolder];
-      setValue('currentFolder', currentFolder+1);
+      folderID = folderIDs[currentFolder];
+      currentFolder += 1;
     }
     xmlhttp(
       'index.php?cmd=inventing&page=' + nextPage + '&folder_id=' +
@@ -3720,9 +3723,8 @@ function parseInventingPage(responseText, callback) { // Legacy
       parseInventingPage,
       {'page': nextPage}
     );
-  }
-  else {
-    output.innerHTML+=
+  } else {
+    output.innerHTML +=
       'Finished parsing ... Retrieving individual blueprints...<br/>';
     xmlhttp(
       'index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
@@ -3734,32 +3736,35 @@ function parseInventingPage(responseText, callback) { // Legacy
 function parseInventingStart(){ // Legacy
   recipebook = {};
   recipebook.recipe = [];
-  var output=document.getElementById('Helper:RecipeManagerOutput');
-  output.innerHTML='<br/>Parsing inventing screen ...<br/>';
-  var currentFolder = 1;
-  setValue('currentFolder', currentFolder);
+  output.innerHTML = '<br/>Parsing inventing screen ...<br/>';
+  currentFolder = 1;
   xmlhttp('index.php?cmd=inventing&page=0',
     parseInventingPage, {'page': 0});
 }
 
-function injectRecipeManager(content) { // Legacy
-  if (!content) {content = notebookContent();}
-  recipebook = getValueJSON('recipebook');
-  content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" ' +
-    'width="100%"><tr style="background-color:#cd9e4b">'+
-    '<td width="90%" nobr><b>&nbsp;Recipe Manager</b></td>'+
-    '<td width="10%" nobr style="font-size:x-small;text-align:right">[' +
-    '<span id="Helper:RecipeManagerRefresh" style="text-decoration:' +
-    'underline;cursor:pointer">Refresh</span>]</td>'+
-    '</tr>' +
-    '</table>' +
-    '<div style="font-size:small;" id="Helper:RecipeManagerOutput">' +
-    '' +
-    '</div>';
+function gotRecipeBook(data) {
+  recipebook = data;
+  if (getValue('hideRecipes')) {
+    hideRecipes = getValue('hideRecipeNames').split(',') || [];
+  }
+  content.innerHTML='<table class="fshInvFilter"><thead><tr>'+
+    '<th width="90%"><b>&nbsp;Recipe Manager</b></th>'+
+    '<th width="10%" class="fshBtnBox">[' +
+    '<span id="rfsh" class="fshLink">' +
+    'Refresh</span>]</th>'+
+    '</tr></thead></table>' +
+    '<div id="fshOutput"></div>';
+  output = document.getElementById('fshOutput');
+  document.getElementById('rfsh')
+    .addEventListener('click', parseInventingStart);
   if (!recipebook) {parseInventingStart();}
-  document.getElementById('Helper:RecipeManagerRefresh')
-    .addEventListener('click', parseInventingStart, true);
-  generateRecipeTable();
+  else {generateRecipeTable();}
+}
+
+function injectRecipeManager(injector) { // Legacy
+  if (injector) {content = injector;}
+  else {content = notebookContent();}
+  getForage('fsh_recipeBook').done(gotRecipeBook);
 }
 
 function generateManageTable() { // Legacy
@@ -3967,7 +3972,7 @@ function uniq(arr, removeBy){ // Ugly but fast
 function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
   var doc = createDocument(responseText);
   //name and level
-  var playerName = $(doc).find('#pCC h1:first').text();
+  var playerName$$1 = $(doc).find('#pCC h1:first').text();
   var levelElement = $(doc).find('td:contains("Level:"):last').next();
   var levelValue = parseInt(levelElement.text().replace(/,/g,''),10);
   var virtualLevelElement = $(doc).find('td:contains("VL:"):last').next();
@@ -4034,9 +4039,9 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
       playerHREF + '" target="new" ' +
       // FIXME - It kind works now, but not guaranteed?
       'class="tipped" data-tipped-options="hook: \'leftmiddle\'" ' + 
-      'data-tipped="'+bioTip+'">' + playerName + '</a>' +
+      'data-tipped="'+bioTip+'">' + playerName$$1 + '</a>' +
       '&nbsp;<span style="color:blue;">[<span class="a-reply" ' +
-      'target_player="' + playerName +'" style="cursor:pointer; ' +
+      'target_player="' + playerName$$1 +'" style="cursor:pointer; ' +
       'text-decoration:underline;">m</span>]</span>' + '</nobr><br>' +
       '<span style="color:gray;">Level:&nbsp;</span>' + levelValue +
       '&nbsp;(' + virtualLevelValue + ')';
@@ -5194,7 +5199,7 @@ function contactColor(last_login, type) { // Native
   return out;
 }
 
-function playerName(val, type) { // Native
+function playerName$1(val, type) { // Native
   return '<a class="player-name tip-static ' +
     contactColor(val.last_login, type) +
     '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
@@ -5227,7 +5232,7 @@ function addContact(contactList, type) { // Native
     if (!calf.hideBuffSelected) {
       output += buffCheck;
     }
-    output += playerName(val, type);
+    output += playerName$1(val, type);
     output += '</div><div class="guild-minibox-actions">';
     if (!calf.hideGuildInfoMessage) {
       output += msgButton;
@@ -5660,7 +5665,7 @@ function getBuffsToBuy() { // Legacy
   if (targetPlayer.length !== 0) {
     targetPlayer = targetPlayer[0].textContent;
   } else {
-    targetPlayer = document.getElementById('statbar-character').textContent;
+    targetPlayer = playerName();
   }
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
   var greetingText = getValue('buyBuffsGreeting').trim();
@@ -6069,8 +6074,7 @@ function injectProfile() { // Native
   if (!avyImg) {return;}
   var playername = document.getElementById('pCC')
     .getElementsByTagName('h1')[0].textContent;
-  var self = playername === document.getElementById('statbar-character')
-    .textContent;
+  var self = playername === playerName();
   if (self) {
     // self inventory
     fastDebuff();
@@ -7888,7 +7892,7 @@ function doFormGroup(e) { // jQuery
 function openQuickBuff(e) { // Native
   e.preventDefault();
   window.openWindow('index.php?cmd=quickbuff&t=' +
-    document.getElementById('statbar-character').textContent,
+    playerName(),
     'fsQuickBuff', 618, 1000, ',scrollbars');
 }
 
@@ -10009,8 +10013,7 @@ function getRanks(membrList) { // Native
     }
     return prev;
   }, {});
-  myRank = membrList[document.getElementById('statbar-character')
-    .textContent].rank_name;
+  myRank = membrList[playerName()].rank_name;
   theRows = document.getElementById('pCC').firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;
@@ -10873,7 +10876,7 @@ function removeHTML(buffName) { // Native
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
 }
 
-function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
+function doChat(aRow, isGuildMate, playerName$$1, addAttackLinkToLog) { // Legacy
   var buffList$$1 = buffList;
   var dateHTML = aRow.cells[1].innerHTML;
   var dateFirstPart = dateHTML
@@ -10883,7 +10886,7 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
   var extraPart = '';
   if (!isGuildMate) {
     extraPart = ' | <a title="Add to Ignore List" href="index.php?cmd' +
-      '=log&subcmd=doaddignore&ignore_username=' + playerName +
+      '=log&subcmd=doaddignore&ignore_username=' + playerName$$1 +
       '">Ignore</a>';
   }
   aRow.cells[1].innerHTML = dateFirstPart + '</a>' + extraPart +
@@ -10896,13 +10899,13 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
   thirdPart = ' | <a ' + quickBuffHref(targetPlayerID) + '>Buff</a></span>';
   var fourthPart = messageHTML.substring(messageHTML.indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
   var lastPart = messageHTML.substring(messageHTML.indexOf('</small>'), messageHTML.length);
-  extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName + '">Trade</a> | ' +
-    '<a title="Secure Trade" href="index.php?cmd=trade&subcmd=createsecure&target_username=' + playerName +
+  extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName$$1 + '">Trade</a> | ' +
+    '<a title="Secure Trade" href="index.php?cmd=trade&subcmd=createsecure&target_username=' + playerName$$1 +
     '">ST</a>';
 
   var attackPart = '';
   if (addAttackLinkToLog) {
-    attackPart = ' | <a href="index.php?cmd=attackplayer&target_username=' + playerName +'">Attack</a>';
+    attackPart = ' | <a href="index.php?cmd=attackplayer&target_username=' + playerName$$1 +'">Attack</a>';
   }
 
   var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
@@ -10956,7 +10959,7 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
 
   var msgReplyTo = '[ <span style="cursor:pointer;text-' +
     'decoration:underline"class="a-reply" target_player="' +
-    playerName + '" replyTo="' +
+    playerName$$1 + '" replyTo="' +
     (getValue('enableChatParsing') ?
     removeHTML(firstPart.replace(/&nbsp;/g, ' '))
     .substr(0, 140) : '') + '...">Reply</span>';
@@ -11004,7 +11007,7 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
 function addLogWidgetsOld() { // Legacy
   var i;
   var playerElement;
-  var playerName;
+  var playerName$$1;
   // var dateHTML;
   var addAttackLinkToLog = getValue('addAttackLinkToLog');
   var logTable = findNode('//table[tbody/tr/td/span[contains' +
@@ -11036,7 +11039,7 @@ function addLogWidgetsOld() { // Legacy
     var isGuildMate = false;
     if (messageType === 'Chat') {
       playerElement = aRow.cells[2].firstChild;
-      playerName = playerElement.innerHTML;
+      playerName$$1 = playerElement.innerHTML;
       colorPlayerName = true;
     }
     if ((messageType === 'General' ||
@@ -11046,30 +11049,30 @@ function addLogWidgetsOld() { // Legacy
       aRow.cells[2].firstChild.nextSibling.getAttribute('href')
         .search('player_id') !== -1) {
       playerElement = aRow.cells[2].firstChild.nextSibling;
-      playerName = playerElement.innerHTML;
+      playerName$$1 = playerElement.innerHTML;
       colorPlayerName = true;
     }
     if (colorPlayerName) {
-      if (memberNameString.indexOf(playerName) !== -1) {
+      if (memberNameString.indexOf(playerName$$1) !== -1) {
         playerElement.style.color='green';
         isGuildMate = true;
       }
-      if (listOfEnemies.indexOf(playerName) !== -1) {
+      if (listOfEnemies.indexOf(playerName$$1) !== -1) {
         playerElement.style.color='red';
       }
-      if (listOfAllies.indexOf(playerName) !== -1) {
+      if (listOfAllies.indexOf(playerName$$1) !== -1) {
         playerElement.style.color='blue';
       }
     }
     if (messageType === 'Chat') {
-      doChat(aRow, isGuildMate, playerName, addAttackLinkToLog);
+      doChat(aRow, isGuildMate, playerName$$1, addAttackLinkToLog);
     }
     if (messageType === 'Notification') {
       if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName === 'A') {
         if (aRow.cells[2].firstChild.nextSibling.getAttribute('href').search('player_id') !== -1) {
           if (!isGuildMate) {
             // dateHTML = aRow.cells[1].innerHTML;
-            var dateExtraText = '<nobr><span style="font-size:x-small;">[ <a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
+            var dateExtraText = '<nobr><span style="font-size:x-small;">[ <a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName$$1 +
             '">Ignore</a> ]</span></nobr>';
             aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' + dateExtraText;
           }
@@ -11178,7 +11181,7 @@ function addGuildLogWidgets() { // Legacy
         targetPlayerName + '&search_show_first=1">' + targetPlayerName +
         '</a>' + message.substring(secondQuote, message.length);
       if (!hasInvited &&
-        targetPlayerName !== document.getElementById('statbar-character').textContent) {
+        targetPlayerName !== playerName()) {
         $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
         aRow.style.color = 'gray';
       }
@@ -11925,7 +11928,7 @@ function selfRecall() { // Native
   var selfRecall = getLi[getLi.length - 1].parentNode;
   selfRecall.insertAdjacentHTML('beforeend',
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
-    'user=' + document.getElementById('statbar-character').textContent +
+    'user=' + playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
@@ -11971,7 +11974,8 @@ function recallGuildStoreItem(evt) { // Legacy
   var guildStoreID=evt.target.getAttribute('itemID');
   var recallHref =
     'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
-    guildStoreID + '&ajax=1';
+    // guildStoreID + '&ajax=1'; // TODO
+    guildStoreID;
   xmlhttp(recallHref,
     recallGuildStoreItemReturnMessage,
     {'item': guildStoreID, 'target': evt.target, 'url': recallHref});
@@ -12917,7 +12921,7 @@ var oldMoves = [];
 var tableOpts = {
   paging: false,
   info: false,
-  order: [[3, 'desc'],[0, 'asc']],
+  order: [[3, 'asc'],[0, 'asc']],
   columnDefs: [
     {orderable: false, targets: [8, 9]}
   ],
@@ -13077,7 +13081,7 @@ function sortHandler(evt) { // jQuery
   var sortOrder = 'desc';
   if (test && test[1] === '_desc') {sortOrder = 'asc';}
   if (myCol !== 3) {
-    table.order([3, 'desc'], [myCol, sortOrder]).draw();
+    table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {
     table.order([3, sortOrder]).draw();
   }
@@ -13202,9 +13206,9 @@ function process(arena) { // jQuery
   setForage('fsh_arena', opts);
   lvlFilter$1();
   theTables.DataTable(tableOpts);
-  $('td[class*="sorting"]', tabs).off('click');
+  $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
   $('div.dataTables_filter').hide();
-  tabs.on('click', 'td[class*="sorting"]', sortHandler);
+  tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
   tabs.on('click', 'input.custombutton[type="submit"]', dontPost$1);
 
   timeEnd('arena.process');
@@ -13413,6 +13417,7 @@ var pageSwitcher = {
     'breakdown': {'-': {'-': {'-': composingBreakdown}}},
     'create': {'-': {'-': {'-': composingCreate}}}},
   pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
+  shop: {'-': {'-': {'-': {'-': injectShop}}}},
   '-': {
     'viewupdatearchive': {'-': {'-': {'-': viewArchive}}},
     'viewarchive': {'-': {'-': {'-': viewArchive}}},
