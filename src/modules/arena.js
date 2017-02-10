@@ -28,7 +28,7 @@ var oldMoves = [];
 var tableOpts = {
   paging: false,
   info: false,
-  order: [[3, 'desc'],[0, 'asc']],
+  order: [[3, 'asc'],[0, 'asc']],
   columnDefs: [
     {orderable: false, targets: [8, 9]}
   ],
@@ -188,7 +188,7 @@ function sortHandler(evt) { // jQuery
   var sortOrder = 'desc';
   if (test && test[1] === '_desc') {sortOrder = 'asc';}
   if (myCol !== 3) {
-    table.order([3, 'desc'], [myCol, sortOrder]).draw();
+    table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {
     table.order([3, sortOrder]).draw();
   }
@@ -313,9 +313,9 @@ function process(arena) { // jQuery
   ajax.setForage('fsh_arena', opts);
   lvlFilter();
   theTables.DataTable(tableOpts);
-  $('td[class*="sorting"]', tabs).off('click');
+  $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
   $('div.dataTables_filter').hide();
-  tabs.on('click', 'td[class*="sorting"]', sortHandler);
+  tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
   tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
 
   debug.timeEnd('arena.process');
