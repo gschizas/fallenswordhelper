@@ -230,7 +230,8 @@ function recallGuildStoreItem(evt) { // Legacy
   var guildStoreID=evt.target.getAttribute('itemID');
   var recallHref =
     'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
-    guildStoreID + '&ajax=1';
+    // guildStoreID + '&ajax=1'; // TODO
+    guildStoreID;
   system.xmlhttp(recallHref,
     recallGuildStoreItemReturnMessage,
     {'item': guildStoreID, 'target': evt.target, 'url': recallHref});
