@@ -230,3 +230,10 @@ export function numberSort(a,b) {
   if (!calf.sortAsc) {result=-result;}
   return result;
 }
+
+export function testQuant(aValue) { // Native
+  var theValue = parseInt(aValue, 10);
+  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+    return theValue;
+  }
+}

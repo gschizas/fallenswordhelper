@@ -5,6 +5,7 @@ import * as buttons from './buttons';
 import * as monsterLog from './monsterLog';
 import * as sendGold from './sendGold';
 import * as viewCreature from './viewCreature';
+import * as shop from './shop';
 
 var showHuntingBuffs;
 var huntingBuffs;
@@ -266,14 +267,7 @@ export function subscribes() { // jQuery
     }
   );
 
-  /*
   // somewhere near here will be multi buy on shop
-  $.subscribe('prompt.worldDialogShop', function(e, data){
-    self._createShop(self.shop.items);
-    $('span[class="price"]').after('<span class="numTake">test</span>');
-  });
-  document.getElementById('Helper:SendGold')
-    .addEventListener('click', calf.sendGoldToPlayer, true);
-  */
+  shop.prepareShop();
 
 }

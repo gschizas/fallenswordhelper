@@ -489,6 +489,9 @@ table.fshInvFilter td {
   margin: 0;
 }
 
+/* New World Shop Multi Buy */
+
+.fshClear {clear: both;}
 
 /*
  * Table styles

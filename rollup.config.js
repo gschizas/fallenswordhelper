@@ -23,8 +23,8 @@ let entry = 'src/' + filename;
 let dest = 'dist/' + folder + '/' + filename;
 
 // jscc options
-let opts = {};
-opts.values = {};
+let opts = {values: {}};
+// opts.values = {};
 let values = opts.values;
 
 switch (true) {
