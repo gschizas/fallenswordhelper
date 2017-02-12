@@ -480,10 +480,10 @@ table.fshInvFilter td {
 }
 .rmTd img {
   margin: 0 auto;
-  display: inline-block;
 }
 .rmItem {
   display: inline-block;
+  margin: 0 3px;
 }
 .rmItem p {
   margin: 0;
