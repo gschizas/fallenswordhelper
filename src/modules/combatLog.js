@@ -1,5 +1,5 @@
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 function notepadCopyLog() { // Native
   var combatLog = document.getElementById('Helper:CombatLog');
@@ -14,7 +14,7 @@ function notepadClearLog() { // Legacy
   }
 }
 
-function injectNotepadShowLogs(content) { // Legacy
+export function injectNotepadShowLogs(content) { // Legacy
   if (!content) {content = layout.notebookContent();}
   var combatLog = system.getValue('CombatLog');
   if (combatLog.indexOf(',') === 0) {
@@ -53,18 +53,12 @@ function injectNotepadShowLogs(content) { // Legacy
     .addEventListener('click', notepadClearLog);
 }
 
-function scrollUpCombatLog() { // Legacy
+export function scrollUpCombatLog() { // Legacy
   var reportLog = system.findNode('//div[@id="reportsLog"]');
   reportLog.scrollTop-=10;
 }
 
-function scrollDownCombatLog() { // Legacy
+export function scrollDownCombatLog() { // Legacy
   var reportLog = system.findNode('//div[@id="reportsLog"]');
   reportLog.scrollTop+=10;
 }
-
-export default {
-  injectNotepadShowLogs: injectNotepadShowLogs,
-  scrollUpCombatLog: scrollUpCombatLog,
-  scrollDownCombatLog: scrollDownCombatLog,
-};

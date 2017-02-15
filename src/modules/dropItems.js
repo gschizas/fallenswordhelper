@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import task from './support/task';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import ajax from './support/ajax';
-import common from './support/common';
+import * as task from './support/task';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
+import * as common from './support/common';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -306,16 +306,11 @@ function injectDropItems() { // Native
   task.add(3, getItems);
 }
 
-function injectProfileDropItems() { // Native
+export function injectProfileDropItems() { // Native
   injectDropItems();
   injectMoveItems();
 }
 
-function injectStoreItems() { // Native
+export function injectStoreItems() { // Native
   injectDropItems();
 }
-
-export default {
-  injectProfileDropItems: injectProfileDropItems,
-  injectStoreItems: injectStoreItems
-};

@@ -1,6 +1,7 @@
-import task from './support/task';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
+import * as layout from './support/layout';
 
 var ranks;
 var myRank;
@@ -122,21 +123,16 @@ function getRanks(membrList) { // Native
     }
     return prev;
   }, {});
-  myRank = membrList[document.getElementById('statbar-character')
-    .textContent].rank_name;
+  myRank = membrList[layout.playerName()].rank_name;
   theRows = document.getElementById('pCC').firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;
   task.add(3, paintRanks);
 }
 
-function injectGuildRanks() { // jQuery
+export function injectGuildRanks() { // jQuery
   ajax.getMembrList(true).done(function(membrList) {
     task.add(3, getRanks, [membrList]);
   });
   task.add(3, doButtons);
 }
-
-export default {
-  injectGuildRanks: injectGuildRanks,
-};

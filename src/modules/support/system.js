@@ -1,11 +1,16 @@
 import calf from './calf';
-import dataObj from './dataObj';
+import * as dataObj from './dataObj';
 
-function getValue(name) {
+export var server = document.location.protocol + '//' + document.location.host + '/';
+export var imageServer = window.HCS && window.HCS.defines &&
+  window.HCS.defines.fileserver &&
+  window.HCS.defines.fileserver.slice(0, -1);
+
+export function getValue(name) {
   return GM_getValue(name, dataObj.defaults[name]);
 }
 
-function getValueJSON(name) {
+export function getValueJSON(name) {
   var resultJSON = getValue(name);
   var result;
   if (resultJSON) {
@@ -23,15 +28,15 @@ function getValueJSON(name) {
   return result;
 }
 
-function setValueJSON(name, value) {
+export function setValueJSON(name, value) {
   GM_setValue(name, JSON.stringify(value));
 }
 
-function setValue(name, value) {
+export function setValue(name, value) {
   GM_setValue(name, value);
 }
 
-function findNodes(xpath, doc) {
+export function findNodes(xpath, doc) {
   var nodes = [];
   if (xpath.indexOf('/') === 0) {
     xpath = '.'+xpath;
@@ -61,20 +66,20 @@ function findNodes(xpath, doc) {
   return nodes;
 }
 
-function findNode(xpath, doc) {
+export function findNode(xpath, doc) {
   var nodes = findNodes(xpath, doc);
   if (!nodes) {return null;}
   return nodes[0];
 }
 
-function createDocument(details) {
+export function createDocument(details) {
   // Use DOMParser to prevent img src tags downloading
   var parser = new DOMParser();
   var doc = parser.parseFromString(details, 'text/html');
   return doc;
 }
 
-function formatDateTime(aDate) {
+export function formatDateTime(aDate) {
   var yyyy = aDate.getFullYear();
   var mon = aDate.getMonth() + 1;
   if (mon < 10) {mon = '0' + mon;}
@@ -90,7 +95,7 @@ function formatDateTime(aDate) {
   return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
-function xmlhttp(theUrl, func, theCallback) {
+export function xmlhttp(theUrl, func, theCallback) {
   return $.ajax({
     url: theUrl,
     callback: theCallback,
@@ -102,12 +107,12 @@ function xmlhttp(theUrl, func, theCallback) {
   });
 }
 
-function intValue(theText) {
+export function intValue(theText) {
   if (!theText) {return 0;}
   return parseInt(theText.replace(/,/g,''), 10);
 }
 
-function getIntFromRegExp(theText, rxSearch) {
+export function getIntFromRegExp(theText, rxSearch) {
   var result;
   var matches = theText.replace(/,/g,'').match(rxSearch);
   if (matches) {
@@ -118,11 +123,11 @@ function getIntFromRegExp(theText, rxSearch) {
   return result;
 }
 
-function addCommas(x) {
+export function addCommas(x) {
   return x.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',');
 }
 
-function convertTextToHtml(inputText) {
+export function convertTextToHtml(inputText) {
   return inputText
     .replace(/</g,'&lt')
     .replace(/>/g,'&gt')
@@ -131,33 +136,20 @@ function convertTextToHtml(inputText) {
     .replace(/\[([a-z])\]/g,'<\$1>');
 }
 
-function parseDate(textDate) {
-  var textDateSplitSpace = textDate.split(' ');
-  var timeText = textDateSplitSpace[0];
-  var dateText = textDateSplitSpace[1];
-  var dayText = dateText.split('/')[0];
-  var monthText = dateText.split('/')[1];
-  var months = {'Jan': 'January',
-    'Feb': 'February',
-    'Mar': 'March',
-    'Apr': 'April',
-    'May': 'May',
-    'Jun': 'June',
-    'Jul': 'July',
-    'Aug': 'August',
-    'Sep': 'September',
-    'Oct': 'October',
-    'Nov': 'November',
-    'Dec': 'December'
-    };
-  var fullMonthText = months[monthText];
-  var yearText = dateText.split('/')[2];
-  var dateAsDate = new Date(fullMonthText + ' ' + dayText + ', ' +
-    yearText + ' ' + timeText + ':00');
-  return dateAsDate;
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
+  'Oct', 'Nov', 'Dec'];
+
+export function parseDateAsTimestamp(textDate) {
+  var dateAry = textDate.split(/[: \/]/);
+  return Date.UTC(dateAry[4] * 1, months.indexOf(dateAry[3]),
+    dateAry[2] * 1, dateAry[0] * 1, dateAry[1] * 1, 0);
 }
 
-function toggleVisibilty(evt) {
+export function parseDate(textDate) {
+  return new Date(parseDateAsTimestamp(textDate));
+}
+
+export function toggleVisibilty(evt) {
   var anItemId = evt.target.getAttribute('linkto');
   var anItem = document.getElementById(anItemId);
   var currentVisibility = anItem.classList.contains('fshHide');
@@ -169,7 +161,7 @@ function toggleVisibilty(evt) {
   }
 }
 
-function getUrlParameter(sParam) {
+export function getUrlParameter(sParam) {
   var sPageURL = decodeURIComponent(window.location.search.substring(1)),
     sURLVariables = sPageURL.split('&'),
     sParameterName,
@@ -184,7 +176,7 @@ function getUrlParameter(sParam) {
   }
 }
 
-function formatLastActivity(last_login) {
+export function formatLastActivity(last_login) {
   var d, h, m, s;
   s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
   m = Math.floor(s / 60);
@@ -210,7 +202,7 @@ function path(obj, path, def){
   return obj;
 }
 
-function stringSort(a,b) {
+export function stringSort(a,b) {
   var result=0;
   a = path(a, calf.sortBy, 'a');
   b = path(b, calf.sortBy, 'a');
@@ -220,7 +212,7 @@ function stringSort(a,b) {
   return result;
 }
 
-function numberSort(a,b) {
+export function numberSort(a,b) {
   var result=0;
   if (typeof a.type !== undefined){
     if (a.type > 8) {return 1;} //non equipment items
@@ -239,29 +231,9 @@ function numberSort(a,b) {
   return result;
 }
 
-export default {
-  getValue: getValue,
-  getValueJSON: getValueJSON,
-  setValueJSON: setValueJSON,
-  setValue: setValue,
-  findNode: findNode,
-  findNodes: findNodes,
-  createDocument: createDocument,
-  formatDateTime: formatDateTime,
-  xmlhttp: xmlhttp,
-  intValue: intValue,
-  getIntFromRegExp: getIntFromRegExp,
-  addCommas: addCommas,
-  convertTextToHtml: convertTextToHtml,
-  parseDate: parseDate,
-  toggleVisibilty: toggleVisibilty,
-  getUrlParameter: getUrlParameter,
-  formatLastActivity: formatLastActivity,
-  stringSort: stringSort,
-  numberSort: numberSort,
-  server: document.location.protocol + '//' +
-    document.location.host + '/',
-  imageServer: window.HCS && window.HCS.defines &&
-    window.HCS.defines.fileserver &&
-    window.HCS.defines.fileserver.slice(0, -1),
-};
+export function testQuant(aValue) { // Native
+  var theValue = parseInt(aValue, 10);
+  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
+    return theValue;
+  }
+}

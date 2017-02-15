@@ -1,7 +1,7 @@
-import system from '../support/system';
-import layout from '../support/layout';
+import * as system from '../support/system';
+import * as layout from '../support/layout';
 
-function doSendGold() { // jQuery
+export function doSendGold() { // jQuery
   $.ajax({
     url: 'index.php',
     data: {
@@ -22,7 +22,7 @@ function doSendGold() { // jQuery
   });
 }
 
-function injectSendGoldOnWorld() { // jQuery
+export function injectSendGoldOnWorld() { // jQuery
   $('#statbar-gold-tooltip-general').append(
     '<dt class="stat-gold-sendTo">Send To:</dt>' +
     '<dd id="HelperSendTo">' + system.getValue('goldRecipient') +
@@ -42,7 +42,7 @@ function injectSendGoldOnWorld() { // jQuery
   $('#HelperSendGold').click(doSendGold);
 }
 
-function updateSendGoldOnWorld(data) { // jQuery
+export function updateSendGoldOnWorld(data) { // jQuery
   $('#HelperSendTotal')
     .html(system.getValue('currentGoldSentTotal')
     .toString()
@@ -54,9 +54,3 @@ function updateSendGoldOnWorld(data) { // jQuery
     $('#statbar-gold').css('background-color','inherit');
   }
 }
-
-export default {
-  doSendGold: doSendGold,
-  injectSendGoldOnWorld: injectSendGoldOnWorld,
-  updateSendGoldOnWorld: updateSendGoldOnWorld
-};

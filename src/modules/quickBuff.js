@@ -1,7 +1,7 @@
-import buffObj from './support/buffObj';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as buffObj from './support/buffObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var retries = 0;
 var quickBuffHeader =
@@ -221,7 +221,7 @@ function buffResult(buffLog) { // Native
   ajax.setForage('fsh_buffLog', buffLog);
 }
 
-function injectQuickBuff() { // jQuery
+export function injectQuickBuff() { // jQuery
   var quickbuffDiv = document.getElementById('quickbuff');
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
@@ -229,12 +229,12 @@ function injectQuickBuff() { // jQuery
   ajax.getProfile(window.self).done(getSustain);
 }
 
-function updateBuffLog() { // Native
+export function updateBuffLog() { // Native
   if (!system.getValue('keepBuffLog')) {return;}
   ajax.getForage('fsh_buffLog').done(buffResult);
 }
 
-function injectBuffLog(content) { // Native
+export function injectBuffLog(content) { // Native
   if (!content) {content = layout.notebookContent();}
   content.innerHTML = layout.makePageTemplate('Buff Log', '',
     'clearBuffs', 'Clear', 'bufflog');
@@ -249,9 +249,3 @@ function injectBuffLog(content) { // Native
     document.getElementById('bufflog').innerHTML = buffLog;
   });
 }
-
-export default {
-  injectQuickBuff: injectQuickBuff,
-  updateBuffLog: updateBuffLog,
-  injectBuffLog: injectBuffLog,
-};

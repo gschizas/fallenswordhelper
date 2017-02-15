@@ -1,19 +1,19 @@
 import calf from '../support/calf';
-import system from '../support/system';
-import layout from '../support/layout';
-import settingObj from './settingObj';
+import * as system from '../support/system';
+import * as layout from '../support/layout';
+import * as settingObj from './settingObj';
 
 var networkIcon = settingObj.networkIcon;
 var saveBoxes = settingObj.saveBoxes;
 var mySimpleCheckboxes = settingObj.mySimpleCheckboxes;
 
-function helpLink(title, text) { // Native
+export function helpLink(title, text) { // Native
   return '&nbsp;[&nbsp;<span class="fshLink tip-static" data-tipped="' +
     '<span class=\'fshHelpTitle\'>' + title + '</span><br><br>' +
     text + '">?</span>&nbsp;]';
 }
 
-function simpleCheckbox(name) { // Native
+export function simpleCheckbox(name) { // Native
   var o = mySimpleCheckboxes[name];
   return '<tr><td align="right">' +
     (o.network ? networkIcon : '') +
@@ -139,7 +139,7 @@ function escapeHtml(unsafe) {
     .replace(/'/g, '&#039;');
 }
 
-function injectSettings() { // Legacy
+export function injectSettings() { // Legacy
   var tickAll = $('<span class="fshLink">Tick all buffs</span>');
   tickAll.click(toggleTickAllBuffs);
   $('#settingsTabs-4 td').eq(0).append('<br>').append(tickAll);
@@ -680,7 +680,7 @@ function injectSettings() { // Legacy
   }
 }
 
-function injectSaveSettings(){ // Hybrid
+export function injectSaveSettings(){ // Hybrid
   var content = layout.notebookContent();
   var fshSettings = {};
   var list = GM_listValues();
@@ -710,12 +710,3 @@ function injectSaveSettings(){ // Hybrid
     alert('Settings loaded successfully!');
   });
 }
-
-export default {
-  injectSettings: injectSettings,
-  injectSaveSettings: injectSaveSettings,
-  helpLink : helpLink,
-//#if _DEV
-  simpleCheckbox: simpleCheckbox
-//#endif
-};

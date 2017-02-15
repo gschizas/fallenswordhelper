@@ -1,5 +1,5 @@
-import debug from './debug';
-import layout from './layout';
+import * as debug from './debug';
+import * as layout from './layout';
 
 var times = {};
 var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
@@ -11,13 +11,13 @@ function isAuto() { // Native
   return refAry.indexOf(docRef) !== -1;
 }
 
-function start(category, variable, label) { // Native
+export function start(category, variable, label) { // Native
   if (isAuto() || typeof ga === 'undefined') {return;}
   times[category + ':' + variable + ':' + label] =
     performance.now() * 1000;
 }
 
-function end(category, variable, label) { // Native
+export function end(category, variable, label) { // Native
   if (isAuto() || typeof ga === 'undefined') {return;}
   var myTime = Math.round(performance.now() * 1000 -
     times[category + ':' + variable + ':' + label]) / 1000;
@@ -58,7 +58,7 @@ function fixupUrl() { // Native
   ga('fsh.set', 'page', page);
 }
 
-function setup() { // Native
+export function setup() { // Native
   if (isAuto() || typeof ga === 'undefined') {return;}
 
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
@@ -75,14 +75,7 @@ function setup() { // Native
   ga('fsh.send', 'pageview');
 }
 
-function screenview(funcName) { // Native
+export function screenview(funcName) { // Native
   if (isAuto() || typeof ga === 'undefined') {return;}
   ga('fshApp.send', 'screenview', {screenName: funcName});
 }
-
-export default {
-  start: start,
-  end: end,
-  setup: setup,
-  screenview: screenview
-};

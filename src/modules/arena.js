@@ -1,7 +1,7 @@
-import debug from './support/debug';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
 
 var moveOptions =
   '<td colspan=3 ' +
@@ -28,7 +28,7 @@ var oldMoves = [];
 var tableOpts = {
   paging: false,
   info: false,
-  order: [[3, 'desc'],[0, 'asc']],
+  order: [[3, 'asc'],[0, 'asc']],
   columnDefs: [
     {orderable: false, targets: [8, 9]}
   ],
@@ -63,7 +63,7 @@ function dontPost(e) { // jQuery
     '&pvp_id=' + pvpId;
 }
 
-function completedArenas() { // jQuery
+export function completedArenas() { // jQuery
   var prevButton = $('#pCC input[value="<"]');
   var nextButton = $('#pCC input[value=">"]');
   if (prevButton.length === 1) {
@@ -112,7 +112,6 @@ function selectMoves(evt) { // jQuery
 
   nodes =
     $('#pCC a[href^="index.php?cmd=arena&subcmd=pickmove&slot_id="] img');
-  // FSH.arena.nodes = nodes;
   var table = nodes.eq(0).closest('table').parent().closest('table');
 
   var row = $('<tr/>');
@@ -125,7 +124,6 @@ function selectMoves(evt) { // jQuery
     } else {
       move = move.match(/pvp\/(\d+).gif$/)[1];
     }
-    // FSH.arena.oldMoves.push(move);
     var html = $(moveOptions);
     $('option[value=' + move + ']', html).prop('selected', true);
     row.append(html);
@@ -143,7 +141,7 @@ function selectMoves(evt) { // jQuery
   table.append(row);
 }
 
-function setupMoves() { // jQuery
+export function setupMoves() { // jQuery
   var node = $('#pCC b:contains("Setup Combat Moves")');
   if (node.length !== 1) {return;}
   node.addClass('fshLink fshGreen');
@@ -188,7 +186,7 @@ function sortHandler(evt) { // jQuery
   var sortOrder = 'desc';
   if (test && test[1] === '_desc') {sortOrder = 'asc';}
   if (myCol !== 3) {
-    table.order([3, 'desc'], [myCol, sortOrder]).draw();
+    table.order([3, 'asc'], [myCol, sortOrder]).draw();
   } else {
     table.order([3, sortOrder]).draw();
   }
@@ -313,16 +311,16 @@ function process(arena) { // jQuery
   ajax.setForage('fsh_arena', opts);
   lvlFilter();
   theTables.DataTable(tableOpts);
-  $('td[class*="sorting"]', tabs).off('click');
+  $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
   $('div.dataTables_filter').hide();
-  tabs.on('click', 'td[class*="sorting"]', sortHandler);
+  tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
   tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
 
   debug.timeEnd('arena.process');
 
 }
 
-function storeMoves() { // jQuery
+export function storeMoves() { // jQuery
   ajax.getForage('fsh_arena').done(function(arena) {
     arena = arena || {};
     arena.moves = {};
@@ -339,16 +337,9 @@ function storeMoves() { // jQuery
   });
 }
 
-function injectArena() { // jQuery
+export function injectArena() { // jQuery
   tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);
   ajax.getForage('fsh_arena').done(process);
 }
-
-export default {
-  storeMoves: storeMoves,
-  injectArena: injectArena,
-  setupMoves: setupMoves,
-  completedArenas: completedArenas
-};

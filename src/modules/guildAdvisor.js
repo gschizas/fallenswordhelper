@@ -1,8 +1,8 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import task from './support/task';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
 
 var newSummary = {};
 var advisorColumns = [
@@ -94,7 +94,7 @@ function injectAdvisorDable() {
   // document.body.innerHTML = '';
   // document.body.appendChild(wrapperDiv);
 
-  console.log('fshWrapper', wrapperDiv);
+  console.log('fshWrapper', wrapperDiv); // DEV Only
   var dable = new Dable(wrapperDiv);
 
   dable.style = 'bootstrap';
@@ -277,7 +277,7 @@ function injectAdvisorWeekly() { // jQuery
 
 }
 
-function injectAdvisor() { // Native
+export function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
@@ -287,7 +287,3 @@ function injectAdvisor() { // Native
     });
   }
 }
-
-export default {
-  injectAdvisor: injectAdvisor,
-};

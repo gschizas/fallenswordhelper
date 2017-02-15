@@ -1,13 +1,12 @@
 import calf from './support/calf';
-import buffObj from './support/buffObj';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as buffObj from './support/buffObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var myPlayer = {};
 
-function addLogColoring(logScreen, dateColumn) { // Legacy
-
+export function addLogColoring(logScreen, dateColumn) { // Legacy
   var jChatTable = $('#pCC td.header').eq(0).closest('table');
   jChatTable.css({tableLayout: 'fixed', wordWrap: 'break-word'});
   if (logScreen === 'Chat') {
@@ -15,13 +14,10 @@ function addLogColoring(logScreen, dateColumn) { // Legacy
       .after('<tr style="height: 2px"><td></td></tr>');
   }
 
-
   if (!system.getValue('enableLogColoring')) {return;}
+  var nowUtc = (new Date()).getTime();
   var lastCheckScreen = 'last' + logScreen + 'Check';
-  var localLastCheckMilli = system.getValue(lastCheckScreen);
-  if (!localLastCheckMilli) {
-    localLastCheckMilli = Date.now();
-  }
+  var lastCheckUtc = system.getValue(lastCheckScreen) || nowUtc;
   var chatTable = system.findNode('//table[@class="width_full"]'); // Guild Log
   if (!chatTable) {
     chatTable = system.findNode('//table[tbody/tr/td[.="Message"]]'); // Outbox & Guild Chat
@@ -32,10 +28,8 @@ function addLogColoring(logScreen, dateColumn) { // Legacy
   }
   if (!chatTable) {return;}
 
-  var localDateMilli = Date.now();
-  var gmtOffsetMinutes = (new Date()).getTimezoneOffset();
-  var gmtOffsetMilli = gmtOffsetMinutes * 60 * 1000;
-  for (var i = logScreen === 'Chat' ? 2 : 1; i < chatTable.rows.length; i += logScreen === 'Chat' ? 4 : 2) {
+  for (var i = logScreen === 'Chat' ? 2 : 1; i < chatTable.rows.length;
+      i += logScreen === 'Chat' ? 4 : 2) {
     var aRow = chatTable.rows[i];
     var addBuffTag = true;
     if (aRow.cells[0].innerHTML) {
@@ -43,13 +37,12 @@ function addLogColoring(logScreen, dateColumn) { // Legacy
       if (logScreen !== 'Chat') {
         cellContents = cellContents.substring(6,23); // fix for player log screen.
       }
-      var postDateAsDate = system.parseDate(cellContents);
-      var postDateAsLocalMilli = postDateAsDate.getTime() - gmtOffsetMilli;
-      var postAge = (localDateMilli - postDateAsLocalMilli)/(1000*60);
-      if (postDateAsLocalMilli > localLastCheckMilli) {
+      var postDateUtc = system.parseDateAsTimestamp(cellContents);
+      var postAgeMins = (nowUtc - postDateUtc)/(1000*60);
+      if (postDateUtc > lastCheckUtc) {
         aRow.style.backgroundColor = '#F5F298';
       }
-      else if (postAge > 20 && postDateAsLocalMilli <= localLastCheckMilli) {
+      else if (postAgeMins > 20 && postDateUtc <= lastCheckUtc) {
         aRow.style.backgroundColor = '#CD9E4B';
         addBuffTag = false;
       }
@@ -226,7 +219,6 @@ function addLogWidgetsOld() { // Legacy
   var i;
   var playerElement;
   var playerName;
-  // var dateHTML;
   var addAttackLinkToLog = system.getValue('addAttackLinkToLog');
   var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
     '(.,"Currently showing:")]]');
@@ -289,7 +281,6 @@ function addLogWidgetsOld() { // Legacy
       if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName === 'A') {
         if (aRow.cells[2].firstChild.nextSibling.getAttribute('href').search('player_id') !== -1) {
           if (!isGuildMate) {
-            // dateHTML = aRow.cells[1].innerHTML;
             var dateExtraText = '<nobr><span style="font-size:x-small;">[ <a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
             '">Ignore</a> ]</span></nobr>';
             aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' + dateExtraText;
@@ -345,7 +336,7 @@ function addLogWidgets() { // jQuery
   ).done(addLogWidgetsOld);
 }
 
-function addGuildLogWidgets() { // Legacy
+export function addGuildLogWidgets() { // Legacy
   if (!system.getValue('hideNonPlayerGuildLogMessages')) {return;}
   var nodeList = document.getElementById('pCC').getElementsByTagName('TD');
   var messageNameCell = Array.prototype.reduce.call(nodeList, function(prev, curr) {
@@ -379,7 +370,8 @@ function addGuildLogWidgets() { // Legacy
       for (var j = 0; j < 3; j += 1) {
         aRow.cells[j].removeAttribute('class');
       }
-      aRow.className = 'fshGrey fshXXSmall';
+      aRow.classList.add('fshGrey');
+      aRow.classList.add('fshXXSmall');
     }
 
     var hasInvited = aRow.cells[2].textContent
@@ -398,7 +390,7 @@ function addGuildLogWidgets() { // Legacy
         targetPlayerName + '&search_show_first=1">' + targetPlayerName +
         '</a>' + message.substring(secondQuote, message.length);
       if (!hasInvited &&
-        targetPlayerName !== document.getElementById('statbar-character').textContent) {
+        targetPlayerName !== layout.playerName()) {
         $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
         aRow.style.color = 'gray';
       }
@@ -407,29 +399,21 @@ function addGuildLogWidgets() { // Legacy
   }
 }
 
-function guildChat() { // Native
+export function guildChat() { // Native
   addChatTextArea();
   addLogColoring('Chat', 0);
 }
 
-function guildLog() { // Native
+export function guildLog() { // Native
   addLogColoring('GuildLog', 1);
   addGuildLogWidgets();
 }
 
-function outbox() { // Native
+export function outbox() { // Native
   addLogColoring('OutBox', 1);
 }
 
-function playerLog() { // Native
+export function playerLog() { // Native
   addLogColoring('PlayerLog', 1);
   addLogWidgets();
 }
-
-export default {
-  addGuildLogWidgets: addGuildLogWidgets,
-  guildChat: guildChat,
-  guildLog: guildLog,
-  outbox: outbox,
-  playerLog: playerLog
-};

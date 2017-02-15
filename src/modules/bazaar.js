@@ -1,4 +1,5 @@
-import layout from './support/layout';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 var ItemId;
 var bazaarTable =
@@ -19,10 +20,7 @@ var bazaarItem =
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
 function testQuant() { // Native
-  var theValue = parseInt(document.getElementById('buy_amount').value, 10);
-  if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
-    return theValue;
-  }
+  return system.testQuant(document.getElementById('buy_amount').value);
 }
 
 function select(evt) { // Native
@@ -63,7 +61,7 @@ function buy() { // jQuery
   }
 }
 
-function injectBazaar() { // Native
+export function injectBazaar() { // Native
   var pCC = document.getElementById('pCC');
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
@@ -84,7 +82,3 @@ function injectBazaar() { // Native
   document.getElementById('buy_amount').addEventListener('input', quantity);
   document.getElementById('fshBuy').addEventListener('click', buy);
 }
-
-export default {
-  injectBazaar: injectBazaar,
-};

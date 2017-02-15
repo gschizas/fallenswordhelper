@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import task from './support/task';
-import system from './support/system';
+import * as task from './support/task';
+import * as system from './support/system';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +
@@ -76,7 +76,7 @@ function findNewGroup(el) { // Native
     '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
-function parseTemplePage(responseText) { // Native
+export function parseTemplePage(responseText) { // Native
   var checkNeedToPray, doc;
   if (!calf.enableTempleAlert) {return;}
   if (calf.cmd !== 'temple') {
@@ -95,7 +95,7 @@ function parseTemplePage(responseText) { // Native
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
 }
 
-function injectTempleAlert() { // jQuery
+export function injectTempleAlert() { // jQuery
   //Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   var templeAlertLastUpdate = system.getValue('lastTempleCheck');
@@ -117,7 +117,7 @@ function injectTempleAlert() { // jQuery
   }
 }
 
-function parseGoldUpgrades(data) { // Native
+export function parseGoldUpgrades(data) { // Native
   if (!calf.enableUpgradeAlert) {return;}
   var doc;
   if (location.search.indexOf('cmd=points&type=1') === -1) {
@@ -141,7 +141,7 @@ function parseGoldUpgrades(data) { // Native
   }
 }
 
-function injectUpgradeAlert() { // jQuery
+export function injectUpgradeAlert() { // jQuery
   if (location.search.indexOf('cmd=points&type=1') !== -1) {return;}
   var needToDoUpgrade = system.getValue('needToDoUpgrade');
   if (needToDoUpgrade) {
@@ -155,15 +155,7 @@ function injectUpgradeAlert() { // jQuery
   });
 }
 
-function injectJoinAllLink() { // Native
+export function injectJoinAllLink() { // Native
   var nodeList = document.getElementById('pCL').getElementsByTagName('li');
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }
-
-export default {
-  injectTempleAlert: injectTempleAlert,
-  parseTemplePage: parseTemplePage,
-  injectUpgradeAlert: injectUpgradeAlert,
-  parseGoldUpgrades: parseGoldUpgrades,
-  injectJoinAllLink: injectJoinAllLink,
-};

@@ -34,7 +34,7 @@ function bubble(i) {
   }
 }
 
-function pop() {
+export function pop() {
   if (heap.length === 1) {return;}
   var topVal = heap[1].data;
   var last = heap.pop();
@@ -45,16 +45,10 @@ function pop() {
   return topVal;
 }
 
-function push(data, priority) {
+export function push(data, priority) {
   bubble(heap.push({data: data, priority: priority}) -1);
 }
 
-function ln() {
+export function getLength() {
   return heap.length - 1;
 }
-
-export default {
-  getLength: ln,
-  push: push,
-  pop: pop
-};

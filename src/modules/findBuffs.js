@@ -1,8 +1,8 @@
 import calf from './support/calf';
-import buffObj from './support/buffObj';
-import system from './support/system';
-import layout from './support/layout';
-import settingsPage from './settings/settingsPage';
+import * as buffObj from './support/buffObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as settingsPage from './settings/settingsPage';
 
 function uniq(arr, removeBy){ // Ugly but fast
   var seen = {};
@@ -352,7 +352,7 @@ function findBuffsClearResults() { // Legacy
   document.getElementById('buffersProcessed').innerHTML = 0;
 }
 
-function injectFindBuffs(content) { // Legacy
+export function injectFindBuffs(content) { // Legacy
   if (!content) {content=layout.notebookContent();}
   var buffList = buffObj.buffList;
   calf.sortBy='name';
@@ -458,7 +458,7 @@ function findOtherStart() { // Legacy
     findBuffsParseGuildManagePage);
 }
 
-function injectFindOther(content) { // Native - Bad
+export function injectFindOther(content) { // Native - Bad
   if (!content) {content=layout.notebookContent();}
   var injectionText = '';
   var textToSearchFor = system.getValue('textToSearchFor');
@@ -529,8 +529,3 @@ function injectFindOther(content) { // Native - Bad
   document.getElementById('clearresultsbutton')
     .addEventListener('click', findBuffsClearResults, true);
 }
-
-export default {
-  injectFindBuffs: injectFindBuffs,
-  injectFindOther: injectFindOther
-};

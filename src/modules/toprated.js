@@ -1,6 +1,6 @@
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 function parseGuildOnline(membrList) { // Native
   var pCC = document.getElementById('pCC');
@@ -35,7 +35,7 @@ function findOnlinePlayers(e) { // jQuery
     .done(parseGuildOnline);
 }
 
-function injectTopRated() { // Native
+export function injectTopRated() { // Native
   var pCC = document.getElementById('pCC');
   if (!pCC ||
       !pCC.firstElementChild ||
@@ -54,7 +54,3 @@ function injectTopRated() { // Native
   theCell.insertBefore(findBtn, theCell.firstElementChild);
   findBtn.addEventListener('click', findOnlinePlayers);
 }
-
-export default {
-  injectTopRated: injectTopRated,
-};

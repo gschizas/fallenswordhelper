@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 function showAHInvManager(injectId) { // Bad jQuery
   var output = '<table width=100% cellspacing=2 cellpadding=2>'+
@@ -89,7 +89,7 @@ function useProfileInventoryItem(evt) { // Legacy
 function equipProfileInventoryItemReturnMessage(responseText, callback) { // Legacy
   var target = callback.target;
   var info = layout.infoBox(responseText);
-  var itemCellElement = target.parentNode; //system.findNode('//td[@title="' + itemID + '"]');
+  var itemCellElement = target.parentNode;
   if (!info) {
     itemCellElement.innerHTML =
       '<span style="color:green; font-weight:bold;">Worn</span>';
@@ -194,12 +194,10 @@ function getItemFromBackpack(responseText, callback) { // Legacy
   }
 }
 
-function insertQuickWear(content) { // Legacy
+export function insertQuickWear(content) { // Legacy
   calf.itemList = {};
   if (!content) {content=layout.notebookContent();}
   content.innerHTML='Getting item list from: ';
   system.xmlhttp('/index.php?cmd=profile&subcmd=dropitems&folder_id=-1',
     getItemFromBackpack, {'inject':content,'id':0});
 }
-
-export default {insertQuickWear: insertQuickWear};

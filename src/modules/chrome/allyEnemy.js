@@ -1,7 +1,7 @@
 import calf from '../support/calf';
-import task from '../support/task';
-import system from '../support/system';
-import ajax from '../support/ajax';
+import * as task from '../support/task';
+import * as system from '../support/system';
+import * as ajax from '../support/ajax';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +
@@ -166,13 +166,9 @@ function makeDiv(data) { // Native
   injectAllyEnemyList(data);
 }
 
-function prepareAllyEnemyList() { // jQuery.min
+export function prepareAllyEnemyList() { // jQuery.min
   ajax.myStats(false)
     .done(function(data) {
       task.add(3, makeDiv, [data]);
     });
 }
-
-export default {
-  prepareAllyEnemyList: prepareAllyEnemyList
-};

@@ -1,7 +1,7 @@
 import calf from './support/calf';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import layout from './support/layout';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 function generateManageTable() { // Legacy
   var i, j, result='<table cellspacing=2 cellpadding=2 style="table-layout: fixed; word-wrap: break-word;" width=100%><tr bgcolor=#CD9E4B>';
@@ -59,16 +59,6 @@ function generateManageTable() { // Legacy
   }
 
   document.getElementById(calf.param.id).innerHTML = result;
-  // for (i=0;i<calf.param.currentItems.length;i += 1) {
-    // document
-      // .getElementById('Helper:DeleteItem' + i)
-      // .addEventListener('click', deleteQuickItem, true);
-  // }
-  // document.getElementById('Helper:AddItem').addEventListener('click', addQuickItem, true);
-  // if (calf.param.showRawEditor) {
-    // document.getElementById('Helper:saveRawEditor').addEventListener('click', saveRawEditor, true);
-    // document.getElementById('Helper:resetRawEditor').addEventListener('click', resetRawEditor, true);
-  // }
 
   system.setValueJSON(calf.param.gmname, calf.param.currentItems);
 }
@@ -122,7 +112,7 @@ function listEvtHnl(e) { // Native
   if (e.target.id.indexOf('Helper:DeleteItem') === 0) {deleteQuickItem(e);}
 }
 
-function injectAuctionSearch(content) { // Legacy
+export function injectAuctionSearch(content) { // Legacy
   if (!content) {content = layout.notebookContent();}
   content.innerHTML =
     layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
@@ -137,7 +127,6 @@ function injectAuctionSearch(content) { // Legacy
     '<div style="font-size:small;" id="Helper:Auction Search Output">' +
     '</div>';
   // global parameters for the meta function generateManageTable
-  // calf.param = {};
   calf.param = {
     'id':'Helper:Auction Search Output',
     'headers': ['Category', 'Nickname', 'Quick Search Text',
@@ -156,13 +145,12 @@ function injectAuctionSearch(content) { // Legacy
   content.addEventListener('click', listEvtHnl);
 }
 
-function injectQuickLinkManager(content) { // Legacy
+export function injectQuickLinkManager(content) { // Legacy
   if (!content) {content = layout.notebookContent();}
   content.innerHTML =
     layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
 
   // global parameters for the meta function generateManageTable
-  calf.param = {};
   calf.param = {
     'id': 'quickLinkAreaId',
     'headers': ['Name', 'URL',
@@ -177,8 +165,3 @@ function injectQuickLinkManager(content) { // Legacy
   generateManageTable();
   content.addEventListener('click', listEvtHnl);
 }
-
-export default {
-  injectAuctionSearch: injectAuctionSearch,
-  injectQuickLinkManager: injectQuickLinkManager
-};

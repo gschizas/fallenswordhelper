@@ -1,84 +1,13 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import fshGa from './support/fshGa';
-import system from './support/system';
-import layout from './support/layout';
-import guildAdvisor from './guildAdvisor';
-import quickBuff from './quickBuff';
-import recipes from './recipes';
-import questBook from './questBook';
-import oldRelic from './oldRelic';
-import newMap from './newMap/newMap';
-
-var shopId;
-var shopItemId;
-
-function selectShopItem(evt) { // Legacy - Old map?
-  shopItemId = evt.target.getAttribute('itemId');
-  document.getElementById('warningMsg').innerHTML = '<span style="' +
-    'color:red;font-size:small">Warning:<br> pressing "t" now will buy the ' +
-    document.getElementById('buy_amount').value +
-    ' item(s) WITHOUT confirmation!</span>';
-  document.getElementById('selectedItem').innerHTML =
-    document.getElementById('select' + shopItemId).parentNode
-    .innerHTML.replace(/='20'/g,'=45');
-}
-
-function injectShop() { // Hybrid - Old map?
-  var injectHere = $('#shop-info');
-  var itemNodes = $('td center a img[src*="/items/"]');
-
-  var selector = '<span style="font-size:xx-small">Select an item to ' +
-    'quick-buy:<br>Select how many to quick-buy <input style="font-' +
-    'size:xx-small" value=1 id="buy_amount" name="buy_amount" size=3 ' +
-    'class="custominput"><table cellpadding=2><tr>';
-  var itemId;
-  for (var i = 0; i < itemNodes.length; i += 1) {
-    var item = itemNodes[i];
-    var src = item.getAttribute('src');
-    var text = item.parentNode.parentNode.textContent;
-    var onmouseover = $(item).data('tipped')
-      .replace('Click to Buy', 'Click to Select');
-    itemId = item.parentNode.getAttribute('href').match(/&item_id=(\d+)&/)[1];
-    selector += '<td width=20 height=20 ><img width=20 height=20 id=select' +
-      itemId + ' itemId=' + itemId + ' src="' + src + '" class="tipped" ' +
-      'data-tipped-options="skin: \'fsItem\', ajax: true" data-tipped=\'' +
-      onmouseover + '\'>' + text + '</td>';
-    if (i % 25 === 24 && i !== itemNodes.length - 1) {
-      selector += '</tr><tr>';
-    }
-  }
-  selector+='</table><table width="600px"></tr><tr><td align="right" ' +
-    'width="50%">Selected item:</td><td height=45 width="50%" id=' +
-    'selectedItem align="left">&nbsp;</td></tr><tr><td id=warningMsg' +
-    ' colspan="2" align="center"></td></tr><tr><td id=buy_result ' +
-    'colspan="2" align="center"></td></tr>';
-  injectHere.after('<table><tr><td>' + selector + '</td></tr></table>');
-  for (i = 0; i < itemNodes.length; i += 1) {
-    itemId = itemNodes[i].parentNode.getAttribute('href')
-      .match(/&item_id=(\d+)&/)[1];
-    document.getElementById('select' + itemId)
-      .addEventListener('click', selectShopItem, true);
-  }
-  shopId = itemNodes[0].parentNode.getAttribute('href')
-    .match(/&shop_id=(\d+)/)[1];
-}
-
-function quickDone(responseText) { // Legacy - Old map?
-  var infoMessage = layout.infoBox(responseText);
-  document.getElementById('buy_result').innerHTML += '<br />' + infoMessage;
-}
-
-function quickBuyItem() { // Legacy - Old map? - from key handler
-  if (!shopId || !shopItemId) {return;}
-  document.getElementById('buy_result').innerHTML = 'Buying ' +
-    document.getElementById('buy_amount').value + ' Items';
-  for (var i = 0; i < document.getElementById('buy_amount').value; i += 1) {
-    system.xmlhttp('index.php?cmd=shop&subcmd=buyitem&item_id=' +
-      shopItemId + '&shop_id=' + shopId,
-      quickDone);
-  }
-}
+import * as debug from './support/debug';
+import * as fshGa from './support/fshGa';
+import * as system from './support/system';
+import * as guildAdvisor from './guildAdvisor';
+import * as quickBuff from './quickBuff';
+import * as recipes from './recipes';
+import * as questBook from './questBook';
+import * as oldRelic from './oldRelic';
+import * as newMap from './newMap/newMap';
 
 function impWarning(impsRemaining) { // Legacy
   var applyImpWarningColor = ' style="color:green; ' +
@@ -267,7 +196,6 @@ function checkBuffs() { // Legacy - Old Map
     '<tr><td style="font-size: small; color:red">' +
     'Hunting mode enabled</td></tr>' : '';
   replacementText += '<tr><td colspan="2" height="10"></td></tr>';
-  // replacementText += FSH.legacy.showHuntingBuffs();
   replacementText += '</td>' ;
 
   var injectHere = system.findNode('//div[table[@class="centered" ' +
@@ -318,11 +246,10 @@ function prepareCombatLog() { // Legacy
 
 function injectOldMap() { // Native
   checkBuffs();
-  // prepareCheckMonster();
   prepareCombatLog();
 }
 
-function injectWorld() { // Native
+export function injectWorld() { // Native
   //-1 = world page
   //0 = quest responce
   //1 = view creature
@@ -340,7 +267,6 @@ function injectWorld() { // Native
   //15 = repair
   //17 = login
   //18 = username not found
-  // if ($('#worldPage').length > 0) { // new map
   if (document.getElementById('worldPage')) { // new map
     newMap.subscribes();
   } else {
@@ -349,10 +275,10 @@ function injectWorld() { // Native
   }
 }
 
-function unknownPage() { // Legacy
+export function unknownPage() { // Legacy
   if (typeof window.jQuery === 'undefined') {return;}
-  //#if _DEV
-  console.log('unknownPage');
+  //#if _DEV  //  unknownPage
+  console.log('unknownPage'); // DEV Only
   //#endif
 
   if ($('#pCC td:contains("Below is the current status for ' +
@@ -362,17 +288,10 @@ function unknownPage() { // Legacy
     return;
   }
 
-  // var isBuffResult = system.findNode('//td[contains(.,"Back to Quick Buff Menu")]');
   var isBuffResult = document.getElementById('quickbuff-report');
   if (isBuffResult) {
     fshGa.screenview('unknown.quickBuff.updateBuffLog');
     quickBuff.updateBuffLog();
-    return;
-  }
-
-  if ($('#shop-info').length > 0) {
-    fshGa.screenview('unknown.legacy.injectShop');
-    injectShop();
     return;
   }
 
@@ -402,13 +321,7 @@ function unknownPage() { // Legacy
     recipes.inventing();
     return;
   }
-  //#if _DEV
-  console.log('Fell through!');
+  //#if _DEV  //  Fell through!
+  console.log('Fell through!'); // DEV Only
   //#endif
 }
-
-export default {
-  injectWorld: injectWorld,
-  quickBuyItem: quickBuyItem,
-  unknownPage: unknownPage
-};

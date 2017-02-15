@@ -1,8 +1,8 @@
-import debug from './support/debug';
-import task from './support/task';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var leftHandSideColumnTable;
 var members;
@@ -28,7 +28,7 @@ function guildXPLock() { // Native
   }
 }
 
-function injectViewGuild() { // Native
+export function injectViewGuild() { // Native
   task.add(3, layout.colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
@@ -59,7 +59,6 @@ function injectViewGuild() { // Native
 }
 
 function gotConflictInfo(responseText, callback) { // Legacy
-  // try {
   var insertHere = callback.node;
   var doc = system.createDocument(responseText);
 
@@ -95,9 +94,6 @@ function gotConflictInfo(responseText, callback) { // Legacy
       gotConflictInfo,
       {'node': callback.node});
   }
-  // } catch (err) {
-    // debug.log(err);
-  // }
 }
 
 function conflictInfo() { // jQuery
@@ -184,11 +180,11 @@ function selfRecall() { // Native
   var selfRecall = getLi[getLi.length - 1].parentNode;
   selfRecall.insertAdjacentHTML('beforeend',
     '<li><a href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&' +
-    'user=' + document.getElementById('statbar-character').textContent +
+    'user=' + layout.playerName() +
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
-function injectGuild() { // Native
+export function injectGuild() { // Native
   task.add(3, layout.colouredDots);
   task.add(3, removeGuildAvyImgBorder);
   task.add(3, guildXPLock);
@@ -210,7 +206,7 @@ function injectGuild() { // Native
 function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
   var target = callback.target;
   var info = layout.infoBox(responseText);
-  var itemCellElement = target.parentNode; //system.findNode('//td[@title="' + itemID + '"]');
+  var itemCellElement = target.parentNode;
   if (info.search('You successfully took the item into your backpack') !==
       -1) {
     itemCellElement.innerHTML =
@@ -230,13 +226,14 @@ function recallGuildStoreItem(evt) { // Legacy
   var guildStoreID=evt.target.getAttribute('itemID');
   var recallHref =
     'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
-    guildStoreID + '&ajax=1';
+    // guildStoreID + '&ajax=1'; // TODO
+    guildStoreID;
   system.xmlhttp(recallHref,
     recallGuildStoreItemReturnMessage,
     {'item': guildStoreID, 'target': evt.target, 'url': recallHref});
 }
 
-function injectGuildAddTagsWidgets() { // Legacy
+export function injectGuildAddTagsWidgets() { // Legacy
   var itemTable = system.findNode(
     '//img[contains(@src,"/items/")]/ancestor::table[1]');
   if (itemTable) {
@@ -269,7 +266,7 @@ function updateHistoryCharacters() { // Legacy
   previewArea.innerHTML = bioPreviewHTML;
 }
 
-function addHistoryWidgets() { // Legacy
+export function addHistoryWidgets() { // Legacy
   var textArea = system.findNode('//textarea[@name="history"]');
   if (!textArea) {return;}
   textArea.value = textArea.value.replace(/<br \/>/ig,'');
@@ -311,14 +308,6 @@ function parseProfileAndPostWarnings(data) { // Native
   });
 }
 
-function injectRPUpgrades() { // jQuery
+export function injectRPUpgrades() { // jQuery
   ajax.myStats().done(parseProfileAndPostWarnings);
 }
-
-export default {
-  injectViewGuild: injectViewGuild,
-  injectGuild: injectGuild,
-  injectGuildAddTagsWidgets: injectGuildAddTagsWidgets,
-  addHistoryWidgets: addHistoryWidgets,
-  injectRPUpgrades: injectRPUpgrades
-};

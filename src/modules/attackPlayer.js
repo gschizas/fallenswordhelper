@@ -1,4 +1,4 @@
-import system from './support/system';
+import * as system from './support/system';
 
 function getProfileStatsAndBuffs(responseText, callback) { // Legacy - currently disabled
   var doc = system.createDocument(responseText);
@@ -81,7 +81,7 @@ function getProfileStatsAndBuffs(responseText, callback) { // Legacy - currently
   injectHere.innerHTML = activeBuffsElement.innerHTML;
 }
 
-function injectAttackPlayer() { // Legacy - currently disabled
+export function injectAttackPlayer() { // Legacy - currently disabled
   var b = system.findNode('//input[contains(@value, "Activate!")]');
   if (b !== null) {
     var oldOnclick = b.getAttribute('onClick');
@@ -133,7 +133,3 @@ function injectAttackPlayer() { // Legacy - currently disabled
     newCell.innerHTML = '&nbsp;';
   }
 }
-
-export default {
-  injectAttackPlayer: injectAttackPlayer
-};

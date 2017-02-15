@@ -1,8 +1,8 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import task from './support/task';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as task from './support/task';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
 
 function hideFolder(evt) { // native
   if (evt.target.nodeName !== 'SPAN' ||
@@ -145,9 +145,7 @@ function injectTradeOld() { // native
   el.parentNode.insertBefore(multiple, el);
 }
 
-function injectTrade() { // native
+export function injectTrade() { // native
   task.add(3, inv);
   task.add(3, injectTradeOld);
 }
-
-export default {injectTrade: injectTrade};

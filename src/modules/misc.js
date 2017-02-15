@@ -1,6 +1,6 @@
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 function cancelAllAH() { // jQuery
   var cancelButtons = document.getElementById('resultRows')
@@ -27,7 +27,7 @@ function cancelAllAH() { // jQuery
   });
 }
 
-function injectAuctionHouse() { // Bad jQuery
+export function injectAuctionHouse() { // Bad jQuery
   if (system.getValue('autoFillMinBidPrice')) {
     document.getElementById('auto-fill').checked = true;
   }
@@ -44,7 +44,7 @@ function injectAuctionHouse() { // Bad jQuery
   cancelAll.addEventListener('click', cancelAllAH);
 }
 
-function injectFindPlayer() { // Bad jQuery
+export function injectFindPlayer() { // Bad jQuery
   var findPlayerButton = $('input[value="Find Player"]');
   var levelToTest = system.intValue($('dt.stat-level:first').next()
     .text());
@@ -97,7 +97,7 @@ function addMarketplaceWarning() { // Legacy
   }
 }
 
-function addMarketplaceWidgets() { // Legacy
+export function addMarketplaceWidgets() { // Legacy
   var requestTable = system.findNode(
     '//table[tbody/tr/td/input[@value="Confirm Request"]]');
   var newRow = requestTable.insertRow(2);
@@ -112,14 +112,14 @@ function addMarketplaceWidgets() { // Legacy
     addMarketplaceWarning, true);
 }
 
-function injectNotepad() { // jQuery
+export function injectNotepad() { // jQuery
   $('#notepad_notes')
   .attr('cols', '90')
   .attr('rows', '30')
   .css('resize', 'none');
 }
 
-function ladder() { // Native
+export function ladder() { // Native
   document.querySelector('#pCC input[type="submit"]')
     .addEventListener('click', function(e) {
       e.preventDefault();
@@ -128,7 +128,7 @@ function ladder() { // Native
     });
 }
 
-function injectFsBoxContent(content) { // jQuery
+export function injectFsBoxContent(content) { // jQuery
   if (!content) {content = layout.notebookContent();}
   content.innerHTML = layout.makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
@@ -141,12 +141,3 @@ function injectFsBoxContent(content) { // jQuery
       location.reload();
     }, true);
 }
-
-export default {
-  injectAuctionHouse: injectAuctionHouse,
-  injectFindPlayer: injectFindPlayer,
-  addMarketplaceWidgets: addMarketplaceWidgets,
-  injectNotepad: injectNotepad,
-  ladder: ladder,
-  injectFsBoxContent: injectFsBoxContent
-};

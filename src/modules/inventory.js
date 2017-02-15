@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import task from './support/task';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as task from './support/task';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as ajax from './support/ajax';
 
 /* jshint latedef: nofunc */
 var options;
@@ -718,6 +718,4 @@ function syncInvMan() { // jQuery
   });
 }
 
-export default {
-  injectInventoryManagerNew: refresh,
-};
+export {refresh as injectInventoryManagerNew};

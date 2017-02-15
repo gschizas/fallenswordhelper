@@ -1,6 +1,6 @@
-import system from './support/system';
+import * as system from './support/system';
 
-function allowBack() { // Native
+export function allowBack() { // Native
   document.querySelector('input[type="submit"]')
     .addEventListener('click', function(e) {
       e.preventDefault();
@@ -13,14 +13,9 @@ function allowBack() { // Native
     });
 }
 
-function showAllQuestSteps() { // Native
+export function showAllQuestSteps() { // Native
   if (!system.getValue('showNextQuestSteps')) {return;}
   Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
     function(e) {e.style.display = 'block';});
   document.getElementById('next_stage_button').style.display = 'none';
 }
-
-export default {
-  allowBack: allowBack,
-  showAllQuestSteps: showAllQuestSteps
-};

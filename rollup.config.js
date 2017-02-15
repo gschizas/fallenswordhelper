@@ -15,7 +15,7 @@ if (source === 'calf') {
 }
 let version = require( './package.json' ).version.replace('.', '');
 let core = version.replace(/\..+/, '');
-let local = 'http://localhost:9966/';
+let local = 'http://' + require('ip').address() + ':9966/';
 let github = 'https://fallenswordhelper.github.io/fallenswordhelper/';
 
 // rollup options
@@ -23,8 +23,8 @@ let entry = 'src/' + filename;
 let dest = 'dist/' + folder + '/' + filename;
 
 // jscc options
-let opts = {};
-opts.values = {};
+let opts = {values: {}};
+// opts.values = {};
 let values = opts.values;
 
 switch (true) {

@@ -1,20 +1,19 @@
 import calf from '../support/calf';
-import task from '../support/task';
-import fshGa from '../support/fshGa';
-import system from '../support/system';
-import ajax from '../support/ajax';
-import composing from '../composing';
-import notification from '../notification';
-import common from '../support/common';
-import helperMenu from './helperMenu';
-import allyEnemy from './allyEnemy';
-import profile from '../profile/profile';
-import news from '../news';
-import messaging from './messaging';
-import activeWantedBounties from './activeWantedBounties';
-import combatLog from '../combatLog';
-import sendGold from '../newMap/sendGold';
-import legacy from '../legacy';
+import * as task from '../support/task';
+import * as fshGa from '../support/fshGa';
+import * as system from '../support/system';
+import * as ajax from '../support/ajax';
+import * as composing from '../composing';
+import * as notification from '../notification';
+import * as common from '../support/common';
+import * as helperMenu from './helperMenu';
+import * as allyEnemy from './allyEnemy';
+import * as profile from '../profile/profile';
+import * as news from '../news';
+import * as messaging from './messaging';
+import * as activeWantedBounties from './activeWantedBounties';
+import * as combatLog from '../combatLog';
+import * as sendGold from '../newMap/sendGold';
 import pageSwitcher from './pageSwitcher';
 
 var coreFunction;
@@ -53,9 +52,7 @@ function getCoreFunction() { // Native
     fromWorld = '-';
   }
 
-//#if _DEV
-  // TODO patch for types that we don't care about
-
+//#if _DEV  // TODO patch for types that we don't care about
 //#endif
   calf.cmd = cmd;
   calf.subcmd = subcmd;
@@ -135,9 +132,6 @@ function keyPress(evt) { // Native
     if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
     location.href = 'index.php?cmd=profile&subcmd=dropitems';
     break;
-  case 116: // quick buy [t]
-    legacy.quickBuyItem();
-    break;
   case 118: // fast wear manager [v]
     if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
     location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
@@ -167,7 +161,6 @@ function keyPress(evt) { // Native
       'key37':5, 'key94':6, 'key38':7, 'key42':8, 'key40':9};
     // I'm using "key??" because I don't feel comfortable of naming properties with integers
     var itemIndex = keyMap['key' + r];
-    // system.xmlhttp('index.php?cmd=profile', FSH.profile.changeCombatSet, itemIndex);
     $.get('index.php?cmd=profile').done(function(data) {
       profile.changeCombatSet(data, itemIndex);
     });
@@ -198,15 +191,6 @@ function keyPress(evt) { // Native
 }
 
 function replaceKeyHandler() { // Native
-  // if ($('#worldPage').length === 0) { // not new map
-    // /* clear out the HCS keybinds so only helper ones fire */
-    // $.each($(document).controls('option').keys, function(index) { 
-      // $(document).controls('option').keys[index] = [];
-    // });
-  // }
-  // window.document.onkeypress = null;
-  // window.document.combatKeyHandler = null;
-  // window.document.realmKeyHandler = null;
   expandMenuOnKeyPress = system.getValue('expandMenuOnKeyPress');
   document.onkeypress = keyPress;
 }
@@ -581,9 +565,9 @@ function injectMenu() { // jQuery.min
     //if not using the new guild log, show it as a separate menu entry
     document.getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
-        '<li class="nav-level-2"><a class="nav-link" id="nav' +
-        '-guild-newguildlog" href="index.php?cmd=notepad&blank=1' +
-        '&subcmd=newguildlog">New Guild Log</a></li>');
+        '<li class="nav-level-2"><a class="nav-link" ' +
+        'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
+        '>New Guild Log</a></li>');
   }
   //top rated
   document.getElementById('nav-toprated-players-level').parentNode
@@ -682,14 +666,14 @@ function prepareEnv() { // Native
 }
 
 function asyncDispatcher() { // Native
-  //#if _DEV
-  console.log('functionPath', functionPath);
+  //#if _DEV  //  asyncDispatcher messages
+  console.log('functionPath', functionPath); // DEV Only
   if (!coreFunction) {
-    console.log('No Core Function.');
+    console.log('No Core Function.'); // DEV Only
     return;
   }
   if (typeof coreFunction !== 'function') {
-    console.log('Not Core Function.');
+    console.log('Not Core Function.'); // DEV Only
     return;
   }
   //#endif

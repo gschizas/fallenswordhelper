@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import system from '../support/system';
+import * as system from '../support/system';
 
 function showMsgTemplate() { // jQuery
   var targetPlayer=$('#quickMsgDialog_targetUsername').text();
@@ -80,10 +80,6 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
   $('#quickMessageDialog').dialog('open');
 }
 
-function injectQuickMsgDialogJQ() { // Native
+export function injectQuickMsgDialogJQ() { // Native
   window.openQuickMsgDialog = openQuickMsgDialog;
 }
-
-export default {
-  injectQuickMsgDialogJQ: injectQuickMsgDialogJQ
-};

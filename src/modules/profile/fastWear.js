@@ -1,6 +1,6 @@
-import task from '../support/task';
-import system from '../support/system';
-import ajax from '../support/ajax';
+import * as task from '../support/task';
+import * as system from '../support/system';
+import * as ajax from '../support/ajax';
 
 function backpackRemove(invId) { // jQuery
   invId = parseInt(invId, 10);
@@ -57,7 +57,7 @@ function fastWearLinks() { // Native
   });
 }
 
-function injectFastWear() { // jQuery
+export function injectFastWear() { // jQuery
   if (!system.getValue('enableQuickDrink')) {return;}
   var bpBack = document.getElementById('backpack');
   bpBack.className = 'fshBackpack';
@@ -77,7 +77,3 @@ function injectFastWear() { // jQuery
     if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
   });
 }
-
-export default {
-  injectFastWear: injectFastWear
-};

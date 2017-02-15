@@ -1,5 +1,5 @@
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 function injectScouttowerBuffLinks() { // Legacy
   var titanTables = system.findNodes('//table[tbody/tr/td/font[.="Guild Member"]]');
@@ -45,12 +45,12 @@ function getScoutTowerDetails(responseText) { // Legacy
   injectScouttowerBuffLinks();
 }
 
-function injectTitan() { // Legacy
+export function injectTitan() { // Legacy
   system.xmlhttp('index.php?cmd=guild&subcmd=scouttower',
     getScoutTowerDetails);
 }
 
-function injectScouttower() { // Legacy
+export function injectScouttower() { // Legacy
   injectScouttowerBuffLinks();
   var titanTable = system.findNode('//table[@width="500"]');
   for (var i = 1; i < titanTable.rows.length; i += 1) {
@@ -66,22 +66,20 @@ function injectScouttower() { // Legacy
         var currentNumberOfKills = totalHP - currentHP;
         var numberOfKillsToSecure = Math.ceil(totalHP/2 + 1);
 
-        var titanString = '<span style="color:red;">' + (numberOfKillsToSecure - guildKills) + '</span> to secure';
+        var titanString = '<span style="color:red;">' +
+          (numberOfKillsToSecure - guildKills) + '</span> to secure';
         if (guildKills >= numberOfKillsToSecure) {
           titanString = 'Secured';
         } else if (numberOfKillsToSecure - guildKills > currentHP) {
           titanString = '<span style="color:red;">Cannot Secure</span>';
         }
-        var killsPercent = (currentNumberOfKills === 0 ? 0 : guildKills * 100/currentNumberOfKills).toFixed(2);
+        var killsPercent = (currentNumberOfKills === 0 ? 0 :
+          guildKills * 100/currentNumberOfKills).toFixed(2);
         var killsTotPct = (guildKills * 100/totalHP).toFixed(2);
-        aRow.cells[3].innerHTML += '<br><span style="color:blue;"> (' + killsPercent + '% Current <br>' +
-        killsTotPct + '% Total<br>' + titanString + ')';
+        aRow.cells[3].innerHTML += '<br><span style="color:blue;"> (' +
+          killsPercent + '% Current <br>' +
+          killsTotPct + '% Total<br>' + titanString + ')';
       }
     }
   }
 }
-
-export default {
-  injectTitan: injectTitan,
-  injectScouttower: injectScouttower
-};

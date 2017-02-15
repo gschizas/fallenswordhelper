@@ -1,6 +1,6 @@
 import calf from '../support/calf';
-import task from '../support/task';
-import system from '../support/system';
+import * as task from '../support/task';
+import * as system from '../support/system';
 
 /* jshint latedef: nofunc */
 var activeBountyListPosted;
@@ -306,7 +306,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
   }
 }
 
-function prepareBountyData() { // jQuery
+export function prepareBountyData() { // jQuery
   if (calf.enableWantedList) {
     $('#pCR').prepend('<div class="minibox"><span id="Helper:' +
       'WantedListPlaceholder"></span></div>');
@@ -319,5 +319,3 @@ function prepareBountyData() { // jQuery
     calf.enableActiveBountyList,
     calf.enableWantedList);
 }
-
-export default {prepareBountyData: prepareBountyData};

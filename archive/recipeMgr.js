@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import system from './support/system';
-import layout from './support/layout';
+import * as system from './support/system';
+import * as layout from './support/layout';
 
 /* jshint latedef: nofunc */
 var recipebook;
@@ -247,7 +247,7 @@ function parseInventingStart(){ // Legacy
     parseInventingPage, {'page': 0});
 }
 
-function injectRecipeManager(content) { // Legacy
+export function injectRecipeManager(content) { // Legacy
   if (!content) {content = layout.notebookContent();}
   recipebook = system.getValueJSON('recipebook');
   content.innerHTML='<table cellspacing="0" cellpadding="0" border="0" ' +
@@ -266,5 +266,3 @@ function injectRecipeManager(content) { // Legacy
     .addEventListener('click', parseInventingStart, true);
   generateRecipeTable();
 }
-
-export default {injectRecipeManager: injectRecipeManager};

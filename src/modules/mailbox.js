@@ -1,5 +1,5 @@
-import dataObj from './support/dataObj';
-import ajax from './support/ajax';
+import * as dataObj from './support/dataObj';
+import * as ajax from './support/ajax';
 
 function quickDoneTaken(data) { // jQuery
   if (data.r !== 0) {
@@ -47,7 +47,7 @@ function toggleQuickTake(){ // jQuery
   }
 }
 
-function injectMailbox() { // Bad jQuery
+export function injectMailbox() { // Bad jQuery
   var items = $('#pCC a');
   if (items.length === 0) {return;} // Empty mailbox
   $('#pCC').wrapInner('<div id="regularMailbox" />');
@@ -111,7 +111,7 @@ function guildTake(e) { // jQuery
   });
 }
 
-function guildMailbox() { // Bad jQuery
+export function guildMailbox() { // Bad jQuery
   var items = $('#pCC a');
   if (items.length === 0) {return;}
   items.wrap(function() {
@@ -127,8 +127,3 @@ function guildMailbox() { // Bad jQuery
     $('#pCC span.helperQC').click();
   });
 }
-
-export default {
-  injectMailbox: injectMailbox,
-  guildMailbox: guildMailbox
-};

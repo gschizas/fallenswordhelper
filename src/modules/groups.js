@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import debug from './support/debug';
-import dataObj from './support/dataObj';
-import system from './support/system';
-import layout from './support/layout';
-import ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as dataObj from './support/dataObj';
+import * as system from './support/system';
+import * as layout from './support/layout';
+import * as ajax from './support/ajax';
 
 var maxGroupSizeToJoin;
 
@@ -53,7 +53,7 @@ function parseMercStats(responseText) { // jQuery
     hpValue.text()) - Math.round(totalMercHP * 0.2)));
 }
 
-function injectGroupStats() { // jQuery
+export function injectGroupStats() { // jQuery
   var attackValueElement = $('#stat-attack');
   attackValueElement.html(
     '<span class="fshBlue">' + attackValueElement.text() + '</span>' +
@@ -94,13 +94,6 @@ function displayMinGroupLevel() { // jQuery
 function filterMercs(e) {return e.search('#000099') === -1;}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
-  // $.ajax({
-    // url: system.server + groupJoinURL,
-    // success: function() {
-      // joinButton.style.display = 'none';
-      // joinButton.style.visibility = 'hidden';
-    // }
-  // });
   return $.get(groupJoinURL).done(function() {
     joinButton.classList.add('fshHide');
   });
@@ -126,9 +119,6 @@ function joinAllGroupsUnderSize() { // Legacy
       prm.push(joinGroup(groupJoinURL, joinButton));
     }
   }
-  //refresh after a slight delay TODO
-  // setTimeout('location.href = "' + system.server +
-    // 'index.php?cmd=guild&subcmd=groups";',1250);
   $.when.apply($, prm).done(function() {
     location.href = 'index.php?cmd=guild&subcmd=groups';
   });
@@ -142,7 +132,6 @@ function parseGroupData(responseText, linkElement) { // Legacy
   var hpValue;
   var doc=system.createDocument(responseText);
   var allItems = doc.getElementsByTagName('TD');
-  //<td><font color='#333333'>Attack:&nbsp;</font></td>
 
   for (var i=0;i<allItems.length;i += 1) {
     var anItem=allItems[i];
@@ -210,8 +199,6 @@ function groupButtons() { // Legacy
   if (enableMaxGroupSizeToJoin) {
     maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
     var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
-    // joinAllInput.style.display = 'none';
-    // joinAllInput.style.visibility = 'hidden';
     joinAllInput.classList.add('fshHide');
     buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
       'size" type="button" value="Join All Groups < ' +
@@ -312,15 +299,10 @@ function doGroupPaint(m) { // jQuery
 
 }
 
-function injectGroups() { // jQuery
+export function injectGroups() { // jQuery
   ajax.getMembrList(false)
     .done(doGroupPaint);
   displayMinGroupLevel();
   groupButtons();
   fixTable();
 }
-
-export default {
-  injectGroupStats: injectGroupStats,
-  injectGroups: injectGroups
-};

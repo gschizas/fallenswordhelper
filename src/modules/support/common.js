@@ -1,4 +1,4 @@
-import system from './system';
+import * as system from './system';
 
 var drag_target;
 
@@ -37,7 +37,7 @@ function fshAjaxSuccess(evt, xhr, ajax, data) { // jQuery
   img.qtip('option', 'content.text', $('<div/>').append(repl).html());
 }
 
-function addStatTotalToMouseover() { // jQuery
+export function addStatTotalToMouseover() { // jQuery
   if (!system.getValue('showStatBonusTotal')) {return;}
   $(document).ajaxSuccess(fshAjaxSuccess);
 }
@@ -59,7 +59,7 @@ function drag_drop(event) { // Native
   return false;
 }
 
-function drag_start(event) { // Native
+export function drag_start(event) { // Native
   drag_target = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
@@ -168,7 +168,7 @@ function playerDataObject(responseText) { // Native
   return obj;
 }
 
-function playerData(responseText) { // Native
+export function playerData(responseText) { // Native
   var obj = {};
   if (typeof responseText === 'string') {
     obj = playerDataString(responseText);
@@ -179,7 +179,7 @@ function playerData(responseText) { // Native
   return obj;
 }
 
-function updateHCSQuickBuffLinks(selector) { // Native
+export function updateHCSQuickBuffLinks(selector) { // Native
   Array.prototype.forEach.call(document.querySelectorAll(selector),
     function(el) {
       el.setAttribute('href', el.getAttribute('href')
@@ -187,10 +187,3 @@ function updateHCSQuickBuffLinks(selector) { // Native
     }
   );
 }
-
-export default {
-  addStatTotalToMouseover: addStatTotalToMouseover,
-  drag_start: drag_start,
-  playerData: playerData,
-  updateHCSQuickBuffLinks: updateHCSQuickBuffLinks
-};

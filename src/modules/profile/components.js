@@ -1,5 +1,5 @@
-import system from '../support/system';
-import layout from '../support/layout';
+import * as system from '../support/system';
+import * as layout from '../support/layout';
 
 var compPages;
 var componentList = {};
@@ -89,7 +89,7 @@ function enableDelComponent() { // Native
   });
 }
 
-function profileComponents() { // Native
+export function profileComponents() { // Native
   var invTables = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table');
   if (invTables.length !== 2) {return;}
@@ -112,7 +112,3 @@ function profileComponents() { // Native
     if (e.target.classList.contains('compDelBtn')) {delComponent(e);}
   });
 }
-
-export default {
-  profileComponents: profileComponents
-};
