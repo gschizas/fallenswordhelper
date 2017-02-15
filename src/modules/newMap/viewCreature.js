@@ -9,8 +9,6 @@ function creatureData(ses) { // jQuery
   obj.class   = $('#dialog-viewcreature')
     .find('span.classification')
     .text();
-  // obj.level   = system.intValue($('#dialog-viewcreature')
-    // .find('span.level').text());
   obj.attack  = system.intValue($('#dialog-viewcreature')
     .find('dd.attribute-atk').text());
   obj.defense = system.intValue($('#dialog-viewcreature')
@@ -445,8 +443,6 @@ function checkIfGroupExists(responseText) { // Hybrid
 
 function addRemoveCreatureToDoNotKillList(evt) { // Native
   var creatureName = evt.target.getAttribute('creatureName');
-  // calf.doNotKillList = system.getValue('doNotKillList');
-  // console.log('viewCreature.js doNotKillList', calf.doNotKillList);
   var newDoNotKillList = '';
   if (calf.doNotKillList.indexOf(creatureName) !== -1) {
     newDoNotKillList = calf.doNotKillList.replace(creatureName, '');

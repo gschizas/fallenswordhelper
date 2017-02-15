@@ -112,7 +112,6 @@ function selectMoves(evt) { // jQuery
 
   nodes =
     $('#pCC a[href^="index.php?cmd=arena&subcmd=pickmove&slot_id="] img');
-  // FSH.arena.nodes = nodes;
   var table = nodes.eq(0).closest('table').parent().closest('table');
 
   var row = $('<tr/>');
@@ -125,7 +124,6 @@ function selectMoves(evt) { // jQuery
     } else {
       move = move.match(/pvp\/(\d+).gif$/)[1];
     }
-    // FSH.arena.oldMoves.push(move);
     var html = $(moveOptions);
     $('option[value=' + move + ']', html).prop('selected', true);
     row.append(html);

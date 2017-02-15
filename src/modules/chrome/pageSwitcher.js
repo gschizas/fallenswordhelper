@@ -113,7 +113,6 @@ export default {
       'joinall': {'-': {'-': groups.injectGroups}},
       '-': {'-': {'-': groups.injectGroups}}},
     'manage': {'-': {'-': {'-': guild.injectGuild}}},
-    // 'structures': {'-': {'-': {'-': guild.injectGuild}}},
     'advisor': {
       '-': {'-': {'-': guildAdvisor.injectAdvisor}},
       'weekly': {'-': {'-': guildAdvisor.injectAdvisor}}},
@@ -179,7 +178,6 @@ export default {
     'smasher': {'-': {'-': {'-': toprated.injectTopRated}}}},
   inventing: {'viewrecipe': {'-': {'-': {'-': recipes.inventing}}}},
   tempinv: {'-': {'-': {'-': {'-': mailbox.injectMailbox}}}},
-  //attackplayer: {'-': {'-': {'-': {'-': 'attackPlayer.injectAttackPlayer'}}}},
   findplayer: {'-': {'-': {'-': {'-': misc.injectFindPlayer}}}},
   quests: {'-': {'-': {'-': {'-': guide.allowBack}}},
     'view': {'-': {'-': {'-': guide.showAllQuestSteps}}}}, //UFSG
@@ -195,7 +193,6 @@ export default {
     'breakdown': {'-': {'-': {'-': composing.composingBreakdown}}},
     'create': {'-': {'-': {'-': composing.composingCreate}}}},
   pvpladder: {'-': {'-': {'-': {'-': misc.ladder}}}},
-  shop: {'-': {'-': {'-': {'-': legacy.injectShop}}}},
   '-': {
     'viewupdatearchive': {'-': {'-': {'-': news.viewArchive}}},
     'viewarchive': {'-': {'-': {'-': news.viewArchive}}},

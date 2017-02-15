@@ -14,7 +14,6 @@ import * as messaging from './messaging';
 import * as activeWantedBounties from './activeWantedBounties';
 import * as combatLog from '../combatLog';
 import * as sendGold from '../newMap/sendGold';
-import * as legacy from '../legacy';
 import pageSwitcher from './pageSwitcher';
 
 var coreFunction;
@@ -133,9 +132,6 @@ function keyPress(evt) { // Native
     if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
     location.href = 'index.php?cmd=profile&subcmd=dropitems';
     break;
-  case 116: // quick buy [t]
-    legacy.quickBuyItem();
-    break;
   case 118: // fast wear manager [v]
     if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
     location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
@@ -165,7 +161,6 @@ function keyPress(evt) { // Native
       'key37':5, 'key94':6, 'key38':7, 'key42':8, 'key40':9};
     // I'm using "key??" because I don't feel comfortable of naming properties with integers
     var itemIndex = keyMap['key' + r];
-    // system.xmlhttp('index.php?cmd=profile', FSH.profile.changeCombatSet, itemIndex);
     $.get('index.php?cmd=profile').done(function(data) {
       profile.changeCombatSet(data, itemIndex);
     });
@@ -196,15 +191,6 @@ function keyPress(evt) { // Native
 }
 
 function replaceKeyHandler() { // Native
-  // if ($('#worldPage').length === 0) { // not new map
-    // /* clear out the HCS keybinds so only helper ones fire */
-    // $.each($(document).controls('option').keys, function(index) { 
-      // $(document).controls('option').keys[index] = [];
-    // });
-  // }
-  // window.document.onkeypress = null;
-  // window.document.combatKeyHandler = null;
-  // window.document.realmKeyHandler = null;
   expandMenuOnKeyPress = system.getValue('expandMenuOnKeyPress');
   document.onkeypress = keyPress;
 }

@@ -203,9 +203,6 @@ export function injectProfile() { // Native
       'http://evolutions.yvong.com/images/tumbler.gif');
     avyImg.addEventListener('click', function(){alert('Winner!');});
   }
-  // $('img[oldtitle="yuuzhan\'s Avatar"]')
-    // .attr('src','http://evolutions.yvong.com/images/tumbler.gif')
-    // .click(function(){alert('Winner!');});
   //**************
 
   common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
@@ -218,7 +215,6 @@ export function injectProfile() { // Native
 export function changeCombatSet(responseText, itemIndex) { // Native
   var doc = system.createDocument(responseText);
 
-  // var cbsSelect = system.findNode('//select[@name="combatSetId"]', doc);
   var cbsSelect = doc.querySelector(
     '#profileCombatSetDiv select[name="combatSetId"]');
 
@@ -229,7 +225,6 @@ export function changeCombatSet(responseText, itemIndex) { // Native
 
   $.ajax({
     type: 'POST',
-    // url: system.server + 'index.php',
     url: 'index.php',
     data: {
       cmd: 'profile',

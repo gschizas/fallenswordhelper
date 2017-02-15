@@ -261,7 +261,6 @@ function selectAll() {
   options.checks = assets.defChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
-    // if (r[4] === 0) {return;}
     r[5].classList.remove('fshHide');
     r[6].classList.remove('fshHide');
   });
@@ -271,7 +270,6 @@ function selectNone() {
   options.checks = assets.noChecks.slice(0);
   setChecks();
   tmpGuildLog.forEach(function(r) {
-    // if (r[4] === 0) {return;}
     r[5].classList.add('fshHide');
     r[6].classList.add('fshHide');
   });

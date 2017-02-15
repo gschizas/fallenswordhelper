@@ -59,16 +59,6 @@ function generateManageTable() { // Legacy
   }
 
   document.getElementById(calf.param.id).innerHTML = result;
-  // for (i=0;i<calf.param.currentItems.length;i += 1) {
-    // document
-      // .getElementById('Helper:DeleteItem' + i)
-      // .addEventListener('click', deleteQuickItem, true);
-  // }
-  // document.getElementById('Helper:AddItem').addEventListener('click', addQuickItem, true);
-  // if (calf.param.showRawEditor) {
-    // document.getElementById('Helper:saveRawEditor').addEventListener('click', saveRawEditor, true);
-    // document.getElementById('Helper:resetRawEditor').addEventListener('click', resetRawEditor, true);
-  // }
 
   system.setValueJSON(calf.param.gmname, calf.param.currentItems);
 }
@@ -137,7 +127,6 @@ export function injectAuctionSearch(content) { // Legacy
     '<div style="font-size:small;" id="Helper:Auction Search Output">' +
     '</div>';
   // global parameters for the meta function generateManageTable
-  // calf.param = {};
   calf.param = {
     'id':'Helper:Auction Search Output',
     'headers': ['Category', 'Nickname', 'Quick Search Text',
@@ -162,7 +151,6 @@ export function injectQuickLinkManager(content) { // Legacy
     layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
 
   // global parameters for the meta function generateManageTable
-  calf.param = {};
   calf.param = {
     'id': 'quickLinkAreaId',
     'headers': ['Name', 'URL',

@@ -44,17 +44,11 @@ export function getForage(forage) {
 export function setForage(forage, data) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
-  // var dfr = $.Deferred();
-  // localforage.setItem(forage, data, function setItemCallback(err, data) {
   localforage.setItem(forage, data, function setItemCallback(err) {
     if (err) {
       debug.log(forage + ' forage error', err);
-      // dfr.reject(err);
-    // } else {
-      // dfr.resolve(data);
     }
   });
-  // return dfr.promise();
 }
 
 function addMembrListToForage(membrList) {

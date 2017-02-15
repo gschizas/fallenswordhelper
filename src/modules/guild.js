@@ -59,7 +59,6 @@ export function injectViewGuild() { // Native
 }
 
 function gotConflictInfo(responseText, callback) { // Legacy
-  // try {
   var insertHere = callback.node;
   var doc = system.createDocument(responseText);
 
@@ -95,9 +94,6 @@ function gotConflictInfo(responseText, callback) { // Legacy
       gotConflictInfo,
       {'node': callback.node});
   }
-  // } catch (err) {
-    // debug.log(err);
-  // }
 }
 
 function conflictInfo() { // jQuery
@@ -210,7 +206,7 @@ export function injectGuild() { // Native
 function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
   var target = callback.target;
   var info = layout.infoBox(responseText);
-  var itemCellElement = target.parentNode; //system.findNode('//td[@title="' + itemID + '"]');
+  var itemCellElement = target.parentNode;
   if (info.search('You successfully took the item into your backpack') !==
       -1) {
     itemCellElement.innerHTML =

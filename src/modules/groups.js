@@ -94,13 +94,6 @@ function displayMinGroupLevel() { // jQuery
 function filterMercs(e) {return e.search('#000099') === -1;}
 
 function joinGroup(groupJoinURL, joinButton) { // jQuery
-  // $.ajax({
-    // url: system.server + groupJoinURL,
-    // success: function() {
-      // joinButton.style.display = 'none';
-      // joinButton.style.visibility = 'hidden';
-    // }
-  // });
   return $.get(groupJoinURL).done(function() {
     joinButton.classList.add('fshHide');
   });
@@ -126,9 +119,6 @@ function joinAllGroupsUnderSize() { // Legacy
       prm.push(joinGroup(groupJoinURL, joinButton));
     }
   }
-  //refresh after a slight delay TODO
-  // setTimeout('location.href = "' + system.server +
-    // 'index.php?cmd=guild&subcmd=groups";',1250);
   $.when.apply($, prm).done(function() {
     location.href = 'index.php?cmd=guild&subcmd=groups';
   });
@@ -142,7 +132,6 @@ function parseGroupData(responseText, linkElement) { // Legacy
   var hpValue;
   var doc=system.createDocument(responseText);
   var allItems = doc.getElementsByTagName('TD');
-  //<td><font color='#333333'>Attack:&nbsp;</font></td>
 
   for (var i=0;i<allItems.length;i += 1) {
     var anItem=allItems[i];
@@ -210,8 +199,6 @@ function groupButtons() { // Legacy
   if (enableMaxGroupSizeToJoin) {
     maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
     var joinAllInput = buttonElement.firstChild.nextSibling.nextSibling;
-    // joinAllInput.style.display = 'none';
-    // joinAllInput.style.visibility = 'hidden';
     joinAllInput.classList.add('fshHide');
     buttonElement.innerHTML += '&nbsp;<input id="joinallgroupsunder' +
       'size" type="button" value="Join All Groups < ' +

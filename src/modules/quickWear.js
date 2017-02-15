@@ -89,7 +89,7 @@ function useProfileInventoryItem(evt) { // Legacy
 function equipProfileInventoryItemReturnMessage(responseText, callback) { // Legacy
   var target = callback.target;
   var info = layout.infoBox(responseText);
-  var itemCellElement = target.parentNode; //system.findNode('//td[@title="' + itemID + '"]');
+  var itemCellElement = target.parentNode;
   if (!info) {
     itemCellElement.innerHTML =
       '<span style="color:green; font-weight:bold;">Worn</span>';

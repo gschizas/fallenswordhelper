@@ -106,14 +106,6 @@ function generateRecipeTable() { // Legacy
   recipebook.lastUpdate = new Date();
   storeRecipeBook(); // Why? storing the sorted data?
 
-  // var recipeTable = document.getElementById('fshRcp');
-  // for (i = 0; i < recipeTable.rows[0].cells.length; i += 1) {
-    // var cell = recipeTable.rows[0].cells[i];
-    // if (cell.getAttribute('sortkey')) {
-      // cell.classList.add('fshLink');
-      // cell.addEventListener('click', sortRecipeTable);
-    // }
-  // }
   document.getElementById('sortName')
     .addEventListener('click', sortRecipeTable);
 }

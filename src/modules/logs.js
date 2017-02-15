@@ -219,7 +219,6 @@ function addLogWidgetsOld() { // Legacy
   var i;
   var playerElement;
   var playerName;
-  // var dateHTML;
   var addAttackLinkToLog = system.getValue('addAttackLinkToLog');
   var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
     '(.,"Currently showing:")]]');
@@ -282,7 +281,6 @@ function addLogWidgetsOld() { // Legacy
       if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName === 'A') {
         if (aRow.cells[2].firstChild.nextSibling.getAttribute('href').search('player_id') !== -1) {
           if (!isGuildMate) {
-            // dateHTML = aRow.cells[1].innerHTML;
             var dateExtraText = '<nobr><span style="font-size:x-small;">[ <a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
             '">Ignore</a> ]</span></nobr>';
             aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' + dateExtraText;
