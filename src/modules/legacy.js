@@ -221,32 +221,8 @@ function checkBuffs() { // Legacy - Old Map
   toggleKsTracker();
 }
 
-function prepareCombatLog() { // Legacy
-  var reportsTable=system.findNode(
-    '//div[table[@class="centered" and @style="width: 270px;"]]');
-  if (!reportsTable) {return;}
-  var tempLog=document.createElement('div');
-  tempLog.id='reportsLog';
-  var injLog=reportsTable.appendChild(tempLog);
-  var is=injLog.style;
-  is.color = 'black';
-  is.backgroundImage='url(' + system.imageServer +
-    '/skin/realm_right_bg.jpg)';
-  is.maxHeight = '240px';
-  is.width = '277px';
-  is.maxWidth = is.width;
-  is.marginLeft = '0px';
-  is.marginRight = '0px';
-  is.paddingLeft = '26px';
-  is.paddingRight = '24px';
-  is.overflow = 'hidden';
-  is.fontSize = 'xx-small';
-  is.textAlign = 'justify';
-}
-
 function injectOldMap() { // Native
   checkBuffs();
-  prepareCombatLog();
 }
 
 export function injectWorld() { // Native

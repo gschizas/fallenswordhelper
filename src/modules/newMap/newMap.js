@@ -2,6 +2,7 @@ import calf from '../support/calf';
 import * as system from '../support/system';
 import assets from './assets';
 import * as buttons from './buttons';
+import * as combatLogger from './combatLogger';
 import * as monsterLog from './monsterLog';
 import * as sendGold from './sendGold';
 import * as viewCreature from './viewCreature';
@@ -108,67 +109,6 @@ function dataEventsPlayerBuffs(evt, data) { // jQuery
   } else {missingBuffsDiv.innerHTML = '';}
 }
 
-function appendSavedLog(text) { // Native
-  setTimeout(function(){
-    var theLog=system.getValue('CombatLog');
-    if (!theLog) {theLog='';}
-    theLog+=text;
-    system.setValue('CombatLog', theLog);
-  }, 0);
-}
-
-function combatResponse(e, data) { // jQuery - Bad
-  // TODO this is too slow
-  // send the response to localforage
-  // and deal with it later
-  // If bad response do nothing.
-  if (data.response.response !== 0) {return;}
-  var l;
-  var i;
-  var combatData = {};
-  combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
-  //delete some values that are not needed to trim down size of log.
-  delete combatData.combat.attacker.img_url;
-  delete combatData.combat.defender.img_url;
-  delete combatData.combat.is_conflict;
-  delete combatData.combat.is_bounty;
-  delete combatData.combat.pvp_rating_change;
-  delete combatData.combat.pvp_prestige_gain;
-  if (combatData.combat.inventory_id) {
-    combatData.combat.drop = combatData.combat.item.id;
-  }
-  delete combatData.combat.inventory_id;
-  delete combatData.combat.item;
-
-  combatData.player={};
-  combatData.player.buffs={};
-  combatData.player.enhancements={};
-  l = data.player.buffs.length;
-  for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
-  {//54 = ca, 26 = doubler
-    var buff = data.player.buffs[i];
-    if(buff.id === 54 || buff.id === 26)
-    {
-      combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
-    }
-  }
-  var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-  if (data.player.enhancements)
-  {
-    l = data.player.enhancements.length;
-    for(i=0; i<l; i += 1) //loop through enhancements
-    {//54 = ca, 26 = doubler
-      var enh = data.player.enhancements[i];
-      if (notSave.indexOf('|'+enh.name+'|')===-1){
-        combatData.player.enhancements[enh.name]=enh.value;
-      }
-    }
-  }
-  var now = new Date();
-  combatData.time = system.formatDateTime(now);
-  appendSavedLog(',' + JSON.stringify(combatData));
-}
-
 function fixDebuffQTip(e) { // jQuery
   $(e.target).qtip('hide');
 }
@@ -251,9 +191,7 @@ export function subscribes() { // jQuery
     }
   });
 
-  if (system.getValue('keepLogs')) {
-    $.subscribe('2-success.action-response', combatResponse);
-  }
+  combatLogger.init();
   //on world
 
   if (window.initialGameData) {//HCS initial data

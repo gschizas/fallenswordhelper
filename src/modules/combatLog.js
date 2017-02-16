@@ -1,28 +1,25 @@
-import * as system from './support/system';
+import * as ajax from './support/ajax';
 import * as layout from './support/layout';
 
+var content;
+var combatLog = [];
+var textArea;
+
 function notepadCopyLog() { // Native
-  var combatLog = document.getElementById('Helper:CombatLog');
-  combatLog.focus();
-  combatLog.select();
+  textArea.focus();
+  textArea.select();
 }
 
 function notepadClearLog() { // Legacy
   if (window.confirm('Are you sure you want to clear your log?')) {
-    system.setValue('CombatLog', '');
-    location.reload();
+    combatLog = [];
+    textArea.value = '[]';
+    ajax.setForage('fsh_combatLog', combatLog);
   }
 }
 
-export function injectNotepadShowLogs(content) { // Legacy
-  if (!content) {content = layout.notebookContent();}
-  var combatLog = system.getValue('CombatLog');
-  if (combatLog.indexOf(',') === 0) {
-    //combat logs start with a ,
-    combatLog = combatLog.substr(1);
-    system.setValue('CombatLog', combatLog);
-  }
-
+function gotCombatLog(data) { // Native
+  if (data) {combatLog = data;}
   var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
     '</td></tr>'+
     '<tr><td colspan="4" align="center">WARNING: this links to an ' +
@@ -35,30 +32,26 @@ export function injectNotepadShowLogs(content) { // Legacy
     'evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
     '<div align="center"><textarea align="center" cols="80" rows="25" ' +
     'readonly style="background-color:white;font-family:Consolas,\'' +
-    'Lucida Console\',\'Courier New\',monospace;" id="Helper:CombatLog" ' +
-    'name="logs">[' + combatLog + ']</textarea></div>' +
+    'Lucida Console\',\'Courier New\',monospace;" id="combatLog" ' +
+    'name="logs">' + JSON.stringify(combatLog) + '</textarea></div>' +
     '<br /><br /><table width="100%"><tr>'+
     '<td colspan="2" align=center>' +
     '<input type="button" class="custombutton" value="Select All" ' +
-    'id="Helper:CopyLog"></td>' +
+    'id="copyLog"></td>' +
     '<td colspan="2" align=center>' +
     '<input type="button" class="custombutton" value="Clear" ' +
-    'id="Helper:ClearLog"></td>' +
+    'id="clearLog"></td>' +
     '</tr>' + yuuzParser + '</table></div>'+
     '</form>';
-
-  document.getElementById('Helper:CopyLog')
+  textArea = document.getElementById('combatLog');
+  document.getElementById('copyLog')
     .addEventListener('click', notepadCopyLog);
-  document.getElementById('Helper:ClearLog')
+  document.getElementById('clearLog')
     .addEventListener('click', notepadClearLog);
 }
 
-export function scrollUpCombatLog() { // Legacy
-  var reportLog = system.findNode('//div[@id="reportsLog"]');
-  reportLog.scrollTop-=10;
-}
-
-export function scrollDownCombatLog() { // Legacy
-  var reportLog = system.findNode('//div[@id="reportsLog"]');
-  reportLog.scrollTop+=10;
+export function injectNotepadShowLogs(injector) { // jQuery.min
+  if (injector) {content = injector;}
+  else {content = layout.notebookContent();}
+  ajax.getForage('fsh_combatLog').done(gotCombatLog);
 }

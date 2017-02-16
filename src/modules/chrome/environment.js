@@ -12,7 +12,6 @@ import * as profile from '../profile/profile';
 import * as news from '../news';
 import * as messaging from './messaging';
 import * as activeWantedBounties from './activeWantedBounties';
-import * as combatLog from '../combatLog';
 import * as sendGold from '../newMap/sendGold';
 import pageSwitcher from './pageSwitcher';
 
@@ -97,7 +96,6 @@ function keyPress(evt) { // Native
   if (evt.altKey) {return;}
 
   var r = evt.charCode;
-  var s = evt.keyCode;
 
   switch (r) {
   case 114: // repair [r]
@@ -164,26 +162,6 @@ function keyPress(evt) { // Native
     $.get('index.php?cmd=profile').done(function(data) {
       profile.changeCombatSet(data, itemIndex);
     });
-    break;
-  case 0: // special key
-    switch (s) {
-    case 33:
-      if (document.getElementById('reportsLog')) {
-        combatLog.scrollUpCombatLog();
-        evt.preventDefault();
-        evt.stopPropagation();
-      }
-      break;
-    case 34:
-      if (document.getElementById('reportsLog')) {
-        combatLog.scrollDownCombatLog();
-        evt.preventDefault();
-        evt.stopPropagation();
-      }
-      break;
-    default:
-      break;
-    }
     break;
   default:
     break;
