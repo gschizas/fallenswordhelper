@@ -3441,28 +3441,25 @@ function injectBuffLog(content) { // Native
   });
 }
 
+var content;
+var combatLog = [];
+var textArea;
+
 function notepadCopyLog() { // Native
-  var combatLog = document.getElementById('Helper:CombatLog');
-  combatLog.focus();
-  combatLog.select();
+  textArea.focus();
+  textArea.select();
 }
 
 function notepadClearLog() { // Legacy
   if (window.confirm('Are you sure you want to clear your log?')) {
-    setValue('CombatLog', '');
-    location.reload();
+    combatLog = [];
+    textArea.value = '[]';
+    setForage('fsh_combatLog', combatLog);
   }
 }
 
-function injectNotepadShowLogs(content) { // Legacy
-  if (!content) {content = notebookContent();}
-  var combatLog = getValue('CombatLog');
-  if (combatLog.indexOf(',') === 0) {
-    //combat logs start with a ,
-    combatLog = combatLog.substr(1);
-    setValue('CombatLog', combatLog);
-  }
-
+function gotCombatLog(data) { // Native
+  if (data) {combatLog = data;}
   var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
     '</td></tr>'+
     '<tr><td colspan="4" align="center">WARNING: this links to an ' +
@@ -3475,36 +3472,32 @@ function injectNotepadShowLogs(content) { // Legacy
     'evolutions.yvong.com/fshlogparser.php" method="post" target="_blank">' +
     '<div align="center"><textarea align="center" cols="80" rows="25" ' +
     'readonly style="background-color:white;font-family:Consolas,\'' +
-    'Lucida Console\',\'Courier New\',monospace;" id="Helper:CombatLog" ' +
-    'name="logs">[' + combatLog + ']</textarea></div>' +
+    'Lucida Console\',\'Courier New\',monospace;" id="combatLog" ' +
+    'name="logs">' + JSON.stringify(combatLog) + '</textarea></div>' +
     '<br /><br /><table width="100%"><tr>'+
     '<td colspan="2" align=center>' +
     '<input type="button" class="custombutton" value="Select All" ' +
-    'id="Helper:CopyLog"></td>' +
+    'id="copyLog"></td>' +
     '<td colspan="2" align=center>' +
     '<input type="button" class="custombutton" value="Clear" ' +
-    'id="Helper:ClearLog"></td>' +
+    'id="clearLog"></td>' +
     '</tr>' + yuuzParser + '</table></div>'+
     '</form>';
-
-  document.getElementById('Helper:CopyLog')
+  textArea = document.getElementById('combatLog');
+  document.getElementById('copyLog')
     .addEventListener('click', notepadCopyLog);
-  document.getElementById('Helper:ClearLog')
+  document.getElementById('clearLog')
     .addEventListener('click', notepadClearLog);
 }
 
-function scrollUpCombatLog() { // Legacy
-  var reportLog = findNode('//div[@id="reportsLog"]');
-  reportLog.scrollTop-=10;
-}
-
-function scrollDownCombatLog() { // Legacy
-  var reportLog = findNode('//div[@id="reportsLog"]');
-  reportLog.scrollTop+=10;
+function injectNotepadShowLogs(injector) { // jQuery.min
+  if (injector) {content = injector;}
+  else {content = notebookContent();}
+  getForage('fsh_combatLog').done(gotCombatLog);
 }
 
 /* jshint latedef: nofunc */
-var content;
+var content$1;
 var recipebook;
 var currentFolder;
 var hideRecipes = [];
@@ -3741,7 +3734,7 @@ function gotRecipeBook(data) {
   if (getValue('hideRecipes')) {
     hideRecipes = getValue('hideRecipeNames').split(',') || [];
   }
-  content.innerHTML='<table class="fshInvFilter"><thead><tr>'+
+  content$1.innerHTML='<table class="fshInvFilter"><thead><tr>'+
     '<th width="90%"><b>&nbsp;Recipe Manager</b></th>'+
     '<th width="10%" class="fshBtnBox">[' +
     '<span id="rfsh" class="fshLink">' +
@@ -3756,8 +3749,8 @@ function gotRecipeBook(data) {
 }
 
 function injectRecipeManager(injector) { // Legacy
-  if (injector) {content = injector;}
-  else {content = notebookContent();}
+  if (injector) {content$1 = injector;}
+  else {content$1 = notebookContent();}
   getForage('fsh_recipeBook').done(gotRecipeBook);
 }
 
@@ -6116,20 +6109,20 @@ function changeCombatSet(responseText, itemIndex) { // Native
 }
 
 var maxcharacters;
-var textArea;
+var textArea$1;
 var shoutboxPreview;
 var warehouse = [];
 
 function updateShoutboxPreview() { // Native
-  var textContent = textArea.value;
+  var textContent = textArea$1.value;
   var chars = textContent.length;
   if (chars > maxcharacters) {
     textContent = textContent.substring(0, maxcharacters);
-    textArea.value = textContent;
+    textArea$1.value = textContent;
     chars = maxcharacters;
   }
   if (!shoutboxPreview) {
-    shoutboxPreview = textArea.parentNode.parentNode.parentNode.parentNode
+    shoutboxPreview = textArea$1.parentNode.parentNode.parentNode.parentNode
       .insertRow().insertCell();
   }
   shoutboxPreview.innerHTML = '<table class="sbpTbl"><tbody><tr>' +
@@ -6139,9 +6132,9 @@ function updateShoutboxPreview() { // Native
 }
 
 function injectShoutboxWidgets() { // Native
-  textArea = document.getElementById('textInputBox');
-  textArea.classList.add('fshNoResize');
-  textArea.addEventListener('keyup', updateShoutboxPreview);
+  textArea$1 = document.getElementById('textInputBox');
+  textArea$1.classList.add('fshNoResize');
+  textArea$1.addEventListener('keyup', updateShoutboxPreview);
 }
 
 function newsFsbox() { // Native
@@ -11877,6 +11870,57 @@ function injectButtons(data) { // jQuery
   worldName.after(buttonContainer);
 }
 
+var notSave = ['Breaker','Protection','Master Thief','Protect Gold','Disarm',
+  'Duelist','Thievery','Master Blacksmith','Master Crafter','Fury Caster',
+  'Master Inventor','Sustain']; // Taking the Not Save in case they add new enhancements.
+var combatLog$1 = [];
+
+function combatResponse(e, data) { // Native
+  // If bad response do nothing.
+  if (data.response.response !== 0) {return;}
+  var l;
+  var i;
+  var combatData = {};
+  combatData.combat = data.response.data;
+  if (combatData.combat.inventory_id) {
+    combatData.combat.drop = combatData.combat.item.id;
+  }
+
+  combatData.player = {};
+  combatData.player.buffs = {};
+  combatData.player.enhancements = {};
+  l = data.player.buffs.length;
+  for (i = 0; i < l; i += 1) { // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler */
+    var buff = data.player.buffs[i];
+    if (buff.id === 54 || buff.id === 26) {
+      combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
+    }
+  }
+  if (data.player.enhancements) {
+    l = data.player.enhancements.length;
+    for (i = 0; i < l; i += 1) { // loop through enhancements
+      var enh = data.player.enhancements[i];
+      if (notSave.indexOf(enh.name) === -1){
+        combatData.player.enhancements[enh.name] = enh.value;
+      }
+    }
+  }
+  combatData.time = data.time;
+  combatLog$1.push(combatData);
+  setForage('fsh_combatLog', combatLog$1);
+}
+
+function gotCombatLog$1(data) { // jQuery.min
+  if (data) {combatLog$1 = data;}
+  $.subscribe('2-success.action-response', combatResponse);
+}
+
+function init() { // jQuery.min
+  if (getValue('keepLogs')) {
+    getForage('fsh_combatLog').done(gotCombatLog$1);
+  }
+}
+
 var showCreatureInfo;
 var showMonsterLog;
 var monsterLog;
@@ -12741,67 +12785,6 @@ function dataEventsPlayerBuffs(evt, data) { // jQuery
   } else {missingBuffsDiv.innerHTML = '';}
 }
 
-function appendSavedLog(text) { // Native
-  setTimeout(function(){
-    var theLog=getValue('CombatLog');
-    if (!theLog) {theLog='';}
-    theLog+=text;
-    setValue('CombatLog', theLog);
-  }, 0);
-}
-
-function combatResponse(e, data) { // jQuery - Bad
-  // TODO this is too slow
-  // send the response to localforage
-  // and deal with it later
-  // If bad response do nothing.
-  if (data.response.response !== 0) {return;}
-  var l;
-  var i;
-  var combatData = {};
-  combatData.combat = $.extend(true, {}, data.response.data); //make a deep copy
-  //delete some values that are not needed to trim down size of log.
-  delete combatData.combat.attacker.img_url;
-  delete combatData.combat.defender.img_url;
-  delete combatData.combat.is_conflict;
-  delete combatData.combat.is_bounty;
-  delete combatData.combat.pvp_rating_change;
-  delete combatData.combat.pvp_prestige_gain;
-  if (combatData.combat.inventory_id) {
-    combatData.combat.drop = combatData.combat.item.id;
-  }
-  delete combatData.combat.inventory_id;
-  delete combatData.combat.item;
-
-  combatData.player={};
-  combatData.player.buffs={};
-  combatData.player.enhancements={};
-  l = data.player.buffs.length;
-  for(i=0; i<l; i += 1) //loop through buffs, only need to keep CA and Doubler
-  {//54 = ca, 26 = doubler
-    var buff = data.player.buffs[i];
-    if(buff.id === 54 || buff.id === 26)
-    {
-      combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
-    }
-  }
-  var notSave = '|Breaker|Protection|Master Thief|Protect Gold|Disarm|Duelist|Thievery|Master Blacksmith|Master Crafter|Fury Caster|Master Inventor|Sustain|';//Taking the Not Save in case they add new enhancements.
-  if (data.player.enhancements)
-  {
-    l = data.player.enhancements.length;
-    for(i=0; i<l; i += 1) //loop through enhancements
-    {//54 = ca, 26 = doubler
-      var enh = data.player.enhancements[i];
-      if (notSave.indexOf('|'+enh.name+'|')===-1){
-        combatData.player.enhancements[enh.name]=enh.value;
-      }
-    }
-  }
-  var now = new Date();
-  combatData.time = formatDateTime(now);
-  appendSavedLog(',' + JSON.stringify(combatData));
-}
-
 function fixDebuffQTip(e) { // jQuery
   $(e.target).qtip('hide');
 }
@@ -12884,9 +12867,7 @@ function subscribes() { // jQuery
     }
   });
 
-  if (getValue('keepLogs')) {
-    $.subscribe('2-success.action-response', combatResponse);
-  }
+  init();
   //on world
 
   if (window.initialGameData) {//HCS initial data
@@ -13114,32 +13095,8 @@ function checkBuffs() { // Legacy - Old Map
   toggleKsTracker();
 }
 
-function prepareCombatLog() { // Legacy
-  var reportsTable=findNode(
-    '//div[table[@class="centered" and @style="width: 270px;"]]');
-  if (!reportsTable) {return;}
-  var tempLog=document.createElement('div');
-  tempLog.id='reportsLog';
-  var injLog=reportsTable.appendChild(tempLog);
-  var is=injLog.style;
-  is.color = 'black';
-  is.backgroundImage='url(' + imageServer +
-    '/skin/realm_right_bg.jpg)';
-  is.maxHeight = '240px';
-  is.width = '277px';
-  is.maxWidth = is.width;
-  is.marginLeft = '0px';
-  is.marginRight = '0px';
-  is.paddingLeft = '26px';
-  is.paddingRight = '24px';
-  is.overflow = 'hidden';
-  is.fontSize = 'xx-small';
-  is.textAlign = 'justify';
-}
-
 function injectOldMap() { // Native
   checkBuffs();
-  prepareCombatLog();
 }
 
 function injectWorld() { // Native
@@ -13454,7 +13411,6 @@ function keyPress(evt) { // Native
   if (evt.altKey) {return;}
 
   var r = evt.charCode;
-  var s = evt.keyCode;
 
   switch (r) {
   case 114: // repair [r]
@@ -13521,26 +13477,6 @@ function keyPress(evt) { // Native
     $.get('index.php?cmd=profile').done(function(data) {
       changeCombatSet(data, itemIndex);
     });
-    break;
-  case 0: // special key
-    switch (s) {
-    case 33:
-      if (document.getElementById('reportsLog')) {
-        scrollUpCombatLog();
-        evt.preventDefault();
-        evt.stopPropagation();
-      }
-      break;
-    case 34:
-      if (document.getElementById('reportsLog')) {
-        scrollDownCombatLog();
-        evt.preventDefault();
-        evt.stopPropagation();
-      }
-      break;
-    default:
-      break;
-    }
     break;
   default:
     break;
