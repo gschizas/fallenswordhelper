@@ -1,3 +1,4 @@
+import * as ajax from '../support/ajax';
 import * as system from './system';
 
 var drag_target;
@@ -186,4 +187,32 @@ export function updateHCSQuickBuffLinks(selector) { // Native
         .replace(/, 500/g, ', 1000'));
     }
   );
+}
+
+var inv;
+var target;
+
+function selectPerf() {
+  var items = document.getElementById(target + '-items')
+    .getElementsByClassName('selectable-item');
+  if (items.length === 0) {return;}
+  Array.prototype.forEach.call(items, function(e) {
+    var thisItem = e.id.replace(target + '-item-', '');
+    if (inv[thisItem].craft === 'Perfect') {e.click();}
+  });
+}
+
+function drawFilters(data) {
+  inv = data.items;
+  var buttonDiv = document.createElement('div');
+  buttonDiv.className = 'fshAC';
+  buttonDiv.insertAdjacentHTML('beforeend',
+    '<button class="fshBl">Perfect</button>');
+  document.getElementById('pCC').appendChild(buttonDiv);
+  buttonDiv.addEventListener('click', selectPerf);
+}
+
+export function perfFilter(loc) {
+  target = loc;
+  ajax.getInventoryById().done(drawFilters);
 }

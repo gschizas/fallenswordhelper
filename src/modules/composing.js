@@ -1,7 +1,8 @@
 import calf from './support/calf';
-import * as task from './support/task';
-import * as system from './support/system';
+import * as common from './support/common';
 import * as settingsPage from './settings/settingsPage';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
@@ -204,6 +205,7 @@ function togglePref() { // Native
 }
 
 export function composingBreakdown() { // Native
+  common.perfFilter('composing');
   disableBreakdownPrompts = system.getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);
