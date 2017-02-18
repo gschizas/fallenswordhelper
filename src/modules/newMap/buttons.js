@@ -11,9 +11,7 @@ function doFormGroup(e) { // jQuery
 
 function openQuickBuff(e) { // Native
   e.preventDefault();
-  window.openWindow('index.php?cmd=quickbuff&t=' +
-    layout.playerName(),
-    'fsQuickBuff', 618, 1000, ',scrollbars');
+  layout.openQuickBuffByName(layout.playerName());
 }
 
 function showQuickLinks(worldName, data) { // jQuery

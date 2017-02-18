@@ -169,8 +169,7 @@ function buffLinks() { // Native
   task.add(3, batchBuffLinks);
   document.getElementById('pCC').addEventListener('click', function(evt) {
     if (evt.target.className !== 'smallLink') {return;}
-    window.openWindow('index.php?cmd=quickbuff&t=' + evt.target
-      .previousElementSibling.text, 'fsQuickBuff', 618, 1000, ',scrollbars');
+    layout.openQuickBuffByName(evt.target.previousElementSibling.text);
   });
 }
 

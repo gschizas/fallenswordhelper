@@ -30,6 +30,16 @@ export function quickBuffHref(playerId, buffList) { // Bad Pattern
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
 }
 
+export function openQuickBuffById(playerId) {
+  window.openWindow('index.php?cmd=quickbuff&tid=' + playerId,
+    'fsQuickBuff', 618, 1000, ',scrollbars');
+}
+
+export function openQuickBuffByName(playerName) {
+  window.openWindow('index.php?cmd=quickbuff&t=' + playerName,
+    'fsQuickBuff', 618, 1000, ',scrollbars');
+}
+
 export function infoBox(documentText) { // Native
   var doc = system.createDocument(documentText);
   var infoMatch = doc.getElementById('info-msg').innerHTML;

@@ -2,6 +2,7 @@ import calf from '../support/calf';
 import * as task from '../support/task';
 import * as system from '../support/system';
 import * as ajax from '../support/ajax';
+import * as layout from '../support/layout';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +
@@ -92,27 +93,6 @@ function injectAllyEnemyList(data) { // Native
   fshContactList.insertAdjacentHTML('beforeend', output);
 }
 
-function resetAllyEnemyList() { // jQuery.min
-  ajax.myStats(true)
-    .done(injectAllyEnemyList);
-}
-
-function quickBuffToggle(evt) { // Native
-  evt.target.classList.toggle('enemy-buff-check-on');
-  evt.target.classList.toggle('enemy-buff-check-off');
-}
-
-function sendMsg(evt) { // Native
-  window.openQuickMsgDialog(evt.target.parentNode.previousElementSibling
-    .lastElementChild.textContent);
-}
-
-function enemyBuff(evt) { // Native
-  window.openWindow('index.php?cmd=quickbuff&t=' + evt.target.parentNode
-    .previousElementSibling.lastElementChild.textContent,
-    'fsQuickBuff', 618, 1000, ',scrollbars');
-}
-
 function selectedBuff() { // Native
   var buffBalls = document.getElementById('fshContactList')
     .getElementsByClassName('enemy-buff-check-on');
@@ -121,26 +101,28 @@ function selectedBuff() { // Native
       prev.push(curr.nextElementSibling.textContent);
       return prev;
     }, []);
-  window.openWindow('index.php?cmd=quickbuff&t=' + sendstring.join(),
-    'fsQuickBuff', 618, 1000, ',scrollbars');
+  layout.openQuickBuffByName(sendstring.join());
 }
 
 function eventHandler(evt) { // Native
   if (evt.target.id === 'fshResetEnemy') {
-    resetAllyEnemyList(evt);
+    ajax.myStats(true).done(injectAllyEnemyList);
     return;
   }
   if (evt.target.classList.contains('enemy-buff-check-on') ||
       evt.target.classList.contains('enemy-buff-check-off')) {
-    quickBuffToggle(evt);
+    evt.target.classList.toggle('enemy-buff-check-on');
+    evt.target.classList.toggle('enemy-buff-check-off');
     return;
   }
   if (evt.target.classList.contains('enemy-send-message')) {
-    sendMsg(evt);
+    window.openQuickMsgDialog(evt.target.parentNode.previousElementSibling
+      .lastElementChild.textContent);
     return;
   }
   if (evt.target.classList.contains('enemy-quickbuff')) {
-    enemyBuff(evt);
+    layout.openQuickBuffByName(evt.target.parentNode
+      .previousElementSibling.lastElementChild.textContent);
     return;
   }
   if (evt.target.classList.contains('enemy-quick-buff')) {
