@@ -493,6 +493,33 @@ table.fshInvFilter td {
 
 .fshClear {clear: both;}
 
+/* Button as Link */
+
+.fshBl {
+  background: transparent;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  font-family : inherit;
+  /*font-size: 84%;*/
+  margin: 0;
+  padding: 0;
+  text-decoration: underline;
+  -moz-user-select: text;
+}
+
+.fshBl::-moz-focus-inner {
+  border: none;
+  padding: 0;
+}
+
+/* Create Aution Craft Buttons */
+
+.fshAC {
+  margin: 10px auto 10px auto;
+  text-align: center;
+}
+
 /*
  * Table styles
  */

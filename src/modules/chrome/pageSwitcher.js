@@ -36,6 +36,7 @@ import * as arena from '../arena';
 import * as combatLog from '../combatLog';
 import * as guide from '../guide';
 import * as legacy from '../legacy';
+import * as auctionHouse from '../auctionHouse/auctionHouse';
 
 export default {
   settings: {'-': {'-': {'-': {'-': settingsPage.injectSettings}}}},
@@ -68,10 +69,17 @@ export default {
     'changebio': {'-': {'-': {'-': bio.injectBioWidgets}}},
     'dropitems': {'-': {'-': {'-': dropItems.injectProfileDropItems,
       '1': dropItems.injectProfileDropItems}}}},
-  auctionhouse: {'-': {'-': {'-': {'-': misc.injectAuctionHouse},
-    '-1': {'-': misc.injectAuctionHouse},
-    '-2': {'-': misc.injectAuctionHouse},
-    '-3': {'-': misc.injectAuctionHouse}}}},
+  auctionhouse: {
+    '-': {
+      '-': {
+        '-': {'-': auctionHouse.injectAuctionHouse},
+        '-1': {'-': auctionHouse.injectAuctionHouse},
+        '-2': {'-': auctionHouse.injectAuctionHouse},
+        '-3': {'-': auctionHouse.injectAuctionHouse}
+      }
+    },
+    'quickcreate': {'-': {'-': {'-': auctionHouse.quickCreate}}}
+  },
   guild: {
     'inventory': {
       'report': {'-': {'-': guildReport.injectReportPaint}},
