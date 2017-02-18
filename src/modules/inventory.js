@@ -695,7 +695,7 @@ function getInvMan() { // Native
 
 function syncInvMan() { // jQuery
   var prm = [];
-  prm.push(ajax.inventory(true).done(function(data) {
+  prm.push(ajax.getInventory().done(function(data) {
     theInv = data;
   }));
   if (calf.subcmd === 'guildinvmgr') {

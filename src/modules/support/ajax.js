@@ -129,6 +129,19 @@ export function inventory(force) {
   return prm.pipe(checkCachedInventory);
 }
 
+function rekeyInventory(data) {
+  data.items = data.items.reduce(function(prev, curr) {
+    if (curr.is_in_st) {prev.fshHasST = true;}
+    prev[curr.inv_id] = curr;
+    return prev;
+  }, {});
+  return data;
+}
+
+export function getInventoryById() {
+  return getInventory().pipe(rekeyInventory);
+}
+
 function addLastUpdateDate(data) {
   data.lastUpdate = Date.now();
   return data;

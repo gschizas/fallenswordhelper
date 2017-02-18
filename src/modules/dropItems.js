@@ -290,10 +290,7 @@ function getItems() { // Native
 }
 
 function inventory(data) { // Native
-  invItems = data.items.reduce(function(prev, curr) {
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
+  invItems = data.items;
   colouring = false;
   dropLinks = false;
   sendLinks = false;
@@ -302,7 +299,7 @@ function inventory(data) { // Native
 }
 
 function injectDropItems() { // Native
-  ajax.getInventory().done(inventory);
+  ajax.getInventoryById().done(inventory);
   task.add(3, getItems);
 }
 

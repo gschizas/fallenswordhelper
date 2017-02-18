@@ -65,12 +65,7 @@ function processTrade(data) { // native
 
   debug.time('trade.processTrade');
 
-  var fshHasST = false;
-  var invItems = data.items.reduce(function(prev, curr) {
-    if (curr.is_in_st) {fshHasST = true;}
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
+  var invItems = data.items;
   /* Highlight items in ST */
   var nodeList = document.getElementById('item-list')
     .getElementsByTagName('table');
@@ -79,7 +74,7 @@ function processTrade(data) { // native
       .firstElementChild;
     var item = invItems[checkbox.getAttribute('value')];
     el.className = 'folderid' + item.folder_id +
-      (fshHasST ? item.is_in_st ? ' isInSTBorder' : ' tradeItemMargin' : '');
+      (invItems.fshHasST ? item.is_in_st ? ' isInSTBorder' : ' tradeItemMargin' : '');
     checkbox.className = 'itemid' + item.item_id + ' itemtype' + item.type +
       (item.is_in_st ? ' isInST' : '');
   });
@@ -90,7 +85,7 @@ function processTrade(data) { // native
 }
 
 function inv() { // jQuery
-  ajax.inventory(true).done(function(data){
+  ajax.getInventoryById().done(function(data){
     task.add(3, processTrade, [data]);
   });
 }
