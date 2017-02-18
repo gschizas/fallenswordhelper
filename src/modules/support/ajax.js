@@ -97,18 +97,27 @@ export function getAllMembrList(force, guildArray) {
     .done(addMembrListToForage);
 }
 
+function sendInventoryToForage(data) {
+  data.lastUpdate = Date.now();
+  setForage(calf.subcmd === 'guildinvmgr' ? 'fsh_guildInv' :
+    'fsh_selfInv', data);
+  return data;
+}
+
 export function getInventory() {
   var prm = $.ajax({
     dataType: 'json',
     url:'index.php?cmd=export&subcmd=' + (calf.subcmd === 'guildinvmgr' ?
       'guild_store&inc_tagged=1' : 'inventory')
   });
-  return prm.pipe(function sendInventoryToForage(data) {
-    data.lastUpdate = Date.now();
-    setForage(calf.subcmd === 'guildinvmgr' ? 'fsh_guildInv' :
-      'fsh_selfInv', data);
-    return data;
-  });
+  return prm.pipe(sendInventoryToForage);
+}
+
+function checkCachedInventory(data) {
+  if (!data || data.lastUpdate < Date.now() - 300000) {
+    return getInventory();
+  }
+  return data;
 }
 
 export function inventory(force) {
@@ -117,12 +126,12 @@ export function inventory(force) {
   }
   var prm = getForage(calf.subcmd === 'guildinvmgr' ?
     'fsh_guildInv' : 'fsh_selfInv');
-  return prm.pipe(function checkCachedInventory(data) {
-    if (!data || data.lastUpdate < Date.now() - 300000) {
-      return getInventory();
-    }
-    return data;
-  });
+  return prm.pipe(checkCachedInventory);
+}
+
+function addLastUpdateDate(data) {
+  data.lastUpdate = Date.now();
+  return data;
 }
 
 export function getProfile(username) {
@@ -130,30 +139,31 @@ export function getProfile(username) {
     cmd:             'export',
     subcmd:          'profile',
     player_username: username
-  }).pipe(function addLastUpdateDate(data) {
-    data.lastUpdate = Date.now();
-    return data;
-  });
+  }).pipe(addLastUpdateDate);
+}
+
+function sendMyProfileToForage(data) {
+  setForage('fsh_selfProfile', data);
 }
 
 function getMyProfile() {
   return getProfile(layout.playerName())
-    .done(function sendMyProfileToForage(data) {
-      setForage('fsh_selfProfile', data);
-    });
+    .done(sendMyProfileToForage);
+}
+
+function getProfileFromForage(data) {
+  if (!data || data.lastUpdate < Date.now() -
+    calf.allyEnemyOnlineRefreshTime) {
+    return getMyProfile();
+  }
+  return data;
 }
 
 export function myStats(force) {
   if (force) {return getMyProfile();}
   // jQuery 1.7 uses pipe instead of then
   return getForage('fsh_selfProfile')
-    .pipe(function getProfileFromForage(data) {
-      if (!data || data.lastUpdate < Date.now() -
-        calf.allyEnemyOnlineRefreshTime) {
-        return getMyProfile();
-      }
-      return data;
-    });
+    .pipe(getProfileFromForage);
 }
 
 function dialog(data) {
