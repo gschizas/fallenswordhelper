@@ -46,7 +46,11 @@ function transResponse(response) { // jQuery
   if ($('#pCC b').eq(o.depoPos).text() === '0') {
     $('#pCC input[value="Deposit"]').prop('disabled', true);
   }
-  $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+  if (o.data.deposit_amount !== '1') {
+    $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+  } else {
+    $('#pCC #deposit_amount').val('1');
+  }
   $('#pCC #withdraw_amount').val(o.initWithdraw);
 }
 
@@ -84,7 +88,7 @@ function ajaxifyBank() { // jQuery
   if (depo.length !== 1) {return;}
   var withdraw = $('#pCC input[value="Withdraw"]');
   if (withdraw.length !== 1) {return;}
-  if ($('#pCC b').eq(o.depoPos).text() === '0') {
+  if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
     depo.prop('disabled', true);
   } else {
     depo.click(bankDeposit);
@@ -97,7 +101,7 @@ export function injectGuildBank() { // Native
   ajaxifyBank();
 }
 
-export function injectBank() { // jQuery
+export function injectBank() { // Native
   bankSettings = playerBank;
   ajaxifyBank();
 }
