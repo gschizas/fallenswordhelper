@@ -192,7 +192,7 @@ export function updateHCSQuickBuffLinks(selector) { // Native
 var inv;
 var target;
 
-function selectPerf() {
+function selectPerf() { // Native
   var items = document.getElementById(target + '-items')
     .getElementsByClassName('selectable-item');
   if (items.length === 0) {return;}
@@ -202,7 +202,7 @@ function selectPerf() {
   });
 }
 
-function drawFilters(data) {
+function drawFilters(data) { // Native
   inv = data.items;
   var buttonDiv = document.createElement('div');
   buttonDiv.className = 'fshAC';
@@ -212,7 +212,7 @@ function drawFilters(data) {
   buttonDiv.addEventListener('click', selectPerf);
 }
 
-export function perfFilter(loc) {
+export function perfFilter(loc) { // jQuery.min
   target = loc;
   ajax.getInventoryById().done(drawFilters);
 }

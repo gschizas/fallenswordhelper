@@ -3,7 +3,7 @@ import * as task from '../support/task';
 import * as fshGa from '../support/fshGa';
 import * as system from '../support/system';
 import * as ajax from '../support/ajax';
-import * as composing from '../composing';
+import * as composing from '../composing/composing';
 import * as notification from '../notification';
 import * as common from '../support/common';
 import * as helperMenu from './helperMenu';

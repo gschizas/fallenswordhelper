@@ -1,5 +1,5 @@
-import * as common from '../support/common';
-import * as system from '../support/system';
+import * as common from './support/common';
+import * as system from './support/system';
 
 function cancelAllAH() { // jQuery
   var cancelButtons = document.getElementById('resultRows')
@@ -43,6 +43,6 @@ export function injectAuctionHouse() { // Native
   cancelAll.addEventListener('click', cancelAllAH);
 }
 
-export function quickCreate() {
+export function quickCreate() { // Native
   common.perfFilter('auction');
 }
