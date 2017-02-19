@@ -8,7 +8,6 @@ import * as notification from '../notification';
 import * as common from '../support/common';
 import * as helperMenu from './helperMenu';
 import * as allyEnemy from './allyEnemy';
-import * as profile from '../profile/profile';
 import * as news from '../news';
 import * as messaging from './messaging';
 import * as activeWantedBounties from './activeWantedBounties';
@@ -83,6 +82,34 @@ function movePage(dir) { // Legacy
   var url = dirButton.getAttribute('onClick');
   url = url.replace(/^[^']*'/m, '').replace(/\';$/m, '');
   location.href = url;
+}
+
+function changeCombatSet(responseText, itemIndex) { // jQuery.min
+  var doc = system.createDocument(responseText);
+
+  var cbsSelect = doc.querySelector(
+    '#profileCombatSetDiv select[name="combatSetId"]');
+
+  // find the combat set id value
+  var allItems = cbsSelect.getElementsByTagName('option');
+  if (itemIndex >= allItems.length) {return;}
+  var cbsIndex = allItems[itemIndex].value;
+
+  $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'managecombatset',
+      combatSetId: cbsIndex,
+      submit: 'Use'
+    },
+    success: function() {
+      if (expandMenuOnKeyPress) {
+        localStorage.setItem('hcs.nav.openIndex', '2');
+      }
+      location.href = 'index.php?cmd=profile';
+    }
+  });
 }
 
 function keyPress(evt) { // Native
@@ -160,7 +187,7 @@ function keyPress(evt) { // Native
     // I'm using "key??" because I don't feel comfortable of naming properties with integers
     var itemIndex = keyMap['key' + r];
     $.get('index.php?cmd=profile').done(function(data) {
-      profile.changeCombatSet(data, itemIndex);
+      changeCombatSet(data, itemIndex);
     });
     break;
   default:

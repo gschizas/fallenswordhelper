@@ -211,30 +211,3 @@ export function injectProfile() { // Native
   common.addStatTotalToMouseover();
   task.add(3, layout.colouredDots);
 }
-
-export function changeCombatSet(responseText, itemIndex) { // Native
-  var doc = system.createDocument(responseText);
-
-  var cbsSelect = doc.querySelector(
-    '#profileCombatSetDiv select[name="combatSetId"]');
-
-  // find the combat set id value
-  var allItems = cbsSelect.getElementsByTagName('option');
-  if (itemIndex >= allItems.length) {return;}
-  var cbsIndex = allItems[itemIndex].value;
-
-  $.ajax({
-    type: 'POST',
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'managecombatset',
-      combatSetId: cbsIndex,
-      submit: 'Use'
-    },
-    success: function() {
-      localStorage.setItem('hcs.nav.openIndex', '2');
-      location.href = 'index.php?cmd=profile';
-    }
-  });
-}
