@@ -85,30 +85,58 @@ function doToggleButtons() { // Native
   insertHere.innerHTML = inject;
 }
 
-function dropItemsPaint() { // Native - abstract this pattern
+function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
   while (performance.now() < limit && paintCount < itemsAry.length) {
     var o = itemsAry[paintCount];
+
+    var item = invItems[o.invid];
+
+    var pattern = '';
     if (!extraLinks && showExtraLinks) {
-      o.injectHere.insertAdjacentHTML('afterbegin',
-        '<span>[<a href="index.php?cmd=auctionhouse' +
-        '&search_text=' + encodeURIComponent(o.itemName) +
-        '">AH</a>] [<a href="http://guide.fallensword.com/' +
-        'index.php?cmd=items&subcmd=view' + '&item_id=' + o.itemId +
-        '" target="_blank">UFSG</a>]</span>');
+      pattern += '<span><span class="aHLink">';
+      if (!item.bound) {
+        pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
+          encodeURIComponent(item.item_name) + '">AH</a>]';
+      }
+      pattern += '</span>[<a href="http://guide.fallensword.com/' +
+        'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
+        '" target="_blank">UFSG</a>]</span>';
+      if (pattern !== '') {
+        o.injectHere.insertAdjacentHTML('afterbegin', pattern);
+      }
     }
-    if (!checkAll && itemsHash[o.itemId] !== 1) {
-      o.injectHere.insertAdjacentHTML('beforeend',
-        ' [<span linkto="' + o.itemId +
-        '" class="fshLink">Check all</span>]');
+
+    pattern = '';
+    if (!checkAll && itemsHash[item.item_id] !== 1) {
+      pattern += ' [<span linkto="' + item.item_id +
+        '" class="fshLink">Check all</span>]';
     }
+    if (!colouring && !disableItemColoring) {
+      o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
+    }
+    if (!sendLinks && showQuickSendLinks && !item.bound) {
+      pattern += ' <span class="quickAction sendLink tip-static" ' +
+        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
+        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
+    }
+    if (!dropLinks && showQuickDropLinks && item.guild_tag === '-1') {
+      pattern += ' <span class="quickAction dropLink tip-static" itemInvId="' +
+        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
+        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
+    }
+    if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
+
     paintCount += 1;
   }
   if (paintCount < itemsAry.length) {
-    task.add(3, dropItemsPaint);
+    task.add(3, invPaint);
   } else {
     if (showExtraLinks) {extraLinks = true;}
     checkAll = true;
+    colouring = true;
+    if (showQuickDropLinks) {dropLinks = true;}
+    sendLinks = true;
   }
 }
 
@@ -118,49 +146,12 @@ function toggleShowExtraLinks() { // Native
   doToggleButtons();
   if (!extraLinks) {
     paintCount = 0;
-    task.add(3, dropItemsPaint);
+    task.add(3, invPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
       el.classList.toggle('fshHide');
     });
-  }
-}
-
-function invPaint() { // Native
-  var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      paintCount < itemsAry.length) {
-    var o = itemsAry[paintCount];
-
-    var item = invItems[o.invid];
-    if (!colouring && !disableItemColoring) {
-      o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
-    }
-    if (!sendLinks && showQuickSendLinks &&
-        !item.bound) {
-      o.injectHere.insertAdjacentHTML('beforeend',
-        ' <span class="quickAction sendLink tip-static" ' +
-        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
-        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>'
-      );
-    }
-    if (!dropLinks && showQuickDropLinks &&
-        item.guild_tag === '-1') {
-      o.injectHere.insertAdjacentHTML('beforeend',
-        ' <span class="quickAction dropLink tip-static" itemInvId="' +
-        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
-        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>');
-    }
-
-    paintCount += 1;
-  }
-  if (paintCount < itemsAry.length) {
-    task.add(3, invPaint);
-  } else {
-    colouring = true;
-    if (showQuickDropLinks) {dropLinks = true;}
-    sendLinks = true;
   }
 }
 
@@ -194,7 +185,7 @@ function doCheckboxes(type, itemId) { // Native
         invItems[o.invid].guild_tag !== '-1' ?
         true : false;
     }
-    if (type === 'item' && o.itemId === itemId) {
+    if (type === 'item' && invItems[o.invid].item_id === itemId) {
       el.checked = !el.disabled && !el.checked ? true : false;
     }
   });
@@ -276,19 +267,17 @@ function getItems() { // Native
     var matches = tipped.match(dataObj.itemRE);
     itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
     var injectHere = el.parentNode.parentNode.nextElementSibling;
-    var itemName = injectHere.textContent.trim();
     itemsAry.push({
-      el: el, itemId: matches[1], invid: matches[2],
-      injectHere: injectHere, itemName: itemName});
+      el: el,
+      invid: matches[2],
+      injectHere: injectHere
+    });
   });
-
-  extraLinks = false;
-  checkAll = false;
-  paintCount = 0;
-  task.add(3, dropItemsPaint);
 }
 
 function inventory(data) { // Native
+  extraLinks = false;
+  checkAll = false;
   invItems = data.items;
   colouring = false;
   dropLinks = false;
