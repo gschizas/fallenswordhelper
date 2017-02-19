@@ -1,4 +1,5 @@
 import * as common from '../support/common';
+import * as layout from '../support/layout';
 import * as settingsPage from '../settings/settingsPage';
 import * as system from '../support/system';
 
@@ -87,7 +88,7 @@ export function composingBreakdown() { // Native
     .addEventListener('click', breakEvt, true);
   document.getElementById('composing-items')
     .addEventListener('click', itemClick);
-  document.getElementById('pCC').insertAdjacentHTML('beforeend',
+  layout.pCC.insertAdjacentHTML('beforeend',
     '<table class="fshTblCenter"><tbody>' +
     settingsPage.simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');

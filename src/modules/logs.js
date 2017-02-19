@@ -338,7 +338,7 @@ function addLogWidgets() { // jQuery
 
 export function addGuildLogWidgets() { // Legacy
   if (!system.getValue('hideNonPlayerGuildLogMessages')) {return;}
-  var nodeList = document.getElementById('pCC').getElementsByTagName('TD');
+  var nodeList = layout.pCC.getElementsByTagName('TD');
   var messageNameCell = Array.prototype.reduce.call(nodeList, function(prev, curr) {
     prev = curr.textContent === 'Message' ? curr : prev;
     return prev;

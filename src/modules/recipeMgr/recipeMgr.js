@@ -236,7 +236,7 @@ function parseInventingStart(){ // Legacy
     parseInventingPage, {'page': 0});
 }
 
-function gotRecipeBook(data) {
+function gotRecipeBook(data) { // Legacy
   recipebook = data;
   if (system.getValue('hideRecipes')) {
     hideRecipes = system.getValue('hideRecipeNames').split(',') || [];
@@ -257,6 +257,6 @@ function gotRecipeBook(data) {
 
 export function injectRecipeManager(injector) { // Legacy
   if (injector) {content = injector;}
-  else {content = layout.notebookContent();}
+  else {content = layout.pCC;}
   ajax.getForage('fsh_recipeBook').done(gotRecipeBook);
 }

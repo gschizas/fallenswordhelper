@@ -353,7 +353,7 @@ function findBuffsClearResults() { // Legacy
 }
 
 export function injectFindBuffs(content) { // Legacy
-  if (!content) {content=layout.notebookContent();}
+  if (!content) {content=layout.pCC;}
   var buffList = buffObj.buffList;
   calf.sortBy='name';
   calf.sortAsc=true;
@@ -459,7 +459,7 @@ function findOtherStart() { // Legacy
 }
 
 export function injectFindOther(content) { // Native - Bad
-  if (!content) {content=layout.notebookContent();}
+  if (!content) {content=layout.pCC;}
   var injectionText = '';
   var textToSearchFor = system.getValue('textToSearchFor');
   var extraProfile = system.getValue('extraProfile');

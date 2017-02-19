@@ -178,7 +178,7 @@ export function injectProfile() { // Native
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
-  var playername = document.getElementById('pCC')
+  var playername = layout.pCC
     .getElementsByTagName('h1')[0].textContent;
   var self = playername === layout.playerName();
   if (self) {

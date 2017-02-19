@@ -1,7 +1,7 @@
-import * as task from './support/task';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
 import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var ranks;
 var myRank;
@@ -88,7 +88,7 @@ function doButtons() { // Native
   theTd.insertAdjacentElement('beforeend', weightButton);
 
   if (system.getValue('ajaxifyRankControls')) {
-    document.getElementById('pCC').addEventListener('click',
+    layout.pCC.addEventListener('click',
       ajaxifyRankControls, true);
   }
 }
@@ -124,7 +124,7 @@ function getRanks(membrList) { // Native
     return prev;
   }, {});
   myRank = membrList[layout.playerName()].rank_name;
-  theRows = document.getElementById('pCC').firstElementChild
+  theRows = layout.pCC.firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;
   task.add(3, paintRanks);

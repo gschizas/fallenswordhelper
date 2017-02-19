@@ -1,4 +1,5 @@
 import * as ajax from '../support/ajax';
+import * as layout from '../support/layout';
 import * as system from './system';
 
 var drag_target;
@@ -208,7 +209,7 @@ function drawFilters(data) { // Native
   buttonDiv.className = 'fshAC';
   buttonDiv.insertAdjacentHTML('beforeend',
     '<button class="fshBl">Perfect</button>');
-  document.getElementById('pCC').appendChild(buttonDiv);
+  layout.pCC.appendChild(buttonDiv);
   buttonDiv.addEventListener('click', selectPerf);
 }
 

@@ -1,9 +1,10 @@
 import calf from './support/calf';
-import * as task from './support/task';
-import * as dataObj from './support/dataObj';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
 import * as common from './support/common';
+import * as dataObj from './support/dataObj';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -69,8 +70,8 @@ function injectMoveItems() { // Bad jQuery
 
 function doToggleButtons() { // Native
   // Option toggle buttons for both screens
-  var insertHere = document.getElementById('pCC')
-    .getElementsByTagName('form')[0].previousElementSibling.firstElementChild;
+  var insertHere = layout.pCC.getElementsByTagName('form')[0]
+    .previousElementSibling.firstElementChild;
   var inject = '[<span id="fshShowExtraLinks" class="reportLink">' +
     (showExtraLinks ? 'Hide' : 'Show') +
     ' AH and UFSG links</span>]&nbsp;' +
@@ -264,10 +265,8 @@ function getItems() { // Native
   showQuickDropLinks = system.getValue('showQuickDropLinks');
   showQuickSendLinks = system.getValue('showQuickSendLinks');
   doToggleButtons();
-
-  var pCC = document.getElementById('pCC');
-  pCC.addEventListener('click', evtHandler);
-  var allTables = pCC.getElementsByTagName('table');
+  layout.pCC.addEventListener('click', evtHandler);
+  var allTables = layout.pCC.getElementsByTagName('table');
   var lastTable = allTables[allTables.length - 1];
   var imgList = lastTable.getElementsByTagName('img');
   itemsAry = [];

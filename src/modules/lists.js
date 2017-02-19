@@ -113,7 +113,7 @@ function listEvtHnl(e) { // Native
 }
 
 export function injectAuctionSearch(content) { // Legacy
-  if (!content) {content = layout.notebookContent();}
+  if (!content) {content = layout.pCC;}
   content.innerHTML =
     layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
     '<div class=content>This screen allows you to set up some quick ' +
@@ -146,7 +146,7 @@ export function injectAuctionSearch(content) { // Legacy
 }
 
 export function injectQuickLinkManager(content) { // Legacy
-  if (!content) {content = layout.notebookContent();}
+  if (!content) {content = layout.pCC;}
   content.innerHTML =
     layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
 

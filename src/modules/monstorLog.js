@@ -1,11 +1,12 @@
-import * as ajax from './support/ajax';
 import calf from './support/calf';
+import * as ajax from './support/ajax';
+import * as layout from './support/layout';
 import * as system from './support/system';
 
 var monsterAry;
 
 function noMobs() {
-  document.getElementById('pCC').innerHTML = '<span>No monster information! ' +
+  layout.pCC.innerHTML = '<span>No monster information! ' +
     'Please enable entity log and travel a bit to see the world</span>';
 }
 
@@ -51,7 +52,7 @@ function doHandlers(evt) {
 }
 
 function drawTable() {
-  var content = document.getElementById('pCC');
+  var content = layout.pCC;
   if (!monsterAry || !content) {return;}
   content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
     'width="100%"><tr class="fshBlack fshWhite">' +

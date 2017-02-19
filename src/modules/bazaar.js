@@ -62,10 +62,9 @@ function buy() { // jQuery
 }
 
 export function injectBazaar() { // Native
-  var pCC = document.getElementById('pCC');
-  var pbImg = pCC.getElementsByTagName('IMG')[0];
+  var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
-  var potions = pCC.getElementsByTagName('A');
+  var potions = layout.pCC.getElementsByTagName('A');
   Array.prototype.forEach.call(potions, function(el, i) {
     var item = el.firstElementChild;
     var tipped = item.getAttribute('data-tipped');

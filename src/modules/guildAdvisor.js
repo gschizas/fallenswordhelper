@@ -1,8 +1,9 @@
 import calf from './support/calf';
-import * as debug from './support/debug';
-import * as task from './support/task';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var newSummary = {};
 var advisorColumns = [
@@ -36,8 +37,7 @@ function doTable() { // jQuery
 }
 
 function summaryLink() { // Native
-  var updateInput = document.getElementById('pCC')
-    .getElementsByClassName('custombutton');
+  var updateInput = layout.pCC.getElementsByClassName('custombutton');
   if (!updateInput) {return;}
   updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
@@ -46,7 +46,7 @@ function summaryLink() { // Native
 /*
 function injectAdvisorDable() {
 
-  var advisorTable = document.getElementById('pCC').firstElementChild
+  var advisorTable = layout.pCC.firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
 
   // for (var i = advisorTable.attributes.length - 1; i >= 0; i--){
@@ -107,7 +107,7 @@ function injectAdvisorNew(m) { // Native
 
   debug.time('guildAdvisor.injectAdvisorNew');
 
-  list = document.getElementById('pCC').getElementsByTagName('TABLE')[1];
+  list = layout.pCC.getElementsByTagName('TABLE')[1];
   if (!list) {return;}
   var totalRow = list.firstElementChild.lastElementChild;
   var totalCell = totalRow.firstElementChild;
@@ -249,8 +249,8 @@ function injectAdvisorWeekly() { // jQuery
 
   debug.time('guildAdvisor.injectAdvisorWeekly');
 
-  list = document.getElementById('pCC').firstElementChild
-    .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
+  list = layout.pCC.firstElementChild.firstElementChild
+    .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
   list.innerHTML = '<span class="fshSpinner" style="background-image: ' +
     'url(\'' + system.imageServer +

@@ -196,7 +196,7 @@ function getItemFromBackpack(responseText, callback) { // Legacy
 
 export function insertQuickWear(content) { // Legacy
   calf.itemList = {};
-  if (!content) {content=layout.notebookContent();}
+  if (!content) {content=layout.pCC;}
   content.innerHTML='Getting item list from: ';
   system.xmlhttp('/index.php?cmd=profile&subcmd=dropitems&folder_id=-1',
     getItemFromBackpack, {'inject':content,'id':0});

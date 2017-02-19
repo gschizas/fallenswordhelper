@@ -1,3 +1,5 @@
+import * as layout from './support/layout';
+
 var maxcharacters;
 var textArea;
 var shoutboxPreview;
@@ -138,7 +140,7 @@ function doTagging(row) { // Native
 }
 
 export function viewArchive() { // Native
-  var myTable = document.getElementById('pCC').getElementsByTagName('table')[2];
+  var myTable = layout.pCC.getElementsByTagName('table')[2];
   Array.prototype.forEach.call(myTable.rows, doTagging);
   myTable.addEventListener('click', evtHdl);
 }

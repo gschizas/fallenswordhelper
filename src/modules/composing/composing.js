@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import * as layout from '../support/layout';
 import * as system from '../support/system';
 import * as task from '../support/task';
 
@@ -90,23 +91,22 @@ export function injectComposeAlert() { // jQuery
 }
 
 export function injectComposing() { // Native
-  var pCC = document.getElementById('pCC');
-  if (!pCC) {return;}
+  if (!layout.pCC) {return;}
   if (calf.enableComposingAlert) {
     parseComposing();}
 
-  var buttons = pCC.querySelectorAll('input[id^=create-]:not(#create-multi)');
+  var buttons = layout.pCC.querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
     el.insertAdjacentHTML('afterend',
       '&nbsp;[<span class="quickCreate">Quick Create</span>]');
   });
-  pCC.addEventListener('click', quickCreate);
+  layout.pCC.addEventListener('click', quickCreate);
 
   if (system.getValue('moveComposingButtons')) {
     var buttonDiv = document.getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = pCC.getElementsByClassName('composing-level')[0].parentNode;
+    var top = layout.pCC.getElementsByClassName('composing-level')[0].parentNode;
     top.insertAdjacentElement('beforebegin', buttonDiv);
   }
 }

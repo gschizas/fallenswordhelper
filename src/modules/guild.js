@@ -1,8 +1,8 @@
-import * as debug from './support/debug';
-import * as task from './support/task';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var leftHandSideColumnTable;
 var members;
@@ -167,7 +167,7 @@ function buffLinks() { // Native
   members = document.querySelectorAll(
     '#pCC a[href^="index.php?cmd=profile&player_id="]');
   task.add(3, batchBuffLinks);
-  document.getElementById('pCC').addEventListener('click', function(evt) {
+  layout.pCC.addEventListener('click', function(evt) {
     if (evt.target.className !== 'smallLink') {return;}
     layout.openQuickBuffByName(evt.target.previousElementSibling.text);
   });
@@ -187,7 +187,7 @@ export function injectGuild() { // Native
   task.add(3, layout.colouredDots);
   task.add(3, removeGuildAvyImgBorder);
   task.add(3, guildXPLock);
-  leftHandSideColumnTable = document.getElementById('pCC')
+  leftHandSideColumnTable = layout.pCC
     .lastElementChild.rows[2].cells[0].firstElementChild;
   task.add(3, logoToggle);
   task.add(3, statToggle);
@@ -291,7 +291,7 @@ function parseProfileAndPostWarnings(data) { // Native
     return prev;
   }, {});
 
-  var nodeList = document.getElementById('pCC').firstElementChild.rows[9]
+  var nodeList = layout.pCC.firstElementChild.rows[9]
     .cells[0].firstElementChild.getElementsByTagName('A');
   Array.prototype.forEach.call(nodeList, function(el) {
     var tipped = el.getAttribute('data-tipped');

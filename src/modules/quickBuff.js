@@ -235,7 +235,7 @@ export function updateBuffLog() { // Native
 }
 
 export function injectBuffLog(content) { // Native
-  if (!content) {content = layout.notebookContent();}
+  if (!content) {content = layout.pCC;}
   content.innerHTML = layout.makePageTemplate('Buff Log', '',
     'clearBuffs', 'Clear', 'bufflog');
   document.getElementById('clearBuffs').addEventListener('click',

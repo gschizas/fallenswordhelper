@@ -681,7 +681,7 @@ export function injectSettings() { // Legacy
 }
 
 export function injectSaveSettings(){ // Hybrid
-  var content = layout.notebookContent();
+  var content = layout.pCC;
   var fshSettings = {};
   var list = GM_listValues();
   for(var i = 0; i < list.length; i += 1) {
@@ -703,10 +703,6 @@ export function injectSaveSettings(){ // Hybrid
     Object.keys(settings).forEach(function(id) {
       system.setValue(id,settings[id]);
     });
-    // for(var id in settings){
-      // if (!settings.hasOwnProperty(id)) { continue; }
-      // system.setValue(id,settings[id]);
-    // }
     alert('Settings loaded successfully!');
   });
 }

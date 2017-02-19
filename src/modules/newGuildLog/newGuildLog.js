@@ -1,5 +1,6 @@
-import * as assets from './assets';
 import * as ajax from '../support/ajax';
+import * as assets from './assets';
+import * as layout from '../support/layout';
 import * as logs from '../logs';
 import * as system from '../support/system';
 
@@ -213,9 +214,8 @@ function buildTable() {
     sep.colSpan = 3;
   });
 
-  var pCC = document.getElementById('pCC');
   var injector = document.getElementById('fshInjectHere');
-  pCC.replaceChild(myTable, injector);
+  layout.pCC.replaceChild(myTable, injector);
   logs.addLogColoring('myGuildLog', 1);
   logs.addGuildLogWidgets();
 }
@@ -296,7 +296,7 @@ function eventHandler(evt) {
 function gotOptions(guildLog) {
   options = guildLog || options;
   options.checks = options.checks || assets.defChecks.slice(0);
-  document.getElementById('pCC').innerHTML = assets.guildLogFilter;
+  layout.pCC.innerHTML = assets.guildLogFilter;
   fshNewGuildLog = document.getElementById('fshNewGuildLog');
   fshNewGuildLog.addEventListener('click', eventHandler);
   setChecks();

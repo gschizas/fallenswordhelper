@@ -21,7 +21,7 @@ function evtHdl(e) { // Native
 }
 
 function injectScouttowerBuffLinks() { // Native
-  titanTables = document.getElementById('pCC')
+  titanTables = layout.pCC
     .getElementsByTagName('table');
   if (titanTables.length < 3) {return;}
   for (var i = 2; i < titanTables.length; i += 1) {

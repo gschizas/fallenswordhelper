@@ -3,10 +3,9 @@ import * as layout from './support/layout';
 import * as ajax from './support/ajax';
 
 function parseGuildOnline(membrList) { // Native
-  var pCC = document.getElementById('pCC');
-  var spinner = pCC.getElementsByClassName('fshSpinner')[0];
+  var spinner = layout.pCC.getElementsByClassName('fshSpinner')[0];
   spinner.classList.add('fshHide');
-  var nodeList = pCC.getElementsByTagName('IMG');
+  var nodeList = layout.pCC.getElementsByTagName('IMG');
   Array.prototype.forEach.call(nodeList, function(el) {
     var guildId = el.getAttribute('src').match(/guilds\/([0-9]+)_/)[1];
     var theTd = el.parentNode.parentNode;
@@ -26,7 +25,7 @@ function findOnlinePlayers(e) { // jQuery
     'style="background-image: url(\'' + system.imageServer +
     '/world/actionLoadingSpinner.gif\');">';
   var guildArray = [];
-  var nodeList = document.getElementById('pCC').getElementsByTagName('IMG');
+  var nodeList = layout.pCC.getElementsByTagName('IMG');
   Array.prototype.forEach.call(nodeList, function(el) {
     var guildId = el.getAttribute('src').match(/guilds\/([0-9]+)_/)[1];
     if (guildArray.indexOf(guildId) === -1) {guildArray.push(guildId);}
@@ -36,14 +35,13 @@ function findOnlinePlayers(e) { // jQuery
 }
 
 export function injectTopRated() { // Native
-  var pCC = document.getElementById('pCC');
-  if (!pCC ||
-      !pCC.firstElementChild ||
-      !pCC.firstElementChild.rows ||
-      pCC.firstElementChild.rows.length < 3 ||
-      pCC.firstElementChild.rows[1].textContent
+  if (!layout.pCC ||
+      !layout.pCC.firstElementChild ||
+      !layout.pCC.firstElementChild.rows ||
+      layout.pCC.firstElementChild.rows.length < 3 ||
+      layout.pCC.firstElementChild.rows[1].textContent
         .indexOf('Last Updated') !== 0) {return;}
-  var theCell = pCC.getElementsByTagName('TD')[0];
+  var theCell = layout.pCC.getElementsByTagName('TD')[0];
   theCell.firstElementChild.className = 'fshTopListWrap';
   var findBtn = document.createElement('INPUT');
   findBtn.className = 'fshFindOnlinePlayers custombutton tip-static';

@@ -76,7 +76,7 @@ function showQuickExtract(data) { // Legacy
 }
 
 export function insertQuickExtract(content) { // Hybrid
-  if (!content) {content=layout.notebookContent();}
+  if (!content) {content=layout.pCC;}
   content.innerHTML='<table width=100%><tr style="background-color:' +
     '#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>' +
     'Select which type of plants you wish to extract all of. Only ' +

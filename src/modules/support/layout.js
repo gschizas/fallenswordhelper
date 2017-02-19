@@ -17,6 +17,8 @@ var offlineDot =
 var sevenDayDot =
   '<span class="sevenDayDot tip-static" data-tipped="Offline"></span>';
 
+export var pCC = document.getElementById('pCC');
+
 export function buffAllHref(shortList) { // Bad Pattern
   shortList = shortList.join(',').replace(/\s/g, '');
   var j = 'java';
@@ -86,10 +88,6 @@ export function makePageHeader(title, comment, spanId, button) { // Native
 export function makePageTemplate(title, comment, spanId, button, divId) { // Native
   return makePageHeader(title, comment, spanId, button) +
     '<div class="fshSmall" id="' + divId + '"></div>';
-}
-
-export function notebookContent() { // Native
-  return document.getElementById('pCC'); // new interface logic
 }
 
 export function onlineDot(obj) { // Native

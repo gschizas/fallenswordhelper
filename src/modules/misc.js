@@ -87,7 +87,7 @@ export function ladder() { // Native
 }
 
 export function injectFsBoxContent(content) { // jQuery
-  if (!content) {content = layout.notebookContent();}
+  if (!content) {content = layout.pCC;}
   content.innerHTML = layout.makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
   ajax.getForage('fsh_fsboxcontent').done(function(fsboxcontent) {

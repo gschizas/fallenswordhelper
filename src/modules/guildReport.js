@@ -191,6 +191,6 @@ export function injectReportPaint() { // jQuery
   });
   task.add(2, searchUser);
   task.add(3, prepareChildRows);
-  document.getElementById('pCC').getElementsByTagName('TABLE')[1]
+  layout.pCC.getElementsByTagName('TABLE')[1]
     .addEventListener('click', eventHandlers);
 }

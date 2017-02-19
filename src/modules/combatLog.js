@@ -52,6 +52,6 @@ function gotCombatLog(data) { // Native
 
 export function injectNotepadShowLogs(injector) { // jQuery.min
   if (injector) {content = injector;}
-  else {content = layout.notebookContent();}
+  else {content = layout.pCC;}
   ajax.getForage('fsh_combatLog').done(gotCombatLog);
 }

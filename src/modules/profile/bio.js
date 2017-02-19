@@ -62,7 +62,7 @@ export function compressBio() { // Native
 
 function getBuffsToBuy() { // Legacy
   if (buffCost.count === 0) {return;}
-  var targetPlayer = document.getElementById('pCC')
+  var targetPlayer = layout.pCC
     .getElementsByTagName('h1');
   if (targetPlayer.length !== 0) {
     targetPlayer = targetPlayer[0].textContent;
@@ -211,7 +211,7 @@ function bioPreview() { // Native
 
 function bioWords() { // Native
   //Add description text for the new tags
-  document.getElementById('pCC').insertAdjacentHTML('beforeend', '<div>' +
+  layout.pCC.insertAdjacentHTML('beforeend', '<div>' +
     '`~This will allow FSH Script users to ' +
     'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
     'determine where to put the "Ask For Buffs" button<br><br>' +
@@ -244,7 +244,7 @@ function bioHeight() { // Native
   saveLines.type = 'button';
   saveLines.addEventListener('click', changeHeight);
   bioEditLinesDiv.appendChild(saveLines);
-  document.getElementById('pCC').appendChild(bioEditLinesDiv);
+  layout.pCC.appendChild(bioEditLinesDiv);
 }
 
 function renderBio(bioContents) {
