@@ -20,52 +20,53 @@ var invItems;
 var colouring;
 var sendLinks;
 
-function moveItemsToFolder() { // Bad jQuery
+function moveItemsToFolder() { // jQuery.min
+  var folderId = document.getElementById('selectFolderId').value;
+  var batchNo;
+  var counter = 0;
   var invList = [];
-  $('input[name="removeIndex[]"]:checked').each(function(i) {
-    var batchNo = Math.floor(i / 50);
-    invList[batchNo] = invList[batchNo] || [];
-    invList[batchNo].push($(this).val());
-  });
-  calf.moveItemsCallback = invList.length;
-  invList.forEach(function(val) {
-    $.ajax({
-      dataType: 'json',
-      url: 'index.php',
-      data: {
-        'cmd': 'profile',
-        'subcmd': 'sendtofolder',
-        'inv_list': JSON.stringify(val),
-        'folder_id': $('#selectFolderId option:selected').val(),
-        'ajax': 1
-      },
-      success: function() {
-        calf.moveItemsCallback -= 1;
-        if (calf.moveItemsCallback === 0) {location.reload();}
+  var prm = [];
+  itemsAry.forEach(function(o) {
+    var el = o.injectHere.previousElementSibling.previousElementSibling
+      .firstElementChild;
+    if (el.checked) {
+      batchNo = Math.floor(counter / 50);
+      invList[batchNo] = invList[batchNo] || [];
+      invList[batchNo].push(o.invid);
+      counter += 1;
+      if (counter % 50 === 0) {
+        prm.push(ajax.moveItem(invList[batchNo], folderId));
       }
-    });
+    }
   });
+  if (counter % 50 !== 0) {
+    prm.push(ajax.moveItem(invList[batchNo], folderId));
+  }
+  $.when.apply($, prm).done(function() {location.reload();});
 }
 
-function injectMoveItems() { // Bad jQuery
-  var foldersEnabled = $('img[src$="/folder_on.gif"]');
-  if (foldersEnabled.length !== 1) {return;}
-  var otherFolders = $('#pCC a').has('img[src$="/folder.gif"]');
-  if (otherFolders.length === 0) {return;}
-  var select = $('<select name=folder id=selectFolderId class=' +
-    'customselect></select>');
-  otherFolders.each(function() {
-    var self = $(this);
-    select.append('<option value=' + self.attr('href')
-    .match(/&folder_id=(-*\d+)/i)[1] + '>' +
-    self.parent().text() + '</option>');
+function injectMoveItems() { // Native
+  var flrRow = layout.pCC.getElementsByTagName('form')[0]
+    .nextElementSibling.nextElementSibling.nextElementSibling;
+  var folders = flrRow.getElementsByTagName('img');
+  var flrEnabled;
+  var oFlr;
+  var options = '<tr><td class="fshCenter">Move selected items to: ' +
+    '<select name="folder" id="selectFolderId" class="customselect">';
+  Array.prototype.forEach.call(folders, function(e) {
+    var src = e.getAttribute('src');
+    if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
+    if (src.indexOf('/folder.gif') !== -1) {
+      oFlr = true;
+      options += '<option value=' + e.parentNode.getAttribute('href')
+        .match(/&folder_id=(-*\d+)/i)[1] + '>' +
+        e.parentNode.parentNode.textContent + '</option>';
+    }
   });
-  $('#pCC tr').has(otherFolders[0]).first().after($('<tr/>')
-    .append($('<td class="fshCenter">Move selected items to: </td>')
-      .append(select)
-      .append('&nbsp;<input type="button" class="custombutton"' +
-        ' id="fshMove" value="Move">')));
-  $('#fshMove').click(moveItemsToFolder);
+  if (!flrEnabled || !oFlr) {return;}
+  options += '</select>&nbsp;<input type="button" class="custombutton" ' +
+    'id="fshMove" value="Move"></td></tr>';
+  flrRow.insertAdjacentHTML('afterend', options);
 }
 
 function doToggleButtons() { // Native
@@ -85,48 +86,48 @@ function doToggleButtons() { // Native
   insertHere.innerHTML = inject;
 }
 
+function afterbegin(o, item) { // Native
+  if (extraLinks || !showExtraLinks) {return;}
+  var pattern = '<span><span class="aHLink">';
+  if (!item.bound) {
+    pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
+      encodeURIComponent(item.item_name) + '">AH</a>]';
+  }
+  pattern += '</span>[<a href="http://guide.fallensword.com/' +
+    'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
+    '" target="_blank">UFSG</a>]</span>';
+  o.injectHere.insertAdjacentHTML('afterbegin',  pattern);
+}
+
+function beforeend(o, item) { // Native
+  var pattern = '';
+  if (!checkAll && itemsHash[item.item_id] !== 1) {
+    pattern += ' [<span linkto="' + item.item_id +
+      '" class="fshLink">Check all</span>]';
+  }
+  if (!colouring && !disableItemColoring) {
+    o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
+  }
+  if (!sendLinks && showQuickSendLinks && !item.bound) {
+    pattern += ' <span class="quickAction sendLink tip-static" ' +
+      'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
+      'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
+  }
+  if (!dropLinks && showQuickDropLinks && item.guild_tag === '-1') {
+    pattern += ' <span class="quickAction dropLink tip-static" itemInvId="' +
+      o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
+      'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
+  }
+  if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
+}
+
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
   while (performance.now() < limit && paintCount < itemsAry.length) {
     var o = itemsAry[paintCount];
-
     var item = invItems[o.invid];
-
-    var pattern = '';
-    if (!extraLinks && showExtraLinks) {
-      pattern += '<span><span class="aHLink">';
-      if (!item.bound) {
-        pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
-          encodeURIComponent(item.item_name) + '">AH</a>]';
-      }
-      pattern += '</span>[<a href="http://guide.fallensword.com/' +
-        'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
-        '" target="_blank">UFSG</a>]</span>';
-      if (pattern !== '') {
-        o.injectHere.insertAdjacentHTML('afterbegin', pattern);
-      }
-    }
-
-    pattern = '';
-    if (!checkAll && itemsHash[item.item_id] !== 1) {
-      pattern += ' [<span linkto="' + item.item_id +
-        '" class="fshLink">Check all</span>]';
-    }
-    if (!colouring && !disableItemColoring) {
-      o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
-    }
-    if (!sendLinks && showQuickSendLinks && !item.bound) {
-      pattern += ' <span class="quickAction sendLink tip-static" ' +
-        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
-        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
-    }
-    if (!dropLinks && showQuickDropLinks && item.guild_tag === '-1') {
-      pattern += ' <span class="quickAction dropLink tip-static" itemInvId="' +
-        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
-        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
-    }
-    if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
-
+    afterbegin(o, item);
+    beforeend(o, item);
     paintCount += 1;
   }
   if (paintCount < itemsAry.length) {
@@ -181,54 +182,29 @@ function doCheckboxes(type, itemId) { // Native
     var el = o.el.parentNode.parentNode.previousElementSibling
       .firstElementChild;
     if (type === 'guild') {
-      el.checked = !el.disabled &&
-        invItems[o.invid].guild_tag !== '-1' ?
-        true : false;
+      el.checked = !el.disabled && invItems[o.invid].guild_tag !== '-1';
     }
     if (type === 'item' && invItems[o.invid].item_id === itemId) {
-      el.checked = !el.disabled && !el.checked ? true : false;
+      el.checked = !el.disabled && !el.checked;
     }
   });
 }
 
-function quickSendItem(evt){ // jQuery
-  var self = evt.target;
+function quickAction(self, success, otherClass) { // jQuery.min
   self.className = 'quickAction';
   var itemInvId = self.getAttribute('itemInvId');
   ajax.sendItem([itemInvId]).done(function(data){
     if (data.r === 1) {return;}
     self.style.color = 'green';
-    self.innerHTML = 'Sent';
+    self.innerHTML = success;
   });
   $(self).qtip('hide');
   anotherSpinner(self);
   var theTd = self.parentNode;
-  var quickDrop = theTd.querySelector('.dropLink');
-  if (quickDrop) {
-    quickDrop.className = 'quickAction';
-    quickDrop.innerHTML = '';
-  }
-  var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
-  checkbox.checked = false;
-  checkbox.disabled = true;
-}
-
-function quickDropItem(evt){ // jQuery
-  var self = evt.target;
-  self.className = 'quickAction';
-  var itemInvId = self.getAttribute('itemInvId');
-  ajax.dropItem([itemInvId]).done(function(data){
-    if (data.r === 1) {return;}
-    self.style.color = 'green';
-    self.innerHTML = 'Dropped';
-  });
-  $(self).qtip('hide');
-  anotherSpinner(self);
-  var theTd = self.parentNode;
-  var quickSend = theTd.querySelector('.sendLink');
-  if (quickSend) {
-    quickSend.className = 'quickAction';
-    quickSend.innerHTML = '';
+  var otherButton = theTd.querySelector(otherClass);
+  if (otherButton) {
+    otherButton.className = 'quickAction';
+    otherButton.innerHTML = '';
   }
   var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
   checkbox.checked = false;
@@ -236,17 +212,22 @@ function quickDropItem(evt){ // jQuery
 }
 
 function evtHandler(evt) { // Native
-  if (evt.target.tagName !== 'SPAN') {return;}
   var self = evt.target;
   var myId = self.id;
   if (myId === 'fshShowExtraLinks') {toggleShowExtraLinks();}
   if (myId === 'fshShowQuickDropLinks') {toggleShowQuickDropLinks();}
   if (myId === 'fshSelectAllGuildLocked') {doCheckboxes('guild');}
+  if (myId === 'fshMove') {moveItemsToFolder();}
   if (self.hasAttribute('linkto')) {
-    doCheckboxes('item', evt.target.getAttribute('linkto'));}
+    doCheckboxes('item', evt.target.getAttribute('linkto'));
+  }
   var myClasses = self.classList;
-  if (myClasses.contains('sendLink')) {quickSendItem(evt);}
-  if (myClasses.contains('dropLink')) {quickDropItem(evt);}
+  if (myClasses.contains('sendLink')) {
+    quickAction(evt.target, 'Sent', '.dropLink');
+  }
+  if (myClasses.contains('dropLink')) {
+    quickAction(evt.target, 'Dropped', '.sendLink');
+  }
 }
 
 function getItems() { // Native
@@ -276,6 +257,7 @@ function getItems() { // Native
 }
 
 function inventory(data) { // Native
+  // console.log('inventory', data);
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
