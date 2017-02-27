@@ -21,7 +21,6 @@ function evtHdl(e) { // Native
 }
 
 function injectScouttowerBuffLinks(titanTables) { // Native
-  // titanTables = layout.pCC.getElementsByTagName('table');
   if (titanTables.length < 3) {return;}
   for (var i = 2; i < titanTables.length; i += 1) {
     var titanTable = titanTables[i];
@@ -48,19 +47,15 @@ function getScoutTowerDetails(responseText) { // Legacy
     var titanTable = system.findNode(
       '//table[tbody/tr/td/img[contains(@src,"/banners/titankilllog.png")]]');
     var newRow = titanTable.insertRow(0);
-    var newCell = newRow.insertCell(0);
-    newCell.align = 'center';
-    newCell.innerHTML = scoutTowerTable.rows[1].cells[0].innerHTML +
-      '<br><br>' ;
+    newRow.appendChild(scoutTowerTable.rows[1].cells[0])
+      .insertAdjacentHTML('beforeend', '<br><br>');
     newRow = titanTable.insertRow(1);
-    newCell = newRow.insertCell(0);
-    newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
+    newRow.appendChild(scoutTowerTable.rows[8].cells[0]);
   }
 }
 
-export function injectTitan() { // Legacy
-  system.xmlhttp('index.php?cmd=guild&subcmd=scouttower',
-    getScoutTowerDetails);
+export function injectTitan() { // jQuery
+  $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
 }
 
 export function injectScouttower() { // Legacy
