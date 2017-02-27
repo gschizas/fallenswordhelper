@@ -20,9 +20,8 @@ function evtHdl(e) { // Native
   }
 }
 
-function injectScouttowerBuffLinks() { // Native
-  titanTables = layout.pCC
-    .getElementsByTagName('table');
+function injectScouttowerBuffLinks(titanTables) { // Native
+  // titanTables = layout.pCC.getElementsByTagName('table');
   if (titanTables.length < 3) {return;}
   for (var i = 2; i < titanTables.length; i += 1) {
     var titanTable = titanTables[i];
@@ -39,7 +38,9 @@ function injectScouttowerBuffLinks() { // Native
 }
 
 function getScoutTowerDetails(responseText) { // Legacy
-  var doc=system.createDocument(responseText);
+  var doc = system.createDocument(responseText);
+  injectScouttowerBuffLinks(doc.getElementById('pCC')
+    .getElementsByTagName('table'));
   var scoutTowerTable = system.findNode(
     '//table[tbody/tr/td/img[contains(@src,"/banners/scouttower.png")]]',
     doc);
@@ -55,7 +56,6 @@ function getScoutTowerDetails(responseText) { // Legacy
     newCell = newRow.insertCell(0);
     newCell.innerHTML = scoutTowerTable.rows[8].cells[0].innerHTML;
   }
-  injectScouttowerBuffLinks();
 }
 
 export function injectTitan() { // Legacy
@@ -64,7 +64,7 @@ export function injectTitan() { // Legacy
 }
 
 export function injectScouttower() { // Legacy
-  injectScouttowerBuffLinks();
+  injectScouttowerBuffLinks(layout.pCC.getElementsByTagName('table'));
   var titanTable = titanTables[1];
   for (var i = 1; i < titanTable.rows.length; i += 6) {
     var aRow = titanTable.rows[i];
