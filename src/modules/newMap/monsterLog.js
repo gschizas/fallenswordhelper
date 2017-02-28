@@ -32,19 +32,19 @@ function processMonsterLog() {
   logCreature.creature_class = logCreature.creature_class ||
     creature.creature_class;
   logCreature.image_id = logCreature.image_id || creature.image_id;
-  logCreature.level = logCreature.level || creature.level * 1;
+  logCreature.level = logCreature.level || Number(creature.level);
   logCreature.type = logCreature.type || creature.type;
-  logCreature.armor = updateMinMax(logCreature.armor, creature.armor * 1);
-  logCreature.attack = updateMinMax(logCreature.attack, creature.attack * 1);
-  logCreature.damage = updateMinMax(logCreature.damage, creature.damage * 1);
+  logCreature.armor = updateMinMax(logCreature.armor, Number(creature.armor));
+  logCreature.attack = updateMinMax(logCreature.attack, Number(creature.attack));
+  logCreature.damage = updateMinMax(logCreature.damage, Number(creature.damage));
   logCreature.defense = updateMinMax(logCreature.defense,
-    creature.defense * 1);
-  logCreature.hp = updateMinMax(logCreature.hp, creature.hp * 1);
-  if (creature.enhancements) {
+    Number(creature.defense));
+  logCreature.hp = updateMinMax(logCreature.hp, Number(creature.hp));
+  if (creature.enhancements && creature.enhancements.length > 0) {
     logCreature.enhancements = logCreature.enhancements || {};
     var logEnh = logCreature.enhancements;
     creature.enhancements.forEach(function(e) {
-      logEnh[e.name] = updateMinMax(logEnh[e.name], e.value * 1);
+      logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
     });
   }
   ajax.setForage('fsh_monsterLog', monsterLog);

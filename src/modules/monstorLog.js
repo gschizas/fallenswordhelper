@@ -88,9 +88,11 @@ function prepMonster(data) {
     tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
     tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
     tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-    if (tmpObj.enhancements) {
+    var enhancements;
+    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+    if (enhancements && enhancements.length > 0) {
       var tmp = '<span class="fshXXSmall">';
-      tmp += Object.keys(tmpObj.enhancements).reduce(function(prev, curr) {
+      tmp += enhancements.reduce(function(prev, curr) {
         return prev + '<span class="fshNoWrap">' + curr + ': ' +
           tmpObj.enhancements[curr].min + ' - ' +
           tmpObj.enhancements[curr].max + '</span><br>';
