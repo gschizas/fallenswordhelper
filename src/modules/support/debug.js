@@ -15,7 +15,7 @@ export function time(name) { // Native
 export function timeEnd(name) { // Native
   if (timers[name]) {
     log(name, Math.round(performance.now() * 1000 -
-      timers[name]) / 1000 + 'ms' );
+      timers[name]) / 1000 + 'ms');
     delete timers[name];
   }
 }

@@ -58,10 +58,8 @@ function newsEvt(evt) { // jQuery
     evt.preventDefault();
     $(_class).hide().data('open', false);
     $(newsBody).show().data('open', true);
-  } else {
-    if (evt.target.tagName !== 'A') {
-      $(newsBody).hide().data('open', false);
-    }
+  } else if (evt.target.tagName !== 'A') {
+    $(newsBody).hide().data('open', false);
   }
   evt.stopPropagation();
 }
@@ -107,7 +105,8 @@ function expandArt(article) { // Native
 
 function closestTr(el) { // Native
   if (el.tagName === 'TR') {
-    if (el.rowIndex % 6 === 0) {return el;} else {return;}
+    if (el.rowIndex % 6 === 0) {return el;}
+    return;
   }
   if (el.tagName === 'TABLE') {return;}
   return closestTr(el.parentNode);

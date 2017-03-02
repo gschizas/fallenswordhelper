@@ -49,14 +49,17 @@
   "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
   "devDependencies": {
     "chokidar-cmd": "^1.2.1",
+    "eslint": "^3.16.1",
     "ip": "^1.1.4",
     "jshint": "^2.9.3",
     "local-web-server": "^1.2.6",
     "npm-run-all": "^3.1.2",
     "rimraf": "^2.5.4",
     "rollup": "^0.36.4",
+    "rollup-plugin-commonjs": "^7.0.0",
     "rollup-plugin-filesize": "^1.0.1",
     "rollup-plugin-jscc": "^0.3.3",
+    "rollup-plugin-node-resolve": "^2.0.0",
     "uglifyjs": "^2.4.10"
   }
 }

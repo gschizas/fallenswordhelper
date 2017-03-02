@@ -5,28 +5,30 @@ fiddle.jshell.net/GRIFFnDOOR/r7tvg/
 
 var heap = [null];
 
-function cmp(i,j) {
+function cmp(i, j) {
   return heap[i] && heap[i].priority < heap[j].priority;
 }
 
-function swp(i,j) {
+function swp(i, j) {
   var temp = heap[i];
   heap[i] = heap[j];
   heap[j] = temp;
 }
 
-function sink(i) {
+function sink(j) {
+  var i = j;
   while (i * 2 < heap.length) {
     var leftHigher = !cmp(i * 2 + 1, i * 2);
     var childIndex = leftHigher ? i * 2 : i * 2 + 1;
-    if (cmp(i,childIndex)) {break;}
+    if (cmp(i, childIndex)) {break;}
     swp(i, childIndex);
     i = childIndex;
   }
 }
 
-function bubble(i) {
-  while (i > 1) { 
+function bubble(j) {
+  var i = j;
+  while (i > 1) {
     var parentIndex = i >> 1;
     if (!cmp(i, parentIndex)) {break;}
     swp(i, parentIndex);
@@ -46,7 +48,7 @@ export function pop() {
 }
 
 export function push(data, priority) {
-  bubble(heap.push({data: data, priority: priority}) -1);
+  bubble(heap.push({data: data, priority: priority}) - 1);
 }
 
 export function getLength() {

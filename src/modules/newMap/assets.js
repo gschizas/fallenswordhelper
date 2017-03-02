@@ -32,10 +32,10 @@ export default {
       system.imageServer + '/temple/1.gif\');">' +
     '</a>',
   bias: {
-    0: {generalVariable: 1.1053, hpVariable: 1.1},
-    1: {generalVariable: 1.1, hpVariable: 1.053},
-    2: {generalVariable: 1.053, hpVariable: 1},
-    3: {generalVariable: 1.1053, hpVariable: 1}
+    '0': {generalVariable: 1.1053, hpVariable: 1.1},
+    '1': {generalVariable: 1.1, hpVariable: 1.053},
+    '2': {generalVariable: 1.053, hpVariable: 1},
+    '3': {generalVariable: 1.1053, hpVariable: 1}
   },
   huntingOnImage: '<a href="#" id="HelperToggleHuntingMode" ' +
     'class="huntOn quicklink tip-static" ' +

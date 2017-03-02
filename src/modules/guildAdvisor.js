@@ -8,18 +8,20 @@ import * as task from './support/task';
 var newSummary = {};
 var advisorColumns = [
   {title: '<div class="fshBold">Member</div>'},
-  {title: '<div class="fshBold">Lvl</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Rank</div>', class: 'dt-center dt-nowrap'},
-  {title: '<div class="fshBold">Gold From Deposits</div>',
-    class: 'dt-center'},
-  {title: '<div class="fshBold">Gold From Tax</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Gold Total</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">FSP</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Skill Cast</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Group Create</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Group Join</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Relic</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">XP Contrib</div>', class: 'dt-center'}
+  {title: '<div class="fshBold">Lvl</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Rank</div>', 'class': 'dt-center dt-nowrap'},
+  {
+    title: '<div class="fshBold">Gold From Deposits</div>',
+    'class': 'dt-center'
+  },
+  {title: '<div class="fshBold">Gold From Tax</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Gold Total</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">FSP</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Skill Cast</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Group Create</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Group Join</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Relic</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">XP Contrib</div>', 'class': 'dt-center'}
 ];
 var membrList;
 var list;
@@ -63,7 +65,6 @@ function injectAdvisorDable() {
       // cell.textContent = oldChild.textContent.trim().replace(/,/g, '');
     // });
   // });
-
 
   var tBody = advisorTable.firstElementChild;
 
@@ -270,8 +271,8 @@ function injectAdvisorWeekly() { // jQuery
     getAdvisorPage(6),
     getAdvisorPage(7)
   ).done(function() {
-      task.add(3, addAdvisorPages);
-    });
+    task.add(3, addAdvisorPages);
+  });
 
   debug.timeEnd('guildAdvisor.injectAdvisorWeekly');
 

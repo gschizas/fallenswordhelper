@@ -16,8 +16,8 @@ var statDamage;
 var statArmor;
 var statHp;
 
-function updateMinMax(logStat, creatureStat) {
-  logStat = logStat || {};
+function updateMinMax(_logStat, creatureStat) {
+  var logStat = _logStat || {};
   logStat.min = logStat.min ? Math.min(logStat.min, creatureStat) :
     creatureStat;
   logStat.max = logStat.max ? Math.max(logStat.max, creatureStat) :

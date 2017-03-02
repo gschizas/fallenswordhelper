@@ -1,14 +1,14 @@
 /*
  * DOMParser HTML extension
  * 2012-09-04
- * 
+ *
  * By Eli Grey, http://eligrey.com
  * Public domain.
  * NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
  */
 
-/*! @source https://gist.github.com/1129031 */
-/*global document, DOMParser*/
+/* ! @source https://gist.github.com/1129031 */
+/* global document, DOMParser*/
 
 (function(DOMParser) {
   var DOMParser_proto = DOMParser.prototype;
@@ -21,20 +21,20 @@
       // text/html parsing is natively supported
       return;
     }
-  } catch (ex) {}
+  } catch (ex) {
+    // Nothing
+  }
 
   DOMParser_proto.parseFromString = function(markup, type) {
     if (/^\s*text\/html\s*(?:;|$)/i.test(type)) {
       var doc = document.implementation.createHTMLDocument('');
       if (markup.toLowerCase().indexOf('<!doctype') > -1) {
         doc.documentElement.innerHTML = markup;
-      }
-      else {
+      } else {
         doc.body.innerHTML = markup;
       }
       return doc;
-    } else {
-      return real_parseFromString.apply(this, arguments);
     }
+    return real_parseFromString.apply(this, arguments);
   };
 }(DOMParser));

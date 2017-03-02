@@ -1,8 +1,8 @@
 import calf from './support/calf';
-import * as task from './support/task';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
   'Gut Rot Head Splitter|Serum');
@@ -48,7 +48,7 @@ function searchUser() { // Native
   if (!userNode) {return;}
   nodeList = document.querySelectorAll('#pCC table table tr');
   counter = 0;
-    task.add(2, hideOthers);
+  task.add(2, hideOthers);
 }
 
 function recallItem(evt) { // jQuery
@@ -61,8 +61,9 @@ function recallItem(evt) { // jQuery
     invId: href.match(/&id=(\d+)/)[1],
     playerId: href.match(/&player_id=(\d+)/)[1],
     mode: mode,
-    action: evt.target.getAttribute('action')})
-    .done(function(data){
+    action: evt.target.getAttribute('action')
+  })
+    .done(function(data) {
       if (data.r === 1) {return;}
       theTd.innerHTML = '<span class="fastWorn">' +
         'You successfully recalled the item</span>';
@@ -74,7 +75,7 @@ function wearItem(evt) { // jQuery
   $(evt.target).qtip('hide');
   var theTd = evt.target.parentNode.parentNode.parentNode;
   var href = theTd.firstElementChild.getAttribute('href');
-  ajax.equipItem(href.match(/&id=(\d+)/)[1]).done(function(data){
+  ajax.equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
     if (data.r === 1) {return;}
     theTd.innerHTML = '<span class="fastWorn">Worn</span>';
   });
@@ -100,8 +101,7 @@ function paintHeader() { // Native
   while (performance.now() < limit && headerCount < headers.length) {
     var el = headers[headerCount];
     var oldhtml = el.textContent;
-    el.innerHTML = layout.onlineDot({
-      last_login: calf.membrList[oldhtml].last_login}) +
+    el.innerHTML = layout.onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
       '<a href="index.php?cmd=profile&player_id=' +
       calf.membrList[oldhtml].id + '">' + oldhtml +
       '</a> [ <span class="a-reply fshLink" target_player=' +
@@ -136,11 +136,11 @@ function paintChild() { // Native
 function mySpan(el) { // Native
   var inject = document.createElement('span');
   var secondHref = el.children.length === 2;
-  var firstHref = secondHref ? '': ' class="fshHide"';
+  var firstHref = secondHref ? '' : ' class="fshHide"';
   var itemName = el.previousElementSibling.innerHTML;
   var wearable = wearRE.test(itemName) ?
     ' class="fshHide"' : '';
-  var equipable = secondHref ? 'recall': 'equip';
+  var equipable = secondHref ? 'recall' : 'equip';
   inject.innerHTML = '<span' + firstHref +
     '> | <span class="reportLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +

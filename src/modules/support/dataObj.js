@@ -80,7 +80,7 @@ export var defaults = {
   fsboxlog: false,
   fsboxcontent: '',
   itemRecipient: '',
-  quickLinks:'[]',
+  quickLinks: '[]',
   enableAttackHelper: false,
   minGroupLevel: 1,
   combatEvaluatorBias: 0,
@@ -167,10 +167,22 @@ export var defaults = {
   bountyList: '',
   wantedList: '',
   inventoryCheckedElements: {
-    '0': 1, '1': 1, '2': 1, '3': 1, '4': 1,
-    '5': 1, '6': 1, '7': 1, '8': 1, '100': 1,
-    '101': 1, '102': 1, '103': 1, '104': 1,
-    '105': 1, '106': 1
+    '0': 1,
+    '1': 1,
+    '2': 1,
+    '3': 1,
+    '4': 1,
+    '5': 1,
+    '6': 1,
+    '7': 1,
+    '8': 1,
+    '100': 1,
+    '101': 1,
+    '102': 1,
+    '103': 1,
+    '104': 1,
+    '105': 1,
+    '106': 1
   },
   lowestLevelInTop250: 0,
 
@@ -188,7 +200,7 @@ export var defaults = {
     '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList: 
+  quickSearchList:
     '[{"category":"Plants","searchname":"Amber","nickname":""},' +
     '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
     '{"category":"Plants","searchname":"Jademare","nickname":""},' +

@@ -49,9 +49,7 @@ export default {
     fsbox: {'-': {'-': {'-': news.newsFsbox}}},
     shoutbox: {'-': {'-': {'-': news.newsShoutbox}}}
   },
-  blacksmith: {
-    repairall: {'-': {'-': {1: legacy.injectWorld}}}
-  },
+  blacksmith: {repairall: {'-': {'-': {'1': legacy.injectWorld}}}},
   arena: {
     '-': {'-': {'-': {'-': arena.injectArena}}},
     join: {'-': {'-': {'-': arena.injectArena}}},
@@ -63,8 +61,8 @@ export default {
     '-': {
       '-': {
         '-': {'-': questBook.injectQuestBookFull},
-        0: {'-': questBook.injectQuestBookFull}, // Normal
-        1: {'-': questBook.injectQuestBookFull} // Seasonal
+        '0': {'-': questBook.injectQuestBookFull}, // Normal
+        '1': {'-': questBook.injectQuestBookFull} // Seasonal
       }
     },
     atoz: {'-': {'-': {'-': questBook.injectQuestBookFull}}},
@@ -81,7 +79,7 @@ export default {
       '-': {
         '-': {
           '-': dropItems.injectProfileDropItems,
-          1: dropItems.injectProfileDropItems
+          '1': dropItems.injectProfileDropItems
         }
       }
     }
@@ -103,33 +101,33 @@ export default {
       addtags: {
         '-': {'-': guild.injectGuildAddTagsWidgets},
         '-1': {'-': guild.injectGuildAddTagsWidgets},
-        0: {'-': guild.injectGuildAddTagsWidgets},
-        1: {'-': guild.injectGuildAddTagsWidgets},
-        2: {'-': guild.injectGuildAddTagsWidgets},
-        3: {'-': guild.injectGuildAddTagsWidgets},
-        4: {'-': guild.injectGuildAddTagsWidgets},
-        5: {'-': guild.injectGuildAddTagsWidgets},
-        6: {'-': guild.injectGuildAddTagsWidgets},
-        7: {'-': guild.injectGuildAddTagsWidgets},
-        8: {'-': guild.injectGuildAddTagsWidgets},
-        10: {'-': guild.injectGuildAddTagsWidgets},
-        15: {'-': guild.injectGuildAddTagsWidgets},
-        16: {'-': guild.injectGuildAddTagsWidgets}
+        '0': {'-': guild.injectGuildAddTagsWidgets},
+        '1': {'-': guild.injectGuildAddTagsWidgets},
+        '2': {'-': guild.injectGuildAddTagsWidgets},
+        '3': {'-': guild.injectGuildAddTagsWidgets},
+        '4': {'-': guild.injectGuildAddTagsWidgets},
+        '5': {'-': guild.injectGuildAddTagsWidgets},
+        '6': {'-': guild.injectGuildAddTagsWidgets},
+        '7': {'-': guild.injectGuildAddTagsWidgets},
+        '8': {'-': guild.injectGuildAddTagsWidgets},
+        '10': {'-': guild.injectGuildAddTagsWidgets},
+        '15': {'-': guild.injectGuildAddTagsWidgets},
+        '16': {'-': guild.injectGuildAddTagsWidgets}
       },
       removetags: {
         '-': {'-': guild.injectGuildAddTagsWidgets},
         '-1': {'-': guild.injectGuildAddTagsWidgets},
-        0: {'-': guild.injectGuildAddTagsWidgets},
-        1: {'-': guild.injectGuildAddTagsWidgets},
-        2: {'-': guild.injectGuildAddTagsWidgets},
-        3: {'-': guild.injectGuildAddTagsWidgets},
-        4: {'-': guild.injectGuildAddTagsWidgets},
-        5: {'-': guild.injectGuildAddTagsWidgets},
-        6: {'-': guild.injectGuildAddTagsWidgets},
-        7: {'-': guild.injectGuildAddTagsWidgets},
-        8: {'-': guild.injectGuildAddTagsWidgets},
-        10: {'-': guild.injectGuildAddTagsWidgets},
-        16: {'-': guild.injectGuildAddTagsWidgets}
+        '0': {'-': guild.injectGuildAddTagsWidgets},
+        '1': {'-': guild.injectGuildAddTagsWidgets},
+        '2': {'-': guild.injectGuildAddTagsWidgets},
+        '3': {'-': guild.injectGuildAddTagsWidgets},
+        '4': {'-': guild.injectGuildAddTagsWidgets},
+        '5': {'-': guild.injectGuildAddTagsWidgets},
+        '6': {'-': guild.injectGuildAddTagsWidgets},
+        '7': {'-': guild.injectGuildAddTagsWidgets},
+        '8': {'-': guild.injectGuildAddTagsWidgets},
+        '10': {'-': guild.injectGuildAddTagsWidgets},
+        '16': {'-': guild.injectGuildAddTagsWidgets}
       },
       storeitems: {'-': {'-': dropItems.injectStoreItems}}
     },
@@ -160,35 +158,21 @@ export default {
       '-': {
         '-': {'-': logs.playerLog},
         '-1': {'-': logs.playerLog},
-        0: {'-': logs.playerLog},
-        1: {'-': logs.playerLog},
-        2: {'-': logs.playerLog},
-        3: {'-': logs.playerLog}
+        '0': {'-': logs.playerLog},
+        '1': {'-': logs.playerLog},
+        '2': {'-': logs.playerLog},
+        '3': {'-': logs.playerLog}
       }
     },
     outbox: {'-': {'-': {'-': logs.outbox}}}
   },
   potionbazaar: {'-': {'-': {'-': {'-': bazaar.injectBazaar}}}},
-  marketplace: {
-    createreq: {'-': {'-': {'-': misc.addMarketplaceWidgets}}}
-  },
+  marketplace: {createreq: {'-': {'-': {'-': misc.addMarketplaceWidgets}}}},
   quickbuff: {'-': {'-': {'-': {'-': quickBuff.injectQuickBuff}}}},
   notepad: {
     showlogs: {'-': {'-': {'-': combatLog.injectNotepadShowLogs}}},
-    invmanagernew: {
-      '-': {
-        '-': {
-          '-': inventory.injectInventoryManagerNew
-        }
-      }
-    },
-    guildinvmgr: {
-      '-': {
-        '-': {
-          '-': inventory.injectInventoryManagerNew
-        }
-      }
-    },
+    invmanagernew: {'-': {'-': {'-': inventory.injectInventoryManagerNew}}},
+    guildinvmgr: {'-': {'-': {'-': inventory.injectInventoryManagerNew}}},
     recipemanager: {'-': {'-': {'-': recipeMgr.injectRecipeManager}}},
     auctionsearch: {'-': {'-': {'-': lists.injectAuctionSearch}}},
     onlineplayers: {'-': {'-': {'-': onlinePlayers.injectOnlinePlayers}}},
@@ -208,8 +192,8 @@ export default {
     '-': {
       '-': {
         '-': {'-': upgrades.storePlayerUpgrades},
-        0: {'-': upgrades.storePlayerUpgrades},
-        1: {'-': notification.parseGoldUpgrades}
+        '0': {'-': upgrades.storePlayerUpgrades},
+        '1': {'-': notification.parseGoldUpgrades}
       }
     }
   },
@@ -233,16 +217,16 @@ export default {
   inventing: {viewrecipe: {'-': {'-': {'-': recipes.inventing}}}},
   tempinv: {'-': {'-': {'-': {'-': mailbox.injectMailbox}}}},
   findplayer: {'-': {'-': {'-': {'-': misc.injectFindPlayer}}}},
-  quests: { //UFSG
+  quests: { // UFSG
     '-': {'-': {'-': {'-': guide.allowBack}}},
     view: {'-': {'-': {'-': guide.showAllQuestSteps}}}
   },
-  items: {'-': {'-': {'-': {'-': guide.allowBack}}}}, //UFSG
-  creatures: {'-': {'-': {'-': {'-': guide.allowBack}}}}, //UFSG
-  masterrealms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, //UFSG
-  realms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, //UFSG
-  relics: {'-': {'-': {'-': {'-': guide.allowBack}}}}, //UFSG
-  shops: {'-': {'-': {'-': {'-': guide.allowBack}}}}, //UFSG
+  items: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
+  creatures: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
+  masterrealms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
+  realms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
+  relics: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
+  shops: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
   scavenging: {'-': {'-': {'-': {'-': scavenging.injectScavenging}}}},
   temple: {'-': {'-': {'-': {'-': notification.parseTemplePage}}}},
   composing: {

@@ -1,8 +1,8 @@
 import calf from '../support/calf';
-import * as task from '../support/task';
-import * as system from '../support/system';
 import * as ajax from '../support/ajax';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
+import * as task from '../support/task';
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
 var msgButton = '<span class="enemy-send-message guild-icon left ' +

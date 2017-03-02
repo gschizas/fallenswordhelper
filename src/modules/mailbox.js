@@ -1,5 +1,5 @@
-import * as dataObj from './support/dataObj';
 import * as ajax from './support/ajax';
+import * as dataObj from './support/dataObj';
 
 function quickDoneTaken(data) { // jQuery
   if (data.r !== 0) {
@@ -23,27 +23,27 @@ function takeAllSimilar(evt) { // jQuery
       type: 'POST',
       url: 'index.php',
       data: {
-        'cmd': 'tempinv',
-        'subcmd': 'takeitem',
-        'temp_id': invId,
-        'ajax': '1'
+        cmd: 'tempinv',
+        subcmd: 'takeitem',
+        temp_id: invId,
+        ajax: '1'
       },
       dataType: 'json'
     }).done(quickDoneTaken);
   });
 }
 
-function toggleQuickTake(){ // jQuery
-  if($('#currentMBDisplay').attr('value')==='mailbox'){
+function toggleQuickTake() { // jQuery
+  if ($('#currentMBDisplay').attr('value') === 'mailbox') {
     $('#mailboxSwitcher').html('Toggle Mailbox');
-    $('#quickTake').css('display','block');
-    $('#regularMailbox').css('display','none');
-    $('#currentMBDisplay').attr('value','quicktake');
-  }else{
+    $('#quickTake').css('display', 'block');
+    $('#regularMailbox').css('display', 'none');
+    $('#currentMBDisplay').attr('value', 'quicktake');
+  } else {
     $('#mailboxSwitcher').html('Toggle Quick Take');
-    $('#quickTake').css('display','none');
-    $('#regularMailbox').css('display','block');
-    $('#currentMBDisplay').attr('value','mailbox');
+    $('#quickTake').css('display', 'none');
+    $('#regularMailbox').css('display', 'block');
+    $('#currentMBDisplay').attr('value', 'mailbox');
   }
 }
 
@@ -51,18 +51,18 @@ export function injectMailbox() { // Bad jQuery
   var items = $('#pCC a');
   if (items.length === 0) {return;} // Empty mailbox
   $('#pCC').wrapInner('<div id="regularMailbox" />');
-  var quickTakeDiv='<div id="quickTake" style="display:none"><br />' +
-    '<br /><center><font size="3"><b>Quick Take</b></font>'+
+  var quickTakeDiv = '<div id="quickTake" style="display:none"><br />' +
+    '<br /><center><font size="3"><b>Quick Take</b></font>' +
     '<br />Select which item to take all similar items from your ' +
-    'Mailbox.<br /></center>'+
+    'Mailbox.<br /></center>' +
     '<table id="quickTakeTable" align="left"><tr><th width=20%>' +
     'Actions</th><th>Items</th></tr><tr><td id="take_result" ' +
-    'colspan=2></td></tr></table>'+
+    'colspan=2></td></tr></table>' +
     '</div>';
   $('#pCC').prepend('<span id="mailboxSwitcher" ' +
     'style="cursor:pointer; text-decoration:underline; ' +
     'color:blue;">Toggle Quick Take</span><input type="hidden" ' +
-    'id="currentMBDisplay" value="mailbox" />'+quickTakeDiv);
+    'id="currentMBDisplay" value="mailbox" />' + quickTakeDiv);
   var itemList = {};
   $('#regularMailbox img[data-tipped*="t=5"]').each(function() {
     var itemIDs = dataObj.itemRE.exec($(this).attr('data-tipped'));
@@ -90,7 +90,7 @@ export function injectMailbox() { // Bad jQuery
       '<span style="cursor:pointer; text-decoration:underline; ' +
       'color:blue; font-size:x-small;" ' +
       'id="Helper:takeAllSimilar' + id + '" invIDs="' + titem.invIds.join() +
-      '">Take All ' + titem.invIds.length + '</span></td>'+
+      '">Take All ' + titem.invIds.length + '</span></td>' +
       '<td><img src="' + titem.src +
       '" class="tip-dynamic" border="0" data-tipped="' +
       titem.tipped + '"></td></tr>');

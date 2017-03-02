@@ -1,24 +1,32 @@
-import * as task from '../support/task';
-import * as system from '../support/system';
-import * as layout from '../support/layout';
-import * as common from '../support/common';
-import * as debuff from './debuff';
-import * as profileAllyEnemy from './profileAllyEnemy';
-import * as fastWear from './fastWear';
-import * as components from './components';
 import * as bio from './bio';
+import * as common from '../support/common';
+import * as components from './components';
+import * as debuff from './debuff';
+import * as fastWear from './fastWear';
+import * as layout from '../support/layout';
+import * as profileAllyEnemy from './profileAllyEnemy';
+import * as system from '../support/system';
+import * as task from '../support/task';
 
 var guildId;
 var currentGuildRelationship;
 var guildMessages = {
-  self: {'color': 'fshGreen',
-    'message': 'Member of your own guild!'},
-  friendly: {'color': 'fshOliveDrab',
-    'message': 'Do not attack - Guild is friendly!'},
-  old: {'color': 'fshDarkCyan',
-    'message': 'Do not attack - You\'ve been in that guild once!'},
-  enemy: {'color': 'fshRed',
-    'message': 'Enemy guild. Attack at will!'}
+  self: {
+    color: 'fshGreen',
+    message: 'Member of your own guild!'
+  },
+  friendly: {
+    color: 'fshOliveDrab',
+    message: 'Do not attack - Guild is friendly!'
+  },
+  old: {
+    color: 'fshDarkCyan',
+    message: 'Do not attack - You\'ve been in that guild once!'
+  },
+  enemy: {
+    color: 'fshRed',
+    message: 'Enemy guild. Attack at will!'
+  }
 };
 
 function quickWearLink() { // Native
@@ -42,13 +50,16 @@ function profileSelectAll() { // Native
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
   Array.prototype.forEach.call(items, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {bubbles: true,
-      ctrlKey: true, metaKey: true}));
+    el.dispatchEvent(new MouseEvent('click', {
+      bubbles: true,
+      ctrlKey: true,
+      metaKey: true
+    }));
   });
 }
 
 function selectAllLink() { // Native
-  //select all link
+  // select all link
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
   if (!node) {return;}
@@ -68,14 +79,14 @@ function storeVL() { // Native
   var virtualLevel = parseInt(
     document.getElementById('stat-vl').textContent, 10);
   if (system.intValue(document.getElementsByClassName('stat-level')[0]
-      .nextElementSibling.textContent) === virtualLevel) {
+    .nextElementSibling.textContent) === virtualLevel) {
     system.setValue('characterVirtualLevel', ''); // ?
   } else {
     system.setValue('characterVirtualLevel', virtualLevel);
   }
 }
 
-function guildRelationship(txt) { // Native
+function guildRelationship(_txt) { // Native
   var output;
   var guildSelf = system.getValue('guildSelf') || '';
   var guildFrnd = system.getValue('guildFrnd') || '';
@@ -89,7 +100,7 @@ function guildRelationship(txt) { // Native
     .replace(/\s\s*/g, ' ').split(',');
   guildEnmy = guildEnmy.toLowerCase().replace(/\s*,\s*/, ',')
     .replace(/\s\s*/g, ' ').split(',');
-  txt = txt.toLowerCase().replace(/\s\s*/g, ' ');
+  var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
   if (guildSelf.indexOf(txt) !== -1) {output = 'self';} else
   if (guildFrnd.indexOf(txt) !== -1) {output = 'friendly';} else
   if (guildPast.indexOf(txt) !== -1) {output = 'old';} else
@@ -197,13 +208,15 @@ export function injectProfile() { // Native
   var playerid = system.getUrlParameter('player_id') || layout.playerId();
   profileInjectQuickButton(avyImg, playerid, playername);
 
-  //************** yuuzhan having fun
+  //* ************* yuuzhan having fun
   if (playername === 'yuuzhan') {
     avyImg.setAttribute('src',
       'http://evolutions.yvong.com/images/tumbler.gif');
-    avyImg.addEventListener('click', function(){alert('Winner!');});
+    avyImg.addEventListener('click', function() {
+      $('#dialog_msg').text('Winner!').dialog('open');
+    });
   }
-  //**************
+  //* *************
 
   common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateStatistics();

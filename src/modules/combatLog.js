@@ -10,18 +10,22 @@ function notepadCopyLog() { // Native
   textArea.select();
 }
 
-function notepadClearLog() { // Legacy
-  if (window.confirm('Are you sure you want to clear your log?')) {
-    combatLog = [];
-    textArea.value = '[]';
-    ajax.setForage('fsh_combatLog', combatLog);
-  }
+function clearCombatLog() { // Native
+  combatLog = [];
+  textArea.value = '[]';
+  ajax.setForage('fsh_combatLog', combatLog);
+}
+
+function notepadClearLog() { // jQuery
+  layout.confirm('Clear Combat Log',
+    'Are you sure you want to clear your log?', clearCombatLog
+  );
 }
 
 function gotCombatLog(data) { // Native
   if (data) {combatLog = data;}
   var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
-    '</td></tr>'+
+    '</td></tr>' +
     '<tr><td colspan="4" align="center">WARNING: this links to an ' +
     'external site not related to HCS.<br />' +
     'If you wish to visit site directly URL is: http://evolutions.' +
@@ -34,14 +38,14 @@ function gotCombatLog(data) { // Native
     'readonly style="background-color:white;font-family:Consolas,\'' +
     'Lucida Console\',\'Courier New\',monospace;" id="combatLog" ' +
     'name="logs">' + JSON.stringify(combatLog) + '</textarea></div>' +
-    '<br /><br /><table width="100%"><tr>'+
+    '<br /><br /><table width="100%"><tr>' +
     '<td colspan="2" align=center>' +
     '<input type="button" class="custombutton" value="Select All" ' +
     'id="copyLog"></td>' +
     '<td colspan="2" align=center>' +
     '<input type="button" class="custombutton" value="Clear" ' +
     'id="clearLog"></td>' +
-    '</tr>' + yuuzParser + '</table></div>'+
+    '</tr>' + yuuzParser + '</table></div>' +
     '</form>';
   textArea = document.getElementById('combatLog');
   document.getElementById('copyLog')
@@ -51,7 +55,6 @@ function gotCombatLog(data) { // Native
 }
 
 export function injectNotepadShowLogs(injector) { // jQuery.min
-  if (injector) {content = injector;}
-  else {content = layout.pCC;}
+  content = injector || layout.pCC;
   ajax.getForage('fsh_combatLog').done(gotCombatLog);
 }

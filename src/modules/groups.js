@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import * as debug from './support/debug';
-import * as dataObj from './support/dataObj';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as dataObj from './support/dataObj';
+import * as debug from './support/debug';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 var maxGroupSizeToJoin;
 
@@ -25,15 +25,15 @@ function parseMercStats(responseText) { // jQuery
   for (var i = 0; i < mercElements.length; i += 1) {
     merc = mercElements[i];
     var mouseoverText = $(merc).data('tipped');
-    var mercAttackValue = attackRE.exec(mouseoverText)[1] * 1;
+    var mercAttackValue = Number(attackRE.exec(mouseoverText)[1]);
     totalMercAttack += mercAttackValue;
-    var mercDefenseValue = defenseRE.exec(mouseoverText)[1] * 1;
+    var mercDefenseValue = Number(defenseRE.exec(mouseoverText)[1]);
     totalMercDefense += mercDefenseValue;
-    var mercArmorValue = armorRE.exec(mouseoverText)[1] * 1;
+    var mercArmorValue = Number(armorRE.exec(mouseoverText)[1]);
     totalMercArmor += mercArmorValue;
-    var mercDamageValue = damageRE.exec(mouseoverText)[1] * 1;
+    var mercDamageValue = Number(damageRE.exec(mouseoverText)[1]);
     totalMercDamage += mercDamageValue;
-    var mercHPValue = hpRE.exec(mouseoverText)[1] * 1;
+    var mercHPValue = Number(hpRE.exec(mouseoverText)[1]);
     totalMercHP += mercHPValue;
   }
   var attackValue = $('#fshAtk');
@@ -130,28 +130,28 @@ function parseGroupData(responseText, linkElement) { // Legacy
   var armorValue;
   var damageValue;
   var hpValue;
-  var doc=system.createDocument(responseText);
+  var doc = system.createDocument(responseText);
   var allItems = doc.getElementsByTagName('TD');
 
-  for (var i=0;i<allItems.length;i += 1) {
-    var anItem=allItems[i];
-    if (anItem.innerHTML === '<font color="#333333">Attack:&nbsp;</font>'){
+  for (var i = 0; i < allItems.length; i += 1) {
+    var anItem = allItems[i];
+    if (anItem.innerHTML === '<font color="#333333">Attack:&nbsp;</font>') {
       var attackLocation = anItem.nextSibling;
       attackValue = attackLocation.textContent;
     }
-    if (anItem.innerHTML === '<font color="#333333">Defense:&nbsp;</font>'){
+    if (anItem.innerHTML === '<font color="#333333">Defense:&nbsp;</font>') {
       var defenseLocation = anItem.nextSibling;
       defenseValue = defenseLocation.textContent;
     }
-    if (anItem.innerHTML === '<font color="#333333">Armor:&nbsp;</font>'){
+    if (anItem.innerHTML === '<font color="#333333">Armor:&nbsp;</font>') {
       var armorLocation = anItem.nextSibling;
       armorValue = armorLocation.textContent;
     }
-    if (anItem.innerHTML === '<font color="#333333">Damage:&nbsp;</font>'){
+    if (anItem.innerHTML === '<font color="#333333">Damage:&nbsp;</font>') {
       var damageLocation = anItem.nextSibling;
       damageValue = damageLocation.textContent;
     }
-    if (anItem.innerHTML === '<font color="#333333">HP:&nbsp;</font>'){
+    if (anItem.innerHTML === '<font color="#333333">HP:&nbsp;</font>') {
       var hpLocation = anItem.nextSibling;
       hpValue = hpLocation.textContent;
     }
@@ -185,7 +185,7 @@ function fetchGroupData() { // Legacy
   var allItems = system.findNodes(
     '//a[contains(@href,"index.php?cmd=guild&subcmd=groups' +
     '&subcmd2=viewstats&group_id=")]/img');
-  for (var i=0; i<allItems.length; i += 1) {
+  for (var i = 0; i < allItems.length; i += 1) {
     system.xmlhttp(allItems[i].parentNode.getAttribute('href'),
       parseGroupData, allItems[i].parentNode);
   }
@@ -242,7 +242,7 @@ function groupLocalTime(theDateCell) { // jQuery
   groupDate.setUTCHours(x[4]);
   groupDate.setUTCMinutes(x[5]);
   theDateCell.append('<br><span style="color:blue; font-size:x-small">' +
-    'Local: ' + groupDate.toString().substr(0,21)+'</span>');
+    'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
 }
 
 function doGroupRow(e, m) { // jQuery
@@ -253,7 +253,7 @@ function doGroupRow(e, m) { // jQuery
     inject += layout.onlineDot({last_login: m[creator].last_login}) +
       '&nbsp;<a href="' + system.server +
       'index.php?cmd=profile&player_id=' + m[creator].id + '">' + td.html() +
-      '</a>' + ' [' + m[creator].level + ']';
+      '</a> [' + m[creator].level + ']';
   } else {inject += td.html();}
   var td2 = $('td', e).eq(1);
   var theList = td2.html();

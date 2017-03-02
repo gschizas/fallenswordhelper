@@ -1,6 +1,6 @@
 import calf from '../support/calf';
-import * as task from '../support/task';
 import * as system from '../support/system';
+import * as task from '../support/task';
 
 /* jshint latedef: nofunc */
 var activeBountyListPosted;
@@ -18,7 +18,7 @@ function injectBountyList(bountyList) { // Native
   displayList.cellPadding = 1;
   displayList.width = 125;
 
-  var aRow = displayList.insertRow(0); //bountyList.rows.length
+  var aRow = displayList.insertRow(0); // bountyList.rows.length
   var aCell = aRow.insertCell(0);
   var output = '<h3>Active Bounties</h3><ol style="color:#FFF380;font-' +
     'size:10px;list-style-type:decimal;margin-left:1px;margin-top:' +
@@ -30,8 +30,7 @@ function injectBountyList(bountyList) { // Native
     output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
       'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
       'bottom:1px;padding-left:10px;">[No Active bounties]</ol>';
-  }
-  else {
+  } else {
     for (var i = 0; i < bountyList.bounty.length; i += 1) {
       var mouseOverText = '<div>Level:  ' + bountyList.bounty[i].lvl +
         '<br/>Reward: ' + bountyList.bounty[i].reward + ' ' +
@@ -55,7 +54,7 @@ function injectBountyList(bountyList) { // Native
   }
 
   aCell.innerHTML = output;
-  var breaker=document.createElement('BR');
+  var breaker = document.createElement('BR');
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
   document.getElementById('Helper:resetBountyList')
@@ -87,8 +86,7 @@ function injectWantedList(wantedList) { // Legacy
     output += '</ol> \f <ol style="color:orange;font-size:10px;list-' +
       'style-type:decimal;margin-left:1px;margin-top:1px;margin-' +
       'bottom:1px;padding-left:7px;">[No wanted bounties]</ol>';
-  }
-  else {
+  } else {
     for (var i = 0; i < wantedList.bounty.length; i += 1) {
       var mouseOverText = '"<div style=\'text-align:center;width:' +
         '205px;\'>Target Level:  ' + wantedList.bounty[i].lvl +
@@ -121,12 +119,12 @@ function injectWantedList(wantedList) { // Legacy
         mouseOverText +
         'style="color:#FFF380;font-size:10px;" href="' +
         wantedList.bounty[i].link + '">' +
-        wantedList.bounty[i].target +'</a></li>';
+        wantedList.bounty[i].target + '</a></li>';
     }
   }
 
   aCell.innerHTML = output;
-  var breaker=document.createElement('BR');
+  var breaker = document.createElement('BR');
   injectHere.parentNode.insertBefore(breaker, injectHere.nextSibling);
   injectHere.parentNode.insertBefore(displayList, injectHere.nextSibling);
   document.getElementById('Helper:resetWantedList')
@@ -135,7 +133,7 @@ function injectWantedList(wantedList) { // Legacy
 
 function getWantedBountyList(doc, callback) { // Legacy
   var page = system.findNode('//input[@name="page"]', doc, $('body'));
-  var curPage = parseInt(page.value,10);
+  var curPage = parseInt(page.value, 10);
   var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
   var activeTable = system.findNode('//table[@width = "630" and ' +
     'contains(.,"Target")]', doc);
@@ -143,7 +141,7 @@ function getWantedBountyList(doc, callback) { // Legacy
   var wantedArray = wantedNames.split(',');
   var wantedList = callback.wantedList;
   if (activeTable) {
-    for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+    for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
       var target = activeTable.rows[i].cells[0].firstChild
         .firstChild.firstChild.textContent;
       if (target === '[ No bounties available. ]') {break;}
@@ -174,8 +172,7 @@ function getWantedBountyList(doc, callback) { // Legacy
             .trim() === '[active]') {
             bounty.active = true;
             bounty.accept = '';
-          }
-          else if (activeTable.rows[i].cells[6].textContent
+          } else if (activeTable.rows[i].cells[6].textContent
             .trim() !== '[n/a]') { // TODO
             bounty.active = false;
             bounty.accept = activeTable.rows[i].cells[6]
@@ -189,7 +186,7 @@ function getWantedBountyList(doc, callback) { // Legacy
   }
   if (curPage < maxPage) {
     system.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
-      parseBountyPageForWorld, {wantedList:wantedList});
+      parseBountyPageForWorld, {wantedList: wantedList});
   } else {
     injectWantedList(wantedList);
   }
@@ -206,7 +203,7 @@ function getActiveBountyList(doc) { // Legacy
     if (!/No bounties active/.test(activeTable.rows[1].cells[0]
       .innerHTML)) {
       bountyList.activeBounties = true;
-      for (var i = 1; i < activeTable.rows.length - 2; i+=2) {
+      for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
         var bounty = {};
         bounty.target = activeTable.rows[i].cells[0].firstChild
           .firstChild.firstChild.textContent;
@@ -229,8 +226,7 @@ function getActiveBountyList(doc) { // Legacy
 
         bountyList.bounty.push(bounty);
       }
-    }
-    else {
+    } else {
       bountyList.activeBounties = false;
     }
   }
@@ -292,7 +288,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
     system.xmlhttp(
       'index.php?cmd=bounty&page=1',
       parseBountyPageForWorld,
-      {wantedList:wantedList}
+      {wantedList: wantedList}
     );
   } else {
     if (enableWantedList) {

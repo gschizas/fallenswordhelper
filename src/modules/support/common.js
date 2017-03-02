@@ -12,16 +12,16 @@ function addStats(i, e) { // jQuery
   var armorStatElement = $('td:contains("Armor:")', statTable);
   var damageStatElement = $('td:contains("Damage:")', statTable);
   var hpStatElement = $('td:contains("HP:")', statTable);
-  var totalStats = (attackStatElement.length > 0 ? attackStatElement
-    .next().text().replace(/\+/g,'') * 1 : 0) +
-    (defenseStatElement.length > 0 ? defenseStatElement.next()
-    .text().replace(/\+/g,'') * 1 : 0) +
-    (armorStatElement.length > 0 ? armorStatElement.next().text()
-    .replace(/\+/g,'') * 1 : 0) +
-    (damageStatElement.length > 0 ? damageStatElement.next().text()
-    .replace(/\+/g,'') * 1 : 0) +
-    (hpStatElement.length > 0 ? hpStatElement.next().text()
-    .replace(/\+/g,'') * 1 : 0);
+  var totalStats = (attackStatElement.length > 0 ? Number(attackStatElement
+    .next().text().replace(/\+/g, '')) : 0) +
+    (defenseStatElement.length > 0 ? Number(defenseStatElement.next()
+    .text().replace(/\+/g, '')) : 0) +
+    (armorStatElement.length > 0 ? Number(armorStatElement.next().text()
+    .replace(/\+/g, '')) : 0) +
+    (damageStatElement.length > 0 ? Number(damageStatElement.next().text()
+    .replace(/\+/g, '')) : 0) +
+    (hpStatElement.length > 0 ? Number(hpStatElement.next().text()
+    .replace(/\+/g, '')) : 0);
   statTable.last().before('<tr style="color:DodgerBlue;"><td>' +
     'Stat Total:</td><td align="right">' + totalStats +
     '&nbsp;</td></tr>'
@@ -52,9 +52,9 @@ function drag_over(event) { // Native
 function drag_drop(event) { // Native
   var offset = event.dataTransfer.getData('text/plain').split(',');
   drag_target.style.left =
-    event.clientX + parseInt(offset[0],10) + 'px';
+    event.clientX + parseInt(offset[0], 10) + 'px';
   drag_target.style.top =
-    event.clientY + parseInt(offset[1],10) + 'px';
+    event.clientY + parseInt(offset[1], 10) + 'px';
   document.body.removeEventListener('dragover', drag_over, false);
   document.body.removeEventListener('drop', drag_drop, false);
   event.preventDefault();
@@ -65,8 +65,8 @@ export function drag_start(event) { // Native
   drag_target = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
-    parseInt(style.getPropertyValue('left'),10) - event.clientX + ',' +
-    (parseInt(style.getPropertyValue('top'),10) - event.clientY));
+    parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
+    (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
   document.body.addEventListener('dragover', drag_over, false);
   document.body.addEventListener('drop', drag_drop, false);
 }
@@ -75,7 +75,7 @@ function getStat(stat, doc) { // jQuery
   // 'Hidden' returns NaN
   return system.intValue($(stat, doc)
     .contents()
-    .filter(function(){
+    .filter(function() {
       return this.nodeType === 3;
     })[0].nodeValue);
 }
@@ -108,7 +108,7 @@ function playerDataString(responseText) { // Native
     damageValue: getStat('#stat-damage', doc),
     hpValue: getStat('#stat-hp', doc),
     killStreakValue: getStat('#stat-kill-streak', doc),
-    //get buffs here later ... DD, CA, DC, Constitution, etc
+    // get buffs here later ... DD, CA, DC, Constitution, etc
     counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
     doublerLevel: getBuffLevel(doc, 'Doubler'),
     deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),

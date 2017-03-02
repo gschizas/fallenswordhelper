@@ -2,7 +2,7 @@ import * as system from './support/system';
 
 function getProfileStatsAndBuffs(responseText, callback) { // Legacy - currently disabled
   var doc = system.createDocument(responseText);
-  //stats
+  // stats
   var vlTextElement = system.findNode(
     '//td[a/b[.="VL"] or b/a[.="VL"]]', doc);
   var vlValueElement = vlTextElement.nextSibling;
@@ -34,7 +34,8 @@ function getProfileStatsAndBuffs(responseText, callback) { // Legacy - currently
   var output = '<table width="100%"><tbody>';
   if (lastActivityElement) {
     output += '<tr><td colspan=4 style="text-align:center;">' +
-      lastActivityElement.innerHTML + '</td></tr>';}
+      lastActivityElement.innerHTML + '</td></tr>';
+  }
   output += '<tr><td width="15%" style="text-align:right;">' +
     vlTextElement.innerHTML +
     '</td><td width="30%" style="text-align:left;">' +
@@ -70,14 +71,14 @@ function getProfileStatsAndBuffs(responseText, callback) { // Legacy - currently
     pvpProtElement.innerHTML + '</td></tr>';
   output += '</tbody></table>';
   var anchor1 = callback.anchor1;
-  var injectHere = system.findNode('//span[@id="Helper:'+anchor1+'"]');
+  var injectHere = system.findNode('//span[@id="Helper:' + anchor1 + '"]');
   injectHere.innerHTML = output;
-  //buffs
+  // buffs
   var activeBuffsTitleRow = system.findNode(
     '//strong[.="Active Buffs"]/ancestor::div[1]', doc);
   var activeBuffsElement = activeBuffsTitleRow.nextSibling.nextSibling;
   var anchor2 = callback.anchor2;
-  injectHere = system.findNode('//span[@id="Helper:'+anchor2+'"]');
+  injectHere = system.findNode('//span[@id="Helper:' + anchor2 + '"]');
   injectHere.innerHTML = activeBuffsElement.innerHTML;
 }
 
@@ -89,7 +90,7 @@ export function injectAttackPlayer() { // Legacy - currently disabled
       'activate PvP Prestige?")) { ' + oldOnclick + '}');
   }
   if (!system.getValue('enableAttackHelper')) {return;}
-  //inject current stats, buffs and equipment
+  // inject current stats, buffs and equipment
   var attackPlayerTable = system.findNode(
     '//table[tbody/tr/td/font/b[.="Attack Player (PvP)"]]');
   if (!attackPlayerTable) {return;}
@@ -104,7 +105,7 @@ export function injectAttackPlayer() { // Legacy - currently disabled
       'Defender</td></tr>' +
       '<tr style="text-align:center;"><td style="border-style: solid; ' +
       'border-width: 1px;"><span id="Helper:attackPlayerSelfStatData">' +
-      '<font color="green">Gathering your stats ...</font></span></td>'+
+      '<font color="green">Gathering your stats ...</font></span></td>' +
       '<td style="border-style: solid; border-width: 1px;"><span ' +
       'id="Helper:attackPlayerDefenderStatData"><font color="green">' +
       'Gathering defender stats ...</font></span></td></tr>' +
@@ -120,14 +121,18 @@ export function injectAttackPlayer() { // Legacy - currently disabled
 
     system.xmlhttp('index.php?cmd=profile',
       getProfileStatsAndBuffs,
-      {'anchor1':'attackPlayerSelfStatData',
-        'anchor2':'attackPlayerSelfBuffData'});
-    system.xmlhttp('index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username='+
-      targetPlayer[1]+'&search_show_first=1',
+      {
+        anchor1: 'attackPlayerSelfStatData',
+        anchor2: 'attackPlayerSelfBuffData'
+      });
+    system.xmlhttp('index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=' +
+      targetPlayer[1] + '&search_show_first=1',
       getProfileStatsAndBuffs,
-      {'anchor1':'attackPlayerDefenderStatData',
-        'anchor2':'attackPlayerDefenderBuffData'});
-    //insert blank row
+      {
+        anchor1: 'attackPlayerDefenderStatData',
+        anchor2: 'attackPlayerDefenderBuffData'
+      });
+    // insert blank row
     var newRow = attackPlayerTable.insertRow(5);
     var newCell = newRow.insertCell(0);
     newCell.innerHTML = '&nbsp;';

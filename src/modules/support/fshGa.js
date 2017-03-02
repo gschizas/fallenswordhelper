@@ -26,7 +26,7 @@ export function end(category, variable, label) { // Native
       label);
   }
 
-  //#if _BETA
+  //#if _BETA  //  Timing output
   debug.log(variable, myTime + 'ms');
   //#endif
 

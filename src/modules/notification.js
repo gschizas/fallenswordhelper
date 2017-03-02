@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import * as task from './support/task';
 import * as system from './support/system';
+import * as task from './support/task';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +
@@ -31,7 +31,7 @@ var goldUpgradeMsg =
 
 function havePrayed() { // Native
   document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
-  system.setValue('needToPray',false);
+  system.setValue('needToPray', false);
   system.setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // Midnight
 }
@@ -63,7 +63,7 @@ function findNewGroup(el) { // Native
   var groupJoinHTML = '';
   if (!system.getValue('enableMaxGroupSizeToJoin')) {
     groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
-      'subcmd2=joinall"><span class="notification-icon"></span>'+
+      'subcmd2=joinall"><span class="notification-icon"></span>' +
       '<p class="notification-content">Join all attack groups.</p></a>';
   } else {
     var maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
@@ -77,7 +77,8 @@ function findNewGroup(el) { // Native
 }
 
 export function parseTemplePage(responseText) { // Native
-  var checkNeedToPray, doc;
+  var checkNeedToPray;
+  var doc;
   if (!calf.enableTempleAlert) {return;}
   if (calf.cmd !== 'temple') {
     doc = system.createDocument(responseText);
@@ -96,7 +97,7 @@ export function parseTemplePage(responseText) { // Native
 }
 
 export function injectTempleAlert() { // jQuery
-  //Checks to see if the temple is open for business.
+  // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
   var templeAlertLastUpdate = system.getValue('lastTempleCheck');
   var needToPray = system.getValue('needToPray');

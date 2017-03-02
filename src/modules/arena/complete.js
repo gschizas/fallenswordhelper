@@ -14,7 +14,7 @@ export function completedArenas() { // jQuery
   }
   if (nextButton.length === 1) {
     var lastPage = $('#pCC input[value="Go"]').closest('td').prev().text()
-      .replace(/\D/g,'');
+      .replace(/\D/g, '');
     var finishButton = $('<input value=">>" type="button">');
     nextButton.after(finishButton).after('&nbsp;');
     finishButton.click(function() {gotoPage(lastPage);});

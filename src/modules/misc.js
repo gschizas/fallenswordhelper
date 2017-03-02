@@ -1,6 +1,6 @@
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 export function injectFindPlayer() { // Bad jQuery
   var findPlayerButton = $('input[value="Find Player"]');
@@ -24,7 +24,7 @@ export function injectFindPlayer() { // Bad jQuery
     .each(function() {
       var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
       $(this).after('<a style="color:blue;font-size:10px;" ' +
-        layout.quickBuffHref(id[1])+'>[b]</a>');
+        layout.quickBuffHref(id[1]) + '>[b]</a>');
     });
 }
 
@@ -72,9 +72,9 @@ export function addMarketplaceWidgets() { // Legacy
 
 export function injectNotepad() { // jQuery
   $('#notepad_notes')
-  .attr('cols', '90')
-  .attr('rows', '30')
-  .css('resize', 'none');
+    .attr('cols', '90')
+    .attr('rows', '30')
+    .css('resize', 'none');
 }
 
 export function ladder() { // Native
@@ -86,8 +86,8 @@ export function ladder() { // Native
     });
 }
 
-export function injectFsBoxContent(content) { // jQuery
-  if (!content) {content = layout.pCC;}
+export function injectFsBoxContent(injector) { // jQuery
+  var content = injector || layout.pCC;
   content.innerHTML = layout.makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
   ajax.getForage('fsh_fsboxcontent').done(function(fsboxcontent) {

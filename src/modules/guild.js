@@ -64,22 +64,22 @@ function gotConflictInfo(responseText, callback) { // Legacy
 
   var page = system.findNode('//td[contains(.,"Page:")]', doc);
   var curPage = parseInt(system.findNode('//input[@name="page"]',
-    doc).value,10);
+    doc).value, 10);
   var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
 
   var conflictTable = system.findNode(
     '//font[contains(.,"Participants")]/ancestor::table[1]', doc);
   if (conflictTable && conflictTable.rows.length > 3) {
     if (curPage === 1) {
-      var newNode = insertHere.insertRow(insertHere.rows.length-2);
+      var newNode = insertHere.insertRow(insertHere.rows.length - 2);
       newNode.insertCell(0);
       newNode.insertCell(0);
       newNode.cells[0].innerHTML =
         '<a href="index.php?cmd=guild&subcmd=conflicts">Active Conflicts</a>';
       newNode.cells[1].innerHTML = 'Score';
     }
-    for (var i = 1; i <= conflictTable.rows.length - 4; i+=2) {
-      var newRow = insertHere.insertRow(insertHere.rows.length-2);
+    for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
+      var newRow = insertHere.insertRow(insertHere.rows.length - 2);
       newRow.insertCell(0);
       newRow.insertCell(0);
       newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
@@ -87,12 +87,12 @@ function gotConflictInfo(responseText, callback) { // Legacy
         .innerHTML + '</b>';
     }
   }
-  if (maxPage && parseInt(maxPage[1],10) > curPage) {
+  if (maxPage && parseInt(maxPage[1], 10) > curPage) {
     system.xmlhttp(
       'index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' +
       (curPage + 1) + '&search_text=',
       gotConflictInfo,
-      {'node': callback.node});
+      {node: callback.node});
   }
 }
 
@@ -195,7 +195,7 @@ export function injectGuild() { // Native
   task.add(3, buffLinks);
   task.add(3, selfRecall);
 
-  //Detailed conflict information
+  // Detailed conflict information
   if (system.getValue('detailedConflictInfo')) {
     task.add(3, conflictInfo);
   }
@@ -210,7 +210,7 @@ function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
       -1) {
     itemCellElement.innerHTML =
       '<span style="color:green; font-weight:bold;">Taken</span>';
-  } else if (info!=='') {
+  } else if (info !== '') {
     itemCellElement.innerHTML =
       '<span style="color:red; font-weight:bold;">Error:' + info + '</span>';
   } else {
@@ -222,21 +222,21 @@ function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
 }
 
 function recallGuildStoreItem(evt) { // Legacy
-  var guildStoreID=evt.target.getAttribute('itemID');
+  var guildStoreID = evt.target.getAttribute('itemID');
   var recallHref =
     'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
     // guildStoreID + '&ajax=1'; // TODO
     guildStoreID;
   system.xmlhttp(recallHref,
     recallGuildStoreItemReturnMessage,
-    {'item': guildStoreID, 'target': evt.target, 'url': recallHref});
+    {item: guildStoreID, target: evt.target, url: recallHref});
 }
 
 export function injectGuildAddTagsWidgets() { // Legacy
   var itemTable = system.findNode(
     '//img[contains(@src,"/items/")]/ancestor::table[1]');
   if (itemTable) {
-    for (var i=1;i<itemTable.rows.length;i += 1) {
+    for (var i = 1; i < itemTable.rows.length; i += 1) {
       var aRow = itemTable.rows[i];
       if (aRow.cells[2]) { // itemRow
         var itemId = aRow.cells[0].firstChild.getAttribute('value');
@@ -268,7 +268,7 @@ function updateHistoryCharacters() { // Legacy
 export function addHistoryWidgets() { // Legacy
   var textArea = system.findNode('//textarea[@name="history"]');
   if (!textArea) {return;}
-  textArea.value = textArea.value.replace(/<br \/>/ig,'');
+  textArea.value = textArea.value.replace(/<br \/>/ig, '');
   var textAreaDiv = textArea.parentNode;
   var bioPreviewHTML = system.convertTextToHtml(textArea.value);
   var newDiv = document.createElement('div');

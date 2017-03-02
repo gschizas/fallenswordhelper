@@ -12,28 +12,26 @@ function showComposingMessage(message, bgcolor) { // jQuery
   $('#composingMessage')
     .append(
       $('<div/>', {
-        'id': 'composingMessageContainer',
-        'width': '100%'
+        id: 'composingMessageContainer',
+        width: '100%'
       })
-      .append(
-        $('<div/>', {
-          'id': 'composingMessageText'
-        })
-        .css({
-          'width': '90%',
-          'text-align': 'center',
-          'background-color': bgcolor,
-          'color': 'rgb(255, 255, 255)',
-          'margin': '5px auto 5px auto',
-          'padding': '2px'
-        })
-        .html(message)
-      )
+        .append(
+          $('<div/>', {id: 'composingMessageText'})
+            .css({
+              width: '90%',
+              'text-align': 'center',
+              'background-color': bgcolor,
+              color: 'rgb(255, 255, 255)',
+              margin: '5px auto 5px auto',
+              padding: '2px'
+            })
+            .html(message)
+        )
     );
 
   setTimeout(function() {
-    $('#composingMessageContainer').animate({'opacity': 0}, 500, function() {
-      $(this).animate({'height': 0}, 500, function() {$(this).hide();});
+    $('#composingMessageContainer').animate({opacity: 0}, 500, function() {
+      $(this).animate({height: 0}, 500, function() {$(this).hide();});
     });
   }, 5000);
 }
@@ -45,13 +43,17 @@ function breakItems() { // jQuery.min
     data: {'item_list[]': selectedList},
     dataType: 'json'
   }).done(function(response) {
-      if (response.error === 0) {
-        window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
-        return;
-      } else {
-        showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
-      }
-    });
+    if (response.error !== 0) {
+      showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
+    }
+    window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
+    // if (response.error === 0) {
+    //   window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
+    //   return;
+    // } else {
+    //   showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
+    // }
+  });
 }
 
 function breakEvt(evt) { // Native

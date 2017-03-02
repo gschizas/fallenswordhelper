@@ -85,8 +85,7 @@ function worldDialogShop(e, data) {
   dialog = dialog || document.getElementById('shopDialogConfirm');
   if (!dialog) {return;}
   jDialog = jDialog || $(dialog).data('worldDialogShopConfirm');
-  if (!fshDiv) {injectQuickBuy();}
-  else {resultDiv.textContent = '';}
+  if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
 }
 
 export function prepareShop() {

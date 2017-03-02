@@ -1,6 +1,6 @@
+import * as ajax from './support/ajax';
 import * as dataObj from './support/dataObj';
 import * as system from './support/system';
-import * as ajax from './support/ajax';
 
 var context;
 var onlinePlayers;
@@ -40,8 +40,7 @@ function dataTableSearch() { // jQuery
       if (isNaN(min) && isNaN(max) ||
         isNaN(min) && level <= max ||
         min <= level && isNaN(max) ||
-        min <= level && level <= max )
-      {return true;}
+        min <= level && level <= max) {return true;}
       return false;
     }
   );
@@ -76,10 +75,10 @@ function gotOnlinePlayers() { // jQuery
     pageLength: 30,
     lengthMenu: [[30, 60, -1], [30, 60, 'All']],
     columns: [
-      {title: 'Guild', class: 'dt-center', orderable: false},
-      {title: 'Name', class: 'dt-center'},
-      {title: 'Level', class: 'dt-center'},
-      {title: 'Page/Index', class: 'dt-center'}
+      {title: 'Guild', 'class': 'dt-center', orderable: false},
+      {title: 'Name', 'class': 'dt-center'},
+      {title: 'Level', 'class': 'dt-center'},
+      {title: 'Page/Index', 'class': 'dt-center'}
     ],
     createdRow: function(row, data) {
       if (highlightPlayersNearMyLvl &&
@@ -157,8 +156,8 @@ function resetEvt() { // context
 }
 
 function doOnlinePlayerEventHandlers(e) { // Native
-  if (e.target.id === 'fshRefresh') {refreshEvt();return;}
-  if (e.target.id === 'fshReset') {resetEvt();return;}
+  if (e.target.id === 'fshRefresh') {refreshEvt();}
+  if (e.target.id === 'fshReset') {resetEvt();}
 }
 
 function injectOnlinePlayersNew() { // jQuery
@@ -171,7 +170,7 @@ function injectOnlinePlayersNew() { // jQuery
       '>[Refresh]</span>';
   } else {
     refreshButton = '<span>[ Wait ' + Math.round(300 - (now -
-      lastCheck) / 1000) +'s ]</span>';
+      lastCheck) / 1000) + 's ]</span>';
   }
   context.html(
     '<span><b>Online Players</b></span>' + refreshButton +

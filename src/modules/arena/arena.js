@@ -100,8 +100,7 @@ function lvlFilter() { // jQuery
       if (isNaN(min) && isNaN(max) ||
         isNaN(min) && level <= max ||
         min <= level && isNaN(max) ||
-        min <= level && level <= max )
-      {return true;}
+        min <= level && level <= max) {return true;}
       return false;
     }
   );
@@ -145,7 +144,7 @@ function orderData(i, e) { // jQuery
 
   cell = theCells.eq(1);
   matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
-  if (matches) {cell.attr('data-order', matches[2] * 1000 + matches[1] * 1);}
+  if (matches) {cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));}
 
   cell = theCells.eq(2);
   cell.attr('data-order',

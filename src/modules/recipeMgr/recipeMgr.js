@@ -1,7 +1,7 @@
 import calf from '../support/calf';
 import * as ajax from '../support/ajax';
-import * as system from '../support/system';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
 
 /* jshint latedef: nofunc */
 var content;
@@ -19,7 +19,7 @@ function sortRecipeTable(evt) { // Legacy
   var sortType = evt.target.getAttribute('sorttype');
   if (!sortType) {sortType = 'string';}
   sortType = sortType.toLowerCase();
-  if (calf.sortAsc === undefined) {calf.sortAsc = true;}
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
   if (calf.sortBy && calf.sortBy === headerClicked) {
     calf.sortAsc = !calf.sortAsc;
   }
@@ -112,7 +112,7 @@ function generateRecipeTable() { // Legacy
 
 function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
   var results = [];
-  $(doc).find(jqueryxpath).each(function(){
+  $(doc).find(jqueryxpath).each(function() {
     var mouseOver = $(this).find('img').data('tipped');
     var resultAmounts = $(this).parent().next().text();
     var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)\&inv_id=-1\&t=2\&p=(\d+)\&vcode=([a-z0-9]+)/i);
@@ -144,9 +144,8 @@ function parseRecipePage(responseText, callback) { // Legacy
     var nextRecipe = recipebook.recipe[nextRecipeIndex];
     system.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
       nextRecipe.id, parseRecipePage,
-      {'recipeIndex': nextRecipeIndex});
-  }
-  else {
+      {recipeIndex: nextRecipeIndex});
+  } else {
     output.innerHTML += 'Finished parsing ... formatting ...';
     recipebook.lastUpdate = new Date();
     storeRecipeBook();
@@ -157,10 +156,10 @@ function parseRecipePage(responseText, callback) { // Legacy
 function parseInventingPage(responseText, callback) { // Legacy
   var doc = system.createDocument(responseText);
 
-  var folderIDs = []; //clear out the array before starting.
+  var folderIDs = []; // clear out the array before starting.
   $(doc).find('a[href*="index.php?cmd=inventing&folder_id="]')
-    .each(function(){
-      var folderID = /folder_id=([-0-9]+)/.exec($(this).attr('href'))[1] * 1;
+    .each(function() {
+      var folderID = Number(/folder_id=([-0-9]+)/.exec($(this).attr('href'))[1]);
       folderIDs.push(folderID);
     });
 
@@ -181,31 +180,32 @@ function parseInventingPage(responseText, callback) { // Legacy
     if (pages.length === 0) {return;}
     $(doc).find(
       'a[href*="index.php?cmd=inventing&subcmd=viewrecipe&recipe_id="]')
-      .each(function(){
+      .each(function() {
         var recipeLink = $(this).attr('href');
         var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1], 10);
         var recipe = {
-          'img': $(this).closest('tr').find('img').attr('src'),
-          'link': recipeLink,
-          'name': $(this).text(),
-          'id': recipeId};
+          img: $(this).closest('tr').find('img').attr('src'),
+          link: recipeLink,
+          name: $(this).text(),
+          id: recipeId
+        };
         output.innerHTML += 'Found blueprint: ' + recipe.name + '<br/>';
         recipebook.recipe.push(recipe);
       });
 
     nextPage = currentPage + 1;
-    output.innerHTML += 'Parsing folder '+ currentFolder + ' ... Page ' +
+    output.innerHTML += 'Parsing folder ' + currentFolder + ' ... Page ' +
       nextPage + '... <br/>';
 
   } else {
     output.innerHTML += 'Skipping folder ' + currentFolder +
       ' as it has the word "quest" in folder name.<br/>';
-    nextPage = pages.find('option:last').text() * 1;
+    nextPage = Number(pages.find('option:last').text());
   }
-  if (nextPage <= pages.find('option:last').text() * 1 &&
+  if (nextPage <= Number(pages.find('option:last').text()) &&
       currentFolder !== folderCount ||
       currentFolder < folderCount) {
-    if (nextPage === pages.find('option:last').text() * 1 &&
+    if (nextPage === Number(pages.find('option:last').text()) &&
         currentFolder < folderCount) {
       nextPage = 0;
       folderID = folderIDs[currentFolder];
@@ -215,7 +215,7 @@ function parseInventingPage(responseText, callback) { // Legacy
       'index.php?cmd=inventing&page=' + nextPage + '&folder_id=' +
       folderID,
       parseInventingPage,
-      {'page': nextPage}
+      {page: nextPage}
     );
   } else {
     output.innerHTML +=
@@ -223,17 +223,17 @@ function parseInventingPage(responseText, callback) { // Legacy
     system.xmlhttp(
       'index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
       recipebook.recipe[0].id,
-      parseRecipePage, {'recipeIndex': 0});
+      parseRecipePage, {recipeIndex: 0});
   }
 }
 
-function parseInventingStart(){ // Legacy
+function parseInventingStart() { // Legacy
   recipebook = {};
   recipebook.recipe = [];
   output.innerHTML = '<br/>Parsing inventing screen ...<br/>';
   currentFolder = 1;
   system.xmlhttp('index.php?cmd=inventing&page=0',
-    parseInventingPage, {'page': 0});
+    parseInventingPage, {page: 0});
 }
 
 function gotRecipeBook(data) { // Legacy
@@ -241,22 +241,20 @@ function gotRecipeBook(data) { // Legacy
   if (system.getValue('hideRecipes')) {
     hideRecipes = system.getValue('hideRecipeNames').split(',') || [];
   }
-  content.innerHTML='<table class="fshInvFilter"><thead><tr>'+
-    '<th width="90%"><b>&nbsp;Recipe Manager</b></th>'+
+  content.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
+    '<th width="90%"><b>&nbsp;Recipe Manager</b></th>' +
     '<th width="10%" class="fshBtnBox">[' +
     '<span id="rfsh" class="fshLink">' +
-    'Refresh</span>]</th>'+
+    'Refresh</span>]</th>' +
     '</tr></thead></table>' +
     '<div id="fshOutput"></div>';
   output = document.getElementById('fshOutput');
   document.getElementById('rfsh')
     .addEventListener('click', parseInventingStart);
-  if (!recipebook) {parseInventingStart();}
-  else {generateRecipeTable();}
+  if (!recipebook) {parseInventingStart();} else {generateRecipeTable();}
 }
 
 export function injectRecipeManager(injector) { // Legacy
-  if (injector) {content = injector;}
-  else {content = layout.pCC;}
+  content = injector || layout.pCC;
   ajax.getForage('fsh_recipeBook').done(gotRecipeBook);
 }

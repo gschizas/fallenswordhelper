@@ -15,7 +15,7 @@ function cancelAllAH() { // jQuery
     prm.push(
       $.post(
         'index.php?cmd=auctionhouse&subcmd=cancel', {
-          'auction_id':
+          auction_id:
             /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
         }
       )

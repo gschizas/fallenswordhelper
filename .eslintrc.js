@@ -1,123 +1,145 @@
 module.exports = {
-    "env": {
-        "browser": true,
-        "jquery": true,
-        "greasemonkey": true
-    },
-    "globals": {
-        "FSH": true,
-        "localforage": false,
-        "ga": false,
-        "GameData": false
-    },
-    "extends": "eslint:recommended",
-    "rules": {
-        "indent": [
-            "error",
-            "tab",
-            {"outerIIFEBody": 0}
-        ],
-        "linebreak-style": [
-            "error",
-            "windows"
-        ],
-        "quotes": [
-            "error",
-            "single"
-        ],
-        "semi": [
-            "error",
-            "always"
-        ],
-        "no-constant-condition": [
-            "error",
-            {"checkLoops": false}
-        ],
-        "no-console": [
-            // "warn"
-            0
-        ],
-        "no-extra-parens": [
-            "error"
-        ],
-        "array-callback-return": [
-            "error"
-        ],
-        "block-scoped-var": [
-            "error"
-        ],
-        // "complexity": [
-            // "warn"
-        // ],
-        "curly": [
-            "error"
-        ],
-        "dot-location": [
-            "error",
-            "property"
-        ],
-        "eqeqeq": [
-            "error"
-        ],
-        "guard-for-in": [
-            "error"
-        ],
-        // "no-alert": [
-            // "warn"
-        // ],
-        "no-caller": [
-            "error"
-        ],
-        "no-else-return": [
-            "error"
-        ],
-        "no-empty-function": [
-            "error"
-        ],
-        "no-eval": [
-            "error"
-        ],
-        "no-extend-native": [
-            "error"
-        ],
-        "no-extra-bind": [
-            "error"
-        ],
-        "no-extra-label": [
-            "error"
-        ],
-        "no-floating-decimal": [
-            "error"
-        ],
-        "no-global-assign": [
-            "error"
-        ],
-        // "no-implicit-coercion": [
-            // "error"
-        // ],
-        "no-implicit-globals": [
-            "error"
-        ],
-        "no-implied-eval": [
-            "error"
-        ],
-        "no-lone-blocks": [
-            "error"
-        ],
-        "no-loop-func": [
-            "error"
-        ],
-        "no-multi-spaces": [
-            "error"
-        ],
-        "no-new-func": [
-            "error"
-        ],
-        "no-new-wrappers": [
-            "error"
-        ],
-        "no-new": [
-            "error"
-        ],
-    }
+  "parserOptions": {
+    "ecmaVersion": 6,
+    "sourceType": "module",
+    "ecmaFeatures": { "impliedStrict": true }
+  },
+  "env": {
+    "browser": true,
+    "node": true,
+    "jquery": true,
+    "greasemonkey": true
+  },
+  "globals": {
+    "FSH": true,
+    "localforage": false,
+    "ga": false,
+    "GameData": false
+  },
+  "extends": "eslint:recommended",
+  "rules": {
+    "no-console": ["warn"],
+    "no-extra-parens": ["error"],
+    "no-unsafe-negation": ["error"],
+    "array-callback-return": ["error"],
+    "block-scoped-var": ["error"],
+    "complexity": ["warn", 39],
+    "curly": ["error"],
+    "default-case": ["error"],
+    "dot-location": ["error", "property"],
+    "eqeqeq": ["error"],
+    "guard-for-in": ["error"],
+    "no-alert": ["warn"],
+    "no-caller": ["error"],
+    "no-else-return": ["error"],
+    "no-empty-function": ["error"],
+    "no-eval": ["error"],
+    "no-extend-native": ["error"],
+    "no-extra-bind": ["error"],
+    "no-extra-label": ["error"],
+    "no-floating-decimal": ["error"],
+    "no-global-assign": ["error"],
+    "no-implicit-coercion": ["error"],
+    "no-implicit-globals": ["error"],
+    "no-implied-eval": ["error"],
+    // "no-invalid-this": ["error"],
+    "no-lone-blocks": ["error"],
+    "no-loop-func": ["error"],
+    // "no-magic-numbers": ["error", {
+    //   "ignore": [-1, 0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 24, 60, 100, 1000],
+    //   "ignoreArrayIndexes": true
+    // }],
+    "no-multi-spaces": ["error"],
+    "no-multi-str": ["error"],
+    "no-new-func": ["error"],
+    "no-new-wrappers": ["error"],
+    "no-new": ["error"],
+    "no-param-reassign": ["error"],
+    "no-return-assign": ["error"],
+    "no-script-url": ["error"],
+    "no-self-compare": ["error"],
+    "no-sequences": ["error"],
+    "no-throw-literal": ["error"],
+    "no-unmodified-loop-condition": ["error"],
+    "no-unused-expressions": ["error"],
+    "no-useless-call": ["error"],
+    "no-useless-concat": ["error"],
+    // "no-useless-escape": ["error"],
+    "no-useless-return": ["error"],
+    // "no-warning-comments": ["error"],
+    "no-with": ["error"],
+    "radix": ["error"],
+    "yoda": ["error"],
+
+    "no-catch-shadow": ["error"],
+    // "no-shadow": ["error"],
+    "no-undef-init": ["error"],
+    "no-undefined": ["error"],
+    // "no-use-before-define": ["error"],
+
+    "array-bracket-spacing": ["error", "never"],
+    "block-spacing": ["error", "never"],
+    "brace-style": ["error", "1tbs", { "allowSingleLine": true }],
+    // "camelcase": ["error", {"properties": "always"}],
+    "comma-dangle": ["error", "only-multiline"],
+    "comma-spacing": ["error"],
+    "eol-last": ["error"],
+    "func-call-spacing": ["error"],
+    "indent": ["error", 2],
+    "key-spacing": ["error"],
+    "keyword-spacing": ["error"],
+    "linebreak-style": ["error", "windows"],
+    "max-depth": ["error", 5],
+    // "max-len": ["error", {"ignoreComments": true}],
+    "max-lines": ["error", 800],
+    "max-nested-callbacks": ["error", 3],
+    "max-params": ["error", 5],
+    "max-statements-per-line": ["error", { "max": 3 }],
+    "max-statements": ["error", 66],
+    "no-lonely-if": ["error"],
+    "no-multi-assign": ["error"],
+    "no-multiple-empty-lines": ["error", {
+      "max": 1,
+      "maxEOF": 1,
+      "maxBOF": 1
+    }],
+    // "no-nested-ternary": ["error"],
+    "no-new-object": ["error"],
+    "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
+    "no-plusplus": ["error"],
+    "no-tabs": ["error"],
+    // "no-ternary": ["error"],
+    "no-trailing-spaces": ["error"],
+    "no-unneeded-ternary": ["error", { "defaultAssignment": false }],
+    "no-whitespace-before-property": ["error"],
+    "object-curly-newline": ["error", { "multiline": true }],
+    "object-curly-spacing": ["error", "never"],
+    "object-property-newline": ["error",
+      { "allowMultiplePropertiesPerLine": true }],
+    "one-var-declaration-per-line": ["error", "always"],
+    "one-var": ["error", "never"],
+    "operator-assignment": ["error", "always"],
+    "operator-linebreak": ["error", "after"],
+    // "padded-blocks": ["error", "never"],
+    "quote-props": ["error", "as-needed", {"keywords": true, "numbers": true}],
+    "quotes": ["error", "single"],
+    "semi-spacing": ["error"],
+    "semi": ["error", "always"],
+    "space-before-blocks": ["error"],
+    "space-before-function-paren": ["error", "never"],
+    "space-in-parens": ["error", "never"],
+    "space-infix-ops": ["error"],
+    "space-unary-ops": ["error", {"words": true, "nonwords": false}],
+    "spaced-comment": ["warn", "always", {"line": {
+      "markers": ["#if"],
+      "exceptions": ["#endif"]
+    }}],
+
+    "no-duplicate-imports": ["error", { "includeExports": true }],
+    "sort-imports": ["error", {
+      "memberSyntaxSortOrder": [
+        'none', 'single', 'all', 'multiple'
+      ]
+    }],
+  }
 };

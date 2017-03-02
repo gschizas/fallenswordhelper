@@ -1,7 +1,7 @@
-import * as buffObj from './support/buffObj';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as buffObj from './support/buffObj';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 var retries = 0;
 var quickBuffHeader =
@@ -21,13 +21,13 @@ var quickBuffHeader =
   '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>' +
   '</tr></tbody></table></div>';
 var excludeBuff = {
-  'skill-50' : 'Death Dealer',
-  'skill-54' : 'Counter Attack',
-  'skill-55' : 'Summon Shield Imp',
-  'skill-56' : 'Vision',
-  'skill-60' : 'Nightmare Visage',
-  'skill-61' : 'Quest Finder',
-  'skill-98' : 'Barricade',
+  'skill-50': 'Death Dealer',
+  'skill-54': 'Counter Attack',
+  'skill-55': 'Summon Shield Imp',
+  'skill-56': 'Vision',
+  'skill-60': 'Nightmare Visage',
+  'skill-61': 'Quest Finder',
+  'skill-98': 'Barricade',
   'skill-101': 'Severe Condition'
 };
 
@@ -41,11 +41,11 @@ function getBuff(doc, buff, inject) { // Native
   var s = doc[buff] || 0;
   if (s) {
     var m = Math.floor(s / 60);
-    s = s % 60;
+    s %= 60;
     var buffTimeToExpire = (m === 0 ? '' : m + 'm') +
       (s === 0 ? '' : ' ' + s + 's');
-  inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
-      'class="fshBuffOn">(' + buffTimeToExpire +')</span>';
+    inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
+      'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
   } else {
     var elem = document.getElementById('buff-outer')
       .querySelector('input[data-name="' + buff + '"]');
@@ -189,7 +189,8 @@ function getSustain(responseText) { // Native
 
 }
 
-function buffResult(buffLog) { // Native
+function buffResult(_buffLog) { // Native
+  var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
   var timeStamp = system.formatDateTime(new Date());
   var buffsAttempted = document.getElementById('quickbuff-report')
@@ -199,7 +200,7 @@ function buffResult(buffLog) { // Native
   var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
     'activated on \'(\\w*)\'');
   var buffList = buffObj.buffList;
-  for (var i = 0; i < buffsAttempted.length; i += 1 ) {
+  for (var i = 0; i < buffsAttempted.length; i += 1) {
     var buffsCast = buffsCastRE.exec(buffsAttempted[i]);
     var buffsNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
     var stamina = 0;
@@ -214,7 +215,7 @@ function buffResult(buffLog) { // Native
         ' stamina) <br>' + buffLog;
     }
     if (buffsNotCast) {
-      buffLog = timeStamp + ' ' + '<span style="color: red;">' +
+      buffLog = timeStamp + ' <span style="color: red;">' +
         buffsNotCast[0] + '</span><br>' + buffLog;
     }
   }
@@ -234,8 +235,8 @@ export function updateBuffLog() { // Native
   ajax.getForage('fsh_buffLog').done(buffResult);
 }
 
-export function injectBuffLog(content) { // Native
-  if (!content) {content = layout.pCC;}
+export function injectBuffLog(injector) { // Native
+  var content = injector || layout.pCC;
   content.innerHTML = layout.makePageTemplate('Buff Log', '',
     'clearBuffs', 'Clear', 'bufflog');
   document.getElementById('clearBuffs').addEventListener('click',

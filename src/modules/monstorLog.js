@@ -40,8 +40,8 @@ function doHandlers(evt) {
   if (!target.classList.contains('fshLink')) {return;}
   var headerClicked = target.getAttribute('sortKey');
   var sortType = target.getAttribute('sortType');
-  if (!sortType) {sortType='string';}
-  if (calf.sortAsc === undefined) {calf.sortAsc = true;}
+  if (!sortType) {sortType = 'string';}
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
   if (calf.sortBy && calf.sortBy === headerClicked) {
     calf.sortAsc = !calf.sortAsc;
   }

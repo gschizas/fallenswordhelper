@@ -16,9 +16,9 @@ function updateMoves() { // jQuery
     if (val === oldMoves[ind]) {return;}
     prm.push(ajax.doPickMove('x', ind));
     nodes.eq(ind).attr({
-      'src': system.imageServer + '/world/actionLoadingSpinner.gif',
-      'width': '25',
-      'height': '25'
+      src: system.imageServer + '/world/actionLoadingSpinner.gif',
+      width: '25',
+      height: '25'
     });
   });
   $.when.apply($, prm).done(function() {
@@ -56,7 +56,7 @@ function selectMoves(evt) { // jQuery
   table.append(row);
 
   $('img[src$="pvp/bar_spacer.jpg"]', table)
-    .attr({'width': '15', 'height': '50'});
+    .attr({width: '15', height: '50'});
 
   row = $('<tr><td colspan=32 align=center ' +
     'style="padding-top: 2px;padding-bottom: 2px;">' +

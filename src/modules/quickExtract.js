@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import * as system from './support/system';
 import * as layout from './support/layout';
+import * as system from './support/system';
 
 var extractInv;
 
@@ -9,17 +9,22 @@ function quickDoneExtracted(responseText) { // Native
   document.getElementById('buy_result').innerHTML += '<br>' + infoMessage;
 }
 
-function extractAllSimilar(evt) { // Legacy
-  if (!confirm('Are you sure you want to extract all similar items?')) {
-    return;}
-  var InventoryIDs = evt.target.getAttribute('invIDs').split(',');
-  evt.target.parentNode.innerHTML = 'extracting all ' +
+function doExtract(target) { // Legacy
+  var InventoryIDs = target.getAttribute('invIDs').split(',');
+  target.parentNode.innerHTML = 'extracting all ' +
     InventoryIDs.length + ' resources';
-  for (var i = 0; i < InventoryIDs.length; i += 1){
+  for (var i = 0; i < InventoryIDs.length; i += 1) {
     system.xmlhttp(
       'index.php?cmd=profile&subcmd=useitem&inventory_id=' +
       InventoryIDs[i], quickDoneExtracted);
   }
+}
+
+function extractAllSimilar(evt) { // Native
+  layout.confirm('Extract Resources',
+    'Are you sure you want to extract all similar items?',
+    function() {doExtract(evt.target);}
+  );
 }
 
 function showQuickExtract(data) { // Legacy
@@ -29,43 +34,45 @@ function showQuickExtract(data) { // Legacy
     extractInv = data;
   }
   var table = $('table[id="Helper:ExtTable"]');
-  table.children().remove();//empty table for re-population.
-  calf.resourceList={}; //reset resourceList
-  var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
-  var selectMain= $('input[id="Helper:useItemsInMain"]').is(':checked');
+  table.children().remove();// empty table for re-population.
+  calf.resourceList = {}; // reset resourceList
+  var selectST = $('input[id="Helper:useItemsInSt"]').is(':checked');
+  var selectMain = $('input[id="Helper:useItemsInMain"]').is(':checked');
   table.append('<tr><th width=20%>Actions</th><th>Items</th></tr><tr>' +
     '<td id="buy_result" colspan=2></td></tr>');
-  for (var i=0; i < extractInv.items.length;i += 1) {
+  for (var i = 0; i < extractInv.items.length; i += 1) {
     item = extractInv.items[i];
     if (selectMain && item.folder_id !== '-1') {continue;}
     if (!selectST && item.is_in_st) {continue;}
     if (item.item_name !== 'Zombie Coffin' &&
       item.type !== '12' &&
       item.type !== '16') {continue;}
-    if (calf.resourceList[item.item_id]){
+    if (calf.resourceList[item.item_id]) {
       calf.resourceList[item.item_id].invIDs += ',' +
         item.inv_id;
       calf.resourceList[item.item_id].count += 1;
     } else {
-      calf.resourceList[item.item_id] = {'count':1,
-        'invIDs':item.inv_id,
-        'first_item':item};
+      calf.resourceList[item.item_id] = {
+        count: 1,
+        invIDs: item.inv_id,
+        first_item: item
+      };
     }
   }
 
   for (id in calf.resourceList) {
     if (!calf.resourceList.hasOwnProperty(id)) {continue;}
-    var res=calf.resourceList[id];
-    item=res.first_item;
+    var res = calf.resourceList[id];
+    item = res.first_item;
     table.append('<tr><td align=center><span style="cursor:pointer; ' +
       'text-decoration:underline; color:#blue; font-size:x-small;"' +
       ' id="Helper:extractAllSimilar' + id + '" invIDs="' +
       res.invIDs + '">Extract all ' + res.count + '</span></td>' +
-      '<td><img src="' + system.imageServer + '/items/' + 
+      '<td><img src="' + system.imageServer + '/items/' +
       item.item_id + '.gif" class="tip-dynamic" data-tipped="' +
       'fetchitem.php?item_id=' + item.item_id + '&inv_id=' +
       item.inv_id + '&t=1&p=' + extractInv.player_id +
-      '" border=0>' + '</td><td>'+item.item_name+'</td></tr>');
+      '" border=0></td><td>' + item.item_name + '</td></tr>');
   }
 
   for (id in calf.resourceList) {
@@ -75,9 +82,9 @@ function showQuickExtract(data) { // Legacy
   }
 }
 
-export function insertQuickExtract(content) { // Hybrid
-  if (!content) {content=layout.pCC;}
-  content.innerHTML='<table width=100%><tr style="background-color:' +
+export function insertQuickExtract(injector) { // Hybrid
+  var content = injector || layout.pCC;
+  content.innerHTML = '<table width=100%><tr style="background-color:' +
     '#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>' +
     'Select which type of plants you wish to extract all of. Only ' +
     'select extractable resources.<br/><label><input type="checkbox"' +

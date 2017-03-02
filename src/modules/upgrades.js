@@ -7,7 +7,7 @@ function updateStamCount(evt) { // jQuery
   var amount = target.attr('amount');
   var cost = target.attr('cost');
   var quantity = target.val();
-  //cap the value if the user goes over his current FSP
+  // cap the value if the user goes over his current FSP
   var color = 'red';
   var extraStam = Math.floor(currentFSP / cost) * amount;
   if (quantity * cost <= currentFSP) {
@@ -51,16 +51,16 @@ export function storePlayerUpgrades() { // Legacy
     .nextSibling;
   if (alliesRatio) {
     var alliesValueRE = /(\d+) \/ 115/;
-    var alliesValue = alliesValueRE.exec(alliesRatio.innerHTML)[1]*1;
-    system.setValue('alliestotal',alliesValue+5);
+    var alliesValue = Number(alliesValueRE.exec(alliesRatio.innerHTML)[1]);
+    system.setValue('alliestotal', alliesValue + 5);
   }
   var enemiesText = system.findNode('//td[.="+1 Max Enemies"]');
   var enemiesRatio = enemiesText.nextSibling.nextSibling.nextSibling
     .nextSibling;
   if (enemiesRatio) {
     var enemiesValueRE = /(\d+) \/ 115/;
-    var enemiesValue = enemiesValueRE.exec(enemiesRatio.innerHTML)[1]*1;
-    system.setValue('enemiestotal',enemiesValue+5);
+    var enemiesValue = Number(enemiesValueRE.exec(enemiesRatio.innerHTML)[1]);
+    system.setValue('enemiestotal', enemiesValue + 5);
   }
   injectPoints();
 }

@@ -1,5 +1,5 @@
-import * as task from './task';
 import * as system from './system';
+import * as task from './task';
 
 var dotList;
 var dotCount;
@@ -20,9 +20,9 @@ var sevenDayDot =
 export var pCC = document.getElementById('pCC');
 
 export function buffAllHref(shortList) { // Bad Pattern
-  shortList = shortList.join(',').replace(/\s/g, '');
+  var _shortList = shortList.join(',').replace(/\s/g, '');
   var j = 'java';
-  return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + shortList +
+  return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + _shortList +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")';
 }
 
@@ -47,7 +47,7 @@ export function infoBox(documentText) { // Native
   var infoMatch = doc.getElementById('info-msg').innerHTML;
   var result = '';
   if (infoMatch) {
-    infoMatch = infoMatch.replace(/<br.*/,'');
+    infoMatch = infoMatch.replace(/<br.*/, '');
     result = infoMatch;
   }
   return result;
@@ -67,7 +67,7 @@ export function guildId() { // Native
 export function playerId() { // Native
   var thePlayerId = parseInt(document.getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
-  system.setValue('playerID',thePlayerId);
+  system.setValue('playerID', thePlayerId);
   return thePlayerId;
 }
 
@@ -101,16 +101,21 @@ export function onlineDot(obj) { // Native
   }
   // last_login is 'false' over 30 days
   if ('last_login' in obj && !obj.last_login) {min = 99999;}
-  if (min < 2) {img = greenDiamond;
-  } else if (min < 5) {img = yellowDiamond;
-  } else if (min < 30) {img = orangeDiamond;
-  } else if (min < 10080) {img = offlineDot;
-  } else if (min < 44640) {img = sevenDayDot;
+  if (min < 2) {
+    img = greenDiamond;
+  } else if (min < 5) {
+    img = yellowDiamond;
+  } else if (min < 30) {
+    img = orangeDiamond;
+  } else if (min < 10080) {
+    img = offlineDot;
+  } else if (min < 44640) {
+    img = sevenDayDot;
   } else {img = redDot;}
   return img;
 }
 
-function changeOnlineDot(contactLink){ // Native
+function changeOnlineDot(contactLink) { // Native
   var lastActivity = lastActivityRE
     .exec(contactLink.getAttribute('data-tipped'));
   contactLink.parentNode.previousSibling.innerHTML =
@@ -139,4 +144,32 @@ export function colouredDots() { // Native
     '#pCC a[data-tipped*="Last Activity"]');
   dotCount = 0;
   task.add(3, batchDots);
+}
+
+export function confirm(title, msgText, fn) { // jQuery
+  var fshMsg = document.getElementById('fshmsg');
+  if (!fshMsg) {
+    fshMsg = document.createElement('div');
+    fshMsg.id = 'fshmsg';
+    document.body.appendChild(fshMsg);
+    $(fshMsg).dialog({
+      autoOpen: false,
+      dialogClass: 'no-close',
+      draggable: false,
+      modal: true,
+      resizable: false,
+    });
+  }
+  fshMsg.textContent = msgText;
+  $(fshMsg).dialog('option', {
+    buttons: {
+      Yes: function() {
+        fn();
+        $(this).dialog('close');
+      },
+      No: function() {$(this).dialog('close');}
+    },
+    title: title
+  })
+  .dialog('open');
 }

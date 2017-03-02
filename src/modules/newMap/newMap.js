@@ -1,12 +1,12 @@
-import calf from '../support/calf';
-import * as system from '../support/system';
 import assets from './assets';
+import calf from '../support/calf';
 import * as buttons from './buttons';
 import * as combatLogger from './combatLogger';
 import * as monsterLog from './monsterLog';
 import * as sendGold from './sendGold';
-import * as viewCreature from './viewCreature';
 import * as shop from './shop';
+import * as system from '../support/system';
+import * as viewCreature from './viewCreature';
 
 var showHuntingBuffs;
 var huntingBuffs;
@@ -41,9 +41,9 @@ function hideGroupButton() { // jQuery
 }
 
 function colorMonsters() { // jQuery
-  $('#actionList li.creature-1').css('color','green');
-  $('#actionList li.creature-2').css('color','yellow');
-  $('#actionList li.creature-3').css('color','red');
+  $('#actionList li.creature-1').css('color', 'green');
+  $('#actionList li.creature-2').css('color', 'yellow');
+  $('#actionList li.creature-3').css('color', 'red');
 }
 
 function afterUpdateActionList() { // jQuery
@@ -52,7 +52,7 @@ function afterUpdateActionList() { // jQuery
   $('#actionList div.header').each(function() {
     if (calf.doNotKillList.indexOf(
         $(this).find('a.icon').data('name')) !== -1) {
-      $(this).css('color','blue');
+      $(this).css('color', 'blue');
     }
   });
 }
@@ -113,7 +113,7 @@ function fixDebuffQTip(e) { // jQuery
   $(e.target).qtip('hide');
 }
 
-function injectWorldNewMap(data){ // Native
+function injectWorldNewMap(data) { // Native
   if (data.player && system.getValue('sendGoldonWorld')) {
     sendGold.updateSendGoldOnWorld(data);
   }
@@ -143,7 +143,7 @@ function doHuntingBuffs() {
   huntingBuffs = huntingBuffs.split(',');
   $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
     dataEventsPlayerBuffs);
-  if (window.initialGameData) {//HCS initial data
+  if (window.initialGameData) {// HCS initial data
     dataEventsPlayerBuffs(null,
       {b: window.initialGameData.player.buffs});
   }
@@ -155,7 +155,7 @@ export function subscribes() { // jQuery
     sendGold.injectSendGoldOnWorld();
   }
 
-  //Subscribes:
+  // Subscribes:
   calf.doNotKillList = system.getValue('doNotKillList');
 
   // subscribe to view creature events on the new map.
@@ -176,7 +176,7 @@ export function subscribes() { // jQuery
   // add monster log functionality
   monsterLog.startMonsterLog();
 
-  // then intercept the action call 
+  // then intercept the action call
   interceptDoAction();
 
   $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
@@ -184,23 +184,20 @@ export function subscribes() { // jQuery
 
   doHuntingBuffs();
 
-  $.subscribe('keydown.controls', function(e, key){
-    switch(key) {
-    case 'ACT_REPAIR': GameData.fetch(387);
-      break;
-    }
+  $.subscribe('keydown.controls', function(e, key) {
+    if (key === 'ACT_REPAIR') {GameData.fetch(387);}
   });
 
   combatLogger.init();
-  //on world
+  // on world
 
-  if (window.initialGameData) {//HCS initial data
+  if (window.initialGameData) {// HCS initial data
     injectWorldNewMap(window.initialGameData);
     impIconColour(null,
       {b: window.initialGameData.player.buffs});
   }
   $.subscribe('-1-success.action-response 5-success.action-response',
-    function(e, data) { //change of information
+    function(e, data) { // change of information
       injectWorldNewMap(data);
     }
   );

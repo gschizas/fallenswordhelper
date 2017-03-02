@@ -1,7 +1,7 @@
-import calf from '../support/calf';
-import * as system from '../support/system';
-import * as layout from '../support/layout';
 import assets from './assets';
+import calf from '../support/calf';
+import * as layout from '../support/layout';
+import * as system from '../support/system';
 
 function doFormGroup(e) { // jQuery
   e.preventDefault();
@@ -74,7 +74,7 @@ function showHuntMode(worldName) { // jQuery
 
 export function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
-  worldName.html(data.realm.name); //HACK - incase of switchign between master realm and realm they dont replace teh realm name
+  worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
   var oldButtonContainer = $('#fshWorldButtonContainer');
   if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});

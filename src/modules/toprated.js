@@ -1,6 +1,6 @@
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 function parseGuildOnline(membrList) { // Native
   var spinner = layout.pCC.getElementsByClassName('fshSpinner')[0];
@@ -11,10 +11,10 @@ function parseGuildOnline(membrList) { // Native
     var theTd = el.parentNode.parentNode;
     var player = theTd.nextElementSibling.textContent.trim();
     if (membrList[guildId] && membrList[guildId][player]) {
-      theTd.parentNode.insertAdjacentHTML('beforeend',
-        '<td>' + layout.onlineDot({
-          last_login: membrList[guildId][player].last_login
-        }) + '</td>');
+      theTd.parentNode.insertAdjacentHTML('beforeend', '<td>' +
+        layout.onlineDot(
+          {last_login: membrList[guildId][player].last_login}
+        ) + '</td>');
     }
   });
 }

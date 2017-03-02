@@ -1,18 +1,18 @@
 import calf from '../support/calf';
-import * as task from '../support/task';
-import * as fshGa from '../support/fshGa';
-import * as system from '../support/system';
-import * as ajax from '../support/ajax';
-import * as composing from '../composing/composing';
-import * as notification from '../notification';
-import * as common from '../support/common';
-import * as helperMenu from './helperMenu';
-import * as allyEnemy from './allyEnemy';
-import * as news from '../news';
-import * as messaging from './messaging';
-import * as activeWantedBounties from './activeWantedBounties';
-import * as sendGold from '../newMap/sendGold';
 import pageSwitcher from './pageSwitcher';
+import * as activeWantedBounties from './activeWantedBounties';
+import * as ajax from '../support/ajax';
+import * as allyEnemy from './allyEnemy';
+import * as common from '../support/common';
+import * as composing from '../composing/composing';
+import * as fshGa from '../support/fshGa';
+import * as helperMenu from './helperMenu';
+import * as messaging from './messaging';
+import * as news from '../news';
+import * as notification from '../notification';
+import * as sendGold from '../newMap/sendGold';
+import * as system from '../support/system';
+import * as task from '../support/task';
 
 var coreFunction;
 var functionPath;
@@ -49,9 +49,8 @@ function getCoreFunction() { // Native
     type = '-';
     fromWorld = '-';
   }
-
-//#if _DEV  // TODO patch for types that we don't care about
-//#endif
+  //#if _DEV  //  TODO patch for types that we don't care about
+  //#endif
   calf.cmd = cmd;
   calf.subcmd = subcmd;
   calf.subcmd2 = subcmd2;
@@ -77,7 +76,7 @@ function gameHelpLink() { // Native
 }
 
 function movePage(dir) { // Legacy
-  var dirButton = system.findNode('//input[@value="'+dir+'"]');
+  var dirButton = system.findNode('//input[@value="' + dir + '"]');
   if (!dirButton) {return;}
   var url = dirButton.getAttribute('onClick');
   url = url.replace(/^[^']*'/m, '').replace(/\';$/m, '');
@@ -126,7 +125,7 @@ function keyPress(evt) { // Native
 
   switch (r) {
   case 114: // repair [r]
-    //do not use repair link for new map
+    // do not use repair link for new map
     if (!document.getElementById('worldPage')) {
       location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
     }
@@ -170,7 +169,7 @@ function keyPress(evt) { // Native
     break;
   case 62: // move to next page [>]
   case 60: // move to prev page [<]
-    movePage({62:'>', 60:'<'}[r]);
+    movePage({'62': '>', '60': '<'}[r]);
     break;
   case 33: // Shift+1
   case 64: // Shift+2
@@ -182,8 +181,18 @@ function keyPress(evt) { // Native
   case 38: // Shift+7
   case 42: // Shift+8
   case 40: // Shift+9
-    var keyMap = {'key33':1, 'key64':2, 'key34':2, 'key35':3, 'key36':4,
-      'key37':5, 'key94':6, 'key38':7, 'key42':8, 'key40':9};
+    var keyMap = {
+      key33: 1,
+      key64: 2,
+      key34: 2,
+      key35: 3,
+      key36: 4,
+      key37: 5,
+      key94: 6,
+      key38: 7,
+      key42: 8,
+      key40: 9
+    };
     // I'm using "key??" because I don't feel comfortable of naming properties with integers
     var itemIndex = keyMap['key' + r];
     $.get('index.php?cmd=profile').done(function(data) {
@@ -352,7 +361,8 @@ function navMenu() { // jQuery
   var myNav = $('#nav').data('nav');
   if (!myNav) {return;}
   var oldSave = myNav._saveState;
-  myNav._saveState = function(id) {
+  myNav._saveState = function(_id) {
+    var id = _id;
     var myHeight = $('li.nav-level-0', '#nav').eq(id).find('ul').height();
     if (myHeight === 0) {id = -1;}
     oldSave.call(myNav, id);
@@ -451,7 +461,8 @@ function injectLevelupCalculator() { // Native
     );
 }
 
-function storeFSBox(boxList) { // Native
+function storeFSBox(_boxList) { // Native
+  var boxList = _boxList;
   if (!boxList) {boxList = '';}
   var fsbox = document.getElementById('minibox-fsbox')
     .getElementsByClassName('message')[0].innerHTML;
@@ -494,7 +505,7 @@ function changeGuildLogHREF() { // Native
     guildLogNode.setAttribute('href',
       'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
   }
-  //hide the lhs box
+  // hide the lhs box
   if (location.search === '?cmd=notepad&blank=1&subcmd=newguildlog') {
     if (guildLogNode.innerHTML.search('Guild Log updated!') !== -1) { // new UI
       messageBox = guildLogNode.parentNode;
@@ -522,7 +533,7 @@ function injectMenu() { // jQuery.min
     document.querySelector('#pCL a[href="index.php?cmd=questbook"]')
       .setAttribute('href', system.getValue('lastActiveQuestPage'));
   }
-  //character
+  // character
   document.getElementById('nav-character-log').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
@@ -560,27 +571,27 @@ function injectMenu() { // jQuery.min
       '<li class="nav-level-1"><a class="nav-link" id="nav-' +
       'character-quicklinkmanager" href="index.php?cmd=notepad&' +
       'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
-  //guild
+  // guild
   document.getElementById('nav-guild-storehouse-inventory').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
       '&subcmd=guildinvmgr">Guild Inventory</a></li>');
   if (!system.getValue('useNewGuildLog')) {
-    //if not using the new guild log, show it as a separate menu entry
+    // if not using the new guild log, show it as a separate menu entry
     document.getElementById('nav-guild-ledger-guildlog').parentNode
       .insertAdjacentHTML('beforebegin',
         '<li class="nav-level-2"><a class="nav-link" ' +
         'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
         '>New Guild Log</a></li>');
   }
-  //top rated
+  // top rated
   document.getElementById('nav-toprated-players-level').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
       'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
       'Top 250 Players</a></li>');
-  //actions
+  // actions
   document.getElementById('nav-actions-trade-auctionhouse').parentNode
     .insertAdjacentHTML('afterend',
       '<li class="nav-level-2"><a class="nav-link" id="nav-' +
@@ -601,14 +612,14 @@ function injectMenu() { // jQuery.min
   var theNav = document.getElementById('nav');
   var myNav = $(theNav).data('nav');
   // first the closed saved variables
-  myNav.heights = [ null, null,
+  myNav.heights = [null, null,
     // Character
     document.getElementById('nav-character').nextElementSibling.children
       .length * 22,
     660,
     // Guild
     document.querySelectorAll('#nav-guild > ul li').length * 22,
-    374, 132, 132, null ];
+    374, 132, 132, null];
   if (myNav.state !== '-1' && myNav.state !== -1) {
     // and now the open one
     theNav.children[myNav.state].children[1].style.height =
@@ -617,7 +628,7 @@ function injectMenu() { // jQuery.min
 }
 
 function notHuntMode() { // Native
-  //move boxes in opposite order that you want them to appear.
+  // move boxes in opposite order that you want them to appear.
   if (system.getValue('moveGuildList')) {
     task.add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
   }
@@ -672,15 +683,17 @@ function prepareEnv() { // Native
 
 function asyncDispatcher() { // Native
   //#if _DEV  //  asyncDispatcher messages
-  console.log('functionPath', functionPath); // DEV Only
+  /* eslint-disable no-console */
+  console.log('functionPath', functionPath);
   if (!coreFunction) {
-    console.log('No Core Function.'); // DEV Only
+    console.log('No Core Function.');
     return;
   }
   if (typeof coreFunction !== 'function') {
-    console.log('Not Core Function.'); // DEV Only
+    console.log('Not Core Function.');
     return;
   }
+  /* eslint-enable no-console */
   //#endif
   if (typeof coreFunction === 'function') {
     fshGa.screenview(functionPath);
@@ -692,11 +705,11 @@ function asyncDispatcher() { // Native
 
 function doMsgSound() { // jQuery
   var soundLocation = system.getValue('defaultMessageSound');
-  $('a:contains("New log messages"):first').each(function(){
+  $('a:contains("New log messages"):first').each(function() {
     $(this).after('<audio src="' + soundLocation +
     '" autoplay=true />');
   });
-  $('a:contains("New Guild chat message"):first').each(function(){
+  $('a:contains("New Guild chat message"):first').each(function() {
     $(this).after('<audio src="' + soundLocation +
     '" autoplay=true />');
   });

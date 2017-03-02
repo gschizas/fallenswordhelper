@@ -22,7 +22,7 @@ export var moveOptions =
 export var tableOpts = {
   paging: false,
   info: false,
-  order: [[3, 'asc'],[0, 'asc']],
+  order: [[3, 'asc'], [0, 'asc']],
   columnDefs: [
     {orderable: false, targets: [9]}
   ],

@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import * as dataObj from './support/dataObj';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
 import * as common from './support/common';
+import * as dataObj from './support/dataObj';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 function getRelicPlayerBuffs(responseText) { // jQuery - Old map
   var processingStatus = $('td[title="ProcessingStatus"]');
@@ -16,8 +16,7 @@ function getRelicPlayerBuffs(responseText) { // jQuery - Old map
     system.addCommas(calf.relicGroupAttackValue));
   var nightmareVisageEffect = Math.ceil(calf.relicGroupAttackValue *
     (player.nightmareVisageLevel * 0.0025));
-  calf.relicGroupAttackValue = calf.relicGroupAttackValue -
-    nightmareVisageEffect;
+  calf.relicGroupAttackValue -= nightmareVisageEffect;
   var storedFlinchLevel =
     system.intValue($('td[title="LDFlinchLevel"]').text());
   var storedFlinchEffectValue = Math.ceil(calf.relicGroupAttackValue *
@@ -61,7 +60,7 @@ function getRelicPlayerBuffs(responseText) { // jQuery - Old map
   groupHPBuffedElement.html(
     system.addCommas(calf.relicGroupHPValue + fortitudeBonusHP));
 
-  //Effect on defending group from Flinch on attacking group.
+  // Effect on defending group from Flinch on attacking group.
   var defGuildBuffedAttackElement = $('td[title="attackValueBuffed"]');
   var defGuildBuffedAttackValue = system.intValue(
     defGuildBuffedAttackElement.text());
@@ -81,7 +80,7 @@ function getRelicPlayerBuffs(responseText) { // jQuery - Old map
 }
 
 function parseRelicMercStats(responseText) { // Hybrid - Old map
-  //merc stats do not count for group stats so subtract them here ...
+  // merc stats do not count for group stats so subtract them here ...
   var processingStatus = $('td[title="ProcessingStatus"]');
   processingStatus.html('Subtracting group merc stats ... ');
 
@@ -97,34 +96,29 @@ function parseRelicMercStats(responseText) { // Hybrid - Old map
     merc = mercElements[i];
     var mouseoverText = $(merc).data('tipped');
     var src = merc.getAttribute('src');
-    if (mouseoverText && src.search('/merc/') !== -1){
+    if (mouseoverText && src.search('/merc/') !== -1) {
       var attackRE = /<td>Attack:<\/td><td>(\d+)<\/td>/;
-      var mercAttackValue = attackRE.exec(mouseoverText)[1] * 1;
+      var mercAttackValue = Number(attackRE.exec(mouseoverText)[1]);
       totalMercAttack += mercAttackValue;
       var defenseRE = /<td>Defense:<\/td><td>(\d+)<\/td>/;
-      var mercDefenseValue = defenseRE.exec(mouseoverText)[1] * 1;
+      var mercDefenseValue = Number(defenseRE.exec(mouseoverText)[1]);
       totalMercDefense += mercDefenseValue;
       var armorRE = /<td>Armor:<\/td><td>(\d+)<\/td>/;
-      var mercArmorValue = armorRE.exec(mouseoverText)[1] * 1;
+      var mercArmorValue = Number(armorRE.exec(mouseoverText)[1]);
       totalMercArmor += mercArmorValue;
       var damageRE = /<td>Damage:<\/td><td>(\d+)<\/td>/;
-      var mercDamageValue = damageRE.exec(mouseoverText)[1] * 1;
+      var mercDamageValue = Number(damageRE.exec(mouseoverText)[1]);
       totalMercDamage += mercDamageValue;
       var hpRE = /<td>HP:<\/td><td>(\d+)<\/td>/;
-      var mercHPValue = hpRE.exec(mouseoverText)[1] * 1;
+      var mercHPValue = Number(hpRE.exec(mouseoverText)[1]);
       totalMercHP += mercHPValue;
     }
   }
-  calf.relicGroupAttackValue =
-    calf.relicGroupAttackValue - Math.round(totalMercAttack * 0.2);
-  calf.relicGroupDefenseValue =
-    calf.relicGroupDefenseValue - Math.round(totalMercDefense * 0.2);
-  calf.relicGroupArmorValue =
-    calf.relicGroupArmorValue - Math.round(totalMercArmor * 0.2);
-  calf.relicGroupDamageValue =
-    calf.relicGroupDamageValue - Math.round(totalMercDamage * 0.2);
-  calf.relicGroupHPValue =
-    calf.relicGroupHPValue - Math.round(totalMercHP * 0.2);
+  calf.relicGroupAttackValue -= Math.round(totalMercAttack * 0.2);
+  calf.relicGroupDefenseValue -= Math.round(totalMercDefense * 0.2);
+  calf.relicGroupArmorValue -= Math.round(totalMercArmor * 0.2);
+  calf.relicGroupDamageValue -= Math.round(totalMercDamage * 0.2);
+  calf.relicGroupHPValue -= Math.round(totalMercHP * 0.2);
 
   system.xmlhttp('index.php?cmd=profile',
     getRelicPlayerBuffs);
@@ -172,9 +166,8 @@ function processRelicStats() { // Legacy - Old map
   var relicMultiplier = 1;
   if (relicCount === 1) {
     relicMultiplier = 1.5;
-  }
-  else if (relicCount >= 2) {
-    relicMultiplier = Math.round((1 - relicCount/10)*100)/100;
+  } else if (relicCount >= 2) {
+    relicMultiplier = Math.round((1 - relicCount / 10) * 100) / 100;
   }
 
   var LDConstitutionLevel =
@@ -250,7 +243,7 @@ function processRelicStats() { // Legacy - Old map
   hpValueBuffed.html(system.addCommas(hpNumber +
     Math.round(LDhpNumber * relicMultiplier) + fortitudeBonusHP));
   var LDpercentageValue = $('td[title="LDPercentage"]');
-  LDpercentageValue.html(relicMultiplier*100 + '%');
+  LDpercentageValue.html(relicMultiplier * 100 + '%');
 
   system.xmlhttp('index.php?cmd=guild&subcmd=groups',
     relicCheckIfGroupExists);
@@ -283,7 +276,7 @@ function getRelicGuildData(extraTextInsertPoint, hrefpointer) { // Legacy - Old 
 }
 
 function leadDefender(player) { // jQuery - Old map
-  //get lead defender (LD) buffs here for use later ... 
+  // get lead defender (LD) buffs here for use later ...
   var attackValue = $('td[title="LDattackValue"]');
   var attackNumber = system.intValue(attackValue.html());
   attackValue.html(system.addCommas(attackNumber +
@@ -293,15 +286,15 @@ function leadDefender(player) { // jQuery - Old map
   defenseValue.html(system.addCommas(defenseNumber +
     Math.round(player.defenseValue)));
   var armorValue = $('td[title="LDarmorValue"]');
-  var armorNumber=system.intValue(armorValue.html());
+  var armorNumber = system.intValue(armorValue.html());
   armorValue.html(system.addCommas(armorNumber +
     Math.round(player.armorValue)));
   var damageValue = $('td[title="LDdamageValue"]');
-  var damageNumber=system.intValue(damageValue.html());
+  var damageNumber = system.intValue(damageValue.html());
   damageValue.html(system.addCommas(damageNumber +
     Math.round(player.damageValue)));
   var hpValue = $('td[title="LDhpValue"]');
-  var hpNumber=system.intValue(hpValue.html());
+  var hpNumber = system.intValue(hpValue.html());
   hpValue.html(system.addCommas(hpNumber + Math.round(player.hpValue)));
   var defendersProcessed = $('td[title="defendersProcessed"]');
   var defendersProcessedNumber =
@@ -367,8 +360,7 @@ function parseRelicPlayerData(responseText, callback) { // jQuery - Old map
       system.intValue(defendersProcessed.html());
     defendersProcessed.html(
       system.addCommas(defendersProcessedNumber + 1));
-  }
-  else {
+  } else {
     leadDefender(player);
   }
   syncRelicData();
@@ -379,21 +371,21 @@ function getRelicPlayerData(defenderCount, hrefpointer, pl) { // Hybrid - Old ma
     system.xmlhttp(
       hrefpointer,
       parseRelicPlayerData,
-      {'defenderCount': defenderCount}
+      {defenderCount: defenderCount}
     );
   } else {
     $.ajax({
       cache: false,
       dataType: 'json',
-      url:'index.php',
+      url: 'index.php',
       data: {
-        'cmd': 'export',
-        'subcmd': 'profile',
-        'player_username': pl
+        cmd: 'export',
+        subcmd: 'profile',
+        player_username: pl
       },
       success: function(data) {
         parseRelicPlayerData(data,
-          {'defenderCount': defenderCount});
+          {defenderCount: defenderCount});
       }
     });
   }
@@ -402,18 +394,18 @@ function getRelicPlayerData(defenderCount, hrefpointer, pl) { // Hybrid - Old ma
 function calculateRelicDefenderStats() { // Legacy - Old map
   var validMemberString;
   var membrList = calf.membrList;
-  //hide the calc button
-  $('input[id="calculatedefenderstats"]').css('visibility','hidden');
-  //make the text smaller
+  // hide the calc button
+  $('input[id="calculatedefenderstats"]').css('visibility', 'hidden');
+  // make the text smaller
   $('td:contains("Below is the current status for the relic"):last')
-    .css('fontSize','x-small');
-  //set the colspan of all other rows to 3
-  $('table[width="600"]>tbody>tr:not(:eq(9))>td').attr('colspan',3);
+    .css('fontSize', 'x-small');
+  // set the colspan of all other rows to 3
+  $('table[width="600"]>tbody>tr:not(:eq(9))>td').attr('colspan', 3);
 
   var tableWithBorderElement = $('table[cellpadding="5"]');
   tableWithBorderElement
-    .attr('align','left')
-    .attr('colSpan',2);
+    .attr('align', 'left')
+    .attr('colSpan', 2);
   var tableInsertPoint = tableWithBorderElement.parents('tr:first');
   tableInsertPoint.append('<td colspan="1"><table width="200" style="' +
     'border:1px solid #A07720;"><tbody><tr><td id="InsertSpot"></td>' +
@@ -421,7 +413,7 @@ function calculateRelicDefenderStats() { // Legacy - Old map
   var extraTextInsertPoint = system.findNode('//td[@id="InsertSpot"]');
   var defendingGuildHref = $('a[href*="index.php?cmd=guild&subcmd=view' +
     '&guild_id="]:first').attr('href');
-  getRelicGuildData(extraTextInsertPoint,defendingGuildHref);
+  getRelicGuildData(extraTextInsertPoint, defendingGuildHref);
 
   var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
   var defendingGuildID = /guilds\/(\d+)_mini.jpg/
@@ -453,7 +445,7 @@ function calculateRelicDefenderStats() { // Legacy - Old map
     getRelicPlayerData(ind, $this.attr('href'), $this.text());
     if (defendingGuildID === myGuildID && !hideRelicOffline) {
       validMemberString = validMemberString.replace(
-        $this.text() + ' ','');
+        $this.text() + ' ', '');
     }
   });
   calf.relicDefenderCount = defenders.length;

@@ -1,8 +1,8 @@
 import calf from './support/calf';
-import * as debug from './support/debug';
-import * as task from './support/task';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as system from './support/system';
+import * as task from './support/task';
 
 function hideFolder(evt) { // native
   if (evt.target.nodeName !== 'SPAN' ||
@@ -43,7 +43,7 @@ function doFolderHeaders(folders) { // native
   var foldersRow = document.createElement('tr');
   foldersRow.id = 'fshFolderSelect';
   var folderCell = '<td colspan=6>';
-  //append main folder
+  // append main folder
   folderCell += '<span id="folderid0" class="fshLink" fid=0>All</span>' +
     ' &ensp;<span id="folderid-1" class="fshLink" fid="-1">Main</span>';
   Object.keys(folders).forEach(function(key) {
@@ -85,7 +85,7 @@ function processTrade(data) { // native
 }
 
 function inv() { // jQuery
-  ajax.getInventoryById().done(function(data){
+  ajax.getInventoryById().done(function(data) {
     task.add(3, processTrade, [data]);
   });
 }

@@ -34,13 +34,13 @@ function parseRankData(responseText) { // Native
       privName === 'Can View Advisor') {
       count += 0.1;
     } else {
-      count+= 1;
+      count += 1;
     }
   });
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
   var linkElement = this.linkElement;
   linkElement.insertAdjacentHTML('afterbegin', '<span class="fshBlue">(' +
-    Math.round(10*count)/10 + ') Tax:(' + taxRate + '%)</span> ');
+    Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
 function fetchRankData() { // jQuery

@@ -1,9 +1,9 @@
 import calf from './support/calf';
-import * as debug from './support/debug';
-import * as task from './support/task';
-import * as dataObj from './support/dataObj';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
+import * as dataObj from './support/dataObj';
+import * as debug from './support/debug';
+import * as system from './support/system';
+import * as task from './support/task';
 
 /* jshint latedef: nofunc */
 var options;
@@ -65,7 +65,7 @@ var invManFilter =
   '<td><input id="fshContainer" item="14" type="checkbox"/></td>' +
   '<td class="fshRight">&nbsp;Frag Stash:</td>' +
   '<td><input id="fshStash" item="16" type="checkbox"/></td>' +
-  //' Composed: <input id="fshComposed" item="15" type="checkbox"/>' +
+  // ' Composed: <input id="fshComposed" item="15" type="checkbox"/>' +
   '<td colspan="3"></td></tr>' +
   '<tr>' +
   '<td class="fshRight">&nbsp;Common:</td>' +
@@ -85,25 +85,43 @@ var invManFilter =
   '</tr>' +
   '</table>';
 var inventoryCheckAll = {
-  '0': 1, '1': 1, '2': 1, '3': 1, '4': 1,
-  '5': 1, '6': 1, '7': 1, '8': 1, '9': 1,
-  '10': 1, '11': 1, '12': 1, '13': 1,
-  '14': 1, '15': 1, '16': 1, '100': 1,
-  '101': 1, '102': 1, '103': 1, '104': 1,
-  '105': 1, '106': 1
+  '0': 1,
+  '1': 1,
+  '2': 1,
+  '3': 1,
+  '4': 1,
+  '5': 1,
+  '6': 1,
+  '7': 1,
+  '8': 1,
+  '9': 1,
+  '10': 1,
+  '11': 1,
+  '12': 1,
+  '13': 1,
+  '14': 1,
+  '15': 1,
+  '16': 1,
+  '100': 1,
+  '101': 1,
+  '102': 1,
+  '103': 1,
+  '104': 1,
+  '105': 1,
+  '106': 1
 };
 var itemType = ['Helmet', 'Armor', 'Gloves', 'Boots', 'Weapon', 'Shield',
   'Ring', 'Amulet', 'Rune', 'Quest Item', 'Potion', 'Component',
   'Resource', 'Recipe', 'Container', 'Composed', 'Frag Stash'];
 var craftHash = {
-  Perfect    : {abbr: 'Perf', colour: '#00b600', index: 8},
-  Excellent  : {abbr:  'Exc', colour: '#f6ed00', index: 7},
-  'Very Good': {abbr:   'VG', colour: '#f67a00', index: 6},
-  Good       : {abbr: 'Good', colour: '#f65d00', index: 5},
-  Average    : {abbr:  'Ave', colour: '#f64500', index: 4},
-  Poor       : {abbr: 'Poor', colour: '#f61d00', index: 3},
-  'Very Poor': {abbr:  'VPr', colour: '#b21500', index: 2},
-  Uncrafted  : {abbr:  'Unc', colour: '#666666', index: 1}
+  Perfect: {abbr: 'Perf', colour: '#00b600', index: 8},
+  Excellent: {abbr: 'Exc', colour: '#f6ed00', index: 7},
+  'Very Good': {abbr: 'VG', colour: '#f67a00', index: 6},
+  Good: {abbr: 'Good', colour: '#f65d00', index: 5},
+  Average: {abbr: 'Ave', colour: '#f64500', index: 4},
+  Poor: {abbr: 'Poor', colour: '#f61d00', index: 3},
+  'Very Poor': {abbr: 'VPr', colour: '#b21500', index: 2},
+  Uncrafted: {abbr: 'Unc', colour: '#666666', index: 1}
 };
 
 function doSpinner() { // jQuery
@@ -147,8 +165,7 @@ function lvlFilter() { // jQuery
         isNaN(min) && isNaN(max) ||
         isNaN(min) && level <= max ||
         min <= level && isNaN(max) ||
-        min <= level && level <= max )
-      {return true;}
+        min <= level && level <= max) {return true;}
       return false;
     }
   );
@@ -158,8 +175,7 @@ function typeFilter() { // jQuery
   $.fn.dataTable.ext.search.push(
     function(_settings, _row, _index, data) {
       return !options.checkedElements ||
-        options.checkedElements[data.type] ?
-        true : false;
+        options.checkedElements[data.type];
     }
   );
 }
@@ -171,8 +187,7 @@ function setFilter() { // jQuery
         !options.checkedElements['-1'] ||
         options.checkedElements['-1'] &&
         data.stats &&
-        data.stats.set_id !== '-1' ?
-        true : false;
+        data.stats.set_id !== '-1';
     }
   );
 }
@@ -182,8 +197,7 @@ function rarityFilter() { // jQuery
     function(_settings, _row, _index, data) {
       var rarity = (parseInt(data.rarity, 10) + 100).toString();
       return !options.checkedElements ||
-        options.checkedElements[rarity] ?
-        true : false;
+        options.checkedElements[rarity];
     }
   );
 }
@@ -237,7 +251,7 @@ function nameRender(data, type, row) { // Native
     dataObj.rarity[row.rarity].clas + '" ' +
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
     '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p +
-    '&currentPlayerId=' + cur + '"' + '>' +
+    '&currentPlayerId=' + cur + '">' +
     bold + '</a>' + setName;
 }
 
@@ -357,9 +371,20 @@ function useRender(row) { // Native
 }
 
 function wuRender(data, _type, row) { // Native
-  var action = {'0': 'Wear', '1': 'Wear', '2': 'Wear', '3': 'Wear',
-    '4': 'Wear', '5': 'Wear', '6': 'Wear', '7': 'Wear', '8': 'Wear',
-    '10': 'Use', '11': 'Use', '15': 'Use'}[data];
+  var action = {
+    '0': 'Wear',
+    '1': 'Wear',
+    '2': 'Wear',
+    '3': 'Wear',
+    '4': 'Wear',
+    '5': 'Wear',
+    '6': 'Wear',
+    '7': 'Wear',
+    '8': 'Wear',
+    '10': 'Use',
+    '11': 'Use',
+    '15': 'Use'
+  }[data];
   if (action === 'Wear') {
     action = wearRender(row);
   } else if (action === 'Use') {
@@ -403,21 +428,29 @@ function doTable() { // jQuery
     pageLength: 50,
     lengthMenu: [[50, 100, 150, 200, -1], [50, 100, 150, 200, 'All']],
     columnDefs: [{targets: '_all', defaultContent: ''},
-      {targets: [1, 4, 5, 6, 7, 8, 9, 10, 12, 13],
-        orderSequence: ['desc', 'asc']}],
+      {
+        targets: [1, 4, 5, 6, 7, 8, 9, 10, 12, 13],
+        orderSequence: ['desc', 'asc']
+      }],
     columns: [
-      {title: 'Name', data: 'item_name',
+      {
+        title: 'Name',
+        data: 'item_name',
         render: nameRender
       },
       {title: 'Level', data: 'stats.min_level'},
-      {title: 'Where', data: whereData,
+      {
+        title: 'Where',
+        data: whereData,
         render: {
-          '_': whereRender,
-          'display': whereRenderDisplay,
-          'filter': whereRenderFilter
+          _: whereRender,
+          display: whereRenderDisplay,
+          filter: whereRenderFilter
         }
       },
-      {title: 'Type', data: 'type',
+      {
+        title: 'Type',
+        data: 'type',
         render: function(type) {return itemType[type];}
       },
       {title: 'Att', data: 'stats.attack'},
@@ -426,41 +459,58 @@ function doTable() { // jQuery
       {title: 'Dam', data: 'stats.damage'},
       {title: 'HP', data: 'stats.hp'},
       {title: 'Frg', data: 'forge'},
-      {title: 'Craft', data: 'craft',
+      {
+        title: 'Craft',
+        data: 'craft',
         render: {
-          '_': function(craft) {
+          _: function(craft) {
             return craftHash[craft] ? craftHash[craft].index : 0;
           },
-          'display': craftRender,
-          'filter': craftRender
+          display: craftRender,
+          filter: craftRender
         }
       },
-      {title: 'Du%', data: 'durability',
-        render: durabilityRender},
-      {title: 'BP',
+      {
+        title: 'Du%',
+        data: 'durability',
+        render: durabilityRender
+      },
+      {
+        title: 'BP',
         data: whereData,
         render: bpRender
       },
-      {title: 'GS',
+      {
+        title: 'GS',
         data: whereData,
         render: gsRender
       },
-      {title: 'W/U',
+      {
+        title: 'W/U',
         data: 'type',
         render: wuRender
       },
-      {title: 'setName', data: 'stats.set_name',
-        orderable: false, visible: false
+      {
+        title: 'setName',
+        data: 'stats.set_name',
+        orderable: false,
+        visible: false
       },
-      {title: 'Tag', data: 'guild_tag',
-        render: function(tag){
+      {
+        title: 'Tag',
+        data: 'guild_tag',
+        render: function(tag) {
           return tag === '-1' ? 'No' : 'Yes';
         }
       },
-      {title: 'Drop', data: 'type',
+      {
+        title: 'Drop',
+        data: 'type',
         render: dropRender
       },
-      {title: 'Send', data: 'type',
+      {
+        title: 'Send',
+        data: 'type',
         render: sendRender
       }
     ],
@@ -571,7 +621,7 @@ function takeItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
   ajax.queueTakeItem(self.attr('invid'), self.attr('action'))
-    .done(function(data){
+    .done(function(data) {
       if (data.r === 1) {return;}
       killRow(self);
     });
@@ -585,8 +635,9 @@ function recallItem(e) { // jQuery
     invId: self.attr('invid'),
     playerId: self.attr('playerid'),
     mode: self.attr('mode'),
-    action: self.attr('action')})
-    .done(function(data){
+    action: self.attr('action')
+  })
+    .done(function(data) {
       if (data.r === 1) {return;}
       killRow(self);
     });
@@ -596,7 +647,7 @@ function recallItem(e) { // jQuery
 function wearItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.equipItem(self.attr('invid')).done(function(data){
+  ajax.equipItem(self.attr('invid')).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
@@ -606,7 +657,7 @@ function wearItem(e) { // jQuery
 function useItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.useItem(self.attr('invid')).done(function(data){
+  ajax.useItem(self.attr('invid')).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
@@ -621,7 +672,7 @@ function moveItem(e) { // jQuery
 function dropItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.dropItem([self.data('inv')]).done(function(data){
+  ajax.dropItem([self.data('inv')]).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
@@ -631,7 +682,7 @@ function dropItem(e) { // jQuery
 function sendItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.sendItem([self.data('inv')]).done(function(data){
+  ajax.sendItem([self.data('inv')]).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });

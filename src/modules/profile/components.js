@@ -1,5 +1,5 @@
-import * as system from '../support/system';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
 
 var compPages;
 var componentList = {};
@@ -25,10 +25,10 @@ function retriveComponent(responseText, currentPage) { // Native
     var mouseover = el.getAttribute('data-tipped');
     var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
     componentList[id] = componentList[id] || {
-        'count': 0,
-        'src': el.getAttribute('src'),
-        'onmouseover': mouseover
-      };
+      count: 0,
+      src: el.getAttribute('src'),
+      onmouseover: mouseover
+    };
     componentList[id].count += 1;
   });
   if (currentPage < compPages - 1) {
@@ -41,7 +41,7 @@ function retriveComponent(responseText, currentPage) { // Native
     var output = 'Component Summary<br/><table>';
     var usedCount = 0;
     Object.keys(componentList).forEach(function(id) {
-      var comp=componentList[id];
+      var comp = componentList[id];
       output += '<tr><td align=center><img src="' + comp.src +
         '" class="tip-dynamic" data-tipped="' + comp.onmouseover +
         '"></td><td>' + comp.count + '</td></tr>';

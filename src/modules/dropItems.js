@@ -96,7 +96,7 @@ function afterbegin(o, item) { // Native
   pattern += '</span>[<a href="http://guide.fallensword.com/' +
     'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
     '" target="_blank">UFSG</a>]</span>';
-  o.injectHere.insertAdjacentHTML('afterbegin',  pattern);
+  o.injectHere.insertAdjacentHTML('afterbegin', pattern);
 }
 
 function beforeend(o, item) { // Native
@@ -193,7 +193,7 @@ function doCheckboxes(type, itemId) { // Native
 function quickAction(self, success, otherClass) { // jQuery.min
   self.className = 'quickAction';
   var itemInvId = self.getAttribute('itemInvId');
-  ajax.sendItem([itemInvId]).done(function(data){
+  ajax.sendItem([itemInvId]).done(function(data) {
     if (data.r === 1) {return;}
     self.style.color = 'green';
     self.innerHTML = success;

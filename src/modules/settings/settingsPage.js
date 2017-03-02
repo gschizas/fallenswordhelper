@@ -1,7 +1,7 @@
 import calf from '../support/calf';
-import * as system from '../support/system';
 import * as layout from '../support/layout';
 import * as settingObj from './settingObj';
+import * as system from '../support/system';
 
 var networkIcon = settingObj.networkIcon;
 var saveBoxes = settingObj.saveBoxes;
@@ -24,7 +24,7 @@ export function simpleCheckbox(name) { // Native
     (system.getValue(o.id) ? ' checked' : '') + '></td></tr>';
 }
 
-function toggleTickAllBuffs(e){ // jQuery
+function toggleTickAllBuffs(e) { // jQuery
   var allItems = $('input[name^="blockedSkillList"]:visible',
     '#settingsTabs-4');
   var tckTxt = $(e.target);
@@ -50,13 +50,14 @@ function injectSettingsGuildData(guildType) { // Native
 }
 
 function clearStorage() { // Native
-  if (confirm('Are you sure you want to clear you localStorage?')) {
-    localStorage.clear();
-  }
+  layout.confirm('Clear localStorage',
+    'Are you sure you want to clear you localStorage?',
+    function() {localStorage.clear();}
+  );
 }
 
 function saveValueForm(name) {
-  /*jshint validthis: true */
+  /* jshint validthis: true */
   var formElement =
     system.findNode('//input[@name="' + name + '"]', this);
   if (formElement.getAttribute('type') === 'checkbox') {
@@ -64,7 +65,7 @@ function saveValueForm(name) {
   } else if (formElement.getAttribute('type') === 'radio') {
     var radioElements = system.findNodes('//input[@name="' + name +
       '"]', 0, this);
-    for (var i=0; i<radioElements.length; i += 1) {
+    for (var i = 0; i < radioElements.length; i += 1) {
       if (radioElements[i].checked) {
         system.setValue(name, radioElements[i].value);
       }
@@ -77,36 +78,36 @@ function saveValueForm(name) {
 function saveConfig(evt) { // Legacy
   var oForm = evt.target.form;
 
-  //bio compressor validation logic
+  // bio compressor validation logic
   var maxCompressedCharacters =
     system.findNode('//input[@name="maxCompressedCharacters"]', oForm);
-  var maxCompressedCharactersValue = maxCompressedCharacters.value * 1;
+  var maxCompressedCharactersValue = Number(maxCompressedCharacters.value);
   if (isNaN(maxCompressedCharactersValue) ||
       maxCompressedCharactersValue <= 50) {
     maxCompressedCharacters.value = 1500;
   }
   var maxCompressedLines =
     system.findNode('//input[@name="maxCompressedLines"]', oForm);
-  var maxCompressedLinesValue = maxCompressedLines.value * 1;
+  var maxCompressedLinesValue = Number(maxCompressedLines.value);
   if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue <= 1) {
     maxCompressedLines.value = 25;
   }
   var newGuildLogHistoryPages =
     system.findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
-  var newGuildLogHistoryPagesValue = newGuildLogHistoryPages.value * 1;
+  var newGuildLogHistoryPagesValue = Number(newGuildLogHistoryPages.value);
   if (isNaN(newGuildLogHistoryPagesValue) ||
       newGuildLogHistoryPagesValue <= 1) {
     newGuildLogHistoryPages.value = 25;
   }
   var maxGroupSizeToJoin =
     system.findNode('//input[@name="maxGroupSizeToJoin"]', oForm);
-  var maxGroupSizeToJoinValue = maxGroupSizeToJoin.value * 1;
+  var maxGroupSizeToJoinValue = Number(maxGroupSizeToJoin.value);
   if (isNaN(maxGroupSizeToJoinValue) || maxGroupSizeToJoinValue <= 1) {
     maxGroupSizeToJoin.value = 11;
   }
   var combatEvaluatorBiasElement =
     system.findNode('//select[@name="combatEvaluatorBias"]', oForm);
-  var combatEvaluatorBias = combatEvaluatorBiasElement.value * 1;
+  var combatEvaluatorBias = Number(combatEvaluatorBiasElement.value);
   system.setValue('combatEvaluatorBias', combatEvaluatorBias);
   var enabledHuntingModeElement =
     system.findNode('//select[@name="enabledHuntingMode"]', oForm);
@@ -115,9 +116,7 @@ function saveConfig(evt) { // Legacy
 
   saveBoxes.forEach(saveValueForm, oForm);
 
-  window.alert('FS Helper Settings Saved');
-  window.location = 'index.php?cmd=settings';
-  return false;
+  $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
 }
 
 function showLogs() { // Native
@@ -180,7 +179,7 @@ export function injectSettings() { // Legacy
       '<a href="https://github.com/fallenswordhelper/fallenswordhelper">' +
       'Fallen Sword Helper web site</a> ' +
       'for any suggestions, requests or bug reports</span></td></tr>' +
-    //General Prefs
+    // General Prefs
     '<tr><th colspan="2" align="left"><b>General preferences ' +
       '(apply to most screens)</b></th></tr>' +
 
@@ -246,7 +245,7 @@ export function injectSettings() { // Legacy
       helpLink('Quick Links Screen Location',
       'Determines where the quick links dialog shows on the screen. ' +
       'Default is top 22, left 0.') +
-      ':</td><td>Top: <input name="quickLinksTopPx" size="3" value="'+
+      ':</td><td>Top: <input name="quickLinksTopPx" size="3" value="' +
       system.getValue('quickLinksTopPx') +
       '"> Left: <input name="quickLinksLeftPx" size="3" value="' +
       system.getValue('quickLinksLeftPx') +
@@ -254,7 +253,7 @@ export function injectSettings() { // Legacy
     simpleCheckbox('draggableQuickLinks') +
     simpleCheckbox('expandMenuOnKeyPress') +
 
-    //Guild Manage
+    // Guild Manage
     '<tr><th colspan="2" align="left"><b>Guild>Manage preferences' +
       '</b></th></tr>' +
     '<tr><td colspan="2" align="left">Enter guild names, ' +
@@ -284,7 +283,7 @@ export function injectSettings() { // Legacy
     simpleCheckbox('ajaxifyRankControls') +
     simpleCheckbox('detailedConflictInfo') +
 
-    //World Screen
+    // World Screen
     '<tr><th colspan="2" align="left"><b>World screen/Hunting preferences' +
       '</b></th></tr>' +
 
@@ -292,19 +291,19 @@ export function injectSettings() { // Legacy
       helpLink('Hide Create Group Button',
       'Enabling this option will hide the Create Group button') +
       ':</td><td>' +
-      '<input name="hideChampionsGroup" ' + 'type="checkbox" value="on"' +
+      '<input name="hideChampionsGroup" type="checkbox" value="on"' +
         (system.getValue('hideChampionsGroup') ? ' checked' : '') + '>' +
       '&nbsp;Champions&nbsp;&nbsp;' +
-      '<input name="hideElitesGroup" type="checkbox" ' + 'value="on"' +
+      '<input name="hideElitesGroup" type="checkbox" value="on"' +
         (system.getValue('hideElitesGroup') ? ' checked' : '') + '>' +
       '&nbsp;Elites&nbsp;&nbsp;' +
-      '<input name="hideSEGroup" type="checkbox" ' + 'value="on"' +
+      '<input name="hideSEGroup" type="checkbox" value="on"' +
         (system.getValue('hideSEGroup') ? ' checked' : '') + '>' +
       '&nbsp;Super Elite&nbsp;&nbsp;' +
       '<input name="hideTitanGroup" type="checkbox" value="on"' +
         (system.getValue('hideTitanGroup') ? ' checked' : '') + '>' +
       '&nbsp;Titan&nbsp;&nbsp;' +
-      '<input name="hideLegendaryGroup" type="checkbox" ' + 'value="on"' +
+      '<input name="hideLegendaryGroup" type="checkbox" value="on"' +
         (system.getValue('hideLegendaryGroup') ? ' checked' : '') + '>' +
       '&nbsp;Legendary' +
       '</td></tr>' +
@@ -341,7 +340,7 @@ export function injectSettings() { // Legacy
       '<option value="3"' + (combatEvaluatorBias === 3 ? ' SELECTED' : '') +
       '>Conservative+</option></select></td></tr>' +
 
-    '<tr><td align="right">' + networkIcon +'Keep Creature Log' +
+    '<tr><td align="right">' + networkIcon + 'Keep Creature Log' +
       helpLink('Keep Creature Log',
       'This will show the creature log for each creature you see when ' +
       'you travel.') +
@@ -357,10 +356,10 @@ export function injectSettings() { // Legacy
       ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
       (system.getValue('sendGoldonWorld') ? ' checked' : '') + '>' +
       '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
-      system.getValue('goldAmount') + '"> '+
+      system.getValue('goldAmount') + '"> ' +
       'gold to <input name="goldRecipient" size="10" value="' +
       system.getValue('goldRecipient') + '">' +
-      ' Current total: <input name="currentGoldSentTotal" size="5" value="'+
+      ' Current total: <input name="currentGoldSentTotal" size="5" value="' +
       system.getValue('currentGoldSentTotal') + '">' +
       '</td></tr>' +
 
@@ -412,13 +411,13 @@ export function injectSettings() { // Legacy
       helpLink(buffs3Name + ' Hunting Buff List',
       'List of ' + buffs3Name + ' hunting buffs.') +
       ':</td><td colspan="3"><input name="huntingBuffs3Name" ' +
-      'title="Hunting mode name" size="7" value="'+ buffs3Name +
+      'title="Hunting mode name" size="7" value="' + buffs3Name +
       '"><input name="huntingBuffs3" size="49" value="' + buffs3 +
       '"></td></tr>' +
 
     simpleCheckbox('huntingMode') +
 
-    //Log screen prefs
+    // Log screen prefs
     '<tr><th colspan="2" align="left"><b>Log screen preferences' +
       '</b></th></tr>' +
 
@@ -464,7 +463,7 @@ export function injectSettings() { // Legacy
     simpleCheckbox('addAttackLinkToLog') +
     simpleCheckbox('enhanceChatTextEntry') +
 
-    //Equipment screen prefs
+    // Equipment screen prefs
     '<tr><th colspan="2" align="left"><b>Equipment screen preferences' +
       '</b></th></tr>' +
 
@@ -477,7 +476,7 @@ export function injectSettings() { // Legacy
       'quick send the item to this person') +
       ':</td><td><input name="showQuickSendLinks" type="checkbox" ' +
       'value="on"' +
-      (system.getValue('showQuickSendLinks') ? ' checked' : '') + '>'+
+      (system.getValue('showQuickSendLinks') ? ' checked' : '') + '>' +
       '&nbsp;&nbsp;Send Items To ' +
       '<input name="itemRecipient" size="10" value="' +
       system.getValue('itemRecipient') + '">' +
@@ -491,9 +490,9 @@ export function injectSettings() { // Legacy
       '[&quot;name&quot;,&quot;itemid&quot;],[&quot;othername&quot;,' +
       '&quot;itemid2&quot;].<br>WARNING: NO REFUNDS ON ERROR') +
       ':</td><td><input name="sendClasses" size="60" value="' +
-      escapeHtml(system.getValue('sendClasses')) + '">'+
+      escapeHtml(system.getValue('sendClasses')) + '">' +
 
-    //Quest Preferences
+    // Quest Preferences
     '<tr><th colspan="2" align="left"><b>Quest preferences</b></th></tr>' +
 
     '<tr><td align="right">Hide Specific Quests' +
@@ -509,7 +508,7 @@ export function injectSettings() { // Legacy
     simpleCheckbox('storeLastQuestPage') +
     simpleCheckbox('showNextQuestSteps') +
 
-    //profile prefs
+    // profile prefs
     '<tr><th colspan="2" align="left"><b>Profile preferences</b></th></tr>' +
 
     simpleCheckbox('renderSelfBio') +
@@ -540,7 +539,7 @@ export function injectSettings() { // Legacy
     simpleCheckbox('enableQuickDrink') +
     simpleCheckbox('disableDeactivatePrompts') +
 
-    //Bounty hunting prefs
+    // Bounty hunting prefs
     '<tr><th colspan="2" align="left"><b>Bounty hunting preferences' +
       '</b></th></tr>' +
 
@@ -574,7 +573,7 @@ export function injectSettings() { // Legacy
     simpleCheckbox('enableAttackHelper') +
     simpleCheckbox('showPvPSummaryInLog') +
 
-    //Other prefs
+    // Other prefs
     '<tr><th colspan="2" align="left"><b>Other preferences</b></th></tr>' +
 
     simpleCheckbox('autoFillMinBidPrice') +
@@ -606,8 +605,8 @@ export function injectSettings() { // Legacy
 
     simpleCheckbox('moveComposingButtons') +
 
-    //save button
-    //http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
+    // save button
+    // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings
     '<tr><td colspan="2" align=center><input type="button" class=' +
       '"custombutton" value="Save" id="Helper:SaveOptions"></td></tr>' +
     '<tr><td colspan="2" align=center><a href="' + system.server +
@@ -642,12 +641,12 @@ export function injectSettings() { // Legacy
     .split('-')[1], 10);
   $('div[id*="settingsTabs-"]:last').after('<div id="settingsTabs-' +
     (maxID + 1) + '">' + configData + '</div>');
-  if($('#settingsTabs').tabs('length') > 0){
-    //chrome, have to add it this way (due to loading order
-    $('#settingsTabs').tabs('add','#settingsTabs-' + (maxID + 1),
+  if ($('#settingsTabs').tabs('length') > 0) {
+    // chrome, have to add it this way (due to loading order
+    $('#settingsTabs').tabs('add', '#settingsTabs-' + (maxID + 1),
       'FSH Settings');
   } else {
-    //firefox loads it later, so just print to page
+    // firefox loads it later, so just print to page
     $('a[href*="settingsTabs-"]:last').parent()
       .after('<li><a href="#settingsTabs-' + (maxID + 1) +
       '">FSH Settings</a></li>');
@@ -676,21 +675,21 @@ export function injectSettings() { // Legacy
     system.findNode('//input[@name="min_group_level"]');
   if (minGroupLevelTextField) {
     var minGroupLevel = minGroupLevelTextField.value;
-    system.setValue('minGroupLevel',minGroupLevel);
+    system.setValue('minGroupLevel', minGroupLevel);
   }
 }
 
-export function injectSaveSettings(){ // Hybrid
+export function injectSaveSettings() { // Hybrid
   var content = layout.pCC;
   var fshSettings = {};
   var list = GM_listValues();
-  for(var i = 0; i < list.length; i += 1) {
+  for (var i = 0; i < list.length; i += 1) {
     fshSettings[list[i]] = system.getValue(list[i]);
   }
   content.innerHTML = '<h1>FSH Settings</h1><br><center>The box below ' +
     'is your current settings. Copy it to save your current settings<br>' +
     'To load saved settings, simply replace the contents of the box with ' +
-    'your saved copy and press the button below.'+
+    'your saved copy and press the button below.' +
     '<textarea align="center" cols="80" rows="25" style="' +
     'background-color:white;' +
     'font-family:Consolas,\'Lucida Console\',\'Courier New\',monospace;" ' +
@@ -698,11 +697,11 @@ export function injectSaveSettings(){ // Hybrid
     JSON.stringify(fshSettings) + '</textarea>' +
     '<br><input id="HelperLoadSettings" class="custombutton" ' +
     'type="submit" value="Load Settings!" /></center>';
-  $('#HelperLoadSettings').click(function(){
+  $('#HelperLoadSettings').click(function() {
     var settings = JSON.parse($('#HelperfshSettings').val());
     Object.keys(settings).forEach(function(id) {
-      system.setValue(id,settings[id]);
+      system.setValue(id, settings[id]);
     });
-    alert('Settings loaded successfully!');
+    $('#dialog_msg').text('Settings loaded successfully!').dialog('open');
   });
 }

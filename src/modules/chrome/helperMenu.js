@@ -1,15 +1,15 @@
-import * as system from '../support/system';
-import * as common from '../support/common';
-import * as fshGa from '../support/fshGa';
-import * as quickBuff from '../quickBuff';
 import * as combatLog from '../combatLog';
-import * as recipeMgr from '../recipeMgr/recipeMgr';
-import * as lists from '../lists';
+import * as common from '../support/common';
 import * as findBuffs from '../findBuffs';
+import * as fshGa from '../support/fshGa';
+import * as lists from '../lists';
+import * as misc from '../misc';
 import * as onlinePlayers from '../onlinePlayers';
+import * as quickBuff from '../quickBuff';
 import * as quickExtract from '../quickExtract';
 import * as quickWear from '../quickWear';
-import * as misc from '../misc';
+import * as recipeMgr from '../recipeMgr/recipeMgr';
+import * as system from '../support/system';
 
 var helperMenuBlob =
   '<div class="column"><h3>Character</h3><ul>' +
@@ -61,7 +61,7 @@ function callHelperFunction(evt) { // jQuery
     fshGa.screenview(functionPath);
     fn(content);
   }
-  $(content).dialog({ width: 'auto', modal: true });
+  $(content).dialog({width: 'auto', modal: true});
 }
 
 function eventHandler(evt) { // Native
@@ -101,7 +101,8 @@ export function injectHelperMenu() { // Native
   helperMenu.id = 'helperMenu';
   helperMenu.className = 'helperMenu';
   if (system.getValue('keepHelperMenuOnScreen')) {
-    helperMenu.classList.add('fshFixed');}
+    helperMenu.classList.add('fshFixed');
+  }
   helperMenu.innerHTML = 'Helper&nbsp;Menu';
   helperMenu.addEventListener('mouseenter', showHelperMenu);
   if (system.getValue('draggableHelperMenu')) {

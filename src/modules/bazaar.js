@@ -73,7 +73,6 @@ export function injectBazaar() { // Native
       .replace('@src@', item.getAttribute('src'))
       .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
       .replace('@tipped@', tipped);
-    
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);

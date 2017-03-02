@@ -1,5 +1,5 @@
-import * as system from './support/system';
 import * as layout from './support/layout';
+import * as system from './support/system';
 
 var titanTables;
 
@@ -70,7 +70,7 @@ export function injectScouttower() { // Legacy
     var currentHP = parseInt(titanHPArray[0], 10);
     var totalHP = parseInt(titanHPArray[1], 10);
     var currentNumberOfKills = totalHP - currentHP;
-    var numberOfKillsToSecure = Math.ceil(totalHP/2 + 1);
+    var numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
 
     var titanString = '<span style="color:red;">' +
       (numberOfKillsToSecure - guildKills) + '</span> to secure';
@@ -80,8 +80,8 @@ export function injectScouttower() { // Legacy
       titanString = '<span style="color:red;">Cannot Secure</span>';
     }
     var killsPercent = (currentNumberOfKills === 0 ? 0 :
-      guildKills * 100/currentNumberOfKills).toFixed(2);
-    var killsTotPct = (guildKills * 100/totalHP).toFixed(2);
+      guildKills * 100 / currentNumberOfKills).toFixed(2);
+    var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
     aRow.cells[3].innerHTML += '<br><span style="color:blue;"> (' +
       killsPercent + '% Current <br>' +
       killsTotPct + '% Total<br>' + titanString + ')';

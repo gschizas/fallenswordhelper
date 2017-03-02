@@ -29,7 +29,7 @@ function parseComposing(data) { // Native
       times.push(0);
     } else {
       var timeArr = timeRE.exec(el.textContent);
-      var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + timeArr[3] * 1) *
+      var milli = (timeArr[1] * 3600 + timeArr[2] * 60 + Number(timeArr[3])) *
         1000 + Date.now();
       times.push(milli);
     }
@@ -48,7 +48,7 @@ function createPotion(temp) { // jQuery
   $.ajax({
     cache: false,
     dataType: 'json',
-    url:'index.php',
+    url: 'index.php',
     data: {
       cmd: 'composing',
       subcmd: 'createajax',
@@ -93,7 +93,8 @@ export function injectComposeAlert() { // jQuery
 export function injectComposing() { // Native
   if (!layout.pCC) {return;}
   if (calf.enableComposingAlert) {
-    parseComposing();}
+    parseComposing();
+  }
 
   var buttons = layout.pCC.querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {

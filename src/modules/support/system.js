@@ -18,7 +18,7 @@ export function getValueJSON(name) {
       if (typeof value === 'string') {
         var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
         if (a) {
-          return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
+          return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]), Number(a[4]), Number(a[5]), Number(a[6])));
         }
       }
       return value;
@@ -37,9 +37,10 @@ export function setValue(name, value) {
 }
 
 export function findNodes(xpath, doc) {
+  var _xpath = xpath;
   var nodes = [];
   if (xpath.indexOf('/') === 0) {
-    xpath = '.'+xpath;
+    _xpath = '.' + xpath;
     // TODO this is likely to be bad
     // this is a chrome fix - needs a .// for xpath
     // where as firefox can function without it.
@@ -49,15 +50,15 @@ export function findNodes(xpath, doc) {
   var target;
   // We may have passed in a HTMLDocument object as the context
   // See createDocument with DOMParser below
-  // This only matters in Firefox. evaluate will fail silently if 
+  // This only matters in Firefox. evaluate will fail silently if
   // the context is not part of the calling object.
-  doc = doc || document;
-  if (doc instanceof HTMLDocument) {
-    target = doc;
+  var _doc = doc || document;
+  if (_doc instanceof HTMLDocument) {
+    target = _doc;
   } else {
     target = document;
   }
-  var findQ = target.evaluate(xpath, doc, null,
+  var findQ = target.evaluate(_xpath, _doc, null,
     XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
   if (findQ.snapshotLength === 0) {return null;}
   for (var i = 0; i < findQ.snapshotLength; i += 1) {
@@ -109,14 +110,14 @@ export function xmlhttp(theUrl, func, theCallback) {
 
 export function intValue(theText) {
   if (!theText) {return 0;}
-  return parseInt(theText.replace(/,/g,''), 10);
+  return parseInt(theText.replace(/,/g, ''), 10);
 }
 
 export function getIntFromRegExp(theText, rxSearch) {
   var result;
-  var matches = theText.replace(/,/g,'').match(rxSearch);
+  var matches = theText.replace(/,/g, '').match(rxSearch);
   if (matches) {
-    result = parseInt(matches[1],10);
+    result = parseInt(matches[1], 10);
   } else {
     result = 0;
   }
@@ -129,11 +130,11 @@ export function addCommas(x) {
 
 export function convertTextToHtml(inputText) {
   return inputText
-    .replace(/</g,'&lt')
-    .replace(/>/g,'&gt')
-    .replace(/\n/g,'<br>')
-    .replace(/\[\/([a-z])\]/g,'<\/\$1>')
-    .replace(/\[([a-z])\]/g,'<\$1>');
+    .replace(/</g, '&lt')
+    .replace(/>/g, '&gt')
+    .replace(/\n/g, '<br>')
+    .replace(/\[\/([a-z])\]/g, '<\/\$1>')
+    .replace(/\[([a-z])\]/g, '<\$1>');
 }
 
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
@@ -141,8 +142,8 @@ var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
 
 export function parseDateAsTimestamp(textDate) {
   var dateAry = textDate.split(/[: \/]/);
-  return Date.UTC(dateAry[4] * 1, months.indexOf(dateAry[3]),
-    dateAry[2] * 1, dateAry[0] * 1, dateAry[1] * 1, 0);
+  return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
+    Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
 }
 
 export function parseDate(textDate) {
@@ -162,72 +163,76 @@ export function toggleVisibilty(evt) {
 }
 
 export function getUrlParameter(sParam) {
-  var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-    sURLVariables = sPageURL.split('&'),
-    sParameterName,
-    i;
+  var sPageURL = decodeURIComponent(window.location.search.substring(1));
+  var sURLVariables = sPageURL.split('&');
+  var sParameterName;
 
-  for (i = 0; i < sURLVariables.length; i+=1) {
+  for (var i = 0; i < sURLVariables.length; i += 1) {
     sParameterName = sURLVariables[i].split('=');
 
     if (sParameterName[0] === sParam) {
-      return sParameterName[1] === undefined ? true : sParameterName[1];
+      return typeof sParameterName[1] === 'undefined' ? true :
+        sParameterName[1];
     }
   }
 }
 
 export function formatLastActivity(last_login) {
-  var d, h, m, s;
+  var d;
+  var h;
+  var m;
+  var s;
   s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
   m = Math.floor(s / 60);
-  s = s % 60;
+  s %= 60;
   h = Math.floor(m / 60);
-  m = m % 60;
+  m %= 60;
   d = Math.floor(h / 24);
-  h = h % 24;
+  h %= 24;
   return (d === 0 ? '' : d + ' days, ') +
     (h === 0 ? '' : h + ' hours, ') +
     (m === 0 ? '' : m + ' mins, ') +
     s + ' secs';
 }
 
-function path(obj, path, def){
-  path = path.split('.');
-  var len = path.length;
-  for (var i = 0; i < len; i+=1) {
+function path(obj, path, def) {
+  var _obj = obj;
+  var _path = path.split('.');
+  var len = _path.length;
+  for (var i = 0; i < len; i += 1) {
     if (!obj || typeof obj !== 'object') {return def;}
-    obj = obj[path[i]];
+    _obj = obj[_path[i]];
   }
-  if (obj === undefined) {return def;}
-  return obj;
+  if (typeof _obj === 'undefined') {return def;}
+  return _obj;
 }
 
-export function stringSort(a,b) {
-  var result=0;
-  a = path(a, calf.sortBy, 'a');
-  b = path(b, calf.sortBy, 'a');
-  if (a.toLowerCase() < b.toLowerCase()) {result = -1;}
-  if (a.toLowerCase() > b.toLowerCase()) {result = 1;}
+export function stringSort(a, b) {
+  var result = 0;
+  var _a = path(a, calf.sortBy, 'a');
+  var _b = path(b, calf.sortBy, 'a');
+  if (_a.toLowerCase() < _b.toLowerCase()) {result = -1;}
+  if (_a.toLowerCase() > _b.toLowerCase()) {result = 1;}
   if (!calf.sortAsc) {result = -result;}
   return result;
 }
 
-export function numberSort(a,b) {
-  var result=0;
-  if (typeof a.type !== undefined){
-    if (a.type > 8) {return 1;} //non equipment items
+export function numberSort(a, b) {
+  var result = 0;
+  if (typeof a.type !== 'undefined') {
+    if (a.type > 8) {return 1;} // non equipment items
     if (b.type > 8) {return -1;}
   }
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
   if (typeof valueA === 'string') {
-    valueA = parseInt(valueA.replace(/,/g,'').replace(/#/g,''),10);
+    valueA = parseInt(valueA.replace(/,/g, '').replace(/#/g, ''), 10);
   }
   if (typeof valueB === 'string') {
-    valueB = parseInt(valueB.replace(/,/g,'').replace(/#/g,''),10);
+    valueB = parseInt(valueB.replace(/,/g, '').replace(/#/g, ''), 10);
   }
-  result = valueA-valueB;
-  if (!calf.sortAsc) {result=-result;}
+  result = valueA - valueB;
+  if (!calf.sortAsc) {result = -result;}
   return result;
 }
 

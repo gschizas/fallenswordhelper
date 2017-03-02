@@ -28,7 +28,7 @@ var fshMain = function() {
     calfSystemCss: '$_CALFCSS',
     localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.4.2/localforage.min.js',
     dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
-    //#if _DEV  // Dable resources
+    //#if _DEV  //  Dable resources
     // dableDev: 'https://raw.githack.com/deltreey/Dable/1.2.1/Dable.js',
     // dableDev: 'http://localhost/Dable/.build/dable.js'
     //#endif
@@ -78,12 +78,14 @@ var fshMain = function() {
 
   var o = {
     css: [resources.calfSystemCss],
-    js:  [resources.localForage,
-          resources.calfSystemJs,
-          //#if _DEV  // Dable resources
-          // resources.dableDev,
-          //#endif
-          resources.dataTablesLoc],
+    js: [
+      resources.localForage,
+      resources.calfSystemJs,
+      //#if _DEV  //  Dable resources
+      // resources.dableDev,
+      //#endif
+      resources.dataTablesLoc
+    ],
     callback: onPageLoad
   };
   if (typeof window.jQuery === 'undefined') {
@@ -97,7 +99,6 @@ if (typeof GM_info === 'undefined') { // Chromium Native
   var script = document.createElement('script');
   script.textContent = '(' + fshMain.toString() + ')();';
   document.body.appendChild(script);
-}
-else {
+} else {
   fshMain();
 }

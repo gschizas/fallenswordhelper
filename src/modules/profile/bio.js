@@ -1,7 +1,7 @@
-import * as system from '../support/system';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
 
-var buffCost = {'count': 0, 'buffs': {}};
+var buffCost = {count: 0, buffs: {}};
 var bioEditLines;
 
 function expandBio() { // Native
@@ -76,25 +76,23 @@ function getBuffsToBuy() { // Legacy
   greetingText = greetingText.replace(/{playername}/g, targetPlayer);
   if (!hasBuffTag) {
     greetingText += ' ' + buffsToBuy;
+  } else if (!hasCostTag) {
+    greetingText = greetingText
+      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
   } else {
-    if (!hasCostTag) {
-      greetingText = greetingText
-        .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
-    } else {
-      greetingText = greetingText
-        .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
-        .replace(/{cost}/g, buffCost.buffCostTotalText);
-    }
+    greetingText = greetingText
+      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
+      .replace(/{cost}/g, buffCost.buffCostTotalText);
   }
   window.openQuickMsgDialog(targetPlayer, greetingText, '');
 }
 
 function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
-    var total = {'k': 0, 'fsp': 0, 'stam': 0, 'unknown': 0};
-    var html='This is an estimated cost based on how the script finds ' +
-      'the cost associated with buffs from viewing bio.'+
-      'It can be incorrect, please use with discretion.<br/><hr/>'+
+    var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
+    var html = 'This is an estimated cost based on how the script finds ' +
+      'the cost associated with buffs from viewing bio.' +
+      'It can be incorrect, please use with discretion.<br/><hr/>' +
       '<table border=0>';
     Object.keys(buffCost.buffs).forEach(function(buff) {
       total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
@@ -107,7 +105,8 @@ function updateBuffCost() { // Legacy
     totalText += total.k > 0 ? total.k + ' k' : '';
 
     if (total.stam > 0 && (total.fsp > 0 || total.k > 0)) {
-      totalText += ' and ';}
+      totalText += ' and ';
+    }
     totalText += total.stam > 0 ? total.stam + ' Stam(' +
       Math.round(total.stam / 25 * 10) / 10 + 'fsp)' : '';
 
@@ -140,7 +139,7 @@ function toggleBuffsToBuy(evt) { // Legacy
   var buffName = node.textContent;
   if (selected) {
     var text = '';
-    // get the whole line from the buff name towards the end (even after 
+    // get the whole line from the buff name towards the end (even after
     // the ',', in case of 'AL, Lib, Mer: 10k each'
     while (node && node.nodeName.toLowerCase() !== 'br') {
       newtext = node.textContent;
@@ -168,7 +167,7 @@ function toggleBuffsToBuy(evt) { // Legacy
       type = 'unknown';
       cost = '1';
     }
-    buffCost.buffs[buffName] = [parseFloat(cost),type];
+    buffCost.buffs[buffName] = [parseFloat(cost), type];
     buffCost.count += 1;
   } else {
     buffCost.count -= 1;
@@ -194,7 +193,6 @@ function bioEvtHdl(e) { // Native
   if (buffNameNode.classList &&
       buffNameNode.classList.contains('buffLink')) {
     toggleBuffsToBuy(e);
-    return;
   }
 }
 
@@ -210,7 +208,7 @@ function bioPreview() { // Native
 }
 
 function bioWords() { // Native
-  //Add description text for the new tags
+  // Add description text for the new tags
   layout.pCC.insertAdjacentHTML('beforeend', '<div>' +
     '`~This will allow FSH Script users to ' +
     'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
@@ -247,12 +245,12 @@ function bioHeight() { // Native
   layout.pCC.appendChild(bioEditLinesDiv);
 }
 
-function renderBio(bioContents) {
-  bioContents = bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
+function renderBio(_bioContents) {
+  var bioContents = _bioContents.replace(/\{b\}/g, '`~').replace(/\{\/b\}/g, '~`');
   var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
   if (!buffs) {return;}
   buffs.forEach(function(buff, i) {
-    var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+    var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
     var cbString = '<span id="fshBuff' + i + '" class="buffLink fshBlue">' +
       fullName + '</span>';
     bioContents = bioContents.replace(buff, cbString);
@@ -300,6 +298,6 @@ export function injectBioWidgets() { // Native
 
   textArea.parentNode.addEventListener('click', bioEvtHdl);
   textArea.addEventListener('keyup', updateBioCharacters);
-  //Force the preview area to render
+  // Force the preview area to render
   updateBioCharacters();
 }
