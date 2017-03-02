@@ -1,8 +1,6 @@
 import * as layout from './support/layout';
 import * as system from './support/system';
 
-var titanTables;
-
 function evtHdl(e) { // Native
   if (!e.target.classList.contains('fshBl')) {return;}
   var self = e.target;
@@ -59,7 +57,8 @@ export function injectTitan() { // jQuery
 }
 
 export function injectScouttower() { // Legacy
-  injectScouttowerBuffLinks(layout.pCC.getElementsByTagName('table'));
+  var titanTables = layout.pCC.getElementsByTagName('table');
+  injectScouttowerBuffLinks(titanTables);
   var titanTable = titanTables[1];
   for (var i = 1; i < titanTable.rows.length; i += 6) {
     var aRow = titanTable.rows[i];
