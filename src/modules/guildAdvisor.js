@@ -140,14 +140,14 @@ function injectAdvisorNew(m) { // Native
 
 }
 
-function returnAdvisorPage(data) { // Native
+function returnAdvisorPage(response) { // Native
   /* jshint validthis: true */
   var e = this.period;
 
   debug.time('guildAdvisor.returnAdvisorPage' + e);
 
   list.lastElementChild.insertAdjacentHTML('beforeend', ' day ' + e + ',');
-  var doc = system.createDocument(data);
+  var doc = system.createDocument(response);
   var table = doc.getElementById('pCC').firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
   var tr = table.rows;
@@ -260,8 +260,8 @@ function injectAdvisorWeekly() { // jQuery
 
   $.when(
     ajax.getMembrList(false)
-      .done(function(data) {
-        membrList = data;
+      .done(function(response) {
+        membrList = response;
       }),
     getAdvisorPage(1),
     getAdvisorPage(2),
@@ -282,8 +282,8 @@ export function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    ajax.getMembrList(false).done(function(membrList) {
-      task.add(3, injectAdvisorNew, [membrList]);
+    ajax.getMembrList(false).done(function(response) {
+      task.add(3, injectAdvisorNew, [response]);
       // task.add(3, injectAdvisorDable, [membrList]);
     });
   }

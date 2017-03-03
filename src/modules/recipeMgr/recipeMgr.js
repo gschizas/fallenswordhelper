@@ -115,7 +115,7 @@ function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
   $(doc).find(jqueryxpath).each(function() {
     var mouseOver = $(this).find('img').data('tipped');
     var resultAmounts = $(this).parent().next().text();
-    var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)\&inv_id=-1\&t=2\&p=(\d+)\&vcode=([a-z0-9]+)/i);
+    var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i);
     var result = {
       img: $(this).find('img').attr('src'),
       id: mouseOverRX[1],

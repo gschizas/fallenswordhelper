@@ -133,15 +133,15 @@ export function convertTextToHtml(inputText) {
     .replace(/</g, '&lt')
     .replace(/>/g, '&gt')
     .replace(/\n/g, '<br>')
-    .replace(/\[\/([a-z])\]/g, '<\/\$1>')
-    .replace(/\[([a-z])\]/g, '<\$1>');
+    .replace(/\[\/([a-z])\]/g, '</$1>')
+    .replace(/\[([a-z])\]/g, '<$1>');
 }
 
 var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
   'Oct', 'Nov', 'Dec'];
 
 export function parseDateAsTimestamp(textDate) {
-  var dateAry = textDate.split(/[: \/]/);
+  var dateAry = textDate.split(/[: /]/);
   return Date.UTC(Number(dateAry[4]), months.indexOf(dateAry[3]),
     Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
 }
@@ -195,9 +195,9 @@ export function formatLastActivity(last_login) {
     s + ' secs';
 }
 
-function path(obj, path, def) {
+function path(obj, aPath, def) {
   var _obj = obj;
-  var _path = path.split('.');
+  var _path = aPath.split('.');
   var len = _path.length;
   for (var i = 0; i < len; i += 1) {
     if (!obj || typeof obj !== 'object') {return def;}

@@ -238,12 +238,18 @@ function nameRender(data, type, row) { // Native
     theInv.player_id :
     theInv.current_player_id;
   var t = row.player_id === -1 ? 4 : 1;
-  var p = theInv.player_id ?
-    theInv.player_id :
-    row.player_id !== -1 ? row.player_id :
-    theInv.guild_id;
+  var p;
+  if (theInv.player_id) {
+    p = theInv.player_id;
+  } else if (row.player_id !== -1) {
+    p = row.player_id;
+  } else {p = theInv.guild_id;}
+  // var p = theInv.player_id ?
+  //   theInv.player_id :
+  //   row.player_id !== -1 ? row.player_id :
+  //   theInv.guild_id;
   var bold = row.equipped ? '<b>' + data + '</b>' : data;
-  var setName = row.stats && row.stats.set_name !== '' ?
+  var _setName = row.stats && row.stats.set_name !== '' ?
     ' (<span class="fshLink setName" set="' + row.stats.set_name +
     '">set</span>)' : '';
   return '<a href="index.php?cmd=auctionhouse&search_text=' + data +
@@ -252,7 +258,7 @@ function nameRender(data, type, row) { // Native
     'data-tipped="fetchitem.php?item_id=' + row.item_id +
     '&inv_id=' + row.inv_id + '&t=' + t + '&p=' + p +
     '&currentPlayerId=' + cur + '">' +
-    bold + '</a>' + setName;
+    bold + '</a>' + _setName;
 }
 
 function whereData(row) { // Native

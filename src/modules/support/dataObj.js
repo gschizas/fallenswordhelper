@@ -277,7 +277,7 @@ export var rarity = [
   {colour: '#009900', clas: 'fshEpic'}
 ];
 
-export var itemRE = /item_id=(\d+)\&inv_id=(\d+)/;
+export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
 
 export var places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
   'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',

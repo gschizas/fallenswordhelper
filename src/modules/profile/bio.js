@@ -146,8 +146,10 @@ function toggleBuffsToBuy(evt) { // Legacy
       node = node.nextSibling;
       text += newtext;
     }
-    var price = text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase()
-      .match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)|([+\-]{0,1}[\.\d]+ *stam)/);
+    var numRE = /[^a-zA-Z0-9.,+\- ]/g;
+    var priceRE =
+      /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
+    var price = text.replace(numRE, '').toLowerCase().match(priceRE);
     if (!price) { // some players have prices BEFORE the buff names
       node = buffNameNode;
       while (node && node.nodeName.toLowerCase() !== 'br') {
@@ -155,14 +157,17 @@ function toggleBuffsToBuy(evt) { // Legacy
         node = node.previousSibling;
         text = newtext + text;
       }
-      price = text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase()
-        .match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)|([+\-]{0,1}[\.\d]+ *stam)/);
+      price = text.replace(numRE, '').toLowerCase().match(priceRE);
     }
     var type;
     var cost;
     if (price) {
-      type = price[0].indexOf('k') > 0 ? 'k' : price[0].indexOf('f') > 0 ? 'fsp' : 'stam';
-      cost = price[0].match(/([+\-]{0,1}[\.\d]+)/)[0];
+      if (price[0].indexOf('k') > 0) {
+        type = 'k';
+      } else if (price[0].indexOf('f') > 0) {
+        type = 'fsp';
+      } else {type = 'stam';}
+      cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
     } else {
       type = 'unknown';
       cost = '1';

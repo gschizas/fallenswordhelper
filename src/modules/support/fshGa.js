@@ -6,7 +6,7 @@ var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
 
 function isAuto() { // Native
   var docRef = document.referrer
-    .match(/^https?\:\/\/([^\/?#]+)(?:[\/?#]|$)/i);
+    .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
   docRef = docRef ? docRef[1] : docRef;
   return refAry.indexOf(docRef) !== -1;
 }
@@ -41,7 +41,7 @@ function fixupUrl() { // Native
     .replace(/&id=.+/, '')
     .replace(/&target_player=.+/, '')
     .replace(/&[a-z]+_username=.+/, '')
-    .replace(/\?cmd=auctionhouse.+/, '\?cmd=auctionhouse')
+    .replace(/\?cmd=auctionhouse.+/, '?cmd=auctionhouse')
     .replace(/&subcmd=[0-9a-f]{32}/, '')
     .replace(/&search_active=.+/, '')
     .replace(/&letter=.+/, '')

@@ -26,19 +26,19 @@ export function buffAllHref(shortList) { // Bad Pattern
     '", "fsQuickBuff", 618, 1000, ",scrollbars")';
 }
 
-export function quickBuffHref(playerId, buffList) { // Bad Pattern
+export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-    'quickbuff&tid=' + playerId + (buffList ? '&blist=' + buffList : '') +
+    'quickbuff&tid=' + aPlayerId + (buffList ? '&blist=' + buffList : '') +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
 }
 
-export function openQuickBuffById(playerId) {
-  window.openWindow('index.php?cmd=quickbuff&tid=' + playerId,
+export function openQuickBuffById(aPlayerId) {
+  window.openWindow('index.php?cmd=quickbuff&tid=' + aPlayerId,
     'fsQuickBuff', 618, 1000, ',scrollbars');
 }
 
-export function openQuickBuffByName(playerName) {
-  window.openWindow('index.php?cmd=quickbuff&t=' + playerName,
+export function openQuickBuffByName(aPlayerName) {
+  window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
     'fsQuickBuff', 618, 1000, ',scrollbars');
 }
 
@@ -54,14 +54,14 @@ export function infoBox(documentText) { // Native
 }
 
 export function guildId() { // Native
-  var guildId;
+  var _guildId;
   var nodeList = document.body.getElementsByTagName('script');
   Array.prototype.forEach.call(nodeList, function getGuildId(el) {
     var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {guildId = parseInt(match[1], 10);}
+    if (match) {_guildId = parseInt(match[1], 10);}
   });
-  system.setValue('guildId', guildId);
-  return guildId;
+  system.setValue('guildId', _guildId);
+  return _guildId;
 }
 
 export function playerId() { // Native

@@ -92,10 +92,10 @@ function prepMonster(data) {
     if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
     if (enhancements && enhancements.length > 0) {
       var tmp = '<span class="fshXXSmall">';
-      tmp += enhancements.reduce(function(prev, curr) {
-        return prev + '<span class="fshNoWrap">' + curr + ': ' +
-          tmpObj.enhancements[curr].min + ' - ' +
-          tmpObj.enhancements[curr].max + '</span><br>';
+      tmp += enhancements.reduce(function(_prev, _curr) {
+        return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
+          tmpObj.enhancements[_curr].min + ' - ' +
+          tmpObj.enhancements[_curr].max + '</span><br>';
       }, '');
       tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
     } else {

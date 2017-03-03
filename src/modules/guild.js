@@ -41,19 +41,26 @@ export function injectViewGuild() { // Native
     'stat-level')[0].nextElementSibling.textContent);
   var characterVirtualLevel = system.getValue('characterVirtualLevel');
   if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
+  var pvpRange;
+  if (levelToTest <= 205) {pvpRange = 5;} else {pvpRange = 10;}
+  var gvgRange;
+  if (levelToTest <= 300) {
+    gvgRange = 25;
+  } else if (levelToTest <= 700) {
+    gvgRange = 50;
+  } else {gvgRange = 100;}
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
     var tipped = el.getAttribute('data-tipped');
     var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
     var aRow = el.parentNode.parentNode;
-    if (highlightPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <= (levelToTest <= 205 ? 5 : 10)) {
-      aRow.classList.add('lvlHighlight');
-    } else if (highlightGvGPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <=
-        (levelToTest <= 300 ? 25 : levelToTest <= 700 ? 50 : 100)) {
-      aRow.classList.add('lvlGvGHighlight');
+    if (highlightPlayersNearMyLvl) {
+      if (Math.abs(vlevel - levelToTest) <= pvpRange) {
+        aRow.classList.add('lvlHighlight');
+      } else if (Math.abs(vlevel - levelToTest) <= gvgRange) {
+        aRow.classList.add('lvlGvGHighlight');
+      }
     }
   });
 }
@@ -173,7 +180,7 @@ function buffLinks() { // Native
   });
 }
 
-function selfRecall() { // Native
+function selfRecallLink() { // Native
   // self recall
   var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
   var selfRecall = getLi[getLi.length - 1].parentNode;
@@ -193,7 +200,7 @@ export function injectGuild() { // Native
   task.add(3, statToggle);
   task.add(3, structureToggle);
   task.add(3, buffLinks);
-  task.add(3, selfRecall);
+  task.add(3, selfRecallLink);
 
   // Detailed conflict information
   if (system.getValue('detailedConflictInfo')) {

@@ -61,23 +61,32 @@ function doFolderHeaders(folders) { // native
   multiple.insertAdjacentElement('afterend', foldersRow);
 }
 
+var invItems;
+
+function forEachInvItem(el) {
+  var checkbox = el.firstElementChild.lastElementChild.firstElementChild
+    .firstElementChild;
+  var item = invItems[checkbox.getAttribute('value')];
+  el.classList.add('folderid' + item.folder_id);
+  if (invItems.fshHasST) {
+    if (item.is_in_st) {
+      el.classList.add('isInSTBorder');
+    } else {el.classList.add('tradeItemMargin');}
+  }
+  checkbox.classList.add('itemid' + item.item_id);
+  checkbox.classList.add('itemtype' + item.type);
+  if (item.is_in_st) {el.classList.add('isInST');}
+}
+
 function processTrade(data) { // native
 
   debug.time('trade.processTrade');
 
-  var invItems = data.items;
+  invItems = data.items;
   /* Highlight items in ST */
   var nodeList = document.getElementById('item-list')
     .getElementsByTagName('table');
-  Array.prototype.forEach.call(nodeList, function(el) {
-    var checkbox = el.firstElementChild.lastElementChild.firstElementChild
-      .firstElementChild;
-    var item = invItems[checkbox.getAttribute('value')];
-    el.className = 'folderid' + item.folder_id +
-      (invItems.fshHasST ? item.is_in_st ? ' isInSTBorder' : ' tradeItemMargin' : '');
-    checkbox.className = 'itemid' + item.item_id + ' itemtype' + item.type +
-      (item.is_in_st ? ' isInST' : '');
-  });
+  Array.prototype.forEach.call(nodeList, forEachInvItem);
   doFolderHeaders(data.folders);
 
   debug.timeEnd('trade.processTrade');

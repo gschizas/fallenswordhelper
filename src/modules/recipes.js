@@ -63,7 +63,7 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
 
 function linkFromMouseoverCustom(mouseOver) { // Legacy
   var reParams =
-    /item_id=(\d+)\&inv_id=([-0-9]*)\&t=(\d+)\&p=(\d+)\&vcode=([a-z0-9]*)/i;
+    /item_id=(\d+)&inv_id=([-0-9]*)&t=(\d+)&p=(\d+)&vcode=([a-z0-9]*)/i;
   var reResult = reParams.exec(mouseOver);
   if (reResult === null) {
     return null;

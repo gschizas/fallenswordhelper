@@ -168,8 +168,8 @@ function retrieveItemInfor(doc) { // jQuery
 }
 
 function getItemFromStoreItemPage(responseText, callback) { // Native
-  var layout = callback.inject;
-  layout.innerHTML += 'store item page.';
+  var _layout = callback.inject;
+  _layout.innerHTML += 'store item page.';
   var doc = system.createDocument(responseText);
   if (responseText.indexOf('Store Items') > 0) {
     retrieveItemInfor(doc);
@@ -178,8 +178,8 @@ function getItemFromStoreItemPage(responseText, callback) { // Native
 }
 
 function getItemFromBackpack(responseText, callback) { // Legacy
-  var layout = callback.inject;
-  layout.innerHTML += '</br>backpack folder ' + (callback.id + 1) + ', ';
+  var _layout = callback.inject;
+  _layout.innerHTML += '</br>backpack folder ' + (callback.id + 1) + ', ';
   var doc = system.createDocument(responseText);
   if (responseText.indexOf('Back to Profile') > 0) {
     retrieveItemInfor(doc);
@@ -190,7 +190,7 @@ function getItemFromBackpack(responseText, callback) { // Legacy
   if (folderNodes && folderNodes.length > 0 &&
       callback.id < folderNodes.length - 1) {
     system.xmlhttp(folderNodes[callback.id + 1].getAttribute('href'),
-      getItemFromBackpack, {inject: layout, id: callback.id + 1});
+      getItemFromBackpack, {inject: _layout, id: callback.id + 1});
   } else {
     system.xmlhttp(
       '/index.php?cmd=guild&subcmd=inventory&subcmd2=storeitems',

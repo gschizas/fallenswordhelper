@@ -64,7 +64,7 @@ module.exports = {
     "no-unused-expressions": ["error"],
     "no-useless-call": ["error"],
     "no-useless-concat": ["error"],
-    // "no-useless-escape": ["error"],
+    "no-useless-escape": ["error"],
     "no-useless-return": ["error"],
     // "no-warning-comments": ["error"],
     "no-with": ["error"],
@@ -72,7 +72,7 @@ module.exports = {
     "yoda": ["error"],
 
     "no-catch-shadow": ["error"],
-    // "no-shadow": ["error"],
+    "no-shadow": ["error"],
     "no-undef-init": ["error"],
     "no-undefined": ["error"],
     // "no-use-before-define": ["error"],
@@ -103,7 +103,7 @@ module.exports = {
       "maxEOF": 1,
       "maxBOF": 1
     }],
-    // "no-nested-ternary": ["error"],
+    "no-nested-ternary": ["error"],
     "no-new-object": ["error"],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
     "no-plusplus": ["error"],

@@ -79,7 +79,7 @@ function movePage(dir) { // Legacy
   var dirButton = system.findNode('//input[@value="' + dir + '"]');
   if (!dirButton) {return;}
   var url = dirButton.getAttribute('onClick');
-  url = url.replace(/^[^']*'/m, '').replace(/\';$/m, '');
+  url = url.replace(/^[^']*'/m, '').replace(/';$/m, '');
   location.href = url;
 }
 

@@ -59,7 +59,7 @@ function ajaxifyRankControls(evt) { // jQuery
   var val = evt.target.getAttribute('value');
   if (val !== 'Up' && val !== 'Down') {return;}
   evt.stopPropagation();
-  var onclickHREF = /window.location=\'(.*)\';/
+  var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
   var thisRankRow = evt.target.parentNode.parentNode.parentNode;
   var thisRankRowNum = thisRankRow.rowIndex;

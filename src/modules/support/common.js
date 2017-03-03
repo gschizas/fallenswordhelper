@@ -28,9 +28,9 @@ function addStats(i, e) { // jQuery
   );
 }
 
-function fshAjaxSuccess(evt, xhr, ajax, data) { // jQuery
-  if (ajax.url.indexOf('fetchitem') !== 0) {return;}
-  var img = $('[data-tipped="' + ajax.url + '"]');
+function fshAjaxSuccess(evt, xhr, ajaxOptions, data) { // jQuery
+  if (ajaxOptions.url.indexOf('fetchitem') !== 0) {return;}
+  var img = $('[data-tipped="' + ajaxOptions.url + '"]');
   if (img.length === 0) {return;}
   var repl = $(data);
   var bonus = $('font:contains("Bonuses")', repl);
