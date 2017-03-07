@@ -17,7 +17,7 @@
 // No warranty expressed or implied. Use at your own risk.
 
 // EVERYTHING MUST BE IN main()
-var fshMain = function() {
+function fshMain() {
 
   window.FSH = window.FSH || {};
 
@@ -93,7 +93,7 @@ var fshMain = function() {
   }
   appendHead(o);
 
-}; // end of var main
+} // end of var main
 
 if (typeof GM_info === 'undefined') { // Chromium Native
   var script = document.createElement('script');

@@ -1,7 +1,8 @@
 import calf from './calf';
 import * as dataObj from './dataObj';
 
-export var server = document.location.protocol + '//' + document.location.host + '/';
+export var server = document.location.protocol + '//' +
+  document.location.host + '/';
 export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
@@ -10,21 +11,23 @@ export function getValue(name) {
   return GM_getValue(name, dataObj.defaults[name]);
 }
 
+function reviver(key, value) {
+  if (typeof value === 'string') {
+    var a =
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/
+      .exec(value);
+    if (a) {
+      return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]),
+        Number(a[4]), Number(a[5]), Number(a[6])));
+    }
+  }
+  return value;
+}
+
 export function getValueJSON(name) {
   var resultJSON = getValue(name);
   var result;
-  if (resultJSON) {
-    var reviver = function(key, value) {
-      if (typeof value === 'string') {
-        var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
-        if (a) {
-          return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]), Number(a[4]), Number(a[5]), Number(a[6])));
-        }
-      }
-      return value;
-    };
-    result = JSON.parse(resultJSON, reviver);
-  }
+  if (resultJSON) {result = JSON.parse(resultJSON, reviver);}
   return result;
 }
 

@@ -537,6 +537,7 @@ table.fshInvFilter td {
   padding: 0;
   text-decoration: underline;
   -moz-user-select: text;
+  user-select: text;
 }
 .fshBl::-moz-focus-inner {
   border: none;
