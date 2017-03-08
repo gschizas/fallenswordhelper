@@ -264,6 +264,7 @@ export var defaults = {
   moveComposingButtons: false,
   expandMenuOnKeyPress: false,
   disableBreakdownPrompts: false,
+  collapseNewsArchive: false,
 
 };
 

@@ -244,6 +244,7 @@ input.fshFindOnlinePlayers {
   text-decoration: underline;
 }
 .buffLink {cursor: pointer;}
+.fshPoint {cursor: pointer;}
 .smallLink {
   cursor: pointer;
   text-decoration: underline;

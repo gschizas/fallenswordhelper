@@ -1,9 +1,12 @@
 import * as layout from './support/layout';
+import * as settingsPage from './settings/settingsPage';
+import * as system from './support/system';
 
 var maxcharacters;
 var textArea;
 var shoutboxPreview;
 var warehouse = [];
+var collapseNewsArchive;
 
 function updateShoutboxPreview() { // Native
   var textContent = textArea.value;
@@ -98,9 +101,16 @@ function collapseAll() { // Native
 }
 
 function expandArt(article) { // Native
-  collapseAll();
-  article.rows.forEach(function(el) {el.row.classList.remove('fshHide');});
+  article.rows.forEach(function(el) {
+    el.row.classList.remove('fshHide');
+  });
   article.open = true;
+}
+
+function expandAll() { // Native
+  warehouse.forEach(function(article) {
+    if (!article.open) {expandArt(article);}
+  });
 }
 
 function closestTr(el) { // Native
@@ -113,11 +123,13 @@ function closestTr(el) { // Native
 }
 
 function evtHdl(evt) { // Native
+  if (!collapseNewsArchive) {return;}
   var myRow = closestTr(evt.target);
   if (!myRow) {return;}
   var articleNo = myRow.rowIndex / 6;
   var article = warehouse[articleNo];
   if (article.open === false) {
+    collapseAll();
     expandArt(article);
   } else {
     collapseArt(article);
@@ -128,18 +140,49 @@ function doTagging(row) { // Native
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
   warehouse[articleNo] = warehouse[articleNo] || {};
-  warehouse[articleNo].open = false;
   warehouse[articleNo].rows = warehouse[articleNo].rows || [];
-  if (rowType === 0) {row.classList.add('buffLink');}
+  if (rowType === 0) {
+    warehouse[articleNo].header = row;
+    if (collapseNewsArchive) {
+      row.classList.add('fshPoint');
+    }
+  } // TODO toggle this
   if (rowType > 1) {
     warehouse[articleNo].rows[rowType] = warehouse[articleNo][rowType] || {};
     warehouse[articleNo].rows[rowType].row = row;
-    row.classList.add('fshHide');
+    if (collapseNewsArchive) {
+      warehouse[articleNo].open = false;
+      row.classList.add('fshHide');
+    } else {
+      warehouse[articleNo].open = true;
+    }
   }
 }
 
+function toggleHeaderClass() {
+  warehouse.forEach(function(article) {
+    article.header.classList.toggle('fshPoint');
+  });
+}
+
+function togglePref() { // Native
+  collapseNewsArchive = !collapseNewsArchive;
+  system.setValue('collapseNewsArchive', collapseNewsArchive);
+  if (collapseNewsArchive) {collapseAll();} else {expandAll();}
+  toggleHeaderClass();
+}
+
+function setupPref(rowInjector) {
+  collapseNewsArchive = system.getValue('collapseNewsArchive');
+  rowInjector.insertAdjacentHTML('afterend',
+    settingsPage.simpleCheckbox('collapseNewsArchive'));
+  document.getElementById('collapseNewsArchive')
+    .addEventListener('click', togglePref);
+}
+
 export function viewArchive() { // Native
-  var myTable = layout.pCC.getElementsByTagName('table')[2];
-  Array.prototype.forEach.call(myTable.rows, doTagging);
-  myTable.addEventListener('click', evtHdl);
+  var theTables = layout.pCC.getElementsByTagName('table');
+  setupPref(theTables[0].rows[2]);
+  Array.prototype.forEach.call(theTables[2].rows, doTagging);
+  theTables[2].addEventListener('click', evtHdl);
 }

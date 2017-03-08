@@ -418,4 +418,9 @@ export var mySimpleCheckboxes = {
     helpText: 'If enabled, will disable prompts when you breakdown items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
   },
+  collapseNewsArchive: {
+    id: 'collapseNewsArchive',
+    helpTitle: 'Collapse News Archive',
+    helpText: 'If enabled, will collapse news archives.'
+  },
 };

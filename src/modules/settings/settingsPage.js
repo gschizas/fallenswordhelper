@@ -39,7 +39,7 @@ function toggleTickAllBuffs(e) { // jQuery
 function injectSettingsGuildData(guildType) { // Native
   return '<input name="guild' + guildType + '" size="60" value="' +
     system.getValue('guild' + guildType) + '">' +
-    '<span class="buffLink" ' +
+    '<span class="fshPoint" ' +
     'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
     guildType + 'Message"> &#x00bb;</span>' +
     '<div id="showGuild' + guildType + 'Message" ' +

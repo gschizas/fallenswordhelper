@@ -57,7 +57,7 @@ function drawTable() {
   content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
     'width="100%"><tr class="fshBlack fshWhite">' +
     '<td width="90%" class="fshCenter"><b>Entity Information</b></td>' +
-    '<td width="10%">[<span id="clearEntityLog" class="buffLink">Clear' +
+    '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear' +
     '</span>]</td></tr></table>' +
     '<table cellspacing="1" cellpadding="2" border="0"><thead>' +
     '<tr class="fshVerySoftOrange">' +
