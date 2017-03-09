@@ -9,6 +9,8 @@ var recipebook;
 var currentFolder;
 var hideRecipes = [];
 var output;
+var itmRE =
+  /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 
 function storeRecipeBook() {
   ajax.setForage('fsh_recipeBook', recipebook);
@@ -115,7 +117,7 @@ function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
   $(doc).find(jqueryxpath).each(function() {
     var mouseOver = $(this).find('img').data('tipped');
     var resultAmounts = $(this).parent().next().text();
-    var mouseOverRX = mouseOver.match(/fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i);
+    var mouseOverRX = mouseOver.match(itmRE);
     var result = {
       img: $(this).find('img').attr('src'),
       id: mouseOverRX[1],
@@ -135,9 +137,12 @@ function parseRecipePage(responseText, callback) { // Legacy
 
   output.innerHTML += 'Parsing blueprint ' + recipe.name + '...<br/>';
 
-  recipe.items = parseRecipeItemOrComponent('td[background*="/inventory/2x3.gif"]', doc);
-  recipe.components = parseRecipeItemOrComponent('td[background*="/inventory/1x1mini.gif"]', doc);
-  recipe.target = parseRecipeItemOrComponent('td[background*="/hellforge/2x3.gif"]', doc)[0];
+  recipe.items = parseRecipeItemOrComponent(
+    'td[background*="/inventory/2x3.gif"]', doc);
+  recipe.components = parseRecipeItemOrComponent(
+    'td[background*="/inventory/1x1mini.gif"]', doc);
+  recipe.target = parseRecipeItemOrComponent(
+    'td[background*="/hellforge/2x3.gif"]', doc)[0];
 
   var nextRecipeIndex = currentRecipeIndex + 1;
   if (nextRecipeIndex < recipebook.recipe.length) {
@@ -159,7 +164,8 @@ function parseInventingPage(responseText, callback) { // Legacy
   var folderIDs = []; // clear out the array before starting.
   $(doc).find('a[href*="index.php?cmd=inventing&folder_id="]')
     .each(function() {
-      var folderID = Number(/folder_id=([-0-9]+)/.exec($(this).attr('href'))[1]);
+      var folderID = Number(/folder_id=([-0-9]+)/
+        .exec($(this).attr('href'))[1]);
       folderIDs.push(folderID);
     });
 

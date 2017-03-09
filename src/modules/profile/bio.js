@@ -57,7 +57,8 @@ export function compressBio() { // Native
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
   // addClickListener('fshBioExpander', expandBio);
-  document.getElementById('fshBioExpander').addEventListener('click', expandBio);
+  document.getElementById('fshBioExpander')
+    .addEventListener('click', expandBio);
 }
 
 function getBuffsToBuy() { // Legacy
@@ -251,7 +252,8 @@ function bioHeight() { // Native
 }
 
 function renderBio(_bioContents) {
-  var bioContents = _bioContents.replace(/\{b\}/g, '`~').replace(/\{\/b\}/g, '~`');
+  var bioContents = _bioContents.replace(/\{b\}/g, '`~')
+    .replace(/\{\/b\}/g, '~`');
   var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
   if (!buffs) {return;}
   buffs.forEach(function(buff, i) {

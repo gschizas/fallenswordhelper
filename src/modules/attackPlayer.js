@@ -125,7 +125,8 @@ export function injectAttackPlayer() { // Legacy - currently disabled
         anchor1: 'attackPlayerSelfStatData',
         anchor2: 'attackPlayerSelfBuffData'
       });
-    system.xmlhttp('index.php?cmd=findplayer&search_active=1&search_level_max=&search_level_min=&search_username=' +
+    system.xmlhttp('index.php?cmd=findplayer&search_active=1' +
+      '&search_level_max=&search_level_min=&search_username=' +
       targetPlayer[1] + '&search_show_first=1',
       getProfileStatsAndBuffs,
       {

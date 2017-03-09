@@ -13,7 +13,8 @@ export var defaults = {
   keepLogs: false,
 
   showExtraLinks: false,
-  huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve',
+  huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,' +
+    'Treasure Hunter,Animal Magnetism,Conserve',
   huntingBuffsName: 'default',
   huntingBuffs2: 'Deflect',
   huntingBuffs2Name: 'PvP',

@@ -116,7 +116,8 @@ function keyPress(evt) { // Native
   if (evt.target.tagName !== 'HTML' &&
       evt.target.tagName !== 'BODY') {return;}
 
-  // ignore control, alt and meta keys (I think meta is the command key in Macintoshes)
+  /* ignore control, alt and meta keys
+  (I think meta is the command key in Macintoshes) */
   if (evt.ctrlKey) {return;}
   if (evt.metaKey) {return;}
   if (evt.altKey) {return;}
@@ -193,7 +194,8 @@ function keyPress(evt) { // Native
       key42: 8,
       key40: 9
     };
-    // I'm using "key??" because I don't feel comfortable of naming properties with integers
+    /* I'm using "key??" because I don't feel
+    comfortable of naming properties with integers */
     var itemIndex = keyMap['key' + r];
     $.get('index.php?cmd=profile').done(function(data) {
       changeCombatSet(data, itemIndex);
@@ -479,7 +481,8 @@ function injectFSBoxLog() { // Native
   if (playerName.length === 0) {return;}
   ajax.getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;
-  nodediv.insertAdjacentHTML('beforeend', '<br><span class="fshPaleVioletRed">' +
+  nodediv.insertAdjacentHTML('beforeend',
+    '<br><span class="fshPaleVioletRed">' +
     '[ <a href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' +
     playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
     'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
@@ -764,7 +767,8 @@ FSH.dispatch = function dispatch() { // Native
     task.add(3, doMsgSound);
   }
 
-  // This must be at the end in order not to screw up other system.findNode calls (Issue 351)
+  /* This must be at the end in order not to
+  screw up other system.findNode calls (Issue 351) */
   if (!calf.huntingMode) {
     task.add(3, injectQuickLinks);
   }

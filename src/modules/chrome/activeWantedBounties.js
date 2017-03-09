@@ -146,7 +146,8 @@ function getWantedBountyList(doc, callback) { // Legacy
         .firstChild.firstChild.textContent;
       if (target === '[ No bounties available. ]') {break;}
       for (var j = 0; j < wantedArray.length; j += 1) {
-        if (target === wantedArray[j].trim() || wantedArray.indexOf('*') !== -1) {
+        if (target === wantedArray[j].trim() ||
+            wantedArray.indexOf('*') !== -1) {
           wantedList.wantedBounties = true;
           var bounty = {};
           bounty.target = target;

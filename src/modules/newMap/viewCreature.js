@@ -36,7 +36,8 @@ function evalExtraBuffs(combat) { // Native
     'SES Stat Reduction Multiplier = ' +
     combat.player.superEliteSlayerMultiplier + '<br>' : '';
   // math section ... analysis
-  // Holy Flame adds its bonus after the armor of the creature has been taken off.
+  // Holy Flame adds its bonus after the
+  // armor of the creature has been taken off.
   combat.holyFlameBonusDamage = 0;
   if (combat.creature.class === 'Undead') {
     combat.holyFlameBonusDamage = Math.max(Math.floor(
@@ -264,7 +265,8 @@ function evalCA(combat) { // Native
         'Extra Stam Used at this lowered CA level = ' +
         combat.extraStaminaPerHitAtLowestFeasibleCALevel + '<br>';
     } else {
-      combat.extraNotes += 'No reduction of stam used at the lower CA level<br>';
+      combat.extraNotes +=
+        'No reduction of stam used at the lower CA level<br>';
     }
   }
   if (combat.numberOfHitsRequired === '-' ||

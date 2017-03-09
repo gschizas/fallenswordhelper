@@ -29,7 +29,8 @@ function buildOnlinePlayerData() { // jQuery
 }
 
 function dataTableSearch() { // jQuery
-  /* Custom filtering function which will search data in column three between two values */
+  /* Custom filtering function which will search
+  data in column three between two values */
   $.fn.dataTable.ext.search.push(
     function(_settings, data) {
       var min = parseInt($('#fshMinLvl', context).val(), 10); // context

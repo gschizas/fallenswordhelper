@@ -84,7 +84,8 @@ function getKillStreak(responseText) { // Hybrid
   var killStreakElement = system.findNode('//span[@findme="killstreak"]');
   killStreakElement.innerHTML = system.addCommas(playerKillStreakValue);
   system.setValue('lastKillStreak', playerKillStreakValue);
-  var deathDealerBuff = system.findNode('//img[contains(@data-tipped,"Death Dealer")]');
+  var deathDealerBuff =
+    system.findNode('//img[contains(@data-tipped,"Death Dealer")]');
   var deathDealerRE = /<b>Death Dealer<\/b> \(Level: (\d+)\)/;
   var deathDealer = deathDealerRE.exec($(deathDealerBuff).data('tipped'));
   var deathDealerPercentage;
@@ -94,7 +95,8 @@ function getKillStreak(responseText) { // Hybrid
         Math.floor(playerKillStreakValue / 5) * deathDealerLevel
       ) * 0.01, 20);
   }
-  var deathDealerPercentageElement = system.findNode('//span[@findme="damagebonus"]');
+  var deathDealerPercentageElement =
+    system.findNode('//span[@findme="damagebonus"]');
   deathDealerPercentageElement.innerHTML = deathDealerPercentage;
   system.setValue('lastDeathDealerPercentage', deathDealerPercentage);
 }
@@ -279,7 +281,8 @@ export function unknownPage() { // Legacy
   }
 
   var isAdvisorPageClue1 = system.findNode('//font[@size=2 and .="Advisor"]');
-  var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" and .="Back to Guild Management"]';
+  var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
+    'and .="Back to Guild Management"]';
   var isAdvisorPageClue2 = system.findNode(clue2);
   if (isAdvisorPageClue1 && isAdvisorPageClue2) {
     fshGa.screenview('unknown.guildAdvisor.injectAdvisor');

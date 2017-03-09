@@ -95,12 +95,12 @@ export function profileComponents() { // Native
   if (invTables.length !== 2) {return;}
   var compDiv = invTables[1].parentNode;
   if (compDiv.style.display !== 'block') {return;}
-  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter">' +
-    '<div>[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
-    '</div>' +
-    '<div id="sumComp">[<span id="compSum" class="sendLink">Count Components</span>]' +
-    '</div>' +
-    '<div>[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
+  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter"><div>' +
+    '[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
+    '</div><div id="sumComp">' +
+    '[<span id="compSum" class="sendLink">Count Components</span>]' +
+    '</div><div>' +
+    '[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
     '&subcmd=quickextract">Quick Extract Components</a>]</div>' +
     '<div class="fshHide">[<span id="compDelAll" class="sendLink">' +
     'Delete All Visible</span>]</div>' +

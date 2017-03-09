@@ -1,9 +1,10 @@
 import * as ajax from '../support/ajax';
 import * as system from '../support/system';
 
-var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold', 'Disarm',
-  'Duelist', 'Thievery', 'Master Blacksmith', 'Master Crafter', 'Fury Caster',
-  'Master Inventor', 'Sustain']; // Taking the Not Save in case they add new enhancements.
+// Taking the Not Save in case they add new enhancements.
+var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
+  'Disarm', 'Duelist', 'Thievery', 'Master Blacksmith', 'Master Crafter',
+  'Fury Caster', 'Master Inventor', 'Sustain'];
 var combatLog = [];
 
 function combatResponse(e, data) { // Native

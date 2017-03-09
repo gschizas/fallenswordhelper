@@ -1,6 +1,7 @@
 // var system = require('./support/system');
 
-/* function getBpCountFromWorld(responseText) { // Legacy - Bad, could be repurposed
+// Legacy - Bad, could be repurposed
+/* function getBpCountFromWorld(responseText) {
   // backpack counter
   var doc=system.createDocument(responseText);
   var bp=system.findNode(

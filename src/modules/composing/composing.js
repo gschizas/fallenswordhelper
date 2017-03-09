@@ -96,7 +96,8 @@ export function injectComposing() { // Native
     parseComposing();
   }
 
-  var buttons = layout.pCC.querySelectorAll('input[id^=create-]:not(#create-multi)');
+  var buttons = layout.pCC
+    .querySelectorAll('input[id^=create-]:not(#create-multi)');
   Array.prototype.forEach.call(buttons, function(el) {
     el.insertAdjacentHTML('afterend',
       '&nbsp;[<span class="quickCreate">Quick Create</span>]');
@@ -107,7 +108,8 @@ export function injectComposing() { // Native
     var buttonDiv = document.getElementById('composing-error-dialog')
       .previousElementSibling;
     buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = layout.pCC.getElementsByClassName('composing-level')[0].parentNode;
+    var top = layout.pCC.getElementsByClassName('composing-level')[0]
+      .parentNode;
     top.insertAdjacentElement('beforebegin', buttonDiv);
   }
 }

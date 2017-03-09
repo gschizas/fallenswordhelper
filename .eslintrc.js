@@ -126,7 +126,11 @@ module.exports = {
     // "lines-around-comment": ["error", {"beforeBlockComment": true}],
     // "lines-around-directive": ["error", "always"],
     "max-depth": ["error", 5],
-    "max-len": ["error", {"code": 160, "ignoreComments": true}],
+    "max-len": ["error", {
+      "code": 80,
+      "ignoreTrailingComments": true,
+      "ignoreUrls": true
+    }],
     "max-lines": ["error", 800],
     "max-nested-callbacks": ["error", 3],
     "max-params": ["error", 5],

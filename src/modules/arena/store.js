@@ -9,7 +9,8 @@ function gotMoves(_arena) { // jQuery
     var src = self.attr('src');
     var moveId = /(\d+)\.gif/.exec(src)[1];
     arena.moves[moveId] = {};
-    arena.moves[moveId].count = Number(/(\d)$/.exec(self.closest('td').html())[1]);
+    arena.moves[moveId].count = Number(/(\d)$/
+      .exec(self.closest('td').html())[1]);
     arena.moves[moveId].href = src;
   });
   ajax.setForage('fsh_arena', arena);

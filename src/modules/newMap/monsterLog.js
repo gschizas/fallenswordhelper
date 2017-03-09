@@ -34,12 +34,16 @@ function processMonsterLog() {
   logCreature.image_id = logCreature.image_id || creature.image_id;
   logCreature.level = logCreature.level || Number(creature.level);
   logCreature.type = logCreature.type || creature.type;
-  logCreature.armor = updateMinMax(logCreature.armor, Number(creature.armor));
-  logCreature.attack = updateMinMax(logCreature.attack, Number(creature.attack));
-  logCreature.damage = updateMinMax(logCreature.damage, Number(creature.damage));
+  logCreature.armor = updateMinMax(logCreature.armor,
+    Number(creature.armor));
+  logCreature.attack = updateMinMax(logCreature.attack,
+    Number(creature.attack));
+  logCreature.damage = updateMinMax(logCreature.damage,
+    Number(creature.damage));
   logCreature.defense = updateMinMax(logCreature.defense,
     Number(creature.defense));
-  logCreature.hp = updateMinMax(logCreature.hp, Number(creature.hp));
+  logCreature.hp = updateMinMax(logCreature.hp,
+    Number(creature.hp));
   if (creature.enhancements && creature.enhancements.length > 0) {
     logCreature.enhancements = logCreature.enhancements || {};
     var logEnh = logCreature.enhancements;

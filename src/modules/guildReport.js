@@ -101,7 +101,8 @@ function paintHeader() { // Native
   while (performance.now() < limit && headerCount < headers.length) {
     var el = headers[headerCount];
     var oldhtml = el.textContent;
-    el.innerHTML = layout.onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
+    el.innerHTML = layout.onlineDot(
+      {last_login: calf.membrList[oldhtml].last_login}) +
       '<a href="index.php?cmd=profile&player_id=' +
       calf.membrList[oldhtml].id + '">' + oldhtml +
       '</a> [ <span class="a-reply fshLink" target_player=' +

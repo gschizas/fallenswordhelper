@@ -4,6 +4,8 @@ import * as layout from './support/layout';
 import * as settingsPage from './settings/settingsPage';
 import * as system from './support/system';
 
+var actRE = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
+
 function uniq(arr, removeBy) { // Ugly but fast
   var seen = {};
   var out = [];
@@ -226,7 +228,7 @@ function findBuffsParseProfilePage(responseText) { // jQuery
     .find('a[data-tipped*="Last Activity"]');
   profileAlliesEnemies.each(function() {
     var onMouseOver = $(this).data('tipped');
-    var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
+    var lastActivity = actRE.exec(onMouseOver);
     var lastActivityDays = parseInt(lastActivity[1], 10);
     var lastActivityHours = parseInt(lastActivity[2], 10) +
       lastActivityDays * 24;
@@ -287,7 +289,7 @@ function findBuffsParseGuildManagePage(responseText) { // jQuery
     memberTableRows.each(function() {
       var contactLink = $(this).find('a');
       var onMouseOver = $(contactLink).data('tipped');
-      var lastActivity = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/.exec(onMouseOver);
+      var lastActivity = actRE.exec(onMouseOver);
       var lastActivityDays = parseInt(lastActivity[1], 10);
       var lastActivityHours = parseInt(lastActivity[2], 10) +
         lastActivityDays * 24;

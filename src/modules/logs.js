@@ -104,18 +104,23 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
 
   var messageHTML = aRow.cells[2].innerHTML;
   var firstPart = messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
-  var thirdPart = messageHTML.substring(messageHTML.indexOf('>Reply</a>') + 10, messageHTML.indexOf('>Buff</a>') + 9);
+  var thirdPart = messageHTML.substring(messageHTML.indexOf('>Reply</a>') + 10,
+    messageHTML.indexOf('>Buff</a>') + 9);
   var targetPlayerID = /quickBuff\((\d+)\)/.exec(thirdPart)[1];
-  thirdPart = ' | <a ' + layout.quickBuffHref(targetPlayerID) + '>Buff</a></span>';
-  var fourthPart = messageHTML.substring(messageHTML.indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
-  var lastPart = messageHTML.substring(messageHTML.indexOf('</small>'), messageHTML.length);
-  extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName + '">Trade</a> | ' +
-    '<a title="Secure Trade" href="index.php?cmd=trade&subcmd=createsecure&target_username=' + playerName +
-    '">ST</a>';
+  thirdPart = ' | <a ' + layout.quickBuffHref(targetPlayerID) +
+    '>Buff</a></span>';
+  var fourthPart = messageHTML.substring(messageHTML
+    .indexOf('>Trade</a>') + 10, messageHTML.indexOf('</small>'));
+  var lastPart = messageHTML.substring(messageHTML.indexOf('</small>'),
+    messageHTML.length);
+  extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName +
+    '">Trade</a> | <a title="Secure Trade" href="index.php?cmd=trade' +
+    '&subcmd=createsecure&target_username=' + playerName + '">ST</a>';
 
   var attackPart = '';
   if (addAttackLinkToLog) {
-    attackPart = ' | <a href="index.php?cmd=attackplayer&target_username=' + playerName + '">Attack</a>';
+    attackPart = ' | <a href="index.php?cmd=attackplayer&target_username=' +
+      playerName + '">Attack</a>';
   }
 
   var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
@@ -130,7 +135,8 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
         var exitOuter = false;
 
         for (var k = 0; k < nicks.length; k += 1) {
-          if (buffsSent[j].toLowerCase().trim() === nicks[k].toLowerCase().trim()) {
+          if (buffsSent[j].toLowerCase().trim() ===
+              nicks[k].toLowerCase().trim()) {
 
             quickBuff += m + ';';
             exitOuter = true;
@@ -155,16 +161,21 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
         }
 
         for (var idx = 0; idx < theBuffPack.size; idx += 1) {
-          var nickname = theBuffPack.nickname[idx] ? theBuffPack.nickname[idx] : '';
-          if (nickname.toLowerCase().trim() === buffsSent[j].toLowerCase().trim()) {
-            // 131 is the number of buffs in the game currently. When they add new buffs, this will need to be updated, along with the fsdataObj.buffList variable!
+          var nickname = theBuffPack.nickname[idx] ?
+            theBuffPack.nickname[idx] : '';
+          if (nickname.toLowerCase().trim() ===
+              buffsSent[j].toLowerCase().trim()) {
+            /* 131 is the number of buffs in the game currently.
+            When they add new buffs, this will need to be updated,
+            along with the fsdataObj.buffList variable! */
             quickBuff += 131 + idx + ';';
             break;
           }
         }
       }
     }
-    thirdPart = ' | <a ' + layout.quickBuffHref(targetPlayerID, quickBuff) + '>Buff</a></span>';
+    thirdPart = ' | <a ' + layout.quickBuffHref(targetPlayerID, quickBuff) +
+      '>Buff</a></span>';
   }
 
   var msgReplyTo = '[ <span style="cursor:pointer;text-' +
@@ -180,11 +191,16 @@ function doChat(aRow, isGuildMate, playerName, addAttackLinkToLog) { // Legacy
 
 function retrievePvPCombatSummary(responseText, callback) { // Legacy
   var winner = callback.winner;
-  var xpGain = system.getIntFromRegExp(responseText, /var\s+xpGain=(-?[0-9]+);/i);
-  var goldGain = system.getIntFromRegExp(responseText, /var\s+goldGain=(-?[0-9]+);/i);
-  var prestigeGain = system.getIntFromRegExp(responseText, /var\s+prestigeGain=(-?[0-9]+);/i);
-  var goldStolen = system.getIntFromRegExp(responseText, /var\s+goldStolen=(-?[0-9]+);/i);
-  var pvpRatingChange = system.getIntFromRegExp(responseText, /var\s+pvpRatingChange=(-?[0-9]+);/i);
+  var xpGain = system.getIntFromRegExp(responseText,
+    /var\s+xpGain=(-?[0-9]+);/i);
+  var goldGain = system.getIntFromRegExp(responseText,
+    /var\s+goldGain=(-?[0-9]+);/i);
+  var prestigeGain = system.getIntFromRegExp(responseText,
+    /var\s+prestigeGain=(-?[0-9]+);/i);
+  var goldStolen = system.getIntFromRegExp(responseText,
+    /var\s+goldStolen=(-?[0-9]+);/i);
+  var pvpRatingChange = system.getIntFromRegExp(responseText,
+    /var\s+pvpRatingChange=(-?[0-9]+);/i);
   var output = '<br> ';
   if (xpGain !== 0) {
     output += 'XP stolen:<span style="color:' +
@@ -279,23 +295,35 @@ function addLogWidgetsOld() { // Legacy
       doChat(aRow, isGuildMate, playerName, addAttackLinkToLog);
     }
     if (messageType === 'Notification') {
-      if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild.nextSibling.nodeName === 'A') {
-        if (aRow.cells[2].firstChild.nextSibling.getAttribute('href').search('player_id') !== -1) {
+      if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild
+          .nextSibling.nodeName === 'A') {
+        if (aRow.cells[2].firstChild.nextSibling.getAttribute('href')
+            .search('player_id') !== -1) {
           if (!isGuildMate) {
-            var dateExtraText = '<nobr><span style="font-size:x-small;">[ <a title="Add to Ignore List" href="index.php?cmd=log&subcmd=doaddignore&ignore_username=' + playerName +
-            '">Ignore</a> ]</span></nobr>';
-            aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' + dateExtraText;
+            var dateExtraText = '<nobr><span style="font-size:x-small;">' +
+              '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
+              '&subcmd=doaddignore&ignore_username=' + playerName +
+              '">Ignore</a> ]</span></nobr>';
+            aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
+              dateExtraText;
           }
           var buffingPlayerIDRE = /player_id=(\d+)/;
-          var buffingPlayerID = buffingPlayerIDRE.exec(aRow.cells[2].innerHTML)[1];
-          var buffingPlayerName = aRow.cells[2].firstChild.nextSibling.innerHTML;
-          var extraText = ' <span style="font-size:x-small;"><nobr>[ <span style="cursor:pointer;text-decoration:underline" class="a-reply" target_player="' + buffingPlayerName +
-            '">Reply</span> | <a href="index.php?cmd=trade&target_player=' + buffingPlayerName +
-            '">Trade</a> | <a title="Secure Trade" href="index.php?cmd=trade&subcmd=createsecure&target_username=' + buffingPlayerName +
-            '">ST</a>';
-          extraText += ' | <a ' + layout.quickBuffHref(buffingPlayerID) + '>Buff</a>';
+          var buffingPlayerID = buffingPlayerIDRE
+            .exec(aRow.cells[2].innerHTML)[1];
+          var buffingPlayerName = aRow.cells[2].firstChild.nextSibling
+            .innerHTML;
+          var extraText = ' <span style="font-size:x-small;"><nobr>' +
+            '[ <span style="cursor:pointer;text-decoration:underline" ' +
+            'class="a-reply" target_player="' + buffingPlayerName +
+            '">Reply</span> | <a href="index.php?cmd=trade&target_player=' +
+            buffingPlayerName + '">Trade</a> | <a title="Secure Trade" ' +
+            'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+            buffingPlayerName + '">ST</a>';
+          extraText += ' | <a ' + layout.quickBuffHref(buffingPlayerID) +
+            '>Buff</a>';
           if (addAttackLinkToLog) {
-            extraText += ' | <a href="index.php?cmd=attackplayer&target_username=' + buffingPlayerName + '">Attack</a>';
+            extraText += ' | <a href="index.php?cmd=attackplayer' +
+              '&target_username=' + buffingPlayerName + '">Attack</a>';
           }
           extraText += ' ]</nobr></span>';
 
@@ -340,9 +368,11 @@ function addLogWidgets() { // jQuery
 export function addGuildLogWidgets() { // Legacy
   if (!system.getValue('hideNonPlayerGuildLogMessages')) {return;}
   var nodeList = layout.pCC.getElementsByTagName('TD');
-  var messageNameCell = Array.prototype.reduce.call(nodeList, function(prev, curr) {
-    return curr.textContent === 'Message' ? curr : prev;
-  }, null);
+  var messageNameCell = Array.prototype.reduce.call(nodeList,
+    function(prev, curr) {
+      return curr.textContent === 'Message' ? curr : prev;
+    }, null
+  );
   if (!messageNameCell) {return;}
   var playerId = layout.playerId();
   var logTable = messageNameCell.parentNode.parentNode.parentNode;

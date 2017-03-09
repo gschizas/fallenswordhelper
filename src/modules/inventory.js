@@ -81,7 +81,8 @@ var invManFilter =
   '<td class="fshRight">&nbsp;Crystalline:</td>' +
   '<td><input id="fshCrystalline" item="105" type="checkbox" checked/></td>' +
   '<td class="fshRight">&nbsp;Epic:</td>' +
-  '<td colspan="2"><input id="fshEpic" item="106" type="checkbox" checked/></td>' +
+  '<td colspan="2"><input id="fshEpic" item="106" type="checkbox" checked/>' +
+  '</td>' +
   '</tr>' +
   '</table>';
 var inventoryCheckAll = {
@@ -155,7 +156,8 @@ function decorate() { // Native
 }
 
 function lvlFilter() { // jQuery
-  /* Custom filtering function which will search data in column 2 between two values */
+  /* Custom filtering function which will search
+  data in column 2 between two values */
   $.fn.dataTable.ext.search.push(
     function(_settings, data) {
       var min = options.fshMinLvl;
@@ -427,7 +429,8 @@ function createdRow(row, data) { // jQuery
 }
 
 function doTable() { // jQuery
-  $('#pCC').append('<table id="fshInv" class="hover" style="font-size: x-small;"></table>');
+  $('#pCC').append('<table id="fshInv" class="hover" ' +
+    'style="font-size: x-small;"></table>');
   var table = $('#fshInv').DataTable({
     data: theInv.items,
     autoWidth: false,

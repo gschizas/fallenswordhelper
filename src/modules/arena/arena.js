@@ -144,7 +144,9 @@ function orderData(i, e) { // jQuery
 
   cell = theCells.eq(1);
   matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
-  if (matches) {cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));}
+  if (matches) {
+    cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
+  }
 
   cell = theCells.eq(2);
   cell.attr('data-order',

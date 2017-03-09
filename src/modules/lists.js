@@ -6,7 +6,9 @@ import * as system from './support/system';
 function generateManageTable() { // Legacy
   var i;
   var j;
-  var result = '<table cellspacing=2 cellpadding=2 style="table-layout: fixed; word-wrap: break-word;" width=100%><tr bgcolor=#CD9E4B>';
+  var result = '<table cellspacing=2 cellpadding=2 ' +
+    'style="table-layout: fixed; word-wrap: break-word;" ' +
+    'width=100%><tr bgcolor=#CD9E4B>';
   var isArrayOnly = calf.param.fields.length === 0;
   for (i = 0; i < calf.param.headers.length; i += 1) {
     result += '<th>' + calf.param.headers[i] + '</th>';
@@ -18,17 +20,23 @@ function generateManageTable() { // Legacy
     if (isArrayOnly) {
       result += '<td align=center>' + calf.param.currentItems[i] + '</td>';
     } else {
-      if (calf.param.categoryField && currentCategory !== calf.param.currentItems[i][calf.param.categoryField]) {
+      if (calf.param.categoryField &&
+          currentCategory !==
+          calf.param.currentItems[i][calf.param.categoryField]) {
         currentCategory = calf.param.currentItems[i][calf.param.categoryField];
-        result += '<td><span style="font-weight:bold; font-size:large;">' + currentCategory + '</span></td></tr><tr>';
+        result += '<td><span style="font-weight:bold; font-size:large;">' +
+          currentCategory + '</span></td></tr><tr>';
       }
       for (j = 0; j < calf.param.fields.length; j += 1) {
         result += '<td align=center class=content>';
         if (calf.param.fields[j] !== calf.param.categoryField) {
           if (calf.param.tags[j] === 'checkbox') {
-            result += '<input type=checkbox ' + (calf.param.currentItems[i][calf.param.fields[j]] ? 'checked' : '') + ' disabled>';
+            result += '<input type=checkbox ' +
+              (calf.param.currentItems[i][calf.param.fields[j]] ?
+              'checked' : '') + ' disabled>';
           } else if (calf.param.url && calf.param.url[j] !== '') {
-            result += '<a href="' + calf.param.url[j].replace('@replaceme@', calf.param.currentItems[i][calf.param.fields[j]]) + '">' +
+            result += '<a href="' + calf.param.url[j].replace('@replaceme@',
+              calf.param.currentItems[i][calf.param.fields[j]]) + '">' +
               calf.param.currentItems[i][calf.param.fields[j]] + '</a>';
           } else {
             result += calf.param.currentItems[i][calf.param.fields[j]];
@@ -37,23 +45,30 @@ function generateManageTable() { // Legacy
         }
       }
     }
-    result += '<td><span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
+    result += '<td><span class=HelperTextLink itemId="' + i +
+      '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
   }
   result += '<tr>';
   if (isArrayOnly) {
-    result += '<td align=center><input type=' + calf.param.tags[i] + ' class=custominput id=Helper:input0></td>';
+    result += '<td align=center><input type=' + calf.param.tags[i] +
+      ' class=custominput id=Helper:input0></td>';
   } else {
     for (i = 0; i < calf.param.tags.length; i += 1) {
-      result += '<td align=center><input type=' + calf.param.tags[i] + ' class=custominput id=Helper:input' + calf.param.fields[i] + '></td>';
+      result += '<td align=center><input type=' + calf.param.tags[i] +
+        ' class=custominput id=Helper:input' + calf.param.fields[i] + '></td>';
     }
   }
-  result += '<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
+  result += '<td><span class=HelperTextLink id="Helper:AddItem">' +
+    '[Add]</span></td></tr></table>';
 
   if (calf.param.showRawEditor) {
-    result += '<table width=100%><tr><td align=center><textarea cols=70 rows=20 name="Helper:rawEditor">' +
+    result += '<table width=100%><tr><td align=center>' +
+      '<textarea cols=70 rows=20 name="Helper:rawEditor">' +
       JSON.stringify(calf.param.currentItems) + '</textarea></td></tr>' +
-      '<tr><td align=center><input id="Helper:saveRawEditor" type="button" value="Save" class="custombutton">' +
-      '&nbsp;<input id="Helper:resetRawEditor" type="button" value="Reset" class="custombutton"></td></tr>' +
+      '<tr><td align=center><input id="Helper:saveRawEditor" type="button" ' +
+      'value="Save" class="custombutton">' +
+      '&nbsp;<input id="Helper:resetRawEditor" type="button" value="Reset" ' +
+      'class="custombutton"></td></tr>' +
       '</tbody></table>';
   }
 
