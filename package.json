@@ -13,7 +13,6 @@
     "clean:beta": "rimraf dist/beta/*",
     "clean:dev": "rimraf dist/dev/*",
     "clean:prod": "rimraf dist/prod/*",
-    "dup": "Set-PSReadLineOption -HistoryNoDuplicates",
     "eslint": "eslint src",
     "jshint": "jshint src --verbose",
     "rollup": "npm run rollup:dev && npm run rollup:beta && npm run rollup:prod",

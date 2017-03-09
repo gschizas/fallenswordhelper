@@ -131,7 +131,7 @@ module.exports = {
       "ignoreTrailingComments": true,
       "ignoreUrls": true
     }],
-    "max-lines": ["error", 800],
+    "max-lines": ["error", 624],
     "max-nested-callbacks": ["error", 3],
     "max-params": ["error", 5],
     "max-statements-per-line": ["error", { "max": 3 }],
@@ -146,7 +146,6 @@ module.exports = {
     "no-nested-ternary": ["error"],
     "no-new-object": ["error"],
     "no-plusplus": ["error", { "allowForLoopAfterthoughts": true }],
-    "no-plusplus": ["error"],
     "no-tabs": ["error"],
     // "no-ternary": ["error"],
     "no-trailing-spaces": ["error"],

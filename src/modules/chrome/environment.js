@@ -1,8 +1,10 @@
 import calf from '../support/calf';
 import pageSwitcher from './pageSwitcher';
+import * as accordion from './accordion';
 import * as activeWantedBounties from './activeWantedBounties';
 import * as ajax from '../support/ajax';
 import * as allyEnemy from './allyEnemy';
+import * as calc from './calc';
 import * as common from '../support/common';
 import * as composing from '../composing/composing';
 import * as fshGa from '../support/fshGa';
@@ -11,15 +13,13 @@ import * as messaging from './messaging';
 import * as news from '../news';
 import * as notification from '../notification';
 import * as sendGold from '../newMap/sendGold';
+import * as statBar from './statBar';
 import * as system from '../support/system';
 import * as task from '../support/task';
+import * as widgets from './widgets';
 
 var coreFunction;
 var functionPath;
-var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-  'Friday', 'Saturday'];
-var months = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
 var expandMenuOnKeyPress;
 
 function getCoreFunction() { // Native
@@ -231,108 +231,6 @@ function getEnvVars() { // Native
     system.getValue('allyEnemyOnlineRefreshTime') * 1000;
 }
 
-function hideElement(el) { // Native
-  el.classList.add('fshHide');
-}
-
-function hideNodeList(nodeList) { // Native
-  Array.prototype.forEach.call(nodeList, hideElement);
-}
-
-function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
-  hideNodeList(parent.querySelectorAll(selector));
-}
-
-function contactColour(el, obj) { // Native
-  var onMouseOver = el.getAttribute('data-tipped');
-  var lastActivityMinutes =
-    /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
-  if (lastActivityMinutes < 2) {
-    el.classList.add(obj.l1);
-  } else if (lastActivityMinutes < 5) {
-    el.classList.add(obj.l2);
-  } else {
-    el.classList.add(obj.l3);
-  }
-}
-
-function guildColour(el) { // Native
-  contactColour(el, {
-    l1: 'fshGreen',
-    l2: 'fshWhite',
-    l3: 'fshGrey'
-  });
-}
-
-function addGuildInfoWidgets() { // Native
-  var guildMembrList = document.getElementById('minibox-guild-members-list');
-  if (!guildMembrList) {return;} // list exists
-  // hide guild info links
-  var hideQSA = hideQuerySelectorAll;
-  if (calf.hideGuildInfoTrade) {
-    hideQSA(guildMembrList, '#guild-minibox-action-trade');
-  }
-  if (calf.hideGuildInfoSecureTrade) {
-    hideQSA(guildMembrList, '#guild-minibox-action-secure-trade');
-  }
-  if (calf.hideGuildInfoBuff) {
-    hideQSA(guildMembrList, '#guild-minibox-action-quickbuff');
-  }
-  if (calf.hideGuildInfoMessage) {
-    hideQSA(guildMembrList, '#guild-minibox-action-send-message');
-  }
-  if (calf.hideBuffSelected) {
-    hideNodeList(
-      guildMembrList.getElementsByClassName('guild-buff-check-on'));
-    document.getElementById('guild-quick-buff').classList.add('fshHide');
-  }
-  // add coloring for offline time
-  Array.prototype.forEach.call(
-    guildMembrList.getElementsByClassName('player-name'), guildColour);
-  Array.prototype.forEach.call(
-    document.querySelectorAll('#pCR h4'),
-    function(el) {
-      if (el.textContent !== 'Chat') {return;}
-      el.innerHTML = '<a href="index.php?cmd=guild&subcmd=chat">' +
-        el.textContent + '</a>';
-    }
-  );
-}
-
-function alliesColour(el) { // Native
-  contactColour(el, {
-    l1: 'fshDodgerBlue',
-    l2: 'fshLightSkyBlue',
-    l3: 'fshPowderBlue'
-  });
-}
-
-function addOnlineAlliesWidgets() { // Native
-  var onlineAlliesList = document.getElementById('minibox-allies-list');
-  if (!onlineAlliesList) {return;}
-  var hideQSA = hideQuerySelectorAll;
-  if (calf.hideGuildInfoTrade) {
-    hideQSA(onlineAlliesList, '#online-allies-action-trade');
-  }
-  if (calf.hideGuildInfoSecureTrade) {
-    hideQSA(onlineAlliesList, '#online-allies-action-secure-trade');
-  }
-  if (calf.hideGuildInfoBuff) {
-    hideQSA(onlineAlliesList, '#online-allies-action-quickbuff');
-  }
-  if (calf.hideGuildInfoMessage) {
-    hideQSA(onlineAlliesList, '#online-allies-action-send-message');
-  }
-  if (calf.hideBuffSelected) {
-    hideNodeList(
-      onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
-    document.getElementById('ally-quick-buff').classList.add('fshHide');
-  }
-  // add coloring for offline time
-  Array.prototype.forEach.call(
-    onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
-}
-
 function conditional() { // Native
   if (calf.enableAllyOnlineList ||
       calf.enableEnemyOnlineList) {
@@ -343,10 +241,10 @@ function conditional() { // Native
     task.add(3, activeWantedBounties.prepareBountyData);
   }
   if (calf.enableGuildInfoWidgets) {
-    task.add(3, addGuildInfoWidgets);
+    task.add(3, widgets.addGuildInfoWidgets);
   }
   if (calf.enableOnlineAlliesWidgets) {
-    task.add(3, addOnlineAlliesWidgets);
+    task.add(3, widgets.addOnlineAlliesWidgets);
   }
   if (calf.enableTempleAlert) {
     task.add(3, notification.injectTempleAlert);
@@ -369,98 +267,6 @@ function navMenu() { // jQuery
     if (myHeight === 0) {id = -1;}
     oldSave.call(myNav, id);
   };
-}
-
-function statbarWrapper(href, id) { // Native
-  var myWrapper = document.createElement('a');
-  myWrapper.setAttribute('href', href);
-  var character = document.getElementById(id);
-  var statWrapper = character.parentNode;
-  myWrapper.appendChild(character);
-  statWrapper.insertBefore(myWrapper, statWrapper.firstChild);
-  myWrapper.addEventListener('click', function(evt) {
-    evt.stopPropagation();
-  }, true);
-}
-
-function statbar() { // Native
-  var sw = statbarWrapper;
-  sw('index.php?cmd=profile', 'statbar-character');
-  sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
-  sw('index.php?cmd=blacksmith', 'statbar-equipment');
-  sw('index.php?cmd=profile&subcmd=dropitems', 'statbar-inventory');
-  sw('index.php?cmd=points', 'statbar-fsp');
-  sw('index.php?cmd=bank', 'statbar-gold');
-}
-
-function formatShortDate(aDate) { // Native
-  var yyyy = aDate.getFullYear();
-  var dd = aDate.getDate();
-  if (dd < 10) {dd = '0' + dd;}
-  var ddd = days[aDate.getDay()].substr(0, 3);
-  var month = months[aDate.getMonth()].substr(0, 3);
-  var hh = aDate.getHours();
-  if (hh < 10) {hh = '0' + hh;}
-  var mm = aDate.getMinutes();
-  if (mm < 10) {mm = '0' + mm;}
-  return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
-}
-
-function timeBox(nextGainTime, hrsToGo) { // Native
-  var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
-  if (!nextGain) {return;}
-  return '<dd>' +
-    formatShortDate(new Date(Date.now() +
-    (hrsToGo * 60 * 60 + parseInt(nextGain[1], 10) * 60 +
-    parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
-}
-
-function injectStaminaCalculator() { // Native
-  var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
-  if (!nextGain) {return;}
-  var staminaMouseover =
-    document.getElementById('statbar-stamina-tooltip-stamina');
-  var stamVals = /([,0-9]+)\s\/\s([,0-9]+)/.exec(
-    staminaMouseover.getElementsByClassName('stat-name')[0]
-      .nextElementSibling.textContent
-  );
-  staminaMouseover.insertAdjacentHTML('beforeend',
-    '<dt class="stat-stamina-nextHuntTime">Max Stam At</dt>' +
-    timeBox(
-      nextGain[0].nextElementSibling.textContent,
-      // get the max hours to still be inside stamina maximum
-      Math.floor(
-        (system.intValue(stamVals[2]) -
-        system.intValue(stamVals[1])) /
-        system.intValue(
-          document.getElementsByClassName('stat-stamina-gainPerHour')[0]
-            .nextElementSibling.textContent
-        )
-      )
-    )
-  );
-}
-
-function injectLevelupCalculator() { // Native
-  var nextGain = document.getElementsByClassName('stat-xp-nextGain');
-  if (!nextGain) {return;}
-  document.getElementById('statbar-level-tooltip-general')
-    .insertAdjacentHTML('beforeend',
-      '<dt class="stat-xp-nextLevel">Next Level At</dt>' +
-      timeBox(
-        nextGain[0].nextElementSibling.textContent,
-        Math.ceil(
-          system.intValue(
-            document.getElementsByClassName('stat-xp-remaining')[0]
-              .nextElementSibling.textContent
-          ) /
-          system.intValue(
-            document.getElementsByClassName('stat-xp-gainPerHour')[0]
-              .nextElementSibling.textContent
-          )
-        )
-      )
-    );
 }
 
 function storeFSBox(_boxList) { // Native
@@ -487,13 +293,6 @@ function injectFSBoxLog() { // Native
     playerName + '">Ignore</a> ]</span> <span class="fshYellow">[ <a ' +
     'href="index.php?cmd=notepad&blank=1&subcmd=fsboxcontent">Log</a> ]' +
     '</span>');
-}
-
-function fixOnlineGuildBuffLinks() { // Native
-  common.updateHCSQuickBuffLinks(
-    '#minibox-guild-members-list #guild-minibox-action-quickbuff');
-  common.updateHCSQuickBuffLinks(
-    '#minibox-allies-list #online-allies-action-quickbuff');
 }
 
 function changeGuildLogHREF() { // Native
@@ -530,106 +329,6 @@ function moveRHSBoxToLHS(title) { // Native
   document.getElementById('pCL').appendChild(boxDiv);
 }
 
-function injectMenu() { // jQuery.min
-  if (!document.getElementById('pCL')) {return;}
-  if (system.getValue('lastActiveQuestPage').length > 0) {
-    document.querySelector('#pCL a[href="index.php?cmd=questbook"]')
-      .setAttribute('href', system.getValue('lastActiveQuestPage'));
-  }
-  // character
-  document.getElementById('nav-character-log').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-medalguide" href="index.php?cmd=profile&subcmd=' +
-      'medalguide">Medal Guide</a></li>' +
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-invmanager" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=invmanagernew">Inventory Manager</a></li>' +
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-recipemanager" href="index.php?cmd=notepad&blank' +
-      '=1&subcmd=recipemanager">Recipe Manager</a></li>');
-  if (system.getValue('keepBuffLog')) {
-    document.getElementById('nav-character-log').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-bufflog" href="index.php?cmd=notepad&blank=1&' +
-        'subcmd=bufflogcontent">Buff Log</a></li>');
-  }
-  if (system.getValue('keepLogs')) {
-    document.getElementById('nav-character-notepad').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-showlogs" href="index.php?cmd=notepad&blank=1' +
-        '&subcmd=showlogs">Combat Logs</a></li>');
-  }
-  if (system.getValue('showMonsterLog')) {
-    document.getElementById('nav-character-notepad').parentNode
-      .insertAdjacentHTML('afterend',
-        '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-        'character-monsterlog" href="index.php?cmd=notepad&blank' +
-        '=1&subcmd=monsterlog">Creature Logs</a></li>');
-  }
-  document.getElementById('nav-character-notepad').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-1"><a class="nav-link" id="nav-' +
-      'character-quicklinkmanager" href="index.php?cmd=notepad&' +
-      'blank=1&subcmd=quicklinkmanager">Quick Links</a></li>');
-  // guild
-  document.getElementById('nav-guild-storehouse-inventory').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'guild-guildinvmanager" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=guildinvmgr">Guild Inventory</a></li>');
-  if (!system.getValue('useNewGuildLog')) {
-    // if not using the new guild log, show it as a separate menu entry
-    document.getElementById('nav-guild-ledger-guildlog').parentNode
-      .insertAdjacentHTML('beforebegin',
-        '<li class="nav-level-2"><a class="nav-link" ' +
-        'href="index.php?cmd=notepad&blank=1&subcmd=newguildlog"' +
-        '>New Guild Log</a></li>');
-  }
-  // top rated
-  document.getElementById('nav-toprated-players-level').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'toprated-top250" href="index.php?cmd=toprated&subcmd=xp">' +
-      'Top 250 Players</a></li>');
-  // actions
-  document.getElementById('nav-actions-trade-auctionhouse').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-ahquicksearch" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=auctionsearch">AH Quick Search</a></li>');
-  document.getElementById('nav-actions-interaction-findplayer').parentNode
-    .insertAdjacentHTML('afterend',
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-findbuffs" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=findbuffs">Find Buffs</a></li>' +
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-findother" href="index.php?cmd=notepad&blank=1&' +
-      'subcmd=findother">Find Other</a></li>' +
-      '<li class="nav-level-2"><a class="nav-link" id="nav-' +
-      'actions-onlineplayers" href="index.php?cmd=notepad&blank=1' +
-      '&subcmd=onlineplayers">Online Players</a></li>');
-  // adjust the menu height for the newly added items
-  var theNav = document.getElementById('nav');
-  var myNav = $(theNav).data('nav');
-  // first the closed saved variables
-  myNav.heights = [null, null,
-    // Character
-    document.getElementById('nav-character').nextElementSibling.children
-      .length * 22,
-    660,
-    // Guild
-    document.querySelectorAll('#nav-guild > ul li').length * 22,
-    374, 132, 132, null];
-  if (myNav.state !== '-1' && myNav.state !== -1) {
-    // and now the open one
-    theNav.children[myNav.state].children[1].style.height =
-      myNav.heights[myNav.state] + 'px';
-  }
-}
-
 function notHuntMode() { // Native
   // move boxes in opposite order that you want them to appear.
   if (system.getValue('moveGuildList')) {
@@ -646,17 +345,17 @@ function notHuntMode() { // Native
   conditional();
 
   task.add(3, navMenu);
-  task.add(3, statbar);
+  task.add(3, statBar.statbar);
 
-  task.add(3, injectStaminaCalculator);
-  task.add(3, injectLevelupCalculator);
+  task.add(3, calc.injectStaminaCalculator);
+  task.add(3, calc.injectLevelupCalculator);
 
-  task.add(3, injectMenu);
+  task.add(3, accordion.injectMenu);
 
   if (system.getValue('fsboxlog')) {
     task.add(3, injectFSBoxLog);
   }
-  task.add(3, fixOnlineGuildBuffLinks);
+  task.add(3, widgets.fixOnlineGuildBuffLinks);
 
   task.add(3, notification.injectJoinAllLink);
   task.add(3, changeGuildLogHREF);

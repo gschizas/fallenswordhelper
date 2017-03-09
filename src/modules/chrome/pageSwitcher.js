@@ -14,9 +14,10 @@ import * as guide from '../guide';
 import * as guild from '../guild';
 import * as guildAdvisor from '../guildAdvisor';
 import * as guildReport from '../guildReport';
-import * as inventory from '../inventory';
+import * as inventory from '../inventory/inventory';
 import * as legacy from '../legacy';
 import * as lists from '../lists';
+import * as load from '../settings/load';
 import * as logs from '../logs';
 import * as mailbox from '../mailbox';
 import * as misc from '../misc';
@@ -185,7 +186,7 @@ export default {
     newguildlog: {'-': {'-': {'-': newGuildLog.injectNewGuildLog}}},
     findbuffs: {'-': {'-': {'-': findBuffs.injectFindBuffs}}},
     findother: {'-': {'-': {'-': findBuffs.injectFindOther}}},
-    savesettings: {'-': {'-': {'-': settingsPage.injectSaveSettings}}},
+    savesettings: {'-': {'-': {'-': load.injectSaveSettings}}},
     '-': {'-': {'-': {'-': misc.injectNotepad}}}
   },
   points: {
