@@ -16,7 +16,8 @@ export function setupConfigData() {
       'defaults<br>Use it if your storage has overflowed or become ' +
       'corrupt"></td><td align=center>' +
       '<span style="font-size:x-small">(Current version: ' +
-      FSH.version + ') (Storage Used: ' + calf.storage + '% Remaining: ' +
+      FSH.version + '(' + FSH.calf + ')) (Storage Used: ' +
+      calf.storage + '% Remaining: ' +
       (100 - calf.storage).toFixed(2) + '%)</span></td></tr>' +
     '<tr><td colspan="2" align=center>' +
       '<span style="font-weight:bold;">Visit the ' +

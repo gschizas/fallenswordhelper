@@ -66,7 +66,7 @@ export function setup() { // Native
     siteSpeedSampleRate: 10
   });
   ga('fshApp.set', 'appName', 'fshApp');
-  ga('fshApp.set', 'appVersion', FSH.version);
+  ga('fshApp.set', 'appVersion', FSH.version + '(' + FSH.calf + ')');
   ga('create', 'UA-76488113-2', 'auto', 'fsh', {
     userId: layout.playerId(),
     siteSpeedSampleRate: 10

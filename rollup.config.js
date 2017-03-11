@@ -15,8 +15,9 @@ if (source === 'calf') {
   filename = 'calfSystem.js';
   format = 'iife';
 }
-let version = require('./package.json').version.replace('.', '');
-let core = version.replace(/\..+/, '');
+let version = require('./package.json').version;
+let varAry = version.split('.');
+let core = varAry[0] + varAry[1];
 let local = 'http://' + require('ip').address() + ':9966/';
 let github = 'https://fallenswordhelper.github.io/fallenswordhelper/';
 
@@ -26,14 +27,14 @@ let dest = 'dist/' + folder + '/' + filename;
 
 // jscc options
 let opts = {values: {}};
-// opts.values = {};
 let values = opts.values;
+values._CALFVER = varAry[2];
 
 switch (true) {
 case folder === 'dev':
   values._DEV = true;
   values._BETA = true;
-  values._VER = version.replace('.', 'a');
+  values._VER = core + 'a' + varAry[2];
   values._DLURL = local + 'dist/dev/fallenswordhelper.user.js';
   values._CALFJS = local + 'dist/dev/calfSystem.js';
   values._CALFCSS = local + 'src/calfSystem.css';
@@ -41,7 +42,7 @@ case folder === 'dev':
 case folder === 'beta':
   values._DEV = false;
   values._BETA = true;
-  values._VER = version.replace('.', 'b');
+  values._VER = core + 'b' + varAry[2];
   values._DLURL = github + 'Releases/Beta/fallenswordhelper.user.js';
   values._CALFJS = github + 'resources/' + core + '/calfSystem.min.js';
   values._CALFCSS = github + 'resources/' + core + '/calfSystem.css';
