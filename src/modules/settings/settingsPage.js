@@ -4,7 +4,7 @@ import * as layout from '../support/layout';
 import * as settingObj from './settingObj';
 import * as system from '../support/system';
 
-function getVars() {
+function getVars() { // Native
   calf.buffs = system.getValue('huntingBuffs');
   calf.buffsName = system.getValue('huntingBuffsName');
   calf.buffs2 = system.getValue('huntingBuffs2');
@@ -58,8 +58,7 @@ export function injectSettingsGuildData(guildType) { // Native
     '<span class="fshPoint" ' +
     'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
     guildType + 'Message"> &#x00bb;</span>' +
-    '<div id="showGuild' + guildType + 'Message" ' +
-    'class="fshHide">' +
+    '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
     '<input name="guild' + guildType + 'Message" size="60" value="' +
     system.getValue('guild' + guildType + 'Message') + '">' +
     '</div>';
@@ -72,7 +71,7 @@ function clearStorage() { // Native
   );
 }
 
-function saveValueForm(name) {
+function saveValueForm(name) { // Legacy
   /* jshint validthis: true */
   var formElement =
     system.findNode('//input[@name="' + name + '"]', this);
@@ -145,7 +144,7 @@ function showMonsterLogs() { // Native
     'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
 }
 
-export function escapeHtml(unsafe) {
+export function escapeHtml(unsafe) { // Native
   return unsafe
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -154,57 +153,48 @@ export function escapeHtml(unsafe) {
     .replace(/'/g, '&#039;');
 }
 
-function createEventListeners() {
-  var tickAll = $('<span class="fshLink">Tick all buffs</span>');
-  tickAll.click(toggleTickAllBuffs);
-  $('#settingsTabs-4 td').eq(0).append('<br>').append(tickAll);
+function createEventListeners() { // Native
+  var tickAll = document.createElement('span');
+  tickAll.id = 'fshAllBuffs';
+  tickAll.className = 'fshLink';
+  tickAll.textContent = 'Tick all buffs';
+  tickAll.addEventListener('click', toggleTickAllBuffs);
+  var inject = document.getElementById('settingsTabs-4').firstElementChild
+    .rows[0].cells[0];
+  inject.appendChild(document.createElement('br'));
+  inject.appendChild(tickAll);
 
   document.getElementById('fshClearStorage')
-    .addEventListener('click', clearStorage, true);
+    .addEventListener('click', clearStorage);
 
   document.getElementById('Helper:SaveOptions')
-    .addEventListener('click', saveConfig, true);
+    .addEventListener('click', saveConfig);
   document.getElementById('Helper:ShowLogs')
-    .addEventListener('click', showLogs, true);
+    .addEventListener('click', showLogs);
   document.getElementById('Helper:ShowMonsterLogs')
-    .addEventListener('click', showMonsterLogs, true);
+    .addEventListener('click', showMonsterLogs);
 
   document.getElementById('toggleShowGuildSelfMessage')
-    .addEventListener('click', system.toggleVisibilty, true);
+    .addEventListener('click', system.toggleVisibilty);
   document.getElementById('toggleShowGuildFrndMessage')
-    .addEventListener('click', system.toggleVisibilty, true);
+    .addEventListener('click', system.toggleVisibilty);
   document.getElementById('toggleShowGuildPastMessage')
-    .addEventListener('click', system.toggleVisibilty, true);
+    .addEventListener('click', system.toggleVisibilty);
   document.getElementById('toggleShowGuildEnmyMessage')
-    .addEventListener('click', system.toggleVisibilty, true);
+    .addEventListener('click', system.toggleVisibilty);
 }
 
-export function injectSettings() { // Legacy
-
+export function injectSettings() { // jQuery.min
   getVars();
   configData.setupConfigData();
-
-  var maxID = parseInt($('div[id*="settingsTabs-"]:last').attr('id')
-    .split('-')[1], 10);
-  $('div[id*="settingsTabs-"]:last').after('<div id="settingsTabs-' +
-    (maxID + 1) + '">' + calf.configData + '</div>');
-  if ($('#settingsTabs').tabs('length') > 0) {
-    // chrome, have to add it this way (due to loading order
-    $('#settingsTabs').tabs('add', '#settingsTabs-' + (maxID + 1),
-      'FSH Settings');
-  } else {
-    // firefox loads it later, so just print to page
-    $('a[href*="settingsTabs-"]:last').parent()
-      .after('<li><a href="#settingsTabs-' + (maxID + 1) +
-      '">FSH Settings</a></li>');
+  var settingsTabs = document.getElementById('settingsTabs');
+  settingsTabs.insertAdjacentHTML('beforeend', '<div id="fshSettings">' +
+    calf.configData + '</div>');
+  if ($(settingsTabs).tabs('length') > 0) {
+    $(settingsTabs).tabs('add', '#fshSettings', 'FSH Settings');
   }
-
   createEventListeners();
-
-  var minGroupLevelTextField =
-    system.findNode('//input[@name="min_group_level"]');
-  if (minGroupLevelTextField) {
-    var minGroupLevel = minGroupLevelTextField.value;
-    system.setValue('minGroupLevel', minGroupLevel);
-  }
+  system.setValue('minGroupLevel', document.getElementById('settingsTabs-1')
+    .firstElementChild.lastElementChild.rows[1].cells[1].firstElementChild
+    .value);
 }
