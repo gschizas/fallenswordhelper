@@ -24,9 +24,13 @@ export var defaults = {
   moveFSBox: false,
 
   guildSelf: '',
+  guildSelfMessage: 'Member of your own guild!',
   guildFrnd: '',
+  guildFrndMessage: 'Do not attack - Guild is friendly!',
   guildPast: '',
+  guildPastMessage: 'Do not attack - You\'ve been in that guild once!',
   guildEnmy: '',
+  guildEnmyMessage: 'Enemy guild. Attack at will!',
   goldRecipient: '',
   goldAmount: '',
   sendGoldonWorld: false,

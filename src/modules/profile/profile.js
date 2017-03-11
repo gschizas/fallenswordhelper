@@ -13,19 +13,19 @@ var currentGuildRelationship;
 var guildMessages = {
   self: {
     color: 'fshGreen',
-    message: 'Member of your own guild!'
+    message: system.getValue('guildSelfMessage')
   },
   friendly: {
     color: 'fshOliveDrab',
-    message: 'Do not attack - Guild is friendly!'
+    message: system.getValue('guildFrndMessage')
   },
   old: {
     color: 'fshDarkCyan',
-    message: 'Do not attack - You\'ve been in that guild once!'
+    message: system.getValue('guildPastMessage')
   },
   enemy: {
     color: 'fshRed',
-    message: 'Enemy guild. Attack at will!'
+    message: system.getValue('guildEnmyMessage')
   }
 };
 

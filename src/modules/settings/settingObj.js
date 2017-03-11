@@ -11,13 +11,18 @@ export var networkIcon =
   'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
   'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
   'egAAAABJRU5ErkJggg==" width="16" height="16" />';
+
 export var saveBoxes = [
   'navigateToLogAfterMsg',
   'gameHelpLink',
   'guildSelf',
+  'guildSelfMessage',
   'guildFrnd',
+  'guildFrndMessage',
   'guildPast',
+  'guildPastMessage',
   'guildEnmy',
+  'guildEnmyMessage',
   'showAdmin',
   'ajaxifyRankControls',
   'detailedConflictInfo',
