@@ -8,6 +8,12 @@ export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver.slice(0, -1);
 
 export function getValue(name) {
+  //#if _DEV  //  No default setting available
+  if (typeof dataObj.defaults[name] === 'undefined') {
+    // eslint-disable-next-line no-console
+    console.log(name, dataObj.defaults[name]);
+  }
+  //#endif
   return GM_getValue(name, dataObj.defaults[name]);
 }
 
