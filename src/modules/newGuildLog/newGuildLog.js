@@ -24,77 +24,104 @@ function getGuildLogPage(page) {
   });
 }
 
+function storeRecallMsg(data) {
+  return data.indexOf('recalled the item') !== -1 ||
+    data.indexOf('took the item') !== -1 ||
+    data.indexOf('auto-returned the') !== -1 ||
+    data.indexOf('stored the item') !== -1;
+}
+
+function taggingMsg(data) {
+  return data.indexOf('has added flags to') !== -1 ||
+    data.indexOf('has removed flags to') !== -1;
+}
+
+function relicMsg(data) {
+  return data.indexOf('relic. This relic now has an empower level of') !== -1 ||
+    / empowered the .+ relic/.test(data) ||
+    data.indexOf(
+      'relic. The relic empower level has been reset to zero.') !== -1 ||
+    data.indexOf('failed to capture the relic') !== -1 ||
+    data.indexOf('captured the relic') !== -1 ||
+    data.indexOf('captured your relic') !== -1 ||
+    data.indexOf('has captured the undefended relic') !== -1 ||
+    data.indexOf('attempted to capture your relic') !== -1 ||
+    / removed the empowerment from the .+ relic/.test(data);
+}
+
+function mercMsg(data) {
+  return data.indexOf('disbanded a mercenary.') !== -1 ||
+    data.indexOf('hired the mercenary') !== -1;
+}
+
+function groupMsg(data) {
+  return data.indexOf('has disbanded one of their groups') !== -1 ||
+    /A group from your guild was (.*) in combat./.test(data);
+}
+
+function donationMsg(data) {
+  return /deposited ([,0-9]+) gold into the guild bank/.test(data) ||
+    /deposited ([,0-9]+) FallenSword Points into the guild./.test(data);
+}
+
+function rankMsg(data) {
+  return data.indexOf('has added a new rank entitled') !== -1 ||
+    data.indexOf('has deleted the rank') !== -1 ||
+    data.indexOf('has requested to join the guild') !== -1 ||
+    data.indexOf('has invited the player') !== -1 ||
+    data.indexOf('has officially joined the guild') !== -1 ||
+    data.indexOf('has been kicked from the guild by') !== -1 ||
+    data.indexOf('has left the guild') !== -1 ||
+    data.indexOf('has been assigned the rank') !== -1;
+}
+
+function gvgMsg(data) {
+  return /resulted in (.*) with a final score of/.test(data) ||
+    data.indexOf('resulted in a draw. Your GvG rating ' +
+      'and Guild RP was unaffected.') !== -1 ||
+    data.indexOf('has just initiated a conflict with the guild') !== -1 ||
+    data.indexOf('has initiated a conflict with your guild') !== -1 ||
+    data.indexOf('is participating in the conflict against the guild') !== -1;
+}
+
+function titanMsg(data) {
+  return data.indexOf('bought the Titan Reward item') !== -1 ||
+    data.indexOf('from your guild\'s contribution to the ' +
+      'defeat of the titan') !== -1 ||
+    data.indexOf('a 7 day cooldown has been activated ' +
+      'on your guild for this titan') !== -1;
+}
+
 function rowProfile(data) {
   var rowTypeID = 0;
   if (data.indexOf('(Potion)') !== -1) {
     // Potion messages
     rowTypeID = 1;
-  } else if (data.indexOf('recalled the item') !== -1 ||
-      data.indexOf('took the item') !== -1 ||
-      data.indexOf('auto-returned the') !== -1 ||
-      data.indexOf('stored the item') !== -1) {
+  } else if (storeRecallMsg(data)) {
     // Store/Recall (showRecallMessages)
     rowTypeID = 2;
-  } else if (
-      data.indexOf('has added flags to') !== -1 ||
-      data.indexOf('has removed flags to') !== -1) {
+  } else if (taggingMsg(data)) {
     // Tag/Untag (showTaggingMessages)
     rowTypeID = 3;
-  } else if (
-      data.indexOf('relic. This relic now has an empower level of') !== -1 ||
-      / empowered the .+ relic/.test(data) ||
-      data.indexOf(
-        'relic. The relic empower level has been reset to zero.') !== -1 ||
-      data.indexOf('failed to capture the relic') !== -1 ||
-      data.indexOf('captured the relic') !== -1 ||
-      data.indexOf('captured your relic') !== -1 ||
-      data.indexOf('has captured the undefended relic') !== -1 ||
-      data.indexOf('attempted to capture your relic') !== -1 ||
-      / removed the empowerment from the .+ relic/.test(data)) {
+  } else if (relicMsg(data)) {
     // Relic messages (showRelicMessages)
     rowTypeID = 4;
-  } else if (
-      data.indexOf('disbanded a mercenary.') !== -1 ||
-      data.indexOf('hired the mercenary') !== -1) {
+  } else if (mercMsg(data)) {
     // Mercenary messages (showMercenaryMessages)
     rowTypeID = 5;
-  } else if (
-      data.indexOf('has disbanded one of their groups') !== -1 ||
-      /A group from your guild was (.*) in combat./.test(data)) {
+  } else if (groupMsg(data)) {
     // Group Combat messages (showGroupCombatMessages)
     rowTypeID = 6;
-  } else if (
-      /deposited ([,0-9]+) FallenSword Points into the guild./.test(data) ||
-      /deposited ([,0-9]+) gold into the guild bank/.test(data)) {
+  } else if (donationMsg(data)) {
     // Donation messages (showDonationMessages)
     rowTypeID = 7;
-  } else if (
-      data.indexOf('has added a new rank entitled') !== -1 ||
-      data.indexOf('has deleted the rank') !== -1 ||
-      data.indexOf('has requested to join the guild') !== -1 ||
-      data.indexOf('has invited the player') !== -1 ||
-      data.indexOf('has officially joined the guild') !== -1 ||
-      data.indexOf('has been kicked from the guild by') !== -1 ||
-      data.indexOf('has left the guild') !== -1 ||
-      data.indexOf('has been assigned the rank') !== -1) {
+  } else if (rankMsg(data)) {
     // Ranking messages (showRankingMessages)
     rowTypeID = 8;
-  } else if (
-      data.indexOf('resulted in a draw. Your GvG rating and ' +
-        'Guild RP was unaffected.') !== -1 ||
-      /resulted in (.*) with a final score of/.test(data) ||
-      data.indexOf('has just initiated a conflict with the guild') !== -1 ||
-      data.indexOf('has initiated a conflict with your guild') !== -1 ||
-      data.indexOf(
-        'is participating in the conflict against the guild') !== -1) {
+  } else if (gvgMsg(data)) {
     // GvG messages (showGvGMessages)
     rowTypeID = 9;
-  } else if (
-      data.indexOf(
-        'from your guild\'s contribution to the defeat of the titan') !== -1 ||
-      data.indexOf('a 7 day cooldown has been activated on your ' +
-        'guild for this titan') !== -1 ||
-      data.indexOf('bought the Titan Reward item') !== -1) {
+  } else if (titanMsg(data)) {
     // Titan messages (showTitanMessages)
     rowTypeID = 10;
   }
