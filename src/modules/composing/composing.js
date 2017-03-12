@@ -44,6 +44,21 @@ function parseComposing(data) { // Native
   }
 }
 
+function createSuccess(temp, textStatus) { // Native
+  var potName = temp[temp.selectedIndex].text;
+  var myParent = temp.parentNode;
+  var infoDiv = myParent.previousElementSibling.previousElementSibling;
+  infoDiv.children[0].innerHTML = '';
+  infoDiv.children[0].classList.add('fshPot');
+  infoDiv.children[0].style.backgroundImage = 'url(' + system.imageServer +
+    '/composing/potions/' + system.getRandomInt(1, 11) + '_' +
+    system.getRandomInt(1, 51) + '.gif)';
+  infoDiv.children[2].innerHTML = 'Creating \'<span class="fshBold">' +
+    potName + '</span>\' Potion';
+  infoDiv.children[3].innerHTML = '';
+  myParent.innerHTML = '<div class="fshScs">' + textStatus + '</div>';
+}
+
 function createPotion(temp) { // jQuery
   $.ajax({
     cache: false,
@@ -53,15 +68,14 @@ function createPotion(temp) { // jQuery
       cmd: 'composing',
       subcmd: 'createajax',
       template_id: temp.value,
-      _rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+      _rnd: system.rnd()
     }
   }).done(function potionDone(data, textStatus) {
     if (data.error !== '') {
-      temp.parentNode.innerHTML = '<div style="height: 26px;">' +
+      temp.parentNode.innerHTML = '<div class="fshScs">' +
         data.error + '</div>';
     } else {
-      temp.parentNode.innerHTML = '<div style="height: 26px;">' +
-        textStatus + '</div>';
+      createSuccess(temp, textStatus);
     }
   });
 }

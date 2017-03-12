@@ -551,6 +551,16 @@ table.fshInvFilter td {
   text-align: center;
 }
 
+/* Composing Potion*/
+.fshPot {
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* Success Msg */
+.fshScs {
+  height: 26px;
+}
+
 /*
  * Table styles
  */

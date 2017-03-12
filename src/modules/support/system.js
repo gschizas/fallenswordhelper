@@ -251,3 +251,13 @@ export function testQuant(aValue) { // Native
     return theValue;
   }
 }
+
+export function getRandomInt(_min, _max) {
+  var min = Math.ceil(_min);
+  var max = Math.floor(_max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+export function rnd() {
+  return getRandomInt(1000000000, 9999999998);
+}

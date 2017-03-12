@@ -17,7 +17,7 @@ function quickBuy() {
       d: 0,
       id: shoppingData.id,
       item_id: shoppingData.itemId,
-      _rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+      _rnd: system.rnd()
     },
     dataType: 'json'
   });
