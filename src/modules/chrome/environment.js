@@ -9,10 +9,10 @@ import * as common from '../support/common';
 import * as composing from '../composing/composing';
 import * as fshGa from '../support/fshGa';
 import * as helperMenu from './helperMenu';
+import * as keyHandler from './keyHandler';
 import * as messaging from './messaging';
 import * as news from '../news';
 import * as notification from '../notification';
-import * as sendGold from '../newMap/sendGold';
 import * as statBar from './statBar';
 import * as system from '../support/system';
 import * as task from '../support/task';
@@ -20,7 +20,6 @@ import * as widgets from './widgets';
 
 var coreFunction;
 var functionPath;
-var expandMenuOnKeyPress;
 
 function getCoreFunction() { // Native
   var cmd;
@@ -73,142 +72,6 @@ function gameHelpLink() { // Native
       el.innerHTML = '<a href="index.php?cmd=settings">Game Help</a>';
     }
   });
-}
-
-function movePage(dir) { // Legacy
-  var dirButton = system.findNode('//input[@value="' + dir + '"]');
-  if (!dirButton) {return;}
-  var url = dirButton.getAttribute('onClick');
-  url = url.replace(/^[^']*'/m, '').replace(/';$/m, '');
-  location.href = url;
-}
-
-function changeCombatSet(responseText, itemIndex) { // jQuery.min
-  var doc = system.createDocument(responseText);
-
-  var cbsSelect = doc.querySelector(
-    '#profileCombatSetDiv select[name="combatSetId"]');
-
-  // find the combat set id value
-  var allItems = cbsSelect.getElementsByTagName('option');
-  if (itemIndex >= allItems.length) {return;}
-  var cbsIndex = allItems[itemIndex].value;
-
-  $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'managecombatset',
-      combatSetId: cbsIndex,
-      submit: 'Use'
-    },
-    success: function() {
-      if (expandMenuOnKeyPress) {
-        localStorage.setItem('hcs.nav.openIndex', '2');
-      }
-      location.href = 'index.php?cmd=profile';
-    }
-  });
-}
-
-function keyPress(evt) { // Native
-
-  if (evt.target.tagName !== 'HTML' &&
-      evt.target.tagName !== 'BODY') {return;}
-
-  /* ignore control, alt and meta keys
-  (I think meta is the command key in Macintoshes) */
-  if (evt.ctrlKey) {return;}
-  if (evt.metaKey) {return;}
-  if (evt.altKey) {return;}
-
-  var r = evt.charCode;
-
-  switch (r) {
-  case 114: // repair [r]
-    // do not use repair link for new map
-    if (!document.getElementById('worldPage')) {
-      location.href = 'index.php?cmd=blacksmith&subcmd=repairall&fromworld=1';
-    }
-    break;
-  case 71: // create group [G]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
-    location.href =
-      'index.php?cmd=guild&subcmd=groups&subcmd2=create&fromworld=1';
-    break;
-  case 76: // Log Page [L]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
-    location.href = 'index.php?cmd=log';
-    break;
-  case 103: // go to guild [g]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
-    location.href = 'index.php?cmd=guild&subcmd=manage';
-    break;
-  case 106: // join all group [j]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '4');}
-    if (!system.getValue('enableMaxGroupSizeToJoin')) {
-      location.href = 'index.php?cmd=guild&subcmd=groups&subcmd2=joinall';
-    } else {
-      location.href =
-        'index.php?cmd=guild&subcmd=groups&subcmd2=joinallgroupsundersize';
-    }
-    break;
-  case 98: // backpack [b]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
-    location.href = 'index.php?cmd=profile&subcmd=dropitems';
-    break;
-  case 118: // fast wear manager [v]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
-    location.href = 'index.php?cmd=notepad&blank=1&subcmd=quickwear';
-    break;
-  case 121: // fast send gold [y]
-    sendGold.doSendGold();
-    break;
-  case 112: // profile [p]
-    if (expandMenuOnKeyPress) {localStorage.setItem('hcs.nav.openIndex', '2');}
-    location.href = 'index.php?cmd=profile';
-    break;
-  case 62: // move to next page [>]
-  case 60: // move to prev page [<]
-    movePage({'62': '>', '60': '<'}[r]);
-    break;
-  case 33: // Shift+1
-  case 64: // Shift+2
-  case 34: // Shift+2 -- for UK keyboards, I think
-  case 35: // Shift+3
-  case 36: // Shift+4
-  case 37: // Shift+5
-  case 94: // Shift+6
-  case 38: // Shift+7
-  case 42: // Shift+8
-  case 40: // Shift+9
-    var keyMap = {
-      key33: 1,
-      key64: 2,
-      key34: 2,
-      key35: 3,
-      key36: 4,
-      key37: 5,
-      key94: 6,
-      key38: 7,
-      key42: 8,
-      key40: 9
-    };
-    /* I'm using "key??" because I don't feel
-    comfortable of naming properties with integers */
-    var itemIndex = keyMap['key' + r];
-    $.get('index.php?cmd=profile').done(function(data) {
-      changeCombatSet(data, itemIndex);
-    });
-    break;
-  default:
-    break;
-  }
-}
-
-function replaceKeyHandler() { // Native
-  expandMenuOnKeyPress = system.getValue('expandMenuOnKeyPress');
-  document.onkeypress = keyPress;
 }
 
 function getEnvVars() { // Native
@@ -371,7 +234,7 @@ function prepareEnv() { // Native
   }
 
   calf.huntingMode = system.getValue('huntingMode');
-  task.add(3, replaceKeyHandler);
+  task.add(3, keyHandler.replaceKeyHandler);
 
   if (!calf.huntingMode) {
     notHuntMode();
