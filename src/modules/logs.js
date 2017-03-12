@@ -230,125 +230,140 @@ function retrievePvPCombatSummary(responseText, callback) { // Legacy
   callback.target.innerHTML = output;
 }
 
-function addLogWidgetsOld() { // Legacy
-  var i;
+var addAttackLinkToLog;
+var memberNameString;
+var listOfAllies;
+var listOfEnemies;
+var showPvPSummaryInLog;
+
+function processRow(aRow) {
+  // if (!aRow.cells[0].innerHTML) {
+  //   console.log('Should not see this...');
+  //   return;
+  // }
   var playerElement;
   var playerName;
-  var addAttackLinkToLog = system.getValue('addAttackLinkToLog');
+  var firstCell = aRow.cells[0];
+  // Valid Types: General, Chat, Guild
+  var messageType = firstCell.firstChild.getAttribute('oldtitle');
+  if (!messageType) {return;}
+  var colorPlayerName = false;
+  var isGuildMate = false;
+  if (messageType === 'Chat') {
+    playerElement = aRow.cells[2].firstChild;
+    playerName = playerElement.innerHTML;
+    colorPlayerName = true;
+  }
+  if ((messageType === 'General' ||
+    messageType === 'Notification') &&
+    aRow.cells[2].firstChild.nextSibling &&
+    aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
+    aRow.cells[2].firstChild.nextSibling.getAttribute('href')
+      .search('player_id') !== -1) {
+    playerElement = aRow.cells[2].firstChild.nextSibling;
+    playerName = playerElement.innerHTML;
+    colorPlayerName = true;
+  }
+  if (colorPlayerName) {
+    if (memberNameString.indexOf(playerName) !== -1) {
+      playerElement.style.color = 'green';
+      isGuildMate = true;
+    }
+    if (listOfEnemies.indexOf(playerName) !== -1) {
+      playerElement.style.color = 'red';
+    }
+    if (listOfAllies.indexOf(playerName) !== -1) {
+      playerElement.style.color = 'blue';
+    }
+  }
+  if (messageType === 'Chat') {
+    doChat(aRow, isGuildMate, playerName, addAttackLinkToLog);
+  }
+  if (messageType === 'Notification' &&
+      aRow.cells[2].firstChild.nextSibling &&
+      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
+      aRow.cells[2].firstChild.nextSibling
+      .getAttribute('href').search('player_id') !== -1) {
+    if (!isGuildMate) {
+      var dateExtraText = '<nobr><span style="font-size:x-small;">' +
+        '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
+        '&subcmd=doaddignore&ignore_username=' + playerName +
+        '">Ignore</a> ]</span></nobr>';
+      aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
+        dateExtraText;
+    }
+    var buffingPlayerIDRE = /player_id=(\d+)/;
+    var buffingPlayerID = buffingPlayerIDRE
+      .exec(aRow.cells[2].innerHTML)[1];
+    var buffingPlayerName = aRow.cells[2].firstChild.nextSibling
+      .innerHTML;
+    var extraText = ' <span style="font-size:x-small;"><nobr>' +
+      '[ <span style="cursor:pointer;text-decoration:underline" ' +
+      'class="a-reply" target_player="' + buffingPlayerName +
+      '">Reply</span> | <a href="index.php?cmd=trade&target_player=' +
+      buffingPlayerName + '">Trade</a> | <a title="Secure Trade" ' +
+      'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+      buffingPlayerName + '">ST</a>';
+    extraText += ' | <a ' + layout.quickBuffHref(buffingPlayerID) +
+      '>Buff</a>';
+    if (addAttackLinkToLog) {
+      extraText += ' | <a href="index.php?cmd=attackplayer' +
+        '&target_username=' + buffingPlayerName + '">Attack</a>';
+    }
+    extraText += ' ]</nobr></span>';
+
+    aRow.cells[2].innerHTML += extraText;
+    //   }
+    // }
+  }
+
+  // add PvP combat log summary
+  if (messageType === 'Combat' &&
+    aRow.cells[2] &&
+    showPvPSummaryInLog &&
+    aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+    var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
+    var combatSummarySpan = document.createElement('SPAN');
+    combatSummarySpan.style.color = 'gray';
+    aRow.cells[2].appendChild(combatSummarySpan);
+    system.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
+      combatID, retrievePvPCombatSummary,
+      {
+        target: combatSummarySpan,
+        winner: defeat ? 0 : 1
+      });
+  }
+}
+
+function addLogWidgetsOld() { // Legacy
+  // var i;
+  // var playerElement;
+  // var playerName;
+  addAttackLinkToLog = system.getValue('addAttackLinkToLog');
   var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
     '(.,"Currently showing:")]]');
   if (!logTable) {return;}
-  var memberNameString = Object.keys(calf.membrList);
-  var listOfAllies = myPlayer._allies.map(function(obj) {
+  memberNameString = Object.keys(calf.membrList);
+  listOfAllies = myPlayer._allies.map(function(obj) {
     return obj.username;
   });
-  var listOfEnemies = myPlayer._enemies.map(function(obj) {
+  listOfEnemies = myPlayer._enemies.map(function(obj) {
     return obj.username;
   });
-  var showPvPSummaryInLog = system.getValue('showPvPSummaryInLog');
-  var messageType;
+  showPvPSummaryInLog = system.getValue('showPvPSummaryInLog');
+  // var messageType;
 
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
-    messageHeader.innerHTML += '&nbsp;&nbsp;<span style="' +
-      'color:white;">(Guild mates show up in <span style="' +
-      'color:green;">green</span>)</span>';
+    messageHeader.insertAdjacentHTML('beforeend', '&nbsp;&nbsp;' +
+      '<span class="fshWhite">(Guild mates show up in ' +
+      '<span class="fshGreen">green</span>)</span>');
   }
 
-  for (i = 1; i < logTable.rows.length; i += 2) {
-    var aRow = logTable.rows[i];
-    if (!aRow.cells[0].innerHTML) {continue;}
-    var firstCell = aRow.cells[0];
-    // Valid Types: General, Chat, Guild
-    messageType = firstCell.firstChild.getAttribute('oldtitle');
-    if (!messageType) {return;}
-    var colorPlayerName = false;
-    var isGuildMate = false;
-    if (messageType === 'Chat') {
-      playerElement = aRow.cells[2].firstChild;
-      playerName = playerElement.innerHTML;
-      colorPlayerName = true;
-    }
-    if ((messageType === 'General' ||
-      messageType === 'Notification') &&
-      aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling.getAttribute('href')
-        .search('player_id') !== -1) {
-      playerElement = aRow.cells[2].firstChild.nextSibling;
-      playerName = playerElement.innerHTML;
-      colorPlayerName = true;
-    }
-    if (colorPlayerName) {
-      if (memberNameString.indexOf(playerName) !== -1) {
-        playerElement.style.color = 'green';
-        isGuildMate = true;
-      }
-      if (listOfEnemies.indexOf(playerName) !== -1) {
-        playerElement.style.color = 'red';
-      }
-      if (listOfAllies.indexOf(playerName) !== -1) {
-        playerElement.style.color = 'blue';
-      }
-    }
-    if (messageType === 'Chat') {
-      doChat(aRow, isGuildMate, playerName, addAttackLinkToLog);
-    }
-    if (messageType === 'Notification') {
-      if (aRow.cells[2].firstChild.nextSibling && aRow.cells[2].firstChild
-          .nextSibling.nodeName === 'A') {
-        if (aRow.cells[2].firstChild.nextSibling.getAttribute('href')
-            .search('player_id') !== -1) {
-          if (!isGuildMate) {
-            var dateExtraText = '<nobr><span style="font-size:x-small;">' +
-              '[ <a title="Add to Ignore List" href="index.php?cmd=log' +
-              '&subcmd=doaddignore&ignore_username=' + playerName +
-              '">Ignore</a> ]</span></nobr>';
-            aRow.cells[1].innerHTML = aRow.cells[1].innerHTML + '<br>' +
-              dateExtraText;
-          }
-          var buffingPlayerIDRE = /player_id=(\d+)/;
-          var buffingPlayerID = buffingPlayerIDRE
-            .exec(aRow.cells[2].innerHTML)[1];
-          var buffingPlayerName = aRow.cells[2].firstChild.nextSibling
-            .innerHTML;
-          var extraText = ' <span style="font-size:x-small;"><nobr>' +
-            '[ <span style="cursor:pointer;text-decoration:underline" ' +
-            'class="a-reply" target_player="' + buffingPlayerName +
-            '">Reply</span> | <a href="index.php?cmd=trade&target_player=' +
-            buffingPlayerName + '">Trade</a> | <a title="Secure Trade" ' +
-            'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-            buffingPlayerName + '">ST</a>';
-          extraText += ' | <a ' + layout.quickBuffHref(buffingPlayerID) +
-            '>Buff</a>';
-          if (addAttackLinkToLog) {
-            extraText += ' | <a href="index.php?cmd=attackplayer' +
-              '&target_username=' + buffingPlayerName + '">Attack</a>';
-          }
-          extraText += ' ]</nobr></span>';
-
-          aRow.cells[2].innerHTML += extraText;
-        }
-      }
-    }
-
-    // add PvP combat log summary
-    if (messageType === 'Combat' &&
-      aRow.cells[2] &&
-      showPvPSummaryInLog &&
-      aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
-      var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-      var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
-      var combatSummarySpan = document.createElement('SPAN');
-      combatSummarySpan.style.color = 'gray';
-      aRow.cells[2].appendChild(combatSummarySpan);
-      system.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
-        combatID, retrievePvPCombatSummary,
-        {
-          target: combatSummarySpan,
-          winner: defeat ? 0 : 1
-        });
-    }
+  for (var i = 1; i < logTable.rows.length; i += 2) {
+    // var aRow = logTable.rows[i];
+    processRow(logTable.rows[i]);
   }
   $('.a-reply').click(function(evt) {
     window.openQuickMsgDialog(evt.target.getAttribute('target_player'),
