@@ -119,7 +119,9 @@ var keyDict = {
 };
 
 function handleKey(r) {
-  keyDict[r].fn(keyDict[r].arg);
+  if (r in keyDict) {
+    keyDict[r].fn(keyDict[r].arg);
+  }
 }
 
 function keyPress(evt) { // Native
