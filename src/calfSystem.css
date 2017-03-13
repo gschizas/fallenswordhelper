@@ -557,8 +557,25 @@ table.fshInvFilter td {
   background-position: center;
 }
 /* Success Msg */
-.fshScs {
-  height: 26px;
+.fshScs {height: 26px;}
+
+/* Guild Chat */
+.fshGc {
+  table-layout: fixed;
+  overflow-wrap: break-word;
+}
+/* New Row */
+.fshNr {
+  background-color: #F5F298;
+}
+/* Old Row */
+.fshOr {
+  background-color: #CD9E4B;
+}
+/* Buff Link */
+.fshBf {
+  color: blue;
+  font-size: 84%;
 }
 
 /*
