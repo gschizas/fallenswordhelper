@@ -90,8 +90,7 @@ export function makePageTemplate(title, comment, spanId, button, divId) { // Nat
     '<div class="fshSmall" id="' + divId + '"></div>';
 }
 
-export function onlineDot(obj) { // Native
-  var img;
+function getMins(obj) {
   var min = 0;
   if (obj.day) {min += parseInt(obj.day, 10) * 1440;}
   if (obj.hour) {min += parseInt(obj.hour, 10) * 60;}
@@ -101,6 +100,12 @@ export function onlineDot(obj) { // Native
   }
   // last_login is 'false' over 30 days
   if ('last_login' in obj && !obj.last_login) {min = 99999;}
+  return min;
+}
+
+export function onlineDot(obj) { // Native
+  var img;
+  var min = getMins(obj);
   if (min < 2) {
     img = greenDiamond;
   } else if (min < 5) {
