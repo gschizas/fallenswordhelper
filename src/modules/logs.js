@@ -10,7 +10,7 @@ var memberNameString;
 var listOfAllies;
 var listOfEnemies;
 var showPvPSummaryInLog;
-var playerId = layout.playerId();
+var playerId;
 
 function findChatTable() { // Legacy
   var chatTable = system.findNode('//table[@class="width_full"]'); // Guild Log
@@ -446,6 +446,8 @@ export function addGuildLogWidgets() { // Legacy
   messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="' +
     'fshWhite">(Guild Log messages not involving ' +
     'self are dimmed!)</span>';
+
+  playerId = layout.playerId();
 
   for (var i = 1; i < logTable.rows.length; i += 2) {
     var aRow = logTable.rows[i];
