@@ -187,29 +187,38 @@ function evalArmour(combat) { // Native
   return combat;
 }
 
-function evalAnalysis(combat) { // Native
-  // Analysis:
-
+function evalPlayerHits(combat) { // Native
+  var playerHits;
   if (combat.numberOfCreatureHitsTillDead === '-') {
-    combat.playerHits = combat.numberOfHitsRequired;
+    playerHits = combat.numberOfHitsRequired;
   } else if (combat.numberOfHitsRequired === '-' ||
       combat.numberOfHitsRequired >
       combat.numberOfCreatureHitsTillDead) {
-    combat.playerHits = '-';
+    playerHits = '-';
   } else {
-    combat.playerHits = combat.numberOfHitsRequired;
+    playerHits = combat.numberOfHitsRequired;
   }
+  return playerHits;
+}
 
+function evalCreatureHits(combat) { // Native
+  var creatureHits;
   if (combat.numberOfHitsRequired === '-') {
-    combat.creatureHits = combat.numberOfCreatureHitsTillDead;
+    creatureHits = combat.numberOfCreatureHitsTillDead;
   } else if (combat.numberOfCreatureHitsTillDead === '-' ||
       combat.numberOfCreatureHitsTillDead >
       combat.numberOfHitsRequired) {
-    combat.creatureHits = '-';
+    creatureHits = '-';
   } else {
-    combat.creatureHits = combat.numberOfCreatureHitsTillDead;
+    creatureHits = combat.numberOfCreatureHitsTillDead;
   }
+  return creatureHits;
+}
 
+function evalAnalysis(combat) { // Native
+  // Analysis:
+  combat.playerHits = evalPlayerHits(combat);
+  combat.creatureHits = evalCreatureHits(combat);
   combat.fightStatus = 'Unknown';
   if (combat.playerHits === '-' && combat.creatureHits === '-') {
     combat.fightStatus = 'Unresolved';
