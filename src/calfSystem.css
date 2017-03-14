@@ -578,6 +578,12 @@ table.fshInvFilter td {
   font-size: 84%;
 }
 
+/* AH Quick Search - Category Header */
+.fshQs {
+  font-weight: bold;
+  font-size: large;
+}
+
 /*
  * Table styles
  */
