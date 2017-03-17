@@ -1,10 +1,12 @@
 export var defaults = {
   lastActiveQuestPage: '',
-  lastCompletedQuestPage: '',
-  lastNotStartedQuestPage: '',
-  lastWorld: '',
-  questsNotStarted: false,
-  questsNotComplete: false,
+  lastNormalActiveQuestPage: '',
+  lastNormalCompletedQuestPage: '',
+  lastNormalNotStartedQuestPage: '',
+  lastSeasonalActiveQuestPage: '',
+  lastSeasonalCompletedQuestPage: '',
+  lastSeasonalNotStartedQuestPage: '',
+
   enableLogColoring: false,
   enableChatParsing: false,
   enableCreatureColoring: false,

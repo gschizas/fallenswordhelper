@@ -2,9 +2,10 @@ import * as system from '../support/system';
 
 export function injectMenu() { // jQuery.min
   if (!document.getElementById('pCL')) {return;}
-  if (system.getValue('lastActiveQuestPage').length > 0) {
+  var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
+  if (lastActiveQuestPage.length > 0) {
     document.querySelector('#pCL a[href="index.php?cmd=questbook"]')
-      .setAttribute('href', system.getValue('lastActiveQuestPage'));
+      .setAttribute('href', lastActiveQuestPage);
   }
   // character
   document.getElementById('nav-character-log').parentNode
