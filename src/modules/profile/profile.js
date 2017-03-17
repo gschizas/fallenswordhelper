@@ -185,6 +185,37 @@ function updateStatistics() { // Native
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
 }
 
+var profileCombatSetDiv;
+
+function getNekid() {
+  var profileBlock = profileCombatSetDiv.nextElementSibling;
+  var aLinks = profileBlock.getElementsByTagName('a');
+  var prm = [];
+  Array.prototype.forEach.call(aLinks, function(link) {
+    var href = link.getAttribute('href');
+    prm.push($.get(href));
+  });
+  $.when.apply($, prm).done(function() {
+    location.assign('index.php?cmd=profile');
+  });
+}
+
+function nekidBtn() { // Native
+  var profileRightColumn = document.getElementById('profileRightColumn');
+  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
+  var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
+  var nekidDiv = document.createElement('div');
+  nekidDiv.className = 'fshCenter';
+  var theBtn = document.createElement('button');
+  theBtn.className = 'fshBl fshBls';
+  theBtn.textContent = 'Nekid';
+  nekidDiv.insertAdjacentText('beforeend', '[ ');
+  nekidDiv.insertAdjacentElement('beforeend', theBtn);
+  nekidDiv.insertAdjacentText('beforeend', ' ]');
+  profileRightColumn.replaceChild(nekidDiv, targetBr);
+  theBtn.addEventListener('click', getNekid);
+}
+
 export function injectProfile() { // Native
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
@@ -201,6 +232,7 @@ export function injectProfile() { // Native
     quickWearLink();
     selectAllLink();
     storeVL();
+    nekidBtn();
   }
   // Must be before profileInjectQuickButton
   profileInjectGuildRel();
