@@ -26,7 +26,7 @@ module.exports = {
     "array-callback-return": ["error"],
     "block-scoped-var": ["error"],
     "class-methods-use-this": ["error"],
-    "complexity": ["error"],
+    "complexity": ["error", 12],
     // "consistent-return": ["error"],
     "curly": ["error"],
     "default-case": ["error"],
@@ -128,6 +128,7 @@ module.exports = {
     "max-depth": ["error", 5],
     "max-len": ["error", {
       "code": 80,
+      "ignoreComments": true,
       "ignoreTrailingComments": true,
       "ignoreUrls": true
     }],

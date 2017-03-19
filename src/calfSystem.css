@@ -18,6 +18,22 @@
 .isInSTBorder {border: 3px solid red;}
 .tradeItemMargin {margin: 2.4px;}
 
+/* Quest Page */
+.parent {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+.parent a {
+  display: inline-block; /* Need this for UC */
+  height: 17.4px;
+  width: 17.4px;
+  background-size: contain;
+  border: solid 1px #4f3717;
+  border-radius: 2px;
+}
+
 /* New Map */
 #missingBuffs {
   text-align: center;
@@ -30,6 +46,7 @@
   align-items: center;
 }
 #fshWorldButtonContainer .quicklink {
+  display: inline-block; /* Need this for UC */
   height: 15px;
   width: 15px;
   border: solid 1px #4f3717;

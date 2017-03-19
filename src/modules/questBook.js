@@ -147,7 +147,21 @@ function updateLinks() { // Native
   }
 }
 
-export function injectQuestBookFull() { // Legacy
+function guideButtons(questID, questName) {
+  return '<div class="parent">' +
+    '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
+    'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
+    'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
+    'style="background-image: url(\'' + system.imageServer +
+    '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
+    '<a href="http://wiki.fallensword.com/index.php?title=' +
+    questName.replace(/ /g, '_') + '" class="tip-static" ' +
+    'data-tipped="Search for this quest on the Wiki" ' +
+    'style="background-image: url(\'' + system.imageServer +
+    '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
+}
+
+export function injectQuestBookFull() { // Native
   layout.pCC.addEventListener('click', dontPost);
   if (system.getValue('storeLastQuestPage')) {
     whereAmI();
@@ -162,8 +176,7 @@ export function injectQuestBookFull() { // Legacy
   }
   for (var i = 2; i < questTable.rows.length; i += 4) {
     var aRow = questTable.rows[i];
-    var questName =
-      aRow.cells[0].firstChild.innerHTML.replace(/ {2}/g, ' ').trim();
+    var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
     if (hideQuests.indexOf(questName) >= 0) {
       aRow.classList.add('fshHide');
       aRow.nextElementSibling.classList.add('fshHide');
@@ -172,39 +185,19 @@ export function injectQuestBookFull() { // Legacy
         .classList.add('fshHide');
     }
     var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-    aRow.cells[4].innerHTML = '<a href="http://guide.fallensword.com/' +
-      'index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID +
-      '&amp;search_name=&amp;search_level_min=&amp;search_level_max=' +
-      '&amp;sort_by=" target="_blank">' +
-      '<img border=0 style="float:left;" title="Search quest in Ultimate' +
-      ' FSG" src="' + system.imageServer + '/temple/1.gif"/></a>';
-    aRow.cells[4].innerHTML += '&nbsp;<a href="http://wiki.fallensword' +
-      '.com/index.php?title=' + questName.replace(/ /g, '_') +
-      '" target="_blank"><img border=0 style="float:left;" title="' +
-      'Search for this quest on the Wiki" src="' +
-      system.imageServer + '/skin/fs_wiki.gif"/></a>';
+    aRow.cells[4].innerHTML = guideButtons(questID, questName);
   }
 }
 
-export function injectQuestTracker() { // Legacy
-  var injectHere = system.findNode('//td[font/b[.="Quest Details"]]');
-  var questId = document.location.search.match(/quest_id=(\d+)/)[1];
-  injectHere.innerHTML += '&nbsp;<a target="_blank" href="http://guide.' +
-    'fallensword.com/index.php?cmd=quests&subcmd=view&quest_id=' + questId +
-    '"><img border=0 title="Search quest in Ultimate FSG" src="' +
-    system.imageServer + '/temple/1.gif"/></a>';
-  var questName =
-    system.findNode('//font[@size="2" and contains(.,"\'")]', injectHere);
-  if (questName) {
-    questName = questName.innerHTML;
-    questName = questName.match(/"(.*)"/);
-    if (questName && questName.length > 1) {
-      questName = questName[1];
-      injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com' +
-        '/index.php?title=' + questName.replace(/ /g, '_') +
-        '" target="_blank"><img border=0 title="Search for this quest on ' +
-        'the Fallensword Wiki" src=' + system.imageServer +
-        '/skin/fs_wiki.gif /></a>';
-    }
+export function injectQuestTracker() { // Native
+  var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
+  if (lastActiveQuestPage.length > 0) {
+    layout.pCC.getElementsByTagName('a')[0]
+      .setAttribute('href', lastActiveQuestPage);
   }
+  var questID = system.getUrlParameter('quest_id');
+  var injectHere = layout.pCC.getElementsByTagName('td')[0];
+  var questName = injectHere.getElementsByTagName('font')[1].textContent
+    .replace(/"/g, '');
+  injectHere.insertAdjacentHTML('beforeend', guideButtons(questID, questName));
 }
