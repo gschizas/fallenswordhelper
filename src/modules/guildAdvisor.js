@@ -140,9 +140,15 @@ function injectAdvisorNew(m) { // Native
 
 }
 
-function returnAdvisorPage(response) { // Native
-  /* jshint validthis: true */
-  var e = this.period;
+function newMember(member) {
+  return member || {};
+}
+
+function newNumber(number) {
+  return number || 0;
+}
+
+function returnAdvisorPage(e, response) { // Native
 
   debug.time('guildAdvisor.returnAdvisorPage' + e);
 
@@ -155,24 +161,24 @@ function returnAdvisorPage(response) { // Native
     var tds = el.cells;
     var member = tds[0].textContent.trim();
     if (member === 'Member') {return;}
-    newSummary[member] = newSummary[member] || {};
-    newSummary[member].deposit = (newSummary[member].deposit || 0) +
+    newSummary[member] = newMember(newSummary[member]);
+    newSummary[member].deposit = newNumber(newSummary[member].deposit) +
       system.intValue(tds[1].textContent);
-    newSummary[member].tax = (newSummary[member].tax || 0) +
+    newSummary[member].tax = newNumber(newSummary[member].tax) +
       system.intValue(tds[2].textContent);
-    newSummary[member].total = (newSummary[member].total || 0) +
+    newSummary[member].total = newNumber(newSummary[member].total) +
       system.intValue(tds[3].textContent);
-    newSummary[member].fsp = (newSummary[member].fsp || 0) +
+    newSummary[member].fsp = newNumber(newSummary[member].fsp) +
       system.intValue(tds[4].textContent);
-    newSummary[member].skills = (newSummary[member].skills || 0) +
+    newSummary[member].skills = newNumber(newSummary[member].skills) +
       system.intValue(tds[5].textContent);
-    newSummary[member].grpCrt = (newSummary[member].grpCrt || 0) +
+    newSummary[member].grpCrt = newNumber(newSummary[member].grpCrt) +
       system.intValue(tds[6].textContent);
-    newSummary[member].grpJoin = (newSummary[member].grpJoin || 0) +
+    newSummary[member].grpJoin = newNumber(newSummary[member].grpJoin) +
       system.intValue(tds[7].textContent);
-    newSummary[member].relics = (newSummary[member].relics || 0) +
+    newSummary[member].relics = newNumber(newSummary[member].relics) +
       system.intValue(tds[8].textContent);
-    newSummary[member].contrib = (newSummary[member].contrib || 0) +
+    newSummary[member].contrib = newNumber(newSummary[member].contrib) +
       system.intValue(tds[9].textContent);
   });
 
@@ -187,9 +193,8 @@ function getAdvisorPage(e) { // jQuery
       cmd: 'guild',
       subcmd: 'advisor',
       period: e
-    },
-    period: e
-  }).done(returnAdvisorPage);
+    }
+  }).done(returnAdvisorPage.bind(null, e));
 }
 
 function displayAdvisor() { // jQuery
