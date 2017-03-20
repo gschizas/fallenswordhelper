@@ -253,12 +253,16 @@ function parseBountyPageForWorld(details, callback) { // Native
   task.add(3, parseBountyPageForWorld2, [details, callback]);
 }
 
-function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legacy
-  var bountyList = system.getValueJSON('bountyList');
-  var wantedList = system.getValueJSON('wantedList');
-  var bountyListRefreshTime = system.getValue('bountyListRefreshTime');
-  var bwNeedsRefresh = system.getValue('bwNeedsRefresh');
+var bountyList;
+var wantedList;
+var bountyListRefreshTime;
+var bwNeedsRefresh;
 
+function invalidateCache() { // Legacy
+  bountyList = system.getValueJSON('bountyList');
+  wantedList = system.getValueJSON('wantedList');
+  bountyListRefreshTime = system.getValue('bountyListRefreshTime');
+  bwNeedsRefresh = system.getValue('bwNeedsRefresh');
   bountyListRefreshTime *= 1000;
   if (!bwNeedsRefresh) {
     if (bountyList) {
@@ -276,7 +280,10 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
       }
     }
   }
+}
 
+function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legacy
+  invalidateCache();
   if (!bountyList || !wantedList || bwNeedsRefresh &&
     (enableActiveBountyList || enableWantedList)) {
     wantedList = {};
