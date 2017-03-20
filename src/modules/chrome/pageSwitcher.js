@@ -213,7 +213,8 @@ export default {
     risingstars: {'-': {'-': {'-': toprated.injectTopRated}}},
     arena: {'-': {'-': {'-': toprated.injectTopRated}}},
     superelites: {'-': {'-': {'-': toprated.injectTopRated}}},
-    smasher: {'-': {'-': {'-': toprated.injectTopRated}}}
+    smasher: {'-': {'-': {'-': toprated.injectTopRated}}},
+    globalquest: {'-': {'-': {'-': toprated.globalQuest}}}
   },
   inventing: {viewrecipe: {'-': {'-': {'-': recipes.inventing}}}},
   tempinv: {'-': {'-': {'-': {'-': mailbox.injectMailbox}}}},

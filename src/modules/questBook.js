@@ -147,7 +147,7 @@ function updateLinks() { // Native
   }
 }
 
-function guideButtons(questID, questName) {
+function guideButtons(questID, questName) { // Native
   return '<div class="parent">' +
     '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
     'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +

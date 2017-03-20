@@ -5,26 +5,6 @@ import * as system from './system';
 
 var deferred = window.$ && $.when();
 
-function getGuildMembers(guildId) {
-  return $.ajax({
-    dataType: 'json',
-    url: 'index.php',
-    data: {
-      cmd: 'export',
-      subcmd: 'guild_members',
-      guild_id: guildId
-    }
-  }).pipe(function membrListToHash(data) {
-    var membrList = {};
-    membrList[guildId] = {};
-    membrList[guildId].lastUpdate = Date.now();
-    data.forEach(function memberToObject(ele) {
-      membrList[guildId][ele.username] = ele;
-    });
-    return membrList;
-  });
-}
-
 export function getForage(forage) {
   // Wrap in jQuery Deferred because we're using 1.7
   // rather than using ES6 promise
@@ -51,7 +31,31 @@ export function setForage(forage, data) {
   });
 }
 
-function addMembrListToForage(membrList) {
+export function getGuild(guildId) {
+  return $.ajax({
+    dataType: 'json',
+    url: 'index.php',
+    data: {
+      cmd: 'export',
+      subcmd: 'guild_members',
+      guild_id: guildId
+    }
+  });
+}
+
+function getGuildMembers(guildId) {
+  return getGuild(guildId).pipe(function membrListToHash(data) {
+    var membrList = {};
+    membrList[guildId] = {};
+    membrList[guildId].lastUpdate = Date.now();
+    data.forEach(function memberToObject(ele) {
+      membrList[guildId][ele.username] = ele;
+    });
+    return membrList;
+  });
+}
+
+export function addMembrListToForage(membrList) {
   getForage('fsh_membrList')
     .done(function saveMembrListInForage(data) {
       var oldMemList = data || {};
@@ -59,7 +63,7 @@ function addMembrListToForage(membrList) {
     });
 }
 
-function guildMembers(force, guildId) {
+export function guildMembers(force, guildId) {
   if (force) {
     return getGuildMembers(guildId).done(addMembrListToForage);
   }
@@ -82,19 +86,6 @@ export function getMembrList(force) {
       calf.membrList = membrList[guildId];
       return calf.membrList;
     });
-}
-
-export function getAllMembrList(force, guildArray) {
-  var prm = [];
-  guildArray.forEach(function addGuildToArray(guildId) {
-    prm.push(guildMembers(force, guildId));
-  });
-  return $.when.apply($, prm)
-    .pipe(function mergeResults() {
-      calf.membrList = $.extend.apply($, arguments);
-      return calf.membrList;
-    })
-    .done(addMembrListToForage);
 }
 
 function sendInventoryToForage(data) {
@@ -152,7 +143,7 @@ export function getProfile(username) {
     cmd: 'export',
     subcmd: 'profile',
     player_username: username
-  }).pipe(addLastUpdateDate);
+  });
 }
 
 function sendMyProfileToForage(data) {
@@ -161,6 +152,7 @@ function sendMyProfileToForage(data) {
 
 function getMyProfile() {
   return getProfile(layout.playerName())
+    .pipe(addLastUpdateDate)
     .done(sendMyProfileToForage);
 }
 
