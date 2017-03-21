@@ -63,8 +63,8 @@ export function addLogColoring(logScreen, dateColumn) { // Legacy
 function addChatTextArea() { // jQuery
   if (!system.getValue('enhanceChatTextEntry')) {return;}
   $('#pCC form').first().attr('id', 'dochat');
-  $('#pCC input').slice(0, 7).each(function() {
-    $(this).attr('form', 'dochat');
+  $('#pCC input').slice(0, 7).each(function(i, e) {
+    $(e).attr('form', 'dochat');
   });
   var theTable = $('#pCC table table').first();
   theTable.append('<tr id="fshMass"></tr>');

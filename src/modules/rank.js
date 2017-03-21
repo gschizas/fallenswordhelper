@@ -9,8 +9,7 @@ var theRows;
 var rankCount;
 var characterRow;
 
-function parseRankData(responseText) { // Native
-  /* jshint validthis: true */
+function parseRankData(linkElement, responseText) { // Native
   // Makes a weighted calculation of available permissions and gets tax rate
   var doc = system.createDocument(responseText);
   var checkBoxes = doc.querySelectorAll(
@@ -38,7 +37,6 @@ function parseRankData(responseText) { // Native
     }
   });
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
-  var linkElement = this.linkElement;
   linkElement.insertAdjacentHTML('afterbegin', '<span class="fshBlue">(' +
     Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
@@ -51,7 +49,7 @@ function fetchRankData() { // jQuery
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;
     var href = /window\.location='(.*)';/.exec(anItem
       .getAttribute('onclick'))[1];
-    $.ajax({url: href, linkElement: targetNode}).done(parseRankData);
+    $.get(href).done(parseRankData.bind(null, targetNode));
   });
 }
 

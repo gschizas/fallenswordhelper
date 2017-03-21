@@ -4,8 +4,8 @@ function gotMoves(_arena) { // jQuery
   var arena = _arena || {};
   arena.moves = {};
   var arenaMoves = $('#pCC img[vspace="4"]').slice(1);
-  arenaMoves.each(function() {
-    var self = $(this);
+  arenaMoves.each(function(i, e) {
+    var self = $(e);
     var src = self.attr('src');
     var moveId = /(\d+)\.gif/.exec(src)[1];
     arena.moves[moveId] = {};

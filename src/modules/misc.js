@@ -21,9 +21,9 @@ export function injectFindPlayer() { // Bad jQuery
     'Get GvG targets</span></a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')
-    .each(function() {
-      var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
-      $(this).after('<a style="color:blue;font-size:10px;" ' +
+    .each(function(i, e) {
+      var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
+      $(e).after('<a style="color:blue;font-size:10px;" ' +
         layout.quickBuffHref(id[1]) + '>[b]</a>');
     });
 }

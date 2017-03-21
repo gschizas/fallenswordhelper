@@ -155,8 +155,8 @@ function showQuickWear(callback) { // jQuery
 }
 
 function retrieveItemInfor(doc) { // jQuery
-  $('#pCC input[name="removeIndex[]"]', doc).each(function() {
-    var input = $(this);
+  $('#pCC input[name="removeIndex[]"]', doc).each(function(i, e) {
+    var input = $(e);
     input.closest('tr').find('img').attr('width', '30')
       .attr('height', '30');
     var item = {

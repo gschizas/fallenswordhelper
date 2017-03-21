@@ -49,10 +49,10 @@ function colorMonsters() { // jQuery
 function afterUpdateActionList() { // jQuery
   // color the critters in the do no kill list blue
   // TODO substring bug
-  $('#actionList div.header').each(function() {
+  $('#actionList div.header').each(function(i, e) {
     if (calf.doNotKillList.indexOf(
-        $(this).find('a.icon').data('name')) !== -1) {
-      $(this).css('color', 'blue');
+        $(e).find('a.icon').data('name')) !== -1) {
+      $(e).css('color', 'blue');
     }
   });
 }

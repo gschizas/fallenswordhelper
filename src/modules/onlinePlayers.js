@@ -102,8 +102,8 @@ function getOnlinePlayers(data) { // Bad jQuery
   var thePage = input.attr('value');
   var theRows = $('#pCC img[src$="/skin/icon_action_view.gif',
     doc).parent().parent().parent();
-  theRows.each(function(index) {
-    var tds = $('td', $(this));
+  theRows.each(function(index, element) {
+    var tds = $('td', $(element));
     var player = tds.eq(1).text();
     if (onlinePlayers[player] &&
         onlinePlayers[player][3] > thePage) {return;}

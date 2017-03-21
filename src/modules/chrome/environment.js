@@ -270,12 +270,12 @@ function asyncDispatcher() { // Native
 
 function doMsgSound() { // jQuery
   var soundLocation = system.getValue('defaultMessageSound');
-  $('a:contains("New log messages"):first').each(function() {
-    $(this).after('<audio src="' + soundLocation +
+  $('a:contains("New log messages"):first').each(function(i, e) {
+    $(e).after('<audio src="' + soundLocation +
     '" autoplay=true />');
   });
-  $('a:contains("New Guild chat message"):first').each(function() {
-    $(this).after('<audio src="' + soundLocation +
+  $('a:contains("New Guild chat message"):first').each(function(i, e) {
+    $(e).after('<audio src="' + soundLocation +
     '" autoplay=true />');
   });
 }

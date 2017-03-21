@@ -30,8 +30,11 @@ function showComposingMessage(message, bgcolor) { // jQuery
     );
 
   setTimeout(function() {
-    $('#composingMessageContainer').animate({opacity: 0}, 500, function() {
-      $(this).animate({height: 0}, 500, function() {$(this).hide();});
+    var self = $('#composingMessageContainer');
+    self.animate({opacity: 0}, 500, function() {
+      self.animate({height: 0}, 500, function() {
+        self.hide();
+      });
     });
   }, 5000);
 }
@@ -47,12 +50,6 @@ function breakItems() { // jQuery.min
       showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
     }
     window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
-    // if (response.error === 0) {
-    //   window.location = 'index.php?cmd=composing&subcmd=breakdown&m=1';
-    //   return;
-    // } else {
-    //   showComposingMessage('Error: ' + response.msg, 'rgb(164, 28, 28)');
-    // }
   });
 }
 

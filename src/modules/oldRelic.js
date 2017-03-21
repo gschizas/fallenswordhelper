@@ -440,8 +440,8 @@ function calculateRelicDefenderStats() { // Legacy - Old map
   }
 
   var defenders = $('#pCC table table a[href*="cmd=profile&player_id="]');
-  defenders.each(function(ind) {
-    var $this = $(this);
+  defenders.each(function(ind, ele) {
+    var $this = $(ele);
     getRelicPlayerData(ind, $this.attr('href'), $this.text());
     if (defendingGuildID === myGuildID && !hideRelicOffline) {
       validMemberString = validMemberString.replace(

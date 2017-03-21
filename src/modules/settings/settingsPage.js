@@ -71,15 +71,14 @@ function clearStorage() { // Native
   );
 }
 
-function saveValueForm(name) { // Legacy
-  /* jshint validthis: true */
+function saveValueForm(oForm, name) { // Legacy
   var formElement =
-    system.findNode('//input[@name="' + name + '"]', this);
+    system.findNode('//input[@name="' + name + '"]', oForm);
   if (formElement.getAttribute('type') === 'checkbox') {
     system.setValue(name, formElement.checked);
   } else if (formElement.getAttribute('type') === 'radio') {
     var radioElements = system.findNodes('//input[@name="' + name +
-      '"]', 0, this);
+      '"]', 0, oForm);
     for (var i = 0; i < radioElements.length; i += 1) {
       if (radioElements[i].checked) {
         system.setValue(name, radioElements[i].value);
@@ -129,7 +128,7 @@ function saveConfig(evt) { // Legacy
   var enabledHuntingMode = enabledHuntingModeElement.value;
   system.setValue('enabledHuntingMode', enabledHuntingMode);
 
-  settingObj.saveBoxes.forEach(saveValueForm, oForm);
+  settingObj.saveBoxes.forEach(saveValueForm.bind(null, oForm));
 
   $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
 }

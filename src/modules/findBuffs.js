@@ -179,11 +179,11 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
     .replace(/\D/g, ''), 10);
   var characterName = $('dt.stat-name:first').next().text().replace(/,/g, '');
   if (curPage !== 1) {
-    playerRows.each(function() {
-      var onlinePlayer = $(this).find('td:eq(1) a').attr('href');
-      var onlinePlayerLevel = parseInt($(this).find('td:eq(2)').text()
+    playerRows.each(function(i, e) {
+      var onlinePlayer = $(e).find('td:eq(1) a').attr('href');
+      var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
         .replace(/,/g, ''), 10);
-      var onlinePlayerName = $(this).find('td:eq(1) a').text();
+      var onlinePlayerName = $(e).find('td:eq(1) a').text();
       var minPlayerVirtualLevel = 1;
       if (calf.findBuffsLevel175Only) {minPlayerVirtualLevel = 500;}
       if (onlinePlayerLevel >= calf.findBuffMinCastLevel &&
@@ -226,8 +226,8 @@ function findBuffsParseProfilePage(responseText) { // jQuery
   var characterName = $('dt.stat-name:first').next().text().replace(/,/g, '');
   var profileAlliesEnemies = $(doc).find('#profileLeftColumn')
     .find('a[data-tipped*="Last Activity"]');
-  profileAlliesEnemies.each(function() {
-    var onMouseOver = $(this).data('tipped');
+  profileAlliesEnemies.each(function(i, e) {
+    var onMouseOver = $(e).data('tipped');
     var lastActivity = actRE.exec(onMouseOver);
     var lastActivityDays = parseInt(lastActivity[1], 10);
     var lastActivityHours = parseInt(lastActivity[2], 10) +
@@ -243,8 +243,8 @@ function findBuffsParseProfilePage(responseText) { // jQuery
       virtualLevel >= calf.findBuffMinCastLevel &&
       virtualLevel >= minPlayerVirtualLevel) {
       // add online player to search list (all but self)
-      var onlinePlayer = $(this).attr('href');
-      if (characterName !== $(this).text().trim()) {
+      var onlinePlayer = $(e).attr('href');
+      if (characterName !== $(e).text().trim()) {
         calf.onlinePlayers.push(onlinePlayer);
       }
     }
@@ -286,8 +286,8 @@ function findBuffsParseGuildManagePage(responseText) { // jQuery
     .find('table:has(td:contains("Rank")[bgcolor="#C18B35"]):last')
     .find('tr:gt(1):not(:has(td[colspan="5"]))');
   if (document.getElementById('guildMembers').checked) {
-    memberTableRows.each(function() {
-      var contactLink = $(this).find('a');
+    memberTableRows.each(function(i, e) {
+      var contactLink = $(e).find('a');
       var onMouseOver = $(contactLink).data('tipped');
       var lastActivity = actRE.exec(onMouseOver);
       var lastActivityDays = parseInt(lastActivity[1], 10);
@@ -305,7 +305,7 @@ function findBuffsParseGuildManagePage(responseText) { // jQuery
         virtualLevel >= minPlayerVirtualLevel) {
         // add online player to search list (all but self)
         var onlinePlayer = contactLink.attr('href');
-        if (characterName !== $(this).find('td:eq(1)')
+        if (characterName !== $(e).find('td:eq(1)')
           .text().trim()) {
           calf.onlinePlayers.push(onlinePlayer);
         }

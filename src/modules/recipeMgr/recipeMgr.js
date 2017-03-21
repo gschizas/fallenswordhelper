@@ -114,12 +114,12 @@ function generateRecipeTable() { // Legacy
 
 function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
   var results = [];
-  $(doc).find(jqueryxpath).each(function() {
-    var mouseOver = $(this).find('img').data('tipped');
-    var resultAmounts = $(this).parent().next().text();
+  $(doc).find(jqueryxpath).each(function(i, e) {
+    var mouseOver = $(e).find('img').data('tipped');
+    var resultAmounts = $(e).parent().next().text();
     var mouseOverRX = mouseOver.match(itmRE);
     var result = {
-      img: $(this).find('img').attr('src'),
+      img: $(e).find('img').attr('src'),
       id: mouseOverRX[1],
       verify: mouseOverRX[3],
       amountPresent: parseInt(resultAmounts.split('/')[0], 10),
@@ -163,9 +163,9 @@ function parseInventingPage(responseText, callback) { // Legacy
 
   var folderIDs = []; // clear out the array before starting.
   $(doc).find('a[href*="index.php?cmd=inventing&folder_id="]')
-    .each(function() {
+    .each(function(i, e) {
       var folderID = Number(/folder_id=([-0-9]+)/
-        .exec($(this).attr('href'))[1]);
+        .exec($(e).attr('href'))[1]);
       folderIDs.push(folderID);
     });
 
@@ -186,13 +186,13 @@ function parseInventingPage(responseText, callback) { // Legacy
     if (pages.length === 0) {return;}
     $(doc).find(
       'a[href*="index.php?cmd=inventing&subcmd=viewrecipe&recipe_id="]')
-      .each(function() {
-        var recipeLink = $(this).attr('href');
+      .each(function(i, e) {
+        var recipeLink = $(e).attr('href');
         var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1], 10);
         var recipe = {
-          img: $(this).closest('tr').find('img').attr('src'),
+          img: $(e).closest('tr').find('img').attr('src'),
           link: recipeLink,
-          name: $(this).text(),
+          name: $(e).text(),
           id: recipeId
         };
         output.innerHTML += 'Found blueprint: ' + recipe.name + '<br/>';

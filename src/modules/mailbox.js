@@ -64,13 +64,13 @@ export function injectMailbox() { // Bad jQuery
     'color:blue;">Toggle Quick Take</span><input type="hidden" ' +
     'id="currentMBDisplay" value="mailbox" />' + quickTakeDiv);
   var itemList = {};
-  $('#regularMailbox img[data-tipped*="t=5"]').each(function() {
-    var itemIDs = dataObj.itemRE.exec($(this).attr('data-tipped'));
+  $('#regularMailbox img[data-tipped*="t=5"]').each(function(i, e) {
+    var itemIDs = dataObj.itemRE.exec($(e).attr('data-tipped'));
     if (!itemIDs) {return;}
     var itemId = itemIDs[1];
     var invId = itemIDs[2];
-    var tipped = $(this).attr('data-tipped');
-    var src = $(this).attr('src');
+    var tipped = $(e).attr('data-tipped');
+    var src = $(e).attr('src');
     if (!itemList[itemId]) {
       var invIds = [];
       invIds.push(invId);
@@ -114,8 +114,8 @@ function guildTake(e) { // jQuery
 export function guildMailbox() { // Bad jQuery
   var items = $('#pCC a');
   if (items.length === 0) {return;}
-  items.wrap(function() {
-    return '<span class="helperQC" href="' + $(this).attr('href') +
+  items.wrap(function(i) {
+    return '<span class="helperQC" href="' + items[i].attr('href') +
       '"></span>';
   }).children().unwrap();
   $('#pCC').on('click', '.helperQC', guildTake);

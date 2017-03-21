@@ -259,8 +259,8 @@ export function injectGuildAddTagsWidgets() { // Legacy
     .children('td:first')
     .append('<input type="button" id="fshCheckAlTag" value="Check All">');
   $('#fshCheckAlTag').click(function() {
-    $('input[name*=tagIndex]').each(function() {
-      this.click();
+    $('input[name*=tagIndex]').each(function(ind, ele) {
+      ele.click();
     });
   });
 }
