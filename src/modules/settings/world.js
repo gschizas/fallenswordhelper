@@ -2,14 +2,88 @@ import calf from '../support/calf';
 import * as settingObj from './settingObj';
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
-import * as worldGroup from './worldGroup';
+
+function worldGroup() {
+  // World Screen
+  return '<tr><td class="fshRight">Hide Create Group Button' +
+    settingsPage.helpLink('Hide Create Group Button',
+    'Enabling this option will hide the Create Group button') +
+    ':</td><td>' +
+    '<input name="hideChampionsGroup" type="checkbox" value="on"' +
+      (system.getValue('hideChampionsGroup') ? ' checked' : '') + '>' +
+    '&nbsp;Champions&nbsp;&nbsp;' +
+    '<input name="hideElitesGroup" type="checkbox" value="on"' +
+      (system.getValue('hideElitesGroup') ? ' checked' : '') + '>' +
+    '&nbsp;Elites&nbsp;&nbsp;' +
+    '<input name="hideSEGroup" type="checkbox" value="on"' +
+      (system.getValue('hideSEGroup') ? ' checked' : '') + '>' +
+    '&nbsp;Super Elite&nbsp;&nbsp;' +
+    '<input name="hideTitanGroup" type="checkbox" value="on"' +
+      (system.getValue('hideTitanGroup') ? ' checked' : '') + '>' +
+    '&nbsp;Titan&nbsp;&nbsp;' +
+    '<input name="hideLegendaryGroup" type="checkbox" value="on"' +
+      (system.getValue('hideLegendaryGroup') ? ' checked' : '') + '>' +
+    '&nbsp;Legendary' +
+    '</td></tr>';
+}
+
+function combatEvalBias() {
+  return '<tr><td class="fshRight">Combat Evaluator Bias' +
+    settingsPage.helpLink('Combat Evaluator Bias',
+    'This changes the bias of the combat evaluator for the damage and ' +
+    'HP evaluation. It will not change the attack bias (1.1053).' +
+    '<br>Conservative = 1.1053 and 1.1 (Safest)' +
+    '<br>Semi-Conservative = 1.1 and 1.053' +
+    '<br>Adventurous = 1.053 and 1 (Bleeding Edge)' +
+    '<br>Conservative+ = 1.1053 and 1 with the attack calculation ' +
+    'changed to +-48 per RJEM') +
+    ':</td><td><select name="combatEvaluatorBias">' +
+    '<option value="0"' +
+    (calf.combatEvaluatorBias === 0 ? ' SELECTED' : '') +
+    '>Conservative</option>' +
+    '<option value="1"' +
+    (calf.combatEvaluatorBias === 1 ? ' SELECTED' : '') +
+    '>Semi-Conservative</option>' +
+    '<option value="2"' +
+    (calf.combatEvaluatorBias === 2 ? ' SELECTED' : '') +
+    '>Adventurous</option>' +
+    '<option value="3"' +
+    (calf.combatEvaluatorBias === 3 ? ' SELECTED' : '') +
+    '>Conservative+</option></select></td></tr>';
+}
+
+function huntingBuffs() {
+  return '<tr><td class="fshRight">Hunting Buffs' +
+    settingsPage.helpLink('Hunting Buffs',
+    'Customize which buffs are designated as hunting buffs. ' +
+    'You must type the full name of each buff, ' +
+    'separated by commas. Use the checkbox to enable/disable them.') +
+    ':</td><td colspan="3"><input name="showHuntingBuffs" ' +
+    'type="checkbox" value="on"' +
+    (system.getValue('showHuntingBuffs') ? ' checked' : '') + '> ' +
+    'Enabled Hunting Mode' +
+    settingsPage.helpLink('Enabled Hunting Mode',
+    'This will determine which list of buffs gets checked ' +
+    'on the world screen.') +
+    ':<select name="enabledHuntingMode">' +
+    '<option value="1"' +
+    (calf.enabledHuntingMode === '1' ? ' SELECTED' : '') +
+    '>' + calf.buffsName + '</option>' +
+    '<option value="2"' +
+    (calf.enabledHuntingMode === '2' ? ' SELECTED' : '') +
+    '>' + calf.buffs2Name + '</option>' +
+    '<option value="3"' +
+    (calf.enabledHuntingMode === '3' ? ' SELECTED' : '') +
+    '>' + calf.buffs3Name + '</option>' +
+    '</select></td></tr>';
+}
 
 export function prefs() {
   // World Screen
   return '<tr><th colspan="2"><b>' +
     'World screen/Hunting preferences</b></th></tr>' +
 
-    worldGroup.prefs() +
+    worldGroup() +
 
     '<tr><td class="fshRight">Keep Combat Logs' +
       settingsPage.helpLink('Keep Combat Logs',
@@ -24,28 +98,7 @@ export function prefs() {
     settingsPage.simpleCheckbox('enableCreatureColoring') +
     settingsPage.simpleCheckbox('showCreatureInfo') +
 
-    '<tr><td class="fshRight">Combat Evaluator Bias' +
-      settingsPage.helpLink('Combat Evaluator Bias',
-      'This changes the bias of the combat evaluator for the damage and ' +
-      'HP evaluation. It will not change the attack bias (1.1053).' +
-      '<br>Conservative = 1.1053 and 1.1 (Safest)' +
-      '<br>Semi-Conservative = 1.1 and 1.053' +
-      '<br>Adventurous = 1.053 and 1 (Bleeding Edge)' +
-      '<br>Conservative+ = 1.1053 and 1 with the attack calculation ' +
-      'changed to +-48 per RJEM') +
-      ':</td><td><select name="combatEvaluatorBias">' +
-      '<option value="0"' +
-      (calf.combatEvaluatorBias === 0 ? ' SELECTED' : '') +
-      '>Conservative</option>' +
-      '<option value="1"' +
-      (calf.combatEvaluatorBias === 1 ? ' SELECTED' : '') +
-      '>Semi-Conservative</option>' +
-      '<option value="2"' +
-      (calf.combatEvaluatorBias === 2 ? ' SELECTED' : '') +
-      '>Adventurous</option>' +
-      '<option value="3"' +
-      (calf.combatEvaluatorBias === 3 ? ' SELECTED' : '') +
-      '>Conservative+</option></select></td></tr>' +
+    combatEvalBias() +
 
     '<tr><td class="fshRight">' + settingObj.networkIcon + 'Keep Creature Log' +
       settingsPage.helpLink('Keep Creature Log',
@@ -80,29 +133,8 @@ export function prefs() {
       ':</td><td colspan="3"><input name="doNotKillList" size="60" value="' +
       calf.doNotKillList + '"></td></tr>' +
 
-    '<tr><td class="fshRight">Hunting Buffs' +
-      settingsPage.helpLink('Hunting Buffs',
-      'Customize which buffs are designated as hunting buffs. ' +
-      'You must type the full name of each buff, ' +
-      'separated by commas. Use the checkbox to enable/disable them.') +
-      ':</td><td colspan="3"><input name="showHuntingBuffs" ' +
-      'type="checkbox" value="on"' +
-      (system.getValue('showHuntingBuffs') ? ' checked' : '') + '> ' +
-      'Enabled Hunting Mode' +
-      settingsPage.helpLink('Enabled Hunting Mode',
-      'This will determine which list of buffs gets checked ' +
-      'on the world screen.') +
-      ':<select name="enabledHuntingMode">' +
-      '<option value="1"' +
-      (calf.enabledHuntingMode === '1' ? ' SELECTED' : '') +
-      '>' + calf.buffsName + '</option>' +
-      '<option value="2"' +
-      (calf.enabledHuntingMode === '2' ? ' SELECTED' : '') +
-      '>' + calf.buffs2Name + '</option>' +
-      '<option value="3"' +
-      (calf.enabledHuntingMode === '3' ? ' SELECTED' : '') +
-      '>' + calf.buffs3Name + '</option>' +
-      '</select></td></tr>' +
+    huntingBuffs() +
+
     '<tr><td class="fshRight">' + calf.buffsName + ' Hunting Buff List' +
       settingsPage.helpLink(calf.buffsName + ' Hunting Buff List',
       calf.buffsName + ' list of hunting buffs.') +
