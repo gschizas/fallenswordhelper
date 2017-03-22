@@ -191,7 +191,7 @@ export function equipItem(backpackInvId) {
 
 function htmlResult(data) {
   var info = layout.infoBox(data);
-  return info.search(/(successfully|gained)/) !== -1 ?
+  return info.search(/(successfully|gained|components)/) !== -1 ?
     {r: 0, m: ''} : {r: 1, m: info};
 }
 
@@ -258,7 +258,7 @@ function guildInvRecall(invId, playerId, mode) {
     .done(dialog);
 }
 
-function backpack() {
+export function backpack() {
   return $.ajax({
     url: 'index.php',
     data: {cmd: 'profile', subcmd: 'fetchinv'},

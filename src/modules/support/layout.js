@@ -44,11 +44,15 @@ export function openQuickBuffByName(aPlayerName) {
 
 export function infoBox(documentText) { // Native
   var doc = system.createDocument(documentText);
-  var infoMatch = doc.getElementById('info-msg').innerHTML;
-  var result = '';
-  if (infoMatch) {
-    infoMatch = infoMatch.replace(/<br.*/, '');
-    result = infoMatch;
+  var result;
+  var infoMsg = doc.getElementById('info-msg');
+  if (infoMsg) {
+    var infoMatch = infoMsg.innerHTML;
+    result = '';
+    if (infoMatch) {
+      infoMatch = infoMatch.replace(/<br.*/, '');
+      result = infoMatch;
+    }
   }
   return result;
 }
