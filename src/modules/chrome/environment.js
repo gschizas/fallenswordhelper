@@ -21,6 +21,10 @@ import * as widgets from './widgets';
 var coreFunction;
 var functionPath;
 
+function newParam(param) {
+  return system.getUrlParameter(param) || '-';
+}
+
 function getCoreFunction() { // Native
   var cmd;
   var subcmd;
@@ -29,11 +33,11 @@ function getCoreFunction() { // Native
   var fromWorld;
   var test_cmd;
   if (document.location.search !== '') {
-    cmd = system.getUrlParameter('cmd') || '-';
-    subcmd = system.getUrlParameter('subcmd') || '-';
-    subcmd2 = system.getUrlParameter('subcmd2') || '-';
-    type = system.getUrlParameter('type') || '-';
-    fromWorld = system.getUrlParameter('fromworld') || '-';
+    cmd = newParam('cmd');
+    subcmd = newParam('subcmd');
+    subcmd2 = newParam('subcmd2');
+    type = newParam('type');
+    fromWorld = newParam('fromworld');
   } else {
     test_cmd = document.querySelector('input[name="cmd"]');
     cmd = test_cmd ? test_cmd.getAttribute('value') : '-';
