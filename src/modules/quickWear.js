@@ -119,17 +119,17 @@ function listen(evt) {
   }
 }
 
+function alpha(a, b) {
+  if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
+  if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
+  return 0;
+}
+
 function folder(a, b) {
   if (a.f === b.f) {
     return alpha(a, b);
   }
   return a.f - b.f;
-}
-
-function alpha(a, b) {
-  if (a.n.toLowerCase() < b.n.toLowerCase()) {return -1;}
-  if (a.n.toLowerCase() > b.n.toLowerCase()) {return 1;}
-  return 0;
 }
 
 function showQuickWear(data) { // jQuery

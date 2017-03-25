@@ -74,57 +74,27 @@ function storeLoc() { // Native
   }
 }
 
-function normalLinks() { // Native
-  if (lastNormalActiveQuestPage.length > 0) {
-    activeLink.setAttribute('href', lastNormalActiveQuestPage);
+function setLink(normalPage, seasonPage, aLink) { // Native
+  var toSet;
+  if (isNormal && normalPage.length > 0) {
+    toSet = normalPage;
+  } else if (isSeason && seasonPage.length > 0) {
+    toSet = seasonPage;
   }
-  if (lastNormalCompletedQuestPage.length > 0) {
-    completeLink.setAttribute('href', lastNormalCompletedQuestPage);
-  }
-  if (lastNormalNotStartedQuestPage.length > 0) {
-    notStartedLink.setAttribute('href', lastNormalNotStartedQuestPage);
-  }
-  if (isActive) {
-    if (lastSeasonalActiveQuestPage.length > 0) {
-      seasonLink.setAttribute('href', lastSeasonalActiveQuestPage);
-    }
-  }
-  if (isComplete) {
-    if (lastSeasonalCompletedQuestPage.length > 0) {
-      seasonLink.setAttribute('href', lastSeasonalCompletedQuestPage);
-    }
-  }
-  if (isNotStarted) {
-    if (lastSeasonalNotStartedQuestPage.length > 0) {
-      seasonLink.setAttribute('href', lastSeasonalNotStartedQuestPage);
-    }
-  }
+  if (toSet) {aLink.setAttribute('href', toSet);}
 }
 
-function seasonLinks() { // Native
-  if (lastSeasonalActiveQuestPage.length > 0) {
-    activeLink.setAttribute('href', lastSeasonalActiveQuestPage);
-  }
-  if (lastSeasonalCompletedQuestPage.length > 0) {
-    completeLink.setAttribute('href', lastSeasonalCompletedQuestPage);
-  }
-  if (lastSeasonalNotStartedQuestPage.length > 0) {
-    notStartedLink.setAttribute('href', lastSeasonalNotStartedQuestPage);
-  }
+function mainLinks(aLink) { // Native
   if (isActive) {
-    if (lastNormalActiveQuestPage.length > 0) {
-      normalLink.setAttribute('href', lastNormalActiveQuestPage);
-    }
+    setLink(lastSeasonalActiveQuestPage, lastNormalActiveQuestPage, aLink);
   }
   if (isComplete) {
-    if (lastNormalCompletedQuestPage.length > 0) {
-      normalLink.setAttribute('href', lastNormalCompletedQuestPage);
-    }
+    setLink(lastSeasonalCompletedQuestPage, lastNormalCompletedQuestPage,
+      aLink);
   }
   if (isNotStarted) {
-    if (lastNormalNotStartedQuestPage.length > 0) {
-      normalLink.setAttribute('href', lastNormalNotStartedQuestPage);
-    }
+    setLink(lastSeasonalNotStartedQuestPage, lastNormalNotStartedQuestPage,
+      aLink);
   }
 }
 
@@ -140,10 +110,15 @@ function updateLinks() { // Native
     system.getValue('lastSeasonalCompletedQuestPage');
   lastSeasonalNotStartedQuestPage =
     system.getValue('lastSeasonalNotStartedQuestPage');
+  setLink(lastNormalActiveQuestPage, lastSeasonalActiveQuestPage, activeLink);
+  setLink(lastNormalCompletedQuestPage, lastSeasonalCompletedQuestPage,
+    completeLink);
+  setLink(lastNormalNotStartedQuestPage, lastSeasonalNotStartedQuestPage,
+    notStartedLink);
   if (isNormal) {
-    normalLinks();
+    mainLinks(seasonLink);
   } else if (isSeason) {
-    seasonLinks();
+    mainLinks(normalLink);
   }
 }
 

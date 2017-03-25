@@ -1,16 +1,22 @@
 import calf from '../support/calf';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
-/* jshint latedef: nofunc */
+var bountyList;
+var wantedList;
+var bountyListRefreshTime;
+var bwNeedsRefresh;
+var curPage;
+var maxPage;
 var activeBountyListPosted;
+var wantedNames;
+var wantedArray;
 
 function resetBountyList() { // Native
   system.setValueJSON('bountyList', null);
   location.reload();
 }
 
-function injectBountyList(bountyList) { // Native
+function injectBountyList() { // Native
   system.setValueJSON('bountyList', bountyList);
   var injectHere = document
     .getElementById('Helper:BountyListPlaceholder');
@@ -66,7 +72,7 @@ function resetWantedList() { // Legacy
   location.reload();
 }
 
-function injectWantedList(wantedList) { // Legacy
+function injectWantedList() { // Legacy
   system.setValueJSON('wantedList', wantedList);
   var injectHere = document
     .getElementById('Helper:WantedListPlaceholder');
@@ -131,71 +137,56 @@ function injectWantedList(wantedList) { // Legacy
     .addEventListener('click', resetWantedList);
 }
 
-function getWantedBountyList(doc, callback) { // Legacy
+function getWantedBountyList(doc) { // Legacy
   var page = system.findNode('//input[@name="page"]', doc, $('body'));
-  var curPage = parseInt(page.value, 10);
-  var maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+  curPage = parseInt(page.value, 10);
+  maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
   var activeTable = system.findNode('//table[@width = "630" and ' +
     'contains(.,"Target")]', doc);
-  var wantedNames = system.getValue('wantedNames');
-  var wantedArray = wantedNames.split(',');
-  var wantedList = callback.wantedList;
-  if (activeTable) {
-    for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
-      var target = activeTable.rows[i].cells[0].firstChild
-        .firstChild.firstChild.textContent;
-      if (target === '[ No bounties available. ]') {break;}
-      for (var j = 0; j < wantedArray.length; j += 1) {
-        if (target === wantedArray[j].trim() ||
-            wantedArray.indexOf('*') !== -1) {
-          wantedList.wantedBounties = true;
-          var bounty = {};
-          bounty.target = target;
-          bounty.link = activeTable.rows[i].cells[0]
-            .firstChild.firstChild.getAttribute('href');
-          bounty.lvl = activeTable.rows[i].cells[0]
-            .firstChild.firstChild.nextSibling.textContent
-              .replace(/\[/, '').replace(/\]/, '');
-          bounty.offerer = activeTable.rows[i].cells[1]
-            .firstChild.firstChild.firstChild.textContent;
-          bounty.reward = activeTable.rows[i].cells[2]
-            .textContent;
-          bounty.rewardType = activeTable.rows[i].cells[2]
-            .firstChild.firstChild.firstChild.firstChild
-            .nextSibling.firstChild.title;
-          bounty.xpLoss = activeTable.rows[i].cells[3]
-            .textContent;
-          bounty.posted = activeTable.rows[i].cells[4]
-            .textContent;
-          bounty.tickets = activeTable.rows[i].cells[5]
-            .textContent;
-          if (activeTable.rows[i].cells[6].textContent
-            .trim() === '[active]') {
-            bounty.active = true;
-            bounty.accept = '';
-          } else if (activeTable.rows[i].cells[6].textContent
+  if (!activeTable) {return;}
+  for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
+    var target = activeTable.rows[i].cells[0].firstChild
+      .firstChild.firstChild.textContent;
+    if (target === '[ No bounties available. ]') {break;}
+    for (var j = 0; j < wantedArray.length; j += 1) {
+      if (target === wantedArray[j].trim() ||
+          wantedArray.indexOf('*') !== -1) {
+        wantedList.wantedBounties = true;
+        var bounty = {};
+        bounty.target = target;
+        bounty.link = activeTable.rows[i].cells[0]
+          .firstChild.firstChild.getAttribute('href');
+        bounty.lvl = activeTable.rows[i].cells[0]
+          .firstChild.firstChild.nextSibling.textContent
+          .replace(/\[/, '').replace(/\]/, '');
+        bounty.offerer = activeTable.rows[i].cells[1]
+          .firstChild.firstChild.firstChild.textContent;
+        bounty.reward = activeTable.rows[i].cells[2].textContent;
+        bounty.rewardType = activeTable.rows[i].cells[2]
+          .firstChild.firstChild.firstChild.firstChild
+          .nextSibling.firstChild.title;
+        bounty.xpLoss = activeTable.rows[i].cells[3].textContent;
+        bounty.posted = activeTable.rows[i].cells[4].textContent;
+        bounty.tickets = activeTable.rows[i].cells[5].textContent;
+        if (activeTable.rows[i].cells[6].textContent.trim() === '[active]') {
+          bounty.active = true;
+          bounty.accept = '';
+        } else if (activeTable.rows[i].cells[6].textContent
             .trim() !== '[n/a]') { // TODO
-            bounty.active = false;
-            bounty.accept = activeTable.rows[i].cells[6]
-              .firstChild.firstChild
-              .getAttribute('onclick');
-          }
-          wantedList.bounty.push(bounty);
+          bounty.active = false;
+          bounty.accept = activeTable.rows[i].cells[6]
+            .firstChild.firstChild
+            .getAttribute('onclick');
         }
+        wantedList.bounty.push(bounty);
       }
     }
-  }
-  if (curPage < maxPage) {
-    system.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
-      parseBountyPageForWorld, {wantedList: wantedList});
-  } else {
-    injectWantedList(wantedList);
   }
 }
 
 function getActiveBountyList(doc) { // Legacy
   var activeTable = system.findNode('//table[@width = 620]', doc);
-  var bountyList = {};
+  bountyList = {};
   bountyList.bounty = [];
   bountyList.isRefreshed = true;
   bountyList.lastUpdate = new Date();
@@ -224,39 +215,32 @@ function getActiveBountyList(doc) { // Legacy
           .textContent;
         bounty.progress = activeTable.rows[i].cells[5]
           .textContent;
-
         bountyList.bounty.push(bounty);
       }
     } else {
       bountyList.activeBounties = false;
     }
   }
-  injectBountyList(bountyList);
+  injectBountyList();
   activeBountyListPosted = true;
 }
 
-function parseBountyPageForWorld2(details, callback) { // Native
+function parseBountyPageForWorld(details) { // Native
   var doc = system.createDocument(details);
-  var enableActiveBountyList = calf.enableActiveBountyList;
-  var enableWantedList = calf.enableWantedList;
-  system.setValue('bwNeedsRefresh', false);
-  if (enableWantedList) {
-    getWantedBountyList(doc, callback);
+  if (calf.enableWantedList) {
+    getWantedBountyList(doc);
   }
-  if (enableActiveBountyList &&
+  if (calf.enableActiveBountyList &&
       !activeBountyListPosted) {
     getActiveBountyList(doc);
   }
+  if (curPage < maxPage) {
+    system.xmlhttp('index.php?cmd=bounty&page=' + (curPage + 1),
+      parseBountyPageForWorld);
+  } else {
+    injectWantedList();
+  }
 }
-
-function parseBountyPageForWorld(details, callback) { // Native
-  task.add(3, parseBountyPageForWorld2, [details, callback]);
-}
-
-var bountyList;
-var wantedList;
-var bountyListRefreshTime;
-var bwNeedsRefresh;
 
 function invalidateCache() { // Legacy
   bountyList = system.getValueJSON('bountyList');
@@ -264,40 +248,28 @@ function invalidateCache() { // Legacy
   bountyListRefreshTime = system.getValue('bountyListRefreshTime');
   bwNeedsRefresh = system.getValue('bwNeedsRefresh');
   bountyListRefreshTime *= 1000;
-  if (!bwNeedsRefresh) {
-    if (bountyList) {
-      if (Date.now() -
-        bountyList.lastUpdate.getTime() >
-        bountyListRefreshTime) {
-        bwNeedsRefresh = true; // invalidate cache
-      }
-    }
-    if (wantedList && !bwNeedsRefresh) {
-      if (Date.now() -
-        wantedList.lastUpdate.getTime() >
-        bountyListRefreshTime) {
-        bwNeedsRefresh = true; // invalidate cache
-      }
-    }
+  if (bwNeedsRefresh) {return;}
+  if (bountyList &&
+      Date.now() - bountyList.lastUpdate.getTime() > bountyListRefreshTime ||
+      wantedList &&
+      Date.now() - wantedList.lastUpdate.getTime() > bountyListRefreshTime) {
+    bwNeedsRefresh = true; // invalidate cache
   }
 }
 
 function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legacy
   invalidateCache();
-  if (!bountyList || !wantedList || bwNeedsRefresh &&
-    (enableActiveBountyList || enableWantedList)) {
+  if (!bountyList || !wantedList || bwNeedsRefresh) {
     wantedList = {};
     wantedList.bounty = [];
     wantedList.isRefreshed = true;
     wantedList.lastUpdate = new Date();
     wantedList.wantedBounties = false;
     activeBountyListPosted = false;
-
-    system.xmlhttp(
-      'index.php?cmd=bounty&page=1',
-      parseBountyPageForWorld,
-      {wantedList: wantedList}
-    );
+    wantedNames = system.getValue('wantedNames');
+    wantedArray = wantedNames.split(',');
+    system.xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
+    system.setValue('bwNeedsRefresh', false);
   } else {
     if (enableWantedList) {
       wantedList.isRefreshed = false;
@@ -310,14 +282,19 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
   }
 }
 
-export function prepareBountyData() { // jQuery
+export function prepareBountyData() { // Native
+  var pCR = document.getElementById('pCR');
   if (calf.enableWantedList) {
-    $('#pCR').prepend('<div class="minibox"><span id="Helper:' +
-      'WantedListPlaceholder"></span></div>');
+    pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
+      '<span id="Helper:WantedListPlaceholder"></span></div>');
+    // $('#pCR').prepend('<div class="minibox"><span id="Helper:' +
+    //   'WantedListPlaceholder"></span></div>');
   }
   if (calf.enableActiveBountyList) {
-    $('#pCR').prepend('<div class="minibox"><span id="Helper:' +
-      'BountyListPlaceholder"></span></div>');
+    pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
+      '<span id="Helper:BountyListPlaceholder"></span></div>');
+    // $('#pCR').prepend('<div class="minibox"><span id="Helper:' +
+    //   'BountyListPlaceholder"></span></div>');
   }
   retrieveBountyInfo(
     calf.enableActiveBountyList,

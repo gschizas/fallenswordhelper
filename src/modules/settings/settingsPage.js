@@ -13,9 +13,7 @@ function getVars() { // Native
   calf.buffs3Name = system.getValue('huntingBuffs3Name');
   calf.doNotKillList = system.getValue('doNotKillList');
 
-  // var enableActiveBountyList = calf.enableActiveBountyList;
   calf.bountyListRefreshTime = system.getValue('bountyListRefreshTime');
-  // var enableWantedList = calf.enableWantedList;
   calf.wantedNames = system.getValue('wantedNames');
   calf.combatEvaluatorBias = system.getValue('combatEvaluatorBias');
   calf.enabledHuntingMode = system.getValue('enabledHuntingMode');
