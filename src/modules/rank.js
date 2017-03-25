@@ -9,6 +9,19 @@ var theRows;
 var rankCount;
 var characterRow;
 
+var privLookup = {
+  'Bank Withdraw': 5,
+  'Build/Upgrade/Demolish Structures': 5,
+  'Can Un-Tag Items': 5,
+  'Build/Upgrade Structures': 4,
+  'Can Kick Members': 4,
+  'Can Mass Messages': 0.5,
+  'Take Items': 0.2,
+  'Can Recall Tagged Items': 0.2,
+  'Store Items': 0.1,
+  'Can View Advisor': 0.1
+};
+
 function parseRankData(linkElement, responseText) { // Native
   // Makes a weighted calculation of available permissions and gets tax rate
   var doc = system.createDocument(responseText);
@@ -17,24 +30,9 @@ function parseRankData(linkElement, responseText) { // Native
   var count = 0;
   Array.prototype.forEach.call(checkBoxes, function(checkbox) {
     var privName = checkbox.nextElementSibling.textContent.trim();
-    if (privName === 'Bank Withdraw' ||
-      privName === 'Build/Upgrade/Demolish Structures' ||
-      privName === 'Can Un-Tag Items') {
-      count += 5;
-    } else if (privName === 'Build/Upgrade Structures' ||
-      privName === 'Can Kick Members') {
-      count += 4;
-    } else if (privName === 'Can Mass Messages') {
-      count += 0.5;
-    } else if (privName === 'Take Items' ||
-      privName === 'Can Recall Tagged Items') {
-      count += 0.2;
-    } else if (privName === 'Store Items' ||
-      privName === 'Can View Advisor') {
-      count += 0.1;
-    } else {
-      count += 1;
-    }
+    if (privName in privLookup) {
+      count += privLookup[privName];
+    } else {count += 1;}
   });
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
   linkElement.insertAdjacentHTML('afterbegin', '<span class="fshBlue">(' +
