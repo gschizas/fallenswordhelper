@@ -1,6 +1,8 @@
 import * as ajax from './support/ajax';
 import * as dataObj from './support/dataObj';
 
+var cn;
+
 function quickDoneTaken(data) { // jQuery
   if (data.r !== 0) {
     var $tempError = $('#temp_error');
@@ -11,13 +13,15 @@ function quickDoneTaken(data) { // jQuery
     $('#temp-inv-' + data.temp_id).remove();
     $('#qtip-' + qtipId).remove();
   }
-  $('#take_result').append('<br />Item taken.');
+  cn += 1;
+  $('#take_result').append('<br>' + cn + '. Item taken.');
 }
 
 function takeAllSimilar(evt) { // jQuery
   var invIds = evt.target.getAttribute('invIDs').split(',');
   evt.target.parentNode.innerHTML = 'taking all ' +
     invIds.length + ' items';
+  cn = 0;
   invIds.forEach(function(invId) {
     $.ajax({
       type: 'POST',
