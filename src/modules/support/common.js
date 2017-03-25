@@ -100,6 +100,14 @@ function getBonus(stat, doc) { // jQuery
   return system.intValue(children.text().slice(2, -1));
 }
 
+function cloakGuess(bonus, level) { // Native
+  if (bonus > level * 10 ||
+      bonus < level) {
+    return bonus;
+  }
+  return level * 10;
+}
+
 function playerDataString(responseText) { // Native
   var doc = system.createDocument(responseText);
   var obj = {
@@ -134,8 +142,11 @@ function playerDataString(responseText) { // Native
   obj.superEliteSlayerMultiplier = Math.round(0.002 *
     obj.superEliteSlayerLevel * 100) / 100;
 
-  if (obj.cloakLevel === 0 || typeof obj.attackValue === 'number' &&
-    !isNaN(obj.attackValue)) {return obj;}
+  if (obj.cloakLevel === 0 ||
+      typeof obj.attackValue === 'number' &&
+      !isNaN(obj.attackValue)) {
+    return obj;
+  }
 
   obj.attackBonus = getBonus('#stat-attack', doc);
   obj.defenseBonus = getBonus('#stat-defense', doc);
@@ -143,18 +154,10 @@ function playerDataString(responseText) { // Native
   obj.damageBonus = getBonus('#stat-damage', doc);
   obj.hpBonus = getBonus('#stat-hp', doc);
 
-  obj.attackValue = obj.attackBonus > obj.levelValue * 10 ||
-    obj.attackBonus < obj.levelValue ?
-    obj.attackBonus : obj.levelValue * 10;
-  obj.defenseValue = obj.defenseBonus > obj.levelValue * 10 ||
-    obj.defenseBonus < obj.levelValue ?
-    obj.defenseBonus : obj.levelValue * 10;
-  obj.armorValue = obj.armorBonus > obj.levelValue * 10 ||
-    obj.armorBonus < obj.levelValue ?
-    obj.armorBonus : obj.levelValue * 10;
-  obj.damageValue = obj.damageBonus > obj.levelValue * 10 ||
-    obj.damageBonus < obj.levelValue ?
-    obj.damageBonus : obj.levelValue * 10;
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
   obj.hpValue = obj.hpBonus;
   return obj;
 }
