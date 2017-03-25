@@ -98,30 +98,58 @@ function getEnvVars() { // Native
     system.getValue('allyEnemyOnlineRefreshTime') * 1000;
 }
 
-function conditional() { // Native
+function callAllyEnemy() {
   if (calf.enableAllyOnlineList ||
       calf.enableEnemyOnlineList) {
     task.add(3, allyEnemy.prepareAllyEnemyList);
   }
+}
+
+function callBounties() {
   if (calf.enableWantedList ||
       calf.enableActiveBountyList) {
     task.add(3, activeWantedBounties.prepareBountyData);
   }
+}
+
+function callGuildInfo() {
   if (calf.enableGuildInfoWidgets) {
     task.add(3, widgets.addGuildInfoWidgets);
   }
+}
+
+function callAllies() {
   if (calf.enableOnlineAlliesWidgets) {
     task.add(3, widgets.addOnlineAlliesWidgets);
   }
+}
+
+function callTemple() {
   if (calf.enableTempleAlert) {
     task.add(3, notification.injectTempleAlert);
   }
+}
+
+function callUpgrade() {
   if (calf.enableUpgradeAlert) {
     task.add(3, notification.injectUpgradeAlert);
   }
+}
+
+function callComposing() {
   if (calf.enableComposingAlert) {
     task.add(3, composing.injectComposeAlert);
   }
+}
+
+function conditional() { // Native
+  callAllyEnemy();
+  callBounties();
+  callGuildInfo();
+  callAllies();
+  callTemple();
+  callUpgrade();
+  callComposing();
 }
 
 function navMenu() { // jQuery
