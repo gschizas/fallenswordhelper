@@ -88,36 +88,12 @@ export function getMembrList(force) {
     });
 }
 
-function sendInventoryToForage(data) {
-  data.lastUpdate = Date.now();
-  setForage(calf.subcmd === 'guildinvmgr' ? 'fsh_guildInv' :
-    'fsh_selfInv', data);
-  return data;
-}
-
 export function getInventory() {
-  var prm = $.ajax({
+  return $.ajax({
     dataType: 'json',
     url: 'index.php?cmd=export&subcmd=' + (calf.subcmd === 'guildinvmgr' ?
       'guild_store&inc_tagged=1' : 'inventory')
   });
-  return prm.pipe(sendInventoryToForage);
-}
-
-function checkCachedInventory(data) {
-  if (!data || data.lastUpdate < Date.now() - 300000) {
-    return getInventory();
-  }
-  return data;
-}
-
-export function inventory(force) {
-  if (force) {
-    return getInventory();
-  }
-  var prm = getForage(calf.subcmd === 'guildinvmgr' ?
-    'fsh_guildInv' : 'fsh_selfInv');
-  return prm.pipe(checkCachedInventory);
 }
 
 function rekeyInventory(data) {
@@ -192,7 +168,7 @@ export function equipItem(backpackInvId) {
 function htmlResult(data) {
   var info = layout.infoBox(data);
   return info.search(/(successfully|gained|components)/) !== -1 ?
-    {r: 0, m: ''} : {r: 1, m: info};
+    {r: 0, m: info} : {r: 1, m: info};
 }
 
 export function useItem(backpackInvId) {

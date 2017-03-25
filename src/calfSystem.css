@@ -606,6 +606,12 @@ table.fshInvFilter td {
   font-size: large;
 }
 
+/* Quick Extract */
+.qeHead {
+  background-color: #CD9E4B;
+  width: 100%;
+}
+
 /*
  * Table styles
  */
