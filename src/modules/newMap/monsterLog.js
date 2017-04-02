@@ -16,24 +16,35 @@ var statDamage;
 var statArmor;
 var statHp;
 
-function updateMinMax(_logStat, creatureStat) {
+function updateMinMax(_logStat, creatureStat) { // Native
   var logStat = _logStat || {};
-  logStat.min = logStat.min ? Math.min(logStat.min, creatureStat) :
-    creatureStat;
-  logStat.max = logStat.max ? Math.max(logStat.max, creatureStat) :
-    creatureStat;
+  if (logStat.min) {
+    logStat.min = Math.min(logStat.min, creatureStat);
+  } else {
+    logStat.min = creatureStat;
+  }
+  if (logStat.max) {
+    logStat.max = Math.max(logStat.max, creatureStat);
+  } else {
+    logStat.max = creatureStat;
+  }
   return logStat;
 }
 
-function processMonsterLog() {
+function oldProperty(oldProp, newProp) {
+  if (oldProp) {return oldProp;}
+  return newProp;
+}
+
+function processMonsterLog() { // Native
   if (!showMonsterLog) {return;}
-  monsterLog[creature.name] = monsterLog[creature.name] || {};
+  monsterLog[creature.name] = system.newMember(monsterLog[creature.name]);
   var logCreature = monsterLog[creature.name];
-  logCreature.creature_class = logCreature.creature_class ||
-    creature.creature_class;
-  logCreature.image_id = logCreature.image_id || creature.image_id;
-  logCreature.level = logCreature.level || Number(creature.level);
-  logCreature.type = logCreature.type || creature.type;
+  logCreature.creature_class = oldProperty(logCreature.creature_class,
+    creature.creature_class);
+  logCreature.image_id = oldProperty(logCreature.image_id, creature.image_id);
+  logCreature.level = oldProperty(logCreature.level, Number(creature.level));
+  logCreature.type = oldProperty(logCreature.type, creature.type);
   logCreature.armor = updateMinMax(logCreature.armor,
     Number(creature.armor));
   logCreature.attack = updateMinMax(logCreature.attack,
@@ -45,7 +56,7 @@ function processMonsterLog() {
   logCreature.hp = updateMinMax(logCreature.hp,
     Number(creature.hp));
   if (creature.enhancements && creature.enhancements.length > 0) {
-    logCreature.enhancements = logCreature.enhancements || {};
+    logCreature.enhancements = system.newMember(logCreature.enhancements);
     var logEnh = logCreature.enhancements;
     creature.enhancements.forEach(function(e) {
       logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
@@ -54,7 +65,7 @@ function processMonsterLog() {
   ajax.setForage('fsh_monsterLog', monsterLog);
 }
 
-function doMouseOver() {
+function doMouseOver() { // Native
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
   var monsterTip = '<table><tr><td>' +
@@ -99,7 +110,7 @@ function doMouseOver() {
   monster.setAttribute('data-tipped', monsterTip);
 }
 
-function processMouseOver(data) {
+function processMouseOver(data) { // Native
   if (!showCreatureInfo) {return;}
   var actions = document.getElementById('actionList').children;
   if (actions.length === 1 &&
@@ -113,20 +124,20 @@ function processMouseOver(data) {
   doMouseOver();
 }
 
-function processMonster(data) {
+function processMonster(data) { // Native
   creature = data.response.data;
   if (!creature) {return;} // creature is null
   processMouseOver(data);
   processMonsterLog();
 }
 
-function loopActions(e, i) {
+function loopActions(e, i) { // jQuery
   if (e.type !== 6) {return;}
   $.getJSON('fetchdata.php?a=1&d=0&id=' + e.data.id + '&passback=' + i)
     .done(processMonster);
 }
 
-function getMyStats() {
+function getMyStats() { // Native
   statLevel = system.intValue(document
     .getElementById('statbar-level-tooltip-general')
     .getElementsByClassName('stat-level')[0].nextElementSibling.textContent);
@@ -142,13 +153,13 @@ function getMyStats() {
     .getElementsByClassName('stat-hp')[0].nextElementSibling.textContent;
 }
 
-function initMonsterLog() {
+function initMonsterLog() { // Native
   if (showCreatureInfo) {getMyStats();}
   actionData = GameData.actions();
   actionData.forEach(loopActions);
 }
 
-function getBias() {
+function getBias() { // Native
   var combatEvaluatorBias = system.getValue('combatEvaluatorBias');
   if (combatEvaluatorBias === 1) {
     generalVariable = 1.1;
@@ -162,7 +173,7 @@ function getBias() {
   }
 }
 
-export function startMonsterLog() {
+export function startMonsterLog() { // jQuery
   showCreatureInfo = system.getValue('showCreatureInfo');
   showMonsterLog = system.getValue('showMonsterLog');
   if (!showCreatureInfo && !showMonsterLog) {return;}
