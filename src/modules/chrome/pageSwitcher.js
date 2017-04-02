@@ -41,6 +41,7 @@ import * as setup from '../arena/setup';
 import * as store from '../arena/store';
 import * as toprated from '../toprated';
 import * as trade from '../trade';
+import * as unknownPage from './unknownPage';
 import * as upgrades from '../upgrades';
 
 export default {
@@ -240,6 +241,6 @@ export default {
   '-': {
     viewupdatearchive: {'-': {'-': {'-': news.viewArchive}}},
     viewarchive: {'-': {'-': {'-': news.viewArchive}}},
-    '-': {'-': {'-': {'-': legacy.unknownPage}}}
+    '-': {'-': {'-': {'-': unknownPage.unknownPage}}}
   }
 };
