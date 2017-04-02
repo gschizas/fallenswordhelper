@@ -171,8 +171,7 @@ export function toggleVisibilty(evt) {
   }
 }
 
-export function getUrlParameter(sParam) {
-  var sPageURL = decodeURIComponent(window.location.search.substring(1));
+export function getCustomUrlParameter(sPageURL, sParam) {
   var sURLVariables = sPageURL.split('&');
   var sParameterName;
 
@@ -184,6 +183,11 @@ export function getUrlParameter(sParam) {
         sParameterName[1];
     }
   }
+}
+
+export function getUrlParameter(sParam) {
+  var sPageURL = decodeURIComponent(window.location.search.substring(1));
+  return getCustomUrlParameter(sPageURL, sParam);
 }
 
 export function formatLastActivity(last_login) {
@@ -216,14 +220,17 @@ function path(obj, aPath, def) {
   return _obj;
 }
 
+function sortDesc(result) {
+  return calf.sortAsc ? result : -result;
+}
+
 export function stringSort(a, b) {
   var result = 0;
   var _a = path(a, calf.sortBy, 'a');
   var _b = path(b, calf.sortBy, 'a');
   if (_a.toLowerCase() < _b.toLowerCase()) {result = -1;}
   if (_a.toLowerCase() > _b.toLowerCase()) {result = 1;}
-  if (!calf.sortAsc) {result = -result;}
-  return result;
+  return sortDesc(result);
 }
 
 export function numberSort(a, b) {
@@ -241,8 +248,7 @@ export function numberSort(a, b) {
     valueB = parseInt(valueB.replace(/,/g, '').replace(/#/g, ''), 10);
   }
   result = valueA - valueB;
-  if (!calf.sortAsc) {result = -result;}
-  return result;
+  return sortDesc(result);
 }
 
 export function testQuant(aValue) { // Native
@@ -260,4 +266,17 @@ export function getRandomInt(_min, _max) {
 
 export function rnd() {
   return getRandomInt(1000000000, 9999999998);
+}
+
+export function escapeHtml(unsafe) { // Native
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function newMember(member) {
+  return member || {};
 }
