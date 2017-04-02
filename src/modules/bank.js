@@ -75,10 +75,7 @@ function bankWithdrawal(e) { // jQuery
   $.get('index.php', o.data).done(transResponse);
 }
 
-function ajaxifyBank() { // jQuery
-  var o = bankSettings;
-  var bank = $('#pCC b');
-  if (bank.length === 0 || bank.eq(0).text() !== o.headText) {return;}
+function appLink(o, bank) {
   if (o.appLink) {
     bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
       '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
@@ -94,6 +91,14 @@ function ajaxifyBank() { // jQuery
     depo.click(bankDeposit);
   }
   withdraw.click(bankWithdrawal);
+}
+
+function ajaxifyBank() { // jQuery
+  var o = bankSettings;
+  var bank = $('#pCC b');
+  if (bank.length !== 0 && bank.eq(0).text() !== o.headText) {
+    appLink(o, bank);
+  }
 }
 
 export function injectGuildBank() { // Native
