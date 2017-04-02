@@ -576,41 +576,40 @@ function calculateRelicDefenderStats() { // Legacy - Old map
   extraTextInsertPoint.innerHTML += textToInsert;
 }
 
+function doBuffLinks(defendingGuildID, injectHere) {
+  var htmlToAppend = '';
+  if (defendingGuildID !== layout.guildId().toString()) {return '';}
+  var listOfDefenders = injectHere.next().text().split(',');
+  if (!listOfDefenders) {return '';}
+  // quick buff only supports 16
+  var shortList = [];
+  for (var i = 0; i < listOfDefenders.length; i += 1) {
+    shortList.push(listOfDefenders[i]);
+    if ((i + 1) % 16 === 0 && i !== 0 ||
+      i === listOfDefenders.length - 1) {
+      var modifierWord = dataObj.places[Math.floor(i / 16)];
+      htmlToAppend += '<br><nobr><a href="' + layout.buffAllHref(shortList) +
+        '" id="buffAll' + modifierWord + '"><span style="color:blue; font-' +
+        'size:x-small;" title="Quick buff functionality ' +
+        'from HCS only does 16">Buff ' + modifierWord +
+        ' 16</span></a></nobr>';
+      shortList = [];
+    }
+  }
+  return htmlToAppend;
+}
+
 export function injectRelic() { // Hybrid - Old map
   var relicNameElement = $('td:contains("Below is the current status ' +
     'for the relic"):last');
   relicNameElement.css('font-size', 'x-small');
-
   var injectHere = $('td:contains("Defended"):last');
   if (injectHere.length === 0) {return;}
   var defendingGuildMiniSRC = $('img[src*="_mini.jpg"]').attr('src');
   var defendingGuildID = /guilds\/(\d+)_mini.jpg/
     .exec(defendingGuildMiniSRC)[1];
-  if (defendingGuildID === layout.guildId().toString()) {
-    var listOfDefenders = injectHere.next().text().split(',');
-    // quick buff only supports 16
-    var shortList = [];
-    if (listOfDefenders) {
-      var modifierWord;
-      for (var i = 0; i < listOfDefenders.length; i += 1) {
-        shortList.push(listOfDefenders[i]);
-        if ((i + 1) % 16 === 0 && i !== 0 ||
-          i === listOfDefenders.length - 1) {
-          modifierWord = dataObj.places[Math.floor(i / 16)];
-          var htmlToAppend = '<br><nobr><a href="#" id="buffAll' +
-            modifierWord + '"><span style="color:blue; font-' +
-            'size:x-small;" title="Quick buff functionality ' +
-            'from HCS only does 16">Buff ' + modifierWord +
-            ' 16</span></a></nobr>';
-          injectHere.append(htmlToAppend);
-          var buffAllLink = $('#buffAll' + modifierWord);
-          buffAllLink.attr('href', layout.buffAllHref(shortList));
-          shortList = [];
-        }
-      }
-    }
-  }
-  injectHere.append('<input id="calculatedefenderstats" type="button" ' +
+  injectHere.append(doBuffLinks(defendingGuildID, injectHere) +
+    '<input id="calculatedefenderstats" type="button" ' +
     'value="Fetch Stats" title="Calculate the stats of the players ' +
     'defending the relic." class="custombutton">');
   document.getElementById('calculatedefenderstats')
