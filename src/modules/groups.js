@@ -125,37 +125,12 @@ function joinAllGroupsUnderSize() { // Legacy
 }
 
 function parseGroupData(responseText, linkElement) { // Legacy
-  var attackValue;
-  var defenseValue;
-  var armorValue;
-  var damageValue;
-  var hpValue;
   var doc = system.createDocument(responseText);
-  var allItems = doc.getElementsByTagName('TD');
-
-  for (var i = 0; i < allItems.length; i += 1) {
-    var anItem = allItems[i];
-    if (anItem.innerHTML === '<font color="#333333">Attack:&nbsp;</font>') {
-      var attackLocation = anItem.nextSibling;
-      attackValue = attackLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">Defense:&nbsp;</font>') {
-      var defenseLocation = anItem.nextSibling;
-      defenseValue = defenseLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">Armor:&nbsp;</font>') {
-      var armorLocation = anItem.nextSibling;
-      armorValue = armorLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">Damage:&nbsp;</font>') {
-      var damageLocation = anItem.nextSibling;
-      damageValue = damageLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">HP:&nbsp;</font>') {
-      var hpLocation = anItem.nextSibling;
-      hpValue = hpLocation.textContent;
-    }
-  }
+  var attackValue = doc.getElementById('stat-attack').textContent;
+  var defenseValue = doc.getElementById('stat-defense').textContent;
+  var armorValue = doc.getElementById('stat-armor').textContent;
+  var damageValue = doc.getElementById('stat-damage').textContent;
+  var hpValue = doc.getElementById('stat-hp').textContent;
   var extraText = '<table cellpadding="1" style="font-size:x-small; ' +
     'border-top:2px black solid; border-spacing: 1px; ' +
     'border-collapse: collapse;">';
