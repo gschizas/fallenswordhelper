@@ -26,8 +26,8 @@ function fshMain() {
   var resources = {
     calfSystemJs: '$_CALFJS',
     calfSystemCss: '$_CALFCSS',
-    localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.4.2/localforage.min.js',
-    dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
+    localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.0/localforage.min.js',
+    dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js',
     //#if _DEV  //  Dable resources
     // dableDev: 'https://raw.githack.com/deltreey/Dable/1.2.1/Dable.js',
     // dableDev: 'http://localhost/Dable/.build/dable.js'
