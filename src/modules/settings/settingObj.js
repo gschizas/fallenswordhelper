@@ -428,4 +428,10 @@ export var mySimpleCheckboxes = {
     helpTitle: 'Collapse News Archive',
     helpText: 'If enabled, will collapse news archives.'
   },
+  hideSubLvlCreature: {
+    id: 'hideSubLvlCreature',
+    helpTitle: 'Hide Sub Level Creatures',
+    helpText: 'If enabled, will hide creatures that are ' +
+      'lower than the current realm level.'
+  },
 };

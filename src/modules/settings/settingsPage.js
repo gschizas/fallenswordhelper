@@ -27,15 +27,33 @@ export function helpLink(title, text) { // Native
     text + '">?</span>&nbsp;]';
 }
 
-export function simpleCheckbox(name) { // Native
+function hasNetwork(o) { // Native
+  if (o.network) {return settingObj.networkIcon;}
+  return '';
+}
+
+export function isChecked(pref) { // Native
+  if (pref) {return ' checked';}
+  return '';
+}
+
+function isOn(o) { // Native
+  return isChecked(system.getValue(o.id));
+}
+
+export function simpleCheckboxHtml(name) {
   var o = settingObj.mySimpleCheckboxes[name];
-  return '<tr><td align="right">' +
-    (o.network ? settingObj.networkIcon : '') +
+  return hasNetwork(o) +
     '<label for="' + o.id + '">' + o.helpTitle +
     helpLink(o.helpTitle, o.helpText) +
     ':</label></td><td><input id="' + o.id +
-    '" name="' + o.id + '" type="checkbox" value="on"' +
-    (system.getValue(o.id) ? ' checked' : '') + '></td></tr>';
+    '" name="' + o.id + '" class="fshVMid" type="checkbox" value="on"' +
+    isOn(o) + '>';
+}
+
+export function simpleCheckbox(name) { // Native
+  return '<tr><td align="right">' +
+    simpleCheckboxHtml(name) + '</td></tr>';
 }
 
 function toggleTickAllBuffs(e) { // jQuery
@@ -48,18 +66,6 @@ function toggleTickAllBuffs(e) { // jQuery
   } else {
     tckTxt.text('Tick all buffs');
   }
-}
-
-export function injectSettingsGuildData(guildType) { // Native
-  return '<input name="guild' + guildType + '" size="60" value="' +
-    system.getValue('guild' + guildType) + '">' +
-    '<span class="fshPoint" ' +
-    'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
-    guildType + 'Message"> &#x00bb;</span>' +
-    '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
-    '<input name="guild' + guildType + 'Message" size="60" value="' +
-    system.getValue('guild' + guildType + 'Message') + '">' +
-    '</div>';
 }
 
 function clearStorage() { // Native
@@ -87,9 +93,7 @@ function saveValueForm(oForm, name) { // Legacy
   }
 }
 
-function saveConfig(evt) { // Legacy
-  var oForm = evt.target.form;
-
+function bioCompressValid(oForm) { // Legacy
   // bio compressor validation logic
   var maxCompressedCharacters =
     system.findNode('//input[@name="maxCompressedCharacters"]', oForm);
@@ -104,6 +108,11 @@ function saveConfig(evt) { // Legacy
   if (isNaN(maxCompressedLinesValue) || maxCompressedLinesValue <= 1) {
     maxCompressedLines.value = 25;
   }
+}
+
+function saveConfig(evt) { // Legacy
+  var oForm = evt.target.form;
+  bioCompressValid(oForm);
   var newGuildLogHistoryPages =
     system.findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
   var newGuildLogHistoryPagesValue = Number(newGuildLogHistoryPages.value);
@@ -139,15 +148,6 @@ function showLogs() { // Native
 function showMonsterLogs() { // Native
   document.location = system.server +
     'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
-}
-
-export function escapeHtml(unsafe) { // Native
-  return unsafe
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;');
 }
 
 function createEventListeners() { // Native

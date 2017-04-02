@@ -193,8 +193,6 @@ export var defaults = {
   },
   lowestLevelInTop250: 0,
 
-  /* jshint -W110 */ // Mixed double and single quotes. (W110)
-
   quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 
   sendClasses: '["Composed Pots", "13699"], ["Amber", "5611"], ' +
@@ -257,8 +255,6 @@ export var defaults = {
     '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
       '"nickname":"FI 1k","displayOnAH":true}]',
 
-  /* jshint +W110 */ // Mixed double and single quotes. (W110)
-
   arenaMoves: '[]',
   arenaMatches: '[]',
   CombatLog: '',
@@ -272,6 +268,8 @@ export var defaults = {
   expandMenuOnKeyPress: false,
   disableBreakdownPrompts: false,
   collapseNewsArchive: false,
+  lastmyGuildLogCheck: 0,
+  hideSubLvlCreature: false,
 
 };
 

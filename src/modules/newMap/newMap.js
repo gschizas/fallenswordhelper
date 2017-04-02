@@ -4,6 +4,7 @@ import * as buttons from './buttons';
 import * as combatLogger from './combatLogger';
 import * as monsterLog from './monsterLog';
 import * as sendGold from './sendGold';
+import * as settingsPage from '../settings/settingsPage';
 import * as shop from './shop';
 import * as system from '../support/system';
 import * as viewCreature from './viewCreature';
@@ -11,6 +12,29 @@ import * as viewCreature from './viewCreature';
 var showHuntingBuffs;
 var huntingBuffs;
 var huntingBuffsName;
+var hideSubLvlCreature;
+
+function xhrDataFilter(data) { // Native
+  var myData = JSON.parse(data);
+  if (!myData.actions || myData.actions.length === 0) {return data;}
+  var realm = GameData.realm();
+  myData.actions = myData.actions.filter(function(el) {
+    if (el.type === 6) {return el.data.level >= realm.minlevel;}
+    return true;
+  });
+  var ret = JSON.stringify(myData);
+  return ret;
+}
+
+function xhrPreFilter(options, originalOptions) { // Native
+  if (!originalOptions.data || !hideSubLvlCreature) {return;}
+  options.dataFilter = xhrDataFilter;
+}
+
+function interceptXHR() { // jQuery
+  $.ajaxPrefilter(xhrPreFilter);
+  if (hideSubLvlCreature) {GameData.fetch(387);}
+}
 
 function hideGroupButton() { // jQuery
   if (system.getValue('hideChampionsGroup')) {
@@ -40,19 +64,49 @@ function hideGroupButton() { // jQuery
   }
 }
 
+function colorType(actionList, creatureClass, colorClass) { // Native
+  var creatures = actionList.getElementsByClassName(creatureClass);
+  Array.prototype.forEach.call(creatures, function(el) {
+    el.classList.add(colorClass);
+  });
+}
+
 function colorMonsters() { // jQuery
-  $('#actionList li.creature-1').css('color', 'green');
-  $('#actionList li.creature-2').css('color', 'yellow');
-  $('#actionList li.creature-3').css('color', 'red');
+  var act = document.getElementById('actionList');
+  colorType(act, 'creature-1', 'fshGreen');
+  colorType(act, 'creature-2', 'fshYellow');
+  colorType(act, 'creature-3', 'fshRed');
+}
+
+function doMonsterColors() { // jQuery
+  if (system.getValue('enableCreatureColoring')) {
+    $.subscribe('after-update.actionlist', colorMonsters);
+    colorMonsters();
+  }
 }
 
 function afterUpdateActionList() { // jQuery
   // color the critters in the do no kill list blue
   // TODO substring bug
-  $('#actionList div.header').each(function(i, e) {
-    if (calf.doNotKillList.indexOf(
-        $(e).find('a.icon').data('name')) !== -1) {
-      $(e).css('color', 'blue');
+  var act = document.getElementById('actionList');
+  // var noActions = act.getElementsByClassName('empty');
+  // if (noActions.length !== 0) {return;}
+  // var playerData = GameData.player();
+  // var actionData = GameData.actions();
+  // console.log('playerData', playerData);
+  // console.log('actionData', actionData);
+  // var actions = act.getElementsByClassName('actionListItem');
+  // Array.prototype.forEach.call(actions, function(el, ind) {
+  //   if (actionData[ind].type === 6 &&
+  //     actionData[ind].data.level < playerData.level) {
+  //     el.classList.add('fshHide');
+  //   }
+  // });
+
+  var creatures = act.getElementsByClassName('creature');
+  Array.prototype.forEach.call(creatures, function(el) {
+    if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
+      el.classList.add('fshBlue');
     }
   });
 }
@@ -124,7 +178,7 @@ function injectWorldNewMap(data) { // Native
   }
 }
 
-function doHuntingBuffs() {
+function doHuntingBuffs() { // jQuery
   showHuntingBuffs = system.getValue('showHuntingBuffs');
   if (!showHuntingBuffs) {return;}
   var enabledHuntingMode = system.getValue('enabledHuntingMode');
@@ -149,48 +203,46 @@ function doHuntingBuffs() {
   }
 }
 
+function togglePref() { // Native
+  hideSubLvlCreature = !hideSubLvlCreature;
+  system.setValue('hideSubLvlCreature', hideSubLvlCreature);
+  GameData.fetch(387);
+}
+
+function setupPref() {
+  hideSubLvlCreature = system.getValue('hideSubLvlCreature');
+  var prefsDiv = document.createElement('div');
+  prefsDiv.insertAdjacentHTML('beforeend',
+    settingsPage.simpleCheckboxHtml('hideSubLvlCreature'));
+  var worldContainerBelow = document.getElementById('worldContainerBelow');
+  worldContainerBelow.insertAdjacentElement('afterbegin', prefsDiv);
+  document.getElementById('hideSubLvlCreature')
+    .addEventListener('click', togglePref);
+}
+
 export function subscribes() { // jQuery
-
-  if (system.getValue('sendGoldonWorld')) {
-    sendGold.injectSendGoldOnWorld();
-  }
-
+  sendGold.injectSendGoldOnWorld();
   // Subscribes:
   calf.doNotKillList = system.getValue('doNotKillList');
-
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', viewCreature.readyViewCreature);
-
-  // Hide Create Group button
-  hideGroupButton();
-
-  if (system.getValue('enableCreatureColoring')) {
-    $.subscribe('after-update.actionlist', colorMonsters);
-    colorMonsters();
-  }
-
+  hideGroupButton(); // Hide Create Group button
+  doMonsterColors();
   // add do-not-kill list functionality
   $.subscribe('after-update.actionlist', afterUpdateActionList);
   afterUpdateActionList();
-
   // add monster log functionality
   monsterLog.startMonsterLog();
-
   // then intercept the action call
   interceptDoAction();
-
   $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
     impIconColour);
-
   doHuntingBuffs();
-
   $.subscribe('keydown.controls', function(e, key) {
     if (key === 'ACT_REPAIR') {GameData.fetch(387);}
   });
-
   combatLogger.init();
   // on world
-
   if (window.initialGameData) {// HCS initial data
     injectWorldNewMap(window.initialGameData);
     impIconColour(null,
@@ -201,8 +253,8 @@ export function subscribes() { // jQuery
       injectWorldNewMap(data);
     }
   );
-
   // somewhere near here will be multi buy on shop
   shop.prepareShop();
-
+  setupPref();
+  interceptXHR();
 }
