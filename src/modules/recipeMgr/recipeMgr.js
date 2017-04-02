@@ -11,6 +11,7 @@ var hideRecipes = [];
 var output;
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
+var playerId;
 
 function storeRecipeBook() {
   ajax.setForage('fsh_recipeBook', recipebook);
@@ -37,77 +38,76 @@ function sortRecipeTable(evt) { // Legacy
   generateRecipeTable();
 }
 
+function getRecipeItems(recipe) {
+  if (recipe.items) {
+    return recipe.items.reduce(function(prev, itm) {
+      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
+        'data-tipped="fetchitem.php?item_id=' +
+        itm.id + '&inv_id=-1&t=2&p=' +
+        playerId + '&vcode=' +
+        itm.verify + '" src="' +
+        itm.img + '" height="20px" width="20px"><p>' +
+        itm.amountPresent + '/' +
+        itm.amountNeeded + '</p></div>';
+    }, '');
+  }
+  return '';
+}
+
+function getComponents(recipe) {
+  if (recipe.components) {
+    return recipe.components.reduce(function(prev, comp) {
+      return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
+        'data-tipped="fetchitem.php?item_id=' +
+        comp.id + '&inv_id=-1&t=2&p=' +
+        playerId + '&vcode=' +
+        comp.verify + '" src="' +
+        comp.img + '" height="20px" width="20px"><p>' +
+        comp.amountPresent + '/' +
+        comp.amountNeeded + '</p></div>';
+    }, '');
+  }
+  return '';
+}
+
+function getImg(recipe) {
+  if (recipe.target) {
+    return ' <img class="tip-dynamic" ' +
+      'data-tipped="fetchitem.php?item_id=' +
+      recipe.target.id + '&inv_id=-1&t=2&p=' + playerId +
+      '&vcode=' + recipe.target.verify + '" ' +
+      'src="' + recipe.target.img +
+      '" height="30px" width="30px"><br/>';
+  }
+  return '';
+}
+
 function generateRecipeTable() { // Legacy
   if (!recipebook) {return;}
-  var playerId = layout.playerId();
+  playerId = layout.playerId();
   var i;
-  var j;
-  var result = '<table width="100%"><tr class="rmTh">' +
-    '<th>Recipe</th>' +
-    '<th><span id="sortName" class="fshLink" sortkey="name">Name</span></th>' +
-    '<th>Items</th>' +
-    '<th>Components</th>' +
-    '<th>Target</th>' +
-    '</tr>';
-
+  var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
+    '<th><span id="sortName" class="fshLink" sortkey="name">Name</span>' +
+    '</th><th>Items</th><th>Components</th><th>Target</th></tr>';
   var recipe;
   for (i = 0; i < recipebook.recipe.length; i += 1) {
     recipe = recipebook.recipe[i];
     if (hideRecipes.indexOf(recipe.name) !== -1) {continue;}
-    result += '<tr class="rmTr"><td class="rmTd">' +
-      '<a href="' + recipe.link + '">' +
-      '<img src="' + recipe.img +
-      '" height="30px" width="30px">' +
-      '</a>' +
-      '</td>' +
-      '<td class="rmTd">' +
-      '<a href="' + recipe.link + '">' + recipe.name + '</a>' +
-      '</td><td class="rmTd">';
-    if (recipe.items) {
-      for (j = 0; j < recipe.items.length; j += 1) {
-        result += '<div class="rmItem"><img class="tip-dynamic" ' +
-          'data-tipped="fetchitem.php?item_id=' +
-          recipe.items[j].id + '&inv_id=-1&t=2&p=' +
-          playerId + '&vcode=' + recipe.items[j].verify +
-          '" src="' + recipe.items[j].img +
-          '" height="20px" width="20px"><p>' +
-          recipe.items[j].amountPresent + '/' +
-          recipe.items[j].amountNeeded + '</p></div>';
-      }
-    }
+    result += '<tr class="rmTr"><td class="rmTd"><a href="' + recipe.link +
+      '"><img src="' + recipe.img +
+      '" height="30px" width="30px"></a></td><td class="rmTd"><a href="' +
+      recipe.link + '">' + recipe.name + '</a></td><td class="rmTd">';
+    result += getRecipeItems(recipe);
     result += '</td><td class="rmTd">';
-    if (recipe.components) {
-      for (j = 0; j < recipe.components.length; j += 1) {
-        result += '<div class="rmItem"><img class="tip-dynamic" ' +
-          'data-tipped="fetchitem.php?item_id=' +
-          recipe.components[j].id + '&inv_id=-1&t=2&p=' +
-          playerId + '&vcode=' +
-          recipe.components[j].verify + '" src="' +
-          recipe.components[j].img +
-          '" height="20px" width="20px"><p>' +
-          recipe.components[j].amountPresent + '/' +
-          recipe.components[j].amountNeeded + '</p></div>';
-      }
-    }
-    result += '</td>';
-    result += '<td class="rmTd">';
-    if (recipe.target) {
-      result += ' <img class="tip-dynamic" ' +
-          'data-tipped="fetchitem.php?item_id=' +
-          recipe.target.id + '&inv_id=-1&t=2&p=' + playerId +
-          '&vcode=' + recipe.target.verify + '" ' +
-          'src="' + recipe.target.img +
-          '" height="30px" width="30px"><br/>';
-    }
-    result += '</td>';
-    result += '</tr>';
+    result += getComponents(recipe);
+    result += '</td><td class="rmTd">';
+    result += getImg(recipe);
+    result += '</td></tr>';
   }
   result += '</table>';
   output.innerHTML = result;
-
   recipebook.lastUpdate = new Date();
   storeRecipeBook(); // Why? storing the sorted data?
-
   document.getElementById('sortName')
     .addEventListener('click', sortRecipeTable);
 }
