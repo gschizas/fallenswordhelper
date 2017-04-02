@@ -1,3 +1,4 @@
+var depoRe = /deposited ([,0-9]+) FallenSword Points into the guild./;
 var lookup = [
   {
     condition: function(data) {return data.indexOf('(Potion)') !== -1;},
@@ -127,8 +128,7 @@ var lookup = [
   },
   {
     condition: function(data) {
-      var re = /deposited ([,0-9]+) FallenSword Points into the guild./;
-      return re.test(data);
+      return depoRe.test(data);
     },
     id: 7
   },
