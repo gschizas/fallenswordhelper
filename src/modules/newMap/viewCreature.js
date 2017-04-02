@@ -3,6 +3,20 @@ import calf from '../support/calf';
 import * as common from '../support/common';
 import * as system from '../support/system';
 
+function getBiasGeneral(combat) { // Native
+  if (assets.bias[combat.combatEvaluatorBias]) {
+    return assets.bias[combat.combatEvaluatorBias].generalVariable;
+  }
+  return 1.1053;
+}
+
+function getBiasHp(combat) { // Native
+  if (assets.bias[combat.combatEvaluatorBias]) {
+    return assets.bias[combat.combatEvaluatorBias].hpVariable;
+  }
+  return 1.1;
+}
+
 function creatureData(ses) { // jQuery
   var obj = {};
   obj.name = $('#dialog-viewcreature').find('h2.name').text();
@@ -30,23 +44,58 @@ function creatureData(ses) { // jQuery
   return obj;
 }
 
+function evalSes(combat) { // Native
+  if (combat.player.superEliteSlayerLevel > 0) {
+    combat.extraNotes += 'SES Stat Reduction Multiplier = ' +
+    combat.player.superEliteSlayerMultiplier + '<br>';
+  }
+}
+
+function evalHolyFlame(combat) { // Native
+  combat.holyFlameBonusDamage = 0;
+  if (combat.creature.class !== 'Undead') {return;}
+  combat.holyFlameBonusDamage = Math.max(Math.floor(
+    (combat.player.damageValue - combat.creature.armor) *
+    combat.player.holyFlameLevel * 0.002), 0);
+  if (combat.player.holyFlameLevel > 0) {
+    combat.extraNotes += 'HF Bonus Damage = ' + combat.holyFlameBonusDamage +
+    '<br>';
+  }
+}
+
+function evalExtraStam(combat) { // Native
+  combat.extraStaminaPerHit = 0;
+  if (combat.player.counterAttackLevel > 0) {
+    combat.extraStaminaPerHit = Math.ceil(
+      (1 + combat.player.doublerLevel / 50) *
+      0.0025 * combat.player.counterAttackLevel
+    );
+  }
+}
+
+function evalDeathDealer(combat) { // Native
+  if (combat.player.deathDealerLevel > 0) {
+    combat.extraNotes += 'DD Bonus Damage = ' +
+      combat.deathDealerBonusDamage + '<br>';
+  }
+}
+
+function evalCounterAttack(combat) { // Native
+  if (combat.player.counterAttackLevel > 0) {
+    combat.extraNotes += 'CA Bonus Attack/Damage = ' +
+      combat.counterAttackBonusAttack + ' / ' +
+      combat.counterAttackBonusDamage + '<br>' +
+      'CA Extra Stam Used = ' + combat.extraStaminaPerHit + '<br>';
+  }
+}
+
 function evalExtraBuffs(combat) { // Native
   combat.extraNotes = '';
-  combat.extraNotes += combat.player.superEliteSlayerLevel > 0 ?
-    'SES Stat Reduction Multiplier = ' +
-    combat.player.superEliteSlayerMultiplier + '<br>' : '';
+  evalSes(combat);
   // math section ... analysis
   // Holy Flame adds its bonus after the
   // armor of the creature has been taken off.
-  combat.holyFlameBonusDamage = 0;
-  if (combat.creature.class === 'Undead') {
-    combat.holyFlameBonusDamage = Math.max(Math.floor(
-      (combat.player.damageValue - combat.creature.armor) *
-      combat.player.holyFlameLevel * 0.002), 0);
-    combat.extraNotes += combat.player.holyFlameLevel > 0 ?
-      'HF Bonus Damage = ' + combat.holyFlameBonusDamage +
-      '<br>' : '';
-  }
+  evalHolyFlame(combat);
   // Death Dealer and Counter Attack both applied at the same time
   combat.deathDealerBonusDamage =
     Math.floor(combat.player.damageValue * (Math.min(Math.floor(
@@ -58,20 +107,9 @@ function evalExtraBuffs(combat) { // Native
   combat.counterAttackBonusDamage =
     Math.floor(combat.player.damageValue * 0.0025 *
     combat.player.counterAttackLevel);
-  combat.extraStaminaPerHit =
-    combat.player.counterAttackLevel > 0 ?
-    Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
-    combat.player.counterAttackLevel) : 0;
-  // playerAttackValue += counterAttackBonusAttack;
-  // playerDamageValue += deathDealerBonusDamage + counterAttackBonusDamage;
-  combat.extraNotes += combat.player.deathDealerLevel > 0 ?
-    'DD Bonus Damage = ' + combat.deathDealerBonusDamage + '<br>' : '';
-  if (combat.player.counterAttackLevel > 0) {
-    combat.extraNotes += 'CA Bonus Attack/Damage = ' +
-      combat.counterAttackBonusAttack + ' / ' +
-      combat.counterAttackBonusDamage + '<br>' +
-      'CA Extra Stam Used = ' + combat.extraStaminaPerHit + '<br>';
-  }
+  evalExtraStam(combat);
+  evalDeathDealer(combat);
+  evalCounterAttack(combat);
   return combat;
 }
 
@@ -104,60 +142,105 @@ function evalAttack(combat) { // Native
   return combat;
 }
 
+function calcHp(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupHPValue;
+  }
+  return combat.player.hpValue;
+}
+
+function calcDmg(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupDamageValue;
+  }
+  return combat.player.damageValue;
+}
+
+function calcDef(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupDefenseValue;
+  }
+  return combat.player.defenseValue;
+}
+
 function evalDamage(combat) { // Native
   // Damage:
-  combat.fortitudeExtraHPs = Math.floor((combat.callback.groupExists ?
-    combat.callback.groupHPValue : combat.player.hpValue) *
-    combat.player.fortitudeLevel * 0.001);
-  combat.extraNotes += combat.player.fortitudeLevel > 0 ?
-    'Fortitude Bonus HP = ' + combat.fortitudeExtraHPs + '<br>' : '';
-  combat.overallHPValue = (combat.callback.groupExists ?
-    combat.callback.groupHPValue : combat.player.hpValue) +
-    combat.fortitudeExtraHPs;
+  var hpValue = calcHp(combat);
+
+  var fortitudeLevel = combat.player.fortitudeLevel;
+  combat.fortitudeExtraHPs = Math.floor(hpValue * fortitudeLevel * 0.001);
+  if (fortitudeLevel > 0) {
+    combat.extraNotes += 'Fortitude Bonus HP = ' + combat.fortitudeExtraHPs +
+      '<br>';
+  }
+  combat.overallHPValue = hpValue + combat.fortitudeExtraHPs;
+
+  var chiStrikeLevel = combat.player.chiStrikeLevel;
   combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
-    combat.player.chiStrikeLevel * 0.001);
-  combat.extraNotes += combat.player.chiStrikeLevel > 0 ?
-    'Chi Strike Bonus Damage = ' + combat.chiStrikeExtraDamage +
-    '<br>' : '';
-  combat.overallDamageValue = (combat.callback.groupExists ?
-    combat.callback.groupDamageValue : combat.player.damageValue) +
+    chiStrikeLevel * 0.001);
+  if (chiStrikeLevel > 0) {
+    combat.extraNotes += 'Chi Strike Bonus Damage = ' +
+      combat.chiStrikeExtraDamage + '<br>';
+  }
+
+  var damageValue = calcDmg(combat);
+  combat.overallDamageValue = damageValue +
     combat.deathDealerBonusDamage + combat.counterAttackBonusDamage +
     combat.holyFlameBonusDamage + combat.chiStrikeExtraDamage;
   combat.damageDone = Math.floor(combat.overallDamageValue - (
     combat.generalVariable * combat.creature.armor +
     combat.hpVariable * combat.creature.hp));
-  combat.numberOfHitsRequired = combat.hitByHowMuch > 0 ?
-    Math.ceil(combat.hpVariable * combat.creature.hp / (
-    combat.overallDamageValue < combat.generalVariable *
-    combat.creature.armor ? 1 : combat.overallDamageValue -
-    combat.generalVariable * combat.creature.armor)) : '-';
+
+  if (combat.hitByHowMuch > 0) {
+    var dmgLessArmor = 1;
+    if (combat.overallDamageValue >=
+        combat.generalVariable * combat.creature.armor) {
+      dmgLessArmor = combat.overallDamageValue - combat.generalVariable *
+        combat.creature.armor;
+    }
+    combat.numberOfHitsRequired = Math.ceil(combat.hpVariable *
+      combat.creature.hp / dmgLessArmor);
+  } else {
+    combat.numberOfHitsRequired = '-';
+  }
   return combat;
 }
 
+function evalConstitution(combat) { // Native
+  if (combat.player.constitutionLevel > 0) {
+    combat.extraNotes += 'Constitution Bonus Defense = ' +
+    Math.floor(calcDef(combat) *
+    combat.player.constitutionLevel * 0.001) + '<br>';
+  }
+}
+
+function evalFlinch(combat) { // Native
+  if (combat.player.flinchLevel > 0) {
+    combat.extraNotes += 'Flinch Bonus Attack Reduction = ' +
+    Math.floor(combat.creature.attack * combat.player.flinchLevel *
+    0.001) + '<br>';
+  }
+}
+
 function evalDefence(combat) { // Native
-  combat.overallDefenseValue = (combat.callback.groupExists ?
-    combat.callback.groupDefenseValue : combat.player.defenseValue) +
-    Math.floor((combat.callback.groupExists ?
-    combat.callback.groupDefenseValue : combat.player.defenseValue) *
+  combat.overallDefenseValue = calcDef(combat) +
+    Math.floor(calcDef(combat) *
     combat.player.constitutionLevel * 0.001) +
     combat.nightmareVisageAttackMovedToDefense;
-  combat.extraNotes += combat.player.constitutionLevel > 0 ?
-    'Constitution Bonus Defense = ' +
-    Math.floor((combat.callback.groupExists ?
-    combat.callback.groupDefenseValue : combat.player.defenseValue) *
-    combat.player.constitutionLevel * 0.001) + '<br>' : '';
-  combat.extraNotes += combat.player.flinchLevel > 0 ?
-    'Flinch Bonus Attack Reduction = ' +
-    Math.floor(combat.creature.attack * combat.player.flinchLevel *
-    0.001) + '<br>' : '';
+
+  evalConstitution(combat);
+  evalFlinch(combat);
+
   combat.creatureHitByHowMuch = Math.floor(combat.attackVariable *
     combat.creature.attack - combat.creature.attack *
     combat.player.flinchLevel * 0.001 - combat.overallDefenseValue);
+
   if (combat.combatEvaluatorBias === 3) {
     combat.creatureHitByHowMuch = Math.floor(combat.creature.attack -
       combat.creature.attack * combat.player.flinchLevel * 0.001 -
       combat.overallDefenseValue - 50);
   }
+
   return combat;
 }
 
@@ -215,6 +298,13 @@ function evalCreatureHits(combat) { // Native
   return creatureHits;
 }
 
+function evalMiss(combat) { // Native
+  if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
+    return ', dies on miss';
+  }
+  return ', survives a miss';
+}
+
 function evalAnalysis(combat) { // Native
   // Analysis:
   combat.playerHits = evalPlayerHits(combat);
@@ -225,20 +315,14 @@ function evalAnalysis(combat) { // Native
   } else if (combat.playerHits === '-') {
     combat.fightStatus = 'Player dies';
   } else if (combat.playerHits === 1) {
-    combat.fightStatus = 'Player 1 hits' + (
-      combat.numberOfCreatureHitsTillDead -
-      combat.numberOfHitsRequired <= 1 ? ', dies on miss' :
-      ', survives a miss');
+    combat.fightStatus = 'Player 1 hits' + evalMiss(combat);
   } else if (combat.playerHits > 1) {
-    combat.fightStatus = 'Player > 1 hits' + (
-      combat.numberOfCreatureHitsTillDead -
-      combat.numberOfHitsRequired <= 1 ? ', dies on miss' :
-      ', survives a miss');
+    combat.fightStatus = 'Player > 1 hits' + evalMiss(combat);
   }
   return combat;
 }
 
-function caRunning(combat) {
+function caRunning(combat) { // Native
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
     combat.player.attackValue / 0.0025), 0);
@@ -277,7 +361,7 @@ function caRunning(combat) {
   }
 }
 
-function caResult(combat) {
+function caResult(combat) { // Native
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
     combat.player.attackValue / 0.0025), 0);
@@ -365,30 +449,14 @@ function evalHTML(combat) { // Native
 }
 
 function getCreaturePlayerData(responseText, callback) { // Legacy
-
   var combat = {};
   combat.callback = callback;
   // playerdata
   combat.player = common.playerData(responseText);
-
   combat.combatEvaluatorBias = system.getValue('combatEvaluatorBias');
   combat.attackVariable = 1.1053;
-  combat.generalVariable =
-    assets.bias[combat.combatEvaluatorBias] ?
-    assets.bias[combat.combatEvaluatorBias].generalVariable :
-    1.1053;
-  combat.hpVariable =
-    assets.bias[combat.combatEvaluatorBias] ?
-    assets.bias[combat.combatEvaluatorBias].hpVariable : 1.1;
-
-  // creaturedata
-  var creatureStatTable;
-  if ($('#worldPage').length === 0) { // old map
-    creatureStatTable = system
-      .findNode('//table[tbody/tr/td[.="Statistics"]]');
-    if (!creatureStatTable) {return;}
-  }
-
+  combat.generalVariable = getBiasGeneral(combat);
+  combat.hpVariable = getBiasHp(combat);
   combat.creature =
     creatureData(combat.player.superEliteSlayerMultiplier);
   combat = evalExtraBuffs(combat);
@@ -399,34 +467,24 @@ function getCreaturePlayerData(responseText, callback) { // Legacy
   combat = evalAnalysis(combat);
   combat = evalCA(combat);
   combat.evaluatorHTML = evalHTML(combat);
-
   var tempdata;
-
-  if ($('#worldPage').length > 0) { // new map
-    if (callback.groupEvaluation) {
-      if ($('#creatureEvaluatorGroup').length === 0) {
-        $('#dialog-viewcreature')
-          .append('<div id="creatureEvaluatorGroup" ' +
-            'style="clear:both;"></div>');
-      }
-      tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
-      $('#creatureEvaluatorGroup').html(tempdata);
-    } else {
-      if ($('#creatureEvaluator').length === 0) {
-        $('#dialog-viewcreature')
-          .append('<div id="creatureEvaluator" ' +
-            'style="clear:both;"></div>');
-      }
-      tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
-      $('#creatureEvaluator').html(tempdata);
+  if (callback.groupEvaluation) {
+    if ($('#creatureEvaluatorGroup').length === 0) {
+      $('#dialog-viewcreature')
+        .append('<div id="creatureEvaluatorGroup" ' +
+          'style="clear:both;"></div>');
     }
+    tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
+    $('#creatureEvaluatorGroup').html(tempdata);
   } else {
-    var newRow = creatureStatTable.insertRow(creatureStatTable.rows.length);
-    var newCell = newRow.insertCell(0);
-    newCell.colSpan = '4';
-    newCell.innerHTML = combat.evaluatorHTML;
+    if ($('#creatureEvaluator').length === 0) {
+      $('#dialog-viewcreature')
+        .append('<div id="creatureEvaluator" ' +
+          'style="clear:both;"></div>');
+    }
+    tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
+    $('#creatureEvaluator').html(tempdata);
   }
-
 }
 
 function getCreatureGroupData(responseText) { // Legacy
