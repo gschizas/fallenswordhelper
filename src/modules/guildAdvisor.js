@@ -140,10 +140,6 @@ function injectAdvisorNew(m) { // Native
 
 }
 
-function newMember(member) {
-  return member || {};
-}
-
 function newNumber(number) {
   return number || 0;
 }
@@ -161,7 +157,7 @@ function returnAdvisorPage(e, response) { // Native
     var tds = el.cells;
     var member = tds[0].textContent.trim();
     if (member === 'Member') {return;}
-    newSummary[member] = newMember(newSummary[member]);
+    newSummary[member] = system.newMember(newSummary[member]);
     newSummary[member].deposit = newNumber(newSummary[member].deposit) +
       system.intValue(tds[1].textContent);
     newSummary[member].tax = newNumber(newSummary[member].tax) +
