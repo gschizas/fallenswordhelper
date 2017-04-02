@@ -189,6 +189,32 @@ function getSustain(responseText) { // Native
 
 }
 
+function rejected(timeStamp, buffsNotCast, buffLog) {
+  if (buffsNotCast) {
+    return timeStamp + ' <span style="color: red;">' +
+      buffsNotCast[0] + '</span><br>' + buffLog;
+  }
+  return buffLog;
+}
+
+function getStamUsed(buffCast) {
+  var buffList = buffObj.buffList;
+  for (var j = 0; j < buffList.length; j += 1) {
+    if (buffList[j].name === buffCast[1]) {
+      return buffList[j].stamina.toString();
+    }
+  }
+  return '-';
+}
+
+function successfull(timeStamp, buffCast, buffLog) {
+  if (buffCast) {
+    return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
+      ' stamina) <br>' + buffLog;
+  }
+  return buffLog;
+}
+
 function buffResult(_buffLog) { // Native
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
@@ -199,25 +225,11 @@ function buffResult(_buffLog) { // Native
     ' higher level is currently active on \'(\\w*)\'');
   var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
     'activated on \'(\\w*)\'');
-  var buffList = buffObj.buffList;
   for (var i = 0; i < buffsAttempted.length; i += 1) {
-    var buffsCast = buffsCastRE.exec(buffsAttempted[i]);
-    var buffsNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
-    var stamina = 0;
-    if (buffsCast) {
-      for (var j = 0; j < buffList.length; j += 1) {
-        if (buffList[j].name === buffsCast[1]) {
-          stamina = buffList[j].stamina;
-          break;
-        }
-      }
-      buffLog = timeStamp + ' ' + buffsCast[0] + ' (' + stamina +
-        ' stamina) <br>' + buffLog;
-    }
-    if (buffsNotCast) {
-      buffLog = timeStamp + ' <span style="color: red;">' +
-        buffsNotCast[0] + '</span><br>' + buffLog;
-    }
+    var buffCast = buffsCastRE.exec(buffsAttempted[i]);
+    var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
+    buffLog = successfull(timeStamp, buffCast, buffLog);
+    buffLog = rejected(timeStamp, buffNotCast, buffLog);
   }
   ajax.setForage('fsh_buffLog', buffLog);
 }
