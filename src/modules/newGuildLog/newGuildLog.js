@@ -2,6 +2,7 @@ import * as ajax from '../support/ajax';
 import * as assets from './assets';
 import * as layout from '../support/layout';
 import * as logs from '../logs';
+import * as profiler from './profiler';
 import * as system from '../support/system';
 
 var options = {};
@@ -22,131 +23,6 @@ function getGuildLogPage(page) {
     data: {cmd: 'guild', subcmd: 'log', page: page},
     datatype: 'html'
   });
-}
-
-function stringIncludes(string, search) {
-  if (string.indexOf(search) !== -1) {return 1;}
-  return 0;
-}
-
-function regExIncludes(string, re) {
-  if (re.test(string)) {return 1;}
-  return 0;
-}
-
-function titanMsg(data) {
-  if (data.indexOf('bought the Titan Reward item') !== -1 ||
-      data.indexOf('from your guild\'s contribution to the ' +
-        'defeat of the titan') !== -1 ||
-      data.indexOf('a 7 day cooldown has been activated ' +
-        'on your guild for this titan') !== -1) {
-    // Titan messages (showTitanMessages)
-    return 10;
-  }
-  return 0;
-}
-
-function gvgMsg(data) {
-  if (/resulted in (.*) with a final score of/.test(data) ||
-      data.indexOf('resulted in a draw. Your GvG rating ' +
-        'and Guild RP was unaffected.') !== -1 ||
-      data.indexOf('has just initiated a conflict with the guild') !== -1 ||
-      data.indexOf('has initiated a conflict with your guild') !== -1 ||
-      data.indexOf('is participating in the conflict ' +
-        'against the guild') !== -1) {
-    // GvG messages (showGvGMessages)
-    return 9;
-  }
-  return titanMsg(data);
-}
-
-function rankMsg(data) {
-  if (data.indexOf('has added a new rank entitled') !== -1 ||
-      data.indexOf('has deleted the rank') !== -1 ||
-      data.indexOf('has requested to join the guild') !== -1 ||
-      data.indexOf('has invited the player') !== -1 ||
-      data.indexOf('has officially joined the guild') !== -1 ||
-      data.indexOf('has been kicked from the guild by') !== -1 ||
-      data.indexOf('has left the guild') !== -1 ||
-      data.indexOf('has been assigned the rank') !== -1) {
-    // Ranking messages (showRankingMessages)
-    return 8;
-  }
-  return gvgMsg(data);
-}
-
-function donationMsg(data) {
-  if (/deposited ([,0-9]+) gold into the guild bank/.test(data) ||
-      /deposited ([,0-9]+) FallenSword Points into the guild./.test(data)) {
-    // Donation messages (showDonationMessages)
-    return 7;
-  }
-  return rankMsg(data);
-}
-
-function groupMsg(data) {
-  if (data.indexOf('has disbanded one of their groups') !== -1 ||
-      /A group from your guild was (.*) in combat./.test(data)) {
-    // Group Combat messages (showGroupCombatMessages)
-    return 6;
-  }
-  return donationMsg(data);
-}
-
-function mercMsg(data) {
-  if (data.indexOf('disbanded a mercenary.') !== -1 ||
-      data.indexOf('hired the mercenary') !== -1) {
-    // Mercenary messages (showMercenaryMessages)
-    return 5;
-  }
-  return groupMsg(data);
-}
-
-function relicMsg(data) {
-  var test = 0;
-  test += stringIncludes(data, 'relic. This relic now has an empower level of');
-  test += stringIncludes(data,
-    'relic. The relic empower level has been reset to zero.');
-  test += stringIncludes(data, 'failed to capture the relic');
-  test += stringIncludes(data, 'captured the relic');
-  test += stringIncludes(data, 'captured your relic');
-  test += stringIncludes(data, 'has captured the undefended relic');
-  test += stringIncludes(data, 'attempted to capture your relic');
-  test += regExIncludes(data, / empowered the .+ relic/);
-  test += regExIncludes(data, / removed the empowerment from the .+ relic/);
-  if (test !== 0) {
-    // Relic messages (showRelicMessages)
-    return 4;
-  }
-  return mercMsg(data);
-}
-
-function taggingMsg(data) {
-  if (data.indexOf('has added flags to') !== -1 ||
-      data.indexOf('has removed flags to') !== -1) {
-    // Tag/Untag (showTaggingMessages)
-    return 3;
-  }
-  return relicMsg(data);
-}
-
-function storeRecallMsg(data) {
-  if (data.indexOf('recalled the item') !== -1 ||
-      data.indexOf('took the item') !== -1 ||
-      data.indexOf('auto-returned the') !== -1 ||
-      data.indexOf('stored the item') !== -1) {
-    // Store/Recall (showRecallMessages)
-    return 2;
-  }
-  return taggingMsg(data);
-}
-
-function rowProfile(data) {
-  if (data.indexOf('(Potion)') !== -1) {
-    // Potion messages
-    return 1;
-  }
-  return storeRecallMsg(data);
 }
 
 function findPageInput(prev, curr) {
@@ -188,7 +64,7 @@ function parseTable() {
       break;
     }
     tmpGuildLog.push([currPage * 100 + i, timestamp, myDate, myMsg,
-      rowProfile(myMsg)]);
+      profiler.rowProfile(myMsg)]);
   }
 }
 
