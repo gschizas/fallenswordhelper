@@ -86,20 +86,20 @@ function storeVL() { // Native
   }
 }
 
+function guildAry(val) {
+  if (val) {
+    return val.toLowerCase().replace(/\s*,\s*/, ',')
+      .replace(/\s\s*/g, ' ').split(',');
+  }
+  return [];
+}
+
 function guildRelationship(_txt) { // Native
   var output;
-  var guildSelf = system.getValue('guildSelf') || '';
-  var guildFrnd = system.getValue('guildFrnd') || '';
-  var guildPast = system.getValue('guildPast') || '';
-  var guildEnmy = system.getValue('guildEnmy') || '';
-  guildSelf = guildSelf.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  guildFrnd = guildFrnd.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  guildPast = guildPast.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  guildEnmy = guildEnmy.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
+  var guildSelf = guildAry(system.getValue('guildSelf'));
+  var guildFrnd = guildAry(system.getValue('guildFrnd'));
+  var guildPast = guildAry(system.getValue('guildPast'));
+  var guildEnmy = guildAry(system.getValue('guildEnmy'));
   var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
   if (guildSelf.indexOf(txt) !== -1) {output = 'self';} else
   if (guildFrnd.indexOf(txt) !== -1) {output = 'friendly';} else
