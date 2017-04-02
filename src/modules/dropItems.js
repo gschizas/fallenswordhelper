@@ -211,6 +211,15 @@ function quickAction(self, success, otherClass) { // jQuery.min
   checkbox.disabled = true;
 }
 
+function sendAndDrop(self, myClasses) {
+  if (myClasses.contains('sendLink')) {
+    quickAction(self, 'Sent', '.dropLink');
+  }
+  if (myClasses.contains('dropLink')) {
+    quickAction(self, 'Dropped', '.sendLink');
+  }
+}
+
 function evtHandler(evt) { // Native
   var self = evt.target;
   var myId = self.id;
@@ -219,15 +228,9 @@ function evtHandler(evt) { // Native
   if (myId === 'fshSelectAllGuildLocked') {doCheckboxes('guild');}
   if (myId === 'fshMove') {moveItemsToFolder();}
   if (self.hasAttribute('linkto')) {
-    doCheckboxes('item', evt.target.getAttribute('linkto'));
+    doCheckboxes('item', self.getAttribute('linkto'));
   }
-  var myClasses = self.classList;
-  if (myClasses.contains('sendLink')) {
-    quickAction(evt.target, 'Sent', '.dropLink');
-  }
-  if (myClasses.contains('dropLink')) {
-    quickAction(evt.target, 'Dropped', '.sendLink');
-  }
+  sendAndDrop(self, self.classList);
 }
 
 function getItems() { // Native
@@ -257,7 +260,6 @@ function getItems() { // Native
 }
 
 function inventory(data) { // Native
-  // console.log('inventory', data);
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
