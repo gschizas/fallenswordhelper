@@ -56,7 +56,6 @@ export function compressBio() { // Native
     '<span id="fshBioExpander" class="reportLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
-  // addClickListener('fshBioExpander', expandBio);
   document.getElementById('fshBioExpander')
     .addEventListener('click', expandBio);
 }
@@ -88,41 +87,64 @@ function getBuffsToBuy() { // Legacy
   window.openQuickMsgDialog(targetPlayer, greetingText, '');
 }
 
+function formatCost(total) {
+  var res = '';
+  if (total.fsp > 0) {res = Math.round(total.fsp * 100) / 100 + ' FSP';}
+  if (total.fsp > 0 && total.k > 0) {res += ' and ';}
+  if (total.k > 0) {res += total.k + ' k';}
+  if (total.stam > 0 && (total.fsp > 0 || total.k > 0)) {
+    res += ' and ';
+  }
+  return res;
+}
+
+function hazBuffs() { // Legacy
+  var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
+  var html = 'This is an estimated cost based on how the script finds ' +
+    'the cost associated with buffs from viewing bio.' +
+    'It can be incorrect, please use with discretion.<br><hr>' +
+    '<table border=0>';
+
+  Object.keys(buffCost.buffs).forEach(function(buff) {
+    total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
+    html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
+      buffCost.buffs[buff][1] + '</td></tr>';
+  });
+
+  var totalText = '';
+  totalText += formatCost(total);
+  if (total.stam > 0) {
+    totalText += total.stam + ' Stam(' +
+      Math.round(total.stam / 25 * 10) / 10 + 'fsp)';
+  }
+  if (total.unknown > 0) {
+    totalText += ' (' + total.unknown + ' buff(s) with unknown cost)';
+  }
+
+  html += '</table><b>Total: ' + totalText + '</b>';
+  document.getElementById('buffCost').innerHTML = '<br/><span ' +
+    'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
+    totalText + '</b></span>';
+  buffCost.buffCostTotalText = totalText;
+}
+
 function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
-    var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
-    var html = 'This is an estimated cost based on how the script finds ' +
-      'the cost associated with buffs from viewing bio.' +
-      'It can be incorrect, please use with discretion.<br/><hr/>' +
-      '<table border=0>';
-    Object.keys(buffCost.buffs).forEach(function(buff) {
-      total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
-      html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
-        buffCost.buffs[buff][1] + '</td></tr>';
-    });
-    var totalText = total.fsp > 0 ? Math.round(total.fsp * 100) / 100 +
-      ' FSP' : '';
-    if (total.fsp > 0 && total.k > 0) {totalText += ' and ';}
-    totalText += total.k > 0 ? total.k + ' k' : '';
-
-    if (total.stam > 0 && (total.fsp > 0 || total.k > 0)) {
-      totalText += ' and ';
-    }
-    totalText += total.stam > 0 ? total.stam + ' Stam(' +
-      Math.round(total.stam / 25 * 10) / 10 + 'fsp)' : '';
-
-    if (total.unknown > 0) {
-      totalText += ' (' + total.unknown + ' buff(s) with unknown cost)';
-    }
-    html += '</table><b>Total: ' + totalText + '</b>';
-    document.getElementById('buffCost').innerHTML = '<br/><span ' +
-      'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
-      totalText + '</b></span>';
-    buffCost.buffCostTotalText = totalText;
+    hazBuffs();
   } else {
     document.getElementById('buffCost').innerHTML = '';
     buffCost.buffCostTotalText = '';
   }
+}
+
+function priceUnit(price) { // Native
+  if (price[0].indexOf('k') > 0) {
+    return 'k';
+  }
+  if (price[0].indexOf('f') > 0) {
+    return 'fsp';
+  }
+  return 'stam';
 }
 
 function toggleBuffsToBuy(evt) { // Legacy
@@ -163,11 +185,7 @@ function toggleBuffsToBuy(evt) { // Legacy
     var type;
     var cost;
     if (price) {
-      if (price[0].indexOf('k') > 0) {
-        type = 'k';
-      } else if (price[0].indexOf('f') > 0) {
-        type = 'fsp';
-      } else {type = 'stam';}
+      type = priceUnit(price);
       cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
     } else {
       type = 'unknown';
