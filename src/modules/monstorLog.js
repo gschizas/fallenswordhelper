@@ -30,6 +30,26 @@ function drawMobs() {
   inject.innerHTML = result;
 }
 
+function findSortType(target) {
+  return target.getAttribute('sortType') || 'string';
+}
+
+function sortCol(target) {
+  var headerClicked = target.getAttribute('sortKey');
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
+  if (calf.sortBy && calf.sortBy === headerClicked) {
+    calf.sortAsc = !calf.sortAsc;
+  }
+  calf.sortBy = headerClicked;
+  var sortType = findSortType(target);
+  if (sortType === 'string') {
+    monsterAry.sort(system.stringSort);
+  } else {
+    monsterAry.sort(system.numberSort);
+  }
+  drawMobs();
+}
+
 function doHandlers(evt) {
   var target = evt.target;
   if (target.id === 'clearEntityLog') {
@@ -38,17 +58,7 @@ function doHandlers(evt) {
     return;
   }
   if (!target.classList.contains('fshLink')) {return;}
-  var headerClicked = target.getAttribute('sortKey');
-  var sortType = target.getAttribute('sortType');
-  if (!sortType) {sortType = 'string';}
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
-  monsterAry.sort(sortType === 'string' ? system.stringSort :
-    system.numberSort);
-  drawMobs();
+  sortCol(target);
 }
 
 function drawTable() {
