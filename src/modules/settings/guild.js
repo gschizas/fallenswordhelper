@@ -1,6 +1,18 @@
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
+function injectSettingsGuildData(guildType) { // Native
+  return '<input name="guild' + guildType + '" size="60" value="' +
+    system.getValue('guild' + guildType) + '">' +
+    '<span class="fshPoint" ' +
+    'id="toggleShowGuild' + guildType + 'Message" linkto="showGuild' +
+    guildType + 'Message"> &#x00bb;</span>' +
+    '<div id="showGuild' + guildType + 'Message" class="fshHide">' +
+    '<input name="guild' + guildType + 'Message" size="60" value="' +
+    system.getValue('guild' + guildType + 'Message') + '">' +
+    '</div>';
+}
+
 export function prefs() {
   // Guild Manage
   return '<tr><th colspan="2"><b>Guild>Manage preferences' +
@@ -8,13 +20,13 @@ export function prefs() {
     '<tr><td colspan="2">Enter guild names, ' +
       'separated by commas</td></tr>' +
     '<tr><td class="fshRight">Own Guild</td><td>' +
-      settingsPage.injectSettingsGuildData('Self') + '</td></tr>' +
+      injectSettingsGuildData('Self') + '</td></tr>' +
     '<tr><td class="fshRight">Friendly Guilds</td><td>' +
-      settingsPage.injectSettingsGuildData('Frnd') + '</td></tr>' +
+      injectSettingsGuildData('Frnd') + '</td></tr>' +
     '<tr><td class="fshRight">Old Guilds</td><td>' +
-      settingsPage.injectSettingsGuildData('Past') + '</td></tr>' +
+      injectSettingsGuildData('Past') + '</td></tr>' +
     '<tr><td class="fshRight">Enemy Guilds</td><td>' +
-      settingsPage.injectSettingsGuildData('Enmy') + '</td></tr>' +
+      injectSettingsGuildData('Enmy') + '</td></tr>' +
 
     '<tr><td class="fshRight">Highlight Valid PvP Targets' +
       settingsPage.helpLink('Highlight Valid PvP Targets',
