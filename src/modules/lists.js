@@ -4,43 +4,49 @@ import * as system from './support/system';
 
 var param;
 
+function itemRow(item) {
+  var result = '';
+  for (var j = 0; j < param.fields.length; j += 1) {
+    result += '<td class="fshCenter">';
+    var itemField = item[param.fields[j]];
+    if (param.fields[j] === param.categoryField) {continue;}
+    if (param.tags[j] === 'checkbox') {
+      var checked = '';
+      if (itemField) {checked = 'checked';}
+      result += '<input type="checkbox" ' + checked + ' disabled>';
+    } else if (param.url && param.url[j] !== '') {
+      result += '<a href="' + param.url[j].replace('@replaceme@', itemField) +
+        '">' + itemField + '</a>';
+    } else {
+      result += itemField;
+    }
+    result += '</td>';
+  }
+  return result;
+}
+
 function generateManageTable() { // Legacy
   var i;
-  var j;
   var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
     'width="100%"><tr class="fshOr">';
-  for (i = 0; i < param.headers.length; i += 1) {
-    result += '<th>' + param.headers[i] + '</th>';
-  }
+  result += param.headers.reduce(function(prev, curr) {
+    return prev + '<th>' + curr + '</th>';
+  }, '');
   result += '<th>Action</th></tr>';
   var currentCategory = '';
   for (i = 0; i < param.currentItems.length; i += 1) {
+    var item = param.currentItems[i];
     result += '<tr>';
     if (param.categoryField &&
         currentCategory !==
-        param.currentItems[i][param.categoryField]) {
-      currentCategory = param.currentItems[i][param.categoryField];
+        item[param.categoryField]) {
+      currentCategory = item[param.categoryField];
       result += '<td><span class="fshQs">' +
-        currentCategory + '</span></td></tr><tr>';
+        currentCategory + '</span></td><td></td><td></td><td></td><td></td>' +
+          '</tr><tr>';
     }
-    for (j = 0; j < param.fields.length; j += 1) {
-      result += '<td class="fshCenter">';
-      if (param.fields[j] !== param.categoryField) {
-        if (param.tags[j] === 'checkbox') {
-          result += '<input type="checkbox" ' +
-            (param.currentItems[i][param.fields[j]] ?
-            'checked' : '') + ' disabled>';
-        } else if (param.url && param.url[j] !== '') {
-          result += '<a href="' + param.url[j].replace('@replaceme@',
-            param.currentItems[i][param.fields[j]]) + '">' +
-            param.currentItems[i][param.fields[j]] + '</a>';
-        } else {
-          result += param.currentItems[i][param.fields[j]];
-        }
-        result += '</td>';
-      }
-    }
-    result += '<td><span class="HelperTextLink" itemId="' + i +
+    result += itemRow(item);
+    result += '<td><span class="HelperTextLink" data-itemId="' + i +
       '" id="fshDel' + i + '">[Del]</span></td></tr>';
   }
   result += '<tr>';
@@ -58,14 +64,12 @@ function generateManageTable() { // Legacy
     '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
     'class="custombutton"></td></tr>' +
     '</tbody></table>';
-
   document.getElementById(param.id).innerHTML = result;
-
   system.setValueJSON(param.gmname, param.currentItems);
 }
 
 function deleteQuickItem(evt) { // Legacy
-  var itemId = evt.target.getAttribute('itemId');
+  var itemId = evt.target.getAttribute('data-itemId');
   param.currentItems.splice(itemId, 1);
   generateManageTable();
 }
@@ -133,9 +137,9 @@ export function injectAuctionSearch(injector) { // Legacy
     headers: ['Category', 'Nickname', 'Quick Search Text',
       'Display in AH?'],
     fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
-    tags: ['textbox', 'textbox', 'textbox', 'checkbox'],
+    tags: ['text', 'text', 'text', 'checkbox'],
     url: ['', '',
-      'index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@', ''],
+      'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
     currentItems: system.getValueJSON('quickSearchList'),
     gmname: 'quickSearchList',
     categoryField: 'category',
@@ -156,7 +160,7 @@ export function injectQuickLinkManager(injector) { // Legacy
       'New [<span class="fshLink tip-static" ' +
       'data-tipped="Open page in a new window">?</span>]'],
     fields: ['name', 'url', 'newWindow'],
-    tags: ['textbox', 'textbox', 'checkbox'],
+    tags: ['text', 'text', 'checkbox'],
     currentItems: system.getValueJSON('quickLinks'),
     gmname: 'quickLinks',
   };
