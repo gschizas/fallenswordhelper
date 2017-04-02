@@ -23,6 +23,7 @@ export function doSendGold() { // jQuery
 }
 
 export function injectSendGoldOnWorld() { // jQuery
+  if (!system.getValue('sendGoldonWorld')) {return;}
   $('#statbar-gold-tooltip-general').append(
     '<dt class="stat-gold-sendTo">Send To:</dt>' +
     '<dd id="HelperSendTo">' + system.getValue('goldRecipient') +
