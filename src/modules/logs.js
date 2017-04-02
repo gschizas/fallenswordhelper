@@ -11,6 +11,8 @@ var listOfAllies;
 var listOfEnemies;
 var showPvPSummaryInLog;
 var playerId;
+var nowUtc;
+var lastCheckUtc;
 
 function findChatTable() { // Legacy
   var chatTable = system.findNode('//table[@class="width_full"]'); // Guild Log
@@ -24,14 +26,33 @@ function findChatTable() { // Legacy
   return chatTable;
 }
 
+function rowColor(aRow, logScreen, dateColumn) { // Legacy
+  var addBuffTag = true;
+  var cellContents = aRow.cells[dateColumn].textContent;
+  var postDateUtc = system.parseDateAsTimestamp(cellContents);
+  var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
+  if (postDateUtc > lastCheckUtc) {
+    aRow.classList.add('fshNr');
+  } else if (postAgeMins > 20 && postDateUtc <= lastCheckUtc) {
+    aRow.classList.add('fshOr');
+    addBuffTag = false;
+  }
+  if (logScreen === 'Chat' && addBuffTag) {
+    var playerIDRE = /player_id=(\d+)/;
+    var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
+    aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
+      layout.quickBuffHref(playerID) + '>[b]</a>';
+  }
+}
+
 export function addLogColoring(logScreen, dateColumn) { // Legacy
   if (!system.getValue('enableLogColoring')) {return;}
   var chatTable = findChatTable();
   if (!chatTable) {return;}
 
-  var nowUtc = (new Date()).getTime();
+  nowUtc = (new Date()).getTime();
   var lastCheckScreen = 'last' + logScreen + 'Check';
-  var lastCheckUtc = system.getValue(lastCheckScreen) || nowUtc;
+  lastCheckUtc = system.getValue(lastCheckScreen) || nowUtc;
 
   var increment = 2;
   if (logScreen === 'Chat') {
@@ -39,23 +60,7 @@ export function addLogColoring(logScreen, dateColumn) { // Legacy
     chatTable.classList.add('fshGc');
   }
   for (var i = 1; i < chatTable.rows.length; i += increment) {
-    var aRow = chatTable.rows[i];
-    var addBuffTag = true;
-    var cellContents = aRow.cells[dateColumn].textContent;
-    var postDateUtc = system.parseDateAsTimestamp(cellContents);
-    var postAgeMins = (nowUtc - postDateUtc) / (1000 * 60);
-    if (postDateUtc > lastCheckUtc) {
-      aRow.classList.add('fshNr');
-    } else if (postAgeMins > 20 && postDateUtc <= lastCheckUtc) {
-      aRow.classList.add('fshOr');
-      addBuffTag = false;
-    }
-    if (logScreen === 'Chat' && addBuffTag) {
-      var playerIDRE = /player_id=(\d+)/;
-      var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
-      aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
-        layout.quickBuffHref(playerID) + '>[b]</a>';
-    }
+    rowColor(chatTable.rows[i], logScreen, dateColumn);
   }
   system.setValue(lastCheckScreen, Date.now());
 }
@@ -131,11 +136,10 @@ function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
       '>Buff</a></span>';
 }
 
-function doChat(aRow, isGuildMate, playerName) { // Legacy
+function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
+  if (messageType !== 'Chat') {return;}
   var extraPart = '';
-
   reportIgnore(aRow, isGuildMate, playerName);
-
   var messageHTML = aRow.cells[2].innerHTML;
   var firstPart = messageHTML.substring(0, messageHTML.indexOf('<small>') + 7);
   var thirdPart = messageHTML.substring(messageHTML.indexOf('>Reply</a>') + 10,
@@ -150,18 +154,15 @@ function doChat(aRow, isGuildMate, playerName) { // Legacy
   extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName +
     '">Trade</a> | <a title="Secure Trade" href="index.php?cmd=trade' +
     '&subcmd=createsecure&target_username=' + playerName + '">ST</a>';
-
   var attackPart = '';
   if (addAttackLinkToLog) {
     attackPart = ' | <a href="index.php?cmd=attackplayer&target_username=' +
       playerName + '">Attack</a>';
   }
-
   var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
   if (buffsSent) {
     thirdPart = doBuffLink(buffsSent, targetPlayerID);
   }
-
   var msgReplyTo = '[ <span style="cursor:pointer;text-' +
     'decoration:underline"class="a-reply" target_player="' +
     playerName + '" replyTo="' +
@@ -265,11 +266,11 @@ function addPvpSummary(aRow, messageType) { // Legacy
   }
 }
 
-function playerColor(playerName, playerElement) { // Legacy
-  var isGuildMate = false;
+function playerColor(colorPlayerName, playerName, playerElement) { // Legacy
+  if (!colorPlayerName) {return false;}
   if (memberNameString.indexOf(playerName) !== -1) {
     playerElement.style.color = 'green';
-    isGuildMate = true;
+    return true;
   }
   if (listOfEnemies.indexOf(playerName) !== -1) {
     playerElement.style.color = 'red';
@@ -277,7 +278,7 @@ function playerColor(playerName, playerElement) { // Legacy
   if (listOfAllies.indexOf(playerName) !== -1) {
     playerElement.style.color = 'blue';
   }
-  return isGuildMate;
+  return false;
 }
 
 function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
@@ -315,12 +316,10 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
 function processLogWidgetRow(aRow) { // Legacy
   var playerElement;
   var playerName;
-  var firstCell = aRow.cells[0];
   // Valid Types: General, Chat, Guild
-  var messageType = firstCell.firstChild.getAttribute('oldtitle');
+  var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
   if (!messageType) {return;}
   var colorPlayerName = false;
-  var isGuildMate = false;
   if (messageType === 'Chat') {
     playerElement = aRow.cells[2].firstChild;
     playerName = playerElement.innerHTML;
@@ -336,12 +335,8 @@ function processLogWidgetRow(aRow) { // Legacy
     playerName = playerElement.innerHTML;
     colorPlayerName = true;
   }
-  if (colorPlayerName) {
-    isGuildMate = playerColor(playerName, playerElement);
-  }
-  if (messageType === 'Chat') {
-    doChat(aRow, isGuildMate, playerName);
-  }
+  var isGuildMate = playerColor(colorPlayerName, playerName, playerElement);
+  doChat(messageType, aRow, isGuildMate, playerName);
   if (messageType === 'Notification' &&
       aRow.cells[2].firstChild.nextSibling &&
       aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
@@ -389,7 +384,7 @@ function addLogWidgets() { // jQuery
   ).done(addLogWidgetsOld);
 }
 
-function processGuildWidgetRow(aRow) { // Legacy
+function findPlayers(aRow) { // Legacy
   var messageHTML = aRow.cells[2].innerHTML;
   var doublerPlayerMessageRE =
     /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
@@ -398,8 +393,10 @@ function processGuildWidgetRow(aRow) { // Legacy
     /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
   var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
 
-  var firstPlayerID = firstPlayer ? Number(firstPlayer[1]) : 0;
-  var secondPlayerID = secondPlayer ? Number(secondPlayer[1]) : 0;
+  var firstPlayerID = 0;
+  if (firstPlayer) {firstPlayerID = Number(firstPlayer[1]);}
+  var secondPlayerID = 0;
+  if (secondPlayer) {secondPlayerID = Number(secondPlayer[1]);}
 
   if (firstPlayer && firstPlayerID !== playerId &&
       secondPlayerID !== playerId) {
@@ -409,10 +406,11 @@ function processGuildWidgetRow(aRow) { // Legacy
     aRow.classList.add('fshGrey');
     aRow.classList.add('fshXXSmall');
   }
+}
 
+function guildInvite(aRow) { // Legacy
   var hasInvited = aRow.cells[2].textContent
     .search('has invited the player') !== -1;
-
   if (aRow.cells[2].textContent.charAt(0) === '\'' || hasInvited) {
     var message = aRow.cells[2].innerHTML;
     var firstQuote = message.indexOf('\'');
@@ -431,6 +429,11 @@ function processGuildWidgetRow(aRow) { // Legacy
       aRow.style.color = 'gray';
     }
   }
+}
+
+function processGuildWidgetRow(aRow) { // Legacy
+  findPlayers(aRow);
+  guildInvite(aRow);
 }
 
 export function addGuildLogWidgets() { // Legacy
