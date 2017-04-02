@@ -29,5 +29,5 @@ export function prefs() {
       '[&quot;name&quot;,&quot;itemid&quot;],[&quot;othername&quot;,' +
       '&quot;itemid2&quot;].<br>WARNING: NO REFUNDS ON ERROR') +
       ':</td><td><input name="sendClasses" size="60" value="' +
-      settingsPage.escapeHtml(system.getValue('sendClasses')) + '">';
+      system.escapeHtml(system.getValue('sendClasses')) + '">';
 }
