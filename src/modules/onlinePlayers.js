@@ -28,23 +28,38 @@ function buildOnlinePlayerData() { // jQuery
   });
 }
 
-function dataTableSearch() { // jQuery
+function saveVal(key, val) { // Native
+  if (!isNaN(val)) {system.setValue(key, val);}
+}
+
+function getLevel(data) { // Native
+  return system.intValue(data[2]) || 0; // use data for the level column
+}
+
+function checkMin(min, max, level) { // Native
+  if (min > level || !isNaN(max)) {return min <= level && level <= max;}
+  return true;
+}
+
+function checkMax(min, max, level) { // Native
+  if (!isNaN(min) || level > max) {return checkMin(min, max, level);}
+  return true;
+}
+
+function validMinMax(min, max, level) { // Native
+  if (!isNaN(min) || !isNaN(max)) {return checkMax(min, max, level);}
+  return true;
+}
+
+function dataTableSearch(_settings, data) { // jQuery
   /* Custom filtering function which will search
   data in column three between two values */
-  $.fn.dataTable.ext.search.push(
-    function(_settings, data) {
-      var min = parseInt($('#fshMinLvl', context).val(), 10); // context
-      var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
-      if (!isNaN(min)) {system.setValue('onlinePlayerMinLvl', min);}
-      if (!isNaN(max)) {system.setValue('onlinePlayerMaxLvl', max);}
-      var level = system.intValue(data[2]) || 0; // use data for the level column
-      if (isNaN(min) && isNaN(max) ||
-        isNaN(min) && level <= max ||
-        min <= level && isNaN(max) ||
-        min <= level && level <= max) {return true;}
-      return false;
-    }
-  );
+  var min = parseInt($('#fshMinLvl', context).val(), 10); // context
+  var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
+  saveVal('onlinePlayerMinLvl', min);
+  saveVal('onlinePlayerMaxLvl', max);
+  var level = getLevel(data);
+  return validMinMax(min, max, level);
 }
 
 function filterHeaderOnlinePlayers() { // jQuery
@@ -68,7 +83,7 @@ function filterHeaderOnlinePlayers() { // jQuery
 
 function gotOnlinePlayers() { // jQuery
   buildOnlinePlayerData();
-  dataTableSearch();
+  $.fn.dataTable.ext.search.push(dataTableSearch);
   filterHeaderOnlinePlayers();
 
   table = $('#fshInv', context).dataTable({ // context
