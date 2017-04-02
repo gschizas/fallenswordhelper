@@ -107,9 +107,6 @@ function itemImage(item) { // Native
 }
 
 function listen(evt) {
-  // console.log('evt.target', evt.target);
-  // console.log('Helper:equip', evt.target.id.indexOf('Helper:equip'));
-  // console.log('Helper:use', evt.target.id.indexOf('Helper:use'));
   if (!evt.target.classList.contains('smallLink')) {return;}
   if (evt.target.classList.contains('fshEq')) {
     equipProfileInventoryItem(evt);
