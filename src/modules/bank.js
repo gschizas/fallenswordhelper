@@ -96,7 +96,7 @@ function appLink(o, bank) {
 function ajaxifyBank() { // jQuery
   var o = bankSettings;
   var bank = $('#pCC b');
-  if (bank.length !== 0 && bank.eq(0).text() !== o.headText) {
+  if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
     appLink(o, bank);
   }
 }
