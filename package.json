@@ -1,6 +1,6 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.18.1",
+  "version": "15.18.2",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "main": "index.js",
   "scripts": {
@@ -15,6 +15,7 @@
     "clean:prod": "rimraf dist/prod/*",
     "eslint": "eslint src",
     "jshint": "jshint src --verbose",
+    "patch": "npm --no-git-tag-version version patch",
     "rollup": "npm run rollup:dev && npm run rollup:beta && npm run rollup:prod",
     "rollup:beta": "npm run rollup:betacalf && npm run rollup:betafsh",
     "rollup:dev": "npm run rollup:devcalf && npm run rollup:devfsh",
@@ -55,6 +56,7 @@
     "ip": "latest",
     "jshint": "latest",
     "local-web-server": "latest",
+    "npm-check": "^5.4.0",
     "npm-run-all": "latest",
     "rimraf": "latest",
     "rollup": "latest",
