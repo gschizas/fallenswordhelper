@@ -1,12 +1,6 @@
 import calf from './support/calf';
 import * as debug from './support/debug';
-import * as fshGa from './support/fshGa';
-import * as guildAdvisor from './guildAdvisor';
 import * as newMap from './newMap/newMap';
-import * as oldRelic from './oldRelic';
-import * as questBook from './questBook';
-import * as quickBuff from './quickBuff';
-import * as recipes from './recipes';
 import * as system from './support/system';
 
 function impWarning(impsRemaining) { // Legacy
@@ -101,24 +95,20 @@ function getKillStreak(responseText) { // Hybrid
   system.setValue('lastDeathDealerPercentage', deathDealerPercentage);
 }
 
+function getLastValue(pref) {
+  var val = system.getValue(pref);
+  if (typeof val === 'undefined') {
+    system.setValue(pref, 0);
+    val = 0;
+  }
+  return val;
+}
+
 function doDeathDealer(impsRemaining) { // Legacy
   var replacementText = '';
-
-  var lastDeathDealerPercentage =
-    system.getValue('lastDeathDealerPercentage');
-  if (typeof lastDeathDealerPercentage === 'undefined') {
-    system.setValue('lastDeathDealerPercentage', 0);
-    lastDeathDealerPercentage = 0;
-  }
-
-  var lastKillStreak = system.getValue('lastKillStreak');
-  if (typeof lastKillStreak === 'undefined') {
-    system.setValue('lastKillStreak', 0);
-    lastKillStreak = 0;
-  }
-
+  var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
+  var lastKillStreak = getLastValue('lastKillStreak');
   var trackKillStreak = system.getValue('trackKillStreak');
-
   if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
     replacementText += '<tr><td style="font-size:small; color:black"' +
       '>Kill Streak: <span findme="killstreak">&gt;' +
@@ -166,19 +156,12 @@ function toggleKsTracker() { // Legacy
   }
 }
 
-function checkBuffs() { // Legacy - Old Map
-  var impsRemaining;
+var hasShieldImp;
+var hasDeathDealer;
+var impsRemaining;
 
-  // extra world screen text
-  var replacementText = '<td background="' + system.imageServer +
-    '/skin/realm_right_bg.jpg"><table align="right" cellpadding="1" ' +
-    'style="width:270px;margin-left:38px;margin-right:38px;font-size' +
-    ':medium; border-spacing: 1px; border-collapse: collapse;"><tr><' +
-    'td colspan="2" height="10"></td></tr><tr>';
-  var hasShieldImp = system
-    .findNode('//img[contains(@src,"/55_sm.gif")]');
-  var hasDeathDealer = system
-    .findNode('//img[contains(@src,"/50_sm.gif")]');
+function findImps() { // Legacy
+  var ret = '';
   if (hasDeathDealer || hasShieldImp) {
     var re = /(\d+) HP remaining/;
     impsRemaining = 0;
@@ -187,11 +170,24 @@ function checkBuffs() { // Legacy - Old Map
       var impsRemainingRE = re.exec(textToTest);
       impsRemaining = impsRemainingRE[1];
     }
-    replacementText += impWarning(impsRemaining);
+    ret += impWarning(impsRemaining);
     if (hasDeathDealer) {
-      replacementText += doDeathDealer(impsRemaining);
+      ret += doDeathDealer(impsRemaining);
     }
   }
+  return ret;
+}
+
+function checkBuffs() { // Legacy - Old Map
+  // extra world screen text
+  var replacementText = '<td background="' + system.imageServer +
+    '/skin/realm_right_bg.jpg"><table align="right" cellpadding="1" ' +
+    'style="width:270px;margin-left:38px;margin-right:38px;font-size' +
+    ':medium; border-spacing: 1px; border-collapse: collapse;"><tr><' +
+    'td colspan="2" height="10"></td></tr><tr>';
+  hasShieldImp = system.findNode('//img[contains(@src,"/55_sm.gif")]');
+  hasDeathDealer = system.findNode('//img[contains(@src,"/50_sm.gif")]');
+  replacementText += findImps();
   replacementText += hasCA();
   replacementText += hasDblr();
   replacementText += calf.huntingMode === true ?
@@ -251,56 +247,4 @@ export function injectWorld() { // Native
     // not new map.
     injectOldMap();
   }
-}
-
-export function unknownPage() { // Legacy
-  if (typeof window.jQuery === 'undefined') {return;}
-  //#if _DEV  //  unknownPage
-  console.log('unknownPage'); // eslint-disable-line no-console
-  //#endif
-
-  if ($('#pCC td:contains("Below is the current status for ' +
-    'the relic")').length > 0) {
-    fshGa.screenview('unknown.oldRelic.injectRelic');
-    oldRelic.injectRelic();
-    return;
-  }
-
-  var isBuffResult = document.getElementById('quickbuff-report');
-  if (isBuffResult) {
-    fshGa.screenview('unknown.quickBuff.updateBuffLog');
-    quickBuff.updateBuffLog();
-    return;
-  }
-
-  var isQuestBookPage = system.findNode('//td[.="Quest Name"]');
-  if (isQuestBookPage) {
-    fshGa.screenview('unknown.questBook.injectQuestBookFull');
-    questBook.injectQuestBookFull();
-    return;
-  }
-
-  var isAdvisorPageClue1 = system.findNode('//font[@size=2 and .="Advisor"]');
-  var clue2 = '//a[@href="index.php?cmd=guild&amp;subcmd=manage" ' +
-    'and .="Back to Guild Management"]';
-  var isAdvisorPageClue2 = system.findNode(clue2);
-  if (isAdvisorPageClue1 && isAdvisorPageClue2) {
-    fshGa.screenview('unknown.guildAdvisor.injectAdvisor');
-    guildAdvisor.injectAdvisor();
-    return;
-  }
-
-  // if (system.findNode('//a[.="Back to Scavenging"]')) {
-    // fshGa.screenview('unknown.scavenging.injectScavenging');
-    // FSH.scavenging.injectScavenging(); // Is this used???
-  // }
-
-  if ($('#pCC img[title="Inventing"]').length > 0) {
-    fshGa.screenview('unknown.recipes.inventing');
-    recipes.inventing();
-    return;
-  }
-  //#if _DEV  //  Fell through!
-  console.log('Fell through!'); // eslint-disable-line no-console
-  //#endif
 }
