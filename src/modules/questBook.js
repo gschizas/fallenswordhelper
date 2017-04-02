@@ -52,25 +52,33 @@ function whereAmI() { // Native
     '#FF0000';
 }
 
+function storeNormal(lastQBPage) { // Native
+  if (isActive) {
+    system.setValue('lastNormalActiveQuestPage', lastQBPage);
+  } else if (isComplete) {
+    system.setValue('lastNormalCompletedQuestPage', lastQBPage);
+  } else if (isNotStarted) {
+    system.setValue('lastNormalNotStartedQuestPage', lastQBPage);
+  }
+}
+
+function storeSeason(lastQBPage) { // Native
+  if (isActive) {
+    system.setValue('lastSeasonalActiveQuestPage', lastQBPage);
+  } else if (isComplete) {
+    system.setValue('lastSeasonalCompletedQuestPage', lastQBPage);
+  } else if (isNotStarted) {
+    system.setValue('lastSeasonalNotStartedQuestPage', lastQBPage);
+  }
+}
+
 function storeLoc() { // Native
   var lastQBPage = location.search;
   system.setValue('lastActiveQuestPage', lastQBPage);
   if (isNormal) {
-    if (isActive) {
-      system.setValue('lastNormalActiveQuestPage', lastQBPage);
-    } else if (isComplete) {
-      system.setValue('lastNormalCompletedQuestPage', lastQBPage);
-    } else if (isNotStarted) {
-      system.setValue('lastNormalNotStartedQuestPage', lastQBPage);
-    }
+    storeNormal(lastQBPage);
   } else if (isSeason) {
-    if (isActive) {
-      system.setValue('lastSeasonalActiveQuestPage', lastQBPage);
-    } else if (isComplete) {
-      system.setValue('lastSeasonalCompletedQuestPage', lastQBPage);
-    } else if (isNotStarted) {
-      system.setValue('lastSeasonalNotStartedQuestPage', lastQBPage);
-    }
+    storeSeason(lastQBPage);
   }
 }
 
