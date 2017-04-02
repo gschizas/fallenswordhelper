@@ -125,19 +125,14 @@ function handleKey(r) {
 }
 
 function keyPress(evt) { // Native
-
   if (evt.target.tagName !== 'HTML' &&
       evt.target.tagName !== 'BODY') {return;}
-
   /* ignore control, alt and meta keys
   (I think meta is the command key in Macintoshes) */
   if (evt.ctrlKey) {return;}
   if (evt.metaKey) {return;}
   if (evt.altKey) {return;}
-
-  // var r = evt.charCode;
   handleKey(evt.charCode);
-
 }
 
 export function replaceKeyHandler() { // Native
