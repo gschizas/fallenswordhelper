@@ -88,22 +88,23 @@ function filterHeader() { // jQuery
 
 }
 
-function lvlFilter() { // jQuery
-  $.fn.dataTable.ext.search.push(
-    function(_settings, data) {
-      if (!opts ||
-        !opts.minLvl ||
-        !opts.maxLvl) {return true;}
-      var min = opts.minLvl;
-      var max = opts.maxLvl;
-      var level = system.intValue(data[7]);
-      if (isNaN(min) && isNaN(max) ||
-        isNaN(min) && level <= max ||
-        min <= level && isNaN(max) ||
-        min <= level && level <= max) {return true;}
-      return false;
-    }
-  );
+function invalidInput() {
+  if (!opts ||
+      !opts.minLvl ||
+      !opts.maxLvl) {return true;}
+  return false;
+}
+
+function lvlFilter(_settings, data) { // jQuery
+  if (invalidInput()) {return true;}
+  var min = opts.minLvl;
+  var max = opts.maxLvl;
+  var level = system.intValue(data[7]);
+  if (isNaN(min) && isNaN(max) ||
+    isNaN(min) && level <= max ||
+    min <= level && isNaN(max) ||
+    min <= level && level <= max) {return true;}
+  return false;
 }
 
 function boolData(cell) { // jQuery
@@ -178,7 +179,7 @@ function process(arena) { // jQuery
   myRows.each(orderData);
   filterHeader();
   ajax.setForage('fsh_arena', opts);
-  lvlFilter();
+  $.fn.dataTable.ext.search.push(lvlFilter);
   theTables.DataTable(assets.tableOpts);
   $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
   $('div.dataTables_filter').hide();
