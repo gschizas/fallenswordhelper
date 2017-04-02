@@ -127,8 +127,8 @@ var lookup = [
   },
   {
     condition: function(data) {
-      return (
-        /deposited ([,0-9]+) FallenSword Points into the guild./.test(data));
+      var re = /deposited ([,0-9]+) FallenSword Points into the guild./;
+      return re.test(data);
     },
     id: 7
   },
