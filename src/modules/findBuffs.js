@@ -33,31 +33,12 @@ function uniq(arr, removeBy) { // Ugly but fast
   return out;
 }
 
-function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
-  var doc = system.createDocument(responseText);
-  // name and level
-  var playerName = $(doc).find('#pCC h1:first').text();
-  var levelElement = $(doc).find('td:contains("Level:"):last').next();
-  var levelValue = parseInt(levelElement.text().replace(/,/g, ''), 10);
-  var virtualLevelElement = $(doc).find('td:contains("VL:"):last').next();
-  var virtualLevelValue = parseInt(virtualLevelElement.text()
-    .replace(/,/g, ''), 10);
-  // last activity
-  var lastActivityElement = $(doc).find('#pCC p:first');
-  var lastActivity = /(\d+) mins, (\d+) secs/
-    .exec(lastActivityElement.text());
-  var lastActivityMinutes = parseInt(lastActivity[1], 10);
-  var lastActivityIMG = layout.onlineDot({min: lastActivityMinutes});
-  // buffs
-  var bioDiv = $(doc)
-    .find('div.innerColumnHeader:contains("Biography"):last');
-  var bioCell = bioDiv.next();
-  var buffTable = document.getElementById('buffTable');
-  var textLineArray = [];
+function getBioLines(bioCellHtml) {
+  var res = [];
   var buffPosition = 0;
   var startingPosition = 0;
   var runningTotalPosition = 0;
-  var bioTextToSearch = ' ' + bioCell.html() + ' ';
+  var bioTextToSearch = ' ' + bioCellHtml + ' ';
   var buffRE = new RegExp('[^a-zA-Z]((' +
     calf.findBuffNicks.replace(/,/g, ')|(') + '))[^a-zA-Z]', 'i');
   while (buffPosition !== -1) {
@@ -67,22 +48,44 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
     if (buffPosition !== -1) {
       startingPosition = buffPosition + 1;
       runningTotalPosition += buffPosition;
-      var prevBR = bioCell.html().lastIndexOf('<br>', runningTotalPosition - 1);
+      var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);
       if (prevBR === -1) {prevBR = 0;}
-      var nextBR = bioCell.html().indexOf('<br>', runningTotalPosition);
-      if (nextBR === -1 && bioCell.html().indexOf('<br>') !== -1) {
-        nextBR = bioCell.html().length - 5;
+      var nextBR = bioCellHtml.indexOf('<br>', runningTotalPosition);
+      if (nextBR === -1 && bioCellHtml.indexOf('<br>') !== -1) {
+        nextBR = bioCellHtml.length - 5;
       }
-      var textLine = bioCell.html().substr(prevBR + 4, nextBR - prevBR);
+      var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
       textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
-      textLineArray.push(textLine);
+      res.push(textLine);
     }
   }
-  textLineArray = uniq(textLineArray);
+  return uniq(res);
+}
+
+function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - Evil
+  var doc = system.createDocument(responseText);
+  // name and level
+  var pCC = doc.getElementById('pCC');
+  var playerName = pCC.getElementsByTagName('h1')[0].textContent;
+  var levelValue = system.intValue(doc.getElementById('profileLeftColumn')
+    .children[4].children[0].rows[0].cells[1].textContent);
+  var virtualLevelValue = parseInt(doc.getElementById('stat-vl')
+    .textContent, 10);
+  // last activity
+  var lastActivityElement = pCC.getElementsByTagName('p')[0];
+  var lastActivity = /(\d+) mins, (\d+) secs/
+    .exec(lastActivityElement.textContent);
+  var lastActivityMinutes = parseInt(lastActivity[1], 10);
+  var lastActivityIMG = layout.onlineDot({min: lastActivityMinutes});
+  // buffs
+  var bioCellHtml = doc.getElementById('profile-bio').innerHTML;
+  var buffTable = document.getElementById('buffTable');
+  var textLineArray = getBioLines(bioCellHtml);
+  // console.log('textLineArray', textLineArray);
   // sustain
   var sustainText = $(doc)
     .find('td:has(a:contains("Sustain")):last').next()
-    .find('table.tipped').data('tipped');
+    .find('table.tip-static').data('tipped');
   var sustainLevel;
   if (typeof sustainText !== 'undefined') {
     var sustainLevelRE = /Level<br>(\d+)%/;
@@ -100,7 +103,7 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
     var newCell = newRow.insertCell(0);
     newCell.style.verticalAlign = 'top';
     var playerHREF = callback.href;
-    var bioTip = bioCell.html().replace(/'|"|\n/g, '');
+    var bioTip = bioCellHtml.replace(/'|"|\n/g, '');
     newCell.innerHTML = '<nobr>' + lastActivityIMG + '&nbsp;<a href="' +
       playerHREF + '" target="new" ' +
       // FIXME - It kind works now, but not guaranteed?
@@ -212,7 +215,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
 function findBuffsParseOnlinePlayersStart() { // Legacy
   // if option enabled then parse online players
   calf.onlinePlayersSetting =
-    document.getElementById('onlinePlayers').value;
+    parseInt(document.getElementById('onlinePlayers').value, 10);
   if (calf.onlinePlayersSetting !== 0) {
     system.xmlhttp('index.php?cmd=onlineplayers&page=1',
       findBuffsParseOnlinePlayers, {page: 1});
@@ -317,7 +320,7 @@ function findBuffsParseGuildManagePage(responseText) { // jQuery
 }
 
 function findBuffsStart() { // Legacy
-  var selectedBuff = $('#selectedBuff').val();
+  var selectedBuff = parseInt($('#selectedBuff').val(), 10);
   // create array of buff nicknames ...
   var buffList = buffObj.buffList;
   for (var j = 0; j < buffList.length; j += 1) {
