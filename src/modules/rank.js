@@ -51,6 +51,12 @@ function fetchRankData() { // jQuery
   });
 }
 
+function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
+  return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
+    targetRowNum < 1 ||
+    targetRowNum > parentTable.rows.length;
+}
+
 function ajaxifyRankControls(evt) { // jQuery
   var val = evt.target.getAttribute('value');
   if (val !== 'Up' && val !== 'Down') {return;}
@@ -61,9 +67,7 @@ function ajaxifyRankControls(evt) { // jQuery
   var thisRankRowNum = thisRankRow.rowIndex;
   var targetRowNum = thisRankRowNum + (val === 'Up' ? -1 : 2);
   var parentTable = thisRankRow.parentNode;
-  if (characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
-      targetRowNum < 1 ||
-      targetRowNum > parentTable.rows.length) {return;}
+  if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
   $.get(onclickHREF);
   var injectRow = parentTable.rows[targetRowNum];
   parentTable.insertBefore(thisRankRow, injectRow);
