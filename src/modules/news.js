@@ -139,22 +139,24 @@ function evtHdl(evt) { // Native
 function doTagging(row) { // Native
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
-  warehouse[articleNo] = warehouse[articleNo] || {};
-  warehouse[articleNo].rows = warehouse[articleNo].rows || [];
+  warehouse[articleNo] = system.newMember(warehouse[articleNo]);
+  var thisArticle = warehouse[articleNo];
+  thisArticle.rows = thisArticle.rows || [];
   if (rowType === 0) {
-    warehouse[articleNo].header = row;
+    thisArticle.header = row;
     if (collapseNewsArchive) {
       row.classList.add('fshPoint');
     }
   } // TODO toggle this
   if (rowType > 1) {
-    warehouse[articleNo].rows[rowType] = warehouse[articleNo][rowType] || {};
-    warehouse[articleNo].rows[rowType].row = row;
+    thisArticle.rows[rowType] =
+      system.newMember(thisArticle[rowType]);
+    thisArticle.rows[rowType].row = row;
     if (collapseNewsArchive) {
-      warehouse[articleNo].open = false;
+      thisArticle.open = false;
       row.classList.add('fshHide');
     } else {
-      warehouse[articleNo].open = true;
+      thisArticle.open = true;
     }
   }
 }
