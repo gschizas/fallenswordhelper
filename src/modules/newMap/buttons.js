@@ -15,7 +15,8 @@ function openQuickBuff(e) { // Native
 }
 
 function showQuickLinks(worldName, data) { // jQuery
-  worldName.append('Min Lvl: ' + data.realm.minlevel);
+  worldName.append('Min: ' + data.realm.minlevel +
+    ' Lvl: ' + data.player.level);
   var formgroup = $(assets.worldFormgroup);
   worldName.append('&nbsp;&nbsp;').append(formgroup);
   formgroup.click(doFormGroup);
