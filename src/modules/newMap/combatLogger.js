@@ -6,13 +6,24 @@ var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
   'Disarm', 'Duelist', 'Thievery', 'Master Blacksmith', 'Master Crafter',
   'Fury Caster', 'Master Inventor', 'Sustain'];
 var combatLog = [];
+var combatData;
+
+function storeBuffs(buff) { // Native
+  if (buff.id === 54 || buff.id === 26) {
+    combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
+  }
+}
+
+function storeEnhancements(enh) { // Native
+  if (notSave.indexOf(enh.name) === -1) {
+    combatData.player.enhancements[enh.name] = enh.value;
+  }
+}
 
 function combatResponse(e, data) { // Native
   // If bad response do nothing.
   if (data.response.response !== 0) {return;}
-  var l;
-  var i;
-  var combatData = {};
+  combatData = {};
   combatData.combat = data.response.data;
   if (combatData.combat.inventory_id) {
     combatData.combat.drop = combatData.combat.item.id;
@@ -21,21 +32,9 @@ function combatResponse(e, data) { // Native
   combatData.player = {};
   combatData.player.buffs = {};
   combatData.player.enhancements = {};
-  l = data.player.buffs.length;
-  for (i = 0; i < l; i += 1) { // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler */
-    var buff = data.player.buffs[i];
-    if (buff.id === 54 || buff.id === 26) {
-      combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
-    }
-  }
+  data.player.buffs.forEach(storeBuffs); // loop through buffs, only need to keep CA and Doubler 54 = ca, 26 = doubler
   if (data.player.enhancements) {
-    l = data.player.enhancements.length;
-    for (i = 0; i < l; i += 1) { // loop through enhancements
-      var enh = data.player.enhancements[i];
-      if (notSave.indexOf(enh.name) === -1) {
-        combatData.player.enhancements[enh.name] = enh.value;
-      }
-    }
+    data.player.enhancements.forEach(storeEnhancements); // loop through enhancements
   }
   combatData.time = data.time;
   combatLog.push(combatData);
