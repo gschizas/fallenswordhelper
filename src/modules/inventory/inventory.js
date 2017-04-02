@@ -74,26 +74,36 @@ function setLvls() { // jQuery
   $('#fshMaxLvl').val(options.fshMaxLvl);
 }
 
+function currentPlayer(player_id, current_player_id) {
+  return player_id || current_player_id;
+}
+
+function getT(player_id) {
+  if (player_id === -1) {return 4;}
+  return 1;
+}
+
+function player(invPlayer, rowPlayer, guild) {
+  if (invPlayer) {return invPlayer;}
+  if (rowPlayer !== -1) {return rowPlayer;}
+  return guild;
+}
+
 export function nameRender(data, type, row) { // Native
   if (type !== 'display') {return data;}
-  var cur = theInv.player_id ?
-    theInv.player_id :
-    theInv.current_player_id;
-  var t = row.player_id === -1 ? 4 : 1;
-  var p;
-  if (theInv.player_id) {
-    p = theInv.player_id;
-  } else if (row.player_id !== -1) {
-    p = row.player_id;
-  } else {p = theInv.guild_id;}
-  // var p = theInv.player_id ?
-  //   theInv.player_id :
-  //   row.player_id !== -1 ? row.player_id :
-  //   theInv.guild_id;
-  var bold = row.equipped ? '<b>' + data + '</b>' : data;
-  var _setName = row.stats && row.stats.set_name !== '' ?
-    ' (<span class="fshLink setName" set="' + row.stats.set_name +
-    '">set</span>)' : '';
+  var cur = currentPlayer(theInv.player_id, theInv.current_player_id);
+  var t = getT(row.player_id);
+  var p = player(theInv.player_id, row.player_id, theInv.guild_id);
+
+  var bold = data;
+  if (row.equipped) {bold = '<b>' + data + '</b>';}
+
+  var _setName = '';
+  if (row.stats && row.stats.set_name !== '') {
+    _setName = ' (<span class="fshLink setName" set="' + row.stats.set_name +
+      '">set</span>)';
+  }
+
   return '<a href="index.php?cmd=auctionhouse&search_text=' + data +
     '" class="fshInvItem tip-dynamic ' +
     dataObj.rarity[row.rarity].clas + '" ' +
