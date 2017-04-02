@@ -42,23 +42,42 @@ function alliesColour(el) { // Native
   });
 }
 
+var hideBtn = [
+  {
+    condition: function() {return calf.hideGuildInfoTrade;},
+    guildSelector: '#guild-minibox-action-trade',
+    allySelector: '#online-allies-action-trade'
+  },
+  {
+    condition: function() {return calf.hideGuildInfoSecureTrade;},
+    guildSelector: '#guild-minibox-action-secure-trade',
+    allySelector: '#online-allies-action-secure-trade'
+  },
+  {
+    condition: function() {return calf.hideGuildInfoBuff;},
+    guildSelector: '#guild-minibox-action-quickbuff',
+    allySelector: '#online-allies-action-quickbuff'
+  },
+  {
+    condition: function() {return calf.hideGuildInfoMessage;},
+    guildSelector: '#guild-minibox-action-send-message',
+    allySelector: '#online-allies-action-send-message'
+  }
+];
+
+function doHideBtn(context, selector) {
+  hideBtn.forEach(function(el) {
+    if (el.condition()) {
+      hideQuerySelectorAll(context, el[selector]);
+    }
+  });
+}
+
 export function addGuildInfoWidgets() { // Native
   var guildMembrList = document.getElementById('minibox-guild-members-list');
   if (!guildMembrList) {return;} // list exists
   // hide guild info links
-  var hideQSA = hideQuerySelectorAll;
-  if (calf.hideGuildInfoTrade) {
-    hideQSA(guildMembrList, '#guild-minibox-action-trade');
-  }
-  if (calf.hideGuildInfoSecureTrade) {
-    hideQSA(guildMembrList, '#guild-minibox-action-secure-trade');
-  }
-  if (calf.hideGuildInfoBuff) {
-    hideQSA(guildMembrList, '#guild-minibox-action-quickbuff');
-  }
-  if (calf.hideGuildInfoMessage) {
-    hideQSA(guildMembrList, '#guild-minibox-action-send-message');
-  }
+  doHideBtn(guildMembrList, 'guildSelector');
   if (calf.hideBuffSelected) {
     hideNodeList(
       guildMembrList.getElementsByClassName('guild-buff-check-on'));
@@ -80,19 +99,7 @@ export function addGuildInfoWidgets() { // Native
 export function addOnlineAlliesWidgets() { // Native
   var onlineAlliesList = document.getElementById('minibox-allies-list');
   if (!onlineAlliesList) {return;}
-  var hideQSA = hideQuerySelectorAll;
-  if (calf.hideGuildInfoTrade) {
-    hideQSA(onlineAlliesList, '#online-allies-action-trade');
-  }
-  if (calf.hideGuildInfoSecureTrade) {
-    hideQSA(onlineAlliesList, '#online-allies-action-secure-trade');
-  }
-  if (calf.hideGuildInfoBuff) {
-    hideQSA(onlineAlliesList, '#online-allies-action-quickbuff');
-  }
-  if (calf.hideGuildInfoMessage) {
-    hideQSA(onlineAlliesList, '#online-allies-action-send-message');
-  }
+  doHideBtn(onlineAlliesList, 'allySelector');
   if (calf.hideBuffSelected) {
     hideNodeList(
       onlineAlliesList.getElementsByClassName('ally-buff-check-on'));
