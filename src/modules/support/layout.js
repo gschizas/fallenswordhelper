@@ -22,8 +22,8 @@ export var pCC = document.getElementById('pCC');
 export function buffAllHref(shortList) { // Bad Pattern
   var _shortList = shortList.join(',').replace(/\s/g, '');
   var j = 'java';
-  return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + _shortList +
-    '", "fsQuickBuff", 618, 1000, ",scrollbars")';
+  return j + 'script:openWindow(\'index.php?cmd=quickbuff&t=' + _shortList +
+    '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\')';
 }
 
 export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
