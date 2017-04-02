@@ -25,13 +25,17 @@ function newParam(param) {
   return system.getUrlParameter(param) || '-';
 }
 
+function newSelector(selector) {
+  var test_cmd = document.querySelector(selector);
+  return test_cmd && test_cmd.value || '-';
+}
+
 function getCoreFunction() { // Native
   var cmd;
   var subcmd;
   var subcmd2;
   var type;
   var fromWorld;
-  var test_cmd;
   if (document.location.search !== '') {
     cmd = newParam('cmd');
     subcmd = newParam('subcmd');
@@ -39,16 +43,13 @@ function getCoreFunction() { // Native
     type = newParam('type');
     fromWorld = newParam('fromworld');
   } else {
-    test_cmd = document.querySelector('input[name="cmd"]');
-    cmd = test_cmd ? test_cmd.getAttribute('value') : '-';
-    test_cmd = document.querySelector('input[name="subcmd"]');
-    subcmd = test_cmd ? test_cmd.getAttribute('value') : '-';
+    cmd = newSelector('input[name="cmd"]');
+    subcmd = newSelector('input[name="subcmd"]');
     if (subcmd === 'dochat') {
       cmd = '-';
       subcmd = '-';
     }
-    test_cmd = document.querySelector('input[name="subcmd2"]');
-    subcmd2 = test_cmd ? test_cmd.getAttribute('value') : '-';
+    subcmd2 = newSelector('input[name="subcmd2"]');
     type = '-';
     fromWorld = '-';
   }
@@ -190,27 +191,28 @@ function injectFSBoxLog() { // Native
     '</span>');
 }
 
+function hideGuildLogMsg(guildLogNode) {
+  // hide the lhs box
+  if (location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
+      guildLogNode.innerHTML.search('Guild Log updated!') === -1) {return;}
+  var messageBox = guildLogNode.parentNode;
+  if (messageBox) {
+    messageBox.classList.add('fshHide');
+  }
+}
+
 function changeGuildLogHREF() { // Native
   if (!system.getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
-  var guildLogNode;
-  var messageBox;
   if (!guildLogNodes) {return;}
+  var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
     guildLogNode.setAttribute('href',
       'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
   }
-  // hide the lhs box
-  if (location.search === '?cmd=notepad&blank=1&subcmd=newguildlog') {
-    if (guildLogNode.innerHTML.search('Guild Log updated!') !== -1) { // new UI
-      messageBox = guildLogNode.parentNode;
-      if (messageBox) {
-        messageBox.classList.add('fshHide');
-      }
-    }
-  }
+  hideGuildLogMsg(guildLogNode);
 }
 
 function moveRHSBoxUpOnRHS(title) { // Native
@@ -312,24 +314,39 @@ function doMsgSound() { // jQuery
   });
 }
 
+function retOption(option, ifTrue, ifFalse) {
+  if (system.getValue(option)) {
+    return ifTrue;
+  }
+  return ifFalse;
+}
+
+function retBool(bool, ifTrue, ifFalse) {
+  if (bool) {
+    return ifTrue;
+  }
+  return ifFalse;
+}
+
 function injectQuickLinks() { // Native ?
   var node = document.getElementById('statbar-container');
   if (!node) {return;}
   var quickLinks = system.getValueJSON('quickLinks') || [];
   if (quickLinks.length <= 0) {return;}
+  var quickLinksTopPx = system.getValue('quickLinksTopPx');
+  var quickLinksLeftPx = system.getValue('quickLinksLeftPx');
   var draggableQuickLinks = system.getValue('draggableQuickLinks');
-  var html = '<div style="top:' +
-    system.getValue('quickLinksTopPx') + 'px; left:' +
-    system.getValue('quickLinksLeftPx') + 'px; background-image:' +
-    'url(\'' + system.imageServer + '/skin/inner_bg.jpg\');" ' +
-    'id="fshQuickLinks" class="fshQuickLinks' +
-    (system.getValue('keepHelperMenuOnScreen') ? ' fshFixed' : '') +
-    (draggableQuickLinks ? ' fshLink" draggable="true"' : '"') +
-    '>';
+  var draggableQuickLinksClass = retBool(draggableQuickLinks,
+    ' fshLink" draggable="true"', '"');
+  var html = '<div style="top:' + quickLinksTopPx + 'px; left:' +
+    quickLinksLeftPx + 'px; background-image:url(\'' + system.imageServer +
+    '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
+    retOption('keepHelperMenuOnScreen',
+    ' fshFixed', '') + draggableQuickLinksClass + '>';
   for (var i = 0; i < quickLinks.length; i += 1) {
-    html += '<li><a href="' + quickLinks[i].url + '"' +
-      (quickLinks[i].newWindow ? ' target=new' : '') +
-      '>' + quickLinks[i].name + '</a></li>';
+    var newWindow = retBool(quickLinks[i].newWindow, ' target="new"', '');
+    html += '<li><a href="' + system.escapeHtml(quickLinks[i].url) + '"' +
+      newWindow + '>' + quickLinks[i].name + '</a></li>';
   }
   html += '</div>';
   document.body.insertAdjacentHTML('beforeend', html);
