@@ -14,7 +14,7 @@ export function prefs() {
       'link to expand the compressed section.') +
       ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
       'value="on"' +
-      (system.getValue('enableBioCompressor') ? ' checked' : '') +
+      settingsPage.isChecked(system.getValue('enableBioCompressor')) +
       '> Max Characters:<input name="maxCompressedCharacters" size="4" ' +
       'value="' + system.getValue('maxCompressedCharacters') + '" />' +
       ' Max Lines:<input name="maxCompressedLines" size="3" value="' +

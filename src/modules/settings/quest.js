@@ -11,7 +11,7 @@ export function prefs() {
       '(separated by commas). This works on Quest Manager and Quest Book.') +
       ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
       'value="on"' +
-      (system.getValue('hideQuests') ? ' checked' : '') + '>' +
+      settingsPage.isChecked(system.getValue('hideQuests')) + '>' +
       '&nbsp;<input name="hideQuestNames" size="60" value="' +
       system.getValue('hideQuestNames') + '"></td></tr>' +
 

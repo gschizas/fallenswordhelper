@@ -15,7 +15,7 @@ export function prefs() {
       'quick send the item to this person') +
       ':</td><td><input name="showQuickSendLinks" type="checkbox" ' +
       'value="on"' +
-      (system.getValue('showQuickSendLinks') ? ' checked' : '') + '>' +
+      settingsPage.isChecked(system.getValue('showQuickSendLinks')) + '>' +
       '&nbsp;&nbsp;Send Items To ' +
       '<input name="itemRecipient" size="10" value="' +
       system.getValue('itemRecipient') + '">' +

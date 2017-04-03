@@ -34,11 +34,11 @@ export function prefs() {
       'are within your level range to attack for PvP or GvG.') +
       ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
       'type="checkbox" value="on"' +
-      (system.getValue('highlightPlayersNearMyLvl') ? ' checked' : '') +
+      settingsPage.isChecked(system.getValue('highlightPlayersNearMyLvl')) +
       '> GvG: <input name="highlightGvGPlayersNearMyLvl" ' +
       'type="checkbox" value="on"' +
-      (system.getValue('highlightGvGPlayersNearMyLvl') ?
-      ' checked' : '') + '></td></tr>' +
+      settingsPage.isChecked(system.getValue('highlightGvGPlayersNearMyLvl')) +
+      '></td></tr>' +
 
     settingsPage.simpleCheckbox('showAdmin') +
     settingsPage.simpleCheckbox('ajaxifyRankControls') +

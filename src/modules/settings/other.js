@@ -13,7 +13,7 @@ export function prefs() {
       '(separated by commas). This works on Recipe Manager') +
       ':</td><td colspan="3"><input name="hideRecipes" ' +
       'type="checkbox" value="on"' +
-      (system.getValue('hideRecipes') ? ' checked' : '') + '>' +
+      settingsPage.isChecked(system.getValue('hideRecipes')) + '>' +
       '&nbsp;<input name="hideRecipeNames" size="60" value="' +
       system.getValue('hideRecipeNames') + '"></td></tr>' +
 
@@ -27,7 +27,7 @@ export function prefs() {
       'groups less than a set size. ') +
       ':</td><td colspan="3"><input name="enableMaxGroupSizeToJoin" ' +
       'type = "checkbox" value = "on"' +
-      (system.getValue('enableMaxGroupSizeToJoin') ? ' checked' : '') +
+      settingsPage.isChecked(system.getValue('enableMaxGroupSizeToJoin')) +
       '>&nbsp;&nbsp;Max Size: ' +
       '<input name="maxGroupSizeToJoin" size="3" value="' +
       system.getValue('maxGroupSizeToJoin') + '"></td></tr>' +
