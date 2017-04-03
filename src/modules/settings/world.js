@@ -39,16 +39,16 @@ function combatEvalBias() {
     'changed to +-48 per RJEM') +
     ':</td><td><select name="combatEvaluatorBias">' +
     '<option value="0"' +
-    (calf.combatEvaluatorBias === 0 ? ' SELECTED' : '') +
+    system.isSelected(calf.combatEvaluatorBias, 0) +
     '>Conservative</option>' +
     '<option value="1"' +
-    (calf.combatEvaluatorBias === 1 ? ' SELECTED' : '') +
+    system.isSelected(calf.combatEvaluatorBias, 1) +
     '>Semi-Conservative</option>' +
     '<option value="2"' +
-    (calf.combatEvaluatorBias === 2 ? ' SELECTED' : '') +
+    system.isSelected(calf.combatEvaluatorBias, 2) +
     '>Adventurous</option>' +
     '<option value="3"' +
-    (calf.combatEvaluatorBias === 3 ? ' SELECTED' : '') +
+    system.isSelected(calf.combatEvaluatorBias, 3) +
     '>Conservative+</option></select></td></tr>';
 }
 
@@ -67,13 +67,13 @@ function huntingBuffs() {
     'on the world screen.') +
     ':<select name="enabledHuntingMode">' +
     '<option value="1"' +
-    (calf.enabledHuntingMode === '1' ? ' SELECTED' : '') +
+    system.isSelected(calf.enabledHuntingMode, '1') +
     '>' + calf.buffsName + '</option>' +
     '<option value="2"' +
-    (calf.enabledHuntingMode === '2' ? ' SELECTED' : '') +
+    system.isSelected(calf.enabledHuntingMode, '2') +
     '>' + calf.buffs2Name + '</option>' +
     '<option value="3"' +
-    (calf.enabledHuntingMode === '3' ? ' SELECTED' : '') +
+    system.isSelected(calf.enabledHuntingMode, '3') +
     '>' + calf.buffs3Name + '</option>' +
     '</select></td></tr>';
 }

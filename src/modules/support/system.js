@@ -280,3 +280,8 @@ export function escapeHtml(unsafe) { // Native
 export function newMember(member) {
   return member || {};
 }
+
+export function isSelected(val, test) {
+  if (val === test) {return ' selected';}
+  return '';
+}

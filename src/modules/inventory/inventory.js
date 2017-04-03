@@ -139,7 +139,7 @@ export function whereRenderDisplay(data, type, row) { // Native
     .sort(function(a, b) {return a - b;});
   keysArray.forEach(function(value) {
     folderSelect += '<option value="' + value + '"' +
-      (value === row.folder_id ? ' selected' : '') + '>' +
+      system.isSelected(value, row.folder_id) + '>' +
       theInv.folders[value] + '</option>';
   });
   folderSelect += '</select>';
