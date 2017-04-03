@@ -434,4 +434,9 @@ export var mySimpleCheckboxes = {
     helpText: 'If enabled, will hide creatures that are ' +
       'lower than the current realm level.'
   },
+  hidePlayerActions: {
+    id: 'hidePlayerActions',
+    helpTitle: 'Hide Player Actions',
+    helpText: 'If enabled, will hide player actions.'
+  },
 };

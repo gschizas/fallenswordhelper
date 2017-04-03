@@ -13,6 +13,7 @@ var showHuntingBuffs;
 var huntingBuffs;
 var huntingBuffsName;
 var hideSubLvlCreature;
+var hidePlayerActions;
 
 function xhrDataFilter(data) { // Native
   var myData = JSON.parse(data);
@@ -85,24 +86,21 @@ function doMonsterColors() { // jQuery
   }
 }
 
-function afterUpdateActionList() { // jQuery
-  // color the critters in the do no kill list blue
-  // TODO substring bug
+function doHidePlayerActions() { // Native
+  if (!hidePlayerActions) {return;}
   var act = document.getElementById('actionList');
-  // var noActions = act.getElementsByClassName('empty');
-  // if (noActions.length !== 0) {return;}
-  // var playerData = GameData.player();
-  // var actionData = GameData.actions();
-  // console.log('playerData', playerData);
-  // console.log('actionData', actionData);
-  // var actions = act.getElementsByClassName('actionListItem');
-  // Array.prototype.forEach.call(actions, function(el, ind) {
-  //   if (actionData[ind].type === 6 &&
-  //     actionData[ind].data.level < playerData.level) {
-  //     el.classList.add('fshHide');
-  //   }
-  // });
+  var players = act.getElementsByClassName('player');
+  Array.prototype.forEach.call(players, function(el) {
+    var verbs = el.getElementsByClassName('verbs');
+    if (verbs && verbs.length === 1) {
+      verbs[0].classList.add('fshHide');
+    }
+  });
+}
 
+function afterUpdateActionList() { // Native
+  // color the critters in the do no kill list blue
+  var act = document.getElementById('actionList');
   var creatures = act.getElementsByClassName('creature');
   Array.prototype.forEach.call(creatures, function(el) {
     if (calf.doNotKillList.indexOf(el.textContent) !== -1) {
@@ -120,7 +118,6 @@ function interceptDoAction() { // jQuery
       // Do custom stuff e.g. do not kill list
       var creatureIcon = $('#actionList div.header')
         .eq(data.passback).find('a.icon');
-      // TODO substring bug
       if (calf.doNotKillList.indexOf(
           creatureIcon.data('name')) !== -1) {
         creatureIcon.removeClass('loading');
@@ -203,27 +200,46 @@ function doHuntingBuffs() { // jQuery
   }
 }
 
-function togglePref() { // Native
+function toggleSubLvlCreature() { // Native
   hideSubLvlCreature = !hideSubLvlCreature;
   system.setValue('hideSubLvlCreature', hideSubLvlCreature);
   GameData.fetch(387);
 }
 
-function setupPref() {
+function toggleHidePlayerActions() { // Native
+  hidePlayerActions = !hidePlayerActions;
+  system.setValue('hidePlayerActions', hidePlayerActions);
+  GameData.fetch(387);
+}
+
+function setupPref() { // Native
   hideSubLvlCreature = system.getValue('hideSubLvlCreature');
+  hidePlayerActions = system.getValue('hidePlayerActions');
   var prefsDiv = document.createElement('div');
   prefsDiv.insertAdjacentHTML('beforeend',
-    settingsPage.simpleCheckboxHtml('hideSubLvlCreature'));
+    settingsPage.simpleCheckboxHtml('hideSubLvlCreature') +
+    ' ' +
+    settingsPage.simpleCheckboxHtml('hidePlayerActions'));
   var worldContainerBelow = document.getElementById('worldContainerBelow');
   worldContainerBelow.insertAdjacentElement('afterbegin', prefsDiv);
   document.getElementById('hideSubLvlCreature')
-    .addEventListener('click', togglePref);
+    .addEventListener('click', toggleSubLvlCreature);
+  document.getElementById('hidePlayerActions')
+    .addEventListener('click', toggleHidePlayerActions);
+}
+
+function getDoNotKillList() { // Native
+  var tempDoNotKillList = system.getValue('doNotKillList');
+  if (tempDoNotKillList && tempDoNotKillList.length > 0) {
+    return tempDoNotKillList.split(/\s*,\s*/);
+  }
+  return [];
 }
 
 export function subscribes() { // jQuery
   sendGold.injectSendGoldOnWorld();
   // Subscribes:
-  calf.doNotKillList = system.getValue('doNotKillList');
+  calf.doNotKillList = getDoNotKillList();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', viewCreature.readyViewCreature);
   hideGroupButton(); // Hide Create Group button
@@ -257,4 +273,6 @@ export function subscribes() { // jQuery
   shop.prepareShop();
   setupPref();
   interceptXHR();
+  $.subscribe('after-update.actionlist', doHidePlayerActions);
+  doHidePlayerActions();
 }

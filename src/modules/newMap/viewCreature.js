@@ -528,23 +528,15 @@ function checkIfGroupExists(responseText) { // Hybrid
 
 function addRemoveCreatureToDoNotKillList(evt) { // Native
   var creatureName = evt.target.getAttribute('creatureName');
-  var newDoNotKillList = '';
-  if (calf.doNotKillList.indexOf(creatureName) !== -1) {
-    newDoNotKillList = calf.doNotKillList.replace(creatureName, '');
-    newDoNotKillList = newDoNotKillList.replace(',,', ',');
-    if (newDoNotKillList.charAt(0) === ',') {
-      newDoNotKillList = newDoNotKillList
-        .substring(1, newDoNotKillList.length);
-    }
+  var ind = calf.doNotKillList.indexOf(creatureName);
+  if (ind !== -1) {
+    calf.doNotKillList.splice(ind, 1);
     evt.target.innerHTML = 'Add to the do not kill list';
   } else {
-    newDoNotKillList = calf.doNotKillList +
-      (calf.doNotKillList.length !== 0 ? ',' : '') + creatureName;
-    newDoNotKillList = newDoNotKillList.replace(',,', ',');
+    calf.doNotKillList.push(creatureName);
     evt.target.innerHTML = 'Remove from do not kill list';
   }
-  system.setValue('doNotKillList', newDoNotKillList);
-  calf.doNotKillList = newDoNotKillList;
+  system.setValue('doNotKillList', calf.doNotKillList.join());
   // refresh the action list
   window.GameData.doAction(-1);
 }
@@ -579,7 +571,6 @@ export function readyViewCreature() { // Hybrid
   $('#addRemoveCreatureToDoNotKillList')
     .attr('creatureName', creatureName);
   var extraText = 'Add to the do not kill list';
-  // TODO substring bug
   if (calf.doNotKillList.indexOf(creatureName) !== -1) {
     extraText = 'Remove from do not kill list';
   }

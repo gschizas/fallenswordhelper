@@ -270,6 +270,7 @@ export var defaults = {
   collapseNewsArchive: false,
   lastmyGuildLogCheck: 0,
   hideSubLvlCreature: false,
+  hidePlayerActions: false,
 
 };
 
