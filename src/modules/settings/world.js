@@ -52,30 +52,41 @@ function combatEvalBias() {
     '>Conservative+</option></select></td></tr>';
 }
 
-function huntingBuffs() {
-  return '<tr><td class="fshRight">Hunting Buffs' +
-    settingsPage.helpLink('Hunting Buffs',
+function huntBuff() {
+  return 'Hunting Buffs' + settingsPage.helpLink('Hunting Buffs',
     'Customize which buffs are designated as hunting buffs. ' +
-    'You must type the full name of each buff, ' +
-    'separated by commas. Use the checkbox to enable/disable them.') +
-    ':</td><td colspan="3"><input name="showHuntingBuffs" ' +
-    'type="checkbox" value="on"' +
-    settingsPage.isChecked(system.getValue('showHuntingBuffs')) + '> ' +
-    'Enabled Hunting Mode' +
+    'You must type the full name of each buff, separated by commas. ' +
+    'Use the checkbox to enable/disable them.') + ':';
+}
+
+function huntBuffCheck() {
+  return '<input name="showHuntingBuffs" ' +
+    'class="fshVMid" type="checkbox" value="on"' +
+    settingsPage.isChecked(calf.showBuffs) + '>';
+}
+
+export function huntMode() {
+  return 'Enabled Hunting Mode' +
     settingsPage.helpLink('Enabled Hunting Mode',
     'This will determine which list of buffs gets checked ' +
     'on the world screen.') +
     ':<select name="enabledHuntingMode">' +
-    '<option value="1"' +
-    system.isSelected(calf.enabledHuntingMode, '1') +
+    '<option value="1"' + system.isSelected(calf.enabledHuntingMode, '1') +
     '>' + calf.buffsName + '</option>' +
-    '<option value="2"' +
-    system.isSelected(calf.enabledHuntingMode, '2') +
+    '<option value="2"' + system.isSelected(calf.enabledHuntingMode, '2') +
     '>' + calf.buffs2Name + '</option>' +
-    '<option value="3"' +
-    system.isSelected(calf.enabledHuntingMode, '3') +
+    '<option value="3"' + system.isSelected(calf.enabledHuntingMode, '3') +
     '>' + calf.buffs3Name + '</option>' +
-    '</select></td></tr>';
+    '</select>';
+}
+
+export function huntingBuffsHtml() {
+  return huntBuff() + huntBuffCheck() + ' ' + huntMode();
+}
+
+function huntingBuffs() {
+  return '<tr><td class="fshRight">' + huntBuff() + '</td><td colspan="3">' +
+    huntBuffCheck() + ' ' + huntMode() + '</td></tr>';
 }
 
 export function prefs() {

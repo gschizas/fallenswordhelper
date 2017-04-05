@@ -17,7 +17,7 @@ export function doSendGold() { // jQuery
       system.setValue('currentGoldSentTotal',
         parseInt(system.getValue('currentGoldSentTotal'), 10) +
         parseInt(system.getValue('goldAmount'), 10));
-      GameData.fetch(387);
+      GameData.fetch(1);
     }
   });
 }

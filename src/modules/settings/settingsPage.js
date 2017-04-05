@@ -5,6 +5,7 @@ import * as settingObj from './settingObj';
 import * as system from '../support/system';
 
 function getVars() { // Native
+  calf.showBuffs = system.getValue('showHuntingBuffs');
   calf.buffs = system.getValue('huntingBuffs');
   calf.buffsName = system.getValue('huntingBuffsName');
   calf.buffs2 = system.getValue('huntingBuffs2');
@@ -41,19 +42,27 @@ function isOn(o) { // Native
   return isChecked(system.getValue(o.id));
 }
 
-export function simpleCheckboxHtml(name) {
+function justLabel(name) {
   var o = settingObj.mySimpleCheckboxes[name];
   return hasNetwork(o) +
     '<label for="' + o.id + '">' + o.helpTitle +
     helpLink(o.helpTitle, o.helpText) +
-    ':</label></td><td><input id="' + o.id +
-    '" name="' + o.id + '" class="fshVMid" type="checkbox" value="on"' +
-    isOn(o) + '>';
+    ':</label>';
+}
+
+function justCheckbox(name) {
+  var o = settingObj.mySimpleCheckboxes[name];
+  return '<input id="' + o.id + '" name="' + o.id +
+    '" class="fshVMid" type="checkbox" value="on"' + isOn(o) + '>';
+}
+
+export function simpleCheckboxHtml(name) {
+  return justLabel(name) + justCheckbox(name);
 }
 
 export function simpleCheckbox(name) { // Native
-  return '<tr><td align="right">' +
-    simpleCheckboxHtml(name) + '</td></tr>';
+  return '<tr><td align="right">' + justLabel(name) +
+    '</td><td>' + justCheckbox(name) + '</td></tr>';
 }
 
 function toggleTickAllBuffs(e) { // jQuery
