@@ -190,10 +190,10 @@ function doCheckboxes(type, itemId) { // Native
   });
 }
 
-function quickAction(self, success, otherClass) { // jQuery.min
+function quickAction(self, fn, success, otherClass) { // jQuery.min
   self.className = 'quickAction';
   var itemInvId = self.getAttribute('itemInvId');
-  ajax.sendItem([itemInvId]).done(function(data) {
+  fn([itemInvId]).done(function(data) {
     if (data.r === 1) {return;}
     self.style.color = 'green';
     self.innerHTML = success;
@@ -211,26 +211,50 @@ function quickAction(self, success, otherClass) { // jQuery.min
   checkbox.disabled = true;
 }
 
-function sendAndDrop(self, myClasses) {
-  if (myClasses.contains('sendLink')) {
-    quickAction(self, 'Sent', '.dropLink');
+var evts = [
+  {
+    condition: function(self) {return self.id === 'fshShowExtraLinks';},
+    result: toggleShowExtraLinks
+  },
+  {
+    condition: function(self) {return self.id === 'fshShowQuickDropLinks';},
+    result: toggleShowQuickDropLinks
+  },
+  {
+    condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
+    result: function() {doCheckboxes('guild');}
+  },
+  {
+    condition: function(self) {return self.id === 'fshMove';},
+    result: moveItemsToFolder
+  },
+  {
+    condition: function(self) {return self.hasAttribute('linkto');},
+    result: function(self) {doCheckboxes('item', self.getAttribute('linkto'));}
+  },
+  {
+    condition: function(self) {return self.classList.contains('sendLink');},
+    result: function(self) {
+      quickAction(self, ajax.sendItem, 'Sent', '.dropLink');
+    }
+  },
+  {
+    condition: function(self) {return self.classList.contains('dropLink');},
+    result: function(self) {
+      quickAction(self, ajax.dropItem, 'Dropped', '.sendLink');
+    }
   }
-  if (myClasses.contains('dropLink')) {
-    quickAction(self, 'Dropped', '.sendLink');
-  }
-}
+];
 
 function evtHandler(evt) { // Native
   var self = evt.target;
-  var myId = self.id;
-  if (myId === 'fshShowExtraLinks') {toggleShowExtraLinks();}
-  if (myId === 'fshShowQuickDropLinks') {toggleShowQuickDropLinks();}
-  if (myId === 'fshSelectAllGuildLocked') {doCheckboxes('guild');}
-  if (myId === 'fshMove') {moveItemsToFolder();}
-  if (self.hasAttribute('linkto')) {
-    doCheckboxes('item', self.getAttribute('linkto'));
-  }
-  sendAndDrop(self, self.classList);
+  evts.some(function(el) {
+    if (el.condition(self)) {
+      el.result(self);
+      return true;
+    }
+    return false;
+  });
 }
 
 function getItems() { // Native
