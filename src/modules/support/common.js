@@ -4,44 +4,67 @@ import * as system from './system';
 
 var drag_target;
 
-function addStats(i, e) { // jQuery
-  var statTable = $(e).closest('tr')
-    .nextUntil('tr:contains("Enhance")');
-  var attackStatElement = $('td:contains("Attack:")', statTable);
-  var defenseStatElement = $('td:contains("Defense:")', statTable);
-  var armorStatElement = $('td:contains("Armor:")', statTable);
-  var damageStatElement = $('td:contains("Damage:")', statTable);
-  var hpStatElement = $('td:contains("HP:")', statTable);
-  var totalStats = (attackStatElement.length > 0 ? Number(attackStatElement
-    .next().text().replace(/\+/g, '')) : 0) +
-    (defenseStatElement.length > 0 ? Number(defenseStatElement.next()
-    .text().replace(/\+/g, '')) : 0) +
-    (armorStatElement.length > 0 ? Number(armorStatElement.next().text()
-    .replace(/\+/g, '')) : 0) +
-    (damageStatElement.length > 0 ? Number(damageStatElement.next().text()
-    .replace(/\+/g, '')) : 0) +
-    (hpStatElement.length > 0 ? Number(hpStatElement.next().text()
-    .replace(/\+/g, '')) : 0);
-  statTable.last().before('<tr style="color:DodgerBlue;"><td>' +
-    'Stat Total:</td><td align="right">' + totalStats +
-    '&nbsp;</td></tr>'
-  );
+function closestTable(el) { // Native
+  if (el.tagName === 'TABLE') {return el;}
+  return closestTable(el.parentNode);
 }
 
-function fshAjaxSuccess(evt, xhr, ajaxOptions, data) { // jQuery
-  if (ajaxOptions.url.indexOf('fetchitem') !== 0) {return;}
-  var img = $('[data-tipped="' + ajaxOptions.url + '"]');
-  if (img.length === 0) {return;}
-  var repl = $(data);
-  var bonus = $('font:contains("Bonuses")', repl);
-  if (bonus.length === 0) {return;}
-  bonus.each(addStats);
-  img.qtip('option', 'content.text', $('<div/>').append(repl).html());
+function reduceStatTable(prev, curr, index) {
+  var key = curr.cells[0].textContent.trim().replace(':', '');
+  if (!key) {return prev;}
+  prev[key] = {ind: index};
+  if (curr.cells[1] && curr.cells[1].textContent) {
+    prev[key].value = Number(
+        curr.cells[1].textContent.trim().replace('+', '')
+      );
+  }
+  return prev;
+}
+
+function getVal(prop, obj) {
+  if (obj[prop] && obj[prop].value) {
+    return obj[prop].value;
+  }
+  return 0;
+}
+
+function getLastIndex(obj, tbl) {
+  if (obj.Enhancements) {
+    return tbl.rows[obj.Enhancements.ind - 1];
+  }
+  return tbl.rows[tbl.rows.length - 1];
+}
+
+function addStats(el) {
+  var statTable = closestTable(el);
+  var statObj = Array.prototype.reduce.call(statTable.rows,
+    reduceStatTable, {});
+  var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
+    getVal('Armor', statObj) + getVal('Damage', statObj) +
+    getVal('HP', statObj);
+  getLastIndex(statObj, statTable).insertAdjacentHTML('beforebegin',
+    '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
+    totalStats + '&nbsp;</td></tr>');
+}
+
+function fshDataFilter(data) { // Native
+  var container = document.createElement('div');
+  container.insertAdjacentHTML('beforeend', data);
+  var bonus = container.getElementsByTagName('font');
+  bonus = Array.prototype.filter.call(bonus, function(el) {
+    return el.textContent === 'Bonuses';
+  });
+  bonus.forEach(addStats);
+  return container.innerHTML;
+}
+
+function fshPreFilter(options) { // Native
+  if (options.url.indexOf('fetchitem') !== 0) {return;}
+  options.dataFilter = fshDataFilter;
 }
 
 export function addStatTotalToMouseover() { // jQuery
-  if (!system.getValue('showStatBonusTotal')) {return;}
-  $(document).ajaxSuccess(fshAjaxSuccess);
+  $.ajaxPrefilter(fshPreFilter);
 }
 
 function drag_over(event) { // Native
