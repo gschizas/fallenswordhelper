@@ -1,5 +1,5 @@
 import * as combatLog from '../combatLog';
-import * as common from '../support/common';
+import * as common from '../common/common';
 import * as findBuffs from '../findBuffs';
 import * as fshGa from '../support/fshGa';
 import * as lists from '../lists';

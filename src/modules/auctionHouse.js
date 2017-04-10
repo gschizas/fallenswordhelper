@@ -1,4 +1,4 @@
-import * as common from './support/common';
+import perfFilter from './common/perfFilter';
 import * as system from './support/system';
 
 function cancelAllAH() { // jQuery
@@ -44,5 +44,5 @@ export function injectAuctionHouse() { // Native
 }
 
 export function quickCreate() { // Native
-  common.perfFilter('auction');
+  perfFilter('auction');
 }

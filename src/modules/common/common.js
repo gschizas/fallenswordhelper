@@ -1,71 +1,6 @@
-import * as ajax from '../support/ajax';
-import * as layout from '../support/layout';
-import * as system from './system';
+import * as system from '../support/system';
 
 var drag_target;
-
-function closestTable(el) { // Native
-  if (el.tagName === 'TABLE') {return el;}
-  return closestTable(el.parentNode);
-}
-
-function reduceStatTable(prev, curr, index) {
-  var key = curr.cells[0].textContent.trim().replace(':', '');
-  if (!key) {return prev;}
-  prev[key] = {ind: index};
-  if (curr.cells[1] && curr.cells[1].textContent) {
-    prev[key].value = Number(
-        curr.cells[1].textContent.trim().replace('+', '')
-      );
-  }
-  return prev;
-}
-
-function getVal(prop, obj) {
-  if (obj[prop] && obj[prop].value) {
-    return obj[prop].value;
-  }
-  return 0;
-}
-
-function getLastIndex(obj, tbl) {
-  if (obj.Enhancements) {
-    return tbl.rows[obj.Enhancements.ind - 1];
-  }
-  return tbl.rows[tbl.rows.length - 1];
-}
-
-function addStats(el) {
-  var statTable = closestTable(el);
-  var statObj = Array.prototype.reduce.call(statTable.rows,
-    reduceStatTable, {});
-  var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
-    getVal('Armor', statObj) + getVal('Damage', statObj) +
-    getVal('HP', statObj);
-  getLastIndex(statObj, statTable).insertAdjacentHTML('beforebegin',
-    '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
-    totalStats + '&nbsp;</td></tr>');
-}
-
-function fshDataFilter(data) { // Native
-  var container = document.createElement('div');
-  container.insertAdjacentHTML('beforeend', data);
-  var bonus = container.getElementsByTagName('font');
-  bonus = Array.prototype.filter.call(bonus, function(el) {
-    return el.textContent === 'Bonuses';
-  });
-  bonus.forEach(addStats);
-  return container.innerHTML;
-}
-
-function fshPreFilter(options) { // Native
-  if (options.url.indexOf('fetchitem') !== 0) {return;}
-  options.dataFilter = fshDataFilter;
-}
-
-export function addStatTotalToMouseover() { // jQuery
-  $.ajaxPrefilter(fshPreFilter);
-}
 
 function drag_over(event) { // Native
   event.preventDefault();
@@ -216,32 +151,4 @@ export function updateHCSQuickBuffLinks(selector) { // Native
         .replace(/, 500/g, ', 1000'));
     }
   );
-}
-
-var inv;
-var target;
-
-function selectPerf() { // Native
-  var items = document.getElementById(target + '-items')
-    .getElementsByClassName('selectable-item');
-  if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, function(e) {
-    var thisItem = e.id.replace(target + '-item-', '');
-    if (inv[thisItem].craft === 'Perfect') {e.click();}
-  });
-}
-
-function drawFilters(data) { // Native
-  inv = data.items;
-  var buttonDiv = document.createElement('div');
-  buttonDiv.className = 'fshAC';
-  buttonDiv.insertAdjacentHTML('beforeend',
-    '<button class="fshBl">Perfect</button>');
-  layout.pCC.appendChild(buttonDiv);
-  buttonDiv.addEventListener('click', selectPerf);
-}
-
-export function perfFilter(loc) { // jQuery.min
-  target = loc;
-  ajax.getInventoryById().done(drawFilters);
 }

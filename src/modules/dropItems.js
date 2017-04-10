@@ -1,6 +1,6 @@
+import addStatTotalToMouseover from './common/addStatTotalToMouseover';
 import calf from './support/calf';
 import * as ajax from './support/ajax';
-import * as common from './support/common';
 import * as dataObj from './support/dataObj';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -258,7 +258,7 @@ function evtHandler(evt) { // Native
 }
 
 function getItems() { // Native
-  common.addStatTotalToMouseover();
+  addStatTotalToMouseover();
   disableItemColoring = system.getValue('disableItemColoring');
   showExtraLinks = system.getValue('showExtraLinks');
   showQuickDropLinks = system.getValue('showQuickDropLinks');

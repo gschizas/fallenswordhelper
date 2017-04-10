@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import * as common from '../support/common';
+import * as common from '../common/common';
 
 function hideElement(el) { // Native
   el.classList.add('fshHide');

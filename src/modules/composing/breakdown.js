@@ -1,4 +1,4 @@
-import * as common from '../support/common';
+import perfFilter from '../common/perfFilter';
 import * as layout from '../support/layout';
 import * as settingsPage from '../settings/settingsPage';
 import * as system from '../support/system';
@@ -81,7 +81,7 @@ function togglePref() { // Native
 }
 
 export function composingBreakdown() { // Native
-  common.perfFilter('composing');
+  perfFilter('composing');
   disableBreakdownPrompts = system.getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode
     .addEventListener('click', breakEvt, true);

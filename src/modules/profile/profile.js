@@ -1,5 +1,6 @@
+import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import * as bio from './bio';
-import * as common from '../support/common';
+import * as common from '../common/common';
 import * as components from './components';
 import * as debuff from './debuff';
 import * as fastWear from './fastWear';
@@ -253,6 +254,6 @@ export function injectProfile() { // Native
   common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateStatistics();
   bio.profileRenderBio(self);
-  common.addStatTotalToMouseover();
+  addStatTotalToMouseover();
   task.add(3, layout.colouredDots);
 }

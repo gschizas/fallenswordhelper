@@ -5,7 +5,7 @@ import * as activeWantedBounties from './activeWantedBounties';
 import * as ajax from '../support/ajax';
 import * as allyEnemy from './allyEnemy';
 import * as calc from './calc';
-import * as common from '../support/common';
+import * as common from '../common/common';
 import * as composing from '../composing/composing';
 import * as fshGa from '../support/fshGa';
 import * as helperMenu from './helperMenu';

@@ -1,6 +1,6 @@
 import assets from './assets';
 import calf from '../support/calf';
-import * as common from '../support/common';
+import * as common from '../common/common';
 import * as system from '../support/system';
 
 function getBiasGeneral(combat) { // Native
