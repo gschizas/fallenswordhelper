@@ -3,6 +3,9 @@ import * as system from '../support/system';
 
 var buffCost = {count: 0, buffs: {}};
 var bioEditLines;
+var numRE = /[^a-zA-Z0-9.,+\- ]/g;
+var priceRE =
+  /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
 function expandBio() { // Native
   var bioExpander = document.getElementById('fshBioExpander');
@@ -11,9 +14,7 @@ function expandBio() { // Native
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
-export function compressBio() { // Native
-  var bioCell = document.getElementById('profile-bio'); // new interface logic
-  if (!bioCell) {return;} // non-self profile
+function compressBio(bioCell) { // Native
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = system.getValue('maxCompressedCharacters');
   var maxRowsToShow = system.getValue('maxCompressedLines');
@@ -147,9 +148,50 @@ function priceUnit(price) { // Native
   return 'stam';
 }
 
+function priceBeforeName(buffNameNode, price) {
+  if (!price) { // some players have prices BEFORE the buff names
+    var newtext;
+    var text = '';
+    var node = buffNameNode;
+    while (node && node.nodeName.toLowerCase() !== 'br') {
+      newtext = node.textContent;
+      node = node.previousSibling;
+      text = newtext + text;
+    }
+    return text.replace(numRE, '').toLowerCase().match(priceRE);
+  }
+  return price;
+}
+
+function getBuffCost(buffNameNode) {
+  var node = buffNameNode;
+  var buffName = node.textContent;
+  var newtext;
+  var text = '';
+  // get the whole line from the buff name towards the end (even after
+  // the ',', in case of 'AL, Lib, Mer: 10k each'
+  while (node && node.nodeName.toLowerCase() !== 'br') {
+    newtext = node.textContent;
+    node = node.nextSibling;
+    text += newtext;
+  }
+  var price = text.replace(numRE, '').toLowerCase().match(priceRE);
+  price = priceBeforeName(buffNameNode, price);
+  var type;
+  var cost;
+  if (price) {
+    type = priceUnit(price);
+    cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
+  } else {
+    type = 'unknown';
+    cost = '1';
+  }
+  buffCost.buffs[buffName] = [parseFloat(cost), type];
+  buffCost.count += 1;
+}
+
 function toggleBuffsToBuy(evt) { // Legacy
   // This is also called by bio preview
-  var newtext;
   var buffNameNode = evt.target;
   while (buffNameNode.tagName.toLowerCase() !== 'span') {
     buffNameNode = buffNameNode.parentNode;
@@ -158,41 +200,9 @@ function toggleBuffsToBuy(evt) { // Legacy
   var selected = node.classList.contains('fshBlue');
   node.classList.toggle('fshBlue');
   node.classList.toggle('fshYellow');
-
   var buffName = node.textContent;
   if (selected) {
-    var text = '';
-    // get the whole line from the buff name towards the end (even after
-    // the ',', in case of 'AL, Lib, Mer: 10k each'
-    while (node && node.nodeName.toLowerCase() !== 'br') {
-      newtext = node.textContent;
-      node = node.nextSibling;
-      text += newtext;
-    }
-    var numRE = /[^a-zA-Z0-9.,+\- ]/g;
-    var priceRE =
-      /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
-    var price = text.replace(numRE, '').toLowerCase().match(priceRE);
-    if (!price) { // some players have prices BEFORE the buff names
-      node = buffNameNode;
-      while (node && node.nodeName.toLowerCase() !== 'br') {
-        newtext = node.textContent;
-        node = node.previousSibling;
-        text = newtext + text;
-      }
-      price = text.replace(numRE, '').toLowerCase().match(priceRE);
-    }
-    var type;
-    var cost;
-    if (price) {
-      type = priceUnit(price);
-      cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
-    } else {
-      type = 'unknown';
-      cost = '1';
-    }
-    buffCost.buffs[buffName] = [parseFloat(cost), type];
-    buffCost.count += 1;
+    getBuffCost(buffNameNode);
   } else {
     buffCost.count -= 1;
     delete buffCost.buffs[buffName];
@@ -290,15 +300,16 @@ function renderBio(_bioContents) {
 
 export function profileRenderBio(self) { // Native
   var bioCell = document.getElementById('profile-bio');
-  if (bioCell && (self && system.getValue('renderSelfBio') ||
-      !self && system.getValue('renderOtherBios'))) {
+  if (!bioCell) {return;}
+  if (self && system.getValue('renderSelfBio') ||
+      !self && system.getValue('renderOtherBios')) {
     var bioContents = bioCell.innerHTML;
     bioContents = renderBio(bioContents);
     if (bioContents) {
       bioCell.innerHTML = bioContents;
     }
   }
-  if (system.getValue('enableBioCompressor')) {compressBio();}
+  if (system.getValue('enableBioCompressor')) {compressBio(bioCell);}
   bioCell.addEventListener('click', bioEvtHdl);
 }
 
