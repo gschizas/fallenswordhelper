@@ -3,42 +3,19 @@ import * as ajax from '../support/ajax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
-/* jshint latedef: nofunc */
 var content;
 var recipebook;
-var currentFolder;
 var hideRecipes = [];
 var output;
 var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 var playerId;
 
-function storeRecipeBook() {
+function storeRecipeBook() { // Native
   ajax.setForage('fsh_recipeBook', recipebook);
 }
 
-function sortRecipeTable(evt) { // Legacy
-  var headerClicked = evt.target.getAttribute('sortKey');
-  var sortType = evt.target.getAttribute('sorttype');
-  if (!sortType) {sortType = 'string';}
-  sortType = sortType.toLowerCase();
-  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
-  switch (sortType) {
-  case 'number':
-    recipebook.recipe.sort(system.numberSort);
-    break;
-  default:
-    recipebook.recipe.sort(system.stringSort);
-    break;
-  }
-  generateRecipeTable();
-}
-
-function getRecipeItems(recipe) {
+function getRecipeItems(recipe) { // Native
   if (recipe.items) {
     return recipe.items.reduce(function(prev, itm) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -54,7 +31,7 @@ function getRecipeItems(recipe) {
   return '';
 }
 
-function getComponents(recipe) {
+function getComponents(recipe) { // Native
   if (recipe.components) {
     return recipe.components.reduce(function(prev, comp) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -70,7 +47,7 @@ function getComponents(recipe) {
   return '';
 }
 
-function getImg(recipe) {
+function getImg(recipe) { // Native
   if (recipe.target) {
     return ' <img class="tip-dynamic" ' +
       'data-tipped="fetchitem.php?item_id=' +
@@ -108,159 +85,175 @@ function generateRecipeTable() { // Legacy
   output.innerHTML = result;
   recipebook.lastUpdate = new Date();
   storeRecipeBook(); // Why? storing the sorted data?
-  document.getElementById('sortName')
-    .addEventListener('click', sortRecipeTable);
 }
 
-function parseRecipeItemOrComponent(jqueryxpath, doc) { // jQuery
-  var results = [];
-  $(doc).find(jqueryxpath).each(function(i, e) {
-    var mouseOver = $(e).find('img').data('tipped');
-    var resultAmounts = $(e).parent().next().text();
-    var mouseOverRX = mouseOver.match(itmRE);
-    var result = {
-      img: $(e).find('img').attr('src'),
-      id: mouseOverRX[1],
-      verify: mouseOverRX[3],
-      amountPresent: parseInt(resultAmounts.split('/')[0], 10),
-      amountNeeded: parseInt(resultAmounts.split('/')[1], 10)
+function sortRecipeTable(evt) { // Legacy
+  var headerClicked = evt.target.getAttribute('sortKey');
+  var sortType = evt.target.getAttribute('sorttype');
+  if (!sortType) {sortType = 'string';}
+  sortType = sortType.toLowerCase();
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
+  if (calf.sortBy && calf.sortBy === headerClicked) {
+    calf.sortAsc = !calf.sortAsc;
+  }
+  calf.sortBy = headerClicked;
+  switch (sortType) {
+  case 'number':
+    recipebook.recipe.sort(system.numberSort);
+    break;
+  default:
+    recipebook.recipe.sort(system.stringSort);
+    break;
+  }
+  generateRecipeTable();
+}
+
+function reduceItemOrComponent(bgGif, prev, el) { // Native
+  var background = el.getAttribute('background');
+  if (!background || background.indexOf(bgGif) === -1) {return prev;}
+  var img = el.children[0].children[0];
+  var mouseOver = img.getAttribute('data-tipped');
+  var mouseOverRX = mouseOver.match(itmRE);
+  var result = {
+    img: img.getAttribute('src'),
+    id: mouseOverRX[1],
+    verify: mouseOverRX[3]
+  };
+  var amounts = el.parentNode.nextElementSibling;
+  if (amounts) {
+    var resultAmounts = amounts.textContent.split('/');
+    result.amountPresent = parseInt(resultAmounts[0], 10);
+    result.amountNeeded = parseInt(resultAmounts[1], 10);
+  }
+  prev.push(result);
+  return prev;
+}
+
+function parseRecipeItemOrComponent(bgGif, doc) { // Native
+  var tblCells = doc.getElementById('pCC').getElementsByTagName('td');
+  return Array.prototype.reduce.call(tblCells,
+    reduceItemOrComponent.bind(null, bgGif), []);
+}
+
+function processRecipe(recipe, data) { // Native
+  var doc = system.createDocument(data);
+  output.insertAdjacentHTML('beforeend',
+    'Parsing blueprint ' + recipe.name + '...<br>');
+  recipe.items = parseRecipeItemOrComponent('/inventory/2x3.gif', doc);
+  recipe.components = parseRecipeItemOrComponent('/inventory/1x1mini.gif', doc);
+  recipe.target = parseRecipeItemOrComponent('/hellforge/2x3.gif', doc)[0];
+  recipebook.recipe.push(recipe);
+}
+
+function processFolderAnyPage(data) { // jQuery.min
+  var doc = system.createDocument(data);
+  var pCC = doc.getElementById('pCC');
+  var scope = pCC.firstElementChild.rows[6].cells[0]
+    .firstElementChild.getElementsByTagName('a');
+  var prm = Array.prototype.reduce.call(scope, function(prev, el) {
+    output.insertAdjacentHTML('beforeend',
+      'Found blueprint "' + el.textContent + '".<br>');
+    var recipe = {
+      img: el.parentNode.previousElementSibling.firstElementChild
+        .getAttribute('src'),
+      link: el.href,
+      name: el.textContent,
+      id: system.getCustomUrlParameter(el.href, 'recipe_id')
     };
-    results.push(result);
-  });
-  return results;
+    prev.push($.get(el.href).pipe(processRecipe.bind(null, recipe)));
+    return prev;
+  }, []);
+  return $.when.apply($, prm);
 }
 
-function parseRecipePage(responseText, callback) { // Legacy
-  var doc = system.createDocument(responseText);
-  var currentRecipeIndex = callback.recipeIndex;
-  var recipe = recipebook.recipe[currentRecipeIndex];
-
-  output.innerHTML += 'Parsing blueprint ' + recipe.name + '...<br/>';
-
-  recipe.items = parseRecipeItemOrComponent(
-    'td[background*="/inventory/2x3.gif"]', doc);
-  recipe.components = parseRecipeItemOrComponent(
-    'td[background*="/inventory/1x1mini.gif"]', doc);
-  recipe.target = parseRecipeItemOrComponent(
-    'td[background*="/hellforge/2x3.gif"]', doc)[0];
-
-  var nextRecipeIndex = currentRecipeIndex + 1;
-  if (nextRecipeIndex < recipebook.recipe.length) {
-    var nextRecipe = recipebook.recipe[nextRecipeIndex];
-    system.xmlhttp('index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
-      nextRecipe.id, parseRecipePage,
-      {recipeIndex: nextRecipeIndex});
-  } else {
-    output.innerHTML += 'Finished parsing ... formatting ...';
-    recipebook.lastUpdate = new Date();
-    storeRecipeBook();
-    generateRecipeTable();
+function processFolderFirstPage(data) { // jQuery.min
+  var prm = [];
+  var doc = system.createDocument(data);
+  var pCC = doc.getElementById('pCC');
+  var scope = pCC.firstElementChild.rows[4].cells[0]
+    .firstElementChild.getElementsByTagName('img');
+  var thisFolder = Array.prototype.filter.call(scope, function(el) {
+    return /\/folder_on\.gif/.test(el.getAttribute('src'));
+  })[0];
+  var pages = pCC.getElementsByClassName('customselect')[0]
+    .getElementsByTagName('option').length;
+  for (var i = 1; i < pages; i += 1) {
+    prm.push($.get(thisFolder.parentNode.href + '&page=' + i)
+      .pipe(processFolderAnyPage));
   }
+  prm.push($.when(data).pipe(processFolderAnyPage));
+  return $.when.apply($, prm);
 }
 
-function parseInventingPage(responseText, callback) { // Legacy
-  var doc = system.createDocument(responseText);
-
-  var folderIDs = []; // clear out the array before starting.
-  $(doc).find('a[href*="index.php?cmd=inventing&folder_id="]')
-    .each(function(i, e) {
-      var folderID = Number(/folder_id=([-0-9]+)/
-        .exec($(e).attr('href'))[1]);
-      folderIDs.push(folderID);
-    });
-
-  var folderCount = folderIDs.length;
-  var folderID = folderIDs[currentFolder - 1];
-  var folderTextElement = $(doc).find(
-    'a[href*="index.php?cmd=inventing&folder_id=' + folderID + '"]')
-    .closest('td').text();
-
-  var folderText = '';
-  if (folderTextElement.length > 0) {
-    folderText = folderTextElement;
+function reduceFolders(prev, el) { // jQuery.min
+  var href = el.parentNode.getAttribute('href');
+  var folderName = el.parentNode.nextElementSibling.nextElementSibling
+    .firstChild.textContent;
+  if (system.getCustomUrlParameter(href, 'folder_id') === '-1') {
+    return prev;
   }
-  var currentPage = callback.page;
-  var pages = $(doc).find('select[name="page"]:first');
-  var nextPage;
-  if (folderText.search(/quest/i) === -1) {
-    if (pages.length === 0) {return;}
-    $(doc).find(
-      'a[href*="index.php?cmd=inventing&subcmd=viewrecipe&recipe_id="]')
-      .each(function(i, e) {
-        var recipeLink = $(e).attr('href');
-        var recipeId = parseInt(recipeLink.match(/recipe_id=(\d+)/i)[1], 10);
-        var recipe = {
-          img: $(e).closest('tr').find('img').attr('src'),
-          link: recipeLink,
-          name: $(e).text(),
-          id: recipeId
-        };
-        output.innerHTML += 'Found blueprint: ' + recipe.name + '<br/>';
-        recipebook.recipe.push(recipe);
-      });
-
-    nextPage = currentPage + 1;
-    output.innerHTML += 'Parsing folder ' + currentFolder + ' ... Page ' +
-      nextPage + '... <br/>';
-
-  } else {
-    output.innerHTML += 'Skipping folder ' + currentFolder +
-      ' as it has the word "quest" in folder name.<br/>';
-    nextPage = Number(pages.find('option:last').text());
+  if (/quest/i.test(folderName)) {
+    output.insertAdjacentHTML('beforeend', 'Skipping folder "' +
+      folderName + '"  as it has the word "quest" in folder name.<br>');
+    return prev;
   }
-  if (nextPage <= Number(pages.find('option:last').text()) &&
-      currentFolder !== folderCount ||
-      currentFolder < folderCount) {
-    if (nextPage === Number(pages.find('option:last').text()) &&
-        currentFolder < folderCount) {
-      nextPage = 0;
-      folderID = folderIDs[currentFolder];
-      currentFolder += 1;
-    }
-    system.xmlhttp(
-      'index.php?cmd=inventing&page=' + nextPage + '&folder_id=' +
-      folderID,
-      parseInventingPage,
-      {page: nextPage}
-    );
-  } else {
-    output.innerHTML +=
-      'Finished parsing ... Retrieving individual blueprints...<br/>';
-    system.xmlhttp(
-      'index.php?cmd=inventing&subcmd=viewrecipe&recipe_id=' +
-      recipebook.recipe[0].id,
-      parseRecipePage, {recipeIndex: 0});
-  }
+  prev.push($.get(href).pipe(processFolderFirstPage));
+  return prev;
 }
 
-function parseInventingStart() { // Legacy
+function processFirstPage(data) { // jQuery.min
+  var doc = system.createDocument(data);
+  var scope = doc.getElementById('pCC').firstElementChild.rows[4].cells[0]
+    .firstElementChild.getElementsByTagName('img');
+  var prm = Array.prototype.reduce.call(scope, reduceFolders, []);
+  prm.push($.when(data).pipe(processFolderFirstPage));
+  return $.when.apply($, prm);
+}
+
+function displayStuff() { // Native
+  output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
+  storeRecipeBook();
+  generateRecipeTable();
+}
+
+function parseInventingStart() { // jQuery.min
   recipebook = {};
   recipebook.recipe = [];
-  output.innerHTML = '<br/>Parsing inventing screen ...<br/>';
-  currentFolder = 1;
-  system.xmlhttp('index.php?cmd=inventing&page=0',
-    parseInventingPage, {page: 0});
+  output.innerHTML = '<br>Parsing inventing screen ...<br>';
+  $.get('index.php?cmd=inventing').pipe(processFirstPage).done(displayStuff);
 }
 
-function gotRecipeBook(data) { // Legacy
+function gotRecipeBook(data) { // Native
   recipebook = data;
   if (system.getValue('hideRecipes')) {
-    hideRecipes = system.getValue('hideRecipeNames').split(',') || [];
+    hideRecipes = system.shouldBeArray('hideRecipeNames');
   }
   content.innerHTML = '<table class="fshInvFilter"><thead><tr>' +
     '<th width="90%"><b>&nbsp;Recipe Manager</b></th>' +
     '<th width="10%" class="fshBtnBox">[' +
     '<span id="rfsh" class="fshLink">' +
     'Refresh</span>]</th>' +
-    '</tr></thead></table>' +
-    '<div id="fshOutput"></div>';
-  output = document.getElementById('fshOutput');
-  document.getElementById('rfsh')
-    .addEventListener('click', parseInventingStart);
-  if (!recipebook) {parseInventingStart();} else {generateRecipeTable();}
+    '</tr></thead></table>';
+  output = document.createElement('div');
+  content.insertAdjacentElement('beforeend', output);
+  if (!recipebook) {
+    parseInventingStart();
+  } else {
+    generateRecipeTable();
+  }
 }
 
-export function injectRecipeManager(injector) { // Legacy
+function rmEvtHdl(evt) { // Native
+  if (evt.target.id === 'rfsh') {
+    parseInventingStart();
+  }
+  if (evt.target.id === 'sortName') {
+    sortRecipeTable(evt);
+  }
+}
+
+export function injectRecipeManager(injector) { // jQuery.min
   content = injector || layout.pCC;
   ajax.getForage('fsh_recipeBook').done(gotRecipeBook);
+  content.addEventListener('click', rmEvtHdl);
 }

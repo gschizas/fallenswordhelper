@@ -16,24 +16,18 @@ var hideSubLvlCreature;
 var hidePlayerActions;
 var missingBuffsDiv;
 
-function shouldBeArray(pref) { // Native
-  var stored = system.getValue(pref);
-  if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
-  return [];
-}
-
 function getPrefs() { // Native
   hideSubLvlCreature = system.getValue('hideSubLvlCreature');
   hidePlayerActions = system.getValue('hidePlayerActions');
   calf.showBuffs = system.getValue('showHuntingBuffs');
   calf.enabledHuntingMode = system.getValue('enabledHuntingMode');
-  calf.buffs = shouldBeArray('huntingBuffs');
+  calf.buffs = system.shouldBeArray('huntingBuffs');
   calf.buffsName = system.getValue('huntingBuffsName');
-  calf.buffs2 = shouldBeArray('huntingBuffs2');
+  calf.buffs2 = system.shouldBeArray('huntingBuffs2');
   calf.buffs2Name = system.getValue('huntingBuffs2Name');
-  calf.buffs3 = shouldBeArray('huntingBuffs3');
+  calf.buffs3 = system.shouldBeArray('huntingBuffs3');
   calf.buffs3Name = system.getValue('huntingBuffs3Name');
-  calf.doNotKillList = shouldBeArray('doNotKillList');
+  calf.doNotKillList = system.shouldBeArray('doNotKillList');
 }
 
 var buffLookup = {

@@ -285,3 +285,9 @@ export function isSelected(val, test) {
   if (val === test) {return ' selected';}
   return '';
 }
+
+export function shouldBeArray(pref) { // Native
+  var stored = getValue(pref);
+  if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
+  return [];
+}
