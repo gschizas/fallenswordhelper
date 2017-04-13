@@ -84,7 +84,7 @@ function generateRecipeTable() { // Legacy
   result += '</table>';
   output.innerHTML = result;
   recipebook.lastUpdate = new Date();
-  storeRecipeBook(); // Why? storing the sorted data?
+  storeRecipeBook();
 }
 
 function sortRecipeTable(evt) { // Legacy

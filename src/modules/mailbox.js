@@ -1,5 +1,6 @@
 import * as ajax from './support/ajax';
 import * as dataObj from './support/dataObj';
+import * as system from './support/system';
 
 var cn;
 
@@ -24,13 +25,15 @@ function takeAllSimilar(evt) { // jQuery
   cn = 0;
   invIds.forEach(function(invId) {
     $.ajax({
+      cache: false,
       type: 'POST',
       url: 'index.php',
       data: {
         cmd: 'tempinv',
         subcmd: 'takeitem',
         temp_id: invId,
-        ajax: '1'
+        ajax: '1',
+        _rnd: system.rnd()
       },
       dataType: 'json'
     }).done(quickDoneTaken);
