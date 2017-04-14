@@ -3,11 +3,19 @@ import * as dataObj from './support/dataObj';
 
 var cn;
 
+function showError(data) { // jQuery
+  var $tempError = $('#temp_error');
+  $tempError.html('<span style="color: red">Error:</span> ' + data.m);
+  $tempError.show().delay(5000).hide(400);
+}
+
+function failHndlr(jqXHR) {
+  showError({m: jqXHR.status + ' ' + jqXHR.statusText});
+}
+
 function quickDoneTaken(data) { // jQuery
   if (data.r !== 0) {
-    var $tempError = $('#temp_error');
-    $tempError.html('<span style="color: red">Error:</span> ' + data.m);
-    $tempError.show().delay(5000).hide(400);
+    showError(data);
   } else {
     var qtipId = $('#temp-inv-img-' + data.temp_id).data('hasqtip');
     $('#temp-inv-' + data.temp_id).remove();
@@ -33,7 +41,7 @@ function takeAllSimilar(evt) { // jQuery.min
         ajax: '1'
       },
       dataType: 'json'
-    }).done(quickDoneTaken);
+    }).done(quickDoneTaken).fail(failHndlr);
   });
 }
 
