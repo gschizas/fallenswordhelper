@@ -1,6 +1,6 @@
+import buffList from './support/buffObj';
 import calf from './support/calf';
 import * as ajax from './support/ajax';
-import * as buffObj from './support/buffObj';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -112,7 +112,6 @@ function reportIgnore(aRow, isGuildMate, playerName) { // Legacy
 }
 
 function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
-  var buffList = buffObj.buffList;
   var quickBuff = '';
   var buffsSent = _buffsSent[0].replace('`~', '').replace('~`', '').split(',');
   for (var j = 0; j < buffsSent.length; j += 1) {

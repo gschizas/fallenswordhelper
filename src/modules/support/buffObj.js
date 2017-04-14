@@ -1,5 +1,5 @@
 /* eslint-disable no-multi-spaces, max-len */
-export var buffList = [
+export default [
   {name: 'Rage',                stamina: 10, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 0,   nicks: 'rage'},
   {name: 'Stun',                stamina: 15, duration: 90,   minCastLevel: 1,    treeId: 0, skillId: 1,   nicks: 'stun,st'},
   {name: 'Fury',                stamina: 10, duration: 90,   minCastLevel: 25,   treeId: 0, skillId: 2,   nicks: 'fury'},

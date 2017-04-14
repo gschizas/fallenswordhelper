@@ -1,5 +1,5 @@
+import buffList from './support/buffObj';
 import * as ajax from './support/ajax';
-import * as buffObj from './support/buffObj';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -198,7 +198,6 @@ function rejected(timeStamp, buffsNotCast, buffLog) {
 }
 
 function getStamUsed(buffCast) {
-  var buffList = buffObj.buffList;
   for (var j = 0; j < buffList.length; j += 1) {
     if (buffList[j].name === buffCast[1]) {
       return buffList[j].stamina.toString();

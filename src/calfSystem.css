@@ -505,12 +505,12 @@ table.fshInvFilter {
 }
 table.fshInvFilter th {
   background-color: #cd9e4b;/*
-  border-style:solid;
-  border-width:1px;*/
+  border-style: solid;
+  border-width: 1px;*/
 }/*
 table.fshInvFilter td {
-  border-style:solid;
-  border-width:1px;
+  border-style: solid;
+  border-width: 1px;
 }*/
 
 #fshInv_filter input {width: 200px}
@@ -619,6 +619,90 @@ table.fshInvFilter td {
   background-color: #CD9E4B;
   width: 100%;
 }
+
+/* Find Buffs & Other */
+
+.fshFind {
+  width: 620px;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.headCell {
+  width: 50%;
+}
+
+.findLabel {
+  text-align: right;
+  color: brown;
+}
+
+.leftLabel {
+  text-align: right;
+  color: brown;
+  width: 30%;
+}
+
+.extraProfile {
+  width: 118px;
+}
+
+.selectOnline {
+  width: 140px;
+}
+
+.disclaim {
+  font-size: xx-small;
+  color: brown;
+  margin-left: 28px;
+  margin-right: 28px;
+}
+
+.buffProg {
+  width: 310px;
+}
+
+.nameCol {
+  width: 120px;
+}
+
+.infoCol {
+  width: 200px;
+}
+
+.fshResult {
+  width: 620px;
+  border-collapse: collapse;
+  margin: 0 auto;
+  border-width: 1px;
+  border-style: solid;
+  border-color: gray black black gray;
+}
+
+.fshResult > tbody > tr > th, .fshResult > tbody > tr > td {
+  padding: 2px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black gray gray black;
+}
+
+.resAct {
+  color: gray;
+  text-align: right;
+  width: 50%;
+}
+
+.resLbl {
+  color: gray;
+  text-align: right;
+  width: 25%;
+}
+
+.resVal {
+  width: 25%
+}
+
+/* End of Find Buffs & Other */
 
 /*
  * Table styles

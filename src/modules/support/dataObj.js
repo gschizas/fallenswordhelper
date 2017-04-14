@@ -271,6 +271,8 @@ export var defaults = {
   lastmyGuildLogCheck: 0,
   hideSubLvlCreature: false,
   hidePlayerActions: false,
+  extraProfile: '',
+  textToSearchFor: '',
 
 };
 
