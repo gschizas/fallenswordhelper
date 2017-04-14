@@ -25,7 +25,7 @@ function findOnlinePlayers() { // jQuery
       .done(parsePlayer.bind(null, someTables[i]))
     );
   }
-  $.when.apply($, prm).done(function() {
+  $.when.apply($, prm).always(function() {
     spinner.classList.add('fshHide');
   });
 }
@@ -46,13 +46,7 @@ function getMyVL(e) { // jQuery
   } else {findOnlinePlayers();}
 }
 
-export function injectTopRated() { // Native
-  if (!layout.pCC ||
-      !layout.pCC.firstElementChild ||
-      !layout.pCC.firstElementChild.rows ||
-      layout.pCC.firstElementChild.rows.length < 3 ||
-      layout.pCC.firstElementChild.rows[1].textContent
-        .indexOf('Last Updated') !== 0) {return;}
+function looksLikeTopRated() { // Native
   highlightPlayersNearMyLvl =
     system.getValue('highlightPlayersNearMyLvl');
   var theCell = layout.pCC.getElementsByTagName('TD')[0];
@@ -65,6 +59,15 @@ export function injectTopRated() { // Native
     'top 250 players (warning ... takes a few seconds).');
   theCell.insertBefore(findBtn, theCell.firstElementChild);
   findBtn.addEventListener('click', getMyVL);
+}
+
+export function injectTopRated() { // Native
+  if (layout.pCC &&
+      layout.pCC.firstElementChild &&
+      layout.pCC.firstElementChild.rows &&
+      layout.pCC.firstElementChild.rows.length > 2 &&
+      layout.pCC.firstElementChild.rows[1].textContent
+        .indexOf('Last Updated') === 0) {looksLikeTopRated();}
 }
 
 export function globalQuest() { // Native
