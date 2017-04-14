@@ -10,15 +10,34 @@ var msgButton = '<span class="enemy-send-message guild-icon left ' +
 var buffButton = '<span class="enemy-quickbuff guild-icon left ' +
   'guild-minibox-action tip-static" data-tipped="Quick Buff"></span>';
 
+var contactClass = [
+  {
+    condition: function(n) {return n < 120;},
+    ally: 'fshDodgerBlue',
+    enemy: 'fshRed'
+  },
+  {
+    condition: function(n) {return n < 300;},
+    ally: 'fshDodgerBlue',
+    enemy: 'fshRed'
+  },
+  {
+    condition: function() {return true;},
+    ally: 'fshPowderBlue',
+    enemy: 'fshPink'
+  }
+];
+
 function contactColor(last_login, type) { // Native
-  var out = 'fshWhite';
   var now = Math.floor(Date.now() / 1000);
-  if (now - last_login < 120) { // 2 mins
-    out = type ? 'fshDodgerBlue' : 'fshRed';
-  } else if (now - last_login < 300) { // 5 mins
-    out = type ? 'fshLightSkyBlue' : 'fshPaleVioletRed';
-  } else {out = type ? 'fshPowderBlue' : 'fshPink';}
-  return out;
+  for (var i = 0; i < contactClass.length; i += 1) {
+    var test = contactClass[i];
+    if (test.condition(now - last_login)) {
+      if (type) {return test.ally;}
+      return test.enemy;
+    }
+  }
+  return 'fshWhite';
 }
 
 function playerName(val, type) { // Native

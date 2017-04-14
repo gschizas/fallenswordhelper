@@ -132,11 +132,9 @@ export function onlineDot(obj) { // Native
   var min = getMins.reduce(function(prev, curr) {
     return curr(obj, prev);
   }, 0);
-  var index = 0;
-  while (index < getDot.length) {
-    var el = getDot[index];
+  for (var i = 0; i < getDot.length; i += 1) {
+    var el = getDot[i];
     if (min < el.condition) {return el.result;}
-    index += 1;
   }
   return redDot;
 }

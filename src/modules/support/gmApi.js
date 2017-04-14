@@ -69,11 +69,9 @@ if (needApiUpgrade) {
     window.GM_getValue = function(name, defValue) {
       var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
       if (value === null || typeof value === 'undefined') {return defValue;}
-      var index = 0;
-      while (index < parser.length) {
-        var test = parser[index];
+      for (var i = 0; i < parser.length; i += 1) {
+        var test = parser[i];
         if (value.substr(0, 2) === test.condition) {return test.result(value);}
-        index += 1;
       }
       return value;
     };

@@ -236,11 +236,9 @@ var lookup = [
 ];
 
 export function rowProfile(data) {
-  var index = 0;
-  while (index < lookup.length) {
-    var test = lookup[index];
+  for (var i = 0; i < lookup.length; i += 1) {
+    var test = lookup[i];
     if (test.condition(data)) {return test.id;}
-    index += 1;
   }
   return 0;
 }
