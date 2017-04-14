@@ -1,6 +1,5 @@
 import * as ajax from './support/ajax';
 import * as dataObj from './support/dataObj';
-import * as system from './support/system';
 
 var cn;
 
@@ -18,22 +17,20 @@ function quickDoneTaken(data) { // jQuery
   $('#take_result').append('<br>' + cn + '. Item taken.');
 }
 
-function takeAllSimilar(evt) { // jQuery
+function takeAllSimilar(evt) { // jQuery.min
   var invIds = evt.target.getAttribute('invIDs').split(',');
   evt.target.parentNode.innerHTML = 'taking all ' +
     invIds.length + ' items';
   cn = 0;
   invIds.forEach(function(invId) {
     $.ajax({
-      cache: false,
       type: 'POST',
       url: 'index.php',
       data: {
         cmd: 'tempinv',
         subcmd: 'takeitem',
         temp_id: invId,
-        ajax: '1',
-        _rnd: system.rnd()
+        ajax: '1'
       },
       dataType: 'json'
     }).done(quickDoneTaken);
