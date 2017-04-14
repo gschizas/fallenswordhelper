@@ -129,18 +129,16 @@ var getDot = [
 ];
 
 export function onlineDot(obj) { // Native
-  var img = redDot;
   var min = getMins.reduce(function(prev, curr) {
     return curr(obj, prev);
   }, 0);
-  getDot.some(function(el) {
-    if (min < el.condition) {
-      img = el.result;
-      return true;
-    }
-    return false;
-  });
-  return img;
+  var index = 0;
+  while (index < getDot.length) {
+    var el = getDot[index];
+    if (min < el.condition) {return el.result;}
+    index += 1;
+  }
+  return redDot;
 }
 
 function changeOnlineDot(contactLink) { // Native

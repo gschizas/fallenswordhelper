@@ -160,16 +160,13 @@ function eventHandler(evt) { // Native
     resetList();
     return;
   }
-  var hasMatch = false;
-  var index = 0;
-  while (!hasMatch && index < classEvt.length) {
-    var test = classEvt[index];
+  classEvt.some(function(test) {
     if (self.classList.contains(test.className)) {
-      hasMatch = true;
       test.handler(self);
+      return true;
     }
-    index += 1;
-  }
+    return false;
+  });
 }
 
 function makeDiv(data) { // Native
