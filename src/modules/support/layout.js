@@ -94,33 +94,52 @@ export function makePageTemplate(title, comment, spanId, button, divId) { // Nat
     '<div class="fshSmall" id="' + divId + '"></div>';
 }
 
-function getMins(obj) {
-  var min = 0;
-  if (obj.day) {min += parseInt(obj.day, 10) * 1440;}
-  if (obj.hour) {min += parseInt(obj.hour, 10) * 60;}
-  if (obj.min) {min += parseInt(obj.min, 10);}
-  if (obj.last_login) {
-    min = Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+var getMins = [
+  function(obj, min) {
+    if (obj.day) {return min + parseInt(obj.day, 10) * 1440;}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.hour) {return min + parseInt(obj.hour, 10) * 60;}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.min) {return min + parseInt(obj.min, 10);}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.last_login) {
+      return Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+    }
+    return min;
+  },
+  function(obj, min) {
+    // last_login is 'false' over 30 days
+    if ('last_login' in obj && !obj.last_login) {return 99999;}
+    return min;
   }
-  // last_login is 'false' over 30 days
-  if ('last_login' in obj && !obj.last_login) {min = 99999;}
-  return min;
-}
+];
+
+var getDot = [
+  {condition: 2, result: greenDiamond},
+  {condition: 5, result: yellowDiamond},
+  {condition: 30, result: orangeDiamond},
+  {condition: 10080, result: offlineDot},
+  {condition: 44640, result: sevenDayDot}
+];
 
 export function onlineDot(obj) { // Native
-  var img;
-  var min = getMins(obj);
-  if (min < 2) {
-    img = greenDiamond;
-  } else if (min < 5) {
-    img = yellowDiamond;
-  } else if (min < 30) {
-    img = orangeDiamond;
-  } else if (min < 10080) {
-    img = offlineDot;
-  } else if (min < 44640) {
-    img = sevenDayDot;
-  } else {img = redDot;}
+  var img = redDot;
+  var min = getMins.reduce(function(prev, curr) {
+    return curr(obj, prev);
+  }, 0);
+  getDot.some(function(el) {
+    if (min < el.condition) {
+      img = el.result;
+      return true;
+    }
+    return false;
+  });
   return img;
 }
 
