@@ -45,6 +45,15 @@ export function setValue(name, value) {
   GM_setValue(name, value);
 }
 
+function getDoc(doc) {
+  return doc || document;
+}
+
+function getTarget(doc) {
+  if (doc instanceof HTMLDocument) {return doc;}
+  return document;
+}
+
 export function findNodes(xpath, doc) {
   var _xpath = xpath;
   var nodes = [];
@@ -61,12 +70,8 @@ export function findNodes(xpath, doc) {
   // See createDocument with DOMParser below
   // This only matters in Firefox. evaluate will fail silently if
   // the context is not part of the calling object.
-  var _doc = doc || document;
-  if (_doc instanceof HTMLDocument) {
-    target = _doc;
-  } else {
-    target = document;
-  }
+  var _doc = getDoc(doc);
+  target = getTarget(_doc);
   var findQ = target.evaluate(_xpath, _doc, null,
     XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
   if (findQ.snapshotLength === 0) {return null;}
@@ -87,22 +92,6 @@ export function createDocument(details) {
   var parser = new DOMParser();
   var doc = parser.parseFromString(details, 'text/html');
   return doc;
-}
-
-export function formatDateTime(aDate) {
-  var yyyy = aDate.getFullYear();
-  var mon = aDate.getMonth() + 1;
-  if (mon < 10) {mon = '0' + mon;}
-  var dd = aDate.getDate();
-  if (dd < 10) {dd = '0' + dd;}
-
-  var hh = aDate.getHours();
-  if (hh < 10) {hh = '0' + hh;}
-  var mm = aDate.getMinutes();
-  if (mm < 10) {mm = '0' + mm;}
-  var ss = aDate.getSeconds();
-  if (ss < 10) {ss = '0' + ss;}
-  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
 export function xmlhttp(theUrl, func, theCallback) {
@@ -221,7 +210,8 @@ function path(obj, aPath, def) {
 }
 
 function sortDesc(result) {
-  return calf.sortAsc ? result : -result;
+  if (calf.sortAsc) {return result;}
+  return -result;
 }
 
 export function stringSort(a, b) {
@@ -233,6 +223,13 @@ export function stringSort(a, b) {
   return sortDesc(result);
 }
 
+function intFromString(val) {
+  if (typeof val === 'string') {
+    return parseInt(val.replace(/,|#/g, ''), 10);
+  }
+  return val;
+}
+
 export function numberSort(a, b) {
   var result = 0;
   if (typeof a.type !== 'undefined') {
@@ -241,12 +238,8 @@ export function numberSort(a, b) {
   }
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
-  if (typeof valueA === 'string') {
-    valueA = parseInt(valueA.replace(/,/g, '').replace(/#/g, ''), 10);
-  }
-  if (typeof valueB === 'string') {
-    valueB = parseInt(valueB.replace(/,/g, '').replace(/#/g, ''), 10);
-  }
+  valueA = intFromString(valueA);
+  valueB = intFromString(valueB);
   result = valueA - valueB;
   return sortDesc(result);
 }

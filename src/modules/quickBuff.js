@@ -214,10 +214,26 @@ function successfull(timeStamp, buffCast, buffLog) {
   return buffLog;
 }
 
+function padZ(n) { // Native
+  var ret = n.toString();
+  if (n < 10) {ret = '0' + ret;}
+  return ret;
+}
+
+function formatDateTime(aDate) { // Native
+  var yyyy = aDate.getFullYear().toString();
+  var mon = padZ(aDate.getMonth() + 1);
+  var dd = padZ(aDate.getDate());
+  var hh = padZ(aDate.getHours());
+  var mm = padZ(aDate.getMinutes());
+  var ss = padZ(aDate.getSeconds());
+  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+}
+
 function buffResult(_buffLog) { // Native
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
-  var timeStamp = system.formatDateTime(new Date());
+  var timeStamp = formatDateTime(new Date());
   var buffsAttempted = document.getElementById('quickbuff-report')
     .innerHTML.split('<p>');
   var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
