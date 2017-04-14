@@ -13,12 +13,16 @@ function taskRunner() {
   }
 }
 
-export function add(priority, fn, args, scope) {
-  //#if _DEV  //  Not sending args as Array
+function devLog(args) {
   if (args && !Array.isArray(args)) {
     // eslint-disable-next-line no-console
     console.log('addTask Array.isArray(args)', Array.isArray(args));
   }
+}
+
+export function add(priority, fn, args, scope) {
+  //#if _DEV  //  Not sending args as Array
+  devLog(args);
   //#endif
   if (typeof fn === 'function') {
     var _scope = scope || window;
