@@ -52,17 +52,28 @@ if (needApiUpgrade) {
   }
   // Catch Security error
   if (ws === 'object') {
+    var parser = [
+      {
+        condition: 'S]',
+        result: function(value) {return value.substr(2);}
+      },
+      {
+        condition: 'N]',
+        result: function(value) {return parseInt(value.substr(2), 10);}
+      },
+      {
+        condition: 'B]',
+        result: function(value) {return value.substr(2) === 'true';}
+      }
+    ];
     window.GM_getValue = function(name, defValue) {
       var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
       if (value === null || typeof value === 'undefined') {return defValue;}
-      switch (value.substr(0, 2)) {
-      case 'S]':
-        return value.substr(2);
-      case 'N]':
-        return parseInt(value.substr(2), 10);
-      case 'B]':
-        return value.substr(2) === 'true';
-      // no default
+      var index = 0;
+      while (index < parser.length) {
+        var test = parser[index];
+        if (value.substr(0, 2) === test.condition) {return test.result(value);}
+        index += 1;
       }
       return value;
     };
