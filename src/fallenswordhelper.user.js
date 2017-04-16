@@ -36,10 +36,6 @@ function fshMain() {
 
   if (typeof GM_info === 'undefined') {
     FSH.version += '_native';
-  } else if (typeof GM_info.script === 'undefined') {
-    FSH.version += '_noScript';
-  } else if (typeof GM_info.script.version === 'undefined') {
-    FSH.version += '_noVersion';
   }
 
   function appendHead(o) { // native
