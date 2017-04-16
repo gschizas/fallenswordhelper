@@ -45,15 +45,14 @@ function rowColor(aRow, logScreen, dateColumn) { // Legacy
   }
 }
 
-export function addLogColoring(logScreen, dateColumn) { // Legacy
-  if (!system.getValue('enableLogColoring')) {return;}
-  var chatTable = findChatTable();
-  if (!chatTable) {return;}
+function getLastCheck(lastCheckScreen) {
+  return system.getValue(lastCheckScreen) || nowUtc;
+}
 
+function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   nowUtc = (new Date()).getTime();
   var lastCheckScreen = 'last' + logScreen + 'Check';
-  lastCheckUtc = system.getValue(lastCheckScreen) || nowUtc;
-
+  lastCheckUtc = getLastCheck(lastCheckScreen);
   var increment = 2;
   if (logScreen === 'Chat') {
     increment = 4;
@@ -65,8 +64,15 @@ export function addLogColoring(logScreen, dateColumn) { // Legacy
   system.setValue(lastCheckScreen, Date.now());
 }
 
+export function addLogColoring(logScreen, dateColumn) { // Legacy
+  if (!system.getValue('enableLogColoring')) {return;}
+  var chatTable = findChatTable();
+  if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
+}
+
 function addChatTextArea() { // jQuery
-  if (!system.getValue('enhanceChatTextEntry')) {return;}
+  if (!system.getValue('enhanceChatTextEntry') ||
+      !layout.pCC) {return;}
   $('#pCC form').first().attr('id', 'dochat');
   $('#pCC input').slice(0, 7).each(function(i, e) {
     $(e).attr('form', 'dochat');
@@ -312,12 +318,9 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   aRow.cells[2].innerHTML += extraText;
 }
 
-function processLogWidgetRow(aRow) { // Legacy
+function doLogWidgetRow(aRow, messageType) { // Legacy
   var playerElement;
   var playerName;
-  // Valid Types: General, Chat, Guild
-  var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
-  if (!messageType) {return;}
   var colorPlayerName = false;
   if (messageType === 'Chat') {
     playerElement = aRow.cells[2].firstChild;
@@ -328,8 +331,8 @@ function processLogWidgetRow(aRow) { // Legacy
       messageType === 'Notification') &&
       aRow.cells[2].firstChild.nextSibling &&
       aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling.getAttribute('href')
-        .search('player_id') !== -1) {
+      aRow.cells[2].firstChild.nextSibling
+        .getAttribute('href').search('player_id') !== -1) {
     playerElement = aRow.cells[2].firstChild.nextSibling;
     playerName = playerElement.innerHTML;
     colorPlayerName = true;
@@ -340,10 +343,16 @@ function processLogWidgetRow(aRow) { // Legacy
       aRow.cells[2].firstChild.nextSibling &&
       aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
       aRow.cells[2].firstChild.nextSibling
-      .getAttribute('href').search('player_id') !== -1) {
+        .getAttribute('href').search('player_id') !== -1) {
     addExtraStuff(aRow, playerName, isGuildMate);
   }
   addPvpSummary(aRow, messageType);
+}
+
+function processLogWidgetRow(aRow) { // Legacy
+  // Valid Types: General, Chat, Guild
+  var messageType = aRow.cells[0].firstChild.getAttribute('oldtitle');
+  if (messageType) {doLogWidgetRow(aRow, messageType);}
 }
 
 function addLogWidgetsOld() { // Legacy

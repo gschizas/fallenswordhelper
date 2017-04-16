@@ -1,4 +1,5 @@
 import perfFilter from './common/perfFilter';
+import * as layout from './support/layout';
 import * as system from './support/system';
 
 function cancelAllAH() { // jQuery
@@ -27,6 +28,7 @@ function cancelAllAH() { // jQuery
 }
 
 export function injectAuctionHouse() { // Native
+  if (!layout.pCC) {return;}
   if (system.getValue('autoFillMinBidPrice')) {
     document.getElementById('auto-fill').checked = true;
   }

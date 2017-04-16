@@ -170,7 +170,7 @@ export default {
   },
   potionbazaar: {'-': {'-': {'-': {'-': bazaar.injectBazaar}}}},
   marketplace: {createreq: {'-': {'-': {'-': misc.addMarketplaceWidgets}}}},
-  quickbuff: {'-': {'-': {'-': {'-': quickBuff.injectQuickBuff}}}},
+  quickbuff: {'-': {'-': {'-': {'-': quickBuff.injectQuickBuff}}}}, // No ga
   notepad: {
     showlogs: {'-': {'-': {'-': combatLog.injectNotepadShowLogs}}},
     invmanagernew: {'-': {'-': {'-': inventory.injectInventoryManagerNew}}},
