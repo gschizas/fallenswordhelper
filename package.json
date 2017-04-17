@@ -28,7 +28,7 @@
     "rollup:prodfsh": "rollup -c --environment FOLDER:prod,SOURCE:fsh",
     "serve": "run-p watch ws",
     "silence": "npm config set loglevel silent",
-    "test": "npm run jshint",
+    "test": "npm run eslint",
     "uglify": "npm run uglify:dev && npm run uglify:beta && npm run uglify:prod",
     "uglify:beta": "uglifyjs dist/beta/calfSystem.js --stats -m -c -o dist/beta/calfSystem.min.js",
     "uglify:dev": "uglifyjs dist/dev/calfSystem.js --stats -m -c -o dist/dev/calfSystem.min.js",
