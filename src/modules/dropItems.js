@@ -99,25 +99,49 @@ function afterbegin(o, item) { // Native
   o.injectHere.insertAdjacentHTML('afterbegin', pattern);
 }
 
-function beforeend(o, item) { // Native
-  var pattern = '';
-  if (!checkAll && itemsHash[item.item_id] !== 1) {
-    pattern += ' [<span linkto="' + item.item_id +
-      '" class="fshLink">Check all</span>]';
+var buildTrailer = [
+  {
+    condition: function(item) {
+      return !checkAll && itemsHash[item.item_id] !== 1;
+    },
+    result: function(o, item) {
+      return ' [<span linkto="' + item.item_id +
+        '" class="fshLink">Check all</span>]';
+    }
+  },
+  {
+    condition: function(item) {
+      return !sendLinks && showQuickSendLinks && !item.bound;
+    },
+    result: function(o) {
+      return ' <span class="quickAction sendLink tip-static" ' +
+        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
+        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
+    }
+  },
+  {
+    condition: function(item) {
+      return !dropLinks && showQuickDropLinks && item.guild_tag === '-1';
+    },
+    result: function(o) {
+      return ' <span class="quickAction dropLink tip-static" itemInvId="' +
+        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
+        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
+    }
   }
+];
+
+function beforeend(o, item) { // Native
   if (!colouring && !disableItemColoring) {
     o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
   }
-  if (!sendLinks && showQuickSendLinks && !item.bound) {
-    pattern += ' <span class="quickAction sendLink tip-static" ' +
-      'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
-      'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
-  }
-  if (!dropLinks && showQuickDropLinks && item.guild_tag === '-1') {
-    pattern += ' <span class="quickAction dropLink tip-static" itemInvId="' +
-      o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
-      'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
-  }
+  var pattern = buildTrailer.reduce(function(prev, el) {
+    var ret = prev;
+    if (el.condition(item)) {
+      ret += el.result(o, item);
+    }
+    return ret;
+  }, '');
   if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
 }
 

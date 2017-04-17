@@ -136,29 +136,39 @@ function evtHdl(evt) { // Native
   }
 }
 
+function makeHeaderClickable(row) { // Native
+  if (collapseNewsArchive) {row.classList.add('fshPoint');}
+}
+
+function collapseDuringAnalysis(row, thisArticle) { // Native
+  if (collapseNewsArchive) {
+    row.classList.add('fshHide');
+    thisArticle.open = false;
+  } else {
+    thisArticle.open = true;
+  }
+}
+
+function testRowType(row, rowType, thisArticle) { // Native
+  if (rowType === 0) {
+    thisArticle.header = row;
+    makeHeaderClickable(row);
+  } // TODO toggle this
+  if (rowType > 1) {
+    thisArticle.rows[rowType] =
+      system.newMember(thisArticle[rowType]);
+    thisArticle.rows[rowType].row = row;
+    collapseDuringAnalysis(row, thisArticle);
+  }
+}
+
 function doTagging(row) { // Native
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
   warehouse[articleNo] = system.newMember(warehouse[articleNo]);
   var thisArticle = warehouse[articleNo];
   thisArticle.rows = thisArticle.rows || [];
-  if (rowType === 0) {
-    thisArticle.header = row;
-    if (collapseNewsArchive) {
-      row.classList.add('fshPoint');
-    }
-  } // TODO toggle this
-  if (rowType > 1) {
-    thisArticle.rows[rowType] =
-      system.newMember(thisArticle[rowType]);
-    thisArticle.rows[rowType].row = row;
-    if (collapseNewsArchive) {
-      thisArticle.open = false;
-      row.classList.add('fshHide');
-    } else {
-      thisArticle.open = true;
-    }
-  }
+  testRowType(row, rowType, thisArticle);
 }
 
 function toggleHeaderClass() {

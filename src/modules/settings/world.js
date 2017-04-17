@@ -10,19 +10,19 @@ function worldGroup() {
     'Enabling this option will hide the Create Group button') +
     ':</td><td>' +
     '<input name="hideChampionsGroup" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('hideChampionsGroup')) + '>' +
+      system.isChecked(system.getValue('hideChampionsGroup')) + '>' +
     '&nbsp;Champions&nbsp;&nbsp;' +
     '<input name="hideElitesGroup" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('hideElitesGroup')) + '>' +
+      system.isChecked(system.getValue('hideElitesGroup')) + '>' +
     '&nbsp;Elites&nbsp;&nbsp;' +
     '<input name="hideSEGroup" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('hideSEGroup')) + '>' +
+      system.isChecked(system.getValue('hideSEGroup')) + '>' +
     '&nbsp;Super Elite&nbsp;&nbsp;' +
     '<input name="hideTitanGroup" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('hideTitanGroup')) + '>' +
+      system.isChecked(system.getValue('hideTitanGroup')) + '>' +
     '&nbsp;Titan&nbsp;&nbsp;' +
     '<input name="hideLegendaryGroup" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('hideLegendaryGroup')) + '>' +
+      system.isChecked(system.getValue('hideLegendaryGroup')) + '>' +
     '&nbsp;Legendary' +
     '</td></tr>';
 }
@@ -62,7 +62,7 @@ function huntBuff() {
 function huntBuffCheck() {
   return '<input name="showHuntingBuffs" ' +
     'class="fshVMid" type="checkbox" value="on"' +
-    settingsPage.isChecked(calf.showBuffs) + '>';
+    system.isChecked(calf.showBuffs) + '>';
 }
 
 export function huntMode() {
@@ -101,7 +101,7 @@ export function prefs() {
       'Save combat logs to a temporary variable. ' +
       'Press <u>Show logs</u> on the right to display and copy them') +
       ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('keepLogs')) + '>&nbsp;&nbsp;' +
+      system.isChecked(system.getValue('keepLogs')) + '>&nbsp;&nbsp;' +
       '<input type="button" class="custombutton" value="Show Logs" ' +
       'id="Helper:ShowLogs"></td></tr>' +
 
@@ -116,7 +116,7 @@ export function prefs() {
       'This will show the creature log for each creature you see when ' +
       'you travel.') +
       ':</td><td><input name="showMonsterLog" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('showMonsterLog')) + '>' +
+      system.isChecked(system.getValue('showMonsterLog')) + '>' +
       '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
       'value="Show" id="Helper:ShowMonsterLogs"></td></tr>' +
 
@@ -125,7 +125,7 @@ export function prefs() {
       'This will show an icon below the world map to allow you to ' +
       'quickly send gold to a Friend.') +
       ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('sendGoldonWorld')) + '>' +
+      system.isChecked(system.getValue('sendGoldonWorld')) + '>' +
       '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
       system.getValue('goldAmount') + '"> ' +
       'gold to <input name="goldRecipient" size="10" value="' +

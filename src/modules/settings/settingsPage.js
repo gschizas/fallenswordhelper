@@ -33,13 +33,8 @@ function hasNetwork(o) { // Native
   return '';
 }
 
-export function isChecked(pref) { // Native
-  if (pref) {return ' checked';}
-  return '';
-}
-
 function isOn(o) { // Native
-  return isChecked(system.getValue(o.id));
+  return system.isChecked(system.getValue(o.id));
 }
 
 function justLabel(name) {

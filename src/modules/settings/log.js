@@ -33,14 +33,14 @@ export function prefs() {
       '(will work on Firefox 3.5+ only)') +
       ':</td><td><input name="playNewMessageSound" type="checkbox" ' +
       'value="on"' +
-      settingsPage.isChecked(system.getValue('playNewMessageSound')) + '>' +
+      system.isChecked(system.getValue('playNewMessageSound')) + '>' +
       ' Show speaker on world' +
       settingsPage.helpLink('Show speaker on world',
       'Should the toggle play sound speaker show on the world map? ' +
       '(This icon is next to the Fallensword wiki icon and will only ' +
       'display on Firefox 3.5+)') +
       ':<input name="showSpeakerOnWorld" type="checkbox" value="on"' +
-      settingsPage.isChecked(system.getValue('showSpeakerOnWorld')) +
+      system.isChecked(system.getValue('showSpeakerOnWorld')) +
       '></tr></td>' +
 
     settingsPage.simpleCheckbox('enableChatParsing') +

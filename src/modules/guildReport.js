@@ -16,19 +16,23 @@ var nodeList;
 var findUser;
 var foundUser;
 
+function hideOther(el) { // Native
+  if (el.firstChild.hasAttribute('bgcolor')) {
+    if (el.firstChild.firstElementChild.textContent === findUser) {
+      foundUser = true;
+    } else {foundUser = false;}
+  }
+  if (!foundUser) {
+    el.className = 'fshHide';
+  }
+}
+
 function hideOthers() { // Native
   var limit = performance.now() + 5;
   while (performance.now() < limit && counter < nodeList.length) {
     var el = nodeList[counter];
 
-    if (el.firstChild.hasAttribute('bgcolor')) {
-      if (el.firstChild.firstElementChild.textContent === findUser) {
-        foundUser = true;
-      } else {foundUser = false;}
-    }
-    if (!foundUser) {
-      el.className = 'fshHide';
-    }
+    hideOther(el);
 
     counter += 1;
   }

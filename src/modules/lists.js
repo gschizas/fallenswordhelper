@@ -11,9 +11,8 @@ function itemRow(item) {
     var itemField = item[param.fields[j]];
     if (param.fields[j] === param.categoryField) {continue;}
     if (param.tags[j] === 'checkbox') {
-      var checked = '';
-      if (itemField) {checked = 'checked';}
-      result += '<input type="checkbox" ' + checked + ' disabled>';
+      result += '<input type="checkbox"' + system.isChecked(itemField) +
+        ' disabled>';
     } else if (param.url && param.url[j] !== '') {
       result += '<a href="' + param.url[j].replace('@replaceme@', itemField) +
         '">' + itemField + '</a>';

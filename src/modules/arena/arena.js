@@ -88,22 +88,23 @@ function filterHeader() { // jQuery
 
 }
 
-function invalidInput() {
-  if (!opts ||
-      !opts.minLvl ||
-      !opts.maxLvl) {return true;}
-  return false;
-}
+var doLvlFilter = [
+  function(min) {return !min;},
+  function(min, max) {return !max;},
+  function(min, max) {return isNaN(min) && isNaN(max);},
+  function(min, max, level) {return isNaN(min) && level <= max;},
+  function(min, max, level) {return min <= level && isNaN(max);},
+  function(min, max, level) {return min <= level && level <= max;}
+];
 
 function lvlFilter(_settings, data) { // jQuery
-  if (invalidInput()) {return true;}
+  if (!opts) {return true;}
   var min = opts.minLvl;
   var max = opts.maxLvl;
   var level = system.intValue(data[7]);
-  if (isNaN(min) && isNaN(max) ||
-    isNaN(min) && level <= max ||
-    min <= level && isNaN(max) ||
-    min <= level && level <= max) {return true;}
+  for (var i = 0; i < doLvlFilter.length; i += 1) {
+    if (doLvlFilter[i](min, max, level)) {return true;}
+  }
   return false;
 }
 

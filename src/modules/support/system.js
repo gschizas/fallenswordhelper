@@ -284,3 +284,8 @@ export function shouldBeArray(pref) { // Native
   if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
   return [];
 }
+
+export function isChecked(pref) { // Native
+  if (pref) {return ' checked';}
+  return '';
+}

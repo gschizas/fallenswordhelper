@@ -16,23 +16,23 @@ export function prefs() {
       '(coloring on the Guild Info panel)') + ':</label></td><td>' +
       '<input id="enableGuildInfoWidgets" name="enableGuildInfoWidgets" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.enableGuildInfoWidgets) +
+      system.isChecked(calf.enableGuildInfoWidgets) +
       '>&nbsp;' +
       '<label>Hide Message&gt;<input name="hideGuildInfoMessage" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.hideGuildInfoMessage) +
+      system.isChecked(calf.hideGuildInfoMessage) +
       '></label>&nbsp;' +
       '<label>Hide Buff&gt;<input name="hideGuildInfoBuff" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.hideGuildInfoBuff) +
+      system.isChecked(calf.hideGuildInfoBuff) +
       '></label>&nbsp;' +
       '<label>Hide ST&gt;<input name="hideGuildInfoSecureTrade" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.hideGuildInfoSecureTrade) +
+      system.isChecked(calf.hideGuildInfoSecureTrade) +
       '></label>&nbsp;' +
       '<label>Hide Trade&gt;<input name="hideGuildInfoTrade" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.hideGuildInfoTrade) +
+      system.isChecked(calf.hideGuildInfoTrade) +
       '></label></td></tr>' +
 
     settingsPage.simpleCheckbox('moveGuildList') +
@@ -44,10 +44,10 @@ export function prefs() {
       'This will show the allies/enemies online list on the right.') +
       ':</td><td><label>Allies&nbsp;<input name="enableAllyOnlineList" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.enableAllyOnlineList) +
+      system.isChecked(calf.enableAllyOnlineList) +
       '></label>&nbsp;&nbsp;<label>Enemies&nbsp;' +
       '<input name="enableEnemyOnlineList" type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.enableEnemyOnlineList) +
+      system.isChecked(calf.enableEnemyOnlineList) +
       '></label>&nbsp;&nbsp;' +
       '<input name="allyEnemyOnlineRefreshTime" size="3" value="' +
       system.getValue('allyEnemyOnlineRefreshTime') +

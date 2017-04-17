@@ -1,6 +1,7 @@
 import calf from '../support/calf';
 import * as settingObj from './settingObj';
 import * as settingsPage from './settingsPage';
+import * as system from '../support/system';
 
 export function prefs() {
   // Bounty hunting prefs
@@ -13,7 +14,7 @@ export function prefs() {
       'This will show your active bounties on the right hand side') +
       ':</td><td colspan="3"><input name="enableActiveBountyList" ' +
       'type = "checkbox" value = "on"' +
-      settingsPage.isChecked(calf.enableActiveBountyList) + '>&nbsp;' +
+      system.isChecked(calf.enableActiveBountyList) + '>&nbsp;' +
       '<input name="bountyListRefreshTime" size="3" value="' +
       calf.bountyListRefreshTime + '"> seconds refresh</td></tr>' +
 
@@ -24,7 +25,7 @@ export function prefs() {
       'the list is displayed on the right hand side') +
       ':</td><td colspan="3"><input name="enableWantedList" ' +
       'type="checkbox" value="on"' +
-      settingsPage.isChecked(calf.enableWantedList) +
+      system.isChecked(calf.enableWantedList) +
       '> Refresh time is same as Active Bounties' +
 
     '<tr><td align= "right">Wanted Names' +

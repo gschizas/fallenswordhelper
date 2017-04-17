@@ -28,6 +28,29 @@ function guildXPLock() { // Native
   }
 }
 
+function calcLvlToTest() { // Native
+  var levelToTest = system.intValue(document.getElementsByClassName(
+    'stat-level')[0].nextElementSibling.textContent);
+  var characterVirtualLevel = system.getValue('characterVirtualLevel');
+  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
+  return levelToTest;
+}
+
+function calcPvpRange(levelToTest) { // Native
+  if (levelToTest <= 205) {return 5;}
+  return 10;
+}
+
+function calcGvgRange(levelToTest) { // Native
+  if (levelToTest <= 300) {
+    return 25;
+  }
+  if (levelToTest <= 700) {
+    return 50;
+  }
+  return 100;
+}
+
 export function injectViewGuild() { // Native
   task.add(3, layout.colouredDots);
   removeGuildAvyImgBorder();
@@ -37,30 +60,21 @@ export function injectViewGuild() { // Native
   var highlightGvGPlayersNearMyLvl =
     system.getValue('highlightGvGPlayersNearMyLvl');
   if (!highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl) {return;}
-  var levelToTest = system.intValue(document.getElementsByClassName(
-    'stat-level')[0].nextElementSibling.textContent);
-  var characterVirtualLevel = system.getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  var pvpRange;
-  if (levelToTest <= 205) {pvpRange = 5;} else {pvpRange = 10;}
-  var gvgRange;
-  if (levelToTest <= 300) {
-    gvgRange = 25;
-  } else if (levelToTest <= 700) {
-    gvgRange = 50;
-  } else {gvgRange = 100;}
+  var levelToTest = calcLvlToTest();
+  var pvpRange = calcPvpRange(levelToTest);
+  var gvgRange = calcGvgRange(levelToTest);
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
     var tipped = el.getAttribute('data-tipped');
     var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
     var aRow = el.parentNode.parentNode;
-    if (highlightPlayersNearMyLvl) {
-      if (Math.abs(vlevel - levelToTest) <= pvpRange) {
-        aRow.classList.add('lvlHighlight');
-      } else if (Math.abs(vlevel - levelToTest) <= gvgRange) {
-        aRow.classList.add('lvlGvGHighlight');
-      }
+    if (highlightPlayersNearMyLvl &&
+        Math.abs(vlevel - levelToTest) <= pvpRange) {
+      aRow.classList.add('lvlHighlight');
+    } else if (highlightGvGPlayersNearMyLvl &&
+        Math.abs(vlevel - levelToTest) <= gvgRange) {
+      aRow.classList.add('lvlGvGHighlight');
     }
   });
 }

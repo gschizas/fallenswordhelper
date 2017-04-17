@@ -13,6 +13,7 @@ var showPvPSummaryInLog;
 var playerId;
 var nowUtc;
 var lastCheckUtc;
+var nickList;
 
 function findChatTable() { // Legacy
   var chatTable = system.findNode('//table[@class="width_full"]'); // Guild Log
@@ -117,26 +118,30 @@ function reportIgnore(aRow, isGuildMate, playerName) { // Legacy
     dateLastPart;
 }
 
+function buildNickList() {// Native
+  nickList = buffList.reduce(function(prev, curr) {
+    var ret = prev;
+    var nicks = curr.nicks.split(',');
+    nicks.forEach(function(el) {
+      var nick = el.toLowerCase();
+      ret[nick] = curr.skillId;
+    });
+    return ret;
+  }, {});
+}
+
 function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
   var quickBuff = '';
-  var buffsSent = _buffsSent[0].replace('`~', '').replace('~`', '').split(',');
-  for (var j = 0; j < buffsSent.length; j += 1) {
-    for (var m = 0; m < buffList.length; m += 1) {
-      var nicks = buffList[m].nicks.split(',');
-      var exitOuter = false;
-      for (var k = 0; k < nicks.length; k += 1) {
-        if (buffsSent[j].toLowerCase().trim() ===
-            nicks[k].toLowerCase().trim()) {
-          quickBuff += m + ';';
-          exitOuter = true;
-          break;
-        }
-      }
-      if (exitOuter) {
-        break;
-      }
+  var buffsSent = _buffsSent[0].replace('`~', '').replace('~`', '')
+    .split(/\s*,\s*/);
+  buffsSent.reduce(function(prev, el) {
+    var ret = prev;
+    var nick = el.toLowerCase();
+    if (nickList[nick]) {
+      ret += nickList[nick].toString() + ';';
     }
-  }
+    return ret;
+  }, '');
   return ' | <a ' + layout.quickBuffHref(targetPlayerID, quickBuff) +
       '>Buff</a></span>';
 }
@@ -356,6 +361,7 @@ function processLogWidgetRow(aRow) { // Legacy
 }
 
 function addLogWidgetsOld() { // Legacy
+  buildNickList();
   addAttackLinkToLog = system.getValue('addAttackLinkToLog');
   var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
     '(.,"Currently showing:")]]');

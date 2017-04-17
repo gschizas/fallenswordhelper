@@ -96,25 +96,24 @@ export function parseTemplePage(responseText) { // Native
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
 }
 
+function checkLastUpdate(templeAlertLastUpdate) { // Native
+  return !templeAlertLastUpdate ||
+    Date.now() > templeAlertLastUpdate;
+}
+
+function doWeNeedToParse() { // Native
+  if (checkLastUpdate(system.getValue('lastTempleCheck'))) {return true;}
+  if (system.getValue('needToPray')) {
+    displayDisconnectedFromGodsMessage();
+  }
+  return false;
+}
+
 export function injectTempleAlert() { // jQuery
   // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
-  var templeAlertLastUpdate = system.getValue('lastTempleCheck');
-  var needToPray = system.getValue('needToPray');
-  var needToParse = false;
-  if (templeAlertLastUpdate) {
-    if (Date.now() > templeAlertLastUpdate) { // midnight
-      needToParse = true;
-    } else if (needToPray) {
-      displayDisconnectedFromGodsMessage();
-    }
-  } else {
-    needToParse = true;
-  }
-  if (needToParse) {
-    $.get('index.php?cmd=temple', function(responseText) {
-      task.add(3, parseTemplePage, [responseText]);
-    });
+  if (doWeNeedToParse()) {
+    $.get('index.php?cmd=temple', parseTemplePage);
   }
 }
 

@@ -168,24 +168,30 @@ function getTarget(target, theRow) {
   wantedList.bounty.push(bounty);
 }
 
-function getWantedBountyList(doc) { // Legacy
-  var page = system.findNode('//input[@name="page"]', doc, $('body'));
-  curPage = parseInt(page.value, 10);
-  maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
-  var activeTable = system.findNode('//table[@width = "630" and ' +
-    'contains(.,"Target")]', doc);
-  if (!activeTable) {return;}
+function wantedTarget(target, theRow, el) {
+  if (target === el.trim() ||
+      wantedArray.indexOf('*') !== -1) {
+    getTarget(target, theRow);
+  }
+}
+
+function findTarget(activeTable) {
   for (var i = 1; i < activeTable.rows.length - 2; i += 2) {
     var theRow = activeTable.rows[i];
     var target = theRow.cells[0].firstChild
       .firstChild.firstChild.textContent;
     if (target === '[ No bounties available. ]') {break;}
-    for (var j = 0; j < wantedArray.length; j += 1) {
-      if (target !== wantedArray[j].trim() &&
-          wantedArray.indexOf('*') === -1) {continue;}
-      getTarget(target, theRow);
-    }
+    wantedArray.forEach(wantedTarget.bind(null, target, theRow));
   }
+}
+
+function getWantedBountyList(doc) { // Legacy
+  var page = system.findNode('//input[@name="page"]', doc);
+  curPage = parseInt(page.value, 10);
+  maxPage = page.parentNode.innerHTML.match(/of&nbsp;(\d*)/)[1];
+  var activeTable = system.findNode('//table[@width = "630" and ' +
+    'contains(.,"Target")]', doc);
+  if (activeTable) {findTarget(activeTable);}
 }
 
 function getActiveBountyList(doc) { // Legacy
@@ -261,28 +267,49 @@ function invalidateCache() { // Legacy
   }
 }
 
+function doRefresh() { // Legacy
+  wantedList = {};
+  wantedList.bounty = [];
+  wantedList.isRefreshed = true;
+  wantedList.lastUpdate = new Date();
+  wantedList.wantedBounties = false;
+  activeBountyListPosted = false;
+  wantedNames = system.getValue('wantedNames');
+  wantedArray = wantedNames.split(',');
+  system.xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
+  system.setValue('bwNeedsRefresh', false);
+}
+
+function notRefreshed(enableActiveBountyList, enableWantedList) { // Native
+  if (enableWantedList) {
+    wantedList.isRefreshed = false;
+    injectWantedList(wantedList);
+  }
+  if (enableActiveBountyList) {
+    bountyList.isRefreshed = false;
+    injectBountyList(bountyList);
+  }
+}
+
+var testConditions = [
+  function() {return !bountyList;},
+  function() {return !wantedList;},
+  function() {return bwNeedsRefresh;}
+];
+
+function testForRefresh() {
+  for (var i = 0; i < testConditions.length; i += 1) {
+    if (testConditions[i]()) {return true;}
+  }
+  return false;
+}
+
 function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legacy
   invalidateCache();
-  if (!bountyList || !wantedList || bwNeedsRefresh) {
-    wantedList = {};
-    wantedList.bounty = [];
-    wantedList.isRefreshed = true;
-    wantedList.lastUpdate = new Date();
-    wantedList.wantedBounties = false;
-    activeBountyListPosted = false;
-    wantedNames = system.getValue('wantedNames');
-    wantedArray = wantedNames.split(',');
-    system.xmlhttp('index.php?cmd=bounty&page=1', parseBountyPageForWorld);
-    system.setValue('bwNeedsRefresh', false);
+  if (testForRefresh()) {
+    doRefresh();
   } else {
-    if (enableWantedList) {
-      wantedList.isRefreshed = false;
-      injectWantedList(wantedList);
-    }
-    if (enableActiveBountyList) {
-      bountyList.isRefreshed = false;
-      injectBountyList(bountyList);
-    }
+    notRefreshed(enableActiveBountyList, enableWantedList);
   }
 }
 

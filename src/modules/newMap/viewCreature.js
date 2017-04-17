@@ -3,6 +3,41 @@ import calf from '../support/calf';
 import * as common from '../common/common';
 import * as system from '../support/system';
 
+function calcAttack(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupAttackValue;
+  }
+  return combat.player.attackValue;
+}
+
+function calcDef(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupDefenseValue;
+  }
+  return combat.player.defenseValue;
+}
+
+function calcArm(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupArmorValue;
+  }
+  return combat.player.armorValue;
+}
+
+function calcDmg(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupDamageValue;
+  }
+  return combat.player.damageValue;
+}
+
+function calcHp(combat) { // Native
+  if (combat.callback.groupExists) {
+    return combat.callback.groupHPValue;
+  }
+  return combat.player.hpValue;
+}
+
 function getBiasGeneral(combat) { // Native
   if (assets.bias[combat.combatEvaluatorBias]) {
     return assets.bias[combat.combatEvaluatorBias].generalVariable;
@@ -113,54 +148,37 @@ function evalExtraBuffs(combat) { // Native
   return combat;
 }
 
+function calcHitByHowMuch(combat) { // Native
+  var remainingDef = combat.creature.defense - combat.creature.defense *
+    combat.player.darkCurseLevel * 0.002;
+  if (combat.combatEvaluatorBias === 3) {
+    return combat.overallAttackValue - Math.ceil(remainingDef) - 50;
+  }
+  return combat.overallAttackValue -
+    Math.ceil(combat.attackVariable * remainingDef);
+}
+
 function evalAttack(combat) { // Native
+  var atkValue = calcAttack(combat);
   // Attack:
-  combat.extraNotes += combat.player.darkCurseLevel > 0 ?
-    'DC Bonus Attack = ' + Math.floor(combat.creature.defense *
-    combat.player.darkCurseLevel * 0.002) + '<br>' : '';
+  if (combat.player.darkCurseLevel > 0) {
+    combat.extraNotes += 'DC Bonus Attack = ' +
+      Math.floor(combat.creature.defense *
+      combat.player.darkCurseLevel * 0.002) + '<br>';
+  }
   combat.nightmareVisageAttackMovedToDefense =
-    Math.floor(((combat.callback.groupExists ?
-    combat.callback.groupAttackValue : combat.player.attackValue) +
+    Math.floor((atkValue +
     combat.counterAttackBonusAttack) *
     combat.player.nightmareVisageLevel * 0.0025);
-  combat.extraNotes += combat.player.nightmareVisageLevel > 0 ?
-    'NMV Attack moved to Defense = ' +
-    combat.nightmareVisageAttackMovedToDefense + '<br>' : '';
-  combat.overallAttackValue = (combat.callback.groupExists ?
-    combat.callback.groupAttackValue : combat.player.attackValue) +
+  if (combat.player.nightmareVisageLevel > 0) {
+    combat.extraNotes += 'NMV Attack moved to Defense = ' +
+      combat.nightmareVisageAttackMovedToDefense + '<br>';
+  }
+  combat.overallAttackValue = atkValue +
     combat.counterAttackBonusAttack -
     combat.nightmareVisageAttackMovedToDefense;
-  combat.hitByHowMuch = combat.overallAttackValue -
-    Math.ceil(combat.attackVariable * (combat.creature.defense -
-    combat.creature.defense * combat.player.darkCurseLevel * 0.002));
-  if (combat.combatEvaluatorBias === 3) {
-    combat.hitByHowMuch = combat.overallAttackValue - Math.ceil(
-      combat.creature.defense - combat.creature.defense *
-      combat.player.darkCurseLevel * 0.002
-    ) - 50;
-  }
+  combat.hitByHowMuch = calcHitByHowMuch(combat);
   return combat;
-}
-
-function calcHp(combat) { // Native
-  if (combat.callback.groupExists) {
-    return combat.callback.groupHPValue;
-  }
-  return combat.player.hpValue;
-}
-
-function calcDmg(combat) { // Native
-  if (combat.callback.groupExists) {
-    return combat.callback.groupDamageValue;
-  }
-  return combat.player.damageValue;
-}
-
-function calcDef(combat) { // Native
-  if (combat.callback.groupExists) {
-    return combat.callback.groupDefenseValue;
-  }
-  return combat.player.defenseValue;
 }
 
 function evalDamage(combat) { // Native
@@ -245,28 +263,42 @@ function evalDefence(combat) { // Native
 }
 
 function evalArmour(combat) { // Native
-  combat.overallArmorValue = (combat.callback.groupExists ?
-    combat.callback.groupArmorValue : combat.player.armorValue) +
+  var armorVal = calcArm(combat);
+  combat.overallArmorValue = armorVal +
     Math.floor(combat.player.armorValue *
     combat.player.sanctuaryLevel * 0.001);
-  combat.extraNotes += combat.player.sanctuaryLevel > 0 ?
-    'Sanc Bonus Armor = ' + Math.floor(combat.player.armorValue *
-    combat.player.sanctuaryLevel * 0.001) + '<br>' : '';
+
+  if (combat.player.sanctuaryLevel > 0) {
+    combat.extraNotes += 'Sanc Bonus Armor = ' +
+      Math.floor(combat.player.armorValue *
+      combat.player.sanctuaryLevel * 0.001) + '<br>';
+  }
+
   combat.terrorizeEffect = Math.floor(combat.creature.damage *
     combat.player.terrorizeLevel * 0.001);
-  combat.extraNotes += combat.player.terrorizeLevel > 0 ?
-    'Terrorize Creature Damage Effect = ' +
-    combat.terrorizeEffect * -1 + '<br>' : '';
+
+  if (combat.player.terrorizeLevel > 0) {
+    combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
+      combat.terrorizeEffect * -1 + '<br>';
+  }
+
   combat.creature.damage -= combat.terrorizeEffect;
   combat.creatureDamageDone = Math.ceil(combat.generalVariable *
     combat.creature.damage - combat.overallArmorValue +
     combat.overallHPValue);
-  combat.numberOfCreatureHitsTillDead =
-    combat.creatureHitByHowMuch >= 0 ?
-    Math.ceil(combat.overallHPValue / (combat.generalVariable *
-    combat.creature.damage < combat.overallArmorValue ? 1 :
-    combat.generalVariable * combat.creature.damage -
-    combat.overallArmorValue)) : '-';
+
+  if (combat.creatureHitByHowMuch >= 0) {
+    var approxDmg = combat.generalVariable * combat.creature.damage;
+    if (approxDmg < combat.overallArmorValue) {
+      combat.numberOfCreatureHitsTillDead = combat.overallHPValue;
+    } else {
+      combat.numberOfCreatureHitsTillDead = Math.ceil(
+        combat.overallHPValue / (approxDmg - combat.overallArmorValue));
+    }
+  } else {
+    combat.numberOfCreatureHitsTillDead = '-';
+  }
+
   return combat;
 }
 

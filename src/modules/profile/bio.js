@@ -14,23 +14,7 @@ function expandBio() { // Native
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
-function compressBio(bioCell) { // Native
-  var bioContents = bioCell.innerHTML;
-  var maxCharactersToShow = system.getValue('maxCompressedCharacters');
-  var maxRowsToShow = system.getValue('maxCompressedLines');
-  var numberOfLines = bioContents.substr(0, maxCharactersToShow)
-    .split(/<br>\n/).length - 1;
-  if (bioContents.length <= maxCharactersToShow &&
-      numberOfLines < maxRowsToShow) {return;}
-  if (numberOfLines >= maxRowsToShow) {
-    var startIndex = 0;
-    while (maxRowsToShow > 0) {
-      maxRowsToShow -= 1;
-      startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
-    }
-    maxCharactersToShow = startIndex;
-  }
-
+function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
   // find the end of next HTML tag after the max characters to show.
   var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
   var lineBreak = '';
@@ -61,6 +45,25 @@ function compressBio(bioCell) { // Native
     .addEventListener('click', expandBio);
 }
 
+function compressBio(bioCell) { // Native
+  var bioContents = bioCell.innerHTML;
+  var maxCharactersToShow = system.getValue('maxCompressedCharacters');
+  var maxRowsToShow = system.getValue('maxCompressedLines');
+  var numberOfLines = bioContents.substr(0, maxCharactersToShow)
+    .split(/<br>\n/).length - 1;
+  if (bioContents.length <= maxCharactersToShow &&
+      numberOfLines < maxRowsToShow) {return;}
+  if (numberOfLines >= maxRowsToShow) {
+    var startIndex = 0;
+    while (maxRowsToShow > 0) {
+      maxRowsToShow -= 1;
+      startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
+    }
+    maxCharactersToShow = startIndex;
+  }
+  doCompression(bioCell, bioContents, maxCharactersToShow);
+}
+
 function getBuffsToBuy() { // Legacy
   if (buffCost.count === 0) {return;}
   var targetPlayer = layout.pCC
@@ -88,15 +91,66 @@ function getBuffsToBuy() { // Legacy
   window.openQuickMsgDialog(targetPlayer, greetingText, '');
 }
 
-function formatCost(total) {
-  var res = '';
-  if (total.fsp > 0) {res = Math.round(total.fsp * 100) / 100 + ' FSP';}
-  if (total.fsp > 0 && total.k > 0) {res += ' and ';}
-  if (total.k > 0) {res += total.k + ' k';}
-  if (total.stam > 0 && (total.fsp > 0 || total.k > 0)) {
-    res += ' and ';
+var costFormatter = [
+  {
+    condition: function(total) {
+      return total.fsp > 0;
+    },
+    result: function(total) {
+      return String(Math.round(total.fsp * 100) / 100) + ' FSP';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.fsp > 0 && total.k > 0;
+    },
+    result: function() {
+      return ' and ';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.k > 0;
+    },
+    result: function(total) {
+      return total.k + ' k';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.stam > 0 && (total.fsp > 0 || total.k > 0);
+    },
+    result: function() {
+      return ' and ';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.stam > 0;
+    },
+    result: function(total) {
+      return total.stam + ' Stam(' +
+        String(Math.round(total.stam / 25 * 10) / 10) + 'fsp)';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.unknown > 0;
+    },
+    result: function(total) {
+      return ' (' + total.unknown + ' buff(s) with unknown cost)';
+    }
   }
-  return res;
+];
+
+function formatCost(total) { // Native
+  return costFormatter.reduce(function(prev, el) {
+    var ret = prev;
+    if (el.condition(total)) {
+      ret += el.result(total);
+    }
+    return ret;
+  }, '');
 }
 
 function hazBuffs() { // Legacy
@@ -112,15 +166,7 @@ function hazBuffs() { // Legacy
       buffCost.buffs[buff][1] + '</td></tr>';
   });
 
-  var totalText = '';
-  totalText += formatCost(total);
-  if (total.stam > 0) {
-    totalText += total.stam + ' Stam(' +
-      Math.round(total.stam / 25 * 10) / 10 + 'fsp)';
-  }
-  if (total.unknown > 0) {
-    totalText += ' (' + total.unknown + ' buff(s) with unknown cost)';
-  }
+  var totalText = formatCost(total);
 
   html += '</table><b>Total: ' + totalText + '</b>';
   document.getElementById('buffCost').innerHTML = '<br/><span ' +
@@ -298,17 +344,25 @@ function renderBio(_bioContents) {
   return bioContents;
 }
 
+function doRender(bioCell) { // Native
+  var bioContents = bioCell.innerHTML;
+  bioContents = renderBio(bioContents);
+  if (bioContents) {
+    bioCell.innerHTML = bioContents;
+  }
+}
+
+function testForRender(self, bioCell) { // Native
+  if (self && system.getValue('renderSelfBio') ||
+      !self && system.getValue('renderOtherBios')) {
+    doRender(bioCell);
+  }
+}
+
 export function profileRenderBio(self) { // Native
   var bioCell = document.getElementById('profile-bio');
   if (!bioCell) {return;}
-  if (self && system.getValue('renderSelfBio') ||
-      !self && system.getValue('renderOtherBios')) {
-    var bioContents = bioCell.innerHTML;
-    bioContents = renderBio(bioContents);
-    if (bioContents) {
-      bioCell.innerHTML = bioContents;
-    }
-  }
+  testForRender(self, bioCell);
   if (system.getValue('enableBioCompressor')) {compressBio(bioCell);}
   bioCell.addEventListener('click', bioEvtHdl);
 }
