@@ -10,6 +10,7 @@ import * as system from '../support/system';
 import * as viewCreature from './viewCreature';
 import * as world from '../settings/world';
 
+var def_afterUpdateActionlist = 'after-update.actionlist';
 var huntingBuffs;
 var huntingBuffsName;
 var hideSubLvlCreature;
@@ -131,32 +132,29 @@ function interceptXHR() { // jQuery
   if (hideSubLvlCreature) {GameData.fetch(256);}
 }
 
-function hideGroupButton() { // jQuery
-  if (system.getValue('hideChampionsGroup')) {
-    $.subscribe('after-update.actionlist',
-      function() {$('#actionList li.creature-1 a.create-group').hide();});
-    $('#actionList li.creature-1 a.create-group').hide();
-  }
-  if (system.getValue('hideElitesGroup')) {
-    $.subscribe('after-update.actionlist',
-      function() {$('#actionList li.creature-2 a.create-group').hide();});
-    $('#actionList li.creature-2 a.create-group').hide();
-  }
-  if (system.getValue('hideSEGroup')) {
-    $.subscribe('after-update.actionlist',
-      function() {$('#actionList li.creature-3 a.create-group').hide();});
-    $('#actionList li.creature-3 a.create-group').hide();
-  }
-  if (system.getValue('hideTitanGroup')) {
-    $.subscribe('after-update.actionlist',
-      function() {$('#actionList li.creature-4 a.create-group').hide();});
-    $('#actionList li.creature-4 a.create-group').hide();
-  }
-  if (system.getValue('hideLegendaryGroup')) {
-    $.subscribe('after-update.actionlist',
-      function() {$('#actionList li.creature-5 a.create-group').hide();});
-    $('#actionList li.creature-5 a.create-group').hide();
-  }
+function hideGroupByType(type) { // jQuery
+  $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
+}
+
+function hideGroupSubscribe(type) { // jQuery
+  $.subscribe(def_afterUpdateActionlist, hideGroupByType.bind(null, type));
+}
+
+var hideGroupTypes = [
+  'hideChampionsGroup',
+  'hideElitesGroup',
+  'hideSEGroup',
+  'hideTitanGroup',
+  'hideLegendaryGroup'
+];
+
+function hideGroupButton() { // Native
+  hideGroupTypes.forEach(function(el, i) {
+    if (system.getValue(el)) {
+      hideGroupSubscribe(i + 1);
+      hideGroupByType(i + 1);
+    }
+  });
 }
 
 function colorType(actionList, creatureClass, colorClass) { // Native
@@ -175,7 +173,7 @@ function colorMonsters() { // jQuery
 
 function doMonsterColors() { // jQuery
   if (system.getValue('enableCreatureColoring')) {
-    $.subscribe('after-update.actionlist', colorMonsters);
+    $.subscribe(def_afterUpdateActionlist, colorMonsters);
     colorMonsters();
   }
 }
@@ -286,7 +284,7 @@ export function subscribes() { // jQuery
   setupPref();
   interceptXHR();
   doHuntingBuffs();
-  $.subscribe('after-update.actionlist', doHidePlayerActions);
+  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
   doHidePlayerActions();
   sendGold.injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
@@ -294,7 +292,7 @@ export function subscribes() { // jQuery
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
   // add do-not-kill list functionality
-  $.subscribe('after-update.actionlist', afterUpdateActionList);
+  $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
   afterUpdateActionList();
   // add monster log functionality
   monsterLog.startMonsterLog();

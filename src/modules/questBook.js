@@ -130,6 +130,14 @@ function updateLinks() { // Native
   }
 }
 
+function storeQuestPage() {
+  if (system.getValue('storeLastQuestPage')) {
+    whereAmI();
+    storeLoc();
+    updateLinks();
+  }
+}
+
 function guideButtons(questID, questName) { // Native
   return '<div class="parent">' +
     '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
@@ -144,29 +152,33 @@ function guideButtons(questID, questName) { // Native
     '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
 }
 
+function isHideQuests() {
+  if (system.getValue('hideQuests')) {
+    return system.getValue('hideQuestNames').split(',');
+  }
+  return [];
+}
+
+function doHideQuests(hideQuests, questName, aRow) {
+  if (hideQuests.indexOf(questName) >= 0) {
+    aRow.classList.add('fshHide');
+    aRow.nextElementSibling.classList.add('fshHide');
+    aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
+    aRow.nextElementSibling.nextElementSibling.nextElementSibling
+      .classList.add('fshHide');
+  }
+}
+
 export function injectQuestBookFull() { // Native
   layout.pCC.addEventListener('click', dontPost);
-  if (system.getValue('storeLastQuestPage')) {
-    whereAmI();
-    storeLoc();
-    updateLinks();
-  }
+  storeQuestPage();
   var questTable = layout.pCC.getElementsByTagName('table')[5];
   if (!questTable) {return;}
-  var hideQuests = [];
-  if (system.getValue('hideQuests')) {
-    hideQuests = system.getValue('hideQuestNames').split(',');
-  }
+  var hideQuests = isHideQuests();
   for (var i = 2; i < questTable.rows.length; i += 4) {
     var aRow = questTable.rows[i];
     var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
-    if (hideQuests.indexOf(questName) >= 0) {
-      aRow.classList.add('fshHide');
-      aRow.nextElementSibling.classList.add('fshHide');
-      aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
-      aRow.nextElementSibling.nextElementSibling.nextElementSibling
-        .classList.add('fshHide');
-    }
+    doHideQuests(hideQuests, questName, aRow);
     var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
     aRow.cells[4].innerHTML = guideButtons(questID, questName);
   }

@@ -56,6 +56,23 @@ export function injectTitan() { // jQuery
   $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
 }
 
+function getTitanString(guildKills, totalHP, currentHP) {
+  var numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
+  if (guildKills >= numberOfKillsToSecure) {
+    return 'Secured';
+  }
+  if (numberOfKillsToSecure - guildKills > currentHP) {
+    return '<span class="fshRed">Cannot Secure</span>';
+  }
+  return '<span class="fshRed">' +
+    (numberOfKillsToSecure - guildKills) + '</span> to secure';
+}
+
+function getKillsPct(currentNumberOfKills, guildKills) {
+  if (currentNumberOfKills === 0) {return 0;}
+  return guildKills * 100 / currentNumberOfKills;
+}
+
 export function injectScouttower() { // Legacy
   var titanTables = layout.pCC.getElementsByTagName('table');
   injectScouttowerBuffLinks(titanTables);
@@ -69,20 +86,10 @@ export function injectScouttower() { // Legacy
     var currentHP = parseInt(titanHPArray[0], 10);
     var totalHP = parseInt(titanHPArray[1], 10);
     var currentNumberOfKills = totalHP - currentHP;
-    var numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
-
-    var titanString = '<span style="color:red;">' +
-      (numberOfKillsToSecure - guildKills) + '</span> to secure';
-    if (guildKills >= numberOfKillsToSecure) {
-      titanString = 'Secured';
-    } else if (numberOfKillsToSecure - guildKills > currentHP) {
-      titanString = '<span style="color:red;">Cannot Secure</span>';
-    }
-    var killsPercent = (currentNumberOfKills === 0 ? 0 :
-      guildKills * 100 / currentNumberOfKills).toFixed(2);
+    var titanString = getTitanString(guildKills, totalHP, currentHP);
     var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
-    aRow.cells[3].innerHTML += '<br><span style="color:blue;"> (' +
-      killsPercent + '% Current <br>' +
-      killsTotPct + '% Total<br>' + titanString + ')';
+    aRow.cells[3].innerHTML += '<br><span class="fshBlue"> (' +
+      getKillsPct(currentNumberOfKills, guildKills).toFixed(2) +
+      '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')';
   }
 }

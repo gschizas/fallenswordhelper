@@ -542,7 +542,6 @@ function addRemoveCreatureToDoNotKillList(evt) { // Native
 }
 
 export function readyViewCreature() { // Hybrid
-
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
 

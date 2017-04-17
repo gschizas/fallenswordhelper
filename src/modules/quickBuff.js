@@ -33,17 +33,25 @@ var excludeBuff = {
 
 function getEnhancement(doc, enh, inject) { // Native
   var enhLevel = doc[enh] || 0;
-  inject.innerHTML = '<span class="' + (enhLevel < 100 ? 'fshRed' :
-    'fshLime') + '">' + enhLevel + '%</span>';
+  var enhClass = 'fshLime';
+  if (enhLevel < 100) {enhClass = 'fshRed';}
+  inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
+}
+
+function buffTimeLeft(_s) {
+  var m = Math.floor(_s / 60);
+  var s = _s % 60;
+  var buffTimeToExpire = '';
+  if (m > 0) {buffTimeToExpire = m + 'm';}
+  if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
+  if (s > 0) {buffTimeToExpire = s + 's';}
+  return buffTimeToExpire;
 }
 
 function getBuff(doc, buff, inject) { // Native
   var s = doc[buff] || 0;
   if (s) {
-    var m = Math.floor(s / 60);
-    s %= 60;
-    var buffTimeToExpire = (m === 0 ? '' : m + 'm') +
-      (s === 0 ? '' : ' ' + s + 's');
+    var buffTimeToExpire = buffTimeLeft(s);
     inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
       'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
   } else {

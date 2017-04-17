@@ -583,8 +583,8 @@ function doBuffLinks(defendingGuildID, injectHere) {
   if (!listOfDefenders) {return '';}
   // quick buff only supports 16
   var shortList = [];
-  for (var i = 0; i < listOfDefenders.length; i += 1) {
-    shortList.push(listOfDefenders[i]);
+  listOfDefenders.forEach(function(el, i) {
+    shortList.push(el);
     if ((i + 1) % 16 === 0 && i !== 0 ||
       i === listOfDefenders.length - 1) {
       var modifierWord = dataObj.places[Math.floor(i / 16)];
@@ -595,7 +595,7 @@ function doBuffLinks(defendingGuildID, injectHere) {
         ' 16</span></a></nobr>';
       shortList = [];
     }
-  }
+  });
   return htmlToAppend;
 }
 

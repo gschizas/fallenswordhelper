@@ -92,7 +92,7 @@ export var defaults = {
   minGroupLevel: 1,
   combatEvaluatorBias: 0,
   huntingMode: false,
-  enabledHuntingMode: 1,
+  enabledHuntingMode: '1',
   hideRelicOffline: false,
 
   enterForSendMessage: false,
