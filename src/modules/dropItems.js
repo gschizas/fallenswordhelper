@@ -281,6 +281,8 @@ function getItems() { // Native
       injectHere: injectHere
     });
   });
+  // Exclude composed pots
+  itemsHash[13699] = 1;
 }
 
 function inventory(data) { // Native
