@@ -200,12 +200,18 @@ function refresh() {
   getGuildLogPage(1).done(processFirstPage);
 }
 
+var guildLogEvents = [
+  {test: function(self) {return self.tagName === 'INPUT';}, fn: toggleItem},
+  {test: function(self) {return self.id === 'fshAll';}, fn: selectAll},
+  {test: function(self) {return self.id === 'fshNone';}, fn: selectNone},
+  {test: function(self) {return self.id === 'rfsh';}, fn: refresh}
+];
+
 function eventHandler(evt) {
   var self = evt.target;
-  if (self.tagName === 'INPUT') {toggleItem(self);}
-  if (self.id === 'fshAll') {selectAll();}
-  if (self.id === 'fshNone') {selectNone();}
-  if (self.id === 'rfsh') {refresh();}
+  for (var i = 0; i < guildLogEvents.length; i += 1) {
+    if (guildLogEvents[i].test(self)) {guildLogEvents[i].fn(self);}
+  }
 }
 
 function gotOptions(guildLog) {

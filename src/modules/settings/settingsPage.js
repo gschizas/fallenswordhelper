@@ -84,21 +84,12 @@ function saveValueForm(oForm, name) { // Legacy
     system.findNode('//input[@name="' + name + '"]', oForm);
   if (formElement.getAttribute('type') === 'checkbox') {
     system.setValue(name, formElement.checked);
-  } else if (formElement.getAttribute('type') === 'radio') {
-    var radioElements = system.findNodes('//input[@name="' + name +
-      '"]', 0, oForm);
-    for (var i = 0; i < radioElements.length; i += 1) {
-      if (radioElements[i].checked) {
-        system.setValue(name, radioElements[i].value);
-      }
-    }
   } else {
     system.setValue(name, formElement.value);
   }
 }
 
-function bioCompressValid(oForm) { // Legacy
-  // bio compressor validation logic
+function setMaxCompressedCharacters(oForm) { // Legacy
   var maxCompressedCharacters =
     system.findNode('//input[@name="maxCompressedCharacters"]', oForm);
   var maxCompressedCharactersValue = Number(maxCompressedCharacters.value);
@@ -106,6 +97,9 @@ function bioCompressValid(oForm) { // Legacy
       maxCompressedCharactersValue <= 50) {
     maxCompressedCharacters.value = 1500;
   }
+}
+
+function setMaxCompressedLines(oForm) { // Legacy
   var maxCompressedLines =
     system.findNode('//input[@name="maxCompressedLines"]', oForm);
   var maxCompressedLinesValue = Number(maxCompressedLines.value);
@@ -114,9 +108,7 @@ function bioCompressValid(oForm) { // Legacy
   }
 }
 
-function saveConfig(evt) { // Legacy
-  var oForm = evt.target.form;
-  bioCompressValid(oForm);
+function setGuildLogHistoryPages(oForm) { // Legacy
   var newGuildLogHistoryPages =
     system.findNode('//input[@name="newGuildLogHistoryPages"]', oForm);
   var newGuildLogHistoryPagesValue = Number(newGuildLogHistoryPages.value);
@@ -124,12 +116,24 @@ function saveConfig(evt) { // Legacy
       newGuildLogHistoryPagesValue <= 1) {
     newGuildLogHistoryPages.value = 25;
   }
+}
+
+function setMaxGroupSizeToJoin(oForm) { // Legacy
   var maxGroupSizeToJoin =
     system.findNode('//input[@name="maxGroupSizeToJoin"]', oForm);
   var maxGroupSizeToJoinValue = Number(maxGroupSizeToJoin.value);
   if (isNaN(maxGroupSizeToJoinValue) || maxGroupSizeToJoinValue <= 1) {
     maxGroupSizeToJoin.value = 11;
   }
+}
+
+function saveConfig(evt) { // Legacy
+  var oForm = evt.target.form;
+  // bio compressor validation logic
+  setMaxCompressedCharacters(oForm);
+  setMaxCompressedLines(oForm);
+  setGuildLogHistoryPages(oForm);
+  setMaxGroupSizeToJoin(oForm);
   var combatEvaluatorBiasElement =
     system.findNode('//select[@name="combatEvaluatorBias"]', oForm);
   var combatEvaluatorBias = Number(combatEvaluatorBiasElement.value);

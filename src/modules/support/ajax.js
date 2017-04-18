@@ -63,29 +63,33 @@ export function addMembrListToForage(membrList) {
     });
 }
 
-export function guildMembers(force, guildId) {
+function getMembrListFromForage(guildId, membrList) {
+  if (system.fallback(system.fallback(system.fallback(
+      !membrList, !membrList[guildId]),
+      !membrList[guildId].lastUpdate),
+      membrList[guildId].lastUpdate < Date.now() - 300000)) {
+    return getGuildMembers(guildId).done(addMembrListToForage);
+  }
+  return membrList;
+}
+
+function guildMembers(force, guildId) {
   if (force) {
     return getGuildMembers(guildId).done(addMembrListToForage);
   }
   return getForage('fsh_membrList')
-    .pipe(function getMembrListFromForage(membrList) {
-      if (!membrList ||
-          !membrList[guildId] ||
-          !membrList[guildId].lastUpdate ||
-          membrList[guildId].lastUpdate < Date.now() - 300000) {
-        return getGuildMembers(guildId).done(addMembrListToForage);
-      }
-      return membrList;
-    });
+    .pipe(getMembrListFromForage.bind(null, guildId));
+}
+
+function setHelperMembrList(guildId, membrList) {
+  calf.membrList = membrList[guildId];
+  return calf.membrList;
 }
 
 export function getMembrList(force) {
   var guildId = layout.guildId();
   return guildMembers(force, guildId)
-    .pipe(function setHelperMembrList(membrList) {
-      calf.membrList = membrList[guildId];
-      return calf.membrList;
-    });
+    .pipe(setHelperMembrList.bind(null, guildId));
 }
 
 export function getInventory() {

@@ -109,10 +109,6 @@ function addContact(contactList, type) { // Native
   return output;
 }
 
-function newAry(maybe) {
-  return maybe || [];
-}
-
 function noAllies(allies, enemies) {
   return allies.length + enemies.length === 0 ||
     !calf.enableAllyOnlineList && enemies.length === 0 ||
@@ -120,8 +116,8 @@ function noAllies(allies, enemies) {
 }
 
 function injectAllyEnemyList(data) { // Native
-  var allies = newAry(data._allies);
-  var enemies = newAry(data._enemies);
+  var allies = system.fallback(data._allies, []);
+  var enemies = system.fallback(data._enemies, []);
   if (noAllies(allies, enemies)) {return;}
   var output = '';
   if (calf.enableAllyOnlineList) {

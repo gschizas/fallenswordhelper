@@ -140,10 +140,6 @@ function injectAdvisorNew(m) { // Native
 
 }
 
-function newNumber(number) {
-  return number || 0;
-}
-
 function returnAdvisorPage(e, response) { // Native
 
   debug.time('guildAdvisor.returnAdvisorPage' + e);
@@ -157,24 +153,27 @@ function returnAdvisorPage(e, response) { // Native
     var tds = el.cells;
     var member = tds[0].textContent.trim();
     if (member === 'Member') {return;}
-    newSummary[member] = system.newMember(newSummary[member]);
-    newSummary[member].deposit = newNumber(newSummary[member].deposit) +
+    newSummary[member] = system.fallback(newSummary[member], {});
+    newSummary[member].deposit =
+      system.fallback(newSummary[member].deposit, 0) +
       system.intValue(tds[1].textContent);
-    newSummary[member].tax = newNumber(newSummary[member].tax) +
+    newSummary[member].tax = system.fallback(newSummary[member].tax, 0) +
       system.intValue(tds[2].textContent);
-    newSummary[member].total = newNumber(newSummary[member].total) +
+    newSummary[member].total = system.fallback(newSummary[member].total, 0) +
       system.intValue(tds[3].textContent);
-    newSummary[member].fsp = newNumber(newSummary[member].fsp) +
+    newSummary[member].fsp = system.fallback(newSummary[member].fsp, 0) +
       system.intValue(tds[4].textContent);
-    newSummary[member].skills = newNumber(newSummary[member].skills) +
+    newSummary[member].skills = system.fallback(newSummary[member].skills, 0) +
       system.intValue(tds[5].textContent);
-    newSummary[member].grpCrt = newNumber(newSummary[member].grpCrt) +
+    newSummary[member].grpCrt = system.fallback(newSummary[member].grpCrt, 0) +
       system.intValue(tds[6].textContent);
-    newSummary[member].grpJoin = newNumber(newSummary[member].grpJoin) +
+    newSummary[member].grpJoin =
+      system.fallback(newSummary[member].grpJoin, 0) +
       system.intValue(tds[7].textContent);
-    newSummary[member].relics = newNumber(newSummary[member].relics) +
+    newSummary[member].relics = system.fallback(newSummary[member].relics, 0) +
       system.intValue(tds[8].textContent);
-    newSummary[member].contrib = newNumber(newSummary[member].contrib) +
+    newSummary[member].contrib =
+      system.fallback(newSummary[member].contrib, 0) +
       system.intValue(tds[9].textContent);
   });
 

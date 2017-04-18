@@ -4,10 +4,7 @@ import * as debug from './support/debug';
 import * as system from './support/system';
 import * as task from './support/task';
 
-function hideFolder(evt) { // native
-  if (evt.target.nodeName !== 'SPAN' ||
-      evt.target.id.indexOf('folderid') === -1) {return;}
-  var folderid = evt.target.id;
+function getItemDiv() { // Native
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
     itemDiv = document.createElement('div');
@@ -21,6 +18,12 @@ function hideFolder(evt) { // native
     }
     itemList.parentNode.insertBefore(itemDiv, itemList);
   }
+  return itemDiv;
+}
+
+function doHideFolder(evt) { // Native
+  var folderid = evt.target.id;
+  var itemDiv = getItemDiv();
   var items = itemDiv.getElementsByTagName('table');
   Array.prototype.forEach.call(items, function(el) {
     el.firstElementChild.lastElementChild.firstElementChild
@@ -37,6 +40,11 @@ function hideFolder(evt) { // native
       el.classList.add('fshHide'); // hide()
     }
   });
+}
+
+function hideFolder(evt) { // native
+  if (evt.target.nodeName === 'SPAN' &&
+      evt.target.id.indexOf('folderid') !== -1) {doHideFolder(evt);}
 }
 
 function doFolderHeaders(folders) { // native
@@ -99,23 +107,26 @@ function inv() { // jQuery
   });
 }
 
-function toggleCheckAllPlants(evt) { // native
-  if (!evt.target.classList.contains('fshCheckAll')) {return;}
+function getHowMany(itemTables) { // Native
+  var howMany = parseInt(document.getElementById('fshSendHowMany').value, 10);
+  if (isNaN(howMany)) {return itemTables.length;}
+  // maximum of 100 items in an ST
+  if (calf.subcmd !== '-') {return Math.min(100, howMany);}
+  return howMany;
+}
+
+function doCheckAll(evt) { // Native
   var itemid = evt.target.id;
   var itemList = document.getElementById('item-div') ||
     document.getElementById('item-list');
   var itemTables = itemList.querySelectorAll('table:not(.fshHide)');
-  var howMany = parseInt(document.getElementById('fshSendHowMany').value, 10);
+  var howMany = getHowMany(itemTables);
   var itemsInSt = document.getElementById('itemsInSt').checked;
-  if (!isNaN(howMany)) {
-    // maximum of 100 items in an ST
-    if (calf.subcmd !== '-') {howMany = Math.min(100, howMany);}
-  } else {howMany = itemTables.length;}
   Array.prototype.forEach.call(itemTables, function(el) {
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
     if (howMany &&
-        (itemsInSt || !checkbox.classList.contains('isInST')) &&
+        system.fallback(itemsInSt, !checkbox.classList.contains('isInST')) &&
         (itemid === 'itemid-1' ||
         itemid === 'itemid-2' &&
         checkbox.classList.contains('itemtype12') ||
@@ -126,6 +137,10 @@ function toggleCheckAllPlants(evt) { // native
     }
     checkbox.checked = false;
   });
+}
+
+function toggleAllPlants(evt) { // native
+  if (evt.target.classList.contains('fshCheckAll')) {doCheckAll(evt);}
 }
 
 function injectTradeOld() { // native
@@ -144,7 +159,7 @@ function injectTradeOld() { // native
   myTd += ' &ensp;How&nbsp;many:<input id="fshSendHowMany" type="text" ' +
     'class="custominput" value="all" size=3></td>';
   multiple.insertAdjacentHTML('afterbegin', myTd);
-  multiple.addEventListener('click', toggleCheckAllPlants);
+  multiple.addEventListener('click', toggleAllPlants);
   var el = document.getElementById('item-list').parentNode.parentNode;
   el.parentNode.insertBefore(multiple, el);
 }

@@ -100,7 +100,39 @@ function addStatsQuickBuff(data) { // Native
     data.stamina * 100) + '% )';
 }
 
-function addBuffLevels(evt) { // jQuery
+function newPlayerSpan(el, playerSpan) { // Native
+  if (!playerSpan) {
+    var ret = document.createElement('SPAN');
+    ret.className = 'fshPlayer';
+    el.nextElementSibling.insertAdjacentElement('afterend', ret);
+    return ret;
+  }
+  return playerSpan;
+}
+
+function getBuffColor(myLvl, playerBuffLevel) { // Native
+  if (myLvl > playerBuffLevel) {return 'fshRed';}
+  return 'fshGreen';
+}
+
+function hazBuff(playerData, el) { // Native
+  var myBuffName = el.getAttribute('data-name');
+  var playerBuffLevel = playerData[myBuffName];
+  var playerSpan = el.nextElementSibling.nextElementSibling;
+  if (!playerBuffLevel && !playerSpan) {return;}
+  if (!playerBuffLevel) {
+    playerSpan.innerHTML = '';
+    return;
+  }
+  var lvlSpan = el.nextElementSibling.firstElementChild.firstElementChild;
+  var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
+  playerSpan = newPlayerSpan(el, playerSpan);
+  var buffColor = getBuffColor(myLvl, playerBuffLevel);
+  playerSpan.innerHTML = ' <span class="' + buffColor +
+    '">[' + playerBuffLevel + ']</span>';
+}
+
+function addBuffLevels(evt) { // Native
   var player = evt.target;
   if (player.tagName !== 'H1') {return;}
   ajax.getProfile(player.textContent).done(addStatsQuickBuff);
@@ -117,26 +149,7 @@ function addBuffLevels(evt) { // jQuery
   var buffOuter = document.getElementById('buff-outer');
   var nodeList = buffOuter.querySelectorAll('input[name]');
 
-  Array.prototype.forEach.call(nodeList, function(e) {
-    var myBuffName = e.getAttribute('data-name');
-    var playerBuffLevel = playerData[myBuffName];
-    var playerSpan = e.nextElementSibling.nextElementSibling;
-    if (!playerBuffLevel && !playerSpan) {return;}
-    if (!playerBuffLevel) {
-      playerSpan.innerHTML = '';
-      return;
-    }
-    var lvlSpan = e.nextElementSibling.firstElementChild.firstElementChild;
-    var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
-    if (!playerSpan) {
-      playerSpan = document.createElement('SPAN');
-      playerSpan.className = 'fshPlayer';
-      e.nextElementSibling.insertAdjacentElement('afterend', playerSpan);
-    }
-    playerSpan.innerHTML = ' <span class="' +
-      (myLvl > playerBuffLevel ? 'fshRed' : 'fshGreen') +
-      '">[' + playerBuffLevel + ']</span>';
-  });
+  Array.prototype.forEach.call(nodeList, hazBuff.bind(null, playerData));
 
 }
 
@@ -153,19 +166,22 @@ function doLabels(el) { // Native
   }
 }
 
-function firstPlayerStats() { // Native
-  var targets = document.getElementById('targetPlayers')
-    .getAttribute('value');
-  if (!targets || targets === '') {return;}
+function haveTargets() { // Native
   var firstPlayer = document.getElementById('players')
     .getElementsByTagName('h1')[0];
   if (!firstPlayer && retries < 9) {
     retries += 1;
-    setTimeout(firstPlayerStats, 100);
+    setTimeout(haveTargets, 100);
     return;
   }
   if (!firstPlayer) {return;}
   firstPlayer.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+}
+
+function firstPlayerStats() { // Native
+  var targets = document.getElementById('targetPlayers')
+    .getAttribute('value');
+  if (targets && targets !== '') {haveTargets();}
 }
 
 function getSustain(responseText) { // Native

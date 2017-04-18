@@ -1,5 +1,6 @@
 import * as debug from './debug';
 import * as sch from './sch';
+import * as system from './system';
 
 var paused = true;
 var message = 'fshMessage';
@@ -25,8 +26,8 @@ export function add(priority, fn, args, scope) {
   devLog(args);
   //#endif
   if (typeof fn === 'function') {
-    var _scope = scope || window;
-    var _args = args || [];
+    var _scope = system.fallback(scope, window);
+    var _args = system.fallback(args, []);
     sch.push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
     if (paused) {taskRunner();}
   }

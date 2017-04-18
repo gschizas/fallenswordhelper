@@ -51,10 +51,20 @@ function fetchRankData() { // jQuery
   });
 }
 
-function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
+function notValidRow(thisRankRowNum, targetRowNum, parentTable) { // Native
   return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
     targetRowNum < 1 ||
     targetRowNum > parentTable.rows.length;
+}
+
+function getTargetRowNumber(val) { // Native
+  if (val === 'Up') {return -1;}
+  return 2;
+}
+
+function getPxScroll(val) { // Native
+  if (val === 'Up') {return -22;}
+  return 22;
 }
 
 function ajaxifyRankControls(evt) { // jQuery
@@ -65,13 +75,14 @@ function ajaxifyRankControls(evt) { // jQuery
     .exec(evt.target.getAttribute('onclick'))[1];
   var thisRankRow = evt.target.parentNode.parentNode.parentNode;
   var thisRankRowNum = thisRankRow.rowIndex;
-  var targetRowNum = thisRankRowNum + (val === 'Up' ? -1 : 2);
+  var targetRowNum = getTargetRowNumber(val);
   var parentTable = thisRankRow.parentNode;
   if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
   $.get(onclickHREF);
   var injectRow = parentTable.rows[targetRowNum];
   parentTable.insertBefore(thisRankRow, injectRow);
-  window.scrollBy(0, val === 'Up' ? -22 : 22);
+  var pxScroll = getPxScroll(val);
+  window.scrollBy(0, pxScroll);
 }
 
 function doButtons() { // Native
@@ -93,20 +104,26 @@ function doButtons() { // Native
   }
 }
 
+function writeMembers(el) { // Native
+  var rankCell = el.firstElementChild;
+  var rankName = rankCell.textContent;
+  if (ranks[rankName]) { // has members
+    if (rankName === myRank) {
+      characterRow = rankCount; // limit for ajaxify later
+    }
+    rankCell.insertAdjacentHTML('beforeend', ' <span class="fshBlue">- ' +
+      ranks[rankName].join(', ') + '</span>');
+  }
+}
+
 function paintRanks() { // Native
   var limit = performance.now() + 10;
   while (performance.now() < limit &&
       rankCount < theRows.length) {
     var el = theRows[rankCount];
-    var rankCell = el.firstElementChild;
-    var rankName = rankCell.textContent;
-    if (ranks[rankName]) { // has members
-      if (rankName === myRank) {
-        characterRow = rankCount; // limit for ajaxify later
-      }
-      rankCell.insertAdjacentHTML('beforeend', ' <span class="fshBlue">- ' +
-        ranks[rankName].join(', ') + '</span>');
-    }
+
+    writeMembers(el);
+
     rankCount += 1;
   }
   if (rankCount < theRows.length) {

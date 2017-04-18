@@ -7,6 +7,10 @@ export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
 
+export function fallback(a, b) { // Native
+  return a || b;
+}
+
 export function getValue(name) {
   //#if _DEV  //  No default setting available
   if (typeof dataObj.defaults[name] === 'undefined') {
@@ -45,10 +49,6 @@ export function setValue(name, value) {
   GM_setValue(name, value);
 }
 
-function getDoc(doc) {
-  return doc || document;
-}
-
 function getTarget(doc) {
   if (doc instanceof HTMLDocument) {return doc;}
   return document;
@@ -70,7 +70,7 @@ export function findNodes(xpath, doc) {
   // See createDocument with DOMParser below
   // This only matters in Firefox. evaluate will fail silently if
   // the context is not part of the calling object.
-  var _doc = getDoc(doc);
+  var _doc = fallback(doc, document);
   target = getTarget(_doc);
   var findQ = target.evaluate(_xpath, _doc, null,
     XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
@@ -202,7 +202,7 @@ function path(obj, aPath, def) {
   var _path = aPath.split('.');
   var len = _path.length;
   for (var i = 0; i < len; i += 1) {
-    if (!obj || typeof obj !== 'object') {return def;}
+    if (fallback(!obj, typeof obj !== 'object')) {return def;}
     _obj = obj[_path[i]];
   }
   if (typeof _obj === 'undefined') {return def;}
@@ -251,13 +251,13 @@ export function testQuant(aValue) { // Native
   }
 }
 
-export function getRandomInt(_min, _max) {
+export function getRandomInt(_min, _max) { // Native
   var min = Math.ceil(_min);
   var max = Math.floor(_max);
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-export function rnd() {
+export function rnd() { // Native
   return getRandomInt(1000000000, 9999999998);
 }
 
@@ -268,10 +268,6 @@ export function escapeHtml(unsafe) { // Native
     .replace(/>/g, '&gt;')
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#039;');
-}
-
-export function newMember(member) {
-  return member || {};
 }
 
 export function isSelected(val, test) {

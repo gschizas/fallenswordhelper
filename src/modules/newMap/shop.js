@@ -82,9 +82,10 @@ function injectQuickBuy() {
 
 function worldDialogShop(e, data) {
   shoppingData = data;
-  dialog = dialog || document.getElementById('shopDialogConfirm');
+  dialog = system.fallback(dialog,
+    document.getElementById('shopDialogConfirm'));
   if (!dialog) {return;}
-  jDialog = jDialog || $(dialog).data('worldDialogShopConfirm');
+  jDialog = system.fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
   if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
 }
 

@@ -6,6 +6,50 @@ import * as debug from './debug';
 // Global variables
 var gvar = {};
 var GMSTORAGE_PATH = 'GM_';
+
+function storItem(name, type, value) {
+  window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+}
+
+var reviver = [
+  {
+    condition: 'S]',
+    result: function(value) {return value.substr(2);}
+  },
+  {
+    condition: 'N]',
+    result: function(value) {return parseInt(value.substr(2), 10);}
+  },
+  {
+    condition: 'B]',
+    result: function(value) {return value.substr(2) === 'true';}
+  }
+];
+var cold = [
+  {
+    condition: 'string',
+    result: function(name, value) {storItem(name, 'S]', value);}
+  },
+  {
+    condition: 'number',
+    result: function(name, value) {
+      if (value.toString().indexOf('.') < 0) {storItem(name, 'N]', value);}
+    }
+  },
+  {
+    condition: 'boolean',
+    result: function(name, value) {storItem(name, 'B]', value);}
+  }
+];
+
+function retrieve(value) {
+  for (var i = 0; i < reviver.length; i += 1) {
+    var test = reviver[i];
+    if (value.substr(0, 2) === test.condition) {return test.result(value);}
+  }
+  return value;
+}
+
 // You can change it to avoid conflict with others scripts
 var needApiUpgrade = false;
 if (window.navigator.appName.match(/^opera/i) &&
@@ -52,46 +96,17 @@ if (needApiUpgrade) {
   }
   // Catch Security error
   if (ws === 'object') {
-    var parser = [
-      {
-        condition: 'S]',
-        result: function(value) {return value.substr(2);}
-      },
-      {
-        condition: 'N]',
-        result: function(value) {return parseInt(value.substr(2), 10);}
-      },
-      {
-        condition: 'B]',
-        result: function(value) {return value.substr(2) === 'true';}
-      }
-    ];
     window.GM_getValue = function(name, defValue) {
       var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
       if (value === null || typeof value === 'undefined') {return defValue;}
-      for (var i = 0; i < parser.length; i += 1) {
-        var test = parser[i];
-        if (value.substr(0, 2) === test.condition) {return test.result(value);}
-      }
-      return value;
+      return retrieve(value);
     };
     window.GM_setValue = function(name, value) {
-      switch (typeof value) {
-      case 'string':
-        window.localStorage.setItem(GMSTORAGE_PATH + name,
-          'S]' + value);
-        break;
-      case 'number':
-        if (value.toString().indexOf('.') < 0) {
-          window.localStorage.setItem(GMSTORAGE_PATH + name,
-            'N]' + value);
+      for (var i = 0; i < cold.length; i += 1) {
+        var storType = cold[i];
+        if (typeof value === storType.condition) {
+          storType.result(name, value);
         }
-        break;
-      case 'boolean':
-        window.localStorage.setItem(GMSTORAGE_PATH + name,
-          'B]' + value);
-        break;
-      // no default
       }
     };
   } else if (!gvar.isOpera || typeof GM_setValue === 'undefined') {

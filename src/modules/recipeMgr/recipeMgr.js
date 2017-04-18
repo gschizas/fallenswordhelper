@@ -87,24 +87,30 @@ function generateRecipeTable() { // Legacy
   storeRecipeBook();
 }
 
-function sortRecipeTable(evt) { // Legacy
-  var headerClicked = evt.target.getAttribute('sortKey');
+function testSortType(evt) { // Native
   var sortType = evt.target.getAttribute('sorttype');
   if (!sortType) {sortType = 'string';}
   sortType = sortType.toLowerCase();
+  return sortType;
+}
+
+function sortRecipeBook(sortType) { // Native
+  if (sortType === 'number') {
+    recipebook.recipe.sort(system.numberSort);
+  } else {
+    recipebook.recipe.sort(system.stringSort);
+  }
+}
+
+function sortRecipeTable(evt) { // Legacy
+  var headerClicked = evt.target.getAttribute('sortKey');
+  var sortType = testSortType(evt);
   if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
   if (calf.sortBy && calf.sortBy === headerClicked) {
     calf.sortAsc = !calf.sortAsc;
   }
   calf.sortBy = headerClicked;
-  switch (sortType) {
-  case 'number':
-    recipebook.recipe.sort(system.numberSort);
-    break;
-  default:
-    recipebook.recipe.sort(system.stringSort);
-    break;
-  }
+  sortRecipeBook(sortType);
   generateRecipeTable();
 }
 

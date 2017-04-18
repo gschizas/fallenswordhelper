@@ -2,21 +2,11 @@ import * as inventory from './inventory';
 import * as system from '../support/system';
 
 var lvlTests = [
-  function(level) {
-    return level === 0;
-  },
-  function(level, min, max) {
-    return isNaN(min) && isNaN(max);
-  },
-  function(level, min, max) {
-    return isNaN(min) && level <= max;
-  },
-  function(level, min, max) {
-    return min <= level && isNaN(max);
-  },
-  function(level, min, max) {
-    return min <= level && level <= max;
-  }
+  function(level) {return level === 0;},
+  function(level, min, max) {return isNaN(min) && isNaN(max);},
+  function(level, min, max) {return isNaN(min) && level <= max;},
+  function(level, min, max) {return min <= level && isNaN(max);},
+  function(level, min, max) {return min <= level && level <= max;}
 ];
 
 function doLvlFilter(_settings, data) {

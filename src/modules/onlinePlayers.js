@@ -32,24 +32,12 @@ function saveVal(key, val) { // Native
   if (!isNaN(val)) {system.setValue(key, val);}
 }
 
-function getLevel(data) { // Native
-  return system.intValue(data[2]) || 0; // use data for the level column
-}
-
-function checkMin(min, max, level) { // Native
-  if (min > level || !isNaN(max)) {return min <= level && level <= max;}
-  return true;
-}
-
-function checkMax(min, max, level) { // Native
-  if (!isNaN(min) || level > max) {return checkMin(min, max, level);}
-  return true;
-}
-
-function validMinMax(min, max, level) { // Native
-  if (!isNaN(min) || !isNaN(max)) {return checkMax(min, max, level);}
-  return true;
-}
+var lvlTests = [
+  function(level, min, max) {return isNaN(min) && isNaN(max);},
+  function(level, min, max) {return isNaN(min) && level <= max;},
+  function(level, min, max) {return min <= level && isNaN(max);},
+  function(level, min, max) {return min <= level && level <= max;}
+];
 
 function dataTableSearch(_settings, data) { // jQuery
   /* Custom filtering function which will search
@@ -58,8 +46,11 @@ function dataTableSearch(_settings, data) { // jQuery
   var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
   saveVal('onlinePlayerMinLvl', min);
   saveVal('onlinePlayerMaxLvl', max);
-  var level = getLevel(data);
-  return validMinMax(min, max, level);
+  var level = system.fallback(system.intValue(data[2]), 0);
+  for (var i = 0; i < lvlTests.length; i += 1) {
+    if (lvlTests[i](level, min, max)) {return true;}
+  }
+  return false;
 }
 
 function filterHeaderOnlinePlayers() { // jQuery

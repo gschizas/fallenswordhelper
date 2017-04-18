@@ -146,6 +146,14 @@ function doBuffLink(_buffsSent, targetPlayerID) { // Legacy
       '>Buff</a></span>';
 }
 
+function getAttackPart(playerName) { // Legacy
+  if (addAttackLinkToLog) {
+    return ' | <a href="index.php?cmd=attackplayer&target_username=' +
+      playerName + '">Attack</a>';
+  }
+  return '';
+}
+
 function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
   if (messageType !== 'Chat') {return;}
   var extraPart = '';
@@ -164,11 +172,7 @@ function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
   extraPart = ' | <a href="index.php?cmd=trade&target_player=' + playerName +
     '">Trade</a> | <a title="Secure Trade" href="index.php?cmd=trade' +
     '&subcmd=createsecure&target_username=' + playerName + '">ST</a>';
-  var attackPart = '';
-  if (addAttackLinkToLog) {
-    attackPart = ' | <a href="index.php?cmd=attackplayer&target_username=' +
-      playerName + '">Attack</a>';
-  }
+  var attackPart = getAttackPart(playerName);
   var buffsSent = aRow.cells[2].innerHTML.match(/`~.*?~`/);
   if (buffsSent) {
     thirdPart = doBuffLink(buffsSent, targetPlayerID);
@@ -276,18 +280,26 @@ function addPvpSummary(aRow, messageType) { // Legacy
   }
 }
 
+function isEnemy(playerName, playerElement) { // Legacy
+  if (listOfEnemies.indexOf(playerName) !== -1) {
+    playerElement.style.color = 'red';
+  }
+}
+
+function isAlly(playerName, playerElement) { // Legacy
+  if (listOfAllies.indexOf(playerName) !== -1) {
+    playerElement.style.color = 'blue';
+  }
+}
+
 function playerColor(colorPlayerName, playerName, playerElement) { // Legacy
   if (!colorPlayerName) {return false;}
   if (memberNameString.indexOf(playerName) !== -1) {
     playerElement.style.color = 'green';
     return true;
   }
-  if (listOfEnemies.indexOf(playerName) !== -1) {
-    playerElement.style.color = 'red';
-  }
-  if (listOfAllies.indexOf(playerName) !== -1) {
-    playerElement.style.color = 'blue';
-  }
+  isEnemy(playerName, playerElement);
+  isAlly(playerName, playerElement);
   return false;
 }
 
@@ -323,6 +335,16 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   aRow.cells[2].innerHTML += extraText;
 }
 
+function doExtraStuff(aRow, messageType, playerName, isGuildMate) {
+  if (messageType === 'Notification' &&
+      aRow.cells[2].firstChild.nextSibling &&
+      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
+      aRow.cells[2].firstChild.nextSibling
+        .getAttribute('href').search('player_id') !== -1) {
+    addExtraStuff(aRow, playerName, isGuildMate);
+  }
+}
+
 function doLogWidgetRow(aRow, messageType) { // Legacy
   var playerElement;
   var playerName;
@@ -332,7 +354,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
     playerName = playerElement.innerHTML;
     colorPlayerName = true;
   }
-  if ((messageType === 'General' ||
+  if (system.fallback(messageType === 'General',
       messageType === 'Notification') &&
       aRow.cells[2].firstChild.nextSibling &&
       aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
@@ -344,13 +366,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   }
   var isGuildMate = playerColor(colorPlayerName, playerName, playerElement);
   doChat(messageType, aRow, isGuildMate, playerName);
-  if (messageType === 'Notification' &&
-      aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling
-        .getAttribute('href').search('player_id') !== -1) {
-    addExtraStuff(aRow, playerName, isGuildMate);
-  }
+  doExtraStuff(aRow, messageType, playerName, isGuildMate);
   addPvpSummary(aRow, messageType);
 }
 
@@ -398,6 +414,11 @@ function addLogWidgets() { // jQuery
   ).done(addLogWidgetsOld);
 }
 
+function getPlayer(playerAry) { // Legacy
+  if (playerAry) {return Number(playerAry[1]);}
+  return 0;
+}
+
 function findPlayers(aRow) { // Legacy
   var messageHTML = aRow.cells[2].innerHTML;
   var doublerPlayerMessageRE =
@@ -407,10 +428,8 @@ function findPlayers(aRow) { // Legacy
     /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
   var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
 
-  var firstPlayerID = 0;
-  if (firstPlayer) {firstPlayerID = Number(firstPlayer[1]);}
-  var secondPlayerID = 0;
-  if (secondPlayer) {secondPlayerID = Number(secondPlayer[1]);}
+  var firstPlayerID = getPlayer(firstPlayer);
+  var secondPlayerID = getPlayer(secondPlayer);
 
   if (firstPlayer && firstPlayerID !== playerId &&
       secondPlayerID !== playerId) {

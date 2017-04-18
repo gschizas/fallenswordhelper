@@ -21,10 +21,6 @@ import * as widgets from './widgets';
 var coreFunction;
 var functionPath;
 
-function newParam(param) {
-  return system.getUrlParameter(param) || '-';
-}
-
 function newSelector(selector) {
   var test_cmd = document.querySelector(selector);
   return test_cmd && test_cmd.value || '-';
@@ -37,11 +33,11 @@ function getCoreFunction() { // Native
   var type;
   var fromWorld;
   if (document.location.search !== '') {
-    cmd = newParam('cmd');
-    subcmd = newParam('subcmd');
-    subcmd2 = newParam('subcmd2');
-    type = newParam('type');
-    fromWorld = newParam('fromworld');
+    cmd = system.fallback(system.getUrlParameter('cmd'), '-');
+    subcmd = system.fallback(system.getUrlParameter('subcmd'), '-');
+    subcmd2 = system.fallback(system.getUrlParameter('subcmd2'), '-');
+    type = system.fallback(system.getUrlParameter('type'), '-');
+    fromWorld = system.fallback(system.getUrlParameter('fromworld'), '-');
   } else {
     cmd = newSelector('input[name="cmd"]');
     subcmd = newSelector('input[name="subcmd"]');
@@ -328,10 +324,6 @@ function retBool(bool, ifTrue, ifFalse) {
   return ifFalse;
 }
 
-function getQuickLinks() { // Native
-  return system.getValueJSON('quickLinks') || [];
-}
-
 function isDraggable(draggableQuickLinks) { // Native
   if (draggableQuickLinks) {
     document.getElementById('fshQuickLinks')
@@ -342,7 +334,7 @@ function isDraggable(draggableQuickLinks) { // Native
 function injectQuickLinks() { // Native ?
   var node = document.getElementById('statbar-container');
   if (!node) {return;}
-  var quickLinks = getQuickLinks();
+  var quickLinks = system.fallback(system.getValueJSON('quickLinks'), []);
   if (quickLinks.length <= 0) {return;}
   var quickLinksTopPx = system.getValue('quickLinksTopPx');
   var quickLinksLeftPx = system.getValue('quickLinksLeftPx');

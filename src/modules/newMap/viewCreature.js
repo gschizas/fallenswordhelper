@@ -181,10 +181,8 @@ function evalAttack(combat) { // Native
   return combat;
 }
 
-function evalDamage(combat) { // Native
-  // Damage:
+function evalFortitude(combat) { // Native
   var hpValue = calcHp(combat);
-
   var fortitudeLevel = combat.player.fortitudeLevel;
   combat.fortitudeExtraHPs = Math.floor(hpValue * fortitudeLevel * 0.001);
   if (fortitudeLevel > 0) {
@@ -192,7 +190,9 @@ function evalDamage(combat) { // Native
       '<br>';
   }
   combat.overallHPValue = hpValue + combat.fortitudeExtraHPs;
+}
 
+function evalChiStrike(combat) { // Native
   var chiStrikeLevel = combat.player.chiStrikeLevel;
   combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
     chiStrikeLevel * 0.001);
@@ -200,6 +200,12 @@ function evalDamage(combat) { // Native
     combat.extraNotes += 'Chi Strike Bonus Damage = ' +
       combat.chiStrikeExtraDamage + '<br>';
   }
+}
+
+function evalDamage(combat) { // Native
+  // Damage:
+  evalFortitude(combat);
+  evalChiStrike(combat);
 
   var damageValue = calcDmg(combat);
   combat.overallDamageValue = damageValue +
@@ -262,25 +268,33 @@ function evalDefence(combat) { // Native
   return combat;
 }
 
+function evalSanctuary(combat) { // Native
+  if (combat.player.sanctuaryLevel > 0) {
+    combat.extraNotes += 'Sanc Bonus Armor = ' +
+      Math.floor(combat.player.armorValue *
+      combat.player.sanctuaryLevel * 0.001) + '<br>';
+  }
+}
+
+function evalTerrorize(combat) { // Native
+  if (combat.player.terrorizeLevel > 0) {
+    combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
+      combat.terrorizeEffect * -1 + '<br>';
+  }
+}
+
 function evalArmour(combat) { // Native
   var armorVal = calcArm(combat);
   combat.overallArmorValue = armorVal +
     Math.floor(combat.player.armorValue *
     combat.player.sanctuaryLevel * 0.001);
 
-  if (combat.player.sanctuaryLevel > 0) {
-    combat.extraNotes += 'Sanc Bonus Armor = ' +
-      Math.floor(combat.player.armorValue *
-      combat.player.sanctuaryLevel * 0.001) + '<br>';
-  }
+  evalSanctuary(combat);
 
   combat.terrorizeEffect = Math.floor(combat.creature.damage *
     combat.player.terrorizeLevel * 0.001);
 
-  if (combat.player.terrorizeLevel > 0) {
-    combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
-      combat.terrorizeEffect * -1 + '<br>';
-  }
+  evalTerrorize(combat);
 
   combat.creature.damage -= combat.terrorizeEffect;
   combat.creatureDamageDone = Math.ceil(combat.generalVariable *
@@ -337,20 +351,38 @@ function evalMiss(combat) { // Native
   return ', survives a miss';
 }
 
+var evalFightStatus = [
+  {
+    test: function(combat) {
+      return combat.playerHits === '-' && combat.creatureHits === '-';
+    },
+    fStatus: function() {return 'Unresolved';}
+  },
+  {
+    test: function(combat) {return combat.playerHits === '-';},
+    fStatus: function() {return 'Player dies';}
+  },
+  {
+    test: function(combat) {return combat.playerHits === 1;},
+    fStatus: function(combat) {return 'Player 1 hits' + evalMiss(combat);}
+  },
+  {
+    test: function(combat) {return combat.playerHits > 1;},
+    fStatus: function(combat) {return 'Player > 1 hits' + evalMiss(combat);}
+  }
+];
+
 function evalAnalysis(combat) { // Native
   // Analysis:
   combat.playerHits = evalPlayerHits(combat);
   combat.creatureHits = evalCreatureHits(combat);
-  combat.fightStatus = 'Unknown';
-  if (combat.playerHits === '-' && combat.creatureHits === '-') {
-    combat.fightStatus = 'Unresolved';
-  } else if (combat.playerHits === '-') {
-    combat.fightStatus = 'Player dies';
-  } else if (combat.playerHits === 1) {
-    combat.fightStatus = 'Player 1 hits' + evalMiss(combat);
-  } else if (combat.playerHits > 1) {
-    combat.fightStatus = 'Player > 1 hits' + evalMiss(combat);
+  for (var i = 0; i < evalFightStatus.length; i += 1) {
+    if (evalFightStatus[i].test(combat)) {
+      combat.fightStatus = evalFightStatus[i].fStatus(combat);
+      return combat;
+    }
   }
+  combat.fightStatus = 'Unknown';
   return combat;
 }
 
@@ -393,13 +425,7 @@ function caRunning(combat) { // Native
   }
 }
 
-function caResult(combat) { // Native
-  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
-    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
-    combat.player.attackValue / 0.0025), 0);
-  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
-    combat.counterAttackBonusDamage - combat.damageDone + 1) /
-    combat.player.damageValue / 0.0025), 0);
+function evalCaKill(combat) { // Native
   if (combat.lowestCALevelToStillHit > 175) {
     combat.extraNotes +=
       'Even with CA175 you cannot hit this creature<br>';
@@ -408,6 +434,9 @@ function caResult(combat) { // Native
       combat.lowestCALevelToStillHit +
       ' to hit this creature<br>';
   }
+}
+
+function evalCaOneHit(combat) { // Native
   if (combat.lowestCALevelToStillKill > 175) {
     combat.extraNotes +=
       'Even with CA175 you cannot 1-hit kill this creature<br>';
@@ -416,6 +445,17 @@ function caResult(combat) { // Native
       combat.lowestCALevelToStillKill +
       ' to 1-hit kill this creature<br>';
   }
+}
+
+function caResult(combat) { // Native
+  combat.lowestCALevelToStillHit = Math.max(Math.ceil((
+    combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
+    combat.player.attackValue / 0.0025), 0);
+  combat.lowestCALevelToStillKill = Math.max(Math.ceil((
+    combat.counterAttackBonusDamage - combat.damageDone + 1) /
+    combat.player.damageValue / 0.0025), 0);
+  evalCaKill(combat);
+  evalCaOneHit(combat);
 }
 
 function evalCA(combat) { // Native

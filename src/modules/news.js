@@ -51,20 +51,29 @@ function closestHead(el) { // Native
   return closestHead(el.parentNode);
 }
 
-function newsEvt(evt) { // jQuery
-  var newsHead = closestHead(evt.target);
-  if (!newsHead) {return;}
+function getNewsClass(newsHead) { // Native
+  if (newsHead.classList.contains('news_head_tavern')) {
+    return '.news_body_tavern';
+  }
+  return '.news_body';
+}
+
+function gotNewsHead(evt, newsHead) { // jQuery
   var newsBody = newsHead.nextElementSibling;
-  var _class = newsHead.classList.contains('news_head_tavern') ?
-    '.news_body_tavern' : '.news_body';
+  var newsClass = getNewsClass(newsHead);
   if (!$(newsBody).data('open')) {
     evt.preventDefault();
-    $(_class).hide().data('open', false);
+    $(newsClass).hide().data('open', false);
     $(newsBody).show().data('open', true);
   } else if (evt.target.tagName !== 'A') {
     $(newsBody).hide().data('open', false);
   }
   evt.stopPropagation();
+}
+
+function newsEvt(evt) { // Native
+  var newsHead = closestHead(evt.target);
+  if (newsHead) {gotNewsHead(evt, newsHead);}
 }
 
 function fixCollapse() { // Native
@@ -156,7 +165,7 @@ function testRowType(row, rowType, thisArticle) { // Native
   } // TODO toggle this
   if (rowType > 1) {
     thisArticle.rows[rowType] =
-      system.newMember(thisArticle[rowType]);
+      system.fallback(thisArticle[rowType], {});
     thisArticle.rows[rowType].row = row;
     collapseDuringAnalysis(row, thisArticle);
   }
@@ -165,7 +174,7 @@ function testRowType(row, rowType, thisArticle) { // Native
 function doTagging(row) { // Native
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
-  warehouse[articleNo] = system.newMember(warehouse[articleNo]);
+  warehouse[articleNo] = system.fallback(warehouse[articleNo], {});
   var thisArticle = warehouse[articleNo];
   thisArticle.rows = thisArticle.rows || [];
   testRowType(row, rowType, thisArticle);

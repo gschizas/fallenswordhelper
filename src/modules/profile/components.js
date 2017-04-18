@@ -89,6 +89,31 @@ function enableDelComponent() { // Native
   });
 }
 
+var evtHdl = [
+  {
+    test: function(e) {return e.target.id === 'compDel';},
+    act: enableDelComponent
+  },
+  {
+    test: function(e) {return e.target.id === 'compSum';},
+    act: countComponent
+  },
+  {
+    test: function(e) {return e.target.id === 'compDelAll';},
+    act: delAllComponent
+  },
+  {
+    test: function(e) {return e.target.classList.contains('compDelBtn');},
+    act: delComponent
+  }
+];
+
+function compEvt(e) {
+  for (var i = 0; i < evtHdl.length; i += 1) {
+    if (evtHdl[i].test(e)) {evtHdl[i].act(e);}
+  }
+}
+
 export function profileComponents() { // Native
   var invTables = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table');
@@ -105,10 +130,5 @@ export function profileComponents() { // Native
     '<div class="fshHide">[<span id="compDelAll" class="sendLink">' +
     'Delete All Visible</span>]</div>' +
     '</div>');
-  compDiv.addEventListener('click', function(e) {
-    if (e.target.id === 'compDel') {enableDelComponent(e);}
-    if (e.target.id === 'compSum') {countComponent(e);}
-    if (e.target.id === 'compDelAll') {delAllComponent(e);}
-    if (e.target.classList.contains('compDelBtn')) {delComponent(e);}
-  });
+  compDiv.addEventListener('click', compEvt);
 }

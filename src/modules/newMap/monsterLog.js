@@ -31,20 +31,17 @@ function updateMinMax(_logStat, creatureStat) { // Native
   return logStat;
 }
 
-function oldProperty(oldProp, newProp) {
-  if (oldProp) {return oldProp;}
-  return newProp;
-}
-
 function processMonsterLog() { // Native
   if (!showMonsterLog) {return;}
-  monsterLog[creature.name] = system.newMember(monsterLog[creature.name]);
+  monsterLog[creature.name] = system.fallback(monsterLog[creature.name], {});
   var logCreature = monsterLog[creature.name];
-  logCreature.creature_class = oldProperty(logCreature.creature_class,
+  logCreature.creature_class = system.fallback(logCreature.creature_class,
     creature.creature_class);
-  logCreature.image_id = oldProperty(logCreature.image_id, creature.image_id);
-  logCreature.level = oldProperty(logCreature.level, Number(creature.level));
-  logCreature.type = oldProperty(logCreature.type, creature.type);
+  logCreature.image_id = system.fallback(logCreature.image_id,
+    creature.image_id);
+  logCreature.level = system.fallback(logCreature.level,
+    Number(creature.level));
+  logCreature.type = system.fallback(logCreature.type, creature.type);
   logCreature.armor = updateMinMax(logCreature.armor,
     Number(creature.armor));
   logCreature.attack = updateMinMax(logCreature.attack,
@@ -56,7 +53,7 @@ function processMonsterLog() { // Native
   logCreature.hp = updateMinMax(logCreature.hp,
     Number(creature.hp));
   if (creature.enhancements && creature.enhancements.length > 0) {
-    logCreature.enhancements = system.newMember(logCreature.enhancements);
+    logCreature.enhancements = system.fallback(logCreature.enhancements, {});
     var logEnh = logCreature.enhancements;
     creature.enhancements.forEach(function(e) {
       logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
@@ -110,18 +107,31 @@ function doMouseOver() { // Native
   monster.setAttribute('data-tipped', monsterTip);
 }
 
-function processMouseOver(data) { // Native
-  if (!showCreatureInfo) {return;}
+var bailOut = [
+  function(data, actions) {
+    return actions.length === 1 &&
+      actions[0].classList.contains('hcs-state-disabled'); // In motion
+  },
+  function(data, actions) {
+    return actions.length - 1 < data.passback; // Not enough actions
+  },
+  function(data) {
+    return creature.id !== actionData[data.passback].data.id.toString(); // Different action list
+  }
+];
+
+function doCreatureInfo(data) { // Native
   var actions = document.getElementById('actionList').children;
-  if (actions.length === 1 &&
-      actions[0].classList.contains('hcs-state-disabled') || // In motion
-      actions.length - 1 < data.passback || // Not enough actions
-      creature.id !== actionData[data.passback].data.id.toString()) { // Different action list
-    return;
+  for (var i = 0; i < bailOut.length; i += 1) {
+    if (bailOut[i](data, actions)) {return;}
   }
   monster = actions[data.passback].firstElementChild.firstElementChild
     .firstElementChild;
   doMouseOver();
+}
+
+function processMouseOver(data) { // Native
+  if (showCreatureInfo) {doCreatureInfo(data);}
 }
 
 function processMonster(data) { // Native

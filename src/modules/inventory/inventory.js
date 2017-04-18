@@ -74,10 +74,6 @@ function setLvls() { // jQuery
   $('#fshMaxLvl').val(options.fshMaxLvl);
 }
 
-function currentPlayer(player_id, current_player_id) {
-  return player_id || current_player_id;
-}
-
 function getT(player_id) {
   if (player_id === -1) {return 4;}
   return 1;
@@ -91,7 +87,7 @@ function player(invPlayer, rowPlayer, guild) {
 
 export function nameRender(data, type, row) { // Native
   if (type !== 'display') {return data;}
-  var cur = currentPlayer(theInv.player_id, theInv.current_player_id);
+  var cur = system.fallback(theInv.player_id, theInv.current_player_id);
   var t = getT(row.player_id);
   var p = player(theInv.player_id, row.player_id, theInv.guild_id);
 
@@ -114,7 +110,7 @@ export function nameRender(data, type, row) { // Native
 }
 
 export function whereData(row) { // Native
-  return row.folder_id || row.player_id;
+  return system.fallback(row.folder_id, row.player_id);
 }
 
 export function whereRender(data, type, row) { // Native

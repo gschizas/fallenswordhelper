@@ -54,8 +54,10 @@ function displayDisconnectedFromGodsMessage() { // Native
 }
 
 function displayUpgradeMsg() { // Native
-  document.getElementById('notifications').insertAdjacentHTML('afterbegin',
-    goldUpgradeMsg);
+  if (location.search.indexOf('cmd=points&type=1') === -1) {
+    document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+      goldUpgradeMsg);
+  }
 }
 
 function findNewGroup(el) { // Native
@@ -117,22 +119,22 @@ export function injectTempleAlert() { // jQuery
   }
 }
 
+function findDoc(data) { // Native
+  if (location.search.indexOf('cmd=points&type=1') === -1) {
+    return system.createDocument(data);
+  }
+  document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
+  return document;
+}
+
 export function parseGoldUpgrades(data) { // Native
   if (!calf.enableUpgradeAlert) {return;}
-  var doc;
-  if (location.search.indexOf('cmd=points&type=1') === -1) {
-    doc = system.createDocument(data);
-  } else {
-    doc = document;
-    doc.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
-  }
+  var doc = findDoc(data);
   var limit = doc.getElementById('pCC').getElementsByTagName('TABLE')[0]
     .rows[3].cells[2];
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
-    if (location.search.indexOf('cmd=points&type=1') === -1) {
-      displayUpgradeMsg();
-    }
+    displayUpgradeMsg();
     system.setValue('needToDoUpgrade', true);
   } else {
     system.setValue('needToDoUpgrade', false);

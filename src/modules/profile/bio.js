@@ -64,8 +64,7 @@ function compressBio(bioCell) { // Native
   doCompression(bioCell, bioContents, maxCharactersToShow);
 }
 
-function getBuffsToBuy() { // Legacy
-  if (buffCost.count === 0) {return;}
+function getTargetPlayer() { // Native
   var targetPlayer = layout.pCC
     .getElementsByTagName('h1');
   if (targetPlayer.length !== 0) {
@@ -73,6 +72,12 @@ function getBuffsToBuy() { // Legacy
   } else {
     targetPlayer = layout.playerName();
   }
+  return targetPlayer;
+}
+
+function getBuffsToBuy() { // Legacy
+  if (buffCost.count === 0) {return;}
+  var targetPlayer = getTargetPlayer();
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
   var greetingText = system.getValue('buyBuffsGreeting').trim();
   var hasBuffTag = greetingText.indexOf('{buffs}') !== -1;
@@ -256,23 +261,22 @@ function toggleBuffsToBuy(evt) { // Legacy
   updateBuffCost();
 }
 
-function bioEvtHdl(e) { // Native
-  if (e.target.classList.contains('buffLink')) {
-    toggleBuffsToBuy(e);
-    return;
-  }
-  if (e.target.id === 'fshSendBuffMsg') {
-    getBuffsToBuy(e);
-    return;
-  }
+function getBuffNameNode(e) { // Native
   var buffNameNode = e.target;
   while (buffNameNode.tagName &&
       buffNameNode.tagName.toLowerCase() !== 'span') {
     buffNameNode = buffNameNode.parentNode;
   }
+  return buffNameNode;
+}
+
+function bioEvtHdl(e) { // Native
+  var buffNameNode = getBuffNameNode(e);
   if (buffNameNode.classList &&
       buffNameNode.classList.contains('buffLink')) {
     toggleBuffsToBuy(e);
+  } else if (e.target.id === 'fshSendBuffMsg') {
+    getBuffsToBuy(e);
   }
 }
 

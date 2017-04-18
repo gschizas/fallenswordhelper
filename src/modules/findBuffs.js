@@ -173,7 +173,7 @@ function getSustain(doc) { // Native
     }
     return false;
   });
-  return sustainLevel || -1;
+  return system.fallback(sustainLevel, -1);
 }
 
 function nameCell(doc, callback, lastActivity, bioCellHtml) { // Legacy

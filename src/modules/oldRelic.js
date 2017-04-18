@@ -5,6 +5,8 @@ import * as dataObj from './support/dataObj';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
+var relicDefenderCount;
+
 function getRelicPlayerBuffs(responseText) { // jQuery - Old map
   var processingStatus = $('td[title="ProcessingStatus"]');
   processingStatus.html('Processing attacking group stats ... ');
@@ -254,7 +256,7 @@ function syncRelicData() { // jQuery - Bad - Old map
   var defendersProcessedNumber =
     system.intValue(defendersProcessed.html());
   var relicProcessedValue = $('td[title="relicProcessed"]');
-  if (calf.relicDefenderCount === defendersProcessedNumber &&
+  if (relicDefenderCount === defendersProcessedNumber &&
     relicProcessedValue.html() === '1') {
     processRelicStats();
   }
@@ -391,9 +393,19 @@ function getRelicPlayerData(defenderCount, hrefpointer, pl) { // Hybrid - Old ma
   }
 }
 
+function memberLastLogin(member) {
+  if (member.last_login) {
+    return Math.floor(Date.now() / 1000 - member.last_login);
+  }
+  return 0;
+}
+
+function memberLevelNotExcluded(lvl) {
+  return lvl < 400 || lvl > 421 && lvl < 441 || lvl > 450;
+}
+
 function calculateRelicDefenderStats() { // Legacy - Old map
   var validMemberString;
-  var membrList = calf.membrList;
   // hide the calc button
   $('input[id="calculatedefenderstats"]').css('visibility', 'hidden');
   // make the text smaller
@@ -421,19 +433,15 @@ function calculateRelicDefenderStats() { // Legacy - Old map
   var myGuildID = layout.guildId().toString();
 
   var hideRelicOffline = system.getValue('hideRelicOffline');
+
   if (defendingGuildID === myGuildID && !hideRelicOffline) {
     validMemberString = '';
-    Object.keys(membrList).forEach(function(val) {
-      var member = membrList[val];
-      var lastLogin = 0;
-      if (member.last_login) {
-        lastLogin = Math.floor(Date.now() / 1000 -
-          member.last_login);
-      }
+    Object.keys(calf.membrList).forEach(function(val) {
+      var member = calf.membrList[val];
+      var lastLogin = memberLastLogin(member);
       if (lastLogin >= 120 && // two minutes is offline
         lastLogin <= 604800 && // 7 days max
-        (member.level < 400 || member.level > 421 &&
-        member.level < 441 || member.level > 450)) {
+        memberLevelNotExcluded(member.level)) {
         validMemberString += member.username + ' ';
       }
     });
@@ -448,12 +456,12 @@ function calculateRelicDefenderStats() { // Legacy - Old map
         $this.text() + ' ', '');
     }
   });
-  calf.relicDefenderCount = defenders.length;
+  relicDefenderCount = defenders.length;
 
   var textToInsert = '<tr><td><table class="relicT">' +
     '<tr><td colspan="2" class="headr">Defending Guild Stats</td></tr>' +
     '<tr><td class="brn">Number of Defenders:</td>' +
-      '<td>' + calf.relicDefenderCount + '</td></tr>' +
+      '<td>' + relicDefenderCount + '</td></tr>' +
     '<tr><td class="brn">Relic Count:</td>' +
       '<td title="relicCount">0</td></tr>' +
     '<tr><td class="brn">Lead Defender Bonus:</td>' +
@@ -550,9 +558,9 @@ function calculateRelicDefenderStats() { // Legacy - Old map
     validMemberString = validMemberString.slice(0, -1);
     var validMemberArray = validMemberString.split(' ');
     validMemberArray.forEach(function(val, ind, arr) {
-      if (membrList[val]) {
+      if (calf.membrList[val]) {
         arr[ind] = '<a style="color:red;" href="index.php?cmd=' +
-          'profile&player_id=' + membrList[val].id + '">' +
+          'profile&player_id=' + calf.membrList[val].id + '">' +
           val + '</a>';
       }
     });
