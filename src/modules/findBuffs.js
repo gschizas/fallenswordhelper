@@ -131,6 +131,20 @@ function uniq(arr, removeBy) { // Native
   return out;
 }
 
+function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
+  var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);
+  if (prevBR === -1) {return 0;}
+  return prevBR;
+}
+
+function getNextBr(bioCellHtml, runningTotalPosition) { // Legacy
+  var nextBR = bioCellHtml.indexOf('<br>', runningTotalPosition);
+  if (nextBR === -1 && bioCellHtml.indexOf('<br>') !== -1) {
+    return bioCellHtml.length - 5;
+  }
+  return nextBR;
+}
+
 function getBioLines(bioCellHtml) { // Legacy
   var res = [];
   var buffPosition = 0;
@@ -146,12 +160,8 @@ function getBioLines(bioCellHtml) { // Legacy
     if (buffPosition !== -1) {
       startingPosition = buffPosition + 1;
       runningTotalPosition += buffPosition;
-      var prevBR = bioCellHtml.lastIndexOf('<br>', runningTotalPosition - 1);
-      if (prevBR === -1) {prevBR = 0;}
-      var nextBR = bioCellHtml.indexOf('<br>', runningTotalPosition);
-      if (nextBR === -1 && bioCellHtml.indexOf('<br>') !== -1) {
-        nextBR = bioCellHtml.length - 5;
-      }
+      var prevBR = getPrevBr(bioCellHtml, runningTotalPosition);
+      var nextBR = getNextBr(bioCellHtml, runningTotalPosition);
       var textLine = bioCellHtml.substr(prevBR + 4, nextBR - prevBR);
       textLine = textLine.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
       res.push(textLine);

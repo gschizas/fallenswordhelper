@@ -4,22 +4,24 @@ import * as system from './support/system';
 
 var param;
 
-function itemRow(item) {
+function detailRow(j, itemField) { // Legacy
+  if (param.tags[j] === 'checkbox') {
+    return '<input type="checkbox"' + system.isChecked(itemField) +
+      ' disabled>';
+  } else if (param.url && param.url[j] !== '') {
+    return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
+      '">' + itemField + '</a>';
+  }
+  return itemField;
+}
+
+function itemRow(item) { // Legacy
   var result = '';
   for (var j = 0; j < param.fields.length; j += 1) {
     result += '<td class="fshCenter">';
     var itemField = item[param.fields[j]];
     if (param.fields[j] === param.categoryField) {continue;}
-    if (param.tags[j] === 'checkbox') {
-      result += '<input type="checkbox"' + system.isChecked(itemField) +
-        ' disabled>';
-    } else if (param.url && param.url[j] !== '') {
-      result += '<a href="' + param.url[j].replace('@replaceme@', itemField) +
-        '">' + itemField + '</a>';
-    } else {
-      result += itemField;
-    }
-    result += '</td>';
+    result += detailRow(j, itemField) + '</td>';
   }
   return result;
 }
@@ -109,11 +111,23 @@ function resetRawEditor() { // Legacy
   generateManageTable();
 }
 
+var listEvents = [
+  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
+  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
+  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
+  {
+    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
+    fn: deleteQuickItem
+  }
+];
+
 function listEvtHnl(e) { // Native
-  if (e.target.id === 'fshReset') {resetRawEditor();} else
-  if (e.target.id === 'fshSave') {saveRawEditor();} else
-  if (e.target.id === 'fshAdd') {addQuickItem();} else
-  if (e.target.id.indexOf('fshDel') === 0) {deleteQuickItem(e);}
+  for (var i = 0; i < listEvents.length; i += 1) {
+    if (listEvents[i].test(e)) {
+      listEvents[i].fn(e);
+      return;
+    }
+  }
 }
 
 export function injectAuctionSearch(injector) { // Legacy

@@ -113,14 +113,18 @@ function boolData(cell) { // jQuery
   if (matches) {cell.attr('data-order', matches[1]);}
 }
 
-function maxMoves(cell, row) { // jQuery
-  if (!opts || !opts.moves) {return;}
-  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
-  if (!matches) {return;}
+function hazMaxMoves(matches, row) { // jQuery
   if (opts.moves[matches[1]] &&
     opts.moves[matches[1]].count === 3) {
     row.addClass('moveMax');
   }
+}
+
+function maxMoves(cell, row) { // jQuery
+  if (system.fallback(!opts, !opts.moves)) {return;}
+  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+  if (!matches) {return;}
+  hazMaxMoves(matches, row);
   cell.attr('data-order', matches[1]);
 }
 

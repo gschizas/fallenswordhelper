@@ -78,12 +78,14 @@ export function injectNotepad() { // jQuery
 }
 
 export function ladder() { // Native
-  document.querySelector('#pCC input[type="submit"]')
-    .addEventListener('click', function(e) {
+  var submitButton = document.querySelector('#pCC input[type="submit"]');
+  if (submitButton) {
+    submitButton.addEventListener('click', function(e) {
       e.preventDefault();
       window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
         document.querySelector('#pCC select[name="viewing_band_id"]').value;
     });
+  }
 }
 
 export function injectFsBoxContent(injector) { // jQuery

@@ -79,35 +79,40 @@ export function injectViewGuild() { // Native
   });
 }
 
-function gotConflictInfo(responseText, callback) { // Legacy
-  var insertHere = callback.node;
-  var doc = system.createDocument(responseText);
+function hazConflict(conflictTable, curPage, insertHere) { // Legacy
+  if (curPage === 1) {
+    var newNode = insertHere.insertRow(insertHere.rows.length - 2);
+    newNode.insertCell(0);
+    newNode.insertCell(0);
+    newNode.cells[0].innerHTML =
+      '<a href="index.php?cmd=guild&subcmd=conflicts">Active Conflicts</a>';
+    newNode.cells[1].innerHTML = 'Score';
+  }
+  for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
+    var newRow = insertHere.insertRow(insertHere.rows.length - 2);
+    newRow.insertCell(0);
+    newRow.insertCell(0);
+    newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
+    newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
+      .innerHTML + '</b>';
+  }
+}
 
+function activeConflicts(doc, curPage, insertHere) { // Legacy
+  var conflictTable = system.findNode(
+    '//font[contains(.,"Participants")]/ancestor::table[1]', doc);
+  if (conflictTable && conflictTable.rows.length > 3) {
+    hazConflict(conflictTable, curPage, insertHere);
+  }
+}
+
+function gotConflictInfo(responseText, callback) { // Legacy
+  var doc = system.createDocument(responseText);
   var page = system.findNode('//td[contains(.,"Page:")]', doc);
   var curPage = parseInt(system.findNode('//input[@name="page"]',
     doc).value, 10);
   var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
-
-  var conflictTable = system.findNode(
-    '//font[contains(.,"Participants")]/ancestor::table[1]', doc);
-  if (conflictTable && conflictTable.rows.length > 3) {
-    if (curPage === 1) {
-      var newNode = insertHere.insertRow(insertHere.rows.length - 2);
-      newNode.insertCell(0);
-      newNode.insertCell(0);
-      newNode.cells[0].innerHTML =
-        '<a href="index.php?cmd=guild&subcmd=conflicts">Active Conflicts</a>';
-      newNode.cells[1].innerHTML = 'Score';
-    }
-    for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
-      var newRow = insertHere.insertRow(insertHere.rows.length - 2);
-      newRow.insertCell(0);
-      newRow.insertCell(0);
-      newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-      newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
-        .innerHTML + '</b>';
-    }
-  }
+  activeConflicts(doc, curPage, callback.node);
   if (maxPage && parseInt(maxPage[1], 10) > curPage) {
     system.xmlhttp(
       'index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' +

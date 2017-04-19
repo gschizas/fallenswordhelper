@@ -145,6 +145,14 @@ function beforeend(o, item) { // Native
   if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
 }
 
+function doneInvPaint() { // Native
+  if (showExtraLinks) {extraLinks = true;}
+  checkAll = true;
+  colouring = true;
+  if (showQuickDropLinks) {dropLinks = true;}
+  sendLinks = true;
+}
+
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
   while (performance.now() < limit && paintCount < itemsAry.length) {
@@ -157,11 +165,7 @@ function invPaint() { // Native - abstract this pattern
   if (paintCount < itemsAry.length) {
     task.add(3, invPaint);
   } else {
-    if (showExtraLinks) {extraLinks = true;}
-    checkAll = true;
-    colouring = true;
-    if (showQuickDropLinks) {dropLinks = true;}
-    sendLinks = true;
+    doneInvPaint();
   }
 }
 

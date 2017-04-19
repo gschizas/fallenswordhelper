@@ -3,27 +3,29 @@ import * as debug from './support/debug';
 import * as newMap from './newMap/newMap';
 import * as system from './support/system';
 
+var impStyles = [
+  ' style="color:red; font-size:large; font-weight:bold"',
+  ' style="color:Orangered; font-size:large; font-weight:bold"',
+  ' style="color:Orangered; font-size:medium; font-weight:bold;"'
+];
+
+function getImpWarningStyle(impsRemaining) { // Legacy
+  if (impsRemaining >= 0 && impsRemaining <= 2) {
+    return impStyles[impsRemaining];
+  }
+  return ' style="color:green; font-size:medium;"';
+}
+
 function impWarning(impsRemaining) { // Legacy
-  var applyImpWarningColor = ' style="color:green; ' +
-    'font-size:medium;"';
-  if (impsRemaining === 2) {
-    applyImpWarningColor = ' style="color:Orangered; ' +
-      'font-size:medium; font-weight:bold;"';
-  }
-  if (impsRemaining === 1) {
-    applyImpWarningColor = ' style="color:Orangered; ' +
-      'font-size:large; font-weight:bold"';
-  }
+  var applyImpWarningColor = getImpWarningStyle(impsRemaining);
+  var recastButton = '';
   if (impsRemaining === 0) {
-    applyImpWarningColor = ' style="color:red; ' +
-      'font-size:large; font-weight:bold"';
+    recastButton = '&nbsp;<span id="Helper:recastImpAndRefresh" ' +
+      'style="color: blue; cursor: pointer; text-decoration: underline; ' +
+      'font-size: xx-small;">Recast</span>';
   }
-  return '<tr><td' + applyImpWarningColor +
-    '>Shield Imps Remaining: ' + impsRemaining +
-    (impsRemaining === 0 ?
-    '&nbsp;<span id="Helper:recastImpAndRefresh" style="color:' +
-    'blue;cursor:pointer;text-decoration:underline;font-size:' +
-    'xx-small;">Recast</span>' : '') + '</td></tr>';
+  return '<tr><td' + applyImpWarningColor + '>Shield Imps Remaining: ' +
+    impsRemaining + recastButton + '</td></tr>';
 }
 
 function hasCA() { // Legacy
@@ -46,25 +48,29 @@ function hasCA() { // Legacy
   return replacementText;
 }
 
-function hasDblr() { // Legacy
-  var replacementText = '';
-  var hasDoubler = system.findNode('//img[contains(@src,"/26_sm.gif")]');
-  if (hasDoubler) {
-    var doublerLevel;
-    if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
-      var onmouseover = $(hasDoubler).data('tipped');
-      var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
-      var doubler = doublerRE.exec(onmouseover);
-      if (doubler) {
-        doublerLevel = doubler[1];
-      }
-    }
-    if (doublerLevel === 200) {
-      replacementText += '<tr><td style="font-size:small; color:' +
-        'red">Doubler ' + doublerLevel + ' active</td></tr>';
+function getDoublerLevel(hasDoubler) { // Legacy
+  var doublerLevel;
+  if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
+    var onmouseover = $(hasDoubler).data('tipped');
+    var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
+    var doubler = doublerRE.exec(onmouseover);
+    if (doubler) {
+      doublerLevel = doubler[1];
     }
   }
-  return replacementText;
+  if (doublerLevel === 200) { // ???
+    return '<tr><td style="font-size:small; color:' +
+      'red">Doubler ' + doublerLevel + ' active</td></tr>';
+  }
+  return '';
+}
+
+function hasDblr() { // Legacy
+  var hasDoubler = system.findNode('//img[contains(@src,"/26_sm.gif")]');
+  if (hasDoubler) {
+    return getDoublerLevel(hasDoubler);
+  }
+  return '';
 }
 
 function getKillStreak(responseText) { // Hybrid
@@ -104,38 +110,40 @@ function getLastValue(pref) {
   return val;
 }
 
+function getTrackText(trackKillStreak) { // Legacy
+  if (trackKillStreak) {return 'ON';}
+  return 'off';
+}
+
 function doDeathDealer(impsRemaining) { // Legacy
-  var replacementText = '';
   var lastDeathDealerPercentage = getLastValue('lastDeathDealerPercentage');
   var lastKillStreak = getLastValue('lastKillStreak');
   var trackKillStreak = system.getValue('trackKillStreak');
+  var trackText = getTrackText(trackKillStreak);
   if (impsRemaining > 0 && lastDeathDealerPercentage === 20) {
-    replacementText += '<tr><td style="font-size:small; color:black"' +
+    return '<tr><td style="font-size:small; color:black"' +
       '>Kill Streak: <span findme="killstreak">&gt;' +
       system.addCommas(lastKillStreak) + '</span> Damage bonus: <' +
       'span findme="damagebonus">20</span>%</td></tr>';
-  } else if (!trackKillStreak) {
-    replacementText += '<tr><td style="font-size:small; color:' +
+  }
+  if (!trackKillStreak) {
+    return '<tr><td style="font-size:small; color:' +
       'navy" nowrap>KillStreak tracker disabled. <span style="' +
       'font-size:xx-small">Track: <span id=Helper:toggleKS' +
       'tracker style="color:navy;cursor:pointer;text-' +
       'decoration:underline;" title="Click to toggle">' +
-      (trackKillStreak ? 'ON' : 'off') +
-      '</span></span></td></tr>';
-  } else {
-    replacementText += '<tr><td style="font-size:small; color:' +
-      'navy" nowrap>KillStreak: <span findme="killstreak">' +
-      system.addCommas(lastKillStreak) + '</span> Damage bonus' +
-      ': <span findme="damagebonus">' +
-      Math.round(lastDeathDealerPercentage * 100) / 100 +
-      '</span>%&nbsp;<span style="font-size:xx-small">Track: ' +
-      '<span id=Helper:toggleKStracker style="color:navy;' +
-      'cursor:pointer;text-decoration:underline;" title="Click' +
-      ' to toggle">' + (trackKillStreak ? 'ON' : 'off') +
-      '</span></span></td></tr>';
-    system.xmlhttp('index.php?cmd=profile', getKillStreak);
+      trackText + '</span></span></td></tr>';
   }
-  return replacementText;
+  system.xmlhttp('index.php?cmd=profile', getKillStreak);
+  return '<tr><td style="font-size:small; color:' +
+    'navy" nowrap>KillStreak: <span findme="killstreak">' +
+    system.addCommas(lastKillStreak) + '</span> Damage bonus' +
+    ': <span findme="damagebonus">' +
+    Math.round(lastDeathDealerPercentage * 100) / 100 +
+    '</span>%&nbsp;<span style="font-size:xx-small">Track: ' +
+    '<span id=Helper:toggleKStracker style="color:navy;' +
+    'cursor:pointer;text-decoration:underline;" title="Click' +
+    ' to toggle">' + trackText + '</span></span></td></tr>';
 }
 
 function recastImpAndRefresh(responseText) { // Legacy
@@ -159,23 +167,41 @@ function toggleKsTracker() { // Legacy
 var hasShieldImp;
 var hasDeathDealer;
 var impsRemaining;
+var re = /(\d+) HP remaining/;
 
-function findImps() { // Legacy
-  var ret = '';
-  if (hasDeathDealer || hasShieldImp) {
-    var re = /(\d+) HP remaining/;
-    impsRemaining = 0;
-    if (hasShieldImp) {
-      var textToTest = $(hasShieldImp).data('tipped');
-      var impsRemainingRE = re.exec(textToTest);
-      impsRemaining = impsRemainingRE[1];
-    }
-    ret += impWarning(impsRemaining);
-    if (hasDeathDealer) {
-      ret += doDeathDealer(impsRemaining);
-    }
+function getImpHp() { // Legacy - Old Map
+  impsRemaining = 0;
+  if (hasShieldImp) {
+    var textToTest = $(hasShieldImp).data('tipped');
+    var impsRemainingRE = re.exec(textToTest);
+    impsRemaining = impsRemainingRE[1];
+  }
+  var ret = impWarning(impsRemaining);
+  if (hasDeathDealer) {
+    ret += doDeathDealer(impsRemaining);
   }
   return ret;
+}
+
+function findImps() { // Legacy - Old Map
+  if (hasDeathDealer || hasShieldImp) {
+    return getImpHp();
+  }
+  return '';
+}
+
+function impRecast() { // Legacy - Old Map
+  if ((hasDeathDealer || hasShieldImp) && impsRemaining === 0) {
+    var _recastImpAndRefresh = document
+      .getElementById('Helper:recastImpAndRefresh');
+    var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
+      'Players=' +
+      $('dt.stat-name:first').next().text().replace(/,/g, '') +
+      '&skills%5B%5D=55';
+    _recastImpAndRefresh.addEventListener('click', function() {
+      system.xmlhttp(impHref, recastImpAndRefresh, true);
+    }, true);
+  }
 }
 
 function checkBuffs() { // Legacy - Old Map
@@ -204,18 +230,7 @@ function checkBuffs() { // Legacy - Old Map
   newSpan.innerHTML = replacementText;
   injectHere.appendChild(newSpan);
 
-  if ((hasDeathDealer || hasShieldImp) && impsRemaining === 0) {
-    var _recastImpAndRefresh = document
-      .getElementById('Helper:recastImpAndRefresh');
-    var impHref = 'index.php?cmd=quickbuff&subcmd=activate&target' +
-      'Players=' +
-      $('dt.stat-name:first').next().text().replace(/,/g, '') +
-      '&skills%5B%5D=55';
-    _recastImpAndRefresh.addEventListener('click', function() {
-      system.xmlhttp(impHref, recastImpAndRefresh, true);
-    }, true);
-  }
-
+  impRecast();
   toggleKsTracker();
 }
 

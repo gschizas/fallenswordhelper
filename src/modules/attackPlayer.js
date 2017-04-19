@@ -1,4 +1,4 @@
-import * as system from './support/system';
+/* import * as system from './support/system';
 
 function getProfileStatsAndBuffs(responseText, callback) { // Legacy - currently disabled
   var doc = system.createDocument(responseText);
@@ -138,4 +138,4 @@ export function injectAttackPlayer() { // Legacy - currently disabled
     var newCell = newRow.insertCell(0);
     newCell.innerHTML = '&nbsp;';
   }
-}
+}*/

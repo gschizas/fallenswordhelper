@@ -222,17 +222,29 @@ function moveRHSBoxToLHS(title) { // Native
   document.getElementById('pCL').appendChild(boxDiv);
 }
 
-function notHuntMode() { // Native
-  // move boxes in opposite order that you want them to appear.
+function doMoveGuildList() { // Native
   if (system.getValue('moveGuildList')) {
     task.add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
   }
+}
+
+function doMoveAllyList() { // Native
   if (system.getValue('moveOnlineAlliesList')) {
     task.add(3, moveRHSBoxUpOnRHS, ['minibox-allies']);
   }
+}
+
+function doMoveFsBox() { // Native
   if (system.getValue('moveFSBox')) {
     task.add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
   }
+}
+
+function notHuntMode() { // Native
+  // move boxes in opposite order that you want them to appear.
+  doMoveGuildList();
+  doMoveAllyList();
+  doMoveFsBox();
 
   getEnvVars();
   conditional();
@@ -356,33 +368,42 @@ function injectQuickLinks() { // Native ?
   isDraggable(draggableQuickLinks);
 }
 
-// main event dispatcher
-FSH.dispatch = function dispatch() { // Native
-
-  fshGa.setup();
-
-  fshGa.start('JS Perf', 'FSH.dispatch');
-
-  getCoreFunction();
-
+function lookForHcsData() { // Native
   var hcsData = document.getElementById('html');
   if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
   }
+}
 
+function isMessageSound() { // Native
+  if (system.getValue('playNewMessageSound')) {
+    task.add(3, doMsgSound);
+  }
+}
+
+function doQuickLinks() { // Native
+  if (!calf.huntingMode) {
+    task.add(3, injectQuickLinks);
+  }
+}
+
+// main event dispatcher
+FSH.dispatch = function dispatch() { // Native
+
+  fshGa.setup();
+  fshGa.start('JS Perf', 'FSH.dispatch');
+
+  getCoreFunction();
+  lookForHcsData();
   task.add(3, asyncDispatcher);
 
   if (typeof window.jQuery === 'undefined') {return;}
 
-  if (system.getValue('playNewMessageSound')) {
-    task.add(3, doMsgSound);
-  }
+  isMessageSound();
 
   /* This must be at the end in order not to
   screw up other system.findNode calls (Issue 351) */
-  if (!calf.huntingMode) {
-    task.add(3, injectQuickLinks);
-  }
+  doQuickLinks();
 
   fshGa.end('JS Perf', 'FSH.dispatch');
 

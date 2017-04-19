@@ -161,9 +161,7 @@ export function durabilityRender(data, type, row) { // Native
   }
 }
 
-export function bpRender(where, type, row) { // Native
-  if (row.folder_id || row.player_id ===
-    theInv.current_player_id) {return;}
+function bpDisplayType(type, row) { // Native
   if (type !== 'display') {return 'BP';}
   if (row.player_id === -1) {
     return '<span class="fshLink takeItem" invid="' + row.inv_id +
@@ -174,52 +172,79 @@ export function bpRender(where, type, row) { // Native
     '" mode="0" action="recall">BP</span>';
 }
 
+export function bpRender(where, type, row) { // Native
+  if (row.folder_id || row.player_id ===
+    theInv.current_player_id) {return;}
+  return bpDisplayType(type, row);
+}
+
+function gsDisplayType(_data, type, row) { // Native
+  if (type === 'display') {
+    return '<span class="fshLink recallItem" invid="' +
+    row.inv_id + '" playerid="' +
+    system.fallback(row.player_id, theInv.player_id) +
+    '" mode="1" action="recall">GS</span>';
+  }
+  return 'GS';
+}
+
 export function gsRender(_data, type, row) { // Native
   if (row.player_id && row.player_id !== -1 ||
-    row.folder_id && row.guild_tag !== '-1') {
-    return type === 'display' ? '<span class="fshLink recallItem" invid="' +
-      row.inv_id + '" playerid="' +
-      (row.player_id || theInv.player_id) +
-      '" mode="1" action="recall">GS</span>' : 'GS';
+      row.folder_id && row.guild_tag !== '-1') {
+    return gsDisplayType(_data, type, row);
   }
 }
 
+var actionTypes = [
+  {
+    test: function(row) {return row.player_id && row.player_id === -1;},
+    wearAction: function(row) {
+      return 'takeItem" invid="' + row.inv_id + '" action="wear';
+    },
+    useAction: function(row) {
+      return 'takeItem" invid="' + row.inv_id + '" action="use';
+    }
+  },
+  {
+    test: function(row) {
+      return row.player_id && row.player_id !== theInv.current_player_id;
+    },
+    wearAction: function(row) {
+      return 'recallItem" invid="' + row.inv_id +
+        '" playerid="' + row.player_id + '" mode="0" action="wear';
+    },
+    useAction: function(row) {
+      return 'recallItem" invid="' + row.inv_id +
+        '" playerid="' + row.player_id + '" mode="0" action="use';
+    }
+  },
+  {
+    test: function(row) {
+      return row.folder_id && !row.equipped ||
+        row.player_id && !row.equipped &&
+        row.player_id === theInv.current_player_id;
+    },
+    wearAction: function(row) {return 'wearItem" invid="' + row.inv_id;},
+    useAction: function(row) {return 'useItem" invid="' + row.inv_id;}
+  }
+];
+
 function wearRender(row) { // Native
-  if (row.player_id && row.player_id === -1) {
-    return '<span class="fshLink takeItem" invid="' + row.inv_id +
-      '" action="wear">Wear</span>';
-  }
-  if (row.player_id &&
-      row.player_id !== theInv.current_player_id) {
-    return '<span class="fshLink recallItem" invid="' + row.inv_id +
-      '" playerid="' + row.player_id +
-      '" mode="0" action="wear">Wear</span>';
-  }
-  if (row.folder_id && !row.equipped ||
-      row.player_id && !row.equipped &&
-      row.player_id === theInv.current_player_id) {
-    return '<span class="fshLink wearItem" invid="' + row.inv_id +
-      '">Wear</span>';
+  for (var i = 0; i < actionTypes.length; i += 1) {
+    if (actionTypes[i].test(row)) {
+      return '<span class="fshLink ' + actionTypes[i].wearAction(row) +
+        '">Wear</span>';
+    }
   }
   return '';
 }
 
 function useRender(row) { // Native
-  if (row.player_id && row.player_id === -1) {
-    return '<span class="fshLink takeItem" invid="' + row.inv_id +
-      '" action="use">Use</span>';
-  }
-  if (row.player_id &&
-      row.player_id !== theInv.current_player_id) {
-    return '<span class="fshLink recallItem" invid="' + row.inv_id +
-      '" playerid="' + row.player_id +
-      '" mode="0" action="use">Use</span>';
-  }
-  if (row.folder_id && !row.equipped ||
-      row.player_id && !row.equipped &&
-      row.player_id === theInv.current_player_id) {
-    return '<span class="fshLink useItem" invid="' + row.inv_id +
-      '">Use</span>';
+  for (var i = 0; i < actionTypes.length; i += 1) {
+    if (actionTypes[i].test(row)) {
+      return '<span class="fshLink ' + actionTypes[i].useAction(row) +
+        '">Use</span>';
+    }
   }
   return '';
 }
@@ -263,15 +288,24 @@ export function sendRender(data, type, row) { // Native
     ' data-inv="' + row.inv_id + '">Send</span>';
 }
 
-export function createdRow(row, data) { // jQuery
-  var colour;
-  if (data.folder_id) {
-    colour = data.equipped ? 'fshGreen' : 'fshNavy';
-  }
-  if (data.player_id) {
-    colour = data.player_id === -1 ? 'fshNavy' : 'fshMaroon';
-  }
-  $(row).addClass(colour);
+function selfRowColor(data) { // Native
+  if (data.equipped) {return 'fshGreen';}
+  return 'fshNavy';
+}
+
+function guildRowColor(data) { // Native
+  if (data.player_id === -1) {return 'fshNavy';}
+  return 'fshMaroon';
+}
+
+function getRowColor(data) { // Native
+  if (data.folder_id) {return selfRowColor(data);}
+  return guildRowColor(data);
+}
+
+export function createdRow(row, data) { // Native
+  var colour = getRowColor(data);
+  row.classList.add(colour);
 }
 
 function refresh() { // Native
@@ -493,6 +527,16 @@ function getInvMan() { // Native
 
 }
 
+function extendOptions(data) {
+  options = system.fallback(data, {});
+  options.fshMinLvl = system.fallback(options.fshMinLvl,
+    dataObj.defaults.inventoryMinLvl);
+  options.fshMaxLvl = system.fallback(options.fshMaxLvl,
+    dataObj.defaults.inventoryMaxLvl);
+  options.checkedElements = system.fallback(options.checkedElements,
+    dataObj.defaults.inventoryCheckedElements);
+}
+
 function syncInvMan() { // jQuery
   var prm = [];
   prm.push(ajax.getInventory().done(function(data) {
@@ -502,16 +546,7 @@ function syncInvMan() { // jQuery
     prm.push(ajax.getMembrList(false));
   }
   prm.push(ajax.getForage('fsh_inventory')
-    .pipe(function(data) {
-      options = data || {};
-      options.fshMinLvl = options.fshMinLvl ||
-        dataObj.defaults.inventoryMinLvl;
-      options.fshMaxLvl = options.fshMaxLvl ||
-        dataObj.defaults.inventoryMaxLvl;
-      options.checkedElements =
-        options.checkedElements ||
-        dataObj.defaults.inventoryCheckedElements;
-    })
+    .done(extendOptions)
   );
   $.when.apply($, prm).done(function() {
     task.add(3, getInvMan);

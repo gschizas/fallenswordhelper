@@ -223,26 +223,43 @@ function displayAdvisor() { // jQuery
 
 }
 
+function playerName(f) { // Native
+  if (!membrList[f]) {return f;}
+  return '<a href="index.php?cmd=profile&player_id=' +
+    membrList[f].id + '">' + f + '</a>';
+}
+
+function playerLevel(f) { // Native
+  if (!membrList[f]) {return '';}
+  return membrList[f].level;
+}
+
+function playerRank(f) { // Native
+  if (!membrList[f]) {return '';}
+  return '<div class="fshAdvRank">' +
+    membrList[f].rank_name + '</div>';
+}
+
+function addStats(f) { // Native
+  if (f === 'Total:') {return;}
+  data.push([
+    playerName(f),
+    playerLevel(f),
+    playerRank(f),
+    system.addCommas(newSummary[f].deposit),
+    system.addCommas(newSummary[f].tax),
+    system.addCommas(newSummary[f].total),
+    system.addCommas(newSummary[f].fsp),
+    system.addCommas(newSummary[f].skills),
+    system.addCommas(newSummary[f].grpCrt),
+    system.addCommas(newSummary[f].grpJoin),
+    system.addCommas(newSummary[f].relics),
+    system.addCommas(newSummary[f].contrib),
+  ]);
+}
+
 function addAdvisorPages() { // Native
-  Object.keys(newSummary).forEach(function(f) {
-    if (f === 'Total:') {return;}
-    data.push([
-      !membrList[f] ? f : '<a href="index.php?cmd=profile&player_id=' +
-        membrList[f].id + '">' + f + '</a>',
-      !membrList[f] ? '' : membrList[f].level,
-      !membrList[f] ? '' : '<div class="fshAdvRank">' +
-        membrList[f].rank_name + '</div>',
-      system.addCommas(newSummary[f].deposit),
-      system.addCommas(newSummary[f].tax),
-      system.addCommas(newSummary[f].total),
-      system.addCommas(newSummary[f].fsp),
-      system.addCommas(newSummary[f].skills),
-      system.addCommas(newSummary[f].grpCrt),
-      system.addCommas(newSummary[f].grpJoin),
-      system.addCommas(newSummary[f].relics),
-      system.addCommas(newSummary[f].contrib),
-    ]);
-  });
+  Object.keys(newSummary).forEach(addStats);
   task.add(3, displayAdvisor);
 }
 

@@ -124,14 +124,21 @@ function handleKey(r) {
   }
 }
 
-function keyPress(evt) { // Native
-  if (evt.target.tagName !== 'HTML' &&
-      evt.target.tagName !== 'BODY') {return;}
+var bailOut = [
+  function(evt) {
+    return evt.target.tagName !== 'HTML' && evt.target.tagName !== 'BODY';
+  },
   /* ignore control, alt and meta keys
   (I think meta is the command key in Macintoshes) */
-  if (evt.ctrlKey) {return;}
-  if (evt.metaKey) {return;}
-  if (evt.altKey) {return;}
+  function(evt) {return evt.ctrlKey;},
+  function(evt) {return evt.metaKey;},
+  function(evt) {return evt.altKey;}
+];
+
+function keyPress(evt) { // Native
+  for (var i = 0; i < bailOut.length; i += 1) {
+    if (bailOut[i](evt)) {return;}
+  }
   handleKey(evt.charCode);
 }
 
