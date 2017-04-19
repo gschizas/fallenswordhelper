@@ -38,18 +38,22 @@ function getEnhancement(doc, enh, inject) { // Native
   inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
 }
 
-function buffTimeLeft(_s) {
+function timeUnit(value, unit) { // Native
+  if (value > 0) {return value.toString() + unit;}
+  return '';
+}
+
+function buffTimeLeft(_s) { // Native
   var m = Math.floor(_s / 60);
   var s = _s % 60;
-  var buffTimeToExpire = '';
-  if (m > 0) {buffTimeToExpire = m + 'm';}
+  var buffTimeToExpire = timeUnit(m, 'm');
   if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
-  if (s > 0) {buffTimeToExpire = s + 's';}
+  buffTimeToExpire += timeUnit(s, 's');
   return buffTimeToExpire;
 }
 
 function getBuff(doc, buff, inject) { // Native
-  var s = doc[buff] || 0;
+  var s = system.fallback(doc[buff], 0);
   if (s) {
     var buffTimeToExpire = buffTimeLeft(s);
     inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +

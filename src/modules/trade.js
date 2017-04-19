@@ -31,7 +31,7 @@ function doHideFolder(evt) { // Native
     var hidden = el.classList.contains('fshHide');
     var all = folderid === 'folderid0';
     var hasFolder = el.classList.contains(folderid);
-    if (hidden && (all || hasFolder)) {
+    if (hidden && system.fallback(all, hasFolder)) {
       el.classList.remove('fshHide');
       el.classList.add('fshBlock'); // show()
     }
@@ -71,16 +71,18 @@ function doFolderHeaders(folders) { // native
 
 var invItems;
 
-function forEachInvItem(el) {
+function stColor(el, item) { // Native
+  if (item.is_in_st) {
+    el.classList.add('isInSTBorder');
+  } else {el.classList.add('tradeItemMargin');}
+}
+
+function forEachInvItem(el) { // Native
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
   var item = invItems[checkbox.getAttribute('value')];
   el.classList.add('folderid' + item.folder_id);
-  if (invItems.fshHasST) {
-    if (item.is_in_st) {
-      el.classList.add('isInSTBorder');
-    } else {el.classList.add('tradeItemMargin');}
-  }
+  if (invItems.fshHasST) {stColor(el, item);}
   checkbox.classList.add('itemid' + item.item_id);
   checkbox.classList.add('itemtype' + item.type);
   if (item.is_in_st) {el.classList.add('isInST');}
@@ -115,6 +117,12 @@ function getHowMany(itemTables) { // Native
   return howMany;
 }
 
+function shouldBeChecked(itemid, checkbox) { // Native
+  return itemid === 'itemid-1' ||
+    itemid === 'itemid-2' && checkbox.classList.contains('itemtype12') ||
+    checkbox.classList.contains(itemid);
+}
+
 function doCheckAll(evt) { // Native
   var itemid = evt.target.id;
   var itemList = document.getElementById('item-div') ||
@@ -127,10 +135,7 @@ function doCheckAll(evt) { // Native
       .firstElementChild;
     if (howMany &&
         system.fallback(itemsInSt, !checkbox.classList.contains('isInST')) &&
-        (itemid === 'itemid-1' ||
-        itemid === 'itemid-2' &&
-        checkbox.classList.contains('itemtype12') ||
-        checkbox.classList.contains(itemid))) {
+        shouldBeChecked(itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
       return;

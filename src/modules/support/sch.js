@@ -15,11 +15,16 @@ function swp(i, j) {
   heap[j] = temp;
 }
 
+function calcChildIndex(leftHigher, i) {
+  if (leftHigher) {return i * 2;}
+  return i * 2 + 1;
+}
+
 function sink(j) {
   var i = j;
   while (i * 2 < heap.length) {
     var leftHigher = !cmp(i * 2 + 1, i * 2);
-    var childIndex = leftHigher ? i * 2 : i * 2 + 1;
+    var childIndex = calcChildIndex(leftHigher, i);
     if (cmp(i, childIndex)) {break;}
     swp(i, childIndex);
     i = childIndex;

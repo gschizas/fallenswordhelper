@@ -187,6 +187,26 @@ export function useItem(backpackInvId) {
     .done(dialog);
 }
 
+function additionalAction(action, data) {
+  if (action === 'wear') {
+    return equipItem(data.b)
+      .pipe(function equipItemStatus() {return data;});
+      // Return takeitem status irrespective of the status of the equipitem
+  }
+  if (action === 'use') {
+    return useItem(data.b)
+      .pipe(function useItemStatus() {return data;});
+      // Return takeitem status irrespective of the status of the useitem
+  }
+}
+
+function takeItemStatus(action, data) {
+  if (data.r === 0 && action !== 'take') {
+    return additionalAction(action, data);
+  }
+  return data;
+}
+
 function takeItem(invId, action) {
   return $.ajax({
     url: 'index.php',
@@ -198,21 +218,7 @@ function takeItem(invId, action) {
       ajax: 1
     },
     dataType: 'json'
-  }).done(dialog).pipe(function takeItemStatus(data) {
-    if (data.r === 0 && action !== 'take') {
-      if (action === 'wear') {
-        return equipItem(data.b)
-          .pipe(function equipItemStatus() {return data;});
-          // Return takeitem status irrespective of the status of the equipitem
-      }
-      if (action === 'use') {
-        return useItem(data.b)
-          .pipe(function useItemStatus() {return data;});
-          // Return takeitem status irrespective of the status of the useitem
-      }
-    }
-    return data;
-  });
+  }).done(dialog).pipe(takeItemStatus.bind(null, action));
 }
 
 export function queueTakeItem(invId, action) {

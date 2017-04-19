@@ -1,6 +1,8 @@
 import * as layout from './support/layout';
 import * as system from './support/system';
 
+var itemRE = /<b>([^<]+)<\/b>/i;
+
 var plantFromComponentHash = {
   'Amber Essense': 'Amber Plant',
   'Blood Bloom Flower': 'Blood Bloom Plant',
@@ -45,11 +47,15 @@ function injectInvent() { // Bad jQuery
 
 }
 
-function injectViewRecipeLinks(responseText, callback) { // Legacy
-  var itemRE = /<b>([^<]+)<\/b>/i;
+function getItemName(responseText) { // Legacy
   var itemName = itemRE.exec(responseText);
-  if (itemName) {itemName = itemName[1];}
-  var plantFromComponent = plantFromComponentHash[itemName] || itemName;
+  if (itemName) {return itemName[1];}
+}
+
+function injectViewRecipeLinks(responseText, callback) { // Legacy
+  var itemName = getItemName(responseText);
+  var plantFromComponent = system.fallback(plantFromComponentHash[itemName],
+    itemName);
   if (itemName !== plantFromComponent) {
     var itemLinks = document.createElement('td');
     itemLinks.innerHTML = '<a href="' + system.server +

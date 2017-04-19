@@ -54,17 +54,20 @@ function getTarget(doc) {
   return document;
 }
 
-export function findNodes(xpath, doc) {
-  var _xpath = xpath;
-  var nodes = [];
+function patchXPath(xpath) {
   if (xpath.indexOf('/') === 0) {
-    _xpath = '.' + xpath;
+    return '.' + xpath;
     // TODO this is likely to be bad
     // this is a chrome fix - needs a .// for xpath
     // where as firefox can function without it.
-    // firefox sitll works with .//
+    // firefox still works with .//
   }
+  return xpath;
+}
 
+export function findNodes(xpath, doc) {
+  var _xpath = patchXPath(xpath);
+  var nodes = [];
   var target;
   // We may have passed in a HTMLDocument object as the context
   // See createDocument with DOMParser below
@@ -160,16 +163,18 @@ export function toggleVisibilty(evt) {
   }
 }
 
+function outputParamVal(param) {
+  if (typeof param === 'undefined') {return true;}
+  return param;
+}
+
 export function getCustomUrlParameter(sPageURL, sParam) {
   var sURLVariables = sPageURL.split('&');
   var sParameterName;
-
   for (var i = 0; i < sURLVariables.length; i += 1) {
     sParameterName = sURLVariables[i].split('=');
-
     if (sParameterName[0] === sParam) {
-      return typeof sParameterName[1] === 'undefined' ? true :
-        sParameterName[1];
+      return outputParamVal(sParameterName[1]);
     }
   }
 }
@@ -177,6 +182,11 @@ export function getCustomUrlParameter(sPageURL, sParam) {
 export function getUrlParameter(sParam) {
   var sPageURL = decodeURIComponent(window.location.search.substring(1));
   return getCustomUrlParameter(sPageURL, sParam);
+}
+
+function outputFormat(value, suffix) {
+  if (value === 0) {return '';}
+  return value.toString() + suffix;
 }
 
 export function formatLastActivity(last_login) {
@@ -191,20 +201,23 @@ export function formatLastActivity(last_login) {
   m %= 60;
   d = Math.floor(h / 24);
   h %= 24;
-  return (d === 0 ? '' : d + ' days, ') +
-    (h === 0 ? '' : h + ' hours, ') +
-    (m === 0 ? '' : m + ' mins, ') +
-    s + ' secs';
+  return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
+    outputFormat(m, ' mins, ') + s + ' secs';
 }
 
-function path(obj, aPath, def) {
+function getPath(obj, aPath, def) {
   var _obj = obj;
   var _path = aPath.split('.');
   var len = _path.length;
   for (var i = 0; i < len; i += 1) {
-    if (fallback(!obj, typeof obj !== 'object')) {return def;}
-    _obj = obj[_path[i]];
+    if (fallback(!_obj, typeof _obj !== 'object')) {return def;}
+    _obj = _obj[_path[i]];
   }
+  return _obj;
+}
+
+function path(obj, aPath, def) {
+  var _obj = getPath(obj, aPath, def);
   if (typeof _obj === 'undefined') {return def;}
   return _obj;
 }
@@ -231,16 +244,13 @@ function intFromString(val) {
 }
 
 export function numberSort(a, b) {
-  var result = 0;
-  if (typeof a.type !== 'undefined') {
-    if (a.type > 8) {return 1;} // non equipment items
-    if (b.type > 8) {return -1;}
-  }
+  if (typeof a.type !== 'undefined' && a.type > 8) {return 1;} // non equipment items
+  if (typeof a.type !== 'undefined' && b.type > 8) {return -1;}
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
   valueA = intFromString(valueA);
   valueB = intFromString(valueB);
-  result = valueA - valueB;
+  var result = valueA - valueB;
   return sortDesc(result);
 }
 

@@ -117,12 +117,8 @@ if (needApiUpgrade) {
       return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
     };
     window.GM_setValue = function(name, value) {
-      switch (typeof value) {
-      case 'string':
-      case 'boolean':
-      case 'number':
+      if (['string', 'boolean', 'number'].indexOf(typeof value) !== -1) {
         gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
-      // no default
       }
     };
   }

@@ -46,9 +46,13 @@ function extractAllSimilar(evt) { // Native
   );
 }
 
+function checkFlags(item) { // Native
+  return selectMain && item.folder_id !== '-1' ||
+    !selectST && item.is_in_st;
+}
+
 function resources(prev, item) { // Native
-  if (selectMain && item.folder_id !== '-1') {return prev;}
-  if (!selectST && item.is_in_st) {return prev;}
+  if (!checkFlags(item)) {return prev;}
   if (prev[item.item_id]) {
     prev[item.item_id].invIDs.push(item.inv_id);
   } else {
@@ -82,30 +86,50 @@ function showQuickExtract() { // Native
   buyResult = document.getElementById('buy_result');
 }
 
+function isExtractable(curr) { // Native
+  return curr.item_name === 'Zombie Coffin' ||
+    curr.type === '12' ||
+    curr.type === '16';
+}
+
 function prepInv(data) { // Native
   playerId = data.player_id;
   extractInv = data.items.reduce(function(prev, curr) {
-    if (curr.item_name === 'Zombie Coffin' ||
-      curr.type === '12' ||
-      curr.type === '16') {prev.push(curr);}
+    if (isExtractable(curr)) {prev.push(curr);}
     return prev;
   }, []);
   showQuickExtract();
 }
 
+var extractEvents = [
+  {
+    test: function(e) {return e.target.id === 'fshInSt';},
+    fn: function() {
+      selectST = !selectST;
+      showQuickExtract();
+    }
+  },
+  {
+    test: function(e) {return e.target.id === 'fshInMain';},
+    fn: function() {
+      selectMain = !selectMain;
+      showQuickExtract();
+    }
+  },
+  {
+    test: function(e) {return e.target.id.indexOf('fshExtr') === 0;},
+    fn: function(e) {
+      extractAllSimilar(e);
+    }
+  }
+];
+
 function listen(e) { // Native
-  if (e.target.id === 'fshInSt') {
-    selectST = !selectST;
-    showQuickExtract();
-    return;
-  }
-  if (e.target.id === 'fshInMain') {
-    selectMain = !selectMain;
-    showQuickExtract();
-    return;
-  }
-  if (e.target.id.indexOf('fshExtr') === 0) {
-    extractAllSimilar(e);
+  for (var i = 0; i < extractEvents.length; i += 1) {
+    if (extractEvents[i].test(e)) {
+      extractEvents[i].fn(e);
+      return;
+    }
   }
 }
 

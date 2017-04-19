@@ -17,19 +17,21 @@ export function start(category, variable, label) { // Native
     performance.now() * 1000;
 }
 
-export function end(category, variable, label) { // Native
-  if (isAuto() || typeof ga === 'undefined') {return;}
+function sendTiming(category, variable, label) { // Native
   var myTime = Math.round(performance.now() * 1000 -
     times[category + ':' + variable + ':' + label]) / 1000;
   if (myTime > 10) {
     ga('fshApp.send', 'timing', category, variable, Math.round(myTime),
       label);
   }
-
   //#if _BETA  //  Timing output
   debug.log(variable, myTime + 'ms');
   //#endif
+}
 
+export function end(category, variable, label) { // Native
+  if (isAuto() || typeof ga === 'undefined') {return;}
+  sendTiming(category, variable, label);
 }
 
 function fixupUrl() { // Native

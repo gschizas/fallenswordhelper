@@ -59,8 +59,7 @@ function getImg(recipe) { // Native
   return '';
 }
 
-function generateRecipeTable() { // Legacy
-  if (!recipebook) {return;}
+function drawRecipeTable() { // Legacy
   playerId = layout.playerId();
   var i;
   var result = '<table width="100%"><tr class="rmTh"><th>Recipe</th>' +
@@ -85,6 +84,10 @@ function generateRecipeTable() { // Legacy
   output.innerHTML = result;
   recipebook.lastUpdate = new Date();
   storeRecipeBook();
+}
+
+function generateRecipeTable() { // Legacy
+  if (recipebook) {drawRecipeTable();}
 }
 
 function testSortType(evt) { // Native
@@ -114,6 +117,14 @@ function sortRecipeTable(evt) { // Legacy
   generateRecipeTable();
 }
 
+function hasAmounts(result, amounts) { // Native
+  if (amounts) {
+    var resultAmounts = amounts.textContent.split('/');
+    result.amountPresent = parseInt(resultAmounts[0], 10);
+    result.amountNeeded = parseInt(resultAmounts[1], 10);
+  }
+}
+
 function reduceItemOrComponent(bgGif, prev, el) { // Native
   var background = el.getAttribute('background');
   if (!background || background.indexOf(bgGif) === -1) {return prev;}
@@ -125,12 +136,7 @@ function reduceItemOrComponent(bgGif, prev, el) { // Native
     id: mouseOverRX[1],
     verify: mouseOverRX[3]
   };
-  var amounts = el.parentNode.nextElementSibling;
-  if (amounts) {
-    var resultAmounts = amounts.textContent.split('/');
-    result.amountPresent = parseInt(resultAmounts[0], 10);
-    result.amountNeeded = parseInt(resultAmounts[1], 10);
-  }
+  hasAmounts(result, el.parentNode.nextElementSibling);
   prev.push(result);
   return prev;
 }

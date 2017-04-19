@@ -10,7 +10,15 @@ function itemName(item) { // Native
   return item.extra && item.extra.name || item.n;
 }
 
-function showAHInvManager() { // Native
+function foundInvItem(invCount, name) { // Legacy
+  if (invCount[name]) {
+    invCount[name].count += 1;
+  } else {
+    invCount[name] = {count: 1, nicknameList: ''};
+  }
+}
+
+function showAHInvManager() { // Legacy
   var output = '<table width="100%" cellspacing="2" cellpadding="2">' +
     '<tr><th colspan="5" class="fshCenter">Items from ' +
     '<a href="index.php?cmd=notepad&blank=1&subcmd=auctionsearch">' +
@@ -23,11 +31,7 @@ function showAHInvManager() { // Native
   // fill up the Inv Counter
   itemList.forEach(function(item) {
     var name = itemName(item);
-    if (invCount[name]) {
-      invCount[name].count += 1;
-    } else {
-      invCount[name] = {count: 1, nicknameList: ''};
-    }
+    foundInvItem(invCount, name);
     for (i = 0; i < quickSL.length; i += 1) {
       if (name.indexOf(quickSL[i].searchname) >= 0 &&
           invCount[name].nicknameList.indexOf(quickSL[i].nickname) < 0) {
@@ -107,11 +111,13 @@ function itemImage(item) { // Native
 }
 
 function listen(evt) {
-  if (!evt.target.classList.contains('smallLink')) {return;}
-  if (evt.target.classList.contains('fshEq')) {
+  if (evt.target.classList.contains('smallLink') &&
+      evt.target.classList.contains('fshEq')) {
     equipProfileInventoryItem(evt);
+    return;
   }
-  if (evt.target.classList.contains('fshUse')) {
+  if (evt.target.classList.contains('smallLink') &&
+      evt.target.classList.contains('fshUse')) {
     useProfileInventoryItem(evt);
   }
 }
