@@ -2,21 +2,11 @@ import * as layout from './support/layout';
 import * as system from './support/system';
 
 var normalLink;
-var isNormal;
 var seasonLink;
-var isSeason;
 var activeLink;
-var isActive;
 var completeLink;
-var isComplete;
 var notStartedLink;
-var isNotStarted;
-var lastNormalActiveQuestPage;
-var lastNormalCompletedQuestPage;
-var lastNormalNotStartedQuestPage;
-var lastSeasonalActiveQuestPage;
-var lastSeasonalCompletedQuestPage;
-var lastSeasonalNotStartedQuestPage;
+var currentPageValue;
 
 function dontPost(e) { // Native
   if (e.target.type !== 'submit') {return;}
@@ -33,100 +23,78 @@ function dontPost(e) { // Native
     '&sortbydir=' + sortbydir;
 }
 
+var currentLocationValue = [
+  {value: 0},
+  {value: 3},
+  {value: 0},
+  {value: 1},
+  {value: 2}
+];
+
+var savePrefKey = [
+  'lastNormalActiveQuestPage',
+  'lastNormalCompletedQuestPage',
+  'lastNormalNotStartedQuestPage',
+  'lastSeasonalActiveQuestPage',
+  'lastSeasonalCompletedQuestPage',
+  'lastSeasonalNotStartedQuestPage'
+];
+
 function whereAmI() { // Native
   var aLinks = layout.pCC.getElementsByTagName('a');
   normalLink = aLinks[0];
-  isNormal = normalLink.firstElementChild.getAttribute('color') ===
-    '#FF0000';
   seasonLink = aLinks[1];
-  isSeason = seasonLink.firstElementChild.getAttribute('color') ===
-    '#FF0000';
   activeLink = aLinks[2];
-  isActive = activeLink.firstElementChild.getAttribute('color') ===
-    '#FF0000';
   completeLink = aLinks[3];
-  isComplete = completeLink.firstElementChild.getAttribute('color') ===
-    '#FF0000';
   notStartedLink = aLinks[4];
-  isNotStarted = notStartedLink.firstElementChild.getAttribute('color') ===
-    '#FF0000';
-}
-
-function storeNormal(lastQBPage) { // Native
-  if (isActive) {
-    system.setValue('lastNormalActiveQuestPage', lastQBPage);
-  } else if (isComplete) {
-    system.setValue('lastNormalCompletedQuestPage', lastQBPage);
-  } else if (isNotStarted) {
-    system.setValue('lastNormalNotStartedQuestPage', lastQBPage);
-  }
-}
-
-function storeSeason(lastQBPage) { // Native
-  if (isActive) {
-    system.setValue('lastSeasonalActiveQuestPage', lastQBPage);
-  } else if (isComplete) {
-    system.setValue('lastSeasonalCompletedQuestPage', lastQBPage);
-  } else if (isNotStarted) {
-    system.setValue('lastSeasonalNotStartedQuestPage', lastQBPage);
-  }
+  currentPageValue = currentLocationValue.reduce(function(prev, curr, i) {
+    var ret = prev;
+    if (aLinks[i].firstElementChild.getAttribute('color') === '#FF0000') {
+      ret += curr.value;
+    }
+    return ret;
+  }, 0);
 }
 
 function storeLoc() { // Native
   var lastQBPage = location.search;
   system.setValue('lastActiveQuestPage', lastQBPage);
-  if (isNormal) {
-    storeNormal(lastQBPage);
-  } else if (isSeason) {
-    storeSeason(lastQBPage);
-  }
+  system.setValue(savePrefKey[currentPageValue], lastQBPage);
 }
 
-function setLink(normalPage, seasonPage, aLink) { // Native
-  var toSet;
-  if (isNormal && normalPage.length > 0) {
-    toSet = normalPage;
-  } else if (isSeason && seasonPage.length > 0) {
-    toSet = seasonPage;
-  }
-  if (toSet) {aLink.setAttribute('href', toSet);}
-}
-
-function mainLinks(aLink) { // Native
-  if (isActive) {
-    setLink(lastSeasonalActiveQuestPage, lastNormalActiveQuestPage, aLink);
-  }
-  if (isComplete) {
-    setLink(lastSeasonalCompletedQuestPage, lastNormalCompletedQuestPage,
-      aLink);
-  }
-  if (isNotStarted) {
-    setLink(lastSeasonalNotStartedQuestPage, lastNormalNotStartedQuestPage,
-      aLink);
+function setLink(aLink, url) { // Native
+  if (url.length > 0) {
+    aLink.setAttribute('href', url);
   }
 }
 
 function updateLinks() { // Native
-  lastNormalActiveQuestPage = system.getValue('lastNormalActiveQuestPage');
-  lastNormalCompletedQuestPage =
-    system.getValue('lastNormalCompletedQuestPage');
-  lastNormalNotStartedQuestPage =
-    system.getValue('lastNormalNotStartedQuestPage');
-  lastSeasonalActiveQuestPage =
-    system.getValue('lastSeasonalActiveQuestPage');
-  lastSeasonalCompletedQuestPage =
-    system.getValue('lastSeasonalCompletedQuestPage');
-  lastSeasonalNotStartedQuestPage =
-    system.getValue('lastSeasonalNotStartedQuestPage');
-  setLink(lastNormalActiveQuestPage, lastSeasonalActiveQuestPage, activeLink);
-  setLink(lastNormalCompletedQuestPage, lastSeasonalCompletedQuestPage,
-    completeLink);
-  setLink(lastNormalNotStartedQuestPage, lastSeasonalNotStartedQuestPage,
-    notStartedLink);
-  if (isNormal) {
-    mainLinks(seasonLink);
-  } else if (isSeason) {
-    mainLinks(normalLink);
+  var lastNormalActiveQuestPage = system.getValue(savePrefKey[0]);
+  var lastNormalCompletedQuestPage = system.getValue(savePrefKey[1]);
+  var lastNormalNotStartedQuestPage = system.getValue(savePrefKey[2]);
+  var lastSeasonalActiveQuestPage = system.getValue(savePrefKey[3]);
+  var lastSeasonalCompletedQuestPage = system.getValue(savePrefKey[4]);
+  var lastSeasonalNotStartedQuestPage = system.getValue(savePrefKey[5]);
+
+  var oppositeTypeUrl = [
+    lastSeasonalActiveQuestPage,
+    lastSeasonalCompletedQuestPage,
+    lastSeasonalNotStartedQuestPage,
+    lastNormalActiveQuestPage,
+    lastNormalCompletedQuestPage,
+    lastNormalNotStartedQuestPage
+  ];
+
+  if (currentPageValue < 3) {
+    setLink(seasonLink, oppositeTypeUrl[currentPageValue]);
+    setLink(activeLink, lastNormalActiveQuestPage);
+    setLink(completeLink, lastNormalCompletedQuestPage);
+    setLink(notStartedLink, lastNormalNotStartedQuestPage);
+  } else {
+    setLink(normalLink, oppositeTypeUrl[currentPageValue]);
+    setLink(activeLink, lastSeasonalActiveQuestPage);
+    setLink(completeLink, lastSeasonalCompletedQuestPage);
+    setLink(notStartedLink, lastSeasonalNotStartedQuestPage);
   }
 }
 
