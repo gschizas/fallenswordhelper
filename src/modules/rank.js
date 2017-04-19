@@ -75,7 +75,7 @@ function ajaxifyRankControls(evt) { // jQuery
     .exec(evt.target.getAttribute('onclick'))[1];
   var thisRankRow = evt.target.parentNode.parentNode.parentNode;
   var thisRankRowNum = thisRankRow.rowIndex;
-  var targetRowNum = getTargetRowNumber(val);
+  var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
   var parentTable = thisRankRow.parentNode;
   if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
   $.get(onclickHREF);
