@@ -195,7 +195,10 @@ function getNekid() { // jQuery
   var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
     var href = link.getAttribute('href');
-    prm.push($.get(href));
+    prm.push($.ajax({
+      url: href,
+      timeout: 1000
+    }));
   });
   $.when.apply($, prm).always(function() {
     location.assign('index.php?cmd=profile');
