@@ -18,9 +18,7 @@ var foundUser;
 
 function hideOther(el) { // Native
   if (el.firstChild.hasAttribute('bgcolor')) {
-    if (el.firstChild.firstElementChild.textContent === findUser) {
-      foundUser = true;
-    } else {foundUser = false;}
+    foundUser = el.firstChild.firstElementChild.textContent === findUser;
   }
   if (!foundUser) {
     el.className = 'fshHide';
@@ -86,17 +84,23 @@ function wearItem(evt) { // jQuery
   theTd.innerHTML = spinner;
 }
 
+var events = [
+  {test: 'recall', fn: function(evt) {recallItem(evt);}},
+  {test: 'equip', fn: function(evt) {wearItem(evt);}},
+  {
+    test: 'a-reply',
+    fn: function(evt) {
+      window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+    }
+  }
+];
+
 function eventHandlers(evt) { // Native
-  if (evt.target.classList.contains('recall')) {
-    recallItem(evt);
-    return;
-  }
-  if (evt.target.classList.contains('equip')) {
-    wearItem(evt);
-    return;
-  }
-  if (evt.target.classList.contains('a-reply')) {
-    window.openQuickMsgDialog(evt.target.getAttribute('target_player'));
+  for (var i = 0; i < events.length; i += 1) {
+    if (evt.target.classList.contains(events[i].test)) {
+      events[i].fn(evt);
+      return;
+    }
   }
 }
 
@@ -138,14 +142,23 @@ function paintChild() { // Native
   }
 }
 
+function hideElement(test) { // Native
+  if (test) {return ' class="fshHide"';}
+  return '';
+}
+
+function isEquipable(test) { // Native
+  if (test) {return 'recall';}
+  return 'equip';
+}
+
 function mySpan(el) { // Native
   var inject = document.createElement('span');
   var secondHref = el.children.length === 2;
-  var firstHref = secondHref ? '' : ' class="fshHide"';
+  var firstHref = hideElement(!secondHref);
   var itemName = el.previousElementSibling.innerHTML;
-  var wearable = wearRE.test(itemName) ?
-    ' class="fshHide"' : '';
-  var equipable = secondHref ? 'recall' : 'equip';
+  var wearable = hideElement(wearRE.test(itemName));
+  var equipable = isEquipable(secondHref);
   inject.innerHTML = '<span' + firstHref +
     '> | <span class="reportLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +
@@ -160,18 +173,24 @@ function mySpan(el) { // Native
   return inject;
 }
 
+function doSpan(el) { // Native
+  if (counter === 0) {
+    el.previousSibling.setAttribute('width', '200px');
+    el.setAttribute('width', '370px');
+  } else {
+    el.previousSibling.removeAttribute('width');
+    el.removeAttribute('width');
+  }
+  nodeArray.push(mySpan(el));
+}
+
 function makeSpan() { // Native
   var limit = performance.now() + 10;
   while (performance.now() < limit && counter < nodeList.length) {
     var el = nodeList[counter];
-    if (counter === 0) {
-      el.previousSibling.setAttribute('width', '200px');
-      el.setAttribute('width', '370px');
-    } else {
-      el.previousSibling.removeAttribute('width');
-      el.removeAttribute('width');
-    }
-    nodeArray.push(mySpan(el));
+
+    doSpan(el);
+
     counter += 1;
   }
   if (counter < nodeList.length) {

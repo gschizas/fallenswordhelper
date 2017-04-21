@@ -45,6 +45,16 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
     .addEventListener('click', expandBio);
 }
 
+function findStartPosition(bioContents, _maxRowsToShow) { // Native
+  var maxRowsToShow = _maxRowsToShow;
+  var startIndex = 0;
+  while (maxRowsToShow > 0) {
+    maxRowsToShow -= 1;
+    startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
+  }
+  return startIndex;
+}
+
 function compressBio(bioCell) { // Native
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = system.getValue('maxCompressedCharacters');
@@ -54,12 +64,7 @@ function compressBio(bioCell) { // Native
   if (bioContents.length <= maxCharactersToShow &&
       numberOfLines < maxRowsToShow) {return;}
   if (numberOfLines >= maxRowsToShow) {
-    var startIndex = 0;
-    while (maxRowsToShow > 0) {
-      maxRowsToShow -= 1;
-      startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
-    }
-    maxCharactersToShow = startIndex;
+    maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
   }
   doCompression(bioCell, bioContents, maxCharactersToShow);
 }
@@ -75,8 +80,7 @@ function getTargetPlayer() { // Native
   return targetPlayer;
 }
 
-function getBuffsToBuy() { // Legacy
-  if (buffCost.count === 0) {return;}
+function formatBuffsToBuy() { // Legacy
   var targetPlayer = getTargetPlayer();
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
   var greetingText = system.getValue('buyBuffsGreeting').trim();
@@ -94,6 +98,10 @@ function getBuffsToBuy() { // Legacy
       .replace(/{cost}/g, buffCost.buffCostTotalText);
   }
   window.openQuickMsgDialog(targetPlayer, greetingText, '');
+}
+
+function getBuffsToBuy() { // Legacy
+  if (buffCost.count > 0) {formatBuffsToBuy();}
 }
 
 var costFormatter = [
@@ -305,10 +313,14 @@ function bioWords() { // Native
     'pack names in them to make buffing even easier!</div>');
 }
 
+function testHeightValid(boxVal) { // Native
+  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
+}
+
 function changeHeight() { // Native
   var theBox = document.getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
-  if (isNaN(boxVal) || boxVal < '1' || boxVal > '99') {return;}
+  if (testHeightValid(boxVal)) {return;}
   bioEditLines = boxVal;
   system.setValue('bioEditLines', boxVal);
   document.getElementById('textInputBox').rows = bioEditLines;

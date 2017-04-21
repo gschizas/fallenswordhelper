@@ -27,6 +27,15 @@ function findChatTable() { // Legacy
   return chatTable;
 }
 
+function chatRowBuffLink(aRow, logScreen, addBuffTag) { // Legacy
+  if (logScreen === 'Chat' && addBuffTag) {
+    var playerIDRE = /player_id=(\d+)/;
+    var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
+    aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
+      layout.quickBuffHref(playerID) + '>[b]</a>';
+  }
+}
+
 function rowColor(aRow, logScreen, dateColumn) { // Legacy
   var addBuffTag = true;
   var cellContents = aRow.cells[dateColumn].textContent;
@@ -38,12 +47,7 @@ function rowColor(aRow, logScreen, dateColumn) { // Legacy
     aRow.classList.add('fshOr');
     addBuffTag = false;
   }
-  if (logScreen === 'Chat' && addBuffTag) {
-    var playerIDRE = /player_id=(\d+)/;
-    var playerID = playerIDRE.exec(aRow.cells[1].innerHTML)[1];
-    aRow.cells[1].innerHTML += ' <a class="fshBf" ' +
-      layout.quickBuffHref(playerID) + '>[b]</a>';
-  }
+  chatRowBuffLink(aRow, logScreen, addBuffTag);
 }
 
 function getLastCheck(lastCheckScreen) {
@@ -71,9 +75,7 @@ export function addLogColoring(logScreen, dateColumn) { // Legacy
   if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
 }
 
-function addChatTextArea() { // jQuery
-  if (!system.getValue('enhanceChatTextEntry') ||
-      !layout.pCC) {return;}
+function hasTextEntry() { // jQuery
   $('#pCC form').first().attr('id', 'dochat');
   $('#pCC input').slice(0, 7).each(function(i, e) {
     $(e).attr('form', 'dochat');
@@ -96,6 +98,12 @@ function addChatTextArea() { // jQuery
       return false;
     }
   });
+}
+
+function addChatTextArea() { // jQuery
+  if (!system.getValue('enhanceChatTextEntry') ||
+      !layout.pCC) {return;}
+  hasTextEntry();
 }
 
 function removeHTML(buffName) { // Native
@@ -154,8 +162,7 @@ function getAttackPart(playerName) { // Legacy
   return '';
 }
 
-function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
-  if (messageType !== 'Chat') {return;}
+function isChat(aRow, isGuildMate, playerName) { // Legacy
   var extraPart = '';
   reportIgnore(aRow, isGuildMate, playerName);
   var messageHTML = aRow.cells[2].innerHTML;
@@ -186,6 +193,10 @@ function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
   aRow.cells[2].innerHTML = firstPart + '<nobr>' + msgReplyTo +
     extraPart + thirdPart + attackPart + fourthPart +
     '</nobr>' + lastPart;
+}
+
+function doChat(messageType, aRow, isGuildMate, playerName) { // Legacy
+  if (messageType === 'Chat') {isChat(aRow, isGuildMate, playerName);}
 }
 
 function pvpXp(color, xpGain) { // Legacy
@@ -376,12 +387,7 @@ function processLogWidgetRow(aRow) { // Legacy
   if (messageType) {doLogWidgetRow(aRow, messageType);}
 }
 
-function addLogWidgetsOld() { // Legacy
-  buildNickList();
-  addAttackLinkToLog = system.getValue('addAttackLinkToLog');
-  var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
-    '(.,"Currently showing:")]]');
-  if (!logTable) {return;}
+function foundLogTable(logTable) { // Legacy
   memberNameString = Object.keys(calf.membrList);
   listOfAllies = myPlayer._allies.map(function(obj) {
     return obj.username;
@@ -403,6 +409,14 @@ function addLogWidgetsOld() { // Legacy
     window.openQuickMsgDialog(evt.target.getAttribute('target_player'),
       '', evt.target.getAttribute('replyTo'));
   });
+}
+
+function addLogWidgetsOld() { // Legacy
+  buildNickList();
+  addAttackLinkToLog = system.getValue('addAttackLinkToLog');
+  var logTable = system.findNode('//table[tbody/tr/td/span[contains' +
+    '(.,"Currently showing:")]]');
+  if (logTable) {foundLogTable(logTable);}
 }
 
 function addLogWidgets() { // jQuery
@@ -441,26 +455,30 @@ function findPlayers(aRow) { // Legacy
   }
 }
 
+function likeInvite(aRow, hasInvited) { // Legacy
+  var message = aRow.cells[2].innerHTML;
+  var firstQuote = message.indexOf('\'');
+  var firstPart = '';
+  firstPart = message.substring(0, firstQuote);
+  var secondQuote = message.indexOf('\'', firstQuote + 1);
+  var targetPlayerName = message.substring(firstQuote + 1, secondQuote);
+  aRow.cells[2].innerHTML = firstPart + '\'' +
+    '<a href="index.php?cmd=findplayer&search_active=1&' +
+    'search_level_max=&search_level_min=&search_username=' +
+    targetPlayerName + '&search_show_first=1">' + targetPlayerName +
+    '</a>' + message.substring(secondQuote, message.length);
+  if (!hasInvited &&
+    targetPlayerName !== layout.playerName()) {
+    $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
+    aRow.style.color = 'gray';
+  }
+}
+
 function guildInvite(aRow) { // Legacy
   var hasInvited = aRow.cells[2].textContent
     .search('has invited the player') !== -1;
   if (aRow.cells[2].textContent.charAt(0) === '\'' || hasInvited) {
-    var message = aRow.cells[2].innerHTML;
-    var firstQuote = message.indexOf('\'');
-    var firstPart = '';
-    firstPart = message.substring(0, firstQuote);
-    var secondQuote = message.indexOf('\'', firstQuote + 1);
-    var targetPlayerName = message.substring(firstQuote + 1, secondQuote);
-    aRow.cells[2].innerHTML = firstPart + '\'' +
-      '<a href="index.php?cmd=findplayer&search_active=1&' +
-      'search_level_max=&search_level_min=&search_username=' +
-      targetPlayerName + '&search_show_first=1">' + targetPlayerName +
-      '</a>' + message.substring(secondQuote, message.length);
-    if (!hasInvited &&
-      targetPlayerName !== layout.playerName()) {
-      $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
-      aRow.style.color = 'gray';
-    }
+    likeInvite(aRow, hasInvited);
   }
 }
 
@@ -469,8 +487,7 @@ function processGuildWidgetRow(aRow) { // Legacy
   guildInvite(aRow);
 }
 
-export function addGuildLogWidgets() { // Legacy
-  if (!system.getValue('hideNonPlayerGuildLogMessages')) {return;}
+function guildLogWidgetsEnabled() { // Legacy
   var nodeList = layout.pCC.getElementsByTagName('TD');
   var messageNameCell = Array.prototype.reduce.call(nodeList,
     function(prev, curr) {
@@ -488,6 +505,12 @@ export function addGuildLogWidgets() { // Legacy
   for (var i = 1; i < logTable.rows.length; i += 2) {
     var aRow = logTable.rows[i];
     processGuildWidgetRow(aRow);
+  }
+}
+
+export function addGuildLogWidgets() { // Legacy
+  if (system.getValue('hideNonPlayerGuildLogMessages')) {
+    guildLogWidgetsEnabled();
   }
 }
 

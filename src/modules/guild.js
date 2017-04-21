@@ -258,22 +258,24 @@ function recallGuildStoreItem(evt) { // Legacy
     {item: guildStoreID, target: evt.target, url: recallHref});
 }
 
+function doItemTable(itemTable) { // Legacy
+  for (var i = 1; i < itemTable.rows.length; i += 1) {
+    var aRow = itemTable.rows[i];
+    if (aRow.cells[2]) { // itemRow
+      var itemId = aRow.cells[0].firstChild.getAttribute('value');
+      aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; ' +
+        'text-decoration:underline; color:blue;" itemID="' + itemId +
+        '">Fast BP</span>';
+      var itemRecall = aRow.cells[2].firstChild.nextSibling;
+      itemRecall.addEventListener('click', recallGuildStoreItem);
+    }
+  }
+}
+
 export function injectGuildAddTagsWidgets() { // Legacy
   var itemTable = system.findNode(
     '//img[contains(@src,"/items/")]/ancestor::table[1]');
-  if (itemTable) {
-    for (var i = 1; i < itemTable.rows.length; i += 1) {
-      var aRow = itemTable.rows[i];
-      if (aRow.cells[2]) { // itemRow
-        var itemId = aRow.cells[0].firstChild.getAttribute('value');
-        aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; ' +
-          'text-decoration:underline; color:blue;" itemID="' + itemId +
-          '">Fast BP</span>';
-        var itemRecall = aRow.cells[2].firstChild.nextSibling;
-        itemRecall.addEventListener('click', recallGuildStoreItem);
-      }
-    }
-  }
+  if (itemTable) {doItemTable(itemTable);}
   $('b:contains("100 x Item Level")').closest('tr').next()
     .children('td:first')
     .append('<input type="button" id="fshCheckAlTag" value="Check All">');

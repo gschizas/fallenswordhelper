@@ -42,9 +42,13 @@ export function newsShoutbox() { // Native
   injectShoutboxWidgets();
 }
 
+function containsNewsHead(el) { // Native
+  return el.classList.contains('news_head') ||
+    el.classList.contains('news_head_tavern');
+}
+
 function closestHead(el) { // Native
-  if (el.classList.contains('news_head') ||
-      el.classList.contains('news_head_tavern')) {
+  if (containsNewsHead(el)) {
     return el;
   }
   if (el.classList.contains('news_left_column')) {return;}
@@ -122,17 +126,19 @@ function expandAll() { // Native
   });
 }
 
+function isHeader(el) { // Native
+  if (el.rowIndex % 6 === 0) {return el;}
+}
+
 function closestTr(el) { // Native
   if (el.tagName === 'TR') {
-    if (el.rowIndex % 6 === 0) {return el;}
-    return;
+    return isHeader(el);
   }
   if (el.tagName === 'TABLE') {return;}
   return closestTr(el.parentNode);
 }
 
-function evtHdl(evt) { // Native
-  if (!collapseNewsArchive) {return;}
+function evtEnabled(evt) { // Native
   var myRow = closestTr(evt.target);
   if (!myRow) {return;}
   var articleNo = myRow.rowIndex / 6;
@@ -143,6 +149,10 @@ function evtHdl(evt) { // Native
   } else {
     collapseArt(article);
   }
+}
+
+function evtHdl(evt) { // Native
+  if (collapseNewsArchive) {evtEnabled(evt);}
 }
 
 function makeHeaderClickable(row) { // Native

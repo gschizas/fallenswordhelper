@@ -107,10 +107,7 @@ function guildRelationship(_txt) { // Native
   }
 }
 
-function profileInjectGuildRel() { // Native
-  var aLink = document.querySelector(
-    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
-  if (!aLink) {return;}
+function foundGuildLink(aLink) { // Native
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
   if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
@@ -120,6 +117,12 @@ function profileInjectGuildRel() { // Native
     aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
       guildMessages[currentGuildRelationship].message);
   }
+}
+
+function profileInjectGuildRel() { // Native
+  var aLink = document.querySelector(
+    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
+  if (aLink) {foundGuildLink(aLink);}
 }
 
 function profileInjectQuickButton(avyImg, playerid, playername) { // Native
@@ -194,7 +197,7 @@ function getNekid() { // jQuery
     var href = link.getAttribute('href');
     prm.push($.get(href));
   });
-  $.when.apply($, prm).done(function() {
+  $.when.apply($, prm).always(function() {
     location.assign('index.php?cmd=profile');
   });
 }

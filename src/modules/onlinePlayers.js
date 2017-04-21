@@ -100,6 +100,13 @@ function gotOnlinePlayers() { // jQuery
   }).api();
 }
 
+function checkLastPage() { // Native
+  if (onlinePages === lastPage) {
+    ajax.setForage('fsh_onlinePlayers', onlinePlayers);
+    gotOnlinePlayers();
+  }
+}
+
 function getOnlinePlayers(data) { // Bad jQuery
   $('#fshOutput', context).append(' ' +
     (onlinePages + 1)); // context
@@ -129,10 +136,8 @@ function getOnlinePlayers(data) { // Bad jQuery
       $.get('index.php?cmd=onlineplayers&page=' + i,
         getOnlinePlayers);
     }
-  } else if (onlinePages === lastPage) {
-    ajax.setForage('fsh_onlinePlayers', onlinePlayers);
-    gotOnlinePlayers();
   }
+  checkLastPage();
 }
 
 function refreshEvt() { // Bad jQuery

@@ -28,35 +28,42 @@ function impWarning(impsRemaining) { // Legacy
     impsRemaining + recastButton + '</td></tr>';
 }
 
+function getCaLvl(hasCounterAttack) { // Legacy
+  var counterAttackLevel;
+  if (hasCounterAttack.getAttribute('src').search('/skills/') !== -1) {
+    var onmouseover = $(hasCounterAttack).data('tipped');
+    var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
+    var counterAttack = counterAttackRE.exec(onmouseover);
+    if (counterAttack) {
+      counterAttackLevel = counterAttack[1];
+    }
+  }
+  return '<tr><td style="font-size:small; color:' +
+    'blue">CA' + counterAttackLevel + ' active</td></tr>';
+}
+
 function hasCA() { // Legacy
   var replacementText = '';
   var hasCounterAttack = system
     .findNode('//img[contains(@src,"/54_sm.gif")]');
   if (hasCounterAttack) {
-    var counterAttackLevel;
-    if (hasCounterAttack.getAttribute('src').search('/skills/') !== -1) {
-      var onmouseover = $(hasCounterAttack).data('tipped');
-      var counterAttackRE = /<b>Counter Attack<\/b> \(Level: (\d+)\)/;
-      var counterAttack = counterAttackRE.exec(onmouseover);
-      if (counterAttack) {
-        counterAttackLevel = counterAttack[1];
-      }
-    }
-    replacementText += '<tr><td style="font-size:small; color:' +
-      'blue">CA' + counterAttackLevel + ' active</td></tr>';
+    replacementText += getCaLvl(hasCounterAttack);
   }
   return replacementText;
+}
+
+var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
+
+function doublerLvl(onmouseover) { // Legacy
+  var doubler = doublerRE.exec(onmouseover);
+  if (doubler) {return doubler[1];}
 }
 
 function getDoublerLevel(hasDoubler) { // Legacy
   var doublerLevel;
   if (hasDoubler.getAttribute('src').search('/skills/') !== -1) {
     var onmouseover = $(hasDoubler).data('tipped');
-    var doublerRE = /<b>Doubler<\/b> \(Level: (\d+)\)/;
-    var doubler = doublerRE.exec(onmouseover);
-    if (doubler) {
-      doublerLevel = doubler[1];
-    }
+    doublerLevel = doublerLvl(onmouseover);
   }
   if (doublerLevel === 200) { // ???
     return '<tr><td style="font-size:small; color:' +

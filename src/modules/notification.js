@@ -78,10 +78,9 @@ function findNewGroup(el) { // Native
     '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
-export function parseTemplePage(responseText) { // Native
+function templeAlertEnabled(responseText) { // Native
   var checkNeedToPray;
   var doc;
-  if (!calf.enableTempleAlert) {return;}
   if (calf.cmd !== 'temple') {
     doc = system.createDocument(responseText);
   } else {
@@ -96,6 +95,10 @@ export function parseTemplePage(responseText) { // Native
   system.setValue('needToPray', needToPray);
   system.setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
+}
+
+export function parseTemplePage(responseText) { // Native
+  if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
 }
 
 function checkLastUpdate(templeAlertLastUpdate) { // Native
@@ -143,8 +146,7 @@ export function parseGoldUpgrades(data) { // Native
   }
 }
 
-export function injectUpgradeAlert() { // jQuery
-  if (location.search.indexOf('cmd=points&type=1') !== -1) {return;}
+function notUpgradesPage() {
   var needToDoUpgrade = system.getValue('needToDoUpgrade');
   if (needToDoUpgrade) {
     displayUpgradeMsg();
@@ -155,6 +157,10 @@ export function injectUpgradeAlert() { // jQuery
   $.get('index.php?cmd=points&type=1', function(data) {
     task.add(3, parseGoldUpgrades, [data]);
   });
+}
+
+export function injectUpgradeAlert() { // jQuery
+  if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
 }
 
 export function injectJoinAllLink() { // Native

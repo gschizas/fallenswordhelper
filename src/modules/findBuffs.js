@@ -118,17 +118,18 @@ function pageLayout(o) { // Legacy
 
 function uniq(arr, removeBy) { // Native
   var seen = {};
-  var out = arr.filter(function(item) {
-    if (removeBy) {
+  if (removeBy) {
+    return arr.filter(function(item) {
       if (seen[item[removeBy]]) {return false;}
       seen[item[removeBy]] = true;
-    } else {
-      if (seen[item]) {return false;}
-      seen[item] = true;
-    }
+      return true;
+    });
+  }
+  return arr.filter(function(item) {
+    if (seen[item]) {return false;}
+    seen[item] = true;
     return true;
   });
-  return out;
 }
 
 function getPrevBr(bioCellHtml, runningTotalPosition) { // Legacy
@@ -257,9 +258,9 @@ function findBuffsParseProfileAndDisplay(responseText, callback) { // Hybrid - E
     newCell.style.verticalAlign = 'top';
     // buff cell
     newCell = newRow.insertCell(2);
-    for (var i = 0; i < textLineArray.length; i += 1) {
-      newCell.innerHTML += textLineArray[i] + '<br>';
-    }
+    textLineArray.forEach(function(el) {
+      newCell.innerHTML += el + '<br>';
+    });
   }
   var processedBuffers = document.getElementById('buffersProcessed');
   var potentialBuffers =
@@ -293,6 +294,16 @@ function findBuffsParsePlayersForBuffs() { // Legacy
   }
 }
 
+function calcMinLvl() { // Legacy
+  if (findBuffsLevel175Only) {return 500;}
+  return 1;
+}
+
+function calcNextPage(curPage, maxPage) { // Legacy
+  if (curPage === 1) {return Math.round(onlinePlayersSetting * maxPage / 50);}
+  return curPage + 1;
+}
+
 function findBuffsParseOnlinePlayers(responseText) { // Legacy
   var doc = system.createDocument(responseText);
   var playerRows = $(doc).find('table:contains("Username")>tbody>tr:has' +
@@ -308,8 +319,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
       var onlinePlayerLevel = parseInt($(e).find('td:eq(2)').text()
         .replace(/,/g, ''), 10);
       var onlinePlayerName = $(e).find('td:eq(1) a').text();
-      var minPlayerVirtualLevel = 1;
-      if (findBuffsLevel175Only) {minPlayerVirtualLevel = 500;}
+      var minPlayerVirtualLevel = calcMinLvl();
       if (onlinePlayerLevel >= findBuffMinCastLevel &&
         onlinePlayerLevel >= minPlayerVirtualLevel) {
         // add online player to search list (all but self)
@@ -320,10 +330,7 @@ function findBuffsParseOnlinePlayers(responseText) { // Legacy
     });
   }
   if (curPage < maxPage/* -maxPage+15*/) {
-    var newPage = curPage === 1 ?
-      Math.round(onlinePlayersSetting * maxPage / 50) :
-      curPage + 1;
-    // var bufferProgress = document.getElementById('bufferProgress');
+    var newPage = calcNextPage(curPage, maxPage);
     bufferProgress.innerHTML = 'Parsing online page ' + curPage + ' ...';
     system.xmlhttp('index.php?cmd=onlineplayers&page=' + newPage,
       findBuffsParseOnlinePlayers, {page: newPage});
@@ -361,8 +368,7 @@ function findBuffsParseProfilePage(responseText) { // jQuery
     // check if they are high enough level to cast the buff
     var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
     virtualLevel = parseInt(virtualLevel[1].replace(/,/g, ''), 10);
-    var minPlayerVirtualLevel = 1;
-    if (findBuffsLevel175Only) {minPlayerVirtualLevel = 500;}
+    var minPlayerVirtualLevel = calcMinLvl();
     if (lastActivityMinutes < 5 &&
       virtualLevel >= findBuffMinCastLevel &&
       virtualLevel >= minPlayerVirtualLevel) {
@@ -386,20 +392,43 @@ function findBuffsParseProfilePageStart() { // Legacy
   profilePagesToSearch = [];
   profilePagesToSearch.push('index.php?cmd=profile');
   var extraProfileArray = extraProfile.split(',');
-  var i;
-  for (i = 0; i < extraProfileArray.length; i += 1) {
+  extraProfileArray.forEach(function(el) {
     profilePagesToSearch.push('index.php?cmd=findplayer' +
       '&search_active=1&search_level_max=&search_level_min=' +
-      '&search_username=' + extraProfileArray[i] + '&search_show_first=1');
-  }
+      '&search_username=' + el + '&search_show_first=1');
+  });
   profilePagesToSearchProcessed = 0;
   if (document.getElementById('alliesEnemies').checked) {
-    for (i = 0; i < profilePagesToSearch.length; i += 1) {
-      system.xmlhttp(profilePagesToSearch[i],
-        findBuffsParseProfilePage);
-    }
+    profilePagesToSearch.forEach(function(el) {
+      system.xmlhttp(el, findBuffsParseProfilePage);
+    });
   } else {
     findBuffsParseOnlinePlayersStart();
+  }
+}
+
+function guildMember(characterName, i, e) { // jQuery
+  var contactLink = $(e).find('a');
+  var onMouseOver = $(contactLink).data('tipped');
+  var lastActivity = actRE.exec(onMouseOver);
+  var lastActivityDays = parseInt(lastActivity[1], 10);
+  var lastActivityHours = parseInt(lastActivity[2], 10) +
+    lastActivityDays * 24;
+  var lastActivityMinutes = parseInt(lastActivity[3], 10) +
+    lastActivityHours * 60;
+  // check if they are high enough level to cast the buff
+  var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
+  virtualLevel = parseInt(virtualLevel[1].replace(/,/g, ''), 10);
+  var minPlayerVirtualLevel = calcMinLvl();
+  if (lastActivityMinutes < 5 &&
+    virtualLevel >= findBuffMinCastLevel &&
+    virtualLevel >= minPlayerVirtualLevel) {
+    // add online player to search list (all but self)
+    var onlinePlayer = contactLink.attr('href');
+    if (characterName !== $(e).find('td:eq(1)')
+      .text().trim()) {
+      onlinePlayers.push(onlinePlayer);
+    }
   }
 }
 
@@ -410,31 +439,7 @@ function findBuffsParseGuildManagePage(responseText) { // jQuery
     .find('table:has(td:contains("Rank")[bgcolor="#C18B35"]):last')
     .find('tr:gt(1):not(:has(td[colspan="5"]))');
   if (document.getElementById('guildMembers').checked) {
-    memberTableRows.each(function(i, e) {
-      var contactLink = $(e).find('a');
-      var onMouseOver = $(contactLink).data('tipped');
-      var lastActivity = actRE.exec(onMouseOver);
-      var lastActivityDays = parseInt(lastActivity[1], 10);
-      var lastActivityHours = parseInt(lastActivity[2], 10) +
-        lastActivityDays * 24;
-      var lastActivityMinutes = parseInt(lastActivity[3], 10) +
-        lastActivityHours * 60;
-      // check if they are high enough level to cast the buff
-      var virtualLevel = /<td>VL:<\/td><td>([,0-9]+)<\/td>/.exec(onMouseOver);
-      virtualLevel = parseInt(virtualLevel[1].replace(/,/g, ''), 10);
-      var minPlayerVirtualLevel = 1;
-      if (findBuffsLevel175Only) {minPlayerVirtualLevel = 500;}
-      if (lastActivityMinutes < 5 &&
-        virtualLevel >= findBuffMinCastLevel &&
-        virtualLevel >= minPlayerVirtualLevel) {
-        // add online player to search list (all but self)
-        var onlinePlayer = contactLink.attr('href');
-        if (characterName !== $(e).find('td:eq(1)')
-          .text().trim()) {
-          onlinePlayers.push(onlinePlayer);
-        }
-      }
-    });
+    memberTableRows.each(guildMember.bind(characterName));
   }
   // continue with profile pages
   findBuffsParseProfilePageStart();

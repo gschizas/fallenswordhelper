@@ -99,26 +99,27 @@ function joinGroup(groupJoinURL, joinButton) { // jQuery
   });
 }
 
+function doJoinUnderSize(prev, joinButton) { // Legacy
+  var memList = joinButton.parentNode.parentNode.parentNode
+    .previousSibling.previousSibling.previousSibling.previousSibling;
+  var memListArrayWithMercs = memList.innerHTML.split(',');
+  var memListArrayWithoutMercs = memListArrayWithMercs
+    .filter(filterMercs);
+  if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
+    var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
+      joinButton.parentNode.getAttribute('href'))[1];
+    var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
+      '&group_id=' + groupID;
+    prev.push(joinGroup(groupJoinURL, joinButton));
+  }
+  return prev;
+}
+
 function joinAllGroupsUnderSize() { // Legacy
   var joinButtons = system.findNodes(
     '//img[contains(@src,"skin/icon_action_join.gif")]');
   if (!joinButtons) {return;}
-  var prm = [];
-  for (var i = 0; i < joinButtons.length; i += 1) {
-    var joinButton = joinButtons[i];
-    var memList = joinButton.parentNode.parentNode.parentNode
-      .previousSibling.previousSibling.previousSibling.previousSibling;
-    var memListArrayWithMercs = memList.innerHTML.split(',');
-    var memListArrayWithoutMercs = memListArrayWithMercs
-      .filter(filterMercs);
-    if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
-      var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
-        joinButton.parentNode.getAttribute('href'))[1];
-      var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
-        '&group_id=' + groupID;
-      prm.push(joinGroup(groupJoinURL, joinButton));
-    }
-  }
+  var prm = joinButtons.reduce(doJoinUnderSize, []);
   $.when.apply($, prm).done(function() {
     location.href = 'index.php?cmd=guild&subcmd=groups';
   });
@@ -243,7 +244,8 @@ function doGroupRow(e, m) { // jQuery
   listArr.forEach(function(v, i, a) {
     if (v.indexOf('<font') !== -1) {return;}
     countMembers += 1;
-    buffList[Math.floor(i / 16)] = buffList[Math.floor(i / 16)] || [];
+    buffList[Math.floor(i / 16)] =
+      system.fallback(buffList[Math.floor(i / 16)], []);
     buffList[Math.floor(i / 16)].push(v);
     if (!m[v]) {return;}
     a[i] = ' <a href="index.php?cmd=profile&player_id=' +

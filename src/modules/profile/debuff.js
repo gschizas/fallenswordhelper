@@ -25,6 +25,14 @@ function doPrompt(aLink) { // Native
   });
 }
 
+function checkForPrompt(aLink) {
+  if (!disableDeactivatePrompts) {
+    doPrompt(aLink);
+  } else {
+    debuff(aLink);
+  }
+}
+
 function interceptDebuff(e) { // jQuery
   var aLink = e.target;
   if (aLink.tagName === 'IMG') {
@@ -33,11 +41,7 @@ function interceptDebuff(e) { // jQuery
   } else if (aLink.tagName !== 'A') {return;}
   e.stopPropagation();
   e.preventDefault();
-  if (!disableDeactivatePrompts) {
-    doPrompt(aLink);
-  } else {
-    debuff(aLink);
-  }
+  checkForPrompt(aLink);
 }
 
 export function fastDebuff() { // Native

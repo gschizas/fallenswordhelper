@@ -229,8 +229,7 @@ function impIconColour() { // jQuery
   }
 }
 
-function dataEventsPlayerBuffs(evt, data) { // Native
-  if (!huntingBuffs) {return;}
+function huntingBuffsEnabled(evt, data) { // Native
   if (!calf.showBuffs) {
     missingBuffsDiv.innerHTML = '';
     return;
@@ -248,6 +247,10 @@ function dataEventsPlayerBuffs(evt, data) { // Native
       huntingBuffsName + ' hunting buffs<br>(' +
       missingBuffs.join(', ') + ')';
   } else {missingBuffsDiv.innerHTML = '';}
+}
+
+function dataEventsPlayerBuffs(evt, data) { // Native
+  if (huntingBuffs) {huntingBuffsEnabled(evt, data);}
 }
 
 function fixDebuffQTip(e) { // jQuery

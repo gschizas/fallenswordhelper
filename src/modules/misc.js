@@ -7,9 +7,11 @@ export function injectFindPlayer() { // Bad jQuery
   var levelToTest = system.intValue($('dt.stat-level:first').next()
     .text());
   var characterVirtualLevel = system.getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  var pvpLowerLevelModifier = levelToTest > 205 ? 10 : 5;
-  var pvpUpperLevelModifier = levelToTest >= 200 ? 10 : 5;
+  levelToTest = system.fallback(characterVirtualLevel, levelToTest);
+  var pvpLowerLevelModifier = 5;
+  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
+  var pvpUpperLevelModifier = 5;
+  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
     'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
     (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
@@ -28,30 +30,34 @@ export function injectFindPlayer() { // Bad jQuery
     });
 }
 
-function addMarketplaceWarning() { // Legacy
+function marketplaceWarning(sellPrice) { // Legacy
+  var warningColor = 'green';
+  var warningText =
+    '</b><br>This is probably an offer that will please someone.';
+  if (sellPrice < 100000) {
+    warningColor = 'brown';
+    warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
+  }
+  if (sellPrice > 250000) {
+    warningColor = 'red';
+    warningText = '</b><br>Hold up there ... this is way to high a ' +
+      'price ... you should reconsider.';
+  }
   var amount = system.findNode('//input[@id="amount"]').value;
-  var goldPerPoint = system.findNode('//input[@id="price"]');
   var warningField = system.findNode('//td[@id="warningfield"]');
+  warningField.innerHTML = '<span style="color:' + warningColor +
+    ';">You are offering to buy <b>' + amount +
+    '</b> FSP for >> <b>' + system.addCommas(sellPrice) +
+    warningText + ' (Total: ' +
+    system.addCommas(amount * sellPrice +
+    Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
+}
+
+function addMarketplaceWarning() { // Legacy
+  var goldPerPoint = system.findNode('//input[@id="price"]');
   var sellPrice = goldPerPoint.value;
   if (sellPrice.search(/^[0-9]*$/) !== -1) {
-    var warningColor = 'green';
-    var warningText =
-      '</b><br>This is probably an offer that will please someone.';
-    if (sellPrice < 100000) {
-      warningColor = 'brown';
-      warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
-    } else if (sellPrice > 250000) {
-      warningColor = 'red';
-      warningText = '</b><br>Hold up there ... this is way to high a ' +
-        'price ... you should reconsider.';
-    }
-
-    warningField.innerHTML = '<span style="color:' + warningColor +
-      ';">You are offering to buy <b>' + amount +
-      '</b> FSP for >> <b>' + system.addCommas(sellPrice) +
-      warningText + ' (Total: ' +
-      system.addCommas(amount * sellPrice +
-      Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
+    marketplaceWarning(sellPrice);
   }
 }
 

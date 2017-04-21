@@ -316,32 +316,32 @@ function evalArmour(combat) { // Native
   return combat;
 }
 
+function canIHit(combat) { // Native
+  return combat.numberOfHitsRequired === '-' ||
+    combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
+}
+
 function evalPlayerHits(combat) { // Native
-  var playerHits;
   if (combat.numberOfCreatureHitsTillDead === '-') {
-    playerHits = combat.numberOfHitsRequired;
-  } else if (combat.numberOfHitsRequired === '-' ||
-      combat.numberOfHitsRequired >
-      combat.numberOfCreatureHitsTillDead) {
-    playerHits = '-';
-  } else {
-    playerHits = combat.numberOfHitsRequired;
+    return combat.numberOfHitsRequired;
+  } else if (canIHit(combat)) {
+    return '-';
   }
-  return playerHits;
+  return combat.numberOfHitsRequired;
+}
+
+function canCreatureHit(combat) { // Native
+  return combat.numberOfCreatureHitsTillDead === '-' ||
+    combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
 }
 
 function evalCreatureHits(combat) { // Native
-  var creatureHits;
   if (combat.numberOfHitsRequired === '-') {
-    creatureHits = combat.numberOfCreatureHitsTillDead;
-  } else if (combat.numberOfCreatureHitsTillDead === '-' ||
-      combat.numberOfCreatureHitsTillDead >
-      combat.numberOfHitsRequired) {
-    creatureHits = '-';
-  } else {
-    creatureHits = combat.numberOfCreatureHitsTillDead;
+    return combat.numberOfCreatureHitsTillDead;
+  } else if (canCreatureHit(combat)) {
+    return '-';
   }
-  return creatureHits;
+  return combat.numberOfCreatureHitsTillDead;
 }
 
 function evalMiss(combat) { // Native
@@ -386,6 +386,14 @@ function evalAnalysis(combat) { // Native
   return combat;
 }
 
+function stamAtLowestCa(combat) { // Native
+  if (combat.player.counterAttackLevel > 0) {
+    return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
+      combat.lowestFeasibleCALevel);
+  }
+  return 0;
+}
+
 function caRunning(combat) { // Native
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
@@ -410,10 +418,7 @@ function caRunning(combat) { // Native
       combat.extraAttackAtLowestFeasibleCALevel + ' / ' +
       combat.extraDamageAtLowestFeasibleCALevel + '<br>';
   }
-  combat.extraStaminaPerHitAtLowestFeasibleCALevel =
-    combat.player.counterAttackLevel > 0 ? Math.ceil((1 +
-    combat.player.doublerLevel / 50) * 0.0025 *
-    combat.lowestFeasibleCALevel) : 0;
+  combat.extraStaminaPerHitAtLowestFeasibleCALevel = stamAtLowestCa(combat);
   if (combat.extraStaminaPerHitAtLowestFeasibleCALevel <
     combat.extraStaminaPerHit) {
     combat.extraNotes +=
@@ -458,26 +463,45 @@ function caResult(combat) { // Native
   evalCaOneHit(combat);
 }
 
+function needCa(combat) { // Native
+  return combat.numberOfHitsRequired === '-' ||
+    combat.numberOfHitsRequired !== 1;
+}
+
 function evalCA(combat) { // Native
   if (combat.player.counterAttackLevel > 0 &&
       combat.numberOfHitsRequired === 1) {
     caRunning(combat);
   }
-  if (combat.numberOfHitsRequired === '-' ||
-      combat.numberOfHitsRequired !== 1) {
+  if (needCa(combat)) {
     caResult(combat);
   }
   return combat;
 }
 
+function doesGroupExist(combat) { // Native
+  if (combat.callback.groupExists) {return 'Group ';}
+  return '';
+}
+
+function canIHitIt(combat) { // Native
+  if (combat.hitByHowMuch > 0) {return 'Yes';}
+  return 'No';
+}
+
+function willIBeHit(combat) { // Native
+  if (combat.creatureHitByHowMuch >= 0) {return 'Yes';}
+  return 'No';
+}
+
 function evalHTML(combat) { // Native
   return '<table width="100%"><tbody>' +
     '<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
-    (combat.callback.groupExists ? 'Group ' : '') +
+    doesGroupExist(combat) +
     'Combat Evaluation</td></tr>' +
     '<tr><td align="right"><span style="color:#333333">' +
     'Will I hit it? </td><td align="left">' +
-    (combat.hitByHowMuch > 0 ? 'Yes' : 'No') +
+    canIHitIt(combat) +
     '</td><td align="right"><span style="color:#333333">' +
     'Extra Attack: </td><td align="left">( ' +
     combat.hitByHowMuch + ' )</td></tr>' +
@@ -489,7 +513,7 @@ function evalHTML(combat) { // Native
     ' )</td></tr>' +
     '<tr><td align="right"><span style="color:#333333">' +
     'Will I be hit? </td><td align="left">' +
-    (combat.creatureHitByHowMuch >= 0 ? 'Yes' : 'No') +
+    willIBeHit(combat) +
     '</td><td align="right"><span style="color:#333333">' +
     'Extra Defense: </td><td align="left">( ' + -1 *
     combat.creatureHitByHowMuch + ' )</td></tr>' +
@@ -520,6 +544,22 @@ function evalHTML(combat) { // Native
     '</tbody></table>';
 }
 
+function checkForCreatureEvaluatorGroup() { // Legacy
+  if ($('#creatureEvaluatorGroup').length === 0) {
+    $('#dialog-viewcreature')
+      .append('<div id="creatureEvaluatorGroup" ' +
+        'style="clear:both;"></div>');
+  }
+}
+
+function checkForCreatureEvaluator() { // Legacy
+  if ($('#creatureEvaluator').length === 0) {
+    $('#dialog-viewcreature')
+      .append('<div id="creatureEvaluator" ' +
+        'style="clear:both;"></div>');
+  }
+}
+
 function getCreaturePlayerData(responseText, callback) { // Legacy
   var combat = {};
   combat.callback = callback;
@@ -541,19 +581,11 @@ function getCreaturePlayerData(responseText, callback) { // Legacy
   combat.evaluatorHTML = evalHTML(combat);
   var tempdata;
   if (callback.groupEvaluation) {
-    if ($('#creatureEvaluatorGroup').length === 0) {
-      $('#dialog-viewcreature')
-        .append('<div id="creatureEvaluatorGroup" ' +
-          'style="clear:both;"></div>');
-    }
+    checkForCreatureEvaluatorGroup();
     tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
     $('#creatureEvaluatorGroup').html(tempdata);
   } else {
-    if ($('#creatureEvaluator').length === 0) {
-      $('#dialog-viewcreature')
-        .append('<div id="creatureEvaluator" ' +
-          'style="clear:both;"></div>');
-    }
+    checkForCreatureEvaluator();
     tempdata = combat.evaluatorHTML.replace(/'/g, '\\\'');
     $('#creatureEvaluator').html(tempdata);
   }

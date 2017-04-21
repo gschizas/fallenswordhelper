@@ -85,8 +85,7 @@ function player(invPlayer, rowPlayer, guild) {
   return guild;
 }
 
-export function nameRender(data, type, row) { // Native
-  if (type !== 'display') {return data;}
+function nameRenderDisplay(data, row) { // Native
   var cur = system.fallback(theInv.player_id, theInv.current_player_id);
   var t = getT(row.player_id);
   var p = player(theInv.player_id, row.player_id, theInv.guild_id);
@@ -109,24 +108,37 @@ export function nameRender(data, type, row) { // Native
     bold + '</a>' + _setName;
 }
 
+export function nameRender(data, type, row) { // Native
+  if (type !== 'display') {return data;}
+  return nameRenderDisplay(data, row);
+}
+
 export function whereData(row) { // Native
   return system.fallback(row.folder_id, row.player_id);
 }
 
+function whereRenderUserFolder(row) { // Native
+  if (row.equipped) {return -2;}
+  return parseInt(row.folder_id, 10);
+}
+
 export function whereRender(data, type, row) { // Native
   if (row.folder_id) {
-    return row.equipped ? -2 : parseInt(row.folder_id, 10);
+    return whereRenderUserFolder(row);
   }
-  return row.player_id === -1 ? '~' :
-    calf.membrList[row.player_id].username;
+  if (row.player_id === -1) {return '~';}
+  return calf.membrList[row.player_id].username;
+}
+
+function whereRenderGuildDisplay(row) { // Native
+  if (row.player_id === -1) {return 'GS';}
+  return '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
+    row.player_id + '">' + calf.membrList[row.player_id].username + '</a>';
 }
 
 export function whereRenderDisplay(data, type, row) { // Native
   if (row.player_id) {
-    return row.player_id === -1 ? 'GS' :
-      '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
-      row.player_id + '">' +
-      calf.membrList[row.player_id].username + '</a>';
+    return whereRenderGuildDisplay(row);
   }
   if (row.equipped) {return 'Worn';}
   var folderSelect = '<select class="moveItem" data-inv="' + row.inv_id +
@@ -142,10 +154,14 @@ export function whereRenderDisplay(data, type, row) { // Native
   return folderSelect;
 }
 
+function whereRenderGuildFilter(row) { // Native
+  if (row.player_id === -1) {return 'GS';}
+  return calf.membrList[row.player_id].username;
+}
+
 export function whereRenderFilter(data, type, row) { // Native
   if (row.player_id) {
-    return row.player_id === -1 ? 'GS' :
-      calf.membrList[row.player_id].username;
+    return whereRenderGuildFilter(row);
   }
   if (row.equipped) {return 'Worn';}
   return theInv.folders[row.folder_id];
@@ -273,7 +289,7 @@ export function wuRender(data, _type, row) { // Native
 }
 
 export function dropRender(data, type, row) { // Native
-  if (row.guild_tag !== '-1' || row.equipped) {return;}
+  if (system.fallback(row.guild_tag !== '-1', row.equipped)) {return;}
   if (type !== 'display') {return 'Drop';}
   return '<span class="dropItem tip-static dropLink" data-tipped=' +
     '"INSTANTLY DESTROY THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +
@@ -281,7 +297,7 @@ export function dropRender(data, type, row) { // Native
 }
 
 export function sendRender(data, type, row) { // Native
-  if (row.bound || row.equipped) {return;}
+  if (system.fallback(row.bound, row.equipped)) {return;}
   if (type !== 'display') {return 'Send';}
   return '<span class="sendItem tip-static reportLink" data-tipped=' +
     '"INSTANTLY SEND THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +

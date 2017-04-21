@@ -46,9 +46,7 @@ function parsePage(data) {
   fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage + '...';
 }
 
-function parseTable() {
-  var tableList = doc.getElementsByClassName('width_full');
-  if (tableList.length !== 1) {return;}
+function getTableList(tableList) {
   var theTable = tableList[0];
   var limit = theTable.rows.length - 1;
   for (var i = 1; i < limit; i += 2) {
@@ -66,6 +64,11 @@ function parseTable() {
     tmpGuildLog.push([currPage * 100 + i, timestamp, myDate, myMsg,
       profiler.rowProfile(myMsg)]);
   }
+}
+
+function parseTable() {
+  var tableList = doc.getElementsByClassName('width_full');
+  if (tableList.length === 1) {getTableList(tableList);}
 }
 
 function processPage(data) {

@@ -10,9 +10,7 @@ function noMobs() {
     'Please enable entity log and travel a bit to see the world</span>';
 }
 
-function drawMobs() {
-  var inject = document.getElementById('entityTableOutput');
-  if (!monsterAry || !inject) {return;}
+function mobRows() {
   var result = '';
   for (var i = 0; i < monsterAry.length; i += 1) {
     result += '<tr>' +
@@ -27,11 +25,25 @@ function drawMobs() {
       '<td class="fshCenter">' + monsterAry[i].hp + '</td>' +
       '<td class="fshCenter">' + monsterAry[i].enhancements + '</td></tr>';
   }
-  inject.innerHTML = result;
+  return result;
+}
+
+function drawMobs() {
+  var inject = document.getElementById('entityTableOutput');
+  if (!monsterAry || !inject) {return;}
+  inject.innerHTML = mobRows();
 }
 
 function findSortType(target) {
   return target.getAttribute('sortType') || 'string';
+}
+
+function sortMonsterAry(sortType) {
+  if (sortType === 'string') {
+    monsterAry.sort(system.stringSort);
+  } else {
+    monsterAry.sort(system.numberSort);
+  }
 }
 
 function sortCol(target) {
@@ -42,11 +54,7 @@ function sortCol(target) {
   }
   calf.sortBy = headerClicked;
   var sortType = findSortType(target);
-  if (sortType === 'string') {
-    monsterAry.sort(system.stringSort);
-  } else {
-    monsterAry.sort(system.numberSort);
-  }
+  sortMonsterAry(sortType);
   drawMobs();
 }
 

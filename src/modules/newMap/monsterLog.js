@@ -17,7 +17,7 @@ var statArmor;
 var statHp;
 
 function updateMinMax(_logStat, creatureStat) { // Native
-  var logStat = _logStat || {};
+  var logStat = system.fallback(_logStat, {});
   if (logStat.min) {
     logStat.min = Math.min(logStat.min, creatureStat);
   } else {
@@ -169,18 +169,13 @@ function initMonsterLog() { // Native
   actionData.forEach(loopActions);
 }
 
+var genVar = [0, 1.1, 1.053, 1.1053];
+var hpVar = [0, 1.053, 1, 1];
+
 function getBias() { // Native
   var combatEvaluatorBias = system.getValue('combatEvaluatorBias');
-  if (combatEvaluatorBias === 1) {
-    generalVariable = 1.1;
-    hpVariable = 1.053;
-  } else if (combatEvaluatorBias === 2) {
-    generalVariable = 1.053;
-    hpVariable = 1;
-  } else if (combatEvaluatorBias === 3) {
-    generalVariable = 1.1053;
-    hpVariable = 1;
-  }
+  generalVariable = genVar[combatEvaluatorBias];
+  hpVariable = hpVar[combatEvaluatorBias];
 }
 
 export function startMonsterLog() { // jQuery

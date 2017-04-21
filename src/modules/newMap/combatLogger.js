@@ -20,9 +20,7 @@ function storeEnhancements(enh) { // Native
   }
 }
 
-function combatResponse(e, data) { // Native
-  // If bad response do nothing.
-  if (data.response.response !== 0) {return;}
+function processCombatResponse(e, data) { // Native
   combatData = {};
   combatData.combat = data.response.data;
   if (combatData.combat.inventory_id) {
@@ -39,6 +37,11 @@ function combatResponse(e, data) { // Native
   combatData.time = data.time;
   combatLog.push(combatData);
   ajax.setForage('fsh_combatLog', combatLog);
+}
+
+function combatResponse(e, data) { // Native
+  // If bad response do nothing.
+  if (data.response.response === 0) {processCombatResponse(e, data);}
 }
 
 function gotCombatLog(data) { // jQuery.min

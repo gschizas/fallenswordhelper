@@ -132,7 +132,7 @@ module.exports = {
       'ignoreTrailingComments': true,
       'ignoreUrls': true
     }],
-    'max-lines': ['error', 653],
+    'max-lines': ['error', 685],
     'max-nested-callbacks': ['error', 3],
     'max-params': ['error', 5],
     'max-statements-per-line': ['error', { 'max': 3 }],

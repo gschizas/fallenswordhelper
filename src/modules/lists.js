@@ -26,8 +26,16 @@ function itemRow(item) { // Legacy
   return result;
 }
 
+function doInputs() { // Legacy
+  var result = '<tr>';
+  for (var i = 0; i < param.tags.length; i += 1) {
+    result += '<td align=center><input type="' + param.tags[i] +
+      '" class="custominput" id="fshIn' + param.fields[i] + '"></td>';
+  }
+  return result;
+}
+
 function generateManageTable() { // Legacy
-  var i;
   var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
     'width="100%"><tr class="fshOr">';
   result += param.headers.reduce(function(prev, curr) {
@@ -35,7 +43,7 @@ function generateManageTable() { // Legacy
   }, '');
   result += '<th>Action</th></tr>';
   var currentCategory = '';
-  for (i = 0; i < param.currentItems.length; i += 1) {
+  for (var i = 0; i < param.currentItems.length; i += 1) {
     var item = param.currentItems[i];
     result += '<tr>';
     if (param.categoryField &&
@@ -50,11 +58,7 @@ function generateManageTable() { // Legacy
     result += '<td><span class="HelperTextLink" data-itemId="' + i +
       '" id="fshDel' + i + '">[Del]</span></td></tr>';
   }
-  result += '<tr>';
-  for (i = 0; i < param.tags.length; i += 1) {
-    result += '<td align=center><input type="' + param.tags[i] +
-      '" class="custominput" id="fshIn' + param.fields[i] + '"></td>';
-  }
+  result += doInputs();
   result += '<td><span class="HelperTextLink" id="fshAdd">' +
     '[Add]</span></td></tr></table>' +
     '<table width="100%"><tr><td class="fshCenter">' +
@@ -75,23 +79,27 @@ function deleteQuickItem(evt) { // Legacy
   generateManageTable();
 }
 
+function buildNewItem() { // Legacy
+  var newItem = {};
+  for (var i = 0; i < param.fields.length; i += 1) {
+    if (param.tags[i] === 'checkbox') {
+      newItem[param.fields[i]] =
+        document.getElementById('fshIn' + param.fields[i]).checked;
+    } else {
+      newItem[param.fields[i]] =
+        document.getElementById('fshIn' + param.fields[i]).value;
+    }
+  }
+  return newItem;
+}
+
 function addQuickItem() { // Legacy
   var isArrayOnly = param.fields.length === 0;
   var newItem = {};
   if (isArrayOnly) {
     newItem = document.getElementById('fshIn0').value;
   } else {
-    for (var i = 0; i < param.fields.length; i += 1) {
-      if (param.tags[i] === 'checkbox') {
-        newItem[param.fields[i]] =
-          document.getElementById('fshIn' +
-            param.fields[i]).checked;
-      } else {
-        newItem[param.fields[i]] =
-          document.getElementById('fshIn' +
-            param.fields[i]).value;
-      }
-    }
+    newItem = buildNewItem();
   }
   param.currentItems.push(newItem);
   generateManageTable();
