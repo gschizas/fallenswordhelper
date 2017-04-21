@@ -31,7 +31,7 @@ function moveItemsToFolder() { // jQuery.min
       .firstElementChild;
     if (el.checked) {
       batchNo = Math.floor(counter / 50);
-      invList[batchNo] = invList[batchNo] || [];
+      invList[batchNo] = system.fallback(invList[batchNo], []);
       invList[batchNo].push(o.invid);
       counter += 1;
       if (counter % 50 === 0) {
@@ -69,15 +69,20 @@ function injectMoveItems() { // Native
   flrRow.insertAdjacentHTML('afterend', options);
 }
 
+function showHideLabel(pref) { // Native
+  if (pref) {return 'Hide';}
+  return 'Show';
+}
+
 function doToggleButtons() { // Native
   // Option toggle buttons for both screens
   var insertHere = layout.pCC.getElementsByTagName('form')[0]
     .previousElementSibling.firstElementChild;
   var inject = '[<span id="fshShowExtraLinks" class="reportLink">' +
-    (showExtraLinks ? 'Hide' : 'Show') +
+    showHideLabel(showExtraLinks) +
     ' AH and UFSG links</span>]&nbsp;' +
     '[<span id="fshShowQuickDropLinks" class="reportLink">' +
-    (showQuickDropLinks ? 'Hide' : 'Show') +
+    showHideLabel(showQuickDropLinks) +
     ' Quick Drop links</span>]&nbsp;';
   if (calf.subcmd2 === 'storeitems') {
     inject += '[<span id="fshSelectAllGuildLocked" class="reportLink">' +
@@ -87,7 +92,7 @@ function doToggleButtons() { // Native
 }
 
 function afterbegin(o, item) { // Native
-  if (extraLinks || !showExtraLinks) {return;}
+  if (system.fallback(extraLinks, !showExtraLinks)) {return;}
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
