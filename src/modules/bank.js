@@ -66,12 +66,16 @@ function transResponse(response) { // jQuery
   $('#pCC #withdraw_amount').val(o.initWithdraw);
 }
 
+function invalidAmount(o, amount) { // jQuery
+  return $('#pCC b').eq(o.depoPos).text() === '0' ||
+    !$.isNumeric(amount) || amount < 1;
+}
+
 function bankDeposit(e) { // jQuery
   e.preventDefault();
   var o = bankSettings;
   var amount = $('#pCC #deposit_amount').val();
-  if ($('#pCC b').eq(o.depoPos).text() === '0' || !$.isNumeric(amount) ||
-    amount < 1) {return;}
+  if (invalidAmount(o, amount)) {return;}
   o.data.mode = 'deposit';
   o.data.deposit_amount = amount;
   $.get('index.php', o.data).done(transResponse);

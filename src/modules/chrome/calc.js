@@ -1,20 +1,16 @@
 import * as system from '../support/system';
 
-var days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday',
-  'Friday', 'Saturday'];
-var months = ['January', 'February', 'March', 'April', 'May', 'June',
-  'July', 'August', 'September', 'October', 'November', 'December'];
+var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
+  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function formatShortDate(aDate) { // Native
   var yyyy = aDate.getFullYear();
-  var dd = aDate.getDate();
-  if (dd < 10) {dd = '0' + dd;}
-  var ddd = days[aDate.getDay()].substr(0, 3);
-  var month = months[aDate.getMonth()].substr(0, 3);
-  var hh = aDate.getHours();
-  if (hh < 10) {hh = '0' + hh;}
-  var mm = aDate.getMinutes();
-  if (mm < 10) {mm = '0' + mm;}
+  var dd = system.padZ(aDate.getDate());
+  var ddd = days[aDate.getDay()];
+  var month = months[aDate.getMonth()];
+  var hh = system.padZ(aDate.getHours());
+  var mm = system.padZ(aDate.getMinutes());
   return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
 }
 

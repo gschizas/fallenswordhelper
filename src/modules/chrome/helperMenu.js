@@ -93,10 +93,7 @@ function showHelperMenu() { // Native
   helperMenuDiv.addEventListener('click', eventHandler);
 }
 
-export function injectHelperMenu() { // Native
-  // don't put all the menu code here (but call if clicked) to minimize lag
-  var node = document.getElementById('statbar-container');
-  if (!node) {return;}
+function haveNode(node) { // Native
   var helperMenu = document.createElement('DIV');
   helperMenu.id = 'helperMenu';
   helperMenu.className = 'helperMenu';
@@ -110,4 +107,10 @@ export function injectHelperMenu() { // Native
     helperMenu.addEventListener('dragstart', common.drag_start);
   }
   node.parentNode.insertBefore(helperMenu, node);
+}
+
+export function injectHelperMenu() { // Native
+  // don't put all the menu code here (but call if clicked) to minimize lag
+  var node = document.getElementById('statbar-container');
+  if (node) {haveNode(node);}
 }

@@ -19,9 +19,15 @@
 // EVERYTHING MUST BE IN main()
 function fshMain() {
 
+  function setVer() { // Native
+    var ver = '$_VER';
+    if (typeof GM_info === 'undefined') {return ver + '_native';}
+    return ver;
+  }
+
   window.FSH = window.FSH || {};
 
-  FSH.version = '$_VER';
+  FSH.version = setVer();
 
   var resources = {
     calfSystemJs: '$_CALFJS',
@@ -33,10 +39,6 @@ function fshMain() {
     // dableDev: 'http://localhost/Dable/.build/dable.js'
     //#endif
   };
-
-  if (typeof GM_info === 'undefined') {
-    FSH.version += '_native';
-  }
 
   function appendHead(o) { // native
     var count = 0;

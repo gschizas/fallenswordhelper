@@ -13,13 +13,15 @@ function displayComposeMsg() { // Native
     .insertAdjacentHTML('afterbegin', composeMsg);
 }
 
-function parseComposing(data) { // Native
-  var doc;
+function getDoc(data) { // Native
   if (calf.cmd !== 'composing') {
-    doc = system.createDocument(data);
-  } else {
-    doc = document;
+    return system.createDocument(data);
   }
+  return document;
+}
+
+function parseComposing(data) { // Native
+  var doc = getDoc(data);
   var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
   var times = [];
   var openSlots = doc.getElementsByClassName('composing-potion-time');
@@ -80,28 +82,49 @@ function createPotion(temp) { // jQuery
   });
 }
 
+function quickCreateBailOut(target) {
+  return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
+}
+
 function quickCreate(evt) { // Native
   var target = evt.target;
-  if (target.tagName !== 'SPAN' ||
-      target.className !== 'quickCreate') {return;}
+  if (quickCreateBailOut(target)) {return;}
   var temp = target.previousElementSibling.previousElementSibling;
   if (temp && temp.value !== 'none') {
     createPotion(temp);
   }
 }
 
-export function injectComposeAlert() { // jQuery
-  if (calf.cmd === 'composing') {return;}
-  var needToCompose = system.getValue('needToCompose');
-  if (needToCompose) {
-    displayComposeMsg();
-    return;
-  }
+function checkLastCompose() { // jQuery
   var lastComposeCheck = system.getValue('lastComposeCheck');
   if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
   $.get('index.php?cmd=composing', function(data) {
     task.add(3, parseComposing, [data]);
   });
+}
+
+function composeAlert() { // Native
+  var needToCompose = system.getValue('needToCompose');
+  if (needToCompose) {
+    displayComposeMsg();
+    return;
+  }
+  checkLastCompose();
+}
+
+export function injectComposeAlert() { // Native
+  if (calf.cmd !== 'composing') {composeAlert();}
+}
+
+function moveButtons() { // Native
+  if (system.getValue('moveComposingButtons')) {
+    var buttonDiv = document.getElementById('composing-error-dialog')
+      .previousElementSibling;
+    buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
+    var top = layout.pCC.getElementsByClassName('composing-level')[0]
+      .parentNode;
+    top.insertAdjacentElement('beforebegin', buttonDiv);
+  }
 }
 
 export function injectComposing() { // Native
@@ -117,15 +140,7 @@ export function injectComposing() { // Native
       '&nbsp;[<span class="quickCreate">Quick Create</span>]');
   });
   layout.pCC.addEventListener('click', quickCreate);
-
-  if (system.getValue('moveComposingButtons')) {
-    var buttonDiv = document.getElementById('composing-error-dialog')
-      .previousElementSibling;
-    buttonDiv.setAttribute('style', 'text-align: right; padding: 0 38px 0 0');
-    var top = layout.pCC.getElementsByClassName('composing-level')[0]
-      .parentNode;
-    top.insertAdjacentElement('beforebegin', buttonDiv);
-  }
+  moveButtons();
 }
 
 export function composingCreate() { // Native

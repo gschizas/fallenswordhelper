@@ -53,39 +53,44 @@ function sortHandler(evt) { // jQuery
   }
 }
 
-function filterHeader() { // jQuery
-
-  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
-  theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
-  theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
-
-  var aTable = $(assets.arenaFilter);
-
+function hideMovesCheckbox(aTable) { // jQuery
   var fshHideMoves = $('#fshHideMoves', aTable);
   if (opts && 'hideMoves' in opts) {
     fshHideMoves.prop('checked', opts.hideMoves);
     $('.moveMax').toggle(!opts.hideMoves);
   }
   fshHideMoves.click(hideMoves);
+}
 
+function minLvlValue(aTable) { // jQuery
   var fshMinLvl = $('#fshMinLvl', aTable);
   if (opts && 'minLvl' in opts) {
     fshMinLvl.val(opts.minLvl);
   } else {
     fshMinLvl.val(dataObj.defaults.arenaMinLvl);
   }
+}
+
+function maxLvlValue(aTable) { // jQuery
   var fshMaxLvl = $('#fshMaxLvl', aTable);
   if (opts && 'maxLvl' in opts) {
     fshMaxLvl.val(opts.maxLvl);
   } else {
     fshMaxLvl.val(dataObj.defaults.arenaMaxLvl);
   }
+}
+
+function filterHeader() { // jQuery
+  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
+  theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
+  theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
+  var aTable = $(assets.arenaFilter);
+  hideMovesCheckbox(aTable);
+  minLvlValue(aTable);
+  maxLvlValue(aTable);
   $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
-
   $('#fshReset', aTable).click(resetLvls);
-
   $('td', theRow).append(aTable);
-
 }
 
 var doLvlFilter = [
@@ -97,8 +102,7 @@ var doLvlFilter = [
   function(min, max, level) {return min <= level && level <= max;}
 ];
 
-function lvlFilter(_settings, data) { // jQuery
-  if (!opts) {return true;}
+function hazOpts(_settings, data) { // Native
   var min = opts.minLvl;
   var max = opts.maxLvl;
   var level = system.intValue(data[7]);
@@ -106,6 +110,18 @@ function lvlFilter(_settings, data) { // jQuery
     if (doLvlFilter[i](min, max, level)) {return true;}
   }
   return false;
+}
+
+function lvlFilter(_settings, data) { // Native
+  if (opts) {return hazOpts(_settings, data);}
+  return true;
+}
+
+function players(cell) { // jQuery
+  var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
+  if (matches) {
+    cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
+  }
 }
 
 function boolData(cell) { // jQuery
@@ -148,16 +164,9 @@ function orderData(i, e) { // jQuery
     }
   }
 
-  cell = theCells.eq(1);
-  matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
-  if (matches) {
-    cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
-  }
-
+  players(theCells.eq(1));
   cell = theCells.eq(2);
-  cell.attr('data-order',
-    $('td', cell).first().text().replace(/[,\s]/g, ''));
-
+  cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
   boolData(theCells.eq(4));
   boolData(theCells.eq(5));
   boolData(theCells.eq(6));

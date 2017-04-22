@@ -26,6 +26,16 @@ function newSelector(selector) {
   return test_cmd && test_cmd.value || '-';
 }
 
+function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
+  if (pageSwitcher[cmd] &&
+      pageSwitcher[cmd][subcmd] &&
+      pageSwitcher[cmd][subcmd][subcmd2] &&
+      pageSwitcher[cmd][subcmd][subcmd2][type] &&
+      pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
+    return pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
+  }
+}
+
 function getCoreFunction() { // Native
   var cmd;
   var subcmd;
@@ -57,13 +67,7 @@ function getCoreFunction() { // Native
   functionPath = cmd + '/' + subcmd + '/' + subcmd2 + '/' + type + '/' +
     fromWorld;
 
-  if (pageSwitcher[cmd] &&
-      pageSwitcher[cmd][subcmd] &&
-      pageSwitcher[cmd][subcmd][subcmd2] &&
-      pageSwitcher[cmd][subcmd][subcmd2][type] &&
-      pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld]) {
-    coreFunction = pageSwitcher[cmd][subcmd][subcmd2][type][fromWorld];
-  }
+  coreFunction = testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld);
 }
 
 function gameHelpLink() { // Native
@@ -161,9 +165,13 @@ function navMenu() { // jQuery
   };
 }
 
+function getBoxList(boxList) { // Native
+  if (boxList) {return boxList;}
+  return '';
+}
+
 function storeFSBox(_boxList) { // Native
-  var boxList = _boxList;
-  if (!boxList) {boxList = '';}
+  var boxList = getBoxList(_boxList);
   var fsbox = document.getElementById('minibox-fsbox')
     .getElementsByClassName('message')[0].innerHTML;
   if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
@@ -187,21 +195,21 @@ function injectFSBoxLog() { // Native
     '</span>');
 }
 
-function hideGuildLogMsg(guildLogNode) {
+function testForGuildLogMsg(guildLogNode) { // Native
+  return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
+    guildLogNode.innerHTML.search('Guild Log updated!') === -1;
+}
+
+function hideGuildLogMsg(guildLogNode) { // Native
   // hide the lhs box
-  if (location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
-      guildLogNode.innerHTML.search('Guild Log updated!') === -1) {return;}
+  if (testForGuildLogMsg(guildLogNode)) {return;}
   var messageBox = guildLogNode.parentNode;
   if (messageBox) {
     messageBox.classList.add('fshHide');
   }
 }
 
-function changeGuildLogHREF() { // Native
-  if (!system.getValue('useNewGuildLog')) {return;}
-  var guildLogNodes = document.querySelectorAll(
-    '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
-  if (!guildLogNodes) {return;}
+function gotGuildLogNodes(guildLogNodes) { // Native
   var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
@@ -209,6 +217,13 @@ function changeGuildLogHREF() { // Native
       'index.php?cmd=notepad&blank=1&subcmd=newguildlog');
   }
   hideGuildLogMsg(guildLogNode);
+}
+
+function changeGuildLogHREF() { // Native
+  if (!system.getValue('useNewGuildLog')) {return;}
+  var guildLogNodes = document.querySelectorAll(
+    '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
+  if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
 function moveRHSBoxUpOnRHS(title) { // Native
@@ -241,6 +256,7 @@ function doMoveFsBox() { // Native
 }
 
 function notHuntMode() { // Native
+  if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
   doMoveGuildList();
   doMoveAllyList();
@@ -270,37 +286,34 @@ function notHuntMode() { // Native
 }
 
 function prepareEnv() { // Native
-
   if (system.getValue('gameHelpLink')) {
     task.add(3, gameHelpLink);
   }
-
   calf.huntingMode = system.getValue('huntingMode');
   task.add(3, keyHandler.replaceKeyHandler);
-
-  if (!calf.huntingMode) {
-    notHuntMode();
-  }
-
+  notHuntMode();
   if (!system.getValue('hideHelperMenu')) {
     task.add(3, helperMenu.injectHelperMenu);
   }
-
 }
 
-function asyncDispatcher() { // Native
-  //#if _DEV  //  asyncDispatcher messages
+//#if _DEV  //  asyncDispatcher messages
+function devHooks() {
   /* eslint-disable no-console */
   console.log('functionPath', functionPath);
   if (!coreFunction) {
     console.log('No Core Function.');
-    return;
   }
   if (typeof coreFunction !== 'function') {
     console.log('Not Core Function.');
-    return;
   }
   /* eslint-enable no-console */
+}
+//#endif
+
+function asyncDispatcher() { // Native
+  //#if _DEV  //  asyncDispatcher messages
+  devHooks();
   //#endif
   if (typeof coreFunction === 'function') {
     fshGa.screenview(functionPath);
@@ -343,11 +356,7 @@ function isDraggable(draggableQuickLinks) { // Native
   }
 }
 
-function injectQuickLinks() { // Native ?
-  var node = document.getElementById('statbar-container');
-  if (!node) {return;}
-  var quickLinks = system.fallback(system.getValueJSON('quickLinks'), []);
-  if (quickLinks.length <= 0) {return;}
+function haveNode(node, quickLinks) { // Native ?
   var quickLinksTopPx = system.getValue('quickLinksTopPx');
   var quickLinksLeftPx = system.getValue('quickLinksLeftPx');
   var draggableQuickLinks = system.getValue('draggableQuickLinks');
@@ -366,6 +375,14 @@ function injectQuickLinks() { // Native ?
   html += '</div>';
   document.body.insertAdjacentHTML('beforeend', html);
   isDraggable(draggableQuickLinks);
+}
+
+function injectQuickLinks() { // Native ?
+  var node = document.getElementById('statbar-container');
+  if (!node) {return;}
+  var quickLinks = system.fallback(system.getValueJSON('quickLinks'), []);
+  if (quickLinks.length <= 0) {return;}
+  haveNode(node, quickLinks);
 }
 
 function lookForHcsData() { // Native

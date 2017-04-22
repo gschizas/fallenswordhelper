@@ -295,3 +295,9 @@ export function isChecked(pref) { // Native
   if (pref) {return ' checked';}
   return '';
 }
+
+export function padZ(n) { // Native
+  var ret = n.toString();
+  if (n < 10) {ret = '0' + ret;}
+  return ret;
+}

@@ -74,9 +74,9 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
   }
   $('#quickMsgDialog_targetUsername').html(name);
   $('#quickMsgDialog_targetPlayer').val(name);
-  $('#quickMsgDialog_msg').val(msg || '');
+  $('#quickMsgDialog_msg').val(system.fallback(msg, ''));
   $('#quickMsgDialog_msg').removeAttr('disabled');
-  $('.validateTips').text(tip || '');
+  $('.validateTips').text(system.fallback(tip, ''));
   $('#quickMessageDialog').dialog('open');
 }
 

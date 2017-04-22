@@ -28,13 +28,17 @@ var contactClass = [
   }
 ];
 
+function allyOrEnemy(type, test) {
+  if (type) {return test.ally;}
+  return test.enemy;
+}
+
 function contactColor(last_login, type) { // Native
   var now = Math.floor(Date.now() / 1000);
   for (var i = 0; i < contactClass.length; i += 1) {
     var test = contactClass[i];
     if (test.condition(now - last_login)) {
-      if (type) {return test.ally;}
-      return test.enemy;
+      return allyOrEnemy(type, test);
     }
   }
   return 'fshWhite';
@@ -115,10 +119,7 @@ function noAllies(allies, enemies) {
     !calf.enableEnemyOnlineList && allies.length === 0;
 }
 
-function injectAllyEnemyList(data) { // Native
-  var allies = system.fallback(data._allies, []);
-  var enemies = system.fallback(data._enemies, []);
-  if (noAllies(allies, enemies)) {return;}
+function hazAllies(allies, enemies) { // Native
   var output = '';
   if (calf.enableAllyOnlineList) {
     output += addContact(allies, true);
@@ -129,6 +130,13 @@ function injectAllyEnemyList(data) { // Native
   var fshContactList = document.getElementById('fshContactList');
   fshContactList.innerHTML = '';
   fshContactList.insertAdjacentHTML('beforeend', output);
+}
+
+function injectAllyEnemyList(data) { // Native
+  var allies = system.fallback(data._allies, []);
+  var enemies = system.fallback(data._enemies, []);
+  if (noAllies(allies, enemies)) {return;}
+  hazAllies(allies, enemies);
 }
 
 function resetList() { // jQuery

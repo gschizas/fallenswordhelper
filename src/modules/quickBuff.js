@@ -242,19 +242,13 @@ function successfull(timeStamp, buffCast, buffLog) {
   return buffLog;
 }
 
-function padZ(n) { // Native
-  var ret = n.toString();
-  if (n < 10) {ret = '0' + ret;}
-  return ret;
-}
-
 function formatDateTime(aDate) { // Native
   var yyyy = aDate.getFullYear().toString();
-  var mon = padZ(aDate.getMonth() + 1);
-  var dd = padZ(aDate.getDate());
-  var hh = padZ(aDate.getHours());
-  var mm = padZ(aDate.getMinutes());
-  var ss = padZ(aDate.getSeconds());
+  var mon = system.padZ(aDate.getMonth() + 1);
+  var dd = system.padZ(aDate.getDate());
+  var hh = system.padZ(aDate.getHours());
+  var mm = system.padZ(aDate.getMinutes());
+  var ss = system.padZ(aDate.getSeconds());
   return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
