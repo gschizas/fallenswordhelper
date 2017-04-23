@@ -1,5 +1,5 @@
-import assets from './assets';
-import calf from '../support/calf';
+import assets from '../assets';
+import calf from '../../support/calf';
 import evalAnalysis from './evalAnalysis';
 import evalArmour from './evalArmour';
 import evalAttack from './evalAttack';
@@ -8,8 +8,8 @@ import evalDamage from './evalDamage';
 import evalDefence from './evalDefence';
 import evalExtraBuffs from './evalExtraBuffs';
 import evalHtml from './evalHtml';
-import * as common from '../common/common';
-import * as system from '../support/system';
+import * as common from '../../common/common';
+import * as system from '../../support/system';
 
 function getBiasGeneral(combat) { // Native
   if (assets.bias[combat.combatEvaluatorBias]) {

@@ -7,7 +7,7 @@ import * as sendGold from './sendGold';
 import * as settingsPage from '../settings/settingsPage';
 import * as shop from './shop';
 import * as system from '../support/system';
-import * as viewCreature from './viewCreature';
+import * as viewCreature from './viewCreature/viewCreature';
 import * as world from '../settings/world';
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
