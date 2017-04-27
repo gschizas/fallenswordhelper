@@ -303,8 +303,7 @@ function devHooks() {
   console.log('functionPath', functionPath);
   if (!coreFunction) {
     console.log('No Core Function.');
-  }
-  if (typeof coreFunction !== 'function') {
+  } else if (typeof coreFunction !== 'function') {
     console.log('Not Core Function.');
   }
   /* eslint-enable no-console */
