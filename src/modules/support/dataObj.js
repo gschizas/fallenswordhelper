@@ -291,3 +291,16 @@ export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
 export var places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
   'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
   'fourteenth'];
+
+export var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+  'Sep', 'Oct', 'Nov', 'Dec'];
+
+export var defenderMultiplier = 0.2;
+
+export var mercRE = [
+  /<td>Attack:<\/td><td>(\d+)<\/td>/,
+  /<td>Defense:<\/td><td>(\d+)<\/td>/,
+  /<td>Armor:<\/td><td>(\d+)<\/td>/,
+  /<td>Damage:<\/td><td>(\d+)<\/td>/,
+  /<td>HP:<\/td><td>(\d+)<\/td>/
+];

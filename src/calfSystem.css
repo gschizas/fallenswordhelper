@@ -1,3 +1,12 @@
+/* Groups */
+
+table#stat {
+  font-size: x-small;
+  border-top: 2px black solid;
+  border-spacing: 1px;
+  border-collapse: collapse;
+}
+
 /* Drop Items */
 .quickActionSpinner {
   display: inline;
@@ -293,6 +302,7 @@ input.fshFindOnlinePlayers {
 .fshLime {color: lime;}
 .fshYellow {color: yellow;}
 .fshPink {color: pink;}
+.fshBrown {color: brown;}
 .fshDarkCyan {color: DarkCyan;}
 .fshOliveDrab {color: OliveDrab;}
 .fshDodgerBlue {color: DodgerBlue;}
@@ -471,6 +481,39 @@ table#fshBazaar span#warning {
   font-size: small
 }
 
+/* Relic */
+
+div.leftDiv {
+  width: 100px;
+  margin-right: 10px;
+}
+div.midDiv {
+  width: 160px;
+  margin-right: 10px;
+}
+.midDiv .brn {
+  min-width: 112px;
+}
+.midDiv .grey {
+  min-width: 46px;
+}
+div.rightDiv {
+  width: 160px;
+}
+.rightDiv .brn {
+  min-width: 112px;
+}
+.rightDiv .grey {
+  min-width: 46px;
+}
+div.lowDiv {
+  width: 455px;
+  padding-top: 10px;
+}
+.lowDiv a {
+  color: red;
+}
+
 table.relicT {font-size: small;}
 table.relicT tr.hidden {
   display: none;
@@ -486,6 +529,8 @@ table.relicT td.headr {
   font-size: small;
   border-top: 2px black solid;
 }
+
+/* Relic */
 
 img.center {
   display: block;
@@ -574,7 +619,7 @@ table.fshInvFilter td {
   border: none;
   padding: 0;
 }
-.fshBls {font-size: 84%;}
+button.fshBls {font-size: 84%;}
 
 /* Create Aution Craft Buttons */
 .fshAC {

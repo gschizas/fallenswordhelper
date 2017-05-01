@@ -31,8 +31,11 @@
     "test": "npm run eslint",
     "uglify": "npm run uglify:dev && npm run uglify:beta && npm run uglify:prod",
     "uglify:beta": "uglifyjs dist/beta/calfSystem.js --stats -m -c -o dist/beta/calfSystem.min.js",
+    "postuglify:beta": "cost :max,unzip:dist/beta/calfSystem.min.js && cost :max:dist/beta/calfSystem.min.js",
     "uglify:dev": "uglifyjs dist/dev/calfSystem.js --stats -m -c -o dist/dev/calfSystem.min.js",
+    "postuglify:dev": "cost :max,unzip:dist/dev/calfSystem.min.js && cost :max:dist/dev/calfSystem.min.js",
     "uglify:prod": "uglifyjs dist/prod/calfSystem.js --stats -m -c -o dist/prod/calfSystem.min.js",
+    "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
     "watch": "chokidar-cmd -c \"npm run rollup:devcalf\" -t src --initial",
     "ws": "ws -c -p 9966 -d ."
   },
@@ -52,6 +55,7 @@
   "homepage": "https://fallenswordhelper.github.io/fallenswordhelper",
   "devDependencies": {
     "chokidar-cmd": "latest",
+    "cost": "latest",
     "eslint": "latest",
     "ip": "latest",
     "jshint": "latest",

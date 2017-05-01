@@ -1,22 +1,11 @@
 import * as fshGa from '../support/fshGa';
 import * as guildAdvisor from '../guildAdvisor';
-import * as oldRelic from '../oldRelic';
 import * as questBook from '../questBook';
 import * as quickBuff from '../quickBuff';
 import * as recipes from '../recipes';
 import * as system from '../support/system';
 
 var unknown = [
-  {
-    condition: function() {
-      return $('#pCC td:contains("Below is the current ' +
-        'status for the relic")').length > 0;
-    },
-    result: function() {
-      fshGa.screenview('unknown.oldRelic.injectRelic');
-      oldRelic.injectRelic();
-    }
-  },
   {
     condition: function() {
       return document.getElementById('quickbuff-report');

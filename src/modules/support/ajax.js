@@ -1,4 +1,5 @@
 import calf from './calf';
+import * as dataObj from './dataObj';
 import * as debug from './debug';
 import * as layout from './layout';
 import * as system from './system';
@@ -354,4 +355,59 @@ export function doPickMove(moveId, slotId) {
       slot_id: slotId
     }
   });
+}
+
+export function groupViewStats(doc) {
+  var attackElement = doc.getElementById('stat-attack');
+  var defenseElement = doc.getElementById('stat-defense');
+  var armorElement = doc.getElementById('stat-armor');
+  var damageElement = doc.getElementById('stat-damage');
+  var hpElement = doc.getElementById('stat-hp');
+  return {
+    attack: system.intValue(attackElement.textContent),
+    attackElement: attackElement,
+    defense: system.intValue(defenseElement.textContent),
+    defenseElement: defenseElement,
+    armor: system.intValue(armorElement.textContent),
+    armorElement: armorElement,
+    damage: system.intValue(damageElement.textContent),
+    damageElement: damageElement,
+    hp: system.intValue(hpElement.textContent),
+    hpElement: hpElement
+  };
+}
+
+function parseGroupStats(html) {
+  var doc = system.createDocument(html);
+  return groupViewStats(doc);
+}
+
+export function getGroupStats(viewStats) {
+  return $.ajax(viewStats).pipe(parseGroupStats);
+}
+
+function parseMercStats(html) {
+  var doc = system.createDocument(html);
+  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
+  var mercTotal = [0, 0, 0, 0, 0];
+  Array.prototype.forEach.call(mercElements, function(merc) {
+    var mouseoverText = merc.dataset.tipped;
+    mercTotal = mercTotal.map(function(el, i) {
+      return el + Number(dataObj.mercRE[i].exec(mouseoverText)[1]);
+    });
+  });
+  mercTotal = mercTotal.map(function(el) {
+    return Math.round(el * dataObj.defenderMultiplier);
+  });
+  return {
+    attack: mercTotal[0],
+    defense: mercTotal[1],
+    armor: mercTotal[2],
+    damage: mercTotal[3],
+    hp: mercTotal[4]
+  };
+}
+
+export function getMercStats() {
+  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }

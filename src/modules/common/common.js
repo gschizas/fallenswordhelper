@@ -66,15 +66,28 @@ function cloakGuess(bonus, level) { // Native
   return level * 10;
 }
 
+function updateForCloak(obj) {
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+  obj.hpValue = obj.hpBonus;
+}
+
 function playerDataString(responseText) { // Native
   var doc = system.createDocument(responseText);
   var obj = {
     levelValue: getStat('#stat-vl', doc),
     attackValue: getStat('#stat-attack', doc),
+    attackBonus: getBonus('#stat-attack', doc),
     defenseValue: getStat('#stat-defense', doc),
+    defenseBonus: getBonus('#stat-defense', doc),
     armorValue: getStat('#stat-armor', doc),
+    armorBonus: getBonus('#stat-armor', doc),
     damageValue: getStat('#stat-damage', doc),
+    damageBonus: getBonus('#stat-damage', doc),
     hpValue: getStat('#stat-hp', doc),
+    hpBonus: getBonus('#stat-hp', doc),
     killStreakValue: getStat('#stat-kill-streak', doc),
     // get buffs here later ... DD, CA, DC, Constitution, etc
     counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
@@ -106,30 +119,58 @@ function playerDataString(responseText) { // Native
     return obj;
   }
 
-  obj.attackBonus = getBonus('#stat-attack', doc);
-  obj.defenseBonus = getBonus('#stat-defense', doc);
-  obj.armorBonus = getBonus('#stat-armor', doc);
-  obj.damageBonus = getBonus('#stat-damage', doc);
-  obj.hpBonus = getBonus('#stat-hp', doc);
-
-  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
-  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
-  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
-  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
-  obj.hpValue = obj.hpBonus;
+  updateForCloak(obj);
   return obj;
 }
 
-function playerDataObject(responseText) { // Native
+export function reduceBuffArray(buffAry) {
+  return buffAry.reduce(function(prev, curr) {
+    prev[curr.name] = Number(curr.level);
+    return prev;
+  }, {});
+}
+
+function getBuffLvl(buffs, buff) {
+  return system.fallback(buffs[buff], 0);
+}
+
+export function playerDataObject(json) { // Native
+  var buffs = reduceBuffArray(json._skills);
   var obj = {
-    levelValue: responseText.level,
-    attackValue: responseText.attack,
-    defenseValue: responseText.defense,
-    armorValue: responseText.armor,
-    damageValue: responseText.damage,
-    hpValue: responseText.hp,
-    killStreakValue: system.intValue(responseText.killstreak)
+    levelValue: json.level,
+    attackValue: json.attack,
+    attackBonus: json.bonus_attack,
+    defenseValue: json.defense,
+    defenseBonus: json.bonus_defense,
+    armorValue: json.armor,
+    armorBonus: json.bonus_armor,
+    damageValue: json.damage,
+    damageBonus: json.bonus_damage,
+    hpValue: json.hp,
+    hpBonus: json.bonus_hp,
+    killStreakValue: system.intValue(json.killstreak),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
+    doublerLevel: getBuffLvl(buffs, 'Doubler'),
+    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
+    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
+    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
+    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
+    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
+    flinchLevel: getBuffLvl(buffs, 'Flinch'),
+    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
+    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
+    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
+    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
+    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
+    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
+    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
+    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
+    cloakLevel: getBuffLvl(buffs, 'Cloak')
   };
+  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
   return obj;
 }
 

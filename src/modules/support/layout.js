@@ -1,3 +1,4 @@
+import * as dataObj from './dataObj';
 import * as system from './system';
 import * as task from './task';
 
@@ -40,6 +41,30 @@ export function openQuickBuffById(aPlayerId) {
 export function openQuickBuffByName(aPlayerName) {
   window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
     'fsQuickBuff', 618, 1000, ',scrollbars');
+}
+
+export function doBuffLinks(members) {
+  // quick buff only supports 16
+  var shortList = members.reduce(function(prev, curr, i) {
+    var slot = Math.floor(i / 16);
+    prev[slot] = system.fallback(prev[slot], []);
+    prev[slot].push(curr);
+    return prev;
+  }, []).reduce(function(prev, curr, i) {
+    var theNames = curr.join(',');
+    var modifierWord = dataObj.places[i];
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.className = 'fshBl fshBls tip-static';
+    btn.dataset.tipped = 'Quick buff functionality from HCS only does 16';
+    btn.textContent = 'Buff ' + modifierWord + ' 16';
+    btn.addEventListener('click',
+      openQuickBuffByName.bind(null, theNames));
+    li.appendChild(btn);
+    prev.appendChild(li);
+    return prev;
+  }, document.createElement('ul'));
+  return shortList;
 }
 
 export function infoBox(documentText) { // Native

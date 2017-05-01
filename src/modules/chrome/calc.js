@@ -1,14 +1,13 @@
+import * as dataObj from '../support/dataObj';
 import * as system from '../support/system';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-  'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
 function formatShortDate(aDate) { // Native
   var yyyy = aDate.getFullYear();
   var dd = system.padZ(aDate.getDate());
   var ddd = days[aDate.getDay()];
-  var month = months[aDate.getMonth()];
+  var month = dataObj.months[aDate.getMonth()];
   var hh = system.padZ(aDate.getHours());
   var mm = system.padZ(aDate.getMinutes());
   return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;

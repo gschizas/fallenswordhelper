@@ -1,5 +1,6 @@
 import assets from './assets';
 import calf from '../support/calf';
+import injectRelic from './relic/relic';
 import * as buttons from './buttons';
 import * as combatLogger from './combatLogger';
 import * as monsterLog from './monsterLog';
@@ -304,7 +305,7 @@ export function subscribes() { // jQuery
   $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
     impIconColour);
   $.subscribe('keydown.controls', function(e, key) {
-    if (key === 'ACT_REPAIR') {GameData.fetch(387);}
+    if (key === 'ACT_REPAIR') {GameData.fetch(403);}
   });
   combatLogger.init();
   // on world
@@ -320,6 +321,7 @@ export function subscribes() { // jQuery
   );
   // somewhere near here will be multi buy on shop
   shop.prepareShop();
+  injectRelic();
 }
 
 /* fetchFlags = {

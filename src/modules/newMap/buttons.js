@@ -6,7 +6,7 @@ import * as system from '../support/system';
 function doFormGroup(e) { // jQuery
   e.preventDefault();
   $(e.target).qtip('hide');
-  GameData.doAction(12, 385, {}, 0);
+  GameData.doAction(12, 401, {}, 0);
 }
 
 function openQuickBuff(e) { // Native
