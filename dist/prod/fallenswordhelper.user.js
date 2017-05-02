@@ -17,26 +17,24 @@
 // No warranty expressed or implied. Use at your own risk.
 
 // EVERYTHING MUST BE IN main()
-var fshMain = function() {
+function fshMain() {
+
+  function setVer() { // Native
+    var ver = '1518';
+    if (typeof GM_info === 'undefined') {return ver + '_native';}
+    return ver;
+  }
 
   window.FSH = window.FSH || {};
 
-  FSH.version = '1518';
+  FSH.version = setVer();
 
   var resources = {
     calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1518/calfSystem.min.js',
     calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1518/calfSystem.css',
-    localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.4.2/localforage.min.js',
-    dataTablesLoc: 'https://cdn.datatables.net/1.10.12/js/jquery.dataTables.min.js',
+    localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.0/localforage.min.js',
+    dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js',
   };
-
-  if (typeof GM_info === 'undefined') {
-    FSH.version += '_native';
-  } else if (typeof GM_info.script === 'undefined') {
-    FSH.version += '_noScript';
-  } else if (typeof GM_info.script.version === 'undefined') {
-    FSH.version += '_noVersion';
-  }
 
   function appendHead(o) { // native
     var count = 0;
@@ -74,9 +72,11 @@ var fshMain = function() {
 
   var o = {
     css: [resources.calfSystemCss],
-    js:  [resources.localForage,
-          resources.calfSystemJs,
-          resources.dataTablesLoc],
+    js: [
+      resources.localForage,
+      resources.calfSystemJs,
+      resources.dataTablesLoc
+    ],
     callback: onPageLoad
   };
   if (typeof window.jQuery === 'undefined') {
@@ -84,13 +84,12 @@ var fshMain = function() {
   }
   appendHead(o);
 
-}; // end of var main
+} // end of var main
 
 if (typeof GM_info === 'undefined') { // Chromium Native
   var script = document.createElement('script');
   script.textContent = '(' + fshMain.toString() + ')();';
   document.body.appendChild(script);
-}
-else {
+} else {
   fshMain();
 }
