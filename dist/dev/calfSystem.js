@@ -1210,13 +1210,12 @@ function addMembrListToForage(membrList) {
 }
 
 function getMembrListFromForage(guildId$$1, membrList) {
-  if (fallback(fallback(fallback(
-      !membrList, !membrList[guildId$$1]),
-      !membrList[guildId$$1].lastUpdate),
-      membrList[guildId$$1].lastUpdate < Date.now() - 300000)) {
-    return getGuildMembers(guildId$$1).done(addMembrListToForage);
+  if (membrList && membrList[guildId$$1] &&
+      membrList[guildId$$1].lastUpdate &&
+      membrList[guildId$$1].lastUpdate < Date.now() - 300000) {
+    return membrList;
   }
-  return membrList;
+  return getGuildMembers(guildId$$1).done(addMembrListToForage);
 }
 
 function guildMembers(force, guildId$$1) {
@@ -1739,11 +1738,13 @@ function hazMaxMoves(matches, row) { // jQuery
 }
 
 function maxMoves(cell, row) { // jQuery
-  if (fallback(!opts, !opts.moves)) {return;}
-  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
-  if (!matches) {return;}
-  hazMaxMoves(matches, row);
-  cell.attr('data-order', matches[1]);
+  if (opts && opts.moves) {
+    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+    if (matches) {
+      hazMaxMoves(matches, row);
+      cell.attr('data-order', matches[1]);
+    }
+  }
 }
 
 function reward(cell) { // jQuery
