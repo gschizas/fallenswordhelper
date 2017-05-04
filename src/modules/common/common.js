@@ -1,46 +1,6 @@
-import * as system from './system';
+import * as system from '../support/system';
 
 var drag_target;
-
-function addStats(i, e) { // jQuery
-  var statTable = $(e).closest('tr')
-    .nextUntil('tr:contains("Enhance")');
-  var attackStatElement = $('td:contains("Attack:")', statTable);
-  var defenseStatElement = $('td:contains("Defense:")', statTable);
-  var armorStatElement = $('td:contains("Armor:")', statTable);
-  var damageStatElement = $('td:contains("Damage:")', statTable);
-  var hpStatElement = $('td:contains("HP:")', statTable);
-  var totalStats = (attackStatElement.length > 0 ? attackStatElement
-    .next().text().replace(/\+/g,'') * 1 : 0) +
-    (defenseStatElement.length > 0 ? defenseStatElement.next()
-    .text().replace(/\+/g,'') * 1 : 0) +
-    (armorStatElement.length > 0 ? armorStatElement.next().text()
-    .replace(/\+/g,'') * 1 : 0) +
-    (damageStatElement.length > 0 ? damageStatElement.next().text()
-    .replace(/\+/g,'') * 1 : 0) +
-    (hpStatElement.length > 0 ? hpStatElement.next().text()
-    .replace(/\+/g,'') * 1 : 0);
-  statTable.last().before('<tr style="color:DodgerBlue;"><td>' +
-    'Stat Total:</td><td align="right">' + totalStats +
-    '&nbsp;</td></tr>'
-  );
-}
-
-function fshAjaxSuccess(evt, xhr, ajax, data) { // jQuery
-  if (ajax.url.indexOf('fetchitem') !== 0) {return;}
-  var img = $('[data-tipped="' + ajax.url + '"]');
-  if (img.length === 0) {return;}
-  var repl = $(data);
-  var bonus = $('font:contains("Bonuses")', repl);
-  if (bonus.length === 0) {return;}
-  bonus.each(addStats);
-  img.qtip('option', 'content.text', $('<div/>').append(repl).html());
-}
-
-export function addStatTotalToMouseover() { // jQuery
-  if (!system.getValue('showStatBonusTotal')) {return;}
-  $(document).ajaxSuccess(fshAjaxSuccess);
-}
 
 function drag_over(event) { // Native
   event.preventDefault();
@@ -50,9 +10,9 @@ function drag_over(event) { // Native
 function drag_drop(event) { // Native
   var offset = event.dataTransfer.getData('text/plain').split(',');
   drag_target.style.left =
-    event.clientX + parseInt(offset[0],10) + 'px';
+    event.clientX + parseInt(offset[0], 10) + 'px';
   drag_target.style.top =
-    event.clientY + parseInt(offset[1],10) + 'px';
+    event.clientY + parseInt(offset[1], 10) + 'px';
   document.body.removeEventListener('dragover', drag_over, false);
   document.body.removeEventListener('drop', drag_drop, false);
   event.preventDefault();
@@ -63,19 +23,21 @@ export function drag_start(event) { // Native
   drag_target = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
-    parseInt(style.getPropertyValue('left'),10) - event.clientX + ',' +
-    (parseInt(style.getPropertyValue('top'),10) - event.clientY));
+    parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
+    (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
   document.body.addEventListener('dragover', drag_over, false);
   document.body.addEventListener('drop', drag_drop, false);
 }
 
 function getStat(stat, doc) { // jQuery
   // 'Hidden' returns NaN
-  return system.intValue($(stat, doc)
-    .contents()
-    .filter(function(){
-      return this.nodeType === 3;
-    })[0].nodeValue);
+  return system.intValue(
+      $(stat, doc)
+        .contents()
+        .filter(function(i, e) {
+          return e.nodeType === 3;
+        })[0].nodeValue
+    );
 }
 
 function getBuffLevel(doc, buff) { // jQuery
@@ -96,17 +58,38 @@ function getBonus(stat, doc) { // jQuery
   return system.intValue(children.text().slice(2, -1));
 }
 
+function cloakGuess(bonus, level) { // Native
+  if (bonus > level * 10 ||
+      bonus < level) {
+    return bonus;
+  }
+  return level * 10;
+}
+
+function updateForCloak(obj) {
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+  obj.hpValue = obj.hpBonus;
+}
+
 function playerDataString(responseText) { // Native
   var doc = system.createDocument(responseText);
   var obj = {
     levelValue: getStat('#stat-vl', doc),
     attackValue: getStat('#stat-attack', doc),
+    attackBonus: getBonus('#stat-attack', doc),
     defenseValue: getStat('#stat-defense', doc),
+    defenseBonus: getBonus('#stat-defense', doc),
     armorValue: getStat('#stat-armor', doc),
+    armorBonus: getBonus('#stat-armor', doc),
     damageValue: getStat('#stat-damage', doc),
+    damageBonus: getBonus('#stat-damage', doc),
     hpValue: getStat('#stat-hp', doc),
+    hpBonus: getBonus('#stat-hp', doc),
     killStreakValue: getStat('#stat-kill-streak', doc),
-    //get buffs here later ... DD, CA, DC, Constitution, etc
+    // get buffs here later ... DD, CA, DC, Constitution, etc
     counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
     doublerLevel: getBuffLevel(doc, 'Doubler'),
     deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
@@ -130,41 +113,64 @@ function playerDataString(responseText) { // Native
   obj.superEliteSlayerMultiplier = Math.round(0.002 *
     obj.superEliteSlayerLevel * 100) / 100;
 
-  if (obj.cloakLevel === 0 || typeof obj.attackValue === 'number' &&
-    !isNaN(obj.attackValue)) {return obj;}
+  if (obj.cloakLevel === 0 ||
+      typeof obj.attackValue === 'number' &&
+      !isNaN(obj.attackValue)) {
+    return obj;
+  }
 
-  obj.attackBonus = getBonus('#stat-attack', doc);
-  obj.defenseBonus = getBonus('#stat-defense', doc);
-  obj.armorBonus = getBonus('#stat-armor', doc);
-  obj.damageBonus = getBonus('#stat-damage', doc);
-  obj.hpBonus = getBonus('#stat-hp', doc);
-
-  obj.attackValue = obj.attackBonus > obj.levelValue * 10 ||
-    obj.attackBonus < obj.levelValue ?
-    obj.attackBonus : obj.levelValue * 10;
-  obj.defenseValue = obj.defenseBonus > obj.levelValue * 10 ||
-    obj.defenseBonus < obj.levelValue ?
-    obj.defenseBonus : obj.levelValue * 10;
-  obj.armorValue = obj.armorBonus > obj.levelValue * 10 ||
-    obj.armorBonus < obj.levelValue ?
-    obj.armorBonus : obj.levelValue * 10;
-  obj.damageValue = obj.damageBonus > obj.levelValue * 10 ||
-    obj.damageBonus < obj.levelValue ?
-    obj.damageBonus : obj.levelValue * 10;
-  obj.hpValue = obj.hpBonus;
+  updateForCloak(obj);
   return obj;
 }
 
-function playerDataObject(responseText) { // Native
+export function reduceBuffArray(buffAry) {
+  return buffAry.reduce(function(prev, curr) {
+    prev[curr.name] = Number(curr.level);
+    return prev;
+  }, {});
+}
+
+function getBuffLvl(buffs, buff) {
+  return system.fallback(buffs[buff], 0);
+}
+
+export function playerDataObject(json) { // Native
+  var buffs = reduceBuffArray(json._skills);
   var obj = {
-    levelValue: responseText.level,
-    attackValue: responseText.attack,
-    defenseValue: responseText.defense,
-    armorValue: responseText.armor,
-    damageValue: responseText.damage,
-    hpValue: responseText.hp,
-    killStreakValue: system.intValue(responseText.killstreak)
+    levelValue: json.level,
+    attackValue: json.attack,
+    attackBonus: json.bonus_attack,
+    defenseValue: json.defense,
+    defenseBonus: json.bonus_defense,
+    armorValue: json.armor,
+    armorBonus: json.bonus_armor,
+    damageValue: json.damage,
+    damageBonus: json.bonus_damage,
+    hpValue: json.hp,
+    hpBonus: json.bonus_hp,
+    killStreakValue: system.intValue(json.killstreak),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
+    doublerLevel: getBuffLvl(buffs, 'Doubler'),
+    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
+    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
+    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
+    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
+    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
+    flinchLevel: getBuffLvl(buffs, 'Flinch'),
+    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
+    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
+    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
+    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
+    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
+    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
+    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
+    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
+    cloakLevel: getBuffLvl(buffs, 'Cloak')
   };
+  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
   return obj;
 }
 

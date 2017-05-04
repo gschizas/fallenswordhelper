@@ -1,16 +1,18 @@
-import * as system from './support/system';
 import * as layout from './support/layout';
+import * as system from './support/system';
+
+var itemRE = /<b>([^<]+)<\/b>/i;
 
 var plantFromComponentHash = {
-  'Amber Essense':      'Amber Plant',
+  'Amber Essense': 'Amber Plant',
   'Blood Bloom Flower': 'Blood Bloom Plant',
-  'Dark Shade ':        'Dark Shade Plant',
-  'Snake Eye':          'Elya Snake Head',
-  'Snake Venom Fang':   'Elya Snake Head',
-  'Heffle Wart':        'Heffle Wart Plant',
-  'Jademare Blossom':   'Jademare Plant',
-  'Trinettle Leaf':     'Trinettle Plant',
-  'Purplet Flower':     'Purplet Plant',
+  'Dark Shade ': 'Dark Shade Plant',
+  'Snake Eye': 'Elya Snake Head',
+  'Snake Venom Fang': 'Elya Snake Head',
+  'Heffle Wart': 'Heffle Wart Plant',
+  'Jademare Blossom': 'Jademare Plant',
+  'Trinettle Leaf': 'Trinettle Plant',
+  'Purplet Flower': 'Purplet Plant',
 };
 
 function quickInventDone(responseText) { // jQuery
@@ -24,19 +26,19 @@ function quickInvent() { // Legacy
   var recipeID = $('input[name="recipe_id"]').attr('value');
   $('#invet_Result_label').html('Inventing ' + amountToInvent + ' Items');
   for (var i = 0; i < amountToInvent; i += 1) {
-    //Had to add &fsh=i to ensure that the call is sent out multiple times.
+    // Had to add &fsh=i to ensure that the call is sent out multiple times.
     system.xmlhttp(
       'index.php?cmd=inventing&subcmd=doinvent&recipe_id=' +
       recipeID + '&fsh=' + i, quickInventDone);
   }
 }
 
-function injectInvent(){ // Bad jQuery
+function injectInvent() { // Bad jQuery
   var selector = '<tr><td align="center">Select how many to quick ' +
     'invent<input value=1 id="invent_amount" name="invent_amount" ' +
     'size=3 class="custominput"></td></tr>' +
     '<tr><td align="center"><input id="quickInvent" value="Quick ' +
-    'invent items" class="custombutton" type="submit"></td></tr>' + //button to invent
+    'invent items" class="custombutton" type="submit"></td></tr>' + // button to invent
     '<tr><td colspan=6 align="center"><span id="invet_Result_label">' +
     '</span><ol id="invent_Result"></ol></td></tr>';
   $('input[name="recipe_id"]').closest('tbody').append(selector);
@@ -45,17 +47,21 @@ function injectInvent(){ // Bad jQuery
 
 }
 
-function injectViewRecipeLinks(responseText, callback) { // Legacy
-  var itemRE = /<b>([^<]+)<\/b>/i;
+function getItemName(responseText) { // Legacy
   var itemName = itemRE.exec(responseText);
-  if (itemName) {itemName=itemName[1];}
-  var plantFromComponent = plantFromComponentHash[itemName] || itemName;
+  if (itemName) {return itemName[1];}
+}
+
+function injectViewRecipeLinks(responseText, callback) { // Legacy
+  var itemName = getItemName(responseText);
+  var plantFromComponent = system.fallback(plantFromComponentHash[itemName],
+    itemName);
   if (itemName !== plantFromComponent) {
     var itemLinks = document.createElement('td');
     itemLinks.innerHTML = '<a href="' + system.server +
       '?cmd=auctionhouse&search_text=' +
       encodeURI(plantFromComponent) + '">AH</a>';
-    var counter=system.findNode('../../../../tr[2]/td', callback);
+    var counter = system.findNode('../../../../tr[2]/td', callback);
     counter.setAttribute('colspan', '2');
     callback.parentNode.parentNode.parentNode.appendChild(itemLinks);
   }
@@ -63,8 +69,8 @@ function injectViewRecipeLinks(responseText, callback) { // Legacy
 
 function linkFromMouseoverCustom(mouseOver) { // Legacy
   var reParams =
-    /item_id=(\d+)\&inv_id=([-0-9]*)\&t=(\d+)\&p=(\d+)\&vcode=([a-z0-9]*)/i;
-  var reResult =reParams.exec(mouseOver);
+    /item_id=(\d+)&inv_id=([-0-9]*)&t=(\d+)&p=(\d+)&vcode=([a-z0-9]*)/i;
+  var reResult = reParams.exec(mouseOver);
   if (reResult === null) {
     return null;
   }
@@ -74,7 +80,7 @@ function linkFromMouseoverCustom(mouseOver) { // Legacy
   var pid = reResult[4];
   var vcode = reResult[5];
   var theUrl = 'fetchitem.php?item_id=' + itemId + '&inv_id=' + invId +
-    '&t='+type + '&p=' + pid + '&vcode=' + vcode;
+    '&t=' + type + '&p=' + pid + '&vcode=' + vcode;
   theUrl = system.server + theUrl;
   return theUrl;
 }

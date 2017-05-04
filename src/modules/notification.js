@@ -1,6 +1,6 @@
 import calf from './support/calf';
-import * as task from './support/task';
 import * as system from './support/system';
+import * as task from './support/task';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +
@@ -31,7 +31,7 @@ var goldUpgradeMsg =
 
 function havePrayed() { // Native
   document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
-  system.setValue('needToPray',false);
+  system.setValue('needToPray', false);
   system.setValue('lastTempleCheck', new Date()
     .setUTCHours(23, 59, 59, 999) + 1); // Midnight
 }
@@ -54,8 +54,10 @@ function displayDisconnectedFromGodsMessage() { // Native
 }
 
 function displayUpgradeMsg() { // Native
-  document.getElementById('notifications').insertAdjacentHTML('afterbegin',
-    goldUpgradeMsg);
+  if (location.search.indexOf('cmd=points&type=1') === -1) {
+    document.getElementById('notifications').insertAdjacentHTML('afterbegin',
+      goldUpgradeMsg);
+  }
 }
 
 function findNewGroup(el) { // Native
@@ -63,7 +65,7 @@ function findNewGroup(el) { // Native
   var groupJoinHTML = '';
   if (!system.getValue('enableMaxGroupSizeToJoin')) {
     groupJoinHTML = '<a href="index.php?cmd=guild&subcmd=groups&' +
-      'subcmd2=joinall"><span class="notification-icon"></span>'+
+      'subcmd2=joinall"><span class="notification-icon"></span>' +
       '<p class="notification-content">Join all attack groups.</p></a>';
   } else {
     var maxGroupSizeToJoin = system.getValue('maxGroupSizeToJoin');
@@ -76,9 +78,9 @@ function findNewGroup(el) { // Native
     '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
-export function parseTemplePage(responseText) { // Native
-  var checkNeedToPray, doc;
-  if (!calf.enableTempleAlert) {return;}
+function templeAlertEnabled(responseText) { // Native
+  var checkNeedToPray;
+  var doc;
   if (calf.cmd !== 'temple') {
     doc = system.createDocument(responseText);
   } else {
@@ -95,44 +97,47 @@ export function parseTemplePage(responseText) { // Native
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
 }
 
+export function parseTemplePage(responseText) { // Native
+  if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
+}
+
+function checkLastUpdate(templeAlertLastUpdate) { // Native
+  return !templeAlertLastUpdate ||
+    Date.now() > templeAlertLastUpdate;
+}
+
+function doWeNeedToParse() { // Native
+  if (checkLastUpdate(system.getValue('lastTempleCheck'))) {return true;}
+  if (system.getValue('needToPray')) {
+    displayDisconnectedFromGodsMessage();
+  }
+  return false;
+}
+
 export function injectTempleAlert() { // jQuery
-  //Checks to see if the temple is open for business.
+  // Checks to see if the temple is open for business.
   if (calf.cmd === 'temple') {return;}
-  var templeAlertLastUpdate = system.getValue('lastTempleCheck');
-  var needToPray = system.getValue('needToPray');
-  var needToParse = false;
-  if (templeAlertLastUpdate) {
-    if (Date.now() > templeAlertLastUpdate) { // midnight
-      needToParse = true;
-    } else if (needToPray) {
-      displayDisconnectedFromGodsMessage();
-    }
-  } else {
-    needToParse = true;
+  if (doWeNeedToParse()) {
+    $.get('index.php?cmd=temple', parseTemplePage);
   }
-  if (needToParse) {
-    $.get('index.php?cmd=temple', function(responseText) {
-      task.add(3, parseTemplePage, [responseText]);
-    });
+}
+
+function findDoc(data) { // Native
+  if (location.search.indexOf('cmd=points&type=1') === -1) {
+    return system.createDocument(data);
   }
+  document.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
+  return document;
 }
 
 export function parseGoldUpgrades(data) { // Native
   if (!calf.enableUpgradeAlert) {return;}
-  var doc;
-  if (location.search.indexOf('cmd=points&type=1') === -1) {
-    doc = system.createDocument(data);
-  } else {
-    doc = document;
-    doc.querySelectorAll('#pCC input[name="quantity"]')[1].value = '10';
-  }
+  var doc = findDoc(data);
   var limit = doc.getElementById('pCC').getElementsByTagName('TABLE')[0]
     .rows[3].cells[2];
   var checkDoneUpgrade = limit.textContent.split(' / ');
   if (checkDoneUpgrade[0] !== checkDoneUpgrade[1]) {
-    if (location.search.indexOf('cmd=points&type=1') === -1) {
-      displayUpgradeMsg();
-    }
+    displayUpgradeMsg();
     system.setValue('needToDoUpgrade', true);
   } else {
     system.setValue('needToDoUpgrade', false);
@@ -141,8 +146,7 @@ export function parseGoldUpgrades(data) { // Native
   }
 }
 
-export function injectUpgradeAlert() { // jQuery
-  if (location.search.indexOf('cmd=points&type=1') !== -1) {return;}
+function notUpgradesPage() {
   var needToDoUpgrade = system.getValue('needToDoUpgrade');
   if (needToDoUpgrade) {
     displayUpgradeMsg();
@@ -153,6 +157,10 @@ export function injectUpgradeAlert() { // jQuery
   $.get('index.php?cmd=points&type=1', function(data) {
     task.add(3, parseGoldUpgrades, [data]);
   });
+}
+
+export function injectUpgradeAlert() { // jQuery
+  if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
 }
 
 export function injectJoinAllLink() { // Native

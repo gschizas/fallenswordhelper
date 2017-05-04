@@ -1,7 +1,7 @@
 // var system = require('./support/system');
 
-/* jshint -W098 */
-/*function getBpCountFromWorld(responseText) { // Legacy - Bad, could be repurposed
+// Legacy - Bad, could be repurposed
+/* function getBpCountFromWorld(responseText) {
   // backpack counter
   var doc=system.createDocument(responseText);
   var bp=system.findNode(
@@ -15,7 +15,7 @@
 }
 */
 
-/*function multiSummary() { // Legacy - Bad, could be repurposed
+/* function multiSummary() { // Legacy - Bad, could be repurposed
   var injectHere=system.findNode(
     '//b[contains(.,"Multiple Scavenging Results")]/..');
   if (injectHere) { // multi scavenging

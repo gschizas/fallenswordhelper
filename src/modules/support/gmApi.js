@@ -6,38 +6,81 @@ import * as debug from './debug';
 // Global variables
 var gvar = {};
 var GMSTORAGE_PATH = 'GM_';
+
+function storItem(name, type, value) {
+  window.localStorage.setItem(GMSTORAGE_PATH + name, type + value);
+}
+
+var reviver = [
+  {
+    condition: 'S]',
+    result: function(value) {return value.substr(2);}
+  },
+  {
+    condition: 'N]',
+    result: function(value) {return parseInt(value.substr(2), 10);}
+  },
+  {
+    condition: 'B]',
+    result: function(value) {return value.substr(2) === 'true';}
+  }
+];
+var cold = [
+  {
+    condition: 'string',
+    result: function(name, value) {storItem(name, 'S]', value);}
+  },
+  {
+    condition: 'number',
+    result: function(name, value) {
+      if (value.toString().indexOf('.') < 0) {storItem(name, 'N]', value);}
+    }
+  },
+  {
+    condition: 'boolean',
+    result: function(name, value) {storItem(name, 'B]', value);}
+  }
+];
+
+function retrieve(value) {
+  for (var i = 0; i < reviver.length; i += 1) {
+    var test = reviver[i];
+    if (value.substr(0, 2) === test.condition) {return test.result(value);}
+  }
+  return value;
+}
+
 // You can change it to avoid conflict with others scripts
 var needApiUpgrade = false;
-if (window.navigator.appName.match(/^opera/i) && 
-    typeof window.opera !== 'undefined'){
+if (window.navigator.appName.match(/^opera/i) &&
+    typeof window.opera !== 'undefined') {
   needApiUpgrade = true;
   gvar.isOpera = true;
   window.GM_log = window.opera.postError;
 }
-if (typeof GM_setValue !== 'undefined'){
+if (typeof GM_setValue !== 'undefined') {
   var gsv;
   try {
-    gsv=window.GM_setValue.toString();
-  } catch(e) {
-    gsv='staticArgs';
+    gsv = window.GM_setValue.toString();
+  } catch (e) {
+    gsv = 'staticArgs';
   }
-  if (gsv.indexOf('staticArgs') > 0){
+  if (gsv.indexOf('staticArgs') > 0) {
     gvar.isGreaseMonkey = true;
-  }
   // test GM_hitch
-  else if (gsv.match(/not\s+supported/)){
+  } else if (gsv.match(/not\s+supported/)) {
     needApiUpgrade = true;
     gvar.isBuggedChrome = true;
   }
-} else{
+} else {
   needApiUpgrade = true;
 }
 
-if (needApiUpgrade){
+if (needApiUpgrade) {
   var ws = null;
   var uid = new Date().toString();
   var result;
-  try{
+  try {
     window.localStorage.setItem(uid, uid);
     result = window.localStorage.getItem(uid) === uid;
     window.localStorage.removeItem(uid);
@@ -48,60 +91,39 @@ if (needApiUpgrade){
         'FSH cannot persist your settings.');
       ws = null;
     }
-  } catch(e){
+  } catch (e) {
     ws = null;
   }
   // Catch Security error
-  if (ws === 'object'){
-    window.GM_getValue = function(name, defValue){
+  if (ws === 'object') {
+    window.GM_getValue = function(name, defValue) {
       var value = window.localStorage.getItem(GMSTORAGE_PATH + name);
-      if (value === null || value === undefined) {return defValue;}
-      switch (value.substr(0, 2)) {
-      case 'S]':
-        return value.substr(2);
-      case 'N]':
-        return parseInt(value.substr(2), 10);
-      case 'B]':
-        return value.substr(2) === 'true';
-      }
-      return value;
+      if (value === null || typeof value === 'undefined') {return defValue;}
+      return retrieve(value);
     };
-    window.GM_setValue = function(name, value){
-      switch (typeof value){
-      case 'string':
-        window.localStorage.setItem(GMSTORAGE_PATH + name,
-          'S]' + value);
-        break;
-      case 'number':
-        if (value.toString().indexOf('.') < 0){
-          window.localStorage.setItem(GMSTORAGE_PATH + name,
-            'N]' + value);
+    window.GM_setValue = function(name, value) {
+      for (var i = 0; i < cold.length; i += 1) {
+        var storType = cold[i];
+        if (typeof value === storType.condition) {
+          storType.result(name, value);
         }
-        break;
-      case 'boolean':
-        window.localStorage.setItem(GMSTORAGE_PATH + name,
-          'B]' + value);
-        break;
       }
     };
-  } else if (!gvar.isOpera || typeof GM_setValue === 'undefined'){
+  } else if (!gvar.isOpera || typeof GM_setValue === 'undefined') {
     gvar.temporarilyStorage = [];
-    window.GM_getValue = function(name, defValue){
+    window.GM_getValue = function(name, defValue) {
       if (typeof gvar.temporarilyStorage[GMSTORAGE_PATH + name] ===
         'undefined') {return defValue;}
       return gvar.temporarilyStorage[GMSTORAGE_PATH + name];
     };
-    window.GM_setValue = function(name, value){
-      switch (typeof value){
-      case 'string':
-      case 'boolean':
-      case 'number':
+    window.GM_setValue = function(name, value) {
+      if (['string', 'boolean', 'number'].indexOf(typeof value) !== -1) {
         gvar.temporarilyStorage[GMSTORAGE_PATH + name] = value;
       }
     };
   }
 
-  window.GM_listValues = function(){
+  window.GM_listValues = function() {
     var list = [];
     var reKey = new RegExp('^' + GMSTORAGE_PATH);
     for (var i = 0, il = window.localStorage.length; i < il; i += 1) {

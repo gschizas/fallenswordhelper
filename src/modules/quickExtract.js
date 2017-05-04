@@ -1,90 +1,152 @@
-import calf from './support/calf';
-import * as system from './support/system';
+import * as ajax from './support/ajax';
 import * as layout from './support/layout';
+import * as system from './support/system';
 
+var extTbl;
+var playerId;
 var extractInv;
+var selectST;
+var selectMain;
+var resourceList;
+var buyResult;
+var cn;
 
-function quickDoneExtracted(responseText) { // Native
-  var infoMessage = layout.infoBox(responseText);
-  document.getElementById('buy_result').innerHTML += '<br>' + infoMessage;
+function backpackRemove(invId) { // Native
+  extractInv.some(function(el, i, ary) {
+    if (el.inv_id === invId) {
+      ary.splice(i, 1);
+      return true;
+    }
+    return false;
+  });
 }
 
-function extractAllSimilar(evt) { // Legacy
-  if (!confirm('Are you sure you want to extract all similar items?')) {
-    return;}
-  var InventoryIDs = evt.target.getAttribute('invIDs').split(',');
-  evt.target.parentNode.innerHTML = 'extracting all ' +
+function quickDoneExtracted(invId, data) { // Native
+  if (data.r !== 0) {return;}
+  backpackRemove(invId);
+  cn += 1;
+  buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. ' + data.m);
+}
+
+function doExtract(target) { // Native
+  var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
+  target.parentNode.innerHTML = 'extracting all ' +
     InventoryIDs.length + ' resources';
-  for (var i = 0; i < InventoryIDs.length; i += 1){
-    system.xmlhttp(
-      'index.php?cmd=profile&subcmd=useitem&inventory_id=' +
-      InventoryIDs[i], quickDoneExtracted);
+  cn = 0;
+  for (var i = 0; i < InventoryIDs.length; i += 1) {
+    ajax.useItem(InventoryIDs[i])
+      .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
   }
 }
 
-function showQuickExtract(data) { // Legacy
-  var item;
-  var id;
-  if (data.items) {
-    extractInv = data;
+function extractAllSimilar(evt) { // Native
+  layout.confirm('Extract Resources',
+    'Are you sure you want to extract all similar items?',
+    doExtract.bind(null, evt.target)
+  );
+}
+
+function checkFlags(item) { // Native
+  return selectMain && item.folder_id !== '-1' ||
+    !selectST && item.is_in_st;
+}
+
+function resources(prev, item) { // Native
+  if (!checkFlags(item)) {return prev;}
+  if (prev[item.item_id]) {
+    prev[item.item_id].invIDs.push(item.inv_id);
+  } else {
+    prev[item.item_id] = {
+      invIDs: [item.inv_id],
+      inv_id: item.inv_id,
+      item_name: item.item_name
+    };
   }
-  var table = $('table[id="Helper:ExtTable"]');
-  table.children().remove();//empty table for re-population.
-  calf.resourceList={}; //reset resourceList
-  var selectST= $('input[id="Helper:useItemsInSt"]').is(':checked');
-  var selectMain= $('input[id="Helper:useItemsInMain"]').is(':checked');
-  table.append('<tr><th width=20%>Actions</th><th>Items</th></tr><tr>' +
-    '<td id="buy_result" colspan=2></td></tr>');
-  for (var i=0; i < extractInv.items.length;i += 1) {
-    item = extractInv.items[i];
-    if (selectMain && item.folder_id !== '-1') {continue;}
-    if (!selectST && item.is_in_st) {continue;}
-    if (item.item_name !== 'Zombie Coffin' &&
-      item.type !== '12' &&
-      item.type !== '16') {continue;}
-    if (calf.resourceList[item.item_id]){
-      calf.resourceList[item.item_id].invIDs += ',' +
-        item.inv_id;
-      calf.resourceList[item.item_id].count += 1;
-    } else {
-      calf.resourceList[item.item_id] = {'count':1,
-        'invIDs':item.inv_id,
-        'first_item':item};
+  return prev;
+}
+
+function tableRows(prev, item_id) { // Native
+  var res = resourceList[item_id];
+  return prev + '<tr><td class="fshCenter"><span class="smallLink"' +
+    ' id="fshExtr' + item_id +
+    '">Extract all ' + res.invIDs.length + '</span></td>' +
+    '<td><img src="' + system.imageServer + '/items/' +
+    item_id + '.gif" class="tip-dynamic" data-tipped="' +
+    'fetchitem.php?item_id=' + item_id + '&inv_id=' +
+    res.inv_id + '&t=1&p=' + playerId +
+    '" border=0></td><td>' + res.item_name + '</td></tr>';
+}
+
+function showQuickExtract() { // Native
+  resourceList = extractInv.reduce(resources, {});
+  var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
+    '<tr><td id="buy_result" colspan="2"></td></tr>';
+  output += Object.keys(resourceList).reduce(tableRows, '');
+  extTbl.innerHTML = output;
+  buyResult = document.getElementById('buy_result');
+}
+
+function isExtractable(curr) { // Native
+  return curr.item_name === 'Zombie Coffin' ||
+    curr.type === '12' ||
+    curr.type === '16';
+}
+
+function prepInv(data) { // Native
+  playerId = data.player_id;
+  extractInv = data.items.reduce(function(prev, curr) {
+    if (isExtractable(curr)) {prev.push(curr);}
+    return prev;
+  }, []);
+  showQuickExtract();
+}
+
+var extractEvents = [
+  {
+    test: function(e) {return e.target.id === 'fshInSt';},
+    fn: function() {
+      selectST = !selectST;
+      showQuickExtract();
+    }
+  },
+  {
+    test: function(e) {return e.target.id === 'fshInMain';},
+    fn: function() {
+      selectMain = !selectMain;
+      showQuickExtract();
+    }
+  },
+  {
+    test: function(e) {return e.target.id.indexOf('fshExtr') === 0;},
+    fn: function(e) {
+      extractAllSimilar(e);
     }
   }
+];
 
-  for (id in calf.resourceList) {
-    if (!calf.resourceList.hasOwnProperty(id)) {continue;}
-    var res=calf.resourceList[id];
-    item=res.first_item;
-    table.append('<tr><td align=center><span style="cursor:pointer; ' +
-      'text-decoration:underline; color:#blue; font-size:x-small;"' +
-      ' id="Helper:extractAllSimilar' + id + '" invIDs="' +
-      res.invIDs + '">Extract all ' + res.count + '</span></td>' +
-      '<td><img src="' + system.imageServer + '/items/' + 
-      item.item_id + '.gif" class="tip-dynamic" data-tipped="' +
-      'fetchitem.php?item_id=' + item.item_id + '&inv_id=' +
-      item.inv_id + '&t=1&p=' + extractInv.player_id +
-      '" border=0>' + '</td><td>'+item.item_name+'</td></tr>');
-  }
-
-  for (id in calf.resourceList) {
-    if (!calf.resourceList.hasOwnProperty(id)) {continue;}
-    document.getElementById('Helper:extractAllSimilar' + id)
-      .addEventListener('click', extractAllSimilar, true);
+function listen(e) { // Native
+  for (var i = 0; i < extractEvents.length; i += 1) {
+    if (extractEvents[i].test(e)) {
+      extractEvents[i].fn(e);
+      return;
+    }
   }
 }
 
-export function insertQuickExtract(content) { // Hybrid
-  if (!content) {content=layout.notebookContent();}
-  content.innerHTML='<table width=100%><tr style="background-color:' +
-    '#CD9E4B;"><td nobr><b>Quick Extract</b></td></tr></table>' +
+export function insertQuickExtract(injector) { // jQuery.min
+  var content = injector || layout.pCC;
+  content.innerHTML = '<div class="qeHead"><b>Quick Extract</b></div>' +
     'Select which type of plants you wish to extract all of. Only ' +
-    'select extractable resources.<br/><label><input type="checkbox"' +
-    ' id="Helper:useItemsInSt" checked /> Select items in ST</label>' +
-    '<label><input type="checkbox" id="Helper:useItemsInMain" ' +
-    'checked /> Only extract items in Main Folder</label><table ' +
-    'width=100% id="Helper:ExtTable"></table>';
-  $('[id^="Helper\\:useItemsIn"]').click(showQuickExtract);
-  $.getJSON('?cmd=export&subcmd=inventory', showQuickExtract);
+    'select extractable resources.<br>' +
+    '<label><input type="checkbox" id="fshInSt" checked>' +
+    ' Select items in ST</label>&nbsp;&nbsp;' +
+    '<label><input type="checkbox" id="fshInMain" checked>' +
+    ' Only extract items in Main Folder</label>'; // +
+  extTbl = document.createElement('table');
+  extTbl.width = '100%';
+  content.appendChild(extTbl);
+  selectST = true;
+  selectMain = true;
+  content.addEventListener('click', listen);
+  ajax.getInventory().done(prepInv);
 }

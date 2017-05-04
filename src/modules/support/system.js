@@ -1,30 +1,43 @@
 import calf from './calf';
 import * as dataObj from './dataObj';
 
-export var server = document.location.protocol + '//' + document.location.host + '/';
+export var server = document.location.protocol + '//' +
+  document.location.host + '/';
 export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
 
+export function fallback(a, b) { // Native
+  return a || b;
+}
+
 export function getValue(name) {
+  //#if _DEV  //  No default setting available
+  if (typeof dataObj.defaults[name] === 'undefined') {
+    // eslint-disable-next-line no-console
+    console.log(name, dataObj.defaults[name]);
+  }
+  //#endif
   return GM_getValue(name, dataObj.defaults[name]);
+}
+
+function reviver(key, value) {
+  if (typeof value === 'string') {
+    var a =
+      /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/
+      .exec(value);
+    if (a) {
+      return new Date(Date.UTC(Number(a[1]), Number(a[2]) - 1, Number(a[3]),
+        Number(a[4]), Number(a[5]), Number(a[6])));
+    }
+  }
+  return value;
 }
 
 export function getValueJSON(name) {
   var resultJSON = getValue(name);
   var result;
-  if (resultJSON) {
-    var reviver = function(key, value) {
-      if (typeof value === 'string') {
-        var a = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2}):(\d{2}(?:\.\d*)?)Z$/.exec(value);
-        if (a) {
-          return new Date(Date.UTC(+a[1], +a[2] - 1, +a[3], +a[4], +a[5], +a[6]));
-        }
-      }
-      return value;
-    };
-    result = JSON.parse(resultJSON, reviver);
-  }
+  if (resultJSON) {result = JSON.parse(resultJSON, reviver);}
   return result;
 }
 
@@ -36,28 +49,33 @@ export function setValue(name, value) {
   GM_setValue(name, value);
 }
 
-export function findNodes(xpath, doc) {
-  var nodes = [];
+function getTarget(doc) {
+  if (doc instanceof HTMLDocument) {return doc;}
+  return document;
+}
+
+function patchXPath(xpath) {
   if (xpath.indexOf('/') === 0) {
-    xpath = '.'+xpath;
+    return '.' + xpath;
     // TODO this is likely to be bad
     // this is a chrome fix - needs a .// for xpath
     // where as firefox can function without it.
-    // firefox sitll works with .//
+    // firefox still works with .//
   }
+  return xpath;
+}
 
+export function findNodes(xpath, doc) {
+  var _xpath = patchXPath(xpath);
+  var nodes = [];
   var target;
   // We may have passed in a HTMLDocument object as the context
   // See createDocument with DOMParser below
-  // This only matters in Firefox. evaluate will fail silently if 
+  // This only matters in Firefox. evaluate will fail silently if
   // the context is not part of the calling object.
-  doc = doc || document;
-  if (doc instanceof HTMLDocument) {
-    target = doc;
-  } else {
-    target = document;
-  }
-  var findQ = target.evaluate(xpath, doc, null,
+  var _doc = fallback(doc, document);
+  target = getTarget(_doc);
+  var findQ = target.evaluate(_xpath, _doc, null,
     XPathResult.UNORDERED_NODE_SNAPSHOT_TYPE, null);
   if (findQ.snapshotLength === 0) {return null;}
   for (var i = 0; i < findQ.snapshotLength; i += 1) {
@@ -79,22 +97,6 @@ export function createDocument(details) {
   return doc;
 }
 
-export function formatDateTime(aDate) {
-  var yyyy = aDate.getFullYear();
-  var mon = aDate.getMonth() + 1;
-  if (mon < 10) {mon = '0' + mon;}
-  var dd = aDate.getDate();
-  if (dd < 10) {dd = '0' + dd;}
-
-  var hh = aDate.getHours();
-  if (hh < 10) {hh = '0' + hh;}
-  var mm = aDate.getMinutes();
-  if (mm < 10) {mm = '0' + mm;}
-  var ss = aDate.getSeconds();
-  if (ss < 10) {ss = '0' + ss;}
-  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
-}
-
 export function xmlhttp(theUrl, func, theCallback) {
   return $.ajax({
     url: theUrl,
@@ -109,14 +111,14 @@ export function xmlhttp(theUrl, func, theCallback) {
 
 export function intValue(theText) {
   if (!theText) {return 0;}
-  return parseInt(theText.replace(/,/g,''), 10);
+  return parseInt(theText.replace(/,/g, ''), 10);
 }
 
 export function getIntFromRegExp(theText, rxSearch) {
   var result;
-  var matches = theText.replace(/,/g,'').match(rxSearch);
+  var matches = theText.replace(/,/g, '').match(rxSearch);
   if (matches) {
-    result = parseInt(matches[1],10);
+    result = parseInt(matches[1], 10);
   } else {
     result = 0;
   }
@@ -129,20 +131,17 @@ export function addCommas(x) {
 
 export function convertTextToHtml(inputText) {
   return inputText
-    .replace(/</g,'&lt')
-    .replace(/>/g,'&gt')
-    .replace(/\n/g,'<br>')
-    .replace(/\[\/([a-z])\]/g,'<\/\$1>')
-    .replace(/\[([a-z])\]/g,'<\$1>');
+    .replace(/</g, '&lt')
+    .replace(/>/g, '&gt')
+    .replace(/\n/g, '<br>')
+    .replace(/\[\/([a-z])\]/g, '</$1>')
+    .replace(/\[([a-z])\]/g, '<$1>');
 }
 
-var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep',
-  'Oct', 'Nov', 'Dec'];
-
 export function parseDateAsTimestamp(textDate) {
-  var dateAry = textDate.split(/[: \/]/);
-  return Date.UTC(dateAry[4] * 1, months.indexOf(dateAry[3]),
-    dateAry[2] * 1, dateAry[0] * 1, dateAry[1] * 1, 0);
+  var dateAry = textDate.split(/[: /[]/);
+  return Date.UTC(Number(dateAry[4]), dataObj.months.indexOf(dateAry[3]),
+    Number(dateAry[2]), Number(dateAry[0]), Number(dateAry[1]), 0);
 }
 
 export function parseDate(textDate) {
@@ -161,74 +160,95 @@ export function toggleVisibilty(evt) {
   }
 }
 
-export function getUrlParameter(sParam) {
-  var sPageURL = decodeURIComponent(window.location.search.substring(1)),
-    sURLVariables = sPageURL.split('&'),
-    sParameterName,
-    i;
+function outputParamVal(param) {
+  if (typeof param === 'undefined') {return true;}
+  return param;
+}
 
-  for (i = 0; i < sURLVariables.length; i+=1) {
+export function getCustomUrlParameter(sPageURL, sParam) {
+  var sURLVariables = sPageURL.split('&');
+  var sParameterName;
+  for (var i = 0; i < sURLVariables.length; i += 1) {
     sParameterName = sURLVariables[i].split('=');
-
     if (sParameterName[0] === sParam) {
-      return sParameterName[1] === undefined ? true : sParameterName[1];
+      return outputParamVal(sParameterName[1]);
     }
   }
 }
 
+export function getUrlParameter(sParam) {
+  var sPageURL = decodeURIComponent(window.location.search.substring(1));
+  return getCustomUrlParameter(sPageURL, sParam);
+}
+
+function outputFormat(value, suffix) {
+  if (value === 0) {return '';}
+  return value.toString() + suffix;
+}
+
 export function formatLastActivity(last_login) {
-  var d, h, m, s;
+  var d;
+  var h;
+  var m;
+  var s;
   s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
   m = Math.floor(s / 60);
-  s = s % 60;
+  s %= 60;
   h = Math.floor(m / 60);
-  m = m % 60;
+  m %= 60;
   d = Math.floor(h / 24);
-  h = h % 24;
-  return (d === 0 ? '' : d + ' days, ') +
-    (h === 0 ? '' : h + ' hours, ') +
-    (m === 0 ? '' : m + ' mins, ') +
-    s + ' secs';
+  h %= 24;
+  return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
+    outputFormat(m, ' mins, ') + s + ' secs';
 }
 
-function path(obj, path, def){
-  path = path.split('.');
-  var len = path.length;
-  for (var i = 0; i < len; i+=1) {
-    if (!obj || typeof obj !== 'object') {return def;}
-    obj = obj[path[i]];
+function getPath(obj, aPath, def) {
+  var _obj = obj;
+  var _path = aPath.split('.');
+  var len = _path.length;
+  for (var i = 0; i < len; i += 1) {
+    if (fallback(!_obj, typeof _obj !== 'object')) {return def;}
+    _obj = _obj[_path[i]];
   }
-  if (obj === undefined) {return def;}
-  return obj;
+  return _obj;
 }
 
-export function stringSort(a,b) {
-  var result=0;
-  a = path(a, calf.sortBy, 'a');
-  b = path(b, calf.sortBy, 'a');
-  if (a.toLowerCase() < b.toLowerCase()) {result = -1;}
-  if (a.toLowerCase() > b.toLowerCase()) {result = 1;}
-  if (!calf.sortAsc) {result = -result;}
-  return result;
+function path(obj, aPath, def) {
+  var _obj = getPath(obj, aPath, def);
+  if (typeof _obj === 'undefined') {return def;}
+  return _obj;
 }
 
-export function numberSort(a,b) {
-  var result=0;
-  if (typeof a.type !== undefined){
-    if (a.type > 8) {return 1;} //non equipment items
-    if (b.type > 8) {return -1;}
+function sortDesc(result) {
+  if (calf.sortAsc) {return result;}
+  return -result;
+}
+
+export function stringSort(a, b) {
+  var result = 0;
+  var _a = path(a, calf.sortBy, 'a');
+  var _b = path(b, calf.sortBy, 'a');
+  if (_a.toLowerCase() < _b.toLowerCase()) {result = -1;}
+  if (_a.toLowerCase() > _b.toLowerCase()) {result = 1;}
+  return sortDesc(result);
+}
+
+function intFromString(val) {
+  if (typeof val === 'string') {
+    return parseInt(val.replace(/,|#/g, ''), 10);
   }
+  return val;
+}
+
+export function numberSort(a, b) {
+  if (typeof a.type !== 'undefined' && a.type > 8) {return 1;} // non equipment items
+  if (typeof a.type !== 'undefined' && b.type > 8) {return -1;}
   var valueA = path(a, calf.sortBy, 1);
   var valueB = path(b, calf.sortBy, 1);
-  if (typeof valueA === 'string') {
-    valueA = parseInt(valueA.replace(/,/g,'').replace(/#/g,''),10);
-  }
-  if (typeof valueB === 'string') {
-    valueB = parseInt(valueB.replace(/,/g,'').replace(/#/g,''),10);
-  }
-  result = valueA-valueB;
-  if (!calf.sortAsc) {result=-result;}
-  return result;
+  valueA = intFromString(valueA);
+  valueB = intFromString(valueB);
+  var result = valueA - valueB;
+  return sortDesc(result);
 }
 
 export function testQuant(aValue) { // Native
@@ -236,4 +256,45 @@ export function testQuant(aValue) { // Native
   if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
     return theValue;
   }
+}
+
+export function getRandomInt(_min, _max) { // Native
+  var min = Math.ceil(_min);
+  var max = Math.floor(_max);
+  return Math.floor(Math.random() * (max - min)) + min;
+}
+
+export function rnd() { // Native
+  return getRandomInt(1000000000, 9999999998);
+}
+
+export function escapeHtml(unsafe) { // Native
+  return unsafe
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;');
+}
+
+export function isSelected(val, test) {
+  if (val === test) {return ' selected';}
+  return '';
+}
+
+export function shouldBeArray(pref) { // Native
+  var stored = getValue(pref);
+  if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
+  return [];
+}
+
+export function isChecked(pref) { // Native
+  if (pref) {return ' checked';}
+  return '';
+}
+
+export function padZ(n) { // Native
+  var ret = n.toString();
+  if (n < 10) {ret = '0' + ret;}
+  return ret;
 }

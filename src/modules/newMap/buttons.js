@@ -1,23 +1,22 @@
-import calf from '../support/calf';
-import * as system from '../support/system';
-import * as layout from '../support/layout';
 import assets from './assets';
+import calf from '../support/calf';
+import * as layout from '../support/layout';
+import * as system from '../support/system';
 
 function doFormGroup(e) { // jQuery
   e.preventDefault();
   $(e.target).qtip('hide');
-  GameData.doAction(12, 385, {}, 0);
+  GameData.doAction(12, 401, {}, 0);
 }
 
 function openQuickBuff(e) { // Native
   e.preventDefault();
-  window.openWindow('index.php?cmd=quickbuff&t=' +
-    layout.playerName(),
-    'fsQuickBuff', 618, 1000, ',scrollbars');
+  layout.openQuickBuffByName(layout.playerName());
 }
 
 function showQuickLinks(worldName, data) { // jQuery
-  worldName.append('Min Lvl: ' + data.realm.minlevel);
+  worldName.append('<div class="fshFsty"><div>Min Lvl: ' + data.realm.minlevel +
+    '</div><div>Your Lvl: ' + data.player.level + '</div></div>');
   var formgroup = $(assets.worldFormgroup);
   worldName.append('&nbsp;&nbsp;').append(formgroup);
   formgroup.click(doFormGroup);
@@ -76,7 +75,7 @@ function showHuntMode(worldName) { // jQuery
 
 export function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
-  worldName.html(data.realm.name); //HACK - incase of switchign between master realm and realm they dont replace teh realm name
+  worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
   var oldButtonContainer = $('#fshWorldButtonContainer');
   if (oldButtonContainer.length !== 0) {oldButtonContainer.remove();}
   var buttonContainer = $('<div/>', {id: 'fshWorldButtonContainer'});

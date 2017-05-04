@@ -1,8 +1,8 @@
-import * as debug from './support/debug';
-import * as task from './support/task';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var leftHandSideColumnTable;
 var members;
@@ -28,6 +28,29 @@ function guildXPLock() { // Native
   }
 }
 
+function calcLvlToTest() { // Native
+  var levelToTest = system.intValue(document.getElementsByClassName(
+    'stat-level')[0].nextElementSibling.textContent);
+  var characterVirtualLevel = system.getValue('characterVirtualLevel');
+  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
+  return levelToTest;
+}
+
+function calcPvpRange(levelToTest) { // Native
+  if (levelToTest <= 205) {return 5;}
+  return 10;
+}
+
+function calcGvgRange(levelToTest) { // Native
+  if (levelToTest <= 300) {
+    return 25;
+  }
+  if (levelToTest <= 700) {
+    return 50;
+  }
+  return 100;
+}
+
 export function injectViewGuild() { // Native
   task.add(3, layout.colouredDots);
   removeGuildAvyImgBorder();
@@ -37,10 +60,9 @@ export function injectViewGuild() { // Native
   var highlightGvGPlayersNearMyLvl =
     system.getValue('highlightGvGPlayersNearMyLvl');
   if (!highlightPlayersNearMyLvl && !highlightGvGPlayersNearMyLvl) {return;}
-  var levelToTest = system.intValue(document.getElementsByClassName(
-    'stat-level')[0].nextElementSibling.textContent);
-  var characterVirtualLevel = system.getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
+  var levelToTest = calcLvlToTest();
+  var pvpRange = calcPvpRange(levelToTest);
+  var gvgRange = calcGvgRange(levelToTest);
   var memList = document.querySelectorAll(
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
@@ -48,51 +70,55 @@ export function injectViewGuild() { // Native
     var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
     var aRow = el.parentNode.parentNode;
     if (highlightPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <= (levelToTest <= 205 ? 5 : 10)) {
+        Math.abs(vlevel - levelToTest) <= pvpRange) {
       aRow.classList.add('lvlHighlight');
     } else if (highlightGvGPlayersNearMyLvl &&
-        Math.abs(vlevel - levelToTest) <=
-        (levelToTest <= 300 ? 25 : levelToTest <= 700 ? 50 : 100)) {
+        Math.abs(vlevel - levelToTest) <= gvgRange) {
       aRow.classList.add('lvlGvGHighlight');
     }
   });
 }
 
-function gotConflictInfo(responseText, callback) { // Legacy
-  var insertHere = callback.node;
-  var doc = system.createDocument(responseText);
+function hazConflict(conflictTable, curPage, insertHere) { // Legacy
+  if (curPage === 1) {
+    var newNode = insertHere.insertRow(insertHere.rows.length - 2);
+    newNode.insertCell(0);
+    newNode.insertCell(0);
+    newNode.cells[0].innerHTML =
+      '<a href="index.php?cmd=guild&subcmd=conflicts">Active Conflicts</a>';
+    newNode.cells[1].innerHTML = 'Score';
+  }
+  for (var i = 1; i <= conflictTable.rows.length - 4; i += 2) {
+    var newRow = insertHere.insertRow(insertHere.rows.length - 2);
+    newRow.insertCell(0);
+    newRow.insertCell(0);
+    newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
+    newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
+      .innerHTML + '</b>';
+  }
+}
 
-  var page = system.findNode('//td[contains(.,"Page:")]', doc);
-  var curPage = parseInt(system.findNode('//input[@name="page"]',
-    doc).value,10);
-  var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
-
+function activeConflicts(doc, curPage, insertHere) { // Legacy
   var conflictTable = system.findNode(
     '//font[contains(.,"Participants")]/ancestor::table[1]', doc);
   if (conflictTable && conflictTable.rows.length > 3) {
-    if (curPage === 1) {
-      var newNode = insertHere.insertRow(insertHere.rows.length-2);
-      newNode.insertCell(0);
-      newNode.insertCell(0);
-      newNode.cells[0].innerHTML =
-        '<a href="index.php?cmd=guild&subcmd=conflicts">Active Conflicts</a>';
-      newNode.cells[1].innerHTML = 'Score';
-    }
-    for (var i = 1; i <= conflictTable.rows.length - 4; i+=2) {
-      var newRow = insertHere.insertRow(insertHere.rows.length-2);
-      newRow.insertCell(0);
-      newRow.insertCell(0);
-      newRow.cells[0].innerHTML = conflictTable.rows[i].cells[0].innerHTML;
-      newRow.cells[1].innerHTML = '<b>' + conflictTable.rows[i].cells[6]
-        .innerHTML + '</b>';
-    }
+    hazConflict(conflictTable, curPage, insertHere);
   }
-  if (maxPage && parseInt(maxPage[1],10) > curPage) {
+}
+
+function gotConflictInfo(responseText, callback) { // Legacy
+  var doc = system.createDocument(responseText);
+  var page = system.findNode('//td[contains(.,"Page:")]', doc);
+  var curPage = parseInt(system.findNode('//input[@name="page"]',
+    doc).value, 10);
+  var maxPage = page.innerHTML.match(/of&nbsp;(\d*)/);
+  activeConflicts(doc, curPage, callback.node);
+  if (maxPage && parseInt(maxPage[1], 10) > curPage) {
     system.xmlhttp(
       'index.php?cmd=guild&subcmd=conflicts&subcmd2=&page=' +
       (curPage + 1) + '&search_text=',
       gotConflictInfo,
-      {'node': callback.node});
+      {node: callback.node});
   }
 }
 
@@ -167,14 +193,13 @@ function buffLinks() { // Native
   members = document.querySelectorAll(
     '#pCC a[href^="index.php?cmd=profile&player_id="]');
   task.add(3, batchBuffLinks);
-  document.getElementById('pCC').addEventListener('click', function(evt) {
+  layout.pCC.addEventListener('click', function(evt) {
     if (evt.target.className !== 'smallLink') {return;}
-    window.openWindow('index.php?cmd=quickbuff&t=' + evt.target
-      .previousElementSibling.text, 'fsQuickBuff', 618, 1000, ',scrollbars');
+    layout.openQuickBuffByName(evt.target.previousElementSibling.text);
   });
 }
 
-function selfRecall() { // Native
+function selfRecallLink() { // Native
   // self recall
   var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
   var selfRecall = getLi[getLi.length - 1].parentNode;
@@ -188,15 +213,15 @@ export function injectGuild() { // Native
   task.add(3, layout.colouredDots);
   task.add(3, removeGuildAvyImgBorder);
   task.add(3, guildXPLock);
-  leftHandSideColumnTable = document.getElementById('pCC')
+  leftHandSideColumnTable = layout.pCC
     .lastElementChild.rows[2].cells[0].firstElementChild;
   task.add(3, logoToggle);
   task.add(3, statToggle);
   task.add(3, structureToggle);
   task.add(3, buffLinks);
-  task.add(3, selfRecall);
+  task.add(3, selfRecallLink);
 
-  //Detailed conflict information
+  // Detailed conflict information
   if (system.getValue('detailedConflictInfo')) {
     task.add(3, conflictInfo);
   }
@@ -211,7 +236,7 @@ function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
       -1) {
     itemCellElement.innerHTML =
       '<span style="color:green; font-weight:bold;">Taken</span>';
-  } else if (info!=='') {
+  } else if (info !== '') {
     itemCellElement.innerHTML =
       '<span style="color:red; font-weight:bold;">Error:' + info + '</span>';
   } else {
@@ -223,38 +248,40 @@ function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
 }
 
 function recallGuildStoreItem(evt) { // Legacy
-  var guildStoreID=evt.target.getAttribute('itemID');
+  var guildStoreID = evt.target.getAttribute('itemID');
   var recallHref =
     'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
     // guildStoreID + '&ajax=1'; // TODO
     guildStoreID;
   system.xmlhttp(recallHref,
     recallGuildStoreItemReturnMessage,
-    {'item': guildStoreID, 'target': evt.target, 'url': recallHref});
+    {item: guildStoreID, target: evt.target, url: recallHref});
+}
+
+function doItemTable(itemTable) { // Legacy
+  for (var i = 1; i < itemTable.rows.length; i += 1) {
+    var aRow = itemTable.rows[i];
+    if (aRow.cells[2]) { // itemRow
+      var itemId = aRow.cells[0].firstChild.getAttribute('value');
+      aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; ' +
+        'text-decoration:underline; color:blue;" itemID="' + itemId +
+        '">Fast BP</span>';
+      var itemRecall = aRow.cells[2].firstChild.nextSibling;
+      itemRecall.addEventListener('click', recallGuildStoreItem);
+    }
+  }
 }
 
 export function injectGuildAddTagsWidgets() { // Legacy
   var itemTable = system.findNode(
     '//img[contains(@src,"/items/")]/ancestor::table[1]');
-  if (itemTable) {
-    for (var i=1;i<itemTable.rows.length;i += 1) {
-      var aRow = itemTable.rows[i];
-      if (aRow.cells[2]) { // itemRow
-        var itemId = aRow.cells[0].firstChild.getAttribute('value');
-        aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; ' +
-          'text-decoration:underline; color:blue;" itemID="' + itemId +
-          '">Fast BP</span>';
-        var itemRecall = aRow.cells[2].firstChild.nextSibling;
-        itemRecall.addEventListener('click', recallGuildStoreItem);
-      }
-    }
-  }
+  if (itemTable) {doItemTable(itemTable);}
   $('b:contains("100 x Item Level")').closest('tr').next()
     .children('td:first')
     .append('<input type="button" id="fshCheckAlTag" value="Check All">');
   $('#fshCheckAlTag').click(function() {
-    $('input[name*=tagIndex]').each(function() {
-      this.click();
+    $('input[name*=tagIndex]').each(function(ind, ele) {
+      ele.click();
     });
   });
 }
@@ -269,7 +296,7 @@ function updateHistoryCharacters() { // Legacy
 export function addHistoryWidgets() { // Legacy
   var textArea = system.findNode('//textarea[@name="history"]');
   if (!textArea) {return;}
-  textArea.value = textArea.value.replace(/<br \/>/ig,'');
+  textArea.value = textArea.value.replace(/<br \/>/ig, '');
   var textAreaDiv = textArea.parentNode;
   var bioPreviewHTML = system.convertTextToHtml(textArea.value);
   var newDiv = document.createElement('div');
@@ -292,7 +319,7 @@ function parseProfileAndPostWarnings(data) { // Native
     return prev;
   }, {});
 
-  var nodeList = document.getElementById('pCC').firstElementChild.rows[9]
+  var nodeList = layout.pCC.firstElementChild.rows[9]
     .cells[0].firstElementChild.getElementsByTagName('A');
   Array.prototype.forEach.call(nodeList, function(el) {
     var tipped = el.getAttribute('data-tipped');

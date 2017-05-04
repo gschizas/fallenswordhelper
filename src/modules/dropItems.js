@@ -1,9 +1,10 @@
+import addStatTotalToMouseover from './common/addStatTotalToMouseover';
 import calf from './support/calf';
-import * as task from './support/task';
-import * as dataObj from './support/dataObj';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
-import * as common from './support/common';
+import * as dataObj from './support/dataObj';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -19,63 +20,69 @@ var invItems;
 var colouring;
 var sendLinks;
 
-function moveItemsToFolder() { // Bad jQuery
+function moveItemsToFolder() { // jQuery.min
+  var folderId = document.getElementById('selectFolderId').value;
+  var batchNo;
+  var counter = 0;
   var invList = [];
-  $('input[name="removeIndex[]"]:checked').each(function(i) {
-    var batchNo = Math.floor(i / 50);
-    invList[batchNo] = invList[batchNo] || [];
-    invList[batchNo].push($(this).val());
-  });
-  calf.moveItemsCallback = invList.length;
-  invList.forEach(function(val) {
-    $.ajax({
-      dataType: 'json',
-      url: 'index.php',
-      data: {
-        'cmd': 'profile',
-        'subcmd': 'sendtofolder',
-        'inv_list': JSON.stringify(val),
-        'folder_id': $('#selectFolderId option:selected').val(),
-        'ajax': 1
-      },
-      success: function() {
-        calf.moveItemsCallback -= 1;
-        if (calf.moveItemsCallback === 0) {location.reload();}
+  var prm = [];
+  itemsAry.forEach(function(o) {
+    var el = o.injectHere.previousElementSibling.previousElementSibling
+      .firstElementChild;
+    if (el.checked) {
+      batchNo = Math.floor(counter / 50);
+      invList[batchNo] = system.fallback(invList[batchNo], []);
+      invList[batchNo].push(o.invid);
+      counter += 1;
+      if (counter % 50 === 0) {
+        prm.push(ajax.moveItem(invList[batchNo], folderId));
       }
-    });
+    }
   });
+  if (counter % 50 !== 0) {
+    prm.push(ajax.moveItem(invList[batchNo], folderId));
+  }
+  $.when.apply($, prm).done(function() {location.reload();});
 }
 
-function injectMoveItems() { // Bad jQuery
-  var foldersEnabled = $('img[src$="/folder_on.gif"]');
-  if (foldersEnabled.length !== 1) {return;}
-  var otherFolders = $('#pCC a').has('img[src$="/folder.gif"]');
-  if (otherFolders.length === 0) {return;}
-  var select = $('<select name=folder id=selectFolderId class=' +
-    'customselect></select>');
-  otherFolders.each(function() {
-    var self = $(this);
-    select.append('<option value=' + self.attr('href')
-    .match(/&folder_id=(-*\d+)/i)[1] + '>' +
-    self.parent().text() + '</option>');
+function injectMoveItems() { // Native
+  var flrRow = layout.pCC.getElementsByTagName('form')[0]
+    .nextElementSibling.nextElementSibling.nextElementSibling;
+  var folders = flrRow.getElementsByTagName('img');
+  var flrEnabled;
+  var oFlr;
+  var options = '<tr><td class="fshCenter">Move selected items to: ' +
+    '<select name="folder" id="selectFolderId" class="customselect">';
+  Array.prototype.forEach.call(folders, function(e) {
+    var src = e.getAttribute('src');
+    if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
+    if (src.indexOf('/folder.gif') !== -1) {
+      oFlr = true;
+      options += '<option value=' + e.parentNode.getAttribute('href')
+        .match(/&folder_id=(-*\d+)/i)[1] + '>' +
+        e.parentNode.parentNode.textContent + '</option>';
+    }
   });
-  $('#pCC tr').has(otherFolders[0]).first().after($('<tr/>')
-    .append($('<td class="fshCenter">Move selected items to: </td>')
-      .append(select)
-      .append('&nbsp;<input type="button" class="custombutton"' +
-        ' id="fshMove" value="Move">')));
-  $('#fshMove').click(moveItemsToFolder);
+  if (!flrEnabled || !oFlr) {return;}
+  options += '</select>&nbsp;<input type="button" class="custombutton" ' +
+    'id="fshMove" value="Move"></td></tr>';
+  flrRow.insertAdjacentHTML('afterend', options);
+}
+
+function showHideLabel(pref) { // Native
+  if (pref) {return 'Hide';}
+  return 'Show';
 }
 
 function doToggleButtons() { // Native
   // Option toggle buttons for both screens
-  var insertHere = document.getElementById('pCC')
-    .getElementsByTagName('form')[0].previousElementSibling.firstElementChild;
+  var insertHere = layout.pCC.getElementsByTagName('form')[0]
+    .previousElementSibling.firstElementChild;
   var inject = '[<span id="fshShowExtraLinks" class="reportLink">' +
-    (showExtraLinks ? 'Hide' : 'Show') +
+    showHideLabel(showExtraLinks) +
     ' AH and UFSG links</span>]&nbsp;' +
     '[<span id="fshShowQuickDropLinks" class="reportLink">' +
-    (showQuickDropLinks ? 'Hide' : 'Show') +
+    showHideLabel(showQuickDropLinks) +
     ' Quick Drop links</span>]&nbsp;';
   if (calf.subcmd2 === 'storeitems') {
     inject += '[<span id="fshSelectAllGuildLocked" class="reportLink">' +
@@ -84,30 +91,86 @@ function doToggleButtons() { // Native
   insertHere.innerHTML = inject;
 }
 
-function dropItemsPaint() { // Native - abstract this pattern
+function afterbegin(o, item) { // Native
+  if (system.fallback(extraLinks, !showExtraLinks)) {return;}
+  var pattern = '<span><span class="aHLink">';
+  if (!item.bound) {
+    pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
+      encodeURIComponent(item.item_name) + '">AH</a>]';
+  }
+  pattern += '</span>[<a href="http://guide.fallensword.com/' +
+    'index.php?cmd=items&subcmd=view&item_id=' + item.item_id +
+    '" target="_blank">UFSG</a>]</span>';
+  o.injectHere.insertAdjacentHTML('afterbegin', pattern);
+}
+
+var buildTrailer = [
+  {
+    condition: function(item) {
+      return !checkAll && itemsHash[item.item_id] !== 1;
+    },
+    result: function(o, item) {
+      return ' [<span linkto="' + item.item_id +
+        '" class="fshLink">Check all</span>]';
+    }
+  },
+  {
+    condition: function(item) {
+      return !sendLinks && showQuickSendLinks && !item.bound;
+    },
+    result: function(o) {
+      return ' <span class="quickAction sendLink tip-static" ' +
+        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
+        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>';
+    }
+  },
+  {
+    condition: function(item) {
+      return !dropLinks && showQuickDropLinks && item.guild_tag === '-1';
+    },
+    result: function(o) {
+      return ' <span class="quickAction dropLink tip-static" itemInvId="' +
+        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
+        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>';
+    }
+  }
+];
+
+function beforeend(o, item) { // Native
+  if (!colouring && !disableItemColoring) {
+    o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
+  }
+  var pattern = buildTrailer.reduce(function(prev, el) {
+    var ret = prev;
+    if (el.condition(item)) {
+      ret += el.result(o, item);
+    }
+    return ret;
+  }, '');
+  if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
+}
+
+function doneInvPaint() { // Native
+  if (showExtraLinks) {extraLinks = true;}
+  checkAll = true;
+  colouring = true;
+  if (showQuickDropLinks) {dropLinks = true;}
+  sendLinks = true;
+}
+
+function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
   while (performance.now() < limit && paintCount < itemsAry.length) {
     var o = itemsAry[paintCount];
-    if (!extraLinks && showExtraLinks) {
-      o.injectHere.insertAdjacentHTML('afterbegin',
-        '<span>[<a href="index.php?cmd=auctionhouse' +
-        '&search_text=' + encodeURIComponent(o.itemName) +
-        '">AH</a>] [<a href="http://guide.fallensword.com/' +
-        'index.php?cmd=items&subcmd=view' + '&item_id=' + o.itemId +
-        '" target="_blank">UFSG</a>]</span>');
-    }
-    if (!checkAll && itemsHash[o.itemId] !== 1) {
-      o.injectHere.insertAdjacentHTML('beforeend',
-        ' [<span linkto="' + o.itemId +
-        '" class="fshLink">Check all</span>]');
-    }
+    var item = invItems[o.invid];
+    afterbegin(o, item);
+    beforeend(o, item);
     paintCount += 1;
   }
   if (paintCount < itemsAry.length) {
-    task.add(3, dropItemsPaint);
+    task.add(3, invPaint);
   } else {
-    if (showExtraLinks) {extraLinks = true;}
-    checkAll = true;
+    doneInvPaint();
   }
 }
 
@@ -117,49 +180,12 @@ function toggleShowExtraLinks() { // Native
   doToggleButtons();
   if (!extraLinks) {
     paintCount = 0;
-    task.add(3, dropItemsPaint);
+    task.add(3, invPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
       el.classList.toggle('fshHide');
     });
-  }
-}
-
-function invPaint() { // Native
-  var limit = performance.now() + 5;
-  while (performance.now() < limit &&
-      paintCount < itemsAry.length) {
-    var o = itemsAry[paintCount];
-
-    var item = invItems[o.invid];
-    if (!colouring && !disableItemColoring) {
-      o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
-    }
-    if (!sendLinks && showQuickSendLinks &&
-        !item.bound) {
-      o.injectHere.insertAdjacentHTML('beforeend',
-        ' <span class="quickAction sendLink tip-static" ' +
-        'itemInvId="' + o.invid + '" data-tipped="INSTANTLY SENDS THE ' +
-        'ITEM. NO REFUNDS OR DO-OVERS! Use at own risk.">[Quick Send]</span>'
-      );
-    }
-    if (!dropLinks && showQuickDropLinks &&
-        item.guild_tag === '-1') {
-      o.injectHere.insertAdjacentHTML('beforeend',
-        ' <span class="quickAction dropLink tip-static" itemInvId="' +
-        o.invid + '" data-tipped="INSTANTLY DROP THE ITEM. NO REFUNDS ' +
-        'OR DO-OVERS! Use at own risk.">[Quick Drop]</span>');
-    }
-
-    paintCount += 1;
-  }
-  if (paintCount < itemsAry.length) {
-    task.add(3, invPaint);
-  } else {
-    colouring = true;
-    if (showQuickDropLinks) {dropLinks = true;}
-    sendLinks = true;
   }
 }
 
@@ -189,85 +215,90 @@ function doCheckboxes(type, itemId) { // Native
     var el = o.el.parentNode.parentNode.previousElementSibling
       .firstElementChild;
     if (type === 'guild') {
-      el.checked = !el.disabled &&
-        invItems[o.invid].guild_tag !== '-1' ?
-        true : false;
+      el.checked = !el.disabled && invItems[o.invid].guild_tag !== '-1';
     }
-    if (type === 'item' && o.itemId === itemId) {
-      el.checked = !el.disabled && !el.checked ? true : false;
+    if (type === 'item' && invItems[o.invid].item_id === itemId) {
+      el.checked = !el.disabled && !el.checked;
     }
   });
 }
 
-function quickSendItem(evt){ // jQuery
-  var self = evt.target;
+function quickAction(self, fn, success, otherClass) { // jQuery.min
   self.className = 'quickAction';
   var itemInvId = self.getAttribute('itemInvId');
-  ajax.sendItem([itemInvId]).done(function(data){
+  fn([itemInvId]).done(function(data) {
     if (data.r === 1) {return;}
     self.style.color = 'green';
-    self.innerHTML = 'Sent';
+    self.innerHTML = success;
   });
   $(self).qtip('hide');
   anotherSpinner(self);
   var theTd = self.parentNode;
-  var quickDrop = theTd.querySelector('.dropLink');
-  if (quickDrop) {
-    quickDrop.className = 'quickAction';
-    quickDrop.innerHTML = '';
+  var otherButton = theTd.querySelector(otherClass);
+  if (otherButton) {
+    otherButton.className = 'quickAction';
+    otherButton.innerHTML = '';
   }
   var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
   checkbox.checked = false;
   checkbox.disabled = true;
 }
 
-function quickDropItem(evt){ // jQuery
-  var self = evt.target;
-  self.className = 'quickAction';
-  var itemInvId = self.getAttribute('itemInvId');
-  ajax.dropItem([itemInvId]).done(function(data){
-    if (data.r === 1) {return;}
-    self.style.color = 'green';
-    self.innerHTML = 'Dropped';
-  });
-  $(self).qtip('hide');
-  anotherSpinner(self);
-  var theTd = self.parentNode;
-  var quickSend = theTd.querySelector('.sendLink');
-  if (quickSend) {
-    quickSend.className = 'quickAction';
-    quickSend.innerHTML = '';
+var evts = [
+  {
+    condition: function(self) {return self.id === 'fshShowExtraLinks';},
+    result: toggleShowExtraLinks
+  },
+  {
+    condition: function(self) {return self.id === 'fshShowQuickDropLinks';},
+    result: toggleShowQuickDropLinks
+  },
+  {
+    condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
+    result: function() {doCheckboxes('guild');}
+  },
+  {
+    condition: function(self) {return self.id === 'fshMove';},
+    result: moveItemsToFolder
+  },
+  {
+    condition: function(self) {return self.hasAttribute('linkto');},
+    result: function(self) {doCheckboxes('item', self.getAttribute('linkto'));}
+  },
+  {
+    condition: function(self) {return self.classList.contains('sendLink');},
+    result: function(self) {
+      quickAction(self, ajax.sendItem, 'Sent', '.dropLink');
+    }
+  },
+  {
+    condition: function(self) {return self.classList.contains('dropLink');},
+    result: function(self) {
+      quickAction(self, ajax.dropItem, 'Dropped', '.sendLink');
+    }
   }
-  var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
-  checkbox.checked = false;
-  checkbox.disabled = true;
-}
+];
 
 function evtHandler(evt) { // Native
-  if (evt.target.tagName !== 'SPAN') {return;}
   var self = evt.target;
-  var myId = self.id;
-  if (myId === 'fshShowExtraLinks') {toggleShowExtraLinks();}
-  if (myId === 'fshShowQuickDropLinks') {toggleShowQuickDropLinks();}
-  if (myId === 'fshSelectAllGuildLocked') {doCheckboxes('guild');}
-  if (self.hasAttribute('linkto')) {
-    doCheckboxes('item', evt.target.getAttribute('linkto'));}
-  var myClasses = self.classList;
-  if (myClasses.contains('sendLink')) {quickSendItem(evt);}
-  if (myClasses.contains('dropLink')) {quickDropItem(evt);}
+  evts.some(function(el) {
+    if (el.condition(self)) {
+      el.result(self);
+      return true;
+    }
+    return false;
+  });
 }
 
 function getItems() { // Native
-  common.addStatTotalToMouseover();
+  addStatTotalToMouseover();
   disableItemColoring = system.getValue('disableItemColoring');
   showExtraLinks = system.getValue('showExtraLinks');
   showQuickDropLinks = system.getValue('showQuickDropLinks');
   showQuickSendLinks = system.getValue('showQuickSendLinks');
   doToggleButtons();
-
-  var pCC = document.getElementById('pCC');
-  pCC.addEventListener('click', evtHandler);
-  var allTables = pCC.getElementsByTagName('table');
+  layout.pCC.addEventListener('click', evtHandler);
+  var allTables = layout.pCC.getElementsByTagName('table');
   var lastTable = allTables[allTables.length - 1];
   var imgList = lastTable.getElementsByTagName('img');
   itemsAry = [];
@@ -277,23 +308,20 @@ function getItems() { // Native
     var matches = tipped.match(dataObj.itemRE);
     itemsHash[matches[1]] = (itemsHash[matches[1]] || 0) + 1;
     var injectHere = el.parentNode.parentNode.nextElementSibling;
-    var itemName = injectHere.textContent.trim();
     itemsAry.push({
-      el: el, itemId: matches[1], invid: matches[2],
-      injectHere: injectHere, itemName: itemName});
+      el: el,
+      invid: matches[2],
+      injectHere: injectHere
+    });
   });
-
-  extraLinks = false;
-  checkAll = false;
-  paintCount = 0;
-  task.add(3, dropItemsPaint);
+  // Exclude composed pots
+  itemsHash[13699] = 1;
 }
 
 function inventory(data) { // Native
-  invItems = data.items.reduce(function(prev, curr) {
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
+  extraLinks = false;
+  checkAll = false;
+  invItems = data.items;
   colouring = false;
   dropLinks = false;
   sendLinks = false;
@@ -302,7 +330,7 @@ function inventory(data) { // Native
 }
 
 function injectDropItems() { // Native
-  ajax.getInventory().done(inventory);
+  ajax.getInventoryById().done(inventory);
   task.add(3, getItems);
 }
 

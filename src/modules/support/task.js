@@ -1,5 +1,6 @@
 import * as debug from './debug';
 import * as sch from './sch';
+import * as system from './system';
 
 var paused = true;
 var message = 'fshMessage';
@@ -13,16 +14,21 @@ function taskRunner() {
   }
 }
 
+function devLog(args) {
+  if (args && !Array.isArray(args)) {
+    // eslint-disable-next-line no-console
+    console.log('addTask Array.isArray(args)', Array.isArray(args));
+  }
+}
+
 export function add(priority, fn, args, scope) {
   //#if _DEV  //  Not sending args as Array
-  if (args && !Array.isArray(args)) {
-    console.log('addTask Array.isArray(args)', Array.isArray(args)); // DEV Only
-  }
+  devLog(args);
   //#endif
   if (typeof fn === 'function') {
-    scope = scope || window;
-    args = args || [];
-    sch.push(fn.bind.apply(fn, [scope].concat(args)), priority);
+    var _scope = system.fallback(scope, window);
+    var _args = system.fallback(args, []);
+    sch.push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
     if (paused) {taskRunner();}
   }
 }
@@ -33,7 +39,8 @@ function asyncTask() {
   } catch (error) {
     debug.log('Unhandled Exception:', error);
     //#if _DEV  //  Unhandled Exception
-    console.log('Unhandled Exception:', error); // DEV Only
+    // eslint-disable-next-line no-console
+    console.log('Unhandled Exception:', error);
     //#endif
   }
   taskRunner();

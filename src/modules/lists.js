@@ -1,166 +1,189 @@
-import calf from './support/calf';
 import * as dataObj from './support/dataObj';
-import * as system from './support/system';
 import * as layout from './support/layout';
+import * as system from './support/system';
+
+var param;
+
+function detailRow(j, itemField) { // Legacy
+  if (param.tags[j] === 'checkbox') {
+    return '<input type="checkbox"' + system.isChecked(itemField) +
+      ' disabled>';
+  } else if (param.url && param.url[j] !== '') {
+    return '<a href="' + param.url[j].replace('@replaceme@', itemField) +
+      '">' + itemField + '</a>';
+  }
+  return itemField;
+}
+
+function itemRow(item) { // Legacy
+  var result = '';
+  for (var j = 0; j < param.fields.length; j += 1) {
+    result += '<td class="fshCenter">';
+    var itemField = item[param.fields[j]];
+    if (param.fields[j] === param.categoryField) {continue;}
+    result += detailRow(j, itemField) + '</td>';
+  }
+  return result;
+}
+
+function doInputs() { // Legacy
+  var result = '<tr>';
+  for (var i = 0; i < param.tags.length; i += 1) {
+    result += '<td align=center><input type="' + param.tags[i] +
+      '" class="custominput" id="fshIn' + param.fields[i] + '"></td>';
+  }
+  return result;
+}
 
 function generateManageTable() { // Legacy
-  var i, j, result='<table cellspacing=2 cellpadding=2 style="table-layout: fixed; word-wrap: break-word;" width=100%><tr bgcolor=#CD9E4B>';
-  var isArrayOnly= calf.param.fields.length === 0;
-  for (i=0;i<calf.param.headers.length;i += 1) {
-    result+='<th>'+calf.param.headers[i]+'</th>';
-  }
-  result+='<th>Action</th></tr>';
+  var result = '<table cellspacing="2" cellpadding="2" class="fshGc" ' +
+    'width="100%"><tr class="fshOr">';
+  result += param.headers.reduce(function(prev, curr) {
+    return prev + '<th>' + curr + '</th>';
+  }, '');
+  result += '<th>Action</th></tr>';
   var currentCategory = '';
-  for (i=0;i<calf.param.currentItems.length;i += 1) {
-    result+='<tr>';
-    if (isArrayOnly) {
-      result+='<td align=center>'+calf.param.currentItems[i]+'</td>';
-    } else {
-      if (calf.param.categoryField && currentCategory !== calf.param.currentItems[i][calf.param.categoryField]) {
-        currentCategory = calf.param.currentItems[i][calf.param.categoryField];
-        result += '<td><span style="font-weight:bold; font-size:large;">' + currentCategory + '</span></td></tr><tr>';
-      }
-      for (j=0;j<calf.param.fields.length;j += 1) {
-        result+='<td align=center class=content>';
-        if (calf.param.fields[j]!==calf.param.categoryField){
-          if (calf.param.tags[j]==='checkbox'){
-            result+='<input type=checkbox '+(calf.param.currentItems[i][calf.param.fields[j]]?'checked':'')+' disabled>';
-          } else {
-            if (calf.param.url && calf.param.url[j] !== ''){
-              result+='<a href="'+calf.param.url[j].replace('@replaceme@',calf.param.currentItems[i][calf.param.fields[j]])+'">'+
-                calf.param.currentItems[i][calf.param.fields[j]]+'</a>';
-            } else {
-              result+=calf.param.currentItems[i][calf.param.fields[j]];
-            }
-          }
-          result+='</td>';
-        }
-      }
+  for (var i = 0; i < param.currentItems.length; i += 1) {
+    var item = param.currentItems[i];
+    result += '<tr>';
+    if (param.categoryField &&
+        currentCategory !==
+        item[param.categoryField]) {
+      currentCategory = item[param.categoryField];
+      result += '<td><span class="fshQs">' +
+        currentCategory + '</span></td><td></td><td></td><td></td><td></td>' +
+          '</tr><tr>';
     }
-    result+='<td><span class=HelperTextLink itemId="' + i + '" id="Helper:DeleteItem' + i + '">[Del]</span></td></tr>';
+    result += itemRow(item);
+    result += '<td><span class="HelperTextLink" data-itemId="' + i +
+      '" id="fshDel' + i + '">[Del]</span></td></tr>';
   }
-  result+='<tr>';
-  if (isArrayOnly){
-    result+='<td align=center><input type='+calf.param.tags[i]+' class=custominput id=Helper:input0></td>';
-  }
-  else {
-    for (i=0;i<calf.param.tags.length;i += 1){
-      result+='<td align=center><input type='+calf.param.tags[i]+' class=custominput id=Helper:input'+calf.param.fields[i]+'></td>';
-    }
-  }
-  result+='<td><span class=HelperTextLink id="Helper:AddItem">[Add]</span></td></tr></table>';
-
-  if (calf.param.showRawEditor) {
-    result+='<table width=100%><tr><td align=center><textarea cols=70 rows=20 name="Helper:rawEditor">' +
-      JSON.stringify(calf.param.currentItems) + '</textarea></td></tr>'+
-      '<tr><td align=center><input id="Helper:saveRawEditor" type="button" value="Save" class="custombutton">'+
-      '&nbsp;<input id="Helper:resetRawEditor" type="button" value="Reset" class="custombutton"></td></tr>'+
-      '</tbody></table>';
-  }
-
-  document.getElementById(calf.param.id).innerHTML = result;
-
-  system.setValueJSON(calf.param.gmname, calf.param.currentItems);
+  result += doInputs();
+  result += '<td><span class="HelperTextLink" id="fshAdd">' +
+    '[Add]</span></td></tr></table>' +
+    '<table width="100%"><tr><td class="fshCenter">' +
+    '<textarea cols=70 rows=20 name="fshEd">' +
+    JSON.stringify(param.currentItems) + '</textarea></td></tr>' +
+    '<tr><td class="fshCenter"><input id="fshSave" ' +
+    'type="button" value="Save" class="custombutton">' +
+    '&nbsp;<input id="fshReset" type="button" value="Reset" ' +
+    'class="custombutton"></td></tr>' +
+    '</tbody></table>';
+  document.getElementById(param.id).innerHTML = result;
+  system.setValueJSON(param.gmname, param.currentItems);
 }
 
 function deleteQuickItem(evt) { // Legacy
-  var itemId = evt.target.getAttribute('itemId');
-  calf.param.currentItems.splice(itemId, 1);
+  var itemId = evt.target.getAttribute('data-itemId');
+  param.currentItems.splice(itemId, 1);
   generateManageTable();
 }
 
-function addQuickItem() { // Legacy
-  var isArrayOnly= calf.param.fields.length === 0;
-  var newItem={};
-  if (isArrayOnly) {
-    newItem=document.getElementById('Helper:input0').value;
-  } else {
-    for (var i=0;i<calf.param.fields.length;i += 1){
-      if (calf.param.tags[i]==='checkbox') {
-        newItem[calf.param.fields[i]] =
-          document.getElementById('Helper:input' +
-            calf.param.fields[i]).checked;
-      } else {
-        newItem[calf.param.fields[i]] =
-          document.getElementById('Helper:input' +
-            calf.param.fields[i]).value;
-      }
+function buildNewItem() { // Legacy
+  var newItem = {};
+  for (var i = 0; i < param.fields.length; i += 1) {
+    if (param.tags[i] === 'checkbox') {
+      newItem[param.fields[i]] =
+        document.getElementById('fshIn' + param.fields[i]).checked;
+    } else {
+      newItem[param.fields[i]] =
+        document.getElementById('fshIn' + param.fields[i]).value;
     }
   }
-  calf.param.currentItems.push(newItem);
+  return newItem;
+}
+
+function addQuickItem() { // Legacy
+  var isArrayOnly = param.fields.length === 0;
+  var newItem = {};
+  if (isArrayOnly) {
+    newItem = document.getElementById('fshIn0').value;
+  } else {
+    newItem = buildNewItem();
+  }
+  param.currentItems.push(newItem);
   generateManageTable();
 }
 
 function saveRawEditor() { // jQuery
-  calf.param.currentItems =
-    JSON.parse($('textarea[name="Helper:rawEditor"]').val());
+  param.currentItems =
+    JSON.parse($('textarea[name="fshEd"]').val());
   generateManageTable();
 }
 
 function resetRawEditor() { // Legacy
   if (location.search === '?cmd=notepad&blank=1&subcmd=auctionsearch') {
-    calf.param.currentItems =
+    param.currentItems =
       JSON.parse(dataObj.defaults.quickSearchList);
-  } else {calf.param.currentItems=[];}
+  } else {param.currentItems = [];}
   generateManageTable();
 }
 
+var listEvents = [
+  {test: function(e) {return e.target.id === 'fshReset';}, fn: resetRawEditor},
+  {test: function(e) {return e.target.id === 'fshSave';}, fn: saveRawEditor},
+  {test: function(e) {return e.target.id === 'fshAdd';}, fn: addQuickItem},
+  {
+    test: function(e) {return e.target.id.indexOf('fshDel') === 0;},
+    fn: deleteQuickItem
+  }
+];
+
 function listEvtHnl(e) { // Native
-  if (e.target.id === 'Helper:resetRawEditor') {resetRawEditor();} else
-  if (e.target.id === 'Helper:saveRawEditor') {saveRawEditor();} else
-  if (e.target.id === 'Helper:AddItem') {addQuickItem();} else
-  if (e.target.id.indexOf('Helper:DeleteItem') === 0) {deleteQuickItem(e);}
+  for (var i = 0; i < listEvents.length; i += 1) {
+    if (listEvents[i].test(e)) {
+      listEvents[i].fn(e);
+      return;
+    }
+  }
 }
 
-export function injectAuctionSearch(content) { // Legacy
-  if (!content) {content = layout.notebookContent();}
+export function injectAuctionSearch(injector) { // Legacy
+  var content = injector || layout.pCC;
   content.innerHTML =
     layout.makePageHeader('Trade Hub Quick Search', '', '', '') +
-    '<div class=content>This screen allows you to set up some quick ' +
+    '<div>This screen allows you to set up some quick ' +
       'search templates for the Auction House. The Display on AH column ' +
       'indicates if the quick search will show on the short list on the ' +
       'Auction House main screen. A maximum of 36 items can show on this ' +
       'list (It will not show more than 36 even if you have more than 36 ' +
       'flagged). To edit items, either use the large text area below, or ' +
       'add a new entry and delete the old one. You can always reset the ' +
-      'list to the default values.</div>'+
-    '<div style="font-size:small;" id="Helper:Auction Search Output">' +
+      'list to the default values.</div>' +
+    '<div class="fshSmall" id="fshAso">' +
     '</div>';
   // global parameters for the meta function generateManageTable
-  calf.param = {
-    'id':'Helper:Auction Search Output',
-    'headers': ['Category', 'Nickname', 'Quick Search Text',
+  param = {
+    id: 'fshAso',
+    headers: ['Category', 'Nickname', 'Quick Search Text',
       'Display in AH?'],
-    'fields': ['category', 'nickname', 'searchname', 'displayOnAH'],
-    'tags': ['textbox', 'textbox', 'textbox', 'checkbox'],
-    'url': ['', '',
-      'index.php?cmd=auctionhouse&type=-1&search_text=@replaceme@', ''],
-    'currentItems': system.getValueJSON('quickSearchList'),
-    'gmname': 'quickSearchList',
-    'sortField': 'category',
-    'categoryField': 'category',
-    'showRawEditor': true
+    fields: ['category', 'nickname', 'searchname', 'displayOnAH'],
+    tags: ['text', 'text', 'text', 'checkbox'],
+    url: ['', '',
+      'index.php?cmd=auctionhouse&amp;type=-1&amp;search_text=@replaceme@', ''],
+    currentItems: system.getValueJSON('quickSearchList'),
+    gmname: 'quickSearchList',
+    categoryField: 'category',
   };
   generateManageTable();
   content.addEventListener('click', listEvtHnl);
 }
 
-export function injectQuickLinkManager(content) { // Legacy
-  if (!content) {content = layout.notebookContent();}
+export function injectQuickLinkManager(injector) { // Legacy
+  var content = injector || layout.pCC;
   content.innerHTML =
-    layout.makePageTemplate('Quick Links', '', '', '', 'quickLinkAreaId');
+    layout.makePageTemplate('Quick Links', '', '', '', 'qla');
 
   // global parameters for the meta function generateManageTable
-  calf.param = {
-    'id': 'quickLinkAreaId',
-    'headers': ['Name', 'URL',
-      'New [<span style="cursor:pointer; text-decoration:underline;" ' +
-      'title="Open page in a new window">?</span>]'],
-    'fields': ['name', 'url', 'newWindow'],
-    'tags': ['textbox', 'textbox', 'checkbox'],
-    'currentItems': system.getValueJSON('quickLinks'),
-    'gmname': 'quickLinks',
-    'showRawEditor': true
+  param = {
+    id: 'qla',
+    headers: ['Name', 'URL',
+      'New [<span class="fshLink tip-static" ' +
+      'data-tipped="Open page in a new window">?</span>]'],
+    fields: ['name', 'url', 'newWindow'],
+    tags: ['text', 'text', 'checkbox'],
+    currentItems: system.getValueJSON('quickLinks'),
+    gmname: 'quickLinks',
   };
   generateManageTable();
   content.addEventListener('click', listEvtHnl);

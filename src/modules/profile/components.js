@@ -1,5 +1,5 @@
-import * as system from '../support/system';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
 
 var compPages;
 var componentList = {};
@@ -25,10 +25,10 @@ function retriveComponent(responseText, currentPage) { // Native
     var mouseover = el.getAttribute('data-tipped');
     var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
     componentList[id] = componentList[id] || {
-        'count': 0,
-        'src': el.getAttribute('src'),
-        'onmouseover': mouseover
-      };
+      count: 0,
+      src: el.getAttribute('src'),
+      onmouseover: mouseover
+    };
     componentList[id].count += 1;
   });
   if (currentPage < compPages - 1) {
@@ -41,7 +41,7 @@ function retriveComponent(responseText, currentPage) { // Native
     var output = 'Component Summary<br/><table>';
     var usedCount = 0;
     Object.keys(componentList).forEach(function(id) {
-      var comp=componentList[id];
+      var comp = componentList[id];
       output += '<tr><td align=center><img src="' + comp.src +
         '" class="tip-dynamic" data-tipped="' + comp.onmouseover +
         '"></td><td>' + comp.count + '</td></tr>';
@@ -89,26 +89,46 @@ function enableDelComponent() { // Native
   });
 }
 
+var evtHdl = [
+  {
+    test: function(e) {return e.target.id === 'compDel';},
+    act: enableDelComponent
+  },
+  {
+    test: function(e) {return e.target.id === 'compSum';},
+    act: countComponent
+  },
+  {
+    test: function(e) {return e.target.id === 'compDelAll';},
+    act: delAllComponent
+  },
+  {
+    test: function(e) {return e.target.classList.contains('compDelBtn');},
+    act: delComponent
+  }
+];
+
+function compEvt(e) {
+  for (var i = 0; i < evtHdl.length; i += 1) {
+    if (evtHdl[i].test(e)) {evtHdl[i].act(e);}
+  }
+}
+
 export function profileComponents() { // Native
   var invTables = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table');
   if (invTables.length !== 2) {return;}
   var compDiv = invTables[1].parentNode;
   if (compDiv.style.display !== 'block') {return;}
-  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter">' +
-    '<div>[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
-    '</div>' +
-    '<div id="sumComp">[<span id="compSum" class="sendLink">Count Components</span>]' +
-    '</div>' +
-    '<div>[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
+  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter"><div>' +
+    '[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
+    '</div><div id="sumComp">' +
+    '[<span id="compSum" class="sendLink">Count Components</span>]' +
+    '</div><div>' +
+    '[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
     '&subcmd=quickextract">Quick Extract Components</a>]</div>' +
     '<div class="fshHide">[<span id="compDelAll" class="sendLink">' +
     'Delete All Visible</span>]</div>' +
     '</div>');
-  compDiv.addEventListener('click', function(e) {
-    if (e.target.id === 'compDel') {enableDelComponent(e);}
-    if (e.target.id === 'compSum') {countComponent(e);}
-    if (e.target.id === 'compDelAll') {delAllComponent(e);}
-    if (e.target.classList.contains('compDelBtn')) {delComponent(e);}
-  });
+  compDiv.addEventListener('click', compEvt);
 }

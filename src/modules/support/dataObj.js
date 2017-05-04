@@ -1,10 +1,12 @@
 export var defaults = {
   lastActiveQuestPage: '',
-  lastCompletedQuestPage: '',
-  lastNotStartedQuestPage: '',
-  lastWorld: '',
-  questsNotStarted: false,
-  questsNotComplete: false,
+  lastNormalActiveQuestPage: '',
+  lastNormalCompletedQuestPage: '',
+  lastNormalNotStartedQuestPage: '',
+  lastSeasonalActiveQuestPage: '',
+  lastSeasonalCompletedQuestPage: '',
+  lastSeasonalNotStartedQuestPage: '',
+
   enableLogColoring: false,
   enableChatParsing: false,
   enableCreatureColoring: false,
@@ -13,7 +15,8 @@ export var defaults = {
   keepLogs: false,
 
   showExtraLinks: false,
-  huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,Treasure Hunter,Animal Magnetism,Conserve',
+  huntingBuffs: 'Doubler,Librarian,Adept Learner,Merchant,' +
+    'Treasure Hunter,Animal Magnetism,Conserve',
   huntingBuffsName: 'default',
   huntingBuffs2: 'Deflect',
   huntingBuffs2Name: 'PvP',
@@ -23,9 +26,13 @@ export var defaults = {
   moveFSBox: false,
 
   guildSelf: '',
+  guildSelfMessage: 'Member of your own guild!',
   guildFrnd: '',
+  guildFrndMessage: 'Do not attack - Guild is friendly!',
   guildPast: '',
+  guildPastMessage: 'Do not attack - You\'ve been in that guild once!',
   guildEnmy: '',
+  guildEnmyMessage: 'Enemy guild. Attack at will!',
   goldRecipient: '',
   goldAmount: '',
   sendGoldonWorld: false,
@@ -80,12 +87,12 @@ export var defaults = {
   fsboxlog: false,
   fsboxcontent: '',
   itemRecipient: '',
-  quickLinks:'[]',
+  quickLinks: '[]',
   enableAttackHelper: false,
   minGroupLevel: 1,
   combatEvaluatorBias: 0,
   huntingMode: false,
-  enabledHuntingMode: 1,
+  enabledHuntingMode: '1',
   hideRelicOffline: false,
 
   enterForSendMessage: false,
@@ -167,14 +174,24 @@ export var defaults = {
   bountyList: '',
   wantedList: '',
   inventoryCheckedElements: {
-    '0': 1, '1': 1, '2': 1, '3': 1, '4': 1,
-    '5': 1, '6': 1, '7': 1, '8': 1, '100': 1,
-    '101': 1, '102': 1, '103': 1, '104': 1,
-    '105': 1, '106': 1
+    '0': 1,
+    '1': 1,
+    '2': 1,
+    '3': 1,
+    '4': 1,
+    '5': 1,
+    '6': 1,
+    '7': 1,
+    '8': 1,
+    '100': 1,
+    '101': 1,
+    '102': 1,
+    '103': 1,
+    '104': 1,
+    '105': 1,
+    '106': 1
   },
   lowestLevelInTop250: 0,
-
-  /* jshint -W110 */ // Mixed double and single quotes. (W110)
 
   quickMsg: '["Thank you very much ^_^","Happy hunting, {playername}"]',
 
@@ -188,7 +205,7 @@ export var defaults = {
     '["Trinettle", "5567"], ["Viridian\u00A0Vine", "9151"], ' +
     '["Mortar & Pestle", "9157"], ["Beetle Juice", "9158"]',
 
-  quickSearchList: 
+  quickSearchList:
     '[{"category":"Plants","searchname":"Amber","nickname":""},' +
     '{"category":"Plants","searchname":"Blood Bloom","nickname":""},' +
     '{"category":"Plants","searchname":"Jademare","nickname":""},' +
@@ -238,8 +255,6 @@ export var defaults = {
     '{"category":"Potions","searchname":"Potion of Supreme Luck",' +
       '"nickname":"FI 1k","displayOnAH":true}]',
 
-  /* jshint +W110 */ // Mixed double and single quotes. (W110)
-
   arenaMoves: '[]',
   arenaMatches: '[]',
   CombatLog: '',
@@ -252,6 +267,12 @@ export var defaults = {
   moveComposingButtons: false,
   expandMenuOnKeyPress: false,
   disableBreakdownPrompts: false,
+  collapseNewsArchive: false,
+  lastmyGuildLogCheck: 0,
+  hideSubLvlCreature: false,
+  hidePlayerActions: false,
+  extraProfile: '',
+  textToSearchFor: '',
 
 };
 
@@ -265,8 +286,21 @@ export var rarity = [
   {colour: '#009900', clas: 'fshEpic'}
 ];
 
-export var itemRE = /item_id=(\d+)\&inv_id=(\d+)/;
+export var itemRE = /item_id=(\d+)&inv_id=(\d+)/;
 
 export var places = ['first', 'second', 'third', 'fourth', 'fifth', 'sixth',
   'seventh', 'eighth', 'ninth', 'tenth', 'eleventh', 'twelfth', 'thirteenth',
   'fourteenth'];
+
+export var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug',
+  'Sep', 'Oct', 'Nov', 'Dec'];
+
+export var defenderMultiplier = 0.2;
+
+export var mercRE = [
+  /<td>Attack:<\/td><td>(\d+)<\/td>/,
+  /<td>Defense:<\/td><td>(\d+)<\/td>/,
+  /<td>Armor:<\/td><td>(\d+)<\/td>/,
+  /<td>Damage:<\/td><td>(\d+)<\/td>/,
+  /<td>HP:<\/td><td>(\d+)<\/td>/
+];

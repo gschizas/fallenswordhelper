@@ -62,10 +62,9 @@ function buy() { // jQuery
 }
 
 export function injectBazaar() { // Native
-  var pCC = document.getElementById('pCC');
-  var pbImg = pCC.getElementsByTagName('IMG')[0];
+  var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
-  var potions = pCC.getElementsByTagName('A');
+  var potions = layout.pCC.getElementsByTagName('A');
   Array.prototype.forEach.call(potions, function(el, i) {
     var item = el.firstElementChild;
     var tipped = item.getAttribute('data-tipped');
@@ -74,7 +73,6 @@ export function injectBazaar() { // Native
       .replace('@src@', item.getAttribute('src'))
       .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
       .replace('@tipped@', tipped);
-    
   });
   bazaarTable = bazaarTable.replace(/@\d@/g, '');
   pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);

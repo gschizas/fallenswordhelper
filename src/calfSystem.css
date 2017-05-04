@@ -1,33 +1,61 @@
-.quickActionSpinner {display: inline; vertical-align: middle;}
-.quickAction {display: inline-block; width: 72px; text-align:center;}
+/* Groups */
 
+table#stat {
+  font-size: x-small;
+  border-top: 2px black solid;
+  border-spacing: 1px;
+  border-collapse: collapse;
+}
+
+/* Drop Items */
+.quickActionSpinner {
+  display: inline;
+  vertical-align: middle;
+}
+.quickAction {
+  display: inline-block;
+  width: 72px;
+  text-align: center;
+}
+.aHLink {
+  display: inline-block;
+  width: 2.2em;
+}
+
+/* Trade */
 .itemDiv {width: 427px;}
+.isInSTBorder {border: 3px solid red;}
+.tradeItemMargin {margin: 2.4px;}
 
+/* Quest Page */
+.parent {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: flex-end;
+}
+.parent a {
+  display: inline-block; /* Need this for UC */
+  height: 17.4px;
+  width: 17.4px;
+  background-size: contain;
+  border: solid 1px #4f3717;
+  border-radius: 2px;
+}
+
+/* New Map */
 #missingBuffs {
   text-align: center;
   margin: 0 0 4px 0;
 }
-
-.custombutton[disabled] {background: #B8B8B8; pointer-events:none;}
-
-.isInSTBorder {border: 3px solid red;}
-
-.tradeItemMargin {margin: 2.4px;}
-
-#fshSettingsTable {border-spacing: 10px;}
-
-.networkIcon {display: inline-block;}
-
-.fshHelpTitle {font-weight: bold; color: #FFF380;}
-
 #fshWorldButtonContainer {
   float: left;
   height: 25.6px;
   display: flex;
   align-items: center;
 }
-
 #fshWorldButtonContainer .quicklink {
+  display: inline-block; /* Need this for UC */
   height: 15px;
   width: 15px;
   border: solid 1px #4f3717;
@@ -36,30 +64,29 @@
   box-shadow: 0 0 4px #4f3717;
 }
 
-.fshSpinner {
-  display: inline-block;
-  vertical-align: middle;
-  height: 15px;
-  width: 15px;
-  border: solid 1px #4f3717;
-  border-radius: 2px;
-  background-position: center center;
-  box-shadow: 0 0 4px #4f3717;
+div.fshFsty {font-size: 70%}
+div.fshFten {font-size: 11px;}
+.fshFten select {
+  font-family: 'Open Sans', Helvetica, Arial;
+  font-size: 11px;
 }
 
+
+/* Settings */
+#fshSettingsTable {border-spacing: 10px;}
+.networkIcon {display: inline-block;}
+.fshHelpTitle {
+  font-weight: bold;
+  color: #FFF380;
+}
+
+/* Advisor */
 .fshSpinnerMsg {
   display: inline-block;
   vertical-align: middle;
 }
 
-.quickButton {
-  display: inline-block;
-  height: 17px;
-  width: 17px;
-  background-repeat: no-repeat;
-  background-position: center;
-}
-
+/* Bazaar */
 .bazaarButton {
   display: inline-block;
   height: 20px;
@@ -69,13 +96,6 @@
   background-size: contain;
   cursor: pointer;
 }
-
-.newGuildLog {
-  display: inline-block;
-  height: 16px;
-  width: 16px;
-}
-
 .bazaarSelected {
   display: inline-block;
   height: 45px;
@@ -85,6 +105,14 @@
   background-size: contain;
 }
 
+/* New Guild Log */
+.newGuildLog {
+  display: inline-block;
+  height: 16px;
+  width: 16px;
+}
+
+/* Guild Report */
 .guildReportSpinner {
   width: 25px;
   height: 25px;
@@ -92,39 +120,34 @@
   background-size: contain;
 }
 
+/* Top Lists */
 input.fshFindOnlinePlayers {
   width: 120px;
   float: right;
   margin: 0 100px 0 0;
   padding: 0;
 }
-
 .fshTopListWrap {
   width: 190px;
   display: block;
 }
-
 .fshTopListSpinner {
   float: right;
   margin: 0 160px 0 0;
 }
 
+/* Helper Menu */
 #content {max-width:600px}
-
 .column {
   float: left;
   width: 180px;
   margin-right: 5px;
 }
-
 .column h3 {
   background: #e0e0e0;
   font: bold 13px Arial;
   margin: 0 0 5px 0;
 }
-
-/*.column ul {margin: 0; padding: 0; list-style-type: none;}*/
-
 .helperMenuDiv {
   cursor: default;
   text-decoration: none;
@@ -139,15 +162,15 @@ input.fshFindOnlinePlayers {
   visibility: hidden;
   transition: opacity 100ms linear, visibility 0s linear 100ms;
 }
-
 .showMenuDiv {
   opacity: 1;
   visibility: visible;
   transition: opacity 100ms linear, visibility 0s linear;
 }
-
-.helperMenuDiv .a-reply {cursor: pointer; text-decoration: underline;}
-
+.helperMenuDiv .a-reply {
+  cursor: pointer;
+  text-decoration: underline;
+}
 .helperMenu {
   position: absolute;
   top: 0px;
@@ -161,6 +184,7 @@ input.fshFindOnlinePlayers {
   white-space: nowrap;
 }
 
+/* Quick Links */
 .fshQuickLinks {
   position: absolute;
   z-index: 1;
@@ -173,112 +197,157 @@ input.fshFindOnlinePlayers {
   width: 100px;
 }
 
-.no-close .ui-dialog-titlebar-close {display: none;}
+/* Lists */
+.HelperTextLink {
+  color: blue;
+  font-size: x-small;
+  cursor: pointer;
+}
+.HelperTextLink:hover {text-decoration: underline;}
 
-.HelperTextLink {color:blue;font-size:x-small;cursor:pointer;}
-.HelperTextLink:hover {text-decoration:underline;}
-
+/* Profile*/
+.quickButton {
+  display: inline-block;
+  height: 17px;
+  width: 17px;
+  background-repeat: no-repeat;
+  background-position: center;
+}
 .fshBackpack  {height: 490px;}
-
 .fshBackpack .backpackTabContent > div {height: 110px;}
-
-.backpackTabContent > div {
-  width: 60px;
-}
-
-.fastDiv {
-  height: 16px;
-}
-
+.backpackTabContent > div {width: 60px;}
+.fastDiv {height: 16px;}
 .fastWear {
-  cursor:pointer;
-  text-decoration:underline;
-  color:blue;
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
   position: relative;
   top: -16%;
 }
-
-.fastWorn {color:green; font-weight:bold;}
-
+.fastWorn {
+  color: green;
+  font-weight: bold;
+}
 .fastUse {
-  cursor:pointer;
-  text-decoration:underline;
-  color:blue;
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
   position: relative;
   top: -16%;
 }
+.compDelBtn {
+  cursor: pointer;
+  text-decoration: underline;
+  color: #A0CFEC;
+}
 
+/* General */
+.custombutton[disabled] {
+  background: #B8B8B8;
+  pointer-events: none;
+}
+.no-close .ui-dialog-titlebar-close {display: none;}
+.fshSpinner {
+  display: inline-block;
+  vertical-align: middle;
+  height: 15px;
+  width: 15px;
+  border: solid 1px #4f3717;
+  border-radius: 2px;
+  background-position: center center;
+  box-shadow: 0 0 4px #4f3717;
+}
 .fshNoResize {resize: none;}
-
-.reportLink {cursor: pointer; text-decoration: underline; color: blue;}
-.sendLink {cursor: pointer; text-decoration: underline; color: blue;}
-.dropLink {cursor: pointer; text-decoration: underline; color: red;}
-.compDelBtn {cursor: pointer; text-decoration: underline; color: #A0CFEC;}
-.fshLink {cursor: pointer; text-decoration: underline;}
+.reportLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+.sendLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: blue;
+}
+.dropLink {
+  cursor: pointer;
+  text-decoration: underline;
+  color: red;
+}
+.fshLink {
+  cursor: pointer;
+  text-decoration: underline;
+}
 .buffLink {cursor: pointer;}
+.fshPoint {cursor: pointer;}
 .smallLink {
   cursor: pointer;
   text-decoration: underline;
   color: blue;
   font-size: x-small;
 }
+.notLink {
+  color: grey;
+  font-size: x-small;
+}
 
-.pCR a { color: #F7EAC9; }
+.pCR a {color: #F7EAC9;}
 
-.fshRed       {color: red;}
-.fshBlue      {color: blue;}
-.fshGreen     {color: green;}
-.fshNavy      {color: navy;}
-.fshMaroon    {color: maroon;}
-.fshWhite     {color: white;}
-.fshGrey      {color: grey;}
-.fshLime      {color: lime;}
-.fshYellow    {color: yellow;}
-.fshPink      {color: pink;}
-.fshDarkCyan  {color: DarkCyan;}
+.fshRed {color: red;}
+.fshBlue {color: blue;}
+.fshGreen {color: green;}
+.fshNavy {color: navy;}
+.fshMaroon {color: maroon;}
+.fshWhite {color: white;}
+.fshGrey {color: grey;}
+.fshLime {color: lime;}
+.fshYellow {color: yellow;}
+.fshPink {color: pink;}
+.fshBrown {color: brown;}
+.fshDarkCyan {color: DarkCyan;}
 .fshOliveDrab {color: OliveDrab;}
 .fshDodgerBlue {color: DodgerBlue;}
 .fshPowderBlue {color: PowderBlue;}
 .fshLightSkyBlue {color: LightSkyBlue;}
 .fshPaleVioletRed {color: PaleVioletRed;}
-.fshRed a     {color: red;}
-.fshGreen a   {color: green;}
-.fshYellow a  {color: yellow;}
+.fshRed a {color: red;}
+.fshGreen a {color: green;}
+.fshYellow a {color: yellow;}
 .fshDarkCyan a {color: DarkCyan;}
 .fshOliveDrab a {color: OliveDrab;}
 .fshPaleVioletRed a {color: PaleVioletRed;}
-.fshHeader    {background-color: #CD9E4B;}
-.fshBlack     {background-color: black;}
+.fshHeader {background-color: #CD9E4B;}
+.fshBlack {background-color: black;}
 .fshVerySoftOrange {background-color: #e2b960;}
-.fshBtnBox    {
+.fshBtnBox {
   font-size: x-small;
   text-align: right;
 }
 
-.fshCommon    {color: white;}
-.fshRare      {color: #3366ff;}
-.fshUnique    {color: #cc33ff;}
+.fshCommon {color: white;}
+.fshRare {color: #3366ff;}
+.fshUnique {color: #cc33ff;}
 .fshLegendary {color: #ffff40;}
-.fshSuper     {color: #ff0000;}
-.fshCrystal   {color: #6633ff;}
-.fshEpic      {color: #009933;}
+.fshSuper {color: #ff0000;}
+.fshCrystal {color: #6633ff;}
+.fshEpic {color: #009933;}
 
-.fshCenter    {text-align: center;}
+.fshVMid {vertical-align: middle;}
+.fshCenter {text-align: center;}
 .fshTblCenter {margin: 0 auto;}
-.fshRight     {text-align: right;}
-.fshHide      {display: none;}
-.fshWearHide  {display: none;}
-.fshInline    {display: inline;}
-.fshBlock     {display: inline-block;}
-.fshNoWrap    {white-space: nowrap;}
-.fshBold      {font-weight: bold;}
-.quickCreate  {cursor: pointer;}
-.fshFixed     {position: fixed;}
-.fshXSmall    {font-size: x-small;}
-.fshXXSmall   {font-size: xx-small;}
-.fshSmall     {font-size: small;}
+.fshRight {text-align: right;}
+.fshHide {display: none;}
+.fshWearHide {display: none;}
+.fshInline {display: inline;}
+.fshBlock {display: inline-block;}
+.fshNoWrap {white-space: nowrap;}
+.fshBold {font-weight: bold;}
+.quickCreate {cursor: pointer;}
+.fshFixed {position: fixed;}
+.fshXSmall {font-size: x-small;}
+.fshXXSmall {font-size: xx-small;}
+.fshSmall {font-size: small;}
 .fshFloatLeft {float: left;}
-.fshAdvRank   {
+.fshAdvRank {
   width: 62px;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -315,10 +384,10 @@ input.fshFindOnlinePlayers {
 #minibox-guild-members-list .fshWhite {color: white;}
 #minibox-guild-members-list .fshGrey {color: grey;}
 #minibox-guild-members-list .fshHide {display: none;}
-#minibox-allies-list .fshDodgerBlue   {color: DodgerBlue;}
+#minibox-allies-list .fshDodgerBlue {color: DodgerBlue;}
 #minibox-allies-list .fshLightSkyBlue {color: LightSkyBlue;}
-#minibox-allies-list .fshPowderBlue   {color: PowderBlue;}
-#minibox-allies-list .fshHide         {display: none;}
+#minibox-allies-list .fshPowderBlue {color: PowderBlue;}
+#minibox-allies-list .fshHide {display: none;}
 
 .fastPray {text-align: center;}
 .fastPray table {
@@ -333,10 +402,20 @@ input.fshFindOnlinePlayers {
   background-repeat: no-repeat;
 }
 
-.quickbuffTable       {margin: 0px auto;}
-.quickbuffTableHeader {text-align: center; padding:0px 4px; color:orange;}
-.quickbuffTableDetail {text-align: center; padding:0px 4px;}
-.quickbuffActivate    {cursor: pointer; color: red;}
+.quickbuffTable {margin: 0px auto;}
+.quickbuffTableHeader {
+  text-align: center;
+  padding: 0px 4px;
+  color: orange;
+}
+.quickbuffTableDetail {
+  text-align: center;
+  padding: 0px 4px;
+}
+.quickbuffActivate {
+  cursor: pointer;
+  color: red;
+}
 
 #quickbuff .player h1 {float: left;}
 #quickbuff .player p {clear: both;}
@@ -390,17 +469,68 @@ ul.enemy-quick-buff {
   background-position: -270px -80px;
 }
 
-select.moveItem {font-size: xx-small; border: none; height: 11px;}
+select.moveItem {
+  font-size: xx-small;
+  border: none;
+  height: 11px;
+}
 
 table#fshBazaar {font-size: x-small;}
-table#fshBazaar span#warning {color: red; font-size: small}
+table#fshBazaar span#warning {
+  color: red;
+  font-size: small
+}
 
-table.relicT {font-size:small;}
-table.relicT tr.hidden {display:none; visibility:hidden;}
-table.relicT td {font-size:x-small; text-align: right;}
-table.relicT td.brn {color:brown;}
-table.relicT td.grey {color:grey;}
-table.relicT td.headr {font-size:small;border-top:2px black solid;}
+/* Relic */
+
+div.leftDiv {
+  width: 100px;
+  margin-right: 10px;
+}
+div.midDiv {
+  width: 160px;
+  margin-right: 10px;
+}
+.midDiv .brn {
+  min-width: 112px;
+}
+.midDiv .grey {
+  min-width: 46px;
+}
+div.rightDiv {
+  width: 160px;
+}
+.rightDiv .brn {
+  min-width: 112px;
+}
+.rightDiv .grey {
+  min-width: 46px;
+}
+div.lowDiv {
+  width: 455px;
+  padding-top: 10px;
+}
+.lowDiv a {
+  color: red;
+}
+
+table.relicT {font-size: small;}
+table.relicT tr.hidden {
+  display: none;
+  visibility: hidden;
+}
+table.relicT td {
+  font-size: x-small;
+  text-align: right;
+}
+table.relicT td.brn {color: brown;}
+table.relicT td.grey {color: grey;}
+table.relicT td.headr {
+  font-size: small;
+  border-top: 2px black solid;
+}
+
+/* Relic */
 
 img.center {
   display: block;
@@ -408,7 +538,6 @@ img.center {
   margin-right: auto;
 }
 
-/*td.lvlHighlight {background-color:#4671C8;}*/
 .lvlHighlight {background-color: #4671C8;}
 .lvlGvGHighlight {background-color: #FF9900;}
 
@@ -417,26 +546,17 @@ span#fshRefresh {
   cursor: pointer;
 }
 
-/*
-div#fshCompConf {
-  position: relative;
-  top: -16px;
-  text-align: right;
-  padding-right: 38px;
-}
-*/
-
 table.fshInvFilter {
   width: 100%;
 }
 table.fshInvFilter th {
   background-color: #cd9e4b;/*
-  border-style:solid;
-  border-width:1px;*/
+  border-style: solid;
+  border-width: 1px;*/
 }/*
 table.fshInvFilter td {
-  border-style:solid;
-  border-width:1px;
+  border-style: solid;
+  border-width: 1px;
 }*/
 
 #fshInv_filter input {width: 200px}
@@ -444,54 +564,191 @@ table.fshInvFilter td {
 .fshNumberInput {width: 3em;}
 
 .text-input-wrapper {
-  border:1px solid;
-  padding:1px 6px 1px 1px;
-  display:inline-block;
+  border: 1px solid;
+  padding: 1px 6px 1px 1px;
+  display: inline-block;
   background: white;
 }
 .text-input-wrapper input {
-  border:none;
-  background:none;
-  outline:none;
-  padding:0 0;
-  margin:0 0;
-  font:inherit;
+  border: none;
+  background: none;
+  outline: none;
+  padding: 0 0;
+  margin: 0 0;
+  font: inherit;
 }
 .text-input-wrapper span {
-  cursor:pointer;
-  color:blue;
-  font-weight:bold;
+  cursor: pointer;
+  color: blue;
+  font-weight: bold;
 }
 
 /* Recipe Manager */
 
-.rmTh {
-  background-color: #ddd;
-}
-.rmTh th {
-  text-align: center;
-}
+.rmTh {background-color: #ddd;}
+.rmTh th {text-align: center;}
 .rmTr {
   vertical-align: middle;
   text-align: center;
 }
-.rmTd {
-  border-bottom: 1px solid #CD9E4B;
-}
-.rmTd img {
-  margin: 0 auto;
-}
+.rmTd {border-bottom: 1px solid #CD9E4B;}
+.rmTd img {margin: 0 auto;}
 .rmItem {
   display: inline-block;
   margin: 0 3px;
 }
-.rmItem p {
-  margin: 0;
-}
+.rmItem p {margin: 0;}
 
 /* New World Shop Multi Buy */
-
 .fshClear {clear: both;}
+
+/* Button as Link */
+.fshBl {
+  background: transparent;
+  border: none;
+  color: blue;
+  cursor: pointer;
+  font-family : inherit;
+  margin: 0;
+  padding: 0;
+  text-decoration: underline;
+  -moz-user-select: text;
+  user-select: text;
+}
+.fshBl::-moz-focus-inner {
+  border: none;
+  padding: 0;
+}
+button.fshBls {font-size: 84%;}
+
+/* Create Aution Craft Buttons */
+.fshAC {
+  margin: 10px auto 10px auto;
+  text-align: center;
+}
+
+/* Composing Potion*/
+.fshPot {
+  background-repeat: no-repeat;
+  background-position: center;
+}
+/* Success Msg */
+.fshScs {height: 26px;}
+
+/* Guild Chat */
+.fshGc {
+  table-layout: fixed;
+  overflow-wrap: break-word;
+}
+/* New Row */
+.fshNr {
+  background-color: #F5F298;
+}
+/* Old Row */
+.fshOr {
+  background-color: #CD9E4B;
+}
+/* Buff Link */
+.fshBf {
+  color: blue;
+  font-size: 84%;
+}
+
+/* AH Quick Search - Category Header */
+.fshQs {
+  font-weight: bold;
+  font-size: large;
+}
+
+/* Quick Extract */
+.qeHead {
+  background-color: #CD9E4B;
+  width: 100%;
+}
+
+/* Find Buffs & Other */
+
+.fshFind {
+  width: 620px;
+  border-collapse: collapse;
+  margin: 0 auto;
+}
+
+.headCell {
+  width: 50%;
+}
+
+.findLabel {
+  text-align: right;
+  color: brown;
+}
+
+.leftLabel {
+  text-align: right;
+  color: brown;
+  width: 30%;
+}
+
+.extraProfile {
+  width: 118px;
+}
+
+.selectOnline {
+  width: 140px;
+}
+
+.disclaim {
+  font-size: xx-small;
+  color: brown;
+  margin-left: 28px;
+  margin-right: 28px;
+}
+
+.buffProg {
+  width: 310px;
+}
+
+.nameCol {
+  width: 120px;
+}
+
+.infoCol {
+  width: 200px;
+}
+
+.fshResult {
+  width: 620px;
+  border-collapse: collapse;
+  margin: 0 auto;
+  border-width: 1px;
+  border-style: solid;
+  border-color: gray black black gray;
+}
+
+.fshResult > tbody > tr > th, .fshResult > tbody > tr > td {
+  padding: 2px;
+  border-width: 1px;
+  border-style: solid;
+  border-color: black gray gray black;
+}
+
+.resAct {
+  color: gray;
+  text-align: right;
+  width: 50%;
+}
+
+.resLbl {
+  color: gray;
+  text-align: right;
+  width: 25%;
+}
+
+.resVal {
+  width: 25%
+}
+
+/* End of Find Buffs & Other */
 
 /*
  * Table styles

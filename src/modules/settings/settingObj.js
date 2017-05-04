@@ -11,13 +11,18 @@ export var networkIcon =
   'r+1ZWgxp8wi1VrEqxfeFWloYq4wKtOHeBNqeawqmeOnNvfdY' +
   'SvkbfaeUxP0w/G+k6WsT/xCBc25SuxDsnownEy4u5BHudpMF' +
   'egAAAABJRU5ErkJggg==" width="16" height="16" />';
+
 export var saveBoxes = [
   'navigateToLogAfterMsg',
   'gameHelpLink',
   'guildSelf',
+  'guildSelfMessage',
   'guildFrnd',
+  'guildFrndMessage',
   'guildPast',
+  'guildPastMessage',
   'guildEnmy',
+  'guildEnmyMessage',
   'showAdmin',
   'ajaxifyRankControls',
   'detailedConflictInfo',
@@ -417,5 +422,21 @@ export var mySimpleCheckboxes = {
     helpTitle: 'Disable Breakdown Prompts',
     helpText: 'If enabled, will disable prompts when you breakdown items.' +
       '<br>NO REFUNDS OR DO-OVERS! Use at own risk.'
+  },
+  collapseNewsArchive: {
+    id: 'collapseNewsArchive',
+    helpTitle: 'Collapse News Archive',
+    helpText: 'If enabled, will collapse news archives.'
+  },
+  hideSubLvlCreature: {
+    id: 'hideSubLvlCreature',
+    helpTitle: 'Hide Sub Level Creatures',
+    helpText: 'If enabled, will hide creatures that are ' +
+      'lower than the current realm level.'
+  },
+  hidePlayerActions: {
+    id: 'hidePlayerActions',
+    helpTitle: 'Hide Player Actions',
+    helpText: 'If enabled, will hide player actions.'
   },
 };

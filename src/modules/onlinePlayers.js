@@ -1,6 +1,6 @@
+import * as ajax from './support/ajax';
 import * as dataObj from './support/dataObj';
 import * as system from './support/system';
-import * as ajax from './support/ajax';
 
 var context;
 var onlinePlayers;
@@ -28,23 +28,29 @@ function buildOnlinePlayerData() { // jQuery
   });
 }
 
-function dataTableSearch() { // jQuery
-  /* Custom filtering function which will search data in column three between two values */
-  $.fn.dataTable.ext.search.push(
-    function(_settings, data) {
-      var min = parseInt($('#fshMinLvl', context).val(), 10); // context
-      var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
-      if (!isNaN(min)) {system.setValue('onlinePlayerMinLvl', min);}
-      if (!isNaN(max)) {system.setValue('onlinePlayerMaxLvl', max);}
-      var level = system.intValue(data[2]) || 0; // use data for the level column
-      if (isNaN(min) && isNaN(max) ||
-        isNaN(min) && level <= max ||
-        min <= level && isNaN(max) ||
-        min <= level && level <= max )
-      {return true;}
-      return false;
-    }
-  );
+function saveVal(key, val) { // Native
+  if (!isNaN(val)) {system.setValue(key, val);}
+}
+
+var lvlTests = [
+  function(level, min, max) {return isNaN(min) && isNaN(max);},
+  function(level, min, max) {return isNaN(min) && level <= max;},
+  function(level, min, max) {return min <= level && isNaN(max);},
+  function(level, min, max) {return min <= level && level <= max;}
+];
+
+function dataTableSearch(_settings, data) { // jQuery
+  /* Custom filtering function which will search
+  data in column three between two values */
+  var min = parseInt($('#fshMinLvl', context).val(), 10); // context
+  var max = parseInt($('#fshMaxLvl', context).val(), 10); // context
+  saveVal('onlinePlayerMinLvl', min);
+  saveVal('onlinePlayerMaxLvl', max);
+  var level = system.fallback(system.intValue(data[2]), 0);
+  for (var i = 0; i < lvlTests.length; i += 1) {
+    if (lvlTests[i](level, min, max)) {return true;}
+  }
+  return false;
 }
 
 function filterHeaderOnlinePlayers() { // jQuery
@@ -68,7 +74,7 @@ function filterHeaderOnlinePlayers() { // jQuery
 
 function gotOnlinePlayers() { // jQuery
   buildOnlinePlayerData();
-  dataTableSearch();
+  $.fn.dataTable.ext.search.push(dataTableSearch);
   filterHeaderOnlinePlayers();
 
   table = $('#fshInv', context).dataTable({ // context
@@ -76,10 +82,10 @@ function gotOnlinePlayers() { // jQuery
     pageLength: 30,
     lengthMenu: [[30, 60, -1], [30, 60, 'All']],
     columns: [
-      {title: 'Guild', class: 'dt-center', orderable: false},
-      {title: 'Name', class: 'dt-center'},
-      {title: 'Level', class: 'dt-center'},
-      {title: 'Page/Index', class: 'dt-center'}
+      {title: 'Guild', 'class': 'dt-center', orderable: false},
+      {title: 'Name', 'class': 'dt-center'},
+      {title: 'Level', 'class': 'dt-center'},
+      {title: 'Page/Index', 'class': 'dt-center'}
     ],
     createdRow: function(row, data) {
       if (highlightPlayersNearMyLvl &&
@@ -94,6 +100,13 @@ function gotOnlinePlayers() { // jQuery
   }).api();
 }
 
+function checkLastPage() { // Native
+  if (onlinePages === lastPage) {
+    ajax.setForage('fsh_onlinePlayers', onlinePlayers);
+    gotOnlinePlayers();
+  }
+}
+
 function getOnlinePlayers(data) { // Bad jQuery
   $('#fshOutput', context).append(' ' +
     (onlinePages + 1)); // context
@@ -102,8 +115,8 @@ function getOnlinePlayers(data) { // Bad jQuery
   var thePage = input.attr('value');
   var theRows = $('#pCC img[src$="/skin/icon_action_view.gif',
     doc).parent().parent().parent();
-  theRows.each(function(index) {
-    var tds = $('td', $(this));
+  theRows.each(function(index, element) {
+    var tds = $('td', $(element));
     var player = tds.eq(1).text();
     if (onlinePlayers[player] &&
         onlinePlayers[player][3] > thePage) {return;}
@@ -123,10 +136,8 @@ function getOnlinePlayers(data) { // Bad jQuery
       $.get('index.php?cmd=onlineplayers&page=' + i,
         getOnlinePlayers);
     }
-  } else if (onlinePages === lastPage) {
-    ajax.setForage('fsh_onlinePlayers', onlinePlayers);
-    gotOnlinePlayers();
   }
+  checkLastPage();
 }
 
 function refreshEvt() { // Bad jQuery
@@ -157,8 +168,8 @@ function resetEvt() { // context
 }
 
 function doOnlinePlayerEventHandlers(e) { // Native
-  if (e.target.id === 'fshRefresh') {refreshEvt();return;}
-  if (e.target.id === 'fshReset') {resetEvt();return;}
+  if (e.target.id === 'fshRefresh') {refreshEvt();}
+  if (e.target.id === 'fshReset') {resetEvt();}
 }
 
 function injectOnlinePlayersNew() { // jQuery
@@ -171,7 +182,7 @@ function injectOnlinePlayersNew() { // jQuery
       '>[Refresh]</span>';
   } else {
     refreshButton = '<span>[ Wait ' + Math.round(300 - (now -
-      lastCheck) / 1000) +'s ]</span>';
+      lastCheck) / 1000) + 's ]</span>';
   }
   context.html(
     '<span><b>Online Players</b></span>' + refreshButton +

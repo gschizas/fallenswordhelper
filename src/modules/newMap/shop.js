@@ -17,7 +17,7 @@ function quickBuy() {
       d: 0,
       id: shoppingData.id,
       item_id: shoppingData.itemId,
-      _rnd: Math.floor(Math.random() * 8999999998) + 1000000000
+      _rnd: system.rnd()
     },
     dataType: 'json'
   });
@@ -82,11 +82,11 @@ function injectQuickBuy() {
 
 function worldDialogShop(e, data) {
   shoppingData = data;
-  dialog = dialog || document.getElementById('shopDialogConfirm');
+  dialog = system.fallback(dialog,
+    document.getElementById('shopDialogConfirm'));
   if (!dialog) {return;}
-  jDialog = jDialog || $(dialog).data('worldDialogShopConfirm');
-  if (!fshDiv) {injectQuickBuy();}
-  else {resultDiv.textContent = '';}
+  jDialog = system.fallback(jDialog, $(dialog).data('worldDialogShopConfirm'));
+  if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
 }
 
 export function prepareShop() {

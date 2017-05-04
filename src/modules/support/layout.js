@@ -1,5 +1,6 @@
-import * as task from './task';
+import * as dataObj from './dataObj';
 import * as system from './system';
+import * as task from './task';
 
 var dotList;
 var dotCount;
@@ -17,45 +18,85 @@ var offlineDot =
 var sevenDayDot =
   '<span class="sevenDayDot tip-static" data-tipped="Offline"></span>';
 
+export var pCC = document.getElementById('pCC');
+
 export function buffAllHref(shortList) { // Bad Pattern
-  shortList = shortList.join(',').replace(/\s/g, '');
+  var _shortList = shortList.join(',').replace(/\s/g, '');
   var j = 'java';
-  return j + 'script:openWindow("index.php?cmd=quickbuff&t=' + shortList +
-    '", "fsQuickBuff", 618, 1000, ",scrollbars")';
+  return j + 'script:openWindow(\'index.php?cmd=quickbuff&t=' + _shortList +
+    '\', \'fsQuickBuff\', 618, 1000, \',scrollbars\')';
 }
 
-export function quickBuffHref(playerId, buffList) { // Bad Pattern
+export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
   return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-    'quickbuff&tid=' + playerId + (buffList ? '&blist=' + buffList : '') +
+    'quickbuff&tid=' + aPlayerId + (buffList ? '&blist=' + buffList : '') +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
+}
+
+export function openQuickBuffById(aPlayerId) {
+  window.openWindow('index.php?cmd=quickbuff&tid=' + aPlayerId,
+    'fsQuickBuff', 618, 1000, ',scrollbars');
+}
+
+export function openQuickBuffByName(aPlayerName) {
+  window.openWindow('index.php?cmd=quickbuff&t=' + aPlayerName,
+    'fsQuickBuff', 618, 1000, ',scrollbars');
+}
+
+export function doBuffLinks(members) {
+  // quick buff only supports 16
+  var shortList = members.reduce(function(prev, curr, i) {
+    var slot = Math.floor(i / 16);
+    prev[slot] = system.fallback(prev[slot], []);
+    prev[slot].push(curr);
+    return prev;
+  }, []).reduce(function(prev, curr, i) {
+    var theNames = curr.join(',');
+    var modifierWord = dataObj.places[i];
+    var li = document.createElement('li');
+    var btn = document.createElement('button');
+    btn.className = 'fshBl fshBls tip-static';
+    btn.dataset.tipped = 'Quick buff functionality from HCS only does 16';
+    btn.textContent = 'Buff ' + modifierWord + ' 16';
+    btn.addEventListener('click',
+      openQuickBuffByName.bind(null, theNames));
+    li.appendChild(btn);
+    prev.appendChild(li);
+    return prev;
+  }, document.createElement('ul'));
+  return shortList;
 }
 
 export function infoBox(documentText) { // Native
   var doc = system.createDocument(documentText);
-  var infoMatch = doc.getElementById('info-msg').innerHTML;
-  var result = '';
-  if (infoMatch) {
-    infoMatch = infoMatch.replace(/<br.*/,'');
-    result = infoMatch;
+  var result;
+  var infoMsg = doc.getElementById('info-msg');
+  if (infoMsg) {
+    var infoMatch = infoMsg.innerHTML;
+    result = '';
+    if (infoMatch) {
+      infoMatch = infoMatch.replace(/<br.*/, '');
+      result = infoMatch;
+    }
   }
   return result;
 }
 
 export function guildId() { // Native
-  var guildId;
+  var _guildId;
   var nodeList = document.body.getElementsByTagName('script');
   Array.prototype.forEach.call(nodeList, function getGuildId(el) {
     var match = el.textContent.match(/\s+guildId: ([0-9]+),/);
-    if (match) {guildId = parseInt(match[1], 10);}
+    if (match) {_guildId = parseInt(match[1], 10);}
   });
-  system.setValue('guildId', guildId);
-  return guildId;
+  system.setValue('guildId', _guildId);
+  return _guildId;
 }
 
 export function playerId() { // Native
   var thePlayerId = parseInt(document.getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
-  system.setValue('playerID',thePlayerId);
+  system.setValue('playerID', thePlayerId);
   return thePlayerId;
 }
 
@@ -78,31 +119,52 @@ export function makePageTemplate(title, comment, spanId, button, divId) { // Nat
     '<div class="fshSmall" id="' + divId + '"></div>';
 }
 
-export function notebookContent() { // Native
-  return document.getElementById('pCC'); // new interface logic
-}
+var getMins = [
+  function(obj, min) {
+    if (obj.day) {return min + parseInt(obj.day, 10) * 1440;}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.hour) {return min + parseInt(obj.hour, 10) * 60;}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.min) {return min + parseInt(obj.min, 10);}
+    return min;
+  },
+  function(obj, min) {
+    if (obj.last_login) {
+      return Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+    }
+    return min;
+  },
+  function(obj, min) {
+    // last_login is 'false' over 30 days
+    if ('last_login' in obj && !obj.last_login) {return 99999;}
+    return min;
+  }
+];
+
+var getDot = [
+  {condition: 2, result: greenDiamond},
+  {condition: 5, result: yellowDiamond},
+  {condition: 30, result: orangeDiamond},
+  {condition: 10080, result: offlineDot},
+  {condition: 44640, result: sevenDayDot}
+];
 
 export function onlineDot(obj) { // Native
-  var img;
-  var min = 0;
-  if (obj.day) {min += parseInt(obj.day, 10) * 1440;}
-  if (obj.hour) {min += parseInt(obj.hour, 10) * 60;}
-  if (obj.min) {min += parseInt(obj.min, 10);}
-  if (obj.last_login) {
-    min = Math.floor(Date.now() / 60000) - Math.floor(obj.last_login / 60);
+  var min = getMins.reduce(function(prev, curr) {
+    return curr(obj, prev);
+  }, 0);
+  for (var i = 0; i < getDot.length; i += 1) {
+    var el = getDot[i];
+    if (min < el.condition) {return el.result;}
   }
-  // last_login is 'false' over 30 days
-  if ('last_login' in obj && !obj.last_login) {min = 99999;}
-  if (min < 2) {img = greenDiamond;
-  } else if (min < 5) {img = yellowDiamond;
-  } else if (min < 30) {img = orangeDiamond;
-  } else if (min < 10080) {img = offlineDot;
-  } else if (min < 44640) {img = sevenDayDot;
-  } else {img = redDot;}
-  return img;
+  return redDot;
 }
 
-function changeOnlineDot(contactLink){ // Native
+function changeOnlineDot(contactLink) { // Native
   var lastActivity = lastActivityRE
     .exec(contactLink.getAttribute('data-tipped'));
   contactLink.parentNode.previousSibling.innerHTML =
@@ -131,4 +193,32 @@ export function colouredDots() { // Native
     '#pCC a[data-tipped*="Last Activity"]');
   dotCount = 0;
   task.add(3, batchDots);
+}
+
+export function confirm(title, msgText, fn) { // jQuery
+  var fshMsg = document.getElementById('fshmsg');
+  if (!fshMsg) {
+    fshMsg = document.createElement('div');
+    fshMsg.id = 'fshmsg';
+    document.body.appendChild(fshMsg);
+    $(fshMsg).dialog({
+      autoOpen: false,
+      dialogClass: 'no-close',
+      draggable: false,
+      modal: true,
+      resizable: false,
+    });
+  }
+  fshMsg.textContent = msgText;
+  $(fshMsg).dialog('option', {
+    buttons: {
+      Yes: function() {
+        fn();
+        $(this).dialog('close');
+      },
+      No: function() {$(this).dialog('close');}
+    },
+    title: title
+  })
+  .dialog('open');
 }

@@ -2,8 +2,8 @@ import * as system from './support/system';
 
 export function allowBack() { // Native
   document.querySelector('input[type="submit"]')
-    .addEventListener('click', function(e) {
-      e.preventDefault();
+    .addEventListener('click', function(evt) {
+      evt.preventDefault();
       var url = 'index.php?';
       Array.prototype.forEach.call(
         document.querySelectorAll('input:not([type="submit"])' +

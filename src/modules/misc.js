@@ -1,57 +1,17 @@
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
-
-function cancelAllAH() { // jQuery
-  var cancelButtons = document.getElementById('resultRows')
-    .getElementsByClassName('auctionCancel');
-  if (cancelButtons.length === 0) {return;}
-  var prm = [];
-  for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
-    var cancelButton = cancelButtons[i];
-    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
-      .firstElementChild;
-    cancelButton.outerHTML = '<img src="' + system.imageServer +
-      '/skin/loading.gif" width="14" height="14">';
-    prm.push(
-      $.post(
-        'index.php?cmd=auctionhouse&subcmd=cancel', {
-          'auction_id':
-            /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
-        }
-      )
-    );
-  }
-  $.when.apply($, prm).done(function() {
-    document.getElementById('refresh').click();
-  });
-}
-
-export function injectAuctionHouse() { // Bad jQuery
-  if (system.getValue('autoFillMinBidPrice')) {
-    document.getElementById('auto-fill').checked = true;
-  }
-  document.getElementById('sort0').click();
-  var cancelAll = document.createElement('span');
-  cancelAll.className = 'smallLink';
-  cancelAll.textContent = 'Cancel All';
-  var fill = document.getElementById('fill').parentNode.parentNode
-    .nextElementSibling.firstElementChild;
-  fill.classList.add('fshCenter');
-  fill.insertAdjacentHTML('afterbegin', ']');
-  fill.insertAdjacentElement('afterbegin', cancelAll);
-  fill.insertAdjacentHTML('afterbegin', '[');
-  cancelAll.addEventListener('click', cancelAllAH);
-}
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 export function injectFindPlayer() { // Bad jQuery
   var findPlayerButton = $('input[value="Find Player"]');
   var levelToTest = system.intValue($('dt.stat-level:first').next()
     .text());
   var characterVirtualLevel = system.getValue('characterVirtualLevel');
-  if (characterVirtualLevel) {levelToTest = characterVirtualLevel;}
-  var pvpLowerLevelModifier = levelToTest > 205 ? 10 : 5;
-  var pvpUpperLevelModifier = levelToTest >= 200 ? 10 : 5;
+  levelToTest = system.fallback(characterVirtualLevel, levelToTest);
+  var pvpLowerLevelModifier = 5;
+  if (levelToTest > 205) {pvpLowerLevelModifier = 10;}
+  var pvpUpperLevelModifier = 5;
+  if (levelToTest >= 200) {pvpUpperLevelModifier = 10;}
   findPlayerButton.parent().append('&nbsp;<a href="index.php?' +
     'cmd=findplayer&search_active=1&search_username=&search_level_min=' +
     (levelToTest - pvpLowerLevelModifier) + '&search_level_max=' +
@@ -63,37 +23,41 @@ export function injectFindPlayer() { // Bad jQuery
     'Get GvG targets</span></a>');
 
   $('table[class="width_full"]').find('a[href*="player_id"]')
-    .each(function() {
-      var id = /player_id=([0-9]*)/.exec($(this).attr('href'));
-      $(this).after('<a style="color:blue;font-size:10px;" ' +
-        layout.quickBuffHref(id[1])+'>[b]</a>');
+    .each(function(i, e) {
+      var id = /player_id=([0-9]*)/.exec($(e).attr('href'));
+      $(e).after('<a style="color:blue;font-size:10px;" ' +
+        layout.quickBuffHref(id[1]) + '>[b]</a>');
     });
 }
 
-function addMarketplaceWarning() { // Legacy
+function marketplaceWarning(sellPrice) { // Legacy
+  var warningColor = 'green';
+  var warningText =
+    '</b><br>This is probably an offer that will please someone.';
+  if (sellPrice < 100000) {
+    warningColor = 'brown';
+    warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
+  }
+  if (sellPrice > 250000) {
+    warningColor = 'red';
+    warningText = '</b><br>Hold up there ... this is way to high a ' +
+      'price ... you should reconsider.';
+  }
   var amount = system.findNode('//input[@id="amount"]').value;
-  var goldPerPoint = system.findNode('//input[@id="price"]');
   var warningField = system.findNode('//td[@id="warningfield"]');
+  warningField.innerHTML = '<span style="color:' + warningColor +
+    ';">You are offering to buy <b>' + amount +
+    '</b> FSP for >> <b>' + system.addCommas(sellPrice) +
+    warningText + ' (Total: ' +
+    system.addCommas(amount * sellPrice +
+    Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
+}
+
+function addMarketplaceWarning() { // Legacy
+  var goldPerPoint = system.findNode('//input[@id="price"]');
   var sellPrice = goldPerPoint.value;
   if (sellPrice.search(/^[0-9]*$/) !== -1) {
-    var warningColor = 'green';
-    var warningText =
-      '</b><br>This is probably an offer that will please someone.';
-    if (sellPrice < 100000) {
-      warningColor = 'brown';
-      warningText = '</b><br>This is too low ... it just ain"t gonna sell.';
-    } else if (sellPrice > 250000) {
-      warningColor = 'red';
-      warningText = '</b><br>Hold up there ... this is way to high a ' +
-        'price ... you should reconsider.';
-    }
-
-    warningField.innerHTML = '<span style="color:' + warningColor +
-      ';">You are offering to buy <b>' + amount +
-      '</b> FSP for >> <b>' + system.addCommas(sellPrice) +
-      warningText + ' (Total: ' +
-      system.addCommas(amount * sellPrice +
-      Math.ceil(amount * sellPrice * 0.005)) + ')</span>';
+    marketplaceWarning(sellPrice);
   }
 }
 
@@ -114,22 +78,24 @@ export function addMarketplaceWidgets() { // Legacy
 
 export function injectNotepad() { // jQuery
   $('#notepad_notes')
-  .attr('cols', '90')
-  .attr('rows', '30')
-  .css('resize', 'none');
+    .attr('cols', '90')
+    .attr('rows', '30')
+    .css('resize', 'none');
 }
 
 export function ladder() { // Native
-  document.querySelector('#pCC input[type="submit"]')
-    .addEventListener('click', function(e) {
+  var submitButton = document.querySelector('#pCC input[type="submit"]');
+  if (submitButton) {
+    submitButton.addEventListener('click', function(e) {
       e.preventDefault();
       window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
         document.querySelector('#pCC select[name="viewing_band_id"]').value;
     });
+  }
 }
 
-export function injectFsBoxContent(content) { // jQuery
-  if (!content) {content = layout.notebookContent();}
+export function injectFsBoxContent(injector) { // jQuery
+  var content = injector || layout.pCC;
   content.innerHTML = layout.makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
   ajax.getForage('fsh_fsboxcontent').done(function(fsboxcontent) {

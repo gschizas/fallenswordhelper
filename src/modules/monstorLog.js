@@ -1,17 +1,16 @@
-import * as ajax from './support/ajax';
 import calf from './support/calf';
+import * as ajax from './support/ajax';
+import * as layout from './support/layout';
 import * as system from './support/system';
 
 var monsterAry;
 
 function noMobs() {
-  document.getElementById('pCC').innerHTML = '<span>No monster information! ' +
+  layout.pCC.innerHTML = '<span>No monster information! ' +
     'Please enable entity log and travel a bit to see the world</span>';
 }
 
-function drawMobs() {
-  var inject = document.getElementById('entityTableOutput');
-  if (!monsterAry || !inject) {return;}
+function mobRows() {
   var result = '';
   for (var i = 0; i < monsterAry.length; i += 1) {
     result += '<tr>' +
@@ -26,7 +25,37 @@ function drawMobs() {
       '<td class="fshCenter">' + monsterAry[i].hp + '</td>' +
       '<td class="fshCenter">' + monsterAry[i].enhancements + '</td></tr>';
   }
-  inject.innerHTML = result;
+  return result;
+}
+
+function drawMobs() {
+  var inject = document.getElementById('entityTableOutput');
+  if (!monsterAry || !inject) {return;}
+  inject.innerHTML = mobRows();
+}
+
+function findSortType(target) {
+  return target.getAttribute('sortType') || 'string';
+}
+
+function sortMonsterAry(sortType) {
+  if (sortType === 'string') {
+    monsterAry.sort(system.stringSort);
+  } else {
+    monsterAry.sort(system.numberSort);
+  }
+}
+
+function sortCol(target) {
+  var headerClicked = target.getAttribute('sortKey');
+  if (typeof calf.sortAsc === 'undefined') {calf.sortAsc = true;}
+  if (calf.sortBy && calf.sortBy === headerClicked) {
+    calf.sortAsc = !calf.sortAsc;
+  }
+  calf.sortBy = headerClicked;
+  var sortType = findSortType(target);
+  sortMonsterAry(sortType);
+  drawMobs();
 }
 
 function doHandlers(evt) {
@@ -37,26 +66,16 @@ function doHandlers(evt) {
     return;
   }
   if (!target.classList.contains('fshLink')) {return;}
-  var headerClicked = target.getAttribute('sortKey');
-  var sortType = target.getAttribute('sortType');
-  if (!sortType) {sortType='string';}
-  if (calf.sortAsc === undefined) {calf.sortAsc = true;}
-  if (calf.sortBy && calf.sortBy === headerClicked) {
-    calf.sortAsc = !calf.sortAsc;
-  }
-  calf.sortBy = headerClicked;
-  monsterAry.sort(sortType === 'string' ? system.stringSort :
-    system.numberSort);
-  drawMobs();
+  sortCol(target);
 }
 
 function drawTable() {
-  var content = document.getElementById('pCC');
+  var content = layout.pCC;
   if (!monsterAry || !content) {return;}
   content.innerHTML = '<table cellspacing="0" cellpadding="0" border="0" ' +
     'width="100%"><tr class="fshBlack fshWhite">' +
     '<td width="90%" class="fshCenter"><b>Entity Information</b></td>' +
-    '<td width="10%">[<span id="clearEntityLog" class="buffLink">Clear' +
+    '<td width="10%">[<span id="clearEntityLog" class="fshPoint">Clear' +
     '</span>]</td></tr></table>' +
     '<table cellspacing="1" cellpadding="2" border="0"><thead>' +
     '<tr class="fshVerySoftOrange">' +
@@ -87,12 +106,14 @@ function prepMonster(data) {
     tmpObj.armor = tmpObj.armor.min + ' - ' + tmpObj.armor.max;
     tmpObj.damage = tmpObj.damage.min + ' - ' + tmpObj.damage.max;
     tmpObj.hp = tmpObj.hp.min + ' - ' + tmpObj.hp.max;
-    if (tmpObj.enhancements) {
+    var enhancements;
+    if (tmpObj.enhancements) {enhancements = Object.keys(tmpObj.enhancements);}
+    if (enhancements && enhancements.length > 0) {
       var tmp = '<span class="fshXXSmall">';
-      tmp += Object.keys(tmpObj.enhancements).reduce(function(prev, curr) {
-        return prev + '<span class="fshNoWrap">' + curr + ': ' +
-          tmpObj.enhancements[curr].min + ' - ' +
-          tmpObj.enhancements[curr].max + '</span><br>';
+      tmp += enhancements.reduce(function(_prev, _curr) {
+        return _prev + '<span class="fshNoWrap">' + _curr + ': ' +
+          tmpObj.enhancements[_curr].min + ' - ' +
+          tmpObj.enhancements[_curr].max + '</span><br>';
       }, '');
       tmpObj.enhancements = tmp.slice(0, -4) + '</span>';
     } else {

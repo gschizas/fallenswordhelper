@@ -1,24 +1,33 @@
-import * as task from '../support/task';
-import * as system from '../support/system';
-import * as layout from '../support/layout';
-import * as common from '../support/common';
-import * as debuff from './debuff';
-import * as profileAllyEnemy from './profileAllyEnemy';
-import * as fastWear from './fastWear';
-import * as components from './components';
+import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import * as bio from './bio';
+import * as common from '../common/common';
+import * as components from './components';
+import * as debuff from './debuff';
+import * as fastWear from './fastWear';
+import * as layout from '../support/layout';
+import * as profileAllyEnemy from './profileAllyEnemy';
+import * as system from '../support/system';
+import * as task from '../support/task';
 
 var guildId;
 var currentGuildRelationship;
 var guildMessages = {
-  self: {'color': 'fshGreen',
-    'message': 'Member of your own guild!'},
-  friendly: {'color': 'fshOliveDrab',
-    'message': 'Do not attack - Guild is friendly!'},
-  old: {'color': 'fshDarkCyan',
-    'message': 'Do not attack - You\'ve been in that guild once!'},
-  enemy: {'color': 'fshRed',
-    'message': 'Enemy guild. Attack at will!'}
+  self: {
+    color: 'fshGreen',
+    message: system.getValue('guildSelfMessage')
+  },
+  friendly: {
+    color: 'fshOliveDrab',
+    message: system.getValue('guildFrndMessage')
+  },
+  old: {
+    color: 'fshDarkCyan',
+    message: system.getValue('guildPastMessage')
+  },
+  enemy: {
+    color: 'fshRed',
+    message: system.getValue('guildEnmyMessage')
+  }
 };
 
 function quickWearLink() { // Native
@@ -42,13 +51,16 @@ function profileSelectAll() { // Native
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
   Array.prototype.forEach.call(items, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {bubbles: true,
-      ctrlKey: true, metaKey: true}));
+    el.dispatchEvent(new MouseEvent('click', {
+      bubbles: true,
+      ctrlKey: true,
+      metaKey: true
+    }));
   });
 }
 
 function selectAllLink() { // Native
-  //select all link
+  // select all link
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
   if (!node) {return;}
@@ -68,39 +80,34 @@ function storeVL() { // Native
   var virtualLevel = parseInt(
     document.getElementById('stat-vl').textContent, 10);
   if (system.intValue(document.getElementsByClassName('stat-level')[0]
-      .nextElementSibling.textContent) === virtualLevel) {
+    .nextElementSibling.textContent) === virtualLevel) {
     system.setValue('characterVirtualLevel', ''); // ?
   } else {
     system.setValue('characterVirtualLevel', virtualLevel);
   }
 }
 
-function guildRelationship(txt) { // Native
-  var output;
-  var guildSelf = system.getValue('guildSelf') || '';
-  var guildFrnd = system.getValue('guildFrnd') || '';
-  var guildPast = system.getValue('guildPast') || '';
-  var guildEnmy = system.getValue('guildEnmy') || '';
-  guildSelf = guildSelf.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  guildFrnd = guildFrnd.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  guildPast = guildPast.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  guildEnmy = guildEnmy.toLowerCase().replace(/\s*,\s*/, ',')
-    .replace(/\s\s*/g, ' ').split(',');
-  txt = txt.toLowerCase().replace(/\s\s*/g, ' ');
-  if (guildSelf.indexOf(txt) !== -1) {output = 'self';} else
-  if (guildFrnd.indexOf(txt) !== -1) {output = 'friendly';} else
-  if (guildPast.indexOf(txt) !== -1) {output = 'old';} else
-  if (guildEnmy.indexOf(txt) !== -1) {output = 'enemy';}
-  return output;
+function guildAry(val) {
+  if (val) {
+    return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
+  }
+  return [];
 }
 
-function profileInjectGuildRel() { // Native
-  var aLink = document.querySelector(
-    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
-  if (!aLink) {return;}
+function guildRelationship(_txt) { // Native
+  var scenario = [
+    {test: guildAry(system.getValue('guildSelf')), type: 'self'},
+    {test: guildAry(system.getValue('guildFrnd')), type: 'friendly'},
+    {test: guildAry(system.getValue('guildPast')), type: 'old'},
+    {test: guildAry(system.getValue('guildEnmy')), type: 'enemy'}
+  ];
+  var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
+  for (var i = 0; i < scenario.length; i += 1) {
+    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
+  }
+}
+
+function foundGuildLink(aLink) { // Native
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
   if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
@@ -110,6 +117,12 @@ function profileInjectGuildRel() { // Native
     aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
       guildMessages[currentGuildRelationship].message);
   }
+}
+
+function profileInjectGuildRel() { // Native
+  var aLink = document.querySelector(
+    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
+  if (aLink) {foundGuildLink(aLink);}
 }
 
 function profileInjectQuickButton(avyImg, playerid, playername) { // Native
@@ -174,13 +187,41 @@ function updateStatistics() { // Native
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
 }
 
-export function injectProfile() { // Native
-  var avyImg = document
-    .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
-  if (!avyImg) {return;}
-  var playername = document.getElementById('pCC')
-    .getElementsByTagName('h1')[0].textContent;
-  var self = playername === layout.playerName();
+var profileCombatSetDiv;
+
+function getNekid() { // jQuery
+  var profileBlock = profileCombatSetDiv.nextElementSibling;
+  var aLinks = profileBlock.getElementsByTagName('a');
+  var prm = [];
+  Array.prototype.forEach.call(aLinks, function(link) {
+    var href = link.getAttribute('href');
+    prm.push($.ajax({
+      url: href,
+      timeout: 1000
+    }));
+  });
+  $.when.apply($, prm).always(function() {
+    location.assign('index.php?cmd=profile');
+  });
+}
+
+function nekidBtn() { // Native
+  var profileRightColumn = document.getElementById('profileRightColumn');
+  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
+  var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
+  var nekidDiv = document.createElement('div');
+  nekidDiv.className = 'fshCenter';
+  var theBtn = document.createElement('button');
+  theBtn.className = 'fshBl fshBls';
+  theBtn.textContent = 'Nekid';
+  nekidDiv.insertAdjacentText('beforeend', '[ ');
+  nekidDiv.insertAdjacentElement('beforeend', theBtn);
+  nekidDiv.insertAdjacentText('beforeend', ' ]');
+  profileRightColumn.replaceChild(nekidDiv, targetBr);
+  theBtn.addEventListener('click', getNekid);
+}
+
+function ifSelf(self) { // Legacy
   if (self) {
     // self inventory
     debuff.fastDebuff();
@@ -190,51 +231,42 @@ export function injectProfile() { // Native
     quickWearLink();
     selectAllLink();
     storeVL();
+    nekidBtn();
   }
-  // Must be before profileInjectQuickButton
-  profileInjectGuildRel();
-  // It sets up guildId and currentGuildRelationship
-  var playerid = system.getUrlParameter('player_id') || layout.playerId();
-  profileInjectQuickButton(avyImg, playerid, playername);
+}
 
-  //************** yuuzhan having fun
+function yuuzhan(playername, avyImg) { // Legacy
   if (playername === 'yuuzhan') {
     avyImg.setAttribute('src',
       'http://evolutions.yvong.com/images/tumbler.gif');
-    avyImg.addEventListener('click', function(){alert('Winner!');});
+    avyImg.addEventListener('click', function() {
+      $('#dialog_msg').text('Winner!').dialog('open');
+    });
   }
-  //**************
+}
+
+export function injectProfile() { // Legacy
+  var avyImg = document
+    .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+  if (!avyImg) {return;}
+  var playername = layout.pCC
+    .getElementsByTagName('h1')[0].textContent;
+  var self = playername === layout.playerName();
+  ifSelf(self);
+  // Must be before profileInjectQuickButton
+  profileInjectGuildRel();
+  // It sets up guildId and currentGuildRelationship
+  var playerid = system.fallback(system.getUrlParameter('player_id'),
+    layout.playerId());
+  profileInjectQuickButton(avyImg, playerid, playername);
+
+  //* ************* yuuzhan having fun
+  yuuzhan(playername, avyImg);
+  //* *************
 
   common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateStatistics();
   bio.profileRenderBio(self);
-  common.addStatTotalToMouseover();
+  addStatTotalToMouseover();
   task.add(3, layout.colouredDots);
-}
-
-export function changeCombatSet(responseText, itemIndex) { // Native
-  var doc = system.createDocument(responseText);
-
-  var cbsSelect = doc.querySelector(
-    '#profileCombatSetDiv select[name="combatSetId"]');
-
-  // find the combat set id value
-  var allItems = cbsSelect.getElementsByTagName('option');
-  if (itemIndex >= allItems.length) {return;}
-  var cbsIndex = allItems[itemIndex].value;
-
-  $.ajax({
-    type: 'POST',
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'managecombatset',
-      combatSetId: cbsIndex,
-      submit: 'Use'
-    },
-    success: function() {
-      localStorage.setItem('hcs.nav.openIndex', '2');
-      location.href = 'index.php?cmd=profile';
-    }
-  });
 }

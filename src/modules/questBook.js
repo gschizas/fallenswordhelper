@@ -1,80 +1,166 @@
+import * as layout from './support/layout';
 import * as system from './support/system';
 
-export function injectQuestBookFull() { // Legacy
+var normalLink;
+var seasonLink;
+var activeLink;
+var completeLink;
+var notStartedLink;
+var currentPageValue;
+
+function dontPost(e) { // Native
+  if (e.target.type !== 'submit') {return;}
+  e.preventDefault();
+  var form = e.target.form;
+  var mode = form[1].value;
+  var type = form[2].value;
+  var letter = form[3].value;
+  var sortby = form[4].value;
+  var sortbydir = form[5].value;
+  var page = form[6].value;
+  window.location = 'index.php?cmd=questbook&type=' + type + '&mode=' + mode +
+    '&page=' + page + '&letter=' + letter + '&sortby=' + sortby +
+    '&sortbydir=' + sortbydir;
+}
+
+var currentLocationValue = [
+  {value: 0},
+  {value: 3},
+  {value: 0},
+  {value: 1},
+  {value: 2}
+];
+
+var savePrefKey = [
+  'lastNormalActiveQuestPage',
+  'lastNormalCompletedQuestPage',
+  'lastNormalNotStartedQuestPage',
+  'lastSeasonalActiveQuestPage',
+  'lastSeasonalCompletedQuestPage',
+  'lastSeasonalNotStartedQuestPage'
+];
+
+function whereAmI() { // Native
+  var aLinks = layout.pCC.getElementsByTagName('a');
+  normalLink = aLinks[0];
+  seasonLink = aLinks[1];
+  activeLink = aLinks[2];
+  completeLink = aLinks[3];
+  notStartedLink = aLinks[4];
+  currentPageValue = currentLocationValue.reduce(function(prev, curr, i) {
+    var ret = prev;
+    if (aLinks[i].firstElementChild.getAttribute('color') === '#FF0000') {
+      ret += curr.value;
+    }
+    return ret;
+  }, 0);
+}
+
+function storeLoc() { // Native
   var lastQBPage = location.search;
-  if (lastQBPage.indexOf('&mode=0') !== -1) {
-    system.setValue('lastActiveQuestPage', lastQBPage);
-  } else if (lastQBPage.indexOf('&mode=1') !== -1) {
-    system.setValue('lastCompletedQuestPage', lastQBPage);
-  } else if (lastQBPage.indexOf('&mode=2') !== -1) {
-    system.setValue('lastNotStartedQuestPage', lastQBPage);
-  }
-  if (system.getValue('storeLastQuestPage')) {
-    if (system.getValue('lastActiveQuestPage').length > 0) {
-      var activeLink = $('a[href*="index.php?cmd=questbook&mode=0"]');
-      activeLink.attr('href', system.getValue('lastActiveQuestPage'));
-    }
-    if (system.getValue('lastCompletedQuestPage').length > 0) {
-      var completedLink = $('a[href*="index.php?cmd=questbook&mode=1"]');
-      completedLink.attr('href', system.getValue('lastCompletedQuestPage'));
-    }
-    if (system.getValue('lastNotStartedQuestPage').length > 0) {
-      var notStartedLink = $('a[href*="index.php?cmd=questbook&mode=2"]');
-      notStartedLink.attr('href', system.getValue('lastNotStartedQuestPage'));
-    }
-  }
-  var questTable = system.findNode('//table[tbody/tr/td[.="Guide"]]');
-  if (!questTable) {return;}
-  var hideQuests = [];
-  if (system.getValue('hideQuests')) {
-    hideQuests = system.getValue('hideQuestNames').split(',');
-  }
-  for (var i = 1; i < questTable.rows.length; i += 1) {
-    var aRow = questTable.rows[i];
-    if (aRow.cells[0].innerHTML) {
-      var questName =
-        aRow.cells[0].firstChild.innerHTML.replace(/ {2}/g,' ').trim();
-      if (hideQuests.indexOf(questName) >= 0) {
-        aRow.parentNode.removeChild(aRow.nextSibling);
-        aRow.parentNode.removeChild(aRow.nextSibling);
-        aRow.parentNode.removeChild(aRow);
-      }
-      var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
-      aRow.cells[4].innerHTML = '<a href="http://guide.fallensword.com/' +
-        'index.php?cmd=quests&amp;subcmd=view&amp;quest_id=' + questID +
-        '&amp;search_name=&amp;search_level_min=&amp;search_level_max=' +
-        '&amp;sort_by=" target="_blank">' +
-        '<img border=0 style="float:left;" title="Search quest in Ultimate' +
-        ' FSG" src="' + system.imageServer + '/temple/1.gif"/></a>';
-      aRow.cells[4].innerHTML += '&nbsp;<a href="http://wiki.fallensword' +
-        '.com/index.php?title=' + questName.replace(/ /g,'_') +
-        '" target="_blank"><img border=0 style="float:left;" title="' +
-        'Search for this quest on the Wiki" src="' +
-        system.imageServer + '/skin/fs_wiki.gif"/></a>';
-    }
+  system.setValue('lastActiveQuestPage', lastQBPage);
+  system.setValue(savePrefKey[currentPageValue], lastQBPage);
+}
+
+function setLink(aLink, url) { // Native
+  if (url.length > 0) {
+    aLink.setAttribute('href', url);
   }
 }
 
-export function injectQuestTracker() { // Legacy
-  var injectHere = system.findNode('//td[font/b[.="Quest Details"]]');
-  var questId = document.location.search.match(/quest_id=(\d+)/)[1];
-  injectHere.innerHTML += '&nbsp;<a target="_blank" href="http://guide.' +
-    'fallensword.com/index.php?cmd=quests&subcmd=view&quest_id=' + questId +
-    '"><img border=0 title="Search quest in Ultimate FSG" src="' +
-    system.imageServer + '/temple/1.gif"/></a>';
-  
-  var questName =
-    system.findNode('//font[@size="2" and contains(.,"\'")]', injectHere);
-  if (questName) {
-    questName = questName.innerHTML;
-    questName = questName.match(/"(.*)"/);
-    if (questName && questName.length > 1) {
-      questName = questName[1];
-      injectHere.innerHTML += '&nbsp;<a href="http://wiki.fallensword.com' +
-        '/index.php?title=' + questName.replace(/ /g,'_') +
-        '" target="_blank"><img border=0 title="Search for this quest on ' +
-        'the Fallensword Wiki" src=' + system.imageServer +
-        '/skin/fs_wiki.gif /></a>';
-    }
+function updateLinks() { // Native
+  var lastNormalActiveQuestPage = system.getValue(savePrefKey[0]);
+  var lastNormalCompletedQuestPage = system.getValue(savePrefKey[1]);
+  var lastNormalNotStartedQuestPage = system.getValue(savePrefKey[2]);
+  var lastSeasonalActiveQuestPage = system.getValue(savePrefKey[3]);
+  var lastSeasonalCompletedQuestPage = system.getValue(savePrefKey[4]);
+  var lastSeasonalNotStartedQuestPage = system.getValue(savePrefKey[5]);
+
+  var oppositeTypeUrl = [
+    lastSeasonalActiveQuestPage,
+    lastSeasonalCompletedQuestPage,
+    lastSeasonalNotStartedQuestPage,
+    lastNormalActiveQuestPage,
+    lastNormalCompletedQuestPage,
+    lastNormalNotStartedQuestPage
+  ];
+
+  if (currentPageValue < 3) {
+    setLink(seasonLink, oppositeTypeUrl[currentPageValue]);
+    setLink(activeLink, lastNormalActiveQuestPage);
+    setLink(completeLink, lastNormalCompletedQuestPage);
+    setLink(notStartedLink, lastNormalNotStartedQuestPage);
+  } else {
+    setLink(normalLink, oppositeTypeUrl[currentPageValue]);
+    setLink(activeLink, lastSeasonalActiveQuestPage);
+    setLink(completeLink, lastSeasonalCompletedQuestPage);
+    setLink(notStartedLink, lastSeasonalNotStartedQuestPage);
   }
+}
+
+function storeQuestPage() {
+  if (system.getValue('storeLastQuestPage')) {
+    whereAmI();
+    storeLoc();
+    updateLinks();
+  }
+}
+
+function guideButtons(questID, questName) { // Native
+  return '<div class="parent">' +
+    '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
+    'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
+    'data-tipped="Search for this quest on the Ultimate Fallen Sword Guide" ' +
+    'style="background-image: url(\'' + system.imageServer +
+    '/temple/1.gif\');" target="_blank"></a>&nbsp;' +
+    '<a href="http://wiki.fallensword.com/index.php?title=' +
+    questName.replace(/ /g, '_') + '" class="tip-static" ' +
+    'data-tipped="Search for this quest on the Wiki" ' +
+    'style="background-image: url(\'' + system.imageServer +
+    '/skin/fs_wiki.gif\');" target="_blank"></a></div>';
+}
+
+function isHideQuests() {
+  if (system.getValue('hideQuests')) {
+    return system.getValue('hideQuestNames').split(',');
+  }
+  return [];
+}
+
+function doHideQuests(hideQuests, questName, aRow) {
+  if (hideQuests.indexOf(questName) >= 0) {
+    aRow.classList.add('fshHide');
+    aRow.nextElementSibling.classList.add('fshHide');
+    aRow.nextElementSibling.nextElementSibling.classList.add('fshHide');
+    aRow.nextElementSibling.nextElementSibling.nextElementSibling
+      .classList.add('fshHide');
+  }
+}
+
+export function injectQuestBookFull() { // Native
+  layout.pCC.addEventListener('click', dontPost);
+  storeQuestPage();
+  var questTable = layout.pCC.getElementsByTagName('table')[5];
+  if (!questTable) {return;}
+  var hideQuests = isHideQuests();
+  for (var i = 2; i < questTable.rows.length; i += 4) {
+    var aRow = questTable.rows[i];
+    var questName = aRow.cells[0].textContent.replace(/ {2}/g, ' ').trim();
+    doHideQuests(hideQuests, questName, aRow);
+    var questID = /quest_id=(\d+)/.exec(aRow.cells[4].innerHTML)[1];
+    aRow.cells[4].innerHTML = guideButtons(questID, questName);
+  }
+}
+
+export function injectQuestTracker() { // Native
+  var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
+  if (lastActiveQuestPage.length > 0) {
+    layout.pCC.getElementsByTagName('a')[0]
+      .setAttribute('href', lastActiveQuestPage);
+  }
+  var questID = system.getUrlParameter('quest_id');
+  var injectHere = layout.pCC.getElementsByTagName('td')[0];
+  var questName = injectHere.getElementsByTagName('font')[1].textContent
+    .replace(/"/g, '');
+  injectHere.insertAdjacentHTML('beforeend', guideButtons(questID, questName));
 }

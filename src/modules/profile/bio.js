@@ -1,8 +1,11 @@
-import * as system from '../support/system';
 import * as layout from '../support/layout';
+import * as system from '../support/system';
 
-var buffCost = {'count': 0, 'buffs': {}};
+var buffCost = {count: 0, buffs: {}};
 var bioEditLines;
+var numRE = /[^a-zA-Z0-9.,+\- ]/g;
+var priceRE =
+  /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
 function expandBio() { // Native
   var bioExpander = document.getElementById('fshBioExpander');
@@ -11,25 +14,7 @@ function expandBio() { // Native
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
-export function compressBio() { // Native
-  var bioCell = document.getElementById('profile-bio'); // new interface logic
-  if (!bioCell) {return;} // non-self profile
-  var bioContents = bioCell.innerHTML;
-  var maxCharactersToShow = system.getValue('maxCompressedCharacters');
-  var maxRowsToShow = system.getValue('maxCompressedLines');
-  var numberOfLines = bioContents.substr(0, maxCharactersToShow)
-    .split(/<br>\n/).length - 1;
-  if (bioContents.length <= maxCharactersToShow &&
-      numberOfLines < maxRowsToShow) {return;}
-  if (numberOfLines >= maxRowsToShow) {
-    var startIndex = 0;
-    while (maxRowsToShow > 0) {
-      maxRowsToShow -= 1;
-      startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
-    }
-    maxCharactersToShow = startIndex;
-  }
-
+function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
   // find the end of next HTML tag after the max characters to show.
   var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
   var lineBreak = '';
@@ -56,19 +41,47 @@ export function compressBio() { // Native
     '<span id="fshBioExpander" class="reportLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
-  // addClickListener('fshBioExpander', expandBio);
-  document.getElementById('fshBioExpander').addEventListener('click', expandBio);
+  document.getElementById('fshBioExpander')
+    .addEventListener('click', expandBio);
 }
 
-function getBuffsToBuy() { // Legacy
-  if (buffCost.count === 0) {return;}
-  var targetPlayer = document.getElementById('pCC')
+function findStartPosition(bioContents, _maxRowsToShow) { // Native
+  var maxRowsToShow = _maxRowsToShow;
+  var startIndex = 0;
+  while (maxRowsToShow > 0) {
+    maxRowsToShow -= 1;
+    startIndex = bioContents.indexOf('<br>\n', startIndex + 1);
+  }
+  return startIndex;
+}
+
+function compressBio(bioCell) { // Native
+  var bioContents = bioCell.innerHTML;
+  var maxCharactersToShow = system.getValue('maxCompressedCharacters');
+  var maxRowsToShow = system.getValue('maxCompressedLines');
+  var numberOfLines = bioContents.substr(0, maxCharactersToShow)
+    .split(/<br>\n/).length - 1;
+  if (bioContents.length <= maxCharactersToShow &&
+      numberOfLines < maxRowsToShow) {return;}
+  if (numberOfLines >= maxRowsToShow) {
+    maxCharactersToShow = findStartPosition(bioContents, maxRowsToShow);
+  }
+  doCompression(bioCell, bioContents, maxCharactersToShow);
+}
+
+function getTargetPlayer() { // Native
+  var targetPlayer = layout.pCC
     .getElementsByTagName('h1');
   if (targetPlayer.length !== 0) {
     targetPlayer = targetPlayer[0].textContent;
   } else {
     targetPlayer = layout.playerName();
   }
+  return targetPlayer;
+}
+
+function formatBuffsToBuy() { // Legacy
+  var targetPlayer = getTargetPlayer();
   var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
   var greetingText = system.getValue('buyBuffsGreeting').trim();
   var hasBuffTag = greetingText.indexOf('{buffs}') !== -1;
@@ -76,58 +89,168 @@ function getBuffsToBuy() { // Legacy
   greetingText = greetingText.replace(/{playername}/g, targetPlayer);
   if (!hasBuffTag) {
     greetingText += ' ' + buffsToBuy;
+  } else if (!hasCostTag) {
+    greetingText = greetingText
+      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
   } else {
-    if (!hasCostTag) {
-      greetingText = greetingText
-        .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
-    } else {
-      greetingText = greetingText
-        .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
-        .replace(/{cost}/g, buffCost.buffCostTotalText);
-    }
+    greetingText = greetingText
+      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
+      .replace(/{cost}/g, buffCost.buffCostTotalText);
   }
   window.openQuickMsgDialog(targetPlayer, greetingText, '');
 }
 
+function getBuffsToBuy() { // Legacy
+  if (buffCost.count > 0) {formatBuffsToBuy();}
+}
+
+var costFormatter = [
+  {
+    condition: function(total) {
+      return total.fsp > 0;
+    },
+    result: function(total) {
+      return String(Math.round(total.fsp * 100) / 100) + ' FSP';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.fsp > 0 && total.k > 0;
+    },
+    result: function() {
+      return ' and ';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.k > 0;
+    },
+    result: function(total) {
+      return total.k + ' k';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.stam > 0 && (total.fsp > 0 || total.k > 0);
+    },
+    result: function() {
+      return ' and ';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.stam > 0;
+    },
+    result: function(total) {
+      return total.stam + ' Stam(' +
+        String(Math.round(total.stam / 25 * 10) / 10) + 'fsp)';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.unknown > 0;
+    },
+    result: function(total) {
+      return ' (' + total.unknown + ' buff(s) with unknown cost)';
+    }
+  }
+];
+
+function formatCost(total) { // Native
+  return costFormatter.reduce(function(prev, el) {
+    var ret = prev;
+    if (el.condition(total)) {
+      ret += el.result(total);
+    }
+    return ret;
+  }, '');
+}
+
+function hazBuffs() { // Legacy
+  var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
+  var html = 'This is an estimated cost based on how the script finds ' +
+    'the cost associated with buffs from viewing bio.' +
+    'It can be incorrect, please use with discretion.<br><hr>' +
+    '<table border=0>';
+
+  Object.keys(buffCost.buffs).forEach(function(buff) {
+    total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
+    html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
+      buffCost.buffs[buff][1] + '</td></tr>';
+  });
+
+  var totalText = formatCost(total);
+
+  html += '</table><b>Total: ' + totalText + '</b>';
+  document.getElementById('buffCost').innerHTML = '<br/><span ' +
+    'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
+    totalText + '</b></span>';
+  buffCost.buffCostTotalText = totalText;
+}
+
 function updateBuffCost() { // Legacy
   if (buffCost.count > 0) {
-    var total = {'k': 0, 'fsp': 0, 'stam': 0, 'unknown': 0};
-    var html='This is an estimated cost based on how the script finds ' +
-      'the cost associated with buffs from viewing bio.'+
-      'It can be incorrect, please use with discretion.<br/><hr/>'+
-      '<table border=0>';
-    Object.keys(buffCost.buffs).forEach(function(buff) {
-      total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
-      html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
-        buffCost.buffs[buff][1] + '</td></tr>';
-    });
-    var totalText = total.fsp > 0 ? Math.round(total.fsp * 100) / 100 +
-      ' FSP' : '';
-    if (total.fsp > 0 && total.k > 0) {totalText += ' and ';}
-    totalText += total.k > 0 ? total.k + ' k' : '';
-
-    if (total.stam > 0 && (total.fsp > 0 || total.k > 0)) {
-      totalText += ' and ';}
-    totalText += total.stam > 0 ? total.stam + ' Stam(' +
-      Math.round(total.stam / 25 * 10) / 10 + 'fsp)' : '';
-
-    if (total.unknown > 0) {
-      totalText += ' (' + total.unknown + ' buff(s) with unknown cost)';
-    }
-    html += '</table><b>Total: ' + totalText + '</b>';
-    document.getElementById('buffCost').innerHTML = '<br/><span ' +
-      'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
-      totalText + '</b></span>';
-    buffCost.buffCostTotalText = totalText;
+    hazBuffs();
   } else {
     document.getElementById('buffCost').innerHTML = '';
     buffCost.buffCostTotalText = '';
   }
 }
 
+function priceUnit(price) { // Native
+  if (price[0].indexOf('k') > 0) {
+    return 'k';
+  }
+  if (price[0].indexOf('f') > 0) {
+    return 'fsp';
+  }
+  return 'stam';
+}
+
+function priceBeforeName(buffNameNode, price) {
+  if (!price) { // some players have prices BEFORE the buff names
+    var newtext;
+    var text = '';
+    var node = buffNameNode;
+    while (node && node.nodeName.toLowerCase() !== 'br') {
+      newtext = node.textContent;
+      node = node.previousSibling;
+      text = newtext + text;
+    }
+    return text.replace(numRE, '').toLowerCase().match(priceRE);
+  }
+  return price;
+}
+
+function getBuffCost(buffNameNode) {
+  var node = buffNameNode;
+  var buffName = node.textContent;
+  var newtext;
+  var text = '';
+  // get the whole line from the buff name towards the end (even after
+  // the ',', in case of 'AL, Lib, Mer: 10k each'
+  while (node && node.nodeName.toLowerCase() !== 'br') {
+    newtext = node.textContent;
+    node = node.nextSibling;
+    text += newtext;
+  }
+  var price = text.replace(numRE, '').toLowerCase().match(priceRE);
+  price = priceBeforeName(buffNameNode, price);
+  var type;
+  var cost;
+  if (price) {
+    type = priceUnit(price);
+    cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
+  } else {
+    type = 'unknown';
+    cost = '1';
+  }
+  buffCost.buffs[buffName] = [parseFloat(cost), type];
+  buffCost.count += 1;
+}
+
 function toggleBuffsToBuy(evt) { // Legacy
   // This is also called by bio preview
-  var newtext;
   var buffNameNode = evt.target;
   while (buffNameNode.tagName.toLowerCase() !== 'span') {
     buffNameNode = buffNameNode.parentNode;
@@ -136,40 +259,9 @@ function toggleBuffsToBuy(evt) { // Legacy
   var selected = node.classList.contains('fshBlue');
   node.classList.toggle('fshBlue');
   node.classList.toggle('fshYellow');
-
   var buffName = node.textContent;
   if (selected) {
-    var text = '';
-    // get the whole line from the buff name towards the end (even after 
-    // the ',', in case of 'AL, Lib, Mer: 10k each'
-    while (node && node.nodeName.toLowerCase() !== 'br') {
-      newtext = node.textContent;
-      node = node.nextSibling;
-      text += newtext;
-    }
-    var price = text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase()
-      .match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)|([+\-]{0,1}[\.\d]+ *stam)/);
-    if (!price) { // some players have prices BEFORE the buff names
-      node = buffNameNode;
-      while (node && node.nodeName.toLowerCase() !== 'br') {
-        newtext = node.textContent;
-        node = node.previousSibling;
-        text = newtext + text;
-      }
-      price = text.replace(/[^a-zA-Z0-9.,+\- ]/g, '').toLowerCase()
-        .match(/([+\-]{0,1}[\.\d]+ *k)|([+\-]{0,1}[\.\d]+ *fsp)|([+\-]{0,1}[\.\d]+ *stam)/);
-    }
-    var type;
-    var cost;
-    if (price) {
-      type = price[0].indexOf('k') > 0 ? 'k' : price[0].indexOf('f') > 0 ? 'fsp' : 'stam';
-      cost = price[0].match(/([+\-]{0,1}[\.\d]+)/)[0];
-    } else {
-      type = 'unknown';
-      cost = '1';
-    }
-    buffCost.buffs[buffName] = [parseFloat(cost),type];
-    buffCost.count += 1;
+    getBuffCost(buffNameNode);
   } else {
     buffCost.count -= 1;
     delete buffCost.buffs[buffName];
@@ -177,24 +269,22 @@ function toggleBuffsToBuy(evt) { // Legacy
   updateBuffCost();
 }
 
-function bioEvtHdl(e) { // Native
-  if (e.target.classList.contains('buffLink')) {
-    toggleBuffsToBuy(e);
-    return;
-  }
-  if (e.target.id === 'fshSendBuffMsg') {
-    getBuffsToBuy(e);
-    return;
-  }
+function getBuffNameNode(e) { // Native
   var buffNameNode = e.target;
   while (buffNameNode.tagName &&
       buffNameNode.tagName.toLowerCase() !== 'span') {
     buffNameNode = buffNameNode.parentNode;
   }
+  return buffNameNode;
+}
+
+function bioEvtHdl(e) { // Native
+  var buffNameNode = getBuffNameNode(e);
   if (buffNameNode.classList &&
       buffNameNode.classList.contains('buffLink')) {
     toggleBuffsToBuy(e);
-    return;
+  } else if (e.target.id === 'fshSendBuffMsg') {
+    getBuffsToBuy(e);
   }
 }
 
@@ -210,8 +300,8 @@ function bioPreview() { // Native
 }
 
 function bioWords() { // Native
-  //Add description text for the new tags
-  document.getElementById('pCC').insertAdjacentHTML('beforeend', '<div>' +
+  // Add description text for the new tags
+  layout.pCC.insertAdjacentHTML('beforeend', '<div>' +
     '`~This will allow FSH Script users to ' +
     'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
     'determine where to put the "Ask For Buffs" button<br><br>' +
@@ -223,10 +313,14 @@ function bioWords() { // Native
     'pack names in them to make buffing even easier!</div>');
 }
 
+function testHeightValid(boxVal) { // Native
+  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
+}
+
 function changeHeight() { // Native
   var theBox = document.getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
-  if (isNaN(boxVal) || boxVal < '1' || boxVal > '99') {return;}
+  if (testHeightValid(boxVal)) {return;}
   bioEditLines = boxVal;
   system.setValue('bioEditLines', boxVal);
   document.getElementById('textInputBox').rows = bioEditLines;
@@ -244,15 +338,16 @@ function bioHeight() { // Native
   saveLines.type = 'button';
   saveLines.addEventListener('click', changeHeight);
   bioEditLinesDiv.appendChild(saveLines);
-  document.getElementById('pCC').appendChild(bioEditLinesDiv);
+  layout.pCC.appendChild(bioEditLinesDiv);
 }
 
-function renderBio(bioContents) {
-  bioContents = bioContents.replace(/\{b\}/g,'`~').replace(/\{\/b\}/g,'~`');
+function renderBio(_bioContents) {
+  var bioContents = _bioContents.replace(/\{b\}/g, '`~')
+    .replace(/\{\/b\}/g, '~`');
   var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
   if (!buffs) {return;}
   buffs.forEach(function(buff, i) {
-    var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g,'');
+    var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
     var cbString = '<span id="fshBuff' + i + '" class="buffLink fshBlue">' +
       fullName + '</span>';
     bioContents = bioContents.replace(buff, cbString);
@@ -265,17 +360,26 @@ function renderBio(bioContents) {
   return bioContents;
 }
 
+function doRender(bioCell) { // Native
+  var bioContents = bioCell.innerHTML;
+  bioContents = renderBio(bioContents);
+  if (bioContents) {
+    bioCell.innerHTML = bioContents;
+  }
+}
+
+function testForRender(self, bioCell) { // Native
+  if (self && system.getValue('renderSelfBio') ||
+      !self && system.getValue('renderOtherBios')) {
+    doRender(bioCell);
+  }
+}
+
 export function profileRenderBio(self) { // Native
   var bioCell = document.getElementById('profile-bio');
-  if (bioCell && (self && system.getValue('renderSelfBio') ||
-      !self && system.getValue('renderOtherBios'))) {
-    var bioContents = bioCell.innerHTML;
-    bioContents = renderBio(bioContents);
-    if (bioContents) {
-      bioCell.innerHTML = bioContents;
-    }
-  }
-  if (system.getValue('enableBioCompressor')) {compressBio();}
+  if (!bioCell) {return;}
+  testForRender(self, bioCell);
+  if (system.getValue('enableBioCompressor')) {compressBio(bioCell);}
   bioCell.addEventListener('click', bioEvtHdl);
 }
 
@@ -300,6 +404,6 @@ export function injectBioWidgets() { // Native
 
   textArea.parentNode.addEventListener('click', bioEvtHdl);
   textArea.addEventListener('keyup', updateBioCharacters);
-  //Force the preview area to render
+  // Force the preview area to render
   updateBioCharacters();
 }

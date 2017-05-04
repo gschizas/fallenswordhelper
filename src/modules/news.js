@@ -1,7 +1,12 @@
+import * as layout from './support/layout';
+import * as settingsPage from './settings/settingsPage';
+import * as system from './support/system';
+
 var maxcharacters;
 var textArea;
 var shoutboxPreview;
 var warehouse = [];
+var collapseNewsArchive;
 
 function updateShoutboxPreview() { // Native
   var textContent = textArea.value;
@@ -37,31 +42,42 @@ export function newsShoutbox() { // Native
   injectShoutboxWidgets();
 }
 
+function containsNewsHead(el) { // Native
+  return el.classList.contains('news_head') ||
+    el.classList.contains('news_head_tavern');
+}
+
 function closestHead(el) { // Native
-  if (el.classList.contains('news_head') ||
-      el.classList.contains('news_head_tavern')) {
+  if (containsNewsHead(el)) {
     return el;
   }
   if (el.classList.contains('news_left_column')) {return;}
   return closestHead(el.parentNode);
 }
 
-function newsEvt(evt) { // jQuery
-  var newsHead = closestHead(evt.target);
-  if (!newsHead) {return;}
+function getNewsClass(newsHead) { // Native
+  if (newsHead.classList.contains('news_head_tavern')) {
+    return '.news_body_tavern';
+  }
+  return '.news_body';
+}
+
+function gotNewsHead(evt, newsHead) { // jQuery
   var newsBody = newsHead.nextElementSibling;
-  var _class = newsHead.classList.contains('news_head_tavern') ?
-    '.news_body_tavern' : '.news_body';
+  var newsClass = getNewsClass(newsHead);
   if (!$(newsBody).data('open')) {
     evt.preventDefault();
-    $(_class).hide().data('open', false);
+    $(newsClass).hide().data('open', false);
     $(newsBody).show().data('open', true);
-  } else {
-    if (evt.target.tagName !== 'A') {
-      $(newsBody).hide().data('open', false);
-    }
+  } else if (evt.target.tagName !== 'A') {
+    $(newsBody).hide().data('open', false);
   }
   evt.stopPropagation();
+}
+
+function newsEvt(evt) { // Native
+  var newsHead = closestHead(evt.target);
+  if (newsHead) {gotNewsHead(evt, newsHead);}
 }
 
 function fixCollapse() { // Native
@@ -98,47 +114,106 @@ function collapseAll() { // Native
 }
 
 function expandArt(article) { // Native
-  collapseAll();
-  article.rows.forEach(function(el) {el.row.classList.remove('fshHide');});
+  article.rows.forEach(function(el) {
+    el.row.classList.remove('fshHide');
+  });
   article.open = true;
+}
+
+function expandAll() { // Native
+  warehouse.forEach(function(article) {
+    if (!article.open) {expandArt(article);}
+  });
+}
+
+function isHeader(el) { // Native
+  if (el.rowIndex % 6 === 0) {return el;}
 }
 
 function closestTr(el) { // Native
   if (el.tagName === 'TR') {
-    if (el.rowIndex % 6 === 0) {return el;} else {return;}
+    return isHeader(el);
   }
   if (el.tagName === 'TABLE') {return;}
   return closestTr(el.parentNode);
 }
 
-function evtHdl(evt) { // Native
+function evtEnabled(evt) { // Native
   var myRow = closestTr(evt.target);
   if (!myRow) {return;}
   var articleNo = myRow.rowIndex / 6;
   var article = warehouse[articleNo];
   if (article.open === false) {
+    collapseAll();
     expandArt(article);
   } else {
     collapseArt(article);
   }
 }
 
-function doTagging(row) { // Native
-  var rowType = row.rowIndex % 6;
-  var articleNo = (row.rowIndex - rowType) / 6;
-  warehouse[articleNo] = warehouse[articleNo] || {};
-  warehouse[articleNo].open = false;
-  warehouse[articleNo].rows = warehouse[articleNo].rows || [];
-  if (rowType === 0) {row.classList.add('buffLink');}
-  if (rowType > 1) {
-    warehouse[articleNo].rows[rowType] = warehouse[articleNo][rowType] || {};
-    warehouse[articleNo].rows[rowType].row = row;
+function evtHdl(evt) { // Native
+  if (collapseNewsArchive) {evtEnabled(evt);}
+}
+
+function makeHeaderClickable(row) { // Native
+  if (collapseNewsArchive) {row.classList.add('fshPoint');}
+}
+
+function collapseDuringAnalysis(row, thisArticle) { // Native
+  if (collapseNewsArchive) {
     row.classList.add('fshHide');
+    thisArticle.open = false;
+  } else {
+    thisArticle.open = true;
   }
 }
 
+function testRowType(row, rowType, thisArticle) { // Native
+  if (rowType === 0) {
+    thisArticle.header = row;
+    makeHeaderClickable(row);
+  } // TODO toggle this
+  if (rowType > 1) {
+    thisArticle.rows[rowType] =
+      system.fallback(thisArticle[rowType], {});
+    thisArticle.rows[rowType].row = row;
+    collapseDuringAnalysis(row, thisArticle);
+  }
+}
+
+function doTagging(row) { // Native
+  var rowType = row.rowIndex % 6;
+  var articleNo = (row.rowIndex - rowType) / 6;
+  warehouse[articleNo] = system.fallback(warehouse[articleNo], {});
+  var thisArticle = warehouse[articleNo];
+  thisArticle.rows = thisArticle.rows || [];
+  testRowType(row, rowType, thisArticle);
+}
+
+function toggleHeaderClass() {
+  warehouse.forEach(function(article) {
+    article.header.classList.toggle('fshPoint');
+  });
+}
+
+function togglePref() { // Native
+  collapseNewsArchive = !collapseNewsArchive;
+  system.setValue('collapseNewsArchive', collapseNewsArchive);
+  if (collapseNewsArchive) {collapseAll();} else {expandAll();}
+  toggleHeaderClass();
+}
+
+function setupPref(rowInjector) {
+  collapseNewsArchive = system.getValue('collapseNewsArchive');
+  rowInjector.insertAdjacentHTML('afterend',
+    settingsPage.simpleCheckbox('collapseNewsArchive'));
+  document.getElementById('collapseNewsArchive')
+    .addEventListener('click', togglePref);
+}
+
 export function viewArchive() { // Native
-  var myTable = document.getElementById('pCC').getElementsByTagName('table')[2];
-  Array.prototype.forEach.call(myTable.rows, doTagging);
-  myTable.addEventListener('click', evtHdl);
+  var theTables = layout.pCC.getElementsByTagName('table');
+  setupPref(theTables[0].rows[2]);
+  Array.prototype.forEach.call(theTables[2].rows, doTagging);
+  theTables[2].addEventListener('click', evtHdl);
 }

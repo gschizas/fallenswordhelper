@@ -1,6 +1,8 @@
-import * as assets from './assets';
 import * as ajax from '../support/ajax';
+import * as assets from './assets';
+import * as layout from '../support/layout';
 import * as logs from '../logs';
+import * as profiler from './profiler';
 import * as system from '../support/system';
 
 var options = {};
@@ -23,92 +25,6 @@ function getGuildLogPage(page) {
   });
 }
 
-function rowProfile(data) {
-  var rowTypeID = 0;
-  // Potion messages
-  if (data.indexOf('(Potion)') !== -1) {
-    rowTypeID = 1;
-  }
-  // Store/Recall (showRecallMessages)
-  else if (data.indexOf('recalled the item') !== -1 ||
-      data.indexOf('took the item') !== -1 ||
-      data.indexOf('auto-returned the') !== -1 ||
-      data.indexOf('stored the item') !== -1) {
-    rowTypeID = 2;
-  }
-  // Tag/Untag (showTaggingMessages)
-  else if (
-      data.indexOf('has added flags to') !== -1 ||
-      data.indexOf('has removed flags to') !== -1) {
-    rowTypeID = 3;
-  }
-  // Relic messages (showRelicMessages)
-  else if (
-      data.indexOf('relic. This relic now has an empower level of') !== -1 ||
-      / empowered the .+ relic/.test(data) ||
-      data.indexOf(
-        'relic. The relic empower level has been reset to zero.') !== -1 ||
-      data.indexOf('failed to capture the relic') !== -1 ||
-      data.indexOf('captured the relic') !== -1 ||
-      data.indexOf('captured your relic') !== -1 ||
-      data.indexOf('has captured the undefended relic') !== -1 ||
-      data.indexOf('attempted to capture your relic') !== -1 ||
-      / removed the empowerment from the .+ relic/.test(data)) {
-    rowTypeID = 4;
-  }
-  // Mercenary messages (showMercenaryMessages)
-  else if (
-      data.indexOf('disbanded a mercenary.') !== -1 ||
-      data.indexOf('hired the mercenary') !== -1) {
-    rowTypeID = 5;
-  }
-  // Group Combat messages (showGroupCombatMessages)
-  else if (
-      data.indexOf('has disbanded one of their groups') !== -1 ||
-      /A group from your guild was (.*) in combat./.test(data)) {
-    rowTypeID = 6;
-  }
-  // Donation messages (showDonationMessages)
-  else if (
-      /deposited ([,0-9]+) FallenSword Points into the guild./.test(data) ||
-      /deposited ([,0-9]+) gold into the guild bank/.test(data)) {
-    rowTypeID = 7;
-  }
-  //Ranking messages (showRankingMessages)
-  else if (
-      data.indexOf('has added a new rank entitled') !== -1 ||
-      data.indexOf('has deleted the rank') !== -1 ||
-      data.indexOf('has requested to join the guild') !== -1 ||
-      data.indexOf('has invited the player') !== -1 ||
-      data.indexOf('has officially joined the guild') !== -1 ||
-      data.indexOf('has been kicked from the guild by') !== -1 ||
-      data.indexOf('has left the guild') !== -1 ||
-      data.indexOf('has been assigned the rank') !== -1) {
-    rowTypeID = 8;
-  }
-  //GvG messages (showGvGMessages)
-  else if (
-      data.indexOf('resulted in a draw. Your GvG rating and ' +
-        'Guild RP was unaffected.') !== -1 ||
-      /resulted in (.*) with a final score of/.test(data) ||
-      data.indexOf('has just initiated a conflict with the guild') !== -1 ||
-      data.indexOf('has initiated a conflict with your guild') !== -1 ||
-      data.indexOf(
-        'is participating in the conflict against the guild') !== -1) {
-    rowTypeID = 9;
-  }
-  // Titan messages (showTitanMessages)
-  else if (
-      data.indexOf(
-        'from your guild\'s contribution to the defeat of the titan') !== -1 ||
-      data.indexOf('a 7 day cooldown has been activated on your ' +
-        'guild for this titan') !== -1 ||
-      data.indexOf('bought the Titan Reward item') !== -1) {
-    rowTypeID = 10;
-  }
-  return rowTypeID;
-}
-
 function findPageInput(prev, curr) {
   var output = prev;
   if (!prev && curr.name === 'page') {output = curr;}
@@ -124,15 +40,13 @@ function getPageInput() {
 function parsePage(data) {
   doc = system.createDocument(data);
   var pageInput = getPageInput();
-  currPage = pageInput.value * 1;
-  lastPage = /\d+/.exec(pageInput.parentNode.textContent)[0] * 1;
+  currPage = Number(pageInput.value);
+  lastPage = Number(/\d+/.exec(pageInput.parentNode.textContent)[0]);
   if (currPage === 1) {maxPage = Math.min(lastPage, maxPagesToFetch);}
   fshOutput.textContent = 'Loading ' + currPage + ' of ' + maxPage + '...';
 }
 
-function parseTable() {
-  var tableList = doc.getElementsByClassName('width_full');
-  if (tableList.length !== 1) {return;}
+function getTableList(tableList) {
   var theTable = tableList[0];
   var limit = theTable.rows.length - 1;
   for (var i = 1; i < limit; i += 2) {
@@ -144,12 +58,17 @@ function parseTable() {
         options.log &&
         timestamp === options.log[0][0] &&
         myMsg === options.log[0][2]) {
-          completeReload = false;
-          break;
-        }
+      completeReload = false;
+      break;
+    }
     tmpGuildLog.push([currPage * 100 + i, timestamp, myDate, myMsg,
-      rowProfile(myMsg)]);
+      profiler.rowProfile(myMsg)]);
   }
+}
+
+function parseTable() {
+  var tableList = doc.getElementsByClassName('width_full');
+  if (tableList.length === 1) {getTableList(tableList);}
 }
 
 function processPage(data) {
@@ -213,9 +132,8 @@ function buildTable() {
     sep.colSpan = 3;
   });
 
-  var pCC = document.getElementById('pCC');
   var injector = document.getElementById('fshInjectHere');
-  pCC.replaceChild(myTable, injector);
+  layout.pCC.replaceChild(myTable, injector);
   logs.addLogColoring('myGuildLog', 1);
   logs.addGuildLogWidgets();
 }
@@ -247,7 +165,7 @@ function processFirstPage(data) {
 }
 
 function toggleItem(self) {
-  var item = self.getAttribute('item') * 1;
+  var item = Number(self.getAttribute('item'));
   options.checks[item] = !options.checks[item];
   storeOptions();
   tmpGuildLog.forEach(function(r) {
@@ -285,23 +203,29 @@ function refresh() {
   getGuildLogPage(1).done(processFirstPage);
 }
 
+var guildLogEvents = [
+  {test: function(self) {return self.tagName === 'INPUT';}, fn: toggleItem},
+  {test: function(self) {return self.id === 'fshAll';}, fn: selectAll},
+  {test: function(self) {return self.id === 'fshNone';}, fn: selectNone},
+  {test: function(self) {return self.id === 'rfsh';}, fn: refresh}
+];
+
 function eventHandler(evt) {
   var self = evt.target;
-  if (self.tagName === 'INPUT') {toggleItem(self);}
-  if (self.id === 'fshAll') {selectAll();}
-  if (self.id === 'fshNone') {selectNone();}
-  if (self.id === 'rfsh') {refresh();}
+  for (var i = 0; i < guildLogEvents.length; i += 1) {
+    if (guildLogEvents[i].test(self)) {guildLogEvents[i].fn(self);}
+  }
 }
 
 function gotOptions(guildLog) {
   options = guildLog || options;
   options.checks = options.checks || assets.defChecks.slice(0);
-  document.getElementById('pCC').innerHTML = assets.guildLogFilter;
+  layout.pCC.innerHTML = assets.guildLogFilter;
   fshNewGuildLog = document.getElementById('fshNewGuildLog');
   fshNewGuildLog.addEventListener('click', eventHandler);
   setChecks();
   fshOutput = document.getElementById('fshOutput');
-  maxPagesToFetch = system.getValue('newGuildLogHistoryPages') * 1;
+  maxPagesToFetch = Number(system.getValue('newGuildLogHistoryPages'));
   maxPage = maxPagesToFetch;
   getGuildLogPage(1).done(processFirstPage);
 }

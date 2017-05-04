@@ -1,7 +1,7 @@
-import * as buffObj from './support/buffObj';
-import * as system from './support/system';
-import * as layout from './support/layout';
+import buffList from './support/buffObj';
 import * as ajax from './support/ajax';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 var retries = 0;
 var quickBuffHeader =
@@ -21,31 +21,43 @@ var quickBuffHeader =
   '<td id="fshRI"  class="quickbuffTableDetail">&nbsp;</td>' +
   '</tr></tbody></table></div>';
 var excludeBuff = {
-  'skill-50' : 'Death Dealer',
-  'skill-54' : 'Counter Attack',
-  'skill-55' : 'Summon Shield Imp',
-  'skill-56' : 'Vision',
-  'skill-60' : 'Nightmare Visage',
-  'skill-61' : 'Quest Finder',
-  'skill-98' : 'Barricade',
+  'skill-50': 'Death Dealer',
+  'skill-54': 'Counter Attack',
+  'skill-55': 'Summon Shield Imp',
+  'skill-56': 'Vision',
+  'skill-60': 'Nightmare Visage',
+  'skill-61': 'Quest Finder',
+  'skill-98': 'Barricade',
   'skill-101': 'Severe Condition'
 };
 
 function getEnhancement(doc, enh, inject) { // Native
   var enhLevel = doc[enh] || 0;
-  inject.innerHTML = '<span class="' + (enhLevel < 100 ? 'fshRed' :
-    'fshLime') + '">' + enhLevel + '%</span>';
+  var enhClass = 'fshLime';
+  if (enhLevel < 100) {enhClass = 'fshRed';}
+  inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
+}
+
+function timeUnit(value, unit) { // Native
+  if (value > 0) {return value.toString() + unit;}
+  return '';
+}
+
+function buffTimeLeft(_s) { // Native
+  var m = Math.floor(_s / 60);
+  var s = _s % 60;
+  var buffTimeToExpire = timeUnit(m, 'm');
+  if (m > 0 && s > 0) {buffTimeToExpire += ' ';}
+  buffTimeToExpire += timeUnit(s, 's');
+  return buffTimeToExpire;
 }
 
 function getBuff(doc, buff, inject) { // Native
-  var s = doc[buff] || 0;
+  var s = system.fallback(doc[buff], 0);
   if (s) {
-    var m = Math.floor(s / 60);
-    s = s % 60;
-    var buffTimeToExpire = (m === 0 ? '' : m + 'm') +
-      (s === 0 ? '' : ' ' + s + 's');
-  inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
-      'class="fshBuffOn">(' + buffTimeToExpire +')</span>';
+    var buffTimeToExpire = buffTimeLeft(s);
+    inject.innerHTML = '<span class="fshLime">On</span>&nbsp;<span ' +
+      'class="fshBuffOn">(' + buffTimeToExpire + ')</span>';
   } else {
     var elem = document.getElementById('buff-outer')
       .querySelector('input[data-name="' + buff + '"]');
@@ -92,7 +104,39 @@ function addStatsQuickBuff(data) { // Native
     data.stamina * 100) + '% )';
 }
 
-function addBuffLevels(evt) { // jQuery
+function newPlayerSpan(el, playerSpan) { // Native
+  if (!playerSpan) {
+    var ret = document.createElement('SPAN');
+    ret.className = 'fshPlayer';
+    el.nextElementSibling.insertAdjacentElement('afterend', ret);
+    return ret;
+  }
+  return playerSpan;
+}
+
+function getBuffColor(myLvl, playerBuffLevel) { // Native
+  if (myLvl > playerBuffLevel) {return 'fshRed';}
+  return 'fshGreen';
+}
+
+function hazBuff(playerData, el) { // Native
+  var myBuffName = el.getAttribute('data-name');
+  var playerBuffLevel = playerData[myBuffName];
+  var playerSpan = el.nextElementSibling.nextElementSibling;
+  if (!playerBuffLevel && !playerSpan) {return;}
+  if (!playerBuffLevel) {
+    playerSpan.innerHTML = '';
+    return;
+  }
+  var lvlSpan = el.nextElementSibling.firstElementChild.firstElementChild;
+  var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
+  playerSpan = newPlayerSpan(el, playerSpan);
+  var buffColor = getBuffColor(myLvl, playerBuffLevel);
+  playerSpan.innerHTML = ' <span class="' + buffColor +
+    '">[' + playerBuffLevel + ']</span>';
+}
+
+function addBuffLevels(evt) { // Native
   var player = evt.target;
   if (player.tagName !== 'H1') {return;}
   ajax.getProfile(player.textContent).done(addStatsQuickBuff);
@@ -109,26 +153,7 @@ function addBuffLevels(evt) { // jQuery
   var buffOuter = document.getElementById('buff-outer');
   var nodeList = buffOuter.querySelectorAll('input[name]');
 
-  Array.prototype.forEach.call(nodeList, function(e) {
-    var myBuffName = e.getAttribute('data-name');
-    var playerBuffLevel = playerData[myBuffName];
-    var playerSpan = e.nextElementSibling.nextElementSibling;
-    if (!playerBuffLevel && !playerSpan) {return;}
-    if (!playerBuffLevel) {
-      playerSpan.innerHTML = '';
-      return;
-    }
-    var lvlSpan = e.nextElementSibling.firstElementChild.firstElementChild;
-    var myLvl = parseInt(lvlSpan.textContent.replace(/\[|\]/g, ''), 10);
-    if (!playerSpan) {
-      playerSpan = document.createElement('SPAN');
-      playerSpan.className = 'fshPlayer';
-      e.nextElementSibling.insertAdjacentElement('afterend', playerSpan);
-    }
-    playerSpan.innerHTML = ' <span class="' +
-      (myLvl > playerBuffLevel ? 'fshRed' : 'fshGreen') +
-      '">[' + playerBuffLevel + ']</span>';
-  });
+  Array.prototype.forEach.call(nodeList, hazBuff.bind(null, playerData));
 
 }
 
@@ -145,19 +170,22 @@ function doLabels(el) { // Native
   }
 }
 
-function firstPlayerStats() { // Native
-  var targets = document.getElementById('targetPlayers')
-    .getAttribute('value');
-  if (!targets || targets === '') {return;}
+function haveTargets() { // Native
   var firstPlayer = document.getElementById('players')
     .getElementsByTagName('h1')[0];
   if (!firstPlayer && retries < 9) {
     retries += 1;
-    setTimeout(firstPlayerStats, 100);
+    setTimeout(haveTargets, 100);
     return;
   }
   if (!firstPlayer) {return;}
   firstPlayer.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+}
+
+function firstPlayerStats() { // Native
+  var targets = document.getElementById('targetPlayers')
+    .getAttribute('value');
+  if (targets && targets !== '') {haveTargets();}
 }
 
 function getSustain(responseText) { // Native
@@ -189,34 +217,56 @@ function getSustain(responseText) { // Native
 
 }
 
-function buffResult(buffLog) { // Native
+function rejected(timeStamp, buffsNotCast, buffLog) {
+  if (buffsNotCast) {
+    return timeStamp + ' <span style="color: red;">' +
+      buffsNotCast[0] + '</span><br>' + buffLog;
+  }
+  return buffLog;
+}
+
+function getStamUsed(buffCast) {
+  for (var j = 0; j < buffList.length; j += 1) {
+    if (buffList[j].name === buffCast[1]) {
+      return buffList[j].stamina.toString();
+    }
+  }
+  return '-';
+}
+
+function successfull(timeStamp, buffCast, buffLog) {
+  if (buffCast) {
+    return timeStamp + ' ' + buffCast[0] + ' (' + getStamUsed(buffCast) +
+      ' stamina) <br>' + buffLog;
+  }
+  return buffLog;
+}
+
+function formatDateTime(aDate) { // Native
+  var yyyy = aDate.getFullYear().toString();
+  var mon = system.padZ(aDate.getMonth() + 1);
+  var dd = system.padZ(aDate.getDate());
+  var hh = system.padZ(aDate.getHours());
+  var mm = system.padZ(aDate.getMinutes());
+  var ss = system.padZ(aDate.getSeconds());
+  return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
+}
+
+function buffResult(_buffLog) { // Native
+  var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
-  var timeStamp = system.formatDateTime(new Date());
+  var timeStamp = formatDateTime(new Date());
   var buffsAttempted = document.getElementById('quickbuff-report')
     .innerHTML.split('<p>');
   var buffsNotCastRE = new RegExp('The skill ([\\w ]*) of current or' +
     ' higher level is currently active on \'(\\w*)\'');
   var buffsCastRE = new RegExp('Skill ([\\w ]*) level (\\d*) was ' +
     'activated on \'(\\w*)\'');
-  var buffList = buffObj.buffList;
-  for (var i = 0; i < buffsAttempted.length; i += 1 ) {
-    var buffsCast = buffsCastRE.exec(buffsAttempted[i]);
-    var buffsNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
-    var stamina = 0;
-    if (buffsCast) {
-      for (var j = 0; j < buffList.length; j += 1) {
-        if (buffList[j].name === buffsCast[1]) {
-          stamina = buffList[j].stamina;
-          break;
-        }
-      }
-      buffLog = timeStamp + ' ' + buffsCast[0] + ' (' + stamina +
-        ' stamina) <br>' + buffLog;
-    }
-    if (buffsNotCast) {
-      buffLog = timeStamp + ' ' + '<span style="color: red;">' +
-        buffsNotCast[0] + '</span><br>' + buffLog;
-    }
+  for (var i = 0; i < buffsAttempted.length; i += 1) {
+    var buffCast = buffsCastRE.exec(buffsAttempted[i]);
+    var buffNotCast = buffsNotCastRE.exec(buffsAttempted[i]);
+    buffLog = successfull(timeStamp, buffCast, buffLog);
+    buffLog = rejected(timeStamp, buffNotCast, buffLog);
   }
   ajax.setForage('fsh_buffLog', buffLog);
 }
@@ -234,8 +284,8 @@ export function updateBuffLog() { // Native
   ajax.getForage('fsh_buffLog').done(buffResult);
 }
 
-export function injectBuffLog(content) { // Native
-  if (!content) {content = layout.notebookContent();}
+export function injectBuffLog(injector) { // Native
+  var content = injector || layout.pCC;
   content.innerHTML = layout.makePageTemplate('Buff Log', '',
     'clearBuffs', 'Clear', 'bufflog');
   document.getElementById('clearBuffs').addEventListener('click',

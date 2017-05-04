@@ -1,7 +1,7 @@
-import * as task from './support/task';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
 import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var ranks;
 var myRank;
@@ -9,8 +9,20 @@ var theRows;
 var rankCount;
 var characterRow;
 
-function parseRankData(responseText) { // Native
-  /* jshint validthis: true */
+var privLookup = {
+  'Bank Withdraw': 5,
+  'Build/Upgrade/Demolish Structures': 5,
+  'Can Un-Tag Items': 5,
+  'Build/Upgrade Structures': 4,
+  'Can Kick Members': 4,
+  'Can Mass Messages': 0.5,
+  'Take Items': 0.2,
+  'Can Recall Tagged Items': 0.2,
+  'Store Items': 0.1,
+  'Can View Advisor': 0.1
+};
+
+function parseRankData(linkElement, responseText) { // Native
   // Makes a weighted calculation of available permissions and gets tax rate
   var doc = system.createDocument(responseText);
   var checkBoxes = doc.querySelectorAll(
@@ -18,29 +30,13 @@ function parseRankData(responseText) { // Native
   var count = 0;
   Array.prototype.forEach.call(checkBoxes, function(checkbox) {
     var privName = checkbox.nextElementSibling.textContent.trim();
-    if (privName === 'Bank Withdraw' ||
-      privName === 'Build/Upgrade/Demolish Structures' ||
-      privName === 'Can Un-Tag Items') {
-      count += 5;
-    } else if (privName === 'Build/Upgrade Structures' ||
-      privName === 'Can Kick Members') {
-      count += 4;
-    } else if (privName === 'Can Mass Messages') {
-      count += 0.5;
-    } else if (privName === 'Take Items' ||
-      privName === 'Can Recall Tagged Items') {
-      count += 0.2;
-    } else if (privName === 'Store Items' ||
-      privName === 'Can View Advisor') {
-      count += 0.1;
-    } else {
-      count+= 1;
-    }
+    if (privName in privLookup) {
+      count += privLookup[privName];
+    } else {count += 1;}
   });
   var taxRate = doc.querySelector('#pCC input[name="rank_tax"]').value;
-  var linkElement = this.linkElement;
   linkElement.insertAdjacentHTML('afterbegin', '<span class="fshBlue">(' +
-    Math.round(10*count)/10 + ') Tax:(' + taxRate + '%)</span> ');
+    Math.round(10 * count) / 10 + ') Tax:(' + taxRate + '%)</span> ');
 }
 
 function fetchRankData() { // jQuery
@@ -51,27 +47,42 @@ function fetchRankData() { // jQuery
     var targetNode = anItem.parentNode.parentNode.previousElementSibling;
     var href = /window\.location='(.*)';/.exec(anItem
       .getAttribute('onclick'))[1];
-    $.ajax({url: href, linkElement: targetNode}).done(parseRankData);
+    $.get(href).done(parseRankData.bind(null, targetNode));
   });
+}
+
+function notValidRow(thisRankRowNum, targetRowNum, parentTable) { // Native
+  return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
+    targetRowNum < 1 ||
+    targetRowNum > parentTable.rows.length;
+}
+
+function getTargetRowNumber(val) { // Native
+  if (val === 'Up') {return -1;}
+  return 2;
+}
+
+function getPxScroll(val) { // Native
+  if (val === 'Up') {return -22;}
+  return 22;
 }
 
 function ajaxifyRankControls(evt) { // jQuery
   var val = evt.target.getAttribute('value');
   if (val !== 'Up' && val !== 'Down') {return;}
   evt.stopPropagation();
-  var onclickHREF = /window.location=\'(.*)\';/
+  var onclickHREF = /window.location='(.*)';/
     .exec(evt.target.getAttribute('onclick'))[1];
   var thisRankRow = evt.target.parentNode.parentNode.parentNode;
   var thisRankRowNum = thisRankRow.rowIndex;
-  var targetRowNum = thisRankRowNum + (val === 'Up' ? -1 : 2);
+  var targetRowNum = thisRankRowNum + getTargetRowNumber(val);
   var parentTable = thisRankRow.parentNode;
-  if (characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
-      targetRowNum < 1 ||
-      targetRowNum > parentTable.rows.length) {return;}
+  if (notValidRow(thisRankRowNum, targetRowNum, parentTable)) {return;}
   $.get(onclickHREF);
   var injectRow = parentTable.rows[targetRowNum];
   parentTable.insertBefore(thisRankRow, injectRow);
-  window.scrollBy(0, val === 'Up' ? -22 : 22);
+  var pxScroll = getPxScroll(val);
+  window.scrollBy(0, pxScroll);
 }
 
 function doButtons() { // Native
@@ -88,8 +99,20 @@ function doButtons() { // Native
   theTd.insertAdjacentElement('beforeend', weightButton);
 
   if (system.getValue('ajaxifyRankControls')) {
-    document.getElementById('pCC').addEventListener('click',
+    layout.pCC.addEventListener('click',
       ajaxifyRankControls, true);
+  }
+}
+
+function writeMembers(el) { // Native
+  var rankCell = el.firstElementChild;
+  var rankName = rankCell.textContent;
+  if (ranks[rankName]) { // has members
+    if (rankName === myRank) {
+      characterRow = rankCount; // limit for ajaxify later
+    }
+    rankCell.insertAdjacentHTML('beforeend', ' <span class="fshBlue">- ' +
+      ranks[rankName].join(', ') + '</span>');
   }
 }
 
@@ -98,15 +121,9 @@ function paintRanks() { // Native
   while (performance.now() < limit &&
       rankCount < theRows.length) {
     var el = theRows[rankCount];
-    var rankCell = el.firstElementChild;
-    var rankName = rankCell.textContent;
-    if (ranks[rankName]) { // has members
-      if (rankName === myRank) {
-        characterRow = rankCount; // limit for ajaxify later
-      }
-      rankCell.insertAdjacentHTML('beforeend', ' <span class="fshBlue">- ' +
-        ranks[rankName].join(', ') + '</span>');
-    }
+
+    writeMembers(el);
+
     rankCount += 1;
   }
   if (rankCount < theRows.length) {
@@ -124,7 +141,7 @@ function getRanks(membrList) { // Native
     return prev;
   }, {});
   myRank = membrList[layout.playerName()].rank_name;
-  theRows = document.getElementById('pCC').firstElementChild
+  theRows = layout.pCC.firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;
   task.add(3, paintRanks);

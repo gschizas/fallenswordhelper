@@ -1,24 +1,27 @@
 import calf from './support/calf';
-import * as debug from './support/debug';
-import * as task from './support/task';
-import * as system from './support/system';
 import * as ajax from './support/ajax';
+import * as debug from './support/debug';
+import * as layout from './support/layout';
+import * as system from './support/system';
+import * as task from './support/task';
 
 var newSummary = {};
 var advisorColumns = [
   {title: '<div class="fshBold">Member</div>'},
-  {title: '<div class="fshBold">Lvl</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Rank</div>', class: 'dt-center dt-nowrap'},
-  {title: '<div class="fshBold">Gold From Deposits</div>',
-    class: 'dt-center'},
-  {title: '<div class="fshBold">Gold From Tax</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Gold Total</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">FSP</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Skill Cast</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Group Create</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Group Join</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">Relic</div>', class: 'dt-center'},
-  {title: '<div class="fshBold">XP Contrib</div>', class: 'dt-center'}
+  {title: '<div class="fshBold">Lvl</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Rank</div>', 'class': 'dt-center dt-nowrap'},
+  {
+    title: '<div class="fshBold">Gold From Deposits</div>',
+    'class': 'dt-center'
+  },
+  {title: '<div class="fshBold">Gold From Tax</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Gold Total</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">FSP</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Skill Cast</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Group Create</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Group Join</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">Relic</div>', 'class': 'dt-center'},
+  {title: '<div class="fshBold">XP Contrib</div>', 'class': 'dt-center'}
 ];
 var membrList;
 var list;
@@ -36,8 +39,7 @@ function doTable() { // jQuery
 }
 
 function summaryLink() { // Native
-  var updateInput = document.getElementById('pCC')
-    .getElementsByClassName('custombutton');
+  var updateInput = layout.pCC.getElementsByClassName('custombutton');
   if (!updateInput) {return;}
   updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
     '?cmd=guild&subcmd=advisor&subcmd2=weekly">7-Day Summary</a></span>');
@@ -46,7 +48,7 @@ function summaryLink() { // Native
 /*
 function injectAdvisorDable() {
 
-  var advisorTable = document.getElementById('pCC').firstElementChild
+  var advisorTable = layout.pCC.firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
 
   // for (var i = advisorTable.attributes.length - 1; i >= 0; i--){
@@ -63,7 +65,6 @@ function injectAdvisorDable() {
       // cell.textContent = oldChild.textContent.trim().replace(/,/g, '');
     // });
   // });
-
 
   var tBody = advisorTable.firstElementChild;
 
@@ -107,7 +108,7 @@ function injectAdvisorNew(m) { // Native
 
   debug.time('guildAdvisor.injectAdvisorNew');
 
-  list = document.getElementById('pCC').getElementsByTagName('TABLE')[1];
+  list = layout.pCC.getElementsByTagName('TABLE')[1];
   if (!list) {return;}
   var totalRow = list.firstElementChild.lastElementChild;
   var totalCell = totalRow.firstElementChild;
@@ -139,14 +140,12 @@ function injectAdvisorNew(m) { // Native
 
 }
 
-function returnAdvisorPage(data) { // Native
-  /* jshint validthis: true */
-  var e = this.period;
+function returnAdvisorPage(e, response) { // Native
 
   debug.time('guildAdvisor.returnAdvisorPage' + e);
 
   list.lastElementChild.insertAdjacentHTML('beforeend', ' day ' + e + ',');
-  var doc = system.createDocument(data);
+  var doc = system.createDocument(response);
   var table = doc.getElementById('pCC').firstElementChild
     .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
   var tr = table.rows;
@@ -154,24 +153,27 @@ function returnAdvisorPage(data) { // Native
     var tds = el.cells;
     var member = tds[0].textContent.trim();
     if (member === 'Member') {return;}
-    newSummary[member] = newSummary[member] || {};
-    newSummary[member].deposit = (newSummary[member].deposit || 0) +
+    newSummary[member] = system.fallback(newSummary[member], {});
+    newSummary[member].deposit =
+      system.fallback(newSummary[member].deposit, 0) +
       system.intValue(tds[1].textContent);
-    newSummary[member].tax = (newSummary[member].tax || 0) +
+    newSummary[member].tax = system.fallback(newSummary[member].tax, 0) +
       system.intValue(tds[2].textContent);
-    newSummary[member].total = (newSummary[member].total || 0) +
+    newSummary[member].total = system.fallback(newSummary[member].total, 0) +
       system.intValue(tds[3].textContent);
-    newSummary[member].fsp = (newSummary[member].fsp || 0) +
+    newSummary[member].fsp = system.fallback(newSummary[member].fsp, 0) +
       system.intValue(tds[4].textContent);
-    newSummary[member].skills = (newSummary[member].skills || 0) +
+    newSummary[member].skills = system.fallback(newSummary[member].skills, 0) +
       system.intValue(tds[5].textContent);
-    newSummary[member].grpCrt = (newSummary[member].grpCrt || 0) +
+    newSummary[member].grpCrt = system.fallback(newSummary[member].grpCrt, 0) +
       system.intValue(tds[6].textContent);
-    newSummary[member].grpJoin = (newSummary[member].grpJoin || 0) +
+    newSummary[member].grpJoin =
+      system.fallback(newSummary[member].grpJoin, 0) +
       system.intValue(tds[7].textContent);
-    newSummary[member].relics = (newSummary[member].relics || 0) +
+    newSummary[member].relics = system.fallback(newSummary[member].relics, 0) +
       system.intValue(tds[8].textContent);
-    newSummary[member].contrib = (newSummary[member].contrib || 0) +
+    newSummary[member].contrib =
+      system.fallback(newSummary[member].contrib, 0) +
       system.intValue(tds[9].textContent);
   });
 
@@ -186,9 +188,8 @@ function getAdvisorPage(e) { // jQuery
       cmd: 'guild',
       subcmd: 'advisor',
       period: e
-    },
-    period: e
-  }).done(returnAdvisorPage);
+    }
+  }).done(returnAdvisorPage.bind(null, e));
 }
 
 function displayAdvisor() { // jQuery
@@ -222,26 +223,43 @@ function displayAdvisor() { // jQuery
 
 }
 
+function playerName(f) { // Native
+  if (!membrList[f]) {return f;}
+  return '<a href="index.php?cmd=profile&player_id=' +
+    membrList[f].id + '">' + f + '</a>';
+}
+
+function playerLevel(f) { // Native
+  if (!membrList[f]) {return '';}
+  return membrList[f].level;
+}
+
+function playerRank(f) { // Native
+  if (!membrList[f]) {return '';}
+  return '<div class="fshAdvRank">' +
+    membrList[f].rank_name + '</div>';
+}
+
+function addStats(f) { // Native
+  if (f === 'Total:') {return;}
+  data.push([
+    playerName(f),
+    playerLevel(f),
+    playerRank(f),
+    system.addCommas(newSummary[f].deposit),
+    system.addCommas(newSummary[f].tax),
+    system.addCommas(newSummary[f].total),
+    system.addCommas(newSummary[f].fsp),
+    system.addCommas(newSummary[f].skills),
+    system.addCommas(newSummary[f].grpCrt),
+    system.addCommas(newSummary[f].grpJoin),
+    system.addCommas(newSummary[f].relics),
+    system.addCommas(newSummary[f].contrib),
+  ]);
+}
+
 function addAdvisorPages() { // Native
-  Object.keys(newSummary).forEach(function(f) {
-    if (f === 'Total:') {return;}
-    data.push([
-      !membrList[f] ? f : '<a href="index.php?cmd=profile&player_id=' +
-        membrList[f].id + '">' + f + '</a>',
-      !membrList[f] ? '' : membrList[f].level,
-      !membrList[f] ? '' : '<div class="fshAdvRank">' +
-        membrList[f].rank_name + '</div>',
-      system.addCommas(newSummary[f].deposit),
-      system.addCommas(newSummary[f].tax),
-      system.addCommas(newSummary[f].total),
-      system.addCommas(newSummary[f].fsp),
-      system.addCommas(newSummary[f].skills),
-      system.addCommas(newSummary[f].grpCrt),
-      system.addCommas(newSummary[f].grpJoin),
-      system.addCommas(newSummary[f].relics),
-      system.addCommas(newSummary[f].contrib),
-    ]);
-  });
+  Object.keys(newSummary).forEach(addStats);
   task.add(3, displayAdvisor);
 }
 
@@ -249,8 +267,8 @@ function injectAdvisorWeekly() { // jQuery
 
   debug.time('guildAdvisor.injectAdvisorWeekly');
 
-  list = document.getElementById('pCC').firstElementChild
-    .firstElementChild.lastElementChild.firstElementChild.firstElementChild;
+  list = layout.pCC.firstElementChild.firstElementChild
+    .lastElementChild.firstElementChild.firstElementChild;
   if (!list) {return;}
   list.innerHTML = '<span class="fshSpinner" style="background-image: ' +
     'url(\'' + system.imageServer +
@@ -259,8 +277,8 @@ function injectAdvisorWeekly() { // jQuery
 
   $.when(
     ajax.getMembrList(false)
-      .done(function(data) {
-        membrList = data;
+      .done(function(response) {
+        membrList = response;
       }),
     getAdvisorPage(1),
     getAdvisorPage(2),
@@ -270,8 +288,8 @@ function injectAdvisorWeekly() { // jQuery
     getAdvisorPage(6),
     getAdvisorPage(7)
   ).done(function() {
-      task.add(3, addAdvisorPages);
-    });
+    task.add(3, addAdvisorPages);
+  });
 
   debug.timeEnd('guildAdvisor.injectAdvisorWeekly');
 
@@ -281,8 +299,8 @@ export function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    ajax.getMembrList(false).done(function(membrList) {
-      task.add(3, injectAdvisorNew, [membrList]);
+    ajax.getMembrList(false).done(function(response) {
+      task.add(3, injectAdvisorNew, [response]);
       // task.add(3, injectAdvisorDable, [membrList]);
     });
   }

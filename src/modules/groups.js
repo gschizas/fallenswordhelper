@@ -1,85 +1,34 @@
 import calf from './support/calf';
-import * as debug from './support/debug';
-import * as dataObj from './support/dataObj';
-import * as system from './support/system';
-import * as layout from './support/layout';
 import * as ajax from './support/ajax';
+import * as dataObj from './support/dataObj';
+import * as debug from './support/debug';
+import * as layout from './support/layout';
+import * as system from './support/system';
 
 var maxGroupSizeToJoin;
+var groupStats;
 
-function parseMercStats(responseText) { // jQuery
-  var attackRE = /<td>Attack:<\/td><td>(\d+)<\/td>/;
-  var defenseRE = /<td>Defense:<\/td><td>(\d+)<\/td>/;
-  var armorRE = /<td>Armor:<\/td><td>(\d+)<\/td>/;
-  var damageRE = /<td>Damage:<\/td><td>(\d+)<\/td>/;
-  var hpRE = /<td>HP:<\/td><td>(\d+)<\/td>/;
-  var mercPage = system.createDocument(responseText);
-  var mercElements = $('#pCC img[src*="/merc/"][data-tipped]',
-    mercPage);
-  var totalMercAttack = 0;
-  var totalMercDefense = 0;
-  var totalMercArmor = 0;
-  var totalMercDamage = 0;
-  var totalMercHP = 0;
-  var merc;
-  for (var i = 0; i < mercElements.length; i += 1) {
-    merc = mercElements[i];
-    var mouseoverText = $(merc).data('tipped');
-    var mercAttackValue = attackRE.exec(mouseoverText)[1] * 1;
-    totalMercAttack += mercAttackValue;
-    var mercDefenseValue = defenseRE.exec(mouseoverText)[1] * 1;
-    totalMercDefense += mercDefenseValue;
-    var mercArmorValue = armorRE.exec(mouseoverText)[1] * 1;
-    totalMercArmor += mercArmorValue;
-    var mercDamageValue = damageRE.exec(mouseoverText)[1] * 1;
-    totalMercDamage += mercDamageValue;
-    var mercHPValue = hpRE.exec(mouseoverText)[1] * 1;
-    totalMercHP += mercHPValue;
-  }
-  var attackValue = $('#fshAtk');
-  attackValue.html(system.addCommas(system.intValue(
-    attackValue.text()) - Math.round(totalMercAttack * 0.2)));
-  var defenseValue = $('#fshDef');
-  defenseValue.html(system.addCommas(system.intValue(
-    defenseValue.text()) - Math.round(totalMercDefense * 0.2)));
-  var armorValue = $('#fshArm');
-  armorValue.html(system.addCommas(system.intValue(
-    armorValue.text()) - Math.round(totalMercArmor * 0.2)));
-  var damageValue = $('#fshDam');
-  damageValue.html(system.addCommas(system.intValue(
-    damageValue.text()) - Math.round(totalMercDamage * 0.2)));
-  var hpValue = $('#fshHP');
-  hpValue.html(system.addCommas(system.intValue(
-    hpValue.text()) - Math.round(totalMercHP * 0.2)));
+function parseMercStats(mercStats) { // Native
+  groupStats.attackElement.innerHTML = '<span class="fshBlue">' +
+    system.addCommas(groupStats.attack) + '</span>' +
+    ' ( ' + system.addCommas(groupStats.attack - mercStats.attack) + ' )';
+  groupStats.defenseElement.innerHTML = '<span class="fshBlue">' +
+    system.addCommas(groupStats.defense) + '</span>' +
+    ' ( ' + system.addCommas(groupStats.defense - mercStats.defense) + ' )';
+  groupStats.armorElement.innerHTML = '<span class="fshBlue">' +
+    system.addCommas(groupStats.armor) + '</span>' +
+    ' ( ' + system.addCommas(groupStats.armor - mercStats.armor) + ' )';
+  groupStats.damageElement.innerHTML = '<span class="fshBlue">' +
+    system.addCommas(groupStats.damage) + '</span>' +
+    ' ( ' + system.addCommas(groupStats.damage - mercStats.damage) + ' )';
+  groupStats.hpElement.innerHTML = '<span class="fshBlue">' +
+    system.addCommas(groupStats.hp) + '</span>' +
+    ' ( ' + system.addCommas(groupStats.hp - mercStats.hp) + ' )';
 }
 
 export function injectGroupStats() { // jQuery
-  var attackValueElement = $('#stat-attack');
-  attackValueElement.html(
-    '<span class="fshBlue">' + attackValueElement.text() + '</span>' +
-    ' ( <span id="fshAtk">' + attackValueElement.text() + '</span> )'
-  );
-  var defenseValueElement = $('#stat-defense');
-  defenseValueElement.html(
-    '<span class="fshBlue">' + defenseValueElement.text() + '</span>' +
-    ' ( <span id="fshDef">' + defenseValueElement.text() + '</span> )'
-  );
-  var armorValueElement = $('#stat-armor');
-  armorValueElement.html(
-    '<span class="fshBlue">' + armorValueElement.text() + '</span>' +
-    ' ( <span id="fshArm">' + armorValueElement.text() + '</span> )'
-  );
-  var damageValueElement = $('#stat-damage');
-  damageValueElement.html(
-    '<span class="fshBlue">' + damageValueElement.text() + '</span>' +
-    ' ( <span id="fshDam">' + damageValueElement.text() + '</span> )'
-  );
-  var hpValueElement = $('#stat-hp');
-  hpValueElement.html(
-    '<span class="fshBlue">' + hpValueElement.text() + '</span>' +
-    ' ( <span id="fshHP">' + hpValueElement.text() + '</span> )'
-  );
-  system.xmlhttp('index.php?cmd=guild&subcmd=mercs', parseMercStats);
+  groupStats = ajax.groupViewStats(document);
+  ajax.getMercStats().done(parseMercStats);
 }
 
 function displayMinGroupLevel() { // jQuery
@@ -99,96 +48,60 @@ function joinGroup(groupJoinURL, joinButton) { // jQuery
   });
 }
 
+function doJoinUnderSize(prev, joinButton) { // Legacy
+  var memList = joinButton.parentNode.parentNode.parentNode
+    .previousSibling.previousSibling.previousSibling.previousSibling;
+  var memListArrayWithMercs = memList.innerHTML.split(',');
+  var memListArrayWithoutMercs = memListArrayWithMercs
+    .filter(filterMercs);
+  if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
+    var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
+      joinButton.parentNode.getAttribute('href'))[1];
+    var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
+      '&group_id=' + groupID;
+    prev.push(joinGroup(groupJoinURL, joinButton));
+  }
+  return prev;
+}
+
 function joinAllGroupsUnderSize() { // Legacy
   var joinButtons = system.findNodes(
     '//img[contains(@src,"skin/icon_action_join.gif")]');
   if (!joinButtons) {return;}
-  var prm = [];
-  for (var i = 0; i < joinButtons.length; i += 1) {
-    var joinButton = joinButtons[i];
-    var memList = joinButton.parentNode.parentNode.parentNode
-      .previousSibling.previousSibling.previousSibling.previousSibling;
-    var memListArrayWithMercs = memList.innerHTML.split(',');
-    var memListArrayWithoutMercs = memListArrayWithMercs
-      .filter(filterMercs);
-    if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
-      var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
-        joinButton.parentNode.getAttribute('href'))[1];
-      var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
-        '&group_id=' + groupID;
-      prm.push(joinGroup(groupJoinURL, joinButton));
-    }
-  }
+  var prm = joinButtons.reduce(doJoinUnderSize, []);
   $.when.apply($, prm).done(function() {
     location.href = 'index.php?cmd=guild&subcmd=groups';
   });
 }
 
-function parseGroupData(responseText, linkElement) { // Legacy
-  var attackValue;
-  var defenseValue;
-  var armorValue;
-  var damageValue;
-  var hpValue;
-  var doc=system.createDocument(responseText);
-  var allItems = doc.getElementsByTagName('TD');
-
-  for (var i=0;i<allItems.length;i += 1) {
-    var anItem=allItems[i];
-    if (anItem.innerHTML === '<font color="#333333">Attack:&nbsp;</font>'){
-      var attackLocation = anItem.nextSibling;
-      attackValue = attackLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">Defense:&nbsp;</font>'){
-      var defenseLocation = anItem.nextSibling;
-      defenseValue = defenseLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">Armor:&nbsp;</font>'){
-      var armorLocation = anItem.nextSibling;
-      armorValue = armorLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">Damage:&nbsp;</font>'){
-      var damageLocation = anItem.nextSibling;
-      damageValue = damageLocation.textContent;
-    }
-    if (anItem.innerHTML === '<font color="#333333">HP:&nbsp;</font>'){
-      var hpLocation = anItem.nextSibling;
-      hpValue = hpLocation.textContent;
-    }
-  }
-  var extraText = '<table cellpadding="1" style="font-size:x-small; ' +
-    'border-top:2px black solid; border-spacing: 1px; ' +
-    'border-collapse: collapse;">';
-  extraText += '<tr>';
-  extraText += '<td style="color:brown;">Attack</td><td align="right">' +
-    attackValue + '</td>';
-  extraText += '<td style="color:brown;">Defense</td><td align="right">' +
-    defenseValue + '</td></tr>';
-  extraText += '<tr>';
-  extraText += '<td style="color:brown;">Armor</td><td align="right">' +
-    armorValue + '</td>';
-  extraText += '<td style="color:brown;">Damage</td><td align="right">' +
-    damageValue + '</td></tr>';
-  extraText += '<tr>';
-  extraText += '<td style="color:brown;">HP</td><td align="right">' +
-    hpValue + '</td>';
-  extraText += '<td colspan="2"></td></tr>';
-  extraText += '</table>';
-  var expiresLocation = linkElement.parentNode.parentNode.previousSibling
-    .previousSibling;
-  expiresLocation.innerHTML += extraText;
+function parseGroupData(linkElement, obj) { // Native
+  var extraText = '<table id="stat">' +
+    '<tr>' +
+    '<td class="fshBrown">Attack</td>' +
+    '<td class="fshRight">' + obj.attack + '</td>' +
+    '<td class="fshBrown">Defense</td>' +
+    '<td class="fshRight">' + obj.defense + '</td>' +
+    '</tr><tr>' +
+    '<td class="fshBrown">Armor</td>' +
+    '<td class="fshRight">' + obj.armor + '</td>' +
+    '<td class="fshBrown">Damage</td>' +
+    '<td class="fshRight">' + obj.damage + '</td>' +
+    '</tr><tr>' +
+    '<td class="fshBrown">HP</td>' +
+    '<td class="fshRight">' + obj.hp + '</td>' +
+    '<td colspan="2"></td>' +
+    '</tr></table>';
+  var expiresLocation = linkElement.parentNode.parentNode
+    .previousElementSibling;
+  expiresLocation.insertAdjacentHTML('beforeend', extraText);
 }
 
-function fetchGroupData() { // Legacy
-  var calcButton = system.findNode('//input[@id="fetchgroupstats"]');
-  calcButton.style.display = 'none';
-  var allItems = system.findNodes(
-    '//a[contains(@href,"index.php?cmd=guild&subcmd=groups' +
-    '&subcmd2=viewstats&group_id=")]/img');
-  for (var i=0; i<allItems.length; i += 1) {
-    system.xmlhttp(allItems[i].parentNode.getAttribute('href'),
-      parseGroupData, allItems[i].parentNode);
-  }
+function fetchGroupData(evt) { // Native
+  evt.target.classList.add('fshHide');
+  var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
+  Array.prototype.forEach.call(allItems, function(aLink) {
+    ajax.getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
+  });
 }
 
 function groupButtons() { // Legacy
@@ -212,7 +125,7 @@ function groupButtons() { // Legacy
       'type="button" value="Fetch Group Stats" class="custombutton">';
   }
   document.getElementById('fetchgroupstats')
-    .addEventListener('click', fetchGroupData, true);
+    .addEventListener('click', fetchGroupData);
 
   if (calf.subcmd2 === 'joinallgroupsundersize') {
     joinAllGroupsUnderSize();
@@ -229,11 +142,9 @@ function fixTable() { // jQuery
 }
 
 function groupLocalTime(theDateCell) { // jQuery
-  var months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul',
-    'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
   var xRE = /([a-zA-Z]+), (\d+) ([a-zA-Z]+) (\d+):(\d+):(\d+) UTC/;
   var x = xRE.exec(theDateCell.text());
-  var month = months.indexOf(x[3]);
+  var month = dataObj.months.indexOf(x[3]);
   var curYear = new Date().getFullYear(); // Boundary condition
   var groupDate = new Date();
   groupDate.setUTCDate(x[2]);
@@ -242,48 +153,49 @@ function groupLocalTime(theDateCell) { // jQuery
   groupDate.setUTCHours(x[4]);
   groupDate.setUTCMinutes(x[5]);
   theDateCell.append('<br><span style="color:blue; font-size:x-small">' +
-    'Local: ' + groupDate.toString().substr(0,21)+'</span>');
+    'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
 }
 
-function doGroupRow(e, m) { // jQuery
-  var creator = $('b', e).text();
-  var td = $('td', e).first();
-  var inject = '';
-  if (m[creator]) {
-    inject += layout.onlineDot({last_login: m[creator].last_login}) +
-      '&nbsp;<a href="' + system.server +
-      'index.php?cmd=profile&player_id=' + m[creator].id + '">' + td.html() +
-      '</a>' + ' [' + m[creator].level + ']';
-  } else {inject += td.html();}
-  var td2 = $('td', e).eq(1);
+function getCreator(membrlist, creator) { // Native
+  if (membrlist[creator]) {
+    return layout.onlineDot({last_login: membrlist[creator].last_login}) +
+      '&nbsp;<a href="' + system.server + 'index.php?cmd=profile&player_id=' +
+      membrlist[creator].id + '"><b>' + creator + '</b></a> [' +
+      membrlist[creator].level + ']';
+  }
+  return '<b>' + creator + '</b>';
+}
+
+function memberLevel(membrlist, member) { // Native
+  if (membrlist[member]) {return membrlist[member].level;}
+  return 0;
+}
+
+function byMember(membrlist, a, b) { // Native
+  return memberLevel(membrlist, b) - memberLevel(membrlist, a);
+}
+
+function doGroupRow(row, membrlist) { // jQuery
+  var creator = $('b', row).text();
+  var td = $('td', row).first();
+  td.html(getCreator(membrlist, creator));
+  var td2 = $('td', row).eq(1);
   var theList = td2.html();
   var listArr = theList.split(', ');
-  if (listArr.length > 1) {
-    listArr.sort(function(a, b) {
-      return (m[b] ? m[b].level : 0) - (m[a] ? m[a].level : 0);
-    });
-  }
-  var countMembers = 0;
-  var buffList = [];
-  listArr.forEach(function(v, i, a) {
-    if (v.indexOf('<font') !== -1) {return;}
-    countMembers += 1;
-    buffList[Math.floor(i / 16)] = buffList[Math.floor(i / 16)] || [];
-    buffList[Math.floor(i / 16)].push(v);
-    if (!m[v]) {return;}
-    a[i] = ' <a href="index.php?cmd=profile&player_id=' +
-      m[v].id + '">' + v + '</a>';
+  if (listArr.length > 1) {listArr.sort(byMember.bind(null, membrlist));}
+  var buffList = listArr.filter(function(name) {
+    return name !== '[none]' && name.indexOf('<font') === -1;
   });
-  buffList.forEach(function(v, i) {
-    inject += '<br><a href=\'' + layout.buffAllHref(v) +
-      '\'><span style="color:blue; font-size:x-small;" title="Quick ' +
-      'buff functionality from HCS only does 16">Buff ' +
-      dataObj.places[i] + ' 16</span></a>';
+  if (buffList.length > 0) {td.append(layout.doBuffLinks(buffList));}
+  td.append('<span class="fshXSmall">Members: ' +
+    buffList.length + '</span>');
+  listArr = listArr.map(function(name) {
+    if (!membrlist[name]) {return name;}
+    return '<a href="index.php?cmd=profile&player_id=' +
+      membrlist[name].id + '">' + name + '</a>';
   });
-  td.html(inject + '<br><span style="font-size:x-small;">Members: ' +
-    countMembers + '</span>');
   td2.html('<span>' + listArr.join(', ') + '</span>');
-  groupLocalTime($('td', e).eq(2));
+  groupLocalTime($('td', row).eq(2));
 }
 
 function doGroupPaint(m) { // jQuery
