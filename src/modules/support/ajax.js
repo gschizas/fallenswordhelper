@@ -64,12 +64,19 @@ export function addMembrListToForage(membrList) {
     });
 }
 
+var testGuildLastUpdate = [
+  function(guildId, membrList) {return !membrList || !membrList[guildId];},
+  function(guildId, membrList) {return !membrList[guildId].lastUpdate;},
+  function(guildId, membrList) {
+    return membrList[guildId].lastUpdate < Date.now() - 300000;
+  }
+];
+
 function getMembrListFromForage(guildId, membrList) {
-  if (system.fallback(system.fallback(system.fallback(
-      !membrList, !membrList[guildId]),
-      !membrList[guildId].lastUpdate),
-      membrList[guildId].lastUpdate < Date.now() - 300000)) {
-    return getGuildMembers(guildId).done(addMembrListToForage);
+  for (var i = 0; i < testGuildLastUpdate.length; i += 1) {
+    if (testGuildLastUpdate[i](guildId, membrList)) {
+      return getGuildMembers(guildId).done(addMembrListToForage);
+    }
   }
   return membrList;
 }

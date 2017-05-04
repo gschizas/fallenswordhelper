@@ -137,11 +137,13 @@ function hazMaxMoves(matches, row) { // jQuery
 }
 
 function maxMoves(cell, row) { // jQuery
-  if (system.fallback(!opts, !opts.moves)) {return;}
-  var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
-  if (!matches) {return;}
-  hazMaxMoves(matches, row);
-  cell.attr('data-order', matches[1]);
+  if (opts && opts.moves) {
+    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+    if (matches) {
+      hazMaxMoves(matches, row);
+      cell.attr('data-order', matches[1]);
+    }
+  }
 }
 
 function reward(cell) { // jQuery
