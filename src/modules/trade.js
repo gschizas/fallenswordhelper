@@ -73,7 +73,7 @@ var invItems;
 
 function stColor(el, item) { // Native
   if (item.is_in_st) {
-    el.classList.add('isInSTBorder');
+    el.classList.add('isInST');
   } else {el.classList.add('tradeItemMargin');}
 }
 
@@ -85,7 +85,6 @@ function forEachInvItem(el) { // Native
   if (invItems.fshHasST) {stColor(el, item);}
   checkbox.classList.add('itemid' + item.item_id);
   checkbox.classList.add('itemtype' + item.type);
-  if (item.is_in_st) {el.classList.add('isInST');}
 }
 
 function processTrade(data) { // native
@@ -134,7 +133,7 @@ function doCheckAll(evt) { // Native
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
     if (howMany &&
-        system.fallback(itemsInSt, !checkbox.classList.contains('isInST')) &&
+        system.fallback(itemsInSt, !el.classList.contains('isInST')) &&
         shouldBeChecked(itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
