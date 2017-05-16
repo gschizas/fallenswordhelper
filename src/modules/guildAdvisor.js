@@ -125,6 +125,8 @@ function injectAdvisorNew(m) { // Native
     });
     var tdOne = tr.cells[0];
     var username = tdOne.textContent.trim();
+    // TODO There is no fall back here for when a member is new and isn't in the cache yet
+    // Weekly has fallback functions we could use
     tdOne.innerHTML = '<a href="index.php?cmd=profile&player_id=' +
       m[username].id + '">' +
       username + '</a>';
@@ -299,7 +301,7 @@ export function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    ajax.getMembrList(false).done(function(response) {
+    ajax.getMembrList(true).done(function(response) {
       task.add(3, injectAdvisorNew, [response]);
       // task.add(3, injectAdvisorDable, [membrList]);
     });
