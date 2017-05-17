@@ -1,5 +1,12 @@
 # Fallen Sword Helper
 
+<p align="center">
+  <a href="https://david-dm.org/fallenswordhelper/fallenswordhelper/?type=dev">
+    <img src="https://david-dm.org/fallenswordhelper/fallenswordhelper/dev-status.svg"
+      alt="devDependency Status">
+  </a>
+</p>
+
 Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.
 
 To install:
