@@ -6,12 +6,14 @@ var highlightPlayersNearMyLvl;
 var lvlDiffToHighlight;
 var myVL;
 var spinner;
+var validPvP = Math.floor(Date.now() / 1000) - 604800;
 
 function parsePlayer(aTable, data) { // Native
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
   if (!myVL) {return;}
-  if (data.virtual_level > myVL - lvlDiffToHighlight &&
+  if (data.last_login >= validPvP &&
+      data.virtual_level > myVL - lvlDiffToHighlight &&
       data.virtual_level < myVL + lvlDiffToHighlight) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }

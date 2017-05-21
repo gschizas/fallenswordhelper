@@ -531,6 +531,9 @@ var mercRE = [
   /<td>HP:<\/td><td>(\d+)<\/td>/
 ];
 
+var lastActivityRE =
+  /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
+
 var server = document.location.protocol + '//' +
   document.location.host + '/';
 var imageServer = window.HCS && window.HCS.defines &&
@@ -938,8 +941,6 @@ window.addEventListener('message', callback);
 
 var dotList;
 var dotCount;
-var lastActivityRE =
-  /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 var redDot = '<span class="redDot tip-static" data-tipped="Offline"></span>';
 var greenDiamond =
   '<span class="greenDiamond tip-static" data-tipped="Online"></span>';
@@ -1212,7 +1213,7 @@ function addMembrListToForage(membrList) {
 function getMembrListFromForage(guildId$$1, membrList) {
   if (membrList && membrList[guildId$$1] &&
       membrList[guildId$$1].lastUpdate &&
-      membrList[guildId$$1].lastUpdate < Date.now() - 300000) {
+      membrList[guildId$$1].lastUpdate > Date.now() - 300000) {
     return membrList;
   }
   return getGuildMembers(guildId$$1).done(addMembrListToForage);
@@ -5394,12 +5395,15 @@ function injectViewGuild() { // Native
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
     var tipped = el.getAttribute('data-tipped');
+    var lastActDays = lastActivityRE.exec(tipped)[1];
     var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
     var aRow = el.parentNode.parentNode;
-    if (highlightPlayersNearMyLvl &&
+    if (lastActDays < 7 &&
+        highlightPlayersNearMyLvl &&
         Math.abs(vlevel - levelToTest) <= pvpRange) {
       aRow.classList.add('lvlHighlight');
-    } else if (highlightGvGPlayersNearMyLvl &&
+    } else if (lastActDays < 7 &&
+        highlightGvGPlayersNearMyLvl &&
         Math.abs(vlevel - levelToTest) <= gvgRange) {
       aRow.classList.add('lvlGvGHighlight');
     }
@@ -5786,6 +5790,8 @@ function injectAdvisorNew(m) { // Native
     });
     var tdOne = tr.cells[0];
     var username = tdOne.textContent.trim();
+    // TODO There is no fall back here for when a member is new and isn't in the cache yet
+    // Weekly has fallback functions we could use
     tdOne.innerHTML = '<a href="index.php?cmd=profile&player_id=' +
       m[username].id + '">' +
       username + '</a>';
@@ -5960,7 +5966,7 @@ function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    getMembrList(false).done(function(response) {
+    getMembrList(true).done(function(response) {
       add(3, injectAdvisorNew, [response]);
       // task.add(3, injectAdvisorDable, [membrList]);
     });
@@ -6075,7 +6081,7 @@ function paintHeader() { // Native
     el.innerHTML = onlineDot(
       {last_login: calf.membrList[oldhtml].last_login}) +
       '<a href="index.php?cmd=profile&player_id=' +
-      calf.membrList[oldhtml].id + '">' + oldhtml +
+      calf.membrList[oldhtml].id + '">' + oldhtml + // TODO guard
       '</a> [ <span class="a-reply fshLink" target_player=' +
       oldhtml + '>m</span> ]';
     headerCount += 1;
@@ -6173,7 +6179,7 @@ function prepareChildRows() { // Native
 }
 
 function injectReportPaint() { // jQuery
-  getMembrList(false).done(function() {
+  getMembrList(true).done(function() { // TODO no guard
     add(3, reportHeader);
   });
   add(2, searchUser);
@@ -7009,7 +7015,7 @@ function syncInvMan() { // jQuery
     theInv = data;
   }));
   if (calf.subcmd === 'guildinvmgr') {
-    prm.push(getMembrList(false));
+    prm.push(getMembrList(true)); // TODO No fall back
   }
   prm.push(getForage('fsh_inventory')
     .done(extendOptions)
@@ -7543,7 +7549,7 @@ function missingMembers(membrList) {
       if (memberExclusions[i](key)) {return prev;}
     }
     prev.push('<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>');
+      guildMemberList[key].id + '">' + key + '</a>'); // TODO guard
     return prev;
   }, []);
   containerDiv.insertAdjacentHTML('beforeend',
@@ -7586,7 +7592,7 @@ function prepareDivs() {
   fetchStatsBtn.classList.add('fshHide');
   hideRelicOffline = getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
-    getMembrList(false).done(missingMembers);
+    getMembrList(true).done(missingMembers); // TODO guard
   }
   leftDiv.insertAdjacentHTML('beforeend', assets$1.proc);
   processingStatus = document.getElementById('ProcessingStatus');
@@ -9976,7 +9982,8 @@ function addPvpSummary(aRow, messageType) { // Legacy
   if (messageType === 'Combat' &&
       aRow.cells[2] &&
       showPvPSummaryInLog &&
-      aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+      aRow.cells[2].innerHTML.indexOf('combat_id=') !== -1 &&
+      aRow.cells[2].textContent.indexOf('(Guild Conflict)') === -1) {
     var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
     var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
     var combatSummarySpan = document.createElement('SPAN');
@@ -10860,8 +10867,7 @@ var lookup = [
   },
   {
     condition: function(data) {
-      return data.indexOf('resulted in a draw. Your GvG rating ' +
-        'and Guild RP was unaffected.') !== -1;
+      return data.indexOf('resulted in a draw. Your GvG rating ') !== -1;
     },
     id: 9
   },
@@ -12794,7 +12800,7 @@ function checkFlags(item) { // Native
 }
 
 function resources(prev, item) { // Native
-  if (!checkFlags(item)) {return prev;}
+  if (checkFlags(item)) {return prev;}
   if (prev[item.item_id]) {
     prev[item.item_id].invIDs.push(item.inv_id);
   } else {
@@ -13866,12 +13872,14 @@ var highlightPlayersNearMyLvl$1;
 var lvlDiffToHighlight$1;
 var myVL;
 var spinner$1;
+var validPvP = Math.floor(Date.now() / 1000) - 604800;
 
 function parsePlayer(aTable, data) { // Native
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
   if (!myVL) {return;}
-  if (data.virtual_level > myVL - lvlDiffToHighlight$1 &&
+  if (data.last_login >= validPvP &&
+      data.virtual_level > myVL - lvlDiffToHighlight$1 &&
       data.virtual_level < myVL + lvlDiffToHighlight$1) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
@@ -14009,7 +14017,7 @@ var invItems$1;
 
 function stColor(el, item) { // Native
   if (item.is_in_st) {
-    el.classList.add('isInSTBorder');
+    el.classList.add('isInST');
   } else {el.classList.add('tradeItemMargin');}
 }
 
@@ -14021,7 +14029,6 @@ function forEachInvItem(el) { // Native
   if (invItems$1.fshHasST) {stColor(el, item);}
   checkbox.classList.add('itemid' + item.item_id);
   checkbox.classList.add('itemtype' + item.type);
-  if (item.is_in_st) {el.classList.add('isInST');}
 }
 
 function processTrade(data) { // native
@@ -14070,7 +14077,7 @@ function doCheckAll(evt) { // Native
     var checkbox = el.firstElementChild.lastElementChild.firstElementChild
       .firstElementChild;
     if (howMany &&
-        fallback(itemsInSt, !checkbox.classList.contains('isInST')) &&
+        fallback(itemsInSt, !el.classList.contains('isInST')) &&
         shouldBeChecked(itemid, checkbox)) {
       checkbox.checked = true;
       howMany -= 1;
@@ -16135,6 +16142,6 @@ FSH.dispatch = function dispatch() { // Native
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '4';
+window.FSH.calf = '9';
 
 }());

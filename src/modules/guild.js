@@ -1,3 +1,4 @@
+import {lastActivityRE} from './support/dataObj';
 import * as ajax from './support/ajax';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
@@ -67,12 +68,15 @@ export function injectViewGuild() { // Native
     '#pCC a[data-tipped*="<td>VL:</td>"]');
   Array.prototype.forEach.call(memList, function(el) {
     var tipped = el.getAttribute('data-tipped');
+    var lastActDays = lastActivityRE.exec(tipped)[1];
     var vlevel = /VL:.+?(\d+)/.exec(tipped)[1];
     var aRow = el.parentNode.parentNode;
-    if (highlightPlayersNearMyLvl &&
+    if (lastActDays < 7 &&
+        highlightPlayersNearMyLvl &&
         Math.abs(vlevel - levelToTest) <= pvpRange) {
       aRow.classList.add('lvlHighlight');
-    } else if (highlightGvGPlayersNearMyLvl &&
+    } else if (lastActDays < 7 &&
+        highlightGvGPlayersNearMyLvl &&
         Math.abs(vlevel - levelToTest) <= gvgRange) {
       aRow.classList.add('lvlGvGHighlight');
     }
