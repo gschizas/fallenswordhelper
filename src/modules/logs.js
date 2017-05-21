@@ -276,7 +276,8 @@ function addPvpSummary(aRow, messageType) { // Legacy
   if (messageType === 'Combat' &&
       aRow.cells[2] &&
       showPvPSummaryInLog &&
-      aRow.cells[2].innerHTML.search('combat_id=') !== -1) {
+      aRow.cells[2].innerHTML.indexOf('combat_id=') !== -1 &&
+      aRow.cells[2].textContent.indexOf('(Guild Conflict)') === -1) {
     var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
     var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
     var combatSummarySpan = document.createElement('SPAN');
