@@ -130,7 +130,6 @@ function xhrPreFilter(options, originalOptions) { // Native
 
 function interceptXHR() { // jQuery
   $.ajaxPrefilter('JSON', xhrPreFilter);
-  if (hideSubLvlCreature) {GameData.fetch(256);}
 }
 
 function hideGroupByType(type) { // jQuery
@@ -211,8 +210,7 @@ function interceptDoAction() { // jQuery
       // Do custom stuff e.g. do not kill list
       var creatureIcon = $('#actionList div.header')
         .eq(data.passback).find('a.icon');
-      if (calf.doNotKillList.indexOf(
-          creatureIcon.data('name')) !== -1) {
+      if (calf.doNotKillList.indexOf(creatureIcon.data('name')) !== -1) {
         creatureIcon.removeClass('loading');
         return;
       }
@@ -259,13 +257,12 @@ function fixDebuffQTip(e) { // jQuery
 }
 
 function injectWorldNewMap(data) { // Native
-  if (data.player && system.getValue('sendGoldonWorld')) {
-    sendGold.updateSendGoldOnWorld(data);
-  }
+  sendGold.updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     buttons.injectButtons(data);
     document.getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
+    if (hideSubLvlCreature) {GameData.fetch(256);}
   }
 }
 
