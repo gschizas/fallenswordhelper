@@ -1,0 +1,5 @@
+**/*{.,-}min.js
+archive/
+dist/
+node_modules/
+**/third_party/**

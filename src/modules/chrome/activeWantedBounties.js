@@ -155,8 +155,7 @@ function getTarget(target, theRow) {
   if (theRow.cells[6].textContent.trim() === '[active]') {
     bounty.active = true;
     bounty.accept = '';
-  } else if (theRow.cells[6].textContent
-      .trim() !== '[n/a]') { // TODO
+  } else if (theRow.cells[6].textContent.trim() !== '[n/a]') { // TODO
     bounty.active = false;
     bounty.accept = theRow.cells[6]
       .firstChild.firstChild

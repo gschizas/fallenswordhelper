@@ -1,8 +1,9 @@
+import injectBioWidgets from '../profile/bio/bioWidgets';
+import injectProfile from '../profile/profile';
 import * as arena from '../arena/arena';
 import * as auctionHouse from '../auctionHouse';
 import * as bank from '../bank';
 import * as bazaar from '../bazaar';
-import * as bio from '../profile/bio';
 import * as breakdown from '../composing/breakdown';
 import * as combatLog from '../combatLog';
 import * as complete from '../arena/complete';
@@ -26,7 +27,6 @@ import * as newGuildLog from '../newGuildLog/newGuildLog';
 import * as news from '../news';
 import * as notification from '../notification';
 import * as onlinePlayers from '../onlinePlayers';
-import * as profile from '../profile/profile';
 import * as questBook from '../questBook';
 import * as quickBuff from '../quickBuff';
 import * as quickExtract from '../quickExtract';
@@ -71,12 +71,12 @@ export default {
     viewquest: {'-': {'-': {'-': questBook.injectQuestTracker}}}
   },
   profile: {
-    '-': {'-': {'-': {'-': profile.injectProfile}}},
-    managecombatset: {'-': {'-': {'-': profile.injectProfile}}},
-    report: {'-': {'-': {'-': profile.injectProfile}}},
-    equipitem: {'-': {'-': {'-': profile.injectProfile}}},
-    useitem: {'-': {'-': {'-': profile.injectProfile}}},
-    changebio: {'-': {'-': {'-': bio.injectBioWidgets}}},
+    '-': {'-': {'-': {'-': injectProfile}}},
+    managecombatset: {'-': {'-': {'-': injectProfile}}},
+    report: {'-': {'-': {'-': injectProfile}}},
+    equipitem: {'-': {'-': {'-': injectProfile}}},
+    useitem: {'-': {'-': {'-': injectProfile}}},
+    changebio: {'-': {'-': {'-': injectBioWidgets}}},
     dropitems: {
       '-': {
         '-': {

@@ -326,6 +326,7 @@ export function createdRow(row, data) { // Native
 
 function refresh() { // Native
   doSpinner();
+  // eslint-disable-next-line no-use-before-define
   syncInvMan();
 }
 

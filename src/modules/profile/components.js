@@ -114,7 +114,7 @@ function compEvt(e) {
   }
 }
 
-export function profileComponents() { // Native
+export default function profileComponents() { // Native
   var invTables = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table');
   if (invTables.length !== 2) {return;}
