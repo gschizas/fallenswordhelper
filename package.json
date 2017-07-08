@@ -38,7 +38,7 @@
     "uglify:prod": "uglifyjs dist/prod/calfSystem.js --stats -m -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -o dist/prod/calfSystem.min.js",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
     "watch": "chokidar-cmd -c \"npm run rollup:devcalf\" -t src --initial",
-    "ws": "ws -c -p 9966 -d ."
+    "ws": "http-server -p 9966 -c-1"
   },
   "repository": {
     "type": "git",
@@ -58,14 +58,14 @@
     "chokidar-cmd": "^1.2.1",
     "cost": "^1.2.3",
     "eslint": "^4.0.0",
+    "http-server": "^0.10.0",
     "ip": "^1.1.5",
     "jshint": "^2.9.4",
     "jsinspect": "^0.12.4",
-    "local-web-server": "^1.2.8",
     "npm-run-all": "^4.0.2",
     "rimraf": "^2.6.1",
     "rollup": "^0.43.0",
-    "rollup-plugin-commonjs": "latest",
+    "rollup-plugin-commonjs": "^8.0.2",
     "rollup-plugin-filesize": "^1.3.2",
     "rollup-plugin-jscc": "^0.3.3",
     "rollup-plugin-node-resolve": "^3.0.0",
