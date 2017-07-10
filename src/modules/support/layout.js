@@ -4,8 +4,6 @@ import * as task from './task';
 
 var dotList;
 var dotCount;
-var lastActivityRE =
-  /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 var redDot = '<span class="redDot tip-static" data-tipped="Offline"></span>';
 var greenDiamond =
   '<span class="greenDiamond tip-static" data-tipped="Online"></span>';
@@ -165,7 +163,7 @@ export function onlineDot(obj) { // Native
 }
 
 function changeOnlineDot(contactLink) { // Native
-  var lastActivity = lastActivityRE
+  var lastActivity = dataObj.lastActivityRE
     .exec(contactLink.getAttribute('data-tipped'));
   contactLink.parentNode.previousSibling.innerHTML =
     onlineDot({

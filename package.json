@@ -1,6 +1,6 @@
 {
   "name": "fallenswordhelper",
-  "version": "15.18.4",
+  "version": "15.18.9",
   "description": "Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.",
   "main": "index.js",
   "scripts": {
@@ -30,11 +30,11 @@
     "silence": "npm config set loglevel silent",
     "test": "npm run eslint",
     "uglify": "npm run uglify:dev && npm run uglify:beta && npm run uglify:prod",
-    "uglify:beta": "uglifyjs dist/beta/calfSystem.js --stats -m -c -o dist/beta/calfSystem.min.js",
+    "uglify:beta": "uglifyjs dist/beta/calfSystem.js --stats -m -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -o dist/beta/calfSystem.min.js",
     "postuglify:beta": "cost :max,unzip:dist/beta/calfSystem.min.js && cost :max:dist/beta/calfSystem.min.js",
-    "uglify:dev": "uglifyjs dist/dev/calfSystem.js --stats -m -c -o dist/dev/calfSystem.min.js",
+    "uglify:dev": "uglifyjs dist/dev/calfSystem.js -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -m --stats -o dist/dev/calfSystem.min.js",
     "postuglify:dev": "cost :max,unzip:dist/dev/calfSystem.min.js && cost :max:dist/dev/calfSystem.min.js",
-    "uglify:prod": "uglifyjs dist/prod/calfSystem.js --stats -m -c -o dist/prod/calfSystem.min.js",
+    "uglify:prod": "uglifyjs dist/prod/calfSystem.js --stats -m -c unsafe,unsafe_comps,unsafe_math,unsafe_proto -o dist/prod/calfSystem.min.js",
     "postuglify:prod": "cost :max,unzip:dist/prod/calfSystem.min.js && cost :max:dist/prod/calfSystem.min.js",
     "watch": "chokidar-cmd -c \"npm run rollup:devcalf\" -t src --initial",
     "ws": "ws -c -p 9966 -d ."
@@ -48,7 +48,7 @@
     "fallenswordhelper"
   ],
   "author": "Adrian Tompkins",
-  "license": "UNLICENSED",
+  "license": "MIT",
   "bugs": {
     "url": "https://github.com/fallenswordhelper/fallenswordhelper/issues"
   },
@@ -68,6 +68,6 @@
     "rollup-plugin-filesize": "latest",
     "rollup-plugin-jscc": "latest",
     "rollup-plugin-node-resolve": "latest",
-    "uglifyjs": "latest"
+    "uglify-js": "latest"
   }
 }

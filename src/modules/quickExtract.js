@@ -52,7 +52,7 @@ function checkFlags(item) { // Native
 }
 
 function resources(prev, item) { // Native
-  if (!checkFlags(item)) {return prev;}
+  if (checkFlags(item)) {return prev;}
   if (prev[item.item_id]) {
     prev[item.item_id].invIDs.push(item.inv_id);
   } else {

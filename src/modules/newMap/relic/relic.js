@@ -208,7 +208,7 @@ function missingMembers(membrList) {
       if (memberExclusions[i](key)) {return prev;}
     }
     prev.push('<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>');
+      guildMemberList[key].id + '">' + key + '</a>'); // TODO guard
     return prev;
   }, []);
   containerDiv.insertAdjacentHTML('beforeend',
@@ -251,7 +251,7 @@ function prepareDivs() {
   fetchStatsBtn.classList.add('fshHide');
   hideRelicOffline = system.getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
-    ajax.getMembrList(false).done(missingMembers);
+    ajax.getMembrList(true).done(missingMembers); // TODO guard
   }
   leftDiv.insertAdjacentHTML('beforeend', assets.proc);
   processingStatus = document.getElementById('ProcessingStatus');

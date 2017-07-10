@@ -559,7 +559,7 @@ function syncInvMan() { // jQuery
     theInv = data;
   }));
   if (calf.subcmd === 'guildinvmgr') {
-    prm.push(ajax.getMembrList(false));
+    prm.push(ajax.getMembrList(true)); // TODO No fall back
   }
   prm.push(ajax.getForage('fsh_inventory')
     .done(extendOptions)

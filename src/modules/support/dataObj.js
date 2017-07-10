@@ -304,3 +304,6 @@ export var mercRE = [
   /<td>Damage:<\/td><td>(\d+)<\/td>/,
   /<td>HP:<\/td><td>(\d+)<\/td>/
 ];
+
+export var lastActivityRE =
+  /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;

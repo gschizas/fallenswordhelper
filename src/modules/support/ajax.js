@@ -67,7 +67,7 @@ export function addMembrListToForage(membrList) {
 function getMembrListFromForage(guildId, membrList) {
   if (membrList && membrList[guildId] &&
       membrList[guildId].lastUpdate &&
-      membrList[guildId].lastUpdate < Date.now() - 300000) {
+      membrList[guildId].lastUpdate > Date.now() - 300000) {
     return membrList;
   }
   return getGuildMembers(guildId).done(addMembrListToForage);

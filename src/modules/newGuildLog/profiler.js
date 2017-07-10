@@ -188,8 +188,7 @@ var lookup = [
   },
   {
     condition: function(data) {
-      return data.indexOf('resulted in a draw. Your GvG rating ' +
-        'and Guild RP was unaffected.') !== -1;
+      return data.indexOf('resulted in a draw. Your GvG rating ') !== -1;
     },
     id: 9
   },

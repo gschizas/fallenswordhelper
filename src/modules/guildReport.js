@@ -112,7 +112,7 @@ function paintHeader() { // Native
     el.innerHTML = layout.onlineDot(
       {last_login: calf.membrList[oldhtml].last_login}) +
       '<a href="index.php?cmd=profile&player_id=' +
-      calf.membrList[oldhtml].id + '">' + oldhtml +
+      calf.membrList[oldhtml].id + '">' + oldhtml + // TODO guard
       '</a> [ <span class="a-reply fshLink" target_player=' +
       oldhtml + '>m</span> ]';
     headerCount += 1;
@@ -210,7 +210,7 @@ function prepareChildRows() { // Native
 }
 
 export function injectReportPaint() { // jQuery
-  ajax.getMembrList(false).done(function() {
+  ajax.getMembrList(true).done(function() { // TODO no guard
     task.add(3, reportHeader);
   });
   task.add(2, searchUser);
