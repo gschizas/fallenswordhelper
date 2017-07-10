@@ -85,8 +85,8 @@ function wearItem(evt) { // jQuery
 }
 
 var events = [
-  {test: 'recall', fn: function(evt) {recallItem(evt);}},
-  {test: 'equip', fn: function(evt) {wearItem(evt);}},
+  {test: 'recall', fn: recallItem},
+  {test: 'equip', fn: wearItem},
   {
     test: 'a-reply',
     fn: function(evt) {

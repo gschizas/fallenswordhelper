@@ -22,7 +22,7 @@ function findAllyEnemy(el) { // Native
   }
 }
 
-export function profileParseAllyEnemy() { // Native
+export default function profileParseAllyEnemy() { // Native
   // Allies/Enemies count/total function
   Array.prototype.forEach.call(
     document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);

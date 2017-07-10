@@ -44,7 +44,7 @@ function interceptDebuff(e) { // jQuery
   checkForPrompt(aLink);
 }
 
-export function fastDebuff() { // Native
+export default function fastDebuff() { // Native
   var profileRightColumn = document.getElementById('profileRightColumn')
     .lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);

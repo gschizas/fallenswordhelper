@@ -1,11 +1,12 @@
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
-import * as bio from './bio';
+import fastDebuff from './debuff';
+import injectFastWear from './fastWear';
+import nekidBtn from './nekidBtn';
+import profileComponents from './components';
+import profileParseAllyEnemy from './profileAllyEnemy';
+import profileRenderBio from './bio/bio';
 import * as common from '../common/common';
-import * as components from './components';
-import * as debuff from './debuff';
-import * as fastWear from './fastWear';
 import * as layout from '../support/layout';
-import * as profileAllyEnemy from './profileAllyEnemy';
 import * as system from '../support/system';
 import * as task from '../support/task';
 
@@ -187,47 +188,13 @@ function updateStatistics() { // Native
   Array.prototype.forEach.call(dodgyTables, removeStatTable);
 }
 
-var profileCombatSetDiv;
-
-function getNekid() { // jQuery
-  var profileBlock = profileCombatSetDiv.nextElementSibling;
-  var aLinks = profileBlock.getElementsByTagName('a');
-  var prm = [];
-  Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.getAttribute('href');
-    prm.push($.ajax({
-      url: href,
-      timeout: 1000
-    }));
-  });
-  $.when.apply($, prm).always(function() {
-    location.assign('index.php?cmd=profile');
-  });
-}
-
-function nekidBtn() { // Native
-  var profileRightColumn = document.getElementById('profileRightColumn');
-  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
-  var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
-  var nekidDiv = document.createElement('div');
-  nekidDiv.className = 'fshCenter';
-  var theBtn = document.createElement('button');
-  theBtn.className = 'fshBl fshBls';
-  theBtn.textContent = 'Nekid';
-  nekidDiv.insertAdjacentText('beforeend', '[ ');
-  nekidDiv.insertAdjacentElement('beforeend', theBtn);
-  nekidDiv.insertAdjacentText('beforeend', ' ]');
-  profileRightColumn.replaceChild(nekidDiv, targetBr);
-  theBtn.addEventListener('click', getNekid);
-}
-
 function ifSelf(self) { // Legacy
   if (self) {
     // self inventory
-    debuff.fastDebuff();
-    profileAllyEnemy.profileParseAllyEnemy();
-    fastWear.injectFastWear();
-    components.profileComponents();
+    fastDebuff();
+    profileParseAllyEnemy();
+    injectFastWear();
+    profileComponents();
     quickWearLink();
     selectAllLink();
     storeVL();
@@ -245,7 +212,7 @@ function yuuzhan(playername, avyImg) { // Legacy
   }
 }
 
-export function injectProfile() { // Legacy
+export default function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
   if (!avyImg) {return;}
@@ -266,7 +233,7 @@ export function injectProfile() { // Legacy
 
   common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
   updateStatistics();
-  bio.profileRenderBio(self);
+  profileRenderBio(self);
   addStatTotalToMouseover();
   task.add(3, layout.colouredDots);
 }

@@ -70,7 +70,7 @@ function fastWearLinks() { // Native
   Array.prototype.forEach.call(items, drawButtons);
 }
 
-export function injectFastWear() { // jQuery
+export default function injectFastWear() { // jQuery
   if (!system.getValue('enableQuickDrink')) {return;}
   var bpBack = document.getElementById('backpack');
   bpBack.className = 'fshBackpack';

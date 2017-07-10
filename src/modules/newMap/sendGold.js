@@ -44,14 +44,16 @@ export function injectSendGoldOnWorld() { // jQuery
 }
 
 export function updateSendGoldOnWorld(data) { // jQuery
-  $('#HelperSendTotal')
-    .html(system.getValue('currentGoldSentTotal')
-      .toString()
-      .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-  if (parseInt(data.player.gold, 10) >
-    system.getValue('goldAmount')) {
-    $('#statbar-gold').css('background-color', 'red');
-  } else {
-    $('#statbar-gold').css('background-color', 'inherit');
+  if (data.player && system.getValue('sendGoldonWorld')) {
+    $('#HelperSendTotal')
+      .html(system.getValue('currentGoldSentTotal')
+        .toString()
+        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
+    if (parseInt(data.player.gold, 10) >
+      system.getValue('goldAmount')) {
+      $('#statbar-gold').css('background-color', 'red');
+    } else {
+      $('#statbar-gold').css('background-color', 'inherit');
+    }
   }
 }

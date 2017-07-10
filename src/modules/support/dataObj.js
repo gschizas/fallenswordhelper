@@ -273,6 +273,7 @@ export var defaults = {
   hidePlayerActions: false,
   extraProfile: '',
   textToSearchFor: '',
+  lastLadderReset: 0,
 
 };
 
