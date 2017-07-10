@@ -1,5 +1,7 @@
 import injectBioWidgets from '../profile/bio/bioWidgets';
 import injectProfile from '../profile/profile';
+import ladder from '../ladder';
+import viewArchive from '../news/viewArchive';
 import * as arena from '../arena/arena';
 import * as auctionHouse from '../auctionHouse';
 import * as bank from '../bank';
@@ -19,12 +21,12 @@ import * as inventory from '../inventory/inventory';
 import * as legacy from '../legacy';
 import * as lists from '../lists';
 import * as load from '../settings/load';
-import * as logs from '../logs';
+import * as logs from '../logs/logs';
 import * as mailbox from '../mailbox';
 import * as misc from '../misc';
 import * as monstorLog from '../monstorLog';
 import * as newGuildLog from '../newGuildLog/newGuildLog';
-import * as news from '../news';
+import * as news from '../news/news';
 import * as notification from '../notification';
 import * as onlinePlayers from '../onlinePlayers';
 import * as questBook from '../questBook';
@@ -237,10 +239,10 @@ export default {
     breakdown: {'-': {'-': {'-': breakdown.composingBreakdown}}},
     create: {'-': {'-': {'-': composing.composingCreate}}}
   },
-  pvpladder: {'-': {'-': {'-': {'-': misc.ladder}}}},
+  pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
   '-': {
-    viewupdatearchive: {'-': {'-': {'-': news.viewArchive}}},
-    viewarchive: {'-': {'-': {'-': news.viewArchive}}},
+    viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
+    viewarchive: {'-': {'-': {'-': viewArchive}}},
     '-': {'-': {'-': {'-': unknownPage.unknownPage}}}
   }
 };

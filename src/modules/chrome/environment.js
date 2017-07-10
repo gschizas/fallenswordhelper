@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import pageSwitcher from './pageSwitcher';
 import * as accordion from './accordion';
 import * as activeWantedBounties from './activeWantedBounties';
@@ -11,7 +12,6 @@ import * as fshGa from '../support/fshGa';
 import * as helperMenu from './helperMenu';
 import * as keyHandler from './keyHandler';
 import * as messaging from './messaging';
-import * as news from '../news';
 import * as notification from '../notification';
 import * as statBar from './statBar';
 import * as system from '../support/system';
@@ -280,7 +280,7 @@ function notHuntMode() { // Native
 
   task.add(3, notification.injectJoinAllLink);
   task.add(3, changeGuildLogHREF);
-  task.add(3, news.injectHomePageTwoLink);
+  task.add(3, injectHomePageTwoLink);
 
   task.add(3, messaging.injectQuickMsgDialogJQ);
 }

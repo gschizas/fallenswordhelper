@@ -83,17 +83,6 @@ export function injectNotepad() { // jQuery
     .css('resize', 'none');
 }
 
-export function ladder() { // Native
-  var submitButton = document.querySelector('#pCC input[type="submit"]');
-  if (submitButton) {
-    submitButton.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
-        document.querySelector('#pCC select[name="viewing_band_id"]').value;
-    });
-  }
-}
-
 export function injectFsBoxContent(injector) { // jQuery
   var content = injector || layout.pCC;
   content.innerHTML = layout.makePageTemplate('FS Box Log', '',

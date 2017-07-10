@@ -1,7 +1,8 @@
+import addGuildLogWidgets from '../logs/addGuildLogWidgets';
+import addLogColoring from '../logs/addLogColoring';
 import * as ajax from '../support/ajax';
 import * as assets from './assets';
 import * as layout from '../support/layout';
-import * as logs from '../logs';
 import * as profiler from './profiler';
 import * as system from '../support/system';
 
@@ -134,8 +135,8 @@ function buildTable() {
 
   var injector = document.getElementById('fshInjectHere');
   layout.pCC.replaceChild(myTable, injector);
-  logs.addLogColoring('myGuildLog', 1);
-  logs.addGuildLogWidgets();
+  addLogColoring('myGuildLog', 1);
+  addGuildLogWidgets();
 }
 
 function setChecks() {
