@@ -217,6 +217,5 @@ export function confirm(title, msgText, fn) { // jQuery
       No: function() {$(this).dialog('close');}
     },
     title: title
-  })
-  .dialog('open');
+  }).dialog('open');
 }

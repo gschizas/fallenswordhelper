@@ -85,11 +85,12 @@ export default function addPvpSummary(aRow, messageType) { // Legacy
     var combatSummarySpan = document.createElement('SPAN');
     combatSummarySpan.style.color = 'gray';
     aRow.cells[2].appendChild(combatSummarySpan);
-    system.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
-      combatID, retrievePvPCombatSummary,
+    system.xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' + combatID,
+      retrievePvPCombatSummary,
       {
         target: combatSummarySpan,
         winner: defeat ? 0 : 1
-      });
+      }
+    );
   }
 }

@@ -15,7 +15,7 @@ function caRunning(combat) { // Native
     combat.player.damageValue / 0.0025), 0);
   combat.lowestFeasibleCALevel =
     Math.max(combat.lowestCALevelToStillHit,
-    combat.lowestCALevelToStillKill);
+      combat.lowestCALevelToStillKill);
   combat.extraNotes += 'Lowest CA to still 1-hit this creature = ' +
     combat.lowestFeasibleCALevel + '<br>';
   if (combat.lowestFeasibleCALevel !== 0) {

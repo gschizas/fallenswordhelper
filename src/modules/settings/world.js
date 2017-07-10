@@ -7,7 +7,7 @@ function worldGroup() {
   // World Screen
   return '<tr><td class="fshRight">Hide Create Group Button' +
     settingsPage.helpLink('Hide Create Group Button',
-    'Enabling this option will hide the Create Group button') +
+      'Enabling this option will hide the Create Group button') +
     ':</td><td>' +
     '<input name="hideChampionsGroup" type="checkbox" value="on"' +
       system.isChecked(system.getValue('hideChampionsGroup')) + '>' +
@@ -30,13 +30,13 @@ function worldGroup() {
 function combatEvalBias() {
   return '<tr><td class="fshRight">Combat Evaluator Bias' +
     settingsPage.helpLink('Combat Evaluator Bias',
-    'This changes the bias of the combat evaluator for the damage and ' +
-    'HP evaluation. It will not change the attack bias (1.1053).' +
-    '<br>Conservative = 1.1053 and 1.1 (Safest)' +
-    '<br>Semi-Conservative = 1.1 and 1.053' +
-    '<br>Adventurous = 1.053 and 1 (Bleeding Edge)' +
-    '<br>Conservative+ = 1.1053 and 1 with the attack calculation ' +
-    'changed to +-48 per RJEM') +
+      'This changes the bias of the combat evaluator for the damage and ' +
+      'HP evaluation. It will not change the attack bias (1.1053).' +
+      '<br>Conservative = 1.1053 and 1.1 (Safest)' +
+      '<br>Semi-Conservative = 1.1 and 1.053' +
+      '<br>Adventurous = 1.053 and 1 (Bleeding Edge)' +
+      '<br>Conservative+ = 1.1053 and 1 with the attack calculation ' +
+      'changed to +-48 per RJEM') +
     ':</td><td><select name="combatEvaluatorBias">' +
     '<option value="0"' +
     system.isSelected(calf.combatEvaluatorBias, 0) +
@@ -68,8 +68,8 @@ function huntBuffCheck() {
 export function huntMode() {
   return 'Enabled Hunting Mode' +
     settingsPage.helpLink('Enabled Hunting Mode',
-    'This will determine which list of buffs gets checked ' +
-    'on the world screen.') +
+      'This will determine which list of buffs gets checked ' +
+      'on the world screen.') +
     ':<select name="enabledHuntingMode">' +
     '<option value="1"' + system.isSelected(calf.enabledHuntingMode, '1') +
     '>' + calf.buffsName + '</option>' +
@@ -98,8 +98,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">Keep Combat Logs' +
       settingsPage.helpLink('Keep Combat Logs',
-      'Save combat logs to a temporary variable. ' +
-      'Press <u>Show logs</u> on the right to display and copy them') +
+        'Save combat logs to a temporary variable. ' +
+        'Press <u>Show logs</u> on the right to display and copy them') +
       ':</td><td><input name="keepLogs" type="checkbox" value="on"' +
       system.isChecked(system.getValue('keepLogs')) + '>&nbsp;&nbsp;' +
       '<input type="button" class="custombutton" value="Show Logs" ' +
@@ -113,8 +113,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">' + settingObj.networkIcon + 'Keep Creature Log' +
       settingsPage.helpLink('Keep Creature Log',
-      'This will show the creature log for each creature you see when ' +
-      'you travel.') +
+        'This will show the creature log for each creature you see when ' +
+        'you travel.') +
       ':</td><td><input name="showMonsterLog" type="checkbox" value="on"' +
       system.isChecked(system.getValue('showMonsterLog')) + '>' +
       '&nbsp;&nbsp;<input type="button" class="custombutton" ' +
@@ -122,8 +122,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">Show Send Gold' +
       settingsPage.helpLink('Show Gold on World Screen',
-      'This will show an icon below the world map to allow you to ' +
-      'quickly send gold to a Friend.') +
+        'This will show an icon below the world map to allow you to ' +
+        'quickly send gold to a Friend.') +
       ':</td><td><input name="sendGoldonWorld" type="checkbox" value="on"' +
       system.isChecked(system.getValue('sendGoldonWorld')) + '>' +
       '&nbsp;&nbsp;Send <input name="goldAmount" size="5" value="' +
@@ -136,11 +136,11 @@ export function prefs() {
 
     '<tr><td class="fshRight">Do Not Kill List' +
       settingsPage.helpLink('Do Not Kill List',
-      'List of creatures that will not be killed by quick kill. ' +
-      'You must type the full name of each creature, separated by commas. ' +
-      'Creature name will show up in red color on world screen and will ' +
-      'not be killed by keyboard entry (but can still be killed by ' +
-      'mouseclick). Quick kill must be enabled for this function to work.') +
+        'List of creatures that will not be killed by quick kill. ' +
+        'You must type the full name of each creature, separated by commas. ' +
+        'Creature name will show up in red color on world screen and will ' +
+        'not be killed by keyboard entry (but can still be killed by ' +
+        'mouseclick). Quick kill must be enabled for this function to work.') +
       ':</td><td colspan="3"><input name="doNotKillList" size="60" value="' +
       calf.doNotKillList + '"></td></tr>' +
 
@@ -148,21 +148,21 @@ export function prefs() {
 
     '<tr><td class="fshRight">' + calf.buffsName + ' Hunting Buff List' +
       settingsPage.helpLink(calf.buffsName + ' Hunting Buff List',
-      calf.buffsName + ' list of hunting buffs.') +
+        calf.buffsName + ' list of hunting buffs.') +
       ':</td><td colspan="3"><input name="huntingBuffsName" ' +
       'title="Hunting mode name" size="7" value="' + calf.buffsName +
       '"><input name="huntingBuffs" size="49" value="' + calf.buffs +
       '"></td></tr>' +
     '<tr><td class="fshRight">' + calf.buffs2Name + ' Hunting Buff List' +
       settingsPage.helpLink(calf.buffs2Name + ' Hunting Buff List',
-      'List of ' + calf.buffs2Name + ' hunting buffs.') +
+        'List of ' + calf.buffs2Name + ' hunting buffs.') +
       ':</td><td colspan="3"><input name="huntingBuffs2Name" ' +
       'title="Hunting mode name" size="7" value="' + calf.buffs2Name +
       '"><input name="huntingBuffs2" size="49" value="' + calf.buffs2 +
       '"></td></tr>' +
     '<tr><td class="fshRight">' + calf.buffs3Name + ' Hunting Buff List' +
       settingsPage.helpLink(calf.buffs3Name + ' Hunting Buff List',
-      'List of ' + calf.buffs3Name + ' hunting buffs.') +
+        'List of ' + calf.buffs3Name + ' hunting buffs.') +
       ':</td><td colspan="3"><input name="huntingBuffs3Name" ' +
       'title="Hunting mode name" size="7" value="' + calf.buffs3Name +
       '"><input name="huntingBuffs3" size="49" value="' + calf.buffs3 +

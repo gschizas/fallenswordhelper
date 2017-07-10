@@ -95,8 +95,8 @@ function isChat(aRow, isGuildMate, playerName) { // Legacy
     'decoration:underline"class="a-reply" target_player="' +
     playerName + '" replyTo="' +
     (system.getValue('enableChatParsing') ?
-    removeHTML(firstPart.replace(/&nbsp;/g, ' '))
-    .substr(0, 140) : '') + '...">Reply</span>';
+      removeHTML(firstPart.replace(/&nbsp;/g, ' '))
+        .substr(0, 140) : '') + '...">Reply</span>';
   aRow.cells[2].innerHTML = firstPart + '<nobr>' + msgReplyTo +
     extraPart + thirdPart + attackPart + fourthPart +
     '</nobr>' + lastPart;
@@ -181,7 +181,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
     colorPlayerName = true;
   }
   if (system.fallback(messageType === 'General',
-      messageType === 'Notification') &&
+    messageType === 'Notification') &&
       aRow.cells[2].firstChild.nextSibling &&
       aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
       aRow.cells[2].firstChild.nextSibling

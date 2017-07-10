@@ -99,8 +99,8 @@ function getKillStreak(responseText) { // Hybrid
   if (deathDealer) {
     var deathDealerLevel = deathDealer[1];
     deathDealerPercentage = Math.min(Math.round(
-        Math.floor(playerKillStreakValue / 5) * deathDealerLevel
-      ) * 0.01, 20);
+      Math.floor(playerKillStreakValue / 5) * deathDealerLevel
+    ) * 0.01, 20);
   }
   var deathDealerPercentageElement =
     system.findNode('//span[@findme="damagebonus"]');
@@ -165,7 +165,7 @@ function toggleKsTracker() { // Legacy
   if (trackKS) {
     trackKS.addEventListener('click', function() {
       system.setValue('trackKillStreak',
-      !system.getValue('trackKillStreak'));
+        !system.getValue('trackKillStreak'));
       location.reload();
     }, true);
   }

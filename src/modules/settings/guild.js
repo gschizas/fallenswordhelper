@@ -30,8 +30,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">Highlight Valid PvP Targets' +
       settingsPage.helpLink('Highlight Valid PvP Targets',
-      'Enabling this option will highlight targets in OTHER guilds that ' +
-      'are within your level range to attack for PvP or GvG.') +
+        'Enabling this option will highlight targets in OTHER guilds that ' +
+        'are within your level range to attack for PvP or GvG.') +
       ':</td><td>PvP: <input name="highlightPlayersNearMyLvl" ' +
       'type="checkbox" value="on"' +
       system.isChecked(system.getValue('highlightPlayersNearMyLvl')) +

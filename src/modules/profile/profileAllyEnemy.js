@@ -3,7 +3,7 @@ import * as system from '../support/system';
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
   target.insertAdjacentHTML('beforeend', '<span class="fshBlue">&nbsp;' +
     numberOfContacts + (contactsTotal && contactsTotal >= numberOfContacts ?
-    '/' + contactsTotal : '') + '</span>');
+      '/' + contactsTotal : '') + '</span>');
 }
 
 function findAllyEnemy(el) { // Native

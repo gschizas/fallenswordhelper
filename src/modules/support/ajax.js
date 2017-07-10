@@ -191,12 +191,12 @@ function additionalAction(action, data) {
   if (action === 'wear') {
     return equipItem(data.b)
       .pipe(function equipItemStatus() {return data;});
-      // Return takeitem status irrespective of the status of the equipitem
+    // Return takeitem status irrespective of the status of the equipitem
   }
   if (action === 'use') {
     return useItem(data.b)
       .pipe(function useItemStatus() {return data;});
-      // Return takeitem status irrespective of the status of the useitem
+    // Return takeitem status irrespective of the status of the useitem
   }
 }
 
@@ -265,7 +265,7 @@ function recallItem(o) {
           }
           if (o.action === 'use') {
             return useItem(
-                bpData.items[bpData.items.length - 1].a)
+              bpData.items[bpData.items.length - 1].a)
               .pipe(function useItemStatus() {return data;});
             // Return recall status irrespective of the status of the useitem
           }

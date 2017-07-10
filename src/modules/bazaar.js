@@ -47,7 +47,7 @@ function quantity() { // Native
 
 function done(responseText) { // Native
   document.getElementById('buy_result').insertAdjacentHTML('beforeend',
-  '<br>' + layout.infoBox(responseText));
+    '<br>' + layout.infoBox(responseText));
 }
 
 function buy() { // jQuery

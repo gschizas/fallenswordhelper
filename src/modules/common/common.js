@@ -32,12 +32,12 @@ export function drag_start(event) { // Native
 function getStat(stat, doc) { // jQuery
   // 'Hidden' returns NaN
   return system.intValue(
-      $(stat, doc)
-        .contents()
-        .filter(function(i, e) {
-          return e.nodeType === 3;
-        })[0].nodeValue
-    );
+    $(stat, doc)
+      .contents()
+      .filter(function(i, e) {
+        return e.nodeType === 3;
+      })[0].nodeValue
+  );
 }
 
 function getBuffLevel(doc, buff) { // jQuery

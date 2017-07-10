@@ -365,7 +365,7 @@ function haveNode(node, quickLinks) { // Native ?
     quickLinksLeftPx + 'px; background-image:url(\'' + system.imageServer +
     '/skin/inner_bg.jpg\');" id="fshQuickLinks" class="fshQuickLinks' +
     retOption('keepHelperMenuOnScreen',
-    ' fshFixed', '') + draggableQuickLinksClass + '>';
+      ' fshFixed', '') + draggableQuickLinksClass + '>';
   for (var i = 0; i < quickLinks.length; i += 1) {
     var newWindow = retBool(quickLinks[i].newWindow, ' target="new"', '');
     html += '<li><a href="' + system.escapeHtml(quickLinks[i].url) + '"' +

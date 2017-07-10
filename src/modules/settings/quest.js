@@ -7,8 +7,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">Hide Specific Quests' +
       settingsPage.helpLink('Hide Specific Quests',
-      'If enabled, this hides quests whose name matches the list ' +
-      '(separated by commas). This works on Quest Manager and Quest Book.') +
+        'If enabled, this hides quests whose name matches the list ' +
+        '(separated by commas). This works on Quest Manager and Quest Book.') +
       ':</td><td colspan="3"><input name="hideQuests" type="checkbox" ' +
       'value="on"' +
       system.isChecked(system.getValue('hideQuests')) + '>' +
