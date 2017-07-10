@@ -499,6 +499,7 @@ var defaults = {
   hidePlayerActions: false,
   extraProfile: '',
   textToSearchFor: '',
+  lastLadderReset: 0,
 
 };
 
@@ -860,7 +861,10 @@ function sink(j) {
 function bubble(j) {
   var i = j;
   while (i > 1) {
+    /* jshint -W016 */
+    // eslint-disable-next-line no-bitwise
     var parentIndex = i >> 1;
+    /* jshint +W016 */
     if (!cmp(i, parentIndex)) {break;}
     swp(i, parentIndex);
     i = parentIndex;
@@ -1134,6 +1138,465 @@ function confirm(title, msgText, fn) { // jQuery
     title: title
   })
   .dialog('open');
+}
+
+function containsNewsHead(el) { // Native
+  return el.classList.contains('news_head') ||
+    el.classList.contains('news_head_tavern');
+}
+
+function closestHead(el) { // Native
+  if (containsNewsHead(el)) {
+    return el;
+  }
+  if (el.classList.contains('news_left_column')) {return;}
+  return closestHead(el.parentNode);
+}
+
+function getNewsClass(newsHead) { // Native
+  if (newsHead.classList.contains('news_head_tavern')) {
+    return '.news_body_tavern';
+  }
+  return '.news_body';
+}
+
+function gotNewsHead(evt, newsHead) { // jQuery
+  var newsBody = newsHead.nextElementSibling;
+  var newsClass = getNewsClass(newsHead);
+  if (!$(newsBody).data('open')) {
+    evt.preventDefault();
+    $(newsClass).hide().data('open', false);
+    $(newsBody).show().data('open', true);
+  } else if (evt.target.tagName !== 'A') {
+    $(newsBody).hide().data('open', false);
+  }
+  evt.stopPropagation();
+}
+
+function newsEvt(evt) { // Native
+  var newsHead = closestHead(evt.target);
+  if (newsHead) {gotNewsHead(evt, newsHead);}
+}
+
+function fixCollapse() { // Native
+  var newsCol = document.getElementsByClassName('news_left_column');
+  if (newsCol.length !== 1) {return;}
+  newsCol[0].addEventListener('click', newsEvt, true);
+}
+
+function lookForPvPLadder() { // Native
+  var lastLadderReset = getValue('lastLadderReset');
+  var rumours = pCC.getElementsByClassName('news_head_tavern');
+  Array.prototype.forEach.call(rumours, function(head) {
+    if (head.children[1].textContent === 'PvP Ladder') {
+      var logTime = parseDateAsTimestamp(head.children[2].textContent);
+      if (logTime > lastLadderReset) {
+        setValue('lastLadderReset', logTime);
+        lastLadderReset = logTime;
+      }
+    }
+  });
+}
+
+function injectHomePageTwoLink() { // Native
+  var archiveLink = document.querySelector(
+    '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
+  if (!archiveLink) {return;}
+  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
+    '&subcmd=viewupdatearchive&subcmd2=&page=2&search_text=">' +
+    'View Updates Page 2</a>');
+  archiveLink = document.querySelector(
+    '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
+  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
+    '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
+  fixCollapse();
+  lookForPvPLadder();
+}
+
+var buffCost = {count: 0, buffs: {}};
+var numRE = /[^a-zA-Z0-9.,+\- ]/g;
+var priceRE =
+  /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
+
+function getTargetPlayer() { // Native
+  var targetPlayer = pCC
+    .getElementsByTagName('h1');
+  if (targetPlayer.length !== 0) {
+    targetPlayer = targetPlayer[0].textContent;
+  } else {
+    targetPlayer = playerName();
+  }
+  return targetPlayer;
+}
+
+function formatBuffsToBuy() { // Legacy
+  var targetPlayer = getTargetPlayer();
+  var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
+  var greetingText = getValue('buyBuffsGreeting').trim();
+  var hasBuffTag = greetingText.indexOf('{buffs}') !== -1;
+  var hasCostTag = greetingText.indexOf('{cost}') !== -1;
+  greetingText = greetingText.replace(/{playername}/g, targetPlayer);
+  if (!hasBuffTag) {
+    greetingText += ' ' + buffsToBuy;
+  } else if (!hasCostTag) {
+    greetingText = greetingText
+      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
+  } else {
+    greetingText = greetingText
+      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
+      .replace(/{cost}/g, buffCost.buffCostTotalText);
+  }
+  window.openQuickMsgDialog(targetPlayer, greetingText, '');
+}
+
+function getBuffsToBuy() { // Legacy
+  if (buffCost.count > 0) {formatBuffsToBuy();}
+}
+
+var costFormatter = [
+  {
+    condition: function(total) {
+      return total.fsp > 0;
+    },
+    result: function(total) {
+      return String(Math.round(total.fsp * 100) / 100) + ' FSP';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.fsp > 0 && total.k > 0;
+    },
+    result: function() {
+      return ' and ';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.k > 0;
+    },
+    result: function(total) {
+      return total.k + ' k';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.stam > 0 && (total.fsp > 0 || total.k > 0);
+    },
+    result: function() {
+      return ' and ';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.stam > 0;
+    },
+    result: function(total) {
+      return total.stam + ' Stam(' +
+        String(Math.round(total.stam / 25 * 10) / 10) + 'fsp)';
+    }
+  },
+  {
+    condition: function(total) {
+      return total.unknown > 0;
+    },
+    result: function(total) {
+      return ' (' + total.unknown + ' buff(s) with unknown cost)';
+    }
+  }
+];
+
+function formatCost(total) { // Native
+  return costFormatter.reduce(function(prev, el) {
+    var ret = prev;
+    if (el.condition(total)) {
+      ret += el.result(total);
+    }
+    return ret;
+  }, '');
+}
+
+function hazBuffs() { // Legacy
+  var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
+  var html = 'This is an estimated cost based on how the script finds ' +
+    'the cost associated with buffs from viewing bio.' +
+    'It can be incorrect, please use with discretion.<br><hr>' +
+    '<table border=0>';
+
+  Object.keys(buffCost.buffs).forEach(function(buff) {
+    total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
+    html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
+      buffCost.buffs[buff][1] + '</td></tr>';
+  });
+
+  var totalText = formatCost(total);
+
+  html += '</table><b>Total: ' + totalText + '</b>';
+  document.getElementById('buffCost').innerHTML = '<br/><span ' +
+    'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
+    totalText + '</b></span>';
+  buffCost.buffCostTotalText = totalText;
+}
+
+function updateBuffCost() { // Legacy
+  if (buffCost.count > 0) {
+    hazBuffs();
+  } else {
+    document.getElementById('buffCost').innerHTML = '';
+    buffCost.buffCostTotalText = '';
+  }
+}
+
+function priceUnit(price) { // Native
+  if (price[0].indexOf('k') > 0) {
+    return 'k';
+  }
+  if (price[0].indexOf('f') > 0) {
+    return 'fsp';
+  }
+  return 'stam';
+}
+
+function priceBeforeName(buffNameNode, price) {
+  if (!price) { // some players have prices BEFORE the buff names
+    var newtext;
+    var text = '';
+    var node = buffNameNode;
+    while (node && node.nodeName.toLowerCase() !== 'br') {
+      newtext = node.textContent;
+      node = node.previousSibling;
+      text = newtext + text;
+    }
+    return text.replace(numRE, '').toLowerCase().match(priceRE);
+  }
+  return price;
+}
+
+function getBuffCost(buffNameNode) {
+  var node = buffNameNode;
+  var buffName = node.textContent;
+  var newtext;
+  var text = '';
+  // get the whole line from the buff name towards the end (even after
+  // the ',', in case of 'AL, Lib, Mer: 10k each'
+  while (node && node.nodeName.toLowerCase() !== 'br') {
+    newtext = node.textContent;
+    node = node.nextSibling;
+    text += newtext;
+  }
+  var price = text.replace(numRE, '').toLowerCase().match(priceRE);
+  price = priceBeforeName(buffNameNode, price);
+  var type;
+  var cost;
+  if (price) {
+    type = priceUnit(price);
+    cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
+  } else {
+    type = 'unknown';
+    cost = '1';
+  }
+  buffCost.buffs[buffName] = [parseFloat(cost), type];
+  buffCost.count += 1;
+}
+
+function toggleBuffsToBuy(evt) { // Legacy
+  // This is also called by bio preview
+  var buffNameNode = evt.target;
+  while (buffNameNode.tagName.toLowerCase() !== 'span') {
+    buffNameNode = buffNameNode.parentNode;
+  }
+  var node = buffNameNode;
+  var selected = node.classList.contains('fshBlue');
+  node.classList.toggle('fshBlue');
+  node.classList.toggle('fshYellow');
+  var buffName = node.textContent;
+  if (selected) {
+    getBuffCost(buffNameNode);
+  } else {
+    buffCost.count -= 1;
+    delete buffCost.buffs[buffName];
+  }
+  updateBuffCost();
+}
+
+function getBuffNameNode(e) { // Native
+  var buffNameNode = e.target;
+  while (buffNameNode.tagName &&
+      buffNameNode.tagName.toLowerCase() !== 'span') {
+    buffNameNode = buffNameNode.parentNode;
+  }
+  return buffNameNode;
+}
+
+function bioEvtHdl(e) { // Native
+  var buffNameNode = getBuffNameNode(e);
+  if (buffNameNode.classList &&
+      buffNameNode.classList.contains('buffLink')) {
+    toggleBuffsToBuy(e);
+  } else if (e.target.id === 'fshSendBuffMsg') {
+    getBuffsToBuy(e);
+  }
+}
+
+function renderBio(_bioContents) {
+  var bioContents = _bioContents.replace(/\{b\}/g, '`~')
+    .replace(/\{\/b\}/g, '~`');
+  var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
+  if (!buffs) {return;}
+  buffs.forEach(function(buff, i) {
+    var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
+    var cbString = '<span id="fshBuff' + i + '" class="buffLink fshBlue">' +
+      fullName + '</span>';
+    bioContents = bioContents.replace(buff, cbString);
+  });
+  if (bioContents.indexOf('[cmd]') < 0) {bioContents += '[cmd]';}
+  bioContents = bioContents.replace('[cmd]',
+    '<br><input id="fshSendBuffMsg" ' +
+    'class="custombutton" type="button" value="Ask For Buffs">' +
+    '<span id="buffCost" class="fshRed"></span>');
+  return bioContents;
+}
+
+var bioEditLines;
+
+function bioPreview() { // Native
+  var textArea = document.getElementById('textInputBox');
+  var bioPreviewHTML = convertTextToHtml(textArea.value);
+  textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
+    '<table align="center" width="325" border="1">' +
+    '<tbody><tr><td style="text-align:center;color:#7D2252;' +
+    'background-color:#CD9E4B">Preview</td></tr><tr>' +
+    '<td align="left" width="325"><span id="biopreview">' +
+    bioPreviewHTML + '</span></td></tr></tbody></table></div>');
+}
+
+function bioWords() { // Native
+  // Add description text for the new tags
+  pCC.insertAdjacentHTML('beforeend', '<div>' +
+    '`~This will allow FSH Script users to ' +
+    'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
+    'determine where to put the "Ask For Buffs" button<br><br>' +
+    '&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same ' +
+    'key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br>' +
+    '&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special ' +
+    'characters (non-alphanumeric).<br>' +
+    '&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff ' +
+    'pack names in them to make buffing even easier!</div>');
+}
+
+function testHeightValid(boxVal) { // Native
+  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
+}
+
+function changeHeight() { // Native
+  var theBox = document.getElementById('fshLinesToShow');
+  var boxVal = parseInt(theBox.value, 10);
+  if (testHeightValid(boxVal)) {return;}
+  bioEditLines = boxVal;
+  setValue('bioEditLines', boxVal);
+  document.getElementById('textInputBox').rows = bioEditLines;
+}
+
+function bioHeight() { // Native
+  var bioEditLinesDiv = document.createElement('DIV');
+  bioEditLinesDiv.insertAdjacentHTML('beforeend',
+    ' Display <input id="fshLinesToShow"' +
+    ' type="number" min="1" max="99" value="' +
+    bioEditLines + '"/> Lines ');
+  var saveLines = document.createElement('INPUT');
+  saveLines.className = 'custombutton';
+  saveLines.value = 'Update Rows To Show';
+  saveLines.type = 'button';
+  saveLines.addEventListener('click', changeHeight);
+  bioEditLinesDiv.appendChild(saveLines);
+  pCC.appendChild(bioEditLinesDiv);
+}
+
+function updateBioCharacters() { // Native
+  var textArea = document.getElementById('textInputBox');
+  var previewArea = document.getElementById('biopreview');
+  var bioContents = convertTextToHtml(textArea.value);
+  bioContents = renderBio(bioContents);
+  if (bioContents) {
+    previewArea.innerHTML = bioContents;
+  }
+}
+
+function injectBioWidgets() { // Native
+  bioEditLines = getValue('bioEditLines');
+  var textArea = document.getElementById('textInputBox');
+  bioPreview();
+  bioWords();
+  bioHeight();
+  textArea.rows = bioEditLines;
+  textArea.classList.add('fshNoResize');
+
+  textArea.parentNode.addEventListener('click', bioEvtHdl);
+  textArea.addEventListener('keyup', updateBioCharacters);
+  // Force the preview area to render
+  updateBioCharacters();
+}
+
+function closestTable(el) { // Native
+  if (el.tagName === 'TABLE') {return el;}
+  return closestTable(el.parentNode);
+}
+
+function reduceStatTable(prev, curr, index) { // Native
+  var key = curr.cells[0].textContent.trim().replace(':', '');
+  if (!key) {return prev;}
+  prev[key] = {ind: index};
+  if (curr.cells[1] && curr.cells[1].textContent) {
+    prev[key].value = Number(
+        curr.cells[1].textContent.trim().replace('+', '')
+      );
+  }
+  return prev;
+}
+
+function getVal(prop, obj) { // Native
+  if (obj[prop] && obj[prop].value) {
+    return obj[prop].value;
+  }
+  return 0;
+}
+
+function getLastIndex(obj, tbl) { // Native
+  if (obj.Enhancements) {
+    return tbl.rows[obj.Enhancements.ind - 1];
+  }
+  return tbl.rows[tbl.rows.length - 1];
+}
+
+function addStats(el) { // Native
+  var statTable = closestTable(el);
+  var statObj = Array.prototype.reduce.call(statTable.rows,
+    reduceStatTable, {});
+  var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
+    getVal('Armor', statObj) + getVal('Damage', statObj) +
+    getVal('HP', statObj);
+  getLastIndex(statObj, statTable).insertAdjacentHTML('beforebegin',
+    '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
+    totalStats + '&nbsp;</td></tr>');
+}
+
+function fshDataFilter(data) { // Native
+  var container = document.createElement('div');
+  container.insertAdjacentHTML('beforeend', data);
+  var bonus = container.getElementsByTagName('font');
+  bonus = Array.prototype.filter.call(bonus, function(el) {
+    return el.textContent === 'Bonuses';
+  });
+  bonus.forEach(addStats);
+  return container.innerHTML;
+}
+
+function fshPreFilter(options) { // Native
+  if (options.url.indexOf('fetchitem') !== 0) {return;}
+  options.dataFilter = fshDataFilter;
+}
+
+function addStatTotalToMouseover() { // jQuery
+  $.ajaxPrefilter(fshPreFilter);
 }
 
 var deferred = window.$ && $.when();
@@ -1464,7 +1927,7 @@ function sendItem(invIdList) {
     .done(dialog);
 }
 
-function debuff(buffId) {
+function debuff$1(buffId) {
   return $.ajax({
     url: 'fetchdata.php',
     data: {
@@ -1543,559 +2006,336 @@ function getMercStats() {
   return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }
 
-var moveOptions =
-  '<td colspan=3 ' +
-  'style="padding-top: 2px;padding-bottom: 2px;">' +
-  '<select style="max-width: 50px;">' +
-  '<option value="x">Basic Attack</option>' +
-  '<option value="0">Block</option>' +
-  '<option value="1">Counter Attack</option>' +
-  '<option value="2">Critical Hit</option>' +
-  '<option value="3">Defend</option>' +
-  '<option value="4">Deflect</option>' +
-  '<option value="5">Dodge</option>' +
-  '<option value="6">Lunge</option>' +
-  '<option value="7">Power Attack</option>' +
-  '<option value="8">Spin Attack</option>' +
-  '<option value="9">Piercing Strike</option>' +
-  '<option value="10">Crush</option>' +
-  '<option value="11">Weaken</option>' +
-  '<option value="12">Ice Shard</option>' +
-  '<option value="13">Fire Blast</option>' +
-  '<option value="14">Poison</option>' +
-  '</select></td>';
-var tableOpts = {
-  paging: false,
-  info: false,
-  order: [[3, 'asc'], [0, 'asc']],
-  columnDefs: [
-    {orderable: false, targets: [9]}
-  ],
-  stateSave: true,
-  stateDuration: 0
-};
-var arenaFilter =
-  '<table width="100%"><tbody><tr><td>' +
-  '<span class="fshBlue"><input id="fshHideMoves" type="checkbox">' +
-  '&nbsp;Hide Matches for Completed Moves</span></td><td align="right">' +
-  '<span class="fshBlue">Min lvl:&nbsp;<input id="fshMinLvl" size="5">' +
-  '&nbsp;Max lvl:&nbsp;<input id="fshMaxLvl" size="5">&nbsp;&nbsp;' +
-  '<input id="fshReset" class="custombutton" type="button" ' +
-  'value="Reset"></span></td></tr></tbody></table>';
+var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
-function dontPost(e) { // jQuery
+function debuff(aLink) { // jQuery
+  var buffId = aLink.getAttribute('href').match(/(\d+)$/)[1];
+  debuff$1(buffId)
+    .done(function(data) {
+      if (data.response.response === 0) {
+        aLink.parentNode.innerHTML = '';
+      } else {
+        $('#dialog_msg').html(data.response.msg).dialog('open');
+      }
+    });
+}
+
+function doPrompt(aLink) { // Native
+  var onclick = aLink.getAttribute('onclick');
+  var warn = onclick
+    .match(/Are you sure you wish to remove the .* skill\?/)[0];
+  confirm('Remove Skill', warn, function() {
+    debuff(aLink);
+  });
+}
+
+function checkForPrompt(aLink) {
+  if (!disableDeactivatePrompts) {
+    doPrompt(aLink);
+  } else {
+    debuff(aLink);
+  }
+}
+
+function interceptDebuff(e) { // jQuery
+  var aLink = e.target;
+  if (aLink.tagName === 'IMG') {
+    $(e.target).qtip('hide');
+    aLink = aLink.parentNode;
+  } else if (aLink.tagName !== 'A') {return;}
+  e.stopPropagation();
   e.preventDefault();
-  var self = $(e.target);
-  var pvpId = self.prev().val();
-  var subcmd = self.prev().prev().val();
-  window.location = 'index.php?cmd=arena&subcmd=' + subcmd +
-    '&pvp_id=' + pvpId;
+  checkForPrompt(aLink);
 }
 
-var tabs;
-var theTables;
-var opts;
-var oldIds;
+function fastDebuff() { // Native
+  var profileRightColumn = document.getElementById('profileRightColumn')
+    .lastElementChild;
+  profileRightColumn.addEventListener('click', interceptDebuff, true);
+}
 
-function changeLvls() { // jQuery
-  var minLvl = parseInt($('#fshMinLvl').val(), 10);
-  var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
-  if (!isNaN(minLvl) && !isNaN(maxLvl)) {
-    opts = opts || {};
-    opts.minLvl = minLvl;
-    opts.maxLvl = maxLvl;
-    setForage('fsh_arena', opts);
-    $('#arenaTypeTabs table[width="635"]').DataTable().draw();
+function backpackRemove(invId) { // jQuery
+  var _invId = parseInt(invId, 10);
+  var theBackpack = $('#backpackContainer').data('backpack');
+  // remove from srcData
+  theBackpack.srcData.some(function(el, i, ary) {
+    if (el.a === _invId) {
+      ary.splice(i, 1);
+      return true;
+    }
+    return false;
+  });
+}
+
+function fastWearUse(evt) { // jQuery
+  var InventoryItemID = evt.target.getAttribute('itemID');
+  useItem(InventoryItemID).done(function(data) {
+    if (data.r !== 0) {return;}
+    backpackRemove(InventoryItemID);
+    evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
+  });
+}
+
+function fastWearEquip(e) { // jQuery
+  var self = e.target;
+  var invId = self.getAttribute('itemid');
+  equipItem(invId).done(function(data) {
+    if (data.r !== 0) {return;}
+    backpackRemove(invId);
+    // TODO Insert item from worn
+    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
+  });
+}
+
+function actionClass(usable) { // Native
+  if (usable) {return 'fastUse';}
+  return 'fastWear';
+}
+
+function actionText(usable) { // Native
+  if (usable) {return 'Use';}
+  return 'Wear';
+}
+
+function drawButtons(theSpan) { // Native
+  var toUse = theSpan.classList.contains('backpackContextMenuUsable');
+  var myDiv = document.createElement('DIV');
+  myDiv.className = 'fastDiv';
+  myDiv.insertAdjacentHTML('beforeend', '<span class="' +
+    actionClass(toUse) + '" itemid="' +
+    theSpan.getAttribute('data-inv') + '">' +
+    actionText(toUse) + '</span>&nbsp;');
+  if (theSpan.parentNode.nextElementSibling) {
+    myDiv.appendChild(
+      theSpan.parentNode.nextElementSibling.nextElementSibling);
   }
+  theSpan.parentNode.parentNode.appendChild(myDiv);
 }
 
-function resetLvls() { // jQuery
-  opts = opts || {};
-  opts.minLvl = defaults.arenaMinLvl;
-  opts.maxLvl = defaults.arenaMaxLvl;
-  setForage('fsh_arena', opts);
-  $('#fshMinLvl').val(opts.minLvl);
-  $('#fshMaxLvl').val(opts.maxLvl);
-  $('#arenaTypeTabs table[width="635"]').DataTable().draw();
+function fastWearLinks() { // Native
+  var bpTabs = document.getElementById('backpack_tabs');
+  var type = bpTabs.getElementsByClassName('tab-selected')[0]
+    .getAttribute('data-type');
+  var items = document.querySelectorAll('#backpackTab_' + type +
+    ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
+  if (items.length === 0) {return;}
+  Array.prototype.forEach.call(items, drawButtons);
 }
 
-function hideMoves(evt) { // jQuery
-  opts = opts || {};
-  opts.hideMoves = evt.target.checked;
-  setForage('fsh_arena', opts);
-  $('.moveMax').toggle(!evt.target.checked);
+function injectFastWear() { // jQuery
+  if (!getValue('enableQuickDrink')) {return;}
+  var bpBack = document.getElementById('backpack');
+  bpBack.className = 'fshBackpack';
+  bpBack.removeAttribute('style');
+  var backpackContainer = document.getElementById('backpackContainer');
+  var theBackpack = $(backpackContainer).data('backpack');
+  var oldShow = theBackpack._showPage;
+  theBackpack._showPage = function(type, page) {
+    oldShow.call(theBackpack, type, page);
+    fastWearLinks();
+  };
+  if (document.getElementById('backpack_current').textContent.length !== 0) {
+    add(3, fastWearLinks);
+  }
+  backpackContainer.addEventListener('click', function(e) {
+    if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
+    if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
+  });
 }
 
-function sortHandler(evt) { // jQuery
-  var self = $(evt.target).closest('td');
-  var table = self.closest('table').DataTable();
-  var myCol = self.index();
-  var classes = self.attr('class');
-  var test = /sorting([^\s]+)/.exec(classes);
-  var sortOrder = 'desc';
-  if (test && test[1] === '_desc') {sortOrder = 'asc';}
-  if (myCol !== 3) {
-    table.order([3, 'asc'], [myCol, sortOrder]).draw();
+var profileCombatSetDiv;
+
+function getNekid() { // jQuery
+  var profileBlock = profileCombatSetDiv.nextElementSibling;
+  var aLinks = profileBlock.getElementsByTagName('a');
+  var prm = [];
+  Array.prototype.forEach.call(aLinks, function(link) {
+    var href = link.getAttribute('href');
+    prm.push($.ajax({
+      url: href,
+      timeout: 3000
+    }));
+  });
+  $.when.apply($, prm).always(function() {
+    location.assign('index.php?cmd=profile');
+  });
+}
+
+function nekidBtn() { // Native
+  var profileRightColumn = document.getElementById('profileRightColumn');
+  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
+  var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
+  var nekidDiv = document.createElement('div');
+  nekidDiv.className = 'fshCenter';
+  var theBtn = document.createElement('button');
+  theBtn.className = 'fshBl fshBls';
+  theBtn.textContent = 'Nekid';
+  nekidDiv.insertAdjacentText('beforeend', '[ ');
+  nekidDiv.insertAdjacentElement('beforeend', theBtn);
+  nekidDiv.insertAdjacentText('beforeend', ' ]');
+  profileRightColumn.replaceChild(nekidDiv, targetBr);
+  theBtn.addEventListener('click', getNekid);
+}
+
+var compPages;
+var componentList = {};
+
+function delAllComponent() { // Native
+  var invTbl = document.getElementById('profileRightColumn')
+    .getElementsByClassName('inventory-table')[1];
+  var nodeList = invTbl.getElementsByClassName('compDelBtn');
+  Array.prototype.forEach.call(nodeList, function(el) {
+    el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+  });
+}
+
+function retriveComponent(responseText, currentPage) { // Native
+  var nextPage = currentPage + 1;
+  var sumComp = document.getElementById('sumComp');
+  sumComp.insertAdjacentHTML('beforeend', nextPage + ', ');
+  var doc = createDocument(responseText);
+  var invTbl = doc.getElementById('profileRightColumn')
+    .getElementsByClassName('inventory-table')[1];
+  var nodeList = invTbl.getElementsByTagName('IMG');
+  Array.prototype.forEach.call(nodeList, function(el) {
+    var mouseover = el.getAttribute('data-tipped');
+    var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
+    componentList[id] = componentList[id] || {
+      count: 0,
+      src: el.getAttribute('src'),
+      onmouseover: mouseover
+    };
+    componentList[id].count += 1;
+  });
+  if (currentPage < compPages - 1) {
+    $.get('index.php?cmd=profile&component_page=' + nextPage)
+      .done(function(data) {retriveComponent(data, nextPage);});
   } else {
-    table.order([3, sortOrder]).draw();
+    var totalCount = invTbl.querySelectorAll(
+      'td[background$="inventory/1x1mini.gif"]');
+    totalCount = totalCount.length + currentPage * 50;
+    var output = 'Component Summary<br/><table>';
+    var usedCount = 0;
+    Object.keys(componentList).forEach(function(id) {
+      var comp = componentList[id];
+      output += '<tr><td align=center><img src="' + comp.src +
+        '" class="tip-dynamic" data-tipped="' + comp.onmouseover +
+        '"></td><td>' + comp.count + '</td></tr>';
+      usedCount += comp.count;
+    });
+    output += '<tr><td align=center>Total:</td><td>' + usedCount + ' / ' +
+      totalCount + '</td></tr></table>';
+    sumComp.innerHTML = output;
   }
 }
 
-function hideMovesCheckbox(aTable) { // jQuery
-  var fshHideMoves = $('#fshHideMoves', aTable);
-  if (opts && 'hideMoves' in opts) {
-    fshHideMoves.prop('checked', opts.hideMoves);
-    $('.moveMax').toggle(!opts.hideMoves);
+function countComponent(e) { // jQuery
+  var invTbl = document.getElementById('profileRightColumn')
+    .getElementsByClassName('inventory-table')[1];
+  var compPage = invTbl.querySelectorAll(
+    'a[href^="index.php?cmd=profile&component_page="]');
+  compPages = compPage.length;
+  e.target.parentNode.innerHTML = 'Retrieve page: ';
+  $.get('index.php?cmd=profile&component_page=0')
+    .done(function(data) {retriveComponent(data, 0);});
+}
+
+function delComponent(evt) { // jQuery
+  var href = evt.target.previousElementSibling.getAttribute('href');
+  $.get(href).done(function(data) {
+    var response = infoBox(data);
+    if (response === 'Component destroyed.') {
+      evt.target.parentNode.innerHTML = '';
+    } else {
+      $('#dialog_msg').html(response).dialog('open');
+    }
+  });
+}
+
+function enableDelComponent() { // Native
+  document.getElementById('compDel').parentNode.classList.add('fshHide');
+  document.getElementById('compDelAll').parentNode.classList
+    .remove('fshHide');
+  var nodeList = document.getElementById('profileRightColumn')
+    .getElementsByClassName('inventory-table')[1]
+    .getElementsByTagName('IMG');
+  Array.prototype.forEach.call(nodeList, function(el) {
+    el.parentNode.parentNode.insertAdjacentHTML('beforeend',
+      '<span class="compDelBtn">Del</span>');
+  });
+}
+
+var evtHdl = [
+  {
+    test: function(e) {return e.target.id === 'compDel';},
+    act: enableDelComponent
+  },
+  {
+    test: function(e) {return e.target.id === 'compSum';},
+    act: countComponent
+  },
+  {
+    test: function(e) {return e.target.id === 'compDelAll';},
+    act: delAllComponent
+  },
+  {
+    test: function(e) {return e.target.classList.contains('compDelBtn');},
+    act: delComponent
   }
-  fshHideMoves.click(hideMoves);
-}
-
-function minLvlValue(aTable) { // jQuery
-  var fshMinLvl = $('#fshMinLvl', aTable);
-  if (opts && 'minLvl' in opts) {
-    fshMinLvl.val(opts.minLvl);
-  } else {
-    fshMinLvl.val(defaults.arenaMinLvl);
-  }
-}
-
-function maxLvlValue(aTable) { // jQuery
-  var fshMaxLvl = $('#fshMaxLvl', aTable);
-  if (opts && 'maxLvl' in opts) {
-    fshMaxLvl.val(opts.maxLvl);
-  } else {
-    fshMaxLvl.val(defaults.arenaMaxLvl);
-  }
-}
-
-function filterHeader() { // jQuery
-  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
-  theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
-  theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
-  var aTable = $(arenaFilter);
-  hideMovesCheckbox(aTable);
-  minLvlValue(aTable);
-  maxLvlValue(aTable);
-  $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
-  $('#fshReset', aTable).click(resetLvls);
-  $('td', theRow).append(aTable);
-}
-
-var doLvlFilter = [
-  function(min) {return !min;},
-  function(min, max) {return !max;},
-  function(min, max) {return isNaN(min) && isNaN(max);},
-  function(min, max, level) {return isNaN(min) && level <= max;},
-  function(min, max, level) {return min <= level && isNaN(max);},
-  function(min, max, level) {return min <= level && level <= max;}
 ];
 
-function hazOpts(_settings, data) { // Native
-  var min = opts.minLvl;
-  var max = opts.maxLvl;
-  var level = intValue(data[7]);
-  for (var i = 0; i < doLvlFilter.length; i += 1) {
-    if (doLvlFilter[i](min, max, level)) {return true;}
-  }
-  return false;
-}
-
-function lvlFilter(_settings, data) { // Native
-  if (opts) {return hazOpts(_settings, data);}
-  return true;
-}
-
-function players(cell) { // jQuery
-  var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
-  if (matches) {
-    cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
+function compEvt(e) {
+  for (var i = 0; i < evtHdl.length; i += 1) {
+    if (evtHdl[i].test(e)) {evtHdl[i].act(e);}
   }
 }
 
-function boolData(cell) { // jQuery
-  var matches = /(\d)\.gif/.exec($('img', cell).attr('src'));
-  if (matches) {cell.attr('data-order', matches[1]);}
+function profileComponents() { // Native
+  var invTables = document.getElementById('profileRightColumn')
+    .getElementsByClassName('inventory-table');
+  if (invTables.length !== 2) {return;}
+  var compDiv = invTables[1].parentNode;
+  if (compDiv.style.display !== 'block') {return;}
+  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter"><div>' +
+    '[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
+    '</div><div id="sumComp">' +
+    '[<span id="compSum" class="sendLink">Count Components</span>]' +
+    '</div><div>' +
+    '[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
+    '&subcmd=quickextract">Quick Extract Components</a>]</div>' +
+    '<div class="fshHide">[<span id="compDelAll" class="sendLink">' +
+    'Delete All Visible</span>]</div>' +
+    '</div>');
+  compDiv.addEventListener('click', compEvt);
 }
 
-function hazMaxMoves(matches, row) { // jQuery
-  if (opts.moves[matches[1]] &&
-    opts.moves[matches[1]].count === 3) {
-    row.addClass('moveMax');
-  }
+function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
+  target.insertAdjacentHTML('beforeend', '<span class="fshBlue">&nbsp;' +
+    numberOfContacts + (contactsTotal && contactsTotal >= numberOfContacts ?
+    '/' + contactsTotal : '') + '</span>');
 }
 
-function maxMoves(cell, row) { // jQuery
-  if (opts && opts.moves) {
-    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
-    if (matches) {
-      hazMaxMoves(matches, row);
-      cell.attr('data-order', matches[1]);
-    }
-  }
-}
-
-function reward(cell) { // jQuery
-  if (cell.children('table').length !== 1) {return;}
-  cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
-}
-
-function orderData(i, e) { // jQuery
-
-  var row = $(e);
-  var theCells = row.children();
-
-  var cell = theCells.eq(0);
-  var matches = /#\s(\d+)/.exec(cell.text());
-  if (matches && opts && opts.id) {
-    opts.id[matches[1]] = matches[1];
-    if (oldIds && !oldIds[matches[1]]) {
-      row.css('background-color', '#F5F298');
-      row.find('tr').css('background-color', '#F5F298');
-    }
-  }
-
-  players(theCells.eq(1));
-  cell = theCells.eq(2);
-  cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
-  boolData(theCells.eq(4));
-  boolData(theCells.eq(5));
-  boolData(theCells.eq(6));
-  maxMoves(theCells.eq(8), row);
-  reward(theCells.eq(8));
-
-}
-
-function redoHead(i, e) { // jQuery
-  var firstRow = $('tr', e).first();
-  $('a', firstRow).contents().unwrap();
-  $(e).prepend($('<thead/>').append(firstRow));
-}
-
-function process(arena) { // jQuery
-
-  time('arena.process');
-
-  theTables.each(redoHead);
-  opts = arena || {};
-  oldIds = opts.id || {};
-  opts.id = {};
-  var myRows = theTables.children('tbody').children('tr');
-  myRows.each(orderData);
-  filterHeader();
-  setForage('fsh_arena', opts);
-  $.fn.dataTable.ext.search.push(lvlFilter);
-  theTables.DataTable(tableOpts);
-  $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
-  $('div.dataTables_filter').hide();
-  tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
-  tabs.on('click', 'input.custombutton[type="submit"]', dontPost);
-
-  timeEnd('arena.process');
-
-}
-
-function injectArena() { // jQuery
-  tabs = $('#arenaTypeTabs');
-  if (tabs.length !== 1) {return;} // Join error screen
-  theTables = $('table[width="635"]', tabs);
-  getForage('fsh_arena').done(process);
-}
-
-var inv;
-var target;
-
-function selectPerf() { // Native
-  var items = document.getElementById(target + '-items')
-    .getElementsByClassName('selectable-item');
-  if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, function(e) {
-    var thisItem = e.id.replace(target + '-item-', '');
-    if (inv[thisItem].craft === 'Perfect') {e.click();}
-  });
-}
-
-function drawFilters(data) { // Native
-  inv = data.items;
-  var buttonDiv = document.createElement('div');
-  buttonDiv.className = 'fshAC';
-  buttonDiv.insertAdjacentHTML('beforeend',
-    '<button class="fshBl">Perfect</button>');
-  pCC.appendChild(buttonDiv);
-  buttonDiv.addEventListener('click', selectPerf);
-}
-
-function perfFilter(loc) { // jQuery.min
-  target = loc;
-  getInventoryById().done(drawFilters);
-}
-
-function cancelAllAH() { // jQuery
-  var cancelButtons = document.getElementById('resultRows')
-    .getElementsByClassName('auctionCancel');
-  if (cancelButtons.length === 0) {return;}
-  var prm = [];
-  for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
-    var cancelButton = cancelButtons[i];
-    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
-      .firstElementChild;
-    cancelButton.outerHTML = '<img src="' + imageServer +
-      '/skin/loading.gif" width="14" height="14">';
-    prm.push(
-      $.post(
-        'index.php?cmd=auctionhouse&subcmd=cancel', {
-          auction_id:
-            /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
-        }
-      )
-    );
-  }
-  $.when.apply($, prm).done(function() {
-    document.getElementById('refresh').click();
-  });
-}
-
-function injectAuctionHouse() { // Native
-  if (!pCC) {return;}
-  if (getValue('autoFillMinBidPrice')) {
-    document.getElementById('auto-fill').checked = true;
-  }
-  document.getElementById('sort0').click();
-  var cancelAll = document.createElement('span');
-  cancelAll.className = 'smallLink';
-  cancelAll.textContent = 'Cancel All';
-  var fill = document.getElementById('fill').parentNode.parentNode
-    .nextElementSibling.firstElementChild;
-  fill.classList.add('fshCenter');
-  fill.insertAdjacentHTML('afterbegin', ']');
-  fill.insertAdjacentElement('afterbegin', cancelAll);
-  fill.insertAdjacentHTML('afterbegin', '[');
-  cancelAll.addEventListener('click', cancelAllAH);
-}
-
-function quickCreate() { // Native
-  perfFilter('auction');
-}
-
-var playerBank = {
-  headText: 'Bank',
-  appLink: true,
-  depoPos: 2,
-  balPos: 1,
-  data: {
-    cmd: 'bank',
-    subcmd: 'transaction'
-  },
-  initWithdraw: ''
-};
-var guildBank = {
-  headText: 'Guild Bank',
-  appLink: false,
-  depoPos: 3,
-  balPos: 2,
-  data: {
-    cmd: 'guild',
-    subcmd: 'bank',
-    subcmd2: 'transaction'
-  },
-  initWithdraw: '1'
-};
-var bankSettings;
-
-function doInfoBox(infoBox) { // jQuery
-  var target = $('#pCC #info-msg');
-  if (target.length === 0) {
-    $('#pCC').prepend(infoBox.closest('table'));
+function findAllyEnemy(el) { // Native
+  var isAllies = el.textContent === 'Allies';
+  var isEnemies = el.textContent === 'Enemies';
+  if (!isAllies && !isEnemies) {return;}
+  var target = el.parentNode;
+  var numberOfContacts = target.nextSibling.nextSibling
+    .getElementsByTagName('table').length - 1;
+  if (isAllies) {
+    totalAllyEnemy(target, numberOfContacts,
+      getValue('alliestotal'));
   } else {
-    target.closest('table').replaceWith(infoBox.closest('table'));
+    totalAllyEnemy(target, numberOfContacts,
+      getValue('enemiestotal'));
   }
 }
 
-function disableDepo(o) { // jQuery
-  if ($('#pCC b').eq(o.depoPos).text() === '0') {
-    $('#pCC input[value="Deposit"]').prop('disabled', true);
-  }
+function profileParseAllyEnemy() { // Native
+  // Allies/Enemies count/total function
+  Array.prototype.forEach.call(
+    document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);
 }
-
-function updateDepoAmount(o, doc) { // jQuery
-  if (o.data.deposit_amount !== '1') {
-    $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
-  } else {
-    $('#pCC #deposit_amount').val('1');
-  }
-}
-
-function transResponse(response) { // jQuery
-  var doc = createDocument(response);
-  var infoBox = $('#pCC #info-msg', doc);
-  if (infoBox.length === 0) {return;}
-  doInfoBox(infoBox);
-  $('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
-  $('#pH #statbar-gold-tooltip-general dd').text(function(index) {
-    return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
-  });
-  var o = bankSettings;
-  $('#pCC b').slice(o.balPos).text(function(index) {
-    return $('#pCC b', doc).slice(o.balPos).eq(index).text();
-  });
-  disableDepo(o);
-  updateDepoAmount(o, doc);
-  $('#pCC #withdraw_amount').val(o.initWithdraw);
-}
-
-function invalidAmount(o, amount) { // jQuery
-  return $('#pCC b').eq(o.depoPos).text() === '0' ||
-    !$.isNumeric(amount) || amount < 1;
-}
-
-function bankDeposit(e) { // jQuery
-  e.preventDefault();
-  var o = bankSettings;
-  var amount = $('#pCC #deposit_amount').val();
-  if (invalidAmount(o, amount)) {return;}
-  o.data.mode = 'deposit';
-  o.data.deposit_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
-}
-
-function bankWithdrawal(e) { // jQuery
-  e.preventDefault();
-  var o = bankSettings;
-  var amount = $('#pCC #withdraw_amount').val();
-  if (!$.isNumeric(amount) || amount < 1) {return;}
-  o.data.mode = 'withdraw';
-  o.data.withdraw_amount = amount;
-  $.get('index.php', o.data).done(transResponse);
-}
-
-function linkToGuildBank(o, bank) { // jQuery
-  if (o.appLink) {
-    bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
-      '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
-      '</td></tr>');
-  }
-}
-
-function captureButtons(o, depo, withdraw) { // jQuery
-  if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
-    depo.prop('disabled', true);
-  } else {
-    depo.click(bankDeposit);
-  }
-  withdraw.click(bankWithdrawal);
-}
-
-function appLink(o, bank) { // jQuery
-  linkToGuildBank(o, bank);
-  var depo = $('#pCC input[value="Deposit"]');
-  if (depo.length !== 1) {return;}
-  var withdraw = $('#pCC input[value="Withdraw"]');
-  if (withdraw.length !== 1) {return;}
-  captureButtons(o, depo, withdraw);
-}
-
-function ajaxifyBank() { // jQuery
-  var o = bankSettings;
-  var bank = $('#pCC b');
-  if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
-    appLink(o, bank);
-  }
-}
-
-function injectGuildBank() { // Native
-  bankSettings = guildBank;
-  ajaxifyBank();
-}
-
-function injectBank() { // Native
-  bankSettings = playerBank;
-  ajaxifyBank();
-}
-
-var ItemId;
-var bazaarTable =
-  '<table id="fshBazaar"><tr><td colspan="5">Select an item to quick-buy:' +
-  '</td></tr><tr><td colspan="5">Select how many to quick-buy</td></tr>' +
-  '<tr><td colspan="5"><input id="buy_amount" class="fshNumberInput" ' +
-  'type="number" min="0" max="99" value="1"></td></tr><tr><td>@0@</td>' +
-  '<td>@1@</td><td>@2@</td><td>@3@</td><td>@4@</td></tr><tr><td>@5@</td>' +
-  '<td>@6@</td><td>@7@</td><td>@8@</td><td>@9@</td></tr><tr>' +
-  '<td colspan="3">Selected item:</td><td id="selectedItem" colspan="2">' +
-  '</td></tr><tr><td colspan="5"><span id="warning" class="fshHide">' +
-  'Warning:<br>pressing [<span id="fshBuy" class="fshLink">This button' +
-  '</span>] now will buy the <span id="quantity">1</span> item(s) WITHOUT ' +
-  'confirmation!</span></td></tr><tr><td id="buy_result" colspan="5"></td>' +
-  '</tr></table>';
-var bazaarItem =
-  '<span class="bazaarButton tip-dynamic" style="background-image: ' +
-  'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
-
-function testQuant$1() { // Native
-  return testQuant(document.getElementById('buy_amount').value);
-}
-
-function select(evt) { // Native
-  var target = evt.target;
-  if (!target.classList.contains('bazaarButton')) {return;}
-  var theValue = testQuant$1();
-  if (!theValue) {return;}
-  document.getElementById('quantity').textContent = theValue;
-  ItemId = target.getAttribute('itemid');
-  document.getElementById('warning').removeAttribute('class');
-  var dupNode = target.cloneNode(false);
-  dupNode.className = 'bazaarSelected tip-dynamic';
-  var selected = document.getElementById('selectedItem');
-  selected.innerHTML = '';
-  selected.appendChild(dupNode);
-}
-
-function quantity() { // Native
-  var theValue = testQuant$1();
-  if (theValue) {
-    document.getElementById('quantity').textContent = theValue;
-  }
-}
-
-function done(responseText) { // Native
-  document.getElementById('buy_result').insertAdjacentHTML('beforeend',
-  '<br>' + infoBox(responseText));
-}
-
-function buy() { // jQuery
-  if (!ItemId) {return;}
-  var buyAmount = document.getElementById('quantity').textContent;
-  document.getElementById('buy_result').textContent =
-    'Buying ' + buyAmount + ' items';
-  for (var i = 0; i < buyAmount; i += 1) {
-    $.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
-      ItemId, done);
-  }
-}
-
-function injectBazaar() { // Native
-  var pbImg = pCC.getElementsByTagName('IMG')[0];
-  pbImg.className = 'fshFloatLeft';
-  var potions = pCC.getElementsByTagName('A');
-  Array.prototype.forEach.call(potions, function(el, i) {
-    var item = el.firstElementChild;
-    var tipped = item.getAttribute('data-tipped');
-    bazaarTable = bazaarTable
-      .replace('@' + i + '@', bazaarItem)
-      .replace('@src@', item.getAttribute('src'))
-      .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
-      .replace('@tipped@', tipped);
-  });
-  bazaarTable = bazaarTable.replace(/@\d@/g, '');
-  pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);
-  document.getElementById('fshBazaar').addEventListener('click', select);
-  document.getElementById('buy_amount').addEventListener('input', quantity);
-  document.getElementById('fshBuy').addEventListener('click', buy);
-}
-
-var buffCost = {count: 0, buffs: {}};
-var bioEditLines;
-var numRE = /[^a-zA-Z0-9.,+\- ]/g;
-var priceRE =
-  /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
 function expandBio() { // Native
   var bioExpander = document.getElementById('fshBioExpander');
@@ -2159,297 +2399,6 @@ function compressBio(bioCell) { // Native
   doCompression(bioCell, bioContents, maxCharactersToShow);
 }
 
-function getTargetPlayer() { // Native
-  var targetPlayer = pCC
-    .getElementsByTagName('h1');
-  if (targetPlayer.length !== 0) {
-    targetPlayer = targetPlayer[0].textContent;
-  } else {
-    targetPlayer = playerName();
-  }
-  return targetPlayer;
-}
-
-function formatBuffsToBuy() { // Legacy
-  var targetPlayer = getTargetPlayer();
-  var buffsToBuy = Object.keys(buffCost.buffs).join(', ');
-  var greetingText = getValue('buyBuffsGreeting').trim();
-  var hasBuffTag = greetingText.indexOf('{buffs}') !== -1;
-  var hasCostTag = greetingText.indexOf('{cost}') !== -1;
-  greetingText = greetingText.replace(/{playername}/g, targetPlayer);
-  if (!hasBuffTag) {
-    greetingText += ' ' + buffsToBuy;
-  } else if (!hasCostTag) {
-    greetingText = greetingText
-      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`');
-  } else {
-    greetingText = greetingText
-      .replace(/{buffs}/g, '`~' + buffsToBuy + '~`')
-      .replace(/{cost}/g, buffCost.buffCostTotalText);
-  }
-  window.openQuickMsgDialog(targetPlayer, greetingText, '');
-}
-
-function getBuffsToBuy() { // Legacy
-  if (buffCost.count > 0) {formatBuffsToBuy();}
-}
-
-var costFormatter = [
-  {
-    condition: function(total) {
-      return total.fsp > 0;
-    },
-    result: function(total) {
-      return String(Math.round(total.fsp * 100) / 100) + ' FSP';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.fsp > 0 && total.k > 0;
-    },
-    result: function() {
-      return ' and ';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.k > 0;
-    },
-    result: function(total) {
-      return total.k + ' k';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.stam > 0 && (total.fsp > 0 || total.k > 0);
-    },
-    result: function() {
-      return ' and ';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.stam > 0;
-    },
-    result: function(total) {
-      return total.stam + ' Stam(' +
-        String(Math.round(total.stam / 25 * 10) / 10) + 'fsp)';
-    }
-  },
-  {
-    condition: function(total) {
-      return total.unknown > 0;
-    },
-    result: function(total) {
-      return ' (' + total.unknown + ' buff(s) with unknown cost)';
-    }
-  }
-];
-
-function formatCost(total) { // Native
-  return costFormatter.reduce(function(prev, el) {
-    var ret = prev;
-    if (el.condition(total)) {
-      ret += el.result(total);
-    }
-    return ret;
-  }, '');
-}
-
-function hazBuffs() { // Legacy
-  var total = {k: 0, fsp: 0, stam: 0, unknown: 0};
-  var html = 'This is an estimated cost based on how the script finds ' +
-    'the cost associated with buffs from viewing bio.' +
-    'It can be incorrect, please use with discretion.<br><hr>' +
-    '<table border=0>';
-
-  Object.keys(buffCost.buffs).forEach(function(buff) {
-    total[buffCost.buffs[buff][1]] += buffCost.buffs[buff][0];
-    html += '<tr><td>' + buff + '</td><td>: ' + buffCost.buffs[buff][0] +
-      buffCost.buffs[buff][1] + '</td></tr>';
-  });
-
-  var totalText = formatCost(total);
-
-  html += '</table><b>Total: ' + totalText + '</b>';
-  document.getElementById('buffCost').innerHTML = '<br/><span ' +
-    'class="tip-static" data-tipped="' + html + '">Estimated Cost: <b>' +
-    totalText + '</b></span>';
-  buffCost.buffCostTotalText = totalText;
-}
-
-function updateBuffCost() { // Legacy
-  if (buffCost.count > 0) {
-    hazBuffs();
-  } else {
-    document.getElementById('buffCost').innerHTML = '';
-    buffCost.buffCostTotalText = '';
-  }
-}
-
-function priceUnit(price) { // Native
-  if (price[0].indexOf('k') > 0) {
-    return 'k';
-  }
-  if (price[0].indexOf('f') > 0) {
-    return 'fsp';
-  }
-  return 'stam';
-}
-
-function priceBeforeName(buffNameNode, price) {
-  if (!price) { // some players have prices BEFORE the buff names
-    var newtext;
-    var text = '';
-    var node = buffNameNode;
-    while (node && node.nodeName.toLowerCase() !== 'br') {
-      newtext = node.textContent;
-      node = node.previousSibling;
-      text = newtext + text;
-    }
-    return text.replace(numRE, '').toLowerCase().match(priceRE);
-  }
-  return price;
-}
-
-function getBuffCost(buffNameNode) {
-  var node = buffNameNode;
-  var buffName = node.textContent;
-  var newtext;
-  var text = '';
-  // get the whole line from the buff name towards the end (even after
-  // the ',', in case of 'AL, Lib, Mer: 10k each'
-  while (node && node.nodeName.toLowerCase() !== 'br') {
-    newtext = node.textContent;
-    node = node.nextSibling;
-    text += newtext;
-  }
-  var price = text.replace(numRE, '').toLowerCase().match(priceRE);
-  price = priceBeforeName(buffNameNode, price);
-  var type;
-  var cost;
-  if (price) {
-    type = priceUnit(price);
-    cost = price[0].match(/([+-]{0,1}[.\d]+)/)[0];
-  } else {
-    type = 'unknown';
-    cost = '1';
-  }
-  buffCost.buffs[buffName] = [parseFloat(cost), type];
-  buffCost.count += 1;
-}
-
-function toggleBuffsToBuy(evt) { // Legacy
-  // This is also called by bio preview
-  var buffNameNode = evt.target;
-  while (buffNameNode.tagName.toLowerCase() !== 'span') {
-    buffNameNode = buffNameNode.parentNode;
-  }
-  var node = buffNameNode;
-  var selected = node.classList.contains('fshBlue');
-  node.classList.toggle('fshBlue');
-  node.classList.toggle('fshYellow');
-  var buffName = node.textContent;
-  if (selected) {
-    getBuffCost(buffNameNode);
-  } else {
-    buffCost.count -= 1;
-    delete buffCost.buffs[buffName];
-  }
-  updateBuffCost();
-}
-
-function getBuffNameNode(e) { // Native
-  var buffNameNode = e.target;
-  while (buffNameNode.tagName &&
-      buffNameNode.tagName.toLowerCase() !== 'span') {
-    buffNameNode = buffNameNode.parentNode;
-  }
-  return buffNameNode;
-}
-
-function bioEvtHdl(e) { // Native
-  var buffNameNode = getBuffNameNode(e);
-  if (buffNameNode.classList &&
-      buffNameNode.classList.contains('buffLink')) {
-    toggleBuffsToBuy(e);
-  } else if (e.target.id === 'fshSendBuffMsg') {
-    getBuffsToBuy(e);
-  }
-}
-
-function bioPreview() { // Native
-  var textArea = document.getElementById('textInputBox');
-  var bioPreviewHTML = convertTextToHtml(textArea.value);
-  textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
-    '<table align="center" width="325" border="1">' +
-    '<tbody><tr><td style="text-align:center;color:#7D2252;' +
-    'background-color:#CD9E4B">Preview</td></tr><tr>' +
-    '<td align="left" width="325"><span id="biopreview">' +
-    bioPreviewHTML + '</span></td></tr></tbody></table></div>');
-}
-
-function bioWords() { // Native
-  // Add description text for the new tags
-  pCC.insertAdjacentHTML('beforeend', '<div>' +
-    '`~This will allow FSH Script users to ' +
-    'select buffs from your bio~`<br>You can use the [cmd] tag as well to ' +
-    'determine where to put the "Ask For Buffs" button<br><br>' +
-    '&nbsp;&nbsp;&nbsp;- Note 1: The ` and ~ characters are on the same ' +
-    'key on QWERTY keyboards. ` is <b>NOT</b> an apostrophe.<br>' +
-    '&nbsp;&nbsp;&nbsp;- Note 2: Inner text will not contain special ' +
-    'characters (non-alphanumeric).<br>' +
-    '&nbsp;&nbsp;&nbsp;- P.S. Be creative with these! Wrap your buff ' +
-    'pack names in them to make buffing even easier!</div>');
-}
-
-function testHeightValid(boxVal) { // Native
-  return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
-}
-
-function changeHeight() { // Native
-  var theBox = document.getElementById('fshLinesToShow');
-  var boxVal = parseInt(theBox.value, 10);
-  if (testHeightValid(boxVal)) {return;}
-  bioEditLines = boxVal;
-  setValue('bioEditLines', boxVal);
-  document.getElementById('textInputBox').rows = bioEditLines;
-}
-
-function bioHeight() { // Native
-  var bioEditLinesDiv = document.createElement('DIV');
-  bioEditLinesDiv.insertAdjacentHTML('beforeend',
-    ' Display <input id="fshLinesToShow"' +
-    ' type="number" min="1" max="99" value="' +
-    bioEditLines + '"/> Lines ');
-  var saveLines = document.createElement('INPUT');
-  saveLines.className = 'custombutton';
-  saveLines.value = 'Update Rows To Show';
-  saveLines.type = 'button';
-  saveLines.addEventListener('click', changeHeight);
-  bioEditLinesDiv.appendChild(saveLines);
-  pCC.appendChild(bioEditLinesDiv);
-}
-
-function renderBio(_bioContents) {
-  var bioContents = _bioContents.replace(/\{b\}/g, '`~')
-    .replace(/\{\/b\}/g, '~`');
-  var buffs = bioContents.match(/`~([^~]|~(?!`))*~`/g);
-  if (!buffs) {return;}
-  buffs.forEach(function(buff, i) {
-    var fullName = buff.replace(/(`~)|(~`)|(\{b\})|(\{\/b\})/g, '');
-    var cbString = '<span id="fshBuff' + i + '" class="buffLink fshBlue">' +
-      fullName + '</span>';
-    bioContents = bioContents.replace(buff, cbString);
-  });
-  if (bioContents.indexOf('[cmd]') < 0) {bioContents += '[cmd]';}
-  bioContents = bioContents.replace('[cmd]',
-    '<br><input id="fshSendBuffMsg" ' +
-    'class="custombutton" type="button" value="Ask For Buffs">' +
-    '<span id="buffCost" class="fshRed"></span>');
-  return bioContents;
-}
-
 function doRender(bioCell) { // Native
   var bioContents = bioCell.innerHTML;
   bioContents = renderBio(bioContents);
@@ -2473,29 +2422,465 @@ function profileRenderBio(self) { // Native
   bioCell.addEventListener('click', bioEvtHdl);
 }
 
-function updateBioCharacters() { // Native
-  var textArea = document.getElementById('textInputBox');
-  var previewArea = document.getElementById('biopreview');
-  var bioContents = convertTextToHtml(textArea.value);
-  bioContents = renderBio(bioContents);
-  if (bioContents) {
-    previewArea.innerHTML = bioContents;
+var drag_target;
+
+function drag_over(event) { // Native
+  event.preventDefault();
+  return false;
+}
+
+function drag_drop(event) { // Native
+  var offset = event.dataTransfer.getData('text/plain').split(',');
+  drag_target.style.left =
+    event.clientX + parseInt(offset[0], 10) + 'px';
+  drag_target.style.top =
+    event.clientY + parseInt(offset[1], 10) + 'px';
+  document.body.removeEventListener('dragover', drag_over, false);
+  document.body.removeEventListener('drop', drag_drop, false);
+  event.preventDefault();
+  return false;
+}
+
+function drag_start(event) { // Native
+  drag_target = event.target;
+  var style = window.getComputedStyle(event.target, null);
+  event.dataTransfer.setData('text/plain',
+    parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
+    (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
+  document.body.addEventListener('dragover', drag_over, false);
+  document.body.addEventListener('drop', drag_drop, false);
+}
+
+function getStat(stat, doc) { // jQuery
+  // 'Hidden' returns NaN
+  return intValue(
+      $(stat, doc)
+        .contents()
+        .filter(function(i, e) {
+          return e.nodeType === 3;
+        })[0].nodeValue
+    );
+}
+
+function getBuffLevel(doc, buff) { // jQuery
+  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]',
+    doc);
+  hasBuff = hasBuff.data('tipped');
+  var re = new RegExp('</b> \\(Level: (\\d+)\\)');
+  var test = re.exec(hasBuff);
+  return test === null ? 0 : intValue(test[1]);
+}
+
+function getBonus(stat, doc) { // jQuery
+  var target = $(stat, doc);
+  var children = target.children();
+  if (children.length === 0) {
+    children = target.next();
+  }
+  return intValue(children.text().slice(2, -1));
+}
+
+function cloakGuess(bonus, level) { // Native
+  if (bonus > level * 10 ||
+      bonus < level) {
+    return bonus;
+  }
+  return level * 10;
+}
+
+function updateForCloak(obj) {
+  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
+  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
+  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
+  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
+  obj.hpValue = obj.hpBonus;
+}
+
+function playerDataString(responseText) { // Native
+  var doc = createDocument(responseText);
+  var obj = {
+    levelValue: getStat('#stat-vl', doc),
+    attackValue: getStat('#stat-attack', doc),
+    attackBonus: getBonus('#stat-attack', doc),
+    defenseValue: getStat('#stat-defense', doc),
+    defenseBonus: getBonus('#stat-defense', doc),
+    armorValue: getStat('#stat-armor', doc),
+    armorBonus: getBonus('#stat-armor', doc),
+    damageValue: getStat('#stat-damage', doc),
+    damageBonus: getBonus('#stat-damage', doc),
+    hpValue: getStat('#stat-hp', doc),
+    hpBonus: getBonus('#stat-hp', doc),
+    killStreakValue: getStat('#stat-kill-streak', doc),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
+    doublerLevel: getBuffLevel(doc, 'Doubler'),
+    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
+    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
+    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
+    constitutionLevel: getBuffLevel(doc, 'Constitution'),
+    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
+    flinchLevel: getBuffLevel(doc, 'Flinch'),
+    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
+    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
+    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
+    barricadeLevel: getBuffLevel(doc, 'Barricade'),
+    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
+    anchoredLevel: getBuffLevel(doc, 'Anchored'),
+    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
+    entrenchLevel: getBuffLevel(doc, 'Entrench'),
+    cloakLevel: getBuffLevel(doc, 'Cloak')
+  };
+  obj.superEliteSlayerMultiplier = Math.round(0.002 *
+    obj.superEliteSlayerLevel * 100) / 100;
+
+  if (obj.cloakLevel === 0 ||
+      typeof obj.attackValue === 'number' &&
+      !isNaN(obj.attackValue)) {
+    return obj;
+  }
+
+  updateForCloak(obj);
+  return obj;
+}
+
+function reduceBuffArray(buffAry) {
+  return buffAry.reduce(function(prev, curr) {
+    prev[curr.name] = Number(curr.level);
+    return prev;
+  }, {});
+}
+
+function getBuffLvl(buffs, buff) {
+  return fallback(buffs[buff], 0);
+}
+
+function playerDataObject(json) { // Native
+  var buffs = reduceBuffArray(json._skills);
+  var obj = {
+    levelValue: json.level,
+    attackValue: json.attack,
+    attackBonus: json.bonus_attack,
+    defenseValue: json.defense,
+    defenseBonus: json.bonus_defense,
+    armorValue: json.armor,
+    armorBonus: json.bonus_armor,
+    damageValue: json.damage,
+    damageBonus: json.bonus_damage,
+    hpValue: json.hp,
+    hpBonus: json.bonus_hp,
+    killStreakValue: intValue(json.killstreak),
+    // get buffs here later ... DD, CA, DC, Constitution, etc
+    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
+    doublerLevel: getBuffLvl(buffs, 'Doubler'),
+    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
+    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
+    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
+    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
+    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
+    flinchLevel: getBuffLvl(buffs, 'Flinch'),
+    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
+    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
+    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
+    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
+    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
+    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
+    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
+    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
+    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
+    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
+    cloakLevel: getBuffLvl(buffs, 'Cloak')
+  };
+  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
+  return obj;
+}
+
+function playerData(responseText) { // Native
+  var obj = {};
+  if (typeof responseText === 'string') {
+    obj = playerDataString(responseText);
+  }
+  if (typeof responseText === 'object') {
+    obj = playerDataObject(responseText);
+  }
+  return obj;
+}
+
+function updateHCSQuickBuffLinks(selector) { // Native
+  Array.prototype.forEach.call(document.querySelectorAll(selector),
+    function(el) {
+      el.setAttribute('href', el.getAttribute('href')
+        .replace(/, 500/g, ', 1000'));
+    }
+  );
+}
+
+var guildId$1;
+var currentGuildRelationship;
+var guildMessages = {
+  self: {
+    color: 'fshGreen',
+    message: getValue('guildSelfMessage')
+  },
+  friendly: {
+    color: 'fshOliveDrab',
+    message: getValue('guildFrndMessage')
+  },
+  old: {
+    color: 'fshDarkCyan',
+    message: getValue('guildPastMessage')
+  },
+  enemy: {
+    color: 'fshRed',
+    message: getValue('guildEnmyMessage')
+  }
+};
+
+function quickWearLink() { // Native
+  // quick wear manager link
+  var node = document.querySelector('#profileRightColumn ' +
+    'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
+  if (!node) {return;}
+  node.parentNode.insertAdjacentHTML('beforeend',
+    '&nbsp;[<a href="/index.php?cmd=notepad&blank=1&subcmd=quickwear" ' +
+    'class="fshBlue">Quick&nbsp;Wear</a>]');
+}
+
+function profileSelectAll() { // Native
+  var bpTabs = document.getElementById('backpack_tabs');
+  var type = bpTabs.getElementsByClassName('tab-selected')[0]
+    .getAttribute('data-type');
+  var items = document.querySelectorAll('#backpackTab_' + type +
+    ' li:not(.hcsPaginate_hidden) .backpackItem');
+  if (items.length === 0) {return;}
+  var checkboxes = document.querySelectorAll('#backpackTab_' + type +
+    ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
+  if (checkboxes.length > 0) {items = checkboxes;}
+  Array.prototype.forEach.call(items, function(el) {
+    el.dispatchEvent(new MouseEvent('click', {
+      bubbles: true,
+      ctrlKey: true,
+      metaKey: true
+    }));
+  });
+}
+
+function selectAllLink() { // Native
+  // select all link
+  var node = document.querySelector('#profileRightColumn' +
+    ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
+  if (!node) {return;}
+  var allSpan = document.createElement('SPAN');
+  allSpan.className = 'smallLink';
+  allSpan.textContent = 'All';
+  allSpan.addEventListener('click', profileSelectAll);
+  var wrapper = document.createElement('SPAN');
+  wrapper.insertAdjacentHTML('beforeend', '[&nbsp;');
+  wrapper.appendChild(allSpan);
+  wrapper.insertAdjacentHTML('beforeend', '&nbsp;]&nbsp;');
+  node.parentNode.appendChild(wrapper);
+}
+
+function storeVL() { // Native
+  // store the VL of the player
+  var virtualLevel = parseInt(
+    document.getElementById('stat-vl').textContent, 10);
+  if (intValue(document.getElementsByClassName('stat-level')[0]
+    .nextElementSibling.textContent) === virtualLevel) {
+    setValue('characterVirtualLevel', ''); // ?
+  } else {
+    setValue('characterVirtualLevel', virtualLevel);
   }
 }
 
-function injectBioWidgets() { // Native
-  bioEditLines = getValue('bioEditLines');
-  var textArea = document.getElementById('textInputBox');
-  bioPreview();
-  bioWords();
-  bioHeight();
-  textArea.rows = bioEditLines;
-  textArea.classList.add('fshNoResize');
+function guildAry(val) {
+  if (val) {
+    return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
+  }
+  return [];
+}
 
-  textArea.parentNode.addEventListener('click', bioEvtHdl);
-  textArea.addEventListener('keyup', updateBioCharacters);
-  // Force the preview area to render
-  updateBioCharacters();
+function guildRelationship(_txt) { // Native
+  var scenario = [
+    {test: guildAry(getValue('guildSelf')), type: 'self'},
+    {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
+    {test: guildAry(getValue('guildPast')), type: 'old'},
+    {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
+  ];
+  var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
+  for (var i = 0; i < scenario.length; i += 1) {
+    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
+  }
+}
+
+function foundGuildLink(aLink) { // Native
+  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
+  if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
+  currentGuildRelationship = guildRelationship(aLink.text);
+  if (currentGuildRelationship) {
+    aLink.parentNode.classList.add(
+      guildMessages[currentGuildRelationship].color);
+    aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
+      guildMessages[currentGuildRelationship].message);
+  }
+}
+
+function profileInjectGuildRel() { // Native
+  var aLink = document.querySelector(
+    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
+  if (aLink) {foundGuildLink(aLink);}
+}
+
+function profileInjectQuickButton(avyImg, playerid, playername) { // Native
+  var newhtml = '<div align="center">';
+  newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
+    quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
+    '" style="background-image: url(\'' + imageServer +
+    '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
+  if (!getValue('enableMaxGroupSizeToJoin')) {
+    newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
+      'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
+      'data-tipped="Join All Groups" style="background-image: url(\'' +
+      imageServer +
+      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+  } else {
+    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
+    newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
+      'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
+      'joinallgroupsundersize" data-tipped="Join All Groups < ' +
+      maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
+      imageServer +
+      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
+  }
+  newhtml += '<a class="quickButton tip-static" ' +
+    'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
+    '" data-tipped="Go to ' + playername +
+    '\'s auctions" style="background-image: url(\'' +
+    imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
+  newhtml += '<a class="quickButton tip-static" ' +
+    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
+    playername + '" data-tipped="Create Secure Trade to ' + playername +
+    '" style="background-image: url(\'' + imageServer +
+    '/temple/2.gif\');"></a>&nbsp;&nbsp;';
+  newhtml += '<a class="quickButton tip-static" ' +
+    'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
+    playername + '" data-tipped="Recall items from ' + playername +
+    '" style="background-image: url(\'' + imageServer +
+    '/temple/3.gif\');"></a>&nbsp;&nbsp;';
+  if (currentGuildRelationship === 'self' &&
+      getValue('showAdmin')) {
+    newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
+      'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
+      playerid + '" data-tipped="Rank ' + playername +
+      '" style="background-image: url(\'' + imageServer +
+      '/guilds/' + guildId$1 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
+  }
+  newhtml += '</div>';
+  avyImg.insertAdjacentHTML('afterend', newhtml);
+}
+
+function removeStatTable(el) { // Native
+  var tde = el.getElementsByTagName('td');
+  el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
+    '<div class="profile-stat-bonus">' +
+    tde[1].textContent + '</div>';
+}
+
+function updateStatistics() { // Native
+  var charStats = document.getElementById('profileLeftColumn')
+    .getElementsByTagName('table')[0];
+  var dodgyTables = charStats.getElementsByTagName('table');
+  Array.prototype.forEach.call(dodgyTables, removeStatTable);
+}
+
+function ifSelf(self) { // Legacy
+  if (self) {
+    // self inventory
+    fastDebuff();
+    profileParseAllyEnemy();
+    injectFastWear();
+    profileComponents();
+    quickWearLink();
+    selectAllLink();
+    storeVL();
+    nekidBtn();
+  }
+}
+
+function yuuzhan(playername, avyImg) { // Legacy
+  if (playername === 'yuuzhan') {
+    avyImg.setAttribute('src',
+      'http://evolutions.yvong.com/images/tumbler.gif');
+    avyImg.addEventListener('click', function() {
+      $('#dialog_msg').text('Winner!').dialog('open');
+    });
+  }
+}
+
+function injectProfile() { // Legacy
+  var avyImg = document
+    .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
+  if (!avyImg) {return;}
+  var playername = pCC
+    .getElementsByTagName('h1')[0].textContent;
+  var self = playername === playerName();
+  ifSelf(self);
+  // Must be before profileInjectQuickButton
+  profileInjectGuildRel();
+  // It sets up guildId and currentGuildRelationship
+  var playerid = fallback(getUrlParameter('player_id'),
+    playerId());
+  profileInjectQuickButton(avyImg, playerid, playername);
+
+  //* ************* yuuzhan having fun
+  yuuzhan(playername, avyImg);
+  //* *************
+
+  updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
+  updateStatistics();
+  profileRenderBio(self);
+  addStatTotalToMouseover();
+  add(3, colouredDots);
+}
+
+function dontPost() { // Native
+  var submitButton = document.querySelector('#pCC input[type="submit"]');
+  if (submitButton) {
+    submitButton.addEventListener('click', function(e) {
+      e.preventDefault();
+      window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
+        document.querySelector('#pCC select[name="viewing_band_id"]').value;
+    });
+  }
+}
+
+function formatTime() { // Native
+  var lastLadderReset = getValue('lastLadderReset');
+  var now = Date.now();
+  if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
+    return '<span class="fshLink tip-static" data-tipped="FSH has not seen ' +
+      'the last ladder reset.<br>You can find it in your log if you ' +
+      'qualified<br>or Tavern Rumours.">???</span>';
+  }
+  return formatLastActivity(lastLadderReset / 1000);
+}
+
+function lastReset() { // Native
+  var topTable = document.querySelector('#pCC table');
+  var newRow = document.createElement('tr');
+  var leftCell = newRow.insertCell(-1);
+  leftCell.height = 25;
+  leftCell.textContent = 'Last Reset:';
+  var rightCell = newRow.insertCell(-1);
+  rightCell.align = 'right';
+  rightCell.innerHTML = formatTime();
+  topTable.appendChild(newRow);
+}
+
+function ladder() { // Native
+  dontPost();
+  lastReset();
 }
 
 var networkIcon =
@@ -3711,6 +4096,689 @@ function injectSettings() { // jQuery.min
     .value);
 }
 
+var warehouse = [];
+var collapseNewsArchive;
+var lastLadderReset;
+
+function collapseArt(article) { // Native
+  article.rows.forEach(function(el) {
+    el.row.classList.add('fshHide');
+  });
+  article.open = false;
+}
+
+function collapseAll() { // Native
+  warehouse.forEach(function(article) {
+    if (article.open) {collapseArt(article);}
+  });
+}
+
+function expandArt(article) { // Native
+  article.rows.forEach(function(el) {
+    el.row.classList.remove('fshHide');
+  });
+  article.open = true;
+}
+
+function expandAll() { // Native
+  warehouse.forEach(function(article) {
+    if (!article.open) {expandArt(article);}
+  });
+}
+
+function isHeader(el) { // Native
+  if (el.rowIndex % 6 === 0) {return el;}
+}
+
+function closestTr(el) { // Native
+  if (el.tagName === 'TR') {
+    return isHeader(el);
+  }
+  if (el.tagName === 'TABLE') {return;}
+  return closestTr(el.parentNode);
+}
+
+function evtEnabled(evt) { // Native
+  var myRow = closestTr(evt.target);
+  if (!myRow) {return;}
+  var articleNo = myRow.rowIndex / 6;
+  var article = warehouse[articleNo];
+  if (article.open === false) {
+    collapseAll();
+    expandArt(article);
+  } else {
+    collapseArt(article);
+  }
+}
+
+function evtHdl$1(evt) { // Native
+  if (collapseNewsArchive) {evtEnabled(evt);}
+}
+
+function makeHeaderClickable(row) { // Native
+  if (collapseNewsArchive) {row.classList.add('fshPoint');}
+}
+
+function collapseDuringAnalysis(row, thisArticle) { // Native
+  if (collapseNewsArchive) {
+    row.classList.add('fshHide');
+    thisArticle.open = false;
+  } else {
+    thisArticle.open = true;
+  }
+}
+
+function checkForPvPLadder(row) { // Native
+  if (row.children[1].children[0].textContent === 'PvP Ladder') {
+    var logTime = parseDateAsTimestamp(
+      row.children[1].children[2].textContent.replace('Posted: ', ''));
+    if (logTime > lastLadderReset) {
+      setValue('lastLadderReset', logTime);
+      lastLadderReset = logTime;
+    }
+  }
+}
+
+function testRowType(row, rowType, thisArticle) { // Native
+  if (rowType === 0) {
+    thisArticle.header = row;
+    makeHeaderClickable(row);
+    checkForPvPLadder(row);
+  }
+  if (rowType > 1) {
+    thisArticle.rows[rowType] =
+      fallback(thisArticle[rowType], {});
+    thisArticle.rows[rowType].row = row;
+    collapseDuringAnalysis(row, thisArticle);
+  }
+}
+
+function doTagging(row) { // Native
+  var rowType = row.rowIndex % 6;
+  var articleNo = (row.rowIndex - rowType) / 6;
+  warehouse[articleNo] = fallback(warehouse[articleNo], {});
+  var thisArticle = warehouse[articleNo];
+  thisArticle.rows = thisArticle.rows || [];
+  testRowType(row, rowType, thisArticle);
+}
+
+function toggleHeaderClass() {
+  warehouse.forEach(function(article) {
+    article.header.classList.toggle('fshPoint');
+  });
+}
+
+function togglePref() { // Native
+  collapseNewsArchive = !collapseNewsArchive;
+  setValue('collapseNewsArchive', collapseNewsArchive);
+  if (collapseNewsArchive) {collapseAll();} else {expandAll();}
+  toggleHeaderClass();
+}
+
+function setupPref(rowInjector) {
+  collapseNewsArchive = getValue('collapseNewsArchive');
+  rowInjector.insertAdjacentHTML('afterend',
+    simpleCheckbox('collapseNewsArchive'));
+  document.getElementById('collapseNewsArchive')
+    .addEventListener('click', togglePref);
+}
+
+function viewArchive() { // Native
+  lastLadderReset = getValue('lastLadderReset');
+  var theTables = pCC.getElementsByTagName('table');
+  setupPref(theTables[0].rows[2]);
+  Array.prototype.forEach.call(theTables[2].rows, doTagging);
+  theTables[2].addEventListener('click', evtHdl$1);
+}
+
+var moveOptions =
+  '<td colspan=3 ' +
+  'style="padding-top: 2px;padding-bottom: 2px;">' +
+  '<select style="max-width: 50px;">' +
+  '<option value="x">Basic Attack</option>' +
+  '<option value="0">Block</option>' +
+  '<option value="1">Counter Attack</option>' +
+  '<option value="2">Critical Hit</option>' +
+  '<option value="3">Defend</option>' +
+  '<option value="4">Deflect</option>' +
+  '<option value="5">Dodge</option>' +
+  '<option value="6">Lunge</option>' +
+  '<option value="7">Power Attack</option>' +
+  '<option value="8">Spin Attack</option>' +
+  '<option value="9">Piercing Strike</option>' +
+  '<option value="10">Crush</option>' +
+  '<option value="11">Weaken</option>' +
+  '<option value="12">Ice Shard</option>' +
+  '<option value="13">Fire Blast</option>' +
+  '<option value="14">Poison</option>' +
+  '</select></td>';
+var tableOpts = {
+  paging: false,
+  info: false,
+  order: [[3, 'asc'], [0, 'asc']],
+  columnDefs: [
+    {orderable: false, targets: [9]}
+  ],
+  stateSave: true,
+  stateDuration: 0
+};
+var arenaFilter =
+  '<table width="100%"><tbody><tr><td>' +
+  '<span class="fshBlue"><input id="fshHideMoves" type="checkbox">' +
+  '&nbsp;Hide Matches for Completed Moves</span></td><td align="right">' +
+  '<span class="fshBlue">Min lvl:&nbsp;<input id="fshMinLvl" size="5">' +
+  '&nbsp;Max lvl:&nbsp;<input id="fshMaxLvl" size="5">&nbsp;&nbsp;' +
+  '<input id="fshReset" class="custombutton" type="button" ' +
+  'value="Reset"></span></td></tr></tbody></table>';
+
+function dontPost$1(e) { // jQuery
+  e.preventDefault();
+  var self = $(e.target);
+  var pvpId = self.prev().val();
+  var subcmd = self.prev().prev().val();
+  window.location = 'index.php?cmd=arena&subcmd=' + subcmd +
+    '&pvp_id=' + pvpId;
+}
+
+var tabs;
+var theTables;
+var opts;
+var oldIds;
+
+function changeLvls() { // jQuery
+  var minLvl = parseInt($('#fshMinLvl').val(), 10);
+  var maxLvl = parseInt($('#fshMaxLvl').val(), 10);
+  if (!isNaN(minLvl) && !isNaN(maxLvl)) {
+    opts = opts || {};
+    opts.minLvl = minLvl;
+    opts.maxLvl = maxLvl;
+    setForage('fsh_arena', opts);
+    $('#arenaTypeTabs table[width="635"]').DataTable().draw();
+  }
+}
+
+function resetLvls() { // jQuery
+  opts = opts || {};
+  opts.minLvl = defaults.arenaMinLvl;
+  opts.maxLvl = defaults.arenaMaxLvl;
+  setForage('fsh_arena', opts);
+  $('#fshMinLvl').val(opts.minLvl);
+  $('#fshMaxLvl').val(opts.maxLvl);
+  $('#arenaTypeTabs table[width="635"]').DataTable().draw();
+}
+
+function hideMoves(evt) { // jQuery
+  opts = opts || {};
+  opts.hideMoves = evt.target.checked;
+  setForage('fsh_arena', opts);
+  $('.moveMax').toggle(!evt.target.checked);
+}
+
+function sortHandler(evt) { // jQuery
+  var self = $(evt.target).closest('td');
+  var table = self.closest('table').DataTable();
+  var myCol = self.index();
+  var classes = self.attr('class');
+  var test = /sorting([^\s]+)/.exec(classes);
+  var sortOrder = 'desc';
+  if (test && test[1] === '_desc') {sortOrder = 'asc';}
+  if (myCol !== 3) {
+    table.order([3, 'asc'], [myCol, sortOrder]).draw();
+  } else {
+    table.order([3, sortOrder]).draw();
+  }
+}
+
+function hideMovesCheckbox(aTable) { // jQuery
+  var fshHideMoves = $('#fshHideMoves', aTable);
+  if (opts && 'hideMoves' in opts) {
+    fshHideMoves.prop('checked', opts.hideMoves);
+    $('.moveMax').toggle(!opts.hideMoves);
+  }
+  fshHideMoves.click(hideMoves);
+}
+
+function minLvlValue(aTable) { // jQuery
+  var fshMinLvl = $('#fshMinLvl', aTable);
+  if (opts && 'minLvl' in opts) {
+    fshMinLvl.val(opts.minLvl);
+  } else {
+    fshMinLvl.val(defaults.arenaMinLvl);
+  }
+}
+
+function maxLvlValue(aTable) { // jQuery
+  var fshMaxLvl = $('#fshMaxLvl', aTable);
+  if (opts && 'maxLvl' in opts) {
+    fshMaxLvl.val(opts.maxLvl);
+  } else {
+    fshMaxLvl.val(defaults.arenaMaxLvl);
+  }
+}
+
+function filterHeader() { // jQuery
+  var theRow = $('#pCC > table > tbody > tr:nth-child(7)');
+  theRow.clone().insertBefore(theRow).find('td').attr('height', '2');
+  theRow.clone().insertAfter(theRow).find('td').attr('height', '1');
+  var aTable = $(arenaFilter);
+  hideMovesCheckbox(aTable);
+  minLvlValue(aTable);
+  maxLvlValue(aTable);
+  $('#fshMinLvl, #fshMaxLvl', aTable).keyup(changeLvls);
+  $('#fshReset', aTable).click(resetLvls);
+  $('td', theRow).append(aTable);
+}
+
+var doLvlFilter = [
+  function(min) {return !min;},
+  function(min, max) {return !max;},
+  function(min, max) {return isNaN(min) && isNaN(max);},
+  function(min, max, level) {return isNaN(min) && level <= max;},
+  function(min, max, level) {return min <= level && isNaN(max);},
+  function(min, max, level) {return min <= level && level <= max;}
+];
+
+function hazOpts(_settings, data) { // Native
+  var min = opts.minLvl;
+  var max = opts.maxLvl;
+  var level = intValue(data[7]);
+  for (var i = 0; i < doLvlFilter.length; i += 1) {
+    if (doLvlFilter[i](min, max, level)) {return true;}
+  }
+  return false;
+}
+
+function lvlFilter(_settings, data) { // Native
+  if (opts) {return hazOpts(_settings, data);}
+  return true;
+}
+
+function players(cell) { // jQuery
+  var matches = /(\d+)\s\/\s(\d+)/.exec(cell.text());
+  if (matches) {
+    cell.attr('data-order', matches[2] * 1000 + Number(matches[1]));
+  }
+}
+
+function boolData(cell) { // jQuery
+  var matches = /(\d)\.gif/.exec($('img', cell).attr('src'));
+  if (matches) {cell.attr('data-order', matches[1]);}
+}
+
+function hazMaxMoves(matches, row) { // jQuery
+  if (opts.moves[matches[1]] &&
+    opts.moves[matches[1]].count === 3) {
+    row.addClass('moveMax');
+  }
+}
+
+function maxMoves(cell, row) { // jQuery
+  if (opts && opts.moves) {
+    var matches = /\/pvp\/(\d+)\.gif/.exec($('img', cell).attr('src'));
+    if (matches) {
+      hazMaxMoves(matches, row);
+      cell.attr('data-order', matches[1]);
+    }
+  }
+}
+
+function reward(cell) { // jQuery
+  if (cell.children('table').length !== 1) {return;}
+  cell.attr('data-order', cell.find('td').first().text().replace(/[,\s]/g, ''));
+}
+
+function orderData(i, e) { // jQuery
+
+  var row = $(e);
+  var theCells = row.children();
+
+  var cell = theCells.eq(0);
+  var matches = /#\s(\d+)/.exec(cell.text());
+  if (matches && opts && opts.id) {
+    opts.id[matches[1]] = matches[1];
+    if (oldIds && !oldIds[matches[1]]) {
+      row.css('background-color', '#F5F298');
+      row.find('tr').css('background-color', '#F5F298');
+    }
+  }
+
+  players(theCells.eq(1));
+  cell = theCells.eq(2);
+  cell.attr('data-order', $('td', cell).first().text().replace(/[,\s]/g, ''));
+  boolData(theCells.eq(4));
+  boolData(theCells.eq(5));
+  boolData(theCells.eq(6));
+  maxMoves(theCells.eq(8), row);
+  reward(theCells.eq(8));
+
+}
+
+function redoHead(i, e) { // jQuery
+  var firstRow = $('tr', e).first();
+  $('a', firstRow).contents().unwrap();
+  $(e).prepend($('<thead/>').append(firstRow));
+}
+
+function process(arena) { // jQuery
+
+  time('arena.process');
+
+  theTables.each(redoHead);
+  opts = arena || {};
+  oldIds = opts.id || {};
+  opts.id = {};
+  var myRows = theTables.children('tbody').children('tr');
+  myRows.each(orderData);
+  filterHeader();
+  setForage('fsh_arena', opts);
+  $.fn.dataTable.ext.search.push(lvlFilter);
+  theTables.DataTable(tableOpts);
+  $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
+  $('div.dataTables_filter').hide();
+  tabs.on('click', 'td.sorting, td.sorting_asc, td.sorting_desc', sortHandler);
+  tabs.on('click', 'input.custombutton[type="submit"]', dontPost$1);
+
+  timeEnd('arena.process');
+
+}
+
+function injectArena() { // jQuery
+  tabs = $('#arenaTypeTabs');
+  if (tabs.length !== 1) {return;} // Join error screen
+  theTables = $('table[width="635"]', tabs);
+  getForage('fsh_arena').done(process);
+}
+
+var inv;
+var target;
+
+function selectPerf() { // Native
+  var items = document.getElementById(target + '-items')
+    .getElementsByClassName('selectable-item');
+  if (items.length === 0) {return;}
+  Array.prototype.forEach.call(items, function(e) {
+    var thisItem = e.id.replace(target + '-item-', '');
+    if (inv[thisItem].craft === 'Perfect') {e.click();}
+  });
+}
+
+function drawFilters(data) { // Native
+  inv = data.items;
+  var buttonDiv = document.createElement('div');
+  buttonDiv.className = 'fshAC';
+  buttonDiv.insertAdjacentHTML('beforeend',
+    '<button class="fshBl">Perfect</button>');
+  pCC.appendChild(buttonDiv);
+  buttonDiv.addEventListener('click', selectPerf);
+}
+
+function perfFilter(loc) { // jQuery.min
+  target = loc;
+  getInventoryById().done(drawFilters);
+}
+
+function cancelAllAH() { // jQuery
+  var cancelButtons = document.getElementById('resultRows')
+    .getElementsByClassName('auctionCancel');
+  if (cancelButtons.length === 0) {return;}
+  var prm = [];
+  for (var i = cancelButtons.length - 1; i >= 0; i -= 1) {
+    var cancelButton = cancelButtons[i];
+    var itemImage = cancelButton.parentNode.parentNode.firstElementChild
+      .firstElementChild;
+    cancelButton.outerHTML = '<img src="' + imageServer +
+      '/skin/loading.gif" width="14" height="14">';
+    prm.push(
+      $.post(
+        'index.php?cmd=auctionhouse&subcmd=cancel', {
+          auction_id:
+            /inv_id=(\d+)/.exec(itemImage.getAttribute('data-tipped'))[1]
+        }
+      )
+    );
+  }
+  $.when.apply($, prm).done(function() {
+    document.getElementById('refresh').click();
+  });
+}
+
+function injectAuctionHouse() { // Native
+  if (!pCC) {return;}
+  if (getValue('autoFillMinBidPrice')) {
+    document.getElementById('auto-fill').checked = true;
+  }
+  document.getElementById('sort0').click();
+  var cancelAll = document.createElement('span');
+  cancelAll.className = 'smallLink';
+  cancelAll.textContent = 'Cancel All';
+  var fill = document.getElementById('fill').parentNode.parentNode
+    .nextElementSibling.firstElementChild;
+  fill.classList.add('fshCenter');
+  fill.insertAdjacentHTML('afterbegin', ']');
+  fill.insertAdjacentElement('afterbegin', cancelAll);
+  fill.insertAdjacentHTML('afterbegin', '[');
+  cancelAll.addEventListener('click', cancelAllAH);
+}
+
+function quickCreate() { // Native
+  perfFilter('auction');
+}
+
+var playerBank = {
+  headText: 'Bank',
+  appLink: true,
+  depoPos: 2,
+  balPos: 1,
+  data: {
+    cmd: 'bank',
+    subcmd: 'transaction'
+  },
+  initWithdraw: ''
+};
+var guildBank = {
+  headText: 'Guild Bank',
+  appLink: false,
+  depoPos: 3,
+  balPos: 2,
+  data: {
+    cmd: 'guild',
+    subcmd: 'bank',
+    subcmd2: 'transaction'
+  },
+  initWithdraw: '1'
+};
+var bankSettings;
+
+function doInfoBox(infoBox) { // jQuery
+  var target = $('#pCC #info-msg');
+  if (target.length === 0) {
+    $('#pCC').prepend(infoBox.closest('table'));
+  } else {
+    target.closest('table').replaceWith(infoBox.closest('table'));
+  }
+}
+
+function disableDepo(o) { // jQuery
+  if ($('#pCC b').eq(o.depoPos).text() === '0') {
+    $('#pCC input[value="Deposit"]').prop('disabled', true);
+  }
+}
+
+function updateDepoAmount(o, doc) { // jQuery
+  if (o.data.deposit_amount !== '1') {
+    $('#pCC #deposit_amount').val($('#pCC #deposit_amount', doc).val());
+  } else {
+    $('#pCC #deposit_amount').val('1');
+  }
+}
+
+function transResponse(response) { // jQuery
+  var doc = createDocument(response);
+  var infoBox = $('#pCC #info-msg', doc);
+  if (infoBox.length === 0) {return;}
+  doInfoBox(infoBox);
+  $('#pH #statbar-gold').text($('#pH #statbar-gold', doc).text());
+  $('#pH #statbar-gold-tooltip-general dd').text(function(index) {
+    return $('#pH #statbar-gold-tooltip-general dd', doc).eq(index).text();
+  });
+  var o = bankSettings;
+  $('#pCC b').slice(o.balPos).text(function(index) {
+    return $('#pCC b', doc).slice(o.balPos).eq(index).text();
+  });
+  disableDepo(o);
+  updateDepoAmount(o, doc);
+  $('#pCC #withdraw_amount').val(o.initWithdraw);
+}
+
+function invalidAmount(o, amount) { // jQuery
+  return $('#pCC b').eq(o.depoPos).text() === '0' ||
+    !$.isNumeric(amount) || amount < 1;
+}
+
+function bankDeposit(e) { // jQuery
+  e.preventDefault();
+  var o = bankSettings;
+  var amount = $('#pCC #deposit_amount').val();
+  if (invalidAmount(o, amount)) {return;}
+  o.data.mode = 'deposit';
+  o.data.deposit_amount = amount;
+  $.get('index.php', o.data).done(transResponse);
+}
+
+function bankWithdrawal(e) { // jQuery
+  e.preventDefault();
+  var o = bankSettings;
+  var amount = $('#pCC #withdraw_amount').val();
+  if (!$.isNumeric(amount) || amount < 1) {return;}
+  o.data.mode = 'withdraw';
+  o.data.withdraw_amount = amount;
+  $.get('index.php', o.data).done(transResponse);
+}
+
+function linkToGuildBank(o, bank) { // jQuery
+  if (o.appLink) {
+    bank.eq(0).closest('tr').after('<tr><td colspan="3" align="center">' +
+      '<a href="/index.php?cmd=guild&subcmd=bank">Go to Guild Bank</a>' +
+      '</td></tr>');
+  }
+}
+
+function captureButtons(o, depo, withdraw) { // jQuery
+  if ($('#pCC b').eq(o.depoPos).text() === '0') { // Check Deposits Available
+    depo.prop('disabled', true);
+  } else {
+    depo.click(bankDeposit);
+  }
+  withdraw.click(bankWithdrawal);
+}
+
+function appLink(o, bank) { // jQuery
+  linkToGuildBank(o, bank);
+  var depo = $('#pCC input[value="Deposit"]');
+  if (depo.length !== 1) {return;}
+  var withdraw = $('#pCC input[value="Withdraw"]');
+  if (withdraw.length !== 1) {return;}
+  captureButtons(o, depo, withdraw);
+}
+
+function ajaxifyBank() { // jQuery
+  var o = bankSettings;
+  var bank = $('#pCC b');
+  if (bank.length !== 0 && bank.eq(0).text() === o.headText) {
+    appLink(o, bank);
+  }
+}
+
+function injectGuildBank() { // Native
+  bankSettings = guildBank;
+  ajaxifyBank();
+}
+
+function injectBank() { // Native
+  bankSettings = playerBank;
+  ajaxifyBank();
+}
+
+var ItemId;
+var bazaarTable =
+  '<table id="fshBazaar"><tr><td colspan="5">Select an item to quick-buy:' +
+  '</td></tr><tr><td colspan="5">Select how many to quick-buy</td></tr>' +
+  '<tr><td colspan="5"><input id="buy_amount" class="fshNumberInput" ' +
+  'type="number" min="0" max="99" value="1"></td></tr><tr><td>@0@</td>' +
+  '<td>@1@</td><td>@2@</td><td>@3@</td><td>@4@</td></tr><tr><td>@5@</td>' +
+  '<td>@6@</td><td>@7@</td><td>@8@</td><td>@9@</td></tr><tr>' +
+  '<td colspan="3">Selected item:</td><td id="selectedItem" colspan="2">' +
+  '</td></tr><tr><td colspan="5"><span id="warning" class="fshHide">' +
+  'Warning:<br>pressing [<span id="fshBuy" class="fshLink">This button' +
+  '</span>] now will buy the <span id="quantity">1</span> item(s) WITHOUT ' +
+  'confirmation!</span></td></tr><tr><td id="buy_result" colspan="5"></td>' +
+  '</tr></table>';
+var bazaarItem =
+  '<span class="bazaarButton tip-dynamic" style="background-image: ' +
+  'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
+
+function testQuant$1() { // Native
+  return testQuant(document.getElementById('buy_amount').value);
+}
+
+function select(evt) { // Native
+  var target = evt.target;
+  if (!target.classList.contains('bazaarButton')) {return;}
+  var theValue = testQuant$1();
+  if (!theValue) {return;}
+  document.getElementById('quantity').textContent = theValue;
+  ItemId = target.getAttribute('itemid');
+  document.getElementById('warning').removeAttribute('class');
+  var dupNode = target.cloneNode(false);
+  dupNode.className = 'bazaarSelected tip-dynamic';
+  var selected = document.getElementById('selectedItem');
+  selected.innerHTML = '';
+  selected.appendChild(dupNode);
+}
+
+function quantity() { // Native
+  var theValue = testQuant$1();
+  if (theValue) {
+    document.getElementById('quantity').textContent = theValue;
+  }
+}
+
+function done(responseText) { // Native
+  document.getElementById('buy_result').insertAdjacentHTML('beforeend',
+  '<br>' + infoBox(responseText));
+}
+
+function buy() { // jQuery
+  if (!ItemId) {return;}
+  var buyAmount = document.getElementById('quantity').textContent;
+  document.getElementById('buy_result').textContent =
+    'Buying ' + buyAmount + ' items';
+  for (var i = 0; i < buyAmount; i += 1) {
+    $.get('index.php?cmd=potionbazaar&subcmd=buyitem&item_id=' +
+      ItemId, done);
+  }
+}
+
+function injectBazaar() { // Native
+  var pbImg = pCC.getElementsByTagName('IMG')[0];
+  pbImg.className = 'fshFloatLeft';
+  var potions = pCC.getElementsByTagName('A');
+  Array.prototype.forEach.call(potions, function(el, i) {
+    var item = el.firstElementChild;
+    var tipped = item.getAttribute('data-tipped');
+    bazaarTable = bazaarTable
+      .replace('@' + i + '@', bazaarItem)
+      .replace('@src@', item.getAttribute('src'))
+      .replace('@itemid@', tipped.match(/\?item_id=(\d+)/)[1])
+      .replace('@tipped@', tipped);
+  });
+  bazaarTable = bazaarTable.replace(/@\d@/g, '');
+  pbImg.parentNode.insertAdjacentHTML('beforeend', bazaarTable);
+  document.getElementById('fshBazaar').addEventListener('click', select);
+  document.getElementById('buy_amount').addEventListener('input', quantity);
+  document.getElementById('fshBuy').addEventListener('click', buy);
+}
+
 var disableBreakdownPrompts;
 var selectedList = [];
 
@@ -3784,7 +4852,7 @@ function itemClick(evt) { // Native
   }
 }
 
-function togglePref() { // Native
+function togglePref$1() { // Native
   disableBreakdownPrompts = !disableBreakdownPrompts;
   setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
@@ -3801,7 +4869,7 @@ function composingBreakdown() { // Native
     simpleCheckbox('disableBreakdownPrompts') +
     '</tbody></table>');
   document.getElementById('disableBreakdownPrompts')
-    .addEventListener('click', togglePref);
+    .addEventListener('click', togglePref$1);
 }
 
 var content;
@@ -3881,7 +4949,7 @@ function completedArenas() { // jQuery
     nextButton.after(finishButton).after('&nbsp;');
     finishButton.click(function() {gotoPage(lastPage);});
   }
-  $('#pCC input[value="View"]').click(dontPost);
+  $('#pCC input[value="View"]').click(dontPost$1);
 }
 
 var composeMsg =
@@ -4035,69 +5103,6 @@ function composingCreate() { // Native
       document.getElementById('composing-skill-level-input').value =
         document.getElementById('composing-skill-level-max').textContent;
     });
-}
-
-function closestTable(el) { // Native
-  if (el.tagName === 'TABLE') {return el;}
-  return closestTable(el.parentNode);
-}
-
-function reduceStatTable(prev, curr, index) { // Native
-  var key = curr.cells[0].textContent.trim().replace(':', '');
-  if (!key) {return prev;}
-  prev[key] = {ind: index};
-  if (curr.cells[1] && curr.cells[1].textContent) {
-    prev[key].value = Number(
-        curr.cells[1].textContent.trim().replace('+', '')
-      );
-  }
-  return prev;
-}
-
-function getVal(prop, obj) { // Native
-  if (obj[prop] && obj[prop].value) {
-    return obj[prop].value;
-  }
-  return 0;
-}
-
-function getLastIndex(obj, tbl) { // Native
-  if (obj.Enhancements) {
-    return tbl.rows[obj.Enhancements.ind - 1];
-  }
-  return tbl.rows[tbl.rows.length - 1];
-}
-
-function addStats(el) { // Native
-  var statTable = closestTable(el);
-  var statObj = Array.prototype.reduce.call(statTable.rows,
-    reduceStatTable, {});
-  var totalStats = getVal('Attack', statObj) + getVal('Defense', statObj) +
-    getVal('Armor', statObj) + getVal('Damage', statObj) +
-    getVal('HP', statObj);
-  getLastIndex(statObj, statTable).insertAdjacentHTML('beforebegin',
-    '<tr class="fshDodgerBlue"><td>Stat Total:</td><td align="right">' +
-    totalStats + '&nbsp;</td></tr>');
-}
-
-function fshDataFilter(data) { // Native
-  var container = document.createElement('div');
-  container.insertAdjacentHTML('beforeend', data);
-  var bonus = container.getElementsByTagName('font');
-  bonus = Array.prototype.filter.call(bonus, function(el) {
-    return el.textContent === 'Bonuses';
-  });
-  bonus.forEach(addStats);
-  return container.innerHTML;
-}
-
-function fshPreFilter(options) { // Native
-  if (options.url.indexOf('fetchitem') !== 0) {return;}
-  options.dataFilter = fshDataFilter;
-}
-
-function addStatTotalToMouseover() { // jQuery
-  $.ajaxPrefilter(fshPreFilter);
 }
 
 var disableItemColoring;
@@ -6040,8 +7045,8 @@ function wearItem(evt) { // jQuery
 }
 
 var events = [
-  {test: 'recall', fn: function(evt) {recallItem$1(evt);}},
-  {test: 'equip', fn: function(evt) {wearItem(evt);}},
+  {test: 'recall', fn: recallItem$1},
+  {test: 'equip', fn: wearItem},
   {
     test: 'a-reply',
     fn: function(evt) {
@@ -6768,6 +7773,7 @@ function createdRow(row, data) { // Native
 
 function refresh() { // Native
   doSpinner();
+  // eslint-disable-next-line no-use-before-define
   syncInvMan();
 }
 
@@ -7137,200 +8143,6 @@ var assets$1 = {
       'defending group and attacking group.</td></tr>' +
     '</tbody></table>'
 };
-
-var drag_target;
-
-function drag_over(event) { // Native
-  event.preventDefault();
-  return false;
-}
-
-function drag_drop(event) { // Native
-  var offset = event.dataTransfer.getData('text/plain').split(',');
-  drag_target.style.left =
-    event.clientX + parseInt(offset[0], 10) + 'px';
-  drag_target.style.top =
-    event.clientY + parseInt(offset[1], 10) + 'px';
-  document.body.removeEventListener('dragover', drag_over, false);
-  document.body.removeEventListener('drop', drag_drop, false);
-  event.preventDefault();
-  return false;
-}
-
-function drag_start(event) { // Native
-  drag_target = event.target;
-  var style = window.getComputedStyle(event.target, null);
-  event.dataTransfer.setData('text/plain',
-    parseInt(style.getPropertyValue('left'), 10) - event.clientX + ',' +
-    (parseInt(style.getPropertyValue('top'), 10) - event.clientY));
-  document.body.addEventListener('dragover', drag_over, false);
-  document.body.addEventListener('drop', drag_drop, false);
-}
-
-function getStat(stat, doc) { // jQuery
-  // 'Hidden' returns NaN
-  return intValue(
-      $(stat, doc)
-        .contents()
-        .filter(function(i, e) {
-          return e.nodeType === 3;
-        })[0].nodeValue
-    );
-}
-
-function getBuffLevel(doc, buff) { // jQuery
-  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]',
-    doc);
-  hasBuff = hasBuff.data('tipped');
-  var re = new RegExp('</b> \\(Level: (\\d+)\\)');
-  var test = re.exec(hasBuff);
-  return test === null ? 0 : intValue(test[1]);
-}
-
-function getBonus(stat, doc) { // jQuery
-  var target = $(stat, doc);
-  var children = target.children();
-  if (children.length === 0) {
-    children = target.next();
-  }
-  return intValue(children.text().slice(2, -1));
-}
-
-function cloakGuess(bonus, level) { // Native
-  if (bonus > level * 10 ||
-      bonus < level) {
-    return bonus;
-  }
-  return level * 10;
-}
-
-function updateForCloak(obj) {
-  obj.attackValue = cloakGuess(obj.attackBonus, obj.levelValue);
-  obj.defenseValue = cloakGuess(obj.defenseBonus, obj.levelValue);
-  obj.armorValue = cloakGuess(obj.armorBonus, obj.levelValue);
-  obj.damageValue = cloakGuess(obj.damageBonus, obj.levelValue);
-  obj.hpValue = obj.hpBonus;
-}
-
-function playerDataString(responseText) { // Native
-  var doc = createDocument(responseText);
-  var obj = {
-    levelValue: getStat('#stat-vl', doc),
-    attackValue: getStat('#stat-attack', doc),
-    attackBonus: getBonus('#stat-attack', doc),
-    defenseValue: getStat('#stat-defense', doc),
-    defenseBonus: getBonus('#stat-defense', doc),
-    armorValue: getStat('#stat-armor', doc),
-    armorBonus: getBonus('#stat-armor', doc),
-    damageValue: getStat('#stat-damage', doc),
-    damageBonus: getBonus('#stat-damage', doc),
-    hpValue: getStat('#stat-hp', doc),
-    hpBonus: getBonus('#stat-hp', doc),
-    killStreakValue: getStat('#stat-kill-streak', doc),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLevel(doc, 'Counter Attack'),
-    doublerLevel: getBuffLevel(doc, 'Doubler'),
-    deathDealerLevel: getBuffLevel(doc, 'Death Dealer'),
-    darkCurseLevel: getBuffLevel(doc, 'Dark Curse'),
-    holyFlameLevel: getBuffLevel(doc, 'Holy Flame'),
-    constitutionLevel: getBuffLevel(doc, 'Constitution'),
-    sanctuaryLevel: getBuffLevel(doc, 'Sanctuary'),
-    flinchLevel: getBuffLevel(doc, 'Flinch'),
-    nightmareVisageLevel: getBuffLevel(doc, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLevel(doc, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLevel(doc, 'Fortitude'),
-    chiStrikeLevel: getBuffLevel(doc, 'Chi Strike'),
-    terrorizeLevel: getBuffLevel(doc, 'Terrorize'),
-    barricadeLevel: getBuffLevel(doc, 'Barricade'),
-    reignOfTerrorLevel: getBuffLevel(doc, 'Reign Of Terror'),
-    anchoredLevel: getBuffLevel(doc, 'Anchored'),
-    severeConditionLevel: getBuffLevel(doc, 'Severe Condition'),
-    entrenchLevel: getBuffLevel(doc, 'Entrench'),
-    cloakLevel: getBuffLevel(doc, 'Cloak')
-  };
-  obj.superEliteSlayerMultiplier = Math.round(0.002 *
-    obj.superEliteSlayerLevel * 100) / 100;
-
-  if (obj.cloakLevel === 0 ||
-      typeof obj.attackValue === 'number' &&
-      !isNaN(obj.attackValue)) {
-    return obj;
-  }
-
-  updateForCloak(obj);
-  return obj;
-}
-
-function reduceBuffArray(buffAry) {
-  return buffAry.reduce(function(prev, curr) {
-    prev[curr.name] = Number(curr.level);
-    return prev;
-  }, {});
-}
-
-function getBuffLvl(buffs, buff) {
-  return fallback(buffs[buff], 0);
-}
-
-function playerDataObject(json) { // Native
-  var buffs = reduceBuffArray(json._skills);
-  var obj = {
-    levelValue: json.level,
-    attackValue: json.attack,
-    attackBonus: json.bonus_attack,
-    defenseValue: json.defense,
-    defenseBonus: json.bonus_defense,
-    armorValue: json.armor,
-    armorBonus: json.bonus_armor,
-    damageValue: json.damage,
-    damageBonus: json.bonus_damage,
-    hpValue: json.hp,
-    hpBonus: json.bonus_hp,
-    killStreakValue: intValue(json.killstreak),
-    // get buffs here later ... DD, CA, DC, Constitution, etc
-    counterAttackLevel: getBuffLvl(buffs, 'Counter Attack'),
-    doublerLevel: getBuffLvl(buffs, 'Doubler'),
-    deathDealerLevel: getBuffLvl(buffs, 'Death Dealer'),
-    darkCurseLevel: getBuffLvl(buffs, 'Dark Curse'),
-    holyFlameLevel: getBuffLvl(buffs, 'Holy Flame'),
-    constitutionLevel: getBuffLvl(buffs, 'Constitution'),
-    sanctuaryLevel: getBuffLvl(buffs, 'Sanctuary'),
-    flinchLevel: getBuffLvl(buffs, 'Flinch'),
-    nightmareVisageLevel: getBuffLvl(buffs, 'Nightmare Visage'),
-    superEliteSlayerLevel: getBuffLvl(buffs, 'Super Elite Slayer'),
-    fortitudeLevel: getBuffLvl(buffs, 'Fortitude'),
-    chiStrikeLevel: getBuffLvl(buffs, 'Chi Strike'),
-    terrorizeLevel: getBuffLvl(buffs, 'Terrorize'),
-    barricadeLevel: getBuffLvl(buffs, 'Barricade'),
-    reignOfTerrorLevel: getBuffLvl(buffs, 'Reign Of Terror'),
-    anchoredLevel: getBuffLvl(buffs, 'Anchored'),
-    severeConditionLevel: getBuffLvl(buffs, 'Severe Condition'),
-    entrenchLevel: getBuffLvl(buffs, 'Entrench'),
-    cloakLevel: getBuffLvl(buffs, 'Cloak')
-  };
-  if (obj.cloakLevel !== 0) {updateForCloak(obj);}
-  return obj;
-}
-
-function playerData(responseText) { // Native
-  var obj = {};
-  if (typeof responseText === 'string') {
-    obj = playerDataString(responseText);
-  }
-  if (typeof responseText === 'object') {
-    obj = playerDataObject(responseText);
-  }
-  return obj;
-}
-
-function updateHCSQuickBuffLinks(selector) { // Native
-  Array.prototype.forEach.call(document.querySelectorAll(selector),
-    function(el) {
-      el.setAttribute('href', el.getAttribute('href')
-        .replace(/, 500/g, ', 1000'));
-    }
-  );
-}
 
 var relicData;
 var containerDiv;
@@ -8099,15 +8911,17 @@ function injectSendGoldOnWorld() { // jQuery
 }
 
 function updateSendGoldOnWorld(data) { // jQuery
-  $('#HelperSendTotal')
-    .html(getValue('currentGoldSentTotal')
-      .toString()
-      .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
-  if (parseInt(data.player.gold, 10) >
-    getValue('goldAmount')) {
-    $('#statbar-gold').css('background-color', 'red');
-  } else {
-    $('#statbar-gold').css('background-color', 'inherit');
+  if (data.player && getValue('sendGoldonWorld')) {
+    $('#HelperSendTotal')
+      .html(getValue('currentGoldSentTotal')
+        .toString()
+        .replace(/(\d)(?=(\d\d\d)+(?!\d))/g, '$1,'));
+    if (parseInt(data.player.gold, 10) >
+      getValue('goldAmount')) {
+      $('#statbar-gold').css('background-color', 'red');
+    } else {
+      $('#statbar-gold').css('background-color', 'inherit');
+    }
   }
 }
 
@@ -9003,7 +9817,6 @@ function xhrPreFilter(options, originalOptions) { // Native
 
 function interceptXHR() { // jQuery
   $.ajaxPrefilter('JSON', xhrPreFilter);
-  if (hideSubLvlCreature) {GameData.fetch(256);}
 }
 
 function hideGroupByType(type) { // jQuery
@@ -9084,8 +9897,7 @@ function interceptDoAction() { // jQuery
       // Do custom stuff e.g. do not kill list
       var creatureIcon = $('#actionList div.header')
         .eq(data.passback).find('a.icon');
-      if (calf.doNotKillList.indexOf(
-          creatureIcon.data('name')) !== -1) {
+      if (calf.doNotKillList.indexOf(creatureIcon.data('name')) !== -1) {
         creatureIcon.removeClass('loading');
         return;
       }
@@ -9132,13 +9944,12 @@ function fixDebuffQTip(e) { // jQuery
 }
 
 function injectWorldNewMap(data) { // Native
-  if (data.player && getValue('sendGoldonWorld')) {
-    updateSendGoldOnWorld(data);
-  }
+  updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
     document.getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
+    if (hideSubLvlCreature) {GameData.fetch(256);}
   }
 }
 
@@ -9152,13 +9963,13 @@ function doHuntingBuffs() { // jQuery
   }
 }
 
-function setupPref() { // Native
+function setupPref$1() { // Native
   getPrefs();
   buildFshDivs();
 }
 
 function subscribes() { // jQuery
-  setupPref();
+  setupPref$1();
   interceptXHR();
   doHuntingBuffs();
   $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
@@ -9696,16 +10507,127 @@ function injectSaveSettings() { // Hybrid
   });
 }
 
-var myPlayer = {};
-var addAttackLinkToLog;
-var memberNameString;
-var listOfAllies;
-var listOfEnemies;
-var showPvPSummaryInLog;
+function hasTextEntry() { // jQuery
+  $('#pCC form').first().attr('id', 'dochat');
+  $('#pCC input').slice(0, 7).each(function(i, e) {
+    $(e).attr('form', 'dochat');
+  });
+  var theTable = $('#pCC table table').first();
+  theTable.append('<tr id="fshMass"></tr>');
+  $('td', theTable).eq(0).remove();
+  var btnMass = $('input[value="Send As Mass"]', theTable);
+  if (btnMass.length === 1) {
+    btnMass.appendTo('#fshMass', theTable);
+  }
+  var ourTd = $('td', theTable).eq(0);
+  ourTd.attr('rowspan', '2');
+  $('input', ourTd).replaceWith('<textarea id="fshTxt" name="msg" cols' +
+    '="72" rows="2" form="dochat" style="resize: none"></textarea>');
+  var fshTxt = $('#fshTxt', ourTd);
+  fshTxt.keydown(function(e) {
+    if (e.keyCode === 13 && fshTxt.val() !== '') {
+      $('input[value=Send]', theTable).click();
+      return false;
+    }
+  });
+}
+
+function addChatTextArea() { // jQuery
+  if (!getValue('enhanceChatTextEntry') ||
+      !pCC) {return;}
+  hasTextEntry();
+}
+
 var playerId$1;
+
+function getPlayer(playerAry) { // Legacy
+  if (playerAry) {return Number(playerAry[1]);}
+  return 0;
+}
+
+function findPlayers(aRow) { // Legacy
+  var messageHTML = aRow.cells[2].innerHTML;
+  var doublerPlayerMessageRE =
+    /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
+  var secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
+  var singlePlayerMessageRE =
+    /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
+  var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
+
+  var firstPlayerID = getPlayer(firstPlayer);
+  var secondPlayerID = getPlayer(secondPlayer);
+
+  if (firstPlayer && firstPlayerID !== playerId$1 &&
+      secondPlayerID !== playerId$1) {
+    for (var j = 0; j < 3; j += 1) {
+      aRow.cells[j].removeAttribute('class');
+    }
+    aRow.classList.add('fshGrey');
+    aRow.classList.add('fshXXSmall');
+  }
+}
+
+function likeInvite(aRow, hasInvited) { // Legacy
+  var message = aRow.cells[2].innerHTML;
+  var firstQuote = message.indexOf('\'');
+  var firstPart = '';
+  firstPart = message.substring(0, firstQuote);
+  var secondQuote = message.indexOf('\'', firstQuote + 1);
+  var targetPlayerName = message.substring(firstQuote + 1, secondQuote);
+  aRow.cells[2].innerHTML = firstPart + '\'' +
+    '<a href="index.php?cmd=findplayer&search_active=1&' +
+    'search_level_max=&search_level_min=&search_username=' +
+    targetPlayerName + '&search_show_first=1">' + targetPlayerName +
+    '</a>' + message.substring(secondQuote, message.length);
+  if (!hasInvited &&
+    targetPlayerName !== playerName()) {
+    $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
+    aRow.style.color = 'gray';
+  }
+}
+
+function guildInvite(aRow) { // Legacy
+  var hasInvited = aRow.cells[2].textContent
+    .search('has invited the player') !== -1;
+  if (aRow.cells[2].textContent.charAt(0) === '\'' || hasInvited) {
+    likeInvite(aRow, hasInvited);
+  }
+}
+
+function processGuildWidgetRow(aRow) { // Legacy
+  findPlayers(aRow);
+  guildInvite(aRow);
+}
+
+function guildLogWidgetsEnabled() { // Legacy
+  var nodeList = pCC.getElementsByTagName('TD');
+  var messageNameCell = Array.prototype.reduce.call(nodeList,
+    function(prev, curr) {
+      return curr.textContent === 'Message' ? curr : prev;
+    }, null
+  );
+  if (!messageNameCell) {return;}
+  var logTable = messageNameCell.parentNode.parentNode.parentNode;
+  messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="' +
+    'fshWhite">(Guild Log messages not involving ' +
+    'self are dimmed!)</span>';
+
+  playerId$1 = playerId();
+
+  for (var i = 1; i < logTable.rows.length; i += 2) {
+    var aRow = logTable.rows[i];
+    processGuildWidgetRow(aRow);
+  }
+}
+
+function addGuildLogWidgets() { // Legacy
+  if (getValue('hideNonPlayerGuildLogMessages')) {
+    guildLogWidgetsEnabled();
+  }
+}
+
 var nowUtc;
 var lastCheckUtc;
-var nickList;
 
 function findChatTable() { // Legacy
   var chatTable = findNode('//table[@class="width_full"]'); // Guild Log
@@ -9767,36 +10689,118 @@ function addLogColoring(logScreen, dateColumn) { // Legacy
   if (chatTable) {doLogColoring(logScreen, dateColumn, chatTable);}
 }
 
-function hasTextEntry() { // jQuery
-  $('#pCC form').first().attr('id', 'dochat');
-  $('#pCC input').slice(0, 7).each(function(i, e) {
-    $(e).attr('form', 'dochat');
-  });
-  var theTable = $('#pCC table table').first();
-  theTable.append('<tr id="fshMass"></tr>');
-  $('td', theTable).eq(0).remove();
-  var btnMass = $('input[value="Send As Mass"]', theTable);
-  if (btnMass.length === 1) {
-    btnMass.appendTo('#fshMass', theTable);
+function pvpXp(color, xpGain) { // Legacy
+  var out = '';
+  if (xpGain !== 0) {
+    out = 'XP stolen:<span class="' + color + '">' +
+      addCommas(xpGain) + ' </span>';
   }
-  var ourTd = $('td', theTable).eq(0);
-  ourTd.attr('rowspan', '2');
-  $('input', ourTd).replaceWith('<textarea id="fshTxt" name="msg" cols' +
-    '="72" rows="2" form="dochat" style="resize: none"></textarea>');
-  var fshTxt = $('#fshTxt', ourTd);
-  fshTxt.keydown(function(e) {
-    if (e.keyCode === 13 && fshTxt.val() !== '') {
-      $('input[value=Send]', theTable).click();
-      return false;
-    }
-  });
+  return out;
 }
 
-function addChatTextArea() { // jQuery
-  if (!getValue('enhanceChatTextEntry') ||
-      !pCC) {return;}
-  hasTextEntry();
+function pvpGoldGain(color, goldGain) { // Legacy
+  var out = '';
+  if (goldGain !== 0) {
+    out = 'Gold lost:<span class="' + color + '">' +
+      addCommas(goldGain) + ' </span>';
+  }
+  return out;
 }
+
+function pvpGoldStolen(color, goldStolen) { // Legacy
+  var out = '';
+  if (goldStolen !== 0) {
+    out = 'Gold stolen:<span class="' + color + '">' +
+      addCommas(goldStolen) + ' </span>';
+  }
+  return out;
+}
+
+function pvpPrestigeGain(color, prestigeGain) { // Legacy
+  var out = '';
+  if (prestigeGain !== 0) {
+    out = 'Prestige gain:<span class="' + color + '">' +
+      prestigeGain + ' </span>';
+  }
+  return out;
+}
+
+function pvpRating(color, pvpRatingChange) { // Legacy
+  var out = '';
+  if (pvpRatingChange !== 0) {
+    out = 'PvP change:<span class="' + color + '">' +
+    pvpRatingChange + ' </span>';
+  }
+  return out;
+}
+
+function retrievePvPCombatSummary(responseText, callback) { // Legacy
+  var winner = callback.winner;
+  var color;
+  if (winner === 1) {
+    color = 'fshGreen';
+  } else {
+    color = 'fshRed';
+  }
+  var xpGain = getIntFromRegExp(responseText,
+    /var\s+xpGain=(-?[0-9]+);/i);
+  var goldGain = getIntFromRegExp(responseText,
+    /var\s+goldGain=(-?[0-9]+);/i);
+  var prestigeGain = getIntFromRegExp(responseText,
+    /var\s+prestigeGain=(-?[0-9]+);/i);
+  var goldStolen = getIntFromRegExp(responseText,
+    /var\s+goldStolen=(-?[0-9]+);/i);
+  var pvpRatingChange = getIntFromRegExp(responseText,
+    /var\s+pvpRatingChange=(-?[0-9]+);/i);
+  var output = '<br> ';
+  output += pvpXp(color, xpGain);
+  output += pvpGoldGain(color, goldGain);
+  output += pvpGoldStolen(color, goldStolen);
+  output += pvpPrestigeGain(color, prestigeGain);
+  output += pvpRating(color, pvpRatingChange);
+  callback.target.innerHTML = output;
+}
+
+function addPvpSummary(aRow, messageType) { // Legacy
+  // add PvP combat log summary
+  if (messageType === 'Combat' &&
+      aRow.cells[2] &&
+      calf.showPvPSummaryInLog &&
+      aRow.cells[2].innerHTML.indexOf('combat_id=') !== -1 &&
+      aRow.cells[2].textContent.indexOf('(Guild Conflict)') === -1) {
+    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
+    var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
+    var combatSummarySpan = document.createElement('SPAN');
+    combatSummarySpan.style.color = 'gray';
+    aRow.cells[2].appendChild(combatSummarySpan);
+    xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
+      combatID, retrievePvPCombatSummary,
+      {
+        target: combatSummarySpan,
+        winner: defeat ? 0 : 1
+      });
+  }
+}
+
+function processLadder(aRow, messageType) {
+  if (messageType === 'Notification' &&
+      aRow.cells[2].firstElementChild &&
+      aRow.cells[2].firstElementChild.tagName === 'IMG' &&
+      aRow.cells[2].firstElementChild.src.indexOf('pvp_icon.gif') !== -1) {
+    var logTime = parseDateAsTimestamp(aRow.cells[1].textContent);
+    if (logTime > calf.lastLadderReset) {
+      setValue('lastLadderReset', logTime);
+      calf.lastLadderReset = logTime;
+    }
+  }
+}
+
+var myPlayer = {};
+var addAttackLinkToLog;
+var memberNameString;
+var listOfAllies;
+var listOfEnemies;
+var nickList;
 
 function removeHTML(buffName) { // Native
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
@@ -9891,99 +10895,6 @@ function doChat(messageType, aRow, isGuildMate, playerName$$1) { // Legacy
   if (messageType === 'Chat') {isChat(aRow, isGuildMate, playerName$$1);}
 }
 
-function pvpXp(color, xpGain) { // Legacy
-  var out = '';
-  if (xpGain !== 0) {
-    out = 'XP stolen:<span class="' + color + '">' +
-      addCommas(xpGain) + ' </span>';
-  }
-  return out;
-}
-
-function pvpGoldGain(color, goldGain) { // Legacy
-  var out = '';
-  if (goldGain !== 0) {
-    out = 'Gold lost:<span class="' + color + '">' +
-      addCommas(goldGain) + ' </span>';
-  }
-  return out;
-}
-
-function pvpGoldStolen(color, goldStolen) { // Legacy
-  var out = '';
-  if (goldStolen !== 0) {
-    out = 'Gold stolen:<span class="' + color + '">' +
-      addCommas(goldStolen) + ' </span>';
-  }
-  return out;
-}
-
-function pvpPrestigeGain(color, prestigeGain) { // Legacy
-  var out = '';
-  if (prestigeGain !== 0) {
-    out = 'Prestige gain:<span class="' + color + '">' +
-      prestigeGain + ' </span>';
-  }
-  return out;
-}
-
-function pvpRating(color, pvpRatingChange) { // Legacy
-  var out = '';
-  if (pvpRatingChange !== 0) {
-    out = 'PvP change:<span class="' + color + '">' +
-    pvpRatingChange + ' </span>';
-  }
-  return out;
-}
-
-function retrievePvPCombatSummary(responseText, callback) { // Legacy
-  var winner = callback.winner;
-  var color;
-  if (winner === 1) {
-    color = 'fshGreen';
-  } else {
-    color = 'fshRed';
-  }
-  var xpGain = getIntFromRegExp(responseText,
-    /var\s+xpGain=(-?[0-9]+);/i);
-  var goldGain = getIntFromRegExp(responseText,
-    /var\s+goldGain=(-?[0-9]+);/i);
-  var prestigeGain = getIntFromRegExp(responseText,
-    /var\s+prestigeGain=(-?[0-9]+);/i);
-  var goldStolen = getIntFromRegExp(responseText,
-    /var\s+goldStolen=(-?[0-9]+);/i);
-  var pvpRatingChange = getIntFromRegExp(responseText,
-    /var\s+pvpRatingChange=(-?[0-9]+);/i);
-  var output = '<br> ';
-  output += pvpXp(color, xpGain);
-  output += pvpGoldGain(color, goldGain);
-  output += pvpGoldStolen(color, goldStolen);
-  output += pvpPrestigeGain(color, prestigeGain);
-  output += pvpRating(color, pvpRatingChange);
-  callback.target.innerHTML = output;
-}
-
-function addPvpSummary(aRow, messageType) { // Legacy
-  // add PvP combat log summary
-  if (messageType === 'Combat' &&
-      aRow.cells[2] &&
-      showPvPSummaryInLog &&
-      aRow.cells[2].innerHTML.indexOf('combat_id=') !== -1 &&
-      aRow.cells[2].textContent.indexOf('(Guild Conflict)') === -1) {
-    var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
-    var combatSummarySpan = document.createElement('SPAN');
-    combatSummarySpan.style.color = 'gray';
-    aRow.cells[2].appendChild(combatSummarySpan);
-    xmlhttp('index.php?cmd=combat&subcmd=view&combat_id=' +
-      combatID, retrievePvPCombatSummary,
-      {
-        target: combatSummarySpan,
-        winner: defeat ? 0 : 1
-      });
-  }
-}
-
 function isEnemy(playerName$$1, playerElement) { // Legacy
   if (listOfEnemies.indexOf(playerName$$1) !== -1) {
     playerElement.style.color = 'red';
@@ -10072,6 +10983,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   doChat(messageType, aRow, isGuildMate, playerName$$1);
   doExtraStuff(aRow, messageType, playerName$$1, isGuildMate);
   addPvpSummary(aRow, messageType);
+  processLadder(aRow, messageType);
 }
 
 function processLogWidgetRow(aRow) { // Legacy
@@ -10088,7 +11000,8 @@ function foundLogTable(logTable) { // Legacy
   listOfEnemies = myPlayer._enemies.map(function(obj) {
     return obj.username;
   });
-  showPvPSummaryInLog = getValue('showPvPSummaryInLog');
+  calf.showPvPSummaryInLog = getValue('showPvPSummaryInLog');
+  calf.lastLadderReset = getValue('lastLadderReset');
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
     messageHeader.insertAdjacentHTML('beforeend', '&nbsp;&nbsp;' +
@@ -10119,92 +11032,6 @@ function addLogWidgets() { // jQuery
       myPlayer = data;
     })
   ).done(addLogWidgetsOld);
-}
-
-function getPlayer(playerAry) { // Legacy
-  if (playerAry) {return Number(playerAry[1]);}
-  return 0;
-}
-
-function findPlayers(aRow) { // Legacy
-  var messageHTML = aRow.cells[2].innerHTML;
-  var doublerPlayerMessageRE =
-    /member\s<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
-  var secondPlayer = doublerPlayerMessageRE.exec(messageHTML);
-  var singlePlayerMessageRE =
-    /<a\shref="index.php\?cmd=profile&amp;player_id=(\d+)/;
-  var firstPlayer = singlePlayerMessageRE.exec(messageHTML);
-
-  var firstPlayerID = getPlayer(firstPlayer);
-  var secondPlayerID = getPlayer(secondPlayer);
-
-  if (firstPlayer && firstPlayerID !== playerId$1 &&
-      secondPlayerID !== playerId$1) {
-    for (var j = 0; j < 3; j += 1) {
-      aRow.cells[j].removeAttribute('class');
-    }
-    aRow.classList.add('fshGrey');
-    aRow.classList.add('fshXXSmall');
-  }
-}
-
-function likeInvite(aRow, hasInvited) { // Legacy
-  var message = aRow.cells[2].innerHTML;
-  var firstQuote = message.indexOf('\'');
-  var firstPart = '';
-  firstPart = message.substring(0, firstQuote);
-  var secondQuote = message.indexOf('\'', firstQuote + 1);
-  var targetPlayerName = message.substring(firstQuote + 1, secondQuote);
-  aRow.cells[2].innerHTML = firstPart + '\'' +
-    '<a href="index.php?cmd=findplayer&search_active=1&' +
-    'search_level_max=&search_level_min=&search_username=' +
-    targetPlayerName + '&search_show_first=1">' + targetPlayerName +
-    '</a>' + message.substring(secondQuote, message.length);
-  if (!hasInvited &&
-    targetPlayerName !== playerName()) {
-    $(aRow).find('td').removeClass('row').css('font-size', 'xx-small');
-    aRow.style.color = 'gray';
-  }
-}
-
-function guildInvite(aRow) { // Legacy
-  var hasInvited = aRow.cells[2].textContent
-    .search('has invited the player') !== -1;
-  if (aRow.cells[2].textContent.charAt(0) === '\'' || hasInvited) {
-    likeInvite(aRow, hasInvited);
-  }
-}
-
-function processGuildWidgetRow(aRow) { // Legacy
-  findPlayers(aRow);
-  guildInvite(aRow);
-}
-
-function guildLogWidgetsEnabled() { // Legacy
-  var nodeList = pCC.getElementsByTagName('TD');
-  var messageNameCell = Array.prototype.reduce.call(nodeList,
-    function(prev, curr) {
-      return curr.textContent === 'Message' ? curr : prev;
-    }, null
-  );
-  if (!messageNameCell) {return;}
-  var logTable = messageNameCell.parentNode.parentNode.parentNode;
-  messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="' +
-    'fshWhite">(Guild Log messages not involving ' +
-    'self are dimmed!)</span>';
-
-  playerId$1 = playerId();
-
-  for (var i = 1; i < logTable.rows.length; i += 2) {
-    var aRow = logTable.rows[i];
-    processGuildWidgetRow(aRow);
-  }
-}
-
-function addGuildLogWidgets() { // Legacy
-  if (getValue('hideNonPlayerGuildLogMessages')) {
-    guildLogWidgetsEnabled();
-  }
 }
 
 function guildChat() { // Native
@@ -10444,17 +11271,6 @@ function injectNotepad() { // jQuery
     .attr('cols', '90')
     .attr('rows', '30')
     .css('resize', 'none');
-}
-
-function ladder() { // Native
-  var submitButton = document.querySelector('#pCC input[type="submit"]');
-  if (submitButton) {
-    submitButton.addEventListener('click', function(e) {
-      e.preventDefault();
-      window.location = 'index.php?cmd=pvpladder&viewing_band_id=' +
-        document.querySelector('#pCC select[name="viewing_band_id"]').value;
-    });
-  }
 }
 
 function injectFsBoxContent(injector) { // jQuery
@@ -11119,8 +11935,8 @@ function eventHandler(evt) {
   }
 }
 
-function gotOptions(guildLog$$1) {
-  options$1 = guildLog$$1 || options$1;
+function gotOptions(guildLog) {
+  options$1 = guildLog || options$1;
   options$1.checks = options$1.checks || defChecks.slice(0);
   pCC.innerHTML = guildLogFilter;
   fshNewGuildLog = document.getElementById('fshNewGuildLog');
@@ -11139,8 +11955,6 @@ function injectNewGuildLog() {
 var maxcharacters;
 var textArea$1;
 var shoutboxPreview;
-var warehouse = [];
-var collapseNewsArchive;
 
 function updateShoutboxPreview() { // Native
   var textContent = textArea$1.value;
@@ -11174,182 +11988,6 @@ function newsFsbox() { // Native
 function newsShoutbox() { // Native
   maxcharacters = 150;
   injectShoutboxWidgets();
-}
-
-function containsNewsHead(el) { // Native
-  return el.classList.contains('news_head') ||
-    el.classList.contains('news_head_tavern');
-}
-
-function closestHead(el) { // Native
-  if (containsNewsHead(el)) {
-    return el;
-  }
-  if (el.classList.contains('news_left_column')) {return;}
-  return closestHead(el.parentNode);
-}
-
-function getNewsClass(newsHead) { // Native
-  if (newsHead.classList.contains('news_head_tavern')) {
-    return '.news_body_tavern';
-  }
-  return '.news_body';
-}
-
-function gotNewsHead(evt, newsHead) { // jQuery
-  var newsBody = newsHead.nextElementSibling;
-  var newsClass = getNewsClass(newsHead);
-  if (!$(newsBody).data('open')) {
-    evt.preventDefault();
-    $(newsClass).hide().data('open', false);
-    $(newsBody).show().data('open', true);
-  } else if (evt.target.tagName !== 'A') {
-    $(newsBody).hide().data('open', false);
-  }
-  evt.stopPropagation();
-}
-
-function newsEvt(evt) { // Native
-  var newsHead = closestHead(evt.target);
-  if (newsHead) {gotNewsHead(evt, newsHead);}
-}
-
-function fixCollapse() { // Native
-  var newsCol = document.getElementsByClassName('news_left_column');
-  if (newsCol.length !== 1) {return;}
-  newsCol[0].addEventListener('click', newsEvt, true);
-}
-
-function injectHomePageTwoLink() { // Native
-  var archiveLink = document.querySelector(
-    '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
-  if (!archiveLink) {return;}
-  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
-    '&subcmd=viewupdatearchive&subcmd2=&page=2&search_text=">' +
-    'View Updates Page 2</a>');
-  archiveLink = document.querySelector(
-    '#pCC a[href="index.php?cmd=&subcmd=viewarchive"]');
-  archiveLink.insertAdjacentHTML('afterend', '&nbsp;<a href="index.php?cmd=' +
-    '&subcmd=viewarchive&subcmd2=&page=2&search_text=">View News Page 2</a>');
-  fixCollapse();
-}
-
-function collapseArt(article) { // Native
-  article.rows.forEach(function(el) {
-    el.row.classList.add('fshHide');
-  });
-  article.open = false;
-}
-
-function collapseAll() { // Native
-  warehouse.forEach(function(article) {
-    if (article.open) {collapseArt(article);}
-  });
-}
-
-function expandArt(article) { // Native
-  article.rows.forEach(function(el) {
-    el.row.classList.remove('fshHide');
-  });
-  article.open = true;
-}
-
-function expandAll() { // Native
-  warehouse.forEach(function(article) {
-    if (!article.open) {expandArt(article);}
-  });
-}
-
-function isHeader(el) { // Native
-  if (el.rowIndex % 6 === 0) {return el;}
-}
-
-function closestTr(el) { // Native
-  if (el.tagName === 'TR') {
-    return isHeader(el);
-  }
-  if (el.tagName === 'TABLE') {return;}
-  return closestTr(el.parentNode);
-}
-
-function evtEnabled(evt) { // Native
-  var myRow = closestTr(evt.target);
-  if (!myRow) {return;}
-  var articleNo = myRow.rowIndex / 6;
-  var article = warehouse[articleNo];
-  if (article.open === false) {
-    collapseAll();
-    expandArt(article);
-  } else {
-    collapseArt(article);
-  }
-}
-
-function evtHdl(evt) { // Native
-  if (collapseNewsArchive) {evtEnabled(evt);}
-}
-
-function makeHeaderClickable(row) { // Native
-  if (collapseNewsArchive) {row.classList.add('fshPoint');}
-}
-
-function collapseDuringAnalysis(row, thisArticle) { // Native
-  if (collapseNewsArchive) {
-    row.classList.add('fshHide');
-    thisArticle.open = false;
-  } else {
-    thisArticle.open = true;
-  }
-}
-
-function testRowType(row, rowType, thisArticle) { // Native
-  if (rowType === 0) {
-    thisArticle.header = row;
-    makeHeaderClickable(row);
-  } // TODO toggle this
-  if (rowType > 1) {
-    thisArticle.rows[rowType] =
-      fallback(thisArticle[rowType], {});
-    thisArticle.rows[rowType].row = row;
-    collapseDuringAnalysis(row, thisArticle);
-  }
-}
-
-function doTagging(row) { // Native
-  var rowType = row.rowIndex % 6;
-  var articleNo = (row.rowIndex - rowType) / 6;
-  warehouse[articleNo] = fallback(warehouse[articleNo], {});
-  var thisArticle = warehouse[articleNo];
-  thisArticle.rows = thisArticle.rows || [];
-  testRowType(row, rowType, thisArticle);
-}
-
-function toggleHeaderClass() {
-  warehouse.forEach(function(article) {
-    article.header.classList.toggle('fshPoint');
-  });
-}
-
-function togglePref$1() { // Native
-  collapseNewsArchive = !collapseNewsArchive;
-  setValue('collapseNewsArchive', collapseNewsArchive);
-  if (collapseNewsArchive) {collapseAll();} else {expandAll();}
-  toggleHeaderClass();
-}
-
-function setupPref$1(rowInjector) {
-  collapseNewsArchive = getValue('collapseNewsArchive');
-  rowInjector.insertAdjacentHTML('afterend',
-    simpleCheckbox('collapseNewsArchive'));
-  document.getElementById('collapseNewsArchive')
-    .addEventListener('click', togglePref$1);
-}
-
-function viewArchive() { // Native
-  var theTables = pCC.getElementsByTagName('table');
-  setupPref$1(theTables[0].rows[2]);
-  Array.prototype.forEach.call(theTables[2].rows, doTagging);
-  theTables[2].addEventListener('click', evtHdl);
 }
 
 var havePrayedMsg =
@@ -11716,565 +12354,6 @@ function injectOnlinePlayers(content) { // jQuery
   injectOnlinePlayersNew();
 }
 
-var compPages;
-var componentList = {};
-
-function delAllComponent() { // Native
-  var invTbl = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1];
-  var nodeList = invTbl.getElementsByClassName('compDelBtn');
-  Array.prototype.forEach.call(nodeList, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
-  });
-}
-
-function retriveComponent(responseText, currentPage) { // Native
-  var nextPage = currentPage + 1;
-  var sumComp = document.getElementById('sumComp');
-  sumComp.insertAdjacentHTML('beforeend', nextPage + ', ');
-  var doc = createDocument(responseText);
-  var invTbl = doc.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1];
-  var nodeList = invTbl.getElementsByTagName('IMG');
-  Array.prototype.forEach.call(nodeList, function(el) {
-    var mouseover = el.getAttribute('data-tipped');
-    var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
-    componentList[id] = componentList[id] || {
-      count: 0,
-      src: el.getAttribute('src'),
-      onmouseover: mouseover
-    };
-    componentList[id].count += 1;
-  });
-  if (currentPage < compPages - 1) {
-    $.get('index.php?cmd=profile&component_page=' + nextPage)
-      .done(function(data) {retriveComponent(data, nextPage);});
-  } else {
-    var totalCount = invTbl.querySelectorAll(
-      'td[background$="inventory/1x1mini.gif"]');
-    totalCount = totalCount.length + currentPage * 50;
-    var output = 'Component Summary<br/><table>';
-    var usedCount = 0;
-    Object.keys(componentList).forEach(function(id) {
-      var comp = componentList[id];
-      output += '<tr><td align=center><img src="' + comp.src +
-        '" class="tip-dynamic" data-tipped="' + comp.onmouseover +
-        '"></td><td>' + comp.count + '</td></tr>';
-      usedCount += comp.count;
-    });
-    output += '<tr><td align=center>Total:</td><td>' + usedCount + ' / ' +
-      totalCount + '</td></tr></table>';
-    sumComp.innerHTML = output;
-  }
-}
-
-function countComponent(e) { // jQuery
-  var invTbl = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1];
-  var compPage = invTbl.querySelectorAll(
-    'a[href^="index.php?cmd=profile&component_page="]');
-  compPages = compPage.length;
-  e.target.parentNode.innerHTML = 'Retrieve page: ';
-  $.get('index.php?cmd=profile&component_page=0')
-    .done(function(data) {retriveComponent(data, 0);});
-}
-
-function delComponent(evt) { // jQuery
-  var href = evt.target.previousElementSibling.getAttribute('href');
-  $.get(href).done(function(data) {
-    var response = infoBox(data);
-    if (response === 'Component destroyed.') {
-      evt.target.parentNode.innerHTML = '';
-    } else {
-      $('#dialog_msg').html(response).dialog('open');
-    }
-  });
-}
-
-function enableDelComponent() { // Native
-  document.getElementById('compDel').parentNode.classList.add('fshHide');
-  document.getElementById('compDelAll').parentNode.classList
-    .remove('fshHide');
-  var nodeList = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1]
-    .getElementsByTagName('IMG');
-  Array.prototype.forEach.call(nodeList, function(el) {
-    el.parentNode.parentNode.insertAdjacentHTML('beforeend',
-      '<span class="compDelBtn">Del</span>');
-  });
-}
-
-var evtHdl$1 = [
-  {
-    test: function(e) {return e.target.id === 'compDel';},
-    act: enableDelComponent
-  },
-  {
-    test: function(e) {return e.target.id === 'compSum';},
-    act: countComponent
-  },
-  {
-    test: function(e) {return e.target.id === 'compDelAll';},
-    act: delAllComponent
-  },
-  {
-    test: function(e) {return e.target.classList.contains('compDelBtn');},
-    act: delComponent
-  }
-];
-
-function compEvt(e) {
-  for (var i = 0; i < evtHdl$1.length; i += 1) {
-    if (evtHdl$1[i].test(e)) {evtHdl$1[i].act(e);}
-  }
-}
-
-function profileComponents() { // Native
-  var invTables = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table');
-  if (invTables.length !== 2) {return;}
-  var compDiv = invTables[1].parentNode;
-  if (compDiv.style.display !== 'block') {return;}
-  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter"><div>' +
-    '[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
-    '</div><div id="sumComp">' +
-    '[<span id="compSum" class="sendLink">Count Components</span>]' +
-    '</div><div>' +
-    '[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
-    '&subcmd=quickextract">Quick Extract Components</a>]</div>' +
-    '<div class="fshHide">[<span id="compDelAll" class="sendLink">' +
-    'Delete All Visible</span>]</div>' +
-    '</div>');
-  compDiv.addEventListener('click', compEvt);
-}
-
-var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
-
-function debuff$1(aLink) { // jQuery
-  var buffId = aLink.getAttribute('href').match(/(\d+)$/)[1];
-  debuff(buffId)
-    .done(function(data) {
-      if (data.response.response === 0) {
-        aLink.parentNode.innerHTML = '';
-      } else {
-        $('#dialog_msg').html(data.response.msg).dialog('open');
-      }
-    });
-}
-
-function doPrompt(aLink) { // Native
-  var onclick = aLink.getAttribute('onclick');
-  var warn = onclick
-    .match(/Are you sure you wish to remove the .* skill\?/)[0];
-  confirm('Remove Skill', warn, function() {
-    debuff$1(aLink);
-  });
-}
-
-function checkForPrompt(aLink) {
-  if (!disableDeactivatePrompts) {
-    doPrompt(aLink);
-  } else {
-    debuff$1(aLink);
-  }
-}
-
-function interceptDebuff(e) { // jQuery
-  var aLink = e.target;
-  if (aLink.tagName === 'IMG') {
-    $(e.target).qtip('hide');
-    aLink = aLink.parentNode;
-  } else if (aLink.tagName !== 'A') {return;}
-  e.stopPropagation();
-  e.preventDefault();
-  checkForPrompt(aLink);
-}
-
-function fastDebuff() { // Native
-  var profileRightColumn = document.getElementById('profileRightColumn')
-    .lastElementChild;
-  profileRightColumn.addEventListener('click', interceptDebuff, true);
-}
-
-function backpackRemove(invId) { // jQuery
-  var _invId = parseInt(invId, 10);
-  var theBackpack = $('#backpackContainer').data('backpack');
-  // remove from srcData
-  theBackpack.srcData.some(function(el, i, ary) {
-    if (el.a === _invId) {
-      ary.splice(i, 1);
-      return true;
-    }
-    return false;
-  });
-}
-
-function fastWearUse(evt) { // jQuery
-  var InventoryItemID = evt.target.getAttribute('itemID');
-  useItem(InventoryItemID).done(function(data) {
-    if (data.r !== 0) {return;}
-    backpackRemove(InventoryItemID);
-    evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
-  });
-}
-
-function fastWearEquip(e) { // jQuery
-  var self = e.target;
-  var invId = self.getAttribute('itemid');
-  equipItem(invId).done(function(data) {
-    if (data.r !== 0) {return;}
-    backpackRemove(invId);
-    // TODO Insert item from worn
-    self.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
-  });
-}
-
-function actionClass(usable) { // Native
-  if (usable) {return 'fastUse';}
-  return 'fastWear';
-}
-
-function actionText(usable) { // Native
-  if (usable) {return 'Use';}
-  return 'Wear';
-}
-
-function drawButtons(theSpan) { // Native
-  var toUse = theSpan.classList.contains('backpackContextMenuUsable');
-  var myDiv = document.createElement('DIV');
-  myDiv.className = 'fastDiv';
-  myDiv.insertAdjacentHTML('beforeend', '<span class="' +
-    actionClass(toUse) + '" itemid="' +
-    theSpan.getAttribute('data-inv') + '">' +
-    actionText(toUse) + '</span>&nbsp;');
-  if (theSpan.parentNode.nextElementSibling) {
-    myDiv.appendChild(
-      theSpan.parentNode.nextElementSibling.nextElementSibling);
-  }
-  theSpan.parentNode.parentNode.appendChild(myDiv);
-}
-
-function fastWearLinks() { // Native
-  var bpTabs = document.getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0]
-    .getAttribute('data-type');
-  var items = document.querySelectorAll('#backpackTab_' + type +
-    ' .backpackContextMenuEquippable,.backpackContextMenuUsable');
-  if (items.length === 0) {return;}
-  Array.prototype.forEach.call(items, drawButtons);
-}
-
-function injectFastWear() { // jQuery
-  if (!getValue('enableQuickDrink')) {return;}
-  var bpBack = document.getElementById('backpack');
-  bpBack.className = 'fshBackpack';
-  bpBack.removeAttribute('style');
-  var backpackContainer = document.getElementById('backpackContainer');
-  var theBackpack = $(backpackContainer).data('backpack');
-  var oldShow = theBackpack._showPage;
-  theBackpack._showPage = function(type, page) {
-    oldShow.call(theBackpack, type, page);
-    fastWearLinks();
-  };
-  if (document.getElementById('backpack_current').textContent.length !== 0) {
-    add(3, fastWearLinks);
-  }
-  backpackContainer.addEventListener('click', function(e) {
-    if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
-    if (e.target.classList.contains('fastUse')) {fastWearUse(e);}
-  });
-}
-
-function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
-  target.insertAdjacentHTML('beforeend', '<span class="fshBlue">&nbsp;' +
-    numberOfContacts + (contactsTotal && contactsTotal >= numberOfContacts ?
-    '/' + contactsTotal : '') + '</span>');
-}
-
-function findAllyEnemy(el) { // Native
-  var isAllies = el.textContent === 'Allies';
-  var isEnemies = el.textContent === 'Enemies';
-  if (!isAllies && !isEnemies) {return;}
-  var target = el.parentNode;
-  var numberOfContacts = target.nextSibling.nextSibling
-    .getElementsByTagName('table').length - 1;
-  if (isAllies) {
-    totalAllyEnemy(target, numberOfContacts,
-      getValue('alliestotal'));
-  } else {
-    totalAllyEnemy(target, numberOfContacts,
-      getValue('enemiestotal'));
-  }
-}
-
-function profileParseAllyEnemy() { // Native
-  // Allies/Enemies count/total function
-  Array.prototype.forEach.call(
-    document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);
-}
-
-var guildId$1;
-var currentGuildRelationship;
-var guildMessages = {
-  self: {
-    color: 'fshGreen',
-    message: getValue('guildSelfMessage')
-  },
-  friendly: {
-    color: 'fshOliveDrab',
-    message: getValue('guildFrndMessage')
-  },
-  old: {
-    color: 'fshDarkCyan',
-    message: getValue('guildPastMessage')
-  },
-  enemy: {
-    color: 'fshRed',
-    message: getValue('guildEnmyMessage')
-  }
-};
-
-function quickWearLink() { // Native
-  // quick wear manager link
-  var node = document.querySelector('#profileRightColumn ' +
-    'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
-  if (!node) {return;}
-  node.parentNode.insertAdjacentHTML('beforeend',
-    '&nbsp;[<a href="/index.php?cmd=notepad&blank=1&subcmd=quickwear" ' +
-    'class="fshBlue">Quick&nbsp;Wear</a>]');
-}
-
-function profileSelectAll() { // Native
-  var bpTabs = document.getElementById('backpack_tabs');
-  var type = bpTabs.getElementsByClassName('tab-selected')[0]
-    .getAttribute('data-type');
-  var items = document.querySelectorAll('#backpackTab_' + type +
-    ' li:not(.hcsPaginate_hidden) .backpackItem');
-  if (items.length === 0) {return;}
-  var checkboxes = document.querySelectorAll('#backpackTab_' + type +
-    ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
-  if (checkboxes.length > 0) {items = checkboxes;}
-  Array.prototype.forEach.call(items, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {
-      bubbles: true,
-      ctrlKey: true,
-      metaKey: true
-    }));
-  });
-}
-
-function selectAllLink() { // Native
-  // select all link
-  var node = document.querySelector('#profileRightColumn' +
-    ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
-  if (!node) {return;}
-  var allSpan = document.createElement('SPAN');
-  allSpan.className = 'smallLink';
-  allSpan.textContent = 'All';
-  allSpan.addEventListener('click', profileSelectAll);
-  var wrapper = document.createElement('SPAN');
-  wrapper.insertAdjacentHTML('beforeend', '[&nbsp;');
-  wrapper.appendChild(allSpan);
-  wrapper.insertAdjacentHTML('beforeend', '&nbsp;]&nbsp;');
-  node.parentNode.appendChild(wrapper);
-}
-
-function storeVL() { // Native
-  // store the VL of the player
-  var virtualLevel = parseInt(
-    document.getElementById('stat-vl').textContent, 10);
-  if (intValue(document.getElementsByClassName('stat-level')[0]
-    .nextElementSibling.textContent) === virtualLevel) {
-    setValue('characterVirtualLevel', ''); // ?
-  } else {
-    setValue('characterVirtualLevel', virtualLevel);
-  }
-}
-
-function guildAry(val) {
-  if (val) {
-    return val.toLowerCase().replace(/\s\s*/g, ' ').split(/\s*,\s*/);
-  }
-  return [];
-}
-
-function guildRelationship(_txt) { // Native
-  var scenario = [
-    {test: guildAry(getValue('guildSelf')), type: 'self'},
-    {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
-    {test: guildAry(getValue('guildPast')), type: 'old'},
-    {test: guildAry(getValue('guildEnmy')), type: 'enemy'}
-  ];
-  var txt = _txt.toLowerCase().replace(/\s\s*/g, ' ');
-  for (var i = 0; i < scenario.length; i += 1) {
-    if (scenario[i].test.indexOf(txt) !== -1) {return scenario[i].type;}
-  }
-}
-
-function foundGuildLink(aLink) { // Native
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
-  if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
-  currentGuildRelationship = guildRelationship(aLink.text);
-  if (currentGuildRelationship) {
-    aLink.parentNode.classList.add(
-      guildMessages[currentGuildRelationship].color);
-    aLink.parentNode.insertAdjacentHTML('beforeend', '<br>' +
-      guildMessages[currentGuildRelationship].message);
-  }
-}
-
-function profileInjectGuildRel() { // Native
-  var aLink = document.querySelector(
-    '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
-  if (aLink) {foundGuildLink(aLink);}
-}
-
-function profileInjectQuickButton(avyImg, playerid, playername) { // Native
-  var newhtml = '<div align="center">';
-  newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
-    quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
-    '" style="background-image: url(\'' + imageServer +
-    '/skin/realm/icon_action_quickbuff.gif\');"></a>&nbsp;&nbsp;';
-  if (!getValue('enableMaxGroupSizeToJoin')) {
-    newhtml += '<a class="quickButton buttonJoinAll tip-static" ' +
-      'href="index.php?cmd=guild&subcmd=groups&subcmd2=joinall" ' +
-      'data-tipped="Join All Groups" style="background-image: url(\'' +
-      imageServer +
-      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-  } else {
-    var maxGroupSizeToJoin = getValue('maxGroupSizeToJoin');
-    newhtml += '<a class="quickButton buttonJoinUnder tip-static" ' +
-      'href="index.php?cmd=guild&subcmd=groups&subcmd2=' +
-      'joinallgroupsundersize" data-tipped="Join All Groups < ' +
-      maxGroupSizeToJoin + ' Members" style="background-image: url(\'' +
-      imageServer +
-      '/skin/icon_action_join.gif\');"></a>&nbsp;&nbsp;';
-  }
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=auctionhouse&type=-3&tid=' + playerid +
-    '" data-tipped="Go to ' + playername +
-    '\'s auctions" style="background-image: url(\'' +
-    imageServer + '/skin/gold_button.gif\');"></a>&nbsp;&nbsp;';
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=trade&subcmd=createsecure&target_username=' +
-    playername + '" data-tipped="Create Secure Trade to ' + playername +
-    '" style="background-image: url(\'' + imageServer +
-    '/temple/2.gif\');"></a>&nbsp;&nbsp;';
-  newhtml += '<a class="quickButton tip-static" ' +
-    'href="index.php?cmd=guild&subcmd=inventory&subcmd2=report&user=' +
-    playername + '" data-tipped="Recall items from ' + playername +
-    '" style="background-image: url(\'' + imageServer +
-    '/temple/3.gif\');"></a>&nbsp;&nbsp;';
-  if (currentGuildRelationship === 'self' &&
-      getValue('showAdmin')) {
-    newhtml += '<a class="quickButton buttonGuildRank tip-static" href="' +
-      'index.php?cmd=guild&subcmd=members&subcmd2=changerank&member_id=' +
-      playerid + '" data-tipped="Rank ' + playername +
-      '" style="background-image: url(\'' + imageServer +
-      '/guilds/' + guildId$1 + '_mini.jpg\');"></a>&nbsp;&nbsp;';
-  }
-  newhtml += '</div>';
-  avyImg.insertAdjacentHTML('afterend', newhtml);
-}
-
-function removeStatTable(el) { // Native
-  var tde = el.getElementsByTagName('td');
-  el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
-    '<div class="profile-stat-bonus">' +
-    tde[1].textContent + '</div>';
-}
-
-function updateStatistics() { // Native
-  var charStats = document.getElementById('profileLeftColumn')
-    .getElementsByTagName('table')[0];
-  var dodgyTables = charStats.getElementsByTagName('table');
-  Array.prototype.forEach.call(dodgyTables, removeStatTable);
-}
-
-var profileCombatSetDiv;
-
-function getNekid() { // jQuery
-  var profileBlock = profileCombatSetDiv.nextElementSibling;
-  var aLinks = profileBlock.getElementsByTagName('a');
-  var prm = [];
-  Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.getAttribute('href');
-    prm.push($.ajax({
-      url: href,
-      timeout: 1000
-    }));
-  });
-  $.when.apply($, prm).always(function() {
-    location.assign('index.php?cmd=profile');
-  });
-}
-
-function nekidBtn() { // Native
-  var profileRightColumn = document.getElementById('profileRightColumn');
-  profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
-  var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
-  var nekidDiv = document.createElement('div');
-  nekidDiv.className = 'fshCenter';
-  var theBtn = document.createElement('button');
-  theBtn.className = 'fshBl fshBls';
-  theBtn.textContent = 'Nekid';
-  nekidDiv.insertAdjacentText('beforeend', '[ ');
-  nekidDiv.insertAdjacentElement('beforeend', theBtn);
-  nekidDiv.insertAdjacentText('beforeend', ' ]');
-  profileRightColumn.replaceChild(nekidDiv, targetBr);
-  theBtn.addEventListener('click', getNekid);
-}
-
-function ifSelf(self) { // Legacy
-  if (self) {
-    // self inventory
-    fastDebuff();
-    profileParseAllyEnemy();
-    injectFastWear();
-    profileComponents();
-    quickWearLink();
-    selectAllLink();
-    storeVL();
-    nekidBtn();
-  }
-}
-
-function yuuzhan(playername, avyImg) { // Legacy
-  if (playername === 'yuuzhan') {
-    avyImg.setAttribute('src',
-      'http://evolutions.yvong.com/images/tumbler.gif');
-    avyImg.addEventListener('click', function() {
-      $('#dialog_msg').text('Winner!').dialog('open');
-    });
-  }
-}
-
-function injectProfile() { // Legacy
-  var avyImg = document
-    .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
-  if (!avyImg) {return;}
-  var playername = pCC
-    .getElementsByTagName('h1')[0].textContent;
-  var self = playername === playerName();
-  ifSelf(self);
-  // Must be before profileInjectQuickButton
-  profileInjectGuildRel();
-  // It sets up guildId and currentGuildRelationship
-  var playerid = fallback(getUrlParameter('player_id'),
-    playerId());
-  profileInjectQuickButton(avyImg, playerid, playername);
-
-  //* ************* yuuzhan having fun
-  yuuzhan(playername, avyImg);
-  //* *************
-
-  updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
-  updateStatistics();
-  profileRenderBio(self);
-  addStatTotalToMouseover();
-  add(3, colouredDots);
-}
-
 var normalLink;
 var seasonLink;
 var activeLink;
@@ -12282,7 +12361,7 @@ var completeLink;
 var notStartedLink;
 var currentPageValue;
 
-function dontPost$1(e) { // Native
+function dontPost$2(e) { // Native
   if (e.target.type !== 'submit') {return;}
   e.preventDefault();
   var form = e.target.form;
@@ -12412,7 +12491,7 @@ function doHideQuests(hideQuests, questName, aRow) {
 }
 
 function injectQuestBookFull() { // Native
-  pCC.addEventListener('click', dontPost$1);
+  pCC.addEventListener('click', dontPost$2);
   storeQuestPage();
   var questTable = pCC.getElementsByTagName('table')[5];
   if (!questTable) {return;}
@@ -13645,7 +13724,7 @@ function inventing() { // Native
 }
 */
 
-function dontPost$2(e) { // jQuery
+function dontPost$3(e) { // jQuery
   e.preventDefault();
   window.location = 'index.php?cmd=scavenging&subcmd=process' +
     '&cave_id=' + $('#pCC input[name="cave_id"]:checked').val() +
@@ -13653,7 +13732,7 @@ function dontPost$2(e) { // jQuery
 }
 
 function injectScavenging() { // jQuery
-  $('#pCC input[value="Scavenge"]').click(dontPost$2);
+  $('#pCC input[value="Scavenge"]').click(dontPost$3);
 }
 
 function buffAll(self) { // Native
@@ -14793,8 +14872,7 @@ function getTarget$1(target, theRow) {
   if (theRow.cells[6].textContent.trim() === '[active]') {
     bounty.active = true;
     bounty.accept = '';
-  } else if (theRow.cells[6].textContent
-      .trim() !== '[n/a]') { // TODO
+  } else if (theRow.cells[6].textContent.trim() !== '[n/a]') { // TODO
     bounty.active = false;
     bounty.accept = theRow.cells[6]
       .firstChild.firstChild
@@ -16111,6 +16189,6 @@ FSH.dispatch = function dispatch() { // Native
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '9';
+window.FSH.calf = '10';
 
 }());
