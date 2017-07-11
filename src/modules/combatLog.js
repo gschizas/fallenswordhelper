@@ -54,7 +54,7 @@ function gotCombatLog(data) { // Native
     .addEventListener('click', notepadClearLog);
 }
 
-export function injectNotepadShowLogs(injector) { // jQuery.min
+export default function injectNotepadShowLogs(injector) { // jQuery.min
   content = injector || layout.pCC;
   ajax.getForage('fsh_combatLog').done(gotCombatLog);
 }

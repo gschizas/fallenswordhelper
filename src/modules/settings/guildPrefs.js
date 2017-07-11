@@ -13,7 +13,7 @@ function injectSettingsGuildData(guildType) { // Native
     '</div>';
 }
 
-export function prefs() {
+export default function guildPrefs() {
   // Guild Manage
   return '<tr><th colspan="2"><b>Guild>Manage preferences' +
       '</b></th></tr>' +

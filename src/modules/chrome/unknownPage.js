@@ -1,8 +1,8 @@
+import injectAdvisor from '../guildAdvisor';
+import inventing from '../recipes';
 import * as fshGa from '../support/fshGa';
-import * as guildAdvisor from '../guildAdvisor';
 import * as questBook from '../questBook';
 import * as quickBuff from '../quickBuff';
-import * as recipes from '../recipes';
 import * as system from '../support/system';
 
 var unknown = [
@@ -32,7 +32,7 @@ var unknown = [
     },
     result: function() {
       fshGa.screenview('unknown.guildAdvisor.injectAdvisor');
-      guildAdvisor.injectAdvisor();
+      injectAdvisor();
     }
   },
   // {
@@ -50,7 +50,7 @@ var unknown = [
     },
     result: function() {
       fshGa.screenview('unknown.recipes.inventing');
-      recipes.inventing();
+      inventing();
     }
   //#if _DEV  //  Fell through!
   },
@@ -61,7 +61,7 @@ var unknown = [
   }
 ];
 
-export function unknownPage() { // Legacy
+export default function unknownPage() { // Legacy
   if (typeof window.jQuery === 'undefined') {return;}
   //#if _DEV  //  unknownPage
   console.log('unknownPage'); // eslint-disable-line no-console

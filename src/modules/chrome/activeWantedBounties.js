@@ -313,7 +313,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
   }
 }
 
-export function prepareBountyData() { // Native
+export default function prepareBountyData() { // Native
   var pCR = document.getElementById('pCR');
   if (calf.enableWantedList) {
     pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +

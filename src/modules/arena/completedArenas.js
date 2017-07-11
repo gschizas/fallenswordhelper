@@ -4,7 +4,7 @@ function gotoPage(pageId) { // Native
   window.location = 'index.php?cmd=arena&subcmd=completed&page=' + pageId;
 }
 
-export function completedArenas() { // jQuery
+export default function completedArenas() { // jQuery
   var prevButton = $('#pCC input[value="<"]');
   var nextButton = $('#pCC input[value=">"]');
   if (prevButton.length === 1) {

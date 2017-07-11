@@ -147,7 +147,7 @@ function getRanks(membrList) { // Native
   task.add(3, paintRanks);
 }
 
-export function injectGuildRanks() { // jQuery
+export default function injectGuildRanks() { // jQuery
   ajax.getMembrList(true).done(function(membrList) {
     task.add(3, getRanks, [membrList]);
   });

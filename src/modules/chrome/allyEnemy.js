@@ -210,7 +210,7 @@ function makeDiv(data) { // Native
   injectAllyEnemyList(data);
 }
 
-export function prepareAllyEnemyList() { // jQuery.min
+export default function prepareAllyEnemyList() { // jQuery.min
   ajax.myStats(false)
     .done(function(data) {
       task.add(3, makeDiv, [data]);

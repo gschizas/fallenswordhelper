@@ -9,7 +9,7 @@ import * as settingsPage from '../settings/settingsPage';
 import * as shop from './shop';
 import * as system from '../support/system';
 import * as viewCreature from './viewCreature/viewCreature';
-import * as world from '../settings/world';
+import * as world from '../settings/worldPrefs';
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
 var huntingBuffs;

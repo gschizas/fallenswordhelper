@@ -3,7 +3,7 @@ import * as settingObj from './settingObj';
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
-export function prefs() {
+export default function generalPrefs() {
   // General Prefs
   return '<tr><th colspan="2"><b>General preferences ' +
       '(apply to most screens)</b></th></tr>' +

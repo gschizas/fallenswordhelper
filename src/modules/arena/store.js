@@ -16,6 +16,6 @@ function gotMoves(_arena) { // jQuery
   ajax.setForage('fsh_arena', arena);
 }
 
-export function storeMoves() { // jQuery.min
+export default function storeMoves() { // jQuery.min
   ajax.getForage('fsh_arena').done(gotMoves);
 }

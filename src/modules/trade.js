@@ -168,7 +168,7 @@ function injectTradeOld() { // native
   el.parentNode.insertBefore(multiple, el);
 }
 
-export function injectTrade() { // native
+export default function injectTrade() { // native
   task.add(3, inv);
   task.add(3, injectTradeOld);
 }

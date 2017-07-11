@@ -133,7 +133,7 @@ function listen(e) { // Native
   }
 }
 
-export function insertQuickExtract(injector) { // jQuery.min
+export default function insertQuickExtract(injector) { // jQuery.min
   var content = injector || layout.pCC;
   content.innerHTML = '<div class="qeHead"><b>Quick Extract</b></div>' +
     'Select which type of plants you wish to extract all of. Only ' +

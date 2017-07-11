@@ -174,7 +174,7 @@ function showQuickWear(data) { // jQuery
   showAHInvManager('#invTabs-ah');
 }
 
-export function insertQuickWear(injector) { // Legacy
+export default function insertQuickWear(injector) { // Legacy
   content = injector || layout.pCC;
   if (!content) {return;}
   content.innerHTML = 'Getting item list from backpack';

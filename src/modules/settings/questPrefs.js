@@ -1,7 +1,7 @@
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
-export function prefs() {
+export default function questPrefs() {
   // Quest Preferences
   return '<tr><th colspan="2"><b>Quest preferences</b></th></tr>' +
 

@@ -1,7 +1,7 @@
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
-export function prefs() {
+export default function equipPrefs() {
   // Equipment screen prefs
   return '<tr><th colspan="2"><b>Equipment screen preferences' +
       '</b></th></tr>' +

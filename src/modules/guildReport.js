@@ -209,7 +209,7 @@ function prepareChildRows() { // Native
   task.add(3, makeSpan);
 }
 
-export function injectReportPaint() { // jQuery
+export default function injectReportPaint() { // jQuery
   ajax.getMembrList(true).done(function() { // TODO no guard
     task.add(3, reportHeader);
   });

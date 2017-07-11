@@ -1,5 +1,6 @@
 import calf from '../support/calf';
-import * as configData from './configData';
+import mySimpleCheckboxes from './simple';
+import setupConfigData from './configData';
 import * as layout from '../support/layout';
 import * as settingObj from './settingObj';
 import * as system from '../support/system';
@@ -38,7 +39,7 @@ function isOn(o) { // Native
 }
 
 function justLabel(name) {
-  var o = settingObj.mySimpleCheckboxes[name];
+  var o = mySimpleCheckboxes[name];
   return hasNetwork(o) +
     '<label for="' + o.id + '">' + o.helpTitle +
     helpLink(o.helpTitle, o.helpText) +
@@ -46,7 +47,7 @@ function justLabel(name) {
 }
 
 function justCheckbox(name) {
-  var o = settingObj.mySimpleCheckboxes[name];
+  var o = mySimpleCheckboxes[name];
   return '<input id="' + o.id + '" name="' + o.id +
     '" class="fshVMid" type="checkbox" value="on"' + isOn(o) + '>';
 }
@@ -191,7 +192,7 @@ function createEventListeners() { // Native
 
 export function injectSettings() { // jQuery.min
   getVars();
-  configData.setupConfigData();
+  setupConfigData();
   var settingsTabs = document.getElementById('settingsTabs');
   settingsTabs.insertAdjacentHTML('beforeend', '<div id="fshSettings">' +
     calf.configData + '</div>');

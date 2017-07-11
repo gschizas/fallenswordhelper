@@ -1,16 +1,16 @@
+import bountyPrefs from './bountyPrefs';
 import calf from '../support/calf';
-import * as bounty from './bounty';
-import * as equip from './equip';
-import * as general from './general';
-import * as guild from './guild';
-import * as log from './log';
-import * as other from './other';
-import * as profile from './profile';
-import * as quest from './quest';
+import equipPrefs from './equipPrefs';
+import generalPrefs from './generalPrefs';
+import guildPrefs from './guildPrefs';
+import logPrefs from './logPrefs';
+import otherPrefs from './otherPrefs';
+import profilePrefs from './profilePrefs';
+import questPrefs from './questPrefs';
 import * as system from '../support/system';
-import * as world from './world';
+import * as world from './worldPrefs';
 
-export function setupConfigData() {
+export default function setupConfigData() {
   calf.configData =
     '<form><table id="fshSettingsTable">' +
     '<thead><th colspan="2"><b>Fallen Sword Helper configuration ' +
@@ -33,31 +33,31 @@ export function setupConfigData() {
       'for any suggestions, requests or bug reports</span></td></tr>' +
 
     // General Prefs
-    general.prefs() +
+    generalPrefs() +
 
     // Guild Manage
-    guild.prefs() +
+    guildPrefs() +
 
     // World Screen
     world.prefs() +
 
     // Log screen prefs
-    log.prefs() +
+    logPrefs() +
 
     // Equipment screen prefs
-    equip.prefs() +
+    equipPrefs() +
 
     // Quest Preferences
-    quest.prefs() +
+    questPrefs() +
 
     // profile prefs
-    profile.prefs() +
+    profilePrefs() +
 
     // Bounty hunting prefs
-    bounty.prefs() +
+    bountyPrefs() +
 
     // Other prefs
-    other.prefs() +
+    otherPrefs() +
 
     // save button
     // http://www.fallensword.com/index.php?cmd=notepad&blank=1&subcmd=savesettings

@@ -245,7 +245,7 @@ function injectOldMap() { // Native
   checkBuffs();
 }
 
-export function injectWorld() { // Native
+export default function injectWorld() { // Native
   // -1 = world page
   // 0 = quest responce
   // 1 = view creature

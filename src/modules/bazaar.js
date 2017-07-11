@@ -61,7 +61,7 @@ function buy() { // jQuery
   }
 }
 
-export function injectBazaar() { // Native
+export default function injectBazaar() { // Native
   var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = layout.pCC.getElementsByTagName('A');
