@@ -81,7 +81,7 @@ function togglePref() { // Native
   system.setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
 
-export function composingBreakdown() { // Native
+export default function composingBreakdown() { // Native
   perfFilter('composing');
   disableBreakdownPrompts = system.getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode

@@ -99,8 +99,8 @@ function getKillStreak(responseText) { // Hybrid
   if (deathDealer) {
     var deathDealerLevel = deathDealer[1];
     deathDealerPercentage = Math.min(Math.round(
-        Math.floor(playerKillStreakValue / 5) * deathDealerLevel
-      ) * 0.01, 20);
+      Math.floor(playerKillStreakValue / 5) * deathDealerLevel
+    ) * 0.01, 20);
   }
   var deathDealerPercentageElement =
     system.findNode('//span[@findme="damagebonus"]');
@@ -165,7 +165,7 @@ function toggleKsTracker() { // Legacy
   if (trackKS) {
     trackKS.addEventListener('click', function() {
       system.setValue('trackKillStreak',
-      !system.getValue('trackKillStreak'));
+        !system.getValue('trackKillStreak'));
       location.reload();
     }, true);
   }
@@ -223,9 +223,10 @@ function checkBuffs() { // Legacy - Old Map
   replacementText += findImps();
   replacementText += hasCA();
   replacementText += hasDblr();
-  replacementText += calf.huntingMode === true ?
-    '<tr><td style="font-size: small; color:red">' +
-    'Hunting mode enabled</td></tr>' : '';
+  if (calf.huntingMode) {
+    replacementText += '<tr><td style="font-size: small; color:red">' +
+      'Hunting mode enabled</td></tr>';
+  }
   replacementText += '<tr><td colspan="2" height="10"></td></tr>';
   replacementText += '</td>';
 
@@ -245,7 +246,7 @@ function injectOldMap() { // Native
   checkBuffs();
 }
 
-export function injectWorld() { // Native
+export default function injectWorld() { // Native
   // -1 = world page
   // 0 = quest responce
   // 1 = view creature

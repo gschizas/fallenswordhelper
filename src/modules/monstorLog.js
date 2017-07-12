@@ -137,6 +137,6 @@ function prepAry(data) {
   drawMobs();
 }
 
-export function injectMonsterLog() {
+export default function injectMonsterLog() {
   ajax.getForage('fsh_monsterLog').done(prepAry);
 }

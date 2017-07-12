@@ -231,6 +231,6 @@ function gotOptions(guildLog) {
   getGuildLogPage(1).done(processFirstPage);
 }
 
-export function injectNewGuildLog() {
+export default function injectNewGuildLog() {
   ajax.getForage('fsh_guildLog').done(gotOptions);
 }

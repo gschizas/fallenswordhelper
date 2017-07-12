@@ -1,7 +1,7 @@
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
-export function injectSaveSettings() { // Hybrid
+export default function injectSaveSettings() { // Hybrid
   var content = layout.pCC;
   var fshSettings = {};
   var list = GM_listValues();

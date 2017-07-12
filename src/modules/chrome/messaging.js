@@ -80,6 +80,6 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
   $('#quickMessageDialog').dialog('open');
 }
 
-export function injectQuickMsgDialogJQ() { // Native
+export default function injectQuickMsgDialogJQ() { // Native
   window.openQuickMsgDialog = openQuickMsgDialog;
 }

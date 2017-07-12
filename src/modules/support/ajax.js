@@ -93,10 +93,13 @@ export function getMembrList(force) {
 }
 
 export function getInventory() {
+  var subcmd = 'inventory';
+  if (calf.subcmd === 'guildinvmgr') {
+    subcmd = 'guild_store&inc_tagged=1';
+  }
   return $.ajax({
     dataType: 'json',
-    url: 'index.php?cmd=export&subcmd=' + (calf.subcmd === 'guildinvmgr' ?
-      'guild_store&inc_tagged=1' : 'inventory')
+    url: 'index.php?cmd=export&subcmd=' + subcmd
   });
 }
 
@@ -171,8 +174,9 @@ export function equipItem(backpackInvId) {
 
 function htmlResult(data) {
   var info = layout.infoBox(data);
-  return info.search(/(successfully|gained|components)/) !== -1 ?
-    {r: 0, m: info} : {r: 1, m: info};
+  var _r = 1;
+  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
+  return {r: _r, m: info};
 }
 
 export function useItem(backpackInvId) {
@@ -191,12 +195,12 @@ function additionalAction(action, data) {
   if (action === 'wear') {
     return equipItem(data.b)
       .pipe(function equipItemStatus() {return data;});
-      // Return takeitem status irrespective of the status of the equipitem
+    // Return takeitem status irrespective of the status of the equipitem
   }
   if (action === 'use') {
     return useItem(data.b)
       .pipe(function useItemStatus() {return data;});
-      // Return takeitem status irrespective of the status of the useitem
+    // Return takeitem status irrespective of the status of the useitem
   }
 }
 
@@ -265,7 +269,7 @@ function recallItem(o) {
           }
           if (o.action === 'use') {
             return useItem(
-                bpData.items[bpData.items.length - 1].a)
+              bpData.items[bpData.items.length - 1].a)
               .pipe(function useItemStatus() {return data;});
             // Return recall status irrespective of the status of the useitem
           }
@@ -283,12 +287,17 @@ export function queueRecallItem(o) {
   return deferred;
 }
 
+function translateReturnInfo(data) {
+  var info = layout.infoBox(data);
+  var _r = {r: 1, m: info};
+  if (info === 'Item was transferred to the guild store!') {
+    _r = {r: 0, m: ''};
+  }
+  return _r;
+}
+
 export function guildMailboxTake(href) {
-  return $.ajax({url: href}).pipe(function translateReturnInfo(data) {
-    var info = layout.infoBox(data);
-    return info === 'Item was transferred to the guild store!' ?
-      {r: 0, m: ''} : {r: 1, m: info};
-  }).done(dialog);
+  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
 }
 
 export function moveItem(invIdList, folderId) {

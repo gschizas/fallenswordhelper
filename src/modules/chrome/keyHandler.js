@@ -142,7 +142,7 @@ function keyPress(evt) { // Native
   handleKey(evt.charCode);
 }
 
-export function replaceKeyHandler() { // Native
+export default function replaceKeyHandler() { // Native
   expandMenuOnKeyPress = system.getValue('expandMenuOnKeyPress');
   document.onkeypress = keyPress;
 }

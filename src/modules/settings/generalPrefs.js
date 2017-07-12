@@ -3,7 +3,7 @@ import * as settingObj from './settingObj';
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
-export function prefs() {
+export default function generalPrefs() {
   // General Prefs
   return '<tr><th colspan="2"><b>General preferences ' +
       '(apply to most screens)</b></th></tr>' +
@@ -12,8 +12,8 @@ export function prefs() {
       '<label for="enableGuildInfoWidgets">' +
       'Enable Guild Info Widgets' +
       settingsPage.helpLink('Enable Guild Info Widgets',
-      'Enabling this option will enable the Guild Info Widgets ' +
-      '(coloring on the Guild Info panel)') + ':</label></td><td>' +
+        'Enabling this option will enable the Guild Info Widgets ' +
+        '(coloring on the Guild Info panel)') + ':</label></td><td>' +
       '<input id="enableGuildInfoWidgets" name="enableGuildInfoWidgets" ' +
       'type="checkbox" value="on"' +
       system.isChecked(calf.enableGuildInfoWidgets) +
@@ -41,7 +41,7 @@ export function prefs() {
     '<tr><td class="fshRight">' + settingObj.networkIcon +
       'Show Online Allies/Enemies' +
       settingsPage.helpLink('Show Online Allies/Enemies',
-      'This will show the allies/enemies online list on the right.') +
+        'This will show the allies/enemies online list on the right.') +
       ':</td><td><label>Allies&nbsp;<input name="enableAllyOnlineList" ' +
       'type="checkbox" value="on"' +
       system.isChecked(calf.enableAllyOnlineList) +
@@ -68,8 +68,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">Quick Links Screen Location' +
       settingsPage.helpLink('Quick Links Screen Location',
-      'Determines where the quick links dialog shows on the screen. ' +
-      'Default is top 22, left 0.') +
+        'Determines where the quick links dialog shows on the screen. ' +
+        'Default is top 22, left 0.') +
       ':</td><td>Top: <input name="quickLinksTopPx" size="3" value="' +
       system.getValue('quickLinksTopPx') +
       '"> Left: <input name="quickLinksLeftPx" size="3" value="' +

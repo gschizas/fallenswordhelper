@@ -26,8 +26,10 @@ export function buffAllHref(shortList) { // Bad Pattern
 }
 
 export function quickBuffHref(aPlayerId, buffList) { // Bad Pattern
+  var passthru = '';
+  if (buffList) {passthru = '&blist=' + buffList;}
   return 'href=\'javascript:window.openWindow("index.php?cmd=' +
-    'quickbuff&tid=' + aPlayerId + (buffList ? '&blist=' + buffList : '') +
+    'quickbuff&tid=' + aPlayerId + passthru +
     '", "fsQuickBuff", 618, 1000, ",scrollbars")\'';
 }
 
@@ -103,12 +105,16 @@ export function playerName() {
 }
 
 export function makePageHeader(title, comment, spanId, button) { // Native
+  var _comment = '';
+  if (comment !== '') {_comment = '&nbsp;(' + comment + ')';}
+  var _span = '';
+  if (spanId) {
+    _span = '[<span class="fshLink" id="' +
+      spanId + '">' + button + '</span>]';
+  }
   return '<table width=100%><tbody><tr class="fshHeader">' +
-    '<td width="90%"><b>&nbsp;' + title + '</b>' +
-    (comment === '' ? '' : '&nbsp;(' + comment + ')') +
-    '<td width="10%" class="fshBtnBox">' +
-    (spanId ? '[<span class="fshLink" id="' +
-    spanId + '">' + button + '</span>]' : '') +
+    '<td width="90%"><b>&nbsp;' + title + '</b>' + _comment +
+    '<td width="10%" class="fshBtnBox">' + _span +
     '</td></tr><tbody></table>';
 }
 
@@ -217,6 +223,5 @@ export function confirm(title, msgText, fn) { // jQuery
       No: function() {$(this).dialog('close');}
     },
     title: title
-  })
-  .dialog('open');
+  }).dialog('open');
 }

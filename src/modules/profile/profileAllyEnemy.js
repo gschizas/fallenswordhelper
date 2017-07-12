@@ -1,9 +1,12 @@
 import * as system from '../support/system';
 
 function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
+  var _c = '';
+  if (contactsTotal && contactsTotal >= numberOfContacts) {
+    _c = '/' + contactsTotal;
+  }
   target.insertAdjacentHTML('beforeend', '<span class="fshBlue">&nbsp;' +
-    numberOfContacts + (contactsTotal && contactsTotal >= numberOfContacts ?
-    '/' + contactsTotal : '') + '</span>');
+    numberOfContacts + _c + '</span>');
 }
 
 function findAllyEnemy(el) { // Native

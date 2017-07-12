@@ -78,8 +78,9 @@ function quickActivate(evt) { // jQuery
   $.get(buffHref).done(function(data) {
     var doc = system.createDocument(data);
     var result = doc.querySelector('#quickbuff-report font');
-    if (result && (result.textContent.indexOf(
-        'current or higher level is currently active on') !== -1 ||
+    if (result &&
+        (result.textContent.indexOf(
+          'current or higher level is currently active on') !== -1 ||
         result.textContent.indexOf('was activated on') !== -1)) {
       trigger.className = 'fshLime';
       trigger.innerHTML = 'On';

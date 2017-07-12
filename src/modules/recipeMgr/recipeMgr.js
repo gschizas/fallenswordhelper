@@ -264,7 +264,7 @@ function rmEvtHdl(evt) { // Native
   }
 }
 
-export function injectRecipeManager(injector) { // jQuery.min
+export default function injectRecipeManager(injector) { // jQuery.min
   content = injector || layout.pCC;
   ajax.getForage('fsh_recipeBook').done(gotRecipeBook);
   content.addEventListener('click', rmEvtHdl);

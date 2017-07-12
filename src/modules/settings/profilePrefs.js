@@ -1,7 +1,7 @@
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
-export function prefs() {
+export default function profilePrefs() {
   // profile prefs
   return '<tr><th colspan="2"><b>Profile preferences</b></th></tr>' +
 
@@ -10,8 +10,8 @@ export function prefs() {
 
     '<tr><td class="fshRight">Enable Bio Compressor' +
       settingsPage.helpLink('Enable Bio Compressor',
-      'This will compress long bios according to settings and provide a ' +
-      'link to expand the compressed section.') +
+        'This will compress long bios according to settings and provide a ' +
+        'link to expand the compressed section.') +
       ':</td><td><input name="enableBioCompressor" type="checkbox" ' +
       'value="on"' +
       system.isChecked(system.getValue('enableBioCompressor')) +
@@ -22,10 +22,10 @@ export function prefs() {
 
     '<tr><td class="fshRight">Buy Buffs Greeting' +
       settingsPage.helpLink('Buy Buffs Greeting',
-      'This is the default text to open a message with when asking to ' +
-      'buy buffs. You can use {playername} to insert the target players ' +
-      'name. You can also use {buffs} to insert the list of buffs. You ' +
-      'can use {cost} to insert the total cost of the buffs.') +
+        'This is the default text to open a message with when asking to ' +
+        'buy buffs. You can use {playername} to insert the target players ' +
+        'name. You can also use {buffs} to insert the list of buffs. You ' +
+        'can use {cost} to insert the total cost of the buffs.') +
       ':</td><td colspan="3"><input name="buyBuffsGreeting" size="60" ' +
       'value="' + system.getValue('buyBuffsGreeting') + '"></td></tr>' +
 

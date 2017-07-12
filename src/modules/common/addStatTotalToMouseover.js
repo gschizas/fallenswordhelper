@@ -9,8 +9,8 @@ function reduceStatTable(prev, curr, index) { // Native
   prev[key] = {ind: index};
   if (curr.cells[1] && curr.cells[1].textContent) {
     prev[key].value = Number(
-        curr.cells[1].textContent.trim().replace('+', '')
-      );
+      curr.cells[1].textContent.trim().replace('+', '')
+    );
   }
   return prev;
 }

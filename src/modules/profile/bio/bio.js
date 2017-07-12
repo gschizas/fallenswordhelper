@@ -4,8 +4,11 @@ import * as system from '../../support/system';
 
 function expandBio() { // Native
   var bioExpander = document.getElementById('fshBioExpander');
-  bioExpander.textContent =
-    bioExpander.textContent === 'More ...' ? 'Less ...' : 'More ...';
+  if (bioExpander.textContent === 'More ...') {
+    bioExpander.textContent = 'Less ...';
+  } else {
+    bioExpander.textContent = 'More ...';
+  }
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 

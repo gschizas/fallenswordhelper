@@ -195,7 +195,11 @@ function injectOnlinePlayersNew() { // jQuery
   context[0].addEventListener('keyup', changeLvl);
 }
 
-export function injectOnlinePlayers(content) { // jQuery
-  context = content ? $(content) : $('#pCC');
+export default function injectOnlinePlayers(content) { // jQuery
+  if (content) {
+    context = $(content);
+  } else {
+    context = $('#pCC');
+  }
   injectOnlinePlayersNew();
 }

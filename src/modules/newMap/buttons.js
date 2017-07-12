@@ -45,9 +45,8 @@ function toggleSound(e) { // jQuery
 }
 
 function showSpeakerOnWorld(worldName) { // jQuery
-  var img = system.getValue('playNewMessageSound') === true ?
-    assets.soundMuteImage :
-    assets.soundImage;
+  var img = assets.soundImage;
+  if (system.getValue('playNewMessageSound')) {img = assets.soundMuteImage;}
   worldName.append('&nbsp;').append(img);
   worldName.on('click', '#toggleSoundLink', toggleSound);
 }
@@ -66,14 +65,14 @@ function toggleHuntMode(e) { // jQuery
 }
 
 function showHuntMode(worldName) { // jQuery
-  var img = calf.huntingMode === true ? assets.huntingOnImage :
-    assets.huntingOffImage;
+  var img = assets.huntingOffImage;
+  if (calf.huntingMode) {img = assets.huntingOnImage;}
   worldName.append('&nbsp;').append(img);
   worldName.on('click', '#HelperToggleHuntingMode',
     toggleHuntMode);
 }
 
-export function injectButtons(data) { // jQuery
+export default function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
   worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
   var oldButtonContainer = $('#fshWorldButtonContainer');

@@ -206,7 +206,7 @@ function process(arena) { // jQuery
 
 }
 
-export function injectArena() { // jQuery
+export default function injectArena() { // jQuery
   tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);

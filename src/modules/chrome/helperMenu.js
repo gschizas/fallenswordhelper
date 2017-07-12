@@ -1,14 +1,14 @@
-import * as combatLog from '../combatLog';
+import injectNotepadShowLogs from '../combatLog';
+import injectOnlinePlayers from '../onlinePlayers';
+import injectRecipeManager from '../recipeMgr/recipeMgr';
+import insertQuickExtract from '../quickExtract';
+import insertQuickWear from '../quickWear';
 import * as common from '../common/common';
 import * as findBuffs from '../findBuffs';
 import * as fshGa from '../support/fshGa';
 import * as lists from '../lists';
 import * as misc from '../misc';
-import * as onlinePlayers from '../onlinePlayers';
 import * as quickBuff from '../quickBuff';
-import * as quickExtract from '../quickExtract';
-import * as quickWear from '../quickWear';
-import * as recipeMgr from '../recipeMgr/recipeMgr';
 import * as system from '../support/system';
 
 var helperMenuBlob =
@@ -35,15 +35,15 @@ var helperMenuBlob =
 
 var functionLookup = {
   'Buff Log': quickBuff.injectBuffLog,
-  'Combat Log': combatLog.injectNotepadShowLogs,
-  'Recipe Manager': recipeMgr.injectRecipeManager,
+  'Combat Log': injectNotepadShowLogs,
+  'Recipe Manager': injectRecipeManager,
   'Quick Links': lists.injectQuickLinkManager,
   'Find Buffs': findBuffs.injectFindBuffs,
   'Find Other': findBuffs.injectFindOther,
-  'Online Players': onlinePlayers.injectOnlinePlayers,
+  'Online Players': injectOnlinePlayers,
   'AH Quick Search': lists.injectAuctionSearch,
-  'Quick Extract': quickExtract.insertQuickExtract,
-  'Quick Wear': quickWear.insertQuickWear,
+  'Quick Extract': insertQuickExtract,
+  'Quick Wear': insertQuickWear,
   'FS Box Log': misc.injectFsBoxContent
 };
 
@@ -109,7 +109,7 @@ function haveNode(node) { // Native
   node.parentNode.insertBefore(helperMenu, node);
 }
 
-export function injectHelperMenu() { // Native
+export default function injectHelperMenu() { // Native
   // don't put all the menu code here (but call if clicked) to minimize lag
   var node = document.getElementById('statbar-container');
   if (node) {haveNode(node);}

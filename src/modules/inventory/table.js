@@ -1,5 +1,6 @@
 import * as assets from './assets';
 import * as inventory from './inventory';
+import * as render from './render';
 
 export function doTable() { // jQuery
   $('#pCC').append('<table id="fshInv" class="hover" ' +
@@ -18,16 +19,16 @@ export function doTable() { // jQuery
       {
         title: 'Name',
         data: 'item_name',
-        render: inventory.nameRender
+        render: render.nameRender
       },
       {title: 'Level', data: 'stats.min_level'},
       {
         title: 'Where',
-        data: inventory.whereData,
+        data: render.whereData,
         render: {
-          _: inventory.whereRender,
-          display: inventory.whereRenderDisplay,
-          filter: inventory.whereRenderFilter
+          _: render.whereRender,
+          display: render.whereRenderDisplay,
+          filter: render.whereRenderFilter
         }
       },
       {
@@ -46,31 +47,34 @@ export function doTable() { // jQuery
         data: 'craft',
         render: {
           _: function(craft) {
-            return assets.craftHash[craft] ? assets.craftHash[craft].index : 0;
+            if (assets.craftHash[craft]) {
+              return assets.craftHash[craft].index;
+            }
+            return 0;
           },
-          display: inventory.craftRender,
-          filter: inventory.craftRender
+          display: render.craftRender,
+          filter: render.craftRender
         }
       },
       {
         title: 'Du%',
         data: 'durability',
-        render: inventory.durabilityRender
+        render: render.durabilityRender
       },
       {
         title: 'BP',
-        data: inventory.whereData,
-        render: inventory.bpRender
+        data: render.whereData,
+        render: render.bpRender
       },
       {
         title: 'GS',
-        data: inventory.whereData,
-        render: inventory.gsRender
+        data: render.whereData,
+        render: render.gsRender
       },
       {
         title: 'W/U',
         data: 'type',
-        render: inventory.wuRender
+        render: render.wuRender
       },
       {
         title: 'setName',
@@ -82,21 +86,22 @@ export function doTable() { // jQuery
         title: 'Tag',
         data: 'guild_tag',
         render: function(tag) {
-          return tag === '-1' ? 'No' : 'Yes';
+          if (tag === '-1') {return 'No';}
+          return 'Yes';
         }
       },
       {
         title: 'Drop',
         data: 'type',
-        render: inventory.dropRender
+        render: render.dropRender
       },
       {
         title: 'Send',
         data: 'type',
-        render: inventory.sendRender
+        render: render.sendRender
       }
     ],
-    createdRow: inventory.createdRow,
+    createdRow: render.createdRow,
     stateSave: true,
     stateDuration: 0
   });

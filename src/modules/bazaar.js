@@ -47,7 +47,7 @@ function quantity() { // Native
 
 function done(responseText) { // Native
   document.getElementById('buy_result').insertAdjacentHTML('beforeend',
-  '<br>' + layout.infoBox(responseText));
+    '<br>' + layout.infoBox(responseText));
 }
 
 function buy() { // jQuery
@@ -61,7 +61,7 @@ function buy() { // jQuery
   }
 }
 
-export function injectBazaar() { // Native
+export default function injectBazaar() { // Native
   var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = layout.pCC.getElementsByTagName('A');

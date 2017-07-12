@@ -55,6 +55,6 @@ function dontPost(e) { // jQuery
     '&gold=' + $('#gold').val() + '&submit=Scavenge';
 }
 
-export function injectScavenging() { // jQuery
+export default function injectScavenging() { // jQuery
   $('#pCC input[value="Scavenge"]').click(dontPost);
 }

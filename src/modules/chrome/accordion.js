@@ -75,7 +75,7 @@ function adjustHeight() { // jQuery
   }
 }
 
-export function injectMenu() { // Native
+export default function injectMenu() { // Native
   if (!document.getElementById('pCL')) {return;}
   updateQuestLink();
   // character

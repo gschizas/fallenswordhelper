@@ -10,7 +10,7 @@ function statbarWrapper(href, id) { // Native
   }, true);
 }
 
-export function statbar() { // Native
+export default function statbar() { // Native
   var sw = statbarWrapper;
   sw('index.php?cmd=profile', 'statbar-character');
   sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');

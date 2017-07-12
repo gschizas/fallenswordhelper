@@ -49,7 +49,7 @@ function gotCombatLog(data) { // jQuery.min
   $.subscribe('2-success.action-response', combatResponse);
 }
 
-export function init() { // jQuery.min
+export default function combatLogger() { // jQuery.min
   if (system.getValue('keepLogs')) {
     ajax.getForage('fsh_combatLog').done(gotCombatLog);
   }

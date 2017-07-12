@@ -108,7 +108,7 @@ function injectViewRecipe() { // Legacy
   }
 }
 
-export function inventing() { // Native
+export default function inventing() { // Native
   injectViewRecipe();
   injectInvent();
 }

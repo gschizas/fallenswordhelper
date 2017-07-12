@@ -297,7 +297,7 @@ function injectAdvisorWeekly() { // jQuery
 
 }
 
-export function injectAdvisor() { // Native
+export default function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {

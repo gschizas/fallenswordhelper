@@ -125,8 +125,7 @@ module.exports = {
     'id-blacklist': ['off'],
     'id-length': ['off'],
     'id-match': ['off'],
-    indent: ['off'],
-    'indent-legacy': ['error', 2],
+    indent: ['error', 2],
     'jsx-quotes': ['off'],
     'key-spacing': ['error'],
     'keyword-spacing': ['error'],
@@ -142,13 +141,13 @@ module.exports = {
       ignoreUrls: true
     }],
     'max-lines': ['error', {
-      max: 500, // 200 ? 300
+      max: 463, // 200 ? 300
       skipBlankLines: true,
       skipComments: true
     }],
     'max-nested-callbacks': ['error', 3],
     'max-params': ['error', 5],
-    'max-statements': ['error', 154], // 30 ?
+    'max-statements': ['error', 30],
     'max-statements-per-line': ['error', {max: 3}],
     'multiline-ternary': ['off'],
     'new-cap': ['error', {
@@ -182,7 +181,7 @@ module.exports = {
     'no-plusplus': ['error', {allowForLoopAfterthoughts: true}],
     'no-restricted-syntax': ['off'],
     'no-tabs': ['error'],
-    // 'no-ternary': ['error'],
+    'no-ternary': ['error'],
     'no-trailing-spaces': ['error'],
     'no-underscore-dangle': ['off'],
     'no-unneeded-ternary': ['error', {defaultAssignment: false}],

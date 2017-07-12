@@ -1,65 +1,70 @@
+import addHistoryWidgets from '../guild/addHistoryWidgets';
+import completedArenas from '../arena/completedArenas';
+import composingBreakdown from '../composing/breakdown';
+import guildMailbox from '../mailbox/guildMailbox';
+import injectAdvisor from '../guildAdvisor';
+import injectArena from '../arena/arena';
+import injectBazaar from '../bazaar';
 import injectBioWidgets from '../profile/bio/bioWidgets';
+import injectGuild from '../guild/guild';
+import injectGuildAddTagsWidgets from '../guild/injectGuildAddTagsWidgets';
+import injectGuildRanks from '../rank';
+import {injectInventoryManagerNew} from '../inventory/inventory';
+import injectMailbox from '../mailbox/mailbox';
+import injectMonsterLog from '../monstorLog';
+import injectNewGuildLog from '../newGuildLog/newGuildLog';
+import injectNotepadShowLogs from '../combatLog';
+import injectOnlinePlayers from '../onlinePlayers';
 import injectProfile from '../profile/profile';
+import injectRPUpgrades from '../guild/injectRPUpgrades';
+import injectRecipeManager from '../recipeMgr/recipeMgr';
+import injectReportPaint from '../guildReport';
+import injectSaveSettings from '../settings/load';
+import injectScavenging from '../scavenging';
+import injectTrade from '../trade';
+import injectViewGuild from '../guild/injectViewGuild';
+import injectWorld from '../legacy';
+import insertQuickExtract from '../quickExtract';
+import insertQuickWear from '../quickWear';
+import inventing from '../recipes';
 import ladder from '../ladder';
+import setupMoves from '../arena/setup';
+import storeMoves from '../arena/store';
+import storePlayerUpgrades from '../upgrades';
+import unknownPage from './unknownPage';
 import viewArchive from '../news/viewArchive';
-import * as arena from '../arena/arena';
 import * as auctionHouse from '../auctionHouse';
 import * as bank from '../bank';
-import * as bazaar from '../bazaar';
-import * as breakdown from '../composing/breakdown';
-import * as combatLog from '../combatLog';
-import * as complete from '../arena/complete';
 import * as composing from '../composing/composing';
 import * as dropItems from '../dropItems';
 import * as findBuffs from '../findBuffs';
 import * as groups from '../groups';
 import * as guide from '../guide';
-import * as guild from '../guild';
-import * as guildAdvisor from '../guildAdvisor';
-import * as guildReport from '../guildReport';
-import * as inventory from '../inventory/inventory';
-import * as legacy from '../legacy';
 import * as lists from '../lists';
-import * as load from '../settings/load';
 import * as logs from '../logs/logs';
-import * as mailbox from '../mailbox';
 import * as misc from '../misc';
-import * as monstorLog from '../monstorLog';
-import * as newGuildLog from '../newGuildLog/newGuildLog';
 import * as news from '../news/news';
 import * as notification from '../notification';
-import * as onlinePlayers from '../onlinePlayers';
 import * as questBook from '../questBook';
 import * as quickBuff from '../quickBuff';
-import * as quickExtract from '../quickExtract';
-import * as quickWear from '../quickWear';
-import * as rank from '../rank';
-import * as recipeMgr from '../recipeMgr/recipeMgr';
-import * as recipes from '../recipes';
-import * as scavenging from '../scavenging';
 import * as scoutTower from '../scoutTower';
 import * as settingsPage from '../settings/settingsPage';
-import * as setup from '../arena/setup';
-import * as store from '../arena/store';
 import * as toprated from '../toprated';
-import * as trade from '../trade';
-import * as unknownPage from './unknownPage';
-import * as upgrades from '../upgrades';
 
 export default {
   settings: {'-': {'-': {'-': {'-': settingsPage.injectSettings}}}},
-  world: {'-': {'-': {'-': {'-': legacy.injectWorld}}}},
+  world: {'-': {'-': {'-': {'-': injectWorld}}}},
   news: {
     fsbox: {'-': {'-': {'-': news.newsFsbox}}},
     shoutbox: {'-': {'-': {'-': news.newsShoutbox}}}
   },
-  blacksmith: {repairall: {'-': {'-': {'1': legacy.injectWorld}}}},
+  blacksmith: {repairall: {'-': {'-': {'1': injectWorld}}}},
   arena: {
-    '-': {'-': {'-': {'-': arena.injectArena}}},
-    join: {'-': {'-': {'-': arena.injectArena}}},
-    completed: {'-': {'-': {'-': complete.completedArenas}}},
-    pickmove: {'-': {'-': {'-': store.storeMoves}}},
-    setup: {'-': {'-': {'-': setup.setupMoves}}}
+    '-': {'-': {'-': {'-': injectArena}}},
+    join: {'-': {'-': {'-': injectArena}}},
+    completed: {'-': {'-': {'-': completedArenas}}},
+    pickmove: {'-': {'-': {'-': storeMoves}}},
+    setup: {'-': {'-': {'-': setupMoves}}}
   },
   questbook: {
     '-': {
@@ -101,37 +106,37 @@ export default {
   },
   guild: {
     inventory: {
-      report: {'-': {'-': guildReport.injectReportPaint}},
+      report: {'-': {'-': injectReportPaint}},
       addtags: {
-        '-': {'-': guild.injectGuildAddTagsWidgets},
-        '-1': {'-': guild.injectGuildAddTagsWidgets},
-        '0': {'-': guild.injectGuildAddTagsWidgets},
-        '1': {'-': guild.injectGuildAddTagsWidgets},
-        '2': {'-': guild.injectGuildAddTagsWidgets},
-        '3': {'-': guild.injectGuildAddTagsWidgets},
-        '4': {'-': guild.injectGuildAddTagsWidgets},
-        '5': {'-': guild.injectGuildAddTagsWidgets},
-        '6': {'-': guild.injectGuildAddTagsWidgets},
-        '7': {'-': guild.injectGuildAddTagsWidgets},
-        '8': {'-': guild.injectGuildAddTagsWidgets},
-        '10': {'-': guild.injectGuildAddTagsWidgets},
-        '15': {'-': guild.injectGuildAddTagsWidgets},
-        '16': {'-': guild.injectGuildAddTagsWidgets}
+        '-': {'-': injectGuildAddTagsWidgets},
+        '-1': {'-': injectGuildAddTagsWidgets},
+        '0': {'-': injectGuildAddTagsWidgets},
+        '1': {'-': injectGuildAddTagsWidgets},
+        '2': {'-': injectGuildAddTagsWidgets},
+        '3': {'-': injectGuildAddTagsWidgets},
+        '4': {'-': injectGuildAddTagsWidgets},
+        '5': {'-': injectGuildAddTagsWidgets},
+        '6': {'-': injectGuildAddTagsWidgets},
+        '7': {'-': injectGuildAddTagsWidgets},
+        '8': {'-': injectGuildAddTagsWidgets},
+        '10': {'-': injectGuildAddTagsWidgets},
+        '15': {'-': injectGuildAddTagsWidgets},
+        '16': {'-': injectGuildAddTagsWidgets}
       },
       removetags: {
-        '-': {'-': guild.injectGuildAddTagsWidgets},
-        '-1': {'-': guild.injectGuildAddTagsWidgets},
-        '0': {'-': guild.injectGuildAddTagsWidgets},
-        '1': {'-': guild.injectGuildAddTagsWidgets},
-        '2': {'-': guild.injectGuildAddTagsWidgets},
-        '3': {'-': guild.injectGuildAddTagsWidgets},
-        '4': {'-': guild.injectGuildAddTagsWidgets},
-        '5': {'-': guild.injectGuildAddTagsWidgets},
-        '6': {'-': guild.injectGuildAddTagsWidgets},
-        '7': {'-': guild.injectGuildAddTagsWidgets},
-        '8': {'-': guild.injectGuildAddTagsWidgets},
-        '10': {'-': guild.injectGuildAddTagsWidgets},
-        '16': {'-': guild.injectGuildAddTagsWidgets}
+        '-': {'-': injectGuildAddTagsWidgets},
+        '-1': {'-': injectGuildAddTagsWidgets},
+        '0': {'-': injectGuildAddTagsWidgets},
+        '1': {'-': injectGuildAddTagsWidgets},
+        '2': {'-': injectGuildAddTagsWidgets},
+        '3': {'-': injectGuildAddTagsWidgets},
+        '4': {'-': injectGuildAddTagsWidgets},
+        '5': {'-': injectGuildAddTagsWidgets},
+        '6': {'-': injectGuildAddTagsWidgets},
+        '7': {'-': injectGuildAddTagsWidgets},
+        '8': {'-': injectGuildAddTagsWidgets},
+        '10': {'-': injectGuildAddTagsWidgets},
+        '16': {'-': injectGuildAddTagsWidgets}
       },
       storeitems: {'-': {'-': dropItems.injectStoreItems}}
     },
@@ -143,17 +148,17 @@ export default {
       joinall: {'-': {'-': groups.injectGroups}},
       '-': {'-': {'-': groups.injectGroups}}
     },
-    manage: {'-': {'-': {'-': guild.injectGuild}}},
+    manage: {'-': {'-': {'-': injectGuild}}},
     advisor: {
-      '-': {'-': {'-': guildAdvisor.injectAdvisor}},
-      weekly: {'-': {'-': guildAdvisor.injectAdvisor}}
+      '-': {'-': {'-': injectAdvisor}},
+      weekly: {'-': {'-': injectAdvisor}}
     },
-    history: {'-': {'-': {'-': guild.addHistoryWidgets}}},
-    view: {'-': {'-': {'-': guild.injectViewGuild}}},
+    history: {'-': {'-': {'-': addHistoryWidgets}}},
+    view: {'-': {'-': {'-': injectViewGuild}}},
     scouttower: {'-': {'-': {'-': scoutTower.injectScouttower}}},
-    mailbox: {'-': {'-': {'-': mailbox.guildMailbox}}},
-    ranks: {'-': {'-': {'-': rank.injectGuildRanks}}},
-    conflicts: {rpupgrades: {'-': {'-': guild.injectRPUpgrades}}},
+    mailbox: {'-': {'-': {'-': guildMailbox}}},
+    ranks: {'-': {'-': {'-': injectGuildRanks}}},
+    conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
     bank: {'-': {'-': {'-': bank.injectGuildBank}}}
   },
   bank: {'-': {'-': {'-': {'-': bank.injectBank}}}},
@@ -170,41 +175,41 @@ export default {
     },
     outbox: {'-': {'-': {'-': logs.outbox}}}
   },
-  potionbazaar: {'-': {'-': {'-': {'-': bazaar.injectBazaar}}}},
+  potionbazaar: {'-': {'-': {'-': {'-': injectBazaar}}}},
   marketplace: {createreq: {'-': {'-': {'-': misc.addMarketplaceWidgets}}}},
   quickbuff: {'-': {'-': {'-': {'-': quickBuff.injectQuickBuff}}}}, // No ga
   notepad: {
-    showlogs: {'-': {'-': {'-': combatLog.injectNotepadShowLogs}}},
-    invmanagernew: {'-': {'-': {'-': inventory.injectInventoryManagerNew}}},
-    guildinvmgr: {'-': {'-': {'-': inventory.injectInventoryManagerNew}}},
-    recipemanager: {'-': {'-': {'-': recipeMgr.injectRecipeManager}}},
+    showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}},
+    invmanagernew: {'-': {'-': {'-': injectInventoryManagerNew}}},
+    guildinvmgr: {'-': {'-': {'-': injectInventoryManagerNew}}},
+    recipemanager: {'-': {'-': {'-': injectRecipeManager}}},
     auctionsearch: {'-': {'-': {'-': lists.injectAuctionSearch}}},
-    onlineplayers: {'-': {'-': {'-': onlinePlayers.injectOnlinePlayers}}},
+    onlineplayers: {'-': {'-': {'-': injectOnlinePlayers}}},
     quicklinkmanager: {'-': {'-': {'-': lists.injectQuickLinkManager}}},
-    monsterlog: {'-': {'-': {'-': monstorLog.injectMonsterLog}}},
-    quickextract: {'-': {'-': {'-': quickExtract.insertQuickExtract}}},
-    quickwear: {'-': {'-': {'-': quickWear.insertQuickWear}}},
+    monsterlog: {'-': {'-': {'-': injectMonsterLog}}},
+    quickextract: {'-': {'-': {'-': insertQuickExtract}}},
+    quickwear: {'-': {'-': {'-': insertQuickWear}}},
     fsboxcontent: {'-': {'-': {'-': misc.injectFsBoxContent}}},
     bufflogcontent: {'-': {'-': {'-': quickBuff.injectBuffLog}}},
-    newguildlog: {'-': {'-': {'-': newGuildLog.injectNewGuildLog}}},
+    newguildlog: {'-': {'-': {'-': injectNewGuildLog}}},
     findbuffs: {'-': {'-': {'-': findBuffs.injectFindBuffs}}},
     findother: {'-': {'-': {'-': findBuffs.injectFindOther}}},
-    savesettings: {'-': {'-': {'-': load.injectSaveSettings}}},
+    savesettings: {'-': {'-': {'-': injectSaveSettings}}},
     '-': {'-': {'-': {'-': misc.injectNotepad}}}
   },
   points: {
     '-': {
       '-': {
-        '-': {'-': upgrades.storePlayerUpgrades},
-        '0': {'-': upgrades.storePlayerUpgrades},
+        '-': {'-': storePlayerUpgrades},
+        '0': {'-': storePlayerUpgrades},
         '1': {'-': notification.parseGoldUpgrades}
       }
     }
   },
   trade: {
-    '-': {'-': {'-': {'-': trade.injectTrade}}},
-    createsecure: {'-': {'-': {'-': trade.injectTrade}}},
-    docreatesecure: {'-': {'-': {'-': trade.injectTrade}}}
+    '-': {'-': {'-': {'-': injectTrade}}},
+    createsecure: {'-': {'-': {'-': injectTrade}}},
+    docreatesecure: {'-': {'-': {'-': injectTrade}}}
   },
   titan: {'-': {'-': {'-': {'-': scoutTower.injectTitan}}}},
   toprated: {
@@ -219,8 +224,8 @@ export default {
     smasher: {'-': {'-': {'-': toprated.injectTopRated}}},
     globalquest: {'-': {'-': {'-': toprated.globalQuest}}}
   },
-  inventing: {viewrecipe: {'-': {'-': {'-': recipes.inventing}}}},
-  tempinv: {'-': {'-': {'-': {'-': mailbox.injectMailbox}}}},
+  inventing: {viewrecipe: {'-': {'-': {'-': inventing}}}},
+  tempinv: {'-': {'-': {'-': {'-': injectMailbox}}}},
   findplayer: {'-': {'-': {'-': {'-': misc.injectFindPlayer}}}},
   quests: { // UFSG
     '-': {'-': {'-': {'-': guide.allowBack}}},
@@ -232,17 +237,17 @@ export default {
   realms: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
   relics: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
   shops: {'-': {'-': {'-': {'-': guide.allowBack}}}}, // UFSG
-  scavenging: {'-': {'-': {'-': {'-': scavenging.injectScavenging}}}},
+  scavenging: {'-': {'-': {'-': {'-': injectScavenging}}}},
   temple: {'-': {'-': {'-': {'-': notification.parseTemplePage}}}},
   composing: {
     '-': {'-': {'-': {'-': composing.injectComposing}}},
-    breakdown: {'-': {'-': {'-': breakdown.composingBreakdown}}},
+    breakdown: {'-': {'-': {'-': composingBreakdown}}},
     create: {'-': {'-': {'-': composing.composingCreate}}}
   },
   pvpladder: {'-': {'-': {'-': {'-': ladder}}}},
   '-': {
     viewupdatearchive: {'-': {'-': {'-': viewArchive}}},
     viewarchive: {'-': {'-': {'-': viewArchive}}},
-    '-': {'-': {'-': {'-': unknownPage.unknownPage}}}
+    '-': {'-': {'-': {'-': unknownPage}}}
   }
 };
