@@ -1,7 +1,7 @@
 {
   "ignore": [
-    "**/archive/**",
-    "**/dist/**",
+    "archive/**",
+    "dist/**",
 
     "**/deps/**",
     "**/node_modules/**",
