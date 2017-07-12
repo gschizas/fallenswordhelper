@@ -1,11 +1,7 @@
 # Fallen Sword Helper
 
-<p align="center">
-  <a href="https://david-dm.org/fallenswordhelper/fallenswordhelper/?type=dev">
-    <img src="https://david-dm.org/fallenswordhelper/fallenswordhelper/dev-status.svg"
-      alt="devDependency Status">
-  </a>
-</p>
+[![bitHound Overall Score](https://www.bithound.io/github/fallenswordhelper/fallenswordhelper/badges/score.svg)](https://www.bithound.io/github/fallenswordhelper/fallenswordhelper)
+[![bitHound Dev Dependencies](https://www.bithound.io/github/fallenswordhelper/fallenswordhelper/badges/devDependencies.svg)](https://www.bithound.io/github/fallenswordhelper/fallenswordhelper/master/dependencies/npm)
 
 Fallen Sword Helper is a Greasemonkey script meant to enhance the experience of playing Fallen Sword, by removing repetitive tasks, presenting more information at a glance, enhancing the social aspect of the game and creating shortcuts to common tasks.
 
