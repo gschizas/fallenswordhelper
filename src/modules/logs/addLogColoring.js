@@ -44,7 +44,7 @@ function getLastCheck(lastCheckScreen) {
 }
 
 function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
-  nowUtc = (new Date()).getTime();
+  nowUtc = (new Date()).setUTCSeconds(0, 0) - 1;
   var lastCheckScreen = 'last' + logScreen + 'Check';
   lastCheckUtc = getLastCheck(lastCheckScreen);
   var increment = 2;
