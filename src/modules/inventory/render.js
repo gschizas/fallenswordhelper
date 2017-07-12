@@ -100,7 +100,8 @@ export function whereRenderFilter(data, type, row) { // Native
 }
 
 export function craftRender(craft) { // Native
-  return assets.craftHash[craft] ? assets.craftHash[craft].abbr : '';
+  if (assets.craftHash[craft]) {return assets.craftHash[craft].abbr;}
+  return '';
 }
 
 export function durabilityRender(data, type, row) { // Native

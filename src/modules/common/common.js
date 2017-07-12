@@ -41,12 +41,12 @@ function getStat(stat, doc) { // jQuery
 }
 
 function getBuffLevel(doc, buff) { // jQuery
-  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]',
-    doc);
-  hasBuff = hasBuff.data('tipped');
-  var re = new RegExp('</b> \\(Level: (\\d+)\\)');
-  var test = re.exec(hasBuff);
-  return test === null ? 0 : system.intValue(test[1]);
+  var hasBuff = $('img.tip-static[data-tipped*="b>' + buff + '</b"]', doc)
+    .data('tipped');
+  // var re = new RegExp('</b> \\(Level: (\\d+)\\)');
+  var test = /<\/b> \(Level: (\d+)\)/.exec(hasBuff);
+  if (test) {return system.intValue(test[1]);}
+  return 0;
 }
 
 function getBonus(stat, doc) { // jQuery
@@ -74,7 +74,7 @@ function updateForCloak(obj) {
   obj.hpValue = obj.hpBonus;
 }
 
-function playerDataString(responseText) { // Native
+export function playerDataString(responseText) { // Native
   var doc = system.createDocument(responseText);
   var obj = {
     levelValue: getStat('#stat-vl', doc),
@@ -171,17 +171,6 @@ export function playerDataObject(json) { // Native
     cloakLevel: getBuffLvl(buffs, 'Cloak')
   };
   if (obj.cloakLevel !== 0) {updateForCloak(obj);}
-  return obj;
-}
-
-export function playerData(responseText) { // Native
-  var obj = {};
-  if (typeof responseText === 'string') {
-    obj = playerDataString(responseText);
-  }
-  if (typeof responseText === 'object') {
-    obj = playerDataObject(responseText);
-  }
   return obj;
 }
 

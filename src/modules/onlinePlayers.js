@@ -196,6 +196,10 @@ function injectOnlinePlayersNew() { // jQuery
 }
 
 export default function injectOnlinePlayers(content) { // jQuery
-  context = content ? $(content) : $('#pCC');
+  if (content) {
+    context = $(content);
+  } else {
+    context = $('#pCC');
+  }
   injectOnlinePlayersNew();
 }

@@ -78,10 +78,12 @@ export default function addPvpSummary(aRow, messageType) { // Legacy
   if (messageType === 'Combat' &&
       aRow.cells[2] &&
       calf.showPvPSummaryInLog &&
-      aRow.cells[2].innerHTML.indexOf('combat_id=') !== -1 &&
-      aRow.cells[2].textContent.indexOf('(Guild Conflict)') === -1) {
+      /combat_id=/.test(aRow.cells[2].innerHTML) &&
+      !/\(Guild Conflict\)/.test(aRow.cells[2].textContent)) {
     var combatID = /combat_id=(\d+)/.exec(aRow.cells[2].innerHTML)[1];
-    var defeat = /You were defeated by/.exec(aRow.cells[2].innerHTML);
+    var defeat = /You were defeated by/.test(aRow.cells[2].innerHTML);
+    var _winner = 1;
+    if (defeat) {_winner = 0;}
     var combatSummarySpan = document.createElement('SPAN');
     combatSummarySpan.style.color = 'gray';
     aRow.cells[2].appendChild(combatSummarySpan);
@@ -89,7 +91,7 @@ export default function addPvpSummary(aRow, messageType) { // Legacy
       retrievePvPCombatSummary,
       {
         target: combatSummarySpan,
-        winner: defeat ? 0 : 1
+        winner: _winner
       }
     );
   }

@@ -7,7 +7,7 @@ var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
 function isAuto() { // Native
   var docRef = document.referrer
     .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
-  docRef = docRef ? docRef[1] : docRef;
+  if (docRef) {docRef = docRef[1];}
   return refAry.indexOf(docRef) !== -1;
 }
 

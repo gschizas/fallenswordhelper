@@ -47,7 +47,10 @@ export function doTable() { // jQuery
         data: 'craft',
         render: {
           _: function(craft) {
-            return assets.craftHash[craft] ? assets.craftHash[craft].index : 0;
+            if (assets.craftHash[craft]) {
+              return assets.craftHash[craft].index;
+            }
+            return 0;
           },
           display: render.craftRender,
           filter: render.craftRender
@@ -83,7 +86,8 @@ export function doTable() { // jQuery
         title: 'Tag',
         data: 'guild_tag',
         render: function(tag) {
-          return tag === '-1' ? 'No' : 'Yes';
+          if (tag === '-1') {return 'No';}
+          return 'Yes';
         }
       },
       {

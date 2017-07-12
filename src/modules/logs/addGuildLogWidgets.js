@@ -62,18 +62,21 @@ function processGuildWidgetRow(aRow) { // Legacy
   guildInvite(aRow);
 }
 
-function guildLogWidgetsEnabled() { // Legacy
+function getMessageHeader() { // Native
   var nodeList = layout.pCC.getElementsByTagName('TD');
-  var messageNameCell = Array.prototype.reduce.call(nodeList,
-    function(prev, curr) {
-      return curr.textContent === 'Message' ? curr : prev;
-    }, null
-  );
+  for (var i = 0; i < nodeList.length; i += 1) {
+    if (nodeList[i].textContent === 'Message') {
+      return nodeList[i];
+    }
+  }
+}
+
+function guildLogWidgetsEnabled() { // Legacy
+  var messageNameCell = getMessageHeader();
   if (!messageNameCell) {return;}
   var logTable = messageNameCell.parentNode.parentNode.parentNode;
-  messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="' +
-    'fshWhite">(Guild Log messages not involving ' +
-    'self are dimmed!)</span>';
+  messageNameCell.innerHTML += '&nbsp;&nbsp;<span class="fshWhite">' +
+    '(Guild Log messages not involving self are dimmed!)</span>';
 
   playerId = layout.playerId();
 

@@ -223,9 +223,10 @@ function checkBuffs() { // Legacy - Old Map
   replacementText += findImps();
   replacementText += hasCA();
   replacementText += hasDblr();
-  replacementText += calf.huntingMode === true ?
-    '<tr><td style="font-size: small; color:red">' +
-    'Hunting mode enabled</td></tr>' : '';
+  if (calf.huntingMode) {
+    replacementText += '<tr><td style="font-size: small; color:red">' +
+      'Hunting mode enabled</td></tr>';
+  }
   replacementText += '<tr><td colspan="2" height="10"></td></tr>';
   replacementText += '</td>';
 

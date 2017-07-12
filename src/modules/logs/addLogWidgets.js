@@ -12,6 +12,7 @@ var memberNameString;
 var listOfAllies;
 var listOfEnemies;
 var nickList;
+var enableChatParsing;
 
 function removeHTML(buffName) { // Native
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
@@ -91,12 +92,13 @@ function isChat(aRow, isGuildMate, playerName) { // Legacy
   if (buffsSent) {
     thirdPart = doBuffLink(buffsSent, targetPlayerID);
   }
+  var replyTo = '';
+  if (enableChatParsing) {
+    replyTo = removeHTML(firstPart.replace(/&nbsp;/g, ' ')).substr(0, 140);
+  }
   var msgReplyTo = '[ <span style="cursor:pointer;text-' +
-    'decoration:underline"class="a-reply" target_player="' +
-    playerName + '" replyTo="' +
-    (system.getValue('enableChatParsing') ?
-      removeHTML(firstPart.replace(/&nbsp;/g, ' '))
-        .substr(0, 140) : '') + '...">Reply</span>';
+    'decoration:underline"class="a-reply" target_player="' + playerName +
+    '" replyTo="' + replyTo + '...">Reply</span>';
   aRow.cells[2].innerHTML = firstPart + '<nobr>' + msgReplyTo +
     extraPart + thirdPart + attackPart + fourthPart +
     '</nobr>' + lastPart;
@@ -213,6 +215,7 @@ function foundLogTable(logTable) { // Legacy
   });
   calf.showPvPSummaryInLog = system.getValue('showPvPSummaryInLog');
   calf.lastLadderReset = system.getValue('lastLadderReset');
+  enableChatParsing = system.getValue('enableChatParsing');
   var messageHeader = logTable.rows[0].cells[2];
   if (messageHeader) {
     messageHeader.insertAdjacentHTML('beforeend', '&nbsp;&nbsp;' +

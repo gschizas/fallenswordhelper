@@ -72,7 +72,7 @@ function getCreaturePlayerData(responseText, callback) { // Legacy
   var combat = {};
   combat.callback = callback;
   // playerdata
-  combat.player = common.playerData(responseText);
+  combat.player = common.playerDataString(responseText);
   combat.combatEvaluatorBias = system.getValue('combatEvaluatorBias');
   combat.attackVariable = 1.1053;
   combat.generalVariable = getBiasGeneral(combat);
