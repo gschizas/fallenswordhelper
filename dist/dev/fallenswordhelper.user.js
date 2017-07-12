@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1518a10
+// @version        1518a11
 // @downloadURL    http://192.168.137.1:9966/dist/dev/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -20,7 +20,7 @@
 function fshMain() {
 
   function setVer() { // Native
-    var ver = '1518a10';
+    var ver = '1518a11';
     if (typeof GM_info === 'undefined') {return ver + '_native';}
     return ver;
   }
