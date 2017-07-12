@@ -1,15 +1,15 @@
 import assets from './assets';
 import calf from '../support/calf';
+import combatLogger from './combatLogger';
+import {huntingBuffsHtml} from '../settings/worldPrefs';
+import injectButtons from './buttons';
 import injectRelic from './relic/relic';
-import * as buttons from './buttons';
-import * as combatLogger from './combatLogger';
-import * as monsterLog from './monsterLog';
+import prepareShop from './shop';
+import readyViewCreature from './viewCreature/viewCreature';
+import {simpleCheckboxHtml} from '../settings/settingsPage';
+import startMonsterLog from './monsterLog';
 import * as sendGold from './sendGold';
-import * as settingsPage from '../settings/settingsPage';
-import * as shop from './shop';
 import * as system from '../support/system';
-import * as viewCreature from './viewCreature/viewCreature';
-import * as world from '../settings/worldPrefs';
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
 var huntingBuffs;
@@ -101,9 +101,9 @@ function buildFshDivs() { // Native
   prefsDiv.addEventListener('click', prefsClickEvent);
   prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
   prefsDiv.insertAdjacentHTML('beforeend',
-    settingsPage.simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-    settingsPage.simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-    world.huntingBuffsHtml());
+    simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+    simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+    huntingBuffsHtml());
   fshDiv.insertAdjacentElement('beforeend', prefsDiv);
   missingBuffsDiv = document.createElement('div');
   fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
@@ -259,7 +259,7 @@ function fixDebuffQTip(e) { // jQuery
 function injectWorldNewMap(data) { // Native
   sendGold.updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
-    buttons.injectButtons(data);
+    injectButtons(data);
     document.getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
     if (hideSubLvlCreature) {GameData.fetch(256);}
@@ -289,14 +289,14 @@ export function subscribes() { // jQuery
   doHidePlayerActions();
   sendGold.injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
-  $.subscribe('ready.view-creature', viewCreature.readyViewCreature);
+  $.subscribe('ready.view-creature', readyViewCreature);
   hideGroupButton(); // Hide Create Group button
   doMonsterColors();
   // add do-not-kill list functionality
   $.subscribe(def_afterUpdateActionlist, afterUpdateActionList);
   afterUpdateActionList();
   // add monster log functionality
-  monsterLog.startMonsterLog();
+  startMonsterLog();
   // then intercept the action call
   interceptDoAction();
   $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
@@ -304,7 +304,7 @@ export function subscribes() { // jQuery
   $.subscribe('keydown.controls', function(e, key) {
     if (key === 'ACT_REPAIR') {GameData.fetch(403);}
   });
-  combatLogger.init();
+  combatLogger();
   // on world
   if (window.initialGameData) {// HCS initial data
     injectWorldNewMap(window.initialGameData);
@@ -317,7 +317,7 @@ export function subscribes() { // jQuery
     }
   );
   // somewhere near here will be multi buy on shop
-  shop.prepareShop();
+  prepareShop();
   injectRelic();
 }
 

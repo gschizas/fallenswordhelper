@@ -89,6 +89,6 @@ function worldDialogShop(e, data) {
   if (!fshDiv) {injectQuickBuy();} else {resultDiv.textContent = '';}
 }
 
-export function prepareShop() {
+export default function prepareShop() {
   $.subscribe('prompt.worldDialogShop', worldDialogShop);
 }

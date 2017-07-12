@@ -73,7 +73,7 @@ function showHuntMode(worldName) { // jQuery
     toggleHuntMode);
 }
 
-export function injectButtons(data) { // jQuery
+export default function injectButtons(data) { // jQuery
   var worldName = $('#worldName');
   worldName.html(data.realm.name); // HACK - incase of switchign between master realm and realm they dont replace teh realm name
   var oldButtonContainer = $('#fshWorldButtonContainer');

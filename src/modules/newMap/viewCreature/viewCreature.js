@@ -153,7 +153,7 @@ function addRemoveCreatureToDoNotKillList(evt) { // Native
   window.GameData.doAction(-1);
 }
 
-export function readyViewCreature() { // Hybrid
+export default function readyViewCreature() { // Hybrid
   $('#creatureEvaluator').html('');
   $('#creatureEvaluatorGroup').html('');
 

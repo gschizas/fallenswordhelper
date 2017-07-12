@@ -178,7 +178,7 @@ function getBias() { // Native
   hpVariable = hpVar[combatEvaluatorBias];
 }
 
-export function startMonsterLog() { // jQuery
+export default function startMonsterLog() { // jQuery
   showCreatureInfo = system.getValue('showCreatureInfo');
   showMonsterLog = system.getValue('showMonsterLog');
   if (!showCreatureInfo && !showMonsterLog) {return;}
