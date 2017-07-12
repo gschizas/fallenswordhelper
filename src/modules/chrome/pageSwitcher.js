@@ -1,6 +1,7 @@
 import addHistoryWidgets from '../guild/addHistoryWidgets';
 import completedArenas from '../arena/completedArenas';
 import composingBreakdown from '../composing/breakdown';
+import guildMailbox from '../mailbox/guildMailbox';
 import injectAdvisor from '../guildAdvisor';
 import injectArena from '../arena/arena';
 import injectBazaar from '../bazaar';
@@ -9,6 +10,7 @@ import injectGuild from '../guild/guild';
 import injectGuildAddTagsWidgets from '../guild/injectGuildAddTagsWidgets';
 import injectGuildRanks from '../rank';
 import {injectInventoryManagerNew} from '../inventory/inventory';
+import injectMailbox from '../mailbox/mailbox';
 import injectMonsterLog from '../monstorLog';
 import injectNewGuildLog from '../newGuildLog/newGuildLog';
 import injectNotepadShowLogs from '../combatLog';
@@ -40,7 +42,6 @@ import * as groups from '../groups';
 import * as guide from '../guide';
 import * as lists from '../lists';
 import * as logs from '../logs/logs';
-import * as mailbox from '../mailbox';
 import * as misc from '../misc';
 import * as news from '../news/news';
 import * as notification from '../notification';
@@ -155,7 +156,7 @@ export default {
     history: {'-': {'-': {'-': addHistoryWidgets}}},
     view: {'-': {'-': {'-': injectViewGuild}}},
     scouttower: {'-': {'-': {'-': scoutTower.injectScouttower}}},
-    mailbox: {'-': {'-': {'-': mailbox.guildMailbox}}},
+    mailbox: {'-': {'-': {'-': guildMailbox}}},
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
     bank: {'-': {'-': {'-': bank.injectGuildBank}}}
@@ -224,7 +225,7 @@ export default {
     globalquest: {'-': {'-': {'-': toprated.globalQuest}}}
   },
   inventing: {viewrecipe: {'-': {'-': {'-': inventing}}}},
-  tempinv: {'-': {'-': {'-': {'-': mailbox.injectMailbox}}}},
+  tempinv: {'-': {'-': {'-': {'-': injectMailbox}}}},
   findplayer: {'-': {'-': {'-': {'-': misc.injectFindPlayer}}}},
   quests: { // UFSG
     '-': {'-': {'-': {'-': guide.allowBack}}},
