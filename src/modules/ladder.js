@@ -11,6 +11,13 @@ function dontPost() { // Native
   }
 }
 
+function formatLastReset(last_login) {
+  var m = Math.floor((Date.now() - last_login) / 60000);
+  var h = Math.floor(m / 60);
+  m %= 60;
+  return system.outputFormat(h, ' hours, ') + m + ' mins';
+}
+
 function formatTime() { // Native
   var lastLadderReset = system.getValue('lastLadderReset');
   var now = Date.now();
@@ -19,7 +26,7 @@ function formatTime() { // Native
       'the last ladder reset.<br>You can find it in your log if you ' +
       'qualified<br>or Tavern Rumours.">???</span>';
   }
-  return system.formatLastActivity(lastLadderReset / 1000);
+  return formatLastReset(lastLadderReset);
 }
 
 function lastReset() { // Native
