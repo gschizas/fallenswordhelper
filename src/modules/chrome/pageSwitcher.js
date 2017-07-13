@@ -6,6 +6,7 @@ import injectAdvisor from '../guildAdvisor';
 import injectArena from '../arena/arena';
 import injectBazaar from '../bazaar';
 import injectBioWidgets from '../profile/bio/bioWidgets';
+import injectBuffLog from '../buffLog/injectBuffLog';
 import injectGuild from '../guild/guild';
 import injectGuildAddTagsWidgets from '../guild/injectGuildAddTagsWidgets';
 import injectGuildRanks from '../rank';
@@ -16,6 +17,7 @@ import injectNewGuildLog from '../newGuildLog/newGuildLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectProfile from '../profile/profile';
+import injectQuickBuff from '../quickBuff';
 import injectRPUpgrades from '../guild/injectRPUpgrades';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
 import injectReportPaint from '../guildReport';
@@ -46,7 +48,6 @@ import * as misc from '../misc';
 import * as news from '../news/news';
 import * as notification from '../notification';
 import * as questBook from '../questBook';
-import * as quickBuff from '../quickBuff';
 import * as scoutTower from '../scoutTower';
 import * as settingsPage from '../settings/settingsPage';
 import * as toprated from '../toprated';
@@ -177,7 +178,7 @@ export default {
   },
   potionbazaar: {'-': {'-': {'-': {'-': injectBazaar}}}},
   marketplace: {createreq: {'-': {'-': {'-': misc.addMarketplaceWidgets}}}},
-  quickbuff: {'-': {'-': {'-': {'-': quickBuff.injectQuickBuff}}}}, // No ga
+  quickbuff: {'-': {'-': {'-': {'-': injectQuickBuff}}}}, // No ga
   notepad: {
     showlogs: {'-': {'-': {'-': injectNotepadShowLogs}}},
     invmanagernew: {'-': {'-': {'-': injectInventoryManagerNew}}},
@@ -190,7 +191,7 @@ export default {
     quickextract: {'-': {'-': {'-': insertQuickExtract}}},
     quickwear: {'-': {'-': {'-': insertQuickWear}}},
     fsboxcontent: {'-': {'-': {'-': misc.injectFsBoxContent}}},
-    bufflogcontent: {'-': {'-': {'-': quickBuff.injectBuffLog}}},
+    bufflogcontent: {'-': {'-': {'-': injectBuffLog}}},
     newguildlog: {'-': {'-': {'-': injectNewGuildLog}}},
     findbuffs: {'-': {'-': {'-': findBuffs.injectFindBuffs}}},
     findother: {'-': {'-': {'-': findBuffs.injectFindOther}}},

@@ -1,8 +1,8 @@
 import injectAdvisor from '../guildAdvisor';
 import inventing from '../recipes';
+import updateBuffLog from '../buffLog/updateBuffLog';
 import * as fshGa from '../support/fshGa';
 import * as questBook from '../questBook';
-import * as quickBuff from '../quickBuff';
 import * as system from '../support/system';
 
 var unknown = [
@@ -11,8 +11,8 @@ var unknown = [
       return document.getElementById('quickbuff-report');
     },
     result: function() {
-      fshGa.screenview('unknown.quickBuff.updateBuffLog');
-      quickBuff.updateBuffLog();
+      fshGa.screenview('unknown.buffLog.updateBuffLog');
+      updateBuffLog();
     }
   },
   {

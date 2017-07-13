@@ -181,22 +181,18 @@ export function getUrlParameter(sParam) {
   return getCustomUrlParameter(sPageURL, sParam);
 }
 
-function outputFormat(value, suffix) {
+export function outputFormat(value, suffix) {
   if (value === 0) {return '';}
   return value.toString() + suffix;
 }
 
 export function formatLastActivity(last_login) {
-  var d;
-  var h;
-  var m;
-  var s;
-  s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
-  m = Math.floor(s / 60);
+  var s = Math.abs(Math.floor(Date.now() / 1000 - last_login));
+  var m = Math.floor(s / 60);
   s %= 60;
-  h = Math.floor(m / 60);
+  var h = Math.floor(m / 60);
   m %= 60;
-  d = Math.floor(h / 24);
+  var d = Math.floor(h / 24);
   h %= 24;
   return outputFormat(d, ' days, ') + outputFormat(h, ' hours, ') +
     outputFormat(m, ' mins, ') + s + ' secs';

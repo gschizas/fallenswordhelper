@@ -1,3 +1,4 @@
+import injectBuffLog from '../buffLog/injectBuffLog';
 import injectNotepadShowLogs from '../combatLog';
 import injectOnlinePlayers from '../onlinePlayers';
 import injectRecipeManager from '../recipeMgr/recipeMgr';
@@ -8,7 +9,6 @@ import * as findBuffs from '../findBuffs';
 import * as fshGa from '../support/fshGa';
 import * as lists from '../lists';
 import * as misc from '../misc';
-import * as quickBuff from '../quickBuff';
 import * as system from '../support/system';
 
 var helperMenuBlob =
@@ -34,7 +34,7 @@ var helperMenuBlob =
   '</ul></div>';
 
 var functionLookup = {
-  'Buff Log': quickBuff.injectBuffLog,
+  'Buff Log': injectBuffLog,
   'Combat Log': injectNotepadShowLogs,
   'Recipe Manager': injectRecipeManager,
   'Quick Links': lists.injectQuickLinkManager,
