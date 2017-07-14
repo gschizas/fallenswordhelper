@@ -104,7 +104,24 @@ function injectAdvisorDable() {
 }
 */
 
-function injectAdvisorNew(m) { // Native
+function playerName(f) { // Native
+  if (!membrList[f]) {return f;}
+  return '<a href="index.php?cmd=profile&player_id=' +
+    membrList[f].id + '">' + f + '</a>';
+}
+
+function playerLevel(f) { // Native
+  if (!membrList[f]) {return '';}
+  return membrList[f].level;
+}
+
+function playerRank(f) { // Native
+  if (!membrList[f]) {return '';}
+  return '<div class="fshAdvRank">' +
+    membrList[f].rank_name + '</div>';
+}
+
+function injectAdvisorNew() { // Native
 
   debug.time('guildAdvisor.injectAdvisorNew');
 
@@ -125,14 +142,9 @@ function injectAdvisorNew(m) { // Native
     });
     var tdOne = tr.cells[0];
     var username = tdOne.textContent.trim();
-    // TODO There is no fall back here for when a member is new and isn't in the cache yet
-    // Weekly has fallback functions we could use
-    tdOne.innerHTML = '<a href="index.php?cmd=profile&player_id=' +
-      m[username].id + '">' +
-      username + '</a>';
-    tdOne.insertAdjacentHTML('afterend', '<td>' + m[username].level +
-      '</td><td><div class="fshAdvRank">' + m[username].rank_name +
-      '</div></td>');
+    tdOne.innerHTML = playerName(username);
+    tdOne.insertAdjacentHTML('afterend', '<td>' + playerLevel(username) +
+      '</td><td>' + playerRank(username) + '</td>');
   });
   list.insertAdjacentElement('beforeend', tfoot);
   task.add(3, doTable);
@@ -225,23 +237,6 @@ function displayAdvisor() { // jQuery
 
 }
 
-function playerName(f) { // Native
-  if (!membrList[f]) {return f;}
-  return '<a href="index.php?cmd=profile&player_id=' +
-    membrList[f].id + '">' + f + '</a>';
-}
-
-function playerLevel(f) { // Native
-  if (!membrList[f]) {return '';}
-  return membrList[f].level;
-}
-
-function playerRank(f) { // Native
-  if (!membrList[f]) {return '';}
-  return '<div class="fshAdvRank">' +
-    membrList[f].rank_name + '</div>';
-}
-
 function addStats(f) { // Native
   if (f === 'Total:') {return;}
   data.push([
@@ -301,8 +296,9 @@ export default function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    ajax.getMembrList(true).done(function(response) {
-      task.add(3, injectAdvisorNew, [response]);
+    ajax.getMembrList(false).done(function(response) {
+      membrList = response;
+      task.add(3, injectAdvisorNew);
       // task.add(3, injectAdvisorDable, [membrList]);
     });
   }

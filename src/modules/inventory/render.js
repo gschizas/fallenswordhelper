@@ -54,18 +54,23 @@ function whereRenderUserFolder(row) { // Native
   return parseInt(row.folder_id, 10);
 }
 
+function playerName(f) { // Native
+  if (!calf.membrList[f]) {return '???';}
+  return calf.membrList[f].username;
+}
+
 export function whereRender(data, type, row) { // Native
   if (row.folder_id) {
     return whereRenderUserFolder(row);
   }
   if (row.player_id === -1) {return '~';}
-  return calf.membrList[row.player_id].username;
+  return playerName(row.player_id);
 }
 
 function whereRenderGuildDisplay(row) { // Native
   if (row.player_id === -1) {return 'GS';}
   return '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
-    row.player_id + '">' + calf.membrList[row.player_id].username + '</a>';
+    row.player_id + '">' + playerName(row.player_id) + '</a>';
 }
 
 export function whereRenderDisplay(data, type, row) { // Native
@@ -88,7 +93,7 @@ export function whereRenderDisplay(data, type, row) { // Native
 
 function whereRenderGuildFilter(row) { // Native
   if (row.player_id === -1) {return 'GS';}
-  return calf.membrList[row.player_id].username;
+  return playerName(row.player_id);
 }
 
 export function whereRenderFilter(data, type, row) { // Native
