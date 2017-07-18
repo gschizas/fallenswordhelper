@@ -38,7 +38,7 @@ import viewArchive from '../news/viewArchive';
 import * as auctionHouse from '../auctionHouse';
 import * as bank from '../bank';
 import * as composing from '../composing/composing';
-import * as dropItems from '../dropItems';
+import * as dropItems from '../dropItems/dropItems';
 import * as findBuffs from '../findBuffs';
 import * as groups from '../groups';
 import * as guide from '../guide';
