@@ -1,10 +1,16 @@
-import addStatTotalToMouseover from './common/addStatTotalToMouseover';
-import calf from './support/calf';
-import * as ajax from './support/ajax';
-import * as dataObj from './support/dataObj';
-import * as layout from './support/layout';
-import * as system from './support/system';
-import * as task from './support/task';
+import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
+import doCheckboxes from './doCheckboxes';
+import doFolderButtons from './doFolderButtons';
+import doToggleButtons from './doToggleButtons';
+import hideFolders from './hideFolders';
+import injectMoveItems from './injectMoveItems';
+import moveItemsToFolder from './moveItemsToFolder';
+import quickAction from './quickAction';
+import * as ajax from '../support/ajax';
+import * as dataObj from '../support/dataObj';
+import * as layout from '../support/layout';
+import * as system from '../support/system';
+import * as task from '../support/task';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -20,79 +26,10 @@ var invItems;
 var colouring;
 var sendLinks;
 
-function moveItemsToFolder() { // jQuery.min
-  var folderId = document.getElementById('selectFolderId').value;
-  var batchNo;
-  var counter = 0;
-  var invList = [];
-  var prm = [];
-  itemsAry.forEach(function(o) {
-    var el = o.injectHere.previousElementSibling.previousElementSibling
-      .firstElementChild;
-    if (el.checked) {
-      batchNo = Math.floor(counter / 50);
-      invList[batchNo] = system.fallback(invList[batchNo], []);
-      invList[batchNo].push(o.invid);
-      counter += 1;
-      if (counter % 50 === 0) {
-        prm.push(ajax.moveItem(invList[batchNo], folderId));
-      }
-    }
-  });
-  if (counter % 50 !== 0) {
-    prm.push(ajax.moveItem(invList[batchNo], folderId));
-  }
-  $.when.apply($, prm).done(function() {location.reload();});
-}
-
-function injectMoveItems() { // Native
-  var flrRow = layout.pCC.getElementsByTagName('form')[0]
-    .nextElementSibling.nextElementSibling.nextElementSibling;
-  var folders = flrRow.getElementsByTagName('img');
-  var flrEnabled;
-  var oFlr;
-  var options = '<tr><td class="fshCenter">Move selected items to: ' +
-    '<select name="folder" id="selectFolderId" class="customselect">';
-  Array.prototype.forEach.call(folders, function(e) {
-    var src = e.getAttribute('src');
-    if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
-    if (src.indexOf('/folder.gif') !== -1) {
-      oFlr = true;
-      options += '<option value=' + e.parentNode.getAttribute('href')
-        .match(/&folder_id=(-*\d+)/i)[1] + '>' +
-        e.parentNode.parentNode.textContent + '</option>';
-    }
-  });
-  if (!flrEnabled || !oFlr) {return;}
-  options += '</select>&nbsp;<input type="button" class="custombutton" ' +
-    'id="fshMove" value="Move"></td></tr>';
-  flrRow.insertAdjacentHTML('afterend', options);
-}
-
-function showHideLabel(pref) { // Native
-  if (pref) {return 'Hide';}
-  return 'Show';
-}
-
-function doToggleButtons() { // Native
-  // Option toggle buttons for both screens
-  var insertHere = layout.pCC.getElementsByTagName('form')[0]
-    .previousElementSibling.firstElementChild;
-  var inject = '[<span id="fshShowExtraLinks" class="reportLink">' +
-    showHideLabel(showExtraLinks) +
-    ' AH and UFSG links</span>]&nbsp;' +
-    '[<span id="fshShowQuickDropLinks" class="reportLink">' +
-    showHideLabel(showQuickDropLinks) +
-    ' Quick Drop links</span>]&nbsp;';
-  if (calf.subcmd2 === 'storeitems') {
-    inject += '[<span id="fshSelectAllGuildLocked" class="reportLink">' +
-      ' Select All Guild Locked</span>]&nbsp;';
-  }
-  insertHere.innerHTML = inject;
-}
-
 function afterbegin(o, item) { // Native
-  if (system.fallback(extraLinks, !showExtraLinks)) {return;}
+  if (system.fallback(extraLinks, !showExtraLinks)) {
+    return;
+  }
   var pattern = '<span><span class="aHLink">';
   if (!item.bound) {
     pattern += '[<a href="index.php?cmd=auctionhouse&search_text=' +
@@ -116,7 +53,8 @@ var buildTrailer = [
   },
   {
     condition: function(item) {
-      return !sendLinks && showQuickSendLinks && !item.bound;
+      return !sendLinks && showQuickSendLinks &&
+        !item.bound;
     },
     result: function(o) {
       return ' <span class="quickAction sendLink tip-static" ' +
@@ -126,7 +64,8 @@ var buildTrailer = [
   },
   {
     condition: function(item) {
-      return !dropLinks && showQuickDropLinks && item.guild_tag === '-1';
+      return !dropLinks && showQuickDropLinks &&
+        item.guild_tag === '-1';
     },
     result: function(o) {
       return ' <span class="quickAction dropLink tip-static" itemInvId="' +
@@ -160,7 +99,8 @@ function doneInvPaint() { // Native
 
 function invPaint() { // Native - abstract this pattern
   var limit = performance.now() + 5;
-  while (performance.now() < limit && paintCount < itemsAry.length) {
+  while (performance.now() < limit &&
+      paintCount < itemsAry.length) {
     var o = itemsAry[paintCount];
     var item = invItems[o.invid];
     afterbegin(o, item);
@@ -177,7 +117,7 @@ function invPaint() { // Native - abstract this pattern
 function toggleShowExtraLinks() { // Native
   showExtraLinks = !showExtraLinks;
   system.setValue('showExtraLinks', showExtraLinks);
-  doToggleButtons();
+  doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
     paintCount = 0;
     task.add(3, invPaint);
@@ -192,7 +132,7 @@ function toggleShowExtraLinks() { // Native
 function toggleShowQuickDropLinks() { // Native
   showQuickDropLinks = !showQuickDropLinks;
   system.setValue('showQuickDropLinks', showQuickDropLinks);
-  doToggleButtons();
+  doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
     paintCount = 0;
     task.add(3, invPaint);
@@ -202,46 +142,6 @@ function toggleShowQuickDropLinks() { // Native
       el.classList.toggle('fshHide');
     });
   }
-}
-
-function anotherSpinner(self) { // Native
-  self.innerHTML = '<img class="quickActionSpinner" src="' +
-    system.imageServer +
-    '/skin/loading.gif" width="15" height="15">';
-}
-
-function doCheckboxes(type, itemId) { // Native
-  itemsAry.forEach(function(o) {
-    var el = o.el.parentNode.parentNode.previousElementSibling
-      .firstElementChild;
-    if (type === 'guild') {
-      el.checked = !el.disabled && invItems[o.invid].guild_tag !== '-1';
-    }
-    if (type === 'item' && invItems[o.invid].item_id === itemId) {
-      el.checked = !el.disabled && !el.checked;
-    }
-  });
-}
-
-function quickAction(self, fn, success, otherClass) { // jQuery.min
-  self.className = 'quickAction';
-  var itemInvId = self.getAttribute('itemInvId');
-  fn([itemInvId]).done(function(data) {
-    if (data.r === 1) {return;}
-    self.style.color = 'green';
-    self.innerHTML = success;
-  });
-  $(self).qtip('hide');
-  anotherSpinner(self);
-  var theTd = self.parentNode;
-  var otherButton = theTd.querySelector(otherClass);
-  if (otherButton) {
-    otherButton.className = 'quickAction';
-    otherButton.innerHTML = '';
-  }
-  var checkbox = theTd.parentNode.firstElementChild.firstElementChild;
-  checkbox.checked = false;
-  checkbox.disabled = true;
 }
 
 var evts = [
@@ -255,15 +155,17 @@ var evts = [
   },
   {
     condition: function(self) {return self.id === 'fshSelectAllGuildLocked';},
-    result: function() {doCheckboxes('guild');}
+    result: function() {doCheckboxes(itemsAry, invItems, 'guild');}
   },
   {
     condition: function(self) {return self.id === 'fshMove';},
-    result: moveItemsToFolder
+    result: function() {moveItemsToFolder(itemsAry);}
   },
   {
     condition: function(self) {return self.hasAttribute('linkto');},
-    result: function(self) {doCheckboxes('item', self.getAttribute('linkto'));}
+    result: function(self) {
+      doCheckboxes(itemsAry, invItems, 'item', self.getAttribute('linkto'));
+    }
   },
   {
     condition: function(self) {return self.classList.contains('sendLink');},
@@ -275,6 +177,12 @@ var evts = [
     condition: function(self) {return self.classList.contains('dropLink');},
     result: function(self) {
       quickAction(self, ajax.dropItem, 'Dropped', '.sendLink');
+    }
+  },
+  {
+    condition: function(self) {return self.classList.contains('folder');},
+    result: function(self) {
+      hideFolders(itemsAry, invItems, self);
     }
   }
 ];
@@ -296,7 +204,7 @@ function getItems() { // Native
   showExtraLinks = system.getValue('showExtraLinks');
   showQuickDropLinks = system.getValue('showQuickDropLinks');
   showQuickSendLinks = system.getValue('showQuickSendLinks');
-  doToggleButtons();
+  doToggleButtons(showExtraLinks, showQuickDropLinks);
   layout.pCC.addEventListener('click', evtHandler);
   var allTables = layout.pCC.getElementsByTagName('table');
   var lastTable = allTables[allTables.length - 1];
@@ -327,6 +235,7 @@ function inventory(data) { // Native
   sendLinks = false;
   paintCount = 0;
   task.add(3, invPaint);
+  doFolderButtons(data.folders);
 }
 
 function injectDropItems() { // Native
@@ -339,6 +248,4 @@ export function injectProfileDropItems() { // Native
   injectMoveItems();
 }
 
-export function injectStoreItems() { // Native
-  injectDropItems();
-}
+export {injectDropItems as injectStoreItems};

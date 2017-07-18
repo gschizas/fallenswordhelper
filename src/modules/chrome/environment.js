@@ -10,6 +10,14 @@ import * as task from '../support/task';
 var coreFunction;
 var functionPath;
 
+function getType(cmd) {
+  var type = '-';
+  if (cmd === 'points') {
+    type = system.fallback(system.getUrlParameter('type'), '-');
+  }
+  return type;
+}
+
 function newSelector(selector) {
   var test_cmd = document.querySelector(selector);
   return test_cmd && test_cmd.value || '-';
@@ -35,7 +43,7 @@ function getCoreFunction() { // Native
     cmd = system.fallback(system.getUrlParameter('cmd'), '-');
     subcmd = system.fallback(system.getUrlParameter('subcmd'), '-');
     subcmd2 = system.fallback(system.getUrlParameter('subcmd2'), '-');
-    type = system.fallback(system.getUrlParameter('type'), '-');
+    type = getType(cmd);
     fromWorld = system.fallback(system.getUrlParameter('fromworld'), '-');
   } else {
     cmd = newSelector('input[name="cmd"]');
@@ -48,8 +56,6 @@ function getCoreFunction() { // Native
     type = '-';
     fromWorld = '-';
   }
-  //#if _DEV  //  TODO patch for types that we don't care about
-  //#endif
   calf.cmd = cmd;
   calf.subcmd = subcmd;
   calf.subcmd2 = subcmd2;

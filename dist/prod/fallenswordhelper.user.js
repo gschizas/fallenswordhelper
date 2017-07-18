@@ -9,7 +9,7 @@
 // @include        http://local.huntedcow.com/fallensword/*
 // @exclude        http://forum.fallensword.com/*
 // @exclude        http://wiki.fallensword.com/*
-// @version        1518
+// @version        1519
 // @downloadURL    https://fallenswordhelper.github.io/fallenswordhelper/Releases/Current/fallenswordhelper.user.js
 // @grant          none
 // ==/UserScript==
@@ -20,7 +20,7 @@
 function fshMain() {
 
   function setVer() { // Native
-    var ver = '1518';
+    var ver = '1519';
     if (typeof GM_info === 'undefined') {return ver + '_native';}
     return ver;
   }
@@ -30,8 +30,8 @@ function fshMain() {
   FSH.version = setVer();
 
   var resources = {
-    calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1518/calfSystem.min.js',
-    calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1518/calfSystem.css',
+    calfSystemJs: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1519/calfSystem.min.js',
+    calfSystemCss: 'https://fallenswordhelper.github.io/fallenswordhelper/resources/1519/calfSystem.css',
     localForage: 'https://cdnjs.cloudflare.com/ajax/libs/localforage/1.5.0/localforage.min.js',
     dataTablesLoc: 'https://cdn.datatables.net/1.10.13/js/jquery.dataTables.min.js',
   };

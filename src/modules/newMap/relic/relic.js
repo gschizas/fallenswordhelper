@@ -19,6 +19,7 @@ var twoMinutes;
 var sevenDays;
 var memberExclusions = [
   function(key) {return key === 'lastUpdate';},
+  function(key) {return myDefenders.indexOf(key) !== -1;},
   function(key) {return !guildMemberList[key].last_login;},
   function(key) {return guildMemberList[key].last_login >= twoMinutes;},
   function(key) {return guildMemberList[key].last_login <= sevenDays;},
@@ -29,8 +30,7 @@ var memberExclusions = [
   function(key) {
     return guildMemberList[key].level >= 441 &&
       guildMemberList[key].level <= 450;
-  },
-  function(key) {return myDefenders.indexOf(key) !== -1;}
+  }
 ];
 var relicCount;
 var relicMultiplier;
@@ -208,7 +208,7 @@ function missingMembers(membrList) {
       if (memberExclusions[i](key)) {return prev;}
     }
     prev.push('<a href="index.php?cmd=profile&player_id=' +
-      guildMemberList[key].id + '">' + key + '</a>'); // TODO guard
+      guildMemberList[key].id + '">' + key + '</a>');
     return prev;
   }, []);
   containerDiv.insertAdjacentHTML('beforeend',
@@ -251,7 +251,7 @@ function prepareDivs() {
   fetchStatsBtn.classList.add('fshHide');
   hideRelicOffline = system.getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
-    ajax.getMembrList(true).done(missingMembers); // TODO guard
+    ajax.getMembrList(false).done(missingMembers);
   }
   leftDiv.insertAdjacentHTML('beforeend', assets.proc);
   processingStatus = document.getElementById('ProcessingStatus');
