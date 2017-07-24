@@ -1,3 +1,4 @@
+import {reduceBuffArray} from '../common/common';
 import * as ajax from '../support/ajax';
 import * as layout from '../support/layout';
 
@@ -21,10 +22,7 @@ function postWarnings(myBuffs) {
 
 function parseProfile(data) { // Native
   if (data._skills.length !== 0) {
-    var myBuffs = data._skills.reduce(function(prev, curr) {
-      prev[curr.name] = curr.level;
-      return prev;
-    }, {});
+    var myBuffs = reduceBuffArray(data._skills);
     postWarnings(myBuffs);
   }
 }
