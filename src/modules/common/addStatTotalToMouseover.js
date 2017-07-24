@@ -1,7 +1,4 @@
-function closestTable(el) { // Native
-  if (el.tagName === 'TABLE') {return el;}
-  return closestTable(el.parentNode);
-}
+import {closestTable} from './closest';
 
 function reduceStatTable(prev, curr, index) { // Native
   var key = curr.cells[0].textContent.trim().replace(':', '');
