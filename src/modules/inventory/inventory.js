@@ -1,5 +1,12 @@
 import calf from '../support/calf';
-import * as ajax from '../support/ajax';
+import dropItem from '../ajax/dropItem';
+import getForage from '../ajax/getForage';
+import getInventory from '../ajax/getInventory';
+import getMembrList from '../ajax/getMembrList';
+import moveItem from '../ajax/moveItem';
+import sendItem from '../ajax/sendItem';
+import setForage from '../ajax/setForage';
+import {equipItem, queueRecallItem, queueTakeItem} from '../support/ajax';
 import * as assets from './assets';
 import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
@@ -66,7 +73,7 @@ function setChecks() { // Native
       el.checked =
         options.checkedElements[el.getAttribute('item')] === 1;
     });
-  ajax.setForage('fsh_inventory', options);
+  setForage('fsh_inventory', options);
 }
 
 function setLvls() { // jQuery
@@ -86,14 +93,14 @@ function changeLvls() { // jQuery
   if (isNaN(minLvl) || isNaN(maxLvl)) {return;}
   options.fshMinLvl = minLvl;
   options.fshMaxLvl = maxLvl;
-  ajax.setForage('fsh_inventory', options);
+  setForage('fsh_inventory', options);
   $('#fshInv').DataTable().draw(false);
 }
 
 function resetLvls() { // jQuery
   options.fshMinLvl = dataObj.defaults.inventoryMinLvl;
   options.fshMaxLvl = dataObj.defaults.inventoryMaxLvl;
-  ajax.setForage('fsh_inventory', options);
+  setForage('fsh_inventory', options);
   $('#fshMinLvl').val(options.fshMinLvl);
   $('#fshMaxLvl').val(options.fshMaxLvl);
   $('#fshInv').DataTable().draw(false);
@@ -107,7 +114,7 @@ function getChecks() { // jQuery
     function(el) {
       options.checkedElements[el.getAttribute('item')] = 1;
     });
-  ajax.setForage('fsh_inventory', options);
+  setForage('fsh_inventory', options);
   $('#fshInv').DataTable().draw(false);
 }
 
@@ -170,7 +177,7 @@ function anotherSpinner(self) {
 function takeItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.queueTakeItem(self.attr('invid'), self.attr('action'))
+  queueTakeItem(self.attr('invid'), self.attr('action'))
     .done(function(data) {
       if (data.r === 1) {return;}
       killRow(self);
@@ -181,7 +188,7 @@ function takeItem(e) { // jQuery
 function recallItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.queueRecallItem({
+  queueRecallItem({
     invId: self.attr('invid'),
     playerId: self.attr('playerid'),
     mode: self.attr('mode'),
@@ -197,7 +204,7 @@ function recallItem(e) { // jQuery
 function wearItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.equipItem(self.attr('invid')).done(function(data) {
+  equipItem(self.attr('invid')).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
@@ -207,32 +214,32 @@ function wearItem(e) { // jQuery
 function useItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.useItem(self.attr('invid')).done(function(data) {
+  useItem(self.attr('invid')).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
   anotherSpinner(self);
 }
 
-function moveItem(e) { // jQuery
+function doMoveItem(e) { // jQuery
   var self = $(e.target);
-  ajax.moveItem([self.data('inv')], self.val());
+  moveItem([self.data('inv')], self.val());
 }
 
-function dropItem(e) { // jQuery
+function doDropItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.dropItem([self.data('inv')]).done(function(data) {
+  dropItem([self.data('inv')]).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
   anotherSpinner(self);
 }
 
-function sendItem(e) { // jQuery
+function doSendItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  ajax.sendItem([self.data('inv')]).done(function(data) {
+  sendItem([self.data('inv')]).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
@@ -252,9 +259,9 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.recallItem', recallItem);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
   $('#fshInv').on('click', 'span.useItem', useItem);
-  $('#fshInv').on('change', 'select.moveItem', moveItem);
-  $('#fshInv').on('click', 'span.dropItem', dropItem);
-  $('#fshInv').on('click', 'span.sendItem', sendItem);
+  $('#fshInv').on('change', 'select.moveItem', doMoveItem);
+  $('#fshInv').on('click', 'span.dropItem', doDropItem);
+  $('#fshInv').on('click', 'span.sendItem', doSendItem);
 }
 
 function clearButton() { // jQuery
@@ -306,13 +313,13 @@ function extendOptions(data) {
 
 function syncInvMan() { // jQuery
   var prm = [];
-  prm.push(ajax.getInventory().done(function(data) {
+  prm.push(getInventory().done(function(data) {
     theInv = data;
   }));
   if (calf.subcmd === 'guildinvmgr') {
-    prm.push(ajax.getMembrList(false));
+    prm.push(getMembrList(false));
   }
-  prm.push(ajax.getForage('fsh_inventory')
+  prm.push(getForage('fsh_inventory')
     .done(extendOptions)
   );
   $.when.apply($, prm).done(function() {

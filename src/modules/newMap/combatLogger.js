@@ -1,4 +1,5 @@
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
 // Taking the Not Save in case they add new enhancements.
@@ -36,7 +37,7 @@ function processCombatResponse(e, data) { // Native
   }
   combatData.time = data.time;
   combatLog.push(combatData);
-  ajax.setForage('fsh_combatLog', combatLog);
+  setForage('fsh_combatLog', combatLog);
 }
 
 function combatResponse(e, data) { // Native
@@ -51,6 +52,6 @@ function gotCombatLog(data) { // jQuery.min
 
 export default function combatLogger() { // jQuery.min
   if (system.getValue('keepLogs')) {
-    ajax.getForage('fsh_combatLog').done(gotCombatLog);
+    getForage('fsh_combatLog').done(gotCombatLog);
   }
 }

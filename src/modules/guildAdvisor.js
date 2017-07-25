@@ -1,5 +1,5 @@
 import calf from './support/calf';
-import * as ajax from './support/ajax';
+import getMembrList from './ajax/getMembrList';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
 import * as system from './support/system';
@@ -273,7 +273,7 @@ function injectAdvisorWeekly() { // jQuery
     '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';
 
   $.when(
-    ajax.getMembrList(false)
+    getMembrList(false)
       .done(function(response) {
         membrList = response;
       }),
@@ -296,7 +296,7 @@ export default function injectAdvisor() { // Native
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    ajax.getMembrList(false).done(function(response) {
+    getMembrList(false).done(function(response) {
       membrList = response;
       task.add(3, injectAdvisorNew);
       // task.add(3, injectAdvisorDable, [membrList]);

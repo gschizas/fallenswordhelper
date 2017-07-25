@@ -2,11 +2,13 @@ import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
+import dropItem from '../ajax/dropItem';
+import getInventoryById from '../ajax/getInventoryById';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
 import moveItemsToFolder from './moveItemsToFolder';
 import quickAction from './quickAction';
-import * as ajax from '../support/ajax';
+import sendItem from '../ajax/sendItem';
 import * as dataObj from '../support/dataObj';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
@@ -170,13 +172,13 @@ var evts = [
   {
     condition: function(self) {return self.classList.contains('sendLink');},
     result: function(self) {
-      quickAction(self, ajax.sendItem, 'Sent', '.dropLink');
+      quickAction(self, sendItem, 'Sent', '.dropLink');
     }
   },
   {
     condition: function(self) {return self.classList.contains('dropLink');},
     result: function(self) {
-      quickAction(self, ajax.dropItem, 'Dropped', '.sendLink');
+      quickAction(self, dropItem, 'Dropped', '.sendLink');
     }
   },
   {
@@ -239,7 +241,7 @@ function inventory(data) { // Native
 }
 
 function injectDropItems() { // Native
-  ajax.getInventoryById().done(inventory);
+  getInventoryById().done(inventory);
   task.add(3, getItems);
 }
 

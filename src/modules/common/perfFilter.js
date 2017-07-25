@@ -1,4 +1,4 @@
-import * as ajax from '../support/ajax';
+import getInventoryById from '../ajax/getInventoryById';
 import * as layout from '../support/layout';
 
 var inv;
@@ -26,5 +26,5 @@ function drawFilters(data) { // Native
 
 export default function perfFilter(loc) { // jQuery.min
   target = loc;
-  ajax.getInventoryById().done(drawFilters);
+  getInventoryById().done(drawFilters);
 }

@@ -1,5 +1,6 @@
 import calf from './support/calf';
-import * as ajax from './support/ajax';
+import getMembrList from './ajax/getMembrList';
+import {equipItem, queueRecallItem} from './support/ajax';
 import * as layout from './support/layout';
 import * as system from './support/system';
 import * as task from './support/task';
@@ -59,7 +60,7 @@ function recallItem(evt) { // jQuery
   var theTd = evt.target.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
   var href = theTd.firstElementChild.getAttribute('href');
-  ajax.queueRecallItem({
+  queueRecallItem({
     invId: href.match(/&id=(\d+)/)[1],
     playerId: href.match(/&player_id=(\d+)/)[1],
     mode: mode,
@@ -77,7 +78,7 @@ function wearItem(evt) { // jQuery
   $(evt.target).qtip('hide');
   var theTd = evt.target.parentNode.parentNode.parentNode;
   var href = theTd.firstElementChild.getAttribute('href');
-  ajax.equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
+  equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
     if (data.r === 1) {return;}
     theTd.innerHTML = '<span class="fastWorn">Worn</span>';
   });
@@ -213,7 +214,7 @@ function prepareChildRows() { // Native
 }
 
 export default function injectReportPaint() { // jQuery
-  ajax.getMembrList(false).done(function() {
+  getMembrList(false).done(function() {
     task.add(3, reportHeader);
   });
   task.add(2, searchUser);

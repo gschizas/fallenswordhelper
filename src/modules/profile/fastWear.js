@@ -1,4 +1,4 @@
-import * as ajax from '../support/ajax';
+import {equipItem, useItem} from '../support/ajax';
 import * as system from '../support/system';
 import * as task from '../support/task';
 
@@ -17,7 +17,7 @@ function backpackRemove(invId) { // jQuery
 
 function fastWearUse(evt) { // jQuery
   var InventoryItemID = evt.target.getAttribute('itemID');
-  ajax.useItem(InventoryItemID).done(function(data) {
+  useItem(InventoryItemID).done(function(data) {
     if (data.r !== 0) {return;}
     backpackRemove(InventoryItemID);
     evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
@@ -27,7 +27,7 @@ function fastWearUse(evt) { // jQuery
 function fastWearEquip(e) { // jQuery
   var self = e.target;
   var invId = self.getAttribute('itemid');
-  ajax.equipItem(invId).done(function(data) {
+  equipItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
     backpackRemove(invId);
     // TODO Insert item from worn

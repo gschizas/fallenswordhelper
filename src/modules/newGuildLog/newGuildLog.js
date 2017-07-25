@@ -1,6 +1,7 @@
 import addGuildLogWidgets from '../logs/addGuildLogWidgets';
 import addLogColoring from '../logs/addLogColoring';
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as assets from './assets';
 import * as layout from '../support/layout';
 import * as profiler from './profiler';
@@ -92,7 +93,7 @@ function getOtherPages() {
 }
 
 function storeOptions() {
-  ajax.setForage('fsh_guildLog', options);
+  setForage('fsh_guildLog', options);
 }
 
 function updateOptionsLog() {
@@ -232,5 +233,5 @@ function gotOptions(guildLog) {
 }
 
 export default function injectNewGuildLog() {
-  ajax.getForage('fsh_guildLog').done(gotOptions);
+  getForage('fsh_guildLog').done(gotOptions);
 }

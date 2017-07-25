@@ -1,4 +1,4 @@
-import * as ajax from '../support/ajax';
+import moveItem from '../ajax/moveItem';
 import * as system from '../support/system';
 
 export default function moveItemsToFolder(itemsAry) { // jQuery.min
@@ -16,12 +16,12 @@ export default function moveItemsToFolder(itemsAry) { // jQuery.min
       invList[batchNo].push(o.invid);
       counter += 1;
       if (counter % 50 === 0) {
-        prm.push(ajax.moveItem(invList[batchNo], folderId));
+        prm.push(moveItem(invList[batchNo], folderId));
       }
     }
   });
   if (counter % 50 !== 0) {
-    prm.push(ajax.moveItem(invList[batchNo], folderId));
+    prm.push(moveItem(invList[batchNo], folderId));
   }
   $.when.apply($, prm).done(function() {location.reload();});
 }

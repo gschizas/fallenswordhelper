@@ -1,4 +1,4 @@
-import * as ajax from './support/ajax';
+import getMembrList from './ajax/getMembrList';
 import * as layout from './support/layout';
 import * as system from './support/system';
 import * as task from './support/task';
@@ -148,7 +148,7 @@ function getRanks(membrList) { // Native
 }
 
 export default function injectGuildRanks() { // jQuery
-  ajax.getMembrList(true).done(function(membrList) {
+  getMembrList(true).done(function(membrList) {
     task.add(3, getRanks, [membrList]);
   });
   task.add(3, doButtons);

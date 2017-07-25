@@ -1,5 +1,5 @@
 import calf from '../support/calf';
-import * as ajax from '../support/ajax';
+import myStats from '../ajax/myStats';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 import * as task from '../support/task';
@@ -140,7 +140,7 @@ function injectAllyEnemyList(data) { // Native
 }
 
 function resetList() { // jQuery
-  ajax.myStats(true).done(injectAllyEnemyList);
+  myStats(true).done(injectAllyEnemyList);
 }
 
 function toggleBuffSelected(self) { // Native
@@ -211,7 +211,7 @@ function makeDiv(data) { // Native
 }
 
 export default function prepareAllyEnemyList() { // jQuery.min
-  ajax.myStats(false)
+  myStats(false)
     .done(function(data) {
       task.add(3, makeDiv, [data]);
     });

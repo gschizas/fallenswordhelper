@@ -1,5 +1,5 @@
 import calf from './support/calf';
-import * as ajax from './support/ajax';
+import getInventoryById from './ajax/getInventoryById';
 import * as debug from './support/debug';
 import * as system from './support/system';
 import * as task from './support/task';
@@ -103,7 +103,7 @@ function processTrade(data) { // native
 }
 
 function inv() { // jQuery
-  ajax.getInventoryById().done(function(data) {
+  getInventoryById().done(function(data) {
     task.add(3, processTrade, [data]);
   });
 }

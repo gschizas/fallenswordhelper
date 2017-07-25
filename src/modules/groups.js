@@ -1,5 +1,8 @@
 import calf from './support/calf';
-import * as ajax from './support/ajax';
+import getGroupStats from './ajax/getGroupStats';
+import getMembrList from './ajax/getMembrList';
+import getMercStats from './ajax/getMercStats';
+import groupViewStats from './ajax/groupViewStats';
 import * as dataObj from './support/dataObj';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
@@ -27,8 +30,8 @@ function parseMercStats(mercStats) { // Native
 }
 
 export function injectGroupStats() { // jQuery
-  groupStats = ajax.groupViewStats(document);
-  ajax.getMercStats().done(parseMercStats);
+  groupStats = groupViewStats(document);
+  getMercStats().done(parseMercStats);
 }
 
 function displayMinGroupLevel() { // jQuery
@@ -100,7 +103,7 @@ function fetchGroupData(evt) { // Native
   evt.target.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
   Array.prototype.forEach.call(allItems, function(aLink) {
-    ajax.getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
+    getGroupStats(aLink.href).done(parseGroupData.bind(null, aLink));
   });
 }
 
@@ -212,7 +215,7 @@ function doGroupPaint(m) { // jQuery
 }
 
 export function injectGroups() { // jQuery
-  ajax.getMembrList(false)
+  getMembrList(false)
     .done(doGroupPaint);
   displayMinGroupLevel();
   groupButtons();

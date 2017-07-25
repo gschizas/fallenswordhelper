@@ -1,4 +1,5 @@
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
 var showCreatureInfo;
@@ -59,7 +60,7 @@ function processMonsterLog() { // Native
       logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
     });
   }
-  ajax.setForage('fsh_monsterLog', monsterLog);
+  setForage('fsh_monsterLog', monsterLog);
 }
 
 function doMouseOver() { // Native
@@ -184,7 +185,7 @@ export default function startMonsterLog() { // jQuery
   if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getBias();}
   $.subscribe('after-update.actionlist', initMonsterLog);
-  ajax.getForage('fsh_monsterLog').done(function(data) {
+  getForage('fsh_monsterLog').done(function(data) {
     monsterLog = data || {};
   });
   initMonsterLog();

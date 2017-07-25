@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import getForage from '../ajax/getForage';
 import injectHelperMenu from './helperMenu';
 import injectHomePageTwoLink from '../news/injectHomePageTwoLink';
 import injectMenu from './accordion';
@@ -6,8 +7,8 @@ import injectQuickMsgDialogJQ from './messaging';
 import prepareAllyEnemyList from './allyEnemy';
 import prepareBountyData from './activeWantedBounties';
 import replaceKeyHandler from './keyHandler';
+import setForage from '../ajax/setForage';
 import statbar from './statBar';
-import * as ajax from '../support/ajax';
 import * as calc from './calc';
 import * as composing from '../composing/composing';
 import * as notification from '../notification';
@@ -121,7 +122,7 @@ function storeFSBox(_boxList) { // Native
     .getElementsByClassName('message')[0].innerHTML;
   if (boxList.indexOf(fsbox) < 0) {boxList = '<br>' + fsbox + boxList;}
   if (boxList.length > 10000) {boxList = boxList.substring(0, 10000);}
-  ajax.setForage('fsh_fsboxcontent', boxList);
+  setForage('fsh_fsboxcontent', boxList);
 }
 
 function injectFSBoxLog() { // Native
@@ -130,7 +131,7 @@ function injectFSBoxLog() { // Native
   var nodediv = node.lastElementChild;
   var playerName = nodediv.getElementsByTagName('a');
   if (playerName.length === 0) {return;}
-  ajax.getForage('fsh_fsboxcontent').done(storeFSBox);
+  getForage('fsh_fsboxcontent').done(storeFSBox);
   playerName = playerName[0].textContent;
   nodediv.insertAdjacentHTML('beforeend',
     '<br><span class="fshPaleVioletRed">' +

@@ -1,5 +1,6 @@
 import calf from '../support/calf';
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -12,7 +13,7 @@ var itmRE =
 var playerId;
 
 function storeRecipeBook() { // Native
-  ajax.setForage('fsh_recipeBook', recipebook);
+  setForage('fsh_recipeBook', recipebook);
 }
 
 function getRecipeItems(recipe) { // Native
@@ -266,6 +267,6 @@ function rmEvtHdl(evt) { // Native
 
 export default function injectRecipeManager(injector) { // jQuery.min
   content = injector || layout.pCC;
-  ajax.getForage('fsh_recipeBook').done(gotRecipeBook);
+  getForage('fsh_recipeBook').done(gotRecipeBook);
   content.addEventListener('click', rmEvtHdl);
 }

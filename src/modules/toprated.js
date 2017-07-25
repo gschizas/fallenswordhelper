@@ -1,4 +1,5 @@
-import * as ajax from './support/ajax';
+import getProfile from './ajax/getProfile';
+import myStats from './ajax/myStats';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -23,7 +24,7 @@ function findOnlinePlayers() { // jQuery
   var someTables = layout.pCC.getElementsByTagName('table');
   var prm = [];
   for (var i = 4; i < someTables.length; i += 1) {
-    prm.push(ajax.getProfile(someTables[i].textContent.trim())
+    prm.push(getProfile(someTables[i].textContent.trim())
       .done(parsePlayer.bind(null, someTables[i]))
     );
   }
@@ -40,7 +41,7 @@ function getMyVL(e) { // jQuery
     '/world/actionLoadingSpinner.gif\')';
   e.target.parentNode.replaceChild(spinner, e.target);
   if (highlightPlayersNearMyLvl) {
-    ajax.myStats(false).done(function(data) {
+    myStats(false).done(function(data) {
       myVL = data.virtual_level;
       lvlDiffToHighlight = 11;
       if (myVL <= 205) {lvlDiffToHighlight = 6;}

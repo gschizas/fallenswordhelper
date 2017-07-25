@@ -1,4 +1,5 @@
-import * as ajax from './support/ajax';
+import getForage from './ajax/getForage';
+import setForage from './ajax/setForage';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -87,12 +88,12 @@ export function injectFsBoxContent(injector) { // jQuery
   var content = injector || layout.pCC;
   content.innerHTML = layout.makePageTemplate('FS Box Log', '',
     'fsboxclear', 'Clear', 'fsboxdetail');
-  ajax.getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
+  getForage('fsh_fsboxcontent').done(function(fsboxcontent) {
     document.getElementById('fsboxdetail').innerHTML = fsboxcontent;
   });
   document.getElementById('fsboxclear')
     .addEventListener('click', function() {
-      ajax.setForage('fsh_fsboxcontent', '');
+      setForage('fsh_fsboxcontent', '');
       location.reload();
     }, true);
 }

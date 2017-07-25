@@ -1,5 +1,6 @@
 import buffList from '../support/buffObj';
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
 function rejected(timeStamp, buffsNotCast, buffLog) {
@@ -53,10 +54,10 @@ function buffResult(_buffLog) { // Native
     buffLog = successfull(timeStamp, buffCast, buffLog);
     buffLog = rejected(timeStamp, buffNotCast, buffLog);
   }
-  ajax.setForage('fsh_buffLog', buffLog);
+  setForage('fsh_buffLog', buffLog);
 }
 
 export default function updateBuffLog() { // Native
   if (!system.getValue('keepBuffLog')) {return;}
-  ajax.getForage('fsh_buffLog').done(buffResult);
+  getForage('fsh_buffLog').done(buffResult);
 }

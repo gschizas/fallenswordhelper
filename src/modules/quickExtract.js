@@ -1,4 +1,5 @@
-import * as ajax from './support/ajax';
+import getInventory from './ajax/getInventory';
+import {useItem} from './support/ajax';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -34,7 +35,7 @@ function doExtract(target) { // Native
     InventoryIDs.length + ' resources';
   cn = 0;
   for (var i = 0; i < InventoryIDs.length; i += 1) {
-    ajax.useItem(InventoryIDs[i])
+    useItem(InventoryIDs[i])
       .done(quickDoneExtracted.bind(null, InventoryIDs[i]));
   }
 }
@@ -148,5 +149,5 @@ export default function insertQuickExtract(injector) { // jQuery.min
   selectST = true;
   selectMain = true;
   content.addEventListener('click', listen);
-  ajax.getInventory().done(prepInv);
+  getInventory().done(prepInv);
 }

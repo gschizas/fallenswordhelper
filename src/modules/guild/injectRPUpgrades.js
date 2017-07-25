@@ -1,5 +1,5 @@
+import myStats from '../ajax/myStats';
 import {reduceBuffArray} from '../common/common';
-import * as ajax from '../support/ajax';
 import * as layout from '../support/layout';
 
 var packRE = />([ a-zA-Z]+) Level (\d+)/g;
@@ -28,5 +28,5 @@ function parseProfile(data) { // Native
 }
 
 export default function injectRPUpgrades() { // jQuery.min
-  ajax.myStats().done(parseProfile);
+  myStats().done(parseProfile);
 }

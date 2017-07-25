@@ -1,4 +1,5 @@
-import * as ajax from './support/ajax';
+import getForage from './ajax/getForage';
+import setForage from './ajax/setForage';
 import * as dataObj from './support/dataObj';
 import * as system from './support/system';
 
@@ -102,7 +103,7 @@ function gotOnlinePlayers() { // jQuery
 
 function checkLastPage() { // Native
   if (onlinePages === lastPage) {
-    ajax.setForage('fsh_onlinePlayers', onlinePlayers);
+    setForage('fsh_onlinePlayers', onlinePlayers);
     gotOnlinePlayers();
   }
 }
@@ -187,7 +188,7 @@ function injectOnlinePlayersNew() { // jQuery
   context.html(
     '<span><b>Online Players</b></span>' + refreshButton +
     '<div id="fshOutput"></div>');
-  ajax.getForage('fsh_onlinePlayers').done(function(value) {
+  getForage('fsh_onlinePlayers').done(function(value) {
     onlinePlayers = value || {};
     gotOnlinePlayers();
   });

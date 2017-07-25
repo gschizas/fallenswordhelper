@@ -1,6 +1,19 @@
 import {closestTable} from '../common/closest';
-import * as ajax from '../support/ajax';
+import {dialog} from '../support/ajax';
 import * as layout from '../support/layout';
+
+function translateReturnInfo(data) {
+  var info = layout.infoBox(data);
+  var _r = {r: 1, m: info};
+  if (info === 'Item was transferred to the guild store!') {
+    _r = {r: 0, m: ''};
+  }
+  return _r;
+}
+
+function guildMailboxTake(href) {
+  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
+}
 
 function takeResult(self, data) {
   if (data.r === 0) {
@@ -14,7 +27,7 @@ function guildMailboxEvent(e) {
   if (self.tagName === 'IMG') {
     e.preventDefault();
     var anchor = self.parentNode.href;
-    ajax.guildMailboxTake(anchor).done(takeResult.bind(null, self));
+    guildMailboxTake(anchor).done(takeResult.bind(null, self));
   }
   if (self.className === 'reportLink') {
     var nodeList = layout.pCC.getElementsByTagName('img');

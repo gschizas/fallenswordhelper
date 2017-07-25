@@ -1,4 +1,4 @@
-import * as ajax from './support/ajax';
+import getProfile from './ajax/getProfile';
 import * as system from './support/system';
 
 var retries = 0;
@@ -138,7 +138,7 @@ function hazBuff(playerData, el) { // Native
 function addBuffLevels(evt) { // Native
   var player = evt.target;
   if (player.tagName !== 'H1') {return;}
-  ajax.getProfile(player.textContent).done(addStatsQuickBuff);
+  getProfile(player.textContent).done(addStatsQuickBuff);
 
   var playerData = player.parentNode.lastElementChild.textContent.split(',');
   playerData = playerData.reduce(function(prev, curr) {
@@ -221,5 +221,5 @@ export default function injectQuickBuff() { // jQuery
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
     quickBuffHeader);
-  ajax.getProfile(window.self).done(getSustain);
+  getProfile(window.self).done(getSustain);
 }
