@@ -186,6 +186,12 @@ var evts = [
     result: function(self) {
       hideFolders(itemsAry, invItems, self);
     }
+  },
+  {
+    condition: function(self) {return self.value === 'Check All';},
+    result: function() {
+      doCheckboxes(itemsAry, invItems, 'checkAll');
+    }
   }
 ];
 
@@ -240,14 +246,12 @@ function inventory(data) { // Native
   doFolderButtons(data.folders);
 }
 
-function injectDropItems() { // Native
+export function injectStoreItems() { // Native
   getInventoryById().done(inventory);
   task.add(3, getItems);
 }
 
 export function injectProfileDropItems() { // Native
-  injectDropItems();
+  injectStoreItems();
   injectMoveItems();
 }
-
-export {injectDropItems as injectStoreItems};
