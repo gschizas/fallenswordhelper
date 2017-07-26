@@ -1,4 +1,5 @@
 import calf from '../support/calf';
+import doTable from './table';
 import dropItem from '../ajax/dropItem';
 import getForage from '../ajax/getForage';
 import getInventory from '../ajax/getInventory';
@@ -12,7 +13,6 @@ import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
 import * as filters from './filters';
 import * as system from '../support/system';
-import * as table from './table';
 import * as task from '../support/task';
 
 /* jshint latedef: nofunc */
@@ -293,7 +293,7 @@ function getInvMan() { // Native
   headers();
   setChecks();
   setLvls();
-  table.doTable();
+  doTable();
   eventHandlers();
   clearButton();
 

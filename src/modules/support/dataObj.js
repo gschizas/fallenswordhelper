@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 export var defaults = {
   lastActiveQuestPage: '',
   lastNormalActiveQuestPage: '',
