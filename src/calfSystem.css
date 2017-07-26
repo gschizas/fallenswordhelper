@@ -120,6 +120,17 @@ div.fshFten {font-size: 11px;}
   background-size: contain;
 }
 
+/* Guild Add/Remove Tags */
+.guildTagSpinner {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: contain;
+}
+
 /* Top Lists */
 input.fshFindOnlinePlayers {
   width: 120px;

@@ -59,7 +59,7 @@ function takeItemStatus(action, data) {
   return data;
 }
 
-function takeItem(invId, action) {
+export function takeItem(invId) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -70,13 +70,13 @@ function takeItem(invId, action) {
       ajax: 1
     },
     dataType: 'json'
-  }).done(dialog).pipe(takeItemStatus.bind(null, action));
+  }).done(dialog);
 }
 
 export function queueTakeItem(invId, action) {
   // You have to chain them because they could be modifying the backpack
   deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId, action);
+    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
   });
   return deferred;
 }
