@@ -9,7 +9,7 @@ function delAllComponent() { // Native
     .getElementsByClassName('inventory-table')[1];
   var nodeList = invTbl.getElementsByClassName('compDelBtn');
   Array.prototype.forEach.call(nodeList, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+    el.click();
   });
 }
 

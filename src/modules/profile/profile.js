@@ -52,11 +52,7 @@ function profileSelectAll() { // Native
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
   Array.prototype.forEach.call(items, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {
-      bubbles: true,
-      ctrlKey: true,
-      metaKey: true
-    }));
+    el.click();
   });
 }
 

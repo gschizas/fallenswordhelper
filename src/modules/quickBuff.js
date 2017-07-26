@@ -178,7 +178,7 @@ function haveTargets() { // Native
     return;
   }
   if (!firstPlayer) {return;}
-  firstPlayer.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+  firstPlayer.click();
 }
 
 function firstPlayerStats() { // Native
