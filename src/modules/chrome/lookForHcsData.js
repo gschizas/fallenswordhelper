@@ -1,3 +1,4 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import getForage from '../ajax/getForage';
 import injectHelperMenu from './helperMenu';
@@ -13,7 +14,6 @@ import * as calc from './calc';
 import * as composing from '../composing/composing';
 import * as notification from '../notification';
 import * as system from '../support/system';
-import * as task from '../support/task';
 import * as widgets from './widgets';
 
 function gameHelpLink() { // Native
@@ -48,44 +48,44 @@ function getEnvVars() { // Native
 function callAllyEnemy() {
   if (calf.enableAllyOnlineList ||
       calf.enableEnemyOnlineList) {
-    task.add(3, prepareAllyEnemyList);
+    add(3, prepareAllyEnemyList);
   }
 }
 
 function callBounties() {
   if (calf.enableWantedList ||
       calf.enableActiveBountyList) {
-    task.add(3, prepareBountyData);
+    add(3, prepareBountyData);
   }
 }
 
 function callGuildInfo() {
   if (calf.enableGuildInfoWidgets) {
-    task.add(3, widgets.addGuildInfoWidgets);
+    add(3, widgets.addGuildInfoWidgets);
   }
 }
 
 function callAllies() {
   if (calf.enableOnlineAlliesWidgets) {
-    task.add(3, widgets.addOnlineAlliesWidgets);
+    add(3, widgets.addOnlineAlliesWidgets);
   }
 }
 
 function callTemple() {
   if (calf.enableTempleAlert) {
-    task.add(3, notification.injectTempleAlert);
+    add(3, notification.injectTempleAlert);
   }
 }
 
 function callUpgrade() {
   if (calf.enableUpgradeAlert) {
-    task.add(3, notification.injectUpgradeAlert);
+    add(3, notification.injectUpgradeAlert);
   }
 }
 
 function callComposing() {
   if (calf.enableComposingAlert) {
-    task.add(3, composing.injectComposeAlert);
+    add(3, composing.injectComposeAlert);
   }
 }
 
@@ -185,19 +185,19 @@ function moveRHSBoxToLHS(title) { // Native
 
 function doMoveGuildList() { // Native
   if (system.getValue('moveGuildList')) {
-    task.add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
+    add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
   }
 }
 
 function doMoveAllyList() { // Native
   if (system.getValue('moveOnlineAlliesList')) {
-    task.add(3, moveRHSBoxUpOnRHS, ['minibox-allies']);
+    add(3, moveRHSBoxUpOnRHS, ['minibox-allies']);
   }
 }
 
 function doMoveFsBox() { // Native
   if (system.getValue('moveFSBox')) {
-    task.add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
+    add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
   }
 }
 
@@ -211,35 +211,35 @@ function notHuntMode() { // Native
   getEnvVars();
   conditional();
 
-  task.add(3, navMenu);
-  task.add(3, statbar);
+  add(3, navMenu);
+  add(3, statbar);
 
-  task.add(3, calc.injectStaminaCalculator);
-  task.add(3, calc.injectLevelupCalculator);
+  add(3, calc.injectStaminaCalculator);
+  add(3, calc.injectLevelupCalculator);
 
-  task.add(3, injectMenu);
+  add(3, injectMenu);
 
   if (system.getValue('fsboxlog')) {
-    task.add(3, injectFSBoxLog);
+    add(3, injectFSBoxLog);
   }
-  task.add(3, widgets.fixOnlineGuildBuffLinks);
+  add(3, widgets.fixOnlineGuildBuffLinks);
 
-  task.add(3, notification.injectJoinAllLink);
-  task.add(3, changeGuildLogHREF);
-  task.add(3, injectHomePageTwoLink);
+  add(3, notification.injectJoinAllLink);
+  add(3, changeGuildLogHREF);
+  add(3, injectHomePageTwoLink);
 
-  task.add(3, injectQuickMsgDialogJQ);
+  add(3, injectQuickMsgDialogJQ);
 }
 
 function prepareEnv() { // Native
   if (system.getValue('gameHelpLink')) {
-    task.add(3, gameHelpLink);
+    add(3, gameHelpLink);
   }
   calf.huntingMode = system.getValue('huntingMode');
-  task.add(3, replaceKeyHandler);
+  add(3, replaceKeyHandler);
   notHuntMode();
   if (!system.getValue('hideHelperMenu')) {
-    task.add(3, injectHelperMenu);
+    add(3, injectHelperMenu);
   }
 }
 

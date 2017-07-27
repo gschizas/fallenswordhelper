@@ -1,9 +1,9 @@
+import add from './support/task';
 import calf from './support/calf';
 import getMembrList from './ajax/getMembrList';
 import {equipItem, queueRecallItem} from './support/ajax';
 import * as layout from './support/layout';
 import * as system from './support/system';
-import * as task from './support/task';
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
   'Gut Rot Head Splitter|Serum');
@@ -36,7 +36,7 @@ function hideOthers() { // Native
     counter += 1;
   }
   if (counter < nodeList.length) {
-    task.add(2, hideOthers);
+    add(2, hideOthers);
   }
 }
 
@@ -51,7 +51,7 @@ function searchUser() { // Native
   if (!userNode) {return;}
   nodeList = document.querySelectorAll('#pCC table table tr');
   counter = 0;
-  task.add(2, hideOthers);
+  add(2, hideOthers);
 }
 
 function recallItem(evt) { // jQuery
@@ -122,7 +122,7 @@ function paintHeader() { // Native
     headerCount += 1;
   }
   if (headerCount < headers.length) {
-    task.add(3, paintHeader);
+    add(3, paintHeader);
   }
 }
 
@@ -130,7 +130,7 @@ function reportHeader() { // Native
   headers = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
   headerCount = 0;
-  task.add(3, paintHeader);
+  add(3, paintHeader);
 }
 
 function paintChild() { // Native
@@ -142,7 +142,7 @@ function paintChild() { // Native
     counter += 1;
   }
   if (counter < nodeArray.length) {
-    task.add(3, paintChild);
+    add(3, paintChild);
   }
 }
 
@@ -198,10 +198,10 @@ function makeSpan() { // Native
     counter += 1;
   }
   if (counter < nodeList.length) {
-    task.add(3, makeSpan);
+    add(3, makeSpan);
   } else {
     counter = 0;
-    task.add(3, paintChild);
+    add(3, paintChild);
   }
 }
 
@@ -210,15 +210,15 @@ function prepareChildRows() { // Native
     'tr:not(.fshHide) td:nth-of-type(3n+0)');
   nodeArray = [];
   counter = 0;
-  task.add(3, makeSpan);
+  add(3, makeSpan);
 }
 
 export default function injectReportPaint() { // jQuery
   getMembrList(false).done(function() {
-    task.add(3, reportHeader);
+    add(3, reportHeader);
   });
-  task.add(2, searchUser);
-  task.add(3, prepareChildRows);
+  add(2, searchUser);
+  add(3, prepareChildRows);
   layout.pCC.getElementsByTagName('TABLE')[1]
     .addEventListener('click', eventHandlers);
 }

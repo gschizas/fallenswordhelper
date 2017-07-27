@@ -1,7 +1,7 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
@@ -99,7 +99,7 @@ function checkLastCompose() { // jQuery
   var lastComposeCheck = system.getValue('lastComposeCheck');
   if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
   $.get('index.php?cmd=composing', function(data) {
-    task.add(3, parseComposing, [data]);
+    add(3, parseComposing, [data]);
   });
 }
 

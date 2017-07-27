@@ -1,3 +1,4 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import isMessageSound from './isMessageSound';
@@ -5,7 +6,6 @@ import lookForHcsData from './lookForHcsData';
 import pageSwitcher from './pageSwitcher';
 import * as fshGa from '../support/fshGa';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var coreFunction;
 var functionPath;
@@ -98,7 +98,7 @@ FSH.dispatch = function dispatch() { // Native
 
   getCoreFunction();
   lookForHcsData();
-  task.add(3, asyncDispatcher);
+  add(3, asyncDispatcher);
 
   if (typeof window.jQuery === 'undefined') {return;}
 

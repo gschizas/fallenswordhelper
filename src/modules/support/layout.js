@@ -1,6 +1,6 @@
+import add from './task';
 import * as dataObj from './dataObj';
 import * as system from './system';
-import * as task from './task';
 
 var dotList;
 var dotCount;
@@ -187,7 +187,7 @@ function batchDots() { // Native
     dotCount += 1;
   }
   if (dotCount < dotList.length) {
-    task.add(3, batchDots);
+    add(3, batchDots);
   }
 }
 
@@ -196,7 +196,7 @@ export function colouredDots() { // Native
   dotList = document.querySelectorAll(
     '#pCC a[data-tipped*="Last Activity"]');
   dotCount = 0;
-  task.add(3, batchDots);
+  add(3, batchDots);
 }
 
 export function confirm(title, msgText, fn) { // jQuery

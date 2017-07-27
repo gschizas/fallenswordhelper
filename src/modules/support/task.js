@@ -21,7 +21,7 @@ function devLog(args) {
   }
 }
 
-export function add(priority, fn, args, scope) {
+export default function add(priority, fn, args, scope) {
   //#if _DEV  //  Not sending args as Array
   devLog(args);
   //#endif

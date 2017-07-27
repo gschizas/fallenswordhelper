@@ -1,7 +1,7 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import * as common from '../common/common';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 function retOption(option, ifTrue, ifFalse) {
   if (system.getValue(option)) {
@@ -55,6 +55,6 @@ function injectQuickLinks() { // Native ?
 
 export default function doQuickLinks() { // Native
   if (!calf.huntingMode) {
-    task.add(3, injectQuickLinks);
+    add(3, injectQuickLinks);
   }
 }

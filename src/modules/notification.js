@@ -1,6 +1,6 @@
+import add from './support/task';
 import calf from './support/calf';
 import * as system from './support/system';
-import * as task from './support/task';
 
 var havePrayedMsg =
   '<span class="notification-icon"></span><p class="notification-content">' +
@@ -155,7 +155,7 @@ function notUpgradesPage() {
   var lastUpgradeCheck = system.getValue('lastUpgradeCheck');
   if (lastUpgradeCheck && Date.now() < lastUpgradeCheck) {return;}
   $.get('index.php?cmd=points&type=1', function(data) {
-    task.add(3, parseGoldUpgrades, [data]);
+    add(3, parseGoldUpgrades, [data]);
   });
 }
 

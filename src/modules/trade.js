@@ -1,8 +1,8 @@
+import add from './support/task';
 import calf from './support/calf';
 import getInventoryById from './ajax/getInventoryById';
 import * as debug from './support/debug';
 import * as system from './support/system';
-import * as task from './support/task';
 
 function getItemDiv() { // Native
   var itemDiv = document.getElementById('item-div');
@@ -104,7 +104,7 @@ function processTrade(data) { // native
 
 function inv() { // jQuery
   getInventoryById().done(function(data) {
-    task.add(3, processTrade, [data]);
+    add(3, processTrade, [data]);
   });
 }
 
@@ -169,6 +169,6 @@ function injectTradeOld() { // native
 }
 
 export default function injectTrade() { // native
-  task.add(3, inv);
-  task.add(3, injectTradeOld);
+  add(3, inv);
+  add(3, injectTradeOld);
 }

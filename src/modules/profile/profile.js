@@ -1,3 +1,4 @@
+import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import fastDebuff from './debuff';
 import injectFastWear from './fastWear';
@@ -8,7 +9,6 @@ import profileRenderBio from './bio/bio';
 import * as common from '../common/common';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var guildId;
 var currentGuildRelationship;
@@ -231,5 +231,5 @@ export default function injectProfile() { // Legacy
   updateStatistics();
   profileRenderBio(self);
   addStatTotalToMouseover();
-  task.add(3, layout.colouredDots);
+  add(3, layout.colouredDots);
 }

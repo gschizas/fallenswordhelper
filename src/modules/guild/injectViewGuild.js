@@ -1,8 +1,8 @@
+import add from '../support/task';
 import {lastActivityRE} from '../support/dataObj';
 import * as guildUtils from './guildUtils';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 function calcLvlToTest() { // Native
   var levelToTest = system.intValue(document.getElementsByClassName(
@@ -28,7 +28,7 @@ function calcGvgRange(levelToTest) { // Native
 }
 
 export default function injectViewGuild() { // Native
-  task.add(3, layout.colouredDots);
+  add(3, layout.colouredDots);
   guildUtils.removeGuildAvyImgBorder();
   guildUtils.guildXPLock();
   var highlightPlayersNearMyLvl =

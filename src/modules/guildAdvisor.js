@@ -1,9 +1,9 @@
+import add from './support/task';
 import calf from './support/calf';
 import getMembrList from './ajax/getMembrList';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
 import * as system from './support/system';
-import * as task from './support/task';
 
 var newSummary = {};
 var advisorColumns = [
@@ -147,7 +147,7 @@ function injectAdvisorNew() { // Native
       '</td><td>' + playerRank(username) + '</td>');
   });
   list.insertAdjacentElement('beforeend', tfoot);
-  task.add(3, doTable);
+  add(3, doTable);
   summaryLink();
 
   debug.timeEnd('guildAdvisor.injectAdvisorNew');
@@ -257,7 +257,7 @@ function addStats(f) { // Native
 
 function addAdvisorPages() { // Native
   Object.keys(newSummary).forEach(addStats);
-  task.add(3, displayAdvisor);
+  add(3, displayAdvisor);
 }
 
 function injectAdvisorWeekly() { // jQuery
@@ -285,7 +285,7 @@ function injectAdvisorWeekly() { // jQuery
     getAdvisorPage(6),
     getAdvisorPage(7)
   ).done(function() {
-    task.add(3, addAdvisorPages);
+    add(3, addAdvisorPages);
   });
 
   debug.timeEnd('guildAdvisor.injectAdvisorWeekly');
@@ -298,8 +298,8 @@ export default function injectAdvisor() { // Native
   } else {
     getMembrList(false).done(function(response) {
       membrList = response;
-      task.add(3, injectAdvisorNew);
-      // task.add(3, injectAdvisorDable, [membrList]);
+      add(3, injectAdvisorNew);
+      // add(3, injectAdvisorDable, [membrList]);
     });
   }
 }

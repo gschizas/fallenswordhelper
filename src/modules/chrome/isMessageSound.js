@@ -1,5 +1,5 @@
+import add from '../support/task';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 function doMsgSound() { // jQuery
   var soundLocation = system.getValue('defaultMessageSound');
@@ -15,6 +15,6 @@ function doMsgSound() { // jQuery
 
 export default function isMessageSound() { // Native
   if (system.getValue('playNewMessageSound')) {
-    task.add(3, doMsgSound);
+    add(3, doMsgSound);
   }
 }

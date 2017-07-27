@@ -1,3 +1,4 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import doTable from './table';
 import dropItem from '../ajax/dropItem';
@@ -13,7 +14,6 @@ import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
 import * as filters from './filters';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 /* jshint latedef: nofunc */
 export var options;
@@ -323,7 +323,7 @@ function syncInvMan() { // jQuery
     .done(extendOptions)
   );
   $.when.apply($, prm).done(function() {
-    task.add(3, getInvMan);
+    add(3, getInvMan);
   });
 }
 

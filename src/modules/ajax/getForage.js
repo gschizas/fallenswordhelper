@@ -1,4 +1,4 @@
-import * as debug from '../support/debug';
+import {log} from '../support/debug';
 
 export default function getForage(forage) {
   // Wrap in jQuery Deferred because we're using 1.7
@@ -6,7 +6,7 @@ export default function getForage(forage) {
   var dfr = $.Deferred();
   localforage.getItem(forage, function getItemCallback(err, data) {
     if (err) {
-      debug.log(forage + ' forage error', err);
+      log(forage + ' forage error', err);
       dfr.reject(err);
     } else {
       // returns null if key does not exist

@@ -1,7 +1,7 @@
+import add from './support/task';
 import getMembrList from './ajax/getMembrList';
 import * as layout from './support/layout';
 import * as system from './support/system';
-import * as task from './support/task';
 
 var ranks;
 var myRank;
@@ -127,7 +127,7 @@ function paintRanks() { // Native
     rankCount += 1;
   }
   if (rankCount < theRows.length) {
-    task.add(3, paintRanks);
+    add(3, paintRanks);
   }
 }
 
@@ -144,12 +144,12 @@ function getRanks(membrList) { // Native
   theRows = layout.pCC.firstElementChild
     .nextElementSibling.rows[13].firstElementChild.firstElementChild.rows;
   rankCount = 1;
-  task.add(3, paintRanks);
+  add(3, paintRanks);
 }
 
 export default function injectGuildRanks() { // jQuery
   getMembrList(true).done(function(membrList) {
-    task.add(3, getRanks, [membrList]);
+    add(3, getRanks, [membrList]);
   });
-  task.add(3, doButtons);
+  add(3, doButtons);
 }

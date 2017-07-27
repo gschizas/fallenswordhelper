@@ -1,3 +1,4 @@
+import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
@@ -12,7 +13,6 @@ import sendItem from '../ajax/sendItem';
 import * as dataObj from '../support/dataObj';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -110,7 +110,7 @@ function invPaint() { // Native - abstract this pattern
     paintCount += 1;
   }
   if (paintCount < itemsAry.length) {
-    task.add(3, invPaint);
+    add(3, invPaint);
   } else {
     doneInvPaint();
   }
@@ -122,7 +122,7 @@ function toggleShowExtraLinks() { // Native
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
     paintCount = 0;
-    task.add(3, invPaint);
+    add(3, invPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
@@ -137,7 +137,7 @@ function toggleShowQuickDropLinks() { // Native
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
     paintCount = 0;
-    task.add(3, invPaint);
+    add(3, invPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
@@ -242,13 +242,13 @@ function inventory(data) { // Native
   dropLinks = false;
   sendLinks = false;
   paintCount = 0;
-  task.add(3, invPaint);
+  add(3, invPaint);
   doFolderButtons(data.folders);
 }
 
 export function injectStoreItems() { // Native
   getInventoryById().done(inventory);
-  task.add(3, getItems);
+  add(3, getItems);
 }
 
 export function injectProfileDropItems() { // Native

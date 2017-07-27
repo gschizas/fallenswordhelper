@@ -1,4 +1,4 @@
-import * as debug from '../support/debug';
+import {log} from '../support/debug';
 
 export default function setForage(forage, data) {
   // Wrap in jQuery Deferred because we're using 1.7
@@ -6,7 +6,7 @@ export default function setForage(forage, data) {
   var dfr = $.Deferred();
   localforage.setItem(forage, data, function setItemCallback(err, _data) {
     if (err) {
-      debug.log(forage + ' forage error', err);
+      log(forage + ' forage error', err);
       dfr.reject(err);
     } else {
       dfr.resolve(_data);

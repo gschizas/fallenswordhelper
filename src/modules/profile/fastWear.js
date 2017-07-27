@@ -1,6 +1,6 @@
+import add from '../support/task';
 import {equipItem, useItem} from '../support/ajax';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 function backpackRemove(invId) { // jQuery
   var _invId = parseInt(invId, 10);
@@ -83,7 +83,7 @@ export default function injectFastWear() { // jQuery
     fastWearLinks();
   };
   if (document.getElementById('backpack_current').textContent.length !== 0) {
-    task.add(3, fastWearLinks);
+    add(3, fastWearLinks);
   }
   backpackContainer.addEventListener('click', function(e) {
     if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}
