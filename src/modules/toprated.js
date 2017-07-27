@@ -9,15 +9,24 @@ var myVL;
 var spinner;
 var validPvP = Math.floor(Date.now() / 1000) - 604800;
 
-function parsePlayer(aTable, data) { // Native
-  aTable.rows[0].insertAdjacentHTML('beforeend',
-    '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
-  if (!myVL) {return;}
-  if (data.last_login >= validPvP &&
-      data.virtual_level > myVL - lvlDiffToHighlight &&
-      data.virtual_level < myVL + lvlDiffToHighlight) {
-    aTable.parentNode.parentNode.classList.add('lvlHighlight');
+function parsePlayer(aTable, data, jqXhr) { // Native
+  if (data) {
+    aTable.rows[0].insertAdjacentHTML('beforeend',
+      '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
+    if (myVL &&
+        data.last_login >= validPvP &&
+        data.virtual_level > myVL - lvlDiffToHighlight &&
+        data.virtual_level < myVL + lvlDiffToHighlight) {
+      aTable.parentNode.parentNode.classList.add('lvlHighlight');
+    }
+  } else {
+    aTable.rows[0].insertAdjacentHTML('beforeend',
+      '<td class="fshBkRed">' + jqXhr.status + '</td>');
   }
+}
+
+function failFilter(jqXhr) {
+  return $.Deferred().resolve(null, jqXhr).promise();
 }
 
 function findOnlinePlayers() { // jQuery
@@ -25,10 +34,11 @@ function findOnlinePlayers() { // jQuery
   var prm = [];
   for (var i = 4; i < someTables.length; i += 1) {
     prm.push(getProfile(someTables[i].textContent.trim())
+      .pipe(null, failFilter)
       .done(parsePlayer.bind(null, someTables[i]))
     );
   }
-  $.when.apply($, prm).always(function() {
+  $.when.apply($, prm).done(function() {
     spinner.classList.add('fshHide');
   });
 }

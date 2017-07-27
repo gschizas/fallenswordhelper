@@ -333,6 +333,7 @@ input.fshFindOnlinePlayers {
   font-size: x-small;
   text-align: right;
 }
+.fshBkRed {background-color: red;}
 
 .fshCommon {color: white;}
 .fshRare {color: #3366ff;}

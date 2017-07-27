@@ -9,9 +9,9 @@ function getNekid() { // jQuery
     prm.push($.ajax({
       url: href,
       timeout: 3000
-    }));
+    }).pipe(null, function() {return $.when();}));
   });
-  $.when.apply($, prm).always(function() {
+  $.when.apply($, prm).done(function() {
     location.assign('index.php?cmd=profile');
   });
 }
