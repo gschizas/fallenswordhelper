@@ -28,7 +28,7 @@ function successfull(timeStamp, buffCast, buffLog) {
   return buffLog;
 }
 
-function formatDateTime(aDate) { // Native
+function formatDateTime(aDate) {
   var yyyy = aDate.getFullYear().toString();
   var mon = system.padZ(aDate.getMonth() + 1);
   var dd = system.padZ(aDate.getDate());
@@ -38,7 +38,7 @@ function formatDateTime(aDate) { // Native
   return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
-function buffResult(_buffLog) { // Native
+function buffResult(_buffLog) {
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
   var timeStamp = formatDateTime(new Date());
@@ -57,7 +57,7 @@ function buffResult(_buffLog) { // Native
   setForage('fsh_buffLog', buffLog);
 }
 
-export default function updateBuffLog() { // Native
+export default function updateBuffLog() {
   if (!system.getValue('keepBuffLog')) {return;}
   getForage('fsh_buffLog').done(buffResult);
 }

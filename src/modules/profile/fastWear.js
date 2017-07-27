@@ -35,17 +35,17 @@ function fastWearEquip(e) { // jQuery
   });
 }
 
-function actionClass(usable) { // Native
+function actionClass(usable) {
   if (usable) {return 'fastUse';}
   return 'fastWear';
 }
 
-function actionText(usable) { // Native
+function actionText(usable) {
   if (usable) {return 'Use';}
   return 'Wear';
 }
 
-function drawButtons(theSpan) { // Native
+function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = document.createElement('DIV');
   myDiv.className = 'fastDiv';
@@ -60,7 +60,7 @@ function drawButtons(theSpan) { // Native
   theSpan.parentNode.parentNode.appendChild(myDiv);
 }
 
-function fastWearLinks() { // Native
+function fastWearLinks() {
   var bpTabs = document.getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');

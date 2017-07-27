@@ -33,7 +33,7 @@ function allyOrEnemy(type, test) {
   return test.enemy;
 }
 
-function contactColor(last_login, type) { // Native
+function contactColor(last_login, type) {
   var now = Math.floor(Date.now() / 1000);
   for (var i = 0; i < contactClass.length; i += 1) {
     var test = contactClass[i];
@@ -44,7 +44,7 @@ function contactColor(last_login, type) { // Native
   return 'fshWhite';
 }
 
-function playerName(val, type) { // Native
+function playerName(val, type) {
   return '<a class="player-name tip-static ' +
     contactColor(val.last_login, type) +
     '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
@@ -54,28 +54,28 @@ function playerName(val, type) { // Native
     val.id + '">' + val.username + '</a>';
 }
 
-function doBuffCheck() { // Native
+function doBuffCheck() {
   if (!calf.hideBuffSelected) {
     return buffCheck;
   }
   return '';
 }
 
-function doMsgButton() { // Native
+function doMsgButton() {
   if (!calf.hideGuildInfoMessage) {
     return msgButton;
   }
   return '';
 }
 
-function doBuffButton() { // Native
+function doBuffButton() {
   if (!calf.hideGuildInfoBuff) {
     return buffButton;
   }
   return '';
 }
 
-function doSecureButton(val) { // Native
+function doSecureButton(val) {
   if (!calf.hideGuildInfoSecureTrade) {
     return '<a class="enemy-secure-trade guild-icon left ' +
       'guild-minibox-action tip-static" href="index.php?cmd=trade' +
@@ -85,7 +85,7 @@ function doSecureButton(val) { // Native
   return '';
 }
 
-function doTradeButton(val) { // Native
+function doTradeButton(val) {
   if (!calf.hideGuildInfoTrade) {
     return '<a class="enemy-trade guild-icon left ' +
       'guild-minibox-action tip-static" href="index.php?cmd=trade' +
@@ -95,7 +95,7 @@ function doTradeButton(val) { // Native
   return '';
 }
 
-function addContact(contactList, type) { // Native
+function addContact(contactList, type) {
   var now = Math.floor(Date.now() / 1000);
   var output = '';
   contactList.forEach(function(val) {
@@ -119,7 +119,7 @@ function noAllies(allies, enemies) {
     !calf.enableEnemyOnlineList && allies.length === 0;
 }
 
-function hazAllies(allies, enemies) { // Native
+function hazAllies(allies, enemies) {
   var output = '';
   if (calf.enableAllyOnlineList) {
     output += addContact(allies, true);
@@ -132,7 +132,7 @@ function hazAllies(allies, enemies) { // Native
   fshContactList.insertAdjacentHTML('beforeend', output);
 }
 
-function injectAllyEnemyList(data) { // Native
+function injectAllyEnemyList(data) {
   var allies = system.fallback(data._allies, []);
   var enemies = system.fallback(data._enemies, []);
   if (noAllies(allies, enemies)) {return;}
@@ -143,22 +143,22 @@ function resetList() { // jQuery
   myStats(true).done(injectAllyEnemyList);
 }
 
-function toggleBuffSelected(self) { // Native
+function toggleBuffSelected(self) {
   self.classList.toggle('enemy-buff-check-on');
   self.classList.toggle('enemy-buff-check-off');
 }
 
-function msgPlayer(self) { // Native
+function msgPlayer(self) {
   window.openQuickMsgDialog(self.parentNode.previousElementSibling
     .lastElementChild.textContent);
 }
 
-function buffPlayer(self) { // Native
+function buffPlayer(self) {
   layout.openQuickBuffByName(self.parentNode
     .previousElementSibling.lastElementChild.textContent);
 }
 
-function selectedBuff() { // Native
+function selectedBuff() {
   var buffBalls = document.getElementById('fshContactList')
     .getElementsByClassName('enemy-buff-check-on');
   var sendstring = Array.prototype.reduce.call(buffBalls,
@@ -177,7 +177,7 @@ var classEvt = [
   {className: 'enemy-quick-buff', handler: selectedBuff}
 ];
 
-function eventHandler(evt) { // Native
+function eventHandler(evt) {
   var self = evt.target;
   if (self.id === 'fshResetEnemy') {
     resetList();
@@ -192,7 +192,7 @@ function eventHandler(evt) { // Native
   });
 }
 
-function makeDiv(data) { // Native
+function makeDiv(data) {
   var fshAllyEnemy = document.createElement('DIV');
   fshAllyEnemy.id = 'fshAllyEnemy';
   fshAllyEnemy.className = 'minibox';

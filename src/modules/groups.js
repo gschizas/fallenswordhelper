@@ -11,7 +11,7 @@ import * as system from './support/system';
 var maxGroupSizeToJoin;
 var groupStats;
 
-function parseMercStats(mercStats) { // Native
+function parseMercStats(mercStats) {
   groupStats.attackElement.innerHTML = '<span class="fshBlue">' +
     system.addCommas(groupStats.attack) + '</span>' +
     ' ( ' + system.addCommas(groupStats.attack - mercStats.attack) + ' )';
@@ -77,7 +77,7 @@ function joinAllGroupsUnderSize() { // Legacy
   });
 }
 
-function parseGroupData(linkElement, obj) { // Native
+function parseGroupData(linkElement, obj) {
   var extraText = '<table id="stat">' +
     '<tr>' +
     '<td class="fshBrown">Attack</td>' +
@@ -99,7 +99,7 @@ function parseGroupData(linkElement, obj) { // Native
   expiresLocation.insertAdjacentHTML('beforeend', extraText);
 }
 
-function fetchGroupData(evt) { // Native
+function fetchGroupData(evt) {
   evt.target.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
   Array.prototype.forEach.call(allItems, function(aLink) {
@@ -159,7 +159,7 @@ function groupLocalTime(theDateCell) { // jQuery
     'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
 }
 
-function getCreator(membrlist, creator) { // Native
+function getCreator(membrlist, creator) {
   if (membrlist[creator]) {
     return layout.onlineDot({last_login: membrlist[creator].last_login}) +
       '&nbsp;<a href="' + system.server + 'index.php?cmd=profile&player_id=' +
@@ -169,12 +169,12 @@ function getCreator(membrlist, creator) { // Native
   return '<b>' + creator + '</b>';
 }
 
-function memberLevel(membrlist, member) { // Native
+function memberLevel(membrlist, member) {
   if (membrlist[member]) {return membrlist[member].level;}
   return 0;
 }
 
-function byMember(membrlist, a, b) { // Native
+function byMember(membrlist, a, b) {
   return memberLevel(membrlist, b) - memberLevel(membrlist, a);
 }
 

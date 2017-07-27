@@ -1,4 +1,4 @@
-function stamAtLowestCa(combat) { // Native
+function stamAtLowestCa(combat) {
   if (combat.player.counterAttackLevel > 0) {
     return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
       combat.lowestFeasibleCALevel);
@@ -6,7 +6,7 @@ function stamAtLowestCa(combat) { // Native
   return 0;
 }
 
-function caRunning(combat) { // Native
+function caRunning(combat) {
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
     combat.player.attackValue / 0.0025), 0);
@@ -42,12 +42,12 @@ function caRunning(combat) { // Native
   }
 }
 
-function needCa(combat) { // Native
+function needCa(combat) {
   return combat.numberOfHitsRequired === '-' ||
     combat.numberOfHitsRequired !== 1;
 }
 
-function evalCaKill(combat) { // Native
+function evalCaKill(combat) {
   if (combat.lowestCALevelToStillHit > 175) {
     combat.extraNotes +=
       'Even with CA175 you cannot hit this creature<br>';
@@ -58,7 +58,7 @@ function evalCaKill(combat) { // Native
   }
 }
 
-function evalCaOneHit(combat) { // Native
+function evalCaOneHit(combat) {
   if (combat.lowestCALevelToStillKill > 175) {
     combat.extraNotes +=
       'Even with CA175 you cannot 1-hit kill this creature<br>';
@@ -69,7 +69,7 @@ function evalCaOneHit(combat) { // Native
   }
 }
 
-function caResult(combat) { // Native
+function caResult(combat) {
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
     combat.player.attackValue / 0.0025), 0);
@@ -80,7 +80,7 @@ function caResult(combat) { // Native
   evalCaOneHit(combat);
 }
 
-export default function evalCA(combat) { // Native
+export default function evalCA(combat) {
   if (combat.player.counterAttackLevel > 0 &&
       combat.numberOfHitsRequired === 1) {
     caRunning(combat);

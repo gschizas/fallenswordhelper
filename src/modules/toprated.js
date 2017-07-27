@@ -9,7 +9,7 @@ var myVL;
 var spinner;
 var validPvP = Math.floor(Date.now() / 1000) - 604800;
 
-function parsePlayer(aTable, data, jqXhr) { // Native
+function parsePlayer(aTable, data, jqXhr) {
   if (data) {
     aTable.rows[0].insertAdjacentHTML('beforeend',
       '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
@@ -59,7 +59,7 @@ function getMyVL(e) { // jQuery
   } else {findOnlinePlayers();}
 }
 
-function looksLikeTopRated() { // Native
+function looksLikeTopRated() {
   highlightPlayersNearMyLvl =
     system.getValue('highlightPlayersNearMyLvl');
   var theCell = layout.pCC.getElementsByTagName('TD')[0];
@@ -74,7 +74,7 @@ function looksLikeTopRated() { // Native
   findBtn.addEventListener('click', getMyVL);
 }
 
-export function injectTopRated() { // Native
+export function injectTopRated() {
   if (layout.pCC &&
       layout.pCC.firstElementChild &&
       layout.pCC.firstElementChild.rows &&
@@ -83,7 +83,7 @@ export function injectTopRated() { // Native
         .indexOf('Last Updated') === 0) {looksLikeTopRated();}
 }
 
-export function globalQuest() { // Native
+export function globalQuest() {
   var topTable = layout.pCC.getElementsByTagName('table')[3];
   for (var i = 2; i < topTable.rows.length; i += 4) {
     var aCell = topTable.rows[i].cells[1];

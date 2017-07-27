@@ -4,7 +4,7 @@ import * as guildUtils from './guildUtils';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
-function calcLvlToTest() { // Native
+function calcLvlToTest() {
   var levelToTest = system.intValue(document.getElementsByClassName(
     'stat-level')[0].nextElementSibling.textContent);
   var characterVirtualLevel = system.getValue('characterVirtualLevel');
@@ -12,12 +12,12 @@ function calcLvlToTest() { // Native
   return levelToTest;
 }
 
-function calcPvpRange(levelToTest) { // Native
+function calcPvpRange(levelToTest) {
   if (levelToTest <= 205) {return 5;}
   return 10;
 }
 
-function calcGvgRange(levelToTest) { // Native
+function calcGvgRange(levelToTest) {
   if (levelToTest <= 300) {
     return 25;
   }
@@ -27,7 +27,7 @@ function calcGvgRange(levelToTest) { // Native
   return 100;
 }
 
-export default function injectViewGuild() { // Native
+export default function injectViewGuild() {
   add(3, layout.colouredDots);
   guildUtils.removeGuildAvyImgBorder();
   guildUtils.guildXPLock();

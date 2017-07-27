@@ -16,7 +16,7 @@ function getNekid() { // jQuery
   });
 }
 
-export default function nekidBtn() { // Native
+export default function nekidBtn() {
   var profileRightColumn = document.getElementById('profileRightColumn');
   profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
   var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;

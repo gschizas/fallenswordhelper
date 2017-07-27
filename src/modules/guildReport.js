@@ -17,7 +17,7 @@ var nodeList;
 var findUser;
 var foundUser;
 
-function hideOther(el) { // Native
+function hideOther(el) {
   if (el.firstChild.hasAttribute('bgcolor')) {
     foundUser = el.firstChild.firstElementChild.textContent === findUser;
   }
@@ -26,7 +26,7 @@ function hideOther(el) { // Native
   }
 }
 
-function hideOthers() { // Native
+function hideOthers() {
   var limit = performance.now() + 5;
   while (performance.now() < limit && counter < nodeList.length) {
     var el = nodeList[counter];
@@ -40,7 +40,7 @@ function hideOthers() { // Native
   }
 }
 
-function searchUser() { // Native
+function searchUser() {
   findUser = system.getUrlParameter('user');
   if (!findUser) {return;}
   var userNodes = document.querySelectorAll(
@@ -96,7 +96,7 @@ var events = [
   }
 ];
 
-function eventHandlers(evt) { // Native
+function eventHandlers(evt) {
   for (var i = 0; i < events.length; i += 1) {
     if (evt.target.classList.contains(events[i].test)) {
       events[i].fn(evt);
@@ -105,7 +105,7 @@ function eventHandlers(evt) { // Native
   }
 }
 
-function memberHeader(oldhtml) { // Native
+function memberHeader(oldhtml) {
   if (!calf.membrList[oldhtml]) {return oldhtml;}
   return layout.onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
     '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
@@ -113,7 +113,7 @@ function memberHeader(oldhtml) { // Native
     oldhtml + '>m</span> ]';
 }
 
-function paintHeader() { // Native
+function paintHeader() {
   var limit = performance.now() + 10;
   while (performance.now() < limit && headerCount < headers.length) {
     var el = headers[headerCount];
@@ -126,14 +126,14 @@ function paintHeader() { // Native
   }
 }
 
-function reportHeader() { // Native
+function reportHeader() {
   headers = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
   headerCount = 0;
   add(3, paintHeader);
 }
 
-function paintChild() { // Native
+function paintChild() {
   var limit = performance.now() + 1;
   while (performance.now() < limit && counter < nodeArray.length) {
     var el = nodeList[counter];
@@ -146,17 +146,17 @@ function paintChild() { // Native
   }
 }
 
-function hideElement(test) { // Native
+function hideElement(test) {
   if (test) {return ' class="fshHide"';}
   return '';
 }
 
-function isEquipable(test) { // Native
+function isEquipable(test) {
   if (test) {return 'recall';}
   return 'equip';
 }
 
-function mySpan(el) { // Native
+function mySpan(el) {
   var inject = document.createElement('span');
   var secondHref = el.children.length === 2;
   var firstHref = hideElement(!secondHref);
@@ -177,7 +177,7 @@ function mySpan(el) { // Native
   return inject;
 }
 
-function doSpan(el) { // Native
+function doSpan(el) {
   if (counter === 0) {
     el.previousSibling.setAttribute('width', '200px');
     el.setAttribute('width', '370px');
@@ -188,7 +188,7 @@ function doSpan(el) { // Native
   nodeArray.push(mySpan(el));
 }
 
-function makeSpan() { // Native
+function makeSpan() {
   var limit = performance.now() + 10;
   while (performance.now() < limit && counter < nodeList.length) {
     var el = nodeList[counter];
@@ -205,7 +205,7 @@ function makeSpan() { // Native
   }
 }
 
-function prepareChildRows() { // Native
+function prepareChildRows() {
   nodeList = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td:nth-of-type(3n+0)');
   nodeArray = [];

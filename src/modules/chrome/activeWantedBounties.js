@@ -11,12 +11,12 @@ var activeBountyListPosted;
 var wantedNames;
 var wantedArray;
 
-function resetBountyList() { // Native
+function resetBountyList() {
   system.setValueJSON('bountyList', null);
   location.reload();
 }
 
-function injectBountyList() { // Native
+function injectBountyList() {
   system.setValueJSON('bountyList', bountyList);
   var injectHere = document
     .getElementById('Helper:BountyListPlaceholder');
@@ -232,7 +232,7 @@ function getActiveBountyList(doc) { // Legacy
   activeBountyListPosted = true;
 }
 
-function parseBountyPageForWorld(details) { // Native
+function parseBountyPageForWorld(details) {
   var doc = system.createDocument(details);
   getWantedBountyList(doc);
   if (calf.enableActiveBountyList &&
@@ -280,7 +280,7 @@ function doRefresh() { // Legacy
   system.setValue('bwNeedsRefresh', false);
 }
 
-function notRefreshed(enableActiveBountyList, enableWantedList) { // Native
+function notRefreshed(enableActiveBountyList, enableWantedList) {
   if (enableWantedList) {
     wantedList.isRefreshed = false;
     injectWantedList(wantedList);
@@ -313,7 +313,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
   }
 }
 
-export default function prepareBountyData() { // Native
+export default function prepareBountyData() {
   var pCR = document.getElementById('pCR');
   if (calf.enableWantedList) {
     pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +

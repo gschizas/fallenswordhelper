@@ -31,7 +31,7 @@ var guildMessages = {
   }
 };
 
-function quickWearLink() { // Native
+function quickWearLink() {
   // quick wear manager link
   var node = document.querySelector('#profileRightColumn ' +
     'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
@@ -41,7 +41,7 @@ function quickWearLink() { // Native
     'class="fshBlue">Quick&nbsp;Wear</a>]');
 }
 
-function profileSelectAll() { // Native
+function profileSelectAll() {
   var bpTabs = document.getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
@@ -56,7 +56,7 @@ function profileSelectAll() { // Native
   });
 }
 
-function selectAllLink() { // Native
+function selectAllLink() {
   // select all link
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
@@ -72,7 +72,7 @@ function selectAllLink() { // Native
   node.parentNode.appendChild(wrapper);
 }
 
-function storeVL() { // Native
+function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(
     document.getElementById('stat-vl').textContent, 10);
@@ -91,7 +91,7 @@ function guildAry(val) {
   return [];
 }
 
-function guildRelationship(_txt) { // Native
+function guildRelationship(_txt) {
   var scenario = [
     {test: guildAry(system.getValue('guildSelf')), type: 'self'},
     {test: guildAry(system.getValue('guildFrnd')), type: 'friendly'},
@@ -104,7 +104,7 @@ function guildRelationship(_txt) { // Native
   }
 }
 
-function foundGuildLink(aLink) { // Native
+function foundGuildLink(aLink) {
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
   if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
@@ -116,13 +116,13 @@ function foundGuildLink(aLink) { // Native
   }
 }
 
-function profileInjectGuildRel() { // Native
+function profileInjectGuildRel() {
   var aLink = document.querySelector(
     '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
   if (aLink) {foundGuildLink(aLink);}
 }
 
-function profileInjectQuickButton(avyImg, playerid, playername) { // Native
+function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
     layout.quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
@@ -170,14 +170,14 @@ function profileInjectQuickButton(avyImg, playerid, playername) { // Native
   avyImg.insertAdjacentHTML('afterend', newhtml);
 }
 
-function removeStatTable(el) { // Native
+function removeStatTable(el) {
   var tde = el.getElementsByTagName('td');
   el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
     '<div class="profile-stat-bonus">' +
     tde[1].textContent + '</div>';
 }
 
-function updateStatistics() { // Native
+function updateStatistics() {
   var charStats = document.getElementById('profileLeftColumn')
     .getElementsByTagName('table')[0];
   var dodgyTables = charStats.getElementsByTagName('table');

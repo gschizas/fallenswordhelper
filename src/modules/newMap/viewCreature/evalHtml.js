@@ -1,19 +1,19 @@
-function doesGroupExist(combat) { // Native
+function doesGroupExist(combat) {
   if (combat.callback.groupExists) {return 'Group ';}
   return '';
 }
 
-function canIHitIt(combat) { // Native
+function canIHitIt(combat) {
   if (combat.hitByHowMuch > 0) {return 'Yes';}
   return 'No';
 }
 
-function willIBeHit(combat) { // Native
+function willIBeHit(combat) {
   if (combat.creatureHitByHowMuch >= 0) {return 'Yes';}
   return 'No';
 }
 
-export default function evalHTML(combat) { // Native
+export default function evalHTML(combat) {
   return '<table width="100%"><tbody>' +
     '<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
     doesGroupExist(combat) +

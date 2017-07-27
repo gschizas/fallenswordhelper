@@ -17,7 +17,7 @@ function retBool(bool, ifTrue, ifFalse) {
   return ifFalse;
 }
 
-function isDraggable(draggableQuickLinks) { // Native
+function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
     document.getElementById('fshQuickLinks')
       .addEventListener('dragstart', common.drag_start, false);
@@ -53,7 +53,7 @@ function injectQuickLinks() { // Native ?
   haveNode(node, quickLinks);
 }
 
-export default function doQuickLinks() { // Native
+export default function doQuickLinks() {
   if (!calf.huntingMode) {
     add(3, injectQuickLinks);
   }

@@ -1,19 +1,19 @@
 
-function calcHp(combat) { // Native
+function calcHp(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupHPValue;
   }
   return combat.player.hpValue;
 }
 
-function calcDmg(combat) { // Native
+function calcDmg(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupDamageValue;
   }
   return combat.player.damageValue;
 }
 
-function evalFortitude(combat) { // Native
+function evalFortitude(combat) {
   var hpValue = calcHp(combat);
   var fortitudeLevel = combat.player.fortitudeLevel;
   combat.fortitudeExtraHPs = Math.floor(hpValue * fortitudeLevel * 0.001);
@@ -24,7 +24,7 @@ function evalFortitude(combat) { // Native
   combat.overallHPValue = hpValue + combat.fortitudeExtraHPs;
 }
 
-function evalChiStrike(combat) { // Native
+function evalChiStrike(combat) {
   var chiStrikeLevel = combat.player.chiStrikeLevel;
   combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
     chiStrikeLevel * 0.001);
@@ -34,7 +34,7 @@ function evalChiStrike(combat) { // Native
   }
 }
 
-export default function evalDamage(combat) { // Native
+export default function evalDamage(combat) {
   // Damage:
   evalFortitude(combat);
   evalChiStrike(combat);

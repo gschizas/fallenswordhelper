@@ -6,7 +6,7 @@ var numRE = /[^a-zA-Z0-9.,+\- ]/g;
 var priceRE =
   /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
-function getTargetPlayer() { // Native
+function getTargetPlayer() {
   var targetPlayer = layout.pCC
     .getElementsByTagName('h1');
   if (targetPlayer.length !== 0) {
@@ -93,7 +93,7 @@ var costFormatter = [
   }
 ];
 
-function formatCost(total) { // Native
+function formatCost(total) {
   return costFormatter.reduce(function(prev, el) {
     var ret = prev;
     if (el.condition(total)) {
@@ -134,7 +134,7 @@ function updateBuffCost() { // Legacy
   }
 }
 
-function priceUnit(price) { // Native
+function priceUnit(price) {
   if (price[0].indexOf('k') > 0) {
     return 'k';
   }
@@ -206,7 +206,7 @@ function toggleBuffsToBuy(evt) { // Legacy
   updateBuffCost();
 }
 
-function getBuffNameNode(e) { // Native
+function getBuffNameNode(e) {
   var buffNameNode = e.target;
   while (buffNameNode.tagName &&
       buffNameNode.tagName.toLowerCase() !== 'span') {
@@ -215,7 +215,7 @@ function getBuffNameNode(e) { // Native
   return buffNameNode;
 }
 
-export default function bioEvtHdl(e) { // Native
+export default function bioEvtHdl(e) {
   var buffNameNode = getBuffNameNode(e);
   if (buffNameNode.classList &&
       buffNameNode.classList.contains('buffLink')) {

@@ -13,7 +13,7 @@ function doMsgSound() { // jQuery
   });
 }
 
-export default function isMessageSound() { // Native
+export default function isMessageSound() {
   if (system.getValue('playNewMessageSound')) {
     add(3, doMsgSound);
   }

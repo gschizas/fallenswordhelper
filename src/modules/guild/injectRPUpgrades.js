@@ -20,7 +20,7 @@ function postWarnings(myBuffs) {
   });
 }
 
-function parseProfile(data) { // Native
+function parseProfile(data) {
   if (data._skills.length !== 0) {
     var myBuffs = reduceBuffArray(data._skills);
     postWarnings(myBuffs);

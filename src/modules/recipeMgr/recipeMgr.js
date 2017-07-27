@@ -12,11 +12,11 @@ var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 var playerId;
 
-function storeRecipeBook() { // Native
+function storeRecipeBook() {
   setForage('fsh_recipeBook', recipebook);
 }
 
-function getRecipeItems(recipe) { // Native
+function getRecipeItems(recipe) {
   if (recipe.items) {
     return recipe.items.reduce(function(prev, itm) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -32,7 +32,7 @@ function getRecipeItems(recipe) { // Native
   return '';
 }
 
-function getComponents(recipe) { // Native
+function getComponents(recipe) {
   if (recipe.components) {
     return recipe.components.reduce(function(prev, comp) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -48,7 +48,7 @@ function getComponents(recipe) { // Native
   return '';
 }
 
-function getImg(recipe) { // Native
+function getImg(recipe) {
   if (recipe.target) {
     return ' <img class="tip-dynamic" ' +
       'data-tipped="fetchitem.php?item_id=' +
@@ -91,14 +91,14 @@ function generateRecipeTable() { // Legacy
   if (recipebook) {drawRecipeTable();}
 }
 
-function testSortType(evt) { // Native
+function testSortType(evt) {
   var sortType = evt.target.getAttribute('sorttype');
   if (!sortType) {sortType = 'string';}
   sortType = sortType.toLowerCase();
   return sortType;
 }
 
-function sortRecipeBook(sortType) { // Native
+function sortRecipeBook(sortType) {
   if (sortType === 'number') {
     recipebook.recipe.sort(system.numberSort);
   } else {
@@ -118,7 +118,7 @@ function sortRecipeTable(evt) { // Legacy
   generateRecipeTable();
 }
 
-function hasAmounts(result, amounts) { // Native
+function hasAmounts(result, amounts) {
   if (amounts) {
     var resultAmounts = amounts.textContent.split('/');
     result.amountPresent = parseInt(resultAmounts[0], 10);
@@ -126,7 +126,7 @@ function hasAmounts(result, amounts) { // Native
   }
 }
 
-function reduceItemOrComponent(bgGif, prev, el) { // Native
+function reduceItemOrComponent(bgGif, prev, el) {
   var background = el.getAttribute('background');
   if (!background || background.indexOf(bgGif) === -1) {return prev;}
   var img = el.children[0].children[0];
@@ -142,13 +142,13 @@ function reduceItemOrComponent(bgGif, prev, el) { // Native
   return prev;
 }
 
-function parseRecipeItemOrComponent(bgGif, doc) { // Native
+function parseRecipeItemOrComponent(bgGif, doc) {
   var tblCells = doc.getElementById('pCC').getElementsByTagName('td');
   return Array.prototype.reduce.call(tblCells,
     reduceItemOrComponent.bind(null, bgGif), []);
 }
 
-function processRecipe(recipe, data) { // Native
+function processRecipe(recipe, data) {
   var doc = system.createDocument(data);
   output.insertAdjacentHTML('beforeend',
     'Parsing blueprint ' + recipe.name + '...<br>');
@@ -223,7 +223,7 @@ function processFirstPage(data) { // jQuery.min
   return $.when.apply($, prm);
 }
 
-function displayStuff() { // Native
+function displayStuff() {
   output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
   storeRecipeBook();
   generateRecipeTable();
@@ -236,7 +236,7 @@ function parseInventingStart() { // jQuery.min
   $.get('index.php?cmd=inventing').pipe(processFirstPage).done(displayStuff);
 }
 
-function gotRecipeBook(data) { // Native
+function gotRecipeBook(data) {
   recipebook = data;
   if (system.getValue('hideRecipes')) {
     hideRecipes = system.shouldBeArray('hideRecipeNames');
@@ -256,7 +256,7 @@ function gotRecipeBook(data) { // Native
   }
 }
 
-function rmEvtHdl(evt) { // Native
+function rmEvtHdl(evt) {
   if (evt.target.id === 'rfsh') {
     parseInventingStart();
   }

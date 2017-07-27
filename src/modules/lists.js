@@ -129,7 +129,7 @@ var listEvents = [
   }
 ];
 
-function listEvtHnl(e) { // Native
+function listEvtHnl(e) {
   for (var i = 0; i < listEvents.length; i += 1) {
     if (listEvents[i].test(e)) {
       listEvents[i].fn(e);

@@ -27,7 +27,7 @@ function doSpinner() { // jQuery
     'Getting inventory data...</span>');
 }
 
-function rekeyMembrList() { // Native
+function rekeyMembrList() {
   calf.membrList = Object.keys(calf.membrList)
     // Using reduce() to rekey the membrList from names to id's
     .reduce(function(prev, curr) {
@@ -39,7 +39,7 @@ function rekeyMembrList() { // Native
     }, {});
 }
 
-function decorate() { // Native
+function decorate() {
   if (theInv.folders) {
     theInv.folders['-1'] = 'Main';
   }
@@ -66,7 +66,7 @@ function headers() { // jQuery
   $('#pCC').html(myHtml);
 }
 
-function setChecks() { // Native
+function setChecks() {
   Array.prototype.forEach.call(
     document.querySelectorAll('table.fshInvFilter input[type="checkbox"]'),
     function(el) {
@@ -81,7 +81,7 @@ function setLvls() { // jQuery
   $('#fshMaxLvl').val(options.fshMaxLvl);
 }
 
-function refresh() { // Native
+function refresh() {
   doSpinner();
   // eslint-disable-next-line no-use-before-define
   syncInvMan();
@@ -124,7 +124,7 @@ function allChecks() { // jQuery
   $('#fshInv').DataTable().draw(false);
 }
 
-function clearGearOnly(checkedElements) { // Native
+function clearGearOnly(checkedElements) {
   var newEle = {};
   Object.keys(checkedElements).forEach(function(key) {
     if (parseInt(key, 10) >= 100) {
@@ -276,7 +276,7 @@ function clearButton() { // jQuery
   });
 }
 
-function getInvMan() { // Native
+function getInvMan() {
 
   debug.time('inventory.getInvMan');
 

@@ -3,7 +3,7 @@ import * as system from '../support/system';
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function formatShortDate(aDate) { // Native
+function formatShortDate(aDate) {
   var yyyy = aDate.getFullYear();
   var dd = system.padZ(aDate.getDate());
   var ddd = days[aDate.getDay()];
@@ -13,7 +13,7 @@ function formatShortDate(aDate) { // Native
   return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
 }
 
-function timeBox(nextGainTime, hrsToGo) { // Native
+function timeBox(nextGainTime, hrsToGo) {
   var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
   if (!nextGain) {return;}
   return '<dd>' +
@@ -22,7 +22,7 @@ function timeBox(nextGainTime, hrsToGo) { // Native
     parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 }
 
-export function injectStaminaCalculator() { // Native
+export function injectStaminaCalculator() {
   var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
   if (!nextGain) {return;}
   var staminaMouseover =
@@ -48,7 +48,7 @@ export function injectStaminaCalculator() { // Native
   );
 }
 
-export function injectLevelupCalculator() { // Native
+export function injectLevelupCalculator() {
   var nextGain = document.getElementsByClassName('stat-xp-nextGain');
   if (!nextGain) {return;}
   document.getElementById('statbar-level-tooltip-general')

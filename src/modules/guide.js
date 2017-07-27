@@ -1,6 +1,6 @@
 import * as system from './support/system';
 
-export function allowBack() { // Native
+export function allowBack() {
   document.querySelector('input[type="submit"]')
     .addEventListener('click', function(evt) {
       evt.preventDefault();
@@ -13,7 +13,7 @@ export function allowBack() { // Native
     });
 }
 
-export function showAllQuestSteps() { // Native
+export function showAllQuestSteps() {
   if (!system.getValue('showNextQuestSteps')) {return;}
   Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
     function(e) {e.style.display = 'block';});

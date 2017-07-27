@@ -11,14 +11,14 @@ import evalHtml from './evalHtml';
 import * as common from '../../common/common';
 import * as system from '../../support/system';
 
-function getBiasGeneral(combat) { // Native
+function getBiasGeneral(combat) {
   if (assets.bias[combat.combatEvaluatorBias]) {
     return assets.bias[combat.combatEvaluatorBias].generalVariable;
   }
   return 1.1053;
 }
 
-function getBiasHp(combat) { // Native
+function getBiasHp(combat) {
   if (assets.bias[combat.combatEvaluatorBias]) {
     return assets.bias[combat.combatEvaluatorBias].hpVariable;
   }
@@ -138,7 +138,7 @@ function checkIfGroupExists(responseText) { // Hybrid
   }
 }
 
-function addRemoveCreatureToDoNotKillList(evt) { // Native
+function addRemoveCreatureToDoNotKillList(evt) {
   var creatureName = evt.target.getAttribute('creatureName');
   var ind = calf.doNotKillList.indexOf(creatureName);
   if (ind !== -1) {

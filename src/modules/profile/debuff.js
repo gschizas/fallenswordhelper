@@ -27,7 +27,7 @@ function doDebuff(aLink) { // jQuery
     });
 }
 
-function doPrompt(aLink) { // Native
+function doPrompt(aLink) {
   var onclick = aLink.getAttribute('onclick');
   var warn = onclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
@@ -55,7 +55,7 @@ function interceptDebuff(e) { // jQuery
   checkForPrompt(aLink);
 }
 
-export default function fastDebuff() { // Native
+export default function fastDebuff() {
   var profileRightColumn = document.getElementById('profileRightColumn')
     .lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);

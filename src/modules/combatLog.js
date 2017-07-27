@@ -6,12 +6,12 @@ var content;
 var combatLog = [];
 var textArea;
 
-function notepadCopyLog() { // Native
+function notepadCopyLog() {
   textArea.focus();
   textArea.select();
 }
 
-function clearCombatLog() { // Native
+function clearCombatLog() {
   combatLog = [];
   textArea.value = '[]';
   setForage('fsh_combatLog', combatLog);
@@ -23,7 +23,7 @@ function notepadClearLog() { // jQuery
   );
 }
 
-function gotCombatLog(data) { // Native
+function gotCombatLog(data) {
   if (data) {combatLog = data;}
   var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
     '</td></tr>' +

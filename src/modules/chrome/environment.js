@@ -33,7 +33,7 @@ function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
   }
 }
 
-function getCoreFunction() { // Native
+function getCoreFunction() {
   var cmd;
   var subcmd;
   var subcmd2;
@@ -78,7 +78,7 @@ function devHooks() {
 }
 //#endif
 
-function asyncDispatcher() { // Native
+function asyncDispatcher() {
   //#if _DEV  //  asyncDispatcher messages
   devHooks();
   //#endif
@@ -91,7 +91,7 @@ function asyncDispatcher() { // Native
 }
 
 // main event dispatcher
-FSH.dispatch = function dispatch() { // Native
+FSH.dispatch = function dispatch() {
 
   fshGa.setup();
   fshGa.start('JS Perf', 'FSH.dispatch');

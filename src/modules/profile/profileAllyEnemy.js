@@ -1,6 +1,6 @@
 import * as system from '../support/system';
 
-function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
+function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';
   if (contactsTotal && contactsTotal >= numberOfContacts) {
     _c = '/' + contactsTotal;
@@ -9,7 +9,7 @@ function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
     numberOfContacts + _c + '</span>');
 }
 
-function findAllyEnemy(el) { // Native
+function findAllyEnemy(el) {
   var isAllies = el.textContent === 'Allies';
   var isEnemies = el.textContent === 'Enemies';
   if (!isAllies && !isEnemies) {return;}
@@ -25,7 +25,7 @@ function findAllyEnemy(el) { // Native
   }
 }
 
-export default function profileParseAllyEnemy() { // Native
+export default function profileParseAllyEnemy() {
   // Allies/Enemies count/total function
   Array.prototype.forEach.call(
     document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);

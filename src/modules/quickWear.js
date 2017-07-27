@@ -6,7 +6,7 @@ var content;
 var itemList;
 var playerId;
 
-function itemName(item) { // Native
+function itemName(item) {
   return item.extra && item.extra.name || item.n;
 }
 
@@ -84,7 +84,7 @@ function doUseItem(evt) { // Legacy
   });
 }
 
-function useProfileInventoryItem(evt) { // Native
+function useProfileInventoryItem(evt) {
   layout.confirm('Use/Extract Item',
     'Are you sure you want to use/extract the item?',
     doUseItem.bind(null, evt)
@@ -99,7 +99,7 @@ function equipProfileInventoryItem(evt) { // Legacy
   });
 }
 
-function itemImage(item) { // Native
+function itemImage(item) {
   var ret = system.imageServer + '/';
   if (item.extra) {
     ret += 'composing/potions/' + item.extra.design + '_' +

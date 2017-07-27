@@ -1,7 +1,7 @@
 import * as layout from './support/layout';
 import * as system from './support/system';
 
-function buffAll(self) { // Native
+function buffAll(self) {
   var titanTable = self.parentNode.parentNode.parentNode.parentNode;
   var shortList = [];
   for (var j = 1; j < titanTable.rows.length; j += 2) {
@@ -11,7 +11,7 @@ function buffAll(self) { // Native
   layout.openQuickBuffByName(shortList.join());
 }
 
-function buffEvent(e) { // Native
+function buffEvent(e) {
   var self = e.target;
   if (self.textContent === '[b]') {
     layout.openQuickBuffByName(self.previousElementSibling.textContent);
@@ -21,11 +21,11 @@ function buffEvent(e) { // Native
   }
 }
 
-function evtHdl(e) { // Native
+function evtHdl(e) {
   if (e.target.classList.contains('fshBl')) {buffEvent(e);}
 }
 
-function doBuffLinks(titanTable) { // Native
+function doBuffLinks(titanTable) {
   for (var j = 1; j < titanTable.rows.length; j += 2) {
     var firstCell = titanTable.rows[j].cells[0];
     firstCell.insertAdjacentHTML('beforeend',
@@ -35,7 +35,7 @@ function doBuffLinks(titanTable) { // Native
     ' <button class="fshBl fshXSmall">all</button>');
 }
 
-function gotTables(titanTables) { // Native
+function gotTables(titanTables) {
   for (var i = 2; i < titanTables.length; i += 1) {
     var titanTable = titanTables[i];
     if (titanTable.rows.length < 2) {continue;}
@@ -44,7 +44,7 @@ function gotTables(titanTables) { // Native
   titanTables[1].addEventListener('click', evtHdl);
 }
 
-function injectScouttowerBuffLinks(titanTables) { // Native
+function injectScouttowerBuffLinks(titanTables) {
   if (titanTables.length > 2) {gotTables(titanTables);}
 }
 

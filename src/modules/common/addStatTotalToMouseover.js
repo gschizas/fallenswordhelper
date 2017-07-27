@@ -1,6 +1,6 @@
 import {closestTable} from './closest';
 
-function reduceStatTable(prev, curr, index) { // Native
+function reduceStatTable(prev, curr, index) {
   var key = curr.cells[0].textContent.trim().replace(':', '');
   if (!key) {return prev;}
   prev[key] = {ind: index};
@@ -12,21 +12,21 @@ function reduceStatTable(prev, curr, index) { // Native
   return prev;
 }
 
-function getVal(prop, obj) { // Native
+function getVal(prop, obj) {
   if (obj[prop] && obj[prop].value) {
     return obj[prop].value;
   }
   return 0;
 }
 
-function getLastIndex(obj, tbl) { // Native
+function getLastIndex(obj, tbl) {
   if (obj.Enhancements) {
     return tbl.rows[obj.Enhancements.ind - 1];
   }
   return tbl.rows[tbl.rows.length - 1];
 }
 
-function addStats(el) { // Native
+function addStats(el) {
   var statTable = closestTable(el);
   var statObj = Array.prototype.reduce.call(statTable.rows,
     reduceStatTable, {});
@@ -38,7 +38,7 @@ function addStats(el) { // Native
     totalStats + '&nbsp;</td></tr>');
 }
 
-function fshDataFilter(data) { // Native
+function fshDataFilter(data) {
   var container = document.createElement('div');
   container.insertAdjacentHTML('beforeend', data);
   var bonus = container.getElementsByTagName('font');
@@ -49,7 +49,7 @@ function fshDataFilter(data) { // Native
   return container.innerHTML;
 }
 
-function fshPreFilter(options) { // Native
+function fshPreFilter(options) {
   if (options.url.indexOf('fetchitem') !== 0) {return;}
   options.dataFilter = fshDataFilter;
 }

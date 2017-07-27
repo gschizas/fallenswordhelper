@@ -22,7 +22,7 @@ var privLookup = {
   'Can View Advisor': 0.1
 };
 
-function parseRankData(linkElement, responseText) { // Native
+function parseRankData(linkElement, responseText) {
   // Makes a weighted calculation of available permissions and gets tax rate
   var doc = system.createDocument(responseText);
   var checkBoxes = doc.querySelectorAll(
@@ -51,18 +51,18 @@ function fetchRankData() { // jQuery
   });
 }
 
-function notValidRow(thisRankRowNum, targetRowNum, parentTable) { // Native
+function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
   return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
     targetRowNum < 1 ||
     targetRowNum > parentTable.rows.length;
 }
 
-function getTargetRowNumber(val) { // Native
+function getTargetRowNumber(val) {
   if (val === 'Up') {return -1;}
   return 2;
 }
 
-function getPxScroll(val) { // Native
+function getPxScroll(val) {
   if (val === 'Up') {return -22;}
   return 22;
 }
@@ -85,7 +85,7 @@ function ajaxifyRankControls(evt) { // jQuery
   window.scrollBy(0, pxScroll);
 }
 
-function doButtons() { // Native
+function doButtons() {
   // gather rank info button
   var weightButton = document.createElement('input');
   weightButton.id = 'getrankweightings';
@@ -104,7 +104,7 @@ function doButtons() { // Native
   }
 }
 
-function writeMembers(el) { // Native
+function writeMembers(el) {
   var rankCell = el.firstElementChild;
   var rankName = rankCell.textContent;
   if (ranks[rankName]) { // has members
@@ -116,7 +116,7 @@ function writeMembers(el) { // Native
   }
 }
 
-function paintRanks() { // Native
+function paintRanks() {
   var limit = performance.now() + 10;
   while (performance.now() < limit &&
       rankCount < theRows.length) {
@@ -131,7 +131,7 @@ function paintRanks() { // Native
   }
 }
 
-function getRanks(membrList) { // Native
+function getRanks(membrList) {
   ranks = Object.keys(membrList).reduce(function(prev, curr) {
     if (curr !== 'lastUpdate') {
       var rankName = membrList[curr].rank_name;

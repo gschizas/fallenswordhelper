@@ -12,7 +12,7 @@ var resourceList;
 var buyResult;
 var cn;
 
-function backpackRemove(invId) { // Native
+function backpackRemove(invId) {
   extractInv.some(function(el, i, ary) {
     if (el.inv_id === invId) {
       ary.splice(i, 1);
@@ -22,14 +22,14 @@ function backpackRemove(invId) { // Native
   });
 }
 
-function quickDoneExtracted(invId, data) { // Native
+function quickDoneExtracted(invId, data) {
   if (data.r !== 0) {return;}
   backpackRemove(invId);
   cn += 1;
   buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. ' + data.m);
 }
 
-function doExtract(target) { // Native
+function doExtract(target) {
   var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
   target.parentNode.innerHTML = 'extracting all ' +
     InventoryIDs.length + ' resources';
@@ -40,19 +40,19 @@ function doExtract(target) { // Native
   }
 }
 
-function extractAllSimilar(evt) { // Native
+function extractAllSimilar(evt) {
   layout.confirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
     doExtract.bind(null, evt.target)
   );
 }
 
-function checkFlags(item) { // Native
+function checkFlags(item) {
   return selectMain && item.folder_id !== '-1' ||
     !selectST && item.is_in_st;
 }
 
-function resources(prev, item) { // Native
+function resources(prev, item) {
   if (checkFlags(item)) {return prev;}
   if (prev[item.item_id]) {
     prev[item.item_id].invIDs.push(item.inv_id);
@@ -66,7 +66,7 @@ function resources(prev, item) { // Native
   return prev;
 }
 
-function tableRows(prev, item_id) { // Native
+function tableRows(prev, item_id) {
   var res = resourceList[item_id];
   return prev + '<tr><td class="fshCenter"><span class="smallLink"' +
     ' id="fshExtr' + item_id +
@@ -78,7 +78,7 @@ function tableRows(prev, item_id) { // Native
     '" border=0></td><td>' + res.item_name + '</td></tr>';
 }
 
-function showQuickExtract() { // Native
+function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
     '<tr><td id="buy_result" colspan="2"></td></tr>';
@@ -87,13 +87,13 @@ function showQuickExtract() { // Native
   buyResult = document.getElementById('buy_result');
 }
 
-function isExtractable(curr) { // Native
+function isExtractable(curr) {
   return curr.item_name === 'Zombie Coffin' ||
     curr.type === '12' ||
     curr.type === '16';
 }
 
-function prepInv(data) { // Native
+function prepInv(data) {
   playerId = data.player_id;
   extractInv = data.items.reduce(function(prev, curr) {
     if (isExtractable(curr)) {prev.push(curr);}
@@ -125,7 +125,7 @@ var extractEvents = [
   }
 ];
 
-function listen(e) { // Native
+function listen(e) {
   for (var i = 0; i < extractEvents.length; i += 1) {
     if (extractEvents[i].test(e)) {
       extractEvents[i].fn(e);

@@ -9,19 +9,19 @@ var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
 var combatLog = [];
 var combatData;
 
-function storeBuffs(buff) { // Native
+function storeBuffs(buff) {
   if (buff.id === 54 || buff.id === 26) {
     combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
   }
 }
 
-function storeEnhancements(enh) { // Native
+function storeEnhancements(enh) {
   if (notSave.indexOf(enh.name) === -1) {
     combatData.player.enhancements[enh.name] = enh.value;
   }
 }
 
-function processCombatResponse(e, data) { // Native
+function processCombatResponse(e, data) {
   combatData = {};
   combatData.combat = data.response.data;
   if (combatData.combat.inventory_id) {
@@ -40,7 +40,7 @@ function processCombatResponse(e, data) { // Native
   setForage('fsh_combatLog', combatLog);
 }
 
-function combatResponse(e, data) { // Native
+function combatResponse(e, data) {
   // If bad response do nothing.
   if (data.response.response === 0) {processCombatResponse(e, data);}
 }

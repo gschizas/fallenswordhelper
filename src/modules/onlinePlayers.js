@@ -29,7 +29,7 @@ function buildOnlinePlayerData() { // jQuery
   });
 }
 
-function saveVal(key, val) { // Native
+function saveVal(key, val) {
   if (!isNaN(val)) {system.setValue(key, val);}
 }
 
@@ -101,7 +101,7 @@ function gotOnlinePlayers() { // jQuery
   }).api();
 }
 
-function checkLastPage() { // Native
+function checkLastPage() {
   if (onlinePages === lastPage) {
     setForage('fsh_onlinePlayers', onlinePlayers);
     gotOnlinePlayers();
@@ -168,7 +168,7 @@ function resetEvt() { // context
   table.draw();
 }
 
-function doOnlinePlayerEventHandlers(e) { // Native
+function doOnlinePlayerEventHandlers(e) {
   if (e.target.id === 'fshRefresh') {refreshEvt();}
   if (e.target.id === 'fshReset') {resetEvt();}
 }

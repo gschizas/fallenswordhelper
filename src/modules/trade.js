@@ -4,7 +4,7 @@ import getInventoryById from './ajax/getInventoryById';
 import * as debug from './support/debug';
 import * as system from './support/system';
 
-function getItemDiv() { // Native
+function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
     itemDiv = document.createElement('div');
@@ -21,7 +21,7 @@ function getItemDiv() { // Native
   return itemDiv;
 }
 
-function doHideFolder(evt) { // Native
+function doHideFolder(evt) {
   var folderid = evt.target.id;
   var itemDiv = getItemDiv();
   var items = itemDiv.getElementsByTagName('table');
@@ -42,12 +42,12 @@ function doHideFolder(evt) { // Native
   });
 }
 
-function hideFolder(evt) { // native
+function hideFolder(evt) {
   if (evt.target.nodeName === 'SPAN' &&
       evt.target.id.indexOf('folderid') !== -1) {doHideFolder(evt);}
 }
 
-function doFolderHeaders(folders) { // native
+function doFolderHeaders(folders) {
   var foldersRow = document.createElement('tr');
   foldersRow.id = 'fshFolderSelect';
   var folderCell = '<td colspan=6>';
@@ -71,13 +71,13 @@ function doFolderHeaders(folders) { // native
 
 var invItems;
 
-function stColor(el, item) { // Native
+function stColor(el, item) {
   if (item.is_in_st) {
     el.classList.add('isInST');
   } else {el.classList.add('tradeItemMargin');}
 }
 
-function forEachInvItem(el) { // Native
+function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
   var item = invItems[checkbox.getAttribute('value')];
@@ -87,7 +87,7 @@ function forEachInvItem(el) { // Native
   checkbox.classList.add('itemtype' + item.type);
 }
 
-function processTrade(data) { // native
+function processTrade(data) {
 
   debug.time('trade.processTrade');
 
@@ -108,7 +108,7 @@ function inv() { // jQuery
   });
 }
 
-function getHowMany(itemTables) { // Native
+function getHowMany(itemTables) {
   var howMany = parseInt(document.getElementById('fshSendHowMany').value, 10);
   if (isNaN(howMany)) {return itemTables.length;}
   // maximum of 100 items in an ST
@@ -116,13 +116,13 @@ function getHowMany(itemTables) { // Native
   return howMany;
 }
 
-function shouldBeChecked(itemid, checkbox) { // Native
+function shouldBeChecked(itemid, checkbox) {
   return itemid === 'itemid-1' ||
     itemid === 'itemid-2' && checkbox.classList.contains('itemtype12') ||
     checkbox.classList.contains(itemid);
 }
 
-function doCheckAll(evt) { // Native
+function doCheckAll(evt) {
   var itemid = evt.target.id;
   var itemList = document.getElementById('item-div') ||
     document.getElementById('item-list');
@@ -143,11 +143,11 @@ function doCheckAll(evt) { // Native
   });
 }
 
-function toggleAllPlants(evt) { // native
+function toggleAllPlants(evt) {
   if (evt.target.classList.contains('fshCheckAll')) {doCheckAll(evt);}
 }
 
-function injectTradeOld() { // native
+function injectTradeOld() {
   var multiple = document.createElement('tr');
   multiple.id = 'fshSelectMultiple';
   var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
@@ -168,7 +168,7 @@ function injectTradeOld() { // native
   el.parentNode.insertBefore(multiple, el);
 }
 
-export default function injectTrade() { // native
+export default function injectTrade() {
   add(3, inv);
   add(3, injectTradeOld);
 }

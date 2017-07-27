@@ -103,7 +103,7 @@ var doLvlFilter = [
   function(min, max, level) {return min <= level && level <= max;}
 ];
 
-function hazOpts(_settings, data) { // Native
+function hazOpts(_settings, data) {
   var min = opts.minLvl;
   var max = opts.maxLvl;
   var level = system.intValue(data[7]);
@@ -113,7 +113,7 @@ function hazOpts(_settings, data) { // Native
   return false;
 }
 
-function lvlFilter(_settings, data) { // Native
+function lvlFilter(_settings, data) {
   if (opts) {return hazOpts(_settings, data);}
   return true;
 }

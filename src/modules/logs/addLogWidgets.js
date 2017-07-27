@@ -15,7 +15,7 @@ var listOfEnemies;
 var nickList;
 var enableChatParsing;
 
-function removeHTML(buffName) { // Native
+function removeHTML(buffName) {
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
 }
 

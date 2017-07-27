@@ -8,7 +8,7 @@ var completeLink;
 var notStartedLink;
 var currentPageValue;
 
-function dontPost(e) { // Native
+function dontPost(e) {
   if (e.target.type !== 'submit') {return;}
   e.preventDefault();
   var form = e.target.form;
@@ -40,7 +40,7 @@ var savePrefKey = [
   'lastSeasonalNotStartedQuestPage'
 ];
 
-function whereAmI() { // Native
+function whereAmI() {
   var aLinks = layout.pCC.getElementsByTagName('a');
   normalLink = aLinks[0];
   seasonLink = aLinks[1];
@@ -56,19 +56,19 @@ function whereAmI() { // Native
   }, 0);
 }
 
-function storeLoc() { // Native
+function storeLoc() {
   var lastQBPage = location.search;
   system.setValue('lastActiveQuestPage', lastQBPage);
   system.setValue(savePrefKey[currentPageValue], lastQBPage);
 }
 
-function setLink(aLink, url) { // Native
+function setLink(aLink, url) {
   if (url.length > 0) {
     aLink.setAttribute('href', url);
   }
 }
 
-function updateLinks() { // Native
+function updateLinks() {
   var lastNormalActiveQuestPage = system.getValue(savePrefKey[0]);
   var lastNormalCompletedQuestPage = system.getValue(savePrefKey[1]);
   var lastNormalNotStartedQuestPage = system.getValue(savePrefKey[2]);
@@ -106,7 +106,7 @@ function storeQuestPage() {
   }
 }
 
-function guideButtons(questID, questName) { // Native
+function guideButtons(questID, questName) {
   return '<div class="parent">' +
     '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
     'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
@@ -137,7 +137,7 @@ function doHideQuests(hideQuests, questName, aRow) {
   }
 }
 
-export function injectQuestBookFull() { // Native
+export function injectQuestBookFull() {
   layout.pCC.addEventListener('click', dontPost);
   storeQuestPage();
   var questTable = layout.pCC.getElementsByTagName('table')[5];
@@ -152,7 +152,7 @@ export function injectQuestBookFull() { // Native
   }
 }
 
-export function injectQuestTracker() { // Native
+export function injectQuestTracker() {
   var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
     layout.pCC.getElementsByTagName('a')[0]

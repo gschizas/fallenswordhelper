@@ -1,6 +1,6 @@
 import * as system from './support/system';
 
-function dontPost() { // Native
+function dontPost() {
   var submitButton = document.querySelector('#pCC input[type="submit"]');
   if (submitButton) {
     submitButton.addEventListener('click', function(e) {
@@ -18,7 +18,7 @@ function formatLastReset(last_login) {
   return system.outputFormat(h, ' hours, ') + m + ' mins';
 }
 
-function formatTime() { // Native
+function formatTime() {
   var lastLadderReset = system.getValue('lastLadderReset');
   var now = Date.now();
   if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
@@ -29,7 +29,7 @@ function formatTime() { // Native
   return formatLastReset(lastLadderReset);
 }
 
-function lastReset() { // Native
+function lastReset() {
   var topTable = document.querySelector('#pCC table');
   var newRow = document.createElement('tr');
   var leftCell = newRow.insertCell(-1);
@@ -41,7 +41,7 @@ function lastReset() { // Native
   topTable.appendChild(newRow);
 }
 
-export default function ladder() { // Native
+export default function ladder() {
   dontPost();
   lastReset();
 }

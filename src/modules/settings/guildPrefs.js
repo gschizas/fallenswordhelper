@@ -1,7 +1,7 @@
 import * as settingsPage from './settingsPage';
 import * as system from '../support/system';
 
-function injectSettingsGuildData(guildType) { // Native
+function injectSettingsGuildData(guildType) {
   return '<input name="guild' + guildType + '" size="60" value="' +
     system.getValue('guild' + guildType) + '">' +
     '<span class="fshPoint" ' +

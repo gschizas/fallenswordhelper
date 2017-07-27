@@ -53,7 +53,7 @@ function breakItems() { // jQuery.min
   });
 }
 
-function breakEvt(evt) { // Native
+function breakEvt(evt) {
   if (disableBreakdownPrompts &&
       evt.target.id === 'breakdown-selected-items') {
     evt.stopPropagation();
@@ -65,7 +65,7 @@ function breakEvt(evt) { // Native
   }
 }
 
-function itemClick(evt) { // Native
+function itemClick(evt) {
   if (!evt.target.classList.contains('selectable-item')) {return;}
   var myItem = evt.target.id.replace('composing-item-', '');
   var itemPos = selectedList.indexOf(myItem);
@@ -76,12 +76,12 @@ function itemClick(evt) { // Native
   }
 }
 
-function togglePref() { // Native
+function togglePref() {
   disableBreakdownPrompts = !disableBreakdownPrompts;
   system.setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
 
-export default function composingBreakdown() { // Native
+export default function composingBreakdown() {
   perfFilter('composing');
   disableBreakdownPrompts = system.getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode

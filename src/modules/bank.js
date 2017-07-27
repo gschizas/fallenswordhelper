@@ -125,12 +125,12 @@ function ajaxifyBank() { // jQuery
   }
 }
 
-export function injectGuildBank() { // Native
+export function injectGuildBank() {
   bankSettings = guildBank;
   ajaxifyBank();
 }
 
-export function injectBank() { // Native
+export function injectBank() {
   bankSettings = playerBank;
   ajaxifyBank();
 }

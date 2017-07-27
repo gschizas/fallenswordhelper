@@ -116,7 +116,7 @@ function pageLayout(o) { // Legacy
     'over time.</div>';
 }
 
-function uniq(arr, removeBy) { // Native
+function uniq(arr, removeBy) {
   var seen = {};
   if (removeBy) {
     return arr.filter(function(item) {
@@ -171,7 +171,7 @@ function getBioLines(bioCellHtml) { // Legacy
   return uniq(res);
 }
 
-function getSustain(doc) { // Native
+function getSustain(doc) {
   var aLinks = doc.getElementById('profileLeftColumn')
     .getElementsByTagName('a');
   var sustainLevel;

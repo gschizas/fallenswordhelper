@@ -1,12 +1,12 @@
 
-function calcArm(combat) { // Native
+function calcArm(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupArmorValue;
   }
   return combat.player.armorValue;
 }
 
-function evalSanctuary(combat) { // Native
+function evalSanctuary(combat) {
   if (combat.player.sanctuaryLevel > 0) {
     combat.extraNotes += 'Sanc Bonus Armor = ' +
       Math.floor(combat.player.armorValue *
@@ -14,14 +14,14 @@ function evalSanctuary(combat) { // Native
   }
 }
 
-function evalTerrorize(combat) { // Native
+function evalTerrorize(combat) {
   if (combat.player.terrorizeLevel > 0) {
     combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
       combat.terrorizeEffect * -1 + '<br>';
   }
 }
 
-export default function evalArmour(combat) { // Native
+export default function evalArmour(combat) {
   var armorVal = calcArm(combat);
   combat.overallArmorValue = armorVal +
     Math.floor(combat.player.armorValue *

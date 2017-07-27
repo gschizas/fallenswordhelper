@@ -19,11 +19,11 @@ var bazaarItem =
   '<span class="bazaarButton tip-dynamic" style="background-image: ' +
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
-function testQuant() { // Native
+function testQuant() {
   return system.testQuant(document.getElementById('buy_amount').value);
 }
 
-function select(evt) { // Native
+function select(evt) {
   var target = evt.target;
   if (!target.classList.contains('bazaarButton')) {return;}
   var theValue = testQuant();
@@ -38,14 +38,14 @@ function select(evt) { // Native
   selected.appendChild(dupNode);
 }
 
-function quantity() { // Native
+function quantity() {
   var theValue = testQuant();
   if (theValue) {
     document.getElementById('quantity').textContent = theValue;
   }
 }
 
-function done(responseText) { // Native
+function done(responseText) {
   document.getElementById('buy_result').insertAdjacentHTML('beforeend',
     '<br>' + layout.infoBox(responseText));
 }
@@ -61,7 +61,7 @@ function buy() { // jQuery
   }
 }
 
-export default function injectBazaar() { // Native
+export default function injectBazaar() {
   var pbImg = layout.pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = layout.pCC.getElementsByTagName('A');

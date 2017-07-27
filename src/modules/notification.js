@@ -29,7 +29,7 @@ var goldUpgradeMsg =
   ' class="notification-icon"></span><p class="notification-content">Up' +
   'grade stamina with gold</p></a></li>';
 
-function havePrayed() { // Native
+function havePrayed() {
   document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
   system.setValue('needToPray', false);
   system.setValue('lastTempleCheck', new Date()
@@ -46,21 +46,21 @@ function prayToGods(e) { // jQuery
   $(e.target).qtip('hide');
 }
 
-function displayDisconnectedFromGodsMessage() { // Native
+function displayDisconnectedFromGodsMessage() {
   document.getElementById('notifications').insertAdjacentHTML('afterbegin',
     godsNotification);
   document.getElementById('helperPrayToGods').addEventListener('click',
     prayToGods);
 }
 
-function displayUpgradeMsg() { // Native
+function displayUpgradeMsg() {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
     document.getElementById('notifications').insertAdjacentHTML('afterbegin',
       goldUpgradeMsg);
   }
 }
 
-function findNewGroup(el) { // Native
+function findNewGroup(el) {
   if (el.textContent.indexOf('New attack group created.') === -1) {return;}
   var groupJoinHTML = '';
   if (!system.getValue('enableMaxGroupSizeToJoin')) {
@@ -78,7 +78,7 @@ function findNewGroup(el) { // Native
     '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
-function templeAlertEnabled(responseText) { // Native
+function templeAlertEnabled(responseText) {
   var checkNeedToPray;
   var doc;
   if (calf.cmd !== 'temple') {
@@ -97,16 +97,16 @@ function templeAlertEnabled(responseText) { // Native
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
 }
 
-export function parseTemplePage(responseText) { // Native
+export function parseTemplePage(responseText) {
   if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
 }
 
-function checkLastUpdate(templeAlertLastUpdate) { // Native
+function checkLastUpdate(templeAlertLastUpdate) {
   return !templeAlertLastUpdate ||
     Date.now() > templeAlertLastUpdate;
 }
 
-function doWeNeedToParse() { // Native
+function doWeNeedToParse() {
   if (checkLastUpdate(system.getValue('lastTempleCheck'))) {return true;}
   if (system.getValue('needToPray')) {
     displayDisconnectedFromGodsMessage();
@@ -122,7 +122,7 @@ export function injectTempleAlert() { // jQuery
   }
 }
 
-function findDoc(data) { // Native
+function findDoc(data) {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
     return system.createDocument(data);
   }
@@ -130,7 +130,7 @@ function findDoc(data) { // Native
   return document;
 }
 
-export function parseGoldUpgrades(data) { // Native
+export function parseGoldUpgrades(data) {
   if (!calf.enableUpgradeAlert) {return;}
   var doc = findDoc(data);
   var limit = doc.getElementById('pCC').getElementsByTagName('TABLE')[0]
@@ -163,7 +163,7 @@ export function injectUpgradeAlert() { // jQuery
   if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
 }
 
-export function injectJoinAllLink() { // Native
+export function injectJoinAllLink() {
   var nodeList = document.getElementById('pCL').getElementsByTagName('li');
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }

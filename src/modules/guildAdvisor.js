@@ -38,7 +38,7 @@ function doTable() { // jQuery
   });
 }
 
-function summaryLink() { // Native
+function summaryLink() {
   var updateInput = layout.pCC.getElementsByClassName('custombutton');
   if (!updateInput) {return;}
   updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
@@ -104,24 +104,24 @@ function injectAdvisorDable() {
 }
 */
 
-function playerName(f) { // Native
+function playerName(f) {
   if (!membrList[f]) {return f;}
   return '<a href="index.php?cmd=profile&player_id=' +
     membrList[f].id + '">' + f + '</a>';
 }
 
-function playerLevel(f) { // Native
+function playerLevel(f) {
   if (!membrList[f]) {return '';}
   return membrList[f].level;
 }
 
-function playerRank(f) { // Native
+function playerRank(f) {
   if (!membrList[f]) {return '';}
   return '<div class="fshAdvRank">' +
     membrList[f].rank_name + '</div>';
 }
 
-function injectAdvisorNew() { // Native
+function injectAdvisorNew() {
 
   debug.time('guildAdvisor.injectAdvisorNew');
 
@@ -154,7 +154,7 @@ function injectAdvisorNew() { // Native
 
 }
 
-function returnAdvisorPage(e, response) { // Native
+function returnAdvisorPage(e, response) {
 
   debug.time('guildAdvisor.returnAdvisorPage' + e);
 
@@ -237,7 +237,7 @@ function displayAdvisor() { // jQuery
 
 }
 
-function addStats(f) { // Native
+function addStats(f) {
   if (f === 'Total:') {return;}
   data.push([
     playerName(f),
@@ -255,7 +255,7 @@ function addStats(f) { // Native
   ]);
 }
 
-function addAdvisorPages() { // Native
+function addAdvisorPages() {
   Object.keys(newSummary).forEach(addStats);
   add(3, displayAdvisor);
 }
@@ -292,7 +292,7 @@ function injectAdvisorWeekly() { // jQuery
 
 }
 
-export default function injectAdvisor() { // Native
+export default function injectAdvisor() {
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {

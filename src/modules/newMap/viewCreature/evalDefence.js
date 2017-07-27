@@ -1,11 +1,11 @@
-function calcDef(combat) { // Native
+function calcDef(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupDefenseValue;
   }
   return combat.player.defenseValue;
 }
 
-function evalConstitution(combat) { // Native
+function evalConstitution(combat) {
   if (combat.player.constitutionLevel > 0) {
     combat.extraNotes += 'Constitution Bonus Defense = ' +
     Math.floor(calcDef(combat) *
@@ -13,7 +13,7 @@ function evalConstitution(combat) { // Native
   }
 }
 
-function evalFlinch(combat) { // Native
+function evalFlinch(combat) {
   if (combat.player.flinchLevel > 0) {
     combat.extraNotes += 'Flinch Bonus Attack Reduction = ' +
     Math.floor(combat.creature.attack * combat.player.flinchLevel *
@@ -21,7 +21,7 @@ function evalFlinch(combat) { // Native
   }
 }
 
-export default function evalDefence(combat) { // Native
+export default function evalDefence(combat) {
   combat.overallDefenseValue = calcDef(combat) +
     Math.floor(calcDef(combat) *
     combat.player.constitutionLevel * 0.001) +

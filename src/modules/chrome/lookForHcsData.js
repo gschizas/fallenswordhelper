@@ -16,7 +16,7 @@ import * as notification from '../notification';
 import * as system from '../support/system';
 import * as widgets from './widgets';
 
-function gameHelpLink() { // Native
+function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
   Array.prototype.forEach.call(nodeList, function(el) {
     if (el.textContent === 'Game Help') {
@@ -25,7 +25,7 @@ function gameHelpLink() { // Native
   });
 }
 
-function getEnvVars() { // Native
+function getEnvVars() {
   calf.enableAllyOnlineList = system.getValue('enableAllyOnlineList');
   calf.enableEnemyOnlineList = system.getValue('enableEnemyOnlineList');
   calf.enableGuildInfoWidgets = system.getValue('enableGuildInfoWidgets');
@@ -89,7 +89,7 @@ function callComposing() {
   }
 }
 
-function conditional() { // Native
+function conditional() {
   callAllyEnemy();
   callBounties();
   callGuildInfo();
@@ -111,12 +111,12 @@ function navMenu() { // jQuery
   };
 }
 
-function getBoxList(boxList) { // Native
+function getBoxList(boxList) {
   if (boxList) {return boxList;}
   return '';
 }
 
-function storeFSBox(_boxList) { // Native
+function storeFSBox(_boxList) {
   var boxList = getBoxList(_boxList);
   var fsbox = document.getElementById('minibox-fsbox')
     .getElementsByClassName('message')[0].innerHTML;
@@ -125,7 +125,7 @@ function storeFSBox(_boxList) { // Native
   setForage('fsh_fsboxcontent', boxList);
 }
 
-function injectFSBoxLog() { // Native
+function injectFSBoxLog() {
   var node = document.getElementById('minibox-fsbox');
   if (!node) {return;}
   var nodediv = node.lastElementChild;
@@ -141,12 +141,12 @@ function injectFSBoxLog() { // Native
     '</span>');
 }
 
-function testForGuildLogMsg(guildLogNode) { // Native
+function testForGuildLogMsg(guildLogNode) {
   return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
     guildLogNode.innerHTML.search('Guild Log updated!') === -1;
 }
 
-function hideGuildLogMsg(guildLogNode) { // Native
+function hideGuildLogMsg(guildLogNode) {
   // hide the lhs box
   if (testForGuildLogMsg(guildLogNode)) {return;}
   var messageBox = guildLogNode.parentNode;
@@ -155,7 +155,7 @@ function hideGuildLogMsg(guildLogNode) { // Native
   }
 }
 
-function gotGuildLogNodes(guildLogNodes) { // Native
+function gotGuildLogNodes(guildLogNodes) {
   var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
@@ -165,43 +165,43 @@ function gotGuildLogNodes(guildLogNodes) { // Native
   hideGuildLogMsg(guildLogNode);
 }
 
-function changeGuildLogHREF() { // Native
+function changeGuildLogHREF() {
   if (!system.getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
-function moveRHSBoxUpOnRHS(title) { // Native
+function moveRHSBoxUpOnRHS(title) {
   document.getElementById('pCR').insertAdjacentElement('afterbegin',
     document.getElementById(title));
 }
 
-function moveRHSBoxToLHS(title) { // Native
+function moveRHSBoxToLHS(title) {
   var boxDiv = document.getElementById(title);
   boxDiv.classList.add('pCR');
   document.getElementById('pCL').appendChild(boxDiv);
 }
 
-function doMoveGuildList() { // Native
+function doMoveGuildList() {
   if (system.getValue('moveGuildList')) {
     add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
   }
 }
 
-function doMoveAllyList() { // Native
+function doMoveAllyList() {
   if (system.getValue('moveOnlineAlliesList')) {
     add(3, moveRHSBoxUpOnRHS, ['minibox-allies']);
   }
 }
 
-function doMoveFsBox() { // Native
+function doMoveFsBox() {
   if (system.getValue('moveFSBox')) {
     add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
   }
 }
 
-function notHuntMode() { // Native
+function notHuntMode() {
   if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
   doMoveGuildList();
@@ -231,7 +231,7 @@ function notHuntMode() { // Native
   add(3, injectQuickMsgDialogJQ);
 }
 
-function prepareEnv() { // Native
+function prepareEnv() {
   if (system.getValue('gameHelpLink')) {
     add(3, gameHelpLink);
   }
@@ -243,7 +243,7 @@ function prepareEnv() { // Native
   }
 }
 
-export default function lookForHcsData() { // Native
+export default function lookForHcsData() {
   var hcsData = document.getElementById('html');
   if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();

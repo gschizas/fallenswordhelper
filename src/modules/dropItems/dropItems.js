@@ -28,7 +28,7 @@ var invItems;
 var colouring;
 var sendLinks;
 
-function afterbegin(o, item) { // Native
+function afterbegin(o, item) {
   if (system.fallback(extraLinks, !showExtraLinks)) {
     return;
   }
@@ -77,7 +77,7 @@ var buildTrailer = [
   }
 ];
 
-function beforeend(o, item) { // Native
+function beforeend(o, item) {
   if (!colouring && !disableItemColoring) {
     o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
   }
@@ -91,7 +91,7 @@ function beforeend(o, item) { // Native
   if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
 }
 
-function doneInvPaint() { // Native
+function doneInvPaint() {
   if (showExtraLinks) {extraLinks = true;}
   checkAll = true;
   colouring = true;
@@ -116,7 +116,7 @@ function invPaint() { // Native - abstract this pattern
   }
 }
 
-function toggleShowExtraLinks() { // Native
+function toggleShowExtraLinks() {
   showExtraLinks = !showExtraLinks;
   system.setValue('showExtraLinks', showExtraLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks);
@@ -131,7 +131,7 @@ function toggleShowExtraLinks() { // Native
   }
 }
 
-function toggleShowQuickDropLinks() { // Native
+function toggleShowQuickDropLinks() {
   showQuickDropLinks = !showQuickDropLinks;
   system.setValue('showQuickDropLinks', showQuickDropLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks);
@@ -195,7 +195,7 @@ var evts = [
   }
 ];
 
-function evtHandler(evt) { // Native
+function evtHandler(evt) {
   var self = evt.target;
   evts.some(function(el) {
     if (el.condition(self)) {
@@ -206,7 +206,7 @@ function evtHandler(evt) { // Native
   });
 }
 
-function getItems() { // Native
+function getItems() {
   addStatTotalToMouseover();
   disableItemColoring = system.getValue('disableItemColoring');
   showExtraLinks = system.getValue('showExtraLinks');
@@ -234,7 +234,7 @@ function getItems() { // Native
   itemsHash[13699] = 1;
 }
 
-function inventory(data) { // Native
+function inventory(data) {
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
@@ -246,12 +246,12 @@ function inventory(data) { // Native
   doFolderButtons(data.folders);
 }
 
-export function injectStoreItems() { // Native
+export function injectStoreItems() {
   getInventoryById().done(inventory);
   add(3, getItems);
 }
 
-export function injectProfileDropItems() { // Native
+export function injectProfileDropItems() {
   injectStoreItems();
   injectMoveItems();
 }

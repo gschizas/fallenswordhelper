@@ -135,14 +135,14 @@ var bailOut = [
   function(evt) {return evt.altKey;}
 ];
 
-function keyPress(evt) { // Native
+function keyPress(evt) {
   for (var i = 0; i < bailOut.length; i += 1) {
     if (bailOut[i](evt)) {return;}
   }
   handleKey(evt.charCode);
 }
 
-export default function replaceKeyHandler() { // Native
+export default function replaceKeyHandler() {
   expandMenuOnKeyPress = system.getValue('expandMenuOnKeyPress');
   document.onkeypress = keyPress;
 }
