@@ -213,10 +213,10 @@ function updateNmv() {
     '#profileRightColumn img[src$="/60_sm.gif"]');
   if (!nmvImg) {return;}
   var atkStat = Number(
-    document.getElementById('stat-attack').textContent.trim());
+    document.getElementById('stat-attack').firstChild.textContent.trim());
   if (isNaN(atkStat)) {return;}
   var defStat = Number(
-    document.getElementById('stat-defense').textContent.trim());
+    document.getElementById('stat-defense').firstChild.textContent.trim());
   var oldTipped = nmvImg.dataset.tipped;
   var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
   var nmvLvl = Number(lvlAry[1]);
