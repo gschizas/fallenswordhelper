@@ -1,5 +1,6 @@
 import getProfile from './ajax/getProfile';
 import myStats from './ajax/myStats';
+import * as common from './common/common';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -9,16 +10,24 @@ var myVL;
 var spinner;
 var validPvP = Math.floor(Date.now() / 1000) - 604800;
 
+function doOnlineDot(aTable, data) {
+  aTable.rows[0].insertAdjacentHTML('beforeend',
+    '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
+  if (myVL &&
+      data.last_login >= validPvP &&
+      data.virtual_level > myVL - lvlDiffToHighlight &&
+      data.virtual_level < myVL + lvlDiffToHighlight) {
+    aTable.parentNode.parentNode.classList.add('lvlHighlight');
+  }
+  //#if _DEV  //  get cloaked players
+  var defender = common.playerDataObject(data);
+  if (defender.cloakLevel !== 0) {console.log('data', data);} // eslint-disable-line no-console
+  //#endif
+}
+
 function parsePlayer(aTable, data, jqXhr) {
   if (data) {
-    aTable.rows[0].insertAdjacentHTML('beforeend',
-      '<td>' + layout.onlineDot({last_login: data.last_login}) + '</td>');
-    if (myVL &&
-        data.last_login >= validPvP &&
-        data.virtual_level > myVL - lvlDiffToHighlight &&
-        data.virtual_level < myVL + lvlDiffToHighlight) {
-      aTable.parentNode.parentNode.classList.add('lvlHighlight');
-    }
+    doOnlineDot(aTable, data);
   } else {
     aTable.rows[0].insertAdjacentHTML('beforeend',
       '<td class="fshBkRed">' + jqXhr.status + '</td>');
