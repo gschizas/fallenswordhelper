@@ -1,5 +1,13 @@
-/* Groups */
+/* Scout Tower Titan Tracker */
+.fshTTracker {
+  width: 500px;
+  margin: auto;
+}
+.fshCooldown {
+  color: #640000;
+}
 
+/* Groups */
 table#stat {
   font-size: x-small;
   border-top: 2px black solid;

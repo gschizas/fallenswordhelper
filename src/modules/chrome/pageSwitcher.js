@@ -23,6 +23,8 @@ import injectRecipeManager from '../recipeMgr/recipeMgr';
 import injectReportPaint from '../guildReport';
 import injectSaveSettings from '../settings/load';
 import injectScavenging from '../scavenging';
+import injectScouttower from '../scoutTower/injectScouttower';
+import injectTitan from '../scoutTower/injectTitan';
 import injectTrade from '../trade';
 import injectViewGuild from '../guild/injectViewGuild';
 import injectWorld from '../legacy';
@@ -48,7 +50,6 @@ import * as misc from '../misc';
 import * as news from '../news/news';
 import * as notification from '../notification';
 import * as questBook from '../questBook';
-import * as scoutTower from '../scoutTower';
 import * as settingsPage from '../settings/settingsPage';
 import * as toprated from '../toprated';
 
@@ -107,7 +108,7 @@ export default {
     },
     history: {'-': {'-': {'-': addHistoryWidgets}}},
     view: {'-': {'-': {'-': injectViewGuild}}},
-    scouttower: {'-': {'-': {'-': scoutTower.injectScouttower}}},
+    scouttower: {'-': {'-': {'-': injectScouttower}}},
     mailbox: {'-': {'-': {'-': guildMailbox}}},
     ranks: {'-': {'-': {'-': injectGuildRanks}}},
     conflicts: {rpupgrades: {'-': {'-': injectRPUpgrades}}},
@@ -154,7 +155,7 @@ export default {
     createsecure: {'-': {'-': {'-': injectTrade}}},
     docreatesecure: {'-': {'-': {'-': injectTrade}}}
   },
-  titan: {'-': {'-': {'-': {'-': scoutTower.injectTitan}}}},
+  titan: {'-': {'-': {'-': {'-': injectTitan}}}},
   toprated: {
     xp: {'-': {'-': {'-': toprated.injectTopRated}}},
     monthlyxp: {'-': {'-': {'-': toprated.injectTopRated}}},
