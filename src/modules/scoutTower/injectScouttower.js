@@ -49,6 +49,7 @@ function displayTracker(parentTable, theTitans) {
 }
 
 function addMissingTitansFromOld(oldTitans, newTitans) {
+  if (!oldTitans) {return;}
   Object.keys(oldTitans).forEach(function(oldTitan) {
     if (newTitans[oldTitan]) {return;}
     if (oldTitans[oldTitan].coolTime <= Date.now()) {return;}
