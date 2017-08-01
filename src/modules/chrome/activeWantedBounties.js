@@ -139,7 +139,7 @@ function getTarget(target, theRow) {
   var bounty = {};
   bounty.target = target;
   bounty.link = theRow.cells[0]
-    .firstChild.firstChild.getAttribute('href');
+    .firstChild.firstChild.href;
   bounty.lvl = theRow.cells[0]
     .firstChild.firstChild.nextSibling.textContent
     .replace(/\[/, '').replace(/\]/, '');
@@ -199,7 +199,7 @@ function parseActiveBounty(activeTable) { // Legacy
       bounty.target = activeTable.rows[i].cells[0].firstChild
         .firstChild.firstChild.textContent;
       bounty.link = activeTable.rows[i].cells[0].firstChild
-        .firstChild.getAttribute('href');
+        .firstChild.href;
       bounty.lvl = activeTable.rows[i].cells[0].firstChild
         .firstChild.nextSibling.textContent
         .replace(/\[/, '').replace(/\]/, '');

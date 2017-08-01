@@ -188,7 +188,7 @@ var evts = [
     }
   },
   {
-    condition: function(self) {return self.value === 'Check All';},
+    condition: function(self) {return self.id === 'fshChkAll';},
     result: function() {
       doCheckboxes(itemsAry, invItems, 'checkAll');
     }

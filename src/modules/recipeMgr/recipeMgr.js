@@ -199,7 +199,7 @@ function processFolderFirstPage(data) { // jQuery.min
 }
 
 function reduceFolders(prev, el) { // jQuery.min
-  var href = el.parentNode.getAttribute('href');
+  var href = el.parentNode.href;
   var folderName = el.parentNode.nextElementSibling.nextElementSibling
     .firstChild.textContent;
   if (system.getCustomUrlParameter(href, 'folder_id') === '-1') {

@@ -59,7 +59,7 @@ function recallItem(evt) { // jQuery
   var mode = evt.target.getAttribute('mode');
   var theTd = evt.target.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
-  var href = theTd.firstElementChild.getAttribute('href');
+  var href = theTd.firstElementChild.href;
   queueRecallItem({
     invId: href.match(/&id=(\d+)/)[1],
     playerId: href.match(/&player_id=(\d+)/)[1],
@@ -77,7 +77,7 @@ function recallItem(evt) { // jQuery
 function wearItem(evt) { // jQuery
   $(evt.target).qtip('hide');
   var theTd = evt.target.parentNode.parentNode.parentNode;
-  var href = theTd.firstElementChild.getAttribute('href');
+  var href = theTd.firstElementChild.href;
   equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
     if (data.r === 1) {return;}
     theTd.innerHTML = '<span class="fastWorn">Worn</span>';
@@ -164,14 +164,14 @@ function mySpan(el) {
   var wearable = hideElement(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
   inject.innerHTML = '<span' + firstHref +
-    '> | <span class="reportLink recall tip-static" data-tipped="' +
+    '> | <span class="sendLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +
     '</span></span>' +
-    ' | <span class="reportLink recall tip-static" ' +
+    ' | <span class="sendLink recall tip-static" ' +
     'data-tipped="Click to recall to guild store" mode="1" ' +
     'action="recall">Fast GS</span>' +
     '<span' + wearable +
-    '> | <span class="reportLink ' +
+    '> | <span class="sendLink ' +
     equipable +
     '" mode="0" action="wear">Fast Wear</span></span>';
   return inject;

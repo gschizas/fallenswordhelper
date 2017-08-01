@@ -164,12 +164,15 @@ function addExtraStuff(aRow, playerName, isGuildMate) { // Legacy
   aRow.cells[2].innerHTML += extraText;
 }
 
+function hasPlayerLink(aRow) {
+  return aRow.cells[2].firstChild.nextSibling &&
+    aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
+    /player_id/.test(aRow.cells[2].firstChild.nextSibling.href);
+}
+
 function doExtraStuff(aRow, messageType, playerName, isGuildMate) {
   if (messageType === 'Notification' &&
-      aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling
-        .getAttribute('href').search('player_id') !== -1) {
+      hasPlayerLink(aRow)) {
     addExtraStuff(aRow, playerName, isGuildMate);
   }
 }
@@ -185,10 +188,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   }
   if (system.fallback(messageType === 'General',
     messageType === 'Notification') &&
-      aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling
-        .getAttribute('href').search('player_id') !== -1) {
+      hasPlayerLink(aRow)) {
     playerElement = aRow.cells[2].firstChild.nextSibling;
     playerName = playerElement.innerHTML;
     colorPlayerName = true;

@@ -4,7 +4,7 @@ import * as layout from '../support/layout';
 function extraButtons() {
   var tRows = layout.pCC.getElementsByTagName('table')[0].rows;
   tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
-    '<input value="Check All" type="button">&nbsp;');
+    '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
 }
 
 export default function doFolderButtons(folders) {

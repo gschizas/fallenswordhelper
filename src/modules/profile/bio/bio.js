@@ -36,7 +36,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
     }
   });
   bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak +
-    '<span id="fshBioExpander" class="reportLink">More ...</span><br>' +
+    '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
   document.getElementById('fshBioExpander')

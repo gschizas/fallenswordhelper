@@ -29,7 +29,7 @@ function guildMailboxEvent(e) {
     var anchor = self.parentNode.href;
     guildMailboxTake(anchor).done(takeResult.bind(null, self));
   }
-  if (self.className === 'reportLink') {
+  if (self.className === 'sendLink') {
     var nodeList = layout.pCC.getElementsByTagName('img');
     Array.prototype.forEach.call(nodeList, function(el) {el.click();});
   }
@@ -39,5 +39,5 @@ export default function guildMailbox() {
   layout.pCC.addEventListener('click', guildMailboxEvent);
   document.querySelector('#pCC td[height="25"]')
     .insertAdjacentHTML('beforeend',
-      '<span class="reportLink">Take All</span>');
+      '<span class="sendLink">Take All</span>');
 }

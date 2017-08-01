@@ -5,7 +5,7 @@ function getNekid() { // jQuery
   var aLinks = profileBlock.getElementsByTagName('a');
   var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.getAttribute('href');
+    var href = link.href;
     prm.push($.ajax({
       url: href,
       timeout: 3000
