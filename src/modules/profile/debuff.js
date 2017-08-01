@@ -16,7 +16,7 @@ function debuff(buffId) {
 }
 
 function doDebuff(aLink) { // jQuery
-  var buffId = aLink.getAttribute('href').match(/(\d+)$/)[1];
+  var buffId = aLink.href.match(/(\d+)$/)[1];
   debuff(buffId)
     .done(function(data) {
       if (data.response.response === 0) {

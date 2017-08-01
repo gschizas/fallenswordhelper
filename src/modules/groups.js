@@ -59,7 +59,7 @@ function doJoinUnderSize(prev, joinButton) { // Legacy
     .filter(filterMercs);
   if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
     var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
-      joinButton.parentNode.getAttribute('href'))[1];
+      joinButton.parentNode.href)[1];
     var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
       '&group_id=' + groupID;
     prev.push(joinGroup(groupJoinURL, joinButton));

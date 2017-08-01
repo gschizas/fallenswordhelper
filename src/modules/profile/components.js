@@ -65,7 +65,7 @@ function countComponent(e) { // jQuery
 }
 
 function delComponent(evt) { // jQuery
-  var href = evt.target.previousElementSibling.getAttribute('href');
+  var href = evt.target.previousElementSibling.href;
   $.get(href).done(function(data) {
     var response = layout.infoBox(data);
     if (response === 'Component destroyed.') {

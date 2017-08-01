@@ -13,7 +13,7 @@ export default function injectMoveItems() {
     if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
     if (src.indexOf('/folder.gif') !== -1) {
       oFlr = true;
-      options += '<option value=' + e.parentNode.getAttribute('href')
+      options += '<option value=' + e.parentNode.href
         .match(/&folder_id=(-*\d+)/i)[1] + '>' +
         e.parentNode.parentNode.textContent + '</option>';
     }

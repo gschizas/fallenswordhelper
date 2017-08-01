@@ -105,7 +105,7 @@ function guildRelationship(_txt) {
 }
 
 function foundGuildLink(aLink) {
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
+  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
   if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
   if (currentGuildRelationship) {
