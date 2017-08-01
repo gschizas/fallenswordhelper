@@ -55,7 +55,7 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   for (var i = 1; i < chatTable.rows.length; i += increment) {
     rowColor(chatTable.rows[i], logScreen, dateColumn);
   }
-  system.setValue(lastCheckScreen, Date.now());
+  system.setValue(lastCheckScreen, nowUtc);
 }
 
 export default function addLogColoring(logScreen, dateColumn) { // Legacy
