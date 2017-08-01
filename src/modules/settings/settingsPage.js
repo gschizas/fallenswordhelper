@@ -5,7 +5,7 @@ import * as layout from '../support/layout';
 import * as settingObj from './settingObj';
 import * as system from '../support/system';
 
-function getVars() { // Native
+function getVars() {
   calf.showBuffs = system.getValue('showHuntingBuffs');
   calf.buffs = system.getValue('huntingBuffs');
   calf.buffsName = system.getValue('huntingBuffsName');
@@ -23,18 +23,18 @@ function getVars() { // Native
     (5 * 1024 * 1024) * 100).toFixed(2);
 }
 
-export function helpLink(title, text) { // Native
+export function helpLink(title, text) {
   return '&nbsp;[&nbsp;<span class="fshLink tip-static" data-tipped="' +
     '<span class=\'fshHelpTitle\'>' + title + '</span><br><br>' +
     text + '">?</span>&nbsp;]';
 }
 
-function hasNetwork(o) { // Native
+function hasNetwork(o) {
   if (o.network) {return settingObj.networkIcon;}
   return '';
 }
 
-function isOn(o) { // Native
+function isOn(o) {
   return system.isChecked(system.getValue(o.id));
 }
 
@@ -56,7 +56,7 @@ export function simpleCheckboxHtml(name) {
   return justLabel(name) + justCheckbox(name);
 }
 
-export function simpleCheckbox(name) { // Native
+export function simpleCheckbox(name) {
   return '<tr><td align="right">' + justLabel(name) +
     '</td><td>' + justCheckbox(name) + '</td></tr>';
 }
@@ -73,7 +73,7 @@ function toggleTickAllBuffs(e) { // jQuery
   }
 }
 
-function clearStorage() { // Native
+function clearStorage() {
   layout.confirm('Clear localStorage',
     'Are you sure you want to clear you localStorage?',
     function() {localStorage.clear();}
@@ -149,17 +149,17 @@ function saveConfig(evt) { // Legacy
   $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
 }
 
-function showLogs() { // Native
+function showLogs() {
   document.location = system.server +
     'index.php?cmd=notepad&blank=1&subcmd=showlogs';
 }
 
-function showMonsterLogs() { // Native
+function showMonsterLogs() {
   document.location = system.server +
     'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
 }
 
-function createEventListeners() { // Native
+function createEventListeners() {
   var tickAll = document.createElement('span');
   tickAll.id = 'fshAllBuffs';
   tickAll.className = 'fshLink';

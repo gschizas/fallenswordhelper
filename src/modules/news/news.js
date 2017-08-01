@@ -2,7 +2,7 @@ var maxcharacters;
 var textArea;
 var shoutboxPreview;
 
-function updateShoutboxPreview() { // Native
+function updateShoutboxPreview() {
   var textContent = textArea.value;
   var chars = textContent.length;
   if (chars > maxcharacters) {
@@ -20,18 +20,18 @@ function updateShoutboxPreview() { // Native
     '</span></td></tr></tbody></table>';
 }
 
-function injectShoutboxWidgets() { // Native
+function injectShoutboxWidgets() {
   textArea = document.getElementById('textInputBox');
   textArea.classList.add('fshNoResize');
   textArea.addEventListener('keyup', updateShoutboxPreview);
 }
 
-export function newsFsbox() { // Native
+export function newsFsbox() {
   maxcharacters = 100;
   injectShoutboxWidgets();
 }
 
-export function newsShoutbox() { // Native
+export function newsShoutbox() {
   maxcharacters = 150;
   injectShoutboxWidgets();
 }

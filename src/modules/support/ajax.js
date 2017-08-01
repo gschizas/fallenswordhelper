@@ -1,165 +1,8 @@
-import calf from './calf';
-import * as dataObj from './dataObj';
-import * as debug from './debug';
 import * as layout from './layout';
-import * as system from './system';
 
 var deferred = window.$ && $.when();
 
-export function getForage(forage) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
-  localforage.getItem(forage, function getItemCallback(err, data) {
-    if (err) {
-      debug.log(forage + ' forage error', err);
-      dfr.reject(err);
-    } else {
-      // returns null if key does not exist
-      dfr.resolve(data);
-    }
-  });
-  return dfr.promise();
-}
-
-export function setForage(forage, data) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
-  localforage.setItem(forage, data, function setItemCallback(err, _data) {
-    if (err) {
-      debug.log(forage + ' forage error', err);
-      dfr.reject(err);
-    } else {
-      dfr.resolve(_data);
-    }
-  });
-  return dfr.promise();
-}
-
-export function getGuild(guildId) {
-  return $.ajax({
-    dataType: 'json',
-    url: 'index.php',
-    data: {
-      cmd: 'export',
-      subcmd: 'guild_members',
-      guild_id: guildId
-    }
-  });
-}
-
-function getGuildMembers(guildId) {
-  return getGuild(guildId).pipe(function membrListToHash(data) {
-    var membrList = {};
-    membrList[guildId] = {};
-    membrList[guildId].lastUpdate = Date.now();
-    data.forEach(function memberToObject(ele) {
-      membrList[guildId][ele.username] = ele;
-    });
-    return membrList;
-  });
-}
-
-export function addMembrListToForage(membrList) {
-  getForage('fsh_membrList')
-    .done(function saveMembrListInForage(data) {
-      var oldMemList = data || {};
-      setForage('fsh_membrList', $.extend(oldMemList, membrList));
-    });
-}
-
-function getMembrListFromForage(guildId, membrList) {
-  if (membrList && membrList[guildId] &&
-      membrList[guildId].lastUpdate &&
-      membrList[guildId].lastUpdate > Date.now() - 300000) {
-    return membrList;
-  }
-  return getGuildMembers(guildId).done(addMembrListToForage);
-}
-
-function guildMembers(force, guildId) {
-  if (force) {
-    return getGuildMembers(guildId).done(addMembrListToForage);
-  }
-  return getForage('fsh_membrList')
-    .pipe(getMembrListFromForage.bind(null, guildId));
-}
-
-function setHelperMembrList(guildId, membrList) {
-  calf.membrList = membrList[guildId];
-  return calf.membrList;
-}
-
-export function getMembrList(force) {
-  var guildId = layout.guildId();
-  return guildMembers(force, guildId)
-    .pipe(setHelperMembrList.bind(null, guildId));
-}
-
-export function getInventory() {
-  var subcmd = 'inventory';
-  if (calf.subcmd === 'guildinvmgr') {
-    subcmd = 'guild_store&inc_tagged=1';
-  }
-  return $.ajax({
-    dataType: 'json',
-    url: 'index.php?cmd=export&subcmd=' + subcmd
-  });
-}
-
-function rekeyInventory(data) {
-  data.items = data.items.reduce(function(prev, curr) {
-    if (curr.is_in_st) {prev.fshHasST = true;}
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
-  return data;
-}
-
-export function getInventoryById() {
-  return getInventory().pipe(rekeyInventory);
-}
-
-function addLastUpdateDate(data) {
-  data.lastUpdate = Date.now();
-  return data;
-}
-
-export function getProfile(username) {
-  return $.getJSON('index.php', {
-    cmd: 'export',
-    subcmd: 'profile',
-    player_username: username
-  });
-}
-
-function sendMyProfileToForage(data) {
-  setForage('fsh_selfProfile', data);
-}
-
-function getMyProfile() {
-  return getProfile(layout.playerName())
-    .pipe(addLastUpdateDate)
-    .done(sendMyProfileToForage);
-}
-
-function getProfileFromForage(data) {
-  if (!data || data.lastUpdate < Date.now() -
-    calf.allyEnemyOnlineRefreshTime) {
-    return getMyProfile();
-  }
-  return data;
-}
-
-export function myStats(force) {
-  if (force) {return getMyProfile();}
-  // jQuery 1.7 uses pipe instead of then
-  return getForage('fsh_selfProfile')
-    .pipe(getProfileFromForage);
-}
-
-function dialog(data) {
+export function dialog(data) {
   if (data.r === 0) {return;}
   $('#dialog_msg').html(data.m).dialog('open');
 }
@@ -177,7 +20,7 @@ export function equipItem(backpackInvId) {
   }).done(dialog);
 }
 
-function htmlResult(data) {
+export function htmlResult(data) {
   var info = layout.infoBox(data);
   var _r = 1;
   if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
@@ -216,7 +59,7 @@ function takeItemStatus(action, data) {
   return data;
 }
 
-function takeItem(invId, action) {
+export function takeItem(invId) {
   return $.ajax({
     url: 'index.php',
     data: {
@@ -227,13 +70,13 @@ function takeItem(invId, action) {
       ajax: 1
     },
     dataType: 'json'
-  }).done(dialog).pipe(takeItemStatus.bind(null, action));
+  }).done(dialog);
 }
 
 export function queueTakeItem(invId, action) {
   // You have to chain them because they could be modifying the backpack
   deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId, action);
+    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
   });
   return deferred;
 }
@@ -290,137 +133,4 @@ export function queueRecallItem(o) {
     return recallItem(o);
   });
   return deferred;
-}
-
-function translateReturnInfo(data) {
-  var info = layout.infoBox(data);
-  var _r = {r: 1, m: info};
-  if (info === 'Item was transferred to the guild store!') {
-    _r = {r: 0, m: ''};
-  }
-  return _r;
-}
-
-export function guildMailboxTake(href) {
-  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
-}
-
-export function moveItem(invIdList, folderId) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'sendtofolder',
-      inv_list: JSON.stringify(invIdList),
-      folder_id: folderId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-export function dropItem(invIdList) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'dodropitems',
-      removeIndex: invIdList,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-export function sendItem(invIdList) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'trade',
-      subcmd: 'senditems',
-      xc: window.ajaxXC,
-      target_username: system.getValue('itemRecipient'),
-      sendItemList: invIdList
-    }
-  }).pipe(htmlResult)
-    .done(dialog);
-}
-
-export function debuff(buffId) {
-  return $.ajax({
-    url: 'fetchdata.php',
-    data: {
-      a: '22',
-      d: '0',
-      id: buffId
-    },
-    dataType: 'json'
-  });
-}
-
-export function doPickMove(moveId, slotId) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'arena',
-      subcmd: 'dopickmove',
-      move_id: moveId,
-      slot_id: slotId
-    }
-  });
-}
-
-export function groupViewStats(doc) {
-  var attackElement = doc.getElementById('stat-attack');
-  var defenseElement = doc.getElementById('stat-defense');
-  var armorElement = doc.getElementById('stat-armor');
-  var damageElement = doc.getElementById('stat-damage');
-  var hpElement = doc.getElementById('stat-hp');
-  return {
-    attack: system.intValue(attackElement.textContent),
-    attackElement: attackElement,
-    defense: system.intValue(defenseElement.textContent),
-    defenseElement: defenseElement,
-    armor: system.intValue(armorElement.textContent),
-    armorElement: armorElement,
-    damage: system.intValue(damageElement.textContent),
-    damageElement: damageElement,
-    hp: system.intValue(hpElement.textContent),
-    hpElement: hpElement
-  };
-}
-
-function parseGroupStats(html) {
-  var doc = system.createDocument(html);
-  return groupViewStats(doc);
-}
-
-export function getGroupStats(viewStats) {
-  return $.ajax(viewStats).pipe(parseGroupStats);
-}
-
-function parseMercStats(html) {
-  var doc = system.createDocument(html);
-  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
-  var mercTotal = [0, 0, 0, 0, 0];
-  Array.prototype.forEach.call(mercElements, function(merc) {
-    var mouseoverText = merc.dataset.tipped;
-    mercTotal = mercTotal.map(function(el, i) {
-      return el + Number(dataObj.mercRE[i].exec(mouseoverText)[1]);
-    });
-  });
-  mercTotal = mercTotal.map(function(el) {
-    return Math.round(el * dataObj.defenderMultiplier);
-  });
-  return {
-    attack: mercTotal[0],
-    defense: mercTotal[1],
-    armor: mercTotal[2],
-    damage: mercTotal[3],
-    hp: mercTotal[4]
-  };
-}
-
-export function getMercStats() {
-  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
 }

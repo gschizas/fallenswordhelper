@@ -1,17 +1,17 @@
 
-function evalMiss(combat) { // Native
+function evalMiss(combat) {
   if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
     return ', dies on miss';
   }
   return ', survives a miss';
 }
 
-function canIHit(combat) { // Native
+function canIHit(combat) {
   return combat.numberOfHitsRequired === '-' ||
     combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
 }
 
-function evalPlayerHits(combat) { // Native
+function evalPlayerHits(combat) {
   if (combat.numberOfCreatureHitsTillDead === '-') {
     return combat.numberOfHitsRequired;
   } else if (canIHit(combat)) {
@@ -20,12 +20,12 @@ function evalPlayerHits(combat) { // Native
   return combat.numberOfHitsRequired;
 }
 
-function canCreatureHit(combat) { // Native
+function canCreatureHit(combat) {
   return combat.numberOfCreatureHitsTillDead === '-' ||
     combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
 }
 
-function evalCreatureHits(combat) { // Native
+function evalCreatureHits(combat) {
   if (combat.numberOfHitsRequired === '-') {
     return combat.numberOfCreatureHitsTillDead;
   } else if (canCreatureHit(combat)) {
@@ -55,7 +55,7 @@ var evalFightStatus = [
   }
 ];
 
-export default function evalAnalysis(combat) { // Native
+export default function evalAnalysis(combat) {
   // Analysis:
   combat.playerHits = evalPlayerHits(combat);
   combat.creatureHits = evalCreatureHits(combat);

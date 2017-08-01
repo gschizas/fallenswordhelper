@@ -1,3 +1,4 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import doQuickLinks from './doQuickLinks';
 import isMessageSound from './isMessageSound';
@@ -5,7 +6,6 @@ import lookForHcsData from './lookForHcsData';
 import pageSwitcher from './pageSwitcher';
 import * as fshGa from '../support/fshGa';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var coreFunction;
 var functionPath;
@@ -33,7 +33,7 @@ function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
   }
 }
 
-function getCoreFunction() { // Native
+function getCoreFunction() {
   var cmd;
   var subcmd;
   var subcmd2;
@@ -78,7 +78,7 @@ function devHooks() {
 }
 //#endif
 
-function asyncDispatcher() { // Native
+function asyncDispatcher() {
   //#if _DEV  //  asyncDispatcher messages
   devHooks();
   //#endif
@@ -91,14 +91,14 @@ function asyncDispatcher() { // Native
 }
 
 // main event dispatcher
-FSH.dispatch = function dispatch() { // Native
+FSH.dispatch = function dispatch() {
 
   fshGa.setup();
   fshGa.start('JS Perf', 'FSH.dispatch');
 
   getCoreFunction();
   lookForHcsData();
-  task.add(3, asyncDispatcher);
+  add(3, asyncDispatcher);
 
   if (typeof window.jQuery === 'undefined') {return;}
 

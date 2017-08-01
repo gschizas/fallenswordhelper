@@ -7,7 +7,7 @@ export var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
 
-export function fallback(a, b) { // Native
+export function fallback(a, b) {
   return a || b;
 }
 
@@ -247,24 +247,24 @@ export function numberSort(a, b) {
   return sortDesc(result);
 }
 
-export function testQuant(aValue) { // Native
+export function testQuant(aValue) {
   var theValue = parseInt(aValue, 10);
   if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
     return theValue;
   }
 }
 
-export function getRandomInt(_min, _max) { // Native
+export function getRandomInt(_min, _max) {
   var min = Math.ceil(_min);
   var max = Math.floor(_max);
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-export function rnd() { // Native
+export function rnd() {
   return getRandomInt(1000000000, 9999999998);
 }
 
-export function escapeHtml(unsafe) { // Native
+export function escapeHtml(unsafe) {
   return unsafe
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -278,18 +278,18 @@ export function isSelected(val, test) {
   return '';
 }
 
-export function shouldBeArray(pref) { // Native
+export function shouldBeArray(pref) {
   var stored = getValue(pref);
   if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
   return [];
 }
 
-export function isChecked(pref) { // Native
+export function isChecked(pref) {
   if (pref) {return ' checked';}
   return '';
 }
 
-export function padZ(n) { // Native
+export function padZ(n) {
   var ret = n.toString();
   if (n < 10) {ret = '0' + ret;}
   return ret;

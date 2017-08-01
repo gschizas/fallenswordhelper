@@ -1,26 +1,26 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var composeMsg =
   '<li class="notification"><a href="index.php?cmd=composing"><span' +
   ' class="notification-icon"></span><p class="notification-content">' +
   'Composing to do</p></a></li>';
 
-function displayComposeMsg() { // Native
+function displayComposeMsg() {
   document.getElementById('notifications')
     .insertAdjacentHTML('afterbegin', composeMsg);
 }
 
-function getDoc(data) { // Native
+function getDoc(data) {
   if (calf.cmd !== 'composing') {
     return system.createDocument(data);
   }
   return document;
 }
 
-function parseComposing(data) { // Native
+function parseComposing(data) {
   var doc = getDoc(data);
   var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
   var times = [];
@@ -46,7 +46,7 @@ function parseComposing(data) { // Native
   }
 }
 
-function createSuccess(temp, textStatus) { // Native
+function createSuccess(temp, textStatus) {
   var potName = temp[temp.selectedIndex].text;
   var myParent = temp.parentNode;
   var infoDiv = myParent.previousElementSibling.previousElementSibling;
@@ -86,7 +86,7 @@ function quickCreateBailOut(target) {
   return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
 }
 
-function quickCreate(evt) { // Native
+function quickCreate(evt) {
   var target = evt.target;
   if (quickCreateBailOut(target)) {return;}
   var temp = target.previousElementSibling.previousElementSibling;
@@ -99,11 +99,11 @@ function checkLastCompose() { // jQuery
   var lastComposeCheck = system.getValue('lastComposeCheck');
   if (lastComposeCheck && Date.now() < lastComposeCheck) {return;}
   $.get('index.php?cmd=composing', function(data) {
-    task.add(3, parseComposing, [data]);
+    add(3, parseComposing, [data]);
   });
 }
 
-function composeAlert() { // Native
+function composeAlert() {
   var needToCompose = system.getValue('needToCompose');
   if (needToCompose) {
     displayComposeMsg();
@@ -112,11 +112,11 @@ function composeAlert() { // Native
   checkLastCompose();
 }
 
-export function injectComposeAlert() { // Native
+export function injectComposeAlert() {
   if (calf.cmd !== 'composing') {composeAlert();}
 }
 
-function moveButtons() { // Native
+function moveButtons() {
   if (system.getValue('moveComposingButtons')) {
     var buttonDiv = document.getElementById('composing-error-dialog')
       .previousElementSibling;
@@ -127,7 +127,7 @@ function moveButtons() { // Native
   }
 }
 
-export function injectComposing() { // Native
+export function injectComposing() {
   if (!layout.pCC) {return;}
   if (calf.enableComposingAlert) {
     parseComposing();
@@ -143,7 +143,7 @@ export function injectComposing() { // Native
   moveButtons();
 }
 
-export function composingCreate() { // Native
+export function composingCreate() {
   document.getElementById('composing-add-skill')
     .addEventListener('click', function() {
       document.getElementById('composing-skill-level-input').value =

@@ -1,4 +1,4 @@
-import * as ajax from './support/ajax';
+import {backpack, equipItem, useItem} from './support/ajax';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -6,7 +6,7 @@ var content;
 var itemList;
 var playerId;
 
-function itemName(item) { // Native
+function itemName(item) {
   return item.extra && item.extra.name || item.n;
 }
 
@@ -76,30 +76,30 @@ function showAHInvManager() { // Legacy
   document.getElementById('invTabs-ah').innerHTML = output;
 }
 
-function useItem(evt) { // Legacy
+function doUseItem(evt) { // Legacy
   var invId = evt.target.getAttribute('itemID');
-  ajax.useItem(invId).done(function(data) {
+  useItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
     evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
   });
 }
 
-function useProfileInventoryItem(evt) { // Native
+function useProfileInventoryItem(evt) {
   layout.confirm('Use/Extract Item',
     'Are you sure you want to use/extract the item?',
-    useItem.bind(null, evt)
+    doUseItem.bind(null, evt)
   );
 }
 
 function equipProfileInventoryItem(evt) { // Legacy
   var invId = evt.target.getAttribute('itemID');
-  ajax.equipItem(invId).done(function(data) {
+  equipItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
     evt.target.parentNode.innerHTML = '<span class="fastWorn">Worn</span>';
   });
 }
 
-function itemImage(item) { // Native
+function itemImage(item) {
   var ret = system.imageServer + '/';
   if (item.extra) {
     ret += 'composing/potions/' + item.extra.design + '_' +
@@ -178,6 +178,6 @@ export default function insertQuickWear(injector) { // Legacy
   content = injector || layout.pCC;
   if (!content) {return;}
   content.innerHTML = 'Getting item list from backpack';
-  ajax.backpack().done(showQuickWear);
+  backpack().done(showQuickWear);
   playerId = layout.playerId();
 }

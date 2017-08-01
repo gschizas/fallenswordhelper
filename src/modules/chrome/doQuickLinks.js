@@ -1,7 +1,7 @@
+import add from '../support/task';
 import calf from '../support/calf';
 import * as common from '../common/common';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 function retOption(option, ifTrue, ifFalse) {
   if (system.getValue(option)) {
@@ -17,7 +17,7 @@ function retBool(bool, ifTrue, ifFalse) {
   return ifFalse;
 }
 
-function isDraggable(draggableQuickLinks) { // Native
+function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
     document.getElementById('fshQuickLinks')
       .addEventListener('dragstart', common.drag_start, false);
@@ -53,8 +53,8 @@ function injectQuickLinks() { // Native ?
   haveNode(node, quickLinks);
 }
 
-export default function doQuickLinks() { // Native
+export default function doQuickLinks() {
   if (!calf.huntingMode) {
-    task.add(3, injectQuickLinks);
+    add(3, injectQuickLinks);
   }
 }

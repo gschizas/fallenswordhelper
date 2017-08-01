@@ -1,142 +1,22 @@
 import assets from './assets';
 import calf from '../support/calf';
 import combatLogger from './combatLogger';
-import {huntingBuffsHtml} from '../settings/worldPrefs';
 import injectButtons from './buttons';
 import injectRelic from './relic/relic';
 import prepareShop from './shop';
 import readyViewCreature from './viewCreature/viewCreature';
-import {simpleCheckboxHtml} from '../settings/settingsPage';
+import setupPref from './subLevel';
 import startMonsterLog from './monsterLog';
 import * as sendGold from './sendGold';
 import * as system from '../support/system';
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
-var huntingBuffs;
-var huntingBuffsName;
-var hideSubLvlCreature;
-var hidePlayerActions;
-var missingBuffsDiv;
-
-function getPrefs() { // Native
-  hideSubLvlCreature = system.getValue('hideSubLvlCreature');
-  hidePlayerActions = system.getValue('hidePlayerActions');
-  calf.showBuffs = system.getValue('showHuntingBuffs');
-  calf.enabledHuntingMode = system.getValue('enabledHuntingMode');
-  calf.buffs = system.shouldBeArray('huntingBuffs');
-  calf.buffsName = system.getValue('huntingBuffsName');
-  calf.buffs2 = system.shouldBeArray('huntingBuffs2');
-  calf.buffs2Name = system.getValue('huntingBuffs2Name');
-  calf.buffs3 = system.shouldBeArray('huntingBuffs3');
-  calf.buffs3Name = system.getValue('huntingBuffs3Name');
-  calf.doNotKillList = system.shouldBeArray('doNotKillList');
-}
-
-var buffLookup = {
-  '1': function() {
-    huntingBuffs = calf.buffs;
-    huntingBuffsName = calf.buffsName;
-  },
-  '2': function() {
-    huntingBuffs = calf.buffs2;
-    huntingBuffsName = calf.buffs2Name;
-  },
-  '3': function() {
-    huntingBuffs = calf.buffs3;
-    huntingBuffsName = calf.buffs3Name;
-  }
-};
-
-function setCurrentBuffList() { // Native
-  var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (typeof tmpFn === 'function') {
-    tmpFn();
-  }
-}
-
-function toggleSubLvlCreature() { // Native
-  hideSubLvlCreature = !hideSubLvlCreature;
-  system.setValue('hideSubLvlCreature', hideSubLvlCreature);
-  GameData.fetch(256);
-}
-
-function toggleHidePlayerActions() { // Native
-  hidePlayerActions = !hidePlayerActions;
-  system.setValue('hidePlayerActions', hidePlayerActions);
-  GameData.fetch(256);
-}
-
-function toggleShowHuntingBuffs() { // Native
-  calf.showBuffs = !calf.showBuffs;
-  system.setValue('showHuntingBuffs', calf.showBuffs);
-  GameData.fetch(16);
-}
-
-function toggleEnabledHuntingMode(e) { // Native
-  if (e.target.name !== 'enabledHuntingMode') {return;}
-  calf.enabledHuntingMode = e.target.value;
-  system.setValue('enabledHuntingMode', calf.enabledHuntingMode);
-  setCurrentBuffList();
-  GameData.fetch(16);
-}
-
-var fshEvents = {
-  hideSubLvlCreature: toggleSubLvlCreature,
-  hidePlayerActions: toggleHidePlayerActions,
-  showHuntingBuffs: toggleShowHuntingBuffs
-};
-
-function prefsClickEvent(e) { // Native
-  var tmpFn = fshEvents[e.target.name];
-  if (typeof tmpFn === 'function') {
-    e.target.blur();
-    tmpFn(e);
-  }
-}
-
-function buildFshDivs() { // Native
-  var fshDiv = document.createElement('div');
-  fshDiv.className = 'fshCenter fshFten';
-  var prefsDiv = document.createElement('div');
-  prefsDiv.addEventListener('click', prefsClickEvent);
-  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  prefsDiv.insertAdjacentHTML('beforeend',
-    simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-    simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-    huntingBuffsHtml());
-  fshDiv.insertAdjacentElement('beforeend', prefsDiv);
-  missingBuffsDiv = document.createElement('div');
-  fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
-  var worldContainerBelow = document.getElementById('worldContainerBelow');
-  worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
-}
-
-function xhrDataFilter(data) { // Native
-  var myData = JSON.parse(data);
-  if (!myData.actions || myData.actions.length === 0) {return data;}
-  var realm = GameData.realm();
-  myData.actions = myData.actions.filter(function(el) {
-    if (el.type === 6) {return el.data.level >= realm.minlevel;}
-    return true;
-  });
-  var ret = JSON.stringify(myData);
-  return ret;
-}
-
-function xhrPreFilter(options, originalOptions) { // Native
-  if (!originalOptions.data || !hideSubLvlCreature) {return;}
-  options.dataFilter = xhrDataFilter;
-}
-
-function interceptXHR() { // jQuery
-  $.ajaxPrefilter('JSON', xhrPreFilter);
-}
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
 }
 
-function hideGroupSubscribe(type) { // jQuery
+function hideGroupSubscribe(type) { // jQuery.min
   $.subscribe(def_afterUpdateActionlist, hideGroupByType.bind(null, type));
 }
 
@@ -148,7 +28,7 @@ var hideGroupTypes = [
   'hideLegendaryGroup'
 ];
 
-function hideGroupButton() { // Native
+function hideGroupButton() {
   hideGroupTypes.forEach(function(el, i) {
     if (system.getValue(el)) {
       hideGroupSubscribe(i + 1);
@@ -157,40 +37,28 @@ function hideGroupButton() { // Native
   });
 }
 
-function colorType(actionList, creatureClass, colorClass) { // Native
+function colorType(actionList, creatureClass, colorClass) {
   var creatures = actionList.getElementsByClassName(creatureClass);
   Array.prototype.forEach.call(creatures, function(el) {
     el.classList.add(colorClass);
   });
 }
 
-function colorMonsters() { // jQuery
+function colorMonsters() {
   var act = document.getElementById('actionList');
   colorType(act, 'creature-1', 'fshGreen');
   colorType(act, 'creature-2', 'fshYellow');
   colorType(act, 'creature-3', 'fshRed');
 }
 
-function doMonsterColors() { // jQuery
+function doMonsterColors() { // jQuery.min
   if (system.getValue('enableCreatureColoring')) {
     $.subscribe(def_afterUpdateActionlist, colorMonsters);
     colorMonsters();
   }
 }
 
-function doHidePlayerActions() { // Native
-  if (!hidePlayerActions) {return;}
-  var act = document.getElementById('actionList');
-  var players = act.getElementsByClassName('player');
-  Array.prototype.forEach.call(players, function(el) {
-    var verbs = el.getElementsByClassName('verbs');
-    if (verbs && verbs.length === 1) {
-      verbs[0].classList.add('fshHide');
-    }
-  });
-}
-
-function afterUpdateActionList() { // Native
+function afterUpdateActionList() {
   // color the critters in the do no kill list blue
   var act = document.getElementById('actionList');
   var creatures = act.getElementsByClassName('creature');
@@ -228,65 +96,22 @@ function impIconColour() { // jQuery
   }
 }
 
-function huntingBuffsEnabled(evt, data) { // Native
-  if (!calf.showBuffs) {
-    missingBuffsDiv.innerHTML = '';
-    return;
-  }
-  var buffHash = data.b.reduce(function(prev, curr) {
-    prev[curr.name] = true;
-    return prev;
-  }, {});
-  var missingBuffs = huntingBuffs.reduce(function(prev, curr) {
-    if (!buffHash[curr.trim()]) {prev.push(curr);}
-    return prev;
-  }, []);
-  if (missingBuffs.length > 0) {
-    missingBuffsDiv.innerHTML = 'You are missing some ' +
-      huntingBuffsName + ' hunting buffs<br>(' +
-      missingBuffs.join(', ') + ')';
-  } else {missingBuffsDiv.innerHTML = '';}
-}
-
-function dataEventsPlayerBuffs(evt, data) { // Native
-  if (huntingBuffs) {huntingBuffsEnabled(evt, data);}
-}
-
-function fixDebuffQTip(e) { // jQuery
+function fixDebuffQTip(e) { // jQuery.min
   $(e.target).qtip('hide');
 }
 
-function injectWorldNewMap(data) { // Native
+function injectWorldNewMap(data) {
   sendGold.updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
     document.getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
-    if (hideSubLvlCreature) {GameData.fetch(256);}
+    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
   }
 }
 
-function doHuntingBuffs() { // jQuery
-  setCurrentBuffList();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    dataEventsPlayerBuffs);
-  if (calf.showBuffs && window.initialGameData) { // HCS initial data
-    dataEventsPlayerBuffs(null,
-      {b: window.initialGameData.player.buffs});
-  }
-}
-
-function setupPref() { // Native
-  getPrefs();
-  buildFshDivs();
-}
-
-export function subscribes() { // jQuery
+export default function subscribes() { // jQuery.min
   setupPref();
-  interceptXHR();
-  doHuntingBuffs();
-  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
-  doHidePlayerActions();
   sendGold.injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
@@ -319,6 +144,13 @@ export function subscribes() { // jQuery
   // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
+
+  //#if _DEV  //  "Your Lvl" does not update during combat #155
+  $.subscribe('level.stats-player', function(e, data) {
+    console.log('level.stats-player data', data); // eslint-disable-line no-console
+  });
+  //#endif
+
 }
 
 /* fetchFlags = {

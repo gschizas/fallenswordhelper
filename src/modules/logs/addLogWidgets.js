@@ -1,8 +1,9 @@
 import addPvpSummary from './addPvpSummary';
 import buffList from '../support/buffObj';
 import calf from '../support/calf';
+import getMembrList from '../ajax/getMembrList';
+import myStats from '../ajax/myStats';
 import processLadder from './processLadder';
-import * as ajax from '../support/ajax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
@@ -14,7 +15,7 @@ var listOfEnemies;
 var nickList;
 var enableChatParsing;
 
-function removeHTML(buffName) { // Native
+function removeHTML(buffName) {
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
 }
 
@@ -241,8 +242,8 @@ function addLogWidgetsOld() { // Legacy
 
 export default function addLogWidgets() { // jQuery
   $.when(
-    ajax.getMembrList(false),
-    ajax.myStats(false).done(function(data) {
+    getMembrList(false),
+    myStats(false).done(function(data) {
       myPlayer = data;
     })
   ).done(addLogWidgetsOld);

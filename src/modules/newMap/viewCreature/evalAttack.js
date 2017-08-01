@@ -1,12 +1,12 @@
 
-function calcAttack(combat) { // Native
+function calcAttack(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupAttackValue;
   }
   return combat.player.attackValue;
 }
 
-function calcHitByHowMuch(combat) { // Native
+function calcHitByHowMuch(combat) {
   var remainingDef = combat.creature.defense - combat.creature.defense *
     combat.player.darkCurseLevel * 0.002;
   if (combat.combatEvaluatorBias === 3) {
@@ -16,7 +16,7 @@ function calcHitByHowMuch(combat) { // Native
     Math.ceil(combat.attackVariable * remainingDef);
 }
 
-export default function evalAttack(combat) { // Native
+export default function evalAttack(combat) {
   var atkValue = calcAttack(combat);
   // Attack:
   if (combat.player.darkCurseLevel > 0) {

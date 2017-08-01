@@ -1,16 +1,18 @@
+import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import doCheckboxes from './doCheckboxes';
 import doFolderButtons from './doFolderButtons';
 import doToggleButtons from './doToggleButtons';
+import dropItem from '../ajax/dropItem';
+import getInventoryById from '../ajax/getInventoryById';
 import hideFolders from './hideFolders';
 import injectMoveItems from './injectMoveItems';
 import moveItemsToFolder from './moveItemsToFolder';
 import quickAction from './quickAction';
-import * as ajax from '../support/ajax';
+import sendItem from '../ajax/sendItem';
 import * as dataObj from '../support/dataObj';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var disableItemColoring;
 var showExtraLinks;
@@ -26,7 +28,7 @@ var invItems;
 var colouring;
 var sendLinks;
 
-function afterbegin(o, item) { // Native
+function afterbegin(o, item) {
   if (system.fallback(extraLinks, !showExtraLinks)) {
     return;
   }
@@ -75,7 +77,7 @@ var buildTrailer = [
   }
 ];
 
-function beforeend(o, item) { // Native
+function beforeend(o, item) {
   if (!colouring && !disableItemColoring) {
     o.injectHere.classList.add(dataObj.rarity[item.rarity].clas);
   }
@@ -89,7 +91,7 @@ function beforeend(o, item) { // Native
   if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
 }
 
-function doneInvPaint() { // Native
+function doneInvPaint() {
   if (showExtraLinks) {extraLinks = true;}
   checkAll = true;
   colouring = true;
@@ -108,19 +110,19 @@ function invPaint() { // Native - abstract this pattern
     paintCount += 1;
   }
   if (paintCount < itemsAry.length) {
-    task.add(3, invPaint);
+    add(3, invPaint);
   } else {
     doneInvPaint();
   }
 }
 
-function toggleShowExtraLinks() { // Native
+function toggleShowExtraLinks() {
   showExtraLinks = !showExtraLinks;
   system.setValue('showExtraLinks', showExtraLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!extraLinks) {
     paintCount = 0;
-    task.add(3, invPaint);
+    add(3, invPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.firstElementChild;
@@ -129,13 +131,13 @@ function toggleShowExtraLinks() { // Native
   }
 }
 
-function toggleShowQuickDropLinks() { // Native
+function toggleShowQuickDropLinks() {
   showQuickDropLinks = !showQuickDropLinks;
   system.setValue('showQuickDropLinks', showQuickDropLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks);
   if (!dropLinks) {
     paintCount = 0;
-    task.add(3, invPaint);
+    add(3, invPaint);
   } else {
     itemsAry.forEach(function(o) {
       var el = o.injectHere.querySelector('.dropLink');
@@ -170,13 +172,13 @@ var evts = [
   {
     condition: function(self) {return self.classList.contains('sendLink');},
     result: function(self) {
-      quickAction(self, ajax.sendItem, 'Sent', '.dropLink');
+      quickAction(self, sendItem, 'Sent', '.dropLink');
     }
   },
   {
     condition: function(self) {return self.classList.contains('dropLink');},
     result: function(self) {
-      quickAction(self, ajax.dropItem, 'Dropped', '.sendLink');
+      quickAction(self, dropItem, 'Dropped', '.sendLink');
     }
   },
   {
@@ -184,10 +186,16 @@ var evts = [
     result: function(self) {
       hideFolders(itemsAry, invItems, self);
     }
+  },
+  {
+    condition: function(self) {return self.value === 'Check All';},
+    result: function() {
+      doCheckboxes(itemsAry, invItems, 'checkAll');
+    }
   }
 ];
 
-function evtHandler(evt) { // Native
+function evtHandler(evt) {
   var self = evt.target;
   evts.some(function(el) {
     if (el.condition(self)) {
@@ -198,7 +206,7 @@ function evtHandler(evt) { // Native
   });
 }
 
-function getItems() { // Native
+function getItems() {
   addStatTotalToMouseover();
   disableItemColoring = system.getValue('disableItemColoring');
   showExtraLinks = system.getValue('showExtraLinks');
@@ -226,7 +234,7 @@ function getItems() { // Native
   itemsHash[13699] = 1;
 }
 
-function inventory(data) { // Native
+function inventory(data) {
   extraLinks = false;
   checkAll = false;
   invItems = data.items;
@@ -234,18 +242,16 @@ function inventory(data) { // Native
   dropLinks = false;
   sendLinks = false;
   paintCount = 0;
-  task.add(3, invPaint);
+  add(3, invPaint);
   doFolderButtons(data.folders);
 }
 
-function injectDropItems() { // Native
-  ajax.getInventoryById().done(inventory);
-  task.add(3, getItems);
+export function injectStoreItems() {
+  getInventoryById().done(inventory);
+  add(3, getItems);
 }
 
-export function injectProfileDropItems() { // Native
-  injectDropItems();
+export function injectProfileDropItems() {
+  injectStoreItems();
   injectMoveItems();
 }
-
-export {injectDropItems as injectStoreItems};

@@ -1,10 +1,21 @@
-import * as ajax from '../support/ajax';
 import * as assets from './assets';
 import * as system from '../support/system';
 
 var oldMoves = [];
 var nodes;
 var selectRow;
+
+function doPickMove(moveId, slotId) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'arena',
+      subcmd: 'dopickmove',
+      move_id: moveId,
+      slot_id: slotId
+    }
+  });
+}
 
 function updateMoves() { // jQuery
   var newMoves = [];
@@ -14,7 +25,7 @@ function updateMoves() { // jQuery
   var prm = [];
   newMoves.forEach(function(val, ind) {
     if (val === oldMoves[ind]) {return;}
-    prm.push(ajax.doPickMove('x', ind));
+    prm.push(doPickMove('x', ind));
     nodes.eq(ind).attr({
       src: system.imageServer + '/world/actionLoadingSpinner.gif',
       width: '25',
@@ -24,7 +35,7 @@ function updateMoves() { // jQuery
   $.when.apply($, prm).done(function() {
     newMoves.forEach(function(val, ind) {
       if (val === 'x' || val === oldMoves[ind]) {return;}
-      prm.push(ajax.doPickMove(val, ind));
+      prm.push(doPickMove(val, ind));
     });
     $.when.apply($, prm).done(function() {
       window.location = 'index.php?cmd=arena&subcmd=setup';

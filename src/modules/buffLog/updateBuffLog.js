@@ -1,5 +1,6 @@
 import buffList from '../support/buffObj';
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
 function rejected(timeStamp, buffsNotCast, buffLog) {
@@ -27,7 +28,7 @@ function successfull(timeStamp, buffCast, buffLog) {
   return buffLog;
 }
 
-function formatDateTime(aDate) { // Native
+function formatDateTime(aDate) {
   var yyyy = aDate.getFullYear().toString();
   var mon = system.padZ(aDate.getMonth() + 1);
   var dd = system.padZ(aDate.getDate());
@@ -37,7 +38,7 @@ function formatDateTime(aDate) { // Native
   return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
-function buffResult(_buffLog) { // Native
+function buffResult(_buffLog) {
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
   var timeStamp = formatDateTime(new Date());
@@ -53,10 +54,10 @@ function buffResult(_buffLog) { // Native
     buffLog = successfull(timeStamp, buffCast, buffLog);
     buffLog = rejected(timeStamp, buffNotCast, buffLog);
   }
-  ajax.setForage('fsh_buffLog', buffLog);
+  setForage('fsh_buffLog', buffLog);
 }
 
-export default function updateBuffLog() { // Native
+export default function updateBuffLog() {
   if (!system.getValue('keepBuffLog')) {return;}
-  ajax.getForage('fsh_buffLog').done(buffResult);
+  getForage('fsh_buffLog').done(buffResult);
 }

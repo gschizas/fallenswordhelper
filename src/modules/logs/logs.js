@@ -3,21 +3,21 @@ import addGuildLogWidgets from './addGuildLogWidgets';
 import addLogColoring from './addLogColoring';
 import addLogWidgets from './addLogWidgets';
 
-export function guildChat() { // Native
+export function guildChat() {
   addChatTextArea();
   addLogColoring('Chat', 0);
 }
 
-export function guildLog() { // Native
+export function guildLog() {
   addLogColoring('GuildLog', 1);
   addGuildLogWidgets();
 }
 
-export function outbox() { // Native
+export function outbox() {
   addLogColoring('OutBox', 1);
 }
 
-export function playerLog() { // Native
+export function playerLog() {
   addLogColoring('PlayerLog', 1);
   addLogWidgets();
 }

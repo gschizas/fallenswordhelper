@@ -2,7 +2,7 @@ import bioEvtHdl from './bioEvtHdl';
 import renderBio from './render';
 import * as system from '../../support/system';
 
-function expandBio() { // Native
+function expandBio() {
   var bioExpander = document.getElementById('fshBioExpander');
   if (bioExpander.textContent === 'More ...') {
     bioExpander.textContent = 'Less ...';
@@ -12,7 +12,7 @@ function expandBio() { // Native
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
-function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
+function doCompression(bioCell, bioContents, maxCharactersToShow) {
   // find the end of next HTML tag after the max characters to show.
   var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
   var lineBreak = '';
@@ -43,7 +43,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
     .addEventListener('click', expandBio);
 }
 
-function findStartPosition(bioContents, _maxRowsToShow) { // Native
+function findStartPosition(bioContents, _maxRowsToShow) {
   var maxRowsToShow = _maxRowsToShow;
   var startIndex = 0;
   while (maxRowsToShow > 0) {
@@ -53,7 +53,7 @@ function findStartPosition(bioContents, _maxRowsToShow) { // Native
   return startIndex;
 }
 
-function compressBio(bioCell) { // Native
+function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = system.getValue('maxCompressedCharacters');
   var maxRowsToShow = system.getValue('maxCompressedLines');
@@ -67,7 +67,7 @@ function compressBio(bioCell) { // Native
   doCompression(bioCell, bioContents, maxCharactersToShow);
 }
 
-function doRender(bioCell) { // Native
+function doRender(bioCell) {
   var bioContents = bioCell.innerHTML;
   bioContents = renderBio(bioContents);
   if (bioContents) {
@@ -75,14 +75,14 @@ function doRender(bioCell) { // Native
   }
 }
 
-function testForRender(self, bioCell) { // Native
+function testForRender(self, bioCell) {
   if (self && system.getValue('renderSelfBio') ||
       !self && system.getValue('renderOtherBios')) {
     doRender(bioCell);
   }
 }
 
-export default function profileRenderBio(self) { // Native
+export default function profileRenderBio(self) {
   var bioCell = document.getElementById('profile-bio');
   if (!bioCell) {return;}
   testForRender(self, bioCell);

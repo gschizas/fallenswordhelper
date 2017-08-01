@@ -1,6 +1,6 @@
 import * as system from '../support/system';
 
-function anotherSpinner(self) { // Native
+function anotherSpinner(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +
     system.imageServer +
     '/skin/loading.gif" width="15" height="15">';

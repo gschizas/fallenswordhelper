@@ -222,7 +222,7 @@ module.exports = {
     'no-duplicate-imports': ['error', {includeExports: true}],
     'sort-imports': ['error', {
       memberSyntaxSortOrder: [
-        'none', 'single', 'all', 'multiple'
+        'none', 'single', 'multiple', 'all'
       ]
     }],
   }

@@ -62,7 +62,7 @@ function processGuildWidgetRow(aRow) { // Legacy
   guildInvite(aRow);
 }
 
-function getMessageHeader() { // Native
+function getMessageHeader() {
   var nodeList = layout.pCC.getElementsByTagName('TD');
   for (var i = 0; i < nodeList.length; i += 1) {
     if (nodeList[i].textContent === 'Message') {

@@ -9,7 +9,7 @@ function doFormGroup(e) { // jQuery
   GameData.doAction(12, 401, {}, 0);
 }
 
-function openQuickBuff(e) { // Native
+function openQuickBuff(e) {
   e.preventDefault();
   layout.openQuickBuffByName(layout.playerName());
 }

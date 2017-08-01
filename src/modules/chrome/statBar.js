@@ -1,4 +1,4 @@
-function statbarWrapper(href, id) { // Native
+function statbarWrapper(href, id) {
   var myWrapper = document.createElement('a');
   myWrapper.setAttribute('href', href);
   var character = document.getElementById(id);
@@ -10,7 +10,7 @@ function statbarWrapper(href, id) { // Native
   }, true);
 }
 
-export default function statbar() { // Native
+export default function statbar() {
   var sw = statbarWrapper;
   sw('index.php?cmd=profile', 'statbar-character');
   sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');

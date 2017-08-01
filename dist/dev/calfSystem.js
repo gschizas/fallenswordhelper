@@ -67,18 +67,18 @@ if ('now' in window.performance === false) {
 var timers = {};
 var footWrap = document.getElementById('foot-wrap');
 
-function log(text, value) { // Native
+function log(text, value) {
   if (footWrap) {
     footWrap.insertAdjacentHTML('beforeend',
       '<br>' + text + ': ' + value + ' (' + typeof value + ')');
   }
 }
 
-function time(name) { // Native
+function time(name) {
   if (name) {timers[name] = performance.now() * 1000;}
 }
 
-function timeEnd(name) { // Native
+function timeEnd(name) {
   if (timers[name]) {
     log(name, Math.round(performance.now() * 1000 -
       timers[name]) / 1000 + 'ms');
@@ -222,8 +222,74 @@ if (needApiUpgrade) {
   };
 }
 
+/*
+Based on
+fiddle.jshell.net/GRIFFnDOOR/r7tvg/
+*/
+
+var heap = [null];
+
+function cmp(i, j) {
+  return heap[i] && heap[i].priority < heap[j].priority;
+}
+
+function swp(i, j) {
+  var temp = heap[i];
+  heap[i] = heap[j];
+  heap[j] = temp;
+}
+
+function calcChildIndex(leftHigher, i) {
+  if (leftHigher) {return i * 2;}
+  return i * 2 + 1;
+}
+
+function sink(j) {
+  var i = j;
+  while (i * 2 < heap.length) {
+    var leftHigher = !cmp(i * 2 + 1, i * 2);
+    var childIndex = calcChildIndex(leftHigher, i);
+    if (cmp(i, childIndex)) {break;}
+    swp(i, childIndex);
+    i = childIndex;
+  }
+}
+
+function bubble(j) {
+  var i = j;
+  while (i > 1) {
+    /* jshint -W016 */
+    // eslint-disable-next-line no-bitwise
+    var parentIndex = i >> 1;
+    /* jshint +W016 */
+    if (!cmp(i, parentIndex)) {break;}
+    swp(i, parentIndex);
+    i = parentIndex;
+  }
+}
+
+function pop() {
+  if (heap.length === 1) {return;}
+  var topVal = heap[1].data;
+  var last = heap.pop();
+  if (heap.length > 1) {
+    heap[1] = last;
+    sink(1);
+  }
+  return topVal;
+}
+
+function push(data, priority) {
+  bubble(heap.push({data: data, priority: priority}) - 1);
+}
+
+function getLength() {
+  return heap.length - 1;
+}
+
 var calf = {};
 
+/* eslint-disable max-lines */
 var defaults = {
   lastActiveQuestPage: '',
   lastNormalActiveQuestPage: '',
@@ -281,7 +347,7 @@ var defaults = {
   renderOtherBios: false,
   playNewMessageSound: false,
   showSpeakerOnWorld: false,
-  defaultMessageSound: 'http://dl.getdropbox.com/u/2144065/chimes.wav',
+  defaultMessageSound: 'https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav',
   highlightPlayersNearMyLvl: false,
   highlightGvGPlayersNearMyLvl: false,
   detailedConflictInfo: false,
@@ -541,7 +607,7 @@ var imageServer = window.HCS && window.HCS.defines &&
   window.HCS.defines.fileserver &&
   window.HCS.defines.fileserver.slice(0, -1);
 
-function fallback(a, b) { // Native
+function fallback(a, b) {
   return a || b;
 }
 
@@ -777,24 +843,24 @@ function numberSort(a, b) {
   return sortDesc(result);
 }
 
-function testQuant(aValue) { // Native
+function testQuant(aValue) {
   var theValue = parseInt(aValue, 10);
   if (!isNaN(theValue) && theValue > 0 && theValue < 100) {
     return theValue;
   }
 }
 
-function getRandomInt(_min, _max) { // Native
+function getRandomInt(_min, _max) {
   var min = Math.ceil(_min);
   var max = Math.floor(_max);
   return Math.floor(Math.random() * (max - min)) + min;
 }
 
-function rnd() { // Native
+function rnd() {
   return getRandomInt(1000000000, 9999999998);
 }
 
-function escapeHtml(unsafe) { // Native
+function escapeHtml(unsafe) {
   return unsafe
     .replace(/&/g, '&amp;')
     .replace(/</g, '&lt;')
@@ -808,31 +874,80 @@ function isSelected(val, test) {
   return '';
 }
 
-function shouldBeArray(pref) { // Native
+function shouldBeArray(pref) {
   var stored = getValue(pref);
   if (stored && stored !== '') {return stored.split(/\s*,\s*/);}
   return [];
 }
 
-function isChecked(pref) { // Native
+function isChecked(pref) {
   if (pref) {return ' checked';}
   return '';
 }
 
-function padZ(n) { // Native
+function padZ(n) {
   var ret = n.toString();
   if (n < 10) {ret = '0' + ret;}
   return ret;
 }
 
+var paused = true;
+var message = 'fshMessage';
+
+function taskRunner() {
+  if (getLength() === 0) {
+    paused = true;
+  } else {
+    paused = false;
+    window.postMessage(message, '*');
+  }
+}
+
+function devLog(args) {
+  if (args && !Array.isArray(args)) {
+    // eslint-disable-next-line no-console
+    console.log('addTask Array.isArray(args)', Array.isArray(args));
+  }
+}
+
+function add(priority, fn, args, scope) {
+  devLog(args);
+  if (typeof fn === 'function') {
+    var _scope = fallback(scope, window);
+    var _args = fallback(args, []);
+    push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
+    if (paused) {taskRunner();}
+  }
+}
+
+function asyncTask() {
+  try {
+    pop()();
+  } catch (error) {
+    log('Unhandled Exception:', error);
+    // eslint-disable-next-line no-console
+    console.log('Unhandled Exception:', error);
+  }
+  taskRunner();
+}
+
+function callback(event) {
+  var key = event.data;
+  if (typeof key === 'string' && key.indexOf(message) === 0) {
+    asyncTask();
+  }
+}
+
+window.addEventListener('message', callback);
+
 var drag_target;
 
-function drag_over(event) { // Native
+function drag_over(event) {
   event.preventDefault();
   return false;
 }
 
-function drag_drop(event) { // Native
+function drag_drop(event) {
   var offset = event.dataTransfer.getData('text/plain').split(',');
   drag_target.style.left =
     event.clientX + parseInt(offset[0], 10) + 'px';
@@ -844,7 +959,7 @@ function drag_drop(event) { // Native
   return false;
 }
 
-function drag_start(event) { // Native
+function drag_start(event) {
   drag_target = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
@@ -883,7 +998,7 @@ function getBonus(stat, doc) { // jQuery
   return intValue(children.text().slice(2, -1));
 }
 
-function cloakGuess(bonus, level) { // Native
+function cloakGuess(bonus, level) {
   if (bonus > level * 10 ||
       bonus < level) {
     return bonus;
@@ -899,7 +1014,7 @@ function updateForCloak(obj) {
   obj.hpValue = obj.hpBonus;
 }
 
-function playerDataString(responseText) { // Native
+function playerDataString(responseText) {
   var doc = createDocument(responseText);
   var obj = {
     levelValue: getStat('#stat-vl', doc),
@@ -959,7 +1074,7 @@ function getBuffLvl(buffs, buff) {
   return fallback(buffs[buff], 0);
 }
 
-function playerDataObject(json) { // Native
+function playerDataObject(json) {
   var buffs = reduceBuffArray(json._skills);
   var obj = {
     levelValue: json.level,
@@ -999,7 +1114,7 @@ function playerDataObject(json) { // Native
   return obj;
 }
 
-function updateHCSQuickBuffLinks(selector) { // Native
+function updateHCSQuickBuffLinks(selector) {
   Array.prototype.forEach.call(document.querySelectorAll(selector),
     function(el) {
       el.setAttribute('href', el.getAttribute('href')
@@ -1007,120 +1122,6 @@ function updateHCSQuickBuffLinks(selector) { // Native
     }
   );
 }
-
-/*
-Based on
-fiddle.jshell.net/GRIFFnDOOR/r7tvg/
-*/
-
-var heap = [null];
-
-function cmp(i, j) {
-  return heap[i] && heap[i].priority < heap[j].priority;
-}
-
-function swp(i, j) {
-  var temp = heap[i];
-  heap[i] = heap[j];
-  heap[j] = temp;
-}
-
-function calcChildIndex(leftHigher, i) {
-  if (leftHigher) {return i * 2;}
-  return i * 2 + 1;
-}
-
-function sink(j) {
-  var i = j;
-  while (i * 2 < heap.length) {
-    var leftHigher = !cmp(i * 2 + 1, i * 2);
-    var childIndex = calcChildIndex(leftHigher, i);
-    if (cmp(i, childIndex)) {break;}
-    swp(i, childIndex);
-    i = childIndex;
-  }
-}
-
-function bubble(j) {
-  var i = j;
-  while (i > 1) {
-    /* jshint -W016 */
-    // eslint-disable-next-line no-bitwise
-    var parentIndex = i >> 1;
-    /* jshint +W016 */
-    if (!cmp(i, parentIndex)) {break;}
-    swp(i, parentIndex);
-    i = parentIndex;
-  }
-}
-
-function pop() {
-  if (heap.length === 1) {return;}
-  var topVal = heap[1].data;
-  var last = heap.pop();
-  if (heap.length > 1) {
-    heap[1] = last;
-    sink(1);
-  }
-  return topVal;
-}
-
-function push(data, priority) {
-  bubble(heap.push({data: data, priority: priority}) - 1);
-}
-
-function getLength() {
-  return heap.length - 1;
-}
-
-var paused = true;
-var message = 'fshMessage';
-
-function taskRunner() {
-  if (getLength() === 0) {
-    paused = true;
-  } else {
-    paused = false;
-    window.postMessage(message, '*');
-  }
-}
-
-function devLog(args) {
-  if (args && !Array.isArray(args)) {
-    // eslint-disable-next-line no-console
-    console.log('addTask Array.isArray(args)', Array.isArray(args));
-  }
-}
-
-function add(priority, fn, args, scope) {
-  devLog(args);
-  if (typeof fn === 'function') {
-    var _scope = fallback(scope, window);
-    var _args = fallback(args, []);
-    push(fn.bind.apply(fn, [_scope].concat(_args)), priority);
-    if (paused) {taskRunner();}
-  }
-}
-
-function asyncTask() {
-  try {
-    pop()();
-  } catch (error) {
-    log('Unhandled Exception:', error);
-    // eslint-disable-next-line no-console
-    console.log('Unhandled Exception:', error);
-  }
-  taskRunner();
-}
-
-function callback(event) {
-  var key = event.data;
-  if (typeof key === 'string' && key.indexOf(message) === 0) {
-    asyncTask();
-  }
-}
-
-window.addEventListener('message', callback);
 
 function retOption(option, ifTrue, ifFalse) {
   if (getValue(option)) {
@@ -1136,7 +1137,7 @@ function retBool(bool, ifTrue, ifFalse) {
   return ifFalse;
 }
 
-function isDraggable(draggableQuickLinks) { // Native
+function isDraggable(draggableQuickLinks) {
   if (draggableQuickLinks) {
     document.getElementById('fshQuickLinks')
       .addEventListener('dragstart', drag_start, false);
@@ -1172,7 +1173,7 @@ function injectQuickLinks() { // Native ?
   haveNode(node, quickLinks);
 }
 
-function doQuickLinks() { // Native
+function doQuickLinks() {
   if (!calf.huntingMode) {
     add(3, injectQuickLinks);
   }
@@ -1190,10 +1191,41 @@ function doMsgSound() { // jQuery
   });
 }
 
-function isMessageSound() { // Native
+function isMessageSound() {
   if (getValue('playNewMessageSound')) {
     add(3, doMsgSound);
   }
+}
+
+function getForage(forage) {
+  // Wrap in jQuery Deferred because we're using 1.7
+  // rather than using ES6 promise
+  var dfr = $.Deferred();
+  localforage.getItem(forage, function getItemCallback(err, data) {
+    if (err) {
+      log(forage + ' forage error', err);
+      dfr.reject(err);
+    } else {
+      // returns null if key does not exist
+      dfr.resolve(data);
+    }
+  });
+  return dfr.promise();
+}
+
+function setForage(forage, data) {
+  // Wrap in jQuery Deferred because we're using 1.7
+  // rather than using ES6 promise
+  var dfr = $.Deferred();
+  localforage.setItem(forage, data, function setItemCallback(err, _data) {
+    if (err) {
+      log(forage + ' forage error', err);
+      dfr.reject(err);
+    } else {
+      dfr.resolve(_data);
+    }
+  });
+  return dfr.promise();
 }
 
 var dotList;
@@ -1253,7 +1285,7 @@ function doBuffLinks(members) {
   return shortList;
 }
 
-function infoBox(documentText) { // Native
+function infoBox(documentText) {
   var doc = createDocument(documentText);
   var result;
   var infoMsg = doc.getElementById('info-msg');
@@ -1268,7 +1300,7 @@ function infoBox(documentText) { // Native
   return result;
 }
 
-function guildId() { // Native
+function guildId() {
   var _guildId;
   var nodeList = document.body.getElementsByTagName('script');
   Array.prototype.forEach.call(nodeList, function getGuildId(el) {
@@ -1279,7 +1311,7 @@ function guildId() { // Native
   return _guildId;
 }
 
-function playerId() { // Native
+function playerId() {
   var thePlayerId = parseInt(document.getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
   setValue('playerID', thePlayerId);
@@ -1290,7 +1322,7 @@ function playerName() {
   return document.getElementById('statbar-character').textContent;
 }
 
-function makePageHeader(title, comment, spanId, button) { // Native
+function makePageHeader(title, comment, spanId, button) {
   var _comment = '';
   if (comment !== '') {_comment = '&nbsp;(' + comment + ')';}
   var _span = '';
@@ -1304,7 +1336,7 @@ function makePageHeader(title, comment, spanId, button) { // Native
     '</td></tr><tbody></table>';
 }
 
-function makePageTemplate(title, comment, spanId, button, divId) { // Native
+function makePageTemplate(title, comment, spanId, button, divId) {
   return makePageHeader(title, comment, spanId, button) +
     '<div class="fshSmall" id="' + divId + '"></div>';
 }
@@ -1343,7 +1375,7 @@ var getDot = [
   {condition: 44640, result: sevenDayDot}
 ];
 
-function onlineDot(obj) { // Native
+function onlineDot(obj) {
   var min = getMins.reduce(function(prev, curr) {
     return curr(obj, prev);
   }, 0);
@@ -1354,7 +1386,7 @@ function onlineDot(obj) { // Native
   return redDot;
 }
 
-function changeOnlineDot(contactLink) { // Native
+function changeOnlineDot(contactLink) {
   var lastActivity = lastActivityRE
     .exec(contactLink.getAttribute('data-tipped'));
   contactLink.parentNode.previousSibling.innerHTML =
@@ -1365,7 +1397,7 @@ function changeOnlineDot(contactLink) { // Native
     });
 }
 
-function batchDots() { // Native
+function batchDots() {
   var limit = performance.now() + 5;
   while (performance.now() < limit &&
       dotCount < dotList.length) {
@@ -1377,7 +1409,7 @@ function batchDots() { // Native
   }
 }
 
-function colouredDots() { // Native
+function colouredDots() {
   if (!getValue('enhanceOnlineDots')) {return;}
   dotList = document.querySelectorAll(
     '#pCC a[data-tipped*="Last Activity"]');
@@ -1412,436 +1444,15 @@ function confirm(title, msgText, fn) { // jQuery
   }).dialog('open');
 }
 
-var deferred = window.$ && $.when();
-
-function getForage(forage) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
-  localforage.getItem(forage, function getItemCallback(err, data) {
-    if (err) {
-      log(forage + ' forage error', err);
-      dfr.reject(err);
-    } else {
-      // returns null if key does not exist
-      dfr.resolve(data);
-    }
-  });
-  return dfr.promise();
-}
-
-function setForage(forage, data) {
-  // Wrap in jQuery Deferred because we're using 1.7
-  // rather than using ES6 promise
-  var dfr = $.Deferred();
-  localforage.setItem(forage, data, function setItemCallback(err, _data) {
-    if (err) {
-      log(forage + ' forage error', err);
-      dfr.reject(err);
-    } else {
-      dfr.resolve(_data);
-    }
-  });
-  return dfr.promise();
-}
-
-function getGuild(guildId$$1) {
-  return $.ajax({
-    dataType: 'json',
-    url: 'index.php',
-    data: {
-      cmd: 'export',
-      subcmd: 'guild_members',
-      guild_id: guildId$$1
-    }
-  });
-}
-
-function getGuildMembers(guildId$$1) {
-  return getGuild(guildId$$1).pipe(function membrListToHash(data) {
-    var membrList = {};
-    membrList[guildId$$1] = {};
-    membrList[guildId$$1].lastUpdate = Date.now();
-    data.forEach(function memberToObject(ele) {
-      membrList[guildId$$1][ele.username] = ele;
-    });
-    return membrList;
-  });
-}
-
-function addMembrListToForage(membrList) {
-  getForage('fsh_membrList')
-    .done(function saveMembrListInForage(data) {
-      var oldMemList = data || {};
-      setForage('fsh_membrList', $.extend(oldMemList, membrList));
-    });
-}
-
-function getMembrListFromForage(guildId$$1, membrList) {
-  if (membrList && membrList[guildId$$1] &&
-      membrList[guildId$$1].lastUpdate &&
-      membrList[guildId$$1].lastUpdate > Date.now() - 300000) {
-    return membrList;
-  }
-  return getGuildMembers(guildId$$1).done(addMembrListToForage);
-}
-
-function guildMembers(force, guildId$$1) {
-  if (force) {
-    return getGuildMembers(guildId$$1).done(addMembrListToForage);
-  }
-  return getForage('fsh_membrList')
-    .pipe(getMembrListFromForage.bind(null, guildId$$1));
-}
-
-function setHelperMembrList(guildId$$1, membrList) {
-  calf.membrList = membrList[guildId$$1];
-  return calf.membrList;
-}
-
-function getMembrList(force) {
-  var guildId$$1 = guildId();
-  return guildMembers(force, guildId$$1)
-    .pipe(setHelperMembrList.bind(null, guildId$$1));
-}
-
-function getInventory() {
-  var subcmd = 'inventory';
-  if (calf.subcmd === 'guildinvmgr') {
-    subcmd = 'guild_store&inc_tagged=1';
-  }
-  return $.ajax({
-    dataType: 'json',
-    url: 'index.php?cmd=export&subcmd=' + subcmd
-  });
-}
-
-function rekeyInventory(data) {
-  data.items = data.items.reduce(function(prev, curr) {
-    if (curr.is_in_st) {prev.fshHasST = true;}
-    prev[curr.inv_id] = curr;
-    return prev;
-  }, {});
-  return data;
-}
-
-function getInventoryById() {
-  return getInventory().pipe(rekeyInventory);
-}
-
-function addLastUpdateDate(data) {
-  data.lastUpdate = Date.now();
-  return data;
-}
-
-function getProfile(username) {
-  return $.getJSON('index.php', {
-    cmd: 'export',
-    subcmd: 'profile',
-    player_username: username
-  });
-}
-
-function sendMyProfileToForage(data) {
-  setForage('fsh_selfProfile', data);
-}
-
-function getMyProfile() {
-  return getProfile(playerName())
-    .pipe(addLastUpdateDate)
-    .done(sendMyProfileToForage);
-}
-
-function getProfileFromForage(data) {
-  if (!data || data.lastUpdate < Date.now() -
-    calf.allyEnemyOnlineRefreshTime) {
-    return getMyProfile();
-  }
-  return data;
-}
-
-function myStats(force) {
-  if (force) {return getMyProfile();}
-  // jQuery 1.7 uses pipe instead of then
-  return getForage('fsh_selfProfile')
-    .pipe(getProfileFromForage);
-}
-
-function dialog(data) {
-  if (data.r === 0) {return;}
-  $('#dialog_msg').html(data.m).dialog('open');
-}
-
-function equipItem(backpackInvId) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'equipitem',
-      inventory_id: backpackInvId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function htmlResult(data) {
-  var info = infoBox(data);
-  var _r = 1;
-  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
-  return {r: _r, m: info};
-}
-
-function useItem(backpackInvId) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'useitem',
-      inventory_id: backpackInvId
-    }
-  }).pipe(htmlResult)
-    .done(dialog);
-}
-
-function additionalAction(action, data) {
-  if (action === 'wear') {
-    return equipItem(data.b)
-      .pipe(function equipItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the equipitem
-  }
-  if (action === 'use') {
-    return useItem(data.b)
-      .pipe(function useItemStatus() {return data;});
-    // Return takeitem status irrespective of the status of the useitem
-  }
-}
-
-function takeItemStatus(action, data) {
-  if (data.r === 0 && action !== 'take') {
-    return additionalAction(action, data);
-  }
-  return data;
-}
-
-function takeItem(invId, action) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'takeitem',
-      guildstore_id: invId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog).pipe(takeItemStatus.bind(null, action));
-}
-
-function queueTakeItem(invId, action) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeTakeToQueue() {
-    return takeItem(invId, action);
-  });
-  return deferred;
-}
-
-function guildInvRecall(invId, playerId$$1, mode) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'guild',
-      subcmd: 'inventory',
-      subcmd2: 'recall',
-      id: invId,
-      player_id: playerId$$1,
-      mode: mode
-    }
-  }).pipe(htmlResult)
-    .done(dialog);
-}
-
-function backpack() {
-  return $.ajax({
-    url: 'index.php',
-    data: {cmd: 'profile', subcmd: 'fetchinv'},
-    dataType: 'json'
-  });
-}
-
-function recallItem(o) {
-  return guildInvRecall(o.invId, o.playerId, o.mode)
-    .pipe(function recallItemStatus(data) {
-      if (data.r === 0 && o.action !== 'recall') {
-        return backpack().pipe(function gotBackpack(bpData) {
-          // TODO assuming backpack is successful...
-          if (o.action === 'wear') {
-            return equipItem(bpData.items[bpData.items.length - 1].a)
-              .pipe(function wearItemStatus() {return data;});
-            // Return recall status irrespective of the status of the equipitem
-          }
-          if (o.action === 'use') {
-            return useItem(
-              bpData.items[bpData.items.length - 1].a)
-              .pipe(function useItemStatus() {return data;});
-            // Return recall status irrespective of the status of the useitem
-          }
-        });
-      }
-      return data;
-    });
-}
-
-function queueRecallItem(o) {
-  // You have to chain them because they could be modifying the backpack
-  deferred = deferred.pipe(function pipeRecallToQueue() {
-    return recallItem(o);
-  });
-  return deferred;
-}
-
-function translateReturnInfo(data) {
-  var info = infoBox(data);
-  var _r = {r: 1, m: info};
-  if (info === 'Item was transferred to the guild store!') {
-    _r = {r: 0, m: ''};
-  }
-  return _r;
-}
-
-function guildMailboxTake(href) {
-  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
-}
-
-function moveItem(invIdList, folderId) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'sendtofolder',
-      inv_list: JSON.stringify(invIdList),
-      folder_id: folderId,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function dropItem(invIdList) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'profile',
-      subcmd: 'dodropitems',
-      removeIndex: invIdList,
-      ajax: 1
-    },
-    dataType: 'json'
-  }).done(dialog);
-}
-
-function sendItem(invIdList) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'trade',
-      subcmd: 'senditems',
-      xc: window.ajaxXC,
-      target_username: getValue('itemRecipient'),
-      sendItemList: invIdList
-    }
-  }).pipe(htmlResult)
-    .done(dialog);
-}
-
-function debuff(buffId) {
-  return $.ajax({
-    url: 'fetchdata.php',
-    data: {
-      a: '22',
-      d: '0',
-      id: buffId
-    },
-    dataType: 'json'
-  });
-}
-
-function doPickMove(moveId, slotId) {
-  return $.ajax({
-    url: 'index.php',
-    data: {
-      cmd: 'arena',
-      subcmd: 'dopickmove',
-      move_id: moveId,
-      slot_id: slotId
-    }
-  });
-}
-
-function groupViewStats(doc) {
-  var attackElement = doc.getElementById('stat-attack');
-  var defenseElement = doc.getElementById('stat-defense');
-  var armorElement = doc.getElementById('stat-armor');
-  var damageElement = doc.getElementById('stat-damage');
-  var hpElement = doc.getElementById('stat-hp');
-  return {
-    attack: intValue(attackElement.textContent),
-    attackElement: attackElement,
-    defense: intValue(defenseElement.textContent),
-    defenseElement: defenseElement,
-    armor: intValue(armorElement.textContent),
-    armorElement: armorElement,
-    damage: intValue(damageElement.textContent),
-    damageElement: damageElement,
-    hp: intValue(hpElement.textContent),
-    hpElement: hpElement
-  };
-}
-
-function parseGroupStats(html) {
-  var doc = createDocument(html);
-  return groupViewStats(doc);
-}
-
-function getGroupStats(viewStats) {
-  return $.ajax(viewStats).pipe(parseGroupStats);
-}
-
-function parseMercStats(html) {
-  var doc = createDocument(html);
-  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
-  var mercTotal = [0, 0, 0, 0, 0];
-  Array.prototype.forEach.call(mercElements, function(merc) {
-    var mouseoverText = merc.dataset.tipped;
-    mercTotal = mercTotal.map(function(el, i) {
-      return el + Number(mercRE[i].exec(mouseoverText)[1]);
-    });
-  });
-  mercTotal = mercTotal.map(function(el) {
-    return Math.round(el * defenderMultiplier);
-  });
-  return {
-    attack: mercTotal[0],
-    defense: mercTotal[1],
-    armor: mercTotal[2],
-    damage: mercTotal[3],
-    hp: mercTotal[4]
-  };
-}
-
-function getMercStats() {
-  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
-}
-
-function displayBuffLog(buffLog) { // Native
+function displayBuffLog(buffLog) {
   document.getElementById('bufflog').innerHTML = buffLog;
 }
 
-function clearBuffLog() { // Native
+function clearBuffLog() {
   setForage('fsh_buffLog', '').done(displayBuffLog);
 }
 
-function injectBuffLog(injector) { // Native
+function injectBuffLog(injector) {
   var content = injector || pCC;
   content.innerHTML = makePageTemplate('Buff Log', '',
     'clearBuffs', 'Clear', 'bufflog');
@@ -1853,12 +1464,12 @@ var content;
 var combatLog = [];
 var textArea;
 
-function notepadCopyLog() { // Native
+function notepadCopyLog() {
   textArea.focus();
   textArea.select();
 }
 
-function clearCombatLog() { // Native
+function clearCombatLog() {
   combatLog = [];
   textArea.value = '[]';
   setForage('fsh_combatLog', combatLog);
@@ -1870,7 +1481,7 @@ function notepadClearLog() { // jQuery
   );
 }
 
-function gotCombatLog(data) { // Native
+function gotCombatLog(data) {
   if (data) {combatLog = data;}
   var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
     '</td></tr>' +
@@ -1933,7 +1544,7 @@ function buildOnlinePlayerData() { // jQuery
   });
 }
 
-function saveVal(key, val) { // Native
+function saveVal(key, val) {
   if (!isNaN(val)) {setValue(key, val);}
 }
 
@@ -2005,7 +1616,7 @@ function gotOnlinePlayers() { // jQuery
   }).api();
 }
 
-function checkLastPage() { // Native
+function checkLastPage() {
   if (onlinePages === lastPage) {
     setForage('fsh_onlinePlayers', onlinePlayers);
     gotOnlinePlayers();
@@ -2072,7 +1683,7 @@ function resetEvt() { // context
   table.draw();
 }
 
-function doOnlinePlayerEventHandlers(e) { // Native
+function doOnlinePlayerEventHandlers(e) {
   if (e.target.id === 'fshRefresh') {refreshEvt();}
   if (e.target.id === 'fshReset') {resetEvt();}
 }
@@ -2117,11 +1728,11 @@ var itmRE =
   /fetchitem.php\?item_id=(\d+)&inv_id=-1&t=2&p=(\d+)&vcode=([a-z0-9]+)/i;
 var playerId$1;
 
-function storeRecipeBook() { // Native
+function storeRecipeBook() {
   setForage('fsh_recipeBook', recipebook);
 }
 
-function getRecipeItems(recipe) { // Native
+function getRecipeItems(recipe) {
   if (recipe.items) {
     return recipe.items.reduce(function(prev, itm) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -2137,7 +1748,7 @@ function getRecipeItems(recipe) { // Native
   return '';
 }
 
-function getComponents(recipe) { // Native
+function getComponents(recipe) {
   if (recipe.components) {
     return recipe.components.reduce(function(prev, comp) {
       return prev + '<div class="rmItem"><img class="tip-dynamic" ' +
@@ -2153,7 +1764,7 @@ function getComponents(recipe) { // Native
   return '';
 }
 
-function getImg(recipe) { // Native
+function getImg(recipe) {
   if (recipe.target) {
     return ' <img class="tip-dynamic" ' +
       'data-tipped="fetchitem.php?item_id=' +
@@ -2196,14 +1807,14 @@ function generateRecipeTable() { // Legacy
   if (recipebook) {drawRecipeTable();}
 }
 
-function testSortType(evt) { // Native
+function testSortType(evt) {
   var sortType = evt.target.getAttribute('sorttype');
   if (!sortType) {sortType = 'string';}
   sortType = sortType.toLowerCase();
   return sortType;
 }
 
-function sortRecipeBook(sortType) { // Native
+function sortRecipeBook(sortType) {
   if (sortType === 'number') {
     recipebook.recipe.sort(numberSort);
   } else {
@@ -2223,7 +1834,7 @@ function sortRecipeTable(evt) { // Legacy
   generateRecipeTable();
 }
 
-function hasAmounts(result, amounts) { // Native
+function hasAmounts(result, amounts) {
   if (amounts) {
     var resultAmounts = amounts.textContent.split('/');
     result.amountPresent = parseInt(resultAmounts[0], 10);
@@ -2231,7 +1842,7 @@ function hasAmounts(result, amounts) { // Native
   }
 }
 
-function reduceItemOrComponent(bgGif, prev, el) { // Native
+function reduceItemOrComponent(bgGif, prev, el) {
   var background = el.getAttribute('background');
   if (!background || background.indexOf(bgGif) === -1) {return prev;}
   var img = el.children[0].children[0];
@@ -2247,13 +1858,13 @@ function reduceItemOrComponent(bgGif, prev, el) { // Native
   return prev;
 }
 
-function parseRecipeItemOrComponent(bgGif, doc) { // Native
+function parseRecipeItemOrComponent(bgGif, doc) {
   var tblCells = doc.getElementById('pCC').getElementsByTagName('td');
   return Array.prototype.reduce.call(tblCells,
     reduceItemOrComponent.bind(null, bgGif), []);
 }
 
-function processRecipe(recipe, data) { // Native
+function processRecipe(recipe, data) {
   var doc = createDocument(data);
   output.insertAdjacentHTML('beforeend',
     'Parsing blueprint ' + recipe.name + '...<br>');
@@ -2328,7 +1939,7 @@ function processFirstPage(data) { // jQuery.min
   return $.when.apply($, prm);
 }
 
-function displayStuff() { // Native
+function displayStuff() {
   output.insertAdjacentHTML('beforeend', 'Finished parsing ... formatting ...');
   storeRecipeBook();
   generateRecipeTable();
@@ -2341,7 +1952,7 @@ function parseInventingStart() { // jQuery.min
   $.get('index.php?cmd=inventing').pipe(processFirstPage).done(displayStuff);
 }
 
-function gotRecipeBook(data) { // Native
+function gotRecipeBook(data) {
   recipebook = data;
   if (getValue('hideRecipes')) {
     hideRecipes = shouldBeArray('hideRecipeNames');
@@ -2361,7 +1972,7 @@ function gotRecipeBook(data) { // Native
   }
 }
 
-function rmEvtHdl(evt) { // Native
+function rmEvtHdl(evt) {
   if (evt.target.id === 'rfsh') {
     parseInventingStart();
   }
@@ -2376,6 +1987,152 @@ function injectRecipeManager(injector) { // jQuery.min
   content$1.addEventListener('click', rmEvtHdl);
 }
 
+function getInventory() {
+  var subcmd = 'inventory';
+  if (calf.subcmd === 'guildinvmgr') {
+    subcmd = 'guild_store&inc_tagged=1';
+  }
+  return $.ajax({
+    dataType: 'json',
+    url: 'index.php?cmd=export&subcmd=' + subcmd
+  });
+}
+
+var deferred = window.$ && $.when();
+
+function dialog(data) {
+  if (data.r === 0) {return;}
+  $('#dialog_msg').html(data.m).dialog('open');
+}
+
+function equipItem(backpackInvId) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'equipitem',
+      inventory_id: backpackInvId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function htmlResult(data) {
+  var info = infoBox(data);
+  var _r = 1;
+  if (info.search(/(successfully|gained|components)/) !== -1) {_r = 0;}
+  return {r: _r, m: info};
+}
+
+function useItem(backpackInvId) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'useitem',
+      inventory_id: backpackInvId
+    }
+  }).pipe(htmlResult)
+    .done(dialog);
+}
+
+function additionalAction(action, data) {
+  if (action === 'wear') {
+    return equipItem(data.b)
+      .pipe(function equipItemStatus() {return data;});
+    // Return takeitem status irrespective of the status of the equipitem
+  }
+  if (action === 'use') {
+    return useItem(data.b)
+      .pipe(function useItemStatus() {return data;});
+    // Return takeitem status irrespective of the status of the useitem
+  }
+}
+
+function takeItemStatus(action, data) {
+  if (data.r === 0 && action !== 'take') {
+    return additionalAction(action, data);
+  }
+  return data;
+}
+
+function takeItem(invId) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'takeitem',
+      guildstore_id: invId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function queueTakeItem(invId, action) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeTakeToQueue() {
+    return takeItem(invId).pipe(takeItemStatus.bind(null, action));
+  });
+  return deferred;
+}
+
+function guildInvRecall(invId, playerId$$1, mode) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'guild',
+      subcmd: 'inventory',
+      subcmd2: 'recall',
+      id: invId,
+      player_id: playerId$$1,
+      mode: mode
+    }
+  }).pipe(htmlResult)
+    .done(dialog);
+}
+
+function backpack() {
+  return $.ajax({
+    url: 'index.php',
+    data: {cmd: 'profile', subcmd: 'fetchinv'},
+    dataType: 'json'
+  });
+}
+
+function recallItem(o) {
+  return guildInvRecall(o.invId, o.playerId, o.mode)
+    .pipe(function recallItemStatus(data) {
+      if (data.r === 0 && o.action !== 'recall') {
+        return backpack().pipe(function gotBackpack(bpData) {
+          // TODO assuming backpack is successful...
+          if (o.action === 'wear') {
+            return equipItem(bpData.items[bpData.items.length - 1].a)
+              .pipe(function wearItemStatus() {return data;});
+            // Return recall status irrespective of the status of the equipitem
+          }
+          if (o.action === 'use') {
+            return useItem(
+              bpData.items[bpData.items.length - 1].a)
+              .pipe(function useItemStatus() {return data;});
+            // Return recall status irrespective of the status of the useitem
+          }
+        });
+      }
+      return data;
+    });
+}
+
+function queueRecallItem(o) {
+  // You have to chain them because they could be modifying the backpack
+  deferred = deferred.pipe(function pipeRecallToQueue() {
+    return recallItem(o);
+  });
+  return deferred;
+}
+
 var extTbl;
 var playerId$2;
 var extractInv;
@@ -2385,7 +2142,7 @@ var resourceList;
 var buyResult;
 var cn;
 
-function backpackRemove(invId) { // Native
+function backpackRemove(invId) {
   extractInv.some(function(el, i, ary) {
     if (el.inv_id === invId) {
       ary.splice(i, 1);
@@ -2395,14 +2152,14 @@ function backpackRemove(invId) { // Native
   });
 }
 
-function quickDoneExtracted(invId, data) { // Native
+function quickDoneExtracted(invId, data) {
   if (data.r !== 0) {return;}
   backpackRemove(invId);
   cn += 1;
   buyResult.insertAdjacentHTML('beforeend', '<br>' + cn + '. ' + data.m);
 }
 
-function doExtract(target) { // Native
+function doExtract(target) {
   var InventoryIDs = resourceList[target.id.replace('fshExtr', '')].invIDs;
   target.parentNode.innerHTML = 'extracting all ' +
     InventoryIDs.length + ' resources';
@@ -2413,19 +2170,19 @@ function doExtract(target) { // Native
   }
 }
 
-function extractAllSimilar(evt) { // Native
+function extractAllSimilar(evt) {
   confirm('Extract Resources',
     'Are you sure you want to extract all similar items?',
     doExtract.bind(null, evt.target)
   );
 }
 
-function checkFlags(item) { // Native
+function checkFlags(item) {
   return selectMain && item.folder_id !== '-1' ||
     !selectST && item.is_in_st;
 }
 
-function resources(prev, item) { // Native
+function resources(prev, item) {
   if (checkFlags(item)) {return prev;}
   if (prev[item.item_id]) {
     prev[item.item_id].invIDs.push(item.inv_id);
@@ -2439,7 +2196,7 @@ function resources(prev, item) { // Native
   return prev;
 }
 
-function tableRows(prev, item_id) { // Native
+function tableRows(prev, item_id) {
   var res = resourceList[item_id];
   return prev + '<tr><td class="fshCenter"><span class="smallLink"' +
     ' id="fshExtr' + item_id +
@@ -2451,7 +2208,7 @@ function tableRows(prev, item_id) { // Native
     '" border=0></td><td>' + res.item_name + '</td></tr>';
 }
 
-function showQuickExtract() { // Native
+function showQuickExtract() {
   resourceList = extractInv.reduce(resources, {});
   var output = '<tr><th width="20%">Actions</th><th>Items</th></tr>' +
     '<tr><td id="buy_result" colspan="2"></td></tr>';
@@ -2460,13 +2217,13 @@ function showQuickExtract() { // Native
   buyResult = document.getElementById('buy_result');
 }
 
-function isExtractable(curr) { // Native
+function isExtractable(curr) {
   return curr.item_name === 'Zombie Coffin' ||
     curr.type === '12' ||
     curr.type === '16';
 }
 
-function prepInv(data) { // Native
+function prepInv(data) {
   playerId$2 = data.player_id;
   extractInv = data.items.reduce(function(prev, curr) {
     if (isExtractable(curr)) {prev.push(curr);}
@@ -2498,7 +2255,7 @@ var extractEvents = [
   }
 ];
 
-function listen(e) { // Native
+function listen(e) {
   for (var i = 0; i < extractEvents.length; i += 1) {
     if (extractEvents[i].test(e)) {
       extractEvents[i].fn(e);
@@ -2529,7 +2286,7 @@ var content$2;
 var itemList;
 var playerId$3;
 
-function itemName(item) { // Native
+function itemName(item) {
   return item.extra && item.extra.name || item.n;
 }
 
@@ -2599,7 +2356,7 @@ function showAHInvManager() { // Legacy
   document.getElementById('invTabs-ah').innerHTML = output;
 }
 
-function useItem$1(evt) { // Legacy
+function doUseItem(evt) { // Legacy
   var invId = evt.target.getAttribute('itemID');
   useItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
@@ -2607,10 +2364,10 @@ function useItem$1(evt) { // Legacy
   });
 }
 
-function useProfileInventoryItem(evt) { // Native
+function useProfileInventoryItem(evt) {
   confirm('Use/Extract Item',
     'Are you sure you want to use/extract the item?',
-    useItem$1.bind(null, evt)
+    doUseItem.bind(null, evt)
   );
 }
 
@@ -2622,7 +2379,7 @@ function equipProfileInventoryItem(evt) { // Legacy
   });
 }
 
-function itemImage(item) { // Native
+function itemImage(item) {
   var ret = imageServer + '/';
   if (item.extra) {
     ret += 'composing/potions/' + item.extra.design + '_' +
@@ -2839,7 +2596,6 @@ var buffList = [
   {name: 'Teleport',            stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 2, skillId: 168, nicks: 'teleport'},
   {name: 'Invigorate',          stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 2, skillId: 169, nicks: 'invigorate'}
 ];
-/* eslint-enable no-multi-spaces, max-len */
 
 /* eslint-disable max-lines */
 var mySimpleCheckboxes = {
@@ -3428,7 +3184,7 @@ function generalPrefs() {
     simpleCheckbox('expandMenuOnKeyPress');
 }
 
-function injectSettingsGuildData(guildType) { // Native
+function injectSettingsGuildData(guildType) {
   return '<input name="guild' + guildType + '" size="60" value="' +
     getValue('guild' + guildType) + '">' +
     '<span class="fshPoint" ' +
@@ -3855,7 +3611,7 @@ function setupConfigData() {
     '</table></form>';
 }
 
-function getVars() { // Native
+function getVars() {
   calf.showBuffs = getValue('showHuntingBuffs');
   calf.buffs = getValue('huntingBuffs');
   calf.buffsName = getValue('huntingBuffsName');
@@ -3873,18 +3629,18 @@ function getVars() { // Native
     (5 * 1024 * 1024) * 100).toFixed(2);
 }
 
-function helpLink(title, text) { // Native
+function helpLink(title, text) {
   return '&nbsp;[&nbsp;<span class="fshLink tip-static" data-tipped="' +
     '<span class=\'fshHelpTitle\'>' + title + '</span><br><br>' +
     text + '">?</span>&nbsp;]';
 }
 
-function hasNetwork(o) { // Native
+function hasNetwork(o) {
   if (o.network) {return networkIcon;}
   return '';
 }
 
-function isOn(o) { // Native
+function isOn(o) {
   return isChecked(getValue(o.id));
 }
 
@@ -3906,7 +3662,7 @@ function simpleCheckboxHtml(name) {
   return justLabel(name) + justCheckbox(name);
 }
 
-function simpleCheckbox(name) { // Native
+function simpleCheckbox(name) {
   return '<tr><td align="right">' + justLabel(name) +
     '</td><td>' + justCheckbox(name) + '</td></tr>';
 }
@@ -3923,7 +3679,7 @@ function toggleTickAllBuffs(e) { // jQuery
   }
 }
 
-function clearStorage() { // Native
+function clearStorage() {
   confirm('Clear localStorage',
     'Are you sure you want to clear you localStorage?',
     function() {localStorage.clear();}
@@ -3999,17 +3755,17 @@ function saveConfig(evt) { // Legacy
   $('#dialog_msg').text('FS Helper Settings Saved').dialog('open');
 }
 
-function showLogs() { // Native
+function showLogs() {
   document.location = server +
     'index.php?cmd=notepad&blank=1&subcmd=showlogs';
 }
 
-function showMonsterLogs() { // Native
+function showMonsterLogs() {
   document.location = server +
     'index.php?cmd=notepad&blank=1&subcmd=monsterlog';
 }
 
-function createEventListeners() { // Native
+function createEventListeners() {
   var tickAll = document.createElement('span');
   tickAll.id = 'fshAllBuffs';
   tickAll.className = 'fshLink';
@@ -4055,7 +3811,6 @@ function injectSettings() { // jQuery.min
     .value);
 }
 
-var actRE = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 var sustainLevelRE = /Level<br>(\d+)%/;
 var buffCustom = {
   header: 'Buff',
@@ -4167,7 +3922,7 @@ function pageLayout(o) { // Legacy
     'over time.</div>';
 }
 
-function uniq(arr, removeBy) { // Native
+function uniq(arr, removeBy) {
   var seen = {};
   if (removeBy) {
     return arr.filter(function(item) {
@@ -4222,7 +3977,7 @@ function getBioLines(bioCellHtml) { // Legacy
   return uniq(res);
 }
 
-function getSustain(doc) { // Native
+function getSustain(doc) {
   var aLinks = doc.getElementById('profileLeftColumn')
     .getElementsByTagName('a');
   var sustainLevel;
@@ -4410,7 +4165,7 @@ function findBuffsParseProfilePage(responseText) { // jQuery
     .find('a[data-tipped*="Last Activity"]');
   profileAlliesEnemies.each(function(i, e) {
     var onMouseOver = $(e).data('tipped');
-    var lastActivity = actRE.exec(onMouseOver);
+    var lastActivity = lastActivityRE.exec(onMouseOver);
     var lastActivityDays = parseInt(lastActivity[1], 10);
     var lastActivityHours = parseInt(lastActivity[2], 10) +
       lastActivityDays * 24;
@@ -4461,7 +4216,7 @@ function findBuffsParseProfilePageStart() { // Legacy
 function guildMember(characterName, i, e) { // jQuery
   var contactLink = $(e).find('a');
   var onMouseOver = $(contactLink).data('tipped');
-  var lastActivity = actRE.exec(onMouseOver);
+  var lastActivity = lastActivityRE.exec(onMouseOver);
   var lastActivityDays = parseInt(lastActivity[1], 10);
   var lastActivityHours = parseInt(lastActivity[2], 10) +
     lastActivityDays * 24;
@@ -4569,20 +4324,20 @@ function injectFindOther(injector) { // Native - Bad
 var times = {};
 var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
 
-function isAuto() { // Native
+function isAuto() {
   var docRef = document.referrer
     .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
   if (docRef) {docRef = docRef[1];}
   return refAry.indexOf(docRef) !== -1;
 }
 
-function start(category, variable, label) { // Native
+function start(category, variable, label) {
   if (isAuto() || typeof ga === 'undefined') {return;}
   times[category + ':' + variable + ':' + label] =
     performance.now() * 1000;
 }
 
-function sendTiming(category, variable, label) { // Native
+function sendTiming(category, variable, label) {
   var myTime = Math.round(performance.now() * 1000 -
     times[category + ':' + variable + ':' + label]) / 1000;
   if (myTime > 10) {
@@ -4592,12 +4347,12 @@ function sendTiming(category, variable, label) { // Native
   log(variable, myTime + 'ms');
 }
 
-function end(category, variable, label) { // Native
+function end(category, variable, label) {
   if (isAuto() || typeof ga === 'undefined') {return;}
   sendTiming(category, variable, label);
 }
 
-function fixupUrl() { // Native
+function fixupUrl() {
   var origPath = window.location.pathname + window.location.search;
   var page = origPath.replace(/&m=.*/, '')
     .replace(/&subcmd=&.*/, '')
@@ -4623,7 +4378,7 @@ function fixupUrl() { // Native
   ga('fsh.set', 'page', page);
 }
 
-function setup() { // Native
+function setup() {
   if (isAuto() || typeof ga === 'undefined') {return;}
 
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
@@ -4640,7 +4395,7 @@ function setup() { // Native
   ga('fsh.send', 'pageview');
 }
 
-function screenview(funcName) { // Native
+function screenview(funcName) {
   if (isAuto() || typeof ga === 'undefined') {return;}
   ga('fshApp.send', 'screenview', {screenName: funcName});
 }
@@ -4772,7 +4527,7 @@ var listEvents = [
   }
 ];
 
-function listEvtHnl(e) { // Native
+function listEvtHnl(e) {
   for (var i = 0; i < listEvents.length; i += 1) {
     if (listEvents[i].test(e)) {
       listEvents[i].fn(e);
@@ -4980,7 +4735,7 @@ function callHelperFunction(evt) { // jQuery
   $(content).dialog({width: 'auto', modal: true});
 }
 
-function eventHandler(evt) { // Native
+function eventHandler(evt) {
   if (evt.target.classList.contains('fshLink')) {
     callHelperFunction(evt);
     return;
@@ -4990,7 +4745,7 @@ function eventHandler(evt) { // Native
   }
 }
 
-function showHelperMenu() { // Native
+function showHelperMenu() {
   var helperMenu = document.getElementById('helperMenu');
   helperMenu.removeEventListener('mouseenter', showHelperMenu);
 
@@ -5009,7 +4764,7 @@ function showHelperMenu() { // Native
   helperMenuDiv.addEventListener('click', eventHandler);
 }
 
-function haveNode$1(node) { // Native
+function haveNode$1(node) {
   var helperMenu = document.createElement('DIV');
   helperMenu.id = 'helperMenu';
   helperMenu.className = 'helperMenu';
@@ -5025,18 +4780,18 @@ function haveNode$1(node) { // Native
   node.parentNode.insertBefore(helperMenu, node);
 }
 
-function injectHelperMenu() { // Native
+function injectHelperMenu() {
   // don't put all the menu code here (but call if clicked) to minimize lag
   var node = document.getElementById('statbar-container');
   if (node) {haveNode$1(node);}
 }
 
-function containsNewsHead(el) { // Native
+function containsNewsHead(el) {
   return el.classList.contains('news_head') ||
     el.classList.contains('news_head_tavern');
 }
 
-function closestHead(el) { // Native
+function closestHead(el) {
   if (containsNewsHead(el)) {
     return el;
   }
@@ -5044,7 +4799,7 @@ function closestHead(el) { // Native
   return closestHead(el.parentNode);
 }
 
-function getNewsClass(newsHead) { // Native
+function getNewsClass(newsHead) {
   if (newsHead.classList.contains('news_head_tavern')) {
     return '.news_body_tavern';
   }
@@ -5064,18 +4819,18 @@ function gotNewsHead(evt, newsHead) { // jQuery
   evt.stopPropagation();
 }
 
-function newsEvt(evt) { // Native
+function newsEvt(evt) {
   var newsHead = closestHead(evt.target);
   if (newsHead) {gotNewsHead(evt, newsHead);}
 }
 
-function fixCollapse() { // Native
+function fixCollapse() {
   var newsCol = document.getElementsByClassName('news_left_column');
   if (newsCol.length !== 1) {return;}
   newsCol[0].addEventListener('click', newsEvt, true);
 }
 
-function lookForPvPLadder() { // Native
+function lookForPvPLadder() {
   var lastLadderReset = getValue('lastLadderReset');
   var rumours = pCC.getElementsByClassName('news_head_tavern');
   Array.prototype.forEach.call(rumours, function(head) {
@@ -5089,7 +4844,7 @@ function lookForPvPLadder() { // Native
   });
 }
 
-function injectHomePageTwoLink() { // Native
+function injectHomePageTwoLink() {
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}
@@ -5104,7 +4859,7 @@ function injectHomePageTwoLink() { // Native
   lookForPvPLadder();
 }
 
-function updateQuestLink() { // Native
+function updateQuestLink() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
     document.getElementById('nav-character-questbook')
@@ -5112,7 +4867,7 @@ function updateQuestLink() { // Native
   }
 }
 
-function buffLogLink() { // Native
+function buffLogLink() {
   if (getValue('keepBuffLog')) {
     document.getElementById('nav-character-log').parentNode
       .insertAdjacentHTML('afterend',
@@ -5122,7 +4877,7 @@ function buffLogLink() { // Native
   }
 }
 
-function combatLogLink() { // Native
+function combatLogLink() {
   if (getValue('keepLogs')) {
     document.getElementById('nav-character-notepad').parentNode
       .insertAdjacentHTML('afterend',
@@ -5132,7 +4887,7 @@ function combatLogLink() { // Native
   }
 }
 
-function creatureLogLink() { // Native
+function creatureLogLink() {
   if (getValue('showMonsterLog')) {
     document.getElementById('nav-character-notepad').parentNode
       .insertAdjacentHTML('afterend',
@@ -5142,7 +4897,7 @@ function creatureLogLink() { // Native
   }
 }
 
-function newGuildLogLink() { // Native
+function newGuildLogLink() {
   if (!getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     document.getElementById('nav-guild-ledger-guildlog').parentNode
@@ -5179,7 +4934,7 @@ function adjustHeight() { // jQuery
   }
 }
 
-function injectMenu() { // Native
+function injectMenu() {
   if (!document.getElementById('pCL')) {return;}
   updateQuestLink();
   // character
@@ -5314,8 +5069,46 @@ function openQuickMsgDialog(name, msg, tip) { // jQuery
   $('#quickMessageDialog').dialog('open');
 }
 
-function injectQuickMsgDialogJQ() { // Native
+function injectQuickMsgDialogJQ() {
   window.openQuickMsgDialog = openQuickMsgDialog;
+}
+
+function getProfile(username) {
+  return $.getJSON('index.php', {
+    cmd: 'export',
+    subcmd: 'profile',
+    player_username: username
+  });
+}
+
+function sendMyProfileToForage(data) {
+  setForage('fsh_selfProfile', data);
+}
+
+function addLastUpdateDate(data) {
+  data.lastUpdate = Date.now();
+  return data;
+}
+
+function getMyProfile() {
+  return getProfile(playerName())
+    .pipe(addLastUpdateDate)
+    .done(sendMyProfileToForage);
+}
+
+function getProfileFromForage(data) {
+  if (!data || data.lastUpdate < Date.now() -
+    calf.allyEnemyOnlineRefreshTime) {
+    return getMyProfile();
+  }
+  return data;
+}
+
+function myStats(force) {
+  if (force) {return getMyProfile();}
+  // jQuery 1.7 uses pipe instead of then
+  return getForage('fsh_selfProfile')
+    .pipe(getProfileFromForage);
 }
 
 var buffCheck = '<span class="enemy-buff-check-on"></span>';
@@ -5347,7 +5140,7 @@ function allyOrEnemy(type, test) {
   return test.enemy;
 }
 
-function contactColor(last_login, type) { // Native
+function contactColor(last_login, type) {
   var now = Math.floor(Date.now() / 1000);
   for (var i = 0; i < contactClass.length; i += 1) {
     var test = contactClass[i];
@@ -5358,7 +5151,7 @@ function contactColor(last_login, type) { // Native
   return 'fshWhite';
 }
 
-function playerName$1(val, type) { // Native
+function playerName$1(val, type) {
   return '<a class="player-name tip-static ' +
     contactColor(val.last_login, type) +
     '" data-tipped="<b>' + val.username + '</b><br><table><tbody><tr>' +
@@ -5368,28 +5161,28 @@ function playerName$1(val, type) { // Native
     val.id + '">' + val.username + '</a>';
 }
 
-function doBuffCheck() { // Native
+function doBuffCheck() {
   if (!calf.hideBuffSelected) {
     return buffCheck;
   }
   return '';
 }
 
-function doMsgButton() { // Native
+function doMsgButton() {
   if (!calf.hideGuildInfoMessage) {
     return msgButton;
   }
   return '';
 }
 
-function doBuffButton() { // Native
+function doBuffButton() {
   if (!calf.hideGuildInfoBuff) {
     return buffButton;
   }
   return '';
 }
 
-function doSecureButton(val) { // Native
+function doSecureButton(val) {
   if (!calf.hideGuildInfoSecureTrade) {
     return '<a class="enemy-secure-trade guild-icon left ' +
       'guild-minibox-action tip-static" href="index.php?cmd=trade' +
@@ -5399,7 +5192,7 @@ function doSecureButton(val) { // Native
   return '';
 }
 
-function doTradeButton(val) { // Native
+function doTradeButton(val) {
   if (!calf.hideGuildInfoTrade) {
     return '<a class="enemy-trade guild-icon left ' +
       'guild-minibox-action tip-static" href="index.php?cmd=trade' +
@@ -5409,7 +5202,7 @@ function doTradeButton(val) { // Native
   return '';
 }
 
-function addContact(contactList, type) { // Native
+function addContact(contactList, type) {
   var now = Math.floor(Date.now() / 1000);
   var output = '';
   contactList.forEach(function(val) {
@@ -5433,7 +5226,7 @@ function noAllies(allies, enemies) {
     !calf.enableEnemyOnlineList && allies.length === 0;
 }
 
-function hazAllies(allies, enemies) { // Native
+function hazAllies(allies, enemies) {
   var output = '';
   if (calf.enableAllyOnlineList) {
     output += addContact(allies, true);
@@ -5446,7 +5239,7 @@ function hazAllies(allies, enemies) { // Native
   fshContactList.insertAdjacentHTML('beforeend', output);
 }
 
-function injectAllyEnemyList(data) { // Native
+function injectAllyEnemyList(data) {
   var allies = fallback(data._allies, []);
   var enemies = fallback(data._enemies, []);
   if (noAllies(allies, enemies)) {return;}
@@ -5457,22 +5250,22 @@ function resetList() { // jQuery
   myStats(true).done(injectAllyEnemyList);
 }
 
-function toggleBuffSelected(self) { // Native
+function toggleBuffSelected(self) {
   self.classList.toggle('enemy-buff-check-on');
   self.classList.toggle('enemy-buff-check-off');
 }
 
-function msgPlayer(self) { // Native
+function msgPlayer(self) {
   window.openQuickMsgDialog(self.parentNode.previousElementSibling
     .lastElementChild.textContent);
 }
 
-function buffPlayer(self) { // Native
+function buffPlayer(self) {
   openQuickBuffByName(self.parentNode
     .previousElementSibling.lastElementChild.textContent);
 }
 
-function selectedBuff() { // Native
+function selectedBuff() {
   var buffBalls = document.getElementById('fshContactList')
     .getElementsByClassName('enemy-buff-check-on');
   var sendstring = Array.prototype.reduce.call(buffBalls,
@@ -5491,7 +5284,7 @@ var classEvt = [
   {className: 'enemy-quick-buff', handler: selectedBuff}
 ];
 
-function eventHandler$1(evt) { // Native
+function eventHandler$1(evt) {
   var self = evt.target;
   if (self.id === 'fshResetEnemy') {
     resetList();
@@ -5506,7 +5299,7 @@ function eventHandler$1(evt) { // Native
   });
 }
 
-function makeDiv(data) { // Native
+function makeDiv(data) {
   var fshAllyEnemy = document.createElement('DIV');
   fshAllyEnemy.id = 'fshAllyEnemy';
   fshAllyEnemy.className = 'minibox';
@@ -5541,12 +5334,12 @@ var activeBountyListPosted;
 var wantedNames;
 var wantedArray;
 
-function resetBountyList() { // Native
+function resetBountyList() {
   setValueJSON('bountyList', null);
   location.reload();
 }
 
-function injectBountyList() { // Native
+function injectBountyList() {
   setValueJSON('bountyList', bountyList);
   var injectHere = document
     .getElementById('Helper:BountyListPlaceholder');
@@ -5762,7 +5555,7 @@ function getActiveBountyList(doc) { // Legacy
   activeBountyListPosted = true;
 }
 
-function parseBountyPageForWorld(details) { // Native
+function parseBountyPageForWorld(details) {
   var doc = createDocument(details);
   getWantedBountyList(doc);
   if (calf.enableActiveBountyList &&
@@ -5810,7 +5603,7 @@ function doRefresh() { // Legacy
   setValue('bwNeedsRefresh', false);
 }
 
-function notRefreshed(enableActiveBountyList, enableWantedList) { // Native
+function notRefreshed(enableActiveBountyList, enableWantedList) {
   if (enableWantedList) {
     wantedList.isRefreshed = false;
     injectWantedList(wantedList);
@@ -5843,7 +5636,7 @@ function retrieveBountyInfo(enableActiveBountyList, enableWantedList) { // Legac
   }
 }
 
-function prepareBountyData() { // Native
+function prepareBountyData() {
   var pCR = document.getElementById('pCR');
   if (calf.enableWantedList) {
     pCR.insertAdjacentHTML('afterbegin', '<div class="minibox">' +
@@ -6049,19 +5842,19 @@ var bailOut = [
   function(evt) {return evt.altKey;}
 ];
 
-function keyPress(evt) { // Native
+function keyPress(evt) {
   for (var i = 0; i < bailOut.length; i += 1) {
     if (bailOut[i](evt)) {return;}
   }
   handleKey(evt.charCode);
 }
 
-function replaceKeyHandler() { // Native
+function replaceKeyHandler() {
   expandMenuOnKeyPress = getValue('expandMenuOnKeyPress');
   document.onkeypress = keyPress;
 }
 
-function statbarWrapper(href, id) { // Native
+function statbarWrapper(href, id) {
   var myWrapper = document.createElement('a');
   myWrapper.setAttribute('href', href);
   var character = document.getElementById(id);
@@ -6073,7 +5866,7 @@ function statbarWrapper(href, id) { // Native
   }, true);
 }
 
-function statbar() { // Native
+function statbar() {
   var sw = statbarWrapper;
   sw('index.php?cmd=profile', 'statbar-character');
   sw('index.php?cmd=points&subcmd=reserve', 'statbar-stamina');
@@ -6085,7 +5878,7 @@ function statbar() { // Native
 
 var days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
-function formatShortDate(aDate) { // Native
+function formatShortDate(aDate) {
   var yyyy = aDate.getFullYear();
   var dd = padZ(aDate.getDate());
   var ddd = days[aDate.getDay()];
@@ -6095,7 +5888,7 @@ function formatShortDate(aDate) { // Native
   return hh + ':' + mm + ' ' + ddd + ' ' + dd + '/' + month + '/' + yyyy;
 }
 
-function timeBox(nextGainTime, hrsToGo) { // Native
+function timeBox(nextGainTime, hrsToGo) {
   var nextGain = /([0-9]+)m ([0-9]+)s/.exec(nextGainTime);
   if (!nextGain) {return;}
   return '<dd>' +
@@ -6104,7 +5897,7 @@ function timeBox(nextGainTime, hrsToGo) { // Native
     parseInt(nextGain[2], 10)) * 1000)) + '</dd>';
 }
 
-function injectStaminaCalculator() { // Native
+function injectStaminaCalculator() {
   var nextGain = document.getElementsByClassName('stat-stamina-nextGain');
   if (!nextGain) {return;}
   var staminaMouseover =
@@ -6130,7 +5923,7 @@ function injectStaminaCalculator() { // Native
   );
 }
 
-function injectLevelupCalculator() { // Native
+function injectLevelupCalculator() {
   var nextGain = document.getElementsByClassName('stat-xp-nextGain');
   if (!nextGain) {return;}
   document.getElementById('statbar-level-tooltip-general')
@@ -6157,19 +5950,19 @@ var composeMsg =
   ' class="notification-icon"></span><p class="notification-content">' +
   'Composing to do</p></a></li>';
 
-function displayComposeMsg() { // Native
+function displayComposeMsg() {
   document.getElementById('notifications')
     .insertAdjacentHTML('afterbegin', composeMsg);
 }
 
-function getDoc(data) { // Native
+function getDoc(data) {
   if (calf.cmd !== 'composing') {
     return createDocument(data);
   }
   return document;
 }
 
-function parseComposing(data) { // Native
+function parseComposing(data) {
   var doc = getDoc(data);
   var timeRE = /ETA:\s*(\d+)h\s*(\d+)m\s*(\d+)s/;
   var times = [];
@@ -6195,7 +5988,7 @@ function parseComposing(data) { // Native
   }
 }
 
-function createSuccess(temp, textStatus) { // Native
+function createSuccess(temp, textStatus) {
   var potName = temp[temp.selectedIndex].text;
   var myParent = temp.parentNode;
   var infoDiv = myParent.previousElementSibling.previousElementSibling;
@@ -6235,7 +6028,7 @@ function quickCreateBailOut(target) {
   return target.tagName !== 'SPAN' || target.className !== 'quickCreate';
 }
 
-function quickCreate(evt) { // Native
+function quickCreate(evt) {
   var target = evt.target;
   if (quickCreateBailOut(target)) {return;}
   var temp = target.previousElementSibling.previousElementSibling;
@@ -6252,7 +6045,7 @@ function checkLastCompose() { // jQuery
   });
 }
 
-function composeAlert() { // Native
+function composeAlert() {
   var needToCompose = getValue('needToCompose');
   if (needToCompose) {
     displayComposeMsg();
@@ -6261,11 +6054,11 @@ function composeAlert() { // Native
   checkLastCompose();
 }
 
-function injectComposeAlert() { // Native
+function injectComposeAlert() {
   if (calf.cmd !== 'composing') {composeAlert();}
 }
 
-function moveButtons() { // Native
+function moveButtons() {
   if (getValue('moveComposingButtons')) {
     var buttonDiv = document.getElementById('composing-error-dialog')
       .previousElementSibling;
@@ -6276,7 +6069,7 @@ function moveButtons() { // Native
   }
 }
 
-function injectComposing() { // Native
+function injectComposing() {
   if (!pCC) {return;}
   if (calf.enableComposingAlert) {
     parseComposing();
@@ -6292,7 +6085,7 @@ function injectComposing() { // Native
   moveButtons();
 }
 
-function composingCreate() { // Native
+function composingCreate() {
   document.getElementById('composing-add-skill')
     .addEventListener('click', function() {
       document.getElementById('composing-skill-level-input').value =
@@ -6332,7 +6125,7 @@ var goldUpgradeMsg =
   ' class="notification-icon"></span><p class="notification-content">Up' +
   'grade stamina with gold</p></a></li>';
 
-function havePrayed() { // Native
+function havePrayed() {
   document.getElementById('helperPrayToGods').outerHTML = havePrayedMsg;
   setValue('needToPray', false);
   setValue('lastTempleCheck', new Date()
@@ -6349,21 +6142,21 @@ function prayToGods(e) { // jQuery
   $(e.target).qtip('hide');
 }
 
-function displayDisconnectedFromGodsMessage() { // Native
+function displayDisconnectedFromGodsMessage() {
   document.getElementById('notifications').insertAdjacentHTML('afterbegin',
     godsNotification);
   document.getElementById('helperPrayToGods').addEventListener('click',
     prayToGods);
 }
 
-function displayUpgradeMsg() { // Native
+function displayUpgradeMsg() {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
     document.getElementById('notifications').insertAdjacentHTML('afterbegin',
       goldUpgradeMsg);
   }
 }
 
-function findNewGroup(el) { // Native
+function findNewGroup(el) {
   if (el.textContent.indexOf('New attack group created.') === -1) {return;}
   var groupJoinHTML = '';
   if (!getValue('enableMaxGroupSizeToJoin')) {
@@ -6381,7 +6174,7 @@ function findNewGroup(el) { // Native
     '<li class="notification">' + groupJoinHTML + '</li>');
 }
 
-function templeAlertEnabled(responseText) { // Native
+function templeAlertEnabled(responseText) {
   var checkNeedToPray;
   var doc;
   if (calf.cmd !== 'temple') {
@@ -6400,16 +6193,16 @@ function templeAlertEnabled(responseText) { // Native
     .setUTCHours(23, 59, 59, 999) + 1); // midnight
 }
 
-function parseTemplePage(responseText) { // Native
+function parseTemplePage(responseText) {
   if (calf.enableTempleAlert) {templeAlertEnabled(responseText);}
 }
 
-function checkLastUpdate(templeAlertLastUpdate) { // Native
+function checkLastUpdate(templeAlertLastUpdate) {
   return !templeAlertLastUpdate ||
     Date.now() > templeAlertLastUpdate;
 }
 
-function doWeNeedToParse() { // Native
+function doWeNeedToParse() {
   if (checkLastUpdate(getValue('lastTempleCheck'))) {return true;}
   if (getValue('needToPray')) {
     displayDisconnectedFromGodsMessage();
@@ -6425,7 +6218,7 @@ function injectTempleAlert() { // jQuery
   }
 }
 
-function findDoc(data) { // Native
+function findDoc(data) {
   if (location.search.indexOf('cmd=points&type=1') === -1) {
     return createDocument(data);
   }
@@ -6433,7 +6226,7 @@ function findDoc(data) { // Native
   return document;
 }
 
-function parseGoldUpgrades(data) { // Native
+function parseGoldUpgrades(data) {
   if (!calf.enableUpgradeAlert) {return;}
   var doc = findDoc(data);
   var limit = doc.getElementById('pCC').getElementsByTagName('TABLE')[0]
@@ -6466,16 +6259,16 @@ function injectUpgradeAlert() { // jQuery
   if (location.search.indexOf('cmd=points&type=1') === -1) {notUpgradesPage();}
 }
 
-function injectJoinAllLink() { // Native
+function injectJoinAllLink() {
   var nodeList = document.getElementById('pCL').getElementsByTagName('li');
   Array.prototype.forEach.call(nodeList, findNewGroup);
 }
 
-function hideElement(el) { // Native
+function hideElement(el) {
   el.classList.add('fshHide');
 }
 
-function hideNodeList(nodeList) { // Native
+function hideNodeList(nodeList) {
   Array.prototype.forEach.call(nodeList, hideElement);
 }
 
@@ -6483,7 +6276,7 @@ function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
   hideNodeList(parent.querySelectorAll(selector));
 }
 
-function contactColour(el, obj) { // Native
+function contactColour(el, obj) {
   var onMouseOver = el.getAttribute('data-tipped');
   var lastActivityMinutes =
     /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
@@ -6496,7 +6289,7 @@ function contactColour(el, obj) { // Native
   }
 }
 
-function guildColour(el) { // Native
+function guildColour(el) {
   contactColour(el, {
     l1: 'fshGreen',
     l2: 'fshWhite',
@@ -6504,7 +6297,7 @@ function guildColour(el) { // Native
   });
 }
 
-function alliesColour(el) { // Native
+function alliesColour(el) {
   contactColour(el, {
     l1: 'fshDodgerBlue',
     l2: 'fshLightSkyBlue',
@@ -6543,7 +6336,7 @@ function doHideBtn(context, selector) {
   });
 }
 
-function addGuildInfoWidgets() { // Native
+function addGuildInfoWidgets() {
   var guildMembrList = document.getElementById('minibox-guild-members-list');
   if (!guildMembrList) {return;} // list exists
   // hide guild info links
@@ -6566,7 +6359,7 @@ function addGuildInfoWidgets() { // Native
   );
 }
 
-function addOnlineAlliesWidgets() { // Native
+function addOnlineAlliesWidgets() {
   var onlineAlliesList = document.getElementById('minibox-allies-list');
   if (!onlineAlliesList) {return;}
   doHideBtn(onlineAlliesList, 'allySelector');
@@ -6580,14 +6373,14 @@ function addOnlineAlliesWidgets() { // Native
     onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
 }
 
-function fixOnlineGuildBuffLinks() { // Native
+function fixOnlineGuildBuffLinks() {
   updateHCSQuickBuffLinks(
     '#minibox-guild-members-list #guild-minibox-action-quickbuff');
   updateHCSQuickBuffLinks(
     '#minibox-allies-list #online-allies-action-quickbuff');
 }
 
-function gameHelpLink() { // Native
+function gameHelpLink() {
   var nodeList = document.querySelectorAll('#pCR h3');
   Array.prototype.forEach.call(nodeList, function(el) {
     if (el.textContent === 'Game Help') {
@@ -6596,7 +6389,7 @@ function gameHelpLink() { // Native
   });
 }
 
-function getEnvVars() { // Native
+function getEnvVars() {
   calf.enableAllyOnlineList = getValue('enableAllyOnlineList');
   calf.enableEnemyOnlineList = getValue('enableEnemyOnlineList');
   calf.enableGuildInfoWidgets = getValue('enableGuildInfoWidgets');
@@ -6660,7 +6453,7 @@ function callComposing() {
   }
 }
 
-function conditional() { // Native
+function conditional() {
   callAllyEnemy();
   callBounties();
   callGuildInfo();
@@ -6682,12 +6475,12 @@ function navMenu() { // jQuery
   };
 }
 
-function getBoxList(boxList) { // Native
+function getBoxList(boxList) {
   if (boxList) {return boxList;}
   return '';
 }
 
-function storeFSBox(_boxList) { // Native
+function storeFSBox(_boxList) {
   var boxList = getBoxList(_boxList);
   var fsbox = document.getElementById('minibox-fsbox')
     .getElementsByClassName('message')[0].innerHTML;
@@ -6696,7 +6489,7 @@ function storeFSBox(_boxList) { // Native
   setForage('fsh_fsboxcontent', boxList);
 }
 
-function injectFSBoxLog() { // Native
+function injectFSBoxLog() {
   var node = document.getElementById('minibox-fsbox');
   if (!node) {return;}
   var nodediv = node.lastElementChild;
@@ -6712,12 +6505,12 @@ function injectFSBoxLog() { // Native
     '</span>');
 }
 
-function testForGuildLogMsg(guildLogNode) { // Native
+function testForGuildLogMsg(guildLogNode) {
   return location.search !== '?cmd=notepad&blank=1&subcmd=newguildlog' ||
     guildLogNode.innerHTML.search('Guild Log updated!') === -1;
 }
 
-function hideGuildLogMsg(guildLogNode) { // Native
+function hideGuildLogMsg(guildLogNode) {
   // hide the lhs box
   if (testForGuildLogMsg(guildLogNode)) {return;}
   var messageBox = guildLogNode.parentNode;
@@ -6726,7 +6519,7 @@ function hideGuildLogMsg(guildLogNode) { // Native
   }
 }
 
-function gotGuildLogNodes(guildLogNodes) { // Native
+function gotGuildLogNodes(guildLogNodes) {
   var guildLogNode;
   for (var i = 0; i < guildLogNodes.length; i += 1) {
     guildLogNode = guildLogNodes[i];
@@ -6736,43 +6529,43 @@ function gotGuildLogNodes(guildLogNodes) { // Native
   hideGuildLogMsg(guildLogNode);
 }
 
-function changeGuildLogHREF() { // Native
+function changeGuildLogHREF() {
   if (!getValue('useNewGuildLog')) {return;}
   var guildLogNodes = document.querySelectorAll(
     '#pCL a[href="index.php?cmd=guild&subcmd=log"]');
   if (guildLogNodes) {gotGuildLogNodes(guildLogNodes);}
 }
 
-function moveRHSBoxUpOnRHS(title) { // Native
+function moveRHSBoxUpOnRHS(title) {
   document.getElementById('pCR').insertAdjacentElement('afterbegin',
     document.getElementById(title));
 }
 
-function moveRHSBoxToLHS(title) { // Native
+function moveRHSBoxToLHS(title) {
   var boxDiv = document.getElementById(title);
   boxDiv.classList.add('pCR');
   document.getElementById('pCL').appendChild(boxDiv);
 }
 
-function doMoveGuildList() { // Native
+function doMoveGuildList() {
   if (getValue('moveGuildList')) {
     add(3, moveRHSBoxUpOnRHS, ['minibox-guild']);
   }
 }
 
-function doMoveAllyList() { // Native
+function doMoveAllyList() {
   if (getValue('moveOnlineAlliesList')) {
     add(3, moveRHSBoxUpOnRHS, ['minibox-allies']);
   }
 }
 
-function doMoveFsBox() { // Native
+function doMoveFsBox() {
   if (getValue('moveFSBox')) {
     add(3, moveRHSBoxToLHS, ['minibox-fsbox']);
   }
 }
 
-function notHuntMode() { // Native
+function notHuntMode() {
   if (calf.huntingMode) {return;}
   // move boxes in opposite order that you want them to appear.
   doMoveGuildList();
@@ -6802,7 +6595,7 @@ function notHuntMode() { // Native
   add(3, injectQuickMsgDialogJQ);
 }
 
-function prepareEnv() { // Native
+function prepareEnv() {
   if (getValue('gameHelpLink')) {
     add(3, gameHelpLink);
   }
@@ -6814,7 +6607,7 @@ function prepareEnv() { // Native
   }
 }
 
-function lookForHcsData() { // Native
+function lookForHcsData() {
   var hcsData = document.getElementById('html');
   if (hcsData && JSON.parse(hcsData.getAttribute('data-hcs'))['new-ui']) {
     prepareEnv();
@@ -6896,7 +6689,7 @@ function dontPost(e) { // jQuery
     '&pvp_id=' + pvpId;
 }
 
-function gotoPage(pageId) { // Native
+function gotoPage(pageId) {
   window.location = 'index.php?cmd=arena&subcmd=completed&page=' + pageId;
 }
 
@@ -6918,10 +6711,23 @@ function completedArenas() { // jQuery
   $('#pCC input[value="View"]').click(dontPost);
 }
 
+function rekeyInventory(data) {
+  data.items = data.items.reduce(function(prev, curr) {
+    if (curr.is_in_st) {prev.fshHasST = true;}
+    prev[curr.inv_id] = curr;
+    return prev;
+  }, {});
+  return data;
+}
+
+function getInventoryById() {
+  return getInventory().pipe(rekeyInventory);
+}
+
 var inv;
 var target;
 
-function selectPerf() { // Native
+function selectPerf() {
   var items = document.getElementById(target + '-items')
     .getElementsByClassName('selectable-item');
   if (items.length === 0) {return;}
@@ -6931,7 +6737,7 @@ function selectPerf() { // Native
   });
 }
 
-function drawFilters(data) { // Native
+function drawFilters(data) {
   inv = data.items;
   var buttonDiv = document.createElement('div');
   buttonDiv.className = 'fshAC';
@@ -6996,7 +6802,7 @@ function breakItems() { // jQuery.min
   });
 }
 
-function breakEvt(evt) { // Native
+function breakEvt(evt) {
   if (disableBreakdownPrompts &&
       evt.target.id === 'breakdown-selected-items') {
     evt.stopPropagation();
@@ -7008,7 +6814,7 @@ function breakEvt(evt) { // Native
   }
 }
 
-function itemClick(evt) { // Native
+function itemClick(evt) {
   if (!evt.target.classList.contains('selectable-item')) {return;}
   var myItem = evt.target.id.replace('composing-item-', '');
   var itemPos = selectedList.indexOf(myItem);
@@ -7019,12 +6825,12 @@ function itemClick(evt) { // Native
   }
 }
 
-function togglePref() { // Native
+function togglePref() {
   disableBreakdownPrompts = !disableBreakdownPrompts;
   setValue('disableBreakdownPrompts', disableBreakdownPrompts);
 }
 
-function composingBreakdown() { // Native
+function composingBreakdown() {
   perfFilter('composing');
   disableBreakdownPrompts = getValue('disableBreakdownPrompts');
   document.getElementById('breakdown-selected-items').parentNode
@@ -7039,31 +6845,109 @@ function composingBreakdown() { // Native
     .addEventListener('click', togglePref);
 }
 
-function guildTake(e) { // jQuery
-  var self = $(e.target);
-  guildMailboxTake(self.attr('href')).done(function(data) {
-    if (data.r === 1) {return;}
-    self.removeClass();
-    self.closest('table').next().find('td')
-      .html('<span class="fshGreen">Taken</span>');
+function closestTable(el) {
+  if (el.tagName === 'TABLE') {return el;}
+  return closestTable(el.parentNode);
+}
+
+function translateReturnInfo(data) {
+  var info = infoBox(data);
+  var _r = {r: 1, m: info};
+  if (info === 'Item was transferred to the guild store!') {
+    _r = {r: 0, m: ''};
+  }
+  return _r;
+}
+
+function guildMailboxTake(href) {
+  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
+}
+
+function takeResult(self, data) {
+  if (data.r === 0) {
+    closestTable(self).nextElementSibling.rows[0].cells[0].innerHTML =
+      '<span class="fshGreen">Taken</span>';
+  }
+}
+
+function guildMailboxEvent(e) {
+  var self = e.target;
+  if (self.tagName === 'IMG') {
+    e.preventDefault();
+    var anchor = self.parentNode.href;
+    guildMailboxTake(anchor).done(takeResult.bind(null, self));
+  }
+  if (self.className === 'reportLink') {
+    var nodeList = pCC.getElementsByTagName('img');
+    Array.prototype.forEach.call(nodeList, function(el) {el.click();});
+  }
+}
+
+function guildMailbox() {
+  pCC.addEventListener('click', guildMailboxEvent);
+  document.querySelector('#pCC td[height="25"]')
+    .insertAdjacentHTML('beforeend',
+      '<span class="reportLink">Take All</span>');
+}
+
+function getGuild(guildId$$1) {
+  return $.ajax({
+    dataType: 'json',
+    url: 'index.php',
+    data: {
+      cmd: 'export',
+      subcmd: 'guild_members',
+      guild_id: guildId$$1
+    }
   });
 }
 
-function guildMailbox() { // Bad jQuery
-  var items = $('#pCC a');
-  if (items.length === 0) {return;}
-  items.wrap(function(i) {
-    return '<span class="helperQC" href="' + $(items[i]).attr('href') +
-      '"></span>';
-  }).children().unwrap();
-  $('#pCC').on('click', '.helperQC', guildTake);
+function addMembrListToForage(membrList) {
+  getForage('fsh_membrList')
+    .done(function saveMembrListInForage(data) {
+      var oldMemList = data || {};
+      setForage('fsh_membrList', $.extend(oldMemList, membrList));
+    });
+}
 
-  var takeItems = $('<div class="fshCenter"><span class="reportLink">' +
-    'Take All</span></div>');
-  $('#pCC td[height="25"]').append(takeItems);
-  takeItems.click(function() {
-    $('#pCC span.helperQC').click();
+function getGuildMembers(guildId$$1) {
+  return getGuild(guildId$$1).pipe(function membrListToHash(data) {
+    var membrList = {};
+    membrList[guildId$$1] = {};
+    membrList[guildId$$1].lastUpdate = Date.now();
+    data.forEach(function memberToObject(ele) {
+      membrList[guildId$$1][ele.username] = ele;
+    });
+    return membrList;
   });
+}
+
+function getMembrListFromForage(guildId$$1, membrList) {
+  if (membrList && membrList[guildId$$1] &&
+      membrList[guildId$$1].lastUpdate &&
+      membrList[guildId$$1].lastUpdate > Date.now() - 300000) {
+    return membrList;
+  }
+  return getGuildMembers(guildId$$1).done(addMembrListToForage);
+}
+
+function guildMembers(force, guildId$$1) {
+  if (force) {
+    return getGuildMembers(guildId$$1).done(addMembrListToForage);
+  }
+  return getForage('fsh_membrList')
+    .pipe(getMembrListFromForage.bind(null, guildId$$1));
+}
+
+function setHelperMembrList(guildId$$1, membrList) {
+  calf.membrList = membrList[guildId$$1];
+  return calf.membrList;
+}
+
+function getMembrList(force) {
+  var guildId$$1 = guildId();
+  return guildMembers(force, guildId$$1)
+    .pipe(setHelperMembrList.bind(null, guildId$$1));
 }
 
 var newSummary = {};
@@ -7099,7 +6983,7 @@ function doTable() { // jQuery
   });
 }
 
-function summaryLink() { // Native
+function summaryLink() {
   var updateInput = pCC.getElementsByClassName('custombutton');
   if (!updateInput) {return;}
   updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
@@ -7165,24 +7049,24 @@ function injectAdvisorDable() {
 }
 */
 
-function playerName$2(f) { // Native
+function playerName$2(f) {
   if (!membrList[f]) {return f;}
   return '<a href="index.php?cmd=profile&player_id=' +
     membrList[f].id + '">' + f + '</a>';
 }
 
-function playerLevel(f) { // Native
+function playerLevel(f) {
   if (!membrList[f]) {return '';}
   return membrList[f].level;
 }
 
-function playerRank(f) { // Native
+function playerRank(f) {
   if (!membrList[f]) {return '';}
   return '<div class="fshAdvRank">' +
     membrList[f].rank_name + '</div>';
 }
 
-function injectAdvisorNew() { // Native
+function injectAdvisorNew() {
 
   time('guildAdvisor.injectAdvisorNew');
 
@@ -7215,7 +7099,7 @@ function injectAdvisorNew() { // Native
 
 }
 
-function returnAdvisorPage(e, response) { // Native
+function returnAdvisorPage(e, response) {
 
   time('guildAdvisor.returnAdvisorPage' + e);
 
@@ -7298,7 +7182,7 @@ function displayAdvisor() { // jQuery
 
 }
 
-function addStats(f) { // Native
+function addStats(f) {
   if (f === 'Total:') {return;}
   data.push([
     playerName$2(f),
@@ -7316,7 +7200,7 @@ function addStats(f) { // Native
   ]);
 }
 
-function addAdvisorPages() { // Native
+function addAdvisorPages() {
   Object.keys(newSummary).forEach(addStats);
   add(3, displayAdvisor);
 }
@@ -7353,14 +7237,14 @@ function injectAdvisorWeekly() { // jQuery
 
 }
 
-function injectAdvisor() { // Native
+function injectAdvisor() {
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
     getMembrList(false).done(function(response) {
       membrList = response;
       add(3, injectAdvisorNew);
-      // task.add(3, injectAdvisorDable, [membrList]);
+      // add(3, injectAdvisorDable, [membrList]);
     });
   }
 }
@@ -7463,7 +7347,7 @@ var doLvlFilter = [
   function(min, max, level) {return min <= level && level <= max;}
 ];
 
-function hazOpts(_settings, data) { // Native
+function hazOpts(_settings, data) {
   var min = opts.minLvl;
   var max = opts.maxLvl;
   var level = intValue(data[7]);
@@ -7473,7 +7357,7 @@ function hazOpts(_settings, data) { // Native
   return false;
 }
 
-function lvlFilter(_settings, data) { // Native
+function lvlFilter(_settings, data) {
   if (opts) {return hazOpts(_settings, data);}
   return true;
 }
@@ -7592,11 +7476,11 @@ var bazaarItem =
   '<span class="bazaarButton tip-dynamic" style="background-image: ' +
   'url(\'@src@\');" itemid="@itemid@" data-tipped="@tipped@"></span>';
 
-function testQuant$1() { // Native
+function testQuant$1() {
   return testQuant(document.getElementById('buy_amount').value);
 }
 
-function select(evt) { // Native
+function select(evt) {
   var target = evt.target;
   if (!target.classList.contains('bazaarButton')) {return;}
   var theValue = testQuant$1();
@@ -7611,14 +7495,14 @@ function select(evt) { // Native
   selected.appendChild(dupNode);
 }
 
-function quantity() { // Native
+function quantity() {
   var theValue = testQuant$1();
   if (theValue) {
     document.getElementById('quantity').textContent = theValue;
   }
 }
 
-function done(responseText) { // Native
+function done(responseText) {
   document.getElementById('buy_result').insertAdjacentHTML('beforeend',
     '<br>' + infoBox(responseText));
 }
@@ -7634,7 +7518,7 @@ function buy() { // jQuery
   }
 }
 
-function injectBazaar() { // Native
+function injectBazaar() {
   var pbImg = pCC.getElementsByTagName('IMG')[0];
   pbImg.className = 'fshFloatLeft';
   var potions = pCC.getElementsByTagName('A');
@@ -7659,7 +7543,7 @@ var numRE = /[^a-zA-Z0-9.,+\- ]/g;
 var priceRE =
   /([+-]{0,1}[.\d]+ *k)|([+-]{0,1}[.\d]+ *fsp)|([+-]{0,1}[.\d]+ *stam)/;
 
-function getTargetPlayer() { // Native
+function getTargetPlayer() {
   var targetPlayer = pCC
     .getElementsByTagName('h1');
   if (targetPlayer.length !== 0) {
@@ -7746,7 +7630,7 @@ var costFormatter = [
   }
 ];
 
-function formatCost(total) { // Native
+function formatCost(total) {
   return costFormatter.reduce(function(prev, el) {
     var ret = prev;
     if (el.condition(total)) {
@@ -7787,7 +7671,7 @@ function updateBuffCost() { // Legacy
   }
 }
 
-function priceUnit(price) { // Native
+function priceUnit(price) {
   if (price[0].indexOf('k') > 0) {
     return 'k';
   }
@@ -7859,7 +7743,7 @@ function toggleBuffsToBuy(evt) { // Legacy
   updateBuffCost();
 }
 
-function getBuffNameNode(e) { // Native
+function getBuffNameNode(e) {
   var buffNameNode = e.target;
   while (buffNameNode.tagName &&
       buffNameNode.tagName.toLowerCase() !== 'span') {
@@ -7868,7 +7752,7 @@ function getBuffNameNode(e) { // Native
   return buffNameNode;
 }
 
-function bioEvtHdl(e) { // Native
+function bioEvtHdl(e) {
   var buffNameNode = getBuffNameNode(e);
   if (buffNameNode.classList &&
       buffNameNode.classList.contains('buffLink')) {
@@ -7899,7 +7783,7 @@ function renderBio(_bioContents) {
 
 var bioEditLines;
 
-function bioPreview() { // Native
+function bioPreview() {
   var textArea = document.getElementById('textInputBox');
   var bioPreviewHTML = convertTextToHtml(textArea.value);
   textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
@@ -7910,7 +7794,7 @@ function bioPreview() { // Native
     bioPreviewHTML + '</span></td></tr></tbody></table></div>');
 }
 
-function bioWords() { // Native
+function bioWords() {
   // Add description text for the new tags
   pCC.insertAdjacentHTML('beforeend', '<div>' +
     '`~This will allow FSH Script users to ' +
@@ -7924,11 +7808,11 @@ function bioWords() { // Native
     'pack names in them to make buffing even easier!</div>');
 }
 
-function testHeightValid(boxVal) { // Native
+function testHeightValid(boxVal) {
   return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
 }
 
-function changeHeight() { // Native
+function changeHeight() {
   var theBox = document.getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
   if (testHeightValid(boxVal)) {return;}
@@ -7937,7 +7821,7 @@ function changeHeight() { // Native
   document.getElementById('textInputBox').rows = bioEditLines;
 }
 
-function bioHeight() { // Native
+function bioHeight() {
   var bioEditLinesDiv = document.createElement('DIV');
   bioEditLinesDiv.insertAdjacentHTML('beforeend',
     ' Display <input id="fshLinesToShow"' +
@@ -7952,7 +7836,7 @@ function bioHeight() { // Native
   pCC.appendChild(bioEditLinesDiv);
 }
 
-function updateBioCharacters() { // Native
+function updateBioCharacters() {
   var textArea = document.getElementById('textInputBox');
   var previewArea = document.getElementById('biopreview');
   var bioContents = convertTextToHtml(textArea.value);
@@ -7962,7 +7846,7 @@ function updateBioCharacters() { // Native
   }
 }
 
-function injectBioWidgets() { // Native
+function injectBioWidgets() {
   bioEditLines = getValue('bioEditLines');
   var textArea = document.getElementById('textInputBox');
   bioPreview();
@@ -7977,12 +7861,12 @@ function injectBioWidgets() { // Native
   updateBioCharacters();
 }
 
-function removeGuildAvyImgBorder() { // Native
+function removeGuildAvyImgBorder() {
   document.querySelector('#pCC img[oldtitle$="\'s Logo"]')
     .removeAttribute('style');
 }
 
-function guildXPLock() { // Native
+function guildXPLock() {
   var xpLock = document
     .querySelector('#pCC a[data-tipped^="<b>Guild XP</b>"]');
   if (!xpLock) {return;}
@@ -8051,7 +7935,7 @@ function conflictInfo() { // jQuery
   });
 }
 
-function logoToggle() { // Native
+function logoToggle() {
   var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
   changeLogoCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink' +
     ' tip-static" id="toggleGuildLogoControl" ' +
@@ -8066,7 +7950,7 @@ function logoToggle() { // Native
     .addEventListener('click', toggleVisibilty);
 }
 
-function statToggle() { // Native
+function statToggle() {
   var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
   leaveGuildCell.insertAdjacentHTML('beforeend', '<span class="fshNoWrap">' +
     '[ <span class="fshLink tip-static" id="toggleStatisticsControl" ' +
@@ -8082,7 +7966,7 @@ function statToggle() { // Native
     .addEventListener('click', toggleVisibilty);
 }
 
-function structureToggle() { // Native
+function structureToggle() {
   var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
   buildCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink ' +
     'tip-static" id="toggleGuildStructureControl" ' +
@@ -8097,7 +7981,7 @@ function structureToggle() { // Native
     .addEventListener('click', toggleVisibilty);
 }
 
-function batchBuffLinks() { // Native
+function batchBuffLinks() {
   var limit = performance.now() + 5;
   while (performance.now() < limit && memCount < members.length) {
     members[memCount].parentNode.insertAdjacentHTML('beforeend',
@@ -8109,7 +7993,7 @@ function batchBuffLinks() { // Native
   }
 }
 
-function buffLinks() { // Native
+function buffLinks() {
   // TODO preference
   memCount = 0;
   members = document.querySelectorAll(
@@ -8121,7 +8005,7 @@ function buffLinks() { // Native
   });
 }
 
-function selfRecallLink() { // Native
+function selfRecallLink() {
   // self recall
   var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
   var selfRecall = getLi[getLi.length - 1].parentNode;
@@ -8131,7 +8015,7 @@ function selfRecallLink() { // Native
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
-function injectGuild() { // Native
+function injectGuild() {
   add(3, colouredDots);
   add(3, removeGuildAvyImgBorder);
   add(3, guildXPLock);
@@ -8150,62 +8034,55 @@ function injectGuild() { // Native
 
 }
 
-function recallGuildStoreItemReturnMessage(responseText, callback) { // Legacy
-  var target = callback.target;
-  var info = infoBox(responseText);
-  var itemCellElement = target.parentNode;
-  if (info.search('You successfully took the item into your backpack') !==
-      -1) {
-    itemCellElement.innerHTML =
-      '<span style="color:green; font-weight:bold;">Taken</span>';
-  } else if (info !== '') {
-    itemCellElement.innerHTML =
-      '<span style="color:red; font-weight:bold;">Error:' + info + '</span>';
-  } else {
-    itemCellElement.innerHTML = 'Weird Error: check the Tools>Error Console';
-    log('Post the previous HTML and the following message to the ' +
-    'GitHub or to the forum to help us debug this error');
-    log(callback.url);
+function doItemTable(rows) {
+  for (var i = 1; i < rows.length - 1; i += 2) {
+    rows[i].cells[2].insertAdjacentHTML('beforeend',
+      '&nbsp;<span class="reportLink">Fast BP</span>');
   }
 }
 
-function recallGuildStoreItem(evt) { // Legacy
-  var guildStoreID = evt.target.getAttribute('itemID');
-  var recallHref =
-    'index.php?cmd=guild&subcmd=inventory&subcmd2=takeitem&guildstore_id=' +
-    // guildStoreID + '&ajax=1'; // TODO
-    guildStoreID;
-  xmlhttp(recallHref,
-    recallGuildStoreItemReturnMessage,
-    {item: guildStoreID, target: evt.target, url: recallHref});
-}
-
-function doItemTable(itemTable) { // Legacy
-  for (var i = 1; i < itemTable.rows.length; i += 1) {
-    var aRow = itemTable.rows[i];
-    if (aRow.cells[2]) { // itemRow
-      var itemId = aRow.cells[0].firstChild.getAttribute('value');
-      aRow.cells[2].innerHTML += '&nbsp;<span style="cursor:pointer; ' +
-        'text-decoration:underline; color:blue;" itemID="' + itemId +
-        '">Fast BP</span>';
-      var itemRecall = aRow.cells[2].firstChild.nextSibling;
-      itemRecall.addEventListener('click', recallGuildStoreItem);
-    }
-  }
-}
-
-function injectGuildAddTagsWidgets() { // Legacy
-  var itemTable = findNode(
-    '//img[contains(@src,"/items/")]/ancestor::table[1]');
-  if (itemTable) {doItemTable(itemTable);}
-  $('b:contains("100 x Item Level")').closest('tr').next()
-    .children('td:first')
-    .append('<input type="button" id="fshCheckAlTag" value="Check All">');
-  $('#fshCheckAlTag').click(function() {
-    $('input[name*=tagIndex]').each(function(ind, ele) {
-      ele.click();
-    });
+function doCheckAll() {
+  var boxes = document.querySelectorAll('#pCC input[name="tagIndex[]"]');
+  Array.prototype.forEach.call(boxes, function(el) {
+    el.click();
   });
+}
+
+function takeResult$1(self, data) {
+  if (data.r === 0) {
+    self.removeAttribute('style');
+    self.className = 'fshGreen';
+    self.textContent = 'Taken';
+  }
+}
+
+function fastBp(el) {
+  var itmId = el.parentNode.previousElementSibling.previousElementSibling
+    .firstElementChild.value;
+  takeItem(itmId).done(takeResult$1.bind(null, el));
+  el.textContent = '';
+  el.className = 'guildTagSpinner';
+  el.style.backgroundImage = 'url(\'' + imageServer +
+    '/skin/loading.gif\')';
+}
+
+function evtHdlr(e) {
+  var self = e.target;
+  if (self.value === 'Check All') {doCheckAll();}
+  if (self.className === 'reportLink') {fastBp(self);}
+}
+
+function injectGuildAddTagsWidgets() {
+  pCC.addEventListener('click', evtHdlr);
+
+  var nodeList = pCC.getElementsByTagName('table');
+  var itemTable = nodeList[nodeList.length - 1];
+  if (itemTable) {doItemTable(itemTable.rows);}
+
+  var checkAll = document.createElement('input');
+  checkAll.type = 'button';
+  checkAll.value = 'Check All';
+  nodeList[0].rows[5].cells[0].appendChild(checkAll);
 }
 
 var ranks;
@@ -8227,7 +8104,7 @@ var privLookup = {
   'Can View Advisor': 0.1
 };
 
-function parseRankData(linkElement, responseText) { // Native
+function parseRankData(linkElement, responseText) {
   // Makes a weighted calculation of available permissions and gets tax rate
   var doc = createDocument(responseText);
   var checkBoxes = doc.querySelectorAll(
@@ -8256,18 +8133,18 @@ function fetchRankData() { // jQuery
   });
 }
 
-function notValidRow(thisRankRowNum, targetRowNum, parentTable) { // Native
+function notValidRow(thisRankRowNum, targetRowNum, parentTable) {
   return characterRow >= Math.min(thisRankRowNum, targetRowNum) ||
     targetRowNum < 1 ||
     targetRowNum > parentTable.rows.length;
 }
 
-function getTargetRowNumber(val) { // Native
+function getTargetRowNumber(val) {
   if (val === 'Up') {return -1;}
   return 2;
 }
 
-function getPxScroll(val) { // Native
+function getPxScroll(val) {
   if (val === 'Up') {return -22;}
   return 22;
 }
@@ -8290,7 +8167,7 @@ function ajaxifyRankControls(evt) { // jQuery
   window.scrollBy(0, pxScroll);
 }
 
-function doButtons() { // Native
+function doButtons() {
   // gather rank info button
   var weightButton = document.createElement('input');
   weightButton.id = 'getrankweightings';
@@ -8309,7 +8186,7 @@ function doButtons() { // Native
   }
 }
 
-function writeMembers(el) { // Native
+function writeMembers(el) {
   var rankCell = el.firstElementChild;
   var rankName = rankCell.textContent;
   if (ranks[rankName]) { // has members
@@ -8321,7 +8198,7 @@ function writeMembers(el) { // Native
   }
 }
 
-function paintRanks() { // Native
+function paintRanks() {
   var limit = performance.now() + 10;
   while (performance.now() < limit &&
       rankCount < theRows.length) {
@@ -8336,7 +8213,7 @@ function paintRanks() { // Native
   }
 }
 
-function getRanks(membrList) { // Native
+function getRanks(membrList) {
   ranks = Object.keys(membrList).reduce(function(prev, curr) {
     if (curr !== 'lastUpdate') {
       var rankName = membrList[curr].rank_name;
@@ -8474,61 +8351,6 @@ var craftHash = {
   Uncrafted: {abbr: 'Unc', colour: '#666666', index: 1}
 };
 
-var lvlTests$1 = [
-  function(level) {return level === 0;},
-  function(level, min, max) {return isNaN(min) && isNaN(max);},
-  function(level, min, max) {return isNaN(min) && level <= max;},
-  function(level, min, max) {return min <= level && isNaN(max);},
-  function(level, min, max) {return min <= level && level <= max;}
-];
-
-function doLvlFilter$1(_settings, data) {
-  var min = options.fshMinLvl;
-  var max = options.fshMaxLvl;
-  var level = intValue(data[1]); // use data for the level column
-  for (var i = 0; i < lvlTests$1.length; i += 1) {
-    if (lvlTests$1[i](level, min, max)) {return true;}
-  }
-  return false;
-}
-
-function lvlFilter$1() { // jQuery
-  /* Custom filtering function which will search
-  data in column 2 between two values */
-  $.fn.dataTable.ext.search.push(doLvlFilter$1);
-}
-
-function typeFilter() { // jQuery
-  $.fn.dataTable.ext.search.push(
-    function(_settings, _row, _index, data) {
-      return !options.checkedElements ||
-        options.checkedElements[data.type];
-    }
-  );
-}
-
-function setFilter() { // jQuery
-  $.fn.dataTable.ext.search.push(
-    function(_settings, _row, _index, data) {
-      return !options.checkedElements ||
-        !options.checkedElements['-1'] ||
-        options.checkedElements['-1'] &&
-        data.stats &&
-        data.stats.set_id !== '-1';
-    }
-  );
-}
-
-function rarityFilter() { // jQuery
-  $.fn.dataTable.ext.search.push(
-    function(_settings, _row, _index, data) {
-      var rarity = (parseInt(data.rarity, 10) + 100).toString();
-      return !options.checkedElements ||
-        options.checkedElements[rarity];
-    }
-  );
-}
-
 function getT(player_id) {
   if (player_id === -1) {return 4;}
   return 1;
@@ -8540,7 +8362,7 @@ function player(invPlayer, rowPlayer, guild) {
   return guild;
 }
 
-function nameRenderDisplay(data, row) { // Native
+function nameRenderDisplay(data, row) {
   var cur = fallback(theInv.player_id,
     theInv.current_player_id);
   var t = getT(row.player_id);
@@ -8565,26 +8387,26 @@ function nameRenderDisplay(data, row) { // Native
     bold + '</a>' + _setName;
 }
 
-function nameRender(data, type, row) { // Native
+function nameRender(data, type, row) {
   if (type !== 'display') {return data;}
   return nameRenderDisplay(data, row);
 }
 
-function whereData(row) { // Native
+function whereData(row) {
   return fallback(row.folder_id, row.player_id);
 }
 
-function whereRenderUserFolder(row) { // Native
+function whereRenderUserFolder(row) {
   if (row.equipped) {return -2;}
   return parseInt(row.folder_id, 10);
 }
 
-function playerName$3(f) { // Native
+function playerName$3(f) {
   if (!calf.membrList[f]) {return '???';}
   return calf.membrList[f].username;
 }
 
-function whereRender(data, type, row) { // Native
+function whereRender(data, type, row) {
   if (row.folder_id) {
     return whereRenderUserFolder(row);
   }
@@ -8592,13 +8414,13 @@ function whereRender(data, type, row) { // Native
   return playerName$3(row.player_id);
 }
 
-function whereRenderGuildDisplay(row) { // Native
+function whereRenderGuildDisplay(row) {
   if (row.player_id === -1) {return 'GS';}
   return '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
     row.player_id + '">' + playerName$3(row.player_id) + '</a>';
 }
 
-function whereRenderDisplay(data, type, row) { // Native
+function whereRenderDisplay(data, type, row) {
   if (row.player_id) {
     return whereRenderGuildDisplay(row);
   }
@@ -8616,12 +8438,12 @@ function whereRenderDisplay(data, type, row) { // Native
   return folderSelect;
 }
 
-function whereRenderGuildFilter(row) { // Native
+function whereRenderGuildFilter(row) {
   if (row.player_id === -1) {return 'GS';}
   return playerName$3(row.player_id);
 }
 
-function whereRenderFilter(data, type, row) { // Native
+function whereRenderFilter(data, type, row) {
   if (row.player_id) {
     return whereRenderGuildFilter(row);
   }
@@ -8629,18 +8451,18 @@ function whereRenderFilter(data, type, row) { // Native
   return theInv.folders[row.folder_id];
 }
 
-function craftRender(craft) { // Native
+function craftRender(craft) {
   if (craftHash[craft]) {return craftHash[craft].abbr;}
   return '';
 }
 
-function durabilityRender(data, type, row) { // Native
+function durabilityRender(data, type, row) {
   if (parseInt(row.max_durability, 10) > 0) {
     return Math.ceil(row.durability / row.max_durability * 100);
   }
 }
 
-function bpDisplayType(type, row) { // Native
+function bpDisplayType(type, row) {
   if (type !== 'display') {return 'BP';}
   if (row.player_id === -1) {
     return '<span class="fshLink takeItem" invid="' + row.inv_id +
@@ -8651,13 +8473,13 @@ function bpDisplayType(type, row) { // Native
     '" mode="0" action="recall">BP</span>';
 }
 
-function bpRender(where, type, row) { // Native
+function bpRender(where, type, row) {
   if (row.folder_id || row.player_id ===
     theInv.current_player_id) {return;}
   return bpDisplayType(type, row);
 }
 
-function gsDisplayType(_data, type, row) { // Native
+function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
     row.inv_id + '" playerid="' +
@@ -8667,7 +8489,7 @@ function gsDisplayType(_data, type, row) { // Native
   return 'GS';
 }
 
-function gsRender(_data, type, row) { // Native
+function gsRender(_data, type, row) {
   if (row.player_id && row.player_id !== -1 ||
       row.folder_id && row.guild_tag !== '-1') {
     return gsDisplayType(_data, type, row);
@@ -8709,7 +8531,7 @@ var actionTypes = [
   }
 ];
 
-function wearRender(row) { // Native
+function wearRender(row) {
   for (var i = 0; i < actionTypes.length; i += 1) {
     if (actionTypes[i].test(row)) {
       return '<span class="fshLink ' + actionTypes[i].wearAction(row) +
@@ -8719,7 +8541,7 @@ function wearRender(row) { // Native
   return '';
 }
 
-function useRender(row) { // Native
+function useRender(row) {
   for (var i = 0; i < actionTypes.length; i += 1) {
     if (actionTypes[i].test(row)) {
       return '<span class="fshLink ' + actionTypes[i].useAction(row) +
@@ -8729,7 +8551,7 @@ function useRender(row) { // Native
   return '';
 }
 
-function wuRender(data, _type, row) { // Native
+function wuRender(data, _type, row) {
   var action = {
     '0': 'Wear',
     '1': 'Wear',
@@ -8752,7 +8574,7 @@ function wuRender(data, _type, row) { // Native
   return action;
 }
 
-function dropRender(data, type, row) { // Native
+function dropRender(data, type, row) {
   if (fallback(row.guild_tag !== '-1', row.equipped)) {return;}
   if (type !== 'display') {return 'Drop';}
   return '<span class="dropItem tip-static dropLink" data-tipped=' +
@@ -8760,7 +8582,7 @@ function dropRender(data, type, row) { // Native
     ' data-inv="' + row.inv_id + '">Drop</span>';
 }
 
-function sendRender(data, type, row) { // Native
+function sendRender(data, type, row) {
   if (fallback(row.bound, row.equipped)) {return;}
   if (type !== 'display') {return 'Send';}
   return '<span class="sendItem tip-static reportLink" data-tipped=' +
@@ -8768,22 +8590,22 @@ function sendRender(data, type, row) { // Native
     ' data-inv="' + row.inv_id + '">Send</span>';
 }
 
-function selfRowColor(data) { // Native
+function selfRowColor(data) {
   if (data.equipped) {return 'fshGreen';}
   return 'fshNavy';
 }
 
-function guildRowColor(data) { // Native
+function guildRowColor(data) {
   if (data.player_id === -1) {return 'fshNavy';}
   return 'fshMaroon';
 }
 
-function getRowColor(data) { // Native
+function getRowColor(data) {
   if (data.folder_id) {return selfRowColor(data);}
   return guildRowColor(data);
 }
 
-function createdRow(row, data) { // Native
+function createdRow(row, data) {
   var colour = getRowColor(data);
   row.classList.add(colour);
 }
@@ -8898,6 +8720,102 @@ function doTable$1() { // jQuery
     showQuickSendLinks);
 }
 
+function dropItem(invIdList) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'dodropitems',
+      removeIndex: invIdList,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function moveItem(invIdList, folderId) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'profile',
+      subcmd: 'sendtofolder',
+      inv_list: JSON.stringify(invIdList),
+      folder_id: folderId,
+      ajax: 1
+    },
+    dataType: 'json'
+  }).done(dialog);
+}
+
+function sendItem(invIdList) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'trade',
+      subcmd: 'senditems',
+      xc: window.ajaxXC,
+      target_username: getValue('itemRecipient'),
+      sendItemList: invIdList
+    }
+  }).pipe(htmlResult)
+    .done(dialog);
+}
+
+var lvlTests$1 = [
+  function(level) {return level === 0;},
+  function(level, min, max) {return isNaN(min) && isNaN(max);},
+  function(level, min, max) {return isNaN(min) && level <= max;},
+  function(level, min, max) {return min <= level && isNaN(max);},
+  function(level, min, max) {return min <= level && level <= max;}
+];
+
+function doLvlFilter$1(_settings, data) {
+  var min = options.fshMinLvl;
+  var max = options.fshMaxLvl;
+  var level = intValue(data[1]); // use data for the level column
+  for (var i = 0; i < lvlTests$1.length; i += 1) {
+    if (lvlTests$1[i](level, min, max)) {return true;}
+  }
+  return false;
+}
+
+function lvlFilter$1() { // jQuery
+  /* Custom filtering function which will search
+  data in column 2 between two values */
+  $.fn.dataTable.ext.search.push(doLvlFilter$1);
+}
+
+function typeFilter() { // jQuery
+  $.fn.dataTable.ext.search.push(
+    function(_settings, _row, _index, data) {
+      return !options.checkedElements ||
+        options.checkedElements[data.type];
+    }
+  );
+}
+
+function setFilter() { // jQuery
+  $.fn.dataTable.ext.search.push(
+    function(_settings, _row, _index, data) {
+      return !options.checkedElements ||
+        !options.checkedElements['-1'] ||
+        options.checkedElements['-1'] &&
+        data.stats &&
+        data.stats.set_id !== '-1';
+    }
+  );
+}
+
+function rarityFilter() { // jQuery
+  $.fn.dataTable.ext.search.push(
+    function(_settings, _row, _index, data) {
+      var rarity = (parseInt(data.rarity, 10) + 100).toString();
+      return !options.checkedElements ||
+        options.checkedElements[rarity];
+    }
+  );
+}
+
 /* jshint latedef: nofunc */
 var options;
 var showQuickDropLinks;
@@ -8910,7 +8828,7 @@ function doSpinner() { // jQuery
     'Getting inventory data...</span>');
 }
 
-function rekeyMembrList() { // Native
+function rekeyMembrList() {
   calf.membrList = Object.keys(calf.membrList)
     // Using reduce() to rekey the membrList from names to id's
     .reduce(function(prev, curr) {
@@ -8922,7 +8840,7 @@ function rekeyMembrList() { // Native
     }, {});
 }
 
-function decorate() { // Native
+function decorate() {
   if (theInv.folders) {
     theInv.folders['-1'] = 'Main';
   }
@@ -8949,7 +8867,7 @@ function headers() { // jQuery
   $('#pCC').html(myHtml);
 }
 
-function setChecks() { // Native
+function setChecks() {
   Array.prototype.forEach.call(
     document.querySelectorAll('table.fshInvFilter input[type="checkbox"]'),
     function(el) {
@@ -8964,7 +8882,7 @@ function setLvls() { // jQuery
   $('#fshMaxLvl').val(options.fshMaxLvl);
 }
 
-function refresh() { // Native
+function refresh() {
   doSpinner();
   // eslint-disable-next-line no-use-before-define
   syncInvMan();
@@ -9007,7 +8925,7 @@ function allChecks() { // jQuery
   $('#fshInv').DataTable().draw(false);
 }
 
-function clearGearOnly(checkedElements) { // Native
+function clearGearOnly(checkedElements) {
   var newEle = {};
   Object.keys(checkedElements).forEach(function(key) {
     if (parseInt(key, 10) >= 100) {
@@ -9094,22 +9012,22 @@ function wearItem(e) { // jQuery
   anotherSpinner(self);
 }
 
-function useItem$2(e) { // jQuery
+function useItem$1(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
-  useItem(self.attr('invid')).done(function(data) {
+  useItem$1(self.attr('invid')).done(function(data) {
     if (data.r === 1) {return;}
     killRow(self);
   });
   anotherSpinner(self);
 }
 
-function moveItem$1(e) { // jQuery
+function doMoveItem(e) { // jQuery
   var self = $(e.target);
   moveItem([self.data('inv')], self.val());
 }
 
-function dropItem$1(e) { // jQuery
+function doDropItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
   dropItem([self.data('inv')]).done(function(data) {
@@ -9119,7 +9037,7 @@ function dropItem$1(e) { // jQuery
   anotherSpinner(self);
 }
 
-function sendItem$1(e) { // jQuery
+function doSendItem(e) { // jQuery
   var self = $(e.target);
   removeClass(self);
   sendItem([self.data('inv')]).done(function(data) {
@@ -9141,10 +9059,10 @@ function eventHandlers() { // jQuery
   $('#fshInv').on('click', 'span.takeItem', takeItem$1);
   $('#fshInv').on('click', 'span.recallItem', recallItem$1);
   $('#fshInv').on('click', 'span.wearItem', wearItem);
-  $('#fshInv').on('click', 'span.useItem', useItem$2);
-  $('#fshInv').on('change', 'select.moveItem', moveItem$1);
-  $('#fshInv').on('click', 'span.dropItem', dropItem$1);
-  $('#fshInv').on('click', 'span.sendItem', sendItem$1);
+  $('#fshInv').on('click', 'span.useItem', useItem$1);
+  $('#fshInv').on('change', 'select.moveItem', doMoveItem);
+  $('#fshInv').on('click', 'span.dropItem', doDropItem);
+  $('#fshInv').on('click', 'span.sendItem', doSendItem);
 }
 
 function clearButton() { // jQuery
@@ -9159,7 +9077,7 @@ function clearButton() { // jQuery
   });
 }
 
-function getInvMan() { // Native
+function getInvMan() {
 
   time('inventory.getInvMan');
 
@@ -9521,7 +9439,7 @@ function processGuildWidgetRow(aRow) { // Legacy
   guildInvite(aRow);
 }
 
-function getMessageHeader() { // Native
+function getMessageHeader() {
   var nodeList = pCC.getElementsByTagName('TD');
   for (var i = 0; i < nodeList.length; i += 1) {
     if (nodeList[i].textContent === 'Message') {
@@ -9605,7 +9523,7 @@ function doLogColoring(logScreen, dateColumn, chatTable) { // Legacy
   for (var i = 1; i < chatTable.rows.length; i += increment) {
     rowColor(chatTable.rows[i], logScreen, dateColumn);
   }
-  setValue(lastCheckScreen, Date.now());
+  setValue(lastCheckScreen, nowUtc);
 }
 
 function addLogColoring(logScreen, dateColumn) { // Legacy
@@ -10141,12 +10059,7 @@ function injectNewGuildLog() {
   getForage('fsh_guildLog').done(gotOptions);
 }
 
-function closestTable(el) { // Native
-  if (el.tagName === 'TABLE') {return el;}
-  return closestTable(el.parentNode);
-}
-
-function reduceStatTable(prev, curr, index) { // Native
+function reduceStatTable(prev, curr, index) {
   var key = curr.cells[0].textContent.trim().replace(':', '');
   if (!key) {return prev;}
   prev[key] = {ind: index};
@@ -10158,21 +10071,21 @@ function reduceStatTable(prev, curr, index) { // Native
   return prev;
 }
 
-function getVal(prop, obj) { // Native
+function getVal(prop, obj) {
   if (obj[prop] && obj[prop].value) {
     return obj[prop].value;
   }
   return 0;
 }
 
-function getLastIndex(obj, tbl) { // Native
+function getLastIndex(obj, tbl) {
   if (obj.Enhancements) {
     return tbl.rows[obj.Enhancements.ind - 1];
   }
   return tbl.rows[tbl.rows.length - 1];
 }
 
-function addStats$1(el) { // Native
+function addStats$1(el) {
   var statTable = closestTable(el);
   var statObj = Array.prototype.reduce.call(statTable.rows,
     reduceStatTable, {});
@@ -10184,7 +10097,7 @@ function addStats$1(el) { // Native
     totalStats + '&nbsp;</td></tr>');
 }
 
-function fshDataFilter(data) { // Native
+function fshDataFilter(data) {
   var container = document.createElement('div');
   container.insertAdjacentHTML('beforeend', data);
   var bonus = container.getElementsByTagName('font');
@@ -10195,7 +10108,7 @@ function fshDataFilter(data) { // Native
   return container.innerHTML;
 }
 
-function fshPreFilter(options) { // Native
+function fshPreFilter(options) {
   if (options.url.indexOf('fetchitem') !== 0) {return;}
   options.dataFilter = fshDataFilter;
 }
@@ -10206,7 +10119,19 @@ function addStatTotalToMouseover() { // jQuery
 
 var disableDeactivatePrompts = getValue('disableDeactivatePrompts');
 
-function debuff$1(aLink) { // jQuery
+function debuff(buffId) {
+  return $.ajax({
+    url: 'fetchdata.php',
+    data: {
+      a: '22',
+      d: '0',
+      id: buffId
+    },
+    dataType: 'json'
+  });
+}
+
+function doDebuff(aLink) { // jQuery
   var buffId = aLink.getAttribute('href').match(/(\d+)$/)[1];
   debuff(buffId)
     .done(function(data) {
@@ -10218,12 +10143,12 @@ function debuff$1(aLink) { // jQuery
     });
 }
 
-function doPrompt(aLink) { // Native
+function doPrompt(aLink) {
   var onclick = aLink.getAttribute('onclick');
   var warn = onclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
   confirm('Remove Skill', warn, function() {
-    debuff$1(aLink);
+    doDebuff(aLink);
   });
 }
 
@@ -10231,7 +10156,7 @@ function checkForPrompt(aLink) {
   if (!disableDeactivatePrompts) {
     doPrompt(aLink);
   } else {
-    debuff$1(aLink);
+    doDebuff(aLink);
   }
 }
 
@@ -10246,7 +10171,7 @@ function interceptDebuff(e) { // jQuery
   checkForPrompt(aLink);
 }
 
-function fastDebuff() { // Native
+function fastDebuff() {
   var profileRightColumn = document.getElementById('profileRightColumn')
     .lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);
@@ -10285,17 +10210,17 @@ function fastWearEquip(e) { // jQuery
   });
 }
 
-function actionClass(usable) { // Native
+function actionClass(usable) {
   if (usable) {return 'fastUse';}
   return 'fastWear';
 }
 
-function actionText(usable) { // Native
+function actionText(usable) {
   if (usable) {return 'Use';}
   return 'Wear';
 }
 
-function drawButtons(theSpan) { // Native
+function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = document.createElement('DIV');
   myDiv.className = 'fastDiv';
@@ -10310,7 +10235,7 @@ function drawButtons(theSpan) { // Native
   theSpan.parentNode.parentNode.appendChild(myDiv);
 }
 
-function fastWearLinks() { // Native
+function fastWearLinks() {
   var bpTabs = document.getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
@@ -10352,14 +10277,14 @@ function getNekid() { // jQuery
     prm.push($.ajax({
       url: href,
       timeout: 3000
-    }));
+    }).pipe(null, function() {return $.when();}));
   });
-  $.when.apply($, prm).always(function() {
+  $.when.apply($, prm).done(function() {
     location.assign('index.php?cmd=profile');
   });
 }
 
-function nekidBtn() { // Native
+function nekidBtn() {
   var profileRightColumn = document.getElementById('profileRightColumn');
   profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
   var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;
@@ -10378,16 +10303,16 @@ function nekidBtn() { // Native
 var compPages;
 var componentList = {};
 
-function delAllComponent() { // Native
+function delAllComponent() {
   var invTbl = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table')[1];
   var nodeList = invTbl.getElementsByClassName('compDelBtn');
   Array.prototype.forEach.call(nodeList, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+    el.click();
   });
 }
 
-function retriveComponent(responseText, currentPage) { // Native
+function retriveComponent(responseText, currentPage) {
   var nextPage = currentPage + 1;
   var sumComp = document.getElementById('sumComp');
   sumComp.insertAdjacentHTML('beforeend', nextPage + ', ');
@@ -10450,7 +10375,7 @@ function delComponent(evt) { // jQuery
   });
 }
 
-function enableDelComponent() { // Native
+function enableDelComponent() {
   document.getElementById('compDel').parentNode.classList.add('fshHide');
   document.getElementById('compDelAll').parentNode.classList
     .remove('fshHide');
@@ -10488,7 +10413,7 @@ function compEvt(e) {
   }
 }
 
-function profileComponents() { // Native
+function profileComponents() {
   var invTables = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table');
   if (invTables.length !== 2) {return;}
@@ -10507,7 +10432,7 @@ function profileComponents() { // Native
   compDiv.addEventListener('click', compEvt);
 }
 
-function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
+function totalAllyEnemy(target, numberOfContacts, contactsTotal) {
   var _c = '';
   if (contactsTotal && contactsTotal >= numberOfContacts) {
     _c = '/' + contactsTotal;
@@ -10516,7 +10441,7 @@ function totalAllyEnemy(target, numberOfContacts, contactsTotal) { // Native
     numberOfContacts + _c + '</span>');
 }
 
-function findAllyEnemy(el) { // Native
+function findAllyEnemy(el) {
   var isAllies = el.textContent === 'Allies';
   var isEnemies = el.textContent === 'Enemies';
   if (!isAllies && !isEnemies) {return;}
@@ -10532,13 +10457,13 @@ function findAllyEnemy(el) { // Native
   }
 }
 
-function profileParseAllyEnemy() { // Native
+function profileParseAllyEnemy() {
   // Allies/Enemies count/total function
   Array.prototype.forEach.call(
     document.querySelectorAll('#profileLeftColumn strong'), findAllyEnemy);
 }
 
-function expandBio() { // Native
+function expandBio() {
   var bioExpander = document.getElementById('fshBioExpander');
   if (bioExpander.textContent === 'More ...') {
     bioExpander.textContent = 'Less ...';
@@ -10548,7 +10473,7 @@ function expandBio() { // Native
   document.getElementById('fshBioHidden').classList.toggle('fshHide');
 }
 
-function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
+function doCompression(bioCell, bioContents, maxCharactersToShow) {
   // find the end of next HTML tag after the max characters to show.
   var breakPoint = bioContents.indexOf('<br>', maxCharactersToShow) + 4;
   var lineBreak = '';
@@ -10579,7 +10504,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) { // Native
     .addEventListener('click', expandBio);
 }
 
-function findStartPosition(bioContents, _maxRowsToShow) { // Native
+function findStartPosition(bioContents, _maxRowsToShow) {
   var maxRowsToShow = _maxRowsToShow;
   var startIndex = 0;
   while (maxRowsToShow > 0) {
@@ -10589,7 +10514,7 @@ function findStartPosition(bioContents, _maxRowsToShow) { // Native
   return startIndex;
 }
 
-function compressBio(bioCell) { // Native
+function compressBio(bioCell) {
   var bioContents = bioCell.innerHTML;
   var maxCharactersToShow = getValue('maxCompressedCharacters');
   var maxRowsToShow = getValue('maxCompressedLines');
@@ -10603,7 +10528,7 @@ function compressBio(bioCell) { // Native
   doCompression(bioCell, bioContents, maxCharactersToShow);
 }
 
-function doRender(bioCell) { // Native
+function doRender(bioCell) {
   var bioContents = bioCell.innerHTML;
   bioContents = renderBio(bioContents);
   if (bioContents) {
@@ -10611,14 +10536,14 @@ function doRender(bioCell) { // Native
   }
 }
 
-function testForRender(self, bioCell) { // Native
+function testForRender(self, bioCell) {
   if (self && getValue('renderSelfBio') ||
       !self && getValue('renderOtherBios')) {
     doRender(bioCell);
   }
 }
 
-function profileRenderBio(self) { // Native
+function profileRenderBio(self) {
   var bioCell = document.getElementById('profile-bio');
   if (!bioCell) {return;}
   testForRender(self, bioCell);
@@ -10647,7 +10572,7 @@ var guildMessages = {
   }
 };
 
-function quickWearLink() { // Native
+function quickWearLink() {
   // quick wear manager link
   var node = document.querySelector('#profileRightColumn ' +
     'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
@@ -10657,7 +10582,7 @@ function quickWearLink() { // Native
     'class="fshBlue">Quick&nbsp;Wear</a>]');
 }
 
-function profileSelectAll() { // Native
+function profileSelectAll() {
   var bpTabs = document.getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
@@ -10668,15 +10593,11 @@ function profileSelectAll() { // Native
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
   Array.prototype.forEach.call(items, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {
-      bubbles: true,
-      ctrlKey: true,
-      metaKey: true
-    }));
+    el.click();
   });
 }
 
-function selectAllLink() { // Native
+function selectAllLink() {
   // select all link
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
@@ -10692,7 +10613,7 @@ function selectAllLink() { // Native
   node.parentNode.appendChild(wrapper);
 }
 
-function storeVL() { // Native
+function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(
     document.getElementById('stat-vl').textContent, 10);
@@ -10711,7 +10632,7 @@ function guildAry(val) {
   return [];
 }
 
-function guildRelationship(_txt) { // Native
+function guildRelationship(_txt) {
   var scenario = [
     {test: guildAry(getValue('guildSelf')), type: 'self'},
     {test: guildAry(getValue('guildFrnd')), type: 'friendly'},
@@ -10724,7 +10645,7 @@ function guildRelationship(_txt) { // Native
   }
 }
 
-function foundGuildLink(aLink) { // Native
+function foundGuildLink(aLink) {
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
   if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
@@ -10736,13 +10657,13 @@ function foundGuildLink(aLink) { // Native
   }
 }
 
-function profileInjectGuildRel() { // Native
+function profileInjectGuildRel() {
   var aLink = document.querySelector(
     '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
   if (aLink) {foundGuildLink(aLink);}
 }
 
-function profileInjectQuickButton(avyImg, playerid, playername) { // Native
+function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
     quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
@@ -10790,14 +10711,14 @@ function profileInjectQuickButton(avyImg, playerid, playername) { // Native
   avyImg.insertAdjacentHTML('afterend', newhtml);
 }
 
-function removeStatTable(el) { // Native
+function removeStatTable(el) {
   var tde = el.getElementsByTagName('td');
   el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
     '<div class="profile-stat-bonus">' +
     tde[1].textContent + '</div>';
 }
 
-function updateStatistics() { // Native
+function updateStatistics() {
   var charStats = document.getElementById('profileLeftColumn')
     .getElementsByTagName('table')[0];
   var dodgyTables = charStats.getElementsByTagName('table');
@@ -10828,6 +10749,25 @@ function yuuzhan(playername, avyImg) { // Legacy
   }
 }
 
+function updateNmv() {
+  var nmvImg = document.querySelector(
+    '#profileRightColumn img[src$="/60_sm.gif"]');
+  if (!nmvImg) {return;}
+  var atkStat = Number(
+    document.getElementById('stat-attack').firstChild.textContent.trim());
+  if (isNaN(atkStat)) {return;}
+  var defStat = Number(
+    document.getElementById('stat-defense').firstChild.textContent.trim());
+  var oldTipped = nmvImg.dataset.tipped;
+  var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
+  var nmvLvl = Number(lvlAry[1]);
+  var nmvEffect = Math.floor(atkStat * nmvLvl * 0.0025);
+  nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
+    '<br>Attack: ' + (atkStat - nmvEffect).toString() +
+    '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
+    '</center></div>';
+}
+
 function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
@@ -10848,6 +10788,7 @@ function injectProfile() { // Legacy
   //* *************
 
   updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
+  updateNmv();
   updateStatistics();
   profileRenderBio(self);
   addStatTotalToMouseover();
@@ -10882,19 +10823,19 @@ var excludeBuff = {
   'skill-101': 'Severe Condition'
 };
 
-function getEnhancement(doc, enh, inject) { // Native
+function getEnhancement(doc, enh, inject) {
   var enhLevel = doc[enh] || 0;
   var enhClass = 'fshLime';
   if (enhLevel < 100) {enhClass = 'fshRed';}
   inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
 }
 
-function timeUnit(value, unit) { // Native
+function timeUnit(value, unit) {
   if (value > 0) {return value.toString() + unit;}
   return '';
 }
 
-function buffTimeLeft(_s) { // Native
+function buffTimeLeft(_s) {
   var m = Math.floor(_s / 60);
   var s = _s % 60;
   var buffTimeToExpire = timeUnit(m, 'm');
@@ -10903,7 +10844,7 @@ function buffTimeLeft(_s) { // Native
   return buffTimeToExpire;
 }
 
-function getBuff(doc, buff, inject) { // Native
+function getBuff(doc, buff, inject) {
   var s = fallback(doc[buff], 0);
   if (s) {
     var buffTimeToExpire = buffTimeLeft(s);
@@ -10939,7 +10880,7 @@ function quickActivate(evt) { // jQuery
   });
 }
 
-function addStatsQuickBuff(data) { // Native
+function addStatsQuickBuff(data) {
   var myPlayer = document.querySelector('div.player[data-username="' +
     data.username + '"]');
   var activity = myPlayer.querySelector('span.fshLastActivity');
@@ -10956,7 +10897,7 @@ function addStatsQuickBuff(data) { // Native
     data.stamina * 100) + '% )';
 }
 
-function newPlayerSpan(el, playerSpan) { // Native
+function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
     var ret = document.createElement('SPAN');
     ret.className = 'fshPlayer';
@@ -10966,12 +10907,12 @@ function newPlayerSpan(el, playerSpan) { // Native
   return playerSpan;
 }
 
-function getBuffColor(myLvl, playerBuffLevel) { // Native
+function getBuffColor(myLvl, playerBuffLevel) {
   if (myLvl > playerBuffLevel) {return 'fshRed';}
   return 'fshGreen';
 }
 
-function hazBuff(playerData, el) { // Native
+function hazBuff(playerData, el) {
   var myBuffName = el.getAttribute('data-name');
   var playerBuffLevel = playerData[myBuffName];
   var playerSpan = el.nextElementSibling.nextElementSibling;
@@ -10988,7 +10929,7 @@ function hazBuff(playerData, el) { // Native
     '">[' + playerBuffLevel + ']</span>';
 }
 
-function addBuffLevels(evt) { // Native
+function addBuffLevels(evt) {
   var player = evt.target;
   if (player.tagName !== 'H1') {return;}
   getProfile(player.textContent).done(addStatsQuickBuff);
@@ -11009,7 +10950,7 @@ function addBuffLevels(evt) { // Native
 
 }
 
-function doLabels(el) { // Native
+function doLabels(el) {
   var nameSpan = el.firstElementChild;
   var dataTipped = nameSpan.getAttribute('data-tipped');
   var cost = el.previousElementSibling.getAttribute('data-cost');
@@ -11022,7 +10963,7 @@ function doLabels(el) { // Native
   }
 }
 
-function haveTargets() { // Native
+function haveTargets() {
   var firstPlayer = document.getElementById('players')
     .getElementsByTagName('h1')[0];
   if (!firstPlayer && retries < 9) {
@@ -11031,16 +10972,16 @@ function haveTargets() { // Native
     return;
   }
   if (!firstPlayer) {return;}
-  firstPlayer.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+  firstPlayer.click();
 }
 
-function firstPlayerStats() { // Native
+function firstPlayerStats() {
   var targets = document.getElementById('targetPlayers')
     .getAttribute('value');
   if (targets && targets !== '') {haveTargets();}
 }
 
-function getSustain$1(responseText) { // Native
+function getSustain$1(responseText) {
   var enh = responseText._enhancements.reduce(function(prev, curr) {
     prev[curr.name] = curr.value;
     return prev;
@@ -11077,18 +11018,13 @@ function injectQuickBuff() { // jQuery
   getProfile(window.self).done(getSustain$1);
 }
 
-function parseProfileAndPostWarnings(data) { // Native
-  var myBuffs = data._skills.reduce(function(prev, curr) {
-    // What happens if I'm not buffed? TODO
-    prev[curr.name] = curr.level;
-    return prev;
-  }, {});
+var packRE = />([ a-zA-Z]+) Level (\d+)/g;
 
+function postWarnings(myBuffs) {
   var nodeList = pCC.firstElementChild.rows[9]
     .cells[0].firstElementChild.getElementsByTagName('A');
   Array.prototype.forEach.call(nodeList, function(el) {
-    var tipped = el.getAttribute('data-tipped');
-    var packRE = />([ a-zA-Z]+) Level (\d+)/g;
+    var tipped = el.dataset.tipped;
     var packBuffs;
     while ((packBuffs = packRE.exec(tipped)) !== null) {
       if (myBuffs[packBuffs[1]] === packBuffs[2]) {
@@ -11100,8 +11036,15 @@ function parseProfileAndPostWarnings(data) { // Native
   });
 }
 
-function injectRPUpgrades() { // jQuery
-  myStats().done(parseProfileAndPostWarnings);
+function parseProfile(data) {
+  if (data._skills.length !== 0) {
+    var myBuffs = reduceBuffArray(data._skills);
+    postWarnings(myBuffs);
+  }
+}
+
+function injectRPUpgrades() { // jQuery.min
+  myStats().done(parseProfile);
 }
 
 var wearRE = new RegExp('<b>|Bottle|Brew|Draft|Elixir|Potion|Jagua Egg|' +
@@ -11116,7 +11059,7 @@ var nodeList;
 var findUser;
 var foundUser;
 
-function hideOther(el) { // Native
+function hideOther(el) {
   if (el.firstChild.hasAttribute('bgcolor')) {
     foundUser = el.firstChild.firstElementChild.textContent === findUser;
   }
@@ -11125,7 +11068,7 @@ function hideOther(el) { // Native
   }
 }
 
-function hideOthers() { // Native
+function hideOthers() {
   var limit = performance.now() + 5;
   while (performance.now() < limit && counter < nodeList.length) {
     var el = nodeList[counter];
@@ -11139,7 +11082,7 @@ function hideOthers() { // Native
   }
 }
 
-function searchUser() { // Native
+function searchUser() {
   findUser = getUrlParameter('user');
   if (!findUser) {return;}
   var userNodes = document.querySelectorAll(
@@ -11195,7 +11138,7 @@ var events = [
   }
 ];
 
-function eventHandlers$1(evt) { // Native
+function eventHandlers$1(evt) {
   for (var i = 0; i < events.length; i += 1) {
     if (evt.target.classList.contains(events[i].test)) {
       events[i].fn(evt);
@@ -11204,7 +11147,7 @@ function eventHandlers$1(evt) { // Native
   }
 }
 
-function memberHeader(oldhtml) { // Native
+function memberHeader(oldhtml) {
   if (!calf.membrList[oldhtml]) {return oldhtml;}
   return onlineDot({last_login: calf.membrList[oldhtml].last_login}) +
     '<a href="index.php?cmd=profile&player_id=' + calf.membrList[oldhtml].id +
@@ -11212,7 +11155,7 @@ function memberHeader(oldhtml) { // Native
     oldhtml + '>m</span> ]';
 }
 
-function paintHeader() { // Native
+function paintHeader() {
   var limit = performance.now() + 10;
   while (performance.now() < limit && headerCount < headers$1.length) {
     var el = headers$1[headerCount];
@@ -11225,14 +11168,14 @@ function paintHeader() { // Native
   }
 }
 
-function reportHeader() { // Native
+function reportHeader() {
   headers$1 = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td[bgcolor="#DAA534"][colspan="2"] b');
   headerCount = 0;
   add(3, paintHeader);
 }
 
-function paintChild() { // Native
+function paintChild() {
   var limit = performance.now() + 1;
   while (performance.now() < limit && counter < nodeArray.length) {
     var el = nodeList[counter];
@@ -11245,17 +11188,17 @@ function paintChild() { // Native
   }
 }
 
-function hideElement$1(test) { // Native
+function hideElement$1(test) {
   if (test) {return ' class="fshHide"';}
   return '';
 }
 
-function isEquipable(test) { // Native
+function isEquipable(test) {
   if (test) {return 'recall';}
   return 'equip';
 }
 
-function mySpan(el) { // Native
+function mySpan(el) {
   var inject = document.createElement('span');
   var secondHref = el.children.length === 2;
   var firstHref = hideElement$1(!secondHref);
@@ -11276,7 +11219,7 @@ function mySpan(el) { // Native
   return inject;
 }
 
-function doSpan(el) { // Native
+function doSpan(el) {
   if (counter === 0) {
     el.previousSibling.setAttribute('width', '200px');
     el.setAttribute('width', '370px');
@@ -11287,7 +11230,7 @@ function doSpan(el) { // Native
   nodeArray.push(mySpan(el));
 }
 
-function makeSpan() { // Native
+function makeSpan() {
   var limit = performance.now() + 10;
   while (performance.now() < limit && counter < nodeList.length) {
     var el = nodeList[counter];
@@ -11304,7 +11247,7 @@ function makeSpan() { // Native
   }
 }
 
-function prepareChildRows() { // Native
+function prepareChildRows() {
   nodeList = document.querySelectorAll('#pCC table table ' +
     'tr:not(.fshHide) td:nth-of-type(3n+0)');
   nodeArray = [];
@@ -11410,7 +11353,185 @@ function injectScavenging() { // jQuery
   $('#pCC input[value="Scavenge"]').click(dontPost$1);
 }
 
-function getItemDiv() { // Native
+function buffAll(self) {
+  var titanTable = self.parentNode.parentNode.parentNode.parentNode;
+  var shortList = [];
+  for (var j = 1; j < titanTable.rows.length; j += 2) {
+    var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
+    shortList.push(firstCell.textContent);
+  }
+  openQuickBuffByName(shortList.join());
+}
+
+function buffEvent(e) {
+  var self = e.target;
+  if (self.textContent === '[b]') {
+    openQuickBuffByName(self.previousElementSibling.textContent);
+  }
+  if (self.textContent === 'all') {
+    buffAll(self);
+  }
+}
+
+function evtHdl$1(e) {
+  if (e.target.classList.contains('fshBl')) {buffEvent(e);}
+}
+
+function doBuffLinks$1(titanTable) {
+  for (var j = 1; j < titanTable.rows.length; j += 2) {
+    var firstCell = titanTable.rows[j].cells[0];
+    firstCell.insertAdjacentHTML('beforeend',
+      ' <button class="fshBl fshXSmall">[b]</button>');
+  }
+  titanTable.rows[0].cells[0].insertAdjacentHTML('beforeend',
+    ' <button class="fshBl fshXSmall">all</button>');
+}
+
+function gotTables(titanTables) {
+  for (var i = 2; i < titanTables.length; i += 1) {
+    var titanTable = titanTables[i];
+    if (titanTable.rows.length < 2) {continue;}
+    doBuffLinks$1(titanTable);
+  }
+  titanTables[1].addEventListener('click', evtHdl$1);
+}
+
+function injectScouttowerBuffLinks(titanTables) {
+  if (titanTables.length > 2) {gotTables(titanTables);}
+}
+
+function cooldownTracker(aRow, theTitans) {
+  var myName = aRow.cells[0].firstElementChild.getAttribute('oldtitle')
+    .replace(' (Titan)', '');
+  if (!theTitans[myName]) {
+    var cooldown = aRow.nextElementSibling.cells[0].textContent;
+    var coolTime = 0;
+    if (cooldown.indexOf('until') !== -1) {
+      coolTime = parseDateAsTimestamp(
+        cooldown.replace('Cooldown until: ', ''));
+    }
+    theTitans[myName] = {
+      cooldownText: cooldown,
+      coolTime: coolTime,
+      seen: 'yes'
+    };
+  }
+}
+
+function addRow(theTitans, trackerTable, titan) {
+  if (theTitans[titan].coolTime < Date.now()) {return;}
+  trackerTable.insertAdjacentHTML('beforeend',
+    '<tr><td class="fshCenter">' + titan + '</td>' +
+    '<td class="fshBold fshCenter fshCooldown">' +
+    theTitans[titan].cooldownText + '</td><td class="fshCenter">' +
+    theTitans[titan].seen + '</td></tr>');
+}
+
+function displayTracker(parentTable, theTitans) {
+  var trackerTable = document.createElement('table');
+  trackerTable.className = 'fshTTracker';
+  var tBody = document.createElement('tbody');
+  trackerTable.appendChild(tBody);
+  tBody.insertAdjacentHTML('beforeend',
+    '<tr><td class="header fshCenter">Titan</td>' +
+    '<td class="header fshCenter">Cooldown</td>' +
+    '<td class="header fshCenter">Visible</td></tr>');
+  Object.keys(theTitans).forEach(addRow.bind(null, theTitans, tBody));
+
+  var newRow = parentTable.insertRow(5);
+  var newCell = newRow.insertCell(-1);
+  newCell.colSpan = 3;
+  newCell.appendChild(trackerTable);
+}
+
+function addMissingTitansFromOld(oldTitans, newTitans) {
+  if (!oldTitans) {return;}
+  Object.keys(oldTitans).forEach(function(oldTitan) {
+    if (newTitans[oldTitan]) {return;}
+    if (oldTitans[oldTitan].coolTime <= Date.now()) {return;}
+    newTitans[oldTitan] = {
+      cooldownText: oldTitans[oldTitan].cooldownText,
+      coolTime: oldTitans[oldTitan].coolTime,
+      seen: 'no'
+    };
+  });
+}
+
+function getTitanString(guildKills, totalHP, currentHP) {
+  var numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
+  if (guildKills >= numberOfKillsToSecure) {
+    return 'Secured';
+  }
+  if (numberOfKillsToSecure - guildKills > currentHP) {
+    return '<span class="fshRed">Cannot Secure</span>';
+  }
+  return '<span class="fshRed">' +
+    (numberOfKillsToSecure - guildKills) + '</span> to secure';
+}
+
+function getKillsPct(currentNumberOfKills, guildKills) {
+  if (currentNumberOfKills === 0) {return 0;}
+  return guildKills * 100 / currentNumberOfKills;
+}
+
+function killsSummary(aRow) {
+  var titanHP = aRow.cells[2].textContent;
+  if (titanHP.indexOf('-') !== -1) {return;}
+  var guildKills = Number(aRow.cells[3].textContent);
+  var titanHPArray = titanHP.split('/');
+  var currentHP = Number(titanHPArray[0]);
+  var totalHP = Number(titanHPArray[1]);
+  var currentNumberOfKills = totalHP - currentHP;
+  var titanString = getTitanString(guildKills, totalHP, currentHP);
+  var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
+  aRow.cells[3].insertAdjacentHTML('beforeend',
+    '<br><span class="fshBlue"> (' +
+    getKillsPct(currentNumberOfKills, guildKills).toFixed(2) +
+    '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')');
+}
+
+function gotOldTitans(oldTitans) {
+  var titanTables = pCC.getElementsByTagName('table');
+  injectScouttowerBuffLinks(titanTables);
+  var titanTable = titanTables[1];
+  var newTitans = {};
+  for (var i = 1; i < titanTable.rows.length - 1; i += 6) {
+    var aRow = titanTable.rows[i];
+    killsSummary(aRow);
+    cooldownTracker(aRow, newTitans);
+  }
+  addMissingTitansFromOld(oldTitans, newTitans);
+  displayTracker(titanTables[0], newTitans);
+  setForage('fsh_titans', newTitans);
+}
+
+function injectScouttower() {
+  getForage('fsh_titans').done(gotOldTitans);
+}
+
+function getScoutTowerDetails(responseText) { // Legacy
+  var doc = createDocument(responseText);
+  injectScouttowerBuffLinks(doc.getElementById('pCC')
+    .getElementsByTagName('table'));
+  var scoutTowerTable = findNode(
+    '//table[tbody/tr/td/img[contains(@src,"/banners/scouttower.png")]]',
+    doc);
+  if (scoutTowerTable) {
+    var titanTable = findNode(
+      '//table[tbody/tr/td/img[contains(@src,"/banners/titankilllog.png")]]');
+    var newRow = titanTable.insertRow(0);
+    newRow.appendChild(scoutTowerTable.rows[1].cells[0])
+      .insertAdjacentHTML('beforeend', '<br><br>');
+    newRow = titanTable.insertRow(1);
+    newRow.appendChild(scoutTowerTable.rows[8].cells[0]);
+  }
+}
+
+function injectTitan() { // jQuery
+  $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
+}
+
+function getItemDiv() {
   var itemDiv = document.getElementById('item-div');
   if (!itemDiv) {
     itemDiv = document.createElement('div');
@@ -11427,7 +11548,7 @@ function getItemDiv() { // Native
   return itemDiv;
 }
 
-function doHideFolder(evt) { // Native
+function doHideFolder(evt) {
   var folderid = evt.target.id;
   var itemDiv = getItemDiv();
   var items = itemDiv.getElementsByTagName('table');
@@ -11448,12 +11569,12 @@ function doHideFolder(evt) { // Native
   });
 }
 
-function hideFolder(evt) { // native
+function hideFolder(evt) {
   if (evt.target.nodeName === 'SPAN' &&
       evt.target.id.indexOf('folderid') !== -1) {doHideFolder(evt);}
 }
 
-function doFolderHeaders(folders) { // native
+function doFolderHeaders(folders) {
   var foldersRow = document.createElement('tr');
   foldersRow.id = 'fshFolderSelect';
   var folderCell = '<td colspan=6>';
@@ -11477,13 +11598,13 @@ function doFolderHeaders(folders) { // native
 
 var invItems;
 
-function stColor(el, item) { // Native
+function stColor(el, item) {
   if (item.is_in_st) {
     el.classList.add('isInST');
   } else {el.classList.add('tradeItemMargin');}
 }
 
-function forEachInvItem(el) { // Native
+function forEachInvItem(el) {
   var checkbox = el.firstElementChild.lastElementChild.firstElementChild
     .firstElementChild;
   var item = invItems[checkbox.getAttribute('value')];
@@ -11493,7 +11614,7 @@ function forEachInvItem(el) { // Native
   checkbox.classList.add('itemtype' + item.type);
 }
 
-function processTrade(data) { // native
+function processTrade(data) {
 
   time('trade.processTrade');
 
@@ -11514,7 +11635,7 @@ function inv$1() { // jQuery
   });
 }
 
-function getHowMany(itemTables) { // Native
+function getHowMany(itemTables) {
   var howMany = parseInt(document.getElementById('fshSendHowMany').value, 10);
   if (isNaN(howMany)) {return itemTables.length;}
   // maximum of 100 items in an ST
@@ -11522,13 +11643,13 @@ function getHowMany(itemTables) { // Native
   return howMany;
 }
 
-function shouldBeChecked(itemid, checkbox) { // Native
+function shouldBeChecked(itemid, checkbox) {
   return itemid === 'itemid-1' ||
     itemid === 'itemid-2' && checkbox.classList.contains('itemtype12') ||
     checkbox.classList.contains(itemid);
 }
 
-function doCheckAll(evt) { // Native
+function doCheckAll$1(evt) {
   var itemid = evt.target.id;
   var itemList = document.getElementById('item-div') ||
     document.getElementById('item-list');
@@ -11549,11 +11670,11 @@ function doCheckAll(evt) { // Native
   });
 }
 
-function toggleAllPlants(evt) { // native
-  if (evt.target.classList.contains('fshCheckAll')) {doCheckAll(evt);}
+function toggleAllPlants(evt) {
+  if (evt.target.classList.contains('fshCheckAll')) {doCheckAll$1(evt);}
 }
 
-function injectTradeOld() { // native
+function injectTradeOld() {
   var multiple = document.createElement('tr');
   multiple.id = 'fshSelectMultiple';
   var myTd = '<td colspan=6>Select:&ensp;<span id="itemid-1" ' +
@@ -11574,12 +11695,12 @@ function injectTradeOld() { // native
   el.parentNode.insertBefore(multiple, el);
 }
 
-function injectTrade() { // native
+function injectTrade() {
   add(3, inv$1);
   add(3, injectTradeOld);
 }
 
-function calcLvlToTest() { // Native
+function calcLvlToTest() {
   var levelToTest = intValue(document.getElementsByClassName(
     'stat-level')[0].nextElementSibling.textContent);
   var characterVirtualLevel = getValue('characterVirtualLevel');
@@ -11587,12 +11708,12 @@ function calcLvlToTest() { // Native
   return levelToTest;
 }
 
-function calcPvpRange(levelToTest) { // Native
+function calcPvpRange(levelToTest) {
   if (levelToTest <= 205) {return 5;}
   return 10;
 }
 
-function calcGvgRange(levelToTest) { // Native
+function calcGvgRange(levelToTest) {
   if (levelToTest <= 300) {
     return 25;
   }
@@ -11602,7 +11723,7 @@ function calcGvgRange(levelToTest) { // Native
   return 100;
 }
 
-function injectViewGuild() { // Native
+function injectViewGuild() {
   add(3, colouredDots);
   removeGuildAvyImgBorder();
   guildXPLock();
@@ -11691,19 +11812,19 @@ var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
 var combatLog$1 = [];
 var combatData;
 
-function storeBuffs(buff) { // Native
+function storeBuffs(buff) {
   if (buff.id === 54 || buff.id === 26) {
     combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
   }
 }
 
-function storeEnhancements(enh) { // Native
+function storeEnhancements(enh) {
   if (notSave.indexOf(enh.name) === -1) {
     combatData.player.enhancements[enh.name] = enh.value;
   }
 }
 
-function processCombatResponse(e, data) { // Native
+function processCombatResponse(e, data) {
   combatData = {};
   combatData.combat = data.response.data;
   if (combatData.combat.inventory_id) {
@@ -11722,7 +11843,7 @@ function processCombatResponse(e, data) { // Native
   setForage('fsh_combatLog', combatLog$1);
 }
 
-function combatResponse(e, data) { // Native
+function combatResponse(e, data) {
   // If bad response do nothing.
   if (data.response.response === 0) {processCombatResponse(e, data);}
 }
@@ -11744,7 +11865,7 @@ function doFormGroup(e) { // jQuery
   GameData.doAction(12, 401, {}, 0);
 }
 
-function openQuickBuff(e) { // Native
+function openQuickBuff(e) {
   e.preventDefault();
   openQuickBuffByName(playerName());
 }
@@ -11897,6 +12018,61 @@ var assets$1 = {
       'defending group and attacking group.</td></tr>' +
     '</tbody></table>'
 };
+
+function groupViewStats(doc) {
+  var attackElement = doc.getElementById('stat-attack');
+  var defenseElement = doc.getElementById('stat-defense');
+  var armorElement = doc.getElementById('stat-armor');
+  var damageElement = doc.getElementById('stat-damage');
+  var hpElement = doc.getElementById('stat-hp');
+  return {
+    attack: intValue(attackElement.textContent),
+    attackElement: attackElement,
+    defense: intValue(defenseElement.textContent),
+    defenseElement: defenseElement,
+    armor: intValue(armorElement.textContent),
+    armorElement: armorElement,
+    damage: intValue(damageElement.textContent),
+    damageElement: damageElement,
+    hp: intValue(hpElement.textContent),
+    hpElement: hpElement
+  };
+}
+
+function parseGroupStats(html) {
+  var doc = createDocument(html);
+  return groupViewStats(doc);
+}
+
+function getGroupStats(viewStats) {
+  return $.ajax(viewStats).pipe(parseGroupStats);
+}
+
+function parseMercStats(html) {
+  var doc = createDocument(html);
+  var mercElements = doc.querySelectorAll('#pCC img[src*="/merc/"]');
+  var mercTotal = [0, 0, 0, 0, 0];
+  Array.prototype.forEach.call(mercElements, function(merc) {
+    var mouseoverText = merc.dataset.tipped;
+    mercTotal = mercTotal.map(function(el, i) {
+      return el + Number(mercRE[i].exec(mouseoverText)[1]);
+    });
+  });
+  mercTotal = mercTotal.map(function(el) {
+    return Math.round(el * defenderMultiplier);
+  });
+  return {
+    attack: mercTotal[0],
+    defense: mercTotal[1],
+    armor: mercTotal[2],
+    damage: mercTotal[3],
+    hp: mercTotal[4]
+  };
+}
+
+function getMercStats() {
+  return $.ajax('index.php?cmd=guild&subcmd=mercs').pipe(parseMercStats);
+}
 
 var relicData;
 var containerDiv;
@@ -12387,19 +12563,19 @@ function prepareShop() {
   $.subscribe('prompt.worldDialogShop', worldDialogShop);
 }
 
-function evalMiss(combat) { // Native
+function evalMiss(combat) {
   if (combat.numberOfCreatureHitsTillDead - combat.numberOfHitsRequired <= 1) {
     return ', dies on miss';
   }
   return ', survives a miss';
 }
 
-function canIHit(combat) { // Native
+function canIHit(combat) {
   return combat.numberOfHitsRequired === '-' ||
     combat.numberOfHitsRequired > combat.numberOfCreatureHitsTillDead;
 }
 
-function evalPlayerHits(combat) { // Native
+function evalPlayerHits(combat) {
   if (combat.numberOfCreatureHitsTillDead === '-') {
     return combat.numberOfHitsRequired;
   } else if (canIHit(combat)) {
@@ -12408,12 +12584,12 @@ function evalPlayerHits(combat) { // Native
   return combat.numberOfHitsRequired;
 }
 
-function canCreatureHit(combat) { // Native
+function canCreatureHit(combat) {
   return combat.numberOfCreatureHitsTillDead === '-' ||
     combat.numberOfCreatureHitsTillDead > combat.numberOfHitsRequired;
 }
 
-function evalCreatureHits(combat) { // Native
+function evalCreatureHits(combat) {
   if (combat.numberOfHitsRequired === '-') {
     return combat.numberOfCreatureHitsTillDead;
   } else if (canCreatureHit(combat)) {
@@ -12443,7 +12619,7 @@ var evalFightStatus = [
   }
 ];
 
-function evalAnalysis(combat) { // Native
+function evalAnalysis(combat) {
   // Analysis:
   combat.playerHits = evalPlayerHits(combat);
   combat.creatureHits = evalCreatureHits(combat);
@@ -12457,14 +12633,14 @@ function evalAnalysis(combat) { // Native
   return combat;
 }
 
-function calcArm(combat) { // Native
+function calcArm(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupArmorValue;
   }
   return combat.player.armorValue;
 }
 
-function evalSanctuary(combat) { // Native
+function evalSanctuary(combat) {
   if (combat.player.sanctuaryLevel > 0) {
     combat.extraNotes += 'Sanc Bonus Armor = ' +
       Math.floor(combat.player.armorValue *
@@ -12472,14 +12648,14 @@ function evalSanctuary(combat) { // Native
   }
 }
 
-function evalTerrorize(combat) { // Native
+function evalTerrorize(combat) {
   if (combat.player.terrorizeLevel > 0) {
     combat.extraNotes += 'Terrorize Creature Damage Effect = ' +
       combat.terrorizeEffect * -1 + '<br>';
   }
 }
 
-function evalArmour(combat) { // Native
+function evalArmour(combat) {
   var armorVal = calcArm(combat);
   combat.overallArmorValue = armorVal +
     Math.floor(combat.player.armorValue *
@@ -12512,14 +12688,14 @@ function evalArmour(combat) { // Native
   return combat;
 }
 
-function calcAttack(combat) { // Native
+function calcAttack(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupAttackValue;
   }
   return combat.player.attackValue;
 }
 
-function calcHitByHowMuch(combat) { // Native
+function calcHitByHowMuch(combat) {
   var remainingDef = combat.creature.defense - combat.creature.defense *
     combat.player.darkCurseLevel * 0.002;
   if (combat.combatEvaluatorBias === 3) {
@@ -12529,7 +12705,7 @@ function calcHitByHowMuch(combat) { // Native
     Math.ceil(combat.attackVariable * remainingDef);
 }
 
-function evalAttack(combat) { // Native
+function evalAttack(combat) {
   var atkValue = calcAttack(combat);
   // Attack:
   if (combat.player.darkCurseLevel > 0) {
@@ -12552,7 +12728,7 @@ function evalAttack(combat) { // Native
   return combat;
 }
 
-function stamAtLowestCa(combat) { // Native
+function stamAtLowestCa(combat) {
   if (combat.player.counterAttackLevel > 0) {
     return Math.ceil((1 + combat.player.doublerLevel / 50) * 0.0025 *
       combat.lowestFeasibleCALevel);
@@ -12560,7 +12736,7 @@ function stamAtLowestCa(combat) { // Native
   return 0;
 }
 
-function caRunning(combat) { // Native
+function caRunning(combat) {
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
     combat.player.attackValue / 0.0025), 0);
@@ -12596,12 +12772,12 @@ function caRunning(combat) { // Native
   }
 }
 
-function needCa(combat) { // Native
+function needCa(combat) {
   return combat.numberOfHitsRequired === '-' ||
     combat.numberOfHitsRequired !== 1;
 }
 
-function evalCaKill(combat) { // Native
+function evalCaKill(combat) {
   if (combat.lowestCALevelToStillHit > 175) {
     combat.extraNotes +=
       'Even with CA175 you cannot hit this creature<br>';
@@ -12612,7 +12788,7 @@ function evalCaKill(combat) { // Native
   }
 }
 
-function evalCaOneHit(combat) { // Native
+function evalCaOneHit(combat) {
   if (combat.lowestCALevelToStillKill > 175) {
     combat.extraNotes +=
       'Even with CA175 you cannot 1-hit kill this creature<br>';
@@ -12623,7 +12799,7 @@ function evalCaOneHit(combat) { // Native
   }
 }
 
-function caResult(combat) { // Native
+function caResult(combat) {
   combat.lowestCALevelToStillHit = Math.max(Math.ceil((
     combat.counterAttackBonusAttack - combat.hitByHowMuch + 1) /
     combat.player.attackValue / 0.0025), 0);
@@ -12634,7 +12810,7 @@ function caResult(combat) { // Native
   evalCaOneHit(combat);
 }
 
-function evalCA(combat) { // Native
+function evalCA(combat) {
   if (combat.player.counterAttackLevel > 0 &&
       combat.numberOfHitsRequired === 1) {
     caRunning(combat);
@@ -12645,21 +12821,21 @@ function evalCA(combat) { // Native
   return combat;
 }
 
-function calcHp(combat) { // Native
+function calcHp(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupHPValue;
   }
   return combat.player.hpValue;
 }
 
-function calcDmg(combat) { // Native
+function calcDmg(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupDamageValue;
   }
   return combat.player.damageValue;
 }
 
-function evalFortitude(combat) { // Native
+function evalFortitude(combat) {
   var hpValue = calcHp(combat);
   var fortitudeLevel = combat.player.fortitudeLevel;
   combat.fortitudeExtraHPs = Math.floor(hpValue * fortitudeLevel * 0.001);
@@ -12670,7 +12846,7 @@ function evalFortitude(combat) { // Native
   combat.overallHPValue = hpValue + combat.fortitudeExtraHPs;
 }
 
-function evalChiStrike(combat) { // Native
+function evalChiStrike(combat) {
   var chiStrikeLevel = combat.player.chiStrikeLevel;
   combat.chiStrikeExtraDamage = Math.floor(combat.overallHPValue *
     chiStrikeLevel * 0.001);
@@ -12680,7 +12856,7 @@ function evalChiStrike(combat) { // Native
   }
 }
 
-function evalDamage(combat) { // Native
+function evalDamage(combat) {
   // Damage:
   evalFortitude(combat);
   evalChiStrike(combat);
@@ -12708,14 +12884,14 @@ function evalDamage(combat) { // Native
   return combat;
 }
 
-function calcDef(combat) { // Native
+function calcDef(combat) {
   if (combat.callback.groupExists) {
     return combat.callback.groupDefenseValue;
   }
   return combat.player.defenseValue;
 }
 
-function evalConstitution(combat) { // Native
+function evalConstitution(combat) {
   if (combat.player.constitutionLevel > 0) {
     combat.extraNotes += 'Constitution Bonus Defense = ' +
     Math.floor(calcDef(combat) *
@@ -12723,7 +12899,7 @@ function evalConstitution(combat) { // Native
   }
 }
 
-function evalFlinch(combat) { // Native
+function evalFlinch(combat) {
   if (combat.player.flinchLevel > 0) {
     combat.extraNotes += 'Flinch Bonus Attack Reduction = ' +
     Math.floor(combat.creature.attack * combat.player.flinchLevel *
@@ -12731,7 +12907,7 @@ function evalFlinch(combat) { // Native
   }
 }
 
-function evalDefence(combat) { // Native
+function evalDefence(combat) {
   combat.overallDefenseValue = calcDef(combat) +
     Math.floor(calcDef(combat) *
     combat.player.constitutionLevel * 0.001) +
@@ -12753,14 +12929,14 @@ function evalDefence(combat) { // Native
   return combat;
 }
 
-function evalSes(combat) { // Native
+function evalSes(combat) {
   if (combat.player.superEliteSlayerLevel > 0) {
     combat.extraNotes += 'SES Stat Reduction Multiplier = ' +
     combat.player.superEliteSlayerMultiplier + '<br>';
   }
 }
 
-function evalHolyFlame(combat) { // Native
+function evalHolyFlame(combat) {
   combat.holyFlameBonusDamage = 0;
   if (combat.creature.class !== 'Undead') {return;}
   combat.holyFlameBonusDamage = Math.max(Math.floor(
@@ -12772,7 +12948,7 @@ function evalHolyFlame(combat) { // Native
   }
 }
 
-function evalExtraStam(combat) { // Native
+function evalExtraStam(combat) {
   combat.extraStaminaPerHit = 0;
   if (combat.player.counterAttackLevel > 0) {
     combat.extraStaminaPerHit = Math.ceil(
@@ -12782,14 +12958,14 @@ function evalExtraStam(combat) { // Native
   }
 }
 
-function evalDeathDealer(combat) { // Native
+function evalDeathDealer(combat) {
   if (combat.player.deathDealerLevel > 0) {
     combat.extraNotes += 'DD Bonus Damage = ' +
       combat.deathDealerBonusDamage + '<br>';
   }
 }
 
-function evalCounterAttack(combat) { // Native
+function evalCounterAttack(combat) {
   if (combat.player.counterAttackLevel > 0) {
     combat.extraNotes += 'CA Bonus Attack/Damage = ' +
       combat.counterAttackBonusAttack + ' / ' +
@@ -12798,7 +12974,7 @@ function evalCounterAttack(combat) { // Native
   }
 }
 
-function evalExtraBuffs(combat) { // Native
+function evalExtraBuffs(combat) {
   combat.extraNotes = '';
   evalSes(combat);
   // math section ... analysis
@@ -12822,22 +12998,22 @@ function evalExtraBuffs(combat) { // Native
   return combat;
 }
 
-function doesGroupExist(combat) { // Native
+function doesGroupExist(combat) {
   if (combat.callback.groupExists) {return 'Group ';}
   return '';
 }
 
-function canIHitIt(combat) { // Native
+function canIHitIt(combat) {
   if (combat.hitByHowMuch > 0) {return 'Yes';}
   return 'No';
 }
 
-function willIBeHit(combat) { // Native
+function willIBeHit(combat) {
   if (combat.creatureHitByHowMuch >= 0) {return 'Yes';}
   return 'No';
 }
 
-function evalHTML(combat) { // Native
+function evalHTML(combat) {
   return '<table width="100%"><tbody>' +
     '<tr><td bgcolor="#CD9E4B" colspan="4" align="center">' +
     doesGroupExist(combat) +
@@ -12887,14 +13063,14 @@ function evalHTML(combat) { // Native
     '</tbody></table>';
 }
 
-function getBiasGeneral(combat) { // Native
+function getBiasGeneral(combat) {
   if (assets.bias[combat.combatEvaluatorBias]) {
     return assets.bias[combat.combatEvaluatorBias].generalVariable;
   }
   return 1.1053;
 }
 
-function getBiasHp(combat) { // Native
+function getBiasHp(combat) {
   if (assets.bias[combat.combatEvaluatorBias]) {
     return assets.bias[combat.combatEvaluatorBias].hpVariable;
   }
@@ -13014,7 +13190,7 @@ function checkIfGroupExists(responseText) { // Hybrid
   }
 }
 
-function addRemoveCreatureToDoNotKillList(evt) { // Native
+function addRemoveCreatureToDoNotKillList(evt) {
   var creatureName = evt.target.getAttribute('creatureName');
   var ind = calf.doNotKillList.indexOf(creatureName);
   if (ind !== -1) {
@@ -13067,6 +13243,180 @@ function readyViewCreature() { // Hybrid
       addRemoveCreatureToDoNotKillList, true);
 }
 
+var huntingBuffs$1;
+var huntingBuffsName;
+var hidePlayerActions;
+var missingBuffsDiv;
+
+function getPrefs() {
+  calf.hideSubLvlCreature = getValue('hideSubLvlCreature');
+  hidePlayerActions = getValue('hidePlayerActions');
+  calf.showBuffs = getValue('showHuntingBuffs');
+  calf.enabledHuntingMode = getValue('enabledHuntingMode');
+  calf.buffs = shouldBeArray('huntingBuffs');
+  calf.buffsName = getValue('huntingBuffsName');
+  calf.buffs2 = shouldBeArray('huntingBuffs2');
+  calf.buffs2Name = getValue('huntingBuffs2Name');
+  calf.buffs3 = shouldBeArray('huntingBuffs3');
+  calf.buffs3Name = getValue('huntingBuffs3Name');
+  calf.doNotKillList = shouldBeArray('doNotKillList');
+}
+
+var buffLookup = {
+  '1': function() {
+    huntingBuffs$1 = calf.buffs;
+    huntingBuffsName = calf.buffsName;
+  },
+  '2': function() {
+    huntingBuffs$1 = calf.buffs2;
+    huntingBuffsName = calf.buffs2Name;
+  },
+  '3': function() {
+    huntingBuffs$1 = calf.buffs3;
+    huntingBuffsName = calf.buffs3Name;
+  }
+};
+
+function setCurrentBuffList() {
+  var tmpFn = buffLookup[calf.enabledHuntingMode];
+  if (typeof tmpFn === 'function') {
+    tmpFn();
+  }
+}
+
+function toggleSubLvlCreature() {
+  calf.hideSubLvlCreature = !calf.hideSubLvlCreature;
+  setValue('hideSubLvlCreature', calf.hideSubLvlCreature);
+  GameData.fetch(256);
+}
+
+function toggleHidePlayerActions() {
+  hidePlayerActions = !hidePlayerActions;
+  setValue('hidePlayerActions', hidePlayerActions);
+  GameData.fetch(256);
+}
+
+function toggleShowHuntingBuffs() {
+  calf.showBuffs = !calf.showBuffs;
+  setValue('showHuntingBuffs', calf.showBuffs);
+  GameData.fetch(16);
+}
+
+function toggleEnabledHuntingMode(e) {
+  if (e.target.name !== 'enabledHuntingMode') {return;}
+  calf.enabledHuntingMode = e.target.value;
+  setValue('enabledHuntingMode', calf.enabledHuntingMode);
+  setCurrentBuffList();
+  GameData.fetch(16);
+}
+
+var fshEvents = {
+  hideSubLvlCreature: toggleSubLvlCreature,
+  hidePlayerActions: toggleHidePlayerActions,
+  showHuntingBuffs: toggleShowHuntingBuffs
+};
+
+function prefsClickEvent(e) {
+  var tmpFn = fshEvents[e.target.name];
+  if (typeof tmpFn === 'function') {
+    e.target.blur();
+    tmpFn(e);
+  }
+}
+
+function buildFshDivs() {
+  var fshDiv = document.createElement('div');
+  fshDiv.className = 'fshCenter fshFten';
+  var prefsDiv = document.createElement('div');
+  prefsDiv.addEventListener('click', prefsClickEvent);
+  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
+  prefsDiv.insertAdjacentHTML('beforeend',
+    simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
+    simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
+    huntingBuffsHtml());
+  fshDiv.insertAdjacentElement('beforeend', prefsDiv);
+  missingBuffsDiv = document.createElement('div');
+  fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
+  var worldContainerBelow = document.getElementById('worldContainerBelow');
+  worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
+}
+
+function xhrDataFilter(data) {
+  var myData = JSON.parse(data);
+  if (!myData.actions || myData.actions.length === 0) {return data;}
+  var realm = GameData.realm();
+  myData.actions = myData.actions.filter(function(el) {
+    if (el.type === 6) {return el.data.level >= realm.minlevel;}
+    return true;
+  });
+  var ret = JSON.stringify(myData);
+  return ret;
+}
+
+function xhrPreFilter(options, originalOptions) {
+  if (!originalOptions.data || !calf.hideSubLvlCreature) {return;}
+  options.dataFilter = xhrDataFilter;
+}
+
+function interceptXHR() { // jQuery.min
+  $.ajaxPrefilter('JSON', xhrPreFilter);
+}
+
+function doHidePlayerActions() {
+  if (!hidePlayerActions) {return;}
+  var act = document.getElementById('actionList');
+  var players = act.getElementsByClassName('player');
+  Array.prototype.forEach.call(players, function(el) {
+    var verbs = el.getElementsByClassName('verbs');
+    if (verbs && verbs.length === 1) {
+      verbs[0].classList.add('fshHide');
+    }
+  });
+}
+
+function huntingBuffsEnabled(evt, data) {
+  if (!calf.showBuffs) {
+    missingBuffsDiv.innerHTML = '';
+    return;
+  }
+  var buffHash = data.b.reduce(function(prev, curr) {
+    prev[curr.name] = true;
+    return prev;
+  }, {});
+  var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
+    if (!buffHash[curr.trim()]) {prev.push(curr);}
+    return prev;
+  }, []);
+  if (missingBuffs.length > 0) {
+    missingBuffsDiv.innerHTML = 'You are missing some ' +
+      huntingBuffsName + ' hunting buffs<br>(' +
+      missingBuffs.join(', ') + ')';
+  } else {missingBuffsDiv.innerHTML = '';}
+}
+
+function dataEventsPlayerBuffs(evt, data) {
+  if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
+}
+
+function doHuntingBuffs() { // jQuery.min
+  setCurrentBuffList();
+  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
+    dataEventsPlayerBuffs);
+  if (calf.showBuffs && window.initialGameData) { // HCS initial data
+    dataEventsPlayerBuffs(null,
+      {b: window.initialGameData.player.buffs});
+  }
+}
+
+function setupPref() {
+  getPrefs();
+  buildFshDivs();
+  interceptXHR();
+  doHuntingBuffs();
+  $.subscribe('after-update.actionlist', doHidePlayerActions);
+  doHidePlayerActions();
+}
+
 var showCreatureInfo;
 var showMonsterLog;
 var monsterLog;
@@ -13082,7 +13432,7 @@ var statDamage;
 var statArmor;
 var statHp;
 
-function updateMinMax(_logStat, creatureStat) { // Native
+function updateMinMax(_logStat, creatureStat) {
   var logStat = fallback(_logStat, {});
   if (logStat.min) {
     logStat.min = Math.min(logStat.min, creatureStat);
@@ -13097,7 +13447,7 @@ function updateMinMax(_logStat, creatureStat) { // Native
   return logStat;
 }
 
-function processMonsterLog() { // Native
+function processMonsterLog() {
   if (!showMonsterLog) {return;}
   monsterLog[creature.name] = fallback(monsterLog[creature.name], {});
   var logCreature = monsterLog[creature.name];
@@ -13128,7 +13478,7 @@ function processMonsterLog() { // Native
   setForage('fsh_monsterLog', monsterLog);
 }
 
-function doMouseOver() { // Native
+function doMouseOver() {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
   var monsterTip = '<table><tr><td>' +
@@ -13186,7 +13536,7 @@ var bailOut$1 = [
   }
 ];
 
-function doCreatureInfo(data) { // Native
+function doCreatureInfo(data) {
   var actions = document.getElementById('actionList').children;
   for (var i = 0; i < bailOut$1.length; i += 1) {
     if (bailOut$1[i](data, actions)) {return;}
@@ -13196,11 +13546,11 @@ function doCreatureInfo(data) { // Native
   doMouseOver();
 }
 
-function processMouseOver(data) { // Native
+function processMouseOver(data) {
   if (showCreatureInfo) {doCreatureInfo(data);}
 }
 
-function processMonster(data) { // Native
+function processMonster(data) {
   creature = data.response.data;
   if (!creature) {return;} // creature is null
   processMouseOver(data);
@@ -13213,7 +13563,7 @@ function loopActions(e, i) { // jQuery
     .done(processMonster);
 }
 
-function getMyStats() { // Native
+function getMyStats() {
   statLevel = intValue(document
     .getElementById('statbar-level-tooltip-general')
     .getElementsByClassName('stat-level')[0].nextElementSibling.textContent);
@@ -13229,7 +13579,7 @@ function getMyStats() { // Native
     .getElementsByClassName('stat-hp')[0].nextElementSibling.textContent;
 }
 
-function initMonsterLog() { // Native
+function initMonsterLog() {
   if (showCreatureInfo) {getMyStats();}
   actionData = GameData.actions();
   actionData.forEach(loopActions);
@@ -13238,7 +13588,7 @@ function initMonsterLog() { // Native
 var genVar = [0, 1.1, 1.053, 1.1053];
 var hpVar = [0, 1.053, 1, 1];
 
-function getBias() { // Native
+function getBias() {
   var combatEvaluatorBias = getValue('combatEvaluatorBias');
   generalVariable = genVar[combatEvaluatorBias];
   hpVariable = hpVar[combatEvaluatorBias];
@@ -13257,131 +13607,12 @@ function startMonsterLog() { // jQuery
 }
 
 var def_afterUpdateActionlist = 'after-update.actionlist';
-var huntingBuffs$1;
-var huntingBuffsName;
-var hideSubLvlCreature;
-var hidePlayerActions;
-var missingBuffsDiv;
-
-function getPrefs() { // Native
-  hideSubLvlCreature = getValue('hideSubLvlCreature');
-  hidePlayerActions = getValue('hidePlayerActions');
-  calf.showBuffs = getValue('showHuntingBuffs');
-  calf.enabledHuntingMode = getValue('enabledHuntingMode');
-  calf.buffs = shouldBeArray('huntingBuffs');
-  calf.buffsName = getValue('huntingBuffsName');
-  calf.buffs2 = shouldBeArray('huntingBuffs2');
-  calf.buffs2Name = getValue('huntingBuffs2Name');
-  calf.buffs3 = shouldBeArray('huntingBuffs3');
-  calf.buffs3Name = getValue('huntingBuffs3Name');
-  calf.doNotKillList = shouldBeArray('doNotKillList');
-}
-
-var buffLookup = {
-  '1': function() {
-    huntingBuffs$1 = calf.buffs;
-    huntingBuffsName = calf.buffsName;
-  },
-  '2': function() {
-    huntingBuffs$1 = calf.buffs2;
-    huntingBuffsName = calf.buffs2Name;
-  },
-  '3': function() {
-    huntingBuffs$1 = calf.buffs3;
-    huntingBuffsName = calf.buffs3Name;
-  }
-};
-
-function setCurrentBuffList() { // Native
-  var tmpFn = buffLookup[calf.enabledHuntingMode];
-  if (typeof tmpFn === 'function') {
-    tmpFn();
-  }
-}
-
-function toggleSubLvlCreature() { // Native
-  hideSubLvlCreature = !hideSubLvlCreature;
-  setValue('hideSubLvlCreature', hideSubLvlCreature);
-  GameData.fetch(256);
-}
-
-function toggleHidePlayerActions() { // Native
-  hidePlayerActions = !hidePlayerActions;
-  setValue('hidePlayerActions', hidePlayerActions);
-  GameData.fetch(256);
-}
-
-function toggleShowHuntingBuffs() { // Native
-  calf.showBuffs = !calf.showBuffs;
-  setValue('showHuntingBuffs', calf.showBuffs);
-  GameData.fetch(16);
-}
-
-function toggleEnabledHuntingMode(e) { // Native
-  if (e.target.name !== 'enabledHuntingMode') {return;}
-  calf.enabledHuntingMode = e.target.value;
-  setValue('enabledHuntingMode', calf.enabledHuntingMode);
-  setCurrentBuffList();
-  GameData.fetch(16);
-}
-
-var fshEvents = {
-  hideSubLvlCreature: toggleSubLvlCreature,
-  hidePlayerActions: toggleHidePlayerActions,
-  showHuntingBuffs: toggleShowHuntingBuffs
-};
-
-function prefsClickEvent(e) { // Native
-  var tmpFn = fshEvents[e.target.name];
-  if (typeof tmpFn === 'function') {
-    e.target.blur();
-    tmpFn(e);
-  }
-}
-
-function buildFshDivs() { // Native
-  var fshDiv = document.createElement('div');
-  fshDiv.className = 'fshCenter fshFten';
-  var prefsDiv = document.createElement('div');
-  prefsDiv.addEventListener('click', prefsClickEvent);
-  prefsDiv.addEventListener('change', toggleEnabledHuntingMode);
-  prefsDiv.insertAdjacentHTML('beforeend',
-    simpleCheckboxHtml('hideSubLvlCreature') + '&nbsp;&nbsp;' +
-    simpleCheckboxHtml('hidePlayerActions') + '&nbsp;&nbsp;' +
-    huntingBuffsHtml());
-  fshDiv.insertAdjacentElement('beforeend', prefsDiv);
-  missingBuffsDiv = document.createElement('div');
-  fshDiv.insertAdjacentElement('beforeend', missingBuffsDiv);
-  var worldContainerBelow = document.getElementById('worldContainerBelow');
-  worldContainerBelow.insertAdjacentElement('afterbegin', fshDiv);
-}
-
-function xhrDataFilter(data) { // Native
-  var myData = JSON.parse(data);
-  if (!myData.actions || myData.actions.length === 0) {return data;}
-  var realm = GameData.realm();
-  myData.actions = myData.actions.filter(function(el) {
-    if (el.type === 6) {return el.data.level >= realm.minlevel;}
-    return true;
-  });
-  var ret = JSON.stringify(myData);
-  return ret;
-}
-
-function xhrPreFilter(options, originalOptions) { // Native
-  if (!originalOptions.data || !hideSubLvlCreature) {return;}
-  options.dataFilter = xhrDataFilter;
-}
-
-function interceptXHR() { // jQuery
-  $.ajaxPrefilter('JSON', xhrPreFilter);
-}
 
 function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
 }
 
-function hideGroupSubscribe(type) { // jQuery
+function hideGroupSubscribe(type) { // jQuery.min
   $.subscribe(def_afterUpdateActionlist, hideGroupByType.bind(null, type));
 }
 
@@ -13393,7 +13624,7 @@ var hideGroupTypes = [
   'hideLegendaryGroup'
 ];
 
-function hideGroupButton() { // Native
+function hideGroupButton() {
   hideGroupTypes.forEach(function(el, i) {
     if (getValue(el)) {
       hideGroupSubscribe(i + 1);
@@ -13402,40 +13633,28 @@ function hideGroupButton() { // Native
   });
 }
 
-function colorType(actionList, creatureClass, colorClass) { // Native
+function colorType(actionList, creatureClass, colorClass) {
   var creatures = actionList.getElementsByClassName(creatureClass);
   Array.prototype.forEach.call(creatures, function(el) {
     el.classList.add(colorClass);
   });
 }
 
-function colorMonsters() { // jQuery
+function colorMonsters() {
   var act = document.getElementById('actionList');
   colorType(act, 'creature-1', 'fshGreen');
   colorType(act, 'creature-2', 'fshYellow');
   colorType(act, 'creature-3', 'fshRed');
 }
 
-function doMonsterColors() { // jQuery
+function doMonsterColors() { // jQuery.min
   if (getValue('enableCreatureColoring')) {
     $.subscribe(def_afterUpdateActionlist, colorMonsters);
     colorMonsters();
   }
 }
 
-function doHidePlayerActions() { // Native
-  if (!hidePlayerActions) {return;}
-  var act = document.getElementById('actionList');
-  var players = act.getElementsByClassName('player');
-  Array.prototype.forEach.call(players, function(el) {
-    var verbs = el.getElementsByClassName('verbs');
-    if (verbs && verbs.length === 1) {
-      verbs[0].classList.add('fshHide');
-    }
-  });
-}
-
-function afterUpdateActionList() { // Native
+function afterUpdateActionList() {
   // color the critters in the do no kill list blue
   var act = document.getElementById('actionList');
   var creatures = act.getElementsByClassName('creature');
@@ -13473,65 +13692,22 @@ function impIconColour() { // jQuery
   }
 }
 
-function huntingBuffsEnabled(evt, data) { // Native
-  if (!calf.showBuffs) {
-    missingBuffsDiv.innerHTML = '';
-    return;
-  }
-  var buffHash = data.b.reduce(function(prev, curr) {
-    prev[curr.name] = true;
-    return prev;
-  }, {});
-  var missingBuffs = huntingBuffs$1.reduce(function(prev, curr) {
-    if (!buffHash[curr.trim()]) {prev.push(curr);}
-    return prev;
-  }, []);
-  if (missingBuffs.length > 0) {
-    missingBuffsDiv.innerHTML = 'You are missing some ' +
-      huntingBuffsName + ' hunting buffs<br>(' +
-      missingBuffs.join(', ') + ')';
-  } else {missingBuffsDiv.innerHTML = '';}
-}
-
-function dataEventsPlayerBuffs(evt, data) { // Native
-  if (huntingBuffs$1) {huntingBuffsEnabled(evt, data);}
-}
-
-function fixDebuffQTip(e) { // jQuery
+function fixDebuffQTip(e) { // jQuery.min
   $(e.target).qtip('hide');
 }
 
-function injectWorldNewMap(data) { // Native
+function injectWorldNewMap(data) {
   updateSendGoldOnWorld(data);
   if (data.realm && data.realm.name) {
     injectButtons(data);
     document.getElementById('buffList')
       .addEventListener('click', fixDebuffQTip);
-    if (hideSubLvlCreature) {GameData.fetch(256);}
+    if (calf.hideSubLvlCreature) {GameData.fetch(256);}
   }
 }
 
-function doHuntingBuffs() { // jQuery
-  setCurrentBuffList();
-  $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
-    dataEventsPlayerBuffs);
-  if (calf.showBuffs && window.initialGameData) { // HCS initial data
-    dataEventsPlayerBuffs(null,
-      {b: window.initialGameData.player.buffs});
-  }
-}
-
-function setupPref() { // Native
-  getPrefs();
-  buildFshDivs();
-}
-
-function subscribes() { // jQuery
+function subscribes() { // jQuery.min
   setupPref();
-  interceptXHR();
-  doHuntingBuffs();
-  $.subscribe(def_afterUpdateActionlist, doHidePlayerActions);
-  doHidePlayerActions();
   injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
   $.subscribe('ready.view-creature', readyViewCreature);
@@ -13564,6 +13740,11 @@ function subscribes() { // jQuery
   // somewhere near here will be multi buy on shop
   prepareShop();
   injectRelic();
+
+  $.subscribe('level.stats-player', function(e, data) {
+    console.log('level.stats-player data', data); // eslint-disable-line no-console
+  });
+
 }
 
 /* fetchFlags = {
@@ -13822,11 +14003,11 @@ function checkBuffs() { // Legacy - Old Map
   toggleKsTracker();
 }
 
-function injectOldMap() { // Native
+function injectOldMap() {
   checkBuffs();
 }
 
-function injectWorld() { // Native
+function injectWorld() {
   // -1 = world page
   // 0 = quest responce
   // 1 = view creature
@@ -13959,12 +14140,12 @@ function injectViewRecipe() { // Legacy
   }
 }
 
-function inventing() { // Native
+function inventing() {
   injectViewRecipe();
   injectInvent();
 }
 
-function dontPost$2() { // Native
+function dontPost$2() {
   var submitButton = document.querySelector('#pCC input[type="submit"]');
   if (submitButton) {
     submitButton.addEventListener('click', function(e) {
@@ -13982,7 +14163,7 @@ function formatLastReset(last_login) {
   return outputFormat(h, ' hours, ') + m + ' mins';
 }
 
-function formatTime() { // Native
+function formatTime() {
   var lastLadderReset = getValue('lastLadderReset');
   var now = Date.now();
   if (lastLadderReset < now - 48 * 60 * 60 * 1000) {
@@ -13993,7 +14174,7 @@ function formatTime() { // Native
   return formatLastReset(lastLadderReset);
 }
 
-function lastReset() { // Native
+function lastReset() {
   var topTable = document.querySelector('#pCC table');
   var newRow = document.createElement('tr');
   var leftCell = newRow.insertCell(-1);
@@ -14005,7 +14186,7 @@ function lastReset() { // Native
   topTable.appendChild(newRow);
 }
 
-function ladder() { // Native
+function ladder() {
   dontPost$2();
   lastReset();
 }
@@ -14013,6 +14194,18 @@ function ladder() { // Native
 var oldMoves = [];
 var nodes;
 var selectRow;
+
+function doPickMove(moveId, slotId) {
+  return $.ajax({
+    url: 'index.php',
+    data: {
+      cmd: 'arena',
+      subcmd: 'dopickmove',
+      move_id: moveId,
+      slot_id: slotId
+    }
+  });
+}
 
 function updateMoves() { // jQuery
   var newMoves = [];
@@ -14191,7 +14384,7 @@ function successfull(timeStamp, buffCast, buffLog) {
   return buffLog;
 }
 
-function formatDateTime(aDate) { // Native
+function formatDateTime(aDate) {
   var yyyy = aDate.getFullYear().toString();
   var mon = padZ(aDate.getMonth() + 1);
   var dd = padZ(aDate.getDate());
@@ -14201,7 +14394,7 @@ function formatDateTime(aDate) { // Native
   return yyyy + '-' + mon + '-' + dd + ' ' + hh + ':' + mm + ':' + ss;
 }
 
-function buffResult(_buffLog) { // Native
+function buffResult(_buffLog) {
   var buffLog = _buffLog;
   if (!buffLog) {buffLog = '';}
   var timeStamp = formatDateTime(new Date());
@@ -14220,7 +14413,7 @@ function buffResult(_buffLog) { // Native
   setForage('fsh_buffLog', buffLog);
 }
 
-function updateBuffLog() { // Native
+function updateBuffLog() {
   if (!getValue('keepBuffLog')) {return;}
   getForage('fsh_buffLog').done(buffResult);
 }
@@ -14232,7 +14425,7 @@ var completeLink;
 var notStartedLink;
 var currentPageValue;
 
-function dontPost$3(e) { // Native
+function dontPost$3(e) {
   if (e.target.type !== 'submit') {return;}
   e.preventDefault();
   var form = e.target.form;
@@ -14264,7 +14457,7 @@ var savePrefKey = [
   'lastSeasonalNotStartedQuestPage'
 ];
 
-function whereAmI() { // Native
+function whereAmI() {
   var aLinks = pCC.getElementsByTagName('a');
   normalLink = aLinks[0];
   seasonLink = aLinks[1];
@@ -14280,19 +14473,19 @@ function whereAmI() { // Native
   }, 0);
 }
 
-function storeLoc() { // Native
+function storeLoc() {
   var lastQBPage = location.search;
   setValue('lastActiveQuestPage', lastQBPage);
   setValue(savePrefKey[currentPageValue], lastQBPage);
 }
 
-function setLink(aLink, url) { // Native
+function setLink(aLink, url) {
   if (url.length > 0) {
     aLink.setAttribute('href', url);
   }
 }
 
-function updateLinks() { // Native
+function updateLinks() {
   var lastNormalActiveQuestPage = getValue(savePrefKey[0]);
   var lastNormalCompletedQuestPage = getValue(savePrefKey[1]);
   var lastNormalNotStartedQuestPage = getValue(savePrefKey[2]);
@@ -14330,7 +14523,7 @@ function storeQuestPage() {
   }
 }
 
-function guideButtons(questID, questName) { // Native
+function guideButtons(questID, questName) {
   return '<div class="parent">' +
     '<a href="http://guide.fallensword.com/index.php?cmd=quests&amp;' +
     'subcmd=view&amp;quest_id=' + questID + '" class="tip-static" ' +
@@ -14361,7 +14554,7 @@ function doHideQuests(hideQuests, questName, aRow) {
   }
 }
 
-function injectQuestBookFull() { // Native
+function injectQuestBookFull() {
   pCC.addEventListener('click', dontPost$3);
   storeQuestPage();
   var questTable = pCC.getElementsByTagName('table')[5];
@@ -14376,7 +14569,7 @@ function injectQuestBookFull() { // Native
   }
 }
 
-function injectQuestTracker() { // Native
+function injectQuestTracker() {
   var lastActiveQuestPage = getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
     pCC.getElementsByTagName('a')[0]
@@ -14459,37 +14652,37 @@ var warehouse = [];
 var collapseNewsArchive;
 var lastLadderReset;
 
-function collapseArt(article) { // Native
+function collapseArt(article) {
   article.rows.forEach(function(el) {
     el.row.classList.add('fshHide');
   });
   article.open = false;
 }
 
-function collapseAll() { // Native
+function collapseAll() {
   warehouse.forEach(function(article) {
     if (article.open) {collapseArt(article);}
   });
 }
 
-function expandArt(article) { // Native
+function expandArt(article) {
   article.rows.forEach(function(el) {
     el.row.classList.remove('fshHide');
   });
   article.open = true;
 }
 
-function expandAll() { // Native
+function expandAll() {
   warehouse.forEach(function(article) {
     if (!article.open) {expandArt(article);}
   });
 }
 
-function isHeader(el) { // Native
+function isHeader(el) {
   if (el.rowIndex % 6 === 0) {return el;}
 }
 
-function closestTr(el) { // Native
+function closestTr(el) {
   if (el.tagName === 'TR') {
     return isHeader(el);
   }
@@ -14497,7 +14690,7 @@ function closestTr(el) { // Native
   return closestTr(el.parentNode);
 }
 
-function evtEnabled(evt) { // Native
+function evtEnabled(evt) {
   var myRow = closestTr(evt.target);
   if (!myRow) {return;}
   var articleNo = myRow.rowIndex / 6;
@@ -14510,15 +14703,15 @@ function evtEnabled(evt) { // Native
   }
 }
 
-function evtHdl$1(evt) { // Native
+function evtHdl$2(evt) {
   if (collapseNewsArchive) {evtEnabled(evt);}
 }
 
-function makeHeaderClickable(row) { // Native
+function makeHeaderClickable(row) {
   if (collapseNewsArchive) {row.classList.add('fshPoint');}
 }
 
-function collapseDuringAnalysis(row, thisArticle) { // Native
+function collapseDuringAnalysis(row, thisArticle) {
   if (collapseNewsArchive) {
     row.classList.add('fshHide');
     thisArticle.open = false;
@@ -14527,7 +14720,7 @@ function collapseDuringAnalysis(row, thisArticle) { // Native
   }
 }
 
-function checkForPvPLadder(row) { // Native
+function checkForPvPLadder(row) {
   if (row.children[1].children[0].textContent === 'PvP Ladder') {
     var logTime = parseDateAsTimestamp(
       row.children[1].children[2].textContent.replace('Posted: ', ''));
@@ -14538,7 +14731,7 @@ function checkForPvPLadder(row) { // Native
   }
 }
 
-function testRowType(row, rowType, thisArticle) { // Native
+function testRowType(row, rowType, thisArticle) {
   if (rowType === 0) {
     thisArticle.header = row;
     makeHeaderClickable(row);
@@ -14552,7 +14745,7 @@ function testRowType(row, rowType, thisArticle) { // Native
   }
 }
 
-function doTagging(row) { // Native
+function doTagging(row) {
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
   warehouse[articleNo] = fallback(warehouse[articleNo], {});
@@ -14567,7 +14760,7 @@ function toggleHeaderClass() {
   });
 }
 
-function togglePref$1() { // Native
+function togglePref$1() {
   collapseNewsArchive = !collapseNewsArchive;
   setValue('collapseNewsArchive', collapseNewsArchive);
   if (collapseNewsArchive) {collapseAll();} else {expandAll();}
@@ -14582,12 +14775,12 @@ function setupPref$1(rowInjector) {
     .addEventListener('click', togglePref$1);
 }
 
-function viewArchive() { // Native
+function viewArchive() {
   lastLadderReset = getValue('lastLadderReset');
   var theTables = pCC.getElementsByTagName('table');
   setupPref$1(theTables[0].rows[2]);
   Array.prototype.forEach.call(theTables[2].rows, doTagging);
-  theTables[2].addEventListener('click', evtHdl$1);
+  theTables[2].addEventListener('click', evtHdl$2);
 }
 
 function cancelAllAH() { // jQuery
@@ -14615,7 +14808,7 @@ function cancelAllAH() { // jQuery
   });
 }
 
-function injectAuctionHouse() { // Native
+function injectAuctionHouse() {
   if (!pCC) {return;}
   if (getValue('autoFillMinBidPrice')) {
     document.getElementById('auto-fill').checked = true;
@@ -14633,7 +14826,7 @@ function injectAuctionHouse() { // Native
   cancelAll.addEventListener('click', cancelAllAH);
 }
 
-function quickCreate$1() { // Native
+function quickCreate$1() {
   perfFilter('auction');
 }
 
@@ -14762,12 +14955,12 @@ function ajaxifyBank() { // jQuery
   }
 }
 
-function injectGuildBank() { // Native
+function injectGuildBank() {
   bankSettings = guildBank;
   ajaxifyBank();
 }
 
-function injectBank() { // Native
+function injectBank() {
   bankSettings = playerBank;
   ajaxifyBank();
 }
@@ -14776,12 +14969,37 @@ var invItems$2;
 var type;
 var itemId;
 
-function testType(o, el) {
-  if (type === 'guild') {
-    el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
-  } else if (type === 'item' && invItems$2[o.invid].item_id === itemId) {
-    el.checked = !el.disabled && !el.checked;
+function tickElement(o, el) {
+  el.checked = !el.disabled && !el.checked;
+}
+
+var types = [
+  {
+    c: function() {return type === 'guild';},
+    r: function(o, el) {
+      el.checked = !el.disabled && invItems$2[o.invid].guild_tag !== '-1';
+    }
+  },
+  {
+    c: function(o) {
+      return type === 'item' && invItems$2[o.invid].item_id === itemId;
+    },
+    r: tickElement
+  },
+  {
+    c: function() {return type === 'checkAll';},
+    r: tickElement
   }
+];
+
+function testType(o, el) {
+  types.some(function(test) {
+    if (test.c(o)) {
+      test.r(o, el);
+      return true;
+    }
+    return false;
+  });
 }
 
 function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
@@ -14795,6 +15013,12 @@ function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
       .firstElementChild;
     testType(o, el);
   });
+}
+
+function extraButtons() {
+  var tRows = pCC.getElementsByTagName('table')[0].rows;
+  tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
+    '<input value="Check All" type="button">&nbsp;');
 }
 
 function doFolderButtons(folders) {
@@ -14813,17 +15037,18 @@ function doFolderButtons(folders) {
         key + '">' + folders[key] + '</span>';
     });
     insertHere.innerHTML = inject;
+    extraButtons();
   }
 }
 
 var insertHere;
 
-function showHideLabel(pref) { // Native
+function showHideLabel(pref) {
   if (pref) {return 'Hide';}
   return 'Show';
 }
 
-function doToggleButtons(showExtraLinks, showQuickDropLinks) { // Native
+function doToggleButtons(showExtraLinks, showQuickDropLinks) {
   // Option toggle buttons for both screens
   if (!insertHere) {
     insertHere = pCC.getElementsByTagName('form')[0]
@@ -14867,7 +15092,7 @@ function hideFolders(itemsAry, invItems, self) {
   });
 }
 
-function injectMoveItems() { // Native
+function injectMoveItems() {
   var flrRow = pCC.getElementsByTagName('form')[0]
     .nextElementSibling.nextElementSibling.nextElementSibling;
   var folders = flrRow.getElementsByTagName('img');
@@ -14916,7 +15141,7 @@ function moveItemsToFolder(itemsAry) { // jQuery.min
   $.when.apply($, prm).done(function() {location.reload();});
 }
 
-function anotherSpinner$1(self) { // Native
+function anotherSpinner$1(self) {
   self.innerHTML = '<img class="quickActionSpinner" src="' +
     imageServer +
     '/skin/loading.gif" width="15" height="15">';
@@ -14957,7 +15182,7 @@ var invItems$1;
 var colouring;
 var sendLinks;
 
-function afterbegin(o, item) { // Native
+function afterbegin(o, item) {
   if (fallback(extraLinks, !showExtraLinks)) {
     return;
   }
@@ -15006,7 +15231,7 @@ var buildTrailer = [
   }
 ];
 
-function beforeend(o, item) { // Native
+function beforeend(o, item) {
   if (!colouring && !disableItemColoring) {
     o.injectHere.classList.add(rarity[item.rarity].clas);
   }
@@ -15020,7 +15245,7 @@ function beforeend(o, item) { // Native
   if (pattern !== '') {o.injectHere.insertAdjacentHTML('beforeend', pattern);}
 }
 
-function doneInvPaint() { // Native
+function doneInvPaint() {
   if (showExtraLinks) {extraLinks = true;}
   checkAll = true;
   colouring = true;
@@ -15045,7 +15270,7 @@ function invPaint() { // Native - abstract this pattern
   }
 }
 
-function toggleShowExtraLinks() { // Native
+function toggleShowExtraLinks() {
   showExtraLinks = !showExtraLinks;
   setValue('showExtraLinks', showExtraLinks);
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
@@ -15060,7 +15285,7 @@ function toggleShowExtraLinks() { // Native
   }
 }
 
-function toggleShowQuickDropLinks() { // Native
+function toggleShowQuickDropLinks() {
   showQuickDropLinks$1 = !showQuickDropLinks$1;
   setValue('showQuickDropLinks', showQuickDropLinks$1);
   doToggleButtons(showExtraLinks, showQuickDropLinks$1);
@@ -15115,10 +15340,16 @@ var evts = [
     result: function(self) {
       hideFolders(itemsAry, invItems$1, self);
     }
+  },
+  {
+    condition: function(self) {return self.value === 'Check All';},
+    result: function() {
+      doCheckboxes(itemsAry, invItems$1, 'checkAll');
+    }
   }
 ];
 
-function evtHandler(evt) { // Native
+function evtHandler(evt) {
   var self = evt.target;
   evts.some(function(el) {
     if (el.condition(self)) {
@@ -15129,7 +15360,7 @@ function evtHandler(evt) { // Native
   });
 }
 
-function getItems() { // Native
+function getItems() {
   addStatTotalToMouseover();
   disableItemColoring = getValue('disableItemColoring');
   showExtraLinks = getValue('showExtraLinks');
@@ -15157,7 +15388,7 @@ function getItems() { // Native
   itemsHash[13699] = 1;
 }
 
-function inventory(data) { // Native
+function inventory(data) {
   extraLinks = false;
   checkAll = false;
   invItems$1 = data.items;
@@ -15169,20 +15400,20 @@ function inventory(data) { // Native
   doFolderButtons(data.folders);
 }
 
-function injectDropItems() { // Native
+function injectStoreItems() {
   getInventoryById().done(inventory);
   add(3, getItems);
 }
 
-function injectProfileDropItems() { // Native
-  injectDropItems();
+function injectProfileDropItems() {
+  injectStoreItems();
   injectMoveItems();
 }
 
 var maxGroupSizeToJoin;
 var groupStats$1;
 
-function parseMercStats$1(mercStats) { // Native
+function parseMercStats$1(mercStats) {
   groupStats$1.attackElement.innerHTML = '<span class="fshBlue">' +
     addCommas(groupStats$1.attack) + '</span>' +
     ' ( ' + addCommas(groupStats$1.attack - mercStats.attack) + ' )';
@@ -15248,7 +15479,7 @@ function joinAllGroupsUnderSize() { // Legacy
   });
 }
 
-function parseGroupData(linkElement, obj) { // Native
+function parseGroupData(linkElement, obj) {
   var extraText = '<table id="stat">' +
     '<tr>' +
     '<td class="fshBrown">Attack</td>' +
@@ -15270,7 +15501,7 @@ function parseGroupData(linkElement, obj) { // Native
   expiresLocation.insertAdjacentHTML('beforeend', extraText);
 }
 
-function fetchGroupData(evt) { // Native
+function fetchGroupData(evt) {
   evt.target.classList.add('fshHide');
   var allItems = document.querySelectorAll('#pCC a[href*="=viewstats&"]');
   Array.prototype.forEach.call(allItems, function(aLink) {
@@ -15330,7 +15561,7 @@ function groupLocalTime(theDateCell) { // jQuery
     'Local: ' + groupDate.toString().substr(0, 21) + '</span>');
 }
 
-function getCreator(membrlist, creator) { // Native
+function getCreator(membrlist, creator) {
   if (membrlist[creator]) {
     return onlineDot({last_login: membrlist[creator].last_login}) +
       '&nbsp;<a href="' + server + 'index.php?cmd=profile&player_id=' +
@@ -15340,12 +15571,12 @@ function getCreator(membrlist, creator) { // Native
   return '<b>' + creator + '</b>';
 }
 
-function memberLevel(membrlist, member) { // Native
+function memberLevel(membrlist, member) {
   if (membrlist[member]) {return membrlist[member].level;}
   return 0;
 }
 
-function byMember(membrlist, a, b) { // Native
+function byMember(membrlist, a, b) {
   return memberLevel(membrlist, b) - memberLevel(membrlist, a);
 }
 
@@ -15393,7 +15624,7 @@ function injectGroups() { // jQuery
   fixTable();
 }
 
-function allowBack() { // Native
+function allowBack() {
   document.querySelector('input[type="submit"]')
     .addEventListener('click', function(evt) {
       evt.preventDefault();
@@ -15406,7 +15637,7 @@ function allowBack() { // Native
     });
 }
 
-function showAllQuestSteps() { // Native
+function showAllQuestSteps() {
   if (!getValue('showNextQuestSteps')) {return;}
   Array.prototype.forEach.call(document.querySelectorAll('div[id^="stage"]'),
     function(e) {e.style.display = 'block';});
@@ -15561,7 +15792,7 @@ var listOfEnemies;
 var nickList;
 var enableChatParsing;
 
-function removeHTML(buffName) { // Native
+function removeHTML(buffName) {
   return buffName.replace(/<\/?[^>]+(>|$)/g, '');
 }
 
@@ -15795,21 +16026,21 @@ function addLogWidgets() { // jQuery
   ).done(addLogWidgetsOld);
 }
 
-function guildChat() { // Native
+function guildChat() {
   addChatTextArea();
   addLogColoring('Chat', 0);
 }
 
-function guildLog() { // Native
+function guildLog() {
   addLogColoring('GuildLog', 1);
   addGuildLogWidgets();
 }
 
-function outbox() { // Native
+function outbox() {
   addLogColoring('OutBox', 1);
 }
 
-function playerLog() { // Native
+function playerLog() {
   addLogColoring('PlayerLog', 1);
   addLogWidgets();
 }
@@ -15818,7 +16049,7 @@ var maxcharacters;
 var textArea$1;
 var shoutboxPreview;
 
-function updateShoutboxPreview() { // Native
+function updateShoutboxPreview() {
   var textContent = textArea$1.value;
   var chars = textContent.length;
   if (chars > maxcharacters) {
@@ -15836,127 +16067,20 @@ function updateShoutboxPreview() { // Native
     '</span></td></tr></tbody></table>';
 }
 
-function injectShoutboxWidgets() { // Native
+function injectShoutboxWidgets() {
   textArea$1 = document.getElementById('textInputBox');
   textArea$1.classList.add('fshNoResize');
   textArea$1.addEventListener('keyup', updateShoutboxPreview);
 }
 
-function newsFsbox() { // Native
+function newsFsbox() {
   maxcharacters = 100;
   injectShoutboxWidgets();
 }
 
-function newsShoutbox() { // Native
+function newsShoutbox() {
   maxcharacters = 150;
   injectShoutboxWidgets();
-}
-
-function buffAll(self) { // Native
-  var titanTable = self.parentNode.parentNode.parentNode.parentNode;
-  var shortList = [];
-  for (var j = 1; j < titanTable.rows.length; j += 2) {
-    var firstCell = titanTable.rows[j].cells[0].firstChild.firstChild;
-    shortList.push(firstCell.textContent);
-  }
-  openQuickBuffByName(shortList.join());
-}
-
-function buffEvent(e) { // Native
-  var self = e.target;
-  if (self.textContent === '[b]') {
-    openQuickBuffByName(self.previousElementSibling.textContent);
-  }
-  if (self.textContent === 'all') {
-    buffAll(self);
-  }
-}
-
-function evtHdl$2(e) { // Native
-  if (e.target.classList.contains('fshBl')) {buffEvent(e);}
-}
-
-function doBuffLinks$1(titanTable) { // Native
-  for (var j = 1; j < titanTable.rows.length; j += 2) {
-    var firstCell = titanTable.rows[j].cells[0];
-    firstCell.insertAdjacentHTML('beforeend',
-      ' <button class="fshBl fshXSmall">[b]</button>');
-  }
-  titanTable.rows[0].cells[0].insertAdjacentHTML('beforeend',
-    ' <button class="fshBl fshXSmall">all</button>');
-}
-
-function gotTables(titanTables) { // Native
-  for (var i = 2; i < titanTables.length; i += 1) {
-    var titanTable = titanTables[i];
-    if (titanTable.rows.length < 2) {continue;}
-    doBuffLinks$1(titanTable);
-  }
-  titanTables[1].addEventListener('click', evtHdl$2);
-}
-
-function injectScouttowerBuffLinks(titanTables) { // Native
-  if (titanTables.length > 2) {gotTables(titanTables);}
-}
-
-function getScoutTowerDetails(responseText) { // Legacy
-  var doc = createDocument(responseText);
-  injectScouttowerBuffLinks(doc.getElementById('pCC')
-    .getElementsByTagName('table'));
-  var scoutTowerTable = findNode(
-    '//table[tbody/tr/td/img[contains(@src,"/banners/scouttower.png")]]',
-    doc);
-  if (scoutTowerTable) {
-    var titanTable = findNode(
-      '//table[tbody/tr/td/img[contains(@src,"/banners/titankilllog.png")]]');
-    var newRow = titanTable.insertRow(0);
-    newRow.appendChild(scoutTowerTable.rows[1].cells[0])
-      .insertAdjacentHTML('beforeend', '<br><br>');
-    newRow = titanTable.insertRow(1);
-    newRow.appendChild(scoutTowerTable.rows[8].cells[0]);
-  }
-}
-
-function injectTitan() { // jQuery
-  $.get('index.php?cmd=guild&subcmd=scouttower', getScoutTowerDetails);
-}
-
-function getTitanString(guildKills, totalHP, currentHP) {
-  var numberOfKillsToSecure = Math.ceil(totalHP / 2 + 1);
-  if (guildKills >= numberOfKillsToSecure) {
-    return 'Secured';
-  }
-  if (numberOfKillsToSecure - guildKills > currentHP) {
-    return '<span class="fshRed">Cannot Secure</span>';
-  }
-  return '<span class="fshRed">' +
-    (numberOfKillsToSecure - guildKills) + '</span> to secure';
-}
-
-function getKillsPct(currentNumberOfKills, guildKills) {
-  if (currentNumberOfKills === 0) {return 0;}
-  return guildKills * 100 / currentNumberOfKills;
-}
-
-function injectScouttower() { // Legacy
-  var titanTables = pCC.getElementsByTagName('table');
-  injectScouttowerBuffLinks(titanTables);
-  var titanTable = titanTables[1];
-  for (var i = 1; i < titanTable.rows.length; i += 6) {
-    var aRow = titanTable.rows[i];
-    var titanHP = aRow.cells[2].textContent;
-    if (titanHP.indexOf('-') !== -1) {break;}
-    var guildKills = aRow.cells[3].textContent;
-    var titanHPArray = titanHP.split('/');
-    var currentHP = parseInt(titanHPArray[0], 10);
-    var totalHP = parseInt(titanHPArray[1], 10);
-    var currentNumberOfKills = totalHP - currentHP;
-    var titanString = getTitanString(guildKills, totalHP, currentHP);
-    var killsTotPct = (guildKills * 100 / totalHP).toFixed(2);
-    aRow.cells[3].innerHTML += '<br><span class="fshBlue"> (' +
-      getKillsPct(currentNumberOfKills, guildKills).toFixed(2) +
-      '% Current <br>' + killsTotPct + '% Total<br>' + titanString + ')';
-  }
 }
 
 var highlightPlayersNearMyLvl$1;
@@ -15965,15 +16089,30 @@ var myVL;
 var spinner$1;
 var validPvP = Math.floor(Date.now() / 1000) - 604800;
 
-function parsePlayer(aTable, data) { // Native
+function doOnlineDot(aTable, data) {
   aTable.rows[0].insertAdjacentHTML('beforeend',
     '<td>' + onlineDot({last_login: data.last_login}) + '</td>');
-  if (!myVL) {return;}
-  if (data.last_login >= validPvP &&
+  if (myVL &&
+      data.last_login >= validPvP &&
       data.virtual_level > myVL - lvlDiffToHighlight$1 &&
       data.virtual_level < myVL + lvlDiffToHighlight$1) {
     aTable.parentNode.parentNode.classList.add('lvlHighlight');
   }
+  var defender = playerDataObject(data);
+  if (defender.cloakLevel !== 0) {console.log('data', data);} // eslint-disable-line no-console
+}
+
+function parsePlayer(aTable, data, jqXhr) {
+  if (data) {
+    doOnlineDot(aTable, data);
+  } else {
+    aTable.rows[0].insertAdjacentHTML('beforeend',
+      '<td class="fshBkRed">' + jqXhr.status + '</td>');
+  }
+}
+
+function failFilter(jqXhr) {
+  return $.Deferred().resolve(null, jqXhr).promise();
 }
 
 function findOnlinePlayers() { // jQuery
@@ -15981,10 +16120,11 @@ function findOnlinePlayers() { // jQuery
   var prm = [];
   for (var i = 4; i < someTables.length; i += 1) {
     prm.push(getProfile(someTables[i].textContent.trim())
+      .pipe(null, failFilter)
       .done(parsePlayer.bind(null, someTables[i]))
     );
   }
-  $.when.apply($, prm).always(function() {
+  $.when.apply($, prm).done(function() {
     spinner$1.classList.add('fshHide');
   });
 }
@@ -16005,7 +16145,7 @@ function getMyVL(e) { // jQuery
   } else {findOnlinePlayers();}
 }
 
-function looksLikeTopRated() { // Native
+function looksLikeTopRated() {
   highlightPlayersNearMyLvl$1 =
     getValue('highlightPlayersNearMyLvl');
   var theCell = pCC.getElementsByTagName('TD')[0];
@@ -16020,7 +16160,7 @@ function looksLikeTopRated() { // Native
   findBtn.addEventListener('click', getMyVL);
 }
 
-function injectTopRated() { // Native
+function injectTopRated() {
   if (pCC &&
       pCC.firstElementChild &&
       pCC.firstElementChild.rows &&
@@ -16029,7 +16169,7 @@ function injectTopRated() { // Native
         .indexOf('Last Updated') === 0) {looksLikeTopRated();}
 }
 
-function globalQuest() { // Native
+function globalQuest() {
   var topTable = pCC.getElementsByTagName('table')[3];
   for (var i = 2; i < topTable.rows.length; i += 4) {
     var aCell = topTable.rows[i].cells[1];
@@ -16077,7 +16217,7 @@ var pageSwitcher = {
       report: {'-': {'-': injectReportPaint}},
       addtags: {'-': {'-': injectGuildAddTagsWidgets}},
       removetags: {'-': {'-': injectGuildAddTagsWidgets}},
-      storeitems: {'-': {'-': injectDropItems}}
+      storeitems: {'-': {'-': injectStoreItems}}
     },
     chat: {'-': {'-': {'-': guildChat}}},
     log: {'-': {'-': {'-': guildLog}}},
@@ -16208,7 +16348,7 @@ function testCoreFunction(cmd, subcmd, subcmd2, type, fromWorld) {
   }
 }
 
-function getCoreFunction() { // Native
+function getCoreFunction() {
   var cmd;
   var subcmd;
   var subcmd2;
@@ -16251,7 +16391,7 @@ function devHooks() {
   /* eslint-enable no-console */
 }
 
-function asyncDispatcher() { // Native
+function asyncDispatcher() {
   devHooks();
   if (typeof coreFunction === 'function') {
     screenview(functionPath);
@@ -16262,7 +16402,7 @@ function asyncDispatcher() { // Native
 }
 
 // main event dispatcher
-FSH.dispatch = function dispatch() { // Native
+FSH.dispatch = function dispatch() {
 
   setup();
   start('JS Perf', 'FSH.dispatch');
@@ -16284,6 +16424,6 @@ FSH.dispatch = function dispatch() { // Native
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '13';
+window.FSH.calf = '21';
 
 }());

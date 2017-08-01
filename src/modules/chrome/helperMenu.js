@@ -64,7 +64,7 @@ function callHelperFunction(evt) { // jQuery
   $(content).dialog({width: 'auto', modal: true});
 }
 
-function eventHandler(evt) { // Native
+function eventHandler(evt) {
   if (evt.target.classList.contains('fshLink')) {
     callHelperFunction(evt);
     return;
@@ -74,7 +74,7 @@ function eventHandler(evt) { // Native
   }
 }
 
-function showHelperMenu() { // Native
+function showHelperMenu() {
   var helperMenu = document.getElementById('helperMenu');
   helperMenu.removeEventListener('mouseenter', showHelperMenu);
 
@@ -93,7 +93,7 @@ function showHelperMenu() { // Native
   helperMenuDiv.addEventListener('click', eventHandler);
 }
 
-function haveNode(node) { // Native
+function haveNode(node) {
   var helperMenu = document.createElement('DIV');
   helperMenu.id = 'helperMenu';
   helperMenu.className = 'helperMenu';
@@ -109,7 +109,7 @@ function haveNode(node) { // Native
   node.parentNode.insertBefore(helperMenu, node);
 }
 
-export default function injectHelperMenu() { // Native
+export default function injectHelperMenu() {
   // don't put all the menu code here (but call if clicked) to minimize lag
   var node = document.getElementById('statbar-container');
   if (node) {haveNode(node);}

@@ -1,28 +1,43 @@
-import * as ajax from '../support/ajax';
+import {closestTable} from '../common/closest';
+import {dialog} from '../support/ajax';
+import * as layout from '../support/layout';
 
-function guildTake(e) { // jQuery
-  var self = $(e.target);
-  ajax.guildMailboxTake(self.attr('href')).done(function(data) {
-    if (data.r === 1) {return;}
-    self.removeClass();
-    self.closest('table').next().find('td')
-      .html('<span class="fshGreen">Taken</span>');
-  });
+function translateReturnInfo(data) {
+  var info = layout.infoBox(data);
+  var _r = {r: 1, m: info};
+  if (info === 'Item was transferred to the guild store!') {
+    _r = {r: 0, m: ''};
+  }
+  return _r;
 }
 
-export default function guildMailbox() { // Bad jQuery
-  var items = $('#pCC a');
-  if (items.length === 0) {return;}
-  items.wrap(function(i) {
-    return '<span class="helperQC" href="' + $(items[i]).attr('href') +
-      '"></span>';
-  }).children().unwrap();
-  $('#pCC').on('click', '.helperQC', guildTake);
+function guildMailboxTake(href) {
+  return $.ajax({url: href}).pipe(translateReturnInfo).done(dialog);
+}
 
-  var takeItems = $('<div class="fshCenter"><span class="reportLink">' +
-    'Take All</span></div>');
-  $('#pCC td[height="25"]').append(takeItems);
-  takeItems.click(function() {
-    $('#pCC span.helperQC').click();
-  });
+function takeResult(self, data) {
+  if (data.r === 0) {
+    closestTable(self).nextElementSibling.rows[0].cells[0].innerHTML =
+      '<span class="fshGreen">Taken</span>';
+  }
+}
+
+function guildMailboxEvent(e) {
+  var self = e.target;
+  if (self.tagName === 'IMG') {
+    e.preventDefault();
+    var anchor = self.parentNode.href;
+    guildMailboxTake(anchor).done(takeResult.bind(null, self));
+  }
+  if (self.className === 'reportLink') {
+    var nodeList = layout.pCC.getElementsByTagName('img');
+    Array.prototype.forEach.call(nodeList, function(el) {el.click();});
+  }
+}
+
+export default function guildMailbox() {
+  layout.pCC.addEventListener('click', guildMailboxEvent);
+  document.querySelector('#pCC td[height="25"]')
+    .insertAdjacentHTML('beforeend',
+      '<span class="reportLink">Take All</span>');
 }

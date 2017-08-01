@@ -1,12 +1,12 @@
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
-function containsNewsHead(el) { // Native
+function containsNewsHead(el) {
   return el.classList.contains('news_head') ||
     el.classList.contains('news_head_tavern');
 }
 
-function closestHead(el) { // Native
+function closestHead(el) {
   if (containsNewsHead(el)) {
     return el;
   }
@@ -14,7 +14,7 @@ function closestHead(el) { // Native
   return closestHead(el.parentNode);
 }
 
-function getNewsClass(newsHead) { // Native
+function getNewsClass(newsHead) {
   if (newsHead.classList.contains('news_head_tavern')) {
     return '.news_body_tavern';
   }
@@ -34,18 +34,18 @@ function gotNewsHead(evt, newsHead) { // jQuery
   evt.stopPropagation();
 }
 
-function newsEvt(evt) { // Native
+function newsEvt(evt) {
   var newsHead = closestHead(evt.target);
   if (newsHead) {gotNewsHead(evt, newsHead);}
 }
 
-function fixCollapse() { // Native
+function fixCollapse() {
   var newsCol = document.getElementsByClassName('news_left_column');
   if (newsCol.length !== 1) {return;}
   newsCol[0].addEventListener('click', newsEvt, true);
 }
 
-function lookForPvPLadder() { // Native
+function lookForPvPLadder() {
   var lastLadderReset = system.getValue('lastLadderReset');
   var rumours = layout.pCC.getElementsByClassName('news_head_tavern');
   Array.prototype.forEach.call(rumours, function(head) {
@@ -59,7 +59,7 @@ function lookForPvPLadder() { // Native
   });
 }
 
-export default function injectHomePageTwoLink() { // Native
+export default function injectHomePageTwoLink() {
   var archiveLink = document.querySelector(
     '#pCC a[href="index.php?cmd=&subcmd=viewupdatearchive"]');
   if (!archiveLink) {return;}

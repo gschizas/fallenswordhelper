@@ -1,19 +1,20 @@
-import * as ajax from './support/ajax';
+import getForage from './ajax/getForage';
+import setForage from './ajax/setForage';
 import * as layout from './support/layout';
 
 var content;
 var combatLog = [];
 var textArea;
 
-function notepadCopyLog() { // Native
+function notepadCopyLog() {
   textArea.focus();
   textArea.select();
 }
 
-function clearCombatLog() { // Native
+function clearCombatLog() {
   combatLog = [];
   textArea.value = '[]';
-  ajax.setForage('fsh_combatLog', combatLog);
+  setForage('fsh_combatLog', combatLog);
 }
 
 function notepadClearLog() { // jQuery
@@ -22,7 +23,7 @@ function notepadClearLog() { // jQuery
   );
 }
 
-function gotCombatLog(data) { // Native
+function gotCombatLog(data) {
   if (data) {combatLog = data;}
   var yuuzParser = '<tr><td align="center" colspan="4"><b>Log Parser</b>' +
     '</td></tr>' +
@@ -56,5 +57,5 @@ function gotCombatLog(data) { // Native
 
 export default function injectNotepadShowLogs(injector) { // jQuery.min
   content = injector || layout.pCC;
-  ajax.getForage('fsh_combatLog').done(gotCombatLog);
+  getForage('fsh_combatLog').done(gotCombatLog);
 }

@@ -1,4 +1,5 @@
-import * as ajax from './support/ajax';
+import getForage from './ajax/getForage';
+import setForage from './ajax/setForage';
 import * as dataObj from './support/dataObj';
 import * as system from './support/system';
 
@@ -28,7 +29,7 @@ function buildOnlinePlayerData() { // jQuery
   });
 }
 
-function saveVal(key, val) { // Native
+function saveVal(key, val) {
   if (!isNaN(val)) {system.setValue(key, val);}
 }
 
@@ -100,9 +101,9 @@ function gotOnlinePlayers() { // jQuery
   }).api();
 }
 
-function checkLastPage() { // Native
+function checkLastPage() {
   if (onlinePages === lastPage) {
-    ajax.setForage('fsh_onlinePlayers', onlinePlayers);
+    setForage('fsh_onlinePlayers', onlinePlayers);
     gotOnlinePlayers();
   }
 }
@@ -167,7 +168,7 @@ function resetEvt() { // context
   table.draw();
 }
 
-function doOnlinePlayerEventHandlers(e) { // Native
+function doOnlinePlayerEventHandlers(e) {
   if (e.target.id === 'fshRefresh') {refreshEvt();}
   if (e.target.id === 'fshReset') {resetEvt();}
 }
@@ -187,7 +188,7 @@ function injectOnlinePlayersNew() { // jQuery
   context.html(
     '<span><b>Online Players</b></span>' + refreshButton +
     '<div id="fshOutput"></div>');
-  ajax.getForage('fsh_onlinePlayers').done(function(value) {
+  getForage('fsh_onlinePlayers').done(function(value) {
     onlinePlayers = value || {};
     gotOnlinePlayers();
   });

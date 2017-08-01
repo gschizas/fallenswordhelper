@@ -1,5 +1,6 @@
 import calf from './support/calf';
-import * as ajax from './support/ajax';
+import getForage from './ajax/getForage';
+import setForage from './ajax/setForage';
 import * as layout from './support/layout';
 import * as system from './support/system';
 
@@ -61,7 +62,7 @@ function sortCol(target) {
 function doHandlers(evt) {
   var target = evt.target;
   if (target.id === 'clearEntityLog') {
-    ajax.setForage('fsh_monsterLog', '');
+    setForage('fsh_monsterLog', '');
     noMobs();
     return;
   }
@@ -138,5 +139,5 @@ function prepAry(data) {
 }
 
 export default function injectMonsterLog() {
-  ajax.getForage('fsh_monsterLog').done(prepAry);
+  getForage('fsh_monsterLog').done(prepAry);
 }

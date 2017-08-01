@@ -1,4 +1,5 @@
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 
 function gotMoves(_arena) { // jQuery
   var arena = _arena || {};
@@ -13,9 +14,9 @@ function gotMoves(_arena) { // jQuery
       .exec(self.closest('td').html())[1]);
     arena.moves[moveId].href = src;
   });
-  ajax.setForage('fsh_arena', arena);
+  setForage('fsh_arena', arena);
 }
 
 export default function storeMoves() { // jQuery.min
-  ajax.getForage('fsh_arena').done(gotMoves);
+  getForage('fsh_arena').done(gotMoves);
 }

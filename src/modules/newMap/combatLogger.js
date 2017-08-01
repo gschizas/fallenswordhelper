@@ -1,4 +1,5 @@
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
 // Taking the Not Save in case they add new enhancements.
@@ -8,19 +9,19 @@ var notSave = ['Breaker', 'Protection', 'Master Thief', 'Protect Gold',
 var combatLog = [];
 var combatData;
 
-function storeBuffs(buff) { // Native
+function storeBuffs(buff) {
   if (buff.id === 54 || buff.id === 26) {
     combatData.player.buffs[buff.id] = parseInt(buff.level, 10);
   }
 }
 
-function storeEnhancements(enh) { // Native
+function storeEnhancements(enh) {
   if (notSave.indexOf(enh.name) === -1) {
     combatData.player.enhancements[enh.name] = enh.value;
   }
 }
 
-function processCombatResponse(e, data) { // Native
+function processCombatResponse(e, data) {
   combatData = {};
   combatData.combat = data.response.data;
   if (combatData.combat.inventory_id) {
@@ -36,10 +37,10 @@ function processCombatResponse(e, data) { // Native
   }
   combatData.time = data.time;
   combatLog.push(combatData);
-  ajax.setForage('fsh_combatLog', combatLog);
+  setForage('fsh_combatLog', combatLog);
 }
 
-function combatResponse(e, data) { // Native
+function combatResponse(e, data) {
   // If bad response do nothing.
   if (data.response.response === 0) {processCombatResponse(e, data);}
 }
@@ -51,6 +52,6 @@ function gotCombatLog(data) { // jQuery.min
 
 export default function combatLogger() { // jQuery.min
   if (system.getValue('keepLogs')) {
-    ajax.getForage('fsh_combatLog').done(gotCombatLog);
+    getForage('fsh_combatLog').done(gotCombatLog);
   }
 }

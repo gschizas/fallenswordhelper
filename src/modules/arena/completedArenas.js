@@ -1,6 +1,6 @@
 import * as assets from './assets';
 
-function gotoPage(pageId) { // Native
+function gotoPage(pageId) {
   window.location = 'index.php?cmd=arena&subcmd=completed&page=' + pageId;
 }
 

@@ -1,5 +1,13 @@
-/* Groups */
+/* Scout Tower Titan Tracker */
+.fshTTracker {
+  width: 500px;
+  margin: auto;
+}
+.fshCooldown {
+  color: #640000;
+}
 
+/* Groups */
 table#stat {
   font-size: x-small;
   border-top: 2px black solid;
@@ -117,6 +125,17 @@ div.fshFten {font-size: 11px;}
   width: 25px;
   height: 25px;
   display: inline-block;
+  background-size: contain;
+}
+
+/* Guild Add/Remove Tags */
+.guildTagSpinner {
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+  background-repeat: no-repeat;
+  background-position: center;
   background-size: contain;
 }
 
@@ -322,6 +341,7 @@ input.fshFindOnlinePlayers {
   font-size: x-small;
   text-align: right;
 }
+.fshBkRed {background-color: red;}
 
 .fshCommon {color: white;}
 .fshRare {color: #3366ff;}

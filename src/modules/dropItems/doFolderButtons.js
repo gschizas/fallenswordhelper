@@ -1,6 +1,12 @@
 import calf from '../support/calf';
 import * as layout from '../support/layout';
 
+function extraButtons() {
+  var tRows = layout.pCC.getElementsByTagName('table')[0].rows;
+  tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
+    '<input value="Check All" type="button">&nbsp;');
+}
+
 export default function doFolderButtons(folders) {
   if (calf.subcmd2 === 'storeitems') {
     var formNode = layout.pCC.getElementsByTagName('form')[0];
@@ -17,5 +23,6 @@ export default function doFolderButtons(folders) {
         key + '">' + folders[key] + '</span>';
     });
     insertHere.innerHTML = inject;
+    extraButtons();
   }
 }

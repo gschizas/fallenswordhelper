@@ -6,37 +6,37 @@ var warehouse = [];
 var collapseNewsArchive;
 var lastLadderReset;
 
-function collapseArt(article) { // Native
+function collapseArt(article) {
   article.rows.forEach(function(el) {
     el.row.classList.add('fshHide');
   });
   article.open = false;
 }
 
-function collapseAll() { // Native
+function collapseAll() {
   warehouse.forEach(function(article) {
     if (article.open) {collapseArt(article);}
   });
 }
 
-function expandArt(article) { // Native
+function expandArt(article) {
   article.rows.forEach(function(el) {
     el.row.classList.remove('fshHide');
   });
   article.open = true;
 }
 
-function expandAll() { // Native
+function expandAll() {
   warehouse.forEach(function(article) {
     if (!article.open) {expandArt(article);}
   });
 }
 
-function isHeader(el) { // Native
+function isHeader(el) {
   if (el.rowIndex % 6 === 0) {return el;}
 }
 
-function closestTr(el) { // Native
+function closestTr(el) {
   if (el.tagName === 'TR') {
     return isHeader(el);
   }
@@ -44,7 +44,7 @@ function closestTr(el) { // Native
   return closestTr(el.parentNode);
 }
 
-function evtEnabled(evt) { // Native
+function evtEnabled(evt) {
   var myRow = closestTr(evt.target);
   if (!myRow) {return;}
   var articleNo = myRow.rowIndex / 6;
@@ -57,15 +57,15 @@ function evtEnabled(evt) { // Native
   }
 }
 
-function evtHdl(evt) { // Native
+function evtHdl(evt) {
   if (collapseNewsArchive) {evtEnabled(evt);}
 }
 
-function makeHeaderClickable(row) { // Native
+function makeHeaderClickable(row) {
   if (collapseNewsArchive) {row.classList.add('fshPoint');}
 }
 
-function collapseDuringAnalysis(row, thisArticle) { // Native
+function collapseDuringAnalysis(row, thisArticle) {
   if (collapseNewsArchive) {
     row.classList.add('fshHide');
     thisArticle.open = false;
@@ -74,7 +74,7 @@ function collapseDuringAnalysis(row, thisArticle) { // Native
   }
 }
 
-function checkForPvPLadder(row) { // Native
+function checkForPvPLadder(row) {
   if (row.children[1].children[0].textContent === 'PvP Ladder') {
     var logTime = system.parseDateAsTimestamp(
       row.children[1].children[2].textContent.replace('Posted: ', ''));
@@ -85,7 +85,7 @@ function checkForPvPLadder(row) { // Native
   }
 }
 
-function testRowType(row, rowType, thisArticle) { // Native
+function testRowType(row, rowType, thisArticle) {
   if (rowType === 0) {
     thisArticle.header = row;
     makeHeaderClickable(row);
@@ -99,7 +99,7 @@ function testRowType(row, rowType, thisArticle) { // Native
   }
 }
 
-function doTagging(row) { // Native
+function doTagging(row) {
   var rowType = row.rowIndex % 6;
   var articleNo = (row.rowIndex - rowType) / 6;
   warehouse[articleNo] = system.fallback(warehouse[articleNo], {});
@@ -114,7 +114,7 @@ function toggleHeaderClass() {
   });
 }
 
-function togglePref() { // Native
+function togglePref() {
   collapseNewsArchive = !collapseNewsArchive;
   system.setValue('collapseNewsArchive', collapseNewsArchive);
   if (collapseNewsArchive) {collapseAll();} else {expandAll();}
@@ -129,7 +129,7 @@ function setupPref(rowInjector) {
     .addEventListener('click', togglePref);
 }
 
-export default function viewArchive() { // Native
+export default function viewArchive() {
   lastLadderReset = system.getValue('lastLadderReset');
   var theTables = layout.pCC.getElementsByTagName('table');
   setupPref(theTables[0].rows[2]);

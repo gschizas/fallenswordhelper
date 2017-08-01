@@ -1,4 +1,5 @@
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as system from '../support/system';
 
 var showCreatureInfo;
@@ -16,7 +17,7 @@ var statDamage;
 var statArmor;
 var statHp;
 
-function updateMinMax(_logStat, creatureStat) { // Native
+function updateMinMax(_logStat, creatureStat) {
   var logStat = system.fallback(_logStat, {});
   if (logStat.min) {
     logStat.min = Math.min(logStat.min, creatureStat);
@@ -31,7 +32,7 @@ function updateMinMax(_logStat, creatureStat) { // Native
   return logStat;
 }
 
-function processMonsterLog() { // Native
+function processMonsterLog() {
   if (!showMonsterLog) {return;}
   monsterLog[creature.name] = system.fallback(monsterLog[creature.name], {});
   var logCreature = monsterLog[creature.name];
@@ -59,10 +60,10 @@ function processMonsterLog() { // Native
       logEnh[e.name] = updateMinMax(logEnh[e.name], Number(e.value));
     });
   }
-  ajax.setForage('fsh_monsterLog', monsterLog);
+  setForage('fsh_monsterLog', monsterLog);
 }
 
-function doMouseOver() { // Native
+function doMouseOver() {
   var oneHitNumber = Math.ceil(creature.hp * hpVariable + creature.armor *
     generalVariable);
   var monsterTip = '<table><tr><td>' +
@@ -120,7 +121,7 @@ var bailOut = [
   }
 ];
 
-function doCreatureInfo(data) { // Native
+function doCreatureInfo(data) {
   var actions = document.getElementById('actionList').children;
   for (var i = 0; i < bailOut.length; i += 1) {
     if (bailOut[i](data, actions)) {return;}
@@ -130,11 +131,11 @@ function doCreatureInfo(data) { // Native
   doMouseOver();
 }
 
-function processMouseOver(data) { // Native
+function processMouseOver(data) {
   if (showCreatureInfo) {doCreatureInfo(data);}
 }
 
-function processMonster(data) { // Native
+function processMonster(data) {
   creature = data.response.data;
   if (!creature) {return;} // creature is null
   processMouseOver(data);
@@ -147,7 +148,7 @@ function loopActions(e, i) { // jQuery
     .done(processMonster);
 }
 
-function getMyStats() { // Native
+function getMyStats() {
   statLevel = system.intValue(document
     .getElementById('statbar-level-tooltip-general')
     .getElementsByClassName('stat-level')[0].nextElementSibling.textContent);
@@ -163,7 +164,7 @@ function getMyStats() { // Native
     .getElementsByClassName('stat-hp')[0].nextElementSibling.textContent;
 }
 
-function initMonsterLog() { // Native
+function initMonsterLog() {
   if (showCreatureInfo) {getMyStats();}
   actionData = GameData.actions();
   actionData.forEach(loopActions);
@@ -172,7 +173,7 @@ function initMonsterLog() { // Native
 var genVar = [0, 1.1, 1.053, 1.1053];
 var hpVar = [0, 1.053, 1, 1];
 
-function getBias() { // Native
+function getBias() {
   var combatEvaluatorBias = system.getValue('combatEvaluatorBias');
   generalVariable = genVar[combatEvaluatorBias];
   hpVariable = hpVar[combatEvaluatorBias];
@@ -184,7 +185,7 @@ export default function startMonsterLog() { // jQuery
   if (!showCreatureInfo && !showMonsterLog) {return;}
   if (showCreatureInfo) {getBias();}
   $.subscribe('after-update.actionlist', initMonsterLog);
-  ajax.getForage('fsh_monsterLog').done(function(data) {
+  getForage('fsh_monsterLog').done(function(data) {
     monsterLog = data || {};
   });
   initMonsterLog();

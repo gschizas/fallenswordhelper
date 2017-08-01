@@ -15,7 +15,7 @@ function player(invPlayer, rowPlayer, guild) {
   return guild;
 }
 
-function nameRenderDisplay(data, row) { // Native
+function nameRenderDisplay(data, row) {
   var cur = system.fallback(inventory.theInv.player_id,
     inventory.theInv.current_player_id);
   var t = getT(row.player_id);
@@ -40,26 +40,26 @@ function nameRenderDisplay(data, row) { // Native
     bold + '</a>' + _setName;
 }
 
-export function nameRender(data, type, row) { // Native
+export function nameRender(data, type, row) {
   if (type !== 'display') {return data;}
   return nameRenderDisplay(data, row);
 }
 
-export function whereData(row) { // Native
+export function whereData(row) {
   return system.fallback(row.folder_id, row.player_id);
 }
 
-function whereRenderUserFolder(row) { // Native
+function whereRenderUserFolder(row) {
   if (row.equipped) {return -2;}
   return parseInt(row.folder_id, 10);
 }
 
-function playerName(f) { // Native
+function playerName(f) {
   if (!calf.membrList[f]) {return '???';}
   return calf.membrList[f].username;
 }
 
-export function whereRender(data, type, row) { // Native
+export function whereRender(data, type, row) {
   if (row.folder_id) {
     return whereRenderUserFolder(row);
   }
@@ -67,13 +67,13 @@ export function whereRender(data, type, row) { // Native
   return playerName(row.player_id);
 }
 
-function whereRenderGuildDisplay(row) { // Native
+function whereRenderGuildDisplay(row) {
   if (row.player_id === -1) {return 'GS';}
   return '<a class="fshMaroon" href="index.php?cmd=profile&player_id=' +
     row.player_id + '">' + playerName(row.player_id) + '</a>';
 }
 
-export function whereRenderDisplay(data, type, row) { // Native
+export function whereRenderDisplay(data, type, row) {
   if (row.player_id) {
     return whereRenderGuildDisplay(row);
   }
@@ -91,12 +91,12 @@ export function whereRenderDisplay(data, type, row) { // Native
   return folderSelect;
 }
 
-function whereRenderGuildFilter(row) { // Native
+function whereRenderGuildFilter(row) {
   if (row.player_id === -1) {return 'GS';}
   return playerName(row.player_id);
 }
 
-export function whereRenderFilter(data, type, row) { // Native
+export function whereRenderFilter(data, type, row) {
   if (row.player_id) {
     return whereRenderGuildFilter(row);
   }
@@ -104,18 +104,18 @@ export function whereRenderFilter(data, type, row) { // Native
   return inventory.theInv.folders[row.folder_id];
 }
 
-export function craftRender(craft) { // Native
+export function craftRender(craft) {
   if (assets.craftHash[craft]) {return assets.craftHash[craft].abbr;}
   return '';
 }
 
-export function durabilityRender(data, type, row) { // Native
+export function durabilityRender(data, type, row) {
   if (parseInt(row.max_durability, 10) > 0) {
     return Math.ceil(row.durability / row.max_durability * 100);
   }
 }
 
-function bpDisplayType(type, row) { // Native
+function bpDisplayType(type, row) {
   if (type !== 'display') {return 'BP';}
   if (row.player_id === -1) {
     return '<span class="fshLink takeItem" invid="' + row.inv_id +
@@ -126,13 +126,13 @@ function bpDisplayType(type, row) { // Native
     '" mode="0" action="recall">BP</span>';
 }
 
-export function bpRender(where, type, row) { // Native
+export function bpRender(where, type, row) {
   if (row.folder_id || row.player_id ===
     inventory.theInv.current_player_id) {return;}
   return bpDisplayType(type, row);
 }
 
-function gsDisplayType(_data, type, row) { // Native
+function gsDisplayType(_data, type, row) {
   if (type === 'display') {
     return '<span class="fshLink recallItem" invid="' +
     row.inv_id + '" playerid="' +
@@ -142,7 +142,7 @@ function gsDisplayType(_data, type, row) { // Native
   return 'GS';
 }
 
-export function gsRender(_data, type, row) { // Native
+export function gsRender(_data, type, row) {
   if (row.player_id && row.player_id !== -1 ||
       row.folder_id && row.guild_tag !== '-1') {
     return gsDisplayType(_data, type, row);
@@ -184,7 +184,7 @@ var actionTypes = [
   }
 ];
 
-function wearRender(row) { // Native
+function wearRender(row) {
   for (var i = 0; i < actionTypes.length; i += 1) {
     if (actionTypes[i].test(row)) {
       return '<span class="fshLink ' + actionTypes[i].wearAction(row) +
@@ -194,7 +194,7 @@ function wearRender(row) { // Native
   return '';
 }
 
-function useRender(row) { // Native
+function useRender(row) {
   for (var i = 0; i < actionTypes.length; i += 1) {
     if (actionTypes[i].test(row)) {
       return '<span class="fshLink ' + actionTypes[i].useAction(row) +
@@ -204,7 +204,7 @@ function useRender(row) { // Native
   return '';
 }
 
-export function wuRender(data, _type, row) { // Native
+export function wuRender(data, _type, row) {
   var action = {
     '0': 'Wear',
     '1': 'Wear',
@@ -227,7 +227,7 @@ export function wuRender(data, _type, row) { // Native
   return action;
 }
 
-export function dropRender(data, type, row) { // Native
+export function dropRender(data, type, row) {
   if (system.fallback(row.guild_tag !== '-1', row.equipped)) {return;}
   if (type !== 'display') {return 'Drop';}
   return '<span class="dropItem tip-static dropLink" data-tipped=' +
@@ -235,7 +235,7 @@ export function dropRender(data, type, row) { // Native
     ' data-inv="' + row.inv_id + '">Drop</span>';
 }
 
-export function sendRender(data, type, row) { // Native
+export function sendRender(data, type, row) {
   if (system.fallback(row.bound, row.equipped)) {return;}
   if (type !== 'display') {return 'Send';}
   return '<span class="sendItem tip-static reportLink" data-tipped=' +
@@ -243,22 +243,22 @@ export function sendRender(data, type, row) { // Native
     ' data-inv="' + row.inv_id + '">Send</span>';
 }
 
-function selfRowColor(data) { // Native
+function selfRowColor(data) {
   if (data.equipped) {return 'fshGreen';}
   return 'fshNavy';
 }
 
-function guildRowColor(data) { // Native
+function guildRowColor(data) {
   if (data.player_id === -1) {return 'fshNavy';}
   return 'fshMaroon';
 }
 
-function getRowColor(data) { // Native
+function getRowColor(data) {
   if (data.folder_id) {return selfRowColor(data);}
   return guildRowColor(data);
 }
 
-export function createdRow(row, data) { // Native
+export function createdRow(row, data) {
   var colour = getRowColor(data);
   row.classList.add(colour);
 }

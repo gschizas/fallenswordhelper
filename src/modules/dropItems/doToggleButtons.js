@@ -3,12 +3,12 @@ import * as layout from '../support/layout';
 
 var insertHere;
 
-function showHideLabel(pref) { // Native
+function showHideLabel(pref) {
   if (pref) {return 'Hide';}
   return 'Show';
 }
 
-export default function doToggleButtons(showExtraLinks, showQuickDropLinks) { // Native
+export default function doToggleButtons(showExtraLinks, showQuickDropLinks) {
   // Option toggle buttons for both screens
   if (!insertHere) {
     insertHere = layout.pCC.getElementsByTagName('form')[0]

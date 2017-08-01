@@ -4,20 +4,20 @@ import * as layout from './layout';
 var times = {};
 var refAry = ['www.lazywebtools.co.uk', 'refreshthing.com'];
 
-function isAuto() { // Native
+function isAuto() {
   var docRef = document.referrer
     .match(/^https?:\/\/([^/?#]+)(?:[/?#]|$)/i);
   if (docRef) {docRef = docRef[1];}
   return refAry.indexOf(docRef) !== -1;
 }
 
-export function start(category, variable, label) { // Native
+export function start(category, variable, label) {
   if (isAuto() || typeof ga === 'undefined') {return;}
   times[category + ':' + variable + ':' + label] =
     performance.now() * 1000;
 }
 
-function sendTiming(category, variable, label) { // Native
+function sendTiming(category, variable, label) {
   var myTime = Math.round(performance.now() * 1000 -
     times[category + ':' + variable + ':' + label]) / 1000;
   if (myTime > 10) {
@@ -29,12 +29,12 @@ function sendTiming(category, variable, label) { // Native
   //#endif
 }
 
-export function end(category, variable, label) { // Native
+export function end(category, variable, label) {
   if (isAuto() || typeof ga === 'undefined') {return;}
   sendTiming(category, variable, label);
 }
 
-function fixupUrl() { // Native
+function fixupUrl() {
   var origPath = window.location.pathname + window.location.search;
   var page = origPath.replace(/&m=.*/, '')
     .replace(/&subcmd=&.*/, '')
@@ -60,7 +60,7 @@ function fixupUrl() { // Native
   ga('fsh.set', 'page', page);
 }
 
-export function setup() { // Native
+export function setup() {
   if (isAuto() || typeof ga === 'undefined') {return;}
 
   ga('create', 'UA-76488113-1', 'auto', 'fshApp', {
@@ -77,7 +77,7 @@ export function setup() { // Native
   ga('fsh.send', 'pageview');
 }
 
-export function screenview(funcName) { // Native
+export function screenview(funcName) {
   if (isAuto() || typeof ga === 'undefined') {return;}
   ga('fshApp.send', 'screenview', {screenName: funcName});
 }

@@ -1,4 +1,5 @@
-import * as ajax from '../support/ajax';
+import getForage from '../ajax/getForage';
+import setForage from '../ajax/setForage';
 import * as assets from './assets';
 import * as dataObj from '../support/dataObj';
 import * as debug from '../support/debug';
@@ -16,7 +17,7 @@ function changeLvls() { // jQuery
     opts = opts || {};
     opts.minLvl = minLvl;
     opts.maxLvl = maxLvl;
-    ajax.setForage('fsh_arena', opts);
+    setForage('fsh_arena', opts);
     $('#arenaTypeTabs table[width="635"]').DataTable().draw();
   }
 }
@@ -25,7 +26,7 @@ function resetLvls() { // jQuery
   opts = opts || {};
   opts.minLvl = dataObj.defaults.arenaMinLvl;
   opts.maxLvl = dataObj.defaults.arenaMaxLvl;
-  ajax.setForage('fsh_arena', opts);
+  setForage('fsh_arena', opts);
   $('#fshMinLvl').val(opts.minLvl);
   $('#fshMaxLvl').val(opts.maxLvl);
   $('#arenaTypeTabs table[width="635"]').DataTable().draw();
@@ -34,7 +35,7 @@ function resetLvls() { // jQuery
 function hideMoves(evt) { // jQuery
   opts = opts || {};
   opts.hideMoves = evt.target.checked;
-  ajax.setForage('fsh_arena', opts);
+  setForage('fsh_arena', opts);
   $('.moveMax').toggle(!evt.target.checked);
 }
 
@@ -102,7 +103,7 @@ var doLvlFilter = [
   function(min, max, level) {return min <= level && level <= max;}
 ];
 
-function hazOpts(_settings, data) { // Native
+function hazOpts(_settings, data) {
   var min = opts.minLvl;
   var max = opts.maxLvl;
   var level = system.intValue(data[7]);
@@ -112,7 +113,7 @@ function hazOpts(_settings, data) { // Native
   return false;
 }
 
-function lvlFilter(_settings, data) { // Native
+function lvlFilter(_settings, data) {
   if (opts) {return hazOpts(_settings, data);}
   return true;
 }
@@ -194,7 +195,7 @@ function process(arena) { // jQuery
   var myRows = theTables.children('tbody').children('tr');
   myRows.each(orderData);
   filterHeader();
-  ajax.setForage('fsh_arena', opts);
+  setForage('fsh_arena', opts);
   $.fn.dataTable.ext.search.push(lvlFilter);
   theTables.DataTable(assets.tableOpts);
   $('td.sorting, td.sorting_asc, td.sorting_desc', tabs).off('click');
@@ -210,5 +211,5 @@ export default function injectArena() { // jQuery
   tabs = $('#arenaTypeTabs');
   if (tabs.length !== 1) {return;} // Join error screen
   theTables = $('table[width="635"]', tabs);
-  ajax.getForage('fsh_arena').done(process);
+  getForage('fsh_arena').done(process);
 }

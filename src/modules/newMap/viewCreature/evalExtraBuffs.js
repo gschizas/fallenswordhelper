@@ -1,12 +1,12 @@
 
-function evalSes(combat) { // Native
+function evalSes(combat) {
   if (combat.player.superEliteSlayerLevel > 0) {
     combat.extraNotes += 'SES Stat Reduction Multiplier = ' +
     combat.player.superEliteSlayerMultiplier + '<br>';
   }
 }
 
-function evalHolyFlame(combat) { // Native
+function evalHolyFlame(combat) {
   combat.holyFlameBonusDamage = 0;
   if (combat.creature.class !== 'Undead') {return;}
   combat.holyFlameBonusDamage = Math.max(Math.floor(
@@ -18,7 +18,7 @@ function evalHolyFlame(combat) { // Native
   }
 }
 
-function evalExtraStam(combat) { // Native
+function evalExtraStam(combat) {
   combat.extraStaminaPerHit = 0;
   if (combat.player.counterAttackLevel > 0) {
     combat.extraStaminaPerHit = Math.ceil(
@@ -28,14 +28,14 @@ function evalExtraStam(combat) { // Native
   }
 }
 
-function evalDeathDealer(combat) { // Native
+function evalDeathDealer(combat) {
   if (combat.player.deathDealerLevel > 0) {
     combat.extraNotes += 'DD Bonus Damage = ' +
       combat.deathDealerBonusDamage + '<br>';
   }
 }
 
-function evalCounterAttack(combat) { // Native
+function evalCounterAttack(combat) {
   if (combat.player.counterAttackLevel > 0) {
     combat.extraNotes += 'CA Bonus Attack/Damage = ' +
       combat.counterAttackBonusAttack + ' / ' +
@@ -44,7 +44,7 @@ function evalCounterAttack(combat) { // Native
   }
 }
 
-export default function evalExtraBuffs(combat) { // Native
+export default function evalExtraBuffs(combat) {
   combat.extraNotes = '';
   evalSes(combat);
   // math section ... analysis

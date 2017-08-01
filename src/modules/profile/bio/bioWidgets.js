@@ -5,7 +5,7 @@ import * as system from '../../support/system';
 
 var bioEditLines;
 
-function bioPreview() { // Native
+function bioPreview() {
   var textArea = document.getElementById('textInputBox');
   var bioPreviewHTML = system.convertTextToHtml(textArea.value);
   textArea.parentNode.insertAdjacentHTML('beforeend', '<div>' +
@@ -16,7 +16,7 @@ function bioPreview() { // Native
     bioPreviewHTML + '</span></td></tr></tbody></table></div>');
 }
 
-function bioWords() { // Native
+function bioWords() {
   // Add description text for the new tags
   layout.pCC.insertAdjacentHTML('beforeend', '<div>' +
     '`~This will allow FSH Script users to ' +
@@ -30,11 +30,11 @@ function bioWords() { // Native
     'pack names in them to make buffing even easier!</div>');
 }
 
-function testHeightValid(boxVal) { // Native
+function testHeightValid(boxVal) {
   return isNaN(boxVal) || boxVal < '1' || boxVal > '99';
 }
 
-function changeHeight() { // Native
+function changeHeight() {
   var theBox = document.getElementById('fshLinesToShow');
   var boxVal = parseInt(theBox.value, 10);
   if (testHeightValid(boxVal)) {return;}
@@ -43,7 +43,7 @@ function changeHeight() { // Native
   document.getElementById('textInputBox').rows = bioEditLines;
 }
 
-function bioHeight() { // Native
+function bioHeight() {
   var bioEditLinesDiv = document.createElement('DIV');
   bioEditLinesDiv.insertAdjacentHTML('beforeend',
     ' Display <input id="fshLinesToShow"' +
@@ -58,7 +58,7 @@ function bioHeight() { // Native
   layout.pCC.appendChild(bioEditLinesDiv);
 }
 
-function updateBioCharacters() { // Native
+function updateBioCharacters() {
   var textArea = document.getElementById('textInputBox');
   var previewArea = document.getElementById('biopreview');
   var bioContents = system.convertTextToHtml(textArea.value);
@@ -68,7 +68,7 @@ function updateBioCharacters() { // Native
   }
 }
 
-export default function injectBioWidgets() { // Native
+export default function injectBioWidgets() {
   bioEditLines = system.getValue('bioEditLines');
   var textArea = document.getElementById('textInputBox');
   bioPreview();

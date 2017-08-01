@@ -1,3 +1,4 @@
+/* eslint-disable max-lines */
 export var defaults = {
   lastActiveQuestPage: '',
   lastNormalActiveQuestPage: '',
@@ -55,7 +56,7 @@ export var defaults = {
   renderOtherBios: false,
   playNewMessageSound: false,
   showSpeakerOnWorld: false,
-  defaultMessageSound: 'http://dl.getdropbox.com/u/2144065/chimes.wav',
+  defaultMessageSound: 'https://fallenswordhelper.github.io/fallenswordhelper/audio/sms-alert-2-daniel_simon.wav',
   highlightPlayersNearMyLvl: false,
   highlightGvGPlayersNearMyLvl: false,
   detailedConflictInfo: false,

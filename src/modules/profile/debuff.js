@@ -1,12 +1,23 @@
-import * as ajax from '../support/ajax';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
 
 var disableDeactivatePrompts = system.getValue('disableDeactivatePrompts');
 
-function debuff(aLink) { // jQuery
+function debuff(buffId) {
+  return $.ajax({
+    url: 'fetchdata.php',
+    data: {
+      a: '22',
+      d: '0',
+      id: buffId
+    },
+    dataType: 'json'
+  });
+}
+
+function doDebuff(aLink) { // jQuery
   var buffId = aLink.getAttribute('href').match(/(\d+)$/)[1];
-  ajax.debuff(buffId)
+  debuff(buffId)
     .done(function(data) {
       if (data.response.response === 0) {
         aLink.parentNode.innerHTML = '';
@@ -16,12 +27,12 @@ function debuff(aLink) { // jQuery
     });
 }
 
-function doPrompt(aLink) { // Native
+function doPrompt(aLink) {
   var onclick = aLink.getAttribute('onclick');
   var warn = onclick
     .match(/Are you sure you wish to remove the .* skill\?/)[0];
   layout.confirm('Remove Skill', warn, function() {
-    debuff(aLink);
+    doDebuff(aLink);
   });
 }
 
@@ -29,7 +40,7 @@ function checkForPrompt(aLink) {
   if (!disableDeactivatePrompts) {
     doPrompt(aLink);
   } else {
-    debuff(aLink);
+    doDebuff(aLink);
   }
 }
 
@@ -44,7 +55,7 @@ function interceptDebuff(e) { // jQuery
   checkForPrompt(aLink);
 }
 
-export default function fastDebuff() { // Native
+export default function fastDebuff() {
   var profileRightColumn = document.getElementById('profileRightColumn')
     .lastElementChild;
   profileRightColumn.addEventListener('click', interceptDebuff, true);

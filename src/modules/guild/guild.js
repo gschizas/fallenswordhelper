@@ -1,7 +1,7 @@
+import add from '../support/task';
 import * as guildUtils from './guildUtils';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var leftHandSideColumnTable;
 var members;
@@ -57,7 +57,7 @@ function conflictInfo() { // jQuery
   });
 }
 
-function logoToggle() { // Native
+function logoToggle() {
   var changeLogoCell = leftHandSideColumnTable.rows[0].cells[1].firstChild;
   changeLogoCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink' +
     ' tip-static" id="toggleGuildLogoControl" ' +
@@ -72,7 +72,7 @@ function logoToggle() { // Native
     .addEventListener('click', system.toggleVisibilty);
 }
 
-function statToggle() { // Native
+function statToggle() {
   var leaveGuildCell = leftHandSideColumnTable.rows[4].cells[1].firstChild;
   leaveGuildCell.insertAdjacentHTML('beforeend', '<span class="fshNoWrap">' +
     '[ <span class="fshLink tip-static" id="toggleStatisticsControl" ' +
@@ -88,7 +88,7 @@ function statToggle() { // Native
     .addEventListener('click', system.toggleVisibilty);
 }
 
-function structureToggle() { // Native
+function structureToggle() {
   var buildCell = leftHandSideColumnTable.rows[15].cells[1].firstChild;
   buildCell.insertAdjacentHTML('beforeend', '[ <span class="fshLink ' +
     'tip-static" id="toggleGuildStructureControl" ' +
@@ -103,7 +103,7 @@ function structureToggle() { // Native
     .addEventListener('click', system.toggleVisibilty);
 }
 
-function batchBuffLinks() { // Native
+function batchBuffLinks() {
   var limit = performance.now() + 5;
   while (performance.now() < limit && memCount < members.length) {
     members[memCount].parentNode.insertAdjacentHTML('beforeend',
@@ -111,23 +111,23 @@ function batchBuffLinks() { // Native
     memCount += 1;
   }
   if (memCount < members.length) {
-    task.add(3, batchBuffLinks);
+    add(3, batchBuffLinks);
   }
 }
 
-function buffLinks() { // Native
+function buffLinks() {
   // TODO preference
   memCount = 0;
   members = document.querySelectorAll(
     '#pCC a[href^="index.php?cmd=profile&player_id="]');
-  task.add(3, batchBuffLinks);
+  add(3, batchBuffLinks);
   layout.pCC.addEventListener('click', function(evt) {
     if (evt.target.className !== 'smallLink') {return;}
     layout.openQuickBuffByName(evt.target.previousElementSibling.text);
   });
 }
 
-function selfRecallLink() { // Native
+function selfRecallLink() {
   // self recall
   var getLi = leftHandSideColumnTable.getElementsByTagName('LI');
   var selfRecall = getLi[getLi.length - 1].parentNode;
@@ -137,21 +137,21 @@ function selfRecallLink() { // Native
     '" class="tip-static" data-tipped="Self Recall">Self Recall</a></li>');
 }
 
-export default function injectGuild() { // Native
-  task.add(3, layout.colouredDots);
-  task.add(3, guildUtils.removeGuildAvyImgBorder);
-  task.add(3, guildUtils.guildXPLock);
+export default function injectGuild() {
+  add(3, layout.colouredDots);
+  add(3, guildUtils.removeGuildAvyImgBorder);
+  add(3, guildUtils.guildXPLock);
   leftHandSideColumnTable = layout.pCC
     .lastElementChild.rows[2].cells[0].firstElementChild;
-  task.add(3, logoToggle);
-  task.add(3, statToggle);
-  task.add(3, structureToggle);
-  task.add(3, buffLinks);
-  task.add(3, selfRecallLink);
+  add(3, logoToggle);
+  add(3, statToggle);
+  add(3, structureToggle);
+  add(3, buffLinks);
+  add(3, selfRecallLink);
 
   // Detailed conflict information
   if (system.getValue('detailedConflictInfo')) {
-    task.add(3, conflictInfo);
+    add(3, conflictInfo);
   }
 
 }

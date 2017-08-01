@@ -1,9 +1,9 @@
+import add from './support/task';
 import calf from './support/calf';
-import * as ajax from './support/ajax';
+import getMembrList from './ajax/getMembrList';
 import * as debug from './support/debug';
 import * as layout from './support/layout';
 import * as system from './support/system';
-import * as task from './support/task';
 
 var newSummary = {};
 var advisorColumns = [
@@ -38,7 +38,7 @@ function doTable() { // jQuery
   });
 }
 
-function summaryLink() { // Native
+function summaryLink() {
   var updateInput = layout.pCC.getElementsByClassName('custombutton');
   if (!updateInput) {return;}
   updateInput[0].insertAdjacentHTML('afterend', '<span> <a href="index.php' +
@@ -104,24 +104,24 @@ function injectAdvisorDable() {
 }
 */
 
-function playerName(f) { // Native
+function playerName(f) {
   if (!membrList[f]) {return f;}
   return '<a href="index.php?cmd=profile&player_id=' +
     membrList[f].id + '">' + f + '</a>';
 }
 
-function playerLevel(f) { // Native
+function playerLevel(f) {
   if (!membrList[f]) {return '';}
   return membrList[f].level;
 }
 
-function playerRank(f) { // Native
+function playerRank(f) {
   if (!membrList[f]) {return '';}
   return '<div class="fshAdvRank">' +
     membrList[f].rank_name + '</div>';
 }
 
-function injectAdvisorNew() { // Native
+function injectAdvisorNew() {
 
   debug.time('guildAdvisor.injectAdvisorNew');
 
@@ -147,14 +147,14 @@ function injectAdvisorNew() { // Native
       '</td><td>' + playerRank(username) + '</td>');
   });
   list.insertAdjacentElement('beforeend', tfoot);
-  task.add(3, doTable);
+  add(3, doTable);
   summaryLink();
 
   debug.timeEnd('guildAdvisor.injectAdvisorNew');
 
 }
 
-function returnAdvisorPage(e, response) { // Native
+function returnAdvisorPage(e, response) {
 
   debug.time('guildAdvisor.returnAdvisorPage' + e);
 
@@ -237,7 +237,7 @@ function displayAdvisor() { // jQuery
 
 }
 
-function addStats(f) { // Native
+function addStats(f) {
   if (f === 'Total:') {return;}
   data.push([
     playerName(f),
@@ -255,9 +255,9 @@ function addStats(f) { // Native
   ]);
 }
 
-function addAdvisorPages() { // Native
+function addAdvisorPages() {
   Object.keys(newSummary).forEach(addStats);
-  task.add(3, displayAdvisor);
+  add(3, displayAdvisor);
 }
 
 function injectAdvisorWeekly() { // jQuery
@@ -273,7 +273,7 @@ function injectAdvisorWeekly() { // jQuery
     '<span class="fshSpinnerMsg">&nbsp;Retrieving daily data ...</span>';
 
   $.when(
-    ajax.getMembrList(false)
+    getMembrList(false)
       .done(function(response) {
         membrList = response;
       }),
@@ -285,21 +285,21 @@ function injectAdvisorWeekly() { // jQuery
     getAdvisorPage(6),
     getAdvisorPage(7)
   ).done(function() {
-    task.add(3, addAdvisorPages);
+    add(3, addAdvisorPages);
   });
 
   debug.timeEnd('guildAdvisor.injectAdvisorWeekly');
 
 }
 
-export default function injectAdvisor() { // Native
+export default function injectAdvisor() {
   if (calf.subcmd2 === 'weekly') {
     injectAdvisorWeekly();
   } else {
-    ajax.getMembrList(false).done(function(response) {
+    getMembrList(false).done(function(response) {
       membrList = response;
-      task.add(3, injectAdvisorNew);
-      // task.add(3, injectAdvisorDable, [membrList]);
+      add(3, injectAdvisorNew);
+      // add(3, injectAdvisorDable, [membrList]);
     });
   }
 }

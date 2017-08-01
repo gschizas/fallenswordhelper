@@ -2,12 +2,12 @@ import * as system from '../support/system';
 
 var drag_target;
 
-function drag_over(event) { // Native
+function drag_over(event) {
   event.preventDefault();
   return false;
 }
 
-function drag_drop(event) { // Native
+function drag_drop(event) {
   var offset = event.dataTransfer.getData('text/plain').split(',');
   drag_target.style.left =
     event.clientX + parseInt(offset[0], 10) + 'px';
@@ -19,7 +19,7 @@ function drag_drop(event) { // Native
   return false;
 }
 
-export function drag_start(event) { // Native
+export function drag_start(event) {
   drag_target = event.target;
   var style = window.getComputedStyle(event.target, null);
   event.dataTransfer.setData('text/plain',
@@ -58,7 +58,7 @@ function getBonus(stat, doc) { // jQuery
   return system.intValue(children.text().slice(2, -1));
 }
 
-function cloakGuess(bonus, level) { // Native
+function cloakGuess(bonus, level) {
   if (bonus > level * 10 ||
       bonus < level) {
     return bonus;
@@ -74,7 +74,7 @@ function updateForCloak(obj) {
   obj.hpValue = obj.hpBonus;
 }
 
-export function playerDataString(responseText) { // Native
+export function playerDataString(responseText) {
   var doc = system.createDocument(responseText);
   var obj = {
     levelValue: getStat('#stat-vl', doc),
@@ -134,7 +134,7 @@ function getBuffLvl(buffs, buff) {
   return system.fallback(buffs[buff], 0);
 }
 
-export function playerDataObject(json) { // Native
+export function playerDataObject(json) {
   var buffs = reduceBuffArray(json._skills);
   var obj = {
     levelValue: json.level,
@@ -174,7 +174,7 @@ export function playerDataObject(json) { // Native
   return obj;
 }
 
-export function updateHCSQuickBuffLinks(selector) { // Native
+export function updateHCSQuickBuffLinks(selector) {
   Array.prototype.forEach.call(document.querySelectorAll(selector),
     function(el) {
       el.setAttribute('href', el.getAttribute('href')

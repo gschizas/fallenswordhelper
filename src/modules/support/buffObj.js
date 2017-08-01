@@ -132,4 +132,3 @@ export default [
   {name: 'Teleport',            stamina: 40, duration: 60,   minCastLevel: 2500, treeId: 2, skillId: 168, nicks: 'teleport'},
   {name: 'Invigorate',          stamina: 40, duration: 90,   minCastLevel: 3000, treeId: 2, skillId: 169, nicks: 'invigorate'}
 ];
-/* eslint-enable no-multi-spaces, max-len */

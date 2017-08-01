@@ -1,3 +1,4 @@
+import add from '../support/task';
 import addStatTotalToMouseover from '../common/addStatTotalToMouseover';
 import fastDebuff from './debuff';
 import injectFastWear from './fastWear';
@@ -8,7 +9,6 @@ import profileRenderBio from './bio/bio';
 import * as common from '../common/common';
 import * as layout from '../support/layout';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 var guildId;
 var currentGuildRelationship;
@@ -31,7 +31,7 @@ var guildMessages = {
   }
 };
 
-function quickWearLink() { // Native
+function quickWearLink() {
   // quick wear manager link
   var node = document.querySelector('#profileRightColumn ' +
     'a[href="index.php?cmd=profile&subcmd=togglesection&section_id=2"]');
@@ -41,7 +41,7 @@ function quickWearLink() { // Native
     'class="fshBlue">Quick&nbsp;Wear</a>]');
 }
 
-function profileSelectAll() { // Native
+function profileSelectAll() {
   var bpTabs = document.getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
@@ -52,15 +52,11 @@ function profileSelectAll() { // Native
     ' li:not(.hcsPaginate_hidden) .backpackCheckbox:not(:disabled)');
   if (checkboxes.length > 0) {items = checkboxes;}
   Array.prototype.forEach.call(items, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {
-      bubbles: true,
-      ctrlKey: true,
-      metaKey: true
-    }));
+    el.click();
   });
 }
 
-function selectAllLink() { // Native
+function selectAllLink() {
   // select all link
   var node = document.querySelector('#profileRightColumn' +
     ' a[href="index.php?cmd=profile&subcmd=dropitems"]');
@@ -76,7 +72,7 @@ function selectAllLink() { // Native
   node.parentNode.appendChild(wrapper);
 }
 
-function storeVL() { // Native
+function storeVL() {
   // store the VL of the player
   var virtualLevel = parseInt(
     document.getElementById('stat-vl').textContent, 10);
@@ -95,7 +91,7 @@ function guildAry(val) {
   return [];
 }
 
-function guildRelationship(_txt) { // Native
+function guildRelationship(_txt) {
   var scenario = [
     {test: guildAry(system.getValue('guildSelf')), type: 'self'},
     {test: guildAry(system.getValue('guildFrnd')), type: 'friendly'},
@@ -108,7 +104,7 @@ function guildRelationship(_txt) { // Native
   }
 }
 
-function foundGuildLink(aLink) { // Native
+function foundGuildLink(aLink) {
   var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
   if (guildIdResult) {guildId = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
@@ -120,13 +116,13 @@ function foundGuildLink(aLink) { // Native
   }
 }
 
-function profileInjectGuildRel() { // Native
+function profileInjectGuildRel() {
   var aLink = document.querySelector(
     '#pCC a[href^="index.php?cmd=guild&subcmd=view&guild_id="]');
   if (aLink) {foundGuildLink(aLink);}
 }
 
-function profileInjectQuickButton(avyImg, playerid, playername) { // Native
+function profileInjectQuickButton(avyImg, playerid, playername) {
   var newhtml = '<div align="center">';
   newhtml += '<a class="quickButton buttonQuickBuff tip-static" ' +
     layout.quickBuffHref(playerid) + 'data-tipped="Buff ' + playername +
@@ -174,14 +170,14 @@ function profileInjectQuickButton(avyImg, playerid, playername) { // Native
   avyImg.insertAdjacentHTML('afterend', newhtml);
 }
 
-function removeStatTable(el) { // Native
+function removeStatTable(el) {
   var tde = el.getElementsByTagName('td');
   el.parentNode.innerHTML = tde[0].innerHTML.replace(/&nbsp;/g, ' ') +
     '<div class="profile-stat-bonus">' +
     tde[1].textContent + '</div>';
 }
 
-function updateStatistics() { // Native
+function updateStatistics() {
   var charStats = document.getElementById('profileLeftColumn')
     .getElementsByTagName('table')[0];
   var dodgyTables = charStats.getElementsByTagName('table');
@@ -212,6 +208,25 @@ function yuuzhan(playername, avyImg) { // Legacy
   }
 }
 
+function updateNmv() {
+  var nmvImg = document.querySelector(
+    '#profileRightColumn img[src$="/60_sm.gif"]');
+  if (!nmvImg) {return;}
+  var atkStat = Number(
+    document.getElementById('stat-attack').firstChild.textContent.trim());
+  if (isNaN(atkStat)) {return;}
+  var defStat = Number(
+    document.getElementById('stat-defense').firstChild.textContent.trim());
+  var oldTipped = nmvImg.dataset.tipped;
+  var lvlAry = /\(Level: (\d+)\)/.exec(oldTipped);
+  var nmvLvl = Number(lvlAry[1]);
+  var nmvEffect = Math.floor(atkStat * nmvLvl * 0.0025);
+  nmvImg.dataset.tipped = oldTipped.slice(0, -15) +
+    '<br>Attack: ' + (atkStat - nmvEffect).toString() +
+    '&nbsp;&nbsp;Defense: ' + (defStat + nmvEffect).toString() +
+    '</center></div>';
+}
+
 export default function injectProfile() { // Legacy
   var avyImg = document
     .querySelector('#profileLeftColumn img[oldtitle*="\'s Avatar"]');
@@ -232,8 +247,9 @@ export default function injectProfile() { // Legacy
   //* *************
 
   common.updateHCSQuickBuffLinks('#profileRightColumn a[href*="quickbuff"]');
+  updateNmv();
   updateStatistics();
   profileRenderBio(self);
   addStatTotalToMouseover();
-  task.add(3, layout.colouredDots);
+  add(3, layout.colouredDots);
 }

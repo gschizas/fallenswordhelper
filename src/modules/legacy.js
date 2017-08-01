@@ -1,6 +1,6 @@
 import calf from './support/calf';
+import subscribes from './newMap/newMap';
 import * as debug from './support/debug';
-import * as newMap from './newMap/newMap';
 import * as system from './support/system';
 
 var impStyles = [
@@ -242,11 +242,11 @@ function checkBuffs() { // Legacy - Old Map
   toggleKsTracker();
 }
 
-function injectOldMap() { // Native
+function injectOldMap() {
   checkBuffs();
 }
 
-export default function injectWorld() { // Native
+export default function injectWorld() {
   // -1 = world page
   // 0 = quest responce
   // 1 = view creature
@@ -265,7 +265,7 @@ export default function injectWorld() { // Native
   // 17 = login
   // 18 = username not found
   if (document.getElementById('worldPage')) { // new map
-    newMap.subscribes();
+    subscribes();
   } else {
     // not new map.
     injectOldMap();

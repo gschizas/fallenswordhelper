@@ -1,10 +1,10 @@
 import buffList from './support/buffObj';
 import calf from './support/calf';
+import {lastActivityRE} from './support/dataObj';
 import * as layout from './support/layout';
 import * as settingsPage from './settings/settingsPage';
 import * as system from './support/system';
 
-var actRE = /<td>Last Activity:<\/td><td>(\d+)d (\d+)h (\d+)m (\d+)s<\/td>/;
 var sustainLevelRE = /Level<br>(\d+)%/;
 var buffCustom = {
   header: 'Buff',
@@ -116,7 +116,7 @@ function pageLayout(o) { // Legacy
     'over time.</div>';
 }
 
-function uniq(arr, removeBy) { // Native
+function uniq(arr, removeBy) {
   var seen = {};
   if (removeBy) {
     return arr.filter(function(item) {
@@ -171,7 +171,7 @@ function getBioLines(bioCellHtml) { // Legacy
   return uniq(res);
 }
 
-function getSustain(doc) { // Native
+function getSustain(doc) {
   var aLinks = doc.getElementById('profileLeftColumn')
     .getElementsByTagName('a');
   var sustainLevel;
@@ -359,7 +359,7 @@ function findBuffsParseProfilePage(responseText) { // jQuery
     .find('a[data-tipped*="Last Activity"]');
   profileAlliesEnemies.each(function(i, e) {
     var onMouseOver = $(e).data('tipped');
-    var lastActivity = actRE.exec(onMouseOver);
+    var lastActivity = lastActivityRE.exec(onMouseOver);
     var lastActivityDays = parseInt(lastActivity[1], 10);
     var lastActivityHours = parseInt(lastActivity[2], 10) +
       lastActivityDays * 24;
@@ -410,7 +410,7 @@ function findBuffsParseProfilePageStart() { // Legacy
 function guildMember(characterName, i, e) { // jQuery
   var contactLink = $(e).find('a');
   var onMouseOver = $(contactLink).data('tipped');
-  var lastActivity = actRE.exec(onMouseOver);
+  var lastActivity = lastActivityRE.exec(onMouseOver);
   var lastActivityDays = parseInt(lastActivity[1], 10);
   var lastActivityHours = parseInt(lastActivity[2], 10) +
     lastActivityDays * 24;

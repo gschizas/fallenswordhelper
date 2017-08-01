@@ -1,11 +1,11 @@
 import calf from '../support/calf';
 import * as common from '../common/common';
 
-function hideElement(el) { // Native
+function hideElement(el) {
   el.classList.add('fshHide');
 }
 
-function hideNodeList(nodeList) { // Native
+function hideNodeList(nodeList) {
   Array.prototype.forEach.call(nodeList, hideElement);
 }
 
@@ -13,7 +13,7 @@ function hideQuerySelectorAll(parent, selector) { // Native - probably wrong
   hideNodeList(parent.querySelectorAll(selector));
 }
 
-function contactColour(el, obj) { // Native
+function contactColour(el, obj) {
   var onMouseOver = el.getAttribute('data-tipped');
   var lastActivityMinutes =
     /Last Activity:<\/td><td>(\d+) mins/.exec(onMouseOver)[1];
@@ -26,7 +26,7 @@ function contactColour(el, obj) { // Native
   }
 }
 
-function guildColour(el) { // Native
+function guildColour(el) {
   contactColour(el, {
     l1: 'fshGreen',
     l2: 'fshWhite',
@@ -34,7 +34,7 @@ function guildColour(el) { // Native
   });
 }
 
-function alliesColour(el) { // Native
+function alliesColour(el) {
   contactColour(el, {
     l1: 'fshDodgerBlue',
     l2: 'fshLightSkyBlue',
@@ -73,7 +73,7 @@ function doHideBtn(context, selector) {
   });
 }
 
-export function addGuildInfoWidgets() { // Native
+export function addGuildInfoWidgets() {
   var guildMembrList = document.getElementById('minibox-guild-members-list');
   if (!guildMembrList) {return;} // list exists
   // hide guild info links
@@ -96,7 +96,7 @@ export function addGuildInfoWidgets() { // Native
   );
 }
 
-export function addOnlineAlliesWidgets() { // Native
+export function addOnlineAlliesWidgets() {
   var onlineAlliesList = document.getElementById('minibox-allies-list');
   if (!onlineAlliesList) {return;}
   doHideBtn(onlineAlliesList, 'allySelector');
@@ -110,7 +110,7 @@ export function addOnlineAlliesWidgets() { // Native
     onlineAlliesList.getElementsByClassName('player-name'), alliesColour);
 }
 
-export function fixOnlineGuildBuffLinks() { // Native
+export function fixOnlineGuildBuffLinks() {
   common.updateHCSQuickBuffLinks(
     '#minibox-guild-members-list #guild-minibox-action-quickbuff');
   common.updateHCSQuickBuffLinks(

@@ -27,7 +27,7 @@ function cancelAllAH() { // jQuery
   });
 }
 
-export function injectAuctionHouse() { // Native
+export function injectAuctionHouse() {
   if (!layout.pCC) {return;}
   if (system.getValue('autoFillMinBidPrice')) {
     document.getElementById('auto-fill').checked = true;
@@ -45,6 +45,6 @@ export function injectAuctionHouse() { // Native
   cancelAll.addEventListener('click', cancelAllAH);
 }
 
-export function quickCreate() { // Native
+export function quickCreate() {
   perfFilter('auction');
 }

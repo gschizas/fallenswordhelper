@@ -2,7 +2,7 @@ import * as assets from './assets';
 import * as inventory from './inventory';
 import * as render from './render';
 
-export function doTable() { // jQuery
+export default function doTable() { // jQuery
   $('#pCC').append('<table id="fshInv" class="hover" ' +
     'style="font-size: x-small;"></table>');
   var table = $('#fshInv').DataTable({

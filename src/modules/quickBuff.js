@@ -1,4 +1,4 @@
-import * as ajax from './support/ajax';
+import getProfile from './ajax/getProfile';
 import * as system from './support/system';
 
 var retries = 0;
@@ -29,19 +29,19 @@ var excludeBuff = {
   'skill-101': 'Severe Condition'
 };
 
-function getEnhancement(doc, enh, inject) { // Native
+function getEnhancement(doc, enh, inject) {
   var enhLevel = doc[enh] || 0;
   var enhClass = 'fshLime';
   if (enhLevel < 100) {enhClass = 'fshRed';}
   inject.innerHTML = '<span class="' + enhClass + '">' + enhLevel + '%</span>';
 }
 
-function timeUnit(value, unit) { // Native
+function timeUnit(value, unit) {
   if (value > 0) {return value.toString() + unit;}
   return '';
 }
 
-function buffTimeLeft(_s) { // Native
+function buffTimeLeft(_s) {
   var m = Math.floor(_s / 60);
   var s = _s % 60;
   var buffTimeToExpire = timeUnit(m, 'm');
@@ -50,7 +50,7 @@ function buffTimeLeft(_s) { // Native
   return buffTimeToExpire;
 }
 
-function getBuff(doc, buff, inject) { // Native
+function getBuff(doc, buff, inject) {
   var s = system.fallback(doc[buff], 0);
   if (s) {
     var buffTimeToExpire = buffTimeLeft(s);
@@ -86,7 +86,7 @@ function quickActivate(evt) { // jQuery
   });
 }
 
-function addStatsQuickBuff(data) { // Native
+function addStatsQuickBuff(data) {
   var myPlayer = document.querySelector('div.player[data-username="' +
     data.username + '"]');
   var activity = myPlayer.querySelector('span.fshLastActivity');
@@ -103,7 +103,7 @@ function addStatsQuickBuff(data) { // Native
     data.stamina * 100) + '% )';
 }
 
-function newPlayerSpan(el, playerSpan) { // Native
+function newPlayerSpan(el, playerSpan) {
   if (!playerSpan) {
     var ret = document.createElement('SPAN');
     ret.className = 'fshPlayer';
@@ -113,12 +113,12 @@ function newPlayerSpan(el, playerSpan) { // Native
   return playerSpan;
 }
 
-function getBuffColor(myLvl, playerBuffLevel) { // Native
+function getBuffColor(myLvl, playerBuffLevel) {
   if (myLvl > playerBuffLevel) {return 'fshRed';}
   return 'fshGreen';
 }
 
-function hazBuff(playerData, el) { // Native
+function hazBuff(playerData, el) {
   var myBuffName = el.getAttribute('data-name');
   var playerBuffLevel = playerData[myBuffName];
   var playerSpan = el.nextElementSibling.nextElementSibling;
@@ -135,10 +135,10 @@ function hazBuff(playerData, el) { // Native
     '">[' + playerBuffLevel + ']</span>';
 }
 
-function addBuffLevels(evt) { // Native
+function addBuffLevels(evt) {
   var player = evt.target;
   if (player.tagName !== 'H1') {return;}
-  ajax.getProfile(player.textContent).done(addStatsQuickBuff);
+  getProfile(player.textContent).done(addStatsQuickBuff);
 
   var playerData = player.parentNode.lastElementChild.textContent.split(',');
   playerData = playerData.reduce(function(prev, curr) {
@@ -156,7 +156,7 @@ function addBuffLevels(evt) { // Native
 
 }
 
-function doLabels(el) { // Native
+function doLabels(el) {
   var nameSpan = el.firstElementChild;
   var dataTipped = nameSpan.getAttribute('data-tipped');
   var cost = el.previousElementSibling.getAttribute('data-cost');
@@ -169,7 +169,7 @@ function doLabels(el) { // Native
   }
 }
 
-function haveTargets() { // Native
+function haveTargets() {
   var firstPlayer = document.getElementById('players')
     .getElementsByTagName('h1')[0];
   if (!firstPlayer && retries < 9) {
@@ -178,16 +178,16 @@ function haveTargets() { // Native
     return;
   }
   if (!firstPlayer) {return;}
-  firstPlayer.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+  firstPlayer.click();
 }
 
-function firstPlayerStats() { // Native
+function firstPlayerStats() {
   var targets = document.getElementById('targetPlayers')
     .getAttribute('value');
   if (targets && targets !== '') {haveTargets();}
 }
 
-function getSustain(responseText) { // Native
+function getSustain(responseText) {
   var enh = responseText._enhancements.reduce(function(prev, curr) {
     prev[curr.name] = curr.value;
     return prev;
@@ -221,5 +221,5 @@ export default function injectQuickBuff() { // jQuery
   if (!quickbuffDiv) {return;}
   quickbuffDiv.firstElementChild.insertAdjacentHTML('afterend',
     quickBuffHeader);
-  ajax.getProfile(window.self).done(getSustain);
+  getProfile(window.self).done(getSustain);
 }

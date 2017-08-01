@@ -1,5 +1,8 @@
 import assets from './assets';
-import * as ajax from '../../support/ajax';
+import getGroupStats from '../../ajax/getGroupStats';
+import getMembrList from '../../ajax/getMembrList';
+import getMercStats from '../../ajax/getMercStats';
+import getProfile from '../../ajax/getProfile';
 import * as common from '../../common/common';
 import * as dataObj from '../../support/dataObj';
 import * as layout from '../../support/layout';
@@ -251,7 +254,7 @@ function prepareDivs() {
   fetchStatsBtn.classList.add('fshHide');
   hideRelicOffline = system.getValue('hideRelicOffline');
   if (relicData.is_owner && !hideRelicOffline) {
-    ajax.getMembrList(false).done(missingMembers);
+    getMembrList(false).done(missingMembers);
   }
   leftDiv.insertAdjacentHTML('beforeend', assets.proc);
   processingStatus = document.getElementById('ProcessingStatus');
@@ -331,11 +334,11 @@ function parseGroups(html) {
   var doc = system.createDocument(html);
   var disband = doc.querySelector('#pCC a[href*="confirmDisband"]');
   var viewStats = disband.previousElementSibling.href;
-  var prm = [ajax.getGroupStats(viewStats).done(storeGroupStats)];
+  var prm = [getGroupStats(viewStats).done(storeGroupStats)];
   var hasMerc = disband.parentNode.parentNode.previousElementSibling
     .previousElementSibling.innerHTML.indexOf('"#000099"') !== -1;
   if (hasMerc) {
-    prm.push(ajax.getMercStats().done(storeMercStats));
+    prm.push(getMercStats().done(storeMercStats));
   }
   return $.when.apply($, prm);
 }
@@ -360,10 +363,10 @@ function getStats() {
     prm.push(getGroups().pipe(parseGroups));
   }
   for (var i = 1; i < myDefenders.length; i += 1) {
-    prm.push(ajax.getProfile(myDefenders[i]).done(parseDefender)
+    prm.push(getProfile(myDefenders[i]).done(parseDefender)
       .fail(ajaxFailure));
   }
-  prm.push(ajax.getProfile(myDefenders[0]).done(storeLeadDefender));
+  prm.push(getProfile(myDefenders[0]).done(storeLeadDefender));
   $.when.apply($, prm).done(doCalculations);
 }
 

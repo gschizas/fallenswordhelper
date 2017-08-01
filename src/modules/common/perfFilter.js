@@ -1,10 +1,10 @@
-import * as ajax from '../support/ajax';
+import getInventoryById from '../ajax/getInventoryById';
 import * as layout from '../support/layout';
 
 var inv;
 var target;
 
-function selectPerf() { // Native
+function selectPerf() {
   var items = document.getElementById(target + '-items')
     .getElementsByClassName('selectable-item');
   if (items.length === 0) {return;}
@@ -14,7 +14,7 @@ function selectPerf() { // Native
   });
 }
 
-function drawFilters(data) { // Native
+function drawFilters(data) {
   inv = data.items;
   var buttonDiv = document.createElement('div');
   buttonDiv.className = 'fshAC';
@@ -26,5 +26,5 @@ function drawFilters(data) { // Native
 
 export default function perfFilter(loc) { // jQuery.min
   target = loc;
-  ajax.getInventoryById().done(drawFilters);
+  getInventoryById().done(drawFilters);
 }

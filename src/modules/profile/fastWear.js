@@ -1,6 +1,6 @@
-import * as ajax from '../support/ajax';
+import add from '../support/task';
+import {equipItem, useItem} from '../support/ajax';
 import * as system from '../support/system';
-import * as task from '../support/task';
 
 function backpackRemove(invId) { // jQuery
   var _invId = parseInt(invId, 10);
@@ -17,7 +17,7 @@ function backpackRemove(invId) { // jQuery
 
 function fastWearUse(evt) { // jQuery
   var InventoryItemID = evt.target.getAttribute('itemID');
-  ajax.useItem(InventoryItemID).done(function(data) {
+  useItem(InventoryItemID).done(function(data) {
     if (data.r !== 0) {return;}
     backpackRemove(InventoryItemID);
     evt.target.parentNode.innerHTML = '<span class="fastWorn">Used</span>';
@@ -27,7 +27,7 @@ function fastWearUse(evt) { // jQuery
 function fastWearEquip(e) { // jQuery
   var self = e.target;
   var invId = self.getAttribute('itemid');
-  ajax.equipItem(invId).done(function(data) {
+  equipItem(invId).done(function(data) {
     if (data.r !== 0) {return;}
     backpackRemove(invId);
     // TODO Insert item from worn
@@ -35,17 +35,17 @@ function fastWearEquip(e) { // jQuery
   });
 }
 
-function actionClass(usable) { // Native
+function actionClass(usable) {
   if (usable) {return 'fastUse';}
   return 'fastWear';
 }
 
-function actionText(usable) { // Native
+function actionText(usable) {
   if (usable) {return 'Use';}
   return 'Wear';
 }
 
-function drawButtons(theSpan) { // Native
+function drawButtons(theSpan) {
   var toUse = theSpan.classList.contains('backpackContextMenuUsable');
   var myDiv = document.createElement('DIV');
   myDiv.className = 'fastDiv';
@@ -60,7 +60,7 @@ function drawButtons(theSpan) { // Native
   theSpan.parentNode.parentNode.appendChild(myDiv);
 }
 
-function fastWearLinks() { // Native
+function fastWearLinks() {
   var bpTabs = document.getElementById('backpack_tabs');
   var type = bpTabs.getElementsByClassName('tab-selected')[0]
     .getAttribute('data-type');
@@ -83,7 +83,7 @@ export default function injectFastWear() { // jQuery
     fastWearLinks();
   };
   if (document.getElementById('backpack_current').textContent.length !== 0) {
-    task.add(3, fastWearLinks);
+    add(3, fastWearLinks);
   }
   backpackContainer.addEventListener('click', function(e) {
     if (e.target.classList.contains('fastWear')) {fastWearEquip(e);}

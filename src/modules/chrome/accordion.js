@@ -1,6 +1,6 @@
 import * as system from '../support/system';
 
-function updateQuestLink() { // Native
+function updateQuestLink() {
   var lastActiveQuestPage = system.getValue('lastActiveQuestPage');
   if (lastActiveQuestPage.length > 0) {
     document.getElementById('nav-character-questbook')
@@ -8,7 +8,7 @@ function updateQuestLink() { // Native
   }
 }
 
-function buffLogLink() { // Native
+function buffLogLink() {
   if (system.getValue('keepBuffLog')) {
     document.getElementById('nav-character-log').parentNode
       .insertAdjacentHTML('afterend',
@@ -18,7 +18,7 @@ function buffLogLink() { // Native
   }
 }
 
-function combatLogLink() { // Native
+function combatLogLink() {
   if (system.getValue('keepLogs')) {
     document.getElementById('nav-character-notepad').parentNode
       .insertAdjacentHTML('afterend',
@@ -28,7 +28,7 @@ function combatLogLink() { // Native
   }
 }
 
-function creatureLogLink() { // Native
+function creatureLogLink() {
   if (system.getValue('showMonsterLog')) {
     document.getElementById('nav-character-notepad').parentNode
       .insertAdjacentHTML('afterend',
@@ -38,7 +38,7 @@ function creatureLogLink() { // Native
   }
 }
 
-function newGuildLogLink() { // Native
+function newGuildLogLink() {
   if (!system.getValue('useNewGuildLog')) {
     // if not using the new guild log, show it as a separate menu entry
     document.getElementById('nav-guild-ledger-guildlog').parentNode
@@ -75,7 +75,7 @@ function adjustHeight() { // jQuery
   }
 }
 
-export default function injectMenu() { // Native
+export default function injectMenu() {
   if (!document.getElementById('pCL')) {return;}
   updateQuestLink();
   // character

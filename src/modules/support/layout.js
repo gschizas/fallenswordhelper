@@ -1,6 +1,6 @@
+import add from './task';
 import * as dataObj from './dataObj';
 import * as system from './system';
-import * as task from './task';
 
 var dotList;
 var dotCount;
@@ -67,7 +67,7 @@ export function doBuffLinks(members) {
   return shortList;
 }
 
-export function infoBox(documentText) { // Native
+export function infoBox(documentText) {
   var doc = system.createDocument(documentText);
   var result;
   var infoMsg = doc.getElementById('info-msg');
@@ -82,7 +82,7 @@ export function infoBox(documentText) { // Native
   return result;
 }
 
-export function guildId() { // Native
+export function guildId() {
   var _guildId;
   var nodeList = document.body.getElementsByTagName('script');
   Array.prototype.forEach.call(nodeList, function getGuildId(el) {
@@ -93,7 +93,7 @@ export function guildId() { // Native
   return _guildId;
 }
 
-export function playerId() { // Native
+export function playerId() {
   var thePlayerId = parseInt(document.getElementById('holdtext')
     .textContent.match(/fallensword.com\/\?ref=(\d+)/)[1], 10);
   system.setValue('playerID', thePlayerId);
@@ -104,7 +104,7 @@ export function playerName() {
   return document.getElementById('statbar-character').textContent;
 }
 
-export function makePageHeader(title, comment, spanId, button) { // Native
+export function makePageHeader(title, comment, spanId, button) {
   var _comment = '';
   if (comment !== '') {_comment = '&nbsp;(' + comment + ')';}
   var _span = '';
@@ -118,7 +118,7 @@ export function makePageHeader(title, comment, spanId, button) { // Native
     '</td></tr><tbody></table>';
 }
 
-export function makePageTemplate(title, comment, spanId, button, divId) { // Native
+export function makePageTemplate(title, comment, spanId, button, divId) {
   return makePageHeader(title, comment, spanId, button) +
     '<div class="fshSmall" id="' + divId + '"></div>';
 }
@@ -157,7 +157,7 @@ var getDot = [
   {condition: 44640, result: sevenDayDot}
 ];
 
-export function onlineDot(obj) { // Native
+export function onlineDot(obj) {
   var min = getMins.reduce(function(prev, curr) {
     return curr(obj, prev);
   }, 0);
@@ -168,7 +168,7 @@ export function onlineDot(obj) { // Native
   return redDot;
 }
 
-function changeOnlineDot(contactLink) { // Native
+function changeOnlineDot(contactLink) {
   var lastActivity = dataObj.lastActivityRE
     .exec(contactLink.getAttribute('data-tipped'));
   contactLink.parentNode.previousSibling.innerHTML =
@@ -179,7 +179,7 @@ function changeOnlineDot(contactLink) { // Native
     });
 }
 
-function batchDots() { // Native
+function batchDots() {
   var limit = performance.now() + 5;
   while (performance.now() < limit &&
       dotCount < dotList.length) {
@@ -187,16 +187,16 @@ function batchDots() { // Native
     dotCount += 1;
   }
   if (dotCount < dotList.length) {
-    task.add(3, batchDots);
+    add(3, batchDots);
   }
 }
 
-export function colouredDots() { // Native
+export function colouredDots() {
   if (!system.getValue('enhanceOnlineDots')) {return;}
   dotList = document.querySelectorAll(
     '#pCC a[data-tipped*="Last Activity"]');
   dotCount = 0;
-  task.add(3, batchDots);
+  add(3, batchDots);
 }
 
 export function confirm(title, msgText, fn) { // jQuery

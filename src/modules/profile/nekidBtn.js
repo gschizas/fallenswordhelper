@@ -9,14 +9,14 @@ function getNekid() { // jQuery
     prm.push($.ajax({
       url: href,
       timeout: 3000
-    }));
+    }).pipe(null, function() {return $.when();}));
   });
-  $.when.apply($, prm).always(function() {
+  $.when.apply($, prm).done(function() {
     location.assign('index.php?cmd=profile');
   });
 }
 
-export default function nekidBtn() { // Native
+export default function nekidBtn() {
   var profileRightColumn = document.getElementById('profileRightColumn');
   profileCombatSetDiv = document.getElementById('profileCombatSetDiv');
   var targetBr = profileCombatSetDiv.parentElement.nextElementSibling;

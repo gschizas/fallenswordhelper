@@ -1,6 +1,6 @@
 import * as layout from '../support/layout';
 
-export default function injectMoveItems() { // Native
+export default function injectMoveItems() {
   var flrRow = layout.pCC.getElementsByTagName('form')[0]
     .nextElementSibling.nextElementSibling.nextElementSibling;
   var folders = flrRow.getElementsByTagName('img');

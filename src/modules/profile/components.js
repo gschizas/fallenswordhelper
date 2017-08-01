@@ -4,16 +4,16 @@ import * as system from '../support/system';
 var compPages;
 var componentList = {};
 
-function delAllComponent() { // Native
+function delAllComponent() {
   var invTbl = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table')[1];
   var nodeList = invTbl.getElementsByClassName('compDelBtn');
   Array.prototype.forEach.call(nodeList, function(el) {
-    el.dispatchEvent(new MouseEvent('click', {bubbles: true}));
+    el.click();
   });
 }
 
-function retriveComponent(responseText, currentPage) { // Native
+function retriveComponent(responseText, currentPage) {
   var nextPage = currentPage + 1;
   var sumComp = document.getElementById('sumComp');
   sumComp.insertAdjacentHTML('beforeend', nextPage + ', ');
@@ -76,7 +76,7 @@ function delComponent(evt) { // jQuery
   });
 }
 
-function enableDelComponent() { // Native
+function enableDelComponent() {
   document.getElementById('compDel').parentNode.classList.add('fshHide');
   document.getElementById('compDelAll').parentNode.classList
     .remove('fshHide');
@@ -114,7 +114,7 @@ function compEvt(e) {
   }
 }
 
-export default function profileComponents() { // Native
+export default function profileComponents() {
   var invTables = document.getElementById('profileRightColumn')
     .getElementsByClassName('inventory-table');
   if (invTables.length !== 2) {return;}
