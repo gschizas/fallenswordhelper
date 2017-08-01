@@ -5,7 +5,7 @@ import * as system from '../support/system';
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
     rows[i].cells[2].insertAdjacentHTML('beforeend',
-      '&nbsp;<span class="reportLink">Fast BP</span>');
+      '&nbsp;<span class="sendLink">Fast BP</span>');
   }
 }
 
@@ -37,7 +37,7 @@ function fastBp(el) {
 function evtHdlr(e) {
   var self = e.target;
   if (self.value === 'Check All') {doCheckAll();}
-  if (self.className === 'reportLink') {fastBp(self);}
+  if (self.className === 'sendLink') {fastBp(self);}
 }
 
 export default function injectGuildAddTagsWidgets() {

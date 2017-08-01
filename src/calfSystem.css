@@ -277,11 +277,6 @@ input.fshFindOnlinePlayers {
   box-shadow: 0 0 4px #4f3717;
 }
 .fshNoResize {resize: none;}
-.reportLink {
-  cursor: pointer;
-  text-decoration: underline;
-  color: blue;
-}
 .sendLink {
   cursor: pointer;
   text-decoration: underline;

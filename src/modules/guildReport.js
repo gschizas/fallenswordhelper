@@ -164,14 +164,14 @@ function mySpan(el) {
   var wearable = hideElement(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
   inject.innerHTML = '<span' + firstHref +
-    '> | <span class="reportLink recall tip-static" data-tipped="' +
+    '> | <span class="sendLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +
     '</span></span>' +
-    ' | <span class="reportLink recall tip-static" ' +
+    ' | <span class="sendLink recall tip-static" ' +
     'data-tipped="Click to recall to guild store" mode="1" ' +
     'action="recall">Fast GS</span>' +
     '<span' + wearable +
-    '> | <span class="reportLink ' +
+    '> | <span class="sendLink ' +
     equipable +
     '" mode="0" action="wear">Fast Wear</span></span>';
   return inject;

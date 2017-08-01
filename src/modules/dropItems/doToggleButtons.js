@@ -14,14 +14,14 @@ export default function doToggleButtons(showExtraLinks, showQuickDropLinks) {
     insertHere = layout.pCC.getElementsByTagName('form')[0]
       .previousElementSibling.firstElementChild;
   }
-  var inject = '[<span id="fshShowExtraLinks" class="reportLink">' +
+  var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +
     showHideLabel(showExtraLinks) +
     ' AH and UFSG links</span>]&nbsp;' +
-    '[<span id="fshShowQuickDropLinks" class="reportLink">' +
+    '[<span id="fshShowQuickDropLinks" class="sendLink">' +
     showHideLabel(showQuickDropLinks) +
     ' Quick Drop links</span>]&nbsp;';
   if (calf.subcmd2 === 'storeitems') {
-    inject += '[<span id="fshSelectAllGuildLocked" class="reportLink">' +
+    inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">' +
       ' Select All Guild Locked</span>]&nbsp;';
   }
   insertHere.innerHTML = inject;
