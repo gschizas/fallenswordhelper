@@ -1117,8 +1117,7 @@ function playerDataObject(json) {
 function updateHCSQuickBuffLinks(selector) {
   Array.prototype.forEach.call(document.querySelectorAll(selector),
     function(el) {
-      el.setAttribute('href', el.getAttribute('href')
-        .replace(/, 500/g, ', 1000'));
+      el.href = el.getAttribute('href').replace(/, 500/g, ', 1000'); // getAttribute neccessary for FF
     }
   );
 }
@@ -1915,7 +1914,7 @@ function processFolderFirstPage(data) { // jQuery.min
 }
 
 function reduceFolders(prev, el) { // jQuery.min
-  var href = el.parentNode.getAttribute('href');
+  var href = el.parentNode.href;
   var folderName = el.parentNode.nextElementSibling.nextElementSibling
     .firstChild.textContent;
   if (getCustomUrlParameter(href, 'folder_id') === '-1') {
@@ -5462,7 +5461,7 @@ function getTarget$1(target, theRow) {
   var bounty = {};
   bounty.target = target;
   bounty.link = theRow.cells[0]
-    .firstChild.firstChild.getAttribute('href');
+    .firstChild.firstChild.href;
   bounty.lvl = theRow.cells[0]
     .firstChild.firstChild.nextSibling.textContent
     .replace(/\[/, '').replace(/\]/, '');
@@ -5522,7 +5521,7 @@ function parseActiveBounty(activeTable) { // Legacy
       bounty.target = activeTable.rows[i].cells[0].firstChild
         .firstChild.firstChild.textContent;
       bounty.link = activeTable.rows[i].cells[0].firstChild
-        .firstChild.getAttribute('href');
+        .firstChild.href;
       bounty.lvl = activeTable.rows[i].cells[0].firstChild
         .firstChild.nextSibling.textContent
         .replace(/\[/, '').replace(/\]/, '');
@@ -6877,7 +6876,7 @@ function guildMailboxEvent(e) {
     var anchor = self.parentNode.href;
     guildMailboxTake(anchor).done(takeResult.bind(null, self));
   }
-  if (self.className === 'reportLink') {
+  if (self.className === 'sendLink') {
     var nodeList = pCC.getElementsByTagName('img');
     Array.prototype.forEach.call(nodeList, function(el) {el.click();});
   }
@@ -6887,7 +6886,7 @@ function guildMailbox() {
   pCC.addEventListener('click', guildMailboxEvent);
   document.querySelector('#pCC td[height="25"]')
     .insertAdjacentHTML('beforeend',
-      '<span class="reportLink">Take All</span>');
+      '<span class="sendLink">Take All</span>');
 }
 
 function getGuild(guildId$$1) {
@@ -8037,7 +8036,7 @@ function injectGuild() {
 function doItemTable(rows) {
   for (var i = 1; i < rows.length - 1; i += 2) {
     rows[i].cells[2].insertAdjacentHTML('beforeend',
-      '&nbsp;<span class="reportLink">Fast BP</span>');
+      '&nbsp;<span class="sendLink">Fast BP</span>');
   }
 }
 
@@ -8069,7 +8068,7 @@ function fastBp(el) {
 function evtHdlr(e) {
   var self = e.target;
   if (self.value === 'Check All') {doCheckAll();}
-  if (self.className === 'reportLink') {fastBp(self);}
+  if (self.className === 'sendLink') {fastBp(self);}
 }
 
 function injectGuildAddTagsWidgets() {
@@ -8585,7 +8584,7 @@ function dropRender(data, type, row) {
 function sendRender(data, type, row) {
   if (fallback(row.bound, row.equipped)) {return;}
   if (type !== 'display') {return 'Send';}
-  return '<span class="sendItem tip-static reportLink" data-tipped=' +
+  return '<span class="sendItem tip-static sendLink" data-tipped=' +
     '"INSTANTLY SEND THE ITEM. NO REFUNDS OR DO-OVERS! Use at own risk."' +
     ' data-inv="' + row.inv_id + '">Send</span>';
 }
@@ -10132,7 +10131,7 @@ function debuff(buffId) {
 }
 
 function doDebuff(aLink) { // jQuery
-  var buffId = aLink.getAttribute('href').match(/(\d+)$/)[1];
+  var buffId = aLink.href.match(/(\d+)$/)[1];
   debuff(buffId)
     .done(function(data) {
       if (data.response.response === 0) {
@@ -10273,7 +10272,7 @@ function getNekid() { // jQuery
   var aLinks = profileBlock.getElementsByTagName('a');
   var prm = [];
   Array.prototype.forEach.call(aLinks, function(link) {
-    var href = link.getAttribute('href');
+    var href = link.href;
     prm.push($.ajax({
       url: href,
       timeout: 3000
@@ -10364,7 +10363,7 @@ function countComponent(e) { // jQuery
 }
 
 function delComponent(evt) { // jQuery
-  var href = evt.target.previousElementSibling.getAttribute('href');
+  var href = evt.target.previousElementSibling.href;
   $.get(href).done(function(data) {
     var response = infoBox(data);
     if (response === 'Component destroyed.') {
@@ -10497,7 +10496,7 @@ function doCompression(bioCell, bioContents, maxCharactersToShow) {
     }
   });
   bioCell.innerHTML = bioStart + extraCloseHTML + lineBreak +
-    '<span id="fshBioExpander" class="reportLink">More ...</span><br>' +
+    '<span id="fshBioExpander" class="sendLink">More ...</span><br>' +
     '<span class="fshHide" id="fshBioHidden">' + extraOpenHTML + bioEnd +
     '</span>';
   document.getElementById('fshBioExpander')
@@ -10646,7 +10645,7 @@ function guildRelationship(_txt) {
 }
 
 function foundGuildLink(aLink) {
-  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.getAttribute('href'));
+  var guildIdResult = /guild_id=([0-9]+)/i.exec(aLink.href);
   if (guildIdResult) {guildId$1 = parseInt(guildIdResult[1], 10);}
   currentGuildRelationship = guildRelationship(aLink.text);
   if (currentGuildRelationship) {
@@ -11101,7 +11100,7 @@ function recallItem$2(evt) { // jQuery
   var mode = evt.target.getAttribute('mode');
   var theTd = evt.target.parentNode.parentNode;
   if (mode === '0') {theTd = theTd.parentNode;}
-  var href = theTd.firstElementChild.getAttribute('href');
+  var href = theTd.firstElementChild.href;
   queueRecallItem({
     invId: href.match(/&id=(\d+)/)[1],
     playerId: href.match(/&player_id=(\d+)/)[1],
@@ -11119,7 +11118,7 @@ function recallItem$2(evt) { // jQuery
 function wearItem$1(evt) { // jQuery
   $(evt.target).qtip('hide');
   var theTd = evt.target.parentNode.parentNode.parentNode;
-  var href = theTd.firstElementChild.getAttribute('href');
+  var href = theTd.firstElementChild.href;
   equipItem(href.match(/&id=(\d+)/)[1]).done(function(data) {
     if (data.r === 1) {return;}
     theTd.innerHTML = '<span class="fastWorn">Worn</span>';
@@ -11206,14 +11205,14 @@ function mySpan(el) {
   var wearable = hideElement$1(wearRE.test(itemName));
   var equipable = isEquipable(secondHref);
   inject.innerHTML = '<span' + firstHref +
-    '> | <span class="reportLink recall tip-static" data-tipped="' +
+    '> | <span class="sendLink recall tip-static" data-tipped="' +
     'Click to recall to backpack" mode="0" action="recall">Fast BP' +
     '</span></span>' +
-    ' | <span class="reportLink recall tip-static" ' +
+    ' | <span class="sendLink recall tip-static" ' +
     'data-tipped="Click to recall to guild store" mode="1" ' +
     'action="recall">Fast GS</span>' +
     '<span' + wearable +
-    '> | <span class="reportLink ' +
+    '> | <span class="sendLink ' +
     equipable +
     '" mode="0" action="wear">Fast Wear</span></span>';
   return inject;
@@ -15018,7 +15017,7 @@ function doCheckboxes(itemsAry, invItems_, type_, itemId_) {
 function extraButtons() {
   var tRows = pCC.getElementsByTagName('table')[0].rows;
   tRows[tRows.length - 2].cells[0].insertAdjacentHTML('afterbegin',
-    '<input value="Check All" type="button">&nbsp;');
+    '<input id="fshChkAll" value="Check All" type="button">&nbsp;');
 }
 
 function doFolderButtons(folders) {
@@ -15054,14 +15053,14 @@ function doToggleButtons(showExtraLinks, showQuickDropLinks) {
     insertHere = pCC.getElementsByTagName('form')[0]
       .previousElementSibling.firstElementChild;
   }
-  var inject = '[<span id="fshShowExtraLinks" class="reportLink">' +
+  var inject = '[<span id="fshShowExtraLinks" class="sendLink">' +
     showHideLabel(showExtraLinks) +
     ' AH and UFSG links</span>]&nbsp;' +
-    '[<span id="fshShowQuickDropLinks" class="reportLink">' +
+    '[<span id="fshShowQuickDropLinks" class="sendLink">' +
     showHideLabel(showQuickDropLinks) +
     ' Quick Drop links</span>]&nbsp;';
   if (calf.subcmd2 === 'storeitems') {
-    inject += '[<span id="fshSelectAllGuildLocked" class="reportLink">' +
+    inject += '[<span id="fshSelectAllGuildLocked" class="sendLink">' +
       ' Select All Guild Locked</span>]&nbsp;';
   }
   insertHere.innerHTML = inject;
@@ -15105,7 +15104,7 @@ function injectMoveItems() {
     if (src.indexOf('/folder_on.gif') !== -1) {flrEnabled = true;}
     if (src.indexOf('/folder.gif') !== -1) {
       oFlr = true;
-      options += '<option value=' + e.parentNode.getAttribute('href')
+      options += '<option value=' + e.parentNode.href
         .match(/&folder_id=(-*\d+)/i)[1] + '>' +
         e.parentNode.parentNode.textContent + '</option>';
     }
@@ -15342,7 +15341,7 @@ var evts = [
     }
   },
   {
-    condition: function(self) {return self.value === 'Check All';},
+    condition: function(self) {return self.id === 'fshChkAll';},
     result: function() {
       doCheckboxes(itemsAry, invItems$1, 'checkAll');
     }
@@ -15461,7 +15460,7 @@ function doJoinUnderSize(prev, joinButton) { // Legacy
     .filter(filterMercs);
   if (memListArrayWithoutMercs.length < maxGroupSizeToJoin) {
     var groupID = /javascript:confirmJoin\((\d+)\)/.exec(
-      joinButton.parentNode.getAttribute('href'))[1];
+      joinButton.parentNode.href)[1];
     var groupJoinURL = 'index.php?cmd=guild&subcmd=groups&subcmd2=join' +
       '&group_id=' + groupID;
     prev.push(joinGroup(groupJoinURL, joinButton));
@@ -15941,12 +15940,15 @@ function addExtraStuff(aRow, playerName$$1, isGuildMate) { // Legacy
   aRow.cells[2].innerHTML += extraText;
 }
 
+function hasPlayerLink(aRow) {
+  return aRow.cells[2].firstChild.nextSibling &&
+    aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
+    /player_id/.test(aRow.cells[2].firstChild.nextSibling.href);
+}
+
 function doExtraStuff(aRow, messageType, playerName$$1, isGuildMate) {
   if (messageType === 'Notification' &&
-      aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling
-        .getAttribute('href').search('player_id') !== -1) {
+      hasPlayerLink(aRow)) {
     addExtraStuff(aRow, playerName$$1, isGuildMate);
   }
 }
@@ -15962,10 +15964,7 @@ function doLogWidgetRow(aRow, messageType) { // Legacy
   }
   if (fallback(messageType === 'General',
     messageType === 'Notification') &&
-      aRow.cells[2].firstChild.nextSibling &&
-      aRow.cells[2].firstChild.nextSibling.nodeName === 'A' &&
-      aRow.cells[2].firstChild.nextSibling
-        .getAttribute('href').search('player_id') !== -1) {
+      hasPlayerLink(aRow)) {
     playerElement = aRow.cells[2].firstChild.nextSibling;
     playerName$$1 = playerElement.innerHTML;
     colorPlayerName = true;
@@ -16424,6 +16423,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '21';
+window.FSH.calf = '22';
 
 }());
