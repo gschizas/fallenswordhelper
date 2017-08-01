@@ -118,7 +118,7 @@ function xhrPreFilter(options, originalOptions) {
   options.dataFilter = xhrDataFilter;
 }
 
-function interceptXHR() { // jQuery
+function interceptXHR() { // jQuery.min
   $.ajaxPrefilter('JSON', xhrPreFilter);
 }
 
@@ -158,7 +158,7 @@ function dataEventsPlayerBuffs(evt, data) {
   if (huntingBuffs) {huntingBuffsEnabled(evt, data);}
 }
 
-function doHuntingBuffs() { // jQuery
+function doHuntingBuffs() { // jQuery.min
   setCurrentBuffList();
   $.subscribe(window.DATA_EVENTS.PLAYER_BUFFS.ANY,
     dataEventsPlayerBuffs);

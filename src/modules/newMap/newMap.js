@@ -16,7 +16,7 @@ function hideGroupByType(type) { // jQuery
   $('#actionList li.creature-' + type.toString() + ' a.create-group').hide();
 }
 
-function hideGroupSubscribe(type) { // jQuery
+function hideGroupSubscribe(type) { // jQuery.min
   $.subscribe(def_afterUpdateActionlist, hideGroupByType.bind(null, type));
 }
 
@@ -44,14 +44,14 @@ function colorType(actionList, creatureClass, colorClass) {
   });
 }
 
-function colorMonsters() { // jQuery
+function colorMonsters() {
   var act = document.getElementById('actionList');
   colorType(act, 'creature-1', 'fshGreen');
   colorType(act, 'creature-2', 'fshYellow');
   colorType(act, 'creature-3', 'fshRed');
 }
 
-function doMonsterColors() { // jQuery
+function doMonsterColors() { // jQuery.min
   if (system.getValue('enableCreatureColoring')) {
     $.subscribe(def_afterUpdateActionlist, colorMonsters);
     colorMonsters();
@@ -96,7 +96,7 @@ function impIconColour() { // jQuery
   }
 }
 
-function fixDebuffQTip(e) { // jQuery
+function fixDebuffQTip(e) { // jQuery.min
   $(e.target).qtip('hide');
 }
 
@@ -110,7 +110,7 @@ function injectWorldNewMap(data) {
   }
 }
 
-export default function subscribes() { // jQuery
+export default function subscribes() { // jQuery.min
   setupPref();
   sendGold.injectSendGoldOnWorld();
   // subscribe to view creature events on the new map.
@@ -145,9 +145,11 @@ export default function subscribes() { // jQuery
   prepareShop();
   injectRelic();
 
+  //#if _DEV  //  "Your Lvl" does not update during combat #155
   $.subscribe('level.stats-player', function(e, data) {
-    console.log('level.stats-player data', data);
+    console.log('level.stats-player data', data); // eslint-disable-line no-console
   });
+  //#endif
 
 }
 
