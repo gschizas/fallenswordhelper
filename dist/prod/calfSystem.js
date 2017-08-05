@@ -10284,135 +10284,224 @@ function nekidBtn() {
   theBtn.addEventListener('click', getNekid);
 }
 
-var compPages;
+function cElement(type, props) {
+  var el = document.createElement(type);
+  if (props) {
+    Object.keys(props).forEach(function(prop) {
+      el[prop] = props[prop];
+    });
+  }
+  return el;
+}
+
+var quickDelDiv;
+var sumComp;
+var delAllDiv;
+var compDel;
+var compSum;
+var compDelAll;
+var thisInvTable;
 var componentList = {};
+var usedCount;
+var usedCountDom;
+var totalCount;
+var pageCount;
+
+function getInvTables(doc) {
+  return doc.getElementById('profileRightColumn')
+    .getElementsByClassName('inventory-table');
+}
+
+function tallyComponent(visible, el) {
+  var mouseover = el.getAttribute('data-tipped');
+  var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
+  componentList[id] = componentList[id] || {
+    count: 0,
+    src: el.getAttribute('src'),
+    onmouseover: mouseover,
+    del: [],
+    dom: []
+  };
+  componentList[id].count += 1;
+  componentList[id].del.push(el.parentNode.href);
+  if (visible) {componentList[id].dom.push(el.parentNode.parentNode);}
+  usedCount += 1;
+}
+
+function retriveComponent(doc) {
+  var visible = doc === document;
+  var invTbl = getInvTables(doc)[1];
+  var nodeList = invTbl.getElementsByTagName('IMG');
+  Array.prototype.forEach.call(nodeList, tallyComponent.bind(null, visible));
+  totalCount += invTbl.querySelectorAll(
+    'td[background$="inventory/1x1mini.gif"]').length;
+}
+
+function tallyTableRow(prev, id) {
+  var comp = componentList[id];
+  return prev + '<tr><td><img src="' + comp.src +
+    '" class="fshTblCenter tip-dynamic" data-tipped="' + comp.onmouseover +
+    '"></td><td>' + comp.count + '</td>' +
+    '<td>[<span class="sendLink compDelType" data-compid="' + id +
+    '">Del</span>]</td></tr>';
+}
+
+function displayComponentTally() {
+  var tbl = cElement('table', {className: 'fshTblCenter'});
+  var tBody = cElement('tbody');
+  tbl.appendChild(tBody);
+  tBody.insertAdjacentHTML('beforeend',
+    '<tr><td colspan="3">Component Summary</td></tr>' +
+    Object.keys(componentList).reduce(tallyTableRow, ''));
+  var totRow = tbl.insertRow(-1);
+  totRow.insertAdjacentHTML('beforeend', '<td>Total:</td>');
+  var totCell = totRow.insertCell(-1);
+  totCell.colSpan = 2;
+  usedCountDom = cElement('span');
+  usedCountDom.innerHTML = usedCount.toString();
+  totCell.appendChild(usedCountDom);
+  totCell.insertAdjacentText('beforeend', ' / ' + totalCount.toString());
+  sumComp.innerHTML = '';
+  sumComp.appendChild(tbl);
+}
+
+function gotComponentsPage(data) {
+  pageCount += 1;
+  sumComp.insertAdjacentHTML('beforeend', pageCount + ', ');
+  retriveComponent(createDocument(data));
+}
+
+function countComponent(self) { // jQuery.min
+  self.parentNode.innerHTML = 'Retrieve page: 1, ';
+  usedCount = 0;
+  totalCount = 0;
+  pageCount = 1;
+  var prm = [$.when(document).done(retriveComponent)];
+  var lastRowIndex = thisInvTable.rows.length - 1;
+  var pageLinks = thisInvTable.rows[lastRowIndex].firstChild.children;
+  Array.prototype.forEach.call(pageLinks, function(el) {
+    if (el.children.length === 0) {
+      prm.push($.get(el.href).done(gotComponentsPage));
+    }
+  });
+  $.when.apply($, prm).done(displayComponentTally);
+}
 
 function delAllComponent() {
-  var invTbl = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1];
-  var nodeList = invTbl.getElementsByClassName('compDelBtn');
+  var nodeList = thisInvTable.getElementsByClassName('compDelBtn');
   Array.prototype.forEach.call(nodeList, function(el) {
     el.click();
   });
 }
 
-function retriveComponent(responseText, currentPage) {
-  var nextPage = currentPage + 1;
-  var sumComp = document.getElementById('sumComp');
-  sumComp.insertAdjacentHTML('beforeend', nextPage + ', ');
-  var doc = createDocument(responseText);
-  var invTbl = doc.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1];
-  var nodeList = invTbl.getElementsByTagName('IMG');
-  Array.prototype.forEach.call(nodeList, function(el) {
-    var mouseover = el.getAttribute('data-tipped');
-    var id = mouseover.match(/fetchitem.php\?item_id=(\d+)/)[1];
-    componentList[id] = componentList[id] || {
-      count: 0,
-      src: el.getAttribute('src'),
-      onmouseover: mouseover
-    };
-    componentList[id].count += 1;
-  });
-  if (currentPage < compPages - 1) {
-    $.get('index.php?cmd=profile&component_page=' + nextPage)
-      .done(function(data) {retriveComponent(data, nextPage);});
+function compDeleted(self, data) {
+  var response = infoBox(data);
+  if (response === 'Component destroyed.') {
+    self.parentNode.innerHTML = '';
   } else {
-    var totalCount = invTbl.querySelectorAll(
-      'td[background$="inventory/1x1mini.gif"]');
-    totalCount = totalCount.length + currentPage * 50;
-    var output = 'Component Summary<br/><table>';
-    var usedCount = 0;
-    Object.keys(componentList).forEach(function(id) {
-      var comp = componentList[id];
-      output += '<tr><td align=center><img src="' + comp.src +
-        '" class="tip-dynamic" data-tipped="' + comp.onmouseover +
-        '"></td><td>' + comp.count + '</td></tr>';
-      usedCount += comp.count;
-    });
-    output += '<tr><td align=center>Total:</td><td>' + usedCount + ' / ' +
-      totalCount + '</td></tr></table>';
-    sumComp.innerHTML = output;
+    $('#dialog_msg').html(response).dialog('open');
   }
 }
 
-function countComponent(e) { // jQuery
-  var invTbl = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1];
-  var compPage = invTbl.querySelectorAll(
-    'a[href^="index.php?cmd=profile&component_page="]');
-  compPages = compPage.length;
-  e.target.parentNode.innerHTML = 'Retrieve page: ';
-  $.get('index.php?cmd=profile&component_page=0')
-    .done(function(data) {retriveComponent(data, 0);});
+function delComponent(self) { // jQuery.min
+  var href = self.previousElementSibling.href;
+  $.get(href).done(compDeleted.bind(null, self));
 }
 
-function delComponent(evt) { // jQuery
-  var href = evt.target.previousElementSibling.href;
-  $.get(href).done(function(data) {
-    var response = infoBox(data);
-    if (response === 'Component destroyed.') {
-      evt.target.parentNode.innerHTML = '';
-    } else {
-      $('#dialog_msg').html(response).dialog('open');
-    }
-  });
+function addDelBtn(el) {
+  el.parentNode.parentNode.insertAdjacentHTML('beforeend',
+    '<span class="compDelBtn">Del</span>');
 }
 
 function enableDelComponent() {
-  document.getElementById('compDel').parentNode.classList.add('fshHide');
-  document.getElementById('compDelAll').parentNode.classList
-    .remove('fshHide');
-  var nodeList = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table')[1]
-    .getElementsByTagName('IMG');
-  Array.prototype.forEach.call(nodeList, function(el) {
-    el.parentNode.parentNode.insertAdjacentHTML('beforeend',
-      '<span class="compDelBtn">Del</span>');
+  quickDelDiv.classList.add('fshHide');
+  delAllDiv.classList.remove('fshHide');
+  var nodeList = thisInvTable.getElementsByTagName('IMG');
+  Array.prototype.forEach.call(nodeList, addDelBtn);
+}
+
+function delCompType(self) { // jQuery.min
+  var id = self.dataset.compid;
+  var td = self.parentNode;
+  td.innerHTML = '';
+  td.className = 'guildTagSpinner';
+  td.style.backgroundImage = 'url(\'' + imageServer +
+    '/skin/loading.gif\')';
+  var prm = [];
+  componentList[id].del.forEach(function(href) {
+    prm.push($.get(href).done(function() {
+      usedCount -= 1;
+      usedCountDom.textContent = usedCount.toString();
+    }));
+  });
+  $.when.apply($, prm).done(function() {
+    componentList[id].dom.forEach(function(el) {el.innerHTML = '';});
+    td.parentNode.remove();
   });
 }
 
 var evtHdl = [
   {
-    test: function(e) {return e.target.id === 'compDel';},
+    test: function(self) {return self === compDel;},
     act: enableDelComponent
   },
   {
-    test: function(e) {return e.target.id === 'compSum';},
+    test: function(self) {return self === compSum;},
     act: countComponent
   },
   {
-    test: function(e) {return e.target.id === 'compDelAll';},
+    test: function(self) {return self === compDelAll;},
     act: delAllComponent
   },
   {
-    test: function(e) {return e.target.classList.contains('compDelBtn');},
+    test: function(self) {return self.classList.contains('compDelBtn');},
     act: delComponent
+  },
+  {
+    test: function(self) {return self.classList.contains('compDelType');},
+    act: delCompType
   }
 ];
 
-function compEvt(e) {
-  for (var i = 0; i < evtHdl.length; i += 1) {
-    if (evtHdl[i].test(e)) {evtHdl[i].act(e);}
-  }
+function compEvt(evt) {
+  var self = evt.target;
+  evtHdl.some(function(el) {
+    if (el.test(self)) {
+      el.act(self);
+      return true;
+    }
+    return false;
+  });
+}
+
+function decorateButton(parentDiv, label) {
+  var innerSpan = cElement('span', {className: 'sendLink', textContent: label});
+  parentDiv.textContent = '[';
+  parentDiv.appendChild(innerSpan);
+  parentDiv.insertAdjacentHTML('beforeend', ']');
+  return innerSpan;
 }
 
 function profileComponents() {
-  var invTables = document.getElementById('profileRightColumn')
-    .getElementsByClassName('inventory-table');
+  var invTables = getInvTables(document);
   if (invTables.length !== 2) {return;}
-  var compDiv = invTables[1].parentNode;
+  thisInvTable = invTables[1];
+  var compDiv = thisInvTable.parentNode;
   if (compDiv.style.display !== 'block') {return;}
-  compDiv.insertAdjacentHTML('beforeend', '<div class="fshCenter"><div>' +
-    '[<span id="compDel" class="sendLink">Enable Quick Del</span>]' +
-    '</div><div id="sumComp">' +
-    '[<span id="compSum" class="sendLink">Count Components</span>]' +
-    '</div><div>' +
-    '[<a class="fshBlue" href="index.php?cmd=notepad&blank=1' +
-    '&subcmd=quickextract">Quick Extract Components</a>]</div>' +
-    '<div class="fshHide">[<span id="compDelAll" class="sendLink">' +
-    'Delete All Visible</span>]</div>' +
-    '</div>');
+  var cmDiv = cElement('div', {className: 'fshCenter'});
+  quickDelDiv = cElement('div');
+  sumComp = cElement('div');
+  delAllDiv = cElement('div', {className: 'fshHide'});
+  compDel = decorateButton(quickDelDiv, 'Enable Quick Del');
+  compSum = decorateButton(sumComp, 'Count Components');
+  compDelAll = decorateButton(delAllDiv, 'Delete All Visible');
+  cmDiv.appendChild(quickDelDiv);
+  cmDiv.appendChild(sumComp);
+  cmDiv.insertAdjacentHTML('beforeend', '[<a class="fshBlue" ' +
+    'href="index.php?cmd=notepad&blank=1&subcmd=quickextract"' +
+    '>Quick Extract Components</a>]');
+  cmDiv.appendChild(delAllDiv);
+  compDiv.appendChild(cmDiv);
   compDiv.addEventListener('click', compEvt);
 }
 
@@ -16387,6 +16476,6 @@ FSH.dispatch = function dispatch() {
 };
 
 window.FSH = window.FSH || {};
-window.FSH.calf = '22';
+window.FSH.calf = '23';
 
 }());
